@@ -84,26 +84,6 @@ const excerpt = {
 	subjectId: "019f9872-bd49-7bb4-a6b7-ec621fca2034",
 	rootPostId: null,
 	parentPostId: null,
-	body: {
-		_type: "portable-text",
-		_key: "000000000001",
-		content: [
-			{
-				_type: "block",
-				_key: "excerpt-block",
-				children: [
-					{
-						_type: "span",
-						_key: "excerpt-span",
-						text: "We are all stories in the end.",
-						marks: [],
-					},
-				],
-				markDefs: [],
-				style: "normal",
-			},
-		],
-	},
 	contentSpoiler: { level: 0, concealed: false },
 	contentNsfw: { labelled: false, concealed: false },
 	replyCount: 0,
@@ -125,7 +105,6 @@ const review = {
 	id: "019f9872-bd49-7bb4-a6b7-ec621fca2035",
 	postKind: "review",
 	title: "A scored review",
-	body: null,
 	subject: {
 		...excerpt.subject,
 		scores: {
@@ -196,7 +175,7 @@ describe("FeedPostCard", () => {
 		).toBeTruthy();
 	});
 
-	it("uses an authored summary instead of the body for the feed preview", () => {
+	it("uses the authored summary for the feed preview", () => {
 		const summarizedPost = {
 			...excerpt,
 			postKind: "post",
@@ -211,18 +190,16 @@ describe("FeedPostCard", () => {
 		);
 
 		expect(screen.getByText("手寫摘要")).toBeTruthy();
-		expect(screen.queryByText("We are all stories in the end.")).toBeNull();
 		expect(screen.queryByRole("heading", { level: 2 })).toBeNull();
 	});
 
-	it("renders an Excerpt source as an internal Unit link without a duplicate target card", () => {
+	it("renders an Excerpt source as an internal Unit link without loading the Post body", () => {
 		const { container } = render(
 			<TranslationProvider initial={translation.snapshot}>
 				<FeedPostCard post={excerpt} />
 			</TranslationProvider>,
 		);
 
-		expect(screen.getByText("We are all stories in the end.")).toBeTruthy();
 		const source = screen.getByLabelText("摘錄來源");
 		expect(source.textContent).toBe("― Glorious Exploits");
 		expect(

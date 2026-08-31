@@ -171,7 +171,6 @@ const contextualReview = {
 	subjectId: book.id,
 	rootPostId: null,
 	parentPostId: null,
-	body: null,
 	contentSpoiler: { level: 0, concealed: false },
 	contentNsfw: { labelled: false, concealed: false },
 	replyCount: 3,

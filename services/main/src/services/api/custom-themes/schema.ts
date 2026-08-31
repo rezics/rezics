@@ -138,14 +138,12 @@ export const CustomThemeRevisionListResponse = t.Object({
 
 export const CustomThemeReviewQueueResponse = t.Object({
 	items: t.Array(
-		t.Intersect([
-			CustomThemeRevisionResponse,
-			t.Object({
-				files: t.Array(CustomThemeRevisionFileResponse),
-				externalResources: t.Array(ReviewedExternalResourceV0),
-				reviewEvidence: t.Nullable(t.Record(t.String(), t.Unknown())),
-			}),
-		]),
+		t.Object({
+			...CustomThemeRevisionResponse.properties,
+			files: t.Array(CustomThemeRevisionFileResponse),
+			externalResources: t.Array(ReviewedExternalResourceV0),
+			reviewEvidence: t.Nullable(t.Record(t.String(), t.Unknown())),
+		}),
 	),
 	nextCursor: t.Nullable(Uuid),
 });

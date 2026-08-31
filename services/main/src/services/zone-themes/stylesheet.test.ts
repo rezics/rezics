@@ -49,7 +49,7 @@ describe("Zone theme stylesheet review", () => {
 		);
 		expect(first.automatedReview).toMatchObject({
 			contractVersion: "3.0.0",
-			rendererVersion: "1.10.0",
+			rendererVersion: "1.11.0",
 			ruleCount: 2,
 			declarationCount: 4,
 			sourceSha256: expect.stringMatching(/^[0-9a-f]{64}$/),

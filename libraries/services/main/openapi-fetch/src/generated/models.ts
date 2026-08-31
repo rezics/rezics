@@ -11963,7 +11963,6 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 				subjectId: (string | null) | null;
 				rootPostId: (string | null) | null;
 				parentPostId: (string | null) | null;
-				body: (PortableTextDocument | null) | null;
 				/**
 				 * @type object
 				 */
@@ -12651,7 +12650,6 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 				subjectId: (string | null) | null;
 				rootPostId: (string | null) | null;
 				parentPostId: (string | null) | null;
-				body: (PortableTextDocument | null) | null;
 				/**
 				 * @type object
 				 */
@@ -13362,7 +13360,6 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 				subjectId: (string | null) | null;
 				rootPostId: (string | null) | null;
 				parentPostId: (string | null) | null;
-				body: (PortableTextDocument | null) | null;
 				/**
 				 * @type object
 				 */
@@ -27007,7 +27004,6 @@ export type PostApiFeedQueryStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -27695,7 +27691,6 @@ export type PostApiFeedQueryStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -28406,7 +28401,6 @@ export type PostApiFeedQueryStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -59300,6 +59294,22 @@ export type GetApiCustomThemesReviewQueueQuery = {
 	limit?: number;
 };
 
+export const GetApiCustomThemesReviewQueueStatus200ItemsManifestFragmentsSlotEnum = {
+	"header.append": "header.append",
+	"footer.append": "footer.append",
+} as const;
+
+export type GetApiCustomThemesReviewQueueStatus200ItemsManifestFragmentsSlotEnum =
+	(typeof GetApiCustomThemesReviewQueueStatus200ItemsManifestFragmentsSlotEnum)[keyof typeof GetApiCustomThemesReviewQueueStatus200ItemsManifestFragmentsSlotEnum];
+
+export const GetApiCustomThemesReviewQueueStatus200ItemsManifestScriptsRoleEnum = {
+	classic_dependency: "classic_dependency",
+	module_entry: "module_entry",
+} as const;
+
+export type GetApiCustomThemesReviewQueueStatus200ItemsManifestScriptsRoleEnum =
+	(typeof GetApiCustomThemesReviewQueueStatus200ItemsManifestScriptsRoleEnum)[keyof typeof GetApiCustomThemesReviewQueueStatus200ItemsManifestScriptsRoleEnum];
+
 export const GetApiCustomThemesReviewQueueStatus200ItemsReviewStateEnum = {
 	pending_automated: "pending_automated",
 	pending_human: "pending_human",
@@ -59335,7 +59345,7 @@ export type GetApiCustomThemesReviewQueueStatus200 = {
 	/**
 	 * @type array
 	 */
-	items: ({
+	items: {
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -59384,7 +59394,10 @@ export type GetApiCustomThemesReviewQueueStatus200 = {
 			 * @type array
 			 */
 			fragments: {
-				slot: "header.append" | "footer.append";
+				/**
+				 * @type string
+				 */
+				slot: GetApiCustomThemesReviewQueueStatus200ItemsManifestFragmentsSlotEnum;
 				/**
 				 * @type object
 				 */
@@ -59498,7 +59511,10 @@ export type GetApiCustomThemesReviewQueueStatus200 = {
 							 */
 							integrityWaiverReason?: string;
 					  };
-				role: "classic_dependency" | "module_entry";
+				/**
+				 * @type string
+				 */
+				role: GetApiCustomThemesReviewQueueStatus200ItemsManifestScriptsRoleEnum;
 				/**
 				 * @minLength 0
 				 * @maxLength 31
@@ -59578,7 +59594,6 @@ export type GetApiCustomThemesReviewQueueStatus200 = {
 		 * @type string
 		 */
 		updatedAt: string;
-	} & {
 		/**
 		 * @type array
 		 */
@@ -59680,7 +59695,7 @@ export type GetApiCustomThemesReviewQueueStatus200 = {
 					[key: string]: unknown;
 			  } | null)
 			| null;
-	})[];
+	}[];
 	nextCursor: (string | null) | null;
 };
 
@@ -122072,7 +122087,6 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 							subjectId: (string | null) | null;
 							rootPostId: (string | null) | null;
 							parentPostId: (string | null) | null;
-							body: (PortableTextDocument | null) | null;
 							/**
 							 * @type object
 							 */
@@ -122762,7 +122776,6 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 							subjectId: (string | null) | null;
 							rootPostId: (string | null) | null;
 							parentPostId: (string | null) | null;
-							body: (PortableTextDocument | null) | null;
 							/**
 							 * @type object
 							 */
@@ -123475,7 +123488,6 @@ export type GetApiCollectionsByCollectionIdItemsStatus200 = {
 							subjectId: (string | null) | null;
 							rootPostId: (string | null) | null;
 							parentPostId: (string | null) | null;
-							body: (PortableTextDocument | null) | null;
 							/**
 							 * @type object
 							 */
@@ -128569,7 +128581,6 @@ export type GetApiReviewsStatus200 = {
 		subjectId: (string | null) | null;
 		rootPostId: (string | null) | null;
 		parentPostId: (string | null) | null;
-		body: (PortableTextDocument | null) | null;
 		/**
 		 * @type object
 		 */
@@ -145131,7 +145142,6 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -145819,7 +145829,6 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -146530,7 +146539,6 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -156266,7 +156274,6 @@ export type PostApiSearchFilterFeedStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -156954,7 +156961,6 @@ export type PostApiSearchFilterFeedStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -157665,7 +157671,6 @@ export type PostApiSearchFilterFeedStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -161680,7 +161685,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -162368,7 +162372,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -163079,7 +163082,6 @@ export type PostApiSearchZonesByZoneIdFilterFeedStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -168525,7 +168527,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 											subjectId: (string | null) | null;
 											rootPostId: (string | null) | null;
 											parentPostId: (string | null) | null;
-											body: (PortableTextDocument | null) | null;
 											/**
 											 * @type object
 											 */
@@ -169215,7 +169216,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 											subjectId: (string | null) | null;
 											rootPostId: (string | null) | null;
 											parentPostId: (string | null) | null;
-											body: (PortableTextDocument | null) | null;
 											/**
 											 * @type object
 											 */
@@ -169928,7 +169928,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 											subjectId: (string | null) | null;
 											rootPostId: (string | null) | null;
 											parentPostId: (string | null) | null;
-											body: (PortableTextDocument | null) | null;
 											/**
 											 * @type object
 											 */
@@ -171520,7 +171519,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 											subjectId: (string | null) | null;
 											rootPostId: (string | null) | null;
 											parentPostId: (string | null) | null;
-											body: (PortableTextDocument | null) | null;
 											/**
 											 * @type object
 											 */
@@ -172210,7 +172208,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 											subjectId: (string | null) | null;
 											rootPostId: (string | null) | null;
 											parentPostId: (string | null) | null;
-											body: (PortableTextDocument | null) | null;
 											/**
 											 * @type object
 											 */
@@ -172923,7 +172920,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 											subjectId: (string | null) | null;
 											rootPostId: (string | null) | null;
 											parentPostId: (string | null) | null;
-											body: (PortableTextDocument | null) | null;
 											/**
 											 * @type object
 											 */
@@ -175026,7 +175022,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 											subjectId: (string | null) | null;
 											rootPostId: (string | null) | null;
 											parentPostId: (string | null) | null;
-											body: (PortableTextDocument | null) | null;
 											/**
 											 * @type object
 											 */
@@ -175716,7 +175711,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 											subjectId: (string | null) | null;
 											rootPostId: (string | null) | null;
 											parentPostId: (string | null) | null;
-											body: (PortableTextDocument | null) | null;
 											/**
 											 * @type object
 											 */
@@ -176429,7 +176423,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 											subjectId: (string | null) | null;
 											rootPostId: (string | null) | null;
 											parentPostId: (string | null) | null;
-											body: (PortableTextDocument | null) | null;
 											/**
 											 * @type object
 											 */
@@ -178021,7 +178014,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 											subjectId: (string | null) | null;
 											rootPostId: (string | null) | null;
 											parentPostId: (string | null) | null;
-											body: (PortableTextDocument | null) | null;
 											/**
 											 * @type object
 											 */
@@ -178711,7 +178703,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 											subjectId: (string | null) | null;
 											rootPostId: (string | null) | null;
 											parentPostId: (string | null) | null;
-											body: (PortableTextDocument | null) | null;
 											/**
 											 * @type object
 											 */
@@ -179424,7 +179415,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdExecuteStatus200 = {
 											subjectId: (string | null) | null;
 											rootPostId: (string | null) | null;
 											parentPostId: (string | null) | null;
-											body: (PortableTextDocument | null) | null;
 											/**
 											 * @type object
 											 */
@@ -183438,7 +183428,6 @@ export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -184128,7 +184117,6 @@ export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -184841,7 +184829,6 @@ export type PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200 = {
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -187455,7 +187442,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200 
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -188145,7 +188131,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200 
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */
@@ -188858,7 +188843,6 @@ export type PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsStatus200 
 						subjectId: (string | null) | null;
 						rootPostId: (string | null) | null;
 						parentPostId: (string | null) | null;
-						body: (PortableTextDocument | null) | null;
 						/**
 						 * @type object
 						 */

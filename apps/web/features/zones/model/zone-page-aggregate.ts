@@ -1,6 +1,5 @@
 import {
 	BlockPath,
-	PortableTextDocument,
 	encodeBlockPath,
 	isDocument,
 	type BlockPath as BlockPathValue,
@@ -353,7 +352,6 @@ function isFeedPost(value: Record<string, unknown>): value is ZoneAggregateFeedI
 		!isNullableUuid(value.subjectId) ||
 		!isNullableUuid(value.rootPostId) ||
 		!isNullableUuid(value.parentPostId) ||
-		!(value.body === null || isDocument(PortableTextDocument, value.body)) ||
 		!Number.isSafeInteger(value.replyCount) ||
 		!isNullableUuid(value.latestRevisionId) ||
 		!isReplyContext(value.replyContext) ||

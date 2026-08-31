@@ -382,7 +382,6 @@ export function RealmDetailPage({ id, page = "main" }: { id: string; page?: Real
 												status: "ready",
 												items: pins.data.contentItems.map((item) => ({
 													id: item.id,
-													body: item.itemType === "post" ? item.body : undefined,
 													href: realmPinnedContentHref(item, realm.id),
 													avatar:
 														item.itemType === "unit" && item.presentation.kind === "identity"

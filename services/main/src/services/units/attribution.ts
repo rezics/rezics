@@ -46,6 +46,19 @@ export type UnitPresentation = Pick<
 	"id" | "kind" | "language" | "title" | "summary" | "avatar"
 >;
 
+export interface AttributionSummaryReadOptions {
+	readonly maximumPerSourceUnit?: number;
+}
+
+interface AttributionSummaryRow {
+	readonly [key: string]: unknown;
+	readonly sourceUnitId: string;
+	readonly id: string;
+	readonly role: CreditAttributionRole;
+	readonly position: string;
+	readonly creditedUnitId: string;
+}
+
 export type UnitAttributionSummaryWithStatistics = Omit<UnitAttributionSummary, "creditedUnit"> & {
 	readonly creditedUnit: UnitSummary & {
 		readonly creditedBookCount: CountResult;
@@ -220,26 +233,60 @@ export async function createProfilePublisherAttribution(
 export async function getAttributionSummariesByUnitIds(
 	sourceUnitIds: readonly string[],
 	localizationLanguages: LocalizationLanguageQuery = [],
+	options: AttributionSummaryReadOptions = {},
 ): Promise<Map<string, UnitAttributionSummary[]>> {
 	const result = new Map<string, UnitAttributionSummary[]>();
-	for (const sourceUnitId of sourceUnitIds) result.set(sourceUnitId, []);
-	if (!sourceUnitIds.length) return result;
+	const requestedSourceUnitIds = [...new Set(sourceUnitIds)];
+	for (const sourceUnitId of requestedSourceUnitIds) result.set(sourceUnitId, []);
+	if (!requestedSourceUnitIds.length) return result;
+	if (
+		options.maximumPerSourceUnit !== undefined &&
+		(!Number.isSafeInteger(options.maximumPerSourceUnit) || options.maximumPerSourceUnit < 1)
+	)
+		throw new RangeError("maximumPerSourceUnit must be a positive safe integer");
 
-	const rows = await database
-		.select({
-			sourceUnitId: creditAttribution.sourceUnitId,
-			id: creditAttribution.id,
-			role: creditAttribution.role,
-			position: creditAttribution.position,
-			creditedUnitId: creditAttribution.creditedUnitId,
-		})
-		.from(creditAttribution)
-		.where(inArray(creditAttribution.sourceUnitId, [...sourceUnitIds]))
-		.orderBy(
-			asc(creditAttribution.sourceUnitId),
-			asc(creditAttribution.position),
-			asc(creditAttribution.id),
-		);
+	const rows: AttributionSummaryRow[] = options.maximumPerSourceUnit
+		? (
+				await database.execute<AttributionSummaryRow>(sql`
+					select
+						requested.source_unit_id as "sourceUnitId",
+						bounded.id,
+						bounded.role,
+						bounded.position,
+						bounded.credited_unit_id as "creditedUnitId"
+					from unnest(array[${sql.join(
+						requestedSourceUnitIds.map((sourceUnitId) => sql`${sourceUnitId}::uuid`),
+						sql`, `,
+					)}]::uuid[]) as requested(source_unit_id)
+					cross join lateral (
+						select
+							attribution.id,
+							attribution.role,
+							attribution.position,
+							attribution.credited_unit_id
+						from ${creditAttribution} as attribution
+						where attribution.source_unit_id = requested.source_unit_id
+						order by attribution.position, attribution.id
+						limit ${options.maximumPerSourceUnit}
+					) as bounded
+					order by requested.source_unit_id, bounded.position, bounded.id
+				`)
+			).rows
+		: await database
+				.select({
+					sourceUnitId: creditAttribution.sourceUnitId,
+					id: creditAttribution.id,
+					role: creditAttribution.role,
+					position: creditAttribution.position,
+					creditedUnitId: creditAttribution.creditedUnitId,
+				})
+				.from(creditAttribution)
+				.where(inArray(creditAttribution.sourceUnitId, requestedSourceUnitIds))
+				.orderBy(
+					asc(creditAttribution.sourceUnitId),
+					asc(creditAttribution.position),
+					asc(creditAttribution.id),
+				);
 	const creditedUnits = await getPublicUnitSummariesByIds(
 		rows.map(({ creditedUnitId }) => creditedUnitId),
 		localizationLanguages,

@@ -10,6 +10,10 @@ import { LocalizationLanguageQuery } from "../schema";
 
 export const FeedSortSchema = t.UnionEnum(FeedSortValues, { default: "best" });
 
+export const MaximumFeedAttributionsPerItem = 8;
+export const MaximumFeedRealmContextsPerItem = 8;
+export const MaximumFeedPageSize = 50;
+
 export const FeedUnitKindValues = [
 	"profile",
 	"book",
@@ -105,7 +109,7 @@ export const FeedRequest = t.Object(
 		filter: t.Optional(UnitFilter),
 		sort: t.Optional(FeedSortSchema),
 		cursor: t.Optional(t.String({ maxLength: 1024 })),
-		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: MaximumFeedPageSize, default: 20 })),
 		...LocalizationLanguageQuery,
 	},
 	{ additionalProperties: false },

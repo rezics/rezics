@@ -1,6 +1,6 @@
 {
 	"openapi": "3.2.0",
-	"info": { "title": "REZICS API", "version": "1.10.0" },
+	"info": { "title": "REZICS API", "version": "1.11.0" },
 	"components": {
 		"schemas": {
 			"JsonValue": {
@@ -11848,6 +11848,7 @@
 									"type": "object",
 									"properties": {
 										"items": {
+											"maxItems": 50,
 											"type": "array",
 											"items": {
 												"anyOf": [
@@ -11874,6 +11875,7 @@
 																}
 															},
 															"attributions": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -12075,6 +12077,7 @@
 																]
 															},
 															"realms": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -12473,13 +12476,6 @@
 																	{ "type": "null" }
 																]
 															},
-															"body": {
-																"nullable": true,
-																"anyOf": [
-																	{ "$ref": "#/components/schemas/PortableTextDocument" },
-																	{ "type": "null" }
-																]
-															},
 															"contentSpoiler": {
 																"type": "object",
 																"properties": {
@@ -12522,6 +12518,7 @@
 																				"anyOf": [{ "type": "string" }, { "type": "null" }]
 																			},
 																			"attributions": {
+																				"maxItems": 8,
 																				"type": "array",
 																				"items": {
 																					"type": "object",
@@ -12897,7 +12894,6 @@
 															"subjectId",
 															"rootPostId",
 															"parentPostId",
-															"body",
 															"contentSpoiler",
 															"contentNsfw",
 															"replyCount",
@@ -12930,6 +12926,7 @@
 																}
 															},
 															"attributions": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -13131,6 +13128,7 @@
 																]
 															},
 															"realms": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -13529,13 +13527,6 @@
 																	{ "type": "null" }
 																]
 															},
-															"body": {
-																"nullable": true,
-																"anyOf": [
-																	{ "$ref": "#/components/schemas/PortableTextDocument" },
-																	{ "type": "null" }
-																]
-															},
 															"contentSpoiler": {
 																"type": "object",
 																"properties": {
@@ -13578,6 +13569,7 @@
 																				"anyOf": [{ "type": "string" }, { "type": "null" }]
 																			},
 																			"attributions": {
+																				"maxItems": 8,
 																				"type": "array",
 																				"items": {
 																					"type": "object",
@@ -13965,7 +13957,6 @@
 															"subjectId",
 															"rootPostId",
 															"parentPostId",
-															"body",
 															"contentSpoiler",
 															"contentNsfw",
 															"replyCount",
@@ -13999,6 +13990,7 @@
 																}
 															},
 															"attributions": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -14200,6 +14192,7 @@
 																]
 															},
 															"realms": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -14598,13 +14591,6 @@
 																	{ "type": "null" }
 																]
 															},
-															"body": {
-																"nullable": true,
-																"anyOf": [
-																	{ "$ref": "#/components/schemas/PortableTextDocument" },
-																	{ "type": "null" }
-																]
-															},
 															"contentSpoiler": {
 																"type": "object",
 																"properties": {
@@ -14647,6 +14633,7 @@
 																				"anyOf": [{ "type": "string" }, { "type": "null" }]
 																			},
 																			"attributions": {
+																				"maxItems": 8,
 																				"type": "array",
 																				"items": {
 																					"type": "object",
@@ -15118,7 +15105,6 @@
 															"subjectId",
 															"rootPostId",
 															"parentPostId",
-															"body",
 															"contentSpoiler",
 															"contentNsfw",
 															"replyCount",
@@ -26272,6 +26258,7 @@
 									"type": "object",
 									"properties": {
 										"items": {
+											"maxItems": 50,
 											"type": "array",
 											"items": {
 												"anyOf": [
@@ -26298,6 +26285,7 @@
 																}
 															},
 															"attributions": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -26499,6 +26487,7 @@
 																]
 															},
 															"realms": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -27177,6 +27166,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -27394,6 +27384,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -27809,13 +27800,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -27858,6 +27842,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -28256,7 +28241,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -28289,6 +28273,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -28506,6 +28491,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -28921,13 +28907,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -28970,6 +28949,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -29380,7 +29360,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -29414,6 +29393,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -29631,6 +29611,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -30046,13 +30027,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -30095,6 +30069,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -30599,7 +30574,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -56351,51 +56325,73 @@
 										"items": {
 											"type": "array",
 											"items": {
-												"allOf": [
-													{
+												"type": "object",
+												"properties": {
+													"id": { "type": "string", "format": "uuid" },
+													"customThemeUnitId": { "type": "string", "format": "uuid" },
+													"targetContract": {
+														"type": "string",
+														"const": "rezics.unit.presentation@0"
+													},
+													"executionMode": { "type": "string", "const": "host_full_trust" },
+													"resourceMode": { "type": "string", "const": "external_live" },
+													"manifest": {
 														"type": "object",
+														"required": [
+															"schemaVersion",
+															"targetContract",
+															"executionMode",
+															"resourceMode",
+															"fragments",
+															"styles",
+															"scripts",
+															"declaredRuntimeOrigins"
+														],
 														"properties": {
-															"id": { "type": "string", "format": "uuid" },
-															"customThemeUnitId": { "type": "string", "format": "uuid" },
+															"schemaVersion": { "type": "number", "const": 0 },
 															"targetContract": {
 																"type": "string",
 																"const": "rezics.unit.presentation@0"
 															},
 															"executionMode": { "type": "string", "const": "host_full_trust" },
 															"resourceMode": { "type": "string", "const": "external_live" },
-															"manifest": {
-																"type": "object",
-																"required": [
-																	"schemaVersion",
-																	"targetContract",
-																	"executionMode",
-																	"resourceMode",
-																	"fragments",
-																	"styles",
-																	"scripts",
-																	"declaredRuntimeOrigins"
-																],
-																"properties": {
-																	"schemaVersion": { "type": "number", "const": 0 },
-																	"targetContract": {
-																		"type": "string",
-																		"const": "rezics.unit.presentation@0"
-																	},
-																	"executionMode": { "type": "string", "const": "host_full_trust" },
-																	"resourceMode": { "type": "string", "const": "external_live" },
-																	"fragments": {
-																		"type": "array",
-																		"items": {
+															"fragments": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"required": ["slot", "source"],
+																	"properties": {
+																		"slot": {
+																			"type": "string",
+																			"enum": ["header.append", "footer.append"]
+																		},
+																		"source": {
 																			"type": "object",
-																			"required": ["slot", "source"],
+																			"required": ["kind", "path"],
 																			"properties": {
-																				"slot": {
-																					"anyOf": [
-																						{ "type": "string", "const": "header.append" },
-																						{ "type": "string", "const": "footer.append" }
-																					]
-																				},
-																				"source": {
+																				"kind": { "type": "string", "const": "packaged" },
+																				"path": {
+																					"type": "string",
+																					"minLength": 1,
+																					"maxLength": 512
+																				}
+																			},
+																			"additionalProperties": false
+																		}
+																	},
+																	"additionalProperties": false
+																},
+																"maxItems": 2
+															},
+															"styles": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"required": ["source", "required"],
+																	"properties": {
+																		"source": {
+																			"anyOf": [
+																				{
 																					"type": "object",
 																					"required": ["kind", "path"],
 																					"properties": {
@@ -56407,408 +56403,353 @@
 																						}
 																					},
 																					"additionalProperties": false
+																				},
+																				{
+																					"type": "object",
+																					"required": ["kind", "url"],
+																					"properties": {
+																						"kind": { "type": "string", "const": "external" },
+																						"url": {
+																							"type": "string",
+																							"minLength": 9,
+																							"maxLength": 2048,
+																							"pattern": "^https://"
+																						},
+																						"integrity": {
+																							"type": "string",
+																							"minLength": 1,
+																							"maxLength": 500,
+																							"pattern": "^(?:sha256|sha384|sha512)-[A-Za-z0-9+/]+={0,2}(?:\\s+(?:sha256|sha384|sha512)-[A-Za-z0-9+/]+={0,2})*$"
+																						},
+																						"integrityWaiverReason": {
+																							"type": "string",
+																							"minLength": 1,
+																							"maxLength": 2000
+																						}
+																					},
+																					"additionalProperties": false
 																				}
-																			},
-																			"additionalProperties": false
+																			]
 																		},
-																		"maxItems": 2
+																		"media": { "type": "string", "minLength": 1, "maxLength": 500 },
+																		"required": { "type": "boolean" }
 																	},
-																	"styles": {
-																		"type": "array",
-																		"items": {
-																			"type": "object",
-																			"required": ["source", "required"],
-																			"properties": {
-																				"source": {
-																					"anyOf": [
-																						{
-																							"type": "object",
-																							"required": ["kind", "path"],
-																							"properties": {
-																								"kind": { "type": "string", "const": "packaged" },
-																								"path": {
-																									"type": "string",
-																									"minLength": 1,
-																									"maxLength": 512
-																								}
-																							},
-																							"additionalProperties": false
-																						},
-																						{
-																							"type": "object",
-																							"required": ["kind", "url"],
-																							"properties": {
-																								"kind": { "type": "string", "const": "external" },
-																								"url": {
-																									"type": "string",
-																									"minLength": 9,
-																									"maxLength": 2048,
-																									"pattern": "^https://"
-																								},
-																								"integrity": {
-																									"type": "string",
-																									"minLength": 1,
-																									"maxLength": 500,
-																									"pattern": "^(?:sha256|sha384|sha512)-[A-Za-z0-9+/]+={0,2}(?:\\s+(?:sha256|sha384|sha512)-[A-Za-z0-9+/]+={0,2})*$"
-																								},
-																								"integrityWaiverReason": {
-																									"type": "string",
-																									"minLength": 1,
-																									"maxLength": 2000
-																								}
-																							},
-																							"additionalProperties": false
-																						}
-																					]
-																				},
-																				"media": {
-																					"type": "string",
-																					"minLength": 1,
-																					"maxLength": 500
-																				},
-																				"required": { "type": "boolean" }
-																			},
-																			"additionalProperties": false
-																		},
-																		"maxItems": 32
-																	},
-																	"scripts": {
-																		"type": "array",
-																		"items": {
-																			"type": "object",
-																			"required": ["source", "role", "order", "required"],
-																			"properties": {
-																				"source": {
-																					"anyOf": [
-																						{
-																							"type": "object",
-																							"required": ["kind", "path"],
-																							"properties": {
-																								"kind": { "type": "string", "const": "packaged" },
-																								"path": {
-																									"type": "string",
-																									"minLength": 1,
-																									"maxLength": 512
-																								}
-																							},
-																							"additionalProperties": false
-																						},
-																						{
-																							"type": "object",
-																							"required": ["kind", "url"],
-																							"properties": {
-																								"kind": { "type": "string", "const": "external" },
-																								"url": {
-																									"type": "string",
-																									"minLength": 9,
-																									"maxLength": 2048,
-																									"pattern": "^https://"
-																								},
-																								"integrity": {
-																									"type": "string",
-																									"minLength": 1,
-																									"maxLength": 500,
-																									"pattern": "^(?:sha256|sha384|sha512)-[A-Za-z0-9+/]+={0,2}(?:\\s+(?:sha256|sha384|sha512)-[A-Za-z0-9+/]+={0,2})*$"
-																								},
-																								"integrityWaiverReason": {
-																									"type": "string",
-																									"minLength": 1,
-																									"maxLength": 2000
-																								}
-																							},
-																							"additionalProperties": false
-																						}
-																					]
-																				},
-																				"role": {
-																					"anyOf": [
-																						{ "type": "string", "const": "classic_dependency" },
-																						{ "type": "string", "const": "module_entry" }
-																					]
-																				},
-																				"order": { "type": "integer", "minimum": 0, "maximum": 31 },
-																				"required": { "type": "boolean" }
-																			},
-																			"additionalProperties": false
-																		},
-																		"maxItems": 32
-																	},
-																	"declaredRuntimeOrigins": {
-																		"type": "object",
-																		"required": ["connect", "image", "font", "frame", "media"],
-																		"properties": {
-																			"connect": {
-																				"type": "array",
-																				"items": {
-																					"type": "string",
-																					"minLength": 9,
-																					"maxLength": 300,
-																					"pattern": "^https://"
-																				},
-																				"maxItems": 32,
-																				"uniqueItems": true
-																			},
-																			"image": {
-																				"type": "array",
-																				"items": {
-																					"type": "string",
-																					"minLength": 9,
-																					"maxLength": 300,
-																					"pattern": "^https://"
-																				},
-																				"maxItems": 32,
-																				"uniqueItems": true
-																			},
-																			"font": {
-																				"type": "array",
-																				"items": {
-																					"type": "string",
-																					"minLength": 9,
-																					"maxLength": 300,
-																					"pattern": "^https://"
-																				},
-																				"maxItems": 32,
-																				"uniqueItems": true
-																			},
-																			"frame": {
-																				"type": "array",
-																				"items": {
-																					"type": "string",
-																					"minLength": 9,
-																					"maxLength": 300,
-																					"pattern": "^https://"
-																				},
-																				"maxItems": 32,
-																				"uniqueItems": true
-																			},
-																			"media": {
-																				"type": "array",
-																				"items": {
-																					"type": "string",
-																					"minLength": 9,
-																					"maxLength": 300,
-																					"pattern": "^https://"
-																				},
-																				"maxItems": 32,
-																				"uniqueItems": true
-																			}
-																		},
-																		"additionalProperties": false
-																	}
+																	"additionalProperties": false
 																},
-																"additionalProperties": false,
-																"$id": "SubmittedCustomThemeManifestV0"
+																"maxItems": 32
 															},
-															"manifestSha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" },
-															"sourceArchiveSha256": {
-																"pattern": "^[0-9a-f]{64}$",
-																"type": "string"
-															},
-															"reviewState": {
-																"default": "pending_automated",
-																"enum": [
-																	"pending_automated",
-																	"pending_human",
-																	"approved",
-																	"rejected",
-																	"killed",
-																	"revalidation_required"
-																],
-																"type": "string"
-															},
-															"approvalScope": { "type": "string", "const": "host_unit" },
-															"approvedHostUnitId": {
-																"nullable": true,
-																"anyOf": [
-																	{ "type": "string", "format": "uuid" },
-																	{ "type": "null" }
-																]
-															},
-															"submittedByProfileId": { "type": "string", "format": "uuid" },
-															"reviewedByProfileId": {
-																"nullable": true,
-																"anyOf": [
-																	{ "type": "string", "format": "uuid" },
-																	{ "type": "null" }
-																]
-															},
-															"reviewedAt": {
-																"nullable": true,
-																"anyOf": [
-																	{ "type": "string", "format": "date-time" },
-																	{ "type": "null" }
-																]
-															},
-															"decisionReason": {
-																"nullable": true,
-																"anyOf": [{ "type": "string" }, { "type": "null" }]
-															},
-															"killedAt": {
-																"nullable": true,
-																"anyOf": [
-																	{ "type": "string", "format": "date-time" },
-																	{ "type": "null" }
-																]
-															},
-															"createdAt": { "type": "string", "format": "date-time" },
-															"updatedAt": { "type": "string", "format": "date-time" }
-														},
-														"required": [
-															"id",
-															"customThemeUnitId",
-															"targetContract",
-															"executionMode",
-															"resourceMode",
-															"manifest",
-															"manifestSha256",
-															"sourceArchiveSha256",
-															"reviewState",
-															"approvalScope",
-															"approvedHostUnitId",
-															"submittedByProfileId",
-															"reviewedByProfileId",
-															"reviewedAt",
-															"decisionReason",
-															"killedAt",
-															"createdAt",
-															"updatedAt"
-														]
-													},
-													{
-														"type": "object",
-														"properties": {
-															"files": {
+															"scripts": {
 																"type": "array",
 																"items": {
 																	"type": "object",
+																	"required": ["source", "role", "order", "required"],
 																	"properties": {
-																		"path": { "type": "string" },
-																		"role": {
-																			"default": "manifest",
-																			"enum": [
-																				"manifest",
-																				"source_archive",
-																				"html",
-																				"css",
-																				"js",
-																				"worker",
-																				"wasm",
-																				"font",
-																				"svg",
-																				"asset"
-																			],
-																			"type": "string"
+																		"source": {
+																			"anyOf": [
+																				{
+																					"type": "object",
+																					"required": ["kind", "path"],
+																					"properties": {
+																						"kind": { "type": "string", "const": "packaged" },
+																						"path": {
+																							"type": "string",
+																							"minLength": 1,
+																							"maxLength": 512
+																						}
+																					},
+																					"additionalProperties": false
+																				},
+																				{
+																					"type": "object",
+																					"required": ["kind", "url"],
+																					"properties": {
+																						"kind": { "type": "string", "const": "external" },
+																						"url": {
+																							"type": "string",
+																							"minLength": 9,
+																							"maxLength": 2048,
+																							"pattern": "^https://"
+																						},
+																						"integrity": {
+																							"type": "string",
+																							"minLength": 1,
+																							"maxLength": 500,
+																							"pattern": "^(?:sha256|sha384|sha512)-[A-Za-z0-9+/]+={0,2}(?:\\s+(?:sha256|sha384|sha512)-[A-Za-z0-9+/]+={0,2})*$"
+																						},
+																						"integrityWaiverReason": {
+																							"type": "string",
+																							"minLength": 1,
+																							"maxLength": 2000
+																						}
+																					},
+																					"additionalProperties": false
+																				}
+																			]
 																		},
-																		"contentType": { "type": "string" },
-																		"sha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" },
-																		"byteLength": { "minimum": 0, "type": "integer" }
+																		"role": {
+																			"type": "string",
+																			"enum": ["classic_dependency", "module_entry"]
+																		},
+																		"order": { "type": "integer", "minimum": 0, "maximum": 31 },
+																		"required": { "type": "boolean" }
 																	},
-																	"required": [
-																		"path",
-																		"role",
-																		"contentType",
-																		"sha256",
-																		"byteLength"
+																	"additionalProperties": false
+																},
+																"maxItems": 32
+															},
+															"declaredRuntimeOrigins": {
+																"type": "object",
+																"required": ["connect", "image", "font", "frame", "media"],
+																"properties": {
+																	"connect": {
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"minLength": 9,
+																			"maxLength": 300,
+																			"pattern": "^https://"
+																		},
+																		"maxItems": 32,
+																		"uniqueItems": true
+																	},
+																	"image": {
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"minLength": 9,
+																			"maxLength": 300,
+																			"pattern": "^https://"
+																		},
+																		"maxItems": 32,
+																		"uniqueItems": true
+																	},
+																	"font": {
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"minLength": 9,
+																			"maxLength": 300,
+																			"pattern": "^https://"
+																		},
+																		"maxItems": 32,
+																		"uniqueItems": true
+																	},
+																	"frame": {
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"minLength": 9,
+																			"maxLength": 300,
+																			"pattern": "^https://"
+																		},
+																		"maxItems": 32,
+																		"uniqueItems": true
+																	},
+																	"media": {
+																		"type": "array",
+																		"items": {
+																			"type": "string",
+																			"minLength": 9,
+																			"maxLength": 300,
+																			"pattern": "^https://"
+																		},
+																		"maxItems": 32,
+																		"uniqueItems": true
+																	}
+																},
+																"additionalProperties": false
+															}
+														},
+														"additionalProperties": false,
+														"$id": "SubmittedCustomThemeManifestV0"
+													},
+													"manifestSha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" },
+													"sourceArchiveSha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" },
+													"reviewState": {
+														"default": "pending_automated",
+														"enum": [
+															"pending_automated",
+															"pending_human",
+															"approved",
+															"rejected",
+															"killed",
+															"revalidation_required"
+														],
+														"type": "string"
+													},
+													"approvalScope": { "type": "string", "const": "host_unit" },
+													"approvedHostUnitId": {
+														"nullable": true,
+														"anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }]
+													},
+													"submittedByProfileId": { "type": "string", "format": "uuid" },
+													"reviewedByProfileId": {
+														"nullable": true,
+														"anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }]
+													},
+													"reviewedAt": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string", "format": "date-time" },
+															{ "type": "null" }
+														]
+													},
+													"decisionReason": {
+														"nullable": true,
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"killedAt": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string", "format": "date-time" },
+															{ "type": "null" }
+														]
+													},
+													"createdAt": { "type": "string", "format": "date-time" },
+													"updatedAt": { "type": "string", "format": "date-time" },
+													"files": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"properties": {
+																"path": { "type": "string" },
+																"role": {
+																	"default": "manifest",
+																	"enum": [
+																		"manifest",
+																		"source_archive",
+																		"html",
+																		"css",
+																		"js",
+																		"worker",
+																		"wasm",
+																		"font",
+																		"svg",
+																		"asset"
+																	],
+																	"type": "string"
+																},
+																"contentType": { "type": "string" },
+																"sha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" },
+																"byteLength": { "minimum": 0, "type": "integer" }
+															},
+															"required": ["path", "role", "contentType", "sha256", "byteLength"]
+														}
+													},
+													"externalResources": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"resourceKey",
+																"role",
+																"requestedUrl",
+																"finalUrl",
+																"redirectChain",
+																"observedSha256",
+																"observedByteLength",
+																"observedContentType",
+																"observedAt",
+																"corsAllowsAnonymous",
+																"required",
+																"effectiveIntegrity",
+																"integrityWaiverReason"
+															],
+															"properties": {
+																"resourceKey": {
+																	"type": "string",
+																	"minLength": 1,
+																	"maxLength": 200
+																},
+																"role": { "type": "string", "minLength": 1, "maxLength": 64 },
+																"requestedUrl": {
+																	"type": "string",
+																	"minLength": 9,
+																	"maxLength": 2048,
+																	"pattern": "^https://"
+																},
+																"finalUrl": {
+																	"type": "string",
+																	"minLength": 9,
+																	"maxLength": 2048,
+																	"pattern": "^https://"
+																},
+																"redirectChain": {
+																	"type": "array",
+																	"items": {
+																		"type": "string",
+																		"minLength": 9,
+																		"maxLength": 2048,
+																		"pattern": "^https://"
+																	},
+																	"maxItems": 6
+																},
+																"observedSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+																"observedByteLength": {
+																	"type": "integer",
+																	"minimum": 0,
+																	"maximum": 5242880
+																},
+																"observedContentType": {
+																	"type": "string",
+																	"minLength": 1,
+																	"maxLength": 255
+																},
+																"observedAt": { "type": "string", "format": "date-time" },
+																"corsAllowsAnonymous": { "type": "boolean" },
+																"required": { "type": "boolean" },
+																"effectiveIntegrity": {
+																	"anyOf": [
+																		{
+																			"type": "string",
+																			"minLength": 1,
+																			"maxLength": 500,
+																			"pattern": "^(?:sha256|sha384|sha512)-[A-Za-z0-9+/]+={0,2}(?:\\s+(?:sha256|sha384|sha512)-[A-Za-z0-9+/]+={0,2})*$"
+																		},
+																		{ "type": "null" }
+																	]
+																},
+																"integrityWaiverReason": {
+																	"anyOf": [
+																		{ "type": "string", "minLength": 1, "maxLength": 2000 },
+																		{ "type": "null" }
 																	]
 																}
 															},
-															"externalResources": {
-																"type": "array",
-																"items": {
-																	"type": "object",
-																	"required": [
-																		"resourceKey",
-																		"role",
-																		"requestedUrl",
-																		"finalUrl",
-																		"redirectChain",
-																		"observedSha256",
-																		"observedByteLength",
-																		"observedContentType",
-																		"observedAt",
-																		"corsAllowsAnonymous",
-																		"required",
-																		"effectiveIntegrity",
-																		"integrityWaiverReason"
-																	],
-																	"properties": {
-																		"resourceKey": {
-																			"type": "string",
-																			"minLength": 1,
-																			"maxLength": 200
-																		},
-																		"role": { "type": "string", "minLength": 1, "maxLength": 64 },
-																		"requestedUrl": {
-																			"type": "string",
-																			"minLength": 9,
-																			"maxLength": 2048,
-																			"pattern": "^https://"
-																		},
-																		"finalUrl": {
-																			"type": "string",
-																			"minLength": 9,
-																			"maxLength": 2048,
-																			"pattern": "^https://"
-																		},
-																		"redirectChain": {
-																			"type": "array",
-																			"items": {
-																				"type": "string",
-																				"minLength": 9,
-																				"maxLength": 2048,
-																				"pattern": "^https://"
-																			},
-																			"maxItems": 6
-																		},
-																		"observedSha256": {
-																			"type": "string",
-																			"pattern": "^[0-9a-f]{64}$"
-																		},
-																		"observedByteLength": {
-																			"type": "integer",
-																			"minimum": 0,
-																			"maximum": 5242880
-																		},
-																		"observedContentType": {
-																			"type": "string",
-																			"minLength": 1,
-																			"maxLength": 255
-																		},
-																		"observedAt": { "type": "string", "format": "date-time" },
-																		"corsAllowsAnonymous": { "type": "boolean" },
-																		"required": { "type": "boolean" },
-																		"effectiveIntegrity": {
-																			"anyOf": [
-																				{
-																					"type": "string",
-																					"minLength": 1,
-																					"maxLength": 500,
-																					"pattern": "^(?:sha256|sha384|sha512)-[A-Za-z0-9+/]+={0,2}(?:\\s+(?:sha256|sha384|sha512)-[A-Za-z0-9+/]+={0,2})*$"
-																				},
-																				{ "type": "null" }
-																			]
-																		},
-																		"integrityWaiverReason": {
-																			"anyOf": [
-																				{ "type": "string", "minLength": 1, "maxLength": 2000 },
-																				{ "type": "null" }
-																			]
-																		}
-																	},
-																	"additionalProperties": false,
-																	"$id": "ReviewedExternalResourceV0"
-																}
-															},
-															"reviewEvidence": {
-																"nullable": true,
-																"anyOf": [
-																	{ "type": "object", "patternProperties": { "^(.*)$": {} } },
-																	{ "type": "null" }
-																]
-															}
-														},
-														"required": ["files", "externalResources", "reviewEvidence"]
+															"additionalProperties": false,
+															"$id": "ReviewedExternalResourceV0"
+														}
+													},
+													"reviewEvidence": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "object", "patternProperties": { "^(.*)$": {} } },
+															{ "type": "null" }
+														]
 													}
+												},
+												"required": [
+													"id",
+													"customThemeUnitId",
+													"targetContract",
+													"executionMode",
+													"resourceMode",
+													"manifest",
+													"manifestSha256",
+													"sourceArchiveSha256",
+													"reviewState",
+													"approvalScope",
+													"approvedHostUnitId",
+													"submittedByProfileId",
+													"reviewedByProfileId",
+													"reviewedAt",
+													"decisionReason",
+													"killedAt",
+													"createdAt",
+													"updatedAt",
+													"files",
+													"externalResources",
+													"reviewEvidence"
 												]
 											}
 										},
@@ -110113,6 +110054,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -110330,6 +110272,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -111055,6 +110998,7 @@
 																				}
 																			},
 																			"attributions": {
+																				"maxItems": 8,
 																				"type": "array",
 																				"items": {
 																					"type": "object",
@@ -111290,6 +111234,7 @@
 																				]
 																			},
 																			"realms": {
+																				"maxItems": 8,
 																				"type": "array",
 																				"items": {
 																					"type": "object",
@@ -111733,13 +111678,6 @@
 																					{ "type": "null" }
 																				]
 																			},
-																			"body": {
-																				"nullable": true,
-																				"anyOf": [
-																					{ "$ref": "#/components/schemas/PortableTextDocument" },
-																					{ "type": "null" }
-																				]
-																			},
 																			"contentSpoiler": {
 																				"type": "object",
 																				"properties": {
@@ -111782,6 +111720,7 @@
 																								"anyOf": [{ "type": "string" }, { "type": "null" }]
 																							},
 																							"attributions": {
+																								"maxItems": 8,
 																								"type": "array",
 																								"items": {
 																									"type": "object",
@@ -112188,7 +112127,6 @@
 																			"subjectId",
 																			"rootPostId",
 																			"parentPostId",
-																			"body",
 																			"contentSpoiler",
 																			"contentNsfw",
 																			"replyCount",
@@ -112221,6 +112159,7 @@
 																				}
 																			},
 																			"attributions": {
+																				"maxItems": 8,
 																				"type": "array",
 																				"items": {
 																					"type": "object",
@@ -112456,6 +112395,7 @@
 																				]
 																			},
 																			"realms": {
+																				"maxItems": 8,
 																				"type": "array",
 																				"items": {
 																					"type": "object",
@@ -112899,13 +112839,6 @@
 																					{ "type": "null" }
 																				]
 																			},
-																			"body": {
-																				"nullable": true,
-																				"anyOf": [
-																					{ "$ref": "#/components/schemas/PortableTextDocument" },
-																					{ "type": "null" }
-																				]
-																			},
 																			"contentSpoiler": {
 																				"type": "object",
 																				"properties": {
@@ -112948,6 +112881,7 @@
 																								"anyOf": [{ "type": "string" }, { "type": "null" }]
 																							},
 																							"attributions": {
+																								"maxItems": 8,
 																								"type": "array",
 																								"items": {
 																									"type": "object",
@@ -113370,7 +113304,6 @@
 																			"subjectId",
 																			"rootPostId",
 																			"parentPostId",
-																			"body",
 																			"contentSpoiler",
 																			"contentNsfw",
 																			"replyCount",
@@ -113404,6 +113337,7 @@
 																				}
 																			},
 																			"attributions": {
+																				"maxItems": 8,
 																				"type": "array",
 																				"items": {
 																					"type": "object",
@@ -113639,6 +113573,7 @@
 																				]
 																			},
 																			"realms": {
+																				"maxItems": 8,
 																				"type": "array",
 																				"items": {
 																					"type": "object",
@@ -114082,13 +114017,6 @@
 																					{ "type": "null" }
 																				]
 																			},
-																			"body": {
-																				"nullable": true,
-																				"anyOf": [
-																					{ "$ref": "#/components/schemas/PortableTextDocument" },
-																					{ "type": "null" }
-																				]
-																			},
 																			"contentSpoiler": {
 																				"type": "object",
 																				"properties": {
@@ -114131,6 +114059,7 @@
 																								"anyOf": [{ "type": "string" }, { "type": "null" }]
 																							},
 																							"attributions": {
+																								"maxItems": 8,
 																								"type": "array",
 																								"items": {
 																									"type": "object",
@@ -114654,7 +114583,6 @@
 																			"subjectId",
 																			"rootPostId",
 																			"parentPostId",
-																			"body",
 																			"contentSpoiler",
 																			"contentNsfw",
 																			"replyCount",
@@ -118027,6 +117955,7 @@
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
 										"items": {
+											"maxItems": 50,
 											"type": "array",
 											"items": {
 												"type": "object",
@@ -118051,6 +117980,7 @@
 														}
 													},
 													"attributions": {
+														"maxItems": 8,
 														"type": "array",
 														"items": {
 															"type": "object",
@@ -118243,6 +118173,7 @@
 														"anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }]
 													},
 													"realms": {
+														"maxItems": 8,
 														"type": "array",
 														"items": {
 															"type": "object",
@@ -118612,13 +118543,6 @@
 														"nullable": true,
 														"anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }]
 													},
-													"body": {
-														"nullable": true,
-														"anyOf": [
-															{ "$ref": "#/components/schemas/PortableTextDocument" },
-															{ "type": "null" }
-														]
-													},
 													"contentSpoiler": {
 														"type": "object",
 														"properties": {
@@ -118652,6 +118576,7 @@
 																		"anyOf": [{ "type": "string" }, { "type": "null" }]
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -119016,7 +118941,6 @@
 													"subjectId",
 													"rootPostId",
 													"parentPostId",
-													"body",
 													"contentSpoiler",
 													"contentNsfw",
 													"replyCount",
@@ -131880,6 +131804,7 @@
 																}
 															},
 															"attributions": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -132081,6 +132006,7 @@
 																]
 															},
 															"realms": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -132759,6 +132685,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -132976,6 +132903,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -133391,13 +133319,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -133440,6 +133361,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -133838,7 +133760,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -133871,6 +133792,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -134088,6 +134010,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -134503,13 +134426,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -134552,6 +134468,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -134962,7 +134879,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -134996,6 +134912,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -135213,6 +135130,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -135628,13 +135546,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -135677,6 +135588,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -136181,7 +136093,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -144633,6 +144544,7 @@
 									"type": "object",
 									"properties": {
 										"items": {
+											"maxItems": 50,
 											"type": "array",
 											"items": {
 												"anyOf": [
@@ -144659,6 +144571,7 @@
 																}
 															},
 															"attributions": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -144860,6 +144773,7 @@
 																]
 															},
 															"realms": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -145538,6 +145452,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -145755,6 +145670,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -146170,13 +146086,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -146219,6 +146128,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -146617,7 +146527,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -146650,6 +146559,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -146867,6 +146777,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -147282,13 +147193,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -147331,6 +147235,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -147741,7 +147646,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -147775,6 +147679,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -147992,6 +147897,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -148407,13 +148313,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -148456,6 +148355,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -148960,7 +148860,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -152197,6 +152096,7 @@
 									"type": "object",
 									"properties": {
 										"items": {
+											"maxItems": 50,
 											"type": "array",
 											"items": {
 												"anyOf": [
@@ -152223,6 +152123,7 @@
 																}
 															},
 															"attributions": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -152424,6 +152325,7 @@
 																]
 															},
 															"realms": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -153102,6 +153004,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -153319,6 +153222,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -153734,13 +153638,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -153783,6 +153680,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -154181,7 +154079,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -154214,6 +154111,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -154431,6 +154329,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -154846,13 +154745,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -154895,6 +154787,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -155305,7 +155198,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -155339,6 +155231,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -155556,6 +155449,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -155971,13 +155865,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -156020,6 +155907,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -156524,7 +156412,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -160603,6 +160490,7 @@
 																									}
 																								},
 																								"attributions": {
+																									"maxItems": 8,
 																									"type": "array",
 																									"items": {
 																										"type": "object",
@@ -160848,6 +160736,7 @@
 																									]
 																								},
 																								"realms": {
+																									"maxItems": 8,
 																									"type": "array",
 																									"items": {
 																										"type": "object",
@@ -161698,6 +161587,7 @@
 																											}
 																										},
 																										"attributions": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -161958,6 +161848,7 @@
 																											]
 																										},
 																										"realms": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -162468,15 +162359,6 @@
 																												{ "type": "null" }
 																											]
 																										},
-																										"body": {
-																											"nullable": true,
-																											"anyOf": [
-																												{
-																													"$ref": "#/components/schemas/PortableTextDocument"
-																												},
-																												{ "type": "null" }
-																											]
-																										},
 																										"contentSpoiler": {
 																											"type": "object",
 																											"properties": {
@@ -162525,6 +162407,7 @@
 																															]
 																														},
 																														"attributions": {
+																															"maxItems": 8,
 																															"type": "array",
 																															"items": {
 																																"type": "object",
@@ -162980,7 +162863,6 @@
 																										"subjectId",
 																										"rootPostId",
 																										"parentPostId",
-																										"body",
 																										"contentSpoiler",
 																										"contentNsfw",
 																										"replyCount",
@@ -163029,6 +162911,7 @@
 																											}
 																										},
 																										"attributions": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -163289,6 +163172,7 @@
 																											]
 																										},
 																										"realms": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -163799,15 +163683,6 @@
 																												{ "type": "null" }
 																											]
 																										},
-																										"body": {
-																											"nullable": true,
-																											"anyOf": [
-																												{
-																													"$ref": "#/components/schemas/PortableTextDocument"
-																												},
-																												{ "type": "null" }
-																											]
-																										},
 																										"contentSpoiler": {
 																											"type": "object",
 																											"properties": {
@@ -163856,6 +163731,7 @@
 																															]
 																														},
 																														"attributions": {
+																															"maxItems": 8,
 																															"type": "array",
 																															"items": {
 																																"type": "object",
@@ -164338,7 +164214,6 @@
 																										"subjectId",
 																										"rootPostId",
 																										"parentPostId",
-																										"body",
 																										"contentSpoiler",
 																										"contentNsfw",
 																										"replyCount",
@@ -164388,6 +164263,7 @@
 																											}
 																										},
 																										"attributions": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -164648,6 +164524,7 @@
 																											]
 																										},
 																										"realms": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -165158,15 +165035,6 @@
 																												{ "type": "null" }
 																											]
 																										},
-																										"body": {
-																											"nullable": true,
-																											"anyOf": [
-																												{
-																													"$ref": "#/components/schemas/PortableTextDocument"
-																												},
-																												{ "type": "null" }
-																											]
-																										},
 																										"contentSpoiler": {
 																											"type": "object",
 																											"properties": {
@@ -165215,6 +165083,7 @@
 																															]
 																														},
 																														"attributions": {
+																															"maxItems": 8,
 																															"type": "array",
 																															"items": {
 																																"type": "object",
@@ -165812,7 +165681,6 @@
 																										"subjectId",
 																										"rootPostId",
 																										"parentPostId",
-																										"body",
 																										"contentSpoiler",
 																										"contentNsfw",
 																										"replyCount",
@@ -166154,6 +166022,7 @@
 																									}
 																								},
 																								"attributions": {
+																									"maxItems": 8,
 																									"type": "array",
 																									"items": {
 																										"type": "object",
@@ -166399,6 +166268,7 @@
 																									]
 																								},
 																								"realms": {
+																									"maxItems": 8,
 																									"type": "array",
 																									"items": {
 																										"type": "object",
@@ -167249,6 +167119,7 @@
 																											}
 																										},
 																										"attributions": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -167509,6 +167380,7 @@
 																											]
 																										},
 																										"realms": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -168019,15 +167891,6 @@
 																												{ "type": "null" }
 																											]
 																										},
-																										"body": {
-																											"nullable": true,
-																											"anyOf": [
-																												{
-																													"$ref": "#/components/schemas/PortableTextDocument"
-																												},
-																												{ "type": "null" }
-																											]
-																										},
 																										"contentSpoiler": {
 																											"type": "object",
 																											"properties": {
@@ -168076,6 +167939,7 @@
 																															]
 																														},
 																														"attributions": {
+																															"maxItems": 8,
 																															"type": "array",
 																															"items": {
 																																"type": "object",
@@ -168531,7 +168395,6 @@
 																										"subjectId",
 																										"rootPostId",
 																										"parentPostId",
-																										"body",
 																										"contentSpoiler",
 																										"contentNsfw",
 																										"replyCount",
@@ -168580,6 +168443,7 @@
 																											}
 																										},
 																										"attributions": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -168840,6 +168704,7 @@
 																											]
 																										},
 																										"realms": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -169350,15 +169215,6 @@
 																												{ "type": "null" }
 																											]
 																										},
-																										"body": {
-																											"nullable": true,
-																											"anyOf": [
-																												{
-																													"$ref": "#/components/schemas/PortableTextDocument"
-																												},
-																												{ "type": "null" }
-																											]
-																										},
 																										"contentSpoiler": {
 																											"type": "object",
 																											"properties": {
@@ -169407,6 +169263,7 @@
 																															]
 																														},
 																														"attributions": {
+																															"maxItems": 8,
 																															"type": "array",
 																															"items": {
 																																"type": "object",
@@ -169889,7 +169746,6 @@
 																										"subjectId",
 																										"rootPostId",
 																										"parentPostId",
-																										"body",
 																										"contentSpoiler",
 																										"contentNsfw",
 																										"replyCount",
@@ -169939,6 +169795,7 @@
 																											}
 																										},
 																										"attributions": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -170199,6 +170056,7 @@
 																											]
 																										},
 																										"realms": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -170709,15 +170567,6 @@
 																												{ "type": "null" }
 																											]
 																										},
-																										"body": {
-																											"nullable": true,
-																											"anyOf": [
-																												{
-																													"$ref": "#/components/schemas/PortableTextDocument"
-																												},
-																												{ "type": "null" }
-																											]
-																										},
 																										"contentSpoiler": {
 																											"type": "object",
 																											"properties": {
@@ -170766,6 +170615,7 @@
 																															]
 																														},
 																														"attributions": {
+																															"maxItems": 8,
 																															"type": "array",
 																															"items": {
 																																"type": "object",
@@ -171363,7 +171213,6 @@
 																										"subjectId",
 																										"rootPostId",
 																										"parentPostId",
-																										"body",
 																										"contentSpoiler",
 																										"contentNsfw",
 																										"replyCount",
@@ -172515,6 +172364,7 @@
 																									}
 																								},
 																								"attributions": {
+																									"maxItems": 8,
 																									"type": "array",
 																									"items": {
 																										"type": "object",
@@ -172760,6 +172610,7 @@
 																									]
 																								},
 																								"realms": {
+																									"maxItems": 8,
 																									"type": "array",
 																									"items": {
 																										"type": "object",
@@ -173610,6 +173461,7 @@
 																											}
 																										},
 																										"attributions": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -173870,6 +173722,7 @@
 																											]
 																										},
 																										"realms": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -174380,15 +174233,6 @@
 																												{ "type": "null" }
 																											]
 																										},
-																										"body": {
-																											"nullable": true,
-																											"anyOf": [
-																												{
-																													"$ref": "#/components/schemas/PortableTextDocument"
-																												},
-																												{ "type": "null" }
-																											]
-																										},
 																										"contentSpoiler": {
 																											"type": "object",
 																											"properties": {
@@ -174437,6 +174281,7 @@
 																															]
 																														},
 																														"attributions": {
+																															"maxItems": 8,
 																															"type": "array",
 																															"items": {
 																																"type": "object",
@@ -174892,7 +174737,6 @@
 																										"subjectId",
 																										"rootPostId",
 																										"parentPostId",
-																										"body",
 																										"contentSpoiler",
 																										"contentNsfw",
 																										"replyCount",
@@ -174941,6 +174785,7 @@
 																											}
 																										},
 																										"attributions": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -175201,6 +175046,7 @@
 																											]
 																										},
 																										"realms": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -175711,15 +175557,6 @@
 																												{ "type": "null" }
 																											]
 																										},
-																										"body": {
-																											"nullable": true,
-																											"anyOf": [
-																												{
-																													"$ref": "#/components/schemas/PortableTextDocument"
-																												},
-																												{ "type": "null" }
-																											]
-																										},
 																										"contentSpoiler": {
 																											"type": "object",
 																											"properties": {
@@ -175768,6 +175605,7 @@
 																															]
 																														},
 																														"attributions": {
+																															"maxItems": 8,
 																															"type": "array",
 																															"items": {
 																																"type": "object",
@@ -176250,7 +176088,6 @@
 																										"subjectId",
 																										"rootPostId",
 																										"parentPostId",
-																										"body",
 																										"contentSpoiler",
 																										"contentNsfw",
 																										"replyCount",
@@ -176300,6 +176137,7 @@
 																											}
 																										},
 																										"attributions": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -176560,6 +176398,7 @@
 																											]
 																										},
 																										"realms": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -177070,15 +176909,6 @@
 																												{ "type": "null" }
 																											]
 																										},
-																										"body": {
-																											"nullable": true,
-																											"anyOf": [
-																												{
-																													"$ref": "#/components/schemas/PortableTextDocument"
-																												},
-																												{ "type": "null" }
-																											]
-																										},
 																										"contentSpoiler": {
 																											"type": "object",
 																											"properties": {
@@ -177127,6 +176957,7 @@
 																															]
 																														},
 																														"attributions": {
+																															"maxItems": 8,
 																															"type": "array",
 																															"items": {
 																																"type": "object",
@@ -177724,7 +177555,6 @@
 																										"subjectId",
 																										"rootPostId",
 																										"parentPostId",
-																										"body",
 																										"contentSpoiler",
 																										"contentNsfw",
 																										"replyCount",
@@ -178066,6 +177896,7 @@
 																									}
 																								},
 																								"attributions": {
+																									"maxItems": 8,
 																									"type": "array",
 																									"items": {
 																										"type": "object",
@@ -178311,6 +178142,7 @@
 																									]
 																								},
 																								"realms": {
+																									"maxItems": 8,
 																									"type": "array",
 																									"items": {
 																										"type": "object",
@@ -179161,6 +178993,7 @@
 																											}
 																										},
 																										"attributions": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -179421,6 +179254,7 @@
 																											]
 																										},
 																										"realms": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -179931,15 +179765,6 @@
 																												{ "type": "null" }
 																											]
 																										},
-																										"body": {
-																											"nullable": true,
-																											"anyOf": [
-																												{
-																													"$ref": "#/components/schemas/PortableTextDocument"
-																												},
-																												{ "type": "null" }
-																											]
-																										},
 																										"contentSpoiler": {
 																											"type": "object",
 																											"properties": {
@@ -179988,6 +179813,7 @@
 																															]
 																														},
 																														"attributions": {
+																															"maxItems": 8,
 																															"type": "array",
 																															"items": {
 																																"type": "object",
@@ -180443,7 +180269,6 @@
 																										"subjectId",
 																										"rootPostId",
 																										"parentPostId",
-																										"body",
 																										"contentSpoiler",
 																										"contentNsfw",
 																										"replyCount",
@@ -180492,6 +180317,7 @@
 																											}
 																										},
 																										"attributions": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -180752,6 +180578,7 @@
 																											]
 																										},
 																										"realms": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -181262,15 +181089,6 @@
 																												{ "type": "null" }
 																											]
 																										},
-																										"body": {
-																											"nullable": true,
-																											"anyOf": [
-																												{
-																													"$ref": "#/components/schemas/PortableTextDocument"
-																												},
-																												{ "type": "null" }
-																											]
-																										},
 																										"contentSpoiler": {
 																											"type": "object",
 																											"properties": {
@@ -181319,6 +181137,7 @@
 																															]
 																														},
 																														"attributions": {
+																															"maxItems": 8,
 																															"type": "array",
 																															"items": {
 																																"type": "object",
@@ -181801,7 +181620,6 @@
 																										"subjectId",
 																										"rootPostId",
 																										"parentPostId",
-																										"body",
 																										"contentSpoiler",
 																										"contentNsfw",
 																										"replyCount",
@@ -181851,6 +181669,7 @@
 																											}
 																										},
 																										"attributions": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -182111,6 +181930,7 @@
 																											]
 																										},
 																										"realms": {
+																											"maxItems": 8,
 																											"type": "array",
 																											"items": {
 																												"type": "object",
@@ -182621,15 +182441,6 @@
 																												{ "type": "null" }
 																											]
 																										},
-																										"body": {
-																											"nullable": true,
-																											"anyOf": [
-																												{
-																													"$ref": "#/components/schemas/PortableTextDocument"
-																												},
-																												{ "type": "null" }
-																											]
-																										},
 																										"contentSpoiler": {
 																											"type": "object",
 																											"properties": {
@@ -182678,6 +182489,7 @@
 																															]
 																														},
 																														"attributions": {
+																															"maxItems": 8,
 																															"type": "array",
 																															"items": {
 																																"type": "object",
@@ -183275,7 +183087,6 @@
 																										"subjectId",
 																										"rootPostId",
 																										"parentPostId",
-																										"body",
 																										"contentSpoiler",
 																										"contentNsfw",
 																										"replyCount",
@@ -185543,6 +185354,7 @@
 									"type": "object",
 									"properties": {
 										"items": {
+											"maxItems": 50,
 											"type": "array",
 											"items": {
 												"anyOf": [
@@ -185569,6 +185381,7 @@
 																}
 															},
 															"attributions": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -185770,6 +185583,7 @@
 																]
 															},
 															"realms": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -186448,6 +186262,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -186665,6 +186480,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -187080,13 +186896,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -187129,6 +186938,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -187527,7 +187337,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -187560,6 +187369,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -187777,6 +187587,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -188192,13 +188003,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -188241,6 +188045,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -188651,7 +188456,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -188685,6 +188489,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -188902,6 +188707,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -189317,13 +189123,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -189366,6 +189165,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -189870,7 +189670,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -190925,6 +190724,7 @@
 									"type": "object",
 									"properties": {
 										"items": {
+											"maxItems": 50,
 											"type": "array",
 											"items": {
 												"anyOf": [
@@ -190951,6 +190751,7 @@
 																}
 															},
 															"attributions": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -191152,6 +190953,7 @@
 																]
 															},
 															"realms": {
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "object",
@@ -191830,6 +191632,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -192047,6 +191850,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -192462,13 +192266,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -192511,6 +192308,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -192909,7 +192707,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -192942,6 +192739,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -193159,6 +192957,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -193574,13 +193373,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -193623,6 +193415,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -194033,7 +193826,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",
@@ -194067,6 +193859,7 @@
 																		}
 																	},
 																	"attributions": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -194284,6 +194077,7 @@
 																		]
 																	},
 																	"realms": {
+																		"maxItems": 8,
 																		"type": "array",
 																		"items": {
 																			"type": "object",
@@ -194699,13 +194493,6 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"body": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "$ref": "#/components/schemas/PortableTextDocument" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"contentSpoiler": {
 																		"type": "object",
 																		"properties": {
@@ -194748,6 +194535,7 @@
 																						"anyOf": [{ "type": "string" }, { "type": "null" }]
 																					},
 																					"attributions": {
+																						"maxItems": 8,
 																						"type": "array",
 																						"items": {
 																							"type": "object",
@@ -195252,7 +195040,6 @@
 																	"subjectId",
 																	"rootPostId",
 																	"parentPostId",
-																	"body",
 																	"contentSpoiler",
 																	"contentNsfw",
 																	"replyCount",

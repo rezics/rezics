@@ -87,7 +87,6 @@ describe("API response values", () => {
 			subjectId: null,
 			rootPostId: null,
 			parentPostId: null,
-			body: null,
 			replyCount: 0,
 			latestRevisionId: null,
 			replyContext: null,
@@ -315,6 +314,11 @@ describe("API response values", () => {
 	});
 
 	it("requires Scores only for Review Feed items", () => {
+		expect("body" in FeedNonReviewPostItemResponse.properties).toBe(false);
+		expect("body" in FeedReviewItemResponse.properties).toBe(false);
+		expect("body" in FeedWikiItemResponse.properties).toBe(false);
+		expect(Reflect.get(FeedNonReviewPostItemResponse.properties.attributions, "maxItems")).toBe(8);
+		expect(Reflect.get(FeedNonReviewPostItemResponse.properties.realms, "maxItems")).toBe(8);
 		expect(FeedReviewItemResponse.required).toContain("scores");
 		expect(FeedReviewItemResponse.properties.postKind.const).toBe("review");
 		expect(FeedReviewItemResponse.properties.scores.items.required).toEqual([

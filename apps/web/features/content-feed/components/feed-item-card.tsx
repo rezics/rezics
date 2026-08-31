@@ -9,7 +9,6 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import type { ReactNode } from "react";
 
 import { CardContent, cn, IdentityAvatar } from "@rezics/ui";
-import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { ContentLanguageVersionMenu } from "@/features/content-languages/components/content-language-version-menu";
 import { withContentLanguage } from "@/features/content-languages/routing/content-language-route";
@@ -25,7 +24,6 @@ import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { useRecommendationTracking } from "@/features/recommendations/tracking";
 import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
-import { readPortableText } from "@/lib/block";
 import { getFeedActionPolicy } from "../model/feed-action-policy";
 import { feedUnitDiscussionHref } from "../model/feed-discussion-route";
 import {
@@ -236,14 +234,6 @@ export function FeedPostCard({
 					) : null}
 					{post.summary ? (
 						<p className="mt-2 text-muted-foreground text-sm leading-6">{displayedSummary}</p>
-					) : post.body ? (
-						<div className="prose prose-sm mt-2 max-w-none text-muted-foreground leading-6">
-							<LocalizedPortableTextContent
-								language={post.language}
-								value={readPortableText(post.body)}
-								variant="preview"
-							/>
-						</div>
 					) : null}
 				</FeedItemMain>
 				{excerptSource ? (

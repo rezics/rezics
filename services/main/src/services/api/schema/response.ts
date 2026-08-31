@@ -48,7 +48,13 @@ import {
 	TagExpressionKindValues,
 	TagExpressionLabelComponentKindValues,
 } from "../../database/schema/tag-expression";
-import { FeedNonReviewPostKindValues, FeedUnitKindValues } from "../feed/schema";
+import {
+	FeedNonReviewPostKindValues,
+	FeedUnitKindValues,
+	MaximumFeedAttributionsPerItem,
+	MaximumFeedPageSize,
+	MaximumFeedRealmContextsPerItem,
+} from "../feed/schema";
 import {
 	RecommendationReasonSchema,
 	RecommendationTrackingSchema,
@@ -772,7 +778,9 @@ const FeedItemBaseResponse = {
 	id: Uuid,
 	language: t.Nullable(ContentLanguage),
 	availableLanguages: t.Array(ContentLanguage, { uniqueItems: true }),
-	attributions: t.Array(UnitAttributionSummaryResponse),
+	attributions: t.Array(UnitAttributionSummaryResponse, {
+		maxItems: MaximumFeedAttributionsPerItem,
+	}),
 	realmId: t.Nullable(Uuid),
 	realms: t.Array(
 		t.Object({
@@ -783,6 +791,7 @@ const FeedItemBaseResponse = {
 			summary: NullableText,
 			avatar: AvatarResponse,
 		}),
+		{ maxItems: MaximumFeedRealmContextsPerItem },
 	),
 	title: NullableText,
 	createdAt: DateTimeString,
@@ -875,7 +884,6 @@ const FeedPostItemFields = {
 	subjectId: t.Nullable(Uuid),
 	rootPostId: t.Nullable(Uuid),
 	parentPostId: t.Nullable(Uuid),
-	body: t.Nullable(PortableTextDocument),
 	contentSpoiler: t.Object({
 		level: t.Union([t.Literal(0), t.Literal(1), t.Literal(2)]),
 		concealed: t.Boolean(),
@@ -890,7 +898,9 @@ const FeedPostItemFields = {
 		t.Object({
 			rootPostId: Uuid,
 			title: NullableText,
-			attributions: t.Array(UnitAttributionSummaryResponse),
+			attributions: t.Array(UnitAttributionSummaryResponse, {
+				maxItems: MaximumFeedAttributionsPerItem,
+			}),
 			subjectId: t.Nullable(Uuid),
 		}),
 	),
@@ -942,13 +952,17 @@ export type FeedItemResponseValue =
 	| StaticDecode<typeof FeedWikiItemResponse>;
 
 export const FeedResponse = t.Object({
-	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),
+	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse]), {
+		maxItems: MaximumFeedPageSize,
+	}),
 	nextCursor: NullableText,
 	total: SearchCountResultSchema,
 });
 
 export const SearchFeedResponse = t.Object({
-	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),
+	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse]), {
+		maxItems: MaximumFeedPageSize,
+	}),
 	nextCursor: t.Optional(SearchContinuationToken),
 	advisory: t.Optional(PersistedSortUnavailableAdvisoryResponse),
 	facets: SearchResponse.properties.facets,
@@ -956,7 +970,7 @@ export const SearchFeedResponse = t.Object({
 });
 
 export const PostFeedResponse = t.Object({
-	items: t.Array(FeedPostItemResponse),
+	items: t.Array(FeedPostItemResponse, { maxItems: MaximumFeedPageSize }),
 	nextCursor: NullableText,
 });
 export const ReviewListResponse = t.Object({
@@ -967,6 +981,7 @@ export const ReviewListResponse = t.Object({
 			...FeedReviewItemResponse.properties,
 			targetId: Uuid,
 		}),
+		{ maxItems: MaximumFeedPageSize },
 	),
 });
 

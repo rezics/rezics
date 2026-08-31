@@ -42,7 +42,7 @@ const humanEvidence: CustomThemeHumanReviewEvidenceV0 = {
 };
 
 const referenceRenderEvidence: CustomThemeReferenceRenderEvidenceV0 = {
-	rendererVersion: "1.10.0",
+	rendererVersion: "1.11.0",
 	observedRuntimeOrigins: {
 		connect: ["https://api.example.test"],
 		image: [],

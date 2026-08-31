@@ -73,22 +73,17 @@ import { InvalidSearch, SearchUnavailable } from "../../search/errors";
 import { SearchCategories } from "../../search/schema";
 import type { SearchExpression, SearchKeysetPosition } from "../../search/query";
 import { searchGlobalIdentifiers, type GlobalSearchBranch } from "../../search/service";
+import type { PublicCanonicalUnitSlugAddress } from "../../units/slug-address";
 import {
-	getPublicCanonicalUnitSlugAddresses,
-	type PublicCanonicalUnitSlugAddress,
-} from "../../units/slug-address";
-import { getAttributionSummariesByUnitIds } from "../../units/attribution";
+	getAttributionSummariesByUnitIds,
+	getPublicUnitSummariesByIds,
+} from "../../units/attribution";
 import {
 	RecommendationPolicyVersionSchema,
 	type RecommendationReason,
 	type RecommendationSurface,
 } from "../recommendations/schema";
-import {
-	toApiErrorResponse,
-	FeedResponse,
-	toPortableTextResponse,
-	type FeedItemResponseValue,
-} from "../schema/response";
+import { toApiErrorResponse, FeedResponse, type FeedItemResponseValue } from "../schema/response";
 import { resolveFeedPageContinuation } from "./continuation";
 import { InvalidFeedCursor, InvalidFeedFilter } from "./errors";
 import {
@@ -100,6 +95,8 @@ import {
 	FeedRequest,
 	FeedRatedWorkUnitKindValues,
 	FeedSortSchema,
+	MaximumFeedAttributionsPerItem,
+	MaximumFeedRealmContextsPerItem,
 	type FeedUnitKind,
 	FeedUnitKindValues,
 	type FeedRequest as FeedRequestType,
@@ -107,7 +104,6 @@ import {
 } from "./schema";
 import type { ContentRating } from "../../database/schema/contract-values";
 
-const feedContextRealm = alias(unit, "feed_context_realm");
 const feedReviewScoreTargetUnit = alias(unit, "feed_review_score_target_unit");
 const feedReviewScoreRealm = alias(unit, "feed_review_score_realm");
 const feedRealmContextTagUnit = alias(unit, "feed_realm_context_tag_unit");
@@ -123,44 +119,58 @@ interface FeedRealmContextSummary {
 }
 
 async function getFeedRealmContextsByUnitIds(
-	unitIds: readonly string[],
+	candidates: readonly FeedHydrationCandidate[],
 	localizationLanguages: readonly ContentLanguage[] = [],
 ): Promise<Map<string, FeedRealmContextSummary[]>> {
+	const requested = [...new Map(candidates.map((candidate) => [candidate.id, candidate])).values()];
 	const result = new Map<string, FeedRealmContextSummary[]>();
-	for (const unitId of unitIds) result.set(unitId, []);
-	if (!unitIds.length) return result;
-	const rows = await database
-		.select({
-			unitId: realmUnit.unitId,
-			id: realmUnit.realmId,
-			language: resolvedUnitLocalizationLanguage(feedContextRealm.id, localizationLanguages),
-			title: resolvedUnitLocalizationTitle(feedContextRealm.id, localizationLanguages),
-			summary: resolvedUnitLocalizationSummary(feedContextRealm.id, localizationLanguages),
-			avatar: resolvedUnitLocalizationAvatar(feedContextRealm.id, localizationLanguages),
-		})
-		.from(realmUnit)
-		.innerJoin(feedContextRealm, eq(feedContextRealm.id, realmUnit.realmId))
-		.where(
-			and(
-				inArray(realmUnit.unitId, [...unitIds]),
-				eq(realmUnit.status, "visible"),
-				eq(realmUnit.publicationState, "active"),
-				eq(feedContextRealm.status, "published"),
-				eq(feedContextRealm.visibility, "public"),
-				isNull(feedContextRealm.deletedAt),
-			),
-		)
-		.orderBy(asc(realmUnit.createdAt), asc(realmUnit.realmId));
-	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(rows.map((row) => row.id));
-	for (const row of rows) {
-		if (!row.language) continue;
+	for (const { id } of requested) result.set(id, []);
+	if (!requested.length) return result;
+	const membershipRows = await database.execute<{
+		readonly unitId: string;
+		readonly realmId: string;
+	}>(
+		sql`
+			select
+				requested.unit_id as "unitId",
+				bounded.realm_id as "realmId"
+			from (values ${sql.join(
+				requested.map(({ id, realmId }) => sql`(${id}::uuid, ${realmId}::uuid)`),
+				sql`, `,
+			)}) as requested(unit_id, primary_realm_id)
+			cross join lateral (
+				select membership.realm_id
+				from ${realmUnit} as membership
+				inner join ${unit} as context_realm on context_realm.id = membership.realm_id
+				where membership.unit_id = requested.unit_id
+					and membership.status = 'visible'
+					and membership.publication_state = 'active'
+					and context_realm.status = 'published'
+					and context_realm.visibility = 'public'
+					and context_realm.deleted_at is null
+				order by
+					(membership.realm_id = requested.primary_realm_id) desc nulls last,
+					membership.updated_at desc,
+					membership.realm_id desc
+				limit ${MaximumFeedRealmContextsPerItem}
+			) as bounded
+			order by requested.unit_id, (bounded.realm_id = requested.primary_realm_id) desc, bounded.realm_id
+		`,
+	);
+	const realmSummaries = await getPublicUnitSummariesByIds(
+		membershipRows.rows.map(({ realmId }) => realmId),
+		localizationLanguages,
+	);
+	for (const row of membershipRows.rows) {
+		const realm = realmSummaries.get(row.realmId);
+		if (!realm || realm.kind !== "realm") continue;
 		result.get(row.unitId)?.push({
-			id: row.id,
-			language: row.language,
-			slugAddress: slugAddresses.get(row.id) ?? null,
-			title: row.title,
-			summary: row.summary,
-			avatar: presentAvatar(row.avatar),
+			id: realm.id,
+			language: realm.language,
+			slugAddress: realm.slugAddress,
+			title: realm.title,
+			summary: realm.summary,
+			avatar: realm.avatar,
 		});
 	}
 	return result;
@@ -835,7 +845,6 @@ export async function hydrateFeedItems(
 			rootPostId: postReply.rootPostId,
 			parentPostId: postReply.parentPostId,
 			language: resolvedUnitLocalizationLanguage(unit.id, displayLanguages, allowedLanguages),
-			body: unitLocalization.content,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
 			coverAssetId: resolvedUnitLocalizationImageAssetId(
@@ -1186,9 +1195,13 @@ export async function hydrateFeedItems(
 			: [],
 	]);
 	const [attributions, rootAttributions, realmContexts] = await Promise.all([
-		getAttributionSummariesByUnitIds(validIds, displayLanguages),
-		getAttributionSummariesByUnitIds(rootIds, displayLanguages),
-		getFeedRealmContextsByUnitIds(validIds, displayLanguages),
+		getAttributionSummariesByUnitIds(validIds, displayLanguages, {
+			maximumPerSourceUnit: MaximumFeedAttributionsPerItem,
+		}),
+		getAttributionSummariesByUnitIds(rootIds, displayLanguages, {
+			maximumPerSourceUnit: MaximumFeedAttributionsPerItem,
+		}),
+		getFeedRealmContextsByUnitIds(page, displayLanguages),
 	]);
 	const subjects = new Map(
 		subjectRows.flatMap((subject) => {
@@ -1412,13 +1425,6 @@ export async function hydrateFeedItems(
 			subjectId: row.subjectId,
 			rootPostId: row.rootPostId,
 			parentPostId: row.parentPostId,
-			body:
-				(row.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers) ||
-				(row.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw)
-					? null
-					: row.body === null
-						? null
-						: toPortableTextResponse(row.body, "post.body"),
 			contentSpoiler: {
 				level: contentSpoilerLevel,
 				concealed: row.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers,

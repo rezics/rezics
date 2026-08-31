@@ -205,6 +205,52 @@ report an exact total or a lower bound when the Search Service has not exhausted
 its bounded candidate window. Clients must render that distinction (for
 example, “at least 1,000”) and must not present a lower bound as an exact count.
 
+## Feed projection and payload budget
+
+Canonical Feed items are discovery projections, not Post detail resources.
+Post items therefore return authored `title` and optional authored `summary`,
+but never the Portable Text `body`. A consumer that opens or otherwise needs a
+Post body reads `GET /api/v1/posts/:postId`. Missing summary is represented by
+`null`; the server and clients do not manufacture an excerpt from the body.
+
+Every Feed request returns at most 50 items. Zone query Blocks use at most 20
+eager items, with at most 24 Page query Blocks and 6 Dock query Blocks. Each
+item carries at most 8 attribution summaries and 8 public Realm contexts. The
+hydration query applies those per-item association limits inside PostgreSQL
+with index-routed lateral probes; it does not fetch all associations and slice
+them in application memory. The selected execution Realm is ordered first when
+it is public and present within the bound.
+
+`unit_localization` and the association relations are planned at 500 million
+rows and estimated at 3 billion rows. Candidate selection supplies at most 50
+Unit IDs to hydration. Localization reads remain equality/index lookups, while
+each attribution probe reads at most 8 entries from
+`credit_attribution_source_position_idx` and each Realm-context probe reads at
+most 8 entries from `realm_unit_unit_publication_status_updated_idx`. Work is
+therefore proportional to the requested page and fixed per-item bounds rather
+than corpus cardinality or a Unit's total association degree. These reads add
+no writes, write amplification, background queue, cache invalidation, or
+whole-corpus maintenance.
+
+At the maximum Zone Page plus Dock shape, at most 600 item projections are
+validated across independently bounded Block results. Authored summaries are
+limited to 2,000 characters at write boundaries, so the summary contribution
+is at most 1.2 million characters (up to 4.8 MB in worst-case UTF-8) before
+ordinary response metadata. This is a defensive maximum, not a target response
+size; normal Pages should remain well below it. Before this decision, Post
+bodies made the same request unbounded by content size and multiplied database
+I/O, heap retention, JSON serialization, schema validation, network transfer,
+client parsing, and rendering work.
+
+The srvx entry point compiles the complete Elysia application after conditional
+routes are registered and before accepting traffic. Route validators therefore
+pay their code-generation cost once during startup. Request-path validation
+remains linear in the bounded response shape and does not use Elysia's deferred
+interpreter path for the first requests.
+
+The breaking 1.11.0 client cutover and rollback are specified in
+[`docs/releases/1.11.0.md`](../releases/1.11.0.md).
+
 ## Rationale
 
 This keeps one stable domain abstraction while allowing each execution engine

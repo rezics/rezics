@@ -16,15 +16,12 @@ import {
 	Shelf,
 	Skeleton,
 } from "@rezics/ui";
-import { readPortableText } from "@/lib/block";
 import type { ContentLanguage } from "@rezics/i18n";
-import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 import { useTranslation } from "@/i18n/client";
 
 export interface RealmPinnedContentItem {
 	readonly id: string;
-	readonly body?: Parameters<typeof readPortableText>[0];
 	readonly href?: string;
 	readonly avatar?: PresentedAvatar | null;
 	readonly identity?: boolean;
@@ -197,13 +194,6 @@ function RealmPinnedItemCard({
 								value={item.summary}
 							/>
 						</p>
-					) : item.body ? (
-						<LocalizedPortableTextContent
-							className="mt-2 line-clamp-4 text-muted-foreground leading-5"
-							language={item.language}
-							value={readPortableText(item.body)}
-							variant="preview"
-						/>
 					) : null}
 				</CardContent>
 			)}

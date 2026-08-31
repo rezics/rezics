@@ -30,6 +30,12 @@ if (smokeProbeToken)
 		throw new Error("Intentional AppHost smoke-probe failure");
 	});
 
+// srvx invokes Elysia through `api.fetch` instead of Elysia's own listener.
+// Compile after every conditional route has been registered so request and
+// response validators never fall back to deferred interpreter validation on
+// the first production requests.
+api.compile();
+
 const server = serve({
 	maxRequestBodySize: MaximumRequestBodyBytes,
 	async fetch(request) {
