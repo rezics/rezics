@@ -100,6 +100,16 @@ try {
 					`grant execute on function public.search_text_candidates(text[],text[],text,bigint,uuid,integer,integer) to ${role}`,
 				),
 			);
+			await transaction.execute(
+				sql.raw(
+					`grant execute on function public.rebuild_tag_expression_effective_tags(uuid) to ${role}`,
+				),
+			);
+			await transaction.execute(
+				sql.raw(
+					`grant execute on function public.enqueue_tag_expression_projection_rebuild(uuid) to ${role}`,
+				),
+			);
 			const privilegeProof = await transaction.execute<
 				Record<string, unknown> & {
 					readonly canMaintainUnit: boolean;
@@ -108,6 +118,7 @@ try {
 					readonly canRunApproximateWriter: boolean;
 					readonly canRunPgroongaCommand: boolean;
 					readonly canRunSearchText: boolean;
+					readonly canRebuildTagExpression: boolean;
 					readonly canWriteApproximateMetrics: boolean;
 				}
 			>(sql`
@@ -139,6 +150,11 @@ try {
 						'public.search_text_candidates(text[],text[],text,bigint,uuid,integer,integer)',
 						'EXECUTE'
 					) as "canRunSearchText",
+					has_function_privilege(
+						${applicationRole},
+						'public.rebuild_tag_expression_effective_tags(uuid)',
+						'EXECUTE'
+					) as "canRebuildTagExpression",
 					has_table_privilege(
 						${applicationRole},
 						'approx_count.metrics',
@@ -150,6 +166,7 @@ try {
 				!proof?.canReadEstimate ||
 				!proof.canReadApproximateMetrics ||
 				!proof.canRunSearchText ||
+				!proof.canRebuildTagExpression ||
 				proof.canMaintainUnit ||
 				proof.canRunApproximateWriter ||
 				proof.canRunPgroongaCommand ||
