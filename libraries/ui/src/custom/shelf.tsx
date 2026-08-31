@@ -3,6 +3,7 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import {
 	Children,
+	type CSSProperties,
 	type PointerEvent as ReactPointerEvent,
 	type ReactNode,
 	isValidElement,
@@ -37,6 +38,7 @@ export interface ShelfLabels {
 
 export interface ShelfProps {
 	readonly children: ReactNode;
+	/** Root classes. Set `--shelf-item-max-inline-size` to override the density-derived cap. */
 	readonly className?: string;
 	readonly itemClassName?: string;
 	readonly itemSize?: ShelfItemSize;
@@ -44,7 +46,7 @@ export interface ShelfProps {
 }
 
 const ShelfGapPixels = 12;
-const ShelfTargetItemWidthPixels: Readonly<Record<ShelfItemSize, number>> = {
+const ShelfMaxItemInlineSizePixels: Readonly<Record<ShelfItemSize, number>> = {
 	sm: 144,
 	md: 208,
 	lg: 272,
@@ -57,6 +59,10 @@ interface ShelfLayout {
 	readonly slidesPerPage: number;
 }
 
+interface ShelfCarouselStyle extends CSSProperties {
+	readonly "--slide-item-size": string;
+}
+
 interface PointerStart {
 	readonly pointerId: number;
 	readonly x: number;
@@ -65,7 +71,7 @@ interface PointerStart {
 
 function resolveSlidesPerPage(width: number, itemSize: ShelfItemSize, itemCount: number): number {
 	if (itemCount === 0) return 1;
-	const targetItemWidth = ShelfTargetItemWidthPixels[itemSize];
+	const targetItemWidth = ShelfMaxItemInlineSizePixels[itemSize];
 	const availableSlots = Math.floor(
 		(Math.max(0, width) + ShelfGapPixels) / (targetItemWidth + ShelfGapPixels),
 	);
@@ -82,6 +88,9 @@ export function Shelf({ children, className, itemClassName, itemSize = "md", lab
 	const pointerStartRef = useRef<PointerStart | null>(null);
 	const suppressClickUntilRef = useRef(0);
 	const [layout, setLayout] = useState<ShelfLayout>({ enhanced: false, slidesPerPage: 1 });
+	const carouselStyle: ShelfCarouselStyle = {
+		"--slide-item-size": `min(100%, var(--shelf-item-max-inline-size, ${ShelfMaxItemInlineSizePixels[itemSize]}px))`,
+	};
 
 	useEffect(() => {
 		const container = containerRef.current;
@@ -146,6 +155,7 @@ export function Shelf({ children, className, itemClassName, itemSize = "md", lab
 				slidesPerMove={layout.slidesPerPage}
 				slidesPerPage={layout.slidesPerPage}
 				spacing={`${ShelfGapPixels}px`}
+				style={carouselStyle}
 			>
 				<CarouselContent
 					className="snap-x snap-mandatory scroll-smooth overflow-x-auto overscroll-x-contain rounded-none [scrollbar-width:none] motion-reduce:scroll-auto [&::-webkit-scrollbar]:hidden"
