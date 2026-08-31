@@ -371,8 +371,10 @@ The semantic render tree is:
 
 ```text
 UnitPresentationHost
+├── platformHeader
+│   └── adapter-owned identity, navigation, and actions
 ├── header
-│   ├── platform/default or Unit-owned Header Block document
+│   ├── optional Unit-owned Header Block document
 │   └── approved theme fragment: header.append
 ├── main
 │   └── normal route content
@@ -383,9 +385,12 @@ UnitPresentationHost
 
 For the Zone adapter:
 
-- move ordinary identity/navigation composition toward the Header Block document;
-- stop treating Menu Blocks in the Dock as the Header's content source;
-- keep Dock semantics as Dock semantics;
+- keep the adapter-owned Zone identity, Dock navigation, and platform actions in an invariant
+  `platformHeader` that a Unit-owned Header document does not replace;
+- project top-level Menu Blocks from the Dock into that platform Header while retaining Dock
+  ownership and `surface = dock` semantics;
+- render the remaining Dock Blocks in the main Dock composition region;
+- treat the optional Unit-owned Header Block document as additive presentation content;
 - keep route content in `main`;
 - render the footer after main content in document order.
 

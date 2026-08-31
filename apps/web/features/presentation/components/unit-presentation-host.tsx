@@ -25,10 +25,10 @@ export interface UnitPresentationHostCopy {
 export function UnitPresentationHost({
 	children,
 	copy,
-	defaultHeader,
 	headerLabel,
 	hostUnit,
 	onUseDefaultTheme,
+	platformHeader,
 	presentation,
 	renderRegion,
 	useDefaultThemeFailed,
@@ -36,10 +36,10 @@ export function UnitPresentationHost({
 }: {
 	readonly children: ReactNode;
 	readonly copy: UnitPresentationHostCopy;
-	readonly defaultHeader: ReactNode;
 	readonly headerLabel: string;
 	readonly hostUnit: { readonly id: string; readonly kind: "zone" };
 	readonly onUseDefaultTheme: () => void;
+	readonly platformHeader: ReactNode;
 	readonly presentation: ResolvedUnitPresentation;
 	readonly renderRegion: (
 		document: UnitReferencedBlockDocument,
@@ -164,8 +164,9 @@ export function UnitPresentationHost({
 					</div>
 				</aside>
 			) : null}
+			{platformHeader}
 			<header aria-label={headerLabel} data-unit-presentation-region="header" ref={headerRoot}>
-				{headerDocument.blocks.length > 0 ? renderRegion(headerDocument, "header") : defaultHeader}
+				{headerDocument.blocks.length > 0 ? renderRegion(headerDocument, "header") : null}
 				<div data-unit-presentation-fragment="header.append" ref={headerFragment} />
 			</header>
 			<main data-unit-presentation-region="main" ref={mainRoot}>

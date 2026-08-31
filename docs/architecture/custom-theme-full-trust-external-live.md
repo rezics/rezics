@@ -66,6 +66,10 @@ future remote bytes were approved.
 - `unit_presentation_document` owns semantic Header and Footer Block documents
   with immutable history. The theme may append only revision-owned
   `header.append` and `footer.append` fragments. Dock remains a Dock.
+- The Zone adapter keeps identity, top-level Dock Menu navigation, and platform
+  actions in an invariant platform Header sibling. A Unit-owned Header document
+  is additive and cannot replace that adapter-owned chrome; non-Menu Dock Blocks
+  remain in the main Dock composition region.
 - Zone appearance owns only safe fallback tokens and backdrop configuration.
 
 The manifest, submitted representation, reviewed evidence, and resolved browser

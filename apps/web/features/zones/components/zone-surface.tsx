@@ -14,6 +14,7 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
+import { zoneDockPresentation } from "../model/zone-dock-presentation";
 import { parseZoneRenderProjection, type ZoneRenderProjection } from "../model/zone-render";
 import { ZoneBlockProvider, ZoneDocument } from "./block-renderer";
 import { ZoneDockContent } from "./zone-dock-content";
@@ -96,6 +97,10 @@ export function ZoneSurface({
 	const title = localization?.title ?? t.ui.unnamed;
 	const avatar = localization?.avatar ?? projection.zone.avatar;
 	const hostUnit = { id: projection.zone.id, kind: "zone" } as const;
+	const dockPresentation = zoneDockPresentation(
+		projection.dock?.document.blocks ?? [],
+		projection.navigations,
+	);
 
 	const surface = (
 		<ZoneBlockProvider baseHref={baseHref} projection={projection}>
@@ -107,10 +112,18 @@ export function ZoneSurface({
 						defaultThemeScope: t.zones.theme.viewerDefaultScope,
 						runtimeFailed: t.zones.theme.runtimeFailed,
 					}}
-					defaultHeader={<ZoneHeader avatar={avatar} projection={projection} title={title} />}
 					headerLabel={t.zones.navigation}
 					hostUnit={hostUnit}
 					onUseDefaultTheme={() => useDefaultTheme.mutate({ body: { customThemesEnabled: false } })}
+					platformHeader={
+						<ZoneHeader
+							avatar={avatar}
+							canManage={projection.zone.capabilities.canManage}
+							menuBlocks={dockPresentation.menuBlocks}
+							title={title}
+							zoneId={projection.zone.id}
+						/>
+					}
 					presentation={projection.resolvedPresentation}
 					renderRegion={(document, region) => (
 						<div className={ZoneSurfaceContainerClassName}>
@@ -135,7 +148,7 @@ export function ZoneSurface({
 							/>
 						</div>
 					) : null}
-					<ZoneDockContent projection={projection} />
+					<ZoneDockContent blocks={dockPresentation.contentBlocks} />
 					{children(projection)}
 				</UnitPresentationHost>
 			</ZoneAppearanceContent>
