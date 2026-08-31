@@ -1,6 +1,7 @@
 /** @vitest-environment jsdom */
 
 import { act, renderHook } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -47,6 +48,17 @@ import {
 	useLocalizationLanguages,
 	useLocalizationLanguageState,
 } from "./use-localization-languages";
+import { BrowserContentLanguagesProvider } from "./browser-content-languages";
+
+function browserLanguages(languages: readonly ("en" | "zh")[]) {
+	return function BrowserLanguages({ children }: { readonly children: ReactNode }) {
+		return (
+			<BrowserContentLanguagesProvider languages={languages}>
+				{children}
+			</BrowserContentLanguagesProvider>
+		);
+	};
+}
 
 beforeEach(() => {
 	mocks.requestedLanguage = undefined;
@@ -61,21 +73,35 @@ beforeEach(() => {
 });
 
 describe("localization language state", () => {
-	it("delegates anonymous fallback to Unit localization order", () => {
+	it("uses the interface language for anonymous viewers", () => {
 		const { result } = renderHook(useLocalizationLanguageState);
 
 		expect(result.current).toEqual({
 			status: "ready",
-			languages: [],
+			languages: ["zh"],
+			source: "anonymous",
+		});
+	});
+
+	it("places browser languages after the anonymous interface language", () => {
+		const { result } = renderHook(useLocalizationLanguageState, {
+			wrapper: browserLanguages(["en"]),
+		});
+
+		expect(result.current).toEqual({
+			status: "ready",
+			languages: ["zh", "en"],
 			source: "anonymous",
 		});
 	});
 
 	it("prepends an explicit content-language override without duplicating preferences", () => {
 		mocks.requestedLanguage = "ja";
-		const { result } = renderHook(useLocalizationLanguages);
+		const { result } = renderHook(useLocalizationLanguages, {
+			wrapper: browserLanguages(["en"]),
+		});
 
-		expect(result.current).toEqual(["ja"]);
+		expect(result.current).toEqual(["ja", "zh", "en"]);
 	});
 
 	it("preserves the authenticated preference order before the interface fallback", () => {

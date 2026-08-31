@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
+import { parseAcceptLanguage } from "native-i18n";
 import type { ReactNode } from "react";
 import { dehydrate } from "@tanstack/react-query";
 import socialCard from "@rezics/brand/social-card.png?url&no-inline";
@@ -16,6 +17,7 @@ import { getTranslation } from "@/i18n/server";
 import { AppProviders } from "@/lib/app-providers";
 import { createQueryClient } from "@/lib/query-client";
 import { getFrontendOrigin } from "@/lib/frontend-origin.server";
+import { contentLanguagesFromLocaleTags } from "@/lib/localization";
 
 import "@/styles/global.css";
 
@@ -100,6 +102,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 	const dehydratedState = dehydrate(queryClient);
 	const fontAwesomeCss = fontAwesomeKitCssUrl();
 	const fontAwesomeLicense = fontAwesomeKitLicense();
+	const browserContentLanguages = contentLanguagesFromLocaleTags(
+		parseAcceptLanguage(requestHeaders.get("accept-language")),
+	);
 	const usesTraditionalChineseFont = locale.current === "zh-Hant";
 	const requestNonce = requestHeaders.get("x-nonce") ?? undefined;
 	const presentationRevision = requestHeaders.get("x-rezics-presentation-revision") ?? "";
@@ -147,6 +152,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 			</head>
 			<body className="min-w-80">
 				<AppProviders
+					browserContentLanguages={browserContentLanguages}
 					dehydratedState={dehydratedState}
 					initialSession={initialSession}
 					initialTranslation={snapshot}

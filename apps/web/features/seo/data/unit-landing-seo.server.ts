@@ -3,6 +3,7 @@ import {
 	getPublicUnitSeoProjection,
 	type GetPublicUnitSeoProjectionStatus200,
 } from "@rezics/openapi-tanstack-query";
+import { parseAcceptLanguage } from "native-i18n";
 import { cache } from "react";
 import { headers } from "next/headers";
 
@@ -10,6 +11,7 @@ import { getInitialPresentationPreferences } from "@/features/preferences/server
 import { getTranslation } from "@/i18n/server";
 import { getBackendOrigin } from "@/lib/backend-origin.server";
 import { getFrontendOrigin } from "@/lib/frontend-origin.server";
+import { contentLanguagesFromLocaleTags } from "@/lib/localization";
 import {
 	buildUnitLandingSeoDocument,
 	type UnitLandingSeoDocument,
@@ -58,11 +60,18 @@ const getCachedUnitLandingSeoDocument = cache(
 		parentCanonicalPath: string | undefined,
 		requestedLanguage: UnitLandingSeoRoute["requestedLanguage"],
 	): Promise<UnitLandingSeoDocument> => {
-		const translation = await getTranslation(["brand", "seo"]);
-		const profile = await getUnitLandingProfileLanguagePreferences();
+		const [translation, profile, requestHeaders] = await Promise.all([
+			getTranslation(["brand", "seo"]),
+			getUnitLandingProfileLanguagePreferences(),
+			headers(),
+		]);
 		const localizationLanguages = buildUnitLandingLocalizationLanguages({
 			requestedLanguage,
 			profile,
+			interfaceLanguage: toContentLanguage(translation.locale.current),
+			browserLanguages: contentLanguagesFromLocaleTags(
+				parseAcceptLanguage(requestHeaders.get("accept-language")),
+			),
 		});
 		const projection = await fetchPublicUnitSeoProjection(unitId, localizationLanguages);
 		return buildUnitLandingSeoDocument({

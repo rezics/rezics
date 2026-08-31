@@ -69,6 +69,7 @@ describe("AppProviders", () => {
 	it("places session-aware UI below both session and query providers", () => {
 		render(
 			<AppProviders
+				browserContentLanguages={["en"]}
 				dehydratedState={dehydratedState}
 				initialSession={{ status: "resolved", data: null }}
 				initialTranslation={translation.snapshot}

@@ -7,17 +7,20 @@ export interface UnitLandingProfileLanguagePreferences {
 	readonly interfaceLanguage: ContentLanguage;
 }
 
-/**
- * Builds lookup hints without assigning semantic priority to any Unit localization.
- * An empty result deliberately delegates anonymous fallback to the Unit's stored position order.
- */
+/** Builds presentation hints before the Unit's stored localization order is used as a last resort. */
 export function buildUnitLandingLocalizationLanguages(input: {
 	readonly requestedLanguage?: ContentLanguage;
 	readonly profile?: UnitLandingProfileLanguagePreferences;
+	readonly interfaceLanguage: ContentLanguage;
+	readonly browserLanguages?: readonly ContentLanguage[];
 }): ContentLanguage[] {
 	const fallbackLanguages = input.profile
-		? buildLocalizationLanguages(input.profile.preferredLanguages, input.profile.interfaceLanguage)
-		: [];
+		? buildLocalizationLanguages(
+				input.profile.preferredLanguages,
+				input.profile.interfaceLanguage,
+				input.browserLanguages,
+			)
+		: buildLocalizationLanguages([], input.interfaceLanguage, input.browserLanguages);
 	return input.requestedLanguage
 		? [
 				input.requestedLanguage,

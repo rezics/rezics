@@ -7,6 +7,7 @@ import { useRequestedContentLanguage } from "@/features/content-languages/hooks/
 import { usePresentationPreferences } from "@/features/preferences/data/use-presentation-preferences";
 import { buildLocalizationLanguages } from "@/lib/localization";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
+import { useBrowserContentLanguages } from "./browser-content-languages";
 import { useTranslation } from "./client";
 
 export type LocalizationLanguageState =
@@ -18,25 +19,29 @@ export type LocalizationLanguageState =
 	  }
 	| { readonly status: "error"; readonly error: unknown; readonly retry: () => void };
 
-const AnonymousLocalizationLanguages: ContentLanguage[] = [];
-
 export function useLocalizationLanguageState(): LocalizationLanguageState {
 	const { locale } = useTranslation(["ui"]);
 	const session = useHydratedSession();
 	const preferences = usePresentationPreferences();
+	const browserContentLanguages = useBrowserContentLanguages();
 	const storedInterfaceLanguage = preferences.data
 		? toContentLanguage(preferences.data.interfaceLocale)
 		: undefined;
 	const currentInterfaceLanguage = toContentLanguage(locale.target);
+	const anonymousLanguages = useMemo(
+		() => buildLocalizationLanguages([], currentInterfaceLanguage, browserContentLanguages),
+		[browserContentLanguages, currentInterfaceLanguage],
+	);
 	const profileLanguages = useMemo(
 		() =>
 			preferences.data
 				? buildLocalizationLanguages(
 						preferences.data.preferredLanguages,
 						storedInterfaceLanguage ?? currentInterfaceLanguage,
+						browserContentLanguages,
 					)
 				: undefined,
-		[preferences.data, storedInterfaceLanguage, currentInterfaceLanguage],
+		[browserContentLanguages, currentInterfaceLanguage, preferences.data, storedInterfaceLanguage],
 	);
 	if (session.status === "restoring") return { status: "restoring" };
 	if (session.status === "error")
@@ -48,7 +53,7 @@ export function useLocalizationLanguageState(): LocalizationLanguageState {
 	if (session.status === "anonymous")
 		return {
 			status: "ready",
-			languages: AnonymousLocalizationLanguages,
+			languages: anonymousLanguages,
 			source: "anonymous",
 		};
 	if (profileLanguages) return { status: "ready", languages: profileLanguages, source: "profile" };
@@ -65,12 +70,17 @@ export function useLocalizationLanguages() {
 	const { locale } = useTranslation(["ui"]);
 	const state = useLocalizationLanguageState();
 	const interfaceLanguage = toContentLanguage(locale.target);
+	const browserContentLanguages = useBrowserContentLanguages();
 	const requestedLanguage = useRequestedContentLanguage();
+	const interfaceLanguages = useMemo(
+		() => buildLocalizationLanguages([], interfaceLanguage, browserContentLanguages),
+		[browserContentLanguages, interfaceLanguage],
+	);
 
 	return useMemo(() => {
-		const languages = state.status === "ready" ? state.languages : [interfaceLanguage];
+		const languages = state.status === "ready" ? state.languages : interfaceLanguages;
 		return requestedLanguage
 			? [requestedLanguage, ...languages.filter((language) => language !== requestedLanguage)]
 			: languages;
-	}, [interfaceLanguage, requestedLanguage, state]);
+	}, [interfaceLanguages, requestedLanguage, state]);
 }

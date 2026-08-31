@@ -18,10 +18,11 @@ canonical URL. Unit localizations are peers: there is no primary-language field 
 primary version. Resolution uses the existing ordered fallback contract:
 
 1. a valid explicit `?language` value is tried first;
-2. an authenticated request then uses the Profile's ordered language preferences and interface
-   language fallback; and
-3. an anonymous request without an explicit language sends no preference hints, so the Unit's
-   localization position order deterministically selects the presentation.
+2. an authenticated request then uses the Profile's ordered language preferences;
+3. the active interface language is tried next;
+4. remaining supported browser `Accept-Language` preferences follow; and
+5. the Unit's localization position order deterministically selects the presentation only when
+   none of those hints are available on the Unit.
 
 Canonical-address redirects preserve a valid explicit language parameter even though that
 parameter is not part of the canonical identity.
