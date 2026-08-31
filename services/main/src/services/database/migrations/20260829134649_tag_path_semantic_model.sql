@@ -1,8 +1,28 @@
 SET search_path TO public;
 
--- This release replaces an unused preview. Fail closed if production contains
--- any retired fact instead of silently deleting or guessing its semantics.
--- Every EXISTS stops at its first row, so the preflight stays bounded.
+-- Freeze the retired write paths so the preflight, vote transfer, and table
+-- removal form one atomic cutover. Reads remain available while Atlas holds
+-- these locks.
+LOCK TABLE
+	public.unit_structure,
+	public.unit_structure_member,
+	public.unit_structure_edge,
+	public.unit_structure_vote,
+	public.unit_structure_vote_stat,
+	public.unit_structure_application,
+	public.unit_structure_application_vote,
+	public.unit_structure_application_vote_stat,
+	public.unit_tag_structure_support,
+	public.unit_tag_vote,
+	public.unit_tag_vote_stat,
+	public.realm_tag_vote,
+	public.realm_tag_vote_stat,
+	public.unit_effective_tag_vote
+IN SHARE ROW EXCLUSIVE MODE;
+
+-- Structure and Path preview facts have no lossless semantic mapping. Direct
+-- Tag votes do: they become fit judgments below. Every EXISTS stops at its
+-- first row, and the bounded vote checks cap work in this atomic migration.
 DO $cutover$
 BEGIN
 	IF EXISTS (SELECT 1 FROM public.unit_structure)
@@ -14,18 +34,22 @@ BEGIN
 		OR EXISTS (SELECT 1 FROM public.unit_structure_application_vote)
 		OR EXISTS (SELECT 1 FROM public.unit_structure_application_vote_stat)
 		OR EXISTS (SELECT 1 FROM public.unit_tag_structure_support)
-		OR EXISTS (SELECT 1 FROM public.unit_tag_vote)
-		OR EXISTS (SELECT 1 FROM public.unit_tag_vote_stat)
-		OR EXISTS (SELECT 1 FROM public.realm_tag_vote)
-		OR EXISTS (SELECT 1 FROM public.realm_tag_vote_stat)
-		OR EXISTS (SELECT 1 FROM public.unit_effective_tag_vote)
 		OR EXISTS (
 			SELECT 1 FROM public.unit_effective_tag
 			WHERE NOT direct OR structure_support_count <> 0
 		)
 		OR EXISTS (SELECT 1 FROM public.unit WHERE kind IN ('structure', 'tag_path'))
 	THEN
-		RAISE EXCEPTION 'Tag Path cutover rejected: retired Structure, Path, or Tag-vote data exists';
+		RAISE EXCEPTION 'Tag Path cutover rejected: retired Structure or Path data exists';
+	END IF;
+
+	IF (
+		SELECT count(*) FROM (SELECT 1 FROM public.unit_tag_vote LIMIT 100001) AS bounded_vote
+	) > 100000 OR (
+		SELECT count(*) FROM (SELECT 1 FROM public.realm_tag_vote LIMIT 100001) AS bounded_vote
+	) > 100000 THEN
+		RAISE EXCEPTION 'Atomic Tag judgment cutover supports at most 100000 votes per authority'
+			USING ERRCODE = '54000', CONSTRAINT = 'tag_judgment_atomic_vote_bound';
 	END IF;
 
 	IF EXISTS (
@@ -97,7 +121,9 @@ ALTER TABLE public.unit_merge_operation
 	ALTER COLUMN phase SET DEFAULT 'entity_measurement_preflight'::public.unit_merge_operation_phase;
 DROP TYPE public.unit_merge_operation_phase_retired_20260825;
 
--- The released effective-vote projection is empty by the assertion above.
+-- This projection is derived from the authoritative direct votes retained
+-- below. Structure support is empty by the assertion above, so it adds no
+-- independent fact that needs transfer.
 DROP TABLE public.unit_effective_tag_vote;
 
 -- Existing Tags become concept vocabulary nodes before the new composite
@@ -917,6 +943,48 @@ CREATE TABLE "unit_tag_path_application_judgment_stat" (
   CONSTRAINT "unit_tag_path_application_judgment_stat_spoiler_count_check" CHECK (spoiler_vote_count = ((spoiler_none_count + spoiler_minor_count) + spoiler_major_count)),
   CONSTRAINT "unit_tag_path_application_judgment_stat_spoiler_nonnegative_che" CHECK ((spoiler_vote_count >= 0) AND (spoiler_none_count >= 0) AND (spoiler_minor_count >= 0) AND (spoiler_major_count >= 0))
 );
+
+-- Preserve direct Tag votes as the fit dimension of the new judgment model.
+-- The containing Atlas migration is transactional; source tables are dropped
+-- only after both authoritative rows and their rebuilt aggregates exist.
+INSERT INTO public.realm_tag_judgment(
+	realm_id, unit_id, tag_id, profile_id,
+	fit_vote, spoiler_level, fit_updated_at, spoiler_updated_at,
+	created_at, updated_at
+)
+SELECT realm_id, unit_id, tag_id, profile_id,
+	value, NULL, updated_at, NULL, created_at, updated_at
+FROM public.realm_tag_vote;
+
+INSERT INTO public.realm_tag_judgment_stat(
+	realm_id, unit_id, tag_id, score, vote_count,
+	spoiler_vote_count, spoiler_none_count, spoiler_minor_count,
+	spoiler_major_count, updated_at
+)
+SELECT realm_id, unit_id, tag_id, sum(value)::bigint, count(*)::bigint,
+	0, 0, 0, 0, max(updated_at)
+FROM public.realm_tag_vote
+GROUP BY realm_id, unit_id, tag_id;
+
+INSERT INTO public.unit_tag_judgment(
+	unit_id, tag_id, profile_id,
+	fit_vote, spoiler_level, fit_updated_at, spoiler_updated_at,
+	created_at, updated_at
+)
+SELECT unit_id, tag_id, profile_id,
+	value, NULL, updated_at, NULL, created_at, updated_at
+FROM public.unit_tag_vote;
+
+INSERT INTO public.unit_tag_judgment_stat(
+	unit_id, tag_id, score, vote_count,
+	spoiler_vote_count, spoiler_none_count, spoiler_minor_count,
+	spoiler_major_count, updated_at
+)
+SELECT unit_id, tag_id, sum(value)::bigint, count(*)::bigint,
+	0, 0, 0, 0, max(updated_at)
+FROM public.unit_tag_vote
+GROUP BY unit_id, tag_id;
+
 -- Drop "realm_tag_vote" table
 DROP TABLE "realm_tag_vote";
 -- Drop "realm_tag_vote_stat" table
