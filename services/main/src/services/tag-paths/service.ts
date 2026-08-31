@@ -1,7 +1,18 @@
 import { createHash } from "node:crypto";
 
 import type { ContentLanguage } from "@rezics/i18n";
-import { and, desc, eq, inArray, isNotNull, isNull, or, sql, type SQLWrapper } from "drizzle-orm";
+import {
+	and,
+	desc,
+	eq,
+	inArray,
+	isNotNull,
+	isNull,
+	or,
+	sql,
+	type SQL,
+	type SQLWrapper,
+} from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { createCommunityOwnedUnitAccess } from "../authorization/unit/ownership";
@@ -94,6 +105,20 @@ const viewerRealmApplicationJudgment = alias(
 const viewerDirectTagJudgment = alias(unitTagJudgment, "viewer_direct_tag_judgment");
 const viewerRealmDirectTagJudgment = alias(realmTagJudgment, "viewer_realm_direct_tag_judgment");
 const acceptedMerge = alias(tagPathMerge, "accepted_tag_path_merge");
+
+function toTextArray(values: readonly string[]): SQL {
+	return sql`array[${sql.join(
+		values.map((value) => sql`${value}`),
+		sql`, `,
+	)}]::text[]`;
+}
+
+function toUuidArray(values: readonly string[]): SQL {
+	return sql`array[${sql.join(
+		values.map((value) => sql`${value}::uuid`),
+		sql`, `,
+	)}]::uuid[]`;
+}
 
 export function toTagPathConstraintError(error: unknown): InvalidTagPath | undefined {
 	const constraint = databaseConstraintName(error);
@@ -532,14 +557,15 @@ export type TagPathMember = {
 };
 
 function guideTitleSql(nodeId: SQLWrapper, languages: LocalizationLanguageQuery = []) {
+	const languageArray = toTextArray(languages);
 	return sql<string | null>`(
 		select localization.title
 		from ${guideNodeLocalization} localization
 		where localization.node_id = ${nodeId}
-			and ${languages.length ? sql`localization.language = any(${languages}::text[])` : sql`true`}
+			and ${languages.length ? sql`localization.language = any(${languageArray})` : sql`true`}
 		order by ${
 			languages.length
-				? sql`array_position(${languages}::text[], localization.language)`
+				? sql`array_position(${languageArray}, localization.language)`
 				: sql`localization.language`
 		}
 		limit 1
@@ -1083,8 +1109,8 @@ export async function suggestTagExpressions(input: {
 	const candidates = await database.execute<{ readonly tagId: string }>(sql`
 		select candidate.unit_id as "tagId"
 		from public.search_text_candidates(
-			array[${input.query}]::text[],
-			${input.localizationLanguages ?? []}::text[],
+			${toTextArray([input.query])},
+			${toTextArray(input.localizationLanguages ?? [])},
 			'tag', null, null, 5000, ${Math.min(input.limit * 4, 80)}
 		) candidate
 		where candidate.search_matched
@@ -1137,7 +1163,7 @@ export async function suggestTagExpressions(input: {
 					sql`exists (
 						select 1 from ${tagExpressionArgument} argument
 						where argument.expression_id = ${tagExpression.id}
-							and argument.tag_id = any(${tagIds}::uuid[])
+							and argument.tag_id = any(${toUuidArray(tagIds)})
 					)`,
 				),
 			),
@@ -1868,7 +1894,7 @@ export async function getTagHierarchy(input: {
 							order by relation.relation_kind, relation.child_node_id
 						) as sibling_ordinal
 					from public.tag_relation relation
-					where relation.parent_node_id = any(${childNodeIds}::uuid[])
+					where relation.parent_node_id = any(${toUuidArray(childNodeIds)})
 						and relation.status = 'active'
 				)
 				select "relationId", "relationKind", "parentNodeId", "nodeId"
