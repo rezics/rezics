@@ -71,12 +71,30 @@ describe("presentation request policy", () => {
 		expect(csp).toContain("script-src 'self' 'nonce-nonce-value' 'wasm-unsafe-eval'");
 		expect(csp).toContain("https://scripts.example");
 		expect(csp).toContain("style-src 'self' 'nonce-nonce-value'");
+		expect(csp).toContain(
+			"connect-src 'self' https://challenges.cloudflare.com https://*.r2.cloudflarestorage.com",
+		);
+		expect(csp).toContain("img-src 'self' data: blob: https://*.r2.cloudflarestorage.com");
 		expect(csp).toContain("object-src 'none'");
 		expect(csp).toContain("frame-src https://challenges.cloudflare.com https://frames.example");
 		expect(csp).toContain("report-to rezics-csp");
 		expect(csp).toContain("report-uri /__rezics/security-report");
 		expect(csp).toContain("upgrade-insecure-requests");
 		expect(csp).not.toContain(" 'unsafe-eval'");
+		expect(csp).not.toContain("http://localhost:*");
+	});
+
+	it("allows only loopback storage ports in the development platform policy", () => {
+		const csp = contentSecurityPolicy({
+			development: true,
+			nonce: "nonce-value",
+			policy: policy({ revisionId: null }),
+			secureRequest: false,
+		});
+		expect(csp).toContain("http://localhost:*");
+		expect(csp).toContain("http://127.0.0.1:*");
+		expect(csp).not.toContain("https://*.r2.cloudflarestorage.com");
+		expect(csp).not.toContain("upgrade-insecure-requests");
 	});
 
 	it("resolves an exact Zone host with the viewer cookie and fails closed in safe mode", async () => {

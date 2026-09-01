@@ -295,6 +295,12 @@ function directive(name: string, sources: readonly string[]): string {
 	return `${name} ${[...new Set(sources)].join(" ")}`;
 }
 
+function platformStorageSources(development: boolean): readonly string[] {
+	return development
+		? ["http://localhost:*", "http://127.0.0.1:*"]
+		: ["https://*.r2.cloudflarestorage.com"];
+}
+
 export function contentSecurityPolicy(input: {
 	readonly development: boolean;
 	readonly fontAwesomeCssUrl?: string;
@@ -305,6 +311,7 @@ export function contentSecurityPolicy(input: {
 	const fontAwesomeOrigin = input.fontAwesomeCssUrl
 		? new URL(input.fontAwesomeCssUrl).origin
 		: undefined;
+	const storageSources = platformStorageSources(input.development);
 	const scriptSources = [
 		"'self'",
 		`'nonce-${input.nonce}'`,
@@ -329,9 +336,16 @@ export function contentSecurityPolicy(input: {
 		directive("connect-src", [
 			"'self'",
 			"https://challenges.cloudflare.com",
+			...storageSources,
 			...input.policy.connectOrigins,
 		]),
-		directive("img-src", ["'self'", "data:", "blob:", ...input.policy.imageOrigins]),
+		directive("img-src", [
+			"'self'",
+			"data:",
+			"blob:",
+			...storageSources,
+			...input.policy.imageOrigins,
+		]),
 		directive("font-src", [
 			"'self'",
 			"data:",

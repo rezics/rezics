@@ -136,7 +136,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 						/>
 					</>
 				) : null}
-				<style nonce={requestNonce}>{appThemeCss}</style>
+				<style nonce={requestNonce} suppressHydrationWarning>
+					{appThemeCss}
+				</style>
 				<meta
 					content={appTheme.light.background}
 					data-dark={appTheme.dark.background}
@@ -148,6 +150,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 						__html: `(function(){try{var t=localStorage.getItem('rezics-theme');var d=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=d?m.dataset.dark:m.dataset.light}catch(e){}})()`,
 					}}
 					nonce={requestNonce}
+					suppressHydrationWarning
 				/>
 			</head>
 			<body className="min-w-80">
