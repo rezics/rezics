@@ -116,6 +116,18 @@ vi.mock("@/features/content-feed/components/feed-item-card", () => ({
 	FeedItemCard: () => <article data-testid="collection-card" />,
 }));
 
+vi.mock("@/features/block-composition/components/identity-badge-link", () => ({
+	IdentityBadgeLink: ({ href, label }: { readonly href?: string; readonly label: string }) => (
+		<a data-testid="identity-badge" href={href}>
+			{label}
+		</a>
+	),
+}));
+
+vi.mock("@/features/content-feed/components/feed-item-identity-badge", () => ({
+	FeedItemIdentityBadge: () => <a data-testid="collection-identity-badge">Theme</a>,
+}));
+
 vi.mock("@/features/units/routing/public-unit-route", () => ({
 	publicUnitHref: (kind: string, unit: { readonly id: string }) => `/units/${kind}/${unit.id}`,
 }));
@@ -261,6 +273,36 @@ describe("UnitDockRenderer unit-list presentation", () => {
 		expect(screen.getByTestId("shelf").getAttribute("data-item-size")).toBe("sm");
 		expect(screen.getByTestId("shelf").getAttribute("data-label")).toBe("Items");
 		expect(screen.getByTestId("collection-card")).toBeTruthy();
+	});
+
+	it("renders collection identities as wrapping badges instead of Feed Cards", () => {
+		fixtures.document = {
+			_key: "000000000010",
+			_type: "dock-document",
+			blocks: [
+				{
+					_key: "000000000011",
+					_type: "unit-list",
+					layout: "wrap",
+					limit: 8,
+					presentation: { itemAppearance: "identity-badge" },
+					source: { collectionId: CollectionId, kind: "collection" },
+				},
+			],
+		};
+		fixtures.collectionItems = [
+			{
+				content: { id: ItemId },
+				membership: { targetId: ItemId },
+			},
+		];
+
+		renderDock();
+
+		expect(screen.queryByTestId("shelf")).toBeNull();
+		expect(screen.queryByTestId("collection-card")).toBeNull();
+		expect(screen.getByTestId("collection-identity-badge")).toBeTruthy();
+		expect(screen.getByRole("list").className).toContain("flex-wrap");
 	});
 
 	it("keeps grid lists on the non-carousel path", () => {

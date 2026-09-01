@@ -175,8 +175,18 @@ const UnitListSource = Type.Union([
 export const UnitListItemSizeValues = ["sm", "md", "lg"] as const;
 export type UnitListItemSize = (typeof UnitListItemSizeValues)[number];
 
+export const UnitListItemAppearanceValues = ["default", "identity-badge"] as const;
+export type UnitListItemAppearance = (typeof UnitListItemAppearanceValues)[number];
+
 export const UnitListPresentation = Type.Object(
 	{
+		/** Selects the content shape rendered for each item; absent preserves the default card. */
+		itemAppearance: Type.Optional(
+			Type.Union([
+				Type.Literal(UnitListItemAppearanceValues[0]),
+				Type.Literal(UnitListItemAppearanceValues[1]),
+			]),
+		),
 		/** Renderers use `md` when this density hint is absent. */
 		itemSize: Type.Optional(
 			Type.Union([
@@ -199,7 +209,12 @@ export const UnitListBlock = Type.Object(
 		_key: BlockKey,
 		...BlockClassFields,
 		source: UnitListSource,
-		layout: Type.Union([Type.Literal("list"), Type.Literal("grid"), Type.Literal("carousel")]),
+		layout: Type.Union([
+			Type.Literal("list"),
+			Type.Literal("grid"),
+			Type.Literal("carousel"),
+			Type.Literal("wrap"),
+		]),
 		limit: Type.Integer({ minimum: 1, maximum: 100 }),
 		presentation: Type.Optional(UnitListPresentation),
 	},

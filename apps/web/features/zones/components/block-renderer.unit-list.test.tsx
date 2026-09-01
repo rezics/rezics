@@ -164,6 +164,18 @@ vi.mock("@/features/content-feed/components/feed-item-card", () => ({
 	FeedItemCard: () => <article data-testid="collection-card" />,
 }));
 
+vi.mock("@/features/block-composition/components/identity-badge-link", () => ({
+	IdentityBadgeLink: ({ href, label }: { readonly href?: string; readonly label: string }) => (
+		<a data-testid="identity-badge" href={href}>
+			{label}
+		</a>
+	),
+}));
+
+vi.mock("@/features/content-feed/components/feed-item-identity-badge", () => ({
+	FeedItemIdentityBadge: () => <a data-testid="collection-identity-badge">Theme</a>,
+}));
+
 vi.mock("@/features/content-feed/components/feed-list", () => ({
 	FeedList: ({
 		"aria-label": ariaLabel,
@@ -307,9 +319,7 @@ const PageId = "019f9000-0000-7000-8000-000000000007";
 const Timestamp = "2026-08-24T00:00:00.000Z";
 
 type RenderUnit = ZoneRenderProjection["references"]["units"][number];
-type ZoneSurface =
-	| { readonly kind: "dock" }
-	| { readonly kind: "page"; readonly pageId: string };
+type ZoneSurface = { readonly kind: "dock" } | { readonly kind: "page"; readonly pageId: string };
 
 function unit(id: string, kind: string, title: string, cover: RenderUnit["cover"] = null) {
 	return {
@@ -521,6 +531,29 @@ describe("Zone unit-list presentation", () => {
 		expect(screen.getByTestId("collection-card")).toBeTruthy();
 	});
 
+	it("renders collection identities as wrapping badges instead of Feed Cards", () => {
+		fixtures.collectionItems = [
+			{
+				content: { id: ItemId },
+				membership: { targetId: ItemId },
+			},
+		];
+		const block = {
+			_key: "000000000015",
+			_type: "unit-list",
+			layout: "wrap",
+			limit: 8,
+			presentation: { itemAppearance: "identity-badge" },
+			source: { collectionId: CollectionId, kind: "collection" },
+		} satisfies Block;
+		renderZone(block);
+
+		expect(screen.queryByTestId("shelf")).toBeNull();
+		expect(screen.queryByTestId("collection-card")).toBeNull();
+		expect(screen.getByTestId("collection-identity-badge")).toBeTruthy();
+		expect(screen.getByRole("list").className).toContain("flex-wrap");
+	});
+
 	it("renders Search results through Shelf and UnitCard", async () => {
 		fixtures.searchResponse = {
 			groups: [
@@ -663,7 +696,9 @@ describe("Zone unit-list presentation", () => {
 			],
 			selectionSeed: "after-load",
 		});
-		await waitFor(() => expect(screen.getByTestId("unit-card").textContent).toContain("Loaded item"));
+		await waitFor(() =>
+			expect(screen.getByTestId("unit-card").textContent).toContain("Loaded item"),
+		);
 		expect(screen.queryByRole("button", { name: "Load this section" })).toBeNull();
 		expectPresetShelf();
 	});

@@ -2398,13 +2398,20 @@
 											"anyOf": [
 												{ "type": "string", "const": "list" },
 												{ "type": "string", "const": "grid" },
-												{ "type": "string", "const": "carousel" }
+												{ "type": "string", "const": "carousel" },
+												{ "type": "string", "const": "wrap" }
 											]
 										},
 										"limit": { "type": "integer", "minimum": 1, "maximum": 100 },
 										"presentation": {
 											"type": "object",
 											"properties": {
+												"itemAppearance": {
+													"anyOf": [
+														{ "type": "string", "const": "default" },
+														{ "type": "string", "const": "identity-badge" }
+													]
+												},
 												"itemSize": {
 													"anyOf": [
 														{ "type": "string", "const": "sm" },
@@ -3567,13 +3574,20 @@
 											"anyOf": [
 												{ "type": "string", "const": "list" },
 												{ "type": "string", "const": "grid" },
-												{ "type": "string", "const": "carousel" }
+												{ "type": "string", "const": "carousel" },
+												{ "type": "string", "const": "wrap" }
 											]
 										},
 										"limit": { "type": "integer", "minimum": 1, "maximum": 100 },
 										"presentation": {
 											"type": "object",
 											"properties": {
+												"itemAppearance": {
+													"anyOf": [
+														{ "type": "string", "const": "default" },
+														{ "type": "string", "const": "identity-badge" }
+													]
+												},
 												"itemSize": {
 													"anyOf": [
 														{ "type": "string", "const": "sm" },

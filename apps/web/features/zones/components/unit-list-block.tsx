@@ -4,6 +4,7 @@ import {
 	type Block,
 	type BlockPath,
 	type NavigationTarget,
+	type UnitListItemAppearance,
 	type UnitListItemSize,
 } from "@rezics/block";
 import type { SearchFeatureState } from "@rezics/filter";
@@ -26,7 +27,9 @@ import {
 } from "react";
 
 import { AppLink } from "@/features/application-shell/components/app-link";
+import { IdentityBadgeLink } from "@/features/block-composition/components/identity-badge-link";
 import { FeedItemCard } from "@/features/content-feed/components/feed-item-card";
+import { FeedItemIdentityBadge } from "@/features/content-feed/components/feed-item-identity-badge";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -85,7 +88,10 @@ interface SearchExecutionResponse {
 const DefaultUnitListItemSize: UnitListItemSize = "md";
 
 function unitListClasses(layout: UnitListLayout): string {
-	return cn("grid gap-4", layout === "grid" && "sm:grid-cols-2 lg:grid-cols-3");
+	return cn(
+		layout === "wrap" ? "flex flex-wrap items-center gap-2" : "grid gap-4",
+		layout === "grid" && "sm:grid-cols-2 lg:grid-cols-3",
+	);
 }
 
 function ShelfUnitCard({
@@ -162,19 +168,49 @@ function ReferencedUnitShelfCard({
 	);
 }
 
+function ReferencedUnitIdentityBadge({
+	resolveHref,
+	unit,
+}: {
+	readonly resolveHref: (unit: ZoneUnitListRenderUnit) => string | null;
+	readonly unit: ZoneUnitListRenderUnit;
+}) {
+	const { t } = useTranslation("ui");
+	const localizedTitle = useChineseContentText(unit.title ?? "", unit.language);
+	return (
+		<IdentityBadgeLink
+			avatar={unit.avatar}
+			href={resolveHref(unit)}
+			label={localizedTitle || t.unnamed}
+		/>
+	);
+}
+
 function StaticUnitList({
 	ReferencedUnitComponent,
+	itemAppearance,
 	layout,
 	resolveUnitHref,
 	shelf,
 	units,
 }: {
 	ReferencedUnitComponent: ComponentType<{ readonly unit: ZoneUnitListRenderUnit }>;
+	itemAppearance: UnitListItemAppearance;
 	layout: UnitListLayout;
 	resolveUnitHref: (unit: ZoneUnitListRenderUnit) => string | null;
 	shelf: UnitListShelfPresentation;
 	units: readonly ZoneUnitListRenderUnit[];
 }) {
+	if (itemAppearance === "identity-badge")
+		return (
+			<ul aria-label={shelf.labels.label} className={unitListClasses(layout)} data-part="items">
+				{units.map((unit) => (
+					<li data-part="item" key={unit.id}>
+						<ReferencedUnitIdentityBadge resolveHref={resolveUnitHref} unit={unit} />
+					</li>
+				))}
+			</ul>
+		);
 	if (layout === "carousel")
 		return (
 			<div data-part="items">
@@ -210,6 +246,7 @@ function StaticUnitList({
 function CollectionUnitList({
 	aggregate,
 	collectionId,
+	itemAppearance,
 	layout,
 	limit,
 	shelf,
@@ -217,6 +254,7 @@ function CollectionUnitList({
 }: {
 	aggregate: ZoneAggregateBlockState;
 	collectionId: string;
+	itemAppearance: UnitListItemAppearance;
 	layout: UnitListLayout;
 	limit: number;
 	shelf: UnitListShelfPresentation;
@@ -293,6 +331,16 @@ function CollectionUnitList({
 				{t.zones.searchEmpty}
 			</p>
 		);
+	if (itemAppearance === "identity-badge")
+		return (
+			<ul aria-label={t.zones.contentList} className={unitListClasses(layout)} data-part="items">
+				{items.map((item) => (
+					<li data-part="item" key={item.key}>
+						<FeedItemIdentityBadge item={item.content} postContext={{ kind: "zone", zone }} />
+					</li>
+				))}
+			</ul>
+		);
 	if (layout === "carousel")
 		return (
 			<div data-part="items">
@@ -317,6 +365,7 @@ function CollectionUnitList({
 }
 
 function SearchResults({
+	itemAppearance,
 	presentation,
 	resolveResultHref,
 	results,
@@ -324,6 +373,7 @@ function SearchResults({
 	total,
 	unitListLayout,
 }: {
+	itemAppearance: UnitListItemAppearance;
 	presentation: Pick<SearchPresentation, "results" | "showResultCount">;
 	resolveResultHref: (result: ZoneUnitListSearchResult) => string | null;
 	results: readonly ZoneUnitListSearchResult[];
@@ -352,7 +402,18 @@ function SearchResults({
 						: search.atLeastResultCount({ count: total.value })}
 				</p>
 			) : null}
-			{unitListLayout === "carousel" ? (
+			{itemAppearance === "identity-badge" ? (
+				<ul aria-label={t.searchResults} className={unitListClasses(unitListLayout)}>
+					{results.map((result) => {
+						const { href, title } = resultPresentation(result);
+						return (
+							<li data-part="item" key={`${result.kind}:${result.id}`}>
+								<IdentityBadgeLink href={href} label={title} />
+							</li>
+						);
+					})}
+				</ul>
+			) : unitListLayout === "carousel" ? (
 				<Shelf itemSize={shelf.itemSize} labels={shelf.labels}>
 					{results.map((result) => {
 						const { href, title } = resultPresentation(result);
@@ -416,6 +477,7 @@ function ZoneSearchUnitListBlock({
 	aggregate,
 	error,
 	execute,
+	itemAppearance,
 	layout,
 	limit,
 	pending,
@@ -429,6 +491,7 @@ function ZoneSearchUnitListBlock({
 		state: SearchFeatureState,
 		selectionSeed?: string,
 	) => Promise<SearchExecutionResponse>;
+	readonly itemAppearance: UnitListItemAppearance;
 	readonly layout: UnitListLayout;
 	readonly limit: number;
 	readonly pending: boolean;
@@ -459,10 +522,7 @@ function ZoneSearchUnitListBlock({
 		if (executionInFlight.current) return;
 		executionInFlight.current = true;
 		setExecuting(true);
-		void execute(
-			{ pageSize: Math.min(limit, 50) },
-			selectionSeed ?? aggregateSelectionSeed,
-		)
+		void execute({ pageSize: Math.min(limit, 50) }, selectionSeed ?? aggregateSelectionSeed)
 			.then(
 				(response) => {
 					setPage(toSearchPage(response));
@@ -522,6 +582,7 @@ function ZoneSearchUnitListBlock({
 	const displayedPage = page ?? aggregatePage;
 	return displayedPage ? (
 		<SearchResults
+			itemAppearance={itemAppearance}
 			presentation={presentation}
 			resolveResultHref={resolveResultHref}
 			results={displayedPage.results.slice(0, limit)}
@@ -535,6 +596,7 @@ function ZoneSearchUnitListBlock({
 function SearchUnitList({
 	aggregate,
 	blockPath,
+	itemAppearance,
 	layout,
 	limit,
 	pageId,
@@ -544,6 +606,7 @@ function SearchUnitList({
 }: {
 	aggregate: ZoneAggregateBlockState;
 	blockPath: BlockPath;
+	itemAppearance: UnitListItemAppearance;
 	layout: UnitListLayout;
 	limit: number;
 	pageId?: string;
@@ -574,6 +637,7 @@ function SearchUnitList({
 						path: { zoneId },
 					})
 				}
+				itemAppearance={itemAppearance}
 				layout={layout}
 				limit={limit}
 				pending={dockMutation.isPending}
@@ -597,6 +661,7 @@ function SearchUnitList({
 					path: { pageId, zoneId },
 				})
 			}
+			itemAppearance={itemAppearance}
 			layout={layout}
 			limit={limit}
 			pending={pageMutation.isPending}
@@ -648,6 +713,7 @@ export function ZoneUnitListBlock({
 	const viewAllTarget = block.presentation?.viewAllTarget;
 	const viewAllHref = viewAllTarget ? resolveNavigationHref(viewAllTarget) : null;
 	const externalViewAll = viewAllTarget?.kind === "external";
+	const itemAppearance = block.presentation?.itemAppearance ?? "default";
 	if (aggregate.kind === "hidden") return null;
 	const shelf = {
 		cardHeadingAs: heading ? "h3" : "h2",
@@ -666,6 +732,7 @@ export function ZoneUnitListBlock({
 			<CollectionUnitList
 				aggregate={aggregate}
 				collectionId={block.source.collectionId}
+				itemAppearance={itemAppearance}
 				layout={block.layout}
 				limit={block.limit}
 				shelf={shelf}
@@ -677,6 +744,7 @@ export function ZoneUnitListBlock({
 			<SearchUnitList
 				aggregate={aggregate}
 				blockPath={blockPath}
+				itemAppearance={itemAppearance}
 				layout={block.layout}
 				limit={block.limit}
 				pageId={surface.kind === "page" ? surface.pageId : undefined}
@@ -693,6 +761,7 @@ export function ZoneUnitListBlock({
 		content = (
 			<StaticUnitList
 				ReferencedUnitComponent={ReferencedUnitComponent}
+				itemAppearance={itemAppearance}
 				layout={block.layout}
 				resolveUnitHref={resolveUnitHref}
 				shelf={shelf}

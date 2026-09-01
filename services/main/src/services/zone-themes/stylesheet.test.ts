@@ -48,7 +48,7 @@ describe("Zone theme stylesheet review", () => {
 			`[data-zone-theme-scope="${FirstRevisionId}"] [data-block-type="unit-list"]`,
 		);
 		expect(first.automatedReview).toMatchObject({
-			contractVersion: "3.0.0",
+			contractVersion: "3.1.0",
 			rendererVersion: "1.11.0",
 			ruleCount: 2,
 			declarationCount: 4,
@@ -64,6 +64,10 @@ describe("Zone theme stylesheet review", () => {
 
 	it.each([
 		["reserved class", ".rezics-theme-featured { color: red }"],
+		[
+			"identity badge Unit List",
+			'[data-block-type="unit-list"][data-appearance="identity-badge"][data-layout="wrap"] { color: red }',
+		],
 		["class-anchored part", '.rezics-theme-featured > [data-part="content"] { color: red }'],
 		["rich-text heading", "[data-portable-text] h2 { color: red }"],
 		["functional rich-text list", "[data-portable-text] :is(h2, h3):first-of-type { color: red }"],

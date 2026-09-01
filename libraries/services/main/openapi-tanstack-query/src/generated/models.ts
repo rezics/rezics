@@ -2102,7 +2102,7 @@ export type DockDocument = {
 										collectionId: string;
 								  };
 					  };
-				layout: "list" | "grid" | "carousel";
+				layout: "list" | "grid" | "carousel" | "wrap";
 				/**
 				 * @minLength 1
 				 * @maxLength 100
@@ -2113,6 +2113,7 @@ export type DockDocument = {
 				 * @type object | undefined
 				 */
 				presentation?: {
+					itemAppearance?: "default" | "identity-badge";
 					itemSize?: "sm" | "md" | "lg";
 					headingUnitId?: (string & {}) | "selected";
 					/**
@@ -3077,7 +3078,7 @@ export type UnitReferencedBlockDocument = {
 										collectionId: string;
 								  };
 					  };
-				layout: "list" | "grid" | "carousel";
+				layout: "list" | "grid" | "carousel" | "wrap";
 				/**
 				 * @minLength 1
 				 * @maxLength 100
@@ -3088,6 +3089,7 @@ export type UnitReferencedBlockDocument = {
 				 * @type object | undefined
 				 */
 				presentation?: {
+					itemAppearance?: "default" | "identity-badge";
 					itemSize?: "sm" | "md" | "lg";
 					headingUnitId?: (string & {}) | "selected";
 					/**

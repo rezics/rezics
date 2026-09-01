@@ -1,7 +1,7 @@
 import { BlockClassNamePrefix, type BlockType, BlockTypeValues } from "./blocks";
 
 /** Styling-contract SemVer is independent from the REZICS product RomVer. */
-export const ZoneStylingContractVersion = "3.0.0" as const;
+export const ZoneStylingContractVersion = "3.1.0" as const;
 
 export const ZoneStylingContractRootAttributeValues = ["data-block-type"] as const;
 export type ZoneStylingContractRootAttribute =
@@ -71,7 +71,8 @@ export const ZoneBlockStylingContractRegistry = {
 	"unit-list": {
 		parts: ["heading", "view-all", "items", "item", "action", "loading", "empty", "error"],
 		stateAttributes: {
-			"data-layout": ["list", "grid", "carousel"],
+			"data-appearance": ["default", "identity-badge"],
+			"data-layout": ["list", "grid", "carousel", "wrap"],
 			"data-item-size": ["sm", "md", "lg"],
 		},
 	},

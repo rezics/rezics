@@ -1,4 +1,4 @@
-# Zone styling contract 3.0.0
+# Zone styling contract 3.1.0
 
 Status: Historical/inactive
 
@@ -9,7 +9,7 @@ implemented `host_full_trust` Custom Theme runtime. See
 [Custom Theme full-trust external-live execution](../architecture/custom-theme-full-trust-external-live.md).
 
 This document is the authoring reference for custom Zone themes under styling
-contract `3.0.0`. The machine-readable source of truth is
+contract `3.1.0`. The machine-readable source of truth is
 `ZoneStylingContract` from `@rezics/block`.
 
 The styling contract uses Semantic Versioning independently from REZICS product
@@ -109,7 +109,7 @@ distinction matters.
 | `portable-text` | `content` | — |
 | `post-full-view` | `header`, `title`, `summary`, `content` | — |
 | `unit-ref` | `link`, `card`, `cover`, `title`, `summary` | `data-appearance`: `inline`, `card`, `cover` |
-| `unit-list` | `heading`, `view-all`, `items`, `item`, `action`, `loading`, `empty`, `error` | `data-layout`: `list`, `grid`, `carousel`; `data-item-size`: `sm`, `md`, `lg` |
+| `unit-list` | `heading`, `view-all`, `items`, `item`, `action`, `loading`, `empty`, `error` | `data-appearance`: `default`, `identity-badge`; `data-layout`: `list`, `grid`, `carousel`, `wrap`; `data-item-size`: `sm`, `md`, `lg` |
 | `search` | `form`, `query`, `submit`, `filters` | — |
 | `feed` | `toolbar`, `items`, `item`, `continuation`, `loading`, `empty`, `error` | — |
 | `menu` | `list`, `item`, `label`, `link` | `data-appearance`: `links`, `buttons`, `tabs`, `drawer` |

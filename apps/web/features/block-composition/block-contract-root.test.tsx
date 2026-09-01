@@ -38,4 +38,32 @@ describe("BlockContractRoot", () => {
 		expect(root?.getAttribute("data-block-type")).toBe("unit-ref");
 		expect(root?.hasAttribute("data-style-role")).toBe(false);
 	});
+
+	it("emits the Unit List appearance, wrap layout, and default appearance states", () => {
+		const identityBlock = {
+			_type: "unit-list",
+			_key: "000000000002",
+			layout: "wrap",
+			limit: 8,
+			presentation: { itemAppearance: "identity-badge" },
+			source: {
+				kind: "collection",
+				collectionId: "019b0000-0000-7000-8000-000000000002",
+			},
+		} satisfies Block;
+		const { container, rerender } = render(
+			<BlockContractRoot block={identityBlock}>Content</BlockContractRoot>,
+		);
+		let root = container.firstElementChild;
+		expect(root?.getAttribute("data-appearance")).toBe("identity-badge");
+		expect(root?.getAttribute("data-layout")).toBe("wrap");
+
+		rerender(
+			<BlockContractRoot block={{ ...identityBlock, layout: "carousel", presentation: undefined }}>
+				Content
+			</BlockContractRoot>,
+		);
+		root = container.firstElementChild;
+		expect(root?.getAttribute("data-appearance")).toBe("default");
+	});
 });

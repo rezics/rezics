@@ -497,6 +497,15 @@ function assertBlockTree(value: BlockContainerDocument, policy: BlockHostPolicy)
 			new Set(block.source.unitIds).size !== block.source.unitIds.length
 		)
 			throw new TypeError("Unit List Block contains duplicate Unit references");
+		if (block._type === "unit-list") {
+			const usesIdentityBadges = block.presentation?.itemAppearance === "identity-badge";
+			if (usesIdentityBadges !== (block.layout === "wrap"))
+				throw new TypeError(
+					`Block ${block._key} must pair the wrap layout with the identity-badge appearance`,
+				);
+			if (usesIdentityBadges && block.presentation?.itemSize !== undefined)
+				throw new TypeError(`Block ${block._key} cannot set a shelf item size for identity badges`);
+		}
 		if (
 			(block._type === "feed" && block.initialSort === "relevance") ||
 			(block._type === "feed" &&

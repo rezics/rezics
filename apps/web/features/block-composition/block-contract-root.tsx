@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 type UnitListBlock = Extract<Block, { readonly _type: "unit-list" }>;
 
 function blockAppearance(block: Block): string | undefined {
+	if (block._type === "unit-list") return block.presentation?.itemAppearance ?? "default";
 	return block._type === "unit-ref" || block._type === "menu" ? block.appearance : undefined;
 }
 

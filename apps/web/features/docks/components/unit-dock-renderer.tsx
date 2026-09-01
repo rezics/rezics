@@ -39,7 +39,9 @@ import { useMemo } from "react";
 
 import { AppLink } from "@/features/application-shell/components/app-link";
 import { BlockContractRoot } from "@/features/block-composition/block-contract-root";
+import { IdentityBadgeLink } from "@/features/block-composition/components/identity-badge-link";
 import { FeedItemCard } from "@/features/content-feed/components/feed-item-card";
+import { FeedItemIdentityBadge } from "@/features/content-feed/components/feed-item-identity-badge";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -234,11 +236,17 @@ function DockBlockContent({
 				: "h2";
 		return (
 			<DockUnitList layout={block.layout} presentation={block.presentation} units={units}>
-				{items.map((unit) => (
-					<div data-part="item" key={unit.id}>
-						<DockUnitCard headingAs={itemHeadingAs} unit={unit} />
-					</div>
-				))}
+				{block.presentation?.itemAppearance === "identity-badge"
+					? items.map((unit) => (
+							<li data-part="item" key={unit.id}>
+								<DockUnitIdentityBadge unit={unit} />
+							</li>
+						))
+					: items.map((unit) => (
+							<div data-part="item" key={unit.id}>
+								<DockUnitCard headingAs={itemHeadingAs} unit={unit} />
+							</div>
+						))}
 			</DockUnitList>
 		);
 	}
@@ -419,6 +427,14 @@ function DockUnitCard({
 	);
 }
 
+function DockUnitIdentityBadge({ unit }: { readonly unit: UnitPresentation }) {
+	const { t } = useTranslation(["ui"]);
+	const title = unit.title ?? t.ui.unnamed;
+	return (
+		<IdentityBadgeLink avatar={unit.avatar} href={publicUnitHref(unit.kind, unit)} label={title} />
+	);
+}
+
 function DockUnitList({
 	children,
 	layout,
@@ -426,7 +442,7 @@ function DockUnitList({
 	units,
 }: {
 	readonly children: ReactNode;
-	readonly layout: "list" | "grid" | "carousel";
+	readonly layout: "list" | "grid" | "carousel" | "wrap";
 	readonly presentation?: UnitListPresentation;
 	readonly units: ReadonlyMap<string, UnitPresentation>;
 }) {
@@ -437,7 +453,11 @@ function DockUnitList({
 	const viewAllTarget = presentation?.viewAllTarget;
 	const viewAllHref = viewAllTarget ? navigationTargetHref(viewAllTarget, units) : undefined;
 	const list =
-		layout === "carousel" ? (
+		presentation?.itemAppearance === "identity-badge" ? (
+			<ul className={unitListClasses(layout)} data-part="items">
+				{children}
+			</ul>
+		) : layout === "carousel" ? (
 			<div data-part="items">
 				<Shelf
 					itemSize={presentation?.itemSize ?? "md"}
@@ -477,8 +497,11 @@ function DockUnitList({
 	);
 }
 
-function unitListClasses(layout: "list" | "grid"): string {
-	return cn("grid gap-3", layout === "grid" && "sm:grid-cols-2");
+function unitListClasses(layout: "list" | "grid" | "carousel" | "wrap"): string {
+	return cn(
+		layout === "wrap" ? "flex flex-wrap items-center gap-2" : "grid gap-3",
+		layout === "grid" && "sm:grid-cols-2",
+	);
 }
 
 function DockCollection({
@@ -489,7 +512,7 @@ function DockCollection({
 	units,
 }: {
 	readonly collectionId: string;
-	readonly layout: "list" | "grid" | "carousel";
+	readonly layout: "list" | "grid" | "carousel" | "wrap";
 	readonly limit: number;
 	readonly presentation?: UnitListPresentation;
 	readonly units: ReadonlyMap<string, UnitPresentation>;
@@ -515,11 +538,17 @@ function DockCollection({
 	if (!query.data || query.data.items.length === 0) return <div data-part="empty" />;
 	return (
 		<DockUnitList layout={layout} presentation={presentation} units={units}>
-			{query.data.items.map((item) => (
-				<div data-part="item" key={item.membership.targetId}>
-					<FeedItemCard item={item.content} />
-				</div>
-			))}
+			{presentation?.itemAppearance === "identity-badge"
+				? query.data.items.map((item) => (
+						<li data-part="item" key={item.membership.targetId}>
+							<FeedItemIdentityBadge item={item.content} />
+						</li>
+					))
+				: query.data.items.map((item) => (
+						<div data-part="item" key={item.membership.targetId}>
+							<FeedItemCard item={item.content} />
+						</div>
+					))}
 		</DockUnitList>
 	);
 }
