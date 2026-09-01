@@ -6,6 +6,13 @@ STUDY DEEPLY BEFORE ANYTHING, PROACTIVELY RESEARCH ONLINE TO ENSURE BEST PRACTIC
 - Put all agent-generated temporary artifacts under `.temp/`, including reports and any notes or checklists used to keep implementation aligned with an agreed plan. Remove artifacts created for the current task before finishing unless the user explicitly asks to retain them; never delete pre-existing or user-provided files.
 - Treat v1.0.0 as the first supported compatibility baseline. Remove and do not restore pre-v1 routes, schema versions, migrations, adapters, compatibility aliases, or removal guards. REZICS uses Romantic Versioning (RomVer) after v1.0.0: versions are `PROJECT.MAJOR.MINOR`, the second segment is for significant or breaking product, public API, or persisted-contract changes, and the third segment is for smaller additions, fixes, and maintenance releases. A breaking release must still include an explicit migration or cutover plan; it does not require a PROJECT bump.
 
+## Local fixture changes
+
+- Treat the showcase loader's fresh-database requirement as a constraint on that loader, not as blanket authorization or a requirement to reset the whole development database for every fixture edit.
+- Before resetting local state, classify the changed contract. When a change only replaces bounded content on an existing resource, such as one Zone Page document, Dock document, or approved theme revision, prefer the owning authenticated API, service operation, or reviewed loopback-only maintenance command that updates exactly that resource, then verify the persisted value. Do not bypass invariants with ad hoc SQL.
+- Use reset-and-reload when identities, relations, slugs, structures, pack-wide invariants, or multiple interdependent resources changed; when the supported loader is the only safe write path; or when the maintainer explicitly requests a full reset. If no safe targeted path exists and a reset would delete unrelated local work, ask the maintainer before resetting.
+- State the exact local scope and recovery consequence before any reset. A fixture loader refusing partial reconciliation does not by itself justify expanding a bounded change into a destructive whole-database operation.
+
 ## Performance and scalability
 
 - Treat performance and scalability as design requirements whenever changing database schemas, queries, indexes, persisted data flows, backend services, APIs, search or recommendation systems, queues, workers, caches, batching, or background jobs.

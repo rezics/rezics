@@ -12,7 +12,13 @@ enforces a local database URL.
 
 Load fixtures only into a freshly reset local database. A mixture of existing
 and missing fixture Units is rejected; reset and reload instead of reconciling
-the fixture repository with canonical data.
+the fixture repository with canonical data through this loader. This is a
+loader invariant, not a general instruction to reset unrelated local state for
+every bounded content edit. When only one existing product-owned resource must
+be replaced, use its owning authenticated API, service operation, or a reviewed
+loopback-only maintenance command and verify the exact persisted value. Keep
+reset-and-reload for identity-graph, relation, slug, structure, or other
+interdependent pack changes, or when no safe targeted write path exists.
 
 The default bundle is a strictly bounded developer dataset (currently about
 2,000 Units and 7,000 relation records, roughly 17 MB). Production capacity

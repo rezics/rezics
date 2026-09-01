@@ -127,8 +127,12 @@ second catalog whose state can override REZICS.
 `rezics-showcase-packs` is a development and demo fixture repository only. Its files may populate
 a freshly reset local database for UI and integration work; they are not a production deploy
 input, backup, migration source, or continuing authority. Do not load showcase packs in staging
-or production. When a fixture changes, reset the disposable local database and load it again
-instead of attempting to reconcile it with existing REZICS data.
+or production. The showcase loader does not reconcile a changed pack with existing REZICS data:
+use reset-and-reload for identity, relation, slug, structure, or other interdependent pack changes.
+That loader limitation is not a blanket requirement to reset the database for every development
+edit. A bounded replacement of one existing product resource may instead use its owning
+authenticated API, service operation, or a reviewed loopback-only maintenance command, followed by
+exact persisted-value verification. Do not use ad hoc SQL or weaken the loader's safety checks.
 
 Metadata-contract work does not imply source regeneration. Update generators for the next
 intentional rebuild, but migrate deterministic committed artifacts directly when that is sufficient.
