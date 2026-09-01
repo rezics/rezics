@@ -15,6 +15,7 @@ import {
 import { applyContentStructureBatch } from "../content-structure/batch";
 import { createContentStructure } from "../content-structure/service";
 import { createNavigationStructure } from "../content-structure/navigation";
+import { createCollectionStructureHistory } from "../collection-structure/history";
 import type { ContentStructureBatchCommand } from "../content-structure/batch-plan";
 import type { DatabaseTransaction } from "../database";
 import {
@@ -153,6 +154,7 @@ export async function applyContentPack(
 	await importRelations(tx, pack, createKeys);
 	await importStructures(tx, pack);
 	await importSlugs(tx, pack, createKeys);
+	await recordImportedCollectionStructureHistories(tx, pack, objects);
 
 	for (const object of objects) {
 		await recordUnitRevision(tx, {
@@ -162,6 +164,20 @@ export async function applyContentPack(
 		});
 	}
 	return { status: "created", created: objects.length };
+}
+
+export async function recordImportedCollectionStructureHistories(
+	tx: DatabaseTransaction,
+	pack: LoadedPack,
+	objects: readonly PackObject[],
+): Promise<void> {
+	for (const object of objects) {
+		if (object.unit.kind !== "collection") continue;
+		await createCollectionStructureHistory(tx, {
+			collectionId: requireId(pack.ids.units, object.sourceKey),
+			actorProfileId: ImportOwnerProfileId,
+		});
+	}
 }
 
 export function assertShowcaseFixtureInstallState(

@@ -3,11 +3,40 @@ import { PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it, vi } from "vitest";
 
 import type { DatabaseTransaction } from "../database";
-import { applyContentPack, assertShowcaseFixtureInstallState } from "./apply";
+import { OfficialProfileIds } from "../bootstrap/data";
+import type { PackObject } from "./contracts";
+import {
+	applyContentPack,
+	assertShowcaseFixtureInstallState,
+	recordImportedCollectionStructureHistories,
+} from "./apply";
 import type { LoadedPack } from "./contracts";
 import { ContentPackConflict } from "./errors";
 
+const createCollectionStructureHistory = vi.hoisted(() => vi.fn());
+
+vi.mock("../collection-structure/history", () => ({ createCollectionStructureHistory }));
+
 const Checksum = "a".repeat(64);
+const CollectionId = "019c0000-0000-7000-8000-000000000001";
+
+function collectionObject(): PackObject {
+	return {
+		sourceKey: "fixture:collection",
+		unit: {
+			kind: "collection",
+			status: "published",
+			visibility: "public",
+			contentRating: "general",
+			aiDisclosure: "none",
+			license: null,
+			moderationStatus: "approved",
+			postTargetingLocked: false,
+		},
+		import: { ownershipMode: "community_owned", actorKind: "import" },
+		localizations: [{ language: "en", title: "Fixture Collection" }],
+	};
+}
 
 function emptyPack(): LoadedPack {
 	return {
@@ -37,6 +66,28 @@ function emptyPack(): LoadedPack {
 }
 
 describe("applyContentPack local showcase boundary", () => {
+	it("records the populated initial structure for every imported Collection", async () => {
+		const transaction = {} as DatabaseTransaction;
+		const pack = emptyPack();
+		const collection = collectionObject();
+		createCollectionStructureHistory.mockResolvedValue({
+			revisionId: "019c0000-0000-7000-8000-000000000002",
+			revisionCreated: true,
+		});
+
+		await recordImportedCollectionStructureHistories(
+			transaction,
+			{ ...pack, ids: { units: { [collection.sourceKey]: CollectionId } } },
+			[collection],
+		);
+
+		expect(createCollectionStructureHistory).toHaveBeenCalledOnce();
+		expect(createCollectionStructureHistory).toHaveBeenCalledWith(transaction, {
+			collectionId: CollectionId,
+			actorProfileId: OfficialProfileIds.editorial,
+		});
+	});
+
 	it("serializes local loads and treats an empty fixture as a mutation-free no-op", async () => {
 		const execute = vi.fn(async (_statement: SQL) => ({ rows: [] }));
 		const transaction = { execute } as unknown as DatabaseTransaction;

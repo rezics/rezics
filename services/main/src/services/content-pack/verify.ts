@@ -1,7 +1,7 @@
 import { inArray } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
-import { unit } from "../database/schema";
+import { collectionStructureRevisionHead, unit } from "../database/schema";
 import { assertContentPackDocuments } from "./documents";
 import { ContentPackInvalid } from "./errors";
 import type { LoadedPack } from "./contracts";
@@ -18,6 +18,19 @@ export async function verifyContentPack(
 	if (existing.length !== unitIds.length)
 		throw new ContentPackInvalid(
 			`${pack.manifest.id} is missing ${unitIds.length - existing.length} imported units`,
+		);
+	const collectionIds = pack.objects.flatMap((object) =>
+		object.unit.kind === "collection" ? [pack.ids.units[object.sourceKey]!] : [],
+	);
+	const collectionStructureHeads = collectionIds.length
+		? await tx
+				.select({ collectionId: collectionStructureRevisionHead.collectionId })
+				.from(collectionStructureRevisionHead)
+				.where(inArray(collectionStructureRevisionHead.collectionId, collectionIds))
+		: [];
+	if (collectionStructureHeads.length !== collectionIds.length)
+		throw new ContentPackInvalid(
+			`${pack.manifest.id} is missing ${collectionIds.length - collectionStructureHeads.length} imported Collection Structure revision heads`,
 		);
 	return { ok: true, present: existing.length };
 }
