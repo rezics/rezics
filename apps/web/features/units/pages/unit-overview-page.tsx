@@ -105,7 +105,11 @@ export function UnitOverviewPage() {
 					</DetailSection>
 				) : null}
 
-				<UnitTagSummary type={type} unitId={unit.id} />
+				<UnitTagSummary
+					expressionPresentation={type === "book" ? "path-badges" : "grouped"}
+					type={type}
+					unitId={unit.id}
+				/>
 
 				<UnitRatingsReviewsSection
 					moreReviewsHref={unitReviewsHref(type, unit.id)}

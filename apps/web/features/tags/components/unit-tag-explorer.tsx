@@ -57,12 +57,14 @@ const SurfaceLimits = {
 const InitialTagVoteContext = { kind: "global" } as const satisfies TagVoteContextRequest;
 
 export function UnitTagExplorer({
+	expressionPresentation = "grouped",
 	highlightedTagId: _highlightedTagId,
 	initialVoteContext = InitialTagVoteContext,
 	surface,
 	type,
 	unitId,
 }: {
+	readonly expressionPresentation?: "grouped" | "path-badges";
 	readonly highlightedTagId?: string;
 	readonly initialVoteContext?: TagVoteContextRequest;
 	readonly surface: "section" | "page";
@@ -166,7 +168,14 @@ export function UnitTagExplorer({
 			realm.title ?? t.tags.unnamedRealm,
 		]),
 	);
-	const expressionSections = expressionAuthoritySections(query.data.expressions, realmTitleById, t);
+	const showExpressionPathBadges =
+		surface === "section" && expressionPresentation === "path-badges";
+	const expressionSections = expressionAuthoritySections(
+		query.data.expressions,
+		realmTitleById,
+		t,
+		!showExpressionPathBadges,
+	);
 	const canCurateGlobal = Boolean(unitQuery.data?.capabilities.canCurateTags);
 
 	const voteOnApplication = (application: UnitExpressionApplication, value: -1 | 1) => {
@@ -332,32 +341,48 @@ export function UnitTagExplorer({
 	return (
 		<div className="grid gap-7">
 			<section className="grid gap-5">
-				<div className="grid gap-1">
+				<div className={showExpressionPathBadges ? undefined : "grid gap-1"}>
 					<h2 className={surface === "page" ? "font-heading text-xl font-bold" : "font-semibold"}>
-						{t.tags.expressions.title}
+						{showExpressionPathBadges ? t.tags.page.title : t.tags.expressions.title}
 					</h2>
-					<p className="text-sm leading-6 text-muted-foreground">
-						{t.tags.expressions.description}
-					</p>
+					{showExpressionPathBadges ? null : (
+						<p className="text-sm leading-6 text-muted-foreground">
+							{t.tags.expressions.description}
+						</p>
+					)}
 				</div>
 				{expressionSections.length ? (
-					<div className="grid gap-6">
-						{expressionSections.map((section) => (
-							<ExpressionAuthoritySection
-								canCurate={section.authority.kind === "global" && canCurateGlobal}
-								canVote={Boolean(session)}
-								groups={section.groups}
-								isPending={applicationPending}
-								key={section.key}
-								onClearJudgment={clearApplicationJudgment}
-								onRemoveApplication={removeApplication}
-								onSpoilerChange={changeApplicationSpoiler}
-								onVote={voteOnApplication}
-								title={section.title}
-								type={type}
-							/>
-						))}
-					</div>
+					showExpressionPathBadges ? (
+						<ExpressionPathBadgeList
+							canCurateGlobal={canCurateGlobal}
+							canVote={Boolean(session)}
+							isPending={applicationPending}
+							onClearJudgment={clearApplicationJudgment}
+							onRemoveApplication={removeApplication}
+							onSpoilerChange={changeApplicationSpoiler}
+							onVote={voteOnApplication}
+							sections={expressionSections}
+							type={type}
+						/>
+					) : (
+						<div className="grid gap-6">
+							{expressionSections.map((section) => (
+								<ExpressionAuthoritySection
+									canCurate={section.authority.kind === "global" && canCurateGlobal}
+									canVote={Boolean(session)}
+									groups={section.groups}
+									isPending={applicationPending}
+									key={section.key}
+									onClearJudgment={clearApplicationJudgment}
+									onRemoveApplication={removeApplication}
+									onSpoilerChange={changeApplicationSpoiler}
+									onVote={voteOnApplication}
+									title={section.title}
+									type={type}
+								/>
+							))}
+						</div>
+					)
 				) : (
 					<p className="text-sm text-muted-foreground">{t.tags.expressions.empty}</p>
 				)}
@@ -547,6 +572,7 @@ function expressionAuthoritySections(
 	expressions: GetApiUnitsByTypeByUnitIdTagsStatus200["expressions"],
 	realmTitleById: ReadonlyMap<string, string>,
 	t: Pick<Translation, "tags">,
+	groupByExpressionKey: boolean,
 ): readonly {
 	readonly key: string;
 	readonly title: string;
@@ -577,7 +603,7 @@ function expressionAuthoritySections(
 			authority: section.authority,
 			groups: renderTagExpressions(section.expressions, {
 				unknownLabel: t.tags.unnamedTag,
-				groupByExpressionKey: true,
+				groupByExpressionKey,
 				authorityLabel: () => title,
 				relationLabel: (relation) =>
 					t.tags.expressions.relations[relation as keyof typeof t.tags.expressions.relations] ??
@@ -585,6 +611,62 @@ function expressionAuthoritySections(
 			}),
 		};
 	});
+}
+
+function ExpressionPathBadgeList({
+	canCurateGlobal,
+	canVote,
+	isPending,
+	onClearJudgment,
+	onRemoveApplication,
+	onSpoilerChange,
+	onVote,
+	sections,
+	type,
+}: {
+	readonly canCurateGlobal: boolean;
+	readonly canVote: boolean;
+	readonly isPending: (application: UnitExpressionApplication) => boolean;
+	readonly onClearJudgment: (application: UnitExpressionApplication) => void;
+	readonly onRemoveApplication: (application: UnitExpressionApplication) => void;
+	readonly onSpoilerChange: (
+		application: UnitExpressionApplication,
+		value: 0 | 1 | 2 | null,
+	) => void;
+	readonly onVote: (application: UnitExpressionApplication, value: -1 | 1) => void;
+	readonly sections: readonly {
+		readonly key: string;
+		readonly title: string;
+		readonly authority: TagExpressionAuthority;
+		readonly groups: readonly RenderedTagExpressionGroup<UnitExpressionApplication>[];
+	}[];
+	readonly type: TaggableUnitType;
+}) {
+	return (
+		<div className="flex flex-wrap gap-2">
+			{sections.flatMap((section) =>
+				section.groups.flatMap((group) =>
+					group.items.map((item) => (
+						<TagExpressionBadge
+							authorityLabel={section.title}
+							authorityPrefix={section.authority.kind === "realm" ? section.title : undefined}
+							canCurate={section.authority.kind === "global" && canCurateGlobal}
+							canVote={canVote}
+							isPending={isPending}
+							item={item}
+							key={item.key}
+							onClearJudgment={onClearJudgment}
+							onRemoveApplication={onRemoveApplication}
+							onSpoilerChange={onSpoilerChange}
+							onVote={onVote}
+							presentation="path"
+							type={type}
+						/>
+					)),
+				),
+			)}
+		</div>
+	);
 }
 
 function ExpressionAuthoritySection({

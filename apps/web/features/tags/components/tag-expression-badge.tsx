@@ -23,6 +23,11 @@ import { profileHref } from "@/features/profiles/profile-route";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import type { RenderedTagExpression } from "../model/tag-expression-renderer";
+import {
+	compactTagExpressionTrail,
+	presentTagExpressionTrail,
+	type TagExpressionTrail,
+} from "../model/tag-expression-trail";
 import type { TaggableUnitType } from "../model/taggable-unit";
 import { tagDetailHref, tagPathHref, tagSearchHref } from "../routing/tag-links";
 import { TagPathPath } from "./tag-path";
@@ -35,6 +40,7 @@ export type UnitRenderedExpression = RenderedTagExpression<UnitExpressionApplica
 
 export function TagExpressionBadge({
 	authorityLabel,
+	authorityPrefix,
 	canCurate,
 	canVote,
 	isPending,
@@ -43,9 +49,11 @@ export function TagExpressionBadge({
 	onRemoveApplication,
 	onSpoilerChange,
 	onVote,
+	presentation = "label",
 	type,
 }: {
 	readonly authorityLabel: string;
+	readonly authorityPrefix?: string;
 	readonly canCurate: boolean;
 	readonly canVote: boolean;
 	readonly isPending: (application: UnitExpressionApplication) => boolean;
@@ -57,6 +65,7 @@ export function TagExpressionBadge({
 		value: 0 | 1 | 2 | null,
 	) => void;
 	readonly onVote: (application: UnitExpressionApplication, value: -1 | 1) => void;
+	readonly presentation?: "label" | "path";
 	readonly type: TaggableUnitType;
 }) {
 	const { t } = useTranslation(["tags", "ui"]);
@@ -90,6 +99,13 @@ export function TagExpressionBadge({
 			.filter(({ pathId }) => !adoptedPathIds.has(pathId)) ?? [];
 	const positiveSource = item.applications.some(({ viewerVote }) => viewerVote === 1);
 	const negativeSource = item.applications.some(({ viewerVote }) => viewerVote === -1);
+	const trail = presentation === "path" ? presentTagExpressionTrail(item, t.tags.unnamedTag) : null;
+	const expressionLabel = trail?.label ?? item.label;
+	const visibleAuthorityPrefix =
+		item.collisionRepair === "authority_relation" ? undefined : authorityPrefix;
+	const displayLabel = visibleAuthorityPrefix
+		? `${visibleAuthorityPrefix} · ${expressionLabel}`
+		: expressionLabel;
 
 	return (
 		<Badge
@@ -109,13 +125,17 @@ export function TagExpressionBadge({
 				<PopoverTrigger asChild>
 					<button
 						aria-label={t.tags.expressions.open({
-							expression: item.label,
+							expression: displayLabel,
 							authority: authorityLabel,
 						})}
-						className="inline-flex min-w-0 max-w-full items-center gap-1.5 rounded-full px-2.5 py-1.5 outline-none hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-ring/40"
+						className="inline-flex min-w-0 max-w-full items-center gap-1.5 overflow-hidden rounded-full px-2.5 py-1.5 outline-none hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-ring/40"
 						type="button"
 					>
-						<span className="min-w-0 truncate">{item.label}</span>
+						{trail ? (
+							<TagExpressionTrailLabel authorityPrefix={visibleAuthorityPrefix} trail={trail} />
+						) : (
+							<span className="min-w-0 truncate">{item.label}</span>
+						)}
 						{item.applications.length > 1 ? (
 							<span className="shrink-0 tabular-nums text-[0.6875rem] opacity-75">
 								{item.applications.length}
@@ -125,7 +145,7 @@ export function TagExpressionBadge({
 				</PopoverTrigger>
 				<PopoverContent className="max-h-[min(42rem,calc(100dvh-2rem))] w-[min(32rem,calc(100vw-2rem))] overflow-y-auto">
 					<PopoverHeader className="pe-12">
-						<PopoverTitle>{item.label}</PopoverTitle>
+						<PopoverTitle>{displayLabel}</PopoverTitle>
 						<PopoverDescription>{authorityLabel}</PopoverDescription>
 						<PopoverClose asChild>
 							<Button
@@ -296,6 +316,60 @@ export function TagExpressionBadge({
 			</Popover>
 		</Badge>
 	);
+}
+
+function TagExpressionTrailLabel({
+	authorityPrefix,
+	trail,
+}: {
+	readonly authorityPrefix?: string;
+	readonly trail: TagExpressionTrail;
+}) {
+	return (
+		<span aria-hidden className="inline-flex min-w-0 max-w-full items-center gap-1">
+			{authorityPrefix ? (
+				<>
+					<span className="max-w-36 shrink truncate font-medium">{authorityPrefix}</span>
+					<span className="shrink-0 opacity-45">·</span>
+				</>
+			) : null}
+			<span className="inline-flex min-w-0 items-center gap-1 sm:hidden">
+				<TagExpressionTrailParts trail={trail} maximumParts={3} />
+			</span>
+			<span className="hidden min-w-0 items-center gap-1 sm:inline-flex">
+				<TagExpressionTrailParts trail={trail} maximumParts={4} />
+			</span>
+		</span>
+	);
+}
+
+function TagExpressionTrailParts({
+	maximumParts,
+	trail,
+}: {
+	readonly maximumParts: 3 | 4;
+	readonly trail: TagExpressionTrail;
+}) {
+	const parts = compactTagExpressionTrail(trail.segments, maximumParts);
+	const separator = trail.kind === "path" ? "›" : "·";
+	return parts.map((part, index) => (
+		<span className="contents" key={part.kind === "ellipsis" ? part.key : part.segment.key}>
+			{index ? <span className="shrink-0 opacity-45">{separator}</span> : null}
+			{part.kind === "ellipsis" ? (
+				<span className="shrink-0 opacity-70">…</span>
+			) : (
+				<span
+					className={
+						index === parts.length - 1
+							? "min-w-0 max-w-48 truncate font-semibold"
+							: "max-w-36 shrink truncate opacity-70"
+					}
+				>
+					{part.segment.label}
+				</span>
+			)}
+		</span>
+	));
 }
 
 function relationLabel(
