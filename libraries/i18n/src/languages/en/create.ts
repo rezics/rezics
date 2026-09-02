@@ -24,6 +24,13 @@ export default {
 			contributions: "Your contributions",
 		},
 	},
+	lifecycle: {
+		configurable: "Choose ownership and visibility",
+		publish_now: "Published when created",
+		private_first: "Private when created",
+		immutable: "Immutable definition",
+		preview: "Preview feature",
+	},
 	entityHelp: {
 		label: "Learn about credits",
 		title: "Credit guidance",

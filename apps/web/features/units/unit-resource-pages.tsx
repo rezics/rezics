@@ -51,7 +51,10 @@ import {
 	EntityLocalizationDraftCodec,
 	type EntityLocalizationDraft,
 } from "@/features/entities/model/entity-localization-draft";
-import { StudioTagCreateHref } from "@/features/create/model/studio-section";
+import {
+	studioSectionCreateHref,
+	StudioTagCreateHref,
+} from "@/features/create/model/studio-section";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetOption,
@@ -174,7 +177,7 @@ export function EntitiesPage() {
 		query: { localizationLanguages, limit: 50 },
 	});
 	return (
-		<UnitFrame title={t.entities.entities} createHref="/entities/new">
+		<UnitFrame title={t.entities.entities} createHref={studioSectionCreateHref("entity")}>
 			<ResourceList
 				items={query.data?.items}
 				pending={query.isPending}

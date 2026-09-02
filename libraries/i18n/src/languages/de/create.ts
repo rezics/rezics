@@ -25,6 +25,13 @@ export default {
 			contributions: "Deine Mitwirkungen",
 		},
 	},
+	lifecycle: {
+		configurable: "Eigentum und Sichtbarkeit wählbar",
+		publish_now: "Bei Erstellung veröffentlicht",
+		private_first: "Bei Erstellung privat",
+		immutable: "Unveränderliche Definition",
+		preview: "Vorschaufunktion",
+	},
 	entityHelp: {
 		label: "Hinweise zu Mitwirkungsangaben öffnen",
 		title: "Hinweise zu Mitwirkungsangaben",

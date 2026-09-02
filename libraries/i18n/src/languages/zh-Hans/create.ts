@@ -24,6 +24,13 @@ export default {
 			contributions: "你的贡献",
 		},
 	},
+	lifecycle: {
+		configurable: "可选择归属与可见性",
+		publish_now: "创建后立即发布",
+		private_first: "创建时为私密",
+		immutable: "不可变定义",
+		preview: "预览功能",
+	},
 	entityHelp: {
 		label: "打开署名说明",
 		title: "署名说明",

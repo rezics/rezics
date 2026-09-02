@@ -58,7 +58,7 @@ describe("public-entry search routes", () => {
 		);
 		const url = new URL(href, "https://rezics.example");
 
-		expect(url.pathname).toBe("/entities/new");
+		expect(url.pathname).toBe("/create/entity/new");
 		expect(url.searchParams.get("ownershipMode")).toBe("community_owned");
 		expect(url.searchParams.get("kind")).toBe("organization");
 		expect(url.searchParams.get("title")).toBe("OpenAI");

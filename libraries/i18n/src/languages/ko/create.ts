@@ -24,6 +24,13 @@ export default {
 			contributions: "내 기여",
 		},
 	},
+	lifecycle: {
+		configurable: "소유 방식과 공개 범위 선택",
+		publish_now: "만들 때 공개",
+		private_first: "만들 때 비공개",
+		immutable: "변경 불가 정의",
+		preview: "미리보기 기능",
+	},
 	entityHelp: {
 		label: "크레딧 안내 보기",
 		title: "크레딧 안내",

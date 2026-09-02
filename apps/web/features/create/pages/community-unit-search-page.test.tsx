@@ -100,7 +100,7 @@ describe("CommunityUnitSearchPage", () => {
 		);
 		const createLink = await screen.findByRole("link", { name: "Continue to create" });
 		const url = new URL(createLink.getAttribute("href") ?? "", "https://rezics.example");
-		expect(url.pathname).toBe("/units/book/new");
+		expect(url.pathname).toBe("/create/book/new");
 		expect(url.searchParams.get("ownershipMode")).toBe("community_owned");
 		expect(url.searchParams.get("title")).toBe("Dune");
 	});

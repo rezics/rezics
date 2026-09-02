@@ -11,6 +11,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
+import { studioSectionCreateHref } from "@/features/create/model/studio-section";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { PageHeading } from "@rezics/ui";
@@ -57,7 +58,7 @@ export function PollsPage() {
 				title={t.engagement.polls}
 				action={
 					<Button variant="solid" asChild>
-						<Link href="/polls/new">{t.engagement.newPoll}</Link>
+						<Link href={studioSectionCreateHref("poll")}>{t.engagement.newPoll}</Link>
 					</Button>
 				}
 			/>

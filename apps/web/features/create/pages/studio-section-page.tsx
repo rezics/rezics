@@ -9,7 +9,7 @@ import {
 	type ListCurrentUserContributionResourcesQuery,
 	type ListCurrentUserStudioContentQuery,
 } from "@rezics/openapi-tanstack-query";
-import { Button, ManagementWorkspaceSectionHeader } from "@rezics/ui";
+import { Badge, Button, ManagementWorkspaceSectionHeader } from "@rezics/ui";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useQueryStates } from "nuqs";
@@ -21,40 +21,33 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { StudioContentList, type StudioContentListState } from "../components/studio-content-list";
 import { StudioSectionToolbar } from "../components/studio-section-toolbar";
 import { AnyStudioFilter, studioFilterParsers } from "../model/studio-filters";
-import {
-	studioSectionCreateHref,
-	StudioTagCreateHref,
-	StudioTagPathCreateHref,
-	type StudioSectionId,
-} from "../model/studio-section";
+import { studioSectionCreateActions, type StudioSectionId } from "../model/studio-section";
 import { StudioOverviewHref } from "../routing/studio-routes";
 
 function StudioSectionCreateActions({ sectionId }: { readonly sectionId: StudioSectionId }) {
 	const { t } = useTranslation(["create", "tags"]);
-	if (sectionId === "tag")
-		return (
-			<div className="flex flex-wrap gap-2">
-				<Button asChild variant="solid">
-					<Link href={StudioTagCreateHref}>
-						<Plus aria-hidden className="size-4" />
-						{t.tags.create.title}
-					</Link>
-				</Button>
-				<Button asChild variant="outline">
-					<Link href={StudioTagPathCreateHref}>{t.tags.createPath.title}</Link>
-				</Button>
-			</div>
-		);
-
-	const createHref = studioSectionCreateHref(sectionId);
-	return createHref ? (
-		<Button asChild variant="solid">
-			<Link href={createHref}>
-				<Plus aria-hidden className="size-4" />
-				{t.create.list.create}
-			</Link>
-		</Button>
-	) : null;
+	const actions = studioSectionCreateActions(sectionId);
+	return (
+		<div className="flex flex-wrap gap-2">
+			{actions.map((action) => (
+				<div className="flex items-center gap-2" key={action.kind}>
+					<Button asChild variant={action.kind === "tag_path" ? "outline" : "solid"}>
+						<Link href={action.href}>
+							{action.kind === "section" ? <Plus aria-hidden className="size-4" /> : null}
+							{action.kind === "tag_path"
+								? t.tags.createPath.title
+								: sectionId === "tag"
+									? t.tags.create.title
+									: t.create.list.create}
+						</Link>
+					</Button>
+					<Badge size="sm" variant="outline">
+						{t.create.lifecycle[action.lifecycle]}
+					</Badge>
+				</div>
+			))}
+		</div>
+	);
 }
 
 function StudioSectionContent({ sectionId }: { readonly sectionId: StudioSectionId }) {

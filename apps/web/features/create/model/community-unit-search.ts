@@ -1,4 +1,4 @@
-import { StudioTagCreateHref } from "@/features/create/model/studio-section";
+import { studioSectionCreateHref } from "@/features/create/model/studio-section";
 
 export const CommunityUnitEntityKinds = ["person", "organization", "character"] as const;
 export type CommunityUnitEntityKind = (typeof CommunityUnitEntityKinds)[number];
@@ -115,24 +115,20 @@ export function communityUnitCreationHref(
 	const search = new URLSearchParams({
 		title: trimmedQuery,
 	});
-	let pathname: string;
 	switch (subject.section) {
 		case "book":
 		case "software":
 		case "media":
-			pathname = `/units/${subject.section}/new`;
 			search.set("ownershipMode", "community_owned");
 			break;
 		case "entity":
-			pathname = "/entities/new";
 			search.set("ownershipMode", "community_owned");
 			search.set("kind", subject.kind);
 			break;
 		case "tag":
-			pathname = StudioTagCreateHref;
 			break;
 	}
-	return `${pathname}?${search}`;
+	return `${studioSectionCreateHref(subject.section)}?${search}`;
 }
 
 export function communityUnitSearchResultHref(

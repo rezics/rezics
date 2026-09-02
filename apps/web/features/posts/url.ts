@@ -1,4 +1,5 @@
 import { type AddressableUnit, zoneHref } from "@/features/slugs/unit-route";
+import { studioSectionCreateHref } from "@/features/create/model/studio-section";
 
 export interface RealmPostContext {
 	readonly kind: "realm";
@@ -23,7 +24,7 @@ export interface ZonePostContext {
 export type PostInteractionContext = RealmPostContext | ZonePostContext;
 
 export function postCreateHref(defaultRealmId?: string): string {
-	return defaultRealmId ? `/posts/new?realmId=${encodeURIComponent(defaultRealmId)}` : "/posts/new";
+	return studioSectionCreateHref("post", defaultRealmId ? { realmId: defaultRealmId } : undefined);
 }
 
 export function postHref(postId: string, context?: PostInteractionContext, hash?: string): string {

@@ -24,6 +24,13 @@ export default {
 			contributions: "あなたの貢献",
 		},
 	},
+	lifecycle: {
+		configurable: "所有形態と公開範囲を選択",
+		publish_now: "作成時に公開",
+		private_first: "作成時は非公開",
+		immutable: "変更不可の定義",
+		preview: "プレビュー機能",
+	},
 	entityHelp: {
 		label: "クレジットの説明を開く",
 		title: "クレジットの説明",

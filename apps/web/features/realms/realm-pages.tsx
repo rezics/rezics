@@ -15,6 +15,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
+import { studioSectionCreateHref } from "@/features/create/model/studio-section";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { Banner, PageHeading } from "@rezics/ui";
@@ -90,7 +91,7 @@ export function RealmsPage() {
 				title={t.realms.title}
 				action={
 					<Button variant="solid" asChild>
-						<Link href="/realms/new">{t.realms.create}</Link>
+						<Link href={studioSectionCreateHref("realm")}>{t.realms.create}</Link>
 					</Button>
 				}
 			/>

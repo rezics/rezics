@@ -3,6 +3,7 @@
 import { useGetApiReviews } from "@rezics/openapi-tanstack-query";
 import { Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { studioSectionCreateHref } from "@/features/create/model/studio-section";
 
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -21,7 +22,7 @@ export function ReviewsPage() {
 			<PageHeading
 				action={
 					<Button asChild variant="solid">
-						<Link href="/reviews/new">{t.engagement.newReview}</Link>
+						<Link href={studioSectionCreateHref("review")}>{t.engagement.newReview}</Link>
 					</Button>
 				}
 				title={t.engagement.reviews}

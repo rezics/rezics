@@ -13,6 +13,7 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { CommunityUnitSearchPrompt } from "@/features/create/components/community-unit-search-prompt";
 import { unitCommunityUnitSearchSubject } from "@/features/create/model/community-unit-search";
+import { studioSectionCreateHref } from "@/features/create/model/studio-section";
 import { type FormEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
@@ -81,7 +82,9 @@ export function UnitBrowsePage({ type }: { type: WorkUnitType }) {
 				title={t.units.types[type]}
 				action={
 					<Button variant="solid" asChild>
-						<Link href={`/units/${type}/new`}>{t.actions.create}</Link>
+						<Link href={type === "series" ? "/units/series/new" : studioSectionCreateHref(type)}>
+							{t.actions.create}
+						</Link>
 					</Button>
 				}
 			/>

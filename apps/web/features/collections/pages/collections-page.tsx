@@ -3,6 +3,7 @@
 import { useGetApiUsersMe } from "@rezics/openapi-tanstack-query";
 import { Button, PageHeading, QueryFailure, QueryPending, UnitList } from "@rezics/ui";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { studioSectionCreateHref } from "@/features/create/model/studio-section";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -28,7 +29,7 @@ export function CollectionsPage() {
 			<PageHeading
 				action={
 					<Button asChild variant="solid">
-						<Link href="/collections/new">{t.collections.newCollection}</Link>
+						<Link href={studioSectionCreateHref("collection")}>{t.collections.newCollection}</Link>
 					</Button>
 				}
 				title={t.collections.title}

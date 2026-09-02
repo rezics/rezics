@@ -25,6 +25,13 @@ export default {
 			contributions: "Vos contributions",
 		},
 	},
+	lifecycle: {
+		configurable: "Propriété et visibilité au choix",
+		publish_now: "Publié dès la création",
+		private_first: "Privé à la création",
+		immutable: "Définition immuable",
+		preview: "Fonctionnalité en aperçu",
+	},
 	entityHelp: {
 		label: "En savoir plus sur les crédits",
 		title: "Informations sur les crédits",

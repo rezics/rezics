@@ -1,11 +1,14 @@
-import { PostCreatePage } from "@/features/posts/pages/post-create-page";
-import { postCreateSearchParams } from "@/lib/search-params.server";
+import { redirect } from "next/navigation";
+
+import {
+	studioSectionCreateHref,
+	type StudioCreateSearchParams,
+} from "@/features/create/model/studio-section";
 
 export default async function Page({
 	searchParams,
 }: {
-	searchParams: Promise<{ realmId?: string | string[] }>;
+	searchParams: Promise<StudioCreateSearchParams>;
 }) {
-	const { realmId } = await postCreateSearchParams.parse(searchParams);
-	return <PostCreatePage defaultRealmId={realmId ?? undefined} />;
+	redirect(studioSectionCreateHref("post", await searchParams));
 }

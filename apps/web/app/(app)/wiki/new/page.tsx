@@ -1,11 +1,14 @@
-import { WikiCreatePage } from "@/features/posts/pages/wiki-create-page";
-import { postCreateSearchParams } from "@/lib/search-params.server";
+import { redirect } from "next/navigation";
+
+import {
+	studioSectionCreateHref,
+	type StudioCreateSearchParams,
+} from "@/features/create/model/studio-section";
 
 export default async function Page({
 	searchParams,
 }: {
-	searchParams: Promise<{ realmId?: string | string[] }>;
+	searchParams: Promise<StudioCreateSearchParams>;
 }) {
-	const { realmId } = await postCreateSearchParams.parse(searchParams);
-	return <WikiCreatePage defaultRealmId={realmId ?? undefined} />;
+	redirect(studioSectionCreateHref("wiki", await searchParams));
 }

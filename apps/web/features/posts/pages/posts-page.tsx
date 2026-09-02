@@ -2,6 +2,7 @@
 
 import { Button, PageHeading } from "@rezics/ui";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { studioSectionCreateHref } from "@/features/create/model/studio-section";
 
 import { useTranslation } from "@/i18n/client";
 import { PostList } from "../post-list";
@@ -13,7 +14,7 @@ export function PostsPage() {
 			<PageHeading
 				action={
 					<Button asChild variant="solid">
-						<Link href="/posts/new">{t.posts.create}</Link>
+						<Link href={studioSectionCreateHref("post")}>{t.posts.create}</Link>
 					</Button>
 				}
 				title={t.posts.title}
