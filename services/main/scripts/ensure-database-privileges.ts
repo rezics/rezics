@@ -102,6 +102,11 @@ try {
 			);
 			await transaction.execute(
 				sql.raw(
+					`grant execute on function public.search_tag_suggestion_candidates(text,text[],integer,integer) to ${role}`,
+				),
+			);
+			await transaction.execute(
+				sql.raw(
 					`grant execute on function public.rebuild_tag_expression_effective_tags(uuid) to ${role}`,
 				),
 			);
@@ -117,6 +122,7 @@ try {
 					readonly canReadEstimate: boolean;
 					readonly canRunApproximateWriter: boolean;
 					readonly canRunPgroongaCommand: boolean;
+					readonly canRunTagSuggestions: boolean;
 					readonly canRunSearchText: boolean;
 					readonly canRebuildTagExpression: boolean;
 					readonly canWriteApproximateMetrics: boolean;
@@ -152,6 +158,11 @@ try {
 					) as "canRunSearchText",
 					has_function_privilege(
 						${applicationRole},
+						'public.search_tag_suggestion_candidates(text,text[],integer,integer)',
+						'EXECUTE'
+					) as "canRunTagSuggestions",
+					has_function_privilege(
+						${applicationRole},
 						'public.rebuild_tag_expression_effective_tags(uuid)',
 						'EXECUTE'
 					) as "canRebuildTagExpression",
@@ -166,6 +177,7 @@ try {
 				!proof?.canReadEstimate ||
 				!proof.canReadApproximateMetrics ||
 				!proof.canRunSearchText ||
+				!proof.canRunTagSuggestions ||
 				!proof.canRebuildTagExpression ||
 				proof.canMaintainUnit ||
 				proof.canRunApproximateWriter ||

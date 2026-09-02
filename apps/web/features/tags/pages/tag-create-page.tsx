@@ -26,8 +26,6 @@ import { type FormEvent, useState } from "react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
-import { CommunityUnitSearchPrompt } from "@/features/create/components/community-unit-search-prompt";
-import { TagCommunityUnitSearchSubject } from "@/features/create/model/community-unit-search";
 import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
 import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
 import { portableTextDraftContentLanguageSample } from "@/features/content-languages/model/draft-content-language-sample";
@@ -36,7 +34,8 @@ import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { writePortableText } from "@/lib/block";
-import { type TagCreateIntent, unitTagVoteDuplicateSearchHref } from "../routing/tag-create-route";
+import { TagDuplicateCheck } from "../components/tag-duplicate-check";
+import type { TagCreateIntent } from "../routing/tag-create-route";
 import { unitTagsHref } from "../routing/tag-links";
 
 type UnitTagVoteCompletionState =
@@ -132,9 +131,6 @@ export function TagCreatePage({
 		await finishUnitTagVote(created.id);
 	}
 
-	const searchHref =
-		intent.kind === "unit-tag-vote" ? unitTagVoteDuplicateSearchHref(title, intent) : undefined;
-
 	return (
 		<section>
 			<ManagementWorkspaceSectionHeader
@@ -196,12 +192,11 @@ export function TagCreatePage({
 									value={title}
 								/>
 							</Field>
-							<CommunityUnitSearchPrompt
+							<TagDuplicateCheck
 								confirmed={searchConfirmed}
 								onConfirmedChange={setSearchConfirmed}
-								query={title}
-								searchHref={searchHref}
-								subject={TagCommunityUnitSearchSubject}
+								onUseExisting={intent.kind === "unit-tag-vote" ? finishUnitTagVote : undefined}
+								title={title}
 							/>
 							<Field>
 								<FieldLabel>{t.ui.summary}</FieldLabel>

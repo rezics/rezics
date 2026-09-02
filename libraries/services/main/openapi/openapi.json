@@ -62751,39 +62751,160 @@
 										"items": {
 											"type": "array",
 											"items": {
-												"type": "object",
-												"properties": {
-													"selection": {
-														"type": "string",
-														"enum": ["direct_expression", "path_sense"]
-													},
-													"expression": {
+												"anyOf": [
+													{
 														"type": "object",
 														"properties": {
-															"expressionId": { "type": "string", "format": "uuid" },
-															"expressionKind": {
-																"default": "simple",
-																"enum": ["simple", "facet_value", "relation"],
+															"selection": { "type": "string", "const": "direct_expression" },
+															"selectionKey": {
+																"pattern": "^expression:[0-9a-f-]{36}$",
 																"type": "string"
 															},
-															"focusTagId": { "type": "string", "format": "uuid" },
-															"presentationRevision": { "minimum": 1, "type": "integer" },
-															"components": {
-																"minItems": 1,
+															"expression": {
+																"type": "object",
+																"properties": {
+																	"expressionId": { "type": "string", "format": "uuid" },
+																	"expressionKind": {
+																		"default": "simple",
+																		"enum": ["simple", "facet_value", "relation"],
+																		"type": "string"
+																	},
+																	"focusTagId": { "type": "string", "format": "uuid" },
+																	"presentationRevision": { "minimum": 1, "type": "integer" },
+																	"components": {
+																		"minItems": 1,
+																		"type": "array",
+																		"items": {
+																			"type": "object",
+																			"properties": {
+																				"tagId": { "type": "string", "format": "uuid" },
+																				"semanticRole": {
+																					"default": "predicate",
+																					"enum": [
+																						"predicate",
+																						"slot",
+																						"value",
+																						"focus",
+																						"qualifier"
+																					],
+																					"type": "string"
+																				},
+																				"componentKind": {
+																					"default": "required",
+																					"enum": ["required", "fallback"],
+																					"type": "string"
+																				},
+																				"language": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
+																							"type": "string"
+																						},
+																						{ "type": "null" }
+																					]
+																				},
+																				"title": {
+																					"nullable": true,
+																					"anyOf": [{ "type": "string" }, { "type": "null" }]
+																				}
+																			},
+																			"required": [
+																				"tagId",
+																				"semanticRole",
+																				"componentKind",
+																				"language",
+																				"title"
+																			]
+																		}
+																	},
+																	"groupKey": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"type": "object",
+																				"properties": {
+																					"tagId": { "type": "string", "format": "uuid" },
+																					"semanticRole": {
+																						"default": "predicate",
+																						"enum": [
+																							"predicate",
+																							"slot",
+																							"value",
+																							"focus",
+																							"qualifier"
+																						],
+																						"type": "string"
+																					},
+																					"language": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
+																								"type": "string"
+																							},
+																							{ "type": "null" }
+																						]
+																					},
+																					"title": {
+																						"nullable": true,
+																						"anyOf": [{ "type": "string" }, { "type": "null" }]
+																					}
+																				},
+																				"required": ["tagId", "semanticRole", "language", "title"]
+																			},
+																			{ "type": "null" }
+																		]
+																	}
+																},
+																"required": [
+																	"expressionId",
+																	"expressionKind",
+																	"focusTagId",
+																	"presentationRevision",
+																	"components",
+																	"groupKey"
+																]
+															},
+															"senseId": { "type": "null" },
+															"pathId": { "type": "null" },
+															"members": {
+																"maxItems": 0,
 																"type": "array",
 																"items": {
 																	"type": "object",
 																	"properties": {
-																		"tagId": { "type": "string", "format": "uuid" },
-																		"semanticRole": {
-																			"default": "predicate",
-																			"enum": ["predicate", "slot", "value", "focus", "qualifier"],
-																			"type": "string"
+																		"ordinal": { "minimum": 0, "type": "integer" },
+																		"nodeId": { "type": "string", "format": "uuid" },
+																		"nodeKind": {
+																			"anyOf": [
+																				{ "type": "string", "const": "concept" },
+																				{ "type": "string", "const": "guide" }
+																			]
 																		},
-																		"componentKind": {
-																			"default": "required",
-																			"enum": ["required", "fallback"],
-																			"type": "string"
+																		"incomingRelation": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "object",
+																					"properties": {
+																						"relationId": { "type": "string", "format": "uuid" },
+																						"relationKind": {
+																							"default": "generic",
+																							"enum": [
+																								"generic",
+																								"partitive",
+																								"instance",
+																								"organizational",
+																								"facet_value"
+																							],
+																							"type": "string"
+																						}
+																					},
+																					"required": ["relationId", "relationKind"]
+																				},
+																				{ "type": "null" }
+																			]
 																		},
 																		"language": {
 																			"nullable": true,
@@ -62798,209 +62919,406 @@
 																		"title": {
 																			"nullable": true,
 																			"anyOf": [{ "type": "string" }, { "type": "null" }]
-																		}
-																	},
-																	"required": [
-																		"tagId",
-																		"semanticRole",
-																		"componentKind",
-																		"language",
-																		"title"
-																	]
-																}
-															},
-															"groupKey": {
-																"nullable": true,
-																"anyOf": [
-																	{
-																		"type": "object",
-																		"properties": {
-																			"tagId": { "type": "string", "format": "uuid" },
-																			"semanticRole": {
-																				"default": "predicate",
-																				"enum": [
-																					"predicate",
-																					"slot",
-																					"value",
-																					"focus",
-																					"qualifier"
-																				],
-																				"type": "string"
-																			},
-																			"language": {
-																				"nullable": true,
-																				"anyOf": [
-																					{
-																						"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
-																						"type": "string"
-																					},
-																					{ "type": "null" }
-																				]
-																			},
-																			"title": {
-																				"nullable": true,
-																				"anyOf": [{ "type": "string" }, { "type": "null" }]
-																			}
 																		},
-																		"required": ["tagId", "semanticRole", "language", "title"]
-																	},
-																	{ "type": "null" }
-																]
-															}
-														},
-														"required": [
-															"expressionId",
-															"expressionKind",
-															"focusTagId",
-															"presentationRevision",
-															"components",
-															"groupKey"
-														]
-													},
-													"senseId": {
-														"nullable": true,
-														"anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }]
-													},
-													"pathId": {
-														"nullable": true,
-														"anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }]
-													},
-													"members": {
-														"maxItems": 16,
-														"type": "array",
-														"items": {
-															"type": "object",
-															"properties": {
-																"ordinal": { "minimum": 0, "type": "integer" },
-																"nodeId": { "type": "string", "format": "uuid" },
-																"nodeKind": { "type": "string", "enum": ["concept", "guide"] },
-																"incomingRelation": {
-																	"nullable": true,
-																	"anyOf": [
-																		{
-																			"type": "object",
-																			"properties": {
-																				"relationId": { "type": "string", "format": "uuid" },
-																				"relationKind": {
-																					"default": "generic",
-																					"enum": [
-																						"generic",
-																						"partitive",
-																						"instance",
-																						"organizational",
-																						"facet_value"
-																					],
-																					"type": "string"
-																				}
-																			},
-																			"required": ["relationId", "relationKind"]
+																		"summary": {
+																			"nullable": true,
+																			"anyOf": [{ "type": "string" }, { "type": "null" }]
 																		},
-																		{ "type": "null" }
-																	]
-																},
-																"language": {
-																	"nullable": true,
-																	"anyOf": [
-																		{
-																			"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
-																			"type": "string"
-																		},
-																		{ "type": "null" }
-																	]
-																},
-																"title": {
-																	"nullable": true,
-																	"anyOf": [{ "type": "string" }, { "type": "null" }]
-																},
-																"summary": {
-																	"nullable": true,
-																	"anyOf": [{ "type": "string" }, { "type": "null" }]
-																},
-																"avatar": {
-																	"nullable": true,
-																	"anyOf": [
-																		{
+																		"avatar": {
+																			"nullable": true,
 																			"anyOf": [
 																				{
-																					"additionalProperties": false,
-																					"type": "object",
-																					"properties": {
-																						"type": { "type": "string", "const": "image" },
-																						"image": {
-																							"type": "object",
-																							"properties": {
-																								"id": { "type": "string", "format": "uuid" },
-																								"url": { "type": "string" }
-																							},
-																							"required": ["id", "url"]
-																						}
-																					},
-																					"required": ["type", "image"]
-																				},
-																				{
-																					"additionalProperties": false,
-																					"type": "object",
-																					"properties": {
-																						"type": { "type": "string", "const": "emoji" },
-																						"emoji": { "maxLength": 64, "type": "string" }
-																					},
-																					"required": ["type", "emoji"]
-																				},
-																				{
-																					"additionalProperties": false,
-																					"type": "object",
-																					"properties": {
-																						"type": { "type": "string", "const": "icon" },
-																						"icon": {
+																					"anyOf": [
+																						{
 																							"additionalProperties": false,
 																							"type": "object",
 																							"properties": {
-																								"provider": {
-																									"type": "string",
-																									"const": "font-awesome"
-																								},
-																								"prefix": {
-																									"enum": ["fas", "fab"],
-																									"type": "string"
-																								},
-																								"name": {
-																									"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-																									"maxLength": 128,
-																									"type": "string"
+																								"type": { "type": "string", "const": "image" },
+																								"image": {
+																									"type": "object",
+																									"properties": {
+																										"id": { "type": "string", "format": "uuid" },
+																										"url": { "type": "string" }
+																									},
+																									"required": ["id", "url"]
 																								}
 																							},
-																							"required": ["provider", "prefix", "name"]
+																							"required": ["type", "image"]
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"properties": {
+																								"type": { "type": "string", "const": "emoji" },
+																								"emoji": { "maxLength": 64, "type": "string" }
+																							},
+																							"required": ["type", "emoji"]
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"properties": {
+																								"type": { "type": "string", "const": "icon" },
+																								"icon": {
+																									"additionalProperties": false,
+																									"type": "object",
+																									"properties": {
+																										"provider": {
+																											"type": "string",
+																											"const": "font-awesome"
+																										},
+																										"prefix": {
+																											"enum": ["fas", "fab"],
+																											"type": "string"
+																										},
+																										"name": {
+																											"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																											"maxLength": 128,
+																											"type": "string"
+																										}
+																									},
+																									"required": ["provider", "prefix", "name"]
+																								}
+																							},
+																							"required": ["type", "icon"]
 																						}
-																					},
-																					"required": ["type", "icon"]
-																				}
+																					]
+																				},
+																				{ "type": "null" }
 																			]
-																		},
-																		{ "type": "null" }
+																		}
+																	},
+																	"required": [
+																		"ordinal",
+																		"nodeId",
+																		"nodeKind",
+																		"incomingRelation",
+																		"language",
+																		"title",
+																		"summary",
+																		"avatar"
 																	]
 																}
 															},
-															"required": [
-																"ordinal",
-																"nodeId",
-																"nodeKind",
-																"incomingRelation",
-																"language",
-																"title",
-																"summary",
-																"avatar"
-															]
-														}
+															"usageCount": { "minimum": 0, "type": "integer" },
+															"match": {
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"anyOf": [
+																			{ "type": "string", "const": "exact" },
+																			{ "type": "string", "const": "prefix" },
+																			{ "type": "string", "const": "token" },
+																			{ "type": "string", "const": "fuzzy" }
+																		]
+																	},
+																	"source": {
+																		"anyOf": [
+																			{ "type": "string", "const": "direct_tag" },
+																			{ "type": "string", "const": "expression_component" },
+																			{ "type": "string", "const": "path_member" }
+																		]
+																	},
+																	"tagId": { "type": "string", "format": "uuid" }
+																},
+																"required": ["kind", "source", "tagId"]
+															}
+														},
+														"required": [
+															"selection",
+															"selectionKey",
+															"expression",
+															"senseId",
+															"pathId",
+															"members",
+															"usageCount",
+															"match"
+														]
 													},
-													"usageCount": { "minimum": 0, "type": "integer" }
-												},
-												"required": [
-													"selection",
-													"expression",
-													"senseId",
-													"pathId",
-													"members",
-													"usageCount"
+													{
+														"type": "object",
+														"properties": {
+															"selection": { "type": "string", "const": "path_sense" },
+															"selectionKey": {
+																"pattern": "^sense:[0-9a-f-]{36}$",
+																"type": "string"
+															},
+															"expression": {
+																"type": "object",
+																"properties": {
+																	"expressionId": { "type": "string", "format": "uuid" },
+																	"expressionKind": {
+																		"default": "simple",
+																		"enum": ["simple", "facet_value", "relation"],
+																		"type": "string"
+																	},
+																	"focusTagId": { "type": "string", "format": "uuid" },
+																	"presentationRevision": { "minimum": 1, "type": "integer" },
+																	"components": {
+																		"minItems": 1,
+																		"type": "array",
+																		"items": {
+																			"type": "object",
+																			"properties": {
+																				"tagId": { "type": "string", "format": "uuid" },
+																				"semanticRole": {
+																					"default": "predicate",
+																					"enum": [
+																						"predicate",
+																						"slot",
+																						"value",
+																						"focus",
+																						"qualifier"
+																					],
+																					"type": "string"
+																				},
+																				"componentKind": {
+																					"default": "required",
+																					"enum": ["required", "fallback"],
+																					"type": "string"
+																				},
+																				"language": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
+																							"type": "string"
+																						},
+																						{ "type": "null" }
+																					]
+																				},
+																				"title": {
+																					"nullable": true,
+																					"anyOf": [{ "type": "string" }, { "type": "null" }]
+																				}
+																			},
+																			"required": [
+																				"tagId",
+																				"semanticRole",
+																				"componentKind",
+																				"language",
+																				"title"
+																			]
+																		}
+																	},
+																	"groupKey": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"type": "object",
+																				"properties": {
+																					"tagId": { "type": "string", "format": "uuid" },
+																					"semanticRole": {
+																						"default": "predicate",
+																						"enum": [
+																							"predicate",
+																							"slot",
+																							"value",
+																							"focus",
+																							"qualifier"
+																						],
+																						"type": "string"
+																					},
+																					"language": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
+																								"type": "string"
+																							},
+																							{ "type": "null" }
+																						]
+																					},
+																					"title": {
+																						"nullable": true,
+																						"anyOf": [{ "type": "string" }, { "type": "null" }]
+																					}
+																				},
+																				"required": ["tagId", "semanticRole", "language", "title"]
+																			},
+																			{ "type": "null" }
+																		]
+																	}
+																},
+																"required": [
+																	"expressionId",
+																	"expressionKind",
+																	"focusTagId",
+																	"presentationRevision",
+																	"components",
+																	"groupKey"
+																]
+															},
+															"senseId": { "type": "string", "format": "uuid" },
+															"pathId": { "type": "string", "format": "uuid" },
+															"members": {
+																"minItems": 2,
+																"maxItems": 16,
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"ordinal": { "minimum": 0, "type": "integer" },
+																		"nodeId": { "type": "string", "format": "uuid" },
+																		"nodeKind": {
+																			"anyOf": [
+																				{ "type": "string", "const": "concept" },
+																				{ "type": "string", "const": "guide" }
+																			]
+																		},
+																		"incomingRelation": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "object",
+																					"properties": {
+																						"relationId": { "type": "string", "format": "uuid" },
+																						"relationKind": {
+																							"default": "generic",
+																							"enum": [
+																								"generic",
+																								"partitive",
+																								"instance",
+																								"organizational",
+																								"facet_value"
+																							],
+																							"type": "string"
+																						}
+																					},
+																					"required": ["relationId", "relationKind"]
+																				},
+																				{ "type": "null" }
+																			]
+																		},
+																		"language": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
+																					"type": "string"
+																				},
+																				{ "type": "null" }
+																			]
+																		},
+																		"title": {
+																			"nullable": true,
+																			"anyOf": [{ "type": "string" }, { "type": "null" }]
+																		},
+																		"summary": {
+																			"nullable": true,
+																			"anyOf": [{ "type": "string" }, { "type": "null" }]
+																		},
+																		"avatar": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"anyOf": [
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"properties": {
+																								"type": { "type": "string", "const": "image" },
+																								"image": {
+																									"type": "object",
+																									"properties": {
+																										"id": { "type": "string", "format": "uuid" },
+																										"url": { "type": "string" }
+																									},
+																									"required": ["id", "url"]
+																								}
+																							},
+																							"required": ["type", "image"]
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"properties": {
+																								"type": { "type": "string", "const": "emoji" },
+																								"emoji": { "maxLength": 64, "type": "string" }
+																							},
+																							"required": ["type", "emoji"]
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"properties": {
+																								"type": { "type": "string", "const": "icon" },
+																								"icon": {
+																									"additionalProperties": false,
+																									"type": "object",
+																									"properties": {
+																										"provider": {
+																											"type": "string",
+																											"const": "font-awesome"
+																										},
+																										"prefix": {
+																											"enum": ["fas", "fab"],
+																											"type": "string"
+																										},
+																										"name": {
+																											"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																											"maxLength": 128,
+																											"type": "string"
+																										}
+																									},
+																									"required": ["provider", "prefix", "name"]
+																								}
+																							},
+																							"required": ["type", "icon"]
+																						}
+																					]
+																				},
+																				{ "type": "null" }
+																			]
+																		}
+																	},
+																	"required": [
+																		"ordinal",
+																		"nodeId",
+																		"nodeKind",
+																		"incomingRelation",
+																		"language",
+																		"title",
+																		"summary",
+																		"avatar"
+																	]
+																}
+															},
+															"usageCount": { "minimum": 0, "type": "integer" },
+															"match": {
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"anyOf": [
+																			{ "type": "string", "const": "exact" },
+																			{ "type": "string", "const": "prefix" },
+																			{ "type": "string", "const": "token" },
+																			{ "type": "string", "const": "fuzzy" }
+																		]
+																	},
+																	"source": {
+																		"anyOf": [
+																			{ "type": "string", "const": "direct_tag" },
+																			{ "type": "string", "const": "expression_component" },
+																			{ "type": "string", "const": "path_member" }
+																		]
+																	},
+																	"tagId": { "type": "string", "format": "uuid" }
+																},
+																"required": ["kind", "source", "tagId"]
+															}
+														},
+														"required": [
+															"selection",
+															"selectionKey",
+															"expression",
+															"senseId",
+															"pathId",
+															"members",
+															"usageCount",
+															"match"
+														]
+													}
 												]
 											}
 										}
@@ -64985,39 +65303,160 @@
 										"items": {
 											"type": "array",
 											"items": {
-												"type": "object",
-												"properties": {
-													"selection": {
-														"type": "string",
-														"enum": ["direct_expression", "path_sense"]
-													},
-													"expression": {
+												"anyOf": [
+													{
 														"type": "object",
 														"properties": {
-															"expressionId": { "type": "string", "format": "uuid" },
-															"expressionKind": {
-																"default": "simple",
-																"enum": ["simple", "facet_value", "relation"],
+															"selection": { "type": "string", "const": "direct_expression" },
+															"selectionKey": {
+																"pattern": "^expression:[0-9a-f-]{36}$",
 																"type": "string"
 															},
-															"focusTagId": { "type": "string", "format": "uuid" },
-															"presentationRevision": { "minimum": 1, "type": "integer" },
-															"components": {
-																"minItems": 1,
+															"expression": {
+																"type": "object",
+																"properties": {
+																	"expressionId": { "type": "string", "format": "uuid" },
+																	"expressionKind": {
+																		"default": "simple",
+																		"enum": ["simple", "facet_value", "relation"],
+																		"type": "string"
+																	},
+																	"focusTagId": { "type": "string", "format": "uuid" },
+																	"presentationRevision": { "minimum": 1, "type": "integer" },
+																	"components": {
+																		"minItems": 1,
+																		"type": "array",
+																		"items": {
+																			"type": "object",
+																			"properties": {
+																				"tagId": { "type": "string", "format": "uuid" },
+																				"semanticRole": {
+																					"default": "predicate",
+																					"enum": [
+																						"predicate",
+																						"slot",
+																						"value",
+																						"focus",
+																						"qualifier"
+																					],
+																					"type": "string"
+																				},
+																				"componentKind": {
+																					"default": "required",
+																					"enum": ["required", "fallback"],
+																					"type": "string"
+																				},
+																				"language": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
+																							"type": "string"
+																						},
+																						{ "type": "null" }
+																					]
+																				},
+																				"title": {
+																					"nullable": true,
+																					"anyOf": [{ "type": "string" }, { "type": "null" }]
+																				}
+																			},
+																			"required": [
+																				"tagId",
+																				"semanticRole",
+																				"componentKind",
+																				"language",
+																				"title"
+																			]
+																		}
+																	},
+																	"groupKey": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"type": "object",
+																				"properties": {
+																					"tagId": { "type": "string", "format": "uuid" },
+																					"semanticRole": {
+																						"default": "predicate",
+																						"enum": [
+																							"predicate",
+																							"slot",
+																							"value",
+																							"focus",
+																							"qualifier"
+																						],
+																						"type": "string"
+																					},
+																					"language": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
+																								"type": "string"
+																							},
+																							{ "type": "null" }
+																						]
+																					},
+																					"title": {
+																						"nullable": true,
+																						"anyOf": [{ "type": "string" }, { "type": "null" }]
+																					}
+																				},
+																				"required": ["tagId", "semanticRole", "language", "title"]
+																			},
+																			{ "type": "null" }
+																		]
+																	}
+																},
+																"required": [
+																	"expressionId",
+																	"expressionKind",
+																	"focusTagId",
+																	"presentationRevision",
+																	"components",
+																	"groupKey"
+																]
+															},
+															"senseId": { "type": "null" },
+															"pathId": { "type": "null" },
+															"members": {
+																"maxItems": 0,
 																"type": "array",
 																"items": {
 																	"type": "object",
 																	"properties": {
-																		"tagId": { "type": "string", "format": "uuid" },
-																		"semanticRole": {
-																			"default": "predicate",
-																			"enum": ["predicate", "slot", "value", "focus", "qualifier"],
-																			"type": "string"
+																		"ordinal": { "minimum": 0, "type": "integer" },
+																		"nodeId": { "type": "string", "format": "uuid" },
+																		"nodeKind": {
+																			"anyOf": [
+																				{ "type": "string", "const": "concept" },
+																				{ "type": "string", "const": "guide" }
+																			]
 																		},
-																		"componentKind": {
-																			"default": "required",
-																			"enum": ["required", "fallback"],
-																			"type": "string"
+																		"incomingRelation": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "object",
+																					"properties": {
+																						"relationId": { "type": "string", "format": "uuid" },
+																						"relationKind": {
+																							"default": "generic",
+																							"enum": [
+																								"generic",
+																								"partitive",
+																								"instance",
+																								"organizational",
+																								"facet_value"
+																							],
+																							"type": "string"
+																						}
+																					},
+																					"required": ["relationId", "relationKind"]
+																				},
+																				{ "type": "null" }
+																			]
 																		},
 																		"language": {
 																			"nullable": true,
@@ -65032,209 +65471,406 @@
 																		"title": {
 																			"nullable": true,
 																			"anyOf": [{ "type": "string" }, { "type": "null" }]
-																		}
-																	},
-																	"required": [
-																		"tagId",
-																		"semanticRole",
-																		"componentKind",
-																		"language",
-																		"title"
-																	]
-																}
-															},
-															"groupKey": {
-																"nullable": true,
-																"anyOf": [
-																	{
-																		"type": "object",
-																		"properties": {
-																			"tagId": { "type": "string", "format": "uuid" },
-																			"semanticRole": {
-																				"default": "predicate",
-																				"enum": [
-																					"predicate",
-																					"slot",
-																					"value",
-																					"focus",
-																					"qualifier"
-																				],
-																				"type": "string"
-																			},
-																			"language": {
-																				"nullable": true,
-																				"anyOf": [
-																					{
-																						"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
-																						"type": "string"
-																					},
-																					{ "type": "null" }
-																				]
-																			},
-																			"title": {
-																				"nullable": true,
-																				"anyOf": [{ "type": "string" }, { "type": "null" }]
-																			}
 																		},
-																		"required": ["tagId", "semanticRole", "language", "title"]
-																	},
-																	{ "type": "null" }
-																]
-															}
-														},
-														"required": [
-															"expressionId",
-															"expressionKind",
-															"focusTagId",
-															"presentationRevision",
-															"components",
-															"groupKey"
-														]
-													},
-													"senseId": {
-														"nullable": true,
-														"anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }]
-													},
-													"pathId": {
-														"nullable": true,
-														"anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }]
-													},
-													"members": {
-														"maxItems": 16,
-														"type": "array",
-														"items": {
-															"type": "object",
-															"properties": {
-																"ordinal": { "minimum": 0, "type": "integer" },
-																"nodeId": { "type": "string", "format": "uuid" },
-																"nodeKind": { "type": "string", "enum": ["concept", "guide"] },
-																"incomingRelation": {
-																	"nullable": true,
-																	"anyOf": [
-																		{
-																			"type": "object",
-																			"properties": {
-																				"relationId": { "type": "string", "format": "uuid" },
-																				"relationKind": {
-																					"default": "generic",
-																					"enum": [
-																						"generic",
-																						"partitive",
-																						"instance",
-																						"organizational",
-																						"facet_value"
-																					],
-																					"type": "string"
-																				}
-																			},
-																			"required": ["relationId", "relationKind"]
+																		"summary": {
+																			"nullable": true,
+																			"anyOf": [{ "type": "string" }, { "type": "null" }]
 																		},
-																		{ "type": "null" }
-																	]
-																},
-																"language": {
-																	"nullable": true,
-																	"anyOf": [
-																		{
-																			"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
-																			"type": "string"
-																		},
-																		{ "type": "null" }
-																	]
-																},
-																"title": {
-																	"nullable": true,
-																	"anyOf": [{ "type": "string" }, { "type": "null" }]
-																},
-																"summary": {
-																	"nullable": true,
-																	"anyOf": [{ "type": "string" }, { "type": "null" }]
-																},
-																"avatar": {
-																	"nullable": true,
-																	"anyOf": [
-																		{
+																		"avatar": {
+																			"nullable": true,
 																			"anyOf": [
 																				{
-																					"additionalProperties": false,
-																					"type": "object",
-																					"properties": {
-																						"type": { "type": "string", "const": "image" },
-																						"image": {
-																							"type": "object",
-																							"properties": {
-																								"id": { "type": "string", "format": "uuid" },
-																								"url": { "type": "string" }
-																							},
-																							"required": ["id", "url"]
-																						}
-																					},
-																					"required": ["type", "image"]
-																				},
-																				{
-																					"additionalProperties": false,
-																					"type": "object",
-																					"properties": {
-																						"type": { "type": "string", "const": "emoji" },
-																						"emoji": { "maxLength": 64, "type": "string" }
-																					},
-																					"required": ["type", "emoji"]
-																				},
-																				{
-																					"additionalProperties": false,
-																					"type": "object",
-																					"properties": {
-																						"type": { "type": "string", "const": "icon" },
-																						"icon": {
+																					"anyOf": [
+																						{
 																							"additionalProperties": false,
 																							"type": "object",
 																							"properties": {
-																								"provider": {
-																									"type": "string",
-																									"const": "font-awesome"
-																								},
-																								"prefix": {
-																									"enum": ["fas", "fab"],
-																									"type": "string"
-																								},
-																								"name": {
-																									"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-																									"maxLength": 128,
-																									"type": "string"
+																								"type": { "type": "string", "const": "image" },
+																								"image": {
+																									"type": "object",
+																									"properties": {
+																										"id": { "type": "string", "format": "uuid" },
+																										"url": { "type": "string" }
+																									},
+																									"required": ["id", "url"]
 																								}
 																							},
-																							"required": ["provider", "prefix", "name"]
+																							"required": ["type", "image"]
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"properties": {
+																								"type": { "type": "string", "const": "emoji" },
+																								"emoji": { "maxLength": 64, "type": "string" }
+																							},
+																							"required": ["type", "emoji"]
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"properties": {
+																								"type": { "type": "string", "const": "icon" },
+																								"icon": {
+																									"additionalProperties": false,
+																									"type": "object",
+																									"properties": {
+																										"provider": {
+																											"type": "string",
+																											"const": "font-awesome"
+																										},
+																										"prefix": {
+																											"enum": ["fas", "fab"],
+																											"type": "string"
+																										},
+																										"name": {
+																											"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																											"maxLength": 128,
+																											"type": "string"
+																										}
+																									},
+																									"required": ["provider", "prefix", "name"]
+																								}
+																							},
+																							"required": ["type", "icon"]
 																						}
-																					},
-																					"required": ["type", "icon"]
-																				}
+																					]
+																				},
+																				{ "type": "null" }
 																			]
-																		},
-																		{ "type": "null" }
+																		}
+																	},
+																	"required": [
+																		"ordinal",
+																		"nodeId",
+																		"nodeKind",
+																		"incomingRelation",
+																		"language",
+																		"title",
+																		"summary",
+																		"avatar"
 																	]
 																}
 															},
-															"required": [
-																"ordinal",
-																"nodeId",
-																"nodeKind",
-																"incomingRelation",
-																"language",
-																"title",
-																"summary",
-																"avatar"
-															]
-														}
+															"usageCount": { "minimum": 0, "type": "integer" },
+															"match": {
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"anyOf": [
+																			{ "type": "string", "const": "exact" },
+																			{ "type": "string", "const": "prefix" },
+																			{ "type": "string", "const": "token" },
+																			{ "type": "string", "const": "fuzzy" }
+																		]
+																	},
+																	"source": {
+																		"anyOf": [
+																			{ "type": "string", "const": "direct_tag" },
+																			{ "type": "string", "const": "expression_component" },
+																			{ "type": "string", "const": "path_member" }
+																		]
+																	},
+																	"tagId": { "type": "string", "format": "uuid" }
+																},
+																"required": ["kind", "source", "tagId"]
+															}
+														},
+														"required": [
+															"selection",
+															"selectionKey",
+															"expression",
+															"senseId",
+															"pathId",
+															"members",
+															"usageCount",
+															"match"
+														]
 													},
-													"usageCount": { "minimum": 0, "type": "integer" }
-												},
-												"required": [
-													"selection",
-													"expression",
-													"senseId",
-													"pathId",
-													"members",
-													"usageCount"
+													{
+														"type": "object",
+														"properties": {
+															"selection": { "type": "string", "const": "path_sense" },
+															"selectionKey": {
+																"pattern": "^sense:[0-9a-f-]{36}$",
+																"type": "string"
+															},
+															"expression": {
+																"type": "object",
+																"properties": {
+																	"expressionId": { "type": "string", "format": "uuid" },
+																	"expressionKind": {
+																		"default": "simple",
+																		"enum": ["simple", "facet_value", "relation"],
+																		"type": "string"
+																	},
+																	"focusTagId": { "type": "string", "format": "uuid" },
+																	"presentationRevision": { "minimum": 1, "type": "integer" },
+																	"components": {
+																		"minItems": 1,
+																		"type": "array",
+																		"items": {
+																			"type": "object",
+																			"properties": {
+																				"tagId": { "type": "string", "format": "uuid" },
+																				"semanticRole": {
+																					"default": "predicate",
+																					"enum": [
+																						"predicate",
+																						"slot",
+																						"value",
+																						"focus",
+																						"qualifier"
+																					],
+																					"type": "string"
+																				},
+																				"componentKind": {
+																					"default": "required",
+																					"enum": ["required", "fallback"],
+																					"type": "string"
+																				},
+																				"language": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
+																							"type": "string"
+																						},
+																						{ "type": "null" }
+																					]
+																				},
+																				"title": {
+																					"nullable": true,
+																					"anyOf": [{ "type": "string" }, { "type": "null" }]
+																				}
+																			},
+																			"required": [
+																				"tagId",
+																				"semanticRole",
+																				"componentKind",
+																				"language",
+																				"title"
+																			]
+																		}
+																	},
+																	"groupKey": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"type": "object",
+																				"properties": {
+																					"tagId": { "type": "string", "format": "uuid" },
+																					"semanticRole": {
+																						"default": "predicate",
+																						"enum": [
+																							"predicate",
+																							"slot",
+																							"value",
+																							"focus",
+																							"qualifier"
+																						],
+																						"type": "string"
+																					},
+																					"language": {
+																						"nullable": true,
+																						"anyOf": [
+																							{
+																								"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
+																								"type": "string"
+																							},
+																							{ "type": "null" }
+																						]
+																					},
+																					"title": {
+																						"nullable": true,
+																						"anyOf": [{ "type": "string" }, { "type": "null" }]
+																					}
+																				},
+																				"required": ["tagId", "semanticRole", "language", "title"]
+																			},
+																			{ "type": "null" }
+																		]
+																	}
+																},
+																"required": [
+																	"expressionId",
+																	"expressionKind",
+																	"focusTagId",
+																	"presentationRevision",
+																	"components",
+																	"groupKey"
+																]
+															},
+															"senseId": { "type": "string", "format": "uuid" },
+															"pathId": { "type": "string", "format": "uuid" },
+															"members": {
+																"minItems": 2,
+																"maxItems": 16,
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"ordinal": { "minimum": 0, "type": "integer" },
+																		"nodeId": { "type": "string", "format": "uuid" },
+																		"nodeKind": {
+																			"anyOf": [
+																				{ "type": "string", "const": "concept" },
+																				{ "type": "string", "const": "guide" }
+																			]
+																		},
+																		"incomingRelation": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "object",
+																					"properties": {
+																						"relationId": { "type": "string", "format": "uuid" },
+																						"relationKind": {
+																							"default": "generic",
+																							"enum": [
+																								"generic",
+																								"partitive",
+																								"instance",
+																								"organizational",
+																								"facet_value"
+																							],
+																							"type": "string"
+																						}
+																					},
+																					"required": ["relationId", "relationKind"]
+																				},
+																				{ "type": "null" }
+																			]
+																		},
+																		"language": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
+																					"type": "string"
+																				},
+																				{ "type": "null" }
+																			]
+																		},
+																		"title": {
+																			"nullable": true,
+																			"anyOf": [{ "type": "string" }, { "type": "null" }]
+																		},
+																		"summary": {
+																			"nullable": true,
+																			"anyOf": [{ "type": "string" }, { "type": "null" }]
+																		},
+																		"avatar": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"anyOf": [
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"properties": {
+																								"type": { "type": "string", "const": "image" },
+																								"image": {
+																									"type": "object",
+																									"properties": {
+																										"id": { "type": "string", "format": "uuid" },
+																										"url": { "type": "string" }
+																									},
+																									"required": ["id", "url"]
+																								}
+																							},
+																							"required": ["type", "image"]
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"properties": {
+																								"type": { "type": "string", "const": "emoji" },
+																								"emoji": { "maxLength": 64, "type": "string" }
+																							},
+																							"required": ["type", "emoji"]
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"properties": {
+																								"type": { "type": "string", "const": "icon" },
+																								"icon": {
+																									"additionalProperties": false,
+																									"type": "object",
+																									"properties": {
+																										"provider": {
+																											"type": "string",
+																											"const": "font-awesome"
+																										},
+																										"prefix": {
+																											"enum": ["fas", "fab"],
+																											"type": "string"
+																										},
+																										"name": {
+																											"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																											"maxLength": 128,
+																											"type": "string"
+																										}
+																									},
+																									"required": ["provider", "prefix", "name"]
+																								}
+																							},
+																							"required": ["type", "icon"]
+																						}
+																					]
+																				},
+																				{ "type": "null" }
+																			]
+																		}
+																	},
+																	"required": [
+																		"ordinal",
+																		"nodeId",
+																		"nodeKind",
+																		"incomingRelation",
+																		"language",
+																		"title",
+																		"summary",
+																		"avatar"
+																	]
+																}
+															},
+															"usageCount": { "minimum": 0, "type": "integer" },
+															"match": {
+																"type": "object",
+																"properties": {
+																	"kind": {
+																		"anyOf": [
+																			{ "type": "string", "const": "exact" },
+																			{ "type": "string", "const": "prefix" },
+																			{ "type": "string", "const": "token" },
+																			{ "type": "string", "const": "fuzzy" }
+																		]
+																	},
+																	"source": {
+																		"anyOf": [
+																			{ "type": "string", "const": "direct_tag" },
+																			{ "type": "string", "const": "expression_component" },
+																			{ "type": "string", "const": "path_member" }
+																		]
+																	},
+																	"tagId": { "type": "string", "format": "uuid" }
+																},
+																"required": ["kind", "source", "tagId"]
+															}
+														},
+														"required": [
+															"selection",
+															"selectionKey",
+															"expression",
+															"senseId",
+															"pathId",
+															"members",
+															"usageCount",
+															"match"
+														]
+													}
 												]
 											}
 										}

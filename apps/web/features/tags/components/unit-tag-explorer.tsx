@@ -116,9 +116,8 @@ export function UnitTagExplorer({
 			}),
 		]);
 
-	const addDirect = usePutApiUnitsByTypeByUnitIdTagsByTagId({
-		mutation: { onSuccess: invalidateLandscape },
-	});
+	const addDirect = usePutApiUnitsByTypeByUnitIdTagsByTagId();
+	const addRealmDirect = usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote();
 	const globalVote = usePutApiUnitsByTypeByUnitIdTagsByTagIdVote({
 		mutation: { onSuccess: invalidateLandscape },
 	});
@@ -131,18 +130,14 @@ export function UnitTagExplorer({
 	const clearRealmVote = useDeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote({
 		mutation: { onSuccess: (_data, variables) => invalidateRealm(variables.path.realmId) },
 	});
-	const applyGlobalPath = usePostApiUnitsByTypeByUnitIdTagPathApplications({
-		mutation: { onSuccess: invalidateLandscape },
-	});
+	const applyGlobalPath = usePostApiUnitsByTypeByUnitIdTagPathApplications();
 	const judgeGlobalPath = usePutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgment({
 		mutation: { onSuccess: invalidateLandscape },
 	});
 	const removeGlobalPath = useDeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationId({
 		mutation: { onSuccess: invalidateLandscape },
 	});
-	const applyRealmPath = usePostApiRealmsByRealmIdUnitsByUnitIdTagPathApplications({
-		mutation: { onSuccess: (_data, variables) => invalidateRealm(variables.path.realmId) },
-	});
+	const applyRealmPath = usePostApiRealmsByRealmIdUnitsByUnitIdTagPathApplications();
 	const judgeRealmPath =
 		usePutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgment({
 			mutation: { onSuccess: (_data, variables) => invalidateRealm(variables.path.realmId) },
@@ -324,8 +319,6 @@ export function UnitTagExplorer({
 				? { kind: "global" }
 				: { kind: "realm", realmId: context.realm.realmId },
 		);
-	const addError =
-		addDirect.error ?? applyGlobalPath.error ?? realmVote.error ?? applyRealmPath.error;
 	const mutationError =
 		judgeGlobalPath.error ??
 		removeGlobalPath.error ??
@@ -425,44 +418,70 @@ export function UnitTagExplorer({
 						)
 					) : null}
 					<UnitTagManagement
-						addError={addError}
-						addPending={
-							addDirect.isPending ||
-							applyGlobalPath.isPending ||
-							realmVote.isPending ||
-							applyRealmPath.isPending
-						}
 						canVote={Boolean(session)}
 						key={activeVoteContext.kind === "global" ? "global" : activeVoteContext.realm.realmId}
-						onAddSelection={async (selection) => {
-							if (selection.kind === "direct_expression") {
-								if (activeVoteContext.kind === "global")
-									await addDirect.mutateAsync({
-										path: { type, unitId, tagId: selection.tagId },
-										body: {},
-									});
-								else
-									await realmVote.mutateAsync({
-										path: {
-											realmId: activeVoteContext.realm.realmId,
-											unitId,
-											tagId: selection.tagId,
-										},
-										body: { value: 1 },
-									});
-								return;
+						onAddSelections={async (selections) => {
+							const results: Array<
+								| { readonly selectionKey: string; readonly status: "added" }
+								| {
+										readonly selectionKey: string;
+										readonly status: "failed";
+										readonly error: unknown;
+								  }
+							> = [];
+							for (let offset = 0; offset < selections.length; offset += 4) {
+								const batch = selections.slice(offset, offset + 4);
+								results.push(
+									...(await Promise.all(
+										batch.map(async (selection) => {
+											try {
+												if (selection.kind === "direct_expression") {
+													if (activeVoteContext.kind === "global")
+														await addDirect.mutateAsync({
+															path: { type, unitId, tagId: selection.tagId },
+															body: {},
+														});
+													else
+														await addRealmDirect.mutateAsync({
+															path: {
+																realmId: activeVoteContext.realm.realmId,
+																unitId,
+																tagId: selection.tagId,
+															},
+															body: { value: 1 },
+														});
+												} else {
+													if (activeVoteContext.kind === "global")
+														await applyGlobalPath.mutateAsync({
+															path: { type, unitId },
+															body: { senseId: selection.senseId, fitVote: 1 },
+														});
+													else
+														await applyRealmPath.mutateAsync({
+															path: {
+																realmId: activeVoteContext.realm.realmId,
+																unitId,
+															},
+															body: { senseId: selection.senseId, fitVote: 1 },
+														});
+												}
+												return { selectionKey: selection.selectionKey, status: "added" as const };
+											} catch (error) {
+												return {
+													selectionKey: selection.selectionKey,
+													status: "failed" as const,
+													error,
+												};
+											}
+										}),
+									)),
+								);
 							}
-							if (!selection.senseId) return;
-							if (activeVoteContext.kind === "global")
-								await applyGlobalPath.mutateAsync({
-									path: { type, unitId },
-									body: { senseId: selection.senseId, fitVote: 1 },
-								});
-							else
-								await applyRealmPath.mutateAsync({
-									path: { realmId: activeVoteContext.realm.realmId, unitId },
-									body: { senseId: selection.senseId, fitVote: 1 },
-								});
+							if (results.some(({ status }) => status === "added")) {
+								if (activeVoteContext.kind === "global") await invalidateLandscape();
+								else await invalidateRealm(activeVoteContext.realm.realmId);
+							}
+							return results;
 						}}
 						tagCreateTarget={{
 							type,

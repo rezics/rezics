@@ -1,3 +1,5 @@
+SET search_path TO public;
+
 -- Ordinary search callers request Tag documents. Tag Path curation requests
 -- Tag Path documents explicitly through the same bounded PGroonga primitive.
 CREATE OR REPLACE FUNCTION public.search_tag_suggestion_candidates(

@@ -96,6 +96,7 @@ export const PostgreSqlSchemaFunctionNames = [
 	"refresh_unit_expression_assertion",
 	"reject_content_label_judgment",
 	"reject_custom_theme_immutable_history_mutation",
+	"search_tag_suggestion_candidates",
 	"search_text_candidates",
 	"seed_tag_public_position_stat",
 	"tag_path_unit_is_public",

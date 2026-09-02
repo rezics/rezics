@@ -220,6 +220,47 @@ Senses/Expressions/Paths, then aggregate in process; they do not issue N+1
 definition reads. Definition endpoints are separately capped because their
 datasets do not share corpus pagination semantics.
 
+### Tag suggestion search
+
+The Unit Tag picker is a typeahead workload within the 100,000 bounded reads/s
+deployment envelope. One request returns at most 20 semantic choices. Its
+candidate and hydration budgets are independent of `T` and `Q`:
+
+- `search_tag_suggestion_candidates` asks the existing PGroonga search document
+  for at most 80 public Tag IDs, ordered by `_score`, the existing search order
+  key, and then the returned ordinal;
+- estimated postings are capped at 5,000. A query above that budget returns no
+  suggestions rather than unrelated recent Tags;
+- direct Expressions and Path Senses use separate pools of at most 80 rows each,
+  so one result type cannot starve the other;
+- exact-match classification batch-reads at most 560 localization titles and
+  640 active exact aliases for those candidate IDs. Localization uses the
+  `(unit_id, language)` key; alias lookup intersects the normalized-term index
+  with the bounded candidate set and the 5,000-posting admission ceiling;
+- the Path pool begins from at most 80 candidate Tag IDs and uses
+  `tag_path_member_node_path_idx`, `tag_expression_focus_status_idx`, and
+  `tag_expression_argument_tag_idx`. Each focus/argument branch admits at most
+  80 raw hits, while Path-member and Sense branches admit at most 160 raw hits,
+  before bounded de-duplication and the final 80-row pool limit; and
+- presentation hydration receives at most 160 Expression IDs and 80 Path IDs,
+  with at most `80 * 16 = 1,280` Path-member rows. It is batched and never N+1.
+
+At both 500,000,000 and 3,000,000,000 corpus rows the request therefore retains
+fixed application memory, result-network size, and database fan-out. Exact
+classification covers every supported localization and alias language instead
+of depending on the title chosen for presentation. This
+change adds no persisted row, index, write amplification, maintenance job, or
+migration backfill. Score calculation stays inside the existing partitionable
+PGroonga document index; relational expansion stays left-key routed from the
+bounded Tag candidate set. A hot or overly broad query whose estimated postings
+exceed 5,000 is the explicit limiting case. If more than 1% of non-empty
+suggestion requests hit that ceiling, warm p95 exceeds 100 ms, or one PGroonga
+shard cannot keep the active prefix set resident, the cutover is a normalized
+prefix cache partitioned by language and query hash, populated from the same
+bounded scorer and invalidated by Tag search-document revision. Admission and
+cache-fill concurrency must remain bounded; the request path must not raise the
+posting ceiling or fall back to a corpus scan.
+
 ## Query complexity and plan acceptance
 
 The capacity fixture must capture `EXPLAIN (ANALYZE, BUFFERS, WAL, FORMAT JSON)`
@@ -231,12 +272,17 @@ for at least:
 - Effective Tag inverse reads;
 - Realm Unit Application reads;
 - active Sense and inference-rule reads;
+- ranked Tag suggestion candidates plus the direct/path pool expansion for a
+  query that matches an intermediate Path member;
 - a 50-key `tag_public_position_stat` primary-key lookup; and
 - hot Application judgment mutation.
 
 Plan acceptance requires the named routing index (or documented equivalent),
 no sequential scan of a corpus relation, no unbounded sort, and at most 512
-shared blocks for a bounded read fixture. Small definition tables may use a
+shared blocks for a bounded read fixture. The Tag suggestion expansion may use
+at most 2,048 shared blocks because it intentionally probes up to 80 independent
+Tag keys; every intermediate sort remains capped at 320 rows and warm p95 must
+remain below 100 ms. Small definition tables may use a
 sequential scan only when the fixture proves the relation remains below its
 declared control bound; corpus estimates cannot be extrapolated from that plan.
 
@@ -262,6 +308,15 @@ corpus plan was index-routed; the largest bounded read touched 388 shared blocks
 and the only paged incremental sort consumed 51 rows. Semantic parity proved
 that a 16-member Path produced one qualified Expression assertion, no
 intermediate-member assertion, and only its explicit Effective Tags.
+
+The 2026-09-02 suggestion qualification used the local showcase distribution
+and the query `Hair`, which produced 56 candidate Tags. With sequential scans
+disabled to prove the corpus route, the Path-member branch used
+`tag_path_member_node_path_idx` and `tag_path_sense_path_route_idx`, returned 58
+matching Senses in 5.391 ms, sorted no more than 160 rows at one stage, and
+touched 1,354 shared/read blocks including the PGroonga candidate function.
+This is bounded-route evidence on a small fixture, not a 500M-row latency
+extrapolation.
 
 The projection-qualified harness additionally makes every fixture Path share
 one terminal Tag, runs concurrent accepted/rejected vote crossings against

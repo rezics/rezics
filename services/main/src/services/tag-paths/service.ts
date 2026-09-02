@@ -8,7 +8,6 @@ import {
 	inArray,
 	isNotNull,
 	isNull,
-	or,
 	sql,
 	type SQL,
 	type SQLWrapper,
@@ -48,6 +47,8 @@ import {
 	tagPathVoteStat,
 	tagRelation,
 	unit,
+	unitAlias,
+	unitLocalization,
 	unitTagPathApplication,
 	unitTagPathApplicationJudgment,
 	unitTagPathApplicationJudgmentStat,
@@ -1090,14 +1091,129 @@ export async function listAcceptedTagPathsContaining(input: {
 	};
 }
 
-export type TagExpressionSuggestion = {
-	readonly selection: "direct_expression" | "path_sense";
+type TagSuggestionMatch = {
+	readonly kind: "exact" | "prefix" | "token" | "fuzzy";
+	readonly source: "direct_tag" | "expression_component" | "path_member";
+	readonly tagId: string;
+};
+
+type DirectTagExpressionSuggestion = {
+	readonly selection: "direct_expression";
+	readonly selectionKey: `expression:${string}`;
 	readonly expression: TagExpressionDefinition;
-	readonly senseId: string | null;
-	readonly pathId: string | null;
+	readonly senseId: null;
+	readonly pathId: null;
 	readonly members: TagPathMember[];
 	readonly usageCount: number;
+	readonly match: TagSuggestionMatch;
 };
+
+type PathSenseTagExpressionSuggestion = {
+	readonly selection: "path_sense";
+	readonly selectionKey: `sense:${string}`;
+	readonly expression: TagExpressionDefinition;
+	readonly senseId: string;
+	readonly pathId: string;
+	readonly members: TagPathMember[];
+	readonly usageCount: number;
+	readonly match: TagSuggestionMatch;
+};
+
+export type TagExpressionSuggestion =
+	| DirectTagExpressionSuggestion
+	| PathSenseTagExpressionSuggestion;
+
+type TagSuggestionCandidate = {
+	readonly tagId: string;
+	readonly searchScore: number;
+	readonly candidateRank: number;
+};
+
+type TagSuggestionTerm = {
+	readonly tagId: string;
+	readonly value: string;
+};
+
+type TagSuggestionRow = {
+	readonly expressionId: string;
+	readonly expressionKind: string;
+	readonly senseId: string | null;
+	readonly pathId: string | null;
+	readonly usageCount: bigint | null;
+	readonly matchedTagId: string;
+	readonly matchedSource: "direct_tag" | "expression_component" | "path_member";
+	readonly candidateRank: number;
+};
+
+type RankedTagExpressionSuggestion = {
+	readonly item: TagExpressionSuggestion;
+	readonly candidateRank: number;
+};
+
+function normalizeSuggestionText(value: string): string {
+	return value.normalize("NFKC").trim().replace(/\s+/gu, " ").toLowerCase();
+}
+
+function classifySuggestionMatch(query: string, title: string | null | undefined) {
+	const normalizedTitle = title ? normalizeSuggestionText(title) : "";
+	if (normalizedTitle === query) return "exact" as const;
+	if (normalizedTitle.startsWith(query)) return "prefix" as const;
+	if (
+		normalizedTitle
+			.split(/[\s\p{P}\p{S}]+/u)
+			.filter(Boolean)
+			.some((token) => token.startsWith(query))
+	)
+		return "token" as const;
+	return "fuzzy" as const;
+}
+
+const SuggestionMatchOrder = { exact: 0, prefix: 1, token: 2, fuzzy: 3 } as const;
+
+function classifySuggestionTerms(
+	query: string,
+	terms: readonly (string | null | undefined)[],
+): keyof typeof SuggestionMatchOrder {
+	let best: keyof typeof SuggestionMatchOrder = "fuzzy";
+	for (const term of terms) {
+		const match = classifySuggestionMatch(query, term);
+		if (SuggestionMatchOrder[match] < SuggestionMatchOrder[best]) best = match;
+		if (best === "exact") break;
+	}
+	return best;
+}
+
+function sortRankedSuggestions(
+	left: RankedTagExpressionSuggestion,
+	right: RankedTagExpressionSuggestion,
+): number {
+	return (
+		SuggestionMatchOrder[left.item.match.kind] - SuggestionMatchOrder[right.item.match.kind] ||
+		left.candidateRank - right.candidateRank ||
+		right.item.usageCount - left.item.usageCount ||
+		left.item.selectionKey.localeCompare(right.item.selectionKey)
+	);
+}
+
+function mixSuggestionPools(
+	direct: readonly RankedTagExpressionSuggestion[],
+	paths: readonly RankedTagExpressionSuggestion[],
+	limit: number,
+): TagExpressionSuggestion[] {
+	if (!direct.length) return paths.slice(0, limit).map(({ item }) => item);
+	if (!paths.length) return direct.slice(0, limit).map(({ item }) => item);
+	const directTarget = Math.ceil(limit * 0.6);
+	const selectedDirect = direct.slice(0, directTarget);
+	const selectedPaths = paths.slice(0, limit - selectedDirect.length);
+	const remaining = limit - selectedDirect.length - selectedPaths.length;
+	const overflow = [
+		...direct.slice(selectedDirect.length),
+		...paths.slice(selectedPaths.length),
+	].sort(sortRankedSuggestions);
+	return [...selectedDirect, ...selectedPaths, ...overflow.slice(0, remaining)].map(
+		({ item }) => item,
+	);
+}
 
 /** Picker search returns explicit semantic choices; it never silently chooses among structural Paths. */
 export async function suggestTagExpressions(input: {
@@ -1105,121 +1221,308 @@ export async function suggestTagExpressions(input: {
 	readonly localizationLanguages?: readonly ContentLanguage[];
 	readonly realmId?: string;
 	readonly limit: number;
+	/** Internal pool restriction used by curation surfaces that cannot consume mixed results. */
+	readonly selection?: "direct_expression" | "path_sense";
 }): Promise<TagExpressionSuggestion[]> {
-	const candidates = await database.execute<{ readonly tagId: string }>(sql`
-		select candidate.unit_id as "tagId"
-		from public.search_text_candidates(
-			${toTextArray([input.query])},
+	const candidateLimit = Math.min(Math.max(input.limit * 4, 40), 80);
+	const candidates = await database.execute<TagSuggestionCandidate>(sql`
+		select candidate.tag_id as "tagId",
+			candidate.search_score as "searchScore",
+			candidate.candidate_rank as "candidateRank"
+		from public.search_tag_suggestion_candidates(
+			${input.query},
 			${toTextArray(input.localizationLanguages ?? [])},
-			'tag', null, null, 5000, ${Math.min(input.limit * 4, 80)}
+			5000,
+			${candidateLimit}
 		) candidate
-		where candidate.search_matched
-		order by candidate.unit_updated_at_micros desc, candidate.unit_id desc
+		order by candidate.candidate_rank
 	`);
 	const tagIds = candidates.rows.map((row) => row.tagId);
 	if (!tagIds.length) return [];
-	const expressionRows = await database
-		.select({
-			expressionId: tagExpression.id,
-			expressionKind: tagExpression.expressionKind,
-			senseId: tagPathSense.id,
-			pathId: tagPathSense.pathId,
-			senseScope: tagPathSense.scope,
-			senseRealmId: tagPathSense.realmId,
-			realmAdoptedSenseId: realmTagPathSense.senseId,
-			usageCount: tagPathVoteStat.usageCount,
-		})
-		.from(tagExpression)
-		.leftJoin(
-			tagPathSense,
-			and(
-				eq(tagPathSense.expressionId, tagExpression.id),
-				or(
-					eq(tagPathSense.scope, "global"),
-					input.realmId
-						? and(eq(tagPathSense.scope, "realm"), eq(tagPathSense.realmId, input.realmId))
-						: undefined,
-				),
-				eq(tagPathSense.status, "active"),
-				isNotNull(tagPathSense.sealedAt),
-			),
+	const query = normalizeSuggestionText(input.query);
+	const suggestionTerms = await database.execute<TagSuggestionTerm>(sql`
+		with candidate(tag_id) as materialized (
+			select value
+			from unnest(${toUuidArray(tagIds)}) as ranked(value)
 		)
-		.leftJoin(
-			realmTagPathSense,
-			input.realmId
-				? and(
-						eq(realmTagPathSense.realmId, input.realmId),
-						eq(realmTagPathSense.senseId, tagPathSense.id),
-					)
-				: sql`false`,
+		(
+			select candidate.tag_id as "tagId", localization.title as value
+			from candidate
+			join ${unitLocalization} localization on localization.unit_id = candidate.tag_id
+			where localization.title is not null
+			limit ${candidateLimit * 7}
 		)
-		.leftJoin(tagPathVoteStat, eq(tagPathVoteStat.pathId, tagPathSense.pathId))
-		.where(
-			and(
-				eq(tagExpression.status, "active"),
-				isNotNull(tagExpression.sealedAt),
-				or(
-					inArray(tagExpression.focusTagId, tagIds),
-					sql`exists (
-						select 1 from ${tagExpressionArgument} argument
-						where argument.expression_id = ${tagExpression.id}
-							and argument.tag_id = any(${toUuidArray(tagIds)})
-					)`,
-				),
-			),
+		union all
+		(
+			select candidate.tag_id as "tagId", unit_alias.term as value
+			from candidate
+			join ${unitAlias} unit_alias on unit_alias.unit_id = candidate.tag_id
+			where unit_alias.withdrawn_at is null
+				and unit_alias.normalized_term = ${query}
+			limit ${candidateLimit * 8}
 		)
-		.orderBy(desc(tagPathVoteStat.usageCount), tagExpression.id, tagPathSense.id)
-		.limit(input.limit * 3);
+	`);
+	const termsByTagId = new Map<string, string[]>();
+	for (const term of suggestionTerms.rows) {
+		const existing = termsByTagId.get(term.tagId);
+		if (existing) existing.push(term.value);
+		else termsByTagId.set(term.tagId, [term.value]);
+	}
+	const poolLimit = Math.min(Math.max(input.limit * 4, 16), 80);
+	const directRows =
+		input.selection === "path_sense"
+			? []
+			: (
+					await database.execute<TagSuggestionRow>(sql`
+						with candidate(tag_id, candidate_rank) as materialized (
+							select value, ordinality::integer
+							from unnest(${toUuidArray(tagIds)}) with ordinality as ranked(value, ordinality)
+						)
+						select matched_expression.id as "expressionId",
+							matched_expression.expression_kind as "expressionKind",
+							null::uuid as "senseId",
+							null::uuid as "pathId",
+							0::bigint as "usageCount",
+							candidate.tag_id as "matchedTagId",
+							'direct_tag'::text as "matchedSource",
+							candidate.candidate_rank as "candidateRank"
+						from candidate
+						cross join lateral (
+							select expression.id, expression.expression_kind
+							from ${tagExpression} expression
+							where expression.focus_tag_id = candidate.tag_id
+								and expression.expression_kind = 'simple'
+								and expression.status = 'active'
+								and expression.sealed_at is not null
+							order by expression.id
+							limit ${poolLimit}
+						) matched_expression
+						order by candidate.candidate_rank, matched_expression.id
+						limit ${poolLimit}
+					`)
+				).rows;
+	const pathRows =
+		input.selection === "direct_expression"
+			? []
+			: (
+					await database.execute<TagSuggestionRow>(sql`
+						with candidate(tag_id, candidate_rank) as materialized (
+							select value, ordinality::integer
+							from unnest(${toUuidArray(tagIds)}) with ordinality as ranked(value, ordinality)
+						), expression_raw_hit as materialized (
+							(
+								select matched_expression.id as expression_id,
+									candidate.tag_id,
+									candidate.candidate_rank
+								from candidate
+								cross join lateral (
+									select expression.id
+									from ${tagExpression} expression
+									where expression.focus_tag_id = candidate.tag_id
+										and expression.status = 'active'
+										and expression.sealed_at is not null
+									order by expression.id
+									limit ${poolLimit}
+								) matched_expression
+								order by candidate.candidate_rank, matched_expression.id
+								limit ${poolLimit}
+							)
+							union all
+							(
+								select matched_argument.expression_id,
+									candidate.tag_id,
+									candidate.candidate_rank
+								from candidate
+								cross join lateral (
+									select argument.expression_id
+									from ${tagExpressionArgument} argument
+									join ${tagExpression} expression on expression.id = argument.expression_id
+									where argument.tag_id = candidate.tag_id
+										and expression.status = 'active'
+										and expression.sealed_at is not null
+									order by argument.expression_id
+									limit ${poolLimit}
+								) matched_argument
+								order by candidate.candidate_rank, matched_argument.expression_id
+								limit ${poolLimit}
+							)
+						), expression_hit as materialized (
+							select distinct on (hit.expression_id)
+								hit.expression_id, hit.tag_id, hit.candidate_rank
+							from expression_raw_hit hit
+							order by hit.expression_id, hit.candidate_rank, hit.tag_id
+						), path_raw_hit as materialized (
+							select matched_path.path_id, candidate.tag_id, candidate.candidate_rank
+							from candidate
+							cross join lateral (
+								select member.path_id
+								from ${tagPathMember} member
+								where member.node_id = candidate.tag_id
+								order by member.path_id
+								limit ${poolLimit * 2}
+							) matched_path
+							order by candidate.candidate_rank, matched_path.path_id
+							limit ${poolLimit * 2}
+						), path_hit as materialized (
+							select distinct on (hit.path_id)
+								hit.path_id, hit.tag_id, hit.candidate_rank
+							from path_raw_hit hit
+							order by hit.path_id, hit.candidate_rank, hit.tag_id
+						), sense_raw_hit as materialized (
+							(
+								select matched_sense.id as sense_id,
+									expression_hit.tag_id,
+									expression_hit.candidate_rank,
+									0::integer as source_order
+								from expression_hit
+								cross join lateral (
+									select sense.id
+									from ${tagPathSense} sense
+									where sense.expression_id = expression_hit.expression_id
+										and sense.status = 'active'
+										and sense.sealed_at is not null
+										and (
+											sense.scope = 'global'
+											${
+												input.realmId
+													? sql`or (sense.scope = 'realm' and sense.realm_id = ${input.realmId}::uuid)`
+													: sql``
+											}
+										)
+									order by sense.id
+									limit ${poolLimit}
+								) matched_sense
+								order by expression_hit.candidate_rank, matched_sense.id
+								limit ${poolLimit * 2}
+							)
+							union all
+							(
+								select matched_sense.id as sense_id,
+									path_hit.tag_id,
+									path_hit.candidate_rank,
+									1::integer as source_order
+								from path_hit
+								cross join lateral (
+									select sense.id
+									from ${tagPathSense} sense
+									where sense.path_id = path_hit.path_id
+										and sense.status = 'active'
+										and sense.sealed_at is not null
+										and (
+											sense.scope = 'global'
+											${
+												input.realmId
+													? sql`or (sense.scope = 'realm' and sense.realm_id = ${input.realmId}::uuid)`
+													: sql``
+											}
+										)
+									order by sense.id
+									limit ${poolLimit}
+								) matched_sense
+								order by path_hit.candidate_rank, matched_sense.id
+								limit ${poolLimit * 2}
+							)
+						), sense_hit as materialized (
+							select distinct on (hit.sense_id)
+								hit.sense_id, hit.tag_id, hit.candidate_rank, hit.source_order
+							from sense_raw_hit hit
+							order by hit.sense_id, hit.candidate_rank, hit.source_order, hit.tag_id
+						)
+						select expression.id as "expressionId",
+							expression.expression_kind as "expressionKind",
+							sense.id as "senseId",
+							sense.path_id as "pathId",
+							coalesce(stat.usage_count, 0) as "usageCount",
+							sense_hit.tag_id as "matchedTagId",
+							case when sense_hit.source_order = 0
+								then 'expression_component'
+								else 'path_member'
+							end as "matchedSource",
+							sense_hit.candidate_rank as "candidateRank"
+						from sense_hit
+						join ${tagPathSense} sense on sense.id = sense_hit.sense_id
+						join ${tagExpression} expression on expression.id = sense.expression_id
+						left join ${tagPathVoteStat} stat on stat.path_id = sense.path_id
+						${
+							input.realmId
+								? sql`join ${realmTagPathSense} adoption
+									on adoption.sense_id = sense.id
+									and adoption.realm_id = ${input.realmId}::uuid`
+								: sql``
+						}
+						where expression.status = 'active'
+							and expression.sealed_at is not null
+						order by sense_hit.candidate_rank, coalesce(stat.usage_count, 0) desc, sense.id
+						limit ${poolLimit}
+					`)
+				).rows;
+	const expressionRows = [...directRows, ...pathRows];
 	const expressionIds = [...new Set(expressionRows.map((row) => row.expressionId))];
 	const definitions = await listExpressionDefinitions(expressionIds, input.localizationLanguages);
 	const pathIds = expressionRows.flatMap((row) => (row.pathId ? [row.pathId] : []));
 	const members = await listPathMembers(pathIds, input.localizationLanguages);
-	const seen = new Set<string>();
-	const suggestions: TagExpressionSuggestion[] = [];
+	const direct: RankedTagExpressionSuggestion[] = [];
+	const paths: RankedTagExpressionSuggestion[] = [];
 	for (const row of expressionRows) {
 		const definition = definitions.get(row.expressionId);
 		if (!definition) continue;
-		if (row.expressionKind === "simple") {
-			const key = `expression:${row.expressionId}`;
-			if (!seen.has(key)) {
-				seen.add(key);
-				suggestions.push({
+		const pathMembers = row.pathId ? (members.get(row.pathId) ?? []) : [];
+		const matchedTitle =
+			row.matchedSource === "path_member"
+				? pathMembers.find((member) => member.nodeId === row.matchedTagId)?.title
+				: definition.components.find((component) => component.tagId === row.matchedTagId)?.title;
+		const match = {
+			kind: classifySuggestionTerms(query, [
+				matchedTitle,
+				...(termsByTagId.get(row.matchedTagId) ?? []),
+			]),
+			source: row.matchedSource,
+			tagId: row.matchedTagId,
+		} as const;
+		if (row.senseId && row.pathId) {
+			const selectionKey = `sense:${row.senseId}` as const;
+			paths.push({
+				candidateRank: row.candidateRank,
+				item: {
+					selection: "path_sense",
+					selectionKey,
+					expression: definition,
+					senseId: row.senseId,
+					pathId: row.pathId,
+					members: pathMembers,
+					usageCount: toSafeInteger(row.usageCount ?? 0n, "Tag Path usage count"),
+					match,
+				},
+			});
+		} else if (row.expressionKind === "simple") {
+			const selectionKey = `expression:${row.expressionId}` as const;
+			direct.push({
+				candidateRank: row.candidateRank,
+				item: {
 					selection: "direct_expression",
+					selectionKey,
 					expression: definition,
 					senseId: null,
 					pathId: null,
 					members: [],
 					usageCount: 0,
-				});
-			}
-		}
-		if (suggestions.length >= input.limit) break;
-		const senseAvailable =
-			row.senseId && row.pathId && (!input.realmId || row.realmAdoptedSenseId === row.senseId);
-		if (senseAvailable && row.senseId && row.pathId) {
-			const key = `sense:${row.senseId}`;
-			if (seen.has(key)) continue;
-			seen.add(key);
-			suggestions.push({
-				selection: "path_sense",
-				expression: definition,
-				senseId: row.senseId,
-				pathId: row.pathId,
-				members: members.get(row.pathId) ?? [],
-				usageCount: toSafeInteger(row.usageCount ?? 0n, "Tag Path usage count"),
+					match,
+				},
 			});
 		}
-		if (suggestions.length >= input.limit) break;
 	}
-	return suggestions;
+	direct.sort(sortRankedSuggestions);
+	paths.sort(sortRankedSuggestions);
+	if (input.selection === "direct_expression")
+		return direct.slice(0, input.limit).map(({ item }) => item);
+	if (input.selection === "path_sense") return paths.slice(0, input.limit).map(({ item }) => item);
+	return mixSuggestionPools(direct, paths, input.limit);
 }
 
 export async function searchTagPathsForCuration(
 	input: Parameters<typeof suggestTagExpressions>[0],
 ) {
-	return (await suggestTagExpressions(input)).filter(
-		(suggestion) => suggestion.selection === "path_sense",
-	);
+	return await suggestTagExpressions({ ...input, selection: "path_sense" });
 }
 
 async function ensureGlobalSense(tx: DatabaseTransaction, senseId: string) {

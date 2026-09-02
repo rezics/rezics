@@ -66524,14 +66524,6 @@ export type GetApiTagsSuggestionsQuery = {
 	limit?: number;
 };
 
-export const GetApiTagsSuggestionsStatus200ItemsSelectionEnum = {
-	direct_expression: "direct_expression",
-	path_sense: "path_sense",
-} as const;
-
-export type GetApiTagsSuggestionsStatus200ItemsSelectionEnum =
-	(typeof GetApiTagsSuggestionsStatus200ItemsSelectionEnum)[keyof typeof GetApiTagsSuggestionsStatus200ItemsSelectionEnum];
-
 export const GetApiTagsSuggestionsStatus200ItemsExpressionExpressionKindEnum = {
 	simple: "simple",
 	facet_value: "facet_value",
@@ -66597,14 +66589,6 @@ export const GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeyLanguage = {
 export type GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeyLanguage =
 	(typeof GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeyLanguage)[keyof typeof GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeyLanguage];
 
-export const GetApiTagsSuggestionsStatus200ItemsMembersNodeKindEnum = {
-	concept: "concept",
-	guide: "guide",
-} as const;
-
-export type GetApiTagsSuggestionsStatus200ItemsMembersNodeKindEnum =
-	(typeof GetApiTagsSuggestionsStatus200ItemsMembersNodeKindEnum)[keyof typeof GetApiTagsSuggestionsStatus200ItemsMembersNodeKindEnum];
-
 export const GetApiTagsSuggestionsStatus200ItemsMembersIncomingRelationRelationKindEnum = {
 	generic: "generic",
 	partitive: "partitive",
@@ -66644,62 +66628,47 @@ export type GetApiTagsSuggestionsStatus200 = {
 	/**
 	 * @type array
 	 */
-	items: {
-		/**
-		 * @type string
-		 */
-		selection: GetApiTagsSuggestionsStatus200ItemsSelectionEnum;
-		/**
-		 * @type object
-		 */
-		expression: {
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			expressionId: string;
-			/**
-			 * @default 'simple'
-			 * @type string
-			 */
-			expressionKind: GetApiTagsSuggestionsStatus200ItemsExpressionExpressionKindEnum;
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			focusTagId: string;
-			/**
-			 * @minLength 1
-			 * @type integer
-			 */
-			presentationRevision: number;
-			/**
-			 * @type array
-			 */
-			components: {
+	items: (
+		| {
 				/**
-				 * @description
-				 * Format: `uuid`
 				 * @type string
 				 */
-				tagId: string;
+				selection: "direct_expression";
 				/**
-				 * @default 'predicate'
+				 * @pattern ^expression:[0-9a-f-]{36}$
 				 * @type string
 				 */
-				semanticRole: GetApiTagsSuggestionsStatus200ItemsExpressionComponentsSemanticRoleEnum;
+				selectionKey: string;
 				/**
-				 * @default 'required'
-				 * @type string
+				 * @type object
 				 */
-				componentKind: GetApiTagsSuggestionsStatus200ItemsExpressionComponentsComponentKindEnum;
-				language: (GetApiTagsSuggestionsStatus200ItemsExpressionComponentsLanguage | null) | null;
-				title: (string | null) | null;
-			}[];
-			groupKey:
-				| ({
+				expression: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					expressionId: string;
+					/**
+					 * @default 'simple'
+					 * @type string
+					 */
+					expressionKind: GetApiTagsSuggestionsStatus200ItemsExpressionExpressionKindEnum;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					focusTagId: string;
+					/**
+					 * @minLength 1
+					 * @type integer
+					 */
+					presentationRevision: number;
+					/**
+					 * @type array
+					 */
+					components: {
 						/**
 						 * @description
 						 * Format: `uuid`
@@ -66710,122 +66679,375 @@ export type GetApiTagsSuggestionsStatus200 = {
 						 * @default 'predicate'
 						 * @type string
 						 */
-						semanticRole: GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeySemanticRoleEnum;
-						language: (GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeyLanguage | null) | null;
+						semanticRole: GetApiTagsSuggestionsStatus200ItemsExpressionComponentsSemanticRoleEnum;
+						/**
+						 * @default 'required'
+						 * @type string
+						 */
+						componentKind: GetApiTagsSuggestionsStatus200ItemsExpressionComponentsComponentKindEnum;
+						language:
+							| (GetApiTagsSuggestionsStatus200ItemsExpressionComponentsLanguage | null)
+							| null;
 						title: (string | null) | null;
-				  } | null)
-				| null;
-		};
-		senseId: (string | null) | null;
-		pathId: (string | null) | null;
-		/**
-		 * @type array
-		 */
-		members: {
-			/**
-			 * @minLength 0
-			 * @type integer
-			 */
-			ordinal: number;
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			nodeId: string;
-			/**
-			 * @type string
-			 */
-			nodeKind: GetApiTagsSuggestionsStatus200ItemsMembersNodeKindEnum;
-			incomingRelation:
-				| ({
+					}[];
+					groupKey:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								tagId: string;
+								/**
+								 * @default 'predicate'
+								 * @type string
+								 */
+								semanticRole: GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeySemanticRoleEnum;
+								language:
+									| (GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeyLanguage | null)
+									| null;
+								title: (string | null) | null;
+						  } | null)
+						| null;
+				};
+				/**
+				 * @type null
+				 */
+				senseId: null;
+				/**
+				 * @type null
+				 */
+				pathId: null;
+				/**
+				 * @type array
+				 */
+				members: {
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					ordinal: number;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					nodeId: string;
+					nodeKind: "concept" | "guide";
+					incomingRelation:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								relationId: string;
+								/**
+								 * @default 'generic'
+								 * @type string
+								 */
+								relationKind: GetApiTagsSuggestionsStatus200ItemsMembersIncomingRelationRelationKindEnum;
+						  } | null)
+						| null;
+					language: (GetApiTagsSuggestionsStatus200ItemsMembersLanguage | null) | null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiTagsSuggestionsStatus200ItemsMembersAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
+						| null;
+				}[];
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				usageCount: number;
+				/**
+				 * @type object
+				 */
+				match: {
+					kind: "exact" | "prefix" | "token" | "fuzzy";
+					source: "direct_tag" | "expression_component" | "path_member";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					tagId: string;
+				};
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				selection: "path_sense";
+				/**
+				 * @pattern ^sense:[0-9a-f-]{36}$
+				 * @type string
+				 */
+				selectionKey: string;
+				/**
+				 * @type object
+				 */
+				expression: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					expressionId: string;
+					/**
+					 * @default 'simple'
+					 * @type string
+					 */
+					expressionKind: GetApiTagsSuggestionsStatus200ItemsExpressionExpressionKindEnum;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					focusTagId: string;
+					/**
+					 * @minLength 1
+					 * @type integer
+					 */
+					presentationRevision: number;
+					/**
+					 * @type array
+					 */
+					components: {
 						/**
 						 * @description
 						 * Format: `uuid`
 						 * @type string
 						 */
-						relationId: string;
+						tagId: string;
 						/**
-						 * @default 'generic'
+						 * @default 'predicate'
 						 * @type string
 						 */
-						relationKind: GetApiTagsSuggestionsStatus200ItemsMembersIncomingRelationRelationKindEnum;
-				  } | null)
-				| null;
-			language: (GetApiTagsSuggestionsStatus200ItemsMembersLanguage | null) | null;
-			title: (string | null) | null;
-			summary: (string | null) | null;
-			avatar:
-				| (
+						semanticRole: GetApiTagsSuggestionsStatus200ItemsExpressionComponentsSemanticRoleEnum;
+						/**
+						 * @default 'required'
+						 * @type string
+						 */
+						componentKind: GetApiTagsSuggestionsStatus200ItemsExpressionComponentsComponentKindEnum;
+						language:
+							| (GetApiTagsSuggestionsStatus200ItemsExpressionComponentsLanguage | null)
+							| null;
+						title: (string | null) | null;
+					}[];
+					groupKey:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								tagId: string;
+								/**
+								 * @default 'predicate'
+								 * @type string
+								 */
+								semanticRole: GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeySemanticRoleEnum;
+								language:
+									| (GetApiTagsSuggestionsStatus200ItemsExpressionGroupKeyLanguage | null)
+									| null;
+								title: (string | null) | null;
+						  } | null)
+						| null;
+				};
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				senseId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				pathId: string;
+				/**
+				 * @type array
+				 */
+				members: {
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					ordinal: number;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					nodeId: string;
+					nodeKind: "concept" | "guide";
+					incomingRelation:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								relationId: string;
+								/**
+								 * @default 'generic'
+								 * @type string
+								 */
+								relationKind: GetApiTagsSuggestionsStatus200ItemsMembersIncomingRelationRelationKindEnum;
+						  } | null)
+						| null;
+					language: (GetApiTagsSuggestionsStatus200ItemsMembersLanguage | null) | null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
 						| (
-								| {
-										/**
-										 * @type string
-										 */
-										type: "image";
-										/**
-										 * @type object
-										 */
-										image: {
-											/**
-											 * @description
-											 * Format: `uuid`
-											 * @type string
-											 */
-											id: string;
-											/**
-											 * @type string
-											 */
-											url: string;
-										};
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										type: "emoji";
-										/**
-										 * @maxLength 64
-										 * @type string
-										 */
-										emoji: string;
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										type: "icon";
-										/**
-										 * @type object
-										 */
-										icon: {
-											/**
-											 * @type string
-											 */
-											provider: "font-awesome";
-											/**
-											 * @type string
-											 */
-											prefix: GetApiTagsSuggestionsStatus200ItemsMembersAvatarIconPrefixEnum;
-											/**
-											 * @maxLength 128
-											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-											 * @type string
-											 */
-											name: string;
-										};
-								  }
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiTagsSuggestionsStatus200ItemsMembersAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
 						  )
-						| null
-				  )
-				| null;
-		}[];
-		/**
-		 * @minLength 0
-		 * @type integer
-		 */
-		usageCount: number;
-	}[];
+						| null;
+				}[];
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				usageCount: number;
+				/**
+				 * @type object
+				 */
+				match: {
+					kind: "exact" | "prefix" | "token" | "fuzzy";
+					source: "direct_tag" | "expression_component" | "path_member";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					tagId: string;
+				};
+		  }
+	)[];
 };
 
 /**
@@ -69281,14 +69503,6 @@ export type GetApiTagPathsSearchQuery = {
 	limit?: number;
 };
 
-export const GetApiTagPathsSearchStatus200ItemsSelectionEnum = {
-	direct_expression: "direct_expression",
-	path_sense: "path_sense",
-} as const;
-
-export type GetApiTagPathsSearchStatus200ItemsSelectionEnum =
-	(typeof GetApiTagPathsSearchStatus200ItemsSelectionEnum)[keyof typeof GetApiTagPathsSearchStatus200ItemsSelectionEnum];
-
 export const GetApiTagPathsSearchStatus200ItemsExpressionExpressionKindEnum = {
 	simple: "simple",
 	facet_value: "facet_value",
@@ -69354,14 +69568,6 @@ export const GetApiTagPathsSearchStatus200ItemsExpressionGroupKeyLanguage = {
 export type GetApiTagPathsSearchStatus200ItemsExpressionGroupKeyLanguage =
 	(typeof GetApiTagPathsSearchStatus200ItemsExpressionGroupKeyLanguage)[keyof typeof GetApiTagPathsSearchStatus200ItemsExpressionGroupKeyLanguage];
 
-export const GetApiTagPathsSearchStatus200ItemsMembersNodeKindEnum = {
-	concept: "concept",
-	guide: "guide",
-} as const;
-
-export type GetApiTagPathsSearchStatus200ItemsMembersNodeKindEnum =
-	(typeof GetApiTagPathsSearchStatus200ItemsMembersNodeKindEnum)[keyof typeof GetApiTagPathsSearchStatus200ItemsMembersNodeKindEnum];
-
 export const GetApiTagPathsSearchStatus200ItemsMembersIncomingRelationRelationKindEnum = {
 	generic: "generic",
 	partitive: "partitive",
@@ -69401,62 +69607,47 @@ export type GetApiTagPathsSearchStatus200 = {
 	/**
 	 * @type array
 	 */
-	items: {
-		/**
-		 * @type string
-		 */
-		selection: GetApiTagPathsSearchStatus200ItemsSelectionEnum;
-		/**
-		 * @type object
-		 */
-		expression: {
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			expressionId: string;
-			/**
-			 * @default 'simple'
-			 * @type string
-			 */
-			expressionKind: GetApiTagPathsSearchStatus200ItemsExpressionExpressionKindEnum;
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			focusTagId: string;
-			/**
-			 * @minLength 1
-			 * @type integer
-			 */
-			presentationRevision: number;
-			/**
-			 * @type array
-			 */
-			components: {
+	items: (
+		| {
 				/**
-				 * @description
-				 * Format: `uuid`
 				 * @type string
 				 */
-				tagId: string;
+				selection: "direct_expression";
 				/**
-				 * @default 'predicate'
+				 * @pattern ^expression:[0-9a-f-]{36}$
 				 * @type string
 				 */
-				semanticRole: GetApiTagPathsSearchStatus200ItemsExpressionComponentsSemanticRoleEnum;
+				selectionKey: string;
 				/**
-				 * @default 'required'
-				 * @type string
+				 * @type object
 				 */
-				componentKind: GetApiTagPathsSearchStatus200ItemsExpressionComponentsComponentKindEnum;
-				language: (GetApiTagPathsSearchStatus200ItemsExpressionComponentsLanguage | null) | null;
-				title: (string | null) | null;
-			}[];
-			groupKey:
-				| ({
+				expression: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					expressionId: string;
+					/**
+					 * @default 'simple'
+					 * @type string
+					 */
+					expressionKind: GetApiTagPathsSearchStatus200ItemsExpressionExpressionKindEnum;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					focusTagId: string;
+					/**
+					 * @minLength 1
+					 * @type integer
+					 */
+					presentationRevision: number;
+					/**
+					 * @type array
+					 */
+					components: {
 						/**
 						 * @description
 						 * Format: `uuid`
@@ -69467,122 +69658,375 @@ export type GetApiTagPathsSearchStatus200 = {
 						 * @default 'predicate'
 						 * @type string
 						 */
-						semanticRole: GetApiTagPathsSearchStatus200ItemsExpressionGroupKeySemanticRoleEnum;
-						language: (GetApiTagPathsSearchStatus200ItemsExpressionGroupKeyLanguage | null) | null;
+						semanticRole: GetApiTagPathsSearchStatus200ItemsExpressionComponentsSemanticRoleEnum;
+						/**
+						 * @default 'required'
+						 * @type string
+						 */
+						componentKind: GetApiTagPathsSearchStatus200ItemsExpressionComponentsComponentKindEnum;
+						language:
+							| (GetApiTagPathsSearchStatus200ItemsExpressionComponentsLanguage | null)
+							| null;
 						title: (string | null) | null;
-				  } | null)
-				| null;
-		};
-		senseId: (string | null) | null;
-		pathId: (string | null) | null;
-		/**
-		 * @type array
-		 */
-		members: {
-			/**
-			 * @minLength 0
-			 * @type integer
-			 */
-			ordinal: number;
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			nodeId: string;
-			/**
-			 * @type string
-			 */
-			nodeKind: GetApiTagPathsSearchStatus200ItemsMembersNodeKindEnum;
-			incomingRelation:
-				| ({
+					}[];
+					groupKey:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								tagId: string;
+								/**
+								 * @default 'predicate'
+								 * @type string
+								 */
+								semanticRole: GetApiTagPathsSearchStatus200ItemsExpressionGroupKeySemanticRoleEnum;
+								language:
+									| (GetApiTagPathsSearchStatus200ItemsExpressionGroupKeyLanguage | null)
+									| null;
+								title: (string | null) | null;
+						  } | null)
+						| null;
+				};
+				/**
+				 * @type null
+				 */
+				senseId: null;
+				/**
+				 * @type null
+				 */
+				pathId: null;
+				/**
+				 * @type array
+				 */
+				members: {
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					ordinal: number;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					nodeId: string;
+					nodeKind: "concept" | "guide";
+					incomingRelation:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								relationId: string;
+								/**
+								 * @default 'generic'
+								 * @type string
+								 */
+								relationKind: GetApiTagPathsSearchStatus200ItemsMembersIncomingRelationRelationKindEnum;
+						  } | null)
+						| null;
+					language: (GetApiTagPathsSearchStatus200ItemsMembersLanguage | null) | null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiTagPathsSearchStatus200ItemsMembersAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
+						| null;
+				}[];
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				usageCount: number;
+				/**
+				 * @type object
+				 */
+				match: {
+					kind: "exact" | "prefix" | "token" | "fuzzy";
+					source: "direct_tag" | "expression_component" | "path_member";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					tagId: string;
+				};
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				selection: "path_sense";
+				/**
+				 * @pattern ^sense:[0-9a-f-]{36}$
+				 * @type string
+				 */
+				selectionKey: string;
+				/**
+				 * @type object
+				 */
+				expression: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					expressionId: string;
+					/**
+					 * @default 'simple'
+					 * @type string
+					 */
+					expressionKind: GetApiTagPathsSearchStatus200ItemsExpressionExpressionKindEnum;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					focusTagId: string;
+					/**
+					 * @minLength 1
+					 * @type integer
+					 */
+					presentationRevision: number;
+					/**
+					 * @type array
+					 */
+					components: {
 						/**
 						 * @description
 						 * Format: `uuid`
 						 * @type string
 						 */
-						relationId: string;
+						tagId: string;
 						/**
-						 * @default 'generic'
+						 * @default 'predicate'
 						 * @type string
 						 */
-						relationKind: GetApiTagPathsSearchStatus200ItemsMembersIncomingRelationRelationKindEnum;
-				  } | null)
-				| null;
-			language: (GetApiTagPathsSearchStatus200ItemsMembersLanguage | null) | null;
-			title: (string | null) | null;
-			summary: (string | null) | null;
-			avatar:
-				| (
+						semanticRole: GetApiTagPathsSearchStatus200ItemsExpressionComponentsSemanticRoleEnum;
+						/**
+						 * @default 'required'
+						 * @type string
+						 */
+						componentKind: GetApiTagPathsSearchStatus200ItemsExpressionComponentsComponentKindEnum;
+						language:
+							| (GetApiTagPathsSearchStatus200ItemsExpressionComponentsLanguage | null)
+							| null;
+						title: (string | null) | null;
+					}[];
+					groupKey:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								tagId: string;
+								/**
+								 * @default 'predicate'
+								 * @type string
+								 */
+								semanticRole: GetApiTagPathsSearchStatus200ItemsExpressionGroupKeySemanticRoleEnum;
+								language:
+									| (GetApiTagPathsSearchStatus200ItemsExpressionGroupKeyLanguage | null)
+									| null;
+								title: (string | null) | null;
+						  } | null)
+						| null;
+				};
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				senseId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				pathId: string;
+				/**
+				 * @type array
+				 */
+				members: {
+					/**
+					 * @minLength 0
+					 * @type integer
+					 */
+					ordinal: number;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					nodeId: string;
+					nodeKind: "concept" | "guide";
+					incomingRelation:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								relationId: string;
+								/**
+								 * @default 'generic'
+								 * @type string
+								 */
+								relationKind: GetApiTagPathsSearchStatus200ItemsMembersIncomingRelationRelationKindEnum;
+						  } | null)
+						| null;
+					language: (GetApiTagPathsSearchStatus200ItemsMembersLanguage | null) | null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
 						| (
-								| {
-										/**
-										 * @type string
-										 */
-										type: "image";
-										/**
-										 * @type object
-										 */
-										image: {
-											/**
-											 * @description
-											 * Format: `uuid`
-											 * @type string
-											 */
-											id: string;
-											/**
-											 * @type string
-											 */
-											url: string;
-										};
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										type: "emoji";
-										/**
-										 * @maxLength 64
-										 * @type string
-										 */
-										emoji: string;
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										type: "icon";
-										/**
-										 * @type object
-										 */
-										icon: {
-											/**
-											 * @type string
-											 */
-											provider: "font-awesome";
-											/**
-											 * @type string
-											 */
-											prefix: GetApiTagPathsSearchStatus200ItemsMembersAvatarIconPrefixEnum;
-											/**
-											 * @maxLength 128
-											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-											 * @type string
-											 */
-											name: string;
-										};
-								  }
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiTagPathsSearchStatus200ItemsMembersAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
 						  )
-						| null
-				  )
-				| null;
-		}[];
-		/**
-		 * @minLength 0
-		 * @type integer
-		 */
-		usageCount: number;
-	}[];
+						| null;
+				}[];
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				usageCount: number;
+				/**
+				 * @type object
+				 */
+				match: {
+					kind: "exact" | "prefix" | "token" | "fuzzy";
+					source: "direct_tag" | "expression_component" | "path_member";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					tagId: string;
+				};
+		  }
+	)[];
 };
 
 /**

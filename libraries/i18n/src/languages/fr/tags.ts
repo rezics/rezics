@@ -40,6 +40,22 @@ export default {
 		search: "Rechercher parmi les étiquettes sélectionnées",
 		clear: "Effacer la sélection",
 	},
+	picker: {
+		open: insert("Vérifier {{tag}} avant de l’ajouter", { tag: String }),
+		close: "Fermer les détails de l’étiquette",
+		path: tagPathTerms.label,
+		remove: insert("Retirer {{tag}} des étiquettes en attente", { tag: String }),
+		searchMore: "Rechercher une autre étiquette",
+		loading: "Recherche des étiquettes…",
+		searchError: "Impossible de rechercher les étiquettes. Réessayez.",
+		directResults: "Étiquettes",
+		pathResults: `Significations des ${tagPathTerms.plural}`,
+		noResults: `Aucune étiquette ni aucun ${tagPathTerms.inline} correspondant.`,
+		addSelected: insert("Ajouter les étiquettes sélectionnées ({{count}})", { count: Number }),
+		selectedCount: insert("{{count}} sélections en attente", { count: Number }),
+		commitError:
+			"Certaines étiquettes n’ont pas pu être ajoutées. Les sélections en échec restent disponibles pour réessayer.",
+	},
 	basic: {
 		title: "Étiquettes de base",
 		description: `Étiquettes globales et ${tagPathTerms.plural}, sans appréciation contextuelle d’un ${realmTerms.inline}.`,
@@ -271,6 +287,20 @@ export default {
 		retryVote: "Réessayer le vote",
 		returnToUnitTags: "Revenir aux étiquettes de l’œuvre",
 		completed: "L’étiquette a été créée et votre vote « Correspond » a été enregistré.",
+		duplicateTitle: "Vérifier les étiquettes existantes",
+		duplicateDescription:
+			"Les étiquettes correspondantes apparaissent automatiquement pendant la saisie du titre afin de pouvoir les réutiliser.",
+		duplicateSearching: "Vérification des étiquettes existantes…",
+		duplicateSearchError:
+			"Impossible de vérifier les étiquettes existantes. Modifiez le titre ou réessayez.",
+		duplicateMatches: "Correspondances possibles",
+		duplicateNoMatches: "Aucune étiquette existante similaire n’a été trouvée.",
+		useExisting: "Utiliser cette étiquette",
+		viewExisting: "Voir l’étiquette",
+		exactDuplicateBlocked: "Une étiquette porte déjà ce titre. Utilisez l’étiquette existante.",
+		duplicateConfirmed: "Vous avez confirmé qu’aucune de ces étiquettes ne convient.",
+		continueDistinct: "Aucune ne convient ; créer une étiquette",
+		useExistingError: "Impossible d’appliquer l’étiquette existante. Réessayez.",
 	},
 	global: {
 		title: "Contexte global",

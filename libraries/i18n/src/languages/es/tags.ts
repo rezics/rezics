@@ -40,6 +40,22 @@ export default {
 		search: "Buscar entre las etiquetas seleccionadas",
 		clear: "Borrar selección",
 	},
+	picker: {
+		open: insert("Revisar {{tag}} antes de añadirla", { tag: String }),
+		close: "Cerrar los detalles de la etiqueta",
+		path: tagPathTerms.label,
+		remove: insert("Quitar {{tag}} de las etiquetas pendientes", { tag: String }),
+		searchMore: "Buscar otra etiqueta",
+		loading: "Buscando etiquetas…",
+		searchError: "No se pudieron buscar las etiquetas. Inténtalo de nuevo.",
+		directResults: "Etiquetas",
+		pathResults: `Significados de ${tagPathTerms.plural}`,
+		noResults: `No hay etiquetas ni ${tagPathTerms.plural} coincidentes.`,
+		addSelected: insert("Añadir etiquetas seleccionadas ({{count}})", { count: Number }),
+		selectedCount: insert("{{count}} selecciones pendientes", { count: Number }),
+		commitError:
+			"No se pudieron añadir algunas etiquetas. Las selecciones fallidas se conservan para volver a intentarlo.",
+	},
 	basic: {
 		title: "Etiquetas básicas",
 		description: `Etiquetas globales y ${tagPathTerms.plural}, sin valoraciones contextuales de ningún ${realmTerms.inline}.`,
@@ -272,6 +288,20 @@ export default {
 		retryVote: "Reintentar el voto",
 		returnToUnitTags: "Volver a las etiquetas de la obra",
 		completed: "Se creó la etiqueta y se registró tu voto «Encaja».",
+		duplicateTitle: "Comprobar etiquetas existentes",
+		duplicateDescription:
+			"Las etiquetas coincidentes aparecen automáticamente al editar el título para que puedas reutilizarlas.",
+		duplicateSearching: "Comprobando las etiquetas existentes…",
+		duplicateSearchError:
+			"No se pudieron comprobar las etiquetas existentes. Modifica el título o inténtalo de nuevo.",
+		duplicateMatches: "Posibles coincidencias",
+		duplicateNoMatches: "No se encontró ninguna etiqueta existente similar.",
+		useExisting: "Usar esta etiqueta",
+		viewExisting: "Ver etiqueta",
+		exactDuplicateBlocked: "Ya existe una etiqueta con este título. Usa la etiqueta existente.",
+		duplicateConfirmed: "Has confirmado que ninguna de estas etiquetas es la que necesitas.",
+		continueDistinct: "Ninguna coincide; crear una nueva",
+		useExistingError: "No se pudo aplicar la etiqueta existente. Inténtalo de nuevo.",
 	},
 	global: {
 		title: "Contexto global",

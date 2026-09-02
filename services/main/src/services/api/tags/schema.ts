@@ -221,14 +221,40 @@ export const TagSuggestionQuery = t.Object(
 	{ additionalProperties: false },
 );
 
-const TagExpressionSuggestion = t.Object({
-	selection: t.Union([t.Literal("direct_expression"), t.Literal("path_sense")]),
-	expression: TagExpressionDefinitionResponse,
-	senseId: t.Nullable(Uuid),
-	pathId: t.Nullable(Uuid),
-	members: t.Array(TagPathMemberResponse, { maxItems: TagPathMaximumMembers }),
-	usageCount: t.Integer({ minimum: 0 }),
+const TagSuggestionMatch = t.Object({
+	kind: t.Union([t.Literal("exact"), t.Literal("prefix"), t.Literal("token"), t.Literal("fuzzy")]),
+	source: t.Union([
+		t.Literal("direct_tag"),
+		t.Literal("expression_component"),
+		t.Literal("path_member"),
+	]),
+	tagId: Uuid,
 });
+const TagExpressionSuggestion = t.Union([
+	t.Object({
+		selection: t.Literal("direct_expression"),
+		selectionKey: t.String({ pattern: "^expression:[0-9a-f-]{36}$" }),
+		expression: TagExpressionDefinitionResponse,
+		senseId: t.Null(),
+		pathId: t.Null(),
+		members: t.Array(TagPathMemberResponse, { maxItems: 0 }),
+		usageCount: t.Integer({ minimum: 0 }),
+		match: TagSuggestionMatch,
+	}),
+	t.Object({
+		selection: t.Literal("path_sense"),
+		selectionKey: t.String({ pattern: "^sense:[0-9a-f-]{36}$" }),
+		expression: TagExpressionDefinitionResponse,
+		senseId: Uuid,
+		pathId: Uuid,
+		members: t.Array(TagPathMemberResponse, {
+			minItems: TagPathMinimumMembers,
+			maxItems: TagPathMaximumMembers,
+		}),
+		usageCount: t.Integer({ minimum: 0 }),
+		match: TagSuggestionMatch,
+	}),
+]);
 export const TagSuggestionResponse = t.Object({ items: t.Array(TagExpressionSuggestion) });
 
 export const TagConceptExpressionsQuery = t.Object(

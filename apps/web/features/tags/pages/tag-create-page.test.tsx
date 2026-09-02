@@ -43,8 +43,8 @@ vi.mock("@/features/application-shell/components/app-link", () => ({
 	),
 }));
 
-vi.mock("@/features/create/components/community-unit-search-prompt", () => ({
-	CommunityUnitSearchPrompt: ({
+vi.mock("../components/tag-duplicate-check", () => ({
+	TagDuplicateCheck: ({
 		confirmed,
 		onConfirmedChange,
 	}: {

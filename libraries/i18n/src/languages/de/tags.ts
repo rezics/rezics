@@ -40,6 +40,22 @@ export default {
 		search: "Ausgewählte Tags durchsuchen",
 		clear: "Auswahl aufheben",
 	},
+	picker: {
+		open: insert("{{tag}} vor dem Hinzufügen prüfen", { tag: String }),
+		close: "Tag-Details schließen",
+		path: tagPathTerms.label,
+		remove: insert("{{tag}} aus den vorgemerkten Tags entfernen", { tag: String }),
+		searchMore: "Weiteren Tag suchen",
+		loading: "Tags werden gesucht…",
+		searchError: "Tags konnten nicht durchsucht werden. Versuche es erneut.",
+		directResults: "Tags",
+		pathResults: `Bedeutungen von ${tagPathTerms.pluralLabel}`,
+		noResults: `Keine passenden Tags oder ${tagPathTerms.plural}.`,
+		addSelected: insert("Ausgewählte Tags hinzufügen ({{count}})", { count: Number }),
+		selectedCount: insert("{{count}} vorgemerkte Auswahlen", { count: Number }),
+		commitError:
+			"Einige Tags konnten nicht hinzugefügt werden. Die fehlgeschlagenen Auswahlen bleiben zum erneuten Versuch erhalten.",
+	},
 	basic: {
 		title: "Einfache Tags",
 		description: `Globale Tags und ${tagPathTerms.pluralLabel} ohne kontextbezogene Bewertungen eines ${realmTerms.inline}s.`,
@@ -270,6 +286,21 @@ export default {
 		retryVote: "Abstimmung wiederholen",
 		returnToUnitTags: "Zu den Tags des Werks",
 		completed: "Der Tag wurde erstellt und deine Stimme „Passt“ wurde erfasst.",
+		duplicateTitle: "Vorhandene Tags prüfen",
+		duplicateDescription:
+			"Während du den Titel bearbeitest, erscheinen passende Tags automatisch, damit du einen vorhandenen Tag wiederverwenden kannst.",
+		duplicateSearching: "Vorhandene Tags werden geprüft…",
+		duplicateSearchError:
+			"Vorhandene Tags konnten nicht geprüft werden. Ändere den Titel oder versuche es erneut.",
+		duplicateMatches: "Mögliche Treffer",
+		duplicateNoMatches: "Kein passender vorhandener Tag gefunden.",
+		useExisting: "Diesen Tag verwenden",
+		viewExisting: "Tag anzeigen",
+		exactDuplicateBlocked:
+			"Ein Tag mit diesem Titel ist bereits vorhanden. Verwende den vorhandenen Tag.",
+		duplicateConfirmed: "Du hast bestätigt, dass keiner dieser Tags der benötigte Tag ist.",
+		continueDistinct: "Keiner passt; neuen Tag erstellen",
+		useExistingError: "Der vorhandene Tag konnte nicht angewendet werden. Versuche es erneut.",
 	},
 	global: {
 		title: "Globaler Kontext",
