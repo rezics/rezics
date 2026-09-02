@@ -1,1 +1,7 @@
-export { TagPathCreatePage as default } from "@/features/tags/pages/tag-path-create-page";
+import { redirect } from "next/navigation";
+
+import { StudioTagPathCreateHref } from "@/features/create/model/studio-section";
+
+export default function Page() {
+	redirect(StudioTagPathCreateHref);
+}

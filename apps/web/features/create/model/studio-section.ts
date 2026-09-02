@@ -30,6 +30,7 @@ export function isStudioSectionId(value: string): value is StudioSectionId {
 }
 
 export const StudioTagCreateHref = "/create/tag/new";
+export const StudioTagPathCreateHref = "/create/tag/path/new";
 
 export const StudioSectionCreateHrefs = {
 	book: "/units/book/new",

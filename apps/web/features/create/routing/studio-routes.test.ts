@@ -1,7 +1,11 @@
 import { TopLevelSlugNamespaceUnitIds } from "@rezics/slug";
 import { describe, expect, it } from "vitest";
 
-import { studioContentHref, studioSectionCreateHref } from "../model/studio-section";
+import {
+	studioContentHref,
+	studioSectionCreateHref,
+	StudioTagPathCreateHref,
+} from "../model/studio-section";
 import { parseStudioSection, studioSectionHref } from "./studio-routes";
 
 describe("Studio routes", () => {
@@ -34,5 +38,6 @@ describe("Studio routes", () => {
 		expect(studioSectionCreateHref("book")).toBe("/units/book/new");
 		expect(studioSectionCreateHref("wiki")).toBe("/wiki/new");
 		expect(studioSectionCreateHref("tag")).toBe("/create/tag/new");
+		expect(StudioTagPathCreateHref).toBe("/create/tag/path/new");
 	});
 });

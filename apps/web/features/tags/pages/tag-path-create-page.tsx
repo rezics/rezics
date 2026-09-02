@@ -13,12 +13,13 @@ import {
 	Button,
 	Card,
 	CardContent,
-	PageHeading,
+	ManagementWorkspaceSectionHeader,
 } from "@rezics/ui";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useState } from "react";
 
-import { RequireSession } from "@/features/auth/require-session";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { studioSectionHref } from "@/features/create/routing/studio-routes";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import {
@@ -86,10 +87,15 @@ export function TagPathCreatePage() {
 	}
 
 	return (
-		<RequireSession>
-			<main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
-				<PageHeading title={t.tags.createPath.title} />
-				<p className="max-w-3xl text-muted-foreground">{t.tags.createPath.description}</p>
+		<section>
+			<ManagementWorkspaceSectionHeader
+				backHref={studioSectionHref("tag")}
+				backLabel={t.tags.create.backToStudioTags}
+				description={t.tags.createPath.description}
+				link={Link}
+				title={t.tags.createPath.title}
+			/>
+			<div className="max-w-4xl">
 				<Card>
 					<CardContent className="grid gap-5 p-5 sm:p-6">
 						<TagPathMemberEditor
@@ -146,7 +152,7 @@ export function TagPathCreatePage() {
 						/>
 					</CardContent>
 				</Card>
-			</main>
-		</RequireSession>
+			</div>
+		</section>
 	);
 }

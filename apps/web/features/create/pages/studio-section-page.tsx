@@ -21,8 +21,41 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { StudioContentList, type StudioContentListState } from "../components/studio-content-list";
 import { StudioSectionToolbar } from "../components/studio-section-toolbar";
 import { AnyStudioFilter, studioFilterParsers } from "../model/studio-filters";
-import { studioSectionCreateHref, type StudioSectionId } from "../model/studio-section";
+import {
+	studioSectionCreateHref,
+	StudioTagCreateHref,
+	StudioTagPathCreateHref,
+	type StudioSectionId,
+} from "../model/studio-section";
 import { StudioOverviewHref } from "../routing/studio-routes";
+
+function StudioSectionCreateActions({ sectionId }: { readonly sectionId: StudioSectionId }) {
+	const { t } = useTranslation(["create", "tags"]);
+	if (sectionId === "tag")
+		return (
+			<div className="flex flex-wrap gap-2">
+				<Button asChild variant="solid">
+					<Link href={StudioTagCreateHref}>
+						<Plus aria-hidden className="size-4" />
+						{t.tags.create.title}
+					</Link>
+				</Button>
+				<Button asChild variant="outline">
+					<Link href={StudioTagPathCreateHref}>{t.tags.createPath.title}</Link>
+				</Button>
+			</div>
+		);
+
+	const createHref = studioSectionCreateHref(sectionId);
+	return createHref ? (
+		<Button asChild variant="solid">
+			<Link href={createHref}>
+				<Plus aria-hidden className="size-4" />
+				{t.create.list.create}
+			</Link>
+		</Button>
+	) : null;
+}
 
 function StudioSectionContent({ sectionId }: { readonly sectionId: StudioSectionId }) {
 	const { t } = useTranslation(["create"]);
@@ -110,21 +143,11 @@ function StudioSectionContent({ sectionId }: { readonly sectionId: StudioSection
 			),
 		};
 	const section = t.create.sections[sectionId];
-	const createHref = studioSectionCreateHref(sectionId);
 
 	return (
 		<section>
 			<ManagementWorkspaceSectionHeader
-				action={
-					createHref ? (
-						<Button asChild variant="solid">
-							<Link href={createHref}>
-								<Plus aria-hidden className="size-4" />
-								{t.create.list.create}
-							</Link>
-						</Button>
-					) : undefined
-				}
+				action={<StudioSectionCreateActions sectionId={sectionId} />}
 				backHref={StudioOverviewHref}
 				backLabel={t.create.workspace.backToOverview}
 				description={section.description}
