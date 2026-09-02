@@ -30,7 +30,7 @@ bash deploy/scripts/check-release-component-plan.sh
 bash deploy/scripts/check-docker-build-context-contracts.sh
 bash deploy/scripts/check-nomad-job-apply-contracts.sh
 bash deploy/scripts/check-nomad-variable-templates.sh
-bash deploy/scripts/check-postgres-nomad-contracts.sh
+bash deploy/scripts/check-postgres-application-contracts.sh
 task db:check
 task infra:up
 task seed:contract

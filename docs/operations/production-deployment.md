@@ -145,18 +145,27 @@ and [workload identity model](https://developer.hashicorp.com/nomad/docs/concept
 Each API or worker process owns a six-connection `node-postgres` pool. Eight API
 allocations plus the worker therefore admit at most 54 application connections;
 the ninth temporary API canary raises that bound to 60. PostgreSQL keeps
-`max_connections = 100`, of which three are reserved for superusers, leaving 37
-ordinary slots beyond the worst application rollout. Increase the autoscaling
-maximum only after checking both PostgreSQL connection headroom and the
-application's pool waiting metric.
+`max_connections = 120`, with ten reserved connections and another three
+superuser-reserved connections, leaving 107 ordinary slots and 47 ordinary
+slots beyond the worst direct-connection application rollout. Increase the
+autoscaling maximum only after checking PostgreSQL connection headroom and the
+application pool waiting metric.
 
-The stateful PostgreSQL jobspec allocates 4,000 MHz and 8 GiB, including a 2 GiB
-shared buffer cache and settings sized for the host. It remains outside the
-application release graph. Apply and verify that jobspec before a release that
-depends on new database resource settings; a normal stable application tag does
-not mutate the stateful job. Nomad sends `SIGINT` for PostgreSQL's fast shutdown
-mode so persistent application pools cannot turn a graceful rollout into a
-forced `SIGKILL` after the task timeout.
+The NixOS repository is the source of truth for the PostgreSQL, PgBouncer, and
+Databasus Nomad jobs. PostgreSQL receives 24,000 MHz, a 24 GiB soft memory
+reservation, a 45 GiB hard limit, and a 12 GiB shared buffer cache. PgBouncer
+admits at most 512 clients but caps the transaction database at 48 server
+connections and the explicit session database at four. It is initially deployed
+without changing `application/runtime`: API and worker continue to use B port
+5432 until a separately verified application cutover moves eligible traffic to
+port 6432.
+
+These stateful jobs remain outside the application release graph. Activate and
+verify the sibling NixOS revision before a release that depends on new database
+resource settings; a normal stable application tag does not mutate them. Nomad
+sends `SIGINT` for PostgreSQL's fast shutdown mode so persistent application
+pools cannot turn a graceful rollout into a forced `SIGKILL` after the task
+timeout.
 
 `deploy/scripts/database-operation.sh release` runs preflight, migration,
 identity ensure, and verification in one serialized batch job. It asserts that both administrative
@@ -208,14 +217,16 @@ be retained, stop application writers, and recreate the REZICS
 database before installing v1.0.0. Do not dispatch the routine rolling release
 graph against a database that recorded an earlier checksum for this baseline.
 
-For the v1.0.0 cutover, apply the stateful PostgreSQL jobspec first and wait for
-PostgreSQL and pinned Databasus readiness, then use
+For the v1.0.0 cutover, activate the sibling NixOS revision first and wait for
+the `rezics-database-reconcile` service, PostgreSQL, PgBouncer, and pinned
+Databasus readiness, then use
 `bootstrap-production.sh --confirm-empty-database`.
 The bootstrap installs the database, verifies PostgreSQL 18.4, PGroonga 4.0.8,
 `approx_count` 1.0, the required preload settings and canonical indexes, and only then starts API
 and worker traffic. No v1 workload owns a logical CDC slot. Databasus owns the backup schedule,
 R2 transfer, GFS retention, catalog, notification, and weekly isolated restore; its separately
-installed verification agent uses the REZICS PostgreSQL 18 image.
+provisioned verification identity is consumed by the NixOS-managed agent using the REZICS
+PostgreSQL 18 verification image.
 
 ## Cloudflare Worker release
 

@@ -50,11 +50,13 @@ docker build --target postgres ...
 docker build --target postgres-verification ...
 ```
 
-The ordinary image is pinned by digest in `postgres.nomad.hcl`. Publish the verification target
-in a repository where its PostgreSQL-major tag `:18` resolves to that exact build; this is the
-repository passed to the Databasus verification agent. Databasus itself must be
-`databasus/databasus:v3.51.0@sha256:<digest>`; the infrastructure deploy script rejects floating
-or different versions.
+The sibling NixOS repository is the runtime source of truth. It pins the ordinary image in
+`hosts/B/jobs/database/rezics-postgres.nomad.hcl` and Databasus in
+`hosts/B/jobs/backup/databasus.nomad.hcl`; activate that repository to reconcile the stateful
+jobs. Publish the verification target in a repository where its PostgreSQL-major tag `:18`
+resolves to the exact ordinary build; this is the repository passed to the Databasus
+verification agent. Databasus itself remains
+`databasus/databasus:v3.51.0@sha256:<digest>`.
 
 The NixOS host must define a writable `rezics-databasus` host volume. The Databasus allocation
 mounts it at `/databasus-data`, advertises port 4005 only on B's WireGuard network, and mounts its
@@ -96,8 +98,9 @@ system.
    daily, 4 weekly, 12 monthly, and 0 yearly slots. Enable failure notifications and at least one
    separately monitored delivery channel.
 5. Create a verification agent under Settings, copy its ID and one-time token, and immediately
-   pass the token on standard input to `install-databasus-verification-agent.sh`. Pass an
-   immutable lightweight runner image and the untagged REZICS verification PostgreSQL repository.
+   pass the token on standard input to `install-databasus-verification-agent.sh`. The sibling
+   NixOS repository pins the lightweight runner and the untagged REZICS verification PostgreSQL
+   repository and reconciles the agent job.
 6. Enable scheduled verification for `rezics` once per week. Enable verification-failure
    notification. Trigger one manual backup and one manual verification before accepting the
    installation.
