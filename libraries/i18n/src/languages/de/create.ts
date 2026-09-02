@@ -18,6 +18,22 @@ export default {
 		overview: "Inhaltstypen",
 		backToOverview: "Zurück zu den Inhaltstypen",
 	},
+	overview: {
+		continueTitle: "Weiterarbeiten",
+		createTitle: "Erstellen",
+		recentContributionsTitle: "Neueste Beiträge",
+		createAction: insert("{{subject}} erstellen", { subject: String }),
+		groups: {
+			works: "Werke und Einträge",
+			publishing: "Veröffentlichen",
+			organization: "Bereiche und Organisation",
+			vocabulary: "Vokabular",
+		},
+		empty: {
+			workspace: "Keine bearbeitbaren Inhalte zum Fortsetzen.",
+			contributions: "Noch keine öffentlichen Beiträge.",
+		},
+	},
 	mode: {
 		label: "Inhaltsliste",
 		options: {

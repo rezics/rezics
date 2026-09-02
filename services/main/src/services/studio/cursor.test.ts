@@ -36,4 +36,18 @@ describe("Studio workspace cursor", () => {
 		);
 		expect(() => decodeStudioCursor("not-a-cursor", query)).toThrow(InvalidPaginationCursor);
 	});
+
+	it("round-trips an aggregate section scope without widening a section cursor", () => {
+		const aggregateQuery = { source: "all" } satisfies StudioContentListQuery;
+		const boundary = {
+			relevantAt: new Date("2026-07-27T08:00:00.000Z"),
+			unitId: UnitId,
+			sourceKey: "profile",
+		};
+		const cursor = encodeStudioCursor(aggregateQuery, boundary);
+		expect(decodeStudioCursor(cursor, aggregateQuery)).toEqual(boundary);
+		expect(() => decodeStudioCursor(cursor, { ...aggregateQuery, section: "book" })).toThrow(
+			InvalidPaginationCursor,
+		);
+	});
 });

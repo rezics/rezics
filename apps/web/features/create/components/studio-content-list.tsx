@@ -36,14 +36,16 @@ export function StudioContentList({
 	onOpen,
 	sectionId,
 	state,
+	emptyMessage,
 }: {
 	readonly hasNextPage: boolean;
 	readonly isFetchingNextPage: boolean;
 	readonly loadMore: () => void;
 	readonly mode: StudioMode;
 	readonly onOpen: (item: StudioContentItem) => void;
-	readonly sectionId: StudioSectionId;
+	readonly sectionId?: StudioSectionId;
 	readonly state: StudioContentListState;
+	readonly emptyMessage?: string;
 }) {
 	const { t } = useTranslation(["actions", "create"]);
 	const messages = useUiMessages();
@@ -76,7 +78,7 @@ export function StudioContentList({
 				className="grid min-h-40 place-items-center px-6 py-8 text-center text-muted-foreground text-sm"
 				role="status"
 			>
-				{t.create.list.empty[mode]}
+				{emptyMessage ?? t.create.list.empty[mode]}
 			</div>
 		);
 
@@ -103,11 +105,13 @@ export function StudioContentList({
 	);
 }
 
-function StudioContentSkeleton({ sectionId }: { readonly sectionId: StudioSectionId }) {
-	const showCover = studioContentShowsCover({
-		cover: null,
-		section: sectionId,
-	});
+function StudioContentSkeleton({ sectionId }: { readonly sectionId?: StudioSectionId }) {
+	const showCover = sectionId
+		? studioContentShowsCover({
+				cover: null,
+				section: sectionId,
+			})
+		: false;
 	return (
 		<ContentCard appearance="outlined" aria-hidden className="overflow-hidden rounded-2xl">
 			<CardContent
@@ -117,7 +121,7 @@ function StudioContentSkeleton({ sectionId }: { readonly sectionId: StudioSectio
 						: "p-4 sm:p-5"
 				}
 			>
-				{showCover ? (
+				{showCover && sectionId ? (
 					<Cover
 						alt=""
 						className="w-full rounded-xl"

@@ -4,10 +4,12 @@ import type { ContentLanguage } from "@rezics/i18n";
 
 import type { ContributionResourceListQuery } from "../api/history/schema";
 import { database } from "../database";
-import { profileResourceParticipation, unit } from "../database/schema";
+import { post, profileResourceParticipation, unit } from "../database/schema";
 import {
+	PostKindValues,
 	UnitKindValues,
 	type FollowableUnitKind,
+	type PostKind,
 	type UnitKind,
 } from "../database/schema/contract-values";
 import { listPathMembers, type TagPathMember } from "../tag-paths/service";
@@ -18,7 +20,11 @@ import {
 } from "../units/localization";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import { presentImageAsset } from "../units/service";
-import { resourceSectionCondition } from "../units/resource-section";
+import {
+	resourceSectionFromKinds,
+	studioResourceScopeCondition,
+	type ResourceSection,
+} from "../units/resource-section";
 import {
 	decodeParticipationCursor,
 	encodeParticipationCursor,
@@ -33,6 +39,7 @@ type RawContributionCandidate = {
 	readonly sortAt: unknown;
 	readonly accepted: boolean;
 	readonly resourceKind: string | null;
+	readonly postKind: string | null;
 	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly coverAssetId: string | null;
@@ -49,7 +56,7 @@ type RawContributionCandidate = {
 
 type ContributionActivity = {
 	readonly id: string;
-	readonly section: ContributionResourceListQuery["section"];
+	readonly section: ResourceSection;
 	readonly createdResourceAt: Date | null;
 	readonly firstContributedAt: Date | null;
 	readonly lastContributedAt: Date | null;
@@ -101,6 +108,10 @@ function unitKindValue(value: string | null): UnitKind | undefined {
 	return UnitKindValues.find((kind) => kind === value);
 }
 
+function postKindValue(value: string | null): PostKind | undefined {
+	return PostKindValues.find((kind) => kind === value);
+}
+
 function participationSortColumn(kind: NonNullable<ContributionResourceListQuery["kind"]>): SQL {
 	switch (kind) {
 		case "all":
@@ -126,6 +137,7 @@ function participationKindCondition(kind: NonNullable<ContributionResourceListQu
 async function selectContributionCandidateBatch(input: {
 	readonly profileId: string;
 	readonly query: ContributionResourceListQuery;
+	readonly includeDevelopmentPreview: boolean;
 	readonly cursor?: ParticipationCursorBoundary;
 	readonly scanLimit: number;
 }): Promise<RawContributionCandidate[]> {
@@ -138,13 +150,24 @@ async function selectContributionCandidateBatch(input: {
 		)`
 		: sql``;
 	const resource = alias(unit, "contribution_resource");
+	const resourcePost = alias(post, "contribution_post");
 	const localizationLanguages = input.query.localizationLanguages ?? [];
 	const accepted = and(
 		eq(resource.status, "published"),
 		eq(resource.visibility, "public"),
 		eq(resource.moderationStatus, "approved"),
 		sql`${resource.deletedAt} is null`,
-		resourceSectionCondition(input.query.section, resource),
+		studioResourceScopeCondition(
+			input.query.section,
+			{
+				id: resource.id,
+				kind: resource.kind,
+				postKind: resourcePost.kind,
+			},
+			{
+				includeDevelopmentPreview: input.includeDevelopmentPreview,
+			},
+		),
 	) as SQL;
 	const result = await database.execute<RawContributionCandidate>(sql`
 		with scanned as materialized (
@@ -170,6 +193,7 @@ async function selectContributionCandidateBatch(input: {
 			scanned.sort_at as "sortAt",
 			${accepted} as accepted,
 			${resource.kind} as "resourceKind",
+			${resourcePost.kind} as "postKind",
 			${resolvedUnitLocalizationLanguage(resource.id, localizationLanguages)} as language,
 			${resolvedUnitLocalizationTitle(resource.id, localizationLanguages)} as title,
 			${resolvedUnitLocalizationImageAssetId(resource.id, "cover", localizationLanguages)} as "coverAssetId",
@@ -184,6 +208,7 @@ async function selectContributionCandidateBatch(input: {
 			${resource.updatedAt} as "updatedAt"
 		from scanned
 		left join ${unit} contribution_resource on ${resource.id} = scanned.resource_unit_id
+		left join ${post} contribution_post on ${resourcePost.id} = ${resource.id}
 		order by
 			scanned.sort_at desc nulls last,
 			scanned.resource_unit_id desc nulls last
@@ -193,7 +218,6 @@ async function selectContributionCandidateBatch(input: {
 
 function presentContributionCandidate(
 	row: RawContributionCandidate,
-	section: ContributionResourceListQuery["section"],
 ): PresentedContributionCandidate | undefined {
 	const resourceKind = unitKindValue(row.resourceKind);
 	if (
@@ -205,6 +229,8 @@ function presentContributionCandidate(
 		row.updatedAt === null
 	)
 		return undefined;
+	const section = resourceSectionFromKinds(resourceKind, postKindValue(row.postKind) ?? null);
+	if (!section) return undefined;
 	const activity = {
 		id: row.resourceUnitId,
 		section,
@@ -253,6 +279,7 @@ function presentContributionCandidate(
 export async function listCurrentProfileContributionResources(input: {
 	readonly profileId: string;
 	readonly query: ContributionResourceListQuery;
+	readonly includeDevelopmentPreview: boolean;
 }) {
 	const limit = input.query.limit ?? 30;
 	const initialCursor = decodeParticipationCursor(input.query.cursor, input.query);
@@ -269,6 +296,7 @@ export async function listCurrentProfileContributionResources(input: {
 		const rows = await selectContributionCandidateBatch({
 			profileId: input.profileId,
 			query: input.query,
+			includeDevelopmentPreview: input.includeDevelopmentPreview,
 			cursor: scanCursor,
 			scanLimit,
 		});
@@ -282,7 +310,7 @@ export async function listCurrentProfileContributionResources(input: {
 				sortAt: dateValue(row.sortAt, "sortAt"),
 				resourceUnitId: row.resourceUnitId,
 			};
-			const item = presentContributionCandidate(row, input.query.section);
+			const item = presentContributionCandidate(row);
 			if (item) items.push(item);
 			if (items.length >= limit + 1 || scanned >= ParticipationScanBudget) break;
 		}

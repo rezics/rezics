@@ -37,6 +37,7 @@ function directCandidate(overrides: Record<string, unknown> = {}) {
 		hasDirectAccess: true,
 		hasRealmAccess: false,
 		resourceKind: "book",
+		postKind: null,
 		language: "en",
 		title: "Editable work",
 		coverAssetId: CoverId,
@@ -61,6 +62,7 @@ describe("Studio workspace presentation", () => {
 		const result = await listStudioContent({
 			profileId: ProfileId,
 			query: { section: "book", source: "direct", limit: 1 },
+			includeDevelopmentPreview: false,
 		});
 
 		expect(execute).toHaveBeenCalledOnce();
@@ -83,6 +85,7 @@ describe("Studio workspace presentation", () => {
 		const result = await listStudioContent({
 			profileId: ProfileId,
 			query: { section: "book", source: "direct", limit: 1 },
+			includeDevelopmentPreview: false,
 		});
 
 		expect(result.items).toEqual([]);
@@ -98,7 +101,27 @@ describe("Studio workspace presentation", () => {
 			listStudioContent({
 				profileId: ProfileId,
 				query: { section: "book", source: "direct", limit: 1 },
+				includeDevelopmentPreview: false,
 			}),
 		).rejects.toThrow("Studio candidate.directGrantSince is not a valid date");
+	});
+
+	it("derives each section for an aggregate workspace page", async () => {
+		execute.mockResolvedValueOnce({
+			rows: [directCandidate({ resourceKind: "post", postKind: "wiki", title: "Editable wiki" })],
+		});
+
+		const result = await listStudioContent({
+			profileId: ProfileId,
+			query: { source: "direct", limit: 1 },
+			includeDevelopmentPreview: false,
+		});
+
+		expect(result.items[0]).toMatchObject({
+			id: UnitId,
+			section: "wiki",
+			resourceKind: "post",
+			title: "Editable wiki",
+		});
 	});
 });

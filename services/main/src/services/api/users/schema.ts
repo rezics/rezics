@@ -44,7 +44,7 @@ export type StudioAccessSource = StaticDecode<typeof StudioAccessSource>;
 
 export const StudioContentListQuery = t.Object(
 	{
-		section: StudioSection,
+		section: t.Optional(StudioSection),
 		source: t.Optional(StudioWorkspaceSource),
 		status: t.Optional(t.UnionEnum(UnitStatusValues, { default: undefined })),
 		visibility: t.Optional(t.UnionEnum(ResourceVisibilityValues, { default: undefined })),

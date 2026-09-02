@@ -18,6 +18,22 @@ export default {
 		overview: "Tipos de contenido",
 		backToOverview: "Volver a los tipos de contenido",
 	},
+	overview: {
+		continueTitle: "Continuar",
+		createTitle: "Crear",
+		recentContributionsTitle: "Contribuciones recientes",
+		createAction: insert("Crear {{subject}}", { subject: String }),
+		groups: {
+			works: "Obras y entradas",
+			publishing: "Publicación",
+			organization: "Espacios y organización",
+			vocabulary: "Vocabulario",
+		},
+		empty: {
+			workspace: "No hay contenido editable para continuar.",
+			contributions: "Aún no hay contribuciones públicas.",
+		},
+	},
 	mode: {
 		label: "Lista de contenido",
 		options: {

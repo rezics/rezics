@@ -31,4 +31,17 @@ describe("participation cursor", () => {
 			InvalidPaginationCursor,
 		);
 	});
+
+	it("keeps aggregate and section contribution scopes separate", () => {
+		const aggregateQuery = { kind: "all" } satisfies ContributionResourceListQuery;
+		const boundary = {
+			sortAt: new Date("2026-07-27T08:00:00.000Z"),
+			resourceUnitId: ResourceUnitId,
+		};
+		const cursor = encodeParticipationCursor(aggregateQuery, boundary);
+		expect(decodeParticipationCursor(cursor, aggregateQuery)).toEqual(boundary);
+		expect(() => decodeParticipationCursor(cursor, { ...aggregateQuery, section: "book" })).toThrow(
+			InvalidPaginationCursor,
+		);
+	});
 });

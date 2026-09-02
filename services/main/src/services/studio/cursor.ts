@@ -20,8 +20,8 @@ type ResourceVisibility = NonNullable<StudioContentListQuery["visibility"]>;
 
 const StudioCursor = t.Object(
 	{
-		v: t.Literal(2),
-		section: t.UnionEnum(ResourceSectionValues, { default: undefined }),
+		v: t.Literal(3),
+		section: t.Nullable(t.UnionEnum(ResourceSectionValues, { default: undefined })),
 		source: t.UnionEnum(StudioWorkspaceSourceValues, { default: undefined }),
 		status: t.Nullable(t.UnionEnum(UnitStatusValues, { default: undefined })),
 		visibility: t.Nullable(t.UnionEnum(ResourceVisibilityValues, { default: undefined })),
@@ -36,7 +36,7 @@ const StudioCursor = t.Object(
 );
 
 export type StudioCursorScope = {
-	readonly section: ResourceSection;
+	readonly section?: ResourceSection;
 	readonly source: StudioWorkspaceSource;
 	readonly status?: UnitStatus;
 	readonly visibility?: ResourceVisibility;
@@ -69,8 +69,9 @@ export function encodeStudioCursor(
 ): string {
 	return Buffer.from(
 		JSON.stringify({
-			v: 2,
+			v: 3,
 			...cursorScope(query),
+			section: query.section ?? null,
 			status: query.status ?? null,
 			visibility: query.visibility ?? null,
 			relevantAt: boundary.relevantAt.toISOString(),
@@ -89,7 +90,7 @@ export function decodeStudioCursor(
 		const cursor = parseJsonCursor(value, StudioCursor);
 		const scope = cursorScope(query);
 		if (
-			cursor.section !== scope.section ||
+			cursor.section !== (scope.section ?? null) ||
 			cursor.source !== scope.source ||
 			cursor.status !== (scope.status ?? null) ||
 			cursor.visibility !== (scope.visibility ?? null) ||

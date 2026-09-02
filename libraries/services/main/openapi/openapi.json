@@ -52463,7 +52463,7 @@
 					{
 						"name": "section",
 						"in": "query",
-						"required": true,
+						"required": false,
 						"schema": {
 							"enum": [
 								"book",
@@ -89517,7 +89517,7 @@
 					{
 						"name": "section",
 						"in": "query",
-						"required": true,
+						"required": false,
 						"schema": {
 							"enum": [
 								"book",

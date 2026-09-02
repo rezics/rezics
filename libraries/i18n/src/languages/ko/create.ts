@@ -17,6 +17,22 @@ export default {
 		overview: "콘텐츠 유형",
 		backToOverview: "콘텐츠 유형으로 돌아가기",
 	},
+	overview: {
+		continueTitle: "계속 작업하기",
+		createTitle: "만들기",
+		recentContributionsTitle: "최근 기여",
+		createAction: insert("{{subject}} 만들기", { subject: String }),
+		groups: {
+			works: "작품과 항목",
+			publishing: "게시",
+			organization: "공간과 정리",
+			vocabulary: "어휘",
+		},
+		empty: {
+			workspace: "계속 편집할 수 있는 콘텐츠가 없습니다.",
+			contributions: "아직 공개 기여가 없습니다.",
+		},
+	},
 	mode: {
 		label: "콘텐츠 목록",
 		options: {

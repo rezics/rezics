@@ -17,6 +17,22 @@ export default {
 		overview: "コンテンツの種類",
 		backToOverview: "コンテンツの種類に戻る",
 	},
+	overview: {
+		continueTitle: "作業を続ける",
+		createTitle: "作成",
+		recentContributionsTitle: "最近の貢献",
+		createAction: insert("{{subject}}を作成", { subject: String }),
+		groups: {
+			works: "作品と項目",
+			publishing: "公開",
+			organization: "スペースと整理",
+			vocabulary: "語彙",
+		},
+		empty: {
+			workspace: "続けて編集できるコンテンツはありません。",
+			contributions: "公開された貢献はまだありません。",
+		},
+	},
 	mode: {
 		label: "コンテンツ一覧",
 		options: {

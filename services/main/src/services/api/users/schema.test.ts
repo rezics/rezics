@@ -178,6 +178,7 @@ describe("profile content language contract", () => {
 
 describe("Studio content list contract", () => {
 	it("accepts only supported sections and bounded limits", () => {
+		expect(Check(StudioContentListQuery, {})).toBe(true);
 		expect(Check(StudioContentListQuery, { section: "book" })).toBe(true);
 		expect(StudioContentListQuery.properties.source).toHaveProperty("default", "all");
 		expect(Reflect.get(StudioContentListQuery.properties.status, "default")).toBeUndefined();

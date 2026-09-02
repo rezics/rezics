@@ -41,6 +41,7 @@ describe("History API schemas", () => {
 		).toBe(false);
 	});
 	it("keeps public contribution-resource filters typed and bounded", () => {
+		expect(Value.Check(ContributionResourceListQuery, {})).toBe(true);
 		expect(
 			Value.Check(ContributionResourceListQuery, {
 				section: "book",

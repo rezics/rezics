@@ -11,8 +11,8 @@ import { ResourceSectionValues } from "../units/resource-section";
 
 const ParticipationCursor = t.Object(
 	{
-		v: t.Literal(1),
-		section: t.UnionEnum(ResourceSectionValues, { default: undefined }),
+		v: t.Literal(2),
+		section: t.Nullable(t.UnionEnum(ResourceSectionValues, { default: undefined })),
 		kind: t.UnionEnum(ContributionResourceKindValues, { default: undefined }),
 		localizationLanguages: t.Array(t.UnionEnum(ContentLanguageValues, { default: undefined }), {
 			uniqueItems: true,
@@ -46,8 +46,9 @@ export function encodeParticipationCursor(
 ): string {
 	return Buffer.from(
 		JSON.stringify({
-			v: 1,
+			v: 2,
 			...scope(query),
+			section: query.section ?? null,
 			sortAt: boundary.sortAt.toISOString(),
 			resourceUnitId: boundary.resourceUnitId,
 		}),
@@ -63,7 +64,7 @@ export function decodeParticipationCursor(
 		const cursor = parseJsonCursor(value, ParticipationCursor);
 		const expected = scope(query);
 		if (
-			cursor.section !== expected.section ||
+			cursor.section !== (expected.section ?? null) ||
 			cursor.kind !== expected.kind ||
 			!sameArray(cursor.localizationLanguages, expected.localizationLanguages)
 		)

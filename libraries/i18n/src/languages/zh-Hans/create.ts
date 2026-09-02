@@ -17,6 +17,22 @@ export default {
 		overview: "内容类型",
 		backToOverview: "返回内容类型",
 	},
+	overview: {
+		continueTitle: "继续处理",
+		createTitle: "创建内容",
+		recentContributionsTitle: "最近贡献",
+		createAction: insert("创建{{subject}}", { subject: String }),
+		groups: {
+			works: "作品与条目",
+			publishing: "发布",
+			organization: "空间与整理",
+			vocabulary: "词汇体系",
+		},
+		empty: {
+			workspace: "目前没有可继续编辑的内容。",
+			contributions: "目前没有公开贡献。",
+		},
+	},
 	mode: {
 		label: "内容列表",
 		options: {

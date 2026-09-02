@@ -12,6 +12,7 @@ import { database } from "../database";
 import {
 	realm,
 	realmMember,
+	post,
 	studioProfileEditorCandidate,
 	studioRealmEditorCandidate,
 	studioResourceVisit,
@@ -19,7 +20,12 @@ import {
 	unitAccessGrant,
 	unitOwnership,
 } from "../database/schema";
-import { UnitKindValues, type UnitKind } from "../database/schema/contract-values";
+import {
+	PostKindValues,
+	UnitKindValues,
+	type PostKind,
+	type UnitKind,
+} from "../database/schema/contract-values";
 import type {
 	StudioAccessSource,
 	StudioContentListQuery,
@@ -32,7 +38,11 @@ import {
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
-import { resourceSectionCondition } from "../units/resource-section";
+import {
+	resourceSectionFromKinds,
+	studioResourceScopeCondition,
+	type ResourceSection,
+} from "../units/resource-section";
 import { presentImageAsset } from "../units/service";
 import { decodeStudioCursor, encodeStudioCursor, type StudioCursorBoundary } from "./cursor";
 
@@ -64,6 +74,7 @@ type RawWorkspaceCandidate = {
 	readonly hasDirectAccess: boolean;
 	readonly hasRealmAccess: boolean;
 	readonly resourceKind: string | null;
+	readonly postKind: string | null;
 	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly coverAssetId: string | null;
@@ -75,7 +86,7 @@ type RawWorkspaceCandidate = {
 
 type PresentedWorkspaceCandidate = {
 	readonly id: string;
-	readonly section: StudioContentListQuery["section"];
+	readonly section: ResourceSection;
 	readonly resourceKind: UnitKind;
 	readonly language: ContentLanguage;
 	readonly title: string | null;
@@ -105,6 +116,10 @@ function realmRelation(value: string): RealmSubject["realmRelation"] {
 
 function unitKindValue(value: string | null): UnitKind | undefined {
 	return UnitKindValues.find((kind) => kind === value);
+}
+
+function postKindValue(value: string | null): PostKind | undefined {
+	return PostKindValues.find((kind) => kind === value);
 }
 
 /** Loads the small dynamic userset used to seek Realm candidate streams. */
@@ -332,11 +347,13 @@ async function selectWorkspaceCandidateBatch(input: {
 	readonly profileId: string;
 	readonly query: StudioContentListQuery;
 	readonly realmSubjects: readonly RealmSubject[];
+	readonly includeDevelopmentPreview: boolean;
 	readonly cursor?: StudioCursorBoundary;
 	readonly scanLimit: number;
 }): Promise<RawWorkspaceCandidate[]> {
 	const source = input.query.source ?? "all";
 	const resource = alias(unit, "studio_workspace_resource");
+	const resourcePost = alias(post, "studio_workspace_post");
 	const subjectRealm = alias(unit, "studio_workspace_subject_realm");
 	const otherRealmCandidate = alias(
 		studioRealmEditorCandidate,
@@ -456,7 +473,17 @@ async function selectWorkspaceCandidateBatch(input: {
 	const accepted = and(
 		sql`${resource.id} is not null`,
 		getUnitReadCondition(input.profileId, {}, resource),
-		resourceSectionCondition(input.query.section, resource),
+		studioResourceScopeCondition(
+			input.query.section,
+			{
+				id: resource.id,
+				kind: resource.kind,
+				postKind: resourcePost.kind,
+			},
+			{
+				includeDevelopmentPreview: input.includeDevelopmentPreview,
+			},
+		),
 		statusCondition,
 		visibilityCondition,
 		acceptedSource,
@@ -504,6 +531,7 @@ async function selectWorkspaceCandidateBatch(input: {
 			${directAccess} as "hasDirectAccess",
 			case when page.source_kind = 'realm' then ${realmAccess} else false end as "hasRealmAccess",
 			${resource.kind} as "resourceKind",
+			${resourcePost.kind} as "postKind",
 			${resolvedUnitLocalizationLanguage(resource.id, localizationLanguages)} as language,
 			${resolvedUnitLocalizationTitle(resource.id, localizationLanguages)} as title,
 			${resolvedUnitLocalizationImageAssetId(resource.id, "cover", localizationLanguages)} as "coverAssetId",
@@ -513,6 +541,7 @@ async function selectWorkspaceCandidateBatch(input: {
 			${resource.updatedAt} as "updatedAt"
 		from page
 		left join ${unit} studio_workspace_resource on ${resource.id} = page.unit_id
+		left join ${post} studio_workspace_post on ${resourcePost.id} = ${resource.id}
 		left join ${studioResourceVisit} visit
 			on visit.profile_id = ${input.profileId}
 			and visit.resource_unit_id = page.unit_id
@@ -524,10 +553,7 @@ async function selectWorkspaceCandidateBatch(input: {
 	return result.rows;
 }
 
-function presentCandidate(
-	row: RawWorkspaceCandidate,
-	section: StudioContentListQuery["section"],
-): PresentedWorkspaceCandidate | undefined {
+function presentCandidate(row: RawWorkspaceCandidate): PresentedWorkspaceCandidate | undefined {
 	const resourceKind = unitKindValue(row.resourceKind);
 	if (
 		!row.accepted ||
@@ -539,6 +565,8 @@ function presentCandidate(
 		row.updatedAt === null
 	)
 		return undefined;
+	const section = resourceSectionFromKinds(resourceKind, postKindValue(row.postKind) ?? null);
+	if (!section) return undefined;
 	const accessSources: StudioAccessSource[] = [];
 	const assignedDates: Date[] = [];
 	if (row.sourceKind === "profile") {
@@ -582,6 +610,7 @@ function presentCandidate(
 export async function listStudioContent(input: {
 	readonly profileId: string;
 	readonly query: StudioContentListQuery;
+	readonly includeDevelopmentPreview: boolean;
 }) {
 	const limit = input.query.limit ?? 30;
 	const initialCursor = decodeStudioCursor(input.query.cursor, input.query);
@@ -602,6 +631,7 @@ export async function listStudioContent(input: {
 			profileId: input.profileId,
 			query: input.query,
 			realmSubjects,
+			includeDevelopmentPreview: input.includeDevelopmentPreview,
 			cursor: scanCursor,
 			scanLimit,
 		});
@@ -616,7 +646,7 @@ export async function listStudioContent(input: {
 				unitId: row.unitId,
 				sourceKey: row.sourceKey,
 			};
-			const item = presentCandidate(row, input.query.section);
+			const item = presentCandidate(row);
 			if (item) items.push(item);
 			if (items.length >= limit + 1 || scanned >= StudioCandidateScanBudget) break;
 		}

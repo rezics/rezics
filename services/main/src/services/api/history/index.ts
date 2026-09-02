@@ -251,11 +251,19 @@ export default new Elysia({ prefix: "/history" })
 			},
 		},
 		async ({ authorization, profile, query }) => {
-			if (query.section === "zone")
+			let includeDevelopmentPreview = false;
+			if (query.section === "zone") {
 				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
+				includeDevelopmentPreview = true;
+			} else if (!query.section) {
+				includeDevelopmentPreview = await authorization.platform.hasCapability(
+					DevelopmentPreviewCapability,
+				);
+			}
 			return listCurrentProfileContributionResources({
 				profileId: profile.unitId,
 				query,
+				includeDevelopmentPreview,
 			});
 		},
 	)

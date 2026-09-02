@@ -9,46 +9,20 @@ import {
 	type ListCurrentUserContributionResourcesQuery,
 	type ListCurrentUserStudioContentQuery,
 } from "@rezics/openapi-tanstack-query";
-import { Badge, Button, ManagementWorkspaceSectionHeader } from "@rezics/ui";
+import { ManagementWorkspaceSectionHeader } from "@rezics/ui";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { DevelopmentPreviewBoundary } from "@/features/preview-access/components/development-preview-boundary";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import { StudioCreateActions } from "../components/studio-create-actions";
 import { StudioContentList, type StudioContentListState } from "../components/studio-content-list";
 import { StudioSectionToolbar } from "../components/studio-section-toolbar";
 import { AnyStudioFilter, studioFilterParsers } from "../model/studio-filters";
-import { studioSectionCreateActions, type StudioSectionId } from "../model/studio-section";
+import type { StudioSectionId } from "../model/studio-section";
 import { StudioOverviewHref } from "../routing/studio-routes";
-
-function StudioSectionCreateActions({ sectionId }: { readonly sectionId: StudioSectionId }) {
-	const { t } = useTranslation(["create", "tags"]);
-	const actions = studioSectionCreateActions(sectionId);
-	return (
-		<div className="flex flex-wrap gap-2">
-			{actions.map((action) => (
-				<div className="flex items-center gap-2" key={action.kind}>
-					<Button asChild variant={action.kind === "tag_path" ? "outline" : "solid"}>
-						<Link href={action.href}>
-							{action.kind === "section" ? <Plus aria-hidden className="size-4" /> : null}
-							{action.kind === "tag_path"
-								? t.tags.createPath.title
-								: sectionId === "tag"
-									? t.tags.create.title
-									: t.create.list.create}
-						</Link>
-					</Button>
-					<Badge size="sm" variant="outline">
-						{t.create.lifecycle[action.lifecycle]}
-					</Badge>
-				</div>
-			))}
-		</div>
-	);
-}
 
 function StudioSectionContent({ sectionId }: { readonly sectionId: StudioSectionId }) {
 	const { t } = useTranslation(["create"]);
@@ -140,7 +114,7 @@ function StudioSectionContent({ sectionId }: { readonly sectionId: StudioSection
 	return (
 		<section>
 			<ManagementWorkspaceSectionHeader
-				action={<StudioSectionCreateActions sectionId={sectionId} />}
+				action={<StudioCreateActions sectionId={sectionId} />}
 				backHref={StudioOverviewHref}
 				backLabel={t.create.workspace.backToOverview}
 				description={section.description}

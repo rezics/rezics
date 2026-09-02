@@ -29,6 +29,18 @@ export function isStudioSectionId(value: string): value is StudioSectionId {
 	return StudioSectionIds.some((sectionId) => sectionId === value);
 }
 
+export const StudioSectionGroups = [
+	{ id: "works", sectionIds: ["book", "software", "media", "entity"] },
+	{ id: "publishing", sectionIds: ["post", "wiki", "review", "poll"] },
+	{ id: "organization", sectionIds: ["realm", "zone", "collection"] },
+	{ id: "vocabulary", sectionIds: ["tag"] },
+] as const satisfies readonly {
+	readonly id: string;
+	readonly sectionIds: readonly StudioSectionId[];
+}[];
+
+export type StudioSectionGroupId = (typeof StudioSectionGroups)[number]["id"];
+
 export const StudioTagCreateHref = "/create/tag/new";
 export const StudioTagPathCreateHref = "/create/tag/path/new";
 

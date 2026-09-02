@@ -5,6 +5,8 @@ import {
 	studioContentHref,
 	studioSectionCreateActions,
 	studioSectionCreateHref,
+	StudioSectionGroups,
+	StudioSectionIds,
 	StudioTagPathCreateHref,
 } from "../model/studio-section";
 import { parseStudioSection, studioSectionHref } from "./studio-routes";
@@ -64,6 +66,18 @@ describe("Studio routes", () => {
 		expect(studioSectionCreateActions("tag")).toEqual([
 			{ kind: "section", href: "/create/tag/new", lifecycle: "publish_now" },
 			{ kind: "tag_path", href: "/create/tag/path/new", lifecycle: "immutable" },
+		]);
+	});
+
+	it("groups every Studio section exactly once on the overview", () => {
+		const grouped = StudioSectionGroups.flatMap((group) => group.sectionIds);
+		expect(grouped).toHaveLength(StudioSectionIds.length);
+		expect(new Set(grouped)).toEqual(new Set(StudioSectionIds));
+		expect(StudioSectionGroups.map((group) => group.id)).toEqual([
+			"works",
+			"publishing",
+			"organization",
+			"vocabulary",
 		]);
 	});
 });

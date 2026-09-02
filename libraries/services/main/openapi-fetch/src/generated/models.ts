@@ -54524,9 +54524,9 @@ export type ListCurrentUserStudioContentLocalizationLanguagesEnum =
  */
 export type ListCurrentUserStudioContentQuery = {
 	/**
-	 * @type string
+	 * @type string | undefined
 	 */
-	section: ListCurrentUserStudioContentSection;
+	section?: ListCurrentUserStudioContentSection;
 	/**
 	 * @default 'all'
 	 * @type string | undefined
@@ -54869,7 +54869,7 @@ export type ListCurrentUserStudioContentStatus500 = InternalError;
 export type ListCurrentUserStudioContentOptions = {
 	body?: never;
 	path?: never;
-	query: ListCurrentUserStudioContentQuery;
+	query?: ListCurrentUserStudioContentQuery;
 	headers?: never;
 };
 
@@ -96804,9 +96804,9 @@ export type ListCurrentUserContributionResourcesLocalizationLanguagesEnum =
  */
 export type ListCurrentUserContributionResourcesQuery = {
 	/**
-	 * @type string
+	 * @type string | undefined
 	 */
-	section: ListCurrentUserContributionResourcesSection;
+	section?: ListCurrentUserContributionResourcesSection;
 	/**
 	 * @default 'all'
 	 * @type string | undefined
@@ -97308,7 +97308,7 @@ export type ListCurrentUserContributionResourcesStatus500 = InternalError;
 export type ListCurrentUserContributionResourcesOptions = {
 	body?: never;
 	path?: never;
-	query: ListCurrentUserContributionResourcesQuery;
+	query?: ListCurrentUserContributionResourcesQuery;
 	headers?: never;
 };
 

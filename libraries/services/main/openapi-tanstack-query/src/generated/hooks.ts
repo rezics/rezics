@@ -16675,13 +16675,13 @@ export function useAssignCurrentProfileSlug<TContext>(
 
 export const listCurrentUserStudioContentQueryKey = ({
 	query,
-}: Omit<ListCurrentUserStudioContentOptions, "headers">) =>
+}: Omit<ListCurrentUserStudioContentOptions, "headers"> = {}) =>
 	[{ url: "/api/v1/users/me/studio" }, ...(query ? [query] : [])] as const;
 
 type ListCurrentUserStudioContentQueryKey = ReturnType<typeof listCurrentUserStudioContentQueryKey>;
 
 export function listCurrentUserStudioContentQueryOptions(
-	{ query }: ListCurrentUserStudioContentOptions,
+	{ query }: ListCurrentUserStudioContentOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
 	const queryKey = listCurrentUserStudioContentQueryKey({ query });
@@ -16722,10 +16722,10 @@ export function useListCurrentUserStudioContent<
 	{
 		query,
 	}: {
-		query:
+		query?:
 			| ListCurrentUserStudioContentOptions["query"]
 			| (() => ListCurrentUserStudioContentOptions["query"]);
-	},
+	} = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
@@ -28296,7 +28296,7 @@ export function usePostApiUnitsByTypeByUnitIdSubjectAssociations<TContext>(
 
 export const listCurrentUserContributionResourcesQueryKey = ({
 	query,
-}: Omit<ListCurrentUserContributionResourcesOptions, "headers">) =>
+}: Omit<ListCurrentUserContributionResourcesOptions, "headers"> = {}) =>
 	[{ url: "/api/v1/history/contribution-resources/me" }, ...(query ? [query] : [])] as const;
 
 type ListCurrentUserContributionResourcesQueryKey = ReturnType<
@@ -28304,7 +28304,7 @@ type ListCurrentUserContributionResourcesQueryKey = ReturnType<
 >;
 
 export function listCurrentUserContributionResourcesQueryOptions(
-	{ query }: ListCurrentUserContributionResourcesOptions,
+	{ query }: ListCurrentUserContributionResourcesOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
 	const queryKey = listCurrentUserContributionResourcesQueryKey({ query });
@@ -28345,10 +28345,10 @@ export function useListCurrentUserContributionResources<
 	{
 		query,
 	}: {
-		query:
+		query?:
 			| ListCurrentUserContributionResourcesOptions["query"]
 			| (() => ListCurrentUserContributionResourcesOptions["query"]);
-	},
+	} = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<

@@ -28,6 +28,7 @@ function contributionCandidate(overrides: Record<string, unknown> = {}) {
 		sortAt: "2026-07-27T08:00:00.000Z",
 		accepted: true,
 		resourceKind: "post",
+		postKind: "wiki",
 		language: "en",
 		title: "Public contribution",
 		coverAssetId: null,
@@ -59,6 +60,7 @@ describe("public contribution resources", () => {
 		const result = await listCurrentProfileContributionResources({
 			profileId: ProfileId,
 			query: { section: "wiki", kind: "contributed", limit: 1 },
+			includeDevelopmentPreview: false,
 		});
 
 		expect(result.items[0]).toMatchObject({
@@ -80,6 +82,7 @@ describe("public contribution resources", () => {
 		const result = await listCurrentProfileContributionResources({
 			profileId: ProfileId,
 			query: { section: "wiki", limit: 1 },
+			includeDevelopmentPreview: false,
 		});
 
 		expect(result.items).toEqual([]);
@@ -100,6 +103,7 @@ describe("public contribution resources", () => {
 			rows: [
 				contributionCandidate({
 					resourceKind: "tag_path",
+					postKind: null,
 					language: null,
 					title: null,
 					coverAssetId: null,
@@ -111,6 +115,7 @@ describe("public contribution resources", () => {
 		const result = await listCurrentProfileContributionResources({
 			profileId: ProfileId,
 			query: { section: "tag", kind: "created", limit: 30 },
+			includeDevelopmentPreview: false,
 		});
 
 		expect(listPathMembers).toHaveBeenCalledWith([ResourceUnitId], undefined);
@@ -121,5 +126,21 @@ describe("public contribution resources", () => {
 			presentation: { kind: "tag_path", members: [member, member] },
 		});
 		expect(getPublicCanonicalUnitSlugAddresses).toHaveBeenCalledWith([]);
+	});
+
+	it("derives the public resource section for an aggregate contribution page", async () => {
+		execute.mockResolvedValueOnce({ rows: [contributionCandidate()] });
+
+		const result = await listCurrentProfileContributionResources({
+			profileId: ProfileId,
+			query: { kind: "contributed", limit: 1 },
+			includeDevelopmentPreview: false,
+		});
+
+		expect(result.items[0]).toMatchObject({
+			id: ResourceUnitId,
+			section: "wiki",
+			resourceKind: "post",
+		});
 	});
 });

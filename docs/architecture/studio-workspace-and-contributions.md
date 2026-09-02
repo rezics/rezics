@@ -114,17 +114,26 @@ GET /api/v1/history/contribution-resources/me
   -> (selected participation timestamp, resource_unit_id)
 ```
 
+`section` is optional. A section page binds one exact section into its cursor;
+the Studio overview omits it and issues exactly two aggregate requests—one per
+endpoint—instead of fanning out across all sections. Aggregate rows derive
+their response section from the validated Unit kind plus the joined Post kind.
+Unsupported Unit/Post kinds are rejected inside the bounded candidate batch.
+Zones are excluded unless the current Profile has the development-preview
+capability; an explicit Zone query still requires that capability.
+
 The request limit defaults to 30 and is capped at 100. Each database batch is
 at most 256 candidates and each request examines at most 4,096 candidates.
 Filtering deleted, inaccessible, or no-longer-public rows therefore cannot turn
 one request into a full scan. A page that reaches the scan budget returns a
 continuation cursor even when it contains fewer requested items.
 
-The Web page gives the two endpoints independent TanStack Query keys, cursors,
-and enabled states. Switching the selector does not reinterpret one response
-shape as the other. Workspace-only status and visibility controls are hidden
-for contributions because public contribution visibility is an invariant, not
-a user filter.
+The overview requests four results per list and groups all creation/navigation
+actions in four bounded product groups. Section pages give the two endpoints
+independent TanStack Query keys, cursors, and enabled states. Switching the
+selector does not reinterpret one response shape as the other. Workspace-only
+status and visibility controls are hidden for contributions because public
+contribution visibility is an invariant, not a user filter.
 
 ## Index-to-query mapping
 
@@ -142,7 +151,10 @@ a user filter.
 Live authorization probes use the existing active ownership, Profile grant,
 Realm grant, Profile restriction, and Realm restriction indexes by Unit and
 subject. Localization and cover resolution are limited to the selected
-candidate batch; there is no per-item application round trip.
+candidate batch; there is no per-item application round trip. Aggregate reads
+add one primary-key Post extension join per scanned candidate so Post, Wiki,
+and Review sections can be discriminated without a second query or unbounded
+fan-out.
 
 ## Capacity plan
 

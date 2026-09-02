@@ -48,7 +48,7 @@ export const ContributionResourceSection = t.UnionEnum(ResourceSectionValues, {
 
 export const ContributionResourceListQuery = t.Object(
 	{
-		section: ContributionResourceSection,
+		section: t.Optional(ContributionResourceSection),
 		kind: t.Optional(ContributionResourceKind),
 		...LocalizationLanguageQuery,
 		cursor: t.Optional(t.String({ maxLength: 1_024 })),

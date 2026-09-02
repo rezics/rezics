@@ -3339,7 +3339,7 @@ export function assignCurrentProfileSlug<ThrowOnError extends boolean = true>(
  * {@link /api/v1/users/me/studio}
  */
 export function listCurrentUserStudioContent<ThrowOnError extends boolean = true>(
-	options: Options<ListCurrentUserStudioContentOptions, ThrowOnError>,
+	options: Options<ListCurrentUserStudioContentOptions, ThrowOnError> = {},
 ): Promise<RequestResult<ListCurrentUserStudioContentResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
@@ -5651,7 +5651,7 @@ export function postApiUnitsByTypeByUnitIdSubjectAssociations<ThrowOnError exten
  * {@link /api/v1/history/contribution-resources/me}
  */
 export function listCurrentUserContributionResources<ThrowOnError extends boolean = true>(
-	options: Options<ListCurrentUserContributionResourcesOptions, ThrowOnError>,
+	options: Options<ListCurrentUserContributionResourcesOptions, ThrowOnError> = {},
 ): Promise<RequestResult<ListCurrentUserContributionResourcesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 

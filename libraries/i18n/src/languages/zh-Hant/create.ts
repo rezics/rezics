@@ -17,6 +17,22 @@ export default {
 		overview: "內容類型",
 		backToOverview: "返回內容類型",
 	},
+	overview: {
+		continueTitle: "繼續處理",
+		createTitle: "建立內容",
+		recentContributionsTitle: "最近貢獻",
+		createAction: insert("建立{{subject}}", { subject: String }),
+		groups: {
+			works: "作品與條目",
+			publishing: "發布",
+			organization: "空間與整理",
+			vocabulary: "詞彙體系",
+		},
+		empty: {
+			workspace: "目前沒有可繼續編輯的內容。",
+			contributions: "目前沒有公開貢獻。",
+		},
+	},
 	mode: {
 		label: "內容清單",
 		options: {
