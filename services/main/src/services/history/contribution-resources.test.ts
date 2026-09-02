@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const execute = vi.hoisted(() => vi.fn());
 const getPublicCanonicalUnitSlugAddresses = vi.hoisted(() => vi.fn());
+const listPathMembers = vi.hoisted(() => vi.fn());
 
 vi.mock("../database", async () => {
 	const { sql } = await import("drizzle-orm");
@@ -14,6 +15,7 @@ vi.mock("../database", async () => {
 	};
 });
 vi.mock("../units/slug-address", () => ({ getPublicCanonicalUnitSlugAddresses }));
+vi.mock("../tag-paths/service", () => ({ listPathMembers }));
 
 import { listCurrentProfileContributionResources } from "./contribution-resources";
 
@@ -25,6 +27,7 @@ function contributionCandidate(overrides: Record<string, unknown> = {}) {
 		resourceUnitId: ResourceUnitId,
 		sortAt: "2026-07-27T08:00:00.000Z",
 		accepted: true,
+		resourceKind: "post",
 		language: "en",
 		title: "Public contribution",
 		coverAssetId: null,
@@ -46,6 +49,8 @@ describe("public contribution resources", () => {
 		execute.mockReset();
 		getPublicCanonicalUnitSlugAddresses.mockReset();
 		getPublicCanonicalUnitSlugAddresses.mockResolvedValue(new Map());
+		listPathMembers.mockReset();
+		listPathMembers.mockResolvedValue(new Map());
 	});
 
 	it("presents a public resource independently from current editor access", async () => {
@@ -58,6 +63,11 @@ describe("public contribution resources", () => {
 
 		expect(result.items[0]).toMatchObject({
 			id: ResourceUnitId,
+			resourceKind: "post",
+			presentation: {
+				kind: "localized_unit",
+				title: "Public contribution",
+			},
 			contributionCount: 3,
 			firstContributedAt: new Date("2026-07-01T08:00:00.000Z"),
 			lastContributedAt: new Date("2026-07-27T08:00:00.000Z"),
@@ -73,5 +83,43 @@ describe("public contribution resources", () => {
 		});
 
 		expect(result.items).toEqual([]);
+	});
+
+	it("presents an immutable Tag Path with one bounded member hydration", async () => {
+		const member = {
+			ordinal: 0,
+			nodeId: "019b76da-a800-7300-8000-000000000003",
+			nodeKind: "concept",
+			incomingRelation: null,
+			language: "en",
+			title: "Fiction",
+			summary: null,
+			avatar: null,
+		} as const;
+		execute.mockResolvedValueOnce({
+			rows: [
+				contributionCandidate({
+					resourceKind: "tag_path",
+					language: null,
+					title: null,
+					coverAssetId: null,
+				}),
+			],
+		});
+		listPathMembers.mockResolvedValueOnce(new Map([[ResourceUnitId, [member, member]]]));
+
+		const result = await listCurrentProfileContributionResources({
+			profileId: ProfileId,
+			query: { section: "tag", kind: "created", limit: 30 },
+		});
+
+		expect(listPathMembers).toHaveBeenCalledWith([ResourceUnitId], undefined);
+		expect(result.items[0]).toMatchObject({
+			id: ResourceUnitId,
+			section: "tag",
+			resourceKind: "tag_path",
+			presentation: { kind: "tag_path", members: [member, member] },
+		});
+		expect(getPublicCanonicalUnitSlugAddresses).toHaveBeenCalledWith([]);
 	});
 });

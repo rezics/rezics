@@ -1,12 +1,14 @@
 import type { StaticDecode } from "typebox";
 import { t } from "elysia";
 import { ResourceVisibilityValues, UnitStatusValues } from "../../database/schema/contract-values";
+import { TagPathMaximumMembers, TagPathMinimumMembers } from "../../database/schema/tag-path";
 import { RevisionHiddenFieldValues } from "../../history/visibility";
 import { UnitRevisionChangeTags } from "../../units/history";
 import { ResourceSectionValues } from "../../units/resource-section";
 import {
 	ContentLanguage,
 	DateTime,
+	FollowableUnitKind,
 	LocalizationLanguageQuery,
 	RevisionContext,
 	RevisionPrimaryContribution,
@@ -14,6 +16,7 @@ import {
 } from "../schema";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 import { GovernanceRuleReferences } from "../governance/schema";
+import { TagPathMemberResponse } from "../tags/schema";
 
 export const UnitHistoryParams = t.Object({ unitId: Uuid });
 export const UnitRevisionParams = t.Object({ revisionId: Uuid });
@@ -55,25 +58,47 @@ export const ContributionResourceListQuery = t.Object(
 );
 export type ContributionResourceListQuery = StaticDecode<typeof ContributionResourceListQuery>;
 
+const ContributionResourceActivity = {
+	id: Uuid,
+	section: ContributionResourceSection,
+	createdResourceAt: t.Nullable(DateTime),
+	firstContributedAt: t.Nullable(DateTime),
+	lastContributedAt: t.Nullable(DateTime),
+	contributionCount: t.Integer({ minimum: 0 }),
+	lastParticipatedAt: DateTime,
+	createdAt: DateTime,
+	updatedAt: DateTime,
+} as const;
+
 export const ContributionResourceListResponse = t.Object({
 	items: t.Array(
-		t.Object({
-			id: Uuid,
-			slugAddress: NullablePublicSlugAddressResponse,
-			section: ContributionResourceSection,
-			language: ContentLanguage,
-			title: t.Nullable(t.String()),
-			cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
-			status: t.UnionEnum(UnitStatusValues),
-			visibility: t.UnionEnum(ResourceVisibilityValues),
-			createdResourceAt: t.Nullable(DateTime),
-			firstContributedAt: t.Nullable(DateTime),
-			lastContributedAt: t.Nullable(DateTime),
-			contributionCount: t.Integer({ minimum: 0 }),
-			lastParticipatedAt: DateTime,
-			createdAt: DateTime,
-			updatedAt: DateTime,
-		}),
+		t.Union([
+			t.Object({
+				...ContributionResourceActivity,
+				resourceKind: FollowableUnitKind,
+				presentation: t.Object({
+					kind: t.Literal("localized_unit"),
+					slugAddress: NullablePublicSlugAddressResponse,
+					language: ContentLanguage,
+					title: t.Nullable(t.String()),
+					cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
+					status: t.UnionEnum(UnitStatusValues),
+					visibility: t.UnionEnum(ResourceVisibilityValues),
+				}),
+			}),
+			t.Object({
+				...ContributionResourceActivity,
+				section: t.Literal("tag"),
+				resourceKind: t.Literal("tag_path"),
+				presentation: t.Object({
+					kind: t.Literal("tag_path"),
+					members: t.Array(TagPathMemberResponse, {
+						minItems: TagPathMinimumMembers,
+						maxItems: TagPathMaximumMembers,
+					}),
+				}),
+			}),
+		]),
 	),
 	nextCursor: t.Nullable(t.String()),
 });

@@ -115,6 +115,7 @@ export default {
 			contributions: "No public contributions match the current filters.",
 		},
 		untitled: "Untitled content",
+		immutable: "Immutable",
 		contributionCount: insert("Contributions: {{count}}", { count: Number }),
 		activity: {
 			visited: "Visited",

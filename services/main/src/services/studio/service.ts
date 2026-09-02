@@ -19,6 +19,7 @@ import {
 	unitAccessGrant,
 	unitOwnership,
 } from "../database/schema";
+import { UnitKindValues, type UnitKind } from "../database/schema/contract-values";
 import type {
 	StudioAccessSource,
 	StudioContentListQuery,
@@ -62,6 +63,7 @@ type RawWorkspaceCandidate = {
 	readonly hasOwnerAccess: boolean;
 	readonly hasDirectAccess: boolean;
 	readonly hasRealmAccess: boolean;
+	readonly resourceKind: string | null;
 	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly coverAssetId: string | null;
@@ -74,6 +76,7 @@ type RawWorkspaceCandidate = {
 type PresentedWorkspaceCandidate = {
 	readonly id: string;
 	readonly section: StudioContentListQuery["section"];
+	readonly resourceKind: UnitKind;
 	readonly language: ContentLanguage;
 	readonly title: string | null;
 	readonly cover: { readonly id: string; readonly url: string } | null;
@@ -98,6 +101,10 @@ function dateValue(value: unknown, field: string): Date {
 function realmRelation(value: string): RealmSubject["realmRelation"] {
 	if (value === "member" || value === "access_manager") return value;
 	throw new TypeError("Studio Realm subject relation is invalid");
+}
+
+function unitKindValue(value: string | null): UnitKind | undefined {
+	return UnitKindValues.find((kind) => kind === value);
 }
 
 /** Loads the small dynamic userset used to seek Realm candidate streams. */
@@ -496,6 +503,7 @@ async function selectWorkspaceCandidateBatch(input: {
 			${ownerAccess} as "hasOwnerAccess",
 			${directAccess} as "hasDirectAccess",
 			case when page.source_kind = 'realm' then ${realmAccess} else false end as "hasRealmAccess",
+			${resource.kind} as "resourceKind",
 			${resolvedUnitLocalizationLanguage(resource.id, localizationLanguages)} as language,
 			${resolvedUnitLocalizationTitle(resource.id, localizationLanguages)} as title,
 			${resolvedUnitLocalizationImageAssetId(resource.id, "cover", localizationLanguages)} as "coverAssetId",
@@ -520,8 +528,10 @@ function presentCandidate(
 	row: RawWorkspaceCandidate,
 	section: StudioContentListQuery["section"],
 ): PresentedWorkspaceCandidate | undefined {
+	const resourceKind = unitKindValue(row.resourceKind);
 	if (
 		!row.accepted ||
+		!resourceKind ||
 		!row.language ||
 		!row.status ||
 		!row.visibility ||
@@ -549,6 +559,7 @@ function presentCandidate(
 	return {
 		id: row.unitId,
 		section,
+		resourceKind,
 		language: row.language,
 		title: row.title,
 		cover: presentImageAsset(row.coverAssetId, "cover"),

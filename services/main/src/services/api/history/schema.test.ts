@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	ContributionResourceListQuery,
+	ContributionResourceListResponse,
 	RevisionActionBody,
 	RevisionVisibilityBody,
 } from "./schema";
@@ -53,6 +54,76 @@ describe("History API schemas", () => {
 			false,
 		);
 		expect(Value.Check(ContributionResourceListQuery, { section: "book", limit: 101 })).toBe(false);
+	});
+
+	it("keeps localized Units and immutable Tag Paths discriminated", () => {
+		const activity = {
+			id: "019b76da-a800-7300-8000-000000000002",
+			createdResourceAt: "2026-07-01T08:00:00.000Z",
+			firstContributedAt: null,
+			lastContributedAt: null,
+			contributionCount: 0,
+			lastParticipatedAt: "2026-07-01T08:00:00.000Z",
+			createdAt: "2026-07-01T08:00:00.000Z",
+			updatedAt: "2026-07-01T08:00:00.000Z",
+		};
+		const localized = {
+			...activity,
+			section: "book",
+			resourceKind: "book",
+			presentation: {
+				kind: "localized_unit",
+				slugAddress: null,
+				language: "en",
+				title: "A book",
+				cover: null,
+				status: "published",
+				visibility: "public",
+			},
+		};
+		const path = {
+			...activity,
+			section: "tag",
+			resourceKind: "tag_path",
+			presentation: {
+				kind: "tag_path",
+				members: [
+					{
+						ordinal: 0,
+						nodeId: "019b76da-a800-7300-8000-000000000003",
+						nodeKind: "concept",
+						incomingRelation: null,
+						language: "en",
+						title: "Fiction",
+						summary: null,
+						avatar: null,
+					},
+					{
+						ordinal: 1,
+						nodeId: "019b76da-a800-7300-8000-000000000004",
+						nodeKind: "concept",
+						incomingRelation: {
+							relationId: "019b76da-a800-7300-8000-000000000005",
+							relationKind: "generic",
+						},
+						language: "en",
+						title: "Fantasy",
+						summary: null,
+						avatar: null,
+					},
+				],
+			},
+		};
+
+		expect(
+			Value.Check(ContributionResourceListResponse, { items: [localized, path], nextCursor: null }),
+		).toBe(true);
+		expect(
+			Value.Check(ContributionResourceListResponse, {
+				items: [{ ...path, presentation: localized.presentation }],
+				nextCursor: null,
+			}),
+		).toBe(false);
 	});
 
 	it.each([

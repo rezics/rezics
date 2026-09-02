@@ -97,6 +97,7 @@ export default {
 			contributions: "没有符合当前筛选条件的公开贡献。",
 		},
 		untitled: "未命名内容",
+		immutable: "不可变",
 		contributionCount: insert("贡献 {{count}} 次", { count: Number }),
 		activity: {
 			visited: "最近浏览",

@@ -9,6 +9,8 @@ import { ChevronRightIcon } from "lucide-react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { formatRelativeTime } from "@/features/content-feed/model/format-relative-time";
+import { TagPathPath } from "@/features/tags/components/tag-path";
+import { tagPathHref } from "@/features/tags/routing/tag-links";
 import { UnitCoverFallback } from "@/features/units/components/unit-cover-fallback";
 import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
@@ -48,10 +50,28 @@ export function StudioContentCard({
 	readonly item: StudioContentItem;
 	readonly onOpen: () => void;
 }) {
-	const { locale, t } = useTranslation(["create"]);
+	const { locale, t } = useTranslation(["create", "tags"]);
+	const presentation =
+		item.kind === "workspace"
+			? {
+					kind: "localized_unit" as const,
+					slugAddress: item.resource.slugAddress,
+					language: item.resource.language,
+					title: item.resource.title,
+					cover: item.resource.cover,
+					status: item.resource.status,
+					visibility: item.resource.visibility,
+				}
+			: item.resource.presentation;
 	const resource = item.resource;
-	const title = resource.title ?? t.create.list.untitled;
-	const href = studioContentHref(resource.section, resource);
+	const isTagPath = presentation.kind === "tag_path";
+	const title = isTagPath ? t.tags.paths.pathLabel : (presentation.title ?? t.create.list.untitled);
+	const href = isTagPath
+		? tagPathHref(resource.id)
+		: studioContentHref(resource.section, {
+				id: resource.id,
+				slugAddress: presentation.slugAddress,
+			});
 	const activity =
 		item.kind === "workspace"
 			? item.resource.lastVisitedAt
@@ -66,7 +86,9 @@ export function StudioContentCard({
 	const contributionCount =
 		item.kind === "contribution" ? toNonNegativeApiInteger(item.resource.contributionCount) : 0;
 	const titleId = `studio-content-${resource.id}`;
-	const showCover = studioContentShowsCover(resource);
+	const showCover =
+		presentation.kind === "localized_unit" &&
+		studioContentShowsCover({ cover: presentation.cover, section: resource.section });
 
 	return (
 		<ContentCard
@@ -88,7 +110,7 @@ export function StudioContentCard({
 						className="w-full rounded-xl border border-border-weak shadow-sm/5"
 						fallback={<UnitCoverFallback kind={resource.section} />}
 						sizes="(min-width: 640px) 96px, 80px"
-						src={resource.cover?.url}
+						src={presentation.kind === "localized_unit" ? presentation.cover?.url : undefined}
 					/>
 				) : null}
 				<CardContent className="min-w-0 p-0">
@@ -99,23 +121,56 @@ export function StudioContentCard({
 							{formatRelativeTime(activity.value, locale.target)}
 						</time>
 					</p>
-					<h3
-						className="mt-2 font-heading font-black text-[1.05rem] leading-snug sm:text-lg"
-						id={titleId}
-					>
-						<LinkOverlay asChild>
-							<Link href={href} onClick={onOpen}>
-								{title}
-							</Link>
-						</LinkOverlay>
-					</h3>
+					{presentation.kind === "tag_path" ? (
+						<div className="mt-2" id={titleId}>
+							<LinkOverlay asChild>
+								<Link href={href} onClick={onOpen}>
+									<span className="sr-only">{t.tags.paths.details}</span>
+								</Link>
+							</LinkOverlay>
+							<TagPathPath
+								ariaLabel={t.tags.paths.pathLabel}
+								fallback={t.tags.paths.memberFallback}
+								linkMembers={false}
+								members={presentation.members}
+								relationLabel={(kind) =>
+									t.tags.expressions.relations[kind as keyof typeof t.tags.expressions.relations] ??
+									t.tags.expressions.relationFallback
+								}
+							/>
+						</div>
+					) : (
+						<h3
+							className="mt-2 font-heading font-black text-[1.05rem] leading-snug sm:text-lg"
+							id={titleId}
+						>
+							<LinkOverlay asChild>
+								<Link href={href} onClick={onOpen}>
+									{title}
+								</Link>
+							</LinkOverlay>
+						</h3>
+					)}
 					<div className="mt-3 flex flex-wrap gap-1.5">
-						<Badge size="sm" variant={statusVariant(resource.status)}>
-							{t.create.filters.statuses[resource.status]}
-						</Badge>
-						<Badge size="sm" variant="outline">
-							{t.create.filters.visibilities[resource.visibility]}
-						</Badge>
+						{presentation.kind === "tag_path" ? (
+							<>
+								<Badge size="sm" variant="secondary">
+									{t.tags.paths.pathLabel}
+								</Badge>
+								<Badge size="sm" variant="outline">
+									{t.create.list.immutable}
+								</Badge>
+							</>
+						) : (
+							<>
+								<Badge size="sm" variant={statusVariant(presentation.status)}>
+									{t.create.filters.statuses[presentation.status]}
+								</Badge>
+								<Badge size="sm" variant="outline">
+									{t.create.filters.visibilities[presentation.visibility]}
+								</Badge>
+							</>
+						)}
 					</div>
 					<div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground text-xs">
 						{item.kind === "workspace"

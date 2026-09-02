@@ -54576,6 +54576,33 @@ export const ListCurrentUserStudioContentStatus200ItemsSectionEnum = {
 export type ListCurrentUserStudioContentStatus200ItemsSectionEnum =
 	(typeof ListCurrentUserStudioContentStatus200ItemsSectionEnum)[keyof typeof ListCurrentUserStudioContentStatus200ItemsSectionEnum];
 
+export const ListCurrentUserStudioContentStatus200ItemsResourceKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	tag_path: "tag_path",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type ListCurrentUserStudioContentStatus200ItemsResourceKindEnum =
+	(typeof ListCurrentUserStudioContentStatus200ItemsResourceKindEnum)[keyof typeof ListCurrentUserStudioContentStatus200ItemsResourceKindEnum];
+
 export const ListCurrentUserStudioContentStatus200ItemsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -54655,6 +54682,11 @@ export type ListCurrentUserStudioContentStatus200 = {
 		 * @type string
 		 */
 		section: ListCurrentUserStudioContentStatus200ItemsSectionEnum;
+		/**
+		 * @default 'slug_namespace'
+		 * @type string
+		 */
+		resourceKind: ListCurrentUserStudioContentStatus200ItemsResourceKindEnum;
 		/**
 		 * @type string
 		 */
@@ -96816,7 +96848,33 @@ export const ListCurrentUserContributionResourcesStatus200ItemsSectionEnum = {
 export type ListCurrentUserContributionResourcesStatus200ItemsSectionEnum =
 	(typeof ListCurrentUserContributionResourcesStatus200ItemsSectionEnum)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsSectionEnum];
 
-export const ListCurrentUserContributionResourcesStatus200ItemsLanguageEnum = {
+export const ListCurrentUserContributionResourcesStatus200ItemsResourceKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type ListCurrentUserContributionResourcesStatus200ItemsResourceKindEnum =
+	(typeof ListCurrentUserContributionResourcesStatus200ItemsResourceKindEnum)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsResourceKindEnum];
+
+export const ListCurrentUserContributionResourcesStatus200ItemsPresentationLanguageEnum = {
 	zh: "zh",
 	en: "en",
 	ja: "ja",
@@ -96826,26 +96884,60 @@ export const ListCurrentUserContributionResourcesStatus200ItemsLanguageEnum = {
 	es: "es",
 } as const;
 
-export type ListCurrentUserContributionResourcesStatus200ItemsLanguageEnum =
-	(typeof ListCurrentUserContributionResourcesStatus200ItemsLanguageEnum)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsLanguageEnum];
+export type ListCurrentUserContributionResourcesStatus200ItemsPresentationLanguageEnum =
+	(typeof ListCurrentUserContributionResourcesStatus200ItemsPresentationLanguageEnum)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsPresentationLanguageEnum];
 
-export const ListCurrentUserContributionResourcesStatus200ItemsStatusEnum = {
+export const ListCurrentUserContributionResourcesStatus200ItemsPresentationStatusEnum = {
 	draft: "draft",
 	published: "published",
 	archived: "archived",
 } as const;
 
-export type ListCurrentUserContributionResourcesStatus200ItemsStatusEnum =
-	(typeof ListCurrentUserContributionResourcesStatus200ItemsStatusEnum)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsStatusEnum];
+export type ListCurrentUserContributionResourcesStatus200ItemsPresentationStatusEnum =
+	(typeof ListCurrentUserContributionResourcesStatus200ItemsPresentationStatusEnum)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsPresentationStatusEnum];
 
-export const ListCurrentUserContributionResourcesStatus200ItemsVisibilityEnum = {
+export const ListCurrentUserContributionResourcesStatus200ItemsPresentationVisibilityEnum = {
 	public: "public",
 	unlisted: "unlisted",
 	private: "private",
 } as const;
 
-export type ListCurrentUserContributionResourcesStatus200ItemsVisibilityEnum =
-	(typeof ListCurrentUserContributionResourcesStatus200ItemsVisibilityEnum)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsVisibilityEnum];
+export type ListCurrentUserContributionResourcesStatus200ItemsPresentationVisibilityEnum =
+	(typeof ListCurrentUserContributionResourcesStatus200ItemsPresentationVisibilityEnum)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsPresentationVisibilityEnum];
+
+export const ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersIncomingRelationRelationKindEnum =
+	{
+		generic: "generic",
+		partitive: "partitive",
+		instance: "instance",
+		organizational: "organizational",
+		facet_value: "facet_value",
+	} as const;
+
+export type ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersIncomingRelationRelationKindEnum =
+	(typeof ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersIncomingRelationRelationKindEnum)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersIncomingRelationRelationKindEnum];
+
+export const ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersLanguage = {
+	zh: "zh",
+	en: "en",
+	ja: "ja",
+	ko: "ko",
+	de: "de",
+	fr: "fr",
+	es: "es",
+} as const;
+
+export type ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersLanguage =
+	(typeof ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersLanguage)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersLanguage];
+
+export const ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersAvatarIconPrefixEnum =
+	(typeof ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersAvatarIconPrefixEnum)[keyof typeof ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersAvatarIconPrefixEnum];
 
 /**
  * @type object
@@ -96854,94 +96946,261 @@ export type ListCurrentUserContributionResourcesStatus200 = {
 	/**
 	 * @type array
 	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		slugAddress:
-			| ({
+	items: (
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				section: ListCurrentUserContributionResourcesStatus200ItemsSectionEnum;
+				createdResourceAt: (string | null) | null;
+				firstContributedAt: (string | null) | null;
+				lastContributedAt: (string | null) | null;
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				contributionCount: number;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				lastParticipatedAt: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				updatedAt: string;
+				/**
+				 * @type string
+				 */
+				resourceKind: ListCurrentUserContributionResourcesStatus200ItemsResourceKindEnum;
+				/**
+				 * @type object
+				 */
+				presentation: {
 					/**
-					 * @minLength 1
-					 * @maxLength 63
-					 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
 					 * @type string
 					 */
-					slug: string;
+					kind: "localized_unit";
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
 					/**
-					 * @description
-					 * Format: `uuid`
 					 * @type string
 					 */
-					scopeUnitId: string;
+					language: ListCurrentUserContributionResourcesStatus200ItemsPresentationLanguageEnum;
+					title: (string | null) | null;
+					cover:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @type string
+								 */
+								url: string;
+						  } | null)
+						| null;
+					/**
+					 * @default 'draft'
+					 * @type string
+					 */
+					status: ListCurrentUserContributionResourcesStatus200ItemsPresentationStatusEnum;
+					/**
+					 * @default 'public'
+					 * @type string
+					 */
+					visibility: ListCurrentUserContributionResourcesStatus200ItemsPresentationVisibilityEnum;
+				};
+		  }
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				section: "tag";
+				createdResourceAt: (string | null) | null;
+				firstContributedAt: (string | null) | null;
+				lastContributedAt: (string | null) | null;
+				/**
+				 * @minLength 0
+				 * @type integer
+				 */
+				contributionCount: number;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				lastParticipatedAt: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				updatedAt: string;
+				/**
+				 * @type string
+				 */
+				resourceKind: "tag_path";
+				/**
+				 * @type object
+				 */
+				presentation: {
+					/**
+					 * @type string
+					 */
+					kind: "tag_path";
 					/**
 					 * @type array
 					 */
-					canonicalPath: string[];
-			  } | null)
-			| null;
-		/**
-		 * @type string
-		 */
-		section: ListCurrentUserContributionResourcesStatus200ItemsSectionEnum;
-		/**
-		 * @type string
-		 */
-		language: ListCurrentUserContributionResourcesStatus200ItemsLanguageEnum;
-		title: (string | null) | null;
-		cover:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
-			| null;
-		/**
-		 * @default 'draft'
-		 * @type string
-		 */
-		status: ListCurrentUserContributionResourcesStatus200ItemsStatusEnum;
-		/**
-		 * @default 'public'
-		 * @type string
-		 */
-		visibility: ListCurrentUserContributionResourcesStatus200ItemsVisibilityEnum;
-		createdResourceAt: (string | null) | null;
-		firstContributedAt: (string | null) | null;
-		lastContributedAt: (string | null) | null;
-		/**
-		 * @minLength 0
-		 * @type integer
-		 */
-		contributionCount: number;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		lastParticipatedAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
+					members: {
+						/**
+						 * @minLength 0
+						 * @type integer
+						 */
+						ordinal: number;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						nodeId: string;
+						nodeKind: "concept" | "guide";
+						incomingRelation:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									relationId: string;
+									/**
+									 * @default 'generic'
+									 * @type string
+									 */
+									relationKind: ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersIncomingRelationRelationKindEnum;
+							  } | null)
+							| null;
+						language:
+							| (ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersLanguage | null)
+							| null;
+						title: (string | null) | null;
+						summary: (string | null) | null;
+						avatar:
+							| (
+									| (
+											| {
+													/**
+													 * @type string
+													 */
+													type: "image";
+													/**
+													 * @type object
+													 */
+													image: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														id: string;
+														/**
+														 * @type string
+														 */
+														url: string;
+													};
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													type: "emoji";
+													/**
+													 * @maxLength 64
+													 * @type string
+													 */
+													emoji: string;
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													type: "icon";
+													/**
+													 * @type object
+													 */
+													icon: {
+														/**
+														 * @type string
+														 */
+														provider: "font-awesome";
+														/**
+														 * @type string
+														 */
+														prefix: ListCurrentUserContributionResourcesStatus200ItemsPresentationMembersAvatarIconPrefixEnum;
+														/**
+														 * @maxLength 128
+														 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+														 * @type string
+														 */
+														name: string;
+													};
+											  }
+									  )
+									| null
+							  )
+							| null;
+					}[];
+				};
+		  }
+	)[];
 	nextCursor: (string | null) | null;
 };
 

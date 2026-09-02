@@ -6,6 +6,12 @@ import type { ContributionResourceListQuery } from "../api/history/schema";
 import { database } from "../database";
 import { profileResourceParticipation, unit } from "../database/schema";
 import {
+	UnitKindValues,
+	type FollowableUnitKind,
+	type UnitKind,
+} from "../database/schema/contract-values";
+import { listPathMembers, type TagPathMember } from "../tag-paths/service";
+import {
 	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
@@ -26,6 +32,7 @@ type RawContributionCandidate = {
 	readonly resourceUnitId: string;
 	readonly sortAt: unknown;
 	readonly accepted: boolean;
+	readonly resourceKind: string | null;
 	readonly language: ContentLanguage | null;
 	readonly title: string | null;
 	readonly coverAssetId: string | null;
@@ -40,14 +47,9 @@ type RawContributionCandidate = {
 	readonly updatedAt: unknown | null;
 };
 
-type PresentedContributionCandidate = {
+type ContributionActivity = {
 	readonly id: string;
 	readonly section: ContributionResourceListQuery["section"];
-	readonly language: ContentLanguage;
-	readonly title: string | null;
-	readonly cover: { readonly id: string; readonly url: string } | null;
-	readonly status: "draft" | "published" | "archived";
-	readonly visibility: "public" | "unlisted" | "private";
 	readonly createdResourceAt: Date | null;
 	readonly firstContributedAt: Date | null;
 	readonly lastContributedAt: Date | null;
@@ -57,6 +59,28 @@ type PresentedContributionCandidate = {
 	readonly updatedAt: Date;
 	readonly cursorBoundary: ParticipationCursorBoundary;
 };
+
+type PresentedContributionCandidate =
+	| (ContributionActivity & {
+			readonly resourceKind: FollowableUnitKind;
+			readonly presentation: {
+				readonly kind: "localized_unit";
+				readonly slugAddress: null;
+				readonly language: ContentLanguage;
+				readonly title: string | null;
+				readonly cover: { readonly id: string; readonly url: string } | null;
+				readonly status: "draft" | "published" | "archived";
+				readonly visibility: "public" | "unlisted" | "private";
+			};
+	  })
+	| (ContributionActivity & {
+			readonly section: "tag";
+			readonly resourceKind: "tag_path";
+			readonly presentation: {
+				readonly kind: "tag_path";
+				readonly members: readonly TagPathMember[];
+			};
+	  });
 
 function dateValue(value: unknown, field: string): Date {
 	const parsed =
@@ -71,6 +95,10 @@ function countValue(value: number | string): number {
 	if (!Number.isSafeInteger(parsed) || parsed < 0)
 		throw new TypeError("Contribution resource count is outside the safe integer range");
 	return parsed;
+}
+
+function unitKindValue(value: string | null): UnitKind | undefined {
+	return UnitKindValues.find((kind) => kind === value);
 }
 
 function participationSortColumn(kind: NonNullable<ContributionResourceListQuery["kind"]>): SQL {
@@ -141,6 +169,7 @@ async function selectContributionCandidateBatch(input: {
 			scanned.resource_unit_id as "resourceUnitId",
 			scanned.sort_at as "sortAt",
 			${accepted} as accepted,
+			${resource.kind} as "resourceKind",
 			${resolvedUnitLocalizationLanguage(resource.id, localizationLanguages)} as language,
 			${resolvedUnitLocalizationTitle(resource.id, localizationLanguages)} as title,
 			${resolvedUnitLocalizationImageAssetId(resource.id, "cover", localizationLanguages)} as "coverAssetId",
@@ -166,23 +195,19 @@ function presentContributionCandidate(
 	row: RawContributionCandidate,
 	section: ContributionResourceListQuery["section"],
 ): PresentedContributionCandidate | undefined {
+	const resourceKind = unitKindValue(row.resourceKind);
 	if (
 		!row.accepted ||
-		!row.language ||
+		!resourceKind ||
 		!row.status ||
 		!row.visibility ||
 		row.createdAt === null ||
 		row.updatedAt === null
 	)
 		return undefined;
-	return {
+	const activity = {
 		id: row.resourceUnitId,
 		section,
-		language: row.language,
-		title: row.title,
-		cover: presentImageAsset(row.coverAssetId, "cover"),
-		status: row.status,
-		visibility: row.visibility,
 		createdResourceAt:
 			row.createdResourceAt === null ? null : dateValue(row.createdResourceAt, "createdResourceAt"),
 		firstContributedAt:
@@ -198,6 +223,29 @@ function presentContributionCandidate(
 		cursorBoundary: {
 			sortAt: dateValue(row.sortAt, "sortAt"),
 			resourceUnitId: row.resourceUnitId,
+		},
+	};
+	if (resourceKind === "tag_path") {
+		if (section !== "tag") return undefined;
+		return {
+			...activity,
+			section,
+			resourceKind,
+			presentation: { kind: "tag_path", members: [] },
+		};
+	}
+	if (!row.language) return undefined;
+	return {
+		...activity,
+		resourceKind,
+		presentation: {
+			kind: "localized_unit",
+			slugAddress: null,
+			language: row.language,
+			title: row.title,
+			cover: presentImageAsset(row.coverAssetId, "cover"),
+			status: row.status,
+			visibility: row.visibility,
 		},
 	};
 }
@@ -243,7 +291,12 @@ export async function listCurrentProfileContributionResources(input: {
 
 	const page = items.slice(0, limit);
 	const last = page.at(-1);
-	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(page.map(({ id }) => id));
+	const localizedIds = page.flatMap((item) => (item.resourceKind === "tag_path" ? [] : [item.id]));
+	const pathIds = page.flatMap((item) => (item.resourceKind === "tag_path" ? [item.id] : []));
+	const [slugAddresses, pathMembers] = await Promise.all([
+		getPublicCanonicalUnitSlugAddresses(localizedIds),
+		listPathMembers(pathIds, input.query.localizationLanguages),
+	]);
 	const nextBoundary =
 		items.length > limit
 			? last?.cursorBoundary
@@ -251,10 +304,23 @@ export async function listCurrentProfileContributionResources(input: {
 				? scanCursor
 				: undefined;
 	return {
-		items: page.map(({ cursorBoundary: _cursorBoundary, ...item }) => ({
-			...item,
-			slugAddress: slugAddresses.get(item.id) ?? null,
-		})),
+		items: page.map(({ cursorBoundary: _cursorBoundary, ...item }) =>
+			item.resourceKind === "tag_path"
+				? {
+						...item,
+						presentation: {
+							...item.presentation,
+							members: pathMembers.get(item.id) ?? [],
+						},
+					}
+				: {
+						...item,
+						presentation: {
+							...item.presentation,
+							slugAddress: slugAddresses.get(item.id) ?? null,
+						},
+					},
+		),
 		nextCursor: nextBoundary ? encodeParticipationCursor(input.query, nextBoundary) : null,
 	};
 }

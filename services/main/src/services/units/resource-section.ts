@@ -1,4 +1,4 @@
-import { and, eq, exists, sql, type SQL } from "drizzle-orm";
+import { and, eq, exists, inArray, sql, type SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 
 import { database } from "../database";
@@ -41,12 +41,13 @@ export function resourceSectionCondition(section: ResourceSection, target: Secti
 		case "software":
 		case "media":
 		case "entity":
-		case "tag":
 		case "realm":
 		case "zone":
 		case "collection":
 		case "poll":
 			return eq(target.kind, section);
+		case "tag":
+			return inArray(target.kind, ["tag", "tag_path"]);
 		default:
 			section satisfies never;
 			return sql`false`;

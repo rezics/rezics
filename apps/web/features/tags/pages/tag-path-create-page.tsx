@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	listCurrentUserContributionResourcesQueryKey,
 	type PostApiTagPathsDefinitionWarningsStatus200,
 	usePostApiTagPaths,
 	usePostApiTagPathsDefinitionWarnings,
@@ -15,6 +16,7 @@ import {
 	CardContent,
 	ManagementWorkspaceSectionHeader,
 } from "@rezics/ui";
+import { useQueryClient } from "@tanstack/react-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useState } from "react";
 
@@ -33,6 +35,7 @@ import { tagPathHref } from "../routing/tag-links";
 export function TagPathCreatePage() {
 	const { t } = useTranslation(["tags", "ui"]);
 	const router = useApplicationRouter();
+	const queryClient = useQueryClient();
 	const [members, setMembers] = useState<EditableTagPathMember[]>([]);
 	const [relationKinds, setRelationKinds] = useState<EditableTagRelationKind[]>([]);
 	const [reviewedDefinition, setReviewedDefinition] = useState<string | null>(null);
@@ -83,6 +86,9 @@ export function TagPathCreatePage() {
 			if (result.items.length > 0) return;
 		}
 		const result = await create.mutateAsync({ body: { memberNodeIds, relationIds } });
+		await queryClient.invalidateQueries({
+			queryKey: listCurrentUserContributionResourcesQueryKey({ query: { section: "tag" } }),
+		});
 		router.push(tagPathHref(result.pathId));
 	}
 

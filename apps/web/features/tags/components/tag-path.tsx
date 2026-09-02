@@ -16,11 +16,13 @@ export interface TagPathPathMember {
 export function TagPathPath({
 	ariaLabel,
 	fallback,
+	linkMembers = true,
 	members,
 	relationLabel,
 }: {
 	readonly ariaLabel: string;
 	readonly fallback: string;
+	readonly linkMembers?: boolean;
 	readonly members: readonly TagPathPathMember[];
 	readonly relationLabel?: (relationKind: string) => string;
 }) {
@@ -38,7 +40,7 @@ export function TagPathPath({
 							<span aria-hidden="true">›</span>
 						</span>
 					) : null}
-					{member.nodeKind === "concept" ? (
+					{member.nodeKind === "concept" && linkMembers ? (
 						<Link href={tagDetailHref(member.nodeId)}>
 							<Badge variant="secondary">
 								{member.title ? (
@@ -49,7 +51,7 @@ export function TagPathPath({
 							</Badge>
 						</Link>
 					) : (
-						<Badge variant="outline">
+						<Badge variant={member.nodeKind === "concept" ? "secondary" : "outline"}>
 							{member.title ? (
 								<LocalizedText language={member.language} value={member.title} />
 							) : (

@@ -114,6 +114,7 @@ export default {
 			contributions: "현재 필터와 일치하는 공개 기여가 없습니다.",
 		},
 		untitled: "제목 없는 콘텐츠",
+		immutable: "변경 불가",
 		contributionCount: insert("기여 {{count}}회", { count: Number }),
 		activity: {
 			visited: "최근 방문",

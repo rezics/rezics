@@ -52590,6 +52590,33 @@
 														],
 														"type": "string"
 													},
+													"resourceKind": {
+														"default": "slug_namespace",
+														"enum": [
+															"slug_namespace",
+															"profile",
+															"book",
+															"software",
+															"media",
+															"video",
+															"audio",
+															"release",
+															"entity",
+															"label",
+															"tag",
+															"tag_path",
+															"series",
+															"zone",
+															"zone_page",
+															"custom_theme",
+															"collection",
+															"post",
+															"poll",
+															"realm",
+															"realm_rule"
+														],
+														"type": "string"
+													},
 													"language": {
 														"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
 														"type": "string"
@@ -52643,6 +52670,7 @@
 													"id",
 													"slugAddress",
 													"section",
+													"resourceKind",
 													"language",
 													"title",
 													"cover",
@@ -89553,131 +89581,363 @@
 										"items": {
 											"type": "array",
 											"items": {
-												"type": "object",
-												"properties": {
-													"id": { "type": "string", "format": "uuid" },
-													"slugAddress": {
-														"nullable": true,
-														"anyOf": [
-															{
-																"additionalProperties": false,
+												"anyOf": [
+													{
+														"type": "object",
+														"properties": {
+															"id": { "type": "string", "format": "uuid" },
+															"section": {
+																"enum": [
+																	"book",
+																	"software",
+																	"media",
+																	"entity",
+																	"tag",
+																	"realm",
+																	"zone",
+																	"post",
+																	"wiki",
+																	"collection",
+																	"review",
+																	"poll"
+																],
+																"type": "string"
+															},
+															"createdResourceAt": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string", "format": "date-time" },
+																	{ "type": "null" }
+																]
+															},
+															"firstContributedAt": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string", "format": "date-time" },
+																	{ "type": "null" }
+																]
+															},
+															"lastContributedAt": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string", "format": "date-time" },
+																	{ "type": "null" }
+																]
+															},
+															"contributionCount": { "minimum": 0, "type": "integer" },
+															"lastParticipatedAt": { "type": "string", "format": "date-time" },
+															"createdAt": { "type": "string", "format": "date-time" },
+															"updatedAt": { "type": "string", "format": "date-time" },
+															"resourceKind": {
+																"enum": [
+																	"slug_namespace",
+																	"profile",
+																	"book",
+																	"software",
+																	"media",
+																	"video",
+																	"audio",
+																	"release",
+																	"entity",
+																	"label",
+																	"tag",
+																	"series",
+																	"zone",
+																	"zone_page",
+																	"custom_theme",
+																	"collection",
+																	"post",
+																	"poll",
+																	"realm",
+																	"realm_rule"
+																],
+																"type": "string"
+															},
+															"presentation": {
 																"type": "object",
 																"properties": {
-																	"slug": {
-																		"minLength": 1,
-																		"maxLength": 63,
-																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																	"kind": { "type": "string", "const": "localized_unit" },
+																	"slugAddress": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"properties": {
+																					"slug": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					},
+																					"scopeUnitId": { "type": "string", "format": "uuid" },
+																					"canonicalPath": {
+																						"minItems": 2,
+																						"maxItems": 3,
+																						"type": "array",
+																						"items": {
+																							"minLength": 1,
+																							"maxLength": 63,
+																							"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																							"type": "string"
+																						}
+																					}
+																				},
+																				"required": ["slug", "scopeUnitId", "canonicalPath"]
+																			},
+																			{ "type": "null" }
+																		]
+																	},
+																	"language": {
+																		"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
 																		"type": "string"
 																	},
-																	"scopeUnitId": { "type": "string", "format": "uuid" },
-																	"canonicalPath": {
+																	"title": {
+																		"nullable": true,
+																		"anyOf": [{ "type": "string" }, { "type": "null" }]
+																	},
+																	"cover": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"type": "object",
+																				"properties": {
+																					"id": { "type": "string", "format": "uuid" },
+																					"url": { "type": "string" }
+																				},
+																				"required": ["id", "url"]
+																			},
+																			{ "type": "null" }
+																		]
+																	},
+																	"status": {
+																		"default": "draft",
+																		"enum": ["draft", "published", "archived"],
+																		"type": "string"
+																	},
+																	"visibility": {
+																		"default": "public",
+																		"enum": ["public", "unlisted", "private"],
+																		"type": "string"
+																	}
+																},
+																"required": [
+																	"kind",
+																	"slugAddress",
+																	"language",
+																	"title",
+																	"cover",
+																	"status",
+																	"visibility"
+																]
+															}
+														},
+														"required": [
+															"id",
+															"section",
+															"createdResourceAt",
+															"firstContributedAt",
+															"lastContributedAt",
+															"contributionCount",
+															"lastParticipatedAt",
+															"createdAt",
+															"updatedAt",
+															"resourceKind",
+															"presentation"
+														]
+													},
+													{
+														"type": "object",
+														"properties": {
+															"id": { "type": "string", "format": "uuid" },
+															"section": { "type": "string", "const": "tag" },
+															"createdResourceAt": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string", "format": "date-time" },
+																	{ "type": "null" }
+																]
+															},
+															"firstContributedAt": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string", "format": "date-time" },
+																	{ "type": "null" }
+																]
+															},
+															"lastContributedAt": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string", "format": "date-time" },
+																	{ "type": "null" }
+																]
+															},
+															"contributionCount": { "minimum": 0, "type": "integer" },
+															"lastParticipatedAt": { "type": "string", "format": "date-time" },
+															"createdAt": { "type": "string", "format": "date-time" },
+															"updatedAt": { "type": "string", "format": "date-time" },
+															"resourceKind": { "type": "string", "const": "tag_path" },
+															"presentation": {
+																"type": "object",
+																"properties": {
+																	"kind": { "type": "string", "const": "tag_path" },
+																	"members": {
 																		"minItems": 2,
-																		"maxItems": 3,
+																		"maxItems": 16,
 																		"type": "array",
 																		"items": {
-																			"minLength": 1,
-																			"maxLength": 63,
-																			"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
-																			"type": "string"
+																			"type": "object",
+																			"properties": {
+																				"ordinal": { "minimum": 0, "type": "integer" },
+																				"nodeId": { "type": "string", "format": "uuid" },
+																				"nodeKind": {
+																					"anyOf": [
+																						{ "type": "string", "const": "concept" },
+																						{ "type": "string", "const": "guide" }
+																					]
+																				},
+																				"incomingRelation": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"type": "object",
+																							"properties": {
+																								"relationId": {
+																									"type": "string",
+																									"format": "uuid"
+																								},
+																								"relationKind": {
+																									"default": "generic",
+																									"enum": [
+																										"generic",
+																										"partitive",
+																										"instance",
+																										"organizational",
+																										"facet_value"
+																									],
+																									"type": "string"
+																								}
+																							},
+																							"required": ["relationId", "relationKind"]
+																						},
+																						{ "type": "null" }
+																					]
+																				},
+																				"language": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
+																							"type": "string"
+																						},
+																						{ "type": "null" }
+																					]
+																				},
+																				"title": {
+																					"nullable": true,
+																					"anyOf": [{ "type": "string" }, { "type": "null" }]
+																				},
+																				"summary": {
+																					"nullable": true,
+																					"anyOf": [{ "type": "string" }, { "type": "null" }]
+																				},
+																				"avatar": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"anyOf": [
+																								{
+																									"additionalProperties": false,
+																									"type": "object",
+																									"properties": {
+																										"type": { "type": "string", "const": "image" },
+																										"image": {
+																											"type": "object",
+																											"properties": {
+																												"id": {
+																													"type": "string",
+																													"format": "uuid"
+																												},
+																												"url": { "type": "string" }
+																											},
+																											"required": ["id", "url"]
+																										}
+																									},
+																									"required": ["type", "image"]
+																								},
+																								{
+																									"additionalProperties": false,
+																									"type": "object",
+																									"properties": {
+																										"type": { "type": "string", "const": "emoji" },
+																										"emoji": { "maxLength": 64, "type": "string" }
+																									},
+																									"required": ["type", "emoji"]
+																								},
+																								{
+																									"additionalProperties": false,
+																									"type": "object",
+																									"properties": {
+																										"type": { "type": "string", "const": "icon" },
+																										"icon": {
+																											"additionalProperties": false,
+																											"type": "object",
+																											"properties": {
+																												"provider": {
+																													"type": "string",
+																													"const": "font-awesome"
+																												},
+																												"prefix": {
+																													"enum": ["fas", "fab"],
+																													"type": "string"
+																												},
+																												"name": {
+																													"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+																													"maxLength": 128,
+																													"type": "string"
+																												}
+																											},
+																											"required": ["provider", "prefix", "name"]
+																										}
+																									},
+																									"required": ["type", "icon"]
+																								}
+																							]
+																						},
+																						{ "type": "null" }
+																					]
+																				}
+																			},
+																			"required": [
+																				"ordinal",
+																				"nodeId",
+																				"nodeKind",
+																				"incomingRelation",
+																				"language",
+																				"title",
+																				"summary",
+																				"avatar"
+																			]
 																		}
 																	}
 																},
-																"required": ["slug", "scopeUnitId", "canonicalPath"]
-															},
-															{ "type": "null" }
+																"required": ["kind", "members"]
+															}
+														},
+														"required": [
+															"id",
+															"section",
+															"createdResourceAt",
+															"firstContributedAt",
+															"lastContributedAt",
+															"contributionCount",
+															"lastParticipatedAt",
+															"createdAt",
+															"updatedAt",
+															"resourceKind",
+															"presentation"
 														]
-													},
-													"section": {
-														"enum": [
-															"book",
-															"software",
-															"media",
-															"entity",
-															"tag",
-															"realm",
-															"zone",
-															"post",
-															"wiki",
-															"collection",
-															"review",
-															"poll"
-														],
-														"type": "string"
-													},
-													"language": {
-														"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
-														"type": "string"
-													},
-													"title": {
-														"nullable": true,
-														"anyOf": [{ "type": "string" }, { "type": "null" }]
-													},
-													"cover": {
-														"nullable": true,
-														"anyOf": [
-															{
-																"type": "object",
-																"properties": {
-																	"id": { "type": "string", "format": "uuid" },
-																	"url": { "type": "string" }
-																},
-																"required": ["id", "url"]
-															},
-															{ "type": "null" }
-														]
-													},
-													"status": {
-														"default": "draft",
-														"enum": ["draft", "published", "archived"],
-														"type": "string"
-													},
-													"visibility": {
-														"default": "public",
-														"enum": ["public", "unlisted", "private"],
-														"type": "string"
-													},
-													"createdResourceAt": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string", "format": "date-time" },
-															{ "type": "null" }
-														]
-													},
-													"firstContributedAt": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string", "format": "date-time" },
-															{ "type": "null" }
-														]
-													},
-													"lastContributedAt": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string", "format": "date-time" },
-															{ "type": "null" }
-														]
-													},
-													"contributionCount": { "minimum": 0, "type": "integer" },
-													"lastParticipatedAt": { "type": "string", "format": "date-time" },
-													"createdAt": { "type": "string", "format": "date-time" },
-													"updatedAt": { "type": "string", "format": "date-time" }
-												},
-												"required": [
-													"id",
-													"slugAddress",
-													"section",
-													"language",
-													"title",
-													"cover",
-													"status",
-													"visibility",
-													"createdResourceAt",
-													"firstContributedAt",
-													"lastContributedAt",
-													"contributionCount",
-													"lastParticipatedAt",
-													"createdAt",
-													"updatedAt"
+													}
 												]
 											}
 										},

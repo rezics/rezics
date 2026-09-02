@@ -129,6 +129,7 @@ export default {
 			contributions: "Keine öffentlichen Mitwirkungen entsprechen den aktuellen Filtern.",
 		},
 		untitled: "Inhalt ohne Titel",
+		immutable: "Unveränderlich",
 		contributionCount: insert("Mitwirkungen: {{count}}", { count: Number }),
 		activity: {
 			visited: "Besucht",

@@ -129,6 +129,7 @@ export default {
 			contributions: "Aucune contribution publique ne correspond aux filtres actuels.",
 		},
 		untitled: "Contenu sans titre",
+		immutable: "Immuable",
 		contributionCount: insert("Contributions : {{count}}", { count: Number }),
 		activity: {
 			visited: "Consulté",

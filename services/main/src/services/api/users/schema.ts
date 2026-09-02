@@ -7,6 +7,7 @@ import { PortableTextDocument } from "@rezics/block";
 import {
 	ContentLanguageValues,
 	ResourceVisibilityValues,
+	UnitKindValues,
 	UnitStatusValues,
 } from "../../database/schema/contract-values";
 import { NullablePublicSlugAddressResponse, SlugLabelInput } from "../slug-addresses/schema";
@@ -61,6 +62,7 @@ export const StudioContentListResponse = t.Object({
 			id: Uuid,
 			slugAddress: NullablePublicSlugAddressResponse,
 			section: StudioSection,
+			resourceKind: t.UnionEnum(UnitKindValues),
 			language: ContentLanguage,
 			title: t.Nullable(t.String()),
 			cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),

@@ -120,6 +120,7 @@ export default {
 			contributions: "現在の絞り込み条件に一致する公開の貢献はありません。",
 		},
 		untitled: "タイトルなしコンテンツ",
+		immutable: "変更不可",
 		contributionCount: insert("貢献 {{count}} 件", { count: Number }),
 		activity: {
 			visited: "閲覧",

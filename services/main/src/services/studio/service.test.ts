@@ -36,6 +36,7 @@ function directCandidate(overrides: Record<string, unknown> = {}) {
 		hasOwnerAccess: false,
 		hasDirectAccess: true,
 		hasRealmAccess: false,
+		resourceKind: "book",
 		language: "en",
 		title: "Editable work",
 		coverAssetId: CoverId,
@@ -66,6 +67,7 @@ describe("Studio workspace presentation", () => {
 		expect(result.items).toHaveLength(1);
 		expect(result.items[0]).toMatchObject({
 			id: UnitId,
+			resourceKind: "book",
 			accessSources: ["direct"],
 			assignedAt: new Date("2026-07-01T08:00:00.000Z"),
 			cover: {
