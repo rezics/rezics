@@ -21,7 +21,12 @@ for setting in \
 	'"-c", "max_replication_slots=0"' \
 	'"-c", "max_wal_size=16GB"' \
 	'"-c", "min_wal_size=4GB"' \
-	'"-c", "max_worker_processes=16"'; do
+	'"-c", "max_connections=120"' \
+	'"-c", "reserved_connections=10"' \
+	'"-c", "max_worker_processes=16"' \
+	'"-c", "autovacuum_worker_slots=8"' \
+	'"-c", "autovacuum_vacuum_max_threshold=1000000"' \
+	'"-c", "io_method=worker"'; do
 	if ! grep -Fq "${setting}" deploy/nomad/postgres.nomad.hcl; then
 		printf 'Production PostgreSQL is missing the no-logical-CDC contract: %s\n' "${setting}" >&2
 		exit 1
@@ -104,11 +109,30 @@ for setting in \
 	'"-c", "pgroonga.enable_wal_resource_manager=on"' \
 	'"-c", "pgroonga.enable_crash_safe=on"' \
 	'"-c", "compute_query_id=on"' \
-	'"-c", "pg_stat_statements.track=all"' \
+	'"-c", "pg_stat_statements.track=top"' \
+	'"-c", "pg_stat_statements.max=20000"' \
 	'"-c", "track_io_timing=on"' \
 	'"-c", "track_wal_io_timing=on"'; do
 	if ! grep -Fq "${setting}" deploy/nomad/postgres.nomad.hcl; then
 		printf 'Production PostgreSQL is missing required setting: %s\n' "${setting}" >&2
+		exit 1
+	fi
+done
+
+for pgbouncer_contract in \
+	'job "rezics-pgbouncer"' \
+	'pool_mode=transaction pool_size=40' \
+	'max_db_connections=48' \
+	'pool_mode=session pool_size=4' \
+	'max_client_conn = 512' \
+	'auth_type = scram-sha-256' \
+	'nomad/jobs/rezics-postgres/postgres/postgres' \
+	'edoburu/pgbouncer:v1\.25\.2-p0@sha256:' \
+	'wait-loopback-service.sh" 10.64.0.2 6432'; do
+	if ! grep -Eq "${pgbouncer_contract}" \
+		deploy/nomad/pgbouncer.nomad.hcl \
+		deploy/scripts/deploy-production-infrastructure.sh; then
+		printf 'Production PgBouncer contract is missing: %s\n' "${pgbouncer_contract}" >&2
 		exit 1
 	fi
 done
