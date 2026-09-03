@@ -604,6 +604,7 @@ function expressionAuthoritySections(
 			groups: renderTagExpressions(section.expressions, {
 				unknownLabel: t.tags.unnamedTag,
 				groupByExpressionKey,
+				maximumCollisionRepair: groupByExpressionKey ? "full_breadcrumb" : "authority_relation",
 				authorityLabel: () => title,
 				relationLabel: (relation) =>
 					t.tags.expressions.relations[relation as keyof typeof t.tags.expressions.relations] ??

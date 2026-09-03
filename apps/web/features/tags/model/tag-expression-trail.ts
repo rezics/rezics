@@ -1,8 +1,4 @@
-import type {
-	RenderedTagExpression,
-	TagExpressionPathMember,
-	TagExpressionRenderSource,
-} from "./tag-expression-renderer";
+import type { RenderedTagExpression, TagExpressionRenderSource } from "./tag-expression-renderer";
 
 export interface TagExpressionTrailSegment {
 	readonly key: string;
@@ -15,7 +11,6 @@ export type TagExpressionTrailSegments = readonly [
 ];
 
 export interface TagExpressionTrail {
-	readonly kind: "path" | "semantic";
 	readonly label: string;
 	readonly segments: TagExpressionTrailSegments;
 }
@@ -24,80 +19,32 @@ export type CompactTagExpressionTrailPart =
 	| { readonly kind: "segment"; readonly segment: TagExpressionTrailSegment }
 	| { readonly kind: "ellipsis"; readonly key: string };
 
-function sourcePathIdentity(source: TagExpressionRenderSource): string | null {
-	if (source.sourceKind !== "path" || !source.members.length) return null;
-	if (source.pathId) return `path:${source.pathId}`;
-	return `members:${source.members
-		.map((member) => `${member.nodeId}:${member.incomingRelation?.relationKind ?? "root"}`)
-		.join("/")}`;
-}
-
-function pathSegments(
-	item: RenderedTagExpression,
-	unknownLabel: string,
-): TagExpressionTrailSegments | null {
-	const identities = item.applications.map(sourcePathIdentity);
-	const identity = identities[0];
-	if (!identity || identities.some((candidate) => candidate !== identity)) return null;
-	const source = item.applications[0];
-	const [firstMember, ...remainingMembers] = source?.members ?? [];
-	if (!firstMember) return null;
-	const presentMember = (member: TagExpressionPathMember, index: number) => ({
-		key: `${member.nodeId}:${index}`,
-		label: member.title?.trim() || unknownLabel,
-	});
-	return [
-		presentMember(firstMember, 0),
-		...remainingMembers.map((member, index) => presentMember(member, index + 1)),
-	];
-}
-
-function semanticSegments(
+function displaySegments(
 	item: RenderedTagExpression,
 	unknownLabel: string,
 ): TagExpressionTrailSegments {
-	if (
-		item.collisionRepair === "path_ancestor" ||
-		item.collisionRepair === "authority_relation" ||
-		item.collisionRepair === "full_breadcrumb" ||
-		!item.labelComponents.length
-	)
-		return [{ key: `label:${item.key}`, label: item.label || unknownLabel }];
-
-	const [firstComponent, ...remainingComponents] = item.labelComponents;
-	if (!firstComponent) return [{ key: `label:${item.key}`, label: item.label || unknownLabel }];
-	const presentComponent = (component: (typeof item.labelComponents)[number], index: number) => ({
-		key: `${component.semanticRole}:${component.tagId}:${index}`,
-		label: component.title?.trim() || unknownLabel,
+	const [firstPart, ...remainingParts] = item.displayParts;
+	if (!firstPart) return [{ key: `label:${item.key}`, label: item.label || unknownLabel }];
+	const presentPart = (part: (typeof item.displayParts)[number]) => ({
+		key: part.key,
+		label: part.label.trim() || unknownLabel,
 	});
-	return [
-		presentComponent(firstComponent, 0),
-		...remainingComponents.map((component, index) => presentComponent(component, index + 1)),
-	];
+	return [presentPart(firstPart), ...remainingParts.map((part) => presentPart(part))];
 }
 
 /**
- * Presents one aggregated Expression as a stable trail. A source Path is only
- * exposed when every application resolves to the same Path identity; mixed or
- * conflicting sources retain the renderer's collision-safe semantic label.
+ * Presents the active Expression presentation as a Path-styled badge trail.
+ * Structural Path members remain source detail and never become display parts
+ * unless the renderer explicitly selected one to repair a visible collision.
  */
 export function presentTagExpressionTrail<Source extends TagExpressionRenderSource>(
 	item: RenderedTagExpression<Source>,
 	unknownLabel: string,
 ): TagExpressionTrail {
-	const path = pathSegments(item, unknownLabel);
-	if (path)
-		return {
-			kind: "path",
-			label: path.map(({ label }) => label).join(" › "),
-			segments: path,
-		};
-
-	const semantic = semanticSegments(item, unknownLabel);
+	const segments = displaySegments(item, unknownLabel);
 	return {
-		kind: "semantic",
-		label: item.label || semantic.map(({ label }) => label).join(" · "),
-		segments: semantic,
+		label: segments.map(({ label }) => label).join(" › "),
+		segments,
 	};
 }
 

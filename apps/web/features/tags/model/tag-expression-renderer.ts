@@ -55,6 +55,23 @@ export interface TagExpressionRenderContext {
 	readonly unknownLabel: string;
 	readonly separator?: string;
 	readonly breadcrumbSeparator?: string;
+	readonly maximumCollisionRepair?:
+		| "presentation"
+		| "path_ancestor"
+		| "authority_relation"
+		| "full_breadcrumb";
+}
+
+export interface RenderedTagExpressionDisplayPart {
+	readonly key: string;
+	readonly label: string;
+	readonly source:
+		| "component"
+		| "path_ancestor"
+		| "authority"
+		| "relation"
+		| "path_member"
+		| "unknown";
 }
 
 export interface RenderedTagExpression<
@@ -66,6 +83,7 @@ export interface RenderedTagExpression<
 	readonly focusTagId: string;
 	readonly label: string;
 	readonly labelComponents: readonly TagExpressionLabelComponent[];
+	readonly displayParts: readonly RenderedTagExpressionDisplayPart[];
 	readonly applications: readonly Source[];
 	readonly collisionRepair:
 		| "none"
@@ -94,8 +112,27 @@ type AggregatedInput<Source extends TagExpressionRenderSource> =
 type LabelCandidate = {
 	readonly label: string;
 	readonly components: readonly TagExpressionLabelComponent[];
+	readonly displayParts: readonly RenderedTagExpressionDisplayPart[];
 	readonly repair: RenderedTagExpression["collisionRepair"];
 };
+
+const CollisionRepairRank = {
+	none: 0,
+	restored_qualifier: 0,
+	fallback_qualifier: 0,
+	path_ancestor: 1,
+	authority_relation: 2,
+	full_breadcrumb: 3,
+} as const satisfies Readonly<Record<RenderedTagExpression["collisionRepair"], number>>;
+
+const MaximumCollisionRepairRank = {
+	presentation: 0,
+	path_ancestor: 1,
+	authority_relation: 2,
+	full_breadcrumb: 3,
+} as const satisfies Readonly<
+	Record<NonNullable<TagExpressionRenderContext["maximumCollisionRepair"]>, number>
+>;
 
 function authorityKey(authority: TagExpressionAuthority): string {
 	return authority.kind === "global" ? "global" : `realm:${authority.realmId}`;
@@ -202,18 +239,28 @@ function buildCandidates<Source extends TagExpressionRenderSource>(
 		contextKeys,
 	);
 	const candidates: LabelCandidate[] = [];
+	const maximumRepairRank =
+		MaximumCollisionRepairRank[context.maximumCollisionRepair ?? "full_breadcrumb"];
 	const add = (
-		parts: readonly string[],
+		displayParts: readonly RenderedTagExpressionDisplayPart[],
 		components: readonly TagExpressionLabelComponent[],
 		repair: LabelCandidate["repair"],
+		joiner = separator,
 	) => {
-		const label = parts.filter(Boolean).join(separator);
+		if (CollisionRepairRank[repair] > maximumRepairRank) return;
+		const label = displayParts.map(({ label: partLabel }) => partLabel).join(joiner);
 		if (label && !candidates.some((candidate) => candidate.label === label))
-			candidates.push({ label, components, repair });
+			candidates.push({ label, components, displayParts, repair });
 	};
-	const labels = (components: readonly TagExpressionLabelComponent[]) =>
-		components.map((component) => componentLabel(component, context.unknownLabel));
-	add(labels(semantic.residual), semantic.residual, "none");
+	const componentParts = (
+		components: readonly TagExpressionLabelComponent[],
+	): readonly RenderedTagExpressionDisplayPart[] =>
+		components.map((component, index) => ({
+			key: `component:${component.semanticRole}:${component.tagId}:${component.componentKind}:${index}`,
+			label: componentLabel(component, context.unknownLabel),
+			source: "component",
+		}));
+	add(componentParts(semantic.residual), semantic.residual, "none");
 	for (let count = 1; count <= semantic.omitted.length; count += 1) {
 		const restoredKeys = new Set(
 			semantic.omitted.slice(-count).map((component) => semanticKey(component)),
@@ -223,7 +270,7 @@ function buildCandidates<Source extends TagExpressionRenderSource>(
 				component.componentKind === "required" &&
 				(semantic.residual.includes(component) || restoredKeys.has(semanticKey(component))),
 		);
-		add(labels(restored), restored, "restored_qualifier");
+		add(componentParts(restored), restored, "restored_qualifier");
 	}
 	const fallback = input.expression.components.filter(
 		(component) => component.componentKind === "fallback",
@@ -235,7 +282,7 @@ function buildCandidates<Source extends TagExpressionRenderSource>(
 				semantic.residual.includes(component) ||
 				(component.componentKind === "fallback" && fallbackKeys.has(semanticKey(component))),
 		);
-		add(labels(withFallback), withFallback, "fallback_qualifier");
+		add(componentParts(withFallback), withFallback, "fallback_qualifier");
 	}
 	const expressionTagIds = new Set(input.expression.components.map((component) => component.tagId));
 	for (const ancestor of uniquePathAncestors(
@@ -243,7 +290,14 @@ function buildCandidates<Source extends TagExpressionRenderSource>(
 		expressionTagIds,
 	))
 		add(
-			[componentLabel(ancestor, context.unknownLabel), ...labels(semantic.residual)],
+			[
+				{
+					key: `path-ancestor:${ancestor.nodeId}`,
+					label: componentLabel(ancestor, context.unknownLabel),
+					source: "path_ancestor",
+				},
+				...componentParts(semantic.residual),
+			],
 			semantic.residual,
 			"path_ancestor",
 		);
@@ -254,20 +308,52 @@ function buildCandidates<Source extends TagExpressionRenderSource>(
 	const relation = relationKind ? context.relationLabel?.(relationKind) : undefined;
 	if (authority || relation)
 		add(
-			[authority ?? "", relation ?? "", ...labels(semantic.residual)],
+			[
+				...(authority
+					? [
+							{
+								key: `authority:${authorityKey(input.authority)}`,
+								label: authority,
+								source: "authority" as const,
+							},
+						]
+					: []),
+				...(relation && relationKind
+					? [
+							{
+								key: `relation:${relationKind}`,
+								label: relation,
+								source: "relation" as const,
+							},
+						]
+					: []),
+				...componentParts(semantic.residual),
+			],
 			semantic.residual,
 			"authority_relation",
 		);
 	for (const source of input.applications) {
 		if (!source.members.length) continue;
-		const label = source.members
-			.map((member) => componentLabel(member, context.unknownLabel))
-			.join(breadcrumbSeparator);
-		if (label && !candidates.some((candidate) => candidate.label === label))
-			candidates.push({ label, components: semantic.residual, repair: "full_breadcrumb" });
+		add(
+			source.members.map((member, index) => ({
+				key: `path-member:${member.nodeId}:${index}`,
+				label: componentLabel(member, context.unknownLabel),
+				source: "path_member",
+			})),
+			semantic.residual,
+			"full_breadcrumb",
+			breadcrumbSeparator,
+		);
 	}
 	if (!candidates.length)
-		candidates.push({ label: context.unknownLabel, components: [], repair: "none" });
+		candidates.push({
+			label: context.unknownLabel,
+			components: [],
+			displayParts: [
+				{ key: `unknown:${input.key}`, label: context.unknownLabel, source: "unknown" },
+			],
+			repair: "none",
+		});
 	return candidates;
 }
 
@@ -354,6 +440,7 @@ export function renderTagExpressions<Source extends TagExpressionRenderSource>(
 				focusTagId: input.expression.focusTagId,
 				label: selected[index]!.label,
 				labelComponents: selected[index]!.components,
+				displayParts: selected[index]!.displayParts,
 				applications: input.applications,
 				collisionRepair: selected[index]!.repair,
 			})),

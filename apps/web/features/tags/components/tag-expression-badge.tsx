@@ -351,10 +351,9 @@ function TagExpressionTrailParts({
 	readonly trail: TagExpressionTrail;
 }) {
 	const parts = compactTagExpressionTrail(trail.segments, maximumParts);
-	const separator = trail.kind === "path" ? "›" : "·";
 	return parts.map((part, index) => (
 		<span className="contents" key={part.kind === "ellipsis" ? part.key : part.segment.key}>
-			{index ? <span className="shrink-0 opacity-45">{separator}</span> : null}
+			{index ? <span className="shrink-0 opacity-45">›</span> : null}
 			{part.kind === "ellipsis" ? (
 				<span className="shrink-0 opacity-70">…</span>
 			) : (

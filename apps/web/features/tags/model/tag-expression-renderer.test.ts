@@ -92,6 +92,8 @@ describe("renderTagExpressions", () => {
 			context,
 		);
 		expect(group?.items[0]?.label).toBe("Hair Color · Red");
+		expect(group?.items[0]?.displayParts.map(({ label }) => label)).toEqual(["Hair Color", "Red"]);
+		expect(group?.items[0]?.displayParts.every(({ source }) => source === "component")).toBe(true);
 	});
 
 	it("keeps hair-color Red and eye-color Red as distinct Expressions", () => {
@@ -137,6 +139,10 @@ describe("renderTagExpressions", () => {
 		expect(groups[0]?.items[0]?.applications.map(({ applicationId }) => applicationId)).toEqual([
 			"application:1",
 			"application:2",
+		]);
+		expect(groups[0]?.items[0]?.displayParts.map(({ label }) => label)).toEqual([
+			"Hair Color",
+			"Red",
 		]);
 	});
 
@@ -218,5 +224,63 @@ describe("renderTagExpressions", () => {
 		expect(items).toHaveLength(2);
 		expect(new Set(items.map(({ label }) => label)).size).toBe(2);
 		expect(items.every(({ collisionRepair }) => collisionRepair === "path_ancestor")).toBe(true);
+		expect(items.map(({ displayParts }) => displayParts[0]?.source)).toEqual([
+			"path_ancestor",
+			"path_ancestor",
+		]);
+	});
+
+	it("uses configured fallback components before structural Path context", () => {
+		const withFallback = (
+			input: TagExpressionRenderInput,
+			fallback: { readonly id: string; readonly title: string },
+		): TagExpressionRenderInput => ({
+			...input,
+			expression: {
+				...input.expression,
+				components: [
+					...input.expression.components,
+					{
+						tagId: fallback.id,
+						semanticRole: "qualifier",
+						componentKind: "fallback",
+						title: fallback.title,
+					},
+				],
+			},
+		});
+		const groups = renderTagExpressions(
+			[
+				withFallback(
+					expression({
+						id: "hair-red",
+						slot: { id: "hair-color", title: "Color" },
+						value: { id: "red", title: "Red" },
+						sources: [pathSource("application:hair", "path:hair", ["Hair", "Color", "Red"])],
+					}),
+					{ id: "hair", title: "Hair" },
+				),
+				withFallback(
+					expression({
+						id: "eye-red",
+						slot: { id: "eye-color", title: "Color" },
+						value: { id: "red", title: "Red" },
+						sources: [pathSource("application:eye", "path:eye", ["Eye", "Color", "Red"])],
+					}),
+					{ id: "eye", title: "Eye" },
+				),
+			],
+			context,
+		);
+		const items = groups.flatMap(({ items }) => items);
+
+		expect(items.map(({ collisionRepair }) => collisionRepair)).toEqual([
+			"fallback_qualifier",
+			"fallback_qualifier",
+		]);
+		expect(items.map(({ displayParts }) => displayParts.map(({ label }) => label))).toEqual([
+			["Color", "Red", "Hair"],
+			["Color", "Red", "Eye"],
+		]);
 	});
 });

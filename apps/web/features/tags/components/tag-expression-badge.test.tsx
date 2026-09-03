@@ -17,7 +17,7 @@ vi.mock("@rezics/ui", () => {
 		Popover: Container,
 		PopoverBody: Container,
 		PopoverClose: Container,
-		PopoverContent: () => null,
+		PopoverContent: Container,
 		PopoverDescription: Container,
 		PopoverHeader: Container,
 		PopoverTitle: Container,
@@ -84,7 +84,13 @@ vi.mock("@/i18n/client", () => ({
 vi.mock("@/i18n/use-localization-languages", () => ({
 	useLocalizationLanguages: () => ["en"],
 }));
-vi.mock("./tag-path", () => ({ TagPathPath: () => null }));
+vi.mock("./tag-path", () => ({
+	TagPathPath: ({
+		members,
+	}: {
+		readonly members: readonly { readonly title: string | null }[];
+	}) => <div data-testid="complete-path">{members.map(({ title }) => title).join(" › ")}</div>,
+}));
 vi.mock("./tag-vote-controls", () => ({ TagVoteControls: () => null }));
 
 import { TagExpressionBadge, type UnitRenderedExpression } from "./tag-expression-badge";
@@ -108,6 +114,10 @@ const item = {
 			componentKind: "required",
 			title: "Curtained",
 		},
+	],
+	displayParts: [
+		{ key: "component:slot:hair", label: "Hair", source: "component" },
+		{ key: "component:value:curtained", label: "Curtained", source: "component" },
 	],
 	applications: [
 		{
@@ -147,7 +157,7 @@ const item = {
 afterEach(cleanup);
 
 describe("TagExpressionBadge Path presentation", () => {
-	it("uses the full Path for its accessible name and responsive compact trails", () => {
+	it("uses configured display parts instead of every structural Path member", () => {
 		const { container } = render(
 			<TagExpressionBadge
 				authorityLabel="Global"
@@ -166,12 +176,15 @@ describe("TagExpressionBadge Path presentation", () => {
 
 		expect(
 			screen.getByRole("button", {
-				name: "Open Hair › Hairstyle › Bangs › Curtained in Global",
+				name: "Open Hair › Curtained in Global",
 			}),
 		).toBeTruthy();
-		expect(container.querySelector(".sm\\:hidden")?.textContent).toBe("Hair›…›Curtained");
-		expect(container.querySelector(".sm\\:inline-flex")?.textContent).toBe(
-			"Hair›Hairstyle›Bangs›Curtained",
+		expect(container.querySelector(".sm\\:hidden")?.textContent).toBe("Hair›Curtained");
+		expect(container.querySelector(".sm\\:inline-flex")?.textContent).toBe("Hair›Curtained");
+		expect(screen.queryByText("Hairstyle")).toBeNull();
+		expect(screen.queryByText("Bangs")).toBeNull();
+		expect(screen.getByTestId("complete-path").textContent).toBe(
+			"Hair › Hairstyle › Bangs › Curtained",
 		);
 	});
 });
