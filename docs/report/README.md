@@ -1,4 +1,4 @@
-# Architecture research and design reports
+# Architecture and operational research reports
 
 These reports describe proposed REZICS architecture. They do not establish that a schema,
 adapter, migration, or capacity target has been implemented or qualified. Source code and the
@@ -6,11 +6,20 @@ implemented contracts under [`docs/architecture`](../architecture/) describe cur
 
 | Report | Responsibility | Delivery status |
 | --- | --- | --- |
+| [Operational decisions and issue register, 2026-09-06](REZICS-operational-refactor-decisions-20260906.md) | Selected product portfolio, integrated decisions, concrete gaps, evidence gates and later work. | Current planning entry point; links twelve implementation plans. No implementation or production qualification. |
+| [Product opportunities and scenarios, 2026-09-06](REZICS-product-opportunities-and-user-scenarios-20260906.md) | Primary market evidence, U01–U15 user scenarios, cold start and product metrics. | Research and selected scope; market hypotheses remain distinguished from adoption evidence. |
+| [Language and authority audit, 2026-09-06](REZICS-language-and-authority-audit-20260906.md) | BCP 47/IANA versus locale conventions, source mappings, multiple named forms and scoped officialness. | Current-source audit and target contracts; language migration not run. |
+| [Source integration and review, 2026-09-06](REZICS-source-integration-and-review-20260906.md) | MusicBrainz/VNDB/Bangumi acquisition, continuous adoption, rights, AI review, repair and capacity. | Source evidence and implementation decisions; no full import, source authorization or AI evaluation claimed. |
+| [System readiness audit, 2026-09-06](REZICS-system-readiness-audit-20260906.md) | Concrete code/contract gaps, worker correctness, privacy, query costs, migration and recovery. | Static audit; no production inspection, rendered QA or capacity certification. |
 | [Platform architecture and gradual expansion, 2026-09-05](REZICS-动态元信息与渐进扩展架构-20260905.md) | Product direction, Unit capabilities, Work and edition boundaries, unified Entity participation, Access delegation, and gradual deployment. | Adopted direction; migrations and full capacity qualification remain pending. |
 | [Content structures, relations, and query models, 2026-09-06](REZICS-内容结构关系与查询模型-20260906.md) | Fixed and dynamic fields, content identity and occurrences, traversal, Tag evolution, referenceable relations, and relational/full-text query execution. | Existing implementation observations plus proposed changes; not a completion record. |
 | [Catalog boundaries and implementation phases, 2026-09-06](REZICS-Catalog领域边界与实施分期-20260906.md) | Full catalog ownership map; classification versus extensions, object identities, table groups and sharding; products/GPU, compute services, software/packages, media, courses and future domains. | Owns the current-source status snapshot, deferred scope, activation conditions and delivery criteria. |
 
-Start with the platform report for product context. Before implementation, read the status and
+For this operational refactor, start with the operational decision report and the
+[implementation program](../plan/operational-refactor-20260906/README.md). The program adds
+VNDB as a named adapter, standard language/officialness contracts, operational product lines,
+and a destructive-migration/replacement-deployment path. The platform report provides the
+underlying product and semantic context. Before implementation, read the status and
 scope in section 1 of the catalog report; then use the report that owns the affected topic.
 Catalog means all indexed domains, while `publishing` names the book/publication table group.
 Neither a semantic class nor a proposed table group implies a separate database or service.
@@ -26,5 +35,6 @@ source-status snapshot with evidence when a capability is delivered, keeping inc
 explicit. Existing source links and old commit references are research evidence, not guarantees
 that the present checkout or a production database still matches that snapshot.
 
-The Chinese reports retain the language of the ongoing maintainer design discussion. Deprecated
+The Chinese reports retain the language of the ongoing maintainer design discussion. New
+maintainer research and plans use English as required by CONTRIBUTING. Deprecated
 and user-provided working reports under `.temp/` are outside this maintained report set.

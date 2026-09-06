@@ -1,5 +1,7 @@
 # REZICS：Catalog 领域边界与实施分期
 
+**Operational implementation supplement (2026-09-06):** the [decision register](REZICS-operational-refactor-decisions-20260906.md) and [twelve-plan program](../plan/operational-refactor-20260906/README.md) select the current operational scope, add VNDB source conformance and language/authority contracts, and permit destructive forward migration or replacement deployment. Future domain examples below remain expansion paths rather than implicit launch requirements.
+
 日期：2026-09-06。**领域边界方向已确认；完整领域模型、迁移与容量尚未验收。本次只维护设计文档。**
 
 本文负责整个 Catalog 的拆分规则、领域归属、交叉对象和实施分期。[总体报告](REZICS-动态元信息与渐进扩展架构-20260905.md)负责产品方向、Work／版本、Unit 能力、统一 Entity 与部署演进；[结构与查询报告](REZICS-内容结构关系与查询模型-20260906.md)负责字段、content-structure、Tag、关系实例和复杂查询。本报告不重复定义这些机制。
