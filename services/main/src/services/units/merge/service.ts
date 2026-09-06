@@ -47,7 +47,7 @@ import {
 	requireCurrentUnitMergeManifest,
 	type UnitMergeManifestV1,
 } from "./manifest";
-import { UnitMergePolicyV1, unitMergeRequestExpiry } from "./policy";
+import { UnitMergePolicy, unitMergeRequestExpiry } from "./policy";
 
 export type UnitMergeReviewView = {
 	readonly reviewerProfileId: string;
@@ -156,7 +156,7 @@ const requestSelection = {
 type SelectedRequest = Awaited<ReturnType<typeof selectRequests>>[number];
 
 function requireUnitMergeManifestVersion(value: number): 1 {
-	if (value !== UnitMergePolicyV1.manifestVersion)
+	if (value !== UnitMergePolicy.manifestVersion)
 		throw new Error(`Unsupported Unit merge manifest version ${value}`);
 	return value;
 }
@@ -346,10 +346,10 @@ export async function preflightUnitMerge(input: {
 		},
 		unitKind: manifest.unitKind,
 		policy: {
-			version: UnitMergePolicyV1.version,
-			requiredApprovals: UnitMergePolicyV1.requiredApprovals,
-			vetoEnabled: UnitMergePolicyV1.vetoEnabled,
-			selfReviewForbidden: UnitMergePolicyV1.selfReviewForbidden,
+			version: UnitMergePolicy.version,
+			requiredApprovals: UnitMergePolicy.requiredApprovals,
+			vetoEnabled: UnitMergePolicy.vetoEnabled,
+			selfReviewForbidden: UnitMergePolicy.selfReviewForbidden,
 		},
 		manifest: {
 			version: manifest.version,
@@ -394,11 +394,11 @@ function requestInsertValues(
 		proposerProfileId: input.proposerProfileId,
 		idempotencyKey: input.idempotencyKey,
 		note: input.note,
-		policyVersion: UnitMergePolicyV1.version,
-		requiredApprovals: UnitMergePolicyV1.requiredApprovals,
-		vetoEnabled: UnitMergePolicyV1.vetoEnabled,
-		selfReviewForbidden: UnitMergePolicyV1.selfReviewForbidden,
-		manifestVersion: UnitMergePolicyV1.manifestVersion,
+		policyVersion: UnitMergePolicy.version,
+		requiredApprovals: UnitMergePolicy.requiredApprovals,
+		vetoEnabled: UnitMergePolicy.vetoEnabled,
+		selfReviewForbidden: UnitMergePolicy.selfReviewForbidden,
+		manifestVersion: UnitMergePolicy.manifestVersion,
 		sourceUpdatedAt: manifest.sourceUpdatedAt,
 		targetUpdatedAt: manifest.targetUpdatedAt,
 		sourceGraphRevision: manifest.sourceGraphRevision,
@@ -661,8 +661,8 @@ export async function createReviewedUnitMerge(input: CreateMergeInput) {
 					targetUnitId: manifest.targetUnitId,
 					governanceDecisionId: decision.id,
 					details: {
-						policyVersion: UnitMergePolicyV1.version,
-						requiredApprovals: UnitMergePolicyV1.requiredApprovals,
+						policyVersion: UnitMergePolicy.version,
+						requiredApprovals: UnitMergePolicy.requiredApprovals,
 						requestFingerprint: manifest.requestFingerprint,
 					},
 				});
@@ -672,86 +672,6 @@ export async function createReviewedUnitMerge(input: CreateMergeInput) {
 	} catch (error) {
 		if (databaseConstraintName(error) === "unit_merge_request_proposer_idempotency_key") {
 			const existing = await existingIdempotentRequest(database, input, "reviewed");
-			if (existing) return getUnitMergeRequest(existing);
-		}
-		mapCreateConstraint(error);
-	}
-	return getUnitMergeRequest(requestId);
-}
-
-export async function createDirectUnitMerge(
-	input: CreateMergeInput & { readonly overrideOfRequestId?: string },
-) {
-	let requestId: string;
-	try {
-		requestId = await runVoteTransaction(
-			{ family: "unit_merge", authority: "global" },
-			async (tx) => {
-				await expirePendingMergeForSource(tx, input.sourceUnitId, new Date());
-				const existing = await existingIdempotentRequest(tx, input, "privileged_direct");
-				if (existing) return existing;
-				const manifest = await buildUnitMergeManifest(tx, input);
-				if (input.overrideOfRequestId) {
-					const [overridden] = await tx
-						.select({
-							state: unitMergeRequest.state,
-							sourceUnitId: unitMergeRequest.sourceUnitId,
-							targetUnitId: unitMergeRequest.targetUnitId,
-						})
-						.from(unitMergeRequest)
-						.where(eq(unitMergeRequest.id, input.overrideOfRequestId))
-						.limit(1)
-						.for("update");
-					if (
-						!overridden ||
-						overridden.state !== "rejected" ||
-						overridden.sourceUnitId !== input.sourceUnitId ||
-						overridden.targetUnitId !== input.targetUnitId
-					)
-						throw new UnitMergeRequestConflict();
-				}
-				const now = new Date();
-				const newRequestId = await generateUuidv7(tx);
-				const decision = await createGovernanceDecision(tx, {
-					action: "unit.merge.direct",
-					actorProfileId: input.proposerProfileId,
-					authority: { kind: "platform" },
-					targetUnitId: manifest.sourceUnitId,
-					subject: { kind: "unit_merge_request", id: newRequestId },
-					basis: { kind: "rules", rules: input.rules },
-				});
-				const [created] = await tx
-					.insert(unitMergeRequest)
-					.values({
-						...requestInsertValues(
-							manifest,
-							input,
-							newRequestId,
-							decision.id,
-							"privileged_direct",
-							"accepted",
-							now,
-						),
-						overrideOfRequestId: input.overrideOfRequestId,
-					})
-					.returning({ id: unitMergeRequest.id });
-				if (!created) throw new Error("Direct Unit merge insertion returned no row");
-				await acceptUnitMerge(tx, {
-					requestId: created.id,
-					sourceUnitId: manifest.sourceUnitId,
-					targetUnitId: manifest.targetUnitId,
-					graphPlan: manifest.graphPlan,
-					actorProfileId: input.proposerProfileId,
-					governanceDecisionId: decision.id,
-					mode: "privileged_direct",
-					now,
-				});
-				return created.id;
-			},
-		);
-	} catch (error) {
-		if (databaseConstraintName(error) === "unit_merge_request_proposer_idempotency_key") {
-			const existing = await existingIdempotentRequest(database, input, "privileged_direct");
 			if (existing) return getUnitMergeRequest(existing);
 		}
 		mapCreateConstraint(error);

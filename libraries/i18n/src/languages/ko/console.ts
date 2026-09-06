@@ -149,7 +149,7 @@ export default {
 			entity: entityTerms.label,
 		},
 		mode: "결정 경로",
-		modes: { reviewed: "4인 검토", privileged_direct: "고권한 직접 병합" },
+		modes: { reviewed: "검토 필요", privileged_direct: "고권한 직접 병합" },
 		proposer: "제안자",
 		approvalProgress: insert("승인 {{required}}건 중 {{count}}건", {
 			count: Number,
@@ -192,14 +192,12 @@ export default {
 		notePlaceholder: "중복 근거, 확인한 출처, 이 대상을 정식 항목으로 선택한 이유를 기록하세요.",
 		confirmSource: `원본 유닛 ${verbatimTerms.id.value} 다시 입력`,
 		confirmTarget: `대상 유닛 ${verbatimTerms.id.value} 다시 입력`,
-		submitForReview: "4인 검토로 제출",
-		mergeDirectly: "직접 병합",
+		submitForReview: "검토 요청",
 		approveTitle: "이 유닛 병합을 승인할까요?",
 		approveDescription:
-			"승인은 표시된 병합 명세에 연결됩니다. 네 번째 승인이 되돌릴 수 없는 병합을 원자적으로 수락합니다.",
+			"승인은 현재 표시된 병합 내용에만 적용됩니다. 필요한 승인이 모두 모이면 병합이 확정되며 되돌릴 수 없습니다.",
 		rejectTitle: "이 유닛 병합을 거부할까요?",
-		rejectDescription:
-			"한 번의 거부로 요청이 영구 종료됩니다. 고권한 재정의는 별도의 직접 병합 요청을 만들어야 합니다.",
+		rejectDescription: "한 명이라도 거부하면 이 요청은 영구적으로 종료됩니다.",
 		reviewNote: "검토 메모(선택 사항)",
 		reviewNotePlaceholder: "확인한 근거와 결정 이유를 기록하세요.",
 		confirmRequest: `확인하려면 병합 요청 ${verbatimTerms.id.value} 입력`,

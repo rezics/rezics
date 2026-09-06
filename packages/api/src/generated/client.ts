@@ -165,8 +165,6 @@ import type {
 	GetApiGovernancePlatformUnitMergesByRequestIdResponses,
 	PostApiGovernancePlatformUnitMergesPreflightOptions,
 	PostApiGovernancePlatformUnitMergesPreflightResponses,
-	PostApiGovernancePlatformUnitMergesDirectOptions,
-	PostApiGovernancePlatformUnitMergesDirectResponses,
 	PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
 	PostApiGovernancePlatformUnitMergesByRequestIdReviewsResponses,
 	PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
@@ -2366,23 +2364,6 @@ export function postApiGovernancePlatformUnitMergesPreflight<ThrowOnError extend
 }
 
 /**
- * @summary Start a privileged direct Unit identity merge
- * {@link /api/v1/governance/platform/unit-merges/direct}
- */
-export function postApiGovernancePlatformUnitMergesDirect<ThrowOnError extends boolean = true>(
-	options: Options<PostApiGovernancePlatformUnitMergesDirectOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernancePlatformUnitMergesDirectResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/platform/unit-merges/direct",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiGovernancePlatformUnitMergesDirectResponses, ThrowOnError>>;
-}
-
-/**
  * @summary Approve or reject a Unit merge request
  * {@link /api/v1/governance/platform/unit-merges/:requestId/reviews}
  */
@@ -3319,7 +3300,7 @@ export function patchApiUsersMe<ThrowOnError extends boolean = true>(
  * {@link /api/v1/users/me/studio}
  */
 export function listCurrentUserStudioContent<ThrowOnError extends boolean = true>(
-	options: Options<ListCurrentUserStudioContentOptions, ThrowOnError>,
+	options: Options<ListCurrentUserStudioContentOptions, ThrowOnError> = {},
 ): Promise<RequestResult<ListCurrentUserStudioContentResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
@@ -5631,7 +5612,7 @@ export function postApiUnitsByTypeByUnitIdSubjectAssociations<ThrowOnError exten
  * {@link /api/v1/history/contribution-resources/me}
  */
 export function listCurrentUserContributionResources<ThrowOnError extends boolean = true>(
-	options: Options<ListCurrentUserContributionResourcesOptions, ThrowOnError>,
+	options: Options<ListCurrentUserContributionResourcesOptions, ThrowOnError> = {},
 ): Promise<RequestResult<ListCurrentUserContributionResourcesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 

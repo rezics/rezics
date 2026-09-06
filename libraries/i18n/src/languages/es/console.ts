@@ -157,7 +157,7 @@ export default {
 		},
 		mode: "Vía de decisión",
 		modes: {
-			reviewed: "Revisión de cuatro personas",
+			reviewed: "Requiere revisión",
 			privileged_direct: "Fusión directa privilegiada",
 		},
 		proposer: "Propuesta por",
@@ -205,14 +205,12 @@ export default {
 			"Registra las pruebas de duplicidad, las fuentes verificadas y por qué este destino es canónico.",
 		confirmSource: `Vuelve a introducir el ${verbatimTerms.id.value} de la Unit de origen`,
 		confirmTarget: `Vuelve a introducir el ${verbatimTerms.id.value} de la Unit de destino`,
-		submitForReview: "Enviar a cuatro revisiones",
-		mergeDirectly: "Fusionar directamente",
+		submitForReview: "Enviar a revisión",
 		approveTitle: "¿Aprobar esta fusión de Units?",
 		approveDescription:
-			"Tu aprobación queda vinculada al manifiesto mostrado. La cuarta aprobación acepta atómicamente la fusión irreversible.",
+			"Tu aprobación se aplica únicamente a la fusión mostrada. Cuando se reúnen las aprobaciones necesarias, la fusión es irreversible.",
 		rejectTitle: "¿Rechazar esta fusión de Units?",
-		rejectDescription:
-			"Un rechazo cierra esta solicitud de forma permanente. Una anulación privilegiada debe crear otra solicitud directa.",
+		rejectDescription: "Un rechazo cierra esta solicitud de forma permanente.",
 		reviewNote: "Nota de revisión (opcional)",
 		reviewNotePlaceholder: "Registra las pruebas comprobadas y el fundamento de la decisión.",
 		confirmRequest: `Introduce el ${verbatimTerms.id.value} de la solicitud de fusión para confirmar`,

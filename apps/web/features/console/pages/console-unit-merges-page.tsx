@@ -10,7 +10,6 @@ import {
 	usePostApiGovernancePlatformUnitMerges,
 	usePostApiGovernancePlatformUnitMergesByRequestIdRetry,
 	usePostApiGovernancePlatformUnitMergesByRequestIdReviews,
-	usePostApiGovernancePlatformUnitMergesDirect,
 	usePostApiGovernancePlatformUnitMergesPreflight,
 } from "@rezics/openapi-tanstack-query";
 import {
@@ -75,7 +74,7 @@ export function ConsoleUnitMergesPage() {
 		canReadUnitMerges,
 		canProposeUnitMerges,
 		canReviewUnitMerges,
-		canMergeUnitsDirectly,
+		canRetryUnitMerges,
 		currentProfileId,
 	} = useConsoleWorkspace();
 	const queryClient = useQueryClient();
@@ -115,10 +114,8 @@ export function ConsoleUnitMergesPage() {
 	const [note, setNote] = useState("");
 	const [confirmationSourceUnitId, setConfirmationSourceUnitId] = useState("");
 	const [confirmationTargetUnitId, setConfirmationTargetUnitId] = useState("");
-	const [overrideOfRequestId, setOverrideOfRequestId] = useState<string>();
 	const preflight = usePostApiGovernancePlatformUnitMergesPreflight();
 	const propose = usePostApiGovernancePlatformUnitMerges();
-	const direct = usePostApiGovernancePlatformUnitMergesDirect();
 
 	const [reviewDecision, setReviewDecision] = useState<ReviewDecision | null>(null);
 	const [reviewNote, setReviewNote] = useState("");
@@ -134,7 +131,6 @@ export function ConsoleUnitMergesPage() {
 	function resetPreflight() {
 		preflight.reset();
 		propose.reset();
-		direct.reset();
 		setConfirmationSourceUnitId("");
 		setConfirmationTargetUnitId("");
 	}
@@ -145,18 +141,6 @@ export function ConsoleUnitMergesPage() {
 		setIdempotencyKey(createIdempotencyKey());
 		setRules([]);
 		setNote("");
-		setOverrideOfRequestId(undefined);
-		resetPreflight();
-		setCreateOpen(true);
-	}
-
-	function openDirectOverride(request: UnitMergeRequest) {
-		setSourceUnitId(request.sourceUnit.id);
-		setTargetUnitId(request.targetUnit.id);
-		setIdempotencyKey(createIdempotencyKey());
-		setRules([]);
-		setNote("");
-		setOverrideOfRequestId(request.id);
 		resetPreflight();
 		setCreateOpen(true);
 	}
@@ -170,7 +154,7 @@ export function ConsoleUnitMergesPage() {
 		}
 	}
 
-	async function submitMerge(mode: "reviewed" | "privileged_direct") {
+	async function submitMerge() {
 		const manifest = preflight.data?.manifest;
 		if (
 			!manifest ||
@@ -189,17 +173,13 @@ export function ConsoleUnitMergesPage() {
 			idempotencyKey,
 			rules,
 			...(note.trim() ? { note: note.trim() } : {}),
-			...(mode === "privileged_direct" && overrideOfRequestId ? { overrideOfRequestId } : {}),
 		};
 		try {
-			const created =
-				mode === "privileged_direct"
-					? await direct.mutateAsync({ body })
-					: await propose.mutateAsync({ body });
+			const created = await propose.mutateAsync({ body });
 			await queryClient.invalidateQueries({
 				queryKey: getApiGovernancePlatformUnitMergesQueryKey(),
 			});
-			setState(mode === "reviewed" ? "pending_review" : "all");
+			setState("pending_review");
 			setSelectedRequestId(created.id);
 			setCreateOpen(false);
 		} catch {
@@ -249,7 +229,7 @@ export function ConsoleUnitMergesPage() {
 		}
 	}
 
-	const pendingCreate = propose.isPending || direct.isPending;
+	const pendingCreate = propose.isPending;
 	const preflightResult = preflight.data as
 		| PostApiGovernancePlatformUnitMergesPreflightStatus200
 		| undefined;
@@ -487,7 +467,7 @@ export function ConsoleUnitMergesPage() {
 										</Button>
 									</>
 								) : null}
-								{canMergeUnitsDirectly && selected.operation?.state === "failed" ? (
+								{canRetryUnitMerges && selected.operation?.state === "failed" ? (
 									<Button
 										isLoading={retry.isPending}
 										onClick={() => void retryMerge()}
@@ -495,12 +475,6 @@ export function ConsoleUnitMergesPage() {
 									>
 										<RefreshCw aria-hidden />
 										{t.console.unitMerges.retry}
-									</Button>
-								) : null}
-								{canMergeUnitsDirectly && selected.state === "rejected" ? (
-									<Button onClick={() => openDirectOverride(selected)} variant="destructive">
-										<GitMerge aria-hidden />
-										{t.console.unitMerges.mergeDirectly}
 									</Button>
 								) : null}
 							</div>
@@ -536,7 +510,6 @@ export function ConsoleUnitMergesPage() {
 									autoComplete="off"
 									onChange={(event) => {
 										setSourceUnitId(event.currentTarget.value.trim());
-										setOverrideOfRequestId(undefined);
 										resetPreflight();
 									}}
 									spellCheck={false}
@@ -549,7 +522,6 @@ export function ConsoleUnitMergesPage() {
 									autoComplete="off"
 									onChange={(event) => {
 										setTargetUnitId(event.currentTarget.value.trim());
-										setOverrideOfRequestId(undefined);
 										resetPreflight();
 									}}
 									spellCheck={false}
@@ -620,7 +592,7 @@ export function ConsoleUnitMergesPage() {
 								</div>
 							</div>
 						) : null}
-						<RequestFailure error={preflight.error ?? propose.error ?? direct.error} />
+						<RequestFailure error={preflight.error ?? propose.error} />
 					</DialogBody>
 					<DialogFooter>
 						<Button disabled={pendingCreate} onClick={() => setCreateOpen(false)} variant="outline">
@@ -630,19 +602,9 @@ export function ConsoleUnitMergesPage() {
 							<Button
 								disabled={!confirmationValid}
 								isLoading={propose.isPending}
-								onClick={() => void submitMerge("reviewed")}
+								onClick={() => void submitMerge()}
 							>
 								{t.console.unitMerges.submitForReview}
-							</Button>
-						) : null}
-						{preflightResult && canMergeUnitsDirectly ? (
-							<Button
-								disabled={!confirmationValid}
-								isLoading={direct.isPending}
-								onClick={() => void submitMerge("privileged_direct")}
-								variant="destructive"
-							>
-								{t.console.unitMerges.mergeDirectly}
 							</Button>
 						) : null}
 					</DialogFooter>

@@ -56,3 +56,9 @@ expression and its obsolete test. The online exact-count policy is retained
 unchanged. No schema, API response or live ranking behavior changes in this slice.
 Remaining active expression/Realm ranking costs and the broader P06 retrieval
 acceptance still require implementation and representative plans.
+
+The merge acceptance check subsequently reproduced an existing projection failure:
+the tombstone update tried to insert a search document referencing the now-merged
+identity. The new forward migration filters deleted owners before insertion and
+removes their old document. The real service fixture verifies merge/delete removal
+and ordinary restore reconstruction, with no weakening of merged-reference guards.

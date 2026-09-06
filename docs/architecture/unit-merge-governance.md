@@ -38,21 +38,48 @@ The centralized policy is versioned in backend code and copied into every reques
 | --- | --- |
 | `unit.merge.propose` | Preflight and submit a reviewed merge |
 | `unit.merge.review` | Approve or reject a reviewed merge |
-| `unit.merge` | Directly accept a merge and manually retry a failed operation |
+| `unit.merge` | Manage reviewed merges and manually retry an already accepted failed operation |
 
-Policy version 1 requires four distinct approvals, forbids proposer self-review, enables
-a one-vote terminal rejection, and expires pending requests after seven days. A reviewer
-with the direct capability still casts only one ordinary vote unless they intentionally
-use the separately labelled direct-merge command. A rejected request is immutable; a
-privileged override creates another `privileged_direct` request linked to the rejected
-request rather than altering its decision record.
+Policy version 2 requires two distinct reviewers, forbids proposer self-review, enables
+a one-vote terminal rejection, and expires pending requests after seven days. The direct
+acceptance service/API and console actions are retired. The management capability
+does not bypass quorum or permit self-approval. A rejected request is immutable.
+Historical `privileged_direct` records and already accepted operations remain readable
+and recoverable; their persisted policy and authority are not rewritten.
 
 Review votes are immutable and bound to the request fingerprint. The fingerprint covers
 the policy version, source and target IDs, kinds, Unit aggregate `updated_at` values,
-Variant graph revisions, and the graph plan. The fourth approval revalidates the
+Variant graph revisions, and the graph plan. The final required approval revalidates the
 fingerprint and accepts the merge in the same transaction. Any aggregate edit or relevant
 Variant graph change supersedes the request; independently versioned historical evidence
 does not silently change the chosen identity direction.
+
+Version 1 pending requests retain their four-review snapshot. Because the fingerprint
+also binds policy version, reviewing one after the policy change supersedes it as stale;
+the operator must submit a fresh proposal under version 2. Existing votes are never
+silently counted toward a smaller quorum. Current Profile IDs each bind a distinct Auth
+user; P02 must preserve human/operator independence when delegated/service actors arrive.
+
+This is a public API cutover: clients must use the reviewed request endpoint instead of
+`POST /api/v1/governance/platform/unit-merges/direct`. The generated SDK and console
+remove that command together. Ship the new forward search-projection migration before
+the new API/worker: a merged/soft-deleted Unit must not be reinserted into the live search
+projection by its own tombstone update. Ordinary restoration rebuilds its document;
+permanent merge redirects still prohibit restoring a merged identity.
+
+The projection migration performs no corpus scan or backfill. It adds a deletion-state
+predicate to an existing primary-key refresh, then deletes at most one projection row
+when no live owner exists. Row/index growth at 500M/3B is unchanged; active text refresh
+fan-out and global search capacity remain P06/P10 qualification work. Measurement
+collision checks compare all five current typed measurement columns, without referring
+to removed source columns. Existing bounded Entity and context-batch budgets remain.
+
+`scripts/check-unit-merge-review-policy.ts` exercises actual service commands against
+loopback local `rezics`, requires `REZICS_DISPOSABLE_MIGRATION_FIXTURE=1` and rolls back
+the complete fixture transaction. It verifies one approval is insufficient, two eligible
+reviewers accept, proposer/duplicate votes fail, v1 snapshots remain intact but stale,
+and search documents disappear/reappear for deletion/restoration. No fixture merge is
+committed and no worker is started by this check.
 
 ## Retry and convergence model
 

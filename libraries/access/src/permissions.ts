@@ -301,7 +301,7 @@ export const PlatformCapabilityDefinitions = {
 		resource: "unit",
 		action: "merge",
 		rationale:
-			"Directly accepts an irreversible Unit identity merge and administers retryable execution.",
+			"Manages reviewed Unit merges and retries already accepted operations without bypassing review.",
 	},
 	"unit.ownership.override": {
 		resource: "unit.ownership",

@@ -1,9 +1,9 @@
 import { type UnitMergeOperationPhase, UnitMergeOperationPhaseValues } from "../../database/schema";
 
 /** Versioned centralized policy. Persistence stores this snapshot for audit. */
-export const UnitMergePolicyV1 = {
-	version: 1,
-	requiredApprovals: 4,
+export const UnitMergePolicy = {
+	version: 2,
+	requiredApprovals: 2,
 	vetoEnabled: true,
 	selfReviewForbidden: true,
 	requestLifetimeMs: 7 * 24 * 60 * 60 * 1_000,
@@ -15,7 +15,7 @@ export const UnitMergePolicyV1 = {
 } as const;
 
 export function unitMergeRequestExpiry(now: Date): Date {
-	return new Date(now.getTime() + UnitMergePolicyV1.requestLifetimeMs);
+	return new Date(now.getTime() + UnitMergePolicy.requestLifetimeMs);
 }
 
 export function nextUnitMergePhase(phase: UnitMergeOperationPhase): UnitMergeOperationPhase | null {

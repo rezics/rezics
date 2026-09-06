@@ -1,6 +1,6 @@
 # P05 — Change proposals, identity resolution and AI-assisted review
 
-Status: planned, not implemented. Date: 2026-09-06. Parent: [program and gates](README.md).
+Status: reviewed identity-merge policy implemented; proposal/source/AI workflow pending. Date: 2026-09-06. Parent: [program and gates](README.md).
 
 ## Outcome and owners
 
@@ -55,3 +55,29 @@ Keep a permanent rejected-pair/binding decision keyed by evidence version to avo
 Let daily changed source records be C, semantic-change fraction s and mean coalescing factor g: proposals ≈ Cs/g; model calls ≈ proposals × a plus controlled retries; human cases ≈ proposals × h, where h includes direct-human and post-AI referrals as a fraction of all proposals. Record input/output tokens and cache reuse rather than multiplying all source objects by a model call. Price is a deployment input. Redaction or a private model does not by itself establish processing rights; P04 eligibility applies to the actual mode and material.
 
 Test duplicate and out-of-order events, expired leases, stale approvals, operator revocation, model timeout, schema-invalid output, injection strings, conflicting evidence and rejected-pair reopening. Add DB concurrency and rollback tests around apply/merge. P10 covers bounded jobs, 500M/3B proposal/evidence histories, retention and partition routing. Private prompts/audit access follow evidence rights and privacy policy.
+
+## Implementation ledger
+
+Policy version 2 uses two independent reviewers, no proposer self-review and a one-vote
+veto. The direct merge writer/API/UI and generated client operation were removed;
+management retains recovery for already accepted operations. Historical policy snapshots,
+votes and direct-mode records remain intact. A v1 pending request becomes superseded
+on review because its fingerprint binds the old policy; it is not silently converted.
+All UI locales describe the request's displayed quorum without hardcoded four-person
+labels or offering a privileged override.
+
+An actual service transaction in `rezics-dev` verified the quorum, self-review denial,
+duplicate denial, v1 staleness and rollback. It also exposed and repaired two existing
+merge blockers: obsolete measurement-column references and search projection refresh
+of a merged tombstone. Migration `20260906143437_unit_search_document_tombstones.sql`
+is a new forward function update generated through the supported workflow; released
+SQL is unchanged. See [merge governance](../../architecture/unit-merge-governance.md)
+for the cutover and reproducible check. Source proposals, AI review, review staffing
+and delegated/service-actor eligibility remain unqualified.
+
+Verification: the final combined backend/language/filter/fixture/access/i18n run
+passed 1,545 tests in 254 files. Backend/Web/API and both generated SDK typechecks,
+localization/terminology policy, the unchanged online-count gate, full migration
+replay, canonical PostgreSQL comparison, schema drift and PGroonga health passed.
+The new migration is installed locally in `rezics-dev`; no production operation
+or rendered frontend acceptance is claimed.

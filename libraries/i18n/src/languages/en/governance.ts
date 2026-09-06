@@ -81,7 +81,7 @@ export default {
 		"unit.governance.read": "Inspect governance data for every Unit",
 		"unit.merge.propose": "Propose Unit merges",
 		"unit.merge.review": "Review Unit merges",
-		"unit.merge": "Merge Units directly",
+		"unit.merge": "Manage Unit merges",
 		"unit.ownership.override": "Override the owner of any Unit",
 		"unit.license.manage": `Invalidate or restore Unit ${enTerminology.license.forms.inline} grants`,
 		"unit.delete": "Soft-delete any Unit",

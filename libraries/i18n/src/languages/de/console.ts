@@ -155,7 +155,7 @@ export default {
 		},
 		mode: "Entscheidungsweg",
 		modes: {
-			reviewed: "Prüfung durch vier Personen",
+			reviewed: "Prüfung erforderlich",
 			privileged_direct: "Direkte privilegierte Zusammenführung",
 		},
 		proposer: "Vorgeschlagen von",
@@ -203,14 +203,12 @@ export default {
 			"Belege für das Duplikat, Prüfquellen und die Wahl des kanonischen Ziels festhalten.",
 		confirmSource: `Quell-Unit-${verbatimTerms.id.value} erneut eingeben`,
 		confirmTarget: `Ziel-Unit-${verbatimTerms.id.value} erneut eingeben`,
-		submitForReview: "Zur Vier-Personen-Prüfung senden",
-		mergeDirectly: "Direkt zusammenführen",
+		submitForReview: "Zur Prüfung einreichen",
 		approveTitle: "Dieser Unit-Zusammenführung zustimmen?",
 		approveDescription:
-			"Deine Zustimmung ist an das angezeigte Manifest gebunden. Die vierte Zustimmung nimmt die unumkehrbare Zusammenführung atomar an.",
+			"Deine Zustimmung gilt nur für die angezeigte Zusammenführung. Sobald die erforderlichen Zustimmungen vorliegen, ist die Zusammenführung unumkehrbar.",
 		rejectTitle: "Diese Unit-Zusammenführung ablehnen?",
-		rejectDescription:
-			"Eine Ablehnung schließt diesen Antrag endgültig. Eine privilegierte Übersteuerung muss einen separaten Direktantrag erstellen.",
+		rejectDescription: "Eine Ablehnung schließt diesen Antrag endgültig.",
 		reviewNote: "Prüfnotiz (optional)",
 		reviewNotePlaceholder: "Geprüfte Belege und Entscheidungsgrundlage festhalten.",
 		confirmRequest: `Zusammenführungsantrag-${verbatimTerms.id.value} zur Bestätigung eingeben`,

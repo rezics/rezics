@@ -22,7 +22,7 @@ import {
 } from "../../database/schema";
 import { UnitNotFound } from "../errors";
 import { requireEntityMeasurementsMergeable } from "./entity-measurements";
-import { UnitMergePolicyV1 } from "./policy";
+import { UnitMergePolicy } from "./policy";
 
 const EligibleKinds: ReadonlySet<string> = new Set(UnitMergeEligibleKindValues);
 const ProtectedRegistryUnitIds: ReadonlySet<string> = new Set(ContentLabelRegistryIds);
@@ -181,7 +181,7 @@ function fingerprintManifest(manifest: Omit<UnitMergeManifestV1, "requestFingerp
 		.update(
 			JSON.stringify({
 				version: manifest.version,
-				policyVersion: UnitMergePolicyV1.version,
+				policyVersion: UnitMergePolicy.version,
 				sourceUnitId: manifest.sourceUnitId,
 				targetUnitId: manifest.targetUnitId,
 				unitKind: manifest.unitKind,

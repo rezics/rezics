@@ -95,3 +95,9 @@ The restored `rezics-dev` was verified through its container's `psql`: PostgreSQ
 inventory command records schema/runtime metadata and Profile/Auth foreign keys.
 This local evidence does not qualify production. Production capture, recovery,
 retention, admission control and mixed-workload qualification remain pending.
+
+P05 acceptance repair added and locally verified forward migration
+`20260906143437_unit_search_document_tombstones.sql`. The complete disposable
+migration check passed, including canonical SQL equality, schema synchronization
+and PGroonga health. The ordinary `rezics-dev` database was upgraded through Atlas
+and its completed revision verified using the container's `psql`; no reset was needed.

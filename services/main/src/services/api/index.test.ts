@@ -345,7 +345,6 @@ describe("API root", () => {
 		const unitMergeOperations = [
 			document.paths["/api/v1/governance/platform/unit-merges/preflight"]?.post,
 			document.paths["/api/v1/governance/platform/unit-merges"]?.post,
-			document.paths["/api/v1/governance/platform/unit-merges/direct"]?.post,
 			document.paths["/api/v1/governance/platform/unit-merges/{requestId}/reviews"]?.post,
 		];
 
@@ -385,6 +384,7 @@ describe("API root", () => {
 				"ContentLabelUnitMergeForbidden",
 			);
 		}
+		expect(document.paths["/api/v1/governance/platform/unit-merges/direct"]).toBeUndefined();
 
 		expect(document.paths["/api/v1/tag-paths/{pathId}"]?.put).toBeUndefined();
 		expect(document.paths["/api/v1/tag-paths/{pathId}/corrections/{correctionId}"]).toBeUndefined();

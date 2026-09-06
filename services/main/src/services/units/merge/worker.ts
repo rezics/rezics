@@ -13,7 +13,7 @@ import {
 } from "../../database/schema";
 import { isEntityMeasurementMergePhase } from "./entity-measurements";
 import { processUnitMergePhase } from "./phase-handlers";
-import { nextUnitMergePhase, UnitMergePolicyV1, unitMergeRetryDelayMilliseconds } from "./policy";
+import { nextUnitMergePhase, UnitMergePolicy, unitMergeRetryDelayMilliseconds } from "./policy";
 
 const MaximumStepsPerDispatch = 32;
 
@@ -30,7 +30,7 @@ type ClaimedUnitMergeOperation = {
 
 export async function claimUnitMergeOperations(
 	now: Date,
-	limit = UnitMergePolicyV1.workerClaimBatchSize,
+	limit = UnitMergePolicy.workerClaimBatchSize,
 ): Promise<ClaimedUnitMergeOperation[]> {
 	return database.transaction(async (tx) => {
 		const candidates = await tx
@@ -53,7 +53,7 @@ export async function claimUnitMergeOperations(
 			.for("update", { skipLocked: true });
 		const ids = candidates.map(({ id }) => id);
 		if (!ids.length) return [];
-		const leaseExpiresAt = new Date(now.getTime() + UnitMergePolicyV1.workerLeaseDurationMs);
+		const leaseExpiresAt = new Date(now.getTime() + UnitMergePolicy.workerLeaseDurationMs);
 		const claimed = await tx
 			.update(unitMergeOperation)
 			.set({
@@ -172,7 +172,7 @@ async function processClaimedStep(
 			sourceUnitId: claimed.sourceUnitId,
 			targetUnitId: claimed.targetUnitId,
 			graphPlan: claimed.graphPlan,
-			batchSize: UnitMergePolicyV1.workerBatchSize,
+			batchSize: UnitMergePolicy.workerBatchSize,
 		});
 		const now = new Date();
 		if (phase === "finalize" && result.done) {
@@ -219,7 +219,7 @@ async function processClaimedStep(
 				attemptCount: 0,
 				lastErrorCode: null,
 				lastErrorMessage: null,
-				leaseExpiresAt: new Date(now.getTime() + UnitMergePolicyV1.workerLeaseDurationMs),
+				leaseExpiresAt: new Date(now.getTime() + UnitMergePolicy.workerLeaseDurationMs),
 				updatedAt: now,
 			})
 			.where(
@@ -343,7 +343,7 @@ async function markClaimedFailure(
 		const attemptCount = operation.attemptCount + 1;
 		const terminal =
 			isTerminalUnitMergeExecutionFailure(error) ||
-			attemptCount >= UnitMergePolicyV1.workerMaximumAutomaticAttempts;
+			attemptCount >= UnitMergePolicy.workerMaximumAutomaticAttempts;
 		const retryAt = new Date(
 			now.getTime() + unitMergeRetryDelayMilliseconds(attemptCount, Math.random()),
 		);

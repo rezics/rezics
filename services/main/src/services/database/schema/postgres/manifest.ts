@@ -9,6 +9,7 @@ export const PostgreSqlSchemaFileNames = [
 	"tag-path.sql",
 	"tag-path-search.sql",
 	"unit-license-grant.sql",
+	"unit-search-document.sql",
 	"unit-variant-integrity.sql",
 ] as const;
 
@@ -19,6 +20,7 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles = {
+	unit_search_document_tombstones: ["unit-search-document.sql"],
 	tag_path_semantic_model: [
 		"realm-tag-authority.sql",
 		"tag-judgment-aggregates.sql",
@@ -29,6 +31,7 @@ export const PostgreSqlSchemaMigrationBundles = {
 } as const satisfies Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>>;
 
 export const PostgreSqlSchemaFunctionNames = [
+	"refresh_unit_search_document",
 	"adjust_tag_public_position_stat",
 	"apply_book_chapter_delta",
 	"book_chapter_node_scope",

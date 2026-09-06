@@ -2,16 +2,17 @@ import { describe, expect, it } from "vitest";
 
 import { UnitMergeOperationPhaseValues } from "../../database/schema";
 import {
-	UnitMergePolicyV1,
+	UnitMergePolicy,
 	nextUnitMergePhase,
 	unitMergeRequestExpiry,
 	unitMergeRetryDelayMilliseconds,
 } from "./policy";
 
 describe("centralized Unit merge policy", () => {
-	it("requires four independent approvals with one-vote veto and no self-review", () => {
-		expect(UnitMergePolicyV1).toMatchObject({
-			requiredApprovals: 4,
+	it("requires two independent approvals with one-vote veto and no self-review", () => {
+		expect(UnitMergePolicy).toMatchObject({
+			version: 2,
+			requiredApprovals: 2,
 			vetoEnabled: true,
 			selfReviewForbidden: true,
 			manifestVersion: 1,

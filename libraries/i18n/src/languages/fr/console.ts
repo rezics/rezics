@@ -157,7 +157,7 @@ export default {
 		},
 		mode: "Circuit de décision",
 		modes: {
-			reviewed: "Examen par quatre personnes",
+			reviewed: "Examen requis",
 			privileged_direct: "Fusion directe privilégiée",
 		},
 		proposer: "Proposée par",
@@ -205,14 +205,12 @@ export default {
 			"Consignez les preuves de doublon, les sources vérifiées et le choix de cette cible canonique.",
 		confirmSource: `Saisir à nouveau l’${verbatimTerms.id.value} de la Unit source`,
 		confirmTarget: `Saisir à nouveau l’${verbatimTerms.id.value} de la Unit cible`,
-		submitForReview: "Soumettre à quatre examens",
-		mergeDirectly: "Fusionner directement",
+		submitForReview: "Soumettre à examen",
 		approveTitle: "Approuver cette fusion d’Units ?",
 		approveDescription:
-			"Votre approbation est liée au manifeste affiché. La quatrième approbation accepte atomiquement la fusion irréversible.",
+			"Votre approbation porte uniquement sur la fusion affichée. Une fois les approbations requises réunies, la fusion est irréversible.",
 		rejectTitle: "Rejeter cette fusion d’Units ?",
-		rejectDescription:
-			"Un seul rejet clôt définitivement cette demande. Un contournement privilégié doit créer une demande directe distincte.",
+		rejectDescription: "Un seul rejet clôt définitivement cette demande.",
 		reviewNote: "Note d’examen (facultative)",
 		reviewNotePlaceholder: "Consignez les preuves vérifiées et le fondement de cette décision.",
 		confirmRequest: `Saisir l’${verbatimTerms.id.value} de la demande de fusion pour confirmer`,

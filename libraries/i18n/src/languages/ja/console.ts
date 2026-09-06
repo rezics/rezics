@@ -152,7 +152,7 @@ export default {
 			entity: entityTerms.label,
 		},
 		mode: "決定経路",
-		modes: { reviewed: "4名による審査", privileged_direct: "特権による直接統合" },
+		modes: { reviewed: "審査が必要", privileged_direct: "特権による直接統合" },
 		proposer: "提案者",
 		approvalProgress: insert("{{required}} 件中 {{count}} 件の承認", {
 			count: Number,
@@ -195,14 +195,12 @@ export default {
 		notePlaceholder: "重複の根拠、確認した情報源、この統合先を正規とする理由を記録します。",
 		confirmSource: `統合元ユニットの ${verbatimTerms.id.value} を再入力`,
 		confirmTarget: `統合先ユニットの ${verbatimTerms.id.value} を再入力`,
-		submitForReview: "4名審査へ送信",
-		mergeDirectly: "直接統合",
+		submitForReview: "審査に提出",
 		approveTitle: "このユニット統合を承認しますか？",
 		approveDescription:
-			"承認は表示中の統合仕様に紐づきます。4件目の承認で不可逆な統合がアトミックに受理されます。",
+			"承認は表示中の統合内容にのみ適用されます。必要な承認がそろうと統合が確定し、元に戻せません。",
 		rejectTitle: "このユニット統合を却下しますか？",
-		rejectDescription:
-			"1件の却下で申請は恒久的に終了します。特権による上書きには別の直接統合申請が必要です。",
+		rejectDescription: "1件の却下でこの申請は恒久的に終了します。",
 		reviewNote: "審査メモ（任意）",
 		reviewNotePlaceholder: "確認した根拠と判断理由を記録します。",
 		confirmRequest: `確認のため統合申請の ${verbatimTerms.id.value} を入力`,

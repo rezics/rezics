@@ -306,7 +306,7 @@ describe("lossless Entity measurement merge", () => {
 	});
 
 	it.each(["entity_id", "context_unit_id"] as const)(
-		"deduplicates only an exact sourced fact during %s convergence",
+		"deduplicates only equal current measurement values during %s convergence",
 		async (direction) => {
 			const { transaction, statements } = transactionWithRows([
 				[],
@@ -334,11 +334,8 @@ describe("lossless Entity measurement merge", () => {
 				"bust_millimetres",
 				"waist_millimetres",
 				"hips_millimetres",
-				"source_url",
-				"source_imported_at",
-				"source_provenance",
 			])
-				expect(convergence).toContain(`"batch".${field}`);
+				expect(convergence).toContain(`"batch"."${field}"`);
 			expect(convergence).toContain("is not distinct from row");
 			expect(convergence).toContain("delete from entity_measurement as source using duplicates");
 			expect(convergence).toContain("and not exists ( select 1 from duplicates");

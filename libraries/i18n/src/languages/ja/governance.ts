@@ -80,7 +80,7 @@ export default {
 		"unit.governance.read": "すべてのユニットのガバナンス情報を閲覧する",
 		"unit.merge.propose": "ユニットの統合を提案する",
 		"unit.merge.review": "ユニットの統合を審査する",
-		"unit.merge": "ユニットを直接統合する",
+		"unit.merge": "ユニット統合を管理する",
 		"unit.ownership.override": "任意のユニットの所有者を強制変更する",
 		"unit.license.manage": `ユニットの${jaTerminology.license.forms.label}付与を無効化または復元する`,
 		"unit.delete": "任意のユニットを論理削除する",

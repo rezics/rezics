@@ -165,8 +165,6 @@ import type {
 	GetApiGovernancePlatformUnitMergesByRequestIdResponses,
 	PostApiGovernancePlatformUnitMergesPreflightOptions,
 	PostApiGovernancePlatformUnitMergesPreflightResponses,
-	PostApiGovernancePlatformUnitMergesDirectOptions,
-	PostApiGovernancePlatformUnitMergesDirectResponses,
 	PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
 	PostApiGovernancePlatformUnitMergesByRequestIdReviewsResponses,
 	PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
@@ -2365,23 +2363,6 @@ export function postApiGovernancePlatformUnitMergesPreflight<ThrowOnError extend
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PostApiGovernancePlatformUnitMergesPreflightResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Start a privileged direct Unit identity merge
- * {@link /api/v1/governance/platform/unit-merges/direct}
- */
-export function postApiGovernancePlatformUnitMergesDirect<ThrowOnError extends boolean = true>(
-	options: Options<PostApiGovernancePlatformUnitMergesDirectOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernancePlatformUnitMergesDirectResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/platform/unit-merges/direct",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiGovernancePlatformUnitMergesDirectResponses, ThrowOnError>>;
 }
 
 /**

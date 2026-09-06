@@ -82,7 +82,7 @@ export default {
 		"unit.governance.read": "Verwaltungsdaten aller Units einsehen",
 		"unit.merge.propose": "Zusammenführungen von Units vorschlagen",
 		"unit.merge.review": "Zusammenführungen von Units prüfen",
-		"unit.merge": "Units direkt zusammenführen",
+		"unit.merge": "Zusammenführungen von Units verwalten",
 		"unit.ownership.override": "Eigentümerschaft einer beliebigen Unit neu zuweisen",
 		"unit.license.manage": "Lizenzvergaben von Units ungültig machen oder wiederherstellen",
 		"unit.delete": "Beliebige Units vorläufig löschen",

@@ -4,7 +4,6 @@ import Elysia from "elysia";
 
 import session from "../../auth/session";
 import {
-	createDirectUnitMerge,
 	createReviewedUnitMerge,
 	getUnitMergeRequest,
 	listUnitMergeRequests,
@@ -15,7 +14,6 @@ import {
 import { toApiErrorResponse } from "../schema/response";
 import { UnitMergeConfirmationInvalid } from "./errors";
 import {
-	CreateDirectUnitMergeBody,
 	CreateReviewedUnitMergeBody,
 	ListUnitMergeRequestsQuery,
 	ReviewUnitMergeBody,
@@ -162,49 +160,6 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 					idempotencyKey: body.idempotencyKey,
 					rules: body.rules,
 					note: body.note?.trim() || undefined,
-				}),
-			);
-		},
-	)
-	.post(
-		"/direct",
-		{
-			access: "fresh-session-only",
-			body: CreateDirectUnitMergeBody,
-			response: {
-				[StatusCodes.OK]: UnitMergeRequestResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"UnitMergeConfirmationInvalid",
-					"GovernanceRuleSourceForbidden",
-				]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"PlatformCapabilityRequired",
-					"FreshSessionRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: MergeNotFoundResponse,
-				[StatusCodes.CONFLICT]: MergeRuleConflictResponse,
-				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: MergeEligibilityResponse,
-			},
-			detail: {
-				summary: "Start a privileged direct Unit identity merge",
-				tags: ["Governance"],
-			},
-		},
-		async ({ authorization, profile, body }) => {
-			await authorization.platform.ensureCapability("unit.merge");
-			requireMatchingConfirmations(body);
-			return presentMergeRequest(
-				await createDirectUnitMerge({
-					sourceUnitId: body.sourceUnitId,
-					targetUnitId: body.targetUnitId,
-					expectedSourceUpdatedAt: new Date(body.expectedSourceUpdatedAt),
-					expectedTargetUpdatedAt: new Date(body.expectedTargetUpdatedAt),
-					proposerProfileId: profile.unitId,
-					idempotencyKey: body.idempotencyKey,
-					rules: body.rules,
-					note: body.note?.trim() || undefined,
-					overrideOfRequestId: body.overrideOfRequestId,
 				}),
 			);
 		},

@@ -156,7 +156,7 @@ export default {
 		},
 		mode: "Decision path",
 		modes: {
-			reviewed: "Four-person review",
+			reviewed: "Review required",
 			privileged_direct: "Administrative direct merge",
 		},
 		proposer: "Proposed by",
@@ -203,14 +203,12 @@ export default {
 			"Record duplicate evidence, verification sources, and why this target is canonical.",
 		confirmSource: `Re-enter the source Unit ${verbatimTerms.id.value}`,
 		confirmTarget: `Re-enter the target Unit ${verbatimTerms.id.value}`,
-		submitForReview: "Submit for four reviews",
-		mergeDirectly: "Merge directly",
+		submitForReview: "Submit for review",
 		approveTitle: "Approve this Unit merge?",
 		approveDescription:
-			"Your approval is bound to the displayed manifest. The fourth approval atomically accepts the irreversible merge.",
+			"Your approval applies only to the displayed merge. Once the required approvals are collected, the merge is irreversible.",
 		rejectTitle: "Reject this Unit merge?",
-		rejectDescription:
-			"One rejection closes this request permanently. A privileged override must create a separate direct request.",
+		rejectDescription: "One rejection closes this request permanently.",
 		reviewNote: "Review note (optional)",
 		reviewNotePlaceholder: "Record the evidence checked and the basis for this decision.",
 		confirmRequest: `Enter the merge request ${verbatimTerms.id.value} to confirm`,

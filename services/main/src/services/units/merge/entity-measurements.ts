@@ -2,7 +2,8 @@ import { sql } from "drizzle-orm";
 
 import { UnitMergeMeasurementConflict } from "../../api/governance/errors";
 import type { DatabaseTransaction } from "../../database";
-import { UnitMergePolicyV1 } from "./policy";
+import { entityMeasurement } from "../../database/schema";
+import { UnitMergePolicy } from "./policy";
 
 export const EntityMeasurementMergePhaseValues = [
 	"entity_measurement_preflight",
@@ -64,16 +65,16 @@ function requireBoundedBatchSize(batchSize: number): void {
 	if (
 		!Number.isSafeInteger(batchSize) ||
 		batchSize < 1 ||
-		batchSize > UnitMergePolicyV1.workerBatchSize
+		batchSize > UnitMergePolicy.workerBatchSize
 	)
 		throw new RangeError(
-			`Entity measurement merge batch size must be an integer from 1 through ${UnitMergePolicyV1.workerBatchSize}`,
+			`Entity measurement merge batch size must be an integer from 1 through ${UnitMergePolicy.workerBatchSize}`,
 		);
 }
 
 /**
  * Proves that both measurement identities can be rewritten without discarding
- * a sourced fact. The caller must hold the Unit merge advisory locks while it
+ * conflicting measured values. The caller must hold the Unit merge advisory locks while it
  * uses this result to accept a merge.
  */
 export async function requireEntityMeasurementsMergeable(
@@ -108,25 +109,7 @@ export async function requireEntityMeasurementsMergeable(
 					on target.entity_id = ${input.targetUnitId}::uuid
 					and target.context_unit_id is not distinct from source.context_unit_id
 				where source.entity_id = ${input.sourceUnitId}::uuid
-					and row(
-						source.height_millimetres,
-						source.weight_grams,
-						source.bust_millimetres,
-						source.waist_millimetres,
-						source.hips_millimetres,
-						source.source_url,
-						source.source_imported_at,
-						source.source_provenance
-					) is distinct from row(
-						target.height_millimetres,
-						target.weight_grams,
-						target.bust_millimetres,
-						target.waist_millimetres,
-						target.hips_millimetres,
-						target.source_url,
-						target.source_imported_at,
-						target.source_provenance
-					)
+					and ${measurementValues("source")} is distinct from ${measurementValues("target")}
 				limit 1
 			)) as "entityCollision",
 			case when ${input.sourceIsEntity}::boolean then (
@@ -213,25 +196,7 @@ export async function processEntityMeasurementPreflightBatch(
 				${input.sourceUnitId}::uuid,
 				${input.targetUnitId}::uuid
 			) as "selfContext",
-			(target.entity_id is not null and row(
-				source.height_millimetres,
-				source.weight_grams,
-				source.bust_millimetres,
-				source.waist_millimetres,
-				source.hips_millimetres,
-				source.source_url,
-				source.source_imported_at,
-				source.source_provenance
-			) is distinct from row(
-				target.height_millimetres,
-				target.weight_grams,
-				target.bust_millimetres,
-				target.waist_millimetres,
-				target.hips_millimetres,
-				target.source_url,
-				target.source_imported_at,
-				target.source_provenance
-			)) as "differingCollision"
+			(target.entity_id is not null and ${measurementValues("source")} is distinct from ${measurementValues("target")}) as "differingCollision"
 		from entity_measurement as source
 		left join entity_measurement as target
 			on target.entity_id = source.entity_id
@@ -361,25 +326,7 @@ async function requireBatchCompatible(
 						from batch
 						join collisions as target
 							on target.context_unit_id is not distinct from batch.context_unit_id
-						where row(
-							batch.height_millimetres,
-							batch.weight_grams,
-							batch.bust_millimetres,
-							batch.waist_millimetres,
-							batch.hips_millimetres,
-							batch.source_url,
-							batch.source_imported_at,
-							batch.source_provenance
-						) is distinct from row(
-							target.height_millimetres,
-							target.weight_grams,
-							target.bust_millimetres,
-							target.waist_millimetres,
-							target.hips_millimetres,
-							target.source_url,
-							target.source_imported_at,
-							target.source_provenance
-						)
+						where ${measurementValues("batch")} is distinct from ${measurementValues("target")}
 					) as "differingCollision",
 					(
 						select count(*)::integer
@@ -424,25 +371,7 @@ async function requireBatchCompatible(
 						select 1
 						from batch
 						join collisions as target on target.entity_id = batch.entity_id
-						where row(
-							batch.height_millimetres,
-							batch.weight_grams,
-							batch.bust_millimetres,
-							batch.waist_millimetres,
-							batch.hips_millimetres,
-							batch.source_url,
-							batch.source_imported_at,
-							batch.source_provenance
-						) is distinct from row(
-							target.height_millimetres,
-							target.weight_grams,
-							target.bust_millimetres,
-							target.waist_millimetres,
-							target.hips_millimetres,
-							target.source_url,
-							target.source_imported_at,
-							target.source_provenance
-						)
+						where ${measurementValues("batch")} is distinct from ${measurementValues("target")}
 					) as "differingCollision",
 					0::integer as "targetContextualCount"
 			`;
@@ -460,31 +389,19 @@ async function requireBatchCompatible(
 		});
 }
 
-function semanticDuplicateCondition(
-	sourceAlias: "batch",
-	targetAlias: "target",
-): ReturnType<typeof sql> {
-	return sql`row(
-		${sql.identifier(sourceAlias)}.height_millimetres,
-		${sql.identifier(sourceAlias)}.weight_grams,
-		${sql.identifier(sourceAlias)}.bust_millimetres,
-		${sql.identifier(sourceAlias)}.waist_millimetres,
-		${sql.identifier(sourceAlias)}.hips_millimetres,
-		${sql.identifier(sourceAlias)}.source_url,
-		${sql.identifier(sourceAlias)}.source_imported_at,
-		${sql.identifier(sourceAlias)}.source_provenance
-	) is not distinct from row(
-		${sql.identifier(targetAlias)}.height_millimetres,
-		${sql.identifier(targetAlias)}.weight_grams,
-		${sql.identifier(targetAlias)}.bust_millimetres,
-		${sql.identifier(targetAlias)}.waist_millimetres,
-		${sql.identifier(targetAlias)}.hips_millimetres,
-		${sql.identifier(targetAlias)}.source_url,
-		${sql.identifier(targetAlias)}.source_imported_at,
-		${sql.identifier(targetAlias)}.source_provenance
-	)`;
+/** Measurement identity/context and revision timestamps are not the measured values. */
+function measurementValues(alias: "source" | "target" | "batch"): ReturnType<typeof sql> {
+	return sql`row(${sql.join(
+		[
+			entityMeasurement.heightMillimetres,
+			entityMeasurement.weightGrams,
+			entityMeasurement.bustMillimetres,
+			entityMeasurement.waistMillimetres,
+			entityMeasurement.hipsMillimetres,
+		].map((column) => sql`${sql.identifier(alias)}.${sql.identifier(column.name)}`),
+		sql`, `,
+	)})`;
 }
-
 /** Moves one bounded batch after lossless preflight has accepted the merge. */
 export async function processEntityMeasurementMergeBatch(
 	tx: DatabaseTransaction,
@@ -494,7 +411,7 @@ export async function processEntityMeasurementMergeBatch(
 	requireBoundedBatchSize(input.batchSize);
 	await lockMeasurementMergeBatchUnits(tx, input, direction);
 	await requireBatchCompatible(tx, input, direction);
-	const sameMeasurement = semanticDuplicateCondition("batch", "target");
+	const sameMeasurement = sql`${measurementValues("batch")} is not distinct from ${measurementValues("target")}`;
 	const query =
 		direction === "entity_id"
 			? sql`

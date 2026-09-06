@@ -80,7 +80,7 @@ export default {
 		"unit.governance.read": "檢視所有條目的治理資料",
 		"unit.merge.propose": "提出條目合併",
 		"unit.merge.review": "審核條目合併",
-		"unit.merge": "直接合併條目",
+		"unit.merge": "管理條目合併",
 		"unit.ownership.override": "強制移轉任意條目的所有權",
 		"unit.license.manage": `使條目${zhHantTerminology.license.forms.label}授予失效或恢復`,
 		"unit.delete": "軟刪除任意條目",

@@ -459,13 +459,6 @@ const UnitMergeCommandFields = {
 export const CreateReviewedUnitMergeBody = t.Object(UnitMergeCommandFields, {
 	additionalProperties: false,
 });
-export const CreateDirectUnitMergeBody = t.Object(
-	{
-		...UnitMergeCommandFields,
-		overrideOfRequestId: t.Optional(Uuid),
-	},
-	{ additionalProperties: false },
-);
 export const UnitMergeRequestParams = t.Object(
 	{ requestId: Uuid },
 	{ additionalProperties: false },

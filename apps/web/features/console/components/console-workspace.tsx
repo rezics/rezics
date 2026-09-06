@@ -72,7 +72,7 @@ interface ConsoleWorkspaceModel {
 	readonly canReadUnitMerges: boolean;
 	readonly canProposeUnitMerges: boolean;
 	readonly canReviewUnitMerges: boolean;
-	readonly canMergeUnitsDirectly: boolean;
+	readonly canRetryUnitMerges: boolean;
 	readonly currentProfileId: string;
 	readonly canDecideOwnershipClaims: boolean;
 	readonly canDeleteUnits: boolean;
@@ -160,7 +160,7 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 	const canReadUnitMerges = accessibleSectionIds.has("unit-merges");
 	const canProposeUnitMerges = capabilities.has("unit.merge.propose");
 	const canReviewUnitMerges = capabilities.has("unit.merge.review");
-	const canMergeUnitsDirectly = capabilities.has("unit.merge");
+	const canRetryUnitMerges = capabilities.has("unit.merge");
 	const canDecideOwnershipClaims = capabilities.has("unit.ownership.override");
 	const canDeleteUnits = capabilities.has("unit.delete");
 	const canRestoreUnits = capabilities.has("unit.restore");
@@ -284,7 +284,7 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 		canReadUnitMerges,
 		canProposeUnitMerges,
 		canReviewUnitMerges,
-		canMergeUnitsDirectly,
+		canRetryUnitMerges,
 		currentProfileId: me.data.id,
 		canDecideOwnershipClaims,
 		canDeleteUnits,

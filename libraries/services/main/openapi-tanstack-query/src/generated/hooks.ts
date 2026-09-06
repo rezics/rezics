@@ -538,15 +538,6 @@ import type {
 	PostApiGovernancePlatformUnitMergesPreflightStatus422,
 	PostApiGovernancePlatformUnitMergesPreflightStatus429,
 	PostApiGovernancePlatformUnitMergesPreflightStatus500,
-	PostApiGovernancePlatformUnitMergesDirectOptions,
-	PostApiGovernancePlatformUnitMergesDirectStatus200,
-	PostApiGovernancePlatformUnitMergesDirectStatus400,
-	PostApiGovernancePlatformUnitMergesDirectStatus403,
-	PostApiGovernancePlatformUnitMergesDirectStatus404,
-	PostApiGovernancePlatformUnitMergesDirectStatus409,
-	PostApiGovernancePlatformUnitMergesDirectStatus422,
-	PostApiGovernancePlatformUnitMergesDirectStatus429,
-	PostApiGovernancePlatformUnitMergesDirectStatus500,
 	PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
 	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus200,
 	PostApiGovernancePlatformUnitMergesByRequestIdReviewsStatus400,
@@ -3009,7 +3000,6 @@ import {
 	postApiGovernancePlatformUnitMerges,
 	getApiGovernancePlatformUnitMergesByRequestId,
 	postApiGovernancePlatformUnitMergesPreflight,
-	postApiGovernancePlatformUnitMergesDirect,
 	postApiGovernancePlatformUnitMergesByRequestIdReviews,
 	postApiGovernancePlatformUnitMergesByRequestIdRetry,
 	getApiGovernancePlatformOwnershipClaims,
@@ -11415,120 +11405,6 @@ export function usePostApiGovernancePlatformUnitMergesPreflight<TContext>(
 			| PostApiGovernancePlatformUnitMergesPreflightStatus500
 		>,
 		PostApiGovernancePlatformUnitMergesPreflightOptions,
-		TContext
-	>;
-}
-
-export const postApiGovernancePlatformUnitMergesDirectMutationKey = () =>
-	[{ url: "/api/v1/governance/platform/unit-merges/direct" }] as const;
-
-export function postApiGovernancePlatformUnitMergesDirectMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = postApiGovernancePlatformUnitMergesDirectMutationKey();
-	return mutationOptions<
-		PostApiGovernancePlatformUnitMergesDirectStatus200,
-		ResponseErrorConfig<
-			| PostApiGovernancePlatformUnitMergesDirectStatus400
-			| PostApiGovernancePlatformUnitMergesDirectStatus403
-			| PostApiGovernancePlatformUnitMergesDirectStatus404
-			| PostApiGovernancePlatformUnitMergesDirectStatus409
-			| PostApiGovernancePlatformUnitMergesDirectStatus422
-			| PostApiGovernancePlatformUnitMergesDirectStatus429
-			| PostApiGovernancePlatformUnitMergesDirectStatus500
-		>,
-		PostApiGovernancePlatformUnitMergesDirectOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ body }) => {
-			const { data } = await postApiGovernancePlatformUnitMergesDirect({
-				...config,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Start a privileged direct Unit identity merge
- * {@link /api/v1/governance/platform/unit-merges/direct}
- */
-export function usePostApiGovernancePlatformUnitMergesDirect<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PostApiGovernancePlatformUnitMergesDirectStatus200,
-			ResponseErrorConfig<
-				| PostApiGovernancePlatformUnitMergesDirectStatus400
-				| PostApiGovernancePlatformUnitMergesDirectStatus403
-				| PostApiGovernancePlatformUnitMergesDirectStatus404
-				| PostApiGovernancePlatformUnitMergesDirectStatus409
-				| PostApiGovernancePlatformUnitMergesDirectStatus422
-				| PostApiGovernancePlatformUnitMergesDirectStatus429
-				| PostApiGovernancePlatformUnitMergesDirectStatus500
-			>,
-			PostApiGovernancePlatformUnitMergesDirectOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? postApiGovernancePlatformUnitMergesDirectMutationKey();
-
-	const baseOptions = postApiGovernancePlatformUnitMergesDirectMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PostApiGovernancePlatformUnitMergesDirectStatus200,
-		ResponseErrorConfig<
-			| PostApiGovernancePlatformUnitMergesDirectStatus400
-			| PostApiGovernancePlatformUnitMergesDirectStatus403
-			| PostApiGovernancePlatformUnitMergesDirectStatus404
-			| PostApiGovernancePlatformUnitMergesDirectStatus409
-			| PostApiGovernancePlatformUnitMergesDirectStatus422
-			| PostApiGovernancePlatformUnitMergesDirectStatus429
-			| PostApiGovernancePlatformUnitMergesDirectStatus500
-		>,
-		PostApiGovernancePlatformUnitMergesDirectOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PostApiGovernancePlatformUnitMergesDirectStatus200,
-		ResponseErrorConfig<
-			| PostApiGovernancePlatformUnitMergesDirectStatus400
-			| PostApiGovernancePlatformUnitMergesDirectStatus403
-			| PostApiGovernancePlatformUnitMergesDirectStatus404
-			| PostApiGovernancePlatformUnitMergesDirectStatus409
-			| PostApiGovernancePlatformUnitMergesDirectStatus422
-			| PostApiGovernancePlatformUnitMergesDirectStatus429
-			| PostApiGovernancePlatformUnitMergesDirectStatus500
-		>,
-		PostApiGovernancePlatformUnitMergesDirectOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PostApiGovernancePlatformUnitMergesDirectStatus200,
-		ResponseErrorConfig<
-			| PostApiGovernancePlatformUnitMergesDirectStatus400
-			| PostApiGovernancePlatformUnitMergesDirectStatus403
-			| PostApiGovernancePlatformUnitMergesDirectStatus404
-			| PostApiGovernancePlatformUnitMergesDirectStatus409
-			| PostApiGovernancePlatformUnitMergesDirectStatus422
-			| PostApiGovernancePlatformUnitMergesDirectStatus429
-			| PostApiGovernancePlatformUnitMergesDirectStatus500
-		>,
-		PostApiGovernancePlatformUnitMergesDirectOptions,
 		TContext
 	>;
 }

@@ -82,7 +82,7 @@ export default {
 		"unit.governance.read": "Consulter la gouvernance de toutes les Units",
 		"unit.merge.propose": "Proposer des fusions d’Units",
 		"unit.merge.review": "Examiner les fusions d’Units",
-		"unit.merge": "Fusionner directement des Units",
+		"unit.merge": "Gérer les fusions d’Units",
 		"unit.ownership.override": "Réattribuer la propriété de n’importe quelle Unit",
 		"unit.license.manage": `Invalider ou rétablir les octrois de ${frTerminology.license.forms.inline} des Units`,
 		"unit.delete": "Supprimer provisoirement n’importe quelle Unit",
