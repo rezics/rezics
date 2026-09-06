@@ -121,11 +121,13 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("UnitProgressDialog", () => {
-	it("creates progress as public under a private profile-wide ceiling", async () => {
+	it("creates private progress and exposes its visibility on the first save", async () => {
 		setProgressState(null);
 		renderDialog();
 
-		expect(screen.queryByRole("combobox", { name: "單項可見性" })).toBeNull();
+		expect((screen.getByRole("combobox", { name: "單項可見性" }) as HTMLSelectElement).value).toBe(
+			"private",
+		);
 		fireEvent.click(screen.getByRole("button", { name: "更新進度" }));
 
 		await vi.waitFor(() =>
@@ -133,7 +135,7 @@ describe("UnitProgressDialog", () => {
 				progress: 0,
 				status: "active",
 				totalTimeMs: 0,
-				visibility: "public",
+				visibility: "private",
 			}),
 		);
 	});
@@ -154,7 +156,7 @@ describe("UnitProgressDialog", () => {
 				progress: 0,
 				status: "active",
 				totalTimeMs: 5_400_000,
-				visibility: "public",
+				visibility: "private",
 			}),
 		);
 	});
@@ -176,7 +178,7 @@ describe("UnitProgressDialog", () => {
 				progress: 0.75,
 				status: "active",
 				totalTimeMs: 0,
-				visibility: "public",
+				visibility: "private",
 			}),
 		);
 	});
@@ -209,7 +211,7 @@ describe("UnitProgressDialog", () => {
 				progress: 0.57,
 				status: "active",
 				totalTimeMs: 0,
-				visibility: "public",
+				visibility: "private",
 			}),
 		);
 	});
@@ -243,6 +245,21 @@ describe("UnitProgressDialog", () => {
 				totalTimeMs: 0,
 				visibility: "unlisted",
 			}),
+		);
+	});
+
+	it("submits an explicit sharing choice when creating progress", async () => {
+		setProgressState(null);
+		privacyState.progressVisibility = "public";
+		renderDialog();
+		fireEvent.change(screen.getByRole("combobox", { name: "單項可見性" }), {
+			target: { value: "unlisted" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "更新進度" }));
+		await vi.waitFor(() =>
+			expect(actions.saveProgress).toHaveBeenCalledWith(
+				expect.objectContaining({ visibility: "unlisted" }),
+			),
 		);
 	});
 });

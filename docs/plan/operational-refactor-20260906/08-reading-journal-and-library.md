@@ -1,6 +1,6 @@
 # P08 — Reading journal, progress and personal library
 
-Status: planned, not implemented. Date: 2026-09-06. Parent: [program and gates](README.md).
+Status: implementation in progress. Date: 2026-09-06. Parent: [program and gates](README.md).
 
 ## Outcome and baseline
 
@@ -43,3 +43,20 @@ Make U04/U13 useful even without a large social community. Existing `schema/prog
 ## Capacity
 
 History reads use actor/time/ID keysets; current summaries are incremental. For U users × e yearly entries, budget Ue rows plus actual revisions and bounded device retry records. Product retention/deletion determines historical growth; do not retain private activity forever simply for analytics. Plan 500M/3B history/library rows, high-volume imports and extremely active users; impose batch/payload limits rather than an undocumented lifetime-history cap. P10 owns storage and deletion backlog SLOs.
+
+## Implementation ledger
+
+First-save privacy: canonical journal/chapter/media progress writers now use a
+private default for absent or recreated progress, retaining an existing record's
+explicit visibility. The Web dialog defaults private and exposes the existing
+localized individual/effective visibility controls on first save. Explicit sharing
+is submitted for both ordinary updates and completion. Existing account-wide
+preferences and Score defaults are unchanged; P11 still owns their conversion.
+
+Verified against `rezics-dev` through the actual service writer: new progress is
+private, public/unlisted choices survive later updates, and recreation does not
+silently restore disclosure. The fixture transaction rolls back. Reproduce with
+`scripts/check-progress-privacy.ts`, loopback `DATABASE_URL` and
+`REZICS_DISPOSABLE_MIGRATION_FIXTURE=1`. Web/backend typechecks and 30 Web / 22
+backend focused tests passed. These are deterministic checks, not rendered UX
+acceptance. No row/index is added and no existing user row is mass-updated.

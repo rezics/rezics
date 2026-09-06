@@ -9,7 +9,6 @@ import {
 	contentStructureRevisionHead,
 	bookChapterProgressStat,
 	bookChapterStat,
-	DefaultResourceVisibility,
 	audio,
 	type ProgressCurrentBasis,
 	type ProgressDatePrecision,
@@ -54,6 +53,7 @@ type ProgressSnapshot = {
 };
 
 const AutomaticProgressCheckpointIntervalMs = 24 * 60 * 60 * 1_000;
+const DefaultProgressVisibility = "private" as const;
 
 export async function lockUnitProgress(
 	tx: DatabaseTransaction,
@@ -271,7 +271,7 @@ export async function recordMediaNodeCompletion(
 			lastContentStructureNodeId: status === "completed" ? null : input.nodeId,
 			currentEntryId: null,
 			currentBasis: "reading",
-			visibility: snapshot?.visibility ?? DefaultResourceVisibility,
+			visibility: snapshot?.visibility ?? DefaultProgressVisibility,
 			deletedAt: null,
 		})
 		.onConflictDoUpdate({
@@ -286,7 +286,7 @@ export async function recordMediaNodeCompletion(
 				lastContentStructureNodeId: status === "completed" ? null : input.nodeId,
 				currentEntryId: null,
 				currentBasis: "reading",
-				visibility: snapshot?.visibility ?? DefaultResourceVisibility,
+				visibility: snapshot?.visibility ?? DefaultProgressVisibility,
 				deletedAt: null,
 				updatedAt: input.now,
 			},
@@ -484,7 +484,7 @@ export async function refreshProgressSnapshot(
 			lastContentStructureNodeId,
 			currentEntryId,
 			currentBasis,
-			visibility: DefaultResourceVisibility,
+			visibility: snapshot?.visibility ?? DefaultProgressVisibility,
 			deletedAt: null,
 		})
 		.onConflictDoUpdate({
@@ -499,6 +499,7 @@ export async function refreshProgressSnapshot(
 				lastContentStructureNodeId,
 				currentEntryId,
 				currentBasis,
+				visibility: snapshot?.visibility ?? DefaultProgressVisibility,
 				deletedAt: null,
 			},
 		});
@@ -649,7 +650,7 @@ export async function recordChapterReading(
 			lastContentStructureNodeId: reading.status === "completed" ? null : input.nodeId,
 			currentEntryId: null,
 			currentBasis: "reading",
-			visibility: snapshot?.visibility ?? DefaultResourceVisibility,
+			visibility: snapshot?.visibility ?? DefaultProgressVisibility,
 			deletedAt: null,
 		})
 		.onConflictDoUpdate({
@@ -664,7 +665,7 @@ export async function recordChapterReading(
 				lastContentStructureNodeId: reading.status === "completed" ? null : input.nodeId,
 				currentEntryId: null,
 				currentBasis: "reading",
-				visibility: snapshot?.visibility ?? DefaultResourceVisibility,
+				visibility: snapshot?.visibility ?? DefaultProgressVisibility,
 				deletedAt: null,
 				updatedAt: input.now,
 			},

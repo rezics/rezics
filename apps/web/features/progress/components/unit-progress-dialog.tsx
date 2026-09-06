@@ -36,7 +36,6 @@ import { useState, type FormEvent } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import {
-	DefaultResourceVisibility,
 	isResourceVisibility,
 	resolveEffectiveResourceVisibility,
 	ResourceVisibilityValues,
@@ -48,6 +47,7 @@ import {
 	changeProgressDraftStatus,
 	createProgressDraft,
 	createProgressUpdate,
+	DefaultProgressVisibility,
 	isCompletionTransition,
 	parseBoundedNumber,
 	ProgressStatuses,
@@ -90,16 +90,15 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 	const [sourceRecord] = useState(record);
 	const [draft, setDraft] = useState(() => createProgressDraft(record));
 	const [visibility, setVisibility] = useState<ResourceVisibility>(
-		record?.visibility ?? DefaultResourceVisibility,
+		record?.visibility ?? DefaultProgressVisibility,
 	);
 	const [invalid, setInvalid] = useState(false);
 	const [removeOpen, setRemoveOpen] = useState(false);
 	const copy = t.engagement.progressByType[progress.domain.type];
 	const completing = isCompletionTransition(sourceRecord, draft.status);
 	const nextCompletedCount = (sourceRecord?.completedCount ?? 0) + 1;
-	const submittedVisibility = sourceRecord ? visibility : DefaultResourceVisibility;
 	const effectiveVisibility = preferences.data
-		? resolveEffectiveResourceVisibility(preferences.data.progressVisibility, submittedVisibility)
+		? resolveEffectiveResourceVisibility(preferences.data.progressVisibility, visibility)
 		: undefined;
 
 	async function completeCurrentProgress() {
@@ -111,8 +110,8 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 		setInvalid(false);
 		await progress.completeCurrentProgress(
 			update.totalTimeMs === undefined
-				? { visibility: submittedVisibility }
-				: { totalTimeMs: update.totalTimeMs, visibility: submittedVisibility },
+				? { visibility }
+				: { totalTimeMs: update.totalTimeMs, visibility },
 		);
 	}
 
@@ -130,7 +129,7 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 		setInvalid(false);
 		await progress.saveProgress({
 			...update,
-			visibility: submittedVisibility,
+			visibility,
 		});
 	}
 
@@ -152,31 +151,29 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 							t={t}
 							type={progress.domain.type}
 						/>
-						{sourceRecord ? (
-							<Field>
-								<FieldLabel htmlFor="progress-visibility">{t.engagement.itemVisibility}</FieldLabel>
-								<NativeSelect
-									id="progress-visibility"
-									onChange={(event) => {
-										if (isResourceVisibility(event.target.value)) setVisibility(event.target.value);
-									}}
-									value={visibility}
-								>
-									{ResourceVisibilityValues.map((value) => (
-										<NativeSelectOption key={value} value={value}>
-											{t.ui[value]}
-										</NativeSelectOption>
-									))}
-								</NativeSelect>
-								{effectiveVisibility ? (
-									<FieldDescription>
-										{t.engagement.effectiveItemVisibility({
-											visibility: t.ui[effectiveVisibility],
-										})}
-									</FieldDescription>
-								) : null}
-							</Field>
-						) : null}
+						<Field>
+							<FieldLabel htmlFor="progress-visibility">{t.engagement.itemVisibility}</FieldLabel>
+							<NativeSelect
+								id="progress-visibility"
+								onChange={(event) => {
+									if (isResourceVisibility(event.target.value)) setVisibility(event.target.value);
+								}}
+								value={visibility}
+							>
+								{ResourceVisibilityValues.map((value) => (
+									<NativeSelectOption key={value} value={value}>
+										{t.ui[value]}
+									</NativeSelectOption>
+								))}
+							</NativeSelect>
+							{effectiveVisibility ? (
+								<FieldDescription>
+									{t.engagement.effectiveItemVisibility({
+										visibility: t.ui[effectiveVisibility],
+									})}
+								</FieldDescription>
+							) : null}
+						</Field>
 						{progress.domain.type === "book" ? (
 							<BookProgressFields draft={draft} onChange={setDraft} />
 						) : progress.domain.type === "media" ? (

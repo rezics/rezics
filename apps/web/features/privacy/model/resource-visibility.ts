@@ -3,10 +3,10 @@ export const ResourceVisibilityValues = ["public", "unlisted", "private"] as con
 export type ResourceVisibility = (typeof ResourceVisibilityValues)[number];
 
 /**
- * The individual visibility assigned when a Score or Progress record is first created.
+ * The ordinary resource/Score default. Detailed Progress has its own private default.
  *
  * @remarks
- * `public` is an intentional product default. Profile-wide visibility preferences are
+ * Profile-wide visibility preferences are
  * separate disclosure ceilings and must not redefine this value; a stored record
  * becomes more restrictive only when the user explicitly changes its individual
  * visibility.

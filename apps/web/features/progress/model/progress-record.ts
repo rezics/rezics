@@ -1,7 +1,7 @@
-import {
-	DefaultResourceVisibility,
-	type ResourceVisibility,
-} from "@/features/privacy/model/resource-visibility";
+import type { ResourceVisibility } from "@/features/privacy/model/resource-visibility";
+
+/** New detailed progress is private until its owner chooses to share it. */
+export const DefaultProgressVisibility = "private" satisfies ResourceVisibility;
 
 export const ProgressStatuses = ["backlog", "active", "paused", "completed", "dropped"] as const;
 
@@ -72,7 +72,7 @@ const EmptyProgressRecord: UnitProgressRecord = {
 	progress: 0,
 	status: "active",
 	totalTimeMs: 0,
-	visibility: DefaultResourceVisibility,
+	visibility: DefaultProgressVisibility,
 };
 const MaximumTotalMinutes = Math.floor(Number.MAX_SAFE_INTEGER / 60_000);
 
