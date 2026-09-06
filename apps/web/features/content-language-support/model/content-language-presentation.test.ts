@@ -24,4 +24,9 @@ describe("content-language presentation", () => {
 		expect(formatContentLanguageName("zh-Hans", "zh-Hant")).toBe("繁体中文");
 		expect(formatContentLanguageName("zh-Hant", "zh-Hant")).toBe("繁體中文");
 	});
+
+	it("keeps registry identities that Intl cannot represent without aliasing", () => {
+		expect(formatContentLanguageName("en", "cmn-Hans")).toBe("cmn-Hans");
+		expect(formatContentLanguageName("en", "i-default")).toBe("i-default");
+	});
 });

@@ -99,6 +99,8 @@ Verified implementation commits: `0535b1141` (P10 email/worker foundation),
 `a8d3af36e` (P06 orphan Tag query removal).
 `c8a89a705` (P08 first-save privacy), `8e984d081` (P10/P11 runtime pin and inventory).
 `cc8bb65b6` (P03 pinned IANA validation and audit).
+`698461619` (authoring terminology correction), `4b55bac34` (P05 reviewed merge
+policy and acceptance/projection repairs).
 
 Sequencing clarification: production access is a production conversion/activation
 gate. It does not prevent local migration generation, disposable rehearsal or

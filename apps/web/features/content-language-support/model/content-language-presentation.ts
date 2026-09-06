@@ -30,14 +30,22 @@ export function groupContentLanguageSupport(
 const LanguageDisplayNames = new Map<string, Intl.DisplayNames>();
 
 export function formatContentLanguageName(locale: string, languageTag: string): string {
-	let displayNames = LanguageDisplayNames.get(locale);
-	if (!displayNames) {
-		displayNames = new Intl.DisplayNames([locale], {
-			fallback: "none",
-			languageDisplay: "dialect",
-			type: "language",
-		});
-		LanguageDisplayNames.set(locale, displayNames);
+	try {
+		// Do not label a distinct IANA language with a CLDR replacement's name.
+		if (new Intl.Locale(languageTag).toString().toLowerCase() !== languageTag.toLowerCase())
+			return languageTag;
+		let displayNames = LanguageDisplayNames.get(locale);
+		if (!displayNames) {
+			displayNames = new Intl.DisplayNames([locale], {
+				fallback: "none",
+				languageDisplay: "dialect",
+				type: "language",
+			});
+			LanguageDisplayNames.set(locale, displayNames);
+		}
+		return displayNames.of(languageTag) ?? languageTag;
+	} catch (error) {
+		if (!(error instanceof RangeError)) throw error;
+		return languageTag;
 	}
-	return displayNames.of(languageTag) ?? languageTag;
 }

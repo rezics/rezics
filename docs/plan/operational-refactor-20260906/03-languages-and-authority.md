@@ -63,3 +63,9 @@ passed. The local audit found
 all 80 current language-support rows unchanged. Historical/filter/production audits,
 VNDB vocabulary mapping, open metadata localization, named forms and revision-scoped
 authority are not claimed complete by this slice.
+
+The Web display adapter preserves the original tag when Intl would alias it to a
+different identity or cannot represent a grandfathered tag. This avoids both a
+misleading language name and a rendering exception. Eleven pure presentation,
+model and route tests passed; Web TypeScript passed. No new translation claim or
+rendered UX acceptance is inferred from that fallback.
