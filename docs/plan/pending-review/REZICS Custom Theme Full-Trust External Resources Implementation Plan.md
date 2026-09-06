@@ -89,12 +89,12 @@ The temporary use of external resources is a distinct additional risk. Third-par
 
 At the recorded baseline:
 
-- `ZoneThemeDocument.custom` stores `{ themeUnitId, revisionId }` inside Zone appearance data in [`libraries/block/src/domain-documents.ts`](../../libraries/block/src/domain-documents.ts).
+- `ZoneThemeDocument.custom` stores `{ themeUnitId, revisionId }` inside Zone appearance data in [`libraries/block/src/domain-documents.ts`](../../../libraries/block/src/domain-documents.ts).
 - [`services/main/src/services/database/schema/zone-theme.ts`](../../services/main/src/services/database/schema/zone-theme.ts) defines `zone_theme`, CSS-only revisions, and image-asset bindings.
 - [`services/main/src/services/api/zone-themes`](../../services/main/src/services/api/zone-themes) exposes Zone-specific submission, review, decision, kill, and revalidation routes.
-- [`libraries/block/src/styling-contract.ts`](../../libraries/block/src/styling-contract.ts) and [`services/main/src/services/zone-themes/stylesheet.ts`](../../services/main/src/services/zone-themes/stylesheet.ts) implement styling contract `3.0.0`, AST validation, selector rewriting, and external-URL rejection.
-- [`apps/web/features/zones/components/zone-surface.tsx`](../../apps/web/features/zones/components/zone-surface.tsx) hard-codes `ZoneHeader -> ZoneDockContent -> route children` inside `ZoneThemeContent`.
-- [`apps/web/features/zones/components/zone-header.tsx`](../../apps/web/features/zones/components/zone-header.tsx) derives Menu Blocks from the Dock and mixes Unit identity with follow/manage actions.
+- [`libraries/block/src/styling-contract.ts`](../../../libraries/block/src/styling-contract.ts) and [`services/main/src/services/zone-themes/stylesheet.ts`](../../../services/main/src/services/zone-themes/stylesheet.ts) implement styling contract `3.0.0`, AST validation, selector rewriting, and external-URL rejection.
+- [`apps/web/features/zones/components/zone-surface.tsx`](../../../apps/web/features/zones/components/zone-surface.tsx) hard-codes `ZoneHeader -> ZoneDockContent -> route children` inside `ZoneThemeContent`.
+- [`apps/web/features/zones/components/zone-header.tsx`](../../../apps/web/features/zones/components/zone-header.tsx) derives Menu Blocks from the Dock and mixes Unit identity with follow/manage actions.
 - A custom stylesheet is returned only when the viewer is authenticated, has `platform.development_preview.access`, and has not disabled custom Zone themes. Phase 1 should preserve that release gate and add a separate external-live access capability; the development-preview capability must not become domain authority.
 - The accepted architecture currently states that scripts never execute in the host page. That decision must be superseded explicitly; leaving both statements in force would make the repository contract contradictory.
 
@@ -189,16 +189,16 @@ Do not add feature-specific preview, author, or install capabilities. Authoring 
 
 Authorization is conjunctive and deny-by-default:
 
-| Operation | Required authorization |
-| --- | --- |
-| Create a Custom Theme Unit | development-preview capability + external-live access capability + ordinary Unit-create authorization |
-| Submit a revision | development-preview capability + external-live access capability + update permission on the Custom Theme Unit |
-| Inspect review material | development-preview capability + external-live access capability + review capability |
-| Approve or reject | development-preview capability + external-live access capability + review capability; reviewer must differ from submitter |
-| Install on a host | development-preview capability + external-live access capability + theme-management permission on the host Unit |
-| Execute/view Phase 1 | development-preview capability + external-live access capability + viewer opt-in |
-| Grant, renew, or revoke external-live access | fresh session + external-live access-management capability; actor and target must differ |
-| Kill globally | kill capability; emergency kill does not depend on external-live access eligibility |
+| Operation                                    | Required authorization                                                                                                    |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Create a Custom Theme Unit                   | development-preview capability + external-live access capability + ordinary Unit-create authorization                     |
+| Submit a revision                            | development-preview capability + external-live access capability + update permission on the Custom Theme Unit             |
+| Inspect review material                      | development-preview capability + external-live access capability + review capability                                      |
+| Approve or reject                            | development-preview capability + external-live access capability + review capability; reviewer must differ from submitter |
+| Install on a host                            | development-preview capability + external-live access capability + theme-management permission on the host Unit           |
+| Execute/view Phase 1                         | development-preview capability + external-live access capability + viewer opt-in                                          |
+| Grant, renew, or revoke external-live access | fresh session + external-live access-management capability; actor and target must differ                                  |
+| Kill globally                                | kill capability; emergency kill does not depend on external-live access eligibility                                       |
 
 Zone ownership or `zone.theme.manage` alone must not authorize full-trust installation. `DevelopmentPreviewCapability` alone must not authorize authoring, review, installation, execution, or kill. `CustomThemeExternalLiveAccessCapability` makes a Profile eligible to attempt those v0 operations but grants none of their resource-specific authority by itself.
 
@@ -859,10 +859,10 @@ Initial access patterns are:
 
 An installation heap row plus primary key, revision foreign-key support, alignment, and row overhead is expected to occupy approximately 170–240 bytes before replication, WAL, free-space overhead, and bloat. This is an estimate to be replaced by `pg_column_size`, relation-size measurements, and representative indexes.
 
-| Rows | Estimated heap + essential indexes |
-| ---: | ---: |
-| 500,000,000 | 85–120 GB |
-| 3,000,000,000 | 510–720 GB |
+|          Rows | Estimated heap + essential indexes |
+| ------------: | ---------------------------------: |
+|   500,000,000 |                          85–120 GB |
+| 3,000,000,000 |                         510–720 GB |
 
 Keep the primary read path on the leading `host_unit_id`. Hash partition/shard by `host_unit_id` before a single relation approaches operational storage, vacuum, backup, or latency limits. The target-contract value should use a compact registered identifier if measured text/index amplification is material.
 
@@ -970,8 +970,8 @@ It does not claim to contain approved code. The `host_full_trust` name must rema
 
 Implementation must update or supersede:
 
-- [`docs/architecture/zone-composition-and-theming-decisions.md`](../architecture/zone-composition-and-theming-decisions.md), especially the permanent “scripts never run” decision;
-- [`docs/architecture/zone-composition-and-theming-research-report.md`](../architecture/zone-composition-and-theming-research-report.md), separating historical bounded-CSS research from the accepted trusted-code model;
+- [`docs/architecture/zone-composition-and-theming-decisions.md`](../../architecture/zone-composition-and-theming-decisions.md), especially the permanent “scripts never run” decision;
+- [`docs/architecture/zone-composition-and-theming-research-report.md`](../../architecture/zone-composition-and-theming-research-report.md), separating historical bounded-CSS research from the accepted trusted-code model;
 - the Zone styling reference, which becomes historical or a future `bounded_style` contract rather than the active full-trust contract;
 - threat model, core trusted member admission/recertification policy, delegated external-live access runbook, reviewer runbook, external-resource incident runbook, kill/safe-mode runbook, and the owning TSDoc future-direction note;
 - API documentation and maintainer-facing capability definitions.
@@ -1234,9 +1234,9 @@ The key architectural statement is:
 
 ## 27. References
 
-- [REZICS Zone composition, aggregation, and theming decisions](../architecture/zone-composition-and-theming-decisions.md)
-- [REZICS Zone composition and theming research report](../architecture/zone-composition-and-theming-research-report.md)
-- [REZICS access model](../../libraries/access/README.md)
+- [REZICS Zone composition, aggregation, and theming decisions](../../architecture/zone-composition-and-theming-decisions.md)
+- [REZICS Zone composition and theming research report](../../architecture/zone-composition-and-theming-research-report.md)
+- [REZICS access model](../../../libraries/access/README.md)
 - [NIST Role Based Access Control FAQ](https://csrc.nist.gov/projects/role-based-access-control/faqs)
 - [W3C Subresource Integrity](https://www.w3.org/TR/SRI/)
 - [W3C Content Security Policy Level 3](https://www.w3.org/TR/CSP/)
