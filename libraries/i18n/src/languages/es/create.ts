@@ -25,7 +25,7 @@ export default {
 		createAction: insert("Crear {{subject}}", { subject: String }),
 		groups: {
 			works: "Obras y entradas",
-			publishing: "Publicación",
+			publishing: "Publicar",
 			organization: "Espacios y organización",
 			vocabulary: "Vocabulario",
 		},

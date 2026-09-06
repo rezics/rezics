@@ -21,7 +21,7 @@ export default {
 	overview: {
 		continueTitle: "Weiterarbeiten",
 		createTitle: "Erstellen",
-		recentContributionsTitle: "Neueste Beiträge",
+		recentContributionsTitle: "Neueste Mitwirkungen",
 		createAction: insert("{{subject}} erstellen", { subject: String }),
 		groups: {
 			works: "Werke und Einträge",
@@ -31,7 +31,7 @@ export default {
 		},
 		empty: {
 			workspace: "Keine bearbeitbaren Inhalte zum Fortsetzen.",
-			contributions: "Noch keine öffentlichen Beiträge.",
+			contributions: "Noch keine öffentlichen Mitwirkungen.",
 		},
 	},
 	mode: {
