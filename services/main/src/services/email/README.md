@@ -75,10 +75,12 @@ WAL, throughput or target-cardinality qualification. The reproducible command is
 `scripts/benchmark-email-outbox.ts` with the same disposable flags; it rolls back
 its fixture transaction.
 
-The repository Dockerfile built PostgreSQL 18.6 with PGroonga 4.0.8 despite its
-18.4 base-image label, because package installation upgraded PostgreSQL. Resolve
-that build/runtime version drift before using this image as production recovery
-evidence. All 37 existing migrations replayed successfully on this test image.
+An initial build exposed PostgreSQL package drift from 18.4 to 18.6. The Dockerfile
+now pins server/client/development/JIT packages to the base image's `PG_VERSION`
+using PGDG's signed archive. The rebuilt image retained PostgreSQL 18.4 and
+PGroonga 4.0.8. All 37 migrations and the claim race check passed on that image;
+the repeated 300,000-row fixture had the same widths/sizes and index plans
+(0.051 ms pending / 0.026 ms expired). These remain local measurements.
 
 Primary references: [PostgreSQL queue locking](https://www.postgresql.org/docs/current/sql-select.html#SQL-FOR-UPDATE-SHARE),
 [transactional outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html),

@@ -84,8 +84,14 @@ Primary references: [PostgreSQL partitioning](https://www.postgresql.org/docs/cu
 - [Email owner documentation](../../../services/main/src/services/email/README.md)
   records commands, measured plans, 500M/3B estimates and unqualified limits.
 
-Unresolved findings are not completed acceptance: the production host/configuration
-is unavailable in this checkout; the fresh image's package installation upgraded
-PostgreSQL 18.4 to 18.6; the existing online-count gate still rejects
-`tags/service.ts`'s window count (P06/SYS-08). Recovery, retention, admission control,
-mixed-workload qualification and production activation remain pending.
+Follow-up: the Dockerfile now uses PGDG's signed archive with the base image's
+exact PostgreSQL package version. A fresh build retained server/client 18.4 and
+PGroonga 4.0.8; all 37 migrations, claim races and the 300,000-row query fixture
+passed again on that build. The orphan Tag query was removed and the unchanged
+online-count gate passes.
+
+The restored `rezics-dev` was verified through its container's `psql`: PostgreSQL
+18.4, PGroonga 4.0.8 and completed migration `20260902101640`. The read-only
+inventory command records schema/runtime metadata and Profile/Auth foreign keys.
+This local evidence does not qualify production. Production capture, recovery,
+retention, admission control and mixed-workload qualification remain pending.

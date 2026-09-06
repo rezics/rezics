@@ -144,6 +144,11 @@ tasks:
         cmds:
             - yarn exec tsx scripts/check-email-outbox.ts
 
+    db:inventory:
+        desc: Capture read-only schema/runtime metadata using DATABASE_INVENTORY_URL and scope local or production.
+        cmds:
+            - yarn exec tsx scripts/inventory-database.ts {{.CLI_ARGS}}
+
     db:replay:up:
         internal: true
         dir: ../..

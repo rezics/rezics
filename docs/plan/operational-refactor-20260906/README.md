@@ -44,7 +44,7 @@ Prerequisites are contracts or integration gates, not a requirement to finish ev
 
 ## Delivery order and useful increments
 
-1. **Baseline and contracts:** P10/P11/P12 inventory and acceptance corpus; P01/P02/P03 identity, language and authority contracts. Record the actual production version and recoverable export structure before producing migration code.
+1. **Baseline and contracts:** P10/P11/P12 inventory and acceptance corpus; P01/P02/P03 identity, language and authority contracts. Develop and rehearse contracts locally; record the actual production version and recoverable export structure before executing production conversion or cutover.
 2. **First complete data loop:** P04 Bangumi slice + P05 observation/proposal/adoption + P06 title lookup + P09 one correctly modeled subject. Demonstrate replay, source conflict and a protected human correction before increasing volume.
 3. **Complete existing product lines:** P07/P08 in parallel with all-source mapping. Ship book search/reviews/lists, realm scoring and reading history against the new identities, including API/SDK consumers.
 4. **All-source coverage and relationship discovery:** VNDB and MusicBrainz adapters, multilingual named forms, character filters, edition navigation and credit/music links. A working pilot does not count as completion of the three-adapter requirement.
@@ -89,8 +89,16 @@ U14 group challenges and U15 third-party commercial API are expansion experiment
 | --- | --- | --- |
 | P10 | First operational slice: fenced email claims and renewal, acknowledged auth enqueue, independently scheduled lanes, isolated delivery process/pool, and real PostgreSQL race/plan checks. See [P10](10-capacity-and-operations.md#implementation-ledger). | Full resource ledger, admission/retention, source/AI executors, production inventory and recovery qualification. |
 | P06 | Traced and removed the orphan exact-count/whole-owner global Tag query; active landscape contracts remain authoritative. | Relevance, active ranking bounds, correlated filters, retrieval corpus and product acceptance. |
-| P01–P05, P07–P09, P11–P12 | Planned; existing foundations do not imply the new acceptance contracts pass. | Owning implementation and acceptance slices. |
+| P08 | New progress defaults private in canonical writers and the Web editor; first-save visibility is selectable and existing choices are retained. | Session/checkpoint semantics, portability, account privacy defaults and user acceptance. |
+| P11 | Read-only schema/runtime inventory with explicit Profile/Auth reference inventory and evidence limits. | Production capture, recoverable exports, conversion and cutover rehearsals. |
+| P01–P05, P07, P09, P12 | Planned; existing foundations do not imply the new acceptance contracts pass. | Owning implementation and acceptance slices. |
 
-Verified implementation commit: `0535b1141` (P10 email/worker foundation).
+Verified implementation commits: `0535b1141` (P10 email/worker foundation),
+`a8d3af36e` (P06 orphan Tag query removal).
+
+Sequencing clarification: production access is a production conversion/activation
+gate. It does not prevent local migration generation, disposable rehearsal or
+independent contract implementation. This aligns the implementation order with
+the issue register's explicitly local activation gates.
 
 No fundamental design blocker has been identified. Source-use permissions, missing live inventory and unmeasured capacity are explicit, locally scoped activation gates with assigned work and fallback paths in the decision register. They do not suspend independent implementation.

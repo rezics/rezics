@@ -176,8 +176,12 @@ ADD --checksum=sha256:3406de4b8965c44a0e793090efbb0996a1802930159e7aa3f31c97dbef
     https://packages.groonga.org/debian/groonga-apt-source-latest-trixie.deb \
     /tmp/groonga-apt-source.deb
 
-RUN apt-get update \
-	&& apt-get install --yes --no-install-recommends ca-certificates git make postgresql-server-dev-18 /tmp/groonga-apt-source.deb \
+# PGDG's live repository retires older minor releases. Resolve build dependencies
+# from its signed archive and keep server/client/JIT aligned with the pinned base.
+RUN printf 'deb [signed-by=/usr/local/share/keyrings/postgres.gpg.asc] https://apt-archive.postgresql.org/pub/repos/apt trixie-pgdg-archive main %s\n' "${PG_MAJOR}" > /etc/apt/sources.list.d/pgdg-archive.list \
+	&& printf 'Package: postgresql-%s postgresql-client-%s postgresql-server-dev-%s postgresql-%s-jit\nPin: version %s\nPin-Priority: 1001\n' "${PG_MAJOR}" "${PG_MAJOR}" "${PG_MAJOR}" "${PG_MAJOR}" "${PG_VERSION}" > /etc/apt/preferences.d/rezics-postgres \
+	&& apt-get update \
+	&& apt-get install --yes --no-install-recommends ca-certificates git make "postgresql-server-dev-${PG_MAJOR}=${PG_VERSION}" /tmp/groonga-apt-source.deb \
 	&& apt-get update \
 	&& apt-get install --yes --no-install-recommends "postgresql-18-pgdg-pgroonga=${PGROONGA_VERSION}" \
 	&& git clone --filter=blob:none --no-checkout https://github.com/jmealo/pg_approx_count.git /tmp/pg_approx_count \
@@ -185,6 +189,8 @@ RUN apt-get update \
 	&& test "$(git -C /tmp/pg_approx_count rev-parse HEAD)" = "${APPROX_COUNT_COMMIT}" \
 	&& make -C /tmp/pg_approx_count install \
 	&& apt-get purge --yes --auto-remove git make postgresql-server-dev-18 \
+	&& test "$(dpkg-query -W -f='${Version}' postgresql-${PG_MAJOR})" = "${PG_VERSION}" \
+	&& test "$(dpkg-query -W -f='${Version}' postgresql-client-${PG_MAJOR})" = "${PG_VERSION}" \
 	&& rm -rf /tmp/groonga-apt-source.deb /tmp/pg_approx_count /var/lib/apt/lists/*
 
 COPY --chmod=0755 services/main/docker/postgres/init /docker-entrypoint-initdb.d

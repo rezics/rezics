@@ -1,6 +1,6 @@
 # P11 — Destructive migration, legacy preservation and deployment cutover
 
-Status: planned, not implemented. Date: 2026-09-06. Parent: [program and gates](README.md).
+Status: inventory tooling implemented; production conversion pending. Date: 2026-09-06. Parent: [program and gates](README.md).
 
 ## Decision
 
@@ -58,3 +58,28 @@ Any intentionally non-convertible new contract needs a documented export/forward
 - A failed Web/API/worker promotion leaves a controlled maintenance/previous-state path, not mixed incompatible writes.
 
 Existing references: [deployment](../../operations/production-deployment.md), [backup and recovery](../../operations/postgresql-backup-recovery.md), [Unit addresses](../../architecture/unit-slug-addressing.md).
+
+## Inventory command
+
+`DATABASE_INVENTORY_URL=... task services-main:db:inventory -- local` (or
+`production`) captures a repeatable-read, read-only inventory of public tables,
+columns, foreign keys, indexes, extension versions, an allowlisted set of runtime
+settings and the Atlas ledger. The URL is never included in output. Application
+rows, credentials and `archive_command` are excluded; row counts are explicitly
+stale-capable estimates. Profile/Auth foreign keys have a separate inventory.
+Use a read-only credential and store the JSON in restricted operator evidence.
+
+The reference-contract checksum covers columns, foreign keys and index definitions;
+it is not a complete schema export or a backup checksum. `pg_dump`/restore,
+constraint/function/trigger coverage and actual production release identification
+remain separate requirements. Table/index sizes can change during capture despite
+the catalog snapshot. The command caps catalog object counts (20,000 relations,
+2M columns, 400,000 FKs/indexes) and fails rather than silently truncating; it does
+not scan a 500M/3B business-row corpus. Existing partition families count toward
+those catalog bounds and require reviewing the cap before further growth.
+
+Local verification on the current schema: 213 tables, 1,614 columns, 468 foreign
+keys, 718 indexes and 37 migrations; 115 FKs reference Profile and 11 Auth users.
+Those relationships are inventoried, not automatically assigned migration
+semantics. Live production inventory, preservation dispositions and both migration
+rehearsals remain required before activation.
