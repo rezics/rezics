@@ -15,7 +15,7 @@ export class WorkerHealthState {
 	#loopStarted = false;
 	#stopping = false;
 	#lastHeartbeatAt = 0;
-	#activeJobStartedAt: number | undefined;
+	#activeJobs = new Map<string, number>();
 
 	start(): void {
 		this.#loopStarted = true;
@@ -26,13 +26,14 @@ export class WorkerHealthState {
 		this.#lastHeartbeatAt = Date.now();
 	}
 
-	startJob(): void {
-		this.#activeJobStartedAt = Date.now();
+	startJob(name = "default"): void {
+		if (this.#activeJobs.has(name)) throw new Error(`Worker job ${name} is already active`);
+		this.#activeJobs.set(name, Date.now());
 		this.heartbeat();
 	}
 
-	finishJob(): void {
-		this.#activeJobStartedAt = undefined;
+	finishJob(name = "default"): void {
+		this.#activeJobs.delete(name);
 		this.heartbeat();
 	}
 
@@ -42,18 +43,18 @@ export class WorkerHealthState {
 	}
 
 	isReady(now = Date.now()): boolean {
+		const oldestJob = this.activeJobStartedAt();
 		return (
 			this.#loopStarted &&
 			!this.#stopping &&
 			this.#lastHeartbeatAt > 0 &&
 			now - this.#lastHeartbeatAt <= workerReadinessPolicy.maxHeartbeatAgeMs &&
-			(this.#activeJobStartedAt === undefined ||
-				now - this.#activeJobStartedAt <= workerReadinessPolicy.maxActiveJobAgeMs)
+			(oldestJob === undefined || now - oldestJob <= workerReadinessPolicy.maxActiveJobAgeMs)
 		);
 	}
 
 	activeJobStartedAt(): number | undefined {
-		return this.#activeJobStartedAt;
+		return this.#activeJobs.size === 0 ? undefined : Math.min(...this.#activeJobs.values());
 	}
 }
 

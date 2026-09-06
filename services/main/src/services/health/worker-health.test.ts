@@ -9,6 +9,28 @@ import {
 import { workerReadinessPolicy } from "../../health-contract";
 
 describe("recommendation worker health", () => {
+	it("keeps the oldest active lane visible when another job finishes", () => {
+		vi.useFakeTimers();
+		try {
+			vi.setSystemTime(new Date("2026-09-06T00:00:00Z"));
+			const state = new WorkerHealthState();
+			state.start();
+			state.startJob("external");
+			const oldest = state.activeJobStartedAt();
+			vi.advanceTimersByTime(1_000);
+			state.startJob("delivery");
+			state.finishJob("delivery");
+			expect(state.activeJobStartedAt()).toBe(oldest);
+			vi.advanceTimersByTime(workerReadinessPolicy.maxActiveJobAgeMs);
+			state.heartbeat();
+			expect(state.isReady()).toBe(false);
+			state.finishJob("external");
+			expect(state.isReady()).toBe(true);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
 	it("serves process liveness without a dependency call", async () => {
 		const evaluate = vi.fn(async () => Promise.reject(new Error("must not run")));
 		const handler = createWorkerHealthHandler(evaluate);

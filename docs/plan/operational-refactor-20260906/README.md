@@ -1,6 +1,6 @@
 # REZICS operational refactor program
 
-Date: 2026-09-06. Status: selected design and implementation plan; no implementation or production qualification is claimed.
+Date: 2026-09-06. Status: implementation in progress; production qualification remains pending.
 Source baseline: `470aa6c0432fae1dacbd3be7d8ad62b566447ca9`.
 
 ## Mandate and outcome
@@ -9,7 +9,10 @@ Deliver multiple independently useful product lines: finding books and choosing 
 
 The maintainer permits destructive database migration for this refactor. Design for the correct target contract instead of preserving obsolete columns indefinitely. Preserve legitimate existing data and its meaning through explicit conversion, quarantine or archival. Permission for destructive schema changes does not designate user records as disposable.
 
-The current delivery is documentation. Running migrations, modifying application code, publishing claims and production cutover are subsequent implementation work. This plan does not add pre-v1 compatibility. Released SQL remains immutable; a new forward migration may deliberately drop replaced structures after verified transfer.
+Implementation was authorized on 2026-09-06, including autonomous adjustments and
+verified commits. Production activation still requires the evidence below. This
+plan does not add pre-v1 compatibility. Released SQL remains immutable; a new
+forward migration may deliberately drop replaced structures after verified transfer.
 
 ## Research and decisions
 
@@ -82,7 +85,9 @@ U14 group challenges and U15 third-party commercial API are expansion experiment
 
 ## Completion ledger
 
-All P01–P12 are **planned / not implemented by this documentation task**. Existing code foundations are identified in each report; they do not automatically satisfy the new acceptance contracts.
+| Plan | Current implementation evidence | Remaining gate |
+| --- | --- | --- |
+| P10 | First operational slice: fenced email claims and renewal, acknowledged auth enqueue, independently scheduled lanes, isolated delivery process/pool, and real PostgreSQL race/plan checks. See [P10](10-capacity-and-operations.md#implementation-ledger). | Full resource ledger, admission/retention, source/AI executors, production inventory and recovery qualification. |
+| P01–P09, P11–P12 | Planned; existing foundations do not imply the new acceptance contracts pass. | Owning implementation and acceptance slices. |
 
 No fundamental design blocker has been identified. Source-use permissions, missing live inventory and unmeasured capacity are explicit, locally scoped activation gates with assigned work and fallback paths in the decision register. They do not suspend independent implementation.
-

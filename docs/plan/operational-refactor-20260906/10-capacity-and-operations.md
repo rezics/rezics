@@ -1,6 +1,6 @@
 # P10 — Bounded processing, capacity and operational recovery
 
-Status: planned, not implemented. Date: 2026-09-06. Parent: [program and gates](README.md).
+Status: implementation in progress. Date: 2026-09-06. Parent: [program and gates](README.md).
 
 ## Outcome and current owners
 
@@ -63,3 +63,29 @@ Groonga table-record, key-space, distinct-term and index-size limits are indepen
 Operational invariants and targeted tests are mandatory; GitHub's advisory Check status remains advisory. Repository frontend policy still applies. The host's unrelated Outline service is out of scope and must not be stopped or purged during REZICS migration.
 
 Primary references: [PostgreSQL partitioning](https://www.postgresql.org/docs/current/ddl-partitioning.html), [PITR](https://www.postgresql.org/docs/current/continuous-archiving.html), [transactional outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html).
+
+## Implementation ledger
+
+2026-09-06, first operational slice:
+
+- Email claim generation and expiry fence completion, retries, failure and renewal;
+  expired and pending claims use separately limited partial-index scans.
+- Authentication awaits durable enqueue. A Better Auth integration propagates
+  enqueue errors through its otherwise error-swallowing background helper.
+- Five selected worker lanes isolate scheduling and per-job errors. Nomad runs
+  delivery and background work in separate processes, each with three database
+  connections, retaining the prior aggregate resource allocation.
+- Backend TypeScript and 1,435 tests across 242 files passed. Nomad static
+  validation and formatting passed; no Nomad server deployment was performed.
+- All 37 existing migrations replayed on isolated PostgreSQL; the production
+  writer passed expiry/reclaim rejection, eight nonoverlapping concurrent claims,
+  and sensitive-payload clearing checks. A 300,000-row fixture verified both
+  claim queries use their partial indexes without pre-limit sorting.
+- [Email owner documentation](../../../services/main/src/services/email/README.md)
+  records commands, measured plans, 500M/3B estimates and unqualified limits.
+
+Unresolved findings are not completed acceptance: the production host/configuration
+is unavailable in this checkout; the fresh image's package installation upgraded
+PostgreSQL 18.4 to 18.6; the existing online-count gate still rejects
+`tags/service.ts`'s window count (P06/SYS-08). Recovery, retention, admission control,
+mixed-workload qualification and production activation remain pending.

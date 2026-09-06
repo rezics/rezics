@@ -49,6 +49,10 @@ job "rezics-worker" {
       port "health" {
         host_network = "loopback"
       }
+
+      port "delivery_health" {
+        host_network = "loopback"
+      }
     }
 
     task "worker" {
@@ -63,7 +67,8 @@ job "rezics-worker" {
 
       env {
         DEPLOYMENT_ENVIRONMENT = "production"
-        DATABASE_POOL_MAX      = "6"
+        DATABASE_POOL_MAX      = "3"
+        WORKER_LANES           = "canonical,projection,maintenance,external"
         NODE_ENV               = "production"
         REZICS_RELEASE         = var.release
       }
@@ -119,9 +124,84 @@ job "rezics-worker" {
       shutdown_delay = "5s"
 
       resources {
-        cpu        = 2300
-        memory     = 512
-        memory_max = 2048
+        cpu        = 2000
+        memory     = 384
+        memory_max = 1536
+      }
+    }
+
+    task "delivery" {
+      driver = "docker"
+
+      config {
+        image        = var.worker_image
+        force_pull   = true
+        network_mode = "host"
+        ports        = ["delivery_health"]
+      }
+
+      env {
+        DEPLOYMENT_ENVIRONMENT = "production"
+        DATABASE_POOL_MAX      = "3"
+        WORKER_LANES           = "delivery"
+        NODE_ENV               = "production"
+        REZICS_RELEASE         = var.release
+      }
+
+      template {
+        data = <<-EOH
+        WORKER_HEALTH_HOST=127.0.0.1
+        WORKER_HEALTH_PORT={{ env "NOMAD_PORT_delivery_health" }}
+        {{- with nomadVar "application/runtime" }}
+        {{- range .Tuples }}
+        {{ .K }}={{ .V | toJSON }}
+        {{- end }}
+        {{- end }}
+        EOH
+
+        destination = "secrets/runtime.env"
+        env         = true
+        change_mode = "restart"
+      }
+
+      service {
+        provider     = "nomad"
+        name         = "rezics-delivery"
+        port         = "delivery_health"
+        address_mode = "host"
+
+        check {
+          name      = "delivery-readiness"
+          type      = "http"
+          path      = "/ready"
+          interval  = "5s"
+          timeout   = "3s"
+          on_update = "require_healthy"
+        }
+
+        check {
+          name      = "delivery-liveness"
+          type      = "http"
+          path      = "/health"
+          interval  = "10s"
+          timeout   = "1s"
+          on_update = "require_healthy"
+
+          check_restart {
+            limit = 3
+            grace = "10s"
+          }
+        }
+      }
+
+      kill_signal    = "SIGTERM"
+      kill_timeout   = "30s"
+      shutdown_delay = "5s"
+
+      resources {
+        cpu        = 300
+        memory     = 128
+        memory_max = 512
       }
     }
   }

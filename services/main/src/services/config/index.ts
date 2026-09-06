@@ -6,6 +6,7 @@ import { config as loadEnv } from "dotenv";
 import { z } from "zod";
 
 import { WorkPolicy } from "../performance/policy";
+import { WorkerLaneValues } from "../workers/scheduler";
 
 loadEnv({
 	path: resolve(dirname(fileURLToPath(import.meta.url)), "../../../../.env"),
@@ -74,6 +75,12 @@ export const env = createEnv({
 		EMAIL_DISPATCH_POLL_INTERVAL_MS: z.coerce.number().int().min(250).max(60_000).default(1_000),
 		EMAIL_DISPATCH_BATCH_SIZE: z.coerce.number().int().min(1).max(100).default(20),
 		EMAIL_DISPATCH_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(20).default(5),
+		WORKER_LANES: z
+			.string()
+			.default(WorkerLaneValues.join(","))
+			.transform((value) => value.split(",").map((lane) => lane.trim()))
+			.pipe(z.array(z.enum(WorkerLaneValues)).min(1))
+			.refine((lanes) => new Set(lanes).size === lanes.length, "worker lanes must be unique"),
 		BETTER_AUTH_TRUSTED_ORIGINS: z
 			.string()
 			.transform((value) =>

@@ -139,6 +139,11 @@ tasks:
         cmds:
             - yarn exec tsx scripts/generate-auth-schema.ts
 
+    email:check:
+        desc: Verify email claim races on an empty loopback rezics_atlas replay database.
+        cmds:
+            - yarn exec tsx scripts/check-email-outbox.ts
+
     db:replay:up:
         internal: true
         dir: ../..

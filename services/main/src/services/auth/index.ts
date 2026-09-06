@@ -1,6 +1,7 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { apiKey } from "@better-auth/api-key";
 import { betterAuth } from "better-auth/minimal";
+import { APIError } from "better-auth/api";
 import { captcha } from "better-auth/plugins";
 import { getActiveObservability } from "@rezics/observability";
 import { ContentLanguageValues } from "@rezics/i18n";
@@ -10,6 +11,7 @@ import { database } from "../database";
 import * as schema from "../database/schema/auth";
 import { enqueueAuthenticationEmail } from "../email/outbox";
 import { getRequestTranslation } from "../i18n";
+import { durableAuthenticationCallbacks } from "./durable-callbacks";
 
 const { logger } = getActiveObservability();
 
@@ -53,6 +55,7 @@ export const auth = betterAuth({
 		"/api-key/delete",
 	],
 	plugins: [
+		durableAuthenticationCallbacks,
 		captcha({
 			provider: "cloudflare-turnstile",
 			secretKey: turnstile.secretKey,
@@ -108,7 +111,7 @@ export const auth = betterAuth({
 		revokeSessionsOnPasswordReset: true,
 		async sendResetPassword({ user, url }, request) {
 			const { locale } = await getRequestTranslation("emails", request?.headers);
-			void enqueueAuthenticationEmail({
+			await enqueueAuthenticationEmail({
 				actionUrl: url,
 				kind: "reset_password",
 				locale,
@@ -119,6 +122,7 @@ export const auth = betterAuth({
 					errorCode: "PasswordResetEmailEnqueueFailed",
 					error,
 				});
+				throw new APIError("SERVICE_UNAVAILABLE", { code: "EMAIL_ENQUEUE_UNAVAILABLE" });
 			});
 		},
 	},
@@ -127,7 +131,7 @@ export const auth = betterAuth({
 		autoSignInAfterVerification: true,
 		async sendVerificationEmail({ user, url }, request) {
 			const { locale } = await getRequestTranslation("emails", request?.headers);
-			void enqueueAuthenticationEmail({
+			await enqueueAuthenticationEmail({
 				actionUrl: url,
 				kind: "verify_email",
 				locale,
@@ -138,6 +142,7 @@ export const auth = betterAuth({
 					errorCode: "VerificationEmailEnqueueFailed",
 					error,
 				});
+				throw new APIError("SERVICE_UNAVAILABLE", { code: "EMAIL_ENQUEUE_UNAVAILABLE" });
 			});
 		},
 	},

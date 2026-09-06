@@ -142,11 +142,18 @@ and [workload identity model](https://developer.hashicorp.com/nomad/docs/concept
 
 ## Database rules
 
-Each API or worker process owns a six-connection `node-postgres` pool. Eight API
-allocations plus the worker therefore admit at most 54 application connections;
-the ninth temporary API canary raises that bound to 60. PostgreSQL keeps
+Each API process owns a six-connection `node-postgres` pool. The worker allocation
+runs separate delivery and background processes with three connections each.
+Delivery runs only `WORKER_LANES=delivery`; the background process runs
+`canonical,projection,maintenance,external`. Their health checks and process
+limits are independent. The allocation retains its combined 2,300 MHz CPU,
+512 MiB reservation and 2 GiB memory ceiling.
+
+Eight API allocations plus the worker admit at most 54 application connections;
+the ninth temporary API canary raises that bound to 60. A simultaneous worker
+canary adds six more, for 66. PostgreSQL keeps
 `max_connections = 120`, with ten reserved connections and another three
-superuser-reserved connections, leaving 107 ordinary slots and 47 ordinary
+superuser-reserved connections, leaving 107 ordinary slots and 41 ordinary
 slots beyond the worst direct-connection application rollout. Increase the
 autoscaling maximum only after checking PostgreSQL connection headroom and the
 application pool waiting metric.

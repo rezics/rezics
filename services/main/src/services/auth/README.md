@@ -4,6 +4,22 @@ Better Auth is the sole owner of credentials, password verification, cookies,
 sessions, and API keys. Backend code never accepts a client-provided profile ID
 as identity.
 
+## Email acknowledgement
+
+Verification and password-reset callbacks await the local email outbox insert.
+The `durable-authentication-callbacks` plugin propagates failures that Better Auth
+1.7.2's default background helper otherwise catches. No external email provider
+call runs inside the authentication request. A failed insert returns
+`503 / EMAIL_ENQUEUE_UNAVAILABLE`; retry the reset or verification resend action.
+A signup may already have created its account before enqueue fails, so recovery
+uses verification resend rather than assuming account creation rolled back.
+
+The framework compatibility test exercises the actual reset HTTP endpoint with
+an unavailable enqueue and a subsequent successful retry. It also verifies the
+callback cannot acknowledge an unresolved insert. This is durable intent
+acceptance, not proof of message delivery or receipt. Keep the framework's
+generic nonexistent-account reset response and abuse protection.
+
 ## Request identity
 
 `session.ts` is the only bridge from an HTTP request to application identity.

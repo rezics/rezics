@@ -2,7 +2,14 @@ import { getActiveObservability } from "@rezics/observability";
 
 import { env } from "../config";
 import { renderClaimedEmail, InvalidEmailIntent } from "./content";
-import { claimEmailBatch, type ClaimedEmail, markEmailAccepted, markEmailFailed } from "./outbox";
+import {
+	claimEmailBatch,
+	type ClaimedEmail,
+	EmailLeaseLost,
+	markEmailAccepted,
+	markEmailFailed,
+	renewEmailLease,
+} from "./outbox";
 import { emailIntentDeliveryEnabled } from "./policy";
 import { MailTransportError, sendMail } from "./transport";
 
@@ -57,28 +64,37 @@ async function processClaimedEmail(item: ClaimedEmail): Promise<void> {
 		return;
 	}
 
+	await renewEmailLease(item, LeaseDurationMilliseconds);
+	let acceptance: Awaited<ReturnType<typeof sendMail>>;
 	try {
-		const acceptance = await sendMail(message);
-		await markEmailAccepted(item, acceptance, new Date());
+		acceptance = await sendMail(message);
 	} catch (error) {
 		await recordFailure(item, {
 			code: error instanceof MailTransportError ? error.code : "EmailDeliveryFailure",
 			error,
 			retryable: error instanceof MailTransportError ? error.retryable : true,
 		});
+		return;
 	}
+	// An acknowledgement failure is uncertain delivery, not a provider rejection.
+	// Leave the claim for recovery; never reschedule an already accepted send here.
+	await markEmailAccepted(item, acceptance, new Date());
 }
 
 export async function dispatchEmailBatch(): Promise<number> {
 	const claimed = await claimEmailBatch({
 		batchSize: env.EMAIL_DISPATCH_BATCH_SIZE,
 		leaseDurationMs: LeaseDurationMilliseconds,
-		now: new Date(),
 	});
 	if (claimed.length === 0) return 0;
 	const results = await Promise.allSettled(claimed.map(processClaimedEmail));
 	for (const result of results)
-		if (result.status === "rejected")
+		if (result.status === "rejected" && result.reason instanceof EmailLeaseLost)
+			logger.warn("Email outbox claim expired or was reclaimed", {
+				eventName: "email.outbox.lease_lost",
+				errorCode: "EmailLeaseLost",
+			});
+		else if (result.status === "rejected")
 			logger.error("Email outbox processing stopped before recording an outcome", {
 				eventName: "email.outbox.processing_failed",
 				errorCode: "EmailOutboxProcessingFailed",
