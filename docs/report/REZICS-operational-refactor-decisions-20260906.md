@@ -61,8 +61,8 @@ U14 reading groups/challenges and U15 third-party catalog/API consumers proceed 
 | ID | Decision | Reason and implementation owner |
 | --- | --- | --- |
 | D01 | One PostgreSQL business database initially, domain-owned table groups, PGroonga with measured partition/cutover limits | Preserve relational execution and transactions; do not confuse a future extensible catalog with mandatory microservices. P01/P06/P10 |
-| D02 | Stable Unit IDs; explicit concrete versions; optional evidenced Work | Avoid empty parent records and accidental edition conflation. P01 |
-| D03 | Typed stable columns, governed long-tail values and identified relation revisions with one writer | Strong semantics without all-facts-in-one-JSON or duplicate authority. P01 |
+| D02 | Stable logical Unit IDs with owner-local physical identity/lifecycle; explicit concrete versions; optional evidenced Work | No mandatory global `unit` parent in the target. Preserve addresses and migrate every existing reference family. P01/P11 |
+| D03 | Typed stable columns, fixed domain structural relations, governed long-tail values and dynamic semantic relation revisions with one writer | Classify each source path explicitly; a shared relation interface cannot duplicate a structural writer. P01 |
 | D04 | Identified content occurrences; local commands, paged reads and segmented checkpoints | Existing whole-owner loads are unsafe for large structures/collections. P01/P07 |
 | D05 | Unified public Entity, private Auth and scoped delegated/service principals | Catalog editing is not impersonation authority; AI attribution cannot forge a human reviewer. P02 |
 | D06 | Versioned IANA BCP 47 contract for persisted content; Intl/CLDR for UI presentation/negotiation | A valid-looking code, locale alias and true content-language identity are different facts. P03 |
@@ -88,6 +88,14 @@ U14 reading groups/challenges and U15 third-party catalog/API consumers proceed 
 | D26 | Include every source-required supporting catalog family now | MusicBrainz Area/Place/Event/Instrument/Label/Series/Genre/Mood/URL, VNDB quotes/taxonomies and Bangumi indices/Archive relations are not deferred general-purpose products. P01/P04 |
 | D27 | A book-index provider is replaceable; its required semantics are not | Open Library Work/Edition plus permitted serialization/translation fixtures; Novel Updates availability does not gate the model. P01/P04/P09 |
 | D28 | Verify authoritative API components against real public responses | Bangumi v0 belongs to `bangumi/server`; pin its complete component graph and encode the observed Infobox/nullability discrepancies explicitly. P04 |
+| D29 | Retire the live global Unit identity parent in this refactor | Owner-local identities, checked concrete references, bounded/rebuildable ID routing and all-consumer conversion are acceptance requirements; metadata-only splitting is insufficient. Clarified 2026-09-07; P01/P10/P11 |
+| D30 | Universe/world setting, franchise and series are current native schema scope | Distinct identities and membership predicates, continuity/canon/branch context, ordering, source-free creation and independent behavior targets; not future placeholders. Clarified 2026-09-07; P01/P12 |
+
+The [physical identity contract](REZICS-source-complete-catalog-schema-20260906.md#41-logical-unit-and-owner-local-physical-identity)
+supersedes the earlier thin-global-parent proposal. The
+[fixed/dynamic classification](REZICS-内容结构关系与查询模型-20260906.md#24-fixed-structural-relations-and-dynamic-semantic-relations)
+is the source inventory rule; its examples are not a completed mapping suite.
+D29/D30 are selected requirements, not implementation evidence.
 
 ## 5. Language and authority: material report additions
 

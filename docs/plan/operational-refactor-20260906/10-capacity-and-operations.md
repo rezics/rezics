@@ -23,6 +23,22 @@ Owners: `services/main/src/worker.ts`, `services/email/outbox.ts`, auth delivery
 
 These are selected qualification targets, not current measurements.
 
+For the 2026-09-07 identity/grouping contract, measure owner-local identity and
+owner-locator storage separately at 500M and 3B logical IDs. Use the
+[schema report's routing budget](../../report/REZICS-source-complete-catalog-schema-20260906.md#5-schema-qualification-and-capacity)
+as an estimate until sampled heap/index sizes replace it. Include additional
+target-routing keys, indexes, revision/evidence and order-profile amplification;
+the locator is not a bounded configuration dataset.
+
+Run the workload below with concurrent ID creation/routing publication, cache
+misses and locator repair/rebuild. Include 1M-member franchises and independent
+continuities; page direct members by indexed owner/profile/cursor, never recurse
+through every descendant for an ordinary read or activity write. Cap batch counts
+and bytes, repair concurrency and queues; use resumable owner/key checkpoints.
+Measure p95/p99 resolution and mutation latency, WAL, lock contention and rebuild
+reserve. Physical owner splitting alone does not prove 500M/3B capacity. Select
+partition/shard cutovers before the existing protection thresholds are crossed.
+
 | Input/target | Initial test profile |
 | --- | --- |
 | Foreground mix | 100 reads/s, 20 writes/s, 32 clients; separate 5× burst |

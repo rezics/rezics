@@ -9,6 +9,13 @@ schema for VNDB, MusicBrainz, Bangumi and book indexes now. Follow the
 MusicBrainz-required Area/Place/Event/Instrument/Label/Series/Genre/Mood/URL data,
 VNDB quotes/taxonomies and Bangumi source catalog structures are current scope.
 The future labels below apply to broader products, not those source-required facts.
+
+**Maintainer clarification, 2026-09-07:** universe/world setting, franchise and
+series are also required native models in this stage, including source-free
+creation. Unit is a logical protocol with owner-local physical identities; a
+global `unit` parent is not the target. Follow the
+[identity contract](REZICS-source-complete-catalog-schema-20260906.md#41-logical-unit-and-owner-local-physical-identity)
+and [fixed/dynamic relation classification](REZICS-内容结构关系与查询模型-20260906.md#24-fixed-structural-relations-and-dynamic-semantic-relations).
 The core schema remains unimplemented; supporting fixes do not complete it.
 
 日期：2026-09-06。**领域边界方向已确认；完整领域模型、迁移与容量尚未验收。本次只维护设计文档。**
@@ -107,7 +114,7 @@ Market 与 Catalog 的边界已确认；Market 的订单、交易、结算、二
 | 事件与活动 `event` | 事件、活动系列、场次、时间、地点与参与关系 | **Current stage for MusicBrainz-required catalog data.** Broader event products remain future scope; distinguish event identity, place/time and repeated occurrences. |
 | 公开主体 `entity` | 人、组织、角色、服务代理及获授权的互动资料 | **当前基础＋待实施。** Profile／Entity 合并尚未完成；平台账号与实际创作者身份分开 |
 | 网站与平台资料 | 网站、平台账号、外部发布及来源身份 | **未来按需。** 网站不必是软件；跨内容类型共享协议，不强制所有重投稿数据汇入一个表 |
-| 组织对象与一般概念 | 系列、世界观、IP、地点及其他受治理概念 | **部分基础＋待实施／未来扩展。** 复用组织／类成员机制；普通新概念不要求专属空表或互动权限 |
+| 组织对象与一般概念 | 系列、世界观、IP、地点及其他受治理概念 | **Current stage: universe, franchise and series identities, governed membership and ordering; source-required places/concepts.** Shared grouping capabilities do not require a table per class. Unrelated general-purpose concept products remain future scope. |
 
 资产、来源机制、权限、标签、收藏和社群是这些领域共用的能力。共享机制不表示所有实例数据都要保存在一个永久的全站大表。
 
@@ -132,9 +139,10 @@ Market 与 Catalog 的边界已确认；Market 的订单、交易、结算、二
 同一个显卡型号可以使用以下结构：
 
 ```text
-unit(id = U)
-  product_model(id = U)          厂商、型号等产品资料
-  graphics_card_spec(id = U)     显存、接口、板卡专属规格
+Logical Unit U, physically owned by product:
+  product_identity(id = U)       owner-local identity and lifecycle
+    product_model(id = U)        same-identity product extension
+    graphics_card_spec(id = U)   same-identity specification extension
 
 另一个对象 C：GPU 芯片型号
   U --采用芯片--> C
@@ -143,7 +151,11 @@ unit(id = U)
   I --属于型号--> U
 ```
 
-同 ID 的 Unit 扩展仍以 `id` 为主键并直接外键引用 `unit.id`；需要同时满足产品资格的约束由实施契约补齐，不能假设一个 Unit 外键就证明规格适用性。基础字段只有一个归属；不要在规格表再复制厂商名称和标题。
+Same-identity extensions use a primary key and concrete FK to their owning
+domain identity, with any required routing key and eligibility constraints.
+They do not reference a global `unit` parent in the target model. Existing
+constraints stay enforced until coordinated conversion. Identity existence alone
+does not prove product/specification eligibility; each base fact has one writer.
 
 一般产品、GPU、CPU、主板不因名称不同就各建一套完整平台。专属规格使用扩展；长尾规格使用有类型动态属性。硬件型号、兼容关系、评测若形成独立维护负载，再整体扩展硬件表组。
 
@@ -225,7 +237,11 @@ Web 应用可以复用软件项目模型；学校官网、作者博客等网站�
 5. **模块选择受控。** 同构的来源、关系、修订和查询结构可共享 schema 模板；实际物理表由服务端受类型检查的登记选择，不允许用户参数拼接表名。当前 `unit.kind` 不是任意语义类别，也不直接等于物理分片地址。
 6. **共置与跨组读取。** 同库阶段保留明确的 JOIN、事务和真实外键。未来迁出需要识别必须同行的扩展、修订与引用；跨组查询集中在有名字的读取接口。多种资料能力并不承诺未来所有跨域 JOIN 都免费。
 
-`unit`、全局来源身份定位、标签及反向投影本身也计入容量。来源身份唯一性不能仅靠“UUID 不重复”代替；未来分片时必须设计唯一性的作用域和校验途径。详见[总体报告 §10](REZICS-动态元信息与渐进扩展架构-20260905.md#10-第一阶段的分表方案)。
+Count owner-local identities, the rebuildable ID locator, source-key ownership,
+tags and reverse projections separately. The locator is not a universal entity
+parent. Source-key uniqueness and cross-owner UUID conflicts need explicit
+constraints/routing and rejection paths; per-owner PKs alone are insufficient.
+See [physical identity and capacity](REZICS-source-complete-catalog-schema-20260906.md#41-logical-unit-and-owner-local-physical-identity).
 
 ## 6. 不均匀增长的规划与验证边界
 

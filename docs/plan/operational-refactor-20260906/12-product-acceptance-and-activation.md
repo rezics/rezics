@@ -7,6 +7,22 @@ semantic fixtures, native roundtrip/query assertions and honest coverage status.
 Product activation, marketing metrics and broad UI work follow the four-source
 schema gate; they must not become substitutes for the missing database refactor.
 
+The 2026-09-07 clarification makes owner-local physical Unit identity, fixed versus
+dynamic relationship ownership, and native universe/franchise/series models part
+of this same schema gate. Four-source conformance alone does not qualify them.
+
+## Current-stage shared-model acceptance
+
+| Gate | Required evidence | State |
+| --- | --- | --- |
+| Logical Unit, physical owner identity | No live global `unit`/universal parent dependency; preserved IDs/addresses/private state; concrete reference rejection; concurrent ownership conflict handling; bounded routing and locator rebuild | Not qualified |
+| Fixed structure versus dynamic relation | Every required source path classified with actual storage/definition and sole writer; structural graph reads do not create duplicate writable facts; governed role additions keep target/value constraints | Not qualified |
+| Universe, franchise and series | Native source-free creation/edit/query/export/history/restore; same-name identities remain separate; two continuities in one franchise; `about` differs from `set_in_universe`; multiple memberships/order profiles/evidence survive without automatic behavior or rights propagation | Not qualified |
+
+Use [P01](01-catalog-and-relations.md) fixtures and [P11](11-migration-and-cutover.md)
+conversion evidence. These are deterministic schema/service acceptance cases;
+broader human-rendered product acceptance remains separately scoped below.
+
 ## Outcome
 
 Make “ready to operate” a verifiable product state. Use [U01–U15 scenarios and market evidence](../../report/REZICS-product-opportunities-and-user-scenarios-20260906.md), not counts of tables or completed tickets. U01–U09/U13 are the initial full portfolio; U10/U11 are bounded supported pilots, U12 invited participation. U14/U15 remain later experiments.

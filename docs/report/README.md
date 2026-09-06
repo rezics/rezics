@@ -32,6 +32,14 @@ including MusicBrainz supporting entities and book-index/translation structures.
 Future-product examples in older reports do not defer those required data models.
 Supporting operational commits and general test totals are not schema completion.
 
+The 2026-09-07 clarification additionally requires logical Unit identities with
+owner-local physical storage and retirement of the live global `unit` parent;
+explicit [fixed structural/dynamic semantic relation classification](REZICS-内容结构关系与查询模型-20260906.md#24-fixed-structural-relations-and-dynamic-semantic-relations);
+and native universe/world-setting, franchise and series models in this stage.
+The [physical identity contract](REZICS-source-complete-catalog-schema-20260906.md#41-logical-unit-and-owner-local-physical-identity)
+and P01/P11/P12 own the conversion and acceptance gates. Older thin-parent and
+future-grouping wording is superseded. These requirements are not yet delivered.
+
 Maintain each topic in its owning report and link to it rather than creating competing
 specifications. Adopted design, existing foundations, deferred features, and unqualified capacity
 are separate states. A future-domain example does not expand the scope of an implementation task.

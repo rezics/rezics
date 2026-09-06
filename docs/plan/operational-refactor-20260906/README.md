@@ -14,6 +14,15 @@ They own this stage's concrete source URLs, native table owners, coverage gates
 and next implementation order. The broader product program below remains valid
 after this milestone; it must not divert implementation into more peripheral fixes.
 
+**Additional scope confirmed 2026-09-07:** Unit remains the logical identity,
+reference and capability abstraction; physical identity/lifecycle moves to owning
+table groups and the live global `unit` parent is retired in this stage. Fixed
+domain structure and dynamic semantic relations must be classified explicitly.
+Universe/world-setting, franchise and series identities, scoped memberships and
+ordering are required native models now, including source-free authoring. P01/P11/
+P12 own their implementation, all-consumer conversion and acceptance; four-source
+coverage alone does not complete these shared-model gates.
+
 Deliver multiple independently useful product lines: finding books and choosing through reviews, scores and lists; keeping a reading journal; discovering works through tags and characters; choosing languages and editions; exploring rich credits and cross-media relationships; contributing corrections to a maintained catalog. Three production source adapters (Bangumi, VNDB and MusicBrainz), continuous adoption and AI-assisted review are part of this program.
 
 The maintainer permits destructive database migration for this refactor. Design for the correct target contract instead of preserving obsolete columns indefinitely. Preserve legitimate existing data and its meaning through explicit conversion, quarantine or archival. Permission for destructive schema changes does not designate user records as disposable.
@@ -106,7 +115,8 @@ U14 group challenges and U15 third-party commercial API are expansion experiment
 ## Completion ledger
 
 **Current-stage result: not complete.** VNDB, MusicBrainz, Bangumi and book-index
-native schema gates are all unqualified. Core catalog replacement DDL and a complete
+native schema gates are all unqualified. Owner-local Unit identity cutover and
+universe/franchise/series native acceptance are also unqualified. Core catalog replacement DDL and a complete
 native mapping suite have not been delivered. The table below records supporting
 work only; commit counts and general test totals are not catalog-schema progress.
 

@@ -27,6 +27,45 @@ Source-less books remain useful records. Do not make them wait for rediscovery i
 
 ## Rehearsal and execution sequence
 
+### Required global Unit parent retirement
+
+The 2026-09-07 [identity contract](../../report/REZICS-source-complete-catalog-schema-20260906.md#41-logical-unit-and-owner-local-physical-identity)
+requires owner-local physical identity and lifecycle in this stage. This is a
+conversion of existing identity dependencies, not just a metadata-table split.
+
+- Inventory every `unit` FK, lookup, writer, trigger/function, projection, history
+  payload, worker, generated contract and supported ID/slug entry point. Include
+  Entity/Auth bindings, community, moderation, reviews, lists, tags, progress and
+  private state alongside publishing/music/program/software/grouping.
+- Assign each old identity exactly one physical owner, preserving its UUID,
+  lifecycle, permissions, addresses, redirects and history. Record uncertain
+  object grain separately; do not infer a new Work or duplicate identity from the
+  destination table. Same-object extensions reference the selected owner key.
+- For each reference family, record old and new keys, concrete FK/checked target
+  alternatives, writer, target deletion/restore behavior and conversion evidence.
+  A replacement polymorphic UUID column without enforced target validity fails.
+- Populate and reconcile owner records through bounded, restartable conversion;
+  rebuild the owner locator from authoritative identity/migration records. Test
+  ownership conflicts, stale generations, locator loss and interrupted rebuild.
+  Preserve ID-only lookup without scans across all owner tables. The address
+  registry and permanent merge records retain their distinct authorities.
+- Maintain one authoritative writer at each cutover point. Temporary migration
+  reads or staging copies have an explicit generation and removal step. They are
+  not permanent dual identity systems or restoration of pre-v1 compatibility.
+- Fence all old writers and update affected service/API/SDK consumers together.
+  Retire live global `unit` reads/FKs/writes and drop the old table via new forward
+  SQL only after reconciled conversion. Released migration history and a restricted
+  recovery archive may retain the old representation; the running target may not
+  depend on it. A renamed universal parent or common partitioned parent fails the
+  target as well.
+
+Owner-local identity, fixed/dynamic relation mappings and native grouping fixtures
+must pass in the same restored target as the four-source catalog fixtures. This
+requirement does not assert that the current inventory command already enumerates
+all application-level consumers or that this conversion has been implemented.
+
+### Deployment sequence
+
 1. Inventory production versions and table families with approved read-only access at implementation time; classify privacy, source and existing user-write activity. Never print credentials.
 2. Take and restore a complete recoverable backup; record artifact hashes, schema/extension/runtime versions and the recovery target.
 3. Build the target schema through the supported release/migration process. Generate new migration files with `task services-main:db:generate -- <name>`; retain released SQL and checksums.
@@ -48,6 +87,12 @@ Any intentionally non-convertible new contract needs a documented export/forward
 
 ## Acceptance
 
+- The target has no mandatory global Unit parent or runtime dependencies on it;
+  schema/catalog inspection and actual consumer-path tests agree. All preserved
+  IDs, references, merge redirects, scoped slugs and private visibility resolve to
+  their correct owner after interruption, restore and locator rebuild.
+- Universe/franchise/series memberships, continuity, order profiles and evidence
+  survive conversion; user activity remains attached to its original logical ID.
 - Every authoritative row family and object-store asset has an accounted disposition; unexplained losses = 0.
 - Historical source-less records survive; ISBN/name collisions do not trigger automatic destructive merging.
 - Auth login/claim, private journals, reviews, live scores, lists, language selection, source adoption and source redirects function on restored target data.

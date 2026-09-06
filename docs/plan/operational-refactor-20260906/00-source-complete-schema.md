@@ -4,6 +4,11 @@ Priority: **the next implementation milestone**. Status: **not implemented / not
 qualified**. The scope clarification was requested by the maintainer on 2026-09-06.
 This stage takes precedence over the program's earlier broad increment order.
 
+The 2026-09-07 clarification also makes the following mandatory in this same
+stage: **logical Unit with owner-local physical identities and no live global
+`unit` parent; explicit fixed-structure/dynamic-relation classification; native
+universe/world-setting, franchise and series models.** These remain unimplemented.
+
 ## Required result
 
 REZICS must natively represent the public catalog data of **VNDB, MusicBrainz,
@@ -29,6 +34,12 @@ useful but does not complete any of the four source-schema gates below.
 “Not qualified” is not a percentage estimate. No current four-source native
 conformance suite or replacement catalog DDL has been delivered. A subset cannot
 be renamed “full coverage” by reducing the denominator.
+
+Four-source coverage is necessary but not sufficient. The shared model must also
+pass owner-identity cutover and source-free grouping acceptance even when an
+upstream source has no equivalent field. See the
+[physical identity contract](../../report/REZICS-source-complete-catalog-schema-20260906.md#41-logical-unit-and-owner-local-physical-identity)
+and [relation classification](../../report/REZICS-内容结构关系与查询模型-20260906.md#24-fixed-structural-relations-and-dynamic-semantic-relations).
 
 ## Mandatory references and live API examples
 
@@ -83,15 +94,20 @@ Invoke-RestMethod -Headers $bangumiHeaders -Method Post -ContentType 'applicatio
 
 1. **Complete the contract inventory, then write DDL.** P01/P03/P04 enumerate the
    pinned catalog object families, nested field paths, source vocabularies and
-   relationships. Each maps to a named native table/column or typed fact/relation
-   definition, with identity, cardinality, scope, conversion, unknown-value,
-   query/export and fixture rules. API plus Archive/dump/taxonomy contracts form
+   relationships. Classify each as fixed structure, dynamic semantic relation,
+   typed value or derived/source observation. Each maps to a named native
+   table/column or typed fact/relation definition, with identity, cardinality,
+   scope, conversion, unknown-value, query/export and fixture rules.
+   API plus Archive/dump/taxonomy contracts form
    the denominator; an API-only inventory must not omit dump-only catalog facts.
-2. **Implement shared schema foundations.** Stable identities and domain membership,
+2. **Implement shared schema foundations.** Owner-local physical identities and
+   domain membership implementing the logical Unit protocol, bounded ID routing,
    identified named forms/revisions, open content languages, typed identifiers,
    source records/observations/bindings, governed property/role definitions,
    identified relation revisions/participants/qualifiers/evidence, and ordered
-   composition/occurrences. Use real FKs and validated target alternatives. Keep
+   composition/occurrences. Use real owner-key FKs and validated concrete target
+   alternatives; no mandatory global identity parent. Inventory all existing Unit
+   consumers before declaring a target reference family complete. Keep
    Auth/private accounts separate from catalog creators; only the necessary P02
    reference integration is on this critical path, not a new account-management UI.
 3. **Implement the actual domain tables.** Publishing Work/text version/publication/
@@ -100,6 +116,9 @@ Invoke-RestMethod -Headers $bangumiHeaders -Method Post -ContentType 'applicatio
    credits/media/tracks/TOCs and required supporting catalog objects. Complete
    Area/Place/Event/Instrument/Label/Series/Genre/Mood metadata now where source
    contracts require it. They are not future feature placeholders.
+   Implement shared grouping identities for universe, franchise and series now,
+   with distinct membership predicates, continuity/canon/branch context, source
+   support and named ordering profiles. Include native source-free commands.
 4. **Integrate one canonical write/read path per owner.** Source-free manual
    creation and versioned source adapters call the same invariant-enforcing
    commands. Wire history/restore, merge, reference/slug resolution, filters,
@@ -108,9 +127,11 @@ Invoke-RestMethod -Headers $bangumiHeaders -Method Post -ContentType 'applicatio
    redesign, scoring pilots and notification polish wait.
 5. **Convert and retire the replaced catalog contract.** Inventory old Unit IDs,
    Book/Media/Software/Release grain, localized rows/aliases, credit/subject edges,
-   compositions and historical references. Preserve uncertain/source-less entries.
+   compositions and historical references, including non-catalog consumers of
+   the old global parent. Preserve uncertain/source-less entries.
    Replace old authorities through new forward migrations and reviewed bounded
-   conversion; do not maintain duplicate writable metadata or edit released SQL.
+   conversion; retire the live global `unit` parent and its runtime consumers.
+   Do not maintain duplicate writable metadata or edit released SQL.
 6. **Pass four-source database qualification.** Import permitted representative
    source graphs, query/export them from native tables, verify semantic roundtrips,
    rejection/conflict/withdrawal cases, and complete two interrupted/repeatable
@@ -124,6 +145,17 @@ fixture qualification. Production conversion/activation remains separately gated
 
 ## Required schema acceptance cases
 
+- The same UUID resolves through its physical owner without a global `unit` row.
+  Concrete references reject missing/wrong-owner targets; concurrent ID ownership
+  conflicts fail safely; stale/missing routing is bounded and the locator rebuilds
+  from authoritative owner records. Existing ID/slug/merge addresses survive.
+- Fixed containment/track references can be read through the relation interface,
+  but only their owner command can change them. New governed semantic roles do
+  not require a second fact store or removal of reference/value constraints.
+- Same-name universe, franchise and series remain separately identifiable. A
+  franchise can contain two continuities; `about` does not imply `set_in_universe`.
+  Multiple memberships and ordering profiles survive query/edit/export/history/
+  restore without inheriting rights or propagating reviews, scores or progress.
 - Bangumi subject 253 retains 26 main episodes and 31 total source episodes as
   separate metrics; episode `sort`, meaningful `ep`, type, disc and duration text
   remain distinct. A fractional source number is not coerced to an integer.
@@ -155,6 +187,11 @@ fixture qualification. Production conversion/activation remains separately gated
   mapping manifest identifies actual tables/columns/definitions and actual tests.
 - All four source-schema gates pass; all required field/object dispositions are
   accounted for. Raw preservation and partial samples are reported separately.
+- Owner-identity conversion and universe/franchise/series model gates pass as
+  well. The live target has no global `unit` table or substitute universal parent,
+  and no runtime FK/read/write dependency on it. Account for existing catalog,
+  Entity/Auth, community, personal state, address, history/merge and search owners;
+  released SQL and restricted recovery archives are historical evidence only.
 - Native read/query/edit/export and revision/withdrawal behavior pass; fixed
   request/document limits do not impose hidden lifetime limits on imported owners.
 - Released migration checksums are intact. Generate with

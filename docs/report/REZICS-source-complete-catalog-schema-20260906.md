@@ -1,6 +1,6 @@
 # Source-complete catalog schema: current-stage contract
 
-Date: 2026-09-06. Status: corrected stage scope and researched target schema;
+Date: 2026-09-06; target clarified 2026-09-07. Status: corrected stage scope and researched target schema;
 the core catalog schema described here is **not implemented or qualified**.
 Code inspection baseline: `4fbb0ce67`. This report owns the source-to-domain
 mapping and physical-schema milestone. [Source operations](REZICS-source-integration-and-review-20260906.md)
@@ -212,8 +212,16 @@ field/object inventory defines the coverage denominator.
 
 ## 4. Physical schema contract to implement
 
+**Maintainer clarification, 2026-09-07:** this stage includes owner-local physical
+identities, the fixed-structure/dynamic-relation distinction, and native universe,
+franchise and series modeling. These are required schema outcomes even where a
+source has no matching field; they are not postponed product experiments.
+
 The current schema has concrete blockers, not merely missing importer code:
 
+- Every current Unit subtype depends on the global `unit` identity/lifecycle
+  table. Moving only heavy metadata leaves that central identity dependency in
+  place and does not fulfill the selected target below.
 - `book.isbn13` is a single globally unique value and `publication_date` is a
   complete SQL date; source editions carry plural identifiers and partial dates.
   An uncertain legacy Book, a series, a text version and a concrete publication
@@ -239,12 +247,72 @@ must turn each row into DDL, constraints, indexes, canonical commands and mappin
 fixtures before describing it as supported. Preserve Unit IDs where the referent
 is unchanged; do not create empty Work parents or merge source-less legacy Books.
 
+### 4.1 Logical Unit and owner-local physical identity
+
+Unit is the shared logical contract for stable UUID identity, typed references,
+lifecycle operations and applicable platform capabilities. It is not a mandatory
+physical parent row. Publishing, music, program, software, public Entity, grouping
+and existing platform owners keep their own authoritative identity/lifecycle
+records, with one owner per identity. Same-object extensions reference that owner;
+an MV can combine capabilities without creating two independent identities.
+Semantic class, public API kind and storage owner are distinct concepts.
+
+The final target has no global `unit` table, renamed universal entity parent or
+mandatory parent registration that all domains must join or reference. Merely
+partitioning the old parent also does not complete this change. Initially all
+owner tables remain in one PostgreSQL database and `public` schema; separate
+databases or services are not required.
+
+- Preserve existing UUIDs and supported v1+ ID/slug addresses. Internally resolve
+  a Unit reference to a validated owner and ID before dispatch. Only registered
+  server-side owners select SQL tables; a supplied class/kind is not proof of
+  physical ownership or permission.
+- Owner-local extensions and cross-owner endpoints in this single database use
+  concrete target keys/FKs and checked target alternatives. Each reference family
+  must name its actual constraints, lookup, deletion and restore policy before
+  DDL acceptance. A TypeScript union or unchecked `(type, uuid)` pair does not
+  establish referential integrity; a normal FK cannot target a union of tables.
+  [PostgreSQL foreign keys](https://www.postgresql.org/docs/18/ddl-constraints.html#DDL-CONSTRAINTS-FK)
+- ID-only lookup uses a rebuildable, partitionable owner locator, with bounded
+  lookup/batch resolution. It carries routing information, not canonical titles,
+  visibility or lifecycle, and is not an FK parent. Owner identity and migration
+  records are its recovery source. Missing, conflicting or stale entries fail
+  closed or enter bounded repair; they never cause a scan of every owner table.
+  Admission must detect conflicting UUID ownership, including imported IDs;
+  per-owner uniqueness alone does not prove global uniqueness. The executable
+  contract must cover concurrent creation, locator publication and repair before
+  claiming global ID resolution.
+- Keep slug addressing and permanent merge redirects under their existing
+  semantic authorities; migrate their target references. Merge/restore and owner
+  moves retain the original ID and checked routing generation. Routing metadata
+  must never become a second authority for permissions or canonical identity.
+- Inventory all existing consumers: catalog, Entity/Auth bindings, community,
+  reviews/lists, tags, private progress, addresses, history, merge and search.
+  Replacing the catalog alone while these still require a live global parent is
+  not completion. [P11](../plan/operational-refactor-20260906/11-migration-and-cutover.md)
+  owns bounded conversion, writer fencing and retirement. Released migrations
+  remain intact; a restricted old-data archive is not an active identity service.
+
+PostgreSQL inheritance does not supply cross-child unique/FK guarantees, and
+partitioned uniqueness must include the partition key. Neither mechanism is an
+implicit implementation of the logical Unit contract. Retain real local
+constraints; future cross-database extraction needs an explicit reference protocol
+and separate qualification. [Inheritance caveats](https://www.postgresql.org/docs/18/ddl-inherit.html#DDL-INHERIT-CAVEATS),
+[partitioning limits](https://www.postgresql.org/docs/18/ddl-partitioning.html#DDL-PARTITIONING-DECLARATIVE-LIMITATIONS)
+
+### 4.2 Required owner families and relationship storage
+
+The [fixed/dynamic relationship inventory](REZICS-内容结构关系与查询模型-20260906.md#24-fixed-structural-relations-and-dynamic-semantic-relations)
+owns the classification rules and examples. Every source mapping must name its
+category, authoritative owner and invariant-enforcing command. A unified relation
+read interface must not introduce a second writable edge for a structural fact.
+
 | Owner/table family | Required physical contract |
 | --- | --- |
-| `unit` and domain membership | Immutable shared identity and lifecycle; domain membership/subtype IDs directly reference `unit.id`. Explicit unresolved grain is allowed for legacy/source ambiguity. Cataloging a creator never grants login/representation rights. |
+| Owner-local identity and domain membership | Stable logical Unit IDs; each physical owner holds identity/lifecycle and its extensions reference that owner key. No global `unit` parent. Explicit unresolved grain is allowed for legacy/source ambiguity. Cataloging a creator never grants login/representation rights. |
 | `named_form`, `named_form_revision`, display selection | Identified multiple names per language, scoped to content/edition/territory; exact original text, kind, origin, translation method and evidence. A display choice references a form, not a second writable title. |
 | Definition/revision and typed fact tables | Governed field/type/cardinality/unit definitions; typed scalar columns and ordered structured value nodes for long-tail source facts. Parsed wiki entries preserve repeated keys, order and nested tuples; common queried domain fields remain typed domain columns. |
-| `catalog_relation`, revisions, participants, qualifiers, supports | Identified n-ary relations with role definitions, ordinal/credited-as text, owner/context, precise target revision, partial dates, active/disputed/withdrawn/superseded lifecycle and independent evidence supports. Roles and properties are governed data; supported shape is versioned code. |
+| Owner-local relation families, revisions, participants, qualifiers, supports | Shared logical relation protocol with identified n-ary relations, governed roles, ordinal/credited-as text, owner/context, precise target revision, partial dates, lifecycle and independent evidence supports. Shared definitions do not imply one universal physical `catalog_relation` table. Supported shape is versioned code. |
 | Source records/observations/bindings | Namespace + source object type + native ID uniqueness; immutable observation headers/checksums, schema/mapping versions and payload references; revisioned scoped bindings. Typed Unit/occurrence/name/relation target FKs with exactly-one-target constraints, not unchecked `target_type + uuid`. |
 | Identifier claims | Namespace, normalized and original value, target scope, validation and evidence; plural ISBN/GTIN/ISRC/ISWC/MBID/source aliases. Identifier equality is evidence, not automatic Unit equality. |
 | Publishing | Domain membership; optional `publishing_work`, `publishing_text_version`, `publishing_publication`, `publishing_serialization`, ordered contents and `publishing_release_event`/links. Translator and translation state belong to the actual text/version; publisher/date/format/page count belong to the relevant publication. Book-index records need not host text. |
@@ -252,6 +320,7 @@ is unchanged; do not create empty Work parents or merge source-less legacy Books
 | Program | `program`, program versions and episode/content identities, hierarchy/occurrences and distinct expected/aired/cataloged counts. Bangumi's episodes and music tracks do not share one undifferentiated episode-count field. |
 | Music | `music_work`, `music_recording`, `music_release_group`, `music_release`, artist-credit group/names, release labels/events, media and track occurrences, TOC/disc identifiers and typed relationship attributes. Existing Audio remains content, not a file or universal replacement for these identities. |
 | Supporting catalog | Public Entity details plus catalog Area/Place/Event/Instrument/Label and governed Series/Genre/Mood/Tag/Trait owners. Reuse common protocols where semantics match; implement location/event/instrument facts required by MusicBrainz now. Ticketing, logistics and generic event products remain out of scope. |
+| Grouping: universe, franchise and series | Independently addressable identities using shared grouping capabilities and governed semantic classes. Distinct `set_in_universe`, `part_of_franchise`, `part_of_series` and `about` relations, continuity/canon/branch and source context, and named ordering profiles where relevant. No mandatory Work parent, rights inference or automatic propagation of scores/progress. Implement now, including source-free creation. |
 | Composition/occurrences | Stable occurrence IDs distinct from Unit IDs; owner/parent/order indexes, source position text and normalized ordering, local mutation commands and segmented checkpoints. Formal containment is concurrency-safe and acyclic. A track/medium can have a source ID without becoming a social Unit. |
 | Language support/authority | Open BCP 47 content tags; per-version/channel declarations and identified translation derivations; officialness assertions bind an exact form/release/revision, authorizer when known, territory/time, evidence and review state. Unknown authority remains unknown. |
 | Source statistics/excerpts/media descriptors | Preserve source scales/counts/timestamps separately from local votes; attributed quotes/annotations have explicit owner, scope and rights. Large eligible payloads use object storage with checksum and access/retention metadata; structured relationships and queried fields remain in SQL. |
@@ -287,13 +356,23 @@ quotes; identifiers that collide; and source-less legacy Books. Roundtrip throug
 the native tables and canonical readers must preserve these cases. Unknown source
 enum/schema changes pause that mapping rather than silently dropping fields.
 
+The same gate requires a same-name universe/franchise/series fixture, two
+continuities within one franchise, and a commentary item that is `about` a
+universe without being set in it. Preserve independent memberships, evidence,
+ordering and behavior targets through native edit/query/export/history/restore.
+Prove owner-routed Unit lookup, wrong-owner/dangling-reference rejection,
+concurrent ownership conflict handling and locator rebuild from authoritative
+records. The final target must have no runtime FK/read/write dependency on the
+retired global `unit` table. Schema inventory plus actual service-path tests are
+required; a document or table-name search alone does not qualify this gate.
+
 For every growing family, model 500M and 3B rows separately, plus child fan-out.
 Illustrative object-scale amplification at N identities (decimal, excluding
 indexes, payloads and revisions):
 
 | Family | Rows | Illustrative bytes/row | At N=500M | At N=3B |
 | --- | --- | ---: | ---: | ---: |
-| Identities | N | 160 | 80 GB | 480 GB |
+| Owner-local identities, summed across owners | N | 160 | 80 GB | 480 GB |
 | Named forms | 8N | 160 | 640 GB | 3.84 TB |
 | Typed facts | 12N | 160 | 960 GB | 5.76 TB |
 | Relations | 20N | 240 | 2.4 TB | 14.4 TB |
@@ -310,6 +389,17 @@ owner-routed partition/shard cutovers. Test million-occurrence/credit/name owner
 a 64-entry request or document limit is not an admissible lifetime catalog cap.
 A monthly scan of 3B source objects already needs about 1,157 objects/s, so the
 initial 50 normalized objects/s target is not a full-scale sweep claim.
+
+Identity splitting does not remove routing cost. An illustrative locator budget
+of 64 B heap + 48 B index per ID adds 56 GB at 500M IDs and 336 GB at 3B, excluding
+bloat, WAL, replicas and backups. Charge grouping identities to N and their member,
+context, order-profile and evidence rows separately; a million-member franchise
+is a hot-owner case, not a bounded configuration set. Locator lookup is keyed,
+batch resolution has explicit count/byte caps, and rebuild proceeds by owner/key
+checkpoints into a new generation. P10 must measure indexed read/write rates,
+concurrent publication, cache misses, stale-routing repair, p95/p99 latency,
+WAL/index amplification and cutover headroom before choosing physical buckets.
+No request or recurring repair may rebuild all identities or all descendants.
 
 The current milestone is complete only after physical DDL/migrations, all four
 coverage matrices, native roundtrips and queries, legacy conversion rehearsals,
