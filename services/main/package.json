@@ -70,6 +70,7 @@
 		"@types/pg": "^8",
 		"drizzle-kit": "1.0.0-rc.4",
 		"tsx": "4",
-		"typescript": "7"
+		"typescript": "7",
+		"yaml": "2.9.0"
 	}
 }

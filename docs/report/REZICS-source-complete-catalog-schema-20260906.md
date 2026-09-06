@@ -1,7 +1,8 @@
 # Source-complete catalog schema: current-stage contract
 
 Date: 2026-09-06; target clarified 2026-09-07. Status: corrected stage scope and researched target schema;
-the core catalog schema described here is **not implemented or qualified**.
+the complete catalog schema described here is **not yet qualified**. A first native
+foundation is implemented; see the [implementation ledger](../plan/operational-refactor-20260906/00-source-complete-schema.md#implementation-ledger--2026-09-07).
 Code inspection baseline: `4fbb0ce67`. This report owns the source-to-domain
 mapping and physical-schema milestone. [Source operations](REZICS-source-integration-and-review-20260906.md)
 continues to own acquisition, rights, continuous adoption and review.
@@ -219,7 +220,7 @@ source has no matching field; they are not postponed product experiments.
 
 The current schema has concrete blockers, not merely missing importer code:
 
-- Every current Unit subtype depends on the global `unit` identity/lifecycle
+- Existing supported resource types still depend on the global `unit` identity/lifecycle
   table. Moving only heavy metadata leaves that central identity dependency in
   place and does not fulfill the selected target below.
 - `book.isbn13` is a single globally unique value and `publication_date` is a
@@ -236,7 +237,8 @@ The current schema has concrete blockers, not merely missing importer code:
   bound cannot become lifetime limits on source-complete names or contextual facts.
   New owners must use bounded commands/pages without silently truncating history.
 - External display links are not source records, immutable observations, field
-  provenance or revisioned adoption bindings. Those native owners are still absent.
+  provenance or revisioned adoption bindings. Native record/snapshot/binding/support
+  tables now exist, while source adoption and full revision-target integration remain pending.
 
 These gaps must be resolved by the catalog DDL and coordinated owner cutovers.
 Do not label them complete after adding a JSON column or a source URL.

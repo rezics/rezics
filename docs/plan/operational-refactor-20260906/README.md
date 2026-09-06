@@ -116,9 +116,11 @@ U14 group challenges and U15 third-party commercial API are expansion experiment
 
 **Current-stage result: not complete.** VNDB, MusicBrainz, Bangumi and book-index
 native schema gates are all unqualified. Owner-local Unit identity cutover and
-universe/franchise/series native acceptance are also unqualified. Core catalog replacement DDL and a complete
-native mapping suite have not been delivered. The table below records supporting
-work only; commit counts and general test totals are not catalog-schema progress.
+universe/franchise/series native acceptance are also unqualified. The first native
+storage DDL and internal command/query checks are delivered; complete domain
+structures, source mappings and consumer cutover are not. Track the concrete
+[schema ledger](00-source-complete-schema.md#implementation-ledger--2026-09-07);
+supporting commit counts and general test totals cannot substitute for it.
 
 | Plan | Current implementation evidence | Remaining gate |
 | --- | --- | --- |
@@ -128,7 +130,8 @@ work only; commit counts and general test totals are not catalog-schema progress
 | P05 | Two-reviewer versioned merge policy, retired direct bypass, preserved historical decisions and actual transaction acceptance checks; repaired existing merge blockers. | Source proposal lifecycle, AI evaluation, actor independence and full operational review workflow. |
 | P08 | New progress defaults private in canonical writers and the Web editor; first-save visibility is selectable and existing choices are retained. | Session/checkpoint semantics, portability, account privacy defaults and user acceptance. |
 | P11 | Read-only schema/runtime inventory with explicit Profile/Auth reference inventory and evidence limits. | Production capture, recoverable exports, conversion and cutover rehearsals. |
-| P01–P02, P04, P07, P09, P12 | Planned; existing foundations do not imply the new acceptance contracts pass. | Owning implementation and acceptance slices. |
+| P01 | 87 native foundation tables, owner-scoped keys, typed values, scoped relations/grouping and local command/constraint/query evidence; see `00`. | Domain structures, source mapping, full revisions/restore, shared authorization/API integration and global-parent cutover. |
+| P02, P04, P07, P09, P12 | Planned; existing foundations do not imply the new acceptance contracts pass. | Owning implementation and acceptance slices. |
 
 Verified implementation commits: `0535b1141` (P10 email/worker foundation),
 `a8d3af36e` (P06 orphan Tag query removal).

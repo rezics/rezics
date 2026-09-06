@@ -149,6 +149,23 @@ tasks:
         cmds:
             - yarn exec tsx scripts/inventory-database.ts {{.CLI_ARGS}}
 
+    catalog:sources:inventory:
+        desc: Verify or regenerate the pinned catalog declaration inventory using a cache under repository .temp.
+        cmds:
+            - yarn exec tsx scripts/generate-catalog-source-inventory.ts {{.CLI_ARGS}}
+
+    catalog:check-local:
+        desc: Verify native catalog commands and constraints on the loopback rezics-dev database with disposable fixtures.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-catalog-native-foundation.ts
+
+    catalog:benchmark-local:
+        desc: Measure native relation query plans using rollback-only fixtures on rezics-dev PostgreSQL.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/benchmark-catalog-native.ts
+
     db:replay:up:
         internal: true
         dir: ../..

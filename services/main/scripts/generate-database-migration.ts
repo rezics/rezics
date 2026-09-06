@@ -237,7 +237,9 @@ export function composeMigrationSql(sections: MigrationSqlSections): string {
 		sections.schemaDiff?.trimEnd(),
 		sections.canonicalSql?.trimEnd(),
 		sections.postOverlay?.trimEnd(),
-	].filter((section): section is string => Boolean(section));
+	]
+		.filter((section): section is string => Boolean(section))
+		.map((section) => section.replace(/\r\n?/gu, "\n"));
 	const sqlBody = sqlSections.join("\n\n");
 	if (containsConcurrentKeyword(sqlBody) && !transactionModeNoneReason)
 		throw new Error(

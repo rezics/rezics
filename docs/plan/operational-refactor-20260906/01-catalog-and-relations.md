@@ -1,6 +1,6 @@
 # P01 — Catalog identities, typed facts and content relations
 
-Status: planned, not implemented. Date: 2026-09-06. Parent: [program and gates](README.md).
+Status: native storage foundation implemented; full model and cutover unqualified. Updated: 2026-09-07. Parent: [program and gates](README.md).
 
 **Current critical path:** implement the [source-complete schema milestone](00-source-complete-schema.md).
 This is the principal deliverable of the present stage, not a later refinement
@@ -60,3 +60,13 @@ stage even where older reports called a general-purpose domain a future expansio
 P10 owns the shared resource ledger. Budget identity N, relations rN, participants pR, named forms lN, actual revisions h and evidence eR separately; no corpus-wide graph closure. Owner-first adjacency and reverse-participant indexes must cover both access directions. Test one owner with 1M occurrences/relations and skewed writes through segmented commands; request payload limits are not lifetime object limits.
 
 P02/P03 consume stable identities and revision references. P04 must use these commands, never ad hoc inserts bypassing invariants. Rollback before activation can restore the prior environment; after new writes use P11's journal-aware recovery.
+
+## Implementation evidence
+
+The [current-stage ledger](00-source-complete-schema.md#implementation-ledger--2026-09-07)
+records the two native foundation migrations, 87 new tables, 34 actual local
+command/constraint assertions and the selective relation-query fixture. The
+[native module](../../../services/main/src/services/catalog/README.md) specifies
+the current creator-only internal write boundary and remaining integration work.
+There is no completed source adapter, full relationship revision/restore system,
+public API cutover or retirement of the old global Unit parent yet.

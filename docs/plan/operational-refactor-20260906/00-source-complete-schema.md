@@ -1,13 +1,13 @@
 # Current stage — source-complete database schema
 
-Priority: **the next implementation milestone**. Status: **not implemented / not
+Priority: **the current implementation milestone**. Status: **in progress / not
 qualified**. The scope clarification was requested by the maintainer on 2026-09-06.
 This stage takes precedence over the program's earlier broad increment order.
 
 The 2026-09-07 clarification also makes the following mandatory in this same
 stage: **logical Unit with owner-local physical identities and no live global
 `unit` parent; explicit fixed-structure/dynamic-relation classification; native
-universe/world-setting, franchise and series models.** These remain unimplemented.
+universe/world-setting, franchise and series models.** These gates remain unqualified.
 
 ## Required result
 
@@ -31,9 +31,10 @@ useful but does not complete any of the four source-schema gates below.
 | MusicBrainz | Complete selected catalog schema: musical entities, supporting entities/vocabularies, credits/attributes, media/tracks, identifiers/redirects, dates, TOCs, source annotations/statistics and incomplete catalog candidates | Not qualified |
 | Book indexing | Work where evidenced, text/translation version, publication/edition, serialization, volume/chapter composition, identifiers, contributors, classifications, publishers and source release/update links/statuses | Not qualified |
 
-“Not qualified” is not a percentage estimate. No current four-source native
-conformance suite or replacement catalog DDL has been delivered. A subset cannot
-be renamed “full coverage” by reducing the denominator.
+“Not qualified” is not a percentage estimate. Native foundation DDL now exists;
+complete domain structures, four-source mapping/conformance and global-parent
+consumer conversion do not. A subset cannot be renamed “full coverage” by reducing
+the denominator.
 
 Four-source coverage is necessary but not sufficient. The shared model must also
 pass owner-identity cutover and source-free grouping acceptance even when an
@@ -207,3 +208,34 @@ fixture qualification. Production conversion/activation remains separately gated
 Progress reports must lead with catalog DDL/table owners, source mapping coverage,
 native data-flow evidence and remaining schema blockers. Supporting maintenance
 commits and general test counts cannot replace that report.
+
+## Implementation ledger — 2026-09-07
+
+- `20260906171239_catalog_native_foundation.sql` adds 87 native tables: seven
+  owner-local identities and their names, identifier claims, typed facts/value
+  nodes, relation participants/scopes, operation records, source bindings/support,
+  plus definitions, acquisition evidence, routing and grouping/order structures.
+  Native owner identities do not reference the old `unit` parent; the old system
+  still does. A temporary collision fence protects both identity stores.
+- `20260906174358_catalog_value_integrity.sql` enforces append-only/sealed values,
+  root type and prefix checks, and source-snapshot immutability. Both migrations
+  were applied to `rezics-dev`; the complete migration/schema replay passed.
+- Canonical internal commands and reads passed 34 local assertions, including
+  source-free grouping classes/order, same-relation conditions, multiple value
+  batches, privacy, owner/FK rejection, sealed values, stale edits and concurrent
+  identity allocation. Fixtures were rolled back or precisely cleaned up.
+- A 50,000-relation / 100,000-participant rollback fixture exercised rare-target
+  conjunctions with visibility enabled: warm `EXPLAIN (ANALYZE, BUFFERS)` recorded
+  SQL execution of 0.493 ms for 50 matching rows and 0.248 ms for zero mismatched
+  rows. These exclude API/transport and the preliminary owner access lookup;
+  they are local plan evidence, not a 500M/3B capacity qualification.
+- A reproducible compiler pins 46 upstream artifacts and emits 8,412 declaration
+  entries. It also includes internal/private declarations and vocabulary shape;
+  this count is not the catalog mapping denominator or native coverage.
+
+The next work remains actual publishing/VN/program/music/supporting domain
+structures and explicit source-field dispositions, then complete definition
+governance, revision/restore, source adapters and old-consumer integration. No
+four-source gate, final Unit cutover, full grouping gate or production gate has
+been marked complete. See the [native module](../../../services/main/src/services/catalog/README.md)
+for implemented boundaries, workload assumptions and verification commands.

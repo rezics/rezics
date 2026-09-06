@@ -16,6 +16,18 @@ describe("database migration canonical bundles", () => {
 });
 
 describe("database migration transaction mode", () => {
+	it("hashes portable LF SQL even when a Windows canonical source has CRLF", () => {
+		const result = composeMigrationSql({
+			preOverlay: "-- preparation\r\nSELECT 1;\r\n",
+			schemaDiff: "CREATE TABLE example (\r\n id uuid PRIMARY KEY\r\n);",
+			canonicalSql:
+				"CREATE FUNCTION example() RETURNS text LANGUAGE sql AS $$\r\n SELECT E'\\r\\n';\r\n$$;",
+			postOverlay: "-- completion\r\nSELECT 2;",
+		});
+		expect(result).not.toContain("\r");
+		expect(result).toContain("SELECT E'\\r\\n';\n");
+		expect(result).toContain("CREATE TABLE example (\n id uuid PRIMARY KEY\n);");
+	});
 	it("uses Atlas's transactional file mode by default", () => {
 		expect(
 			composeMigrationSql({
