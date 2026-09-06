@@ -3,7 +3,7 @@
 This module implements the first native storage foundation of the
 [source-complete schema program](../../../../../docs/plan/operational-refactor-20260906/00-source-complete-schema.md).
 It is not the completed four-source model or the global Unit cutover. Public
-routes, shared Access integration, full revision/restore semantics, source adapters,
+routes, shared Access integration, full revision/restore semantics, complete source adapters,
 complete domain/source coverage and legacy conversion still have separate outstanding work.
 
 ## Implemented boundary
@@ -104,6 +104,73 @@ checksum requires a reviewed baseline update, not silent acceptance of a new
 contract. The current parser preserves unknown scalar shape information as
 unknown rather than guessing types from field names. Source API validation and
 the native mapper remain distinct tasks.
+
+## Source observation and initial adoption
+
+Initial adapters now accept Bangumi Subject, Open Library Work/Edition, VNDB VN
+and MusicBrainz Release records against pinned contracts. Acquisition writes an
+8 MB maximum record to an archive port before the database transaction. The
+receipt binds the source key, contract hash and exact content hash. A mapper
+cannot substitute another payload or fabricate an inline reference's snapshot
+evidence. Inline MusicBrainz identities are checked against the actual JSON
+Pointer value in the recorded document, including escaped keys and exact array
+indices ([RFC 6901](https://www.rfc-editor.org/rfc/rfc6901)).
+
+First adoption creates private identities. Repeat observations reuse the source
+binding; changed observations create a review proposal without replacing human
+edits. An inline reference can establish identity using another record's snapshot;
+fetching its own record later requires review rather than a second identity.
+Proposal application/rejection, withdrawal, durable dependency scheduling and
+complete historical recovery still require implementation.
+
+The initial native projections are deliberately reported separately from source
+preservation:
+
+| Input | Structural projection verified | Supplied fields still requiring semantic mapping |
+| --- | --- | --- |
+| Bangumi Subject 253 | Program identity, independent main/total counts, identified original/Chinese names and source binding | Episode/person/character graphs, governed tags, indices, revisions and Archive-only catalog relations |
+| Open Library Work/Edition | Work, publication, direct publication-to-Work coverage, page metadata, plural identifiers, publisher/date events | Author and classification identities/relations, complete book contracts and serialization/translation cases |
+| VNDB VN v17 | VN content, scoped local editions, names/languages and source identifiers | Staff/alias/voice graphs, edition-qualified relationships, releases, characters and taxonomies |
+| MusicBrainz Release | Release group, release, media, distinct track occurrences/recordings, sealed artist credits and source-backed artist references | Ancillary musical/reference objects, complete relationships/attributes, vocabularies, TOCs and redirects |
+
+Every supplied field in these examples also has ordered typed value nodes with
+snapshot support. The source export reconstructs those observations from native
+rows rather than loading the archive. This establishes lossless observation
+storage; it does **not** prove all fields have canonical domain semantics or that
+a canonical human edit is reflected in source-shaped exports. Some structural
+projection writes remain adapter-specific; unifying them with the source-free
+domain commands is still part of the canonical-path gate.
+
+Acquisition and source export limits apply per admitted record, not per owner or
+corpus. Export reads 512 nodes per keyset page with a 200,000-node/32 MB
+materialization budget. Import value batches keep the existing 512-node/512 KB
+limit. The initial adapters do not yet offer staged recovery for a source record
+larger than these budgets; they fail explicitly. Large dependency fan-out,
+transaction duration, source hot keys and per-reference query counts remain
+capacity work. Never qualify these paths using only the small live examples.
+
+Snapshots, mapping claims and review proposals are growing source-record-keyed
+families. At an illustrative 160 B heap plus 192 B indexes, 500M proposals cost
+176 GB and 3B cost 1.056 TB, excluding WAL, replicas and retained payloads. Three
+observations per 500M/3B source records produce 1.5B/9B snapshots; at an assumed
+400 B per header/index total this is 600 GB/3.6 TB, with object bytes budgeted
+separately. These are planning estimates, not measured widths. Queue workers
+still need bounded claim batches, retry admission and retention; the pending
+index alone does not implement an operational queue.
+
+Local live-response checks use real `rezics-dev` PostgreSQL and rollback their
+rows. The archive port is an in-memory test double in these checks. The default
+storage adapter, private bucket policy, rights controls and archive recovery are
+not qualified by them; `Cache-Control: private` is not a bucket access policy.
+
+From the repository root:
+
+```sh
+task services-main:catalog:check-source-local
+task services-main:catalog:check-books-local
+task services-main:catalog:check-vndb-local
+task services-main:catalog:check-music-local
+```
 
 ## Workload and capacity boundaries
 

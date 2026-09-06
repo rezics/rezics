@@ -117,8 +117,9 @@ U14 group challenges and U15 third-party commercial API are expansion experiment
 **Current-stage result: not complete.** VNDB, MusicBrainz, Bangumi and book-index
 native schema gates are all unqualified. Owner-local Unit identity cutover and
 universe/franchise/series native acceptance are also unqualified. The first native
-storage DDL and internal command/query checks are delivered; complete domain
-structures, source mappings and consumer cutover are not. Track the concrete
+storage DDL, typed domain structures and initial four-source sample projections
+are delivered; complete source semantics, historical restoration and consumer
+cutover are not. Track the concrete
 [schema ledger](00-source-complete-schema.md#implementation-ledger--2026-09-07);
 supporting commit counts and general test totals cannot substitute for it.
 
@@ -130,8 +131,9 @@ supporting commit counts and general test totals cannot substitute for it.
 | P05 | Two-reviewer versioned merge policy, retired direct bypass, preserved historical decisions and actual transaction acceptance checks; repaired existing merge blockers. | Source proposal lifecycle, AI evaluation, actor independence and full operational review workflow. |
 | P08 | New progress defaults private in canonical writers and the Web editor; first-save visibility is selectable and existing choices are retained. | Session/checkpoint semantics, portability, account privacy defaults and user acceptance. |
 | P11 | Read-only schema/runtime inventory with explicit Profile/Auth reference inventory and evidence limits. | Production capture, recoverable exports, conversion and cutover rehearsals. |
-| P01 | 87 native foundation tables, owner-scoped keys, typed values, scoped relations/grouping and local command/constraint/query evidence; see `00`. | Domain structures, source mapping, full revisions/restore, shared authorization/API integration and global-parent cutover. |
-| P02, P04, P07, P09, P12 | Planned; existing foundations do not imply the new acceptance contracts pass. | Owning implementation and acceptance slices. |
+| P01 | Owner-local foundation, 50 typed domain tables, scoped relations/grouping, shared credits and local command/constraint/query evidence; see `00`. | Complete source mapping, full revisions/restore, shared authorization/API integration and global-parent cutover. |
+| P04 | Immutable source observations, checked inline reference evidence, first-adoption bindings, changed-snapshot proposals and four selected live-source native roundtrips. | Complete field/object semantic mapping, canonical-path integration, proposal application/withdrawal, dependency scheduling and operational qualification. |
+| P02, P07, P09, P12 | Planned; existing foundations do not imply the new acceptance contracts pass. | Owning implementation and acceptance slices. |
 
 Verified implementation commits: `0535b1141` (P10 email/worker foundation),
 `a8d3af36e` (P06 orphan Tag query removal).
@@ -139,6 +141,8 @@ Verified implementation commits: `0535b1141` (P10 email/worker foundation),
 `cc8bb65b6` (P03 pinned IANA validation and audit).
 `698461619` (authoring terminology correction), `4b55bac34` (P05 reviewed merge
 policy and acceptance/projection repairs).
+`8db9a5732` (native catalog foundation), `2741c9d6c` (typed domain structures and
+streamed immutable artist credits).
 
 Sequencing clarification: production access is a production conversion/activation
 gate. It does not prevent local migration generation, disposable rehearsal or

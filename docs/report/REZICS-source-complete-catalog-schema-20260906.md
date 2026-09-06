@@ -2,7 +2,11 @@
 
 Date: 2026-09-06; target clarified 2026-09-07. Status: corrected stage scope and researched target schema;
 the complete catalog schema described here is **not yet qualified**. A first native
-foundation is implemented; see the [implementation ledger](../plan/operational-refactor-20260906/00-source-complete-schema.md#implementation-ledger--2026-09-07).
+foundation, typed domain structures and initial four-source sample projections
+are implemented; see the [implementation ledger](../plan/operational-refactor-20260906/00-source-complete-schema.md#implementation-ledger--2026-09-07).
+Selected-record typed observation roundtrips do not establish complete canonical
+field/relation coverage. The live old `unit` parent and its consumers still need
+the coordinated cutover; no final schema gate is qualified.
 Code inspection baseline: `4fbb0ce67`. This report owns the source-to-domain
 mapping and physical-schema milestone. [Source operations](REZICS-source-integration-and-review-20260906.md)
 continues to own acquisition, rights, continuous adoption and review.

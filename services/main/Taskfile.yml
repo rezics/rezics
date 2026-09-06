@@ -167,6 +167,30 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/benchmark-catalog-native.ts
 
+    catalog:check-source-local:
+        desc: Verify native Bangumi adoption and roundtrip using a supplied payload or one public API read.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-catalog-source-adoption.ts {{.CLI_ARGS}}
+
+    catalog:check-books-local:
+        desc: Verify book-index native Work/Edition adoption against two public Open Library records.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-openlibrary-adoption.ts
+
+    catalog:check-vndb-local:
+        desc: Verify VN identity and source-context roundtrip against one selected public VNDB record.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-vndb-adoption.ts
+
+    catalog:check-music-local:
+        desc: Verify MusicBrainz release, recording and track adoption from one public source graph.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-musicbrainz-adoption.ts
+
     db:replay:up:
         internal: true
         dir: ../..

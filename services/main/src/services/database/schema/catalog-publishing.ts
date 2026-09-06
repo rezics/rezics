@@ -111,6 +111,34 @@ export const publishingPublicationText = pgTable(
 	],
 );
 
+/** Some providers identify Work coverage without identifying a text-version layer. */
+export const publishingPublicationWork = pgTable(
+	"publishing_publication_work",
+	{
+		publicationId: uuid()
+			.notNull()
+			.references(() => publishingPublication.id, { onDelete: "restrict" }),
+		workId: uuid()
+			.notNull()
+			.references(() => publishingWork.id, { onDelete: "restrict" }),
+		position: bigint({ mode: "number" }).notNull(),
+		coverageText: text(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.publicationId, table.workId] }),
+		index("publishing_publication_work_reverse_idx").on(table.workId, table.publicationId),
+		index("publishing_publication_work_order_idx").on(
+			table.publicationId,
+			table.position,
+			table.workId,
+		),
+		check(
+			"publishing_publication_work_position_check",
+			sql`${table.position} between 0 and 9007199254740991`,
+		),
+	],
+);
+
 export const publishingPublicationFacet = pgTable(
 	"publishing_publication_facet",
 	{

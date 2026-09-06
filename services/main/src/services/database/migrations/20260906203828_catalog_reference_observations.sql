@@ -1,0 +1,6 @@
+SET search_path TO public;
+
+-- Modify "catalog_source_mapping_claim" table
+ALTER TABLE "catalog_source_mapping_claim" ADD CONSTRAINT "catalog_source_mapping_evidence_check" CHECK (((observed_snapshot_id IS NOT NULL) AND (evidence_source_record_id IS NULL) AND (evidence_snapshot_id IS NULL) AND (evidence_path IS NULL)) OR ((observed_snapshot_id IS NULL) AND (evidence_source_record_id IS NOT NULL) AND (evidence_snapshot_id IS NOT NULL) AND (evidence_path IS NOT NULL) AND ((octet_length(evidence_path) >= 1) AND (octet_length(evidence_path) <= 512)))), ALTER COLUMN "observed_snapshot_id" DROP NOT NULL, ADD COLUMN "evidence_source_record_id" uuid NULL, ADD COLUMN "evidence_snapshot_id" uuid NULL, ADD COLUMN "evidence_path" text NULL, ADD CONSTRAINT "catalog_source_mapping_reference_evidence_fk" FOREIGN KEY ("evidence_source_record_id", "evidence_snapshot_id") REFERENCES "catalog_source_snapshot" ("source_record_id", "id") ON UPDATE NO ACTION ON DELETE RESTRICT;
+-- Create index "catalog_source_mapping_reference_evidence_idx" to table: "catalog_source_mapping_claim"
+CREATE INDEX "catalog_source_mapping_reference_evidence_idx" ON "catalog_source_mapping_claim" ("evidence_source_record_id", "evidence_snapshot_id");

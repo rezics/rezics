@@ -257,3 +257,38 @@ partial regional dates, separate episode counts/fractional numbering, VN-local
 edition rejection, installment cycles and 520-member credit groups spanning several
 batches. They do not yet prove complete four-source field coverage, source adoption,
 historical restoration or old-schema conversion. The complete stage remains open.
+
+### Initial source adoption slice
+
+`20260906192903_catalog_source_adoption.sql` adds snapshot-scoped review proposals;
+`20260906195437_catalog_publication_work_coverage.sql` adds explicit publication
+coverage of evidenced Works without manufacturing text-version identities;
+`20260906203828_catalog_reference_observations.sql` adds checked snapshot evidence
+for source identities first encountered inside another source record. All three
+were generated through the supported task, applied to `rezics-dev` without a
+reset and passed complete migration/schema replay.
+
+The following actual public responses passed rollback-only PostgreSQL checks:
+
+| Input | Verified native result |
+| --- | --- |
+| https://api.bgm.tv/v0/subjects/253 | Independent 26 main / 31 total episode counts, names, repeat identity, changed-snapshot review, protected local correction and private-target denial |
+| https://openlibrary.org/works/OL15626917W.json and https://openlibrary.org/books/OL24574991M.json | Separate Work/publication identities, direct coverage, plural identifiers, partial 2010 publication date and repeat identity |
+| https://api.vndb.org/kana/vn with filter `["id","=","v17"]` and the explicit selected fields in `check-vndb-adoption.ts` | VN content and local editions; supplied staff `aid`, edition `eid` and voice context values retained as source observations |
+| https://musicbrainz.org/ws/2/release/f922ec87-4758-421d-a839-3193455345ff?fmt=json&inc=recordings+artist-credits+release-groups+labels+discids | Release/media, 12 distinct track occurrences, recording/track length separation, shared credits and checked inline source identity evidence |
+
+All supplied fields in these examples roundtrip through typed value rows and
+snapshot support. This is **selected-record observation preservation plus the
+listed structural projections**, not complete semantic conversion. VNDB staff
+and voice contexts, for example, are not yet the final canonical contextual
+relations. Source-shaped export currently reflects adopted observations, not a
+completed canonical-edit export protocol. Archive transport was an in-memory
+test double; the database and public HTTP reads were real.
+
+The final backend suite passed 253 files / 1,474 tests; backend and script
+TypeScript checks passed. MusicBrainz's live database check also passed after
+reference hardening. The reference writer now rejects evidence
+with another ID, invalid array positions or a fabricated receipt. Temporary
+fixture rows were rolled back. These checks do not establish complete source
+coverage, API/SDK integration, historic restore, global-parent retirement or
+500M/3B operational capacity. No source-schema gate changes to qualified.
