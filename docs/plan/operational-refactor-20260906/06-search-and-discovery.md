@@ -1,6 +1,6 @@
 # P06 — Book retrieval, tags and relationship discovery
 
-Status: planned, not implemented. Date: 2026-09-06. Parent: [program and gates](README.md).
+Status: implementation in progress; retrieval/relationship qualification pending. Date: 2026-09-06. Parent: [program and gates](README.md).
 
 ## Outcome and baseline
 
@@ -45,3 +45,14 @@ Owners: `services/search`, `services/filter`, `services/tags`, `libraries/filter
 ## Growth and recovery
 
 Budget 500M/3B identity/name/relation/projection rows independently; relation fan-out can exceed that by multiplication. Use selective reverse indexes and necessary bounded projections, not global closure or arbitrary JSON GIN. Retain source-of-truth repair and projection generation rollback. Evaluate external search only after proving an actual workload subset and end-to-end semantic/cost benefit.
+
+## Implementation ledger
+
+2026-09-06: the SYS-08 window-count query was traced through its callers before
+changing the data contract. `listGlobalUnitTags` had no production callers; its
+only consumer was its own unit test. The public landscape already delegates to
+`listVisibleUnitTagExpressions`. Removed the orphan query, its duplicated Wilson
+expression and its obsolete test. The online exact-count policy is retained
+unchanged. No schema, API response or live ranking behavior changes in this slice.
+Remaining active expression/Realm ranking costs and the broader P06 retrieval
+acceptance still require implementation and representative plans.

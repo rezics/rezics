@@ -88,6 +88,9 @@ U14 group challenges and U15 third-party commercial API are expansion experiment
 | Plan | Current implementation evidence | Remaining gate |
 | --- | --- | --- |
 | P10 | First operational slice: fenced email claims and renewal, acknowledged auth enqueue, independently scheduled lanes, isolated delivery process/pool, and real PostgreSQL race/plan checks. See [P10](10-capacity-and-operations.md#implementation-ledger). | Full resource ledger, admission/retention, source/AI executors, production inventory and recovery qualification. |
-| P01–P09, P11–P12 | Planned; existing foundations do not imply the new acceptance contracts pass. | Owning implementation and acceptance slices. |
+| P06 | Traced and removed the orphan exact-count/whole-owner global Tag query; active landscape contracts remain authoritative. | Relevance, active ranking bounds, correlated filters, retrieval corpus and product acceptance. |
+| P01–P05, P07–P09, P11–P12 | Planned; existing foundations do not imply the new acceptance contracts pass. | Owning implementation and acceptance slices. |
+
+Verified implementation commit: `0535b1141` (P10 email/worker foundation).
 
 No fundamental design blocker has been identified. Source-use permissions, missing live inventory and unmeasured capacity are explicit, locally scoped activation gates with assigned work and fallback paths in the decision register. They do not suspend independent implementation.

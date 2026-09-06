@@ -1,4 +1,4 @@
-import { and, desc, eq, exists, gt, inArray, isNull, lte, notInArray, or, sql } from "drizzle-orm";
+import { and, eq, exists, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { ContentLanguage } from "@rezics/i18n";
 import { getRealmContributionCondition } from "../authorization/realm/query";
@@ -6,8 +6,6 @@ import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
 import {
-	unitTagJudgmentStat,
-	unitTagJudgment,
 	profileRealmTagSubscription,
 	realm,
 	realmMember,
@@ -17,7 +15,6 @@ import {
 	realmUnit,
 	tag,
 	unit,
-	unitTag,
 } from "../database/schema";
 import { listVisibleUnitTagExpressions } from "../tag-paths/service";
 import {
@@ -38,9 +35,7 @@ function presentTagVote(value: number | null): TagVoteValue {
 	throw new Error("Stored Tag vote has an invalid value");
 }
 
-const viewerUnitTagVote = alias(unitTagJudgment, "viewer_unit_tag_judgment");
 const viewerRealmTagVote = alias(realmTagJudgment, "viewer_realm_tag_judgment");
-const globalTagUnit = alias(unit, "global_tag_unit");
 const realmSourceUnit = alias(unit, "realm_tag_source_unit");
 const voteContextRealmUnit = alias(unit, "realm_tag_judgment_context_unit");
 const votedTagUnit = alias(unit, "realm_voted_tag_unit");
@@ -53,119 +48,6 @@ const rankedContextRealm = alias(realm, "ranked_realm_tag_context_realm");
 const rankedTagUnit = alias(unit, "ranked_realm_voted_tag_unit");
 const rankedContextPostUnit = alias(unit, "ranked_realm_tag_context_post_unit");
 const rankedContextRealmUnit = alias(realmUnit, "ranked_realm_tag_context_realm_unit");
-const unitTagWilsonConfidence = sql<number>`case
-	when coalesce(${unitTagJudgmentStat.voteCount}, 0) = 0 then 0
-	else (
-		(
-			(
-				(coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric
-					+ coalesce(${unitTagJudgmentStat.score}, 0)::numeric)
-				/ (2 * coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric)
-			)
-			+ (1.96 * 1.96) / (2 * coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric)
-			- 1.96 * sqrt(
-				(
-					(
-						(
-							(coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric
-								+ coalesce(${unitTagJudgmentStat.score}, 0)::numeric)
-							/ (2 * coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric)
-						)
-						* (
-							1 - (
-								(coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric
-									+ coalesce(${unitTagJudgmentStat.score}, 0)::numeric)
-								/ (2 * coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric)
-							)
-						)
-						+ (1.96 * 1.96)
-							/ (4 * coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric)
-					)
-					/ coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric
-				)
-			)
-		)
-		/ (
-			1 + (1.96 * 1.96) / coalesce(${unitTagJudgmentStat.voteCount}, 0)::numeric
-		)
-	)
-end`;
-
-export async function listGlobalUnitTags(input: {
-	readonly unitId: string;
-	readonly viewerProfileId?: string;
-	readonly localizationLanguages?: LocalizationLanguageQuery;
-	readonly limit: number;
-	readonly excludedTagIds?: readonly string[];
-}) {
-	const rows = await database
-		.select({
-			tagId: unitTag.tagId,
-			language: resolvedUnitLocalizationLanguage(unitTag.tagId, input.localizationLanguages),
-			title: resolvedUnitLocalizationTitle(unitTag.tagId, input.localizationLanguages),
-			summary: resolvedUnitLocalizationSummary(unitTag.tagId, input.localizationLanguages),
-			avatar: resolvedUnitLocalizationAvatar(unitTag.tagId, input.localizationLanguages),
-			pinned: unitTag.pinned,
-			position: unitTag.position,
-			score: unitTagJudgmentStat.score,
-			voteCount: unitTagJudgmentStat.voteCount,
-			viewerVote: viewerUnitTagVote.fitVote,
-			createdAt: unitTag.createdAt,
-			updatedAt: unitTag.updatedAt,
-			totalCount: sql<bigint>`count(*) over()`,
-		})
-		.from(unitTag)
-		.innerJoin(tag, eq(tag.id, unitTag.tagId))
-		.innerJoin(globalTagUnit, eq(globalTagUnit.id, unitTag.tagId))
-		.leftJoin(
-			unitTagJudgmentStat,
-			and(
-				eq(unitTagJudgmentStat.unitId, unitTag.unitId),
-				eq(unitTagJudgmentStat.tagId, unitTag.tagId),
-				gt(unitTagJudgmentStat.voteCount, 0n),
-			),
-		)
-		.leftJoin(
-			viewerUnitTagVote,
-			and(
-				eq(viewerUnitTagVote.unitId, unitTag.unitId),
-				eq(viewerUnitTagVote.tagId, unitTag.tagId),
-				input.viewerProfileId ? eq(viewerUnitTagVote.profileId, input.viewerProfileId) : sql`false`,
-			),
-		)
-		.where(
-			and(
-				eq(unitTag.unitId, input.unitId),
-				input.excludedTagIds?.length
-					? notInArray(unitTag.tagId, [...input.excludedTagIds])
-					: undefined,
-				getUnitReadCondition(input.viewerProfileId, {}, globalTagUnit),
-			),
-		)
-		.orderBy(
-			desc(unitTag.pinned),
-			sql`case when ${unitTag.pinned} then ${unitTag.position} end asc nulls last`,
-			desc(unitTagWilsonConfidence),
-			desc(unitTagJudgmentStat.score),
-			desc(unitTagJudgmentStat.voteCount),
-			unitTag.tagId,
-		)
-		.limit(input.limit);
-
-	return {
-		totalCount: toSafeInteger(rows[0]?.totalCount ?? 0n, "Unit Tag total count"),
-		items: rows.map(({ totalCount: _totalCount, ...row }) => ({
-			...row,
-			avatar: presentAvatar(row.avatar),
-			score: toSafeInteger(row.score ?? 0n, "Unit Tag score"),
-			voteCount: toSafeInteger(row.voteCount ?? 0n, "Unit Tag vote count"),
-			viewerVote: presentTagVote(row.viewerVote),
-			createdAt: row.createdAt.toISOString(),
-			updatedAt: row.updatedAt.toISOString(),
-		})),
-	};
-}
-
 export async function listRealmTagSubscriptions(input: {
 	readonly profileId: string;
 	readonly localizationLanguages?: LocalizationLanguageQuery;

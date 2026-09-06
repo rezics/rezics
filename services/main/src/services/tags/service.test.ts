@@ -11,8 +11,7 @@ vi.mock("../authorization/unit/query", () => ({
 	getUnitReadCondition: () => sql`true`,
 }));
 
-import { unitTagJudgmentStat } from "../database/schema";
-import { listGlobalUnitTags, listRealmVotedTags } from "./service";
+import { listRealmVotedTags } from "./service";
 
 interface JoinCapture {
 	readonly table: unknown;
@@ -74,25 +73,6 @@ function renderCondition(condition: SQL | undefined) {
 describe("Tag judgment-stat fit consumers", () => {
 	beforeEach(() => {
 		databaseSelect.mockReset();
-	});
-
-	it("ignores spoiler-only Unit Tag stats when joining fit-ranking aggregates", async () => {
-		let query: QueryCapture | undefined;
-		databaseSelect.mockImplementationOnce((selection: Record<string, SQLWrapper>) => {
-			query = captureQuery(selection);
-			return query.builder;
-		});
-
-		await listGlobalUnitTags({
-			unitId: "019f94d1-c8ca-7110-b984-b0614ba4db9c",
-			limit: 20,
-		});
-
-		const statJoin = query?.joins.find(({ table }) => table === unitTagJudgmentStat);
-		const rendered = renderCondition(statJoin?.condition);
-		expect(rendered.sql).toContain('"unit_tag_judgment_stat"."vote_count" >');
-		expect(rendered.sql).not.toContain("spoiler_vote_count");
-		expect(rendered.params).toContain(0n);
 	});
 
 	it("removes spoiler-only Realm Tag stats before fit ranking and per-Realm limits", async () => {
