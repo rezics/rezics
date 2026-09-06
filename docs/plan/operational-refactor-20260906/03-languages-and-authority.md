@@ -2,6 +2,12 @@
 
 Status: IANA consumption-language foundation implemented; named forms and authority pending. Date: 2026-09-06. Parent: [program and gates](README.md).
 
+The [current schema milestone](00-source-complete-schema.md) requires the remaining
+open metadata-language, identified named-form, translation/version and scoped
+authority **database contracts now**. The completed parser is supporting work and
+does not pass this source-schema gate. Source URLs and concrete counterexamples
+are in the [schema report](../../report/REZICS-source-complete-catalog-schema-20260906.md).
+
 ## Outcome and evidence
 
 Support cross-language discovery and distinguish original, authorized, unofficial and machine-generated representations without losing source detail. Supports U01/U07–U09.

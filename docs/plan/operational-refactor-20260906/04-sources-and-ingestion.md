@@ -2,9 +2,18 @@
 
 Status: planned, not implemented. Date: 2026-09-06. Parent: [program and gates](README.md).
 
+Current priority is the [four-family native schema gate](00-source-complete-schema.md):
+VNDB, MusicBrainz, Bangumi and required book-index data. Implement complete mapping
+and source/evidence persistence with P01/P03 before expanding operator UX or AI.
+Native field/object conformance and later full-corpus acquisition are separate gates;
+neither a raw archive nor one working record substitutes for either gate.
+
 ## Outcome and prerequisites
 
-Deliver independently operable Bangumi, VNDB and MusicBrainz adapters using one source protocol. Initial loads and ongoing changes use the same canonicalization and proposal path; neither bypasses P01/P03/P05 invariants.
+Deliver independently operable Bangumi, VNDB and MusicBrainz adapters, plus a
+book-index acquisition/mapping route, using one source protocol. Novel Updates
+is replaceable; book indexing is required. Initial loads and ongoing changes use
+the same canonicalization and proposal path; neither bypasses P01/P03/P05 invariants.
 [Source research](../../report/REZICS-source-integration-and-review-20260906.md) owns dated acquisition/license evidence. The local `services/main/src/services/content-pack` fixture loader remains local-only and is not repurposed as production ingestion.
 
 ## Persistent protocol
@@ -24,7 +33,7 @@ Separate SourceDefinition/terms revision, SourceRecord identity, immutable Sourc
 
 ## Implementation slices
 
-1. Add production-only source registry/run ledger, bounded job claims with fencing, snapshot manifest/checksum validation, staging/observation storage and resumable checkpoints.
+1. Build the complete pinned object/field/relation inventory and native mapping matrix with P01/P03. Add source registry/run ledger, bounded job claims with fencing, snapshot manifest/checksum validation, staging/observation storage and resumable checkpoints usable for local conformance and eligible production runs. Do not make production credentials a prerequisite for writing the schema.
 2. Add identity namespace and typed field/relationship mapping contracts with unsupported-state reporting. Implement binding/adoption policy commands, permissions and operator views.
 3. Implement Bangumi snapshot adapter; use API only for allowed bounded enrichment. Parse ordered/repeated Infobox structures, subject/person/character/episode records and contextual relations; keep source relation constants versioned.
 4. Implement VNDB bulk adapter using an eligible acquisition route. Preserve VN/release, staff aliases, release languages, character roles/traits/spoilers, official/MTL qualifiers and contextual voice roles. Track snapshot schema changes; do not treat edition-local IDs as globally stable identities.
@@ -32,8 +41,40 @@ Separate SourceDefinition/terms revision, SourceRecord identity, immutable Sourc
 6. Connect change diff/proposals to P05 and projection updates to P06. Implement pause/resume, checkpoint inspection, changed-field explanation and bounded replay.
 7. Run complete selected snapshot manifests, not just sample records. Reconcile input counts, duplicates, mapped items, unsupported fields and publication eligibility. Resolve every unexplained discrepancy before claiming scope completion.
 8. Implement eligible export/attribution and withdrawal operations. Assess actual combined-dataset obligations before consolidated publication, including any derivative-database machine-readable offer. Physical table separation does not establish independent licensing. Source-user activity is excluded from native REZICS accounts, reviews and ratings unless a separate user-authorized import contract applies.
+9. Implement the required book-index route: Work/Edition bibliographic inputs plus
+   serialization/translation/volume/chapter/release-link cases through a permitted
+   source or manual-contribution fixture. Open Library and Bangumi book data are
+   verified starting inputs; a Novel Updates HTTP 403 does not defer the book model.
 
 Each source field/relation declares `native`, `unmapped`, `excluded_by_rights`, `unavailable_from_source` or `unsupported`, with a reason. Scope is a versioned manifest, not an unbounded promise about private or unavailable provider data.
+
+For the current schema milestone, every required catalog field must finish as
+native (including implemented typed extensions); `unmapped`, `unsupported` and
+raw-only storage fail the gate. Rights exclusions describe handling of actual
+payloads, not permission to leave their required data model unimplemented.
+
+## Mandatory Bangumi verification inputs
+
+Read [rendered docs](https://bangumi.github.io/api/), the
+[API repository](https://github.com/bangumi/api), its authoritative
+[server OpenAPI](https://github.com/bangumi/server/blob/master/openapi/v0.yaml)
+and referenced components, [Archive](https://github.com/bangumi/Archive),
+[latest manifest](https://raw.githubusercontent.com/bangumi/Archive/master/aux/latest.json),
+[common dictionaries](https://github.com/bangumi/common) and
+[wiki syntax](https://github.com/bangumi/wiki-syntax-spec).
+Use an identified User-Agent per the
+[source guidance](https://github.com/bangumi/api/blob/master/docs-raw/user%20agent.md).
+Actually call representative public endpoints; do not stop at reading a README.
+
+The 2026-09-06 audit called thirteen public endpoints, including
+[subject detail](https://api.bgm.tv/v0/subjects/253),
+[contextual characters](https://api.bgm.tv/v0/subjects/253/characters),
+[episodes](https://api.bgm.tv/v0/episodes?subject_id=253&limit=3&offset=0),
+[book detail](https://api.bgm.tv/v0/subjects/870) and
+[revision summaries](https://api.bgm.tv/v0/revisions/subjects?subject_id=253&limit=3&offset=0).
+All returned 200. Preserve the narrow Infobox/nullability discrepancy rules from
+the [verification report](../../report/REZICS-source-complete-catalog-schema-20260906.md#bangumi-documentation-source-and-live-requests)
+and the full URL/field baseline in `00`; these are mandatory adapter fixtures.
 
 ## Acquisition and scope gates
 

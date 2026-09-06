@@ -2,6 +2,15 @@
 
 **Operational implementation supplement (2026-09-06):** the [decision register](REZICS-operational-refactor-decisions-20260906.md) and [twelve-plan program](../plan/operational-refactor-20260906/README.md) select the current operational scope, add VNDB source conformance and language/authority contracts, and permit destructive forward migration or replacement deployment. Future domain examples below remain expansion paths rather than implicit launch requirements.
 
+**Current-stage clarification:** the maintainer requires a source-complete database
+schema for VNDB, MusicBrainz, Bangumi and book indexes now. Follow the
+[source/schema report](REZICS-source-complete-catalog-schema-20260906.md) and
+[current milestone](../plan/operational-refactor-20260906/00-source-complete-schema.md).
+MusicBrainz-required Area/Place/Event/Instrument/Label/Series/Genre/Mood/URL data,
+VNDB quotes/taxonomies and Bangumi source catalog structures are current scope.
+The future labels below apply to broader products, not those source-required facts.
+The core schema remains unimplemented; supporting fixes do not complete it.
+
 日期：2026-09-06。**领域边界方向已确认；完整领域模型、迁移与容量尚未验收。本次只维护设计文档。**
 
 本文负责整个 Catalog 的拆分规则、领域归属、交叉对象和实施分期。[总体报告](REZICS-动态元信息与渐进扩展架构-20260905.md)负责产品方向、Work／版本、Unit 能力、统一 Entity 与部署演进；[结构与查询报告](REZICS-内容结构关系与查询模型-20260906.md)负责字段、content-structure、Tag、关系实例和复杂查询。本报告不重复定义这些机制。
@@ -95,7 +104,7 @@ Market 与 Catalog 的边界已确认；Market 的订单、交易、结算、二
 | 实物产品 `product` | 产品型号、变体、必要实物个体 | **未来按需。** GPU／家具可共享产品结构，规格扩展；不吞并书籍、软件等已明确的领域身份 |
 | 服务 `service` | 服务定义、规格、提供者、必要服务实例 | **未来按需。** 计算服务使用规格扩展；调度、库存时序与计费不归编目主行 |
 | 教育 `education` | 课程、开课、学校／教师关系及教学资料 | **未来按需。** 不按学校建表；课程代码按所属机构及有效语境识别 |
-| 事件与活动 `event` | 事件、活动系列、场次、时间、地点与参与关系 | **未来按需。** 历史事件可以直接建档；反复举办的活动按需区分系列与场次 |
+| 事件与活动 `event` | 事件、活动系列、场次、时间、地点与参与关系 | **Current stage for MusicBrainz-required catalog data.** Broader event products remain future scope; distinguish event identity, place/time and repeated occurrences. |
 | 公开主体 `entity` | 人、组织、角色、服务代理及获授权的互动资料 | **当前基础＋待实施。** Profile／Entity 合并尚未完成；平台账号与实际创作者身份分开 |
 | 网站与平台资料 | 网站、平台账号、外部发布及来源身份 | **未来按需。** 网站不必是软件；跨内容类型共享协议，不强制所有重投稿数据汇入一个表 |
 | 组织对象与一般概念 | 系列、世界观、IP、地点及其他受治理概念 | **部分基础＋待实施／未来扩展。** 复用组织／类成员机制；普通新概念不要求专属空表或互动权限 |

@@ -2,6 +2,12 @@
 
 Status: planned, not implemented. Date: 2026-09-06. Parent: [program and gates](README.md).
 
+The [current stage](00-source-complete-schema.md) is full native source-schema
+coverage, including book indexing and MusicBrainz supporting catalog entities.
+The CJK scope below is a later launch/presentation focus. It must not reduce the
+database's language, object, field or relationship coverage or justify one-record
+pilots as completion. Implement the domain/schema owners before the broader views.
+
 ## Outcome
 
 Deliver U05–U08 and the catalog event side of U10 with real source coverage and useful navigation. A source adapter that stores raw JSON does not complete this product plan.

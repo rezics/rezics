@@ -2,6 +2,12 @@
 
 Status: planned, not implemented. Date: 2026-09-06. Parent: [program and gates](README.md).
 
+**Current critical path:** implement the [source-complete schema milestone](00-source-complete-schema.md).
+This is the principal deliverable of the present stage, not a later refinement
+after operations or UI work. The [source-to-domain and physical-owner contract](../../report/REZICS-source-complete-catalog-schema-20260906.md#4-physical-schema-contract-to-implement)
+is mandatory input to the DDL and mapping inventory. Existing Unit/Book/Media
+tables and the repaired merge path do not establish full catalog support.
+
 ## Outcome and existing owners
 
 Make each catalog record mean a defined thing, with stable references and a single authoritative writer. Supports U01/U05–U09.
@@ -22,12 +28,17 @@ Inspect [Unit](../../../services/main/src/services/database/schema/unit.ts), [Bo
 
 ## Implementation slices
 
-1. Write accepted/rejected fixtures covering single volume, omnibus, translation, uncertain legacy Book, VN work/release, character credit, music work/recording/release group/release/disc/track, MV and audiobook.
+1. Enumerate every required source object/field/relationship from the pinned contracts in `00`, assign native physical owners, then write accepted/rejected fixtures covering single volume, omnibus, serialization/translation updates, uncertain legacy Book, VN work/release/local edition/staff alias/quote, contextual character credit, all MusicBrainz catalog/supporting entities, music work/recording/release group/release/medium/track/TOC, MV and audiobook. A hand-selected happy-path sample is not the coverage denominator.
 2. Define owner/reference/definition revisions and source-free manual creation commands. Replace fixed business-role restrictions with validated definitions while retaining database FK and value constraints.
 3. Introduce necessary domain structures and composition extensions; move heavy localized facts/history by owner. Preserve existing Audio/Video content semantics rather than reinterpreting them as files.
 4. Replace whole-structure mutation requirements with node commands, parent pagination and segmented immutable checkpoints. Published formal composition uses concurrency-safe acyclicity; drafts may contain diagnosed invalid structures but cannot advertise complete traversal.
 5. Migrate variant/series/credit/subject references, history snapshots, restore, merge manifests, indexes, lifecycle triggers, filter AST and SDK in one coordinated contract slice per owner.
 6. Delete replaced writes and obsolete fields through new forward migrations only after conversion checks. Keep archival evidence separately from current authority.
+
+Required domain scope includes MusicBrainz Area, Place, Event, Instrument, Label,
+Series, Genre/Mood and URL semantics, and Bangumi Archive-only person/character
+relations and public catalog indices. Their source-required metadata is in this
+stage even where older reports called a general-purpose domain a future expansion.
 
 ## Acceptance
 

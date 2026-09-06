@@ -2,6 +2,11 @@
 
 Status: planned, not implemented. Date: 2026-09-06. Parent: [program and gates](README.md).
 
+During the [current schema stage](00-source-complete-schema.md), P12 owns source
+semantic fixtures, native roundtrip/query assertions and honest coverage status.
+Product activation, marketing metrics and broad UI work follow the four-source
+schema gate; they must not become substitutes for the missing database refactor.
+
 ## Outcome
 
 Make “ready to operate” a verifiable product state. Use [U01–U15 scenarios and market evidence](../../report/REZICS-product-opportunities-and-user-scenarios-20260906.md), not counts of tables or completed tickets. U01–U09/U13 are the initial full portfolio; U10/U11 are bounded supported pilots, U12 invited participation. U14/U15 remain later experiments.
@@ -52,4 +57,3 @@ No invented retention or revenue promise is a launch fact. Set growth experiment
 - P11 performs the production cutover; P10 supplies dashboards/recovery, and each feature owner signs its scenario ledger.
 
 Release record includes plan status, source scope, human acceptance date, actual service/cost/recovery measurements, known limitations, supported API versions and operations owner. This documentation task supplies the plan, not those future results.
-

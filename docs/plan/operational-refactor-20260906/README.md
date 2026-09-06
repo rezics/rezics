@@ -1,9 +1,18 @@
 # REZICS operational refactor program
 
-Date: 2026-09-06. Status: implementation in progress; production qualification remains pending.
+Date: 2026-09-06. Status: supporting implementation exists; **the current source-complete catalog schema milestone is not delivered**.
 Source baseline: `470aa6c0432fae1dacbd3be7d8ad62b566447ca9`.
 
 ## Mandate and outcome
+
+**Current stage, clarified by the maintainer:** finish the database schema needed
+to natively carry **VNDB, MusicBrainz, Bangumi and book-index data**. Novel Updates
+is a reference for book/translation indexing, not an irreplaceable provider.
+Start with [Current-stage schema plan](00-source-complete-schema.md) and its
+[verified source/schema report](../../report/REZICS-source-complete-catalog-schema-20260906.md).
+They own this stage's concrete source URLs, native table owners, coverage gates
+and next implementation order. The broader product program below remains valid
+after this milestone; it must not divert implementation into more peripheral fixes.
 
 Deliver multiple independently useful product lines: finding books and choosing through reviews, scores and lists; keeping a reading journal; discovering works through tags and characters; choosing languages and editions; exploring rich credits and cross-media relationships; contributing corrections to a maintained catalog. Three production source adapters (Bangumi, VNDB and MusicBrainz), continuous adoption and AI-assisted review are part of this program.
 
@@ -16,6 +25,8 @@ forward migration may deliberately drop replaced structures after verified trans
 
 ## Research and decisions
 
+- [Source-complete catalog schema and actual API verification](../../report/REZICS-source-complete-catalog-schema-20260906.md) — current-stage authority.
+- [Current-stage source baseline](source-contract-baseline.json) — pinned artifacts and observed HTTP/schema results, not implementation coverage.
 - [Integrated decisions and issue register](../../report/REZICS-operational-refactor-decisions-20260906.md).
 - [Product evidence and user scenarios](../../report/REZICS-product-opportunities-and-user-scenarios-20260906.md).
 - [Language and authority audit](../../report/REZICS-language-and-authority-audit-20260906.md).
@@ -44,12 +55,21 @@ Prerequisites are contracts or integration gates, not a requirement to finish ev
 
 ## Delivery order and useful increments
 
-1. **Baseline and contracts:** P10/P11/P12 inventory and acceptance corpus; P01/P02/P03 identity, language and authority contracts. Develop and rehearse contracts locally; record the actual production version and recoverable export structure before executing production conversion or cutover.
-2. **First complete data loop:** P04 Bangumi slice + P05 observation/proposal/adoption + P06 title lookup + P09 one correctly modeled subject. Demonstrate replay, source conflict and a protected human correction before increasing volume.
-3. **Complete existing product lines:** P07/P08 in parallel with all-source mapping. Ship book search/reviews/lists, realm scoring and reading history against the new identities, including API/SDK consumers.
-4. **All-source coverage and relationship discovery:** VNDB and MusicBrainz adapters, multilingual named forms, character filters, edition navigation and credit/music links. A working pilot does not count as completion of the three-adapter requirement.
-5. **Qualification and conversion:** full declared source-scope reconciliation, capacity tests, AI shadow evaluation, user-flow acceptance and at least two repeatable legacy migration rehearsals.
-6. **Controlled activation:** P11 coordinated maintenance cutover; P12 feature/connector activation and monitoring. Future GPU/compute/education/package-marketplace scope is not an entry condition.
+1. **Finish the source-complete database milestone:** follow `00` in order: full
+   source contract inventory, shared DDL, actual domain tables, canonical commands/
+   reads/queries, old-schema conversion, four-source native conformance and local
+   capacity/rehearsal checks. P01/P03/P04/P09 are the primary owners. Use P02/P10/P11
+   only for dependencies that this work actually needs.
+2. **Complete source operations:** continuous acquisition/adoption, proposal and
+   operator flows, full selected snapshot-count reconciliation and source freshness.
+   A few imported examples do not establish either schema coverage or corpus coverage.
+3. **Complete the wider product portfolio:** P06/P07/P08/P09 discovery, reviews,
+   lists, scoring and journals on the new identities; invited participation and
+   P12 human product acceptance. CJK campaigns do not narrow the schema milestone.
+4. **Production qualification and activation:** actual production inventory and
+   recoverable exports, migration rehearsals against that inventory, P10 recovery/
+   capacity, P05 AI shadow evaluation where enabled, then coordinated P11/P12 cutover.
+   Missing production access does not postpone local schema implementation.
 
 Every increment must leave a runnable integrated system with one authoritative write path per fact. A large final database cutover does not justify months of unintegrated feature branches. Small reviewed slices may merge before activation; commit policy follows the maintainer's session authorization.
 
@@ -84,6 +104,11 @@ U14 group challenges and U15 third-party commercial API are expansion experiment
 - Generated OpenAPI/SDK and mirrors are never hand-edited. Existing deterministic checks are not weakened. GitHub Check remains advisory as documented.
 
 ## Completion ledger
+
+**Current-stage result: not complete.** VNDB, MusicBrainz, Bangumi and book-index
+native schema gates are all unqualified. Core catalog replacement DDL and a complete
+native mapping suite have not been delivered. The table below records supporting
+work only; commit counts and general test totals are not catalog-schema progress.
 
 | Plan | Current implementation evidence | Remaining gate |
 | --- | --- | --- |

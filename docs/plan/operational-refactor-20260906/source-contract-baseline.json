@@ -1,0 +1,1708 @@
+{
+	"format": "rezics.catalog-source-contract-baseline.v1",
+	"capturedAt": "2026-09-06T15:16:31.605Z",
+	"localCodeBaseline": "4fbb0ce67",
+	"stage": "source-complete-catalog-schema",
+	"stageImplemented": false,
+	"nativeMappingCoverageQualified": false,
+	"bangumi": {
+		"repository": "https://github.com/bangumi/server",
+		"commit": "60fdc32daf1d717f8446bad75fd2c3dc44805642",
+		"specUrl": "https://raw.githubusercontent.com/bangumi/server/60fdc32daf1d717f8446bad75fd2c3dc44805642/openapi/v0.yaml",
+		"bundledSchemaSha256": "1c60608e97a53129b6fa646e0813a2e02f2efcebbd0f9e3beb08488c02297c66",
+		"userAgent": "edge/REZICS-schema-audit (2026.09.06; +https://www.rezics.com)",
+		"archiveManifestUrl": "https://raw.githubusercontent.com/bangumi/Archive/master/aux/latest.json",
+		"archive": {
+			"browser_download_url": "https://github.com/bangumi/Archive/releases/download/archive/dump-2026-09-01.210329Z.zip",
+			"content_type": "application/zip",
+			"created_at": "2026-09-01T21:03:30Z",
+			"digest": "sha256:5d02c90e8317c47f17f912b614f25c7611cd08297bf428450ebf7a00a9821a39",
+			"id": 540136637,
+			"label": "",
+			"name": "dump-2026-09-01.210329Z.zip",
+			"node_id": "RA_kwDOGogJqs4gMdS9",
+			"size": 435891841,
+			"updated_at": "2026-09-01T21:03:51Z",
+			"url": "https://api.github.com/repos/bangumi/Archive/releases/assets/540136637"
+		},
+		"archiveDownloaded": false,
+		"validation": {
+			"http200": 13,
+			"requests": 13,
+			"literalMatches": 8,
+			"narrowOverlayExperimentMatches": 13,
+			"adapterImplemented": false,
+			"corrections": [
+				"WikiV0.value: remove incompatible outer object type; preserve existing string/list union",
+				"Character/PersonDetail.blood_type: allow explicit null without changing known-value enum"
+			],
+			"tools": {
+				"refParser": "14.2.1",
+				"ajv": "8.20.0",
+				"ajvFormats": "2.1.1",
+				"strictSchema": false,
+				"coerceTypes": false,
+				"useDefaults": false,
+				"removeAdditional": false
+			}
+		},
+		"requests": [
+			{
+				"method": "GET",
+				"url": "https://api.bgm.tv/v0/subjects/253",
+				"path": "/v0/subjects/{subject_id}",
+				"status": 200,
+				"bytes": 8744,
+				"sha256": "4203222975c45abd01e4b7b47896502b816bcac49b499e06a631530a952651da",
+				"literalSchemaValid": false,
+				"errors": [
+					{
+						"instancePath": "/infobox/0/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/1/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/2/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/3/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/4/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/5/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/6/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/7/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/8/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/9/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/10/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/11/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/12/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/13/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/14/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/15/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/16/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/17/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/18/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/19/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/20/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/21/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/22/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/23/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/24/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/25/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/26/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/27/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/28/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/29/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/30/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/31/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/32/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/33/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/34/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/35/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/36/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/37/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/38/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/39/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/40/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/41/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/42/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/43/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/44/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/45/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/46/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/47/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/48/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/49/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/50/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/51/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/52/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/53/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/54/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/55/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/56/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/57/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/58/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/59/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/60/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					}
+				],
+				"narrowOverlayExperimentValid": true,
+				"observedFacts": {
+					"id": 253,
+					"type": 2,
+					"name": "カウボーイビバップ",
+					"eps": 26,
+					"total_episodes": 31,
+					"series": false,
+					"volumes": 0
+				}
+			},
+			{
+				"method": "GET",
+				"url": "https://api.bgm.tv/v0/subjects/253/persons",
+				"path": "/v0/subjects/{subject_id}/persons",
+				"status": 200,
+				"bytes": 41104,
+				"sha256": "4c3d0a598236de976e927f4fcb7fcaf0fdf2111835329739146cf719d89e8582",
+				"literalSchemaValid": true,
+				"errors": [],
+				"narrowOverlayExperimentValid": true,
+				"observedFacts": {
+					"count": 130
+				}
+			},
+			{
+				"method": "GET",
+				"url": "https://api.bgm.tv/v0/subjects/253/characters",
+				"path": "/v0/subjects/{subject_id}/characters",
+				"status": 200,
+				"bytes": 161851,
+				"sha256": "a178c5196fc1d0c7e28be862960cb21164d6c6c156f1329c20fa0bff6a5cf940",
+				"literalSchemaValid": true,
+				"errors": [],
+				"narrowOverlayExperimentValid": true,
+				"observedFacts": {
+					"count": 97
+				}
+			},
+			{
+				"method": "GET",
+				"url": "https://api.bgm.tv/v0/subjects/253/subjects",
+				"path": "/v0/subjects/{subject_id}/subjects",
+				"status": 200,
+				"bytes": 12950,
+				"sha256": "052601cf495fd3b75d1844c7419578841898ef20ac0446c9a0a8457cb6b54205",
+				"literalSchemaValid": true,
+				"errors": [],
+				"narrowOverlayExperimentValid": true,
+				"observedFacts": {
+					"count": 28
+				}
+			},
+			{
+				"method": "GET",
+				"url": "https://api.bgm.tv/v0/episodes?subject_id=253&limit=3&offset=0",
+				"path": "/v0/episodes",
+				"status": 200,
+				"bytes": 2754,
+				"sha256": "87f22feb68fd548246f00ed6398460faa4ae9149f1f8018ad8efab57d014770e",
+				"literalSchemaValid": true,
+				"errors": [],
+				"narrowOverlayExperimentValid": true,
+				"observedFacts": {
+					"count": 3,
+					"total": 31
+				}
+			},
+			{
+				"method": "GET",
+				"url": "https://api.bgm.tv/v0/subjects/870",
+				"path": "/v0/subjects/{subject_id}",
+				"status": 200,
+				"bytes": 3647,
+				"sha256": "67654dea6f7ecd38d8cf5b28d50ff3b6ae6b3128247d3b088cca3aceddd6dbe6",
+				"literalSchemaValid": false,
+				"errors": [
+					{
+						"instancePath": "/infobox/0/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/1/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/2/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/3/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/4/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/5/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/6/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/7/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/infobox/8/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					}
+				],
+				"narrowOverlayExperimentValid": true,
+				"observedFacts": {
+					"id": 870,
+					"type": 1,
+					"name": "狼と香辛料",
+					"eps": 0,
+					"total_episodes": 0,
+					"series": true,
+					"volumes": 24
+				}
+			},
+			{
+				"method": "GET",
+				"url": "https://api.bgm.tv/v0/subjects/870/subjects",
+				"path": "/v0/subjects/{subject_id}/subjects",
+				"status": 200,
+				"bytes": 21925,
+				"sha256": "6d35dd343aca6610c9b2a56070fc769852253905ec7388ec67a9639154d5f5da",
+				"literalSchemaValid": true,
+				"errors": [],
+				"narrowOverlayExperimentValid": true,
+				"observedFacts": {
+					"count": 48
+				}
+			},
+			{
+				"method": "GET",
+				"url": "https://api.bgm.tv/v0/characters/77",
+				"path": "/v0/characters/{character_id}",
+				"status": 200,
+				"bytes": 1832,
+				"sha256": "a00865452b130448710451a9953ac503c7ffb053f5070d803898045644437331",
+				"literalSchemaValid": false,
+				"errors": [
+					{
+						"instancePath": "/blood_type",
+						"schemaPath": "#/properties/blood_type/type",
+						"keyword": "type",
+						"message": "must be integer"
+					},
+					{
+						"instancePath": "/blood_type",
+						"schemaPath": "#/components/schemas/BloodType/type",
+						"keyword": "type",
+						"message": "must be integer"
+					},
+					{
+						"instancePath": "/blood_type",
+						"schemaPath": "#/components/schemas/BloodType/enum",
+						"keyword": "enum",
+						"message": "must be equal to one of the allowed values"
+					}
+				],
+				"narrowOverlayExperimentValid": true,
+				"observedFacts": {
+					"id": 77,
+					"type": 1,
+					"name": "スパイク・スピーゲル"
+				}
+			},
+			{
+				"method": "GET",
+				"url": "https://api.bgm.tv/v0/persons/3914",
+				"path": "/v0/persons/{person_id}",
+				"status": 200,
+				"bytes": 2802,
+				"sha256": "2e4dbe3dd4eb0fb58a44d3e436badcc4864a7df36de53799a511fb9c3d847e02",
+				"literalSchemaValid": false,
+				"errors": [
+					{
+						"instancePath": "/blood_type",
+						"schemaPath": "#/properties/blood_type/type",
+						"keyword": "type",
+						"message": "must be integer"
+					},
+					{
+						"instancePath": "/blood_type",
+						"schemaPath": "#/components/schemas/BloodType/type",
+						"keyword": "type",
+						"message": "must be integer"
+					},
+					{
+						"instancePath": "/blood_type",
+						"schemaPath": "#/components/schemas/BloodType/enum",
+						"keyword": "enum",
+						"message": "must be equal to one of the allowed values"
+					}
+				],
+				"narrowOverlayExperimentValid": true,
+				"observedFacts": {
+					"id": 3914,
+					"type": 1,
+					"name": "山寺宏一"
+				}
+			},
+			{
+				"method": "GET",
+				"url": "https://api.bgm.tv/v0/episodes/519",
+				"path": "/v0/episodes/{episode_id}",
+				"status": 200,
+				"bytes": 871,
+				"sha256": "3b5390bdb396830417d659de23ae1f8c563f5c90313d69e1a5eb17433c323772",
+				"literalSchemaValid": true,
+				"errors": [],
+				"narrowOverlayExperimentValid": true,
+				"observedFacts": {
+					"id": 519,
+					"type": 0,
+					"name": "アステロイド・ブルース Asteroid Blues"
+				}
+			},
+			{
+				"method": "GET",
+				"url": "https://api.bgm.tv/v0/characters/77/persons",
+				"path": "/v0/characters/{character_id}/persons",
+				"status": 200,
+				"bytes": 3816,
+				"sha256": "66727288b7829c88586604deeba33a374639b1fcc1ceac341eb2654b444f4ca1",
+				"literalSchemaValid": true,
+				"errors": [],
+				"narrowOverlayExperimentValid": true,
+				"observedFacts": {
+					"count": 8
+				}
+			},
+			{
+				"method": "GET",
+				"url": "https://api.bgm.tv/v0/revisions/subjects?subject_id=253&limit=3&offset=0",
+				"path": "/v0/revisions/subjects",
+				"status": 200,
+				"bytes": 499,
+				"sha256": "21a57c1b7ea793877883e4472839847e7596e255b42e27342c744282175f55a1",
+				"literalSchemaValid": true,
+				"errors": [],
+				"narrowOverlayExperimentValid": true,
+				"observedFacts": {
+					"count": 3,
+					"total": 44
+				}
+			},
+			{
+				"method": "POST",
+				"url": "https://api.bgm.tv/v0/search/subjects?limit=3&offset=0",
+				"path": "/v0/search/subjects",
+				"status": 200,
+				"body": {
+					"keyword": "狼与香辛料",
+					"sort": "match",
+					"filter": {
+						"type": [1]
+					}
+				},
+				"bytes": 9149,
+				"sha256": "93238217a3dcfb948860c471c91bd94ff6678dae6cb86ee8f424623137a070e5",
+				"literalSchemaValid": false,
+				"errors": [
+					{
+						"instancePath": "/data/0/infobox/0/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/0/infobox/1/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/0/infobox/2/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/0/infobox/3/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/0/infobox/4/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/0/infobox/5/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/0/infobox/6/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/0/infobox/7/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/0/infobox/8/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/0/infobox/9/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/0/infobox/10/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/0/infobox/11/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/1/infobox/0/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/1/infobox/1/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/1/infobox/2/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/1/infobox/3/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/1/infobox/4/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/1/infobox/5/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/1/infobox/6/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/1/infobox/7/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/1/infobox/8/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/2/infobox/0/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/2/infobox/1/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/2/infobox/2/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/2/infobox/3/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/2/infobox/4/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/2/infobox/5/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					},
+					{
+						"instancePath": "/data/2/infobox/6/value",
+						"schemaPath": "#/components/schemas/WikiV0/items/properties/value/type",
+						"keyword": "type",
+						"message": "must be object"
+					}
+				],
+				"narrowOverlayExperimentValid": true,
+				"observedFacts": {
+					"count": 3,
+					"total": 1000
+				}
+			}
+		],
+		"minimalObservedCases": {
+			"countSemantics": {
+				"sourceUrl": "https://api.bgm.tv/v0/subjects/253",
+				"id": 253,
+				"eps": 26,
+				"total_episodes": 31
+			},
+			"infoboxValueShapes": [
+				{
+					"key": "中文名",
+					"value": "星际牛仔"
+				},
+				{
+					"key": "别名",
+					"value": [
+						{
+							"v": "Cowboy Bebop"
+						},
+						{
+							"v": "宇宙牛仔"
+						},
+						{
+							"v": "赏金猎人"
+						},
+						{
+							"v": "太空牛仔"
+						},
+						{
+							"v": "恶男杰特"
+						}
+					]
+				}
+			],
+			"contextualActors": {
+				"subject_id": 253,
+				"character_id": 77,
+				"relation": "主角",
+				"actor_ids": [3914, 28677]
+			},
+			"editionBlock": {
+				"subject_id": 870,
+				"series": true,
+				"volumes": 24,
+				"entry": {
+					"key": "版本:新经典文化版",
+					"value": [
+						{
+							"k": "出版社",
+							"v": "南海出版公司"
+						},
+						{
+							"k": "发售日",
+							"v": "2012"
+						},
+						{
+							"k": "出品方",
+							"v": "新经典文化"
+						}
+					]
+				}
+			},
+			"nullableBloodType": {
+				"character": {
+					"id": 77,
+					"blood_type": null
+				},
+				"person": {
+					"id": 3914,
+					"blood_type": null
+				}
+			}
+		}
+	},
+	"vndb": {
+		"documentation": "https://api.vndb.org/kana",
+		"schemaUrl": "https://api.vndb.org/kana/schema",
+		"sha256": "4821b4815b6b316ae61e9556e480e4915a607451f3f5c7ad1e239aa02b632d0f",
+		"catalogApiFields": {
+			"/character": {
+				"age": null,
+				"aliases": null,
+				"birthday": null,
+				"blood_type": null,
+				"bust": null,
+				"cup": null,
+				"description": null,
+				"gender": null,
+				"height": null,
+				"hips": null,
+				"id": null,
+				"image": {
+					"dims": null,
+					"id": null,
+					"sexual": null,
+					"url": null,
+					"violence": null,
+					"votecount": null
+				},
+				"name": null,
+				"original": null,
+				"sex": null,
+				"traits": {
+					"_inherit": "/trait",
+					"lie": null,
+					"spoiler": null
+				},
+				"vns": {
+					"_inherit": "/vn",
+					"release": {
+						"_inherit": "/release"
+					},
+					"role": null,
+					"spoiler": null
+				},
+				"waist": null,
+				"weight": null
+			},
+			"/producer": {
+				"aliases": null,
+				"description": null,
+				"extlinks": {
+					"id": null,
+					"label": null,
+					"name": null,
+					"url": null
+				},
+				"id": null,
+				"lang": null,
+				"name": null,
+				"original": null,
+				"type": null
+			},
+			"/quote": {
+				"character": {
+					"_inherit": "/character"
+				},
+				"id": null,
+				"quote": null,
+				"score": null,
+				"vn": {
+					"_inherit": "/vn"
+				}
+			},
+			"/release": {
+				"alttitle": null,
+				"catalog": null,
+				"engine": null,
+				"extlinks": {
+					"id": null,
+					"label": null,
+					"name": null,
+					"url": null
+				},
+				"freeware": null,
+				"gtin": null,
+				"has_ero": null,
+				"id": null,
+				"images": {
+					"dims": null,
+					"id": null,
+					"languages": null,
+					"photo": null,
+					"sexual": null,
+					"thumbnail": null,
+					"thumbnail_dims": null,
+					"type": null,
+					"url": null,
+					"violence": null,
+					"vn": null,
+					"votecount": null
+				},
+				"languages": {
+					"lang": null,
+					"latin": null,
+					"main": null,
+					"mtl": null,
+					"title": null
+				},
+				"media": {
+					"medium": null,
+					"qty": null
+				},
+				"minage": null,
+				"notes": null,
+				"official": null,
+				"patch": null,
+				"platforms": null,
+				"producers": {
+					"_inherit": "/producer",
+					"developer": null,
+					"publisher": null
+				},
+				"released": null,
+				"resolution": null,
+				"title": null,
+				"uncensored": null,
+				"vns": {
+					"_inherit": "/vn",
+					"rtype": null
+				},
+				"voiced": null
+			},
+			"/staff": {
+				"aid": null,
+				"aliases": {
+					"aid": null,
+					"ismain": null,
+					"latin": null,
+					"name": null
+				},
+				"description": null,
+				"extlinks": {
+					"id": null,
+					"label": null,
+					"name": null,
+					"url": null
+				},
+				"gender": null,
+				"id": null,
+				"ismain": null,
+				"lang": null,
+				"name": null,
+				"original": null
+			},
+			"/tag": {
+				"aliases": null,
+				"applicable": null,
+				"category": null,
+				"description": null,
+				"id": null,
+				"name": null,
+				"searchable": null,
+				"vn_count": null
+			},
+			"/trait": {
+				"aliases": null,
+				"applicable": null,
+				"char_count": null,
+				"description": null,
+				"group_id": null,
+				"group_name": null,
+				"id": null,
+				"name": null,
+				"searchable": null,
+				"sexual": null
+			},
+			"/vn": {
+				"aliases": null,
+				"alttitle": null,
+				"average": null,
+				"description": null,
+				"developers": {
+					"_inherit": "/producer"
+				},
+				"devstatus": null,
+				"editions": {
+					"eid": null,
+					"lang": null,
+					"name": null,
+					"official": null
+				},
+				"extlinks": {
+					"id": null,
+					"label": null,
+					"name": null,
+					"url": null
+				},
+				"id": null,
+				"image": {
+					"dims": null,
+					"id": null,
+					"sexual": null,
+					"thumbnail": null,
+					"thumbnail_dims": null,
+					"url": null,
+					"violence": null,
+					"votecount": null
+				},
+				"languages": null,
+				"length": null,
+				"length_minutes": null,
+				"length_votes": null,
+				"olang": null,
+				"platforms": null,
+				"popularity": null,
+				"rating": null,
+				"relations": {
+					"_inherit": "/vn",
+					"relation": null,
+					"relation_official": null
+				},
+				"released": null,
+				"screenshots": {
+					"dims": null,
+					"id": null,
+					"release": {
+						"_inherit": "/release"
+					},
+					"sexual": null,
+					"thumbnail": null,
+					"thumbnail_dims": null,
+					"url": null,
+					"violence": null,
+					"votecount": null
+				},
+				"staff": {
+					"_inherit": "/staff",
+					"eid": null,
+					"note": null,
+					"role": null
+				},
+				"tags": {
+					"_inherit": "/tag",
+					"lie": null,
+					"rating": null,
+					"spoiler": null
+				},
+				"title": null,
+				"titles": {
+					"lang": null,
+					"latin": null,
+					"main": null,
+					"official": null,
+					"title": null
+				},
+				"va": {
+					"character": {
+						"_inherit": "/character"
+					},
+					"note": null,
+					"staff": {
+						"_inherit": "/staff"
+					}
+				},
+				"votecount": null
+			}
+		},
+		"fieldInventoryNote": "Leaf null values describe schema inventory, not field nullability; _inherit must be resolved without infinitely expanding cycles.",
+		"sourceLanguageExceptions": [
+			{
+				"id": "ck",
+				"label": "Cherokee"
+			},
+			{
+				"id": "zh",
+				"label": "Chinese"
+			},
+			{
+				"id": "zh-Hans",
+				"label": "Chinese (simplified)"
+			},
+			{
+				"id": "zh-Hant",
+				"label": "Chinese (traditional)"
+			},
+			{
+				"id": "ta",
+				"label": "Tagalog"
+			}
+		],
+		"sourceMappings": {
+			"ta": "tl",
+			"ck": "chr"
+		},
+		"nativeAdapterImplemented": false
+	},
+	"musicbrainz": {
+		"schemaDocumentation": "https://musicbrainz.org/doc/MusicBrainz_Database/Schema",
+		"repositoryCommit": "cff977f0ba8f06d5fa594e7590f6a134b1a5a22c",
+		"sqlUrl": "https://github.com/metabrainz/musicbrainz-server/blob/cff977f0ba8f06d5fa594e7590f6a134b1a5a22c/admin/sql/CreateTables.sql",
+		"sha256": "92d1981a0d4f5032bca1565d27fafa8a0eac4d11b7f34feab71bfde8a00ecb13",
+		"sqlTableDeclarations": 374,
+		"sourceTableInventory": [
+			"alternative_release",
+			"alternative_release_type",
+			"alternative_medium",
+			"alternative_track",
+			"alternative_medium_track",
+			"annotation",
+			"application",
+			"area_type",
+			"area",
+			"area_gid_redirect",
+			"area_alias_type",
+			"area_alias",
+			"area_annotation",
+			"area_attribute_type",
+			"area_attribute_type_allowed_value",
+			"area_attribute",
+			"area_containment",
+			"area_tag",
+			"area_tag_raw",
+			"artist",
+			"artist_alias_type",
+			"artist_alias",
+			"artist_annotation",
+			"artist_attribute_type",
+			"artist_attribute_type_allowed_value",
+			"artist_attribute",
+			"artist_ipi",
+			"artist_isni",
+			"artist_meta",
+			"artist_tag",
+			"artist_rating_raw",
+			"artist_tag_raw",
+			"artist_credit",
+			"artist_credit_gid_redirect",
+			"artist_credit_name",
+			"artist_gid_redirect",
+			"artist_type",
+			"artist_release",
+			"artist_release_nonva",
+			"artist_release_va",
+			"artist_release_pending_update",
+			"artist_release_group",
+			"artist_release_group_nonva",
+			"artist_release_group_va",
+			"artist_release_group_pending_update",
+			"autoeditor_election",
+			"autoeditor_election_vote",
+			"cdtoc",
+			"cdtoc_raw",
+			"country_area",
+			"deleted_entity",
+			"edit",
+			"edit_data",
+			"edit_note",
+			"edit_note_change",
+			"edit_note_recipient",
+			"edit_area",
+			"edit_artist",
+			"edit_event",
+			"edit_genre",
+			"edit_instrument",
+			"edit_label",
+			"edit_mood",
+			"edit_place",
+			"edit_release",
+			"edit_release_group",
+			"edit_recording",
+			"edit_series",
+			"edit_work",
+			"edit_url",
+			"editor",
+			"editor_language",
+			"editor_preference",
+			"editor_subscribe_artist",
+			"editor_subscribe_artist_deleted",
+			"editor_subscribe_collection",
+			"editor_subscribe_label",
+			"editor_subscribe_label_deleted",
+			"editor_subscribe_editor",
+			"editor_subscribe_series",
+			"editor_subscribe_series_deleted",
+			"event",
+			"event_meta",
+			"event_rating_raw",
+			"event_tag_raw",
+			"event_alias_type",
+			"event_alias",
+			"event_annotation",
+			"event_attribute_type",
+			"event_attribute_type_allowed_value",
+			"event_attribute",
+			"event_gid_redirect",
+			"event_tag",
+			"event_type",
+			"release_first_release_date",
+			"recording_first_release_date",
+			"gender",
+			"genre",
+			"genre_alias_type",
+			"genre_alias",
+			"genre_annotation",
+			"instrument_type",
+			"instrument",
+			"instrument_gid_redirect",
+			"instrument_alias_type",
+			"instrument_alias",
+			"instrument_annotation",
+			"instrument_attribute_type",
+			"instrument_attribute_type_allowed_value",
+			"instrument_attribute",
+			"instrument_tag",
+			"instrument_tag_raw",
+			"iso_",
+			"iso_",
+			"iso_",
+			"isrc",
+			"iswc",
+			"l_area_area",
+			"l_area_artist",
+			"l_area_event",
+			"l_area_genre",
+			"l_area_instrument",
+			"l_area_label",
+			"l_area_mood",
+			"l_area_place",
+			"l_area_recording",
+			"l_area_release",
+			"l_area_release_group",
+			"l_area_series",
+			"l_area_url",
+			"l_area_work",
+			"l_artist_artist",
+			"l_artist_event",
+			"l_artist_genre",
+			"l_artist_instrument",
+			"l_artist_label",
+			"l_artist_mood",
+			"l_artist_place",
+			"l_artist_recording",
+			"l_artist_release",
+			"l_artist_release_group",
+			"l_artist_series",
+			"l_artist_url",
+			"l_artist_work",
+			"l_event_event",
+			"l_event_genre",
+			"l_event_instrument",
+			"l_event_label",
+			"l_event_mood",
+			"l_event_place",
+			"l_event_recording",
+			"l_event_release",
+			"l_event_release_group",
+			"l_event_series",
+			"l_event_url",
+			"l_event_work",
+			"l_label_label",
+			"l_genre_genre",
+			"l_genre_instrument",
+			"l_genre_label",
+			"l_genre_mood",
+			"l_genre_place",
+			"l_genre_recording",
+			"l_genre_release",
+			"l_genre_release_group",
+			"l_genre_series",
+			"l_genre_url",
+			"l_genre_work",
+			"l_instrument_instrument",
+			"l_instrument_label",
+			"l_instrument_mood",
+			"l_instrument_place",
+			"l_instrument_recording",
+			"l_instrument_release",
+			"l_instrument_release_group",
+			"l_instrument_series",
+			"l_instrument_url",
+			"l_instrument_work",
+			"l_label_mood",
+			"l_label_place",
+			"l_label_recording",
+			"l_label_release",
+			"l_label_release_group",
+			"l_label_series",
+			"l_label_url",
+			"l_label_work",
+			"l_mood_mood",
+			"l_mood_place",
+			"l_mood_recording",
+			"l_mood_release",
+			"l_mood_release_group",
+			"l_mood_series",
+			"l_mood_url",
+			"l_mood_work",
+			"l_place_place",
+			"l_place_recording",
+			"l_place_release",
+			"l_place_release_group",
+			"l_place_series",
+			"l_place_url",
+			"l_place_work",
+			"l_recording_recording",
+			"l_recording_release",
+			"l_recording_release_group",
+			"l_recording_series",
+			"l_recording_url",
+			"l_recording_work",
+			"l_release_release",
+			"l_release_release_group",
+			"l_release_series",
+			"l_release_url",
+			"l_release_work",
+			"l_release_group_release_group",
+			"l_release_group_series",
+			"l_release_group_url",
+			"l_release_group_work",
+			"l_series_series",
+			"l_series_url",
+			"l_series_work",
+			"l_url_url",
+			"l_url_work",
+			"l_work_work",
+			"label",
+			"label_rating_raw",
+			"label_tag_raw",
+			"label_alias_type",
+			"label_alias",
+			"label_annotation",
+			"label_attribute_type",
+			"label_attribute_type_allowed_value",
+			"label_attribute",
+			"label_ipi",
+			"label_isni",
+			"label_meta",
+			"label_gid_redirect",
+			"label_tag",
+			"label_type",
+			"language",
+			"link",
+			"link_attribute",
+			"link_attribute_type",
+			"link_creditable_attribute_type",
+			"link_attribute_credit",
+			"link_text_attribute_type",
+			"link_attribute_text_value",
+			"link_type",
+			"link_type_attribute_type",
+			"editor_collection",
+			"editor_collection_gid_redirect",
+			"editor_collection_type",
+			"editor_collection_collaborator",
+			"editor_collection_area",
+			"editor_collection_artist",
+			"editor_collection_event",
+			"editor_collection_genre",
+			"editor_collection_instrument",
+			"editor_collection_label",
+			"editor_collection_place",
+			"editor_collection_recording",
+			"editor_collection_release",
+			"editor_collection_release_group",
+			"editor_collection_series",
+			"editor_collection_work",
+			"editor_collection_deleted_entity",
+			"editor_oauth_token",
+			"medium",
+			"medium_attribute_type",
+			"medium_attribute_type_allowed_format",
+			"medium_attribute_type_allowed_value",
+			"medium_attribute_type_allowed_value_allowed_format",
+			"medium_attribute",
+			"medium_cdtoc",
+			"medium_format",
+			"medium_gid_redirect",
+			"mood",
+			"mood_alias_type",
+			"mood_alias",
+			"mood_annotation",
+			"orderable_link_type",
+			"place",
+			"place_alias",
+			"place_alias_type",
+			"place_annotation",
+			"place_attribute_type",
+			"place_attribute_type_allowed_value",
+			"place_attribute",
+			"place_gid_redirect",
+			"place_meta",
+			"place_rating_raw",
+			"place_tag",
+			"place_tag_raw",
+			"place_type",
+			"replication_control",
+			"recording",
+			"recording_alias_type",
+			"recording_alias",
+			"recording_rating_raw",
+			"recording_tag_raw",
+			"recording_annotation",
+			"recording_attribute_type",
+			"recording_attribute_type_allowed_value",
+			"recording_attribute",
+			"recording_meta",
+			"recording_gid_redirect",
+			"recording_tag",
+			"release",
+			"release_alias_type",
+			"release_alias",
+			"release_country",
+			"release_unknown_country",
+			"release_raw",
+			"release_tag_raw",
+			"release_annotation",
+			"release_attribute_type",
+			"release_attribute_type_allowed_value",
+			"release_attribute",
+			"release_gid_redirect",
+			"release_meta",
+			"release_label",
+			"release_packaging",
+			"release_status",
+			"release_tag",
+			"release_group",
+			"release_group_alias_type",
+			"release_group_alias",
+			"release_group_rating_raw",
+			"release_group_tag_raw",
+			"release_group_annotation",
+			"release_group_attribute_type",
+			"release_group_attribute_type_allowed_value",
+			"release_group_attribute",
+			"release_group_gid_redirect",
+			"release_group_meta",
+			"release_group_tag",
+			"release_group_primary_type",
+			"release_group_secondary_type",
+			"release_group_secondary_type_join",
+			"script",
+			"series",
+			"series_type",
+			"series_ordering_type",
+			"series_gid_redirect",
+			"series_alias_type",
+			"series_alias",
+			"series_annotation",
+			"series_attribute_type",
+			"series_attribute_type_allowed_value",
+			"series_attribute",
+			"series_tag",
+			"series_tag_raw",
+			"tag",
+			"tag_relation",
+			"track",
+			"track_gid_redirect",
+			"track_raw",
+			"medium_index",
+			"unreferenced_row_log",
+			"url",
+			"url_gid_redirect",
+			"vote",
+			"work",
+			"work_language",
+			"work_rating_raw",
+			"work_tag_raw",
+			"work_alias_type",
+			"work_alias",
+			"work_annotation",
+			"work_gid_redirect",
+			"work_meta",
+			"work_tag",
+			"work_type",
+			"work_attribute_type",
+			"work_attribute_type_allowed_value",
+			"work_attribute"
+		],
+		"tableClassificationComplete": false,
+		"note": "Includes catalog, derived and internal tables; this is not a requirement to clone every physical source table. Actual dump schema sequence remains an import precondition.",
+		"nativeAdapterImplemented": false
+	},
+	"bookIndex": {
+		"required": true,
+		"providerReplaceable": true,
+		"reference": "https://www.novelupdates.com/series-finder/",
+		"novelUpdatesPageReadStatus": 403,
+		"schemaSource": "https://github.com/internetarchive/openlibrary/blob/dc153f22c728ad4e2e414867363805a032c64a6b/openlibrary/core/schema.py",
+		"examples": [
+			{
+				"url": "https://openlibrary.org/works/OL15626917W.json",
+				"httpStatus": 200,
+				"sha256": "4fb2683eca9d8d9732e46c75f0fe068eacbb9c15cafc2bc3742274032cce0cbf",
+				"fields": [
+					"created",
+					"subjects",
+					"latest_revision",
+					"description",
+					"key",
+					"title",
+					"authors",
+					"type",
+					"last_modified",
+					"revision"
+				]
+			},
+			{
+				"url": "https://openlibrary.org/works/OL15626917W/editions.json?limit=2",
+				"httpStatus": 200,
+				"sha256": "2814ad060e9840217e89780adc1d035c9c457f51a6966d7d8e54ba0d80a51c81",
+				"editionKeys": ["/books/OL24574991M"],
+				"fields": [
+					"publishers",
+					"number_of_pages",
+					"table_of_contents",
+					"covers",
+					"lc_classifications",
+					"latest_revision",
+					"key",
+					"authors",
+					"ocaid",
+					"publish_places",
+					"isbn_13",
+					"pagination",
+					"classifications",
+					"source_records",
+					"subtitle",
+					"title",
+					"lccn",
+					"notes",
+					"identifiers",
+					"created",
+					"languages",
+					"dewey_decimal_class",
+					"last_modified",
+					"publish_date",
+					"publish_country",
+					"by_statement",
+					"oclc_numbers",
+					"works",
+					"type",
+					"revision"
+				]
+			}
+		],
+		"serializationTranslationCoverageQualified": false,
+		"nativeAdapterImplemented": false
+	}
+}

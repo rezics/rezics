@@ -3,6 +3,15 @@
 Date: 2026-09-06. Source baseline: `470aa6c0432fae1dacbd3be7d8ad62b566447ca9`.
 Status: research and selected implementation design. No application change, migration, production inspection, capacity benchmark or rendered acceptance was performed by this task.
 
+**Current-stage correction:** the maintainer clarified that the immediate minimum
+is a **source-complete database schema for VNDB, MusicBrainz, Bangumi and book-index
+data**. The [schema report](REZICS-source-complete-catalog-schema-20260906.md) and
+[stage plan](../plan/operational-refactor-20260906/00-source-complete-schema.md) are
+the execution priority. Prior worker/privacy/parser/governance commits are supporting
+work, not evidence that the core schema has been refactored. The four schema gates
+remain unqualified. This supplement includes actual Bangumi API verification;
+the original audit boundary above describes the earlier report, not this new evidence.
+
 ## 1. Mandate and decision method
 
 The maintainer requests a complete operational refactor plan, independently researched product opportunities, and a comprehensive check of gaps beyond their examples. Destructive database migration is permitted. The old schema is not a compatibility constraint on the target design; legitimate user/catalog data, identity and provenance still require explicit preservation or a documented disposition.
@@ -75,6 +84,10 @@ U14 reading groups/challenges and U15 third-party catalog/API consumers proceed 
 | D22 | Recovery must preserve target-era writes and reapply erasure/revocation decisions | Old backups/routing cannot silently resurrect deleted data or discard new records. P10/P11 |
 | D23 | Source-aware acquisition/display/processing/export/withdrawal policies | Data license, hosted service terms, source-reported officialness and processing permission are independent. P04/P05 |
 | D24 | Scenario acceptance, coverage manifests and measured operations define completion | A populated schema or raw import count does not establish usable, marketable coverage. P12 |
+| D25 | Complete the four-source catalog schema before broader operational/product increments | Physical DDL, full field/object mapping and native conformance are the current minimum. `00`, P01/P03/P04/P09 |
+| D26 | Include every source-required supporting catalog family now | MusicBrainz Area/Place/Event/Instrument/Label/Series/Genre/Mood/URL, VNDB quotes/taxonomies and Bangumi indices/Archive relations are not deferred general-purpose products. P01/P04 |
+| D27 | A book-index provider is replaceable; its required semantics are not | Open Library Work/Edition plus permitted serialization/translation fixtures; Novel Updates availability does not gate the model. P01/P04/P09 |
+| D28 | Verify authoritative API components against real public responses | Bangumi v0 belongs to `bangumi/server`; pin its complete component graph and encode the observed Infobox/nullability discrepancies explicitly. P04 |
 
 ## 5. Language and authority: material report additions
 
@@ -145,7 +158,7 @@ AI is not mandatory per row. Deterministic mapping handles clear source records.
 
 | Gate | Current state | Concrete path / fallback | Decision deadline |
 | --- | --- | --- | --- |
-| G01 Live legacy inventory and version | Not inspected; maintainer estimates only | P11 bounded inventory, export manifest and two rehearsals; preserve unknowns/source-less records | Before final conversion code and scheduling |
+| G01 Live legacy inventory and version | Production not inspected; local inventory/tooling exists | P11 bounded production inventory, export manifest and two rehearsals; preserve unknowns/source-less records | Before production conversion execution/scheduling; not a blocker for local schema code |
 | G02 Actual host/extension/connection capacity | Repository docs are not live measurements | P10 hardware/query/recovery capture; add capacity or reduce admitted workload | Before sustained source/public activation |
 | G03 Provider acquisition/processing/export eligibility | Public terms researched; no REZICS-specific grant inferred | Per-mode eligibility; permitted samples/private review; independent eligible inputs; obtain external arrangement if needed | Before that mode runs or material is published |
 | G04 Model selection, price and autonomy quality | No evaluated model or price commitment | P05 frozen evaluation; deterministic/human path remains available; action allowlist stays off until qualified | Before auto-adoption cohort |
@@ -174,4 +187,9 @@ No question is parked merely because several solutions exist. Defaults above all
 
 This task produces maintained English reports/plans as required by CONTRIBUTING. Existing Chinese architecture reports retain their historical discussion language. Documentation validation checks relative file links, whitespace, plan references, scenario coverage and cross-report policy consistency; it does not substitute for code tests or production acceptance.
 
-Next implementation begins with the program's baseline/contracts increment, including migration/recovery preparation in parallel. All twelve plans remain planned until their actual code, migration, tests, operator evidence and applicable human acceptance are recorded. No current production or data mutation is implied by completion of these documents.
+Next implementation follows the source-complete schema stage: source inventory,
+core and domain DDL, canonical commands, native source conformance, and conversion.
+Supporting implementation is tracked separately in the program ledger. Do not
+resume a general maintenance stream or report its test/commit count as progress
+on the unimplemented catalog schema. No production operation is implied by this
+documentation update.

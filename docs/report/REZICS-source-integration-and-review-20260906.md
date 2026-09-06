@@ -2,9 +2,16 @@
 
 Date: 2026-09-06. Status: researched design and implementation input; no importer, production inventory, migration, or capacity benchmark was executed for this report.
 
+**Scope correction and new evidence:** the current stage is native database
+coverage for VNDB, MusicBrainz, Bangumi **and book indexes**, before broader source
+operations or product polish. The [source-complete schema report](REZICS-source-complete-catalog-schema-20260906.md)
+owns the full object/field scope and physical owners. It records thirteen successful
+Bangumi API calls, resolved/pinned OpenAPI components and two literal-schema
+discrepancies. Those live checks do not constitute an implemented importer.
+
 ## 1. Decisions and scope
 
-REZICS should offer native catalog records that remain useful without contacting a source during a user request. MusicBrainz, VNDB, and Bangumi are explicit connector targets. A connector supplies evidence and source-specific structure; it does not own REZICS identities, user activity, editorial judgment, or authorization.
+REZICS should offer native catalog records that remain useful without contacting a source during a user request. MusicBrainz, VNDB, and Bangumi are explicit connector targets; book indexing is also mandatory, with Novel Updates or an equivalent provider. A connector supplies evidence and source-specific structure; it does not own REZICS identities, user activity, editorial judgment, or authorization.
 
 Adopt these decisions for the refactor:
 
@@ -32,7 +39,7 @@ These observations are from repository code, not a production database inspectio
 | [Governance decision ledger](../../services/main/src/services/database/schema/governance.ts#L115) | Authority, policy basis, reversal, target, and immutable decision structure | Reuse decision principles. Current `actorProfileId` is required; automated operations need an explicit service principal/executing credential aligned with the identity refactor, not fabricated human attribution. |
 | [Content review cases](../../services/main/src/services/database/schema/governance.ts#L253) | Platform/Realm moderation cases, reports, assignment, enforcement | Keep moderation ownership. Do not force every catalog field correction into a moderation case. |
 | [Merge request schema](../../services/main/src/services/database/schema/unit-merge.ts), [merge worker](../../services/main/src/services/units/merge/worker.ts) | Idempotency, captured graph revisions, guarded phases, leases, retry, and reference movement | Reuse bounded execution and staleness patterns; source rebinding must remain a separate operation. |
-| [Merge policy](../../services/main/src/services/units/merge/policy.ts) | Four approvals, no self-review, veto, seven-day expiry; 500-row worker batches | Replace a universal staffing assumption with an explicit risk policy. Preserve a governed high-risk identity operation; do not use this workflow for ordinary source updates. |
+| [Merge policy](../../services/main/src/services/units/merge/policy.ts) | Now version 2: two approvals, no self-review, veto, seven-day expiry; 500-row worker batches | Supporting governance work has advanced; it does not establish catalog/source model coverage or serve as the workflow for every source update. |
 | [Email outbox](../../services/main/src/services/email/outbox.ts), [worker entry](../../services/main/src/worker.ts) | Existing asynchronous delivery and worker lifecycle patterns | Build a source/review-specific transactional event owner with lease fencing and idempotent consumers; do not couple its payloads or throughput to email. |
 
 Inspection did not find a general MusicBrainz/VNDB/Bangumi ingestion owner, shared immutable source observations, per-field adoption policies, or catalog AI review execution pipeline. The showcase content-pack source resolver locates fixture directories; it is not a continuous catalog source connector.
@@ -76,6 +83,26 @@ Connector decisions:
 
 ### 3.3 Bangumi
 
+The authoritative [rendered API docs](https://bangumi.github.io/api/),
+[API repository](https://github.com/bangumi/api) and
+[server OpenAPI](https://github.com/bangumi/server/blob/master/openapi/v0.yaml)
+must be checked together with their external components. The API repository is a
+documentation entry point; its v0 file is synced from the server repository.
+Follow the [User-Agent guidance](https://github.com/bangumi/api/blob/master/docs-raw/user%20agent.md)
+and actually request public endpoints while developing the mapping.
+
+This audit verified thirteen HTTP 200 responses, including
+[subject detail](https://api.bgm.tv/v0/subjects/253),
+[related characters](https://api.bgm.tv/v0/subjects/253/characters),
+[chapter pagination](https://api.bgm.tv/v0/episodes?subject_id=253&limit=3&offset=0),
+[book detail](https://api.bgm.tv/v0/subjects/870), and
+[revision summaries](https://api.bgm.tv/v0/revisions/subjects?subject_id=253&limit=3&offset=0).
+Eight matched the literal schema; five exposed contradictory Infobox typing or
+blood-type nullability. A narrow validation experiment resolved those mismatches.
+The [new report](REZICS-source-complete-catalog-schema-20260906.md#bangumi-documentation-source-and-live-requests)
+records the exact commit, requests, hashes, outcomes and adapter obligations.
+API availability is not a reason to defer the core schema behind source infrastructure.
+
 Bangumi Archive provides weekly wiki snapshots and a latest-manifest pointer. The archive includes typed subjects, persons, characters, episodes, ordered/raw wiki data and relationships, plus selected tags and rating aggregates. Source dictionaries and wiki grammar have separate official repositories. Pin all of these with the data artifact. [Bangumi Archive](https://github.com/bangumi/Archive).
 
 The copyright/developer agreement distinguishes catalog information from user-authored posts and artwork; it permits API/archive development subject to its conditions. It also restricts unauthorized onward provision, requires consent and purpose limitation for user data, and contains termination/deletion terms. Interpret image and description rights separately and resolve the applicable onward-processing route before sending source payloads to an external AI service or redistributing source-derived exports. [Bangumi copyright and developer agreement](https://bgm.tv/about/copyright).
@@ -89,9 +116,26 @@ Connector decisions:
 - Apply content/age/spoiler policy to presentation separately from whether metadata is factually valid. Do not silently discard a source field and still claim full semantic coverage.
 - When source rights require withdrawal, identify affected material by its derivation links. Recompute adopted values from other eligible evidence or local contributions; purge affected blobs/caches/embeddings under the applicable policy. Preserve only the minimal non-content audit record that remains permitted. Avoid training durable model weights on imported source data by default because selective removal is then difficult to establish.
 
-### 3.4 Connector eligibility is a configuration and delivery gate
+### 3.4 Book-index data is a required fourth family
 
-Maintain a versioned rights/access manifest per source and payload class: acquisition mechanism, operational-use eligibility, attribution, redistribution, AI-processing destination, storage/retention, media rights, terms reference, and evidence of any arrangement. The enrolled connector definitions begin at three and are a bounded control set; observations, policy history, and arbitrary third-party source registrations are not automatically bounded datasets.
+Book indexing covers original/alternative titles, creators, languages, Work/text
+version/publication/serialization distinctions, volumes/chapters, translators and
+groups, original and translation status, publishers, identifiers and source update
+links. Novel Updates is a reference, not the only acceptable provider. Its pages
+returned 403 during this audit; no successful extraction is claimed.
+
+[Open Library API documentation](https://openlibrary.org/developers/api),
+[Work/Edition types](https://openlibrary.org/type/edition) and source code provide
+a concrete bibliographic baseline. Both the
+[Work example](https://openlibrary.org/works/OL15626917W.json) and
+[edition listing](https://openlibrary.org/works/OL15626917W/editions.json?limit=2)
+were read successfully. This alone does not qualify web-serialization/translation
+updates, which remain explicit required fixtures and mapping work. Provider
+eligibility cannot be used to drop the book model from the schema stage.
+
+### 3.5 Connector eligibility is a configuration and delivery gate
+
+Maintain a versioned rights/access manifest per source and payload class: acquisition mechanism, operational-use eligibility, attribution, redistribution, AI-processing destination, storage/retention, media rights, terms reference, and evidence of any arrangement. The three named connectors plus the selected book-index inputs form the initial control set; observations, policy history, and arbitrary third-party source registrations are not automatically bounded datasets. Eligibility gates the actual acquisition/use mode, not development of required native schema semantics with permitted fixtures.
 
 Default fallbacks are concrete:
 
