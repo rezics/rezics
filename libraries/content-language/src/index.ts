@@ -2,12 +2,6 @@ export const ContentLanguageChannelValues = ["text", "audio", "subtitle", "inter
 export type ContentLanguageChannel = (typeof ContentLanguageChannelValues)[number];
 
 export const MaximumContentLanguageSupportEntries = 64;
-export const MaximumContentLanguageTagLength = 255;
-
-declare const ContentLanguageTagProof: unique symbol;
-
-/** A structurally valid canonical BCP 47 language tag proven at runtime. */
-export type ContentLanguageTag = string & { readonly [ContentLanguageTagProof]: true };
 
 export type ContentLanguageSupportEntry = {
 	readonly languageTag: ContentLanguageTag;
@@ -33,33 +27,14 @@ export class ContentLanguageSupportValidationError extends TypeError {
 }
 
 export function canonicalizeContentLanguageTag(value: unknown): ContentLanguageTag {
-	if (
-		typeof value !== "string" ||
-		value.length === 0 ||
-		value.length > MaximumContentLanguageTagLength ||
-		value.trim() !== value ||
-		value.includes("_")
-	)
-		throw new ContentLanguageSupportValidationError(
-			"Language must be a well-formed BCP 47 tag",
-			"/languageTag",
-		);
-
-	let canonical: string;
 	try {
-		canonical = new Intl.Locale(value).toString();
+		return parseContentLanguageTag(value).tag;
 	} catch {
 		throw new ContentLanguageSupportValidationError(
-			"Language must be a well-formed BCP 47 tag",
+			"Language must be a registered BCP 47 content-language tag without unscoped private use or locale extensions",
 			"/languageTag",
 		);
 	}
-	if (canonical.length > MaximumContentLanguageTagLength)
-		throw new ContentLanguageSupportValidationError(
-			"Canonical language tag is too long",
-			"/languageTag",
-		);
-	return canonical as ContentLanguageTag;
 }
 
 export function isCanonicalContentLanguageTag(value: unknown): value is ContentLanguageTag {
@@ -161,3 +136,12 @@ export function normalizeContentLanguageSupport(value: unknown): ContentLanguage
 	);
 	return Object.freeze(entries);
 }
+import { parseContentLanguageTag, type ContentLanguageTag } from "./language-tag";
+export {
+	ContentLanguageRegistryPolicy,
+	LanguageTagValidationError,
+	MaximumContentLanguageTagLength,
+	parseContentLanguageTag,
+	type ContentLanguageTag,
+	type ParsedContentLanguage,
+} from "./language-tag";

@@ -89,12 +89,14 @@ U14 group challenges and U15 third-party commercial API are expansion experiment
 | --- | --- | --- |
 | P10 | First operational slice: fenced email claims and renewal, acknowledged auth enqueue, independently scheduled lanes, isolated delivery process/pool, and real PostgreSQL race/plan checks. See [P10](10-capacity-and-operations.md#implementation-ledger). | Full resource ledger, admission/retention, source/AI executors, production inventory and recovery qualification. |
 | P06 | Traced and removed the orphan exact-count/whole-owner global Tag query; active landscape contracts remain authoritative. | Relevance, active ranking bounds, correlated filters, retrieval corpus and product acceptance. |
+| P03 | Pinned IANA consumption-language validation, scoped private-use parsing, registry-bound Search hashes and bounded stored-value audit. | Open metadata localization, source mappings, named forms, authority and production/history conversion. |
 | P08 | New progress defaults private in canonical writers and the Web editor; first-save visibility is selectable and existing choices are retained. | Session/checkpoint semantics, portability, account privacy defaults and user acceptance. |
 | P11 | Read-only schema/runtime inventory with explicit Profile/Auth reference inventory and evidence limits. | Production capture, recoverable exports, conversion and cutover rehearsals. |
-| P01–P05, P07, P09, P12 | Planned; existing foundations do not imply the new acceptance contracts pass. | Owning implementation and acceptance slices. |
+| P01–P02, P04–P05, P07, P09, P12 | Planned; existing foundations do not imply the new acceptance contracts pass. | Owning implementation and acceptance slices. |
 
 Verified implementation commits: `0535b1141` (P10 email/worker foundation),
 `a8d3af36e` (P06 orphan Tag query removal).
+`c8a89a705` (P08 first-save privacy), `8e984d081` (P10/P11 runtime pin and inventory).
 
 Sequencing clarification: production access is a production conversion/activation
 gate. It does not prevent local migration generation, disposable rehearsal or

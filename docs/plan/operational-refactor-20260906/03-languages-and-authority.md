@@ -1,6 +1,6 @@
 # P03 — Standard language tags, named forms and official provenance
 
-Status: planned, not implemented. Date: 2026-09-06. Parent: [program and gates](README.md).
+Status: IANA consumption-language foundation implemented; named forms and authority pending. Date: 2026-09-06. Parent: [program and gates](README.md).
 
 ## Outcome and evidence
 
@@ -43,3 +43,23 @@ The [language audit](../../report/REZICS-language-and-authority-audit-20260906.m
 ## Capacity
 
 Count named forms, support entries and authority/evidence rows separately (not one per UI language). Paginate long name and language lists; replace 64-entry whole-object assumptions where source coverage requires growth. Index target/scope/language/role and source revision; cache registry/definition data by pinned version with bounded memory. P10 includes 500M/3B row estimates and update fan-out. No automatic index per arbitrary tag or full-corpus rewrite on registry refresh.
+
+## Implementation ledger
+
+The [content-language owner](../../../libraries/content-language/README.md) now
+pins the IANA 2026-08-08 registry and its complete checksum, validates registration
+and extlang prefixes, applies only IANA preferred values, preserves scripts/regions,
+and retains scoped private-use identity. The existing consumption field uses this
+boundary and rejects unscoped private use or locale-preference extensions.
+Reads fail for values requiring conversion instead of silently returning a different
+tag than the indexed stored fact. Both Search request-hash owners include the
+language policy. A bounded read-only audit reports conversion/quarantine candidates.
+
+Registry generation/checks and tests are part of root deterministic checks.
+47 parser tests include every registered primary language, extlang prefix and
+grandfathered/redundant tag; the combined backend/language/filter/fixture suite
+passed 1,502 tests across 250 files. Backend, Web, library and API package types
+passed. The local audit found
+all 80 current language-support rows unchanged. Historical/filter/production audits,
+VNDB vocabulary mapping, open metadata localization, named forms and revision-scoped
+authority are not claimed complete by this slice.

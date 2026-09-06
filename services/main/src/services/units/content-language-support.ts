@@ -52,7 +52,10 @@ export function normalizeContentLanguageSupportInput(value: unknown): ContentLan
 
 function parseStoredContentLanguageSupport(value: unknown): ContentLanguageSupport {
 	try {
-		return normalizeContentLanguageSupport(value);
+		const normalized = normalizeContentLanguageSupport(value);
+		if (!isDeepStrictEqual(value, normalized))
+			throw new Error("Persisted content language support requires an explicit policy migration");
+		return normalized;
 	} catch (error) {
 		throw new Error("Invalid persisted Unit content language support", { cause: error });
 	}
@@ -115,3 +118,4 @@ export async function replaceUnitContentLanguageSupport(
 		});
 	return normalized;
 }
+import { isDeepStrictEqual } from "node:util";

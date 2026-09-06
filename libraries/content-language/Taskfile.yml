@@ -1,0 +1,16 @@
+version: "3"
+
+tasks:
+    typecheck:
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json
+
+    registry:check:
+        cmds:
+            - node scripts/update-registry.ts --check
+
+    test:
+        deps: [registry:check]
+        dir: ../..
+        cmds:
+            - yarn exec vitest run --project content-language

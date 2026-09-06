@@ -9,7 +9,7 @@ import {
 } from ".";
 
 describe("content language support contract", () => {
-	it("canonicalizes arbitrary well-formed BCP 47 tags independently of UI locales", () => {
+	it("canonicalizes registered BCP 47 tags independently of UI locales", () => {
 		expect(canonicalizeContentLanguageTag("EN-us")).toBe("en-US");
 		expect(canonicalizeContentLanguageTag("yue-Hant-HK")).toBe("yue-Hant-HK");
 		expect(isCanonicalContentLanguageTag("en-US")).toBe(true);

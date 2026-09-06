@@ -20,8 +20,8 @@ offers a bounded Select whose nine canonical choices are derived from the
 product's supported content-language groups and UI locales, including `zh`,
 `zh-Hans`, and `zh-Hant`; selected values are rendered with localized language
 names. This authoring catalog is not the persistence validity set. API and
-local showcase-fixture boundaries validate and canonicalize any well-formed
-BCP 47 tag, and the editor can preserve or adopt canonical values supplied by
+local showcase-fixture boundaries validate registered BCP 47 content-language tags
+against the pinned IANA policy, and the editor can preserve or adopt canonical values supplied by
 those boundaries or related-Unit evidence. Once stored, the REZICS Unit value
 is authoritative; a fixture file is not a continuing source.
 
@@ -48,6 +48,13 @@ uniqueness after canonicalization, and the 64-entry ceiling on every public
 write and persisted read. There is deliberately no JSONB GIN index: discovery
 requests use the trigger-maintained reverse projection described below and
 never scan the authoritative document.
+
+The [shared language owner](../../libraries/content-language/README.md) defines
+the registry version, update checks and stricter-input cutover. Persisted reads
+require an already canonical value and do not reinterpret it through the current
+runtime's CLDR aliases. Locale preference extensions and unscoped private use
+are rejected by this field; the scoped parser is a separate foundation for source
+contracts. Existing metadata-localization groups remain a separate P03 migration.
 
 ## Search projection
 

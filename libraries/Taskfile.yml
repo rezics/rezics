@@ -1,6 +1,9 @@
 version: "3"
 
 includes:
+    content-language:
+        taskfile: ./content-language/Taskfile.yml
+        dir: ./content-language
     access:
         taskfile: ./access/Taskfile.yml
         dir: ./access
@@ -61,6 +64,7 @@ tasks:
     typecheck:
         desc: Type-check library packages.
         cmds:
+            - task: content-language:typecheck
             - task: access:typecheck
             - task: avatar:typecheck
             - task: observability:typecheck

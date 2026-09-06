@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { ContentLanguageRegistryPolicy } from "@rezics/content-language";
 
 import { and, eq, exists, inArray, isNull, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -2275,6 +2276,7 @@ async function searchDomainScan(
 				query: expandedQuery.query,
 				queryVariants: expandedQuery.variants,
 				queryExpansionPolicyVersion: expandedQuery.policyVersion,
+				contentLanguageRegistryPolicy: ContentLanguageRegistryPolicy,
 				limit,
 				sort,
 				localizationLanguages: request.localizationLanguages,

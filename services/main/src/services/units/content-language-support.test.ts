@@ -10,6 +10,17 @@ import {
 } from "./content-language-support";
 
 describe("Unit content language support boundary", () => {
+	it("preserves Mandarin and generic Chinese as distinct canonical facts", () => {
+		expect(
+			presentContentLanguageSupport(
+				normalizeContentLanguageSupportInput([{ languageTag: "cmn-Hans" }, { languageTag: "zh" }]),
+			),
+		).toEqual([{ languageTag: "cmn-Hans" }, { languageTag: "zh" }]);
+		expect(() => normalizeContentLanguageSupportInput([{ languageTag: "en-foobar" }])).toThrow(
+			UnitContentLanguageSupportInvalid,
+		);
+	});
+
 	it("normalizes external values before they reach persistence", () => {
 		const value = normalizeContentLanguageSupportInput([
 			{ languageTag: "ZH-hant", channels: ["interface", "text"] },

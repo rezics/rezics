@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { ContentLanguageRegistryPolicy } from "@rezics/content-language";
 
 import {
 	canonicalUnitPredicate,
@@ -164,6 +165,7 @@ async function resolveCompiledExecution(
 				categories: scope.categories,
 				query: compiled.query.trim(),
 				queryExpansionPolicyVersion: SearchQueryExpansionPolicyVersion,
+				contentLanguageRegistryPolicy: ContentLanguageRegistryPolicy,
 				sort: compiled.sort,
 				localizationLanguages,
 				maxResultWindow: compiled.maxResultWindow,
