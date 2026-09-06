@@ -4,7 +4,7 @@ This module implements the first native storage foundation of the
 [source-complete schema program](../../../../../docs/plan/operational-refactor-20260906/00-source-complete-schema.md).
 It is not the completed four-source model or the global Unit cutover. Public
 routes, shared Access integration, full revision/restore semantics, source adapters,
-domain structures and legacy conversion still have separate outstanding work.
+complete domain/source coverage and legacy conversion still have separate outstanding work.
 
 ## Implemented boundary
 
@@ -44,6 +44,40 @@ During conversion, a temporary legacy insert guard and native insert guard share
 an ID-scoped transaction lock. They reject concurrent ownership conflicts without
 rewriting old IDs. P11 must remove the legacy guard and all remaining global-parent
 dependencies before marking the final identity gate complete.
+
+## Typed domain structures
+
+The next slice adds 50 tables for publishing Work/text/publication/serialization,
+music Work/Recording/Release Group/Release/Medium/Track, shared artist credits,
+alternate tracklists, TOCs and scoped child identifiers, program/season/version/
+episode occurrences, VN content/releases/local editions, Entity profiles and
+Area/Place/Event/Instrument metadata. Structural subtypes have an ID/shape FK to
+the correct owner, so a Work cannot accidentally acquire Recording storage.
+Dates preserve separate year/month/day components and original text. Release
+events can have distinct or unknown territories. These tables do not constitute
+a complete provider mapping or a migration of old catalog consumers.
+
+Artist credits use begin/append/seal commands. Each append admits at most 128
+members and 512 KB; total membership is not limited to one batch. Statement-level
+transition tables maintain prefix counters, and only sealed active groups may
+be referenced. Original credited names/join phrases and source positions are
+preserved. Database guards prevent later mutation; a retired group permits
+controlled value erasure. Original group size remains historical after erasure.
+
+Publishing installment parents are checked within their serialization, under an
+owner lock, with at most 256 ancestor steps. Display order is separate from
+parentage and source numbering. This is a declared hierarchy-grammar limit, not
+a cap on the number of chapters in a serialization. Deep imports fail explicitly.
+
+For capacity planning, budget subtype rows, occurrences, alternate presentations,
+credits and indexes separately. An illustrative track occurrence at 160 B heap
+plus 320 B across primary, position, medium-scope, recording and credit indexes
+is 240 GB at 500M tracks and 1.44 TB at 3B tracks before TOAST/WAL/replicas. Four
+occurrences per recording multiply those costs by four at the same recording
+population. Shared credits and TOCs have their own aggregate/routing key; they
+are not empty social identities. Measure hot serialization/credit locks and
+source fan-out before qualification. Domain command tests are correctness
+evidence, not measured 500M/3B throughput or cross-database FK support.
 
 ## Source contract inventory
 

@@ -60,6 +60,9 @@ RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 DECLARE actual_kind text; definition_revision uuid;
 BEGIN
   definition_revision := (to_jsonb(NEW) ->> TG_ARGV[0])::uuid;
+  IF definition_revision IS NULL AND coalesce(TG_ARGV[2], '') = 'optional' THEN
+    RETURN NEW;
+  END IF;
   SELECT d.kind INTO actual_kind
     FROM public.catalog_definition_revision AS r
     JOIN public.catalog_definition AS d ON d.id = r.definition_id

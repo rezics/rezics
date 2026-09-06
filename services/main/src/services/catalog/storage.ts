@@ -506,7 +506,7 @@ export function readableRelation(reference: CatalogReference, actor: string | nu
 	return sql`exists (select 1 from ${participant} where ${participant.ownerId} = ${relation.ownerId} and ${participant.relationId} = ${relation.id}) and not exists (select 1 from ${participant} where ${participant.ownerId} = ${relation.ownerId} and ${participant.relationId} = ${relation.id} and not (${sql.join(visibleTargets, sql` or `)}))`;
 }
 
-async function assertReadableTargets(
+export async function assertReadableTargets(
 	tx: DatabaseTransaction,
 	references: readonly CatalogReference[],
 	actor: string | null,

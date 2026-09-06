@@ -159,6 +159,7 @@ tasks:
         cmds:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-catalog-native-foundation.ts
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-catalog-domains.ts
 
     catalog:benchmark-local:
         desc: Measure native relation query plans using rollback-only fixtures on rezics-dev PostgreSQL.

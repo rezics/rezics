@@ -1,4 +1,4 @@
-h1:FEae21KkBjiQ/5uTRhRkUixOLSKetQCnAhjLobksOPk=
+h1:fQN98L9x6kVm1bzr1RjSz3DdwxJLO/cxOZupmsVI0Qo=
 20260801000000_v1_baseline.sql h1:RkSyDwLRpFOPI7iqWg+WlFc5TAshnB4gsRkBpsTMjGY=
 20260807000000_search_ordered_candidates.sql h1:rPOS8iAdRmWOfc9lpyCNNsFWjduRV1e27Q1Mc1QpTFc=
 20260807000001_backfill_search_best_score.sql h1:lmLn+kpWiNWEPlk40W4QRIGsqpWezY//UsNaaZ8FToc=
@@ -39,3 +39,5 @@ h1:FEae21KkBjiQ/5uTRhRkUixOLSKetQCnAhjLobksOPk=
 20260906143437_unit_search_document_tombstones.sql h1:twgc4SHX3Ymkk3AO8eL81mvsm0H1BevITSCJmPc1hjs=
 20260906171239_catalog_native_foundation.sql h1:lXgokOw0xwOKCuXg6rEKYQyWI5qXEYYyW9g8P3NMOhI=
 20260906174358_catalog_value_integrity.sql h1:eipd5xvh+yZgzu7C0z3SqORN0GFDspPdsfN3kxhxAI4=
+20260906183824_catalog_domain_structures.sql h1:dGcwY4IHTeAH66gSy9ybaRBftqXtwOI13RozZ9xgqRg=
+20260906185206_catalog_credit_streaming.sql h1:Ax/MV5FP+HaybqPmUjhxnkRum1L25GPHpytlxw6KLxA=

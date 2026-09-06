@@ -1,4 +1,6 @@
 export const PostgreSqlSchemaFileNames = [
+	"catalog-credit-integrity.sql",
+	"catalog-domain-integrity.sql",
 	"catalog-integrity.sql",
 	"book-chapter-progress.sql",
 	"content-label-policy.sql",
@@ -21,6 +23,8 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles = {
+	catalog_credit_streaming: ["catalog-credit-integrity.sql"],
+	catalog_domain_structures: ["catalog-integrity.sql", "catalog-domain-integrity.sql"],
 	catalog_value_integrity: ["catalog-integrity.sql"],
 	catalog_native_foundation: ["catalog-integrity.sql"],
 	unit_search_document_tombstones: ["unit-search-document.sql"],
@@ -34,6 +38,11 @@ export const PostgreSqlSchemaMigrationBundles = {
 } as const satisfies Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>>;
 
 export const PostgreSqlSchemaFunctionNames = [
+	"catalog_guard_credit_member",
+	"catalog_count_credit_members",
+	"catalog_guard_credit_header",
+	"catalog_require_sealed_credit",
+	"catalog_guard_installment_parent",
 	"catalog_guard_fact_value",
 	"catalog_guard_fact_header",
 	"catalog_guard_source_snapshot",
@@ -118,6 +127,48 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "music_recording", name: "music_recording_sealed_credit_guard" },
+	{ table: "music_release_group", name: "music_release_group_sealed_credit_guard" },
+	{ table: "music_release", name: "music_release_sealed_credit_guard" },
+	{ table: "music_track_occurrence", name: "music_track_occurrence_sealed_credit_guard" },
+	{ table: "music_release_presentation", name: "music_release_presentation_sealed_credit_guard" },
+	{ table: "music_alternative_track", name: "music_alternative_track_sealed_credit_guard" },
+	{ table: "music_artist_credit_name", name: "music_credit_member_guard" },
+	{ table: "music_artist_credit_name", name: "music_credit_member_count" },
+	{ table: "music_artist_credit", name: "music_credit_header_guard" },
+	{ table: "reference_area", name: "reference_area_type_vocab_guard" },
+	{ table: "reference_place", name: "reference_place_type_vocab_guard" },
+	{ table: "reference_instrument", name: "reference_instrument_type_vocab_guard" },
+	{ table: "reference_event", name: "reference_event_type_vocab_guard" },
+	{ table: "entity_catalog_profile", name: "entity_catalog_profile_type_vocab_guard" },
+	{ table: "entity_catalog_profile", name: "entity_catalog_profile_gender_vocab_guard" },
+	{ table: "publishing_text_version", name: "publishing_text_version_method_vocab_guard" },
+	{
+		table: "publishing_publication_facet",
+		name: "publishing_publication_facet_definition_vocab_guard",
+	},
+	{ table: "publishing_serialization", name: "publishing_serialization_status_vocab_guard" },
+	{ table: "publishing_installment", name: "publishing_installment_kind_vocab_guard" },
+	{ table: "music_work", name: "music_work_type_vocab_guard" },
+	{ table: "music_release_group", name: "music_release_group_primary_type_vocab_guard" },
+	{
+		table: "music_release_group_secondary_type",
+		name: "music_release_group_secondary_type_type_vocab_guard",
+	},
+	{ table: "music_release", name: "music_release_status_vocab_guard" },
+	{ table: "music_release", name: "music_release_packaging_vocab_guard" },
+	{ table: "music_medium", name: "music_medium_format_vocab_guard" },
+	{ table: "music_release_presentation", name: "music_release_presentation_type_vocab_guard" },
+	{ table: "program_work", name: "program_work_type_vocab_guard" },
+	{ table: "program_version", name: "program_version_version_type_vocab_guard" },
+	{ table: "program_episode", name: "program_episode_type_vocab_guard" },
+	{ table: "software_visual_novel", name: "software_visual_novel_length_type_vocab_guard" },
+	{ table: "software_release", name: "software_release_type_vocab_guard" },
+	{ table: "software_release_content", name: "software_release_content_release_type_vocab_guard" },
+	{ table: "software_release_platform", name: "software_release_platform_platform_vocab_guard" },
+	{ table: "software_release_medium", name: "software_release_medium_medium_type_vocab_guard" },
+	{ table: "software_release_language", name: "software_release_language_channel_vocab_guard" },
+	{ table: "publishing_installment", name: "publishing_installment_parent_guard" },
 	{ table: "publishing_fact_value_node", name: "publishing_fact_value_node_value_guard" },
 	{ table: "publishing_fact", name: "publishing_fact_value_guard" },
 	{ table: "music_fact_value_node", name: "music_fact_value_node_value_guard" },

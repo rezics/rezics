@@ -233,9 +233,27 @@ commits and general test counts cannot replace that report.
   entries. It also includes internal/private declarations and vocabulary shape;
   this count is not the catalog mapping denominator or native coverage.
 
-The next work remains actual publishing/VN/program/music/supporting domain
-structures and explicit source-field dispositions, then complete definition
+The next work remains complete source-field dispositions and native adapter
+coverage on the domain structures, then complete definition
 governance, revision/restore, source adapters and old-consumer integration. No
 four-source gate, final Unit cutover, full grouping gate or production gate has
 been marked complete. See the [native module](../../../services/main/src/services/catalog/README.md)
 for implemented boundaries, workload assumptions and verification commands.
+
+### Typed domain slice
+
+`20260906183824_catalog_domain_structures.sql` adds 50 actual domain tables and
+owner/shape FKs. Publishing Work/text/publication/serialization, musical work/
+recording/release group/release/medium/track, alternate tracklists/TOCs, programs/
+episodes, scoped VN editions and required reference entities now have structural
+owners. `20260906185206_catalog_credit_streaming.sql` adds batchable, sealed shared
+credits with database-maintained counters and immutable member values. Both were
+applied locally and passed full schema replay; 31 additional local domain assertions
+passed. Native fixture data was rolled back.
+
+The domain assertions cover independent publications, plural/colliding identifiers,
+original credit names and join phrases, shared recordings with distinct occurrences,
+partial regional dates, separate episode counts/fractional numbering, VN-local
+edition rejection, installment cycles and 520-member credit groups spanning several
+batches. They do not yet prove complete four-source field coverage, source adoption,
+historical restoration or old-schema conversion. The complete stage remains open.

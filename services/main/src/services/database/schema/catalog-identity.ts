@@ -116,6 +116,7 @@ function createOwnerIdentity<const Owner extends CatalogOwner>(owner: Owner) {
 			updatedAt: createUpdatedAtColumn(),
 		},
 		(table) => [
+			unique(`${owner}_identity_shape_key`).on(table.id, table.shape),
 			index(`${owner}_identity_creator_idx`).on(table.createdByAuthUserId, table.id),
 			index(`${owner}_identity_shape_idx`).on(table.shape, table.id),
 			check(`${owner}_identity_shape_check`, sql`${table.shape} ~ '^[a-z][a-z0-9_.-]{0,95}$'`),
