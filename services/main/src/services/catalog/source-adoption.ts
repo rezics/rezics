@@ -10,47 +10,16 @@ import {
 } from "../database/schema/catalog-source";
 import { programWork } from "../database/schema/catalog-program";
 import { softwareContent } from "../database/schema/catalog-software";
-import { type CatalogOwner, type CatalogValueKind } from "./contracts";
-import {
-	BangumiSubjectContractSha256,
-	BangumiSubjectSchema,
-	planBangumiSubject,
-	type BangumiSubject,
-} from "./bangumi";
+import { type CatalogOwner } from "./contracts";
+import { BangumiSubjectContractSha256, planBangumiSubject } from "./bangumi";
 import { type CatalogSourceReceipt, recordCatalogSourceObservation } from "./source-observations";
 import {
 	addCatalogName,
-	appendCatalogFactNodes,
-	beginCatalogFact,
 	createCatalogIdentity,
 	ensureCatalogDefinition,
 	loadCatalogIdentity,
-	sealCatalogFact,
 } from "./storage";
 import { assignGroupingClass } from "./grouping";
-import { catalogValueNodes } from "./value-nodes";
-
-const bangumiValueKinds = {
-	id: "number",
-	type: "number",
-	name: "string",
-	name_cn: "string",
-	summary: "string",
-	series: "boolean",
-	nsfw: "boolean",
-	locked: "boolean",
-	date: "string",
-	platform: "string",
-	images: "object",
-	infobox: "array",
-	volumes: "number",
-	eps: "number",
-	total_episodes: "number",
-	rating: "object",
-	collection: "object",
-	tags: "array",
-	meta_tags: "array",
-} as const satisfies Record<keyof BangumiSubject, CatalogValueKind>;
 
 async function findBoundIdentity(tx: DatabaseTransaction, sourceRecordId: string) {
 	const [claim] = await tx
@@ -241,58 +210,6 @@ export async function adoptBangumiSubject(
 		snapshotId: observation.snapshot.id,
 		sourcePath: "/id",
 	});
-	for (const field of BangumiSubjectSchema.keyof().options) {
-		const value = plan.subject[field];
-		if (value === undefined) continue;
-		const definition = await ensureCatalogDefinition(tx, {
-			namespace: "source.bangumi.subject",
-			key: field,
-			kind: "property",
-			valueKind: bangumiValueKinds[field],
-		});
-		const fact = await beginCatalogFact(tx, identity, actor, revision, definition.revisionId);
-		revision = fact.revision;
-		let position = -1;
-		let batch = [];
-		for (const node of catalogValueNodes(value)) {
-			batch.push(node);
-			if (batch.length === 512) {
-				const appended = await appendCatalogFactNodes(
-					tx,
-					identity,
-					actor,
-					revision,
-					fact.id,
-					position,
-					batch,
-				);
-				revision = appended.revision;
-				position = appended.lastNodePosition;
-				batch = [];
-			}
-		}
-		if (batch.length) {
-			const appended = await appendCatalogFactNodes(
-				tx,
-				identity,
-				actor,
-				revision,
-				fact.id,
-				position,
-				batch,
-			);
-			revision = appended.revision;
-			position = appended.lastNodePosition;
-		}
-		revision = (await sealCatalogFact(tx, identity, actor, revision, fact.id, position)).revision;
-		await tx.insert(tables.support).values({
-			ownerId: identity.id,
-			factId: fact.id,
-			sourceRecordId: observation.record.id,
-			snapshotId: observation.snapshot.id,
-			sourcePath: `/${field}`,
-		});
-	}
 	const [claim] = await tx
 		.insert(catalogSourceMappingClaim)
 		.values({
