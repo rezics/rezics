@@ -89,9 +89,19 @@ export async function adoptMusicBrainzRelease(
 					"release_group_primary_type",
 					record["release-group"]["primary-type-id"],
 					record["release-group"]["primary-type"],
+					{
+						actor,
+						observation,
+						idPath: "/release-group/primary-type-id",
+						namePath: "/release-group/primary-type",
+					},
 				),
 			});
-			await projectMusicBrainzGroupTypes(tx, group.id, record["release-group"]);
+			await projectMusicBrainzGroupTypes(tx, group.id, record["release-group"], undefined, {
+				actor,
+				observation,
+				path: "/release-group",
+			});
 			await adoptMusicBrainzRelations(
 				tx,
 				actor,
@@ -117,12 +127,14 @@ export async function adoptMusicBrainzRelease(
 			"release_status",
 			record["status-id"],
 			record.status,
+			{ actor, observation, idPath: "/status-id", namePath: "/status" },
 		),
 		packagingRevisionId: await musicBrainzVocabulary(
 			tx,
 			"release_packaging",
 			record["packaging-id"],
 			record.packaging,
+			{ actor, observation, idPath: "/packaging-id", namePath: "/packaging" },
 		),
 		languageTag: record["text-representation"]?.language
 			? musicBrainzLanguageTag(record["text-representation"].language)
@@ -163,6 +175,12 @@ export async function adoptMusicBrainzRelease(
 					"medium_format",
 					sourceMedium["format-id"],
 					sourceMedium.format,
+					{
+						actor,
+						observation,
+						idPath: `/media/${mediumPosition}/format-id`,
+						namePath: `/media/${mediumPosition}/format`,
+					},
 				),
 			})
 			.returning({ id: musicMedium.id });

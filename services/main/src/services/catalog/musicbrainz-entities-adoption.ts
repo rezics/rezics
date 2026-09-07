@@ -14,7 +14,7 @@ import {
 	sealCatalogFact,
 } from "./storage";
 import { catalogValueNodes } from "./value-nodes";
-import { musicBrainzAreaReference } from "./musicbrainz-native";
+import { musicBrainzAreaReference, musicBrainzVocabulary } from "./musicbrainz-native";
 import { bindCatalogSourceIdentity } from "./source-bindings";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { recordCatalogSourceDocument, type CatalogSourceReceipt } from "./source-observations";
@@ -28,24 +28,6 @@ import {
 import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
 
 type Observation = Awaited<ReturnType<typeof recordCatalogSourceDocument>>;
-
-async function vocabulary(
-	tx: DatabaseTransaction,
-	family: string,
-	id: string | null | undefined,
-	name: string | null | undefined,
-) {
-	const key = id || name;
-	if (!key) return null;
-	return (
-		await ensureCatalogDefinition(tx, {
-			namespace: `musicbrainz.${family}`,
-			key,
-			kind: "vocabulary",
-			valueKind: null,
-		})
-	).revisionId;
-}
 
 async function areaReference(
 	tx: DatabaseTransaction,
@@ -134,6 +116,18 @@ export async function adoptMusicBrainzSupportingEndpoint(
 ) {
 	const parsed = parseMusicBrainzSupportingDocument(receipt, bytes);
 	const observation = await recordCatalogSourceDocument(tx, receipt, bytes);
+	const vocabulary = (
+		family: string,
+		id: string | null | undefined,
+		label: string | null | undefined,
+		field = "type",
+	) =>
+		musicBrainzVocabulary(tx, family, id, label, {
+			actor,
+			observation,
+			idPath: `/${field}-id`,
+			namePath: `/${field}`,
+		});
 	const existing = await inspectExistingSourceBinding(
 		tx,
 		actor,
@@ -154,8 +148,13 @@ export async function adoptMusicBrainzSupportingEndpoint(
 				shape: musicBrainzArtistShape(record.type),
 				profile: {
 					...musicBrainzLifecycle(record["life-span"]),
-					typeRevisionId: await vocabulary(tx, "artist_type", record["type-id"], record.type),
-					genderRevisionId: await vocabulary(tx, "gender", record["gender-id"], record.gender),
+					typeRevisionId: await vocabulary("artist_type", record["type-id"], record.type),
+					genderRevisionId: await vocabulary(
+						"gender",
+						record["gender-id"],
+						record.gender,
+						"gender",
+					),
 					areaId: await areaReference(tx, actor, observation, record.area, "/area"),
 					beginAreaId: await areaReference(
 						tx,
@@ -176,7 +175,7 @@ export async function adoptMusicBrainzSupportingEndpoint(
 				shape: musicBrainzLabelShape(record.type),
 				profile: {
 					...musicBrainzLifecycle(record["life-span"]),
-					typeRevisionId: await vocabulary(tx, "label_type", record["type-id"], record.type),
+					typeRevisionId: await vocabulary("label_type", record["type-id"], record.type),
 					areaId: await areaReference(tx, actor, observation, record.area, "/area"),
 				},
 			});
@@ -189,7 +188,7 @@ export async function adoptMusicBrainzSupportingEndpoint(
 				profile: {
 					shape: "area",
 					...musicBrainzLifecycle(record["life-span"]),
-					typeRevisionId: await vocabulary(tx, "area_type", record["type-id"], record.type),
+					typeRevisionId: await vocabulary("area_type", record["type-id"], record.type),
 				},
 			});
 			identity.revision = await areaCodes(tx, actor, identity, identity.revision, record);
@@ -202,7 +201,7 @@ export async function adoptMusicBrainzSupportingEndpoint(
 				profile: {
 					shape: "place",
 					...musicBrainzLifecycle(record["life-span"]),
-					typeRevisionId: await vocabulary(tx, "place_type", record["type-id"], record.type),
+					typeRevisionId: await vocabulary("place_type", record["type-id"], record.type),
 					areaId: await areaReference(tx, actor, observation, record.area, "/area"),
 					address: record.address ?? null,
 					latitude: record.coordinates?.latitude ?? null,
@@ -218,7 +217,7 @@ export async function adoptMusicBrainzSupportingEndpoint(
 				profile: {
 					shape: "event",
 					...musicBrainzLifecycle(record["life-span"]),
-					typeRevisionId: await vocabulary(tx, "event_type", record["type-id"], record.type),
+					typeRevisionId: await vocabulary("event_type", record["type-id"], record.type),
 					localTime: record.time || null,
 					cancelled: record.cancelled ?? null,
 					setlist: record.setlist ?? null,
@@ -232,7 +231,7 @@ export async function adoptMusicBrainzSupportingEndpoint(
 				name,
 				profile: {
 					shape: "instrument",
-					typeRevisionId: await vocabulary(tx, "instrument_type", record["type-id"], record.type),
+					typeRevisionId: await vocabulary("instrument_type", record["type-id"], record.type),
 				},
 			});
 			break;

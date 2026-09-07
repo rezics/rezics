@@ -80,8 +80,13 @@ export async function adoptMusicBrainzRelations(
 	observation: Observation,
 	input: readonly Relation[],
 	path = "/relations",
+	sourceOffset = 0,
+	replacement?: { semanticId: string; expectedHeadVersion: number },
 ) {
 	const relations = z.array(MusicBrainzRelationSchema).max(8192).parse(input);
+	z.number().int().min(0).max(8191).parse(sourceOffset);
+	if (sourceOffset + relations.length > 8192 || (replacement && relations.length !== 1))
+		throw new TypeError("Relationship replacement requires one exact source occurrence");
 	if (!relations.length) return expectedRevision;
 	const identity = await loadCatalogIdentity(tx, reference, actor, true);
 	const sourceRole = await ensureCatalogDefinition(tx, {
@@ -97,7 +102,8 @@ export async function adoptMusicBrainzRelations(
 		valueKind: null,
 	});
 	let revision = expectedRevision;
-	for (const [position, relation] of relations.entries()) {
+	for (const [index, relation] of relations.entries()) {
+		const position = sourceOffset + index;
 		const key =
 			relation["target-type"] === "release_group" ? "release-group" : relation["target-type"];
 		const target = relation[key];
@@ -269,6 +275,7 @@ export async function adoptMusicBrainzRelations(
 			},
 		});
 		const created = await createCatalogRelation(tx, reference, actor, revision, {
+			...replacement,
 			definitionRevisionId: predicate.revisionId,
 			participants: [
 				{

@@ -19,6 +19,9 @@ import { resolveCatalogSourceOwnedBaseline } from "./source-owned-baselines";
 const schema = z.object({
 	annotation: z.string().max(131072).nullable().optional(),
 	disambiguation: z.string().max(131072).nullable().optional(),
+	description: z.string().max(131072).nullable().optional(),
+	country: z.string().max(131072).nullable().optional(),
+	"ordering-type": z.string().max(131072).nullable().optional(),
 	"first-release-date": z.string().optional(),
 	attributes: z
 		.array(
@@ -45,7 +48,7 @@ type Descriptor = {
 export function musicBrainzFactDescriptors(input: RecordFacts): Descriptor[] {
 	const record = schema.parse(input);
 	const result: Descriptor[] = [];
-	for (const key of ["annotation", "disambiguation"] as const)
+	for (const key of ["annotation", "disambiguation", "description"] as const)
 		if (record[key])
 			result.push({
 				identity: key,
@@ -53,6 +56,19 @@ export function musicBrainzFactDescriptors(input: RecordFacts): Descriptor[] {
 				namespace: "catalog",
 				key,
 				value: record[key],
+				kind: "string",
+			});
+	for (const [field, key] of [
+		["country", "country_of_association"],
+		["ordering-type", "series.ordering_method"],
+	] as const)
+		if (record[field])
+			result.push({
+				identity: key,
+				path: `/${field}`,
+				namespace: "catalog",
+				key,
+				value: record[field],
 				kind: "string",
 			});
 	if (record["first-release-date"])
@@ -78,7 +94,7 @@ export function musicBrainzFactDescriptors(input: RecordFacts): Descriptor[] {
 
 type FactChange = {
 	kind: "catalog-semantic";
-	owner: "music";
+	owner: CatalogReference["owner"];
 	ownerId: string;
 	componentKey: string;
 	beforeRevision: number | null;
@@ -95,12 +111,11 @@ export async function applyMusicBrainzFactDelta(
 	previous: { snapshotId: string; mappingKey: string; record: RecordFacts } | null,
 	incoming: RecordFacts,
 ) {
-	if (reference.owner !== "music") throw new TypeError("Expected music owner");
 	const before = previous ? musicBrainzFactDescriptors(previous.record) : [];
 	const after = musicBrainzFactDescriptors(incoming);
 	if (before.length + after.length > 128)
 		throw new RangeError("Music semantic delta requires staged application");
-	const f = CatalogFactTables.music;
+	const f = CatalogFactTables[reference.owner];
 	const changes: FactChange[] = [];
 	const consumed = new Set<number>();
 	const support = async (snapshotId: string, descriptor: Descriptor) => {
@@ -207,15 +222,13 @@ export async function applyMusicBrainzFactDelta(
 		if (old && isDeepStrictEqual(old.value, descriptor.value) && proof.row) {
 			const target = await support(observation.snapshot.id, descriptor);
 			if (!target.row)
-				await tx
-					.insert(f.support)
-					.values({
-						ownerId: reference.id,
-						factId: proof.row.factId,
-						sourceRecordId: observation.record.id,
-						snapshotId: observation.snapshot.id,
-						sourcePath: descriptor.path,
-					});
+				await tx.insert(f.support).values({
+					ownerId: reference.id,
+					factId: proof.row.factId,
+					sourceRecordId: observation.record.id,
+					snapshotId: observation.snapshot.id,
+					sourcePath: descriptor.path,
+				});
 			else if (target.row.semanticId !== proof.row.semanticId)
 				throw new Error("Source fact occurrence changed native semantic identity");
 			continue;
@@ -227,7 +240,7 @@ export async function applyMusicBrainzFactDelta(
 						tx,
 						{ sourceRecordId: observation.record.id, mappingKey: previous.mappingKey },
 						{
-							owner: "music",
+							owner: reference.owner,
 							ownerId: reference.id,
 							kind: "catalog-semantic",
 							componentKey: proof.row.semanticId,
@@ -245,7 +258,7 @@ export async function applyMusicBrainzFactDelta(
 								tx,
 								{ sourceRecordId: observation.record.id, mappingKey: previous.mappingKey },
 								{
-									owner: "music",
+									owner: reference.owner,
 									ownerId: reference.id,
 									kind: "catalog-semantic",
 									componentKey: target.row.semanticId,
@@ -265,7 +278,7 @@ export async function applyMusicBrainzFactDelta(
 			revision = restored.revision;
 			changes.push({
 				kind: "catalog-semantic",
-				owner: "music",
+				owner: reference.owner,
 				ownerId: reference.id,
 				componentKey: target.row.semanticId,
 				beforeRevision: expected,
@@ -310,18 +323,16 @@ export async function applyMusicBrainzFactDelta(
 			.where(and(eq(f.fact.ownerId, reference.id), eq(f.fact.id, fact.id)))
 			.limit(1);
 		if (!native) throw new Error("Music semantic projection is missing");
-		await tx
-			.insert(f.support)
-			.values({
-				ownerId: reference.id,
-				factId: fact.id,
-				sourceRecordId: observation.record.id,
-				snapshotId: observation.snapshot.id,
-				sourcePath: descriptor.path,
-			});
+		await tx.insert(f.support).values({
+			ownerId: reference.id,
+			factId: fact.id,
+			sourceRecordId: observation.record.id,
+			snapshotId: observation.snapshot.id,
+			sourcePath: descriptor.path,
+		});
 		changes.push({
 			kind: "catalog-semantic",
-			owner: "music",
+			owner: reference.owner,
 			ownerId: reference.id,
 			componentKey: native.semanticId,
 			beforeRevision: replacement ? currentRevision : null,
@@ -337,7 +348,7 @@ export async function applyMusicBrainzFactDelta(
 			tx,
 			{ sourceRecordId: observation.record.id, mappingKey: previous.mappingKey },
 			{
-				owner: "music",
+				owner: reference.owner,
 				ownerId: reference.id,
 				kind: "catalog-semantic",
 				componentKey: proof.row.semanticId,
@@ -356,7 +367,7 @@ export async function applyMusicBrainzFactDelta(
 		revision = removed.revision;
 		changes.push({
 			kind: "catalog-semantic",
-			owner: "music",
+			owner: reference.owner,
 			ownerId: reference.id,
 			componentKey: proof.row.semanticId,
 			beforeRevision: current,

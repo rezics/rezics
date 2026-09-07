@@ -124,12 +124,14 @@ export function musicBrainzReleaseNativeWriter(
 						"release_status",
 						incoming["status-id"],
 						incoming.status,
+						{ actor: context.actor, observation, idPath: "/status-id", namePath: "/status" },
 					),
 					packaging_revision_id: await musicBrainzVocabulary(
 						tx,
 						"release_packaging",
 						incoming["packaging-id"],
 						incoming.packaging,
+						{ actor: context.actor, observation, idPath: "/packaging-id", namePath: "/packaging" },
 					),
 					language_tag: incoming["text-representation"]?.language
 						? musicBrainzLanguageTag(incoming["text-representation"].language)
@@ -166,6 +168,12 @@ export function musicBrainzReleaseNativeWriter(
 							"medium_format",
 							medium["format-id"],
 							medium.format,
+							{
+								actor: context.actor,
+								observation,
+								idPath: `/media/${index}/format-id`,
+								namePath: `/media/${index}/format`,
+							},
 						),
 						source_track_count: medium["track-count"] ?? null,
 					},

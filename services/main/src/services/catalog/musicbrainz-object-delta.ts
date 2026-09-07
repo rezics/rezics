@@ -99,6 +99,7 @@ export function musicBrainzObjectNativeWriter(
 							"work_type",
 							incoming.record["type-id"],
 							incoming.record.type,
+							{ actor: context.actor, observation, idPath: "/type-id", namePath: "/type" },
 						),
 					},
 					old,
@@ -153,6 +154,12 @@ export function musicBrainzObjectNativeWriter(
 							"release_group_primary_type",
 							incoming.record["primary-type-id"],
 							incoming.record["primary-type"],
+							{
+								actor: context.actor,
+								observation,
+								idPath: "/primary-type-id",
+								namePath: "/primary-type",
+							},
 						),
 						artist_credit_id: isDeepStrictEqual(
 							previous.record["artist-credit"],
@@ -174,6 +181,12 @@ export function musicBrainzObjectNativeWriter(
 						"release_group_secondary_type",
 						ids[index],
 						names[index],
+						{
+							actor: context.actor,
+							observation,
+							idPath: `/secondary-type-ids/${index}`,
+							namePath: `/secondary-types/${index}`,
+						},
 					);
 					if (!typeId || seen.has(typeId)) continue;
 					seen.add(typeId);

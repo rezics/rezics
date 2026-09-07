@@ -16,7 +16,9 @@ import {
 	musicWorkLanguage,
 } from "../database/schema/catalog-music";
 import { beginMusicCredit, appendMusicCreditMembers, sealMusicCredit } from "./domains";
-import { ensureCatalogDefinition } from "./storage";
+import { ensureCatalogDefinition, addCatalogName } from "./storage";
+import { bindCatalogNameSourceOccurrence } from "./names";
+import { attachCatalogDefinitionTerm } from "./definition-terms";
 import { bindReferencedSourceIdentity } from "./source-references";
 import { recordMusicSourceComponent } from "./music-source-occurrences";
 import type { recordCatalogSourceDocument } from "./source-observations";
@@ -37,6 +39,7 @@ export async function musicBrainzVocabulary(
 	family: string,
 	id: string | null | undefined,
 	name: string | null | undefined,
+	source?: { actor: string; observation: Observation; idPath: string; namePath: string },
 ) {
 	const key = id || name;
 	if (!key) return null;
@@ -50,33 +53,85 @@ export async function musicBrainzVocabulary(
 		release_group_secondary_type: "music_release_group_secondary_type.type_revision_id",
 	};
 	const slot = releaseSlots[family];
-	return (
-		await ensureCatalogDefinition(tx, {
-			namespace: `musicbrainz.${family}`,
-			key,
-			kind: "vocabulary",
-			valueKind: null,
-			...(slot
-				? {
-						constraints: {
-							targets: [
-								{
-									owner: "music" as const,
-									shapes: [
-										family === "work_type"
-											? "work"
-											: family.startsWith("release_group_")
-												? "release_group"
-												: "release",
-									],
-								},
-							],
-							slots: [slot],
-						},
-					}
-				: {}),
-		})
-	).revisionId;
+	const definition = await ensureCatalogDefinition(tx, {
+		namespace: `musicbrainz.${family}`,
+		key,
+		kind: "vocabulary",
+		valueKind: null,
+		...(slot
+			? {
+					constraints: {
+						targets: [
+							{
+								owner: "music" as const,
+								shapes: [
+									family === "work_type"
+										? "work"
+										: family.startsWith("release_group_")
+											? "release_group"
+											: "release",
+								],
+							},
+						],
+						slots: [slot],
+					},
+				}
+			: {}),
+	});
+	if (source) {
+		const evidence = source.observation.referenceAt(id ? source.idPath : source.namePath);
+		if (name && source.observation.referenceAt(source.namePath).externalId !== name)
+			throw new TypeError("Taxonomy label differs from its recorded source evidence");
+		const concept = await bindReferencedSourceIdentity(tx, source.actor, {
+			source: "musicbrainz",
+			objectType: family,
+			externalId: key,
+			owner: "reference",
+			shape: "concept",
+			evidence,
+			initialize: async (created) => {
+				let revision = (
+					await initializeReferenceProfile(tx, created, source.actor, created.revision, {
+						shape: "concept",
+						typeRevisionId: null,
+					})
+				).revision;
+				if (name) {
+					const named = await addCatalogName(tx, created, source.actor, revision, {
+						kind: "source-reference",
+						languageTag: "en",
+						value: name,
+					});
+					revision = named.revision;
+					await bindCatalogNameSourceOccurrence(tx, created, source.actor, {
+						sourceRecordId: source.observation.record.id,
+						snapshotId: source.observation.snapshot.id,
+						namespace: "musicbrainz.taxonomy.name",
+						localKey: "primary",
+						nameId: named.id,
+						nameRevision: named.nameRevision,
+						sourcePath: source.namePath,
+					});
+					await tx
+						.insert(CatalogFactTables.reference.support)
+						.values({
+							ownerId: created.id,
+							namedFormId: named.id,
+							sourceRecordId: source.observation.record.id,
+							snapshotId: source.observation.snapshot.id,
+							sourcePath: source.namePath,
+						});
+				}
+				return { ...created, revision };
+			},
+		});
+		await attachCatalogDefinitionTerm(tx, source.actor, {
+			definitionRevisionId: definition.revisionId,
+			conceptId: concept.id,
+			evidence,
+		});
+	}
+	return definition.revisionId;
 }
 
 /** Cache lifetime is one admitted document; it never grows with the source corpus. */
@@ -113,6 +168,12 @@ export function musicBrainzCreditWriter(
 								"artist_type",
 								member.artist["type-id"],
 								member.artist.type,
+								{
+									actor,
+									observation,
+									idPath: `${path}/${position}/artist/type-id`,
+									namePath: `${path}/${position}/artist/type`,
+								},
 							),
 						})
 					).revision;
@@ -166,7 +227,12 @@ export async function musicBrainzAreaReference(
 			let revision = (
 				await initializeReferenceProfile(tx, created, actor, created.revision, {
 					shape: "area",
-					typeRevisionId: await musicBrainzVocabulary(tx, "area_type", area["type-id"], area.type),
+					typeRevisionId: await musicBrainzVocabulary(tx, "area_type", area["type-id"], area.type, {
+						actor,
+						observation,
+						idPath: `${path}/type-id`,
+						namePath: `${path}/type`,
+					}),
 				})
 			).revision;
 			for (const [namespace, codes] of [
@@ -216,6 +282,7 @@ export async function musicBrainzLabelReference(
 						"label_type",
 						label["type-id"],
 						label.type,
+						{ actor, observation, idPath: `${path}/type-id`, namePath: `${path}/type` },
 					),
 				})
 			).revision;
@@ -225,15 +292,13 @@ export async function musicBrainzLabelReference(
 					value: String(label["label-code"]),
 				});
 				revision = identifier.revision;
-				await tx
-					.insert(CatalogFactTables.entity.support)
-					.values({
-						ownerId: created.id,
-						identifierId: identifier.id,
-						sourceRecordId: observation.record.id,
-						snapshotId: observation.snapshot.id,
-						sourcePath: `${path}/label-code`,
-					});
+				await tx.insert(CatalogFactTables.entity.support).values({
+					ownerId: created.id,
+					identifierId: identifier.id,
+					sourceRecordId: observation.record.id,
+					snapshotId: observation.snapshot.id,
+					sourcePath: `${path}/label-code`,
+				});
 			}
 			return { ...created, revision };
 		},
@@ -368,6 +433,7 @@ export async function projectMusicBrainzGroupTypes(
 	releaseGroupId: string,
 	record: MusicBrainzReleaseGroup,
 	observation?: Observation,
+	termSource?: { actor: string; observation: Observation; path: string },
 ) {
 	const ids = record["secondary-type-ids"] ?? [];
 	const names = record["secondary-types"] ?? [];
@@ -378,6 +444,14 @@ export async function projectMusicBrainzGroupTypes(
 			"release_group_secondary_type",
 			ids[position],
 			names[position],
+			termSource
+				? {
+						actor: termSource.actor,
+						observation: termSource.observation,
+						idPath: `${termSource.path}/secondary-type-ids/${position}`,
+						namePath: `${termSource.path}/secondary-types/${position}`,
+					}
+				: undefined,
 		);
 		if (typeRevisionId && !recorded.has(typeRevisionId)) {
 			await tx

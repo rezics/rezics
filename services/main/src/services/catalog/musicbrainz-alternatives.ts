@@ -91,6 +91,7 @@ export async function adoptMusicBrainzAlternativeRelease(
 				"alternative_release_type",
 				record.type.gid,
 				record.type.name,
+				{ actor, observation, idPath: "/type/gid", namePath: "/type/name" },
 			),
 			comment: record.comment || null,
 		});

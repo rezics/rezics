@@ -63,6 +63,7 @@ export async function adoptMusicBrainzObject(
 				"work_type",
 				document.record["type-id"],
 				document.record.type,
+				{ actor, observation, idPath: "/type-id", namePath: "/type" },
 			);
 			await tx
 				.insert(musicWork)
@@ -115,6 +116,7 @@ export async function adoptMusicBrainzObject(
 				"release_group_primary_type",
 				document.record["primary-type-id"],
 				document.record["primary-type"],
+				{ actor, observation, idPath: "/primary-type-id", namePath: "/primary-type" },
 			);
 			await tx
 				.insert(musicReleaseGroup)
@@ -133,7 +135,11 @@ export async function adoptMusicBrainzObject(
 								: musicReleaseGroup.primaryTypeRevisionId,
 					},
 				});
-			await projectMusicBrainzGroupTypes(tx, identity.id, document.record, observation);
+			await projectMusicBrainzGroupTypes(tx, identity.id, document.record, observation, {
+				actor,
+				observation,
+				path: "",
+			});
 			break;
 		}
 	}
