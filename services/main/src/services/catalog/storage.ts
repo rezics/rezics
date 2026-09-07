@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { currentCatalogSemantic, publishCatalogSemanticRevision } from "./semantic-history";
 import { isDeepStrictEqual } from "node:util";
 import { and, asc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
@@ -150,6 +149,12 @@ export async function ensureCatalogDefinition(
 		await assertCatalogDefinitionRevision(tx, qualifier, "property");
 	if (value.constraints.vocabularyRevisionId)
 		await assertCatalogDefinitionRevision(tx, value.constraints.vocabularyRevisionId, "vocabulary");
+	for (const vocabulary of new Set(
+		(value.constraints.rules ?? []).flatMap((r) =>
+			r.vocabularyRevisionId ? [r.vocabularyRevisionId] : [],
+		),
+	))
+		await assertCatalogDefinitionRevision(tx, vocabulary, "vocabulary");
 	for (const member of value.constraints.memberRevisionIds ?? [])
 		await assertCatalogDefinitionRevision(tx, member, ["class", "vocabulary"]);
 	if (value.kind === "predicate" && !value.constraints.roles?.length)
@@ -264,18 +269,16 @@ export async function beginCatalogFact(
 		.parse(options);
 	if (Boolean(staged.semanticId) !== staged.expectedHeadVersion > 0)
 		throw new TypeError("Replacement requires an exact existing semantic head");
-	const id = randomUUID();
 	await assertCatalogDefinitionRevision(tx, definitionRevisionId, "property");
 	const revision = await recordCatalogChange(tx, reference, actor, expectedVersion, "fact.begin");
 	const table = CatalogFactTables[reference.owner].fact;
 	const [created] = await tx
 		.insert(table)
 		.values({
-			id,
 			ownerId: reference.id,
 			definitionRevisionId,
 			spoiler: staged.spoiler,
-			semanticId: staged.semanticId ?? id,
+			semanticId: staged.semanticId,
 			expectedHeadVersion: staged.expectedHeadVersion,
 		})
 		.returning({ id: table.id });
@@ -564,7 +567,6 @@ export async function createCatalogRelation(
 		});
 	if (Boolean(value.semanticId) !== value.expectedHeadVersion > 0)
 		throw new TypeError("Replacement requires an exact existing semantic head");
-	const relationId = randomUUID();
 	const revision = await recordCatalogChange(
 		tx,
 		reference,
@@ -616,11 +618,10 @@ export async function createCatalogRelation(
 			ownerId: reference.id,
 			definitionRevisionId: value.definitionRevisionId,
 			spoiler: value.spoiler,
-			id: relationId,
-			semanticId: value.semanticId ?? relationId,
+			semanticId: value.semanticId,
 			expectedHeadVersion: value.expectedHeadVersion,
 		})
-		.returning({ id: tables.relation.id });
+		.returning({ id: tables.relation.id, semanticId: tables.relation.semanticId });
 	if (!relation) throw new Error("Catalog relation insertion returned no row");
 	await tx.insert(tables.participant).values(
 		value.participants.map((participant, position) => ({
@@ -639,7 +640,7 @@ export async function createCatalogRelation(
 				value.qualifiers.map((q) => ({ ...q, ownerId: reference.id, relationId: relation.id })),
 			);
 	const head = await publishCatalogSemanticRevision(tx, reference, actor, {
-		semanticId: value.semanticId ?? relation.id,
+		semanticId: relation.semanticId,
 		expectedHeadVersion: value.expectedHeadVersion,
 		relationId: relation.id,
 	});
@@ -666,6 +667,7 @@ export async function findCatalogRelations(
 	definitionRevisionId: string,
 	query: {
 		readonly afterId?: string;
+		readonly maxSpoiler?: 0 | 1 | 2;
 		readonly participants?: readonly {
 			readonly roleRevisionId: string;
 			readonly target: CatalogReference;

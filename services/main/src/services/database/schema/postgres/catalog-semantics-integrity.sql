@@ -84,6 +84,11 @@ BEGIN
     END IF;
    END LOOP;
   END LOOP;
+  EXECUTE format('SELECT count(*) FROM (SELECT 1 FROM public.%I WHERE owner_id=$1 AND relation_id=$2 LIMIT 65) q',TG_ARGV[0]||'_relation_scope') INTO total USING NEW.owner_id,NEW.relation_id;
+  IF total>64 THEN RAISE EXCEPTION 'Relation qualifier budget exceeded' USING ERRCODE='23514'; END IF;
+  FOR target IN EXECUTE format('SELECT q.definition_revision_id,f.definition_revision_id AS fact_definition,f.sealed_at FROM public.%I q JOIN public.%I f ON f.owner_id=q.owner_id AND f.id=q.value_fact_id WHERE q.owner_id=$1 AND q.relation_id=$2 LIMIT 65',TG_ARGV[0]||'_relation_scope',TG_ARGV[0]||'_fact') USING NEW.owner_id,NEW.relation_id LOOP
+   IF NOT (coalesce(predicate->'qualifierRevisionIds','[]'::jsonb) ? target.definition_revision_id::text) OR target.fact_definition<>target.definition_revision_id OR target.sealed_at IS NULL THEN RAISE EXCEPTION 'Undeclared or unsealed relation qualifier' USING ERRCODE='23514'; END IF;
+  END LOOP;
  END IF;
  RETURN NEW;
 END;
@@ -369,3 +374,40 @@ CREATE TRIGGER reference_semantic_head_governance BEFORE INSERT OR UPDATE OR DEL
 
 DROP TRIGGER IF EXISTS distribution_semantic_head_governance ON public.distribution_semantic_head;
 CREATE TRIGGER distribution_semantic_head_governance BEFORE INSERT OR UPDATE OR DELETE ON public.distribution_semantic_head FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_semantic_head();
+
+CREATE OR REPLACE FUNCTION public.catalog_guard_definition_constraints()
+RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
+DECLARE kind text; rule jsonb; role jsonb; reference_id text; reference_kind text; rule_position integer:=0; parent_rule jsonb;
+BEGIN
+ SELECT d.kind INTO kind FROM public.catalog_definition d WHERE d.id=NEW.definition_id;
+ IF kind='predicate' AND (jsonb_typeof(NEW.constraints->'roles') IS DISTINCT FROM 'array' OR jsonb_array_length(NEW.constraints->'roles') NOT BETWEEN 1 AND 32) THEN RAISE EXCEPTION 'Predicate needs bounded roles' USING ERRCODE='23514'; END IF;
+ IF NEW.value_kind IN ('object','array') AND (jsonb_typeof(NEW.constraints->'rules') IS DISTINCT FROM 'array' OR jsonb_array_length(NEW.constraints->'rules') NOT BETWEEN 1 AND 128) THEN RAISE EXCEPTION 'Structured property needs bounded grammar' USING ERRCODE='23514'; END IF;
+ FOR rule IN SELECT value FROM jsonb_array_elements(coalesce(NEW.constraints->'rules','[]'::jsonb)) LOOP
+  IF (rule->>'position')::integer IS DISTINCT FROM rule_position OR (rule_position=0 AND (rule->>'parent' IS NOT NULL OR rule->>'memberKey' IS NOT NULL OR rule->>'kind'<>NEW.value_kind)) OR (rule_position>0 AND ((rule->>'parent')::integer IS NULL OR (rule->>'parent')::integer NOT BETWEEN 0 AND rule_position-1)) THEN RAISE EXCEPTION 'Invalid governed grammar order' USING ERRCODE='23514'; END IF;
+  IF rule_position>0 THEN
+   parent_rule:=NEW.constraints->'rules'->((rule->>'parent')::integer);
+   IF parent_rule->>'kind' NOT IN ('object','array') OR (parent_rule->>'kind'='array')<>(rule->>'memberKey' IS NULL) THEN RAISE EXCEPTION 'Governed grammar parent mismatch' USING ERRCODE='23514'; END IF;
+  END IF;
+  rule_position:=rule_position+1;
+ END LOOP;
+ FOR role IN SELECT value FROM jsonb_array_elements(coalesce(NEW.constraints->'roles','[]'::jsonb)) LOOP
+  SELECT d.kind INTO reference_kind FROM public.catalog_definition_revision r JOIN public.catalog_definition d ON d.id=r.definition_id WHERE r.id=(role->>'roleRevisionId')::uuid;
+  IF reference_kind IS DISTINCT FROM 'role' OR role->>'min' IS NULL OR role->>'max' IS NULL OR (role->>'min')::integer NOT BETWEEN 0 AND 128 OR (role->>'max')::integer NOT BETWEEN 1 AND 128 OR (role->>'min')::integer>(role->>'max')::integer THEN RAISE EXCEPTION 'Invalid governed predicate role' USING ERRCODE='23514'; END IF;
+ END LOOP;
+ FOR reference_id IN SELECT value FROM jsonb_array_elements_text(coalesce(NEW.constraints->'qualifierRevisionIds','[]'::jsonb)) LOOP
+  SELECT d.kind INTO reference_kind FROM public.catalog_definition_revision r JOIN public.catalog_definition d ON d.id=r.definition_id WHERE r.id=reference_id::uuid;
+  IF reference_kind IS DISTINCT FROM 'property' THEN RAISE EXCEPTION 'Qualifier must name a property revision' USING ERRCODE='23514'; END IF;
+ END LOOP;
+ FOR reference_id IN SELECT value FROM jsonb_array_elements_text(coalesce(NEW.constraints->'memberRevisionIds','[]'::jsonb)) LOOP
+  SELECT d.kind INTO reference_kind FROM public.catalog_definition_revision r JOIN public.catalog_definition d ON d.id=r.definition_id WHERE r.id=reference_id::uuid;
+  IF reference_kind IS NULL OR reference_kind NOT IN ('class','vocabulary') THEN RAISE EXCEPTION 'Vocabulary member must exist as a governed meaning' USING ERRCODE='23514'; END IF;
+ END LOOP;
+ FOR reference_id IN SELECT v FROM (SELECT NEW.constraints->>'vocabularyRevisionId' AS v UNION SELECT value->>'vocabularyRevisionId' FROM jsonb_array_elements(coalesce(NEW.constraints->'rules','[]'::jsonb))) q WHERE v IS NOT NULL LOOP
+  SELECT d.kind INTO reference_kind FROM public.catalog_definition_revision r JOIN public.catalog_definition d ON d.id=r.definition_id WHERE r.id=reference_id::uuid;
+  IF reference_kind IS DISTINCT FROM 'vocabulary' THEN RAISE EXCEPTION 'Vocabulary reference must name a vocabulary revision' USING ERRCODE='23514'; END IF;
+ END LOOP;
+ RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS catalog_definition_revision_governance ON public.catalog_definition_revision;
+CREATE TRIGGER catalog_definition_revision_governance BEFORE INSERT ON public.catalog_definition_revision FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_definition_constraints();

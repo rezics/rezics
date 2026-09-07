@@ -1,6 +1,7 @@
-import { and, eq, gt, sql } from "drizzle-orm";
+import { and, eq, gt, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
+import { catalogDefinitionRevision } from "../database/schema/catalog-identity";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import { CatalogFactStateValues, type CatalogFactState, type CatalogReference } from "./contracts";
 import {
@@ -85,6 +86,40 @@ export async function publishCatalogSemanticRevision(
 			.limit(1);
 		if (!previous || Boolean(previous.factId) !== Boolean(value.factId))
 			throw new TypeError("A semantic identity cannot change target family");
+		if (
+			previous.state === "withdrawn" &&
+			value.state === "active" &&
+			previous.factId === (value.factId ?? null) &&
+			previous.relationId === (value.relationId ?? null)
+		)
+			throw new TypeError("A revoked revision requires a fresh reviewed value");
+		const oldId = previous.factId ?? previous.relationId;
+		const newId = value.factId ?? value.relationId;
+		const targetTable = value.factId ? fact : relation;
+		if (oldId && newId) {
+			const rows = await tx
+				.select({ definitionRevisionId: targetTable.definitionRevisionId })
+				.from(targetTable)
+				.where(
+					and(
+						eq(targetTable.ownerId, reference.id),
+						sql`${targetTable.id} in (${oldId}::uuid,${newId}::uuid)`,
+					),
+				)
+				.limit(2);
+			const definitions = await tx
+				.select({ definitionId: catalogDefinitionRevision.definitionId })
+				.from(catalogDefinitionRevision)
+				.where(
+					sql`${catalogDefinitionRevision.id} in (${sql.join(
+						rows.map((row) => sql`${row.definitionRevisionId}::uuid`),
+						sql`, `,
+					)})`,
+				)
+				.limit(2);
+			if (new Set(definitions.map((d) => d.definitionId)).size !== 1)
+				throw new TypeError("A semantic identity cannot change its governed meaning");
+		}
 	}
 	const version = value.expectedHeadVersion + 1;
 	await tx.insert(history).values({
@@ -186,6 +221,29 @@ export async function restoreCatalogSemanticRevision(
 		.limit(1);
 	if (!target || target.state !== "active" || !current || current.state === "withdrawn")
 		throw new TypeError("Withdrawn or unavailable semantics require a fresh review decision");
+	const supportTarget = target.factId
+		? eq(tables.support.factId, target.factId)
+		: eq(tables.support.relationId, target.relationId ?? "00000000-0000-0000-0000-000000000000");
+	const [anySupport] = await tx
+		.select({ id: tables.support.id })
+		.from(tables.support)
+		.where(and(eq(tables.support.ownerId, reference.id), supportTarget))
+		.limit(1);
+	if (anySupport) {
+		const [activeSupport] = await tx
+			.select({ id: tables.support.id })
+			.from(tables.support)
+			.where(
+				and(
+					eq(tables.support.ownerId, reference.id),
+					supportTarget,
+					isNull(tables.support.withdrawnAt),
+				),
+			)
+			.limit(1);
+		if (!activeSupport)
+			throw new TypeError("All support for this historical revision has been revoked");
+	}
 	if (target.relationId) {
 		const [visible] = await tx
 			.select({ id: tables.relation.id })

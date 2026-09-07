@@ -1,7 +1,16 @@
 import { z } from "zod";
 
 const target = z.strictObject({
-	owner: z.enum(["publishing", "music", "program", "software", "entity", "grouping", "reference"]),
+	owner: z.enum([
+		"publishing",
+		"music",
+		"program",
+		"software",
+		"entity",
+		"grouping",
+		"reference",
+		"distribution",
+	]),
 	shapes: z
 		.array(z.string().regex(/^[a-z][a-z0-9_.-]{0,95}$/u))
 		.min(1)
@@ -64,6 +73,11 @@ export const CatalogDefinitionConstraintsSchema = z
 			ctx.addIssue({ code: "custom", message: "Invalid numeric bounds" });
 		if (v.minLength !== undefined && v.maxLength !== undefined && v.minLength > v.maxLength)
 			ctx.addIssue({ code: "custom", message: "Invalid text bounds" });
+		if (v.roles && v.roles.reduce((sum, role) => sum + role.min, 0) > 128)
+			ctx.addIssue({
+				code: "custom",
+				message: "Predicate minimum participation exceeds command budget",
+			});
 		if (v.roles && new Set(v.roles.map((r) => r.roleRevisionId)).size !== v.roles.length)
 			ctx.addIssue({ code: "custom", message: "Duplicate predicate role" });
 		if (Buffer.byteLength(JSON.stringify(v), "utf8") > 262144)
