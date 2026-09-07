@@ -80,7 +80,10 @@ export function vndbAcquisitionRequest(objectType: string, externalId: string) {
 		method: "POST" as const,
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({
-			filters: ["id", "=", externalId],
+			filters:
+				type === "staff"
+					? ["and", ["id", "=", externalId], ["ismain", "=", 1]]
+					: ["id", "=", externalId],
 			fields: VndbAcquisitionFields[type],
 			results: 1,
 		}),

@@ -19,7 +19,11 @@ describe("VNDB complete principal acquisition descriptors", () => {
 		] as const) {
 			const request = vndbAcquisitionRequest(family, id);
 			expect(request.url).toBe(`https://api.vndb.org/kana/${family}`);
-			expect(JSON.parse(request.body)).toMatchObject({ filters: ["id", "=", id], results: 1 });
+			expect(JSON.parse(request.body)).toMatchObject({
+				filters:
+					family === "staff" ? ["and", ["id", "=", id], ["ismain", "=", 1]] : ["id", "=", id],
+				results: 1,
+			});
 		}
 		expect(() => vndbAcquisitionRequest("../private", "v1")).toThrow();
 		expect(() => vndbAcquisitionRequest("staff", "v1")).toThrow();
