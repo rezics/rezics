@@ -3,6 +3,9 @@ import { Readable } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import { operationalCapacity } from "../src/services/database/schema/operational-durability";
+import { aggregateRoutingBucket } from "../src/services/events/envelope";
+import { catalogSourceRecordId } from "../src/services/catalog/source-record-key";
 import { users } from "../src/services/database/schema/auth";
 import { CatalogNameTables } from "../src/services/database/schema/catalog-names";
 import { softwareParticipationRevision } from "../src/services/database/schema/catalog-software-participation";
@@ -85,6 +88,23 @@ try {
 				.values({ name: "Participation fixture", email: `${crypto.randomUUID()}@example.invalid` })
 				.returning({ id: users.id });
 			assert.ok(actor);
+			for (const routingBucket of new Set(
+				[staff.id, vn.id, "c990001"].map((id) =>
+					aggregateRoutingBucket("source_record", catalogSourceRecordId(vndbSourceKey(id))),
+				),
+			))
+				await tx
+					.insert(operationalCapacity)
+					.values(
+						["event-outbox", "task-outbox", "task-intent", "receipt"].map((lane) => ({
+							routingBucket,
+							lane,
+							maximumRows: 1000n,
+							maximumBytes: 64_000_000n,
+						})),
+					)
+					.onConflictDoNothing();
+
 			await assert.rejects(
 				tx.transaction((inner) => adoptVndbVn(inner, actor.id, vnReceipt, vnBytes)),
 				/alias dependency/,
