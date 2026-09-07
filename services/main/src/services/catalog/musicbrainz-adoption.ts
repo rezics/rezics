@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import type { DatabaseTransaction } from "../database";
-import { entityCatalogProfile } from "../database/schema/catalog-entity";
+import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import {
 	musicRecording,
 	musicRelease,
@@ -10,19 +10,25 @@ import {
 	musicMediumIdentifier,
 	musicTrackIdentifier,
 } from "../database/schema/catalog-music";
-import { catalogSourceMappingClaim } from "../database/schema/catalog-source";
+import { bindCatalogSourceIdentity, acceptCatalogSourceInitialization } from "./source-bindings";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import { createCatalogIdentity, addCatalogName } from "./storage";
-import { beginMusicCredit, appendMusicCreditMembers, sealMusicCredit } from "./domains";
+import {
+	musicBrainzCreditWriter,
+	musicBrainzVocabulary,
+	projectMusicBrainzReleaseMetadata,
+	projectMusicBrainzDiscs,
+	projectMusicBrainzGroupTypes,
+	projectMusicBrainzIdentifiers,
+} from "./musicbrainz-native";
+import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { bindReferencedSourceIdentity } from "./source-references";
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
-import { appendSourceFieldObservation } from "./source-fields";
 import {
 	MusicBrainzCatalogContractSha256,
 	MusicBrainzReleaseSchema,
 	musicBrainzSourceKey,
-	type MusicBrainzCredit,
 } from "./musicbrainz";
 
 /** Release, media and track identity are projected separately; inline records retain parent evidence. */
@@ -55,51 +61,10 @@ export async function adoptMusicBrainzRelease(
 		observation,
 		"musicbrainz.release.1",
 	);
-	if (existing) return existing;
-	const creditCache = new Map<string, string>();
-	const creditId = async (members: MusicBrainzCredit | undefined, path: string) => {
-		if (!members?.length) return null;
-		const signature = JSON.stringify(
-			members.map((member) => [member.artist.id, member.name, member.joinphrase ?? ""]),
-		);
-		const cached = creditCache.get(signature);
-		if (cached) return cached;
-		const values = [];
-		for (const [position, member] of members.entries()) {
-			const shape =
-				member.artist.type === "Person"
-					? "person"
-					: member.artist.type === "Character"
-						? "character"
-						: member.artist.type
-							? "collective"
-							: "unresolved";
-			const person = await bindReferencedSourceIdentity(tx, actor, {
-				...musicBrainzSourceKey("artist", member.artist.id),
-				owner: "entity",
-				shape,
-				name: member.artist.name,
-				evidence: observation.referenceAt(`${path}/${position}/artist/id`),
-			});
-			if (person.created)
-				await tx.insert(entityCatalogProfile).values({ id: person.id, identityShape: shape });
-			values.push({
-				artist: person,
-				creditedName: member.name,
-				joinPhrase: member.joinphrase ?? "",
-			});
-		}
-		const id = await beginMusicCredit(
-			tx,
-			actor,
-			values.map((value) => value.creditedName + value.joinPhrase).join(""),
-		);
-		for (let offset = 0; offset < values.length; offset += 128)
-			await appendMusicCreditMembers(tx, actor, id, offset, values.slice(offset, offset + 128));
-		await sealMusicCredit(tx, actor, id, values.length);
-		creditCache.set(signature, id);
-		return id;
-	};
+	if (existing && existing.status !== "initialize_reference") return existing;
+	if (existing && existing.reference.owner !== "music")
+		throw new TypeError("MusicBrainz source resolves to another catalog owner");
+	const creditId = musicBrainzCreditWriter(tx, actor, observation);
 	let releaseGroupId: string | null = null;
 	if (record["release-group"]) {
 		const group = await bindReferencedSourceIdentity(tx, actor, {
@@ -109,14 +74,61 @@ export async function adoptMusicBrainzRelease(
 			name: record["release-group"].title,
 			evidence: observation.referenceAt("/release-group/id"),
 		});
-		if (group.created) await tx.insert(musicReleaseGroup).values({ id: group.id });
+		if (group.created) {
+			await tx.insert(musicReleaseGroup).values({
+				id: group.id,
+				artistCreditId: await creditId(
+					record["release-group"]["artist-credit"],
+					"/release-group/artist-credit",
+				),
+				primaryTypeRevisionId: await musicBrainzVocabulary(
+					tx,
+					"release_group_primary_type",
+					record["release-group"]["primary-type-id"],
+					record["release-group"]["primary-type"],
+				),
+			});
+			await projectMusicBrainzGroupTypes(tx, group.id, record["release-group"]);
+			await adoptMusicBrainzRelations(
+				tx,
+				actor,
+				group,
+				group.revision,
+				observation,
+				record["release-group"].relations ?? [],
+				"/release-group/relations",
+			);
+		}
 		releaseGroupId = group.id;
 	}
 	const releaseCredit = await creditId(record["artist-credit"], "/artist-credit");
-	const identity = await createCatalogIdentity(tx, { owner: "music", shape: "release" }, actor);
-	await tx
-		.insert(musicRelease)
-		.values({ id: identity.id, releaseGroupId, artistCreditId: releaseCredit });
+	const identity = existing
+		? { ...existing.reference, revision: existing.revision }
+		: await createCatalogIdentity(tx, { owner: "music", shape: "release" }, actor);
+	await tx.insert(musicRelease).values({
+		id: identity.id,
+		releaseGroupId,
+		artistCreditId: releaseCredit,
+		statusRevisionId: await musicBrainzVocabulary(
+			tx,
+			"release_status",
+			record["status-id"],
+			record.status,
+		),
+		packagingRevisionId: await musicBrainzVocabulary(
+			tx,
+			"release_packaging",
+			record["packaging-id"],
+			record.packaging,
+		),
+		languageTag: record["text-representation"]?.language
+			? canonicalizeContentLanguageTag(record["text-representation"].language)
+			: null,
+		scriptCode: record["text-representation"]?.script || null,
+		barcode: record.barcode ?? null,
+	});
+	await projectMusicBrainzReleaseMetadata(tx, actor, observation, identity.id, record);
+	if (record.asin) await projectMusicBrainzIdentifiers(tx, identity.id, "asin", [record.asin]);
 	let revision = identity.revision;
 	if (record.title)
 		revision = (
@@ -126,12 +138,13 @@ export async function adoptMusicBrainzRelease(
 				value: record.title,
 			})
 		).revision;
-	await tx.insert(CatalogFactTables.music.identifier).values({
-		ownerId: identity.id,
-		namespace: "musicbrainz.release",
-		value: record.id,
-		normalizedValue: record.id,
-	});
+	if (!existing)
+		await tx.insert(CatalogFactTables.music.identifier).values({
+			ownerId: identity.id,
+			namespace: "musicbrainz.release",
+			value: record.id,
+			normalizedValue: record.id,
+		});
 	for (const [mediumPosition, sourceMedium] of record.media.entries()) {
 		const [medium] = await tx
 			.insert(musicMedium)
@@ -140,17 +153,39 @@ export async function adoptMusicBrainzRelease(
 				position: sourceMedium.position,
 				name: sourceMedium.title ?? null,
 				sourceTrackCount: sourceMedium["track-count"] ?? null,
+				formatRevisionId: await musicBrainzVocabulary(
+					tx,
+					"medium_format",
+					sourceMedium["format-id"],
+					sourceMedium.format,
+				),
 			})
 			.returning({ id: musicMedium.id });
 		if (!medium) throw new Error("MusicBrainz medium insertion returned no row");
-		await tx.insert(musicMediumIdentifier).values({
-			releaseId: identity.id,
-			mediumId: medium.id,
-			namespace: "musicbrainz.medium",
-			value: sourceMedium.id,
-		});
-		for (const [trackPosition, sourceTrack] of sourceMedium.tracks.entries()) {
-			const path = `/media/${mediumPosition}/tracks/${trackPosition}`;
+		if (sourceMedium.id)
+			await tx.insert(musicMediumIdentifier).values({
+				releaseId: identity.id,
+				mediumId: medium.id,
+				namespace: "musicbrainz.medium",
+				value: sourceMedium.id,
+			});
+		await projectMusicBrainzDiscs(tx, identity.id, medium.id, sourceMedium.discs ?? []);
+		const tracks = [
+			...(sourceMedium.pregap
+				? [{ track: sourceMedium.pregap, path: `/media/${mediumPosition}/pregap`, data: false }]
+				: []),
+			...(sourceMedium.tracks ?? []).map((track, position) => ({
+				track,
+				path: `/media/${mediumPosition}/tracks/${position}`,
+				data: false,
+			})),
+			...(sourceMedium["data-tracks"] ?? []).map((track, position) => ({
+				track,
+				path: `/media/${mediumPosition}/data-tracks/${position}`,
+				data: true,
+			})),
+		];
+		for (const { track: sourceTrack, path, data } of tracks) {
 			const target = await bindReferencedSourceIdentity(tx, actor, {
 				...musicBrainzSourceKey("recording", sourceTrack.recording.id),
 				owner: "music",
@@ -158,7 +193,7 @@ export async function adoptMusicBrainzRelease(
 				name: sourceTrack.recording.title,
 				evidence: observation.referenceAt(`${path}/recording/id`),
 			});
-			if (target.created)
+			if (target.created) {
 				await tx.insert(musicRecording).values({
 					id: target.id,
 					lengthMilliseconds: sourceTrack.recording.length ?? null,
@@ -168,6 +203,22 @@ export async function adoptMusicBrainzRelease(
 						`${path}/recording/artist-credit`,
 					),
 				});
+				await projectMusicBrainzIdentifiers(
+					tx,
+					target.id,
+					"isrc",
+					sourceTrack.recording.isrcs ?? [],
+				);
+				await adoptMusicBrainzRelations(
+					tx,
+					actor,
+					target,
+					target.revision,
+					observation,
+					sourceTrack.recording.relations ?? [],
+					`${path}/recording/relations`,
+				);
+			}
 			const [track] = await tx
 				.insert(musicTrackOccurrence)
 				.values({
@@ -176,6 +227,7 @@ export async function adoptMusicBrainzRelease(
 					recordingId: target.id,
 					position: sourceTrack.position,
 					number: sourceTrack.number,
+					isDataTrack: data,
 					name: sourceTrack.title,
 					lengthMilliseconds: sourceTrack.length ?? null,
 					artistCreditId: await creditId(sourceTrack["artist-credit"], `${path}/artist-credit`),
@@ -190,27 +242,31 @@ export async function adoptMusicBrainzRelease(
 			});
 		}
 	}
-	for (const [field, value] of Object.entries(record))
-		revision = await appendSourceFieldObservation(tx, identity, actor, revision, {
-			namespace: "source.musicbrainz.release",
-			field,
-			value,
-			sourceRecordId: observation.record.id,
-			snapshotId: observation.snapshot.id,
-		});
-	const [claim] = await tx
-		.insert(catalogSourceMappingClaim)
-		.values({
+	revision = await adoptMusicBrainzRelations(
+		tx,
+		actor,
+		identity,
+		revision,
+		observation,
+		record.relations ?? [],
+	);
+	if (existing)
+		await acceptCatalogSourceInitialization(tx, actor, {
 			sourceRecordId: observation.record.id,
 			path: "/",
-			owner: "music",
-			observedSnapshotId: observation.snapshot.id,
-		})
-		.returning();
-	if (!claim) throw new Error("MusicBrainz source binding returned no claim");
-	await tx
-		.insert(CatalogFactTables.music.sourceBinding)
-		.values({ ownerId: identity.id, mappingKey: claim.mappingKey, mappingOwner: "music" });
+			snapshotId: observation.snapshot.id,
+			reference: identity,
+			expectedBaselineRevision: existing.revision,
+			finalRevision: revision,
+		});
+	else
+		await bindCatalogSourceIdentity(tx, actor, {
+			sourceRecordId: observation.record.id,
+			path: "/",
+			snapshotId: observation.snapshot.id,
+			reference: identity,
+		});
+
 	return {
 		status: "created" as const,
 		reference: { owner: "music" as const, id: identity.id },

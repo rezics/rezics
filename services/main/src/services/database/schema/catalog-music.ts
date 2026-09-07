@@ -291,7 +291,7 @@ export const musicDiscToc = pgTable(
 		index("music_disc_toc_disc_id_idx").on(table.discId, table.id),
 		check(
 			"music_disc_toc_count_check",
-			sql`${table.trackCount} >= 0 and ${table.leadoutOffset} between 0 and 9007199254740991`,
+			sql`${table.trackCount} between 1 and 99 and ${table.leadoutOffset} between 0 and 9007199254740991`,
 		),
 	],
 );
@@ -309,7 +309,108 @@ export const musicDiscTocOffset = pgTable(
 		primaryKey({ columns: [table.tocId, table.position] }),
 		check(
 			"music_disc_toc_offset_check",
-			sql`${table.position} >= 0 and ${table.offset} between 0 and 9007199254740991`,
+			sql`${table.position} between 0 and 98 and ${table.offset} between 0 and 9007199254740991`,
+		),
+	],
+);
+
+/** Immutable reviewed applicability policy for one attribute definition revision. */
+export const musicMediumAttributePolicy = pgTable(
+	"music_medium_attribute_policy",
+	{
+		definitionRevisionId: uuid()
+			.primaryKey()
+			.references(() => catalogDefinitionRevision.id, { onDelete: "restrict" }),
+		valueMode: text().$type<"text" | "vocabulary">().notNull(),
+	},
+	(table) => [
+		check(
+			"music_medium_attribute_policy_mode_check",
+			sql`${table.valueMode} in ('text', 'vocabulary')`,
+		),
+	],
+);
+
+export const musicMediumAttributeAllowedFormat = pgTable(
+	"music_medium_attribute_allowed_format",
+	{
+		definitionRevisionId: uuid()
+			.notNull()
+			.references(() => musicMediumAttributePolicy.definitionRevisionId, { onDelete: "restrict" }),
+		formatRevisionId: uuid()
+			.notNull()
+			.references(() => catalogDefinitionRevision.id, { onDelete: "restrict" }),
+	},
+	(table) => [primaryKey({ columns: [table.definitionRevisionId, table.formatRevisionId] })],
+);
+
+/** Enumerated values may have stricter format applicability than their attribute family. */
+export const musicMediumAttributeAllowedValueFormat = pgTable(
+	"music_medium_attribute_allowed_value_format",
+	{
+		definitionRevisionId: uuid().notNull(),
+		valueRevisionId: uuid()
+			.notNull()
+			.references(() => catalogDefinitionRevision.id, { onDelete: "restrict" }),
+		formatRevisionId: uuid().notNull(),
+	},
+	(table) => [
+		primaryKey({
+			columns: [table.definitionRevisionId, table.valueRevisionId, table.formatRevisionId],
+		}),
+		foreignKey({
+			name: "music_medium_attribute_allowed_value_format_policy_fk",
+			columns: [table.definitionRevisionId, table.formatRevisionId],
+			foreignColumns: [
+				musicMediumAttributeAllowedFormat.definitionRevisionId,
+				musicMediumAttributeAllowedFormat.formatRevisionId,
+			],
+		}).onDelete("restrict"),
+	],
+);
+
+/** Medium characteristics are governed values on the carrier occurrence. */
+export const musicMediumAttribute = pgTable(
+	"music_medium_attribute",
+	{
+		releaseId: uuid().notNull(),
+		mediumId: uuid().notNull(),
+		id: uuid().default(sql`uuidv7()`).notNull(),
+		definitionRevisionId: uuid()
+			.notNull()
+			.references(() => catalogDefinitionRevision.id, { onDelete: "restrict" }),
+		valueRevisionId: uuid().references(() => catalogDefinitionRevision.id, {
+			onDelete: "restrict",
+		}),
+		textValue: text(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.releaseId, table.mediumId, table.id] }),
+		foreignKey({
+			name: "music_medium_attribute_policy_fk",
+			columns: [table.definitionRevisionId],
+			foreignColumns: [musicMediumAttributePolicy.definitionRevisionId],
+		}).onDelete("restrict"),
+		foreignKey({
+			name: "music_medium_attribute_medium_fk",
+			columns: [table.releaseId, table.mediumId],
+			foreignColumns: [musicMedium.releaseId, musicMedium.id],
+		}).onDelete("restrict"),
+		index("music_medium_attribute_definition_idx").on(
+			table.definitionRevisionId,
+			table.releaseId,
+			table.mediumId,
+			table.id,
+		),
+		index("music_medium_attribute_value_idx").on(
+			table.valueRevisionId,
+			table.releaseId,
+			table.mediumId,
+			table.id,
+		),
+		check(
+			"music_medium_attribute_value_check",
+			sql`(${table.valueRevisionId} is not null) <> (${table.textValue} is not null)`,
 		),
 	],
 );
