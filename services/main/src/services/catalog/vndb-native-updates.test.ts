@@ -1,12 +1,24 @@
 import { describe, expect, it } from "vitest";
 import { mergeVndbOwnedValues } from "./vndb-release-update";
-import { vndbSemanticKeys } from "./vndb-semantics";
+import { vndbSemanticKeys, vndbSemanticSupportId } from "./vndb-semantics";
 import { planVndbSemantics } from "./vndb-semantics-contracts";
 import { planVndbDumpRelease, planVndbDumpReleaseSemantics } from "./vndb-dump";
 import { vndbReleaseComponentId } from "./vndb-release";
 import { planVndbNativeNames } from "./vndb-names-update";
 
 describe("VNDB native source deltas", () => {
+	it("separates semantic evidence for identical bytes under different native correspondence epochs", () => {
+		const document = {
+			record: { id: "00000000-0000-4000-8000-000000000001" },
+			snapshot: { id: "00000000-0000-4000-8000-000000000002" },
+		};
+		const scope = { mappingKey: "00000000-0000-4000-8000-000000000003", correspondenceRevision: 1 };
+		const original = vndbSemanticSupportId(document, "fact/example/0", scope);
+		expect(original).toBe(vndbSemanticSupportId(document, "fact/example/0", { ...scope }));
+		expect(original).not.toBe(
+			vndbSemanticSupportId(document, "fact/example/0", { ...scope, correspondenceRevision: 4 }),
+		);
+	});
 	it("changes only source-modified fields and rejects local conflicts", () => {
 		expect(
 			mergeVndbOwnedValues(

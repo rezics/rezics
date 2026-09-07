@@ -172,6 +172,7 @@ export async function appendVndbParticipation(
 		);
 		const participation = await createSoftwareParticipation(tx, content, actor, values);
 		await tx.insert(softwareParticipationCreditSourceOccurrence).values({
+			...scope,
 			sourceRecordId: document.record.id,
 			snapshotId: document.snapshot.id,
 			sourcePath: sourcePath(item.path),

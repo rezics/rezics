@@ -1,3 +1,7 @@
+import {
+	resolveCatalogSourceChildCorrespondence,
+	type CatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 import { createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { and, desc, eq } from "drizzle-orm";
@@ -50,7 +54,7 @@ export type VndbPreparedSnapshot = {
 	receipt: CatalogSourceReceipt;
 	bytes: Uint8Array;
 };
-type Context = Parameters<CatalogSourceNativeWriter>[1];
+type Context = Parameters<CatalogSourceNativeWriter>[1] & CatalogSourceChildCorrespondence;
 
 /** @internal Three-way field merge retains unrelated native corrections and rejects genuine source/local conflicts. */
 export function mergeVndbOwnedValues(before: unknown, after: unknown, current: unknown) {
@@ -177,6 +181,8 @@ async function sourceComponent(
 		.where(
 			and(
 				eq(t.sourceRecordId, context.sourceRecordId),
+				eq(t.mappingKey, context.mappingKey),
+				eq(t.correspondenceRevision, context.correspondenceRevision),
 				eq(t.snapshotId, snapshotId),
 				eq(t.ownerId, context.reference.id),
 				eq(t.component, kind),
@@ -206,6 +212,8 @@ async function recordComponent(
 	);
 	if (existing) return;
 	await tx.insert(t).values({
+		mappingKey: context.mappingKey,
+		correspondenceRevision: context.correspondenceRevision,
 		sourceRecordId: context.sourceRecordId,
 		snapshotId: context.snapshotId,
 		ownerId: context.reference.id,
@@ -229,7 +237,10 @@ export function createVndbReleaseNativeWriter(input: {
 		);
 	if (before && before.record.id !== after.record.id)
 		throw new TypeError("VNDB delta crosses release identities");
-	return async (tx, context) => {
+	return async (tx, inputContext) => {
+		const scope = await resolveCatalogSourceChildCorrespondence(tx, inputContext.sourceRecordId);
+		if (scope.mappingKey !== inputContext.mappingKey) throw new Error("VNDB root mapping differs");
+		const context = { ...inputContext, ...scope };
 		if (
 			context.mappingVersion !== "vndb.release.2" ||
 			context.snapshotId !== after.snapshotId ||

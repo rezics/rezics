@@ -20,6 +20,9 @@ import {
 import { VndbCatalogContractSha256, vndbSourceKey } from "../src/services/catalog/vndb";
 import { adoptVndbVn } from "../src/services/catalog/vndb-adoption";
 import { createNativeSoftwareContent } from "../src/services/catalog/software";
+import { recordVndbSoftwareScalarOccurrence } from "../src/services/catalog/vndb-release";
+import { softwareRecordSourceOccurrence } from "../src/services/database/schema/catalog-software-source";
+import { loadCatalogSourceDocument } from "../src/services/catalog/source-observations";
 import { createSoftwareParticipationContext } from "../src/services/catalog/software-contexts";
 import {
 	addCatalogName,
@@ -95,6 +98,13 @@ try {
 				const adopted = await adoptVndbVn(tx, actor.id, receipt, bytes);
 				if (adopted.status !== "created") throw new Error("Expected initial VN creation");
 				const first = adopted.reference;
+				const document = await loadCatalogSourceDocument(
+					tx,
+					sourceRecordId,
+					adopted.snapshotId,
+					receipt,
+					bytes,
+				);
 				const secondIdentity = await createNativeSoftwareContent(tx, actor.id, {
 					name: { value: "Second target", languageTag: null },
 				});
@@ -136,6 +146,7 @@ try {
 				assertions++;
 				const writeChildren = async (reference: typeof first) => {
 					const scope = await resolveCatalogSourceChildCorrespondence(tx, sourceRecordId);
+					await recordVndbSoftwareScalarOccurrence(tx, document, reference.id, "/");
 					const native = await loadCatalogIdentity(tx, reference, actor.id, true);
 					const name = await addCatalogName(tx, reference, actor.id, native.revision, {
 						value: record.title,
@@ -214,6 +225,16 @@ try {
 				assert.equal(
 					(await tx.select().from(contexts).where(eq(contexts.sourceRecordId, sourceRecordId)))
 						.length,
+					4,
+				);
+				assertions++;
+				assert.equal(
+					(
+						await tx
+							.select()
+							.from(softwareRecordSourceOccurrence)
+							.where(eq(softwareRecordSourceOccurrence.sourceRecordId, sourceRecordId))
+					).length,
 					4,
 				);
 				assertions++;

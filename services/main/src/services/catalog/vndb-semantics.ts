@@ -6,6 +6,8 @@ import {
 import { initializeVndbNativeNames } from "./vndb-names-update";
 import {
 	prepareCatalogSourceChildCorrespondence,
+	resolveCatalogSourceChildCorrespondence,
+	type CatalogSourceChildCorrespondence,
 	sealCatalogSourceChildCorrespondence,
 } from "./source-child-correspondence";
 import { and, eq } from "drizzle-orm";
@@ -245,6 +247,7 @@ async function appendFact(
 	definitionId: string,
 	document: Document,
 	sourceKey: string,
+	scope: CatalogSourceChildCorrespondence,
 	replacement?: { semanticId: string; headVersion: number },
 ) {
 	const fact = await beginCatalogFact(tx, reference, actor, revision, definitionId, {
@@ -268,7 +271,7 @@ async function appendFact(
 		appended.lastNodePosition,
 	);
 	await tx.insert(CatalogFactTables[reference.owner].support).values({
-		id: vndbSemanticSupportId(document, sourceKey),
+		id: vndbSemanticSupportId(document, sourceKey, scope),
 		ownerId: reference.id,
 		factId: fact.id,
 		sourceRecordId: document.record.id,
@@ -326,6 +329,7 @@ export async function appendVndbSemanticPlan(
 	} = {},
 ) {
 	if (!plan.facts.length && !plan.relations.length) return revision;
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, document.record.id);
 	await loadCatalogIdentity(tx, reference, actor, true);
 	const { definitions, roles } = await semanticDefinitions(tx);
 	const keys = vndbSemanticKeys(plan);
@@ -333,7 +337,7 @@ export async function appendVndbSemanticPlan(
 		const reused = options.reuse?.get(key);
 		if (reused) {
 			if (reused.kind !== "fact") throw new TypeError("Semantic reuse family changed");
-			await reuseVndbSemanticSupport(tx, reference, document, key, item.path, reused);
+			await reuseVndbSemanticSupport(tx, reference, document, key, item.path, reused, scope);
 			return reused.id;
 		}
 		const replacement = options.replacements?.get(key);
@@ -346,6 +350,7 @@ export async function appendVndbSemanticPlan(
 			mustGet(definitions, `${item.namespace}:${item.key}`),
 			document,
 			key,
+			scope,
 			replacement,
 		);
 		revision = created.revision;
@@ -386,7 +391,15 @@ export async function appendVndbSemanticPlan(
 		const reused = options.reuse?.get(relationKey);
 		if (reused) {
 			if (reused.kind !== "relation") throw new TypeError("Semantic reuse family changed");
-			await reuseVndbSemanticSupport(tx, reference, document, relationKey, relation.path, reused);
+			await reuseVndbSemanticSupport(
+				tx,
+				reference,
+				document,
+				relationKey,
+				relation.path,
+				reused,
+				scope,
+			);
 			continue;
 		}
 		const participants = [{ roleRevisionId: mustGet(roles, "subject"), target: reference }];
@@ -455,7 +468,7 @@ export async function appendVndbSemanticPlan(
 			afterRevision: created.headVersion,
 		});
 		await tx.insert(CatalogFactTables[reference.owner].support).values({
-			id: vndbSemanticSupportId(document, relationKey),
+			id: vndbSemanticSupportId(document, relationKey, scope),
 			ownerId: reference.id,
 			relationId: created.id,
 			sourceRecordId: document.record.id,
@@ -785,11 +798,14 @@ export function vndbSemanticKeys(plan: VndbSemanticPlan) {
 
 /** @internal Exact per-snapshot source support identity avoids ambiguous repeated qualifiers. */
 export function vndbSemanticSupportId(
-	document: Pick<Document, "record" | "snapshot">,
+	document: { record: Pick<Document["record"], "id">; snapshot: Pick<Document["snapshot"], "id"> },
 	key: string,
+	scope: CatalogSourceChildCorrespondence,
 ) {
 	const bytes = createHash("sha256")
-		.update(`vndb-semantic-support\n${document.record.id}\n${document.snapshot.id}\n${key}`)
+		.update(
+			`vndb-semantic-support\n${document.record.id}\n${document.snapshot.id}\n${scope.mappingKey}\n${scope.correspondenceRevision}\n${key}`,
+		)
 		.digest();
 	bytes[6] = ((bytes[6] ?? 0) & 15) | 128;
 	bytes[8] = ((bytes[8] ?? 0) & 63) | 128;
@@ -804,9 +820,10 @@ async function reuseVndbSemanticSupport(
 	key: string,
 	sourcePath: string,
 	value: { id: string; kind: "fact" | "relation" },
+	scope: CatalogSourceChildCorrespondence,
 ) {
 	const table = CatalogFactTables[reference.owner].support;
-	const id = vndbSemanticSupportId(document, key);
+	const id = vndbSemanticSupportId(document, key, scope);
 	await tx
 		.insert(table)
 		.values({

@@ -96,19 +96,21 @@ try {
 					name: { value: "Application fixture", languageTag: null },
 					details: { description: "initial" },
 				});
-				await tx.insert(softwareRecordSourceOccurrence).values({
-					sourceRecordId: first.record.id,
-					snapshotId: first.snapshot.id,
-					ownerId: native.id,
-					revision: 1,
-					sourcePath: "/description",
-				});
 				const binding = await bindCatalogSourceIdentity(tx, actor.id, {
 					mappingVersion: "native.fixture.1",
 					sourceRecordId: first.record.id,
 					path: "/",
 					snapshotId: first.snapshot.id,
 					reference: native,
+				});
+				await tx.insert(softwareRecordSourceOccurrence).values({
+					mappingKey: binding.mappingKey,
+					correspondenceRevision: 1,
+					sourceRecordId: first.record.id,
+					snapshotId: first.snapshot.id,
+					ownerId: native.id,
+					revision: 1,
+					sourcePath: "/description",
 				});
 				const second = await recordCatalogSourceObservation(
 					tx,
@@ -150,6 +152,8 @@ try {
 							{ description: "updated" },
 						);
 						await nested.insert(softwareRecordSourceOccurrence).values({
+							mappingKey: binding.mappingKey,
+							correspondenceRevision: 1,
 							sourceRecordId: first.record.id,
 							snapshotId: second.snapshot.id,
 							ownerId: native.id,

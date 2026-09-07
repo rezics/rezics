@@ -1,3 +1,4 @@
+import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { isDeepStrictEqual } from "node:util";
 import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
@@ -85,6 +86,7 @@ export async function reconcileVndbParticipation(
 		contexts: ReadonlyMap<string, VndbNativeContext>;
 	},
 ) {
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, after.document.record.id);
 	const oldRows = before.record ? planVndbParticipation(before.record) : [],
 		nextRows = planVndbParticipation(after.record);
 	const counts = new Map<string, number>();
@@ -114,6 +116,8 @@ export async function reconcileVndbParticipation(
 			.where(
 				and(
 					eq(occurrences.sourceRecordId, document.record.id),
+					eq(occurrences.mappingKey, scope.mappingKey),
+					eq(occurrences.correspondenceRevision, scope.correspondenceRevision),
 					eq(occurrences.snapshotId, document.snapshot.id),
 					eq(occurrences.contentId, content.id),
 				),
@@ -227,6 +231,7 @@ export async function reconcileVndbParticipation(
 			);
 		if (!incoming)
 			sourceWrites.push({
+				...scope,
 				sourceRecordId: after.document.record.id,
 				snapshotId: after.document.snapshot.id,
 				sourcePath: item.path,

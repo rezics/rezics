@@ -1,3 +1,4 @@
+import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -227,6 +228,7 @@ export async function adoptVndbDumpRelease(
 		(path) => vndbDumpReleaseSourcePath(plan.document, path),
 	);
 	if (result.status !== "created") return result;
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, document.record.id);
 	let revision = result.revision;
 	const animationFields = {
 		story_sprite: "ani_story_sp",
@@ -238,17 +240,16 @@ export async function adoptVndbDumpRelease(
 	for (const animation of plan.animationContexts) {
 		revision = (await setSoftwareAnimation(tx, result.reference, actor, revision, animation))
 			.revision;
-		await tx
-			.insert(softwareComponentSourceOccurrence)
-			.values({
-				sourceRecordId: document.record.id,
-				snapshotId: document.snapshot.id,
-				ownerId: result.reference.id,
-				component: "animation",
-				componentKey: animation.context,
-				revision,
-				sourcePath: `/release/${animationFields[animation.context]}`,
-			});
+		await tx.insert(softwareComponentSourceOccurrence).values({
+			...scope,
+			sourceRecordId: document.record.id,
+			snapshotId: document.snapshot.id,
+			ownerId: result.reference.id,
+			component: "animation",
+			componentKey: animation.context,
+			revision,
+			sourcePath: `/release/${animationFields[animation.context]}`,
+		});
 	}
 	revision = await appendVndbSemanticPlan(
 		tx,

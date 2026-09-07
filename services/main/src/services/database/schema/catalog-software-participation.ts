@@ -14,7 +14,7 @@ import { users } from "./auth";
 import { createCreatedAtColumn } from "./columns";
 import { catalogDefinitionRevision, entityIdentity } from "./catalog-identity";
 import { CatalogNameTables } from "./catalog-names";
-import { catalogSourceSnapshot } from "./catalog-source";
+import { catalogSourceSnapshot, catalogSourceBindingRevision } from "./catalog-source";
 import { softwareContent, softwareParticipationContextRevision } from "./catalog-software";
 
 /** Content-local participation is a credited role, not a software version or release. */
@@ -128,6 +128,8 @@ export const softwareParticipationCreditSourceOccurrence = pgTable(
 	"software_participation_credit_source_occurrence",
 	{
 		sourceRecordId: uuid().notNull(),
+		mappingKey: uuid().notNull(),
+		correspondenceRevision: bigint({ mode: "number" }).notNull(),
 		snapshotId: uuid().notNull(),
 		sourcePath: text().notNull(),
 		contentId: uuid().notNull(),
@@ -135,7 +137,24 @@ export const softwareParticipationCreditSourceOccurrence = pgTable(
 		participationRevision: bigint({ mode: "number" }).notNull(),
 	},
 	(t): PgTableExtraConfigValue[] => [
-		primaryKey({ columns: [t.sourceRecordId, t.snapshotId, t.sourcePath] }),
+		primaryKey({
+			columns: [
+				t.sourceRecordId,
+				t.mappingKey,
+				t.correspondenceRevision,
+				t.snapshotId,
+				t.sourcePath,
+			],
+		}),
+		foreignKey({
+			name: "software_participation_credit_correspondence_fk",
+			columns: [t.sourceRecordId, t.mappingKey, t.correspondenceRevision],
+			foreignColumns: [
+				catalogSourceBindingRevision.sourceRecordId,
+				catalogSourceBindingRevision.mappingKey,
+				catalogSourceBindingRevision.revision,
+			],
+		}).onDelete("restrict"),
 		foreignKey({
 			name: "software_participation_credit_source_fk",
 			columns: [t.sourceRecordId, t.snapshotId],

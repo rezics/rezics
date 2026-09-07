@@ -1,3 +1,7 @@
+import {
+	resolveCatalogSourceChildCorrespondence,
+	type CatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 import { isDeepStrictEqual } from "node:util";
 import { and, eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
@@ -61,6 +65,7 @@ async function sourceOrigin(
 	document: Document,
 	sourceKey: string,
 	kind: "fact" | "relation",
+	scope: CatalogSourceChildCorrespondence,
 ): Promise<Origin | null> {
 	const t = CatalogFactTables[reference.owner];
 	const value = kind === "fact" ? t.fact : t.relation;
@@ -72,7 +77,7 @@ async function sourceOrigin(
 		.where(
 			and(
 				eq(t.support.ownerId, reference.id),
-				eq(t.support.id, vndbSemanticSupportId(document, sourceKey)),
+				eq(t.support.id, vndbSemanticSupportId(document, sourceKey, scope)),
 				eq(t.support.sourceRecordId, document.record.id),
 				eq(t.support.snapshotId, document.snapshot.id),
 			),
@@ -93,6 +98,7 @@ export async function reconcileVndbSemanticPlan(
 	before: { plan: VndbSemanticPlan; document: Document },
 	after: { plan: VndbSemanticPlan; document: Document },
 ) {
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, after.document.record.id);
 	const previous = units(before.plan),
 		next = units(after.plan);
 	const changed =
@@ -128,14 +134,16 @@ export async function reconcileVndbSemanticPlan(
 	};
 	for (const [key, unit] of next) {
 		const old = previous.get(key);
-		const prior = old ? await sourceOrigin(tx, reference, before.document, key, old.kind) : null;
+		const prior = old
+			? await sourceOrigin(tx, reference, before.document, key, old.kind, scope)
+			: null;
 		if (old && !prior)
 			throw new Error("Previous VNDB semantic occurrence is missing its native evidence");
 		if (prior && isDeepStrictEqual(old, unit)) {
 			reuse.set(key, prior);
 			continue;
 		}
-		const current = await sourceOrigin(tx, reference, after.document, key, unit.kind);
+		const current = await sourceOrigin(tx, reference, after.document, key, unit.kind, scope);
 		if (current) {
 			if (prior && prior.semanticId !== current.semanticId)
 				throw new CatalogRevisionConflict(
@@ -180,7 +188,7 @@ export async function reconcileVndbSemanticPlan(
 		.filter(([key]) => !next.has(key))
 		.sort((a, b) => (a[1].kind === "relation" ? 0 : 1) - (b[1].kind === "relation" ? 0 : 1));
 	for (const [key, unit] of removed) {
-		const prior = await sourceOrigin(tx, reference, before.document, key, unit.kind);
+		const prior = await sourceOrigin(tx, reference, before.document, key, unit.kind, scope);
 		if (!prior) throw new Error("Removed VNDB semantic occurrence has no native evidence");
 		const expected = await expectedHead(prior);
 		const result = await transitionCatalogSemanticState(

@@ -1,5 +1,6 @@
 import {
 	prepareCatalogSourceChildCorrespondence,
+	resolveCatalogSourceChildCorrespondence,
 	sealCatalogSourceChildCorrespondence,
 } from "./source-child-correspondence";
 import { and, desc, eq } from "drizzle-orm";
@@ -136,7 +137,7 @@ export async function writeVndbReleaseProjection(
 				name: { value: record.title, languageTag: null },
 				details,
 			});
-	await prepareCatalogSourceChildCorrespondence(tx, actor, {
+	const childScope = await prepareCatalogSourceChildCorrespondence(tx, actor, {
 		sourceRecordId: document.record.id,
 		snapshotId: document.snapshot.id,
 		reference: release,
@@ -174,6 +175,7 @@ export async function writeVndbReleaseProjection(
 		);
 		revision = put.revision;
 		await tx.insert(softwareComponentSourceOccurrence).values({
+			...childScope,
 			sourceRecordId: document.record.id,
 			snapshotId: document.snapshot.id,
 			ownerId: release.id,
@@ -342,6 +344,7 @@ export async function recordVndbSoftwareScalarOccurrence(
 	ownerId: string,
 	sourcePath: string,
 ) {
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, document.record.id);
 	const t = softwareRecordRevision;
 	const [current] = await tx
 		.select({ revision: t.revision })
@@ -353,6 +356,7 @@ export async function recordVndbSoftwareScalarOccurrence(
 	await tx
 		.insert(softwareRecordSourceOccurrence)
 		.values({
+			...scope,
 			sourceRecordId: document.record.id,
 			snapshotId: document.snapshot.id,
 			ownerId,
@@ -367,6 +371,8 @@ export async function recordVndbSoftwareScalarOccurrence(
 		.where(
 			and(
 				eq(o.sourceRecordId, document.record.id),
+				eq(o.mappingKey, scope.mappingKey),
+				eq(o.correspondenceRevision, scope.correspondenceRevision),
 				eq(o.snapshotId, document.snapshot.id),
 				eq(o.ownerId, ownerId),
 			),
