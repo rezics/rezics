@@ -25,7 +25,9 @@ export async function bindReferencedSourceIdentity(
 		readonly name?: string;
 		readonly evidence: CatalogSourceReferenceEvidence;
 		/** Initial owner state must be completed before sealing the pristine-source baseline. */
-		readonly initialize?: (reference: Readonly<CatalogReference & { revision: number }>) => Promise<CatalogReference & { revision: number }>;
+		readonly initialize?: (
+			reference: Readonly<CatalogReference & { revision: number }>,
+		) => Promise<CatalogReference & { revision: number }>;
 	},
 ) {
 	const evidence = requireCatalogSourceReferenceEvidence(input.evidence);
@@ -77,12 +79,16 @@ export async function bindReferencedSourceIdentity(
 			})
 		).revision;
 	if (input.initialize) {
-		const initialized = await input.initialize(Object.freeze({ owner: identity.owner, id: identity.id, revision }));
+		const initialized = await input.initialize(
+			Object.freeze({ owner: identity.owner, id: identity.id, revision }),
+		);
 		const returned = CatalogReferenceSchema.parse({ owner: initialized.owner, id: initialized.id });
-		if (returned.owner !== identity.owner || returned.id !== identity.id) throw new TypeError("Source initializer returned another native identity");
+		if (returned.owner !== identity.owner || returned.id !== identity.id)
+			throw new TypeError("Source initializer returned another native identity");
 		z.number().int().min(revision).max(Number.MAX_SAFE_INTEGER).parse(initialized.revision);
 		const current = await loadCatalogIdentity(tx, identity, actor, true);
-		if (current.revision !== initialized.revision) throw new TypeError("Source initializer did not commit its declared native revision");
+		if (current.revision !== initialized.revision)
+			throw new TypeError("Source initializer did not commit its declared native revision");
 		revision = initialized.revision;
 	}
 	const tables = CatalogFactTables[input.owner];

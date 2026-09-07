@@ -3,7 +3,7 @@ import type { DatabaseTransaction } from "../database";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import type { CatalogReference } from "./contracts";
 import { createEntity } from "./entities";
-import { createReference, initializeReferenceProfile, appendAreaCodes } from "./references";
+import { createReference, appendAreaCodes } from "./references";
 import { createGrouping, assignGroupingClass } from "./grouping";
 import { addCatalogIdentifier } from "./identifiers";
 import {
@@ -14,7 +14,7 @@ import {
 	sealCatalogFact,
 } from "./storage";
 import { catalogValueNodes } from "./value-nodes";
-import { bindReferencedSourceIdentity } from "./source-references";
+import { musicBrainzAreaReference } from "./musicbrainz-native";
 import { bindCatalogSourceIdentity } from "./source-bindings";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { recordCatalogSourceDocument, type CatalogSourceReceipt } from "./source-observations";
@@ -55,22 +55,7 @@ async function areaReference(
 	path: string,
 ) {
 	if (!area) return null;
-	const identity = await bindReferencedSourceIdentity(tx, actor, {
-		source: "musicbrainz",
-		objectType: "area",
-		externalId: area.id,
-		owner: "reference",
-		shape: "area",
-		name: area.name,
-		evidence: observation.referenceAt(`${path}/id`),
-	});
-	if (identity.created) {
-		const profile = await initializeReferenceProfile(tx, identity, actor, identity.revision, {
-			shape: "area",
-			typeRevisionId: await vocabulary(tx, "area_type", area["type-id"], area.type),
-		});
-		await areaCodes(tx, actor, identity, profile.revision, area);
-	}
+	const identity = await musicBrainzAreaReference(tx, actor, observation, area, path);
 	return identity.id;
 }
 

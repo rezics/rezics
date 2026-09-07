@@ -7,6 +7,11 @@ import { users } from "../src/services/database/schema/auth";
 import { operationalCapacity } from "../src/services/database/schema/operational-durability";
 import { catalogSourceMappingClaim } from "../src/services/database/schema/catalog-source";
 import { musicTrackOccurrence } from "../src/services/database/schema/catalog-music";
+import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
+import { entityCatalogProfileRevision } from "../src/services/database/schema/catalog-entity";
+import { referenceCatalogProfileRevision } from "../src/services/database/schema/catalog-reference";
+import { readEntityProfile } from "../src/services/catalog/entities";
+import { readReferenceProfile } from "../src/services/catalog/references";
 import {
 	MusicBrainzCatalogContractSha256,
 	type MusicBrainzRelease,
@@ -40,6 +45,7 @@ import { readMusicTracks } from "../src/services/catalog/domains";
 import { readCatalogSourceApplication } from "../src/services/catalog/source-applications";
 import { listCatalogNames, readCatalogFactNodes } from "../src/services/catalog/storage";
 import { listCatalogFacts } from "../src/services/catalog/semantic-history";
+import { bindReferencedSourceIdentity } from "../src/services/catalog/source-references";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
@@ -100,12 +106,27 @@ try {
 			const recordingId = crypto.randomUUID();
 			const originalMediumId = crypto.randomUUID();
 			const addedTrackId = crypto.randomUUID();
+			const artistId = crypto.randomUUID();
+			const labelId = crypto.randomUUID();
+			const areaId = crypto.randomUUID();
 			const previous: MusicBrainzRelease = {
 				id: sourceKey.externalId,
 				title: "Album before",
 				barcode: "111",
 				...(testNames ? { annotation: "First annotation" } : {}),
 				aliases: [{ name: "Alias before", locale: "en", primary: true }],
+				"artist-credit": [
+					{
+						artist: {
+							id: artistId,
+							name: "Fixture artist",
+							type: "Person",
+							aliases: [{ name: "Artist alias", locale: "en" }],
+						},
+						name: "Fixture artist",
+						joinphrase: "",
+					},
+				],
 				media: [
 					{
 						id: originalMediumId,
@@ -129,8 +150,36 @@ try {
 						],
 					},
 				],
-				"label-info": [{ "catalog-number": "CAT-1" }, { "catalog-number": "CAT-1" }],
-				"release-events": [{ date: "2020-02" }, { date: "2020-02" }],
+				"label-info": [
+					{
+						"catalog-number": "CAT-1",
+						label: {
+							id: labelId,
+							name: "Fixture label",
+							type: "Original Production",
+							"label-code": 123,
+						},
+					},
+					{
+						"catalog-number": "CAT-1",
+						label: {
+							id: labelId,
+							name: "Fixture label",
+							type: "Original Production",
+							"label-code": 123,
+						},
+					},
+				],
+				"release-events": [
+					{
+						date: "2020-02",
+						area: { id: areaId, name: "Fixture area", type: "Country", "iso-3166-1-codes": ["JP"] },
+					},
+					{
+						date: "2020-02",
+						area: { id: areaId, name: "Fixture area", type: "Country", "iso-3166-1-codes": ["JP"] },
+					},
+				],
 			};
 			const originalBytes = Buffer.from(JSON.stringify(previous));
 			const originalReceipt = await storeCatalogSourcePayload(
@@ -140,10 +189,74 @@ try {
 				null,
 				archive,
 			);
+			const initialDocument = await recordCatalogSourceDocument(tx, originalReceipt, originalBytes);
+			for (const wrong of ["identity", "revision"] as const)
+				await assert.rejects(
+					tx.transaction(async (inner) =>
+						bindReferencedSourceIdentity(inner, actor.id, {
+							source: "musicbrainz",
+							objectType: "artist",
+							externalId: artistId,
+							owner: "entity",
+							shape: "unresolved",
+							evidence: initialDocument.referenceAt("/artist-credit/0/artist/id"),
+							initialize: async (created) => ({
+								...created,
+								...(wrong === "identity"
+									? { id: crypto.randomUUID() }
+									: { revision: created.revision + 1 }),
+							}),
+						}),
+					),
+					wrong === "identity" ? /another native identity/ : /declared native revision/,
+				);
 			const adopted = await adoptMusicBrainzRelease(tx, actor.id, originalReceipt, originalBytes);
 			assert.equal(adopted.status, "created");
 			assert.ok("reference" in adopted);
 			const reference = adopted.reference;
+			for (const [objectType, externalId, owner] of [
+				["artist", artistId, "entity"],
+				["label", labelId, "entity"],
+				["area", areaId, "reference"],
+			] as const) {
+				const nestedSourceId = catalogSourceRecordId({
+					source: "musicbrainz",
+					objectType,
+					externalId,
+				});
+				const bindings = CatalogFactTables[owner].sourceBinding;
+				const [nested] = await tx
+					.select({
+						ownerId: bindings.ownerId,
+						baseline: catalogSourceMappingClaim.baselineTargetRevision,
+					})
+					.from(catalogSourceMappingClaim)
+					.innerJoin(
+						bindings,
+						and(
+							eq(bindings.sourceRecordId, catalogSourceMappingClaim.sourceRecordId),
+							eq(bindings.mappingKey, catalogSourceMappingClaim.mappingKey),
+						),
+					)
+					.where(eq(catalogSourceMappingClaim.sourceRecordId, nestedSourceId))
+					.limit(1);
+				assert.ok(nested);
+				const profile =
+					owner === "entity"
+						? await readEntityProfile(tx, { owner, id: nested.ownerId }, actor.id)
+						: await readReferenceProfile(tx, { owner, id: nested.ownerId }, actor.id);
+				assert.equal(
+					nested.baseline,
+					profile.revision,
+					"Reference baseline must include canonical profile/alias/code initialization",
+				);
+				const history =
+					owner === "entity" ? entityCatalogProfileRevision : referenceCatalogProfileRevision;
+				assert.equal(
+					(await tx.select().from(history).where(eq(history.ownerId, nested.ownerId))).length,
+					1,
+				);
+			}
 			const textFacts = async () => {
 				const values: string[] = [];
 				for (const fact of await listCatalogFacts(tx, reference, actor.id))

@@ -1,8 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import { z } from "zod";
-import { entityCatalogProfile } from "../database/schema/catalog-entity";
-import { referenceArea } from "../database/schema/catalog-reference";
 import {
 	musicDiscToc,
 	musicDiscTocOffset,
@@ -15,7 +13,12 @@ import {
 	musicBrainzDate,
 	musicBrainzSourceKey,
 } from "./musicbrainz";
-import { musicBrainzCreditWriter, musicBrainzVocabulary } from "./musicbrainz-native";
+import {
+	musicBrainzCreditWriter,
+	musicBrainzVocabulary,
+	musicBrainzAreaReference,
+	musicBrainzLabelReference,
+} from "./musicbrainz-native";
 import { bindReferencedSourceIdentity } from "./source-references";
 import { loadCatalogSourceDocument, type CatalogSourceReceipt } from "./source-observations";
 import { applyMusicBrainzNameDelta } from "./musicbrainz-name-delta";
@@ -300,17 +303,17 @@ export function musicBrainzReleaseNativeWriter(
 						)
 					: recoverAt("music_release_event", path);
 				let areaId: string | null = null;
-				if (event.area) {
-					const area = await bindReferencedSourceIdentity(tx, context.actor, {
-						...musicBrainzSourceKey("area", event.area.id),
-						owner: "reference",
-						shape: "area",
-						name: event.area.name,
-						evidence: observation.referenceAt(`${path}/area/id`),
-					});
-					areaId = area.id;
-					if (area.created) await tx.insert(referenceArea).values({ id: areaId });
-				}
+				if (event.area)
+					areaId = (
+						await musicBrainzAreaReference(
+							tx,
+							context.actor,
+							observation,
+							event.area,
+							`${path}/area`,
+						)
+					).id;
+
 				const date = musicBrainzDate(event.date);
 				put(
 					"music_release_event",
@@ -333,18 +336,17 @@ export function musicBrainzReleaseNativeWriter(
 					? oldAt("music_release_label", path)
 					: recoverAt("music_release_label", path);
 				let labelId: string | null = null;
-				if (label.label) {
-					const target = await bindReferencedSourceIdentity(tx, context.actor, {
-						...musicBrainzSourceKey("label", label.label.id),
-						owner: "entity",
-						shape: "label",
-						name: label.label.name,
-						evidence: observation.referenceAt(`${path}/label/id`),
-					});
-					labelId = target.id;
-					if (target.created)
-						await tx.insert(entityCatalogProfile).values({ id: target.id, identityShape: "label" });
-				}
+				if (label.label)
+					labelId = (
+						await musicBrainzLabelReference(
+							tx,
+							context.actor,
+							observation,
+							label.label,
+							`${path}/label`,
+						)
+					).id;
+
 				put(
 					"music_release_label",
 					path,

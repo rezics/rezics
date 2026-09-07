@@ -1,8 +1,11 @@
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import type { DatabaseTransaction } from "../database";
-import { entityCatalogProfile } from "../database/schema/catalog-entity";
+import { initializeEntityProfile, resolveEntityShape } from "./entities";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { referenceArea, referenceAreaCode } from "../database/schema/catalog-reference";
+import { initializeReferenceProfile, appendAreaCodes } from "./references";
+import { adoptMusicBrainzAliases } from "./musicbrainz-names";
+import { musicBrainzArtistShape, musicBrainzLabelShape } from "./musicbrainz-entities";
+import { addCatalogIdentifier } from "./identifiers";
 import {
 	musicDiscToc,
 	musicDiscTocOffset,
@@ -13,7 +16,7 @@ import {
 	musicWorkLanguage,
 } from "../database/schema/catalog-music";
 import { beginMusicCredit, appendMusicCreditMembers, sealMusicCredit } from "./domains";
-import { ensureCatalogDefinition, addCatalogName } from "./storage";
+import { ensureCatalogDefinition } from "./storage";
 import { bindReferencedSourceIdentity } from "./source-references";
 import { recordMusicSourceComponent } from "./music-source-occurrences";
 import type { recordCatalogSourceDocument } from "./source-observations";
@@ -92,33 +95,39 @@ export function musicBrainzCreditWriter(
 		if (cached) return cached;
 		const values = [];
 		for (const [position, member] of members.entries()) {
-			const shape =
-				member.artist.type === "Person"
-					? "person"
-					: member.artist.type === "Character"
-						? "character"
-						: ["Group", "Orchestra", "Choir"].includes(member.artist.type ?? "")
-							? "collective"
-							: "unresolved";
+			const shape = musicBrainzArtistShape(member.artist.type);
 			const artist = await bindReferencedSourceIdentity(tx, actor, {
 				...musicBrainzSourceKey("artist", member.artist.id),
 				owner: "entity",
-				shape,
+				shape: "unresolved",
 				name: member.artist.name,
 				evidence: observation.referenceAt(`${path}/${position}/artist/id`),
-			});
-			if (artist.created) {
-				await tx.insert(entityCatalogProfile).values({ id: artist.id, identityShape: shape });
-				let revision = artist.revision;
-				for (const alias of member.artist.aliases ?? [])
+				initialize: async (created) => {
+					let revision = created.revision;
+					if (shape !== "unresolved")
+						revision = (await resolveEntityShape(tx, created, actor, revision, shape)).revision;
 					revision = (
-						await addCatalogName(tx, artist, actor, revision, {
-							kind: "alias",
-							languageTag: alias.locale || null,
-							value: alias.name,
+						await initializeEntityProfile(tx, created, actor, revision, {
+							typeRevisionId: await musicBrainzVocabulary(
+								tx,
+								"artist_type",
+								member.artist["type-id"],
+								member.artist.type,
+							),
 						})
 					).revision;
-			}
+					revision = await adoptMusicBrainzAliases(
+						tx,
+						actor,
+						created,
+						revision,
+						observation,
+						member.artist.aliases ?? [],
+						`${path}/${position}/artist/aliases`,
+					);
+					return { ...created, revision };
+				},
+			});
 			values.push({
 				artist,
 				creditedName: member.name,
@@ -139,6 +148,98 @@ export function musicBrainzCreditWriter(
 	};
 }
 
+/** @internal Initializes referenced area metadata/codes before its own source baseline is sealed. */
+export async function musicBrainzAreaReference(
+	tx: DatabaseTransaction,
+	actor: string,
+	observation: Observation,
+	area: NonNullable<NonNullable<MusicBrainzRelease["release-events"]>[number]["area"]>,
+	path: string,
+) {
+	return bindReferencedSourceIdentity(tx, actor, {
+		...musicBrainzSourceKey("area", area.id),
+		owner: "reference",
+		shape: "area",
+		name: area.name,
+		evidence: observation.referenceAt(`${path}/id`),
+		initialize: async (created) => {
+			let revision = (
+				await initializeReferenceProfile(tx, created, actor, created.revision, {
+					shape: "area",
+					typeRevisionId: await musicBrainzVocabulary(tx, "area_type", area["type-id"], area.type),
+				})
+			).revision;
+			for (const [namespace, codes] of [
+				["iso-3166-1", area["iso-3166-1-codes"]],
+				["iso-3166-2", area["iso-3166-2-codes"]],
+				["iso-3166-3", area["iso-3166-3-codes"]],
+			] as const) {
+				const values = [...new Set(codes ?? [])].map((code) => ({ namespace, code }));
+				for (let offset = 0; offset < values.length; offset += 128)
+					revision = (
+						await appendAreaCodes(tx, created, actor, revision, values.slice(offset, offset + 128))
+					).revision;
+			}
+			return { ...created, revision };
+		},
+	});
+}
+
+/** @internal Label references use the shared catalog Entity profile and exact identifier owner. */
+export async function musicBrainzLabelReference(
+	tx: DatabaseTransaction,
+	actor: string,
+	observation: Observation,
+	label: NonNullable<NonNullable<MusicBrainzRelease["label-info"]>[number]["label"]>,
+	path: string,
+) {
+	return bindReferencedSourceIdentity(tx, actor, {
+		...musicBrainzSourceKey("label", label.id),
+		owner: "entity",
+		shape: "unresolved",
+		name: label.name,
+		evidence: observation.referenceAt(`${path}/id`),
+		initialize: async (created) => {
+			let revision = (
+				await resolveEntityShape(
+					tx,
+					created,
+					actor,
+					created.revision,
+					musicBrainzLabelShape(label.type),
+				)
+			).revision;
+			revision = (
+				await initializeEntityProfile(tx, created, actor, revision, {
+					typeRevisionId: await musicBrainzVocabulary(
+						tx,
+						"label_type",
+						label["type-id"],
+						label.type,
+					),
+				})
+			).revision;
+			if (label["label-code"] != null) {
+				const identifier = await addCatalogIdentifier(tx, created, actor, revision, {
+					namespace: "label-code",
+					value: String(label["label-code"]),
+				});
+				revision = identifier.revision;
+				await tx
+					.insert(CatalogFactTables.entity.support)
+					.values({
+						ownerId: created.id,
+						identifierId: identifier.id,
+						sourceRecordId: observation.record.id,
+						snapshotId: observation.snapshot.id,
+						sourcePath: `${path}/label-code`,
+					});
+			}
+			return { ...created, revision };
+		},
+	});
+}
+
 export async function projectMusicBrainzReleaseMetadata(
 	tx: DatabaseTransaction,
 	actor: string,
@@ -148,34 +249,17 @@ export async function projectMusicBrainzReleaseMetadata(
 ) {
 	for (const [position, event] of (record["release-events"] ?? []).entries()) {
 		let areaId: string | null = null;
-		if (event.area) {
-			const area = await bindReferencedSourceIdentity(tx, actor, {
-				...musicBrainzSourceKey("area", event.area.id),
-				owner: "reference",
-				shape: "area",
-				name: event.area.name,
-				evidence: observation.referenceAt(`/release-events/${position}/area/id`),
-			});
-			areaId = area.id;
-			if (area.created) {
-				await tx.insert(referenceArea).values({
-					id: area.id,
-					typeRevisionId: await musicBrainzVocabulary(
-						tx,
-						"area_type",
-						event.area["type-id"],
-						event.area.type,
-					),
-				});
-				for (const [namespace, codes] of [
-					["iso-3166-1", event.area["iso-3166-1-codes"]],
-					["iso-3166-2", event.area["iso-3166-2-codes"]],
-					["iso-3166-3", event.area["iso-3166-3-codes"]],
-				] as const)
-					for (const code of new Set(codes ?? []))
-						await tx.insert(referenceAreaCode).values({ areaId, namespace, code });
-			}
-		}
+		if (event.area)
+			areaId = (
+				await musicBrainzAreaReference(
+					tx,
+					actor,
+					observation,
+					event.area,
+					`/release-events/${position}/area`,
+				)
+			).id;
+
 		const date = musicBrainzDate(event.date);
 		const [nativeEvent] = await tx
 			.insert(musicReleaseEvent)
@@ -223,27 +307,17 @@ export async function projectMusicBrainzReleaseMetadata(
 	}
 	for (const [position, entry] of (record["label-info"] ?? []).entries()) {
 		let labelId: string | null = null;
-		if (entry.label) {
-			const label = await bindReferencedSourceIdentity(tx, actor, {
-				...musicBrainzSourceKey("label", entry.label.id),
-				owner: "entity",
-				shape: "label",
-				name: entry.label.name,
-				evidence: observation.referenceAt(`/label-info/${position}/label/id`),
-			});
-			labelId = label.id;
-			if (label.created)
-				await tx.insert(entityCatalogProfile).values({
-					id: labelId,
-					identityShape: "label",
-					typeRevisionId: await musicBrainzVocabulary(
-						tx,
-						"label_type",
-						entry.label["type-id"],
-						entry.label.type,
-					),
-				});
-		}
+		if (entry.label)
+			labelId = (
+				await musicBrainzLabelReference(
+					tx,
+					actor,
+					observation,
+					entry.label,
+					`/label-info/${position}/label`,
+				)
+			).id;
+
 		const [nativeLabel] = await tx
 			.insert(musicReleaseLabel)
 			.values({ releaseId, labelId, catalogNumber: entry["catalog-number"] ?? null })

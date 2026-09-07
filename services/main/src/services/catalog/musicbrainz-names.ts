@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createHash } from "node:crypto";
 import type { DatabaseTransaction } from "../database";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import type { CatalogReference } from "./contracts";
@@ -44,7 +45,11 @@ export async function adoptMusicBrainzAliases(
 			sourceRecordId: observation.record.id,
 			snapshotId: observation.snapshot.id,
 			namespace: "musicbrainz.name",
-			localKey: `${observation.snapshot.id}:${index}`,
+			localKey: `alias:${createHash("sha256")
+				.update(
+					JSON.stringify([observation.snapshot.id, reference.owner, reference.id, path, index]),
+				)
+				.digest("hex")}`,
 			nameId: added.id,
 			nameRevision: added.nameRevision,
 			sourcePath: `${path}/${index}`,
@@ -83,14 +88,12 @@ export async function adoptMusicBrainzTitle(
 		nameRevision: added.nameRevision,
 		sourcePath: "/title",
 	});
-	await tx
-		.insert(CatalogFactTables[reference.owner].support)
-		.values({
-			ownerId: reference.id,
-			namedFormId: added.id,
-			sourceRecordId: observation.record.id,
-			snapshotId: observation.snapshot.id,
-			sourcePath: "/title",
-		});
+	await tx.insert(CatalogFactTables[reference.owner].support).values({
+		ownerId: reference.id,
+		namedFormId: added.id,
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		sourcePath: "/title",
+	});
 	return added.revision;
 }
