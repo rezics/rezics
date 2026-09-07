@@ -18,8 +18,15 @@ import {
 	completeOperationalTask,
 	parseTaskRequest,
 } from "../events/durability";
-import { SourceObservationPayloadSchema, parseSourceObservationEvent } from "./source-events";
-import { enqueueCatalogSourceObservationProposal } from "./source-proposals";
+import {
+	SourceObservationPayloadSchema,
+	SourceBindingChangedPayloadSchema,
+	parseSourceObservationEvent,
+} from "./source-events";
+import {
+	enqueueCatalogSourceObservationProposal,
+	enqueueCatalogSourceBindingProposal,
+} from "./source-proposals";
 
 const taskSchema = SourceObservationPayloadSchema.extend({
 	afterMappingKey: z.uuid().nullable(),
@@ -139,7 +146,7 @@ export function createSourceHandlers(
 	dispose: EventHandler<unknown>["dispose"],
 ): EventHandler<unknown>[] {
 	const kind = route.class === "event" ? "source.record.observed" : "source.observation.continue";
-	return [
+	const handlers: EventHandler<unknown>[] = [
 		{
 			route,
 			kind,
@@ -222,4 +229,49 @@ export function createSourceHandlers(
 			},
 		},
 	];
+	if (route.class === "event")
+		handlers.push({
+			route,
+			kind: "source.binding.changed",
+			durable: "catalog-source-bindings-v1",
+			parsePayload: (value) => SourceBindingChangedPayloadSchema.parse(value),
+			dispose,
+			async apply({ envelope, signal }) {
+				if (signal.aborted) throw signal.reason;
+				const payload = SourceBindingChangedPayloadSchema.parse(envelope.payload);
+				if (
+					envelope.class !== "event" ||
+					envelope.kind !== "source.binding.changed" ||
+					envelope.aggregate.owner !== "source_record" ||
+					envelope.aggregate.revision !== String(payload.bindingRevision) ||
+					envelope.routingBucket !== route.bucket ||
+					envelope.routingEpoch !== route.epoch
+				)
+					throw new Error("Source binding event differs from its committed revision route");
+				return database.transaction(async (tx) => {
+					await tx.execute(
+						sql`select set_config('transaction_timeout', '25000', true), set_config('statement_timeout', '10000', true), set_config('lock_timeout', '5000', true)`,
+					);
+					return applyOperationalEvent(
+						tx,
+						{
+							routingBucket: envelope.routingBucket,
+							operationId: envelope.messageId,
+							consumerKey: "catalog-source-bindings-v1",
+							requestFingerprint: createHash("sha256")
+								.update(encodeEnvelope(envelope))
+								.digest("hex"),
+						},
+						async (tx) => {
+							await enqueueCatalogSourceBindingProposal(tx, {
+								sourceRecordId: envelope.aggregate.key,
+								...payload,
+							});
+							if (signal.aborted) throw signal.reason;
+						},
+					);
+				});
+			},
+		});
+	return handlers;
 }

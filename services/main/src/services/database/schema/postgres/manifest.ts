@@ -13,6 +13,8 @@ export const PostgreSqlSchemaFileNames = [
 	"catalog-software-history.sql",
 	"catalog-software-participation-integrity.sql",
 	"catalog-source-integrity.sql",
+	"catalog-source-correspondence.sql",
+	"catalog-definition-terms.sql",
 	"catalog-source-application.sql",
 	"catalog-source-owned-baseline.sql",
 	"catalog-profile-source.sql",
@@ -46,6 +48,15 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles = {
+	catalog_source_correspondence: [
+		"participation-private-state.sql",
+		"participation-messages.sql",
+		"participation-notifications.sql",
+		"catalog-source-integrity.sql",
+		"catalog-source-correspondence.sql",
+		"catalog-source-application.sql",
+		"catalog-definition-terms.sql",
+	],
 	participation_entity_cutover: [
 		"participation-integrity.sql",
 		"participation-studio.sql",
@@ -102,6 +113,9 @@ export const PostgreSqlSchemaMigrationBundles = {
 } as const satisfies Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>>;
 
 export const PostgreSqlSchemaFunctionNames = [
+	"catalog_source_guard_binding_correspondence",
+	"catalog_source_guard_child_correspondence",
+	"catalog_guard_definition_term",
 	"catalog_validate_profile_source",
 	"catalog_validate_profile_baseline",
 	"catalog_guard_music_component_head",
@@ -290,6 +304,22 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{
+		table: "software_participation_credit_source_occurrence",
+		name: "software_credit_correspondence_guard",
+	},
+	{ table: "software_record_source_occurrence", name: "software_record_correspondence_guard" },
+	{
+		table: "software_component_source_occurrence",
+		name: "software_component_correspondence_guard",
+	},
+	{ table: "catalog_source_binding_revision", name: "catalog_source_binding_correspondence_guard" },
+	{
+		table: "software_participation_source_occurrence",
+		name: "software_context_correspondence_guard",
+	},
+	{ table: "catalog_definition_term", name: "catalog_definition_term_guard" },
+	{ table: "catalog_definition_term_support", name: "catalog_definition_term_support_guard" },
 	{ table: "music_component_source_baseline", name: "music_source_baseline_proof" },
 	{ table: "catalog_source_adoption_proposal", name: "catalog_source_proposal_guard" },
 	{ table: "software_participation", name: "software_participation_guard" },
@@ -840,6 +870,12 @@ const CatalogSourceApplicationTables = [
  * complete definitions (including arguments, constraint timing and enabled status).
  */
 export const PostgreSqlSchemaDynamicTriggers = [
+	...CatalogTriggerOwners.flatMap((owner) =>
+		["name_source_binding", "name_source_occurrence"].map((family) => ({
+			table: `${owner}_${family}`,
+			name: "catalog_name_correspondence_guard",
+		})),
+	),
 	...["entity", "reference"].flatMap((owner) => [
 		{ table: `${owner}_profile_source_occurrence`, name: "catalog_profile_source_immutable" },
 		{ table: `${owner}_profile_source_occurrence`, name: "catalog_profile_source_exact" },
@@ -949,6 +985,7 @@ export const PostgreSqlSchemaDynamicTriggers = [
 
 /** Exact dynamic declarations permitted by the static manifest check. */
 export const PostgreSqlSchemaDynamicTriggerTemplates = [
+	"CREATE TRIGGER catalog_name_correspondence_guard BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence(%L)",
 	"CREATE TRIGGER catalog_profile_source_immutable BEFORE UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_immutable_evidence()",
 	"CREATE TRIGGER catalog_profile_source_exact BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_validate_profile_source(%L)",
 	"CREATE TRIGGER catalog_profile_baseline_exact BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_validate_profile_baseline(%L)",

@@ -98,6 +98,30 @@ coverage or production throughput.
 
 ## Source-family capacity and partitioning
 
+Each immutable binding revision names a correspondence revision. Policy-only
+pause/resume retains it; changing the native target or mapping protocol creates
+a new self-anchored correspondence. Source child names, software components and
+participation occurrences include this key so that reinterpreting the same
+archived snapshot cannot return children allocated for an earlier target.
+Application headers separately preserve the previous observed snapshot and its
+applied correspondence. The mapper receives a previous native snapshot only
+when it belongs to the current correspondence; withdrawal restores both original
+observation pointers. The database checks contiguous revisions, self-anchored
+meaning, concrete target keys and exact application history references.
+
+`source.binding.changed` is consumed through an operational receipt and the
+current subscription fence. It may propose the existing stored head when a new
+mapping protocol needs review, without fabricating a source observation or
+borrowing a creator account. Superseded revisions and inactive subscriptions
+produce no proposal. Admission is constant work for one binding and one owner;
+the 32-binding observation fan-out remains the separate path for new snapshots.
+Two extra 8-byte epoch values add at least 8 GB at 500M claim rows or 48 GB at 3B,
+before index and tuple overhead; the exact child epoch indexes add further cost.
+These are storage estimates, not production capacity qualification. The disposable
+SQL correspondence fixture covers four graphs from one snapshot across pause,
+resume, rebind and protocol revision; lifecycle checks cover idempotent same-byte
+refresh proposals with no impersonated account.
+
 The minimum baseline is 500,000,000 rows **per growing family**, also estimated at
 3,000,000,000. These are planning estimates, not measured production row sizes.
 Typical source ID text is 36 bytes, path 64 bytes, payload reference 160 bytes;

@@ -34,6 +34,8 @@ BEGIN
      NEW.mapping_key <> OLD.mapping_key OR NEW.owner <> OLD.owner OR
      NEW.binding_revision < OLD.binding_revision OR NEW.binding_revision > OLD.binding_revision + 1 OR
      NEW.policy_revision < OLD.policy_revision OR
+     NEW.correspondence_revision < OLD.correspondence_revision OR
+     (NEW.correspondence_revision <> OLD.correspondence_revision AND NEW.binding_revision <> OLD.binding_revision + 1) OR
      (NEW.mapping_version <> OLD.mapping_version AND NEW.binding_revision <> OLD.binding_revision + 1) OR
      ((NEW.state <> OLD.state OR NEW.policy_revision <> OLD.policy_revision) AND NEW.binding_revision <> OLD.binding_revision + 1))) THEN
     RAISE EXCEPTION 'Source mapping identity is immutable and authority edits require the next revision'
@@ -56,10 +58,13 @@ BEGIN
   END IF;
   SELECT r.* INTO binding_row FROM public.catalog_source_binding_revision r
     WHERE r.source_record_id = claim.source_record_id AND r.mapping_key = claim.mapping_key AND r.revision = claim.binding_revision;
-  IF NOT FOUND OR binding_row.owner <> claim.owner OR binding_row.policy_revision <> claim.policy_revision OR binding_row.state <> claim.state OR binding_row.mapping_version <> claim.mapping_version THEN
+  IF NOT FOUND OR binding_row.owner <> claim.owner OR binding_row.policy_revision <> claim.policy_revision OR binding_row.state <> claim.state OR binding_row.mapping_version <> claim.mapping_version OR binding_row.correspondence_revision <> claim.correspondence_revision THEN
     RAISE EXCEPTION 'Source mapping must commit its exact immutable binding and policy revision'
       USING ERRCODE = '23514', CONSTRAINT = 'catalog_source_binding_head_required';
   END IF;
+  IF claim.applied_correspondence_revision IS NOT NULL AND (claim.observed_snapshot_id IS NULL OR NOT EXISTS(
+    SELECT 1 FROM public.catalog_source_binding_revision a WHERE a.source_record_id=claim.source_record_id AND a.mapping_key=claim.mapping_key AND a.revision=claim.applied_correspondence_revision AND a.correspondence_revision=a.revision AND a.owner=claim.owner
+  )) THEN RAISE EXCEPTION 'Applied source correspondence must retain an exact observed snapshot and epoch anchor' USING ERRCODE='23514'; END IF;
   EXECUTE format('SELECT owner_id FROM public.%I WHERE source_record_id = $1 AND mapping_key = $2', claim.owner || '_source_binding')
     INTO native_target USING claim.source_record_id, claim.mapping_key;
   IF native_target IS NULL OR native_target IS DISTINCT FROM (to_jsonb(binding_row)->>(claim.owner || '_id'))::uuid THEN

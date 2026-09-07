@@ -36,6 +36,7 @@ import {
 import {
 	proposeCatalogSourceAdoption,
 	enqueueCatalogSourceObservationProposal,
+	enqueueCatalogSourceBindingProposal,
 	decideCatalogSourceProposal,
 } from "../src/services/catalog/source-proposals";
 
@@ -332,6 +333,42 @@ try {
 							.set({ acquisitionGeneration: 0 })
 							.where(eq(catalogSourceRecord.id, first.record.id)),
 					),
+				);
+				assert.equal(
+					(await enqueueCatalogSourceBindingProposal(tx, { ...bindingKey, bindingRevision: 3 }))
+						.status,
+					"unchanged",
+				);
+				await reviseCatalogSourceBinding(tx, actor.id, {
+					...bindingKey,
+					expectedRevision: 3,
+					state: "active",
+					mode: "review",
+					mappingVersion: "vndb.vn.2",
+					reason: "Reinterpret the same stored observation",
+				});
+				assert.equal(
+					(await enqueueCatalogSourceBindingProposal(tx, { ...bindingKey, bindingRevision: 3 }))
+						.status,
+					"superseded",
+				);
+				const refresh = await enqueueCatalogSourceBindingProposal(tx, {
+					...bindingKey,
+					bindingRevision: 4,
+				});
+				assert.equal(refresh.status, "proposed");
+				if (refresh.status !== "proposed") throw new Error("Expected same-byte protocol refresh");
+				assert.equal(refresh.proposal.snapshotId, newest.snapshot.id);
+				assert.equal(refresh.proposal.mappingVersion, "vndb.vn.2");
+				assert.equal(refresh.proposal.proposerAuthUserId, null);
+				assert.equal(refresh.proposal.expectedBindingRevision, 4);
+				const refreshAgain = await enqueueCatalogSourceBindingProposal(tx, {
+					...bindingKey,
+					bindingRevision: 4,
+				});
+				assert.equal(
+					refreshAgain.status === "proposed" ? refreshAgain.proposal.id : null,
+					refresh.proposal.id,
 				);
 				await tx.execute(sql`set constraints all immediate`);
 				const plan = await tx.execute(

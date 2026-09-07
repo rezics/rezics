@@ -7,6 +7,7 @@ import {
 	catalogSourceSnapshot as snapshots,
 	catalogSourceSubscription as subscriptions,
 	catalogSourceObservationFanout as fanout,
+	catalogSourceBindingRevision as bindingRevisions,
 } from "../database/schema/catalog-source";
 import { type CatalogReference } from "./contracts";
 import { loadCatalogIdentity } from "./storage";
@@ -45,6 +46,7 @@ export type CatalogSourceNativeWriter = (
 		snapshotId: string;
 		mappingVersion: string;
 		mappingKey: string;
+		correspondenceRevision: number;
 		proposalId: string;
 		action: "apply" | "withdraw";
 		previousSnapshotId: string | null;
@@ -127,6 +129,80 @@ export async function enqueueCatalogSourceObservationProposal(
 	return writeCatalogSourceProposal(tx, current, value, native.revision, null);
 }
 
+/** A committed binding revision can enqueue the existing head without forging a new observation. @internal */
+export async function enqueueCatalogSourceBindingProposal(
+	tx: DatabaseTransaction,
+	input: CatalogBindingKey & { bindingRevision: number },
+) {
+	const value = z
+		.strictObject({
+			sourceRecordId: z.uuid(),
+			mappingKey: z.uuid(),
+			bindingRevision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+		})
+		.parse(input);
+	const current = await lockCatalogSourceBinding(tx, {
+		sourceRecordId: value.sourceRecordId,
+		mappingKey: value.mappingKey,
+	});
+	const [revision] = await tx
+		.select()
+		.from(bindingRevisions)
+		.where(
+			and(
+				eq(bindingRevisions.sourceRecordId, value.sourceRecordId),
+				eq(bindingRevisions.mappingKey, value.mappingKey),
+				eq(bindingRevisions.revision, value.bindingRevision),
+			),
+		)
+		.limit(1);
+	if (!revision) throw new Error("Source binding event has no committed revision");
+	if (current.claim.bindingRevision !== value.bindingRevision)
+		return { status: "superseded" as const };
+	const [subscription] = await tx
+		.select()
+		.from(subscriptions)
+		.where(
+			and(
+				eq(subscriptions.sourceRecordId, value.sourceRecordId),
+				eq(subscriptions.mappingKey, value.mappingKey),
+			),
+		)
+		.limit(1);
+	if (
+		!subscription ||
+		subscription.revision !== value.bindingRevision ||
+		subscription.owner !== current.reference.owner ||
+		revision.owner !== current.reference.owner ||
+		revision.mappingVersion !== current.claim.mappingVersion
+	)
+		throw new Error("Source binding event requires its exact subscription and mapping fence");
+	if (subscription.state !== "active" || current.claim.state !== "active")
+		return { status: "paused" as const };
+	if (!current.source.headSnapshotId || current.source.lastCheckOutcome === "tombstone")
+		return { status: "unobserved" as const };
+	const identity = CatalogIdentityTables[current.reference.owner];
+	const [native] = await tx
+		.select({ revision: identity.revision })
+		.from(identity)
+		.where(and(eq(identity.id, current.reference.id), isNull(identity.deletedAt)))
+		.limit(1)
+		.for("update");
+	if (!native) throw new Error("Source binding target is unavailable");
+	return writeCatalogSourceProposal(
+		tx,
+		current,
+		{
+			sourceRecordId: value.sourceRecordId,
+			mappingKey: value.mappingKey,
+			snapshotId: current.source.headSnapshotId,
+			mappingVersion: current.claim.mappingVersion,
+		},
+		native.revision,
+		null,
+	);
+}
+
 async function writeCatalogSourceProposal(
 	tx: DatabaseTransaction,
 	current: Awaited<ReturnType<typeof lockCatalogSourceBinding>>,
@@ -147,7 +223,11 @@ async function writeCatalogSourceProposal(
 		)
 		.limit(1);
 	if (!snapshot) throw new Error("Proposal snapshot is missing");
-	if (current.claim.observedSnapshotId === snapshot.id) return { status: "unchanged" as const };
+	if (
+		current.claim.observedSnapshotId === snapshot.id &&
+		current.claim.appliedCorrespondenceRevision === current.claim.correspondenceRevision
+	)
+		return { status: "unchanged" as const };
 	const values = {
 		...value,
 		mappingOwner: current.claim.owner,
@@ -295,9 +375,13 @@ export async function decideCatalogSourceProposal(
 				snapshotId: proposal.snapshotId,
 				mappingVersion: proposal.mappingVersion,
 				mappingKey: proposal.mappingKey,
+				correspondenceRevision: current.claim.correspondenceRevision,
 				proposalId: proposal.id,
 				action: value.action,
-				previousSnapshotId: current.claim.observedSnapshotId,
+				previousSnapshotId:
+					current.claim.appliedCorrespondenceRevision === current.claim.correspondenceRevision
+						? current.claim.observedSnapshotId
+						: null,
 			});
 			z.number()
 				.int()
@@ -312,8 +396,14 @@ export async function decideCatalogSourceProposal(
 				{
 					sourceRecordId: value.sourceRecordId,
 					proposalId: proposal.id,
+					mappingKey: proposal.mappingKey,
 					action: value.action,
-					previousSnapshotId: current.claim.observedSnapshotId,
+					previousSnapshotId:
+						current.claim.appliedCorrespondenceRevision === current.claim.correspondenceRevision
+							? current.claim.observedSnapshotId
+							: null,
+					previousObservedSnapshotId: current.claim.observedSnapshotId,
+					previousCorrespondenceRevision: current.claim.appliedCorrespondenceRevision,
 					previousEvidenceSourceRecordId: current.claim.evidenceSourceRecordId,
 					previousEvidenceSnapshotId: current.claim.evidenceSnapshotId,
 					previousEvidencePath: current.claim.evidencePath,
@@ -328,6 +418,7 @@ export async function decideCatalogSourceProposal(
 					.update(claims)
 					.set({
 						observedSnapshotId: proposal.snapshotId,
+						appliedCorrespondenceRevision: current.claim.correspondenceRevision,
 						evidenceSourceRecordId: null,
 						evidenceSnapshotId: null,
 						evidencePath: null,
@@ -342,7 +433,8 @@ export async function decideCatalogSourceProposal(
 				await tx
 					.update(claims)
 					.set({
-						observedSnapshotId: priorApplication.previousSnapshotId,
+						observedSnapshotId: priorApplication.previousObservedSnapshotId,
+						appliedCorrespondenceRevision: priorApplication.previousCorrespondenceRevision,
 						evidenceSourceRecordId: priorApplication.previousEvidenceSourceRecordId,
 						evidenceSnapshotId: priorApplication.previousEvidenceSnapshotId,
 						evidencePath: priorApplication.previousEvidencePath,

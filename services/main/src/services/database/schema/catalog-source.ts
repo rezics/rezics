@@ -129,6 +129,10 @@ export const catalogSourceMappingClaim = pgTable(
 	},
 	(table): PgTableExtraConfigValue[] => [
 		primaryKey({ columns: [table.sourceRecordId, table.path] }),
+		check(
+			"catalog_source_mapping_revisions_check",
+			sql`${table.bindingRevision} between 1 and 9007199254740991 and ${table.policyRevision} between 1 and 9007199254740991 and ${table.correspondenceRevision} between 1 and ${table.bindingRevision} and (${table.appliedCorrespondenceRevision} is null or ${table.appliedCorrespondenceRevision} between 1 and ${table.bindingRevision})`,
+		),
 		foreignKey({
 			name: "catalog_source_mapping_applied_correspondence_fk",
 			columns: [table.sourceRecordId, table.mappingKey, table.appliedCorrespondenceRevision],
@@ -310,7 +314,7 @@ export const catalogSourceBindingRevision = pgTable(
 		}).onDelete("restrict"),
 		check(
 			"catalog_source_binding_correspondence_check",
-			sql`${table.correspondenceRevision} between 1 and ${table.revision}`,
+			sql`${table.revision} between 1 and 9007199254740991 and ${table.policyRevision} between 1 and 9007199254740991 and ${table.correspondenceRevision} between 1 and ${table.revision}`,
 		),
 		foreignKey({
 			columns: [table.sourceRecordId, table.mappingKey, table.owner],

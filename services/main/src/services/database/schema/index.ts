@@ -25,6 +25,7 @@ export * from "./catalog-identity";
 export * from "./catalog-names";
 export * from "./catalog-program";
 export * from "./catalog-profile-source";
+export * from "./catalog-definition-terms";
 export * from "./catalog-software";
 export * from "./catalog-software-participation";
 export * from "./operational-durability";

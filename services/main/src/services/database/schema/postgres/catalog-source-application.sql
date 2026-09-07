@@ -32,6 +32,13 @@ BEGIN
     WHERE source_record_id = NEW.source_record_id AND proposal_id = NEW.proposal_id AND action = NEW.action;
   SELECT * INTO STRICT proposal FROM public.catalog_source_adoption_proposal
     WHERE source_record_id = NEW.source_record_id AND id = NEW.proposal_id;
+  IF application.mapping_key <> proposal.mapping_key THEN RAISE EXCEPTION 'Native application must retain the exact proposal mapping' USING ERRCODE='23514'; END IF;
+  IF application.previous_correspondence_revision IS NOT NULL AND NOT EXISTS(
+    SELECT 1 FROM public.catalog_source_binding_revision b WHERE b.source_record_id=application.source_record_id AND b.mapping_key=application.mapping_key AND b.revision=application.previous_correspondence_revision AND b.correspondence_revision=b.revision
+  ) THEN RAISE EXCEPTION 'Previous native source correspondence must reference an epoch anchor' USING ERRCODE='23514'; END IF;
+  IF NOT EXISTS(SELECT 1 FROM public.catalog_source_binding_revision b WHERE b.source_record_id=proposal.source_record_id AND b.mapping_key=proposal.mapping_key AND b.revision=proposal.expected_binding_revision AND
+    application.previous_snapshot_id IS NOT DISTINCT FROM CASE WHEN application.previous_correspondence_revision=b.correspondence_revision THEN application.previous_observed_snapshot_id ELSE NULL END
+  ) THEN RAISE EXCEPTION 'Effective previous source snapshot must match the proposal correspondence epoch' USING ERRCODE='23514'; END IF;
   IF (application.action = 'apply' AND proposal.state NOT IN ('applied','withdrawn'))
     OR (application.action = 'withdraw' AND proposal.state <> 'withdrawn') THEN
     RAISE EXCEPTION 'Native application must commit its corresponding proposal decision' USING ERRCODE = '23514';

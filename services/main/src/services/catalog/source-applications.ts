@@ -138,8 +138,11 @@ export async function recordCatalogSourceApplication(
 	input: {
 		sourceRecordId: string;
 		proposalId: string;
+		mappingKey: string;
 		action: "apply" | "withdraw";
 		previousSnapshotId: string | null;
+		previousObservedSnapshotId: string | null;
+		previousCorrespondenceRevision: number | null;
 		previousEvidenceSourceRecordId?: string | null;
 		previousEvidenceSnapshotId?: string | null;
 		previousEvidencePath?: string | null;
@@ -160,13 +163,11 @@ export async function recordCatalogSourceApplication(
 		};
 		switch (change.kind) {
 			case "catalog-profile": {
-				await tx
-					.insert(CatalogSourceProfileApplicationTables[change.owner])
-					.values({
-						...common,
-						beforeRevision: change.beforeRevision,
-						afterRevision: change.afterRevision,
-					});
+				await tx.insert(CatalogSourceProfileApplicationTables[change.owner]).values({
+					...common,
+					beforeRevision: change.beforeRevision,
+					afterRevision: change.afterRevision,
+				});
 				break;
 			}
 			case "catalog-semantic":

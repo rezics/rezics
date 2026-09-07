@@ -16,6 +16,12 @@ export const SourceObservationPayloadSchema = z.strictObject({
 	contractSha256: sha256,
 });
 
+/** Binding changes can require reinterpretation without acquiring different bytes. @internal */
+export const SourceBindingChangedPayloadSchema = z.strictObject({
+	mappingKey: z.uuid(),
+	bindingRevision: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+});
+
 const snapshotSchema = z.object({
 	sourceRecordId: z.uuid(),
 	id: z.uuid(),

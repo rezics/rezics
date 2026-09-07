@@ -11,7 +11,11 @@ import {
 } from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
 import { createCreatedAtColumn } from "./columns";
-import { catalogSourceAdoptionProposal, catalogSourceSnapshot } from "./catalog-source";
+import {
+	catalogSourceAdoptionProposal,
+	catalogSourceSnapshot,
+	catalogSourceBindingRevision,
+} from "./catalog-source";
 import { musicComponentRevision } from "./catalog-music";
 import { CatalogFactTables } from "./catalog-facts";
 import { CatalogNameTables } from "./catalog-names";
@@ -30,8 +34,11 @@ export const catalogSourceApplication = pgTable(
 	{
 		sourceRecordId: uuid().notNull(),
 		proposalId: uuid().notNull(),
+		mappingKey: uuid().notNull(),
 		action: text().$type<"apply" | "withdraw">().notNull(),
 		previousSnapshotId: uuid(),
+		previousObservedSnapshotId: uuid(),
+		previousCorrespondenceRevision: bigint({ mode: "number" }),
 		previousEvidenceSourceRecordId: uuid(),
 		previousEvidenceSnapshotId: uuid(),
 		previousEvidencePath: text(),
@@ -52,6 +59,20 @@ export const catalogSourceApplication = pgTable(
 		foreignKey({
 			columns: [t.sourceRecordId, t.previousSnapshotId],
 			foreignColumns: [catalogSourceSnapshot.sourceRecordId, catalogSourceSnapshot.id],
+		}).onDelete("restrict"),
+		foreignKey({
+			name: "catalog_source_application_previous_observation_fk",
+			columns: [t.sourceRecordId, t.previousObservedSnapshotId],
+			foreignColumns: [catalogSourceSnapshot.sourceRecordId, catalogSourceSnapshot.id],
+		}).onDelete("restrict"),
+		foreignKey({
+			name: "catalog_source_application_previous_correspondence_fk",
+			columns: [t.sourceRecordId, t.mappingKey, t.previousCorrespondenceRevision],
+			foreignColumns: [
+				catalogSourceBindingRevision.sourceRecordId,
+				catalogSourceBindingRevision.mappingKey,
+				catalogSourceBindingRevision.revision,
+			],
 		}).onDelete("restrict"),
 		foreignKey({
 			name: "catalog_source_application_previous_evidence_fk",
