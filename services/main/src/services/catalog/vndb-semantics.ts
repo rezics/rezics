@@ -735,7 +735,7 @@ export async function adoptVndbSemanticObject(
 		});
 	return {
 		status: "created" as const,
-		reference: { owner, id: identity.id },
+		reference,
 		revision,
 		snapshotId: document.snapshot.id,
 	};

@@ -19,7 +19,9 @@
     "queryFields": "vndbAcquisitionRequest: all 8 official endpoints accepted selected field syntax with results=0; this is not adoption proof",
     "nativeQueries": "software.ts / software-participation.ts / storage.ts / semantic-history.ts",
     "limits": "8 MB source records; 128 native changes per ordinary application; larger owners need central staged application protocol.",
-    "vnUpdates": "services/main/scripts/check-vndb-vn-updates.ts: 38 assertions over 3 apply/withdraw/reapply cycles; exact renamed/renumbered contexts, staff/voice, playtime and name derivation/authority; post-proposal independent credit edit rejected atomically."
+    "vnUpdates": "services/main/scripts/check-vndb-vn-updates.ts: 38 assertions over 3 apply/withdraw/reapply cycles; exact renamed/renumbered contexts, staff/voice, playtime and name derivation/authority; post-proposal independent credit edit rejected atomically.",
+    "supportingUpdates": "createVndbSupportingNativeWriter and check-vndb-supporting-updates.ts cover eight support families in code; backend/script TypeScript and planner tests pass. The eight-family SQL fixture awaits the combined source-epoch schema and is not yet qualified.",
+    "correspondence": "Source root epochs scope names, contexts, software scalar/component/participation occurrences and VNDB semantic support IDs; check-source-child-correspondence.ts has 21 assertions prepared. SQL validation and shared baseline/support epoch integration remain pending."
   },
   "apiLeaves": [
     {
@@ -774,443 +776,443 @@
     {
       "objectType": "staff",
       "path": "aid",
-      "status": "native-initial-sql",
+      "status": "native-update-code",
       "nativeMeaning": "Selected alias identity and principal main-name preference; gender uses an explicit governed vocabulary. Staff query filters ismain=1 while retrieving all aliases.",
-      "implementation": "vndb-entities.ts / vndb-acquisition.ts"
+      "implementation": "vndb-entities.ts / vndb-acquisition.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "aliases.aid",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
-      "implementation": "vndb-entities.ts / names.ts"
+      "implementation": "vndb-entities.ts / names.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "aliases.ismain",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
-      "implementation": "vndb-entities.ts / names.ts"
+      "implementation": "vndb-entities.ts / names.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "aliases.latin",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
-      "implementation": "vndb-entities.ts / names.ts"
+      "implementation": "vndb-entities.ts / names.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "aliases.name",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
-      "implementation": "vndb-entities.ts / names.ts"
+      "implementation": "vndb-entities.ts / names.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "description",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Primary-language and description facts on the principal, with source evidence; language labels are mapped before BCP 47 parsing.",
-      "implementation": "vndb-entities.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics-contracts.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "extlinks.id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Native qualified external-reference occurrences.",
-      "implementation": "vndb-semantics.ts"
+      "implementation": "vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "extlinks.label",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Native qualified external-reference occurrences.",
-      "implementation": "vndb-semantics.ts"
+      "implementation": "vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "extlinks.name",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Native qualified external-reference occurrences.",
-      "implementation": "vndb-semantics.ts"
+      "implementation": "vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "extlinks.url",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Native qualified external-reference occurrences.",
-      "implementation": "vndb-semantics.ts"
+      "implementation": "vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "gender",
-      "status": "native-initial-sql",
+      "status": "native-update-code",
       "nativeMeaning": "Selected alias identity and principal main-name preference; gender uses an explicit governed vocabulary. Staff query filters ismain=1 while retrieving all aliases.",
-      "implementation": "vndb-entities.ts / vndb-acquisition.ts"
+      "implementation": "vndb-entities.ts / vndb-acquisition.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
-      "implementation": "source-bindings.ts / source-references.ts"
+      "implementation": "source-bindings.ts / source-references.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "ismain",
-      "status": "native-initial-sql",
+      "status": "native-update-code",
       "nativeMeaning": "Selected alias identity and principal main-name preference; gender uses an explicit governed vocabulary. Staff query filters ismain=1 while retrieving all aliases.",
-      "implementation": "vndb-entities.ts / vndb-acquisition.ts"
+      "implementation": "vndb-entities.ts / vndb-acquisition.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "lang",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Primary-language and description facts on the principal, with source evidence; language labels are mapped before BCP 47 parsing.",
-      "implementation": "vndb-entities.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics-contracts.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "name",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
-      "implementation": "vndb-entities.ts / names.ts"
+      "implementation": "vndb-entities.ts / names.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "staff",
       "path": "original",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
-      "implementation": "vndb-entities.ts / names.ts"
+      "implementation": "vndb-entities.ts / names.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "producer",
       "path": "aliases",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
-      "implementation": "vndb-entities.ts / names.ts"
+      "implementation": "vndb-entities.ts / names.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "producer",
       "path": "description",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Primary-language and description facts on the principal, with source evidence; language labels are mapped before BCP 47 parsing.",
-      "implementation": "vndb-entities.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics-contracts.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "producer",
       "path": "extlinks.id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Native qualified external-reference occurrences.",
-      "implementation": "vndb-semantics.ts"
+      "implementation": "vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "producer",
       "path": "extlinks.label",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Native qualified external-reference occurrences.",
-      "implementation": "vndb-semantics.ts"
+      "implementation": "vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "producer",
       "path": "extlinks.name",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Native qualified external-reference occurrences.",
-      "implementation": "vndb-semantics.ts"
+      "implementation": "vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "producer",
       "path": "extlinks.url",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Native qualified external-reference occurrences.",
-      "implementation": "vndb-semantics.ts"
+      "implementation": "vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "producer",
       "path": "id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
-      "implementation": "source-bindings.ts / source-references.ts"
+      "implementation": "source-bindings.ts / source-references.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "producer",
       "path": "lang",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Primary-language and description facts on the principal, with source evidence; language labels are mapped before BCP 47 parsing.",
-      "implementation": "vndb-entities.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics-contracts.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "producer",
       "path": "name",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
-      "implementation": "vndb-entities.ts / names.ts"
+      "implementation": "vndb-entities.ts / names.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "producer",
       "path": "original",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
-      "implementation": "vndb-entities.ts / names.ts"
+      "implementation": "vndb-entities.ts / names.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "producer",
       "path": "type",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "co/in/ng map explicitly to organization/person/collective; no company-to-person coercion.",
-      "implementation": "vndb-entities.ts"
+      "implementation": "vndb-entities.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "age",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "aliases",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "birthday",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "blood_type",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "bust",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "cup",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "description",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "gender",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "height",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "hips",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
-      "implementation": "source-bindings.ts / source-references.ts"
+      "implementation": "source-bindings.ts / source-references.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "image.dims",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "image.id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "image.sexual",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "image.url",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "image.violence",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "image.votecount",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "name",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "original",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "sex",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "traits.id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "traits.lie",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "traits.spoiler",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "vns.id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "vns.release.id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "vns.role",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "vns.spoiler",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "waist",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "character",
       "path": "weight",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
-      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+      "implementation": "vndb-entities.ts / vndb-semantics.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "tag",
       "path": "aliases",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "tag",
       "path": "applicable",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "tag",
       "path": "category",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "tag",
       "path": "description",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "tag",
       "path": "id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
-      "implementation": "source-bindings.ts / source-references.ts"
+      "implementation": "source-bindings.ts / source-references.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "tag",
       "path": "name",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "tag",
       "path": "searchable",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "tag",
@@ -1222,16 +1224,16 @@
     {
       "objectType": "trait",
       "path": "aliases",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "trait",
       "path": "applicable",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "trait",
@@ -1243,72 +1245,72 @@
     {
       "objectType": "trait",
       "path": "description",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "trait",
       "path": "group_id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "trait",
       "path": "group_name",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "trait",
       "path": "id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
-      "implementation": "source-bindings.ts / source-references.ts"
+      "implementation": "source-bindings.ts / source-references.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "trait",
       "path": "name",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "trait",
       "path": "searchable",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "trait",
       "path": "sexual",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "quote",
       "path": "character.id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "quote",
       "path": "id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
-      "implementation": "source-bindings.ts / source-references.ts"
+      "implementation": "source-bindings.ts / source-references.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "quote",
       "path": "quote",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     },
     {
       "objectType": "quote",
@@ -1320,9 +1322,9 @@
     {
       "objectType": "quote",
       "path": "vn.id",
-      "status": "native-initial",
+      "status": "native-update-code",
       "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts / vndb-supporting-plans.ts / vndb-supporting-update.ts"
     }
   ],
   "dumpTables": [
@@ -2051,8 +2053,8 @@
     }
   ],
   "remainingGates": [
-    "Versioned child correspondence after deliberate root rebind must permit the same snapshot on another native target while preserving old alias/context evidence.",
-    "Supporting principal native update callbacks remain open even where initial adoption is implemented.",
+    "Complete combined source-epoch SQL qualification, including shared baseline and fact-support scope, rebind and same-target protocol reinterpretation; code and the dedicated fixture are implemented.",
+    "Run and qualify eight-family supporting native update/withdraw/reapply fixtures; callbacks now exist, but their SQL qualification is pending.",
     "Remaining dump assembly, image/link/anime/character/staff joins and table-specific bulk mapping must close individually.",
     "API-to-dump and dump-to-API source-surface transitions need a reviewed combined projection; current release callbacks reject such switches rather than erase unobserved fields.",
     "Applications above 128 native changes require the central staged protocol.",
