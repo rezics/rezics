@@ -1,6 +1,6 @@
 import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import { imageAsset } from "../database/schema/image";
+import { imageAsset, imageObject } from "../database/schema/image";
 import { storage } from "../storage";
 
 export type ImageErasureArchive = Pick<
@@ -35,6 +35,13 @@ export async function erasePrivateImageBatch(
 	}
 	const prefix = `image-objects/${asset.id}/`;
 	const original = `${prefix}original`;
+	const [object] = await tx
+		.select({ storageKey: imageObject.storageKey })
+		.from(imageObject)
+		.where(eq(imageObject.assetId, asset.id))
+		.limit(1);
+	if (object?.storageKey !== original)
+		throw new Error("Private image original is outside its admitted erasure namespace");
 	if (asset.erasureFenceVersionId === null) {
 		const fence = await archive.put({
 			Key: original,

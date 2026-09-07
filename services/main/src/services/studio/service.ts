@@ -144,8 +144,8 @@ async function loadRealmSubjects(profileId: string): Promise<RealmSubject[]> {
 
 			select access_grant.unit_id, 'access_manager'
 			from ${unitAccessGrant} access_grant
-			where access_grant.subject_kind = 'profile'
-				and access_grant.profile_id = ${profileId}
+			where access_grant.subject_kind = 'auth'
+				and access_grant.auth_user_id = ${selfAuthUserIdForEntity(profileId)}
 				and access_grant.permission = 'unit.access.manage'
 				and cardinality(access_grant.scope) = 0
 				and access_grant.revoked_at is null

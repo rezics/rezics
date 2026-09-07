@@ -187,7 +187,9 @@ then deletes at most 500 other keys/versions below that exact asset prefix per
 transaction. The empty current object rejects even an already in-flight
 conditional upload when it attempts to commit. A confirmed empty fence remains;
 its body contains no private data. Public ready images remain public content;
-private and incomplete uploads are erased. Internal completion, cleanup and
+private and incomplete uploads are erased. The replacement target must use an
+object namespace/bucket with no old unconditional upload URLs; offline conversion
+copies old objects into this new protocol. Internal completion, cleanup and
 derived-image publication share account/asset locks, preventing a queued writer
 from recreating private bytes after erasure admission closes.
 

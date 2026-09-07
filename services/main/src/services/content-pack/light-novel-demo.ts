@@ -1,3 +1,4 @@
+import { withImageAssetWrite } from "../image-assets/write";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -116,17 +117,19 @@ async function uploadBannerIfPresent(
 	});
 	const objectId = created.upload.headers["x-amz-meta-image_object_id"];
 	if (!objectId) throw new Error("Image asset create did not return object tracking metadata");
-	await storage.put({
-		Key: `image-objects/${created.id}/original`,
-		Body: bytes,
-		ContentType: contentType,
-		ContentLength: bytes.byteLength,
-		Metadata: {
-			image_asset_id: created.id,
-			image_object_id: objectId,
-			uploader_auth_user_id: ownerAuthUserId,
-		},
-	});
+	await withImageAssetWrite(ownerAuthUserId, created.id, () =>
+		storage.put({
+			Key: `image-objects/${created.id}/original`,
+			Body: bytes,
+			ContentType: contentType,
+			ContentLength: bytes.byteLength,
+			Metadata: {
+				image_asset_id: created.id,
+				image_object_id: objectId,
+				uploader_auth_user_id: ownerAuthUserId,
+			},
+		}),
+	);
 	const completed = await completeImageAsset(ownerAuthUserId, created.id, { role: "banner" });
 	const nextAppearance: ZoneAppearance = { ...appearance, heroAssetId: completed.id };
 	await database

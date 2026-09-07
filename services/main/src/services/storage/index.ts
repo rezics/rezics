@@ -11,6 +11,7 @@ import {
 	PutObjectCommand,
 	S3Client,
 	type PutObjectCommandInput,
+	type GetBucketVersioningCommandOutput,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { withDependencySpan } from "@rezics/observability";
@@ -75,9 +76,15 @@ export const storage = {
 		if (!/^image-objects\/[0-9a-f-]{36}\/$/u.test(prefix))
 			throw new Error("Image erasure prefix is invalid");
 		const r2 = new URL(env.S3_ENDPOINT).hostname.endsWith(".r2.cloudflarestorage.com");
-		const versioning = r2
-			? undefined
-			: await storageClient.send(new GetBucketVersioningCommand({ Bucket: env.S3_BUCKET }));
+		let versioning: GetBucketVersioningCommandOutput | undefined;
+		try {
+			versioning = await storageClient.send(
+				new GetBucketVersioningCommand({ Bucket: env.S3_BUCKET }),
+			);
+		} catch (cause) {
+			const unsupported = cause instanceof Error && cause.name === "NotImplemented";
+			if (!r2 || !unsupported) throw cause;
+		}
 		if (versioning?.Status === "Enabled" || versioning?.Status === "Suspended") {
 			const page = await storageClient.send(
 				new ListObjectVersionsCommand({ Bucket: env.S3_BUCKET, Prefix: prefix, MaxKeys: 500 }),

@@ -1,6 +1,6 @@
 import { withImageAssetWrite } from "./write";
 import { ImageAssetNotFound } from "../api/image-assets/errors";
-import { and, asc, eq, inArray, isNull, lte, or } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, lte, or, sql } from "drizzle-orm";
 
 import { env } from "../config";
 import { database } from "../database";
@@ -48,6 +48,7 @@ async function claimImageAssetCleanupBatch(input: {
 			.where(
 				and(
 					isNull(imageAsset.deletedAt),
+					sql`exists(select 1 from public.users where id = ${imageAsset.ownerAuthUserId} and erased_at is null)`,
 					or(
 						and(eq(imageAsset.status, "failed"), lte(imageAsset.updatedAt, input.retryCutoff)),
 						and(eq(imageAsset.status, "pending"), lte(imageAsset.createdAt, input.cutoff)),
@@ -56,7 +57,7 @@ async function claimImageAssetCleanupBatch(input: {
 			)
 			.orderBy(asc(imageAsset.updatedAt), asc(imageAsset.createdAt), asc(imageAsset.id))
 			.limit(input.batchSize)
-			.for("update", { skipLocked: true });
+			.for("update", { of: imageAsset, skipLocked: true });
 		const candidateIds = candidates.map(({ id }) => id);
 		if (candidateIds.length > 0)
 			// updatedAt is the bounded cleanup lease: retries wait one interval,

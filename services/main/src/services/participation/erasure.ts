@@ -201,17 +201,32 @@ async function redactSentMessageBatch(tx: DatabaseTransaction, authUserId: strin
 }
 
 /** One locked job, one bounded deletion transaction; a crash rolls back both deletion and stage advancement. @internal */
-export async function dispatchAccountErasureBatch(options: { archive?: ImageErasureArchive } = {}) {
+export async function dispatchAccountErasureBatch(
+	options: { archive?: ImageErasureArchive; authUserId?: string } = {},
+) {
 	return database.transaction(async (tx) => {
 		const [job] = await tx
 			.select()
 			.from(accountErasure)
-			.where(and(isNull(accountErasure.completedAt), lte(accountErasure.availableAt, new Date())))
+			.where(
+				and(
+					isNull(accountErasure.completedAt),
+					lte(accountErasure.availableAt, new Date()),
+					options.authUserId ? eq(accountErasure.authUserId, options.authUserId) : undefined,
+				),
+			)
 			.orderBy(accountErasure.availableAt, accountErasure.authUserId)
 			.limit(1)
 			.for("update", { skipLocked: true });
 		if (!job) return 0;
 		const authId = job.authUserId;
+		const [closedAccount] = await tx
+			.select({ erasedAt: users.erasedAt })
+			.from(users)
+			.where(eq(users.id, authId))
+			.limit(1)
+			.for("share");
+		if (!closedAccount?.erasedAt) throw new Error("Private erasure requires a closed Auth account");
 		if (!job.selfEntityId || !job.priorEmail)
 			throw new Error("Incomplete erasure job lost its private deletion keys");
 		let result: { deleted: number; empty: boolean };
