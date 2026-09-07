@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { and, eq, gt, isNull, sql } from "drizzle-orm";
+import { and, eq, gt, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { users } from "../database/schema/auth";
@@ -277,7 +277,39 @@ export async function listParticipationGrants(
 			),
 		)
 		.orderBy(participationGrant.id)
-		.limit(100);
+		.limit(101);
+}
+
+/** Only active human security grants expose a service's management record; credentials are excluded. */
+export async function listControlledServicePrincipals(
+	tx: DatabaseTransaction,
+	authUserId: string,
+	afterGrantId?: string,
+) {
+	return tx
+		.select({
+			id: servicePrincipal.id,
+			entityId: servicePrincipal.entityId,
+			name: servicePrincipal.name,
+			revision: servicePrincipal.revision,
+			createdAt: servicePrincipal.createdAt,
+			revokedAt: servicePrincipal.revokedAt,
+			grantId: participationGrant.id,
+			grantRevision: participationGrant.revision,
+		})
+		.from(participationGrant)
+		.innerJoin(servicePrincipal, eq(servicePrincipal.entityId, participationGrant.actingEntityId))
+		.where(
+			and(
+				eq(participationGrant.authUserId, z.uuid().parse(authUserId)),
+				eq(participationGrant.capability, "entity.security"),
+				isNull(participationGrant.revokedAt),
+				or(isNull(participationGrant.expiresAt), gt(participationGrant.expiresAt, new Date())),
+				afterGrantId ? gt(participationGrant.id, z.uuid().parse(afterGrantId)) : undefined,
+			),
+		)
+		.orderBy(participationGrant.id)
+		.limit(101);
 }
 
 /** A separate non-interactive Auth account preserves truthful private operator FKs. */
@@ -347,14 +379,12 @@ export async function createServicePrincipal(
 		})
 		.returning({ id: participationGrant.id });
 	if (!controlGrant) throw new Error("Service controller insertion failed");
-	await tx
-		.insert(participationGrantEvent)
-		.values({
-			grantId: controlGrant.id,
-			revision: 1,
-			operation: "grant",
-			operatorAuthUserId: authority.principal.authUserId,
-		});
+	await tx.insert(participationGrantEvent).values({
+		grantId: controlGrant.id,
+		revision: 1,
+		operation: "grant",
+		operatorAuthUserId: authority.principal.authUserId,
+	});
 	return {
 		...principal,
 		authUserId: account.id,

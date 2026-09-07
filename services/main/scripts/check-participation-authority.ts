@@ -359,6 +359,11 @@ try {
 				);
 			assert.equal(restored?.nameRevision, before.nameRevision);
 			assert.equal(restored?.summary, "Original summary");
+			assert.equal(
+				(await ensureSelfEntityInTransaction(tx, human.account)).name,
+				"First public presentation",
+				"Session self identity must use the selected immutable name revision",
+			);
 			await eraseOwnAccount(tx, human.authority);
 			assert.equal(
 				(await tx.select().from(authEntity).where(eq(authEntity.authUserId, human.account.id)))

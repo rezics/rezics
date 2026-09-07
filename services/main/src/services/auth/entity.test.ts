@@ -12,6 +12,7 @@ vi.mock("../database", () => ({
 				select: () => ({
 					from: (table: unknown) => {
 						const query = {
+							innerJoin: () => query,
 							where: () => query,
 							orderBy: () => query,
 							limit: () => query,
@@ -39,7 +40,7 @@ vi.mock("../participation/identity", () => ({ createParticipantIdentity: state.c
 import { users } from "../database/schema/auth";
 import { accountPreference } from "../database/schema/account-preference";
 import { authEntity } from "../database/schema/participation";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
+import { entityPresentation } from "../database/schema/entity-presentation";
 import { ensureSelfEntity } from "./entity";
 
 const account = {
@@ -69,7 +70,7 @@ describe("Auth self Entity lifecycle", () => {
 	});
 	it("preserves the existing public name instead of recreating identity or synchronizing login name", async () => {
 		state.rows.set(authEntity, [{ entityId: id, revision: 7, state: "active" }]);
-		state.rows.set(CatalogFactTables.entity.name, [{ value: "Public pen name" }]);
+		state.rows.set(entityPresentation, [{ value: "Public pen name" }]);
 		expect(await ensureSelfEntity(account)).toEqual({
 			id,
 			name: "Public pen name",

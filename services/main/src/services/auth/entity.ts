@@ -1,11 +1,12 @@
 import type { User } from "better-auth";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { DefaultStoredUiLocale, type UiLocale } from "@rezics/i18n";
 import { database, type DatabaseTransaction } from "../database";
 import { users } from "../database/schema/auth";
 import { authEntity } from "../database/schema/participation";
 import { accountPreference } from "../database/schema/account-preference";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
+import { CatalogNameTables } from "../database/schema/catalog-names";
+import { entityPresentation } from "../database/schema/entity-presentation";
 import { createParticipantIdentity } from "../participation/identity";
 import { ParticipationDenied } from "../participation/policy";
 import { initializeAccountParticipation } from "./account-defaults";
@@ -60,14 +61,25 @@ export async function ensureSelfEntityInTransaction(
 		.from(authEntity)
 		.where(eq(authEntity.authUserId, account.id))
 		.limit(1);
-	const names = CatalogFactTables.entity.name;
+	const names = CatalogNameTables.entity.nameRevision;
 	if (existing) {
 		if (existing.state !== "active") throw new ParticipationDenied("Self identity is suspended");
 		const [name] = await tx
 			.select({ value: names.value })
-			.from(names)
-			.where(and(eq(names.ownerId, existing.entityId), eq(names.state, "active")))
-			.orderBy(names.id)
+			.from(entityPresentation)
+			.innerJoin(
+				names,
+				and(
+					eq(names.ownerId, entityPresentation.entityId),
+					eq(names.id, entityPresentation.nameId),
+					eq(names.revision, entityPresentation.nameRevision),
+				),
+			)
+			.where(eq(entityPresentation.entityId, existing.entityId))
+			.orderBy(
+				desc(sql`${entityPresentation.language} = ${account.language}`),
+				entityPresentation.language,
+			)
 			.limit(1);
 		return {
 			id: existing.entityId,
