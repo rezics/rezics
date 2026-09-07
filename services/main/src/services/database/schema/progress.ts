@@ -130,6 +130,7 @@ export const unitProgressEntry = pgTable(
 			)
 			.where(sql`${table.deletedAt} is null`),
 		index("unit_progress_entry_unit_idx").on(table.unitId),
+		index("unit_progress_entry_auth_erasure_idx").on(table.authUserId, table.id),
 		index("unit_progress_entry_auth_user_unit_created_idx")
 			.on(table.authUserId, table.unitId, table.createdAt.desc())
 			.where(sql`${table.deletedAt} is null`),

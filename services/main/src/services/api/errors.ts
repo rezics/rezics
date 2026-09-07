@@ -10,6 +10,7 @@ import { EntityErrors } from "../entities/errors";
 import { FollowingErrors } from "../following/errors";
 import { OwnershipClaimErrors } from "../ownership-claims/errors";
 import { PaginationErrors } from "../pagination/errors";
+import { FavoriteNotFound, FavoriteRevisionConflict } from "../favorites/errors";
 import { ParticipationDenied } from "../participation/policy";
 import { SearchErrors } from "../search/errors";
 import { UnitErrors } from "../units/errors";
@@ -69,6 +70,8 @@ export const ApiErrors = [
 	CatalogReferenceNotFound,
 	CatalogRevisionConflict,
 	ParticipationDenied,
+	FavoriteNotFound,
+	FavoriteRevisionConflict,
 	MalformedRequestBody,
 	ValidationError,
 	InternalError,

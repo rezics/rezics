@@ -35,7 +35,7 @@ export const studioAuthEditorCandidate = pgTable(
 	},
 	(table) => [
 		primaryKey({ columns: [table.authUserId, table.unitId] }),
-		index("studio_auth_editor_candidate_profile_recent_idx").on(
+		index("studio_auth_editor_candidate_auth_recent_idx").on(
 			table.authUserId,
 			table.relevantAt.desc(),
 			table.unitId.desc(),
@@ -130,7 +130,7 @@ export const studioResourceVisit = pgTable(
 	},
 	(table) => [
 		primaryKey({ columns: [table.authUserId, table.resourceUnitId] }),
-		index("studio_resource_visit_profile_recent_idx").on(
+		index("studio_resource_visit_auth_recent_idx").on(
 			table.authUserId,
 			table.lastVisitedAt.desc(),
 			table.resourceUnitId.desc(),

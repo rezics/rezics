@@ -44,10 +44,10 @@ function eligibleUnit(input: {
 			),
 		),
 		inArray(unit.contentRating, input.viewer.contentRatings),
-		input.viewer.profileId
+		input.viewer.authUserId
 			? sql`(${unit.id} = ${input.afterId ?? null}::uuid or not exists (
 				select 1 from recommendation_exclusion excluded
-				where excluded.profile_id = ${input.viewer.profileId}::uuid
+				where excluded.auth_user_id = ${input.viewer.authUserId}::uuid
 					and excluded.unit_id = ${unit.id}
 			))`
 			: undefined,

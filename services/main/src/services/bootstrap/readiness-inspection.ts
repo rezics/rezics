@@ -23,7 +23,6 @@ import {
 	participationGrant,
 	platformCapabilityGrant,
 	post,
-	profileFavoritesCollection,
 	realm,
 	realmMember,
 	unit,
@@ -73,7 +72,6 @@ export async function inspectInitialInstallationBundle() {
 		officialZoneNavigations,
 		officialRealmAvatar,
 		bootstrapProfiles,
-		profileFavorites,
 		profileScoreMemberships,
 		accountPreferences,
 		profileFollows,
@@ -320,13 +318,6 @@ export async function inspectInitialInstallationBundle() {
 				),
 			),
 		database
-			.select({
-				id: profileFavoritesCollection.collectionId,
-				profileId: profileFavoritesCollection.profileId,
-			})
-			.from(profileFavoritesCollection)
-			.where(inArray(profileFavoritesCollection.profileId, BootstrapProfileIdValues)),
-		database
 			.select({ profileId: realmMember.profileId })
 			.from(realmMember)
 			.where(
@@ -454,7 +445,6 @@ export async function inspectInitialInstallationBundle() {
 		officialZoneNavigations,
 		officialRealmAvatar,
 		bootstrapProfiles,
-		profileFavorites,
 		profileScoreMemberships,
 		accountPreferences,
 		profileFollows,

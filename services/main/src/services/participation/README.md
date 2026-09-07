@@ -141,9 +141,97 @@ the generated fresh replacement target. The coordinator owns migration generatio
 OpenAPI/SDK generation, Web consumers and the final combined checks. No frontend
 browser or visual acceptance is implied.
 
-Remaining coordinated work at this checkpoint includes public actor column/name
-cleanup, favorites/upload and personal projection ownership, full private erasure
-stage coverage (including messages), public presentation restore/history APIs,
-and SQL qualification of the final generated DDL. Baseline-only PostgreSQL
-functions must be audited when their owner columns change: Atlas and a canonical
-manifest limited to newer functions cannot prove those old bodies still execute.
+Remaining coordinated work includes public actor column/name cleanup, retained
+owner replacement of global Unit references and SQL qualification of the final
+generated DDL. Baseline-only PostgreSQL functions must be audited when their owner
+columns change: Atlas and a canonical manifest limited to newer functions cannot
+prove those old bodies still execute.
+
+## Private Favorites, uploads and complete deletion ownership
+
+Favorites now has its own `/favorites` API and three Auth-owned relations:
+`account_favorite`, `account_favorite_revision`, and `account_favorites_state`.
+It is not a public Collection. Public Collection routes and bootstrap no longer
+create hidden Favorites collections or write their private item history into
+shared immutable `revision_content`. A save keeps an ordered target, an optional
+private note and a typed captured preview. Restore restores the stored note,
+preview and position; an occupied historical position inserts immediately after
+that occupant. The optional explicit ordering anchor takes precedence. The fresh
+target accepts this breaking replacement; old Favorites extraction belongs to
+offline conversion, not to a runtime adapter.
+
+One account-local state row serializes mutations and supplies optimistic
+concurrency. Entry lookup and order seek use `(auth_user_id, target_unit_id)` and
+`(auth_user_id, position)`. List pages contain at most 100 entries; history pages
+contain metadata only and retrieve one full snapshot by exact revision. Notes are
+bounded at 64 KiB, previews at 8 KiB and complete historical snapshots at 96 KiB.
+History deletion is permitted only after the owning account is erased. Source,
+operator and public publication evidence continues to use its immutable owners.
+
+The erasure state machine deletes current Progress before its entries so
+`current_basis` cannot be left invalid by an FK setting `current_entry_id` null.
+The one Post link per Progress entry and one mail intent per notification are
+proven bounded by unique constraints. API tokens drain their lease, daily-usage
+and rate-state children by token-indexed batches before the token's two one-row
+cascades. Notifications have an unconditional recipient index, Progress entries
+have an unconditional Auth index, and message redaction has a partial sender
+index that excludes already erased content. Erasure also removes account quotas,
+private blocks, notification/read statistics, Studio state, recommendation
+events/exclusions, personal Tags and subscriptions. Sent messages become content-
+free tombstones so the other participant's read-marker order remains valid.
+
+Image upload and management use private Auth ownership. New presigned uploads
+include a signed `If-None-Match: *` header: an upload cannot overwrite its logical
+content identity. Account erasure overwrites the original key with an empty fence,
+then deletes at most 500 other keys/versions below that exact asset prefix per
+transaction. The empty current object rejects even an already in-flight
+conditional upload when it attempts to commit. A confirmed empty fence remains;
+its body contains no private data. Public ready images remain public content;
+private and incomplete uploads are erased. Internal completion, cleanup and
+derived-image publication share account/asset locks, preventing a queued writer
+from recreating private bytes after erasure admission closes.
+
+The S3 adapter checks bucket versioning and drains historical versions as well as
+current objects. Its explicit R2 endpoint branch uses current-object listing
+because R2 has no object-version API. A provider error, partial delete or missing
+empty fence leaves the durable job incomplete. Successful mocked archive tests
+are not qualification of live storage credentials, retention policy or regional
+availability. The deployment must permit prefix/version listing and deletion,
+and must not lifecycle-delete retained empty upload fences.
+
+These requirements follow the documented [AWS presigned URL reuse semantics](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html),
+[bounded multi-object deletion](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html)
+and [R2's conditional-write and listing support](https://developers.cloudflare.com/r2/api/s3/api/).
+
+### Private workload estimates and remaining qualification
+
+Assume 500 Favorites mutations/second, 5,000 ordered reads/second and 1,000 active
+erasure jobs spread across accounts; hot-account operations serialize on that
+account's state row. These are capacity scenarios, not measured production rates.
+With a 1.3 KiB mean entry including indexes, 500M current Favorites require about
+650 GB and 3B require about 3.9 TB. At a 1.7 KiB mean history row including indexes,
+500M revisions require about 850 GB and 3B about 5.1 TB. A mutation writes a current
+row, a history row and one small state row; budget heap/index/WAL/replica traffic
+for all three, with approximately 1.5 MB/s logical input at the assumed rate
+before WAL overhead and high-note tails. Per-account hash partitions/shards are
+the growth path; target ownership FKs need an explicit coordinated shard cutover.
+
+Ordinary deletion batches contain at most 500 rows. Favorites history uses 32
+rows (at most 3 MiB of bounded snapshot bodies), current Favorites 48 rows (about
+3.4 MiB at their body maximum), and sent messages 32 rows (at most 2.5 MiB of old
+content). These bounds limit high-tail TOAST/WAL work rather than relying on a
+small average. Image erasure uses one locked asset and at most 500 object keys;
+it never materializes all image variants or all account tokens. No account-sized
+cascade, whole-corpus scan, deep offset, or in-process queue is needed.
+
+At a 512 KiB mean original image, 500M originals represent about 262 TB and 3B
+about 1.57 PB before derived images and provider version history. Empty erasure
+fences add object-count/metadata overhead without retaining image bodies. Budget
+provider metadata and request charges, database ownership/index storage and
+network/WAL amplification separately. Large image-generation work retains the
+existing 10 MiB / 40M-pixel input limits. Observe archive request latency/error
+rate, erasure oldest-job age, private row deletion throughput, Auth/asset lock
+wait, history/TOAST size and fractional-position length. Existing fractional-key
+storage bounds still require an order-maintenance path at extreme repeated-gap
+insertion; bounded local compaction and its concurrency proof remain a specific
+qualification gate before claiming unrestricted hot-account ordering capacity.

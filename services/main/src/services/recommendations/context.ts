@@ -17,6 +17,7 @@ import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
 
 export interface RecommendationViewer {
 	profileId?: string;
+	authUserId?: string;
 	personalized: boolean;
 	contentRatings: AllowedContentRatings;
 	preferredLanguages: ContentLanguage[];
@@ -44,6 +45,7 @@ export async function resolveRecommendationViewer(
 		};
 	const [preference] = await database
 		.select({
+			authUserId: accountPreference.authUserId,
 			personalized: accountPreference.personalizedFeed,
 			contentRatings: accountPreference.contentRatings,
 			preferredLanguages: accountPreference.preferredLanguages,
@@ -54,6 +56,7 @@ export async function resolveRecommendationViewer(
 		.limit(1);
 	return {
 		profileId,
+		authUserId: preference?.authUserId,
 		personalized: resolvePersonalization(preference?.personalized, personalizedOverride),
 		contentRatings: contentRatingAllowlistFromStored(preference?.contentRatings),
 		preferredLanguages: preference?.preferredLanguages ?? [],

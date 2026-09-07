@@ -13,6 +13,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { users } from "./auth";
 import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
@@ -99,12 +100,12 @@ export const unitTag = pgTable(
  * following: it only controls which Realm-scoped Tag votes are surfaced in the
  * Profile's personalized Tag landscape.
  */
-export const profileRealmTagSubscription = pgTable(
-	"profile_realm_tag_subscription",
+export const accountRealmTagSubscription = pgTable(
+	"account_realm_tag_subscription",
 	{
-		profileId: uuid()
+		authUserId: uuid()
 			.notNull()
-			.references(() => entityIdentity.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		realmId: uuid()
 			.notNull()
 			.references(() => realm.id, { onDelete: "cascade" }),
@@ -115,15 +116,15 @@ export const profileRealmTagSubscription = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.profileId, table.realmId] }),
-		index("profile_realm_tag_subscription_profile_position_idx").on(
-			table.profileId,
+		primaryKey({ columns: [table.authUserId, table.realmId] }),
+		index("account_realm_tag_subscription_auth_position_idx").on(
+			table.authUserId,
 			table.position,
 			table.realmId,
 		),
-		index("profile_realm_tag_subscription_realm_idx").on(table.realmId, table.profileId),
+		index("account_realm_tag_subscription_realm_idx").on(table.realmId, table.authUserId),
 		createFractionalIndexPositionByteLengthConstraint(
-			"profile_realm_tag_subscription_position_byte_length_check",
+			"account_realm_tag_subscription_position_byte_length_check",
 			table.position,
 		),
 	],
@@ -331,12 +332,12 @@ export const realmUnitTag = pgTable(
 );
 
 /** A Profile's private, direct Tag relationship. */
-export const profileUnitTag = pgTable(
-	"profile_unit_tag",
+export const accountUnitTag = pgTable(
+	"account_unit_tag",
 	{
-		profileId: uuid()
+		authUserId: uuid()
 			.notNull()
-			.references(() => entityIdentity.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
@@ -348,13 +349,13 @@ export const profileUnitTag = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.profileId, table.unitId, table.tagId] }),
-		index("profile_unit_tag_unit_idx").on(table.unitId, table.profileId),
-		index("profile_unit_tag_tag_idx").on(table.tagId),
-		index("profile_unit_tag_profile_tag_idx").on(table.profileId, table.tagId, table.unitId),
-		check("profile_unit_tag_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
+		primaryKey({ columns: [table.authUserId, table.unitId, table.tagId] }),
+		index("account_unit_tag_unit_idx").on(table.unitId, table.authUserId),
+		index("account_unit_tag_tag_idx").on(table.tagId),
+		index("account_unit_tag_auth_tag_idx").on(table.authUserId, table.tagId, table.unitId),
+		check("account_unit_tag_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
 		createFractionalIndexPositionByteLengthConstraint(
-			"profile_unit_tag_position_byte_length_check",
+			"account_unit_tag_position_byte_length_check",
 			table.position,
 		),
 	],

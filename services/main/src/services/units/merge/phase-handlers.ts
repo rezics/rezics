@@ -1387,7 +1387,7 @@ async function realmTagJudgmentBatch(
 	);
 }
 
-async function profileUnitTagBatch(
+async function accountUnitTagBatch(
 	tx: DatabaseTransaction,
 	input: UnitMergePhaseInput,
 ): Promise<UnitMergePhaseResult> {
@@ -1395,43 +1395,43 @@ async function profileUnitTagBatch(
 		tx,
 		sql`
 			with batch as materialized (
-				select profile_id, tag_id, position, created_at, updated_at
-				from profile_unit_tag
+				select auth_user_id, tag_id, position, created_at, updated_at
+				from account_unit_tag
 				where unit_id = ${input.sourceUnitId}::uuid
-				order by profile_id
+				order by auth_user_id
 				limit ${input.batchSize}
 				for update skip locked
 			), inserted_targets as (
-				insert into profile_unit_tag (
-					profile_id, unit_id, tag_id, position, created_at, updated_at
+				insert into account_unit_tag (
+					auth_user_id, unit_id, tag_id, position, created_at, updated_at
 				)
-				select profile_id, ${input.targetUnitId}::uuid, tag_id,
+				select auth_user_id, ${input.targetUnitId}::uuid, tag_id,
 					position, created_at, updated_at
 				from batch
-				on conflict (profile_id, unit_id, tag_id) do nothing
-				returning profile_id, tag_id
+				on conflict (auth_user_id, unit_id, tag_id) do nothing
+				returning auth_user_id, tag_id
 			), ensured_targets as materialized (
-				select profile_id, tag_id from inserted_targets
+				select auth_user_id, tag_id from inserted_targets
 				union
-				select batch.profile_id, batch.tag_id
+				select batch.auth_user_id, batch.tag_id
 				from batch
 				where exists (
-					select 1 from profile_unit_tag as target
-					where target.profile_id = batch.profile_id
+					select 1 from account_unit_tag as target
+					where target.auth_user_id = batch.auth_user_id
 						and target.unit_id = ${input.targetUnitId}::uuid
 						and target.tag_id = batch.tag_id
 				)
 			), deleted as (
-				delete from profile_unit_tag as relation
+				delete from account_unit_tag as relation
 				using ensured_targets
-				where relation.profile_id = ensured_targets.profile_id
+				where relation.auth_user_id = ensured_targets.auth_user_id
 					and relation.unit_id = ${input.sourceUnitId}::uuid
 					and relation.tag_id = ensured_targets.tag_id
 				returning 1
 			)
 			select cardinality(array(select 1 from deleted)) as processed,
 				exists(
-					select 1 from profile_unit_tag where unit_id = ${input.sourceUnitId}::uuid
+					select 1 from account_unit_tag where unit_id = ${input.sourceUnitId}::uuid
 				) as remaining
 		`,
 	);
@@ -2314,36 +2314,36 @@ async function derivedStateBatch(
 		tx,
 		sql`
 			with exclusion_batch as materialized (
-				select profile_id, created_at
+				select auth_user_id, created_at
 				from recommendation_exclusion
 				where unit_id = ${input.sourceUnitId}::uuid
-				order by profile_id
+				order by auth_user_id
 				limit ${input.batchSize}
 				for update skip locked
 			), copied_exclusions as (
-				insert into recommendation_exclusion (profile_id, unit_id, created_at)
-				select profile_id, ${input.targetUnitId}::uuid, created_at
+				insert into recommendation_exclusion (auth_user_id, unit_id, created_at)
+				select auth_user_id, ${input.targetUnitId}::uuid, created_at
 				from exclusion_batch
-				on conflict (profile_id, unit_id) do update
+				on conflict (auth_user_id, unit_id) do update
 				set created_at = least(recommendation_exclusion.created_at, excluded.created_at)
 				returning 1
 			), deleted_exclusions as (
 				delete from recommendation_exclusion as exclusion
 				using exclusion_batch
-				where exclusion.profile_id = exclusion_batch.profile_id
+				where exclusion.auth_user_id = exclusion_batch.auth_user_id
 					and exclusion.unit_id = ${input.sourceUnitId}::uuid
 				returning 1
 			), visit_batch as materialized (
-				select profile_id, last_visited_at
+				select auth_user_id, last_visited_at
 				from studio_resource_visit
 				where resource_unit_id = ${input.sourceUnitId}::uuid
-				order by profile_id
+				order by auth_user_id
 				limit ${input.batchSize}
 				for update skip locked
 			), copied_visits as (
-				insert into studio_resource_visit (profile_id, resource_unit_id, last_visited_at)
-				select profile_id, ${input.targetUnitId}::uuid, last_visited_at from visit_batch
-				on conflict (profile_id, resource_unit_id) do update
+				insert into studio_resource_visit (auth_user_id, resource_unit_id, last_visited_at)
+				select auth_user_id, ${input.targetUnitId}::uuid, last_visited_at from visit_batch
+				on conflict (auth_user_id, resource_unit_id) do update
 				set last_visited_at = greatest(
 					studio_resource_visit.last_visited_at,
 					excluded.last_visited_at
@@ -2352,7 +2352,7 @@ async function derivedStateBatch(
 			), deleted_visits as (
 				delete from studio_resource_visit as visit
 				using visit_batch
-				where visit.profile_id = visit_batch.profile_id
+				where visit.auth_user_id = visit_batch.auth_user_id
 					and visit.resource_unit_id = ${input.sourceUnitId}::uuid
 				returning 1
 			), participation_batch as materialized (
@@ -2422,13 +2422,13 @@ async function derivedStateBatch(
 				returning 1
 			), profile_candidate_batch as materialized (
 				select profile_id
-				from studio_profile_editor_candidate
+				from studio_auth_editor_candidate
 				where unit_id = ${input.sourceUnitId}::uuid
 				order by profile_id
 				limit ${input.batchSize}
 				for update skip locked
 			), deleted_profile_candidates as (
-				delete from studio_profile_editor_candidate as candidate
+				delete from studio_auth_editor_candidate as candidate
 				using profile_candidate_batch
 				where candidate.profile_id = profile_candidate_batch.profile_id
 					and candidate.unit_id = ${input.sourceUnitId}::uuid
@@ -2482,7 +2482,7 @@ async function derivedStateBatch(
 					where resource_unit_id = ${input.sourceUnitId}::uuid
 				)
 				or exists(
-					select 1 from studio_profile_editor_candidate
+					select 1 from studio_auth_editor_candidate
 					where unit_id = ${input.sourceUnitId}::uuid
 				)
 				or exists(
@@ -2510,7 +2510,7 @@ const FinalConvergencePhases = [
 	"collection_items",
 	"unit_tags",
 	"realm_tag_judgments",
-	"profile_unit_tags",
+	"account_unit_tags",
 	"realm_pins",
 	"realm_units",
 	"realm_unit_tags",
@@ -2590,8 +2590,8 @@ export async function processUnitMergePhase(
 			return unitTagBatch(tx, input);
 		case "realm_tag_judgments":
 			return realmTagJudgmentBatch(tx, input);
-		case "profile_unit_tags":
-			return profileUnitTagBatch(tx, input);
+		case "account_unit_tags":
+			return accountUnitTagBatch(tx, input);
 		case "realm_pins":
 			return realmPinBatch(tx, input);
 		case "realm_units":

@@ -14,8 +14,8 @@ import {
 	notification,
 	platformCapabilityGrant,
 	postScore,
-	profileRealmTagSubscription,
-	profileUnitTag,
+	accountRealmTagSubscription,
+	accountUnitTag,
 	realmScoreContext,
 	realmTagContext,
 	realmTagJudgment,
@@ -99,11 +99,11 @@ export async function verifySeedDatabase(
 		},
 		{
 			name: "Profile Realm Tag subscription",
-			query: database.select({ value: count() }).from(profileRealmTagSubscription),
+			query: database.select({ value: count() }).from(accountRealmTagSubscription),
 		},
 		{
 			name: "Profile Unit Tag",
-			query: database.select({ value: count() }).from(profileUnitTag),
+			query: database.select({ value: count() }).from(accountUnitTag),
 		},
 		{
 			name: "Realm Unit Tag",

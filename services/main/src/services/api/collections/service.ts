@@ -16,7 +16,6 @@ import {
 	collectionItem,
 	collectionStat,
 	collectionStructureRevisionHead,
-	profileFavoritesCollection,
 	unit,
 	unitLocalization,
 	unitRevisionHead,
@@ -86,7 +85,6 @@ export async function getCollection(
 			id: unit.id,
 			status: unit.status,
 			visibility: unit.visibility,
-			favoritesProfileId: profileFavoritesCollection.profileId,
 			itemCount: collectionStat.itemCount,
 			latestRevisionId: unitRevisionHead.revisionId,
 			latestItemsRevisionId: collectionStructureRevisionHead.revisionId,
@@ -100,10 +98,6 @@ export async function getCollection(
 		.innerJoin(
 			collectionStructureRevisionHead,
 			eq(collectionStructureRevisionHead.collectionId, collectionTable.id),
-		)
-		.leftJoin(
-			profileFavoritesCollection,
-			eq(profileFavoritesCollection.collectionId, collectionTable.id),
 		)
 		.where(eq(collectionTable.id, collectionId))
 		.limit(1);
@@ -142,13 +136,11 @@ export async function getCollection(
 			authorization.unit.decide(collectionId, "unit.history.restore"),
 			authorization.unit.decide(collectionId, "unit.realm-publication.manage"),
 		]);
-	const ordinaryCollection = record.favoritesProfileId === null;
-	const canUpdate = updateDecision.allowed && ordinaryCollection;
-	const { favoritesProfileId, ...detail } = record;
+	const canUpdate = updateDecision.allowed;
+	const detail = record;
 	return {
 		...detail,
 		itemCount: toSafeInteger(detail.itemCount, "Collection item count"),
-		purpose: favoritesProfileId ? "favorites" : "collection",
 		language: selectedLocalization.language,
 		cover: presentImageAsset(
 			resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "cover", localizationLanguages),
@@ -186,10 +178,10 @@ export async function getCollection(
 			canManageItems: updateDecision.allowed,
 			canManagePublishers: canUpdate,
 			canManageLocalizations: canUpdate,
-			canManageAccess: accessDecision.allowed && ordinaryCollection,
-			canManageRealmPublications: realmPublicationDecision.allowed && ordinaryCollection,
+			canManageAccess: accessDecision.allowed,
+			canManageRealmPublications: realmPublicationDecision.allowed,
 			canViewHistory: updateDecision.allowed || accessDecision.allowed || restoreDecision.allowed,
-			canRestoreHistory: restoreDecision.allowed && ordinaryCollection,
+			canRestoreHistory: restoreDecision.allowed,
 		},
 	};
 }

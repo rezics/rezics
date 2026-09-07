@@ -89,11 +89,8 @@ export const notification = pgTable(
 			.on(table.recipientAuthUserId, table.createdAt.desc(), table.id.desc())
 			.where(sql`${table.inAppVisible} and ${table.readAt} is null`),
 		index("notification_actor_idx").on(table.actorProfileId),
+		index("notification_recipient_erasure_idx").on(table.recipientAuthUserId, table.id),
 		index("notification_subject_unit_idx").on(table.subjectUnitId),
-		check(
-			"notification_not_self_check",
-			sql`${table.actorProfileId} is null or ${table.actorProfileId} <> ${table.recipientAuthUserId}`,
-		),
 		check(
 			"notification_read_at_check",
 			sql`${table.readAt} is null or ${table.readAt} >= ${table.createdAt}`,
@@ -140,6 +137,9 @@ export const emailOutbox = pgTable(
 		uniqueIndex("email_outbox_provider_message_idx")
 			.on(table.providerMessageId)
 			.where(sql`${table.providerMessageId} is not null`),
+		index("email_outbox_recipient_erasure_idx")
+			.on(table.recipientEmail, table.id)
+			.where(sql`${table.recipientEmail} is not null`),
 		index("email_outbox_pending_idx")
 			.on(table.availableAt, table.createdAt)
 			.where(sql`${table.status} = 'pending'::email_outbox_status`),
@@ -328,10 +328,17 @@ export const message = pgTable(
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
+		index("message_sender_erasure_idx")
+			.on(table.senderAuthUserId, table.id)
+			.where(sql`${table.content} is not null`),
 		index("message_sender_created_at_idx").on(
 			table.senderAuthUserId,
 			table.createdAt.desc(),
 			table.id.desc(),
+		),
+		check(
+			"message_content_byte_size_check",
+			sql`${table.content} is null or octet_length(${table.content}) <= 80000`,
 		),
 		check(
 			"message_content_state_check",

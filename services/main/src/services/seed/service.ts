@@ -94,9 +94,8 @@ import {
 	post,
 	postReply,
 	postScore,
-	profileFavoritesCollection,
-	profileRealmTagSubscription,
-	profileUnitTag,
+	accountRealmTagSubscription,
+	accountUnitTag,
 	realm,
 	realmMember,
 	realmPin,
@@ -971,14 +970,6 @@ async function seedUnitFixtures(
 	await writeBatches(
 		collections.map((value) => ({ id: value.id })),
 		(batch) => tx.insert(collection).values(batch),
-	);
-	await writeBatches(
-		collections.slice(0, SeedPlan.users).map((value) => ({
-			profileId: value.ownerProfileId,
-			collectionId: value.id,
-			createdAt: value.createdAt,
-		})),
-		(batch) => tx.insert(profileFavoritesCollection).values(batch),
 	);
 	await writeBatches(
 		collections.map((value) => ({
@@ -2887,7 +2878,7 @@ async function seedRecommendations(
 				...(seedProfile ? [seedProfile.createdAt] : []),
 			);
 			return {
-				profileId: seedProfile?.id ?? null,
+				authUserId: seedProfile ? selfAuthUserIdForEntity(seedProfile.id) : null,
 				requestId: data.fakerByLanguage.en.string.uuid(),
 				surface: itemAt(surfaces, index),
 				type: itemAt(eventTypes, index * 3),
@@ -2905,7 +2896,7 @@ async function seedRecommendations(
 			Array.from({ length: SeedPlan.recommendationExclusions / profiles.length }, (_, index) => {
 				const target = itemAt(targets, profileIndex * 17 + index);
 				return {
-					profileId: seedProfile.id,
+					authUserId: selfAuthUserIdForEntity(seedProfile.id),
 					unitId: target.id,
 					createdAt: latestDate(data.pastDate(180), seedProfile.createdAt, target.createdAt),
 				};
@@ -3060,15 +3051,15 @@ async function seedCoverageContracts(
 		updatedAt: createdAt,
 	});
 
-	await tx.insert(profileRealmTagSubscription).values({
-		profileId: actor.id,
+	await tx.insert(accountRealmTagSubscription).values({
+		authUserId: selfAuthUserIdForEntity(actor.id),
 		realmId: targetRealm.id,
 		position: fractionalPositionAt(0),
 		createdAt,
 		updatedAt: createdAt,
 	});
-	await tx.insert(profileUnitTag).values({
-		profileId: actor.id,
+	await tx.insert(accountUnitTag).values({
+		authUserId: selfAuthUserIdForEntity(actor.id),
 		unitId: target.id,
 		tagId: targetTag.id,
 		position: fractionalPositionAt(0),

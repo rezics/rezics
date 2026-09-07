@@ -27,6 +27,7 @@ CREATE OR REPLACE FUNCTION public.participation_guard_message()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 DECLARE pair public.conversation%ROWTYPE; admitted integer;
 BEGIN
+  IF TG_OP = 'UPDATE' AND NEW.content IS NULL AND NEW.deleted_at IS NOT NULL THEN RETURN NEW; END IF;
   SELECT * INTO pair FROM public.conversation WHERE id = NEW.conversation_id;
   IF NOT FOUND OR NOT ((NEW.sender_auth_user_id = pair.participant_low_auth_user_id AND NEW.sender_entity_id = pair.participant_low_entity_id) OR
     (NEW.sender_auth_user_id = pair.participant_high_auth_user_id AND NEW.sender_entity_id = pair.participant_high_entity_id)) THEN
@@ -46,7 +47,7 @@ BEGIN
   RETURN NEW;
 END $$;
 DROP TRIGGER IF EXISTS participation_message_guard ON public.message;
-CREATE TRIGGER participation_message_guard BEFORE INSERT ON public.message
+CREATE TRIGGER participation_message_guard BEFORE INSERT OR UPDATE OF content, deleted_at ON public.message
 FOR EACH ROW EXECUTE FUNCTION public.participation_guard_message();
 
 CREATE OR REPLACE FUNCTION public.participation_guard_account_block()

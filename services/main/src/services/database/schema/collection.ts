@@ -35,20 +35,6 @@ export const collection = pgTable("collection", {
 		.references(() => unit.id, { onDelete: "cascade" }),
 });
 
-export const profileFavoritesCollection = pgTable(
-	"profile_favorites_collection",
-	{
-		profileId: uuid()
-			.primaryKey()
-			.references(() => entityIdentity.id, { onDelete: "cascade" }),
-		collectionId: uuid()
-			.notNull()
-			.references(() => collection.id, { onDelete: "cascade" }),
-		createdAt: createCreatedAtColumn(),
-	},
-	(table) => [unique("profile_favorites_collection_collection_id_unique").on(table.collectionId)],
-);
-
 export const collectionItem = pgTable(
 	"collection_item",
 	{

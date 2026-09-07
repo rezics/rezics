@@ -16,7 +16,6 @@ export * from "./zones";
 
 export const BootstrapUnitIds = [
 	...SlugNamespaceManifest.map((namespace) => namespace.id),
-	...BootstrapAccountManifest.map((profile) => profile.favoritesCollectionId),
 	...CuratedCreationTagCollectionManifest.map((collection) => collection.id),
 	...ContentLabelRegistryIds,
 	...BootstrapRealmManifest.map((realm) => realm.id),

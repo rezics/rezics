@@ -1,3 +1,4 @@
+import { withImageAssetWrite } from "../../image-assets/write";
 import sharp from "sharp";
 
 import { isStorageNotFound, storage } from "../../storage";
@@ -135,19 +136,25 @@ async function generateDerivedImage(
 	}
 
 	const body = await applyOutputFormat(pipeline, format).toBuffer();
-	await storage.put({
-		Key: storageKey,
-		Body: body,
-		ContentLength: body.byteLength,
-		ContentType: formatContentTypes[format],
-		CacheControl:
-			asset.access === "public" ? "public, max-age=31536000, immutable" : "private, no-store",
-		Metadata: {
-			image_asset_id: asset.id,
-			presentation_role: presentation.role,
-			presentation_revision: String(presentation.revision),
-		},
-	});
+	await withImageAssetWrite(
+		asset.ownerAuthUserId,
+		asset.id,
+		() =>
+			storage.put({
+				Key: storageKey,
+				Body: body,
+				ContentLength: body.byteLength,
+				ContentType: formatContentTypes[format],
+				CacheControl:
+					asset.access === "public" ? "public, max-age=31536000, immutable" : "private, no-store",
+				Metadata: {
+					image_asset_id: asset.id,
+					presentation_role: presentation.role,
+					presentation_revision: String(presentation.revision),
+				},
+			}),
+		true,
+	);
 }
 
 export async function resolveDerivedImageAssetContent(

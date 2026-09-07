@@ -52,7 +52,7 @@ import {
 	post,
 	PostKindValues,
 	postScore,
-	profileRealmTagSubscription,
+	accountRealmTagSubscription,
 	realm,
 	realmAccessSubjectRelation,
 	realmRuleAcceptance,
@@ -1169,16 +1169,16 @@ describe("database schema contracts", () => {
 	});
 
 	it("keeps ordered Realm Tag sources separate from following and membership", () => {
-		const subscription = getTableConfig(profileRealmTagSubscription);
-		expect(subscription.name).toBe("profile_realm_tag_subscription");
+		const subscription = getTableConfig(accountRealmTagSubscription);
+		expect(subscription.name).toBe("account_realm_tag_subscription");
 		expect(subscription.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
-			"profile_id",
+			"auth_user_id",
 			"realm_id",
 		]);
 		expect(subscription.indexes.map((index) => index.config.name)).toEqual(
 			expect.arrayContaining([
-				"profile_realm_tag_subscription_profile_position_idx",
-				"profile_realm_tag_subscription_realm_idx",
+				"account_realm_tag_subscription_auth_position_idx",
+				"account_realm_tag_subscription_realm_idx",
 			]),
 		);
 	});

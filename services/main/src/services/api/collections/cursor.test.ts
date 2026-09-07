@@ -8,7 +8,6 @@ const publisherProfileId = "019b76da-a800-7300-8000-000000000001";
 const targetId = "019b76da-a800-7300-8000-000000000002";
 const localizationLanguages: ListCollectionsQuery["localizationLanguages"] = ["zh", "en"];
 const boundary = {
-	favoritesRank: 1,
 	updatedAt: new Date("2026-07-29T12:00:00.000Z"),
 	id: "019b76da-a800-7300-8000-000000000003",
 };

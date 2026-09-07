@@ -137,7 +137,7 @@ export const UnitMergeOperationPhaseValues = [
 	"collection_items",
 	"unit_tags",
 	"realm_tag_judgments",
-	"profile_unit_tags",
+	"account_unit_tags",
 	"realm_pins",
 	"realm_units",
 	"realm_unit_tags",

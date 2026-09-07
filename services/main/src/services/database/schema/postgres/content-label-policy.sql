@@ -6,7 +6,7 @@ BEGIN
 	IF NOT OLD.directly_applicable OR NEW.directly_applicable THEN RETURN NEW; END IF;
 	IF EXISTS (SELECT 1 FROM public.unit_tag WHERE tag_id = NEW.id)
 		OR EXISTS (SELECT 1 FROM public.realm_unit_tag WHERE tag_id = NEW.id)
-		OR EXISTS (SELECT 1 FROM public.profile_unit_tag WHERE tag_id = NEW.id)
+		OR EXISTS (SELECT 1 FROM public.account_unit_tag WHERE tag_id = NEW.id)
 		OR EXISTS (SELECT 1 FROM public.realm_tag_judgment WHERE tag_id = NEW.id) THEN
 		RAISE EXCEPTION 'A directly applied Tag cannot become category-only'
 			USING ERRCODE = '23514', CONSTRAINT = 'tag_directly_applicable_in_use';
@@ -54,7 +54,7 @@ BEGIN
 		END IF;
 		RETURN NEW;
 	END IF;
-	IF TG_TABLE_NAME = 'profile_unit_tag' THEN
+	IF TG_TABLE_NAME = 'account_unit_tag' THEN
 		RAISE EXCEPTION 'Content labels cannot be private Profile Tags'
 			USING ERRCODE = '23514', CONSTRAINT = 'content_label_private_rejected';
 	END IF;
@@ -118,9 +118,9 @@ CREATE TRIGGER realm_unit_tag_application_policy_guard
 BEFORE INSERT OR UPDATE ON public.realm_unit_tag
 FOR EACH ROW EXECUTE FUNCTION public.guard_direct_tag_application_policy();
 
-DROP TRIGGER IF EXISTS profile_unit_tag_application_policy_guard ON public.profile_unit_tag;
-CREATE TRIGGER profile_unit_tag_application_policy_guard
-BEFORE INSERT OR UPDATE ON public.profile_unit_tag
+DROP TRIGGER IF EXISTS account_unit_tag_application_policy_guard ON public.account_unit_tag;
+CREATE TRIGGER account_unit_tag_application_policy_guard
+BEFORE INSERT OR UPDATE ON public.account_unit_tag
 FOR EACH ROW EXECUTE FUNCTION public.guard_direct_tag_application_policy();
 
 DROP TRIGGER IF EXISTS unit_tag_judgment_content_label_reject ON public.unit_tag_judgment;

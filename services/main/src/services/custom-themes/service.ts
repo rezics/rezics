@@ -1,3 +1,4 @@
+import { selfAuthUserIdForEntity } from "../participation/account-query";
 import type { StaticDecode } from "typebox";
 import { createHash } from "node:crypto";
 
@@ -202,7 +203,7 @@ export async function createCustomTheme(input: {
 	readonly localization: CustomThemeLocalizationInput;
 }) {
 	return database.transaction(async (tx) => {
-		await ensureImageAssetsAttachable(tx, input.ownerProfileId, [
+		await ensureImageAssetsAttachable(tx, selfAuthUserIdForEntity(input.ownerProfileId), [
 			{ assetId: input.localization.bannerAssetId, role: "banner" },
 			{ assetId: input.localization.coverAssetId, role: "cover" },
 		]);

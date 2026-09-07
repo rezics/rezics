@@ -1,3 +1,5 @@
+import { withImageAssetWrite } from "./write";
+import { ImageAssetNotFound } from "../api/image-assets/errors";
 import { and, asc, eq, inArray, isNull, lte, or } from "drizzle-orm";
 
 import { env } from "../config";
@@ -68,9 +70,23 @@ async function claimImageAssetCleanupBatch(input: {
 }
 
 async function deleteImageAssetObject(storageKey: string): Promise<void> {
-	await storage.delete({ Key: storageKey }).catch((error: unknown) => {
-		if (!isStorageNotFound(error)) throw error;
-	});
+	const [asset] = await database
+		.select({ id: imageAsset.id, authUserId: imageAsset.ownerAuthUserId })
+		.from(imageAsset)
+		.innerJoin(imageObject, eq(imageObject.assetId, imageAsset.id))
+		.where(eq(imageObject.storageKey, storageKey))
+		.limit(1);
+	if (!asset) return;
+	try {
+		await withImageAssetWrite(asset.authUserId, asset.id, async () => {
+			await storage.delete({ Key: storageKey }).catch((error: unknown) => {
+				if (!isStorageNotFound(error)) throw error;
+			});
+		});
+	} catch (cause) {
+		// Account erasure owns cleanup after admission closes and must retain its empty upload fence.
+		if (!(cause instanceof ImageAssetNotFound)) throw cause;
+	}
 }
 
 async function finalizeImageAssetCleanup(assetId: string, now: Date): Promise<void> {

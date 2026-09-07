@@ -1,3 +1,4 @@
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { StatusCodes } from "http-status-codes";
@@ -9,10 +10,8 @@ import {
 	createCollectionStructureHistory,
 	getCollectionStructureRevisionState,
 	listCollectionStructureRevisions,
-	mutateCollectionStructureWithHistory,
 	restoreCollectionStructureRevision,
 } from "../../collection-structure/history";
-import { ensureFavorites } from "../../collections/favorites";
 import { database, type DatabaseTransaction } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
@@ -21,13 +20,11 @@ import {
 	collectionStat,
 	collectionStructureRevisionHead,
 	creditAttribution,
-	profileFavoritesCollection,
 	unit,
 	unitLocalization,
 	unitOwnership,
 	unitRevisionHead,
 } from "../../database/schema";
-import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	createProfilePublisherAttribution,
 	getAttributionSummariesByUnitIds,
@@ -46,7 +43,7 @@ import { transitionUnitStatus } from "../../units/status";
 import { toUnitVisibilityUpdate } from "../../units/visibility-update";
 import { ValidationError } from "../errors";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
-import { FavoriteResponse, SavedCollectionItemsResponse } from "../schema/action-response";
+import { SavedCollectionItemsResponse } from "../schema/action-response";
 import {
 	CollectionContentResponse,
 	CollectionDetailResponse,
@@ -54,7 +51,6 @@ import {
 	toApiErrorResponse,
 } from "../schema/response";
 import { decodeCollectionListCursor, encodeCollectionListCursor } from "./cursor";
-import { FavoritesEditForbidden } from "./errors";
 import {
 	AddCollectionItemsBatchBody,
 	AddCollectionItemsBatchResponse,
@@ -69,7 +65,6 @@ import {
 	CollectionStructureRevisionListResponse,
 	CollectionStructureRevisionParams,
 	CreateCollectionBody,
-	FavoriteItemParams,
 	ListCollectionsQuery,
 	MoveCollectionItemsBody,
 	RestoreCollectionStructureRevisionBody,
@@ -91,7 +86,6 @@ const CollectionMutationForbiddenResponse = toApiErrorResponse([
 	"UnitAccessRestricted",
 ]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
-const FavoritesEditResponse = toApiErrorResponse(["FavoritesEditForbidden"]);
 const UnitRevisionConflictResponse = toApiErrorResponse(["UnitRevisionConflict"]);
 const CollectionStructureRevisionConflictResponse = toApiErrorResponse([
 	"CollectionStructureRevisionConflict",
@@ -99,7 +93,6 @@ const CollectionStructureRevisionConflictResponse = toApiErrorResponse([
 const InvalidPaginationCursorResponse = toApiErrorResponse(["InvalidPaginationCursor"]);
 const CollectionBatchErrors = {
 	invalid: (message: string) => new ValidationError({ changes: message }),
-	favoritesEditForbidden: () => new FavoritesEditForbidden(),
 };
 
 function escapeRevisionPathSegment(value: string): string {
@@ -148,28 +141,12 @@ async function ensureEditableCollection(tx: DatabaseTransaction, collectionId: s
 	const [record] = await tx
 		.select({
 			id: collection.id,
-			favoritesProfileId: profileFavoritesCollection.profileId,
 		})
 		.from(collection)
-		.leftJoin(
-			profileFavoritesCollection,
-			eq(profileFavoritesCollection.collectionId, collection.id),
-		)
 		.where(eq(collection.id, collectionId))
 		.limit(1);
 	if (!record) throw new UnitNotFound();
-	if (record.favoritesProfileId) throw new FavoritesEditForbidden();
 	return record;
-}
-
-async function nextCollectionItemPosition(tx: DatabaseTransaction, collectionId: string) {
-	const [last] = await tx
-		.select({ position: collectionItem.position })
-		.from(collectionItem)
-		.where(eq(collectionItem.collectionId, collectionId))
-		.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
-		.limit(1);
-	return fractionalPositionBetween(last?.position, null);
 }
 
 export default new Elysia({ prefix: "/collections" })
@@ -189,34 +166,22 @@ export default new Elysia({ prefix: "/collections" })
 			const identity = query.editableOnly ? await resolveIdentity(request, "unit:read") : undefined;
 			const viewerId = identity?.entity?.id;
 			if (query.editableOnly && !viewerId) return { items: [], nextCursor: null };
-			if (viewerId) await ensureFavorites(viewerId);
 			const cursorContext = { query };
 			const cursor = decodeCollectionListCursor(query.cursor, cursorContext);
 			const limit = query.limit ?? 20;
-			const favoritesRank = sql<number>`case
-				when ${profileFavoritesCollection.profileId} is not null then 1
-				else 0
-			end`;
 			const search = query.search?.trim();
 			const titleMatchesSearch = search
 				? sql<boolean>`position(lower(${search}) in lower(coalesce(${unitLocalization.title}, ''))) > 0`
 				: undefined;
 			const cursorCondition = cursor
 				? or(
-						lt(favoritesRank, cursor.favoritesRank),
-						and(eq(favoritesRank, cursor.favoritesRank), lt(unit.updatedAt, cursor.updatedAt)),
-						and(
-							eq(favoritesRank, cursor.favoritesRank),
-							eq(unit.updatedAt, cursor.updatedAt),
-							lt(collection.id, cursor.id),
-						),
+						lt(unit.updatedAt, cursor.updatedAt),
+						and(eq(unit.updatedAt, cursor.updatedAt), lt(collection.id, cursor.id)),
 					)
 				: undefined;
 			const candidates = await database
 				.select({
 					id: collection.id,
-					favoritesProfileId: profileFavoritesCollection.profileId,
-					favoritesRank,
 					language: unitLocalization.language,
 					itemCount: collectionStat.itemCount,
 					containsTarget: query.targetId
@@ -241,10 +206,6 @@ export default new Elysia({ prefix: "/collections" })
 					collectionStructureRevisionHead,
 					eq(collectionStructureRevisionHead.collectionId, collection.id),
 				)
-				.leftJoin(
-					profileFavoritesCollection,
-					eq(profileFavoritesCollection.collectionId, collection.id),
-				)
 				.innerJoin(
 					unitLocalization,
 					and(
@@ -258,19 +219,12 @@ export default new Elysia({ prefix: "/collections" })
 				.where(
 					and(
 						query.editableOnly
-							? and(
-									getUnitUpdateCondition(viewerId!, unit),
-									or(
-										isNull(profileFavoritesCollection.profileId),
-										eq(profileFavoritesCollection.profileId, viewerId!),
-									),
-								)
+							? getUnitUpdateCondition(viewerId!, unit)
 							: and(
 									eq(unit.status, "published"),
 									eq(unit.visibility, "public"),
 									eq(unit.moderationStatus, "approved"),
 									isNull(unit.deletedAt),
-									isNull(profileFavoritesCollection.profileId),
 								),
 						query.publisherProfileId
 							? sql`exists(
@@ -288,7 +242,7 @@ export default new Elysia({ prefix: "/collections" })
 						cursorCondition,
 					),
 				)
-				.orderBy(desc(favoritesRank), desc(unit.updatedAt), desc(collection.id))
+				.orderBy(desc(unit.updatedAt), desc(collection.id))
 				.limit(limit + 1);
 			const items = candidates.slice(0, limit);
 			const last = items.at(-1);
@@ -297,21 +251,17 @@ export default new Elysia({ prefix: "/collections" })
 				localizationLanguages,
 			);
 			return {
-				items: items.map(
-					({ coverAssetId, favoritesRank: _favoritesRank, favoritesProfileId, ...item }) => ({
-						...item,
-						itemCount: toSafeInteger(item.itemCount, "Collection item count"),
-						purpose: favoritesProfileId ? ("favorites" as const) : ("collection" as const),
-						acceptsItems: Boolean(query.editableOnly),
-						attributions: attributionMap.get(item.id) ?? [],
-						cover: presentImageAsset(coverAssetId, "cover"),
-					}),
-				),
+				items: items.map(({ coverAssetId, ...item }) => ({
+					...item,
+					itemCount: toSafeInteger(item.itemCount, "Collection item count"),
+					acceptsItems: Boolean(query.editableOnly),
+					attributions: attributionMap.get(item.id) ?? [],
+					cover: presentImageAsset(coverAssetId, "cover"),
+				})),
 				nextCursor:
 					candidates.length > limit && last
 						? encodeCollectionListCursor(
 								{
-									favoritesRank: last.favoritesRank,
 									updatedAt: last.updatedAt,
 									id: last.id,
 								},
@@ -340,7 +290,7 @@ export default new Elysia({ prefix: "/collections" })
 			const id = await database.transaction(async (tx) => {
 				await ensureImageAssetsAttachable(
 					tx,
-					entity.id,
+					selfAuthUserIdForEntity(entity.id),
 					unitLocalizationImageAssetReferences(body.localization),
 				);
 				const created = await insertUnit(tx, {
@@ -375,25 +325,6 @@ export default new Elysia({ prefix: "/collections" })
 				return created.id;
 			});
 			return getCollection(id, authorization);
-		},
-	)
-	.get(
-		"/favorites",
-		{
-			access: "write:unit:read",
-			query: CollectionDetailQuery,
-			response: {
-				[StatusCodes.OK]: CollectionDetailResponse,
-				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
-			},
-			detail: { summary: "Get Favorites collection", tags: ["Collections"] },
-		},
-		async ({ entity, authorization, query }) => {
-			return getCollection(
-				await ensureFavorites(entity.id),
-				authorization,
-				query.localizationLanguages,
-			);
 		},
 	)
 	.get(
@@ -451,7 +382,7 @@ export default new Elysia({ prefix: "/collections" })
 				]),
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: CollectionMutationNotFoundResponse,
-				[StatusCodes.CONFLICT]: t.Union([FavoritesEditResponse, UnitRevisionConflictResponse]),
+				[StatusCodes.CONFLICT]: UnitRevisionConflictResponse,
 			},
 			detail: { summary: "Update collection", tags: ["Collections"] },
 		},
@@ -460,21 +391,11 @@ export default new Elysia({ prefix: "/collections" })
 			const statusUpdateDecision = body.status
 				? await authorization.unit.decide(params.collectionId, "unit.status.update", ["unit"])
 				: undefined;
-			const [current] = await database
-				.select({ favoritesProfileId: profileFavoritesCollection.profileId })
-				.from(collection)
-				.leftJoin(
-					profileFavoritesCollection,
-					eq(profileFavoritesCollection.collectionId, collection.id),
-				)
-				.where(eq(collection.id, params.collectionId))
-				.limit(1);
-			if (current?.favoritesProfileId) throw new FavoritesEditForbidden();
 			await database.transaction(async (tx) => {
 				if (body.localization)
 					await ensureImageAssetsAttachable(
 						tx,
-						entity.id,
+						selfAuthUserIdForEntity(entity.id),
 						unitLocalizationImageAssetReferences(body.localization),
 					);
 				const unitUpdate = toUnitVisibilityUpdate(body.visibility);
@@ -526,10 +447,7 @@ export default new Elysia({ prefix: "/collections" })
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-				[StatusCodes.CONFLICT]: t.Union([
-					FavoritesEditResponse,
-					CollectionStructureRevisionConflictResponse,
-				]),
+				[StatusCodes.CONFLICT]: t.Union([CollectionStructureRevisionConflictResponse]),
 			},
 			detail: {
 				summary: "Apply an atomic mixed Collection item command batch",
@@ -573,10 +491,7 @@ export default new Elysia({ prefix: "/collections" })
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-				[StatusCodes.CONFLICT]: t.Union([
-					FavoritesEditResponse,
-					CollectionStructureRevisionConflictResponse,
-				]),
+				[StatusCodes.CONFLICT]: t.Union([CollectionStructureRevisionConflictResponse]),
 			},
 			detail: { summary: "Add collection items atomically", tags: ["Collections"] },
 		},
@@ -628,10 +543,7 @@ export default new Elysia({ prefix: "/collections" })
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-				[StatusCodes.CONFLICT]: t.Union([
-					FavoritesEditResponse,
-					CollectionStructureRevisionConflictResponse,
-				]),
+				[StatusCodes.CONFLICT]: t.Union([CollectionStructureRevisionConflictResponse]),
 			},
 			detail: { summary: "Move collection items atomically", tags: ["Collections"] },
 		},
@@ -668,10 +580,7 @@ export default new Elysia({ prefix: "/collections" })
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-				[StatusCodes.CONFLICT]: t.Union([
-					FavoritesEditResponse,
-					CollectionStructureRevisionConflictResponse,
-				]),
+				[StatusCodes.CONFLICT]: t.Union([CollectionStructureRevisionConflictResponse]),
 			},
 			detail: { summary: "Save collection item", tags: ["Collections"] },
 		},
@@ -709,10 +618,7 @@ export default new Elysia({ prefix: "/collections" })
 			response: {
 				[StatusCodes.OK]: SavedCollectionItemsResponse,
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
-				[StatusCodes.CONFLICT]: t.Union([
-					FavoritesEditResponse,
-					CollectionStructureRevisionConflictResponse,
-				]),
+				[StatusCodes.CONFLICT]: t.Union([CollectionStructureRevisionConflictResponse]),
 			},
 			detail: { summary: "Remove collection item", tags: ["Collections"] },
 		},
@@ -792,10 +698,7 @@ export default new Elysia({ prefix: "/collections" })
 			body: RestoreCollectionStructureRevisionBody,
 			response: {
 				[StatusCodes.OK]: RestoreCollectionStructureRevisionResponse,
-				[StatusCodes.CONFLICT]: t.Union([
-					FavoritesEditResponse,
-					CollectionStructureRevisionConflictResponse,
-				]),
+				[StatusCodes.CONFLICT]: t.Union([CollectionStructureRevisionConflictResponse]),
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
 			},
@@ -818,93 +721,6 @@ export default new Elysia({ prefix: "/collections" })
 				updated: true as const,
 				latestItemsRevisionId: result.revisionId,
 				revisionCreated: result.revisionCreated,
-			};
-		},
-	)
-	.put(
-		"/favorites/items/:targetId",
-		{
-			access: "write:unit:update",
-			params: FavoriteItemParams,
-			body: CollectionItemsRevisionBody,
-			response: {
-				[StatusCodes.OK]: FavoriteResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-				[StatusCodes.CONFLICT]: CollectionStructureRevisionConflictResponse,
-			},
-			detail: { summary: "Favorite unit", tags: ["Collections"] },
-		},
-		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensureCanRead(params.targetId);
-			const collectionId = await ensureFavorites(entity.id);
-			const result = await database.transaction(async (tx) =>
-				mutateCollectionStructureWithHistory(
-					tx,
-					{
-						collectionId,
-						actorProfileId: entity.id,
-						baseRevisionId: body.baseItemsRevisionId,
-					},
-					async () => {
-						await tx
-							.insert(collectionItem)
-							.values({
-								collectionId,
-								unitId: params.targetId,
-								position: await nextCollectionItemPosition(tx, collectionId),
-								addedByProfileId: entity.id,
-							})
-							.onConflictDoNothing();
-						return { favorited: true };
-					},
-				),
-			);
-			return {
-				favorited: result.favorited,
-				collectionId,
-				latestItemsRevisionId: result.revisionId,
-			};
-		},
-	)
-	.delete(
-		"/favorites/items/:targetId",
-		{
-			access: "write:unit:update",
-			params: FavoriteItemParams,
-			body: CollectionItemsRevisionBody,
-			response: {
-				[StatusCodes.OK]: FavoriteResponse,
-				[StatusCodes.CONFLICT]: CollectionStructureRevisionConflictResponse,
-			},
-			detail: { summary: "Remove favorite unit", tags: ["Collections"] },
-		},
-		async ({ params, entity, body }) => {
-			const collectionId = await ensureFavorites(entity.id);
-			const result = await database.transaction(async (tx) =>
-				mutateCollectionStructureWithHistory(
-					tx,
-					{
-						collectionId,
-						actorProfileId: entity.id,
-						baseRevisionId: body.baseItemsRevisionId,
-					},
-					async () => {
-						await tx
-							.delete(collectionItem)
-							.where(
-								and(
-									eq(collectionItem.collectionId, collectionId),
-									eq(collectionItem.unitId, params.targetId),
-								),
-							);
-						return { favorited: false };
-					},
-				),
-			);
-			return {
-				favorited: result.favorited,
-				collectionId,
-				latestItemsRevisionId: result.revisionId,
 			};
 		},
 	);

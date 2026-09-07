@@ -146,7 +146,7 @@ export async function restoreEntityPresentation(
 				.parse(input.expectedRevision)
 	)
 		throw new CatalogRevisionConflict("Entity presentation changed");
-	await ensureImageAssetsAttachable(tx, authority.actingEntityId, [
+	await ensureImageAssetsAttachable(tx, authority.principal.authUserId, [
 		{ assetId: snapshot.avatarAssetId, role: "avatar" },
 		{ assetId: snapshot.bannerAssetId, role: "banner" },
 	]);
@@ -160,15 +160,13 @@ export async function restoreEntityPresentation(
 				eq(entityPresentation.language, snapshot.language),
 			),
 		);
-	await tx
-		.insert(entityPresentationRevision)
-		.values({
-			entityId: authority.actingEntityId,
-			language: snapshot.language,
-			revision: values.revision,
-			snapshot: values,
-			operatorAuthUserId: authority.principal.authUserId,
-		});
+	await tx.insert(entityPresentationRevision).values({
+		entityId: authority.actingEntityId,
+		language: snapshot.language,
+		revision: values.revision,
+		snapshot: values,
+		operatorAuthUserId: authority.principal.authUserId,
+	});
 	return {
 		entityId: authority.actingEntityId,
 		language: snapshot.language,
@@ -402,7 +400,7 @@ export async function updateEntityPresentation(
 			.limit(32);
 		if (variants.length >= 32) throw new Error("Entity presentation language limit reached");
 	}
-	await ensureImageAssetsAttachable(tx, entityId, [
+	await ensureImageAssetsAttachable(tx, authority.principal.authUserId, [
 		{
 			assetId: input.avatar?.type === "image" ? input.avatar.image.assetId : undefined,
 			role: "avatar",

@@ -1,3 +1,4 @@
+import { selfAuthUserIdForEntity } from "../participation/account-query";
 import { and, eq, exists, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { ContentLanguage } from "@rezics/i18n";
@@ -6,7 +7,7 @@ import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
 import {
-	profileRealmTagSubscription,
+	accountRealmTagSubscription,
 	realm,
 	realmMember,
 	realmTagContext,
@@ -54,28 +55,28 @@ export async function listRealmTagSubscriptions(input: {
 }) {
 	const rows = await database
 		.select({
-			realmId: profileRealmTagSubscription.realmId,
+			realmId: accountRealmTagSubscription.realmId,
 			language: resolvedUnitLocalizationLanguage(realmSourceUnit.id, input.localizationLanguages),
 			title: resolvedUnitLocalizationTitle(realmSourceUnit.id, input.localizationLanguages),
 			summary: resolvedUnitLocalizationSummary(realmSourceUnit.id, input.localizationLanguages),
 			avatar: resolvedUnitLocalizationAvatar(realmSourceUnit.id, input.localizationLanguages),
-			position: profileRealmTagSubscription.position,
-			createdAt: profileRealmTagSubscription.createdAt,
-			updatedAt: profileRealmTagSubscription.updatedAt,
+			position: accountRealmTagSubscription.position,
+			createdAt: accountRealmTagSubscription.createdAt,
+			updatedAt: accountRealmTagSubscription.updatedAt,
 		})
-		.from(profileRealmTagSubscription)
-		.innerJoin(realm, eq(realm.id, profileRealmTagSubscription.realmId))
+		.from(accountRealmTagSubscription)
+		.innerJoin(realm, eq(realm.id, accountRealmTagSubscription.realmId))
 		.innerJoin(realmSourceUnit, eq(realmSourceUnit.id, realm.id))
 		.leftJoin(
 			realmMember,
 			and(
-				eq(realmMember.realmId, profileRealmTagSubscription.realmId),
+				eq(realmMember.realmId, accountRealmTagSubscription.realmId),
 				eq(realmMember.profileId, input.profileId),
 			),
 		)
 		.where(
 			and(
-				eq(profileRealmTagSubscription.profileId, input.profileId),
+				eq(accountRealmTagSubscription.authUserId, selfAuthUserIdForEntity(input.profileId)),
 				or(
 					getUnitReadCondition(input.profileId, {}, realmSourceUnit),
 					and(
@@ -88,7 +89,7 @@ export async function listRealmTagSubscriptions(input: {
 				),
 			),
 		)
-		.orderBy(profileRealmTagSubscription.position, profileRealmTagSubscription.realmId);
+		.orderBy(accountRealmTagSubscription.position, accountRealmTagSubscription.realmId);
 	return rows.map((row) => ({
 		...row,
 		avatar: presentAvatar(row.avatar),
@@ -117,10 +118,10 @@ export async function listRealmTagVoteContexts(input: {
 		.innerJoin(realm, eq(realm.id, realmMember.realmId))
 		.innerJoin(voteContextRealmUnit, eq(voteContextRealmUnit.id, realm.id))
 		.leftJoin(
-			profileRealmTagSubscription,
+			accountRealmTagSubscription,
 			and(
-				eq(profileRealmTagSubscription.profileId, input.profileId),
-				eq(profileRealmTagSubscription.realmId, realm.id),
+				eq(accountRealmTagSubscription.authUserId, selfAuthUserIdForEntity(input.profileId)),
+				eq(accountRealmTagSubscription.realmId, realm.id),
 			),
 		)
 		.where(
@@ -155,7 +156,7 @@ export async function listRealmTagVoteContexts(input: {
 				),
 			),
 		)
-		.orderBy(sql`${profileRealmTagSubscription.position} asc nulls last`, realm.id);
+		.orderBy(sql`${accountRealmTagSubscription.position} asc nulls last`, realm.id);
 	return rows.map((row) => ({
 		...row,
 		avatar: presentAvatar(row.avatar),
@@ -169,14 +170,14 @@ export async function upsertRealmTagSubscription(input: {
 	readonly localizationLanguages?: LocalizationLanguageQuery;
 }) {
 	await database
-		.insert(profileRealmTagSubscription)
+		.insert(accountRealmTagSubscription)
 		.values({
-			profileId: input.profileId,
+			authUserId: selfAuthUserIdForEntity(input.profileId),
 			realmId: input.realmId,
 			...(input.position === undefined ? {} : { position: input.position }),
 		})
 		.onConflictDoUpdate({
-			target: [profileRealmTagSubscription.profileId, profileRealmTagSubscription.realmId],
+			target: [accountRealmTagSubscription.authUserId, accountRealmTagSubscription.realmId],
 			set: {
 				...(input.position === undefined ? {} : { position: input.position }),
 				updatedAt: new Date(),
@@ -193,11 +194,11 @@ export async function deleteRealmTagSubscription(
 	realmId: string,
 ): Promise<void> {
 	await database
-		.delete(profileRealmTagSubscription)
+		.delete(accountRealmTagSubscription)
 		.where(
 			and(
-				eq(profileRealmTagSubscription.profileId, profileId),
-				eq(profileRealmTagSubscription.realmId, realmId),
+				eq(accountRealmTagSubscription.authUserId, selfAuthUserIdForEntity(profileId)),
+				eq(accountRealmTagSubscription.realmId, realmId),
 			),
 		);
 }

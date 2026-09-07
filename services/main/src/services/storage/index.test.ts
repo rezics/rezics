@@ -9,10 +9,11 @@ describe("R2-compatible storage requests", () => {
 				Key: "image-objects/asset-id/original",
 				ContentLength: 5,
 				ContentType: "image/png",
+				IfNoneMatch: "*",
 				Metadata: {
 					image_asset_id: "asset-id",
 					image_object_id: "object-id",
-					uploader_profile_id: "profile-id",
+					uploader_auth_user_id: "profile-id",
 				},
 			}),
 		);
@@ -20,9 +21,10 @@ describe("R2-compatible storage requests", () => {
 
 		expect(signedHeaders).toEqual(
 			expect.arrayContaining([
+				"if-none-match",
 				"x-amz-meta-image_asset_id",
 				"x-amz-meta-image_object_id",
-				"x-amz-meta-uploader_profile_id",
+				"x-amz-meta-uploader_auth_user_id",
 			]),
 		);
 		expect(signedHeaders).not.toContain("x-amz-tagging");

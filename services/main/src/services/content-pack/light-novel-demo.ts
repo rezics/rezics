@@ -11,10 +11,7 @@ import { TopLevelSlugNamespaceUnitIds } from "@rezics/slug";
 import { and, eq, isNull } from "drizzle-orm";
 
 import { completeImageAsset, createImageAsset } from "../api/image-assets/service";
-import {
-	BootstrapPlatformAdministratorProfile,
-	OfficialProfileIds,
-} from "../bootstrap/data";
+import { BootstrapPlatformAdministratorProfile, OfficialProfileIds } from "../bootstrap/data";
 import { env } from "../config";
 import { putCustomThemeInstallation } from "../custom-themes/presentation";
 import { validateSubmittedCustomThemePackage } from "../custom-themes/package";
@@ -84,7 +81,7 @@ async function findLightNovelZoneId(): Promise<string> {
 async function uploadBannerIfPresent(
 	exportDir: string,
 	hostUnitId: string,
-	ownerProfileId: string,
+	ownerAuthUserId: string,
 ): Promise<string | null> {
 	const [current] = await database
 		.select({ appearanceDocument: zone.appearanceDocument })
@@ -105,12 +102,14 @@ async function uploadBannerIfPresent(
 			fileName = "catalog-banner.webp";
 			bytes = await readFile(join(exportDir, fileName));
 		} catch {
-			console.info("No local light-novel banner export found; installing the theme without a hero.");
+			console.info(
+				"No local light-novel banner export found; installing the theme without a hero.",
+			);
 			return null;
 		}
 	}
 	const contentType = mimeFromExportName(fileName);
-	const created = await createImageAsset(ownerProfileId, {
+	const created = await createImageAsset(ownerAuthUserId, {
 		contentType,
 		size: bytes.byteLength,
 		access: "public",
@@ -125,10 +124,10 @@ async function uploadBannerIfPresent(
 		Metadata: {
 			image_asset_id: created.id,
 			image_object_id: objectId,
-			uploader_profile_id: ownerProfileId,
+			uploader_auth_user_id: ownerAuthUserId,
 		},
 	});
-	const completed = await completeImageAsset(ownerProfileId, created.id, { role: "banner" });
+	const completed = await completeImageAsset(ownerAuthUserId, created.id, { role: "banner" });
 	const nextAppearance: ZoneAppearance = { ...appearance, heroAssetId: completed.id };
 	await database
 		.update(zone)
@@ -140,7 +139,11 @@ async function uploadBannerIfPresent(
 async function installTheme(
 	hostUnitId: string,
 	themeDir: string,
-): Promise<{ readonly themeUnitId: string; readonly revisionId: string; readonly reused: boolean }> {
+): Promise<{
+	readonly themeUnitId: string;
+	readonly revisionId: string;
+	readonly reused: boolean;
+}> {
 	const pack = await buildLightNovelDemoThemePackage(themeDir);
 	const validated = validateSubmittedCustomThemePackage(pack);
 	const [installed] = await database
@@ -187,7 +190,8 @@ async function installTheme(
 				),
 			)
 			.returning({ id: customThemeRevision.id });
-		if (!humanReady) throw new Error("Local Custom Theme revision was not pending automated review");
+		if (!humanReady)
+			throw new Error("Local Custom Theme revision was not pending automated review");
 		const now = new Date();
 		const [approved] = await tx
 			.update(customThemeRevision)
@@ -198,7 +202,8 @@ async function installTheme(
 				reviewedAt: now,
 				reviewEvidence: evidence,
 				reviewEvidenceSha256: evidenceSha256,
-				decisionReason: "Local disposable development install; automated browser review is skipped.",
+				decisionReason:
+					"Local disposable development install; automated browser review is skipped.",
 			})
 			.where(
 				and(
@@ -232,7 +237,7 @@ export class LightNovelDemoService {
 		const bannerAssetId = await uploadBannerIfPresent(
 			join(packsRoot, "assets/demo/light-novel/export"),
 			hostUnitId,
-			BootstrapPlatformAdministratorProfile.profileId,
+			BootstrapPlatformAdministratorProfile.authUserId,
 		);
 		const theme = await installTheme(hostUnitId, join(packsRoot, "tools/light-novel-theme"));
 		return { hostUnitId, bannerAssetId, ...theme };

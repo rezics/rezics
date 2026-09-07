@@ -262,6 +262,3 @@ export const AddCollectionItemsBatchResponse = t.Object({
 	),
 	latestItemsRevisionId: Uuid,
 });
-
-export const FavoriteItemParams = t.Object({ targetId: Uuid });
-export type FavoriteItemParams = StaticDecode<typeof FavoriteItemParams>;

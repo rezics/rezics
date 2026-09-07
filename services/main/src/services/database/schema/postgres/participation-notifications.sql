@@ -8,6 +8,9 @@ DECLARE
     boundary_created_at timestamp(3) with time zone;
     boundary_id uuid;
 BEGIN
+    IF NEW.actor_profile_id IS NOT NULL AND EXISTS(SELECT 1 FROM public.auth_entity WHERE auth_user_id = NEW.recipient_auth_user_id AND entity_id = NEW.actor_profile_id) THEN
+      RAISE EXCEPTION 'An account does not notify itself as its own Entity' USING ERRCODE = '23514', CONSTRAINT = 'notification_not_self';
+    END IF;
     PERFORM pg_advisory_xact_lock(
         hashtextextended('notification-recipient:' || NEW.recipient_auth_user_id::text, 0)
     );

@@ -1,3 +1,5 @@
+import { SQL } from "drizzle-orm";
+import { PgDialect } from "drizzle-orm/pg-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const databaseSelect = vi.hoisted(() => vi.fn());
@@ -13,7 +15,7 @@ vi.mock("../realms/service", () => ({
 	acknowledgeCurrentRealmRulesOnFollow: vi.fn(),
 }));
 
-import { profileRealmTagSubscription, unitFollowNotificationPreference } from "../database/schema";
+import { accountRealmTagSubscription, unitFollowNotificationPreference } from "../database/schema";
 import { FollowingTargetKindMismatch } from "./errors";
 import { getFollowingStatus, replaceFollowingSettings } from "./service";
 
@@ -94,11 +96,15 @@ describe("following settings", () => {
 					});
 					return { onConflictDoUpdate: preferenceConflict };
 				}
-				expect(table).toBe(profileRealmTagSubscription);
-				expect(values).toEqual({
-					profileId: FollowerProfileId,
-					realmId: TargetUnitId,
-				});
+				expect(table).toBe(accountRealmTagSubscription);
+				expect(values.realmId).toBe(TargetUnitId);
+				expect(values.authUserId).toBeInstanceOf(SQL);
+				if (!(values.authUserId instanceof SQL))
+					throw new Error("Expected an Auth self binding query");
+				const binding = new PgDialect().sqlToQuery(values.authUserId);
+				expect(binding.sql).toContain("auth_entity");
+				expect(binding.sql).toContain("auth_user_id");
+				expect(binding.params).toEqual([FollowerProfileId]);
 				return { onConflictDoNothing: tagConflict };
 			}),
 		}));
@@ -139,7 +145,7 @@ describe("following settings", () => {
 		const preferenceConflict = vi.fn(async () => undefined);
 		const deleteWhere = vi.fn(async () => undefined);
 		const remove = vi.fn((table) => {
-			expect(table).toBe(profileRealmTagSubscription);
+			expect(table).toBe(accountRealmTagSubscription);
 			return { where: deleteWhere };
 		});
 		transaction.mockImplementation(async (operation) =>

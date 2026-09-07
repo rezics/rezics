@@ -1,10 +1,11 @@
-import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, or, sql, type SQLWrapper } from "drizzle-orm";
 import { fileTypeFromBuffer } from "file-type";
 import sharp from "sharp";
 
 import { env } from "../../config";
-import type { DatabaseTransaction } from "../../database";
+import type { DatabaseTransaction, DatabaseExecutor } from "../../database";
 import { database } from "../../database";
+import { withImageAssetWrite } from "../../image-assets/write";
 import {
 	imageAsset,
 	imageAssetPresentation,
@@ -46,12 +47,12 @@ export function imageAssetContentUrl(assetId: string): string {
 export function imageObjectTracking(input: {
 	assetId: string;
 	objectId: string;
-	uploaderProfileId: string;
+	uploaderAuthUserId: string;
 }) {
 	return {
 		image_asset_id: input.assetId,
 		image_object_id: input.objectId,
-		uploader_profile_id: input.uploaderProfileId,
+		uploader_auth_user_id: input.uploaderAuthUserId,
 	};
 }
 
@@ -61,15 +62,16 @@ export function imageObjectUploadHeaders(
 ) {
 	return {
 		"Content-Type": contentType,
+		"If-None-Match": "*",
 		"x-amz-meta-image_asset_id": tracking.image_asset_id,
 		"x-amz-meta-image_object_id": tracking.image_object_id,
-		"x-amz-meta-uploader_profile_id": tracking.uploader_profile_id,
+		"x-amz-meta-uploader_auth_user_id": tracking.uploader_auth_user_id,
 	};
 }
 
 const selection = {
 	id: imageAsset.id,
-	ownerProfileId: imageAsset.ownerProfileId,
+	ownerAuthUserId: imageAsset.ownerAuthUserId,
 	status: imageAsset.status,
 	access: imageAsset.access,
 	deletedAt: imageAsset.deletedAt,
@@ -83,9 +85,9 @@ const selection = {
 	updatedAt: imageAsset.updatedAt,
 };
 
-export async function findImageAsset(assetId: string) {
+export async function findImageAsset(assetId: string, executor: DatabaseExecutor = database) {
 	return (
-		await database
+		await executor
 			.select(selection)
 			.from(imageAsset)
 			.innerJoin(imageObject, eq(imageObject.assetId, imageAsset.id))
@@ -136,8 +138,8 @@ function presentImageAssetPresentation(
 	};
 }
 
-async function listImageAssetPresentations(assetId: string) {
-	const rows = await database
+async function listImageAssetPresentations(assetId: string, executor: DatabaseExecutor = database) {
+	const rows = await executor
 		.select(presentationSelection)
 		.from(imageAssetPresentation)
 		.where(eq(imageAssetPresentation.assetId, assetId))
@@ -148,9 +150,10 @@ async function listImageAssetPresentations(assetId: string) {
 export async function findImageAssetPresentation(
 	assetId: string,
 	role: ImageAssetPresentationRole,
+	executor: DatabaseExecutor = database,
 ) {
 	return (
-		await database
+		await executor
 			.select(presentationSelection)
 			.from(imageAssetPresentation)
 			.where(
@@ -160,9 +163,9 @@ export async function findImageAssetPresentation(
 	)[0];
 }
 
-async function presentImageAsset(asset: FoundImageAsset) {
+async function presentImageAsset(asset: FoundImageAsset, executor: DatabaseExecutor = database) {
 	const {
-		ownerProfileId: _ownerProfileId,
+		ownerAuthUserId: _ownerAuthUserId,
 		storageKey: _storageKey,
 		objectId: _objectId,
 		deletedAt: _deletedAt,
@@ -171,18 +174,18 @@ async function presentImageAsset(asset: FoundImageAsset) {
 	return {
 		...row,
 		contentUrl: imageAssetContentUrl(asset.id),
-		presentations: await listImageAssetPresentations(asset.id),
+		presentations: await listImageAssetPresentations(asset.id, executor),
 	};
 }
 
-export async function createImageAsset(profileId: string, input: CreateImageAssetBody) {
+export async function createImageAsset(authUserId: string, input: CreateImageAssetBody) {
 	if (!allowedTypes.has(input.contentType)) throw new ImageAssetUnsupportedType();
 	const created = await database.transaction(async (tx) => {
 		const [asset] = await tx
 			.insert(imageAsset)
 			.values({
-				uploaderProfileId: profileId,
-				ownerProfileId: profileId,
+				uploaderAuthUserId: authUserId,
+				ownerAuthUserId: authUserId,
 				access: input.access ?? "private",
 			})
 			.returning({
@@ -205,7 +208,7 @@ export async function createImageAsset(profileId: string, input: CreateImageAsse
 	const tracking = imageObjectTracking({
 		assetId: created.id,
 		objectId: created.objectId,
-		uploaderProfileId: profileId,
+		uploaderAuthUserId: authUserId,
 	});
 	const headers = imageObjectUploadHeaders(tracking, input.contentType);
 	const url = await storage.presignPut(
@@ -214,6 +217,7 @@ export async function createImageAsset(profileId: string, input: CreateImageAsse
 			ContentType: input.contentType,
 			ContentLength: input.size,
 			Metadata: tracking,
+			IfNoneMatch: "*",
 		},
 		env.S3_PRESIGN_EXPIRES_IN,
 	);
@@ -233,9 +237,9 @@ export async function createImageAsset(profileId: string, input: CreateImageAsse
 	};
 }
 
-async function markFailed(assetId: string, storageKey: string) {
+async function markFailed(tx: DatabaseTransaction, assetId: string, storageKey: string) {
 	await storage.delete({ Key: storageKey }).catch(() => undefined);
-	await database
+	await tx
 		.update(imageAsset)
 		.set({ status: "failed" })
 		.where(and(eq(imageAsset.id, assetId), eq(imageAsset.status, "pending")));
@@ -262,101 +266,103 @@ async function ensureDefaultPresentation(
 }
 
 export async function completeImageAsset(
-	profileId: string,
+	authUserId: string,
 	assetId: string,
 	input: CompleteImageAssetBody,
 ) {
-	const asset = await findImageAsset(assetId);
-	if (!asset || asset.ownerProfileId !== profileId) throw new ImageAssetNotFound();
-	if (asset.status === "ready") {
-		const { width, height } = asset;
-		if (!width || !height) throw new ImageAssetInvalidState();
-		await database.transaction((tx) =>
-			ensureDefaultPresentation(tx, asset.id, input.role, width, height),
-		);
-		return presentImageAsset(asset);
-	}
-	if (asset.status !== "pending") throw new ImageAssetInvalidState();
+	return withImageAssetWrite(authUserId, assetId, async (tx) => {
+		const asset = await findImageAsset(assetId, tx);
+		if (!asset || asset.ownerAuthUserId !== authUserId) throw new ImageAssetNotFound();
+		if (asset.status === "ready") {
+			const { width, height } = asset;
+			if (!width || !height) throw new ImageAssetInvalidState();
+			await tx.transaction((tx) =>
+				ensureDefaultPresentation(tx, asset.id, input.role, width, height),
+			);
+			return presentImageAsset(asset, tx);
+		}
+		if (asset.status !== "pending") throw new ImageAssetInvalidState();
 
-	let head;
-	try {
-		head = await storage.head({ Key: asset.storageKey });
-	} catch (error) {
-		if (!isStorageNotFound(error)) throw error;
-		throw new ImageAssetUploadNotFound();
-	}
-	if (!head.ContentLength || head.ContentLength > maximumImageBytes) {
-		await markFailed(asset.id, asset.storageKey);
-		throw new ImageAssetInvalidSize();
-	}
-	const expectedTracking = imageObjectTracking({
-		assetId: asset.id,
-		objectId: asset.objectId,
-		uploaderProfileId: profileId,
-	});
-	if (Object.entries(expectedTracking).some(([key, value]) => head.Metadata?.[key] !== value)) {
-		await markFailed(asset.id, asset.storageKey);
-		throw new ImageAssetContentMismatch();
-	}
-	const object = await storage.get({ Key: asset.storageKey });
-	const bytes = await object.Body?.transformToByteArray();
-	const detected = bytes ? await fileTypeFromBuffer(bytes) : undefined;
-	if (
-		!bytes ||
-		!detected ||
-		!allowedTypes.has(detected.mime) ||
-		detected.mime !== head.ContentType
-	) {
-		await markFailed(asset.id, asset.storageKey);
-		throw new ImageAssetContentMismatch();
-	}
-	let metadata;
-	try {
-		metadata = await sharp(bytes, {
-			animated: false,
-			limitInputPixels: maximumImagePixels,
-		}).metadata();
-	} catch {
-		await markFailed(asset.id, asset.storageKey);
-		throw new ImageAssetInvalidSize();
-	}
-	let width = metadata.width;
-	let height = metadata.height;
-	if ([5, 6, 7, 8].includes(metadata.orientation ?? 0)) [width, height] = [height, width];
-	if (
-		!width ||
-		!height ||
-		!Number.isSafeInteger(width) ||
-		!Number.isSafeInteger(height) ||
-		width > maximumImageDimension ||
-		height > maximumImageDimension ||
-		width * height > maximumImagePixels
-	) {
-		await markFailed(asset.id, asset.storageKey);
-		throw new ImageAssetInvalidSize();
-	}
+		let head;
+		try {
+			head = await storage.head({ Key: asset.storageKey });
+		} catch (error) {
+			if (!isStorageNotFound(error)) throw error;
+			throw new ImageAssetUploadNotFound();
+		}
+		if (!head.ContentLength || head.ContentLength > maximumImageBytes) {
+			await markFailed(tx, asset.id, asset.storageKey);
+			throw new ImageAssetInvalidSize();
+		}
+		const expectedTracking = imageObjectTracking({
+			assetId: asset.id,
+			objectId: asset.objectId,
+			uploaderAuthUserId: authUserId,
+		});
+		if (Object.entries(expectedTracking).some(([key, value]) => head.Metadata?.[key] !== value)) {
+			await markFailed(tx, asset.id, asset.storageKey);
+			throw new ImageAssetContentMismatch();
+		}
+		const object = await storage.get({ Key: asset.storageKey });
+		const bytes = await object.Body?.transformToByteArray();
+		const detected = bytes ? await fileTypeFromBuffer(bytes) : undefined;
+		if (
+			!bytes ||
+			!detected ||
+			!allowedTypes.has(detected.mime) ||
+			detected.mime !== head.ContentType
+		) {
+			await markFailed(tx, asset.id, asset.storageKey);
+			throw new ImageAssetContentMismatch();
+		}
+		let metadata;
+		try {
+			metadata = await sharp(bytes, {
+				animated: false,
+				limitInputPixels: maximumImagePixels,
+			}).metadata();
+		} catch {
+			await markFailed(tx, asset.id, asset.storageKey);
+			throw new ImageAssetInvalidSize();
+		}
+		let width = metadata.width;
+		let height = metadata.height;
+		if ([5, 6, 7, 8].includes(metadata.orientation ?? 0)) [width, height] = [height, width];
+		if (
+			!width ||
+			!height ||
+			!Number.isSafeInteger(width) ||
+			!Number.isSafeInteger(height) ||
+			width > maximumImageDimension ||
+			height > maximumImageDimension ||
+			width * height > maximumImagePixels
+		) {
+			await markFailed(tx, asset.id, asset.storageKey);
+			throw new ImageAssetInvalidSize();
+		}
 
-	await database.transaction(async (tx) => {
-		await tx
-			.update(imageObject)
-			.set({ mediaType: detected.mime, byteSize: head.ContentLength, width, height })
-			.where(eq(imageObject.assetId, asset.id));
-		const [ready] = await tx
-			.update(imageAsset)
-			.set({ status: "ready" })
-			.where(and(eq(imageAsset.id, asset.id), eq(imageAsset.status, "pending")))
-			.returning({ id: imageAsset.id });
-		if (!ready) throw new ImageAssetInvalidState();
-		await ensureDefaultPresentation(tx, asset.id, input.role, width, height);
+		await tx.transaction(async (tx) => {
+			await tx
+				.update(imageObject)
+				.set({ mediaType: detected.mime, byteSize: head.ContentLength, width, height })
+				.where(eq(imageObject.assetId, asset.id));
+			const [ready] = await tx
+				.update(imageAsset)
+				.set({ status: "ready" })
+				.where(and(eq(imageAsset.id, asset.id), eq(imageAsset.status, "pending")))
+				.returning({ id: imageAsset.id });
+			if (!ready) throw new ImageAssetInvalidState();
+			await ensureDefaultPresentation(tx, asset.id, input.role, width, height);
+		});
+		const completed = await findImageAsset(asset.id, tx);
+		if (!completed) throw new ImageAssetNotFound();
+		return presentImageAsset(completed, tx);
 	});
-	const completed = await findImageAsset(asset.id);
-	if (!completed) throw new ImageAssetNotFound();
-	return presentImageAsset(completed);
 }
 
-export async function getOwnedImageAsset(profileId: string, assetId: string) {
+export async function getOwnedImageAsset(authUserId: string, assetId: string) {
 	const asset = await findImageAsset(assetId);
-	if (!asset || asset.ownerProfileId !== profileId) throw new ImageAssetNotFound();
+	if (!asset || asset.ownerAuthUserId !== authUserId) throw new ImageAssetNotFound();
 	return presentImageAsset(asset);
 }
 
@@ -425,7 +431,7 @@ export async function ensurePublicZoneThemeHeroAsset(
 /** Validate localization images, including their role presentation, in one ownership query. */
 export async function ensureImageAssetsAttachable(
 	tx: DatabaseTransaction,
-	profileId: string,
+	authUserId: string | SQLWrapper,
 	references: readonly ImageAssetPresentationReference[],
 ): Promise<void> {
 	const requested = [
@@ -442,7 +448,7 @@ export async function ensureImageAssetsAttachable(
 		.innerJoin(imageAssetPresentation, eq(imageAssetPresentation.assetId, imageAsset.id))
 		.where(
 			and(
-				eq(imageAsset.ownerProfileId, profileId),
+				eq(imageAsset.ownerAuthUserId, authUserId),
 				eq(imageAsset.status, "ready"),
 				isNull(imageAsset.deletedAt),
 				or(
@@ -456,53 +462,58 @@ export async function ensureImageAssetsAttachable(
 }
 
 export async function upsertImageAssetPresentation(
-	profileId: string,
+	authUserId: string,
 	assetId: string,
 	role: ImageAssetPresentationRole,
 	input: UpsertImageAssetPresentationBody,
 ) {
-	const asset = await findImageAsset(assetId);
-	if (!asset || asset.ownerProfileId !== profileId) throw new ImageAssetNotFound();
-	if (asset.status !== "ready" || !asset.width || !asset.height) throw new ImageAssetInvalidState();
-	const validated = validateImageAssetPresentation(role, asset.width, asset.height, input);
-	const columns = toImageAssetPresentationColumns(validated);
-	const [stored] = await database
-		.insert(imageAssetPresentation)
-		.values({
-			assetId,
-			role,
-			...columns,
-		})
-		.onConflictDoUpdate({
-			target: [imageAssetPresentation.assetId, imageAssetPresentation.role],
-			set: {
+	return withImageAssetWrite(authUserId, assetId, async (tx) => {
+		const asset = await findImageAsset(assetId, tx);
+		if (!asset || asset.ownerAuthUserId !== authUserId) throw new ImageAssetNotFound();
+		if (asset.status !== "ready" || !asset.width || !asset.height)
+			throw new ImageAssetInvalidState();
+		const validated = validateImageAssetPresentation(role, asset.width, asset.height, input);
+		const columns = toImageAssetPresentationColumns(validated);
+		const [stored] = await tx
+			.insert(imageAssetPresentation)
+			.values({
+				assetId,
+				role,
 				...columns,
-				revision: sql`${imageAssetPresentation.revision} + 1`,
-				updatedAt: new Date(),
-			},
-			setWhere: sql`
+			})
+			.onConflictDoUpdate({
+				target: [imageAssetPresentation.assetId, imageAssetPresentation.role],
+				set: {
+					...columns,
+					revision: sql`${imageAssetPresentation.revision} + 1`,
+					updatedAt: new Date(),
+				},
+				setWhere: sql`
 				${imageAssetPresentation.fit} is distinct from ${columns.fit}
 				or ${imageAssetPresentation.cropX} is distinct from ${columns.cropX}
 				or ${imageAssetPresentation.cropY} is distinct from ${columns.cropY}
 				or ${imageAssetPresentation.cropWidth} is distinct from ${columns.cropWidth}
 				or ${imageAssetPresentation.cropHeight} is distinct from ${columns.cropHeight}
 			`,
-		})
-		.returning(presentationSelection);
-	const effective = stored ?? (await findImageAssetPresentation(assetId, role));
-	if (!effective) throw new ImageAssetInvalidPresentation();
-	return presentImageAssetPresentation(assetId, effective);
+			})
+			.returning(presentationSelection);
+		const effective = stored ?? (await findImageAssetPresentation(assetId, role, tx));
+		if (!effective) throw new ImageAssetInvalidPresentation();
+		return presentImageAssetPresentation(assetId, effective);
+	});
 }
 
-export async function deletePendingImageAsset(profileId: string, assetId: string) {
-	const asset = await findImageAsset(assetId);
-	if (!asset || asset.ownerProfileId !== profileId) throw new ImageAssetNotFound();
-	if (asset.status === "ready") throw new ImageAssetInUse();
-	await storage.delete({ Key: asset.storageKey }).catch((error: unknown) => {
-		if (!isStorageNotFound(error)) throw error;
+export async function deletePendingImageAsset(authUserId: string, assetId: string) {
+	return withImageAssetWrite(authUserId, assetId, async (tx) => {
+		const asset = await findImageAsset(assetId, tx);
+		if (!asset || asset.ownerAuthUserId !== authUserId) throw new ImageAssetNotFound();
+		if (asset.status === "ready") throw new ImageAssetInUse();
+		await storage.delete({ Key: asset.storageKey }).catch((error: unknown) => {
+			if (!isStorageNotFound(error)) throw error;
+		});
+		await tx
+			.update(imageAsset)
+			.set({ deletedAt: new Date() })
+			.where(and(eq(imageAsset.id, asset.id), isNull(imageAsset.deletedAt)));
 	});
-	await database
-		.update(imageAsset)
-		.set({ deletedAt: new Date() })
-		.where(and(eq(imageAsset.id, asset.id), isNull(imageAsset.deletedAt)));
 }

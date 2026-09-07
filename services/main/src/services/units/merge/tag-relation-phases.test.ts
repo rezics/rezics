@@ -27,7 +27,7 @@ const Transaction = { execute } as unknown as DatabaseTransaction;
 const Dialect = new PgDialect();
 
 async function phaseSql(
-	phase: Extract<UnitMergeOperationPhase, "unit_tags" | "realm_unit_tags" | "profile_unit_tags">,
+	phase: Extract<UnitMergeOperationPhase, "unit_tags" | "realm_unit_tags" | "account_unit_tags">,
 ): Promise<string> {
 	await processUnitMergePhase(Transaction, phase, {
 		operationId: OperationId,
@@ -88,10 +88,10 @@ describe("Unit merge Tag-relation convergence", () => {
 
 	it.each([
 		{
-			phase: "profile_unit_tags" as const,
-			conflict: "on conflict (profile_id, unit_id, tag_id) do nothing",
-			preserved: "select profile_id, $3::uuid, tag_id, position, created_at, updated_at from batch",
-			delete: "delete from profile_unit_tag as relation using ensured_targets",
+			phase: "account_unit_tags" as const,
+			conflict: "on conflict (auth_user_id, unit_id, tag_id) do nothing",
+			preserved: "select auth_user_id, $3::uuid, tag_id, position, created_at, updated_at from batch",
+			delete: "delete from account_unit_tag as relation using ensured_targets",
 		},
 		{
 			phase: "realm_unit_tags" as const,

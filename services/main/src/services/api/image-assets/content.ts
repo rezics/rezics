@@ -14,8 +14,9 @@ async function authorizeImageAsset(
 	asset: NonNullable<Awaited<ReturnType<typeof findImageAsset>>>,
 ): Promise<void> {
 	if (asset.access === "private") {
-		const viewer = (await resolveIdentity(request, "upload:read")).entity;
-		if (viewer?.id !== asset.ownerProfileId) throw new ImageAssetNotFound();
+		const viewer = await resolveIdentity(request, "upload:read");
+		if (!("principal" in viewer) || viewer.principal.authUserId !== asset.ownerAuthUserId)
+			throw new ImageAssetNotFound();
 	}
 }
 

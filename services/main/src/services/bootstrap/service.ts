@@ -15,7 +15,7 @@ import { ensureCuratedCreationTagCollections } from "./installation/collections"
 import { ensureContentLabelRegistry } from "./installation/content-labels";
 import { ensureSlugNamespaces } from "./installation/foundation";
 import { ensureBootstrapPlatformAccess } from "./installation/platform-access";
-import { ensureBootstrapProfileFavorites, ensureBootstrapProfiles } from "./installation/profiles";
+import { ensureBootstrapProfiles } from "./installation/profiles";
 import {
 	ensureBootstrapRealm,
 	ensureOfficialRealmAvatar,
@@ -52,7 +52,6 @@ async function ensurePlatform(): Promise<PlatformInstallationResult> {
 		}
 		await ensureSlugNamespaces(tx);
 		const issuedCredentials = await ensureBootstrapProfiles(tx);
-		await ensureBootstrapProfileFavorites(tx);
 		await ensureContentLabelRegistry(tx);
 		await ensureCuratedCreationTagCollections(tx);
 		await ensureBootstrapPlatformAccess(tx);

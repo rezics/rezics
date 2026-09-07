@@ -90,7 +90,7 @@ export async function ensureSelfEntityInTransaction(
 		names: publicName ? [{ language: account.language, value: publicName }] : [],
 	});
 	await tx.insert(authEntity).values({ authUserId: account.id, entityId: entity.id });
-	if (initializeDefaults) await initializeAccountParticipation(tx, entity.id);
+	if (initializeDefaults) await initializeAccountParticipation(tx, entity.id, account.id);
 	return {
 		id: entity.id,
 		name: publicName,

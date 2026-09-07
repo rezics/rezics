@@ -1,3 +1,4 @@
+import { selfAuthUserIdForEntity } from "../participation/account-query";
 import type {
 	BookFilter,
 	CollectionFilter,
@@ -244,10 +245,10 @@ function tagAssertionCondition(
 			viewerProfileId
 				? sql`exists (
 					select 1
-					from profile_unit_tag filter_profile_tag
+					from account_unit_tag filter_profile_tag
 					join unit filter_tag on filter_tag.id = filter_profile_tag.tag_id
 					where filter_profile_tag.unit_id = ${unitId}
-						and filter_profile_tag.profile_id = ${viewerProfileId}::uuid
+						and filter_profile_tag.auth_user_id = ${selfAuthUserIdForEntity(viewerProfileId)}
 						and ${tagReference(sql`filter_profile_tag.tag_id`, sql`filter_tag.kind`)}
 				)`
 				: sql`false`,
@@ -508,8 +509,8 @@ function tagAssertionCandidateSet(
 				])}`);
 	} else if (viewerProfileId) {
 		conjunctiveSets.push(sql`select filter_profile_tag.unit_id
-			from profile_unit_tag filter_profile_tag
-			where filter_profile_tag.profile_id = ${viewerProfileId}::uuid
+			from account_unit_tag filter_profile_tag
+			where filter_profile_tag.auth_user_id = ${selfAuthUserIdForEntity(viewerProfileId)}
 				and ${tagIds ? valuesCondition(sql`filter_profile_tag.tag_id`, tagIds, true) : sql`true`}`);
 	}
 	return combineCandidateSets(conjunctiveSets, "intersect");

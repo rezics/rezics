@@ -727,7 +727,6 @@ export const CollectionListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
-			purpose: t.UnionEnum(["collection", "favorites"]),
 			language: ContentLanguage,
 			itemCount: t.Integer(),
 			containsTarget: t.Boolean(),
@@ -1283,7 +1282,6 @@ export const CollectionDetailResponse = t.Object({
 	status: t.String(),
 	visibility: t.String(),
 	language: ContentLanguage,
-	purpose: t.UnionEnum(["collection", "favorites"]),
 	itemCount: t.Integer(),
 	attributions: t.Array(UnitAttributionSummaryResponse),
 	cover: ImageAssetResponse,

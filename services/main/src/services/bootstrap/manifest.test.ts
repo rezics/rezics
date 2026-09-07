@@ -61,18 +61,6 @@ describe("database bootstrap manifest", () => {
 		}
 	});
 
-	it("reserves one stable Favorites Collection identity for every bootstrap Profile", () => {
-		expect(BootstrapProfileManifest.map((profile) => profile.favoritesCollectionId)).toEqual([
-			"019b76da-a800-7250-8000-000000000001",
-			"019b76da-a800-7250-8000-000000000002",
-			"019b76da-a800-7250-8000-000000000003",
-			"019b76da-a800-7250-8000-000000000004",
-		]);
-		for (const profile of BootstrapProfileManifest) {
-			expect(BootstrapUnitIds).toContain(profile.favoritesCollectionId);
-		}
-	});
-
 	it("reserves the seven curated creation Tag Collections as ordinary Collections", () => {
 		expect(CuratedCreationTagCollectionManifest.map((value) => value.key)).toEqual([
 			"book.form",
@@ -107,9 +95,13 @@ describe("database bootstrap manifest", () => {
 		expect(BootstrapPlatformAdministratorProfile.capabilities).toContain(
 			CustomThemeExternalLiveAccessCapability,
 		);
-		expect(BootstrapPlatformAccessManifest).toContainEqual(
-			expect.objectContaining({ capabilities: ["platform.moderate"] }),
-		);
+		expect(BootstrapPlatformAccessManifest).toEqual([
+			{
+				authUserId: BootstrapPlatformAdministratorProfile.authUserId,
+				grantedByAuthUserId: BootstrapPlatformAdministratorProfile.authUserId,
+				capabilities: BootstrapPlatformAdministratorProfile.capabilities,
+			},
+		]);
 	});
 
 	it("bootstraps the five official work experiences as renderable Zones", () => {

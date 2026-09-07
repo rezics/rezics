@@ -42,6 +42,7 @@ export * from "./dock";
 export * from "./dock-history";
 export * from "./entity";
 export * from "./follow";
+export * from "./favorites";
 export * from "./governance";
 export * from "./history";
 export * from "./image";

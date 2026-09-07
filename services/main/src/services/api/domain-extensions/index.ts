@@ -1,3 +1,4 @@
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 import {
 	CustomThemeExternalLiveAccessCapability,
 	DevelopmentPreviewCapability,
@@ -221,7 +222,7 @@ async function createBaseUnit(
 ) {
 	await ensureImageAssetsAttachable(
 		tx,
-		input.ownerId,
+		selfAuthUserIdForEntity(input.ownerId),
 		unitLocalizationImageAssetReferences(input.localization),
 	);
 	const created = await insertUnit(tx, {
@@ -1047,7 +1048,7 @@ export default new Elysia()
 							const storedLocalization = toUnitLocalizationStorage(body.localization);
 							await ensureImageAssetsAttachable(
 								tx,
-								entity.id,
+								selfAuthUserIdForEntity(entity.id),
 								unitLocalizationImageAssetReferences(body.localization),
 							);
 							await tx

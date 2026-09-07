@@ -13,7 +13,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { entityIdentity } from "./catalog-identity";
+import { users } from "./auth";
 import {
 	createCreatedAtColumn,
 	createTimestampMsColumn,
@@ -44,25 +44,40 @@ export const imageAsset = pgTable(
 	"image_asset",
 	{
 		id: createUuidv7PrimaryKey(),
-		uploaderProfileId: uuid()
+		uploaderAuthUserId: uuid()
 			.notNull()
-			.references(() => entityIdentity.id, { onDelete: "restrict" }),
-		ownerProfileId: uuid()
+			.references(() => users.id, { onDelete: "restrict" }),
+		ownerAuthUserId: uuid()
 			.notNull()
-			.references(() => entityIdentity.id, { onDelete: "restrict" }),
+			.references(() => users.id, { onDelete: "restrict" }),
 		status: imageAssetStatus().default("pending").notNull(),
 		access: imageAssetAccess().default("private").notNull(),
 		deletedAt: createTimestampMsColumn(),
+		contentErasedAt: createTimestampMsColumn(),
+		erasureFenceVersionId: text(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
 		index("image_asset_uploader_status_idx").on(
-			table.uploaderProfileId,
+			table.uploaderAuthUserId,
 			table.status,
 			table.createdAt,
 		),
-		index("image_asset_owner_status_idx").on(table.ownerProfileId, table.status, table.createdAt),
+		index("image_asset_owner_status_idx").on(table.ownerAuthUserId, table.status, table.createdAt),
+		index("image_asset_private_erasure_idx")
+			.on(table.ownerAuthUserId, table.id)
+			.where(
+				sql`${table.contentErasedAt} is null and (${table.access} = 'private' or ${table.status} <> 'ready')`,
+			),
+		check(
+			"image_asset_erasure_fence_check",
+			sql`${table.erasureFenceVersionId} is null or octet_length(${table.erasureFenceVersionId}) between 1 and 4096`,
+		),
+		check(
+			"image_asset_content_erasure_check",
+			sql`${table.contentErasedAt} is null or (${table.deletedAt} is not null and ${table.erasureFenceVersionId} is not null)`,
+		),
 		index("image_asset_cleanup_idx")
 			.on(table.status, table.createdAt, table.id)
 			.where(sql`${table.deletedAt} is null`),

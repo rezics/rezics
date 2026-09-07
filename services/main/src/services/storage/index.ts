@@ -1,6 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 import {
 	DeleteObjectCommand,
+	DeleteObjectsCommand,
+	GetBucketVersioningCommand,
+	ListObjectsV2Command,
+	ListObjectVersionsCommand,
 	GetObjectCommand,
 	HeadBucketCommand,
 	HeadObjectCommand,
@@ -17,7 +21,7 @@ type StorageObjectInput = Readonly<Pick<PutObjectCommandInput, "Key">>;
 type StoragePutInput = Readonly<
 	Pick<
 		PutObjectCommandInput,
-		"Body" | "CacheControl" | "ContentLength" | "ContentType" | "Key" | "Metadata"
+		"Body" | "CacheControl" | "ContentLength" | "ContentType" | "Key" | "Metadata" | "IfNoneMatch"
 	>
 >;
 
@@ -66,6 +70,62 @@ export const storage = {
 		);
 	},
 
+	/** Bounded erasure page includes historical versions when the bucket has ever enabled versioning. */
+	async listErasurePage(prefix: string) {
+		if (!/^image-objects\/[0-9a-f-]{36}\/$/u.test(prefix))
+			throw new Error("Image erasure prefix is invalid");
+		const r2 = new URL(env.S3_ENDPOINT).hostname.endsWith(".r2.cloudflarestorage.com");
+		const versioning = r2
+			? undefined
+			: await storageClient.send(new GetBucketVersioningCommand({ Bucket: env.S3_BUCKET }));
+		if (versioning?.Status === "Enabled" || versioning?.Status === "Suspended") {
+			const page = await storageClient.send(
+				new ListObjectVersionsCommand({ Bucket: env.S3_BUCKET, Prefix: prefix, MaxKeys: 500 }),
+			);
+			return {
+				truncated: page.IsTruncated ?? false,
+				objects: [
+					...(page.Versions ?? []).map((object) => ({
+						key: object.Key,
+						versionId: object.VersionId,
+						size: object.Size,
+					})),
+					...(page.DeleteMarkers ?? []).map((object) => ({
+						key: object.Key,
+						versionId: object.VersionId,
+						size: undefined,
+					})),
+				],
+			};
+		}
+		const page = await storageClient.send(
+			new ListObjectsV2Command({ Bucket: env.S3_BUCKET, Prefix: prefix, MaxKeys: 500 }),
+		);
+		return {
+			truncated: page.IsTruncated ?? false,
+			objects: (page.Contents ?? []).map((object) => ({
+				key: object.Key,
+				versionId: undefined,
+				size: object.Size,
+			})),
+		};
+	},
+	async deleteErasurePage(objects: readonly { key: string; versionId?: string }[]) {
+		if (!objects.length || objects.length > 500)
+			throw new Error("Object erasure batch must contain 1 to 500 objects");
+		const result = await storageClient.send(
+			new DeleteObjectsCommand({
+				Bucket: env.S3_BUCKET,
+				Delete: {
+					Quiet: true,
+					Objects: objects.map((object) => ({ Key: object.key, VersionId: object.versionId })),
+				},
+			}),
+		);
+		if (result.Errors?.length)
+			throw new Error(`Object erasure failed for ${result.Errors.length} objects`);
+	},
+
 	presignPut(input: StoragePutInput, expiresIn = env.S3_PRESIGN_EXPIRES_IN) {
 		const unhoistableHeaders = new Set(
 			Object.keys(input.Metadata ?? {}).map((key) => `x-amz-meta-${key.toLowerCase()}`),
@@ -73,6 +133,7 @@ export const storage = {
 		return getSignedUrl(storageClient, new PutObjectCommand({ ...input, Bucket: env.S3_BUCKET }), {
 			expiresIn,
 			unhoistableHeaders,
+			...(input.IfNoneMatch === "*" ? { signableHeaders: new Set(["if-none-match"]) } : {}),
 		});
 	},
 

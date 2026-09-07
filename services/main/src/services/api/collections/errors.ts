@@ -7,23 +7,4 @@ export class CollectionNotFound extends HTTPError.id("CollectionNotFound", Statu
 	override readonly message = "Collection not found";
 }
 
-export class FavoritesEditForbidden extends HTTPError.id(
-	"FavoritesEditForbidden",
-	StatusCodes.CONFLICT,
-) {
-	override readonly message = "Favorites cannot be edited";
-}
-
-export class FavoritesDeleteForbidden extends HTTPError.id(
-	"FavoritesDeleteForbidden",
-	StatusCodes.CONFLICT,
-) {
-	override readonly message = "Favorites cannot be deleted";
-}
-
-export const CollectionErrors = [
-	CollectionNotFound,
-	FavoritesEditForbidden,
-	FavoritesDeleteForbidden,
-	CollectionStructureRevisionConflict,
-] as const;
+export const CollectionErrors = [CollectionNotFound, CollectionStructureRevisionConflict] as const;

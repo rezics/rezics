@@ -1,8 +1,13 @@
 import { and, eq } from "drizzle-orm";
 
-import { ensureFixedFavoritesInTransaction } from "../../collections/favorites";
 import type { DatabaseTransaction } from "../../database";
-import { accountPreference, accounts, entityIdentity, users } from "../../database/schema";
+import {
+	accountPreference,
+	accountFavoritesState,
+	accounts,
+	entityIdentity,
+	users,
+} from "../../database/schema";
 import {
 	authEntity,
 	participationGrant,
@@ -103,6 +108,10 @@ export async function ensureBootstrapProfiles(
 			.insert(accountPreference)
 			.values({ authUserId: value.authUserId, createdAt, updatedAt: createdAt })
 			.onConflictDoNothing();
+	await tx
+		.insert(accountFavoritesState)
+		.values(BootstrapAccountManifest.map((value) => ({ authUserId: value.authUserId })))
+		.onConflictDoNothing();
 	for (const value of BootstrapProfileManifest) {
 		if (value.key === "platformAdministrator") continue;
 		for (const capability of ["entity.publish", "entity.membership", "entity.security"] as const) {
@@ -129,24 +138,13 @@ export async function ensureBootstrapProfiles(
 				})
 				.returning({ id: participationGrant.id });
 			if (!grant) throw new Error("Bootstrap Entity grant insertion failed");
-			await tx
-				.insert(participationGrantEvent)
-				.values({
-					grantId: grant.id,
-					revision: 1,
-					operation: "grant",
-					operatorAuthUserId: operator.authUserId,
-				});
+			await tx.insert(participationGrantEvent).values({
+				grantId: grant.id,
+				revision: 1,
+				operation: "grant",
+				operatorAuthUserId: operator.authUserId,
+			});
 		}
 	}
 	return issuedCredentials;
-}
-
-export async function ensureBootstrapProfileFavorites(tx: DatabaseTransaction): Promise<void> {
-	for (const bootstrapProfile of BootstrapAccountManifest)
-		await ensureFixedFavoritesInTransaction(tx, {
-			profileId: bootstrapProfile.profileId,
-			collectionId: bootstrapProfile.favoritesCollectionId,
-			createdAt: bootstrapEpoch(),
-		});
 }

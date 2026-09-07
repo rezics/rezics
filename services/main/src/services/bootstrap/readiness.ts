@@ -6,7 +6,6 @@ import { compareFractionalPositions, fractionalPositionAt } from "../ordering/po
 import { avatarReferenceToColumns } from "../units/localization";
 import {
 	BootstrapAccountIds,
-	BootstrapAccountManifest,
 	BootstrapAuthUserIds,
 	BootstrapPlatformAccessManifest,
 	BootstrapPlatformAdministratorProfile,
@@ -135,7 +134,6 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 		officialZoneNavigations,
 		officialRealmAvatar,
 		bootstrapProfiles,
-		profileFavorites,
 		profileScoreMemberships,
 		accountPreferences,
 		profileFollows,
@@ -287,16 +285,6 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 		officialRealmAvatar[0].byteSize > 0 &&
 		officialRealmAvatar[0]?.width === OfficialRealmAvatarAsset.width &&
 		officialRealmAvatar[0]?.height === OfficialRealmAvatarAsset.height &&
-		profileFavorites.length === bootstrapProfiles.length &&
-		bootstrapProfiles.every((targetProfile) =>
-			profileFavorites.some((favorites) => favorites.profileId === targetProfile.id),
-		) &&
-		BootstrapAccountManifest.every((expected) =>
-			profileFavorites.some(
-				(actual) =>
-					actual.profileId === expected.profileId && actual.id === expected.favoritesCollectionId,
-			),
-		) &&
 		bootstrapProfiles.every((targetProfile) =>
 			profileScoreMemberships.some((membership) => membership.profileId === targetProfile.id),
 		) &&

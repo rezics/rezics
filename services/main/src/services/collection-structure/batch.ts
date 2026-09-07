@@ -1,7 +1,7 @@
 import { and, eq, inArray } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
-import { collection, collectionItem, post, profileFavoritesCollection } from "../database/schema";
+import { collection, collectionItem, post } from "../database/schema";
 import { UnitNotFound } from "../units/errors";
 import { revisionedBatchChunks } from "../history/revisioned-batch";
 import { diffCollectionStructureSnapshots } from "./contracts";
@@ -11,25 +11,15 @@ import { planCollectionBatch, type CollectionBatchCommand } from "./batch-plan";
 
 export type CollectionBatchErrorFactory = {
 	readonly invalid: (message: string) => Error;
-	readonly favoritesEditForbidden: () => Error;
 };
 
-async function ensureEditableCollection(
-	tx: DatabaseTransaction,
-	collectionId: string,
-	errors: CollectionBatchErrorFactory,
-) {
+async function ensureEditableCollection(tx: DatabaseTransaction, collectionId: string) {
 	const [record] = await tx
-		.select({ id: collection.id, favoritesProfileId: profileFavoritesCollection.profileId })
+		.select({ id: collection.id })
 		.from(collection)
-		.leftJoin(
-			profileFavoritesCollection,
-			eq(profileFavoritesCollection.collectionId, collection.id),
-		)
 		.where(eq(collection.id, collectionId))
 		.limit(1);
 	if (!record) throw new UnitNotFound();
-	if (record.favoritesProfileId) throw errors.favoritesEditForbidden();
 }
 
 async function reviewSubjectsForTargets(
@@ -70,7 +60,7 @@ export async function applyCollectionBatch(
 			baseRevisionId: input.baseRevisionId,
 		},
 		async () => {
-			await ensureEditableCollection(tx, input.collectionId, input.errors);
+			await ensureEditableCollection(tx, input.collectionId);
 			const requestedTargetIds = input.commands.flatMap((command) =>
 				command.type === "item.add" ? [command.targetId] : [],
 			);

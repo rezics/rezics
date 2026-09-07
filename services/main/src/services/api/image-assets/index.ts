@@ -43,7 +43,7 @@ export default new Elysia({ prefix: "/image-assets" })
 			},
 			detail: { summary: "Create image asset upload", tags: ["Image Assets"] },
 		},
-		({ entity, body }) => createImageAsset(entity.id, body),
+		({ user, body }) => createImageAsset(user.id, body),
 	)
 	.post(
 		"/:id/complete",
@@ -63,7 +63,7 @@ export default new Elysia({ prefix: "/image-assets" })
 			},
 			detail: { summary: "Complete image asset upload", tags: ["Image Assets"] },
 		},
-		({ entity, params, body }) => completeImageAsset(entity.id, params.id, body),
+		({ user, params, body }) => completeImageAsset(user.id, params.id, body),
 	)
 	.put(
 		"/:id/presentations/:role",
@@ -80,8 +80,7 @@ export default new Elysia({ prefix: "/image-assets" })
 			},
 			detail: { summary: "Update image asset presentation", tags: ["Image Assets"] },
 		},
-		({ entity, params, body }) =>
-			upsertImageAssetPresentation(entity.id, params.id, params.role, body),
+		({ user, params, body }) => upsertImageAssetPresentation(user.id, params.id, params.role, body),
 	)
 	.get(
 		"/:id",
@@ -95,7 +94,7 @@ export default new Elysia({ prefix: "/image-assets" })
 			},
 			detail: { summary: "Get image asset", tags: ["Image Assets"] },
 		},
-		({ entity, params }) => getOwnedImageAsset(entity.id, params.id),
+		({ user, params }) => getOwnedImageAsset(user.id, params.id),
 	)
 	.delete(
 		"/:id",
@@ -114,8 +113,8 @@ export default new Elysia({ prefix: "/image-assets" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ entity, params, status }) => {
-			await deletePendingImageAsset(entity.id, params.id);
+		async ({ user, params, status }) => {
+			await deletePendingImageAsset(user.id, params.id);
 			return status(StatusCodes.NO_CONTENT, undefined);
 		},
 	);

@@ -19,8 +19,8 @@ import { storage } from "../../storage";
 import { recordUnitRevision } from "../../units/history";
 import {
 	BootstrapAccountManifest,
+	BootstrapPlatformAdministratorProfile,
 	BootstrapRealmManifest,
-	OfficialProfileIds,
 	OfficialRealmAvatarAsset,
 	RezicsScoreRealmManifest,
 	TopLevelSlugNamespaceUnitIds,
@@ -230,7 +230,7 @@ export async function ensureOfficialRealmAvatar(tx: DatabaseTransaction): Promis
 	const tracking = {
 		image_asset_id: OfficialRealmAvatarAsset.id,
 		image_object_id: OfficialRealmAvatarAsset.objectId,
-		uploader_profile_id: OfficialProfileIds.editorial,
+		uploader_auth_user_id: BootstrapPlatformAdministratorProfile.authUserId,
 	};
 	await storage.put({
 		Key: OfficialRealmAvatarAsset.storageKey,
@@ -241,8 +241,8 @@ export async function ensureOfficialRealmAvatar(tx: DatabaseTransaction): Promis
 	});
 	await tx.insert(imageAsset).values({
 		id: OfficialRealmAvatarAsset.id,
-		uploaderProfileId: OfficialProfileIds.editorial,
-		ownerProfileId: OfficialProfileIds.editorial,
+		uploaderAuthUserId: BootstrapPlatformAdministratorProfile.authUserId,
+		ownerAuthUserId: BootstrapPlatformAdministratorProfile.authUserId,
 		status: "ready",
 		access: "public",
 		createdAt,

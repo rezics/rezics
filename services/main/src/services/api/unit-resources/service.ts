@@ -1,3 +1,4 @@
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 import { eq } from "drizzle-orm";
 
 import { database } from "../../database";
@@ -45,7 +46,7 @@ export async function createUnitResource(
 	return database.transaction(async (tx) => {
 		await ensureImageAssetsAttachable(
 			tx,
-			ownerId,
+			selfAuthUserIdForEntity(ownerId),
 			unitLocalizationImageAssetReferences(body.localization),
 		);
 		const created = await insertUnit(tx, {

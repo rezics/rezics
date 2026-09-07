@@ -2,7 +2,6 @@ import { and, eq, inArray } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import type { StaticDecode } from "typebox";
-import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { getUnitReadCondition } from "../../authorization/unit/query";
@@ -137,16 +136,16 @@ const RecommendationWriteForbiddenResponse = toApiErrorResponse([
 	"AccountRestricted",
 ]);
 
-async function getEventProfileId(request: Request) {
+async function getEventAuthUserId(request: Request) {
 	const identity = await resolveIdentity(request, "recommendation:read");
-	const profileId = identity.entity?.id;
-	if (!profileId) return { identity, profileId: undefined };
+	const authUserId = "principal" in identity ? identity.principal.authUserId : undefined;
+	if (!authUserId) return { identity, authUserId: undefined };
 	const [preference] = await database
 		.select({ personalized: accountPreference.personalizedFeed })
 		.from(accountPreference)
-		.where(eq(accountPreference.authUserId, selfAuthUserIdForEntity(profileId)))
+		.where(eq(accountPreference.authUserId, authUserId))
 		.limit(1);
-	return { identity, profileId: (preference?.personalized ?? true) ? profileId : undefined };
+	return { identity, authUserId: (preference?.personalized ?? true) ? authUserId : undefined };
 }
 
 export default new Elysia({ prefix: "/recommendations" })
@@ -335,7 +334,7 @@ export default new Elysia({ prefix: "/recommendations" })
 				ensureEventTime(event.occurredAt, now);
 				ensureRecommendationTracking(event.targetUnitId, event);
 			}
-			const { identity, profileId } = await getEventProfileId(request);
+			const { identity, authUserId } = await getEventAuthUserId(request);
 			const targetIds = [...new Set(body.events.map(({ targetUnitId }) => targetUnitId))];
 			const readable = await database
 				.select({ id: unit.id })
@@ -353,7 +352,7 @@ export default new Elysia({ prefix: "/recommendations" })
 				.values(
 					body.events.map((event) => ({
 						id: event.id,
-						profileId,
+						authUserId,
 						requestId: event.requestId,
 						surface: event.surface,
 						type: event.type,
@@ -382,20 +381,20 @@ export default new Elysia({ prefix: "/recommendations" })
 			},
 			detail: { summary: "Exclude a recommendation", tags: ["Recommendations"] },
 		},
-		async ({ body, params, entity, authorization }) => {
+		async ({ body, params, user, authorization }) => {
 			ensureEventTime(body.occurredAt, new Date());
 			ensureRecommendationTracking(params.unitId, body);
 			await authorization.unit.ensureCanRead(params.unitId);
 			await database.transaction(async (tx) => {
 				await tx
 					.insert(recommendationExclusion)
-					.values({ profileId: entity.id, unitId: params.unitId })
+					.values({ authUserId: user.id, unitId: params.unitId })
 					.onConflictDoNothing();
 				await tx
 					.insert(recommendationEvent)
 					.values({
 						id: body.eventId,
-						profileId: entity.id,
+						authUserId: user.id,
 						requestId: body.requestId,
 						surface: body.surface,
 						type: "not_interested",
@@ -421,12 +420,12 @@ export default new Elysia({ prefix: "/recommendations" })
 			},
 			detail: { summary: "Restore an excluded recommendation", tags: ["Recommendations"] },
 		},
-		async ({ params, entity }) => {
+		async ({ params, user }) => {
 			await database
 				.delete(recommendationExclusion)
 				.where(
 					and(
-						eq(recommendationExclusion.profileId, entity.id),
+						eq(recommendationExclusion.authUserId, user.id),
 						eq(recommendationExclusion.unitId, params.unitId),
 					),
 				);

@@ -16,6 +16,7 @@ import docks from "./docks";
 import domainExtensions from "./domain-extensions";
 import errorBoundary from "./error-boundary";
 import feed from "./feed";
+import favorites from "./favorites";
 import governance from "./governance";
 import health from "./health";
 import history from "./history";
@@ -109,6 +110,7 @@ export default new Elysia()
 				.use(contentStructure)
 				.use(progress)
 				.use(collections)
+				.use(favorites)
 				.use(reviews)
 				.use(reactions)
 				.use(polls)

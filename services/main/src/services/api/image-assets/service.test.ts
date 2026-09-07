@@ -23,18 +23,19 @@ describe("image asset identity", () => {
 		const tracking = imageObjectTracking({
 			assetId: "asset-id",
 			objectId: "object-id",
-			uploaderProfileId: "profile-id",
+			uploaderAuthUserId: "profile-id",
 		});
 		expect(tracking).toEqual({
 			image_asset_id: "asset-id",
 			image_object_id: "object-id",
-			uploader_profile_id: "profile-id",
+			uploader_auth_user_id: "profile-id",
 		});
 		expect(imageObjectUploadHeaders(tracking, "image/png")).toEqual({
 			"Content-Type": "image/png",
+			"If-None-Match": "*",
 			"x-amz-meta-image_asset_id": "asset-id",
 			"x-amz-meta-image_object_id": "object-id",
-			"x-amz-meta-uploader_profile_id": "profile-id",
+			"x-amz-meta-uploader_auth_user_id": "profile-id",
 		});
 	});
 });

@@ -1,3 +1,4 @@
+import { erasePrivateImageBatch, type ImageErasureArchive } from "../image-assets/erasure";
 import { and, eq, isNull, lte, sql, type SQL } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
 import { database, type DatabaseTransaction } from "../database";
@@ -15,14 +16,35 @@ import {
 	notification,
 	notificationPreference,
 	emailOutbox,
+	message,
+	conversationRead,
 } from "../database/schema/communication";
+import {
+	notificationRecipientStat,
+	conversationParticipantStat,
+	bookChapterProgressStat,
+} from "../database/schema/aggregate";
+import { accountEntityBlock } from "../database/schema/account-block";
+import {
+	accountFavorite,
+	accountFavoriteRevision,
+	accountFavoritesState,
+} from "../database/schema/favorites";
+import { accountRealmTagSubscription, accountUnitTag } from "../database/schema/tag";
+import {
+	apiQuotaRequestLease,
+	apiQuotaDailyUsage,
+	apiQuotaRateState,
+	apiTokenCreationReservation,
+	apiAccountQuotaBinding,
+} from "../database/schema/api-quota";
 import {
 	contentStructureNodeProgress,
 	unitProgress,
 	unitProgressEntry,
 } from "../database/schema/progress";
 import { recommendationEvent, recommendationExclusion } from "../database/schema/recommendation";
-import { studioResourceVisit } from "../database/schema/studio";
+import { studioResourceVisit, studioAuthEditorCandidate } from "../database/schema/studio";
 import { ParticipationDenied, requireParticipation, type ParticipationAuthority } from "./policy";
 import {
 	MaximumActiveParticipationGrants,
@@ -98,14 +120,12 @@ export async function eraseOwnAccount(tx: DatabaseTransaction, authority: Partic
 			.update(participationGrant)
 			.set({ revokedAt: now, revision: grant.revision + 1 })
 			.where(eq(participationGrant.id, grant.id));
-		await tx
-			.insert(participationGrantEvent)
-			.values({
-				grantId: grant.id,
-				revision: grant.revision + 1,
-				operation: "revoke",
-				operatorAuthUserId: authUserId,
-			});
+		await tx.insert(participationGrantEvent).values({
+			grantId: grant.id,
+			revision: grant.revision + 1,
+			operation: "revoke",
+			operatorAuthUserId: authUserId,
+		});
 	}
 	const controlledEntityIds = [
 		...new Set([
@@ -126,9 +146,16 @@ export async function eraseOwnAccount(tx: DatabaseTransaction, authority: Partic
 	return { state: "erasing" as const };
 }
 
-async function deletePrivateBatch(tx: DatabaseTransaction, table: PgTable, predicate: SQL) {
+async function deletePrivateBatch(
+	tx: DatabaseTransaction,
+	table: PgTable,
+	predicate: SQL,
+	limit = 500,
+) {
+	if (!Number.isSafeInteger(limit) || limit < 1 || limit > 500)
+		throw new Error("Private erasure batch bound is invalid");
 	const result = await tx.execute<{ count: number }>(sql`
-		with batch as materialized (select ctid from ${table} where ${predicate} limit 500 for update skip locked),
+		with batch as materialized (select ctid from ${table} where ${predicate} limit ${limit} for update skip locked),
 		deleted as (delete from ${table} where ctid in (select ctid from batch) returning 1)
 		select count(*)::integer as count from deleted`);
 	const deleted = result.rows[0]?.count ?? 0;
@@ -139,8 +166,42 @@ async function deletePrivateBatch(tx: DatabaseTransaction, table: PgTable, predi
 	return { deleted, empty: !(remaining.rows[0]?.present ?? false) };
 }
 
+/** Token children are drained by indexed token seeks before the token's two bounded one-row cascades. */
+async function deletePrivateTokenBatch(tx: DatabaseTransaction, authUserId: string) {
+	const [token] = await tx
+		.select({ id: apikeys.id })
+		.from(apikeys)
+		.where(eq(apikeys.referenceId, authUserId))
+		.limit(1)
+		.for("update");
+	if (!token) return { deleted: 0, empty: true };
+	for (const table of [apiQuotaRequestLease, apiQuotaDailyUsage, apiQuotaRateState]) {
+		const batch = await deletePrivateBatch(tx, table, eq(table.tokenId, token.id));
+		if (!batch.empty) return batch;
+	}
+	await tx.delete(apikeys).where(eq(apikeys.id, token.id));
+	return { deleted: 1, empty: false };
+}
+
+/** Tombstones preserve the other participant's read marker and chronological boundary. */
+async function redactSentMessageBatch(tx: DatabaseTransaction, authUserId: string) {
+	const result = await tx.execute<{ count: number }>(sql`
+		with batch as materialized (select id from ${message} where sender_auth_user_id = ${authUserId}
+			and content is not null limit 32 for update skip locked),
+		redacted as (update ${message} set content = null, deleted_at = now(), updated_at = now()
+			where id in (select id from batch) returning 1)
+		select count(*)::integer as count from redacted`);
+	const deleted = result.rows[0]?.count ?? 0;
+	if (deleted > 0) return { deleted, empty: false };
+	const remaining = await tx.execute<{
+		present: boolean;
+	}>(sql`select exists(select 1 from ${message}
+		where sender_auth_user_id = ${authUserId} and content is not null) as present`);
+	return { deleted, empty: !(remaining.rows[0]?.present ?? false) };
+}
+
 /** One locked job, one bounded deletion transaction; a crash rolls back both deletion and stage advancement. @internal */
-export async function dispatchAccountErasureBatch() {
+export async function dispatchAccountErasureBatch(options: { archive?: ImageErasureArchive } = {}) {
 	return database.transaction(async (tx) => {
 		const [job] = await tx
 			.select()
@@ -153,7 +214,6 @@ export async function dispatchAccountErasureBatch() {
 		const authId = job.authUserId;
 		if (!job.selfEntityId || !job.priorEmail)
 			throw new Error("Incomplete erasure job lost its private deletion keys");
-		const entityId = job.selfEntityId;
 		let result: { deleted: number; empty: boolean };
 		switch (job.stage) {
 			case "sessions":
@@ -163,7 +223,42 @@ export async function dispatchAccountErasureBatch() {
 				result = await deletePrivateBatch(tx, accounts, eq(accounts.userId, authId));
 				break;
 			case "api_tokens":
-				result = await deletePrivateBatch(tx, apikeys, eq(apikeys.referenceId, authId));
+				result = await deletePrivateTokenBatch(tx, authId);
+				break;
+			case "quota_account_leases":
+				result = await deletePrivateBatch(
+					tx,
+					apiQuotaRequestLease,
+					eq(apiQuotaRequestLease.accountUserId, authId),
+				);
+				break;
+			case "quota_account_daily":
+				result = await deletePrivateBatch(
+					tx,
+					apiQuotaDailyUsage,
+					eq(apiQuotaDailyUsage.accountUserId, authId),
+				);
+				break;
+			case "quota_account_rates":
+				result = await deletePrivateBatch(
+					tx,
+					apiQuotaRateState,
+					eq(apiQuotaRateState.accountUserId, authId),
+				);
+				break;
+			case "quota_reservations":
+				result = await deletePrivateBatch(
+					tx,
+					apiTokenCreationReservation,
+					eq(apiTokenCreationReservation.accountUserId, authId),
+				);
+				break;
+			case "quota_account_binding":
+				result = await deletePrivateBatch(
+					tx,
+					apiAccountQuotaBinding,
+					eq(apiAccountQuotaBinding.userId, authId),
+				);
 				break;
 			case "verification":
 				result = await deletePrivateBatch(
@@ -200,6 +295,37 @@ export async function dispatchAccountErasureBatch() {
 					eq(notificationPreference.authUserId, authId),
 				);
 				break;
+			case "notification_stats":
+				result = await deletePrivateBatch(
+					tx,
+					notificationRecipientStat,
+					eq(notificationRecipientStat.authUserId, authId),
+				);
+				break;
+			case "sent_messages":
+				result = await redactSentMessageBatch(tx, authId);
+				break;
+			case "conversation_reads":
+				result = await deletePrivateBatch(
+					tx,
+					conversationRead,
+					eq(conversationRead.authUserId, authId),
+				);
+				break;
+			case "conversation_stats":
+				result = await deletePrivateBatch(
+					tx,
+					conversationParticipantStat,
+					eq(conversationParticipantStat.authUserId, authId),
+				);
+				break;
+			case "account_blocks":
+				result = await deletePrivateBatch(
+					tx,
+					accountEntityBlock,
+					eq(accountEntityBlock.blockerAuthUserId, authId),
+				);
+				break;
 			case "progress_entries":
 				result = await deletePrivateBatch(
 					tx,
@@ -217,18 +343,25 @@ export async function dispatchAccountErasureBatch() {
 			case "progress":
 				result = await deletePrivateBatch(tx, unitProgress, eq(unitProgress.authUserId, authId));
 				break;
+			case "progress_stats":
+				result = await deletePrivateBatch(
+					tx,
+					bookChapterProgressStat,
+					eq(bookChapterProgressStat.authUserId, authId),
+				);
+				break;
 			case "recommendation_events":
 				result = await deletePrivateBatch(
 					tx,
 					recommendationEvent,
-					eq(recommendationEvent.profileId, entityId),
+					eq(recommendationEvent.authUserId, authId),
 				);
 				break;
 			case "recommendation_exclusions":
 				result = await deletePrivateBatch(
 					tx,
 					recommendationExclusion,
-					eq(recommendationExclusion.profileId, entityId),
+					eq(recommendationExclusion.authUserId, authId),
 				);
 				break;
 			case "studio_visits":
@@ -237,6 +370,53 @@ export async function dispatchAccountErasureBatch() {
 					studioResourceVisit,
 					eq(studioResourceVisit.authUserId, authId),
 				);
+				break;
+			case "studio_candidates":
+				result = await deletePrivateBatch(
+					tx,
+					studioAuthEditorCandidate,
+					eq(studioAuthEditorCandidate.authUserId, authId),
+				);
+				break;
+			case "favorite_history":
+				result = await deletePrivateBatch(
+					tx,
+					accountFavoriteRevision,
+					eq(accountFavoriteRevision.authUserId, authId),
+					32,
+				);
+				break;
+			case "favorites":
+				result = await deletePrivateBatch(
+					tx,
+					accountFavorite,
+					eq(accountFavorite.authUserId, authId),
+					48,
+				);
+				break;
+			case "favorites_state":
+				result = await deletePrivateBatch(
+					tx,
+					accountFavoritesState,
+					eq(accountFavoritesState.authUserId, authId),
+				);
+				break;
+			case "tag_subscriptions":
+				result = await deletePrivateBatch(
+					tx,
+					accountRealmTagSubscription,
+					eq(accountRealmTagSubscription.authUserId, authId),
+				);
+				break;
+			case "personal_tags":
+				result = await deletePrivateBatch(
+					tx,
+					accountUnitTag,
+					eq(accountUnitTag.authUserId, authId),
+				);
+				break;
+			case "private_images":
+				result = await erasePrivateImageBatch(tx, authId, options.archive);
 				break;
 			case "complete":
 				return 0;

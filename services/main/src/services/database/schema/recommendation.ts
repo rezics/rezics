@@ -16,7 +16,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { entityIdentity } from "./catalog-identity";
+import { users } from "./auth";
 import {
 	createCreatedAtColumn,
 	createTimestampMsColumn,
@@ -80,7 +80,7 @@ export const recommendationEvent = pgTable(
 	"recommendation_event",
 	{
 		id: createUuidv7PrimaryKey(),
-		profileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
+		authUserId: uuid().references(() => users.id, { onDelete: "set null" }),
 		requestId: uuid().notNull(),
 		surface: recommendationSurface().notNull(),
 		type: recommendationEventType().notNull(),
@@ -99,8 +99,8 @@ export const recommendationEvent = pgTable(
 			table.type,
 		),
 		index("recommendation_event_occurred_at_idx").on(table.occurredAt, table.id),
-		index("recommendation_event_profile_occurred_at_idx").on(
-			table.profileId,
+		index("recommendation_event_auth_occurred_at_idx").on(
+			table.authUserId,
 			table.occurredAt.desc(),
 			table.id.desc(),
 		),
@@ -119,17 +119,17 @@ export const recommendationEvent = pgTable(
 export const recommendationExclusion = pgTable(
 	"recommendation_exclusion",
 	{
-		profileId: uuid()
+		authUserId: uuid()
 			.notNull()
-			.references(() => entityIdentity.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.profileId, table.unitId] }),
-		index("recommendation_exclusion_unit_idx").on(table.unitId, table.profileId),
+		primaryKey({ columns: [table.authUserId, table.unitId] }),
+		index("recommendation_exclusion_unit_idx").on(table.unitId, table.authUserId),
 	],
 );
 

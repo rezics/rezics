@@ -1,3 +1,4 @@
+import { selfAuthUserIdForEntity } from "../participation/account-query";
 import { and, eq, inArray, isNull, or } from "drizzle-orm";
 import type { BlockReferenceResolver } from "@rezics/block";
 
@@ -63,7 +64,10 @@ export function createUnitBlockReferenceResolver(
 							inArray(imageAsset.id, [...identifiers]),
 							eq(imageAsset.status, "ready"),
 							isNull(imageAsset.deletedAt),
-							or(eq(imageAsset.access, "public"), eq(imageAsset.ownerProfileId, input.profileId)),
+							or(
+								eq(imageAsset.access, "public"),
+								eq(imageAsset.ownerAuthUserId, selfAuthUserIdForEntity(input.profileId)),
+							),
 						),
 					);
 				return new Set(rows.map((row) => row.id));

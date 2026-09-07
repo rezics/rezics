@@ -267,7 +267,7 @@ export async function createUnit(
 		async (tx) => {
 			await ensureImageAssetsAttachable(
 				tx,
-				ownerId,
+				selfAuthUserIdForEntity(ownerId),
 				unitLocalizationImageAssetReferences(input.localization),
 			);
 			const resolvedCreditAttributions: {
@@ -1074,7 +1074,7 @@ export async function upsertLocalization(
 		const { revisionContribution, ...localization } = input;
 		await ensureImageAssetsAttachable(
 			tx,
-			authorization.profileId,
+			selfAuthUserIdForEntity(authorization.profileId),
 			unitLocalizationImageAssetReferences(localization),
 		);
 		await tx

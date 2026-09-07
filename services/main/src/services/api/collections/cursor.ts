@@ -19,7 +19,6 @@ const CollectionListCursor = t.Object(
 		}),
 		search: t.Nullable(t.String({ minLength: 1, maxLength: 200 })),
 		limit: t.Integer({ minimum: 1, maximum: 50 }),
-		favoritesRank: t.Integer({ minimum: 0, maximum: 1 }),
 		updatedAt: t.String({ format: "date-time" }),
 		id: Uuid,
 	},
@@ -31,7 +30,6 @@ interface CollectionListCursorContext {
 }
 
 export interface CollectionListCursorBoundary {
-	readonly favoritesRank: number;
 	readonly updatedAt: Date;
 	readonly id: string;
 }
@@ -67,7 +65,7 @@ export function decodeCollectionListCursor(
 			throw new InvalidPaginationCursor();
 		const updatedAt = new Date(cursor.updatedAt);
 		if (Number.isNaN(updatedAt.getTime())) throw new InvalidPaginationCursor();
-		return { favoritesRank: cursor.favoritesRank, updatedAt, id: cursor.id };
+		return { updatedAt, id: cursor.id };
 	} catch {
 		throw new InvalidPaginationCursor();
 	}
@@ -88,7 +86,6 @@ export function encodeCollectionListCursor(
 			localizationLanguages: context.query.localizationLanguages ?? [],
 			search: normalizedSearch(context.query),
 			limit: context.query.limit ?? 20,
-			favoritesRank: boundary.favoritesRank,
 			updatedAt: boundary.updatedAt.toISOString(),
 			id: boundary.id,
 		}),

@@ -12,7 +12,7 @@ import {
 import { database } from "../database";
 import {
 	accountEntityBlock,
-	profileRealmTagSubscription,
+	accountRealmTagSubscription,
 	unit,
 	unitFollow,
 	unitFollowNotificationPreference,
@@ -258,12 +258,15 @@ export async function getFollowingStatus(input: {
 		const realmTagSourceSubscribed = Boolean(
 			(
 				await database
-					.select({ realmId: profileRealmTagSubscription.realmId })
-					.from(profileRealmTagSubscription)
+					.select({ realmId: accountRealmTagSubscription.realmId })
+					.from(accountRealmTagSubscription)
 					.where(
 						and(
-							eq(profileRealmTagSubscription.profileId, input.followerProfileId),
-							eq(profileRealmTagSubscription.realmId, target.id),
+							eq(
+								accountRealmTagSubscription.authUserId,
+								selfAuthUserIdForEntity(input.followerProfileId),
+							),
+							eq(accountRealmTagSubscription.realmId, target.id),
 						),
 					)
 					.limit(1)
@@ -349,19 +352,22 @@ export async function replaceFollowingSettings(input: {
 		if (input.settings.kind === "realm") {
 			if (input.settings.realmTagSourceSubscribed)
 				await tx
-					.insert(profileRealmTagSubscription)
+					.insert(accountRealmTagSubscription)
 					.values({
-						profileId: input.followerProfileId,
+						authUserId: selfAuthUserIdForEntity(input.followerProfileId),
 						realmId: target.id,
 					})
 					.onConflictDoNothing();
 			else
 				await tx
-					.delete(profileRealmTagSubscription)
+					.delete(accountRealmTagSubscription)
 					.where(
 						and(
-							eq(profileRealmTagSubscription.profileId, input.followerProfileId),
-							eq(profileRealmTagSubscription.realmId, target.id),
+							eq(
+								accountRealmTagSubscription.authUserId,
+								selfAuthUserIdForEntity(input.followerProfileId),
+							),
+							eq(accountRealmTagSubscription.realmId, target.id),
 						),
 					);
 		}

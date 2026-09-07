@@ -1,3 +1,4 @@
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 import { DevelopmentPreviewCapability, RealmUnitCreatePermissionValues } from "@rezics/access";
 import type { ContentLanguage } from "@rezics/i18n";
 import { and, desc, eq, gt, inArray, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
@@ -669,7 +670,7 @@ export default new Elysia({ prefix: "/realms" })
 				async (tx) => {
 					await ensureImageAssetsAttachable(
 						tx,
-						entity.id,
+						selfAuthUserIdForEntity(entity.id),
 						unitLocalizationImageAssetReferences(body.localization),
 					);
 					const created = await insertUnit(tx, {
@@ -1249,7 +1250,7 @@ export default new Elysia({ prefix: "/realms" })
 				if (body.localization)
 					await ensureImageAssetsAttachable(
 						tx,
-						entity.id,
+						selfAuthUserIdForEntity(entity.id),
 						unitLocalizationImageAssetReferences(body.localization),
 					);
 				const unitUpdate = toUnitVisibilityUpdate(body.visibility);
