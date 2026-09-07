@@ -229,7 +229,7 @@ export const softwareSourceComponentBaseline = pgTable(
 );
 export const softwareSourceRecordBaseline = pgTable(
 	"software_source_record_baseline",
-	{ ...baselineColumns() },
+	{ ...baselineColumns("software") },
 	(t) => [
 		primaryKey({ columns: [t.sourceRecordId, t.mappingKey, t.ownerId] }),
 		...baselineConstraints("software_source_record_base", t, "software"),
