@@ -27,12 +27,27 @@ type SourceFields = Pick<CatalogNameInput, "value"> &
 	Partial<
 		Pick<
 			CatalogNameInput,
-			"languageTag" | "origin" | "primaryForLanguage" | "derivationNameId" | "derivationRevision"
+			| "kind"
+			| "languageTag"
+			| "origin"
+			| "primaryForLanguage"
+			| "derivationNameId"
+			| "derivationRevision"
 		>
 	>;
 export type VndbNativeNamePlan = {
 	key: string;
-	namespace: "vndb.vn.name" | "vndb.release.name";
+	namespace:
+		| "vndb.vn.name"
+		| "vndb.release.name"
+		| "vndb.staff.alias"
+		| "vndb.producer.name"
+		| "vndb.character.name"
+		| "vndb.tag.name"
+		| "vndb.trait.name"
+		| "vndb.quote.name"
+		| "vndb.drm.name"
+		| "vndb.engine.name";
 	path: string;
 	fields: SourceFields;
 	official?: { value: boolean; path: string };
@@ -353,6 +368,7 @@ export async function reconcileVndbNativeNames(
 					throw new CatalogRevisionConflict("VNDB title was independently withdrawn");
 				const values = catalogNameRevisionValues(current);
 				if (previous) {
+					values.kind = mergeField(previous.fields.kind, item.fields.kind, current.kind);
 					values.value = mergeField(previous.fields.value, item.fields.value, current.value);
 					values.languageTag = mergeField(
 						previous.fields.languageTag,
@@ -478,6 +494,55 @@ export async function reconcileVndbNativeNames(
 		});
 	}
 	return { revision, changes };
+}
+
+/** @internal Initial import uses the same stable name plan as subsequent reviewed updates. */
+export async function initializeVndbNativeNames(
+	tx: DatabaseTransaction,
+	ref: CatalogReference,
+	actor: string,
+	expectedRevision: number,
+	plan: VndbNativeNamePlan[],
+	document: Document,
+	seed?: { id: string; revision: number },
+) {
+	let revision = expectedRevision;
+	const accepted = new Map<string, { id: string; revision: number }>();
+	for (const [position, raw] of plan.entries()) {
+		const derivation = raw.derivationKey ? accepted.get(raw.derivationKey) : undefined;
+		if (raw.derivationKey && !derivation)
+			throw new Error("VNDB name has no prior original derivation");
+		const fields = {
+			...raw.fields,
+			...(derivation
+				? { derivationNameId: derivation.id, derivationRevision: derivation.revision }
+				: {}),
+		};
+		let name: { id: string; revision: number };
+		if (position === 0 && seed) {
+			const current = await requireCatalogNameRevision(tx, ref, actor, seed.id, seed.revision);
+			const values = CatalogNameValuesSchema.parse({
+				...catalogNameRevisionValues(current),
+				...fields,
+			});
+			const updated = isDeepStrictEqual(catalogNameRevisionValues(current), values)
+				? current
+				: await reviseCatalogName(tx, ref, actor, seed.id, seed.revision, values);
+			name = { id: updated.id, revision: updated.revision };
+		} else {
+			const added = await addCatalogName(tx, ref, actor, revision, {
+				kind: "source-alias",
+				languageTag: null,
+				...fields,
+			});
+			revision = added.revision;
+			name = { id: added.id, revision: added.nameRevision };
+		}
+		await supportName(tx, ref, actor, document, raw, name.id, name.revision);
+		await claimAuthority(tx, ref, actor, document, raw, name);
+		accepted.set(raw.key, name);
+	}
+	return revision;
 }
 
 /** @internal Reissued source claims attach only to restored text that still matches the exact previous source. */

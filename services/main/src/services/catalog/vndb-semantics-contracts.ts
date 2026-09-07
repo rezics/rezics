@@ -153,11 +153,20 @@ export const VndbHierarchyEdgeSchema = z
 
 /** @alpha Source-independent typed scalar facts; their source support is stored separately. */
 export type VndbSemanticFact = {
-	namespace: "catalog.metadata" | "source.vndb.statistics" | "source.vndb.qualifier";
+	namespace: "catalog" | "catalog.metadata" | "source.vndb.statistics" | "source.vndb.qualifier";
 	key: string;
 	value: string | number | boolean | null;
 	kind: "string" | "number" | "boolean";
 	path: string;
+	spoiler?: 0 | 1 | 2;
+	constraints?: {
+		nullable: boolean;
+		integer: boolean;
+		minimum?: number;
+		maximum?: number;
+		unit?: string;
+		allowedValues?: string[];
+	};
 };
 export type VndbSemanticTarget = {
 	owner: CatalogOwner;

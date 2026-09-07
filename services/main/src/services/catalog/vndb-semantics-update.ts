@@ -21,6 +21,7 @@ function units(plan: VndbSemanticPlan) {
 		fact.key,
 		fact.kind,
 		fact.value,
+		fact.spoiler ?? 0,
 	];
 	plan.facts.forEach((fact, index) => {
 		const key = keys.facts[index];

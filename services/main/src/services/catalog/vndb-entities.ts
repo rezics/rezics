@@ -340,18 +340,12 @@ async function adoptVndbEntity(
 	const { inspectExistingSourceBinding } = await import("./source-adoption");
 	const { acceptCatalogSourceInitialization } = await import("./source-bindings");
 	const { createEntity, initializeEntityProfile, resolveEntityShape } = await import("./entities");
-	const {
-		addCatalogName,
-		ensureCatalogDefinition,
-		appendCatalogFactNodes,
-		beginCatalogFact,
-		sealCatalogFact,
-		loadCatalogIdentity,
-	} = await import("./storage");
-	const { bindCatalogNameSourceOccurrence } = await import("./names");
-	const { appendVndbSemantics } = await import("./vndb-semantics");
+	const { ensureCatalogDefinition, loadCatalogIdentity } = await import("./storage");
+	const { initializeVndbNativeNames } = await import("./vndb-names-update");
+	const { VndbSupportingRecordSchema, planVndbSupportingNames, planVndbSupportingSemantics } =
+		await import("./vndb-supporting-plans");
+	const { appendVndbSemanticPlan } = await import("./vndb-semantics");
 	const { CatalogFactTables } = await import("../database/schema/catalog-facts");
-	const { catalogValueNodes } = await import("./value-nodes");
 	const document = await recordCatalogSourceDocument(tx, receipt, bytes);
 	const existing = await inspectExistingSourceBinding(tx, actor, document, `vndb.${kind}.2`);
 	if (existing && existing.status !== "initialize_reference") return existing;
@@ -408,95 +402,28 @@ async function adoptVndbEntity(
 		mappingVersion: `vndb.${kind}.2`,
 	});
 	const tables = CatalogFactTables.entity;
-	let unusedPrimaryId = created?.nameId;
-	const writeName = async (
-		value: string,
-		path: string,
-		language: string | null,
-		nameKind: string,
-		origin: "original" | "transliteration" | "variant",
-		primary: boolean,
-	) => {
-		let nameId: string;
-		let nameRevision = 1;
-		if (
-			unusedPrimaryId &&
-			value === primaryValue &&
-			language === languageTag &&
-			origin === "original"
-		) {
-			nameId = unusedPrimaryId;
-			unusedPrimaryId = undefined;
-		} else {
-			const named = await addCatalogName(tx, reference, actor, revision, {
-				value,
-				languageTag: language,
-				kind: nameKind,
-				origin,
-				primaryForLanguage: primary,
-			});
-			revision = named.revision;
-			nameId = named.id;
-			nameRevision = named.nameRevision;
-		}
-		await tx.insert(tables.support).values({
-			ownerId: reference.id,
-			namedFormId: nameId,
+	const supportingRecord = VndbSupportingRecordSchema.parse({ ...record, objectType: kind });
+	revision = await initializeVndbNativeNames(
+		tx,
+		reference,
+		actor,
+		revision,
+		planVndbSupportingNames(supportingRecord),
+		document,
+		created ? { id: created.nameId, revision: 1 } : undefined,
+	);
+	if (staff && staff.gender !== undefined) {
+		const { readCatalogProfileHead, bindCatalogProfileSourceOccurrence } = await import(
+			"./profile-source"
+		);
+		const profile = await readCatalogProfileHead(tx, reference, actor);
+		if (!profile) throw new Error("VNDB staff profile history is missing");
+		await bindCatalogProfileSourceOccurrence(tx, reference, actor, {
 			sourceRecordId: document.record.id,
 			snapshotId: document.snapshot.id,
-			sourcePath: path,
+			sourcePath: "/gender",
+			revision: profile.revision,
 		});
-		return { nameId, nameRevision };
-	};
-	if (staff) {
-		for (const alias of nativeNames) {
-			const named = await writeName(
-				alias.value,
-				alias.path,
-				alias.languageTag,
-				alias.ismain ? "source-primary" : "source-alias",
-				"original",
-				alias.ismain,
-			);
-			await bindCatalogNameSourceOccurrence(tx, reference, actor, {
-				namespace: "vndb.staff.alias",
-				localKey: String(alias.aid),
-				...named,
-				sourceRecordId: document.record.id,
-				snapshotId: document.snapshot.id,
-				sourcePath: alias.aliasPath,
-			});
-			if (alias.latin)
-				await writeName(
-					alias.latin,
-					alias.latinPath,
-					null,
-					"source-transliteration",
-					"transliteration",
-					false,
-				);
-		}
-	} else {
-		await writeName(
-			record.original ?? record.name,
-			record.original ? "/original" : "/name",
-			languageTag,
-			"source-primary",
-			"original",
-			true,
-		);
-		if (record.original && record.name !== record.original)
-			await writeName(
-				record.name,
-				"/name",
-				null,
-				"source-transliteration",
-				"transliteration",
-				false,
-			);
-		const aliases = producer ? producer.aliases : VndbCharacterSchema.parse(record).aliases;
-		for (const [index, alias] of (aliases ?? []).entries())
-			await writeName(alias, `/aliases/${index}`, null, "source-alias", "variant", false);
 	}
 	if (created) {
 		const [identifier] = await tx
@@ -517,54 +444,14 @@ async function adoptVndbEntity(
 			sourcePath: "/id",
 		});
 	}
-	if (kind === "character") {
-		for (const fact of planVndbCharacterFacts(record)) {
-			const definition = await ensureCatalogDefinition(tx, {
-				namespace: "catalog",
-				key: fact.key,
-				kind: "property",
-				valueKind: fact.valueKind,
-				constraints: {
-					nullable: true,
-					integer: fact.valueKind === "number",
-					minimum: fact.minimum,
-					maximum: fact.maximum,
-					unit: fact.unit,
-					allowedValues: fact.allowedValues,
-				},
-			});
-			const begun = await beginCatalogFact(tx, reference, actor, revision, definition.revisionId, {
-				spoiler: fact.spoiler,
-			});
-			const appended = await appendCatalogFactNodes(
-				tx,
-				reference,
-				actor,
-				begun.revision,
-				begun.id,
-				-1,
-				[...catalogValueNodes(fact.value)],
-			);
-			revision = (
-				await sealCatalogFact(
-					tx,
-					reference,
-					actor,
-					appended.revision,
-					begun.id,
-					appended.lastNodePosition,
-				)
-			).revision;
-			await tx.insert(tables.support).values({
-				ownerId: reference.id,
-				factId: begun.id,
-				sourceRecordId: document.record.id,
-				snapshotId: document.snapshot.id,
-				sourcePath: fact.path,
-			});
-		}
-	}
-	revision = await appendVndbSemantics(tx, reference, actor, revision, record, document);
+	revision = await appendVndbSemanticPlan(
+		tx,
+		reference,
+		actor,
+		revision,
+		planVndbSupportingSemantics(supportingRecord),
+		document,
+	);
 	if (existing)
 		await acceptCatalogSourceInitialization(tx, actor, {
 			sourceRecordId: document.record.id,

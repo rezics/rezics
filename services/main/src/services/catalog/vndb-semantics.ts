@@ -1,4 +1,10 @@
 import {
+	planVndbSupportingNames,
+	planVndbSupportingSemantics,
+	vndbCharacterPropertyDefinitions,
+} from "./vndb-supporting-plans";
+import { initializeVndbNativeNames } from "./vndb-names-update";
+import {
 	prepareCatalogSourceChildCorrespondence,
 	sealCatalogSourceChildCorrespondence,
 } from "./source-child-correspondence";
@@ -14,7 +20,6 @@ import { bindReferencedSourceIdentity } from "./source-references";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { recordCatalogSourceDocument, type CatalogSourceReceipt } from "./source-observations";
 import {
-	addCatalogName,
 	appendCatalogFactNodes,
 	beginCatalogFact,
 	createCatalogIdentity,
@@ -72,6 +77,7 @@ const roleTargets: Record<string, TargetRule[]> = {
 	],
 };
 const scalarDefinitions: VndbSemanticFact[] = [
+	...vndbCharacterPropertyDefinitions,
 	...[
 		"description.vndb-markup",
 		"url",
@@ -176,6 +182,7 @@ const scalarDefinitions: VndbSemanticFact[] = [
 ];
 
 function propertyConstraints(item: VndbSemanticFact) {
+	if (item.constraints) return item.constraints;
 	if (item.kind === "string") return { nullable: true, maxLength: 131_072 };
 	if (item.kind === "boolean") return { nullable: true };
 	if (["image-sexual", "image-violence"].includes(item.key))
@@ -193,7 +200,7 @@ function propertyConstraints(item: VndbSemanticFact) {
 
 /**
  * @alpha Register the reviewed semantic vocabulary, independent of any imported record.
- * @remarks The vocabulary has fewer than 64 scalar definitions. A request-local map avoids
+ * @remarks The vocabulary has fewer than 96 scalar definitions. A request-local map avoids
  * repeated definition lookups per occurrence without a process-global database cache.
  */
 async function semanticDefinitions(tx: DatabaseTransaction) {
@@ -240,19 +247,15 @@ async function appendFact(
 	sourceKey: string,
 	replacement?: { semanticId: string; headVersion: number },
 ) {
-	const fact = await beginCatalogFact(
-		tx,
-		reference,
-		actor,
-		revision,
-		definitionId,
-		replacement
+	const fact = await beginCatalogFact(tx, reference, actor, revision, definitionId, {
+		spoiler: item.spoiler ?? 0,
+		...(replacement
 			? {
 					semanticId: replacement.semanticId,
 					expectedHeadVersion: replacement.headVersion,
 				}
-			: {},
-	);
+			: {}),
+	});
 	const appended = await appendCatalogFactNodes(tx, reference, actor, fact.revision, fact.id, -1, [
 		...catalogValueNodes(item.value),
 	]);
@@ -416,7 +419,9 @@ export async function appendVndbSemanticPlan(
 			}));
 			const constraints = {
 				roles: relationRoles,
-				qualifierRevisionIds: [...definitions.values()],
+				qualifierRevisionIds: scalarDefinitions
+					.filter((item) => item.namespace !== "catalog")
+					.map((item) => mustGet(definitions, `${item.namespace}:${item.key}`)),
 			};
 			const predicate = await ensureCatalogDefinition(tx, {
 				namespace: "catalog.semantic-relation",
@@ -653,126 +658,18 @@ export async function adoptVndbSemanticObject(
 		reference: identity,
 		mappingVersion: `vndb.${record.objectType}.semantic.1`,
 	});
-	let revision = identity.revision;
-	if ("name" in record)
-		revision = (
-			await addCatalogName(tx, identity, actor, revision, {
-				kind: "source-primary",
-				languageTag: null,
-				value: record.name,
-			})
-		).revision;
-	if ("aliases" in record)
-		for (const alias of record.aliases ?? [])
-			if (alias)
-				revision = (
-					await addCatalogName(tx, identity, actor, revision, {
-						kind: "source-alias",
-						languageTag: null,
-						value: alias,
-					})
-				).revision;
-	const plan: VndbSemanticPlan =
-		typeof record.id === "string" ? planVndbSemantics(record) : { facts: [], relations: [] };
-	const add = (
-		key: string,
-		value: string | number | boolean | null,
-		path: string,
-		kind: VndbSemanticFact["kind"],
-		namespace: VndbSemanticFact["namespace"] = "source.vndb.qualifier",
-	) => plan.facts.push({ key, value, path, kind, namespace });
-	if (record.objectType === "tag" || record.objectType === "trait") {
-		for (const field of ["searchable", "applicable"] as const)
-			if (record[field] !== undefined)
-				add(`taxonomy-${field}`, record[field], `/${field}`, "boolean");
-		if (record.defaultspoil !== undefined)
-			add("taxonomy-default-spoiler", record.defaultspoil, "/defaultspoil", "number");
-		if (record.objectType === "tag" && record.category !== undefined)
-			add("taxonomy-category", record.category, "/category", "string");
-		if (record.objectType === "trait") {
-			if (record.sexual !== undefined) add("taxonomy-sexual", record.sexual, "/sexual", "boolean");
-			if (record.gorder !== undefined)
-				add("taxonomy-group-order", record.gorder, "/gorder", "number");
-			if (record.group_id && record.group_id !== record.id)
-				plan.relations.push({
-					key: "has-trait-group",
-					path: "/group_id",
-					spoiler: 0,
-					qualifiers: [],
-					participants: [
-						{
-							role: "concept",
-							target: {
-								owner: "reference",
-								shape: "concept",
-								objectType: "trait",
-								externalId: record.group_id,
-								path: "/group_id",
-								name: record.group_name,
-							},
-						},
-					],
-				});
-		}
-	}
-	if (record.objectType === "quote") {
-		add("quotation-text", record.quote, "/quote", "string", "catalog.metadata");
-		const participants: VndbSemanticRelation["participants"] = [
-			{
-				role: "content",
-				target: {
-					owner: "software",
-					shape: "content",
-					objectType: "vn",
-					externalId: record.vn.id,
-					path: "/vn/id",
-				},
-			},
-		];
-		if (record.character)
-			participants.push({
-				role: "character",
-				target: {
-					owner: "entity",
-					shape: "character",
-					objectType: "character",
-					externalId: record.character.id,
-					path: "/character/id",
-				},
-			});
-		plan.relations.push({
-			key: "quotation-context",
-			path: "/vn",
-			spoiler: 0,
-			qualifiers: [],
-			participants,
-		});
-	}
-	if (record.objectType === "drm") {
-		const properties = {
-			disc: "requires-disc-check",
-			cdkey: "requires-product-key",
-			activate: "requires-online-activation",
-			alimit: "limits-activations",
-			account: "requires-account",
-			online: "requires-continuous-network",
-			cloud: "cloud-streamed",
-			physical: "requires-physical-token",
-		} as const;
-		for (const field of Object.keys(properties) as (keyof typeof properties)[])
-			add(properties[field], record[field], `/${field}`, "boolean", "catalog.metadata");
-	}
-	if (
-		(record.objectType === "drm" || record.objectType === "engine") &&
-		record.description !== undefined
-	)
-		add(
-			record.objectType === "drm" ? "access-mechanism-description" : "engine-description",
-			record.description,
-			"/description",
-			"string",
-			"catalog.metadata",
-		);
+	let revision = await initializeVndbNativeNames(
+		tx,
+		identity,
+		actor,
+		identity.revision,
+		planVndbSupportingNames(record).map((item) => ({
+			...item,
+			path: normalized ? normalized.sourcePath(item.path) : item.path,
+		})),
+		document,
+	);
+	const plan = planVndbSupportingSemantics(record);
 	if (normalized) {
 		for (const fact of plan.facts) fact.path = normalized.sourcePath(fact.path);
 		for (const relation of plan.relations) {
