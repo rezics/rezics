@@ -277,11 +277,46 @@ try {
 						.values({ ...base, packageId: other.id, publicationId: book.id }),
 				"23503",
 			);
-			await tx.execute(sql`set constraints all immediate`);
-			const plan = await tx.execute(
-				sql`explain (analyze, buffers, format json) select * from public.distribution_member where package_id = ${box.id}::uuid and manifest_id = ${box.manifestId}::uuid and position > 1 order by position limit 128`,
+			const large = await createDistributionPackage(tx, actor);
+			for (let batch = 0; batch < 128; batch++) {
+				await appendDistributionMembers(
+					tx,
+					large.id,
+					actor,
+					large.manifestId,
+					batch * 128,
+					Array.from({ length: 128 }, () => ({
+						occurrenceId: crypto.randomUUID(),
+						target: { kind: "music_release" as const, id: music.id },
+						originalNumber: null,
+						quantity: 1,
+					})),
+				);
+			}
+			await publishDistributionManifest(tx, large.id, actor, large.manifestId, 0, 16_384, {
+				label: "Large repeated-content distribution",
+			});
+			assert.equal((await readDistributionMembers(tx, large.id, actor, 1, 16_300, 128)).length, 83);
+			const emptyReplacement = await beginDistributionManifest(tx, large.id, actor);
+			await publishDistributionManifest(tx, large.id, actor, emptyReplacement.id, 1, 0, {
+				label: null,
+			});
+			const historicalPage = await queryDistributionPackages(
+				tx,
+				actor,
+				{ kind: "music_release", id: music.id },
+				{ packageId: large.id, manifestId: large.manifestId, position: 0 },
+				128,
 			);
-			assert.ok(plan.rows.length);
+			assert.equal(historicalPage.items.length, 0);
+			assert.equal(historicalPage.nextCursor?.position, 128);
+			checks += 3;
+			await tx.execute(sql`set constraints all immediate`);
+			await tx.execute(sql`analyze public.distribution_member`);
+			const plan = await tx.execute(
+				sql`explain (analyze, buffers, format json) select * from public.distribution_member where package_id = ${large.id}::uuid and manifest_id = ${large.manifestId}::uuid and position > 16300 order by position limit 128`,
+			);
+			assert.match(JSON.stringify(plan.rows), /Index (Only )?Scan/);
 			checks++;
 			throw rollback;
 		});
@@ -293,6 +328,7 @@ try {
 			checks,
 			status: "passed",
 			evidence: "transaction rollback, real PostgreSQL, bounded member EXPLAIN",
+			largeManifestRows: 16_384,
 		}),
 	);
 } finally {

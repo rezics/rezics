@@ -100,6 +100,7 @@ the model is disk-backed and bounded, but hardware throughput is not certified.
 
 `check-distribution.ts` validates source-free mixed-domain authoring, repeated
 occurrences, paged export, restore, stale writers, access isolation and SQL guard
-failures on an explicitly disposable PostgreSQL target. Its small-fixture EXPLAIN
-checks the actual query; it does not claim 500M-row latency from toy data. Unit
+failures on an explicitly disposable PostgreSQL target. A 16,384-member hot
+manifest checks tail keyset index access and bounded historical reverse scans.
+Its EXPLAIN does not claim 500M-row latency from toy data. Unit
 tests cover target alternatives, UTF-8 bounds, quantity and batch invariants.
