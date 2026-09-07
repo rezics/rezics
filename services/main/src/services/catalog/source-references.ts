@@ -1,8 +1,9 @@
 import { and, eq } from "drizzle-orm";
+import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { catalogSourceMappingClaim } from "../database/schema/catalog-source";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
-import type { CatalogOwner } from "./contracts";
+import { CatalogReferenceSchema, type CatalogOwner, type CatalogReference } from "./contracts";
 import { addCatalogName, createCatalogIdentity, loadCatalogIdentity } from "./storage";
 import { sealInitialCatalogSourceBinding } from "./source-bindings";
 import {
@@ -23,6 +24,8 @@ export async function bindReferencedSourceIdentity(
 		readonly shape: string;
 		readonly name?: string;
 		readonly evidence: CatalogSourceReferenceEvidence;
+		/** Initial owner state must be completed before sealing the pristine-source baseline. */
+		readonly initialize?: (reference: Readonly<CatalogReference & { revision: number }>) => Promise<CatalogReference & { revision: number }>;
 	},
 ) {
 	const evidence = requireCatalogSourceReferenceEvidence(input.evidence);
@@ -73,6 +76,15 @@ export async function bindReferencedSourceIdentity(
 				value: input.name,
 			})
 		).revision;
+	if (input.initialize) {
+		const initialized = await input.initialize(Object.freeze({ owner: identity.owner, id: identity.id, revision }));
+		const returned = CatalogReferenceSchema.parse({ owner: initialized.owner, id: initialized.id });
+		if (returned.owner !== identity.owner || returned.id !== identity.id) throw new TypeError("Source initializer returned another native identity");
+		z.number().int().min(revision).max(Number.MAX_SAFE_INTEGER).parse(initialized.revision);
+		const current = await loadCatalogIdentity(tx, identity, actor, true);
+		if (current.revision !== initialized.revision) throw new TypeError("Source initializer did not commit its declared native revision");
+		revision = initialized.revision;
+	}
 	const tables = CatalogFactTables[input.owner];
 	const [identifier] = await tx
 		.insert(tables.identifier)
