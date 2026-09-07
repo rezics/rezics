@@ -26,6 +26,7 @@ import {
 import type { CatalogSourceOwnedChange } from "./source-owned-compensation";
 import { CatalogProfileSourceTables } from "../database/schema/catalog-profile-source";
 import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
+import { catalogSourceApplicationScopes } from "./source-application-scopes";
 
 type NumericChange = Extract<CatalogSourceNativeChange, { afterRevision: number }>;
 type Origin = { sourceSnapshotId: string; sourcePath: string; sourceRevision: number };
@@ -102,9 +103,20 @@ async function origin(
 		}
 		if (change.kind === "catalog-name-authority") {
 			const t = tables.authorityRevision;
+			const binding = tables.sourceBinding;
 			const [row] = await tx
 				.select({ sourcePath: t.sourcePath, sourceRevision: t.revision })
 				.from(t)
+				.innerJoin(
+					binding,
+					and(
+						eq(binding.ownerId, t.ownerId),
+						eq(binding.nameId, t.nameId),
+						eq(binding.sourceRecordId, sourceRecordId),
+						eq(binding.mappingKey, scope.mappingKey),
+						eq(binding.correspondenceRevision, scope.correspondenceRevision),
+					),
+				)
 				.where(
 					and(
 						eq(t.sourceRecordId, sourceRecordId),
@@ -280,7 +292,7 @@ export async function advanceCatalogSourceOwnedBaselines(
 		)
 		.limit(1);
 	if (!epoch) throw new Error("Source baseline requires its proposal's exact correspondence epoch");
-	const scope = {
+	const currentScope = {
 		mappingKey: proposal.mappingKey,
 		correspondenceRevision: epoch.correspondenceRevision,
 	};
@@ -312,214 +324,228 @@ export async function advanceCatalogSourceOwnedBaselines(
 			: [];
 	if (input.action === "withdraw" && !applied)
 		throw new Error("Source baseline compensation requires its original application");
-	const desiredSnapshot =
-		input.action === "apply" ? proposal.snapshotId : applied?.previousSnapshotId;
+	const appliedHeader = input.action === "apply" ? application : applied;
+	if (!appliedHeader) throw new Error("Source interpretation requires its immutable apply header");
+	const scopes = catalogSourceApplicationScopes(
+		appliedHeader,
+		{ ...currentScope, snapshotId: proposal.snapshotId },
+		input.action,
+	);
 	for (const change of changes) {
 		if (!("afterRevision" in change)) continue;
-		const observed = desiredSnapshot
-			? await origin(tx, input.sourceRecordId, desiredSnapshot, change, scope)
-			: undefined;
-		const fallback =
-			observed ??
-			(await origin(tx, input.sourceRecordId, proposal.snapshotId, change, scope)) ??
-			(input.action === "apply" && input.previousSnapshotId
-				? await origin(tx, input.sourceRecordId, input.previousSnapshotId, change, scope)
-				: undefined);
-		const locator = {
-			sourceRecordId: input.sourceRecordId,
-			mappingKey: proposal.mappingKey,
-			correspondenceRevision: scope.correspondenceRevision,
-			ownerId: change.ownerId,
-		};
-		const common = {
-			...locator,
-			mappingOwner: proposal.mappingOwner,
-			currentRevision: change.afterRevision,
-			lastProposalId: input.proposalId,
-			lastAction: input.action,
-			absent: !observed,
-		};
-		if (change.kind === "catalog-profile") {
-			const t = CatalogSourceProfileBaselines[change.owner];
-			const [previous] = await tx
-				.select()
-				.from(t)
-				.where(
-					and(
-						eq(t.sourceRecordId, locator.sourceRecordId),
-						eq(t.mappingKey, locator.mappingKey),
-						eq(t.correspondenceRevision, locator.correspondenceRevision),
-						eq(t.ownerId, locator.ownerId),
-					),
-				)
-				.limit(1)
-				.for("update");
-			const proof = fallback ?? previous;
-			if (!proof) throw new Error("Native profile change has no source occurrence evidence");
-			const values = {
-				...common,
-				sourceSnapshotId: proof.sourceSnapshotId,
-				sourcePath: proof.sourcePath,
-				sourceRevision: proof.sourceRevision,
+		let matched = false;
+		for (const scope of scopes) {
+			const observed = scope.desiredSnapshotId
+				? await origin(tx, input.sourceRecordId, scope.desiredSnapshotId, change, scope)
+				: undefined;
+			let fallback = observed;
+			for (const snapshotId of scope.snapshotIds) {
+				if (fallback) break;
+				fallback = await origin(tx, input.sourceRecordId, snapshotId, change, scope);
+			}
+			const locator = {
+				sourceRecordId: input.sourceRecordId,
+				mappingKey: proposal.mappingKey,
+				correspondenceRevision: scope.correspondenceRevision,
+				ownerId: change.ownerId,
 			};
-			await tx
-				.insert(t)
-				.values(values)
-				.onConflictDoUpdate({
-					target: [t.sourceRecordId, t.mappingKey, t.correspondenceRevision, t.ownerId],
-					set: values,
-				});
-		} else if ("owner" in change) {
-			const t = CatalogSourceOwnedBaselines[change.owner];
-			const key = and(
-				eq(t.sourceRecordId, locator.sourceRecordId),
-				eq(t.mappingKey, locator.mappingKey),
-				eq(t.correspondenceRevision, locator.correspondenceRevision),
-				eq(t.ownerId, locator.ownerId),
-				eq(t.kind, change.kind),
-				eq(t.componentKey, change.componentKey),
-			);
-			const [previous] = await tx.select().from(t).where(key).limit(1).for("update");
-			const proof = fallback ?? previous;
-			if (!proof) throw new Error("Owned native change has no source occurrence evidence");
-			const values = {
-				...common,
-				sourceSnapshotId: proof.sourceSnapshotId,
-				sourcePath: proof.sourcePath,
-				sourceRevision: proof.sourceRevision,
-				kind: change.kind,
-				componentKey: change.componentKey,
-				semanticId: change.kind === "catalog-semantic" ? change.componentKey : null,
-				nameId: change.kind === "catalog-name" ? change.componentKey : null,
-				authorityId: change.kind === "catalog-name-authority" ? change.componentKey : null,
-				identifierId: change.kind === "catalog-identifier" ? change.componentKey : null,
+			const common = {
+				...locator,
+				mappingOwner: proposal.mappingOwner,
+				currentRevision: change.afterRevision,
+				lastProposalId: input.proposalId,
+				lastAction: input.action,
+				absent: !observed,
 			};
-			await tx
-				.insert(t)
-				.values(values)
-				.onConflictDoUpdate({
-					target: [
-						t.sourceRecordId,
-						t.mappingKey,
-						t.correspondenceRevision,
-						t.ownerId,
-						t.kind,
-						t.componentKey,
-					],
-					set: values,
-				});
-		} else if (change.kind === "software-record") {
-			const t = softwareSourceRecordBaseline;
-			const [previous] = await tx
-				.select()
-				.from(t)
-				.where(
-					and(
-						eq(t.sourceRecordId, locator.sourceRecordId),
-						eq(t.mappingKey, locator.mappingKey),
-						eq(t.correspondenceRevision, locator.correspondenceRevision),
-						eq(t.ownerId, locator.ownerId),
-					),
-				)
-				.limit(1)
-				.for("update");
-			const proof = fallback ?? previous;
-			if (!proof) throw new Error("Software record change has no source occurrence evidence");
-			const values = {
-				...common,
-				sourceSnapshotId: proof.sourceSnapshotId,
-				sourcePath: proof.sourcePath,
-				sourceRevision: proof.sourceRevision,
-			};
-			await tx
-				.insert(t)
-				.values(values)
-				.onConflictDoUpdate({
-					target: [t.sourceRecordId, t.mappingKey, t.correspondenceRevision, t.ownerId],
-					set: values,
-				});
-		} else if (change.kind === "software-component") {
-			const t = softwareSourceComponentBaseline;
-			const [previous] = await tx
-				.select()
-				.from(t)
-				.where(
-					and(
-						eq(t.sourceRecordId, locator.sourceRecordId),
-						eq(t.mappingKey, locator.mappingKey),
-						eq(t.correspondenceRevision, locator.correspondenceRevision),
-						eq(t.ownerId, locator.ownerId),
-						eq(t.component, change.component),
-						eq(t.componentKey, change.componentKey),
-					),
-				)
-				.limit(1)
-				.for("update");
-			const proof = fallback ?? previous;
-			if (!proof) throw new Error("Software component change has no source occurrence evidence");
-			const values = {
-				...common,
-				sourceSnapshotId: proof.sourceSnapshotId,
-				sourcePath: proof.sourcePath,
-				sourceRevision: proof.sourceRevision,
-				component: change.component,
-				componentKey: change.componentKey,
-			};
-			await tx
-				.insert(t)
-				.values(values)
-				.onConflictDoUpdate({
-					target: [
-						t.sourceRecordId,
-						t.mappingKey,
-						t.correspondenceRevision,
-						t.ownerId,
-						t.component,
-						t.componentKey,
-					],
-					set: values,
-				});
-		} else {
-			const t =
-				change.kind === "software-context"
-					? softwareSourceContextBaseline
-					: softwareSourceParticipationBaseline;
-			const [previous] = await tx
-				.select()
-				.from(t)
-				.where(
-					and(
-						eq(t.sourceRecordId, locator.sourceRecordId),
-						eq(t.mappingKey, locator.mappingKey),
-						eq(t.correspondenceRevision, locator.correspondenceRevision),
-						eq(t.ownerId, locator.ownerId),
-						eq(t.componentKey, change.componentKey),
-					),
-				)
-				.limit(1)
-				.for("update");
-			const proof = fallback ?? previous;
-			if (!proof) throw new Error("Software child change has no source occurrence evidence");
-			const values = {
-				...common,
-				sourceSnapshotId: proof.sourceSnapshotId,
-				sourcePath: proof.sourcePath,
-				sourceRevision: proof.sourceRevision,
-				componentKey: change.componentKey,
-			};
-			await tx
-				.insert(t)
-				.values(values)
-				.onConflictDoUpdate({
-					target: [
-						t.sourceRecordId,
-						t.mappingKey,
-						t.correspondenceRevision,
-						t.ownerId,
-						t.componentKey,
-					],
-					set: values,
-				});
+			if (change.kind === "catalog-profile") {
+				const t = CatalogSourceProfileBaselines[change.owner];
+				const [previous] = await tx
+					.select()
+					.from(t)
+					.where(
+						and(
+							eq(t.sourceRecordId, locator.sourceRecordId),
+							eq(t.mappingKey, locator.mappingKey),
+							eq(t.correspondenceRevision, locator.correspondenceRevision),
+							eq(t.ownerId, locator.ownerId),
+						),
+					)
+					.limit(1)
+					.for("update");
+				const proof = fallback ?? previous;
+				if (!proof) continue;
+				matched = true;
+				const values = {
+					...common,
+					sourceSnapshotId: proof.sourceSnapshotId,
+					sourcePath: proof.sourcePath,
+					sourceRevision: proof.sourceRevision,
+				};
+				await tx
+					.insert(t)
+					.values(values)
+					.onConflictDoUpdate({
+						target: [t.sourceRecordId, t.mappingKey, t.correspondenceRevision, t.ownerId],
+						set: values,
+					});
+			} else if ("owner" in change) {
+				const t = CatalogSourceOwnedBaselines[change.owner];
+				const key = and(
+					eq(t.sourceRecordId, locator.sourceRecordId),
+					eq(t.mappingKey, locator.mappingKey),
+					eq(t.correspondenceRevision, locator.correspondenceRevision),
+					eq(t.ownerId, locator.ownerId),
+					eq(t.kind, change.kind),
+					eq(t.componentKey, change.componentKey),
+				);
+				const [previous] = await tx.select().from(t).where(key).limit(1).for("update");
+				const proof = fallback ?? previous;
+				if (!proof) continue;
+				matched = true;
+				const values = {
+					...common,
+					sourceSnapshotId: proof.sourceSnapshotId,
+					sourcePath: proof.sourcePath,
+					sourceRevision: proof.sourceRevision,
+					kind: change.kind,
+					componentKey: change.componentKey,
+					semanticId: change.kind === "catalog-semantic" ? change.componentKey : null,
+					nameId: change.kind === "catalog-name" ? change.componentKey : null,
+					authorityId: change.kind === "catalog-name-authority" ? change.componentKey : null,
+					identifierId: change.kind === "catalog-identifier" ? change.componentKey : null,
+				};
+				await tx
+					.insert(t)
+					.values(values)
+					.onConflictDoUpdate({
+						target: [
+							t.sourceRecordId,
+							t.mappingKey,
+							t.correspondenceRevision,
+							t.ownerId,
+							t.kind,
+							t.componentKey,
+						],
+						set: values,
+					});
+			} else if (change.kind === "software-record") {
+				const t = softwareSourceRecordBaseline;
+				const [previous] = await tx
+					.select()
+					.from(t)
+					.where(
+						and(
+							eq(t.sourceRecordId, locator.sourceRecordId),
+							eq(t.mappingKey, locator.mappingKey),
+							eq(t.correspondenceRevision, locator.correspondenceRevision),
+							eq(t.ownerId, locator.ownerId),
+						),
+					)
+					.limit(1)
+					.for("update");
+				const proof = fallback ?? previous;
+				if (!proof) continue;
+				matched = true;
+				const values = {
+					...common,
+					sourceSnapshotId: proof.sourceSnapshotId,
+					sourcePath: proof.sourcePath,
+					sourceRevision: proof.sourceRevision,
+				};
+				await tx
+					.insert(t)
+					.values(values)
+					.onConflictDoUpdate({
+						target: [t.sourceRecordId, t.mappingKey, t.correspondenceRevision, t.ownerId],
+						set: values,
+					});
+			} else if (change.kind === "software-component") {
+				const t = softwareSourceComponentBaseline;
+				const [previous] = await tx
+					.select()
+					.from(t)
+					.where(
+						and(
+							eq(t.sourceRecordId, locator.sourceRecordId),
+							eq(t.mappingKey, locator.mappingKey),
+							eq(t.correspondenceRevision, locator.correspondenceRevision),
+							eq(t.ownerId, locator.ownerId),
+							eq(t.component, change.component),
+							eq(t.componentKey, change.componentKey),
+						),
+					)
+					.limit(1)
+					.for("update");
+				const proof = fallback ?? previous;
+				if (!proof) continue;
+				matched = true;
+				const values = {
+					...common,
+					sourceSnapshotId: proof.sourceSnapshotId,
+					sourcePath: proof.sourcePath,
+					sourceRevision: proof.sourceRevision,
+					component: change.component,
+					componentKey: change.componentKey,
+				};
+				await tx
+					.insert(t)
+					.values(values)
+					.onConflictDoUpdate({
+						target: [
+							t.sourceRecordId,
+							t.mappingKey,
+							t.correspondenceRevision,
+							t.ownerId,
+							t.component,
+							t.componentKey,
+						],
+						set: values,
+					});
+			} else {
+				const t =
+					change.kind === "software-context"
+						? softwareSourceContextBaseline
+						: softwareSourceParticipationBaseline;
+				const [previous] = await tx
+					.select()
+					.from(t)
+					.where(
+						and(
+							eq(t.sourceRecordId, locator.sourceRecordId),
+							eq(t.mappingKey, locator.mappingKey),
+							eq(t.correspondenceRevision, locator.correspondenceRevision),
+							eq(t.ownerId, locator.ownerId),
+							eq(t.componentKey, change.componentKey),
+						),
+					)
+					.limit(1)
+					.for("update");
+				const proof = fallback ?? previous;
+				if (!proof) continue;
+				matched = true;
+				const values = {
+					...common,
+					sourceSnapshotId: proof.sourceSnapshotId,
+					sourcePath: proof.sourcePath,
+					sourceRevision: proof.sourceRevision,
+					componentKey: change.componentKey,
+				};
+				await tx
+					.insert(t)
+					.values(values)
+					.onConflictDoUpdate({
+						target: [
+							t.sourceRecordId,
+							t.mappingKey,
+							t.correspondenceRevision,
+							t.ownerId,
+							t.componentKey,
+						],
+						set: values,
+					});
+			}
 		}
+		if (!matched)
+			throw new Error("Native change has no source occurrence in either recorded interpretation");
 	}
 }

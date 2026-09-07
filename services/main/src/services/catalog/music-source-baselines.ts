@@ -1,3 +1,4 @@
+import { catalogSourceApplicationScopes } from "./source-application-scopes";
 import { and, eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import {
@@ -88,74 +89,24 @@ export async function advanceMusicSourceComponentBaselines(
 		)
 		.limit(1);
 	if (!scope) throw new Error("Music source baseline proposal has no exact correspondence epoch");
-	let sourceSnapshotId = proposal.snapshotId;
-	if (input.action === "withdraw") {
-		const [application] = await tx
-			.select()
-			.from(catalogSourceApplication)
-			.where(
-				and(
-					eq(catalogSourceApplication.sourceRecordId, input.sourceRecordId),
-					eq(catalogSourceApplication.proposalId, input.proposalId),
-					eq(catalogSourceApplication.action, "apply"),
-				),
-			)
-			.limit(1);
-		if (!application) throw new Error("Music source baseline application is missing");
-		sourceSnapshotId = application.previousSnapshotId ?? proposal.snapshotId;
-	}
+	const [appliedHeader] = await tx
+		.select()
+		.from(catalogSourceApplication)
+		.where(
+			and(
+				eq(catalogSourceApplication.sourceRecordId, input.sourceRecordId),
+				eq(catalogSourceApplication.proposalId, input.proposalId),
+				eq(catalogSourceApplication.action, "apply"),
+			),
+		)
+		.limit(1);
+	if (!appliedHeader) throw new Error("Music baseline requires its immutable apply header");
+	const scopes = catalogSourceApplicationScopes(
+		appliedHeader,
+		{ ...scope, snapshotId: proposal.snapshotId },
+		input.action,
+	);
 	for (const change of native) {
-		const occurrence = musicComponentSourceOccurrence;
-		const candidates = await tx
-			.select()
-			.from(occurrence)
-			.where(
-				and(
-					eq(occurrence.sourceRecordId, input.sourceRecordId),
-					eq(occurrence.mappingKey, scope.mappingKey),
-					eq(occurrence.correspondenceRevision, scope.correspondenceRevision),
-					eq(occurrence.snapshotId, sourceSnapshotId),
-					eq(occurrence.ownerId, change.ownerId),
-					eq(occurrence.component, change.component),
-					eq(occurrence.componentKey, change.componentKey),
-				),
-			)
-			.limit(2);
-		const table = musicComponentSourceBaseline;
-		const key = and(
-			eq(table.sourceRecordId, input.sourceRecordId),
-			eq(table.mappingKey, proposal.mappingKey),
-			eq(table.correspondenceRevision, scope.correspondenceRevision),
-			eq(table.ownerId, change.ownerId),
-			eq(table.component, change.component),
-			eq(table.componentKey, change.componentKey),
-		);
-		const [previous] = await tx.select().from(table).where(key).limit(1);
-		let support = candidates[0];
-		if (candidates.length > 1) throw new Error("Ambiguous original music source component support");
-		if (!support) {
-			const fallbackSnapshot =
-				previous?.snapshotId ?? input.previousSnapshotId ?? proposal.snapshotId;
-			const fallback = await tx
-				.select()
-				.from(occurrence)
-				.where(
-					and(
-						eq(occurrence.sourceRecordId, input.sourceRecordId),
-						eq(occurrence.mappingKey, scope.mappingKey),
-						eq(occurrence.correspondenceRevision, scope.correspondenceRevision),
-						eq(occurrence.snapshotId, fallbackSnapshot),
-						eq(occurrence.ownerId, change.ownerId),
-						eq(occurrence.component, change.component),
-						eq(occurrence.componentKey, change.componentKey),
-					),
-				)
-				.limit(2);
-			if (fallback.length !== 1)
-				throw new Error("Removed music component lacks exact source support");
-			support = fallback[0];
-		}
-		if (!support) throw new Error("Music source component support is missing");
 		const [head] = await tx
 			.select()
 			.from(musicComponentRevision)
@@ -167,13 +118,60 @@ export async function advanceMusicSourceComponentBaselines(
 			)
 			.limit(1);
 		if (!head) throw new Error("Music source current history is missing");
-		await tx
-			.insert(table)
-			.values({
+		let matched = false;
+		for (const interpretation of scopes) {
+			const occurrence = musicComponentSourceOccurrence;
+			const find = async (snapshotId: string) => {
+				const rows = await tx
+					.select()
+					.from(occurrence)
+					.where(
+						and(
+							eq(occurrence.sourceRecordId, input.sourceRecordId),
+							eq(occurrence.mappingKey, interpretation.mappingKey),
+							eq(occurrence.correspondenceRevision, interpretation.correspondenceRevision),
+							eq(occurrence.snapshotId, snapshotId),
+							eq(occurrence.ownerId, change.ownerId),
+							eq(occurrence.component, change.component),
+							eq(occurrence.componentKey, change.componentKey),
+						),
+					)
+					.limit(2);
+				if (rows.length > 1) throw new Error("Ambiguous original music source component support");
+				return rows[0];
+			};
+			const observed = interpretation.desiredSnapshotId
+				? await find(interpretation.desiredSnapshotId)
+				: undefined;
+			let support: { snapshotId: string; sourcePath: string; historyId: string } | undefined =
+				observed;
+			for (const snapshotId of interpretation.snapshotIds) {
+				if (support) break;
+				support = await find(snapshotId);
+			}
+			const table = musicComponentSourceBaseline;
+			const key = and(
+				eq(table.sourceRecordId, input.sourceRecordId),
+				eq(table.mappingKey, interpretation.mappingKey),
+				eq(table.correspondenceRevision, interpretation.correspondenceRevision),
+				eq(table.ownerId, change.ownerId),
+				eq(table.component, change.component),
+				eq(table.componentKey, change.componentKey),
+			);
+			const [previous] = await tx.select().from(table).where(key).limit(1).for("update");
+			if (!support && previous)
+				support = {
+					snapshotId: previous.snapshotId,
+					sourcePath: previous.sourcePath,
+					historyId: previous.sourceHistoryId,
+				};
+			if (!support) continue;
+			matched = true;
+			const values = {
 				sourceRecordId: input.sourceRecordId,
-				mappingKey: proposal.mappingKey,
+				mappingKey: interpretation.mappingKey,
+				correspondenceRevision: interpretation.correspondenceRevision,
 				mappingOwner: proposal.mappingOwner,
-				correspondenceRevision: scope.correspondenceRevision,
 				ownerId: change.ownerId,
 				component: change.component,
 				componentKey: change.componentKey,
@@ -181,28 +179,26 @@ export async function advanceMusicSourceComponentBaselines(
 				sourcePath: support.sourcePath,
 				sourceHistoryId: support.historyId,
 				currentHistoryId: head.id,
-				absent: head.operation === "DELETE",
+				absent: !observed || head.operation === "DELETE",
 				proposalId: input.proposalId,
 				action: input.action,
-			})
-			.onConflictDoUpdate({
-				target: [
-					table.sourceRecordId,
-					table.mappingKey,
-					table.correspondenceRevision,
-					table.ownerId,
-					table.component,
-					table.componentKey,
-				],
-				set: {
-					snapshotId: support.snapshotId,
-					sourcePath: support.sourcePath,
-					sourceHistoryId: support.historyId,
-					currentHistoryId: head.id,
-					absent: head.operation === "DELETE",
-					proposalId: input.proposalId,
-					action: input.action,
-				},
-			});
+			};
+			await tx
+				.insert(table)
+				.values(values)
+				.onConflictDoUpdate({
+					target: [
+						table.sourceRecordId,
+						table.mappingKey,
+						table.correspondenceRevision,
+						table.ownerId,
+						table.component,
+						table.componentKey,
+					],
+					set: values,
+				});
+		}
+		if (!matched)
+			throw new Error("Music change lacks exact support in either recorded interpretation");
 	}
 }

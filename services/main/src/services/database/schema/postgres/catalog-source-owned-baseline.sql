@@ -15,10 +15,11 @@ BEGIN
   FROM public.catalog_source_adoption_proposal p JOIN public.catalog_source_binding_revision r
     ON r.source_record_id=p.source_record_id AND r.mapping_key=p.mapping_key AND r.revision=p.expected_binding_revision
   WHERE p.source_record_id=NEW.source_record_id AND p.id=NEW.last_proposal_id;
-  IF source_epoch <> NEW.correspondence_revision OR NOT EXISTS (
+  IF NOT public.catalog_source_application_includes_epoch(NEW.source_record_id,NEW.last_proposal_id,NEW.mapping_key,NEW.correspondence_revision) OR NOT EXISTS (
     SELECT 1 FROM public.catalog_source_binding_revision WHERE source_record_id=NEW.source_record_id
       AND mapping_key=NEW.mapping_key AND revision=NEW.correspondence_revision AND owner=NEW.mapping_owner
   ) THEN RAISE EXCEPTION 'Baseline requires the proposal exact owner correspondence epoch' USING ERRCODE='23514'; END IF;
+  source_epoch := NEW.correspondence_revision;
   IF TG_OP = 'UPDATE' AND NEW.current_revision <= OLD.current_revision THEN
     RAISE EXCEPTION 'Baseline native history must advance' USING ERRCODE = '23514';
   END IF;
@@ -40,7 +41,7 @@ BEGIN
     ELSIF NEW.kind = 'catalog-identifier' THEN
     EXECUTE format('SELECT EXISTS (SELECT 1 FROM public.%I WHERE source_record_id=$1 AND snapshot_id=$2 AND owner_id=$3 AND identifier_id=$4 AND identifier_revision=$5 AND source_path=$6 AND source_mapping_key=$7 AND source_correspondence_revision=$8)', TG_ARGV[1] || '_fact_support') INTO source_matched USING NEW.source_record_id,NEW.source_snapshot_id,NEW.owner_id,NEW.component_key,NEW.source_revision,NEW.source_path,NEW.mapping_key,source_epoch;
     ELSIF NEW.kind = 'catalog-name-authority' THEN
-    EXECUTE format('SELECT EXISTS (SELECT 1 FROM public.%I WHERE source_record_id=$1 AND snapshot_id=$2 AND owner_id=$3 AND id=$4 AND revision=$5 AND source_path=$6)', TG_ARGV[1] || '_name_authority_revision') INTO source_matched USING NEW.source_record_id,NEW.source_snapshot_id,NEW.owner_id,NEW.component_key,NEW.source_revision,NEW.source_path;
+    EXECUTE format('SELECT EXISTS (SELECT 1 FROM public.%I a JOIN public.%I b ON b.owner_id=a.owner_id AND b.name_id=a.name_id WHERE a.source_record_id=$1 AND a.snapshot_id=$2 AND a.owner_id=$3 AND a.id=$4 AND a.revision=$5 AND a.source_path=$6 AND b.source_record_id=$1 AND b.mapping_key=$7 AND b.correspondence_revision=$8)', TG_ARGV[1] || '_name_authority_revision', TG_ARGV[1] || '_name_source_binding') INTO source_matched USING NEW.source_record_id,NEW.source_snapshot_id,NEW.owner_id,NEW.component_key,NEW.source_revision,NEW.source_path,NEW.mapping_key,source_epoch;
     ELSE
     EXECUTE format('SELECT EXISTS (SELECT 1 FROM public.%I s JOIN public.%I v ON v.owner_id=s.owner_id AND v.id=s.fact_id WHERE s.source_record_id=$1 AND s.snapshot_id=$2 AND s.owner_id=$3 AND v.semantic_id=$4 AND v.expected_head_version+1=$5 AND s.source_path=$6 AND s.source_mapping_key=$7 AND s.source_correspondence_revision=$8 UNION ALL SELECT 1 FROM public.%I s JOIN public.%I v ON v.owner_id=s.owner_id AND v.id=s.relation_id WHERE s.source_record_id=$1 AND s.snapshot_id=$2 AND s.owner_id=$3 AND v.semantic_id=$4 AND v.expected_head_version+1=$5 AND s.source_path=$6 AND s.source_mapping_key=$7 AND s.source_correspondence_revision=$8)', TG_ARGV[1] || '_fact_support',TG_ARGV[1] || '_fact',TG_ARGV[1] || '_fact_support',TG_ARGV[1] || '_catalog_relation') INTO source_matched USING NEW.source_record_id,NEW.source_snapshot_id,NEW.owner_id,NEW.component_key,NEW.source_revision,NEW.source_path,NEW.mapping_key,source_epoch;
     END IF;

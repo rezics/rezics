@@ -1,3 +1,17 @@
+CREATE OR REPLACE FUNCTION public.catalog_source_application_includes_epoch(source_id uuid, requested_proposal_id uuid, mapping_id uuid, epoch_revision bigint)
+RETURNS boolean LANGUAGE sql STABLE SET search_path = pg_catalog, public AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.catalog_source_adoption_proposal p
+    JOIN public.catalog_source_binding_revision r ON r.source_record_id=p.source_record_id AND r.mapping_key=p.mapping_key AND r.revision=p.expected_binding_revision
+    WHERE p.source_record_id=source_id AND p.id=requested_proposal_id AND p.mapping_key=mapping_id AND r.correspondence_revision=epoch_revision
+    UNION ALL
+    SELECT 1 FROM public.catalog_source_application a
+    WHERE a.source_record_id=source_id AND a.proposal_id=requested_proposal_id
+      AND a.mapping_key=mapping_id AND a.action='apply' AND a.previous_correspondence_revision=epoch_revision
+      AND a.previous_observed_snapshot_id IS NOT NULL
+  )
+$$;
+
 CREATE OR REPLACE FUNCTION public.catalog_source_validate_application_change()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 DECLARE history public.music_component_revision%ROWTYPE; application public.catalog_source_application%ROWTYPE; proposal_state text; after_sequence bigint;

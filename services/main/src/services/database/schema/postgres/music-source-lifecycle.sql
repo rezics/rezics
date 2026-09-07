@@ -57,10 +57,11 @@ BEGIN
       AND change.component_key=NEW.component_key AND change.after_revision_id=NEW.current_history_id) THEN
     RAISE EXCEPTION 'Music source baseline requires exact native application proof' USING ERRCODE = '23514';
   END IF;
-  IF NOT EXISTS (SELECT 1 FROM public.catalog_source_adoption_proposal p
-    JOIN public.catalog_source_binding_revision r ON r.source_record_id=p.source_record_id AND r.mapping_key=p.mapping_key AND r.revision=p.expected_binding_revision
-    WHERE p.source_record_id=NEW.source_record_id AND p.id=NEW.proposal_id AND r.correspondence_revision=NEW.correspondence_revision AND r.owner=NEW.mapping_owner)
+  IF NOT public.catalog_source_application_includes_epoch(NEW.source_record_id,NEW.proposal_id,NEW.mapping_key,NEW.correspondence_revision) OR NOT EXISTS (
+    SELECT 1 FROM public.catalog_source_binding_revision r WHERE r.source_record_id=NEW.source_record_id AND r.mapping_key=NEW.mapping_key AND r.revision=NEW.correspondence_revision AND r.owner=NEW.mapping_owner)
   THEN RAISE EXCEPTION 'Music baseline requires its proposal owner correspondence epoch' USING ERRCODE='23514'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.music_component_head h WHERE h.owner_id=NEW.owner_id AND h.component=NEW.component AND h.component_key=NEW.component_key AND h.history_id=NEW.current_history_id)
+  THEN RAISE EXCEPTION 'Music baseline must identify its exact current native head' USING ERRCODE='23514'; END IF;
   RETURN NEW;
 END $$;
 DROP TRIGGER IF EXISTS music_source_baseline_proof ON public.music_component_source_baseline;

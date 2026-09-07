@@ -21,9 +21,8 @@ BEGIN
   IF current_revision IS DISTINCT FROM NEW.current_revision THEN RAISE EXCEPTION 'Profile baseline must identify the current native profile head' USING ERRCODE='23514'; END IF;
   EXECUTE format('SELECT EXISTS(SELECT 1 FROM public.%I c JOIN public.catalog_source_adoption_proposal p ON p.source_record_id=c.source_record_id AND p.id=c.proposal_id WHERE c.source_record_id=$1 AND c.proposal_id=$2 AND c.action=$3 AND c.owner_id=$4 AND c.after_revision=$5 AND p.mapping_key=$6)',TG_ARGV[0] || '_source_profile_application_change') INTO valid USING NEW.source_record_id,NEW.last_proposal_id,NEW.last_action,NEW.owner_id,NEW.current_revision,NEW.mapping_key;
   IF NOT valid THEN RAISE EXCEPTION 'Profile baseline requires its exact native application' USING ERRCODE='23514'; END IF;
-  IF NOT EXISTS (SELECT 1 FROM public.catalog_source_adoption_proposal p
-    JOIN public.catalog_source_binding_revision r ON r.source_record_id=p.source_record_id AND r.mapping_key=p.mapping_key AND r.revision=p.expected_binding_revision
-    WHERE p.source_record_id=NEW.source_record_id AND p.id=NEW.last_proposal_id AND r.correspondence_revision=NEW.correspondence_revision AND r.owner=NEW.mapping_owner)
+  IF NOT public.catalog_source_application_includes_epoch(NEW.source_record_id,NEW.last_proposal_id,NEW.mapping_key,NEW.correspondence_revision) OR NOT EXISTS (
+    SELECT 1 FROM public.catalog_source_binding_revision r WHERE r.source_record_id=NEW.source_record_id AND r.mapping_key=NEW.mapping_key AND r.revision=NEW.correspondence_revision AND r.owner=NEW.mapping_owner)
   THEN RAISE EXCEPTION 'Profile baseline requires its proposal owner correspondence epoch' USING ERRCODE='23514'; END IF;
   RETURN NEW;
 END $$;
