@@ -1,3 +1,4 @@
+import { bindCatalogSourceIdentity } from "../src/services/catalog/source-bindings";
 import assert from "node:assert/strict";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -265,6 +266,18 @@ try {
 				])
 				.returning();
 			assert.equal(snapshots.length, 3);
+			const sourceMappings = new Map<string, string>();
+			for (const snapshot of snapshots) {
+				if (sourceMappings.has(snapshot.sourceRecordId)) continue;
+				const binding = await bindCatalogSourceIdentity(tx, account.id, {
+					sourceRecordId: snapshot.sourceRecordId,
+					snapshotId: snapshot.id,
+					path: "/",
+					reference: content,
+					mappingVersion: "participation-fixture.vn.1",
+				});
+				sourceMappings.set(snapshot.sourceRecordId, binding.mappingKey);
+			}
 			const occurrence = softwareParticipationSourceOccurrence;
 			for (const snapshot of snapshots) {
 				const native = await createSoftwareParticipationContext(tx, content, account.id, {
@@ -272,7 +285,11 @@ try {
 					languageTag: "en",
 					state: "active",
 				});
+				const mappingKey = sourceMappings.get(snapshot.sourceRecordId);
+				assert.ok(mappingKey);
 				await tx.insert(occurrence).values({
+					mappingKey,
+					correspondenceRevision: 1,
 					sourceRecordId: snapshot.sourceRecordId,
 					snapshotId: snapshot.id,
 					namespace: "editions",
