@@ -5,26 +5,50 @@ import {
 	foreignKey,
 	index,
 	primaryKey,
+	integer,
+	timestamp,
 	text,
 	unique,
 	uuid,
 } from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
-import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
+import { createCreatedAtColumn } from "./columns";
 import { CatalogOwnerValues, type CatalogOwner } from "../../catalog/contracts";
 import { users } from "./auth";
+import { CatalogIdentityTables } from "./catalog-identity";
 
 /** Upstream record identity; it does not allocate a native Unit or grant participation. */
 export const catalogSourceRecord = pgTable(
 	"catalog_source_record",
 	{
-		id: createUuidv7PrimaryKey(),
+		id: uuid().primaryKey(),
 		source: text().notNull(),
 		objectType: text().notNull(),
 		externalId: text().notNull(),
+		acquisitionGeneration: bigint({ mode: "number" }).default(0).notNull(),
+		acceptedGeneration: bigint({ mode: "number" }).default(0).notNull(),
+		headSnapshotId: uuid(),
+		lastCheckedAt: timestamp({ withTimezone: true, precision: 3 }),
+		lastCheckOutcome: text().$type<"changed" | "unchanged" | "error" | "tombstone">(),
 	},
 	(table) => [
-		unique("catalog_source_record_native_key").on(table.source, table.objectType, table.externalId),
+		// Deterministic natural-key routing lets the primary key enforce uniqueness across shards.
+		check(
+			"catalog_source_record_identity_check",
+			sql`replace(${table.id}::text, '-', '') = overlay(overlay(substr(encode(sha256(convert_to(${table.source} || chr(10) || ${table.objectType} || chr(10) || ${table.externalId}, 'UTF8')), 'hex'), 1, 32) placing '8' from 13 for 1) placing '8' from 17 for 1)`,
+		),
+		check(
+			"catalog_source_record_namespace_check",
+			sql`${table.source} ~ '^[a-z][a-z0-9_.-]{0,95}$' and ${table.objectType} ~ '^[a-z][a-z0-9_.-]{0,95}$'`,
+		),
+		check(
+			"catalog_source_record_generation_check",
+			sql`${table.acceptedGeneration} between 0 and ${table.acquisitionGeneration} and ${table.acquisitionGeneration} <= 9007199254740991`,
+		),
+		check(
+			"catalog_source_record_outcome_check",
+			sql`${table.lastCheckOutcome} is null or ${table.lastCheckOutcome} in ('changed','unchanged','error','tombstone')`,
+		),
 		check(
 			"catalog_source_record_key_check",
 			sql`octet_length(${table.source}) between 1 and 96 and octet_length(${table.objectType}) between 1 and 96 and octet_length(${table.externalId}) between 1 and 512`,
@@ -76,10 +100,14 @@ export const catalogSourceMappingClaim = pgTable(
 		evidenceSourceRecordId: uuid(),
 		evidenceSnapshotId: uuid(),
 		evidencePath: text(),
+		bindingRevision: bigint({ mode: "number" }).default(1).notNull(),
+		policyRevision: bigint({ mode: "number" }).default(1).notNull(),
+		state: text().$type<"active" | "paused" | "withdrawn">().default("active").notNull(),
+		baselineTargetRevision: bigint({ mode: "number" }),
+		mappingVersion: text().default("source.manual.1").notNull(),
 	},
 	(table) => [
 		primaryKey({ columns: [table.sourceRecordId, table.path] }),
-		unique("catalog_source_mapping_claim_owner_key").on(table.mappingKey, table.owner),
 		unique("catalog_source_mapping_claim_record_key").on(
 			table.sourceRecordId,
 			table.mappingKey,
@@ -126,9 +154,14 @@ export const catalogSourceAdoptionProposal = pgTable(
 		mappingOwner: text().$type<CatalogOwner>().notNull(),
 		mappingVersion: text().notNull(),
 		expectedTargetRevision: bigint({ mode: "number" }).notNull(),
+		expectedBindingRevision: bigint({ mode: "number" }).default(1).notNull(),
+		expectedPolicyRevision: bigint({ mode: "number" }).default(1).notNull(),
+		decidedAt: timestamp({ withTimezone: true, precision: 3 }),
+		decisionReason: text(),
+		appliedTargetRevision: bigint({ mode: "number" }),
 		proposerAuthUserId: uuid().references(() => users.id, { onDelete: "set null" }),
 		state: text()
-			.$type<"pending" | "applied" | "rejected" | "superseded">()
+			.$type<"pending" | "applied" | "rejected" | "superseded" | "withdrawn">()
 			.default("pending")
 			.notNull(),
 		createdAt: createCreatedAtColumn(),
@@ -140,6 +173,9 @@ export const catalogSourceAdoptionProposal = pgTable(
 			table.snapshotId,
 			table.mappingKey,
 			table.mappingVersion,
+			table.expectedBindingRevision,
+			table.expectedPolicyRevision,
+			table.expectedTargetRevision,
 		),
 		foreignKey({
 			name: "catalog_adoption_snapshot_fk",
@@ -179,11 +215,166 @@ export const catalogSourceAdoptionProposal = pgTable(
 		),
 		check(
 			"catalog_adoption_state_check",
-			sql`${table.state} in ('pending', 'applied', 'rejected', 'superseded')`,
+			sql`${table.state} in ('pending', 'applied', 'rejected', 'superseded', 'withdrawn')`,
 		),
 		check(
 			"catalog_adoption_version_check",
 			sql`octet_length(${table.mappingVersion}) between 1 and 128`,
 		),
+	],
+);
+
+/** Immutable decisions retain exact native FK alternatives even after a rebind. */
+export const catalogSourceBindingRevision = pgTable(
+	"catalog_source_binding_revision",
+	{
+		sourceRecordId: uuid().notNull(),
+		mappingKey: uuid().notNull(),
+		owner: text().$type<CatalogOwner>().notNull(),
+		revision: bigint({ mode: "number" }).notNull(),
+		policyRevision: bigint({ mode: "number" }).notNull(),
+		state: text().$type<"active" | "paused" | "withdrawn">().notNull(),
+		mode: text().$type<"review" | "manual">().notNull(),
+		publishingId: uuid().references(() => CatalogIdentityTables.publishing.id, {
+			onDelete: "restrict",
+		}),
+		musicId: uuid().references(() => CatalogIdentityTables.music.id, { onDelete: "restrict" }),
+		programId: uuid().references(() => CatalogIdentityTables.program.id, { onDelete: "restrict" }),
+		softwareId: uuid().references(() => CatalogIdentityTables.software.id, {
+			onDelete: "restrict",
+		}),
+		entityId: uuid().references(() => CatalogIdentityTables.entity.id, { onDelete: "restrict" }),
+		groupingId: uuid().references(() => CatalogIdentityTables.grouping.id, {
+			onDelete: "restrict",
+		}),
+		referenceId: uuid().references(() => CatalogIdentityTables.reference.id, {
+			onDelete: "restrict",
+		}),
+		actorAuthUserId: uuid()
+			.notNull()
+			.references(() => users.id, { onDelete: "restrict" }),
+		createdAt: createCreatedAtColumn(),
+		reason: text().notNull(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.sourceRecordId, table.mappingKey, table.revision] }),
+		foreignKey({
+			columns: [table.sourceRecordId, table.mappingKey, table.owner],
+			foreignColumns: [
+				catalogSourceMappingClaim.sourceRecordId,
+				catalogSourceMappingClaim.mappingKey,
+				catalogSourceMappingClaim.owner,
+			],
+		}).onDelete("restrict"),
+		check(
+			"catalog_source_binding_revision_target_check",
+			sql`num_nonnulls(${table.publishingId}, ${table.musicId}, ${table.programId}, ${table.softwareId}, ${table.entityId}, ${table.groupingId}, ${table.referenceId}) = 1 and case ${table.owner} when 'publishing' then ${table.publishingId} when 'music' then ${table.musicId} when 'program' then ${table.programId} when 'software' then ${table.softwareId} when 'entity' then ${table.entityId} when 'grouping' then ${table.groupingId} when 'reference' then ${table.referenceId} end is not null`,
+		),
+		check(
+			"catalog_source_binding_revision_values_check",
+			sql`${table.revision} between 1 and 9007199254740991 and ${table.policyRevision} between 1 and 9007199254740991 and ${table.state} in ('active','paused','withdrawn') and ${table.mode} in ('review','manual') and octet_length(${table.reason}) between 1 and 2048`,
+		),
+	],
+);
+
+/** One shared public acquisition plan; private transport scopes never share this relation. */
+export const catalogSourceCheckPlan = pgTable(
+	"catalog_source_check_plan",
+	{
+		sourceRecordId: uuid()
+			.primaryKey()
+			.references(() => catalogSourceRecord.id, { onDelete: "restrict" }),
+		routingBucket: integer().notNull(),
+		revision: bigint({ mode: "number" }).default(1).notNull(),
+		nextCheckAt: timestamp({ withTimezone: true, precision: 3 }).notNull(),
+		intervalSeconds: integer().notNull(),
+		state: text().$type<"active" | "paused">().default("active").notNull(),
+		leaseUntil: timestamp({ withTimezone: true, precision: 3 }),
+	},
+	(table) => [
+		index("catalog_source_check_due_idx").on(
+			table.routingBucket,
+			table.state,
+			table.nextCheckAt,
+			table.sourceRecordId,
+		),
+		check(
+			"catalog_source_check_plan_limits",
+			sql`${table.routingBucket} between 0 and 1023 and ${table.revision} between 1 and 9007199254740991 and ${table.intervalSeconds} between 60 and 2592000 and ${table.state} in ('active','paused')`,
+		),
+	],
+);
+
+/** Shared acquisition demand is scoped to a particular source binding and revision. */
+export const catalogSourceSubscription = pgTable(
+	"catalog_source_subscription",
+	{
+		sourceRecordId: uuid().notNull(),
+		mappingKey: uuid().notNull(),
+		owner: text().$type<CatalogOwner>().notNull(),
+		revision: bigint({ mode: "number" }).default(1).notNull(),
+		state: text().$type<"active" | "paused">().notNull(),
+		updatedAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.sourceRecordId, table.mappingKey] }),
+		foreignKey({
+			columns: [table.sourceRecordId, table.mappingKey, table.owner],
+			foreignColumns: [
+				catalogSourceMappingClaim.sourceRecordId,
+				catalogSourceMappingClaim.mappingKey,
+				catalogSourceMappingClaim.owner,
+			],
+		}).onDelete("restrict"),
+		index("catalog_source_subscription_active_idx").on(
+			table.sourceRecordId,
+			table.state,
+			table.mappingKey,
+		),
+		check(
+			"catalog_source_subscription_values_check",
+			sql`${table.revision} between 1 and 9007199254740991 and ${table.state} in ('active','paused')`,
+		),
+	],
+);
+
+/** Every completed check has a disposition; errors and missing partial pages are never tombstones. */
+export const catalogSourceCheckReceipt = pgTable(
+	"catalog_source_check_receipt",
+	{
+		sourceRecordId: uuid()
+			.notNull()
+			.references(() => catalogSourceRecord.id, { onDelete: "restrict" }),
+		generation: bigint({ mode: "number" }).notNull(),
+		outcome: text()
+			.$type<"changed" | "unchanged" | "error" | "tombstone" | "superseded">()
+			.notNull(),
+		checkedAt: createCreatedAtColumn(),
+		reason: text(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.sourceRecordId, table.generation] }),
+		check(
+			"catalog_source_check_receipt_values",
+			sql`${table.generation} between 1 and 9007199254740991 and ${table.outcome} in ('changed','unchanged','error','tombstone','superseded') and (${table.reason} is null or octet_length(${table.reason}) <= 2048)`,
+		),
+	],
+);
+
+/** Durable snapshot fan-out cursor and receipts bound transaction work independently of target count. */
+export const catalogSourceObservationFanout = pgTable(
+	"catalog_source_observation_fanout",
+	{
+		sourceRecordId: uuid().notNull(),
+		snapshotId: uuid().notNull(),
+		afterMappingKey: uuid(),
+		completedAt: timestamp({ withTimezone: true, precision: 3 }),
+	},
+	(table) => [
+		primaryKey({ columns: [table.sourceRecordId, table.snapshotId] }),
+		foreignKey({
+			columns: [table.sourceRecordId, table.snapshotId],
+			foreignColumns: [catalogSourceSnapshot.sourceRecordId, catalogSourceSnapshot.id],
+		}).onDelete("restrict"),
 	],
 );

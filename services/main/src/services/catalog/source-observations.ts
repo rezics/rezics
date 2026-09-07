@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { Readable } from "node:stream";
-import { and, desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { storage } from "../storage";
@@ -17,6 +17,59 @@ const sourceKeySchema = z.strictObject({
 		.refine((value) => Buffer.byteLength(value, "utf8") <= 512),
 });
 export type CatalogSourceKey = z.infer<typeof sourceKeySchema>;
+
+/** @internal Natural-key identity and partition route are identical across importers. */
+export function catalogSourceRecordId(input: CatalogSourceKey): string {
+	const key = sourceKeySchema.parse(input);
+	const hash = createHash("sha256")
+		.update(`${key.source}\n${key.objectType}\n${key.externalId}`)
+		.digest("hex");
+	return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-8${hash.slice(13, 16)}-8${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
+}
+
+/** @internal Registers and locks the source aggregate, detecting even a hash collision. */
+export async function registerCatalogSourceRecord(
+	tx: DatabaseTransaction,
+	input: CatalogSourceKey,
+) {
+	const key = sourceKeySchema.parse(input);
+	const id = catalogSourceRecordId(key);
+	await tx
+		.insert(catalogSourceRecord)
+		.values({ id, ...key })
+		.onConflictDoNothing();
+	const [record] = await tx
+		.select()
+		.from(catalogSourceRecord)
+		.where(eq(catalogSourceRecord.id, id))
+		.limit(1)
+		.for("update");
+	if (
+		!record ||
+		record.source !== key.source ||
+		record.objectType !== key.objectType ||
+		record.externalId !== key.externalId
+	)
+		throw new Error("Source identity hash collision or missing registration");
+	return record;
+}
+
+export type CatalogSourceAcquisition = Readonly<{ sourceRecordId: string; generation: number }>;
+
+/** @internal Commit this generation BEFORE fetching: arrival order never determines authority. */
+export async function beginCatalogSourceAcquisition(
+	tx: DatabaseTransaction,
+	key: CatalogSourceKey,
+): Promise<CatalogSourceAcquisition> {
+	const record = await registerCatalogSourceRecord(tx, key);
+	const [updated] = await tx
+		.update(catalogSourceRecord)
+		.set({ acquisitionGeneration: sql`${catalogSourceRecord.acquisitionGeneration} + 1` })
+		.where(eq(catalogSourceRecord.id, record.id))
+		.returning();
+	if (!updated) throw new Error("Source acquisition registration failed");
+	return { sourceRecordId: record.id, generation: updated.acquisitionGeneration };
+}
 const storedReceipt = Symbol("stored-catalog-source-receipt");
 const issuedReceipts = new WeakSet<object>();
 export type CatalogSourceArchive = {
@@ -38,6 +91,7 @@ export type CatalogSourceReceipt = Readonly<{
 	contractSha256: string;
 	payloadRef: string;
 	sourceRevision: string | null;
+	acquisition: CatalogSourceAcquisition | null;
 }>;
 
 /** Archive before opening a database transaction; only object keys are persisted. */
@@ -47,8 +101,16 @@ export async function storeCatalogSourcePayload(
 	contractSha256: string,
 	sourceRevision: string | null = null,
 	archive: CatalogSourceArchive = storage,
+	acquisition: CatalogSourceAcquisition | null = null,
 ): Promise<CatalogSourceReceipt> {
 	const key = sourceKeySchema.parse(input);
+	if (
+		acquisition &&
+		(acquisition.sourceRecordId !== catalogSourceRecordId(key) ||
+			!Number.isSafeInteger(acquisition.generation) ||
+			acquisition.generation < 1)
+	)
+		throw new TypeError("Source acquisition does not match its receipt");
 	z.string()
 		.regex(/^[a-f0-9]{64}$/u)
 		.parse(contractSha256);
@@ -74,6 +136,7 @@ export async function storeCatalogSourcePayload(
 		contractSha256,
 		payloadRef,
 		sourceRevision,
+		acquisition: acquisition === null ? null : Object.freeze({ ...acquisition }),
 	});
 	issuedReceipts.add(receipt);
 	receiptArchives.set(receipt, archive);
@@ -113,20 +176,13 @@ export async function recordCatalogSourceObservation(
 	if (!issuedReceipts.has(receipt) || receipt[storedReceipt] !== true)
 		throw new TypeError("Source receipt was not produced by the archive writer");
 	return tx.transaction(async (tx) => {
-		await tx.insert(catalogSourceRecord).values(receipt.key).onConflictDoNothing();
-		const [record] = await tx
-			.select()
-			.from(catalogSourceRecord)
-			.where(
-				and(
-					eq(catalogSourceRecord.source, receipt.key.source),
-					eq(catalogSourceRecord.objectType, receipt.key.objectType),
-					eq(catalogSourceRecord.externalId, receipt.key.externalId),
-				),
-			)
-			.limit(1)
-			.for("update");
-		if (!record) throw new Error("Source identity registration returned no row");
+		const record = await registerCatalogSourceRecord(tx, receipt.key);
+		const generation = receipt.acquisition?.generation;
+		if (
+			generation !== undefined &&
+			(generation !== record.acquisitionGeneration || generation < record.acceptedGeneration)
+		)
+			throw new Error("Source acquisition generation is stale");
 		const [head] = await tx
 			.select()
 			.from(catalogSourceSnapshot)
@@ -138,8 +194,17 @@ export async function recordCatalogSourceObservation(
 			head.contentSha256 === receipt.contentSha256 &&
 			head.contractSha256 === receipt.contractSha256 &&
 			head.sourceRevision === receipt.sourceRevision
-		)
+		) {
+			await tx
+				.update(catalogSourceRecord)
+				.set({
+					lastCheckedAt: new Date(),
+					lastCheckOutcome: "unchanged",
+					...(generation === undefined ? {} : { acceptedGeneration: generation }),
+				})
+				.where(eq(catalogSourceRecord.id, record.id));
 			return { record, snapshot: head, repeated: true };
+		}
 		const [snapshot] = await tx
 			.insert(catalogSourceSnapshot)
 			.values({
@@ -151,6 +216,15 @@ export async function recordCatalogSourceObservation(
 			})
 			.returning();
 		if (!snapshot) throw new Error("Source snapshot insertion returned no row");
+		await tx
+			.update(catalogSourceRecord)
+			.set({
+				headSnapshotId: snapshot.id,
+				lastCheckedAt: new Date(),
+				lastCheckOutcome: "changed",
+				...(generation === undefined ? {} : { acceptedGeneration: generation }),
+			})
+			.where(eq(catalogSourceRecord.id, record.id));
 		await appendOperationalOutbox(tx, [createSourceObservationEvent(snapshot)]);
 		return { record, snapshot, repeated: false };
 	});

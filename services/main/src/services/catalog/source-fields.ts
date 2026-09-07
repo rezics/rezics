@@ -1,86 +1,21 @@
-import { createHash } from "node:crypto";
-import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import type { CatalogReference } from "./contracts";
-import {
-	appendCatalogFactNodes,
-	beginCatalogFact,
-	ensureCatalogDefinition,
-	sealCatalogFact,
-} from "./storage";
-import { catalogValueNodes } from "./value-nodes";
+import { type CatalogSourceReceipt, readCatalogSourceBytes } from "./source-observations";
 
-/** A typed source observation envelope allows the upstream field's declared representation variants. */
-export async function appendSourceFieldObservation(
-	tx: DatabaseTransaction,
-	reference: CatalogReference,
-	actor: string,
-	expectedRevision: number,
-	input: {
-		readonly namespace: string;
-		readonly field: string;
-		readonly value: unknown;
-		readonly sourceRecordId: string;
-		readonly snapshotId: string;
-	},
-) {
-	const key =
-		input.field.length <= 160
-			? input.field
-			: `field.${createHash("sha256").update(input.field).digest("hex")}`;
-	const definition = await ensureCatalogDefinition(tx, {
-		namespace: input.namespace,
-		key,
-		kind: "property",
-		valueKind: "object",
-	});
-	const fact = await beginCatalogFact(
-		tx,
-		reference,
-		actor,
-		expectedRevision,
-		definition.revisionId,
+/** @internal Raw source fields stay in the bounded immutable archive; they are not canonical facts. */
+export async function readCatalogSourceField(
+	receipt: CatalogSourceReceipt,
+	field: string,
+): Promise<unknown> {
+	if (Buffer.byteLength(field, "utf8") > 512)
+		throw new RangeError("Source field path exceeds its budget");
+	const value: unknown = JSON.parse(
+		new TextDecoder("utf-8", { fatal: true }).decode(await readCatalogSourceBytes(receipt)),
 	);
-	let revision = fact.revision;
-	let position = -1;
-	let batch = [];
-	for (const node of catalogValueNodes({ value: input.value })) {
-		batch.push(node);
-		if (batch.length === 512) {
-			const appended = await appendCatalogFactNodes(
-				tx,
-				reference,
-				actor,
-				revision,
-				fact.id,
-				position,
-				batch,
-			);
-			revision = appended.revision;
-			position = appended.lastNodePosition;
-			batch = [];
-		}
-	}
-	if (batch.length) {
-		const appended = await appendCatalogFactNodes(
-			tx,
-			reference,
-			actor,
-			revision,
-			fact.id,
-			position,
-			batch,
-		);
-		revision = appended.revision;
-		position = appended.lastNodePosition;
-	}
-	revision = (await sealCatalogFact(tx, reference, actor, revision, fact.id, position)).revision;
-	await tx.insert(CatalogFactTables[reference.owner].support).values({
-		ownerId: reference.id,
-		factId: fact.id,
-		sourceRecordId: input.sourceRecordId,
-		snapshotId: input.snapshotId,
-		sourcePath: `/${input.field.replaceAll("~", "~0").replaceAll("/", "~1")}`,
-	});
-	return revision;
+	if (
+		value === null ||
+		typeof value !== "object" ||
+		Array.isArray(value) ||
+		!Object.hasOwn(value, field)
+	)
+		throw new Error("Archived source field is absent");
+	return Reflect.get(value, field);
 }

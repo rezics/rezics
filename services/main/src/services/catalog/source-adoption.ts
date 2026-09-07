@@ -69,7 +69,12 @@ async function findBoundIdentity(tx: DatabaseTransaction, sourceRecordId: string
 	const [binding] = await tx
 		.select()
 		.from(bindingTable)
-		.where(eq(bindingTable.mappingKey, claim.mappingKey))
+		.where(
+			and(
+				eq(bindingTable.sourceRecordId, sourceRecordId),
+				eq(bindingTable.mappingKey, claim.mappingKey),
+			),
+		)
 		.limit(1);
 	if (!binding) throw new Error("Source mapping claim has no native binding");
 	const identityTable = CatalogIdentityTables[claim.owner];
@@ -91,6 +96,25 @@ export async function inspectExistingSourceBinding(
 	const bound = await findBoundIdentity(tx, observation.record.id);
 	if (bound) {
 		await loadCatalogIdentity(tx, bound.reference, actor, false);
+		if (bound.claim.state !== "active")
+			return {
+				status: "paused" as const,
+				reference: bound.reference,
+				revision: bound.identity.revision,
+				snapshotId: observation.snapshot.id,
+			};
+		if (
+			bound.claim.observedSnapshotId === null &&
+			bound.claim.baselineTargetRevision === bound.identity.revision
+		) {
+			await loadCatalogIdentity(tx, bound.reference, actor, true);
+			return {
+				status: "initialize_reference" as const,
+				reference: bound.reference,
+				revision: bound.identity.revision,
+				snapshotId: observation.snapshot.id,
+			};
+		}
 		const [acceptedSnapshot] =
 			bound.claim.observedSnapshotId === null
 				? []
@@ -125,6 +149,8 @@ export async function inspectExistingSourceBinding(
 				mappingVersion,
 				proposerAuthUserId: actor,
 				expectedTargetRevision: bound.identity.revision,
+				expectedBindingRevision: bound.claim.bindingRevision,
+				expectedPolicyRevision: bound.claim.policyRevision,
 			})
 			.onConflictDoNothing();
 		return {
@@ -279,7 +305,12 @@ export async function adoptBangumiSubject(
 	if (!claim) throw new Error("Source mapping claim insertion returned no row");
 	await tx
 		.insert(tables.sourceBinding)
-		.values({ mappingKey: claim.mappingKey, mappingOwner: plan.owner, ownerId: identity.id });
+		.values({
+			sourceRecordId: observation.record.id,
+			mappingKey: claim.mappingKey,
+			mappingOwner: plan.owner,
+			ownerId: identity.id,
+		});
 	return {
 		status: "created" as const,
 		reference: { owner: plan.owner, id: identity.id },

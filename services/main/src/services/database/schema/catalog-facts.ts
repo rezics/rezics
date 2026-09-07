@@ -440,7 +440,8 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 	const sourceBinding = pgTable(
 		`${owner}_source_binding`,
 		{
-			mappingKey: uuid().primaryKey(),
+			sourceRecordId: uuid().notNull(),
+			mappingKey: uuid().notNull(),
 			mappingOwner: text().$type<Owner>().default(owner).notNull(),
 			ownerId: uuid()
 				.notNull()
@@ -448,10 +449,15 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 			createdAt: createCreatedAtColumn(),
 		},
 		(table) => [
+			primaryKey({ columns: [table.sourceRecordId, table.mappingKey] }),
 			foreignKey({
 				name: `${owner}_source_binding_claim_fk`,
-				columns: [table.mappingKey, table.mappingOwner],
-				foreignColumns: [catalogSourceMappingClaim.mappingKey, catalogSourceMappingClaim.owner],
+				columns: [table.sourceRecordId, table.mappingKey, table.mappingOwner],
+				foreignColumns: [
+					catalogSourceMappingClaim.sourceRecordId,
+					catalogSourceMappingClaim.mappingKey,
+					catalogSourceMappingClaim.owner,
+				],
 			}).onDelete("restrict"),
 			index(`${owner}_source_binding_owner_idx`).on(table.ownerId, table.mappingKey),
 			check(`${owner}_source_binding_owner_check`, sql`${table.mappingOwner} = ${owner}`),

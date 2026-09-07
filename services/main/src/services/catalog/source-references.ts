@@ -1,12 +1,13 @@
 import { and, eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
-import { catalogSourceRecord, catalogSourceMappingClaim } from "../database/schema/catalog-source";
+import { catalogSourceMappingClaim } from "../database/schema/catalog-source";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import type { CatalogOwner } from "./contracts";
 import { addCatalogName, createCatalogIdentity, loadCatalogIdentity } from "./storage";
 import {
 	type CatalogSourceReferenceEvidence,
 	requireCatalogSourceReferenceEvidence,
+	registerCatalogSourceRecord,
 } from "./source-observations";
 
 /** A provider reference can identify an object before its own endpoint is fetched. */
@@ -26,23 +27,11 @@ export async function bindReferencedSourceIdentity(
 	const evidence = requireCatalogSourceReferenceEvidence(input.evidence);
 	if (evidence.source !== input.source || evidence.externalId !== input.externalId)
 		throw new TypeError("Source reference identity differs from its recorded evidence");
-	await tx
-		.insert(catalogSourceRecord)
-		.values({ source: input.source, objectType: input.objectType, externalId: input.externalId })
-		.onConflictDoNothing();
-	const [record] = await tx
-		.select()
-		.from(catalogSourceRecord)
-		.where(
-			and(
-				eq(catalogSourceRecord.source, input.source),
-				eq(catalogSourceRecord.objectType, input.objectType),
-				eq(catalogSourceRecord.externalId, input.externalId),
-			),
-		)
-		.limit(1)
-		.for("update");
-	if (!record) throw new Error("Referenced source identity insertion returned no row");
+	const record = await registerCatalogSourceRecord(tx, {
+		source: input.source,
+		objectType: input.objectType,
+		externalId: input.externalId,
+	});
 	const [claim] = await tx
 		.select()
 		.from(catalogSourceMappingClaim)
@@ -60,7 +49,7 @@ export async function bindReferencedSourceIdentity(
 		const [target] = await tx
 			.select()
 			.from(binding)
-			.where(eq(binding.mappingKey, claim.mappingKey))
+			.where(and(eq(binding.sourceRecordId, record.id), eq(binding.mappingKey, claim.mappingKey)))
 			.limit(1);
 		if (!target) throw new Error("Referenced source mapping has no native target");
 		const reference = { owner: claim.owner, id: target.ownerId };
@@ -108,6 +97,7 @@ export async function bindReferencedSourceIdentity(
 			path: "/",
 			owner: input.owner,
 			observedSnapshotId: null,
+			baselineTargetRevision: revision,
 			evidenceSourceRecordId: evidence.sourceRecordId,
 			evidenceSnapshotId: evidence.snapshotId,
 			evidencePath: evidence.path,
@@ -118,6 +108,7 @@ export async function bindReferencedSourceIdentity(
 		ownerId: identity.id,
 		mappingOwner: input.owner,
 		mappingKey: createdClaim.mappingKey,
+		sourceRecordId: record.id,
 	});
 	return { owner: input.owner, id: identity.id, revision, created: true };
 }

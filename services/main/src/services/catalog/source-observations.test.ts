@@ -6,6 +6,7 @@ import {
 	type CatalogSourceArchive,
 	sourceReferenceAt,
 	requireCatalogSourceReferenceEvidence,
+	catalogSourceRecordId,
 } from "./source-observations";
 
 function memoryArchive() {
@@ -23,6 +24,18 @@ function memoryArchive() {
 }
 
 describe("source observation archive receipts", () => {
+	it("routes equal natural keys identically while separating type, source and Unicode identities", () => {
+		const key = { source: "vndb", objectType: "vn", externalId: "v17" };
+		expect(catalogSourceRecordId(key)).toBe(catalogSourceRecordId({ externalId: "v17", source: "vndb", objectType: "vn" }));
+		expect(catalogSourceRecordId(key)).toMatch(/^[a-f0-9]{8}-[a-f0-9]{4}-8[a-f0-9]{3}-8[a-f0-9]{3}-[a-f0-9]{12}$/u);
+		const variants = [key, { ...key, source: "bangumi" }, { ...key, objectType: "release" }, { ...key, externalId: "é" }, { ...key, externalId: "e\u0301" }, { ...key, externalId: "vn\nv17" }];
+		expect(new Set(variants.map(catalogSourceRecordId)).size).toBe(variants.length);
+		expect(() => catalogSourceRecordId({ ...key, source: "vndb\nvn" })).toThrow();
+	});
+	it("rejects a before-fetch generation belonging to a different source identity", async () => {
+		const { archive } = memoryArchive();
+		await expect(storeCatalogSourcePayload({ source: "vndb", objectType: "vn", externalId: "v17" }, Buffer.from("{}"), "a".repeat(64), null, archive, { sourceRecordId: crypto.randomUUID(), generation: 1 })).rejects.toThrow("acquisition");
+	});
 	it("binds a bounded byte stream to an immutable scoped checksum receipt", async () => {
 		const { archive } = memoryArchive();
 		const bytes = Buffer.from('{"id":253,"name":"source"}');

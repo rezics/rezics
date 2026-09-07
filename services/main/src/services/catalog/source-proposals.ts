@@ -1,0 +1,255 @@
+import { and, eq, gt } from "drizzle-orm";
+import { z } from "zod";
+import type { DatabaseTransaction } from "../database";
+import {
+	catalogSourceAdoptionProposal as proposals,
+	catalogSourceMappingClaim as claims,
+	catalogSourceSnapshot as snapshots,
+} from "../database/schema/catalog-source";
+import { type CatalogReference } from "./contracts";
+import { loadCatalogIdentity } from "./storage";
+import {
+	type CatalogBindingKey,
+	lockCatalogSourceBinding,
+	appendSourceLifecycleEvent,
+} from "./source-bindings";
+
+/** @internal Owner commands supply the actual native mutation; this protocol supplies authority and replay fences. */
+export type CatalogSourceNativeWriter = (
+	tx: DatabaseTransaction,
+	context: {
+		reference: CatalogReference;
+		actor: string;
+		expectedRevision: number;
+		sourceRecordId: string;
+		snapshotId: string;
+		mappingVersion: string;
+	},
+) => Promise<{ revision: number }>;
+
+/** @internal Bounded one-target proposal, pinned to exact binding, policy, snapshot and native revision. */
+export async function proposeCatalogSourceAdoption(
+	tx: DatabaseTransaction,
+	actor: string,
+	input: CatalogBindingKey & { snapshotId: string; mappingVersion: string },
+) {
+	const value = z
+		.strictObject({
+			sourceRecordId: z.uuid(),
+			mappingKey: z.uuid(),
+			snapshotId: z.uuid(),
+			mappingVersion: z.string().min(1).max(128),
+		})
+		.parse(input);
+	const current = await lockCatalogSourceBinding(tx, {
+		sourceRecordId: value.sourceRecordId,
+		mappingKey: value.mappingKey,
+	});
+	const native = await loadCatalogIdentity(tx, current.reference, actor, true);
+	if (current.claim.state !== "active") return { status: "paused" as const };
+	if (current.source.headSnapshotId !== value.snapshotId)
+		throw new Error("Proposal observation is no longer current");
+	const [snapshot] = await tx
+		.select()
+		.from(snapshots)
+		.where(
+			and(eq(snapshots.sourceRecordId, value.sourceRecordId), eq(snapshots.id, value.snapshotId)),
+		)
+		.limit(1);
+	if (!snapshot) throw new Error("Proposal snapshot is missing");
+	if (current.claim.observedSnapshotId === snapshot.id) return { status: "unchanged" as const };
+	const values = {
+		...value,
+		mappingOwner: current.claim.owner,
+		expectedTargetRevision: native.revision,
+		expectedBindingRevision: current.claim.bindingRevision,
+		expectedPolicyRevision: current.claim.policyRevision,
+		proposerAuthUserId: actor,
+	};
+	await tx.insert(proposals).values(values).onConflictDoNothing();
+	const [proposal] = await tx
+		.select()
+		.from(proposals)
+		.where(
+			and(
+				eq(proposals.sourceRecordId, value.sourceRecordId),
+				eq(proposals.snapshotId, value.snapshotId),
+				eq(proposals.mappingKey, value.mappingKey),
+				eq(proposals.mappingVersion, value.mappingVersion),
+				eq(proposals.expectedBindingRevision, current.claim.bindingRevision),
+				eq(proposals.expectedPolicyRevision, current.claim.policyRevision),
+				eq(proposals.expectedTargetRevision, native.revision),
+			),
+		)
+		.limit(1);
+	if (!proposal) throw new Error("Source proposal insertion failed");
+	return { status: "proposed" as const, proposal };
+}
+
+/** @internal Apply/reject/supersede/withdraw never accept an approval for another mapping version. */
+export async function decideCatalogSourceProposal(
+	tx: DatabaseTransaction,
+	actor: string,
+	input: {
+		sourceRecordId: string;
+		proposalId: string;
+		mappingVersion: string;
+		action: "apply" | "reject" | "supersede" | "withdraw";
+		reason: string;
+	},
+	nativeWriter?: CatalogSourceNativeWriter,
+) {
+	const value = z
+		.strictObject({
+			sourceRecordId: z.uuid(),
+			proposalId: z.uuid(),
+			mappingVersion: z.string().min(1).max(128),
+			action: z.enum(["apply", "reject", "supersede", "withdraw"]),
+			reason: z.string().min(1).max(2048),
+		})
+		.parse(input);
+	const key = and(
+		eq(proposals.sourceRecordId, value.sourceRecordId),
+		eq(proposals.id, value.proposalId),
+	);
+	// Read locator without authority, then acquire the common source -> mapping -> proposal order.
+	const [locator] = await tx
+		.select({ mappingKey: proposals.mappingKey })
+		.from(proposals)
+		.where(key)
+		.limit(1);
+	if (!locator) throw new Error("Source proposal does not exist");
+	const current = await lockCatalogSourceBinding(tx, {
+		sourceRecordId: value.sourceRecordId,
+		mappingKey: locator.mappingKey,
+	});
+	const [proposal] = await tx.select().from(proposals).where(key).limit(1).for("update");
+	if (!proposal || proposal.mappingVersion !== value.mappingVersion)
+		throw new Error("Source proposal mapping version differs");
+	const native = await loadCatalogIdentity(tx, current.reference, actor, true);
+	const targetState = {
+		apply: "applied",
+		reject: "rejected",
+		supersede: "superseded",
+		withdraw: "withdrawn",
+	} as const;
+	if (proposal.state === targetState[value.action])
+		return { status: "repeated" as const, proposal };
+	if (value.action === "withdraw" ? proposal.state !== "applied" : proposal.state !== "pending")
+		throw new Error("Source proposal transition is not allowed");
+	const fenceMatches =
+		proposal.expectedBindingRevision === current.claim.bindingRevision &&
+		proposal.expectedPolicyRevision === current.claim.policyRevision;
+	const revisionMatches =
+		native.revision ===
+		(value.action === "withdraw"
+			? proposal.appliedTargetRevision
+			: proposal.expectedTargetRevision);
+	if (
+		value.action === "apply" &&
+		(!fenceMatches ||
+			!revisionMatches ||
+			current.claim.state !== "active" ||
+			current.source.headSnapshotId !== proposal.snapshotId ||
+			current.source.lastCheckOutcome === "tombstone")
+	) {
+		await tx
+			.update(proposals)
+			.set({
+				state: "superseded",
+				decidedAt: new Date(),
+				decisionReason: "Source, binding, policy or native revision changed",
+			})
+			.where(key);
+		await appendSourceLifecycleEvent(
+			tx,
+			value.sourceRecordId,
+			"source.adoption.decided",
+			current.claim.bindingRevision,
+			{ proposalId: proposal.id, state: "superseded" },
+		);
+		return { status: "superseded" as const };
+	}
+	if (value.action === "withdraw" && (!fenceMatches || !revisionMatches))
+		throw new Error("Withdrawal would overwrite independent native edits or a rebound target");
+	let appliedTargetRevision = proposal.appliedTargetRevision;
+	if (value.action === "apply" || value.action === "withdraw") {
+		if (!nativeWriter) throw new Error("Source decision requires its canonical native command");
+		const result = await nativeWriter(tx, {
+			reference: current.reference,
+			actor,
+			expectedRevision: native.revision,
+			sourceRecordId: value.sourceRecordId,
+			snapshotId: proposal.snapshotId,
+			mappingVersion: proposal.mappingVersion,
+		});
+		z.number()
+			.int()
+			.min(native.revision + 1)
+			.max(Number.MAX_SAFE_INTEGER)
+			.parse(result.revision);
+		const after = await loadCatalogIdentity(tx, current.reference, actor, true);
+		if (after.revision !== result.revision)
+			throw new Error("Native source command did not commit its declared revision");
+		appliedTargetRevision = result.revision;
+		if (value.action === "apply")
+			await tx
+				.update(claims)
+				.set({
+					observedSnapshotId: proposal.snapshotId,
+					evidenceSourceRecordId: null,
+					evidenceSnapshotId: null,
+					evidencePath: null,
+				})
+				.where(
+					and(
+						eq(claims.sourceRecordId, value.sourceRecordId),
+						eq(claims.mappingKey, proposal.mappingKey),
+					),
+				);
+	}
+	const [decided] = await tx
+		.update(proposals)
+		.set({
+			state: targetState[value.action],
+			decidedAt: new Date(),
+			decisionReason: value.reason,
+			appliedTargetRevision,
+		})
+		.where(key)
+		.returning();
+	await appendSourceLifecycleEvent(
+		tx,
+		value.sourceRecordId,
+		"source.adoption.decided",
+		current.claim.bindingRevision,
+		{ proposalId: proposal.id, state: targetState[value.action], snapshotId: proposal.snapshotId },
+	);
+	return { status: targetState[value.action], proposal: decided };
+}
+
+/** @internal Scoped review page uses source-record partition pruning and a keyset cursor. */
+export async function listCatalogSourceProposals(
+	tx: DatabaseTransaction,
+	actor: string,
+	key: CatalogBindingKey,
+	afterId?: string,
+	limit = 50,
+) {
+	z.number().int().min(1).max(100).parse(limit);
+	if (afterId) z.uuid().parse(afterId);
+	const binding = await lockCatalogSourceBinding(tx, key);
+	await loadCatalogIdentity(tx, binding.reference, actor, false);
+	return tx
+		.select()
+		.from(proposals)
+		.where(
+			and(
+				eq(proposals.sourceRecordId, key.sourceRecordId),
+				eq(proposals.mappingKey, key.mappingKey),
+				afterId ? gt(proposals.id, afterId) : undefined,
+			),
+		)
+		.orderBy(proposals.id)
+		.limit(limit);
+}
