@@ -22,11 +22,11 @@ import {
 	CatalogNameOriginValues,
 	CatalogTranslationMethodValues,
 } from "../../catalog/name-contracts";
+import { users } from "./auth";
 import { pgTable } from "./base";
-import { createCreatedAtColumn, createTimestampMsColumn } from "./columns";
 import { CatalogIdentityTables } from "./catalog-identity";
 import { catalogSourceRecord, catalogSourceSnapshot } from "./catalog-source";
-import { users } from "./auth";
+import { createCreatedAtColumn, createTimestampMsColumn } from "./columns";
 
 function identityValues(owner: CatalogOwner) {
 	return {
@@ -118,6 +118,9 @@ export function createCatalogNameTables(owner: CatalogOwner) {
 	const name = pgTable(`${owner}_named_form`, nameValues(owner), (table) => [
 		primaryKey({ name: `${owner}_named_form_identity_key`, columns: [table.ownerId, table.id] }),
 		index(`${owner}_named_form_language_idx`).on(table.ownerId, table.languageTag, table.id),
+		index(`${owner}_named_form_active_idx`)
+			.on(table.ownerId, table.id)
+			.where(sql`${table.state} = 'active'`),
 		index(`${owner}_named_form_scope_idx`)
 			.on(table.scopeOwnerId, table.id)
 			.where(sql`${table.scopeOwnerId} is not null`),

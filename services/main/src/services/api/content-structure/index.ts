@@ -1,33 +1,27 @@
 import { DevelopmentPreviewCapability } from "@rezics/access";
-import { StatusCodes } from "http-status-codes";
 import type { ContentLanguage } from "@rezics/i18n";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import Elysia from "elysia";
+import { StatusCodes } from "http-status-codes";
 
-import { canAccessContentStructureApi } from "../../authorization/content-structure/release";
 import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
+import { canAccessContentStructureApi } from "../../authorization/content-structure/release";
 import { PlatformCapabilityRequired } from "../../authorization/errors";
-import { database, type DatabaseTransaction } from "../../database";
-import { runVoteTransaction } from "../../database/vote-admission";
-import { resolvedUnitLocalizationLanguage } from "../../units/localization";
-import {
-	contentStructure,
-	contentStructureNode,
-	audio,
-	book,
-	label,
-	media,
-	post,
-	unit,
-	unitOwnership,
-	unitLocalization,
-	unitLocalizationContentMetric,
-	video,
-} from "../../database/schema";
-import { findPostTargetingLock } from "../../posts/targeting";
-import { recordUnitRevision } from "../../units/history";
+import { unitOwnershipModeFromOwnerProfileId } from "../../authorization/unit/ownership";
+import { getUnitLocalizationContentMetric } from "../../content-metrics/service";
 import { applyContentStructureBatch } from "../../content-structure/batch";
+import { saveBookContentStructureDraft } from "../../content-structure/book-draft";
+import {
+	orderReaderChapterNodeIds,
+	selectReaderChapterLocalization,
+} from "../../content-structure/book-reading";
+import { ContentStructureNotFound } from "../../content-structure/errors";
+import {
+	listContentStructureRevisions,
+	restoreContentStructureRevision,
+} from "../../content-structure/history";
+import { saveMediaContentStructureDraft } from "../../content-structure/media-draft";
 import {
 	createContentStructure,
 	deleteContentStructure,
@@ -38,65 +32,72 @@ import {
 	updateContentStructureNode,
 } from "../../content-structure/service";
 import {
-	loadContentStructureSnapshot,
 	contentStructureTargetFromRow,
+	loadContentStructureSnapshot,
 } from "../../content-structure/storage";
-import { insertUnit } from "../../units/create";
-import { BookNotFound, ChapterLanguageNotFound, ChapterNotFound, MediaNotFound } from "./errors";
-import { ContentStructureNotFound } from "../../content-structure/errors";
-import { saveBookContentStructureDraft } from "../../content-structure/book-draft";
-import { saveMediaContentStructureDraft } from "../../content-structure/media-draft";
+import { database, type DatabaseTransaction } from "../../database";
 import {
-	BookContentStructureParams,
-	BookContentStructureQuery,
-	MediaContentStructureParams,
-	MediaContentStructureQuery,
-	ChapterLocalizationParams,
-	BookChapterNodeParams,
-	ReadChapterQuery,
-	UpsertChapterLocalizationBody,
-	ContentStructureParams,
-	ContentStructureRevisionBody,
-	CreateContentStructureBody,
-	CreateGenericContentStructureNodeBody,
-	GenericContentStructureNodeParams,
-	UnitContentStructuresParams,
-	UpdateGenericContentStructureNodeBody,
-	UpdateContentStructureNodesBatchBody,
-	ContentStructureRevisionParams,
-	ContentStructureRevisionListQuery,
-	RestoreContentStructureRevisionBody,
-	SaveBookContentStructureDraftBody,
-	SaveMediaContentStructureDraftBody,
-} from "./schema";
+	audio,
+	book,
+	contentStructure,
+	contentStructureNode,
+	label,
+	media,
+	post,
+	unit,
+	unitLocalization,
+	unitLocalizationContentMetric,
+	unitOwnership,
+	video,
+} from "../../database/schema";
+import { runVoteTransaction } from "../../database/vote-admission";
+import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
+import { findPostTargetingLock } from "../../posts/targeting";
+import { insertUnit } from "../../units/create";
+import { recordUnitRevision } from "../../units/history";
+import { resolvedUnitLocalizationLanguage } from "../../units/localization";
 import {
 	BookChapterNodeDetailResponse,
-	ContentStructureNodeListResponse,
-	SaveBookContentStructureDraftResponse,
-	MediaContentStructureNodeListResponse,
-	SaveMediaContentStructureDraftResponse,
-	toPortableTextResponse,
-	UpdateStateResponse,
+	ContentStructureBatchMutationResponse,
+	ContentStructureDeleteResponse,
 	ContentStructureDetailResponse,
 	ContentStructureListResponse,
 	ContentStructureMutationResponse,
+	ContentStructureNodeListResponse,
 	ContentStructureNodeMutationResponse,
-	ContentStructureBatchMutationResponse,
-	ContentStructureDeleteResponse,
 	ContentStructureRevisionListResponse,
+	MediaContentStructureNodeListResponse,
+	SaveBookContentStructureDraftResponse,
+	SaveMediaContentStructureDraftResponse,
+	toApiErrorResponse,
+	toPortableTextResponse,
+	UpdateStateResponse,
+	VoteBackpressureResponse,
 } from "../schema/response";
+import { BookNotFound, ChapterLanguageNotFound, ChapterNotFound, MediaNotFound } from "./errors";
 import {
-	listContentStructureRevisions,
-	restoreContentStructureRevision,
-} from "../../content-structure/history";
-import { toApiErrorResponse, VoteBackpressureResponse } from "../schema/response";
-import { getUnitLocalizationContentMetric } from "../../content-metrics/service";
-import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
-import {
-	orderReaderChapterNodeIds,
-	selectReaderChapterLocalization,
-} from "../../content-structure/book-reading";
-import { unitOwnershipModeFromOwnerProfileId } from "../../authorization/unit/ownership";
+	BookChapterNodeParams,
+	BookContentStructureParams,
+	BookContentStructureQuery,
+	ChapterLocalizationParams,
+	ContentStructureParams,
+	ContentStructureRevisionBody,
+	ContentStructureRevisionListQuery,
+	ContentStructureRevisionParams,
+	CreateContentStructureBody,
+	CreateGenericContentStructureNodeBody,
+	GenericContentStructureNodeParams,
+	MediaContentStructureParams,
+	MediaContentStructureQuery,
+	ReadChapterQuery,
+	RestoreContentStructureRevisionBody,
+	SaveBookContentStructureDraftBody,
+	SaveMediaContentStructureDraftBody,
+	UnitContentStructuresParams,
+	UpdateContentStructureNodesBatchBody,
+	UpdateGenericContentStructureNodeBody,
+	UpsertChapterLocalizationBody,
+} from "./schema";
 
 const UnitForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const ContentStructureForbiddenResponse = toApiErrorResponse([
@@ -452,7 +453,7 @@ export default new Elysia()
 			},
 			detail: { summary: "Create Content Structure", tags: ["Content Structure"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await ensureCanMutateContentStructure(authorization, {
 				ownerUnitId: params.unitId,
 				kind: body.kind === "realm.taxonomy" ? body.kind : undefined,
@@ -462,7 +463,7 @@ export default new Elysia()
 				return createContentStructure(tx, {
 					ownerUnitId: params.unitId,
 					kind: body.kind,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 				});
 			});
 			return {
@@ -544,7 +545,7 @@ export default new Elysia()
 				tags: ["Content Structure"],
 			},
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await ensureCanMutateContentStructure(authorization, {
 				ownerUnitId: params.unitId,
 				structureId: params.structureId,
@@ -556,7 +557,7 @@ export default new Elysia()
 					structureId: params.structureId,
 					sourceRevisionId: params.revisionId,
 					baseRevisionId: body.baseRevisionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					message: body.message,
 					minor: body.minor,
 				});
@@ -586,7 +587,7 @@ export default new Elysia()
 				tags: ["Content Structure"],
 			},
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await ensureCanMutateContentStructure(authorization, {
 				ownerUnitId: params.unitId,
 				structureId: params.structureId,
@@ -609,7 +610,7 @@ export default new Elysia()
 					ownerUnitId: params.unitId,
 					structureId: params.structureId,
 					baseRevisionId: body.baseRevisionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					commands: body.changes,
 				});
 			});
@@ -639,7 +640,7 @@ export default new Elysia()
 			},
 			detail: { summary: "Insert Content Structure node", tags: ["Content Structure"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await ensureCanMutateContentStructure(authorization, {
 				ownerUnitId: params.unitId,
 				structureId: params.structureId,
@@ -656,7 +657,7 @@ export default new Elysia()
 						status: "published",
 						visibility: "public",
 						publishedAt: new Date(),
-						statusActor: { kind: "profile", profileId: profile.unitId },
+						statusActor: { kind: "profile", profileId: entity.id },
 					});
 					await tx.insert(label).values({ id: created.id });
 					await tx.insert(unitLocalization).values({
@@ -666,12 +667,12 @@ export default new Elysia()
 					});
 					await tx.insert(unitOwnership).values({
 						unitId: created.id,
-						profileId: profile.unitId,
-						assignedByProfileId: profile.unitId,
+						profileId: entity.id,
+						assignedByProfileId: entity.id,
 					});
 					await recordUnitRevision(tx, {
 						unitId: created.id,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						contribution: body.revisionContext?.contribution,
 						event: "create",
 					});
@@ -681,7 +682,7 @@ export default new Elysia()
 					ownerUnitId: params.unitId,
 					structureId: params.structureId,
 					baseRevisionId: body.baseRevisionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					parentId: body.parentId,
 					contentUnitId,
 					documentKey: body.documentKey,
@@ -713,7 +714,7 @@ export default new Elysia()
 			},
 			detail: { summary: "Update Content Structure node", tags: ["Content Structure"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await ensureCanMutateContentStructure(authorization, {
 				ownerUnitId: params.unitId,
 				structureId: params.structureId,
@@ -727,7 +728,7 @@ export default new Elysia()
 					structureId: params.structureId,
 					nodeId: params.nodeId,
 					baseRevisionId: body.baseRevisionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					parentId: body.parentId,
 					contentUnitId: body.contentUnitId,
 					documentKey: body.documentKey,
@@ -761,7 +762,7 @@ export default new Elysia()
 				tags: ["Content Structure"],
 			},
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await ensureCanMutateContentStructure(authorization, {
 				ownerUnitId: params.unitId,
 				structureId: params.structureId,
@@ -773,7 +774,7 @@ export default new Elysia()
 					structureId: params.structureId,
 					nodeId: params.nodeId,
 					baseRevisionId: body.baseRevisionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 				});
 			});
 			return {
@@ -798,7 +799,7 @@ export default new Elysia()
 			},
 			detail: { summary: "Delete Content Structure", tags: ["Content Structure"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await ensureCanMutateContentStructure(authorization, {
 				ownerUnitId: params.unitId,
 				structureId: params.structureId,
@@ -810,7 +811,7 @@ export default new Elysia()
 					structureId: params.structureId,
 					binding: "direct",
 					baseRevisionId: body.baseRevisionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 				});
 			});
 			return {
@@ -869,7 +870,7 @@ export default new Elysia()
 				tags: ["Content Structure"],
 			},
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
 			return runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 				const attachedContentUnitIds = [
@@ -882,7 +883,7 @@ export default new Elysia()
 				const result = await saveBookContentStructureDraft(tx, {
 					ownerUnitId: params.unitId,
 					baseRevisionId: body.baseRevisionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					nodes: body.nodes,
 				});
@@ -942,7 +943,7 @@ export default new Elysia()
 				tags: ["Content Structure"],
 			},
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
 			return database.transaction(async (tx) => {
 				const attachedContentUnitIds = [
@@ -955,7 +956,7 @@ export default new Elysia()
 				const result = await saveMediaContentStructureDraft(tx, {
 					ownerUnitId: params.unitId,
 					base: body.base,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					nodes: body.nodes,
 				});
@@ -1125,7 +1126,7 @@ export default new Elysia()
 			},
 			detail: { summary: "Create or replace chapter content", tags: ["Books"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.chapterId, [
 				["localizations", params.language],
 			]);
@@ -1160,13 +1161,13 @@ export default new Elysia()
 					});
 				await applyNewPostTagMentionVotes(tx, {
 					postId: params.chapterId,
-					profileId: profile.unitId,
+					profileId: entity.id,
 					previousBody: current?.content,
 					nextBody: body.content,
 				});
 				await recordUnitRevision(tx, {
 					unitId: params.chapterId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					event: "update",
 					baseRevisionId: body.baseRevisionId,

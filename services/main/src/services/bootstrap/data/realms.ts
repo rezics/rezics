@@ -1,7 +1,11 @@
 import type { AvatarReference } from "@rezics/avatar";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
-import { OfficialProfileIds, RezicsBrandName } from "./foundation";
+import {
+	BootstrapPlatformAdministratorProfile,
+	OfficialProfileIds,
+	RezicsBrandName,
+} from "./foundation";
 
 /**
  * Fixed image asset for the official REZICS Realm. The historical storage key
@@ -47,7 +51,7 @@ export const OfficialRealmManifest = {
 	],
 	access: [
 		{
-			profileId: OfficialProfileIds.editorial,
+			authUserId: BootstrapPlatformAdministratorProfile.authUserId,
 			permissions: [
 				"unit.read",
 				"unit.update",
@@ -64,7 +68,7 @@ export const OfficialRealmManifest = {
 			],
 		},
 		{
-			profileId: OfficialProfileIds.moderation,
+			authUserId: BootstrapPlatformAdministratorProfile.authUserId,
 			permissions: [
 				"unit.read",
 				"realm.contribute",
@@ -101,7 +105,7 @@ export const RezicsScoreRealmManifest = {
 	],
 	access: [
 		{
-			profileId: OfficialProfileIds.editorial,
+			authUserId: BootstrapPlatformAdministratorProfile.authUserId,
 			permissions: [
 				"unit.read",
 				"unit.update",
@@ -118,7 +122,7 @@ export const RezicsScoreRealmManifest = {
 			],
 		},
 		{
-			profileId: OfficialProfileIds.moderation,
+			authUserId: BootstrapPlatformAdministratorProfile.authUserId,
 			permissions: [
 				"unit.read",
 				"realm.contribute",
@@ -155,7 +159,7 @@ export const RezicsRuleRealmManifest = {
 	],
 	access: [
 		{
-			profileId: OfficialProfileIds.editorial,
+			authUserId: BootstrapPlatformAdministratorProfile.authUserId,
 			permissions: [
 				"unit.read",
 				"unit.update",
@@ -168,7 +172,7 @@ export const RezicsRuleRealmManifest = {
 			],
 		},
 		{
-			profileId: OfficialProfileIds.moderation,
+			authUserId: BootstrapPlatformAdministratorProfile.authUserId,
 			permissions: ["unit.read", "realm.members.read"],
 		},
 	] as const,

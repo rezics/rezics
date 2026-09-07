@@ -13,6 +13,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
 	createFractionalIndexPositionByteLengthConstraint,
@@ -21,20 +22,19 @@ import {
 	createUuidv7PrimaryKey,
 	fractionalIndexPosition,
 } from "./columns";
-import { profile } from "./profile";
-import { unit } from "./unit";
-import { post } from "./post";
 import {
 	AssociationKindValues,
 	AssociationProposalDirectionValues,
 	AssociationProposalResolutionValues,
 	type AssociationRole,
-	CreditAttributionRoleValues,
 	type CreditAttributionRole,
-	SubjectAssociationRoleValues,
+	CreditAttributionRoleValues,
 	type SubjectAssociationRole,
+	SubjectAssociationRoleValues,
 	toEnumValues,
 } from "./contract-values";
+import { post } from "./post";
+import { unit } from "./unit";
 
 export const associationKind = pgEnum("association_kind", toEnumValues(AssociationKindValues));
 export const associationProposalDirection = pgEnum(
@@ -84,11 +84,11 @@ export const unitAssociationProposal = pgTable(
 		direction: associationProposalDirection().notNull(),
 		createdByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		expiresAt: createTimestampMsColumn().notNull(),
 		resolution: associationProposalResolution(),
 		resolvedAt: createTimestampMsColumn(),
-		resolvedByProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		resolvedByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -148,9 +148,9 @@ export const creditAttribution = pgTable(
 		sourceUnitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		creditedUnitId: uuid()
+		creditedEntityId: uuid()
 			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		role: text().$type<CreditAttributionRole>().notNull(),
 		position: fractionalIndexPosition().default(sql`'a0'::text`).notNull(),
 		createdAt: createCreatedAtColumn(),
@@ -159,13 +159,13 @@ export const creditAttribution = pgTable(
 	(table) => [
 		unique("credit_attribution_source_credited_role_key").on(
 			table.sourceUnitId,
-			table.creditedUnitId,
+			table.creditedEntityId,
 			table.role,
 		),
-		index("credit_attribution_credited_unit_role_idx").on(table.creditedUnitId, table.role),
-		index("credit_attribution_search_source_idx").on(table.creditedUnitId, table.sourceUnitId),
+		index("credit_attribution_credited_entity_role_idx").on(table.creditedEntityId, table.role),
+		index("credit_attribution_search_source_idx").on(table.creditedEntityId, table.sourceUnitId),
 		index("credit_attribution_publisher_search_source_idx")
-			.on(table.creditedUnitId, table.sourceUnitId)
+			.on(table.creditedEntityId, table.sourceUnitId)
 			.where(sql`${table.role} = 'publisher'`),
 		index("credit_attribution_source_position_idx").on(
 			table.sourceUnitId,
@@ -175,7 +175,7 @@ export const creditAttribution = pgTable(
 		check("credit_attribution_role_check", inArray(table.role, CreditAttributionRoleValues)),
 		check(
 			"credit_attribution_not_self_check",
-			sql`${table.sourceUnitId} <> ${table.creditedUnitId}`,
+			sql`${table.sourceUnitId} <> ${table.creditedEntityId}`,
 		),
 		createFractionalIndexPositionByteLengthConstraint(
 			"credit_attribution_position_byte_length_check",
@@ -230,7 +230,7 @@ export const subjectAssociationJudgment = pgTable(
 			.references(() => subjectAssociation.id, { onDelete: "restrict" }),
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		spoilerLevel: smallint().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),

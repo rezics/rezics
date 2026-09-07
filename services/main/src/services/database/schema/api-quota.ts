@@ -14,8 +14,9 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 
-import { pgTable } from "./base";
 import { apikeys, users } from "./auth";
+import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
 	createJsonDocumentColumn,
@@ -24,7 +25,6 @@ import {
 	createUuidv7PrimaryKey,
 } from "./columns";
 import { ApiQuotaPolicyClassValues, ApiQuotaPolicySubjectKindValues } from "./contract-values";
-import { profile } from "./profile";
 
 export type ApiQuotaPolicyClass = (typeof ApiQuotaPolicyClassValues)[number];
 export type ApiQuotaPolicySubjectKind = (typeof ApiQuotaPolicySubjectKindValues)[number];
@@ -60,7 +60,7 @@ export const apiQuotaPolicyRevision = pgTable(
 		schemaVersion: integer().notNull(),
 		configuration: createJsonDocumentColumn().notNull(),
 		changeReason: text().notNull(),
-		createdByProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		createdByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
@@ -89,7 +89,7 @@ export const apiAccountQuotaBinding = pgTable(
 		assignmentReason: text().notNull(),
 		assignedByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		revision: integer().default(1).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -132,7 +132,7 @@ export const apiTokenQuotaBinding = pgTable(
 		assignmentReason: text().notNull(),
 		assignedByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		revision: integer().default(1).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -169,7 +169,7 @@ export const apiTokenQuotaOverride = pgTable(
 		revision: integer().default(1).notNull(),
 		updatedByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},

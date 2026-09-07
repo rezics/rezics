@@ -2,8 +2,8 @@ import { getActiveTraceContext } from "@rezics/observability";
 
 import type { DatabaseExecutor } from "../database";
 import { auditEvent, AuditEventSchemaVersion } from "../database/schema";
-import type { AuditRecord } from "./contracts";
 import { getAuditRequestContext } from "./context";
+import type { AuditRecord } from "./contracts";
 
 /**
  * Appends one immutable security audit record.
@@ -24,12 +24,14 @@ export async function recordAuditEvent(
 		outcome: record.outcome,
 		actorKind: record.actor.kind,
 		actorProfileId: record.actor.kind === "profile" ? record.actor.profileId : null,
+		actorAuthUserId:
+			record.actor.kind === "auth" ? record.actor.authUserId : (requestContext?.authUserId ?? null),
 		actorCredentialKind:
-			record.actor.kind === "profile"
+			record.actor.kind !== "system"
 				? (record.actor.credentialKind ?? requestContext?.credentialKind ?? "session")
 				: (record.actor.credentialKind ?? "system"),
 		actorCredentialId:
-			record.actor.kind === "profile"
+			record.actor.kind !== "system"
 				? (record.actor.credentialId ?? requestContext?.credentialId)
 				: record.actor.credentialId,
 		authorityKind: record.authority.kind,

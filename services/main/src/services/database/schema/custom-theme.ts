@@ -1,14 +1,14 @@
 import {
 	CustomThemeExecutionModeV0,
 	CustomThemeExternalResourceHealthStateValues,
-	type CustomThemeExternalResourceHealthState,
 	CustomThemeResourceModeV0,
 	CustomThemeRevisionFileRoleValues,
-	type CustomThemeRevisionFileRole,
 	CustomThemeRevisionStateValues,
+	UnitPresentationTargetContractV0,
+	type CustomThemeExternalResourceHealthState,
+	type CustomThemeRevisionFileRole,
 	type CustomThemeRevisionState,
 	type SubmittedCustomThemeManifestV0,
-	UnitPresentationTargetContractV0,
 } from "@rezics/block";
 import { inArray, sql } from "drizzle-orm";
 import {
@@ -25,6 +25,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
 	createJsonDocumentColumn,
@@ -35,7 +36,6 @@ import {
 	createUuidv7PrimaryKey,
 } from "./columns";
 import { revisionContent } from "./history";
-import { profile } from "./profile";
 import { unit } from "./unit";
 
 /** Unit subtype carrying reusable Custom Theme identity and localization. */
@@ -75,11 +75,11 @@ export const customThemeRevision = pgTable(
 		nextAutomatedReviewAt: createTimestampMsColumn().defaultNow().notNull(),
 		submittedByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
-		reviewedByProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
+		reviewedByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		reviewedAt: createTimestampMsColumn(),
 		decisionReason: text(),
-		killedByProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		killedByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		killedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -183,7 +183,7 @@ export const customThemeRevisionReviewEvent = pgTable(
 			.notNull()
 			.references(() => customThemeRevision.id, { onDelete: "cascade" }),
 		kind: text().$type<"automated" | "approve" | "reject" | "revalidation" | "kill">().notNull(),
-		actorProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		actorProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		evidence: createJsonObjectColumn().notNull(),
 		evidenceSha256: text().notNull(),
 		createdAt: createCreatedAtColumn(),
@@ -357,7 +357,7 @@ export const unitCustomThemeInstallation = pgTable(
 		revisionId: uuid().notNull(),
 		installedByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -410,7 +410,7 @@ export const unitPresentationRevision = pgTable(
 		contentId: uuid()
 			.notNull()
 			.references(() => revisionContent.id, { onDelete: "restrict" }),
-		actorProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		actorProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		kind: text().$type<"create" | "update" | "restore">().notNull(),
 		createdAt: createCreatedAtColumn(),
 	},
@@ -489,7 +489,7 @@ export const customThemeExecutionControl = pgTable(
 	{
 		id: boolean().primaryKey().default(true),
 		enabled: boolean().default(true).notNull(),
-		updatedByProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		updatedByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [check("custom_theme_execution_control_singleton_check", sql`${table.id} = true`)],

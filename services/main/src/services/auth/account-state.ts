@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { database, type DatabaseExecutor } from "../database";
-import { userAccountState } from "../database/schema";
+import { userAccountState, users } from "../database/schema";
 import type { UserAccountState } from "../database/schema/contract-values";
 import { AccountClosed, AccountSuspended } from "./errors";
 
@@ -12,7 +12,7 @@ export interface AccountStateRecord {
 	readonly expiresAt: Date | null;
 	readonly revision: number;
 	readonly updatedAt: Date | null;
-	readonly updatedByProfileId: string | null;
+	readonly updatedByAuthUserId: string | null;
 }
 
 export interface EffectiveAccountState extends AccountStateRecord {
@@ -31,7 +31,7 @@ export function effectiveAccountState(
 			expiresAt: null,
 			revision: 0,
 			updatedAt: null,
-			updatedByProfileId: null,
+			updatedByAuthUserId: null,
 		};
 	if (
 		record.state === "suspended" &&
@@ -59,7 +59,7 @@ export async function loadEffectiveAccountState(
 			expiresAt: userAccountState.expiresAt,
 			revision: userAccountState.revision,
 			updatedAt: userAccountState.updatedAt,
-			updatedByProfileId: userAccountState.updatedByProfileId,
+			updatedByAuthUserId: userAccountState.updatedByAuthUserId,
 		})
 		.from(userAccountState)
 		.where(eq(userAccountState.userId, userId))
@@ -71,6 +71,12 @@ export async function ensureAccountAuthenticationAllowed(
 	userId: string,
 	executor: DatabaseExecutor = database,
 ): Promise<void> {
+	const [account] = await executor
+		.select({ erasedAt: users.erasedAt })
+		.from(users)
+		.where(eq(users.id, userId))
+		.limit(1);
+	if (!account || account.erasedAt) throw new AccountClosed();
 	const state = await loadEffectiveAccountState(userId, executor);
 	if (state.state === "suspended") throw new AccountSuspended(state.expiresAt);
 	if (state.state === "closed") throw new AccountClosed();

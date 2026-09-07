@@ -1,19 +1,26 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 
-import { notification, notificationPreference } from "../database/schema";
-import type { ContentGovernanceActionKindValues, EnforcementKindValues } from "../database/schema";
 import type { DatabaseTransaction } from "../database";
+import type { ContentGovernanceActionKindValues, EnforcementKindValues } from "../database/schema";
+import {
+	authEntity,
+	notification,
+	notificationPreference,
+	participationGrant,
+	users,
+} from "../database/schema";
 import { enqueueNotificationEmail } from "../email/outbox";
 import { emailIntentDeliveryEnabled } from "../email/policy";
+import { MaximumEntitySecurityControllers } from "../participation/lifecycle";
 import { resolveCanonicalUnitId } from "../units/merge/canonical";
 
 type ContentGovernanceActionKind = (typeof ContentGovernanceActionKindValues)[number];
 type EnforcementKind = (typeof EnforcementKindValues)[number];
 
-type NotificationBase = {
-	recipientProfileId: string;
-	dedupeKey?: string | null;
-};
+type NotificationBase = (
+	| { recipientEntityId: string; recipientAuthUserId?: never }
+	| { recipientAuthUserId: string; recipientEntityId?: never }
+) & { dedupeKey?: string | null };
 
 export type NotificationInput = NotificationBase &
 	(
@@ -42,7 +49,7 @@ export type NotificationInput = NotificationBase &
 		| {
 				kind: "moderation";
 				actorProfileId: string;
-				subjectUnitId: string;
+				subjectUnitId?: string;
 				payload:
 					| {
 							type: "content_governance_action";
@@ -167,40 +174,89 @@ export function notificationTranslationKey(
 }
 
 export async function createNotification(tx: DatabaseTransaction, input: NotificationInput) {
-	if (input.actorProfileId && input.actorProfileId === input.recipientProfileId) return;
-	const [preferences] = await tx
-		.select({
-			inApp: notificationPreference.inApp,
-			email: notificationPreference.email,
-		})
+	if (input.actorProfileId === input.recipientEntityId) return;
+	const [self] = input.recipientEntityId
+		? await tx
+				.select({ authUserId: authEntity.authUserId })
+				.from(authEntity)
+				.where(
+					and(eq(authEntity.entityId, input.recipientEntityId), eq(authEntity.state, "active")),
+				)
+				.limit(1)
+		: [];
+	const candidates = input.recipientAuthUserId
+		? [{ authUserId: input.recipientAuthUserId }]
+		: self
+			? [self]
+			: input.recipientEntityId
+				? await tx
+						.selectDistinct({ authUserId: participationGrant.authUserId })
+						.from(participationGrant)
+						.where(
+							and(
+								eq(participationGrant.actingEntityId, input.recipientEntityId),
+								eq(participationGrant.entityId, input.recipientEntityId),
+								eq(participationGrant.capability, "entity.security"),
+								isNull(participationGrant.revokedAt),
+								or(
+									isNull(participationGrant.expiresAt),
+									sql`${participationGrant.expiresAt} > now()`,
+								),
+							),
+						)
+						.limit(MaximumEntitySecurityControllers + 1)
+				: [];
+	if (candidates.length > MaximumEntitySecurityControllers)
+		throw new Error("Entity security controller bound is violated");
+	const candidateIds = candidates.flatMap((candidate) =>
+		candidate.authUserId ? [candidate.authUserId] : [],
+	);
+	if (!candidateIds.length) return;
+	const recipients = await tx
+		.select({ id: users.id })
+		.from(users)
+		.where(and(inArray(users.id, candidateIds), isNull(users.erasedAt)))
+		.orderBy(users.id)
+		.for("share");
+	if (!recipients.length) return;
+	const preferences = await tx
+		.select()
 		.from(notificationPreference)
 		.where(
 			and(
-				eq(notificationPreference.profileId, input.recipientProfileId),
+				inArray(
+					notificationPreference.authUserId,
+					recipients.map((recipient) => recipient.id),
+				),
 				eq(notificationPreference.kind, input.kind),
 			),
-		)
-		.limit(1);
-	const inAppVisible = preferences?.inApp ?? true;
-	const emailEnabled = emailIntentDeliveryEnabled("notification") && (preferences?.email ?? true);
-	if (!inAppVisible && !emailEnabled) return;
+		);
+	const preferenceByAccount = new Map(
+		preferences.map((preference) => [preference.authUserId, preference]),
+	);
 	const subjectUnitId =
 		"subjectUnitId" in input && input.subjectUnitId
 			? await resolveCanonicalUnitId(tx, input.subjectUnitId)
 			: undefined;
-	const [created] = await tx
-		.insert(notification)
-		.values({
-			recipientProfileId: input.recipientProfileId,
-			actorProfileId: input.actorProfileId,
-			kind: input.kind,
-			subjectUnitId,
-			payload: input.payload,
-			dedupeKey: input.dedupeKey,
-			inAppVisible,
-			emailStatus: emailEnabled ? "pending" : "not_requested",
-		})
-		.onConflictDoNothing()
-		.returning({ id: notification.id });
-	if (created && emailEnabled) await enqueueNotificationEmail(tx, created.id);
+	for (const recipient of recipients) {
+		const preference = preferenceByAccount.get(recipient.id);
+		const inAppVisible = preference?.inApp ?? true;
+		const emailEnabled = emailIntentDeliveryEnabled("notification") && (preference?.email ?? true);
+		if (!inAppVisible && !emailEnabled) continue;
+		const [created] = await tx
+			.insert(notification)
+			.values({
+				recipientAuthUserId: recipient.id,
+				actorProfileId: input.actorProfileId,
+				kind: input.kind,
+				subjectUnitId,
+				payload: input.payload,
+				dedupeKey: input.dedupeKey,
+				inAppVisible,
+				emailStatus: emailEnabled ? "pending" : "not_requested",
+			})
+			.onConflictDoNothing()
+			.returning({ id: notification.id });
+		if (created && emailEnabled) await enqueueNotificationEmail(tx, created.id);
+	}
 }

@@ -1,11 +1,11 @@
 import { index, pgEnum, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { ReactionKindValues, toEnumValues } from "./contract-values";
+import { entityIdentity } from "./catalog-identity";
 import { createCreatedAtColumn, createUpdatedAtColumn, createUuidv7PrimaryKey } from "./columns";
-import { profile } from "./profile";
-import { unit } from "./unit";
+import { ReactionKindValues, toEnumValues } from "./contract-values";
 import { realm } from "./realm";
+import { unit } from "./unit";
 
 export const reactionKind = pgEnum("reaction_kind", toEnumValues(ReactionKindValues));
 
@@ -15,7 +15,7 @@ export const unitReaction = pgTable(
 		id: createUuidv7PrimaryKey(),
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
@@ -43,7 +43,7 @@ export const unitShare = pgTable(
 	{
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),

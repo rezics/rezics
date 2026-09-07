@@ -1,32 +1,35 @@
 import { createHash } from "node:crypto";
 
-import { and, eq, inArray, isNull, sql } from "drizzle-orm";
-import { assertFilterDocument } from "@rezics/filter";
 import { normalizeContentLanguageSupport } from "@rezics/content-language";
+import { assertFilterDocument } from "@rezics/filter";
+import { isContentLanguage } from "@rezics/i18n";
 import { isLicenseId } from "@rezics/license";
 import { TopLevelSlugNamespaceUnitIds, ZoneHomePageSlug } from "@rezics/slug";
-import { isContentLanguage } from "@rezics/i18n";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
-import { OfficialProfileIds } from "../bootstrap/data";
 import {
 	createProfileOwnedUnitAccess,
 	createPublicEditableUnitAccess,
 } from "../authorization/unit/ownership";
-import { applyContentStructureBatch } from "../content-structure/batch";
-import { createContentStructure } from "../content-structure/service";
-import { createNavigationStructure } from "../content-structure/navigation";
+import { OfficialProfileIds } from "../bootstrap/data";
 import { createCollectionStructureHistory } from "../collection-structure/history";
+import { applyContentStructureBatch } from "../content-structure/batch";
 import type { ContentStructureBatchCommand } from "../content-structure/batch-plan";
+import { createNavigationStructure } from "../content-structure/navigation";
+import { createContentStructure } from "../content-structure/service";
 import type { DatabaseTransaction } from "../database";
 import {
 	audio,
 	book,
-	contentStructure,
 	collection,
 	collectionItem,
+	ContentLanguageSupportUnitKindValues,
+	contentStructure,
 	creditAttribution,
 	entity,
 	entityMeasurement,
+	guideNode,
+	guideNodeLocalization,
 	label,
 	media,
 	post,
@@ -41,36 +44,36 @@ import {
 	tag,
 	tagRelation,
 	unit,
-	unitContentLanguageSupport,
 	unitAlias,
+	unitContentLanguageSupport,
 	unitLocalization,
 	unitSlugAddress,
-	unitTagPathApplication,
-	unitTagPathApplicationJudgment,
 	unitTag,
 	unitTagJudgment,
+	unitTagPathApplication,
+	unitTagPathApplicationJudgment,
 	unitVariant,
+	VariantCapableUnitKindValues,
 	video,
 	vocabularyNode,
-	guideNode,
-	guideNodeLocalization,
 	zone,
 	zonePage,
-	type ContentStructureKind,
 	type ContentLanguageSupportUnitKind,
+	type ContentStructureKind,
 	type VariantCapableUnitKind,
-	ContentLanguageSupportUnitKindValues,
-	VariantCapableUnitKindValues,
 } from "../database/schema";
-import { insertLicenseGrants } from "../units/license-grants";
-import { recordUnitRevision } from "../units/history";
+import { WorkPolicy } from "../performance/policy";
+import {
+	createTagExpressionInferenceRuleInTransaction,
+	createTagExpressionInTransaction,
+	ensureSimpleTagExpressionInTransaction,
+} from "../tag-expressions/service";
+import { createTagPathInTransaction, createTagPathSenseInTransaction } from "../tag-paths/service";
 import { insertUnit } from "../units/create";
+import { recordUnitRevision } from "../units/history";
+import { insertLicenseGrants } from "../units/license-grants";
 import { recordInitialRealmUnitPublicationEvents } from "../units/realm-publication";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
-import { WorkPolicy } from "../performance/policy";
-import { ContentPackCollision, ContentPackConflict, ContentPackInvalid } from "./errors";
-import { assertContentPackDocuments } from "./documents";
-import { planContentPack } from "./plan";
 import type {
 	ContentPackPlan,
 	LoadedPack,
@@ -78,12 +81,9 @@ import type {
 	PackRelations,
 	PackStructure,
 } from "./contracts";
-import { createTagPathInTransaction, createTagPathSenseInTransaction } from "../tag-paths/service";
-import {
-	createTagExpressionInferenceRuleInTransaction,
-	createTagExpressionInTransaction,
-	ensureSimpleTagExpressionInTransaction,
-} from "../tag-expressions/service";
+import { assertContentPackDocuments } from "./documents";
+import { ContentPackCollision, ContentPackConflict, ContentPackInvalid } from "./errors";
+import { planContentPack } from "./plan";
 import { assertContentPackThemeAssets } from "./theme-assets";
 
 const ImportOwnerProfileId = OfficialProfileIds.editorial;
@@ -604,14 +604,14 @@ async function importRelations(
 		await tx.insert(unitVariant).values(rows);
 	}
 	const credits = (relations.credits ?? []).filter((item) =>
-		touchesCreated(createKeys, [item.sourceUnitSourceKey, item.creditedUnitSourceKey]),
+		touchesCreated(createKeys, [item.sourceUnitSourceKey, item.creditedEntitySourceKey]),
 	);
 	if (credits.length)
 		await tx.insert(creditAttribution).values(
 			credits.map((item) => ({
 				id: ids.credits?.[item.sourceKey],
 				sourceUnitId: requireId(ids.units, item.sourceUnitSourceKey),
-				creditedUnitId: requireId(ids.units, item.creditedUnitSourceKey),
+				creditedEntityId: requireId(ids.units, item.creditedEntitySourceKey),
 				role: item.role,
 				position: item.position,
 			})),

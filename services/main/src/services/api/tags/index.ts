@@ -27,8 +27,8 @@ import {
 	getTagPath,
 	judgeRealmTagPathApplication,
 	judgeTagPathApplication,
-	listPendingTagPathMerges,
 	listAcceptedTagPathsContaining,
+	listPendingTagPathMerges,
 	listRealmTagPaths,
 	listTagPathDefinitionWarnings,
 	proposeTagPathMerge,
@@ -87,13 +87,13 @@ import {
 	RealmTagSubscriptionParams,
 	RealmTagSubscriptionResponse,
 	RealmTagSubscriptionStateResponse,
+	ResolveTagPathMergeBody,
 	RetireTagExpressionInferenceRuleResponse,
 	RetireTagPathSenseResponse,
-	ResolveTagPathMergeBody,
 	TagConceptExpressionsQuery,
 	TagConceptExpressionsResponse,
-	TagExpressionParams,
 	TagExpressionInferenceRuleParams,
+	TagExpressionParams,
 	TagHierarchyQuery,
 	TagHierarchyResponse,
 	TagIdParams,
@@ -111,9 +111,9 @@ import {
 	TagPathParams,
 	TagPathQuery,
 	TagPathResponse,
-	TagPathSenseParams,
 	TagPathsContainingQuery,
 	TagPathsContainingResponse,
+	TagPathSenseParams,
 	TagSuggestionQuery,
 	TagSuggestionResponse,
 	UnitTagLandscapeParams,
@@ -217,10 +217,10 @@ export default new Elysia()
 					},
 					detail: { summary: "Create an immutable Tag Expression", tags: ["Tags"] },
 				},
-				async ({ authorization, body, profile }) => {
+				async ({ authorization, body, entity }) => {
 					await authorization.platform.ensureCapability("unit.merge.propose");
 					try {
-						return await createTagExpression({ ...body, profileId: profile.unitId });
+						return await createTagExpression({ ...body, profileId: entity.id });
 					} catch (error) {
 						return asValidationError(error, "expression");
 					}
@@ -239,13 +239,13 @@ export default new Elysia()
 					},
 					detail: { summary: "Add a governed Tag Expression inference rule", tags: ["Tags"] },
 				},
-				async ({ authorization, body, params, profile }) => {
+				async ({ authorization, body, params, entity }) => {
 					await authorization.platform.ensureCapability("unit.merge.propose");
 					try {
 						return await createTagExpressionInferenceRule({
 							...body,
 							sourceExpressionId: params.expressionId,
-							profileId: profile.unitId,
+							profileId: entity.id,
 						});
 					} catch (error) {
 						return asValidationError(error, "inferenceRule");
@@ -290,7 +290,7 @@ export default new Elysia()
 				},
 				detail: { summary: "Create or find a typed vocabulary relation", tags: ["Tags"] },
 			},
-			({ body, profile }) => createTagRelation({ ...body, profileId: profile.unitId }),
+			({ body, entity }) => createTagRelation({ ...body, profileId: entity.id }),
 		),
 	)
 	.group("/tag-paths", (app) =>
@@ -361,11 +361,11 @@ export default new Elysia()
 					},
 					detail: { summary: "Create or find an immutable structural Tag Path", tags: ["Tags"] },
 				},
-				({ body, profile }) =>
+				({ body, entity }) =>
 					createTagPath({
 						memberNodeIds: body.memberNodeIds,
 						relationIds: body.relationIds,
-						profileId: profile.unitId,
+						profileId: entity.id,
 					}),
 			)
 			.get(
@@ -383,7 +383,7 @@ export default new Elysia()
 					const identity = await resolveIdentity(request, "unit:read");
 					return getTagPath({
 						pathId: params.pathId,
-						viewerProfileId: identity.profile?.unitId,
+						viewerProfileId: identity.entity?.id,
 						localizationLanguages: query.localizationLanguages,
 					});
 				},
@@ -402,12 +402,12 @@ export default new Elysia()
 					},
 					detail: { summary: "Create an explicit Path Sense", tags: ["Tags"] },
 				},
-				async ({ authorization, body, params, profile }) => {
+				async ({ authorization, body, params, entity }) => {
 					await authorization.platform.ensureCapability("unit.merge.propose");
 					return createTagPathSense({
 						...body,
 						pathId: params.pathId,
-						profileId: profile.unitId,
+						profileId: entity.id,
 					});
 				},
 			)
@@ -424,8 +424,8 @@ export default new Elysia()
 					},
 					detail: { summary: "Vote on structural Path validity", tags: ["Tags"] },
 				},
-				({ body, params, profile }) =>
-					voteTagPath({ pathId: params.pathId, profileId: profile.unitId, value: body.value }),
+				({ body, params, entity }) =>
+					voteTagPath({ pathId: params.pathId, profileId: entity.id, value: body.value }),
 			)
 			.delete(
 				"/:pathId/vote",
@@ -435,8 +435,7 @@ export default new Elysia()
 					response: { [StatusCodes.OK]: VoteSummaryResponse },
 					detail: { summary: "Remove a structural Path vote", tags: ["Tags"] },
 				},
-				({ params, profile }) =>
-					deleteTagPathVote({ pathId: params.pathId, profileId: profile.unitId }),
+				({ params, entity }) => deleteTagPathVote({ pathId: params.pathId, profileId: entity.id }),
 			)
 			.post(
 				"/merges",
@@ -451,7 +450,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Propose a governed structural Path merge", tags: ["Tags"] },
 				},
-				async ({ authorization, body, profile }) => {
+				async ({ authorization, body, entity }) => {
 					await authorization.platform.ensureCapability("unit.merge.propose");
 					return proposeTagPathMerge({
 						sourcePathId: body.sourcePathId,
@@ -460,7 +459,7 @@ export default new Elysia()
 						proposalSourceKind: body.proposalSource.kind,
 						proposalProvenance:
 							body.proposalSource.kind === "assisted" ? body.proposalSource : undefined,
-						profileId: profile.unitId,
+						profileId: entity.id,
 					});
 				},
 			)
@@ -498,12 +497,12 @@ export default new Elysia()
 					},
 					detail: { summary: "Resolve a structural Path merge proposal", tags: ["Tags"] },
 				},
-				async ({ authorization, body, params, profile }) => {
+				async ({ authorization, body, params, entity }) => {
 					await authorization.platform.ensureCapability("unit.merge.review");
 					return resolveTagPathMerge({
 						mergeId: params.mergeId,
 						status: body.status,
-						profileId: profile.unitId,
+						profileId: entity.id,
 					});
 				},
 			),
@@ -527,7 +526,7 @@ export default new Elysia()
 					await identity.authorization.unit.ensureCanRead(params.unitId, () => new UnitNotFound());
 					return getUnitTagLandscape({
 						unitId: params.unitId,
-						viewerProfileId: identity.profile?.unitId,
+						viewerProfileId: identity.entity?.id,
 						localizationLanguages: query.localizationLanguages,
 						includeExpressions: query.includeExpressions ?? true,
 						expressionLimit: query.expressionLimit ?? 50,
@@ -549,13 +548,13 @@ export default new Elysia()
 					},
 					detail: { summary: "Apply one explicit global Path Sense", tags: ["Tags"] },
 				},
-				async ({ authorization, body, params, profile }) => {
+				async ({ authorization, body, params, entity }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					return applyTagPath({
 						unitId: params.unitId,
 						senseId: body.senseId,
-						profileId: profile.unitId,
+						profileId: entity.id,
 						fitVote: body.fitVote,
 						spoilerLevel: body.spoilerLevel,
 					});
@@ -594,13 +593,13 @@ export default new Elysia()
 					},
 					detail: { summary: "Judge one global semantic Application", tags: ["Tags"] },
 				},
-				async ({ authorization, body, params, profile }) => {
+				async ({ authorization, body, params, entity }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					return judgeTagPathApplication({
 						applicationId: params.applicationId,
 						unitId: params.unitId,
-						profileId: profile.unitId,
+						profileId: entity.id,
 						...body,
 					});
 				},
@@ -616,13 +615,13 @@ export default new Elysia()
 					},
 					detail: { summary: "Clear one global Application judgment", tags: ["Tags"] },
 				},
-				async ({ authorization, params, profile }) => {
+				async ({ authorization, params, entity }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					return clearTagPathApplicationJudgment({
 						applicationId: params.applicationId,
 						unitId: params.unitId,
-						profileId: profile.unitId,
+						profileId: entity.id,
 					});
 				},
 			),
@@ -648,7 +647,7 @@ export default new Elysia()
 					);
 					return listRealmTagPaths({
 						realmId: params.realmId,
-						viewerProfileId: identity.profile?.unitId,
+						viewerProfileId: identity.entity?.id,
 						localizationLanguages: query.localizationLanguages,
 						limit: query.limit ?? 50,
 					});
@@ -669,9 +668,9 @@ export default new Elysia()
 						tags: ["Realms", "Tags"],
 					},
 				},
-				async ({ authorization, params, profile }) => {
+				async ({ authorization, params, entity }) => {
 					await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
-					return adoptRealmTagPath({ ...params, profileId: profile.unitId });
+					return adoptRealmTagPath({ ...params, profileId: entity.id });
 				},
 			)
 			.put(
@@ -686,9 +685,9 @@ export default new Elysia()
 					},
 					detail: { summary: "Adopt an explicit Path Sense in a Realm", tags: ["Realms", "Tags"] },
 				},
-				async ({ authorization, params, profile }) => {
+				async ({ authorization, params, entity }) => {
 					await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
-					return adoptRealmTagPathSense({ ...params, profileId: profile.unitId });
+					return adoptRealmTagPathSense({ ...params, profileId: entity.id });
 				},
 			)
 			.put(
@@ -700,9 +699,9 @@ export default new Elysia()
 					response: { [StatusCodes.OK]: RealmTagPathVoteResponse },
 					detail: { summary: "Vote on Realm-local structural validity", tags: ["Realms", "Tags"] },
 				},
-				async ({ authorization, body, params, profile }) => {
+				async ({ authorization, body, params, entity }) => {
 					await authorization.realm.ensureParticipation(params.realmId);
-					return voteRealmTagPath({ ...params, profileId: profile.unitId, value: body.value });
+					return voteRealmTagPath({ ...params, profileId: entity.id, value: body.value });
 				},
 			)
 			.delete(
@@ -713,9 +712,9 @@ export default new Elysia()
 					response: { [StatusCodes.OK]: RealmTagPathVoteResponse },
 					detail: { summary: "Remove a Realm-local structural vote", tags: ["Realms", "Tags"] },
 				},
-				async ({ authorization, params, profile }) => {
+				async ({ authorization, params, entity }) => {
 					await authorization.realm.ensureParticipation(params.realmId);
-					return deleteRealmTagPathVote({ ...params, profileId: profile.unitId });
+					return deleteRealmTagPathVote({ ...params, profileId: entity.id });
 				},
 			)
 			.post(
@@ -733,13 +732,13 @@ export default new Elysia()
 					},
 					detail: { summary: "Apply one adopted Realm Path Sense", tags: ["Realms", "Tags"] },
 				},
-				async ({ authorization, body, params, profile }) => {
+				async ({ authorization, body, params, entity }) => {
 					await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
 					await authorization.unit.ensureCanRead(params.unitId);
 					return applyRealmTagPath({
 						...params,
 						senseId: body.senseId,
-						profileId: profile.unitId,
+						profileId: entity.id,
 						fitVote: body.fitVote,
 						spoilerLevel: body.spoilerLevel,
 					});
@@ -774,10 +773,10 @@ export default new Elysia()
 					},
 					detail: { summary: "Judge one Realm semantic Application", tags: ["Realms", "Tags"] },
 				},
-				async ({ authorization, body, params, profile }) => {
+				async ({ authorization, body, params, entity }) => {
 					await authorization.realm.ensureParticipation(params.realmId);
 					await authorization.unit.ensureCanRead(params.unitId);
-					return judgeRealmTagPathApplication({ ...params, ...body, profileId: profile.unitId });
+					return judgeRealmTagPathApplication({ ...params, ...body, profileId: entity.id });
 				},
 			)
 			.delete(
@@ -791,12 +790,12 @@ export default new Elysia()
 					},
 					detail: { summary: "Clear one Realm Application judgment", tags: ["Realms", "Tags"] },
 				},
-				async ({ authorization, params, profile }) => {
+				async ({ authorization, params, entity }) => {
 					await authorization.realm.ensureParticipation(params.realmId);
 					await authorization.unit.ensureCanRead(params.unitId);
 					return clearRealmTagPathApplicationJudgment({
 						...params,
-						profileId: profile.unitId,
+						profileId: entity.id,
 					});
 				},
 			)
@@ -828,9 +827,9 @@ export default new Elysia()
 					response: { [StatusCodes.OK]: RealmTagSubscriptionListResponse },
 					detail: { summary: "List ordered Realm Tag authorities", tags: ["Tags"] },
 				},
-				async ({ profile, query }) => ({
+				async ({ entity, query }) => ({
 					items: await listRealmTagSubscriptions({
-						profileId: profile.unitId,
+						profileId: entity.id,
 						localizationLanguages: query.localizationLanguages,
 					}),
 				}),
@@ -848,7 +847,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Subscribe to or reorder a Realm Tag authority", tags: ["Tags"] },
 				},
-				async ({ authorization, body, params, profile, query }) => {
+				async ({ authorization, body, params, entity, query }) => {
 					const [, [record]] = await Promise.all([
 						authorization.unit.ensureCanRead(params.realmId, () => new RealmNotFound()),
 						database
@@ -859,7 +858,7 @@ export default new Elysia()
 					]);
 					if (!record) throw new RealmNotFound();
 					return upsertRealmTagSubscription({
-						profileId: profile.unitId,
+						profileId: entity.id,
 						realmId: params.realmId,
 						position: body.position,
 						localizationLanguages: query.localizationLanguages,
@@ -874,8 +873,8 @@ export default new Elysia()
 					response: { [StatusCodes.OK]: RealmTagSubscriptionStateResponse },
 					detail: { summary: "Unsubscribe from a Realm Tag authority", tags: ["Tags"] },
 				},
-				async ({ params, profile }) => {
-					await deleteRealmTagSubscription(profile.unitId, params.realmId);
+				async ({ params, entity }) => {
+					await deleteRealmTagSubscription(entity.id, params.realmId);
 					return { realmId: params.realmId, subscribed: false as const };
 				},
 			),

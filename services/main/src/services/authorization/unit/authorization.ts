@@ -1,7 +1,15 @@
 import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 
+import { ensureAccountAuthenticationAllowed } from "../../auth/account-state";
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../../database";
-import { unit, unitAccessGrant, unitAccessRestriction, unitOwnership } from "../../database/schema";
+import {
+	authEntity,
+	unit,
+	unitAccessGrant,
+	unitAccessRestriction,
+	unitOwnership,
+	users,
+} from "../../database/schema";
 import { UnitAccessRestricted, UnitNotFound, UnitPermissionForbidden } from "../../units/errors";
 import type { PlatformAuthorization } from "../platform/authorization";
 import {
@@ -11,9 +19,9 @@ import {
 	resolveUnitAccessOverride,
 	type UnitPermission,
 } from "./policy";
-import { scopeCovers, scopeKey, type UnitScope } from "./scope";
-import { profileMatchesRealmAccessSubject } from "./realm-subject";
 import { getUnitReadCondition } from "./query";
+import { profileMatchesRealmAccessSubject } from "./realm-subject";
+import { scopeCovers, scopeKey, type UnitScope } from "./scope";
 
 export type UnitAccessDecision =
 	| { readonly allowed: true; readonly source: "public" | "platform" | "owner" }
@@ -21,7 +29,7 @@ export type UnitAccessDecision =
 			readonly allowed: true;
 			readonly source: "grant";
 			readonly grantId: string;
-			readonly subjectKind: "profile" | "realm" | "authenticated";
+			readonly subjectKind: "auth" | "realm" | "authenticated";
 	  }
 	| {
 			readonly allowed: false;
@@ -31,7 +39,7 @@ export type UnitAccessDecision =
 			readonly allowed: false;
 			readonly reason: "restricted";
 			readonly restrictionId: string;
-			readonly subjectKind: "profile" | "realm";
+			readonly subjectKind: "auth" | "realm";
 	  };
 
 function active(expiresAt: typeof unitAccessGrant.expiresAt) {
@@ -51,7 +59,28 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 	constructor(
 		readonly profileId: ProfileId,
 		private readonly platform: PlatformAuthorization<ProfileId>,
+		readonly authUserId?: string,
 	) {}
+
+	async #authenticatedSelf(executor: DatabaseExecutor): Promise<boolean> {
+		if (!this.profileId || !this.authUserId) return false;
+		const [binding] = await executor
+			.select({ id: authEntity.entityId })
+			.from(authEntity)
+			.innerJoin(users, eq(users.id, authEntity.authUserId))
+			.where(
+				and(
+					eq(authEntity.authUserId, this.authUserId),
+					eq(authEntity.entityId, this.profileId),
+					eq(authEntity.state, "active"),
+					isNull(users.erasedAt),
+				),
+			)
+			.limit(1)
+			.for("share");
+		if (binding) await ensureAccountAuthenticationAllowed(this.authUserId, executor);
+		return binding !== undefined;
+	}
 
 	decide(unitId: string, permission: UnitPermission, scope: UnitScope = []) {
 		const key = `unit:${unitId}:${permission}:${scopeKey(scope)}`;
@@ -68,6 +97,9 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		permission: UnitPermission,
 		scope: UnitScope,
 	): Promise<UnitAccessDecision> {
+		await executor.execute(
+			sql`select pg_advisory_xact_lock_shared(hashtextextended(${`unit-access:${unitId}`}::text, 0))`,
+		);
 		const [record] = await executor
 			.select({
 				kind: unit.kind,
@@ -82,6 +114,13 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		if (!record || record.deletedAt) return { allowed: false, reason: "missing" };
 		if (!isUnitPermissionApplicable(record.kind, permission))
 			return { allowed: false, reason: "ungranted" };
+		if (!(await this.#authenticatedSelf(executor)))
+			return permission === "unit.read" &&
+				record.status === "published" &&
+				record.moderationStatus === "approved" &&
+				(record.visibility === "public" || record.visibility === "unlisted")
+				? { allowed: true, source: "public" }
+				: { allowed: false, reason: "anonymous" };
 
 		if (isUnitPermissionOwnerOnly(permission)) {
 			if (!this.profileId) return { allowed: false, reason: "anonymous" };
@@ -130,8 +169,10 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 						eq(unitAccessRestriction.permission, permission),
 						or(
 							and(
-								eq(unitAccessRestriction.subjectKind, "profile"),
-								eq(unitAccessRestriction.profileId, this.profileId),
+								eq(unitAccessRestriction.subjectKind, "auth"),
+								this.authUserId
+									? eq(unitAccessRestriction.authUserId, this.authUserId)
+									: sql`false`,
 							),
 							and(
 								eq(unitAccessRestriction.subjectKind, "realm"),
@@ -191,8 +232,8 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 					or(
 						eq(unitAccessGrant.subjectKind, "authenticated"),
 						and(
-							eq(unitAccessGrant.subjectKind, "profile"),
-							eq(unitAccessGrant.profileId, this.profileId),
+							eq(unitAccessGrant.subjectKind, "auth"),
+							this.authUserId ? eq(unitAccessGrant.authUserId, this.authUserId) : sql`false`,
 						),
 						and(
 							eq(unitAccessGrant.subjectKind, "realm"),
@@ -275,10 +316,11 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 	): Promise<void> {
 		const uniqueIds = [...new Set(unitIds)];
 		if (!uniqueIds.length) return;
+		const viewerId = (await this.#authenticatedSelf(database)) ? this.profileId : undefined;
 		const readable = await database
 			.select({ id: unit.id })
 			.from(unit)
-			.where(and(inArray(unit.id, uniqueIds), getUnitReadCondition(this.profileId)));
+			.where(and(inArray(unit.id, uniqueIds), getUnitReadCondition(viewerId)));
 		const readableIds = new Set(readable.map(({ id }) => id));
 		const deniedId = uniqueIds.find((id) => !readableIds.has(id));
 		if (deniedId) throw onDenied(deniedId);
@@ -309,8 +351,8 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 					or(
 						eq(unitAccessGrant.subjectKind, "authenticated"),
 						and(
-							eq(unitAccessGrant.subjectKind, "profile"),
-							eq(unitAccessGrant.profileId, this.profileId),
+							eq(unitAccessGrant.subjectKind, "auth"),
+							this.authUserId ? eq(unitAccessGrant.authUserId, this.authUserId) : sql`false`,
 						),
 						and(
 							eq(unitAccessGrant.subjectKind, "realm"),
@@ -336,11 +378,12 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 
 	async matchesActiveGrant(grantId: string, permission: UnitPermission): Promise<boolean> {
 		if (!this.profileId) return false;
+		if (!(await this.#authenticatedSelf(database))) return false;
 		if (!isUnitPermissionDelegable(permission)) return false;
 		const [grant] = await database
 			.select({
 				subjectKind: unitAccessGrant.subjectKind,
-				profileId: unitAccessGrant.profileId,
+				authUserId: unitAccessGrant.authUserId,
 				realmId: unitAccessGrant.realmId,
 				realmRelation: unitAccessGrant.realmRelation,
 				permission: unitAccessGrant.permission,
@@ -356,7 +399,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 			.limit(1);
 		if (!grant) return false;
 		if (grant.subjectKind === "authenticated") return true;
-		if (grant.subjectKind === "profile") return grant.profileId === this.profileId;
+		if (grant.subjectKind === "auth") return grant.authUserId === this.authUserId;
 		if (!grant.realmId || !grant.realmRelation) return false;
 		const [match] = await database
 			.select({ id: unit.id })

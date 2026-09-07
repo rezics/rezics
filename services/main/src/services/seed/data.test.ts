@@ -88,9 +88,10 @@ describe("seed data", () => {
 	it("uses one enforcement kind for its decision and account record", () => {
 		const startsAt = new Date("2026-07-15T12:00:00.000Z");
 		const plan = createSeedEnforcementPlan({
+			actorEntityId: "actor-entity",
 			index: 12,
-			profileId: "profile-a",
-			actorProfileId: "profile-b",
+			authUserId: "profile-a",
+			actorAuthUserId: "profile-b",
 			kind: "suspension",
 			startsAt,
 			expiresAt: null,

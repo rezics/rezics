@@ -1,17 +1,17 @@
-import type { StaticDecode } from "typebox";
-import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, exists, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
+import type { StaticDecode } from "typebox";
 
+import { DevelopmentPreviewCapability } from "@rezics/access";
 import { recordAuditEvent } from "../../audit";
 import session, { resolveIdentity } from "../../auth/session";
+import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database, type DatabaseExecutor } from "../../database";
-import { runVoteTransaction } from "../../database/vote-admission";
-import { firstUnitLocalizationTitle } from "../../units/localization";
 import {
+	entityIdentity,
 	revisionContent,
-	profile as profileTable,
 	unit,
 	unitRevision,
 	unitRevisionCreditAttribution,
@@ -19,9 +19,9 @@ import {
 	unitRevisionSlot,
 	unitRevisionTag,
 } from "../../database/schema";
+import { runVoteTransaction } from "../../database/vote-admission";
 import { createGovernanceDecision } from "../../governance/decision-service";
-import { parseJsonCursor } from "../../pagination";
-import { getUnitReadCondition } from "../../authorization/unit/query";
+import { listCurrentProfileContributionResources } from "../../history/contribution-resources";
 import {
 	canViewRestrictedRevisionFields,
 	canViewRevisionField,
@@ -31,9 +31,10 @@ import {
 	revisionVisibilityFromStorage,
 	revisionVisibilityToStorage,
 } from "../../history/visibility";
+import { parseJsonCursor } from "../../pagination";
 import {
-	getUnitRevisionSlotContent,
 	getUnitRevisionDocuments,
+	getUnitRevisionSlotContent,
 	lockUnitHistory,
 	parseUnitRevisionSlotIdentity,
 	restoreUnitRevision,
@@ -41,10 +42,9 @@ import {
 	UnitRevisionChangeTags,
 	unitRevisionDocumentsToComparisonValue,
 } from "../../units/history";
+import { firstUnitLocalizationTitle } from "../../units/localization";
 import { presentStoredRevisionPrimaryContribution } from "../../units/revision-contribution";
 import { toApiErrorResponse, VoteBackpressureResponse } from "../schema/response";
-import { DevelopmentPreviewCapability } from "@rezics/access";
-import { listCurrentProfileContributionResources } from "../../history/contribution-resources";
 import {
 	CurrentRevisionContentVisibilityForbidden,
 	InvalidHistoryCursor,
@@ -62,12 +62,12 @@ import {
 	UnitHistoryParams,
 	UnitHistoryQuery,
 	UnitHistoryResponse,
-	UnitScopedHistoryResponse,
 	UnitRevisionActionParams,
 	UnitRevisionCompareQuery,
 	UnitRevisionCompareResponse,
 	UnitRevisionParams,
 	UnitRevisionResponse,
+	UnitScopedHistoryResponse,
 } from "./schema";
 
 const RevisionCursor = t.Object(
@@ -113,7 +113,7 @@ const summarySelection = {
 	creditedEntityId: unitRevisionCreditAttribution.creditedEntityId,
 	creditRole: unitRevisionCreditAttribution.role,
 	attributionAssurance: unitRevisionCreditAttribution.assurance,
-	actorName: firstUnitLocalizationTitle(profileTable.id),
+	actorName: firstUnitLocalizationTitle(entityIdentity.id),
 	editSummary: unitRevision.editSummary,
 	minor: unitRevision.minor,
 	byteSize: unitRevision.byteSize,
@@ -140,7 +140,7 @@ function selectSummaries(executor: DatabaseExecutor = database) {
 			eq(unitRevisionCreditAttribution.revisionId, unitRevision.id),
 		)
 		.leftJoin(parentRevision, eq(parentRevision.id, unitRevision.parentRevisionId))
-		.leftJoin(profileTable, eq(profileTable.id, unitRevision.actorProfileId))
+		.leftJoin(entityIdentity, eq(entityIdentity.id, unitRevision.actorProfileId))
 		.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unitRevision.unitId));
 }
 
@@ -237,7 +237,7 @@ export default new Elysia({ prefix: "/history" })
 	.get(
 		"/contribution-resources/me",
 		{
-			access: "profile:read",
+			access: "account:read",
 			query: ContributionResourceListQuery,
 			response: {
 				[StatusCodes.OK]: ContributionResourceListResponse,
@@ -250,7 +250,7 @@ export default new Elysia({ prefix: "/history" })
 				tags: ["History"],
 			},
 		},
-		async ({ authorization, profile, query }) => {
+		async ({ authorization, entity, query }) => {
 			let includeDevelopmentPreview = false;
 			if (query.section === "zone") {
 				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
@@ -261,7 +261,7 @@ export default new Elysia({ prefix: "/history" })
 				);
 			}
 			return listCurrentProfileContributionResources({
-				profileId: profile.unitId,
+				profileId: entity.id,
 				query,
 				includeDevelopmentPreview,
 			});
@@ -436,7 +436,7 @@ export default new Elysia({ prefix: "/history" })
 			},
 			detail: { summary: "Restore Unit revision", tags: ["History"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await authorization.unit.ensure(params.unitId, "unit.history.restore");
 			const source = await findSummary(params.revisionId);
 			if (source.unitId !== params.unitId) throw new UnitRevisionNotFound();
@@ -448,7 +448,7 @@ export default new Elysia({ prefix: "/history" })
 					unitId: params.unitId,
 					sourceRevisionId: params.revisionId,
 					baseRevisionId: body.baseRevisionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					message: body.editSummary,
 					minor: body.minor,
@@ -487,7 +487,7 @@ export default new Elysia({ prefix: "/history" })
 			},
 			detail: { summary: "Undo Unit revision", tags: ["History"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await authorization.unit.ensure(params.unitId, "unit.history.restore");
 			const target = await findSummary(params.revisionId);
 			if (target.unitId !== params.unitId) throw new UnitRevisionNotFound();
@@ -504,7 +504,7 @@ export default new Elysia({ prefix: "/history" })
 					unitId: params.unitId,
 					targetRevisionId: params.revisionId,
 					baseRevisionId: body.baseRevisionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					message: body.editSummary,
 					minor: body.minor,
@@ -532,7 +532,7 @@ export default new Elysia({ prefix: "/history" })
 			},
 			detail: { summary: "Update revision visibility", tags: ["History"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			const initial = await findSummary(params.revisionId);
 			const requestedVisibility = createRevisionVisibility(
 				body.visibility.kind,
@@ -555,7 +555,7 @@ export default new Elysia({ prefix: "/history" })
 						body.visibility.kind === "visible"
 							? "revision.visibility.restore"
 							: "revision.visibility.restrict",
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					authority: { kind: "unit", unitId: current.unitId },
 					targetUnitId: current.unitId,
 					subject: { kind: "unit_revision", id: current.id },
@@ -568,7 +568,7 @@ export default new Elysia({ prefix: "/history" })
 				await recordAuditEvent(tx, {
 					category: "admin_activity",
 					outcome: "succeeded",
-					actor: { kind: "profile", profileId: profile.unitId },
+					actor: { kind: "profile", profileId: entity.id },
 					authority: { kind: "unit", id: current.unitId },
 					action: "revision.visibility.update",
 					governanceDecisionId: decision.id,
@@ -593,7 +593,7 @@ export default new Elysia({ prefix: "/history" })
 			detail: { summary: "List recent changes", tags: ["History"] },
 		},
 		async ({ query, request }) => {
-			const { profile, authorization } = await resolveIdentity(request, "unit:read");
+			const { entity, authorization } = await resolveIdentity(request, "unit:read");
 			const access = await getVisibilityAccess(authorization);
 			const scope = `recent:${query.tag ?? ""}:${query.minor ?? ""}`;
 			const cursor = decodeCursor(query.cursor, scope);
@@ -602,7 +602,7 @@ export default new Elysia({ prefix: "/history" })
 				.innerJoin(unit, eq(unit.id, unitRevision.unitId))
 				.where(
 					and(
-						getUnitReadCondition(profile?.unitId),
+						getUnitReadCondition(entity?.id),
 						cursorCondition(cursor),
 						query.minor === undefined ? undefined : eq(unitRevision.minor, query.minor),
 						revisionTagCondition(query.tag),
@@ -631,7 +631,7 @@ export default new Elysia({ prefix: "/history" })
 			detail: { summary: "List profile contributions", tags: ["History"] },
 		},
 		async ({ params, query, request }) => {
-			const { profile, authorization } = await resolveIdentity(request, "unit:read");
+			const { entity, authorization } = await resolveIdentity(request, "unit:read");
 			const access = await getVisibilityAccess(authorization);
 			const scope = `contributions:${params.profileId}:${query.tag ?? ""}:${query.minor ?? ""}`;
 			const cursor = decodeCursor(query.cursor, scope);
@@ -641,7 +641,7 @@ export default new Elysia({ prefix: "/history" })
 				.where(
 					and(
 						eq(unitRevision.actorProfileId, params.profileId),
-						getUnitReadCondition(profile?.unitId),
+						getUnitReadCondition(entity?.id),
 						cursorCondition(cursor),
 						query.minor === undefined ? undefined : eq(unitRevision.minor, query.minor),
 						revisionTagCondition(query.tag),

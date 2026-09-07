@@ -1,33 +1,34 @@
-import type { StaticDecode } from "typebox";
-import { StatusCodes } from "http-status-codes";
-import { Check } from "typebox/value";
+import { toUiLocale } from "@rezics/i18n";
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
-import { toUiLocale } from "@rezics/i18n";
+import { StatusCodes } from "http-status-codes";
+import type { StaticDecode } from "typebox";
+import { Check } from "typebox/value";
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
+import { publicEntityName } from "../../participation/presentation";
 
 import session from "../../auth/session";
+import { estimateCount } from "../../counts/contract";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
-import { estimateCount } from "../../counts/contract";
-import { firstUnitLocalizationTitle } from "../../units/localization";
 import {
+	accountPreference,
 	contentReport,
 	conversation,
+	entityIdentity,
 	notification,
 	notificationPreference,
 	notificationRecipientStat,
-	profile as profileTable,
-	profilePreference,
 	unit,
 	unitAccessInvitation,
 } from "../../database/schema";
 import type { UnitKind } from "../../database/schema/contract-values";
+import { DefaultStoredUiLocale } from "../../database/schema/contract-values";
 import { emailIntentDeliveryEnabled } from "../../email/policy";
 import i18n from "../../i18n";
-import { DefaultStoredUiLocale } from "../../database/schema/contract-values";
-import { parseJsonCursor } from "../../pagination";
 import { notificationTranslationKey } from "../../notifications/service";
+import { parseJsonCursor } from "../../pagination";
 import { getPublicCanonicalUnitSlugAddresses } from "../../units/slug-address";
 import { toApiErrorResponse } from "../schema/response";
 import { InvalidNotificationCursor, NotificationNotFound } from "./errors";
@@ -67,7 +68,7 @@ const preferenceKinds = [
 	"system",
 ] as const;
 const notificationEmailDeliveryEnabled = emailIntentDeliveryEnabled("notification");
-const notificationActor = alias(profileTable, "notification_actor");
+const notificationActor = alias(entityIdentity, "notification_actor");
 const notificationSubject = alias(unit, "notification_subject");
 
 function notificationRecipientMutationLockName(profileId: string): string {
@@ -244,8 +245,8 @@ async function hydrateNotifications(
 						and(
 							inArray(conversation.id, [...new Set(conversationIds)]),
 							or(
-								eq(conversation.participantLowProfileId, profileId),
-								eq(conversation.participantHighProfileId, profileId),
+								eq(conversation.participantLowAuthUserId, profileId),
+								eq(conversation.participantHighAuthUserId, profileId),
 							),
 						),
 					)
@@ -257,7 +258,7 @@ async function hydrateNotifications(
 					.where(
 						and(
 							inArray(contentReport.id, [...new Set(reportIds)]),
-							eq(contentReport.reporterProfileId, profileId),
+							eq(selfAuthUserIdForEntity(contentReport.reporterProfileId), profileId),
 						),
 					)
 			: Promise.resolve([]),
@@ -268,7 +269,7 @@ async function hydrateNotifications(
 					.where(
 						and(
 							inArray(unitAccessInvitation.id, [...new Set(invitationIds)]),
-							eq(unitAccessInvitation.invitedProfileId, profileId),
+							eq(unitAccessInvitation.invitedAuthUserId, profileId),
 						),
 					)
 			: Promise.resolve([]),
@@ -383,7 +384,7 @@ function notificationSelection() {
 		id: notification.id,
 		kind: notification.kind,
 		actorProfileId: notification.actorProfileId,
-		actorName: firstUnitLocalizationTitle(notificationActor.id),
+		actorName: publicEntityName(notificationActor.id),
 		subjectUnitId: notification.subjectUnitId,
 		subjectUnitKind: notificationSubject.kind,
 		payload: notification.payload,
@@ -406,9 +407,9 @@ const afterReadThrough = or(
 
 async function loadRecipientLocale(profileId: string) {
 	const [preference] = await database
-		.select({ interfaceLocale: profilePreference.interfaceLocale })
-		.from(profilePreference)
-		.where(eq(profilePreference.profileId, profileId))
+		.select({ interfaceLocale: accountPreference.interfaceLocale })
+		.from(accountPreference)
+		.where(eq(accountPreference.authUserId, profileId))
 		.limit(1);
 	return toUiLocale(preference?.interfaceLocale ?? DefaultStoredUiLocale);
 }
@@ -427,19 +428,19 @@ export default new Elysia({ prefix: "/notifications" })
 			},
 			detail: { summary: "Poll notifications with a cursor", tags: ["Notifications"] },
 		},
-		async ({ i18n, profile, query }) => {
+		async ({ i18n, user, query }) => {
 			const unreadOnly = Boolean(query.unreadOnly);
 			const direction = query.direction ?? "before";
 			const cursor = decodeCursor(query.cursor, unreadOnly);
 			const [locale, unread] = await Promise.all([
-				loadRecipientLocale(profile.unitId),
+				loadRecipientLocale(user.id),
 				database
 					.select({
 						value: notificationRecipientStat.unreadCount,
 						updatedAt: notificationRecipientStat.updatedAt,
 					})
 					.from(notificationRecipientStat)
-					.where(eq(notificationRecipientStat.profileId, profile.unitId))
+					.where(eq(notificationRecipientStat.authUserId, user.id))
 					.limit(1)
 					.then((rows) => rows[0]),
 			]);
@@ -463,11 +464,11 @@ export default new Elysia({ prefix: "/notifications" })
 				.leftJoin(notificationSubject, eq(notificationSubject.id, notification.subjectUnitId))
 				.leftJoin(
 					notificationRecipientStat,
-					eq(notificationRecipientStat.profileId, notification.recipientProfileId),
+					eq(notificationRecipientStat.authUserId, notification.recipientAuthUserId),
 				)
 				.where(
 					and(
-						eq(notification.recipientProfileId, profile.unitId),
+						eq(notification.recipientAuthUserId, user.id),
 						eq(notification.inAppVisible, true),
 						unreadOnly ? and(isNull(notification.readAt), afterReadThrough) : undefined,
 						tupleCondition,
@@ -481,7 +482,7 @@ export default new Elysia({ prefix: "/notifications" })
 			const page = candidates.slice(0, limit);
 			const items = await hydrateNotifications(
 				page,
-				profile.unitId,
+				user.id,
 				(kind, payload) => translations[notificationTranslationKey(kind, payload)],
 			);
 			const newest = direction === "after" ? page.at(-1) : page[0];
@@ -519,14 +520,14 @@ export default new Elysia({ prefix: "/notifications" })
 			response: { [StatusCodes.OK]: UnreadCountResponse },
 			detail: { summary: "Get unread notification count", tags: ["Notifications"] },
 		},
-		async ({ profile }) => {
+		async ({ user }) => {
 			const [row] = await database
 				.select({
 					value: notificationRecipientStat.unreadCount,
 					updatedAt: notificationRecipientStat.updatedAt,
 				})
 				.from(notificationRecipientStat)
-				.where(eq(notificationRecipientStat.profileId, profile.unitId))
+				.where(eq(notificationRecipientStat.authUserId, user.id))
 				.limit(1);
 			return {
 				count: estimateCount(
@@ -547,8 +548,8 @@ export default new Elysia({ prefix: "/notifications" })
 			},
 			detail: { summary: "Get one notification", tags: ["Notifications"] },
 		},
-		async ({ i18n, profile, params }) => {
-			const locale = await loadRecipientLocale(profile.unitId);
+		async ({ i18n, user, params }) => {
+			const locale = await loadRecipientLocale(user.id);
 			const { t: translations } = await i18n.getTranslation("notifications", [locale]);
 			const [candidate] = await database
 				.select(notificationSelection())
@@ -557,12 +558,12 @@ export default new Elysia({ prefix: "/notifications" })
 				.leftJoin(notificationSubject, eq(notificationSubject.id, notification.subjectUnitId))
 				.leftJoin(
 					notificationRecipientStat,
-					eq(notificationRecipientStat.profileId, notification.recipientProfileId),
+					eq(notificationRecipientStat.authUserId, notification.recipientAuthUserId),
 				)
 				.where(
 					and(
 						eq(notification.id, params.notificationId),
-						eq(notification.recipientProfileId, profile.unitId),
+						eq(notification.recipientAuthUserId, user.id),
 						eq(notification.inAppVisible, true),
 					),
 				)
@@ -570,7 +571,7 @@ export default new Elysia({ prefix: "/notifications" })
 			if (!candidate) throw new NotificationNotFound();
 			const [item] = await hydrateNotifications(
 				[candidate],
-				profile.unitId,
+				user.id,
 				(kind, payload) => translations[notificationTranslationKey(kind, payload)],
 			);
 			if (!item) throw new NotificationNotFound();
@@ -588,16 +589,16 @@ export default new Elysia({ prefix: "/notifications" })
 			},
 			detail: { summary: "Mark notifications read", tags: ["Notifications"] },
 		},
-		async ({ profile, authorization, body }) => {
-			await authorization.unit.ensureCanUpdate(profile.unitId, [["notification-preferences"]]);
+		async ({ user, authorization, body }) => {
+			await authorization.unit.ensureCanUpdate(user.id, [["notification-preferences"]]);
 			const through = decodeCursor(body.through, false);
 			return database.transaction(async (tx) => {
 				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${notificationRecipientMutationLockName(profile.unitId)}::text, 0))`,
+					sql`select pg_advisory_xact_lock(hashtextextended(${notificationRecipientMutationLockName(user.id)}::text, 0))`,
 				);
 				await tx
 					.insert(notificationRecipientStat)
-					.values({ profileId: profile.unitId })
+					.values({ authUserId: user.id })
 					.onConflictDoNothing();
 				const [state] = await tx
 					.select({
@@ -606,7 +607,7 @@ export default new Elysia({ prefix: "/notifications" })
 						readThroughAt: notificationRecipientStat.readThroughAt,
 					})
 					.from(notificationRecipientStat)
-					.where(eq(notificationRecipientStat.profileId, profile.unitId))
+					.where(eq(notificationRecipientStat.authUserId, user.id))
 					.for("update")
 					.limit(1);
 				if (!state) throw new Error("Notification recipient state was not initialized");
@@ -614,10 +615,7 @@ export default new Elysia({ prefix: "/notifications" })
 					.select({ id: notification.id, createdAt: notification.createdAt })
 					.from(notification)
 					.where(
-						and(
-							eq(notification.recipientProfileId, profile.unitId),
-							eq(notification.inAppVisible, true),
-						),
+						and(eq(notification.recipientAuthUserId, user.id), eq(notification.inAppVisible, true)),
 					)
 					.orderBy(desc(notification.createdAt), desc(notification.id))
 					.limit(1);
@@ -630,7 +628,7 @@ export default new Elysia({ prefix: "/notifications" })
 							and(
 								eq(notification.id, through.id),
 								eq(notification.createdAt, through.date),
-								eq(notification.recipientProfileId, profile.unitId),
+								eq(notification.recipientAuthUserId, user.id),
 								eq(notification.inAppVisible, true),
 							),
 						)
@@ -643,7 +641,7 @@ export default new Elysia({ prefix: "/notifications" })
 						await tx
 							.update(notificationRecipientStat)
 							.set({ unreadCount: 0n, updatedAt: sql`clock_timestamp()` })
-							.where(eq(notificationRecipientStat.profileId, profile.unitId));
+							.where(eq(notificationRecipientStat.authUserId, user.id));
 					return { updated: false, readAt: state.readThroughAt };
 				}
 				const existing =
@@ -662,7 +660,7 @@ export default new Elysia({ prefix: "/notifications" })
 						...(reachesNewest ? { unreadCount: 0n } : {}),
 						updatedAt: sql`clock_timestamp()`,
 					})
-					.where(eq(notificationRecipientStat.profileId, profile.unitId))
+					.where(eq(notificationRecipientStat.authUserId, user.id))
 					.returning({ readAt: notificationRecipientStat.readThroughAt });
 				if (!updated) throw new Error("Notification read-through update returned no row");
 				return { updated: true, readAt: updated.readAt };
@@ -680,7 +678,7 @@ export default new Elysia({ prefix: "/notifications" })
 			},
 			detail: { summary: "Mark one notification read", tags: ["Notifications"] },
 		},
-		async ({ profile, params }) =>
+		async ({ user, params }) =>
 			database.transaction(async (tx) => {
 				const [current] = await tx
 					.select({
@@ -692,7 +690,7 @@ export default new Elysia({ prefix: "/notifications" })
 					.where(
 						and(
 							eq(notification.id, params.notificationId),
-							eq(notification.recipientProfileId, profile.unitId),
+							eq(notification.recipientAuthUserId, user.id),
 							eq(notification.inAppVisible, true),
 						),
 					)
@@ -701,7 +699,7 @@ export default new Elysia({ prefix: "/notifications" })
 				if (!current) throw new NotificationNotFound();
 				await tx
 					.insert(notificationRecipientStat)
-					.values({ profileId: profile.unitId })
+					.values({ authUserId: user.id })
 					.onConflictDoNothing();
 				const [state] = await tx
 					.select({
@@ -710,7 +708,7 @@ export default new Elysia({ prefix: "/notifications" })
 						readThroughAt: notificationRecipientStat.readThroughAt,
 					})
 					.from(notificationRecipientStat)
-					.where(eq(notificationRecipientStat.profileId, profile.unitId))
+					.where(eq(notificationRecipientStat.authUserId, user.id))
 					.for("update")
 					.limit(1);
 				if (!state) throw new Error("Notification recipient state was not initialized");
@@ -739,11 +737,11 @@ export default new Elysia({ prefix: "/notifications" })
 			response: { [StatusCodes.OK]: NotificationPreferencesResponse },
 			detail: { summary: "Get notification preferences", tags: ["Notifications"] },
 		},
-		async ({ profile }) => {
+		async ({ user }) => {
 			const rows = await database
 				.select()
 				.from(notificationPreference)
-				.where(eq(notificationPreference.profileId, profile.unitId));
+				.where(eq(notificationPreference.authUserId, user.id));
 			return {
 				items: preferenceKinds.map((kind) => ({
 					kind,
@@ -763,18 +761,18 @@ export default new Elysia({ prefix: "/notifications" })
 			response: { [StatusCodes.OK]: NotificationPreferencesResponse },
 			detail: { summary: "Update notification preferences", tags: ["Notifications"] },
 		},
-		async ({ profile, body }) => {
+		async ({ user, body }) => {
 			await database.transaction(async (tx) => {
 				for (const item of body.items)
 					await tx
 						.insert(notificationPreference)
 						.values({
-							profileId: profile.unitId,
+							authUserId: user.id,
 							...item,
 							email: notificationEmailDeliveryEnabled && item.email,
 						})
 						.onConflictDoUpdate({
-							target: [notificationPreference.profileId, notificationPreference.kind],
+							target: [notificationPreference.authUserId, notificationPreference.kind],
 							set: {
 								inApp: item.inApp,
 								email: notificationEmailDeliveryEnabled && item.email,

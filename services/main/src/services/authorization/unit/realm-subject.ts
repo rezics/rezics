@@ -1,5 +1,6 @@
 import { and, eq, exists, isNull, not, or, sql, type SQL, type SQLWrapper } from "drizzle-orm";
 import { alias, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
 import type { DatabaseExecutor } from "../../database";
 import {
@@ -81,8 +82,8 @@ export function profileCanManageRealmAccess(
 					eq(managerRestriction.unitId, realmId),
 					eq(managerRestriction.permission, "unit.access.manage"),
 					sql`cardinality(${managerRestriction.scope}) = 0`,
-					eq(managerRestriction.subjectKind, "profile"),
-					eq(managerRestriction.profileId, profileId),
+					eq(managerRestriction.subjectKind, "auth"),
+					eq(managerRestriction.authUserId, selfAuthUserIdForEntity(profileId)),
 					isNull(managerRestriction.revokedAt),
 					or(isNull(managerRestriction.expiresAt), sql`${managerRestriction.expiresAt} > now()`),
 				),
@@ -128,7 +129,10 @@ export function profileCanManageRealmAccess(
 					isNull(managerGrant.revokedAt),
 					or(isNull(managerGrant.expiresAt), sql`${managerGrant.expiresAt} > now()`),
 					or(
-						and(eq(managerGrant.subjectKind, "profile"), eq(managerGrant.profileId, profileId)),
+						and(
+							eq(managerGrant.subjectKind, "auth"),
+							eq(managerGrant.authUserId, selfAuthUserIdForEntity(profileId)),
+						),
 						and(
 							eq(managerGrant.subjectKind, "realm"),
 							eq(managerGrant.realmRelation, "member"),

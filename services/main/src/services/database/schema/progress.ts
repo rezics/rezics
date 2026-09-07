@@ -14,18 +14,8 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 
+import { users } from "./auth";
 import { pgTable } from "./base";
-import {
-	type ProgressCurrentBasis,
-	ProgressCurrentBasisValues,
-	type ProgressDatePrecision,
-	ProgressDatePrecisionValues,
-	DefaultResourceVisibility,
-	type ProgressEntryKind,
-	ProgressEntryKindValues,
-	ProgressStatusValues,
-	toEnumValues,
-} from "./contract-values";
 import {
 	createCreatedAtColumn,
 	createFractionalIndexPositionByteLengthConstraint,
@@ -36,23 +26,33 @@ import {
 } from "./columns";
 import { contentStructureNode } from "./content-structure";
 import { contentStructureRevision } from "./content-structure-history";
-import { profile } from "./profile";
-import { resourceVisibility, unit } from "./unit";
+import {
+	DefaultResourceVisibility,
+	type ProgressCurrentBasis,
+	ProgressCurrentBasisValues,
+	type ProgressDatePrecision,
+	ProgressDatePrecisionValues,
+	type ProgressEntryKind,
+	ProgressEntryKindValues,
+	ProgressStatusValues,
+	toEnumValues,
+} from "./contract-values";
 import { post } from "./post";
+import { resourceVisibility, unit } from "./unit";
 
 export const progressStatus = pgEnum("progress_status", toEnumValues(ProgressStatusValues));
 
 export const contentStructureNodeProgress = pgTable(
 	"content_structure_node_progress",
 	{
-		profileId: uuid()
+		authUserId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		nodeId: uuid().notNull(),
 		completedAt: createTimestampMsColumn().defaultNow().notNull(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.profileId, table.nodeId] }),
+		primaryKey({ columns: [table.authUserId, table.nodeId] }),
 		foreignKey({
 			columns: [table.nodeId],
 			foreignColumns: [contentStructureNode.id],
@@ -73,9 +73,9 @@ export const unitProgressEntry = pgTable(
 	"unit_progress_entry",
 	{
 		id: createUuidv7PrimaryKey(),
-		profileId: uuid()
+		authUserId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
@@ -94,7 +94,11 @@ export const unitProgressEntry = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		unique("unit_progress_entry_id_profile_unit_key").on(table.id, table.profileId, table.unitId),
+		unique("unit_progress_entry_id_auth_user_unit_key").on(
+			table.id,
+			table.authUserId,
+			table.unitId,
+		),
 		foreignKey({
 			columns: [table.contentStructureNodeId, table.unitId],
 			foreignColumns: [contentStructureNode.id, contentStructureNode.ownerUnitId],
@@ -105,9 +109,9 @@ export const unitProgressEntry = pgTable(
 			foreignColumns: [contentStructureRevision.id],
 			name: "unit_progress_entry_content_structure_revision_fkey",
 		}).onDelete("restrict"),
-		index("unit_progress_entry_profile_unit_sort_idx")
+		index("unit_progress_entry_auth_user_unit_sort_idx")
 			.on(
-				table.profileId,
+				table.authUserId,
 				table.unitId,
 				sql`coalesce(${table.occurredAt}, ${table.createdAt}) desc`,
 				table.createdAt.desc(),
@@ -115,9 +119,9 @@ export const unitProgressEntry = pgTable(
 			)
 			.where(sql`${table.deletedAt} is null`),
 		index("unit_progress_entry_unit_id_merge_idx").on(table.unitId, table.id),
-		index("unit_progress_entry_profile_unit_status_sort_idx")
+		index("unit_progress_entry_auth_user_unit_status_sort_idx")
 			.on(
-				table.profileId,
+				table.authUserId,
 				table.unitId,
 				table.status,
 				sql`coalesce(${table.occurredAt}, ${table.createdAt}) desc`,
@@ -126,8 +130,8 @@ export const unitProgressEntry = pgTable(
 			)
 			.where(sql`${table.deletedAt} is null`),
 		index("unit_progress_entry_unit_idx").on(table.unitId),
-		index("unit_progress_entry_profile_unit_created_idx")
-			.on(table.profileId, table.unitId, table.createdAt.desc())
+		index("unit_progress_entry_auth_user_unit_created_idx")
+			.on(table.authUserId, table.unitId, table.createdAt.desc())
 			.where(sql`${table.deletedAt} is null`),
 		index("unit_progress_entry_content_structure_node_idx").on(table.contentStructureNodeId),
 		index("unit_progress_entry_content_structure_revision_idx").on(
@@ -162,9 +166,9 @@ export const unitProgressEntry = pgTable(
 export const unitProgress = pgTable(
 	"unit_progress",
 	{
-		profileId: uuid()
+		authUserId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
@@ -183,7 +187,7 @@ export const unitProgress = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.profileId, table.unitId] }),
+		primaryKey({ columns: [table.authUserId, table.unitId] }),
 		foreignKey({
 			columns: [table.lastContentStructureNodeId, table.unitId],
 			foreignColumns: [contentStructureNode.id, contentStructureNode.ownerUnitId],
@@ -195,11 +199,11 @@ export const unitProgress = pgTable(
 			name: "unit_progress_current_entry_fkey",
 		}).onDelete("set null"),
 		index("unit_progress_unit_status_idx").on(table.unitId, table.status),
-		index("unit_progress_profile_seen_idx")
-			.on(table.profileId, table.lastSeenAt.desc(), table.unitId)
+		index("unit_progress_auth_user_seen_idx")
+			.on(table.authUserId, table.lastSeenAt.desc(), table.unitId)
 			.where(sql`${table.deletedAt} is null`),
-		index("unit_progress_public_profile_seen_idx")
-			.on(table.profileId, table.lastSeenAt.desc(), table.unitId)
+		index("unit_progress_public_auth_user_seen_idx")
+			.on(table.authUserId, table.lastSeenAt.desc(), table.unitId)
 			.where(sql`${table.deletedAt} is null and ${table.visibility} = 'public'`),
 		index("unit_progress_last_content_structure_node_idx").on(table.lastContentStructureNodeId),
 		index("unit_progress_current_entry_idx").on(table.currentEntryId),

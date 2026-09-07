@@ -4,6 +4,7 @@ export interface AuditRequestContext {
 	readonly requestId: string;
 	readonly credentialKind?: "session" | "api_token";
 	readonly credentialId?: string;
+	readonly authUserId?: string;
 }
 
 const auditRequestContext = new AsyncLocalStorage<AuditRequestContext>();
@@ -24,7 +25,7 @@ export function getAuditRequestContext(): AuditRequestContext | undefined {
 }
 
 export function setAuditCredentialContext(
-	credential: Pick<AuditRequestContext, "credentialKind" | "credentialId">,
+	credential: Pick<AuditRequestContext, "credentialKind" | "credentialId" | "authUserId">,
 ): void {
 	const current = auditRequestContext.getStore();
 	if (current) auditRequestContext.enterWith({ ...current, ...credential });

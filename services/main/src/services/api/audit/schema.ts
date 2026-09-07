@@ -1,13 +1,13 @@
+import { t } from "elysia";
 import {
 	AuditAuthorityKindValues,
 	AuditCredentialKindValues,
 	AuditEventCategoryValues,
 	AuditEventOutcomeValues,
 } from "../../audit";
-import { t } from "elysia";
 
-import { DateTime, Uuid } from "../schema";
 import { AuditEventSchemaVersion } from "../../database/schema";
+import { DateTime, Uuid } from "../schema";
 
 export const AuditEventsQuery = t.Object(
 	{
@@ -30,7 +30,7 @@ export const AuditEventResponse = t.Object({
 	category: t.UnionEnum(AuditEventCategoryValues),
 	outcome: t.UnionEnum(AuditEventOutcomeValues),
 	actor: t.Object({
-		kind: t.UnionEnum(["profile", "system"] as const),
+		kind: t.UnionEnum(["profile", "auth", "system"] as const),
 		profileId: t.Nullable(Uuid),
 		profileName: t.Nullable(t.String()),
 		credentialKind: t.UnionEnum(AuditCredentialKindValues),

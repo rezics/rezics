@@ -1,27 +1,78 @@
 import { DevelopmentPreviewCapability, RealmUnitCreatePermissionValues } from "@rezics/access";
 import type { ContentLanguage } from "@rezics/i18n";
-import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, gt, inArray, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
 
 import { recordAuditEvent as appendAuditEvent } from "../../audit";
 import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
 import { RealmRulesAcceptanceRequired } from "../../authorization/errors";
-import { getUnitReadCondition } from "../../authorization/unit/query";
 import {
 	isRealmJoinable,
 	isRealmVisible,
 	type RealmCapability,
 } from "../../authorization/realm/policy";
-import { database } from "../../database";
-import { runVoteTransaction } from "../../database/vote-admission";
-import { toSafeInteger } from "../../database/integer";
+import { getUnitReadCondition } from "../../authorization/unit/query";
 import { ContentStructureSnapshotSchema } from "../../content-structure/contracts";
 import { createContentStructureHistory } from "../../content-structure/history";
 import { saveRealmTaxonomyDraft } from "../../content-structure/realm-taxonomy-draft";
+import { getContentStructureRevision } from "../../content-structure/service";
+import type { DatabaseTransaction } from "../../database";
+import { database } from "../../database";
+import { toSafeInteger } from "../../database/integer";
+import {
+	ActiveContentReviewCaseStateValues,
+	contentGovernanceAction,
+	contentReport,
+	contentReportReferral,
+	contentReviewCase,
+	contentReviewCaseReportCounter,
+	contentStructure,
+	contentStructureNode,
+	entityIdentity,
+	governanceDecisionRule,
+	post,
+	realm,
+	realmMember,
+	realmPin,
+	realmRule,
+	realmRuleAcceptance,
+	realmRuleRevision,
+	realmScoreContext,
+	realmStat,
+	realmTagContext,
+	realmTagJudgment,
+	realmTagJudgmentStat,
+	realmUnit,
+	realmUnitTag,
+	tag,
+	unit,
+	unitAccessGrant,
+	unitFollow,
+	unitLocalization,
+	unitOwnership,
+	unitRevisionHead,
+} from "../../database/schema";
+import {
+	RealmScoreContextPostKindValues,
+	RealmUnitStatusValues,
+} from "../../database/schema/contract-values";
+import { runVoteTransaction } from "../../database/vote-admission";
+import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
+import { createNotification } from "../../notifications/service";
 import { fractionalPositionBetween } from "../../ordering/position";
 import { decodeCursor, encodeCursor } from "../../pagination";
+import { assertWikiPostWriteDocument, createWikiPost } from "../../posts/wiki";
+import { publishRealmRuleRevision } from "../../realms/rule-publication";
+import { findRealmMembership, getCurrentRealmRules } from "../../realms/service";
+import { resolveRecommendationViewer } from "../../recommendations/context";
+import { applyInitialTags } from "../../tags/initial-applications";
+import { listRealmVotedTags } from "../../tags/service";
+import { presentAvatar } from "../../units/avatar";
+import { insertUnit } from "../../units/create";
+import { UnitNotFound } from "../../units/errors";
+import { recordUnitRevision } from "../../units/history";
 import {
 	avatarReferenceFromColumns,
 	firstUnitLocalizationTitle,
@@ -36,57 +87,28 @@ import {
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
-import {
-	contentStructure,
-	contentStructureNode,
-	ActiveContentReviewCaseStateValues,
-	contentGovernanceAction,
-	governanceDecisionRule,
-	contentReport,
-	contentReportReferral,
-	contentReviewCase,
-	contentReviewCaseReportCounter,
-	post,
-	profile as profileTable,
-	realm,
-	realmStat,
-	realmUnit,
-	realmMember,
-	realmPin,
-	realmRule,
-	realmRuleAcceptance,
-	realmRuleRevision,
-	realmScoreContext,
-	realmTagContext,
-	realmTagJudgment,
-	realmTagJudgmentStat,
-	realmUnitTag,
-	tag,
-	unitFollow,
-	unit,
-	unitAccessGrant,
-	unitOwnership,
-	unitLocalization,
-	unitRevisionHead,
-} from "../../database/schema";
-import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
-import { createNotification } from "../../notifications/service";
-import { findRealmMembership, getCurrentRealmRules } from "../../realms/service";
-import { publishRealmRuleRevision } from "../../realms/rule-publication";
-import { listRealmVotedTags } from "../../tags/service";
-import { applyInitialTags } from "../../tags/initial-applications";
-import type { DatabaseTransaction } from "../../database";
-import { recordUnitRevision } from "../../units/history";
-import { insertUnit } from "../../units/create";
-import { transitionUnitStatus } from "../../units/status";
-import { toUnitVisibilityUpdate } from "../../units/visibility-update";
+import { presentImageAsset } from "../../units/service";
 import {
 	getPublicCanonicalUnitSlugAddress,
 	getPublicCanonicalUnitSlugAddresses,
+	replaceRealmSlugAddress,
 } from "../../units/slug-address";
+import { transitionUnitStatus } from "../../units/status";
+import { toUnitVisibilityUpdate } from "../../units/visibility-update";
+import { ValidationError } from "../errors";
+import { hydrateFeedItems } from "../feed";
+import { FeedContentKindValues } from "../feed/schema";
+import { getRealmUnitModerationCommands } from "../governance/content-governance-contract";
+import {
+	executeAuthorizedContentGovernanceAction,
+	loadContentReviewCaseForAction,
+} from "../governance/content-governance-service";
+import { ContentGovernanceActionNoEffect as ModerationActionNoEffect } from "../governance/errors";
+import { type CreateContentGovernanceActionBody } from "../governance/schema";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
-import { presentImageAsset } from "../../units/service";
-import { presentAvatar } from "../../units/avatar";
+import { PostNotFound } from "../posts/errors";
+import { contentReviewCaseAdvisoryLock } from "../reports/advisory-lock";
+import { RevisionContextBody } from "../schema";
 import {
 	IdResponse,
 	MembershipResponse,
@@ -102,82 +124,20 @@ import {
 	ScoreContextResponse,
 } from "../schema/action-response";
 import {
-	toApiErrorResponse,
-	VoteBackpressureResponse,
 	RealmDetailResponse,
 	RealmListResponse,
 	RealmTaxonomyResponse,
 	SaveRealmTaxonomyDraftResponse,
+	VoteBackpressureResponse,
+	toApiErrorResponse,
 	toPortableTextResponse,
 } from "../schema/response";
-import { contentReviewCaseAdvisoryLock } from "../reports/advisory-lock";
 import {
-	AcknowledgeRealmRulesBody,
-	ApplyRealmPolicyTagBody,
-	CreateRealmBody,
-	CreateRealmTagContextBody,
-	CreateRealmWikiBody,
-	CreateRealmPinBody,
-	ListRealmTagContextsQuery,
-	ListRealmMembersQuery,
-	ListRealmUnitsQuery,
-	ListRealmsQuery,
-	MoveRealmPinsBody,
-	ModerateRealmUnitBody,
-	ReviewRealmUnitBody,
-	UpdateRealmRulesBody,
-	RealmUnitParams,
-	RealmTagContextParams,
-	RealmTagVoteParams,
-	PutRealmTagContextBody,
-	RealmTagVoteBody,
-	RealmTagContextResponse,
-	RealmTagContextListResponse,
-	RealmTagVotingResponse,
-	RealmTagVoteResponse,
-	RealmPolicyTagResponse,
-	RealmUnitListResponse,
-	RealmUnitModerationQuery,
-	RealmUnitModerationResponse,
-	RealmUnitHistoryQuery,
-	RealmUnitModerationActionResponse,
-	RealmUnitReviewResponse,
-	RealmUnitModerationHistoryResponse,
-	RealmMemberParams,
-	RealmParams,
-	RealmPinsQuery,
-	RealmDetailQuery,
-	RealmTaxonomyQuery,
-	SaveRealmTaxonomyDraftBody,
-	RealmRuleRevisionParams,
-	RealmRulesQuery,
-	SetRealmScoreContextBody,
-	RealmPinParams,
-	RemoveRealmPinQuery,
-	RealmPagesResponse,
-	UpdateRealmBody,
-	UpdateRealmTagVotingBody,
-	UpdateRealmPagesBody,
-	UpdateRealmMemberBody,
-} from "./schema";
+	ReplacePublicUnitSlugAddressBody,
+	SlugAddressMutationResponse,
+} from "../slug-addresses/schema";
+import { RealmUnitTagVoteListQuery, RealmUnitTagVoteListResponse } from "../tags/schema";
 import {
-	decodeRealmUnitModerationCursor,
-	encodeRealmUnitModerationCursor,
-} from "./moderation-pagination";
-import { requireCurrentRealmRuleRevision } from "./rule-acknowledgement";
-import {
-	executeAuthorizedContentGovernanceAction,
-	loadContentReviewCaseForAction,
-} from "../governance/content-governance-service";
-import { getRealmUnitModerationCommands } from "../governance/content-governance-contract";
-import { type CreateContentGovernanceActionBody } from "../governance/schema";
-import { ContentGovernanceActionNoEffect as ModerationActionNoEffect } from "../governance/errors";
-import {
-	RealmScoreContextPostKindValues,
-	RealmUnitStatusValues,
-} from "../../database/schema/contract-values";
-import {
-	RealmUnitNotFound,
 	RealmMemberNotFound,
 	RealmMembershipNotFound,
 	RealmNotFound,
@@ -185,30 +145,70 @@ import {
 	RealmRuleRevisionChanged,
 	RealmScoreContextPostKindInvalid,
 	RealmScoreContextPostNotMounted,
-	RealmTagContextNotFound,
 	RealmTagContextAlreadyExists,
+	RealmTagContextNotFound,
 	RealmTagContextPostAlreadyUsed,
 	RealmTagContextPostNotMounted,
 	RealmTagContextRequired,
 	RealmTagSelfReferenceForbidden,
 	RealmTagVotingDisabled,
+	RealmUnitNotFound,
 } from "./errors";
-import { PostNotFound } from "../posts/errors";
-import { UnitNotFound } from "../../units/errors";
 import {
-	ReplacePublicUnitSlugAddressBody,
-	SlugAddressMutationResponse,
-} from "../slug-addresses/schema";
-import { replaceRealmSlugAddress } from "../../units/slug-address";
-import { resolveRecommendationViewer } from "../../recommendations/context";
-import { hydrateFeedItems } from "../feed";
-import { FeedContentKindValues } from "../feed/schema";
-import { assertWikiPostWriteDocument, createWikiPost } from "../../posts/wiki";
-import { getContentStructureRevision } from "../../content-structure/service";
-import { RealmUnitTagVoteListQuery, RealmUnitTagVoteListResponse } from "../tags/schema";
-import { ValidationError } from "../errors";
-import { RevisionContextBody } from "../schema";
+	decodeRealmUnitModerationCursor,
+	encodeRealmUnitModerationCursor,
+} from "./moderation-pagination";
 import { planRealmPinMove } from "./pin-ordering";
+import { requireCurrentRealmRuleRevision } from "./rule-acknowledgement";
+import {
+	AcknowledgeRealmRulesBody,
+	ApplyRealmPolicyTagBody,
+	CreateRealmBody,
+	CreateRealmPinBody,
+	CreateRealmTagContextBody,
+	CreateRealmWikiBody,
+	ListRealmMembersQuery,
+	ListRealmTagContextsQuery,
+	ListRealmUnitsQuery,
+	ListRealmsQuery,
+	ModerateRealmUnitBody,
+	MoveRealmPinsBody,
+	PutRealmTagContextBody,
+	RealmDetailQuery,
+	RealmMemberParams,
+	RealmPagesResponse,
+	RealmParams,
+	RealmPinParams,
+	RealmPinsQuery,
+	RealmPolicyTagResponse,
+	RealmRuleRevisionParams,
+	RealmRulesQuery,
+	RealmTagContextListResponse,
+	RealmTagContextParams,
+	RealmTagContextResponse,
+	RealmTagVoteBody,
+	RealmTagVoteParams,
+	RealmTagVoteResponse,
+	RealmTagVotingResponse,
+	RealmTaxonomyQuery,
+	RealmUnitHistoryQuery,
+	RealmUnitListResponse,
+	RealmUnitModerationActionResponse,
+	RealmUnitModerationHistoryResponse,
+	RealmUnitModerationQuery,
+	RealmUnitModerationResponse,
+	RealmUnitParams,
+	RealmUnitReviewResponse,
+	RemoveRealmPinQuery,
+	ReviewRealmUnitBody,
+	SaveRealmTaxonomyDraftBody,
+	SetRealmScoreContextBody,
+	UpdateRealmBody,
+	UpdateRealmMemberBody,
+	UpdateRealmPagesBody,
+	UpdateRealmRulesBody,
+	UpdateRealmTagVotingBody,
+} from "./schema";
 
 function ensureWikiPostWriteDocument(value: unknown): void {
 	try {
@@ -302,8 +302,8 @@ async function ensureRealmVisible(realmId: string, request: Request) {
 		.limit(1);
 	if (!record) throw new RealmNotFound();
 	const identity = await resolveIdentity(request, "realm:read");
-	const { profile } = identity;
-	const membership = profile ? await findRealmMembership(realmId, profile.unitId) : undefined;
+	const { entity } = identity;
+	const membership = entity ? await findRealmMembership(realmId, entity.id) : undefined;
 	if (!isRealmVisible(record.status, record.visibility, membership?.state))
 		throw new RealmNotFound();
 	return identity;
@@ -663,13 +663,13 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Create Realm", tags: ["Realms"] },
 		},
-		async ({ profile, body }) => {
+		async ({ entity, body }) => {
 			const id = await runVoteTransaction(
 				{ family: "unit_tag", authority: "global" },
 				async (tx) => {
 					await ensureImageAssetsAttachable(
 						tx,
-						profile.unitId,
+						entity.id,
 						unitLocalizationImageAssetReferences(body.localization),
 					);
 					const created = await insertUnit(tx, {
@@ -677,7 +677,7 @@ export default new Elysia({ prefix: "/realms" })
 						status: "published",
 						visibility: body.visibility,
 						publishedAt: new Date(),
-						statusActor: { kind: "profile", profileId: profile.unitId },
+						statusActor: { kind: "profile", profileId: entity.id },
 					});
 					await tx.insert(realm).values({ id: created.id, joinPolicy: body.joinPolicy });
 					const [taxonomy] = await tx
@@ -691,12 +691,12 @@ export default new Elysia({ prefix: "/realms" })
 					});
 					await tx.insert(unitOwnership).values({
 						unitId: created.id,
-						profileId: profile.unitId,
-						assignedByProfileId: profile.unitId,
+						profileId: entity.id,
+						assignedByProfileId: entity.id,
 					});
 					await tx.insert(realmMember).values({
 						realmId: created.id,
-						profileId: profile.unitId,
+						profileId: entity.id,
 					});
 					await tx.insert(unitAccessGrant).values(
 						(["unit.read", "realm.contribute", ...RealmUnitCreatePermissionValues] as const).map(
@@ -707,17 +707,17 @@ export default new Elysia({ prefix: "/realms" })
 								realmRelation: "member" as const,
 								permission,
 								scope: [],
-								grantedByProfileId: profile.unitId,
+								grantedByProfileId: entity.id,
 							}),
 						),
 					);
 					await tx.insert(unitFollow).values({
-						followerProfileId: profile.unitId,
+						followerProfileId: entity.id,
 						unitId: created.id,
 					});
 					await applyInitialTags(tx, {
 						unitId: created.id,
-						profileId: profile.unitId,
+						profileId: entity.id,
 						tagIds: body.initialTagIds ?? [],
 					});
 					const taxonomySnapshot = ContentStructureSnapshotSchema.parse({
@@ -727,13 +727,13 @@ export default new Elysia({ prefix: "/realms" })
 					});
 					await recordUnitRevision(tx, {
 						unitId: created.id,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						contribution: body.revisionContext?.contribution,
 						event: "create",
 					});
 					await createContentStructureHistory(tx, {
 						structureId: taxonomy.id,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						state: taxonomySnapshot,
 					});
 					return created.id;
@@ -790,7 +790,7 @@ export default new Elysia({ prefix: "/realms" })
 		},
 		async ({ params, query, request }) => {
 			const localizationLanguages = query.localizationLanguages ?? [];
-			const { profile: viewer, authorization } = await ensureRealmVisible(params.realmId, request);
+			const { entity: viewer, authorization } = await ensureRealmVisible(params.realmId, request);
 			const [record] = await database
 				.select({
 					id: realm.id,
@@ -835,13 +835,13 @@ export default new Elysia({ prefix: "/realms" })
 			if (!selectedLocalization) throw new RealmNotFound();
 			const [viewerMembership, following] = viewer
 				? await Promise.all([
-						findRealmMembership(params.realmId, viewer.unitId),
+						findRealmMembership(params.realmId, viewer.id),
 						database
 							.select({ realmId: unitFollow.unitId })
 							.from(unitFollow)
 							.where(
 								and(
-									eq(unitFollow.followerProfileId, viewer.unitId),
+									eq(unitFollow.followerProfileId, viewer.id),
 									eq(unitFollow.unitId, params.realmId),
 								),
 							),
@@ -965,7 +965,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Replace enabled Realm pages", tags: ["Realms"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
 			const latestRevisionId = await database.transaction(async (tx) => {
 				const updated = await tx
@@ -976,12 +976,12 @@ export default new Elysia({ prefix: "/realms" })
 				if (!updated.length) throw new RealmNotFound();
 				const revision = await recordUnitRevision(tx, {
 					unitId: params.realmId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					event: "update",
 					baseRevisionId: body.baseRevisionId,
 				});
-				await recordAuditEvent(tx, profile.unitId, "realm.settings.update", params.realmId, {
+				await recordAuditEvent(tx, entity.id, "realm.settings.update", params.realmId, {
 					fields: ["pages"],
 				});
 				return revision.revisionId;
@@ -1052,7 +1052,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Save complete Realm taxonomy draft", tags: ["Realms"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
 			const referencedUnitIds = body.nodes.flatMap((node) =>
 				node.state === "new" && node.content.kind === "unit" ? [node.content.unitId] : [],
@@ -1065,7 +1065,7 @@ export default new Elysia({ prefix: "/realms" })
 				const result = await saveRealmTaxonomyDraft(tx, {
 					ownerUnitId: params.realmId,
 					baseRevisionId: body.baseRevisionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					nodes: body.nodes,
 				});
@@ -1127,7 +1127,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Set Realm Score context", tags: ["Realms"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
 			await authorization.unit.ensureCanRead(body.contextPostId, () => new PostNotFound());
 			await database.transaction(async (tx) => {
@@ -1171,7 +1171,7 @@ export default new Elysia({ prefix: "/realms" })
 						target: realmScoreContext.realmId,
 						set: { contextPostId: body.contextPostId, updatedAt: new Date() },
 					});
-				await recordAuditEvent(tx, profile.unitId, "realm.settings.update", params.realmId, {
+				await recordAuditEvent(tx, entity.id, "realm.settings.update", params.realmId, {
 					fields: ["scoreContextPostId"],
 					operation: "set",
 					previousContextPostId: current?.contextPostId ?? null,
@@ -1196,7 +1196,7 @@ export default new Elysia({ prefix: "/realms" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ params, profile, authorization }) => {
+		async ({ params, entity, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
 			await database.transaction(async (tx) => {
 				await tx.execute(
@@ -1207,7 +1207,7 @@ export default new Elysia({ prefix: "/realms" })
 					.where(eq(realmScoreContext.realmId, params.realmId))
 					.returning({ contextPostId: realmScoreContext.contextPostId });
 				if (!removed) return;
-				await recordAuditEvent(tx, profile.unitId, "realm.settings.update", params.realmId, {
+				await recordAuditEvent(tx, entity.id, "realm.settings.update", params.realmId, {
 					fields: ["scoreContextPostId"],
 					operation: "clear",
 					previousContextPostId: removed.contextPostId,
@@ -1234,7 +1234,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Update Realm", tags: ["Realms"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
 			const statusUpdateDecision = body.status
 				? await authorization.unit.decide(params.realmId, "unit.status.update", ["unit"])
@@ -1249,7 +1249,7 @@ export default new Elysia({ prefix: "/realms" })
 				if (body.localization)
 					await ensureImageAssetsAttachable(
 						tx,
-						profile.unitId,
+						entity.id,
 						unitLocalizationImageAssetReferences(body.localization),
 					);
 				const unitUpdate = toUnitVisibilityUpdate(body.visibility);
@@ -1278,7 +1278,7 @@ export default new Elysia({ prefix: "/realms" })
 				}
 				const revision = await recordUnitRevision(tx, {
 					unitId: params.realmId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					event: "update",
 				});
@@ -1286,14 +1286,14 @@ export default new Elysia({ prefix: "/realms" })
 					await transitionUnitStatus(tx, {
 						unitId: params.realmId,
 						toStatus: body.status,
-						actor: { kind: "profile", profileId: profile.unitId },
+						actor: { kind: "profile", profileId: entity.id },
 						authorization: {
 							kind: "interactive",
 							statusUpdateAllowed: statusUpdateDecision?.allowed ?? false,
 						},
 						revisionId: revision.revisionId,
 					});
-				await recordAuditEvent(tx, profile.unitId, "realm.settings.update", params.realmId);
+				await recordAuditEvent(tx, entity.id, "realm.settings.update", params.realmId);
 			});
 			return { id: params.realmId };
 		},
@@ -1315,7 +1315,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Update Realm Tag voting policy", tags: ["Realms"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tag-voting.update");
 			await database.transaction(async (tx) => {
 				const updated = await tx
@@ -1326,11 +1326,11 @@ export default new Elysia({ prefix: "/realms" })
 				if (!updated.length) throw new RealmNotFound();
 				await recordUnitRevision(tx, {
 					unitId: params.realmId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					event: "update",
 				});
-				await recordAuditEvent(tx, profile.unitId, "realm.tag-voting.update", params.realmId, {
+				await recordAuditEvent(tx, entity.id, "realm.tag-voting.update", params.realmId, {
 					enabled: body.enabled,
 				});
 			});
@@ -1349,7 +1349,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Join Realm", tags: ["Realms"] },
 		},
-		async ({ params, profile }) => {
+		async ({ params, entity }) => {
 			const [record] = await database
 				.select({
 					status: unit.status,
@@ -1361,7 +1361,7 @@ export default new Elysia({ prefix: "/realms" })
 				.where(eq(realm.id, params.realmId))
 				.limit(1);
 			if (!record) throw new RealmNotFound();
-			const current = await findRealmMembership(params.realmId, profile.unitId);
+			const current = await findRealmMembership(params.realmId, entity.id);
 			if (!isRealmJoinable(record.status, record.visibility, current?.state))
 				throw new RealmNotFound();
 			const state = record.joinPolicy === "approval" ? "pending" : "active";
@@ -1387,7 +1387,7 @@ export default new Elysia({ prefix: "/realms" })
 						.where(
 							and(
 								eq(realmRuleAcceptance.revisionId, rules.id),
-								eq(realmRuleAcceptance.profileId, profile.unitId),
+								eq(realmRuleAcceptance.profileId, entity.id),
 							),
 						)
 						.limit(1);
@@ -1395,21 +1395,21 @@ export default new Elysia({ prefix: "/realms" })
 				}
 				await tx
 					.insert(realmMember)
-					.values({ realmId: params.realmId, profileId: profile.unitId, state })
+					.values({ realmId: params.realmId, profileId: entity.id, state })
 					.onConflictDoUpdate({
 						target: [realmMember.realmId, realmMember.profileId],
 						set: { state },
 					});
 				await tx
 					.insert(unitFollow)
-					.values({ followerProfileId: profile.unitId, unitId: params.realmId })
+					.values({ followerProfileId: entity.id, unitId: params.realmId })
 					.onConflictDoNothing();
 				if (rules && acceptsOnFollow)
 					await tx
 						.insert(realmRuleAcceptance)
 						.values({
 							revisionId: rules.id,
-							profileId: profile.unitId,
+							profileId: entity.id,
 							language: null,
 						})
 						.onConflictDoNothing();
@@ -1433,14 +1433,12 @@ export default new Elysia({ prefix: "/realms" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ params, profile }) => {
+		async ({ params, entity }) => {
 			await database.transaction(async (tx) => {
 				const [membership] = await tx
 					.select({ profileId: realmMember.profileId })
 					.from(realmMember)
-					.where(
-						and(eq(realmMember.realmId, params.realmId), eq(realmMember.profileId, profile.unitId)),
-					)
+					.where(and(eq(realmMember.realmId, params.realmId), eq(realmMember.profileId, entity.id)))
 					.limit(1);
 				if (!membership) throw new RealmMembershipNotFound();
 				const [ownership] = await tx
@@ -1449,7 +1447,7 @@ export default new Elysia({ prefix: "/realms" })
 					.where(
 						and(
 							eq(unitOwnership.unitId, params.realmId),
-							eq(unitOwnership.profileId, profile.unitId),
+							eq(unitOwnership.profileId, entity.id),
 							isNull(unitOwnership.revokedAt),
 						),
 					)
@@ -1458,15 +1456,12 @@ export default new Elysia({ prefix: "/realms" })
 				await tx
 					.delete(realmMember)
 					.where(
-						and(eq(realmMember.realmId, params.realmId), eq(realmMember.profileId, profile.unitId)),
+						and(eq(realmMember.realmId, params.realmId), eq(realmMember.profileId, entity.id)),
 					);
 				await tx
 					.delete(unitFollow)
 					.where(
-						and(
-							eq(unitFollow.followerProfileId, profile.unitId),
-							eq(unitFollow.unitId, params.realmId),
-						),
+						and(eq(unitFollow.followerProfileId, entity.id), eq(unitFollow.unitId, params.realmId)),
 					);
 				const revisions = tx
 					.select({ id: realmRuleRevision.id })
@@ -1476,7 +1471,7 @@ export default new Elysia({ prefix: "/realms" })
 					.delete(realmRuleAcceptance)
 					.where(
 						and(
-							eq(realmRuleAcceptance.profileId, profile.unitId),
+							eq(realmRuleAcceptance.profileId, entity.id),
 							inArray(realmRuleAcceptance.revisionId, revisions),
 						),
 					);
@@ -1506,14 +1501,17 @@ export default new Elysia({ prefix: "/realms" })
 			const members = await database
 				.select({
 					profileId: realmMember.profileId,
-					language: resolvedUnitLocalizationLanguage(profileTable.id, query.localizationLanguages),
-					name: resolvedUnitLocalizationTitle(profileTable.id, query.localizationLanguages),
-					avatar: resolvedUnitLocalizationAvatar(profileTable.id, query.localizationLanguages),
+					language: resolvedUnitLocalizationLanguage(
+						entityIdentity.id,
+						query.localizationLanguages,
+					),
+					name: resolvedUnitLocalizationTitle(entityIdentity.id, query.localizationLanguages),
+					avatar: resolvedUnitLocalizationAvatar(entityIdentity.id, query.localizationLanguages),
 					state: realmMember.state,
 					joinedAt: realmMember.joinedAt,
 				})
 				.from(realmMember)
-				.innerJoin(profileTable, eq(profileTable.id, realmMember.profileId))
+				.innerJoin(entityIdentity, eq(entityIdentity.id, realmMember.profileId))
 				.where(
 					and(
 						eq(realmMember.realmId, params.realmId),
@@ -1555,7 +1553,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Update Realm member", tags: ["Realms"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.members.manage");
 			const target = await findRealmMembership(params.realmId, params.profileId);
 			if (!target) throw new RealmMemberNotFound();
@@ -1584,13 +1582,13 @@ export default new Elysia({ prefix: "/realms" })
 					.returning();
 				if (!row) throw new RealmMemberNotFound();
 				await createNotification(tx, {
-					recipientProfileId: params.profileId,
-					actorProfileId: profile.unitId,
+					recipientEntityId: params.profileId,
+					actorProfileId: entity.id,
 					kind: "realm",
 					subjectUnitId: params.realmId,
 					payload: { type: "realm_event", event: "membership_updated" },
 				});
-				await recordAuditEvent(tx, profile.unitId, "realm.members.update", params.realmId, {
+				await recordAuditEvent(tx, entity.id, "realm.members.update", params.realmId, {
 					profileId: params.profileId,
 				});
 				return { ...row, isOwner: Boolean(targetOwnership) };
@@ -1616,14 +1614,14 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Update Realm rules", tags: ["Realms"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.rules.update", [
 				"rules",
 			]);
 			const revision = await database.transaction(async (tx) => {
 				const result = await publishRealmRuleRevision(tx, {
 					realmId: params.realmId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					baseRevisionId: body.baseRevisionId,
 					acknowledgementMode: body.acknowledgementMode,
 					requireOnJoin: body.requireOnJoin,
@@ -1640,7 +1638,7 @@ export default new Elysia({ prefix: "/realms" })
 						path: `rules.${result.ruleIndex}.localizations`,
 						reason: "duplicate_language",
 					});
-				await recordAuditEvent(tx, profile.unitId, "realm.rules.update", params.realmId);
+				await recordAuditEvent(tx, entity.id, "realm.rules.update", params.realmId);
 				return result.revision;
 			});
 			return { id: revision.id, version: revision.version };
@@ -1793,7 +1791,7 @@ export default new Elysia({ prefix: "/realms" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ params, profile, body, request }) => {
+		async ({ params, entity, body, request }) => {
 			await ensureRealmVisible(params.realmId, request);
 			await database.transaction(async (tx) => {
 				await tx.execute(
@@ -1810,7 +1808,7 @@ export default new Elysia({ prefix: "/realms" })
 					.insert(realmRuleAcceptance)
 					.values({
 						revisionId,
-						profileId: profile.unitId,
+						profileId: entity.id,
 						language: body.language,
 					})
 					.onConflictDoNothing();
@@ -1882,7 +1880,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Move Realm pins", tags: ["Realms"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.pins.manage", [
 				"pins",
 			]);
@@ -1912,11 +1910,11 @@ export default new Elysia({ prefix: "/realms" })
 						.where(and(eq(realmPin.realmId, params.realmId), eq(realmPin.unitId, planned.unitId)));
 				const revision = await recordUnitRevision(tx, {
 					unitId: params.realmId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					event: "update",
 				});
-				await recordAuditEvent(tx, profile.unitId, "realm.pins.move", params.realmId, {
+				await recordAuditEvent(tx, entity.id, "realm.pins.move", params.realmId, {
 					unitIds: [...body.unitIds],
 					destinationKind: body.destinationKind,
 					placement: body.placement,
@@ -1944,7 +1942,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Pin Realm unit", tags: ["Realms"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.pins.manage", [
 				"pins",
 			]);
@@ -1983,7 +1981,7 @@ export default new Elysia({ prefix: "/realms" })
 						unitId: params.unitId,
 						kind,
 						position,
-						createdByProfileId: profile.unitId,
+						createdByProfileId: entity.id,
 					})
 					.onConflictDoUpdate({
 						target: [realmPin.realmId, realmPin.unitId],
@@ -1993,11 +1991,11 @@ export default new Elysia({ prefix: "/realms" })
 				if (!entry) throw new Error("Realm pin upsert did not return a row");
 				await recordUnitRevision(tx, {
 					unitId: params.realmId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					event: "update",
 				});
-				await recordAuditEvent(tx, profile.unitId, "realm.pins.upsert", params.unitId, {
+				await recordAuditEvent(tx, entity.id, "realm.pins.upsert", params.unitId, {
 					realmId: params.realmId,
 				});
 				return entry;
@@ -2025,7 +2023,7 @@ export default new Elysia({ prefix: "/realms" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ params, profile, authorization, query, body }) => {
+		async ({ params, entity, authorization, query, body }) => {
 			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.pins.manage", [
 				"pins",
 			]);
@@ -2046,11 +2044,11 @@ export default new Elysia({ prefix: "/realms" })
 				if (!deleted.length) return;
 				await recordUnitRevision(tx, {
 					unitId: params.realmId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body?.revisionContext?.contribution,
 					event: "update",
 				});
-				await recordAuditEvent(tx, profile.unitId, "realm.pins.delete", params.unitId, {
+				await recordAuditEvent(tx, entity.id, "realm.pins.delete", params.unitId, {
 					realmId: params.realmId,
 				});
 			});
@@ -2079,7 +2077,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Create Realm-governed Wiki", tags: ["Realms"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			ensureWikiPostWriteDocument(body.body);
 			await authorization.realm.ensureUnitCreation([params.realmId], "realm.units.create");
 			if (body.subjectId) await authorization.unit.ensureCanRead(body.subjectId);
@@ -2087,7 +2085,7 @@ export default new Elysia({ prefix: "/realms" })
 				{ family: "unit_tag", authority: "global" },
 				async (tx) => {
 					const created = await createWikiPost(tx, {
-						profileId: profile.unitId,
+						profileId: entity.id,
 						authorization,
 						accessMode: body.accessMode ?? "community_owned",
 						title: body.title,
@@ -2115,7 +2113,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "List Realm Tag Context relationships", tags: ["Realms"] },
 		},
-		async ({ params, query, profile, authorization }) => {
+		async ({ params, query, entity, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tag-contexts.manage");
 			const localizationLanguages = query.localizationLanguages ?? [];
 			const limit = query.limit ?? 50;
@@ -2167,9 +2165,7 @@ export default new Elysia({ prefix: "/realms" })
 							await database
 								.select({ id: unit.id })
 								.from(unit)
-								.where(
-									and(inArray(unit.id, referencedUnitIds), getUnitReadCondition(profile.unitId)),
-								)
+								.where(and(inArray(unit.id, referencedUnitIds), getUnitReadCondition(entity.id)))
 						).map((row) => row.id),
 					)
 				: new Set<string>();
@@ -2217,7 +2213,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Create Realm Tag Context Wiki", tags: ["Realms"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			ensureWikiPostWriteDocument(body.body);
 			await Promise.all([
 				authorization.realm.ensureCapability(params.realmId, "realm.tag-contexts.manage"),
@@ -2249,7 +2245,7 @@ export default new Elysia({ prefix: "/realms" })
 						.limit(1);
 					if (!tagRecord) throw new UnitNotFound("Tag");
 					const created = await createWikiPost(tx, {
-						profileId: profile.unitId,
+						profileId: entity.id,
 						authorization,
 						accessMode: body.accessMode ?? "community_owned",
 						title: body.title,
@@ -2263,9 +2259,9 @@ export default new Elysia({ prefix: "/realms" })
 						realmId: params.realmId,
 						tagId: body.tagId,
 						contextPostId: created.id,
-						createdByProfileId: profile.unitId,
+						createdByProfileId: entity.id,
 					});
-					await recordAuditEvent(tx, profile.unitId, "realm.tag-contexts.create", body.tagId, {
+					await recordAuditEvent(tx, entity.id, "realm.tag-contexts.create", body.tagId, {
 						realmId: params.realmId,
 						contextPostId: created.id,
 					});
@@ -2333,7 +2329,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Set Realm Tag Context", tags: ["Realms"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tag-contexts.manage");
 			await Promise.all([
 				authorization.unit.ensureCanRead(params.tagId),
@@ -2385,17 +2381,17 @@ export default new Elysia({ prefix: "/realms" })
 						realmId: params.realmId,
 						tagId: params.tagId,
 						contextPostId: body.contextPostId,
-						createdByProfileId: profile.unitId,
+						createdByProfileId: entity.id,
 					})
 					.onConflictDoUpdate({
 						target: [realmTagContext.realmId, realmTagContext.tagId],
 						set: {
 							contextPostId: body.contextPostId,
-							createdByProfileId: profile.unitId,
+							createdByProfileId: entity.id,
 							updatedAt: new Date(),
 						},
 					});
-				await recordAuditEvent(tx, profile.unitId, "realm.tag-contexts.update", params.tagId, {
+				await recordAuditEvent(tx, entity.id, "realm.tag-contexts.update", params.tagId, {
 					realmId: params.realmId,
 					contextPostId: body.contextPostId,
 				});
@@ -2421,7 +2417,7 @@ export default new Elysia({ prefix: "/realms" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ params, profile, authorization }) => {
+		async ({ params, entity, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tag-contexts.manage");
 			await runVoteTransaction({ family: "unit_tag", authority: "realm" }, async (tx) => {
 				await tx.execute(
@@ -2437,7 +2433,7 @@ export default new Elysia({ prefix: "/realms" })
 					)
 					.returning({ contextPostId: realmTagContext.contextPostId });
 				if (!removed) throw new RealmTagContextNotFound();
-				await recordAuditEvent(tx, profile.unitId, "realm.tag-contexts.delete", params.tagId, {
+				await recordAuditEvent(tx, entity.id, "realm.tag-contexts.delete", params.tagId, {
 					realmId: params.realmId,
 					contextPostId: removed.contextPostId,
 				});
@@ -2463,7 +2459,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Apply Realm Policy Tag", tags: ["Realms"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
 			if (params.unitId === params.tagId) throw new RealmTagSelfReferenceForbidden();
 			await Promise.all([
@@ -2512,7 +2508,7 @@ export default new Elysia({ prefix: "/realms" })
 						unitId: params.unitId,
 						tagId: params.tagId,
 						position,
-						createdByProfileId: profile.unitId,
+						createdByProfileId: entity.id,
 					})
 					.onConflictDoUpdate({
 						target: [realmUnitTag.realmId, realmUnitTag.unitId, realmUnitTag.tagId],
@@ -2520,7 +2516,7 @@ export default new Elysia({ prefix: "/realms" })
 					})
 					.returning();
 				if (!record) throw new Error("Realm Policy Tag upsert returned no row");
-				await recordAuditEvent(tx, profile.unitId, "realm.tags.policy.upsert", params.unitId, {
+				await recordAuditEvent(tx, entity.id, "realm.tags.policy.upsert", params.unitId, {
 					realmId: params.realmId,
 					tagId: params.tagId,
 				});
@@ -2543,7 +2539,7 @@ export default new Elysia({ prefix: "/realms" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ params, profile, authorization }) => {
+		async ({ params, entity, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
 			await database.transaction(async (tx) => {
 				const deleted = await tx
@@ -2557,7 +2553,7 @@ export default new Elysia({ prefix: "/realms" })
 					)
 					.returning({ tagId: realmUnitTag.tagId });
 				if (deleted.length)
-					await recordAuditEvent(tx, profile.unitId, "realm.tags.policy.delete", params.unitId, {
+					await recordAuditEvent(tx, entity.id, "realm.tags.policy.delete", params.unitId, {
 						realmId: params.realmId,
 						tagId: params.tagId,
 					});
@@ -2585,14 +2581,14 @@ export default new Elysia({ prefix: "/realms" })
 				tags: ["Realms"],
 			},
 		},
-		async ({ params, profile, authorization, query }) => {
+		async ({ params, entity, authorization, query }) => {
 			await Promise.all([
 				authorization.realm.ensureParticipation(params.realmId),
 				authorization.unit.ensureCanRead(params.unitId),
 			]);
 			const tags = await listRealmVotedTags({
 				unitId: params.unitId,
-				viewerProfileId: profile.unitId,
+				viewerProfileId: entity.id,
 				realmIds: [params.realmId],
 				localizationLanguages: query.localizationLanguages,
 				perRealmLimit: query.limit ?? 50,
@@ -2627,7 +2623,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Vote on a Realm-scoped Unit Tag", tags: ["Realms"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await authorization.realm.ensureParticipation(params.realmId);
 			if (params.unitId === params.tagId) throw new RealmTagSelfReferenceForbidden();
 			await Promise.all([
@@ -2638,7 +2634,7 @@ export default new Elysia({ prefix: "/realms" })
 				await ensureRealmTagVoteEligibility(tx, {
 					realmId: params.realmId,
 					tagId: params.tagId,
-					viewerProfileId: profile.unitId,
+					viewerProfileId: entity.id,
 				});
 				await tx
 					.insert(realmTagJudgment)
@@ -2646,7 +2642,7 @@ export default new Elysia({ prefix: "/realms" })
 						realmId: params.realmId,
 						unitId: params.unitId,
 						tagId: params.tagId,
-						profileId: profile.unitId,
+						profileId: entity.id,
 						fitVote: body.value,
 						fitUpdatedAt: new Date(),
 					})
@@ -2660,7 +2656,7 @@ export default new Elysia({ prefix: "/realms" })
 						set: { fitVote: body.value, fitUpdatedAt: new Date(), updatedAt: new Date() },
 					});
 			});
-			return getRealmTagVoteSummary(params.realmId, params.unitId, params.tagId, profile.unitId);
+			return getRealmTagVoteSummary(params.realmId, params.unitId, params.tagId, entity.id);
 		},
 	)
 	.delete(
@@ -2680,7 +2676,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Remove a Realm-scoped Unit Tag vote", tags: ["Realms"] },
 		},
-		async ({ params, profile, authorization }) => {
+		async ({ params, entity, authorization }) => {
 			await authorization.realm.ensureParticipation(params.realmId);
 			await Promise.all([
 				authorization.unit.ensureCanRead(params.unitId),
@@ -2691,7 +2687,7 @@ export default new Elysia({ prefix: "/realms" })
 					eq(realmTagJudgment.realmId, params.realmId),
 					eq(realmTagJudgment.unitId, params.unitId),
 					eq(realmTagJudgment.tagId, params.tagId),
-					eq(realmTagJudgment.profileId, profile.unitId),
+					eq(realmTagJudgment.profileId, entity.id),
 				);
 				await tx
 					.delete(realmTagJudgment)
@@ -2701,7 +2697,7 @@ export default new Elysia({ prefix: "/realms" })
 					.set({ fitVote: null, fitUpdatedAt: null, updatedAt: new Date() })
 					.where(and(judgmentKey, isNotNull(realmTagJudgment.spoilerLevel)));
 			});
-			return getRealmTagVoteSummary(params.realmId, params.unitId, params.tagId, profile.unitId);
+			return getRealmTagVoteSummary(params.realmId, params.unitId, params.tagId, entity.id);
 		},
 	)
 	.get(
@@ -2853,7 +2849,7 @@ export default new Elysia({ prefix: "/realms" })
 					caseId: contentGovernanceAction.caseId,
 					kind: contentGovernanceAction.kind,
 					actorProfileId: contentGovernanceAction.actorProfileId,
-					actorName: firstUnitLocalizationTitle(profileTable.id),
+					actorName: firstUnitLocalizationTitle(entityIdentity.id),
 					previousState: contentGovernanceAction.previousState,
 					resultingState: contentGovernanceAction.resultingState,
 					previousPostTargetingLocked: contentGovernanceAction.previousPostTargetingLocked,
@@ -2863,7 +2859,7 @@ export default new Elysia({ prefix: "/realms" })
 				})
 				.from(contentGovernanceAction)
 				.innerJoin(contentReviewCase, eq(contentReviewCase.id, contentGovernanceAction.caseId))
-				.leftJoin(profileTable, eq(profileTable.id, contentGovernanceAction.actorProfileId))
+				.leftJoin(entityIdentity, eq(entityIdentity.id, contentGovernanceAction.actorProfileId))
 				.where(
 					and(
 						eq(contentReviewCase.authority, "realm"),
@@ -2983,7 +2979,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Apply a Realm content governance action", tags: ["Realms"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
 			const result = await database.transaction(async (tx) => {
 				await tx.execute(contentReviewCaseAdvisoryLock("realm", params.realmId, params.unitId));
@@ -3003,7 +2999,7 @@ export default new Elysia({ prefix: "/realms" })
 							)
 							.where(
 								and(
-									eq(contentGovernanceAction.actorProfileId, profile.unitId),
+									eq(contentGovernanceAction.actorProfileId, entity.id),
 									eq(contentGovernanceAction.idempotencyKey, body.idempotencyKey),
 									eq(contentReviewCase.authority, "realm"),
 									eq(contentReviewCase.realmId, params.realmId),
@@ -3062,7 +3058,7 @@ export default new Elysia({ prefix: "/realms" })
 				};
 				const executed = await executeAuthorizedContentGovernanceAction(tx, {
 					caseRow,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					body: actionBody,
 				});
 				const [updatedTarget] = await tx
@@ -3121,7 +3117,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Update a Realm content review case", tags: ["Realms"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
 			const result = await database.transaction(async (tx) => {
 				await tx.execute(contentReviewCaseAdvisoryLock("realm", params.realmId, params.unitId));
@@ -3175,7 +3171,7 @@ export default new Elysia({ prefix: "/realms" })
 					.where(eq(contentReportReferral.caseId, caseRow.id));
 				const annotation = body.annotation
 					? await createGovernanceNotePost(tx, {
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							subjectKind: "content_review_case",
 							subjectId: caseRow.id,
 							subjectUnitId: params.unitId,
@@ -3195,8 +3191,8 @@ export default new Elysia({ prefix: "/realms" })
 						.where(eq(contentReviewCase.id, caseRow.id));
 					for (const report of reportRows)
 						await createNotification(tx, {
-							recipientProfileId: report.reporterProfileId,
-							actorProfileId: profile.unitId,
+							recipientEntityId: report.reporterProfileId,
+							actorProfileId: entity.id,
 							kind: "moderation",
 							subjectUnitId: params.unitId,
 							payload: {
@@ -3212,7 +3208,7 @@ export default new Elysia({ prefix: "/realms" })
 				await appendAuditEvent(tx, {
 					category: "admin_activity",
 					outcome: "succeeded",
-					actor: { kind: "profile", profileId: profile.unitId },
+					actor: { kind: "profile", profileId: entity.id },
 					authority: { kind: "realm", id: params.realmId },
 					action: `content_review.${body.command}`,
 					target: { kind: "realm_unit", id: params.unitId },

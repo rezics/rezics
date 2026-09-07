@@ -1,74 +1,8 @@
-import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
 
 import session, { resolveIdentity } from "../../auth/session";
-import { database, type DatabaseTransaction } from "../../database";
-import { toSafeInteger } from "../../database/integer";
-import { fractionalPositionBetween } from "../../ordering/position";
-import {
-	resolvedUnitLocalizationImageAssetId,
-	resolvedUnitLocalizationLanguage,
-	toUnitLocalizationStorage,
-	unitLocalizationImageAssetReferences,
-} from "../../units/localization";
-import {
-	collection,
-	collectionItem,
-	collectionStat,
-	collectionStructureRevisionHead,
-	creditAttribution,
-	profileFavoritesCollection,
-	unit,
-	unitOwnership,
-	unitLocalization,
-	unitRevisionHead,
-} from "../../database/schema";
-import { recordUnitRevision } from "../../units/history";
-import { insertUnit } from "../../units/create";
-import { transitionUnitStatus } from "../../units/status";
-import { UnitNotFound } from "../../units/errors";
-import { presentImageAsset } from "../../units/service";
-import { toUnitVisibilityUpdate } from "../../units/visibility-update";
-import {
-	AddCollectionItemsBatchBody,
-	AddCollectionItemsBatchResponse,
-	CollectionItemParams,
-	CollectionParams,
-	CollectionDetailQuery,
-	CollectionItemsQuery,
-	CollectionItemsRevisionBody,
-	CollectionStructureRevisionCompareQuery,
-	CollectionStructureRevisionCompareResponse,
-	CollectionStructureRevisionListQuery,
-	CollectionStructureRevisionListResponse,
-	CollectionStructureRevisionParams,
-	CreateCollectionBody,
-	FavoriteItemParams,
-	ListCollectionsQuery,
-	MoveCollectionItemsBody,
-	SaveCollectionItemBody,
-	RestoreCollectionStructureRevisionBody,
-	RestoreCollectionStructureRevisionResponse,
-	UpdateCollectionBody,
-	UpdateCollectionItemsBatchBody,
-	UpdateCollectionItemsBatchResponse,
-} from "./schema";
-import { ensureFavorites } from "../../collections/favorites";
-import { getCollection, getCollectionContent } from "./service";
-import { FavoriteResponse, SavedCollectionItemsResponse } from "../schema/action-response";
-import {
-	toApiErrorResponse,
-	CollectionContentResponse,
-	CollectionDetailResponse,
-	CollectionListResponse,
-} from "../schema/response";
-import { FavoritesEditForbidden } from "./errors";
-import { decodeCollectionListCursor, encodeCollectionListCursor } from "./cursor";
-import { ensureImageAssetsAttachable } from "../image-assets/service";
-import { ValidationError } from "../errors";
-import { createProfilePublisherAttribution } from "../../units/attribution";
-import { getAttributionSummariesByUnitIds } from "../../units/attribution";
 import { getUnitUpdateCondition } from "../../authorization/unit/query";
 import { applyCollectionBatch } from "../../collection-structure/batch";
 import {
@@ -78,6 +12,74 @@ import {
 	mutateCollectionStructureWithHistory,
 	restoreCollectionStructureRevision,
 } from "../../collection-structure/history";
+import { ensureFavorites } from "../../collections/favorites";
+import { database, type DatabaseTransaction } from "../../database";
+import { toSafeInteger } from "../../database/integer";
+import {
+	collection,
+	collectionItem,
+	collectionStat,
+	collectionStructureRevisionHead,
+	creditAttribution,
+	profileFavoritesCollection,
+	unit,
+	unitLocalization,
+	unitOwnership,
+	unitRevisionHead,
+} from "../../database/schema";
+import { fractionalPositionBetween } from "../../ordering/position";
+import {
+	createProfilePublisherAttribution,
+	getAttributionSummariesByUnitIds,
+} from "../../units/attribution";
+import { insertUnit } from "../../units/create";
+import { UnitNotFound } from "../../units/errors";
+import { recordUnitRevision } from "../../units/history";
+import {
+	resolvedUnitLocalizationImageAssetId,
+	resolvedUnitLocalizationLanguage,
+	toUnitLocalizationStorage,
+	unitLocalizationImageAssetReferences,
+} from "../../units/localization";
+import { presentImageAsset } from "../../units/service";
+import { transitionUnitStatus } from "../../units/status";
+import { toUnitVisibilityUpdate } from "../../units/visibility-update";
+import { ValidationError } from "../errors";
+import { ensureImageAssetsAttachable } from "../image-assets/service";
+import { FavoriteResponse, SavedCollectionItemsResponse } from "../schema/action-response";
+import {
+	CollectionContentResponse,
+	CollectionDetailResponse,
+	CollectionListResponse,
+	toApiErrorResponse,
+} from "../schema/response";
+import { decodeCollectionListCursor, encodeCollectionListCursor } from "./cursor";
+import { FavoritesEditForbidden } from "./errors";
+import {
+	AddCollectionItemsBatchBody,
+	AddCollectionItemsBatchResponse,
+	CollectionDetailQuery,
+	CollectionItemParams,
+	CollectionItemsQuery,
+	CollectionItemsRevisionBody,
+	CollectionParams,
+	CollectionStructureRevisionCompareQuery,
+	CollectionStructureRevisionCompareResponse,
+	CollectionStructureRevisionListQuery,
+	CollectionStructureRevisionListResponse,
+	CollectionStructureRevisionParams,
+	CreateCollectionBody,
+	FavoriteItemParams,
+	ListCollectionsQuery,
+	MoveCollectionItemsBody,
+	RestoreCollectionStructureRevisionBody,
+	RestoreCollectionStructureRevisionResponse,
+	SaveCollectionItemBody,
+	UpdateCollectionBody,
+	UpdateCollectionItemsBatchBody,
+	UpdateCollectionItemsBatchResponse,
+} from "./schema";
+import { getCollection, getCollectionContent } from "./service";
 
 const CollectionNotFoundResponse = toApiErrorResponse(["CollectionNotFound"]);
 const CollectionMutationNotFoundResponse = toApiErrorResponse([
@@ -185,7 +187,7 @@ export default new Elysia({ prefix: "/collections" })
 		async ({ query, request }) => {
 			const localizationLanguages = query.localizationLanguages ?? [];
 			const identity = query.editableOnly ? await resolveIdentity(request, "unit:read") : undefined;
-			const viewerId = identity?.profile?.unitId;
+			const viewerId = identity?.entity?.id;
 			if (query.editableOnly && !viewerId) return { items: [], nextCursor: null };
 			if (viewerId) await ensureFavorites(viewerId);
 			const cursorContext = { query };
@@ -274,7 +276,7 @@ export default new Elysia({ prefix: "/collections" })
 							? sql`exists(
 								select 1 from ${creditAttribution} publisher_credit
 								where publisher_credit.source_unit_id = ${collection.id}
-									and publisher_credit.credited_unit_id = ${query.publisherProfileId}
+									and publisher_credit.credited_entity_id = ${query.publisherProfileId}
 									and publisher_credit.role = 'publisher'
 							)`
 							: undefined,
@@ -334,17 +336,17 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "Create collection", tags: ["Collections"] },
 		},
-		async ({ profile, authorization, body }) => {
+		async ({ entity, authorization, body }) => {
 			const id = await database.transaction(async (tx) => {
 				await ensureImageAssetsAttachable(
 					tx,
-					profile.unitId,
+					entity.id,
 					unitLocalizationImageAssetReferences(body.localization),
 				);
 				const created = await insertUnit(tx, {
 					kind: "collection",
 					visibility: body.visibility ?? "private",
-					statusActor: { kind: "profile", profileId: profile.unitId },
+					statusActor: { kind: "profile", profileId: entity.id },
 				});
 				await tx.insert(collection).values({ id: created.id });
 				await tx.insert(unitLocalization).values({
@@ -353,22 +355,22 @@ export default new Elysia({ prefix: "/collections" })
 				});
 				await tx.insert(unitOwnership).values({
 					unitId: created.id,
-					profileId: profile.unitId,
-					assignedByProfileId: profile.unitId,
+					profileId: entity.id,
+					assignedByProfileId: entity.id,
 				});
 				await createProfilePublisherAttribution(tx, {
 					sourceUnitId: created.id,
-					profileId: profile.unitId,
+					profileId: entity.id,
 				});
 				await recordUnitRevision(tx, {
 					unitId: created.id,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					event: "create",
 				});
 				await createCollectionStructureHistory(tx, {
 					collectionId: created.id,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 				});
 				return created.id;
 			});
@@ -386,9 +388,9 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "Get Favorites collection", tags: ["Collections"] },
 		},
-		async ({ profile, authorization, query }) => {
+		async ({ entity, authorization, query }) => {
 			return getCollection(
-				await ensureFavorites(profile.unitId),
+				await ensureFavorites(entity.id),
 				authorization,
 				query.localizationLanguages,
 			);
@@ -453,7 +455,7 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "Update collection", tags: ["Collections"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
 			const statusUpdateDecision = body.status
 				? await authorization.unit.decide(params.collectionId, "unit.status.update", ["unit"])
@@ -472,7 +474,7 @@ export default new Elysia({ prefix: "/collections" })
 				if (body.localization)
 					await ensureImageAssetsAttachable(
 						tx,
-						profile.unitId,
+						entity.id,
 						unitLocalizationImageAssetReferences(body.localization),
 					);
 				const unitUpdate = toUnitVisibilityUpdate(body.visibility);
@@ -493,7 +495,7 @@ export default new Elysia({ prefix: "/collections" })
 				}
 				const revision = await recordUnitRevision(tx, {
 					unitId: params.collectionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					event: "update",
 					baseRevisionId: body.baseRevisionId,
@@ -502,7 +504,7 @@ export default new Elysia({ prefix: "/collections" })
 					await transitionUnitStatus(tx, {
 						unitId: params.collectionId,
 						toStatus: body.status,
-						actor: { kind: "profile", profileId: profile.unitId },
+						actor: { kind: "profile", profileId: entity.id },
 						authorization: {
 							kind: "interactive",
 							statusUpdateAllowed: statusUpdateDecision?.allowed ?? false,
@@ -534,12 +536,12 @@ export default new Elysia({ prefix: "/collections" })
 				tags: ["Collections"],
 			},
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
 			const result = await database.transaction((tx) =>
 				applyCollectionBatch(tx, {
 					collectionId: params.collectionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					baseRevisionId: body.baseItemsRevisionId,
 					commands: body.changes,
 					errors: CollectionBatchErrors,
@@ -578,7 +580,7 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "Add collection items atomically", tags: ["Collections"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
 			if (new Set(body.items.map(({ targetId }) => targetId)).size !== body.items.length)
 				throw new ValidationError({ items: "targetId values must be unique" });
@@ -587,7 +589,7 @@ export default new Elysia({ prefix: "/collections" })
 			return database.transaction(async (tx) => {
 				const result = await applyCollectionBatch(tx, {
 					collectionId: params.collectionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					baseRevisionId: body.baseItemsRevisionId,
 					commands: body.items.map(({ targetId }, index) => ({
 						opId: String(index),
@@ -633,12 +635,12 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "Move collection items atomically", tags: ["Collections"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
 			const result = await database.transaction((tx) =>
 				applyCollectionBatch(tx, {
 					collectionId: params.collectionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					baseRevisionId: body.baseItemsRevisionId,
 					commands: [
 						{
@@ -673,7 +675,7 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "Save collection item", tags: ["Collections"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
 			if (params.targetId === params.collectionId)
 				throw new ValidationError({ targetId: "a Collection cannot contain itself" });
@@ -681,7 +683,7 @@ export default new Elysia({ prefix: "/collections" })
 			const result = await database.transaction((tx) =>
 				applyCollectionBatch(tx, {
 					collectionId: params.collectionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					baseRevisionId: body.baseItemsRevisionId,
 					commands: [{ opId: "add", type: "item.add", targetId: params.targetId }],
 					errors: CollectionBatchErrors,
@@ -714,12 +716,12 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "Remove collection item", tags: ["Collections"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.update");
 			const result = await database.transaction((tx) =>
 				applyCollectionBatch(tx, {
 					collectionId: params.collectionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					baseRevisionId: body.baseItemsRevisionId,
 					commands: [{ opId: "remove", type: "item.remove", targetId: params.targetId }],
 					errors: CollectionBatchErrors,
@@ -799,7 +801,7 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "Restore a Collection item revision", tags: ["Collections"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await authorization.unit.ensure(params.collectionId, "unit.history.restore");
 			const result = await database.transaction(async (tx) => {
 				await ensureEditableCollection(tx, params.collectionId);
@@ -807,7 +809,7 @@ export default new Elysia({ prefix: "/collections" })
 					collectionId: params.collectionId,
 					sourceRevisionId: params.revisionId,
 					baseRevisionId: body.baseItemsRevisionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					message: body.message,
 					minor: body.minor,
 				});
@@ -832,15 +834,15 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "Favorite unit", tags: ["Collections"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensureCanRead(params.targetId);
-			const collectionId = await ensureFavorites(profile.unitId);
+			const collectionId = await ensureFavorites(entity.id);
 			const result = await database.transaction(async (tx) =>
 				mutateCollectionStructureWithHistory(
 					tx,
 					{
 						collectionId,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						baseRevisionId: body.baseItemsRevisionId,
 					},
 					async () => {
@@ -850,7 +852,7 @@ export default new Elysia({ prefix: "/collections" })
 								collectionId,
 								unitId: params.targetId,
 								position: await nextCollectionItemPosition(tx, collectionId),
-								addedByProfileId: profile.unitId,
+								addedByProfileId: entity.id,
 							})
 							.onConflictDoNothing();
 						return { favorited: true };
@@ -876,14 +878,14 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "Remove favorite unit", tags: ["Collections"] },
 		},
-		async ({ params, profile, body }) => {
-			const collectionId = await ensureFavorites(profile.unitId);
+		async ({ params, entity, body }) => {
+			const collectionId = await ensureFavorites(entity.id);
 			const result = await database.transaction(async (tx) =>
 				mutateCollectionStructureWithHistory(
 					tx,
 					{
 						collectionId,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						baseRevisionId: body.baseItemsRevisionId,
 					},
 					async () => {

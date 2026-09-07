@@ -29,7 +29,7 @@ BEGIN
             updated_at = now()
         FROM public.content_structure_node_progress AS progress
         WHERE progress.node_id = p_node_id
-          AND stat.profile_id = progress.profile_id
+          AND stat.auth_user_id = progress.auth_user_id
           AND stat.book_unit_id = p_book_unit_id;
     ELSE
         UPDATE public.book_chapter_stat SET
@@ -48,18 +48,18 @@ BEGIN
             updated_at = now()
         FROM public.content_structure_node_progress AS progress
         WHERE progress.node_id = p_node_id
-          AND stat.profile_id = progress.profile_id
+          AND stat.auth_user_id = progress.auth_user_id
           AND stat.book_unit_id = p_book_unit_id;
 
         INSERT INTO public.book_chapter_progress_stat (
-            profile_id, book_unit_id, all_completed_count, public_completed_count
+            auth_user_id, book_unit_id, all_completed_count, public_completed_count
         )
-        SELECT progress.profile_id, p_book_unit_id, p_all_delta, p_public_delta
+        SELECT progress.auth_user_id, p_book_unit_id, p_all_delta, p_public_delta
         FROM public.content_structure_node_progress AS progress
         WHERE progress.node_id = p_node_id
           AND NOT EXISTS (
               SELECT 1 FROM public.book_chapter_progress_stat AS existing
-              WHERE existing.profile_id = progress.profile_id
+              WHERE existing.auth_user_id = progress.auth_user_id
                 AND existing.book_unit_id = p_book_unit_id
           );
     END IF;
@@ -189,7 +189,7 @@ BEGIN
                 public_completed_count = public_completed_count
                     - CASE WHEN scope.public_eligible THEN 1 ELSE 0 END,
                 updated_at = now()
-            WHERE profile_id = OLD.profile_id AND book_unit_id = scope.book_unit_id;
+            WHERE auth_user_id = OLD.auth_user_id AND book_unit_id = scope.book_unit_id;
         END IF;
     END IF;
     IF TG_OP <> 'DELETE' THEN
@@ -201,14 +201,14 @@ BEGIN
         WHERE node.id = NEW.node_id;
         IF scope.all_eligible THEN
             INSERT INTO public.book_chapter_progress_stat (
-                profile_id, book_unit_id, all_completed_count, public_completed_count
+                auth_user_id, book_unit_id, all_completed_count, public_completed_count
             ) VALUES (
-                NEW.profile_id,
+                NEW.auth_user_id,
                 scope.book_unit_id,
                 1,
                 CASE WHEN scope.public_eligible THEN 1 ELSE 0 END
             )
-            ON CONFLICT (profile_id, book_unit_id) DO UPDATE SET
+            ON CONFLICT (auth_user_id, book_unit_id) DO UPDATE SET
                 all_completed_count = public.book_chapter_progress_stat.all_completed_count + 1,
                 public_completed_count = public.book_chapter_progress_stat.public_completed_count
                     + EXCLUDED.public_completed_count,
@@ -319,7 +319,7 @@ FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_post();
 DROP TRIGGER IF EXISTS book_chapter_progress_stat_maintain
 ON public.content_structure_node_progress;
 CREATE TRIGGER book_chapter_progress_stat_maintain
-AFTER INSERT OR DELETE OR UPDATE OF profile_id, node_id
+AFTER INSERT OR DELETE OR UPDATE OF auth_user_id, node_id
 ON public.content_structure_node_progress
 FOR EACH ROW EXECUTE FUNCTION public.maintain_book_chapter_from_progress();
 

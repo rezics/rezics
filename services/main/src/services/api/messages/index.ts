@@ -1,26 +1,33 @@
-import type { StaticDecode } from "typebox";
-import { StatusCodes } from "http-status-codes";
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
+import type { StaticDecode } from "typebox";
 
 import session from "../../auth/session";
+import { estimateCount } from "../../counts/contract";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
-import { estimateCount } from "../../counts/contract";
-import { firstUnitLocalizationTitle } from "../../units/localization";
 import {
+	accountEntityBlock,
 	conversation,
 	conversationParticipantStat,
 	conversationRead,
 	message,
-	unit,
-	profile as profileTable,
-	profileBlock,
 } from "../../database/schema";
+import { authEntity } from "../../database/schema/participation";
 import { createNotification } from "../../notifications/service";
 import { parseJsonCursor } from "../../pagination";
+import { publicEntityName } from "../../participation/presentation";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
+import { UserNotFound } from "../users/errors";
+import {
+	ConversationNotFound,
+	ConversationParticipantsInvalid,
+	DirectMessageBlocked,
+	InvalidMessageCursor,
+	MessageNotFound,
+} from "./errors";
 import {
 	ConversationListResponse,
 	ConversationParams,
@@ -34,14 +41,19 @@ import {
 	ReadConversationResponse,
 	SendMessageBody,
 } from "./schema";
-import { UserNotFound } from "../users/errors";
-import {
-	ConversationNotFound,
-	ConversationParticipantsInvalid,
-	DirectMessageBlocked,
-	InvalidMessageCursor,
-	MessageNotFound,
-} from "./errors";
+
+const messageSelection = {
+	id: message.id,
+	conversationId: message.conversationId,
+	senderEntityId: message.senderEntityId,
+	content: message.content,
+	deletedAt: message.deletedAt,
+	createdAt: message.createdAt,
+	updatedAt: message.updatedAt,
+};
+function otherConversationEntity(authUserId: string) {
+	return sql<string>`case when ${conversation.participantLowAuthUserId} = ${authUserId} then ${conversation.participantHighEntityId} else ${conversation.participantLowEntityId} end`;
+}
 
 const Cursor = t.Object(
 	{
@@ -76,16 +88,16 @@ function decodeCursor(value: string | undefined, scope: string) {
 async function findParticipant(conversationId: string, userId: string) {
 	const [row] = await database
 		.select({
-			low: conversation.participantLowProfileId,
-			high: conversation.participantHighProfileId,
+			low: conversation.participantLowAuthUserId,
+			high: conversation.participantHighAuthUserId,
 		})
 		.from(conversation)
 		.where(
 			and(
 				eq(conversation.id, conversationId),
 				or(
-					eq(conversation.participantLowProfileId, userId),
-					eq(conversation.participantHighProfileId, userId),
+					eq(conversation.participantLowAuthUserId, userId),
+					eq(conversation.participantHighAuthUserId, userId),
 				),
 			),
 		)
@@ -107,18 +119,15 @@ export default new Elysia({ prefix: "/messages" })
 			},
 			detail: { summary: "List direct-message conversations", tags: ["Messages"] },
 		},
-		async ({ profile, query }) => {
+		async ({ user, query }) => {
 			const cursor = decodeCursor(query.cursor, "conversations");
 			const boundary = cursor;
 			const limit = query.limit ?? 30;
 			const candidates = await database
 				.select({
 					id: conversation.id,
-					otherProfileId: sql<string>`case when ${conversation.participantLowProfileId} = ${profile.unitId} then ${conversation.participantHighProfileId} else ${conversation.participantLowProfileId} end`,
-					otherUserName: sql<string | null>`(
-						select p.name from profile p
-						where p.id = case when ${conversation.participantLowProfileId} = ${profile.unitId} then ${conversation.participantHighProfileId} else ${conversation.participantLowProfileId} end
-					)`,
+					otherEntityId: otherConversationEntity(user.id),
+					otherUserName: publicEntityName(otherConversationEntity(user.id)),
 					lastMessageAt: conversationParticipantStat.lastMessageAt,
 					lastMessage: sql<string | null>`(
 						select m.content from message m
@@ -134,7 +143,7 @@ export default new Elysia({ prefix: "/messages" })
 				.innerJoin(conversation, eq(conversation.id, conversationParticipantStat.conversationId))
 				.where(
 					and(
-						eq(conversationParticipantStat.profileId, profile.unitId),
+						eq(conversationParticipantStat.authUserId, user.id),
 						boundary
 							? sql`(${conversationParticipantStat.sortAt} < ${boundary.date} or (${conversationParticipantStat.sortAt} = ${boundary.date} and ${conversationParticipantStat.conversationId} < ${boundary.id}))`
 							: undefined,
@@ -180,52 +189,64 @@ export default new Elysia({ prefix: "/messages" })
 			},
 			detail: { summary: "Create or find a direct-message conversation", tags: ["Messages"] },
 		},
-		async ({ profile, body }) => {
-			if (body.participantProfileId === profile.unitId) throw new ConversationParticipantsInvalid();
-			const [target] = await database
-				.select({ id: profileTable.id })
-				.from(profileTable)
-				.innerJoin(unit, eq(unit.id, profileTable.id))
-				.where(and(eq(profileTable.id, body.participantProfileId), eq(unit.status, "published")))
-				.limit(1);
-			if (!target) throw new UserNotFound();
-			const [low, high] =
-				profile.unitId < body.participantProfileId
-					? [profile.unitId, body.participantProfileId]
-					: [body.participantProfileId, profile.unitId];
-			const id = await database.transaction(async (tx) => {
+		async ({ user, body }) =>
+			database.transaction(async (tx) => {
+				const [self] = await tx
+					.select()
+					.from(authEntity)
+					.where(and(eq(authEntity.authUserId, user.id), eq(authEntity.state, "active")))
+					.limit(1);
+				const [target] = await tx
+					.select()
+					.from(authEntity)
+					.where(
+						and(eq(authEntity.entityId, body.participantEntityId), eq(authEntity.state, "active")),
+					)
+					.limit(1);
+				if (!self || !target) throw new UserNotFound();
+				if (self.authUserId === target.authUserId) throw new ConversationParticipantsInvalid();
+				const [low, high] = self.authUserId < target.authUserId ? [self, target] : [target, self];
 				const [blocked] = await tx
-					.select({ id: profileBlock.blockerProfileId })
-					.from(profileBlock)
+					.select({ id: accountEntityBlock.blockerAuthUserId })
+					.from(accountEntityBlock)
 					.where(
 						or(
-							and(eq(profileBlock.blockerProfileId, low), eq(profileBlock.blockedProfileId, high)),
-							and(eq(profileBlock.blockerProfileId, high), eq(profileBlock.blockedProfileId, low)),
+							and(
+								eq(accountEntityBlock.blockerAuthUserId, self.authUserId),
+								eq(accountEntityBlock.blockedEntityId, target.entityId),
+							),
+							and(
+								eq(accountEntityBlock.blockerAuthUserId, target.authUserId),
+								eq(accountEntityBlock.blockedEntityId, self.entityId),
+							),
 						),
 					)
 					.limit(1);
 				if (blocked) throw new DirectMessageBlocked();
 				const [created] = await tx
 					.insert(conversation)
-					.values({ participantLowProfileId: low, participantHighProfileId: high })
+					.values({
+						participantLowAuthUserId: low.authUserId,
+						participantHighAuthUserId: high.authUserId,
+						participantLowEntityId: low.entityId,
+						participantHighEntityId: high.entityId,
+					})
 					.onConflictDoNothing()
 					.returning({ id: conversation.id });
-				if (created) return created.id;
+				if (created) return created;
 				const [existing] = await tx
 					.select({ id: conversation.id })
 					.from(conversation)
 					.where(
 						and(
-							eq(conversation.participantLowProfileId, low),
-							eq(conversation.participantHighProfileId, high),
+							eq(conversation.participantLowAuthUserId, low.authUserId),
+							eq(conversation.participantHighAuthUserId, high.authUserId),
 						),
 					)
 					.limit(1);
-				if (!existing) throw new Error("Conversation upsert did not return a row");
-				return existing.id;
-			});
-			return { id };
-		},
+				if (!existing) throw new Error("Conversation insertion failed");
+				return existing;
+			}),
 	)
 	.get(
 		"/conversations/:conversationId",
@@ -238,13 +259,13 @@ export default new Elysia({ prefix: "/messages" })
 			},
 			detail: { summary: "Get direct-message conversation", tags: ["Messages"] },
 		},
-		async ({ profile, params }) => {
-			const otherProfileId = await findParticipant(params.conversationId, profile.unitId);
+		async ({ user, params }) => {
+			await findParticipant(params.conversationId, user.id);
 			const [row] = await database
 				.select({
 					id: conversation.id,
-					otherProfileId: sql<string>`${otherProfileId}`,
-					otherUserName: firstUnitLocalizationTitle(profileTable.id),
+					otherEntityId: otherConversationEntity(user.id),
+					otherUserName: publicEntityName(otherConversationEntity(user.id)),
 					lastMessageAt: conversationParticipantStat.lastMessageAt,
 					lastMessage: sql<string | null>`(
 						select m.content from message m
@@ -257,11 +278,10 @@ export default new Elysia({ prefix: "/messages" })
 				})
 				.from(conversationParticipantStat)
 				.innerJoin(conversation, eq(conversation.id, conversationParticipantStat.conversationId))
-				.innerJoin(profileTable, eq(profileTable.id, otherProfileId))
 				.where(
 					and(
 						eq(conversationParticipantStat.conversationId, params.conversationId),
-						eq(conversationParticipantStat.profileId, profile.unitId),
+						eq(conversationParticipantStat.authUserId, user.id),
 					),
 				)
 				.limit(1);
@@ -289,13 +309,13 @@ export default new Elysia({ prefix: "/messages" })
 			},
 			detail: { summary: "List direct messages", tags: ["Messages"] },
 		},
-		async ({ profile, params, query }) => {
-			await findParticipant(params.conversationId, profile.unitId);
+		async ({ user, params, query }) => {
+			await findParticipant(params.conversationId, user.id);
 			const cursor = decodeCursor(query.cursor, params.conversationId);
 			const boundary = cursor;
 			const limit = query.limit ?? 30;
 			const candidates = await database
-				.select()
+				.select(messageSelection)
 				.from(message)
 				.where(
 					and(
@@ -339,31 +359,35 @@ export default new Elysia({ prefix: "/messages" })
 			},
 			detail: { summary: "Send direct message", tags: ["Messages"] },
 		},
-		async ({ profile, params, body }) => {
+		async ({ user, params, body }) => {
 			const result = await database.transaction(async (tx) => {
 				const [current] = await tx
 					.select({
-						low: conversation.participantLowProfileId,
-						high: conversation.participantHighProfileId,
+						low: conversation.participantLowAuthUserId,
+						high: conversation.participantHighAuthUserId,
+						lowEntity: conversation.participantLowEntityId,
+						highEntity: conversation.participantHighEntityId,
 					})
 					.from(conversation)
 					.where(eq(conversation.id, params.conversationId))
 					.limit(1);
-				if (!current || (current.low !== profile.unitId && current.high !== profile.unitId))
+				if (!current || (current.low !== user.id && current.high !== user.id))
 					throw new ConversationNotFound();
-				const recipientProfileId = current.low === profile.unitId ? current.high : current.low;
+				const recipientAuthUserId = current.low === user.id ? current.high : current.low;
+				const senderEntityId = current.low === user.id ? current.lowEntity : current.highEntity;
+				const recipientEntityId = current.low === user.id ? current.highEntity : current.lowEntity;
 				const [blocked] = await tx
-					.select({ id: profileBlock.blockerProfileId })
-					.from(profileBlock)
+					.select({ id: accountEntityBlock.blockerAuthUserId })
+					.from(accountEntityBlock)
 					.where(
 						or(
 							and(
-								eq(profileBlock.blockerProfileId, profile.unitId),
-								eq(profileBlock.blockedProfileId, recipientProfileId),
+								eq(accountEntityBlock.blockerAuthUserId, user.id),
+								eq(accountEntityBlock.blockedEntityId, recipientEntityId),
 							),
 							and(
-								eq(profileBlock.blockerProfileId, recipientProfileId),
-								eq(profileBlock.blockedProfileId, profile.unitId),
+								eq(accountEntityBlock.blockerAuthUserId, recipientAuthUserId),
+								eq(accountEntityBlock.blockedEntityId, senderEntityId),
 							),
 						),
 					)
@@ -373,14 +397,15 @@ export default new Elysia({ prefix: "/messages" })
 					.insert(message)
 					.values({
 						conversationId: params.conversationId,
-						senderProfileId: profile.unitId,
+						senderAuthUserId: user.id,
+						senderEntityId,
 						content: body.content.trim(),
 					})
-					.returning();
+					.returning(messageSelection);
 				if (!created) throw new Error("Message insert did not return a row");
 				await createNotification(tx, {
-					recipientProfileId: recipientProfileId,
-					actorProfileId: profile.unitId,
+					recipientAuthUserId,
+					actorProfileId: senderEntityId,
 					kind: "direct_message",
 					payload: {
 						type: "direct_message",
@@ -405,7 +430,7 @@ export default new Elysia({ prefix: "/messages" })
 			},
 			detail: { summary: "Mark direct-message conversation read", tags: ["Messages"] },
 		},
-		async ({ profile, params, body }) => {
+		async ({ user, params, body }) => {
 			const now = await database.transaction(async (tx) => {
 				const [participant] = await tx
 					.select({
@@ -416,7 +441,7 @@ export default new Elysia({ prefix: "/messages" })
 					.where(
 						and(
 							eq(conversationParticipantStat.conversationId, params.conversationId),
-							eq(conversationParticipantStat.profileId, profile.unitId),
+							eq(conversationParticipantStat.authUserId, user.id),
 						),
 					)
 					.for("update")
@@ -442,12 +467,12 @@ export default new Elysia({ prefix: "/messages" })
 					.insert(conversationRead)
 					.values({
 						conversationId: params.conversationId,
-						profileId: profile.unitId,
+						authUserId: user.id,
 						lastReadMessageId: body.lastReadMessageId,
 						readAt,
 					})
 					.onConflictDoUpdate({
-						target: [conversationRead.conversationId, conversationRead.profileId],
+						target: [conversationRead.conversationId, conversationRead.authUserId],
 						set: { lastReadMessageId: body.lastReadMessageId, readAt },
 					});
 				await tx
@@ -456,7 +481,7 @@ export default new Elysia({ prefix: "/messages" })
 					.where(
 						and(
 							eq(conversationParticipantStat.conversationId, params.conversationId),
-							eq(conversationParticipantStat.profileId, profile.unitId),
+							eq(conversationParticipantStat.authUserId, user.id),
 						),
 					);
 				return readAt;
@@ -483,14 +508,14 @@ export default new Elysia({ prefix: "/messages" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ profile, params }) => {
+		async ({ user, params }) => {
 			const [deleted] = await database
 				.update(message)
 				.set({ content: null, deletedAt: new Date() })
 				.where(
 					and(
 						eq(message.id, params.messageId),
-						eq(message.senderProfileId, profile.unitId),
+						eq(message.senderAuthUserId, user.id),
 						isNull(message.deletedAt),
 					),
 				)

@@ -1,114 +1,113 @@
-import { and, desc, eq, inArray, isNull, max, notInArray, sql } from "drizzle-orm";
-import { createSchemaFactory } from "drizzle-orm/zod";
-import { z } from "zod";
 import { AvatarTypeValues, FontAwesomeIconPrefixValues } from "@rezics/avatar";
 import {
-	WikiPostBlockHostPolicy,
-	PollContentBlock,
-	UnitReferencedBlockDocument,
-	ZonePageBlockHostPolicy,
-	ZoneAppearanceDocument,
 	assertBlockQueryBudget,
 	assertUnitReferencedBlockDocument,
 	assertWikiPostPortableTextDocument,
 	isDocument,
 	isPortableTextDocument,
+	PollContentBlock,
 	type PortableTextDocument as PortableTextDocumentValue,
+	UnitReferencedBlockDocument,
+	WikiPostBlockHostPolicy,
+	ZoneAppearanceDocument,
+	ZonePageBlockHostPolicy,
 } from "@rezics/block";
-import { assertFilterDocument, type FilterDocument } from "@rezics/filter";
-import type { StaticDecode, TSchema } from "typebox";
-import { type ContentLanguage, ContentLanguageValues, isContentLanguage } from "@rezics/i18n";
 import {
 	type ContentLanguageSupport,
 	normalizeContentLanguageSupport,
 } from "@rezics/content-language";
+import { assertFilterDocument, type FilterDocument } from "@rezics/filter";
+import { type ContentLanguage, ContentLanguageValues, isContentLanguage } from "@rezics/i18n";
+import { and, desc, eq, inArray, isNull, max, notInArray, sql } from "drizzle-orm";
+import { createSchemaFactory } from "drizzle-orm/zod";
+import type { StaticDecode, TSchema } from "typebox";
+import { z } from "zod";
 
-import type { DatabaseTransaction } from "../database";
+import { ensurePublicZoneThemeHeroAsset } from "../api/image-assets/service";
 import type { Authorization } from "../authorization";
-import { ensureMetadataOnlyChangeAllowed } from "./metadata-only";
-import { isFirstUnitLocalization } from "./localization";
+import { syncUnitLocalizationContentMetrics } from "../content-metrics/service";
+import type { DatabaseTransaction } from "../database";
 import {
 	audio,
 	book,
 	collection,
+	creditAttribution,
+	CreditAttributionRoleValues,
 	entity,
-	software,
-	softwareRequirement,
-	media,
 	MaximumAudioTracksPerVideo,
+	media,
 	poll,
 	pollOption,
 	PollOptionSourceKindValues,
 	post,
-	profile,
 	realm,
 	realmPin,
 	realmRule,
-	realmRuleRevision,
 	RealmRuleAcknowledgementModeValues,
+	realmRuleRevision,
 	release,
 	revisionContent,
 	series,
 	seriesRelease,
+	software,
+	softwareRequirement,
 	subjectAssociation,
+	SubjectAssociationRoleValues,
 	unit,
-	UnitKindValues,
-	VariantCapableUnitKindValues,
-	creditAttribution,
-	unitLocalization,
-	videoAudioTrack,
 	unitContentLanguageSupport,
+	UnitKindValues,
+	unitLocalization,
 	unitRevision,
 	unitRevisionCreditAttribution,
 	unitRevisionHead,
 	unitRevisionSlot,
 	UnitRevisionSlotRoleValues,
-	CreditAttributionRoleValues,
-	SubjectAssociationRoleValues,
 	unitRevisionTag,
 	unitTag,
 	unitVariant,
+	VariantCapableUnitKindValues,
 	video,
+	videoAudioTrack,
 	zone,
 } from "../database/schema";
 import {
 	canonicalRevisionJson as canonicalJson,
 	findOrCreateRevisionContent,
+	type MaterializedRevisionContent,
 	materializeStoredRevisionContent,
 	normalizeRevisionJson as normalizeJson,
-	type MaterializedRevisionContent,
 } from "../history/content";
+import { recordProfileResourceParticipation } from "../history/participation";
 import {
 	compareBytewisePositions,
 	compareFractionalPositions,
 	FractionalPositionStorageMaximumBytes,
 	isFractionalPosition,
 } from "../ordering/position";
+import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
+import { ensureWikiAssociationContextPosts } from "./association-context";
+import { ensureDirectCreditAttributionAllowed } from "./attribution-authorization";
+import {
+	isContentLanguageSupportUnitKind,
+	replaceUnitContentLanguageSupport,
+} from "./content-language-support";
+import { insertUnit } from "./create";
 import {
 	AssociationContextPostInvalid,
-	RevisionCreditEntityInvalid,
 	RevisionContributionActorRequired,
+	RevisionCreditEntityInvalid,
 	UnitRevisionConflict,
 } from "./errors";
+import { isFirstUnitLocalization } from "./localization";
+import { ensureMetadataOnlyChangeAllowed } from "./metadata-only";
 import type {
 	RevisionContributionInput,
 	TrustedRevisionContribution,
 } from "./revision-contribution";
 import { defaultRevisionContribution } from "./revision-contribution";
-import { ensureWikiAssociationContextPosts } from "./association-context";
-import { insertUnit } from "./create";
 import { finalizeInitialUnitStatusRevision } from "./status";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
-import { ensureDirectCreditAttributionAllowed } from "./attribution-authorization";
-import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
-import { syncUnitLocalizationContentMetrics } from "../content-metrics/service";
-import { recordProfileResourceParticipation } from "../history/participation";
-import {
-	isContentLanguageSupportUnitKind,
-	replaceUnitContentLanguageSupport,
-} from "./content-language-support";
 import { restoreVideoAudioTracks } from "./video-audio-tracks";
-import { ensurePublicZoneThemeHeroAsset } from "../api/image-assets/service";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
 
@@ -251,9 +250,6 @@ const UnitLocalizationRevisionDocumentSchema = z.object({
 	localization: unitLocalizationStateSchema,
 });
 type UnitLocalizationState = z.infer<typeof unitLocalizationStateSchema>;
-const profileStateSchema = schemaFactory
-	.createSelectSchema(profile)
-	.omit({ id: true, authUserId: true, joinedAt: true, createdAt: true, updatedAt: true });
 const bookStateSchema = schemaFactory
 	.createSelectSchema(book, { metadataOnly: z.boolean().default(true) })
 	.omit({ id: true, createdAt: true, updatedAt: true });
@@ -373,11 +369,6 @@ async function snapshotExtension(
 	kind: UnitSnapshot["kind"],
 ) {
 	switch (kind) {
-		case "profile":
-			return parseSnapshotState(
-				profileStateSchema,
-				(await tx.select().from(profile).where(eq(profile.id, unitId)).limit(1))[0],
-			);
 		case "book":
 			return parseSnapshotState(
 				bookStateSchema,
@@ -604,9 +595,6 @@ async function restoreExtension(
 		return;
 	if (!value) throw new Error(`Missing ${kind} extension in Unit snapshot`);
 	switch (kind) {
-		case "profile":
-			await tx.update(profile).set(profileStateSchema.parse(value)).where(eq(profile.id, unitId));
-			break;
 		case "book":
 			await tx.update(book).set(bookStateSchema.parse(value)).where(eq(book.id, unitId));
 			break;
@@ -816,7 +804,7 @@ export async function restoreUnitSnapshot(
 			mediaStateSchema.parse(snapshot.extension).metadataOnly,
 		);
 	const currentCredits = await tx
-		.select({ creditedUnitId: creditAttribution.creditedUnitId })
+		.select({ creditedEntityId: creditAttribution.creditedEntityId })
 		.from(creditAttribution)
 		.where(eq(creditAttribution.sourceUnitId, unitId));
 	const currentSubjectAssociations = await tx
@@ -827,7 +815,7 @@ export async function restoreUnitSnapshot(
 		.from(subjectAssociation)
 		.where(eq(subjectAssociation.unitId, unitId));
 	const currentCreditTargetIds = new Set(
-		currentCredits.map(({ creditedUnitId }) => creditedUnitId),
+		currentCredits.map(({ creditedEntityId }) => creditedEntityId),
 	);
 	const currentSubjectTargetIds = new Set(
 		currentSubjectAssociations.map(({ entityId }) => entityId),
@@ -838,7 +826,7 @@ export async function restoreUnitSnapshot(
 		),
 	);
 	for (const targetUnitId of credits
-		.map(({ creditedUnitId }) => creditedUnitId)
+		.map(({ creditedEntityId }) => creditedEntityId)
 		.filter((targetUnitId) => !currentCreditTargetIds.has(targetUnitId))
 		.sort((left, right) => left.localeCompare(right)))
 		await ensureDirectCreditAttributionAllowed(authorization, tx, targetUnitId);

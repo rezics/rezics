@@ -1,10 +1,17 @@
 import { and, desc, eq, gt, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 
+import {
+	UnitAlreadyDeleted,
+	UnitLifecycleChanged,
+	UnitLifecycleProtected,
+	UnitMergeRequestConflict,
+	UnitNotDeleted,
+} from "../api/governance/errors";
 import { recordAuditEvent } from "../audit";
 import { BootstrapUnitIds } from "../bootstrap/data";
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
 import {
-	profile,
+	entityIdentity,
 	governanceDecision,
 	unit,
 	unitMergeGraphLock,
@@ -17,17 +24,10 @@ import {
 	createGovernanceDecision,
 	type GovernanceRuleReference,
 } from "../governance/decision-service";
-import {
-	UnitAlreadyDeleted,
-	UnitLifecycleChanged,
-	UnitLifecycleProtected,
-	UnitMergeRequestConflict,
-	UnitNotDeleted,
-} from "../api/governance/errors";
 import { UnitNotFound } from "./errors";
 import { recordUnitRevision } from "./history";
-import type { RevisionContributionInput } from "./revision-contribution";
 import { firstUnitLocalizationTitle } from "./localization";
+import type { RevisionContributionInput } from "./revision-contribution";
 import { transitionUnitStatus } from "./status";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
 
@@ -77,11 +77,11 @@ async function presentPlatformUnits<
 	const owners = ownerIds.length
 		? await executor
 				.select({
-					profileId: profile.id,
-					label: firstUnitLocalizationTitle(profile.id),
+					profileId: entityIdentity.id,
+					label: firstUnitLocalizationTitle(entityIdentity.id),
 				})
-				.from(profile)
-				.where(inArray(profile.id, ownerIds))
+				.from(entityIdentity)
+				.where(inArray(entityIdentity.id, ownerIds))
 		: [];
 	const ownerById = new Map(owners.map((owner) => [owner.profileId, owner]));
 	return rows.map(

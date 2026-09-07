@@ -1,9 +1,9 @@
 import { t } from "elysia";
 
-import { UserAccountStateValues } from "../../database/schema";
 import { CountResultSchema } from "../../counts/contract";
-import { DateTime, Uuid } from "../schema";
+import { UserAccountStateValues } from "../../database/schema";
 import { GovernanceRuleReferences } from "../governance/schema";
+import { DateTime, Uuid } from "../schema";
 
 export const PlatformUsersQuery = t.Object(
 	{
@@ -26,12 +26,12 @@ export const PlatformUserAccountStateResponse = t.Object({
 	expiresAt: t.Nullable(DateTime),
 	revision: t.Integer({ minimum: 0 }),
 	updatedAt: t.Nullable(DateTime),
-	updatedByProfileId: t.Nullable(Uuid),
+	updatedByAuthUserId: t.Nullable(Uuid),
 });
 
 export const PlatformUserResponse = t.Object({
 	userId: Uuid,
-	profileId: t.Nullable(Uuid),
+	entityId: t.Nullable(Uuid),
 	name: t.String(),
 	email: t.String(),
 	emailVerified: t.Boolean(),

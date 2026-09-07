@@ -1,10 +1,19 @@
-import { and, asc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
+import { and, asc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
+import {
+	getPublicEntitySummariesByIds,
+	type PublicEntitySummary,
+} from "../participation/presentation";
 
+import type { PresentedAvatar } from "@rezics/avatar";
+import { getUnitReadCondition } from "../authorization/unit/query";
+import { exactCount, lowerBoundCount, type CountResult } from "../counts/contract";
 import { database, type DatabaseExecutor } from "../database";
-import { creditAttribution, unit, unitFollowStat } from "../database/schema";
 import { toSafeInteger } from "../database/integer";
+import { creditAttribution, unit, unitFollowStat } from "../database/schema";
 import type { CreditAttributionRole, UnitKind } from "../database/schema/contract-values";
+import { WorkPolicy } from "../performance/policy";
+import { presentAvatar } from "./avatar";
 import {
 	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationLanguage,
@@ -16,11 +25,6 @@ import {
 	getPublicCanonicalUnitSlugAddresses,
 	type PublicCanonicalUnitSlugAddress,
 } from "./slug-address";
-import { presentAvatar } from "./avatar";
-import type { PresentedAvatar } from "@rezics/avatar";
-import { getUnitReadCondition } from "../authorization/unit/query";
-import { exactCount, lowerBoundCount, type CountResult } from "../counts/contract";
-import { WorkPolicy } from "../performance/policy";
 
 export const PublisherAttributionRole = "publisher" as const;
 
@@ -28,18 +32,18 @@ export type UnitAttributionSummary = {
 	readonly id: string;
 	readonly role: CreditAttributionRole;
 	readonly position: string;
-	readonly creditedUnit: {
-		readonly id: string;
-		readonly kind: UnitKind;
-		readonly language: ContentLanguage;
-		readonly slugAddress: PublicCanonicalUnitSlugAddress | null;
-		readonly title: string | null;
-		readonly summary: string | null;
-		readonly avatar: PresentedAvatar | null;
-	};
+	readonly creditedEntity: PublicEntitySummary;
 };
 
-export type UnitSummary = UnitAttributionSummary["creditedUnit"];
+export type UnitSummary = {
+	readonly id: string;
+	readonly kind: UnitKind;
+	readonly language: ContentLanguage;
+	readonly slugAddress: PublicCanonicalUnitSlugAddress | null;
+	readonly title: string | null;
+	readonly summary: string | null;
+	readonly avatar: PresentedAvatar | null;
+};
 
 export type UnitPresentation = Pick<
 	UnitSummary,
@@ -56,11 +60,14 @@ interface AttributionSummaryRow {
 	readonly id: string;
 	readonly role: CreditAttributionRole;
 	readonly position: string;
-	readonly creditedUnitId: string;
+	readonly creditedEntityId: string;
 }
 
-export type UnitAttributionSummaryWithStatistics = Omit<UnitAttributionSummary, "creditedUnit"> & {
-	readonly creditedUnit: UnitSummary & {
+export type UnitAttributionSummaryWithStatistics = Omit<
+	UnitAttributionSummary,
+	"creditedEntity"
+> & {
+	readonly creditedEntity: PublicEntitySummary & {
 		readonly creditedBookCount: CountResult;
 		readonly followerCount: number;
 	};
@@ -153,8 +160,8 @@ async function getAttributionStatisticsByUnitIds(
 	Map<string, { readonly creditedBookCount: CountResult; readonly followerCount: number }>
 > {
 	if (!unitIds.length) return new Map();
-	type CreditedBookRow = { readonly creditedUnitId: string; readonly sourceUnitId: string };
-	const creditedUnitArray = sql`array[${sql.join(
+	type CreditedBookRow = { readonly creditedEntityId: string; readonly sourceUnitId: string };
+	const creditedEntityArray = sql`array[${sql.join(
 		[...new Set(unitIds)].map((unitId) => sql`${unitId}::uuid`),
 		sql`, `,
 	)}]::uuid[]`;
@@ -167,14 +174,14 @@ async function getAttributionStatisticsByUnitIds(
 			.from(unitFollowStat)
 			.where(inArray(unitFollowStat.unitId, [...unitIds])),
 		database.execute<CreditedBookRow>(sql`
-			select requested.credited_unit_id as "creditedUnitId",
+			select requested.credited_entity_id as "creditedEntityId",
 				bounded.source_unit_id as "sourceUnitId"
-			from unnest(${creditedUnitArray}) as requested(credited_unit_id)
+			from unnest(${creditedEntityArray}) as requested(credited_entity_id)
 			cross join lateral (
 				select distinct attribution.source_unit_id
 				from ${creditAttribution} as attribution
 				inner join ${unit} as source_unit on source_unit.id = attribution.source_unit_id
-				where attribution.credited_unit_id = requested.credited_unit_id
+				where attribution.credited_entity_id = requested.credited_entity_id
 					and attribution.role in ('author', 'co-author')
 					and source_unit.kind = 'book'
 					and source_unit.status = 'published'
@@ -193,8 +200,8 @@ async function getAttributionStatisticsByUnitIds(
 		]),
 	);
 	const creditedBookValues = new Map<string, number>();
-	for (const { creditedUnitId } of creditedBookRows.rows)
-		creditedBookValues.set(creditedUnitId, (creditedBookValues.get(creditedUnitId) ?? 0) + 1);
+	for (const { creditedEntityId } of creditedBookRows.rows)
+		creditedBookValues.set(creditedEntityId, (creditedBookValues.get(creditedEntityId) ?? 0) + 1);
 	const creditedBookCount = (unitId: string): CountResult => {
 		const value = creditedBookValues.get(unitId) ?? 0;
 		return value < WorkPolicy.count.maxCreditedBookCountScan
@@ -224,7 +231,7 @@ export async function createProfilePublisherAttribution(
 		.insert(creditAttribution)
 		.values({
 			sourceUnitId: input.sourceUnitId,
-			creditedUnitId: input.profileId,
+			creditedEntityId: input.profileId,
 			role: PublisherAttributionRole,
 		})
 		.onConflictDoNothing();
@@ -253,7 +260,7 @@ export async function getAttributionSummariesByUnitIds(
 						bounded.id,
 						bounded.role,
 						bounded.position,
-						bounded.credited_unit_id as "creditedUnitId"
+						bounded.credited_entity_id as "creditedEntityId"
 					from unnest(array[${sql.join(
 						requestedSourceUnitIds.map((sourceUnitId) => sql`${sourceUnitId}::uuid`),
 						sql`, `,
@@ -263,7 +270,7 @@ export async function getAttributionSummariesByUnitIds(
 							attribution.id,
 							attribution.role,
 							attribution.position,
-							attribution.credited_unit_id
+							attribution.credited_entity_id
 						from ${creditAttribution} as attribution
 						where attribution.source_unit_id = requested.source_unit_id
 						order by attribution.position, attribution.id
@@ -278,7 +285,7 @@ export async function getAttributionSummariesByUnitIds(
 					id: creditAttribution.id,
 					role: creditAttribution.role,
 					position: creditAttribution.position,
-					creditedUnitId: creditAttribution.creditedUnitId,
+					creditedEntityId: creditAttribution.creditedEntityId,
 				})
 				.from(creditAttribution)
 				.where(inArray(creditAttribution.sourceUnitId, requestedSourceUnitIds))
@@ -287,18 +294,18 @@ export async function getAttributionSummariesByUnitIds(
 					asc(creditAttribution.position),
 					asc(creditAttribution.id),
 				);
-	const creditedUnits = await getPublicUnitSummariesByIds(
-		rows.map(({ creditedUnitId }) => creditedUnitId),
+	const creditedEntitys = await getPublicEntitySummariesByIds(
+		rows.map(({ creditedEntityId }) => creditedEntityId),
 		localizationLanguages,
 	);
 	for (const row of rows) {
-		const creditedUnit = creditedUnits.get(row.creditedUnitId);
-		if (!creditedUnit) continue;
+		const creditedEntity = creditedEntitys.get(row.creditedEntityId);
+		if (!creditedEntity) continue;
 		result.get(row.sourceUnitId)?.push({
 			id: row.id,
 			role: row.role,
 			position: row.position,
-			creditedUnit,
+			creditedEntity,
 		});
 	}
 	return result;
@@ -310,16 +317,18 @@ export async function getAttributionSummariesWithStatisticsByUnitIds(
 ): Promise<Map<string, UnitAttributionSummaryWithStatistics[]>> {
 	const summaries = await getAttributionSummariesByUnitIds(sourceUnitIds, localizationLanguages);
 	const statistics = await getAttributionStatisticsByUnitIds(
-		[...summaries.values()].flatMap((items) => items.map(({ creditedUnit }) => creditedUnit.id)),
+		[...summaries.values()].flatMap((items) =>
+			items.map(({ creditedEntity }) => creditedEntity.id),
+		),
 	);
 	return new Map(
 		[...summaries].map(([sourceUnitId, items]) => [
 			sourceUnitId,
 			items.map((item) => ({
 				...item,
-				creditedUnit: {
-					...item.creditedUnit,
-					...(statistics.get(item.creditedUnit.id) ?? {
+				creditedEntity: {
+					...item.creditedEntity,
+					...(statistics.get(item.creditedEntity.id) ?? {
 						creditedBookCount: exactCount(0),
 						followerCount: 0,
 					}),

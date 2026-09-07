@@ -1,7 +1,7 @@
+import { SearchContinuationToken } from "@rezics/filter";
+import { getActiveObservability } from "@rezics/observability";
 import type { StaticDecode } from "typebox";
 import { Check, Decode, Encode } from "typebox/value";
-import { getActiveObservability } from "@rezics/observability";
-import { SearchContinuationToken } from "@rezics/filter";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -10,12 +10,13 @@ import {
 } from "../../database/schema/contract-values";
 
 import { DateTime, DateTimeString } from ".";
+import { ReactionSummaryResponse } from "./action-response";
 import {
-	CollectionContentResponse,
-	toPortableTextResponse,
 	BookChapterNodeDetailResponse,
 	ChapterPostDetailResponse,
+	CollectionContentResponse,
 	ContentMetricResponse,
+	ContentStructureNodeListResponse,
 	EntityDetailResponse,
 	FeedNonReviewPostItemResponse,
 	FeedReviewItemResponse,
@@ -23,18 +24,17 @@ import {
 	FeedWikiItemResponse,
 	LocalizedContentMetricResponse,
 	MediaContentStructureNodeListResponse,
-	ContentStructureNodeListResponse,
 	OrdinaryPostDetailResponse,
 	PostDetailResponse,
 	ReviewDetailResponse,
 	SearchResponse,
-	UnitDetailResponse,
+	toPortableTextResponse,
 	UnitDetailAttributionSummaryResponse,
+	UnitDetailResponse,
 	UnitProgressStatisticsResponse,
 	UnitVariantContextResponse,
 	WikiPostDetailResponse,
 } from "./response";
-import { ReactionSummaryResponse } from "./action-response";
 
 describe("API response values", () => {
 	it("treats Search continuation tokens as opaque response values", () => {
@@ -372,7 +372,7 @@ describe("API response values", () => {
 			id: "00000000-0000-7000-8000-000000000001",
 			role: "author",
 			position: "a0",
-			creditedUnit: {
+			creditedEntity: {
 				id: "00000000-0000-7000-8000-000000000002",
 				kind: "profile",
 				language: "en",
@@ -389,8 +389,8 @@ describe("API response values", () => {
 		expect(
 			Check(UnitDetailAttributionSummaryResponse, {
 				...attribution,
-				creditedUnit: {
-					...attribution.creditedUnit,
+				creditedEntity: {
+					...attribution.creditedEntity,
 					creditedBookCount: { kind: "exact", value: -1 },
 				},
 			}),
@@ -398,7 +398,7 @@ describe("API response values", () => {
 		expect(
 			Check(UnitDetailAttributionSummaryResponse, {
 				...attribution,
-				creditedUnit: { ...attribution.creditedUnit, followerCount: 1.5 },
+				creditedEntity: { ...attribution.creditedEntity, followerCount: 1.5 },
 			}),
 		).toBe(false);
 	});

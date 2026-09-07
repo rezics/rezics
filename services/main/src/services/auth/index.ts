@@ -1,10 +1,11 @@
-import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { apiKey } from "@better-auth/api-key";
-import { betterAuth } from "better-auth/minimal";
-import { APIError } from "better-auth/api";
-import { captcha } from "better-auth/plugins";
-import { getActiveObservability } from "@rezics/observability";
+import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { ContentLanguageValues } from "@rezics/i18n";
+import { getActiveObservability } from "@rezics/observability";
+import { APIError } from "better-auth/api";
+import { betterAuth } from "better-auth/minimal";
+import { captcha } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
 
 import { CloudflareTurnstileTestSecretKey, env } from "../config";
 import { database } from "../database";
@@ -38,6 +39,24 @@ const turnstileVerificationConstraints =
 			};
 
 export const auth = betterAuth({
+	databaseHooks: {
+		session: {
+			create: {
+				before: async (session) => {
+					const [account] = await database
+						.select({ kind: schema.users.principalKind, erasedAt: schema.users.erasedAt })
+						.from(schema.users)
+						.where(eq(schema.users.id, session.userId))
+						.limit(1);
+					if (!account || account.kind !== "human" || account.erasedAt)
+						throw new APIError("FORBIDDEN", {
+							message: "Interactive authentication is unavailable for this principal",
+						});
+					return { data: session };
+				},
+			},
+		},
+	},
 	baseURL: env.BETTER_AUTH_URL,
 	basePath: "/api/auth",
 	secret: env.BETTER_AUTH_SECRET,

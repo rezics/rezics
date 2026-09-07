@@ -41,7 +41,7 @@ describe("Custom Theme external-live access mutation schema", () => {
 	it("distinguishes the permanent Bootstrap grant from expiring grants", () => {
 		const common = {
 			id: "019b76da-a800-7900-8000-000000000001",
-			grantedByProfileId: "019b76da-a800-7200-8000-000000000004",
+			grantedByAuthUserId: "019b76da-a800-7200-8000-000000000004",
 			createdAt: "2026-01-01T00:00:00.000Z",
 			updatedAt: "2026-01-01T00:00:00.000Z",
 		};

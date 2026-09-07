@@ -11,7 +11,7 @@ export const MessageCursorQuery = t.Object({
 export const ConversationParams = t.Object({ conversationId: Uuid });
 export const MessageParams = t.Object({ messageId: Uuid });
 
-export const CreateConversationBody = t.Object({ participantProfileId: Uuid });
+export const CreateConversationBody = t.Object({ participantEntityId: Uuid });
 export const SendMessageBody = t.Object({
 	content: t.String({ minLength: 1, maxLength: 20_000, pattern: ".*\\S.*" }),
 });
@@ -19,7 +19,7 @@ export const MarkConversationReadBody = t.Object({ lastReadMessageId: Uuid });
 
 export const ConversationResponse = t.Object({
 	id: Uuid,
-	otherProfileId: Uuid,
+	otherEntityId: Uuid,
 	otherUserName: t.Nullable(t.String()),
 	lastMessageAt: t.Nullable(DateTime),
 	lastMessage: t.Nullable(t.String()),
@@ -36,7 +36,7 @@ export const ConversationListResponse = t.Object({
 export const MessageResponse = t.Object({
 	id: Uuid,
 	conversationId: Uuid,
-	senderProfileId: Uuid,
+	senderEntityId: Uuid,
 	content: t.Nullable(t.String()),
 	deletedAt: t.Nullable(DateTime),
 	createdAt: DateTime,

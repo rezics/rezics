@@ -5,14 +5,15 @@ import {
 	foreignKey,
 	index,
 	integer,
+	primaryKey,
 	smallint,
 	text,
-	primaryKey,
 	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
 	createFractionalIndexPositionByteLengthConstraint,
@@ -20,10 +21,9 @@ import {
 	createUpdatedAtColumn,
 	fractionalIndexPosition,
 } from "./columns";
-import { profile } from "./profile";
-import { unit } from "./unit";
 import { post } from "./post";
 import { realm, realmUnit } from "./realm";
+import { unit } from "./unit";
 import { vocabularyNode } from "./vocabulary";
 
 /** Marker table proving that a Unit is a Tag. */
@@ -63,7 +63,7 @@ export const unitTag = pgTable(
 		tagId: uuid()
 			.notNull()
 			.references(() => tag.id, { onDelete: "cascade" }),
-		createdByProfileId: uuid().references(() => profile.id, {
+		createdByProfileId: uuid().references(() => entityIdentity.id, {
 			onDelete: "set null",
 		}),
 		pinned: boolean().default(false).notNull(),
@@ -104,7 +104,7 @@ export const profileRealmTagSubscription = pgTable(
 	{
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
 		realmId: uuid()
 			.notNull()
 			.references(() => realm.id, { onDelete: "cascade" }),
@@ -140,7 +140,7 @@ export const unitTagJudgment = pgTable(
 			.references(() => tag.id, { onDelete: "restrict" }),
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		fitVote: integer(),
 		spoilerLevel: smallint(),
 		fitUpdatedAt: createTimestampMsColumn(),
@@ -194,7 +194,7 @@ export const realmTagContext = pgTable(
 		contextPostId: uuid()
 			.notNull()
 			.references(() => post.id, { onDelete: "restrict" }),
-		createdByProfileId: uuid().references(() => profile.id, {
+		createdByProfileId: uuid().references(() => entityIdentity.id, {
 			onDelete: "set null",
 		}),
 		createdAt: createCreatedAtColumn(),
@@ -221,7 +221,7 @@ export const realmTagJudgment = pgTable(
 		tagId: uuid().notNull(),
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		fitVote: integer(),
 		spoilerLevel: smallint(),
 		fitUpdatedAt: createTimestampMsColumn(),
@@ -308,7 +308,7 @@ export const realmUnitTag = pgTable(
 		position: fractionalIndexPosition().default(sql`'a0'::text`).notNull(),
 		createdByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -336,7 +336,7 @@ export const profileUnitTag = pgTable(
 	{
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),

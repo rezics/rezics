@@ -1,11 +1,11 @@
 import { eq } from "drizzle-orm";
 
-import type { DatabaseTransaction } from "../../database";
-import { collection, creditAttribution, unit } from "../../database/schema";
 import {
 	createCollectionStructureHistory,
 	getCollectionStructureHeadRevision,
 } from "../../collection-structure/history";
+import type { DatabaseTransaction } from "../../database";
+import { collection, creditAttribution, unit } from "../../database/schema";
 import { fractionalPositionAt } from "../../ordering/position";
 import { insertUnitIfMissing } from "../../units/create";
 import { recordUnitRevision } from "../../units/history";
@@ -59,7 +59,7 @@ export async function ensureCuratedCreationTagCollections(tx: DatabaseTransactio
 			.insert(creditAttribution)
 			.values({
 				sourceUnitId: value.id,
-				creditedUnitId: OfficialProfileIds.editorial,
+				creditedEntityId: OfficialProfileIds.editorial,
 				role: "publisher",
 				position: "a0",
 				createdAt,

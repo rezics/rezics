@@ -22,16 +22,16 @@ import {
 	type StoredUiLocale,
 	StoredUiLocaleValues,
 } from "./contract-values";
-import { profile } from "./profile";
+import { users } from "./auth";
 import { contentRating, resourceVisibility } from "./unit";
 import { realm } from "./realm";
 
-export const profilePreference = pgTable(
-	"profile_preference",
+export const accountPreference = pgTable(
+	"account_preference",
 	{
-		profileId: uuid()
+		authUserId: uuid()
 			.primaryKey()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		defaultLicenses: text().$type<LicenseId>().array().default(sql`'{}'::text[]`).notNull(),
 		defaultRealmManageMode: boolean().default(false).notNull(),
 		defaultScoreRealmId: uuid().references(() => realm.id, { onDelete: "set null" }),
@@ -66,9 +66,9 @@ export const profilePreference = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		index("profile_preference_default_score_realm_idx").on(table.defaultScoreRealmId),
+		index("account_preference_default_score_realm_idx").on(table.defaultScoreRealmId),
 		check(
-			"profile_preference_languages_check",
+			"account_preference_languages_check",
 			sql`cardinality(${table.preferredLanguages}) > 0
 				and ${table.preferredLanguages} <@ array[${sql.join(
 					ContentLanguageValues.map((language) => sql`${language}`),
@@ -83,19 +83,19 @@ export const profilePreference = pgTable(
 				)}`,
 		),
 		check(
-			"profile_preference_content_ratings_check",
+			"account_preference_content_ratings_check",
 			sql`cardinality(${table.contentRatings}) > 0`,
 		),
 		check(
-			"profile_preference_interface_locale_check",
+			"account_preference_interface_locale_check",
 			inArray(table.interfaceLocale, StoredUiLocaleValues),
 		),
 		check(
-			"profile_preference_chinese_content_display_check",
+			"account_preference_chinese_content_display_check",
 			inArray(table.chineseContentDisplay, ChineseContentDisplayValues),
 		),
 		createJsonObjectConstraint(
-			"profile_preference_collection_config_json_object_check",
+			"account_preference_collection_config_json_object_check",
 			table.collectionConfig,
 		),
 	],

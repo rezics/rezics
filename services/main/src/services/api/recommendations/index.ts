@@ -1,43 +1,44 @@
-import type { StaticDecode } from "typebox";
-import { StatusCodes } from "http-status-codes";
 import { and, eq, inArray } from "drizzle-orm";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
+import type { StaticDecode } from "typebox";
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
-import { getUnitReadCondition } from "../../authorization/unit/query";
 import session, { resolveIdentity } from "../../auth/session";
+import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
 import {
-	profilePreference,
+	accountPreference,
+	ContentRatingValues,
+	post,
 	recommendationEvent,
 	recommendationExclusion,
-	post,
 	unit,
-	ContentRatingValues,
 } from "../../database/schema";
-import { InvalidPaginationCursor } from "../../pagination/errors";
 import { parseJsonCursor } from "../../pagination";
+import { InvalidPaginationCursor } from "../../pagination/errors";
 import {
 	resolveRecommendationSnapshot,
 	resolveRecommendationViewer,
 } from "../../recommendations/context";
-import { recommendUnits } from "../../recommendations/units";
 import { RecommendationPolicyVersion } from "../../recommendations/policy";
 import { recommendRelatedPosts } from "../../recommendations/related-posts";
 import { verifyRecommendationTracking } from "../../recommendations/tracking";
+import { recommendUnits } from "../../recommendations/units";
+import { getAttributionSummariesByUnitIds } from "../../units/attribution";
 import { UnitNotFound } from "../../units/errors";
 import { resolveMainUnitId } from "../../units/variants";
-import { getAttributionSummariesByUnitIds } from "../../units/attribution";
 import { ValidationError } from "../errors";
 import { PostFeedResponse, toApiErrorResponse } from "../schema/response";
 import {
-	RelatedPostParams,
-	RelatedPostQuery,
 	RecommendationEventBatchBody,
 	RecommendationEventBatchResponse,
 	RecommendationExclusionBody,
 	RecommendationExclusionParams,
 	RecommendationExclusionResponse,
 	RecommendationPolicyVersionSchema,
+	RelatedPostParams,
+	RelatedPostQuery,
 	UnitRecommendationQuery,
 	UnitRecommendationResponse,
 } from "./schema";
@@ -138,12 +139,12 @@ const RecommendationWriteForbiddenResponse = toApiErrorResponse([
 
 async function getEventProfileId(request: Request) {
 	const identity = await resolveIdentity(request, "recommendation:read");
-	const profileId = identity.profile?.unitId;
+	const profileId = identity.entity?.id;
 	if (!profileId) return { identity, profileId: undefined };
 	const [preference] = await database
-		.select({ personalized: profilePreference.personalizedFeed })
-		.from(profilePreference)
-		.where(eq(profilePreference.profileId, profileId))
+		.select({ personalized: accountPreference.personalizedFeed })
+		.from(accountPreference)
+		.where(eq(accountPreference.authUserId, selfAuthUserIdForEntity(profileId)))
 		.limit(1);
 	return { identity, profileId: (preference?.personalized ?? true) ? profileId : undefined };
 }
@@ -163,10 +164,7 @@ export default new Elysia({ prefix: "/recommendations" })
 		},
 		async ({ query, request }) => {
 			const identity = await resolveIdentity(request, "recommendation:read");
-			const viewer = await resolveRecommendationViewer(
-				identity.profile?.unitId,
-				query.personalized,
-			);
+			const viewer = await resolveRecommendationViewer(identity.entity?.id, query.personalized);
 			const cursor = decodeUnitCursor(query.cursor);
 			if (
 				cursor &&
@@ -186,7 +184,7 @@ export default new Elysia({ prefix: "/recommendations" })
 					.where(
 						and(
 							eq(unit.id, query.seedUnitId),
-							getUnitReadCondition(identity.profile?.unitId),
+							getUnitReadCondition(identity.entity?.id),
 							eq(unit.moderationStatus, "approved"),
 						),
 					)
@@ -197,9 +195,7 @@ export default new Elysia({ prefix: "/recommendations" })
 					const [readableMain] = await database
 						.select({ id: unit.id })
 						.from(unit)
-						.where(
-							and(eq(unit.id, resolvedMainUnitId), getUnitReadCondition(identity.profile?.unitId)),
-						)
+						.where(and(eq(unit.id, resolvedMainUnitId), getUnitReadCondition(identity.entity?.id)))
 						.limit(1);
 					if (readableMain) inheritedSeedUnitId = resolvedMainUnitId;
 				}
@@ -255,10 +251,7 @@ export default new Elysia({ prefix: "/recommendations" })
 		},
 		async ({ params, query, request }) => {
 			const identity = await resolveIdentity(request, "recommendation:read");
-			const viewer = await resolveRecommendationViewer(
-				identity.profile?.unitId,
-				query.personalized,
-			);
+			const viewer = await resolveRecommendationViewer(identity.entity?.id, query.personalized);
 			const cursor = decodePostCursor(query.cursor);
 			if (
 				cursor &&
@@ -279,7 +272,7 @@ export default new Elysia({ prefix: "/recommendations" })
 				.where(
 					and(
 						eq(post.id, params.postId),
-						getUnitReadCondition(identity.profile?.unitId),
+						getUnitReadCondition(identity.entity?.id),
 						eq(unit.moderationStatus, "approved"),
 					),
 				)
@@ -288,8 +281,8 @@ export default new Elysia({ prefix: "/recommendations" })
 			const attributionMap = await getAttributionSummariesByUnitIds([seedBase.id]);
 			const seed = {
 				...seedBase,
-				creditedUnitIds: (attributionMap.get(seedBase.id) ?? []).map(
-					({ creditedUnit }) => creditedUnit.id,
+				creditedEntityIds: (attributionMap.get(seedBase.id) ?? []).map(
+					({ creditedEntity }) => creditedEntity.id,
 				),
 			};
 			const snapshot = await resolvePageSnapshot(cursor);
@@ -350,7 +343,7 @@ export default new Elysia({ prefix: "/recommendations" })
 				.where(
 					and(
 						inArray(unit.id, targetIds),
-						getUnitReadCondition(identity.profile?.unitId),
+						getUnitReadCondition(identity.entity?.id),
 						eq(unit.moderationStatus, "approved"),
 					),
 				);
@@ -389,20 +382,20 @@ export default new Elysia({ prefix: "/recommendations" })
 			},
 			detail: { summary: "Exclude a recommendation", tags: ["Recommendations"] },
 		},
-		async ({ body, params, profile, authorization }) => {
+		async ({ body, params, entity, authorization }) => {
 			ensureEventTime(body.occurredAt, new Date());
 			ensureRecommendationTracking(params.unitId, body);
 			await authorization.unit.ensureCanRead(params.unitId);
 			await database.transaction(async (tx) => {
 				await tx
 					.insert(recommendationExclusion)
-					.values({ profileId: profile.unitId, unitId: params.unitId })
+					.values({ profileId: entity.id, unitId: params.unitId })
 					.onConflictDoNothing();
 				await tx
 					.insert(recommendationEvent)
 					.values({
 						id: body.eventId,
-						profileId: profile.unitId,
+						profileId: entity.id,
 						requestId: body.requestId,
 						surface: body.surface,
 						type: "not_interested",
@@ -428,12 +421,12 @@ export default new Elysia({ prefix: "/recommendations" })
 			},
 			detail: { summary: "Restore an excluded recommendation", tags: ["Recommendations"] },
 		},
-		async ({ params, profile }) => {
+		async ({ params, entity }) => {
 			await database
 				.delete(recommendationExclusion)
 				.where(
 					and(
-						eq(recommendationExclusion.profileId, profile.unitId),
+						eq(recommendationExclusion.profileId, entity.id),
 						eq(recommendationExclusion.unitId, params.unitId),
 					),
 				);

@@ -1,9 +1,3 @@
-import type { StaticDecode } from "typebox";
-import { createHash } from "node:crypto";
-import { StatusCodes } from "http-status-codes";
-import { and, asc, eq, exists, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
-import Elysia, { t } from "elysia";
 import type { PresentedAvatar } from "@rezics/avatar";
 import {
 	assertUnitFilter,
@@ -16,47 +10,49 @@ import {
 } from "@rezics/filter";
 import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import { OfficialRealmUnitIds } from "@rezics/slug";
+import { and, asc, eq, exists, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
+import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
+import { createHash } from "node:crypto";
+import type { StaticDecode } from "typebox";
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
 import { resolveIdentity } from "../../auth/session";
+import { getProfileActivityReadCondition } from "../../authorization/profile-activity/query";
+import { getUnitReadCondition } from "../../authorization/unit/query";
+import { requireContentSpoilerLevel } from "../../content-labels/presentation";
 import {
 	contentRatingPolicyFromAllowlist,
 	getContentRatingCondition,
 } from "../../content-rating/policy";
-import { requireContentSpoilerLevel } from "../../content-labels/presentation";
-import { getProfileActivityReadCondition } from "../../authorization/profile-activity/query";
-import { getUnitReadCondition } from "../../authorization/unit/query";
-import { database } from "../../database";
 import type { SearchCountResult } from "../../counts/contract";
+import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
-	resolvedUnitLocalizationAvatar,
-	resolvedUnitLocalizationImageAssetId,
-	resolvedUnitLocalizationLanguage,
-	resolvedUnitLocalizationSummary,
-	resolvedUnitLocalizationTitle,
-} from "../../units/localization";
-import {
+	accountPreference,
+	collectionStat,
+	ContentRatingValues,
 	post,
-	postScore,
 	postReply,
 	postReplyStat,
-	profilePreference,
-	score,
-	scoreStat,
-	collectionStat,
-	unitFollow,
+	postScore,
 	realmStat,
 	realmTagContext,
 	realmUnit,
-	unitBestScore,
+	score,
+	scoreStat,
 	unit,
+	unitBestScore,
+	unitFollow,
 	unitLocalization,
 	unitReaction,
 	unitReactionGlobalStat,
 	unitRevisionHead,
-	ContentRatingValues,
 	unitTag,
 } from "../../database/schema";
+import type { ContentRating } from "../../database/schema/contract-values";
+import { compileUnitPredicateSql } from "../../filter/sql";
 import { parseJsonCursor } from "../../pagination";
 import {
 	fallbackRecommendationSnapshot,
@@ -66,43 +62,48 @@ import {
 } from "../../recommendations/context";
 import type { RecommendationCandidate } from "../../recommendations/ranking";
 import { createRecommendationTracking } from "../../recommendations/tracking";
-import { presentAvatar } from "../../units/avatar";
-import { presentImageAsset } from "../../units/service";
-import { compileUnitPredicateSql } from "../../filter/sql";
 import { InvalidSearch, SearchUnavailable } from "../../search/errors";
-import { SearchCategories } from "../../search/schema";
 import type { SearchExpression, SearchKeysetPosition } from "../../search/query";
+import { SearchCategories } from "../../search/schema";
 import { searchGlobalIdentifiers, type GlobalSearchBranch } from "../../search/service";
-import type { PublicCanonicalUnitSlugAddress } from "../../units/slug-address";
 import {
 	getAttributionSummariesByUnitIds,
 	getPublicUnitSummariesByIds,
 } from "../../units/attribution";
+import { presentAvatar } from "../../units/avatar";
+import {
+	resolvedUnitLocalizationAvatar,
+	resolvedUnitLocalizationImageAssetId,
+	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationSummary,
+	resolvedUnitLocalizationTitle,
+} from "../../units/localization";
+import { presentImageAsset } from "../../units/service";
+import type { PublicCanonicalUnitSlugAddress } from "../../units/slug-address";
 import {
 	RecommendationPolicyVersionSchema,
 	type RecommendationReason,
 	type RecommendationSurface,
 } from "../recommendations/schema";
-import { toApiErrorResponse, FeedResponse, type FeedItemResponseValue } from "../schema/response";
+import { FeedResponse, toApiErrorResponse, type FeedItemResponseValue } from "../schema/response";
 import { resolveFeedPageContinuation } from "./continuation";
 import { InvalidFeedCursor, InvalidFeedFilter } from "./errors";
 import {
 	DefaultFeedContentKindValues,
-	type FeedContentKind,
 	FeedContentKindValues,
-	type FeedPostKind,
 	FeedPostKindValues,
-	FeedRequest,
 	FeedRatedWorkUnitKindValues,
+	FeedRequest,
 	FeedSortSchema,
+	FeedUnitKindValues,
 	MaximumFeedAttributionsPerItem,
 	MaximumFeedRealmContextsPerItem,
-	type FeedUnitKind,
-	FeedUnitKindValues,
+	type FeedContentKind,
+	type FeedPostKind,
 	type FeedRequest as FeedRequestType,
 	type FeedSort,
+	type FeedUnitKind,
 } from "./schema";
-import type { ContentRating } from "../../database/schema/contract-values";
 
 const feedReviewScoreTargetUnit = alias(unit, "feed_review_score_target_unit");
 const feedReviewScoreRealm = alias(unit, "feed_review_score_realm");
@@ -192,7 +193,6 @@ type FeedContentDefinition =
 	| { readonly itemType: "post"; readonly postKind: FeedPostKind };
 
 const FeedContentDefinitions = {
-	"unit:profile": { itemType: "unit", unitKind: "profile" },
 	"unit:book": { itemType: "unit", unitKind: "book" },
 	"unit:software": { itemType: "unit", unitKind: "software" },
 	"unit:media": { itemType: "unit", unitKind: "media" },
@@ -281,7 +281,6 @@ export function resolveFeedContentSelection(content?: readonly FeedContentKind[]
 }
 
 const FeedSearchCategoryByContentKind = {
-	"unit:profile": "users",
 	"unit:book": "units",
 	"unit:software": "units",
 	"unit:media": "units",
@@ -614,7 +613,10 @@ export function getFeedEligibilityCondition(
 						.select({ scoreId: score.id })
 						.from(postScore)
 						.innerJoin(score, eq(score.id, postScore.scoreId))
-						.innerJoin(profilePreference, eq(profilePreference.profileId, score.profileId))
+						.innerJoin(
+							accountPreference,
+							eq(accountPreference.authUserId, selfAuthUserIdForEntity(score.profileId)),
+						)
 						.innerJoin(feedReviewScoreTargetUnit, eq(feedReviewScoreTargetUnit.id, score.unitId))
 						.innerJoin(feedReviewScoreRealm, eq(feedReviewScoreRealm.id, score.realmId))
 						.where(
@@ -624,7 +626,7 @@ export function getFeedEligibilityCondition(
 								inArray(score.value, scope.reviewScore.values),
 								getProfileActivityReadCondition({
 									ownerProfileId: score.profileId,
-									categoryVisibility: profilePreference.scoreVisibility,
+									categoryVisibility: accountPreference.scoreVisibility,
 									itemVisibility: score.visibility,
 									viewerProfileId: viewer.profileId,
 									surface: "linked",
@@ -646,9 +648,9 @@ export function getFeedEligibilityCondition(
 		viewer.profileId
 			? sql`not exists (
 				select 1 from credit_attribution attribution
-				join profile_block blocked on
-					(blocked.blocker_profile_id = ${viewer.profileId}::uuid and blocked.blocked_profile_id = attribution.credited_unit_id)
-					or (blocked.blocker_profile_id = attribution.credited_unit_id and blocked.blocked_profile_id = ${viewer.profileId}::uuid)
+				join account_entity_block blocked on
+					(blocked.blocker_auth_user_id = ${viewer.profileId}::uuid and blocked.blocked_entity_id = attribution.credited_entity_id)
+					or (blocked.blocker_auth_user_id = attribution.credited_entity_id and blocked.blocked_entity_id = ${viewer.profileId}::uuid)
 				where attribution.source_unit_id = ${unit.id}
 			)`
 			: undefined,
@@ -700,7 +702,7 @@ export function createFeedTotal(input: {
 export interface FeedRankingCandidate extends RecommendationCandidate {
 	unitKind: FeedUnitKind | "post";
 	postKind: FeedPostKind | null;
-	creditedUnitIds: readonly string[];
+	creditedEntityIds: readonly string[];
 	realmId: string | null;
 	subjectId: string | null;
 	rootPostId: string | null;
@@ -758,11 +760,11 @@ export async function getFeedRankingCandidates(input: {
 			id: unit.id,
 			unitKind: unit.kind,
 			postKind: post.kind,
-			creditedUnitIds: sql<string[]>`array(
-				select distinct attribution.credited_unit_id::text
+			creditedEntityIds: sql<string[]>`array(
+				select distinct attribution.credited_entity_id::text
 				from credit_attribution attribution
 				where attribution.source_unit_id = ${unit.id}
-				order by attribution.credited_unit_id::text
+				order by attribution.credited_entity_id::text
 			)`,
 			realmId: selectedRealmId,
 			subjectId: post.subjectUnitId,
@@ -796,7 +798,7 @@ export async function getFeedRankingCandidates(input: {
 			{
 				id: row.id,
 				...kind,
-				creditedUnitIds: row.creditedUnitIds,
+				creditedEntityIds: row.creditedEntityIds,
 				realmId: row.realmId,
 				subjectId: row.subjectId,
 				rootPostId: row.rootPostId,
@@ -899,11 +901,11 @@ export async function hydrateFeedItems(
 	const [viewerDisplayPreference] = viewer.profileId
 		? await database
 				.select({
-					alwaysShowSpoilers: profilePreference.alwaysShowSpoilers,
-					alwaysShowNsfw: profilePreference.alwaysShowNsfw,
+					alwaysShowSpoilers: accountPreference.alwaysShowSpoilers,
+					alwaysShowNsfw: accountPreference.alwaysShowNsfw,
 				})
-				.from(profilePreference)
-				.where(eq(profilePreference.profileId, viewer.profileId))
+				.from(accountPreference)
+				.where(eq(accountPreference.authUserId, selfAuthUserIdForEntity(viewer.profileId)))
 				.limit(1)
 		: [];
 	const validIds = rows.map(({ id }) => id);
@@ -1174,7 +1176,10 @@ export async function hydrateFeedItems(
 					})
 					.from(postScore)
 					.innerJoin(score, eq(score.id, postScore.scoreId))
-					.innerJoin(profilePreference, eq(profilePreference.profileId, score.profileId))
+					.innerJoin(
+						accountPreference,
+						eq(accountPreference.authUserId, selfAuthUserIdForEntity(score.profileId)),
+					)
 					.innerJoin(feedReviewScoreTargetUnit, eq(feedReviewScoreTargetUnit.id, score.unitId))
 					.innerJoin(feedReviewScoreRealm, eq(feedReviewScoreRealm.id, score.realmId))
 					.where(
@@ -1182,7 +1187,7 @@ export async function hydrateFeedItems(
 							inArray(postScore.postId, reviewIds),
 							getProfileActivityReadCondition({
 								ownerProfileId: score.profileId,
-								categoryVisibility: profilePreference.scoreVisibility,
+								categoryVisibility: accountPreference.scoreVisibility,
 								itemVisibility: score.visibility,
 								viewerProfileId: viewer.profileId,
 								surface: "linked",
@@ -1490,7 +1495,7 @@ export default new Elysia({ prefix: "/feed" }).post(
 				throw new InvalidFeedFilter();
 			}
 		const identity = await resolveIdentity(request, "unit:read");
-		const viewer = await resolveRecommendationViewer(identity.profile?.unitId);
+		const viewer = await resolveRecommendationViewer(identity.entity?.id);
 		const cursor = decodeCursor(body.cursor);
 		const simpleSelection = body.filter?.where
 			? readSimpleFeedFilter(body.filter.where)

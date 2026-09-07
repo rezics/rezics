@@ -19,8 +19,8 @@ import Elysia, { t } from "elysia";
 
 import { RevisionContextBody } from "../schema";
 
-import session, { resolveIdentity } from "../../auth/session";
 import { AuthenticationRequired } from "../../auth/errors";
+import session, { resolveIdentity } from "../../auth/session";
 import { getPlatformCapabilityCondition } from "../../authorization/platform/query";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { unitOwnershipModeFromOwnerProfileId } from "../../authorization/unit/ownership";
@@ -28,20 +28,8 @@ import { getUnitPermissionCondition } from "../../authorization/unit/query";
 import { associationTargetScope, unitScope } from "../../authorization/unit/scope";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
-import { runVoteTransaction } from "../../database/vote-admission";
-import {
-	avatarReferenceFromColumns,
-	resolveUnitLocalizationAvatarFromOrdered,
-	resolveUnitLocalizationFromOrdered,
-	resolveUnitLocalizationImageAssetIdFromOrdered,
-	resolvedUnitLocalizationAvatar,
-	resolvedUnitLocalizationImageAssetId,
-	resolvedUnitLocalizationLanguage,
-} from "../../units/localization";
-import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	creditAttribution,
-	unitTagJudgmentStat,
 	entity,
 	entityMeasurement,
 	subjectAssociation,
@@ -52,65 +40,33 @@ import {
 	unitAlias,
 	unitAliasVote,
 	unitAliasVoteStat,
-	unitOwnership,
-	unitTagJudgment,
 	unitExternalLink,
 	unitExternalLinkVote,
 	unitExternalLinkVoteStat,
+	unitLocalization,
+	unitOwnership,
 	unitReferenceCurationHead,
 	unitTag,
-	unitLocalization,
+	unitTagJudgment,
+	unitTagJudgmentStat,
 } from "../../database/schema";
 import {
+	type UnitReferenceCurationKind,
 	isCreditAttributionRoleForUnitKind,
 	isEntityKind,
-} from "../../database/schema/contract-values";
-import {
-	type UnitReferenceCurationKind,
 	UnitReferenceActiveLimit,
 	UnitReferencePageDefault,
 } from "../../database/schema/contract-values";
+import { runVoteTransaction } from "../../database/vote-admission";
 import {
-	AddUnitAliasBody,
-	AddUnitCreditBody,
-	AddUnitSubjectAssociationBody,
-	SubjectAssociationSpoilerBody,
-	AddUnitExternalLinkBody,
-	AttributionAssociationParams,
-	AttributionUnitParams,
-	CreateUnitResourceBody,
-	CreateEntityBody,
-	EntityDetailQuery,
-	EntityLocalizationParams,
-	UpsertEntityMeasurementBody,
-	ListEntityEntriesQuery,
-	ListTagsQuery,
-	TagDetailParams,
-	TagDetailQuery,
-	TagLocalizationParams,
-	TagUnitBody,
-	UpdateUnitTagCurationBody,
-	UpdateUnitReferenceCurationBody,
-	WithdrawUnitReferenceQuery,
-	UnitAssociationParams,
-	UnitAliasListQuery,
-	UnitAliasParams,
-	UnitAliasUnitParams,
-	UnitExternalLinkParams,
-	UnitExternalLinkListQuery,
-	UnitExternalLinkUnitParams,
-	UnitUnitParams,
-	UnitTagParams,
-	VoteBody,
-} from "./schema";
-import { checkUnitType, createUnitResource } from "./service";
-import { upsertLocalization } from "../../units/service";
-import {
-	PromoteUnitVariantBody,
-	UnitLocalizationBody,
-	UpdateUnitVariantContextBody,
-} from "../units/schema";
-import { recordUnitRevision } from "../../units/history";
+	CreditAttributionNotFound,
+	CreditAttributionRoleInvalid,
+	EntityEntryNotFound,
+	SubjectAssociationNotFound,
+} from "../../entities/errors";
+import { fractionalPositionBetween } from "../../ordering/position";
+import { getPendingUnitOwnershipClaim } from "../../ownership-claims/service";
+import { updateDirectUnitTagCuration } from "../../tags/curation";
 import {
 	ensureWikiAssociationContextPost,
 	getAssociationContextPostsByAssociationIds,
@@ -119,57 +75,23 @@ import {
 	getAttributionSummariesByUnitIds,
 	getPublicUnitSummariesByIds,
 } from "../../units/attribution";
-import {
-	getUnitVariantContext,
-	promoteUnitVariantToMain,
-	updateUnitVariantContext,
-} from "../../units/variants";
 import { ensureDirectCreditAttributionAllowed } from "../../units/attribution-authorization";
-import { presentImageAsset } from "../../units/service";
 import { presentAvatar } from "../../units/avatar";
-import { IdResponse, NoContentResponse } from "../schema/action-response";
-import { UnitIdParams } from "../schema";
-import { ValidationError } from "../errors";
-import {
-	TagApplicationPolicyResponse,
-	toApiErrorResponse,
-	AliasResponse,
-	AliasCurationResponse,
-	AliasListResponse,
-	CreditAttributionResponse,
-	EntityDetailResponse,
-	EntityMeasurementResponse,
-	EntityListResponse,
-	SubjectAssociationResponse,
-	SubjectAssociationSpoilerResponse,
-	TagApplicationResponse,
-	TagDetailResponse,
-	TagListResponse,
-	toPortableTextResponse,
-	UnitExternalLinkListResponse,
-	UnitExternalLinkResponse,
-	UnitExternalLinkCurationResponse,
-	VoteResponse,
-	VoteBackpressureResponse,
-} from "../schema/response";
-import {
-	AliasNotFound,
-	TagApplicationNotFound,
-	UnitExternalLinkNotFound,
-	UnitReferenceLimitReached,
-	UnitReferenceWithdrawn,
-} from "./errors";
-import { TagNotFound } from "../tags/errors";
-import {
-	CreditAttributionNotFound,
-	CreditAttributionRoleInvalid,
-	EntityEntryNotFound,
-	SubjectAssociationNotFound,
-} from "../../entities/errors";
 import { AssociationContextPostInvalid } from "../../units/errors";
-import { updateDirectUnitTagCuration } from "../../tags/curation";
-import { getPendingUnitOwnershipClaim } from "../../ownership-claims/service";
-import { normalizeExternalWebUrl } from "./external-web-url";
+import {
+	attachReadableSourceEntities,
+	getUnitExternalLinkPreviewWithSources,
+} from "../../units/external-links";
+import { recordUnitRevision } from "../../units/history";
+import {
+	avatarReferenceFromColumns,
+	resolvedUnitLocalizationAvatar,
+	resolvedUnitLocalizationImageAssetId,
+	resolvedUnitLocalizationLanguage,
+	resolveUnitLocalizationAvatarFromOrdered,
+	resolveUnitLocalizationFromOrdered,
+	resolveUnitLocalizationImageAssetIdFromOrdered,
+} from "../../units/localization";
 import {
 	ensureUnitReferenceCanBeCreated,
 	updateUnitAliasCuration,
@@ -181,11 +103,86 @@ import {
 	paginateUnitReferences,
 	unitReferenceRankingVersion,
 } from "../../units/reference-pagination";
-import { presentBinaryVoteSummary } from "../../votes/binary";
+import { presentImageAsset, upsertLocalization } from "../../units/service";
 import {
-	attachReadableSourceEntities,
-	getUnitExternalLinkPreviewWithSources,
-} from "../../units/external-links";
+	getUnitVariantContext,
+	promoteUnitVariantToMain,
+	updateUnitVariantContext,
+} from "../../units/variants";
+import { presentBinaryVoteSummary } from "../../votes/binary";
+import { ValidationError } from "../errors";
+import { UnitIdParams } from "../schema";
+import { IdResponse, NoContentResponse } from "../schema/action-response";
+import {
+	AliasCurationResponse,
+	AliasListResponse,
+	AliasResponse,
+	CreditAttributionResponse,
+	EntityDetailResponse,
+	EntityListResponse,
+	EntityMeasurementResponse,
+	SubjectAssociationResponse,
+	SubjectAssociationSpoilerResponse,
+	TagApplicationPolicyResponse,
+	TagApplicationResponse,
+	TagDetailResponse,
+	TagListResponse,
+	toApiErrorResponse,
+	toPortableTextResponse,
+	UnitExternalLinkCurationResponse,
+	UnitExternalLinkListResponse,
+	UnitExternalLinkResponse,
+	VoteBackpressureResponse,
+	VoteResponse,
+} from "../schema/response";
+import { TagNotFound } from "../tags/errors";
+import {
+	PromoteUnitVariantBody,
+	UnitLocalizationBody,
+	UpdateUnitVariantContextBody,
+} from "../units/schema";
+import {
+	AliasNotFound,
+	TagApplicationNotFound,
+	UnitExternalLinkNotFound,
+	UnitReferenceLimitReached,
+	UnitReferenceWithdrawn,
+} from "./errors";
+import { normalizeExternalWebUrl } from "./external-web-url";
+import {
+	AddUnitAliasBody,
+	AddUnitCreditBody,
+	AddUnitExternalLinkBody,
+	AddUnitSubjectAssociationBody,
+	AttributionAssociationParams,
+	AttributionUnitParams,
+	CreateEntityBody,
+	CreateUnitResourceBody,
+	EntityDetailQuery,
+	EntityLocalizationParams,
+	ListEntityEntriesQuery,
+	ListTagsQuery,
+	SubjectAssociationSpoilerBody,
+	TagDetailParams,
+	TagDetailQuery,
+	TagLocalizationParams,
+	TagUnitBody,
+	UnitAliasListQuery,
+	UnitAliasParams,
+	UnitAliasUnitParams,
+	UnitAssociationParams,
+	UnitExternalLinkListQuery,
+	UnitExternalLinkParams,
+	UnitExternalLinkUnitParams,
+	UnitTagParams,
+	UnitUnitParams,
+	UpdateUnitReferenceCurationBody,
+	UpdateUnitTagCurationBody,
+	UpsertEntityMeasurementBody,
+	VoteBody,
+	WithdrawUnitReferenceQuery,
+} from "./schema";
+import { checkUnitType, createUnitResource } from "./service";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -477,7 +474,7 @@ export default new Elysia()
 					let entityCondition = publiclyReadableUnitCondition();
 					if (query.creditAttributionSearch === "direct") {
 						const identity = await resolveIdentity(request, "unit:read");
-						if (!identity.profile) throw new AuthenticationRequired();
+						if (!identity.entity) throw new AuthenticationRequired();
 						const target = {
 							id: unit.id,
 							deletedAt: unit.deletedAt,
@@ -489,18 +486,15 @@ export default new Elysia()
 							eq(unit.moderationStatus, "approved"),
 							isNull(unit.deletedAt),
 							or(
-								getPlatformCapabilityCondition(
-									identity.profile.unitId,
-									"entity.associations.override",
-								),
+								getPlatformCapabilityCondition(identity.entity.id, "entity.associations.override"),
 								getUnitPermissionCondition(
-									identity.profile.unitId,
+									identity.entity.id,
 									"unit.association.manage",
 									scope,
 									target,
 								),
 								getUnitPermissionCondition(
-									identity.profile.unitId,
+									identity.entity.id,
 									"entity.association.credit.direct",
 									scope,
 									target,
@@ -575,8 +569,8 @@ export default new Elysia()
 					},
 					detail: { summary: "Create entity entry", tags: ["Entity"] },
 				},
-				async ({ profile, body }) => ({
-					id: await createUnitResource("entity", profile.unitId, body),
+				async ({ entity, body }) => ({
+					id: await createUnitResource("entity", entity.id, body),
 				}),
 			)
 			.get(
@@ -665,7 +659,7 @@ export default new Elysia()
 						.innerJoin(unit, eq(unit.id, creditAttribution.sourceUnitId))
 						.where(
 							and(
-								eq(creditAttribution.creditedUnitId, params.unitId),
+								eq(creditAttribution.creditedEntityId, params.unitId),
 								publiclyReadableUnitCondition(),
 							),
 						);
@@ -984,8 +978,8 @@ export default new Elysia()
 					},
 					detail: { summary: "Create tag", tags: ["Tags"] },
 				},
-				async ({ profile, body }) => ({
-					id: await createUnitResource("tag", profile.unitId, body),
+				async ({ entity, body }) => ({
+					id: await createUnitResource("tag", entity.id, body),
 				}),
 			)
 			.get(
@@ -1095,7 +1089,7 @@ export default new Elysia()
 					},
 					detail: { summary: "List Unit alias references", tags: ["Units"] },
 				},
-				async ({ params, query, profile, authorization }) => {
+				async ({ params, query, entity, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [rows, curationVersion] = await Promise.all([
@@ -1123,7 +1117,7 @@ export default new Elysia()
 								unitAliasVote,
 								and(
 									eq(unitAliasVote.aliasId, unitAlias.id),
-									eq(unitAliasVote.profileId, profile.unitId),
+									eq(unitAliasVote.profileId, entity.id),
 								),
 							)
 							.where(and(eq(unitAlias.unitId, params.unitId), isNull(unitAlias.withdrawnAt)))
@@ -1179,7 +1173,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Propose Unit alias", tags: ["Units"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const term = body.term.trim();
@@ -1218,7 +1212,7 @@ export default new Elysia()
 										normalizedTerm,
 										language: body.language,
 										kind: body.kind,
-										createdByProfileId: profile.unitId,
+										createdByProfileId: entity.id,
 									})
 									.returning()
 							)[0];
@@ -1227,7 +1221,7 @@ export default new Elysia()
 							.insert(unitAliasVote)
 							.values({
 								aliasId: reference.id,
-								profileId: profile.unitId,
+								profileId: entity.id,
 								value: 1,
 							})
 							.onConflictDoUpdate({
@@ -1237,7 +1231,7 @@ export default new Elysia()
 							});
 						return reference.id;
 					});
-					return getAliasReference(aliasId, profile.unitId);
+					return getAliasReference(aliasId, entity.id);
 				},
 			)
 			.put(
@@ -1253,7 +1247,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Vote on Unit alias", tags: ["Units"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [target] = await database
@@ -1272,7 +1266,7 @@ export default new Elysia()
 						.insert(unitAliasVote)
 						.values({
 							aliasId: params.aliasId,
-							profileId: profile.unitId,
+							profileId: entity.id,
 							value: body.value,
 						})
 						.onConflictDoUpdate({
@@ -1295,7 +1289,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Remove Unit alias vote", tags: ["Units"] },
 				},
-				async ({ params, profile, authorization }) => {
+				async ({ params, entity, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [target] = await database
@@ -1315,7 +1309,7 @@ export default new Elysia()
 						.where(
 							and(
 								eq(unitAliasVote.aliasId, params.aliasId),
-								eq(unitAliasVote.profileId, profile.unitId),
+								eq(unitAliasVote.profileId, entity.id),
 							),
 						);
 					return getAliasVoteSummary(params.aliasId, null);
@@ -1338,7 +1332,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Update Unit Alias curation", tags: ["Units"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensure(
 						params.unitId,
@@ -1348,14 +1342,14 @@ export default new Elysia()
 					const result = await updateUnitAliasCuration({
 						unitId: params.unitId,
 						aliasId: params.aliasId,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						baseVersion: body.baseVersion,
 						state: body.pinned
 							? { pinned: true, position: body.position }
 							: { pinned: false, position: null },
 					});
 					return {
-						reference: await getAliasReference(params.aliasId, profile.unitId),
+						reference: await getAliasReference(params.aliasId, entity.id),
 						curationVersion: result.curationVersion,
 					};
 				},
@@ -1378,7 +1372,7 @@ export default new Elysia()
 						responses: NoContentResponse,
 					},
 				},
-				async ({ params, query, profile, authorization }) => {
+				async ({ params, query, entity, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensure(
 						params.unitId,
@@ -1388,7 +1382,7 @@ export default new Elysia()
 					await withdrawUnitAlias({
 						unitId: params.unitId,
 						aliasId: params.aliasId,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						baseVersion: query.baseVersion,
 					});
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
@@ -1424,7 +1418,7 @@ export default new Elysia()
 						"credit-attributions",
 					]);
 					const credit = await database.transaction(async (tx) => {
-						await ensureDirectCreditAttributionAllowed(authorization, tx, body.creditedUnitId);
+						await ensureDirectCreditAttributionAllowed(authorization, tx, body.creditedEntityId);
 						await tx.execute(
 							sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
 						);
@@ -1482,7 +1476,7 @@ export default new Elysia()
 						responses: NoContentResponse,
 					},
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
 						"credit-attributions",
@@ -1500,7 +1494,7 @@ export default new Elysia()
 						if (!deleted.length) throw new CreditAttributionNotFound();
 						await recordUnitRevision(tx, {
 							unitId: params.unitId,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: body?.revisionContext?.contribution,
 							event: "update",
 						});
@@ -1600,7 +1594,7 @@ export default new Elysia()
 						tags: ["Units"],
 					},
 				},
-				async ({ params, body, profile, authorization }) => {
+				async ({ params, body, entity, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [association] = await database
@@ -1619,7 +1613,7 @@ export default new Elysia()
 							.insert(subjectAssociationJudgment)
 							.values({
 								associationId: params.associationId,
-								profileId: profile.unitId,
+								profileId: entity.id,
 								spoilerLevel: body.spoilerLevel,
 							})
 							.onConflictDoUpdate({
@@ -1633,7 +1627,7 @@ export default new Elysia()
 								},
 							}),
 					);
-					return getSubjectAssociationSpoilerSummary(params.associationId, profile.unitId);
+					return getSubjectAssociationSpoilerSummary(params.associationId, entity.id);
 				},
 			)
 			.delete(
@@ -1655,7 +1649,7 @@ export default new Elysia()
 						tags: ["Units"],
 					},
 				},
-				async ({ params, profile, authorization }) => {
+				async ({ params, entity, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					await runVoteTransaction({ family: "unit_tag", authority: "global" }, (tx) =>
@@ -1664,11 +1658,11 @@ export default new Elysia()
 							.where(
 								and(
 									eq(subjectAssociationJudgment.associationId, params.associationId),
-									eq(subjectAssociationJudgment.profileId, profile.unitId),
+									eq(subjectAssociationJudgment.profileId, entity.id),
 								),
 							),
 					);
-					return getSubjectAssociationSpoilerSummary(params.associationId, profile.unitId);
+					return getSubjectAssociationSpoilerSummary(params.associationId, entity.id);
 				},
 			)
 			.delete(
@@ -1695,7 +1689,7 @@ export default new Elysia()
 						responses: NoContentResponse,
 					},
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
 						"subject-associations",
@@ -1713,7 +1707,7 @@ export default new Elysia()
 						if (!deleted.length) throw new SubjectAssociationNotFound();
 						await recordUnitRevision(tx, {
 							unitId: params.unitId,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: body?.revisionContext?.contribution,
 							event: "update",
 						});
@@ -1734,7 +1728,7 @@ export default new Elysia()
 					},
 					detail: { summary: "List Unit external-link references", tags: ["Units"] },
 				},
-				async ({ params, query, profile, authorization }) => {
+				async ({ params, query, entity, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const localizationLanguages = query.localizationLanguages ?? [];
@@ -1766,7 +1760,7 @@ export default new Elysia()
 								unitExternalLinkVote,
 								and(
 									eq(unitExternalLinkVote.externalLinkId, unitExternalLink.id),
-									eq(unitExternalLinkVote.profileId, profile.unitId),
+									eq(unitExternalLinkVote.profileId, entity.id),
 								),
 							)
 							.where(
@@ -1805,11 +1799,7 @@ export default new Elysia()
 						limit: query.limit ?? UnitReferencePageDefault,
 					});
 					return {
-						items: await attachReadableSourceEntities(
-							page.items,
-							localizationLanguages,
-							profile.unitId,
-						),
+						items: await attachReadableSourceEntities(page.items, localizationLanguages, entity.id),
 						nextCursor: page.nextCursor,
 						curationVersion,
 					};
@@ -1832,7 +1822,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Propose Unit external link", tags: ["Units"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					await ensureReadableSourceEntity(authorization.unit, body.sourceEntityId);
@@ -1872,7 +1862,7 @@ export default new Elysia()
 										url,
 										normalizedUrl,
 										normalizedUrlHash,
-										createdByProfileId: profile.unitId,
+										createdByProfileId: entity.id,
 									})
 									.returning()
 							)[0];
@@ -1881,7 +1871,7 @@ export default new Elysia()
 							.insert(unitExternalLinkVote)
 							.values({
 								externalLinkId: reference.id,
-								profileId: profile.unitId,
+								profileId: entity.id,
 								value: 1,
 							})
 							.onConflictDoUpdate({
@@ -1891,7 +1881,7 @@ export default new Elysia()
 							});
 						return reference.id;
 					});
-					return getExternalLinkReference(externalLinkId, profile.unitId);
+					return getExternalLinkReference(externalLinkId, entity.id);
 				},
 			)
 			.put(
@@ -1910,7 +1900,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Vote on Unit external link", tags: ["Units"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [target] = await database
@@ -1929,7 +1919,7 @@ export default new Elysia()
 						.insert(unitExternalLinkVote)
 						.values({
 							externalLinkId: params.externalLinkId,
-							profileId: profile.unitId,
+							profileId: entity.id,
 							value: body.value,
 						})
 						.onConflictDoUpdate({
@@ -1955,7 +1945,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Remove Unit external link vote", tags: ["Units"] },
 				},
-				async ({ params, profile, authorization }) => {
+				async ({ params, entity, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [target] = await database
@@ -1975,7 +1965,7 @@ export default new Elysia()
 						.where(
 							and(
 								eq(unitExternalLinkVote.externalLinkId, params.externalLinkId),
-								eq(unitExternalLinkVote.profileId, profile.unitId),
+								eq(unitExternalLinkVote.profileId, entity.id),
 							),
 						);
 					return getExternalLinkVoteSummary(params.externalLinkId, null);
@@ -2001,7 +1991,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Update Unit external link curation", tags: ["Units"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensure(
 						params.unitId,
@@ -2011,14 +2001,14 @@ export default new Elysia()
 					const result = await updateUnitExternalLinkCuration({
 						unitId: params.unitId,
 						externalLinkId: params.externalLinkId,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						baseVersion: body.baseVersion,
 						state: body.pinned
 							? { pinned: true, position: body.position }
 							: { pinned: false, position: null },
 					});
 					return {
-						reference: await getExternalLinkReference(params.externalLinkId, profile.unitId),
+						reference: await getExternalLinkReference(params.externalLinkId, entity.id),
 						curationVersion: result.curationVersion,
 					};
 				},
@@ -2044,7 +2034,7 @@ export default new Elysia()
 						responses: NoContentResponse,
 					},
 				},
-				async ({ params, query, profile, authorization }) => {
+				async ({ params, query, entity, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensure(
 						params.unitId,
@@ -2054,7 +2044,7 @@ export default new Elysia()
 					await withdrawUnitExternalLink({
 						unitId: params.unitId,
 						externalLinkId: params.externalLinkId,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						baseVersion: query.baseVersion,
 					});
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
@@ -2157,13 +2147,13 @@ export default new Elysia()
 						tags: ["Units"],
 					},
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
 					return updateDirectUnitTagCuration({
 						unitId: params.unitId,
 						tagId: params.tagId,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						expectedUpdatedAt: body.updatedAt,
 						expectedFeaturedTagIds: body.expectedFeaturedTagIds,
 						contribution: body.revisionContext?.contribution,
@@ -2200,7 +2190,7 @@ export default new Elysia()
 						responses: NoContentResponse,
 					},
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
 					await runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
@@ -2211,7 +2201,7 @@ export default new Elysia()
 						if (!deleted.length) throw new TagApplicationNotFound();
 						await recordUnitRevision(tx, {
 							unitId: params.unitId,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: body?.revisionContext?.contribution,
 							event: "update",
 						});
@@ -2237,7 +2227,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Vote on Unit tag", tags: ["Units"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const tagId = await runVoteTransaction(
@@ -2254,7 +2244,7 @@ export default new Elysia()
 								.values({
 									unitId: params.unitId,
 									tagId: application.tagId,
-									profileId: profile.unitId,
+									profileId: entity.id,
 									fitVote: body.value,
 									fitUpdatedAt: new Date(),
 								})
@@ -2285,7 +2275,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Remove Unit tag vote", tags: ["Units"] },
 				},
-				async ({ params, profile, authorization }) => {
+				async ({ params, entity, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const tagId = await runVoteTransaction(
@@ -2300,7 +2290,7 @@ export default new Elysia()
 							const judgmentKey = and(
 								eq(unitTagJudgment.unitId, params.unitId),
 								eq(unitTagJudgment.tagId, application.tagId),
-								eq(unitTagJudgment.profileId, profile.unitId),
+								eq(unitTagJudgment.profileId, entity.id),
 							);
 							await tx
 								.delete(unitTagJudgment)

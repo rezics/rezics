@@ -2,13 +2,13 @@ import { sql } from "drizzle-orm";
 import { check, index, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
 	createFractionalIndexPositionByteLengthConstraint,
 	createUpdatedAtColumn,
 	fractionalIndexPosition,
 } from "./columns";
-import { profile } from "./profile";
 import { unit } from "./unit";
 
 /**
@@ -40,7 +40,7 @@ export const profileFavoritesCollection = pgTable(
 	{
 		profileId: uuid()
 			.primaryKey()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
 		collectionId: uuid()
 			.notNull()
 			.references(() => collection.id, { onDelete: "cascade" }),
@@ -59,7 +59,7 @@ export const collectionItem = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
 		position: fractionalIndexPosition().default(sql`'a0'::text`).notNull(),
-		addedByProfileId: uuid().references(() => profile.id, {
+		addedByProfileId: uuid().references(() => entityIdentity.id, {
 			onDelete: "set null",
 		}),
 		createdAt: createCreatedAtColumn(),

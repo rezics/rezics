@@ -1,12 +1,13 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import { authEntity } from "../database/schema/participation";
 
 import { getProfileActivityReadCondition } from "../authorization/profile-activity/query";
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
 import {
+	accountPreference,
 	postProgressEntry,
-	profilePreference,
 	unit,
 	unitProgress,
 	unitProgressEntry,
@@ -18,7 +19,7 @@ export function selectPostProgressEntry(postId: string, viewerProfileId?: string
 	return database
 		.select({
 			id: unitProgressEntry.id,
-			profileId: unitProgressEntry.profileId,
+			entityId: authEntity.entityId,
 			unitId: unitProgressEntry.unitId,
 			entryKind: unitProgressEntry.entryKind,
 			status: unitProgressEntry.status,
@@ -37,11 +38,12 @@ export function selectPostProgressEntry(postId: string, viewerProfileId?: string
 		.innerJoin(
 			unitProgress,
 			and(
-				eq(unitProgress.profileId, unitProgressEntry.profileId),
+				eq(unitProgress.authUserId, unitProgressEntry.authUserId),
 				eq(unitProgress.unitId, unitProgressEntry.unitId),
 			),
 		)
-		.innerJoin(profilePreference, eq(profilePreference.profileId, unitProgressEntry.profileId))
+		.innerJoin(authEntity, eq(authEntity.authUserId, unitProgressEntry.authUserId))
+		.innerJoin(accountPreference, eq(accountPreference.authUserId, unitProgressEntry.authUserId))
 		.innerJoin(progressTargetUnit, eq(progressTargetUnit.id, unitProgressEntry.unitId))
 		.where(
 			and(
@@ -49,8 +51,8 @@ export function selectPostProgressEntry(postId: string, viewerProfileId?: string
 				isNull(unitProgressEntry.deletedAt),
 				isNull(unitProgress.deletedAt),
 				getProfileActivityReadCondition({
-					ownerProfileId: unitProgressEntry.profileId,
-					categoryVisibility: profilePreference.progressVisibility,
+					ownerProfileId: authEntity.entityId,
+					categoryVisibility: accountPreference.progressVisibility,
 					itemVisibility: unitProgress.visibility,
 					viewerProfileId,
 					surface: "linked",

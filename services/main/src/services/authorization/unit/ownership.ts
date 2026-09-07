@@ -1,9 +1,10 @@
 import type { DelegableUnitPermission } from "@rezics/access";
 import { and, eq, isNull } from "drizzle-orm";
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
+import { OfficialProfileIds } from "../../bootstrap/data";
 import type { DatabaseTransaction } from "../../database";
 import { unitAccessGrant, unitAccessRestriction, unitOwnership } from "../../database/schema";
-import { OfficialProfileIds } from "../../bootstrap/data";
 import { expandDelegableUnitPermissions } from "./policy";
 
 export type UnitOwnershipMode = "profile_owned" | "community_owned";
@@ -84,14 +85,14 @@ export async function replaceUnitOwnership(
 		.update(unitAccessGrant)
 		.set({
 			revokedAt: input.now,
-			revokedByProfileId: input.actorProfileId,
+			revokedByAuthUserId: selfAuthUserIdForEntity(input.actorProfileId),
 			updatedAt: input.now,
 		})
 		.where(
 			and(
 				eq(unitAccessGrant.unitId, input.unitId),
-				eq(unitAccessGrant.subjectKind, "profile"),
-				eq(unitAccessGrant.profileId, input.targetProfileId),
+				eq(unitAccessGrant.subjectKind, "auth"),
+				eq(unitAccessGrant.authUserId, selfAuthUserIdForEntity(input.targetProfileId)),
 				isNull(unitAccessGrant.revokedAt),
 			),
 		);
@@ -99,14 +100,14 @@ export async function replaceUnitOwnership(
 		.update(unitAccessRestriction)
 		.set({
 			revokedAt: input.now,
-			revokedByProfileId: input.actorProfileId,
+			revokedByAuthUserId: selfAuthUserIdForEntity(input.actorProfileId),
 			updatedAt: input.now,
 		})
 		.where(
 			and(
 				eq(unitAccessRestriction.unitId, input.unitId),
-				eq(unitAccessRestriction.subjectKind, "profile"),
-				eq(unitAccessRestriction.profileId, input.targetProfileId),
+				eq(unitAccessRestriction.subjectKind, "auth"),
+				eq(unitAccessRestriction.authUserId, selfAuthUserIdForEntity(input.targetProfileId)),
 				isNull(unitAccessRestriction.revokedAt),
 			),
 		);
@@ -132,7 +133,7 @@ async function grantProfilePermissions(
 		readonly unitId: string;
 		readonly profileId: string;
 		readonly permissions: readonly DelegableUnitPermission[];
-		readonly grantedByProfileId: string;
+		readonly grantedByAuthUserId: string | null;
 	},
 ) {
 	const permissions = expandDelegableUnitPermissions(input.permissions);
@@ -140,11 +141,11 @@ async function grantProfilePermissions(
 	await tx.insert(unitAccessGrant).values(
 		permissions.map((permission) => ({
 			unitId: input.unitId,
-			subjectKind: "profile" as const,
-			profileId: input.profileId,
+			subjectKind: "auth" as const,
+			authUserId: selfAuthUserIdForEntity(input.profileId),
 			permission,
 			scope: [],
-			grantedByProfileId: input.grantedByProfileId,
+			grantedByAuthUserId: input.grantedByAuthUserId,
 		})),
 	);
 }
@@ -173,7 +174,7 @@ export async function createPublicEditableUnitAccess(
 				subjectKind: "authenticated" as const,
 				permission,
 				scope: [],
-				grantedByProfileId: OfficialProfileIds.community,
+				grantedByAuthUserId: null,
 			})),
 		)
 		.onConflictDoNothing();
@@ -212,7 +213,7 @@ export async function grantRealmAccessManagersUnitGovernance(
 				realmRelation: "access_manager" as const,
 				permission,
 				scope: [],
-				grantedByProfileId: input.grantedByProfileId,
+				grantedByAuthUserId: selfAuthUserIdForEntity(input.grantedByProfileId),
 			})),
 		)
 		.onConflictDoNothing();
@@ -237,7 +238,7 @@ export async function createCommunityContributedUnitAccess(
 		unitId,
 		profileId: contributorProfileId,
 		permissions: contributorPermissions,
-		grantedByProfileId: OfficialProfileIds.community,
+		grantedByAuthUserId: null,
 	});
 }
 

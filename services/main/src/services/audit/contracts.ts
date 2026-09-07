@@ -16,6 +16,12 @@ export type AuditAuthorityKind = (typeof AuditAuthorityKindValues)[number];
 
 export type AuditActor =
 	| {
+			readonly kind: "auth";
+			readonly authUserId: string;
+			readonly credentialKind?: Exclude<AuditCredentialKind, "system">;
+			readonly credentialId?: string;
+	  }
+	| {
 			readonly kind: "profile";
 			readonly profileId: string;
 			readonly credentialKind?: Exclude<AuditCredentialKind, "system">;

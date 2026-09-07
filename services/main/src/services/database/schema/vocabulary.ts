@@ -10,8 +10,8 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 
-import { ContentLanguageValues, type ContentLanguage } from "./contract-values";
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
 	createJsonObjectColumn,
@@ -20,7 +20,7 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { profile } from "./profile";
+import { ContentLanguageValues, type ContentLanguage } from "./contract-values";
 
 export const VocabularyNodeKindValues = ["concept", "guide"] as const;
 export type VocabularyNodeKind = (typeof VocabularyNodeKindValues)[number];
@@ -46,7 +46,7 @@ export const vocabularyNode = pgTable(
 		id: createUuidv7PrimaryKey(),
 		kind: text().$type<VocabularyNodeKind>().notNull(),
 		status: text().$type<VocabularyNodeStatus>().default("active").notNull(),
-		createdByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
+		createdByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
 		createdAt: createCreatedAtColumn(),
 		retiredAt: createTimestampMsColumn(),
 	},
@@ -110,7 +110,7 @@ export const tagRelation = pgTable(
 		revision: integer().default(1).notNull(),
 		status: text().$type<VocabularyNodeStatus>().default("active").notNull(),
 		provenance: createJsonObjectColumn<VocabularyProvenance>(),
-		createdByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
+		createdByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
 		createdAt: createCreatedAtColumn(),
 		retiredAt: createTimestampMsColumn(),
 	},

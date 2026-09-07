@@ -1,9 +1,16 @@
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 
-import { Authorization } from "../authorization";
 import { recordAuditEvent } from "../audit";
+import { Authorization } from "../authorization";
 import { associationTargetScope } from "../authorization/unit/scope";
 import { database, type DatabaseTransaction } from "../database";
+import {
+	creditAttribution,
+	entity,
+	subjectAssociation,
+	unit,
+	unitAssociationProposal,
+} from "../database/schema";
 import {
 	type AssociationKind,
 	type CreditAttributionRole,
@@ -13,17 +20,9 @@ import {
 	isSubjectAssociationRole,
 	type SubjectAssociationRole,
 } from "../database/schema/contract-values";
-import {
-	creditAttribution,
-	entity,
-	unitAssociationProposal,
-	subjectAssociation,
-	unit,
-} from "../database/schema";
-import { fractionalPositionBetween } from "../ordering/position";
 import { EntityEntryNotFound } from "../entities/errors";
-import { recordUnitRevision } from "./history";
-import type { RevisionContributionInput } from "./revision-contribution";
+import { fractionalPositionBetween } from "../ordering/position";
+import { ensureWikiAssociationContextPost } from "./association-context";
 import {
 	ensureCreditAttributionInvitationAllowed,
 	ensureCreditAttributionRequestAllowed,
@@ -36,7 +35,8 @@ import {
 	AssociationProposalRoleInvalid,
 	UnitNotFound,
 } from "./errors";
-import { ensureWikiAssociationContextPost } from "./association-context";
+import { recordUnitRevision } from "./history";
+import type { RevisionContributionInput } from "./revision-contribution";
 
 export type AssociationProposalState =
 	| "pending"
@@ -169,7 +169,7 @@ async function ensureNoRelationshipOrProposal(
 					.where(
 						and(
 							eq(creditAttribution.sourceUnitId, input.sourceUnitId),
-							eq(creditAttribution.creditedUnitId, input.targetUnitId),
+							eq(creditAttribution.creditedEntityId, input.targetUnitId),
 							eq(creditAttribution.role, input.role),
 						),
 					)
@@ -448,7 +448,7 @@ async function materializeProposal(
 		await tx.insert(creditAttribution).values({
 			id: proposal.id,
 			sourceUnitId: proposal.sourceUnitId,
-			creditedUnitId: proposal.targetUnitId,
+			creditedEntityId: proposal.targetUnitId,
 			role: proposal.role,
 			position: fractionalPositionBetween(last?.position, null),
 		});
@@ -499,7 +499,7 @@ async function ensureNoRelationshipOrProposalForAcceptance(
 						.where(
 							and(
 								eq(creditAttribution.sourceUnitId, proposal.sourceUnitId),
-								eq(creditAttribution.creditedUnitId, proposal.targetUnitId),
+								eq(creditAttribution.creditedEntityId, proposal.targetUnitId),
 								eq(creditAttribution.role, proposal.role),
 							),
 						)

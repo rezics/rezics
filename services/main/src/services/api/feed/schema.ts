@@ -1,6 +1,6 @@
-import type { StaticDecode } from "typebox";
-import { t } from "elysia";
 import { SimpleFeedContentKindValues, UnitFilter } from "@rezics/filter";
+import { t } from "elysia";
+import type { StaticDecode } from "typebox";
 import {
 	FeedSortValues,
 	type PostKind,
@@ -15,7 +15,6 @@ export const MaximumFeedRealmContextsPerItem = 8;
 export const MaximumFeedPageSize = 50;
 
 export const FeedUnitKindValues = [
-	"profile",
 	"book",
 	"software",
 	"media",
@@ -48,7 +47,6 @@ export const FeedIdentityUnitKindValues = [
 export type FeedIdentityUnitKind = (typeof FeedIdentityUnitKindValues)[number];
 
 export const FeedGeneralUnitKindValues = [
-	"profile",
 	"video",
 	"audio",
 	"release",
@@ -77,7 +75,6 @@ export const FeedNonReviewPostKindValues = [
 ] as const satisfies readonly Exclude<FeedPostKind, "review" | "wiki">[];
 
 export const FeedContentKindValues = [
-	"unit:profile",
 	"unit:book",
 	"unit:software",
 	"unit:media",

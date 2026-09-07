@@ -1,11 +1,11 @@
-export const UnitAccessSubjectKindValues = ["profile", "realm", "authenticated"] as const;
+export const UnitAccessSubjectKindValues = ["auth", "realm", "authenticated"] as const;
 export type UnitAccessSubjectKind = (typeof UnitAccessSubjectKindValues)[number];
 
 /** The dynamic Realm audience represented by a Realm Unit access subject. */
 export const RealmAccessSubjectRelationValues = ["member", "access_manager"] as const;
 export type RealmAccessSubjectRelation = (typeof RealmAccessSubjectRelationValues)[number];
 
-export const UnitAccessRestrictionSubjectKindValues = ["profile", "realm"] as const;
+export const UnitAccessRestrictionSubjectKindValues = ["auth", "realm"] as const;
 export type UnitAccessRestrictionSubjectKind =
 	(typeof UnitAccessRestrictionSubjectKindValues)[number];
 

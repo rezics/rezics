@@ -1,13 +1,25 @@
 import { and, eq, gt, isNull, or } from "drizzle-orm";
 
-import { database } from "../../database";
-import { accountEnforcement } from "../../database/schema";
+import { AuthenticationRequired } from "../../auth/errors";
+import { database, type DatabaseExecutor } from "../../database";
+import { accountEnforcement, users } from "../../database/schema";
 import { AccountRestricted } from "../errors";
 import { doesEnforcementBlockAction, type AccountAction } from "./policy";
 
-async function ensureAccountCanAct(profileId: string, action: AccountAction): Promise<void> {
+async function ensureAccountCanAct(
+	authUserId: string,
+	action: AccountAction,
+	executor: DatabaseExecutor,
+): Promise<void> {
+	const [account] = await executor
+		.select({ id: users.id })
+		.from(users)
+		.where(eq(users.id, authUserId))
+		.limit(1)
+		.for("share");
+	if (!account) throw new AuthenticationRequired();
 	const now = new Date();
-	const enforcements = await database
+	const enforcements = await executor
 		.select({
 			kind: accountEnforcement.kind,
 			startsAt: accountEnforcement.startsAt,
@@ -16,7 +28,7 @@ async function ensureAccountCanAct(profileId: string, action: AccountAction): Pr
 		.from(accountEnforcement)
 		.where(
 			and(
-				eq(accountEnforcement.profileId, profileId),
+				eq(accountEnforcement.authUserId, authUserId),
 				isNull(accountEnforcement.revocationActionId),
 				or(isNull(accountEnforcement.expiresAt), gt(accountEnforcement.expiresAt, now)),
 			),
@@ -32,14 +44,16 @@ async function ensureAccountCanAct(profileId: string, action: AccountAction): Pr
 		throw new AccountRestricted();
 }
 
-export class AccountAuthorization<ProfileId extends string | undefined> {
-	constructor(readonly profileId: ProfileId) {}
+export class AccountAuthorization<AuthUserId extends string | undefined> {
+	constructor(readonly authUserId: AuthUserId) {}
 
-	ensureCanWrite(this: AccountAuthorization<string>): Promise<void> {
-		return ensureAccountCanAct(this.profileId, "write");
+	ensureCanWrite(executor: DatabaseExecutor = database): Promise<void> {
+		if (!this.authUserId) throw new AuthenticationRequired();
+		return ensureAccountCanAct(this.authUserId, "write", executor);
 	}
 
-	ensureCanContribute(this: AccountAuthorization<string>): Promise<void> {
-		return ensureAccountCanAct(this.profileId, "contribute");
+	ensureCanContribute(executor: DatabaseExecutor = database): Promise<void> {
+		if (!this.authUserId) throw new AuthenticationRequired();
+		return ensureAccountCanAct(this.authUserId, "contribute", executor);
 	}
 }

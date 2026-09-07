@@ -1,6 +1,6 @@
-import type { StaticDecode } from "typebox";
-import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
+import { StatusCodes } from "http-status-codes";
+import type { StaticDecode } from "typebox";
 
 import session from "../../auth/session";
 import {
@@ -147,7 +147,7 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 			},
 			detail: { summary: "Propose a reviewed Unit identity merge", tags: ["Governance"] },
 		},
-		async ({ authorization, profile, body }) => {
+		async ({ authorization, entity, body }) => {
 			await authorization.platform.ensureCapability("unit.merge.propose");
 			requireMatchingConfirmations(body);
 			return presentMergeRequest(
@@ -156,7 +156,7 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 					targetUnitId: body.targetUnitId,
 					expectedSourceUpdatedAt: new Date(body.expectedSourceUpdatedAt),
 					expectedTargetUpdatedAt: new Date(body.expectedTargetUpdatedAt),
-					proposerProfileId: profile.unitId,
+					proposerProfileId: entity.id,
 					idempotencyKey: body.idempotencyKey,
 					rules: body.rules,
 					note: body.note?.trim() || undefined,
@@ -193,12 +193,12 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 			},
 			detail: { summary: "Approve or reject a Unit merge request", tags: ["Governance"] },
 		},
-		async ({ authorization, profile, params, body }) => {
+		async ({ authorization, entity, params, body }) => {
 			await authorization.platform.ensureCapability("unit.merge.review");
 			return presentMergeRequest(
 				await reviewUnitMerge({
 					requestId: params.requestId,
-					reviewerProfileId: profile.unitId,
+					reviewerProfileId: entity.id,
 					decision: body.decision,
 					requestFingerprint: body.requestFingerprint,
 					note: body.note?.trim() || undefined,
@@ -226,12 +226,12 @@ export default new Elysia({ prefix: "/platform/unit-merges" })
 			},
 			detail: { summary: "Retry a failed Unit merge operation", tags: ["Governance"] },
 		},
-		async ({ authorization, profile, params }) => {
+		async ({ authorization, entity, params }) => {
 			await authorization.platform.ensureCapability("unit.merge");
 			return presentMergeRequest(
 				await retryUnitMerge({
 					requestId: params.requestId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 				}),
 			);
 		},

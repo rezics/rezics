@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import { check, foreignKey, index, integer, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
 	createFractionalIndexPositionByteLengthConstraint,
@@ -10,10 +11,9 @@ import {
 	fractionalIndexPosition,
 } from "./columns";
 import { DefaultResourceVisibility } from "./contract-values";
-import { profile } from "./profile";
-import { resourceVisibility, unit } from "./unit";
 import { post } from "./post";
 import { realm, realmUnit } from "./realm";
+import { resourceVisibility, unit } from "./unit";
 
 /**
  * Current Score state for a Profile, target Unit, and Realm.
@@ -26,7 +26,7 @@ export const score = pgTable(
 		id: createUuidv7PrimaryKey(),
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),

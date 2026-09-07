@@ -3,23 +3,23 @@ import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
+	audio,
+	bookChapterProgressStat,
+	bookChapterStat,
 	contentStructure,
 	contentStructureNode,
 	contentStructureNodeProgress,
 	contentStructureRevisionHead,
-	bookChapterProgressStat,
-	bookChapterStat,
-	audio,
-	type ProgressCurrentBasis,
-	type ProgressDatePrecision,
-	type ProgressEntryKind,
-	type ProgressStatus,
-	postProgressEntry,
 	post,
+	postProgressEntry,
 	unit,
 	unitProgress,
 	unitProgressEntry,
 	video,
+	type ProgressCurrentBasis,
+	type ProgressDatePrecision,
+	type ProgressEntryKind,
+	type ProgressStatus,
 } from "../../database/schema";
 import { ContentStructureNodeNotFound } from "../content-structure/errors";
 import { ValidationError } from "../errors";
@@ -57,11 +57,11 @@ const DefaultProgressVisibility = "private" as const;
 
 export async function lockUnitProgress(
 	tx: DatabaseTransaction,
-	profileId: string,
+	authUserId: string,
 	unitId: string,
 ): Promise<void> {
 	await tx.execute(
-		sql`select pg_advisory_xact_lock(hashtextextended(${`unit-progress:${profileId}:${unitId}`}::text, 0))`,
+		sql`select pg_advisory_xact_lock(hashtextextended(${`unit-progress:${authUserId}:${unitId}`}::text, 0))`,
 	);
 }
 
@@ -82,7 +82,7 @@ export function isAutomaticProgressCheckpointDue(
 
 async function findProgressSnapshot(
 	tx: DatabaseTransaction,
-	profileId: string,
+	authUserId: string,
 	unitId: string,
 ): Promise<ProgressSnapshot | undefined> {
 	const [snapshot] = await tx
@@ -101,7 +101,7 @@ async function findProgressSnapshot(
 		.from(unitProgress)
 		.where(
 			and(
-				eq(unitProgress.profileId, profileId),
+				eq(unitProgress.authUserId, authUserId),
 				eq(unitProgress.unitId, unitId),
 				isNull(unitProgress.deletedAt),
 			),
@@ -174,11 +174,11 @@ export async function recordMediaNodeCompletion(
 		readonly completed: boolean;
 		readonly nodeId: string;
 		readonly now: Date;
-		readonly profileId: string;
+		readonly authUserId: string;
 		readonly unitId: string;
 	},
 ) {
-	await lockUnitProgress(tx, input.profileId, input.unitId);
+	await lockUnitProgress(tx, input.authUserId, input.unitId);
 	const readableUnitCondition = input.canReadUnpublished
 		? undefined
 		: and(eq(unit.status, "published"), inArray(unit.visibility, ["public", "unlisted"]));
@@ -205,14 +205,14 @@ export async function recordMediaNodeCompletion(
 	if (input.completed)
 		await tx
 			.insert(contentStructureNodeProgress)
-			.values({ profileId: input.profileId, nodeId: input.nodeId, completedAt: input.now })
+			.values({ authUserId: input.authUserId, nodeId: input.nodeId, completedAt: input.now })
 			.onConflictDoNothing();
 	else
 		await tx
 			.delete(contentStructureNodeProgress)
 			.where(
 				and(
-					eq(contentStructureNodeProgress.profileId, input.profileId),
+					eq(contentStructureNodeProgress.authUserId, input.authUserId),
 					eq(contentStructureNodeProgress.nodeId, input.nodeId),
 				),
 			);
@@ -234,7 +234,7 @@ export async function recordMediaNodeCompletion(
 		.leftJoin(
 			contentStructureNodeProgress,
 			and(
-				eq(contentStructureNodeProgress.profileId, input.profileId),
+				eq(contentStructureNodeProgress.authUserId, input.authUserId),
 				eq(contentStructureNodeProgress.nodeId, contentStructureNode.id),
 			),
 		)
@@ -256,11 +256,11 @@ export async function recordMediaNodeCompletion(
 			completed: item.completedAt !== null,
 		})),
 	);
-	const snapshot = await findProgressSnapshot(tx, input.profileId, input.unitId);
+	const snapshot = await findProgressSnapshot(tx, input.authUserId, input.unitId);
 	const [record] = await tx
 		.insert(unitProgress)
 		.values({
-			profileId: input.profileId,
+			authUserId: input.authUserId,
 			unitId: input.unitId,
 			status,
 			progress,
@@ -275,7 +275,7 @@ export async function recordMediaNodeCompletion(
 			deletedAt: null,
 		})
 		.onConflictDoUpdate({
-			target: [unitProgress.profileId, unitProgress.unitId],
+			target: [unitProgress.authUserId, unitProgress.unitId],
 			set: {
 				status,
 				progress,
@@ -343,7 +343,7 @@ function normalizeEntry(
 
 async function findCurrentEntry(
 	tx: DatabaseTransaction,
-	profileId: string,
+	authUserId: string,
 	unitId: string,
 	snapshot: ProgressSnapshot | undefined,
 	preferredCurrentEntryId: string | undefined,
@@ -355,7 +355,7 @@ async function findCurrentEntry(
 			.where(
 				and(
 					eq(unitProgressEntry.id, preferredCurrentEntryId),
-					eq(unitProgressEntry.profileId, profileId),
+					eq(unitProgressEntry.authUserId, authUserId),
 					eq(unitProgressEntry.unitId, unitId),
 					eq(unitProgressEntry.affectsCurrent, true),
 					isNull(unitProgressEntry.deletedAt),
@@ -371,7 +371,7 @@ async function findCurrentEntry(
 			.where(
 				and(
 					eq(unitProgressEntry.id, snapshot.currentEntryId),
-					eq(unitProgressEntry.profileId, profileId),
+					eq(unitProgressEntry.authUserId, authUserId),
 					eq(unitProgressEntry.unitId, unitId),
 					eq(unitProgressEntry.affectsCurrent, true),
 					isNull(unitProgressEntry.deletedAt),
@@ -385,7 +385,7 @@ async function findCurrentEntry(
 		.from(unitProgressEntry)
 		.where(
 			and(
-				eq(unitProgressEntry.profileId, profileId),
+				eq(unitProgressEntry.authUserId, authUserId),
 				eq(unitProgressEntry.unitId, unitId),
 				eq(unitProgressEntry.affectsCurrent, true),
 				isNull(unitProgressEntry.deletedAt),
@@ -398,18 +398,18 @@ async function findCurrentEntry(
 
 export async function refreshProgressSnapshot(
 	tx: DatabaseTransaction,
-	profileId: string,
+	authUserId: string,
 	unitId: string,
 	preferredCurrentEntryId?: string,
 ): Promise<void> {
-	const snapshot = await findProgressSnapshot(tx, profileId, unitId);
+	const snapshot = await findProgressSnapshot(tx, authUserId, unitId);
 	const readingSnapshot =
 		preferredCurrentEntryId === undefined && snapshot?.currentBasis === "reading"
 			? snapshot
 			: undefined;
 	const current = readingSnapshot
 		? undefined
-		: await findCurrentEntry(tx, profileId, unitId, snapshot, preferredCurrentEntryId);
+		: await findCurrentEntry(tx, authUserId, unitId, snapshot, preferredCurrentEntryId);
 	const [statistics] = await tx
 		.select({
 			completedCount: sql<number>`coalesce(sum(${unitProgressEntry.completionDelta})::int, 0)`,
@@ -419,7 +419,7 @@ export async function refreshProgressSnapshot(
 		.from(unitProgressEntry)
 		.where(
 			and(
-				eq(unitProgressEntry.profileId, profileId),
+				eq(unitProgressEntry.authUserId, authUserId),
 				eq(unitProgressEntry.unitId, unitId),
 				isNull(unitProgressEntry.deletedAt),
 			),
@@ -435,7 +435,7 @@ export async function refreshProgressSnapshot(
 					deletedAt: null,
 					updatedAt: new Date(),
 				})
-				.where(and(eq(unitProgress.profileId, profileId), eq(unitProgress.unitId, unitId)));
+				.where(and(eq(unitProgress.authUserId, authUserId), eq(unitProgress.unitId, unitId)));
 			return;
 		}
 		await tx
@@ -446,7 +446,7 @@ export async function refreshProgressSnapshot(
 				deletedAt: new Date(),
 				lastSeenAt: new Date(),
 			})
-			.where(and(eq(unitProgress.profileId, profileId), eq(unitProgress.unitId, unitId)));
+			.where(and(eq(unitProgress.authUserId, authUserId), eq(unitProgress.unitId, unitId)));
 		return;
 	}
 	const completedCount = toSafeInteger(statistics.completedCount, "progress completion count");
@@ -473,7 +473,7 @@ export async function refreshProgressSnapshot(
 	await tx
 		.insert(unitProgress)
 		.values({
-			profileId,
+			authUserId,
 			unitId,
 			status,
 			progress,
@@ -488,7 +488,7 @@ export async function refreshProgressSnapshot(
 			deletedAt: null,
 		})
 		.onConflictDoUpdate({
-			target: [unitProgress.profileId, unitProgress.unitId],
+			target: [unitProgress.authUserId, unitProgress.unitId],
 			set: {
 				status,
 				progress,
@@ -543,11 +543,11 @@ export async function recordChapterReading(
 		readonly canReadUnpublished: boolean;
 		readonly nodeId: string;
 		readonly now: Date;
-		readonly profileId: string;
+		readonly authUserId: string;
 		readonly unitId: string;
 	},
 ) {
-	await lockUnitProgress(tx, input.profileId, input.unitId);
+	await lockUnitProgress(tx, input.authUserId, input.unitId);
 	const readableUnitCondition = input.canReadUnpublished
 		? undefined
 		: and(eq(unit.status, "published"), inArray(unit.visibility, ["public", "unlisted"]));
@@ -575,7 +575,7 @@ export async function recordChapterReading(
 
 	await tx
 		.insert(contentStructureNodeProgress)
-		.values({ profileId: input.profileId, nodeId: input.nodeId, completedAt: input.now })
+		.values({ authUserId: input.authUserId, nodeId: input.nodeId, completedAt: input.now })
 		.onConflictDoNothing();
 
 	const [chapterCounts] = await tx
@@ -589,7 +589,7 @@ export async function recordChapterReading(
 		.leftJoin(
 			bookChapterProgressStat,
 			and(
-				eq(bookChapterProgressStat.profileId, input.profileId),
+				eq(bookChapterProgressStat.authUserId, input.authUserId),
 				eq(bookChapterProgressStat.bookUnitId, bookChapterStat.bookUnitId),
 			),
 		)
@@ -607,7 +607,7 @@ export async function recordChapterReading(
 		.from(unitProgressEntry)
 		.where(
 			and(
-				eq(unitProgressEntry.profileId, input.profileId),
+				eq(unitProgressEntry.authUserId, input.authUserId),
 				eq(unitProgressEntry.unitId, input.unitId),
 				isNull(unitProgressEntry.deletedAt),
 			),
@@ -621,7 +621,7 @@ export async function recordChapterReading(
 	if (journalEntryCreated)
 		await createProgressEntry(
 			tx,
-			input.profileId,
+			input.authUserId,
 			input.unitId,
 			{
 				entryKind: "update",
@@ -635,11 +635,11 @@ export async function recordChapterReading(
 			{ refreshSnapshot: false },
 		);
 
-	const snapshot = await findProgressSnapshot(tx, input.profileId, input.unitId);
+	const snapshot = await findProgressSnapshot(tx, input.authUserId, input.unitId);
 	const [record] = await tx
 		.insert(unitProgress)
 		.values({
-			profileId: input.profileId,
+			authUserId: input.authUserId,
 			unitId: input.unitId,
 			status: reading.status,
 			progress: reading.progress,
@@ -654,7 +654,7 @@ export async function recordChapterReading(
 			deletedAt: null,
 		})
 		.onConflictDoUpdate({
-			target: [unitProgress.profileId, unitProgress.unitId],
+			target: [unitProgress.authUserId, unitProgress.unitId],
 			set: {
 				status: reading.status,
 				progress: reading.progress,
@@ -677,13 +677,13 @@ export async function recordChapterReading(
 
 export async function createProgressEntry(
 	tx: DatabaseTransaction,
-	profileId: string,
+	authUserId: string,
 	unitId: string,
 	input: ProgressEntryWriteInput,
 	options: { readonly refreshSnapshot?: boolean } = {},
 ) {
 	validateOccurredAt(input.occurredAt, input.datePrecision);
-	const snapshot = await findProgressSnapshot(tx, profileId, unitId);
+	const snapshot = await findProgressSnapshot(tx, authUserId, unitId);
 	const normalized = normalizeEntry(input, snapshot);
 	const contentStructureRevisionId = await resolveContentStructureRevision(
 		tx,
@@ -693,7 +693,7 @@ export async function createProgressEntry(
 	const [entry] = await tx
 		.insert(unitProgressEntry)
 		.values({
-			profileId,
+			authUserId,
 			unitId,
 			entryKind: input.entryKind,
 			status: normalized.status,
@@ -711,7 +711,7 @@ export async function createProgressEntry(
 	if (options.refreshSnapshot !== false)
 		await refreshProgressSnapshot(
 			tx,
-			profileId,
+			authUserId,
 			unitId,
 			input.affectsCurrent ? entry.id : undefined,
 		);
@@ -720,7 +720,7 @@ export async function createProgressEntry(
 
 export async function replaceProgressEntry(
 	tx: DatabaseTransaction,
-	profileId: string,
+	authUserId: string,
 	unitId: string,
 	entryId: string,
 	input: ProgressEntryContentInput,
@@ -732,14 +732,14 @@ export async function replaceProgressEntry(
 		.where(
 			and(
 				eq(unitProgressEntry.id, entryId),
-				eq(unitProgressEntry.profileId, profileId),
+				eq(unitProgressEntry.authUserId, authUserId),
 				eq(unitProgressEntry.unitId, unitId),
 				isNull(unitProgressEntry.deletedAt),
 			),
 		)
 		.limit(1);
 	if (!existing) throw new ProgressEntryNotFound();
-	const snapshot = await findProgressSnapshot(tx, profileId, unitId);
+	const snapshot = await findProgressSnapshot(tx, authUserId, unitId);
 	const normalized = normalizeEntry(input, snapshot);
 	const contentStructureRevisionId = await resolveContentStructureRevision(
 		tx,
@@ -763,20 +763,20 @@ export async function replaceProgressEntry(
 		.where(
 			and(
 				eq(unitProgressEntry.id, entryId),
-				eq(unitProgressEntry.profileId, profileId),
+				eq(unitProgressEntry.authUserId, authUserId),
 				eq(unitProgressEntry.unitId, unitId),
 				isNull(unitProgressEntry.deletedAt),
 			),
 		)
 		.returning();
 	if (!entry) throw new ProgressEntryNotFound();
-	await refreshProgressSnapshot(tx, profileId, unitId);
+	await refreshProgressSnapshot(tx, authUserId, unitId);
 	return entry;
 }
 
 export async function setCurrentProgressEntry(
 	tx: DatabaseTransaction,
-	profileId: string,
+	authUserId: string,
 	unitId: string,
 	entryId: string,
 ): Promise<void> {
@@ -786,19 +786,19 @@ export async function setCurrentProgressEntry(
 		.where(
 			and(
 				eq(unitProgressEntry.id, entryId),
-				eq(unitProgressEntry.profileId, profileId),
+				eq(unitProgressEntry.authUserId, authUserId),
 				eq(unitProgressEntry.unitId, unitId),
 				isNull(unitProgressEntry.deletedAt),
 			),
 		)
 		.returning({ id: unitProgressEntry.id });
 	if (!entry) throw new ProgressEntryNotFound();
-	await refreshProgressSnapshot(tx, profileId, unitId, entry.id);
+	await refreshProgressSnapshot(tx, authUserId, unitId, entry.id);
 }
 
 export async function deleteProgressEntry(
 	tx: DatabaseTransaction,
-	profileId: string,
+	authUserId: string,
 	unitId: string,
 	entryId: string,
 ): Promise<void> {
@@ -808,7 +808,7 @@ export async function deleteProgressEntry(
 		.where(
 			and(
 				eq(unitProgressEntry.id, entryId),
-				eq(unitProgressEntry.profileId, profileId),
+				eq(unitProgressEntry.authUserId, authUserId),
 				eq(unitProgressEntry.unitId, unitId),
 				isNull(unitProgressEntry.deletedAt),
 			),
@@ -816,5 +816,5 @@ export async function deleteProgressEntry(
 		.returning({ id: unitProgressEntry.id });
 	if (!deleted) throw new ProgressEntryNotFound();
 	await tx.delete(postProgressEntry).where(eq(postProgressEntry.progressEntryId, entryId));
-	await refreshProgressSnapshot(tx, profileId, unitId);
+	await refreshProgressSnapshot(tx, authUserId, unitId);
 }

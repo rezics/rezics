@@ -1,11 +1,10 @@
 import { sql } from "drizzle-orm";
 import { check, foreignKey, index, integer, pgEnum, text, uuid } from "drizzle-orm/pg-core";
 
-import { pgTable } from "./base";
 import { users } from "./auth";
+import { pgTable } from "./base";
 import { createCreatedAtColumn, createTimestampMsColumn, createUpdatedAtColumn } from "./columns";
 import { UserAccountStateValues, toEnumValues } from "./contract-values";
-import { profile } from "./profile";
 import { governanceDecision } from "./governance";
 
 export const userAccountStateValue = pgEnum(
@@ -28,7 +27,7 @@ export const userAccountState = pgTable(
 		decisionId: uuid().references(() => governanceDecision.id, { onDelete: "restrict" }),
 		note: text(),
 		expiresAt: createTimestampMsColumn(),
-		updatedByProfileId: uuid().notNull(),
+		updatedByAuthUserId: uuid().notNull(),
 		revision: integer().default(1).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -40,12 +39,12 @@ export const userAccountState = pgTable(
 			foreignColumns: [users.id],
 		}).onDelete("cascade"),
 		foreignKey({
-			name: "user_account_state_updated_by_profile_id_fkey",
-			columns: [table.updatedByProfileId],
-			foreignColumns: [profile.id],
+			name: "user_account_state_updated_by_auth_user_id_fkey",
+			columns: [table.updatedByAuthUserId],
+			foreignColumns: [users.id],
 		}).onDelete("restrict"),
 		index("user_account_state_state_expiry_idx").on(table.state, table.expiresAt),
-		index("user_account_state_updated_by_idx").on(table.updatedByProfileId),
+		index("user_account_state_updated_by_idx").on(table.updatedByAuthUserId),
 		index("user_account_state_decision_idx")
 			.on(table.decisionId)
 			.where(sql`${table.decisionId} is not null`),

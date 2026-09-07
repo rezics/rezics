@@ -6,19 +6,19 @@ import sharp from "sharp";
 
 import type { DatabaseTransaction } from "../../database";
 import {
+	accountPreference,
 	contentStructure,
 	imageAsset,
 	imageObject,
-	profilePreference,
 	realm,
 	realmMember,
 	unitAccessGrant,
 } from "../../database/schema";
 import { fractionalPositionAt } from "../../ordering/position";
-import { recordUnitRevision } from "../../units/history";
 import { storage } from "../../storage";
+import { recordUnitRevision } from "../../units/history";
 import {
-	BootstrapProfileManifest,
+	BootstrapAccountManifest,
 	BootstrapRealmManifest,
 	OfficialProfileIds,
 	OfficialRealmAvatarAsset,
@@ -107,7 +107,7 @@ export async function ensureBootstrapRealm(
 			realmRelation: "member",
 			permission,
 			scope: [],
-			grantedByProfileId: value.ownerProfileId,
+			grantedByAuthUserId: null,
 			createdAt,
 			updatedAt: createdAt,
 		});
@@ -128,7 +128,7 @@ export async function ensureBootstrapRealm(
 			subjectKind: "authenticated",
 			permission,
 			scope: [],
-			grantedByProfileId: value.ownerProfileId,
+			grantedByAuthUserId: null,
 			createdAt,
 			updatedAt: createdAt,
 		});
@@ -138,19 +138,19 @@ export async function ensureBootstrapRealm(
 			if (
 				await hasUnitAccessGrant(tx, [
 					eq(unitAccessGrant.unitId, value.id),
-					eq(unitAccessGrant.subjectKind, "profile"),
-					eq(unitAccessGrant.profileId, access.profileId),
+					eq(unitAccessGrant.subjectKind, "auth"),
+					eq(unitAccessGrant.authUserId, access.authUserId),
 					eq(unitAccessGrant.permission, permission),
 				])
 			)
 				continue;
 			await tx.insert(unitAccessGrant).values({
 				unitId: value.id,
-				subjectKind: "profile",
-				profileId: access.profileId,
+				subjectKind: "auth",
+				authUserId: access.authUserId,
 				permission,
 				scope: [],
-				grantedByProfileId: value.ownerProfileId,
+				grantedByAuthUserId: null,
 				createdAt,
 				updatedAt: createdAt,
 			});
@@ -176,11 +176,11 @@ export async function ensureBootstrapRealm(
 }
 
 export async function ensureScoreRealmProfileDefaults(tx: DatabaseTransaction): Promise<void> {
-	if (BootstrapProfileManifest.length) {
+	if (BootstrapAccountManifest.length) {
 		await tx
 			.insert(realmMember)
 			.values(
-				BootstrapProfileManifest.map(({ profileId }) => ({
+				BootstrapAccountManifest.map(({ profileId }) => ({
 					realmId: RezicsScoreRealmManifest.id,
 					profileId,
 					state: "active" as const,
@@ -188,25 +188,25 @@ export async function ensureScoreRealmProfileDefaults(tx: DatabaseTransaction): 
 			)
 			.onConflictDoNothing();
 		await tx
-			.insert(profilePreference)
+			.insert(accountPreference)
 			.values(
-				BootstrapProfileManifest.map(({ profileId }) => ({
-					profileId,
+				BootstrapAccountManifest.map(({ authUserId }) => ({
+					authUserId,
 					defaultScoreRealmId: RezicsScoreRealmManifest.id,
 				})),
 			)
 			.onConflictDoNothing();
 	}
 	await tx
-		.update(profilePreference)
+		.update(accountPreference)
 		.set({ defaultScoreRealmId: RezicsScoreRealmManifest.id })
 		.where(
 			and(
 				inArray(
-					profilePreference.profileId,
-					BootstrapProfileManifest.map(({ profileId }) => profileId),
+					accountPreference.authUserId,
+					BootstrapAccountManifest.map(({ authUserId }) => authUserId),
 				),
-				isNull(profilePreference.defaultScoreRealmId),
+				isNull(accountPreference.defaultScoreRealmId),
 			),
 		);
 }

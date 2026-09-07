@@ -1,7 +1,6 @@
 import type { ContentRating, UnitKind } from "../database/schema/contract-values";
 
 export const PublicUnitSeoKinds = [
-	"profile",
 	"book",
 	"software",
 	"release",

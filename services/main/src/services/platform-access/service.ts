@@ -6,20 +6,20 @@ import {
 } from "@rezics/access";
 import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 
+import { CapabilityGrantExpiryInvalid } from "../api/governance/errors";
+import { UserNotFound } from "../api/users/errors";
+import { recordAuditEvent } from "../audit";
 import {
 	CustomThemeExternalLiveAccessSelfMutationForbidden,
-	PlatformAccessManagerRequired,
 	PlatformAccessConfigurationInvalid,
+	PlatformAccessManagerRequired,
 	PlatformAccessRevisionConflict,
 } from "../authorization/errors";
+import { PlatformAuthorization } from "../authorization/platform/authorization";
 import { preservesPermanentAccessManager } from "../authorization/platform/policy";
-import { recordAuditEvent } from "../audit";
-import { CapabilityGrantExpiryInvalid } from "../api/governance/errors";
-import { ProfileNotFound } from "../api/users/errors";
 import { BootstrapPlatformAdministratorProfile } from "../bootstrap/data/foundation";
 import type { DatabaseExecutor, DatabaseTransaction } from "../database";
-import { platformCapabilityGrant, profile, users } from "../database/schema";
-import { firstUnitLocalizationTitle } from "../units/localization";
+import { platformCapabilityGrant, users } from "../database/schema";
 
 const PlatformAccessLockName = "platform-access-grants";
 export const MaximumCustomThemeExternalLiveAccessGrantDays = 90;
@@ -31,14 +31,14 @@ const MaximumCustomThemeExternalLiveAccessGrantMilliseconds =
 export interface PlatformAccessGrant {
 	readonly id: string;
 	readonly capability: PlatformCapability;
-	readonly grantedByProfileId: string;
+	readonly grantedByAuthUserId: string;
 	readonly expiresAt: Date | null;
 	readonly createdAt: Date;
 	readonly updatedAt: Date;
 }
 
-export interface PlatformAccessProfile {
-	readonly profileId: string;
+export interface PlatformAccessAccount {
+	readonly authUserId: string;
 	readonly name: string | null;
 	readonly email: string;
 	readonly grants: PlatformAccessGrant[];
@@ -52,7 +52,7 @@ export interface DesiredPlatformAccessGrant {
 
 interface CustomThemeExternalLiveAccessGrantFields {
 	readonly id: string;
-	readonly grantedByProfileId: string;
+	readonly grantedByAuthUserId: string;
 	readonly createdAt: Date;
 	readonly updatedAt: Date;
 }
@@ -63,8 +63,8 @@ export type CustomThemeExternalLiveAccessGrant = CustomThemeExternalLiveAccessGr
 		| { readonly state: "granted" | "expired"; readonly expiresAt: Date }
 	);
 
-export interface CustomThemeExternalLiveAccessProfile {
-	readonly profileId: string;
+export interface CustomThemeExternalLiveAccessAccount {
+	readonly authUserId: string;
 	readonly name: string | null;
 	readonly email: string;
 	readonly grant: CustomThemeExternalLiveAccessGrant | null;
@@ -83,27 +83,27 @@ export function isCustomThemeExternalLiveExpiryValid(
 }
 
 export function isPermanentBootstrapCustomThemeExternalLiveAccessGrant(input: {
-	readonly profileId: string;
-	readonly grantedByProfileId: string;
+	readonly authUserId: string;
+	readonly grantedByAuthUserId: string;
 	readonly expiresAt: Date | null;
 }): boolean {
 	return (
-		input.profileId === BootstrapPlatformAdministratorProfile.profileId &&
-		input.grantedByProfileId === BootstrapPlatformAdministratorProfile.profileId &&
+		input.authUserId === BootstrapPlatformAdministratorProfile.authUserId &&
+		input.grantedByAuthUserId === BootstrapPlatformAdministratorProfile.authUserId &&
 		input.expiresAt === null
 	);
 }
 
 export function classifyCustomThemeExternalLiveAccessGrant(
 	row: CustomThemeExternalLiveAccessGrantFields & {
-		readonly profileId: string;
+		readonly authUserId: string;
 		readonly expiresAt: Date | null;
 	},
 	now: Date,
 ): CustomThemeExternalLiveAccessGrant {
 	const fields = {
 		id: row.id,
-		grantedByProfileId: row.grantedByProfileId,
+		grantedByAuthUserId: row.grantedByAuthUserId,
 		createdAt: row.createdAt,
 		updatedAt: row.updatedAt,
 	};
@@ -183,15 +183,15 @@ function orderGrants(grants: readonly PlatformAccessGrant[]): PlatformAccessGran
 
 async function loadActivePlatformGrants(
 	executor: DatabaseExecutor,
-	profileIds: readonly string[],
+	authUserIds: readonly string[],
 ): Promise<ReadonlyMap<string, readonly PlatformAccessGrant[]>> {
-	if (profileIds.length === 0) return new Map();
+	if (authUserIds.length === 0) return new Map();
 	const rows = await executor
 		.select({
 			id: platformCapabilityGrant.id,
-			profileId: platformCapabilityGrant.profileId,
+			authUserId: platformCapabilityGrant.authUserId,
 			capability: platformCapabilityGrant.capability,
-			grantedByProfileId: platformCapabilityGrant.grantedByProfileId,
+			grantedByAuthUserId: platformCapabilityGrant.grantedByAuthUserId,
 			expiresAt: platformCapabilityGrant.expiresAt,
 			createdAt: platformCapabilityGrant.createdAt,
 			updatedAt: platformCapabilityGrant.updatedAt,
@@ -200,24 +200,24 @@ async function loadActivePlatformGrants(
 		.where(
 			and(
 				activePlatformGrantPredicate(),
-				inArray(platformCapabilityGrant.profileId, [...profileIds]),
+				inArray(platformCapabilityGrant.authUserId, [...authUserIds]),
 			),
 		);
 	const grants = new Map<string, PlatformAccessGrant[]>();
-	for (const { profileId, ...grant } of rows) {
-		const existing = grants.get(profileId) ?? [];
+	for (const { authUserId, ...grant } of rows) {
+		const existing = grants.get(authUserId) ?? [];
 		existing.push(grant);
-		grants.set(profileId, existing);
+		grants.set(authUserId, existing);
 	}
 	return new Map(
-		[...grants].map(([profileId, profileGrants]) => [profileId, orderGrants(profileGrants)]),
+		[...grants].map(([authUserId, profileGrants]) => [authUserId, orderGrants(profileGrants)]),
 	);
 }
 
-function presentPlatformAccessProfile(
-	row: Pick<PlatformAccessProfile, "profileId" | "name" | "email">,
+function presentPlatformAccessAccount(
+	row: Pick<PlatformAccessAccount, "authUserId" | "name" | "email">,
 	grants: readonly PlatformAccessGrant[],
-): PlatformAccessProfile {
+): PlatformAccessAccount {
 	return {
 		...row,
 		grants: [...grants],
@@ -225,77 +225,69 @@ function presentPlatformAccessProfile(
 	};
 }
 
-export async function listPlatformAccessProfiles(
+export async function listPlatformAccessAccounts(
 	executor: DatabaseExecutor,
-): Promise<PlatformAccessProfile[]> {
+): Promise<PlatformAccessAccount[]> {
 	const rows = await executor
 		.select({
-			profileId: profile.id,
-			name: firstUnitLocalizationTitle(profile.id),
+			authUserId: users.id,
+			name: users.name,
 			email: users.email,
 		})
 		.from(platformCapabilityGrant)
-		.innerJoin(profile, eq(profile.id, platformCapabilityGrant.profileId))
-		.innerJoin(users, eq(users.id, profile.authUserId))
+		.innerJoin(users, eq(users.id, platformCapabilityGrant.authUserId))
 		.where(activePlatformGrantPredicate())
-		.groupBy(profile.id, users.email)
+		.groupBy(users.id, users.name, users.email)
 		.orderBy(users.email);
 	const grants = await loadActivePlatformGrants(
 		executor,
-		rows.map(({ profileId }) => profileId),
+		rows.map(({ authUserId }) => authUserId),
 	);
 	return rows.flatMap((row) => {
-		const profileGrants = grants.get(row.profileId) ?? [];
-		return profileGrants.length ? [presentPlatformAccessProfile(row, profileGrants)] : [];
+		const profileGrants = grants.get(row.authUserId) ?? [];
+		return profileGrants.length ? [presentPlatformAccessAccount(row, profileGrants)] : [];
 	});
 }
 
-export async function searchPlatformAccessProfiles(
+export async function searchPlatformAccessAccounts(
 	executor: DatabaseExecutor,
 	query: string,
 	limit: number,
-): Promise<PlatformAccessProfile[]> {
+): Promise<PlatformAccessAccount[]> {
 	const pattern = `%${query.trim()}%`;
 	const rows = await executor
 		.select({
-			profileId: profile.id,
-			name: firstUnitLocalizationTitle(profile.id),
+			authUserId: users.id,
+			name: users.name,
 			email: users.email,
 		})
-		.from(profile)
-		.innerJoin(users, eq(users.id, profile.authUserId))
-		.where(
-			or(
-				ilike(users.email, pattern),
-				sql`${firstUnitLocalizationTitle(profile.id)} ilike ${pattern}`,
-			),
-		)
+		.from(users)
+		.where(or(ilike(users.email, pattern), sql`${users.name} ilike ${pattern}`))
 		.orderBy(users.email)
 		.limit(limit);
 	const grants = await loadActivePlatformGrants(
 		executor,
-		rows.map(({ profileId }) => profileId),
+		rows.map(({ authUserId }) => authUserId),
 	);
-	return rows.map((row) => presentPlatformAccessProfile(row, grants.get(row.profileId) ?? []));
+	return rows.map((row) => presentPlatformAccessAccount(row, grants.get(row.authUserId) ?? []));
 }
 
-export async function getPlatformAccessProfile(
+export async function getPlatformAccessAccount(
 	executor: DatabaseExecutor,
-	profileId: string,
-): Promise<PlatformAccessProfile> {
+	authUserId: string,
+): Promise<PlatformAccessAccount> {
 	const [row] = await executor
 		.select({
-			profileId: profile.id,
-			name: firstUnitLocalizationTitle(profile.id),
+			authUserId: users.id,
+			name: users.name,
 			email: users.email,
 		})
-		.from(profile)
-		.innerJoin(users, eq(users.id, profile.authUserId))
-		.where(eq(profile.id, profileId))
+		.from(users)
+		.where(eq(users.id, authUserId))
 		.limit(1);
-	if (!row) throw new ProfileNotFound();
-	const grants = await loadActivePlatformGrants(executor, [profileId]);
-	return presentPlatformAccessProfile(row, grants.get(profileId) ?? []);
+	if (!row) throw new UserNotFound();
+	const grants = await loadActivePlatformGrants(executor, [authUserId]);
+	return presentPlatformAccessAccount(row, grants.get(authUserId) ?? []);
 }
 
 export async function lockPlatformAccess(tx: DatabaseTransaction): Promise<void> {
@@ -314,7 +306,7 @@ async function ensureCustomThemePlatformAccessCapacity(
 	const now = new Date();
 	const accessGrantRows = input.addingAccessGrant
 		? await tx
-				.select({ profileId: platformCapabilityGrant.profileId })
+				.select({ authUserId: platformCapabilityGrant.authUserId })
 				.from(platformCapabilityGrant)
 				.where(
 					and(
@@ -326,7 +318,7 @@ async function ensureCustomThemePlatformAccessCapacity(
 		: [];
 	const accessManagerRows = input.addingAccessManager
 		? await tx
-				.selectDistinct({ profileId: platformCapabilityGrant.profileId })
+				.selectDistinct({ authUserId: platformCapabilityGrant.authUserId })
 				.from(platformCapabilityGrant)
 				.where(
 					and(
@@ -349,12 +341,12 @@ async function ensureCustomThemePlatformAccessCapacity(
 
 async function ensurePermanentAccessManagerContinuity(
 	tx: DatabaseTransaction,
-	targetProfileId: string,
+	targetAuthUserId: string,
 	targetWillRemainPermanentManager: boolean,
 ): Promise<void> {
 	if (targetWillRemainPermanentManager) return;
 	const permanentManagers = await tx
-		.select({ profileId: platformCapabilityGrant.profileId })
+		.select({ authUserId: platformCapabilityGrant.authUserId })
 		.from(platformCapabilityGrant)
 		.where(
 			and(
@@ -363,11 +355,11 @@ async function ensurePermanentAccessManagerContinuity(
 				isNull(platformCapabilityGrant.revokedAt),
 			),
 		)
-		.groupBy(platformCapabilityGrant.profileId);
+		.groupBy(platformCapabilityGrant.authUserId);
 	if (
 		!preservesPermanentAccessManager(
-			permanentManagers.map(({ profileId }) => profileId),
-			targetProfileId,
+			permanentManagers.map(({ authUserId }) => authUserId),
+			targetAuthUserId,
 			targetWillRemainPermanentManager,
 		)
 	)
@@ -381,12 +373,12 @@ function sameExpiry(left: Date | null, right: Date | null): boolean {
 export async function replacePlatformAccess(
 	tx: DatabaseTransaction,
 	input: {
-		readonly actorProfileId: string;
-		readonly targetProfileId: string;
+		readonly actorAuthUserId: string;
+		readonly targetAuthUserId: string;
 		readonly expectedRevision: string;
 		readonly grants: readonly DesiredPlatformAccessGrant[];
 	},
-): Promise<PlatformAccessProfile> {
+): Promise<PlatformAccessAccount> {
 	const now = new Date();
 	if (input.grants.some(({ expiresAt }) => expiresAt !== null && expiresAt <= now))
 		throw new CapabilityGrantExpiryInvalid();
@@ -396,15 +388,19 @@ export async function replacePlatformAccess(
 	const requestedExternalLiveAccessIsPermanentBootstrapGrant = Boolean(
 		requestedExternalLiveAccess &&
 			isPermanentBootstrapCustomThemeExternalLiveAccessGrant({
-				profileId: input.targetProfileId,
-				grantedByProfileId: input.actorProfileId,
+				authUserId: input.targetAuthUserId,
+				grantedByAuthUserId: input.actorAuthUserId,
 				expiresAt: requestedExternalLiveAccess.expiresAt,
 			}),
 	);
 	if (requestedExternalLiveAccess && !requestedExternalLiveAccessIsPermanentBootstrapGrant)
 		ensureCustomThemeExternalLiveExpiry(requestedExternalLiveAccess.expiresAt, now);
 	await lockPlatformAccess(tx);
-	const beforeProfile = await getPlatformAccessProfile(tx, input.targetProfileId);
+	await new PlatformAuthorization(undefined, input.actorAuthUserId).ensureCapability(
+		"platform.access.manage",
+		tx,
+	);
+	const beforeProfile = await getPlatformAccessAccount(tx, input.targetAuthUserId);
 	if (beforeProfile.revision !== input.expectedRevision) throw new PlatformAccessRevisionConflict();
 
 	const desired = new Map(input.grants.map((grant) => [grant.capability, grant] as const));
@@ -424,7 +420,7 @@ export async function replacePlatformAccess(
 	});
 	await ensurePermanentAccessManagerContinuity(
 		tx,
-		input.targetProfileId,
+		input.targetAuthUserId,
 		desired.get("platform.access.manage")?.expiresAt === null,
 	);
 
@@ -438,7 +434,7 @@ export async function replacePlatformAccess(
 		.from(platformCapabilityGrant)
 		.where(
 			and(
-				eq(platformCapabilityGrant.profileId, input.targetProfileId),
+				eq(platformCapabilityGrant.authUserId, input.targetAuthUserId),
 				isNull(platformCapabilityGrant.revokedAt),
 			),
 		);
@@ -451,7 +447,7 @@ export async function replacePlatformAccess(
 		: currentExternalLiveAccess !== undefined;
 	if (
 		externalLiveAccessChanges &&
-		input.actorProfileId === input.targetProfileId &&
+		input.actorAuthUserId === input.targetAuthUserId &&
 		!requestedExternalLiveAccessIsPermanentBootstrapGrant
 	)
 		throw new CustomThemeExternalLiveAccessSelfMutationForbidden();
@@ -469,7 +465,7 @@ export async function replacePlatformAccess(
 			.update(platformCapabilityGrant)
 			.set({
 				revokedAt: now,
-				revokedByProfileId: input.actorProfileId,
+				revokedByAuthUserId: input.actorAuthUserId,
 				updatedAt: now,
 			})
 			.where(inArray(platformCapabilityGrant.id, revokeIds));
@@ -480,9 +476,9 @@ export async function replacePlatformAccess(
 		const [inserted] = await tx
 			.insert(platformCapabilityGrant)
 			.values({
-				profileId: input.targetProfileId,
+				authUserId: input.targetAuthUserId,
 				capability: grant.capability,
-				grantedByProfileId: input.actorProfileId,
+				grantedByAuthUserId: input.actorAuthUserId,
 				expiresAt: grant.expiresAt,
 			})
 			.returning({ id: platformCapabilityGrant.id });
@@ -493,10 +489,10 @@ export async function replacePlatformAccess(
 		await recordAuditEvent(tx, {
 			category: "admin_activity",
 			outcome: "succeeded",
-			actor: { kind: "profile", profileId: input.actorProfileId },
+			actor: { kind: "auth", authUserId: input.actorAuthUserId },
 			authority: { kind: "platform" },
 			action: "platform.access.replace",
-			target: { kind: "profile", id: input.targetProfileId },
+			target: { kind: "auth", id: input.targetAuthUserId },
 			details: {
 				before: beforeProfile.grants.map(({ capability, expiresAt }) => ({
 					capability,
@@ -510,7 +506,7 @@ export async function replacePlatformAccess(
 				createdGrantIds: insertedIds,
 			},
 		});
-	return getPlatformAccessProfile(tx, input.targetProfileId);
+	return getPlatformAccessAccount(tx, input.targetAuthUserId);
 }
 
 function customThemeExternalLiveAccessRevision(
@@ -521,15 +517,15 @@ function customThemeExternalLiveAccessRevision(
 
 async function loadCurrentCustomThemeExternalLiveAccessGrants(
 	executor: DatabaseExecutor,
-	profileIds: readonly string[],
+	authUserIds: readonly string[],
 	now = new Date(),
 ): Promise<ReadonlyMap<string, CustomThemeExternalLiveAccessGrant>> {
-	if (profileIds.length === 0) return new Map();
+	if (authUserIds.length === 0) return new Map();
 	const rows = await executor
 		.select({
 			id: platformCapabilityGrant.id,
-			profileId: platformCapabilityGrant.profileId,
-			grantedByProfileId: platformCapabilityGrant.grantedByProfileId,
+			authUserId: platformCapabilityGrant.authUserId,
+			grantedByAuthUserId: platformCapabilityGrant.grantedByAuthUserId,
 			expiresAt: platformCapabilityGrant.expiresAt,
 			createdAt: platformCapabilityGrant.createdAt,
 			updatedAt: platformCapabilityGrant.updatedAt,
@@ -537,21 +533,21 @@ async function loadCurrentCustomThemeExternalLiveAccessGrants(
 		.from(platformCapabilityGrant)
 		.where(
 			and(
-				inArray(platformCapabilityGrant.profileId, [...profileIds]),
+				inArray(platformCapabilityGrant.authUserId, [...authUserIds]),
 				eq(platformCapabilityGrant.capability, CustomThemeExternalLiveAccessCapability),
 				isNull(platformCapabilityGrant.revokedAt),
 			),
 		);
 	const grants = new Map<string, CustomThemeExternalLiveAccessGrant>();
 	for (const row of rows)
-		grants.set(row.profileId, classifyCustomThemeExternalLiveAccessGrant(row, now));
+		grants.set(row.authUserId, classifyCustomThemeExternalLiveAccessGrant(row, now));
 	return grants;
 }
 
-function presentCustomThemeExternalLiveAccessProfile(
-	row: Pick<CustomThemeExternalLiveAccessProfile, "profileId" | "name" | "email">,
+function presentCustomThemeExternalLiveAccessAccount(
+	row: Pick<CustomThemeExternalLiveAccessAccount, "authUserId" | "name" | "email">,
 	grant: CustomThemeExternalLiveAccessGrant | null,
-): CustomThemeExternalLiveAccessProfile {
+): CustomThemeExternalLiveAccessAccount {
 	return {
 		...row,
 		grant,
@@ -559,85 +555,87 @@ function presentCustomThemeExternalLiveAccessProfile(
 	};
 }
 
-export async function getCustomThemeExternalLiveAccessProfile(
+export async function getCustomThemeExternalLiveAccessAccount(
 	executor: DatabaseExecutor,
-	profileId: string,
-): Promise<CustomThemeExternalLiveAccessProfile> {
+	authUserId: string,
+): Promise<CustomThemeExternalLiveAccessAccount> {
 	const [row] = await executor
 		.select({
-			profileId: profile.id,
-			name: firstUnitLocalizationTitle(profile.id),
+			authUserId: users.id,
+			name: users.name,
 			email: users.email,
 		})
-		.from(profile)
-		.innerJoin(users, eq(users.id, profile.authUserId))
-		.where(eq(profile.id, profileId))
+		.from(users)
+		.where(eq(users.id, authUserId))
 		.limit(1);
-	if (!row) throw new ProfileNotFound();
-	const grants = await loadCurrentCustomThemeExternalLiveAccessGrants(executor, [profileId]);
-	return presentCustomThemeExternalLiveAccessProfile(row, grants.get(profileId) ?? null);
+	if (!row) throw new UserNotFound();
+	const grants = await loadCurrentCustomThemeExternalLiveAccessGrants(executor, [authUserId]);
+	return presentCustomThemeExternalLiveAccessAccount(row, grants.get(authUserId) ?? null);
 }
 
-export async function searchCustomThemeExternalLiveAccessProfiles(
+export async function searchCustomThemeExternalLiveAccessAccounts(
 	executor: DatabaseExecutor,
 	input: { readonly query?: string; readonly limit: number },
-): Promise<CustomThemeExternalLiveAccessProfile[]> {
+): Promise<CustomThemeExternalLiveAccessAccount[]> {
 	const selection = executor
 		.select({
-			profileId: profile.id,
-			name: firstUnitLocalizationTitle(profile.id),
+			authUserId: users.id,
+			name: users.name,
 			email: users.email,
 		})
-		.from(profile)
-		.innerJoin(users, eq(users.id, profile.authUserId));
+		.from(users);
 	const rows = input.query
 		? await selection
 				.where(
 					or(
 						ilike(users.email, `%${input.query.trim()}%`),
-						sql`${firstUnitLocalizationTitle(profile.id)} ilike ${`%${input.query.trim()}%`}`,
+						sql`${users.name} ilike ${`%${input.query.trim()}%`}`,
 					),
 				)
-				.orderBy(users.email, profile.id)
+				.orderBy(users.email, users.id)
 				.limit(input.limit)
-		: await selection.orderBy(users.email, profile.id).limit(input.limit);
+		: await selection.orderBy(users.email, users.id).limit(input.limit);
 	const grants = await loadCurrentCustomThemeExternalLiveAccessGrants(
 		executor,
-		rows.map(({ profileId }) => profileId),
+		rows.map(({ authUserId }) => authUserId),
 	);
 	return rows.map((row) =>
-		presentCustomThemeExternalLiveAccessProfile(row, grants.get(row.profileId) ?? null),
+		presentCustomThemeExternalLiveAccessAccount(row, grants.get(row.authUserId) ?? null),
 	);
 }
 
 export async function setCustomThemeExternalLiveAccess(
 	tx: DatabaseTransaction,
 	input: {
-		readonly actorProfileId: string;
-		readonly targetProfileId: string;
+		readonly actorAuthUserId: string;
+		readonly targetAuthUserId: string;
 		readonly expectedRevision: string;
 		readonly state: "granted" | "revoked";
 		readonly expiresAt?: Date;
 	},
-): Promise<CustomThemeExternalLiveAccessProfile> {
+): Promise<CustomThemeExternalLiveAccessAccount> {
 	const now = new Date();
 	const expiresAt = input.state === "granted" ? (input.expiresAt ?? null) : null;
 	if (input.state === "granted") {
 		const permanentBootstrapGrant = isPermanentBootstrapCustomThemeExternalLiveAccessGrant({
-			profileId: input.targetProfileId,
-			grantedByProfileId: input.actorProfileId,
+			authUserId: input.targetAuthUserId,
+			grantedByAuthUserId: input.actorAuthUserId,
 			expiresAt,
 		});
 		if (!permanentBootstrapGrant) {
-			if (input.actorProfileId === input.targetProfileId)
+			if (input.actorAuthUserId === input.targetAuthUserId)
 				throw new CustomThemeExternalLiveAccessSelfMutationForbidden();
 			ensureCustomThemeExternalLiveExpiry(expiresAt, now);
 		}
-	} else if (input.actorProfileId === input.targetProfileId) {
+	} else if (input.actorAuthUserId === input.targetAuthUserId) {
 		throw new CustomThemeExternalLiveAccessSelfMutationForbidden();
 	}
 	await lockPlatformAccess(tx);
-	const before = await getCustomThemeExternalLiveAccessProfile(tx, input.targetProfileId);
+	await new PlatformAuthorization(undefined, input.actorAuthUserId).ensureCapability(
+		CustomThemeExternalLiveAccessManageCapability,
+		tx,
+	);
+	const before = await getCustomThemeExternalLiveAccessAccount(tx, input.targetAuthUserId);
 	if (before.revision !== input.expectedRevision) throw new PlatformAccessRevisionConflict();
 	await ensureCustomThemePlatformAccessCapacity(tx, {
 		addingAccessGrant:
@@ -649,7 +647,7 @@ export async function setCustomThemeExternalLiveAccess(
 		.from(platformCapabilityGrant)
 		.where(
 			and(
-				eq(platformCapabilityGrant.profileId, input.targetProfileId),
+				eq(platformCapabilityGrant.authUserId, input.targetAuthUserId),
 				eq(platformCapabilityGrant.capability, CustomThemeExternalLiveAccessCapability),
 				isNull(platformCapabilityGrant.revokedAt),
 			),
@@ -660,7 +658,7 @@ export async function setCustomThemeExternalLiveAccess(
 			.update(platformCapabilityGrant)
 			.set({
 				revokedAt: now,
-				revokedByProfileId: input.actorProfileId,
+				revokedByAuthUserId: input.actorAuthUserId,
 				updatedAt: now,
 			})
 			.where(eq(platformCapabilityGrant.id, current.id));
@@ -670,9 +668,9 @@ export async function setCustomThemeExternalLiveAccess(
 		const [created] = await tx
 			.insert(platformCapabilityGrant)
 			.values({
-				profileId: input.targetProfileId,
+				authUserId: input.targetAuthUserId,
 				capability: CustomThemeExternalLiveAccessCapability,
-				grantedByProfileId: input.actorProfileId,
+				grantedByAuthUserId: input.actorAuthUserId,
 				expiresAt,
 			})
 			.returning({ id: platformCapabilityGrant.id });
@@ -684,7 +682,7 @@ export async function setCustomThemeExternalLiveAccess(
 		await recordAuditEvent(tx, {
 			category: "admin_activity",
 			outcome: "succeeded",
-			actor: { kind: "profile", profileId: input.actorProfileId },
+			actor: { kind: "auth", authUserId: input.actorAuthUserId },
 			authority: { kind: "platform" },
 			action:
 				input.state === "revoked"
@@ -692,20 +690,20 @@ export async function setCustomThemeExternalLiveAccess(
 					: before.grant
 						? "platform.custom_theme.external_live.access.renew"
 						: "platform.custom_theme.external_live.access.grant",
-			target: { kind: "profile", id: input.targetProfileId },
+			target: { kind: "auth", id: input.targetAuthUserId },
 			details: {
 				previousGrantId: current?.id ?? null,
 				createdGrantId,
 				expiresAt: expiresAt?.toISOString() ?? null,
 			},
 		});
-	return getCustomThemeExternalLiveAccessProfile(tx, input.targetProfileId);
+	return getCustomThemeExternalLiveAccessAccount(tx, input.targetAuthUserId);
 }
 
 export async function ensurePlatformAccessContinuity(
 	tx: DatabaseTransaction,
 	input: {
-		readonly profileId: string;
+		readonly authUserId: string;
 		readonly capability: PlatformCapability;
 		readonly active: boolean;
 		readonly expiresAt: Date | null;
@@ -715,7 +713,7 @@ export async function ensurePlatformAccessContinuity(
 	await lockPlatformAccess(tx);
 	await ensurePermanentAccessManagerContinuity(
 		tx,
-		input.profileId,
+		input.authUserId,
 		input.active && input.expiresAt === null,
 	);
 }

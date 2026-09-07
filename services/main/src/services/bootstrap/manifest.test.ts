@@ -1,23 +1,23 @@
-import { describe, expect, it } from "vitest";
 import { CustomThemeExternalLiveAccessCapability } from "@rezics/access";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { describe, expect, it } from "vitest";
 
 import { generateBootstrapPassword } from "./credentials";
 import {
 	BootstrapEpochUnixMilliseconds,
 	BootstrapPlatformAccessManifest,
+	BootstrapPlatformAdministratorProfile,
 	BootstrapProfileManifest,
 	BootstrapRealmManifest,
-	BootstrapPlatformAdministratorProfile,
 	BootstrapUnitIds,
 	CuratedCreationTagCollectionManifest,
 	OfficialProfileManifest,
 	OfficialRealmAvatarAsset,
 	OfficialRealmManifest,
 	OfficialZoneManifest,
+	ReservedBootstrapUuidv7s,
 	RezicsRuleRealmManifest,
 	RezicsScoreRealmManifest,
-	ReservedBootstrapUuidv7s,
 	SlugNamespaceManifest,
 } from "./data";
 import { assertBootstrapManifest, uuidv7UnixMilliseconds } from "./manifest-validation";
@@ -263,7 +263,7 @@ describe("database bootstrap manifest", () => {
 		expect(BootstrapUnitIds).not.toContain("019b76da-a800-7360-8000-000000000011");
 		expect(
 			RezicsRuleRealmManifest.access.find(
-				(value) => value.profileId === BootstrapPlatformAccessManifest[1].profileId,
+				(value) => value.authUserId === BootstrapPlatformAdministratorProfile.authUserId,
 			)?.permissions,
 		).not.toContain("realm.units.moderate");
 	});

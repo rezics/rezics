@@ -11,28 +11,27 @@ import {
 	unique,
 	uuid,
 } from "drizzle-orm/pg-core";
+import { users } from "./auth";
 
 import { pgTable } from "./base";
 import { collection } from "./collection";
-import { unitAlias, unitExternalLink } from "./unit";
 import { createTimestampMsColumn, createUpdatedAtColumn, createUuidv7PrimaryKey } from "./columns";
 import { conversation, message } from "./communication";
-import { pollOption } from "./poll";
-import { profile } from "./profile";
-import { unit } from "./unit";
-import { post } from "./post";
 import { type ContentLanguage, ContentLanguageValues } from "./contract-values";
+import { subjectAssociation } from "./entity";
+import { pollOption } from "./poll";
+import { post } from "./post";
 import { reactionKind } from "./reaction";
 import { realm } from "./realm";
+import { realmTagContext, tag } from "./tag";
+import { unitEffectiveTag } from "./tag-expression";
 import {
 	realmTagPath,
 	realmUnitTagPathApplication,
 	tagPath,
 	unitTagPathApplication,
 } from "./tag-path";
-import { unitEffectiveTag } from "./tag-expression";
-import { subjectAssociation } from "./entity";
-import { realmTagContext, tag } from "./tag";
+import { unit, unitAlias, unitExternalLink } from "./unit";
 
 const aggregateCount = () => bigint({ mode: "bigint" }).default(0n).notNull();
 
@@ -541,9 +540,9 @@ export const realmStat = pgTable(
 export const notificationRecipientStat = pgTable(
 	"notification_recipient_stat",
 	{
-		profileId: uuid()
+		authUserId: uuid()
 			.primaryKey()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		unreadCount: aggregateCount(),
 		readThroughCreatedAt: createTimestampMsColumn(),
 		readThroughId: uuid(),
@@ -604,9 +603,9 @@ export const bookChapterStat = pgTable(
 export const bookChapterProgressStat = pgTable(
 	"book_chapter_progress_stat",
 	{
-		profileId: uuid()
+		authUserId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		bookUnitId: uuid("book_unit_id")
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
@@ -615,7 +614,7 @@ export const bookChapterProgressStat = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.profileId, table.bookUnitId] }),
+		primaryKey({ columns: [table.authUserId, table.bookUnitId] }),
 		check(
 			"book_chapter_progress_stat_count_check",
 			sql`${table.allCompletedCount} >= 0 and ${table.publicCompletedCount} >= 0 and ${table.publicCompletedCount} <= ${table.allCompletedCount}`,
@@ -680,9 +679,9 @@ export const conversationParticipantStat = pgTable(
 		conversationId: uuid()
 			.notNull()
 			.references(() => conversation.id, { onDelete: "cascade" }),
-		profileId: uuid()
+		authUserId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		lastMessageId: uuid().references(() => message.id, { onDelete: "set null" }),
 		lastMessageAt: createTimestampMsColumn(),
 		sortAt: createTimestampMsColumn().notNull(),
@@ -690,9 +689,9 @@ export const conversationParticipantStat = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.conversationId, table.profileId] }),
-		index("conversation_participant_stat_profile_sort_idx").on(
-			table.profileId,
+		primaryKey({ columns: [table.conversationId, table.authUserId] }),
+		index("conversation_participant_stat_auth_user_sort_idx").on(
+			table.authUserId,
 			table.sortAt.desc(),
 			table.conversationId.desc(),
 		),

@@ -1,4 +1,3 @@
-import type { StaticDecode } from "typebox";
 import {
 	AuthenticatedGrantableUnitPermissionValues,
 	DelegableUnitPermissionValues,
@@ -8,12 +7,14 @@ import {
 } from "@rezics/access";
 import { PortableTextDocument } from "@rezics/block";
 import { t } from "elysia";
+import type { StaticDecode } from "typebox";
 
 import {
 	ContentGovernanceActionKindValues,
 	ContentReviewCaseStateValues,
 	EnforcementKindValues,
 	GovernanceMaxRuleReferences,
+	UnitKindValues,
 	UnitMergeEligibleKindValues,
 	UnitMergeGraphActionValues,
 	UnitMergeGraphRoleValues,
@@ -22,12 +23,11 @@ import {
 	UnitMergeRequestModeValues,
 	UnitMergeRequestStateValues,
 	UnitMergeReviewDecisionValues,
-	UnitKindValues,
 	UnitStatusValues,
 } from "../../database/schema/contract-values";
 import {
-	DateTime,
 	ContentLanguage,
+	DateTime,
 	LocalizationLanguageQuery,
 	RevisionContext,
 	Uuid,
@@ -207,7 +207,7 @@ export type CreateContentGovernanceActionBody = StaticDecode<
 const AccountEnforcementKind = t.Union(EnforcementKindValues.map((value) => t.Literal(value)));
 export const CreateAccountEnforcementBody = t.Object(
 	{
-		profileId: Uuid,
+		authUserId: Uuid,
 		kind: AccountEnforcementKind,
 		rules: GovernanceRuleReferences,
 		notes: t.Optional(GovernanceActionNotes),
@@ -248,7 +248,7 @@ export const UnitEffectiveAccessQuery = t.Object(
 	{ additionalProperties: false },
 );
 const UnitAccessSubject = t.Union([
-	t.Object({ kind: t.Literal("profile"), profileId: Uuid }, { additionalProperties: false }),
+	t.Object({ kind: t.Literal("auth"), authUserId: Uuid }, { additionalProperties: false }),
 	t.Object(
 		{
 			kind: t.Literal("realm"),
@@ -293,7 +293,7 @@ export const ReplaceUnitSubjectAccessBody = t.Union([
 ]);
 export const CreateUnitAccessInvitationBody = t.Object(
 	{
-		invitedProfileId: Uuid,
+		invitedAuthUserId: Uuid,
 		permissions: t.Array(DelegableUnitPermission, {
 			minItems: 1,
 			maxItems: DelegableUnitPermissionValues.length,
@@ -541,7 +541,7 @@ export const UnitMergeRequestListResponse = t.Object(
 	{ additionalProperties: false },
 );
 export const UnitAccessRestrictionSubject = t.Union([
-	t.Object({ kind: t.Literal("profile"), profileId: Uuid }, { additionalProperties: false }),
+	t.Object({ kind: t.Literal("auth"), authUserId: Uuid }, { additionalProperties: false }),
 	t.Object(
 		{
 			kind: t.Literal("realm"),
@@ -553,7 +553,7 @@ export const UnitAccessRestrictionSubject = t.Union([
 ]);
 export const ListUnitAccessCandidatesQuery = t.Object(
 	{
-		kind: t.Union([t.Literal("profile"), t.Literal("realm")]),
+		kind: t.Union([t.Literal("auth"), t.Literal("realm")]),
 		query: t.Optional(t.String({ maxLength: 200 })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 	},
@@ -597,7 +597,7 @@ export type ContentGovernanceActionResponse = StaticDecode<typeof ContentGoverna
 
 export const EnforcementResponse = t.Object({
 	id: Uuid,
-	profileId: Uuid,
+	authUserId: Uuid,
 	kind: t.String(),
 	active: t.Boolean(),
 	startsAt: DateTime,
@@ -623,10 +623,10 @@ export const GrantListResponse = t.Object({ items: t.Array(GrantResponse) });
 export const UnitAccessInvitationResponse = t.Object({
 	id: Uuid,
 	unitId: Uuid,
-	invitedProfileId: Uuid,
+	invitedAuthUserId: Uuid,
 	permissions: t.Array(DelegableUnitPermission),
 	scope: UnitScope,
-	invitedByProfileId: Uuid,
+	invitedByAuthUserId: Uuid,
 	expiresAt: DateTime,
 	accessExpiresAt: t.Nullable(DateTime),
 	state: t.Union([
@@ -640,7 +640,7 @@ export const UnitAccessInvitationResponse = t.Object({
 		t.Union([t.Literal("accepted"), t.Literal("declined"), t.Literal("cancelled")]),
 	),
 	resolvedAt: t.Nullable(DateTime),
-	resolvedByProfileId: t.Nullable(Uuid),
+	resolvedByAuthUserId: t.Nullable(Uuid),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
@@ -700,7 +700,7 @@ const UnitAllowedDecisionResponse = t.Union([
 			allowed: t.Literal(true),
 			source: t.Literal("grant"),
 			grantId: Uuid,
-			subjectKind: t.Union([t.Literal("profile"), t.Literal("realm"), t.Literal("authenticated")]),
+			subjectKind: t.Union([t.Literal("auth"), t.Literal("realm"), t.Literal("authenticated")]),
 		},
 		{ additionalProperties: false },
 	),
@@ -718,7 +718,7 @@ const UnitDeniedDecisionResponse = t.Union([
 			allowed: t.Literal(false),
 			reason: t.Literal("restricted"),
 			restrictionId: Uuid,
-			subjectKind: t.Union([t.Literal("profile"), t.Literal("realm")]),
+			subjectKind: t.Union([t.Literal("auth"), t.Literal("realm")]),
 		},
 		{ additionalProperties: false },
 	),

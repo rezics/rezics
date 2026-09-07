@@ -1,7 +1,13 @@
+import type { ContentLanguage } from "@rezics/i18n";
 import { and, eq, exists, isNull, not, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import type { ContentLanguage } from "@rezics/i18n";
 
+import { StudioRealmSubjectLimitExceeded } from "../api/users/errors";
+import type {
+	StudioAccessSource,
+	StudioContentListQuery,
+	StudioWorkspaceSource,
+} from "../api/users/schema";
 import type { UnitAuthorization } from "../authorization/unit/authorization";
 import {
 	getExplicitUnitAnyScopePermissionCondition,
@@ -10,9 +16,9 @@ import {
 import { profileCanManageRealmAccess } from "../authorization/unit/realm-subject";
 import { database } from "../database";
 import {
+	post,
 	realm,
 	realmMember,
-	post,
 	studioProfileEditorCandidate,
 	studioRealmEditorCandidate,
 	studioResourceVisit,
@@ -26,24 +32,18 @@ import {
 	type PostKind,
 	type UnitKind,
 } from "../database/schema/contract-values";
-import type {
-	StudioAccessSource,
-	StudioContentListQuery,
-	StudioWorkspaceSource,
-} from "../api/users/schema";
-import { StudioRealmSubjectLimitExceeded } from "../api/users/errors";
 import {
 	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
-import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import {
 	resourceSectionFromKinds,
 	studioResourceScopeCondition,
 	type ResourceSection,
 } from "../units/resource-section";
 import { presentImageAsset } from "../units/service";
+import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import { decodeStudioCursor, encodeStudioCursor, type StudioCursorBoundary } from "./cursor";
 
 const StudioCandidateScanBudget = 4_096;
@@ -374,7 +374,7 @@ async function selectWorkspaceCandidateBatch(input: {
 	const directAccess = getExplicitUnitAnyScopePermissionCondition(
 		input.profileId,
 		"unit.update",
-		{ source: { kind: "profile" }, includeOwnership: false },
+		{ source: { kind: "auth" }, includeOwnership: false },
 		resource,
 	);
 	const realmAccess = getExplicitUnitAnyScopePermissionCondition(

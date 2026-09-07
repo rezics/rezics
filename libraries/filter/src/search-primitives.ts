@@ -21,7 +21,6 @@ function stringEnum<const Values extends readonly [string, ...string[]]>(values:
 
 export const SearchCategoryValues = [
 	"units",
-	"users",
 	"entities",
 	"tags",
 	"posts",

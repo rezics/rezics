@@ -2,8 +2,8 @@ import { sql } from "drizzle-orm";
 import { check, foreignKey, index, text, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
-import { profile } from "./profile";
 import { unitDock } from "./dock";
 import { revisionContent } from "./history";
 
@@ -19,7 +19,7 @@ export const dockRevision = pgTable(
 		contentId: uuid()
 			.notNull()
 			.references(() => revisionContent.id, { onDelete: "restrict" }),
-		actorProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		actorProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		/** @UNIT_LOCALIZATION_EXEMPT Authored point-in-time edit summary, never interface copy. */
 		editSummary: text(),
 		kind: text().$type<"create" | "update" | "delete" | "restore">().notNull(),

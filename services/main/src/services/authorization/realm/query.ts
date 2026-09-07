@@ -1,4 +1,5 @@
 import { and, eq, exists, isNull, or, sql, type SQLWrapper } from "drizzle-orm";
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
 import { database } from "../../database";
 import { platformCapabilityGrant, realmMember, unit } from "../../database/schema";
@@ -48,7 +49,7 @@ export function getRealmContributionCondition(
 			.from(platformCapabilityGrant)
 			.where(
 				and(
-					eq(platformCapabilityGrant.profileId, profileId),
+					eq(platformCapabilityGrant.authUserId, selfAuthUserIdForEntity(profileId)),
 					eq(platformCapabilityGrant.capability, "realm.contribute"),
 					isNull(platformCapabilityGrant.revokedAt),
 					or(

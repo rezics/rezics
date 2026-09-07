@@ -1,21 +1,21 @@
-import { StatusCodes } from "http-status-codes";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
 
 import { resolveIdentity } from "../../auth/session";
 import { storage } from "../../storage";
 import { toApiErrorResponse } from "../schema/response";
 import { resolveDerivedImageAssetContent } from "./derived-content";
 import { ImageAssetNotFound } from "./errors";
-import { findImageAsset, findImageAssetPresentation } from "./service";
 import { ImageAssetParams, ImageAssetPresentationParams } from "./schema";
+import { findImageAsset, findImageAssetPresentation } from "./service";
 
 async function authorizeImageAsset(
 	request: Request,
 	asset: NonNullable<Awaited<ReturnType<typeof findImageAsset>>>,
 ): Promise<void> {
 	if (asset.access === "private") {
-		const viewer = (await resolveIdentity(request, "upload:read")).profile;
-		if (viewer?.unitId !== asset.ownerProfileId) throw new ImageAssetNotFound();
+		const viewer = (await resolveIdentity(request, "upload:read")).entity;
+		if (viewer?.id !== asset.ownerProfileId) throw new ImageAssetNotFound();
 	}
 }
 

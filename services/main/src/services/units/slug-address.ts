@@ -1,18 +1,19 @@
-import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import {
 	isAvailableZonePageSlug,
 	ZoneHomePageSlug,
 	type PublicSlugAddressValue,
 } from "@rezics/slug";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { recordAuditEvent } from "../audit";
 import type { Authorization } from "../authorization";
 import { database, type DatabaseTransaction } from "../database";
-import { profile, unit, unitSlugAddress, zonePage, type UnitKind } from "../database/schema";
+import { unit, unitSlugAddress, zonePage, type UnitKind } from "../database/schema";
 import {
 	createGovernanceDecision,
 	type GovernanceRuleReference,
 } from "../governance/decision-service";
+import { insertUnit } from "./create";
 import {
 	InvalidSlug,
 	SlugDepthExceeded,
@@ -25,17 +26,15 @@ import {
 	UnitNotFound,
 	UnitSlugAddressNotFound,
 } from "./errors";
-import { insertUnit } from "./create";
 import { recordUnitRevision } from "./history";
 import type { RevisionContributionInput } from "./revision-contribution";
-import { decideProfileSlugAssignment, parseAssignableProfileSlug } from "./profile-slug-policy";
+import { parseSlugLabel, SlugAddressMaximumDepth, type SlugLabel } from "./slug";
 import {
 	SystemSlugNamespaceUnitIds,
 	TopLevelSlugNamespaceSlugByUnitId,
 	TopLevelSlugNamespaceUnitIdBySlug,
 	TopLevelSlugNamespaceUnitIds,
 } from "./slug-system";
-import { parseSlugLabel, SlugAddressMaximumDepth, type SlugLabel } from "./slug";
 
 export interface UnitSlugAddressValue {
 	readonly scopeUnitId: string | null;
@@ -85,8 +84,6 @@ const SystemSlugNamespaceUnitIdSet: ReadonlySet<string> = new Set(SystemSlugName
 
 function fixedPublicSlugScope(kind: UnitKind): string | undefined {
 	switch (kind) {
-		case "profile":
-			return TopLevelSlugNamespaceUnitIds.users;
 		case "realm":
 			return TopLevelSlugNamespaceUnitIds.realms;
 		case "zone":
@@ -646,69 +643,6 @@ export async function resolveScopedUnitAddress(
 			address.addressKind === "redirect" ||
 			path.length !== canonicalPath.length ||
 			path.some((segment, index) => canonicalPath[index] !== segment),
-	};
-}
-
-/**
- * Assigns the current Profile's canonical slug address once.
- *
- * @remarks
- * This is a temporary first-party governance command. The route proves the
- * Profile identity from an interactive session, while this transaction fixes
- * the permanent `users` namespace, rejects reserved labels, and permits only
- * an initial assignment or an idempotent repeat. The one-time rule is not a
- * database constraint and may be replaced by a future audited rename flow.
- *
- * @alpha
- */
-export async function assignCurrentProfileSlugAddress(
-	profileId: string,
-	input: { readonly slug: string },
-): Promise<PublicCanonicalUnitSlugAddress> {
-	const slug = parseAssignableProfileSlug(input.slug);
-	const mutation = await database.transaction(async (tx) => {
-		await lockSlugTree(tx);
-		const [ownedProfile] = await tx
-			.select({ id: profile.id })
-			.from(profile)
-			.where(eq(profile.id, profileId))
-			.limit(1);
-		if (!ownedProfile) throw new UnitNotFound();
-		const current = await loadCanonicalAddress(tx, ownedProfile.id);
-		decideProfileSlugAssignment(
-			current
-				? {
-						scopeUnitId: current.scopeUnitId,
-						slug: parseSlugLabel(current.slug),
-					}
-				: null,
-			slug,
-		);
-		const result = await replaceCanonicalAddress(tx, {
-			unitId: ownedProfile.id,
-			scopeUnitId: TopLevelSlugNamespaceUnitIds.users,
-			slug,
-		});
-		if (result.changed)
-			await recordAuditEvent(tx, {
-				category: "admin_activity",
-				outcome: "succeeded",
-				actor: { kind: "profile", profileId },
-				authority: { kind: "unit", id: ownedProfile.id },
-				action: "unit.slug.assign",
-				target: { kind: "unit", id: ownedProfile.id },
-				details: {
-					before: result.before,
-					after: result.after,
-					redirectAddressId: result.redirectAddressId,
-				},
-			});
-		return result;
-	});
-	return {
-		scopeUnitId: TopLevelSlugNamespaceUnitIds.users,
-		slug: mutation.after.slug,
-		canonicalPath: [...(await loadCanonicalUnitPath(profileId, false))],
 	};
 }
 

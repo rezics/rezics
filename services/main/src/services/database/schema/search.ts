@@ -1,12 +1,12 @@
+import type { SharedSearchQueryDocument } from "@rezics/filter";
 import { sql } from "drizzle-orm";
 import { bigint, check, index, jsonb, text, uuid } from "drizzle-orm/pg-core";
-import type { SharedSearchQueryDocument } from "@rezics/filter";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
 import type { UnitKind } from "./contract-values";
 import { CanonicalPgroongaIndexes } from "./pgroonga";
-import { profile } from "./profile";
 import { unit } from "./unit";
 
 const UnitSearchTextColumnNames = [
@@ -83,7 +83,7 @@ export const sharedSearchQuery = pgTable(
 		document: jsonb().$type<SharedSearchQueryDocument>().notNull(),
 		createdByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [

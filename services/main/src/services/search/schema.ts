@@ -1,3 +1,5 @@
+import type { PresentedAvatar } from "@rezics/avatar";
+import type { UnitPredicate } from "@rezics/filter";
 import {
 	SearchCategoryValues,
 	SearchSortValues,
@@ -5,15 +7,12 @@ import {
 	type SearchScalarField,
 	type SearchSort,
 } from "@rezics/filter";
-import type { UnitPredicate } from "@rezics/filter";
-import type { PresentedAvatar } from "@rezics/avatar";
 import type { ContentLanguage } from "@rezics/i18n";
 import type { LicenseId } from "@rezics/license";
 import type { PublicSlugAddressValue } from "@rezics/slug";
 
 import type { ContentRatingPolicy } from "../content-rating/policy";
-import type { SearchExpression } from "./query";
-import type { SearchKeysetPosition } from "./query";
+import type { SearchExpression, SearchKeysetPosition } from "./query";
 import type { SearchTagMatchReason } from "./tag-match-reasons";
 
 export const SearchCategories = SearchCategoryValues;
@@ -70,7 +69,7 @@ export interface DomainSearchRequest {
 	contentRatings?: string[];
 	aiDisclosures?: string[];
 	licenses?: LicenseId[];
-	creditedUnitId?: string;
+	creditedEntityId?: string;
 	realmId?: string;
 	realmTagContextRealmId?: string;
 	subjectId?: string;
@@ -101,7 +100,7 @@ export const SearchFieldByDomainRequestFilter = {
 	contentRating: "content-rating",
 	aiDisclosure: "ai-disclosure",
 	license: "license",
-	creditedUnitId: "credit",
+	creditedEntityId: "credit",
 	realmId: "realm",
 	realmTagContextRealmId: "realm-tag-context",
 	tagId: "tag",

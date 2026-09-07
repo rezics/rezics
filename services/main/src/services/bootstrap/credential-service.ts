@@ -4,7 +4,7 @@ import { database } from "../database";
 import { accounts } from "../database/schema";
 import { assertPlatformCoreReady, inspectPlatformCore, PlatformInstallationLockName } from "./core";
 import { preparePlatformCredential, type IssuedPlatformCredential } from "./credentials";
-import { BootstrapProfileManifest } from "./data";
+import { BootstrapAccountManifest } from "./data";
 
 export async function rotatePlatformCredentials(): Promise<readonly IssuedPlatformCredential[]> {
 	return database.transaction(async (tx) => {
@@ -13,7 +13,7 @@ export async function rotatePlatformCredentials(): Promise<readonly IssuedPlatfo
 		);
 		assertPlatformCoreReady(await inspectPlatformCore(tx));
 		const issuedCredentials: IssuedPlatformCredential[] = [];
-		for (const profile of BootstrapProfileManifest) {
+		for (const profile of BootstrapAccountManifest) {
 			const [storedAccount] = await tx
 				.select({
 					id: accounts.id,

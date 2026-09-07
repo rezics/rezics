@@ -1,6 +1,6 @@
 import {
-	assertUnitPredicate,
 	assertUnitFilter,
+	assertUnitPredicate,
 	canonicalUnitPredicate,
 	collectUnitPredicateReferenceIds,
 	createSimpleFeedFilter,
@@ -14,8 +14,8 @@ import {
 	readSimpleFeedFilter,
 	realmTagQueryPredicate,
 	SimpleFeedContentKindValues,
-	type UnitPredicate,
 	unitFilterSearchQuery,
+	type UnitPredicate,
 } from "@rezics/filter";
 import { sql } from "drizzle-orm";
 import { PgDialect } from "drizzle-orm/pg-core";
@@ -295,7 +295,7 @@ describe("domain Filter contract", () => {
 		).toBeUndefined();
 		expect(
 			compileUnitPredicateCandidateSet({
-				creditAttributions: { some: { kind: { in: ["profile"] } } },
+				creditAttributions: { some: { kind: { in: ["entity"] } } },
 			}),
 		).toBeUndefined();
 		expect(

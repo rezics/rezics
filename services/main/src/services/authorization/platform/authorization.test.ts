@@ -18,7 +18,10 @@ function grantExecutor(rows: readonly { readonly capability: PlatformCapability 
 describe("PlatformAuthorization", () => {
 	it("decides a capability set with one grant query and preserves implications", async () => {
 		const query = grantExecutor([{ capability: "platform.access.manage" }]);
-		const authorization = new PlatformAuthorization("00000000-0000-4000-8000-000000000001");
+		const authorization = new PlatformAuthorization(
+			"00000000-0000-4000-8000-000000000001",
+			"00000000-0000-4000-8000-000000000002",
+		);
 
 		await expect(
 			authorization.decideCapabilities(

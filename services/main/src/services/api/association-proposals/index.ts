@@ -1,5 +1,5 @@
-import { StatusCodes } from "http-status-codes";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
 
 import session from "../../auth/session";
 import {
@@ -19,14 +19,14 @@ import {
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import {
-	CreateAssociationInvitationBody,
-	CreateAssociationRequestBody,
 	AssociationProposalListResponse,
 	AssociationProposalResponse,
+	CreateAssociationInvitationBody,
+	CreateAssociationRequestBody,
 	ListAssociationProposalsQuery,
+	ResolveAssociationProposalBody,
 	UnitAssociationProposalActionParams,
 	UnitAssociationProposalParams,
-	ResolveAssociationProposalBody,
 } from "./schema";
 
 function futureDate(value: string): Date {
@@ -93,7 +93,7 @@ export default new Elysia({ prefix: "/unit" })
 			},
 			detail: { summary: "Request Unit association", tags: ["Unit"] },
 		},
-		async ({ authorization, profile, params, body }) => {
+		async ({ authorization, entity, params, body }) => {
 			const common = {
 				sourceUnitId: params.unitId,
 				targetUnitId: body.targetUnitId,
@@ -101,14 +101,14 @@ export default new Elysia({ prefix: "/unit" })
 			};
 			if (body.kind === "credit") {
 				if (!isCreditAttributionRole(body.role)) throw new AssociationProposalRoleInvalid();
-				return createAssociationRequest(authorization, profile.unitId, {
+				return createAssociationRequest(authorization, entity.id, {
 					...common,
 					kind: body.kind,
 					role: body.role,
 				});
 			}
 			if (!isSubjectAssociationRole(body.role)) throw new AssociationProposalRoleInvalid();
-			return createAssociationRequest(authorization, profile.unitId, {
+			return createAssociationRequest(authorization, entity.id, {
 				...common,
 				kind: body.kind,
 				role: body.role,
@@ -135,7 +135,7 @@ export default new Elysia({ prefix: "/unit" })
 			},
 			detail: { summary: "Invite Unit to association", tags: ["Unit"] },
 		},
-		async ({ authorization, profile, params, body }) => {
+		async ({ authorization, entity, params, body }) => {
 			const common = {
 				sourceUnitId: body.sourceUnitId,
 				targetUnitId: params.unitId,
@@ -143,14 +143,14 @@ export default new Elysia({ prefix: "/unit" })
 			};
 			if (body.kind === "credit") {
 				if (!isCreditAttributionRole(body.role)) throw new AssociationProposalRoleInvalid();
-				return createAssociationInvitation(authorization, profile.unitId, {
+				return createAssociationInvitation(authorization, entity.id, {
 					...common,
 					kind: body.kind,
 					role: body.role,
 				});
 			}
 			if (!isSubjectAssociationRole(body.role)) throw new AssociationProposalRoleInvalid();
-			return createAssociationInvitation(authorization, profile.unitId, {
+			return createAssociationInvitation(authorization, entity.id, {
 				...common,
 				kind: body.kind,
 				role: body.role,
@@ -176,8 +176,8 @@ export default new Elysia({ prefix: "/unit" })
 			},
 			detail: { summary: "Accept Unit association proposal", tags: ["Unit"] },
 		},
-		async ({ authorization, profile, params, body }) =>
-			resolveAssociationProposal(authorization, profile.unitId, {
+		async ({ authorization, entity, params, body }) =>
+			resolveAssociationProposal(authorization, entity.id, {
 				actingUnitId: params.unitId,
 				proposalId: params.proposalId,
 				action: "accept",
@@ -198,8 +198,8 @@ export default new Elysia({ prefix: "/unit" })
 			},
 			detail: { summary: "Decline Unit association proposal", tags: ["Unit"] },
 		},
-		async ({ authorization, profile, params }) =>
-			resolveAssociationProposal(authorization, profile.unitId, {
+		async ({ authorization, entity, params }) =>
+			resolveAssociationProposal(authorization, entity.id, {
 				actingUnitId: params.unitId,
 				proposalId: params.proposalId,
 				action: "decline",
@@ -222,8 +222,8 @@ export default new Elysia({ prefix: "/unit" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ authorization, profile, params }) => {
-			await resolveAssociationProposal(authorization, profile.unitId, {
+		async ({ authorization, entity, params }) => {
+			await resolveAssociationProposal(authorization, entity.id, {
 				actingUnitId: params.unitId,
 				proposalId: params.proposalId,
 				action: "cancel",

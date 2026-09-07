@@ -1,17 +1,23 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	parsePlatformCredentialRotationCommand,
+	parsePlatformInstallCommandOptions,
+} from "./command-options";
+import {
 	classifyPlatformCore,
 	decidePlatformEnsureAction,
 	describePlatformCoreState,
 } from "./core";
 import {
-	parsePlatformCredentialRotationCommand,
-	parsePlatformInstallCommandOptions,
-} from "./command-options";
-import { BootstrapAccountIds, BootstrapAuthUserIds, BootstrapUnitIds } from "./data";
+	BootstrapAccountIds,
+	BootstrapAuthUserIds,
+	BootstrapEntityIds,
+	BootstrapUnitIds,
+} from "./data";
 
 const allIdentityIds = new Set([
+	...BootstrapEntityIds,
 	...BootstrapUnitIds,
 	...BootstrapAuthUserIds,
 	...BootstrapAccountIds,

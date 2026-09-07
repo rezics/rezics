@@ -1,7 +1,7 @@
 import { and, asc, eq, notInArray } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
-import { profile, unitFollow } from "../database/schema";
+import { entityIdentity, unitFollow } from "../database/schema";
 import { fractionalPositionBetween } from "../ordering/position";
 import { OfficialZoneManifest } from "./data";
 
@@ -27,7 +27,7 @@ export async function ensureOfficialZoneFollows(
 ): Promise<void> {
 	const targets = profileIds
 		? [...new Set(profileIds)]
-		: (await tx.select({ id: profile.id }).from(profile)).map(({ id }) => id);
+		: (await tx.select({ id: entityIdentity.id }).from(entityIdentity)).map(({ id }) => id);
 	const officialZoneIds = OfficialZoneManifest.map(({ id }) => id);
 	if (options.sequenceIsEmpty) {
 		const positions = officialPositionsBefore(null);

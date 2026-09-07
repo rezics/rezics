@@ -2,13 +2,13 @@ import { sql } from "drizzle-orm";
 import { boolean, check, index, primaryKey, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
 	createFractionalIndexPositionByteLengthConstraint,
 	createUpdatedAtColumn,
 	fractionalIndexPosition,
 } from "./columns";
-import { profile } from "./profile";
 import { unit } from "./unit";
 
 /**
@@ -24,7 +24,7 @@ export const unitFollow = pgTable(
 	{
 		followerProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),

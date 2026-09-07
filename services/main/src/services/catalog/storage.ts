@@ -1,38 +1,52 @@
-import {
-	currentCatalogSemantic,
-	currentCatalogSemanticState,
-	publishCatalogSemanticRevision,
-} from "./semantic-history";
+import { and, asc, eq, getTableColumns, gt, inArray, isNull, sql } from "drizzle-orm";
+import { HTTPError } from "elysia";
 import { isDeepStrictEqual } from "node:util";
-import { and, asc, eq, gt, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
+import { CatalogFactTables } from "../database/schema/catalog-facts";
 import {
 	CatalogIdentityTables,
 	catalogDefinition,
 	catalogDefinitionRevision,
 	catalogUnitLocator,
 } from "../database/schema/catalog-identity";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
+import { canAccessCatalog } from "../participation/policy";
 import {
 	CatalogDefinitionInputSchema,
 	CatalogIdentityInputSchema,
+	CatalogOwnerValues,
 	CatalogPageSchema,
 	CatalogReferenceSchema,
 	type CatalogIdentityInput,
 	type CatalogReference,
-	CatalogOwnerValues,
 } from "./contracts";
-import { CatalogValueNodeSchema } from "./value-nodes";
 import {
 	assertCatalogDefinitionRevision,
-	validateCatalogScalar,
 	validateCatalogParticipants,
+	validateCatalogScalar,
 } from "./definitions";
+import {
+	currentCatalogSemantic,
+	currentCatalogSemanticState,
+	publishCatalogSemanticRevision,
+} from "./semantic-history";
+import { CatalogValueNodeSchema } from "./value-nodes";
 
 export class CatalogAccessDenied extends Error {}
-export class CatalogRevisionConflict extends Error {}
-export class CatalogReferenceNotFound extends Error {}
+export class CatalogRevisionConflict extends HTTPError.id("CatalogRevisionConflict", 409) {
+	override readonly message: string;
+	constructor(message = "Catalog revision changed") {
+		super();
+		this.message = message;
+	}
+}
+export class CatalogReferenceNotFound extends HTTPError.id("CatalogReferenceNotFound", 404) {
+	override readonly message: string;
+	constructor(message = "Catalog reference is unavailable") {
+		super();
+		this.message = message;
+	}
+}
 
 export async function loadCatalogIdentity(
 	tx: DatabaseTransaction,
@@ -52,7 +66,7 @@ export async function loadCatalogIdentity(
 		.limit(1);
 	const [row] = await (write ? query.for(writeLock) : query);
 	if (!row) throw new CatalogReferenceNotFound("Catalog identity is missing or retired");
-	const creator = actor !== null && row.createdByAuthUserId === actor;
+	const creator = await canAccessCatalog(tx, ref, actor, row.createdByAuthUserId, write);
 	if (
 		write
 			? !creator

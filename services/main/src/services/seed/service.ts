@@ -1,24 +1,27 @@
 import { createHash } from "node:crypto";
+import { authEntity } from "../database/schema/participation";
+import { selfAuthUserIdForEntity } from "../participation/account-query";
+import { createParticipantIdentity } from "../participation/identity";
 
-import {
-	createDockDocument,
-	createPollContentBlock,
-	createPortableTextDocument,
-	createUnitReferencedBlockDocument,
-	createZoneAppearanceDocument,
-	assertWikiPostPortableTextDocument,
-} from "@rezics/block";
-import { createFilterDocument } from "@rezics/filter";
 import { defaultKeyHasher } from "@better-auth/api-key";
-import { hashPassword } from "better-auth/crypto";
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
-import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
 import {
 	CustomThemeExternalLiveAccessCapability,
 	CustomThemeExternalLiveAccessManageCapability,
 	PlatformCapabilityValues,
 } from "@rezics/access";
+import {
+	assertWikiPostPortableTextDocument,
+	createDockDocument,
+	createPollContentBlock,
+	createPortableTextDocument,
+	createUnitReferencedBlockDocument,
+	createZoneAppearanceDocument,
+} from "@rezics/block";
+import { createFilterDocument } from "@rezics/filter";
 import { RecommendedLicenseId } from "@rezics/license";
+import { OfficialRealmUnitIds, ZoneHomePageSlug } from "@rezics/slug";
+import { hashPassword } from "better-auth/crypto";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 const SeedablePlatformCapabilityValues = PlatformCapabilityValues.filter(
 	(capability) =>
@@ -26,64 +29,75 @@ const SeedablePlatformCapabilityValues = PlatformCapabilityValues.filter(
 		capability !== CustomThemeExternalLiveAccessManageCapability,
 );
 
-import { env } from "../config";
+import { createDockHistory, getDockRevisionId } from "../api/docks/history";
+import { ApiPermissionValues, toApiKeyPermissions } from "../auth/api-permissions";
+import { replaceApiTokenQuotaOverride } from "../auth/api-quota/policy-service";
 import { Authorization } from "../authorization";
+import { assertPlatformCoreReady, inspectPlatformCore } from "../bootstrap/core";
 import {
 	CuratedCreationTagCollectionManifest,
 	OfficialProfileIds,
 	OfficialRealmManifest,
 	TopLevelSlugNamespaceUnitIds,
 } from "../bootstrap/data";
-import { assertPlatformCoreReady, inspectPlatformCore } from "../bootstrap/core";
-import { ApiPermissionValues, toApiKeyPermissions } from "../auth/api-permissions";
+import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
+import {
+	createCollectionStructureHistory,
+	getCollectionStructureHeadRevision,
+	mutateCollectionStructureWithHistory,
+} from "../collection-structure/history";
+import { env } from "../config";
+import {
+	createContentStructureHistory,
+	getContentStructureHeadRevision,
+} from "../content-structure/history";
+import { createNavigationStructure } from "../content-structure/navigation";
+import { createContentStructure, insertContentStructureNode } from "../content-structure/service";
+import { loadContentStructureSnapshot } from "../content-structure/storage";
 import { database, type DatabaseTransaction } from "../database";
-import { isFirstUnitLocalization } from "../units/localization";
 import {
 	accountEnforcement,
 	accountEnforcementAction,
+	accountEntityBlock,
+	accountPreference,
 	accounts,
 	apikeys,
 	auditEvent,
+	AuditEventSchemaVersion,
 	book,
-	unitLicenseGrant,
-	platformCapabilityGrant,
 	collection,
 	collectionItem,
-	profileFavoritesCollection,
-	contentStructure,
-	contentStructureNode,
-	contentStructureNodeProgress,
-	conversation,
-	conversationRead,
-	entity,
-	EnforcementKindValues,
-	label,
-	software,
-	softwareRequirement,
-	media,
-	message,
+	CommunityOwnedUnitKindValues,
 	contentGovernanceAction,
 	contentReport,
 	contentReportReferral,
 	contentReportRule,
 	contentReviewCase,
 	contentReviewCaseReportCounter,
+	contentStructure,
+	contentStructureNode,
+	contentStructureNodeProgress,
+	conversation,
+	conversationRead,
+	creditAttribution,
+	EnforcementKindValues,
+	entity,
+	label,
+	media,
+	message,
 	notification,
 	notificationPreference,
+	platformCapabilityGrant,
 	poll,
 	pollOption,
 	pollVote,
 	post,
 	postReply,
 	postScore,
-	profile,
-	profileBlock,
+	profileFavoritesCollection,
 	profileRealmTagSubscription,
-	unitFollow,
-	profilePreference,
 	profileUnitTag,
 	realm,
-	realmUnit,
 	realmMember,
 	realmPin,
 	realmRule,
@@ -92,6 +106,7 @@ import {
 	realmScoreContext,
 	realmTagContext,
 	realmTagJudgment,
+	realmUnit,
 	realmUnitTag,
 	recommendationEvent,
 	recommendationExclusion,
@@ -99,63 +114,51 @@ import {
 	score,
 	series,
 	seriesRelease,
+	software,
+	softwareRequirement,
+	subjectAssociation,
 	tag,
 	tagRelation,
 	unit,
+	unitAccessGrant,
 	unitAccessInvitation,
+	unitAccessRestriction,
 	unitAlias,
 	unitAliasVote,
-	unitAccessGrant,
-	unitAccessRestriction,
 	unitAssociationProposal,
-	creditAttribution,
-	CommunityOwnedUnitKindValues,
-	unitOwnership,
+	unitDock,
 	unitExternalLink,
 	unitExternalLinkVote,
+	unitFollow,
+	unitLicenseGrant,
 	unitLocalization,
-	unitDock,
-	unitSlugAddress,
+	unitOwnership,
 	unitProgress,
 	unitReaction,
-	unitShare,
-	unitStatusEvent,
 	unitRevisionHead,
-	subjectAssociation,
+	unitShare,
+	unitSlugAddress,
+	unitStatusEvent,
 	unitTag,
 	unitTagJudgment,
 	unitVariant,
 	users,
+	vocabularyNode,
 	WorkReleaseStatusValues,
-	AuditEventSchemaVersion,
 	zone,
 	zonePage,
-	vocabularyNode,
 } from "../database/schema";
 import { createGovernanceDecision } from "../governance/decision-service";
-import { createNavigationStructure } from "../content-structure/navigation";
-import { createContentStructure, insertContentStructureNode } from "../content-structure/service";
-import {
-	createContentStructureHistory,
-	getContentStructureHeadRevision,
-} from "../content-structure/history";
-import { loadContentStructureSnapshot } from "../content-structure/storage";
-import {
-	createCollectionStructureHistory,
-	getCollectionStructureHeadRevision,
-	mutateCollectionStructureWithHistory,
-} from "../collection-structure/history";
-import { createDockHistory, getDockRevisionId } from "../api/docks/history";
-import { RecommendationPolicyVersion } from "../recommendations/policy";
 import { fractionalPositionAt } from "../ordering/position";
+import { RecommendationPolicyVersion } from "../recommendations/policy";
+import { createSharedSearchQuery } from "../search/shared-queries";
+import { ensureSimpleTagExpressionInTransaction } from "../tag-expressions/service";
+import { createTagPathInTransaction } from "../tag-paths/service";
 import { recordUnitRevision, restoreUnitRevision } from "../units/history";
+import { isFirstUnitLocalization } from "../units/localization";
 import { recordInitialRealmUnitPublicationEvents } from "../units/realm-publication";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
-import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
-import { replaceApiTokenQuotaOverride } from "../auth/api-quota/policy-service";
-import { createSharedSearchQuery } from "../search/shared-queries";
-import { createTagPathInTransaction } from "../tag-paths/service";
-import { ensureSimpleTagExpressionInTransaction } from "../tag-expressions/service";
+import { createSeedRunOptions, includesSeedScenario, type SeedRunOptions } from "./contracts";
 import {
 	assertLocalDatabaseUrl,
 	chunks,
@@ -166,11 +169,10 @@ import {
 	DemoCredentials,
 	latestDate,
 	position,
-	SeedPlan,
 	SeedFixtureTitles,
+	SeedPlan,
 	type SeedData,
 } from "./data";
-import { createSeedRunOptions, includesSeedScenario, type SeedRunOptions } from "./contracts";
 import { assertFixtureSeedTargetEmpty } from "./fixture-target";
 import { seedPlatformInfrastructure } from "./platform-infrastructure";
 
@@ -227,6 +229,8 @@ interface CreatedConversation {
 	id: string;
 	lowId: string;
 	highId: string;
+	lowEntityId: string;
+	highEntityId: string;
 }
 
 function itemAt<T>(values: readonly T[], index: number): T {
@@ -441,6 +445,22 @@ async function insertUnitDetails(
 	const ownershipRows: (typeof unitOwnership.$inferInsert)[] = [];
 	const grantRows: (typeof unitAccessGrant.$inferInsert)[] = [];
 	const communityOwnedKinds: ReadonlySet<string> = new Set(CommunityOwnedUnitKindValues);
+	const ownerBindings = values.length
+		? await tx
+				.select()
+				.from(authEntity)
+				.where(
+					inArray(authEntity.entityId, [...new Set(values.map((value) => value.ownerProfileId))]),
+				)
+		: [];
+	const authByEntity = new Map(
+		ownerBindings.map((binding) => [binding.entityId, binding.authUserId]),
+	);
+	function requireOwnerAuth(entityId: string) {
+		const id = authByEntity.get(entityId);
+		if (!id) throw new Error("Seed creator has no self account");
+		return id;
+	}
 	for (const value of values) {
 		const ownershipCommon = {
 			unitId: value.id,
@@ -463,7 +483,7 @@ async function insertUnitDetails(
 					subjectKind: "authenticated",
 					permission,
 					scope: [],
-					grantedByProfileId: value.ownerProfileId,
+					grantedByAuthUserId: authByEntity.get(value.ownerProfileId) ?? null,
 					createdAt: value.createdAt,
 					updatedAt: value.updatedAt,
 				});
@@ -480,11 +500,11 @@ async function insertUnitDetails(
 			] as const)
 				grantRows.push({
 					unitId: value.id,
-					subjectKind: "profile",
-					profileId: value.ownerProfileId,
+					subjectKind: "auth",
+					authUserId: requireOwnerAuth(value.ownerProfileId),
 					permission,
 					scope: [],
-					grantedByProfileId: communityOwnerProfileId,
+					grantedByAuthUserId: null,
 					createdAt: value.createdAt,
 					updatedAt: value.updatedAt,
 				});
@@ -508,7 +528,7 @@ async function insertUnitDetails(
 						realmRelation: "member",
 						permission,
 						scope: [],
-						grantedByProfileId: value.ownerProfileId,
+						grantedByAuthUserId: authByEntity.get(value.ownerProfileId) ?? null,
 						createdAt: value.createdAt,
 						updatedAt: value.updatedAt,
 					});
@@ -540,75 +560,30 @@ async function seedProfiles(
 		returnedUsers.push(...(await tx.insert(users).values(batch).returning()));
 	}
 	const userByEmail = new Map(returnedUsers.map((value) => [value.email, value]));
-	const profileDescriptors = userInputs.map((input, index) => ({
-		kind: "profile" as const,
-		seedKey: index === 0 ? "demo" : `seed-profile-${position(index)}`,
-		ownerProfileId: "",
-		localizationKind: "description" as const,
-		status: "published" as const,
-		visibility: "public" as const,
-		moderationStatus: "approved" as const,
-		publishedAt: input.createdAt,
-		createdAt: input.createdAt,
-		updatedAt: input.updatedAt,
-	}));
-	const profileUnits = await insertUnits(tx, profileDescriptors);
-	const profiles = profileUnits.map((profileUnit, index): CreatedProfile => {
-		const input = itemAt(userInputs, index);
-		const authUser = userByEmail.get(input.email);
-		if (!authUser) throw new Error(`Auth User insertion did not return ${input.email}`);
-		return {
-			id: profileUnit.id,
-			authUserId: authUser.id,
+	const profiles: CreatedProfile[] = [];
+	for (const [index, input] of userInputs.entries()) {
+		const account = userByEmail.get(input.email);
+		if (!account) throw new Error("Seed Auth account insertion failed");
+		const native = await createParticipantIdentity(tx, {
+			shape: "person",
+			operatorAuthUserId: account.id,
+			names: [{ language: itemAt(data.languages(index), 0), value: input.name }],
+		});
+		await tx.insert(authEntity).values({ authUserId: account.id, entityId: native.id });
+		profiles.push({
+			id: native.id,
+			authUserId: account.id,
 			name: input.name,
 			email: input.email,
 			createdAt: input.createdAt,
-		};
-	});
-	await writeBatches(
-		profiles.map((value) => {
-			return {
-				id: value.id,
-				authUserId: value.authUserId,
-				joinedAt: value.createdAt,
-				createdAt: value.createdAt,
-				updatedAt: value.createdAt,
-			};
-		}),
-		(batch) => tx.insert(profile).values(batch),
-	);
-	await writeBatches(
-		profiles.map((value) => ({
-			unitId: value.id,
-			profileId: value.id,
-			assignedByProfileId: value.id,
-			createdAt: value.createdAt,
-			updatedAt: value.createdAt,
-		})),
-		(batch) => tx.insert(unitOwnership).values(batch),
-	);
-	await writeBatches(
-		profiles.map((value, index) => {
-			const language = itemAt(data.languages(index), 0);
-			return {
-				unitId: value.id,
-				language,
-				position: fractionalPositionAt(0),
-				title: value.name,
-				summary: data.summary(language),
-				description: createPortableTextDocument(data.portableText(language, 2)),
-				createdAt: value.createdAt,
-				updatedAt: value.createdAt,
-			};
-		}),
-		(batch) => tx.insert(unitLocalization).values(batch),
-	);
+		});
+	}
 	await writeBatches(
 		profiles.map((value, index) => {
 			const contentLanguage = itemAt(data.languages(index), 0);
 			const interfaceLocale = contentLanguage === "zh" ? ("zh-Hant" as const) : contentLanguage;
 			return {
-				profileId: value.id,
+				authUserId: value.authUserId,
 				interfaceLocale,
 				defaultLicenses: index % 3 === 0 ? ["cc-by-4.0"] : [],
 				defaultScoreRealmId: OfficialRealmUnitIds.score,
@@ -625,9 +600,9 @@ async function seedProfiles(
 				},
 				createdAt: value.createdAt,
 				updatedAt: value.createdAt,
-			} satisfies typeof profilePreference.$inferInsert;
+			} satisfies typeof accountPreference.$inferInsert;
 		}),
-		(batch) => tx.insert(profilePreference).values(batch),
+		(batch) => tx.insert(accountPreference).values(batch),
 	);
 	await writeBatches(
 		profiles.map((value) => ({
@@ -1008,7 +983,7 @@ async function seedUnitFixtures(
 	await writeBatches(
 		collections.map((value) => ({
 			sourceUnitId: value.id,
-			creditedUnitId: value.ownerProfileId,
+			creditedEntityId: value.ownerProfileId,
 			role: "publisher" as const,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
@@ -1080,7 +1055,7 @@ async function seedUnitFixtures(
 	await writeBatches(
 		Array.from({ length: SeedPlan.credits }, (_, index) => ({
 			sourceUnitId: itemAt(works, Math.floor(index / 2)).id,
-			creditedUnitId: itemAt(entities, index * 7).id,
+			creditedEntityId: itemAt(entities, index * 7).id,
 			role: itemAt(["author", "developer", "director", "publisher"] as const, index),
 			position: fractionalPositionAt(index),
 		})),
@@ -1489,7 +1464,7 @@ async function seedExampleWiki(
 	});
 	await tx.insert(creditAttribution).values({
 		sourceUnitId: wikiPost.id,
-		creditedUnitId: owner.id,
+		creditedEntityId: owner.id,
 		role: "publisher",
 		createdAt: wikiPost.createdAt,
 		updatedAt: wikiPost.updatedAt,
@@ -1718,7 +1693,7 @@ async function seedContent(
 	await writeBatches(
 		allPosts.map((value) => ({
 			sourceUnitId: value.id,
-			creditedUnitId: value.ownerProfileId,
+			creditedEntityId: value.ownerProfileId,
 			role: "publisher" as const,
 		})),
 		(batch) => tx.insert(creditAttribution).values(batch),
@@ -1968,11 +1943,11 @@ async function seedStructure(
 			);
 			return {
 				unitId: target.id,
-				subjectKind: "profile" as const,
-				profileId: editor.id,
+				subjectKind: "auth" as const,
+				authUserId: editor.authUserId,
 				permission: "unit.update" as const,
 				scope: [],
-				grantedByProfileId: target.ownerProfileId,
+				grantedByAuthUserId: selfAuthUserIdForEntity(target.ownerProfileId),
 				createdAt: target.createdAt,
 				updatedAt: target.updatedAt,
 			};
@@ -2139,12 +2114,14 @@ async function seedStructure(
 			const createdAt = data.pastDate(365);
 			const revoked = index % 13 === 0;
 			return {
-				profileId: itemAt(platformGrantProfiles, index * 7).id,
+				authUserId: itemAt(platformGrantProfiles, index * 7).authUserId,
 				capability: itemAt(SeedablePlatformCapabilityValues, index),
-				grantedByProfileId: itemAt(platformGrantProfiles, index * 11 + 1).id,
+				grantedByAuthUserId: itemAt(platformGrantProfiles, index * 11 + 1).authUserId,
 				expiresAt: index % 5 === 0 ? data.futureDate(365) : null,
 				revokedAt: revoked ? new Date(createdAt.getTime() + 86_400_000) : null,
-				revokedByProfileId: revoked ? itemAt(platformGrantProfiles, index * 13 + 2).id : null,
+				revokedByAuthUserId: revoked
+					? itemAt(platformGrantProfiles, index * 13 + 2).authUserId
+					: null,
 				createdAt,
 				updatedAt: createdAt,
 			};
@@ -2193,12 +2170,12 @@ async function seedInteractions(
 				index * 13,
 			);
 			return {
-				blockerProfileId: blocker.id,
-				blockedProfileId: blocked.id,
+				blockerAuthUserId: blocker.authUserId,
+				blockedEntityId: blocked.id,
 				createdAt: latestDate(data.pastDate(180), blocker.createdAt, blocked.createdAt),
 			};
 		}),
-		(batch) => tx.insert(profileBlock).values(batch),
+		(batch) => tx.insert(accountEntityBlock).values(batch),
 	);
 
 	const firstNodeByBook = new Map<string, CreatedNode>();
@@ -2213,7 +2190,7 @@ async function seedInteractions(
 				const lastSeenAt = new Date(createdAt.getTime() + (index + 1) * 60_000);
 				const progress = (index % 11) / 10;
 				return {
-					profileId: seedProfile.id,
+					authUserId: seedProfile.authUserId,
 					unitId: target.id,
 					progress,
 					status: itemAt(
@@ -2241,7 +2218,7 @@ async function seedInteractions(
 				(_, index) => {
 					const node = itemAt(content.nodes, profileIndex * 13 + index);
 					return {
-						profileId: seedProfile.id,
+						authUserId: seedProfile.authUserId,
 						nodeId: node.id,
 						completedAt: latestDate(data.pastDate(180), seedProfile.createdAt, node.createdAt),
 					};
@@ -2365,10 +2342,12 @@ async function seedCommunications(
 	const conversationInputs = Array.from({ length: SeedPlan.conversations }, (_, index) => {
 		const first = itemAt(profiles, Math.floor(index / 10));
 		const second = itemAt(profiles, 10 + (index % 10));
-		const [low, high] = first.id < second.id ? [first, second] : [second, first];
+		const [low, high] = first.authUserId < second.authUserId ? [first, second] : [second, first];
 		return {
-			participantLowProfileId: low.id,
-			participantHighProfileId: high.id,
+			participantLowAuthUserId: low.authUserId,
+			participantLowEntityId: low.id,
+			participantHighAuthUserId: high.authUserId,
+			participantHighEntityId: high.id,
 			createdAt: data.pastDate(120, 1),
 		};
 	});
@@ -2377,14 +2356,16 @@ async function seedCommunications(
 		conversations.push(
 			...(await tx.insert(conversation).values(batch).returning({
 				id: conversation.id,
-				lowId: conversation.participantLowProfileId,
-				highId: conversation.participantHighProfileId,
+				lowId: conversation.participantLowAuthUserId,
+				highId: conversation.participantHighAuthUserId,
+				lowEntityId: conversation.participantLowEntityId,
+				highEntityId: conversation.participantHighEntityId,
 			})),
 		);
 	}
 	const conversationCreatedAt = new Map(
 		conversationInputs.map((value) => [
-			`${value.participantLowProfileId}:${value.participantHighProfileId}`,
+			`${value.participantLowAuthUserId}:${value.participantHighAuthUserId}`,
 			value.createdAt,
 		]),
 	);
@@ -2396,7 +2377,8 @@ async function seedCommunications(
 			const deleted = (conversationIndex * 10 + index) % 31 === 0;
 			return {
 				conversationId: value.id,
-				senderProfileId: index % 2 === 0 ? value.lowId : value.highId,
+				senderAuthUserId: index % 2 === 0 ? value.lowId : value.highId,
+				senderEntityId: index % 2 === 0 ? value.lowEntityId : value.highEntityId,
 				content: deleted ? null : data.fakerByLanguage.en.lorem.sentences({ min: 1, max: 2 }),
 				deletedAt: deleted ? new Date(createdAt.getTime() + 60_000) : null,
 				createdAt,
@@ -2418,9 +2400,9 @@ async function seedCommunications(
 		conversations.flatMap((value) => {
 			const conversationMessages = messagesByConversation.get(value.id) ?? [];
 			const lastMessage = itemAt(conversationMessages, conversationMessages.length - 1);
-			return [value.lowId, value.highId].map((profileId, index) => ({
+			return [value.lowId, value.highId].map((authUserId, index) => ({
 				conversationId: value.id,
-				profileId,
+				authUserId,
 				lastReadMessageId: index === 0 ? lastMessage.id : itemAt(conversationMessages, 4).id,
 				readAt: lastMessage.createdAt,
 				createdAt: conversationMessages[0]?.createdAt ?? lastMessage.createdAt,
@@ -2443,7 +2425,7 @@ async function seedCommunications(
 			notificationKinds.map((kind, index) => {
 				const createdAt = data.pastDate(365);
 				return {
-					profileId: seedProfile.id,
+					authUserId: seedProfile.authUserId,
 					kind,
 					inApp: (profileIndex + index) % 7 !== 0,
 					email: (profileIndex + index) % 3 !== 0,
@@ -2475,7 +2457,7 @@ async function seedCommunications(
 					profileIndex + index,
 				).id;
 				return {
-					recipientProfileId: recipient.id,
+					recipientAuthUserId: recipient.authUserId,
 					actorProfileId: actor.id,
 					kind,
 					subjectUnitId:
@@ -2796,8 +2778,9 @@ async function seedGovernance(
 		const startsAt = latestDate(data.pastDate(90), targetProfile.createdAt, actor.createdAt);
 		return createSeedEnforcementPlan({
 			index,
-			profileId: targetProfile.id,
-			actorProfileId: actor.id,
+			authUserId: targetProfile.authUserId,
+			actorAuthUserId: actor.authUserId,
+			actorEntityId: actor.id,
 			kind: itemAt(EnforcementKindValues, index),
 			startsAt,
 			expiresAt: index % 4 === 0 ? null : new Date(startsAt.getTime() + 30 * 86_400_000),
@@ -2809,10 +2792,10 @@ async function seedGovernance(
 	for (const [index, plan] of enforcementPlans.entries()) {
 		const decision = await createGovernanceDecision(tx, {
 			action: "account.enforcement.create",
-			actorProfileId: plan.action.actorProfileId,
+			actorProfileId: plan.actorEntityId,
 			authority: { kind: "platform" },
-			targetUnitId: plan.action.targetProfileId,
-			subject: { kind: "profile", id: plan.action.targetProfileId },
+			targetUserId: plan.action.targetAuthUserId,
+			subject: { kind: "auth", id: plan.action.targetAuthUserId },
 			basis: {
 				kind: "rules",
 				rules: [
@@ -3028,10 +3011,10 @@ async function seedCoverageContracts(
 
 	await tx.insert(unitAccessInvitation).values({
 		unitId: target.id,
-		invitedProfileId: collaborator.id,
+		invitedAuthUserId: collaborator.authUserId,
 		permissions: ["unit.read", "unit.update"],
 		scope: ["localizations"],
-		invitedByProfileId: target.ownerProfileId,
+		invitedByAuthUserId: selfAuthUserIdForEntity(target.ownerProfileId),
 		expiresAt,
 		createdAt,
 		updatedAt: createdAt,
@@ -3066,12 +3049,12 @@ async function seedCoverageContracts(
 	});
 	await tx.insert(unitAccessRestriction).values({
 		unitId: itemAt(unitFixtures.works, 2).id,
-		subjectKind: "profile",
-		profileId: collaborator.id,
+		subjectKind: "auth",
+		authUserId: collaborator.authUserId,
 		permission: "unit.update",
 		scope: [],
 		decisionId: accessDecision.id,
-		createdByProfileId: actor.id,
+		createdByAuthUserId: actor.authUserId,
 		expiresAt,
 		createdAt,
 		updatedAt: createdAt,

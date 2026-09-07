@@ -4,15 +4,15 @@ import { describe, expect, it } from "vitest";
 import { FollowingStatusResponse } from "../schema/action-response";
 import {
 	CollectionConfigV1,
+	EntityActivityQuery,
+	EntityPresentationQuery,
 	FollowingListQuery,
-	ProfileActivityQuery,
-	PublicProfileQuery,
 	ReplaceFollowingSettingsBody,
 	ReplacePreferencesBody,
 	StudioContentListQuery,
 	UpdateDisplayPreferencesBody,
+	UpdateEntityPresentationBody,
 	UpdatePrivacyPreferencesBody,
-	UpdateProfileBody,
 } from "./schema";
 
 describe("Collection preference contract", () => {
@@ -123,11 +123,11 @@ describe("following API contracts", () => {
 
 describe("public profile localization query", () => {
 	it("accepts one ordered content-language list only", () => {
-		expect(Check(PublicProfileQuery, {})).toBe(true);
-		expect(Check(PublicProfileQuery, { localizationLanguages: ["zh", "en"] })).toBe(true);
-		expect(Check(PublicProfileQuery, { localizationLanguages: [] })).toBe(true);
-		expect(Check(PublicProfileQuery, { localizationLanguages: ["en", "en"] })).toBe(false);
-		expect(Check(PublicProfileQuery, { language: "en" })).toBe(false);
+		expect(Check(EntityPresentationQuery, {})).toBe(true);
+		expect(Check(EntityPresentationQuery, { localizationLanguages: ["zh", "en"] })).toBe(true);
+		expect(Check(EntityPresentationQuery, { localizationLanguages: [] })).toBe(true);
+		expect(Check(EntityPresentationQuery, { localizationLanguages: ["en", "en"] })).toBe(false);
+		expect(Check(EntityPresentationQuery, { language: "en" })).toBe(false);
 	});
 });
 
@@ -147,13 +147,13 @@ describe("Profile privacy contracts", () => {
 
 	it("bounds public Profile activity reads", () => {
 		expect(
-			Check(ProfileActivityQuery, {
+			Check(EntityActivityQuery, {
 				localizationLanguages: ["zh", "en"],
 				limit: 20,
 			}),
 		).toBe(true);
-		expect(Check(ProfileActivityQuery, { limit: 0 })).toBe(false);
-		expect(Check(ProfileActivityQuery, { limit: 51 })).toBe(false);
+		expect(Check(EntityActivityQuery, { limit: 0 })).toBe(false);
+		expect(Check(EntityActivityQuery, { limit: 51 })).toBe(false);
 	});
 });
 
@@ -164,11 +164,11 @@ describe("profile content language contract", () => {
 			language: "zh",
 			name: "名稱",
 		};
-		expect(Check(UpdateProfileBody, input)).toBe(true);
-		expect(Check(UpdateProfileBody, { ...input, language: "ja" })).toBe(true);
-		expect(Check(UpdateProfileBody, { ...input, language: "zh-Hans" })).toBe(false);
+		expect(Check(UpdateEntityPresentationBody, input)).toBe(true);
+		expect(Check(UpdateEntityPresentationBody, { ...input, language: "ja" })).toBe(true);
+		expect(Check(UpdateEntityPresentationBody, { ...input, language: "zh-Hans" })).toBe(false);
 		expect(
-			Check(UpdateProfileBody, {
+			Check(UpdateEntityPresentationBody, {
 				updatedAt: input.updatedAt,
 				name: input.name,
 			}),

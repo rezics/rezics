@@ -16,7 +16,6 @@ function stringEnum<const Values extends readonly [string, ...string[]]>(values:
 
 export const FilterUnitKindValues = [
 	"slug_namespace",
-	"profile",
 	"book",
 	"software",
 	"media",
@@ -54,7 +53,6 @@ export type FilterPostKind = (typeof FilterPostKindValues)[number];
 export const FilterPostKind = stringEnum(FilterPostKindValues);
 
 const SimpleFeedContentDefinitions = {
-	"unit:profile": { group: "unit", kind: "profile" },
 	"unit:book": { group: "unit", kind: "book" },
 	"unit:software": { group: "unit", kind: "software" },
 	"unit:media": { group: "unit", kind: "media" },
@@ -79,7 +77,6 @@ const SimpleFeedContentDefinitions = {
 >;
 
 export const SimpleFeedContentKindValues = [
-	"unit:profile",
 	"unit:book",
 	"unit:software",
 	"unit:media",

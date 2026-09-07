@@ -61,7 +61,7 @@ describe("unit access policy", () => {
 				platformOverride: true,
 				hasDirectProfileOwner: false,
 				restrictions: [
-					{ id: "profile-restriction", subjectKind: "profile" },
+					{ id: "profile-restriction", subjectKind: "auth" },
 					{ id: "realm-restriction", subjectKind: "realm" },
 				],
 			}),
@@ -80,7 +80,7 @@ describe("unit access policy", () => {
 			resolveUnitAccessOverride({
 				platformOverride: false,
 				hasDirectProfileOwner: true,
-				restrictions: [{ id: "profile-restriction", subjectKind: "profile" }],
+				restrictions: [{ id: "profile-restriction", subjectKind: "auth" }],
 			}),
 		).toBeUndefined();
 	});

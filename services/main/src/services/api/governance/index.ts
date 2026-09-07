@@ -1,18 +1,19 @@
-import type { StaticDecode } from "typebox";
-import { StatusCodes } from "http-status-codes";
+import { OfficialRealmUnitIds } from "@rezics/slug";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import Elysia from "elysia";
-import { OfficialRealmUnitIds } from "@rezics/slug";
+import { StatusCodes } from "http-status-codes";
+import type { StaticDecode } from "typebox";
+import { users } from "../../database/schema/auth";
 
-import session from "../../auth/session";
 import { recordAuditEvent as appendAuditEvent } from "../../audit";
+import session from "../../auth/session";
 import type { Authorization } from "../../authorization";
+import type { DatabaseTransaction } from "../../database";
 import { database } from "../../database";
 import {
 	accountEnforcement,
 	accountEnforcementAction,
 	contentReviewCase,
-	profile as profileTable,
 	realm,
 	realmRule,
 	realmRuleRevision,
@@ -30,23 +31,38 @@ import {
 	listGovernanceNotes,
 } from "../../governance/note-service";
 import { createNotification } from "../../notifications/service";
-import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
 import {
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
 } from "../../units/localization";
-import { toApiErrorResponse } from "../schema/response";
 import { ValidationError } from "../errors";
+import { toApiErrorResponse } from "../schema/response";
 import { ProfileNotFound } from "../users/errors";
+import { isLicenseModerationCommand } from "./content-governance-contract";
+import {
+	executeAuthorizedContentGovernanceAction,
+	loadContentReviewCaseForAction,
+} from "./content-governance-service";
+import {
+	EnforcementAlreadyRevoked,
+	EnforcementChanged,
+	EnforcementExpiryInvalid,
+	EnforcementNotFound,
+	GovernanceNoteNotFound,
+	GovernanceReversalUnavailable,
+	ContentReviewCaseNotFound as ModerationCaseNotFound,
+	GovernanceNoteRoleDuplicate as ModerationNoteRoleDuplicate,
+} from "./errors";
+import ownershipClaimRoutes from "./ownership-claims";
 import {
 	AccountEnforcementParams,
 	ContentGovernanceActionResponse,
 	ContentReviewCaseListResponse,
 	ContentReviewCaseParams,
 	ContentReviewCaseResponse,
-	CreateContentGovernanceActionBody,
 	CreateAccountEnforcementBody,
+	CreateContentGovernanceActionBody,
 	EnforcementResponse,
 	GovernanceNoteParams,
 	GovernanceNoteResponse,
@@ -57,26 +73,10 @@ import {
 	UpdateContentReviewCaseBody,
 	UpdateGovernanceNoteBody,
 } from "./schema";
-import {
-	EnforcementAlreadyRevoked,
-	EnforcementChanged,
-	EnforcementExpiryInvalid,
-	EnforcementNotFound,
-	GovernanceReversalUnavailable,
-	GovernanceNoteNotFound,
-	ContentReviewCaseNotFound as ModerationCaseNotFound,
-	GovernanceNoteRoleDuplicate as ModerationNoteRoleDuplicate,
-} from "./errors";
 import unitAccessRoutes from "./unit-access";
 import unitAccessInvitationRoutes from "./unit-access-invitations";
 import unitLifecycleRoutes from "./unit-lifecycle";
 import unitMergeRoutes from "./unit-merges";
-import ownershipClaimRoutes from "./ownership-claims";
-import {
-	executeAuthorizedContentGovernanceAction,
-	loadContentReviewCaseForAction,
-} from "./content-governance-service";
-import { isLicenseModerationCommand } from "./content-governance-contract";
 
 const CapabilityForbiddenResponse = toApiErrorResponse([
 	"RealmCapabilityRequired",
@@ -97,7 +97,7 @@ const caseSelection = {
 
 const enforcementSelection = {
 	id: accountEnforcement.id,
-	profileId: accountEnforcement.profileId,
+	authUserId: accountEnforcement.authUserId,
 	kind: accountEnforcement.kind,
 	active: sql<boolean>`${accountEnforcement.revocationActionId} is null and (${accountEnforcement.expiresAt} is null or ${accountEnforcement.expiresAt} > now())`,
 	startsAt: accountEnforcement.startsAt,
@@ -332,7 +332,7 @@ export default new Elysia({ prefix: "/governance" })
 			},
 			detail: { summary: "Update governance note", tags: ["Governance"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.postId, [["localizations"]]);
 			const note = await database.transaction(async (tx) => {
 				if (!(await getGovernanceNote(tx, params.postId))) throw new GovernanceNoteNotFound();
@@ -354,7 +354,7 @@ export default new Elysia({ prefix: "/governance" })
 					});
 				await recordUnitRevision(tx, {
 					unitId: params.postId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					event: "update",
 					baseRevisionId: body.baseRevisionId,
@@ -446,7 +446,7 @@ export default new Elysia({ prefix: "/governance" })
 			},
 			detail: { summary: "Update content review case", tags: ["Governance"] },
 		},
-		async ({ authorization, profile, params, body }) => {
+		async ({ authorization, entity, params, body }) => {
 			const [current] = await database
 				.select()
 				.from(contentReviewCase)
@@ -465,7 +465,7 @@ export default new Elysia({ prefix: "/governance" })
 				if (!updated) throw new ModerationCaseNotFound();
 				const note = internalNote
 					? await createGovernanceNotePost(tx, {
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							subjectKind: "content_review_case",
 							subjectId: current.id,
 							subjectUnitId: current.targetUnitId,
@@ -475,7 +475,7 @@ export default new Elysia({ prefix: "/governance" })
 						})
 					: undefined;
 				await recordAuditEvent(tx, {
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					action: "content_review.case.update",
 					decisionCode: "allowed",
 					subjectKind: "content_review_case",
@@ -523,7 +523,7 @@ export default new Elysia({ prefix: "/governance" })
 			},
 			detail: { summary: "Apply content governance action", tags: ["Governance"] },
 		},
-		async ({ authorization, profile, body }) => {
+		async ({ authorization, entity, body }) => {
 			const result = await database.transaction(async (tx) => {
 				const caseRow = await loadContentReviewCaseForAction(tx, body.caseId);
 				if (!caseRow) throw new ModerationCaseNotFound();
@@ -532,7 +532,7 @@ export default new Elysia({ prefix: "/governance" })
 					await authorization.platform.ensureCapability("unit.license.manage");
 				return executeAuthorizedContentGovernanceAction(tx, {
 					caseRow,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					body,
 				});
 			});
@@ -559,33 +559,35 @@ export default new Elysia({ prefix: "/governance" })
 			},
 			detail: { summary: "Create account enforcement", tags: ["Governance"] },
 		},
-		async ({ authorization, profile, body }) => {
+		async ({ authorization, entity, user, body }) => {
 			await authorization.platform.ensureCapability("platform.moderate");
 			if (new Set(body.notes?.map((note) => note.role)).size !== (body.notes?.length ?? 0))
 				throw new ModerationNoteRoleDuplicate();
 			const expiresAt = body.expiresAt ? new Date(body.expiresAt) : undefined;
 			if (expiresAt && expiresAt <= new Date()) throw new EnforcementExpiryInvalid();
 			const result = await database.transaction(async (tx) => {
+				await authorization.platform.ensureCapability("platform.moderate", tx);
 				const [target] = await tx
-					.select({ id: profileTable.id })
-					.from(profileTable)
-					.where(eq(profileTable.id, body.profileId))
-					.limit(1);
+					.select({ id: users.id })
+					.from(users)
+					.where(eq(users.id, body.authUserId))
+					.limit(1)
+					.for("update");
 				if (!target) throw new ProfileNotFound();
 				const decision = await createGovernanceDecision(tx, {
 					action: "account.enforcement.create",
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					authority: { kind: "platform" },
-					targetUnitId: target.id,
-					subject: { kind: "profile", id: target.id },
+					targetUserId: target.id,
+					subject: { kind: "auth", id: target.id },
 					basis: { kind: "rules", rules: body.rules },
 				});
 				const [action] = await tx
 					.insert(accountEnforcementAction)
 					.values({
 						decisionId: decision.id,
-						actorProfileId: profile.unitId,
-						targetProfileId: target.id,
+						actorAuthUserId: user.id,
+						targetAuthUserId: target.id,
 						kind: "issue",
 						enforcementKind: body.kind,
 					})
@@ -595,11 +597,10 @@ export default new Elysia({ prefix: "/governance" })
 				let publicNoticePostId: string | undefined;
 				for (const note of body.notes ?? []) {
 					const createdNote = await createGovernanceNotePost(tx, {
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						subjectKind: "account_enforcement_action",
 						subjectId: action.id,
-						subjectUnitId: target.id,
-						publicRecipientProfileIds: [target.id],
+						publicRecipientAuthUserIds: [target.id],
 						revisionContribution: body.revisionContext?.contribution,
 						note,
 					});
@@ -609,7 +610,7 @@ export default new Elysia({ prefix: "/governance" })
 				const [created] = await tx
 					.insert(accountEnforcement)
 					.values({
-						profileId: target.id,
+						authUserId: target.id,
 						kind: body.kind,
 						expiresAt,
 						decisionActionId: action.id,
@@ -617,10 +618,9 @@ export default new Elysia({ prefix: "/governance" })
 					.returning(enforcementSelection);
 				if (!created) throw new Error("Enforcement insertion did not return a row");
 				await createNotification(tx, {
-					recipientProfileId: target.id,
-					actorProfileId: profile.unitId,
+					recipientAuthUserId: target.id,
+					actorProfileId: entity.id,
 					kind: "moderation",
-					subjectUnitId: target.id,
 					payload: {
 						type: "account_enforcement_action",
 						actionId: action.id,
@@ -630,9 +630,9 @@ export default new Elysia({ prefix: "/governance" })
 					},
 				});
 				await recordAuditEvent(tx, {
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					action: "account.enforcement.create",
-					subjectKind: "profile",
+					subjectKind: "auth",
 					subjectId: target.id,
 					governanceDecisionId: decision.id,
 					metadata: { enforcementId: created.id, kind: body.kind, notePostIds },
@@ -665,15 +665,16 @@ export default new Elysia({ prefix: "/governance" })
 			},
 			detail: { summary: "Revoke account enforcement", tags: ["Governance"] },
 		},
-		async ({ authorization, profile, params, body }) => {
+		async ({ authorization, entity, user, params, body }) => {
 			await authorization.platform.ensureCapability("platform.moderate");
 			if (new Set(body.notes?.map((note) => note.role)).size !== (body.notes?.length ?? 0))
 				throw new ModerationNoteRoleDuplicate();
 			const result = await database.transaction(async (tx) => {
+				await authorization.platform.ensureCapability("platform.moderate", tx);
 				const [current] = await tx
 					.select({
 						id: accountEnforcement.id,
-						profileId: accountEnforcement.profileId,
+						authUserId: accountEnforcement.authUserId,
 						kind: accountEnforcement.kind,
 						decisionActionId: accountEnforcement.decisionActionId,
 						decisionId: accountEnforcementAction.decisionId,
@@ -687,22 +688,28 @@ export default new Elysia({ prefix: "/governance" })
 					.where(eq(accountEnforcement.id, params.enforcementId))
 					.limit(1);
 				if (!current) throw new EnforcementNotFound();
+				await tx
+					.select({ id: users.id })
+					.from(users)
+					.where(eq(users.id, current.authUserId))
+					.limit(1)
+					.for("update");
 				if (current.revocationActionId) throw new EnforcementAlreadyRevoked();
 				if (!current.decisionId) throw new GovernanceReversalUnavailable();
 				const decision = await createGovernanceDecision(tx, {
 					action: "account.enforcement.revoke",
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					authority: { kind: "platform" },
-					targetUnitId: current.profileId,
-					subject: { kind: "profile", id: current.profileId },
+					targetUserId: current.authUserId,
+					subject: { kind: "auth", id: current.authUserId },
 					basis: { kind: "reversal", reversesDecisionId: current.decisionId },
 				});
 				const [action] = await tx
 					.insert(accountEnforcementAction)
 					.values({
 						decisionId: decision.id,
-						actorProfileId: profile.unitId,
-						targetProfileId: current.profileId,
+						actorAuthUserId: user.id,
+						targetAuthUserId: current.authUserId,
 						kind: "revoke",
 						enforcementKind: current.kind,
 						reversesActionId: current.decisionActionId,
@@ -713,11 +720,10 @@ export default new Elysia({ prefix: "/governance" })
 				let publicNoticePostId: string | undefined;
 				for (const note of body.notes ?? []) {
 					const createdNote = await createGovernanceNotePost(tx, {
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						subjectKind: "account_enforcement_action",
 						subjectId: action.id,
-						subjectUnitId: current.profileId,
-						publicRecipientProfileIds: [current.profileId],
+						publicRecipientAuthUserIds: [current.authUserId],
 						revisionContribution: body.revisionContext?.contribution,
 						note,
 					});
@@ -736,18 +742,17 @@ export default new Elysia({ prefix: "/governance" })
 					.returning(enforcementSelection);
 				if (!updated) throw new EnforcementChanged();
 				await recordAuditEvent(tx, {
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					action: "account.enforcement.revoke",
-					subjectKind: "profile",
-					subjectId: current.profileId,
+					subjectKind: "auth",
+					subjectId: current.authUserId,
 					governanceDecisionId: decision.id,
 					metadata: { enforcementId: current.id, notePostIds },
 				});
 				await createNotification(tx, {
-					recipientProfileId: current.profileId,
-					actorProfileId: profile.unitId,
+					recipientAuthUserId: current.authUserId,
+					actorProfileId: entity.id,
 					kind: "moderation",
-					subjectUnitId: current.profileId,
 					payload: {
 						type: "account_enforcement_action",
 						actionId: action.id,

@@ -15,36 +15,36 @@ import {
 	unitLicenseGrant,
 	unitOwnership,
 } from "../../database/schema";
-import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
 import {
 	createGovernanceDecision,
 	listGovernanceDecisionRules,
 	type GovernanceAuthority,
 } from "../../governance/decision-service";
+import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
 import { createNotification } from "../../notifications/service";
+import {
+	assertContentGovernanceActionCompatible,
+	isActiveContentReviewCaseState,
+	resolveLicenseRecognitionStatus,
+	resolvePostTargetingLockState,
+	resolveRealmUnitStatus,
+	resolveUnitModerationStatus,
+	type LicenseRecognitionStatus,
+	type RealmUnitStatus,
+	type UnitModerationStatus,
+} from "./content-governance-contract";
 import {
 	ContentGovernanceActionIncompatible as ModerationActionIncompatible,
 	ContentGovernanceActionNoEffect as ModerationActionNoEffect,
 	ContentGovernanceIdempotencyConflict as ModerationIdempotencyConflict,
+	GovernanceNoteRoleDuplicate as ModerationNoteRoleDuplicate,
+	ContentReviewRealmMissing as ModerationRealmMissing,
 	ContentGovernanceReversalUnavailable as ModerationReversalUnavailable,
 	ContentGovernanceReversedActionInvalid as ModerationReversedActionInvalid,
 	ContentGovernanceTargetNotFound as ModerationTargetNotFound,
 	ContentGovernanceTransitionInvalid as ModerationTransitionInvalid,
-	ContentReviewRealmMissing as ModerationRealmMissing,
-	GovernanceNoteRoleDuplicate as ModerationNoteRoleDuplicate,
 } from "./errors";
-import {
-	assertContentGovernanceActionCompatible,
-	isActiveContentReviewCaseState,
-	resolvePostTargetingLockState,
-	resolveRealmUnitStatus,
-	resolveLicenseRecognitionStatus,
-	resolveUnitModerationStatus,
-	type RealmUnitStatus,
-	type LicenseRecognitionStatus,
-	type UnitModerationStatus,
-} from "./content-governance-contract";
-import type { CreateContentGovernanceActionBody, ContentGovernanceActionResponse } from "./schema";
+import type { ContentGovernanceActionResponse, CreateContentGovernanceActionBody } from "./schema";
 
 export const contentGovernanceActionSelection = {
 	id: contentGovernanceAction.id,
@@ -71,7 +71,7 @@ function contentGovernanceAuthority(row: ContentReviewCaseRecord): GovernanceAut
 export type ContentReviewCaseRecord = typeof contentReviewCase.$inferSelect;
 
 type ModerationTargetContext = {
-	recipientProfileIds: readonly string[];
+	recipientEntityIds: readonly string[];
 	subjectUnitId: string;
 };
 
@@ -165,7 +165,7 @@ async function getModerationTargetContext(
 			.from(unitOwnership)
 			.where(and(eq(unitOwnership.unitId, target.unitId), isNull(unitOwnership.revokedAt)));
 		return {
-			recipientProfileIds: presentProfileIds(owners),
+			recipientEntityIds: presentProfileIds(owners),
 			subjectUnitId: target.unitId,
 		};
 	}
@@ -179,7 +179,7 @@ async function getModerationTargetContext(
 		.select({ profileId: unitOwnership.profileId })
 		.from(unitOwnership)
 		.where(and(eq(unitOwnership.unitId, target.id), isNull(unitOwnership.revokedAt)));
-	return { recipientProfileIds: presentProfileIds(owners), subjectUnitId: target.id };
+	return { recipientEntityIds: presentProfileIds(owners), subjectUnitId: target.id };
 }
 
 async function loadUnitStatePlan(
@@ -746,7 +746,7 @@ export async function executeAuthorizedContentGovernanceAction(
 				realmId: input.caseRow.realmId,
 				revisionContribution: input.body.revisionContext?.contribution,
 				publicRecipientProfileIds: [
-					...new Set([...target.recipientProfileIds, ...reportRecipientProfileIds]),
+					...new Set([...target.recipientEntityIds, ...reportRecipientProfileIds]),
 				],
 				note,
 			});
@@ -769,9 +769,9 @@ export async function executeAuthorizedContentGovernanceAction(
 	const publicNoticePostId = noteBindings.find(
 		(binding) => binding.role === "public_notice",
 	)?.postId;
-	for (const recipientProfileId of target.recipientProfileIds) {
+	for (const recipientEntityId of target.recipientEntityIds) {
 		await createNotification(tx, {
-			recipientProfileId,
+			recipientEntityId,
 			actorProfileId: input.actorProfileId,
 			kind: "moderation",
 			subjectUnitId: target.subjectUnitId,
@@ -786,7 +786,7 @@ export async function executeAuthorizedContentGovernanceAction(
 	if (!isActiveContentReviewCaseState(nextCaseState))
 		for (const caseReport of caseReports) {
 			await createNotification(tx, {
-				recipientProfileId: caseReport.reporterProfileId,
+				recipientEntityId: caseReport.reporterProfileId,
 				actorProfileId: input.actorProfileId,
 				kind: "moderation",
 				subjectUnitId: target.subjectUnitId,

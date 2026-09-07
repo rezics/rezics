@@ -12,6 +12,7 @@ import {
 	type SQLWrapper,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
 import { database } from "../../database";
 import { unit, unitAccessGrant, unitAccessRestriction, unitOwnership } from "../../database/schema";
@@ -77,8 +78,8 @@ export function getUnitReadCondition(
 					eq(unitAccessRestriction.unitId, target.id),
 					eq(unitAccessRestriction.permission, "unit.read"),
 					sql`cardinality(${unitAccessRestriction.scope}) = 0`,
-					eq(unitAccessRestriction.subjectKind, "profile"),
-					eq(unitAccessRestriction.profileId, profileId),
+					eq(unitAccessRestriction.subjectKind, "auth"),
+					eq(unitAccessRestriction.authUserId, selfAuthUserIdForEntity(profileId)),
 					isNull(unitAccessRestriction.revokedAt),
 					or(
 						isNull(unitAccessRestriction.expiresAt),
@@ -125,8 +126,8 @@ export function getUnitReadCondition(
 					or(
 						eq(unitAccessGrant.subjectKind, "authenticated"),
 						and(
-							eq(unitAccessGrant.subjectKind, "profile"),
-							eq(unitAccessGrant.profileId, profileId),
+							eq(unitAccessGrant.subjectKind, "auth"),
+							eq(unitAccessGrant.authUserId, selfAuthUserIdForEntity(profileId)),
 						),
 						and(
 							eq(unitAccessGrant.subjectKind, "realm"),
@@ -162,7 +163,7 @@ function scopePrefixCondition(
 }
 
 type ExplicitAnyScopeGrantSource =
-	| { readonly kind: "profile" }
+	| { readonly kind: "auth" }
 	| {
 			readonly kind: "realm";
 			readonly realmId: SQLWrapper;
@@ -201,8 +202,11 @@ export function getExplicitUnitAnyScopePermissionCondition(
 			),
 	);
 	const grantSubject =
-		options.source.kind === "profile"
-			? and(eq(candidateGrant.subjectKind, "profile"), eq(candidateGrant.profileId, profileId))
+		options.source.kind === "auth"
+			? and(
+					eq(candidateGrant.subjectKind, "auth"),
+					eq(candidateGrant.authUserId, selfAuthUserIdForEntity(profileId)),
+				)
 			: and(
 					eq(candidateGrant.subjectKind, "realm"),
 					sql`${candidateGrant.realmId} = ${options.source.realmId}`,
@@ -223,8 +227,8 @@ export function getExplicitUnitAnyScopePermissionCondition(
 					),
 					or(
 						and(
-							eq(candidateRestriction.subjectKind, "profile"),
-							eq(candidateRestriction.profileId, profileId),
+							eq(candidateRestriction.subjectKind, "auth"),
+							eq(candidateRestriction.authUserId, selfAuthUserIdForEntity(profileId)),
 						),
 						and(
 							eq(candidateRestriction.subjectKind, "realm"),
@@ -291,8 +295,8 @@ export function getUnitPermissionCondition(
 					eq(unitAccessRestriction.unitId, target.id),
 					eq(unitAccessRestriction.permission, permission),
 					scopePrefixCondition(unitAccessRestriction.scope, scope),
-					eq(unitAccessRestriction.subjectKind, "profile"),
-					eq(unitAccessRestriction.profileId, profileId),
+					eq(unitAccessRestriction.subjectKind, "auth"),
+					eq(unitAccessRestriction.authUserId, selfAuthUserIdForEntity(profileId)),
 					activeRestriction(),
 				),
 			),
@@ -330,8 +334,8 @@ export function getUnitPermissionCondition(
 					or(
 						eq(unitAccessGrant.subjectKind, "authenticated"),
 						and(
-							eq(unitAccessGrant.subjectKind, "profile"),
-							eq(unitAccessGrant.profileId, profileId),
+							eq(unitAccessGrant.subjectKind, "auth"),
+							eq(unitAccessGrant.authUserId, selfAuthUserIdForEntity(profileId)),
 						),
 						and(
 							eq(unitAccessGrant.subjectKind, "realm"),

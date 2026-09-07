@@ -1,21 +1,21 @@
 import { and, eq, gt, isNull, notExists, or, sql } from "drizzle-orm";
 
+import { UnitOwnershipChanged, UnitOwnershipTargetIneligible } from "../api/governance/errors";
 import { recordAuditEvent } from "../audit";
+import type { PlatformAuthorization } from "../authorization/platform/authorization";
 import { lockUnitAccessState } from "../authorization/unit/invitations";
 import { replaceUnitOwnership } from "../authorization/unit/ownership";
-import type { PlatformAuthorization } from "../authorization/platform/authorization";
 import { database, type DatabaseTransaction } from "../database";
-import { profile, unit, unitOwnership, unitSlugAddress } from "../database/schema";
+import { entityIdentity, unit, unitOwnership, unitSlugAddress } from "../database/schema";
 import {
 	createGovernanceDecision,
 	type GovernanceRuleReference,
 } from "../governance/decision-service";
 import { createNotification } from "../notifications/service";
-import { UnitOwnershipChanged, UnitOwnershipTargetIneligible } from "../api/governance/errors";
 import { UnitNotFound } from "./errors";
 import { firstUnitLocalizationTitle } from "./localization";
 
-function canonicalProfileSlug(profileId: typeof profile.id) {
+function canonicalProfileSlug(profileId: typeof entityIdentity.id) {
 	return sql<string | null>`(
 		select ${unitSlugAddress.slug}
 		from ${unitSlugAddress}
@@ -43,19 +43,19 @@ export async function listPlatformOwnershipCandidates(input: {
 }) {
 	await ensurePlatformUnitExists(input.unitId);
 	const search = input.query?.trim();
-	const slug = canonicalProfileSlug(profile.id);
+	const slug = canonicalProfileSlug(entityIdentity.id);
 	const rows = await database
 		.select({
-			profileId: profile.id,
-			label: firstUnitLocalizationTitle(profile.id),
+			profileId: entityIdentity.id,
+			label: firstUnitLocalizationTitle(entityIdentity.id),
 			slug,
 		})
-		.from(profile)
-		.innerJoin(unit, eq(unit.id, profile.id))
+		.from(entityIdentity)
+		.innerJoin(unit, eq(unit.id, entityIdentity.id))
 		.where(
 			and(
 				isNull(unit.deletedAt),
-				input.cursor ? gt(profile.id, input.cursor) : undefined,
+				input.cursor ? gt(entityIdentity.id, input.cursor) : undefined,
 				notExists(
 					database
 						.select({ id: unitOwnership.id })
@@ -63,21 +63,21 @@ export async function listPlatformOwnershipCandidates(input: {
 						.where(
 							and(
 								eq(unitOwnership.unitId, input.unitId),
-								eq(unitOwnership.profileId, profile.id),
+								eq(unitOwnership.profileId, entityIdentity.id),
 								isNull(unitOwnership.revokedAt),
 							),
 						),
 				),
 				search
 					? or(
-							sql`${profile.id}::text ilike ${`%${search}%`}`,
-							sql`coalesce(${firstUnitLocalizationTitle(profile.id)}, '') ilike ${`%${search}%`}`,
+							sql`${entityIdentity.id}::text ilike ${`%${search}%`}`,
+							sql`coalesce(${firstUnitLocalizationTitle(entityIdentity.id)}, '') ilike ${`%${search}%`}`,
 							sql`coalesce(${slug}, '') ilike ${`%${search}%`}`,
 						)
 					: undefined,
 			),
 		)
-		.orderBy(profile.id)
+		.orderBy(entityIdentity.id)
 		.limit(input.limit + 1);
 	const items = rows.slice(0, input.limit);
 	return {
@@ -102,12 +102,12 @@ async function eligibleTarget(
 ): Promise<{ readonly profileId: string; readonly label: string | null } | undefined> {
 	const [target] = await tx
 		.select({
-			profileId: profile.id,
-			label: firstUnitLocalizationTitle(profile.id),
+			profileId: entityIdentity.id,
+			label: firstUnitLocalizationTitle(entityIdentity.id),
 		})
-		.from(profile)
-		.innerJoin(unit, eq(unit.id, profile.id))
-		.where(and(eq(profile.id, profileId), isNull(unit.deletedAt)))
+		.from(entityIdentity)
+		.innerJoin(unit, eq(unit.id, entityIdentity.id))
+		.where(and(eq(entityIdentity.id, profileId), isNull(unit.deletedAt)))
 		.limit(1);
 	return target;
 }
@@ -167,7 +167,7 @@ export async function overridePlatformUnitOwnership(
 		if (replaced.previousOwnerProfileId)
 			await createNotification(tx, {
 				kind: "system",
-				recipientProfileId: replaced.previousOwnerProfileId,
+				recipientEntityId: replaced.previousOwnerProfileId,
 				actorProfileId: input.actorProfileId,
 				subjectUnitId: input.unitId,
 				dedupeKey: `unit-ownership-override:${replaced.ownershipId}:previous`,
@@ -182,7 +182,7 @@ export async function overridePlatformUnitOwnership(
 			});
 		await createNotification(tx, {
 			kind: "system",
-			recipientProfileId: target.profileId,
+			recipientEntityId: target.profileId,
 			actorProfileId: input.actorProfileId,
 			subjectUnitId: input.unitId,
 			dedupeKey: `unit-ownership-override:${replaced.ownershipId}:owner`,

@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 
+import { createCollectionStructureHistory } from "../collection-structure/history";
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
 import {
 	collection,
@@ -11,7 +12,6 @@ import {
 import { DefaultContentLanguage } from "../database/schema/contract-values";
 import { insertUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
-import { createCollectionStructureHistory } from "../collection-structure/history";
 
 async function findFavorites(executor: DatabaseExecutor, profileId: string) {
 	const [existing] = await executor
@@ -76,7 +76,7 @@ async function ensureFavoritesForIdentityInTransaction(
 	});
 	await tx.insert(creditAttribution).values({
 		sourceUnitId: created.id,
-		creditedUnitId: identity.profileId,
+		creditedEntityId: identity.profileId,
 		role: "publisher",
 		position: "a0",
 		createdAt: identity.createdAt,

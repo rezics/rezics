@@ -1,14 +1,14 @@
 import {
+	type AvatarType,
 	AvatarTypeValues,
 	FontAwesomeIconNamePatternSource,
-	FontAwesomeIconPrefixValues,
-	type AvatarType,
 	type FontAwesomeIconPrefix,
+	FontAwesomeIconPrefixValues,
 } from "@rezics/avatar";
 import {
-	LicenseRecognitionStatusValues,
 	type LicenseId,
 	type LicenseRecognitionStatus,
+	LicenseRecognitionStatusValues,
 } from "@rezics/license";
 import { inArray, sql } from "drizzle-orm";
 import {
@@ -27,6 +27,16 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
+import {
+	createCreatedAtColumn,
+	createFractionalIndexPositionByteLengthConstraint,
+	createJsonDocumentColumn,
+	createTimestampMsColumn,
+	createUpdatedAtColumn,
+	createUuidv7PrimaryKey,
+	fractionalIndexPosition,
+} from "./columns";
 import {
 	AiDisclosureValues,
 	AliasKindValues,
@@ -37,26 +47,16 @@ import {
 	ModerationStatusValues,
 	ResourceVisibilityValues,
 	toEnumValues,
-	type UnitReferenceCurationKind,
-	UnitReferenceCurationKindValues,
 	type UnitKind,
 	UnitKindValues,
+	type UnitReferenceCurationKind,
+	UnitReferenceCurationKindValues,
 	UnitStatusValues,
 	type VariantCapableUnitKind,
 } from "./contract-values";
-import {
-	createCreatedAtColumn,
-	createFractionalIndexPositionByteLengthConstraint,
-	createJsonDocumentColumn,
-	createTimestampMsColumn,
-	createUpdatedAtColumn,
-	createUuidv7PrimaryKey,
-	fractionalIndexPosition,
-} from "./columns";
 import { entity } from "./entity";
 import { imageAsset } from "./image";
 import { CanonicalPgroongaIndexes } from "./pgroonga";
-import { profile } from "./profile";
 
 const PgroongaMetadataLargeOptions = {
 	lexicon_flags_mapping: `'{"current_search_metadata_v1":["LARGE"]}'`,
@@ -285,7 +285,7 @@ export const unitAlias = pgTable(
 		normalizedTerm: text().notNull(),
 		language: text().$type<ContentLanguage>(),
 		kind: aliasKind().default("common").notNull(),
-		createdByProfileId: uuid().references((): AnyPgColumn => profile.id, {
+		createdByProfileId: uuid().references((): AnyPgColumn => entityIdentity.id, {
 			onDelete: "set null",
 		}),
 		withdrawnAt: createTimestampMsColumn(),
@@ -339,7 +339,7 @@ export const unitAliasVote = pgTable(
 			.references(() => unitAlias.id, { onDelete: "cascade" }),
 		profileId: uuid()
 			.notNull()
-			.references((): AnyPgColumn => profile.id, { onDelete: "cascade" }),
+			.references((): AnyPgColumn => entityIdentity.id, { onDelete: "cascade" }),
 		value: integer().$type<-1 | 1>().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -416,12 +416,12 @@ export const unitLicenseGrant = pgTable(
 		foreignKey({
 			name: "unit_license_grant_granted_by_profile_id_profile_id_fkey",
 			columns: [table.grantedByProfileId],
-			foreignColumns: [profile.id],
+			foreignColumns: [entityIdentity.id],
 		}).onDelete("restrict"),
 		foreignKey({
 			name: "unit_license_grant_offering_ended_by_profile_id_profile_id_fkey",
 			columns: [table.offeringEndedByProfileId],
-			foreignColumns: [profile.id],
+			foreignColumns: [entityIdentity.id],
 		}).onDelete("restrict"),
 		uniqueIndex("unit_license_grant_open_unit_license_key")
 			.on(table.unitId, table.licenseId)
@@ -458,7 +458,7 @@ export const unitExternalLink = pgTable(
 		url: text().notNull(),
 		normalizedUrl: text().notNull(),
 		normalizedUrlHash: text().notNull(),
-		createdByProfileId: uuid().references((): AnyPgColumn => profile.id, {
+		createdByProfileId: uuid().references((): AnyPgColumn => entityIdentity.id, {
 			onDelete: "set null",
 		}),
 		withdrawnAt: createTimestampMsColumn(),
@@ -510,7 +510,7 @@ export const unitExternalLinkVote = pgTable(
 			.references(() => unitExternalLink.id, { onDelete: "cascade" }),
 		profileId: uuid()
 			.notNull()
-			.references((): AnyPgColumn => profile.id, { onDelete: "cascade" }),
+			.references((): AnyPgColumn => entityIdentity.id, { onDelete: "cascade" }),
 		value: integer().$type<-1 | 1>().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),

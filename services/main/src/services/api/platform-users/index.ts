@@ -1,8 +1,8 @@
-import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
+import { StatusCodes } from "http-status-codes";
 
-import sessionContext from "../../auth/session";
 import { InteractiveSessionRequired } from "../../auth/errors";
+import sessionContext from "../../auth/session";
 import {
 	getPlatformUser,
 	listPlatformUsers,
@@ -17,9 +17,9 @@ import {
 	PlatformUserListResponse,
 	PlatformUserParams,
 	PlatformUserResponse,
-	PlatformUsersQuery,
 	PlatformUserSessionListResponse,
 	PlatformUserSessionParams,
+	PlatformUsersQuery,
 	ReplacePlatformUserAccountStateBody,
 	SessionRevocationResponse,
 } from "./schema";
@@ -107,10 +107,10 @@ export default new Elysia({ prefix: "/platform-users" })
 			},
 			detail: { summary: "Replace a platform user account state", tags: ["Platform Users"] },
 		},
-		async ({ authorization, profile, user, params, body }) => {
+		async ({ authorization, entity, user, params, body }) => {
 			await authorization.platform.ensureCapability("platform.user.status.update");
 			return replacePlatformUserAccountState({
-				actorProfileId: profile.unitId,
+				actorProfileId: entity.id,
 				actorUserId: user.id,
 				targetUserId: params.userId,
 				command: body,
@@ -151,10 +151,10 @@ export default new Elysia({ prefix: "/platform-users" })
 			},
 			detail: { summary: "Revoke a platform user session", tags: ["Platform Users"] },
 		},
-		async ({ authorization, profile, params }) => {
+		async ({ authorization, entity, params }) => {
 			await authorization.platform.ensureCapability("platform.session.revoke");
 			return revokePlatformUserSession({
-				actorProfileId: profile.unitId,
+				actorProfileId: entity.id,
 				targetUserId: params.userId,
 				sessionId: params.sessionId,
 			});
@@ -173,10 +173,10 @@ export default new Elysia({ prefix: "/platform-users" })
 			},
 			detail: { summary: "Revoke all platform user sessions", tags: ["Platform Users"] },
 		},
-		async ({ authorization, profile, params }) => {
+		async ({ authorization, entity, params }) => {
 			await authorization.platform.ensureCapability("platform.session.revoke");
 			return revokeAllPlatformUserSessions({
-				actorProfileId: profile.unitId,
+				actorProfileId: entity.id,
 				targetUserId: params.userId,
 			});
 		},

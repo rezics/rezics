@@ -10,7 +10,6 @@ import {
 } from "../database/schema/contract-values";
 import { UnitNotFound } from "./errors";
 import { localizationLanguageOrder, resolvedUnitLocalizationTitle } from "./localization";
-import { presentImageAsset } from "./service";
 import {
 	classifyPublicUnitSeoIndexing,
 	isPublicUnitSeoKind,
@@ -18,6 +17,7 @@ import {
 	type PublicUnitSeoIndexing,
 	type PublicUnitSeoKind,
 } from "./seo-contract";
+import { presentImageAsset } from "./service";
 
 export type PublicUnitSeoImageRole = "avatar" | "banner" | "cover";
 
@@ -133,7 +133,7 @@ async function getPublicUnitSeoContext(
 		const [row] = await database
 			.select({
 				attributionTitle: resolvedUnitLocalizationTitle(
-					creditAttribution.creditedUnitId,
+					creditAttribution.creditedEntityId,
 					localizationLanguages,
 				),
 			})

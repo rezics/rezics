@@ -14,15 +14,17 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 
+import { users } from "./auth";
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import {
-	realm,
-	realmRule,
-	realmRuleRevision,
-	realmUnit,
-	realmUnitPublicationState,
-	realmUnitStatus,
-} from "./realm";
+	createCreatedAtColumn,
+	createJsonObjectColumn,
+	createJsonObjectConstraint,
+	createTimestampMsColumn,
+	createUpdatedAtColumn,
+	createUuidv7PrimaryKey,
+} from "./columns";
 import {
 	AccountEnforcementActionKindValues,
 	ActiveContentReviewCaseStateValues,
@@ -36,21 +38,18 @@ import {
 	GovernanceNoteSubjectKindValues,
 	toEnumValues,
 } from "./contract-values";
-import {
-	createCreatedAtColumn,
-	createJsonObjectColumn,
-	createJsonObjectConstraint,
-	createTimestampMsColumn,
-	createUpdatedAtColumn,
-	createUuidv7PrimaryKey,
-} from "./columns";
-import { profile } from "./profile";
-import { unit } from "./unit";
-import { unitLicenseGrant, unitLicenseRecognitionStatus } from "./unit";
 import { unitRevision } from "./history";
 import { post } from "./post";
+import {
+	realm,
+	realmRule,
+	realmRuleRevision,
+	realmUnit,
+	realmUnitPublicationState,
+	realmUnitStatus,
+} from "./realm";
+import { unit, unitLicenseGrant, unitLicenseRecognitionStatus } from "./unit";
 import { zone } from "./zone";
-import { users } from "./auth";
 
 export const governanceAuthorityKind = pgEnum(
 	"governance_authority_kind",
@@ -91,7 +90,7 @@ export const auditEventCategory = pgEnum("audit_event_category", [
 	"system_event",
 ]);
 export const auditEventOutcome = pgEnum("audit_event_outcome", ["succeeded", "denied", "failed"]);
-export const auditActorKind = pgEnum("audit_actor_kind", ["profile", "system"]);
+export const auditActorKind = pgEnum("audit_actor_kind", ["profile", "auth", "system"]);
 export const auditCredentialKind = pgEnum("audit_credential_kind", [
 	"session",
 	"api_token",
@@ -120,7 +119,7 @@ export const governanceDecision = pgTable(
 		basisKind: governanceDecisionBasisKind().notNull(),
 		actorProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		authorityKind: governanceAuthorityKind().notNull(),
 		authorityRealmId: uuid().references(() => realm.id, { onDelete: "restrict" }),
 		authorityZoneId: uuid().references(() => zone.id, { onDelete: "restrict" }),
@@ -260,7 +259,7 @@ export const contentReviewCase = pgTable(
 		targetUnitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
-		assignedProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
+		assignedProfileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
 		duplicateOfCaseId: uuid(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -348,7 +347,7 @@ export const contentReport = pgTable(
 		id: createUuidv7PrimaryKey(),
 		reporterProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		contextRealmId: uuid().references(() => realm.id, { onDelete: "restrict" }),
 		targetUnitId: uuid()
 			.notNull()
@@ -491,7 +490,7 @@ export const contentGovernanceAction = pgTable(
 			.references(() => contentReviewCase.id, { onDelete: "restrict" }),
 		actorProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		kind: contentGovernanceActionKind().notNull(),
 		resultingPostTargetingLocked: boolean(),
 		licenseGrantId: uuid(),
@@ -629,7 +628,7 @@ export const realmUnitStatusEvent = pgTable(
 			.references(() => unit.id, { onDelete: "restrict" }),
 		fromStatus: realmUnitStatus(),
 		toStatus: realmUnitStatus().notNull(),
-		changedByProfileId: uuid().references(() => profile.id, {
+		changedByProfileId: uuid().references(() => entityIdentity.id, {
 			onDelete: "set null",
 		}),
 		contentGovernanceActionId: uuid(),
@@ -672,7 +671,7 @@ export const realmUnitPublicationEvent = pgTable(
 		unitId: uuid().notNull(),
 		fromState: realmUnitPublicationState("from_state"),
 		toState: realmUnitPublicationState("to_state").notNull(),
-		changedByProfileId: uuid().references(() => profile.id, {
+		changedByProfileId: uuid().references(() => entityIdentity.id, {
 			onDelete: "set null",
 		}),
 		createdAt: createCreatedAtColumn(),
@@ -723,12 +722,12 @@ export const accountEnforcementAction = pgTable(
 	{
 		id: createUuidv7PrimaryKey(),
 		decisionId: uuid().references(() => governanceDecision.id, { onDelete: "restrict" }),
-		actorProfileId: uuid()
+		actorAuthUserId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
-		targetProfileId: uuid()
+			.references(() => users.id, { onDelete: "restrict" }),
+		targetAuthUserId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => users.id, { onDelete: "restrict" }),
 		kind: accountEnforcementActionKind().notNull(),
 		enforcementKind: enforcementKind().notNull(),
 		reversesActionId: uuid(),
@@ -748,12 +747,12 @@ export const accountEnforcementAction = pgTable(
 			.on(table.decisionId)
 			.where(sql`${table.decisionId} is not null`),
 		index("account_enforcement_action_target_created_idx").on(
-			table.targetProfileId,
+			table.targetAuthUserId,
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
 		index("account_enforcement_action_actor_created_idx").on(
-			table.actorProfileId,
+			table.actorAuthUserId,
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
@@ -772,9 +771,9 @@ export const accountEnforcement = pgTable(
 	"account_enforcement",
 	{
 		id: createUuidv7PrimaryKey(),
-		profileId: uuid()
+		authUserId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		kind: enforcementKind().notNull(),
 		startsAt: createTimestampMsColumn().defaultNow().notNull(),
 		expiresAt: createTimestampMsColumn(),
@@ -792,8 +791,8 @@ export const accountEnforcement = pgTable(
 		uniqueIndex("account_enforcement_revocation_action_key")
 			.on(table.revocationActionId)
 			.where(sql`${table.revocationActionId} is not null`),
-		index("account_enforcement_profile_kind_expiry_idx").on(
-			table.profileId,
+		index("account_enforcement_auth_user_kind_expiry_idx").on(
+			table.authUserId,
 			table.kind,
 			table.expiresAt,
 		),
@@ -816,7 +815,8 @@ export const auditEvent = pgTable(
 		category: auditEventCategory().notNull(),
 		outcome: auditEventOutcome().notNull(),
 		actorKind: auditActorKind().notNull(),
-		actorProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		actorProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
+		actorAuthUserId: uuid().references(() => users.id, { onDelete: "restrict" }),
 		actorCredentialKind: auditCredentialKind().notNull(),
 		actorCredentialId: text(),
 		authorityKind: auditAuthorityKind().notNull(),
@@ -869,7 +869,7 @@ export const auditEvent = pgTable(
 		),
 		check(
 			"audit_event_actor_check",
-			sql`(${table.actorKind} = 'profile'::audit_actor_kind) = (${table.actorProfileId} is not null)`,
+			sql`((${table.actorKind} = 'profile'::audit_actor_kind) = (${table.actorProfileId} is not null)) and (${table.actorKind} <> 'auth'::audit_actor_kind or ${table.actorAuthUserId} is not null)`,
 		),
 		check(
 			"audit_event_authority_check",

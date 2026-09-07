@@ -1,27 +1,26 @@
-import { StatusCodes } from "http-status-codes";
 import { createPollContentBlock, parseDocument, PollContentBlock } from "@rezics/block";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
-import { resolvedUnitLocalizationLanguage } from "../../units/localization";
 import {
+	poll,
 	pollOption,
 	pollOptionVoteStat,
-	poll,
 	pollVote,
-	unitOwnership,
-	unitLocalization,
 	unit,
+	unitLocalization,
+	unitOwnership,
 } from "../../database/schema";
+import { insertUnit } from "../../units/create";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
-import { insertUnit } from "../../units/create";
-import { ClosePollBody, CreatePollBody, PollDetailQuery, PollParams, VotePollBody } from "./schema";
-import { toApiErrorResponse, PollDetailResponse } from "../schema/response";
+import { resolvedUnitLocalizationLanguage } from "../../units/localization";
 import { IdResponse, PollVoteResponse } from "../schema/action-response";
+import { PollDetailResponse, toApiErrorResponse } from "../schema/response";
 import {
 	PollAlreadyClosed,
 	PollClosed,
@@ -30,6 +29,7 @@ import {
 	PollOptionsDuplicated,
 	PollSingleChoiceInvalid,
 } from "./errors";
+import { ClosePollBody, CreatePollBody, PollDetailQuery, PollParams, VotePollBody } from "./schema";
 
 export default new Elysia({ prefix: "/polls" })
 	.use(session)
@@ -49,7 +49,7 @@ export default new Elysia({ prefix: "/polls" })
 			},
 			detail: { summary: "Create poll", tags: ["Polls"] },
 		},
-		async ({ profile, authorization, body }) => {
+		async ({ entity, authorization, body }) => {
 			const optionKeys = body.options.map((option) =>
 				option.sourceKind === "unit"
 					? `unit:${option.targetUnitId}`
@@ -70,7 +70,7 @@ export default new Elysia({ prefix: "/polls" })
 					status: "published",
 					visibility: "public",
 					publishedAt: new Date(),
-					statusActor: { kind: "profile", profileId: profile.unitId },
+					statusActor: { kind: "profile", profileId: entity.id },
 				});
 				await tx.insert(poll).values({
 					id: pollUnit.id,
@@ -105,12 +105,12 @@ export default new Elysia({ prefix: "/polls" })
 				});
 				await tx.insert(unitOwnership).values({
 					unitId: pollUnit.id,
-					profileId: profile.unitId,
-					assignedByProfileId: profile.unitId,
+					profileId: entity.id,
+					assignedByProfileId: entity.id,
 				});
 				await recordUnitRevision(tx, {
 					unitId: pollUnit.id,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					event: "create",
 				});
@@ -164,13 +164,13 @@ export default new Elysia({ prefix: "/polls" })
 			const labelByOptionId = new Map(
 				content.options.map((option) => [option.optionId, option.label]),
 			);
-			const { profile: viewer, authorization } = await resolveIdentity(request, "unit:read");
+			const { entity: viewer, authorization } = await resolveIdentity(request, "unit:read");
 			await authorization.unit.ensureCanRead(params.pollId, () => new UnitNotFound("Poll"));
 			const viewerVotes = viewer
 				? await database
 						.select({ optionId: pollVote.optionId })
 						.from(pollVote)
-						.where(and(eq(pollVote.pollId, params.pollId), eq(pollVote.profileId, viewer.unitId)))
+						.where(and(eq(pollVote.pollId, params.pollId), eq(pollVote.profileId, viewer.id)))
 				: [];
 			const closed = Boolean(
 				pollRecord.closedAt || (pollRecord.closesAt && pollRecord.closesAt <= new Date()),
@@ -235,7 +235,7 @@ export default new Elysia({ prefix: "/polls" })
 			},
 			detail: { summary: "Replace poll vote", tags: ["Polls"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensureCanRead(params.pollId, () => new UnitNotFound("Poll"));
 			await authorization.realm.ensureParticipation(body.realmId);
 			await database.transaction(async (tx) => {
@@ -259,12 +259,12 @@ export default new Elysia({ prefix: "/polls" })
 				if (valid.length !== new Set(body.optionIds).size) throw new PollOptionInvalid();
 				await tx
 					.delete(pollVote)
-					.where(and(eq(pollVote.pollId, params.pollId), eq(pollVote.profileId, profile.unitId)));
+					.where(and(eq(pollVote.pollId, params.pollId), eq(pollVote.profileId, entity.id)));
 				await tx.insert(pollVote).values(
 					body.optionIds.map((optionId) => ({
 						pollId: params.pollId,
 						optionId,
-						profileId: profile.unitId,
+						profileId: entity.id,
 						realmId: body.realmId,
 					})),
 				);
@@ -284,7 +284,7 @@ export default new Elysia({ prefix: "/polls" })
 			},
 			detail: { summary: "Withdraw poll vote", tags: ["Polls"] },
 		},
-		async ({ params, profile, authorization }) => {
+		async ({ params, entity, authorization }) => {
 			await authorization.unit.ensureCanRead(params.pollId, () => new UnitNotFound("Poll"));
 			await database.transaction(async (tx) => {
 				await tx.execute(
@@ -300,7 +300,7 @@ export default new Elysia({ prefix: "/polls" })
 					throw new PollClosed();
 				await tx
 					.delete(pollVote)
-					.where(and(eq(pollVote.pollId, params.pollId), eq(pollVote.profileId, profile.unitId)));
+					.where(and(eq(pollVote.pollId, params.pollId), eq(pollVote.profileId, entity.id)));
 			});
 			return { optionIds: [] };
 		},
@@ -323,7 +323,7 @@ export default new Elysia({ prefix: "/polls" })
 			},
 			detail: { summary: "Close poll", tags: ["Polls"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.pollId, [["poll", "closed-at"]]);
 			await database.transaction(async (tx) => {
 				await tx.execute(
@@ -337,7 +337,7 @@ export default new Elysia({ prefix: "/polls" })
 				if (!updated) throw new PollAlreadyClosed();
 				await recordUnitRevision(tx, {
 					unitId: params.pollId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					contribution: body?.revisionContext?.contribution,
 					event: "update",
 				});

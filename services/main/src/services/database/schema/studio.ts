@@ -3,8 +3,8 @@ import { check, index, primaryKey, uuid } from "drizzle-orm/pg-core";
 
 import { realmAccessSubjectRelation } from "./access";
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import { createTimestampMsColumn, createUpdatedAtColumn } from "./columns";
-import { profile } from "./profile";
 import { realm } from "./realm";
 import { unit } from "./unit";
 
@@ -20,7 +20,7 @@ export const studioProfileEditorCandidate = pgTable(
 	{
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
@@ -122,7 +122,7 @@ export const studioResourceVisit = pgTable(
 	{
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
 		resourceUnitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),

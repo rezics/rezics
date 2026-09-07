@@ -1,12 +1,17 @@
 import { inArray } from "drizzle-orm";
 
 import { database, type DatabaseExecutor } from "../database";
-import { accounts, unit, users } from "../database/schema";
-import { BootstrapAccountIds, BootstrapAuthUserIds, BootstrapUnitIds } from "./data";
+import { accounts, entityIdentity, unit, users } from "../database/schema";
+import {
+	BootstrapAccountIds,
+	BootstrapAuthUserIds,
+	BootstrapEntityIds,
+	BootstrapUnitIds,
+} from "./data";
 
 export const PlatformInstallationLockName = "rezics-platform-installation";
 
-export type PlatformCoreIdentityKind = "unit" | "auth_user" | "account";
+export type PlatformCoreIdentityKind = "unit" | "entity" | "auth_user" | "account";
 
 export interface PlatformCoreIdentity {
 	readonly kind: PlatformCoreIdentityKind;
@@ -14,6 +19,7 @@ export interface PlatformCoreIdentity {
 }
 
 const PlatformCoreIdentities: readonly PlatformCoreIdentity[] = [
+	...BootstrapEntityIds.map((id) => ({ kind: "entity" as const, id })),
 	...BootstrapUnitIds.map((id) => ({ kind: "unit" as const, id })),
 	...BootstrapAuthUserIds.map((id) => ({ kind: "auth_user" as const, id })),
 	...BootstrapAccountIds.map((id) => ({ kind: "account" as const, id })),
@@ -66,6 +72,10 @@ export async function inspectPlatformCore(
 		.select({ id: unit.id })
 		.from(unit)
 		.where(inArray(unit.id, [...BootstrapUnitIds]));
+	const storedEntities = await executor
+		.select({ id: entityIdentity.id })
+		.from(entityIdentity)
+		.where(inArray(entityIdentity.id, BootstrapEntityIds));
 	const storedUsers = await executor
 		.select({ id: users.id })
 		.from(users)
@@ -75,6 +85,7 @@ export async function inspectPlatformCore(
 		.from(accounts)
 		.where(inArray(accounts.id, BootstrapAccountIds));
 	const presentIdentityIds = new Set([
+		...storedEntities.map(({ id }) => id),
 		...storedUnits.map(({ id }) => id),
 		...storedUsers.map(({ id }) => id),
 		...storedAccounts.map(({ id }) => id),

@@ -1,11 +1,17 @@
-import { and, desc, eq, gt, ne, or } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
+import { and, desc, eq, gt, ne, or } from "drizzle-orm";
+import { selfAuthUserIdForEntity } from "../participation/account-query";
 
 import type { UnitAuthorization } from "../authorization/unit/authorization";
 import { getUnitReadCondition } from "../authorization/unit/query";
+import {
+	DefaultContentRatingPolicy,
+	getContentRatingCondition,
+	type ContentRatingPolicy,
+} from "../content-rating/policy";
 import { database } from "../database";
 import {
-	profileBlock,
+	accountEntityBlock,
 	profileRealmTagSubscription,
 	unit,
 	unitFollow,
@@ -16,11 +22,9 @@ import type {
 	NonRealmFollowableUnitKind,
 	UnitKind,
 } from "../database/schema/contract-values";
-import {
-	DefaultContentRatingPolicy,
-	getContentRatingCondition,
-	type ContentRatingPolicy,
-} from "../content-rating/policy";
+import { createNotification } from "../notifications/service";
+import { acknowledgeCurrentRealmRulesOnFollow } from "../realms/service";
+import { presentAvatar } from "../units/avatar";
 import { UnitNotFound } from "../units/errors";
 import {
 	resolvedUnitLocalizationAvatar,
@@ -28,11 +32,8 @@ import {
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
-import { presentAvatar } from "../units/avatar";
 import { presentImageAsset } from "../units/service";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
-import { acknowledgeCurrentRealmRulesOnFollow } from "../realms/service";
-import { createNotification } from "../notifications/service";
 import {
 	decodeFollowingCursor,
 	encodeFollowingCursor,
@@ -178,19 +179,22 @@ export async function followUnit(input: {
 	if (target.id === input.followerProfileId) throw new UserSelfFollowForbidden();
 
 	await database.transaction(async (tx) => {
-		if (target.kind === "profile") {
+		if (target.kind === "entity") {
 			const [blocked] = await tx
-				.select({ id: profileBlock.blockedProfileId })
-				.from(profileBlock)
+				.select({ id: accountEntityBlock.blockedEntityId })
+				.from(accountEntityBlock)
 				.where(
 					or(
 						and(
-							eq(profileBlock.blockerProfileId, input.followerProfileId),
-							eq(profileBlock.blockedProfileId, target.id),
+							eq(
+								accountEntityBlock.blockerAuthUserId,
+								selfAuthUserIdForEntity(input.followerProfileId),
+							),
+							eq(accountEntityBlock.blockedEntityId, target.id),
 						),
 						and(
-							eq(profileBlock.blockerProfileId, target.id),
-							eq(profileBlock.blockedProfileId, input.followerProfileId),
+							eq(accountEntityBlock.blockerAuthUserId, selfAuthUserIdForEntity(target.id)),
+							eq(accountEntityBlock.blockedEntityId, input.followerProfileId),
 						),
 					),
 				)
@@ -203,10 +207,10 @@ export async function followUnit(input: {
 			.values({ followerProfileId: input.followerProfileId, unitId: target.id })
 			.onConflictDoNothing()
 			.returning({ unitId: unitFollow.unitId });
-		if (created && target.kind === "profile")
+		if (created && target.kind === "entity")
 			await createNotification(tx, {
 				kind: "new_follower",
-				recipientProfileId: target.id,
+				recipientEntityId: target.id,
 				actorProfileId: input.followerProfileId,
 				dedupeKey: `new-follower:${input.followerProfileId}:${target.id}`,
 			});

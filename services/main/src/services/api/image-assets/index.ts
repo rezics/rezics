@@ -1,16 +1,9 @@
-import { StatusCodes } from "http-status-codes";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
 
 import session from "../../auth/session";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
-import {
-	completeImageAsset,
-	createImageAsset,
-	deletePendingImageAsset,
-	getOwnedImageAsset,
-	upsertImageAssetPresentation,
-} from "./service";
 import {
 	CompleteImageAssetBody,
 	CreateImageAssetBody,
@@ -21,6 +14,13 @@ import {
 	ImageAssetResponse,
 	UpsertImageAssetPresentationBody,
 } from "./schema";
+import {
+	completeImageAsset,
+	createImageAsset,
+	deletePendingImageAsset,
+	getOwnedImageAsset,
+	upsertImageAssetPresentation,
+} from "./service";
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -43,7 +43,7 @@ export default new Elysia({ prefix: "/image-assets" })
 			},
 			detail: { summary: "Create image asset upload", tags: ["Image Assets"] },
 		},
-		({ profile, body }) => createImageAsset(profile.unitId, body),
+		({ entity, body }) => createImageAsset(entity.id, body),
 	)
 	.post(
 		"/:id/complete",
@@ -63,7 +63,7 @@ export default new Elysia({ prefix: "/image-assets" })
 			},
 			detail: { summary: "Complete image asset upload", tags: ["Image Assets"] },
 		},
-		({ profile, params, body }) => completeImageAsset(profile.unitId, params.id, body),
+		({ entity, params, body }) => completeImageAsset(entity.id, params.id, body),
 	)
 	.put(
 		"/:id/presentations/:role",
@@ -80,8 +80,8 @@ export default new Elysia({ prefix: "/image-assets" })
 			},
 			detail: { summary: "Update image asset presentation", tags: ["Image Assets"] },
 		},
-		({ profile, params, body }) =>
-			upsertImageAssetPresentation(profile.unitId, params.id, params.role, body),
+		({ entity, params, body }) =>
+			upsertImageAssetPresentation(entity.id, params.id, params.role, body),
 	)
 	.get(
 		"/:id",
@@ -95,7 +95,7 @@ export default new Elysia({ prefix: "/image-assets" })
 			},
 			detail: { summary: "Get image asset", tags: ["Image Assets"] },
 		},
-		({ profile, params }) => getOwnedImageAsset(profile.unitId, params.id),
+		({ entity, params }) => getOwnedImageAsset(entity.id, params.id),
 	)
 	.delete(
 		"/:id",
@@ -114,8 +114,8 @@ export default new Elysia({ prefix: "/image-assets" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ profile, params, status }) => {
-			await deletePendingImageAsset(profile.unitId, params.id);
+		async ({ entity, params, status }) => {
+			await deletePendingImageAsset(entity.id, params.id);
 			return status(StatusCodes.NO_CONTENT, undefined);
 		},
 	);

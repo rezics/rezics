@@ -1,71 +1,73 @@
-import { createHash } from "node:crypto";
 import { ContentLanguageRegistryPolicy } from "@rezics/content-language";
+import { createHash } from "node:crypto";
 
-import { and, eq, exists, inArray, isNull, sql, type SQL } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
 import {
+	canonicalUnitPredicate,
 	readUnitLanguageBoundary,
+	SearchFieldValues,
 	type SearchControlPredicate,
 	type SearchField,
-	SearchFieldValues,
-	type SearchScalarField,
 	type SearchScalar,
+	type SearchScalarField,
 } from "@rezics/filter";
-import { canonicalUnitPredicate } from "@rezics/filter";
 import { isContentLanguage, type ContentLanguage } from "@rezics/i18n";
 import { isLicenseId } from "@rezics/license";
 import { getActiveObservability } from "@rezics/observability";
+import { and, eq, exists, inArray, isNull, sql, type SQL } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 import { getUnitReadCondition } from "../authorization/unit/query";
+import { env } from "../config";
 import {
+	contentRatingPolicyKey,
 	DefaultContentRatingPolicy,
 	getContentRatingCondition,
-	contentRatingPolicyKey,
 } from "../content-rating/policy";
+import type { SearchCountResult } from "../counts/contract";
 import { database } from "../database";
 import {
 	book,
-	unitEffectiveTag,
 	collection,
 	collectionItem,
-	unitLicenseGrant,
-	creditAttribution,
 	contentStructure,
 	contentStructureNode,
+	creditAttribution,
 	entity,
 	media,
 	poll,
 	post,
 	postReply,
 	postReplyStat,
-	tagPublicPositionStat,
-	unitFollowStat,
 	realm,
 	realmTagContext,
 	realmTagJudgmentStat,
 	realmUnit,
+	recommendationSnapshot,
 	software,
 	softwareRequirement,
-	recommendationSnapshot,
-	unitBestScore,
-	unitSearchDocument,
+	tagPublicPositionStat,
 	unit,
-	unitOwnership,
+	unitBestScore,
+	unitEffectiveTag,
+	unitFollowStat,
+	UnitKindValues,
+	unitLicenseGrant,
 	unitLocalization,
+	unitOwnership,
+	unitSearchDocument,
 	unitVariant,
 	type UnitKind,
-	UnitKindValues,
 } from "../database/schema";
-import { env } from "../config";
+import { compileUnitPredicateCandidateSet, compileUnitPredicateSql } from "../filter/sql";
 import { WorkPolicy } from "../performance/policy";
-import type { SearchCountResult } from "../counts/contract";
 import {
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
-import { InvalidSearch } from "./errors";
+import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import { CurrentSearchUnitKindsByCategory } from "./contracts";
+import { InvalidSearch } from "./errors";
 import {
 	getCurrentSearchFieldDefinition,
 	resolveCurrentSearchFilterDefinition,
@@ -81,9 +83,10 @@ import {
 	readSearchExpressionLanguageBoundary,
 	SearchCursorVersion,
 	type GroupedSearchCursorToken,
-	type SearchKeysetPosition,
 	type SearchExpression,
+	type SearchKeysetPosition,
 } from "./query";
+import { expandSearchQuery, type ExpandedSearchQuery } from "./query-expansion";
 import {
 	SearchFieldByDomainRequestFilter,
 	type DomainSearchRequest,
@@ -91,9 +94,6 @@ import {
 	type SearchHit,
 	type SearchSort,
 } from "./schema";
-import { expandSearchQuery, type ExpandedSearchQuery } from "./query-expansion";
-import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
-import { compileUnitPredicateCandidateSet, compileUnitPredicateSql } from "../filter/sql";
 import { boundedSearchStatementTimeout } from "./statement-timeout";
 
 const subjectUnit = alias(unit, "subject_unit");
@@ -150,9 +150,9 @@ function validateRequest(category: SearchCategory, request: DomainSearchRequest)
 		],
 		["licenses", SearchFieldByDomainRequestFilter.license, Boolean(request.licenses?.length)],
 		[
-			"creditedUnitId",
-			SearchFieldByDomainRequestFilter.creditedUnitId,
-			Boolean(request.creditedUnitId),
+			"creditedEntityId",
+			SearchFieldByDomainRequestFilter.creditedEntityId,
+			Boolean(request.creditedEntityId),
 		],
 		["realmId", SearchFieldByDomainRequestFilter.realmId, Boolean(request.realmId)],
 		[
@@ -532,20 +532,20 @@ function compileFilter(
 			: match;
 	}
 	if (filter.field === "credit") {
-		const creditedUnits = sql`array(
-			select distinct ${creditAttribution.creditedUnitId}
+		const creditedEntitys = sql`array(
+			select distinct ${creditAttribution.creditedEntityId}
 			from ${creditAttribution}
 			where ${creditAttribution.sourceUnitId} = ${unit.id}
 		)`;
 		if (filter.operator === "exists")
 			return filter.value
-				? sql`cardinality(${creditedUnits}) > 0`
-				: sql`cardinality(${creditedUnits}) = 0`;
+				? sql`cardinality(${creditedEntitys}) > 0`
+				: sql`cardinality(${creditedEntitys}) = 0`;
 		const values = scalarStrings(searchFilterValues(filter), filter.field);
 		const match =
 			filter.operator === "all-of"
-				? sql`${creditedUnits} @> ${toUuidArray(values)}`
-				: sql`${creditedUnits} && ${toUuidArray(values)}`;
+				? sql`${creditedEntitys} @> ${toUuidArray(values)}`
+				: sql`${creditedEntitys} && ${toUuidArray(values)}`;
 		return filter.operator === "not-equals" || filter.operator === "none-of"
 			? sql`not (${match})`
 			: match;
@@ -554,10 +554,10 @@ function compileFilter(
 		const creditedProfiles = sql`array(
 			select resolved_credit.profile_id
 			from (
-				select direct_credit.credited_unit_id as profile_id
+				select direct_credit.credited_entity_id as profile_id
 				from public.credit_attribution as direct_credit
 				join public.unit as direct_profile
-					on direct_profile.id = direct_credit.credited_unit_id
+					on direct_profile.id = direct_credit.credited_entity_id
 					and direct_profile.kind = 'profile'
 					and direct_profile.status = 'published'
 					and direct_profile.visibility <> 'private'
@@ -565,10 +565,10 @@ function compileFilter(
 					and direct_profile.deleted_at is null
 				where direct_credit.source_unit_id = ${unit.id}
 				union
-				select entity_profile.credited_unit_id as profile_id
+				select entity_profile.credited_entity_id as profile_id
 				from public.credit_attribution as source_credit
 				join public.unit as credited_entity
-					on credited_entity.id = source_credit.credited_unit_id
+					on credited_entity.id = source_credit.credited_entity_id
 					and credited_entity.kind = 'entity'
 					and credited_entity.status = 'published'
 					and credited_entity.visibility <> 'private'
@@ -578,7 +578,7 @@ function compileFilter(
 					on entity_profile.source_unit_id = credited_entity.id
 					and entity_profile.role = 'publisher'
 				join public.unit as credited_profile
-					on credited_profile.id = entity_profile.credited_unit_id
+					on credited_profile.id = entity_profile.credited_entity_id
 					and credited_profile.kind = 'profile'
 					and credited_profile.status = 'published'
 					and credited_profile.visibility <> 'private'
@@ -1001,7 +1001,7 @@ function buildEffectiveSearchExpression(
 	addValues(SearchFieldByDomainRequestFilter.contentRating, request.contentRatings);
 	addValues(SearchFieldByDomainRequestFilter.aiDisclosure, request.aiDisclosures);
 	addValues(SearchFieldByDomainRequestFilter.license, request.licenses);
-	addValue(SearchFieldByDomainRequestFilter.creditedUnitId, request.creditedUnitId);
+	addValue(SearchFieldByDomainRequestFilter.creditedEntityId, request.creditedEntityId);
 	addValue(SearchFieldByDomainRequestFilter.realmId, request.realmId);
 	addValue(SearchFieldByDomainRequestFilter.realmTagContextRealmId, request.realmTagContextRealmId);
 	addValue(SearchFieldByDomainRequestFilter.subjectId, request.subjectId);
@@ -2651,7 +2651,7 @@ function facetSpec(
 		};
 	if (field === "credit")
 		return {
-			value: sql`${facetCreditAttribution.creditedUnitId}`,
+			value: sql`${facetCreditAttribution.creditedEntityId}`,
 			join: sql`join ${creditAttribution} as ${facetCreditAttribution}
 				on ${facetCreditAttribution.sourceUnitId} = ${unit.id}`,
 		};

@@ -6,7 +6,6 @@ import type { UnitKind } from "../database/schema/contract-values";
 /** Authoritative current Unit kinds addressable by each public Search category. */
 export const CurrentSearchUnitKindsByCategory = {
 	units: ["book", "software", "media", "series", "video", "audio", "release", "zone"],
-	users: ["profile"],
 	entities: ["entity"],
 	tags: ["tag"],
 	posts: ["post"],

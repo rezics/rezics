@@ -6,13 +6,15 @@ import { compareFractionalPositions, fractionalPositionAt } from "../ordering/po
 import { avatarReferenceToColumns } from "../units/localization";
 import {
 	BootstrapAccountIds,
+	BootstrapAccountManifest,
 	BootstrapAuthUserIds,
-	ContentLabelRegistryManifest,
 	BootstrapPlatformAccessManifest,
+	BootstrapPlatformAdministratorProfile,
 	BootstrapProfileIdValues,
 	BootstrapProfileManifest,
 	BootstrapRealmManifest,
 	BootstrapUnitIds,
+	ContentLabelRegistryManifest,
 	CuratedCreationTagCollectionManifest,
 	OfficialProfileIds,
 	OfficialRealmAvatarAsset,
@@ -31,11 +33,6 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 			targetUnitId: namespace.id,
 			scopeUnitId: null,
 			slug: namespace.slug,
-		})),
-		...BootstrapProfileManifest.map((bootstrapProfile) => ({
-			targetUnitId: bootstrapProfile.profileId,
-			scopeUnitId: TopLevelSlugNamespaceUnitIds.users,
-			slug: bootstrapProfile.slug,
 		})),
 		...ContentLabelRegistryManifest.map((label) => ({
 			targetUnitId: label.id,
@@ -59,14 +56,6 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 		})),
 	];
 	const expectedLocalizations = [
-		...BootstrapProfileManifest.flatMap((bootstrapProfile) =>
-			bootstrapProfile.localizations.map((localization, index) => ({
-				unitId: bootstrapProfile.profileId,
-				position: fractionalPositionAt(index),
-				summary: null,
-				...localization,
-			})),
-		),
 		...CuratedCreationTagCollectionManifest.flatMap((curatedCollection) =>
 			curatedCollection.localizations.map((localization, index) => ({
 				unitId: curatedCollection.id,
@@ -130,7 +119,9 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 		bootstrapUsers,
 		accountCount,
 		profileCount,
-		bootstrapProfileOwners,
+		bootstrapEntityControls,
+		bootstrapEntityPresentations,
+		bootstrapControlGrants,
 		curatedTagCollections,
 		curatedTagCollectionOwners,
 		curatedTagCollectionPublishers,
@@ -146,7 +137,7 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 		bootstrapProfiles,
 		profileFavorites,
 		profileScoreMemberships,
-		profilePreferences,
+		accountPreferences,
 		profileFollows,
 		firstOrdinaryFollowPositions,
 		localizations,
@@ -180,8 +171,31 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 		bootstrapUsers.every((user) => user.emailVerified) &&
 		accountCount[0]?.value === BootstrapAccountIds.length &&
 		profileCount[0]?.value === BootstrapProfileIdValues.length &&
-		bootstrapProfileOwners.length === BootstrapProfileIdValues.length &&
-		bootstrapProfileOwners.every((owner) => owner.profileId === owner.unitId) &&
+		bootstrapEntityControls.length === BootstrapProfileIdValues.length &&
+		bootstrapEntityControls.every((control) => control.state === "active") &&
+		BootstrapProfileManifest.every((entity) =>
+			entity.localizations.every((locale) =>
+				bootstrapEntityPresentations.some(
+					(presentation) =>
+						presentation.entityId === entity.profileId &&
+						presentation.language === locale.language &&
+						presentation.nameId !== null,
+				),
+			),
+		) &&
+		bootstrapControlGrants.length === (BootstrapProfileManifest.length - 1) * 3 &&
+		BootstrapProfileManifest.filter((entity) => entity.key !== "platformAdministrator").every(
+			(entity) =>
+				["entity.security", "entity.publish", "entity.membership"].every((capability) =>
+					bootstrapControlGrants.some(
+						(grant) =>
+							grant.actingEntityId === entity.profileId &&
+							grant.entityId === entity.profileId &&
+							grant.capability === capability &&
+							grant.authUserId === BootstrapPlatformAdministratorProfile.authUserId,
+					),
+				),
+		) &&
 		curatedTagCollections.length === CuratedCreationTagCollectionManifest.length &&
 		CuratedCreationTagCollectionManifest.every((expected) =>
 			curatedTagCollections.some((actual) => actual.id === expected.id),
@@ -198,7 +212,7 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 			curatedTagCollectionPublishers.some(
 				(actual) =>
 					actual.sourceUnitId === expected.id &&
-					actual.creditedUnitId === OfficialProfileIds.editorial &&
+					actual.creditedEntityId === OfficialProfileIds.editorial &&
 					actual.role === "publisher",
 			),
 		) &&
@@ -210,12 +224,12 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 			access.capabilities.every((capability) =>
 				bootstrapPlatformAccess.some(
 					(grant) =>
-						grant.profileId === access.profileId &&
+						grant.authUserId === access.authUserId &&
 						grant.capability === capability &&
-						grant.grantedByProfileId === access.grantedByProfileId &&
+						grant.grantedByAuthUserId === access.grantedByAuthUserId &&
 						grant.expiresAt === null &&
 						grant.revokedAt === null &&
-						grant.revokedByProfileId === null,
+						grant.revokedByAuthUserId === null,
 				),
 			),
 		) &&
@@ -277,7 +291,7 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 		bootstrapProfiles.every((targetProfile) =>
 			profileFavorites.some((favorites) => favorites.profileId === targetProfile.id),
 		) &&
-		BootstrapProfileManifest.every((expected) =>
+		BootstrapAccountManifest.every((expected) =>
 			profileFavorites.some(
 				(actual) =>
 					actual.profileId === expected.profileId && actual.id === expected.favoritesCollectionId,
@@ -287,9 +301,10 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 			profileScoreMemberships.some((membership) => membership.profileId === targetProfile.id),
 		) &&
 		bootstrapProfiles.every((targetProfile) =>
-			profilePreferences.some(
+			accountPreferences.some(
 				(preference) =>
-					preference.profileId === targetProfile.id && preference.defaultScoreRealmId !== null,
+					preference.authUserId === targetProfile.authUserId &&
+					preference.defaultScoreRealmId !== null,
 			),
 		) &&
 		bootstrapProfiles.every((targetProfile) => {

@@ -11,9 +11,9 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
+import { entityIdentity } from "./catalog-identity";
 import { collection } from "./collection";
-import { profile } from "./profile";
+import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
 import { revisionContent } from "./history";
 
 /** One immutable commit in a Collection Items structure's revision stream. */
@@ -27,7 +27,7 @@ export const collectionStructureRevision = pgTable(
 		contentId: uuid()
 			.notNull()
 			.references(() => revisionContent.id, { onDelete: "restrict" }),
-		actorProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		actorProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		/** @UNIT_LOCALIZATION_EXEMPT Authored point-in-time edit summary, never interface copy. */
 		editSummary: text(),
 		kind: text().$type<"create" | "update" | "restore">().notNull(),

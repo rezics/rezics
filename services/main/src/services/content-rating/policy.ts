@@ -1,10 +1,11 @@
 import { eq, sql, type SQL, type SQLWrapper } from "drizzle-orm";
+import { selfAuthUserIdForEntity } from "../participation/account-query";
 
 import { database } from "../database";
 import {
 	ContentRatingValues,
 	DefaultContentRatingValues,
-	profilePreference,
+	accountPreference,
 	unit,
 	type ContentRating,
 } from "../database/schema";
@@ -38,9 +39,9 @@ export async function resolveViewerContentRatings(
 ): Promise<AllowedContentRatings> {
 	if (!profileId) return [...DefaultContentRatingValues];
 	const [preference] = await database
-		.select({ contentRatings: profilePreference.contentRatings })
-		.from(profilePreference)
-		.where(eq(profilePreference.profileId, profileId))
+		.select({ contentRatings: accountPreference.contentRatings })
+		.from(accountPreference)
+		.where(eq(accountPreference.authUserId, selfAuthUserIdForEntity(profileId)))
 		.limit(1);
 	return contentRatingAllowlistFromStored(preference?.contentRatings);
 }

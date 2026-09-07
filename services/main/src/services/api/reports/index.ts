@@ -1,23 +1,21 @@
-import { StatusCodes } from "http-status-codes";
+import { OfficialRealmUnitIds } from "@rezics/slug";
 import { and, desc, eq, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia from "elysia";
-import { OfficialRealmUnitIds } from "@rezics/slug";
+import { StatusCodes } from "http-status-codes";
 
 import session from "../../auth/session";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
 import {
 	ActiveContentReviewCaseStateValues,
-	GovernanceMaxRuleSources,
-	ContentReviewReportCounterBuckets,
-	type ContentLanguage,
-	type ContentReviewCaseStateValues,
 	contentGovernanceAction,
 	contentReport,
 	contentReportReferral,
 	contentReportRule,
 	contentReviewCase,
 	contentReviewCaseReportCounter,
+	ContentReviewReportCounterBuckets,
+	GovernanceMaxRuleSources,
 	realm,
 	realmRule,
 	realmRuleRevision,
@@ -25,7 +23,10 @@ import {
 	unit,
 	unitLicenseGrant,
 	unitRevisionHead,
+	type ContentLanguage,
+	type ContentReviewCaseStateValues,
 } from "../../database/schema";
+import { currentRealmRuleRevisionReadLock } from "../../realms/rule-revision-lock";
 import { UnitNotFound } from "../../units/errors";
 import {
 	resolvedUnitLocalizationLanguage,
@@ -35,12 +36,12 @@ import {
 	getPublicCanonicalUnitSlugAddresses,
 	type PublicCanonicalUnitSlugAddress,
 } from "../../units/slug-address";
-import { currentRealmRuleRevisionReadLock } from "../../realms/rule-revision-lock";
 import {
 	getPlatformUnitModerationCommands,
 	isActiveContentReviewCaseState,
 } from "../governance/content-governance-contract";
 import { toApiErrorResponse } from "../schema/response";
+import { contentReviewCaseAdvisoryLock, contentReviewReporterAdvisoryLock } from "./advisory-lock";
 import {
 	ReportAlreadySubmitted,
 	ReportRealmMismatch,
@@ -49,7 +50,12 @@ import {
 	ReportRuleUnavailable,
 	ReportTargetRevisionUnavailable,
 } from "./errors";
-import { contentReviewCaseAdvisoryLock, contentReviewReporterAdvisoryLock } from "./advisory-lock";
+import {
+	decodeMyReportCursor,
+	encodeMyReportCursor,
+	toAggregateMyReportStatus,
+	toMyReportStatus,
+} from "./my-report";
 import {
 	CreateReportBody,
 	CreateReportQuery,
@@ -58,7 +64,6 @@ import {
 	ListRealmReportsQuery,
 	ListReviewCaseReportsQuery,
 	MyReportListResponse,
-	type MyReportResponse,
 	PlatformReportCaseListResponse,
 	ReportDestinationsQuery,
 	ReportDestinationsResponse,
@@ -67,13 +72,8 @@ import {
 	ReportResponse,
 	ReportUnitParams,
 	ReviewCaseParams,
+	type MyReportResponse,
 } from "./schema";
-import {
-	decodeMyReportCursor,
-	encodeMyReportCursor,
-	toAggregateMyReportStatus,
-	toMyReportStatus,
-} from "./my-report";
 
 type LocalizationLanguages = Parameters<typeof resolvedUnitLocalizationLanguage>[1];
 type ContentReviewCaseState = (typeof ContentReviewCaseStateValues)[number];
@@ -321,7 +321,7 @@ export default new Elysia().use(session).group("", (app) =>
 				},
 				detail: { summary: "List current user's content reports", tags: ["Reports"] },
 			},
-			async ({ profile, query }) => {
+			async ({ entity, query }) => {
 				const requestedReportId = query.reportId;
 				const limit = requestedReportId ? 1 : (query.limit ?? 30);
 				const cursor = requestedReportId ? undefined : decodeMyReportCursor(query.cursor);
@@ -330,7 +330,7 @@ export default new Elysia().use(session).group("", (app) =>
 					.from(contentReport)
 					.where(
 						and(
-							eq(contentReport.reporterProfileId, profile.unitId),
+							eq(contentReport.reporterProfileId, entity.id),
 							requestedReportId ? eq(contentReport.id, requestedReportId) : undefined,
 							reportCursorCondition(cursor),
 						),
@@ -341,7 +341,7 @@ export default new Elysia().use(session).group("", (app) =>
 				const reports = await hydrateReports(pageRows, query.localizationLanguages);
 				const unitIds = reports.map((report) => report.unitId);
 				const [targets, slugAddresses] = await Promise.all([
-					listReadableReportTargets(unitIds, profile.unitId, query.localizationLanguages),
+					listReadableReportTargets(unitIds, entity.id, query.localizationLanguages),
 					getPublicCanonicalUnitSlugAddresses(unitIds),
 				]);
 				const targetById = new Map(targets.map((target) => [target.id, target]));
@@ -735,7 +735,7 @@ export default new Elysia().use(session).group("", (app) =>
 					tags: ["Reports"],
 				},
 			},
-			async ({ params, body, query, profile, authorization }) => {
+			async ({ params, body, query, entity, authorization }) => {
 				const sourceRealmIds = [...new Set(body.rules.map((rule) => rule.sourceRealmId))].sort();
 				if (sourceRealmIds.length > GovernanceMaxRuleSources) throw new ReportRuleSourceForbidden();
 				const allowedSourceRealmIds = new Set([
@@ -845,7 +845,7 @@ export default new Elysia().use(session).group("", (app) =>
 					const [createdReport] = await tx
 						.insert(contentReport)
 						.values({
-							reporterProfileId: profile.unitId,
+							reporterProfileId: entity.id,
 							contextRealmId: body.contextRealmId,
 							targetUnitId: params.unitId,
 							details,
@@ -909,7 +909,7 @@ export default new Elysia().use(session).group("", (app) =>
 								});
 						}
 						if (!caseRow) throw new Error("Content review case insertion returned no row");
-						await tx.execute(contentReviewReporterAdvisoryLock(caseRow.id, profile.unitId));
+						await tx.execute(contentReviewReporterAdvisoryLock(caseRow.id, entity.id));
 						const [existing] = await tx
 							.select({ id: contentReport.id })
 							.from(contentReportReferral)
@@ -917,7 +917,7 @@ export default new Elysia().use(session).group("", (app) =>
 							.where(
 								and(
 									eq(contentReportReferral.caseId, caseRow.id),
-									eq(contentReport.reporterProfileId, profile.unitId),
+									eq(contentReport.reporterProfileId, entity.id),
 								),
 							)
 							.limit(1);

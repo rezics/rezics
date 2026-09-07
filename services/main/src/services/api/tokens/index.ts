@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import Elysia, { t } from "elysia";
 
 import { recordAuditEvent } from "../../audit";
+import { auth } from "../../auth";
 import { fromApiKeyPermissions, toApiKeyPermissions } from "../../auth/api-permissions";
 import { ApiQuotaPolicyDocumentInvalid } from "../../auth/api-quota/policy-schema";
 import {
@@ -16,7 +17,6 @@ import {
 	type ResolvedApiAccountQuotaPolicy,
 	type ResolvedApiTokenQuotaPolicy,
 } from "../../auth/api-quota/policy-service";
-import { auth } from "../../auth";
 import session from "../../auth/session";
 import { database, type DatabaseTransaction } from "../../database";
 import { apikeys, apiTokenCreationReservation } from "../../database/schema";
@@ -28,17 +28,17 @@ import {
 	ApiTokenQuotaOverrideInvalid,
 	ApiTokenQuotaOverrideRevisionConflict,
 } from "./errors";
+import { requiresActiveTokenReservation } from "./inventory";
 import {
 	ApiTokenListResponse,
 	ApiTokenParams,
 	ApiTokenSummary,
-	CreatedApiTokenResponse,
 	CreateApiTokenBody,
+	CreatedApiTokenResponse,
 	DeleteApiTokenQuotaOverrideBody,
 	ReplaceApiTokenQuotaOverrideBody,
 	UpdateApiTokenBody,
 } from "./schema";
-import { requiresActiveTokenReservation } from "./inventory";
 
 const InteractiveSessionRequiredResponse = toApiErrorResponse(["InteractiveSessionRequired"]);
 const FreshSessionRequiredResponse = toApiErrorResponse(["FreshSessionRequired"]);
@@ -242,7 +242,7 @@ export default new Elysia({ prefix: "/api-tokens" })
 			},
 			detail: { summary: "Create API token (secret returned once)", tags: ["API Tokens"] },
 		},
-		async ({ user, profile, body, request }) => {
+		async ({ user, entity, body, request }) => {
 			let created: CreatedBetterAuthApiKey | undefined;
 			let reservationId: string | undefined;
 			try {
@@ -264,7 +264,7 @@ export default new Elysia({ prefix: "/api-tokens" })
 					await recordAuditEvent(tx, {
 						category: "admin_activity",
 						outcome: "succeeded",
-						actor: { kind: "profile", profileId: profile.unitId },
+						actor: { kind: "profile", profileId: entity.id },
 						authority: { kind: "platform" },
 						action: "api_token.create",
 						target: { kind: "api_token", id: newlyCreated.id },
@@ -306,7 +306,7 @@ export default new Elysia({ prefix: "/api-tokens" })
 			},
 			detail: { summary: "Update API token", tags: ["API Tokens"] },
 		},
-		async ({ user, profile, params, body, request }) => {
+		async ({ user, entity, params, body, request }) => {
 			const current = await findOwnedToken(request, params.tokenId);
 			const now = new Date();
 			const becomesActive = requiresActiveTokenReservation(current, body, now);
@@ -336,7 +336,7 @@ export default new Elysia({ prefix: "/api-tokens" })
 					await recordAuditEvent(tx, {
 						category: "admin_activity",
 						outcome: "succeeded",
-						actor: { kind: "profile", profileId: profile.unitId },
+						actor: { kind: "profile", profileId: entity.id },
 						authority: { kind: "platform" },
 						action: "api_token.update",
 						target: { kind: "api_token", id: params.tokenId },
@@ -376,13 +376,13 @@ export default new Elysia({ prefix: "/api-tokens" })
 			},
 			detail: { summary: "Replace API token quota override", tags: ["API Tokens"] },
 		},
-		async ({ user, profile, params, body, request }) => {
+		async ({ user, entity, params, body, request }) => {
 			const key = await findOwnedToken(request, params.tokenId);
 			try {
 				const replaced = await database.transaction(async (tx) => {
 					const value = await replaceApiTokenQuotaOverride(tx, {
 						tokenId: params.tokenId,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						expectedRevision: body.expectedRevision,
 						override: body.configurationOverride,
 					});
@@ -390,7 +390,7 @@ export default new Elysia({ prefix: "/api-tokens" })
 					await recordAuditEvent(tx, {
 						category: "admin_activity",
 						outcome: "succeeded",
-						actor: { kind: "profile", profileId: profile.unitId },
+						actor: { kind: "profile", profileId: entity.id },
 						authority: { kind: "platform" },
 						action: "api_token.quota_override.replace",
 						target: { kind: "api_token", id: params.tokenId },
@@ -429,7 +429,7 @@ export default new Elysia({ prefix: "/api-tokens" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ profile, params, body, request, status }) => {
+		async ({ entity, params, body, request, status }) => {
 			await findOwnedToken(request, params.tokenId);
 			await database.transaction(async (tx) => {
 				const deleted = await deleteApiTokenQuotaOverride(tx, {
@@ -440,7 +440,7 @@ export default new Elysia({ prefix: "/api-tokens" })
 				await recordAuditEvent(tx, {
 					category: "admin_activity",
 					outcome: "succeeded",
-					actor: { kind: "profile", profileId: profile.unitId },
+					actor: { kind: "profile", profileId: entity.id },
 					authority: { kind: "platform" },
 					action: "api_token.quota_override.delete",
 					target: { kind: "api_token", id: params.tokenId },
@@ -466,7 +466,7 @@ export default new Elysia({ prefix: "/api-tokens" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ request, profile, params, status }) => {
+		async ({ request, entity, params, status }) => {
 			await findOwnedToken(request, params.tokenId);
 			await auth.api.deleteApiKey({
 				headers: request.headers,
@@ -475,7 +475,7 @@ export default new Elysia({ prefix: "/api-tokens" })
 			await recordAuditEvent(database, {
 				category: "admin_activity",
 				outcome: "succeeded",
-				actor: { kind: "profile", profileId: profile.unitId },
+				actor: { kind: "profile", profileId: entity.id },
 				authority: { kind: "platform" },
 				action: "api_token.revoke",
 				target: { kind: "api_token", id: params.tokenId },

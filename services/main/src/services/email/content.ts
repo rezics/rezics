@@ -1,10 +1,10 @@
-import { eq } from "drizzle-orm";
 import { renderActionEmail, renderNotificationEmail, type RenderedEmail } from "@rezics/email";
 import { toDeliveryLocale, toUiLocale, type DeliveryLocale } from "@rezics/i18n";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { eq } from "drizzle-orm";
 
 import { database } from "../database";
-import { notification, profile, profilePreference, users } from "../database/schema";
+import { accountPreference, notification, users } from "../database/schema";
 import { DefaultStoredUiLocale } from "../database/schema/contract-values";
 import { getTranslation } from "../i18n";
 import { notificationTranslationKey } from "../notifications/service";
@@ -61,14 +61,13 @@ async function renderNotificationIntent(item: ClaimedEmail): Promise<RenderedMai
 	const [row] = await database
 		.select({
 			email: users.email,
-			interfaceLocale: profilePreference.interfaceLocale,
+			interfaceLocale: accountPreference.interfaceLocale,
 			kind: notification.kind,
 			payload: notification.payload,
 		})
 		.from(notification)
-		.innerJoin(profile, eq(profile.id, notification.recipientProfileId))
-		.leftJoin(profilePreference, eq(profilePreference.profileId, profile.id))
-		.innerJoin(users, eq(users.id, profile.authUserId))
+		.leftJoin(accountPreference, eq(accountPreference.authUserId, notification.recipientAuthUserId))
+		.innerJoin(users, eq(users.id, notification.recipientAuthUserId))
 		.where(eq(notification.id, item.notificationId))
 		.limit(1);
 	if (!row) throw new InvalidEmailIntent("Notification email intent has no deliverable recipient");

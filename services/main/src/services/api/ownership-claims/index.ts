@@ -1,16 +1,16 @@
-import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
+import { StatusCodes } from "http-status-codes";
 
 import session from "../../auth/session";
-import {
-	createUnitOwnershipClaim,
-	withdrawUnitOwnershipClaim,
-} from "../../ownership-claims/service";
 import {
 	CreateUnitOwnershipClaimBody,
 	PendingUnitOwnershipClaimResponse,
 	UnitOwnershipClaimParams,
 } from "../../ownership-claims/schema";
+import {
+	createUnitOwnershipClaim,
+	withdrawUnitOwnershipClaim,
+} from "../../ownership-claims/service";
 import { IdResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 
@@ -31,10 +31,10 @@ export default new Elysia({ prefix: "/ownership-claims" })
 			},
 			detail: { summary: "Claim ownership of a community-owned Unit", tags: ["Governance"] },
 		},
-		async ({ profile, body }) => {
+		async ({ entity, body }) => {
 			const claim = await createUnitOwnershipClaim({
 				unitId: body.unitId,
-				claimantProfileId: profile.unitId,
+				claimantProfileId: entity.id,
 				details: body.details.trim(),
 			});
 			return { ...claim, state: "pending" as const };
@@ -52,9 +52,9 @@ export default new Elysia({ prefix: "/ownership-claims" })
 			},
 			detail: { summary: "Withdraw a pending Unit ownership claim", tags: ["Governance"] },
 		},
-		async ({ profile, params }) =>
+		async ({ entity, params }) =>
 			withdrawUnitOwnershipClaim({
 				claimId: params.claimId,
-				claimantProfileId: profile.unitId,
+				claimantProfileId: entity.id,
 			}),
 	);

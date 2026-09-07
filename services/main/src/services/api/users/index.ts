@@ -1,39 +1,45 @@
-import type { StaticDecode } from "typebox";
 import { DevelopmentPreviewCapability, PlatformCapabilityValues } from "@rezics/access";
-import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, isNull, or } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
-import Elysia from "elysia";
 import { parseLicenseId } from "@rezics/license";
 import { OfficialRealmUnitIds } from "@rezics/slug";
+import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
+import Elysia from "elysia";
+import { StatusCodes } from "http-status-codes";
+import type { StaticDecode } from "typebox";
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
 import session, { resolveIdentity } from "../../auth/session";
+import { getProfileActivityReadCondition } from "../../authorization/profile-activity/query";
+import { getUnitReadCondition } from "../../authorization/unit/query";
 import { contentRatingPolicyFromAllowlist } from "../../content-rating/policy";
 import { database } from "../../database";
 import {
-	avatarReferenceToColumns,
-	isFirstUnitLocalization,
-	resolvedUnitLocalizationLanguage,
-	resolvedUnitLocalizationTitle,
-	unitLocalizationImageAssetReferences,
-} from "../../units/localization";
-import {
-	unit,
-	profile as profileTable,
-	profileBlock,
+	accountEntityBlock,
+	accountPreference,
 	score,
+	unit,
 	unitFollow,
-	profilePreference,
-	unitLocalization,
 	unitProgress,
 } from "../../database/schema";
-import { getProfileActivityReadCondition } from "../../authorization/profile-activity/query";
-import { getUnitReadCondition } from "../../authorization/unit/query";
-import { ensureImageAssetsAttachable } from "../image-assets/service";
-import { UnitNotFound } from "../../units/errors";
-import { recordUnitRevision } from "../../units/history";
-import { presentUnitLocalization } from "../../units/service";
-import { assignCurrentProfileSlugAddress } from "../../units/slug-address";
+import {
+	followUnit,
+	getFollowingStatus,
+	listFollowing,
+	replaceFollowingSettings,
+	unfollowUnit,
+	updateFollowingPresentation,
+} from "../../following/service";
+import {
+	publicEntityName,
+	readPublicEntityProfile,
+	updateEntityPresentation,
+} from "../../participation/presentation";
+import { resolveRecommendationViewer } from "../../recommendations/context";
+import { listStudioContent, recordStudioVisit } from "../../studio/service";
+import {
+	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationTitle,
+} from "../../units/localization";
 import {
 	BlockResponse,
 	FollowResponse,
@@ -43,63 +49,43 @@ import {
 	UserBlockListResponse,
 } from "../schema/action-response";
 import {
-	toApiErrorResponse,
-	CurrentProfileResponse,
+	CurrentAccountResponse,
+	EntityActivityResponse,
 	PreferencesResponse,
 	PrivacyPreferencesResponse,
-	ProfileActivityResponse,
-	PublicProfileResponse,
+	PublicEntityProfileResponse,
+	toApiErrorResponse,
 } from "../schema/response";
-import { PublicSlugAddressResponse } from "../slug-addresses/schema";
+import { PreferencesNotFound, UserSelfBlockForbidden } from "./errors";
 import {
-	AssignCurrentProfileSlugBody,
-	ReplacePreferencesBody,
-	parseCollectionConfig,
+	EntityActivityQuery,
+	EntityPresentationQuery,
 	FollowingListQuery,
 	FollowingUnitParams,
+	ReplaceFollowingSettingsBody,
+	ReplacePreferencesBody,
 	StudioContentListQuery,
 	StudioContentListResponse,
 	StudioResourceParams,
 	StudioVisitResponse,
 	UpdateDisplayPreferencesBody,
-	UpdateProfileBody,
+	UpdateEntityPresentationBody,
 	UpdateFollowingBody,
+	UpdatePrivacyPreferencesBody,
 	UserIdParams,
 	UserLookupParams,
-	PublicProfileQuery,
-	ProfileActivityQuery,
-	ReplaceFollowingSettingsBody,
-	UpdatePrivacyPreferencesBody,
+	parseCollectionConfig,
 } from "./schema";
-import { getProfile, presentProfile, publicProfileSelection } from "./service";
-import {
-	followUnit,
-	getFollowingStatus,
-	listFollowing,
-	replaceFollowingSettings,
-	unfollowUnit,
-	updateFollowingPresentation,
-} from "../../following/service";
-import { listStudioContent, recordStudioVisit } from "../../studio/service";
-import { resolveRecommendationViewer } from "../../recommendations/context";
-import {
-	PreferencesNotFound,
-	ProfileChanged,
-	ProfileNotFound,
-	UserNotFound,
-	UserSelfBlockForbidden,
-} from "./errors";
 
-const ProfileNotFoundResponse = toApiErrorResponse(["ProfileNotFound"]);
+const ProfileNotFoundResponse = toApiErrorResponse(["CatalogReferenceNotFound"]);
 const ProfileMutationNotFoundResponse = toApiErrorResponse([
-	"ProfileNotFound",
+	"CatalogReferenceNotFound",
 	"ImageAssetNotFound",
 ]);
-const UnitForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
+const UnitForbiddenResponse = toApiErrorResponse(["ParticipationDenied"]);
 
-function presentPreferences(preference: typeof profilePreference.$inferSelect) {
+function presentPreferences(preference: typeof accountPreference.$inferSelect) {
 	return {
-		profileId: preference.profileId,
 		interfaceLocale: preference.interfaceLocale,
 		chineseContentDisplay: preference.chineseContentDisplay,
 		defaultLicenses: preference.defaultLicenses.map(parseLicenseId),
@@ -122,71 +108,41 @@ const activityScoreTargetUnit = alias(unit, "profile_activity_score_target_unit"
 const activityScoreRealm = alias(unit, "profile_activity_score_realm");
 const activityProgressTargetUnit = alias(unit, "profile_activity_progress_target_unit");
 
-export default new Elysia({ prefix: "/users" })
+export default new Elysia({ name: "account-entity-api" })
 	.use(session)
 	.get(
-		"/me",
+		"/account/me",
 		{
-			access: "profile:read",
-			query: PublicProfileQuery,
+			access: "account:read",
+			query: EntityPresentationQuery,
 			response: {
-				[StatusCodes.OK]: CurrentProfileResponse,
+				[StatusCodes.OK]: CurrentAccountResponse,
 				[StatusCodes.NOT_FOUND]: ProfileNotFoundResponse,
 			},
 			detail: { summary: "Current user profile", tags: ["Users"] },
 		},
-		async ({ authorization, profile, query, user }) => {
-			const [platformCapabilities, currentProfile, localizations] = await Promise.all([
+		async ({ authorization, entity, query, user, principal, authorizationRevision }) => {
+			const [platformCapabilities, publicEntity] = await Promise.all([
 				authorization.platform.decideCapabilities(PlatformCapabilityValues),
-				getProfile(profile.unitId, query.localizationLanguages),
-				database
-					.select()
-					.from(unitLocalization)
-					.where(eq(unitLocalization.unitId, profile.unitId))
-					.orderBy(unitLocalization.position, unitLocalization.language),
+				readPublicEntityProfile(entity.id, query.localizationLanguages),
 			]);
 			return {
-				...currentProfile,
-				localizations: localizations.map(presentUnitLocalization),
+				entity: publicEntity,
 				email: user.email,
 				emailVerified: user.emailVerified,
 				onboarding: user.emailVerified ? "complete" : "verify_email",
+				principal,
+				authorizationRevision,
 				platformCapabilities: PlatformCapabilityValues.filter(
 					(capability) => platformCapabilities.get(capability) ?? false,
 				),
 			};
 		},
 	)
-	.put(
-		"/me/profile-slug",
-		{
-			access: "session-only",
-			body: AssignCurrentProfileSlugBody,
-			response: {
-				[StatusCodes.OK]: PublicSlugAddressResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
-				[StatusCodes.UNAUTHORIZED]: toApiErrorResponse(["InteractiveSessionRequired"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["ProfileSlugChangeUnavailable", "SlugTaken"]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
-					"SlugReserved",
-					"SlugDepthExceeded",
-				]),
-			},
-			detail: {
-				operationId: "assignCurrentProfileSlug",
-				summary: "Assign the current Profile slug once",
-				description:
-					"Temporary first-party endpoint. An interactive signed-in user may assign their own Profile slug once without an additional permission. Reserved labels are rejected, and only an idempotent repeat is accepted after assignment.",
-				tags: ["Users", "First-party Preview"],
-			},
-		},
-		async ({ body, profile }) => assignCurrentProfileSlugAddress(profile.unitId, body),
-	)
 	.get(
-		"/me/studio",
+		"/account/me/studio",
 		{
-			access: "profile:read",
+			access: "account:read",
 			query: StudioContentListQuery,
 			response: {
 				[StatusCodes.OK]: StudioContentListResponse,
@@ -200,7 +156,7 @@ export default new Elysia({ prefix: "/users" })
 				tags: ["Users", "Studio"],
 			},
 		},
-		async ({ authorization, profile, query }) => {
+		async ({ authorization, entity, query }) => {
 			let includeDevelopmentPreview = false;
 			if (query.section === "zone") {
 				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
@@ -211,14 +167,14 @@ export default new Elysia({ prefix: "/users" })
 				);
 			}
 			return listStudioContent({
-				profileId: profile.unitId,
+				profileId: entity.id,
 				query,
 				includeDevelopmentPreview,
 			});
 		},
 	)
 	.put(
-		"/me/studio/:unitId/visit",
+		"/account/me/studio/:unitId/visit",
 		{
 			access: "write:interaction:write",
 			params: StudioResourceParams,
@@ -232,121 +188,63 @@ export default new Elysia({ prefix: "/users" })
 				tags: ["Users", "Studio"],
 			},
 		},
-		async ({ authorization, profile, params }) =>
+		async ({ authorization, entity, params }) =>
 			recordStudioVisit({
-				profileId: profile.unitId,
+				profileId: entity.id,
 				unitId: params.unitId,
 				authorization: authorization.unit,
 			}),
 	)
 	.patch(
-		"/me",
+		"/account/me",
 		{
 			access: "write:unit:update",
-			body: UpdateProfileBody,
+			body: UpdateEntityPresentationBody,
 			response: {
-				[StatusCodes.OK]: PublicProfileResponse,
+				[StatusCodes.OK]: PublicEntityProfileResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"RevisionCreditEntityInvalid",
 					"RevisionContributionActorRequired",
 				]),
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: ProfileMutationNotFoundResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["ProfileChanged"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["CatalogRevisionConflict"]),
 			},
 			detail: { summary: "Update current profile", tags: ["Users"] },
 		},
-		async ({ profile, authorization, body }) => {
-			await authorization.unit.ensureCanUpdate(profile.unitId, [["localizations", body.language]]);
-			await database.transaction(async (tx) => {
-				await ensureImageAssetsAttachable(
+		async ({ entity, principal, authorizationRevision, body }) => {
+			await database.transaction((tx) =>
+				updateEntityPresentation(
 					tx,
-					profile.unitId,
-					unitLocalizationImageAssetReferences(body),
-				);
-				const [current] = await tx
-					.select({ id: profileTable.id })
-					.from(profileTable)
-					.where(eq(profileTable.id, profile.unitId))
-					.limit(1);
-				if (!current) throw new ProfileNotFound();
-				const [updated] = await tx
-					.update(unit)
-					.set({ updatedAt: new Date() })
-					.where(
-						and(
-							eq(unit.id, profile.unitId),
-							eq(unit.kind, "profile"),
-							eq(unit.updatedAt, new Date(body.updatedAt)),
-						),
-					)
-					.returning({ id: unit.id });
-				if (!updated) {
-					const [latest] = await tx
-						.select({ updatedAt: unit.updatedAt })
-						.from(unit)
-						.where(eq(unit.id, profile.unitId))
-						.limit(1);
-					if (!latest) throw new ProfileNotFound();
-					throw new ProfileChanged(latest.updatedAt);
-				}
-				await tx
-					.insert(unitLocalization)
-					.values({
-						unitId: profile.unitId,
-						language: body.language,
-						title: body.name,
-						summary: body.summary,
-						description: body.description,
-						...avatarReferenceToColumns(body.avatar ?? null),
-						bannerAssetId: body.bannerAssetId ?? null,
-					})
-					.onConflictDoUpdate({
-						target: [unitLocalization.unitId, unitLocalization.language],
-						set: {
-							title: body.name,
-							summary: body.summary,
-							description: body.description,
-							...(Object.hasOwn(body, "avatar")
-								? avatarReferenceToColumns(body.avatar ?? null)
-								: {}),
-							...(Object.hasOwn(body, "bannerAssetId")
-								? { bannerAssetId: body.bannerAssetId }
-								: {}),
-						},
-					});
-				await recordUnitRevision(tx, {
-					unitId: profile.unitId,
-					actorProfileId: profile.unitId,
-					contribution: body.revisionContext?.contribution,
-					event: "update",
-				});
-			});
-			return getProfile(profile.unitId, [body.language]);
+					{ principal, actingEntityId: entity.id, authorizationRevision },
+					body,
+				),
+			);
+			return readPublicEntityProfile(entity.id, [body.language]);
 		},
 	)
 	.get(
-		"/me/preferences",
+		"/account/me/preferences",
 		{
-			access: "profile:read",
+			access: "account:read",
 			response: {
 				[StatusCodes.OK]: PreferencesResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
 			},
 			detail: { summary: "Current user preferences", tags: ["Users"] },
 		},
-		async ({ profile }) => {
+		async ({ user }) => {
 			const [preference] = await database
 				.select()
-				.from(profilePreference)
-				.where(eq(profilePreference.profileId, profile.unitId))
+				.from(accountPreference)
+				.where(eq(accountPreference.authUserId, user.id))
 				.limit(1);
 			if (!preference) throw new PreferencesNotFound();
 			return presentPreferences(preference);
 		},
 	)
 	.patch(
-		"/me/privacy",
+		"/account/me/privacy",
 		{
 			access: "session-only",
 			body: UpdatePrivacyPreferencesBody,
@@ -361,28 +259,28 @@ export default new Elysia({ prefix: "/users" })
 				tags: ["Users", "First-party Preview"],
 			},
 		},
-		async ({ profile, body }) => {
+		async ({ user, body }) => {
 			const [preference] = await database
-				.update(profilePreference)
+				.update(accountPreference)
 				.set({
 					...(body.scoreVisibility === undefined ? {} : { scoreVisibility: body.scoreVisibility }),
 					...(body.progressVisibility === undefined
 						? {}
 						: { progressVisibility: body.progressVisibility }),
 				})
-				.where(eq(profilePreference.profileId, profile.unitId))
+				.where(eq(accountPreference.authUserId, user.id))
 				.returning({
-					scoreVisibility: profilePreference.scoreVisibility,
-					progressVisibility: profilePreference.progressVisibility,
+					scoreVisibility: accountPreference.scoreVisibility,
+					progressVisibility: accountPreference.progressVisibility,
 				});
 			if (!preference) throw new PreferencesNotFound();
 			return preference;
 		},
 	)
 	.patch(
-		"/me/preferences",
+		"/account/me/preferences",
 		{
-			access: "profile:update",
+			access: "account:update",
 			body: UpdateDisplayPreferencesBody,
 			response: {
 				[StatusCodes.OK]: PreferencesResponse,
@@ -390,9 +288,9 @@ export default new Elysia({ prefix: "/users" })
 			},
 			detail: { summary: "Update current user display preferences", tags: ["Users"] },
 		},
-		async ({ profile, body }) => {
+		async ({ user, body }) => {
 			const [preference] = await database
-				.update(profilePreference)
+				.update(accountPreference)
 				.set({
 					...(body.interfaceLocale === undefined ? {} : { interfaceLocale: body.interfaceLocale }),
 					...(body.chineseContentDisplay === undefined
@@ -406,33 +304,32 @@ export default new Elysia({ prefix: "/users" })
 						? {}
 						: { customThemesEnabled: body.customThemesEnabled }),
 				})
-				.where(eq(profilePreference.profileId, profile.unitId))
+				.where(eq(accountPreference.authUserId, user.id))
 				.returning();
 			if (!preference) throw new PreferencesNotFound();
 			return presentPreferences(preference);
 		},
 	)
 	.put(
-		"/me/preferences",
+		"/account/me/preferences",
 		{
-			access: "write:profile:update",
+			access: "write:account:update",
 			body: ReplacePreferencesBody,
 			response: {
 				[StatusCodes.OK]: PreferencesResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"UnitPermissionForbidden",
+					"ParticipationDenied",
 					"RealmCapabilityRequired",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
 			},
 			detail: { summary: "Replace current user preferences", tags: ["Users"] },
 		},
-		async ({ profile, authorization, body }) => {
-			await authorization.unit.ensureCanUpdate(profile.unitId, [["preferences"]]);
+		async ({ user, authorization, body }) => {
 			await authorization.realm.ensureParticipation(body.defaultScoreRealmId);
 			return database.transaction(async (tx) => {
 				const [preference] = await tx
-					.update(profilePreference)
+					.update(accountPreference)
 					.set({
 						interfaceLocale: body.interfaceLocale,
 						chineseContentDisplay: body.chineseContentDisplay,
@@ -448,7 +345,7 @@ export default new Elysia({ prefix: "/users" })
 						contentRatings: body.contentRatings,
 						preferredLanguages: body.preferredLanguages,
 					})
-					.where(eq(profilePreference.profileId, profile.unitId))
+					.where(eq(accountPreference.authUserId, user.id))
 					.returning();
 				if (!preference) throw new PreferencesNotFound();
 				return presentPreferences(preference);
@@ -456,7 +353,7 @@ export default new Elysia({ prefix: "/users" })
 		},
 	)
 	.get(
-		"/me/following",
+		"/account/me/following",
 		{
 			access: "interaction:read",
 			query: FollowingListQuery,
@@ -466,10 +363,10 @@ export default new Elysia({ prefix: "/users" })
 			},
 			detail: { summary: "List Units followed by the current user", tags: ["Users"] },
 		},
-		async ({ profile, query }) => {
-			const viewer = await resolveRecommendationViewer(profile.unitId, false);
+		async ({ entity, query }) => {
+			const viewer = await resolveRecommendationViewer(entity.id, false);
 			return listFollowing({
-				followerProfileId: profile.unitId,
+				followerProfileId: entity.id,
 				kind: query.kind,
 				localizationLanguages: query.localizationLanguages,
 				cursor: query.cursor,
@@ -479,7 +376,7 @@ export default new Elysia({ prefix: "/users" })
 		},
 	)
 	.get(
-		"/me/following/:unitId",
+		"/account/me/following/:unitId",
 		{
 			access: "interaction:read",
 			params: FollowingUnitParams,
@@ -489,15 +386,15 @@ export default new Elysia({ prefix: "/users" })
 			},
 			detail: { summary: "Get current user's follow state for a Unit", tags: ["Users"] },
 		},
-		async ({ profile, authorization, params }) =>
+		async ({ entity, authorization, params }) =>
 			getFollowingStatus({
-				followerProfileId: profile.unitId,
+				followerProfileId: entity.id,
 				unitId: params.unitId,
 				authorization: authorization.unit,
 			}),
 	)
 	.put(
-		"/me/following/:unitId/settings",
+		"/account/me/following/:unitId/settings",
 		{
 			access: "write:interaction:write",
 			params: FollowingUnitParams,
@@ -512,16 +409,16 @@ export default new Elysia({ prefix: "/users" })
 				tags: ["Users"],
 			},
 		},
-		async ({ profile, authorization, params, body }) =>
+		async ({ entity, authorization, params, body }) =>
 			replaceFollowingSettings({
-				followerProfileId: profile.unitId,
+				followerProfileId: entity.id,
 				unitId: params.unitId,
 				authorization: authorization.unit,
 				settings: body,
 			}),
 	)
 	.put(
-		"/me/following/:unitId",
+		"/account/me/following/:unitId",
 		{
 			access: "contribute:interaction:write",
 			params: FollowingUnitParams,
@@ -535,25 +432,25 @@ export default new Elysia({ prefix: "/users" })
 			},
 			detail: { summary: "Follow a Unit", tags: ["Users"] },
 		},
-		async ({ profile, authorization, params }) =>
+		async ({ entity, authorization, params }) =>
 			followUnit({
-				followerProfileId: profile.unitId,
+				followerProfileId: entity.id,
 				unitId: params.unitId,
 				authorization: authorization.unit,
 			}),
 	)
 	.delete(
-		"/me/following/:unitId",
+		"/account/me/following/:unitId",
 		{
 			access: "write:interaction:write",
 			params: FollowingUnitParams,
 			response: { [StatusCodes.OK]: FollowResponse },
 			detail: { summary: "Unfollow a Unit", tags: ["Users"] },
 		},
-		async ({ profile, params }) => unfollowUnit(profile.unitId, params.unitId),
+		async ({ entity, params }) => unfollowUnit(entity.id, params.unitId),
 	)
 	.patch(
-		"/me/following/:unitId",
+		"/account/me/following/:unitId",
 		{
 			access: "write:interaction:write",
 			params: FollowingUnitParams,
@@ -564,16 +461,15 @@ export default new Elysia({ prefix: "/users" })
 			},
 			detail: { summary: "Update followed Unit presentation", tags: ["Users"] },
 		},
-		async ({ profile, params, body }) =>
-			updateFollowingPresentation(profile.unitId, params.unitId, body),
+		async ({ entity, params, body }) => updateFollowingPresentation(entity.id, params.unitId, body),
 	)
 	.get(
-		"/:id/activity",
+		"/entities/:id/activity",
 		{
 			params: UserLookupParams,
-			query: ProfileActivityQuery,
+			query: EntityActivityQuery,
 			response: {
-				[StatusCodes.OK]: ProfileActivityResponse,
+				[StatusCodes.OK]: EntityActivityResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
 			},
 			detail: {
@@ -584,23 +480,11 @@ export default new Elysia({ prefix: "/users" })
 		},
 		async ({ params, query, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
-			const viewerProfileId = identity.profile?.unitId;
+			const viewerProfileId = identity.entity?.id;
 			const referencedUnitReadOptions = {
 				discoverableOnly: viewerProfileId !== params.id,
 			};
-			const [owner] = await database
-				.select({ id: profileTable.id })
-				.from(profileTable)
-				.innerJoin(unit, eq(unit.id, profileTable.id))
-				.where(
-					and(
-						eq(profileTable.id, params.id),
-						eq(unit.kind, "profile"),
-						getUnitReadCondition(viewerProfileId, referencedUnitReadOptions),
-					),
-				)
-				.limit(1);
-			if (!owner) throw new UserNotFound();
+			await readPublicEntityProfile(params.id, query.localizationLanguages);
 			const localizationLanguages = query.localizationLanguages ?? [];
 			const limit = query.limit ?? 20;
 			const [scores, progress] = await Promise.all([
@@ -624,7 +508,10 @@ export default new Elysia({ prefix: "/users" })
 						updatedAt: score.updatedAt,
 					})
 					.from(score)
-					.innerJoin(profilePreference, eq(profilePreference.profileId, score.profileId))
+					.innerJoin(
+						accountPreference,
+						eq(accountPreference.authUserId, selfAuthUserIdForEntity(score.profileId)),
+					)
 					.innerJoin(activityScoreTargetUnit, eq(activityScoreTargetUnit.id, score.unitId))
 					.innerJoin(activityScoreRealm, eq(activityScoreRealm.id, score.realmId))
 					.where(
@@ -632,7 +519,7 @@ export default new Elysia({ prefix: "/users" })
 							eq(score.profileId, params.id),
 							getProfileActivityReadCondition({
 								ownerProfileId: score.profileId,
-								categoryVisibility: profilePreference.scoreVisibility,
+								categoryVisibility: accountPreference.scoreVisibility,
 								itemVisibility: score.visibility,
 								viewerProfileId,
 								surface: "profile",
@@ -666,18 +553,18 @@ export default new Elysia({ prefix: "/users" })
 						lastSeenAt: unitProgress.lastSeenAt,
 					})
 					.from(unitProgress)
-					.innerJoin(profilePreference, eq(profilePreference.profileId, unitProgress.profileId))
+					.innerJoin(accountPreference, eq(accountPreference.authUserId, unitProgress.authUserId))
 					.innerJoin(
 						activityProgressTargetUnit,
 						eq(activityProgressTargetUnit.id, unitProgress.unitId),
 					)
 					.where(
 						and(
-							eq(unitProgress.profileId, params.id),
+							eq(unitProgress.authUserId, selfAuthUserIdForEntity(params.id)),
 							isNull(unitProgress.deletedAt),
 							getProfileActivityReadCondition({
-								ownerProfileId: unitProgress.profileId,
-								categoryVisibility: profilePreference.progressVisibility,
+								ownerProfileId: sql`${params.id}::uuid`,
+								categoryVisibility: accountPreference.progressVisibility,
 								itemVisibility: unitProgress.visibility,
 								viewerProfileId,
 								surface: "profile",
@@ -692,95 +579,44 @@ export default new Elysia({ prefix: "/users" })
 					.orderBy(desc(unitProgress.lastSeenAt), desc(unitProgress.unitId))
 					.limit(limit),
 			]);
-			return { scores, progress } satisfies StaticDecode<typeof ProfileActivityResponse>;
+			return { scores, progress } satisfies StaticDecode<typeof EntityActivityResponse>;
 		},
 	)
 	.get(
-		"/:id",
+		"/entities/:id/profile",
 		{
 			params: UserLookupParams,
-			query: PublicProfileQuery,
+			query: EntityPresentationQuery,
 			response: {
-				[StatusCodes.OK]: PublicProfileResponse,
+				[StatusCodes.OK]: PublicEntityProfileResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
 			},
 			detail: { summary: "Public user profile", tags: ["Users"] },
 		},
-		async ({ params, query, request }) => {
-			const localizationLanguages = query.localizationLanguages ?? [];
-			const [result] = await database
-				.select(publicProfileSelection(localizationLanguages))
-				.from(profileTable)
-				.innerJoin(unit, eq(unit.id, profileTable.id))
-				.innerJoin(
-					unitLocalization,
-					and(
-						eq(unitLocalization.unitId, profileTable.id),
-						eq(
-							unitLocalization.language,
-							resolvedUnitLocalizationLanguage(profileTable.id, localizationLanguages),
-						),
-					),
-				)
-				.where(
-					and(
-						eq(unit.id, params.id),
-						eq(unit.kind, "profile"),
-						eq(unit.status, "published"),
-						eq(unit.visibility, "public"),
-					),
-				)
-				.limit(1);
-			if (!result) throw new UserNotFound();
-			const viewer = (await resolveIdentity(request, "unit:read")).profile;
-			const following = viewer
-				? Boolean(
-						(
-							await database
-								.select({ id: unitFollow.unitId })
-								.from(unitFollow)
-								.where(
-									and(
-										eq(unitFollow.followerProfileId, viewer.unitId),
-										eq(unitFollow.unitId, result.id),
-									),
-								)
-								.limit(1)
-						)[0],
-					)
-				: false;
-			return { ...(await presentProfile(result)), viewerFollowing: following };
-		},
+		async ({ params, query }) => readPublicEntityProfile(params.id, query.localizationLanguages),
 	)
 	.get(
-		"/me/blocks",
+		"/account/me/blocks",
 		{
 			access: "interaction:read",
 			response: { [StatusCodes.OK]: UserBlockListResponse },
 			detail: { summary: "List blocked users", tags: ["Users"] },
 		},
-		async ({ profile }) => ({
+		async ({ user }) => ({
 			items: await database
 				.select({
-					userId: profileBlock.blockedProfileId,
-					name: unitLocalization.title,
-					createdAt: profileBlock.createdAt,
+					entityId: accountEntityBlock.blockedEntityId,
+					name: publicEntityName(accountEntityBlock.blockedEntityId),
+					createdAt: accountEntityBlock.createdAt,
 				})
-				.from(profileBlock)
-				.innerJoin(profileTable, eq(profileTable.id, profileBlock.blockedProfileId))
-				.leftJoin(
-					unitLocalization,
-					and(
-						eq(unitLocalization.unitId, profileTable.id),
-						isFirstUnitLocalization(unitLocalization.unitId),
-					),
-				)
-				.where(eq(profileBlock.blockerProfileId, profile.unitId))
-				.orderBy(profileBlock.createdAt, profileBlock.blockedProfileId),
+				.from(accountEntityBlock)
+
+				.where(eq(accountEntityBlock.blockerAuthUserId, user.id))
+				.orderBy(accountEntityBlock.createdAt, accountEntityBlock.blockedEntityId),
 		}),
 	)
 	.put(
-		"/:id/block",
+		"/account/blocks/:id",
 		{
 			access: "write:interaction:write",
 			params: UserIdParams,
@@ -791,26 +627,20 @@ export default new Elysia({ prefix: "/users" })
 			},
 			detail: { summary: "Block user", tags: ["Users"] },
 		},
-		async ({ profile, authorization, params }) => {
-			if (params.id === profile.unitId) throw new UserSelfBlockForbidden();
-			await authorization.unit.ensureCanRead(params.id, () => new UnitNotFound("User"));
+		async ({ entity, user, params }) => {
+			if (params.id === entity.id) throw new UserSelfBlockForbidden();
+			await readPublicEntityProfile(params.id);
 			await database.transaction(async (tx) => {
 				await tx
-					.insert(profileBlock)
-					.values({ blockerProfileId: profile.unitId, blockedProfileId: params.id })
+					.insert(accountEntityBlock)
+					.values({ blockerAuthUserId: user.id, blockedEntityId: params.id })
 					.onConflictDoNothing();
 				await tx
 					.delete(unitFollow)
 					.where(
 						or(
-							and(
-								eq(unitFollow.followerProfileId, profile.unitId),
-								eq(unitFollow.unitId, params.id),
-							),
-							and(
-								eq(unitFollow.followerProfileId, params.id),
-								eq(unitFollow.unitId, profile.unitId),
-							),
+							and(eq(unitFollow.followerProfileId, entity.id), eq(unitFollow.unitId, params.id)),
+							and(eq(unitFollow.followerProfileId, params.id), eq(unitFollow.unitId, entity.id)),
 						),
 					);
 			});
@@ -818,21 +648,21 @@ export default new Elysia({ prefix: "/users" })
 		},
 	)
 	.delete(
-		"/:id/block",
+		"/account/blocks/:id",
 		{
 			access: "write:interaction:write",
 			params: UserIdParams,
 			response: { [StatusCodes.OK]: BlockResponse },
 			detail: { summary: "Unblock user", tags: ["Users"] },
 		},
-		async ({ profile, params }) => {
+		async ({ user, params }) => {
 			await database.transaction(async (tx) => {
 				await tx
-					.delete(profileBlock)
+					.delete(accountEntityBlock)
 					.where(
 						and(
-							eq(profileBlock.blockerProfileId, profile.unitId),
-							eq(profileBlock.blockedProfileId, params.id),
+							eq(accountEntityBlock.blockerAuthUserId, user.id),
+							eq(accountEntityBlock.blockedEntityId, params.id),
 						),
 					);
 			});

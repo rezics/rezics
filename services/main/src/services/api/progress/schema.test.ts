@@ -14,7 +14,7 @@ import {
 describe("progress API contract", () => {
 	it("represents untracked and tracked progress as distinct successful states", () => {
 		const progress = {
-			profileId: "00000000-0000-7000-8000-000000000001",
+			authUserId: "00000000-0000-7000-8000-000000000001",
 			unitId: "00000000-0000-7000-8000-000000000002",
 			status: "active",
 			progress: 0.4,
@@ -103,7 +103,7 @@ describe("progress API contract", () => {
 	it("keeps current-snapshot eligibility out of journal responses", () => {
 		const event = {
 			id: "00000000-0000-7000-8000-000000000001",
-			profileId: "00000000-0000-7000-8000-000000000002",
+			authUserId: "00000000-0000-7000-8000-000000000002",
 			unitId: "00000000-0000-7000-8000-000000000003",
 			entryKind: "update",
 			status: "active",

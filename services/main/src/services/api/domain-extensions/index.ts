@@ -2,36 +2,26 @@ import {
 	CustomThemeExternalLiveAccessCapability,
 	DevelopmentPreviewCapability,
 } from "@rezics/access";
-import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
-import Elysia, { t } from "elysia";
 import type { AvatarReference } from "@rezics/avatar";
 import {
-	JsonValue as JsonValueSchema,
-	type JsonValue as JsonValueType,
-} from "@rezics/portable-text";
-import type { StaticDecode } from "typebox";
-import { Check } from "typebox/value";
-import {
-	NavigationDocument,
-	DockDocument,
-	UnresolvedBlockReferenceError,
-	UnitReferencedBlockDocument,
-	ZonePageBlockHostPolicy,
-	ZoneAppearanceDocument,
-	type ZoneAppearanceDocument as ZoneAppearanceDocumentValue,
-	assertUnitReferencedBlockDocument,
 	assertNavigationDocument,
 	assertResolvedBlockReferences,
 	assertResolvedNavigationReferences,
+	assertUnitReferencedBlockDocument,
 	collectBlockReferences,
 	collectNavigationReferences,
+	DockDocument,
+	NavigationDocument,
 	parseDocument,
 	PortableTextDocument,
+	UnitReferencedBlockDocument,
+	UnresolvedBlockReferenceError,
 	walkBlockTree,
+	ZoneAppearanceDocument,
+	ZonePageBlockHostPolicy,
 	type Block,
+	type ZoneAppearanceDocument as ZoneAppearanceDocumentValue,
 } from "@rezics/block";
-import type { ContentLanguage } from "@rezics/i18n";
 import {
 	assertFilterDocument,
 	collectUnitPredicateReferenceIds,
@@ -39,37 +29,24 @@ import {
 	filterDocumentControlField,
 	parseFilterDocument,
 } from "@rezics/filter";
+import type { ContentLanguage } from "@rezics/i18n";
+import {
+	JsonValue as JsonValueSchema,
+	type JsonValue as JsonValueType,
+} from "@rezics/portable-text";
 import { ZoneHomePageSlug } from "@rezics/slug";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
+import type { StaticDecode } from "typebox";
+import { Check } from "typebox/value";
 
 import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { createUnitBlockReferenceResolver } from "../../blocks/reference-resolver";
-import { database } from "../../database";
-import {
-	software,
-	softwareRequirement,
-	post,
-	series,
-	seriesRelease,
-	unitOwnership,
-	unit,
-	unitExternalLink,
-	unitLocalization,
-	zone,
-	realmRule,
-	realmRuleRevision,
-	unitDock,
-	imageAsset,
-} from "../../database/schema";
-import { UnitNotFound } from "../../units/errors";
-import { insertLicenseGrants } from "../../units/license-grants";
-import { assertExecutableBlockFilterDocuments } from "../../search/block-filter-documents";
-import { resolveFilterDocument } from "../../search/filter-document";
-import type { DatabaseTransaction } from "../../database";
-import { presentWikiPostPortableTextDocument } from "../../documents/portable-text-presentation";
-import { recordUnitRevision } from "../../units/history";
+import { ContentStructureInvalid, ContentStructureNotFound } from "../../content-structure/errors";
 import {
 	createNavigationStructure,
 	deleteNavigationStructure,
@@ -78,29 +55,50 @@ import {
 	replaceNavigationStructure,
 } from "../../content-structure/navigation";
 import { getContentStructureRevision } from "../../content-structure/service";
-import { ContentStructureInvalid, ContentStructureNotFound } from "../../content-structure/errors";
+import { resolveUnitPresentation } from "../../custom-themes";
+import type { DatabaseTransaction } from "../../database";
+import { database } from "../../database";
+import {
+	imageAsset,
+	post,
+	realmRule,
+	realmRuleRevision,
+	series,
+	seriesRelease,
+	software,
+	softwareRequirement,
+	unit,
+	unitDock,
+	unitExternalLink,
+	unitLocalization,
+	unitOwnership,
+	zone,
+} from "../../database/schema";
+import { presentWikiPostPortableTextDocument } from "../../documents/portable-text-presentation";
 import { currentRealmRuleRevisionReadLock } from "../../realms/rule-revision-lock";
+import { assertExecutableBlockFilterDocuments } from "../../search/block-filter-documents";
+import { resolveFilterDocument } from "../../search/filter-document";
+import { presentAvatar } from "../../units/avatar";
 import { insertUnit } from "../../units/create";
+import { UnitNotFound } from "../../units/errors";
+import { recordUnitRevision } from "../../units/history";
+import { insertLicenseGrants } from "../../units/license-grants";
 import {
 	avatarReferenceFromColumns,
+	resolvedUnitLocalizationImageAssetId,
+	resolvedUnitLocalizationLanguage,
 	resolveUnitLocalizationAvatarFromOrdered,
 	resolveUnitLocalizationFromOrdered,
 	resolveUnitLocalizationImageAssetIdFromOrdered,
-	resolvedUnitLocalizationImageAssetId,
-	resolvedUnitLocalizationLanguage,
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
-import {
-	ensureImageAssetsAttachable,
-	ensurePublicZoneThemeHeroAsset,
-	findPublicZoneThemeHeroAsset,
-} from "../image-assets/service";
-import { presentAvatar } from "../../units/avatar";
 import { presentImageAsset } from "../../units/service";
-import { getPublicCanonicalUnitSlugAddress } from "../../units/slug-address";
-import { resolveUnitPresentation } from "../../custom-themes";
-import { replaceZoneSlugAddress } from "../../units/slug-address";
+import {
+	getPublicCanonicalUnitSlugAddress,
+	replaceZoneSlugAddress,
+} from "../../units/slug-address";
+import { provisionZoneDefaultExperienceInTransaction } from "../../zones/default-experience";
 import {
 	deleteZonePagePlacement,
 	getZonePageAddressById,
@@ -114,36 +112,53 @@ import {
 	upsertZonePageUnit,
 	type ZonePageProjection,
 } from "../../zones/pages";
-import { provisionZoneDefaultExperienceInTransaction } from "../../zones/default-experience";
-import { IdResponse, NoContentResponse } from "../schema/action-response";
+import {
+	ensureImageAssetsAttachable,
+	ensurePublicZoneThemeHeroAsset,
+	findPublicZoneThemeHeroAsset,
+} from "../image-assets/service";
 import { RevisionContextBody } from "../schema";
+import { IdResponse, NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import {
 	ReplacePublicUnitSlugAddressBody,
 	SlugAddressMutationResponse,
 } from "../slug-addresses/schema";
 import {
+	SeriesReleaseNotFound,
+	SoftwareNotFound,
+	SoftwareSystemRequirementSourceInvalid,
+	SystemRequirementNotFound,
+	ZoneDocumentInvalid,
+	ZoneNavigationInUse,
+	ZoneNavigationNotFound,
+	ZonePageInUse,
+	ZonePageNotFound,
+	ZoneRuleRealmInvalid,
+	ZoneTimeRangeInvalid,
+} from "./errors";
+import {
 	CreateSeriesBody,
 	CreateZoneBody,
-	SoftwareParams,
-	SoftwareRequirementParams,
 	SeriesParams,
 	SeriesReleaseListQuery,
 	SeriesReleaseListResponse,
 	SeriesReleaseParams,
 	SeriesReleaseResponse,
+	SoftwareParams,
+	SoftwareRequirementParams,
 	SystemRequirementBody,
 	SystemRequirementListResponse,
 	SystemRequirementResponse,
 	UpdateZoneBody,
 	UpsertSeriesReleaseBody,
+	ZoneDetailQuery,
 	ZoneNavigationBody,
 	ZoneNavigationListResponse,
 	ZoneNavigationParams,
-	ZoneNavigationResponse,
 	ZoneNavigationReplaceBody,
+	ZoneNavigationResponse,
 	ZoneNavigationRevisionBody,
-	ZoneDetailQuery,
 	ZonePageAddressResponse,
 	ZonePageBody,
 	ZonePageIdParams,
@@ -153,23 +168,10 @@ import {
 	ZonePageResponse,
 	ZonePageSlugParams,
 	ZoneParams,
-	ZoneResponse,
 	ZoneRenderQuery,
 	ZoneRenderResponse,
+	ZoneResponse,
 } from "./schema";
-import {
-	SoftwareNotFound,
-	SoftwareSystemRequirementSourceInvalid,
-	SeriesReleaseNotFound,
-	SystemRequirementNotFound,
-	ZoneDocumentInvalid,
-	ZoneNavigationInUse,
-	ZoneNavigationNotFound,
-	ZonePageNotFound,
-	ZonePageInUse,
-	ZoneRuleRealmInvalid,
-	ZoneTimeRangeInvalid,
-} from "./errors";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const ZonePreviewMutationForbiddenResponse = toApiErrorResponse([
@@ -621,23 +623,23 @@ export default new Elysia()
 					},
 					detail: { summary: "Create Series", tags: ["Series"] },
 				},
-				async ({ profile, body }) => {
+				async ({ entity, body }) => {
 					const id = await database.transaction(async (tx) => {
 						const unitId = await createBaseUnit(tx, {
 							kind: "series",
 							localization: body.localization,
-							ownerId: profile.unitId,
+							ownerId: entity.id,
 						});
 						await tx.insert(series).values({ id: unitId, kind: body.kind });
 						await insertLicenseGrants(tx, {
 							unitId,
-							grantedByProfileId: profile.unitId,
+							grantedByProfileId: entity.id,
 							licenseIds: body.licenses,
 							unitKind: "series",
 						});
 						await recordUnitRevision(tx, {
 							unitId,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: body.revisionContext?.contribution,
 							event: "create",
 						});
@@ -695,7 +697,7 @@ export default new Elysia()
 							and(
 								eq(seriesRelease.seriesId, params.seriesId),
 								inArray(unit.kind, ["book", "software", "media"]),
-								getUnitReadCondition(identity.profile?.unitId),
+								getUnitReadCondition(identity.entity?.id),
 							),
 						)
 						.orderBy(seriesRelease.position, seriesRelease.releaseUnitId);
@@ -870,7 +872,7 @@ export default new Elysia()
 								usesZoneFilter = true;
 						});
 					};
-					const viewerEligible = identity.profile
+					const viewerEligible = identity.entity
 						? (
 								await Promise.all([
 									identity.authorization.platform.hasCapability(DevelopmentPreviewCapability),
@@ -882,7 +884,7 @@ export default new Elysia()
 						: false;
 					const resolvedPresentation = await resolveUnitPresentation({
 						hostUnitId: params.zoneId,
-						viewerProfileId: identity.profile?.unitId,
+						viewerProfileId: identity.entity?.id,
 						viewerEligible,
 						safeMode: query.safeMode ?? false,
 					});
@@ -998,7 +1000,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Update Zone configuration", tags: ["Zones"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					if (body.filterDocument) ensureZoneFilterDocument(body.filterDocument);
 					const scopes: string[][] = [];
 					if (body.localization) scopes.push(["localizations", body.localization.language]);
@@ -1045,7 +1047,7 @@ export default new Elysia()
 							const storedLocalization = toUnitLocalizationStorage(body.localization);
 							await ensureImageAssetsAttachable(
 								tx,
-								profile.unitId,
+								entity.id,
 								unitLocalizationImageAssetReferences(body.localization),
 							);
 							await tx
@@ -1079,7 +1081,7 @@ export default new Elysia()
 								.where(eq(zone.id, params.zoneId));
 						await recordUnitRevision(tx, {
 							unitId: params.zoneId,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: body.revisionContext?.contribution,
 							event: "update",
 						});
@@ -1184,7 +1186,7 @@ export default new Elysia()
 						tags: ["Zones"],
 					},
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					await authorization.zone.ensurePagesMutation(params.zoneId);
 					await getZone(params.zoneId);
@@ -1193,13 +1195,13 @@ export default new Elysia()
 						return await upsertZonePageUnit({
 							zoneId: params.zoneId,
 							slug: body.slug,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: body.revisionContext?.contribution,
 							localization: body.localization,
 							ensureReferences: (tx, document) =>
 								ensureZoneBlockReferences(tx, document, {
 									zoneId: params.zoneId,
-									profileId: profile.unitId,
+									profileId: entity.id,
 								}),
 						});
 					} catch (cause) {
@@ -1251,7 +1253,7 @@ export default new Elysia()
 						tags: ["Zones"],
 					},
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 					await authorization.zone.ensurePagesMutation(params.zoneId);
 					ensureZoneBlockDocument(body.localization.document);
@@ -1260,14 +1262,14 @@ export default new Elysia()
 							zoneId: params.zoneId,
 							pageId: params.pageId,
 							slug: body.slug,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: body.revisionContext?.contribution,
 							localization: body.localization,
 							baseUnitRevisionId: body.baseUnitRevisionId,
 							ensureReferences: (tx, document) =>
 								ensureZoneBlockReferences(tx, document, {
 									zoneId: params.zoneId,
-									profileId: profile.unitId,
+									profileId: entity.id,
 								}),
 						});
 					} catch (cause) {
@@ -1291,12 +1293,12 @@ export default new Elysia()
 					},
 					detail: { summary: "Index Zone page in page-structure", tags: ["Zones"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await authorization.zone.ensurePagesMutation(params.zoneId);
 					return upsertZonePagePlacement({
 						zoneId: params.zoneId,
 						pageId: params.pageId,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						parentPageId: body.parentPageId,
 						position: body.position,
 						baseStructureRevisionId: body.baseStructureRevisionId,
@@ -1328,13 +1330,13 @@ export default new Elysia()
 						responses: NoContentResponse,
 					},
 				},
-				async ({ params, body, profile, authorization }) => {
+				async ({ params, body, entity, authorization }) => {
 					await authorization.zone.ensurePagesMutation(params.zoneId);
 					try {
 						await deleteZonePagePlacement({
 							zoneId: params.zoneId,
 							pageId: params.pageId,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							baseStructureRevisionId: body.baseStructureRevisionId,
 						});
 					} catch (cause) {
@@ -1382,7 +1384,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Create Zone navigation", tags: ["Zones"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await authorization.zone.ensurePagesMutation(params.zoneId);
 					await getZone(params.zoneId);
 					ensureZoneNavigationDocument(body.document);
@@ -1392,13 +1394,13 @@ export default new Elysia()
 						);
 						await ensureZoneNavigationReferences(tx, body.document, {
 							zoneId: params.zoneId,
-							profileId: profile.unitId,
+							profileId: entity.id,
 						});
 						const result = await createNavigationStructure(tx, {
 							ownerUnitId: params.zoneId,
 							kind: "zone.navigation",
 							document: body.document,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 						});
 						const record = await presentNavigationStructure(tx, {
 							ownerUnitId: params.zoneId,
@@ -1459,7 +1461,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Replace Zone navigation", tags: ["Zones"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await authorization.zone.ensurePagesMutation(params.zoneId);
 					await getZone(params.zoneId);
 					ensureZoneNavigationDocument(body.document);
@@ -1470,14 +1472,14 @@ export default new Elysia()
 							);
 							await ensureZoneNavigationReferences(tx, body.document, {
 								zoneId: params.zoneId,
-								profileId: profile.unitId,
+								profileId: entity.id,
 							});
 							const result = await replaceNavigationStructure(tx, {
 								ownerUnitId: params.zoneId,
 								structureId: params.navigationId,
 								kind: "zone.navigation",
 								document: body.document,
-								actorProfileId: profile.unitId,
+								actorProfileId: entity.id,
 								baseRevisionId: body.baseRevisionId,
 							});
 							const record = await presentNavigationStructure(tx, {
@@ -1520,7 +1522,7 @@ export default new Elysia()
 						responses: NoContentResponse,
 					},
 				},
-				async ({ params, body, profile, authorization }) => {
+				async ({ params, body, entity, authorization }) => {
 					await authorization.zone.ensurePagesMutation(params.zoneId);
 					try {
 						await database.transaction(async (tx) => {
@@ -1553,7 +1555,7 @@ export default new Elysia()
 								ownerUnitId: params.zoneId,
 								structureId: params.navigationId,
 								kind: "zone.navigation",
-								actorProfileId: profile.unitId,
+								actorProfileId: entity.id,
 								baseRevisionId: body.baseRevisionId,
 							});
 						});
@@ -1583,7 +1585,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Add or update Series release", tags: ["Series"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					const { revisionContext, ...release } = body;
 					await ensureUnitMutationAuthorized(authorization.unit, params.seriesId, ["releases"]);
 					await authorization.unit.ensureCanRead(
@@ -1617,7 +1619,7 @@ export default new Elysia()
 							.returning();
 						await recordUnitRevision(tx, {
 							unitId: params.seriesId,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: revisionContext?.contribution,
 							event: "update",
 						});
@@ -1644,7 +1646,7 @@ export default new Elysia()
 						responses: NoContentResponse,
 					},
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.seriesId, ["releases"]);
 					await database.transaction(async (tx) => {
 						const deleted = await tx
@@ -1659,7 +1661,7 @@ export default new Elysia()
 						if (!deleted.length) throw new SeriesReleaseNotFound();
 						await recordUnitRevision(tx, {
 							unitId: params.seriesId,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: body?.revisionContext?.contribution,
 							event: "update",
 						});
@@ -1691,7 +1693,7 @@ export default new Elysia()
 				},
 				detail: { summary: "Create Zone", tags: ["Zones"] },
 			},
-			async ({ profile, authorization, body }) => {
+			async ({ entity, authorization, body }) => {
 				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 				if (body.localRuleRealmId) await authorization.unit.ensureCanRead(body.localRuleRealmId);
 				ensureZoneFilterDocument(body.filterDocument);
@@ -1704,7 +1706,7 @@ export default new Elysia()
 					const unitId = await createBaseUnit(tx, {
 						kind: "zone",
 						localization: body.localization,
-						ownerId: profile.unitId,
+						ownerId: entity.id,
 					});
 					await ensureZoneFilterReferences(tx, body.filterDocument);
 					await tx.insert(zone).values({
@@ -1717,13 +1719,13 @@ export default new Elysia()
 					});
 					await recordUnitRevision(tx, {
 						unitId,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						contribution: body.revisionContext?.contribution,
 						event: "create",
 					});
 					await provisionZoneDefaultExperienceInTransaction(tx, {
 						zoneId: unitId,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						language: body.localization.language,
 						title: body.localization.title,
 					});
@@ -1783,7 +1785,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Create Software system requirement", tags: ["Software"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
 						"system-requirements",
 					]);
@@ -1807,7 +1809,7 @@ export default new Elysia()
 							.returning();
 						await recordUnitRevision(tx, {
 							unitId: params.softwareId,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: body.revisionContext?.contribution,
 							event: "update",
 						});
@@ -1838,7 +1840,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Replace Software system requirement", tags: ["Software"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
 						"system-requirements",
 					]);
@@ -1863,7 +1865,7 @@ export default new Elysia()
 						if (!updated) throw new SystemRequirementNotFound();
 						await recordUnitRevision(tx, {
 							unitId: params.softwareId,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: body.revisionContext?.contribution,
 							event: "update",
 						});
@@ -1891,7 +1893,7 @@ export default new Elysia()
 						responses: NoContentResponse,
 					},
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
 						"system-requirements",
 					]);
@@ -1908,7 +1910,7 @@ export default new Elysia()
 						if (!deleted.length) throw new SystemRequirementNotFound();
 						await recordUnitRevision(tx, {
 							unitId: params.softwareId,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: body?.revisionContext?.contribution,
 							event: "update",
 						});

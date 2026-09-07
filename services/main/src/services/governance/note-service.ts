@@ -1,9 +1,10 @@
 import type { PortableTextDocument as PortableTextDocumentValue } from "@rezics/block";
-import { and, eq, inArray } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
+import { and, eq, inArray } from "drizzle-orm";
+import { authEntity } from "../database/schema/participation";
+import { selfAuthUserIdForEntity } from "../participation/account-query";
 
 import type { DatabaseTransaction } from "../database";
-import { presentPortableTextDocument } from "../documents/portable-text-presentation";
 import {
 	governancePostBinding,
 	post,
@@ -14,11 +15,12 @@ import {
 	type GovernanceNoteRoleValues,
 	type GovernanceNoteSubjectKindValues,
 } from "../database/schema";
-import { recordUnitRevision } from "../units/history";
-import { insertUnit } from "../units/create";
-import { createProfilePublisherAttribution } from "../units/attribution";
-import { isFirstUnitLocalization } from "../units/localization";
+import { presentPortableTextDocument } from "../documents/portable-text-presentation";
 import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
+import { createProfilePublisherAttribution } from "../units/attribution";
+import { insertUnit } from "../units/create";
+import { recordUnitRevision } from "../units/history";
+import { isFirstUnitLocalization } from "../units/localization";
 import type { RevisionContributionInput } from "../units/revision-contribution";
 
 export type GovernanceNoteRole = (typeof GovernanceNoteRoleValues)[number];
@@ -48,6 +50,7 @@ export async function createGovernanceNotePost(
 		realmId?: string | null;
 		viewerProfileIds?: readonly string[];
 		publicRecipientProfileIds?: readonly string[];
+		publicRecipientAuthUserIds?: readonly string[];
 		revisionContribution?: RevisionContributionInput;
 		note: GovernanceNote;
 	},
@@ -89,15 +92,24 @@ export async function createGovernanceNotePost(
 	if (input.note.role === "public_notice")
 		for (const profileId of input.publicRecipientProfileIds ?? []) viewerIds.add(profileId);
 	viewerIds.delete(input.actorProfileId);
-	if (viewerIds.size)
+	const selfBindings = viewerIds.size
+		? await tx
+				.select({ authUserId: authEntity.authUserId })
+				.from(authEntity)
+				.where(inArray(authEntity.entityId, [...viewerIds]))
+		: [];
+	const accountIds = new Set(selfBindings.map((binding) => binding.authUserId));
+	if (input.note.role === "public_notice")
+		for (const id of input.publicRecipientAuthUserIds ?? []) accountIds.add(id);
+	if (accountIds.size)
 		await tx.insert(unitAccessGrant).values(
-			[...viewerIds].map((profileId) => ({
+			[...accountIds].map((authUserId) => ({
 				unitId: created.id,
-				subjectKind: "profile" as const,
-				profileId,
+				subjectKind: "auth" as const,
+				authUserId,
 				permission: "unit.read" as const,
 				scope: [] as string[],
-				grantedByProfileId: input.actorProfileId,
+				grantedByAuthUserId: selfAuthUserIdForEntity(input.actorProfileId),
 			})),
 		);
 	if (input.realmId)
@@ -108,7 +120,7 @@ export async function createGovernanceNotePost(
 			realmRelation: "member",
 			permission: "unit.read",
 			scope: [],
-			grantedByProfileId: input.actorProfileId,
+			grantedByAuthUserId: selfAuthUserIdForEntity(input.actorProfileId),
 		});
 	await recordUnitRevision(tx, {
 		unitId: created.id,

@@ -13,6 +13,13 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
+import {
+	createCreatedAtColumn,
+	createTimestampMsColumn,
+	createUpdatedAtColumn,
+	createUuidv7PrimaryKey,
+} from "./columns";
 import {
 	ImageAssetAccessValues,
 	ImageAssetPresentationFitValues,
@@ -20,13 +27,6 @@ import {
 	ImageAssetStatusValues,
 	toEnumValues,
 } from "./contract-values";
-import {
-	createCreatedAtColumn,
-	createTimestampMsColumn,
-	createUpdatedAtColumn,
-	createUuidv7PrimaryKey,
-} from "./columns";
-import { profile } from "./profile";
 
 export const imageAssetStatus = pgEnum("image_asset_status", toEnumValues(ImageAssetStatusValues));
 export const imageAssetAccess = pgEnum("image_asset_access", toEnumValues(ImageAssetAccessValues));
@@ -46,10 +46,10 @@ export const imageAsset = pgTable(
 		id: createUuidv7PrimaryKey(),
 		uploaderProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		ownerProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		status: imageAssetStatus().default("pending").notNull(),
 		access: imageAssetAccess().default("private").notNull(),
 		deletedAt: createTimestampMsColumn(),

@@ -2,17 +2,17 @@ import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 
 import { database, type DatabaseTransaction } from "../database";
 import {
-	profile,
+	entityIdentity,
 	unit,
 	unitRevision,
 	unitRevisionHead,
-	unitStatusEvent,
 	UnitStatusActorKindValues,
+	unitStatusEvent,
 	UnitStatusValues,
 } from "../database/schema";
 import { recordProfileResourceParticipation } from "../history/participation";
-import { firstUnitLocalizationTitle } from "./localization";
 import { UnitChanged, UnitNotFound, UnitPermissionForbidden } from "./errors";
+import { firstUnitLocalizationTitle } from "./localization";
 import { nextUnitUpdatedAt } from "./update-values";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
 
@@ -240,12 +240,12 @@ export async function listUnitStatusEvents(input: {
 			actorKind: unitStatusEvent.actorKind,
 			actorHidden: unitStatusEvent.actorHidden,
 			profileId: unitStatusEvent.changedByProfileId,
-			profileName: firstUnitLocalizationTitle(profile.id),
+			profileName: firstUnitLocalizationTitle(entityIdentity.id),
 			revisionId: unitStatusEvent.revisionId,
 			createdAt: unitStatusEvent.createdAt,
 		})
 		.from(unitStatusEvent)
-		.leftJoin(profile, eq(profile.id, unitStatusEvent.changedByProfileId))
+		.leftJoin(entityIdentity, eq(entityIdentity.id, unitStatusEvent.changedByProfileId))
 		.where(
 			and(
 				eq(unitStatusEvent.unitId, input.unitId),

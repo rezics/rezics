@@ -1,8 +1,8 @@
 import { and, eq } from "drizzle-orm";
 
+import { recordAuditEvent } from "../../audit";
 import type { DatabaseTransaction } from "../../database";
 import { platformCapabilityGrant } from "../../database/schema";
-import { recordAuditEvent } from "../../audit";
 import { lockPlatformAccess } from "../../platform-access";
 import { BootstrapPlatformAccessManifest } from "../data";
 import { bootstrapEpoch } from "./common";
@@ -17,7 +17,7 @@ export async function ensureBootstrapPlatformAccess(tx: DatabaseTransaction): Pr
 				.from(platformCapabilityGrant)
 				.where(
 					and(
-						eq(platformCapabilityGrant.profileId, access.profileId),
+						eq(platformCapabilityGrant.authUserId, access.authUserId),
 						eq(platformCapabilityGrant.capability, capability),
 					),
 				)
@@ -26,9 +26,9 @@ export async function ensureBootstrapPlatformAccess(tx: DatabaseTransaction): Pr
 			const [created] = await tx
 				.insert(platformCapabilityGrant)
 				.values({
-					profileId: access.profileId,
+					authUserId: access.authUserId,
 					capability,
-					grantedByProfileId: access.grantedByProfileId,
+					grantedByAuthUserId: access.grantedByAuthUserId,
 					createdAt,
 					updatedAt: createdAt,
 				})
@@ -37,15 +37,15 @@ export async function ensureBootstrapPlatformAccess(tx: DatabaseTransaction): Pr
 				category: "system_event",
 				outcome: "succeeded",
 				actor: {
-					kind: "profile",
-					profileId: access.grantedByProfileId,
+					kind: "auth",
+					authUserId: access.grantedByAuthUserId,
 					credentialKind: "bootstrap",
 				},
 				authority: { kind: "platform" },
 				action: "platform.access.bootstrap",
 				target: {
-					kind: "profile",
-					id: access.profileId,
+					kind: "auth",
+					id: access.authUserId,
 				},
 				details: {
 					capability,

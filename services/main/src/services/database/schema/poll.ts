@@ -11,22 +11,22 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
+import {
+	createCreatedAtColumn,
+	createTimestampMsColumn,
+	createUpdatedAtColumn,
+	createUuidv7PrimaryKey,
+	ordinalPosition,
+} from "./columns";
 import {
 	PollModeValues,
 	PollOptionSourceKindValues,
 	PollResultVisibilityValues,
 	toEnumValues,
 } from "./contract-values";
-import {
-	createCreatedAtColumn,
-	ordinalPosition,
-	createTimestampMsColumn,
-	createUpdatedAtColumn,
-	createUuidv7PrimaryKey,
-} from "./columns";
-import { profile } from "./profile";
-import { unit } from "./unit";
 import { realm } from "./realm";
+import { unit } from "./unit";
 
 export const pollMode = pgEnum("poll_mode", toEnumValues(PollModeValues));
 export const pollOptionSourceKind = pgEnum(
@@ -108,7 +108,7 @@ export const pollVote = pgTable(
 			.references(() => poll.id, { onDelete: "cascade" }),
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
 		optionId: uuid().notNull(),
 		realmId: uuid().references(() => realm.id, { onDelete: "set null" }),
 		createdAt: createCreatedAtColumn(),

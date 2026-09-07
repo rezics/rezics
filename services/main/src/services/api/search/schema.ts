@@ -1,17 +1,17 @@
-import type { StaticDecode } from "typebox";
 import {
 	BlockPath,
 	MaxDockQueryBlocks,
 	MaxZoneEagerBlockExecutions,
 	MaxZonePageQueryBlocks,
 } from "@rezics/block";
-import { t } from "elysia";
 import { SearchContinuationToken, SearchFeatureState } from "@rezics/filter";
 import { LicenseIds } from "@rezics/license";
+import { t } from "elysia";
+import type { StaticDecode } from "typebox";
 
-import { SearchCategories, SearchSorts } from "../../search/schema";
-import { ContentRatingValues } from "../../database/schema/contract-values";
 import { SearchCountResultSchema } from "../../counts/contract";
+import { ContentRatingValues } from "../../database/schema/contract-values";
+import { SearchCategories, SearchSorts } from "../../search/schema";
 import { ContentLanguage, LocalizationLanguageHints, Uuid } from "../schema";
 import {
 	FeedPostItemResponse,
@@ -45,7 +45,7 @@ export const DomainSearchBody = t.Object(
 		contentRatings: t.Optional(SearchContentRatingList),
 		aiDisclosures: t.Optional(SearchStringList),
 		licenses: t.Optional(SearchLicenseList),
-		creditedUnitId: t.Optional(t.String({ minLength: 1 })),
+		creditedEntityId: t.Optional(t.String({ minLength: 1 })),
 		realmId: t.Optional(t.String({ minLength: 1 })),
 		realmTagContextRealmId: t.Optional(Uuid),
 		subjectId: t.Optional(t.String({ minLength: 1 })),

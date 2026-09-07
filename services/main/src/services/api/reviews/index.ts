@@ -1,21 +1,18 @@
-import type { StaticDecode } from "typebox";
-import { StatusCodes } from "http-status-codes";
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
+import type { StaticDecode } from "typebox";
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { NsfwContentLabelId } from "../../bootstrap/data";
 import { requireContentSpoilerLevel } from "../../content-labels/presentation";
 import { contentRatingPolicyFromAllowlist } from "../../content-rating/policy";
 import { database } from "../../database";
-import { runVoteTransaction } from "../../database/vote-admission";
 import { toSafeInteger } from "../../database/integer";
 import {
-	isFirstUnitLocalization,
-	resolvedUnitLocalizationLanguage,
-	resolvedUnitLocalizationTitle,
-} from "../../units/localization";
-import {
+	accountPreference,
+	ContentRatingValues,
 	post,
 	postProgressEntry,
 	postReplyStat,
@@ -23,34 +20,51 @@ import {
 	score,
 	scoreStat,
 	unit,
-	unitOwnership,
 	unitLocalization,
-	unitRevisionHead,
+	unitOwnership,
 	unitProgressEntry,
+	unitRevisionHead,
 	unitTag,
-	profilePreference,
-	ContentRatingValues,
 } from "../../database/schema";
-import { UnitNotFound } from "../../units/errors";
-import { recordUnitRevision } from "../../units/history";
-import { insertUnit } from "../../units/create";
+import { runVoteTransaction } from "../../database/vote-admission";
 import { fractionalPositionAt } from "../../ordering/position";
 import { parseJsonCursor } from "../../pagination";
 import { InvalidPaginationCursor } from "../../pagination/errors";
-import { ensureSubjectPostTargetingAllowed, findPostTargetingLock } from "../../posts/targeting";
-import { publishPostToRealms } from "../../posts/publication";
 import { getPostSubjectPresentation } from "../../posts/presentation";
-import { selectPostScores } from "../../posts/scores";
 import { selectPostProgressEntry } from "../../posts/progress";
-import {
-	createProfilePublisherAttribution,
-	getAttributionSummariesByUnitIds,
-} from "../../units/attribution";
+import { publishPostToRealms } from "../../posts/publication";
+import { selectPostScores } from "../../posts/scores";
+import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
+import { ensureSubjectPostTargetingAllowed, findPostTargetingLock } from "../../posts/targeting";
 import {
 	fallbackRecommendationSnapshot,
 	resolveRecommendationSnapshot,
 	resolveRecommendationViewer,
 } from "../../recommendations/context";
+import type { SearchKeysetPosition } from "../../search/query";
+import { searchGlobalIdentifiers } from "../../search/service";
+import {
+	createProfilePublisherAttribution,
+	getAttributionSummariesByUnitIds,
+} from "../../units/attribution";
+import { insertUnit } from "../../units/create";
+import { UnitNotFound } from "../../units/errors";
+import { recordUnitRevision } from "../../units/history";
+import {
+	isFirstUnitLocalization,
+	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationTitle,
+} from "../../units/localization";
+import { resolveCanonicalUnitId } from "../../units/merge/canonical";
+import { ValidationError } from "../errors";
+import {
+	getFeedCandidateRealmIdExpression,
+	getFeedEligibilityCondition,
+	hydrateFeedItems,
+	type FeedEligibilityScope,
+} from "../feed";
+import { RecommendationPolicyVersionSchema } from "../recommendations/schema";
+import { ContentLanguage, Uuid } from "../schema";
 import {
 	IdResponse,
 	ScoreAggregateResponse,
@@ -58,40 +72,27 @@ import {
 	ViewerScoreListResponse,
 } from "../schema/action-response";
 import {
-	toApiErrorResponse,
-	VoteBackpressureResponse,
-	toPortableTextResponse,
 	ReviewDetailResponse,
 	ReviewListResponse,
+	toApiErrorResponse,
+	toPortableTextResponse,
+	VoteBackpressureResponse,
 } from "../schema/response";
+import { ReviewNotFound } from "./errors";
 import {
 	CreateReviewBody,
 	GetReviewQuery,
 	ListReviewsQuery,
 	ListViewerScoresQuery,
-	ReviewSortSchema,
-	ReviewParams,
 	resolveReviewScoreFilter,
+	ReviewParams,
+	ReviewSortSchema,
 	ScoreAggregateQuery,
 	ScoreTargetParams,
 	SetScoreBody,
 	UpdateReviewBody,
 } from "./schema";
 import { upsertScore } from "./service";
-import { ReviewNotFound } from "./errors";
-import {
-	getFeedCandidateRealmIdExpression,
-	getFeedEligibilityCondition,
-	hydrateFeedItems,
-	type FeedEligibilityScope,
-} from "../feed";
-import { ContentLanguage, Uuid } from "../schema";
-import { RecommendationPolicyVersionSchema } from "../recommendations/schema";
-import { ValidationError } from "../errors";
-import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
-import type { SearchKeysetPosition } from "../../search/query";
-import { searchGlobalIdentifiers } from "../../search/service";
-import { resolveCanonicalUnitId } from "../../units/merge/canonical";
 
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
@@ -236,7 +237,7 @@ export default new Elysia()
 				},
 				async ({ query, request }) => {
 					const identity = await resolveIdentity(request, "unit:read");
-					const viewer = await resolveRecommendationViewer(identity.profile?.unitId);
+					const viewer = await resolveRecommendationViewer(identity.entity?.id);
 					const rankingViewer = { ...viewer, personalized: false };
 					const scoreFilter = resolveReviewScoreFilter(query);
 					if (scoreFilter.status === "invalid")
@@ -385,7 +386,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Create review", tags: ["Reviews"] },
 				},
-				async ({ profile, authorization, body }) => {
+				async ({ entity, authorization, body }) => {
 					const targetId = await resolveCanonicalUnitId(database, body.targetId);
 					await authorization.unit.ensureCanRead(targetId);
 					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
@@ -400,7 +401,7 @@ export default new Elysia()
 									.where(
 										and(
 											eq(unitProgressEntry.id, body.progressEntryId),
-											eq(unitProgressEntry.profileId, profile.unitId),
+											eq(unitProgressEntry.authUserId, authorization.authUserId ?? sql`null`),
 											eq(unitProgressEntry.unitId, targetId),
 											isNull(unitProgressEntry.deletedAt),
 										),
@@ -428,7 +429,7 @@ export default new Elysia()
 								status: "published",
 								visibility: "public",
 								publishedAt: new Date(),
-								statusActor: { kind: "profile", profileId: profile.unitId },
+								statusActor: { kind: "profile", profileId: entity.id },
 							});
 							await ensureSubjectPostTargetingAllowed(tx, {
 								sourcePostId: created.id,
@@ -450,22 +451,22 @@ export default new Elysia()
 							});
 							await applyNewPostTagMentionVotes(tx, {
 								postId: created.id,
-								profileId: profile.unitId,
+								profileId: entity.id,
 								nextBody: body.body,
 							});
 							await tx.insert(unitOwnership).values({
 								unitId: created.id,
-								profileId: profile.unitId,
-								assignedByProfileId: profile.unitId,
+								profileId: entity.id,
+								assignedByProfileId: entity.id,
 							});
 							await createProfilePublisherAttribution(tx, {
 								sourceUnitId: created.id,
-								profileId: profile.unitId,
+								profileId: entity.id,
 							});
 							if (body.score) {
 								const storedScore = await upsertScore(
 									tx,
-									profile.unitId,
+									entity.id,
 									targetId,
 									body.score.realmId,
 									body.score.value,
@@ -485,11 +486,11 @@ export default new Elysia()
 							await publishPostToRealms(tx, {
 								postId: created.id,
 								realmIds: body.publishRealmIds,
-								actorProfileId: profile.unitId,
+								actorProfileId: entity.id,
 							});
 							await recordUnitRevision(tx, {
 								unitId: created.id,
-								actorProfileId: profile.unitId,
+								actorProfileId: entity.id,
 								contribution: body.revisionContext?.contribution,
 								event: "create",
 							});
@@ -513,7 +514,7 @@ export default new Elysia()
 				async ({ params, query, request }) => {
 					const identity = await resolveIdentity(request, "unit:read");
 					const { authorization } = identity;
-					const viewerProfileId = identity.profile?.unitId;
+					const viewerProfileId = identity.entity?.id;
 					await authorization.unit.ensureCanRead(params.reviewId, () => new UnitNotFound("Review"));
 					const localizationLanguages = query.localizationLanguages ?? [];
 					const [review] = await database
@@ -622,11 +623,11 @@ export default new Elysia()
 						viewerProfileId
 							? database
 									.select({
-										alwaysShowSpoilers: profilePreference.alwaysShowSpoilers,
-										alwaysShowNsfw: profilePreference.alwaysShowNsfw,
+										alwaysShowSpoilers: accountPreference.alwaysShowSpoilers,
+										alwaysShowNsfw: accountPreference.alwaysShowNsfw,
 									})
-									.from(profilePreference)
-									.where(eq(profilePreference.profileId, viewerProfileId))
+									.from(accountPreference)
+									.where(eq(accountPreference.authUserId, selfAuthUserIdForEntity(viewerProfileId)))
 									.limit(1)
 									.then(([value]) => value)
 							: Promise.resolve(undefined),
@@ -689,7 +690,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Update review", tags: ["Reviews"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await authorization.unit.ensureCanUpdate(params.reviewId, [["localizations"]]);
 					await runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 						const [current] = await tx
@@ -724,13 +725,13 @@ export default new Elysia()
 							});
 						await applyNewPostTagMentionVotes(tx, {
 							postId: params.reviewId,
-							profileId: profile.unitId,
+							profileId: entity.id,
 							previousBody: current?.content,
 							nextBody: body.body,
 						});
 						await recordUnitRevision(tx, {
 							unitId: params.reviewId,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: body.revisionContext?.contribution,
 							event: "update",
 						});
@@ -754,18 +755,11 @@ export default new Elysia()
 					},
 					detail: { summary: "Score unit", tags: ["Reviews"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await authorization.unit.ensureCanRead(params.targetId);
 					await authorization.realm.ensureParticipation(body.realmId);
 					const storedScore = await database.transaction((tx) =>
-						upsertScore(
-							tx,
-							profile.unitId,
-							params.targetId,
-							body.realmId,
-							body.score,
-							body.visibility,
-						),
+						upsertScore(tx, entity.id, params.targetId, body.realmId, body.score, body.visibility),
 					);
 					return {
 						scoreId: storedScore.id,
@@ -789,7 +783,7 @@ export default new Elysia()
 						tags: ["Reviews"],
 					},
 				},
-				async ({ params, profile, authorization, query }) => {
+				async ({ params, entity, authorization, query }) => {
 					await authorization.unit.ensureCanRead(params.targetId);
 					const items = await database
 						.select({
@@ -801,7 +795,7 @@ export default new Elysia()
 							updatedAt: score.updatedAt,
 						})
 						.from(score)
-						.where(and(eq(score.profileId, profile.unitId), eq(score.unitId, params.targetId)))
+						.where(and(eq(score.profileId, entity.id), eq(score.unitId, params.targetId)))
 						.orderBy(desc(score.updatedAt), asc(score.realmId));
 					return { items };
 				},

@@ -1,25 +1,26 @@
 import type { ContentLanguage } from "@rezics/i18n";
 import { and, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import { selfAuthUserIdForEntity } from "../participation/account-query";
 
-import type { Authorization } from "../authorization";
-import { getUnitReadCondition } from "../authorization/unit/query";
 import { imageAssetPresentationContentUrl } from "../api/image-assets/presentation";
 import type { UnitSubjectAssociationListResponse } from "../api/schema/response";
+import type { Authorization } from "../authorization";
+import { getUnitReadCondition } from "../authorization/unit/query";
 import { contentRatingAllowlistFromStored } from "../content-rating/policy";
 import { database } from "../database";
 import {
+	accountPreference,
 	entity,
 	entityMeasurement,
-	profilePreference,
+	isEntityKind,
+	MaximumSubjectAssociationExpressionsPerItem,
+	MaximumSubjectAssociationsPageSize,
 	subjectAssociation,
 	subjectAssociationJudgment,
 	subjectAssociationJudgmentStat,
 	unit,
 	type EntityKind,
-	isEntityKind,
-	MaximumSubjectAssociationExpressionsPerItem,
-	MaximumSubjectAssociationsPageSize,
 } from "../database/schema";
 import { presentNullablePortableTextDocument } from "../documents/portable-text-presentation";
 import { getAssociationContextPostsByAssociationIds } from "./association-context";
@@ -33,13 +34,13 @@ import {
 	resolvedUnitLocalizationTitle,
 } from "./localization";
 import { resolveCanonicalUnitId } from "./merge/canonical";
+import type { ManageableUnitKind } from "./service";
 import {
 	decodeSubjectAssociationCursor,
 	encodeSubjectAssociationCursor,
 } from "./subject-association-cursor";
 import { presentSubjectAssociationSpoiler } from "./subject-association-spoiler";
 import { getSubjectAssociationExpressions } from "./subject-association-tags";
-import type { ManageableUnitKind } from "./service";
 
 const associatedEntityUnit = alias(unit, "unit_subject_association_entity_unit");
 
@@ -126,11 +127,16 @@ export async function listUnitSubjectAssociations(
 		input.authorization.profileId
 			? database
 					.select({
-						alwaysShowSpoilers: profilePreference.alwaysShowSpoilers,
-						contentRatings: profilePreference.contentRatings,
+						alwaysShowSpoilers: accountPreference.alwaysShowSpoilers,
+						contentRatings: accountPreference.contentRatings,
 					})
-					.from(profilePreference)
-					.where(eq(profilePreference.profileId, input.authorization.profileId))
+					.from(accountPreference)
+					.where(
+						eq(
+							accountPreference.authUserId,
+							selfAuthUserIdForEntity(input.authorization.profileId),
+						),
+					)
 					.limit(1)
 					.then(([row]) => row)
 			: Promise.resolve(undefined),

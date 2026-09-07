@@ -1,6 +1,6 @@
-import { StatusCodes } from "http-status-codes";
-import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
+import { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
 import {
 	ContentLanguage,
 	DateTime,
@@ -137,7 +137,7 @@ export const BlockResponse = t.Object({ blocked: t.Boolean() });
 export const UserBlockListResponse = t.Object({
 	items: t.Array(
 		t.Object({
-			userId: Uuid,
+			entityId: Uuid,
 			name: t.Nullable(t.String()),
 			createdAt: DateTime,
 		}),

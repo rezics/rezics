@@ -1,27 +1,65 @@
-import type { StaticDecode } from "typebox";
-import { StatusCodes } from "http-status-codes";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
+import type { StaticDecode } from "typebox";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { contentRatingPolicyFromAllowlist } from "../../content-rating/policy";
-import { resolveRecommendationViewer } from "../../recommendations/context";
+import { MaximumSubjectAssociationsPageSize } from "../../database/schema/contract-values";
 import { decodeCursor, encodeCursor } from "../../pagination";
-import { listUnitStatusEvents } from "../../units/status";
+import { resolveRecommendationViewer } from "../../recommendations/context";
+import { getReadableUnitPresentationsByIds } from "../../units/attribution";
+import { enqueueBookChapterDraftJob } from "../../units/book-chapter-draft";
+import { listContentLanguageEvidence } from "../../units/content-language-evidence";
+import {
+	createUnitRealmPublication,
+	listUnitRealmPublications,
+	republishUnitRealmPublication,
+	withdrawUnitRealmPublication,
+} from "../../units/realm-publication";
 import { getPublicUnitSeoProjection } from "../../units/seo";
 import {
 	createUnit,
 	deleteUnitContentLanguage,
-	getUnitLocalizationOrder,
 	getUnit,
+	getUnitLocalizationOrder,
 	listUnits,
-	updateUnitLocalizationOrder,
 	updateUnit,
+	updateUnitLocalizationOrder,
 	upsertLocalization,
 } from "../../units/service";
+import { listUnitStatusEvents } from "../../units/status";
+import { listUnitSubjectAssociations } from "../../units/subject-associations";
 import {
+	getUnitSeriesMemberships,
+	promoteUnitVariantToMain,
+	updateUnitVariantContext,
+} from "../../units/variants";
+import { ValidationError } from "../errors";
+import { NoContentResponse } from "../schema/action-response";
+import {
+	toApiErrorResponse,
+	UnitDetailResponse,
+	UnitListResponse,
+	UnitPresentationListResponse,
+	UnitSubjectAssociationListResponse,
+	VoteBackpressureResponse,
+} from "../schema/response";
+import {
+	BookChapterDraftJobParams,
+	BookChapterDraftJobResponse,
+	ContentLanguageEvidenceQuery,
+	ContentLanguageEvidenceResponse,
+	ContentLanguageEvidenceUnitParams,
+	CreateBookChapterDraftJobBody,
 	CreateUnitBody,
+	ListUnitRealmPublicationsQuery,
 	ListUnitsQuery,
-	UpdateUnitBody,
+	PromoteUnitVariantBody,
+	PublicUnitSeoParams,
+	PublicUnitSeoQuery,
+	PublicUnitSeoResponse,
+	ResolveUnitPresentationsBody,
+	UnitDetailQuery,
 	UnitLocalizationBody,
 	UnitLocalizationDeleteBody,
 	UnitLocalizationDeleteParams,
@@ -29,60 +67,22 @@ import {
 	UnitLocalizationOrderParams,
 	UnitLocalizationOrderResponse,
 	UnitLocalizationParams,
-	UnitDetailQuery,
 	UnitLookupParams,
-	UnitUnitIdParams,
-	VariantUnitUnitIdParams,
-	WorkUnitTypeParams,
-	VariantUnitTypeParams,
+	UnitRealmPublicationListResponse,
+	UnitRealmPublicationParams,
+	UnitSeriesMembershipListResponse,
+	UnitSeriesMembershipQuery,
 	UnitStatusEventListQuery,
 	UnitStatusEventListResponse,
 	UnitStatusEventParams,
-	UpdateUnitVariantContextBody,
-	PromoteUnitVariantBody,
-	UnitSeriesMembershipListResponse,
-	UnitSeriesMembershipQuery,
-	ResolveUnitPresentationsBody,
-	ListUnitRealmPublicationsQuery,
-	UnitRealmPublicationListResponse,
-	UnitRealmPublicationParams,
-	PublicUnitSeoParams,
-	PublicUnitSeoQuery,
-	PublicUnitSeoResponse,
-	BookChapterDraftJobParams,
-	CreateBookChapterDraftJobBody,
-	BookChapterDraftJobResponse,
-	ContentLanguageEvidenceUnitParams,
-	ContentLanguageEvidenceQuery,
-	ContentLanguageEvidenceResponse,
 	UnitSubjectAssociationsQuery,
+	UnitUnitIdParams,
+	UpdateUnitBody,
+	UpdateUnitVariantContextBody,
+	VariantUnitTypeParams,
+	VariantUnitUnitIdParams,
+	WorkUnitTypeParams,
 } from "./schema";
-import {
-	toApiErrorResponse,
-	VoteBackpressureResponse,
-	UnitDetailResponse,
-	UnitListResponse,
-	UnitPresentationListResponse,
-	UnitSubjectAssociationListResponse,
-} from "../schema/response";
-import {
-	getUnitSeriesMemberships,
-	promoteUnitVariantToMain,
-	updateUnitVariantContext,
-} from "../../units/variants";
-import { getReadableUnitPresentationsByIds } from "../../units/attribution";
-import {
-	createUnitRealmPublication,
-	listUnitRealmPublications,
-	republishUnitRealmPublication,
-	withdrawUnitRealmPublication,
-} from "../../units/realm-publication";
-import { NoContentResponse } from "../schema/action-response";
-import { ValidationError } from "../errors";
-import { enqueueBookChapterDraftJob } from "../../units/book-chapter-draft";
-import { listContentLanguageEvidence } from "../../units/content-language-evidence";
-import { listUnitSubjectAssociations } from "../../units/subject-associations";
-import { MaximumSubjectAssociationsPageSize } from "../../database/schema/contract-values";
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
@@ -558,12 +558,12 @@ export default new Elysia({ prefix: "/units" })
 			},
 			detail: { summary: "Draft Chapters attached to a draft Book", tags: ["Units"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensure(params.bookId, "unit.status.update", ["unit"]);
 			return enqueueBookChapterDraftJob({
 				bookId: params.bookId,
 				bookUpdatedAt: new Date(body.bookUpdatedAt),
-				requestedByProfileId: profile.unitId,
+				requestedByProfileId: entity.id,
 			});
 		},
 	)

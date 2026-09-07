@@ -1,9 +1,11 @@
 import { sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../../database";
-import { type UnitMergeOperationPhase, type UnitMergeGraphPlanV1 } from "../../database/schema";
-import { processEntityMeasurementPreflightBatch } from "./entity-measurements";
-import { processEntityMeasurementMergeBatch } from "./entity-measurements";
+import { type UnitMergeGraphPlanV1, type UnitMergeOperationPhase } from "../../database/schema";
+import {
+	processEntityMeasurementMergeBatch,
+	processEntityMeasurementPreflightBatch,
+} from "./entity-measurements";
 
 export type UnitMergePhaseInput = {
 	readonly operationId: string;
@@ -1622,17 +1624,17 @@ async function associationProposalBatch(
 async function creditBatch(
 	tx: DatabaseTransaction,
 	input: UnitMergePhaseInput,
-	direction: "source_unit_id" | "credited_unit_id",
+	direction: "source_unit_id" | "credited_entity_id",
 ): Promise<UnitMergePhaseResult> {
 	const column = sql.identifier(direction);
 	const otherColumn = sql.identifier(
-		direction === "source_unit_id" ? "credited_unit_id" : "source_unit_id",
+		direction === "source_unit_id" ? "credited_entity_id" : "source_unit_id",
 	);
 	return runBatch(
 		tx,
 		sql`
 			with batch as materialized (
-				select id, source_unit_id, credited_unit_id, role
+				select id, source_unit_id, credited_entity_id, role
 				from credit_attribution
 				where ${column} = ${input.sourceUnitId}::uuid
 				limit ${input.batchSize}
@@ -1650,10 +1652,10 @@ async function creditBatch(
 									then ${input.targetUnitId}::uuid
 								else batch.source_unit_id
 							end
-								and canonical.credited_unit_id = case
-									when ${direction} = 'credited_unit_id'
+								and canonical.credited_entity_id = case
+									when ${direction} = 'credited_entity_id'
 										then ${input.targetUnitId}::uuid
-									else batch.credited_unit_id
+									else batch.credited_entity_id
 								end
 								and canonical.role = batch.role
 								and canonical.id <> batch.id
@@ -1674,10 +1676,10 @@ async function creditBatch(
 								then ${input.targetUnitId}::uuid
 							else batch.source_unit_id
 						end
-							and canonical.credited_unit_id = case
-								when ${direction} = 'credited_unit_id'
+							and canonical.credited_entity_id = case
+								when ${direction} = 'credited_entity_id'
 									then ${input.targetUnitId}::uuid
-								else batch.credited_unit_id
+								else batch.credited_entity_id
 							end
 							and canonical.role = batch.role
 							and canonical.id <> batch.id
@@ -2609,7 +2611,7 @@ export async function processUnitMergePhase(
 		case "credit_sources":
 			return creditBatch(tx, input, "source_unit_id");
 		case "credit_targets":
-			return creditBatch(tx, input, "credited_unit_id");
+			return creditBatch(tx, input, "credited_entity_id");
 		case "subject_sources":
 			return subjectAssociationBatch(tx, input, "unit_id");
 		case "subject_entities":

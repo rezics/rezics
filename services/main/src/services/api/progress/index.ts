@@ -1,65 +1,42 @@
-import { StatusCodes } from "http-status-codes";
 import { SearchFeatureDefinition } from "@rezics/filter";
 import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia from "elysia";
+import { StatusCodes } from "http-status-codes";
 
-import { getUnitReadCondition } from "../../authorization/unit/query";
 import session from "../../auth/session";
+import { getUnitReadCondition } from "../../authorization/unit/query";
+import { ContentStructureKindPolicies } from "../../content-structure/contracts";
 import { database } from "../../database";
+import {
+	contentStructure,
+	contentStructureNode,
+	contentStructureNodeProgress,
+	post,
+	postProgressEntry,
+	unit,
+	unitLocalization,
+	unitProgress,
+	unitProgressEntry,
+} from "../../database/schema";
 import {
 	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 } from "../../units/localization";
-import {
-	contentStructure,
-	contentStructureNodeProgress,
-	contentStructureNode,
-	postProgressEntry,
-	post,
-	unitLocalization,
-	unit,
-	unitProgress,
-	unitProgressEntry,
-} from "../../database/schema";
+import { presentImageAsset } from "../../units/service";
 import { ContentStructureNodeNotFound } from "../content-structure/errors";
-import { ContentStructureKindPolicies } from "../../content-structure/contracts";
+import { NoContentResponse } from "../schema/action-response";
 import {
-	CompleteProgressBody,
-	CreateProgressEntryBody,
-	ListProgressQuery,
-	ListProgressEntriesQuery,
-	ProgressEntryParams,
-	ProgressLookupResponse,
-	type ProgressContinuationResponse,
-	ProgressNodeParams,
-	ProgressSearchBody,
-	ProgressUnitParams,
-	ReplaceProgressEntryBody,
-	UpsertProgressBody,
-} from "./schema";
-import {
-	CompletionStateResponse,
 	ChapterReadingProgressResponse,
+	CompletionStateResponse,
 	ProgressEntryListResponse,
 	ProgressEntryResponse,
 	ProgressListResponse,
 	ProgressNodeListResponse,
 	ProgressResponse,
 	ProgressSearchResponse,
+	toApiErrorResponse,
 } from "../schema/response";
-import { NoContentResponse } from "../schema/action-response";
-import { toApiErrorResponse } from "../schema/response";
-import {
-	createProgressEntry,
-	deleteProgressEntry,
-	lockUnitProgress,
-	recordMediaNodeCompletion,
-	recordChapterReading,
-	replaceProgressEntry,
-	setCurrentProgressEntry,
-} from "./service";
-import { presentImageAsset } from "../../units/service";
 import {
 	decodeProgressEntryCursor,
 	encodeProgressEntryCursor,
@@ -68,10 +45,33 @@ import {
 	resolveProgressEntrySortAt,
 } from "./pagination";
 import {
+	CompleteProgressBody,
+	CreateProgressEntryBody,
+	ListProgressEntriesQuery,
+	ListProgressQuery,
+	ProgressEntryParams,
+	ProgressLookupResponse,
+	ProgressNodeParams,
+	ProgressSearchBody,
+	ProgressUnitParams,
+	ReplaceProgressEntryBody,
+	UpsertProgressBody,
+	type ProgressContinuationResponse,
+} from "./schema";
+import {
 	createProgressSearchCursor,
 	getProgressSearchDefinition,
 	resolveProgressSearchRequest,
 } from "./search";
+import {
+	createProgressEntry,
+	deleteProgressEntry,
+	lockUnitProgress,
+	recordChapterReading,
+	recordMediaNodeCompletion,
+	replaceProgressEntry,
+	setCurrentProgressEntry,
+} from "./service";
 
 const continuationContentUnit = alias(unit, "progress_continuation_content_unit");
 
@@ -212,7 +212,7 @@ function toProgressEntryResponse<
 		entryKind: string;
 		id: string;
 		occurredAt: Date | null;
-		profileId: string;
+		authUserId: string;
 		progress: number;
 		reviewId?: string | null;
 		status: string;
@@ -235,13 +235,13 @@ function toProgressEntryResponse<
 	};
 }
 
-async function selectProgressSnapshot(profileId: string, unitId: string) {
+async function selectProgressSnapshot(authUserId: string, unitId: string) {
 	const [progress] = await database
 		.select()
 		.from(unitProgress)
 		.where(
 			and(
-				eq(unitProgress.profileId, profileId),
+				eq(unitProgress.authUserId, authUserId),
 				eq(unitProgress.unitId, unitId),
 				isNull(unitProgress.deletedAt),
 			),
@@ -261,7 +261,7 @@ export default new Elysia({ prefix: "/progress" })
 			response: { [StatusCodes.OK]: ProgressListResponse },
 			detail: { summary: "List current profile progress", tags: ["Progress"] },
 		},
-		async ({ profile, query }) => {
+		async ({ user, authorization, query }) => {
 			const items = await database
 				.select({
 					unitId: unitProgress.unitId,
@@ -292,9 +292,9 @@ export default new Elysia({ prefix: "/progress" })
 				)
 				.where(
 					and(
-						eq(unitProgress.profileId, profile.unitId),
+						eq(unitProgress.authUserId, user.id),
 						isNull(unitProgress.deletedAt),
-						getUnitReadCondition(profile.unitId),
+						getUnitReadCondition(authorization.profileId),
 						query.status ? eq(unitProgress.status, query.status) : undefined,
 					),
 				)
@@ -329,7 +329,7 @@ export default new Elysia({ prefix: "/progress" })
 				tags: ["Progress", "Search"],
 			},
 		},
-		async ({ profile, body }) => {
+		async ({ user, authorization, body }) => {
 			const request = resolveProgressSearchRequest(body);
 			const textCondition = request.query
 				? (() => {
@@ -342,9 +342,9 @@ export default new Elysia({ prefix: "/progress" })
 					})()
 				: undefined;
 			const baseCondition = and(
-				eq(unitProgress.profileId, profile.unitId),
+				eq(unitProgress.authUserId, user.id),
 				isNull(unitProgress.deletedAt),
-				getUnitReadCondition(profile.unitId),
+				getUnitReadCondition(authorization.profileId),
 				inArray(unit.kind, ["book", "media", "software"]),
 				textCondition,
 			);
@@ -463,14 +463,14 @@ export default new Elysia({ prefix: "/progress" })
 			},
 			detail: { summary: "Get progress state", tags: ["Progress"] },
 		},
-		async ({ profile, authorization, params }) => {
+		async ({ user, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const [result] = await database
 				.select()
 				.from(unitProgress)
 				.where(
 					and(
-						eq(unitProgress.profileId, profile.unitId),
+						eq(unitProgress.authUserId, user.id),
 						eq(unitProgress.unitId, params.unitId),
 						isNull(unitProgress.deletedAt),
 					),
@@ -500,7 +500,7 @@ export default new Elysia({ prefix: "/progress" })
 			},
 			detail: { summary: "List Progress journal entries", tags: ["Progress"] },
 		},
-		async ({ profile, authorization, params, query }) => {
+		async ({ user, authorization, params, query }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const cursorScope = { unitId: params.unitId, status: query.status };
 			const cursor = decodeProgressEntryCursor(query.cursor, cursorScope);
@@ -508,7 +508,7 @@ export default new Elysia({ prefix: "/progress" })
 			const rows = await database
 				.select({
 					id: unitProgressEntry.id,
-					profileId: unitProgressEntry.profileId,
+					authUserId: unitProgressEntry.authUserId,
 					unitId: unitProgressEntry.unitId,
 					entryKind: unitProgressEntry.entryKind,
 					status: unitProgressEntry.status,
@@ -527,7 +527,7 @@ export default new Elysia({ prefix: "/progress" })
 				.leftJoin(postProgressEntry, eq(postProgressEntry.progressEntryId, unitProgressEntry.id))
 				.where(
 					and(
-						eq(unitProgressEntry.profileId, profile.unitId),
+						eq(unitProgressEntry.authUserId, user.id),
 						eq(unitProgressEntry.unitId, params.unitId),
 						isNull(unitProgressEntry.deletedAt),
 						query.status ? eq(unitProgressEntry.status, query.status) : undefined,
@@ -567,11 +567,11 @@ export default new Elysia({ prefix: "/progress" })
 			},
 			detail: { summary: "Create a Progress journal entry", tags: ["Progress"] },
 		},
-		async ({ profile, authorization, params, body }) => {
+		async ({ user, authorization, params, body }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const entry = await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, profile.unitId, params.unitId);
-				return createProgressEntry(tx, profile.unitId, params.unitId, {
+				await lockUnitProgress(tx, user.id, params.unitId);
+				return createProgressEntry(tx, user.id, params.unitId, {
 					entryKind: body.entryKind,
 					status: body.status,
 					progress: body.progress,
@@ -602,11 +602,11 @@ export default new Elysia({ prefix: "/progress" })
 			},
 			detail: { summary: "Replace a Progress journal entry", tags: ["Progress"] },
 		},
-		async ({ profile, authorization, params, body }) => {
+		async ({ user, authorization, params, body }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const entry = await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, profile.unitId, params.unitId);
-				return replaceProgressEntry(tx, profile.unitId, params.unitId, params.entryId, {
+				await lockUnitProgress(tx, user.id, params.unitId);
+				return replaceProgressEntry(tx, user.id, params.unitId, params.entryId, {
 					entryKind: body.entryKind,
 					status: body.status,
 					progress: body.progress,
@@ -641,11 +641,11 @@ export default new Elysia({ prefix: "/progress" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ profile, authorization, params }) => {
+		async ({ user, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, profile.unitId, params.unitId);
-				await setCurrentProgressEntry(tx, profile.unitId, params.unitId, params.entryId);
+				await lockUnitProgress(tx, user.id, params.unitId);
+				await setCurrentProgressEntry(tx, user.id, params.unitId, params.entryId);
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
@@ -664,11 +664,11 @@ export default new Elysia({ prefix: "/progress" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ profile, authorization, params }) => {
+		async ({ user, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, profile.unitId, params.unitId);
-				await deleteProgressEntry(tx, profile.unitId, params.unitId, params.entryId);
+				await lockUnitProgress(tx, user.id, params.unitId);
+				await deleteProgressEntry(tx, user.id, params.unitId, params.entryId);
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
@@ -684,7 +684,7 @@ export default new Elysia({ prefix: "/progress" })
 			},
 			detail: { summary: "List completed Content Structure nodes", tags: ["Progress"] },
 		},
-		async ({ profile, authorization, params }) => {
+		async ({ user, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const items = await database
 				.select({
@@ -701,7 +701,7 @@ export default new Elysia({ prefix: "/progress" })
 				.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 				.where(
 					and(
-						eq(contentStructureNodeProgress.profileId, profile.unitId),
+						eq(contentStructureNodeProgress.authUserId, user.id),
 						eq(contentStructureNode.ownerUnitId, params.unitId),
 						or(
 							and(
@@ -737,7 +737,7 @@ export default new Elysia({ prefix: "/progress" })
 			},
 			detail: { summary: "Record a Book chapter read", tags: ["Progress"] },
 		},
-		async ({ profile, authorization, params }) => {
+		async ({ user, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const canReadUnpublished = await authorization.unit.canUpdate(params.unitId);
 			const result = await database.transaction((tx) =>
@@ -745,7 +745,7 @@ export default new Elysia({ prefix: "/progress" })
 					canReadUnpublished,
 					nodeId: params.nodeId,
 					now: new Date(),
-					profileId: profile.unitId,
+					authUserId: user.id,
 					unitId: params.unitId,
 				}),
 			);
@@ -771,12 +771,12 @@ export default new Elysia({ prefix: "/progress" })
 			},
 			detail: { summary: "Create or replace progress", tags: ["Progress"] },
 		},
-		async ({ profile, authorization, params, body }) => {
+		async ({ user, authorization, params, body }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const now = new Date();
 			await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, profile.unitId, params.unitId);
-				await createProgressEntry(tx, profile.unitId, params.unitId, {
+				await lockUnitProgress(tx, user.id, params.unitId);
+				await createProgressEntry(tx, user.id, params.unitId, {
 					entryKind: "update",
 					status: body.status,
 					progress: body.progress,
@@ -792,13 +792,13 @@ export default new Elysia({ prefix: "/progress" })
 						.set({ visibility: body.visibility, updatedAt: new Date() })
 						.where(
 							and(
-								eq(unitProgress.profileId, profile.unitId),
+								eq(unitProgress.authUserId, user.id),
 								eq(unitProgress.unitId, params.unitId),
 								isNull(unitProgress.deletedAt),
 							),
 						);
 			});
-			return selectProgressSnapshot(profile.unitId, params.unitId);
+			return selectProgressSnapshot(user.id, params.unitId);
 		},
 	)
 	.post(
@@ -813,12 +813,12 @@ export default new Elysia({ prefix: "/progress" })
 			},
 			detail: { summary: "Complete current progress", tags: ["Progress"] },
 		},
-		async ({ profile, authorization, params, body }) => {
+		async ({ user, authorization, params, body }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const now = new Date();
 			await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, profile.unitId, params.unitId);
-				await createProgressEntry(tx, profile.unitId, params.unitId, {
+				await lockUnitProgress(tx, user.id, params.unitId);
+				await createProgressEntry(tx, user.id, params.unitId, {
 					entryKind: "completion",
 					status: "completed",
 					totalTimeMs: body.totalTimeMs,
@@ -833,13 +833,13 @@ export default new Elysia({ prefix: "/progress" })
 						.set({ visibility: body.visibility, updatedAt: new Date() })
 						.where(
 							and(
-								eq(unitProgress.profileId, profile.unitId),
+								eq(unitProgress.authUserId, user.id),
 								eq(unitProgress.unitId, params.unitId),
 								isNull(unitProgress.deletedAt),
 							),
 						);
 			});
-			return selectProgressSnapshot(profile.unitId, params.unitId);
+			return selectProgressSnapshot(user.id, params.unitId);
 		},
 	)
 	.delete(
@@ -853,17 +853,17 @@ export default new Elysia({ prefix: "/progress" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ profile, authorization, params }) => {
+		async ({ user, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, profile.unitId, params.unitId);
+				await lockUnitProgress(tx, user.id, params.unitId);
 				const now = new Date();
 				const entries = await tx
 					.select({ id: unitProgressEntry.id })
 					.from(unitProgressEntry)
 					.where(
 						and(
-							eq(unitProgressEntry.profileId, profile.unitId),
+							eq(unitProgressEntry.authUserId, user.id),
 							eq(unitProgressEntry.unitId, params.unitId),
 							isNull(unitProgressEntry.deletedAt),
 						),
@@ -884,15 +884,13 @@ export default new Elysia({ prefix: "/progress" })
 						deletedAt: now,
 						lastSeenAt: now,
 					})
-					.where(
-						and(eq(unitProgress.profileId, profile.unitId), eq(unitProgress.unitId, params.unitId)),
-					);
+					.where(and(eq(unitProgress.authUserId, user.id), eq(unitProgress.unitId, params.unitId)));
 				await tx
 					.update(unitProgressEntry)
 					.set({ deletedAt: now, updatedAt: now })
 					.where(
 						and(
-							eq(unitProgressEntry.profileId, profile.unitId),
+							eq(unitProgressEntry.authUserId, user.id),
 							eq(unitProgressEntry.unitId, params.unitId),
 							isNull(unitProgressEntry.deletedAt),
 						),
@@ -915,7 +913,7 @@ export default new Elysia({ prefix: "/progress" })
 			},
 			detail: { summary: "Complete Content Structure node", tags: ["Progress"] },
 		},
-		async ({ profile, authorization, params }) => {
+		async ({ user, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const nodeKind = await findCompletableContentStructureNode(params.unitId, params.nodeId);
 			if (!nodeKind) throw new ContentStructureNodeNotFound();
@@ -927,7 +925,7 @@ export default new Elysia({ prefix: "/progress" })
 						completed: true,
 						nodeId: params.nodeId,
 						now: new Date(),
-						profileId: profile.unitId,
+						authUserId: user.id,
 						unitId: params.unitId,
 					}),
 				);
@@ -935,7 +933,7 @@ export default new Elysia({ prefix: "/progress" })
 			}
 			await database
 				.insert(contentStructureNodeProgress)
-				.values({ profileId: profile.unitId, nodeId: params.nodeId })
+				.values({ authUserId: user.id, nodeId: params.nodeId })
 				.onConflictDoNothing();
 			return { completed: true };
 		},
@@ -954,7 +952,7 @@ export default new Elysia({ prefix: "/progress" })
 			},
 			detail: { summary: "Uncomplete Content Structure node", tags: ["Progress"] },
 		},
-		async ({ profile, authorization, params }) => {
+		async ({ user, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const nodeKind = await findCompletableContentStructureNode(params.unitId, params.nodeId);
 			if (!nodeKind) throw new ContentStructureNodeNotFound();
@@ -966,7 +964,7 @@ export default new Elysia({ prefix: "/progress" })
 						completed: false,
 						nodeId: params.nodeId,
 						now: new Date(),
-						profileId: profile.unitId,
+						authUserId: user.id,
 						unitId: params.unitId,
 					}),
 				);
@@ -976,7 +974,7 @@ export default new Elysia({ prefix: "/progress" })
 				.delete(contentStructureNodeProgress)
 				.where(
 					and(
-						eq(contentStructureNodeProgress.profileId, profile.unitId),
+						eq(contentStructureNodeProgress.authUserId, user.id),
 						eq(contentStructureNodeProgress.nodeId, params.nodeId),
 					),
 				);

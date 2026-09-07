@@ -1,8 +1,8 @@
-import type { StaticDecode } from "typebox";
-import { t } from "elysia";
-import { LicenseIds } from "@rezics/license";
-import { Value } from "typebox/value";
 import { PortableTextDocument } from "@rezics/block";
+import { LicenseIds } from "@rezics/license";
+import { t } from "elysia";
+import type { StaticDecode } from "typebox";
+import { Value } from "typebox/value";
 
 import {
 	ContentLanguageValues,
@@ -10,7 +10,7 @@ import {
 	UnitKindValues,
 	UnitStatusValues,
 } from "../../database/schema/contract-values";
-import { NullablePublicSlugAddressResponse, SlugLabelInput } from "../slug-addresses/schema";
+import { ResourceSectionValues, type ResourceSection } from "../../units/resource-section";
 import {
 	AvatarInput,
 	ChineseContentDisplay,
@@ -19,15 +19,15 @@ import {
 	DateTime,
 	FollowableUnitKind,
 	FractionalPositionInput,
+	License,
 	LocalizationLanguageQuery,
 	NonRealmFollowableUnitKind,
-	License,
-	RevisionContext,
 	ResourceVisibility,
+	RevisionContext,
 	StoredUiLocale,
 	Uuid,
 } from "../schema";
-import { ResourceSectionValues, type ResourceSection } from "../../units/resource-section";
+import { NullablePublicSlugAddressResponse, SlugLabelInput } from "../slug-addresses/schema";
 
 export const StudioSection = t.UnionEnum(ResourceSectionValues, { default: undefined });
 export type StudioSection = ResourceSection;
@@ -104,10 +104,10 @@ export function parseCollectionConfig(value: unknown): CollectionConfigV1 | null
 	return Value.Decode(CollectionConfigV1, value);
 }
 
-export const UpdateProfileBody = t.Object(
+export const UpdateEntityPresentationBody = t.Object(
 	{
-		updatedAt: t.String({ format: "date-time" }),
-		language: ContentLanguage,
+		expectedRevision: t.Integer({ minimum: 0 }),
+		language: t.String({ minLength: 1, maxLength: 255 }),
 		name: t.Optional(t.String({ minLength: 1, maxLength: 120 })),
 		avatar: t.Optional(t.Nullable(AvatarInput)),
 		bannerAssetId: t.Optional(t.Nullable(Uuid)),
@@ -117,7 +117,7 @@ export const UpdateProfileBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
-export type UpdateProfileBody = StaticDecode<typeof UpdateProfileBody>;
+export type UpdateEntityPresentationBody = StaticDecode<typeof UpdateEntityPresentationBody>;
 
 /**
  * Temporary first-party request for assigning the current Profile slug.
@@ -186,19 +186,19 @@ export type ReplacePreferencesBody = StaticDecode<typeof ReplacePreferencesBody>
 export const UserLookupParams = t.Object({ id: Uuid });
 export type UserLookupParams = StaticDecode<typeof UserLookupParams>;
 
-export const PublicProfileQuery = t.Object(LocalizationLanguageQuery, {
+export const EntityPresentationQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
-export type PublicProfileQuery = StaticDecode<typeof PublicProfileQuery>;
+export type EntityPresentationQuery = StaticDecode<typeof EntityPresentationQuery>;
 
-export const ProfileActivityQuery = t.Object(
+export const EntityActivityQuery = t.Object(
 	{
 		...LocalizationLanguageQuery,
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 	},
 	{ additionalProperties: false },
 );
-export type ProfileActivityQuery = StaticDecode<typeof ProfileActivityQuery>;
+export type EntityActivityQuery = StaticDecode<typeof EntityActivityQuery>;
 
 export const UserIdParams = t.Object({ id: Uuid });
 export type UserIdParams = StaticDecode<typeof UserIdParams>;

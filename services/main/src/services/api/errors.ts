@@ -1,38 +1,40 @@
-import { StatusCodes } from "http-status-codes";
 import type { JsonValue } from "@rezics/portable-text";
 import { HTTPError } from "elysia";
+import { StatusCodes } from "http-status-codes";
 
 import { AuthErrors } from "../auth/errors";
 import { AuthorizationErrors } from "../authorization/errors";
+import { CatalogReferenceNotFound, CatalogRevisionConflict } from "../catalog/storage";
 import { DatabaseErrors } from "../database/errors";
-import { PaginationErrors } from "../pagination/errors";
-import { SearchErrors } from "../search/errors";
-import { UnitErrors } from "../units/errors";
 import { EntityErrors } from "../entities/errors";
 import { FollowingErrors } from "../following/errors";
-import { UnitResourceErrors } from "./unit-resources/errors";
+import { OwnershipClaimErrors } from "../ownership-claims/errors";
+import { PaginationErrors } from "../pagination/errors";
+import { ParticipationDenied } from "../participation/policy";
+import { SearchErrors } from "../search/errors";
+import { UnitErrors } from "../units/errors";
 import { CollectionErrors } from "./collections/errors";
 import { ContentStructureErrors } from "./content-structure/errors";
-import { DomainExtensionErrors } from "./domain-extensions/errors";
+import { CustomThemeErrors } from "./custom-themes/errors";
 import { DockErrors } from "./docks/errors";
-import { ReportErrors } from "./reports/errors";
+import { DomainExtensionErrors } from "./domain-extensions/errors";
 import { FeedErrors } from "./feed/errors";
 import { GovernanceErrors } from "./governance/errors";
 import { HistoryErrors } from "./history/errors";
 import { ImageAssetErrors } from "./image-assets/errors";
 import { MessageErrors } from "./messages/errors";
 import { NotificationErrors } from "./notifications/errors";
-import { OwnershipClaimErrors } from "../ownership-claims/errors";
 import { PollErrors } from "./polls/errors";
 import { PostErrors } from "./posts/errors";
 import { ProgressErrors } from "./progress/errors";
+import { ApiQuotaPolicyErrors } from "./quota-policies/errors";
 import { RealmErrors } from "./realms/errors";
+import { ReportErrors } from "./reports/errors";
 import { ReviewErrors } from "./reviews/errors";
 import { TagErrors } from "./tags/errors";
 import { TokenErrors } from "./tokens/errors";
-import { ApiQuotaPolicyErrors } from "./quota-policies/errors";
+import { UnitResourceErrors } from "./unit-resources/errors";
 import { UserErrors } from "./users/errors";
-import { CustomThemeErrors } from "./custom-themes/errors";
 
 export class MalformedRequestBody extends HTTPError.id(
 	"MalformedRequestBody",
@@ -64,6 +66,9 @@ export class InternalError extends HTTPError.id(
 }
 
 export const ApiErrors = [
+	CatalogReferenceNotFound,
+	CatalogRevisionConflict,
+	ParticipationDenied,
 	MalformedRequestBody,
 	ValidationError,
 	InternalError,

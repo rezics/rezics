@@ -18,6 +18,7 @@ const [
 	emailDispatcher,
 	imageAssetCleanup,
 	apiQuotaCleanup,
+	accountErasureWorker,
 	studioCandidateCleanup,
 	unitMergeWorker,
 	unitMergeService,
@@ -34,6 +35,7 @@ const [
 	import("./services/email/dispatcher"),
 	import("./services/image-assets/cleanup"),
 	import("./services/auth/api-quota/cleanup"),
+	import("./services/participation/erasure"),
 	import("./services/studio/cleanup"),
 	import("./services/units/merge/worker"),
 	import("./services/units/merge/service"),
@@ -124,6 +126,11 @@ const lanes = {
 		},
 	],
 	maintenance: [
+		{
+			name: "account_erasure.dispatch",
+			intervalMs: 1000,
+			run: accountErasureWorker.dispatchAccountErasureBatch,
+		},
 		{
 			name: "image_asset.cleanup",
 			intervalMs: env.IMAGE_ASSET_CLEANUP_INTERVAL_MS,

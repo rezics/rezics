@@ -2,8 +2,8 @@ import { describe, expect, expectTypeOf, it } from "vitest";
 
 import type { GlobalSearchCursorToken, GroupedSearchCursorToken, SearchExpression } from "./query";
 import {
-	createSearchCursor,
 	createGlobalSearchCursor,
+	createSearchCursor,
 	parseGlobalSearchCursor,
 	parseSearchCursor,
 	readSearchExpressionLanguageBoundary,
@@ -44,7 +44,7 @@ describe("category Search expression specialization", () => {
 		});
 	});
 
-	it.each(["units", "users", "tags", "realms", "polls"] as const)(
+	it.each(["units", "entities", "tags", "realms", "polls"] as const)(
 		"proves the Profile content expression cannot match %s",
 		(category) => {
 			expect(specializeSearchExpressionForCategory(category, ProfileContentExpression)).toEqual({

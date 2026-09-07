@@ -5,7 +5,7 @@ const getSession = vi.hoisted(() => vi.fn());
 const verifyApiKey = vi.hoisted(() => vi.fn());
 const selectUser = vi.hoisted(() => vi.fn());
 const ensureAccountAuthenticationAllowed = vi.hoisted(() => vi.fn());
-const ensureProfile = vi.hoisted(() => vi.fn());
+const ensureSelfEntity = vi.hoisted(() => vi.fn());
 const ensureCanWrite = vi.hoisted(() => vi.fn());
 const ensureCanContribute = vi.hoisted(() => vi.fn());
 const enforceApiQuota = vi.hoisted(() => vi.fn());
@@ -28,11 +28,14 @@ vi.mock("../database", () => ({
 	},
 }));
 vi.mock("./account-state", () => ({ ensureAccountAuthenticationAllowed }));
-vi.mock("./profile", () => ({ ensureProfile }));
+vi.mock("./entity", () => ({ ensureSelfEntity }));
 vi.mock("../authorization", () => ({
 	Authorization: class {
 		readonly account = { ensureCanWrite, ensureCanContribute };
-		constructor(readonly profileId: string | undefined) {}
+		constructor(
+			readonly entityId: string | undefined,
+			readonly authUserId?: string,
+		) {}
 	},
 }));
 vi.mock("./api-quota/limit-store", () => ({ enforceApiQuota }));
@@ -76,8 +79,8 @@ beforeEach(() => {
 	selectUser.mockReset();
 	ensureAccountAuthenticationAllowed.mockReset();
 	ensureAccountAuthenticationAllowed.mockResolvedValue(undefined);
-	ensureProfile.mockReset();
-	ensureProfile.mockResolvedValue({ unitId: "019f9ea5-5188-7f3a-8819-380ec28c0b13" });
+	ensureSelfEntity.mockReset();
+	ensureSelfEntity.mockResolvedValue({ id: "019f9ea5-5188-7f3a-8819-380ec28c0b13" });
 	ensureCanWrite.mockReset();
 	ensureCanWrite.mockResolvedValue(undefined);
 	ensureCanContribute.mockReset();
@@ -98,7 +101,7 @@ describe("session access macro", () => {
 
 		const identity = await resolveIdentity(new Request("http://localhost/public"));
 
-		expect(identity.profile).toBeUndefined();
+		expect(identity.entity).toBeUndefined();
 		expect(getSession).toHaveBeenCalledOnce();
 		expect(setAuditCredentialContext).not.toHaveBeenCalled();
 	});
@@ -119,6 +122,7 @@ describe("session access macro", () => {
 		expect(await response.text()).toBe("session");
 		expect(ensureAccountAuthenticationAllowed).toHaveBeenCalledWith(user.id);
 		expect(setAuditCredentialContext).toHaveBeenCalledWith({
+			authUserId: user.id,
 			credentialKind: "session",
 			credentialId: sessionRecord.id,
 		});
@@ -239,6 +243,7 @@ describe("session access macro", () => {
 		expect(enforceApiQuota).toHaveBeenCalledOnce();
 		expect(release).toHaveBeenCalledOnce();
 		expect(setAuditCredentialContext).toHaveBeenCalledWith({
+			authUserId: user.id,
 			credentialKind: "api_token",
 			credentialId: "api-key-id",
 		});

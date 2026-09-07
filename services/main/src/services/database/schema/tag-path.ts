@@ -14,6 +14,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
 	createFractionalIndexPositionByteLengthConstraint,
@@ -24,15 +25,14 @@ import {
 	createUuidv7PrimaryKey,
 	fractionalIndexPosition,
 } from "./columns";
-import { profile } from "./profile";
 import { realm, realmUnit } from "./realm";
 import {
 	tagExpression,
 	TagExpressionArgumentRoleValues,
 	type TagExpressionArgumentRole,
 } from "./tag-expression";
-import { tagRelation, vocabularyNode } from "./vocabulary";
 import { unit } from "./unit";
+import { tagRelation, vocabularyNode } from "./vocabulary";
 
 export const TagPathMinimumMembers = 2 as const;
 export const TagPathMaximumMembers = 16 as const;
@@ -71,7 +71,7 @@ export const tagPath = pgTable(
 			.references(() => vocabularyNode.id, { onDelete: "restrict" }),
 		createdByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
@@ -137,7 +137,7 @@ export const tagPathVote = pgTable(
 			.references(() => tagPath.id, { onDelete: "restrict" }),
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		value: integer().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -167,7 +167,7 @@ export const tagPathSense = pgTable(
 		provenance: createJsonObjectColumn<TagPathSenseProvenance>(),
 		createdByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		sealedAt: createTimestampMsColumn(),
 		retiredAt: createTimestampMsColumn(),
@@ -248,7 +248,7 @@ export const unitTagPathApplication = pgTable(
 		senseId: uuid()
 			.notNull()
 			.references(() => tagPathSense.id, { onDelete: "restrict" }),
-		createdByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
+		createdByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
 		pinned: boolean().default(false).notNull(),
 		position: fractionalIndexPosition(),
 		createdAt: createCreatedAtColumn(),
@@ -284,7 +284,7 @@ export const unitTagPathApplicationJudgment = pgTable(
 			.references(() => unitTagPathApplication.id, { onDelete: "cascade" }),
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		fitVote: integer(),
 		spoilerLevel: smallint(),
 		fitUpdatedAt: createTimestampMsColumn(),
@@ -341,8 +341,8 @@ export const tagPathMerge = pgTable(
 		proposalProvenance: createJsonObjectColumn<TagPathAssistanceProvenance>(),
 		proposedByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
-		resolvedByProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
+		resolvedByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		resolvedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -406,7 +406,7 @@ export const realmTagPath = pgTable(
 			.references(() => tagPath.id, { onDelete: "restrict" }),
 		createdByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
@@ -423,7 +423,7 @@ export const realmTagPathVote = pgTable(
 		pathId: uuid().notNull(),
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		value: integer().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -451,7 +451,7 @@ export const realmTagPathSense = pgTable(
 		pathId: uuid().notNull(),
 		createdByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
@@ -481,7 +481,7 @@ export const realmUnitTagPathApplication = pgTable(
 		senseId: uuid().notNull(),
 		createdByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -525,7 +525,7 @@ export const realmUnitTagPathApplicationJudgment = pgTable(
 			.references(() => realmUnitTagPathApplication.id, { onDelete: "cascade" }),
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		fitVote: integer(),
 		spoilerLevel: smallint(),
 		fitUpdatedAt: createTimestampMsColumn(),

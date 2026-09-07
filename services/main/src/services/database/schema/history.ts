@@ -15,6 +15,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
 	createTimestampMsColumn,
@@ -26,12 +27,11 @@ import {
 	ContentLanguageValues,
 	RevisionAttributionAssuranceValues,
 	RevisionContributionRoleValues,
-	UnitStatusActorKindValues,
 	UnitRevisionPrimaryContributionKindValues,
+	UnitStatusActorKindValues,
 	toEnumValues,
 } from "./contract-values";
 import { entity } from "./entity";
-import { profile } from "./profile";
 import { unit, unitStatus } from "./unit";
 
 /**
@@ -45,7 +45,7 @@ export const profileResourceParticipation = pgTable(
 	{
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
 		resourceUnitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
@@ -180,7 +180,7 @@ export const unitRevision = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
 		parentRevisionId: uuid(),
-		actorProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		actorProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		primaryContributionKind: unitRevisionPrimaryContributionKind()
 			.default("unattributed")
 			.notNull(),
@@ -262,7 +262,7 @@ export const unitStatusEvent = pgTable(
 		fromStatus: unitStatus(),
 		toStatus: unitStatus().notNull(),
 		actorKind: unitStatusActorKind().notNull(),
-		changedByProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		changedByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		revisionId: uuid(),
 		actorHidden: boolean().default(false).notNull(),
 		createdAt: createCreatedAtColumn(),

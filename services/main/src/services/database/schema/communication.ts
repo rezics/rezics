@@ -12,14 +12,10 @@ import {
 	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
+import { users } from "./auth";
 
 import { pgTable } from "./base";
-import {
-	type DeliveryLocale,
-	DeliveryLocaleValues,
-	NotificationKindValues,
-	toEnumValues,
-} from "./contract-values";
+import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
 	createJsonObjectColumn,
@@ -28,8 +24,13 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
+import {
+	type DeliveryLocale,
+	DeliveryLocaleValues,
+	NotificationKindValues,
+	toEnumValues,
+} from "./contract-values";
 import { unitFollow } from "./follow";
-import { profile } from "./profile";
 import { unit } from "./unit";
 
 export const notificationKind = pgEnum("notification_kind", toEnumValues(NotificationKindValues));
@@ -60,10 +61,10 @@ export const notification = pgTable(
 	"notification",
 	{
 		id: createUuidv7PrimaryKey(),
-		recipientProfileId: uuid()
+		recipientAuthUserId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
-		actorProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
+			.references(() => users.id, { onDelete: "cascade" }),
+		actorProfileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
 		kind: notificationKind().notNull(),
 		subjectUnitId: uuid().references(() => unit.id, { onDelete: "set null" }),
 		payload: createJsonObjectColumn(),
@@ -79,19 +80,19 @@ export const notification = pgTable(
 	},
 	(table) => [
 		uniqueIndex("notification_recipient_dedupe_key")
-			.on(table.recipientProfileId, table.dedupeKey)
+			.on(table.recipientAuthUserId, table.dedupeKey)
 			.where(sql`${table.dedupeKey} is not null`),
 		index("notification_recipient_created_at_idx")
-			.on(table.recipientProfileId, table.createdAt.desc(), table.id.desc())
+			.on(table.recipientAuthUserId, table.createdAt.desc(), table.id.desc())
 			.where(sql`${table.inAppVisible}`),
 		index("notification_recipient_unread_idx")
-			.on(table.recipientProfileId, table.createdAt.desc(), table.id.desc())
+			.on(table.recipientAuthUserId, table.createdAt.desc(), table.id.desc())
 			.where(sql`${table.inAppVisible} and ${table.readAt} is null`),
 		index("notification_actor_idx").on(table.actorProfileId),
 		index("notification_subject_unit_idx").on(table.subjectUnitId),
 		check(
 			"notification_not_self_check",
-			sql`${table.actorProfileId} is null or ${table.actorProfileId} <> ${table.recipientProfileId}`,
+			sql`${table.actorProfileId} is null or ${table.actorProfileId} <> ${table.recipientAuthUserId}`,
 		),
 		check(
 			"notification_read_at_check",
@@ -226,9 +227,9 @@ export const emailOutbox = pgTable(
 export const notificationPreference = pgTable(
 	"notification_preference",
 	{
-		profileId: uuid()
+		authUserId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		kind: notificationKind().notNull(),
 		inApp: boolean().default(true).notNull(),
 		email: boolean().default(true).notNull(),
@@ -236,7 +237,7 @@ export const notificationPreference = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.profileId, table.kind] }),
+		primaryKey({ columns: [table.authUserId, table.kind] }),
 		index("notification_preference_kind_idx").on(table.kind),
 	],
 );
@@ -274,24 +275,30 @@ export const conversation = pgTable(
 	"conversation",
 	{
 		id: createUuidv7PrimaryKey(),
-		participantLowProfileId: uuid()
+		participantLowEntityId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
-		participantHighProfileId: uuid()
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
+		participantHighEntityId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
+		participantLowAuthUserId: uuid()
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		participantHighAuthUserId: uuid()
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
 		unique("conversation_participant_pair_key").on(
-			table.participantLowProfileId,
-			table.participantHighProfileId,
+			table.participantLowAuthUserId,
+			table.participantHighAuthUserId,
 		),
-		index("conversation_low_profile_idx").on(table.participantLowProfileId),
-		index("conversation_high_profile_idx").on(table.participantHighProfileId),
+		index("conversation_low_auth_user_idx").on(table.participantLowAuthUserId),
+		index("conversation_high_auth_user_idx").on(table.participantHighAuthUserId),
 		check(
 			"conversation_participant_order_check",
-			sql`${table.participantLowProfileId} < ${table.participantHighProfileId}`,
+			sql`${table.participantLowAuthUserId} < ${table.participantHighAuthUserId}`,
 		),
 	],
 );
@@ -303,9 +310,12 @@ export const message = pgTable(
 		conversationId: uuid()
 			.notNull()
 			.references(() => conversation.id, { onDelete: "cascade" }),
-		senderProfileId: uuid()
+		senderEntityId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
+		senderAuthUserId: uuid()
+			.notNull()
+			.references(() => users.id, { onDelete: "restrict" }),
 		/** @UNIT_LOCALIZATION_EXEMPT Authored snapshot: original direct message; translation would alter the message. */
 		content: text(),
 		deletedAt: createTimestampMsColumn(),
@@ -319,7 +329,7 @@ export const message = pgTable(
 			table.id.desc(),
 		),
 		index("message_sender_created_at_idx").on(
-			table.senderProfileId,
+			table.senderAuthUserId,
 			table.createdAt.desc(),
 			table.id.desc(),
 		),
@@ -340,17 +350,17 @@ export const conversationRead = pgTable(
 		conversationId: uuid()
 			.notNull()
 			.references(() => conversation.id, { onDelete: "cascade" }),
-		profileId: uuid()
+		authUserId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		lastReadMessageId: uuid().references(() => message.id, { onDelete: "set null" }),
 		readAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.conversationId, table.profileId] }),
-		index("conversation_read_profile_idx").on(table.profileId),
+		primaryKey({ columns: [table.conversationId, table.authUserId] }),
+		index("conversation_read_auth_user_idx").on(table.authUserId),
 		index("conversation_read_last_message_idx").on(table.lastReadMessageId),
 	],
 );

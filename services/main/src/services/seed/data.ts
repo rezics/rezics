@@ -72,7 +72,7 @@ export const SeedPlan = {
 	contentStructureNodes: 300,
 	pollOptions: 120,
 	profileUnitFollows: 300,
-	profileBlocks: 50,
+	accountEntityBlocks: 50,
 	collectionItems: 1_500,
 	unitProgress: 1_000,
 	contentStructureNodeProgress: 500,
@@ -298,24 +298,26 @@ type SeedEnforcementKind = (typeof EnforcementKindValues)[number];
 
 export function createSeedEnforcementPlan(input: {
 	readonly index: number;
-	readonly profileId: string;
-	readonly actorProfileId: string;
+	readonly authUserId: string;
+	readonly actorAuthUserId: string;
+	readonly actorEntityId: string;
 	readonly kind: SeedEnforcementKind;
 	readonly startsAt: Date;
 	readonly expiresAt: Date | null;
 }) {
 	const suffix = position(input.index);
 	return {
+		actorEntityId: input.actorEntityId,
 		action: {
-			actorProfileId: input.actorProfileId,
-			targetProfileId: input.profileId,
+			actorAuthUserId: input.actorAuthUserId,
+			targetAuthUserId: input.authUserId,
 			kind: "issue" as const,
 			enforcementKind: input.kind,
 			requestId: `seed-enforcement-request-${suffix}`,
 			createdAt: input.startsAt,
 		},
 		enforcement: {
-			profileId: input.profileId,
+			authUserId: input.authUserId,
 			kind: input.kind,
 			startsAt: input.startsAt,
 			expiresAt: input.expiresAt,

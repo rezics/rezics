@@ -1,6 +1,6 @@
-import type { StaticDecode } from "typebox";
 import { PlatformCapabilityValues } from "@rezics/access";
 import { t } from "elysia";
+import type { StaticDecode } from "typebox";
 
 import { DateTime, Uuid } from "../schema";
 
@@ -9,29 +9,29 @@ export const PlatformCapability = t.UnionEnum(PlatformCapabilityValues);
 export const PlatformAccessGrantResponse = t.Object({
 	id: Uuid,
 	capability: PlatformCapability,
-	grantedByProfileId: Uuid,
+	grantedByAuthUserId: Uuid,
 	expiresAt: t.Nullable(DateTime),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
 
-export const PlatformAccessProfileResponse = t.Object({
-	profileId: Uuid,
+export const PlatformAccessAccountResponse = t.Object({
+	authUserId: Uuid,
 	name: t.Nullable(t.String()),
 	email: t.String({ format: "email" }),
 	grants: t.Array(PlatformAccessGrantResponse),
 	revision: t.String({ minLength: 1 }),
 });
 
-export const PlatformAccessProfileListResponse = t.Object({
-	items: t.Array(PlatformAccessProfileResponse),
+export const PlatformAccessAccountListResponse = t.Object({
+	items: t.Array(PlatformAccessAccountResponse),
 });
 
 export const PlatformAccessPolicyResponse = t.Object({
 	capabilities: t.Array(PlatformCapability, { uniqueItems: true }),
 });
 
-export const PlatformAccessProfilesQuery = t.Object(
+export const PlatformAccessAccountsQuery = t.Object(
 	{
 		query: t.Optional(t.String({ minLength: 1, maxLength: 200 })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
@@ -39,11 +39,11 @@ export const PlatformAccessProfilesQuery = t.Object(
 	{ additionalProperties: false },
 );
 
-export const PlatformAccessProfileParams = t.Object({ profileId: Uuid });
+export const PlatformAccessAccountParams = t.Object({ authUserId: Uuid });
 
 const CustomThemeExternalLiveAccessGrantResponseFields = {
 	id: Uuid,
-	grantedByProfileId: Uuid,
+	grantedByAuthUserId: Uuid,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 } as const;
@@ -61,16 +61,16 @@ export const CustomThemeExternalLiveAccessGrantResponse = t.Union([
 	}),
 ]);
 
-export const CustomThemeExternalLiveAccessProfileResponse = t.Object({
-	profileId: Uuid,
+export const CustomThemeExternalLiveAccessAccountResponse = t.Object({
+	authUserId: Uuid,
 	name: t.Nullable(t.String()),
 	email: t.String({ format: "email" }),
 	grant: t.Nullable(CustomThemeExternalLiveAccessGrantResponse),
 	revision: t.String({ minLength: 1 }),
 });
 
-export const CustomThemeExternalLiveAccessProfileListResponse = t.Object({
-	items: t.Array(CustomThemeExternalLiveAccessProfileResponse),
+export const CustomThemeExternalLiveAccessAccountListResponse = t.Object({
+	items: t.Array(CustomThemeExternalLiveAccessAccountResponse),
 });
 
 export const SetCustomThemeExternalLiveAccessBody = t.Union([

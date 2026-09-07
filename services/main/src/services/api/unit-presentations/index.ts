@@ -1,15 +1,13 @@
-import type { StaticDecode } from "typebox";
 import {
 	CustomThemeExternalLiveAccessCapability,
 	DevelopmentPreviewCapability,
 	type PlatformCapability,
 } from "@rezics/access";
-import { StatusCodes } from "http-status-codes";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
+import type { StaticDecode } from "typebox";
 
-import session from "../../auth/session";
-import { resolveIdentity } from "../../auth/session";
-import { database } from "../../database";
+import session, { resolveIdentity } from "../../auth/session";
 import {
 	deleteCustomThemeInstallation,
 	getUnitPresentation,
@@ -18,8 +16,7 @@ import {
 	putUnitPresentation,
 	resolveUnitPresentation,
 } from "../../custom-themes";
-import { NoContentResponse } from "../schema/action-response";
-import { toApiErrorResponse } from "../schema/response";
+import { database } from "../../database";
 import {
 	CustomThemeInstallationResponse,
 	HostUnitParams,
@@ -30,6 +27,8 @@ import {
 	ResolveUnitPresentationQuery,
 	UnitPresentationResponse,
 } from "../custom-themes/schema";
+import { NoContentResponse } from "../schema/action-response";
+import { toApiErrorResponse } from "../schema/response";
 
 async function viewerEligibility(identity: {
 	readonly profile?: { readonly unitId: string } | null;
@@ -87,7 +86,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 			await identity.authorization.unit.ensureCanRead(params.unitId);
 			return resolveUnitPresentation({
 				hostUnitId: params.unitId,
-				viewerProfileId: identity.profile?.unitId,
+				viewerProfileId: identity.entity?.id,
 				viewerEligible: await viewerEligibility(identity),
 				safeMode: query.safeMode ?? false,
 			});
@@ -114,7 +113,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 			return presentationPolicyFromResolved(
 				await resolveUnitPresentation({
 					hostUnitId: params.unitId,
-					viewerProfileId: identity.profile?.unitId,
+					viewerProfileId: identity.entity?.id,
 					viewerEligible: await viewerEligibility(identity),
 					safeMode: query.safeMode ?? false,
 				}),
@@ -156,12 +155,12 @@ export default new Elysia({ prefix: "/units/by-id" })
 				tags: ["Unit Presentations"],
 			},
 		},
-		async ({ authorization, params, profile, body }) => {
+		async ({ authorization, params, entity, body }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["presentation"]]);
 			return database.transaction((tx) =>
 				putUnitPresentation(tx, {
 					hostUnitId: params.unitId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					expectedRevisionId: body.expectedRevisionId,
 					document: body.document,
 				}),
@@ -188,13 +187,13 @@ export default new Elysia({ prefix: "/units/by-id" })
 			},
 			detail: { summary: "Install one exact Custom Theme revision", tags: ["Unit Presentations"] },
 		},
-		async ({ authorization, params, profile, body }) => {
+		async ({ authorization, params, entity, body }) => {
 			await ensureInstallerEligibility(authorization, params.unitId);
 			return database.transaction((tx) =>
 				putCustomThemeInstallation(tx, {
 					hostUnitId: params.unitId,
 					revisionId: body.revisionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 				}),
 			);
 		},
@@ -218,12 +217,12 @@ export default new Elysia({ prefix: "/units/by-id" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ authorization, params, profile, status }) => {
+		async ({ authorization, params, entity, status }) => {
 			await ensureInstallerEligibility(authorization, params.unitId);
 			await database.transaction((tx) =>
 				deleteCustomThemeInstallation(tx, {
 					hostUnitId: params.unitId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 				}),
 			);
 			return status(StatusCodes.NO_CONTENT, undefined);

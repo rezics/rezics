@@ -11,7 +11,7 @@ describe("effective account state", () => {
 			expiresAt: null,
 			revision: 0,
 			updatedAt: null,
-			updatedByProfileId: null,
+			updatedByAuthUserId: null,
 		});
 	});
 
@@ -26,7 +26,7 @@ describe("effective account state", () => {
 					expiresAt,
 					revision: 2,
 					updatedAt: new Date("2026-07-28T00:00:00.000Z"),
-					updatedByProfileId: "01900000-0000-7000-8000-000000000001",
+					updatedByAuthUserId: "01900000-0000-7000-8000-000000000001",
 				},
 				new Date("2026-07-29T00:00:00.000Z"),
 			).state,
@@ -42,7 +42,7 @@ describe("effective account state", () => {
 				expiresAt: new Date("2026-07-28T00:00:00.000Z"),
 				revision: 3,
 				updatedAt: new Date("2026-07-27T00:00:00.000Z"),
-				updatedByProfileId: "01900000-0000-7000-8000-000000000001",
+				updatedByAuthUserId: "01900000-0000-7000-8000-000000000001",
 			},
 			new Date("2026-07-29T00:00:00.000Z"),
 		);

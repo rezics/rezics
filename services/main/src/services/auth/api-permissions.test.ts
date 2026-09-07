@@ -29,4 +29,11 @@ describe("API permissions", () => {
 		expect(isApiPermission("unknown:write")).toBe(false);
 		expect(fromApiKeyPermissions({ unit: ["admin"] })).toEqual([]);
 	});
+	it("persists account permissions without accepting the retired Profile statement key", () => {
+		expect(toApiKeyPermissions(["account:read", "account:update"])).toEqual({
+			account: ["read", "update"],
+		});
+		expect(fromApiKeyPermissions({ profile: ["read", "update"] })).toEqual([]);
+		expect(fromApiKeyPermissions({ account: ["read"] })).toEqual(["account:read"]);
+	});
 });

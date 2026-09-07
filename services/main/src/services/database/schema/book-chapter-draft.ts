@@ -11,6 +11,8 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { book } from "./book";
+import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
 	createTimestampMsColumn,
@@ -18,8 +20,6 @@ import {
 	createUuidv7PrimaryKey,
 } from "./columns";
 import { contentStructure } from "./content-structure";
-import { profile } from "./profile";
-import { book } from "./book";
 
 export const bookChapterDraftJobState = pgEnum("book_chapter_draft_job_state", [
 	"pending",
@@ -41,7 +41,7 @@ export const bookChapterDraftJob = pgTable(
 		structureId: uuid().references(() => contentStructure.id, { onDelete: "restrict" }),
 		requestedByProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		bookUpdatedAt: createTimestampMsColumn().notNull(),
 		state: bookChapterDraftJobState().default("pending").notNull(),
 		cursorNodeId: uuid(),

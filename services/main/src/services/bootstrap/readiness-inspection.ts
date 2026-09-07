@@ -1,22 +1,29 @@
 import { and, asc, count, eq, inArray, isNull, notInArray } from "drizzle-orm";
 
+import { DefaultApiQuotaPolicies } from "../auth/api-quota/policy-schema";
+import { ContentStructureNotFound } from "../content-structure/errors";
+import { presentNavigationStructure } from "../content-structure/navigation";
 import { database } from "../database";
 import {
+	accountPreference,
 	accounts,
 	apiQuotaPolicy,
 	apiQuotaPolicyRevision,
+	authEntity,
 	collection,
 	collectionStructureRevisionHead,
 	contentStructure,
 	contentStructureNode,
 	creditAttribution,
+	entityIdentity,
+	entityParticipation,
+	entityPresentation,
 	imageAsset,
 	imageObject,
+	participationGrant,
 	platformCapabilityGrant,
 	post,
-	profile,
 	profileFavoritesCollection,
-	profilePreference,
 	realm,
 	realmMember,
 	unit,
@@ -29,15 +36,12 @@ import {
 	zone,
 	zonePage,
 } from "../database/schema";
-import { DefaultApiQuotaPolicies } from "../auth/api-quota/policy-schema";
-import { ContentStructureNotFound } from "../content-structure/errors";
-import { presentNavigationStructure } from "../content-structure/navigation";
 import {
 	BootstrapAccountIds,
+	BootstrapAccountManifest,
 	BootstrapAuthUserIds,
 	BootstrapPlatformAccessManifest,
 	BootstrapProfileIdValues,
-	BootstrapProfileManifest,
 	BootstrapRealmManifest,
 	BootstrapUnitIds,
 	CuratedCreationTagCollectionManifest,
@@ -53,7 +57,9 @@ export async function inspectInitialInstallationBundle() {
 		bootstrapUsers,
 		accountCount,
 		profileCount,
-		bootstrapProfileOwners,
+		bootstrapEntityControls,
+		bootstrapEntityPresentations,
+		bootstrapControlGrants,
 		curatedTagCollections,
 		curatedTagCollectionOwners,
 		curatedTagCollectionPublishers,
@@ -69,7 +75,7 @@ export async function inspectInitialInstallationBundle() {
 		bootstrapProfiles,
 		profileFavorites,
 		profileScoreMemberships,
-		profilePreferences,
+		accountPreferences,
 		profileFollows,
 		firstOrdinaryFollowPositions,
 		localizations,
@@ -102,18 +108,23 @@ export async function inspectInitialInstallationBundle() {
 			.where(inArray(accounts.id, BootstrapAccountIds)),
 		database
 			.select({ value: count() })
-			.from(profile)
-			.where(inArray(profile.id, BootstrapProfileIdValues)),
+			.from(entityIdentity)
+			.where(inArray(entityIdentity.id, BootstrapProfileIdValues)),
 		database
-			.select({
-				unitId: unitOwnership.unitId,
-				profileId: unitOwnership.profileId,
-			})
-			.from(unitOwnership)
+			.select()
+			.from(entityParticipation)
+			.where(inArray(entityParticipation.entityId, BootstrapProfileIdValues)),
+		database
+			.select()
+			.from(entityPresentation)
+			.where(inArray(entityPresentation.entityId, BootstrapProfileIdValues)),
+		database
+			.select()
+			.from(participationGrant)
 			.where(
 				and(
-					inArray(unitOwnership.unitId, BootstrapProfileIdValues),
-					isNull(unitOwnership.revokedAt),
+					inArray(participationGrant.actingEntityId, BootstrapProfileIdValues),
+					isNull(participationGrant.revokedAt),
 				),
 			),
 		database
@@ -143,7 +154,7 @@ export async function inspectInitialInstallationBundle() {
 		database
 			.select({
 				sourceUnitId: creditAttribution.sourceUnitId,
-				creditedUnitId: creditAttribution.creditedUnitId,
+				creditedEntityId: creditAttribution.creditedEntityId,
 				role: creditAttribution.role,
 			})
 			.from(creditAttribution)
@@ -167,19 +178,19 @@ export async function inspectInitialInstallationBundle() {
 			),
 		database
 			.select({
-				profileId: platformCapabilityGrant.profileId,
+				authUserId: platformCapabilityGrant.authUserId,
 				capability: platformCapabilityGrant.capability,
-				grantedByProfileId: platformCapabilityGrant.grantedByProfileId,
+				grantedByAuthUserId: platformCapabilityGrant.grantedByAuthUserId,
 				expiresAt: platformCapabilityGrant.expiresAt,
 				revokedAt: platformCapabilityGrant.revokedAt,
-				revokedByProfileId: platformCapabilityGrant.revokedByProfileId,
+				revokedByAuthUserId: platformCapabilityGrant.revokedByAuthUserId,
 			})
 			.from(platformCapabilityGrant)
 			.where(
 				and(
 					inArray(
-						platformCapabilityGrant.profileId,
-						BootstrapPlatformAccessManifest.map((access) => access.profileId),
+						platformCapabilityGrant.authUserId,
+						BootstrapPlatformAccessManifest.map((access) => access.authUserId),
 					),
 					isNull(platformCapabilityGrant.revokedAt),
 				),
@@ -300,9 +311,14 @@ export async function inspectInitialInstallationBundle() {
 			.where(eq(imageAsset.id, OfficialRealmAvatarAsset.id))
 			.limit(1),
 		database
-			.select({ id: profile.id })
-			.from(profile)
-			.where(inArray(profile.id, BootstrapProfileIdValues)),
+			.select({ id: authEntity.entityId, authUserId: authEntity.authUserId })
+			.from(authEntity)
+			.where(
+				inArray(
+					authEntity.authUserId,
+					BootstrapAccountManifest.map((value) => value.authUserId),
+				),
+			),
 		database
 			.select({
 				id: profileFavoritesCollection.collectionId,
@@ -321,11 +337,16 @@ export async function inspectInitialInstallationBundle() {
 			),
 		database
 			.select({
-				profileId: profilePreference.profileId,
-				defaultScoreRealmId: profilePreference.defaultScoreRealmId,
+				authUserId: accountPreference.authUserId,
+				defaultScoreRealmId: accountPreference.defaultScoreRealmId,
 			})
-			.from(profilePreference)
-			.where(inArray(profilePreference.profileId, BootstrapProfileIdValues)),
+			.from(accountPreference)
+			.where(
+				inArray(
+					accountPreference.authUserId,
+					BootstrapAccountManifest.map((value) => value.authUserId),
+				),
+			),
 		database
 			.select({
 				profileId: unitFollow.followerProfileId,
@@ -381,7 +402,6 @@ export async function inspectInitialInstallationBundle() {
 			.from(unitLocalization)
 			.where(
 				inArray(unitLocalization.unitId, [
-					...BootstrapProfileManifest.map((bootstrapProfile) => bootstrapProfile.profileId),
 					...CuratedCreationTagCollectionManifest.map((curatedCollection) => curatedCollection.id),
 					...BootstrapRealmManifest.map((bootstrapRealm) => bootstrapRealm.id),
 					...OfficialZoneManifest.map((officialZone) => officialZone.id),
@@ -418,7 +438,9 @@ export async function inspectInitialInstallationBundle() {
 		bootstrapUsers,
 		accountCount,
 		profileCount,
-		bootstrapProfileOwners,
+		bootstrapEntityControls,
+		bootstrapEntityPresentations,
+		bootstrapControlGrants,
 		curatedTagCollections,
 		curatedTagCollectionOwners,
 		curatedTagCollectionPublishers,
@@ -434,7 +456,7 @@ export async function inspectInitialInstallationBundle() {
 		bootstrapProfiles,
 		profileFavorites,
 		profileScoreMemberships,
-		profilePreferences,
+		accountPreferences,
 		profileFollows,
 		firstOrdinaryFollowPositions,
 		localizations,

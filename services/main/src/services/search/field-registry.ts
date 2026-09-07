@@ -43,7 +43,6 @@ export interface SearchSortDefinition {
 
 const allCategories: readonly SearchCategory[] = [
 	"units",
-	"users",
 	"entities",
 	"tags",
 	"posts",
@@ -142,7 +141,7 @@ export const CurrentSearchFieldRegistry = {
 		operators: equality,
 		facet: "postgres-authorized",
 		sort: "none",
-		documentPath: "filters.creditedUnitIds",
+		documentPath: "filters.creditedEntityIds",
 		postgres: ["equality"],
 		residual: false,
 	},
@@ -563,14 +562,14 @@ export const CurrentSearchSortRegistry = {
 		orderingIndexes: ["unit_public_published_at_desc_idx"],
 	},
 	"followerCount:asc": {
-		categories: ["users", "realms"],
+		categories: ["realms"],
 		requiresQuery: false,
 		postgres: ["ranking.followerCount:asc", "id:asc"],
 		candidateSource: "sparse-btree",
 		orderingIndexes: ["unit_follow_stat_count_asc_idx", "unit_public_discoverable_idx"],
 	},
 	"followerCount:desc": {
-		categories: ["users", "realms"],
+		categories: ["realms"],
 		requiresQuery: false,
 		postgres: ["ranking.followerCount:desc", "id:desc"],
 		candidateSource: "sparse-btree",

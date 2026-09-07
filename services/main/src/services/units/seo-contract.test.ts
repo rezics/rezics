@@ -48,7 +48,7 @@ describe("public Unit SEO contract", () => {
 
 	it("covers every Unit kind with a public landing route and excludes internal-only kinds", () => {
 		for (const kind of [
-			"profile",
+			"entity",
 			"book",
 			"software",
 			"release",

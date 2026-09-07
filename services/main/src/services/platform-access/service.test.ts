@@ -25,25 +25,25 @@ describe("Custom Theme external-live access policy", () => {
 	});
 
 	it("models only the self-issued Bootstrap administrator grant as permanent", () => {
-		const profileId = BootstrapPlatformAdministratorProfile.profileId;
+		const authUserId = BootstrapPlatformAdministratorProfile.authUserId;
 		expect(
 			isPermanentBootstrapCustomThemeExternalLiveAccessGrant({
-				profileId,
-				grantedByProfileId: profileId,
+				authUserId,
+				grantedByAuthUserId: authUserId,
 				expiresAt: null,
 			}),
 		).toBe(true);
 		expect(
 			isPermanentBootstrapCustomThemeExternalLiveAccessGrant({
-				profileId: "019b76da-a800-7200-8000-000000000003",
-				grantedByProfileId: profileId,
+				authUserId: "019b76da-a800-7200-8000-000000000003",
+				grantedByAuthUserId: authUserId,
 				expiresAt: null,
 			}),
 		).toBe(false);
 		expect(
 			isPermanentBootstrapCustomThemeExternalLiveAccessGrant({
-				profileId,
-				grantedByProfileId: "019b76da-a800-7200-8000-000000000003",
+				authUserId,
+				grantedByAuthUserId: "019b76da-a800-7200-8000-000000000003",
 				expiresAt: null,
 			}),
 		).toBe(false);
@@ -56,10 +56,10 @@ describe("Custom Theme external-live access policy", () => {
 			createdAt: new Date("2026-01-01T00:00:00.000Z"),
 			updatedAt: new Date("2026-01-01T00:00:00.000Z"),
 		};
-		const profileId = BootstrapPlatformAdministratorProfile.profileId;
+		const authUserId = BootstrapPlatformAdministratorProfile.authUserId;
 		expect(
 			classifyCustomThemeExternalLiveAccessGrant(
-				{ ...common, profileId, grantedByProfileId: profileId, expiresAt: null },
+				{ ...common, authUserId, grantedByAuthUserId: authUserId, expiresAt: null },
 				now,
 			),
 		).toMatchObject({ state: "permanent", expiresAt: null });
@@ -67,8 +67,8 @@ describe("Custom Theme external-live access policy", () => {
 			classifyCustomThemeExternalLiveAccessGrant(
 				{
 					...common,
-					profileId: "019b76da-a800-7200-8000-000000000003",
-					grantedByProfileId: profileId,
+					authUserId: "019b76da-a800-7200-8000-000000000003",
+					grantedByAuthUserId: authUserId,
 					expiresAt: null,
 				},
 				now,

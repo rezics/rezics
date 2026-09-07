@@ -1,6 +1,10 @@
-import { BootstrapProfileManifest, SlugNamespaceManifest } from "./foundation";
 import { CuratedCreationTagCollectionManifest } from "./collections";
 import { ContentLabelRegistryIds } from "./content-labels";
+import {
+	BootstrapAccountManifest,
+	BootstrapProfileManifest,
+	SlugNamespaceManifest,
+} from "./foundation";
 import { BootstrapRealmManifest, OfficialRealmAvatarAsset } from "./realms";
 import { OfficialZoneManifest } from "./zones";
 
@@ -12,8 +16,7 @@ export * from "./zones";
 
 export const BootstrapUnitIds = [
 	...SlugNamespaceManifest.map((namespace) => namespace.id),
-	...BootstrapProfileManifest.map((profile) => profile.profileId),
-	...BootstrapProfileManifest.map((profile) => profile.favoritesCollectionId),
+	...BootstrapAccountManifest.map((profile) => profile.favoritesCollectionId),
 	...CuratedCreationTagCollectionManifest.map((collection) => collection.id),
 	...ContentLabelRegistryIds,
 	...BootstrapRealmManifest.map((realm) => realm.id),
@@ -22,10 +25,13 @@ export const BootstrapUnitIds = [
 	...OfficialZoneManifest.map((zone) => zone.homePage.id),
 ] as const;
 
-export const BootstrapAuthUserIds = BootstrapProfileManifest.map((profile) => profile.authUserId);
-export const BootstrapAccountIds = BootstrapProfileManifest.map((profile) => profile.accountId);
+export const BootstrapAuthUserIds = BootstrapAccountManifest.map((profile) => profile.authUserId);
+export const BootstrapAccountIds = BootstrapAccountManifest.map((profile) => profile.accountId);
+
+export const BootstrapEntityIds = BootstrapProfileManifest.map((value) => value.profileId);
 
 export const ReservedBootstrapUuidv7s = [
+	...BootstrapEntityIds,
 	...BootstrapUnitIds,
 	...BootstrapAuthUserIds,
 	...BootstrapAccountIds,

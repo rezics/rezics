@@ -1,8 +1,6 @@
-import type { StaticDecode } from "typebox";
-import { StatusCodes } from "http-status-codes";
 import {
-	DockDocument,
 	DockBlockHostPolicy,
+	DockDocument,
 	UnresolvedBlockReferenceError,
 	assertBlockQueryBudget,
 	assertDockDocument,
@@ -11,6 +9,8 @@ import {
 } from "@rezics/block";
 import { and, eq, getTableColumns, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
+import type { StaticDecode } from "typebox";
 
 import session, { resolveIdentity } from "../../auth/session";
 import {
@@ -20,13 +20,13 @@ import {
 import { database, type DatabaseTransaction } from "../../database";
 import {
 	dockRevisionHead,
-	isDockOwnerUnitKind,
 	isDockKindSupported,
+	isDockOwnerUnitKind,
 	unit,
 	unitDock,
 } from "../../database/schema";
-import { UnitNotFound } from "../../units/errors";
 import { assertExecutableBlockFilterDocuments } from "../../search/block-filter-documents";
+import { UnitNotFound } from "../../units/errors";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import {
@@ -35,6 +35,15 @@ import {
 	DockNotSupported,
 	DockRevisionConflict,
 } from "./errors";
+import {
+	createDockHistory,
+	deleteDockHistory,
+	getDockRevisionId,
+	listDockRevisions,
+	lockDockHistory,
+	restoreDockRevision,
+	updateDockHistory,
+} from "./history";
 import {
 	DockListResponse,
 	DockMutationResponse,
@@ -47,15 +56,6 @@ import {
 	DockUnitParams,
 	PutDockBody,
 } from "./schema";
-import {
-	createDockHistory,
-	deleteDockHistory,
-	getDockRevisionId,
-	listDockRevisions,
-	lockDockHistory,
-	restoreDockRevision,
-	updateDockHistory,
-} from "./history";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
@@ -204,7 +204,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 			},
 			detail: { summary: "Create or replace a Unit Dock", tags: ["Docks"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["dock", params.kind]]);
 			const owner = await getDockOwner(params.unitId);
 			ensureSupported(owner, params.kind);
@@ -216,7 +216,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 				await ensureResolvedDockReferences(tx, {
 					document: body.document,
 					owner,
-					profileId: profile.unitId,
+					profileId: entity.id,
 				});
 				const [current] = await tx
 					.select()
@@ -238,7 +238,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 					const revision = await updateDockHistory(tx, {
 						dock: saved,
 						baseRevisionId,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 					});
 					return presentDock(saved, revision.revisionId);
 				}
@@ -254,7 +254,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 				if (!saved) throw new Error("Dock insertion returned no row");
 				const revision = await createDockHistory(tx, {
 					dock: saved,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 				});
 				return presentDock(saved, revision.revisionId);
 			});
@@ -303,7 +303,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 			},
 			detail: { summary: "Restore a Dock revision", tags: ["Docks"] },
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["dock", params.kind]]);
 			const owner = await getDockOwner(params.unitId);
 			ensureSupported(owner, params.kind);
@@ -321,13 +321,13 @@ export default new Elysia({ prefix: "/units/by-id" })
 					dockId: dock.id,
 					sourceRevisionId: params.revisionId,
 					baseRevisionId: body.baseRevisionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 					validateDocument: async (document) => {
 						ensureDocument(document);
 						await ensureResolvedDockReferences(tx, {
 							document,
 							owner,
-							profileId: profile.unitId,
+							profileId: entity.id,
 						});
 					},
 				});
@@ -354,7 +354,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["dock", params.kind]]);
 			const owner = await getDockOwner(params.unitId);
 			ensureSupported(owner, params.kind);
@@ -384,7 +384,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 				await deleteDockHistory(tx, {
 					dockId: deleted.id,
 					baseRevisionId: body.baseRevisionId,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 				});
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });

@@ -1,5 +1,5 @@
-import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
+import { StatusCodes } from "http-status-codes";
 
 import session from "../../auth/session";
 import {
@@ -18,14 +18,14 @@ import {
 	UnitOwnershipOverrideConfirmationInvalid,
 } from "./errors";
 import {
+	DeleteUnitLifecycleCommandBody,
 	ListPlatformUnitsQuery,
 	ListUnitOwnershipCandidatesQuery,
 	OverrideUnitOwnershipBody,
 	PlatformUnitLifecycleResponse,
 	PlatformUnitListResponse,
-	UnitGovernanceParams,
-	DeleteUnitLifecycleCommandBody,
 	RestoreUnitLifecycleCommandBody,
+	UnitGovernanceParams,
 	UnitOwnershipCandidateListResponse,
 	UnitOwnershipResponse,
 } from "./schema";
@@ -130,12 +130,12 @@ export default new Elysia({ prefix: "/platform/units" })
 				tags: ["Governance"],
 			},
 		},
-		async ({ authorization, profile, params, body }) => {
+		async ({ authorization, entity, params, body }) => {
 			if (body.confirmationUnitId !== params.unitId)
 				throw new UnitOwnershipOverrideConfirmationInvalid();
 			return overridePlatformUnitOwnership(authorization.platform, {
 				unitId: params.unitId,
-				actorProfileId: profile.unitId,
+				actorProfileId: entity.id,
 				expectedOwnerProfileId: body.expectedOwnerProfileId,
 				targetProfileId: body.targetProfileId,
 				rules: body.rules,
@@ -176,12 +176,12 @@ export default new Elysia({ prefix: "/platform/units" })
 				tags: ["Governance"],
 			},
 		},
-		async ({ authorization, profile, params, body }) => {
+		async ({ authorization, entity, params, body }) => {
 			await authorization.platform.ensureCapability("unit.delete");
 			if (body.confirmationUnitId !== params.unitId) throw new UnitLifecycleConfirmationInvalid();
 			return softDeletePlatformUnit({
 				unitId: params.unitId,
-				actorProfileId: profile.unitId,
+				actorProfileId: entity.id,
 				expectedUpdatedAt: new Date(body.expectedUpdatedAt),
 				rules: body.rules,
 				note: body.note?.trim() || undefined,
@@ -221,12 +221,12 @@ export default new Elysia({ prefix: "/platform/units" })
 				tags: ["Governance"],
 			},
 		},
-		async ({ authorization, profile, params, body }) => {
+		async ({ authorization, entity, params, body }) => {
 			await authorization.platform.ensureCapability("unit.restore");
 			if (body.confirmationUnitId !== params.unitId) throw new UnitLifecycleConfirmationInvalid();
 			return restorePlatformUnit({
 				unitId: params.unitId,
-				actorProfileId: profile.unitId,
+				actorProfileId: entity.id,
 				expectedUpdatedAt: new Date(body.expectedUpdatedAt),
 				note: body.note?.trim() || undefined,
 				contribution: body.revisionContext?.contribution,

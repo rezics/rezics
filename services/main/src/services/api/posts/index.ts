@@ -1,77 +1,67 @@
-import { StatusCodes } from "http-status-codes";
 import type { ContentLanguage } from "@rezics/i18n";
 import { and, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import Elysia from "elysia";
+import { StatusCodes } from "http-status-codes";
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
 import session, { resolveIdentity } from "../../auth/session";
+import { ContentSpoilerLabelManifest, NsfwContentLabelId } from "../../bootstrap/data";
 import { requireContentSpoilerLevel } from "../../content-labels/presentation";
+import { selectReaderChapterLocalization } from "../../content-structure/book-reading";
 import { database } from "../../database";
-import { runVoteTransaction } from "../../database/vote-admission";
 import { toSafeInteger } from "../../database/integer";
-import { resolvedUnitLocalizationLanguage } from "../../units/localization";
 import {
+	accountPreference,
 	creditAttribution,
+	entityIdentity,
 	post,
 	postReply,
 	postReplyStat,
 	postScore,
-	profile as profileTable,
 	score,
 	unit,
-	unitOwnership,
-	unitTag,
 	unitLocalization,
+	unitOwnership,
 	unitRevisionHead,
-	profilePreference,
+	unitTag,
 } from "../../database/schema";
-import { ContentSpoilerLabelManifest, NsfwContentLabelId } from "../../bootstrap/data";
+import { runVoteTransaction } from "../../database/vote-admission";
 import { createNotification } from "../../notifications/service";
 import { fractionalPositionAt, fractionalPositionBetween } from "../../ordering/position";
 import { usesSharedPostLocalizationRoute } from "../../posts/localization-route";
-import { UnitNotFound } from "../../units/errors";
-import { recordUnitRevision } from "../../units/history";
-import { insertUnit } from "../../units/create";
+import { getPostSubjectPresentation } from "../../posts/presentation";
+import { selectPostProgressEntry } from "../../posts/progress";
+import { publishPostToRealms } from "../../posts/publication";
+import { selectPostScores } from "../../posts/scores";
+import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
 import {
 	ensureReplyPostTargetingAllowed,
 	ensureSubjectPostTargetingAllowed,
 	findPostTargetingLock,
 	getPostTargetingLockedUnitIds,
 } from "../../posts/targeting";
-import { publishPostToRealms } from "../../posts/publication";
-import { getPostSubjectPresentation } from "../../posts/presentation";
-import { selectPostScores } from "../../posts/scores";
-import { selectPostProgressEntry } from "../../posts/progress";
+import { assertWikiPostWriteDocument, createWikiPost } from "../../posts/wiki";
 import {
 	createProfilePublisherAttribution,
 	getAttributionSummariesByUnitIds,
 	type UnitAttributionSummary,
 } from "../../units/attribution";
-import { IdResponse } from "../schema/action-response";
+import { insertUnit } from "../../units/create";
+import { UnitNotFound } from "../../units/errors";
+import { recordUnitRevision } from "../../units/history";
+import { resolvedUnitLocalizationLanguage } from "../../units/localization";
+import { resolveCanonicalUnitId } from "../../units/merge/canonical";
 import { ValidationError } from "../errors";
+import { IdResponse } from "../schema/action-response";
 import {
-	ReplyListResponse,
-	ReplyResponse,
-	toPortableTextResponse,
 	PostDetailResponse,
 	PostListResponse,
+	ReplyListResponse,
+	ReplyResponse,
 	toApiErrorResponse,
+	toPortableTextResponse,
 	VoteBackpressureResponse,
 } from "../schema/response";
-import {
-	CreateReplyBody,
-	CreatePostBody,
-	CreateWikiBody,
-	GetPostQuery,
-	ListRepliesQuery,
-	ListPostsQuery,
-	PostParams,
-	PostScoreListResponse,
-	ReplyParams,
-	ReplacePostScoresBody,
-	RootPostParams,
-	UpdatePostBody,
-	UpdateReplyBody,
-} from "./schema";
 import {
 	ParentReplyNotFound,
 	PostLocalizationNotFound,
@@ -82,10 +72,21 @@ import {
 	ReplyPostNotFound,
 } from "./errors";
 import { selectReplyTree } from "./reply-tree-query";
-import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
-import { assertWikiPostWriteDocument, createWikiPost } from "../../posts/wiki";
-import { resolveCanonicalUnitId } from "../../units/merge/canonical";
-import { selectReaderChapterLocalization } from "../../content-structure/book-reading";
+import {
+	CreatePostBody,
+	CreateReplyBody,
+	CreateWikiBody,
+	GetPostQuery,
+	ListPostsQuery,
+	ListRepliesQuery,
+	PostParams,
+	PostScoreListResponse,
+	ReplacePostScoresBody,
+	ReplyParams,
+	RootPostParams,
+	UpdatePostBody,
+	UpdateReplyBody,
+} from "./schema";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
 const RevisionContributionBadRequestResponse = toApiErrorResponse([
@@ -240,7 +241,7 @@ export default new Elysia()
 						.limit(1);
 					if (!record) throw new PostNotFound();
 					return {
-						items: await selectPostScores(params.postId, identity.profile?.unitId),
+						items: await selectPostScores(params.postId, identity.entity?.id),
 					};
 				},
 			)
@@ -262,7 +263,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Replace Post Scores", tags: ["Posts"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await authorization.unit.ensureCanUpdate(params.postId, [["relations", "scores"]]);
 					const scoreIds = body.map(({ scoreId }) => scoreId);
 					if (new Set(scoreIds).size !== scoreIds.length) throw new PostScoreDuplicate();
@@ -294,8 +295,8 @@ export default new Elysia()
 									and(
 										inArray(score.id, scoreIds),
 										existingScoreIds.length
-											? or(eq(score.profileId, profile.unitId), inArray(score.id, existingScoreIds))
-											: eq(score.profileId, profile.unitId),
+											? or(eq(score.profileId, entity.id), inArray(score.id, existingScoreIds))
+											: eq(score.profileId, entity.id),
 									),
 								);
 							if (found.length !== scoreIds.length) throw new PostScoreNotFound();
@@ -318,7 +319,7 @@ export default new Elysia()
 							);
 					});
 					return {
-						items: await selectPostScores(params.postId, profile.unitId),
+						items: await selectPostScores(params.postId, entity.id),
 					};
 				},
 			)
@@ -397,14 +398,16 @@ export default new Elysia()
 						rows.map(({ id }) => id),
 						localizationLanguages,
 					);
-					const [viewerDisplayPreference] = identity.profile
+					const [viewerDisplayPreference] = identity.entity
 						? await database
 								.select({
-									alwaysShowSpoilers: profilePreference.alwaysShowSpoilers,
-									alwaysShowNsfw: profilePreference.alwaysShowNsfw,
+									alwaysShowSpoilers: accountPreference.alwaysShowSpoilers,
+									alwaysShowNsfw: accountPreference.alwaysShowNsfw,
 								})
-								.from(profilePreference)
-								.where(eq(profilePreference.profileId, identity.profile.unitId))
+								.from(accountPreference)
+								.where(
+									eq(accountPreference.authUserId, selfAuthUserIdForEntity(identity.entity.id)),
+								)
 								.limit(1)
 						: [];
 					return {
@@ -460,7 +463,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Create post or excerpt", tags: ["Posts"] },
 				},
-				async ({ profile, authorization, body }) => {
+				async ({ entity, authorization, body }) => {
 					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
 					const subjectId = body.subjectId
 						? await resolveCanonicalUnitId(database, body.subjectId)
@@ -478,7 +481,7 @@ export default new Elysia()
 								status: "published",
 								visibility: "public",
 								publishedAt: new Date(),
-								statusActor: { kind: "profile", profileId: profile.unitId },
+								statusActor: { kind: "profile", profileId: entity.id },
 							});
 							await ensureSubjectPostTargetingAllowed(tx, {
 								sourcePostId: created.id,
@@ -500,36 +503,36 @@ export default new Elysia()
 							});
 							await applyNewPostTagMentionVotes(tx, {
 								postId: created.id,
-								profileId: profile.unitId,
+								profileId: entity.id,
 								nextBody: body.body,
 							});
 							await replaceContentSpoilerLabel(tx, {
 								postId: created.id,
-								profileId: profile.unitId,
+								profileId: entity.id,
 								level: body.contentSpoilerLevel ?? 0,
 							});
 							await replaceNsfwContentLabel(tx, {
 								postId: created.id,
-								profileId: profile.unitId,
+								profileId: entity.id,
 								enabled: body.contentNsfw ?? false,
 							});
 							await tx.insert(unitOwnership).values({
 								unitId: created.id,
-								profileId: profile.unitId,
-								assignedByProfileId: profile.unitId,
+								profileId: entity.id,
+								assignedByProfileId: entity.id,
 							});
 							await createProfilePublisherAttribution(tx, {
 								sourceUnitId: created.id,
-								profileId: profile.unitId,
+								profileId: entity.id,
 							});
 							await publishPostToRealms(tx, {
 								postId: created.id,
 								realmIds: body.publishRealmIds,
-								actorProfileId: profile.unitId,
+								actorProfileId: entity.id,
 							});
 							await recordUnitRevision(tx, {
 								unitId: created.id,
-								actorProfileId: profile.unitId,
+								actorProfileId: entity.id,
 								contribution: body.revisionContext?.contribution,
 								event: "create",
 							});
@@ -561,7 +564,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Create Wiki", tags: ["Posts"] },
 				},
-				async ({ profile, authorization, body }) => {
+				async ({ entity, authorization, body }) => {
 					ensureWikiPostWriteDocument(body.body);
 					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
 					const subjectId = body.subjectId
@@ -572,7 +575,7 @@ export default new Elysia()
 						{ family: "unit_tag", authority: "global" },
 						async (tx) => {
 							const created = await createWikiPost(tx, {
-								profileId: profile.unitId,
+								profileId: entity.id,
 								authorization,
 								accessMode: body.accessMode,
 								title: body.title,
@@ -606,7 +609,7 @@ export default new Elysia()
 				async ({ params, query, request }) => {
 					const identity = await resolveIdentity(request, "unit:read");
 					const { authorization } = identity;
-					const viewerProfileId = identity.profile?.unitId;
+					const viewerProfileId = identity.entity?.id;
 					const localizationLanguages = query.localizationLanguages ?? [];
 					await authorization.unit.ensureCanRead(params.postId, () => new UnitNotFound("Post"));
 					const [row] = await database
@@ -746,11 +749,11 @@ export default new Elysia()
 						viewerProfileId
 							? database
 									.select({
-										alwaysShowSpoilers: profilePreference.alwaysShowSpoilers,
-										alwaysShowNsfw: profilePreference.alwaysShowNsfw,
+										alwaysShowSpoilers: accountPreference.alwaysShowSpoilers,
+										alwaysShowNsfw: accountPreference.alwaysShowNsfw,
 									})
-									.from(profilePreference)
-									.where(eq(profilePreference.profileId, viewerProfileId))
+									.from(accountPreference)
+									.where(eq(accountPreference.authUserId, selfAuthUserIdForEntity(viewerProfileId)))
 									.limit(1)
 									.then(([value]) => value)
 							: Promise.resolve(undefined),
@@ -886,7 +889,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Update post", tags: ["Posts"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					const postKind = await ensureSharedPostLocalizationTarget(params.postId);
 					if (postKind === "wiki") ensureWikiPostWriteDocument(body.body);
 					await authorization.unit.ensureCanUpdate(params.postId, [
@@ -926,25 +929,25 @@ export default new Elysia()
 							});
 						await applyNewPostTagMentionVotes(tx, {
 							postId: params.postId,
-							profileId: profile.unitId,
+							profileId: entity.id,
 							previousBody: current?.content,
 							nextBody: body.body,
 						});
 						if (body.contentSpoilerLevel !== undefined)
 							await replaceContentSpoilerLabel(tx, {
 								postId: params.postId,
-								profileId: profile.unitId,
+								profileId: entity.id,
 								level: body.contentSpoilerLevel,
 							});
 						if (body.contentNsfw !== undefined)
 							await replaceNsfwContentLabel(tx, {
 								postId: params.postId,
-								profileId: profile.unitId,
+								profileId: entity.id,
 								enabled: body.contentNsfw,
 							});
 						await recordUnitRevision(tx, {
 							unitId: params.postId,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: body.revisionContext?.contribution,
 							event: "update",
 							baseRevisionId: body.baseRevisionId,
@@ -1088,7 +1091,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Create reply post", tags: ["Posts"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await authorization.unit.ensureCanRead(params.postId, () => new UnitNotFound("Post"));
 					await ensureRootPost(params.postId, body.realmId);
 					await authorization.realm.ensureUnitCreation(
@@ -1135,7 +1138,7 @@ export default new Elysia()
 								status: "published",
 								visibility: "public",
 								publishedAt: new Date(),
-								statusActor: { kind: "profile", profileId: profile.unitId },
+								statusActor: { kind: "profile", profileId: entity.id },
 							});
 							await ensureReplyPostTargetingAllowed(tx, {
 								sourcePostId: created.id,
@@ -1161,40 +1164,43 @@ export default new Elysia()
 							});
 							await applyNewPostTagMentionVotes(tx, {
 								postId: created.id,
-								profileId: profile.unitId,
+								profileId: entity.id,
 								nextBody: body.body,
 							});
 							await tx.insert(unitOwnership).values({
 								unitId: created.id,
-								profileId: profile.unitId,
-								assignedByProfileId: profile.unitId,
+								profileId: entity.id,
+								assignedByProfileId: entity.id,
 							});
 							await createProfilePublisherAttribution(tx, {
 								sourceUnitId: created.id,
-								profileId: profile.unitId,
+								profileId: entity.id,
 							});
 							if (body.realmId)
 								await publishPostToRealms(tx, {
 									postId: created.id,
 									realmIds: [body.realmId],
-									actorProfileId: profile.unitId,
+									actorProfileId: entity.id,
 								});
 							const revision = await recordUnitRevision(tx, {
 								unitId: created.id,
-								actorProfileId: profile.unitId,
+								actorProfileId: entity.id,
 								contribution: body.revisionContext?.contribution,
 								event: "create",
 							});
 							const recipients = await tx
-								.selectDistinct({ profileId: profileTable.id })
+								.selectDistinct({ profileId: entityIdentity.id })
 								.from(creditAttribution)
-								.innerJoin(profileTable, eq(profileTable.id, creditAttribution.creditedUnitId))
+								.innerJoin(
+									entityIdentity,
+									eq(entityIdentity.id, creditAttribution.creditedEntityId),
+								)
 								.where(eq(creditAttribution.sourceUnitId, recipientUnitId));
 							for (const recipient of recipients) {
-								if (!recipient.profileId || recipient.profileId === profile.unitId) continue;
+								if (!recipient.profileId || recipient.profileId === entity.id) continue;
 								await createNotification(tx, {
-									recipientProfileId: recipient.profileId,
-									actorProfileId: profile.unitId,
+									recipientEntityId: recipient.profileId,
+									actorProfileId: entity.id,
 									kind: "reply",
 									subjectUnitId: created.id,
 								});
@@ -1253,7 +1259,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Update reply post", tags: ["Posts"] },
 				},
-				async ({ params, profile, authorization, body }) => {
+				async ({ params, entity, authorization, body }) => {
 					await getReplyPost(params.postId, params.replyPostId);
 					await authorization.unit.ensureCanUpdate(params.replyPostId, [
 						["localizations", body.language],
@@ -1284,13 +1290,13 @@ export default new Elysia()
 							});
 						await applyNewPostTagMentionVotes(tx, {
 							postId: params.replyPostId,
-							profileId: profile.unitId,
+							profileId: entity.id,
 							previousBody: current?.content,
 							nextBody: body.body,
 						});
 						await recordUnitRevision(tx, {
 							unitId: params.replyPostId,
-							actorProfileId: profile.unitId,
+							actorProfileId: entity.id,
 							contribution: body.revisionContext?.contribution,
 							event: "update",
 							baseRevisionId: body.baseRevisionId,

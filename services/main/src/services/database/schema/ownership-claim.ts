@@ -1,21 +1,21 @@
 import { inArray, sql } from "drizzle-orm";
 import { check, index, pgEnum, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
+import { unitOwnership } from "./access";
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { profile } from "./profile";
-import { unit } from "./unit";
 import {
 	toEnumValues,
 	UnitOwnershipClaimResolutionValues,
 	type UnitOwnershipClaimResolution,
 } from "./contract-values";
-import { unitOwnership } from "./access";
+import { unit } from "./unit";
 
 export const unitOwnershipClaimResolution = pgEnum(
 	"unit_ownership_claim_resolution",
@@ -37,7 +37,7 @@ export const unitOwnershipClaim = pgTable(
 			.references(() => unit.id, { onDelete: "restrict" }),
 		claimantProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		sourceOwnershipId: uuid()
 			.notNull()
 			.references(() => unitOwnership.id, { onDelete: "restrict" }),
@@ -45,7 +45,7 @@ export const unitOwnershipClaim = pgTable(
 		details: text().notNull(),
 		resolution: unitOwnershipClaimResolution().$type<UnitOwnershipClaimResolution>(),
 		resolvedAt: createTimestampMsColumn(),
-		resolvedByProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		resolvedByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		resultingOwnershipId: uuid().references(() => unitOwnership.id, {
 			onDelete: "restrict",
 		}),

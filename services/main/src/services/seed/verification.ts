@@ -8,23 +8,23 @@ import {
 } from "../bootstrap/data";
 import { database } from "../database";
 import {
-	contentReviewCase,
-	notification,
 	apiTokenQuotaOverride,
 	collectionItem,
+	contentReviewCase,
+	notification,
 	platformCapabilityGrant,
 	postScore,
-	profile,
 	profileRealmTagSubscription,
 	profileUnitTag,
-	recommendationSnapshot,
 	realmScoreContext,
 	realmTagContext,
 	realmTagJudgment,
 	realmUnitTag,
+	recommendationSnapshot,
 	release,
 	sharedSearchQuery,
 	subjectAssociation,
+	tagPath,
 	unit,
 	unitAccessGrant,
 	unitAccessInvitation,
@@ -32,12 +32,11 @@ import {
 	unitAssociationProposal,
 	unitLocalization,
 	unitLocalizationContentMetric,
-	tagPath,
 	users,
 } from "../database/schema";
+import { executeSearchFeatureInput } from "../search/filter-document";
 import { includesSeedScenario, type SeedRunOptions } from "./contracts";
 import { DemoCredentials, SeedFixtureTitles } from "./data";
-import { executeSearchFeatureInput } from "../search/filter-document";
 
 export interface SeedVerificationResult {
 	readonly profile: SeedRunOptions["profile"];
@@ -215,8 +214,7 @@ export async function verifySeedDatabase(
 		database
 			.select({ value: count() })
 			.from(platformCapabilityGrant)
-			.innerJoin(profile, eq(platformCapabilityGrant.profileId, profile.id))
-			.innerJoin(users, eq(profile.authUserId, users.id))
+			.innerJoin(users, eq(platformCapabilityGrant.authUserId, users.id))
 			.where(eq(users.email, DemoCredentials.email)),
 	]);
 	const seededUnits = seededUnitsResult[0]?.value ?? 0;

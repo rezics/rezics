@@ -1,12 +1,13 @@
-import type { StaticDecode } from "typebox";
-import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
+import { StatusCodes } from "http-status-codes";
+import type { StaticDecode } from "typebox";
 
 import session from "../../auth/session";
 import {
-	decidePlatformUnitOwnershipClaim,
-	listPlatformUnitOwnershipClaims,
-} from "../../ownership-claims/service";
+	decodeUnitOwnershipClaimCursor,
+	encodeUnitOwnershipClaimCursor,
+} from "../../ownership-claims/cursor";
+import { UnitOwnershipClaimConfirmationInvalid } from "../../ownership-claims/errors";
 import {
 	DecideUnitOwnershipClaimBody,
 	ListPlatformUnitOwnershipClaimsQuery,
@@ -15,11 +16,10 @@ import {
 	UnitOwnershipClaimParams,
 } from "../../ownership-claims/schema";
 import {
-	decodeUnitOwnershipClaimCursor,
-	encodeUnitOwnershipClaimCursor,
-} from "../../ownership-claims/cursor";
+	decidePlatformUnitOwnershipClaim,
+	listPlatformUnitOwnershipClaims,
+} from "../../ownership-claims/service";
 import { toApiErrorResponse } from "../schema/response";
-import { UnitOwnershipClaimConfirmationInvalid } from "../../ownership-claims/errors";
 
 export default new Elysia({ prefix: "/platform/ownership-claims" })
 	.use(session)
@@ -76,12 +76,12 @@ export default new Elysia({ prefix: "/platform/ownership-claims" })
 			},
 			detail: { summary: "Resolve a Unit ownership claim", tags: ["Governance"] },
 		},
-		async ({ authorization, profile, params, body }) => {
+		async ({ authorization, entity, params, body }) => {
 			if (body.confirmationClaimId !== params.claimId)
 				throw new UnitOwnershipClaimConfirmationInvalid();
 			return decidePlatformUnitOwnershipClaim(authorization.platform, {
 				claimId: params.claimId,
-				actorProfileId: profile.unitId,
+				actorProfileId: entity.id,
 				decision: body.decision,
 				rules: body.rules,
 				note: body.note?.trim() || undefined,

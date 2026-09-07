@@ -1,14 +1,14 @@
-import { defineRelationsPart, inArray, sql } from "drizzle-orm";
 import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
+import { defineRelationsPart, inArray, sql } from "drizzle-orm";
 import {
-	text,
-	timestamp,
 	boolean,
 	check,
-	integer,
-	uuid,
 	index,
+	integer,
+	text,
+	timestamp,
 	uniqueIndex,
+	uuid,
 } from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
 
@@ -16,6 +16,8 @@ export const users = pgTable(
 	"users",
 	{
 		id: uuid("id").default(sql`uuidv7()`).primaryKey(),
+		principalKind: text().$type<"human" | "service">().default("human").notNull(),
+		erasedAt: timestamp({ withTimezone: true, precision: 3 }),
 		/** @UNIT_LOCALIZATION_EXEMPT Identity source: provider-owned sign-in name; public Profile titles remain Unit localizations. */
 		name: text("name").notNull(),
 		email: text("email").notNull().unique(),
@@ -32,6 +34,7 @@ export const users = pgTable(
 			.notNull(),
 	},
 	(table) => [
+		check("users_principal_kind_check", inArray(table.principalKind, ["human", "service"])),
 		check(
 			"users_registration_content_language_check",
 			inArray(table.registrationContentLanguage, ContentLanguageValues),

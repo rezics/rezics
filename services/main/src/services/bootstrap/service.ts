@@ -9,12 +9,10 @@ import {
 	PlatformInstallationLockName,
 } from "./core";
 import type { IssuedPlatformCredential } from "./credentials";
-import { BootstrapProfileIdValues, BootstrapRealmManifest } from "./data";
-import { ensureOfficialZoneFollows } from "./official-zone-follows";
-import { assertBootstrapManifest } from "./manifest-validation";
+import { BootstrapAccountManifest, BootstrapRealmManifest } from "./data";
 import { ensureDefaultApiQuotaPolicies } from "./installation/api-quotas";
-import { ensureContentLabelRegistry } from "./installation/content-labels";
 import { ensureCuratedCreationTagCollections } from "./installation/collections";
+import { ensureContentLabelRegistry } from "./installation/content-labels";
 import { ensureSlugNamespaces } from "./installation/foundation";
 import { ensureBootstrapPlatformAccess } from "./installation/platform-access";
 import { ensureBootstrapProfileFavorites, ensureBootstrapProfiles } from "./installation/profiles";
@@ -24,6 +22,8 @@ import {
 	ensureScoreRealmProfileDefaults,
 } from "./installation/realms";
 import { ensureOfficialZoneExperiences, ensureOfficialZones } from "./installation/zones";
+import { assertBootstrapManifest } from "./manifest-validation";
+import { ensureOfficialZoneFollows } from "./official-zone-follows";
 import { isInitialInstallationBundleReady } from "./readiness";
 
 export type PlatformInstallationResult =
@@ -62,9 +62,13 @@ async function ensurePlatform(): Promise<PlatformInstallationResult> {
 		await ensureScoreRealmProfileDefaults(tx);
 		const createdZoneIds = await ensureOfficialZones(tx);
 		await ensureOfficialZoneExperiences(tx, createdZoneIds);
-		await ensureOfficialZoneFollows(tx, BootstrapProfileIdValues, {
-			sequenceIsEmpty: initialState.status === "uninstalled",
-		});
+		await ensureOfficialZoneFollows(
+			tx,
+			BootstrapAccountManifest.map((value) => value.profileId),
+			{
+				sequenceIsEmpty: initialState.status === "uninstalled",
+			},
+		);
 		assertPlatformCoreReady(await inspectPlatformCore(tx));
 		if (initialState.status === "ready" && issuedCredentials.length === 0)
 			return { status: "already_installed", issuedCredentials: [] };

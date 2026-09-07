@@ -5,12 +5,11 @@ import {
 	DevelopmentPreviewCapability,
 	type PlatformCapability,
 } from "@rezics/access";
-import { StatusCodes } from "http-status-codes";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
 import type { StaticDecode } from "typebox";
 
 import session, { type SessionIdentity } from "../../auth/session";
-import { database } from "../../database";
 import {
 	createCustomTheme,
 	decideCustomThemeRevision,
@@ -24,23 +23,24 @@ import {
 	setCustomThemeExecutionControl,
 	submitCustomThemeRevision,
 } from "../../custom-themes";
+import { database } from "../../database";
 import { upsertLocalization } from "../../units/service";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import {
 	CreateCustomThemeBody,
 	CustomThemeCursorQuery,
-	CustomThemeFileQuery,
 	CustomThemeExecutionControlResponse,
+	CustomThemeFileQuery,
 	CustomThemeLocalizationBody,
 	CustomThemeLocalizationParams,
 	CustomThemeParams,
+	CustomThemeReferenceRenderArtifactParams,
 	CustomThemeResponse,
 	CustomThemeReviewQueueResponse,
 	CustomThemeRevisionListResponse,
 	CustomThemeRevisionParams,
 	CustomThemeRevisionResponse,
-	CustomThemeReferenceRenderArtifactParams,
 	DecideCustomThemeRevisionBody,
 	KillCustomThemeRevisionBody,
 	SetCustomThemeExecutionControlBody,
@@ -94,13 +94,13 @@ export default new Elysia({ prefix: "/custom-themes" })
 			},
 			detail: { summary: "Set the Custom Theme execution kill switch", tags: ["Custom Themes"] },
 		},
-		async ({ authorization, profile, body }) => {
+		async ({ authorization, entity, body }) => {
 			await authorization.platform.ensureCapability(CustomThemeKillCapability);
 			return database.transaction((tx) =>
 				setCustomThemeExecutionControl(tx, {
 					enabled: body.enabled,
 					reason: body.reason,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 				}),
 			);
 		},
@@ -117,9 +117,9 @@ export default new Elysia({ prefix: "/custom-themes" })
 			},
 			detail: { summary: "Create a Custom Theme Unit", tags: ["Custom Themes"] },
 		},
-		async ({ authorization, profile, body }) => {
+		async ({ authorization, entity, body }) => {
 			await ensureExternalLiveEligibility(authorization);
-			return createCustomTheme({ ownerProfileId: profile.unitId, localization: body.localization });
+			return createCustomTheme({ ownerProfileId: entity.id, localization: body.localization });
 		},
 	)
 	.put(
@@ -217,12 +217,12 @@ export default new Elysia({ prefix: "/custom-themes" })
 			},
 			detail: { summary: "Submit an immutable Custom Theme revision", tags: ["Custom Themes"] },
 		},
-		async ({ authorization, params, profile, body }) => {
+		async ({ authorization, params, entity, body }) => {
 			await ensureExternalLiveEligibility(authorization);
 			await authorization.unit.ensureCanUpdate(params.themeUnitId, [["theme", "revisions"]]);
 			return submitCustomThemeRevision({
 				themeUnitId: params.themeUnitId,
-				profileId: profile.unitId,
+				profileId: entity.id,
 				manifest: body.manifest,
 				sourceArchive: body.sourceArchive,
 				files: body.files,
@@ -250,12 +250,12 @@ export default new Elysia({ prefix: "/custom-themes" })
 			},
 			detail: { summary: "Approve or reject a Custom Theme revision", tags: ["Custom Themes"] },
 		},
-		async ({ authorization, params, profile, body }) => {
+		async ({ authorization, params, entity, body }) => {
 			await ensureExternalLiveEligibility(authorization);
 			await authorization.platform.ensureCapability(CustomThemeReviewCapability);
 			return decideCustomThemeRevision({
 				...params,
-				profileId: profile.unitId,
+				profileId: entity.id,
 				decision: body.decision,
 				reason: body.reason,
 				...(body.decision === "approve"
@@ -286,11 +286,11 @@ export default new Elysia({ prefix: "/custom-themes" })
 			},
 			detail: { summary: "Emergency-disable a Custom Theme revision", tags: ["Custom Themes"] },
 		},
-		async ({ authorization, params, profile, body }) => {
+		async ({ authorization, params, entity, body }) => {
 			await authorization.platform.ensureCapability(CustomThemeKillCapability);
 			return killCustomThemeRevision({
 				...params,
-				profileId: profile.unitId,
+				profileId: entity.id,
 				reason: body.reason,
 			});
 		},
@@ -341,9 +341,9 @@ export default new Elysia({ prefix: "/custom-themes" })
 		async ({
 			authorization,
 			params,
-			profile,
+			entity,
 			query,
-		}: Pick<SessionIdentity, "authorization" | "profile"> & {
+		}: Pick<SessionIdentity, "authorization" | "entity"> & {
 			readonly params: StaticDecode<typeof CustomThemeRevisionParams>;
 			readonly query: StaticDecode<typeof CustomThemeFileQuery>;
 		}) => {
@@ -352,7 +352,7 @@ export default new Elysia({ prefix: "/custom-themes" })
 			const file = await getExecutableCustomThemeFile({
 				...params,
 				hostUnitId: query.hostUnitId,
-				viewerProfileId: profile.unitId,
+				viewerProfileId: entity.id,
 				path: query.path,
 			});
 			return new Response(new Uint8Array(file.bytes).buffer, {

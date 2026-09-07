@@ -93,7 +93,7 @@ describe("followUnit", () => {
 			unitId: TargetUnitId,
 		});
 		expect(onConflictDoNothing).toHaveBeenCalledOnce();
-		if (kind === "profile") expect(transactionSelect).toHaveBeenCalledOnce();
+		if (kind === "entity") expect(transactionSelect).toHaveBeenCalledOnce();
 		else expect(transactionSelect).not.toHaveBeenCalled();
 		if (kind === "realm")
 			expect(acknowledgeCurrentRealmRulesOnFollow).toHaveBeenCalledWith(
@@ -102,10 +102,10 @@ describe("followUnit", () => {
 				FollowerProfileId,
 			);
 		else expect(acknowledgeCurrentRealmRulesOnFollow).not.toHaveBeenCalled();
-		if (kind === "profile")
+		if (kind === "entity")
 			expect(createNotification).toHaveBeenCalledWith(expect.anything(), {
 				kind: "new_follower",
-				recipientProfileId: TargetUnitId,
+				recipientEntityId: TargetUnitId,
 				actorProfileId: FollowerProfileId,
 				dedupeKey: `new-follower:${FollowerProfileId}:${TargetUnitId}`,
 			});
@@ -126,7 +126,7 @@ describe("followUnit", () => {
 	});
 
 	it("does not notify again when the follow already exists", async () => {
-		targetLimit.mockResolvedValue([{ id: TargetUnitId, kind: "profile" }]);
+		targetLimit.mockResolvedValue([{ id: TargetUnitId, kind: "entity" }]);
 		insertReturning.mockResolvedValue([]);
 
 		await expect(
@@ -141,7 +141,7 @@ describe("followUnit", () => {
 	});
 
 	it("rejects following the caller's own Profile before writing", async () => {
-		targetLimit.mockResolvedValue([{ id: FollowerProfileId, kind: "profile" }]);
+		targetLimit.mockResolvedValue([{ id: FollowerProfileId, kind: "entity" }]);
 
 		await expect(
 			followUnit({
@@ -157,7 +157,7 @@ describe("followUnit", () => {
 	});
 
 	it("preserves blocking rules for Profile targets", async () => {
-		targetLimit.mockResolvedValue([{ id: TargetUnitId, kind: "profile" }]);
+		targetLimit.mockResolvedValue([{ id: TargetUnitId, kind: "entity" }]);
 		blockedLimit.mockResolvedValue([{ id: TargetUnitId }]);
 
 		await expect(

@@ -1,4 +1,3 @@
-import type { StaticDecode } from "typebox";
 import {
 	assertBlockQueryBudget,
 	assertUnitReferencedBlockDocument,
@@ -10,6 +9,8 @@ import {
 	UnitPresentationTargetContractV0,
 } from "@rezics/block";
 import { and, asc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
+import type { StaticDecode } from "typebox";
+import { selfAuthUserIdForEntity } from "../participation/account-query";
 
 import {
 	CustomThemeInstallationInvalid,
@@ -20,11 +21,11 @@ import {
 import { recordAuditEvent } from "../audit";
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
 import {
+	accountPreference,
 	customThemeExecutionControl,
 	customThemeRevision,
 	customThemeRevisionExternalResource,
 	customThemeRevisionFile,
-	profilePreference,
 	unit,
 	unitCustomThemeInstallation,
 	unitPresentationDocument,
@@ -401,9 +402,9 @@ export async function resolveUnitPresentation(input: {
 	if (!(await getExecutionEnabled(database))) return fallback("global_disabled");
 	if (!input.viewerProfileId || !input.viewerEligible) return fallback("viewer_ineligible");
 	const [preference] = await database
-		.select({ enabled: profilePreference.customThemesEnabled })
-		.from(profilePreference)
-		.where(eq(profilePreference.profileId, input.viewerProfileId))
+		.select({ enabled: accountPreference.customThemesEnabled })
+		.from(accountPreference)
+		.where(eq(accountPreference.authUserId, selfAuthUserIdForEntity(input.viewerProfileId)))
 		.limit(1);
 	if (preference && !preference.enabled) return fallback("viewer_opt_out");
 	const [installation] = await database
@@ -499,9 +500,9 @@ export async function getExecutableCustomThemeFile(input: {
 }) {
 	if (!(await getExecutionEnabled(database))) throw new CustomThemeInstallationInvalid();
 	const [preference] = await database
-		.select({ enabled: profilePreference.customThemesEnabled })
-		.from(profilePreference)
-		.where(eq(profilePreference.profileId, input.viewerProfileId))
+		.select({ enabled: accountPreference.customThemesEnabled })
+		.from(accountPreference)
+		.where(eq(accountPreference.authUserId, selfAuthUserIdForEntity(input.viewerProfileId)))
 		.limit(1);
 	if (preference && !preference.enabled) throw new CustomThemeInstallationInvalid();
 	const [file] = await database

@@ -12,8 +12,19 @@ import {
 	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
+import { users } from "./auth";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
+import {
+	createCreatedAtColumn,
+	createFractionalIndexPositionByteLengthConstraint,
+	createTimestampMsColumn,
+	createUpdatedAtColumn,
+	createUuidv7PrimaryKey,
+	fractionalIndexPosition,
+	ordinalPosition,
+} from "./columns";
 import {
 	type ContentLanguage,
 	ContentLanguageValues,
@@ -27,16 +38,6 @@ import {
 	RealmUnitStatusValues,
 	toEnumValues,
 } from "./contract-values";
-import {
-	createCreatedAtColumn,
-	createFractionalIndexPositionByteLengthConstraint,
-	fractionalIndexPosition,
-	ordinalPosition,
-	createTimestampMsColumn,
-	createUpdatedAtColumn,
-	createUuidv7PrimaryKey,
-} from "./columns";
-import { profile } from "./profile";
 import { unit } from "./unit";
 
 export const realmJoinPolicy = pgEnum("realm_join_policy", toEnumValues(RealmJoinPolicyValues));
@@ -166,7 +167,7 @@ export const realmMember = pgTable(
 			.references(() => realm.id, { onDelete: "cascade" }),
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
 		state: realmMemberState().default("active").notNull(),
 		joinedAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -189,7 +190,7 @@ export const realmRuleRevision = pgTable(
 		acknowledgementMode: realmRuleAcknowledgementMode().default("explicit").notNull(),
 		requireOnJoin: boolean().default(false).notNull(),
 		requireOnPost: boolean().default(false).notNull(),
-		createdByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
+		createdByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
 		publishedAt: createCreatedAtColumn(),
 	},
 	(table) => [
@@ -227,7 +228,7 @@ export const realmRuleAcceptance = pgTable(
 			.references(() => realmRuleRevision.id, { onDelete: "cascade" }),
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
 		language: text().$type<ContentLanguage>(),
 		acceptedAt: createCreatedAtColumn(),
 	},
@@ -252,7 +253,7 @@ export const realmPin = pgTable(
 			.references(() => unit.id, { onDelete: "cascade" }),
 		kind: realmPinKind().default("pinned").notNull(),
 		position: fractionalIndexPosition().default(sql`'a0'::text`).notNull(),
-		createdByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
+		createdByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -321,36 +322,36 @@ export const platformCapabilityGrant = pgTable(
 	"platform_capability_grant",
 	{
 		id: createUuidv7PrimaryKey(),
-		profileId: uuid()
+		authUserId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		capability: platformCapability().notNull(),
-		grantedByProfileId: uuid()
+		grantedByAuthUserId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => users.id, { onDelete: "restrict" }),
 		expiresAt: createTimestampMsColumn(),
 		revokedAt: createTimestampMsColumn(),
-		revokedByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
+		revokedByAuthUserId: uuid().references(() => users.id, { onDelete: "set null" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
 		uniqueIndex("platform_capability_grant_active_key")
-			.on(table.profileId, table.capability)
+			.on(table.authUserId, table.capability)
 			.where(sql`${table.revokedAt} is null`),
-		index("platform_capability_grant_profile_expiry_idx").on(table.profileId, table.expiresAt),
+		index("platform_capability_grant_auth_user_expiry_idx").on(table.authUserId, table.expiresAt),
 		index("platform_capability_grant_active_capability_expiry_idx")
-			.on(table.capability, table.expiresAt, table.profileId)
+			.on(table.capability, table.expiresAt, table.authUserId)
 			.where(sql`${table.revokedAt} is null`),
-		index("platform_capability_grant_granted_by_idx").on(table.grantedByProfileId),
-		index("platform_capability_grant_revoked_by_idx").on(table.revokedByProfileId),
+		index("platform_capability_grant_granted_by_idx").on(table.grantedByAuthUserId),
+		index("platform_capability_grant_revoked_by_idx").on(table.revokedByAuthUserId),
 		check(
 			"platform_capability_grant_current_capability_check",
 			sql`${table.capability} <> 'unit.ownership.transfer'::platform_capability`,
 		),
 		check(
 			"platform_capability_grant_revocation_check",
-			sql`(${table.revokedAt} is null) = (${table.revokedByProfileId} is null)`,
+			sql`(${table.revokedAt} is null) = (${table.revokedByAuthUserId} is null)`,
 		),
 		check(
 			"platform_capability_grant_expiry_check",

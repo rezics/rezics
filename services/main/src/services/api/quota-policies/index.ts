@@ -4,24 +4,24 @@ import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
 
 import { recordAuditEvent } from "../../audit";
+import { ApiQuotaPolicyDocumentInvalid } from "../../auth/api-quota/policy-schema";
 import {
 	ApiQuotaAssignmentInvalid,
-	assignApiTokenQuotaPolicy,
 	assignApiAccountQuotaPolicy,
+	assignApiTokenQuotaPolicy,
 	createApiQuotaPolicy,
 	listApiQuotaPolicies,
-	resetApiTokenQuotaPolicy,
 	resetApiAccountQuotaPolicy,
+	resetApiTokenQuotaPolicy,
 	resolveApiAccountQuotaPolicy,
 	resolveApiTokenQuotaPolicy,
 	reviseApiQuotaPolicy,
 } from "../../auth/api-quota/policy-service";
-import { ApiQuotaPolicyDocumentInvalid } from "../../auth/api-quota/policy-schema";
 import session from "../../auth/session";
 import { database, type DatabaseExecutor } from "../../database";
 import { apikeys, apiQuotaPolicy, users } from "../../database/schema";
-import { UserNotFound } from "../users/errors";
 import { toApiErrorResponse } from "../schema/response";
+import { UserNotFound } from "../users/errors";
 import {
 	ApiAccountQuotaRevisionConflict,
 	ApiQuotaPolicyInvalid,
@@ -31,20 +31,20 @@ import {
 	ApiTokenQuotaRevisionConflict,
 } from "./errors";
 import {
-	ApiAccountTokenQuotaParams,
 	ApiAccountQuotaParams,
 	ApiAccountQuotaPolicyResponse,
+	ApiAccountTokenQuotaParams,
 	ApiQuotaPolicyListResponse,
 	ApiQuotaPolicyParams,
 	ApiQuotaPolicySummary,
-	AssignApiTokenQuotaBody,
-	AssignApiAccountQuotaBody,
-	ManagedApiTokenQuotaListResponse,
-	ResetApiTokenQuotaBody,
-	ResetApiAccountQuotaBody,
-	ReviseApiQuotaPolicyBody,
 	ApiTokenQuotaPolicyResponse,
+	AssignApiAccountQuotaBody,
+	AssignApiTokenQuotaBody,
 	CreateApiQuotaPolicyBody,
+	ManagedApiTokenQuotaListResponse,
+	ResetApiAccountQuotaBody,
+	ResetApiTokenQuotaBody,
+	ReviseApiQuotaPolicyBody,
 } from "./schema";
 
 const AuthenticationResponse = toApiErrorResponse(["InteractiveSessionRequired"]);
@@ -168,7 +168,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 			},
 			detail: { summary: "Create an API quota policy", tags: ["API Quota Policies"] },
 		},
-		async ({ authorization, profile, body }) => {
+		async ({ authorization, entity, body }) => {
 			await authorization.platform.ensureCapability("platform.api_quota_policy.update");
 			try {
 				return await database.transaction(async (tx) => {
@@ -178,13 +178,13 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 						class: body.class,
 						configuration: body.configuration,
 						reason: body.reason,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 					});
 					if (!created) throw new ApiQuotaPolicyKeyConflict();
 					await recordAuditEvent(tx, {
 						category: "admin_activity",
 						outcome: "succeeded",
-						actor: { kind: "profile", profileId: profile.unitId },
+						actor: { kind: "profile", profileId: entity.id },
 						authority: { kind: "platform" },
 						action: "api_quota.policy.create",
 						target: { kind: "api_quota_policy", id: created.id },
@@ -226,7 +226,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 				tags: ["API Quota Policies"],
 			},
 		},
-		async ({ authorization, profile, params, body }) => {
+		async ({ authorization, entity, params, body }) => {
 			await authorization.platform.ensureCapability("platform.api_quota_policy.update");
 			try {
 				return await database.transaction(async (tx) => {
@@ -235,7 +235,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 						expectedRevision: body.expectedRevision,
 						configuration: body.configuration,
 						reason: body.reason,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 					});
 					if (!updated) {
 						if (!(await getPolicyState(tx, params.policyKey))) throw new ApiQuotaPolicyNotFound();
@@ -244,7 +244,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 					await recordAuditEvent(tx, {
 						category: "admin_activity",
 						outcome: "succeeded",
-						actor: { kind: "profile", profileId: profile.unitId },
+						actor: { kind: "profile", profileId: entity.id },
 						authority: { kind: "platform" },
 						action: "api_quota.policy.revise",
 						target: { kind: "api_quota_policy", id: updated.id },
@@ -301,7 +301,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 			},
 			detail: { summary: "Assign a user's API quota policy", tags: ["API Quota Policies"] },
 		},
-		async ({ authorization, profile, params, body }) => {
+		async ({ authorization, entity, params, body }) => {
 			await authorization.platform.ensureCapability("platform.user.api_quota.update");
 			try {
 				return await database.transaction(async (tx) => {
@@ -313,7 +313,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 						validUntil: body.validUntil ? new Date(body.validUntil) : undefined,
 						reason: body.reason,
 						override: body.configurationOverride ?? {},
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 					});
 					if (!assigned) {
 						const policy = await getPolicyState(tx, body.policyKey);
@@ -325,7 +325,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 					await recordAuditEvent(tx, {
 						category: "admin_activity",
 						outcome: "succeeded",
-						actor: { kind: "profile", profileId: profile.unitId },
+						actor: { kind: "profile", profileId: entity.id },
 						authority: { kind: "platform" },
 						action: "api_quota.account.assign",
 						target: { kind: "platform_user", id: params.userId },
@@ -362,7 +362,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 			},
 			detail: { summary: "Reset a user's API quota policy", tags: ["API Quota Policies"] },
 		},
-		async ({ authorization, profile, params, body }) => {
+		async ({ authorization, entity, params, body }) => {
 			await authorization.platform.ensureCapability("platform.user.api_quota.update");
 			return database.transaction(async (tx) => {
 				await requireUser(tx, params.userId);
@@ -374,7 +374,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 				await recordAuditEvent(tx, {
 					category: "admin_activity",
 					outcome: "succeeded",
-					actor: { kind: "profile", profileId: profile.unitId },
+					actor: { kind: "profile", profileId: entity.id },
 					authority: { kind: "platform" },
 					action: "api_quota.account.reset",
 					target: { kind: "platform_user", id: params.userId },
@@ -448,7 +448,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 			},
 			detail: { summary: "Assign an API token quota policy", tags: ["API Quota Policies"] },
 		},
-		async ({ authorization, profile, params, body }) => {
+		async ({ authorization, entity, params, body }) => {
 			await authorization.platform.ensureCapability("platform.user.api_token.api_quota.update");
 			try {
 				return await database.transaction(async (tx) => {
@@ -460,7 +460,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 						validUntil: body.validUntil ? new Date(body.validUntil) : undefined,
 						reason: body.reason,
 						override: body.configurationOverride ?? {},
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 					});
 					if (!assigned) {
 						const policy = await getPolicyState(tx, body.policyKey);
@@ -472,7 +472,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 					await recordAuditEvent(tx, {
 						category: "admin_activity",
 						outcome: "succeeded",
-						actor: { kind: "profile", profileId: profile.unitId },
+						actor: { kind: "profile", profileId: entity.id },
 						authority: { kind: "platform" },
 						action: "api_quota.token.assign",
 						target: { kind: "api_token", id: params.tokenId },
@@ -510,7 +510,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 			},
 			detail: { summary: "Reset an API token quota policy", tags: ["API Quota Policies"] },
 		},
-		async ({ authorization, profile, params, body }) => {
+		async ({ authorization, entity, params, body }) => {
 			await authorization.platform.ensureCapability("platform.user.api_token.api_quota.update");
 			return database.transaction(async (tx) => {
 				await requireOwnedToken(tx, params.userId, params.tokenId);
@@ -522,7 +522,7 @@ export default new Elysia({ prefix: "/api-quota-policies" })
 				await recordAuditEvent(tx, {
 					category: "admin_activity",
 					outcome: "succeeded",
-					actor: { kind: "profile", profileId: profile.unitId },
+					actor: { kind: "profile", profileId: entity.id },
 					authority: { kind: "platform" },
 					action: "api_quota.token.reset",
 					target: { kind: "api_token", id: params.tokenId },

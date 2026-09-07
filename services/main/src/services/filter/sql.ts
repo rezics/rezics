@@ -348,13 +348,13 @@ function postCondition(filter: PostFilter, viewerProfileId?: string): SQL {
 						and ${
 							viewerProfileId
 								? sql`not exists (
-										select 1 from profile_block filter_score_block
+										select 1 from account_entity_block filter_score_block
 										where (
-											filter_score_block.blocker_profile_id = ${viewerProfileId}::uuid
-											and filter_score_block.blocked_profile_id = filter_score.profile_id
+											filter_score_block.blocker_auth_user_id = ${viewerProfileId}::uuid
+											and filter_score_block.blocked_entity_id = filter_score.profile_id
 										) or (
-											filter_score_block.blocker_profile_id = filter_score.profile_id
-											and filter_score_block.blocked_profile_id = ${viewerProfileId}::uuid
+											filter_score_block.blocker_auth_user_id = filter_score.profile_id
+											and filter_score_block.blocked_entity_id = ${viewerProfileId}::uuid
 										)
 									)`
 								: sql`true`
@@ -706,7 +706,7 @@ export function compileUnitPredicateCandidateSet(
 		conjunctiveSets.push(sql`select filter_credit_attribution.source_unit_id as unit_id
 			from credit_attribution filter_credit_attribution
 			join unit filter_credited_unit
-				on filter_credited_unit.id = filter_credit_attribution.credited_unit_id
+				on filter_credited_unit.id = filter_credit_attribution.credited_entity_id
 			where ${unitReferenceCondition(
 				filter.creditAttributions.some,
 				sql`filter_credited_unit.id`,
@@ -732,7 +732,7 @@ export function compileUnitPredicateCandidateSet(
 			where filter_publisher.role = 'publisher'
 				and ${profileReferenceCondition(
 					filter.publishers.some,
-					sql`filter_publisher.credited_unit_id`,
+					sql`filter_publisher.credited_entity_id`,
 					viewerProfileId,
 				)}`);
 	if (filter.tags && "some" in filter.tags) {
@@ -811,7 +811,7 @@ export function compileUnitPredicateSql(
 			select filter_credit_attribution.source_unit_id
 			from credit_attribution filter_credit_attribution
 			join unit filter_credited_unit
-				on filter_credited_unit.id = filter_credit_attribution.credited_unit_id
+				on filter_credited_unit.id = filter_credit_attribution.credited_entity_id
 			where ${unitReferenceCondition(
 				reference,
 				sql`filter_credited_unit.id`,
@@ -846,7 +846,7 @@ export function compileUnitPredicateSql(
 				and filter_publisher.role = 'publisher'
 				and ${profileReferenceCondition(
 					publisherFilter,
-					sql`filter_publisher.credited_unit_id`,
+					sql`filter_publisher.credited_entity_id`,
 					input.viewerProfileId,
 				)}
 		)`;
@@ -884,13 +884,13 @@ export function compileUnitPredicateSql(
 						and ${
 							input.viewerProfileId
 								? sql`not exists (
-										select 1 from profile_block filter_received_score_block
+										select 1 from account_entity_block filter_received_score_block
 										where (
-											filter_received_score_block.blocker_profile_id = ${input.viewerProfileId}::uuid
-											and filter_received_score_block.blocked_profile_id = filter_received_score.profile_id
+											filter_received_score_block.blocker_auth_user_id = ${input.viewerProfileId}::uuid
+											and filter_received_score_block.blocked_entity_id = filter_received_score.profile_id
 										) or (
-											filter_received_score_block.blocker_profile_id = filter_received_score.profile_id
-											and filter_received_score_block.blocked_profile_id = ${input.viewerProfileId}::uuid
+											filter_received_score_block.blocker_auth_user_id = filter_received_score.profile_id
+											and filter_received_score_block.blocked_entity_id = ${input.viewerProfileId}::uuid
 										)
 									)`
 								: sql`true`

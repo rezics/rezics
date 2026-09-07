@@ -16,6 +16,13 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
+import {
+	createCreatedAtColumn,
+	createTimestampMsColumn,
+	createUuidv7PrimaryKey,
+	displayPosition,
+} from "./columns";
 import {
 	RecommendationEventTypeValues,
 	RecommendationSnapshotStateValues,
@@ -23,13 +30,6 @@ import {
 	type UnitKind,
 	toEnumValues,
 } from "./contract-values";
-import {
-	createCreatedAtColumn,
-	createTimestampMsColumn,
-	createUuidv7PrimaryKey,
-	displayPosition,
-} from "./columns";
-import { profile } from "./profile";
 import { unit } from "./unit";
 
 export const recommendationSurface = pgEnum(
@@ -80,7 +80,7 @@ export const recommendationEvent = pgTable(
 	"recommendation_event",
 	{
 		id: createUuidv7PrimaryKey(),
-		profileId: uuid().references(() => profile.id, { onDelete: "set null" }),
+		profileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
 		requestId: uuid().notNull(),
 		surface: recommendationSurface().notNull(),
 		type: recommendationEventType().notNull(),
@@ -121,7 +121,7 @@ export const recommendationExclusion = pgTable(
 	{
 		profileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => entityIdentity.id, { onDelete: "cascade" }),
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),

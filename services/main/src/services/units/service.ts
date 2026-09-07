@@ -1,98 +1,138 @@
 import { DevelopmentPreviewCapability } from "@rezics/access";
-import { and, desc, eq, exists, gt, isNull, lt, not, or, sql } from "drizzle-orm";
 import type { AvatarReference } from "@rezics/avatar";
 import type { PortableTextDocument as PortableTextDocumentValue } from "@rezics/block";
-import type { StaticDecode } from "typebox";
 import type { ContentLanguage } from "@rezics/i18n";
 import { type LicenseId } from "@rezics/license";
+import { and, desc, eq, exists, gt, isNull, lt, not, or, sql } from "drizzle-orm";
+import type { StaticDecode } from "typebox";
+import { selfAuthUserIdForEntity } from "../participation/account-query";
 
-import type { Authorization } from "../authorization";
 import { ValidationError } from "../api/errors";
-import { OfficialProfileIds } from "../bootstrap/data";
+import { imageAssetPresentationContentUrl } from "../api/image-assets/presentation";
+import { ensureImageAssetsAttachable, imageAssetContentUrl } from "../api/image-assets/service";
+import { UnitDetailResponse } from "../api/schema/response";
+import type { Authorization } from "../authorization";
 import {
 	createProfileOwnedUnitAccess,
 	createPublicEditableUnitAccess,
 } from "../authorization/unit/ownership";
-import { database, type DatabaseTransaction } from "../database";
-import { runVoteTransaction } from "../database/vote-admission";
-import { toSafeInteger } from "../database/integer";
-import { exactCount, lowerBoundCount } from "../counts/contract";
-import { WorkPolicy } from "../performance/policy";
+import { unitScope } from "../authorization/unit/scope";
+import { OfficialProfileIds } from "../bootstrap/data";
+import { listPublishedBookContentMetrics } from "../content-metrics/service";
 import {
 	contentRatingAllowlistFromStored,
 	DefaultContentRatingPolicy,
 	getContentRatingCondition,
 	type ContentRatingPolicy,
 } from "../content-rating/policy";
-import {
-	type CreditAttributionRole,
-	isCreditAttributionRoleForUnitKind,
-	isEntityKind,
-	type WorkReleaseStatus,
-} from "../database/schema/contract-values";
 import { ContentStructureSnapshotSchema } from "../content-structure/contracts";
 import { createContentStructureHistory } from "../content-structure/history";
+import { exactCount, lowerBoundCount } from "../counts/contract";
+import { database, type DatabaseTransaction } from "../database";
+import { toSafeInteger } from "../database/integer";
+import {
+	accountPreference,
+	audio,
+	book,
+	contentStructure,
+	creditAttribution,
+	entity,
+	media,
+	release,
+	series,
+	software,
+	subjectAssociation,
+	subjectAssociationJudgment,
+	subjectAssociationJudgmentStat,
+	unit,
+	unitLocalization,
+	unitOwnership,
+	unitProgress,
+	unitTag,
+	unitTagJudgmentStat,
+	unitVariant,
+	video,
+} from "../database/schema";
+import {
+	isCreditAttributionRoleForUnitKind,
+	isEntityKind,
+	type CreditAttributionRole,
+	type WorkReleaseStatus,
+} from "../database/schema/contract-values";
+import { runVoteTransaction } from "../database/vote-admission";
+import { presentNullablePortableTextDocument } from "../documents/portable-text-presentation";
+import { CreditAttributionRoleInvalid } from "../entities/errors";
+import { fractionalPositionBetween } from "../ordering/position";
+import { getPendingUnitOwnershipClaim } from "../ownership-claims/service";
+import { WorkPolicy } from "../performance/policy";
+import { applyInitialTags } from "../tags/initial-applications";
+import { wilsonLowerBoundSql } from "../tags/ranking";
+import { getAssociationContextPostsByAssociationIds } from "./association-context";
+import { createAssociationRequestInTransaction } from "./association-proposals";
+import {
+	getAttributionSummariesByUnitIds,
+	getAttributionSummariesWithStatisticsByUnitIds,
+} from "./attribution";
+import {
+	ensureCreditAttributionRequestsConfirmed,
+	resolveEntityCreditAttributionCreationMode,
+	type CreditAttributionRequestConsent,
+	type EntityCreditAttributionCreationMode,
+} from "./attribution-authorization";
+import { presentAvatar } from "./avatar";
+import {
+	cancelBookChapterDraftJobs,
+	enqueueBookChapterDraftJobInTransaction,
+} from "./book-chapter-draft";
+import {
+	getUnitContentLanguageSupport,
+	normalizeContentLanguageSupportInput,
+	presentContentLanguageSupport,
+	replaceUnitContentLanguageSupport,
+} from "./content-language-support";
+import { insertUnit } from "./create";
+import {
+	UnitChanged,
+	UnitNotFound,
+	UnitVariantKindMismatch,
+	UnitVariantMainUnavailable,
+	UnitVariantTargetIsVariant,
+	VideoAudioTrackInvalid,
+} from "./errors";
+import { getUnitExternalLinkPreviewWithSources } from "./external-links";
+import { recordUnitRevision } from "./history";
+import {
+	insertLicenseGrants,
+	listEffectiveUnitLicenses,
+	listOpenUnitLicenseOfferings,
+	syncLicenseOfferings,
+} from "./license-grants";
 import {
 	avatarReferenceFromColumns,
 	avatarReferenceToColumns,
 	removeUnitLocalization,
 	reorderUnitLocalizations,
-	resolveUnitLocalizationAvatarFromOrdered,
-	resolveUnitLocalizationFromOrdered,
-	resolveUnitLocalizationImageAssetIdFromOrdered,
 	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
+	resolveUnitLocalizationAvatarFromOrdered,
+	resolveUnitLocalizationFromOrdered,
+	resolveUnitLocalizationImageAssetIdFromOrdered,
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
 } from "./localization";
 import { resolveCanonicalUnitId } from "./merge/canonical";
 import {
-	book,
-	audio,
-	contentStructure,
-	creditAttribution,
-	unitTagJudgmentStat,
-	entity,
-	software,
-	media,
-	profilePreference,
-	release,
-	series,
-	unit,
-	unitOwnership,
-	subjectAssociation,
-	subjectAssociationJudgment,
-	subjectAssociationJudgmentStat,
-	unitLocalization,
-	unitProgress,
-	unitTag,
-	unitVariant,
-	video,
-} from "../database/schema";
-import { imageAssetPresentationContentUrl } from "../api/image-assets/presentation";
-import { ensureImageAssetsAttachable, imageAssetContentUrl } from "../api/image-assets/service";
-import { UnitDetailResponse } from "../api/schema/response";
-import { CreditAttributionRoleInvalid } from "../entities/errors";
-import { fractionalPositionBetween } from "../ordering/position";
-import { presentNullablePortableTextDocument } from "../documents/portable-text-presentation";
-import {
-	UnitChanged,
-	UnitNotFound,
-	VideoAudioTrackInvalid,
-	UnitVariantKindMismatch,
-	UnitVariantMainUnavailable,
-	UnitVariantTargetIsVariant,
-} from "./errors";
-import { recordUnitRevision } from "./history";
-import { insertUnit } from "./create";
+	ensureMetadataOnlyChangeAllowed,
+	isMetadataOnlyUnitKind,
+	resolveCreatedMetadataOnly,
+} from "./metadata-only";
+import type { RevisionContributionInput } from "./revision-contribution";
 import { transitionUnitStatus } from "./status";
-import {
-	cancelBookChapterDraftJobs,
-	enqueueBookChapterDraftJobInTransaction,
-} from "./book-chapter-draft";
+import { presentSubjectAssociationSpoiler } from "./subject-association-spoiler";
+import { getSubjectAssociationExpressionPreviews } from "./subject-association-tags";
 import {
 	nextUnitUpdatedAt,
 	toBookUpdateValues,
@@ -103,47 +143,8 @@ import {
 	toTimedMediaUpdateValues,
 	type UpdateUnitInput,
 } from "./update-values";
-import {
-	getAttributionSummariesByUnitIds,
-	getAttributionSummariesWithStatisticsByUnitIds,
-} from "./attribution";
-import { getUnitVariantContext } from "./variants";
 import { ensureUnitVariantLifecycle, isDiscoverableVariantUnit } from "./variant-policy";
-import { presentAvatar } from "./avatar";
-import { listPublishedBookContentMetrics } from "../content-metrics/service";
-import { getAssociationContextPostsByAssociationIds } from "./association-context";
-import { createAssociationRequestInTransaction } from "./association-proposals";
-import {
-	type CreditAttributionRequestConsent,
-	type EntityCreditAttributionCreationMode,
-	ensureCreditAttributionRequestsConfirmed,
-	resolveEntityCreditAttributionCreationMode,
-} from "./attribution-authorization";
-import { wilsonLowerBoundSql } from "../tags/ranking";
-import {
-	insertLicenseGrants,
-	listEffectiveUnitLicenses,
-	listOpenUnitLicenseOfferings,
-	syncLicenseOfferings,
-} from "./license-grants";
-import { applyInitialTags } from "../tags/initial-applications";
-import { getPendingUnitOwnershipClaim } from "../ownership-claims/service";
-import { unitScope } from "../authorization/unit/scope";
-import { getUnitExternalLinkPreviewWithSources } from "./external-links";
-import type { RevisionContributionInput } from "./revision-contribution";
-import {
-	ensureMetadataOnlyChangeAllowed,
-	isMetadataOnlyUnitKind,
-	resolveCreatedMetadataOnly,
-} from "./metadata-only";
-import {
-	getUnitContentLanguageSupport,
-	normalizeContentLanguageSupportInput,
-	presentContentLanguageSupport,
-	replaceUnitContentLanguageSupport,
-} from "./content-language-support";
-import { getSubjectAssociationExpressionPreviews } from "./subject-association-tags";
-import { presentSubjectAssociationSpoiler } from "./subject-association-spoiler";
+import { getUnitVariantContext } from "./variants";
 import {
 	listAdaptedAudioUnitIds,
 	normalizeAdaptedAudioUnitIds,
@@ -385,7 +386,7 @@ export async function createUnit(
 				if (attribution.creationMode === "direct")
 					await tx.insert(creditAttribution).values({
 						sourceUnitId: created.id,
-						creditedUnitId: attribution.entityId,
+						creditedEntityId: attribution.entityId,
 						role: attribution.role,
 						position,
 					});
@@ -534,11 +535,11 @@ export async function getUnit(
 	const [viewerDisplayPreference] = authorization.profileId
 		? await database
 				.select({
-					alwaysShowSpoilers: profilePreference.alwaysShowSpoilers,
-					contentRatings: profilePreference.contentRatings,
+					alwaysShowSpoilers: accountPreference.alwaysShowSpoilers,
+					contentRatings: accountPreference.contentRatings,
 				})
-				.from(profilePreference)
-				.where(eq(profilePreference.profileId, authorization.profileId))
+				.from(accountPreference)
+				.where(eq(accountPreference.authUserId, selfAuthUserIdForEntity(authorization.profileId)))
 				.limit(1)
 		: [];
 	const subjectAssociationRows = await database
@@ -666,16 +667,16 @@ export async function getUnit(
 	const visibleProgressRows = await database
 		.select({ status: unitProgress.status })
 		.from(unitProgress)
-		.innerJoin(profilePreference, eq(profilePreference.profileId, unitProgress.profileId))
+		.innerJoin(accountPreference, eq(accountPreference.authUserId, unitProgress.authUserId))
 		.where(
 			and(
 				eq(unitProgress.unitId, base.id),
 				isNull(unitProgress.deletedAt),
-				eq(profilePreference.progressVisibility, "public"),
+				eq(accountPreference.progressVisibility, "public"),
 				eq(unitProgress.visibility, "public"),
 			),
 		)
-		.orderBy(unitProgress.profileId)
+		.orderBy(unitProgress.authUserId)
 		.limit(WorkPolicy.count.maxPublicProgressCountScan);
 	const progressCountIsExact =
 		visibleProgressRows.length < WorkPolicy.count.maxPublicProgressCountScan;

@@ -14,10 +14,13 @@ export type {
 	DeliveryLocale,
 	StoredUiLocale,
 } from "@rezics/i18n";
+export {
+	LicenseRecognitionStatusValues,
+	type LicenseRecognitionStatus,
+} from "@rezics/license";
 
 export const UnitKindValues = [
 	"slug_namespace",
-	"profile",
 	"book",
 	"software",
 	"media",
@@ -419,10 +422,6 @@ export const AiDisclosureValues = [
 	"machine_generated",
 ] as const;
 export const ModerationStatusValues = ["approved", "pending", "removed"] as const;
-export {
-	LicenseRecognitionStatusValues,
-	type LicenseRecognitionStatus,
-} from "@rezics/license";
 export const ContentStatusValues = ["draft", "published", "archived"] as const;
 export const ImageAssetStatusValues = ["pending", "ready", "failed"] as const;
 export const ImageAssetAccessValues = ["private", "public"] as const;

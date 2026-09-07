@@ -1,6 +1,4 @@
-import type { StaticDecode } from "typebox";
 import { DevelopmentPreviewCapability } from "@rezics/access";
-import { StatusCodes } from "http-status-codes";
 import {
 	DockDocument,
 	NavigationDocument,
@@ -12,16 +10,16 @@ import {
 } from "@rezics/block";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
+import { StatusCodes } from "http-status-codes";
+import type { StaticDecode } from "typebox";
 
-import session, { resolveIdentity } from "../../auth/session";
 import { AuthenticationRequired } from "../../auth/errors";
+import session, { resolveIdentity } from "../../auth/session";
 import {
 	createUnitBlockReferenceResolver,
 	unitBlockGraphLockName,
 } from "../../blocks/reference-resolver";
-import { database, type DatabaseTransaction } from "../../database";
-import { realm, unitDock } from "../../database/schema";
-import { UnitNotFound } from "../../units/errors";
+import { ContentStructureNotFound } from "../../content-structure/errors";
 import {
 	createNavigationStructure,
 	deleteNavigationStructure,
@@ -30,7 +28,9 @@ import {
 	replaceNavigationStructure,
 } from "../../content-structure/navigation";
 import { getContentStructureRevision } from "../../content-structure/service";
-import { ContentStructureNotFound } from "../../content-structure/errors";
+import { database, type DatabaseTransaction } from "../../database";
+import { realm, unitDock } from "../../database/schema";
+import { UnitNotFound } from "../../units/errors";
 import {
 	WikiNavigationDocumentInvalid,
 	WikiNavigationInUse,
@@ -43,8 +43,8 @@ import {
 	WikiNavigationListResponse,
 	WikiNavigationOwnerParams,
 	WikiNavigationParams,
-	WikiNavigationResponse,
 	WikiNavigationReplaceBody,
+	WikiNavigationResponse,
 	WikiNavigationRevisionBody,
 } from "./schema";
 
@@ -133,7 +133,7 @@ export default new Elysia({ prefix: "/realms" })
 		},
 		async ({ params, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
-			if (!identity.profile) throw new AuthenticationRequired();
+			if (!identity.entity) throw new AuthenticationRequired();
 			await identity.authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			await identity.authorization.unit.ensureCanRead(
 				params.realmId,
@@ -166,7 +166,7 @@ export default new Elysia({ prefix: "/realms" })
 				tags: ["Realms"],
 			},
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			await authorization.unit.ensureCanUpdate(params.realmId, [["wiki", "navigation"]]);
 			await ensureRealm(params.realmId);
@@ -175,12 +175,12 @@ export default new Elysia({ prefix: "/realms" })
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${unitBlockGraphLockName({ unitId: params.realmId, kind: "realm" })}::text, 0))`,
 				);
-				await ensureReferences(tx, params.realmId, body.document, profile.unitId);
+				await ensureReferences(tx, params.realmId, body.document, entity.id);
 				const result = await createNavigationStructure(tx, {
 					ownerUnitId: params.realmId,
 					kind: "wiki.navigation",
 					document: body.document,
-					actorProfileId: profile.unitId,
+					actorProfileId: entity.id,
 				});
 				const record = await presentNavigationStructure(tx, {
 					ownerUnitId: params.realmId,
@@ -209,7 +209,7 @@ export default new Elysia({ prefix: "/realms" })
 		},
 		async ({ params, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
-			if (!identity.profile) throw new AuthenticationRequired();
+			if (!identity.entity) throw new AuthenticationRequired();
 			await identity.authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			await identity.authorization.unit.ensureCanRead(
 				params.realmId,
@@ -256,7 +256,7 @@ export default new Elysia({ prefix: "/realms" })
 				tags: ["Realms"],
 			},
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			await authorization.unit.ensureCanUpdate(params.realmId, [
 				["wiki", "navigation", params.navigationId],
@@ -268,13 +268,13 @@ export default new Elysia({ prefix: "/realms" })
 					await tx.execute(
 						sql`select pg_advisory_xact_lock(hashtextextended(${unitBlockGraphLockName({ unitId: params.realmId, kind: "realm" })}::text, 0))`,
 					);
-					await ensureReferences(tx, params.realmId, body.document, profile.unitId);
+					await ensureReferences(tx, params.realmId, body.document, entity.id);
 					const result = await replaceNavigationStructure(tx, {
 						ownerUnitId: params.realmId,
 						structureId: params.navigationId,
 						kind: "wiki.navigation",
 						document: body.document,
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						baseRevisionId: body.baseRevisionId,
 					});
 					const record = await presentNavigationStructure(tx, {
@@ -311,7 +311,7 @@ export default new Elysia({ prefix: "/realms" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ params, body, profile, authorization }) => {
+		async ({ params, body, entity, authorization }) => {
 			await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
 			await authorization.unit.ensureCanUpdate(params.realmId, [
 				["wiki", "navigation", params.navigationId],
@@ -338,7 +338,7 @@ export default new Elysia({ prefix: "/realms" })
 						ownerUnitId: params.realmId,
 						structureId: params.navigationId,
 						kind: "wiki.navigation",
-						actorProfileId: profile.unitId,
+						actorProfileId: entity.id,
 						baseRevisionId: body.baseRevisionId,
 					});
 				});

@@ -89,19 +89,16 @@ export const BootstrapProfileManifest = [
 	...OfficialProfileManifest,
 	BootstrapPlatformAdministratorProfile,
 ] as const;
+/** Human bootstrap login. Official organizations receive explicit grants from this operator. */
+export const BootstrapAccountManifest = [BootstrapPlatformAdministratorProfile] as const;
 export const BootstrapProfileIdValues: readonly string[] = BootstrapProfileManifest.map(
 	(profile) => profile.profileId,
 );
 
 export const BootstrapPlatformAccessManifest = [
 	{
-		profileId: BootstrapPlatformAdministratorProfile.profileId,
-		grantedByProfileId: BootstrapPlatformAdministratorProfile.profileId,
+		authUserId: BootstrapPlatformAdministratorProfile.authUserId,
+		grantedByAuthUserId: BootstrapPlatformAdministratorProfile.authUserId,
 		capabilities: BootstrapPlatformAdministratorProfile.capabilities,
-	},
-	{
-		profileId: OfficialProfileIds.moderation,
-		grantedByProfileId: BootstrapPlatformAdministratorProfile.profileId,
-		capabilities: ["platform.moderate"],
 	},
 ] as const;

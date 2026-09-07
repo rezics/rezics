@@ -1,6 +1,4 @@
-import type { StaticDecode } from "typebox";
 import { PlatformCapabilityValues } from "@rezics/access";
-import { t } from "elysia";
 import {
 	FontAwesomeIconNamePatternSource,
 	FontAwesomeIconPrefixValues,
@@ -9,6 +7,8 @@ import {
 import { PortableTextDocument } from "@rezics/block";
 import { SearchContinuationToken, SearchSort as SearchSortSchema } from "@rezics/filter";
 import { LicenseIds, LicenseRecognitionStatusValues } from "@rezics/license";
+import { t } from "elysia";
+import type { StaticDecode } from "typebox";
 import {
 	ChineseContentDisplay,
 	ContentLanguage,
@@ -17,13 +17,14 @@ import {
 	DateTime,
 	DateTimeString,
 	FractionalPosition,
-	OrdinalPosition,
 	License,
+	OrdinalPosition,
 	ResourceVisibility,
 	StoredUiLocale,
 	Uuid,
 	WorkReleaseStatus,
 } from ".";
+import { CountResultSchema, SearchCountResultSchema } from "../../counts/contract";
 import {
 	ContentRatingValues,
 	ContentStatusValues,
@@ -48,6 +49,7 @@ import {
 	TagExpressionKindValues,
 	TagExpressionLabelComponentKindValues,
 } from "../../database/schema/tag-expression";
+import { HealthCheckStateValues } from "../../health/model";
 import {
 	FeedNonReviewPostKindValues,
 	FeedUnitKindValues,
@@ -59,10 +61,8 @@ import {
 	RecommendationReasonSchema,
 	RecommendationTrackingSchema,
 } from "../recommendations/schema";
-import { HealthCheckStateValues } from "../../health/model";
-import { CollectionConfigV1 } from "../users/schema";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
-import { CountResultSchema, SearchCountResultSchema } from "../../counts/contract";
+import { CollectionConfigV1 } from "../users/schema";
 export {
 	presentPortableTextDocument as toPortableTextResponse,
 	type PortableTextPersistenceSource,
@@ -223,15 +223,20 @@ const UnitAttributionSummaryFields = {
 	position: FractionalPosition,
 } as const;
 
+const EntitySummaryFields = {
+	...UnitSummaryFields,
+	kind: t.Literal("entity"),
+	language: t.String(),
+};
 export const UnitAttributionSummaryResponse = t.Object({
 	...UnitAttributionSummaryFields,
-	creditedUnit: UnitSummaryResponse,
+	creditedEntity: t.Object(EntitySummaryFields),
 });
 
 export const UnitDetailAttributionSummaryResponse = t.Object({
 	...UnitAttributionSummaryFields,
-	creditedUnit: t.Object({
-		...UnitSummaryFields,
+	creditedEntity: t.Object({
+		...EntitySummaryFields,
 		creditedBookCount: CountResultSchema,
 		followerCount: t.Integer({ minimum: 0 }),
 	}),
@@ -997,35 +1002,30 @@ export const ReviewListResponse = t.Object({
 	),
 });
 
-export const PublicProfileResponse = t.Object({
+export const PublicEntityProfileResponse = t.Object({
 	id: Uuid,
-	slugAddress: NullablePublicSlugAddressResponse,
 	status: t.String(),
 	visibility: t.String(),
-	language: ContentLanguage,
+	language: t.Nullable(t.String()),
 	name: NullableText,
 	avatar: AvatarResponse,
 	banner: ImageAssetResponse,
 	summary: NullableText,
 	description: t.Nullable(PortableTextDocument),
+	revision: t.Integer({ minimum: 0 }),
 	createdAt: DateTime,
 	updatedAt: DateTime,
-	viewerFollowing: t.Optional(t.Boolean()),
 });
-export const CurrentProfileResponse = t.Intersect([
-	PublicProfileResponse,
-	t.Object({
-		email: t.String(),
-		emailVerified: t.Boolean(),
-		onboarding: t.String(),
-		localizations: t.Array(LocalizationResponse),
-		platformCapabilities: t.Array(t.UnionEnum(PlatformCapabilityValues), {
-			uniqueItems: true,
-		}),
-	}),
-]);
+export const CurrentAccountResponse = t.Object({
+	entity: PublicEntityProfileResponse,
+	email: t.String(),
+	emailVerified: t.Boolean(),
+	onboarding: t.String(),
+	principal: t.Object({ kind: t.Literal("auth"), authUserId: Uuid }),
+	authorizationRevision: t.Integer({ minimum: 1 }),
+	platformCapabilities: t.Array(t.UnionEnum(PlatformCapabilityValues), { uniqueItems: true }),
+});
 export const PreferencesResponse = t.Object({
-	profileId: Uuid,
 	interfaceLocale: StoredUiLocale,
 	chineseContentDisplay: ChineseContentDisplay,
 	defaultLicenses: t.Array(License),
@@ -1049,7 +1049,7 @@ export const PrivacyPreferencesResponse = t.Object({
 	scoreVisibility: ResourceVisibility,
 	progressVisibility: ResourceVisibility,
 });
-export const ProfileActivityResponse = t.Object({
+export const EntityActivityResponse = t.Object({
 	scores: t.Array(
 		t.Object({
 			scoreId: Uuid,
@@ -1124,7 +1124,7 @@ export const ProgressSearchResponse = t.Object({
 	total: SearchCountResultSchema,
 });
 export const ProgressResponse = t.Object({
-	profileId: Uuid,
+	authUserId: Uuid,
 	unitId: Uuid,
 	status: ProgressStatusResponse,
 	progress: t.Number(),
@@ -1147,7 +1147,7 @@ export const ChapterReadingProgressResponse = t.Object({
 });
 export const ProgressEntryResponse = t.Object({
 	id: Uuid,
-	profileId: Uuid,
+	authUserId: Uuid,
 	unitId: Uuid,
 	entryKind: ProgressEntryKindResponse,
 	status: ProgressStatusResponse,

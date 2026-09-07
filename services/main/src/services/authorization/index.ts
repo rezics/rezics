@@ -8,7 +8,7 @@ import { ZoneAuthorization } from "./zone/authorization";
 
 /** Request-scoped authorization for one profile, including anonymous requests. */
 export class Authorization<ProfileId extends string | undefined = string | undefined> {
-	readonly account: AccountAuthorization<ProfileId>;
+	readonly account: AccountAuthorization<string | undefined>;
 	readonly collection: CollectionAuthorization<ProfileId>;
 	readonly entity: EntityAuthorization<ProfileId>;
 	readonly platform: PlatformAuthorization<ProfileId>;
@@ -16,11 +16,14 @@ export class Authorization<ProfileId extends string | undefined = string | undef
 	readonly unit: UnitAuthorization<ProfileId>;
 	readonly zone: ZoneAuthorization<ProfileId>;
 
-	constructor(readonly profileId: ProfileId) {
-		this.account = new AccountAuthorization(profileId);
+	constructor(
+		readonly profileId: ProfileId,
+		readonly authUserId?: string,
+	) {
+		this.account = new AccountAuthorization(authUserId);
 		this.collection = new CollectionAuthorization(profileId);
-		this.platform = new PlatformAuthorization(profileId);
-		this.unit = new UnitAuthorization(profileId, this.platform);
+		this.platform = new PlatformAuthorization(profileId, authUserId);
+		this.unit = new UnitAuthorization(profileId, this.platform, authUserId);
 		this.zone = new ZoneAuthorization(this.platform, this.unit);
 		this.entity = new EntityAuthorization(profileId, this.platform, this.unit);
 		this.realm = new RealmAuthorization(profileId, this.platform, this.unit);

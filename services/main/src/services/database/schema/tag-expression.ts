@@ -14,6 +14,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
 	createJsonObjectColumn,
@@ -22,7 +23,6 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { profile } from "./profile";
 import { realmUnit } from "./realm";
 import { tag } from "./tag";
 import { unit } from "./unit";
@@ -76,7 +76,7 @@ export const tagExpression = pgTable(
 			.notNull()
 			.references(() => tag.id, { onDelete: "restrict" }),
 		status: text().$type<TagExpressionStatus>().default("active").notNull(),
-		createdByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
+		createdByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
 		createdAt: createCreatedAtColumn(),
 		sealedAt: createTimestampMsColumn(),
 		retiredAt: createTimestampMsColumn(),
@@ -141,7 +141,7 @@ export const tagExpressionPresentationRevision = pgTable(
 			.references(() => tagExpression.id, { onDelete: "cascade" }),
 		revision: integer().default(1).notNull(),
 		status: text().$type<TagExpressionStatus>().default("active").notNull(),
-		createdByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
+		createdByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
 		createdAt: createCreatedAtColumn(),
 		sealedAt: createTimestampMsColumn(),
 		retiredAt: createTimestampMsColumn(),
@@ -239,7 +239,7 @@ export const tagExpressionInferenceRule = pgTable(
 		revision: integer().default(1).notNull(),
 		status: text().$type<TagExpressionStatus>().default("active").notNull(),
 		provenance: createJsonObjectColumn<TagExpressionInferenceProvenance>(),
-		createdByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
+		createdByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
 		createdAt: createCreatedAtColumn(),
 		retiredAt: createTimestampMsColumn(),
 	},

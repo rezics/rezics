@@ -1,18 +1,18 @@
-import { StatusCodes } from "http-status-codes";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import Elysia from "elysia";
+import { StatusCodes } from "http-status-codes";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import { unitReaction, unitReactionStat, unitShare } from "../../database/schema";
-import { ReactionContextQuery, SetReactionBody, UnitReactionParams } from "./schema";
 import {
 	ReactionResponse,
 	ReactionSummaryResponse,
 	ShareResponse,
 } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
+import { ReactionContextQuery, SetReactionBody, UnitReactionParams } from "./schema";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 
@@ -37,7 +37,7 @@ export default new Elysia({ prefix: "/reactions" })
 			detail: { summary: "Get Unit reaction summary", tags: ["Reactions"] },
 		},
 		async ({ params, query, request }) => {
-			const { authorization, profile } = await resolveIdentity(request, "interaction:read");
+			const { authorization, entity } = await resolveIdentity(request, "interaction:read");
 			await authorization.unit.ensureCanRead(params.unitId);
 			if (query.realmId) {
 				await authorization.unit.ensureCanRead(query.realmId);
@@ -57,13 +57,13 @@ export default new Elysia({ prefix: "/reactions" })
 								: isNull(unitReactionStat.realmId),
 						),
 					),
-				profile
+				entity
 					? database
 							.select({ reaction: unitReaction.reaction })
 							.from(unitReaction)
 							.where(
 								and(
-									eq(unitReaction.profileId, profile.unitId),
+									eq(unitReaction.profileId, entity.id),
 									eq(unitReaction.unitId, params.unitId),
 									getContextCondition(unitReaction, query.realmId),
 								),
@@ -92,26 +92,26 @@ export default new Elysia({ prefix: "/reactions" })
 			},
 			detail: { summary: "Set Unit reaction", tags: ["Reactions"] },
 		},
-		async ({ params, profile, authorization, body }) => {
+		async ({ params, entity, authorization, body }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			if (body.realmId) {
 				await authorization.unit.ensureCanRead(body.realmId);
 			}
 			await database.transaction(async (tx) => {
 				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`${profile.unitId}:${params.unitId}:${body.realmId ?? ""}`}::text, 0))`,
+					sql`select pg_advisory_xact_lock(hashtextextended(${`${entity.id}:${params.unitId}:${body.realmId ?? ""}`}::text, 0))`,
 				);
 				await tx
 					.delete(unitReaction)
 					.where(
 						and(
-							eq(unitReaction.profileId, profile.unitId),
+							eq(unitReaction.profileId, entity.id),
 							eq(unitReaction.unitId, params.unitId),
 							getContextCondition(unitReaction, body.realmId),
 						),
 					);
 				await tx.insert(unitReaction).values({
-					profileId: profile.unitId,
+					profileId: entity.id,
 					unitId: params.unitId,
 					realmId: body.realmId,
 					reaction: body.reaction,
@@ -129,12 +129,12 @@ export default new Elysia({ prefix: "/reactions" })
 			response: { [StatusCodes.OK]: ReactionResponse },
 			detail: { summary: "Remove Unit reaction", tags: ["Reactions"] },
 		},
-		async ({ params, profile, body }) => {
+		async ({ params, entity, body }) => {
 			await database
 				.delete(unitReaction)
 				.where(
 					and(
-						eq(unitReaction.profileId, profile.unitId),
+						eq(unitReaction.profileId, entity.id),
 						eq(unitReaction.unitId, params.unitId),
 						getContextCondition(unitReaction, body.realmId),
 					),
@@ -153,11 +153,11 @@ export default new Elysia({ prefix: "/reactions" })
 			},
 			detail: { summary: "Record Unit share", tags: ["Reactions"] },
 		},
-		async ({ params, profile, authorization }) => {
+		async ({ params, entity, authorization }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			await database
 				.insert(unitShare)
-				.values({ profileId: profile.unitId, unitId: params.unitId })
+				.values({ profileId: entity.id, unitId: params.unitId })
 				.onConflictDoNothing();
 			return { shared: true };
 		},
@@ -170,10 +170,10 @@ export default new Elysia({ prefix: "/reactions" })
 			response: { [StatusCodes.OK]: ShareResponse },
 			detail: { summary: "Remove Unit share", tags: ["Reactions"] },
 		},
-		async ({ params, profile }) => {
+		async ({ params, entity }) => {
 			await database
 				.delete(unitShare)
-				.where(and(eq(unitShare.profileId, profile.unitId), eq(unitShare.unitId, params.unitId)));
+				.where(and(eq(unitShare.profileId, entity.id), eq(unitShare.unitId, params.unitId)));
 			return { shared: false };
 		},
 	);

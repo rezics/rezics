@@ -753,7 +753,7 @@ export const PackRelationsSchema = z
 					.object({
 						sourceKey: NonEmptyString,
 						sourceUnitSourceKey: NonEmptyString,
-						creditedUnitSourceKey: NonEmptyString,
+						creditedEntitySourceKey: NonEmptyString,
 						role: z.enum(CreditAttributionRoleValues),
 						position: NonEmptyString,
 					})

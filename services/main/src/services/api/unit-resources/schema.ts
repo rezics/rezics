@@ -1,20 +1,20 @@
-import type { StaticDecode } from "typebox";
 import { t } from "elysia";
+import type { StaticDecode } from "typebox";
 
 import {
 	AliasKindValues,
-	CreditAttributionUnitKindValues,
 	CreditAttributionRoleValues,
+	CreditAttributionUnitKindValues,
 	EntityKindValues,
 	SubjectAssociationRoleValues,
+	UnitKindValues,
 	UnitReferencePageDefault,
 	UnitReferencePageMaximum,
-	UnitKindValues,
 } from "../../database/schema/contract-values";
 import {
+	ContentLanguage,
 	DateTime,
 	FractionalPositionInput,
-	ContentLanguage,
 	LocalizationLanguageQuery,
 	RevisionContext,
 	UnitLocalizationInput,
@@ -101,7 +101,7 @@ export type TagLocalizationParams = StaticDecode<typeof TagLocalizationParams>;
 
 export const AddUnitCreditBody = t.Object(
 	{
-		creditedUnitId: Uuid,
+		creditedEntityId: Uuid,
 		role: t.UnionEnum(CreditAttributionRoleValues),
 		position: t.Optional(FractionalPositionInput),
 		revisionContext: t.Optional(RevisionContext),

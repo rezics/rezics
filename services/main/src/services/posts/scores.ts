@@ -1,10 +1,11 @@
 import { and, asc, eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import { selfAuthUserIdForEntity } from "../participation/account-query";
 
 import { getProfileActivityReadCondition } from "../authorization/profile-activity/query";
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
-import { postScore, profilePreference, score, unit } from "../database/schema";
+import { accountPreference, postScore, score, unit } from "../database/schema";
 import {
 	resolvedUnitLocalizationTitle,
 	type LocalizationLanguageQuery,
@@ -32,7 +33,10 @@ export function selectPostScores(
 		})
 		.from(postScore)
 		.innerJoin(score, eq(score.id, postScore.scoreId))
-		.innerJoin(profilePreference, eq(profilePreference.profileId, score.profileId))
+		.innerJoin(
+			accountPreference,
+			eq(accountPreference.authUserId, selfAuthUserIdForEntity(score.profileId)),
+		)
 		.innerJoin(scoreTargetUnit, eq(scoreTargetUnit.id, score.unitId))
 		.innerJoin(scoreRealm, eq(scoreRealm.id, score.realmId))
 		.where(
@@ -40,7 +44,7 @@ export function selectPostScores(
 				eq(postScore.postId, postId),
 				getProfileActivityReadCondition({
 					ownerProfileId: score.profileId,
-					categoryVisibility: profilePreference.scoreVisibility,
+					categoryVisibility: accountPreference.scoreVisibility,
 					itemVisibility: score.visibility,
 					viewerProfileId,
 					surface: "linked",

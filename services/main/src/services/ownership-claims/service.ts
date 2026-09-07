@@ -1,31 +1,31 @@
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 
 import { recordAuditEvent } from "../audit";
-import { OfficialProfileIds } from "../bootstrap/data";
 import type { PlatformAuthorization } from "../authorization/platform/authorization";
+import { lockUnitAccessState } from "../authorization/unit/invitations";
 import {
 	replaceUnitOwnership,
 	unitOwnershipModeFromOwnerProfileId,
 } from "../authorization/unit/ownership";
-import { lockUnitAccessState } from "../authorization/unit/invitations";
+import { OfficialProfileIds } from "../bootstrap/data";
 import { database, type DatabaseTransaction } from "../database";
 import {
-	profile,
+	entityIdentity,
 	unit,
 	unitOwnership,
 	unitOwnershipClaim,
-	type UnitOwnershipClaimResolution,
 	UnitOwnershipClaimableUnitKindValues,
+	type UnitOwnershipClaimResolution,
 } from "../database/schema";
-import { createNotification } from "../notifications/service";
-import { recordUnitRevision } from "../units/history";
-import type { RevisionContributionInput } from "../units/revision-contribution";
-import { firstUnitLocalizationTitle } from "../units/localization";
-import { UnitNotFound } from "../units/errors";
 import {
 	createGovernanceDecision,
 	type GovernanceRuleReference,
 } from "../governance/decision-service";
+import { createNotification } from "../notifications/service";
+import { UnitNotFound } from "../units/errors";
+import { recordUnitRevision } from "../units/history";
+import { firstUnitLocalizationTitle } from "../units/localization";
+import type { RevisionContributionInput } from "../units/revision-contribution";
 import {
 	UnitOwnershipClaimAlreadyPending,
 	UnitOwnershipClaimChanged,
@@ -275,7 +275,7 @@ async function notifyClaimDecision(
 ) {
 	await createNotification(tx, {
 		kind: "system",
-		recipientProfileId: input.claimantProfileId,
+		recipientEntityId: input.claimantProfileId,
 		actorProfileId: input.actorProfileId,
 		subjectUnitId: input.unitId,
 		dedupeKey: `unit-ownership-claim:${input.claimId}:${input.resolution}`,
@@ -387,10 +387,10 @@ export async function decidePlatformUnitOwnershipClaim(
 			.for("update");
 		if (!sourceOwnership) throw new UnitOwnershipClaimChanged();
 		const [claimant] = await tx
-			.select({ id: profile.id })
-			.from(profile)
-			.innerJoin(unit, eq(unit.id, profile.id))
-			.where(and(eq(profile.id, claim.claimantProfileId), isNull(unit.deletedAt)))
+			.select({ id: entityIdentity.id })
+			.from(entityIdentity)
+			.innerJoin(unit, eq(unit.id, entityIdentity.id))
+			.where(and(eq(entityIdentity.id, claim.claimantProfileId), isNull(unit.deletedAt)))
 			.limit(1);
 		if (!claimant) throw new UnitOwnershipClaimChanged();
 

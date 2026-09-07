@@ -1,14 +1,22 @@
 import { and, desc, eq, ilike, inArray, isNull, lt, ne, or, sql, type SQL } from "drizzle-orm";
 
-import { grantingPlatformCapabilities } from "../authorization/platform/policy";
-import { effectiveAccountState, type AccountStateRecord } from "../auth/account-state";
-import { recordAuditEvent } from "../audit";
-import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
-import { exactCount, lowerBoundCount } from "../counts/contract";
-import { WorkPolicy } from "../performance/policy";
+import { decodePlatformUserCursor, encodePlatformUserCursor } from "../api/platform-users/cursor";
 import {
+	PlatformUserManagerRequired,
+	SessionNotFound,
+	UserAccountStateExpiryInvalid,
+	UserAccountStateRevisionConflict,
+	UserNotFound,
+	UserSelfStatusChangeForbidden,
+} from "../api/users/errors";
+import { recordAuditEvent } from "../audit";
+import { effectiveAccountState, type AccountStateRecord } from "../auth/account-state";
+import { grantingPlatformCapabilities } from "../authorization/platform/policy";
+import { exactCount, lowerBoundCount } from "../counts/contract";
+import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
+import {
+	authEntity,
 	platformCapabilityGrant,
-	profile,
 	sessions,
 	userAccountState,
 	users,
@@ -19,15 +27,7 @@ import {
 	type GovernanceRuleReference,
 } from "../governance/decision-service";
 import { InvalidPaginationCursor } from "../pagination/errors";
-import {
-	PlatformUserManagerRequired,
-	SessionNotFound,
-	UserAccountStateExpiryInvalid,
-	UserAccountStateRevisionConflict,
-	UserNotFound,
-	UserSelfStatusChangeForbidden,
-} from "../api/users/errors";
-import { decodePlatformUserCursor, encodePlatformUserCursor } from "../api/platform-users/cursor";
+import { WorkPolicy } from "../performance/policy";
 
 export interface ListPlatformUsersInput {
 	readonly cursor?: string;
@@ -77,7 +77,7 @@ function statePredicate(state: UserAccountState): SQL {
 
 const userSelection = {
 	userId: users.id,
-	profileId: profile.id,
+	entityId: authEntity.entityId,
 	name: users.name,
 	email: users.email,
 	emailVerified: users.emailVerified,
@@ -87,7 +87,7 @@ const userSelection = {
 	expiresAt: userAccountState.expiresAt,
 	revision: userAccountState.revision,
 	stateUpdatedAt: userAccountState.updatedAt,
-	updatedByProfileId: userAccountState.updatedByProfileId,
+	updatedByAuthUserId: userAccountState.updatedByAuthUserId,
 	activeSessionCount: sql<number>`(
 		select count(*)::integer
 		from (
@@ -103,7 +103,7 @@ const userSelection = {
 
 type SelectedUser = {
 	readonly userId: string;
-	readonly profileId: string | null;
+	readonly entityId: string | null;
 	readonly name: string;
 	readonly email: string;
 	readonly emailVerified: boolean;
@@ -113,7 +113,7 @@ type SelectedUser = {
 	readonly expiresAt: Date | null;
 	readonly revision: number | null;
 	readonly stateUpdatedAt: Date | null;
-	readonly updatedByProfileId: string | null;
+	readonly updatedByAuthUserId: string | null;
 	readonly activeSessionCount: number;
 	readonly createdAt: Date;
 	readonly updatedAt: Date;
@@ -129,13 +129,13 @@ function presentUser(row: SelectedUser) {
 					expiresAt: row.expiresAt,
 					revision: row.revision ?? 0,
 					updatedAt: row.stateUpdatedAt,
-					updatedByProfileId: row.updatedByProfileId,
+					updatedByAuthUserId: row.updatedByAuthUserId,
 				}
 			: undefined,
 	);
 	return {
 		userId: row.userId,
-		profileId: row.profileId,
+		entityId: row.entityId,
 		name: row.name,
 		email: row.email,
 		emailVerified: row.emailVerified,
@@ -170,14 +170,14 @@ export async function listPlatformUsers(input: ListPlatformUsersInput) {
 	if (input.emailVerified !== undefined)
 		predicates.push(eq(users.emailVerified, input.emailVerified));
 
-	const rows = (await database
+	const rows = await database
 		.select(userSelection)
 		.from(users)
-		.leftJoin(profile, eq(profile.authUserId, users.id))
+		.leftJoin(authEntity, eq(authEntity.authUserId, users.id))
 		.leftJoin(userAccountState, eq(userAccountState.userId, users.id))
 		.where(predicates.length ? and(...predicates) : undefined)
 		.orderBy(desc(users.createdAt), desc(users.id))
-		.limit(input.limit + 1)) as SelectedUser[];
+		.limit(input.limit + 1);
 	const hasNext = rows.length > input.limit;
 	const page = rows.slice(0, input.limit);
 	const last = page.at(-1);
@@ -194,13 +194,13 @@ export async function listPlatformUsers(input: ListPlatformUsersInput) {
 }
 
 export async function getPlatformUser(userId: string, executor: DatabaseExecutor = database) {
-	const [row] = (await executor
+	const [row] = await executor
 		.select(userSelection)
 		.from(users)
-		.leftJoin(profile, eq(profile.authUserId, users.id))
+		.leftJoin(authEntity, eq(authEntity.authUserId, users.id))
 		.leftJoin(userAccountState, eq(userAccountState.userId, users.id))
 		.where(eq(users.id, userId))
-		.limit(1)) as SelectedUser[];
+		.limit(1);
 	if (!row) throw new UserNotFound();
 	return presentUser(row);
 }
@@ -217,7 +217,7 @@ async function ensureManagerContinuity(
 		.from(platformCapabilityGrant)
 		.where(
 			and(
-				eq(platformCapabilityGrant.profileId, targetProfileId),
+				eq(platformCapabilityGrant.authUserId, targetProfileId),
 				inArray(platformCapabilityGrant.capability, grantingCapabilities),
 				isNull(platformCapabilityGrant.revokedAt),
 				or(
@@ -229,13 +229,12 @@ async function ensureManagerContinuity(
 		.limit(1);
 	if (!targetGrant) return;
 	const [otherManager] = await tx
-		.select({ profileId: platformCapabilityGrant.profileId })
+		.select({ profileId: platformCapabilityGrant.authUserId })
 		.from(platformCapabilityGrant)
-		.innerJoin(profile, eq(profile.id, platformCapabilityGrant.profileId))
-		.leftJoin(userAccountState, eq(userAccountState.userId, profile.authUserId))
+		.leftJoin(userAccountState, eq(userAccountState.userId, platformCapabilityGrant.authUserId))
 		.where(
 			and(
-				ne(platformCapabilityGrant.profileId, targetProfileId),
+				ne(platformCapabilityGrant.authUserId, targetProfileId),
 				inArray(platformCapabilityGrant.capability, grantingCapabilities),
 				isNull(platformCapabilityGrant.revokedAt),
 				or(
@@ -257,12 +256,12 @@ export async function replacePlatformUserAccountState(input: {
 }) {
 	return database.transaction(async (tx) => {
 		const [target] = await tx
-			.select({ userId: users.id, profileId: profile.id })
+			.select({ userId: users.id, entityId: authEntity.entityId })
 			.from(users)
-			.leftJoin(profile, eq(profile.authUserId, users.id))
+			.leftJoin(authEntity, eq(authEntity.authUserId, users.id))
 			.where(eq(users.id, input.targetUserId))
 			.limit(1)
-			.for("update");
+			.for("update", { of: users });
 		if (!target) throw new UserNotFound();
 		const [stored] = await tx
 			.select({
@@ -272,7 +271,7 @@ export async function replacePlatformUserAccountState(input: {
 				expiresAt: userAccountState.expiresAt,
 				revision: userAccountState.revision,
 				updatedAt: userAccountState.updatedAt,
-				updatedByProfileId: userAccountState.updatedByProfileId,
+				updatedByAuthUserId: userAccountState.updatedByAuthUserId,
 			})
 			.from(userAccountState)
 			.where(eq(userAccountState.userId, input.targetUserId))
@@ -290,7 +289,7 @@ export async function replacePlatformUserAccountState(input: {
 			input.command.expiresAt.getTime() <= Date.now()
 		)
 			throw new UserAccountStateExpiryInvalid();
-		await ensureManagerContinuity(tx, target.profileId, input.command.state);
+		await ensureManagerContinuity(tx, target.userId, input.command.state);
 
 		const now = new Date();
 		const note = input.command.state === "active" ? null : (input.command.note?.trim() ?? null);
@@ -313,7 +312,7 @@ export async function replacePlatformUserAccountState(input: {
 				decisionId: decision.id,
 				note,
 				expiresAt,
-				updatedByProfileId: input.actorProfileId,
+				updatedByAuthUserId: input.actorUserId,
 				revision,
 				updatedAt: now,
 			})
@@ -324,7 +323,7 @@ export async function replacePlatformUserAccountState(input: {
 					decisionId: decision.id,
 					note,
 					expiresAt,
-					updatedByProfileId: input.actorProfileId,
+					updatedByAuthUserId: input.actorUserId,
 					revision,
 					updatedAt: now,
 				},
@@ -356,7 +355,7 @@ export async function replacePlatformUserAccountState(input: {
 			expiresAt,
 			revision,
 			updatedAt: now,
-			updatedByProfileId: input.actorProfileId,
+			updatedByAuthUserId: input.actorUserId,
 		};
 	});
 }

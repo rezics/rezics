@@ -22,7 +22,7 @@ export {
 export type { UnitPermission };
 export type UnitAccessRestrictionCandidate = {
 	readonly id: string;
-	readonly subjectKind: "profile" | "realm";
+	readonly subjectKind: "auth" | "realm";
 };
 
 export type UnitAccessOverride =
@@ -57,7 +57,7 @@ export function resolveUnitAccessOverride(input: {
 	if (input.platformOverride) return { kind: "platform" };
 	if (input.hasDirectProfileOwner) return undefined;
 	const profileRestriction = input.restrictions.find(
-		(restriction) => restriction.subjectKind === "profile",
+		(restriction) => restriction.subjectKind === "auth",
 	);
 	if (profileRestriction) return { kind: "restriction", restriction: profileRestriction };
 	const realmRestriction = input.restrictions.find(

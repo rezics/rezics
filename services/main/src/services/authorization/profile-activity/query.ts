@@ -1,7 +1,8 @@
 import { and, eq, exists, inArray, not, or, type SQLWrapper } from "drizzle-orm";
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
 import { database } from "../../database";
-import { profileBlock } from "../../database/schema";
+import { accountEntityBlock } from "../../database/schema";
 import type { ProfileActivitySurface } from "./policy";
 
 export interface ProfileActivityReadConditionInput {
@@ -33,17 +34,23 @@ export function getProfileActivityReadCondition(input: ProfileActivityReadCondit
 			? not(
 					exists(
 						database
-							.select({ blockerProfileId: profileBlock.blockerProfileId })
-							.from(profileBlock)
+							.select({ blockerAuthUserId: accountEntityBlock.blockerAuthUserId })
+							.from(accountEntityBlock)
 							.where(
 								or(
 									and(
-										eq(profileBlock.blockerProfileId, input.viewerProfileId),
-										eq(profileBlock.blockedProfileId, input.ownerProfileId),
+										eq(
+											accountEntityBlock.blockerAuthUserId,
+											selfAuthUserIdForEntity(input.viewerProfileId),
+										),
+										eq(accountEntityBlock.blockedEntityId, input.ownerProfileId),
 									),
 									and(
-										eq(profileBlock.blockerProfileId, input.ownerProfileId),
-										eq(profileBlock.blockedProfileId, input.viewerProfileId),
+										eq(
+											accountEntityBlock.blockerAuthUserId,
+											selfAuthUserIdForEntity(input.ownerProfileId),
+										),
+										eq(accountEntityBlock.blockedEntityId, input.viewerProfileId),
 									),
 								),
 							),

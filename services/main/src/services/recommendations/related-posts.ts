@@ -1,5 +1,5 @@
-import { and, desc, eq, inArray, ne } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
+import { and, desc, eq, inArray, ne } from "drizzle-orm";
 
 import {
 	getFeedEligibilityCondition,
@@ -8,8 +8,8 @@ import {
 	type CandidateSources,
 	type FeedEligibilityScope,
 } from "../api/feed";
-import { contentRatingPolicyFromAllowlist } from "../content-rating/policy";
 import type { RecommendationReason } from "../api/recommendations/schema";
+import { contentRatingPolicyFromAllowlist } from "../content-rating/policy";
 import { database } from "../database";
 import { creditAttribution, post, unit } from "../database/schema";
 import { searchGlobalIdentifiers } from "../search/service";
@@ -24,7 +24,7 @@ const RelatedPostFeedQuery = {
 export async function recommendRelatedPosts(input: {
 	viewer: RecommendationViewer;
 	snapshot: RecommendationSnapshotContext | null;
-	seed: { id: string; subjectId: string | null; creditedUnitIds: readonly string[] };
+	seed: { id: string; subjectId: string | null; creditedEntityIds: readonly string[] };
 	asOf: Date;
 	pageSize: number;
 	localizationLanguages: readonly ContentLanguage[];
@@ -48,7 +48,7 @@ export async function recommendRelatedPosts(input: {
 					.orderBy(desc(post.createdAt), desc(post.id))
 					.limit(RecommendationPolicy.maxRelationCandidates)
 			: [],
-		input.seed.creditedUnitIds.length
+		input.seed.creditedEntityIds.length
 			? database
 					.selectDistinct({ id: creditAttribution.sourceUnitId })
 					.from(creditAttribution)
@@ -56,7 +56,7 @@ export async function recommendRelatedPosts(input: {
 					.innerJoin(unit, eq(unit.id, post.id))
 					.where(
 						and(
-							inArray(creditAttribution.creditedUnitId, [...input.seed.creditedUnitIds]),
+							inArray(creditAttribution.creditedEntityId, [...input.seed.creditedEntityIds]),
 							ne(post.id, input.seed.id),
 							eligible,
 						),

@@ -1,17 +1,18 @@
-import { and, desc, eq, gte } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
 import { OfficialRealmUnitIds } from "@rezics/slug";
+import { and, desc, eq, gte } from "drizzle-orm";
+import { selfAuthUserIdForEntity } from "../participation/account-query";
 
-import { database } from "../database";
-import {
-	DefaultContentRatingValues,
-	profilePreference,
-	recommendationSnapshot,
-} from "../database/schema";
 import {
 	contentRatingAllowlistFromStored,
 	type AllowedContentRatings,
 } from "../content-rating/policy";
+import { database } from "../database";
+import {
+	DefaultContentRatingValues,
+	accountPreference,
+	recommendationSnapshot,
+} from "../database/schema";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
 
 export interface RecommendationViewer {
@@ -43,13 +44,13 @@ export async function resolveRecommendationViewer(
 		};
 	const [preference] = await database
 		.select({
-			personalized: profilePreference.personalizedFeed,
-			contentRatings: profilePreference.contentRatings,
-			preferredLanguages: profilePreference.preferredLanguages,
-			defaultScoreRealmId: profilePreference.defaultScoreRealmId,
+			personalized: accountPreference.personalizedFeed,
+			contentRatings: accountPreference.contentRatings,
+			preferredLanguages: accountPreference.preferredLanguages,
+			defaultScoreRealmId: accountPreference.defaultScoreRealmId,
 		})
-		.from(profilePreference)
-		.where(eq(profilePreference.profileId, profileId))
+		.from(accountPreference)
+		.where(eq(accountPreference.authUserId, selfAuthUserIdForEntity(profileId)))
 		.limit(1);
 	return {
 		profileId,

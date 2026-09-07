@@ -1,8 +1,9 @@
 import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 
 import { recordAuditEvent } from "../../audit";
+import { ensureAccountAuthenticationAllowed } from "../../auth/account-state";
 import { database, type DatabaseExecutor } from "../../database";
-import { platformCapabilityGrant } from "../../database/schema";
+import { platformCapabilityGrant, users } from "../../database/schema";
 import { PlatformCapabilityRequired } from "../errors";
 import { grantingPlatformCapabilities, type PlatformCapability } from "./policy";
 
@@ -33,7 +34,7 @@ async function decideActivePlatformGrant(
 		.from(platformCapabilityGrant)
 		.where(
 			and(
-				eq(platformCapabilityGrant.profileId, profileId),
+				eq(platformCapabilityGrant.authUserId, profileId),
 				inArray(platformCapabilityGrant.capability, grantingCapabilities),
 				isNull(platformCapabilityGrant.revokedAt),
 				or(
@@ -43,7 +44,8 @@ async function decideActivePlatformGrant(
 			),
 		)
 		.orderBy(sql`${platformCapabilityGrant.capability} = ${capability} desc`)
-		.limit(1);
+		.limit(1)
+		.for("share");
 	return grant
 		? {
 				allowed: true,
@@ -58,7 +60,10 @@ async function decideActivePlatformGrant(
 export class PlatformAuthorization<ProfileId extends string | undefined> {
 	readonly #decisions = new Map<PlatformCapability, Promise<PlatformAccessDecision>>();
 
-	constructor(readonly profileId: ProfileId) {}
+	constructor(
+		readonly profileId: ProfileId,
+		readonly authUserId?: string,
+	) {}
 
 	decideCapability(capability: PlatformCapability): Promise<PlatformAccessDecision> {
 		const current = this.#decisions.get(capability);
@@ -72,8 +77,8 @@ export class PlatformAuthorization<ProfileId extends string | undefined> {
 		executor: DatabaseExecutor,
 		capability: PlatformCapability,
 	): Promise<PlatformAccessDecision> {
-		return this.profileId
-			? decideActivePlatformGrant(executor, this.profileId, capability)
+		return this.authUserId
+			? decideActivePlatformGrant(executor, this.authUserId, capability)
 			: Promise.resolve({ allowed: false, reason: "anonymous" });
 	}
 
@@ -91,7 +96,7 @@ export class PlatformAuthorization<ProfileId extends string | undefined> {
 		capabilities: readonly [Capability, ...Capability[]],
 		executor: DatabaseExecutor = database,
 	): Promise<ReadonlyMap<Capability, boolean>> {
-		if (!this.profileId)
+		if (!this.authUserId)
 			return new Map(capabilities.map((capability) => [capability, false] as const));
 		const grantingCapabilities = [
 			...new Set(capabilities.flatMap((capability) => grantingPlatformCapabilities(capability))),
@@ -101,7 +106,7 @@ export class PlatformAuthorization<ProfileId extends string | undefined> {
 			.from(platformCapabilityGrant)
 			.where(
 				and(
-					eq(platformCapabilityGrant.profileId, this.profileId),
+					eq(platformCapabilityGrant.authUserId, this.authUserId),
 					inArray(platformCapabilityGrant.capability, grantingCapabilities),
 					isNull(platformCapabilityGrant.revokedAt),
 					or(
@@ -125,16 +130,24 @@ export class PlatformAuthorization<ProfileId extends string | undefined> {
 	}
 
 	async ensureCapability(
-		this: PlatformAuthorization<string>,
 		capability: PlatformCapability,
 		executor: DatabaseExecutor = database,
 	): Promise<void> {
+		if (!this.authUserId) throw new PlatformCapabilityRequired();
+		const [account] = await executor
+			.select({ id: users.id })
+			.from(users)
+			.where(eq(users.id, this.authUserId))
+			.limit(1)
+			.for("share");
+		if (!account) throw new PlatformCapabilityRequired();
+		await ensureAccountAuthenticationAllowed(this.authUserId, executor);
 		const decision = await this.#decideCapability(executor, capability);
 		if (decision.allowed) return;
 		await recordAuditEvent(database, {
 			category: "policy_denied",
 			outcome: "denied",
-			actor: { kind: "profile", profileId: this.profileId },
+			actor: { kind: "auth", authUserId: this.authUserId },
 			authority: { kind: "platform" },
 			action: "platform.authorization.denied",
 			outcomeCode: decision.reason,

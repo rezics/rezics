@@ -1,4 +1,5 @@
 import { and, eq, exists, inArray, isNull, or, sql } from "drizzle-orm";
+import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
 import { database } from "../../database";
 import { platformCapabilityGrant } from "../../database/schema";
@@ -13,7 +14,7 @@ export function getPlatformCapabilityCondition(profileId: string, capability: Pl
 			.from(platformCapabilityGrant)
 			.where(
 				and(
-					eq(platformCapabilityGrant.profileId, profileId),
+					eq(platformCapabilityGrant.authUserId, selfAuthUserIdForEntity(profileId)),
 					inArray(platformCapabilityGrant.capability, grantingPlatformCapabilities(capability)),
 					isNull(platformCapabilityGrant.revokedAt),
 					or(

@@ -17,6 +17,13 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { entityIdentity } from "./catalog-identity";
+import {
+	createCreatedAtColumn,
+	createTimestampMsColumn,
+	createUpdatedAtColumn,
+	createUuidv7PrimaryKey,
+} from "./columns";
 import {
 	type UnitMergeEligibleKind,
 	UnitMergeEligibleKindValues,
@@ -32,14 +39,7 @@ import {
 	UnitMergeReviewDecisionValues,
 	toEnumValues,
 } from "./contract-values";
-import {
-	createCreatedAtColumn,
-	createTimestampMsColumn,
-	createUpdatedAtColumn,
-	createUuidv7PrimaryKey,
-} from "./columns";
 import { governanceDecision } from "./governance";
-import { profile } from "./profile";
 import { unit } from "./unit";
 
 export const unitMergeRequestMode = pgEnum(
@@ -89,7 +89,7 @@ export const unitMergeRequest = pgTable(
 		state: unitMergeRequestState().notNull(),
 		proposerProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		idempotencyKey: text().notNull(),
 		overrideOfRequestId: uuid(),
 		decisionId: uuid().references(() => governanceDecision.id, { onDelete: "restrict" }),
@@ -214,7 +214,7 @@ export const unitMergeReview = pgTable(
 			.references(() => unitMergeRequest.id, { onDelete: "restrict" }),
 		reviewerProfileId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		decision: unitMergeReviewDecision().notNull(),
 		note: text(),
 		requestFingerprint: text().notNull(),

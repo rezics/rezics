@@ -1,28 +1,19 @@
+import type { User } from "better-auth";
 import { eq } from "drizzle-orm";
 import Elysia from "elysia";
 import type { DocumentDecoration } from "elysia/types";
-import type { User } from "better-auth";
+import type { ParticipationAuthority } from "../participation/policy";
+import { resolveRequestParticipation } from "../participation/request";
 
 import { setAuditCredentialContext } from "../audit";
 import { Authorization } from "../authorization";
 import { database } from "../database";
 import { users } from "../database/schema";
-import type { ApiPermission } from "./api-permissions";
-import type { ApiQuotaOperationId } from "./api-quota/operation";
 import { ensureAccountAuthenticationAllowed } from "./account-state";
+import type { ApiPermission } from "./api-permissions";
 import { fromApiKeyPermissions, isApiPermission } from "./api-permissions";
-import {
-	ApiTokenPermissionRequired,
-	ApiTokenRateLimitExceeded,
-	AuthenticationRequired,
-	EmailVerificationRequired,
-	FreshSessionRequired,
-	InteractiveSessionRequired,
-} from "./errors";
-import { auth, CredentialControlFreshAgeSeconds } from "./index";
-import { ensureProfile, type SessionProfile } from "./profile";
-import { resolveRequestUiLocale } from "./request-interface-locale";
 import { enforceApiQuota, type ApiQuotaLease } from "./api-quota/limit-store";
+import type { ApiQuotaOperationId } from "./api-quota/operation";
 import {
 	apiRouteOperationId,
 	resolveApiQuotaOperation,
@@ -37,11 +28,26 @@ import {
 	type ResolvedApiAccountQuotaPolicy,
 	type ResolvedApiTokenQuotaPolicy,
 } from "./api-quota/policy-service";
+import { ensureSelfEntity, type SessionEntity } from "./entity";
+import {
+	ApiTokenPermissionRequired,
+	ApiTokenRateLimitExceeded,
+	AuthenticationRequired,
+	EmailVerificationRequired,
+	FreshSessionRequired,
+	InteractiveSessionRequired,
+} from "./errors";
+import { auth, CredentialControlFreshAgeSeconds } from "./index";
+import { resolveRequestUiLocale } from "./request-interface-locale";
 
 type BaseIdentity = {
+	participation: ParticipationAuthority;
 	user: User;
-	profile: SessionProfile;
+	entity: SessionEntity;
 	authorization: Authorization<string>;
+	principal: { kind: "auth"; authUserId: string };
+	actingEntityId: string;
+	authorizationRevision: number;
 };
 
 export type SessionIdentity = BaseIdentity & {
@@ -77,11 +83,15 @@ export type AuthenticatedIdentity = BaseIdentity & {
 
 export type ResolvedIdentity =
 	| {
-			profile: SessionProfile;
+			participation: ParticipationAuthority;
+			entity: SessionEntity;
 			authorization: Authorization<string>;
+			principal: { kind: "auth"; authUserId: string };
+			actingEntityId: string;
+			authorizationRevision: number;
 	  }
 	| {
-			profile: undefined;
+			entity: undefined;
 			authorization: Authorization<undefined>;
 	  };
 
@@ -163,12 +173,17 @@ async function resolveInteractiveSession(headers: Headers): Promise<SessionIdent
 	const session = await auth.api.getSession({ headers });
 	if (!session) return undefined;
 	await ensureAccountAuthenticationAllowed(session.user.id);
-	const profile = await ensureProfile(session.user, resolveRequestUiLocale(headers));
+	const entity = await ensureSelfEntity(session.user, resolveRequestUiLocale(headers));
+	const participation = await resolveRequestParticipation(headers, entity, session.user.id);
 	return {
+		participation,
 		user: session.user,
+		principal: { kind: "auth", authUserId: session.user.id },
+		actingEntityId: participation.actingEntityId,
+		authorizationRevision: entity.authorizationRevision,
 		session: session.session,
-		profile,
-		authorization: new Authorization(profile.unitId),
+		entity,
+		authorization: new Authorization(entity.id, session.user.id),
 		credential: { kind: "session", session: session.session },
 	};
 }
@@ -188,6 +203,7 @@ async function resolveApiKeyIdentity(
 	requiredPermission: ApiPermission | undefined,
 	operationId: string,
 	accountAccess?: "authenticated" | "write" | "contribute",
+	headers: Headers = new Headers(),
 ): Promise<UnadmittedApiKeyIdentity> {
 	const verified = await auth.api.verifyApiKey({
 		body: { key },
@@ -207,8 +223,9 @@ async function resolveApiKeyIdentity(
 		.limit(1);
 	if (!user) throw new AuthenticationRequired();
 	await ensureAccountAuthenticationAllowed(user.id);
-	const profile = await ensureProfile(user);
-	const authorization = new Authorization(profile.unitId);
+	const entity = await ensureSelfEntity(user);
+	const participation = await resolveRequestParticipation(headers, entity, user.id);
+	const authorization = new Authorization(entity.id, user.id);
 	if (accountAccess === "write" || accountAccess === "contribute") {
 		if (!user.emailVerified) throw new EmailVerificationRequired();
 		if (accountAccess === "write") await authorization.account.ensureCanWrite();
@@ -220,9 +237,13 @@ async function resolveApiKeyIdentity(
 		getApiTokenQuotaOverride(verified.key.id),
 	]);
 	return {
+		participation,
 		user,
+		principal: { kind: "auth", authUserId: user.id },
+		actingEntityId: participation.actingEntityId,
+		authorizationRevision: entity.authorizationRevision,
 		session: undefined,
-		profile,
+		entity,
 		authorization,
 		credential: {
 			kind: "apiKey",
@@ -260,9 +281,10 @@ async function resolveApiKey(
 	operationId: string,
 	operation = resolveApiQuotaOperation(operationId),
 	accountAccess?: "authenticated" | "write" | "contribute",
+	headers: Headers = new Headers(),
 ): Promise<ApiKeyIdentity> {
 	return admitApiKeyQuota(
-		await resolveApiKeyIdentity(key, requiredPermission, operationId, accountAccess),
+		await resolveApiKeyIdentity(key, requiredPermission, operationId, accountAccess, headers),
 		operation,
 	);
 }
@@ -276,7 +298,7 @@ async function requireAccess(
 	if (!("permission" in policy)) {
 		if (policy.credential === "api-key-only") {
 			if (!token) throw new AuthenticationRequired();
-			return resolveApiKey(token, undefined, operationId);
+			return resolveApiKey(token, undefined, operationId, undefined, undefined, headers);
 		}
 		if (token) throw new InteractiveSessionRequired();
 		const identity = await resolveInteractiveSession(headers);
@@ -297,6 +319,7 @@ async function requireAccess(
 				operationId,
 				resolveApiQuotaOperation(operationId),
 				policy.account,
+				headers,
 			)
 		: await resolveInteractiveSession(headers);
 	if (!identity) throw new AuthenticationRequired();
@@ -327,14 +350,23 @@ export async function resolveIdentity(
 			quotaOperationId
 				? resolveApiQuotaOperationById(quotaOperationId)
 				: resolveApiQuotaOperation("unscopedPublicRoute"),
+			undefined,
+			request.headers,
 		);
 	} else {
 		identity = await resolveInteractiveSession(request.headers);
 	}
-	if (!identity) return { profile: undefined, authorization: new Authorization(undefined) };
+	if (!identity) return { entity: undefined, authorization: new Authorization(undefined) };
 	if (identity.credential.kind === "apiKey")
 		trackRequestLimitLease(request, identity.credential.quotaLease);
-	return { profile: identity.profile, authorization: identity.authorization };
+	return {
+		participation: identity.participation,
+		entity: identity.entity,
+		authorization: identity.authorization,
+		principal: identity.principal,
+		actingEntityId: identity.actingEntityId,
+		authorizationRevision: identity.authorizationRevision,
+	};
 }
 
 export type DynamicApiQuotaIdentity = ResolvedIdentity & {
@@ -357,12 +389,25 @@ export async function resolveIdentityWithDynamicApiQuota(
 	let apiKeyIdentity: UnadmittedApiKeyIdentity | undefined;
 	let identity: UnadmittedApiKeyIdentity | SessionIdentity | undefined;
 	if (token) {
-		apiKeyIdentity = await resolveApiKeyIdentity(token, permission, quotaOperationId);
+		apiKeyIdentity = await resolveApiKeyIdentity(
+			token,
+			permission,
+			quotaOperationId,
+			undefined,
+			request.headers,
+		);
 		identity = apiKeyIdentity;
 	} else identity = await resolveInteractiveSession(request.headers);
 	const resolved: ResolvedIdentity = identity
-		? { profile: identity.profile, authorization: identity.authorization }
-		: { profile: undefined, authorization: new Authorization(undefined) };
+		? {
+				participation: identity.participation,
+				entity: identity.entity,
+				authorization: identity.authorization,
+				principal: identity.principal,
+				actingEntityId: identity.actingEntityId,
+				authorizationRevision: identity.authorizationRevision,
+			}
+		: { entity: undefined, authorization: new Authorization(undefined) };
 	let admissionState: "pending" | "admitting" | "admitted" | "failed" = "pending";
 
 	return {
@@ -404,6 +449,7 @@ export default new Elysia({ name: "session-context" })
 				if (identity.credential.kind === "apiKey")
 					trackRequestLimitLease(request, identity.credential.quotaLease);
 				setAuditCredentialContext({
+					authUserId: identity.user.id,
 					credentialKind: identity.credential.kind === "apiKey" ? "api_token" : "session",
 					credentialId:
 						identity.credential.kind === "apiKey"
