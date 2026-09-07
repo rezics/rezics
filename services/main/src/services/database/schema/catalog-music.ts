@@ -92,6 +92,7 @@ export const musicComponentSourceOccurrence = pgTable(
 			foreignColumns: [musicComponentRevision.ownerId, musicComponentRevision.id],
 		}).onDelete("restrict"),
 		index("music_component_source_history_idx").on(table.ownerId, table.historyId),
+		index("music_component_source_component_idx").on(table.sourceRecordId, table.snapshotId, table.ownerId, table.component, table.componentKey, table.sourcePath),
 		check(
 			"music_component_source_key_check",
 			sql`octet_length(${table.sourcePath}) between 1 and 512 and left(${table.sourcePath}, 1) = '/' and octet_length(${table.component}) between 1 and 96 and octet_length(${table.componentKey}) between 1 and 512`,

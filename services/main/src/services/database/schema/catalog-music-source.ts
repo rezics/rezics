@@ -11,6 +11,7 @@ export const musicComponentSourceBaseline = pgTable(
 	{
 		sourceRecordId: uuid().notNull(),
 		mappingKey: uuid().notNull(),
+		mappingOwner: text().$type<"music">().default("music").notNull(),
 		ownerId: uuid().notNull(),
 		component: text().notNull(),
 		componentKey: text().notNull(),
@@ -34,10 +35,11 @@ export const musicComponentSourceBaseline = pgTable(
 		}),
 		foreignKey({
 			name: "music_source_baseline_mapping_fk",
-			columns: [table.sourceRecordId, table.mappingKey],
+			columns: [table.sourceRecordId, table.mappingKey, table.mappingOwner],
 			foreignColumns: [
 				catalogSourceMappingClaim.sourceRecordId,
 				catalogSourceMappingClaim.mappingKey,
+				catalogSourceMappingClaim.owner,
 			],
 		}).onDelete("restrict"),
 		foreignKey({
@@ -78,5 +80,6 @@ export const musicComponentSourceBaseline = pgTable(
 		}).onDelete("restrict"),
 		index("music_source_baseline_current_idx").on(table.ownerId, table.currentHistoryId),
 		check("music_source_baseline_action_check", sql`${table.action} in ('apply','withdraw')`),
+		check("music_source_baseline_owner_check", sql`${table.mappingOwner} = 'music'`),
 	],
 );
