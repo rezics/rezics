@@ -134,3 +134,23 @@ unqualified until the combined source worker benchmark measures the changed
 index footprint, lock waits and WAL on representative skew. Root-source routing
 keeps epoch reads local to each partition and permits source-record sharding
 without a global historical scan.
+
+Protocol refresh also stores the typed scalar mapper output before merging human
+values. It is an immutable interpretation under the root epoch, with a separate
+exact native-history FK; it is not a raw source document or an extensible fact
+bag. Canonical content/release schemas validate every value on write and read;
+SQL checks shape, required/allowed keys, broad JSON types and a 2 MiB ceiling.
+Assuming 2 KiB average interpreted scalar data, 500M occurrence rows add about
+1.024 TB and 3B add 6.144 TB before indexes/TOAST overhead. At three copies and
+30% reserve the payload allowance is about 3.99 TB / 23.96 TB. This explicit
+average must be replaced by measured source distributions before admission;
+the allowed worst-case description is much larger and cannot use this estimate.
+
+A same-target refresh reads at most 128 prior names, contexts, credits and
+semantic supports per query, and rejects when their combined unique output
+count exceeds 128. Native heads and compensation baselines are read in batches;
+each actual mutation retains its canonical exact-revision and authority check.
+Work is proportional to one admitted source record, independent of corpus size.
+The source task capacity/lease remains the concurrency and backpressure owner.
+Refresh qualification must include repeated protocol changes while retaining
+human overrides; graph separation alone does not prove replacement semantics.

@@ -26,6 +26,10 @@ import { reconcileVndbSemanticPlan } from "./vndb-semantics-update";
 import { reconcileVndbContexts } from "./vndb-contexts-update";
 import { reconcileVndbParticipation } from "./vndb-participation-update";
 import { compensateVndbSoftwareApplication } from "./vndb-software-compensation";
+import {
+	retirePreviousSoftwareSourceEpoch,
+	restorePreviousSoftwareNameClaims,
+} from "./software-source-refresh";
 
 function prepare(input: VndbPreparedSnapshot) {
 	const snapshotId = z.uuid().parse(input.snapshotId),
@@ -51,14 +55,16 @@ function prepare(input: VndbPreparedSnapshot) {
 export function createVndbVnNativeWriter(input: {
 	before: VndbPreparedSnapshot | null;
 	after: VndbPreparedSnapshot;
+	mappingVersion?: "vndb.vn.2" | "vndb.vn.3" | "vndb.vn.4";
 }): CatalogSourceNativeWriter {
+	const mappingVersion = input.mappingVersion ?? "vndb.vn.2";
 	const before = input.before ? prepare(input.before) : null,
 		after = prepare(input.after);
 	if (before && before.record.id !== after.record.id)
 		throw new TypeError("VNDB VN delta crosses source identities");
 	return async (tx, context) => {
 		if (
-			context.mappingVersion !== "vndb.vn.2" ||
+			context.mappingVersion !== mappingVersion ||
 			context.snapshotId !== after.snapshotId ||
 			context.reference.owner !== "software"
 		)
@@ -90,6 +96,17 @@ export function createVndbVnNativeWriter(input: {
 			if (!applied || applied.application.previousSnapshotId !== (before?.snapshotId ?? null))
 				throw new Error("VNDB compensation preparation lacks the exact original baseline");
 			const result = await compensateVndbSoftwareApplication(tx, context, "content");
+			if (
+				applied.application.previousCorrespondenceRevision !== null &&
+				applied.application.previousCorrespondenceRevision !== context.correspondenceRevision &&
+				applied.application.previousObservedSnapshotId !== null
+			)
+				result.changes.push(
+					...(await restorePreviousSoftwareNameClaims(tx, context, {
+						previousSnapshotId: applied.application.previousObservedSnapshotId,
+						changes: applied.changes,
+					})),
+				);
 			if (before)
 				result.changes.push(
 					...(await restoreVndbNameAuthority(
@@ -131,6 +148,14 @@ export function createVndbVnNativeWriter(input: {
 					throw new TypeError(`VNDB update omitted observed ${field}`);
 		const changes: CatalogSourceNativeChange[] = [];
 		let revision = context.expectedRevision;
+		const refresh =
+			context.previousSnapshotId === null
+				? await retirePreviousSoftwareSourceEpoch(tx, context)
+				: null;
+		if (refresh) {
+			revision = refresh.revision;
+			changes.push(...refresh.changes);
+		}
 		const t = softwareRecordRevision;
 		const [head] = await tx
 			.select()
@@ -146,7 +171,9 @@ export function createVndbVnNativeWriter(input: {
 		});
 		const desired = SoftwareContentDetailsSchema.parse(
 			mergeVndbOwnedValues(
-				before ? vndbVnDetails(before.record) : SoftwareContentDetailsSchema.parse({}),
+				before
+					? vndbVnDetails(before.record)
+					: (refresh?.scalarBefore ?? SoftwareContentDetailsSchema.parse({})),
 				vndbVnDetails(after.record),
 				current,
 			),
@@ -163,7 +190,10 @@ export function createVndbVnNativeWriter(input: {
 			});
 		}
 		await tx.insert(softwareVisualNovel).values({ id: context.reference.id }).onConflictDoNothing();
-		await recordVndbSoftwareScalarOccurrence(tx, document, context.reference.id, "/");
+		await recordVndbSoftwareScalarOccurrence(tx, document, context.reference.id, "/", {
+			sourceShape: "content",
+			sourceValue: vndbVnDetails(after.record),
+		});
 		const names = await reconcileVndbNativeNames(
 			tx,
 			context.reference,

@@ -24,6 +24,7 @@ import {
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
 import {
 	createNativeSoftwareContent,
+	SoftwareContentDetailsSchema,
 	reviseSoftwareContent,
 	restoreSoftwareDetails,
 } from "../src/services/catalog/software";
@@ -104,6 +105,8 @@ try {
 					reference: native,
 				});
 				await tx.insert(softwareRecordSourceOccurrence).values({
+					sourceShape: "content",
+					sourceValue: SoftwareContentDetailsSchema.parse({ description: "initial" }),
 					mappingKey: binding.mappingKey,
 					correspondenceRevision: 1,
 					sourceRecordId: first.record.id,
@@ -152,6 +155,8 @@ try {
 							{ description: "updated" },
 						);
 						await nested.insert(softwareRecordSourceOccurrence).values({
+							sourceShape: "content",
+							sourceValue: SoftwareContentDetailsSchema.parse({ description: "updated" }),
 							mappingKey: binding.mappingKey,
 							correspondenceRevision: 1,
 							sourceRecordId: first.record.id,

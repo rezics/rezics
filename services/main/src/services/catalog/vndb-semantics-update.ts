@@ -79,6 +79,8 @@ async function sourceOrigin(
 				eq(t.support.ownerId, reference.id),
 				eq(t.support.id, vndbSemanticSupportId(document, sourceKey, scope)),
 				eq(t.support.sourceRecordId, document.record.id),
+				eq(t.support.sourceMappingKey, scope.mappingKey),
+				eq(t.support.sourceCorrespondenceRevision, scope.correspondenceRevision),
 				eq(t.support.snapshotId, document.snapshot.id),
 			),
 		)
@@ -99,6 +101,7 @@ export async function reconcileVndbSemanticPlan(
 	after: { plan: VndbSemanticPlan; document: Document },
 ) {
 	const scope = await resolveCatalogSourceChildCorrespondence(tx, after.document.record.id);
+	if (scope.mappingKey !== mappingKey) throw new Error("VNDB semantic root mapping differs");
 	const previous = units(before.plan),
 		next = units(after.plan);
 	const changed =
@@ -113,7 +116,7 @@ export async function reconcileVndbSemanticPlan(
 	const expectedHead = async (origin: Origin) => {
 		const expected = await resolveCatalogSourceOwnedBaseline(
 			tx,
-			{ sourceRecordId: before.document.record.id, mappingKey },
+			{ sourceRecordId: before.document.record.id, ...scope },
 			{
 				kind: "catalog-semantic",
 				owner: reference.owner,

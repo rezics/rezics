@@ -258,6 +258,7 @@ export async function reconcileVndbNativeNames(
 	after: { plan: VndbNativeNamePlan[]; document: Document },
 ) {
 	const scope = await resolveCatalogSourceChildCorrespondence(tx, after.document.record.id);
+	if (scope.mappingKey !== mappingKey) throw new Error("VNDB names root mapping differs");
 	const old = new Map(before.plan.map((item) => [item.key, item]));
 	const next = new Map(after.plan.map((item) => [item.key, item]));
 	if (old.size !== before.plan.length || next.size !== after.plan.length)
@@ -355,6 +356,7 @@ export async function reconcileVndbNativeNames(
 							and(
 								eq(baseline.sourceRecordId, after.document.record.id),
 								eq(baseline.mappingKey, mappingKey),
+								eq(baseline.correspondenceRevision, scope.correspondenceRevision),
 								eq(baseline.ownerId, ref.id),
 								eq(baseline.kind, "catalog-name"),
 								eq(baseline.componentKey, current.id),
@@ -440,7 +442,7 @@ export async function reconcileVndbNativeNames(
 		if (!origin) throw new Error("Removed VNDB title has no exact native occurrence");
 		const expected = await resolveCatalogSourceOwnedBaseline(
 			tx,
-			{ sourceRecordId: before.document.record.id, mappingKey },
+			{ sourceRecordId: before.document.record.id, ...scope },
 			{
 				kind: "catalog-name",
 				owner: ref.owner,

@@ -85,7 +85,7 @@ describe("exact source/native schema reference keys", () => {
 		}
 		expect(checked).toBeGreaterThan(150);
 	});
-	it("retains the concrete mapping owner in every numeric baseline foreign key", () => {
+	it("pins every numeric baseline to an immutable root correspondence epoch", () => {
 		for (const table of [
 			...Object.values(CatalogSourceOwnedBaselines),
 			softwareSourceComponentBaseline,
@@ -96,17 +96,17 @@ describe("exact source/native schema reference keys", () => {
 			const config = getTableConfig(table);
 			const mapping = config.foreignKeys.find(
 				(key) =>
-					getTableConfig(key.reference().foreignTable).name === "catalog_source_mapping_claim",
+					getTableConfig(key.reference().foreignTable).name === "catalog_source_binding_revision",
 			);
 			expect(mapping?.reference().foreignColumns.map((column) => column.name)).toEqual([
 				"source_record_id",
 				"mapping_key",
-				"owner",
+				"revision",
 			]);
 			expect(mapping?.reference().columns.map((column) => column.name)).toEqual([
 				"source_record_id",
 				"mapping_key",
-				"mapping_owner",
+				"correspondence_revision",
 			]);
 		}
 	});

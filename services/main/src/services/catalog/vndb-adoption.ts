@@ -93,7 +93,10 @@ export async function writeVndbVnProjection(
 		sourcePath("/title"),
 		"nameId" in identity ? { id: identity.nameId, revision: identity.nameRevision } : undefined,
 	);
-	await recordVndbSoftwareScalarOccurrence(tx, observation, identity.id, sourcePath("/"));
+	await recordVndbSoftwareScalarOccurrence(tx, observation, identity.id, sourcePath("/"), {
+		sourceShape: "content",
+		sourceValue: details,
+	});
 	let revision = await appendVndbVnNames(
 		tx,
 		identity,

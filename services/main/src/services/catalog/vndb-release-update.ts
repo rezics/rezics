@@ -325,7 +325,10 @@ export function createVndbReleaseNativeWriter(input: {
 				afterRevision: revision,
 			});
 		}
-		await recordVndbSoftwareScalarOccurrence(tx, document, context.reference.id, after.path("/"));
+		await recordVndbSoftwareScalarOccurrence(tx, document, context.reference.id, after.path("/"), {
+			sourceShape: "release",
+			sourceValue: after.details,
+		});
 		const oldComponents = before
 			? await components(tx, context.actor, before, previousDocument)
 			: [];
@@ -364,6 +367,7 @@ export function createVndbReleaseNativeWriter(input: {
 						and(
 							eq(t.sourceRecordId, context.sourceRecordId),
 							eq(t.mappingKey, context.mappingKey),
+							eq(t.correspondenceRevision, context.correspondenceRevision),
 							eq(t.ownerId, context.reference.id),
 							eq(t.component, kind),
 							eq(t.componentKey, item.componentId),
@@ -420,6 +424,7 @@ export function createVndbReleaseNativeWriter(input: {
 					and(
 						eq(t.sourceRecordId, context.sourceRecordId),
 						eq(t.mappingKey, context.mappingKey),
+						eq(t.correspondenceRevision, context.correspondenceRevision),
 						eq(t.ownerId, context.reference.id),
 						eq(t.component, item.value.kind),
 						eq(t.componentKey, item.componentId),

@@ -1,3 +1,5 @@
+import { isDeepStrictEqual } from "node:util";
+import { SoftwareSourceValueSchema, type SoftwareSourceValueInput } from "./software-source-values";
 import {
 	prepareCatalogSourceChildCorrespondence,
 	resolveCatalogSourceChildCorrespondence,
@@ -154,7 +156,10 @@ export async function writeVndbReleaseProjection(
 		sourcePath("/title"),
 		"nameId" in release ? { id: release.nameId, revision: release.nameRevision } : undefined,
 	);
-	await recordVndbSoftwareScalarOccurrence(tx, document, release.id, sourcePath("/"));
+	await recordVndbSoftwareScalarOccurrence(tx, document, release.id, sourcePath("/"), {
+		sourceShape: "release",
+		sourceValue: details,
+	});
 	const components = await planVndbReleaseComponents(
 		tx,
 		actor,
@@ -343,20 +348,25 @@ export async function recordVndbSoftwareScalarOccurrence(
 	document: Awaited<ReturnType<typeof recordCatalogSourceDocument>>,
 	ownerId: string,
 	sourcePath: string,
+	input: SoftwareSourceValueInput,
 ) {
+	const interpreted = SoftwareSourceValueSchema.parse(input);
 	const scope = await resolveCatalogSourceChildCorrespondence(tx, document.record.id);
 	const t = softwareRecordRevision;
 	const [current] = await tx
-		.select({ revision: t.revision })
+		.select({ revision: t.revision, shape: t.shape })
 		.from(t)
 		.where(eq(t.ownerId, ownerId))
 		.orderBy(desc(t.revision))
 		.limit(1);
 	if (!current) throw new Error("Native software scalar history is missing");
+	if (current.shape !== interpreted.sourceShape)
+		throw new TypeError("Software source interpretation has another native shape");
 	await tx
 		.insert(softwareRecordSourceOccurrence)
 		.values({
 			...scope,
+			...interpreted,
 			sourceRecordId: document.record.id,
 			snapshotId: document.snapshot.id,
 			ownerId,
@@ -380,5 +390,11 @@ export async function recordVndbSoftwareScalarOccurrence(
 		.limit(1);
 	if (!original || original.sourcePath !== sourcePath)
 		throw new Error("Immutable software source occurrence differs");
+	const persisted = SoftwareSourceValueSchema.parse({
+		sourceShape: original.sourceShape,
+		sourceValue: original.sourceValue,
+	});
+	if (!isDeepStrictEqual(persisted, interpreted))
+		throw new Error("Immutable software source interpretation differs within its epoch");
 	return original.revision;
 }

@@ -87,6 +87,7 @@ export async function reconcileVndbParticipation(
 	},
 ) {
 	const scope = await resolveCatalogSourceChildCorrespondence(tx, after.document.record.id);
+	if (scope.mappingKey !== mappingKey) throw new Error("VNDB participation root mapping differs");
 	const oldRows = before.record ? planVndbParticipation(before.record) : [],
 		nextRows = planVndbParticipation(after.record);
 	const counts = new Map<string, number>();
@@ -158,6 +159,7 @@ export async function reconcileVndbParticipation(
 				and(
 					eq(t.sourceRecordId, after.document.record.id),
 					eq(t.mappingKey, mappingKey),
+					eq(t.correspondenceRevision, scope.correspondenceRevision),
 					eq(t.ownerId, content.id),
 					eq(t.componentKey, id),
 				),

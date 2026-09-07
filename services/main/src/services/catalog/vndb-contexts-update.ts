@@ -1,4 +1,7 @@
-import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
+import {
+	resolveCatalogSourceChildCorrespondence,
+	type CatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 import { isDeepStrictEqual } from "node:util";
 import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
@@ -54,7 +57,7 @@ async function currentExpected(
 	tx: DatabaseTransaction,
 	content: CatalogReference,
 	document: Document,
-	mappingKey: string,
+	scope: CatalogSourceChildCorrespondence,
 	context: VndbNativeContext,
 ) {
 	const t = softwareSourceContextBaseline;
@@ -64,7 +67,8 @@ async function currentExpected(
 		.where(
 			and(
 				eq(t.sourceRecordId, document.record.id),
-				eq(t.mappingKey, mappingKey),
+				eq(t.mappingKey, scope.mappingKey),
+				eq(t.correspondenceRevision, scope.correspondenceRevision),
 				eq(t.ownerId, content.id),
 				eq(t.componentKey, context.id),
 			),
@@ -85,6 +89,7 @@ export async function reconcileVndbContexts(
 	after: { record: z.output<typeof VndbVnSchema>; document: Document },
 ) {
 	const scope = await resolveCatalogSourceChildCorrespondence(tx, after.document.record.id);
+	if (scope.mappingKey !== mappingKey) throw new Error("VNDB context root mapping differs");
 	const oldRows = before.record
 		? await snapshotContexts(tx, content, before.document)
 		: new Map<string, typeof occurrences.$inferSelect>();
@@ -126,7 +131,7 @@ export async function reconcileVndbContexts(
 		} else if (incoming) {
 			context = { id: incoming.contextId, revision: incoming.contextRevision };
 			const current = await readSoftwareParticipationContext(tx, content, actor, context.id);
-			const expected = await currentExpected(tx, content, after.document, mappingKey, context);
+			const expected = await currentExpected(tx, content, after.document, scope, context);
 			if (current.revision !== expected)
 				throw new CatalogRevisionConflict(
 					"VNDB context reappearance conflicts with an independent native edit",
@@ -194,7 +199,7 @@ export async function reconcileVndbContexts(
 				[...nextContexts.values()].some((value) => value.id === previous.id)
 			)
 				continue;
-			const expected = await currentExpected(tx, content, before.document, mappingKey, previous);
+			const expected = await currentExpected(tx, content, before.document, scope, previous);
 			const current = await readSoftwareParticipationContext(tx, content, actor, previous.id);
 			if (current.revision !== expected) continue; // Independently curated groups remain canonical objects.
 			const updated = await reviseSoftwareParticipationContext(

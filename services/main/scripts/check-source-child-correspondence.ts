@@ -18,7 +18,7 @@ import {
 	type CatalogSourceArchive,
 } from "../src/services/catalog/source-observations";
 import { VndbCatalogContractSha256, vndbSourceKey } from "../src/services/catalog/vndb";
-import { adoptVndbVn } from "../src/services/catalog/vndb-adoption";
+import { adoptVndbVn, vndbVnDetails } from "../src/services/catalog/vndb-adoption";
 import { createNativeSoftwareContent } from "../src/services/catalog/software";
 import { recordVndbSoftwareScalarOccurrence } from "../src/services/catalog/vndb-release";
 import { softwareRecordSourceOccurrence } from "../src/services/database/schema/catalog-software-source";
@@ -146,7 +146,10 @@ try {
 				assertions++;
 				const writeChildren = async (reference: typeof first) => {
 					const scope = await resolveCatalogSourceChildCorrespondence(tx, sourceRecordId);
-					await recordVndbSoftwareScalarOccurrence(tx, document, reference.id, "/");
+					await recordVndbSoftwareScalarOccurrence(tx, document, reference.id, "/", {
+						sourceShape: "content",
+						sourceValue: vndbVnDetails(record),
+					});
 					const native = await loadCatalogIdentity(tx, reference, actor.id, true);
 					const name = await addCatalogName(tx, reference, actor.id, native.revision, {
 						value: record.title,
