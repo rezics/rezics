@@ -13,6 +13,10 @@ import {
 	lockCatalogSourceBinding,
 	appendSourceLifecycleEvent,
 } from "./source-bindings";
+import {
+	recordCatalogSourceApplication,
+	type CatalogSourceNativeChange,
+} from "./source-applications";
 
 /** @internal Owner commands supply the actual native mutation; this protocol supplies authority and replay fences. */
 export type CatalogSourceNativeWriter = (
@@ -24,8 +28,12 @@ export type CatalogSourceNativeWriter = (
 		sourceRecordId: string;
 		snapshotId: string;
 		mappingVersion: string;
+		mappingKey: string;
+		proposalId: string;
+		action: "apply" | "withdraw";
+		previousSnapshotId: string | null;
 	},
-) => Promise<{ revision: number }>;
+) => Promise<{ revision: number; changes?: CatalogSourceNativeChange[] }>;
 
 /** @internal Bounded one-target proposal, pinned to exact binding, policy, snapshot and native revision. */
 export async function proposeCatalogSourceAdoption(
@@ -182,6 +190,10 @@ export async function decideCatalogSourceProposal(
 			sourceRecordId: value.sourceRecordId,
 			snapshotId: proposal.snapshotId,
 			mappingVersion: proposal.mappingVersion,
+			mappingKey: proposal.mappingKey,
+			proposalId: proposal.id,
+			action: value.action,
+			previousSnapshotId: current.claim.observedSnapshotId,
 		});
 		z.number()
 			.int()
@@ -191,6 +203,18 @@ export async function decideCatalogSourceProposal(
 		const after = await loadCatalogIdentity(tx, current.reference, actor, true);
 		if (after.revision !== result.revision)
 			throw new Error("Native source command did not commit its declared revision");
+		await recordCatalogSourceApplication(
+			tx,
+			{
+				sourceRecordId: value.sourceRecordId,
+				proposalId: proposal.id,
+				action: value.action,
+				previousSnapshotId: current.claim.observedSnapshotId,
+				beforeRevision: native.revision,
+				afterRevision: result.revision,
+			},
+			result.changes ?? [],
+		);
 		appliedTargetRevision = result.revision;
 		if (value.action === "apply")
 			await tx

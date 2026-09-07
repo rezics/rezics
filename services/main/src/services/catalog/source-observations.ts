@@ -312,14 +312,26 @@ export async function recordCatalogSourceDocument(
 	receipt: CatalogSourceReceipt,
 	bytes: Uint8Array,
 ) {
+	const document = parseSourceDocument(receipt, bytes);
+	const observation = await recordCatalogSourceObservation(tx, receipt);
+	return sourceDocumentEvidence(receipt, document, observation);
+}
+
+function parseSourceDocument(receipt: CatalogSourceReceipt, bytes: Uint8Array): unknown {
 	if (
 		!issuedReceipts.has(receipt) ||
 		bytes.byteLength > 8_000_000 ||
 		createHash("sha256").update(bytes).digest("hex") !== receipt.contentSha256
 	)
 		throw new TypeError("Source reference document differs from its archive receipt");
-	const document: unknown = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
-	const observation = await recordCatalogSourceObservation(tx, receipt);
+	return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+}
+
+function sourceDocumentEvidence(
+	receipt: CatalogSourceReceipt,
+	document: unknown,
+	observation: Awaited<ReturnType<typeof recordCatalogSourceObservation>>,
+) {
 	return {
 		...observation,
 		referenceAt(path: string): CatalogSourceReferenceEvidence {
@@ -334,6 +346,46 @@ export async function recordCatalogSourceDocument(
 			return evidence;
 		},
 	};
+}
+
+/** Reopen exact archived evidence without observing again, changing acquisition generations or regressing the head. @internal */
+export async function loadCatalogSourceDocument(
+	tx: DatabaseTransaction,
+	sourceRecordId: string,
+	snapshotId: string,
+	receipt: CatalogSourceReceipt,
+	bytes: Uint8Array,
+) {
+	z.uuid().parse(sourceRecordId);
+	z.uuid().parse(snapshotId);
+	const document = parseSourceDocument(receipt, bytes);
+	if (catalogSourceRecordId(receipt.key) !== sourceRecordId)
+		throw new TypeError("Source document belongs to another record");
+	const [record] = await tx
+		.select()
+		.from(catalogSourceRecord)
+		.where(eq(catalogSourceRecord.id, sourceRecordId))
+		.limit(1);
+	const [snapshot] = await tx
+		.select()
+		.from(catalogSourceSnapshot)
+		.where(
+			and(
+				eq(catalogSourceSnapshot.sourceRecordId, sourceRecordId),
+				eq(catalogSourceSnapshot.id, snapshotId),
+			),
+		)
+		.limit(1);
+	if (
+		!record ||
+		!snapshot ||
+		snapshot.contentSha256 !== receipt.contentSha256 ||
+		snapshot.contractSha256 !== receipt.contractSha256 ||
+		snapshot.payloadRef !== receipt.payloadRef ||
+		snapshot.sourceRevision !== receipt.sourceRevision
+	)
+		throw new TypeError("Source document differs from the exact committed snapshot");
+	return sourceDocumentEvidence(receipt, document, { record, snapshot, repeated: true });
 }
 
 export function requireCatalogSourceReferenceEvidence(evidence: CatalogSourceReferenceEvidence) {

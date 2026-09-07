@@ -42,7 +42,51 @@ current. Whole-record structural update/compensation requires an actual native
 command; the lifecycle does not manufacture one or treat a scalar update as full
 structural reconciliation.
 
-## Capacity and partitioning
+## Native application evidence
+
+`source-proposals.ts` supplies the exact proposal, mapping, action and prior
+observed snapshot to native writers. `loadCatalogSourceDocument` reopens a
+committed snapshot with checked reference capabilities without starting another
+observation or changing acquisition generations. This distinction is required
+when deriving a change from the previous and proposed archived documents.
+
+`catalog_source_application` records applied and compensating revisions. Native
+music and software change tables reference concrete immutable component histories
+through foreign keys, including removed components. Source bytes are not a native
+change manifest. Deferred guards require the corresponding proposal decision and
+a complete contiguous manifest; all evidence is immutable. Music history keys are
+checked against the exact component, and readers require editor access to every
+disclosed native owner even after source rebinding.
+
+The initial application command admits at most 128 component changes. This is
+a bounded atomic proposal slice, not qualification of an arbitrarily large
+source-record update. Larger owners require staged application and paged manifests;
+that remaining gate must not be hidden by increasing an in-memory array limit.
+
+Each of the four new growing relations has 64 source-key hash partitions and
+source-prefixed primary/foreign keys, following PostgreSQL's
+[partitioned-key rules](https://www.postgresql.org/docs/18/ddl-partitioning.html).
+At 256 bytes of estimated heap/key/index storage per application header and
+400 bytes per change, 500M rows require 128 GB and 200 GB respectively; 3B require
+768 GB and 1.2 TB, before replicas/WAL/reserve. Four changes per application
+multiply child storage by four; history storage is additional and owned by the
+native domain. These are capacity estimates, not measured allocations. Use the
+existing 100 reads/s, 20 writes/s, 32-client workload with 5x bursts; a read makes
+one routed header lookup plus three bounded native-family pages. Updates write
+one header, N change rows and their FK/index work in the canonical transaction.
+Deferred completeness checks have O(N squared) worst-case work within the proven
+128-row slice; staged large manifests must replace this with incremental sealed
+counts. Observe lock time, statement duration, WAL bytes/application and source
+skew; keep source and native-history shard references checked at any cutover.
+
+Reproducible rollback SQL checks are `scripts/check-source-native-applications.ts`
+and `scripts/check-catalog-source-lifecycle.ts`, with the existing explicit
+loopback disposable database guard. They cover immutable application evidence,
+missing native history, incomplete manifests, compensation and reopened older
+snapshots without head regression. They do not establish full-provider update
+coverage or production throughput.
+
+## Source-family capacity and partitioning
 
 The minimum baseline is 500,000,000 rows **per growing family**, also estimated at
 3,000,000,000. These are planning estimates, not measured production row sizes.

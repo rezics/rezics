@@ -5,6 +5,7 @@ export const PostgreSqlSchemaFileNames = [
 	"catalog-semantics-integrity.sql",
 	"catalog-software-history.sql",
 	"catalog-source-integrity.sql",
+	"catalog-source-application.sql",
 	"catalog-supporting-integrity.sql",
 	"operational-runtime.sql",
 
@@ -34,6 +35,7 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles = {
+	catalog_source_native_applications: ["catalog-source-application.sql"],
 	catalog_native_source_event_batch: [
 		"catalog-integrity.sql",
 		"catalog-distribution-integrity.sql",
@@ -64,6 +66,8 @@ export const PostgreSqlSchemaMigrationBundles = {
 } as const satisfies Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>>;
 
 export const PostgreSqlSchemaFunctionNames = [
+	"catalog_source_validate_application_change",
+	"catalog_source_require_application_complete",
 	"catalog_guard_distribution_member",
 	"catalog_count_distribution_members",
 	"catalog_guard_distribution_manifest",
@@ -194,6 +198,7 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "music_source_application_change", name: "music_source_application_exact_component" },
 	{ table: "distribution_identity", name: "distribution_identity_route_publish" },
 	{ table: "distribution_identity", name: "distribution_identity_route_remove" },
 	{ table: "distribution_fact", name: "distribution_fact_definition_guard" },
@@ -622,6 +627,23 @@ const CatalogTriggerOwners = [
  */
 export const PostgreSqlSchemaDynamicTriggers = [
 	...[
+		"catalog_source_application",
+		"music_source_application_change",
+		"software_source_component_application_change",
+		"software_source_record_application_change",
+	].map((table) => ({ table, name: "catalog_source_application_immutable" })),
+	...[
+		"catalog_source_application",
+		"music_source_application_change",
+		"software_source_component_application_change",
+		"software_source_record_application_change",
+	].flatMap((parent) =>
+		Array.from({ length: 64 }, (_, index) => ({
+			table: `${parent}_p${String(index).padStart(2, "0")}`,
+			name: "catalog_source_application_complete",
+		})),
+	),
+	...[
 		"catalog_source_snapshot",
 		"catalog_source_binding_revision",
 		"catalog_source_check_receipt",
@@ -676,6 +698,8 @@ export const PostgreSqlSchemaDynamicTriggers = [
 
 /** Exact dynamic declarations permitted by the static manifest check. */
 export const PostgreSqlSchemaDynamicTriggerTemplates = [
+	"CREATE TRIGGER catalog_source_application_immutable BEFORE UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_immutable_evidence()",
+	"CREATE CONSTRAINT TRIGGER catalog_source_application_complete AFTER INSERT ON %s DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.catalog_source_require_application_complete()",
 	"CREATE TRIGGER catalog_source_evidence_guard BEFORE UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_immutable_evidence()",
 	"CREATE CONSTRAINT TRIGGER catalog_source_binding_head_required AFTER INSERT OR UPDATE ON %s DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.catalog_source_require_binding_head()",
 	"CREATE TRIGGER catalog_named_head_guard BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_named_head()",

@@ -2,6 +2,10 @@
 export const sourcePartitionKeys = {
 	catalog_source_record: "id",
 	catalog_source_snapshot: "source_record_id",
+	catalog_source_application: "source_record_id",
+	music_source_application_change: "source_record_id",
+	software_source_component_application_change: "source_record_id",
+	software_source_record_application_change: "source_record_id",
 	catalog_source_mapping_claim: "source_record_id",
 	catalog_source_binding_revision: "source_record_id",
 	catalog_source_check_receipt: "source_record_id",

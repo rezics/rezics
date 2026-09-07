@@ -313,6 +313,25 @@ commits and general test counts cannot replace that report.
 
 ## Implementation ledger — 2026-09-07
 
+### Continued native source application work
+
+The continuation verified `main` at `cfab1acf4` with a clean worktree and retained
+the unmerged P02 draft. Native source writers now receive exact action, proposal,
+mapping and previous snapshot context. Committed archived documents can be reopened
+without re-observation or source-head regression. The generated
+`20260907090209_catalog_source_native_applications.sql` adds four source-partitioned
+application/history-reference relations and 256 physical children. Concrete native
+music/software history FKs, immutable evidence and deferred complete-manifest
+guards support applied and compensating native changes. See
+[source lifecycle](../../architecture/catalog-source-lifecycle.md#native-application-evidence).
+
+Sixteen focused TypeScript tests, backend/scripts typechecks, canonical PostgreSQL
+and partition reconstruction, and the rollback native-application/source-lifecycle
+harnesses passed. The latter exercise actual historical FKs, incomplete-manifest
+rejection, application compensation and old snapshot reopening. Large staged
+applications, complete provider mappings and all existing product consumers remain
+open; this does not qualify a source-schema or program-completion gate.
+
 ### Current integrated batch and pause
 
 The maintainer requested a temporary stop after this batch and a new-session

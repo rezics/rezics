@@ -23,6 +23,7 @@ import {
 	recordCatalogSourceObservation,
 	loadCatalogSourceReceipt,
 	readCatalogSourceBytes,
+	loadCatalogSourceDocument,
 	type CatalogSourceArchive,
 } from "../src/services/catalog/source-observations";
 import {
@@ -123,6 +124,33 @@ try {
 				archive,
 			);
 			assert.deepEqual(Buffer.from(await readCatalogSourceBytes(reopened)), newestBytes);
+			const reopenedDocument = await loadCatalogSourceDocument(
+				tx,
+				first.record.id,
+				newest.snapshot.id,
+				reopened,
+				newestBytes,
+			);
+			assert.equal(reopenedDocument.referenceAt("/value").externalId, "latest");
+			const oldReceipt = await loadCatalogSourceReceipt(
+				tx,
+				first.record.id,
+				first.snapshot.id,
+				archive,
+			);
+			const oldDocument = await loadCatalogSourceDocument(
+				tx,
+				first.record.id,
+				first.snapshot.id,
+				oldReceipt,
+				firstBytes,
+			);
+			assert.equal(oldDocument.referenceAt("/value").externalId, "first");
+			assert.equal(oldDocument.record.headSnapshotId, newest.snapshot.id);
+			await assert.rejects(
+				loadCatalogSourceDocument(tx, first.record.id, newest.snapshot.id, oldReceipt, firstBytes),
+				/exact committed snapshot/u,
+			);
 			const proposalInput = {
 				sourceRecordId: first.record.id,
 				mappingKey: binding.mappingKey,

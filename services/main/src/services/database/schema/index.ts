@@ -11,6 +11,7 @@ export * from "./catalog-distribution";
 export * from "./catalog-facts";
 export * from "./catalog-grouping";
 export * from "./catalog-source";
+export * from "./catalog-source-application";
 export * from "./catalog-reference";
 export * from "./catalog-publishing";
 export * from "./catalog-music";
