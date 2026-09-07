@@ -106,6 +106,7 @@ export const VndbVnSchema = z
 					})
 					.passthrough(),
 			)
+			.max(4096)
 			.optional(),
 		va: z
 			.array(
@@ -117,6 +118,7 @@ export const VndbVnSchema = z
 					})
 					.passthrough(),
 			)
+			.max(4096)
 			.optional(),
 		length_minutes: integer.nullable().optional(),
 	})

@@ -1,0 +1,207 @@
+import { and, eq } from "drizzle-orm";
+import { z } from "zod";
+import type { DatabaseTransaction } from "../database";
+import { CatalogNameTables } from "../database/schema/catalog-names";
+import { catalogSourceMappingClaim } from "../database/schema/catalog-source";
+import { softwareParticipationSourceOccurrence } from "../database/schema/catalog-software";
+import { softwareParticipationCreditSourceOccurrence } from "../database/schema/catalog-software-participation";
+import type { CatalogReference } from "./contracts";
+import { VndbVnSchema, vndbSourceKey } from "./vndb";
+import { catalogSourceRecordId, type recordCatalogSourceDocument } from "./source-observations";
+import { bindReferencedSourceIdentity } from "./source-references";
+import { ensureCatalogDefinition } from "./storage";
+import { createSoftwareParticipation } from "./software-participation";
+
+const roles = {
+	scenario: "scenario_writer",
+	director: "director",
+	chardesign: "character_designer",
+	art: "artist",
+	music: "composer",
+	songs: "vocalist",
+	translator: "translator",
+	editor: "editor",
+	qa: "quality_assurance",
+	staff: "staff",
+} as const;
+const roleSchema = z.enum([
+	"scenario",
+	"director",
+	"chardesign",
+	"art",
+	"music",
+	"songs",
+	"translator",
+	"editor",
+	"qa",
+	"staff",
+]);
+type Document = Awaited<ReturnType<typeof recordCatalogSourceDocument>>;
+
+/** @alpha @remarks VNDB eid is snapshot-local; voice credits do not imply an edition context. */
+export function planVndbParticipation(input: unknown) {
+	const record = VndbVnSchema.parse(input);
+	const contexts = new Set((record.editions ?? []).map((value) => value.eid));
+	const staff = (record.staff ?? []).map((entry, index) => {
+		if (entry.eid !== null && !contexts.has(entry.eid))
+			throw new TypeError("VNDB staff context is absent from the same snapshot");
+		return {
+			path: `/staff/${index}`,
+			staffPath: `/staff/${index}/id`,
+			staffId: entry.id,
+			aliasId: entry.aid,
+			contextKey: entry.eid === null ? null : String(entry.eid),
+			characterId: null,
+			characterPath: null,
+			role: roles[roleSchema.parse(entry.role)],
+			note: entry.note,
+		};
+	});
+	const voice = (record.va ?? []).map((entry, index) => ({
+		path: `/va/${index}`,
+		staffPath: `/va/${index}/staff/id`,
+		staffId: entry.staff.id,
+		aliasId: entry.staff.aid ?? null,
+		contextKey: null,
+		characterId: entry.character.id,
+		characterPath: `/va/${index}/character/id`,
+		role: "voice_actor",
+		note: entry.note,
+	}));
+	return [...staff, ...voice];
+}
+
+/** @alpha @remarks Resolves an adopted staff alias to its immutable source-observed native name revision. */
+export async function resolveVndbStaffAlias(
+	tx: DatabaseTransaction,
+	entityId: string,
+	staffId: string,
+	aid: number,
+) {
+	const sourceRecordId = catalogSourceRecordId(vndbSourceKey(staffId));
+	const t = CatalogNameTables.entity.sourceOccurrence;
+	const claims = catalogSourceMappingClaim;
+	const [alias] = await tx
+		.select({ id: t.nameId, revision: t.nameRevision })
+		.from(t)
+		.innerJoin(
+			claims,
+			and(
+				eq(claims.sourceRecordId, t.sourceRecordId),
+				eq(claims.observedSnapshotId, t.snapshotId),
+				eq(claims.path, "/"),
+				eq(claims.owner, "entity"),
+			),
+		)
+		.where(
+			and(
+				eq(t.sourceRecordId, sourceRecordId),
+				eq(t.ownerId, entityId),
+				eq(t.namespace, "vndb.staff.alias"),
+				eq(t.localKey, String(aid)),
+			),
+		)
+		.limit(1);
+	if (!alias) throw new Error(`VNDB staff alias dependency requires adoption: ${staffId}/${aid}`);
+	return alias;
+}
+
+/** @alpha @remarks Imports credits after supporting staff aliases, retaining exact native context/name revisions. */
+export async function appendVndbParticipation(
+	tx: DatabaseTransaction,
+	content: CatalogReference,
+	actor: string,
+	input: unknown,
+	document: Document,
+) {
+	const plan = planVndbParticipation(input);
+	const targets = new Map<string, CatalogReference>();
+	const aliases = new Map<string, { id: string; revision: number }>();
+	const roleIds = new Map<string, string>();
+	const contexts = new Map<string, { id: string; revision: number }>();
+	const created: { participationId: string; revision: number }[] = [];
+	const resolve = async (id: string, path: string, shape: "unresolved" | "character") => {
+		let target = targets.get(id);
+		if (!target) {
+			target = await bindReferencedSourceIdentity(tx, actor, {
+				...vndbSourceKey(id),
+				owner: "entity",
+				shape,
+				evidence: document.referenceAt(path),
+			});
+			targets.set(id, target);
+		}
+		return target;
+	};
+	for (const item of plan) {
+		const target = await resolve(item.staffId, item.staffPath, "unresolved");
+		let alias: { id: string; revision: number } | null = null;
+		if (item.aliasId !== null) {
+			const key = `${item.staffId}/${item.aliasId}`;
+			alias =
+				aliases.get(key) ??
+				(await resolveVndbStaffAlias(tx, target.id, item.staffId, item.aliasId));
+			aliases.set(key, alias);
+		}
+		let context: { id: string; revision: number } | null = null;
+		if (item.contextKey !== null) {
+			context = contexts.get(item.contextKey) ?? null;
+			if (!context) {
+				const t = softwareParticipationSourceOccurrence;
+				const [row] = await tx
+					.select({ id: t.contextId, revision: t.contextRevision })
+					.from(t)
+					.where(
+						and(
+							eq(t.sourceRecordId, document.record.id),
+							eq(t.snapshotId, document.snapshot.id),
+							eq(t.namespace, "editions"),
+							eq(t.localKey, item.contextKey),
+							eq(t.contentId, content.id),
+						),
+					)
+					.limit(1);
+				if (!row) throw new TypeError("VNDB snapshot context has no exact native revision");
+				context = row;
+				contexts.set(item.contextKey, context);
+			}
+		}
+		let roleRevisionId = roleIds.get(item.role);
+		if (!roleRevisionId) {
+			roleRevisionId = (
+				await ensureCatalogDefinition(tx, {
+					namespace: "catalog.participation_role",
+					key: item.role,
+					kind: "vocabulary",
+					valueKind: null,
+				})
+			).revisionId;
+			roleIds.set(item.role, roleRevisionId);
+		}
+		const character =
+			item.characterId && item.characterPath
+				? await resolve(item.characterId, item.characterPath, "character")
+				: null;
+		const participation = await createSoftwareParticipation(tx, content, actor, {
+			entityId: target.id,
+			name: alias,
+			context,
+			characterId: character?.id ?? null,
+			roleRevisionId,
+			note: item.note,
+			state: "active",
+		});
+		await tx
+			.insert(softwareParticipationCreditSourceOccurrence)
+			.values({
+				sourceRecordId: document.record.id,
+				snapshotId: document.snapshot.id,
+				sourcePath: item.path,
+				contentId: content.id,
+				participationId: participation.participationId,
+				participationRevision: participation.revision,
+			});
+		created.push(participation);
+	}
+	return created;
+}

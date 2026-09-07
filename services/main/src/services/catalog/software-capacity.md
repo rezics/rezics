@@ -61,3 +61,38 @@ adoption; dump VN/title and full field conformance is not complete. The safe sou
 stub initialization path is implemented, but reviewed source-update callbacks for
 complete native graph replacement are not. No full VNDB/plan completion claim is
 made by this batch.
+
+## Exact participation workload
+
+`software_participation` is a provider-independent content-local role identity.
+Its revisions reference the exact Entity named form and participation-context
+revision, with an optional Character on the same row for voice credits. A null
+context means no separately evidenced context; VNDB voice rows do not invent one.
+Supporting staff aliases must be adopted before a VN credit can bind their `aid`.
+The import fails with an explicit dependency when that exact alias is unavailable.
+
+The three growing families are participation identities, complete revisions and
+source occurrences. Assume two revisions and one source occurrence per live role.
+At 80 bytes per identity including its key, 400 bytes per revision including
+actor/character reverse indexes, and 240 bytes per source occurrence including its
+reverse index, 500M live roles require about 560 GB and 3B about 3.36 TB before
+replication, WAL and free space. Three copies with 30% reserve require about
+2.18 TB / 13.10 TB. These planning allowances exclude long notes; notes admit at
+most 16 KiB and must be included in measured capacity before production admission.
+
+Current and history pages seek `(content_id, participation_id, revision)` and
+return at most 100 rows. Visibility checks on actor and character are correlated
+indexed SQL predicates before pagination, without per-result identity queries.
+Each edit locks one participation head, appends one complete revision and advances
+that head; it does not copy or scan other credits or a million-credit content.
+Source files remain limited to 8 MB and 4,096 staff plus 4,096 voice rows per
+assembled record. Larger source owners require separately admitted occurrence
+batches rather than increasing transaction size. Source import caches repeated
+actors/aliases and governed role definitions within the admitted record.
+
+Routing by content ID keeps heads/history together under the software owner's
+partition/shard cutover. At a 10 ms child transaction, one hot credit can sustain
+at most roughly 100 serial updates/s; distinct credits share the content authority
+lock. Pause ingestion when lock-wait p95 exceeds 100 ms or the shared source task
+budget fills. Local deterministic/SQL fixtures prove integrity and bounded query
+shape, not production throughput, physical shard capacity or 500M-row timings.

@@ -13,6 +13,7 @@ import { addCatalogName } from "./storage";
 import { createSoftwareParticipationContext } from "./software-contexts";
 import { createNativeSoftwareContent, reviseSoftwareContent } from "./software";
 import { appendVndbSemantics } from "./vndb-semantics";
+import { appendVndbParticipation } from "./vndb-participation";
 
 /** VN identity and snapshot-local participation observations; staff adoption remains separate. */
 export async function adoptVndbVn(
@@ -126,6 +127,7 @@ export async function adoptVndbVn(
 			sourceClaimedOfficial: edition.official,
 		});
 	}
+	await appendVndbParticipation(tx, identity, actor, record, observation);
 	if (!existing)
 		await tx.insert(CatalogFactTables.software.identifier).values({
 			ownerId: identity.id,
