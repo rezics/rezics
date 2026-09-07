@@ -4,6 +4,7 @@ import { catalogSourceMappingClaim } from "../database/schema/catalog-source";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import type { CatalogOwner } from "./contracts";
 import { addCatalogName, createCatalogIdentity, loadCatalogIdentity } from "./storage";
+import { sealInitialCatalogSourceBinding } from "./source-bindings";
 import {
 	type CatalogSourceReferenceEvidence,
 	requireCatalogSourceReferenceEvidence,
@@ -98,6 +99,7 @@ export async function bindReferencedSourceIdentity(
 			owner: input.owner,
 			observedSnapshotId: null,
 			baselineTargetRevision: revision,
+			mappingVersion: `${input.source}.${input.objectType}.1`,
 			evidenceSourceRecordId: evidence.sourceRecordId,
 			evidenceSnapshotId: evidence.snapshotId,
 			evidencePath: evidence.path,
@@ -109,6 +111,10 @@ export async function bindReferencedSourceIdentity(
 		mappingOwner: input.owner,
 		mappingKey: createdClaim.mappingKey,
 		sourceRecordId: record.id,
+	});
+	await sealInitialCatalogSourceBinding(tx, actor, {
+		sourceRecordId: record.id,
+		mappingKey: createdClaim.mappingKey,
 	});
 	return { owner: input.owner, id: identity.id, revision, created: true };
 }

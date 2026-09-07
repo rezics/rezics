@@ -58,6 +58,40 @@ function targetColumns(reference: CatalogReference) {
 	};
 }
 
+/** @internal Reference-only registration also seals revision one before the transaction commits. */
+export async function sealInitialCatalogSourceBinding(
+	tx: DatabaseTransaction,
+	actor: string,
+	key: CatalogBindingKey,
+) {
+	const current = await lockCatalogSourceBinding(tx, key);
+	await loadCatalogIdentity(tx, current.reference, actor, true);
+	if (current.claim.bindingRevision !== 1)
+		throw new Error("Initial source binding is already revised");
+	await tx
+		.insert(revisions)
+		.values({
+			sourceRecordId: key.sourceRecordId,
+			mappingKey: key.mappingKey,
+			owner: current.claim.owner,
+			revision: 1,
+			policyRevision: 1,
+			state: current.claim.state,
+			mode: "review",
+			actorAuthUserId: actor,
+			reason: "Initial evidenced source correspondence",
+			...targetColumns(current.reference),
+		});
+	await tx
+		.insert(subscriptions)
+		.values({
+			sourceRecordId: key.sourceRecordId,
+			mappingKey: key.mappingKey,
+			owner: current.claim.owner,
+			state: "active",
+		});
+}
+
 /** @internal Initial correspondence records an immutable target/policy revision atomically. */
 export async function bindCatalogSourceIdentity(
 	tx: DatabaseTransaction,

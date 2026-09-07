@@ -7,6 +7,7 @@ export const sourceKeySchema = z.strictObject({
 	externalId: z
 		.string()
 		.min(1)
+		.refine((value) => value.isWellFormed() && !value.includes("\0"))
 		.refine((value) => Buffer.byteLength(value, "utf8") <= 512),
 });
 export type CatalogSourceKey = z.infer<typeof sourceKeySchema>;
@@ -19,4 +20,3 @@ export function catalogSourceRecordId(input: CatalogSourceKey): string {
 		.digest("hex");
 	return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-8${hash.slice(13, 16)}-8${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
 }
-

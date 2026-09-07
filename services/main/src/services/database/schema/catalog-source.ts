@@ -6,6 +6,7 @@ import {
 	index,
 	primaryKey,
 	integer,
+	boolean,
 	timestamp,
 	text,
 	unique,
@@ -16,6 +17,23 @@ import { createCreatedAtColumn } from "./columns";
 import { CatalogOwnerValues, type CatalogOwner } from "../../catalog/contracts";
 import { users } from "./auth";
 import { CatalogIdentityTables } from "./catalog-identity";
+
+/** Three configured provider budgets, independent of corpus cardinality and worker replicas. */
+export const catalogSourceProviderBudget = pgTable(
+	"catalog_source_provider_budget",
+	{
+		source: text().primaryKey(),
+		enabled: boolean().default(true).notNull(),
+		minimumIntervalMs: integer().default(1100).notNull(),
+		nextAllowedAt: timestamp({ withTimezone: true, precision: 3 }).defaultNow().notNull(),
+	},
+	(table) => [
+		check(
+			"catalog_source_provider_budget_check",
+			sql`${table.source} in ('musicbrainz','vndb','bangumi') and ${table.minimumIntervalMs} between 1000 and 86400000`,
+		),
+	],
+);
 
 /** Upstream record identity; it does not allocate a native Unit or grant participation. */
 export const catalogSourceRecord = pgTable(
@@ -282,7 +300,7 @@ export const catalogSourceCheckPlan = pgTable(
 	"catalog_source_check_plan",
 	{
 		sourceRecordId: uuid()
-			.primaryKey()
+			.notNull()
 			.references(() => catalogSourceRecord.id, { onDelete: "restrict" }),
 		routingBucket: integer().notNull(),
 		revision: bigint({ mode: "number" }).default(1).notNull(),
@@ -292,6 +310,11 @@ export const catalogSourceCheckPlan = pgTable(
 		leaseUntil: timestamp({ withTimezone: true, precision: 3 }),
 	},
 	(table) => [
+		primaryKey({ columns: [table.routingBucket, table.sourceRecordId] }),
+		check(
+			"catalog_source_check_bucket_check",
+			sql`${table.routingBucket} = (get_byte(sha256(convert_to('source_record:' || ${table.sourceRecordId}::text, 'UTF8')), 0) * 256 + get_byte(sha256(convert_to('source_record:' || ${table.sourceRecordId}::text, 'UTF8')), 1)) % 1024`,
+		),
 		index("catalog_source_check_due_idx").on(
 			table.routingBucket,
 			table.state,

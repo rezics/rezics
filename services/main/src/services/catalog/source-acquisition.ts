@@ -1,9 +1,16 @@
 import { z } from "zod";
+import { database } from "../database";
+import { reserveCatalogSourceRequest } from "./source-rate";
 import { BangumiSubjectContractSha256, BangumiSubjectSchema } from "./bangumi";
 import { MusicBrainzCatalogContractSha256, MusicBrainzReleaseSchema } from "./musicbrainz";
 import { VndbCatalogContractSha256, VndbVnSchema, VndbReleaseSchema } from "./vndb";
 import { storeCatalogSourcePayload, type CatalogSourceArchive } from "./source-observations";
 import type { CatalogSourceCheckLease, CatalogSourceCheckOutcome } from "./source-scheduling";
+
+export type CatalogSourceFetch = (
+	input: string | URL | Request,
+	init?: RequestInit,
+) => Promise<Response>;
 
 const userAgent = "REZICS-source-check/1.0 (+https://www.rezics.com)";
 const maximumBytes = 8_000_000;
@@ -70,15 +77,21 @@ export function catalogSourceAcquisitionRequest(lease: CatalogSourceCheckLease) 
 export async function acquireCatalogSourceCheck(
 	lease: CatalogSourceCheckLease,
 	signal: AbortSignal,
-	dependencies: { fetch?: typeof fetch; archive?: CatalogSourceArchive } = {},
+	dependencies: {
+		fetch?: CatalogSourceFetch;
+		archive?: CatalogSourceArchive;
+		admit?: () => Promise<void>;
+	} = {},
 ): Promise<CatalogSourceCheckOutcome> {
 	const request = catalogSourceAcquisitionRequest(lease);
+	await (dependencies.admit ?? (() => reserveCatalogSourceRequest(database, lease.source)))();
+	const ioSignal = AbortSignal.any([signal, AbortSignal.timeout(25_000)]);
 	const response = await (dependencies.fetch ?? fetch)(request.url, {
 		method: request.method,
 		headers: request.headers,
 		...("body" in request ? { body: request.body } : {}),
 		redirect: "error",
-		signal: AbortSignal.any([signal, AbortSignal.timeout(20_000)]),
+		signal: AbortSignal.any([ioSignal, AbortSignal.timeout(20_000)]),
 	});
 	if (response.status === 410)
 		return {
@@ -121,6 +134,7 @@ export async function acquireCatalogSourceCheck(
 		response.headers.get("etag"),
 		dependencies.archive,
 		{ sourceRecordId: lease.sourceRecordId, generation: lease.generation },
+		ioSignal,
 	);
 	return { status: "changed", receipt };
 }

@@ -40,9 +40,11 @@ export const storage = {
 			}),
 		);
 	},
-	put(input: StoragePutInput) {
+	put(input: StoragePutInput, options?: { signal?: AbortSignal }) {
 		return withDependencySpan({ dependency: "s3", operation: "put" }, () =>
-			storageClient.send(new PutObjectCommand({ ...input, Bucket: env.S3_BUCKET })),
+			storageClient.send(new PutObjectCommand({ ...input, Bucket: env.S3_BUCKET }), {
+				abortSignal: options?.signal,
+			}),
 		);
 	},
 

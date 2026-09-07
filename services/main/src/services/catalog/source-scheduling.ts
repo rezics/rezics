@@ -54,7 +54,12 @@ export async function planSourceCheck(
 	const [existing] = await tx
 		.select()
 		.from(plans)
-		.where(eq(plans.sourceRecordId, value.sourceRecordId))
+		.where(
+			and(
+				eq(plans.routingBucket, aggregateRoutingBucket("source_record", value.sourceRecordId)),
+				eq(plans.sourceRecordId, value.sourceRecordId),
+			),
+		)
 		.limit(1)
 		.for("update");
 	if (existing && existing.revision !== value.expectedRevision)
@@ -70,7 +75,7 @@ export async function planSourceCheck(
 			revision,
 		})
 		.onConflictDoUpdate({
-			target: plans.sourceRecordId,
+			target: [plans.routingBucket, plans.sourceRecordId],
 			set: {
 				nextCheckAt: value.nextCheckAt,
 				intervalSeconds: value.intervalSeconds,
@@ -121,6 +126,7 @@ export async function claimDueSourceChecks(
 			.from(plans)
 			.where(
 				and(
+					eq(plans.routingBucket, value.bucket),
 					eq(plans.sourceRecordId, candidate.sourceRecordId),
 					eq(plans.state, "active"),
 					lte(plans.nextCheckAt, value.now),
@@ -144,7 +150,12 @@ export async function claimDueSourceChecks(
 			await tx
 				.update(plans)
 				.set({ nextCheckAt: new Date(value.now.getTime() + plan.intervalSeconds * 1000) })
-				.where(eq(plans.sourceRecordId, plan.sourceRecordId));
+				.where(
+					and(
+						eq(plans.routingBucket, aggregateRoutingBucket("source_record", plan.sourceRecordId)),
+						eq(plans.sourceRecordId, plan.sourceRecordId),
+					),
+				);
 			continue;
 		}
 		const [record] = await tx
@@ -164,7 +175,12 @@ export async function claimDueSourceChecks(
 				leaseUntil: new Date(value.now.getTime() + 120_000),
 				nextCheckAt: new Date(value.now.getTime() + plan.intervalSeconds * 1000),
 			})
-			.where(eq(plans.sourceRecordId, plan.sourceRecordId));
+			.where(
+				and(
+					eq(plans.routingBucket, aggregateRoutingBucket("source_record", plan.sourceRecordId)),
+					eq(plans.sourceRecordId, plan.sourceRecordId),
+				),
+			);
 		leases.push({
 			...acquisition,
 			planRevision: plan.revision,
@@ -199,7 +215,12 @@ export async function finishCatalogSourceCheck(
 	const [plan] = await tx
 		.select()
 		.from(plans)
-		.where(eq(plans.sourceRecordId, lease.sourceRecordId))
+		.where(
+			and(
+				eq(plans.routingBucket, aggregateRoutingBucket("source_record", lease.sourceRecordId)),
+				eq(plans.sourceRecordId, lease.sourceRecordId),
+			),
+		)
 		.limit(1)
 		.for("update");
 	if (!record || !plan) throw new Error("Source check authority is missing");
@@ -244,16 +265,19 @@ export async function finishCatalogSourceCheck(
 		await tx
 			.update(plans)
 			.set({ leaseUntil: null })
-			.where(eq(plans.sourceRecordId, lease.sourceRecordId));
+			.where(
+				and(
+					eq(plans.routingBucket, aggregateRoutingBucket("source_record", lease.sourceRecordId)),
+					eq(plans.sourceRecordId, lease.sourceRecordId),
+				),
+			);
 	}
-	await tx
-		.insert(receipts)
-		.values({
-			sourceRecordId: lease.sourceRecordId,
-			generation: lease.generation,
-			outcome: disposition,
-			reason,
-		});
+	await tx.insert(receipts).values({
+		sourceRecordId: lease.sourceRecordId,
+		generation: lease.generation,
+		outcome: disposition,
+		reason,
+	});
 	await appendSourceLifecycleEvent(
 		tx,
 		lease.sourceRecordId,

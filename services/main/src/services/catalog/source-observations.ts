@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { Readable } from "node:stream";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { storage } from "../storage";
@@ -8,24 +8,8 @@ import { catalogSourceRecord, catalogSourceSnapshot } from "../database/schema/c
 import { appendOperationalOutbox } from "../events/durability";
 import { createSourceObservationEvent } from "./source-events";
 
-const sourceKeySchema = z.strictObject({
-	source: z.string().regex(/^[a-z][a-z0-9_.-]{0,95}$/u),
-	objectType: z.string().regex(/^[a-z][a-z0-9_.-]{0,95}$/u),
-	externalId: z
-		.string()
-		.min(1)
-		.refine((value) => Buffer.byteLength(value, "utf8") <= 512),
-});
-export type CatalogSourceKey = z.infer<typeof sourceKeySchema>;
-
-/** @internal Natural-key identity and partition route are identical across importers. */
-export function catalogSourceRecordId(input: CatalogSourceKey): string {
-	const key = sourceKeySchema.parse(input);
-	const hash = createHash("sha256")
-		.update(`${key.source}\n${key.objectType}\n${key.externalId}`)
-		.digest("hex");
-	return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-8${hash.slice(13, 16)}-8${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
-}
+import { sourceKeySchema, catalogSourceRecordId, type CatalogSourceKey } from "./source-record-key";
+export { catalogSourceRecordId, type CatalogSourceKey } from "./source-record-key";
 
 /** @internal Registers and locks the source aggregate, detecting even a hash collision. */
 export async function registerCatalogSourceRecord(
@@ -73,14 +57,17 @@ export async function beginCatalogSourceAcquisition(
 const storedReceipt = Symbol("stored-catalog-source-receipt");
 const issuedReceipts = new WeakSet<object>();
 export type CatalogSourceArchive = {
-	put(input: {
-		Key: string;
-		Body: Uint8Array;
-		ContentLength: number;
-		ContentType: string;
-		Metadata: Record<string, string>;
-		CacheControl: string;
-	}): Promise<unknown>;
+	put(
+		input: {
+			Key: string;
+			Body: Uint8Array;
+			ContentLength: number;
+			ContentType: string;
+			Metadata: Record<string, string>;
+			CacheControl: string;
+		},
+		options?: { signal?: AbortSignal },
+	): Promise<unknown>;
 	get(input: { Key: string }): Promise<{ Body?: unknown }>;
 };
 const receiptArchives = new WeakMap<object, CatalogSourceArchive>();
@@ -102,8 +89,10 @@ export async function storeCatalogSourcePayload(
 	sourceRevision: string | null = null,
 	archive: CatalogSourceArchive = storage,
 	acquisition: CatalogSourceAcquisition | null = null,
+	signal?: AbortSignal,
 ): Promise<CatalogSourceReceipt> {
 	const key = sourceKeySchema.parse(input);
+	if (sourceRevision !== null) z.string().max(512).parse(sourceRevision);
 	if (
 		acquisition &&
 		(acquisition.sourceRecordId !== catalogSourceRecordId(key) ||
@@ -121,14 +110,17 @@ export async function storeCatalogSourcePayload(
 	const contentSha256 = createHash("sha256").update(payload).digest("hex");
 	const keyHash = createHash("sha256").update(JSON.stringify(key)).digest("hex");
 	const payloadRef = `catalog-sources/${key.source}/${keyHash}/${contentSha256}.json`;
-	await archive.put({
-		Key: payloadRef,
-		Body: payload,
-		ContentLength: payload.byteLength,
-		ContentType: "application/json",
-		Metadata: { content_sha256: contentSha256 },
-		CacheControl: "private, no-store",
-	});
+	await archive.put(
+		{
+			Key: payloadRef,
+			Body: payload,
+			ContentLength: payload.byteLength,
+			ContentType: "application/json",
+			Metadata: { content_sha256: contentSha256 },
+			CacheControl: "private, no-store",
+		},
+		{ signal },
+	);
 	const receipt: CatalogSourceReceipt = Object.freeze({
 		[storedReceipt]: true as const,
 		key: Object.freeze(key),
@@ -168,6 +160,50 @@ export async function readCatalogSourceBytes(receipt: CatalogSourceReceipt): Pro
 	return bytes;
 }
 
+/** @internal Reopen committed immutable evidence after restart; the caller already checked source-use authority. */
+export async function loadCatalogSourceReceipt(
+	tx: DatabaseTransaction,
+	sourceRecordId: string,
+	snapshotId: string,
+	archive: CatalogSourceArchive = storage,
+): Promise<CatalogSourceReceipt> {
+	z.uuid().parse(sourceRecordId);
+	z.uuid().parse(snapshotId);
+	const [record] = await tx
+		.select()
+		.from(catalogSourceRecord)
+		.where(eq(catalogSourceRecord.id, sourceRecordId))
+		.limit(1);
+	const [snapshot] = await tx
+		.select()
+		.from(catalogSourceSnapshot)
+		.where(
+			and(
+				eq(catalogSourceSnapshot.sourceRecordId, sourceRecordId),
+				eq(catalogSourceSnapshot.id, snapshotId),
+			),
+		)
+		.limit(1);
+	if (!record || !snapshot) throw new Error("Committed source evidence is missing");
+	const key = sourceKeySchema.parse({
+		source: record.source,
+		objectType: record.objectType,
+		externalId: record.externalId,
+	});
+	const receipt: CatalogSourceReceipt = Object.freeze({
+		[storedReceipt]: true as const,
+		key: Object.freeze(key),
+		contentSha256: snapshot.contentSha256,
+		contractSha256: snapshot.contractSha256,
+		payloadRef: snapshot.payloadRef,
+		sourceRevision: snapshot.sourceRevision,
+		acquisition: null,
+	});
+	issuedReceipts.add(receipt);
+	receiptArchives.set(receipt, archive);
+	return receipt;
+}
+
 /** Identical repeat observations reuse the head; new observations never overwrite it. */
 export async function recordCatalogSourceObservation(
 	tx: DatabaseTransaction,
@@ -178,17 +214,26 @@ export async function recordCatalogSourceObservation(
 	return tx.transaction(async (tx) => {
 		const record = await registerCatalogSourceRecord(tx, receipt.key);
 		const generation = receipt.acquisition?.generation;
+		if (generation === undefined && record.acquisitionGeneration > 0)
+			throw new Error("An actively acquired source requires its before-fetch generation");
 		if (
 			generation !== undefined &&
 			(generation !== record.acquisitionGeneration || generation < record.acceptedGeneration)
 		)
 			throw new Error("Source acquisition generation is stale");
-		const [head] = await tx
-			.select()
-			.from(catalogSourceSnapshot)
-			.where(eq(catalogSourceSnapshot.sourceRecordId, record.id))
-			.orderBy(desc(catalogSourceSnapshot.observedAt), desc(catalogSourceSnapshot.id))
-			.limit(1);
+		const [head] =
+			record.headSnapshotId === null
+				? []
+				: await tx
+						.select()
+						.from(catalogSourceSnapshot)
+						.where(
+							and(
+								eq(catalogSourceSnapshot.sourceRecordId, record.id),
+								eq(catalogSourceSnapshot.id, record.headSnapshotId),
+							),
+						)
+						.limit(1);
 		if (
 			head &&
 			head.contentSha256 === receipt.contentSha256 &&
@@ -205,6 +250,8 @@ export async function recordCatalogSourceObservation(
 				.where(eq(catalogSourceRecord.id, record.id));
 			return { record, snapshot: head, repeated: true };
 		}
+		if (generation !== undefined && generation === record.acceptedGeneration)
+			throw new Error("A completed source acquisition cannot publish different content");
 		const [snapshot] = await tx
 			.insert(catalogSourceSnapshot)
 			.values({
