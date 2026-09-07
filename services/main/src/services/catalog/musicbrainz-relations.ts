@@ -1,3 +1,4 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
@@ -299,6 +300,7 @@ export async function adoptMusicBrainzRelations(
 		});
 		revision = created.revision;
 		await tx.insert(CatalogFactTables[reference.owner].support).values({
+			...(await catalogSourceSupportColumns(tx, observation.record.id)),
 			ownerId: reference.id,
 			relationId: created.id,
 			sourceRecordId: observation.record.id,

@@ -1,3 +1,4 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import { z } from "zod";
 import { createHash } from "node:crypto";
 import type { DatabaseTransaction } from "../database";
@@ -55,6 +56,7 @@ export async function adoptMusicBrainzAliases(
 			sourcePath: `${path}/${index}`,
 		});
 		await tx.insert(CatalogFactTables[reference.owner].support).values({
+			...(await catalogSourceSupportColumns(tx, observation.record.id)),
 			ownerId: reference.id,
 			namedFormId: added.id,
 			sourceRecordId: observation.record.id,
@@ -89,6 +91,7 @@ export async function adoptMusicBrainzTitle(
 		sourcePath: "/title",
 	});
 	await tx.insert(CatalogFactTables[reference.owner].support).values({
+		...(await catalogSourceSupportColumns(tx, observation.record.id)),
 		ownerId: reference.id,
 		namedFormId: added.id,
 		sourceRecordId: observation.record.id,

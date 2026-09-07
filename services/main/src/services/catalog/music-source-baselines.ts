@@ -5,7 +5,11 @@ import {
 	musicComponentSourceOccurrence,
 } from "../database/schema/catalog-music";
 import { musicComponentSourceBaseline } from "../database/schema/catalog-music-source";
-import { catalogSourceAdoptionProposal } from "../database/schema/catalog-source";
+import {
+	catalogSourceAdoptionProposal,
+	catalogSourceBindingRevision,
+} from "../database/schema/catalog-source";
+import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { catalogSourceApplication } from "../database/schema/catalog-source-application";
 import type { CatalogSourceNativeChange } from "./source-applications";
 
@@ -19,9 +23,14 @@ export async function resolveMusicSourceComponentBaseline(
 		component: string;
 		componentKey: string;
 		sourceHistoryId: string;
+		correspondenceRevision?: number;
 	},
 ) {
 	const table = musicComponentSourceBaseline;
+	const correspondenceRevision =
+		input.correspondenceRevision ??
+		(await resolveCatalogSourceChildCorrespondence(tx, input.sourceRecordId))
+			.correspondenceRevision;
 	const [baseline] = await tx
 		.select()
 		.from(table)
@@ -29,6 +38,7 @@ export async function resolveMusicSourceComponentBaseline(
 			and(
 				eq(table.sourceRecordId, input.sourceRecordId),
 				eq(table.mappingKey, input.mappingKey),
+				eq(table.correspondenceRevision, correspondenceRevision),
 				eq(table.ownerId, input.ownerId),
 				eq(table.component, input.component),
 				eq(table.componentKey, input.componentKey),
@@ -63,6 +73,21 @@ export async function advanceMusicSourceComponentBaselines(
 		)
 		.limit(1);
 	if (!proposal) throw new Error("Music source baseline proposal is missing");
+	const [scope] = await tx
+		.select({
+			mappingKey: catalogSourceBindingRevision.mappingKey,
+			correspondenceRevision: catalogSourceBindingRevision.correspondenceRevision,
+		})
+		.from(catalogSourceBindingRevision)
+		.where(
+			and(
+				eq(catalogSourceBindingRevision.sourceRecordId, input.sourceRecordId),
+				eq(catalogSourceBindingRevision.mappingKey, proposal.mappingKey),
+				eq(catalogSourceBindingRevision.revision, proposal.expectedBindingRevision),
+			),
+		)
+		.limit(1);
+	if (!scope) throw new Error("Music source baseline proposal has no exact correspondence epoch");
 	let sourceSnapshotId = proposal.snapshotId;
 	if (input.action === "withdraw") {
 		const [application] = await tx
@@ -87,6 +112,8 @@ export async function advanceMusicSourceComponentBaselines(
 			.where(
 				and(
 					eq(occurrence.sourceRecordId, input.sourceRecordId),
+					eq(occurrence.mappingKey, scope.mappingKey),
+					eq(occurrence.correspondenceRevision, scope.correspondenceRevision),
 					eq(occurrence.snapshotId, sourceSnapshotId),
 					eq(occurrence.ownerId, change.ownerId),
 					eq(occurrence.component, change.component),
@@ -98,6 +125,7 @@ export async function advanceMusicSourceComponentBaselines(
 		const key = and(
 			eq(table.sourceRecordId, input.sourceRecordId),
 			eq(table.mappingKey, proposal.mappingKey),
+			eq(table.correspondenceRevision, scope.correspondenceRevision),
 			eq(table.ownerId, change.ownerId),
 			eq(table.component, change.component),
 			eq(table.componentKey, change.componentKey),
@@ -114,6 +142,8 @@ export async function advanceMusicSourceComponentBaselines(
 				.where(
 					and(
 						eq(occurrence.sourceRecordId, input.sourceRecordId),
+						eq(occurrence.mappingKey, scope.mappingKey),
+						eq(occurrence.correspondenceRevision, scope.correspondenceRevision),
 						eq(occurrence.snapshotId, fallbackSnapshot),
 						eq(occurrence.ownerId, change.ownerId),
 						eq(occurrence.component, change.component),
@@ -142,6 +172,7 @@ export async function advanceMusicSourceComponentBaselines(
 			.values({
 				sourceRecordId: input.sourceRecordId,
 				mappingKey: proposal.mappingKey,
+				correspondenceRevision: scope.correspondenceRevision,
 				ownerId: change.ownerId,
 				component: change.component,
 				componentKey: change.componentKey,
@@ -157,6 +188,7 @@ export async function advanceMusicSourceComponentBaselines(
 				target: [
 					table.sourceRecordId,
 					table.mappingKey,
+					table.correspondenceRevision,
 					table.ownerId,
 					table.component,
 					table.componentKey,

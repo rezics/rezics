@@ -10,7 +10,11 @@ import {
 	musicMediumIdentifier,
 	musicTrackIdentifier,
 } from "../database/schema/catalog-music";
-import { bindCatalogSourceIdentity, acceptCatalogSourceInitialization } from "./source-bindings";
+import { acceptCatalogSourceInitialization } from "./source-bindings";
+import {
+	prepareCatalogSourceChildCorrespondence,
+	sealCatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import { createCatalogIdentity } from "./storage";
 import {
@@ -67,6 +71,15 @@ export async function adoptMusicBrainzRelease(
 	if (existing && existing.status !== "initialize_reference") return existing;
 	if (existing && existing.reference.owner !== "music")
 		throw new TypeError("MusicBrainz source resolves to another catalog owner");
+	const identity = existing
+		? { ...existing.reference, revision: existing.revision }
+		: await createCatalogIdentity(tx, { owner: "music", shape: "release" }, actor);
+	await prepareCatalogSourceChildCorrespondence(tx, actor, {
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		reference: identity,
+		mappingVersion: "musicbrainz.release.1",
+	});
 	const creditId = musicBrainzCreditWriter(tx, actor, observation);
 	let releaseGroupId: string | null = null;
 	if (record["release-group"]) {
@@ -115,9 +128,6 @@ export async function adoptMusicBrainzRelease(
 		releaseGroupId = group.id;
 	}
 	const releaseCredit = await creditId(record["artist-credit"], "/artist-credit");
-	const identity = existing
-		? { ...existing.reference, revision: existing.revision }
-		: await createCatalogIdentity(tx, { owner: "music", shape: "release" }, actor);
 	await tx.insert(musicRelease).values({
 		id: identity.id,
 		releaseGroupId,
@@ -333,7 +343,7 @@ export async function adoptMusicBrainzRelease(
 			finalRevision: revision,
 		});
 	else
-		await bindCatalogSourceIdentity(tx, actor, {
+		await sealCatalogSourceChildCorrespondence(tx, actor, {
 			sourceRecordId: observation.record.id,
 			path: "/",
 			snapshotId: observation.snapshot.id,

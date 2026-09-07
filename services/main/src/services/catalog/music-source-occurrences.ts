@@ -5,6 +5,7 @@ import { musicComponentSourceOccurrence } from "../database/schema/catalog-music
 import { readMusicComponentHead } from "./music-structure";
 import { MusicComponentNameSchema, type MusicComponentName } from "./music-structure-contracts";
 import type { recordCatalogSourceDocument } from "./source-observations";
+import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 
 /** @internal Records exact support after a component write; duplicate source rows retain distinct paths. */
 export async function recordMusicSourceComponent(
@@ -20,20 +21,20 @@ export async function recordMusicSourceComponent(
 		.refine((value) => Buffer.byteLength(value) <= 512)
 		.parse(sourcePath);
 	MusicComponentNameSchema.parse(component);
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, observation.record.id);
 	const head = await readMusicComponentHead(tx, ownerId, component, componentKey);
 	if (!head || head.operation === "DELETE")
 		throw new Error("No live native component history exists for source support");
-	await tx
-		.insert(musicComponentSourceOccurrence)
-		.values({
-			sourceRecordId: observation.record.id,
-			snapshotId: observation.snapshot.id,
-			ownerId,
-			component,
-			componentKey,
-			sourcePath,
-			historyId: head.id,
-		});
+	await tx.insert(musicComponentSourceOccurrence).values({
+		...scope,
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		ownerId,
+		component,
+		componentKey,
+		sourcePath,
+		historyId: head.id,
+	});
 }
 
 /** @internal Source/owner-scoped keyset page never loads the owner's full lifetime history. */
@@ -46,12 +47,15 @@ export async function listMusicSourceComponents(
 	afterPath?: string,
 ) {
 	const table = musicComponentSourceOccurrence;
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, sourceRecordId);
 	return tx
 		.select()
 		.from(table)
 		.where(
 			and(
 				eq(table.sourceRecordId, sourceRecordId),
+				eq(table.mappingKey, scope.mappingKey),
+				eq(table.correspondenceRevision, scope.correspondenceRevision),
 				eq(table.snapshotId, snapshotId),
 				eq(table.ownerId, ownerId),
 				eq(table.component, component),

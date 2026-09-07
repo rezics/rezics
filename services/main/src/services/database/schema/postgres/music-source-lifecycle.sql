@@ -37,12 +37,12 @@ CREATE OR REPLACE FUNCTION public.catalog_check_music_source_baseline()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 DECLARE native public.music_component_revision%ROWTYPE;
 BEGIN
-  IF TG_OP = 'UPDATE' AND (OLD.source_record_id, OLD.mapping_key, OLD.owner_id, OLD.component, OLD.component_key)
-    IS DISTINCT FROM (NEW.source_record_id, NEW.mapping_key, NEW.owner_id, NEW.component, NEW.component_key) THEN
+  IF TG_OP = 'UPDATE' AND (OLD.source_record_id, OLD.mapping_key, OLD.correspondence_revision, OLD.owner_id, OLD.component, OLD.component_key)
+    IS DISTINCT FROM (NEW.source_record_id, NEW.mapping_key, NEW.correspondence_revision, NEW.owner_id, NEW.component, NEW.component_key) THEN
     RAISE EXCEPTION 'Music source baseline identity is immutable' USING ERRCODE = '23514';
   END IF;
   IF NOT EXISTS(SELECT 1 FROM public.music_component_source_occurrence
-    WHERE source_record_id=NEW.source_record_id AND snapshot_id=NEW.snapshot_id AND owner_id=NEW.owner_id
+    WHERE source_record_id=NEW.source_record_id AND mapping_key=NEW.mapping_key AND correspondence_revision=NEW.correspondence_revision AND snapshot_id=NEW.snapshot_id AND owner_id=NEW.owner_id
       AND component=NEW.component AND component_key=NEW.component_key AND source_path=NEW.source_path AND history_id=NEW.source_history_id) THEN
     RAISE EXCEPTION 'Music source baseline requires exact original source support' USING ERRCODE = '23514';
   END IF;
@@ -57,6 +57,10 @@ BEGIN
       AND change.component_key=NEW.component_key AND change.after_revision_id=NEW.current_history_id) THEN
     RAISE EXCEPTION 'Music source baseline requires exact native application proof' USING ERRCODE = '23514';
   END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.catalog_source_adoption_proposal p
+    JOIN public.catalog_source_binding_revision r ON r.source_record_id=p.source_record_id AND r.mapping_key=p.mapping_key AND r.revision=p.expected_binding_revision
+    WHERE p.source_record_id=NEW.source_record_id AND p.id=NEW.proposal_id AND r.correspondence_revision=NEW.correspondence_revision AND r.owner=NEW.mapping_owner)
+  THEN RAISE EXCEPTION 'Music baseline requires its proposal owner correspondence epoch' USING ERRCODE='23514'; END IF;
   RETURN NEW;
 END $$;
 DROP TRIGGER IF EXISTS music_source_baseline_proof ON public.music_component_source_baseline;

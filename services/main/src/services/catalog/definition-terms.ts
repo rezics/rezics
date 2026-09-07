@@ -30,6 +30,7 @@ export async function attachCatalogDefinitionTerm(
 		{ owner: "reference", id: conceptId },
 		actor,
 		true,
+		"share",
 	);
 	if (identity.shape !== "concept")
 		throw new TypeError("Definition term requires a native concept");

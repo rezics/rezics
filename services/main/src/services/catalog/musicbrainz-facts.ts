@@ -1,5 +1,6 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import { isDeepStrictEqual } from "node:util";
-import { and, eq, ne, isNull } from "drizzle-orm";
+import { and, eq, ne, isNull, or } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
@@ -116,6 +117,7 @@ export async function applyMusicBrainzFactDelta(
 	if (before.length + after.length > 128)
 		throw new RangeError("Music semantic delta requires staged application");
 	const f = CatalogFactTables[reference.owner];
+	const scope = await catalogSourceSupportColumns(tx, observation.record.id);
 	const changes: FactChange[] = [];
 	const consumed = new Set<number>();
 	const support = async (snapshotId: string, descriptor: Descriptor) => {
@@ -176,6 +178,8 @@ export async function applyMusicBrainzFactDelta(
 			.where(
 				and(
 					eq(f.support.sourceRecordId, observation.record.id),
+					eq(f.support.sourceMappingKey, scope.sourceMappingKey),
+					eq(f.support.sourceCorrespondenceRevision, scope.sourceCorrespondenceRevision),
 					eq(f.support.snapshotId, snapshotId),
 					eq(f.support.ownerId, reference.id),
 					eq(f.support.sourcePath, descriptor.path),
@@ -194,7 +198,10 @@ export async function applyMusicBrainzFactDelta(
 				and(
 					eq(f.support.ownerId, reference.id),
 					eq(f.support.factId, factId),
-					ne(f.support.sourceRecordId, observation.record.id),
+					or(
+						ne(f.support.sourceRecordId, observation.record.id),
+						isNull(f.support.sourceMappingKey),
+					),
 					isNull(f.support.withdrawnAt),
 				),
 			)
@@ -223,6 +230,7 @@ export async function applyMusicBrainzFactDelta(
 			const target = await support(observation.snapshot.id, descriptor);
 			if (!target.row)
 				await tx.insert(f.support).values({
+					...(await catalogSourceSupportColumns(tx, observation.record.id)),
 					ownerId: reference.id,
 					factId: proof.row.factId,
 					sourceRecordId: observation.record.id,
@@ -324,6 +332,7 @@ export async function applyMusicBrainzFactDelta(
 			.limit(1);
 		if (!native) throw new Error("Music semantic projection is missing");
 		await tx.insert(f.support).values({
+			...(await catalogSourceSupportColumns(tx, observation.record.id)),
 			ownerId: reference.id,
 			factId: fact.id,
 			sourceRecordId: observation.record.id,

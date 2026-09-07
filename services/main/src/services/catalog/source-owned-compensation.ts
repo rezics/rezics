@@ -3,7 +3,12 @@ import type { DatabaseTransaction } from "../database";
 import { CatalogNameTables } from "../database/schema/catalog-names";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import type { CatalogReference } from "./contracts";
-import type { CatalogNameInput, CatalogNameAuthorityInput } from "./name-contracts";
+import type {
+	CatalogNameInput,
+	CatalogNameAuthorityInput,
+	CatalogIdentifierInput,
+} from "./name-contracts";
+import { reviseCatalogIdentifier } from "./identifiers";
 import { reviseCatalogName } from "./names";
 import { reviseCatalogNameAuthority } from "./authority";
 import { restoreCatalogSemanticRevision, transitionCatalogSemanticState } from "./semantic-history";
@@ -15,10 +20,21 @@ import {
 
 type NamedForm = typeof CatalogNameTables.entity.nameRevision.$inferSelect;
 type Authority = typeof CatalogNameTables.entity.authorityRevision.$inferSelect;
+type Identifier = typeof CatalogNameTables.entity.identifierRevision.$inferSelect;
 export type CatalogSourceOwnedChange = Extract<
 	CatalogSourceNativeChange,
-	{ kind: "catalog-semantic" | "catalog-name" | "catalog-name-authority" }
+	{ kind: "catalog-semantic" | "catalog-name" | "catalog-name-authority" | "catalog-identifier" }
 >;
+
+/** @internal Reconstruct identifier input from an exact immutable claim revision. */
+export function catalogIdentifierRevisionValues(row: Identifier): CatalogIdentifierInput {
+	return {
+		namespace: row.namespace,
+		value: row.value,
+		issuerEntityId: row.issuerEntityId,
+		state: row.state,
+	};
+}
 
 /** @internal Reconstruct canonical inputs from checked named-form history without replaying storage metadata. */
 export function catalogNameRevisionValues(row: NamedForm): CatalogNameInput {
@@ -86,6 +102,34 @@ export async function compensateCatalogSourceOwnedChange(
 	const identity = await loadCatalogIdentity(tx, reference, actor, true);
 	let afterRevision: number;
 	switch (change.kind) {
+		case "catalog-identifier": {
+			const table = CatalogNameTables[change.owner].identifierRevision;
+			const [previous] = await tx
+				.select()
+				.from(table)
+				.where(
+					and(
+						eq(table.ownerId, change.ownerId),
+						eq(table.id, change.componentKey),
+						eq(table.revision, change.beforeRevision ?? change.afterRevision),
+					),
+				)
+				.limit(1);
+			if (!previous) throw new TypeError("Identifier compensation history is missing");
+			const values = catalogIdentifierRevisionValues(previous);
+			if (change.beforeRevision === null) values.state = "superseded";
+			afterRevision = (
+				await reviseCatalogIdentifier(
+					tx,
+					reference,
+					actor,
+					change.componentKey,
+					change.afterRevision,
+					values,
+				)
+			).revision;
+			break;
+		}
 		case "catalog-semantic": {
 			if (change.beforeRevision === null)
 				afterRevision = (

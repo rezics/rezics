@@ -1,7 +1,11 @@
 import { createHash } from "node:crypto";
 import type { DatabaseTransaction } from "../database";
 import { musicRecording, musicReleaseGroup, musicWork } from "../database/schema/catalog-music";
-import { bindCatalogSourceIdentity, acceptCatalogSourceInitialization } from "./source-bindings";
+import { acceptCatalogSourceInitialization } from "./source-bindings";
+import {
+	prepareCatalogSourceChildCorrespondence,
+	sealCatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import { createCatalogIdentity } from "./storage";
 import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
@@ -55,6 +59,12 @@ export async function adoptMusicBrainzObject(
 	const identity = existing
 		? { ...existing.reference, revision: existing.revision }
 		: await createCatalogIdentity(tx, { owner: "music", shape: document.kind }, actor);
+	await prepareCatalogSourceChildCorrespondence(tx, actor, {
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		reference: identity,
+		mappingVersion: `musicbrainz.${document.kind}.2`,
+	});
 	const credit = musicBrainzCreditWriter(tx, actor, observation);
 	switch (document.kind) {
 		case "work": {
@@ -218,7 +228,7 @@ export async function adoptMusicBrainzObject(
 			mappingVersion: `musicbrainz.${document.kind}.2`,
 		});
 	else
-		await bindCatalogSourceIdentity(tx, actor, {
+		await sealCatalogSourceChildCorrespondence(tx, actor, {
 			sourceRecordId: observation.record.id,
 			path: "/",
 			snapshotId: observation.snapshot.id,

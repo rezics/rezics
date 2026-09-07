@@ -1,3 +1,4 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import type { DatabaseTransaction } from "../database";
 import { initializeEntityProfile, resolveEntityShape } from "./entities";
@@ -112,15 +113,14 @@ export async function musicBrainzVocabulary(
 						nameRevision: named.nameRevision,
 						sourcePath: source.namePath,
 					});
-					await tx
-						.insert(CatalogFactTables.reference.support)
-						.values({
-							ownerId: created.id,
-							namedFormId: named.id,
-							sourceRecordId: source.observation.record.id,
-							snapshotId: source.observation.snapshot.id,
-							sourcePath: source.namePath,
-						});
+					await tx.insert(CatalogFactTables.reference.support).values({
+						...(await catalogSourceSupportColumns(tx, source.observation.record.id)),
+						ownerId: created.id,
+						namedFormId: named.id,
+						sourceRecordId: source.observation.record.id,
+						snapshotId: source.observation.snapshot.id,
+						sourcePath: source.namePath,
+					});
 				}
 				return { ...created, revision };
 			},
@@ -293,8 +293,10 @@ export async function musicBrainzLabelReference(
 				});
 				revision = identifier.revision;
 				await tx.insert(CatalogFactTables.entity.support).values({
+					...(await catalogSourceSupportColumns(tx, observation.record.id)),
 					ownerId: created.id,
 					identifierId: identifier.id,
+					identifierRevision: identifier.identifierRevision,
 					sourceRecordId: observation.record.id,
 					snapshotId: observation.snapshot.id,
 					sourcePath: `${path}/label-code`,

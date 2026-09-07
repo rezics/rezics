@@ -1,3 +1,4 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -54,6 +55,7 @@ export async function appendVndbVnNames(
 			nameRevision: named.nameRevision,
 		});
 		await tx.insert(CatalogFactTables[reference.owner].support).values({
+			...(await catalogSourceSupportColumns(tx, document.record.id)),
 			ownerId: reference.id,
 			namedFormId: named.id,
 			sourceRecordId: document.record.id,
@@ -143,6 +145,7 @@ export async function appendVndbDisplayName(
 		nameRevision: named.nameRevision,
 	});
 	await tx.insert(CatalogFactTables[reference.owner].support).values({
+		...(await catalogSourceSupportColumns(tx, document.record.id)),
 		ownerId: reference.id,
 		namedFormId: named.id,
 		sourceRecordId: document.record.id,

@@ -19,7 +19,10 @@ import {
 	openLibrarySourceKey,
 } from "./openlibrary";
 import { addCatalogName, createCatalogIdentity } from "./storage";
-import { bindCatalogSourceIdentity } from "./source-bindings";
+import {
+	prepareCatalogSourceChildCorrespondence,
+	sealCatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 
 /** Pinned Open Library type-contract commit; its field artifacts remain in the source inventory. */
 export const OpenLibraryContractSha256 =
@@ -137,6 +140,12 @@ export async function adoptOpenLibraryRecord(
 		{ owner: "publishing", shape: isWork ? "work" : "publication" },
 		actor,
 	);
+	await prepareCatalogSourceChildCorrespondence(tx, actor, {
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		reference: identity,
+		mappingVersion: OpenLibraryMappingVersion,
+	});
 	if (isWork) await tx.insert(publishingWork).values({ id: identity.id });
 	else
 		await tx.insert(publishingPublication).values({
@@ -192,7 +201,7 @@ export async function adoptOpenLibraryRecord(
 				normalizedValue: identifier.value,
 			})),
 		);
-	await bindCatalogSourceIdentity(tx, actor, {
+	await sealCatalogSourceChildCorrespondence(tx, actor, {
 		mappingVersion: OpenLibraryMappingVersion,
 		sourceRecordId: observation.record.id,
 		snapshotId: observation.snapshot.id,

@@ -18,6 +18,7 @@ import { initializeReferenceProfile, removeReferenceProfile } from "./references
 import { CatalogRevisionConflict, loadCatalogIdentity } from "./storage";
 import type { CatalogReference } from "./contracts";
 import type { CatalogSourceNativeChange } from "./source-applications";
+import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 
 const owner = z.enum(["entity", "reference"]);
 const revision = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
@@ -72,9 +73,10 @@ export async function bindCatalogProfileSourceOccurrence(
 	if (!current || current.removed)
 		throw new TypeError("Source profile occurrence requires an existing exact native profile");
 	const table = CatalogProfileSourceTables[type];
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, value.sourceRecordId);
 	await tx
 		.insert(table)
-		.values({ ...value, ownerId: reference.id })
+		.values({ ...value, ...scope, ownerId: reference.id })
 		.onConflictDoNothing();
 	const [existing] = await tx
 		.select()
@@ -82,6 +84,8 @@ export async function bindCatalogProfileSourceOccurrence(
 		.where(
 			and(
 				eq(table.sourceRecordId, value.sourceRecordId),
+				eq(table.mappingKey, scope.mappingKey),
+				eq(table.correspondenceRevision, scope.correspondenceRevision),
 				eq(table.snapshotId, value.snapshotId),
 				eq(table.ownerId, reference.id),
 			),
@@ -107,10 +111,13 @@ export async function bindCatalogProfileSourceOccurrence(
 export async function resolveCatalogProfileSourceBaseline(
 	tx: DatabaseTransaction,
 	reference: CatalogReference,
-	key: { sourceRecordId: string; mappingKey: string },
+	key: { sourceRecordId: string; mappingKey: string; correspondenceRevision?: number },
 	sourceRevision: number,
 ) {
 	const table = CatalogSourceProfileBaselines[owner.parse(reference.owner)];
+	const correspondenceRevision =
+		key.correspondenceRevision ??
+		(await resolveCatalogSourceChildCorrespondence(tx, key.sourceRecordId)).correspondenceRevision;
 	revision.parse(sourceRevision);
 	const [baseline] = await tx
 		.select()
@@ -119,6 +126,7 @@ export async function resolveCatalogProfileSourceBaseline(
 			and(
 				eq(table.sourceRecordId, key.sourceRecordId),
 				eq(table.mappingKey, key.mappingKey),
+				eq(table.correspondenceRevision, correspondenceRevision),
 				eq(table.ownerId, reference.id),
 			),
 		)

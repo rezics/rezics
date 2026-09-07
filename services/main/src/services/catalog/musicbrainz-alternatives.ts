@@ -13,7 +13,10 @@ import { MusicBrainzAlternativeReleaseDumpSchema } from "./musicbrainz-alternati
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import { musicBrainzCreditWriter, musicBrainzVocabulary } from "./musicbrainz-native";
 import { recordCatalogSourceDocument, type CatalogSourceReceipt } from "./source-observations";
-import { bindCatalogSourceIdentity } from "./source-bindings";
+import {
+	prepareCatalogSourceChildCorrespondence,
+	sealCatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 import { bindReferencedSourceIdentity } from "./source-references";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { recordMusicSourceComponent } from "./music-source-occurrences";
@@ -57,6 +60,12 @@ export async function adoptMusicBrainzAlternativeRelease(
 			"musicbrainz.alternative_release.1",
 		);
 		if (existing) return existing;
+		await prepareCatalogSourceChildCorrespondence(inner, actor, {
+			sourceRecordId: observation.record.id,
+			snapshotId: observation.snapshot.id,
+			reference: release,
+			mappingVersion: "musicbrainz.alternative_release.1",
+		});
 		const sourceRelease = await bindReferencedSourceIdentity(inner, actor, {
 			...musicBrainzSourceKey("release", record.release.gid),
 			owner: "music",
@@ -173,7 +182,7 @@ export async function adoptMusicBrainzAlternativeRelease(
 				row.key,
 				row.path,
 			);
-		await bindCatalogSourceIdentity(inner, actor, {
+		await sealCatalogSourceChildCorrespondence(inner, actor, {
 			sourceRecordId: observation.record.id,
 			path: "/",
 			snapshotId: observation.snapshot.id,

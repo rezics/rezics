@@ -23,6 +23,14 @@ import { catalogAccessDecisions } from "../participation/policy";
 const revision = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);
 const nativeChangeSchema = z.discriminatedUnion("kind", [
 	z.strictObject({
+		kind: z.literal("catalog-identifier"),
+		owner: z.enum(CatalogOwnerValues),
+		ownerId: z.uuid(),
+		componentKey: z.uuid(),
+		beforeRevision: revision.nullable(),
+		afterRevision: revision,
+	}),
+	z.strictObject({
 		kind: z.literal("catalog-profile"),
 		owner: z.enum(["entity", "reference"]),
 		ownerId: z.uuid(),
@@ -172,6 +180,7 @@ export async function recordCatalogSourceApplication(
 			}
 			case "catalog-semantic":
 			case "catalog-name":
+			case "catalog-identifier":
 			case "catalog-name-authority": {
 				const tables = CatalogSourceOwnedApplicationTables[change.owner];
 				const table =
@@ -179,7 +188,9 @@ export async function recordCatalogSourceApplication(
 						? tables.semantic
 						: change.kind === "catalog-name"
 							? tables.name
-							: tables.authority;
+							: change.kind === "catalog-identifier"
+								? tables.identifier
+								: tables.authority;
 				await tx.insert(table).values({
 					...common,
 					componentKey: change.componentKey,
@@ -334,6 +345,7 @@ export async function readCatalogSourceApplication(
 		for (const [kind, table] of [
 			["catalog-semantic", tables.semantic],
 			["catalog-name", tables.name],
+			["catalog-identifier", tables.identifier],
 			["catalog-name-authority", tables.authority],
 		] as const) {
 			const rows = await tx
@@ -350,12 +362,14 @@ export async function readCatalogSourceApplication(
 				.limit(128);
 			for (const row of rows) {
 				changes.push({
-					kind,
-					owner,
-					ownerId: row.ownerId,
-					componentKey: row.componentKey,
-					beforeRevision: row.beforeRevision,
-					afterRevision: row.afterRevision,
+					...nativeChangeSchema.parse({
+						kind,
+						owner,
+						ownerId: row.ownerId,
+						componentKey: row.componentKey,
+						beforeRevision: row.beforeRevision,
+						afterRevision: row.afterRevision,
+					}),
 					position: row.position,
 				});
 			}

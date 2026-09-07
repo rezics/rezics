@@ -1,5 +1,6 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import { isDeepStrictEqual } from "node:util";
-import { and, eq, ne, isNull } from "drizzle-orm";
+import { and, eq, ne, isNull, or } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
@@ -31,6 +32,7 @@ export async function applyMusicBrainzRelationDelta(
 	const prior = z.array(MusicBrainzRelationSchema).max(128).parse(previous.relations);
 	const correspondence = correlateMusicBrainzRelations(prior, incoming);
 	const table = CatalogFactTables[reference.owner];
+	const scope = await catalogSourceSupportColumns(tx, observation.record.id);
 	const changes: CatalogSourceNativeChange[] = [];
 	const sourceRevision = (value: Semantic) => value.expectedHeadVersion + 1;
 	const currentRevision = (value: Semantic) =>
@@ -75,6 +77,8 @@ export async function applyMusicBrainzRelationDelta(
 			.where(
 				and(
 					eq(table.support.ownerId, reference.id),
+					eq(table.support.sourceMappingKey, scope.sourceMappingKey),
+					eq(table.support.sourceCorrespondenceRevision, scope.sourceCorrespondenceRevision),
 					eq(table.support.sourceRecordId, observation.record.id),
 					eq(table.support.snapshotId, snapshotId),
 					eq(table.support.sourcePath, `/relations/${index}`),
@@ -107,7 +111,7 @@ export async function applyMusicBrainzRelationDelta(
 			)
 			.orderBy(table.relationScope.id)
 			.limit(65);
-	const remove = async (value: Semantic, kind: "fact" | "relation") => {
+	const independentlySupported = async (value: Semantic, kind: "fact" | "relation") => {
 		const independent = await tx
 			.select({ id: table.support.id })
 			.from(table.support)
@@ -117,12 +121,18 @@ export async function applyMusicBrainzRelationDelta(
 					kind === "fact"
 						? eq(table.support.factId, value.id)
 						: eq(table.support.relationId, value.id),
-					ne(table.support.sourceRecordId, observation.record.id),
+					or(
+						ne(table.support.sourceRecordId, observation.record.id),
+						isNull(table.support.sourceMappingKey),
+					),
 					isNull(table.support.withdrawnAt),
 				),
 			)
 			.limit(1);
-		if (independent.length) return;
+		return independent.length > 0;
+	};
+	const remove = async (value: Semantic, kind: "fact" | "relation") => {
+		if (await independentlySupported(value, kind)) return false;
 		const expected = await currentRevision(value);
 		const removed = await transitionCatalogSemanticState(
 			tx,
@@ -135,6 +145,7 @@ export async function applyMusicBrainzRelationDelta(
 		);
 		revision = removed.revision;
 		record(value, expected, removed.headVersion);
+		return true;
 	};
 	const restore = async (value: Semantic) => {
 		const expected = await currentRevision(value);
@@ -163,6 +174,7 @@ export async function applyMusicBrainzRelationDelta(
 				throw new TypeError("Unchanged relationship occurrence changed its native identity");
 			if (!target)
 				await tx.insert(table.support).values({
+					...(await catalogSourceSupportColumns(tx, observation.record.id)),
 					ownerId: reference.id,
 					relationId: old.id,
 					sourceRecordId: observation.record.id,
@@ -171,15 +183,17 @@ export async function applyMusicBrainzRelationDelta(
 				});
 			continue;
 		}
-		if (old) for (const fact of await qualifierFacts(old)) await remove(fact, "fact");
+		const preserveOld = old ? await independentlySupported(old, "relation") : false;
+		if (old && !preserveOld)
+			for (const fact of await qualifierFacts(old)) await remove(fact, "fact");
 		if (target) {
-			if (old && old.semanticId !== target.semanticId)
+			if (old && !preserveOld && old.semanticId !== target.semanticId)
 				throw new TypeError("Relationship correspondence changed its native semantic identity");
 			for (const fact of await qualifierFacts(target)) await restore(fact);
 			await restore(target);
 			continue;
 		}
-		const expected = old ? await currentRevision(old) : null;
+		const expected = old && !preserveOld ? await currentRevision(old) : null;
 		revision = await adoptMusicBrainzRelations(
 			tx,
 			actor,
@@ -200,6 +214,7 @@ export async function applyMusicBrainzRelationDelta(
 			throw new RangeError("Relationship qualifier bundle exceeds its canonical bound");
 		for (const fact of facts) {
 			await tx.insert(table.support).values({
+				...(await catalogSourceSupportColumns(tx, observation.record.id)),
 				ownerId: reference.id,
 				factId: fact.id,
 				sourceRecordId: observation.record.id,
@@ -214,8 +229,8 @@ export async function applyMusicBrainzRelationDelta(
 		if (used.has(index)) continue;
 		const old = await relationAt(previous.snapshotId, index);
 		if (!old) throw new TypeError("Removed relationship lacks its original source occurrence");
-		await remove(old, "relation");
-		for (const fact of await qualifierFacts(old)) await remove(fact, "fact");
+		if (await remove(old, "relation"))
+			for (const fact of await qualifierFacts(old)) await remove(fact, "fact");
 	}
 	return { revision, changes };
 }

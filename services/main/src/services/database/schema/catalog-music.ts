@@ -23,7 +23,7 @@ import {
 import { catalogDefinitionRevision, entityIdentity, musicIdentity } from "./catalog-identity";
 import { referenceArea } from "./catalog-reference";
 import { users } from "./auth";
-import { catalogSourceSnapshot } from "./catalog-source";
+import { catalogSourceSnapshot, catalogSourceBindingRevision } from "./catalog-source";
 
 /** Exact native row revisions, including removals; this is not a source-payload archive. */
 export const musicComponentRevision = pgTable(
@@ -91,6 +91,8 @@ export const musicComponentSourceOccurrence = pgTable(
 	"music_component_source_occurrence",
 	{
 		sourceRecordId: uuid().notNull(),
+		mappingKey: uuid().notNull(),
+		correspondenceRevision: bigint({ mode: "number" }).notNull(),
 		snapshotId: uuid().notNull(),
 		ownerId: uuid().notNull(),
 		component: text().notNull(),
@@ -102,6 +104,8 @@ export const musicComponentSourceOccurrence = pgTable(
 		primaryKey({
 			columns: [
 				table.sourceRecordId,
+				table.mappingKey,
+				table.correspondenceRevision,
 				table.snapshotId,
 				table.ownerId,
 				table.component,
@@ -114,6 +118,15 @@ export const musicComponentSourceOccurrence = pgTable(
 			foreignColumns: [catalogSourceSnapshot.sourceRecordId, catalogSourceSnapshot.id],
 		}).onDelete("restrict"),
 		foreignKey({
+			name: "music_component_source_correspondence_fk",
+			columns: [table.sourceRecordId, table.mappingKey, table.correspondenceRevision],
+			foreignColumns: [
+				catalogSourceBindingRevision.sourceRecordId,
+				catalogSourceBindingRevision.mappingKey,
+				catalogSourceBindingRevision.revision,
+			],
+		}).onDelete("restrict"),
+		foreignKey({
 			name: "music_component_source_history_fk",
 			columns: [table.ownerId, table.historyId],
 			foreignColumns: [musicComponentRevision.ownerId, musicComponentRevision.id],
@@ -121,6 +134,8 @@ export const musicComponentSourceOccurrence = pgTable(
 		index("music_component_source_history_idx").on(table.ownerId, table.historyId),
 		index("music_component_source_component_idx").on(
 			table.sourceRecordId,
+			table.mappingKey,
+			table.correspondenceRevision,
 			table.snapshotId,
 			table.ownerId,
 			table.component,

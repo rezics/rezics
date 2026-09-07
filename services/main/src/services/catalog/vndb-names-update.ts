@@ -1,3 +1,4 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
@@ -181,6 +182,7 @@ async function supportName(
 		nameRevision: revision,
 	});
 	await tx.insert(CatalogFactTables[ref.owner].support).values({
+		...(await catalogSourceSupportColumns(tx, document.record.id)),
 		ownerId: ref.id,
 		namedFormId: id,
 		sourceRecordId: document.record.id,

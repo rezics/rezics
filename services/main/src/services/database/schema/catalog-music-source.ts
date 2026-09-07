@@ -1,9 +1,18 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, foreignKey, index, primaryKey, text, uuid } from "drizzle-orm/pg-core";
+import {
+	bigint,
+	boolean,
+	check,
+	foreignKey,
+	index,
+	primaryKey,
+	text,
+	uuid,
+} from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
 import { musicComponentRevision, musicComponentSourceOccurrence } from "./catalog-music";
 import { catalogSourceApplication } from "./catalog-source-application";
-import { catalogSourceMappingClaim } from "./catalog-source";
+import { catalogSourceBindingRevision } from "./catalog-source";
 
 /** Current source support frontier; immutable source occurrences and applications remain its proof. */
 export const musicComponentSourceBaseline = pgTable(
@@ -11,6 +20,7 @@ export const musicComponentSourceBaseline = pgTable(
 	{
 		sourceRecordId: uuid().notNull(),
 		mappingKey: uuid().notNull(),
+		correspondenceRevision: bigint({ mode: "number" }).notNull(),
 		mappingOwner: text().$type<"music">().default("music").notNull(),
 		ownerId: uuid().notNull(),
 		component: text().notNull(),
@@ -28,6 +38,7 @@ export const musicComponentSourceBaseline = pgTable(
 			columns: [
 				table.sourceRecordId,
 				table.mappingKey,
+				table.correspondenceRevision,
 				table.ownerId,
 				table.component,
 				table.componentKey,
@@ -35,17 +46,19 @@ export const musicComponentSourceBaseline = pgTable(
 		}),
 		foreignKey({
 			name: "music_source_baseline_mapping_fk",
-			columns: [table.sourceRecordId, table.mappingKey, table.mappingOwner],
+			columns: [table.sourceRecordId, table.mappingKey, table.correspondenceRevision],
 			foreignColumns: [
-				catalogSourceMappingClaim.sourceRecordId,
-				catalogSourceMappingClaim.mappingKey,
-				catalogSourceMappingClaim.owner,
+				catalogSourceBindingRevision.sourceRecordId,
+				catalogSourceBindingRevision.mappingKey,
+				catalogSourceBindingRevision.revision,
 			],
 		}).onDelete("restrict"),
 		foreignKey({
 			name: "music_source_baseline_occurrence_fk",
 			columns: [
 				table.sourceRecordId,
+				table.mappingKey,
+				table.correspondenceRevision,
 				table.snapshotId,
 				table.ownerId,
 				table.component,
@@ -53,6 +66,8 @@ export const musicComponentSourceBaseline = pgTable(
 			],
 			foreignColumns: [
 				musicComponentSourceOccurrence.sourceRecordId,
+				musicComponentSourceOccurrence.mappingKey,
+				musicComponentSourceOccurrence.correspondenceRevision,
 				musicComponentSourceOccurrence.snapshotId,
 				musicComponentSourceOccurrence.ownerId,
 				musicComponentSourceOccurrence.component,

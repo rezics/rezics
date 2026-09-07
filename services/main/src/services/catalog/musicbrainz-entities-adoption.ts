@@ -1,45 +1,41 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import type { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import type { CatalogReference } from "./contracts";
-import { createEntity } from "./entities";
-import { createReference, appendAreaCodes } from "./references";
-import { createGrouping, assignGroupingClass } from "./grouping";
+import { initializeEntityProfile, resolveEntityShape } from "./entities";
+import { initializeReferenceProfile, appendAreaCodes } from "./references";
+import { assignGroupingClass } from "./grouping";
 import { addCatalogIdentifier } from "./identifiers";
 import {
 	addCatalogName,
+	createCatalogIdentity,
+	loadCatalogIdentity,
 	ensureCatalogDefinition,
 	beginCatalogFact,
 	appendCatalogFactNodes,
 	sealCatalogFact,
 } from "./storage";
 import { catalogValueNodes } from "./value-nodes";
-import { musicBrainzAreaReference, musicBrainzVocabulary } from "./musicbrainz-native";
-import { bindCatalogSourceIdentity } from "./source-bindings";
+import {
+	musicBrainzSupportingTarget,
+	musicBrainzSupportingProfile,
+} from "./musicbrainz-supporting-profile";
+import { acceptCatalogSourceInitialization } from "./source-bindings";
+import {
+	prepareCatalogSourceChildCorrespondence,
+	sealCatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
+import { bindCatalogProfileSourceOccurrence } from "./profile-source";
+import { bindCatalogNameSourceOccurrence } from "./names";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { recordCatalogSourceDocument, type CatalogSourceReceipt } from "./source-observations";
-import { MusicBrainzAreaSchema, musicBrainzDate } from "./musicbrainz";
-import {
-	musicBrainzArtistShape,
-	musicBrainzLabelShape,
-	musicBrainzLifecycle,
-	parseMusicBrainzSupportingDocument,
-} from "./musicbrainz-entities";
+import { MusicBrainzAreaSchema } from "./musicbrainz";
+import { adoptMusicBrainzAliases } from "./musicbrainz-names";
+import { parseMusicBrainzSupportingDocument } from "./musicbrainz-entities";
 import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
 
 type Observation = Awaited<ReturnType<typeof recordCatalogSourceDocument>>;
-
-async function areaReference(
-	tx: DatabaseTransaction,
-	actor: string,
-	observation: Observation,
-	area: z.infer<typeof MusicBrainzAreaSchema> | null | undefined,
-	path: string,
-) {
-	if (!area) return null;
-	const identity = await musicBrainzAreaReference(tx, actor, observation, area, path);
-	return identity.id;
-}
 
 async function areaCodes(
 	tx: DatabaseTransaction,
@@ -93,6 +89,7 @@ async function textFact(
 		appended.lastNodePosition,
 	);
 	await tx.insert(CatalogFactTables[reference.owner].support).values({
+		...(await catalogSourceSupportColumns(tx, observation.record.id)),
 		ownerId: reference.id,
 		factId: fact.id,
 		sourceRecordId: observation.record.id,
@@ -116,181 +113,101 @@ export async function adoptMusicBrainzSupportingEndpoint(
 ) {
 	const parsed = parseMusicBrainzSupportingDocument(receipt, bytes);
 	const observation = await recordCatalogSourceDocument(tx, receipt, bytes);
-	const vocabulary = (
-		family: string,
-		id: string | null | undefined,
-		label: string | null | undefined,
-		field = "type",
-	) =>
-		musicBrainzVocabulary(tx, family, id, label, {
-			actor,
-			observation,
-			idPath: `/${field}-id`,
-			namePath: `/${field}`,
-		});
 	const existing = await inspectExistingSourceBinding(
 		tx,
 		actor,
 		observation,
 		`musicbrainz.${parsed.type}.1`,
 	);
-	if (existing) return existing;
-	const name = {
+	if (existing && existing.status !== "initialize_reference") return existing;
+	const target = musicBrainzSupportingTarget(parsed);
+	const root = existing
+		? { ...existing.reference, revision: existing.revision }
+		: await createCatalogIdentity(tx, target, actor);
+	const current = await loadCatalogIdentity(tx, root, actor, true);
+	if (
+		root.owner !== target.owner ||
+		(current.shape !== target.shape &&
+			!(
+				root.owner === "entity" &&
+				(current.shape === "unresolved" || target.shape === "unresolved")
+			))
+	)
+		throw new TypeError("Supporting endpoint requires reviewed native reclassification");
+	await prepareCatalogSourceChildCorrespondence(tx, actor, {
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		reference: root,
+		mappingVersion: `musicbrainz.${parsed.type}.1`,
+	});
+	if (
+		root.owner === "entity" &&
+		current.shape === "unresolved" &&
+		target.owner === "entity" &&
+		target.shape !== "unresolved"
+	)
+		root.revision = (
+			await resolveEntityShape(tx, root, actor, root.revision, target.shape)
+		).revision;
+	const profile = await musicBrainzSupportingProfile(tx, actor, observation, parsed);
+	if (profile) {
+		const initialized =
+			profile.owner === "entity"
+				? await initializeEntityProfile(tx, root, actor, root.revision, profile.profile)
+				: await initializeReferenceProfile(tx, root, actor, root.revision, profile.profile);
+		root.revision = initialized.revision;
+		await bindCatalogProfileSourceOccurrence(tx, root, actor, {
+			sourceRecordId: observation.record.id,
+			snapshotId: observation.snapshot.id,
+			sourcePath: "/",
+			revision: initialized.revision,
+		});
+	}
+	if (parsed.type === "area")
+		root.revision = await areaCodes(tx, actor, root, root.revision, parsed.record);
+	if (parsed.type === "series") {
+		const base = await ensureCatalogDefinition(tx, {
+			namespace: "catalog",
+			key: "series",
+			kind: "class",
+			valueKind: null,
+		});
+		root.revision = (
+			await assignGroupingClass(tx, root, actor, root.revision, base.revisionId)
+		).revision;
+		const sourceType = parsed.record["type-id"] || parsed.record.type;
+		if (sourceType) {
+			const definition = await ensureCatalogDefinition(tx, {
+				namespace: "musicbrainz.series_type",
+				key: sourceType,
+				kind: "class",
+				valueKind: null,
+			});
+			root.revision = (
+				await assignGroupingClass(tx, root, actor, root.revision, definition.revisionId)
+			).revision;
+		}
+	}
+	const named = await addCatalogName(tx, root, actor, root.revision, {
+		kind: "source-primary",
 		languageTag: null,
 		value: parsed.type === "url" ? parsed.record.resource : parsed.record.name,
-	};
-	let identity: CatalogReference & { revision: number; nameId: string };
-	switch (parsed.type) {
-		case "artist": {
-			const record = parsed.record;
-			identity = await createEntity(tx, actor, {
-				name,
-				shape: musicBrainzArtistShape(record.type),
-				profile: {
-					...musicBrainzLifecycle(record["life-span"]),
-					typeRevisionId: await vocabulary("artist_type", record["type-id"], record.type),
-					genderRevisionId: await vocabulary(
-						"gender",
-						record["gender-id"],
-						record.gender,
-						"gender",
-					),
-					areaId: await areaReference(tx, actor, observation, record.area, "/area"),
-					beginAreaId: await areaReference(
-						tx,
-						actor,
-						observation,
-						record["begin-area"],
-						"/begin-area",
-					),
-					endAreaId: await areaReference(tx, actor, observation, record["end-area"], "/end-area"),
-				},
-			});
-			break;
-		}
-		case "label": {
-			const record = parsed.record;
-			identity = await createEntity(tx, actor, {
-				name,
-				shape: musicBrainzLabelShape(record.type),
-				profile: {
-					...musicBrainzLifecycle(record["life-span"]),
-					typeRevisionId: await vocabulary("label_type", record["type-id"], record.type),
-					areaId: await areaReference(tx, actor, observation, record.area, "/area"),
-				},
-			});
-			break;
-		}
-		case "area": {
-			const record = parsed.record;
-			identity = await createReference(tx, actor, {
-				name,
-				profile: {
-					shape: "area",
-					...musicBrainzLifecycle(record["life-span"]),
-					typeRevisionId: await vocabulary("area_type", record["type-id"], record.type),
-				},
-			});
-			identity.revision = await areaCodes(tx, actor, identity, identity.revision, record);
-			break;
-		}
-		case "place": {
-			const record = parsed.record;
-			identity = await createReference(tx, actor, {
-				name,
-				profile: {
-					shape: "place",
-					...musicBrainzLifecycle(record["life-span"]),
-					typeRevisionId: await vocabulary("place_type", record["type-id"], record.type),
-					areaId: await areaReference(tx, actor, observation, record.area, "/area"),
-					address: record.address ?? null,
-					latitude: record.coordinates?.latitude ?? null,
-					longitude: record.coordinates?.longitude ?? null,
-				},
-			});
-			break;
-		}
-		case "event": {
-			const record = parsed.record;
-			identity = await createReference(tx, actor, {
-				name,
-				profile: {
-					shape: "event",
-					...musicBrainzLifecycle(record["life-span"]),
-					typeRevisionId: await vocabulary("event_type", record["type-id"], record.type),
-					localTime: record.time || null,
-					cancelled: record.cancelled ?? null,
-					setlist: record.setlist ?? null,
-				},
-			});
-			break;
-		}
-		case "instrument": {
-			const record = parsed.record;
-			identity = await createReference(tx, actor, {
-				name,
-				profile: {
-					shape: "instrument",
-					typeRevisionId: await vocabulary("instrument_type", record["type-id"], record.type),
-				},
-			});
-			break;
-		}
-		case "series": {
-			identity = await createGrouping(tx, actor, { name });
-			const type = await ensureCatalogDefinition(tx, {
-				namespace: "catalog",
-				key: "series",
-				kind: "class",
-				valueKind: null,
-			});
-			identity.revision = (
-				await assignGroupingClass(tx, identity, actor, identity.revision, type.revisionId)
-			).revision;
-			const sourceType = parsed.record["type-id"] || parsed.record.type;
-			if (sourceType) {
-				const classification = await ensureCatalogDefinition(tx, {
-					namespace: "musicbrainz.series_type",
-					key: sourceType,
-					kind: "class",
-					valueKind: null,
-				});
-				identity.revision = (
-					await assignGroupingClass(
-						tx,
-						identity,
-						actor,
-						identity.revision,
-						classification.revisionId,
-					)
-				).revision;
-			}
-			break;
-		}
-		case "genre":
-		case "mood": {
-			const definition = await ensureCatalogDefinition(tx, {
-				namespace: "musicbrainz",
-				key: parsed.type,
-				kind: "class",
-				valueKind: null,
-			});
-			identity = await createReference(tx, actor, {
-				name,
-				profile: { shape: "concept", typeRevisionId: definition.revisionId },
-			});
-			break;
-		}
-		case "url":
-			identity = await createReference(tx, actor, {
-				name,
-				profile: { shape: "web_resource", url: parsed.record.resource },
-			});
-			break;
-	}
+	});
+	const identity = { ...root, revision: named.revision, nameId: named.id };
+	await bindCatalogNameSourceOccurrence(tx, identity, actor, {
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		namespace: "musicbrainz.name",
+		localKey: "primary",
+		sourcePath: parsed.type === "url" ? "/resource" : "/name",
+		nameId: named.id,
+		nameRevision: named.nameRevision,
+	});
+
 	let revision = identity.revision;
 	const support = CatalogFactTables[identity.owner].support;
 	await tx.insert(support).values({
+		...(await catalogSourceSupportColumns(tx, observation.record.id)),
 		ownerId: identity.id,
 		namedFormId: identity.nameId,
 		sourceRecordId: observation.record.id,
@@ -301,8 +218,10 @@ export async function adoptMusicBrainzSupportingEndpoint(
 		const added = await addCatalogIdentifier(tx, identity, actor, revision, { namespace, value });
 		revision = added.revision;
 		await tx.insert(support).values({
+			...(await catalogSourceSupportColumns(tx, observation.record.id)),
 			ownerId: identity.id,
 			identifierId: added.id,
+			identifierRevision: added.identifierRevision,
 			sourceRecordId: observation.record.id,
 			snapshotId: observation.snapshot.id,
 			sourcePath: path,
@@ -318,7 +237,17 @@ export async function adoptMusicBrainzSupportingEndpoint(
 				languageTag: null,
 			});
 			revision = added.revision;
+			await bindCatalogNameSourceOccurrence(tx, identity, actor, {
+				sourceRecordId: observation.record.id,
+				snapshotId: observation.snapshot.id,
+				namespace: "musicbrainz.name",
+				localKey: "sort",
+				sourcePath: "/sort-name",
+				nameId: added.id,
+				nameRevision: added.nameRevision,
+			});
 			await tx.insert(support).values({
+				...(await catalogSourceSupportColumns(tx, observation.record.id)),
 				ownerId: identity.id,
 				namedFormId: added.id,
 				sourceRecordId: observation.record.id,
@@ -326,31 +255,14 @@ export async function adoptMusicBrainzSupportingEndpoint(
 				sourcePath: "/sort-name",
 			});
 		}
-		for (const [index, alias] of (record.aliases ?? []).entries()) {
-			const added = await addCatalogName(tx, identity, actor, revision, {
-				kind:
-					alias.type === "Search hint"
-						? "search-hint"
-						: alias.type === "Legal name"
-							? "legal"
-							: "alias",
-				value: alias.name,
-				languageTag: alias.locale?.replaceAll("_", "-") || null,
-				sortName: alias["sort-name"] || null,
-				primaryForLanguage: alias.primary ?? null,
-				begin: alias.begin ? musicBrainzDate(alias.begin) : null,
-				end: alias.end ? musicBrainzDate(alias.end) : null,
-				ended: alias.ended ?? null,
-			});
-			revision = added.revision;
-			await tx.insert(support).values({
-				ownerId: identity.id,
-				namedFormId: added.id,
-				sourceRecordId: observation.record.id,
-				snapshotId: observation.snapshot.id,
-				sourcePath: `/aliases/${index}`,
-			});
-		}
+		revision = await adoptMusicBrainzAliases(
+			tx,
+			actor,
+			identity,
+			revision,
+			observation,
+			record.aliases ?? [],
+		);
 		revision = await textFact(
 			tx,
 			actor,
@@ -421,12 +333,23 @@ export async function adoptMusicBrainzSupportingEndpoint(
 		observation,
 		parsed.record.relations ?? [],
 	);
-	await bindCatalogSourceIdentity(tx, actor, {
-		sourceRecordId: observation.record.id,
-		path: "/",
-		snapshotId: observation.snapshot.id,
-		reference: { owner: identity.owner, id: identity.id },
-	});
+	if (existing)
+		await acceptCatalogSourceInitialization(tx, actor, {
+			sourceRecordId: observation.record.id,
+			path: "/",
+			snapshotId: observation.snapshot.id,
+			reference: identity,
+			expectedBaselineRevision: existing.revision,
+			finalRevision: revision,
+			mappingVersion: `musicbrainz.${parsed.type}.1`,
+		});
+	else
+		await sealCatalogSourceChildCorrespondence(tx, actor, {
+			sourceRecordId: observation.record.id,
+			path: "/",
+			snapshotId: observation.snapshot.id,
+			reference: { owner: identity.owner, id: identity.id },
+		});
 	return {
 		status: "created" as const,
 		reference: { owner: identity.owner, id: identity.id },

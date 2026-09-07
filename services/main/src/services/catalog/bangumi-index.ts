@@ -1,3 +1,4 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -14,7 +15,11 @@ import {
 } from "./grouping";
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
 import { bindReferencedSourceIdentity } from "./source-references";
-import { acceptCatalogSourceInitialization, bindCatalogSourceIdentity } from "./source-bindings";
+import { acceptCatalogSourceInitialization } from "./source-bindings";
+import {
+	prepareCatalogSourceChildCorrespondence,
+	sealCatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import {
 	createCatalogRelation,
@@ -139,6 +144,12 @@ export async function adoptBangumiIndex(
 				name: { languageTag: null, value: index.title },
 				classes: [classification.revisionId],
 			});
+	await prepareCatalogSourceChildCorrespondence(tx, actor, {
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		reference: identity,
+		mappingVersion: "bangumi.index.1",
+	});
 	let primaryNameId = "nameId" in identity ? identity.nameId : null;
 	if (existing) {
 		identity.revision = (
@@ -154,6 +165,7 @@ export async function adoptBangumiIndex(
 	}
 	if (!primaryNameId) throw new Error("Index primary name was not created");
 	await tx.insert(CatalogFactTables.grouping.support).values({
+		...(await catalogSourceSupportColumns(tx, observation.record.id)),
 		ownerId: identity.id,
 		namedFormId: primaryNameId,
 		sourceRecordId: observation.record.id,
@@ -314,6 +326,7 @@ export async function adoptBangumiIndex(
 		],
 	});
 	await tx.insert(CatalogFactTables.grouping.support).values({
+		...(await catalogSourceSupportColumns(tx, observation.record.id)),
 		ownerId: identity.id,
 		relationId: relation.id,
 		sourceRecordId: observation.record.id,
@@ -334,7 +347,7 @@ export async function adoptBangumiIndex(
 			expectedBaselineRevision: existing.revision,
 			finalRevision: order.revision,
 		});
-	else await bindCatalogSourceIdentity(tx, actor, binding);
+	else await sealCatalogSourceChildCorrespondence(tx, actor, { ...binding, path: "/" });
 	return {
 		status: "created" as const,
 		reference: { owner: identity.owner, id: identity.id },

@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { bigint, check, foreignKey, primaryKey, text, uuid } from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
-import { catalogSourceSnapshot } from "./catalog-source";
+import { catalogSourceSnapshot, catalogSourceBindingRevision } from "./catalog-source";
 import { entityCatalogProfileRevision } from "./catalog-entity";
 import { referenceCatalogProfileRevision } from "./catalog-reference";
 
@@ -15,13 +15,32 @@ function profileSourceOccurrence(owner: keyof typeof CatalogProfileHistoryTables
 		`${owner}_profile_source_occurrence`,
 		{
 			sourceRecordId: uuid().notNull(),
+			mappingKey: uuid().notNull(),
+			correspondenceRevision: bigint({ mode: "number" }).notNull(),
 			snapshotId: uuid().notNull(),
 			ownerId: uuid().notNull(),
 			sourcePath: text().notNull(),
 			revision: bigint({ mode: "number" }).notNull(),
 		},
 		(t) => [
-			primaryKey({ columns: [t.sourceRecordId, t.snapshotId, t.ownerId] }),
+			primaryKey({
+				columns: [
+					t.sourceRecordId,
+					t.mappingKey,
+					t.correspondenceRevision,
+					t.snapshotId,
+					t.ownerId,
+				],
+			}),
+			foreignKey({
+				name: `${owner}_profile_source_correspondence_fk`,
+				columns: [t.sourceRecordId, t.mappingKey, t.correspondenceRevision],
+				foreignColumns: [
+					catalogSourceBindingRevision.sourceRecordId,
+					catalogSourceBindingRevision.mappingKey,
+					catalogSourceBindingRevision.revision,
+				],
+			}).onDelete("restrict"),
 			foreignKey({
 				name: `${owner}_profile_source_snapshot_fk`,
 				columns: [t.sourceRecordId, t.snapshotId],

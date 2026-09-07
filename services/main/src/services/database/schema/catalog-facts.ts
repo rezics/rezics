@@ -27,6 +27,7 @@ import { CatalogIdentityTables, catalogDefinitionRevision } from "./catalog-iden
 import { users } from "./auth";
 import {
 	catalogSourceMappingClaim,
+	catalogSourceBindingRevision,
 	catalogSourceRecord,
 	catalogSourceSnapshot,
 } from "./catalog-source";
@@ -57,7 +58,7 @@ export function catalogTargetCount(columns: TargetColumns) {
 }
 
 function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
-	const { name, identifier } = CatalogNameTables[owner];
+	const { name, identifier, identifierRevision } = CatalogNameTables[owner];
 	const fact = pgTable(
 		`${owner}_fact`,
 		{
@@ -321,6 +322,10 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 			relationId: uuid(),
 			namedFormId: uuid(),
 			identifierId: uuid(),
+			identifierRevision: bigint({ mode: "number" }),
+			// Curated evidence can be unbound; automatic adoption stores its exact interpretation epoch.
+			sourceMappingKey: uuid(),
+			sourceCorrespondenceRevision: bigint({ mode: "number" }),
 			createdAt: createCreatedAtColumn(),
 			withdrawnAt: createTimestampMsColumn(),
 		},
@@ -330,6 +335,19 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 				columns: [table.ownerId, table.factId],
 				foreignColumns: [fact.ownerId, fact.id],
 			}).onDelete("restrict"),
+			foreignKey({
+				name: `${owner}_support_source_correspondence_fk`,
+				columns: [table.sourceRecordId, table.sourceMappingKey, table.sourceCorrespondenceRevision],
+				foreignColumns: [
+					catalogSourceBindingRevision.sourceRecordId,
+					catalogSourceBindingRevision.mappingKey,
+					catalogSourceBindingRevision.revision,
+				],
+			}).onDelete("restrict"),
+			check(
+				`${owner}_support_source_correspondence_pair`,
+				sql`(${table.sourceMappingKey} is null) = (${table.sourceCorrespondenceRevision} is null)`,
+			),
 			foreignKey({
 				name: `${owner}_support_relation_fk`,
 				columns: [table.ownerId, table.relationId],
@@ -345,6 +363,19 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 				columns: [table.ownerId, table.identifierId],
 				foreignColumns: [identifier.ownerId, identifier.id],
 			}).onDelete("restrict"),
+			foreignKey({
+				name: `${owner}_support_identifier_revision_fk`,
+				columns: [table.ownerId, table.identifierId, table.identifierRevision],
+				foreignColumns: [
+					identifierRevision.ownerId,
+					identifierRevision.id,
+					identifierRevision.revision,
+				],
+			}).onDelete("restrict"),
+			check(
+				`${owner}_support_identifier_revision_check`,
+				sql`(${table.identifierId} is null) = (${table.identifierRevision} is null)`,
+			),
 			primaryKey({ name: `${owner}_support_identity_key`, columns: [table.ownerId, table.id] }),
 			foreignKey({
 				name: `${owner}_support_snapshot_fk`,
@@ -353,6 +384,14 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 			}).onDelete("restrict"),
 			index(`${owner}_support_snapshot_idx`).on(
 				table.sourceRecordId,
+				table.snapshotId,
+				table.ownerId,
+				table.id,
+			),
+			index(`${owner}_support_source_correspondence_idx`).on(
+				table.sourceRecordId,
+				table.sourceMappingKey,
+				table.sourceCorrespondenceRevision,
 				table.snapshotId,
 				table.ownerId,
 				table.id,

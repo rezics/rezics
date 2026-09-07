@@ -1,3 +1,4 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import {
 	planVndbSupportingNames,
 	planVndbSupportingSemantics,
@@ -271,6 +272,7 @@ async function appendFact(
 		appended.lastNodePosition,
 	);
 	await tx.insert(CatalogFactTables[reference.owner].support).values({
+		...(await catalogSourceSupportColumns(tx, document.record.id)),
 		id: vndbSemanticSupportId(document, sourceKey, scope),
 		ownerId: reference.id,
 		factId: fact.id,
@@ -468,6 +470,7 @@ export async function appendVndbSemanticPlan(
 			afterRevision: created.headVersion,
 		});
 		await tx.insert(CatalogFactTables[reference.owner].support).values({
+			...(await catalogSourceSupportColumns(tx, document.record.id)),
 			id: vndbSemanticSupportId(document, relationKey, scope),
 			ownerId: reference.id,
 			relationId: created.id,
@@ -704,11 +707,13 @@ export async function adoptVndbSemanticObject(
 				value: String(record.id),
 				normalizedValue: String(record.id),
 			})
-			.returning({ id: tables.identifier.id });
+			.returning({ id: tables.identifier.id, identifierRevision: tables.identifier.revision });
 		if (!identifier) throw new Error("VNDB semantic identifier insertion returned no row");
 		await tx.insert(tables.support).values({
+			...(await catalogSourceSupportColumns(tx, document.record.id)),
 			ownerId: identity.id,
 			identifierId: identifier.id,
+			identifierRevision: identifier.identifierRevision,
 			sourceRecordId: document.record.id,
 			snapshotId: document.snapshot.id,
 			sourcePath: "/id",

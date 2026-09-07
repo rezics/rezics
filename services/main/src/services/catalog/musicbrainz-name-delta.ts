@@ -35,8 +35,8 @@ export async function applyMusicBrainzNameDelta(
 	mappingKey: string,
 	previousSnapshotId: string,
 	snapshotId: string,
-	previous: Pick<MusicBrainzRelease, "title" | "aliases">,
-	incoming: Pick<MusicBrainzRelease, "title" | "aliases">,
+	previous: Pick<MusicBrainzRelease, "title" | "aliases"> & { "sort-name"?: string | null },
+	incoming: Pick<MusicBrainzRelease, "title" | "aliases"> & { "sort-name"?: string | null },
 	primaryPath = "/title",
 ) {
 	const scope = await resolveCatalogSourceChildCorrespondence(tx, sourceRecordId);
@@ -209,6 +209,13 @@ export async function applyMusicBrainzNameDelta(
 			{ kind: "source-primary", value: incoming.title, languageTag: null },
 			previous.title ? primaryPath : undefined,
 			previous.title === incoming.title,
+		);
+	if (incoming["sort-name"])
+		await write(
+			"/sort-name",
+			{ kind: "sort", value: incoming["sort-name"], languageTag: null },
+			previous["sort-name"] ? "/sort-name" : undefined,
+			previous["sort-name"] === incoming["sort-name"],
 		);
 	const oldAliases = previous.aliases ?? [];
 	const aliasesUsed = new Set<number>();

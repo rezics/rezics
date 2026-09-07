@@ -1,3 +1,4 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import { createHash } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
@@ -34,7 +35,11 @@ import {
 	sealCatalogFact,
 } from "./storage";
 import { getSourceBoundReference, inspectExistingSourceBinding } from "./source-adoption";
-import { acceptCatalogSourceInitialization, bindCatalogSourceIdentity } from "./source-bindings";
+import { acceptCatalogSourceInitialization } from "./source-bindings";
+import {
+	prepareCatalogSourceChildCorrespondence,
+	sealCatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
 import { catalogValueNodes } from "./value-nodes";
 
@@ -98,6 +103,7 @@ async function finish(
 		});
 		revision = created.revision;
 		await tx.insert(tables.support).values({
+			...(await catalogSourceSupportColumns(tx, observation.record.id)),
 			ownerId: identity.id,
 			namedFormId: created.id,
 			sourceRecordId: observation.record.id,
@@ -113,11 +119,13 @@ async function finish(
 			value: receipt.key.externalId,
 			normalizedValue: receipt.key.externalId,
 		})
-		.returning({ id: tables.identifier.id });
+		.returning({ id: tables.identifier.id, identifierRevision: tables.identifier.revision });
 	if (!identifier) throw new Error("Source identifier insertion returned no row");
 	await tx.insert(tables.support).values({
+		...(await catalogSourceSupportColumns(tx, observation.record.id)),
 		ownerId: identity.id,
 		identifierId: identifier.id,
+		identifierRevision: identifier.identifierRevision,
 		sourceRecordId: observation.record.id,
 		snapshotId: observation.snapshot.id,
 		sourcePath: "/id",
@@ -130,7 +138,8 @@ async function finish(
 		snapshotId: observation.snapshot.id,
 		reference: { owner: identity.owner, id: identity.id },
 	};
-	if (baselineRevision === undefined) await bindCatalogSourceIdentity(tx, actor, binding);
+	if (baselineRevision === undefined)
+		await sealCatalogSourceChildCorrespondence(tx, actor, { ...binding, path: "/" });
 	else
 		await acceptCatalogSourceInitialization(tx, actor, {
 			...binding,
@@ -188,6 +197,12 @@ export async function adoptBangumiEntity(
 		const current = await loadCatalogIdentity(tx, existing.reference, actor, true);
 		if (existing.reference.owner !== "entity" || current.shape !== shape)
 			throw new TypeError("Bangumi entity requires reviewed native reclassification");
+		await prepareCatalogSourceChildCorrespondence(tx, actor, {
+			sourceRecordId: observation.record.id,
+			snapshotId: observation.snapshot.id,
+			reference: existing.reference,
+			mappingVersion: "bangumi.entity.1",
+		});
 		const initialized = await initializeEntityProfile(
 			tx,
 			existing.reference,
@@ -215,6 +230,7 @@ export async function adoptBangumiEntity(
 				.where(eq(entityIdentity.id, existing.reference.id));
 		}
 		await tx.insert(CatalogFactTables.entity.support).values({
+			...(await catalogSourceSupportColumns(tx, observation.record.id)),
 			ownerId: existing.reference.id,
 			namedFormId: named.id,
 			sourceRecordId: observation.record.id,
@@ -235,6 +251,12 @@ export async function adoptBangumiEntity(
 		shape,
 		name: { languageTag: null, value: record.name },
 	});
+	await prepareCatalogSourceChildCorrespondence(tx, actor, {
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		reference: identity,
+		mappingVersion: "bangumi.entity.1",
+	});
 	if ("nsfw" in record && record.nsfw) {
 		identity.revision = await recordCatalogChange(
 			tx,
@@ -249,6 +271,7 @@ export async function adoptBangumiEntity(
 			.where(eq(entityIdentity.id, identity.id));
 	}
 	await tx.insert(CatalogFactTables.entity.support).values({
+		...(await catalogSourceSupportColumns(tx, observation.record.id)),
 		ownerId: identity.id,
 		namedFormId: identity.nameId,
 		sourceRecordId: observation.record.id,
@@ -318,7 +341,14 @@ export async function adoptBangumiProgramEpisode(
 		});
 		identity = { ...existing.reference, revision: named.revision, nameId: named.id };
 	} else identity = await createProgramStructure(tx, actor, structure, title);
+	await prepareCatalogSourceChildCorrespondence(tx, actor, {
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		reference: identity,
+		mappingVersion: "bangumi.program-episode.1",
+	});
 	await tx.insert(CatalogFactTables.program.support).values({
+		...(await catalogSourceSupportColumns(tx, observation.record.id)),
 		ownerId: identity.id,
 		namedFormId: identity.nameId,
 		sourceRecordId: observation.record.id,

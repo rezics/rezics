@@ -1,3 +1,4 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import {
 	prepareCatalogSourceChildCorrespondence,
 	sealCatalogSourceChildCorrespondence,
@@ -434,11 +435,13 @@ async function adoptVndbEntity(
 				value: record.id,
 				normalizedValue: record.id,
 			})
-			.returning({ id: tables.identifier.id });
+			.returning({ id: tables.identifier.id, identifierRevision: tables.identifier.revision });
 		if (!identifier) throw new Error("VNDB identifier insert returned no row");
 		await tx.insert(tables.support).values({
+			...(await catalogSourceSupportColumns(tx, document.record.id)),
 			ownerId: reference.id,
 			identifierId: identifier.id,
+			identifierRevision: identifier.identifierRevision,
 			sourceRecordId: document.record.id,
 			snapshotId: document.snapshot.id,
 			sourcePath: "/id",

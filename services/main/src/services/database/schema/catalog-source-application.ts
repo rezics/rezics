@@ -302,8 +302,17 @@ function exactRevisionApplicationTable(
 }
 function ownerApplicationTables(owner: CatalogOwner) {
 	const semantic = CatalogFactTables[owner].semanticRevision;
-	const { nameRevision: name, authorityRevision: authority } = CatalogNameTables[owner];
+	const {
+		nameRevision: name,
+		authorityRevision: authority,
+		identifierRevision: identifier,
+	} = CatalogNameTables[owner];
 	return {
+		identifier: exactRevisionApplicationTable(
+			`${owner}_source_identifier_application_change`,
+			`${owner}_identifier_app`,
+			[identifier.ownerId, identifier.id, identifier.revision],
+		),
 		semantic: exactRevisionApplicationTable(
 			`${owner}_source_semantic_application_change`,
 			`${owner}_semantic_app`,
@@ -378,6 +387,23 @@ export const distributionSourceNameApplicationChange =
 	CatalogSourceOwnedApplicationTables.distribution.name;
 export const distributionSourceAuthorityApplicationChange =
 	CatalogSourceOwnedApplicationTables.distribution.authority;
+
+export const publishingSourceIdentifierApplicationChange =
+	CatalogSourceOwnedApplicationTables.publishing.identifier;
+export const musicSourceIdentifierApplicationChange =
+	CatalogSourceOwnedApplicationTables.music.identifier;
+export const programSourceIdentifierApplicationChange =
+	CatalogSourceOwnedApplicationTables.program.identifier;
+export const softwareSourceIdentifierApplicationChange =
+	CatalogSourceOwnedApplicationTables.software.identifier;
+export const entitySourceIdentifierApplicationChange =
+	CatalogSourceOwnedApplicationTables.entity.identifier;
+export const groupingSourceIdentifierApplicationChange =
+	CatalogSourceOwnedApplicationTables.grouping.identifier;
+export const referenceSourceIdentifierApplicationChange =
+	CatalogSourceOwnedApplicationTables.reference.identifier;
+export const distributionSourceIdentifierApplicationChange =
+	CatalogSourceOwnedApplicationTables.distribution.identifier;
 
 export const softwareSourceContextApplicationChange = exactRevisionApplicationTable(
 	"software_source_context_application_change",

@@ -1,3 +1,4 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import { createHash } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
@@ -27,7 +28,11 @@ import {
 	recordCatalogChange,
 } from "./storage";
 import { assignGroupingClass } from "./grouping";
-import { acceptCatalogSourceInitialization, bindCatalogSourceIdentity } from "./source-bindings";
+import { acceptCatalogSourceInitialization } from "./source-bindings";
+import {
+	prepareCatalogSourceChildCorrespondence,
+	sealCatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 
 async function findBoundIdentity(tx: DatabaseTransaction, sourceRecordId: string) {
 	const [claim] = await tx
@@ -192,6 +197,12 @@ export async function adoptBangumiSubject(
 				},
 				actor,
 			);
+	await prepareCatalogSourceChildCorrespondence(tx, actor, {
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		reference: identity,
+		mappingVersion: "bangumi.subject.1",
+	});
 	if (plan.owner === "program") {
 		const counts =
 			"eps" in plan.subject
@@ -230,6 +241,7 @@ export async function adoptBangumiSubject(
 		const created = await addCatalogName(tx, identity, actor, revision, name);
 		revision = created.revision;
 		await tx.insert(tables.support).values({
+			...(await catalogSourceSupportColumns(tx, observation.record.id)),
 			ownerId: identity.id,
 			namedFormId: created.id,
 			sourceRecordId: observation.record.id,
@@ -245,11 +257,13 @@ export async function adoptBangumiSubject(
 			value: String(plan.subject.id),
 			normalizedValue: String(plan.subject.id),
 		})
-		.returning({ id: tables.identifier.id });
+		.returning({ id: tables.identifier.id, identifierRevision: tables.identifier.revision });
 	if (!identifier) throw new Error("Source identifier insertion returned no row");
 	await tx.insert(tables.support).values({
+		...(await catalogSourceSupportColumns(tx, observation.record.id)),
 		ownerId: identity.id,
 		identifierId: identifier.id,
+		identifierRevision: identifier.identifierRevision,
 		sourceRecordId: observation.record.id,
 		snapshotId: observation.snapshot.id,
 		sourcePath: "/id",
@@ -278,7 +292,7 @@ export async function adoptBangumiSubject(
 			expectedBaselineRevision: existing.revision,
 			finalRevision: revision,
 		});
-	else await bindCatalogSourceIdentity(tx, actor, binding);
+	else await sealCatalogSourceChildCorrespondence(tx, actor, { ...binding, path: "/" });
 	return {
 		status: "created" as const,
 		reference: { owner: plan.owner, id: identity.id },

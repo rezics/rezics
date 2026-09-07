@@ -17,6 +17,7 @@ import {
 } from "./music-structure-contracts";
 import { mutateMusicComponents } from "./music-structure";
 import { recordCatalogChange } from "./storage";
+import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 
 export type MusicSourceComponentBaseline = {
 	component: MusicComponentName;
@@ -35,6 +36,7 @@ export async function prepareMusicSourceProjection(
 ) {
 	const occurrence = musicComponentSourceOccurrence;
 	const history = musicComponentRevision;
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, context.sourceRecordId);
 	const load = async (snapshotId: string) => {
 		const rows = await tx
 			.select({
@@ -52,6 +54,8 @@ export async function prepareMusicSourceProjection(
 			.where(
 				and(
 					eq(occurrence.sourceRecordId, context.sourceRecordId),
+					eq(occurrence.mappingKey, scope.mappingKey),
+					eq(occurrence.correspondenceRevision, scope.correspondenceRevision),
 					eq(occurrence.snapshotId, snapshotId),
 					eq(occurrence.ownerId, context.reference.id),
 				),
@@ -65,6 +69,7 @@ export async function prepareMusicSourceProjection(
 			const currentHistoryId = await resolveMusicSourceComponentBaseline(tx, {
 				sourceRecordId: context.sourceRecordId,
 				mappingKey: context.mappingKey,
+				correspondenceRevision: scope.correspondenceRevision,
 				ownerId: context.reference.id,
 				component,
 				componentKey: row.componentKey,
@@ -181,6 +186,7 @@ export async function prepareMusicSourceProjection(
 			await tx
 				.insert(occurrence)
 				.values({
+					...scope,
 					sourceRecordId: context.sourceRecordId,
 					snapshotId: context.snapshotId,
 					ownerId: context.reference.id,
@@ -196,6 +202,8 @@ export async function prepareMusicSourceProjection(
 				.where(
 					and(
 						eq(occurrence.sourceRecordId, context.sourceRecordId),
+						eq(occurrence.mappingKey, scope.mappingKey),
+						eq(occurrence.correspondenceRevision, scope.correspondenceRevision),
 						eq(occurrence.snapshotId, context.snapshotId),
 						eq(occurrence.ownerId, context.reference.id),
 						eq(occurrence.component, row.component),

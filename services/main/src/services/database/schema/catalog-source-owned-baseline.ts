@@ -10,7 +10,7 @@ import {
 	type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
-import { catalogSourceMappingClaim, catalogSourceSnapshot } from "./catalog-source";
+import { catalogSourceBindingRevision, catalogSourceSnapshot } from "./catalog-source";
 import { catalogSourceApplication } from "./catalog-source-application";
 import { CatalogFactTables } from "./catalog-facts";
 import { CatalogNameTables } from "./catalog-names";
@@ -28,6 +28,7 @@ function baselineColumns(owner: CatalogOwner) {
 		sourceRecordId: uuid().notNull(),
 		mappingOwner: text().$type<CatalogOwner>().default(owner).notNull(),
 		mappingKey: uuid().notNull(),
+		correspondenceRevision: bigint({ mode: "number" }).notNull(),
 		ownerId: uuid().notNull(),
 		sourceSnapshotId: uuid().notNull(),
 		sourcePath: text().notNull(),
@@ -43,6 +44,7 @@ function baselineConstraints(
 	t: {
 		sourceRecordId: AnyPgColumn;
 		mappingKey: AnyPgColumn;
+		correspondenceRevision: AnyPgColumn;
 		mappingOwner: AnyPgColumn;
 		sourceSnapshotId: AnyPgColumn;
 		sourcePath: AnyPgColumn;
@@ -57,11 +59,11 @@ function baselineConstraints(
 		check(`${prefix}_owner`, sql`${t.mappingOwner} = ${owner}`),
 		foreignKey({
 			name: `${prefix}_mapping_fk`,
-			columns: [t.sourceRecordId, t.mappingKey, t.mappingOwner],
+			columns: [t.sourceRecordId, t.mappingKey, t.correspondenceRevision],
 			foreignColumns: [
-				catalogSourceMappingClaim.sourceRecordId,
-				catalogSourceMappingClaim.mappingKey,
-				catalogSourceMappingClaim.owner,
+				catalogSourceBindingRevision.sourceRecordId,
+				catalogSourceBindingRevision.mappingKey,
+				catalogSourceBindingRevision.revision,
 			],
 		}).onDelete("restrict"),
 		foreignKey({
@@ -87,7 +89,7 @@ function baselineConstraints(
 function profileBaseline(owner: keyof typeof CatalogProfileHistoryTables) {
 	const history = CatalogProfileHistoryTables[owner];
 	return pgTable(`${owner}_source_profile_baseline`, { ...baselineColumns(owner) }, (t) => [
-		primaryKey({ columns: [t.sourceRecordId, t.mappingKey, t.ownerId] }),
+		primaryKey({ columns: [t.sourceRecordId, t.mappingKey, t.correspondenceRevision, t.ownerId] }),
 		...baselineConstraints(`${owner}_profile_baseline`, t, owner),
 		foreignKey({
 			name: `${owner}_profile_baseline_source_fk`,
@@ -110,22 +112,48 @@ export const referenceSourceProfileBaseline = CatalogSourceProfileBaselines.refe
 
 function ownedBaseline(owner: CatalogOwner) {
 	const semantic = CatalogFactTables[owner].semanticRevision;
-	const { nameRevision: name, authorityRevision: authority } = CatalogNameTables[owner];
+	const {
+		nameRevision: name,
+		authorityRevision: authority,
+		identifierRevision: identifier,
+	} = CatalogNameTables[owner];
 	return pgTable(
 		`${owner}_source_owned_baseline`,
 		{
 			...baselineColumns(owner),
 			kind: text()
-				.$type<"catalog-semantic" | "catalog-name" | "catalog-name-authority">()
+				.$type<
+					"catalog-semantic" | "catalog-name" | "catalog-name-authority" | "catalog-identifier"
+				>()
 				.notNull(),
 			componentKey: uuid().notNull(),
 			semanticId: uuid(),
 			nameId: uuid(),
 			authorityId: uuid(),
+			identifierId: uuid(),
 		},
 		(t) => [
-			primaryKey({ columns: [t.sourceRecordId, t.mappingKey, t.ownerId, t.kind, t.componentKey] }),
+			primaryKey({
+				columns: [
+					t.sourceRecordId,
+					t.mappingKey,
+					t.correspondenceRevision,
+					t.ownerId,
+					t.kind,
+					t.componentKey,
+				],
+			}),
 			...baselineConstraints(`${owner}_source_owned_base`, t, owner),
+			foreignKey({
+				name: `${owner}_owned_base_identifier_source_fk`,
+				columns: [t.ownerId, t.identifierId, t.sourceRevision],
+				foreignColumns: [identifier.ownerId, identifier.id, identifier.revision],
+			}).onDelete("restrict"),
+			foreignKey({
+				name: `${owner}_owned_base_identifier_current_fk`,
+				columns: [t.ownerId, t.identifierId, t.currentRevision],
+				foreignColumns: [identifier.ownerId, identifier.id, identifier.revision],
+			}).onDelete("restrict"),
 			foreignKey({
 				name: `${owner}_owned_base_semantic_source_fk`,
 				columns: [t.ownerId, t.semanticId, t.sourceRevision],
@@ -158,7 +186,7 @@ function ownedBaseline(owner: CatalogOwner) {
 			}).onDelete("restrict"),
 			check(
 				`${owner}_source_owned_base_kind`,
-				sql`num_nonnulls(${t.semanticId},${t.nameId},${t.authorityId}) = 1 and ((${t.kind} = 'catalog-semantic' and ${t.componentKey} = ${t.semanticId}) or (${t.kind} = 'catalog-name' and ${t.componentKey} = ${t.nameId}) or (${t.kind} = 'catalog-name-authority' and ${t.componentKey} = ${t.authorityId}))`,
+				sql`num_nonnulls(${t.semanticId},${t.nameId},${t.authorityId},${t.identifierId}) = 1 and ((${t.kind} = 'catalog-semantic' and ${t.componentKey} = ${t.semanticId}) or (${t.kind} = 'catalog-name' and ${t.componentKey} = ${t.nameId}) or (${t.kind} = 'catalog-name-authority' and ${t.componentKey} = ${t.authorityId}) or (${t.kind} = 'catalog-identifier' and ${t.componentKey} = ${t.identifierId}))`,
 			),
 		],
 	);
@@ -192,7 +220,15 @@ function softwareChildBaseline(
 		`software_source_${kind}_baseline`,
 		{ ...baselineColumns("software"), componentKey: uuid().notNull() },
 		(t) => [
-			primaryKey({ columns: [t.sourceRecordId, t.mappingKey, t.ownerId, t.componentKey] }),
+			primaryKey({
+				columns: [
+					t.sourceRecordId,
+					t.mappingKey,
+					t.correspondenceRevision,
+					t.ownerId,
+					t.componentKey,
+				],
+			}),
 			...baselineConstraints(`software_source_${kind}_base`, t, "software"),
 			foreignKey({
 				name: `software_${kind}_base_source_fk`,
@@ -227,7 +263,14 @@ export const softwareSourceComponentBaseline = pgTable(
 	},
 	(t) => [
 		primaryKey({
-			columns: [t.sourceRecordId, t.mappingKey, t.ownerId, t.component, t.componentKey],
+			columns: [
+				t.sourceRecordId,
+				t.mappingKey,
+				t.correspondenceRevision,
+				t.ownerId,
+				t.component,
+				t.componentKey,
+			],
 		}),
 		...baselineConstraints("software_source_component_base", t, "software"),
 		foreignKey({
@@ -256,7 +299,7 @@ export const softwareSourceRecordBaseline = pgTable(
 	"software_source_record_baseline",
 	{ ...baselineColumns("software") },
 	(t) => [
-		primaryKey({ columns: [t.sourceRecordId, t.mappingKey, t.ownerId] }),
+		primaryKey({ columns: [t.sourceRecordId, t.mappingKey, t.correspondenceRevision, t.ownerId] }),
 		...baselineConstraints("software_source_record_base", t, "software"),
 		foreignKey({
 			name: "software_record_base_source_fk",

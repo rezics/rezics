@@ -187,3 +187,62 @@ or full reviewed release structural-update/reorder/withdraw/restore transitions.
 Native source history and a metadata restore command do not qualify all structural
 restoration. Supporting endpoint integration, source-free/cross-provider conformance,
 representative skewed SQL plans and sustained load tests remain coordinated gates.
+
+### Exact source interpretation foundation (2026-09-07, SQL qualification pending)
+
+Names, music components, Entity/Reference profiles and generic numeric source
+baselines now retain a source mapping key and immutable correspondence epoch.
+Reusing identical bytes after rebinding does not reinterpret an older occurrence.
+Ordinary writers use the checked current epoch; journal publication uses the
+proposal's exact expected binding revision. This does not enable cross-owner
+reclassification; that remains a separately reviewed workflow.
+
+Generic evidence support remains distinct from adoption correspondence. An
+explicitly curated wiki value, page relation or standalone evidence claim may
+have a null correspondence pair. Automatic mappers use
+`catalogSourceSupportColumns`, and delta/baseline lookups require the exact pair.
+Neither a half-pair nor unbound curated support qualifies as an automatic mapper's
+original interpretation. Source support rows are immutable except for one-way
+evidence withdrawal. Identifier support also pins the exact immutable identifier
+claim revision, rather than whichever value the identifier currently holds.
+
+Identifier changes use eight concrete owner journal tables and the existing
+owner baseline family; they never masquerade as named forms or semantic facts.
+An application remains bounded to 128 changes. Its fixed owner/family journal
+reads add eight indexed probes; no corpus scan or history-chain traversal is
+introduced. The complete journal read path needs measured latency qualification
+before claiming an interactive service-level target.
+
+Capacity assumptions for these additions: at most 128 native changes per source
+transaction; provider requests keep the shared rate budget; an offline admission
+target of 100 source records/second is a workload hypothesis, not measured
+throughput. At its worst 128 changes/record, admission would demand 12,800 native
+journal writes/second and must be limited by the existing capacity reservations,
+bounded queues and connection budgets. Stable unchanged identifiers do not create
+new claim revisions. Source distributions must include popular shared artists,
+terms, repeated snapshot bytes and long-lived owners with many epochs.
+
+Estimate an identifier journal entry at 160–280 bytes including its primary
+index: 80–140 GB at 500 million entries, 0.48–0.84 TB at 3 billion, before WAL,
+replicas and free space. A mapped support row adds approximately 24–32 bytes of
+epoch/revision columns and an estimated 80–144-byte correspondence index entry:
+52–88 GB incremental storage at 500 million supports and 312–528 GB at 3 billion.
+Actual row/index sizes and representative skewed plans remain to be measured.
+Existing snapshot audit indexes are retained alongside epoch-selective indexes.
+Each update adds immutable history and one exact baseline advance; memory is
+bounded by one admitted application. Source-record partition routing and archival
+cutover apply to journal/support history; neither relation is a bounded registry.
+
+Existing referenced source records and governed term concepts use shared locks;
+new correspondence creation remains exclusive. This avoids serializing all
+imports on an already-known popular taxonomy term, while a concurrent rebind
+still waits. Deadlock/retry behavior across independently owned references and
+maintenance costs at the stated cardinalities require the coordinated load test.
+
+Definition terms are optional links from exact class/vocabulary revisions to
+native Reference concepts. Labels and their histories belong to the concept;
+constraints remain validation policy. MusicBrainz's reviewed SQL taxonomy fields
+include UUID identity, name, parent, child order and description; the upstream
+schema is pinned in the source inventory. Inline names now have a native query
+path. Full SQL taxonomy hierarchy installation and native source callback
+qualification are not established by this foundation checkpoint.

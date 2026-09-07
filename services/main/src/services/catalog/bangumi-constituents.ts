@@ -1,3 +1,4 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -10,7 +11,11 @@ import {
 } from "./bangumi-adoption";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
-import { acceptCatalogSourceInitialization, bindCatalogSourceIdentity } from "./source-bindings";
+import { acceptCatalogSourceInitialization } from "./source-bindings";
+import {
+	prepareCatalogSourceChildCorrespondence,
+	sealCatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 import {
 	addCatalogName,
 	appendCatalogFactNodes,
@@ -88,6 +93,12 @@ export async function adoptBangumiConstituent(
 		: await createCatalogIdentity(tx, { owner: mapping.owner, shape: "catalog_entry" }, actor);
 	if (part.owner === parent.owner && part.id === parent.id)
 		throw new TypeError("A constituent cannot contain itself");
+	await prepareCatalogSourceChildCorrespondence(tx, actor, {
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		reference: part,
+		mappingVersion: "bangumi.constituent.1",
+	});
 	let partRevision = part.revision;
 	for (const title of [
 		{ value: episode.name, languageTag: null, path: "/name" },
@@ -100,15 +111,14 @@ export async function adoptBangumiConstituent(
 			kind: "source-primary",
 		});
 		partRevision = named.revision;
-		await tx
-			.insert(CatalogFactTables[part.owner].support)
-			.values({
-				ownerId: part.id,
-				namedFormId: named.id,
-				sourceRecordId: observation.record.id,
-				snapshotId: observation.snapshot.id,
-				sourcePath: title.path,
-			});
+		await tx.insert(CatalogFactTables[part.owner].support).values({
+			...(await catalogSourceSupportColumns(tx, observation.record.id)),
+			ownerId: part.id,
+			namedFormId: named.id,
+			sourceRecordId: observation.record.id,
+			snapshotId: observation.snapshot.id,
+			sourcePath: title.path,
+		});
 	}
 	const scalarQualifiers: { definitionRevisionId: string; value: number | string; path: string }[] =
 		[
@@ -164,15 +174,14 @@ export async function adoptBangumiConstituent(
 			)
 		).revision;
 		qualifiers.push({ definitionRevisionId: qualifier.definitionRevisionId, valueFactId: fact.id });
-		await tx
-			.insert(CatalogFactTables[parent.owner].support)
-			.values({
-				ownerId: parent.id,
-				factId: fact.id,
-				sourceRecordId: observation.record.id,
-				snapshotId: observation.snapshot.id,
-				sourcePath: qualifier.path,
-			});
+		await tx.insert(CatalogFactTables[parent.owner].support).values({
+			...(await catalogSourceSupportColumns(tx, observation.record.id)),
+			ownerId: parent.id,
+			factId: fact.id,
+			sourceRecordId: observation.record.id,
+			snapshotId: observation.snapshot.id,
+			sourcePath: qualifier.path,
+		});
 	}
 	const relation = await createCatalogRelation(tx, parent, actor, parentRevision, {
 		definitionRevisionId: mapping.predicateRevisionId,
@@ -182,15 +191,14 @@ export async function adoptBangumiConstituent(
 		],
 		qualifiers,
 	});
-	await tx
-		.insert(CatalogFactTables[parent.owner].support)
-		.values({
-			ownerId: parent.id,
-			relationId: relation.id,
-			sourceRecordId: observation.record.id,
-			snapshotId: observation.snapshot.id,
-			sourcePath: "/",
-		});
+	await tx.insert(CatalogFactTables[parent.owner].support).values({
+		...(await catalogSourceSupportColumns(tx, observation.record.id)),
+		ownerId: parent.id,
+		relationId: relation.id,
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		sourcePath: "/",
+	});
 	const binding = {
 		sourceRecordId: observation.record.id,
 		path: "/",
@@ -203,7 +211,7 @@ export async function adoptBangumiConstituent(
 			expectedBaselineRevision: existing.revision,
 			finalRevision: partRevision,
 		});
-	else await bindCatalogSourceIdentity(tx, actor, binding);
+	else await sealCatalogSourceChildCorrespondence(tx, actor, { ...binding, path: "/" });
 	return {
 		status: "created" as const,
 		reference: { owner: part.owner, id: part.id },

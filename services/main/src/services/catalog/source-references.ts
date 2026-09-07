@@ -1,7 +1,9 @@
+import { catalogSourceSupportColumns } from "./source-support";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { catalogSourceMappingClaim } from "../database/schema/catalog-source";
+import { catalogSourceMappingClaim, catalogSourceRecord } from "../database/schema/catalog-source";
+import { catalogSourceRecordId } from "./source-record-key";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import { CatalogReferenceSchema, type CatalogOwner, type CatalogReference } from "./contracts";
 import { addCatalogName, createCatalogIdentity, loadCatalogIdentity } from "./storage";
@@ -33,11 +35,32 @@ export async function bindReferencedSourceIdentity(
 	const evidence = requireCatalogSourceReferenceEvidence(input.evidence);
 	if (evidence.source !== input.source || evidence.externalId !== input.externalId)
 		throw new TypeError("Source reference identity differs from its recorded evidence");
-	const record = await registerCatalogSourceRecord(tx, {
+	const key = {
 		source: input.source,
 		objectType: input.objectType,
 		externalId: input.externalId,
-	});
+	};
+	// Existing popular artists/terms share the correspondence lock; only initial admission needs exclusive ownership.
+	const [known] = await tx
+		.select({ record: catalogSourceRecord })
+		.from(catalogSourceRecord)
+		.innerJoin(
+			catalogSourceMappingClaim,
+			and(
+				eq(catalogSourceMappingClaim.sourceRecordId, catalogSourceRecord.id),
+				eq(catalogSourceMappingClaim.path, "/"),
+			),
+		)
+		.where(eq(catalogSourceRecord.id, catalogSourceRecordId(key)))
+		.limit(1)
+		.for("share");
+	const record = known?.record ?? (await registerCatalogSourceRecord(tx, key));
+	if (
+		record.source !== key.source ||
+		record.objectType !== key.objectType ||
+		record.externalId !== key.externalId
+	)
+		throw new TypeError("Referenced source natural identity differs from its registered record");
 	const [claim] = await tx
 		.select()
 		.from(catalogSourceMappingClaim)
@@ -100,11 +123,13 @@ export async function bindReferencedSourceIdentity(
 			value: input.externalId,
 			normalizedValue: input.externalId,
 		})
-		.returning({ id: tables.identifier.id });
+		.returning({ id: tables.identifier.id, identifierRevision: tables.identifier.revision });
 	if (!identifier) throw new Error("Referenced source identifier insertion returned no row");
 	await tx.insert(tables.support).values({
+		...(await catalogSourceSupportColumns(tx, evidence.sourceRecordId)),
 		ownerId: identity.id,
 		identifierId: identifier.id,
+		identifierRevision: identifier.identifierRevision,
 		sourceRecordId: evidence.sourceRecordId,
 		snapshotId: evidence.snapshotId,
 		sourcePath: evidence.path,
