@@ -1,6 +1,6 @@
 # P10 — Bounded processing, capacity and operational recovery
 
-Status: operational foundations exist; event-streaming architecture accepted 2026-09-07; broker integration and production qualification pending under the design-review gate. Parent: [program and gates](README.md).
+Status: event transport and PostgreSQL durability implemented and locally checked; complete relay/business integration, maintenance and production qualification remain open. Updated: 2026-09-07. Parent: [program and gates](README.md).
 
 ## Outcome and current owners
 
@@ -120,6 +120,32 @@ Operational invariants and targeted tests are mandatory; GitHub's advisory Check
 Primary references: [PostgreSQL partitioning](https://www.postgresql.org/docs/current/ddl-partitioning.html), [PITR](https://www.postgresql.org/docs/current/continuous-archiving.html), [transactional outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html).
 
 ## Implementation ledger
+
+2026-09-07, event and task foundation:
+
+- Official NATS clients 3.4.0 on Bun 1.4.0; local NATS 2.14.6 R1 file storage
+  with sync-always. The transport harness verifies acknowledged/deduplicated
+  publication, independent event consumers, task retry/removal, poison handling,
+  bounded concurrency, drift rejection and capacity backpressure.
+- Transaction-only outbox, immutable application receipts, exact-operation
+  task generations/leases/deadlines and prepaid retained-storage admission.
+  PostgreSQL checks cover 42 assertions, including eight-way races, deadlines
+  crossed while waiting for row locks and rollback of effects when a final
+  lease check fails even if the caller catches the error.
+- Three growing relations each have 64 physical partitions over 1,024 buckets.
+  All 192 partition ranges and 384 enabled inherited trigger definitions are
+  checked separately from Atlas's parent-table inspection. Canonical SQL remains
+  replayed and compared by the deterministic database check.
+- Source snapshots and observation events now commit together; nine database
+  check groups cover exact references, repeat suppression, immutability and
+  caller-caught capacity failures. This does not implement source freshness,
+  subscription impact or canonical proposal application.
+- [Transport](../../../services/main/src/services/events/README.md) and
+  [database durability](../../../services/main/src/services/events/durability.md)
+  own exact configuration, admission provisioning, scaling assumptions and
+  limits. Retained history currently requires explicit capacity and has no
+  qualified cleanup/replay coordinator. Debezium, complete worker/business
+  wiring, production HA, recovery and sustained throughput remain unqualified.
 
 2026-09-06, first operational slice:
 

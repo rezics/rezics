@@ -1,7 +1,7 @@
 # Current stage — source-complete database schema
 
-Priority: **the current schema milestone**. Status: **design review open; existing
-implementation unqualified; further implementation gated**. The initial scope
+Priority: **the current schema milestone**. Status: **autonomous implementation
+authorized; complete schema acceptance remains open**. The initial scope
 clarification was requested by the maintainer on 2026-09-06.
 This stage takes precedence over the program's earlier broad increment order.
 
@@ -12,10 +12,12 @@ universe/world-setting, franchise and series models.** These gates remain unqual
 
 ## Design-review gate
 
-**Maintainer clarification, 2026-09-07:** complete and review the design before
-continuing schema/runtime implementation. The current authorization covers these
-documentation updates. Earlier implementation/commit authorization recorded in
-this program is not evidence that the revised design has passed this gate.
+**Latest maintainer clarification, 2026-09-07:** autonomously organize and advance
+implementation with native agents and isolated worktrees. Online research and
+learning inform decisions; update documents when implementation evidence exposes
+a problem. This supersedes the earlier documentation-only pause. Review the
+relevant design before accepting each slice; an open unrelated design question
+does not block independent implementation or qualify the whole milestone.
 
 The selected direction is a [provider-independent native catalog](../../report/REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model)
 for objects REZICS elects to index. Four-source coverage is a required conformance
@@ -33,7 +35,7 @@ execution qualification artifacts below. PostgreSQL retains business plans,
 outbox, checkpoints and application receipts; broker state is not a second
 authority for canonical data or permission.
 
-Before implementation resumes, review the following concrete design artifacts
+During implementation, resolve the following concrete design artifacts
 in their owning reports/plans, without creating competing specifications:
 
 | Artifact | Required decision/evidence |
@@ -46,9 +48,9 @@ in their owning reports/plans, without creating competing specifications:
 
 The [schema review disposition](../../report/REZICS-source-complete-catalog-schema-20260906.md#43-design-review-disposition)
 tracks unresolved work. Principles selected in this update do not make these
-artifacts complete. Design approval precedes implementation; passing actual
-schema replay, type/behavior checks and measured capacity evidence follows
-implementation. Legacy offline conversion and production reopening stay separate.
+artifacts complete. Record researched decisions and verify them with actual
+schema replay, type/behavior checks and representative capacity evidence. Legacy
+offline conversion and production reopening stay separate.
 
 ## Breaking replacement baseline
 
@@ -174,7 +176,7 @@ Invoke-RestMethod -Headers $bangumiHeaders -Method Post -ContentType 'applicatio
 
 ## Implementation order and ownership
 
-1. **Close design review, complete the contract inventory, then write DDL.** Define
+1. **Resolve slice design and contract inventory, then verify its DDL.** Define
    native capabilities and source-free cases before mapping providers onto them.
    P01/P03/P04 enumerate the pinned catalog object families, nested field paths,
    source vocabularies and
@@ -311,9 +313,55 @@ commits and general test counts cannot replace that report.
 
 ## Implementation ledger — 2026-09-07
 
-This ledger records historical execution. It does not override the design-review
-gate above; in particular, an implemented local edition table or successful
-initial observation roundtrip does not qualify a provider-independent model.
+This ledger records scoped execution. Historical tables or successful selected
+observations do not qualify the whole provider-independent model.
+
+### Autonomous implementation wave
+
+`20260907063641_operational_contexts_and_events.sql` replaces `software_edition`
+with provider-independent participation contexts, complete immutable revisions,
+validated current heads and exact snapshot-local source occurrences. All active
+callers use the new commands; a release no longer takes an `editionId` pointing
+at a staff-list context. Manual edit/history/restore, VNDB source claims and
+changed-snapshot review stay distinct. PostgreSQL rejects wrong references,
+unfinished heads and history mutation. Shared owner authority locks allow
+independent context edits while exact context revision locks reject stale edits.
+
+The same generated migration installs the P10 transactional outbox, task intents,
+application receipts, finite storage admission and 192 physical partitions. The
+catalog writes an exact `source.record.observed` event with each new snapshot;
+unchanged observations do not emit, and admission failure rolls back the snapshot.
+See [native verification](../../../services/main/src/services/catalog/README.md#context-verification-and-capacity)
+and [event durability](../../../services/main/src/services/events/durability.md)
+for executable commands, measured evidence, 500M/3B estimates and operational limits.
+
+The final generated target replayed all 46 migrations (3,097 statements) from
+empty PostgreSQL. Atlas reports no schema differences; canonical functions and
+triggers match, including all 192 partition ranges and 384 inherited guards.
+The affected backend/script TypeScript check and targeted catalog, transport,
+durability, coverage and schema-contract tests pass. No global test suite or
+frontend/browser acceptance was run. Ordinary development data was not migrated
+or reset; all SQL qualification used task-owned disposable databases.
+
+The new `catalog:sources:coverage` gate pins reviewed field dispositions and
+schema/write/query/export/fixture evidence. Initial results are deliberately
+incomplete: 22 reviewed declarations, 15 native gaps, 3 source-only observations,
+4 exclusions and 8,390 missing dispositions out of the 8,412-declaration
+superset. Zero complete native mapping evidence is claimed. `--inspect` succeeds
+for internally consistent bookkeeping; normal qualification fails while gaps
+remain. A declaration count is still not the native semantic denominator.
+
+Next integration priorities are source-record natural-key routing and composite
+binding/revision keys; exact source acquisition/subscription/adoption fences;
+provider-independent distribution occurrences and remaining owner references;
+complete source dispositions and canonical semantic coverage. The baseline
+consumer audit found 104 direct `unit` FK declarations across 36 schema files,
+with 21 public kinds and only seven native catalog owners. Retiring the global
+parent therefore still requires retained platform owners and all their consumers.
+No four-source, global-parent-cutover, full grouping or production gate closes
+because of this wave.
+
+### Earlier foundation
 
 - `20260906171239_catalog_native_foundation.sql` adds 87 native tables: seven
   owner-local identities and their names, identifier claims, typed facts/value

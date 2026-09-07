@@ -154,6 +154,46 @@ tasks:
         cmds:
             - yarn exec tsx scripts/generate-catalog-source-inventory.ts {{.CLI_ARGS}}
 
+    catalog:sources:coverage:
+        desc: Check pinned source dispositions and evidence; --inspect reports unresolved coverage without qualifying it.
+        cmds:
+            - yarn exec tsx scripts/check-catalog-source-coverage.ts {{.CLI_ARGS}}
+
+    catalog:check-contexts:
+        desc: Verify context revision constraints on an explicitly configured disposable loopback database.
+        cmds:
+            - bun scripts/check-software-participation-contexts.ts
+
+    catalog:check-context-concurrency:
+        desc: Verify scoped authoring races only on the disposable rezics_atlas_contexts_concurrency database.
+        cmds:
+            - bun scripts/check-software-participation-concurrency.ts
+
+    catalog:context-capacity:
+        desc: Measure rollback-only skewed context and source-mapping query plans on a disposable target.
+        cmds:
+            - bun scripts/check-software-participation-capacity.ts
+
+    catalog:check-source-events:
+        desc: Verify atomic observation/outbox writes and admission rollback on a disposable target.
+        cmds:
+            - bun scripts/check-catalog-source-events.ts
+
+    events:check-transport:
+        desc: Verify transport contracts against an explicitly configured disposable loopback JetStream server.
+        cmds:
+            - bun scripts/check-event-transport.ts
+
+    events:check-durability:
+        desc: Verify exact-operation fencing, receipts, admission and races on a disposable database.
+        cmds:
+            - bun scripts/check-operational-durability.ts
+
+    events:check-partitions:
+        desc: Verify the operational partition placement and inherited integrity triggers.
+        cmds:
+            - bun scripts/check-operational-partitions.ts
+
     catalog:check-local:
         desc: Verify native catalog commands and constraints on the loopback rezics-dev database with disposable fixtures.
         cmds:

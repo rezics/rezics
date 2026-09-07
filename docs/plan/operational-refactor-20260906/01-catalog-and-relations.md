@@ -1,6 +1,6 @@
 # P01 — Catalog identities, typed facts and content relations
 
-Status: native foundation exists; design review open and further implementation gated; full model and cutover unqualified. Updated: 2026-09-07. Parent: [program and gates](README.md).
+Status: native foundation and reviewed software participation-context replacement implemented; autonomous work continues; full model and cutover unqualified. Updated: 2026-09-07. Parent: [program and gates](README.md).
 
 The [breaking replacement baseline](00-source-complete-schema.md#breaking-replacement-baseline)
 applies: implement on a fresh target without old API/schema/data compatibility.

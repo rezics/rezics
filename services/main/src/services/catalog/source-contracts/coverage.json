@@ -1,0 +1,239 @@
+{
+	"format": "rezics.source-coverage.v1",
+	"inventory": {
+		"fieldsSha256": "d0959859bb11f507a8a699fe3c3d2a679632db9597f40fadf788231b3125f2ef",
+		"artifactsSha256": "b999453040ce620909105ad4c33ccb51f5346743a79dda955c3fcc4ca2a1f087",
+		"declarations": { "bangumi": 5644, "vndb": 214, "musicbrainz": 2437, "openlibrary": 117 }
+	},
+	"entries": [
+		{
+			"source": "bangumi",
+			"contract": "component:bangumi-subject_v0.yaml",
+			"path": "id",
+			"disposition": "native",
+			"reason": "The provider identifier locates a source subject and must bind to the elected native owner without becoming a global native identity.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "Scoped source-key binding to a checked owner-local catalog identity.",
+				"gap": "Final source-key routing, binding uniqueness, canonical query and semantic export evidence are not qualified."
+			}
+		},
+		{
+			"source": "bangumi",
+			"contract": "component:bangumi-subject_v0.yaml",
+			"path": "name",
+			"disposition": "native",
+			"reason": "A subject name is a catalog named form whose script, language and evidence cannot be replaced by a raw observation.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "Owner-local named forms with explicit source evidence and supported editing/query/export.",
+				"gap": "Selected importer fixtures do not qualify the final native named-form contract or all downstream consumers."
+			}
+		},
+		{
+			"source": "bangumi",
+			"contract": "component:bangumi-subject_v0.yaml",
+			"path": "infobox",
+			"disposition": "native",
+			"reason": "Ordered wiki values can contain independently meaningful catalog facts and repeated qualified values.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "Preserve ordered entries and map each elected semantic field to fixed native structures or governed typed assertions.",
+				"gap": "Generic value-node preservation is insufficient; nested declarations and actual infobox field semantics each need independent dispositions and native query/export fixtures."
+			}
+		},
+		{
+			"source": "bangumi",
+			"contract": "api:SubjectRevisionData",
+			"path": "field_infobox",
+			"disposition": "native",
+			"reason": "Historical wiki edits must preserve source revisions and support governed native adoption and restoration.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "Immutable source revision evidence linked to exact native adopted revisions and restoration behavior.",
+				"gap": "A stored historical wiki string alone does not prove native revision adoption, historical queries or restore semantics."
+			}
+		},
+		{
+			"source": "bangumi",
+			"contract": "component:bangumi-subject_v0.yaml",
+			"path": "rating.rank",
+			"disposition": "source-only",
+			"reason": "This is Bangumi's ranking at observation time, not an independent REZICS rank or catalog identity fact. Preserve with provider and snapshot scope; never recompute it from REZICS ratings. This disposition does not certify observation retention or export implementation."
+		},
+		{
+			"source": "bangumi",
+			"contract": "component:bangumi-subject_v0.yaml",
+			"path": "locked",
+			"disposition": "source-only",
+			"reason": "Bangumi's source-edit lock is provider workflow metadata. It can inform ingestion evidence but cannot grant or deny REZICS authoring permissions. This disposition is a scope decision, not a claim that lock handling is implemented."
+		},
+		{
+			"source": "vndb",
+			"contract": "/vn",
+			"path": "editions",
+			"disposition": "native",
+			"reason": "VNDB editions carry scoped participation context; they do not mandate a universal native Edition abstraction.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "Represent the referent, variant and credit context implied by each scoped source entry using provider-independent native semantics.",
+				"gap": "The existing software_edition slice is provisional; exact edition child paths and cross-provider/source-free semantics remain unqualified."
+			}
+		},
+		{
+			"source": "vndb",
+			"contract": "/vn",
+			"path": "staff.eid",
+			"disposition": "native",
+			"reason": "The source edition identifier qualifies a staff participation; removing it merges distinct credit contexts.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "Resolve credit participation to its checked source-scoped context and elected native referent.",
+				"gap": "No final native owner/field/write/query/export fixture chain is pinned for this contextual identity."
+			}
+		},
+		{
+			"source": "vndb",
+			"contract": "/vn",
+			"path": "staff.role",
+			"disposition": "native",
+			"reason": "A staff role is a governed catalog participation meaning, not a free-form source field label.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "A versioned credit-role definition and qualified participation on the correct native object.",
+				"gap": "Complete role vocabulary, alias resolution, context, canonical queries and export evidence remain unqualified."
+			}
+		},
+		{
+			"source": "vndb",
+			"contract": "/release",
+			"path": "languages",
+			"disposition": "native",
+			"reason": "Release language participates in consumption availability and translation semantics independently of title language.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "Scoped native availability and language roles using the pinned source-to-BCP-47 mapping.",
+				"gap": "Nested language roles, qualifiers, distribution scope and native query/export roundtrips still need exact dispositions and evidence."
+			}
+		},
+		{
+			"source": "vndb",
+			"contract": "/ulist",
+			"path": "notes",
+			"disposition": "out-of-scope",
+			"reason": "Personal list notes are user-owned activity, potentially private. Public catalog conformance neither imports them nor supplies consent for a personal-library import product. Other /ulist paths remain individually unreviewed."
+		},
+		{
+			"source": "vndb",
+			"contract": "/ulist",
+			"path": "vote",
+			"disposition": "out-of-scope",
+			"reason": "An individual user's vote is user activity rather than a public catalog fact. A consented personal-history importer would require a separate contract and authorization; this scope decision excludes only this exact path."
+		},
+		{
+			"source": "musicbrainz",
+			"contract": "artist",
+			"path": "id",
+			"disposition": "source-only",
+			"reason": "This source database surrogate is needed to resolve MusicBrainz dump foreign keys, but must not be installed as a REZICS person/organization primary key. Resolution still requires the separate stable source identity and native binding contract."
+		},
+		{
+			"source": "musicbrainz",
+			"contract": "artist",
+			"path": "gid",
+			"disposition": "native",
+			"reason": "The MusicBrainz identifier is stable source identity evidence whose native binding must respect artist person/group semantics.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "A source binding to the selected person or organization owner with checked type and merge behavior.",
+				"gap": "Final owner alternatives, source identifier uniqueness and edit/query/export evidence are not pinned."
+			}
+		},
+		{
+			"source": "musicbrainz",
+			"contract": "artist",
+			"path": "name",
+			"disposition": "native",
+			"reason": "Artist names are reusable native named forms, with aliases and credit spellings that cannot be flattened into one source title.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "Person/group named-form semantics distinct from exact credited-as participation names.",
+				"gap": "Complete alias, sorting, writing-system and credit-context native evidence has not been qualified."
+			}
+		},
+		{
+			"source": "musicbrainz",
+			"contract": "artist_credit",
+			"path": "name",
+			"disposition": "native",
+			"reason": "The credited name preserves exact display composition while ordered constituent artist credit roles remain separately meaningful.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "Native ordered credit composition with exact credited spellings, join phrases and constituent identities.",
+				"gap": "Existing streamed credit fixtures do not qualify all relationships, names, canonical edits and semantic export contracts."
+			}
+		},
+		{
+			"source": "musicbrainz",
+			"contract": "editor",
+			"path": "email",
+			"disposition": "out-of-scope",
+			"reason": "An upstream editor email is account data, outside public catalog conformance. Never import it into REZICS Auth or preserve it in a catalog raw-payload fallback."
+		},
+		{
+			"source": "musicbrainz",
+			"contract": "editor",
+			"path": "password",
+			"disposition": "out-of-scope",
+			"reason": "An upstream credential is outside catalog semantics and must not enter REZICS Auth or catalog observation storage. Its presence in CREATE TABLE inventory is not permission to ingest it."
+		},
+		{
+			"source": "openlibrary",
+			"contract": "/type/work",
+			"path": "authors",
+			"disposition": "native",
+			"reason": "Work authorship is an ordered qualified contribution, not merely an array of upstream author identifiers.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "Native book-work contributions with checked people/organization references, order and roles.",
+				"gap": "The selected work import does not qualify every author-role field, native edit, query or export behavior."
+			}
+		},
+		{
+			"source": "openlibrary",
+			"contract": "/type/edition",
+			"path": "isbn_13",
+			"disposition": "native",
+			"reason": "An ISBN identifies a publication product under its own validation and scope, not the abstract work or a universal Edition entity.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "Validated publication identifiers on the elected native publication/distribution referent with ambiguity handling.",
+				"gap": "Duplicate or malformed source identifiers and complete native query/export evidence are not qualified."
+			}
+		},
+		{
+			"source": "openlibrary",
+			"contract": "/type/edition",
+			"path": "languages",
+			"disposition": "native",
+			"reason": "Publication consumption languages must remain distinct from work origin, title language and translation provenance.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "Native publication language roles linked to reviewed source language vocabulary mappings.",
+				"gap": "Source vocabulary resolution, multilingual publication fixtures and native query/export coverage remain unqualified."
+			}
+		},
+		{
+			"source": "openlibrary",
+			"contract": "/type/work",
+			"path": "original_languages",
+			"disposition": "native",
+			"reason": "A work's origin language is distinct from the languages available on particular publications or translations.",
+			"mapping": {
+				"status": "gap",
+				"requirement": "Evidence-scoped original-language assertions separate from native publication consumption languages.",
+				"gap": "Multiple origin languages, disputed evidence, canonical edits and semantic roundtrip evidence remain unqualified."
+			}
+		}
+	]
+}

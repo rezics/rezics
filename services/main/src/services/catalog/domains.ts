@@ -22,7 +22,6 @@ import {
 import { programEpisode, programWork } from "../database/schema/catalog-program";
 import {
 	softwareContent,
-	softwareEdition,
 	softwareRelease,
 	softwareReleaseContent,
 	softwareVisualNovel,
@@ -612,64 +611,22 @@ export async function createVisualNovel(tx: DatabaseTransaction, actor: string, 
 	return nameIdentity(tx, identity, actor, name);
 }
 
-export async function addSoftwareEdition(
-	tx: DatabaseTransaction,
-	content: CatalogReference,
-	actor: string,
-	expectedVersion: number,
-	input: {
-		readonly sourceNamespace?: string;
-		readonly sourceLocalId?: string;
-		readonly name?: string;
-	},
-) {
-	await requireShape(tx, content, actor, "software", "content", true);
-	const value = z
-		.strictObject({
-			sourceNamespace: z.string().min(1).max(96).optional(),
-			sourceLocalId: z.string().min(1).max(128).optional(),
-			name: z.string().optional(),
-		})
-		.refine(
-			(record) => (record.sourceNamespace === undefined) === (record.sourceLocalId === undefined),
-		)
-		.parse(input);
-	const revision = await recordCatalogChange(
-		tx,
-		content,
-		actor,
-		expectedVersion,
-		"software.edition.add",
-	);
-	const [edition] = await tx
-		.insert(softwareEdition)
-		.values({ contentId: content.id, ...value })
-		.returning({ id: softwareEdition.id });
-	if (!edition) throw new Error("Software edition insertion returned no row");
-	return { id: edition.id, revision };
-}
-
 export async function createSoftwareRelease(
 	tx: DatabaseTransaction,
 	actor: string,
 	input: {
 		readonly name: NativeName;
 		readonly content?: CatalogReference;
-		readonly editionId?: string;
 		readonly isPatch?: boolean;
 	},
 ) {
 	if (input.content) await requireShape(tx, input.content, actor, "software", "content");
-	if (input.editionId && !input.content)
-		throw new TypeError("A scoped edition requires its content identity");
-	if (input.editionId) z.uuid().parse(input.editionId);
 	const identity = await createCatalogIdentity(tx, { owner: "software", shape: "release" }, actor);
 	await tx.insert(softwareRelease).values({ id: identity.id, isPatch: input.isPatch ?? null });
 	if (input.content)
 		await tx.insert(softwareReleaseContent).values({
 			releaseId: identity.id,
 			contentId: input.content.id,
-			editionId: input.editionId ?? null,
 		});
 	return nameIdentity(tx, identity, actor, input.name);
 }

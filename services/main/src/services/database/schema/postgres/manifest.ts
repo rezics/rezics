@@ -2,6 +2,8 @@ export const PostgreSqlSchemaFileNames = [
 	"catalog-credit-integrity.sql",
 	"catalog-domain-integrity.sql",
 	"catalog-integrity.sql",
+	"catalog-software-context-integrity.sql",
+	"operational-durability.sql",
 	"book-chapter-progress.sql",
 	"content-label-policy.sql",
 	"content-language-search.sql",
@@ -23,6 +25,10 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles = {
+	operational_contexts_and_events: [
+		"catalog-software-context-integrity.sql",
+		"operational-durability.sql",
+	],
 	catalog_credit_streaming: ["catalog-credit-integrity.sql"],
 	catalog_domain_structures: ["catalog-integrity.sql", "catalog-domain-integrity.sql"],
 	catalog_value_integrity: ["catalog-integrity.sql"],
@@ -38,6 +44,13 @@ export const PostgreSqlSchemaMigrationBundles = {
 } as const satisfies Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>>;
 
 export const PostgreSqlSchemaFunctionNames = [
+	"catalog_guard_software_context",
+	"catalog_require_software_context_head",
+	"catalog_guard_software_context_revision",
+	"catalog_require_software_context_revision_head",
+	"operational_reserve_capacity",
+	"operational_account_insert",
+	"operational_guard_immutable",
 	"catalog_guard_credit_member",
 	"catalog_count_credit_members",
 	"catalog_guard_credit_header",
@@ -127,6 +140,20 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "software_participation_context", name: "software_context_guard" },
+	{ table: "software_participation_context", name: "software_context_head_required" },
+	{ table: "software_participation_context_revision", name: "software_context_revision_guard" },
+	{
+		table: "software_participation_context_revision",
+		name: "software_context_revision_head_required",
+	},
+	{ table: "software_participation_source_occurrence", name: "software_context_occurrence_guard" },
+	{ table: "operational_outbox", name: "operational_outbox_account" },
+	{ table: "operational_outbox", name: "operational_outbox_immutable" },
+	{ table: "operational_task_intent", name: "operational_task_account" },
+	{ table: "operational_task_intent", name: "operational_task_immutable" },
+	{ table: "operational_application_receipt", name: "operational_receipt_account" },
+	{ table: "operational_application_receipt", name: "operational_receipt_immutable" },
 	{ table: "music_recording", name: "music_recording_sealed_credit_guard" },
 	{ table: "music_release_group", name: "music_release_group_sealed_credit_guard" },
 	{ table: "music_release", name: "music_release_sealed_credit_guard" },

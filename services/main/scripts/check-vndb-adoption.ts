@@ -5,7 +5,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { users } from "../src/services/database/schema/auth";
 import {
-	softwareEdition,
+	softwareParticipationSourceOccurrence,
 	softwareVisualNovel,
 } from "../src/services/database/schema/catalog-software";
 import { catalogSourceRecord } from "../src/services/database/schema/catalog-source";
@@ -16,6 +16,7 @@ import {
 } from "../src/services/catalog/vndb";
 import { adoptVndbVn } from "../src/services/catalog/vndb-adoption";
 import { exportVndbVn } from "../src/services/catalog/source-export";
+import { reviseSoftwareParticipationContext } from "../src/services/catalog/software-contexts";
 import {
 	storeCatalogSourcePayload,
 	type CatalogSourceArchive,
@@ -27,8 +28,8 @@ if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1"
 const url = new URL(connectionString);
 if (
 	!["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) ||
-	url.pathname !== "/rezics" ||
-	url.port !== (process.env.POSTGRES_LOCAL_PORT ?? "15432")
+	(!/^\/rezics_atlas(?:_[a-z0-9_]+)?$/.test(url.pathname) &&
+		(url.pathname !== "/rezics" || url.port !== (process.env.POSTGRES_LOCAL_PORT ?? "15432")))
 )
 	throw new Error("VNDB acceptance requires rezics-dev PostgreSQL");
 
@@ -136,17 +137,62 @@ try {
 				).length,
 				1,
 			);
-			const editions = await tx
+			const occurrences = await tx
 				.select()
-				.from(softwareEdition)
-				.where(eq(softwareEdition.contentId, adopted.reference.id));
+				.from(softwareParticipationSourceOccurrence)
+				.where(eq(softwareParticipationSourceOccurrence.contentId, adopted.reference.id));
 			assert.deepEqual(
-				editions.map(({ sourceLocalId }) => sourceLocalId).sort(),
+				occurrences.map(({ localKey }) => localKey).sort(),
 				(original.editions ?? []).map(({ eid }) => String(eid)).sort(),
 			);
 			assert.equal(
 				(await adoptVndbVn(tx, account.id, receipt, bytes)).reference.id,
 				adopted.reference.id,
+			);
+			const firstOccurrence = occurrences[0];
+			if (firstOccurrence) {
+				await reviseSoftwareParticipationContext(
+					tx,
+					adopted.reference,
+					account.id,
+					firstOccurrence.contextId,
+					1,
+					{ label: "Locally revised participation", languageTag: "fr", state: "withdrawn" },
+				);
+				assert.deepEqual(
+					await exportVndbVn(tx, adopted.reference, account.id, record.id, adopted.snapshotId),
+					original,
+					"Source observation export preserves original claims after a native context edit",
+				);
+			}
+			const updatedBytes = Buffer.from(
+				JSON.stringify({
+					...original,
+					title: `${original.title} (changed source snapshot)`,
+					editions: (original.editions ?? []).map((edition) => ({
+						...edition,
+						name: `${edition.name} (changed observation)`,
+					})),
+				}),
+			);
+			const updatedReceipt = await storeCatalogSourcePayload(
+				vndbSourceKey(original.id),
+				updatedBytes,
+				VndbCatalogContractSha256,
+				null,
+				archive,
+			);
+			const proposed = await adoptVndbVn(tx, account.id, updatedReceipt, updatedBytes);
+			assert.equal(proposed.status, "review_required");
+			assert.equal(
+				(
+					await tx
+						.select()
+						.from(softwareParticipationSourceOccurrence)
+						.where(eq(softwareParticipationSourceOccurrence.contentId, adopted.reference.id))
+				).length,
+				occurrences.length,
+				"Reused source-local eid cannot silently identify or overwrite native contexts",
 			);
 			throw rollback;
 		});
@@ -154,7 +200,7 @@ try {
 		if (error !== rollback) throw error;
 	}
 	console.info(
-		`Verified VNDB ${original.id}: selected field roundtrip, VN identity, scoped editions, staff aid/eid/voice context preservation and repeat identity; relation adoption beyond observations remains unqualified`,
+		`Verified VNDB ${original.id}: selected field roundtrip, VN identity, snapshot-local participation contexts, staff aid/eid/voice context preservation and repeat identity; relation adoption beyond observations remains unqualified`,
 	);
 } finally {
 	await pool.end();

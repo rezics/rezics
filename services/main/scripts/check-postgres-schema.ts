@@ -9,6 +9,7 @@ import {
 	PostgreSqlSchemaViews,
 } from "../src/services/database/schema/postgres/manifest";
 import { adminDatabaseUrl } from "./admin-database";
+import { checkOperationalPartitions } from "./check-operational-partitions";
 import {
 	assertCanonicalPostgreSqlObjectManifest,
 	assertCanonicalPostgreSqlSchemaFiles,
@@ -48,6 +49,7 @@ async function readTriggerDefinitions(client: Client): Promise<readonly Definiti
 		 join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
 		 where namespace.nspname = 'public'
 		   and not trigger.tgisinternal
+		   and trigger.tgparentid = 0
 		   and trigger.tgname = any($1::text[])
 		 order by relation.relname, trigger.tgname`,
 		[names],
@@ -126,6 +128,7 @@ async function main(): Promise<void> {
 		const expectedTriggers = PostgreSqlSchemaTriggers.map(({ table, name }) => `${table}.${name}`);
 		const functionsBefore = await readFunctionDefinitions(client);
 		const triggersBefore = await readTriggerDefinitions(client);
+		await checkOperationalPartitions(client);
 		const viewsBefore = await readViewDefinitions(client);
 		assertPostgreSqlDefinitionsComplete(functionsBefore, PostgreSqlSchemaFunctionNames, "function");
 		assertPostgreSqlDefinitionsComplete(triggersBefore, expectedTriggers, "trigger");
@@ -136,6 +139,7 @@ async function main(): Promise<void> {
 			for (const definition of schemaDefinitions) await client.query(definition);
 			const functionsAfter = await readFunctionDefinitions(client);
 			const triggersAfter = await readTriggerDefinitions(client);
+			await checkOperationalPartitions(client);
 			const viewsAfter = await readViewDefinitions(client);
 			assertPostgreSqlDefinitionsComplete(
 				functionsAfter,

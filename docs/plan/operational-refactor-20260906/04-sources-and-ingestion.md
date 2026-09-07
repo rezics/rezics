@@ -1,6 +1,6 @@
 # P04 — Production source ingestion and continuous observation
 
-Status: initial observation/adoption slices exist; full source protocol, subscriptions and update jobs unqualified; further implementation gated by design review. Updated: 2026-09-07. Parent: [program and gates](README.md).
+Status: initial observation/adoption, exact VNDB context observations, coverage gate and transactional observation events implemented; full source protocol, subscriptions and update jobs unqualified. Autonomous implementation continues. Updated: 2026-09-07. Parent: [program and gates](README.md).
 
 Current priority is the [four-family native schema gate](00-source-complete-schema.md):
 VNDB, MusicBrainz, Bangumi and required book-index data. Implement complete mapping

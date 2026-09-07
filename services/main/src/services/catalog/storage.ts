@@ -29,6 +29,8 @@ export async function loadCatalogIdentity(
 	reference: CatalogReference,
 	actor: string | null,
 	write: boolean,
+	/** Scoped child writes may share the authority lock while locking their own current head. */
+	writeLock: "update" | "share" = "update",
 ) {
 	if (actor !== null) z.uuid().parse(actor);
 	const ref = CatalogReferenceSchema.parse({ owner: reference.owner, id: reference.id });
@@ -38,7 +40,7 @@ export async function loadCatalogIdentity(
 		.from(table)
 		.where(and(eq(table.id, ref.id), isNull(table.deletedAt)))
 		.limit(1);
-	const [row] = await (write ? query.for("update") : query);
+	const [row] = await (write ? query.for(writeLock) : query);
 	if (!row) throw new CatalogReferenceNotFound("Catalog identity is missing or retired");
 	const creator = actor !== null && row.createdByAuthUserId === actor;
 	if (

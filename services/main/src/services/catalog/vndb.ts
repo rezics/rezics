@@ -40,6 +40,8 @@ export const VndbVnSchema = z
 					})
 					.passthrough(),
 			)
+			.max(128)
+			.refine((editions) => new Set(editions.map(({ eid }) => eid)).size === editions.length, "Duplicate snapshot-local participation key")
 			.optional(),
 		staff: z
 			.array(

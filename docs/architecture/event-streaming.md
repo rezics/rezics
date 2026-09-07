@@ -1,6 +1,7 @@
 # Event streaming and asynchronous execution
 
-Date: 2026-09-07. Status: **accepted architecture; not implemented or operationally qualified**.
+Date: 2026-09-07. Status: **transport, database durability and observation outbox
+implemented and locally checked; full relay/business flow and production remain unqualified**.
 Owners: Main Service, source ingestion, worker runtime and host operations.
 
 The maintainer accepted NATS JetStream as the dedicated event and task transport,
@@ -10,7 +11,8 @@ business consumers. This document owns that infrastructure decision. The
 owns binding, subscription and adoption semantics; [P10](../plan/operational-refactor-20260906/10-capacity-and-operations.md)
 owns workload and recovery qualification. This decision does not close the broader
 [catalog design-review gate](../plan/operational-refactor-20260906/00-source-complete-schema.md#design-review-gate)
-or authorize code changes, deployment or legacy conversion.
+or qualify deployment or legacy conversion. The later maintainer instruction
+authorizes autonomous implementation and research-led revision of these documents.
 
 ## Decision and alternatives
 
@@ -239,6 +241,44 @@ reserve; cross-cluster moves need checkpointed routing and replay evidence.
 
 ## Qualification and implementation sequence
 
+### Delivered local slice, 2026-09-07
+
+The [transport owner](../../services/main/src/services/events/README.md) implements
+the pinned official Node/Bun clients, strict 64 KiB envelopes, stable aggregate
+routing, bounded file-backed event/task topology, acknowledged publication and
+bounded consumers. Real Bun 1.4.0 / NATS 2.14.6 R1 checks cover broker behavior;
+synthetic transport callbacks are not business transaction evidence.
+
+The [database owner](../../services/main/src/services/events/durability.md) now
+implements transactional outbox, exact-ID task fences, retained application
+receipts and finite prepaid storage admission. PostgreSQL race checks include
+claim/admission/receipt concurrency, expiry during lock waits, final expiry after
+a mutation, caller-caught failure rollback and terminal bookkeeping at capacity.
+The exporter and migration create 192 physical partitions. A catalog verifier
+checks partition ranges and inherited trigger integrity because Atlas Community
+omits child partitions from its inspected SQL. Canonical SQL remains checked
+against migration replay.
+
+The catalog's new observation and `source.record.observed` outbox entry share a
+transaction/savepoint. Repeated observations do not emit another event; admission
+failure rolls back the observation. Exact snapshot/hash references cross the
+transport boundary. This event does not claim that the acquired snapshot is the
+newest upstream revision. No raw source graph or credential is placed in it.
+
+No new producer is admitted without explicit `operational_capacity` rows. The
+four-lane/1,024-bucket control table is bounded to 4,096 rows. Fixture budgets are
+not production defaults. Retained records do not return their credits at task
+completion; cleanup must first establish relay/replay checkpoints.
+
+Debezium Server 3.6.2.Final sink source was inspected for body/header forwarding
+and publish-ACK-before-progress behavior. The connector itself was not run.
+Replication-slot recovery, exhausted-delivery reconciliation, subscription
+pause/rebind races, canonical adoption, retention-floor recovery, R3 fault tests,
+operational worker wiring and deployment remain separate required work. The
+normal development PostgreSQL configuration was not changed to enable CDC.
+
+### Remaining qualification
+
 1. Finish versioned envelope, source/target references, stream/shard routing,
    outbox/receipt keys and retention/failure contracts under the catalog design
    gate. Broker selection is accepted; these concrete integration details remain
@@ -261,6 +301,6 @@ reserve; cross-cluster moves need checkpointed routing and replay evidence.
    upgrade/restore and replay procedures before activation. Existing email and
    maintenance jobs are integrated only with their owners' correctness checks.
 
-The current document change runs no broker, connector, migration, benchmark or
-deployment. Selected architecture, implementation checks and production
-qualification remain distinct evidence states.
+The local slice above includes broker, database and migration checks. It does
+not imply connector execution, production load, failure-domain qualification
+or deployment. These evidence states remain separate.

@@ -15,7 +15,7 @@ of this same schema gate. Four-source conformance alone does not qualify them.
 
 | Gate | Required evidence | State |
 | --- | --- | --- |
-| Provider-independent design review | Native referents/capabilities and complete source dispositions; no mandatory Edition layer; reviewed reference/revision/key/capacity and execution contracts before further implementation | Open |
+| Provider-independent design review | Research and validate each implementation slice; complete native/source/reference/revision/key/capacity contracts remain required for full acceptance | Context and event slices reviewed and locally checked; full gate open |
 | Cross-provider and cross-domain native model | Manual plus independent-source equivalence; translations/variants, parallel-language publications, repeated occurrences and mixed-media distribution; organizational grouping distinct from composition; no invented parents | Not qualified |
 | Generic source subscription and update execution | Scoped many-to-many bindings, shared acquisition, due checks/events, paged fan-out and canonical updates; pause/rebind races, unchanged checks, crash/retry and stale-lease rejection | Not qualified |
 | Accepted broker/relay integration | JetStream event/task retention, independent durable consumption, preferred Debezium outbox delivery, ACK/commit/offset crash behavior, explicit failed-work handling, R3/file/sync qualification, retention-gap and WAL-pressure recovery | Technology selected; runtime not qualified |

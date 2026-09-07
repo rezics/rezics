@@ -1,11 +1,14 @@
 # Native catalog storage
 
-**Design review, 2026-09-07:** this is implementation evidence for an incomplete
-foundation. Further schema/runtime work is gated by the [current design review](../../../../../docs/plan/operational-refactor-20260906/00-source-complete-schema.md#design-review-gate).
+**Implementation, 2026-09-07:** this is evidence for reviewed slices of an incomplete
+foundation. Autonomous implementation and research-led document corrections are
+authorized; the [remaining design obligations](../../../../../docs/plan/operational-refactor-20260906/00-source-complete-schema.md#design-review-gate)
+still distinguish a delivered slice from complete catalog acceptance.
 The [provider-independent model](../../../../../docs/report/REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model)
-does not select a universal Edition layer. Existing `software_edition` rows and
-commands do not establish native version/variant semantics; that slice requires
-replacement or reshaping. Source-local keys belong to the shared source protocol.
+does not select a universal Edition layer. Software participation contexts now have
+provider-free owner-local identities, immutable revisions and a validated current
+head. VNDB edition keys are exact snapshot-local observations; they establish no
+native software version or authority. Source-local keys belong to the source protocol.
 Cross-domain distribution composition and the [binding/subscription/check-job contract](../../../../../docs/report/REZICS-source-integration-and-review-20260906.md#44-generic-source-bindings-and-subscriptions)
 are requirements, not implemented capabilities of this module. The
 [review disposition](../../../../../docs/report/REZICS-source-complete-catalog-schema-20260906.md#43-design-review-disposition)
@@ -24,6 +27,64 @@ old API/schema/data compatibility is not required. The stopped site's approximat
 does not gate the new schema or removal of obsolete runtime structures.
 
 ## Implemented boundary
+
+The current software slice replaces the source-shaped Edition table with
+`software_participation_context`, immutable complete revisions and exact
+`software_participation_source_occurrence` references. Context identity is not a
+software version or a Unit. Manual create/revise/read/history/restore commands
+share the content owner's authorization check, use shared owner locks to fence
+authority changes and exclusively lock only the context being revised. Restore
+appends a revision. SQL rejects unpublished heads, missing/wrong-context heads,
+skipped revisions and mutation of retained revisions/source observations.
+
+VNDB's snapshot-local `eid` never becomes native identity. Language and claimed
+officialness remain typed, attributable observations; a claim does not grant
+authority. Native edits do not rewrite observed source values. Changed snapshots
+still create review work, so automated context adoption remains unimplemented.
+Any future apply path must fence the exact context revision; a content identity
+revision alone does not cover edits to its independent context histories.
+
+`recordCatalogSourceObservation` now saves a new snapshot and its
+`source.record.observed` outbox entry atomically, including rollback when callers
+catch admission failure. Repeated observations emit no additional event. This
+event identifies an observation, not upstream freshness or canonical adoption.
+Provision explicit event-outbox capacity before enabling this writer; missing or
+full budgets reject the transaction. See [durability](../events/durability.md).
+No broker connection is needed on the source write path.
+
+The [source coverage gate](source-contracts/README.md) binds reviewed dispositions
+and evidence to the pinned declarations. Its initial 22 entries deliberately
+leave the complete mapping and semantic acceptance unqualified.
+
+### Context verification and capacity
+
+Disposable PostgreSQL checks passed 29 context constraints, 30 existing domain
+assertions, real independent/same-context/authority-change races, and the live
+VNDB v17 observation/adoption/export/edit/review path. Four indexed queries were
+measured against 12,016 contexts, 36,048 revisions and 24,032 source mappings:
+current head, revision history, exact source occurrence and reverse context
+lookup. The hot owner held 10,000 contexts; other owners held 32 each. All fixture
+capacity budgets were explicit and confined to the disposable target.
+
+Measured relation allocations were 4,399,104 / 11,141,120 / 9,969,664 bytes for
+headers/revisions/source occurrences. At three revisions and two observations
+per context, the fixture's allocated bytes give about 2,123 bytes/context,
+or a naive 1.0615 TB / 6.369 TB at 500M / 3B contexts. These include measured
+head-update/index overhead and exclude WAL, replicas, long-value growth and
+recovery reserve; the earlier nominal 832 GB / 4.992 TB estimate was optimistic.
+Cached local indexed timings (0.011–0.024 ms) do not establish corpus-scale
+latency or production capacity. Every read is owner/key bounded; page limits are
+100, and context writes touch one scalar revision. Hot-authority contention,
+retention, owner-routed physical partitioning and large revision retention still
+require qualification before the resource thresholds in P10 are reached.
+
+Run the affected workspace typecheck and the new `catalog:check-contexts`,
+`catalog:check-context-concurrency`, `catalog:context-capacity` and
+`catalog:check-source-events` tasks with their explicit disposable fixture
+environment. The concurrency fixture commits only in its named disposable clone;
+the constraint, capacity and source-event fixtures roll back their data.
+
+### Earlier foundation
 
 - Publishing, music, program, software, Entity, grouping and reference owners have
   separate physical identity tables. Their UUIDs are not foreign keys to `unit`.

@@ -5,6 +5,8 @@ import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { storage } from "../storage";
 import { catalogSourceRecord, catalogSourceSnapshot } from "../database/schema/catalog-source";
+import { appendOperationalOutbox } from "../events/durability";
+import { createSourceObservationEvent } from "./source-events";
 
 const sourceKeySchema = z.strictObject({
 	source: z.string().regex(/^[a-z][a-z0-9_.-]{0,95}$/u),
@@ -110,45 +112,48 @@ export async function recordCatalogSourceObservation(
 ) {
 	if (!issuedReceipts.has(receipt) || receipt[storedReceipt] !== true)
 		throw new TypeError("Source receipt was not produced by the archive writer");
-	await tx.insert(catalogSourceRecord).values(receipt.key).onConflictDoNothing();
-	const [record] = await tx
-		.select()
-		.from(catalogSourceRecord)
-		.where(
-			and(
-				eq(catalogSourceRecord.source, receipt.key.source),
-				eq(catalogSourceRecord.objectType, receipt.key.objectType),
-				eq(catalogSourceRecord.externalId, receipt.key.externalId),
-			),
+	return tx.transaction(async (tx) => {
+		await tx.insert(catalogSourceRecord).values(receipt.key).onConflictDoNothing();
+		const [record] = await tx
+			.select()
+			.from(catalogSourceRecord)
+			.where(
+				and(
+					eq(catalogSourceRecord.source, receipt.key.source),
+					eq(catalogSourceRecord.objectType, receipt.key.objectType),
+					eq(catalogSourceRecord.externalId, receipt.key.externalId),
+				),
+			)
+			.limit(1)
+			.for("update");
+		if (!record) throw new Error("Source identity registration returned no row");
+		const [head] = await tx
+			.select()
+			.from(catalogSourceSnapshot)
+			.where(eq(catalogSourceSnapshot.sourceRecordId, record.id))
+			.orderBy(desc(catalogSourceSnapshot.observedAt), desc(catalogSourceSnapshot.id))
+			.limit(1);
+		if (
+			head &&
+			head.contentSha256 === receipt.contentSha256 &&
+			head.contractSha256 === receipt.contractSha256 &&
+			head.sourceRevision === receipt.sourceRevision
 		)
-		.limit(1)
-		.for("update");
-	if (!record) throw new Error("Source identity registration returned no row");
-	const [head] = await tx
-		.select()
-		.from(catalogSourceSnapshot)
-		.where(eq(catalogSourceSnapshot.sourceRecordId, record.id))
-		.orderBy(desc(catalogSourceSnapshot.observedAt), desc(catalogSourceSnapshot.id))
-		.limit(1);
-	if (
-		head &&
-		head.contentSha256 === receipt.contentSha256 &&
-		head.contractSha256 === receipt.contractSha256 &&
-		head.sourceRevision === receipt.sourceRevision
-	)
-		return { record, snapshot: head, repeated: true };
-	const [snapshot] = await tx
-		.insert(catalogSourceSnapshot)
-		.values({
-			sourceRecordId: record.id,
-			contentSha256: receipt.contentSha256,
-			contractSha256: receipt.contractSha256,
-			payloadRef: receipt.payloadRef,
-			sourceRevision: receipt.sourceRevision,
-		})
-		.returning();
-	if (!snapshot) throw new Error("Source snapshot insertion returned no row");
-	return { record, snapshot, repeated: false };
+			return { record, snapshot: head, repeated: true };
+		const [snapshot] = await tx
+			.insert(catalogSourceSnapshot)
+			.values({
+				sourceRecordId: record.id,
+				contentSha256: receipt.contentSha256,
+				contractSha256: receipt.contractSha256,
+				payloadRef: receipt.payloadRef,
+				sourceRevision: receipt.sourceRevision,
+			})
+			.returning();
+		if (!snapshot) throw new Error("Source snapshot insertion returned no row");
+		await appendOperationalOutbox(tx, [createSourceObservationEvent(snapshot)]);
+		return { record, snapshot, repeated: false };
+	});
 }
 
 const issuedReferenceEvidence = new WeakSet<object>();

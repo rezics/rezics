@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import type { DatabaseTransaction } from "../database";
 import {
 	softwareContent,
-	softwareEdition,
+	softwareParticipationSourceOccurrence,
 	softwareVisualNovel,
 } from "../database/schema/catalog-software";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
@@ -12,8 +12,9 @@ import { inspectExistingSourceBinding } from "./source-adoption";
 import { VndbCatalogContractSha256, VndbVnSchema, vndbLanguage, vndbSourceKey } from "./vndb";
 import { addCatalogName, createCatalogIdentity } from "./storage";
 import { appendSourceFieldObservation } from "./source-fields";
+import { createSoftwareParticipationContext } from "./software-contexts";
 
-/** VN identity/edition projection; staff and voice contexts remain identified source observations. */
+/** VN identity and snapshot-local participation observations; staff adoption remains separate. */
 export async function adoptVndbVn(
 	tx: DatabaseTransaction,
 	actor: string,
@@ -87,16 +88,28 @@ export async function adoptVndbVn(
 					value: alias,
 				})
 			).revision;
-	const editions = record.editions ?? [];
-	for (let offset = 0; offset < editions.length; offset += 128)
-		await tx.insert(softwareEdition).values(
-			editions.slice(offset, offset + 128).map((edition) => ({
-				contentId: identity.id,
-				sourceNamespace: "vndb",
-				sourceLocalId: String(edition.eid),
-				name: edition.name,
-			})),
-		);
+	for (const [position, edition] of (record.editions ?? []).entries()) {
+		const languageTag = edition.lang === null ? null : vndbLanguage(edition.lang);
+		const context = await createSoftwareParticipationContext(tx, identity, actor, {
+			label: edition.name || null,
+			languageTag,
+			state: "active",
+		});
+		await tx.insert(softwareParticipationSourceOccurrence).values({
+			sourceRecordId: observation.record.id,
+			snapshotId: observation.snapshot.id,
+			namespace: "editions",
+			localKey: String(edition.eid),
+			contentId: identity.id,
+			contextId: context.contextId,
+			contextRevision: context.revision,
+			sourcePointer: `/editions/${position}`,
+			sourceLabel: edition.name,
+			sourceLanguage: edition.lang,
+			sourceLanguageTag: languageTag,
+			sourceClaimedOfficial: edition.official,
+		});
+	}
 	await tx.insert(CatalogFactTables.software.identifier).values({
 		ownerId: identity.id,
 		namespace: "vndb.vn",

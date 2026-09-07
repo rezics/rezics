@@ -1,3 +1,4 @@
+import { createSoftwareParticipationContext } from "../src/services/catalog/software-contexts";
 import assert from "node:assert/strict";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -34,7 +35,6 @@ import {
 	addMusicMedium,
 	addMusicTrack,
 	addReleaseDate,
-	addSoftwareEdition,
 	createArea,
 	createEpisode,
 	createMusicCredit,
@@ -55,8 +55,8 @@ if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1"
 const url = new URL(connectionString);
 if (
 	!["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) ||
-	url.pathname !== "/rezics" ||
-	url.port !== (process.env.POSTGRES_LOCAL_PORT ?? "15432")
+	(!/^\/rezics_atlas(?:_[a-z0-9_]+)?$/.test(url.pathname) &&
+		(url.pathname !== "/rezics" || url.port !== (process.env.POSTGRES_LOCAL_PORT ?? "15432")))
 )
 	throw new Error("Domain acceptance requires rezics-dev PostgreSQL");
 const pool = new Pool({ connectionString, max: 1, statement_timeout: 10_000 });
@@ -398,32 +398,21 @@ try {
 
 			const vn = await createVisualNovel(tx, actor, named("VN one"));
 			const otherVn = await createVisualNovel(tx, actor, named("VN two"));
-			const edition = await addSoftwareEdition(tx, vn, actor, vn.revision, {
-				sourceNamespace: "vndb",
-				sourceLocalId: "1",
-				name: "Original",
+			await createSoftwareParticipationContext(tx, vn, actor, {
+				label: "Original participation",
+				languageTag: null,
+				state: "active",
 			});
-			await addSoftwareEdition(tx, otherVn, actor, otherVn.revision, {
-				sourceNamespace: "vndb",
-				sourceLocalId: "1",
-				name: "Different VN edition",
+			await createSoftwareParticipationContext(tx, otherVn, actor, {
+				label: "Independent participation",
+				languageTag: "en",
+				state: "active",
 			});
 			await createSoftwareRelease(tx, actor, {
 				name: named("VN release"),
 				content: vn,
-				editionId: edition.id,
 				isPatch: false,
 			});
-			await rejectsCode(
-				tx,
-				(nested) =>
-					createSoftwareRelease(nested, actor, {
-						name: named("Wrong VN edition"),
-						content: otherVn,
-						editionId: edition.id,
-					}),
-				"23503",
-			);
 
 			const installmentKind = await ensureCatalogDefinition(tx, {
 				namespace: "domain-fixture",

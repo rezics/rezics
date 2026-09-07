@@ -6,6 +6,7 @@ import type { CatalogReference } from "./contracts";
 import { BangumiSubjectSchema } from "./bangumi";
 import { OpenLibraryWorkSchema, OpenLibraryEditionSchema } from "./openlibrary";
 import { VndbVnSchema } from "./vndb";
+import { softwareParticipationSourceOccurrence } from "../database/schema/catalog-software";
 import { MusicBrainzReleaseSchema } from "./musicbrainz";
 import { loadCatalogIdentity } from "./storage";
 import type { CatalogValueNode } from "./value-nodes";
@@ -230,7 +231,36 @@ export async function exportVndbVn(
 			value: z.strictObject({ value: z.json() }).parse(envelope).value,
 			enumerable: true,
 		});
-	return VndbVnSchema.parse(data);
+	const record = VndbVnSchema.parse(data);
+	const mapping = softwareParticipationSourceOccurrence;
+	const occurrences = await tx
+		.select()
+		.from(mapping)
+		.where(
+			and(
+				eq(mapping.sourceRecordId, sourceRecordId),
+				eq(mapping.snapshotId, snapshotId),
+				eq(mapping.namespace, "editions"),
+				eq(mapping.contentId, reference.id),
+			),
+		)
+		.limit(129);
+	if (reference.owner !== "software" || occurrences.length !== (record.editions ?? []).length)
+		throw new Error("VNDB participation observation set differs from the selected snapshot");
+	const byLocalKey = new Map(occurrences.map((row) => [row.localKey, row]));
+	if (record.editions)
+		record.editions = record.editions.map((edition, position) => {
+			const occurrence = byLocalKey.get(String(edition.eid));
+			if (!occurrence || occurrence.sourcePointer !== `/editions/${position}`)
+				throw new Error("VNDB participation occurrence does not match its snapshot position");
+			return {
+				...edition,
+				name: occurrence.sourceLabel,
+				lang: occurrence.sourceLanguage,
+				official: occurrence.sourceClaimedOfficial,
+			};
+		});
+	return record;
 }
 
 export async function exportMusicBrainzRelease(

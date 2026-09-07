@@ -27,7 +27,8 @@ The 2026-09-07 review further requires a [provider-independent native model](REZ
 The four families below are mandatory coverage cases, not native schema templates
 or a ceiling on which selected objects can be indexed. Source-free semantics,
 cross-provider mapping and cross-domain composition must qualify alongside them.
-Further implementation waits for the [design-review gate](../plan/operational-refactor-20260906/00-source-complete-schema.md#design-review-gate).
+Autonomous implementation resolves the relevant [design obligations](../plan/operational-refactor-20260906/00-source-complete-schema.md#design-review-gate)
+using online research and actual checks; documents are updated when evidence changes.
 
 The current stage must deliver a database model that can fully represent the
 public catalog data of **VNDB, MusicBrainz, Bangumi and a book-index source**.
@@ -368,15 +369,21 @@ identities, history and visibility. Legacy conversion does not gate removal.
 
 ### 4.3 Design-review disposition
 
-**Review outcome, 2026-09-07: changes required; implementation remains gated.**
+**Review outcome, 2026-09-07: autonomous implementation proceeds in reviewed slices;
+complete schema qualification still requires the changes below.**
 The current DDL and commands are useful foundation evidence. Neither their table
 count nor successful selected-source observation roundtrips establish the final
 native model. The following are design obligations, not claims of implemented
-repairs:
+repairs. The software participation-context replacement is now implemented with
+immutable revisions/current heads, exact source occurrence keys, canonical
+commands, real PostgreSQL constraints/concurrency and selected live VNDB
+acceptance. The executable source-coverage gate preserves unmapped declarations
+as gaps. These repairs do not qualify the remaining source, reference or
+distribution capabilities:
 
-| Finding | Selected resolution and work required before design approval |
+| Finding | Selected resolution and remaining acceptance work |
 | --- | --- |
-| Provider-shaped Edition identity | Follow the [Edition decision](REZICS-Catalog领域边界与实施分期-20260906.md#24-edition-is-not-a-universal-intermediate-identity). Distinguish actual content versions/variants, publication/distribution and scoped participation contexts. Replace or reshape `software_edition`; snapshot scoping alone does not validate the abstraction. |
+| Provider-shaped Edition identity | The participation-context replacement is implemented and locally checked. Continue distinguishing independently evidenced content versions/variants and publication/distribution; the new context is neither. Follow the [Edition decision](REZICS-Catalog领域边界与实施分期-20260906.md#24-edition-is-not-a-universal-intermediate-identity). |
 | Incomplete source denominator/mapping | Separate declarations from required catalog semantics. Each required path needs native grain, classification, table/definition, conversion/unknown rule, canonical command, query/export and positive/negative fixtures. Typed observation storage alone is not canonical semantic coverage. |
 | Definition kind is weaker than domain validity | `property`/`role`/`predicate`/`vocabulary` checks do not establish allowed roles, cardinality, target shape, vocabulary membership or units/value ranges. Specify definition revisions and the FK/UNIQUE/CHECK plus concurrency-safe command/trigger enforcement for each invariant. |
 | Incomplete revision/evidence targets | Current operation-name logs cannot reconstruct old values; supports target fact/relation/name/identifier IDs without full revision or structural-field coverage. Define stable identity, immutable revision, current head, exact support and adoption decision for native fields and occurrences as well as dynamic relations. Restore must stage bounded work and atomically publish a validated head, respecting later erasures/revocations. |
