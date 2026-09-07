@@ -135,7 +135,7 @@ describe("event transport boundary", () => {
 		});
 		expect(consumerConfig(route, "apply", envelope.kind)).toMatchObject({
 			ack_policy: AckPolicy.Explicit,
-			max_deliver: 10,
+			max_deliver: -1,
 			max_ack_pending: 64,
 			max_batch: 32,
 			max_bytes: 2 * 1024 * 1024,

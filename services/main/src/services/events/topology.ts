@@ -80,7 +80,8 @@ export function consumerConfig(
 		deliver_policy: DeliverPolicy.All,
 		replay_policy: ReplayPolicy.Instant,
 		ack_wait: DELIVERY_LIMITS.ackWaitMs * 1e6,
-		max_deliver: DELIVERY_LIMITS.maxAttempts,
+		// Application attempts are finite; durable disposition must remain retryable after a crash.
+		max_deliver: -1,
 		max_ack_pending: DELIVERY_LIMITS.outstanding,
 		max_waiting: 16,
 		max_batch: DELIVERY_LIMITS.batch,

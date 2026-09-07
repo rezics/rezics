@@ -1,7 +1,7 @@
 # Bounded event transport
 
 This module implements the transport boundary from [event streaming](../../../../../docs/architecture/event-streaming.md).
-It is not wired into the shared email worker. Business owners supply a runtime
+It is not wired into the shared email worker. The independent [`event-worker.ts`](../../event-worker.ts) process and [runtime owner](runtime.md) wire source handlers. Business owners supply a runtime
 payload parser and transactional application/failure callbacks. An envelope's
 UUID, owner reference, revision, routing epoch and occurrence time prove neither
 current authority nor execution order. Validate those facts against current
@@ -59,10 +59,10 @@ Malformed data is identified by broker stream/sequence plus payload SHA-256;
 failure details use fixed classifications rather than arbitrary source-bearing
 exception text. The failure callback must persist a replay disposition before
 ACK. If storage is unavailable or the final disposition still asks to retry,
-the batch fails without ACK and the caller must alarm. MaxDeliver alone cannot
+the batch fails without ACK and the caller must alarm. The broker uses unlimited redelivery with bounded application attempts: MaxDeliver alone cannot
 guarantee final disposition: crashes, missed ACKs and lease loss can exhaust it
-without executing the last handler. An advisory/reconciliation owner and
-checkpointed replay remain required before unattended production activation.
+without executing the last handler. Durable disposition on every subsequent redelivery and
+checkpointed replay prevent silently stranding an exhausted delivery.
 Task deadlines/retry elapsed time belong to persisted task state; publication
 age is deliberately not used to expire otherwise replayable events.
 
@@ -86,8 +86,8 @@ and performs constant work per envelope, but it does not establish fsync cost,
 hot-key throughput, shard catch-up or total node memory. Measure 1k/5k/10k
 profiles, payload p99, replica bandwidth and rebuild reserve before activation.
 
-Unqualified: Debezium/PostgreSQL offset recovery, real business receipts,
-retention-floor recovery, exhausted-delivery reconciliation, external effect
+The [Debezium qualification](debezium-qualification.md) and [runtime checks](runtime.md) now cover local offset/ACK restart, persisted quarantine and task receipts. Remaining qualification includes
+authoritative rebuild beyond the retention floor, destructive history GC, external effect
 idempotency, broker quorum/disk faults, restore, production credentials/TLS and
 deployment. Retention loss must fail the owning consumer's health gate; this
 isolated batch adapter has no stored business checkpoint from which to infer it.
