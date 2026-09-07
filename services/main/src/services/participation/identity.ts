@@ -3,7 +3,8 @@ import type { DatabaseTransaction } from "../database";
 import { createCatalogIdentity } from "../catalog/storage";
 import { CatalogNameValuesSchema } from "../catalog/name-contracts";
 import { CatalogNameTables } from "../database/schema/catalog-names";
-import { entityCatalogProfile } from "../database/schema/catalog-entity";
+import { entityCatalogProfile, entityCatalogProfileRevision } from "../database/schema/catalog-entity";
+import { EntityProfileSchema } from "../catalog/entity-contracts";
 import { entityParticipation } from "../database/schema/participation";
 import {
 	entityPresentation,
@@ -49,6 +50,9 @@ export async function createParticipantIdentity(
 		input.operatorAuthUserId,
 	);
 	await tx.insert(entityCatalogProfile).values({ id: identity.id, identityShape: input.shape });
+	await tx.insert(entityCatalogProfileRevision).values({
+		ownerId: identity.id, revision: 1, snapshot: EntityProfileSchema.parse({}),
+	});
 	await tx.insert(entityParticipation).values({ entityId: identity.id });
 	for (const value of values) {
 		const [name] = await tx

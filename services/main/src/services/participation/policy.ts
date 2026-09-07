@@ -55,6 +55,17 @@ const ApprovedSourceProposalSchema = z.strictObject({
 });
 export type ApprovedSourceProposal = z.infer<typeof ApprovedSourceProposalSchema>;
 
+/** Carries exact proposal scope only into a savepoint created from its current transaction. */
+export function runParticipationSavepoint<T>(
+	tx: DatabaseTransaction,
+	work: (nested: DatabaseTransaction) => Promise<T>,
+): Promise<T> {
+	const approved = approvedSourceApplications.getStore();
+	return tx.transaction((nested) => approved?.tx === tx
+		? approvedSourceApplications.run({ ...approved, tx: nested }, () => work(nested))
+		: work(nested));
+}
+
 /**
  * The source decision owner first locks and checks the exact proposal/binding/native revision.
  * This callback scope then consumes the human's exact proposal grant and permits only that native target.
