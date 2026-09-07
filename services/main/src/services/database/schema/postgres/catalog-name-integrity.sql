@@ -1,8 +1,31 @@
+CREATE OR REPLACE FUNCTION public.catalog_valid_name_date(value jsonb)
+RETURNS boolean LANGUAGE plpgsql IMMUTABLE SET search_path = pg_catalog, public AS $$
+DECLARE y integer; m integer; d integer; maximum integer;
+BEGIN
+ IF value IS NULL THEN RETURN TRUE; END IF;
+ IF jsonb_typeof(value) <> 'object' THEN RETURN FALSE; END IF;
+ IF NOT value ?& ARRAY['year','month','day'] OR
+    (SELECT count(*) FROM jsonb_object_keys(value)) <> 3 THEN RETURN FALSE; END IF;
+ IF EXISTS (SELECT 1 FROM jsonb_each(value) item WHERE item.value <> 'null'::jsonb AND
+    (jsonb_typeof(item.value) <> 'number' OR NOT pg_input_is_valid(item.value::text, 'integer'))) THEN RETURN FALSE; END IF;
+ y := (value->>'year')::integer; m := (value->>'month')::integer; d := (value->>'day')::integer;
+ IF (m IS NOT NULL AND m NOT BETWEEN 1 AND 12) OR (d IS NOT NULL AND d NOT BETWEEN 1 AND 31) THEN RETURN FALSE; END IF;
+ IF m IS NULL OR d IS NULL THEN RETURN TRUE; END IF;
+ maximum := CASE WHEN m = 2 THEN CASE WHEN y IS NULL OR y % 400 = 0 OR (y % 4 = 0 AND y % 100 <> 0) THEN 29 ELSE 28 END WHEN m IN (4,6,9,11) THEN 30 ELSE 31 END;
+ RETURN d <= maximum;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION public.catalog_guard_named_head()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 BEGIN
  IF TG_OP = 'DELETE' THEN
   RAISE EXCEPTION 'Named facts retain identity and revision history' USING ERRCODE = '23514';
+ END IF;
+ IF TG_TABLE_NAME LIKE '%\_named_form' ESCAPE '\' THEN
+  IF NOT public.catalog_valid_name_date(NEW."begin") OR NOT public.catalog_valid_name_date(NEW."end") THEN
+   RAISE EXCEPTION 'Named-form dates must preserve valid known calendar components' USING ERRCODE = '23514';
+  END IF;
  END IF;
  IF (TG_OP = 'INSERT' AND NEW.revision <> 1) OR
     (TG_OP = 'UPDATE' AND (NEW.owner_id <> OLD.owner_id OR NEW.id <> OLD.id OR NEW.created_at <> OLD.created_at OR NEW.revision <> OLD.revision + 1)) THEN

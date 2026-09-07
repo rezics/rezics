@@ -132,6 +132,12 @@ try {
 				nested.update(tables.name).set({ value: "no revision" }).where(eq(tables.name.id, name.id)),
 			);
 			await rejects(tx, (nested) =>
+				nested
+					.update(tables.name)
+					.set({ revision: 5, begin: { year: 2025, month: 2, day: 29 } })
+					.where(eq(tables.name.id, name.id)),
+			);
+			await rejects(tx, (nested) =>
 				nested.insert(tables.nameRevision).values({ ...history[0]!, revision: 99 }),
 			);
 			const identifier = await addCatalogIdentifier(tx, identity, actor.id, alias.revision, {
@@ -206,10 +212,17 @@ try {
 			};
 			await bindCatalogNameSourceOccurrence(tx, identity, actor.id, source);
 			await bindCatalogNameSourceOccurrence(tx, identity, actor.id, source);
-			assert.deepEqual(await resolveCatalogNameSourceBinding(tx, identity, actor.id, {sourceRecordId:source.sourceRecordId, namespace:source.namespace, localKey:source.localKey}), {
-				nameId: name.id,
-				nameRevision: 4,
-			});
+			assert.deepEqual(
+				await resolveCatalogNameSourceBinding(tx, identity, actor.id, {
+					sourceRecordId: source.sourceRecordId,
+					namespace: source.namespace,
+					localKey: source.localKey,
+				}),
+				{
+					nameId: name.id,
+					nameRevision: 4,
+				},
+			);
 			checks++;
 			await assert.rejects(
 				tx.transaction((nested) =>
