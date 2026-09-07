@@ -99,3 +99,24 @@ CREATE TRIGGER music_medium_toc_record_revision AFTER INSERT OR UPDATE OR DELETE
   FOR EACH ROW EXECUTE FUNCTION public.catalog_record_music_component('release_id','medium_id','toc_id');
 CREATE TRIGGER music_candidate_toc_record_revision AFTER INSERT OR UPDATE OR DELETE ON public.music_candidate_toc
   FOR EACH ROW EXECUTE FUNCTION public.catalog_record_music_component('candidate_id','toc_id');
+
+CREATE TRIGGER music_medium_identifier_record_revision AFTER INSERT OR UPDATE OR DELETE ON public.music_medium_identifier
+  FOR EACH ROW EXECUTE FUNCTION public.catalog_record_music_component('release_id','medium_id','namespace','value');
+CREATE TRIGGER music_track_identifier_record_revision AFTER INSERT OR UPDATE OR DELETE ON public.music_track_identifier
+  FOR EACH ROW EXECUTE FUNCTION public.catalog_record_music_component('release_id','track_id','namespace','value');
+
+CREATE OR REPLACE FUNCTION public.catalog_check_music_source_occurrence()
+RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
+BEGIN
+  IF NOT EXISTS(SELECT 1 FROM public.music_component_revision
+    WHERE owner_id = NEW.owner_id AND id = NEW.history_id AND component = NEW.component
+      AND component_key = NEW.component_key AND operation <> 'DELETE') THEN
+    RAISE EXCEPTION 'Music source occurrence must reference the exact native component revision'
+      USING ERRCODE = '23514', CONSTRAINT = 'music_source_occurrence_exact_history';
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER music_component_source_occurrence_exact_history BEFORE INSERT ON public.music_component_source_occurrence
+  FOR EACH ROW EXECUTE FUNCTION public.catalog_check_music_source_occurrence();
+CREATE TRIGGER music_component_source_occurrence_immutable BEFORE UPDATE OR DELETE ON public.music_component_source_occurrence
+  FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_music_history();

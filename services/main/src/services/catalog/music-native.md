@@ -98,6 +98,31 @@ FK model does not claim distributed transactions or production throughput approv
 
 ## Acceptance and remaining work
 
+`music-structure.ts` now supports complete checked row edits, collision-safe
+reorder, dependency-ordered removal and restoration for release headers, media,
+tracks, labels, regional events, presentation occurrences, TOC attachments and
+medium/track identifiers. Batches admit at most 128 rows; exact history IDs fence
+every child, including writes that did not increment the aggregate revision.
+Compensation reverses only the recorded before/after heads. Its savepoint rolls
+back intermediate reorder rows and history if any check fails. Immutable source
+occurrence support links each archived path to its actual native history row,
+so duplicate label/event rows remain distinguishable.
+
+The source-occurrence relation has a source/snapshot/owner/component/path primary
+index and owner/history reverse index. Assuming 300–700 bytes per occurrence with
+both indexes, 500M entries occupy approximately 150–350 GB and 3B approximately
+0.9–2.1 TB before replicas/WAL. Each observation adds one row and two indexes;
+queries are snapshot/component prefix pages of 128, O(log N + page size), with
+no recurring corpus scan. Reorder maximum-position probes use the release/medium
+position indexes rather than scanning the release's complete track lifetime.
+The existing owner hash partition/shard and history retention requirements apply.
+
+`check-music-structure.ts` passed against the isolated PostgreSQL fixture on
+2026-09-07: track swaps and compensation, exact child conflict after an independent
+human correction, dependency rejection, complete rollback and remove/restore.
+All fixture rows rolled back. Source-occurrence DDL acceptance still requires
+the coordinated generated batch; these observations do not certify source coverage.
+
 Focused checks cover parser semantics, native command contracts and SQL fixtures.
 `check-music-domain.ts`, `check-musicbrainz-adoption.ts` and
 `check-music-native-history.ts` target an explicitly selected isolated PostgreSQL

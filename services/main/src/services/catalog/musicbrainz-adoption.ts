@@ -22,6 +22,8 @@ import {
 	projectMusicBrainzIdentifiers,
 } from "./musicbrainz-native";
 import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
+import { adoptMusicBrainzAliases } from "./musicbrainz-names";
+import { recordMusicSourceComponent } from "./music-source-occurrences";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { bindReferencedSourceIdentity } from "./source-references";
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
@@ -128,6 +130,7 @@ export async function adoptMusicBrainzRelease(
 		barcode: record.barcode ?? null,
 	});
 	await projectMusicBrainzReleaseMetadata(tx, actor, observation, identity.id, record);
+	await recordMusicSourceComponent(tx, observation, identity.id, "music_release", identity.id, "/");
 	if (record.asin) await projectMusicBrainzIdentifiers(tx, identity.id, "asin", [record.asin]);
 	let revision = identity.revision;
 	if (record.title)
@@ -162,6 +165,14 @@ export async function adoptMusicBrainzRelease(
 			})
 			.returning({ id: musicMedium.id });
 		if (!medium) throw new Error("MusicBrainz medium insertion returned no row");
+		await recordMusicSourceComponent(
+			tx,
+			observation,
+			identity.id,
+			"music_medium",
+			medium.id,
+			`/media/${mediumPosition}`,
+		);
 		if (sourceMedium.id)
 			await tx.insert(musicMediumIdentifier).values({
 				releaseId: identity.id,
@@ -169,7 +180,19 @@ export async function adoptMusicBrainzRelease(
 				namespace: "musicbrainz.medium",
 				value: sourceMedium.id,
 			});
-		await projectMusicBrainzDiscs(tx, identity.id, medium.id, sourceMedium.discs ?? []);
+		if (sourceMedium.id)
+			await recordMusicSourceComponent(
+				tx,
+				observation,
+				identity.id,
+				"music_medium_identifier",
+				`${medium.id}/musicbrainz.medium/${sourceMedium.id}`,
+				`/media/${mediumPosition}/id`,
+			);
+		await projectMusicBrainzDiscs(tx, identity.id, medium.id, sourceMedium.discs ?? [], {
+			observation,
+			path: `/media/${mediumPosition}/discs`,
+		});
 		const tracks = [
 			...(sourceMedium.pregap
 				? [{ track: sourceMedium.pregap, path: `/media/${mediumPosition}/pregap`, data: false }]
@@ -234,14 +257,38 @@ export async function adoptMusicBrainzRelease(
 				})
 				.returning({ id: musicTrackOccurrence.id });
 			if (!track) throw new Error("MusicBrainz track insertion returned no row");
+			await recordMusicSourceComponent(
+				tx,
+				observation,
+				identity.id,
+				"music_track_occurrence",
+				track.id,
+				path,
+			);
 			await tx.insert(musicTrackIdentifier).values({
 				releaseId: identity.id,
 				trackId: track.id,
 				namespace: "musicbrainz.track",
 				value: sourceTrack.id,
 			});
+			await recordMusicSourceComponent(
+				tx,
+				observation,
+				identity.id,
+				"music_track_identifier",
+				`${track.id}/musicbrainz.track/${sourceTrack.id}`,
+				`${path}/id`,
+			);
 		}
 	}
+	revision = await adoptMusicBrainzAliases(
+		tx,
+		actor,
+		identity,
+		revision,
+		observation,
+		record.aliases ?? [],
+	);
 	revision = await adoptMusicBrainzRelations(
 		tx,
 		actor,

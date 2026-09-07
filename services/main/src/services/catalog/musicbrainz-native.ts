@@ -23,6 +23,7 @@ import {
 import { catalogValueNodes } from "./value-nodes";
 import type { CatalogReference } from "./contracts";
 import { bindReferencedSourceIdentity } from "./source-references";
+import { recordMusicSourceComponent } from "./music-source-occurrences";
 import type { recordCatalogSourceDocument } from "./source-observations";
 import {
 	musicBrainzDate,
@@ -155,25 +156,49 @@ export async function projectMusicBrainzReleaseMetadata(
 			}
 		}
 		const date = musicBrainzDate(event.date);
-		await tx.insert(musicReleaseEvent).values({
+		const [nativeEvent] = await tx
+			.insert(musicReleaseEvent)
+			.values({
+				releaseId,
+				areaId,
+				dateYear: date.year,
+				dateMonth: date.month,
+				dateDay: date.day,
+				dateText: event.date ?? null,
+			})
+			.returning({ id: musicReleaseEvent.id });
+		if (!nativeEvent) throw new Error("Release event insertion returned no row");
+		await recordMusicSourceComponent(
+			tx,
+			observation,
 			releaseId,
-			areaId,
-			dateYear: date.year,
-			dateMonth: date.month,
-			dateDay: date.day,
-			dateText: event.date ?? null,
-		});
+			"music_release_event",
+			nativeEvent.id,
+			`/release-events/${position}`,
+		);
 	}
 	// The summary date is only a fallback when the source omitted its regional event list.
 	if (!record["release-events"] && record.date) {
 		const date = musicBrainzDate(record.date);
-		await tx.insert(musicReleaseEvent).values({
+		const [nativeEvent] = await tx
+			.insert(musicReleaseEvent)
+			.values({
+				releaseId,
+				dateYear: date.year,
+				dateMonth: date.month,
+				dateDay: date.day,
+				dateText: record.date,
+			})
+			.returning({ id: musicReleaseEvent.id });
+		if (!nativeEvent) throw new Error("Release event insertion returned no row");
+		await recordMusicSourceComponent(
+			tx,
+			observation,
 			releaseId,
-			dateYear: date.year,
-			dateMonth: date.month,
-			dateDay: date.day,
-			dateText: record.date,
-		});
+			"music_release_event",
+			nativeEvent.id,
+			"/date",
+		);
 	}
 	for (const [position, entry] of (record["label-info"] ?? []).entries()) {
 		let labelId: string | null = null;
@@ -198,9 +223,19 @@ export async function projectMusicBrainzReleaseMetadata(
 					),
 				});
 		}
-		await tx
+		const [nativeLabel] = await tx
 			.insert(musicReleaseLabel)
-			.values({ releaseId, labelId, catalogNumber: entry["catalog-number"] ?? null });
+			.values({ releaseId, labelId, catalogNumber: entry["catalog-number"] ?? null })
+			.returning({ id: musicReleaseLabel.id });
+		if (!nativeLabel) throw new Error("Release label insertion returned no row");
+		await recordMusicSourceComponent(
+			tx,
+			observation,
+			releaseId,
+			"music_release_label",
+			nativeLabel.id,
+			`/label-info/${position}`,
+		);
 	}
 }
 
@@ -209,8 +244,9 @@ export async function projectMusicBrainzDiscs(
 	releaseId: string,
 	mediumId: string,
 	discs: NonNullable<MusicBrainzRelease["media"][number]["discs"]>,
+	source?: { observation: Observation; path: string },
 ) {
-	for (const disc of discs) {
+	for (const [position, disc] of discs.entries()) {
 		const [toc] = await tx
 			.insert(musicDiscToc)
 			.values({ discId: disc.id, trackCount: disc["offset-count"], leadoutOffset: disc.sectors })
@@ -220,6 +256,15 @@ export async function projectMusicBrainzDiscs(
 			.insert(musicDiscTocOffset)
 			.values(disc.offsets.map((offset, position) => ({ tocId: toc.id, position, offset })));
 		await tx.insert(musicMediumToc).values({ releaseId, mediumId, tocId: toc.id });
+		if (source)
+			await recordMusicSourceComponent(
+				tx,
+				source.observation,
+				releaseId,
+				"music_medium_toc",
+				`${mediumId}/${toc.id}`,
+				`${source.path}/${position}`,
+			);
 	}
 }
 

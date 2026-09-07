@@ -23,6 +23,7 @@ import {
 import { catalogDefinitionRevision, entityIdentity, musicIdentity } from "./catalog-identity";
 import { referenceArea } from "./catalog-reference";
 import { users } from "./auth";
+import { catalogSourceSnapshot } from "./catalog-source";
 
 /** Exact native row revisions, including removals; this is not a source-payload archive. */
 export const musicComponentRevision = pgTable(
@@ -54,6 +55,46 @@ export const musicComponentRevision = pgTable(
 		check(
 			"music_component_revision_value_check",
 			sql`jsonb_typeof(${table.value}) = 'object' and octet_length(${table.componentKey}) between 1 and 512 and ${table.ownerRevision} > 0`,
+		),
+	],
+);
+
+/** Exact native support for a snapshot-local structural occurrence; not a source JSON archive. */
+export const musicComponentSourceOccurrence = pgTable(
+	"music_component_source_occurrence",
+	{
+		sourceRecordId: uuid().notNull(),
+		snapshotId: uuid().notNull(),
+		ownerId: uuid().notNull(),
+		component: text().notNull(),
+		componentKey: text().notNull(),
+		sourcePath: text().notNull(),
+		historyId: uuid().notNull(),
+	},
+	(table) => [
+		primaryKey({
+			columns: [
+				table.sourceRecordId,
+				table.snapshotId,
+				table.ownerId,
+				table.component,
+				table.sourcePath,
+			],
+		}),
+		foreignKey({
+			name: "music_component_source_snapshot_fk",
+			columns: [table.sourceRecordId, table.snapshotId],
+			foreignColumns: [catalogSourceSnapshot.sourceRecordId, catalogSourceSnapshot.id],
+		}).onDelete("restrict"),
+		foreignKey({
+			name: "music_component_source_history_fk",
+			columns: [table.ownerId, table.historyId],
+			foreignColumns: [musicComponentRevision.ownerId, musicComponentRevision.id],
+		}).onDelete("restrict"),
+		index("music_component_source_history_idx").on(table.ownerId, table.historyId),
+		check(
+			"music_component_source_key_check",
+			sql`octet_length(${table.sourcePath}) between 1 and 512 and left(${table.sourcePath}, 1) = '/' and octet_length(${table.component}) between 1 and 96 and octet_length(${table.componentKey}) between 1 and 512`,
 		),
 	],
 );

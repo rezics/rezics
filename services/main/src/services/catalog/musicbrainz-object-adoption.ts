@@ -6,6 +6,7 @@ import { bindCatalogSourceIdentity, acceptCatalogSourceInitialization } from "./
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import { createCatalogIdentity, addCatalogName } from "./storage";
 import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
+import { adoptMusicBrainzAliases } from "./musicbrainz-names";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
 import {
@@ -157,14 +158,14 @@ export async function adoptMusicBrainzObject(
 				value: document.record.title,
 			})
 		).revision;
-	for (const alias of document.record.aliases ?? [])
-		revision = (
-			await addCatalogName(tx, identity, actor, revision, {
-				kind: "alias",
-				languageTag: alias.locale || null,
-				value: alias.name,
-			})
-		).revision;
+	revision = await adoptMusicBrainzAliases(
+		tx,
+		actor,
+		identity,
+		revision,
+		observation,
+		document.record.aliases ?? [],
+	);
 	if (!existing)
 		await tx.insert(CatalogFactTables.music.identifier).values({
 			ownerId: identity.id,
