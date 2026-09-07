@@ -11,7 +11,10 @@ import { catalogSourceRecordId, type recordCatalogSourceDocument } from "./sourc
 import { bindReferencedSourceIdentity } from "./source-references";
 import { requireCatalogNameRevision } from "./names";
 import { ensureCatalogDefinition } from "./storage";
-import { createSoftwareParticipation } from "./software-participation";
+import {
+	createSoftwareParticipation,
+	type SoftwareParticipationValues,
+} from "./software-participation";
 
 const roles = {
 	scenario: "scenario_writer",
@@ -120,41 +123,14 @@ export async function appendVndbParticipation(
 	sourcePath: (path: string) => string = (path) => path,
 ) {
 	const plan = planVndbParticipation(input);
-	const targets = new Map<string, CatalogReference>();
-	const aliases = new Map<string, { id: string; revision: number }>();
-	const roleIds = new Map<string, string>();
+	const cache: VndbParticipationResolutionCache = {
+		targets: new Map(),
+		aliases: new Map(),
+		roles: new Map(),
+	};
 	const contexts = new Map<string, { id: string; revision: number }>();
 	const created: { participationId: string; revision: number }[] = [];
-	const resolve = async (id: string, path: string, shape: "unresolved" | "character") => {
-		let target = targets.get(id);
-		if (!target) {
-			target = await bindReferencedSourceIdentity(tx, actor, {
-				...vndbSourceKey(id),
-				owner: "entity",
-				shape,
-				evidence: document.referenceAt(sourcePath(path)),
-			});
-			targets.set(id, target);
-		}
-		return target;
-	};
 	for (const item of plan) {
-		const target = await resolve(item.staffId, item.staffPath, "unresolved");
-		let alias: { id: string; revision: number } | null = null;
-		if (item.aliasId !== null) {
-			const key = `${item.staffId}/${item.aliasId}`;
-			alias =
-				aliases.get(key) ??
-				(await resolveVndbStaffAlias(tx, target.id, item.staffId, item.aliasId));
-			if (item.expectedAlias !== undefined) {
-				const exact = await requireCatalogNameRevision(tx, target, actor, alias.id, alias.revision);
-				if (exact.value !== item.expectedAlias)
-					throw new Error(
-						"VNDB staff alias snapshot differs from the VN credit spelling; refresh the dependent observations",
-					);
-			}
-			aliases.set(key, alias);
-		}
 		let context: { id: string; revision: number } | null = null;
 		if (item.contextKey !== null) {
 			context = contexts.get(item.contextKey) ?? null;
@@ -178,31 +154,16 @@ export async function appendVndbParticipation(
 				contexts.set(item.contextKey, context);
 			}
 		}
-		let roleRevisionId = roleIds.get(item.role);
-		if (!roleRevisionId) {
-			roleRevisionId = (
-				await ensureCatalogDefinition(tx, {
-					namespace: "catalog.participation_role",
-					key: item.role,
-					kind: "vocabulary",
-					valueKind: null,
-				})
-			).revisionId;
-			roleIds.set(item.role, roleRevisionId);
-		}
-		const character =
-			item.characterId && item.characterPath
-				? await resolve(item.characterId, item.characterPath, "character")
-				: null;
-		const participation = await createSoftwareParticipation(tx, content, actor, {
-			entityId: target.id,
-			name: alias,
+		const values = await resolveVndbParticipationValues(
+			tx,
+			actor,
+			item,
+			document,
 			context,
-			characterId: character?.id ?? null,
-			roleRevisionId,
-			note: item.note,
-			state: "active",
-		});
+			cache,
+			sourcePath,
+		);
+		const participation = await createSoftwareParticipation(tx, content, actor, values);
 		await tx.insert(softwareParticipationCreditSourceOccurrence).values({
 			sourceRecordId: document.record.id,
 			snapshotId: document.snapshot.id,
@@ -214,4 +175,75 @@ export async function appendVndbParticipation(
 		created.push(participation);
 	}
 	return created;
+}
+
+export type VndbParticipationResolutionCache = {
+	targets: Map<string, CatalogReference>;
+	aliases: Map<string, { id: string; revision: number }>;
+	roles: Map<string, string>;
+};
+/** @internal Resolve only reviewed native targets and exact alias revisions for one source credit. */
+export async function resolveVndbParticipationValues(
+	tx: DatabaseTransaction,
+	actor: string,
+	item: ReturnType<typeof planVndbParticipation>[number],
+	document: Document,
+	context: { id: string; revision: number } | null,
+	cache: VndbParticipationResolutionCache,
+	sourcePath: (path: string) => string = (path) => path,
+): Promise<SoftwareParticipationValues> {
+	const resolve = async (id: string, path: string, shape: "unresolved" | "character") => {
+		let target = cache.targets.get(id);
+		if (!target) {
+			target = await bindReferencedSourceIdentity(tx, actor, {
+				...vndbSourceKey(id),
+				owner: "entity",
+				shape,
+				evidence: document.referenceAt(sourcePath(path)),
+			});
+			cache.targets.set(id, target);
+		}
+		return target;
+	};
+	const target = await resolve(item.staffId, item.staffPath, "unresolved");
+	let alias: { id: string; revision: number } | null = null;
+	if (item.aliasId !== null) {
+		const key = `${item.staffId}/${item.aliasId}`;
+		alias =
+			cache.aliases.get(key) ??
+			(await resolveVndbStaffAlias(tx, target.id, item.staffId, item.aliasId));
+		if (item.expectedAlias !== undefined) {
+			const exact = await requireCatalogNameRevision(tx, target, actor, alias.id, alias.revision);
+			if (exact.value !== item.expectedAlias)
+				throw new Error(
+					"VNDB staff alias snapshot differs from the VN credit spelling; refresh the dependent observations",
+				);
+		}
+		cache.aliases.set(key, alias);
+	}
+	let roleRevisionId = cache.roles.get(item.role);
+	if (!roleRevisionId) {
+		roleRevisionId = (
+			await ensureCatalogDefinition(tx, {
+				namespace: "catalog.participation_role",
+				key: item.role,
+				kind: "vocabulary",
+				valueKind: null,
+			})
+		).revisionId;
+		cache.roles.set(item.role, roleRevisionId);
+	}
+	const character =
+		item.characterId && item.characterPath
+			? await resolve(item.characterId, item.characterPath, "character")
+			: null;
+	return {
+		entityId: target.id,
+		name: alias,
+		context,
+		characterId: character?.id ?? null,
+		roleRevisionId,
+		note: item.note || null,
+		state: "active",
+	};
 }

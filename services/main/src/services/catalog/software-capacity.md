@@ -61,7 +61,7 @@ and software SQL fixtures remain separate evidence. User-reported playtime is a
 qualified estimate with sample count and estimator, not a fixed intrinsic duration.
 
 Unfinished scope remains explicit in `source-contracts/vndb-native-mapping.json`:
-VN and supporting-principal update orchestration, complete remaining public dump
+Supporting-principal update orchestration, versioned child correspondence after root rebind, complete remaining public dump
 assembly, API/dump source-surface transitions and centrally staged applications
 above the ordinary 128-change budget. A source-surface transition is rejected
 until a reviewed combined projection can retain unobserved fields safely. Native
@@ -102,3 +102,13 @@ at most roughly 100 serial updates/s; distinct credits share the content authori
 lock. Pause ingestion when lock-wait p95 exceeds 100 ms or the shared source task
 budget fills. Local deterministic/SQL fixtures prove integrity and bounded query
 shape, not production throughput, physical shard capacity or 500M-row timings.
+
+
+The VN update fixture now runs three complete apply/withdraw/reapply cycles with
+38 assertions, including actual native playtime qualifier reads and exact source
+claims on restored title forms. It tests a reused `eid` with a new language,
+an unchanged group renumbered to another `eid`, a retained local heading,
+multiple voiced characters and a credit edit made after proposal creation. The
+last edit is rejected atomically while preserving unrelated prior data. VN source
+credit observations are read once per admitted snapshot and inserted in batches
+of 128; no per-credit source-occurrence read loop scans an owner's lifetime.

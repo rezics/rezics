@@ -13,7 +13,11 @@ import type { z } from "zod";
 import { recordVndbSoftwareScalarOccurrence } from "./vndb-release";
 import { appendVndbVnNames, appendVndbDisplayName } from "./vndb-names";
 import { createSoftwareParticipationContext } from "./software-contexts";
-import { createNativeSoftwareContent, reviseSoftwareContent } from "./software";
+import {
+	SoftwareContentDetailsSchema,
+	createNativeSoftwareContent,
+	reviseSoftwareContent,
+} from "./software";
 import { appendVndbSemantics } from "./vndb-semantics";
 import { appendVndbParticipation } from "./vndb-participation";
 
@@ -55,18 +59,7 @@ export async function writeVndbVnProjection(
 ) {
 	const existing = await inspectExistingSourceBinding(tx, actor, observation, "vndb.vn.2");
 	if (existing && existing.status !== "initialize_reference") return existing;
-	const details = {
-		originalLanguageTag: record.olang ? vndbLanguage(record.olang) : null,
-		developmentStatus:
-			record.devstatus === 0
-				? ("finished" as const)
-				: record.devstatus === 1
-					? ("in_development" as const)
-					: record.devstatus === 2
-						? ("cancelled" as const)
-						: null,
-		description: record.description ?? null,
-	};
+	const details = vndbVnDetails(record);
 	const identity = existing
 		? {
 				...existing.reference,
@@ -164,4 +157,20 @@ export async function writeVndbVnProjection(
 		revision,
 		snapshotId: observation.snapshot.id,
 	};
+}
+
+/** @internal VNDB content fields use the canonical native scalar contract. */
+export function vndbVnDetails(record: z.output<typeof VndbVnSchema>) {
+	return SoftwareContentDetailsSchema.parse({
+		originalLanguageTag: record.olang ? vndbLanguage(record.olang) : null,
+		developmentStatus:
+			record.devstatus === 0
+				? ("finished" as const)
+				: record.devstatus === 1
+					? ("in_development" as const)
+					: record.devstatus === 2
+						? ("cancelled" as const)
+						: null,
+		description: record.description ?? null,
+	});
 }

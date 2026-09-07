@@ -13,23 +13,20 @@ import { CatalogRevisionConflict, loadCatalogIdentity, recordCatalogChange } fro
 import { loadCatalogSourceDocument, type CatalogSourceReceipt } from "./source-observations";
 import type { CatalogSourceNativeWriter } from "./source-proposals";
 import {
-	readCatalogSourceApplication,
 	CatalogSourceNativeChangesSchema,
 	type CatalogSourceNativeChange,
 } from "./source-applications";
-import { compensateCatalogSourceOwnedChange } from "./source-owned-compensation";
+import { compensateVndbSoftwareApplication } from "./vndb-software-compensation";
 import {
 	SoftwareReleaseDetailsSchema,
 	decodeSoftwareReleaseSnapshot,
 	reviseSoftwareRelease,
-	restoreSoftwareDetails,
 } from "./software";
 import {
 	decodeSoftwareComponentSnapshot,
 	SoftwareComponentValuesSchema,
 	type SoftwareComponentKind,
 	putSoftwareComponent,
-	restoreSoftwareComponent,
 	withdrawSoftwareComponent,
 } from "./software-components";
 import { VndbCatalogContractSha256, VndbDumpContractSha256 } from "./vndb";
@@ -219,82 +216,6 @@ async function recordComponent(
 	});
 }
 
-async function compensateRelease(tx: DatabaseTransaction, context: Context) {
-	const application = await readCatalogSourceApplication(tx, context.actor, {
-		sourceRecordId: context.sourceRecordId,
-		proposalId: context.proposalId,
-		action: "apply",
-	});
-	if (!application) throw new Error("VNDB withdrawal requires its exact native application");
-	const changes: CatalogSourceNativeChange[] = [];
-	let revision = context.expectedRevision;
-	for (const change of [...application.changes].reverse()) {
-		if (change.ownerId !== context.reference.id)
-			throw new TypeError("VNDB release compensation cannot change another owner");
-		if ("owner" in change) {
-			changes.push(await compensateCatalogSourceOwnedChange(tx, context.actor, change));
-			revision = (await loadCatalogIdentity(tx, context.reference, context.actor, true)).revision;
-		} else if (change.kind === "software-component") {
-			const result =
-				change.beforeRevision === null
-					? await withdrawSoftwareComponent(
-							tx,
-							context.reference,
-							context.actor,
-							revision,
-							change.component,
-							change.componentKey,
-							change.afterRevision,
-						)
-					: await restoreSoftwareComponent(
-							tx,
-							context.reference,
-							context.actor,
-							revision,
-							change.component,
-							change.componentKey,
-							change.afterRevision,
-							change.beforeRevision,
-						);
-			revision = result.revision;
-			changes.push({
-				...change,
-				beforeRevision: change.afterRevision,
-				afterRevision: result.componentRevision,
-			});
-		} else if (change.kind === "software-record") {
-			const result =
-				change.beforeRevision === null
-					? await reviseSoftwareRelease(tx, context.reference, context.actor, revision, {})
-					: await restoreSoftwareDetails(
-							tx,
-							context.reference,
-							context.actor,
-							revision,
-							change.beforeRevision,
-						);
-			if (!result) throw new Error("Software record compensation failed");
-			revision = result.revision;
-			const restored = await scalarHead(tx, context.reference.id);
-			if (!restored) throw new Error("Software compensation history is missing");
-			if (restored.revision !== change.afterRevision)
-				changes.push({
-					...change,
-					beforeRevision: change.afterRevision,
-					afterRevision: restored.revision,
-				});
-		} else throw new TypeError("Unexpected component in VNDB release application");
-	}
-	revision = await recordCatalogChange(
-		tx,
-		context.reference,
-		context.actor,
-		revision,
-		"source.vndb.release.withdraw",
-	);
-	return { revision, changes: CatalogSourceNativeChangesSchema.parse(changes) };
-}
-
 /** @alpha @remarks Genuine archived release update and exact compensation callbacks use canonical native writers. */
 export function createVndbReleaseNativeWriter(input: {
 	before: VndbPreparedSnapshot | null;
@@ -318,7 +239,8 @@ export function createVndbReleaseNativeWriter(input: {
 		const native = await loadCatalogIdentity(tx, context.reference, context.actor, true);
 		if (native.shape !== "release")
 			throw new TypeError("VNDB release requires native release identity");
-		if (context.action === "withdraw") return compensateRelease(tx, context);
+		if (context.action === "withdraw")
+			return compensateVndbSoftwareApplication(tx, context, "release");
 		if (context.previousSnapshotId !== (before?.snapshotId ?? null))
 			throw new CatalogRevisionConflict("VNDB source baseline changed after preparation");
 		const document = await loadCatalogSourceDocument(

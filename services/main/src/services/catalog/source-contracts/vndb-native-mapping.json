@@ -18,22 +18,23 @@
     "releaseUpdates": "services/main/scripts/check-vndb-native-updates.ts: 23 assertions over 3 apply/withdraw/reapply cycles; API fixture, local metadata preserved",
     "queryFields": "vndbAcquisitionRequest: all 8 official endpoints accepted selected field syntax with results=0; this is not adoption proof",
     "nativeQueries": "software.ts / software-participation.ts / storage.ts / semantic-history.ts",
-    "limits": "8 MB source records; 128 native changes per ordinary application; larger owners need central staged application protocol."
+    "limits": "8 MB source records; 128 native changes per ordinary application; larger owners need central staged application protocol.",
+    "vnUpdates": "services/main/scripts/check-vndb-vn-updates.ts: 38 assertions over 3 apply/withdraw/reapply cycles; exact renamed/renumbered contexts, staff/voice, playtime and name derivation/authority; post-proposal independent credit edit rejected atomically."
   },
   "apiLeaves": [
     {
       "objectType": "vn",
       "path": "aliases",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
-      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "alttitle",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
-      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
@@ -45,9 +46,9 @@
     {
       "objectType": "vn",
       "path": "description",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Native software content original language, development state and VNDB-markup description with immutable scalar history.",
-      "implementation": "software.ts / vndb-adoption.ts"
+      "implementation": "software.ts / vndb-adoption.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
@@ -59,128 +60,128 @@
     {
       "objectType": "vn",
       "path": "devstatus",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Native software content original language, development state and VNDB-markup description with immutable scalar history.",
-      "implementation": "software.ts / vndb-adoption.ts"
+      "implementation": "software.ts / vndb-adoption.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "editions.eid",
-      "status": "native-initial-sql",
+      "status": "native-update-sql",
       "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
-      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "editions.lang",
-      "status": "native-initial-sql",
+      "status": "native-update-sql",
       "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
-      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "editions.name",
-      "status": "native-initial-sql",
+      "status": "native-update-sql",
       "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
-      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "editions.official",
-      "status": "native-initial-sql",
+      "status": "native-update-sql",
       "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
-      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "extlinks.id",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "extlinks.label",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "extlinks.name",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "extlinks.url",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "id",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
-      "implementation": "source-bindings.ts / source-references.ts"
+      "implementation": "source-bindings.ts / source-references.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "image.dims",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "image.id",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "image.sexual",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "image.thumbnail",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "image.thumbnail_dims",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "image.url",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "image.violence",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "image.votecount",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
@@ -192,30 +193,30 @@
     {
       "objectType": "vn",
       "path": "length",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Source-supported reported-playtime relation with average, sample count, estimator and separate rough fallback category; no intrinsic duration is inferred.",
-      "implementation": "vndb-semantics-contracts.ts / semantic-history.ts"
+      "implementation": "vndb-semantics-contracts.ts / semantic-history.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "length_minutes",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Source-supported reported-playtime relation with average, sample count, estimator and separate rough fallback category; no intrinsic duration is inferred.",
-      "implementation": "vndb-semantics-contracts.ts / semantic-history.ts"
+      "implementation": "vndb-semantics-contracts.ts / semantic-history.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "length_votes",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Source-supported reported-playtime relation with average, sample count, estimator and separate rough fallback category; no intrinsic duration is inferred.",
-      "implementation": "vndb-semantics-contracts.ts / semantic-history.ts"
+      "implementation": "vndb-semantics-contracts.ts / semantic-history.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "olang",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Native software content original language, development state and VNDB-markup description with immutable scalar history.",
-      "implementation": "software.ts / vndb-adoption.ts"
+      "implementation": "software.ts / vndb-adoption.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
@@ -241,23 +242,23 @@
     {
       "objectType": "vn",
       "path": "relations.id",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "relations.relation",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "relations.relation_official",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
@@ -269,184 +270,184 @@
     {
       "objectType": "vn",
       "path": "screenshots.dims",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "screenshots.id",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "screenshots.release.id",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "screenshots.sexual",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "screenshots.thumbnail",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "screenshots.thumbnail_dims",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "screenshots.url",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "screenshots.violence",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "screenshots.votecount",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "staff.id",
-      "status": "native-initial-sql",
+      "status": "native-update-sql",
       "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
-      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "staff.eid",
-      "status": "native-initial-sql",
+      "status": "native-update-sql",
       "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
-      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "staff.note",
-      "status": "native-initial-sql",
+      "status": "native-update-sql",
       "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
-      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "staff.role",
-      "status": "native-initial-sql",
+      "status": "native-update-sql",
       "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
-      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "tags.id",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "tags.lie",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "tags.rating",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "tags.spoiler",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
-      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "title",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
-      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "titles.lang",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
-      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "titles.latin",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
-      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "titles.main",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
-      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "titles.official",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
-      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "titles.title",
-      "status": "native-initial",
+      "status": "native-update-sql",
       "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
-      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "va.character.id",
-      "status": "native-initial-sql",
+      "status": "native-update-sql",
       "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
-      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "va.note",
-      "status": "native-initial-sql",
+      "status": "native-update-sql",
       "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
-      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
       "path": "va.staff.id",
-      "status": "native-initial-sql",
+      "status": "native-update-sql",
       "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
-      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts / vndb-vn-update.ts"
     },
     {
       "objectType": "vn",
@@ -2050,7 +2051,7 @@
     }
   ],
   "remainingGates": [
-    "VN context/participation/name/semantic callback still needs complete source orchestration and cycle SQL.",
+    "Versioned child correspondence after deliberate root rebind must permit the same snapshot on another native target while preserving old alias/context evidence.",
     "Supporting principal native update callbacks remain open even where initial adoption is implemented.",
     "Remaining dump assembly, image/link/anime/character/staff joins and table-specific bulk mapping must close individually.",
     "API-to-dump and dump-to-API source-surface transitions need a reviewed combined projection; current release callbacks reject such switches rather than erase unobserved fields.",

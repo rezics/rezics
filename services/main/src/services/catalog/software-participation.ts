@@ -176,15 +176,16 @@ export async function readSoftwareParticipations(
 	tx: DatabaseTransaction,
 	content: CatalogReference,
 	actor: string | null,
-	input: { afterId?: string; limit?: number } = {},
+	input: { afterId?: string; limit?: number; includeWithdrawn?: boolean } = {},
 ) {
 	const page = z
 		.strictObject({
 			afterId: z.uuid().optional(),
 			limit: z.number().int().min(1).max(100).default(50),
+			includeWithdrawn: z.boolean().default(false),
 		})
 		.parse(input);
-	await requireContent(tx, content, actor, false);
+	await requireContent(tx, content, actor, page.includeWithdrawn);
 	const visibleEntity = (column: typeof revisions.entityId | typeof revisions.characterId) =>
 		sql`exists (select 1 from ${entityIdentity} where ${entityIdentity.id} = ${column} and ${entityIdentity.deletedAt} is null and ((${entityIdentity.createdByAuthUserId} = ${actor}::uuid) is true or (${entityIdentity.visibility} in ('public','unlisted') and ${entityIdentity.status} = 'published' and ${entityIdentity.moderationStatus} = 'approved')))`;
 	const rows = await tx
@@ -201,6 +202,7 @@ export async function readSoftwareParticipations(
 		.where(
 			and(
 				eq(heads.contentId, content.id),
+				page.includeWithdrawn ? undefined : eq(revisions.state, "active"),
 				page.afterId ? gt(heads.id, page.afterId) : undefined,
 				visibleEntity(revisions.entityId),
 				sql`(${revisions.characterId} is null or ${visibleEntity(revisions.characterId)})`,
