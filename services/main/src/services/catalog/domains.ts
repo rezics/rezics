@@ -28,6 +28,7 @@ import {
 } from "../database/schema/catalog-software";
 import { referenceArea } from "../database/schema/catalog-reference";
 import { musicIdentity } from "../database/schema/catalog-identity";
+import { readCatalogAuthorityScope } from "../participation/policy";
 import {
 	CatalogPartialDateSchema,
 	CatalogReferenceSchema,
@@ -142,16 +143,43 @@ export type MusicCreditMemberInput = {
 	readonly sourcePosition?: number | null;
 };
 
+async function requireMusicCreditDraftContext(
+	tx: DatabaseTransaction,
+	actor: string,
+	credit: typeof musicArtistCredit.$inferSelect,
+) {
+	if (credit.createdForMusicId) {
+		await loadCatalogIdentity(
+			tx,
+			{ owner: "music", id: credit.createdForMusicId },
+			actor,
+			true,
+			"share",
+		);
+		return;
+	}
+	const scope = await readCatalogAuthorityScope(tx, actor);
+	if (scope.creatorAuthUserId !== actor || credit.createdByAuthUserId !== actor)
+		throw new CatalogAccessDenied("Artist credit has no authorized creation context");
+}
+
 export async function beginMusicCredit(
 	tx: DatabaseTransaction,
 	actor: string,
 	renderedName: string | null = null,
+	createdFor?: CatalogReference,
 ) {
 	z.uuid().parse(actor);
 	z.string().max(512_000).nullable().parse(renderedName);
+	if (createdFor) {
+		if (createdFor.owner !== "music")
+			throw new TypeError("Credit creation context must be a music identity");
+		await loadCatalogIdentity(tx, createdFor, actor, true, "share");
+	} else if ((await readCatalogAuthorityScope(tx, actor)).creatorAuthUserId !== actor)
+		throw new CatalogAccessDenied("Scoped credit creation requires an authorized music context");
 	const [credit] = await tx
 		.insert(musicArtistCredit)
-		.values({ renderedName, createdByAuthUserId: actor })
+		.values({ renderedName, createdByAuthUserId: actor, createdForMusicId: createdFor?.id ?? null })
 		.returning({ id: musicArtistCredit.id });
 	if (!credit) throw new Error("Artist credit insertion returned no row");
 	return credit.id;
@@ -196,8 +224,8 @@ export async function appendMusicCreditMembers(
 		.where(eq(musicArtistCredit.id, creditId))
 		.limit(1)
 		.for("update");
-	if (!credit || credit.createdByAuthUserId !== actor)
-		throw new CatalogAccessDenied("Artist credit is not editable by this actor");
+	if (!credit) throw new CatalogAccessDenied("Artist credit is not editable by this actor");
+	await requireMusicCreditDraftContext(tx, actor, credit);
 	if (
 		credit.sealedAt ||
 		credit.retiredAt ||
@@ -233,8 +261,8 @@ export async function sealMusicCredit(
 		.where(eq(musicArtistCredit.id, creditId))
 		.limit(1)
 		.for("update");
-	if (!credit || credit.createdByAuthUserId !== actor)
-		throw new CatalogAccessDenied("Artist credit is not editable by this actor");
+	if (!credit) throw new CatalogAccessDenied("Artist credit is not editable by this actor");
+	await requireMusicCreditDraftContext(tx, actor, credit);
 	if (
 		credit.sealedAt ||
 		credit.retiredAt ||

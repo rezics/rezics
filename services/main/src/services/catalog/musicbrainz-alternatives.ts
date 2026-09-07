@@ -74,7 +74,7 @@ export async function adoptMusicBrainzAlternativeRelease(
 		});
 		if (sourceRelease.created || sourceRelease.id !== release.id)
 			throw new TypeError("Alternative tracklist must target its already adopted source release");
-		const credit = musicBrainzCreditWriter(inner, actor, observation);
+		const credit = musicBrainzCreditWriter(inner, actor, observation, release);
 		const releasePresentationId = crypto.randomUUID();
 		const operations: MusicComponentMutation[] = [];
 		const evidence: { component: MusicComponentName; key: string; path: string }[] = [];

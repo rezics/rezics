@@ -80,7 +80,7 @@ export async function adoptMusicBrainzRelease(
 		reference: identity,
 		mappingVersion: "musicbrainz.release.1",
 	});
-	const creditId = musicBrainzCreditWriter(tx, actor, observation);
+	const creditId = musicBrainzCreditWriter(tx, actor, observation, identity);
 	let releaseGroupId: string | null = null;
 	if (record["release-group"]) {
 		const group = await bindReferencedSourceIdentity(tx, actor, {

@@ -91,7 +91,7 @@ export function musicBrainzReleaseNativeWriter(
 				...context,
 				previousSnapshotId: context.previousSnapshotId,
 			});
-			const credit = musicBrainzCreditWriter(tx, context.actor, observation);
+			const credit = musicBrainzCreditWriter(tx, context.actor, observation, context.reference);
 			const releaseId = context.reference.id;
 			const root = oldAt("music_release", "/");
 			let releaseGroupId = root.value.release_group_id;

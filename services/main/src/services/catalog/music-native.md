@@ -246,3 +246,15 @@ include UUID identity, name, parent, child order and description; the upstream
 schema is pinned in the source inventory. Inline names now have a native query
 path. Full SQL taxonomy hierarchy installation and native source callback
 qualification are not established by this foundation checkpoint.
+
+Artist-credit fragments retain independent identity and may be reused. Their
+optional immutable `created_for_music_id` records a creation context for scoped
+construction, rather than granting access through the account's creator ID.
+Beginning, appending and sealing such a fragment require current write authority
+over that context; standalone creation requires direct creator authority.
+Published reuse and actual readable native referencers govern later reads.
+The context lookup is one music-identity primary-key probe, and the context/id
+index supports bounded draft pages. Estimate 16 bytes of row data and 48–80 bytes
+of index storage per contextual fragment: 32–48 GB at 500 million fragments,
+192–288 GB at 3 billion, before replicas/WAL. Source admission still caps one
+credit batch at 128 members and 512 KB; larger credits use bounded append batches.

@@ -1,6 +1,7 @@
 import { catalogSourceSupportColumns } from "./source-support";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import type { DatabaseTransaction } from "../database";
+import type { CatalogReference } from "./contracts";
 import { initializeEntityProfile, resolveEntityShape } from "./entities";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import { initializeReferenceProfile, appendAreaCodes } from "./references";
@@ -139,6 +140,7 @@ export function musicBrainzCreditWriter(
 	tx: DatabaseTransaction,
 	actor: string,
 	observation: Observation,
+	createdFor: CatalogReference,
 ) {
 	const cache = new Map<string, string>();
 	return async (members: MusicBrainzCredit | undefined, path: string) => {
@@ -200,6 +202,7 @@ export function musicBrainzCreditWriter(
 			tx,
 			actor,
 			values.map((value) => value.creditedName + value.joinPhrase).join(""),
+			createdFor,
 		);
 		for (let offset = 0; offset < values.length; offset += 128)
 			await appendMusicCreditMembers(tx, actor, id, offset, values.slice(offset, offset + 128));

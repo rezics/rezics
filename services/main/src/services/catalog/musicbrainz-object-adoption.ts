@@ -65,7 +65,7 @@ export async function adoptMusicBrainzObject(
 		reference: identity,
 		mappingVersion: `musicbrainz.${document.kind}.2`,
 	});
-	const credit = musicBrainzCreditWriter(tx, actor, observation);
+	const credit = musicBrainzCreditWriter(tx, actor, observation, identity);
 	switch (document.kind) {
 		case "work": {
 			const typeRevisionId = await musicBrainzVocabulary(

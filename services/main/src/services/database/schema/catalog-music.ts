@@ -156,6 +156,7 @@ export const musicArtistCredit = pgTable(
 		id: createUuidv7PrimaryKey(),
 		renderedName: text(),
 		createdByAuthUserId: uuid().references(() => users.id, { onDelete: "set null" }),
+		createdForMusicId: uuid().references(() => musicIdentity.id, { onDelete: "restrict" }),
 		publiclyReusable: boolean().default(false).notNull(),
 		memberCount: bigint({ mode: "number" }).default(0).notNull(),
 		lastPosition: bigint({ mode: "number" }).default(-1).notNull(),
@@ -164,6 +165,7 @@ export const musicArtistCredit = pgTable(
 	},
 	(table) => [
 		index("music_artist_credit_creator_idx").on(table.createdByAuthUserId, table.id),
+		index("music_artist_credit_context_idx").on(table.createdForMusicId, table.id),
 		check(
 			"music_credit_prefix_check",
 			sql`${table.memberCount} between 0 and 9007199254740991 and ${table.lastPosition} between -1 and 9007199254740991 and (${table.sealedAt} is null or (${table.memberCount} > 0 and ${table.lastPosition} = ${table.memberCount} - 1))`,

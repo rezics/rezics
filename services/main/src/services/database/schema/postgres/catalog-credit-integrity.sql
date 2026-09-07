@@ -1,3 +1,16 @@
+CREATE OR REPLACE FUNCTION public.catalog_require_credit_creation_context()
+RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
+BEGIN
+  IF NEW.created_for_music_id IS NOT NULL THEN
+    PERFORM id FROM public.music_identity WHERE id=NEW.created_for_music_id AND deleted_at IS NULL FOR SHARE;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Credit creation context must be an existing active music identity' USING ERRCODE='23514'; END IF;
+  END IF;
+  RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS music_credit_creation_context ON public.music_artist_credit;
+CREATE TRIGGER music_credit_creation_context BEFORE INSERT ON public.music_artist_credit
+FOR EACH ROW EXECUTE FUNCTION public.catalog_require_credit_creation_context();
+
 CREATE OR REPLACE FUNCTION public.catalog_guard_credit_member()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 DECLARE target_id uuid; sealed_time timestamptz; retired_time timestamptz;
@@ -42,6 +55,13 @@ CREATE OR REPLACE FUNCTION public.catalog_guard_credit_header()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 BEGIN
   IF NEW.id <> OLD.id THEN RAISE EXCEPTION 'Credit identity is immutable' USING ERRCODE = '23514'; END IF;
+  IF NEW.created_for_music_id IS DISTINCT FROM OLD.created_for_music_id THEN
+    RAISE EXCEPTION 'Credit creation context is immutable' USING ERRCODE='23514';
+  END IF;
+  IF NEW.created_by_auth_user_id IS DISTINCT FROM OLD.created_by_auth_user_id
+    AND NOT (NEW.created_by_auth_user_id IS NULL AND pg_trigger_depth()>1) THEN
+    RAISE EXCEPTION 'Credit creator is immutable except Auth erasure' USING ERRCODE='23514';
+  END IF;
   IF (NEW.member_count <> OLD.member_count OR NEW.last_position <> OLD.last_position) AND pg_trigger_depth() < 2 THEN
     RAISE EXCEPTION 'Credit prefix counters are maintained from inserted members'
       USING ERRCODE = '23514', CONSTRAINT = 'music_credit_prefix_projection';
