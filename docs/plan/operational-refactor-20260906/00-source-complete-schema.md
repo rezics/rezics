@@ -26,6 +26,13 @@ Cross-domain distribution composition and organizational grouping are separate
 required capabilities. [Generic source binding/subscription](../../report/REZICS-source-integration-and-review-20260906.md#44-generic-source-bindings-and-subscriptions)
 and its scheduled event/queue protocol apply across owners.
 
+The [event transport architecture](../../architecture/event-streaming.md) is now
+accepted: NATS JetStream, preferred Debezium Server outbox relay and Bun consumers.
+This closes component selection, not the remaining schema/reference/routing or
+execution qualification artifacts below. PostgreSQL retains business plans,
+outbox, checkpoints and application receipts; broker state is not a second
+authority for canonical data or permission.
+
 Before implementation resumes, review the following concrete design artifacts
 in their owning reports/plans, without creating competing specifications:
 

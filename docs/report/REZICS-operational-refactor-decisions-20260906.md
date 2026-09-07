@@ -28,6 +28,7 @@ Research inspected current schemas, domain/API/worker code, Web feature owners, 
 | [Language and authority](REZICS-language-and-authority-audit-20260906.md) | Current language paths, BCP 47/IANA/CLDR distinctions, source-code mappings, official-name/translation contracts |
 | [Sources and review](REZICS-source-integration-and-review-20260906.md) | Provider acquisition/rights, binding/observation/adoption, AI review, conformance and source capacity math |
 | [System readiness](REZICS-system-readiness-audit-20260906.md) | Current-source defects/risks, preservation requirements, workers, query bounds, deployment and recovery |
+| [Event streaming architecture](../architecture/event-streaming.md) | Accepted NATS JetStream choice, preferred Debezium outbox relay, event/task consumption, durability, routing/retention and pending integration/operation qualification |
 
 The three earlier architecture reports remain the baseline for Unit capabilities, optional Work, domain ownership, composition, relations and Tag semantics. This program adds explicit language/authority and operational contracts, adds VNDB to the named adapter scope, and selects a replacement-environment cutover default. It does not reopen those reports' future GPU/compute/education/package-marketplace examples as mandatory launch scope.
 
@@ -60,7 +61,7 @@ U14 reading groups/challenges and U15 third-party catalog/API consumers proceed 
 
 | ID | Decision | Reason and implementation owner |
 | --- | --- | --- |
-| D01 | One PostgreSQL business database initially, domain-owned table groups, PGroonga with measured partition/cutover limits | Preserve relational execution and transactions; do not confuse a future extensible catalog with mandatory microservices. P01/P06/P10 |
+| D01 | One PostgreSQL business database initially, domain-owned table groups, PGroonga and the D38 dedicated event transport | Preserve relational execution/transactions while JetStream owns new event and ready-task delivery. Separate broker deployment does not require a database per semantic class. P01/P06/P10 |
 | D02 | Stable logical Unit IDs with owner-local physical identity/lifecycle; explicit concrete versions; optional evidenced Work | No mandatory global `unit` parent in the target. Define new addresses and rewrite every retained reference consumer. Legacy address/ID mapping belongs to the offline tool. P01/P11 |
 | D03 | Typed stable columns, fixed domain structural relations, governed long-tail values and dynamic semantic relation revisions with one writer | Classify each source path explicitly; a shared relation interface cannot duplicate a structural writer. P01 |
 | D04 | Identified content occurrences; local commands, paged reads and segmented checkpoints | Existing whole-owner loads are unsafe for large structures/collections. P01/P07 |
@@ -116,6 +117,7 @@ their implementation is unqualified and waits for the stage's design-review gate
 | D35 | SourceRecord and logical Unit support scoped many-to-many binding; subscriptions configure target following while acquisition is shared | [Source protocol](REZICS-source-integration-and-review-20260906.md#44-generic-source-bindings-and-subscriptions). Specify exact/candidate cardinality, snapshot-local references, revisioned pause/resume/rebind and visibility-safe shared demand. P04 |
 | D36 | Scheduled source checks publish durable change events and bounded target update jobs | [Execution protocol](REZICS-source-integration-and-review-20260906.md#51-scheduled-checks-change-events-and-update-jobs). Canonical commands, review policies, transactional outbox, fences and receipts enforce replay and cancellation semantics. P04/P05/P10 |
 | D37 | Complete design review before further schema/runtime implementation | [Design gate](../plan/operational-refactor-20260906/00-source-complete-schema.md#design-review-gate) and [review disposition](REZICS-source-complete-catalog-schema-20260906.md#43-design-review-disposition). Documentation updates do not approve implementation; earlier authorization does not close the revised gate. |
+| D38 | NATS JetStream is the accepted event/task service; qualify Debezium Server as the preferred committed-outbox relay, with Bun business consumers | [Event streaming architecture](../architecture/event-streaming.md). PostgreSQL retains domain state, plans, outbox/checkpoints/receipts. Separate replayable events from competing tasks; qualify R3/file/sync policy, bounded consumers, relay/WAL recovery and 500M/3B capacity. Accepted 2026-09-07; implementation and deployment remain pending. P04/P10/P12 |
 
 These decisions preserve D31's independent offline-conversion track and do not
 lower required source coverage, target integrity or the 500M/3B design baseline.
@@ -212,7 +214,10 @@ These gates do not become fictional completed work because the maintainer permit
 | Legacy transfer | Separate offline software into the final target; no online catch-up | Reconsider only if the maintainer changes the stopped-site/offline premise |
 | New product/domain terminology | Reuse approved termbase; internal English contract names only | User-facing new concepts are implemented and reviewed under localization policy |
 
-No question is parked merely because several solutions exist. Defaults above allow the corresponding implementation plan to start. Reopen a decision only on new evidence or a changed product requirement.
+No question is parked merely because several solutions exist. D38 closes broker
+selection; remaining reference, schema and execution artifacts still follow
+D37's design-review gate. Reopen a selected decision on new evidence or a changed
+product requirement rather than treating unmeasured deployment as completed work.
 
 ## 10. Documentation validation and next execution boundary
 

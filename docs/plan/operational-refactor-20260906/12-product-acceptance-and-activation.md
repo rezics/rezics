@@ -18,6 +18,7 @@ of this same schema gate. Four-source conformance alone does not qualify them.
 | Provider-independent design review | Native referents/capabilities and complete source dispositions; no mandatory Edition layer; reviewed reference/revision/key/capacity and execution contracts before further implementation | Open |
 | Cross-provider and cross-domain native model | Manual plus independent-source equivalence; translations/variants, parallel-language publications, repeated occurrences and mixed-media distribution; organizational grouping distinct from composition; no invented parents | Not qualified |
 | Generic source subscription and update execution | Scoped many-to-many bindings, shared acquisition, due checks/events, paged fan-out and canonical updates; pause/rebind races, unchanged checks, crash/retry and stale-lease rejection | Not qualified |
+| Accepted broker/relay integration | JetStream event/task retention, independent durable consumption, preferred Debezium outbox delivery, ACK/commit/offset crash behavior, explicit failed-work handling, R3/file/sync qualification, retention-gap and WAL-pressure recovery | Technology selected; runtime not qualified |
 | Logical Unit, physical owner identity | Fresh target with no global `unit`/universal parent or legacy runtime dependency; new-contract identity/address/privacy behavior; concrete reference rejection; concurrent ownership conflict handling; bounded routing and locator rebuild | Not qualified |
 | Fixed structure versus dynamic relation | Every required source path classified with actual storage/definition and sole writer; structural graph reads do not create duplicate writable facts; governed role additions keep target/value constraints | Not qualified |
 | Universe, franchise and series | Native source-free creation/edit/query/export/history/restore; same-name identities remain separate; two continuities in one franchise; `about` differs from `set_in_universe`; multiple memberships/order profiles/evidence survive without automatic behavior or rights propagation | Not qualified |
@@ -33,6 +34,12 @@ already implemented test results. All execution/conformance rows require actual
 evidence after implementation is authorized. Preserve the complete four-source
 denominator and add an independent provider/manual case to test generality;
 renaming source-specific tables or counting their rows does not pass either gate.
+
+The [event-streaming qualification](../../architecture/event-streaming.md#qualification-and-implementation-sequence)
+adds an end-to-end source-to-canonical-update path and independently consumed
+search/notification results. Benchmark comparisons use equal message size,
+replication, sync and consumer settings; advertised broker throughput and the
+architecture's storage arithmetic are not production acceptance evidence.
 
 ## Outcome
 

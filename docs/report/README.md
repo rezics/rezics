@@ -1,8 +1,9 @@
 # Architecture and operational research reports
 
 These reports describe proposed REZICS architecture. They do not establish that a schema,
-adapter, migration, or capacity target has been implemented or qualified. Source code and the
-implemented contracts under [`docs/architecture`](../architecture/) describe current behavior.
+adapter, migration, or capacity target has been implemented or qualified. Documents under
+[`docs/architecture`](../architecture/) distinguish accepted designs from implemented
+contracts in their status; use source code and qualification evidence for current behavior.
 
 | Report | Responsibility | Delivery status |
 | --- | --- | --- |
@@ -11,6 +12,7 @@ implemented contracts under [`docs/architecture`](../architecture/) describe cur
 | [Product opportunities and scenarios, 2026-09-06](REZICS-product-opportunities-and-user-scenarios-20260906.md) | Primary market evidence, U01–U15 user scenarios, cold start and product metrics. | Research and selected scope; market hypotheses remain distinguished from adoption evidence. |
 | [Language and authority audit, 2026-09-06](REZICS-language-and-authority-audit-20260906.md) | BCP 47/IANA versus locale conventions, source mappings, multiple named forms and scoped officialness. | Current-source audit and target contracts; language migration not run. |
 | [Source integration and review, 2026-09-06](REZICS-source-integration-and-review-20260906.md) | MusicBrainz/VNDB/Bangumi acquisition, continuous adoption, rights, AI review, repair and capacity. | Source evidence and implementation decisions; no full import, source authorization or AI evaluation claimed. |
+| [Event streaming architecture, 2026-09-07](../architecture/event-streaming.md) | Dedicated NATS JetStream transport, preferred Debezium outbox relay, independent event/task consumers, deployment, replay and capacity. | Maintainer-accepted infrastructure decision; implementation, benchmark and production qualification pending. |
 | [System readiness audit, 2026-09-06](REZICS-system-readiness-audit-20260906.md) | Concrete code/contract gaps, worker correctness, privacy, query costs, migration and recovery. | Static audit; no production inspection, rendered QA or capacity certification. |
 | [Platform architecture and gradual expansion, 2026-09-05](REZICS-动态元信息与渐进扩展架构-20260905.md) | Product direction, Unit capabilities, Work and edition boundaries, unified Entity participation, Access delegation, and gradual deployment. | Adopted direction; migrations and full capacity qualification remain pending. |
 | [Content structures, relations, and query models, 2026-09-06](REZICS-内容结构关系与查询模型-20260906.md) | Fixed and dynamic fields, content identity and occurrences, traversal, Tag evolution, referenceable relations, and relational/full-text query execution. | Existing implementation observations plus proposed changes; not a completion record. |

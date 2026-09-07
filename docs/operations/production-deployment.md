@@ -18,6 +18,33 @@ The sibling `../nixos` repository owns the host, Cloudflare Tunnel origins,
 Nomad ACLs, release gateway, fixed production jobspecs, and release parent jobs.
 Cloudflare Tunnel is the only public ingress to host services.
 
+## Accepted event infrastructure, pending deployment
+
+The maintainer accepted [NATS JetStream event streaming and task delivery](../architecture/event-streaming.md)
+on 2026-09-07, with Debezium Server as the preferred PostgreSQL outbox relay to
+qualify and Bun workers as business consumers. These components are **planned,
+not installed by this documentation change**. The existing deployment inventory
+above remains an account of current repository behavior.
+
+Place broker topology, persistent volumes, versions, credentials and recovery
+under the host-owned stateful infrastructure boundary in `../nixos`. Integrate
+relay and consumer process lifecycle with Nomad after qualification. Ordinary
+API/worker image updates must not recreate broker storage or inherit stateless
+automatic rollback for broker data formats. Pin tested images/configuration and
+review upgrade/restore compatibility independently.
+
+Development can use one node. Production HA requires independent failure domains
+and R3 for critical streams and consumer state, file storage and the selected
+sync policy; three containers on one host do not meet that requirement. Keep
+client/cluster/monitoring endpoints internal with scoped permissions. No host
+count, disk capacity or production readiness is inferred from this plan.
+
+Activation requires the architecture's [qualification sequence](../architecture/event-streaming.md#qualification-and-implementation-sequence),
+including recoverable relay offsets, replication-slot WAL limits, ACK/commit
+crashes, broker failure, retention-gap recovery and measured capacity. New-system
+outbox relay does not restore a legacy runtime dependency or perform offline
+legacy conversion. The unrelated Outline service remains outside this scope.
+
 ## GitHub boundary
 
 `Check` runs on GitHub-hosted runners for pull requests and `main`. It is an

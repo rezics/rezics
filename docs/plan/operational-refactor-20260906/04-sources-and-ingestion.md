@@ -18,6 +18,11 @@ the same canonicalization and proposal path; neither bypasses P01/P03/P05 invari
 
 ## Persistent protocol
 
+The maintainer accepted [NATS JetStream with a preferred Debezium Server outbox relay](../../architecture/event-streaming.md)
+on 2026-09-07. That document owns transport, consumer topology, durability,
+retention and relay qualification; the source report owns business semantics.
+The selection is complete, but integration and the overall design gate are not.
+
 Follow the [generic source binding/subscription contract](../../report/REZICS-source-integration-and-review-20260906.md#44-generic-source-bindings-and-subscriptions) and [scheduled event/job protocol](../../report/REZICS-source-integration-and-review-20260906.md#51-scheduled-checks-change-events-and-update-jobs). These are shared across all logical Unit owners, not owned by software or a provider. Source schemas map to the provider-independent native model; they do not create its object hierarchy.
 
 Separate SourceDefinition/terms revision, SourceRecord identity, immutable SourceObservation, semantic mapping revision, SourceBinding, current SourceSubscription, AdoptionPolicy and SourceCheckPlan. Large raw payloads use object storage with checksums and exact observation references.
@@ -30,6 +35,7 @@ Separate SourceDefinition/terms revision, SourceRecord identity, immutable Sourc
 - Pausing adoption preserves bindings/evidence; disabling acquisition is separate. Correcting a mistaken binding produces a reviewed new binding revision and recalculates only its adopted support.
 - One current subscription per binding records active/paused state, watched scope and versioned policy. Compatible subscription demand shares check plans, with credentials/visibility/response coverage isolated where needed. Unsubscribe/resume/rebind change the revision; final application checks it atomically so queued work cannot outlive its authority.
 - Indexed due plans enqueue durable check requests. Record/query/feed checks produce immutable observations and transactional change events; paged binding fan-out produces coalesced target update jobs, which invoke canonical commands or review. Saved-query discovery does not itself approve Unit creation. Specify schedule, observation, fan-out and application idempotency keys separately.
+- Use replayable JetStream event streams for observations/canonical changes and separate work-queue streams for fetch/map/apply tasks. SourceSubscription rows do not create individual broker consumers. Broker scheduling may wake bounded shards; indexed PostgreSQL check plans remain the authority for actual due work. Do not implement a second competing ready-queue authority in PostgreSQL.
 - Observe no-change using content hashes. Repeated delivery is idempotent. Absence in a partial snapshot, filtering failure or timeout is not a tombstone.
 - Event/outbox publication occurs in the same database transaction as observation/proposal state; delivery is at least once, consumers deduplicate durable IDs and recheck expected revisions.
 - Mapping repairs reprocess stored eligible snapshots with new mapping versions; record corrected outputs without falsifying the old run.
@@ -38,7 +44,7 @@ Separate SourceDefinition/terms revision, SourceRecord identity, immutable Sourc
 
 ## Implementation slices
 
-1. Close the `00` design-review gate with P01/P03: native semantic mappings, source/binding/subscription cardinality, compatible composite uniqueness/FK/partition keys, snapshot-local identity, event/job schemas and acceptance scenarios. Then implement registry/run/check-plan/job owners, fenced claims, staging/observations and checkpoints. Production credentials are not a prerequisite for design or local conformance.
+1. Close the `00` design-review gate with P01/P03: native semantic mappings, source/binding/subscription cardinality, compatible composite uniqueness/FK/partition keys, snapshot-local identity and versioned event/task/receipt contracts for the accepted broker. Then implement domain plan/checkpoint owners and qualify JetStream/Debezium delivery with P10. Production credentials are not a prerequisite for design or local conformance.
 2. Add identity namespace and typed field/relationship mapping contracts with unsupported-state reporting. Implement binding/adoption policy commands, permissions and operator views.
 3. Implement Bangumi snapshot adapter; use API only for allowed bounded enrichment. Parse ordered/repeated Infobox structures, subject/person/character/episode records and contextual relations; keep source relation constants versioned.
 4. Implement VNDB bulk adapter using an eligible acquisition route. Preserve VN/release, staff aliases, release languages, character roles/traits/spoilers, official/MTL qualifiers and contextual voice roles. Track snapshot schema changes. Edition-local IDs are unstable across edits; map them to snapshot-scoped participation contexts or evidenced native variants, not an automatically created Edition layer.
@@ -93,6 +99,7 @@ Do not advertise broader rights because a record is publicly accessible. If comm
 
 ## Acceptance and throughput
 
+- Qualify source observation/outbox -> Debezium -> JetStream -> impact planner -> task stream -> canonical command -> independent search/notification consumption. Relay restart, ACK/offset failure, broker failover, WAL pressure and consumers exceeding hot retention follow the [event-streaming acceptance](../../architecture/event-streaming.md#qualification-and-implementation-sequence). Persisted broker delivery alone is not native source conformance.
 - A Unit binds multiple records and a coarse source binds multiple native scopes; confirmed equivalence cannot accidentally allocate duplicate identities. Manual and independent-provider inputs use the same native commands. Source local-key reorder/reuse preserves prior context and evidence without retargeting it.
 - Compatible subscribers share one acquisition, including different target policies. Pausing one leaves other demand active, preserves existing values and fences its already queued jobs. Resume uses latest eligible state with a three-way comparison. Private acquisition scopes cannot leak through shared checks.
 - Crash after due-plan advancement, observation commit, fan-out page or target commit; durable replay loses no work and applies no mutation twice. Duplicate events, expired/reclaimed leases, out-of-order observations and pause/rebind/policy edits racing with application are covered.

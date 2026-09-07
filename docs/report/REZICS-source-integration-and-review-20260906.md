@@ -277,9 +277,13 @@ are separate controls.
 
 ### 5.1 Scheduled checks, change events and update jobs
 
-This is the selected protocol, not a claim that existing adapters or the worker
-scheduler implement it. Event names describe intent; final versioned contracts
-and physical keys are design-gate deliverables.
+The maintainer accepted [NATS JetStream and the preferred Debezium Server outbox relay](../architecture/event-streaming.md)
+on 2026-09-07. That document owns the transport implementation choice, event/task
+retention, durable consumer topology, relay recovery and broker capacity. The
+business protocol below remains authoritative for source/subscription behavior.
+Neither existing adapters nor the worker scheduler implement the full protocol.
+Final versioned envelopes, physical keys and runtime checks remain design-gate
+deliverables; the broker selection itself is accepted.
 
 ```text
 Due SourceCheckPlan
@@ -327,9 +331,10 @@ Due SourceCheckPlan
    replans stale work rather than silently overwriting local edits.
 8. Retry with delay/jitter and finite attempt/elapsed-time budgets. Bound active
    jobs, payload bytes, per-provider concurrency, per-target work and connections;
-   expose failed/dead-letter work and explicit replay. PostgreSQL queues can use
-   `FOR UPDATE SKIP LOCKED` for competing claims, not for ordinary catalog read
-   consistency.
+   expose failed/dead-letter work and explicit replay. JetStream durable pull
+   consumers distribute ready tasks. PostgreSQL `FOR UPDATE SKIP LOCKED` may
+   claim bounded due plans or fallback relay work; it is not the selected event
+   transport or an ordinary catalog-read consistency policy.
 
 At-least-once transport with transactional publication and durable application
 receipts is the contract. External calls do not become exactly once because a
@@ -356,7 +361,14 @@ Source-level acquisition and manifest verification
 
 Transactions must commit state and event together. Delivery is at least once; consumers deduplicate by stable event/operation identity, and keep ordering or expected versions per aggregate. Do not claim exactly-once provider calls. An outbox avoids the state/event dual-write gap. [Transactional outbox guidance](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html).
 
-Start with database-backed partitioned job ownership and separately scalable worker processes. Claim a bounded batch with leases and fencing tokens; make retries delayed with jitter and a finite attempt/elapsed-time budget. Never hold a database lock while downloading data or calling a model. `SKIP LOCKED` suits competing queue consumers, but its inconsistent view is unsuitable for ordinary catalog reads. [PostgreSQL SELECT](https://www.postgresql.org/docs/current/sql-select.html).
+Use the accepted JetStream event/task transport with separately scalable Bun
+consumers. PostgreSQL owns transactional plans, intent/checkpoints, cancellation
+versions and effective-application receipts; Debezium Server is the preferred
+committed-outbox relay to qualify. Consumer ACK follows a durable application or
+continuation. Broker leases/redelivery do not replace business fencing, and no
+database lock is held while downloading data or calling a model. This supersedes
+the earlier database-backed-ready-queue default without changing source adoption
+or the independent legacy migration boundary.
 
 Use immutable input pointers in job payloads, not whole objects. Quarantine schema errors; circuit-break a connector on abnormal removal counts, parsing failure, sequence gaps or rights-policy change. A failed source should not consume every worker slot. Apply per-source and per-risk fairness, aging of low-priority work, byte/token quotas, and bounded retry/dead-letter storage with explicit retention and operator acknowledgement.
 

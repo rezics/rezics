@@ -11,6 +11,12 @@ checked cross-domain distribution composition and generic source bindings,
 subscriptions, scheduled checks and event-driven update jobs. Four-source
 coverage remains required but does not define the native abstraction boundary.
 
+**Event transport accepted, 2026-09-07:** use [NATS JetStream](../../architecture/event-streaming.md)
+for persistent events and ready-task delivery, qualify Debezium Server as the
+preferred outbox relay, and retain Bun business consumers. PostgreSQL owns
+transactional state/plans/outbox/receipts. This closes service selection only;
+the catalog design gate and integration/production qualification remain open.
+
 ## Mandate and outcome
 
 **Current stage, clarified by the maintainer:** finish the database schema needed
@@ -57,6 +63,7 @@ old endpoints or rows to work in the target application.
 - [Source-complete catalog schema and actual API verification](../../report/REZICS-source-complete-catalog-schema-20260906.md) — current-stage authority.
 - [Provider-independent capabilities and Edition review](../../report/REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model) — native semantic model and cross-provider qualification.
 - [Generic source bindings, subscriptions and scheduled updates](../../report/REZICS-source-integration-and-review-20260906.md#44-generic-source-bindings-and-subscriptions) — common source lifecycle and execution protocol.
+- [Accepted event streaming architecture](../../architecture/event-streaming.md) — NATS JetStream, preferred Debezium relay, event/task semantics, durability, deployment and capacity qualification.
 - [Current-stage source baseline](source-contract-baseline.json) — pinned artifacts and observed HTTP/schema results, not implementation coverage.
 - [Integrated decisions and issue register](../../report/REZICS-operational-refactor-decisions-20260906.md).
 - [Product evidence and user scenarios](../../report/REZICS-product-opportunities-and-user-scenarios-20260906.md).
@@ -78,7 +85,7 @@ old endpoints or rows to work in the target application.
 | [P07 Reviews, lists and scoring](07-reviews-lists-and-scoring.md) | Complete public evaluation and curation journeys | P02/P03 and P06 read contracts |
 | [P08 Reading journal and library](08-reading-journal-and-library.md) | Reliable personal history, resume, privacy, import/export | P01/P02/P03 identity/language contracts |
 | [P09 VN and cross-media catalogs](09-vn-and-cross-media-catalogs.md) | Usable multilingual VN, program and music experiences | P01/P03/P04/P05/P06 |
-| [P10 Capacity and operations](10-capacity-and-operations.md) | Isolated work, recovery, observability and measured resource gates | Starts immediately; integrates every write owner |
+| [P10 Capacity and operations](10-capacity-and-operations.md) | JetStream/relay qualification, isolated consumers, recovery, observability and measured resource gates | Infrastructure choice accepted; implementation follows the design gate and integrates every affected write owner |
 | [P11 Replacement and offline transfer](11-migration-and-cutover.md) | Separate new-system acceptance, standalone legacy conversion and site reopening | New-system implementation is independent of legacy import; the offline tool consumes the final target contract |
 | [P12 Product acceptance and activation](12-product-acceptance-and-activation.md) | Scenario acceptance, truthful coverage claims and launch scorecard | Starts immediately; operational activation after relevant gates |
 
@@ -183,4 +190,8 @@ gate. It does not prevent local migration generation, disposable rehearsal or
 independent contract implementation. This aligns the implementation order with
 the issue register's explicitly local activation gates.
 
-No fundamental design blocker has been identified. Source-use permissions, missing live inventory and unmeasured capacity are explicit, locally scoped activation gates with assigned work and fallback paths in the decision register. They do not suspend independent implementation.
+Source-use permissions and missing production inventory do not block completing
+local design. The revised catalog design-review gate still governs implementation;
+accepted broker selection does not close reference, physical-key, recovery or
+capacity evidence requirements. Activation follows the qualified contracts and
+scoped operational gates in the decision register.

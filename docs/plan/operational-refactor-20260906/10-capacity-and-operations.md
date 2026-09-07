@@ -1,6 +1,6 @@
 # P10 — Bounded processing, capacity and operational recovery
 
-Status: implementation in progress. Date: 2026-09-06. Parent: [program and gates](README.md).
+Status: operational foundations exist; event-streaming architecture accepted 2026-09-07; broker integration and production qualification pending under the design-review gate. Parent: [program and gates](README.md).
 
 ## Outcome and current owners
 
@@ -9,11 +9,13 @@ Owners: `services/main/src/worker.ts`, `services/email/outbox.ts`, auth delivery
 
 ## Selected operational architecture
 
-- Keep the initial business system on PostgreSQL/PGroonga with explicit domain owners; scale worker processes/pools independently. Do not add Kafka, a separate search engine or a database per semantic class without measured need.
+- Keep transactional business state on PostgreSQL/PGroonga with explicit domain owners. Use the accepted [NATS JetStream event/task architecture](../../architecture/event-streaming.md), qualifying Debezium Server as the preferred outbox relay and Bun workers as consumers. This supersedes the default of PostgreSQL carrying every new event/ready-job queue; PostgreSQL still owns plans, outbox, business checkpoints and application receipts. Kafka/RabbitMQ/Redpanda remain documented alternatives, not additional initial services.
 - Separate latency-sensitive email/notification work, source acquisition, AI calls, canonical application, projections and bulk repair into bounded queues/executors. No slow external model call inside the current serial shared worker loop.
 - All leased jobs carry a fencing token or claim generation. Success, failure, renewal and side effects validate it. Fix the existing email outbox's id/status-only completion predicate before broader automation.
 - Authentication email enqueue failure must be awaited/observable and retryable at the request boundary; fire-and-forget promise loss is not accepted delivery.
 - Transactional outbox + idempotent consumers is the event contract. No claim of exactly-once external delivery; use provider idempotency when available and explicit uncertain-send reconciliation.
+- Separate replayable event streams from competing task streams. Use independent durable pull consumers by business purpose/shard, not by Unit or SourceSubscription. ACK only after committed application or continuation; broker redelivery never replaces current authority/revision fences. Track failure disposition and replay explicitly rather than assuming `MaxDeliver` creates a complete dead-letter workflow.
+- Qualify file storage, R3 stream/consumer state across independent failure domains and `sync_interval: always` for critical events. Monitor connector offsets/replication-slot WAL, hot-window exhaustion and backpressure through the outbox. Single-node development is not production HA. The architecture document owns exact transport/recovery contracts and dated version evidence.
 - Independent connection/concurrency/rate budgets protect foreground queries from imports and model retries. Backpressure stops new acquisition before disk/queue exhaustion.
 - Require physical base backup plus continuous WAL where PITR is the recovery target, retaining logical export as additional portability evidence. Qualify PostgreSQL extensions including PGroonga recovery; existing daily logical backup alone cannot prove a five-minute RPO.
 - Keep off-host backup, restore drills and asset recovery. A replica is neither a backup nor proof of high availability. Current host capacity is measured, never inferred from an RS product name.
@@ -54,6 +56,13 @@ partition/shard cutovers before the existing protection thresholds are crossed.
 
 ## Capacity ledger required before risky implementation acceptance
 
+Apply the accepted architecture's [message-rate and retention model](../../architecture/event-streaming.md#capacity-model)
+alongside the domain-row ledger below. Account separately for broker replication,
+consumer delivery bandwidth/state, ready tasks, retained events, outbox/receipts,
+connector WAL and recovery archives. 72-hour hot replay is a planning input;
+retention and deployment sizing must be qualified together. A stream's replicas
+provide fault tolerance; multiple routed streams provide write distribution.
+
 The [design-review gate](00-source-complete-schema.md#design-review-gate) first
 requires a compatible physical-key/routing plan and workload assumptions; actual
 benchmarks qualify the implementation later. Resolve the current source mapping
@@ -92,6 +101,12 @@ Groonga table-record, key-space, distinct-term and index-size limits are indepen
 
 1. Capture actual host/database/extension versions, disk, bandwidth, restore time and current data distribution read-only at the implementation gate.
 2. Repair queue fencing/auth enqueue and isolate workloads; add metrics for oldest age, leases, attempts, errors, throughput and dead-letter recovery.
+   Qualify the accepted broker/relay boundary on one source-to-canonical-update
+   path before broader integration. Precreate persistent streams, pin versions,
+   verify publish-ACK/offset ordering, and test duplicate delivery and current
+   subscription/authority checks. New-system outbox CDC is independent of legacy
+   offline conversion. A bounded SQL relay is the documented fallback if Debezium
+   cannot meet the measured integration/operational requirements.
 3. Build a repeatable skewed benchmark/load generator and capacity workbook/manifest from real row samples; no need to populate 500M physical local rows, but show the scaling argument and representative plans.
 4. Run concurrent imports with foreground reads/writes, source/API failures, paused consumers, model timeouts and hot-key writes. Inspect `EXPLAIN (ANALYZE, BUFFERS)`, WAL and lock waits.
 5. Implement backup/PITR and extension-consistent restore; prove identities, user state, historical evidence and search rebuild/recovery on another environment.
