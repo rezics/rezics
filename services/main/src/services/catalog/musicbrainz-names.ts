@@ -3,7 +3,7 @@ import type { DatabaseTransaction } from "../database";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import type { CatalogReference } from "./contracts";
 import { MusicBrainzAliasSchema, musicBrainzDate } from "./musicbrainz";
-import { addCatalogName } from "./names";
+import { addCatalogName, bindCatalogNameSourceOccurrence } from "./names";
 import type { recordCatalogSourceDocument } from "./source-observations";
 
 /** @internal Alias dates, sorting and primary-locale preference stay on the same named form. */
@@ -40,15 +40,57 @@ export async function adoptMusicBrainzAliases(
 	for (const [index, alias] of aliases.entries()) {
 		const added = await addCatalogName(tx, reference, actor, revision, musicBrainzAliasName(alias));
 		revision = added.revision;
-		await tx
-			.insert(CatalogFactTables[reference.owner].support)
-			.values({
-				ownerId: reference.id,
-				namedFormId: added.id,
-				sourceRecordId: observation.record.id,
-				snapshotId: observation.snapshot.id,
-				sourcePath: `${path}/${index}`,
-			});
+		await bindCatalogNameSourceOccurrence(tx, reference, actor, {
+			sourceRecordId: observation.record.id,
+			snapshotId: observation.snapshot.id,
+			namespace: "musicbrainz.name",
+			localKey: `${observation.snapshot.id}:${index}`,
+			nameId: added.id,
+			nameRevision: added.nameRevision,
+			sourcePath: `${path}/${index}`,
+		});
+		await tx.insert(CatalogFactTables[reference.owner].support).values({
+			ownerId: reference.id,
+			namedFormId: added.id,
+			sourceRecordId: observation.record.id,
+			snapshotId: observation.snapshot.id,
+			sourcePath: `${path}/${index}`,
+		});
 	}
 	return revision;
+}
+
+/** @internal The source's title owns an exact named-form revision, independent of alias ordering. */
+export async function adoptMusicBrainzTitle(
+	tx: DatabaseTransaction,
+	actor: string,
+	reference: CatalogReference,
+	revision: number,
+	observation: Awaited<ReturnType<typeof recordCatalogSourceDocument>>,
+	title: string,
+) {
+	const added = await addCatalogName(tx, reference, actor, revision, {
+		kind: "source-primary",
+		value: title,
+		languageTag: null,
+	});
+	await bindCatalogNameSourceOccurrence(tx, reference, actor, {
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		namespace: "musicbrainz.name",
+		localKey: "primary",
+		nameId: added.id,
+		nameRevision: added.nameRevision,
+		sourcePath: "/title",
+	});
+	await tx
+		.insert(CatalogFactTables[reference.owner].support)
+		.values({
+			ownerId: reference.id,
+			namedFormId: added.id,
+			sourceRecordId: observation.record.id,
+			snapshotId: observation.snapshot.id,
+			sourcePath: "/title",
+		});
+	return added.revision;
 }

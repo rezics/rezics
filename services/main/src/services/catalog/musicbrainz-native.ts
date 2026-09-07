@@ -45,12 +45,27 @@ export async function musicBrainzVocabulary(
 ) {
 	const key = id || name;
 	if (!key) return null;
+	const releaseSlots: Record<string, string> = {
+		release_status: "music_release.status_revision_id",
+		release_packaging: "music_release.packaging_revision_id",
+		medium_format: "music_medium.format_revision_id",
+		alternative_release_type: "music_release_presentation.type_revision_id",
+	};
+	const slot = releaseSlots[family];
 	return (
 		await ensureCatalogDefinition(tx, {
 			namespace: `musicbrainz.${family}`,
 			key,
 			kind: "vocabulary",
 			valueKind: null,
+			...(slot
+				? {
+						constraints: {
+							targets: [{ owner: "music" as const, shapes: ["release"] }],
+							slots: [slot],
+						},
+					}
+				: {}),
 		})
 	).revisionId;
 }

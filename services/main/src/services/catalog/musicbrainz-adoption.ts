@@ -12,7 +12,7 @@ import {
 } from "../database/schema/catalog-music";
 import { bindCatalogSourceIdentity, acceptCatalogSourceInitialization } from "./source-bindings";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { createCatalogIdentity, addCatalogName } from "./storage";
+import { createCatalogIdentity } from "./storage";
 import {
 	musicBrainzCreditWriter,
 	musicBrainzVocabulary,
@@ -22,7 +22,7 @@ import {
 	projectMusicBrainzIdentifiers,
 } from "./musicbrainz-native";
 import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
-import { adoptMusicBrainzAliases } from "./musicbrainz-names";
+import { adoptMusicBrainzAliases, adoptMusicBrainzTitle } from "./musicbrainz-names";
 import { recordMusicSourceComponent } from "./music-source-occurrences";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { bindReferencedSourceIdentity } from "./source-references";
@@ -134,13 +134,14 @@ export async function adoptMusicBrainzRelease(
 	if (record.asin) await projectMusicBrainzIdentifiers(tx, identity.id, "asin", [record.asin]);
 	let revision = identity.revision;
 	if (record.title)
-		revision = (
-			await addCatalogName(tx, identity, actor, revision, {
-				kind: "source-primary",
-				languageTag: null,
-				value: record.title,
-			})
-		).revision;
+		revision = await adoptMusicBrainzTitle(
+			tx,
+			actor,
+			identity,
+			revision,
+			observation,
+			record.title,
+		);
 	if (!existing)
 		await tx.insert(CatalogFactTables.music.identifier).values({
 			ownerId: identity.id,

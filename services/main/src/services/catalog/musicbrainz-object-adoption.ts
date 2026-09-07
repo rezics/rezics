@@ -4,9 +4,9 @@ import type { DatabaseTransaction } from "../database";
 import { musicRecording, musicReleaseGroup, musicWork } from "../database/schema/catalog-music";
 import { bindCatalogSourceIdentity, acceptCatalogSourceInitialization } from "./source-bindings";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { createCatalogIdentity, addCatalogName } from "./storage";
+import { createCatalogIdentity } from "./storage";
 import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
-import { adoptMusicBrainzAliases } from "./musicbrainz-names";
+import { adoptMusicBrainzAliases, adoptMusicBrainzTitle } from "./musicbrainz-names";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
 import {
@@ -151,13 +151,14 @@ export async function adoptMusicBrainzObject(
 
 	let revision = identity.revision;
 	if (document.record.title)
-		revision = (
-			await addCatalogName(tx, identity, actor, revision, {
-				kind: "source-primary",
-				languageTag: null,
-				value: document.record.title,
-			})
-		).revision;
+		revision = await adoptMusicBrainzTitle(
+			tx,
+			actor,
+			identity,
+			revision,
+			observation,
+			document.record.title,
+		);
 	revision = await adoptMusicBrainzAliases(
 		tx,
 		actor,

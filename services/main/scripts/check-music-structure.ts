@@ -3,7 +3,12 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { users } from "../src/services/database/schema/auth";
-import { musicMedium, musicTrackOccurrence } from "../src/services/database/schema/catalog-music";
+import {
+	musicMedium,
+	musicRecording,
+	musicTrackOccurrence,
+} from "../src/services/database/schema/catalog-music";
+import { createCatalogIdentity, ensureCatalogDefinition } from "../src/services/catalog/storage";
 import {
 	createMusicRelease,
 	addMusicMedium,
@@ -70,6 +75,56 @@ try {
 				second.id,
 			);
 			assert.ok(head1 && head2);
+			const [otherActor] = await tx
+				.insert(users)
+				.values({
+					name: "Private recording owner",
+					email: `${crypto.randomUUID()}@example.invalid`,
+				})
+				.returning({ id: users.id });
+			assert.ok(otherActor);
+			const privateRecording = await createCatalogIdentity(
+				tx,
+				{ owner: "music", shape: "recording", visibility: "private" },
+				otherActor.id,
+			);
+			await tx.insert(musicRecording).values({ id: privateRecording.id });
+			await assert.rejects(
+				mutateMusicComponents(tx, release, actor.id, second.revision, [
+					{
+						action: "put",
+						component: "music_track_occurrence",
+						componentKey: first.id,
+						expectedRevisionId: head1.id,
+						value: { ...head1.value, recording_id: privateRecording.id },
+					},
+				]),
+				/cannot access/,
+			);
+			const wrongSlot = await ensureCatalogDefinition(tx, {
+				namespace: "fixture.music",
+				key: crypto.randomUUID(),
+				kind: "vocabulary",
+				valueKind: null,
+				constraints: {
+					targets: [{ owner: "music", shapes: ["release"] }],
+					slots: ["music_release.status_revision_id"],
+				},
+			});
+			const mediumBefore = await readMusicComponentHead(tx, release.id, "music_medium", medium.id);
+			assert.ok(mediumBefore);
+			await assert.rejects(
+				mutateMusicComponents(tx, release, actor.id, second.revision, [
+					{
+						action: "put",
+						component: "music_medium",
+						componentKey: medium.id,
+						expectedRevisionId: mediumBefore.id,
+						value: { ...mediumBefore.value, format_revision_id: wrongSlot.revisionId },
+					},
+				]),
+				/target or slot/,
+			);
 			const reorder: MusicComponentMutation[] = [
 				{
 					action: "put",

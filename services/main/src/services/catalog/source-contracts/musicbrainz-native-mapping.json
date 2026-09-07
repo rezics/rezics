@@ -1,0 +1,433 @@
+{
+	"source": "musicbrainz",
+	"reviewedAt": "2026-09-07",
+	"qualified": false,
+	"denominator": "Required public catalog semantics across WS/2, public SQL dumps, Cover Art Archive and Event Art Archive; declaration counts alone are not the denominator.",
+	"sources": [
+		"https://musicbrainz.org/doc/MusicBrainz_API",
+		"https://musicbrainz.org/doc/MusicBrainz_Database/Schema",
+		"https://raw.githubusercontent.com/metabrainz/musicbrainz-server/cff977f0ba8f06d5fa594e7590f6a134b1a5a22c/admin/sql/CreateTables.sql",
+		"https://musicbrainz.org/doc/Cover_Art_Archive/API"
+	],
+	"families": [
+		{
+			"family": "release",
+			"fields": [
+				"id",
+				"title",
+				"artist-credit",
+				"release-group",
+				"status",
+				"status-id",
+				"packaging",
+				"packaging-id",
+				"barcode",
+				"text-representation.language",
+				"text-representation.script"
+			],
+			"native": [
+				"music_identity",
+				"music_release",
+				"music_name",
+				"music_artist_credit",
+				"music_component_revision",
+				"music_component_source_occurrence"
+			],
+			"write": [
+				"musicbrainz-adoption.ts",
+				"musicbrainz-release-delta.ts",
+				"musicbrainz-name-delta.ts"
+			],
+			"queryExport": ["music-domain.ts:readMusicReleaseMetadata", "storage.ts:listCatalogNames"],
+			"checks": ["musicbrainz.test.ts", "check-music-structure.ts"],
+			"remaining": [
+				"Complete proposal SQL qualification after combined source-baseline migration",
+				"Staged activation for large source scopes"
+			]
+		},
+		{
+			"family": "medium-track",
+			"fields": [
+				"medium.gid",
+				"medium.position",
+				"medium.name",
+				"medium.format",
+				"medium.track_count",
+				"track.gid",
+				"track.position",
+				"track.number",
+				"track.name",
+				"track.recording",
+				"track.artist_credit",
+				"track.length",
+				"pregap",
+				"data-tracks"
+			],
+			"native": [
+				"music_medium",
+				"music_track_occurrence",
+				"music_medium_identifier",
+				"music_track_identifier",
+				"music_component_revision"
+			],
+			"write": [
+				"domains.ts:addMusicMedium",
+				"domains.ts:addMusicTrack",
+				"music-structure.ts:mutateMusicComponents",
+				"musicbrainz-release-delta.ts"
+			],
+			"queryExport": ["music-domain.ts:listMusicMedia", "domains.ts:readMusicTracks"],
+			"checks": ["musicbrainz-release-delta.test.ts", "check-music-structure.ts"],
+			"remaining": [
+				"Explicit reviewed correspondence for medium merges/splits",
+				"Large reorders need staged activation"
+			]
+		},
+		{
+			"family": "release-events-labels",
+			"fields": [
+				"release_country",
+				"release_unknown_country",
+				"date",
+				"country",
+				"release_label.label",
+				"release_label.catalog_number"
+			],
+			"native": [
+				"music_release_event",
+				"reference_area",
+				"reference_area_code",
+				"music_release_label",
+				"entity_identity"
+			],
+			"write": [
+				"musicbrainz-native.ts:projectMusicBrainzReleaseMetadata",
+				"musicbrainz-release-delta.ts"
+			],
+			"queryExport": [
+				"music-domain.ts:listMusicReleaseEvents",
+				"music-domain.ts:listMusicReleaseLabels"
+			],
+			"checks": ["musicbrainz.test.ts", "check-music-domain.ts"],
+			"remaining": [
+				"Country-only summary without area/date needs explicit semantic disposition",
+				"Full public SQL join orchestration"
+			]
+		},
+		{
+			"family": "disc-toc",
+			"fields": [
+				"cdtoc.discid",
+				"cdtoc.freedb_id",
+				"cdtoc.track_count",
+				"cdtoc.leadout_offset",
+				"cdtoc.track_offset",
+				"medium_cdtoc"
+			],
+			"native": ["music_disc_toc", "music_disc_toc_offset", "music_medium_toc"],
+			"write": [
+				"music-domain.ts:attachMusicDiscToc",
+				"musicbrainz-native.ts:projectMusicBrainzDiscs",
+				"musicbrainz-release-delta.ts"
+			],
+			"queryExport": ["music-domain.ts:listMusicDiscTocs", "music-domain.ts:readMusicDiscToc"],
+			"checks": ["musicbrainz.test.ts", "check-music-native-history.ts"],
+			"remaining": ["Public SQL acquisition must supply FreeDB IDs omitted by WS/2"]
+		},
+		{
+			"family": "recording-work-release-group",
+			"fields": [
+				"recording.length",
+				"recording.video",
+				"recording.isrcs",
+				"work.type",
+				"work.languages",
+				"work.iswcs",
+				"work.attributes",
+				"release-group.primary-type",
+				"release-group.secondary-types",
+				"release-group.first-release-date"
+			],
+			"native": [
+				"music_recording",
+				"music_work",
+				"music_work_language",
+				"music_release_group",
+				"music_release_group_secondary_type",
+				"music_identifier",
+				"music_fact"
+			],
+			"write": ["musicbrainz-object-adoption.ts", "musicbrainz-native.ts"],
+			"queryExport": [
+				"music-domain.ts:readMusicWorkMetadata",
+				"music-domain.ts:readMusicReleaseGroupMetadata",
+				"music-domain.ts:listMusicWorkLanguages",
+				"music-domain.ts:listMusicReleaseGroupSecondaryTypes"
+			],
+			"checks": ["musicbrainz.test.ts", "check-music-domain.ts"],
+			"remaining": [
+				"Independent endpoint native update/withdraw callbacks",
+				"First-release-date explicit derived-field disposition",
+				"Complete work-attribute vocabulary installation"
+			]
+		},
+		{
+			"family": "aliases-names",
+			"fields": [
+				"name",
+				"sort-name",
+				"locale",
+				"type",
+				"type-id",
+				"primary",
+				"begin",
+				"end",
+				"ended"
+			],
+			"native": [
+				"music_name",
+				"music_name_revision",
+				"music_name_source_binding",
+				"music_name_source_occurrence",
+				"entity_name",
+				"reference_name",
+				"grouping_name"
+			],
+			"write": [
+				"musicbrainz-names.ts",
+				"musicbrainz-name-delta.ts",
+				"musicbrainz-entities-adoption.ts"
+			],
+			"queryExport": ["names.ts:listCatalogNameRevisions", "storage.ts:listCatalogNames"],
+			"checks": ["music-structure.test.ts"],
+			"remaining": [
+				"Unknown alias-type native vocabulary rather than default alias kind",
+				"Supporting endpoint update callbacks",
+				"Numeric compensation frontier integration"
+			]
+		},
+		{
+			"family": "relations",
+			"fields": [
+				"type-id",
+				"direction",
+				"target-type",
+				"begin",
+				"end",
+				"ended",
+				"ordering-key",
+				"source-credit",
+				"target-credit",
+				"attributes",
+				"attribute-ids",
+				"attribute-values",
+				"attribute-credits"
+			],
+			"native": [
+				"catalog_definition_revision",
+				"music_catalog_relation",
+				"music_relation_participant",
+				"music_relation_scope",
+				"music_semantic_revision"
+			],
+			"write": ["musicbrainz-relations.ts"],
+			"queryExport": ["semantic-history.ts", "storage.ts"],
+			"checks": ["musicbrainz.test.ts"],
+			"remaining": [
+				"Changed/removed relation reconciliation",
+				"Full upstream relationship-type/attribute hierarchy installation",
+				"Cross-owner source update qualification"
+			]
+		},
+		{
+			"family": "supporting-primary-endpoints",
+			"objects": [
+				"artist",
+				"label",
+				"area",
+				"place",
+				"event",
+				"instrument",
+				"series",
+				"genre",
+				"mood",
+				"url"
+			],
+			"fields": [
+				"type",
+				"lifespan",
+				"gender",
+				"area",
+				"begin-area",
+				"end-area",
+				"country codes",
+				"IPI",
+				"ISNI",
+				"label-code",
+				"coordinates",
+				"address",
+				"event time",
+				"cancelled",
+				"setlist",
+				"series ordering",
+				"URL resource"
+			],
+			"native": [
+				"entity_catalog_profile",
+				"reference_area",
+				"reference_place",
+				"reference_event",
+				"reference_instrument",
+				"reference_web_resource",
+				"grouping_identity"
+			],
+			"write": ["musicbrainz-entities-adoption.ts", "musicbrainz-entities.ts"],
+			"queryExport": ["entities.ts", "references.ts", "grouping.ts"],
+			"checks": ["musicbrainz-entities.test.ts"],
+			"remaining": [
+				"Runtime acquisition registration and periodic checks",
+				"Native update/withdraw writers",
+				"Complete exact type/alias mapping"
+			]
+		},
+		{
+			"family": "alternative-tracklists",
+			"objects": [
+				"alternative_release",
+				"alternative_medium",
+				"alternative_track",
+				"alternative_medium_track",
+				"alternative_release_type"
+			],
+			"native": [
+				"music_release_presentation",
+				"music_medium_presentation",
+				"music_alternative_track",
+				"music_track_presentation"
+			],
+			"write": [
+				"music-domain.ts:addMusicReleasePresentation",
+				"music-domain.ts:addMusicMediumPresentation",
+				"music-domain.ts:addMusicTrackPresentation",
+				"music-structure.ts"
+			],
+			"queryExport": [
+				"music-domain.ts:listMusicReleasePresentations",
+				"music-domain.ts:listMusicMediumPresentations",
+				"music-domain.ts:listMusicTrackPresentations"
+			],
+			"checks": ["check-music-domain.ts"],
+			"remaining": [
+				"Joined public SQL source adapter",
+				"Source adoption/update/withdraw fixtures",
+				"Shared alternative-track source row identity"
+			]
+		},
+		{
+			"family": "medium-attributes",
+			"objects": [
+				"medium_attribute",
+				"medium_attribute_type",
+				"medium_attribute_type_allowed_format",
+				"medium_attribute_type_allowed_value",
+				"medium_attribute_type_allowed_value_allowed_format"
+			],
+			"native": [
+				"music_medium_attribute",
+				"music_medium_attribute_policy",
+				"music_medium_attribute_allowed_format",
+				"music_medium_attribute_allowed_value_format"
+			],
+			"write": ["music-medium-attributes.ts"],
+			"queryExport": ["music-medium-attributes.ts:listMusicMediumAttributes"],
+			"checks": ["music-medium-attributes.test.ts", "check-music-domain.ts"],
+			"remaining": [
+				"Joined SQL source and reviewed taxonomy import",
+				"Exact source structural restoration"
+			]
+		},
+		{
+			"family": "incomplete-disc-candidates",
+			"objects": ["release_raw", "track_raw", "cdtoc_raw"],
+			"native": ["music_release_candidate", "music_candidate_track", "music_candidate_toc"],
+			"write": ["musicbrainz-dump-candidates.ts", "music-candidates.ts"],
+			"queryExport": [
+				"music-candidates.ts:readMusicReleaseCandidate",
+				"music-candidates.ts:listMusicCandidateTracks",
+				"music-candidates.ts:listMusicCandidateTocs"
+			],
+			"checks": ["musicbrainz-dump-candidates.test.ts", "check-music-native-history.ts"],
+			"remaining": [
+				"Streaming SQL join/acquisition orchestration",
+				"Candidate update/withdraw callbacks"
+			]
+		},
+		{
+			"family": "redirects",
+			"objects": [
+				"all primary *_gid_redirect",
+				"artist_credit_gid_redirect",
+				"medium_gid_redirect",
+				"track_gid_redirect"
+			],
+			"native": [],
+			"write": [],
+			"queryExport": [],
+			"checks": [],
+			"remaining": [
+				"Typed archived redirect adapter",
+				"Source identity redirect resolution",
+				"Secondary identifier redirect adoption",
+				"No automatic native identity merge"
+			]
+		},
+		{
+			"family": "cover-event-art",
+			"fields": [
+				"image ID",
+				"ordered images",
+				"types",
+				"front",
+				"back",
+				"comment",
+				"image URL",
+				"thumbnails",
+				"approved",
+				"edit ID",
+				"release/event association"
+			],
+			"native": [],
+			"write": [],
+			"queryExport": [],
+			"checks": [],
+			"remaining": [
+				"Typed CAA/EAA source metadata contract",
+				"Provider-independent art associations and resource variants",
+				"Acquisition/adoption/update/withdraw and native query/export fixtures"
+			]
+		},
+		{
+			"family": "source-only-editorial-and-derived-data",
+			"fields": [
+				"edits_pending",
+				"last_updated",
+				"ref_count",
+				"materialized artist_release",
+				"materialized first-release-date",
+				"quality",
+				"aggregate source ratings",
+				"source tag vote counts"
+			],
+			"disposition": "Editorial/derived counters need explicit reviewed source-observation or exclusion rules; they are never native user votes or lifecycle authority.",
+			"remaining": [
+				"Pin each declaration-level disposition and source-scoped aggregate query where product value requires it"
+			]
+		},
+		{
+			"family": "private-editor-account-data",
+			"fields": ["editor credentials", "OAuth tokens", "private *_rating_raw", "private *_tag_raw"],
+			"disposition": "Excluded from public native catalog adoption; no importer for secrets or private editor actions.",
+			"remaining": ["Complete reviewed declaration-level exclusion evidence"]
+		}
+	]
+}

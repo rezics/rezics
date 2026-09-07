@@ -7,7 +7,7 @@ import {
 	musicComponentRevision,
 } from "../database/schema/catalog-music";
 import type { CatalogReference } from "./contracts";
-import { assertCatalogDefinitionRevision } from "./definitions";
+import { assertCatalogDefinitionTarget } from "./definitions";
 import { assertMusicMediumFormatCompatibility } from "./music-medium-attributes";
 import {
 	CatalogAccessDenied,
@@ -79,7 +79,13 @@ async function validateReferences(
 	}
 	for (const [column, value] of Object.entries(row)) {
 		if (column.endsWith("_revision_id") && typeof value === "string")
-			await assertCatalogDefinitionRevision(tx, value, "vocabulary");
+			await assertCatalogDefinitionTarget(
+				tx,
+				value,
+				"vocabulary",
+				{ owner: "music", shape: "release" },
+				`${component}.${column}`,
+			);
 	}
 	if (typeof row.artist_credit_id === "string")
 		await readableCredit(tx, actor, row.artist_credit_id);
