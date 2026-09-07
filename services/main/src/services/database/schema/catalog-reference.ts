@@ -176,6 +176,7 @@ export const referenceCatalogProfileRevision = pgTable(
 			.notNull()
 			.references(() => referenceIdentity.id, { onDelete: "restrict" }),
 		revision: bigint({ mode: "number" }).notNull(),
+		removed: boolean().notNull().default(false),
 		snapshot: jsonb().$type<unknown>().notNull(),
 		createdAt: createCreatedAtColumn(),
 	},

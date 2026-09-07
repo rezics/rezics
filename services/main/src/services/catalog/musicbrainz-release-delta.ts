@@ -1,4 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
+import { runParticipationSavepoint } from "../participation/policy";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import { z } from "zod";
 import {
@@ -47,7 +48,7 @@ export function musicBrainzReleaseNativeWriter(
 	incomingArchive: Archived,
 ): CatalogSourceNativeWriter {
 	return async (outer, context) =>
-		outer.transaction(async (tx) => {
+		runParticipationSavepoint(outer, async (tx) => {
 			if (context.reference.owner !== "music" || context.mappingVersion !== "musicbrainz.release.1")
 				throw new TypeError("Music release writer received another mapping");
 			if (context.action === "withdraw") return compensateMusicSourceApplication(tx, context);

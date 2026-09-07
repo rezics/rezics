@@ -1,4 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
+import { runParticipationSavepoint } from "../participation/policy";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import { MusicBrainzCatalogContractSha256, MusicBrainzObjectDocumentSchema } from "./musicbrainz";
 import { loadCatalogSourceDocument, type CatalogSourceReceipt } from "./source-observations";
@@ -17,7 +18,7 @@ export function musicBrainzObjectNativeWriter(
 	incomingArchive: Archived,
 ): CatalogSourceNativeWriter {
 	return async (outer, context) =>
-		outer.transaction(async (tx) => {
+		runParticipationSavepoint(outer, async (tx) => {
 			if (context.action === "withdraw") return compensateMusicSourceApplication(tx, context);
 			if (context.reference.owner !== "music" || !context.previousSnapshotId)
 				throw new TypeError("Music object update requires its previous adopted source snapshot");

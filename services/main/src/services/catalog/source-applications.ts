@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import {
 	catalogSourceApplication,
+	CatalogSourceProfileApplicationTables,
 	CatalogSourceOwnedApplicationTables,
 	softwareSourceContextApplicationChange,
 	softwareSourceParticipationApplicationChange,
@@ -17,9 +18,17 @@ import { CatalogOwnerValues } from "./contracts";
 import { loadCatalogIdentity } from "./storage";
 import { advanceMusicSourceComponentBaselines } from "./music-source-baselines";
 import { advanceCatalogSourceOwnedBaselines } from "./source-owned-baselines";
+import { catalogAccessDecisions } from "../participation/policy";
 
 const revision = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);
 const nativeChangeSchema = z.discriminatedUnion("kind", [
+	z.strictObject({
+		kind: z.literal("catalog-profile"),
+		owner: z.enum(["entity", "reference"]),
+		ownerId: z.uuid(),
+		beforeRevision: revision.nullable(),
+		afterRevision: revision,
+	}),
 	z.strictObject({
 		kind: z.literal("music-component"),
 		ownerId: z.uuid(),
@@ -150,6 +159,16 @@ export async function recordCatalogSourceApplication(
 			ownerId: change.ownerId,
 		};
 		switch (change.kind) {
+			case "catalog-profile": {
+				await tx
+					.insert(CatalogSourceProfileApplicationTables[change.owner])
+					.values({
+						...common,
+						beforeRevision: change.beforeRevision,
+						afterRevision: change.afterRevision,
+					});
+				break;
+			}
 			case "catalog-semantic":
 			case "catalog-name":
 			case "catalog-name-authority": {
@@ -254,6 +273,30 @@ export async function readCatalogSourceApplication(
 		.limit(1);
 	if (!application) return null;
 	const changes: (CatalogSourceNativeChange & { position: number })[] = [];
+	for (const owner of ["entity", "reference"] as const) {
+		const table = CatalogSourceProfileApplicationTables[owner];
+		const rows = await tx
+			.select()
+			.from(table)
+			.where(
+				and(
+					eq(table.sourceRecordId, value.sourceRecordId),
+					eq(table.proposalId, value.proposalId),
+					eq(table.action, value.action),
+				),
+			)
+			.orderBy(table.position)
+			.limit(128);
+		for (const row of rows)
+			changes.push({
+				kind: "catalog-profile",
+				owner,
+				ownerId: row.ownerId,
+				beforeRevision: row.beforeRevision,
+				afterRevision: row.afterRevision,
+				position: row.position,
+			});
+	}
 	for (const [kind, table] of [
 		["music-component", musicSourceApplicationChange],
 		["software-component", softwareSourceComponentApplicationChange],
@@ -334,13 +377,20 @@ export async function readCatalogSourceApplication(
 		];
 		if (!ids.length) continue;
 		const table = CatalogIdentityTables[owner];
-		const allowed = await tx
-			.select({ id: table.id })
+		const candidates = await tx
+			.select({ id: table.id, createdByAuthUserId: table.createdByAuthUserId })
 			.from(table)
-			.where(
-				and(inArray(table.id, ids), eq(table.createdByAuthUserId, actor), isNull(table.deletedAt)),
-			);
-		if (allowed.length !== ids.length)
+			.where(and(inArray(table.id, ids), isNull(table.deletedAt)));
+		const allowed = await catalogAccessDecisions(
+			tx,
+			candidates.map((candidate) => ({
+				reference: { owner, id: candidate.id },
+				createdByAuthUserId: candidate.createdByAuthUserId,
+			})),
+			actor,
+			true,
+		);
+		if (candidates.length !== ids.length || allowed.some((value) => !value))
 			throw new Error("Native application includes an inaccessible owner");
 	}
 	changes.sort((a, b) => a.position - b.position);

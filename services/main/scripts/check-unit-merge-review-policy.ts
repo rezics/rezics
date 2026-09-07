@@ -11,9 +11,10 @@ if (!["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) || url.pathname 
 	throw new Error("Merge policy fixtures require the loopback local rezics database");
 
 const { database, withDatabaseTransactionDeadline } = await import("../src/services/database");
-const { unit, users, profile, realmRule, realmRuleRevision, unitMergeRequest } = await import(
+const { unit, users, realmRule, realmRuleRevision, unitMergeRequest } = await import(
 	"../src/services/database/schema"
 );
+const { ensureSelfEntityInTransaction } = await import("../src/services/auth/entity");
 const { createReviewedUnitMerge, reviewUnitMerge, getUnitMergeRequest } = await import(
 	"../src/services/units/merge/service"
 );
@@ -42,9 +43,10 @@ try {
 				.insert(users)
 				.values({ name: "Merge policy fixture", email: `${crypto.randomUUID()}@example.invalid` })
 				.returning();
-			const [self] = await database.insert(unit).values({ kind: "profile" }).returning();
-			assert.ok(account && self);
-			await database.insert(profile).values({ id: self.id, authUserId: account.id });
+			assert.ok(account);
+			const self = await database.transaction((tx) =>
+				ensureSelfEntityInTransaction(tx, { ...account, image: null }),
+			);
 			actors.push(self.id);
 		}
 		const [proposer, firstReviewer, secondReviewer] = actors;

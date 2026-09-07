@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import { CatalogNameTables } from "../database/schema/catalog-names";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
-import type { CatalogOwner, CatalogReference } from "./contracts";
+import type { CatalogReference } from "./contracts";
 import type { CatalogNameInput, CatalogNameAuthorityInput } from "./name-contracts";
 import { reviseCatalogName } from "./names";
 import { reviseCatalogNameAuthority } from "./authority";
@@ -15,7 +15,10 @@ import {
 
 type NamedForm = typeof CatalogNameTables.entity.nameRevision.$inferSelect;
 type Authority = typeof CatalogNameTables.entity.authorityRevision.$inferSelect;
-export type CatalogSourceOwnedChange = Extract<CatalogSourceNativeChange, { owner: CatalogOwner }>;
+export type CatalogSourceOwnedChange = Extract<
+	CatalogSourceNativeChange,
+	{ kind: "catalog-semantic" | "catalog-name" | "catalog-name-authority" }
+>;
 
 /** @internal Reconstruct canonical inputs from checked named-form history without replaying storage metadata. */
 export function catalogNameRevisionValues(row: NamedForm): CatalogNameInput {
@@ -77,7 +80,7 @@ export async function compensateCatalogSourceOwnedChange(
 	input: CatalogSourceOwnedChange,
 ): Promise<CatalogSourceOwnedChange> {
 	const [change] = CatalogSourceNativeChangesSchema.parse([input]);
-	if (!change || !("owner" in change))
+	if (!change || !("owner" in change) || change.kind === "catalog-profile")
 		throw new TypeError("Expected an owner-local semantic or named-form change");
 	const reference: CatalogReference = { owner: change.owner, id: change.ownerId };
 	const identity = await loadCatalogIdentity(tx, reference, actor, true);

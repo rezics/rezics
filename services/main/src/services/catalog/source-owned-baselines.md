@@ -15,6 +15,10 @@ components, contexts and participation. Software scalar/component source
 occurrences are immutable, exact native history references. These are correspondence
 and evidence structures; they are not identity parents or raw payload stores.
 
+Entity and Reference additionally retain their own fixed-profile source baselines
+and numeric history FKs. See [fixed-profile source ownership](./profile-source.md)
+for their native commands, inverse behavior and capacity assumptions.
+
 A resolver seeks `(source_record_id, mapping_key, owner_id, kind, component_key)`.
 It maps the original occurrence revision directly to the latest compensated native
 head, irrespective of how many apply/withdraw cycles precede it. There is no

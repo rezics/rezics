@@ -12,7 +12,7 @@ if (
 	throw new Error("Progress privacy checks require a loopback local REZICS database");
 
 const { database } = await import("../src/services/database");
-const { unit, users, profile, unitProgress } = await import("../src/services/database/schema");
+const { unit, users, unitProgress } = await import("../src/services/database/schema");
 const { createProgressEntry, lockUnitProgress } = await import(
 	"../src/services/api/progress/service"
 );
@@ -28,17 +28,15 @@ try {
 			.values({ name: "Privacy fixture", email: `${crypto.randomUUID()}@example.invalid` })
 			.returning();
 		assert.ok(account);
-		const [self] = await tx.insert(unit).values({ kind: "profile" }).returning();
 		const [target] = await tx.insert(unit).values({ kind: "book" }).returning();
-		assert.ok(self && target);
-		await tx.insert(profile).values({ id: self.id, authUserId: account.id });
-		const key = and(eq(unitProgress.profileId, self.id), eq(unitProgress.unitId, target.id));
+		assert.ok(target);
+		const key = and(eq(unitProgress.authUserId, account.id), eq(unitProgress.unitId, target.id));
 		const visibility = async () =>
 			(await tx.select({ visibility: unitProgress.visibility }).from(unitProgress).where(key))[0]
 				?.visibility;
-		await lockUnitProgress(tx, self.id, target.id);
+		await lockUnitProgress(tx, account.id, target.id);
 		const write = () =>
-			createProgressEntry(tx, self.id, target.id, {
+			createProgressEntry(tx, account.id, target.id, {
 				entryKind: "update",
 				status: "active",
 				progress: 0.2,

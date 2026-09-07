@@ -1,6 +1,7 @@
 import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
+import { runParticipationSavepoint } from "../participation/policy";
 import { CatalogStructureHistoryTables } from "../database/schema/catalog-structure-history";
 import type { CatalogReference } from "./contracts";
 import { CatalogRevisionConflict, loadCatalogIdentity } from "./storage";
@@ -231,7 +232,7 @@ export async function restoreStructureComponent(
 		})
 		.parse(input);
 	const table = historyTables(reference).history;
-	return tx.transaction(async (write) => {
+	return runParticipationSavepoint(tx, async (write) => {
 		await loadCatalogIdentity(write, reference, actor, true);
 		const current = await readStructureComponentHead(
 			write,

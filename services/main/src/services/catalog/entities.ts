@@ -258,6 +258,7 @@ export async function restoreEntityProfile(
 		.where(and(eq(table.ownerId, ref.id), eq(table.revision, revision)))
 		.limit(1);
 	if (!row) throw new CatalogReferenceNotFound("Entity profile revision is missing");
+	if (row.removed) return removeEntityProfile(tx, ref, actor, expectedVersion);
 	return initializeEntityProfile(
 		tx,
 		ref,
@@ -265,4 +266,26 @@ export async function restoreEntityProfile(
 		expectedVersion,
 		EntityProfileSchema.parse(row.snapshot),
 	);
+}
+
+/** @alpha Remove fixed catalog values while retaining the Entity identity and immutable history. */
+export async function removeEntityProfile(
+	tx: DatabaseTransaction,
+	ref: CatalogReference,
+	actor: string,
+	expectedVersion: number,
+) {
+	if (ref.owner !== "entity") throw new TypeError("Expected entity owner");
+	const revision = await recordCatalogChange(
+		tx,
+		ref,
+		actor,
+		expectedVersion,
+		"entity.profile.remove",
+	);
+	await tx.delete(entityCatalogProfile).where(eq(entityCatalogProfile.id, ref.id));
+	await tx
+		.insert(entityCatalogProfileRevision)
+		.values({ ownerId: ref.id, revision, removed: true, snapshot: {} });
+	return { revision };
 }

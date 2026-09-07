@@ -241,7 +241,7 @@ try {
 					.where(eq(catalogSourceMappingClaim.sourceRecordId, nestedSourceId))
 					.limit(1);
 				assert.ok(nested);
-				const profile =
+				const profile: { revision: number } =
 					owner === "entity"
 						? await readEntityProfile(tx, { owner, id: nested.ownerId }, actor.id)
 						: await readReferenceProfile(tx, { owner, id: nested.ownerId }, actor.id);

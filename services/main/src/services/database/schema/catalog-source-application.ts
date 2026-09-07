@@ -16,6 +16,7 @@ import { musicComponentRevision } from "./catalog-music";
 import { CatalogFactTables } from "./catalog-facts";
 import { CatalogNameTables } from "./catalog-names";
 import { type CatalogOwner } from "../../catalog/contracts";
+import { CatalogProfileHistoryTables } from "./catalog-profile-source";
 import { softwareParticipationRevision } from "./catalog-software-participation";
 import {
 	softwareParticipationContextRevision,
@@ -77,6 +78,51 @@ function applicationColumns() {
 		ownerId: uuid().notNull(),
 	};
 }
+
+function profileApplicationTable(owner: keyof typeof CatalogProfileHistoryTables) {
+	const history = CatalogProfileHistoryTables[owner];
+	return pgTable(
+		`${owner}_source_profile_application_change`,
+		{
+			...applicationColumns(),
+			beforeRevision: bigint({ mode: "number" }),
+			afterRevision: bigint({ mode: "number" }).notNull(),
+		},
+		(t) => [
+			primaryKey({ columns: [t.sourceRecordId, t.proposalId, t.action, t.position] }),
+			foreignKey({
+				name: `${owner}_profile_app_journal_fk`,
+				columns: [t.sourceRecordId, t.proposalId, t.action],
+				foreignColumns: [
+					catalogSourceApplication.sourceRecordId,
+					catalogSourceApplication.proposalId,
+					catalogSourceApplication.action,
+				],
+			}).onDelete("restrict"),
+			foreignKey({
+				name: `${owner}_profile_app_before_fk`,
+				columns: [t.ownerId, t.beforeRevision],
+				foreignColumns: [history.ownerId, history.revision],
+			}).onDelete("restrict"),
+			foreignKey({
+				name: `${owner}_profile_app_after_fk`,
+				columns: [t.ownerId, t.afterRevision],
+				foreignColumns: [history.ownerId, history.revision],
+			}).onDelete("restrict"),
+			check(
+				`${owner}_profile_app_values`,
+				sql`${t.position} between 0 and 127 and (${t.beforeRevision} is null or ${t.beforeRevision} < ${t.afterRevision})`,
+			),
+		],
+	);
+}
+export const CatalogSourceProfileApplicationTables = {
+	entity: profileApplicationTable("entity"),
+	reference: profileApplicationTable("reference"),
+};
+export const entitySourceProfileApplicationChange = CatalogSourceProfileApplicationTables.entity;
+export const referenceSourceProfileApplicationChange =
+	CatalogSourceProfileApplicationTables.reference;
 
 /** Exact music history foreign keys remain valid after component removal or source rebinding. */
 export const musicSourceApplicationChange = pgTable(

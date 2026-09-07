@@ -275,6 +275,7 @@ export async function restoreReferenceProfile(
 		.where(and(eq(table.ownerId, ref.id), eq(table.revision, revision)))
 		.limit(1);
 	if (!row) throw new CatalogReferenceNotFound("Reference profile revision is missing");
+	if (row.removed) return removeReferenceProfile(tx, ref, actor, expectedVersion);
 	return initializeReferenceProfile(
 		tx,
 		ref,
@@ -282,6 +283,41 @@ export async function restoreReferenceProfile(
 		expectedVersion,
 		ReferenceProfileSchema.parse(row.snapshot),
 	);
+}
+
+/** @alpha Remove fixed reference values; concrete dependent records must be removed through their own commands first. */
+export async function removeReferenceProfile(
+	tx: DatabaseTransaction,
+	ref: CatalogReference,
+	actor: string,
+	expectedVersion: number,
+) {
+	if (ref.owner !== "reference") throw new TypeError("Expected reference owner");
+	const identity = await loadCatalogIdentity(tx, ref, actor, true);
+	const tables = {
+		concept: referenceConcept,
+		web_resource: referenceWebResource,
+		area: referenceArea,
+		place: referencePlace,
+		event: referenceEvent,
+		instrument: referenceInstrument,
+	};
+	const shape = z
+		.enum(["concept", "web_resource", "area", "place", "event", "instrument"])
+		.parse(identity.shape);
+	const table = tables[shape];
+	const revision = await recordCatalogChange(
+		tx,
+		ref,
+		actor,
+		expectedVersion,
+		"reference.profile.remove",
+	);
+	await tx.delete(table).where(eq(table.id, ref.id));
+	await tx
+		.insert(referenceCatalogProfileRevision)
+		.values({ ownerId: ref.id, revision, removed: true, snapshot: { shape } });
+	return { revision };
 }
 
 /** @alpha @remarks ISO and historical codes are namespaced claims, not unique native identities. */

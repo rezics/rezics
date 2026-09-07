@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
+import { runParticipationSavepoint } from "../participation/policy";
 import {
 	musicAlternativeTrack,
 	musicMediumIdentifier,
@@ -29,7 +30,7 @@ export async function adoptMusicBrainzAlternativeRelease(
 	receipt: CatalogSourceReceipt,
 	bytes: Uint8Array,
 ) {
-	return tx.transaction(async (inner) => {
+	return runParticipationSavepoint(tx, async (inner) => {
 		if (
 			bytes.byteLength > 8000000 ||
 			createHash("sha256").update(bytes).digest("hex") !== receipt.contentSha256 ||

@@ -1,4 +1,4 @@
-h1:SVQmB+sEta4hK098nR5aOVYJJfP38FaAESr+FqidqbU=
+h1:BZmW7PBphI4F2xDmWKt/QsXGyvORzjuKZVM6qHZnngU=
 20260801000000_v1_baseline.sql h1:RkSyDwLRpFOPI7iqWg+WlFc5TAshnB4gsRkBpsTMjGY=
 20260807000000_search_ordered_candidates.sql h1:rPOS8iAdRmWOfc9lpyCNNsFWjduRV1e27Q1Mc1QpTFc=
 20260807000001_backfill_search_best_score.sql h1:lmLn+kpWiNWEPlk40W4QRIGsqpWezY//UsNaaZ8FToc=
@@ -53,3 +53,5 @@ h1:SVQmB+sEta4hK098nR5aOVYJJfP38FaAESr+FqidqbU=
 20260907095423_catalog_source_owned_baseline.sql h1:nh5nZ3GRMxWBsXl4X5CVvvTHMFeZcO15ojDIcCVU/7Q=
 20260907102615_catalog_source_mapping_protocol.sql h1:YcFzkaXNP0lLuMYvxZpqYVooEGU1+MzSb71CW0izhpE=
 20260907110755_catalog_component_heads.sql h1:gACPKnxPs0N5mAT/ehjiW78O+cn765J+j0IzragLbmo=
+20260907112935_participation_audit_actor.sql h1:xb/R/+PYja3DB7ZtilFlZBgcF/94GEidgWXxYteMU0U=
+20260907113914_participation_entity_cutover.sql h1:eXqSMI7Iy7XSxBCzPim1ei1RVFNKzlRkO08APBJeYRU=

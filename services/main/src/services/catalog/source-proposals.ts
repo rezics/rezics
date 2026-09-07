@@ -21,6 +21,11 @@ import {
 } from "./source-applications";
 import { catalogSourceApplication } from "../database/schema/catalog-source-application";
 import { CatalogIdentityTables } from "../database/schema/catalog-identity";
+import {
+	currentParticipationAuthority,
+	runWithApprovedSourceProposal,
+	ParticipationDenied,
+} from "../participation/policy";
 
 const proposalInputSchema = z.strictObject({
 	sourceRecordId: z.uuid(),
@@ -211,157 +216,182 @@ export async function decideCatalogSourceProposal(
 	const [proposal] = await tx.select().from(proposals).where(key).limit(1).for("update");
 	if (!proposal || proposal.mappingVersion !== value.mappingVersion)
 		throw new Error("Source proposal mapping version differs");
-	const native = await loadCatalogIdentity(tx, current.reference, actor, true);
-	const targetState = {
-		apply: "applied",
-		reject: "rejected",
-		supersede: "superseded",
-		withdraw: "withdrawn",
-	} as const;
-	if (proposal.state === targetState[value.action])
-		return { status: "repeated" as const, proposal };
-	if (value.action === "withdraw" ? proposal.state !== "applied" : proposal.state !== "pending")
-		throw new Error("Source proposal transition is not allowed");
-	const fenceMatches =
-		proposal.expectedBindingRevision === current.claim.bindingRevision &&
-		proposal.expectedPolicyRevision === current.claim.policyRevision;
-	const revisionMatches =
-		native.revision ===
-		(value.action === "withdraw"
-			? proposal.appliedTargetRevision
-			: proposal.expectedTargetRevision);
-	if (
-		value.action === "apply" &&
-		(!fenceMatches ||
-			proposal.mappingVersion !== current.claim.mappingVersion ||
-			!revisionMatches ||
-			current.claim.state !== "active" ||
-			current.source.headSnapshotId !== proposal.snapshotId ||
-			current.source.lastCheckOutcome === "tombstone")
-	) {
-		await tx
+	const executeDecision = async () => {
+		const native = await loadCatalogIdentity(tx, current.reference, actor, true);
+		const targetState = {
+			apply: "applied",
+			reject: "rejected",
+			supersede: "superseded",
+			withdraw: "withdrawn",
+		} as const;
+		if (proposal.state === targetState[value.action])
+			return { status: "repeated" as const, proposal };
+		if (value.action === "withdraw" ? proposal.state !== "applied" : proposal.state !== "pending")
+			throw new Error("Source proposal transition is not allowed");
+		const fenceMatches =
+			proposal.expectedBindingRevision === current.claim.bindingRevision &&
+			proposal.expectedPolicyRevision === current.claim.policyRevision;
+		const revisionMatches =
+			native.revision ===
+			(value.action === "withdraw"
+				? proposal.appliedTargetRevision
+				: proposal.expectedTargetRevision);
+		if (
+			value.action === "apply" &&
+			(!fenceMatches ||
+				proposal.mappingVersion !== current.claim.mappingVersion ||
+				!revisionMatches ||
+				current.claim.state !== "active" ||
+				current.source.headSnapshotId !== proposal.snapshotId ||
+				current.source.lastCheckOutcome === "tombstone")
+		) {
+			await tx
+				.update(proposals)
+				.set({
+					state: "superseded",
+					decidedAt: new Date(),
+					decisionReason: "Source, binding, policy or native revision changed",
+				})
+				.where(key);
+			await appendSourceLifecycleEvent(
+				tx,
+				value.sourceRecordId,
+				"source.adoption.decided",
+				current.claim.bindingRevision,
+				{ proposalId: proposal.id, state: "superseded" },
+			);
+			return { status: "superseded" as const };
+		}
+		if (value.action === "withdraw" && !fenceMatches)
+			throw new Error("Withdrawal would overwrite independent native edits or a rebound target");
+		let appliedTargetRevision = proposal.appliedTargetRevision;
+		if (value.action === "apply" || value.action === "withdraw") {
+			if (!nativeWriter) throw new Error("Source decision requires its canonical native command");
+			const [priorApplication] =
+				value.action === "withdraw"
+					? await tx
+							.select()
+							.from(catalogSourceApplication)
+							.where(
+								and(
+									eq(catalogSourceApplication.sourceRecordId, value.sourceRecordId),
+									eq(catalogSourceApplication.proposalId, proposal.id),
+									eq(catalogSourceApplication.action, "apply"),
+								),
+							)
+							.limit(1)
+					: [];
+			if (value.action === "withdraw" && !priorApplication)
+				throw new Error("Withdrawal requires the exact prior native application");
+			if (value.action === "withdraw" && !revisionMatches && priorApplication?.changeCount === 0)
+				throw new Error(
+					"Withdrawal would overwrite independent native edits without exact component evidence",
+				);
+			const result = await nativeWriter(tx, {
+				reference: current.reference,
+				actor,
+				expectedRevision: native.revision,
+				sourceRecordId: value.sourceRecordId,
+				snapshotId: proposal.snapshotId,
+				mappingVersion: proposal.mappingVersion,
+				mappingKey: proposal.mappingKey,
+				proposalId: proposal.id,
+				action: value.action,
+				previousSnapshotId: current.claim.observedSnapshotId,
+			});
+			z.number()
+				.int()
+				.min(native.revision + 1)
+				.max(Number.MAX_SAFE_INTEGER)
+				.parse(result.revision);
+			const after = await loadCatalogIdentity(tx, current.reference, actor, true);
+			if (after.revision !== result.revision)
+				throw new Error("Native source command did not commit its declared revision");
+			await recordCatalogSourceApplication(
+				tx,
+				{
+					sourceRecordId: value.sourceRecordId,
+					proposalId: proposal.id,
+					action: value.action,
+					previousSnapshotId: current.claim.observedSnapshotId,
+					previousEvidenceSourceRecordId: current.claim.evidenceSourceRecordId,
+					previousEvidenceSnapshotId: current.claim.evidenceSnapshotId,
+					previousEvidencePath: current.claim.evidencePath,
+					beforeRevision: native.revision,
+					afterRevision: result.revision,
+				},
+				result.changes ?? [],
+			);
+			appliedTargetRevision = result.revision;
+			if (value.action === "apply")
+				await tx
+					.update(claims)
+					.set({
+						observedSnapshotId: proposal.snapshotId,
+						evidenceSourceRecordId: null,
+						evidenceSnapshotId: null,
+						evidencePath: null,
+					})
+					.where(
+						and(
+							eq(claims.sourceRecordId, value.sourceRecordId),
+							eq(claims.mappingKey, proposal.mappingKey),
+						),
+					);
+			else if (priorApplication)
+				await tx
+					.update(claims)
+					.set({
+						observedSnapshotId: priorApplication.previousSnapshotId,
+						evidenceSourceRecordId: priorApplication.previousEvidenceSourceRecordId,
+						evidenceSnapshotId: priorApplication.previousEvidenceSnapshotId,
+						evidencePath: priorApplication.previousEvidencePath,
+					})
+					.where(
+						and(
+							eq(claims.sourceRecordId, value.sourceRecordId),
+							eq(claims.mappingKey, proposal.mappingKey),
+						),
+					);
+		}
+		const [decided] = await tx
 			.update(proposals)
 			.set({
-				state: "superseded",
+				state: targetState[value.action],
 				decidedAt: new Date(),
-				decisionReason: "Source, binding, policy or native revision changed",
+				decisionReason: value.reason,
+				appliedTargetRevision,
 			})
-			.where(key);
+			.where(key)
+			.returning();
 		await appendSourceLifecycleEvent(
 			tx,
 			value.sourceRecordId,
 			"source.adoption.decided",
 			current.claim.bindingRevision,
-			{ proposalId: proposal.id, state: "superseded" },
+			{
+				proposalId: proposal.id,
+				state: targetState[value.action],
+				snapshotId: proposal.snapshotId,
+			},
 		);
-		return { status: "superseded" as const };
-	}
-	if (value.action === "withdraw" && (!fenceMatches || !revisionMatches))
-		throw new Error("Withdrawal would overwrite independent native edits or a rebound target");
-	let appliedTargetRevision = proposal.appliedTargetRevision;
-	if (value.action === "apply" || value.action === "withdraw") {
-		if (!nativeWriter) throw new Error("Source decision requires its canonical native command");
-		const [priorApplication] =
-			value.action === "withdraw"
-				? await tx
-						.select()
-						.from(catalogSourceApplication)
-						.where(
-							and(
-								eq(catalogSourceApplication.sourceRecordId, value.sourceRecordId),
-								eq(catalogSourceApplication.proposalId, proposal.id),
-								eq(catalogSourceApplication.action, "apply"),
-							),
-						)
-						.limit(1)
-				: [];
-		if (value.action === "withdraw" && !priorApplication)
-			throw new Error("Withdrawal requires the exact prior native application");
-		const result = await nativeWriter(tx, {
-			reference: current.reference,
-			actor,
-			expectedRevision: native.revision,
-			sourceRecordId: value.sourceRecordId,
-			snapshotId: proposal.snapshotId,
-			mappingVersion: proposal.mappingVersion,
-			mappingKey: proposal.mappingKey,
-			proposalId: proposal.id,
-			action: value.action,
-			previousSnapshotId: current.claim.observedSnapshotId,
-		});
-		z.number()
-			.int()
-			.min(native.revision + 1)
-			.max(Number.MAX_SAFE_INTEGER)
-			.parse(result.revision);
-		const after = await loadCatalogIdentity(tx, current.reference, actor, true);
-		if (after.revision !== result.revision)
-			throw new Error("Native source command did not commit its declared revision");
-		await recordCatalogSourceApplication(
+		return { status: targetState[value.action], proposal: decided };
+	};
+	const authority = currentParticipationAuthority();
+	if (!authority || authority.principal.authUserId !== actor)
+		throw new ParticipationDenied("Source decision requires the current authenticated operator");
+	if (authority.grant || authority.principal.kind === "service")
+		return runWithApprovedSourceProposal(
 			tx,
+			authority,
 			{
 				sourceRecordId: value.sourceRecordId,
 				proposalId: proposal.id,
-				action: value.action,
-				previousSnapshotId: current.claim.observedSnapshotId,
-				previousEvidenceSourceRecordId: current.claim.evidenceSourceRecordId,
-				previousEvidenceSnapshotId: current.claim.evidenceSnapshotId,
-				previousEvidencePath: current.claim.evidencePath,
-				beforeRevision: native.revision,
-				afterRevision: result.revision,
+				reference: current.reference,
 			},
-			result.changes ?? [],
+			executeDecision,
 		);
-		appliedTargetRevision = result.revision;
-		if (value.action === "apply")
-			await tx
-				.update(claims)
-				.set({
-					observedSnapshotId: proposal.snapshotId,
-					evidenceSourceRecordId: null,
-					evidenceSnapshotId: null,
-					evidencePath: null,
-				})
-				.where(
-					and(
-						eq(claims.sourceRecordId, value.sourceRecordId),
-						eq(claims.mappingKey, proposal.mappingKey),
-					),
-				);
-		else if (priorApplication)
-			await tx
-				.update(claims)
-				.set({
-					observedSnapshotId: priorApplication.previousSnapshotId,
-					evidenceSourceRecordId: priorApplication.previousEvidenceSourceRecordId,
-					evidenceSnapshotId: priorApplication.previousEvidenceSnapshotId,
-					evidencePath: priorApplication.previousEvidencePath,
-				})
-				.where(
-					and(
-						eq(claims.sourceRecordId, value.sourceRecordId),
-						eq(claims.mappingKey, proposal.mappingKey),
-					),
-				);
-	}
-	const [decided] = await tx
-		.update(proposals)
-		.set({
-			state: targetState[value.action],
-			decidedAt: new Date(),
-			decisionReason: value.reason,
-			appliedTargetRevision,
-		})
-		.where(key)
-		.returning();
-	await appendSourceLifecycleEvent(
-		tx,
-		value.sourceRecordId,
-		"source.adoption.decided",
-		current.claim.bindingRevision,
-		{ proposalId: proposal.id, state: targetState[value.action], snapshotId: proposal.snapshotId },
-	);
-	return { status: targetState[value.action], proposal: decided };
+	return executeDecision();
 }
 
 /** @internal Scoped review page uses source-record partition pruning and a keyset cursor. */

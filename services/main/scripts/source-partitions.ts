@@ -3,6 +3,15 @@ import { CatalogOwnerValues } from "@rezics/reference";
 /** @internal Physical source placement preserves each typed primary/unique key. */
 export const sourcePartitionKeys = {
 	...Object.fromEntries(
+		["entity", "reference"].flatMap((owner) =>
+			[
+				`${owner}_profile_source_occurrence`,
+				`${owner}_source_profile_baseline`,
+				`${owner}_source_profile_application_change`,
+			].map((name) => [name, "source_record_id"]),
+		),
+	),
+	...Object.fromEntries(
 		CatalogOwnerValues.map((owner) => [`${owner}_source_owned_baseline`, "source_record_id"]),
 	),
 	software_source_record_baseline: "source_record_id",

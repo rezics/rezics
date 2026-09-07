@@ -14,6 +14,7 @@ export const PostgreSqlSchemaFileNames = [
 	"catalog-source-integrity.sql",
 	"catalog-source-application.sql",
 	"catalog-source-owned-baseline.sql",
+	"catalog-profile-source.sql",
 	"catalog-structure-history.sql",
 	"catalog-supporting-integrity.sql",
 	"operational-runtime.sql",
@@ -46,9 +47,13 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
 export const PostgreSqlSchemaMigrationBundles = {
 	participation_entity_cutover: [
 		"participation-integrity.sql",
+		"participation-studio.sql",
+		"participation-progress.sql",
 		"participation-messages.sql",
 		"participation-notifications.sql",
 		"book-chapter-progress.sql",
+		"catalog-source-application.sql",
+		"catalog-profile-source.sql",
 	],
 	catalog_component_heads: [
 		"catalog-music-history.sql",
@@ -96,6 +101,8 @@ export const PostgreSqlSchemaMigrationBundles = {
 } as const satisfies Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>>;
 
 export const PostgreSqlSchemaFunctionNames = [
+	"catalog_validate_profile_source",
+	"catalog_validate_profile_baseline",
 	"catalog_guard_music_component_head",
 	"catalog_guard_music_revision_insert",
 	"catalog_check_music_definition_scope",
@@ -777,6 +784,8 @@ const CatalogTriggerOwners = [
 ] as const;
 
 const CatalogSourceApplicationTables = [
+	"entity_source_profile_application_change",
+	"reference_source_profile_application_change",
 	"catalog_source_application",
 	"music_source_application_change",
 	"software_source_component_application_change",
@@ -794,6 +803,11 @@ const CatalogSourceApplicationTables = [
  * complete definitions (including arguments, constraint timing and enabled status).
  */
 export const PostgreSqlSchemaDynamicTriggers = [
+	...["entity", "reference"].flatMap((owner) => [
+		{ table: `${owner}_profile_source_occurrence`, name: "catalog_profile_source_immutable" },
+		{ table: `${owner}_profile_source_occurrence`, name: "catalog_profile_source_exact" },
+		{ table: `${owner}_source_profile_baseline`, name: "catalog_profile_baseline_exact" },
+	]),
 	...CatalogTriggerOwners.map((owner) => ({
 		table: `${owner}_source_owned_baseline`,
 		name: "catalog_source_baseline_guard",
@@ -898,6 +912,9 @@ export const PostgreSqlSchemaDynamicTriggers = [
 
 /** Exact dynamic declarations permitted by the static manifest check. */
 export const PostgreSqlSchemaDynamicTriggerTemplates = [
+	"CREATE TRIGGER catalog_profile_source_immutable BEFORE UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_immutable_evidence()",
+	"CREATE TRIGGER catalog_profile_source_exact BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_validate_profile_source(%L)",
+	"CREATE TRIGGER catalog_profile_baseline_exact BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_validate_profile_baseline(%L)",
 	"CREATE TRIGGER catalog_structure_head_maintained BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_structure_head(%L)",
 	"CREATE TRIGGER catalog_structure_revision_capture_only BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_structure_revision_insert()",
 	"CREATE TRIGGER catalog_source_baseline_guard BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_owned_baseline(%L,%L)",

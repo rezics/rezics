@@ -1,6 +1,7 @@
 import { and, eq, getTableColumns, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
+import { runParticipationSavepoint } from "../participation/policy";
 import {
 	musicArtistCredit,
 	musicAlternativeTrack,
@@ -165,7 +166,7 @@ export async function mutateMusicComponents(
 	input: readonly MusicComponentMutation[],
 ) {
 	const operations = MusicComponentBatchSchema.parse(input);
-	return tx.transaction(async (inner) => {
+	return runParticipationSavepoint(tx, async (inner) => {
 		const identity = await loadCatalogIdentity(inner, reference, actor, true);
 		if (reference.owner !== "music") throw new TypeError("Expected music storage owner");
 		if (identity.revision !== expectedRevision)

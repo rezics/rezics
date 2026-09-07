@@ -81,6 +81,7 @@ export const entityCatalogProfileRevision = pgTable(
 			.notNull()
 			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		revision: bigint({ mode: "number" }).notNull(),
+		removed: boolean().notNull().default(false),
 		snapshot: jsonb().$type<unknown>().notNull(),
 		createdAt: createCreatedAtColumn(),
 	},

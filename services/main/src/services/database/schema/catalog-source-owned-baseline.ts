@@ -21,6 +21,7 @@ import {
 	softwareParticipationContextRevision,
 } from "./catalog-software";
 import { softwareParticipationRevision } from "./catalog-software-participation";
+import { CatalogProfileHistoryTables } from "./catalog-profile-source";
 
 function baselineColumns(owner: CatalogOwner) {
 	return {
@@ -83,6 +84,30 @@ function baselineConstraints(
 		),
 	];
 }
+function profileBaseline(owner: keyof typeof CatalogProfileHistoryTables) {
+	const history = CatalogProfileHistoryTables[owner];
+	return pgTable(`${owner}_source_profile_baseline`, { ...baselineColumns(owner) }, (t) => [
+		primaryKey({ columns: [t.sourceRecordId, t.mappingKey, t.ownerId] }),
+		...baselineConstraints(`${owner}_profile_baseline`, t, owner),
+		foreignKey({
+			name: `${owner}_profile_baseline_source_fk`,
+			columns: [t.ownerId, t.sourceRevision],
+			foreignColumns: [history.ownerId, history.revision],
+		}).onDelete("restrict"),
+		foreignKey({
+			name: `${owner}_profile_baseline_current_fk`,
+			columns: [t.ownerId, t.currentRevision],
+			foreignColumns: [history.ownerId, history.revision],
+		}).onDelete("restrict"),
+	]);
+}
+export const CatalogSourceProfileBaselines = {
+	entity: profileBaseline("entity"),
+	reference: profileBaseline("reference"),
+};
+export const entitySourceProfileBaseline = CatalogSourceProfileBaselines.entity;
+export const referenceSourceProfileBaseline = CatalogSourceProfileBaselines.reference;
+
 function ownedBaseline(owner: CatalogOwner) {
 	const semantic = CatalogFactTables[owner].semanticRevision;
 	const { nameRevision: name, authorityRevision: authority } = CatalogNameTables[owner];

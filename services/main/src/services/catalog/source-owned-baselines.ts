@@ -2,6 +2,7 @@ import { and, eq, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import {
 	CatalogSourceOwnedBaselines,
+	CatalogSourceProfileBaselines,
 	softwareSourceComponentBaseline,
 	softwareSourceRecordBaseline,
 	softwareSourceContextBaseline,
@@ -22,6 +23,7 @@ import {
 	type CatalogSourceNativeChange,
 } from "./source-applications";
 import type { CatalogSourceOwnedChange } from "./source-owned-compensation";
+import { CatalogProfileSourceTables } from "../database/schema/catalog-profile-source";
 
 type NumericChange = Extract<CatalogSourceNativeChange, { afterRevision: number }>;
 type Origin = { sourceSnapshotId: string; sourcePath: string; sourceRevision: number };
@@ -32,6 +34,21 @@ async function origin(
 	snapshotId: string,
 	change: NumericChange,
 ): Promise<Origin | undefined> {
+	if (change.kind === "catalog-profile") {
+		const t = CatalogProfileSourceTables[change.owner];
+		const [row] = await tx
+			.select({ sourcePath: t.sourcePath, sourceRevision: t.revision })
+			.from(t)
+			.where(
+				and(
+					eq(t.sourceRecordId, sourceRecordId),
+					eq(t.snapshotId, snapshotId),
+					eq(t.ownerId, change.ownerId),
+				),
+			)
+			.limit(1);
+		return row && { ...row, sourceSnapshotId: snapshotId };
+	}
 	if ("owner" in change) {
 		const tables = CatalogNameTables[change.owner];
 		if (change.kind === "catalog-name") {
@@ -258,7 +275,33 @@ export async function advanceCatalogSourceOwnedBaselines(
 			lastAction: input.action,
 			absent: !observed,
 		};
-		if ("owner" in change) {
+		if (change.kind === "catalog-profile") {
+			const t = CatalogSourceProfileBaselines[change.owner];
+			const [previous] = await tx
+				.select()
+				.from(t)
+				.where(
+					and(
+						eq(t.sourceRecordId, locator.sourceRecordId),
+						eq(t.mappingKey, locator.mappingKey),
+						eq(t.ownerId, locator.ownerId),
+					),
+				)
+				.limit(1)
+				.for("update");
+			const proof = fallback ?? previous;
+			if (!proof) throw new Error("Native profile change has no source occurrence evidence");
+			const values = {
+				...common,
+				sourceSnapshotId: proof.sourceSnapshotId,
+				sourcePath: proof.sourcePath,
+				sourceRevision: proof.sourceRevision,
+			};
+			await tx
+				.insert(t)
+				.values(values)
+				.onConflictDoUpdate({ target: [t.sourceRecordId, t.mappingKey, t.ownerId], set: values });
+		} else if ("owner" in change) {
 			const t = CatalogSourceOwnedBaselines[change.owner];
 			const key = and(
 				eq(t.sourceRecordId, locator.sourceRecordId),

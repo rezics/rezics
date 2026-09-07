@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import { Readable } from "node:stream";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -165,99 +166,102 @@ try {
 				.returning({ id: users.id });
 			assert.ok(account);
 			const actor = account.id;
-			const program = await adoptBangumiSubject(tx, actor, subject.receipt, subject.bytes);
-			const grouping = await adoptBangumiIndex(tx, actor, index.receipt, index.bytes);
-			assert.equal(grouping.status, "created");
-			if (!("orderProfileId" in grouping)) throw new Error("Expected new collection order profile");
-			const names = CatalogNameTables.grouping.sourceOccurrence;
-			assert.equal(
-				(await tx.select().from(names).where(eq(names.ownerId, grouping.reference.id))).length,
-				1,
-			);
-			checks++;
-			const definitions = await ensureBangumiIndexMemberDefinitions(tx);
-			await adoptBangumiIndexMember(tx, grouping.reference, actor, grouping.revision, {
-				...members,
-				entryIndex: 0,
-				profileId: grouping.orderProfileId,
-				position: "a0",
-				...definitions,
-			});
-			const ordered = await readGroupingOrder(
-				tx,
-				grouping.reference,
-				actor,
-				grouping.orderProfileId,
-			);
-			assert.equal(ordered.length, 1);
-			const supports = CatalogFactTables.grouping.support;
-			const sources = await tx
-				.select()
-				.from(supports)
-				.where(eq(supports.ownerId, grouping.reference.id));
-			for (const path of [
-				"/title",
-				"/desc",
-				"/total",
-				"/stat/comments",
-				"/stat/collects",
-				"/created_at",
-				"/updated_at",
-				"/ban",
-				"/data/0/comment",
-				"/data/0/added_at",
-			])
-				assert.ok(
-					sources.some((row) => row.sourcePath === path),
-					`Missing native source support ${path}`,
+			await runWithNativeFixtureActor(tx, actor, async () => {
+				const program = await adoptBangumiSubject(tx, actor, subject.receipt, subject.bytes);
+				const grouping = await adoptBangumiIndex(tx, actor, index.receipt, index.bytes);
+				assert.equal(grouping.status, "created");
+				if (!("orderProfileId" in grouping))
+					throw new Error("Expected new collection order profile");
+				const names = CatalogNameTables.grouping.sourceOccurrence;
+				assert.equal(
+					(await tx.select().from(names).where(eq(names.ownerId, grouping.reference.id))).length,
+					1,
 				);
-			checks += 2;
-			const wikiDefinition = await ensureCatalogDefinition(tx, {
-				namespace: "catalog.metadata",
-				key: "historical-name-note",
-				kind: "property",
-				valueKind: "string",
+				checks++;
+				const definitions = await ensureBangumiIndexMemberDefinitions(tx);
+				await adoptBangumiIndexMember(tx, grouping.reference, actor, grouping.revision, {
+					...members,
+					entryIndex: 0,
+					profileId: grouping.orderProfileId,
+					position: "a0",
+					...definitions,
+				});
+				const ordered = await readGroupingOrder(
+					tx,
+					grouping.reference,
+					actor,
+					grouping.orderProfileId,
+				);
+				assert.equal(ordered.length, 1);
+				const supports = CatalogFactTables.grouping.support;
+				const sources = await tx
+					.select()
+					.from(supports)
+					.where(eq(supports.ownerId, grouping.reference.id));
+				for (const path of [
+					"/title",
+					"/desc",
+					"/total",
+					"/stat/comments",
+					"/stat/collects",
+					"/created_at",
+					"/updated_at",
+					"/ban",
+					"/data/0/comment",
+					"/data/0/added_at",
+				])
+					assert.ok(
+						sources.some((row) => row.sourcePath === path),
+						`Missing native source support ${path}`,
+					);
+				checks += 2;
+				const wikiDefinition = await ensureCatalogDefinition(tx, {
+					namespace: "catalog.metadata",
+					key: "historical-name-note",
+					kind: "property",
+					valueKind: "string",
+				});
+				const current = await loadCatalogIdentity(tx, program.reference, actor, true);
+				const input = {
+					...historical,
+					entryIndex: 0,
+					definitionRevisionId: wikiDefinition.revisionId,
+					revisionTarget: { objectType: "subject" as const, externalId: 253 },
+				};
+				await assert.rejects(
+					() =>
+						tx.transaction((savepoint) =>
+							adoptBangumiWikiValue(savepoint, program.reference, actor, current.revision, input),
+						),
+					/membership evidence/,
+				);
+				await assert.rejects(
+					() =>
+						tx.transaction((savepoint) =>
+							adoptBangumiWikiValue(savepoint, program.reference, actor, current.revision, {
+								...input,
+								revisionContext: { ...wrongMembership, entryIndex: 0 },
+							}),
+						),
+					/membership evidence/,
+				);
+				const wiki = await adoptBangumiWikiValue(tx, program.reference, actor, current.revision, {
+					...input,
+					revisionContext: { ...membership, entryIndex: 0 },
+				});
+				const evidence = CatalogFactTables.program.support;
+				const wikiProofs = await tx
+					.select()
+					.from(evidence)
+					.where(and(eq(evidence.ownerId, program.reference.id), eq(evidence.factId, wiki.id)));
+				assert.equal(wikiProofs.length, 2);
+				assert.deepEqual(
+					new Set(wikiProofs.map((row) => row.sourcePath)),
+					new Set(["/data/field_infobox", "/data/0/id"]),
+				);
+				checks += 3;
+				throw rollback;
 			});
-			const current = await loadCatalogIdentity(tx, program.reference, actor, true);
-			const input = {
-				...historical,
-				entryIndex: 0,
-				definitionRevisionId: wikiDefinition.revisionId,
-				revisionTarget: { objectType: "subject" as const, externalId: 253 },
-			};
-			await assert.rejects(
-				() =>
-					tx.transaction((savepoint) =>
-						adoptBangumiWikiValue(savepoint, program.reference, actor, current.revision, input),
-					),
-				/membership evidence/,
-			);
-			await assert.rejects(
-				() =>
-					tx.transaction((savepoint) =>
-						adoptBangumiWikiValue(savepoint, program.reference, actor, current.revision, {
-							...input,
-							revisionContext: { ...wrongMembership, entryIndex: 0 },
-						}),
-					),
-				/membership evidence/,
-			);
-			const wiki = await adoptBangumiWikiValue(tx, program.reference, actor, current.revision, {
-				...input,
-				revisionContext: { ...membership, entryIndex: 0 },
-			});
-			const evidence = CatalogFactTables.program.support;
-			const wikiProofs = await tx
-				.select()
-				.from(evidence)
-				.where(and(eq(evidence.ownerId, program.reference.id), eq(evidence.factId, wiki.id)));
-			assert.equal(wikiProofs.length, 2);
-			assert.deepEqual(
-				new Set(wikiProofs.map((row) => row.sourcePath)),
-				new Set(["/data/field_infobox", "/data/0/id"]),
-			);
-			checks += 3;
-			throw rollback;
 		});
 	} catch (error) {
 		if (error !== rollback) throw error;

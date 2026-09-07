@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { sql } from "drizzle-orm";
@@ -53,252 +54,261 @@ try {
 				.returning({ id: users.id });
 			assert.ok(account);
 			const actor = account.id;
-			const program = await createProgramStructure(
-				tx,
-				actor,
-				{
-					shape: "program",
-					fields: { declaredMainEpisodeCount: 26, declaredTotalEpisodeCount: 31 },
-				},
-				name("Program"),
-			);
-			const season = await createProgramStructure(
-				tx,
-				actor,
-				{ shape: "season", fields: { programId: program.id, number: "I" } },
-				name("Season"),
-			);
-			const version = await createProgramStructure(
-				tx,
-				actor,
-				{ shape: "program_version", fields: { programId: program.id } },
-				name("Version"),
-			);
-			const episode = await createProgramStructure(
-				tx,
-				actor,
-				{
-					shape: "episode",
-					fields: {
-						programId: program.id,
-						seasonId: season.id,
-						sortNumber: 1.5,
-						episodeNumber: 2,
-						durationText: "00:24:43",
-						lengthMilliseconds: 1_483_000,
-						date: { year: 1998, month: 10, day: null },
-					},
-				},
-				name("Episode"),
-			);
-			const exported = await readProgramStructure(tx, episode, actor);
-			assert.ok("sortNumber" in exported.record);
-			assert.equal(exported.record.sortNumber, "1.5");
-			assert.ok("dateDay" in exported.record);
-			assert.equal(exported.record.dateDay, null);
-			checks += 2;
-			const first = await putProgramOccurrence(tx, version, actor, version.revision, {
-				episodeId: episode.id,
-				position: "a0",
-			});
-			const second = await putProgramOccurrence(tx, version, actor, first.revision, {
-				episodeId: episode.id,
-				position: "a1",
-				sourceNumber: "encore",
-			});
-			const page1 = await listProgramOccurrences(tx, version, actor, { limit: 1 });
-			assert.equal(page1.items[0]?.id, first.id);
-			assert.ok(page1.nextCursor);
-			const page2 = await listProgramOccurrences(tx, version, actor, {
-				limit: 1,
-				after: page1.nextCursor,
-			});
-			assert.equal(page2.items[0]?.id, second.id);
-			checks += 2;
-			await assert.rejects(
-				tx.transaction((nested) =>
-					updateProgramStructure(nested, program, actor, program.revision - 1, {
+			await runWithNativeFixtureActor(tx, actor, async () => {
+				const program = await createProgramStructure(
+					tx,
+					actor,
+					{
 						shape: "program",
-						fields: {},
-					}),
-				),
-			);
-			await assert.rejects(readProgramStructure(tx, episode, null));
-			checks += 2;
-			const originalOccurrence = await readStructureComponentHead(
-				tx,
-				version,
-				"program_episode_occurrence",
-				first.id,
-			);
-			assert.ok(originalOccurrence);
-			const removed = await removeProgramOccurrence(tx, version, actor, second.revision, first.id);
-			assert.equal((await listProgramOccurrences(tx, version, actor)).items.length, 1);
-			const removedOccurrence = await readStructureComponentHead(
-				tx,
-				version,
-				"program_episode_occurrence",
-				first.id,
-			);
-			assert.ok(removedOccurrence);
-			await restoreStructureComponent(tx, version, actor, removed.revision, {
-				component: "program_episode_occurrence",
-				componentKey: first.id,
-				expectedHistoryId: removedOccurrence.id,
-				historyId: originalOccurrence.id,
-			});
-			assert.equal((await listProgramOccurrences(tx, version, actor)).items.length, 2);
-			const historyPage = await listStructureComponentHistory(
-				tx,
-				version,
-				actor,
-				"program_episode_occurrence",
-				first.id,
-				{ afterId: originalOccurrence.id },
-			);
-			assert.deepEqual(
-				historyPage.map((row) => row.componentSequence),
-				[2, 3],
-			);
-			assert.equal(
-				(await readStructureComponentHead(tx, version, "program_episode_occurrence", first.id))?.id,
-				historyPage[1]?.id,
-			);
-			await assert.rejects(
-				tx.transaction((nested) =>
-					nested.execute(
-						sql`update program_component_head set history_id=${originalOccurrence.id}::uuid where owner_id=${version.id}::uuid and component='program_episode_occurrence' and component_key=${first.id}`,
-					),
-				),
-			);
-			await assert.rejects(
-				tx.transaction((nested) =>
-					nested.execute(
-						sql`insert into program_component_revision(owner_id,id,component,component_key,component_sequence,owner_revision,operation,value) select owner_id,uuidv7(),component,component_key,4,owner_revision,operation,value from program_component_revision where owner_id=${version.id}::uuid and id=${originalOccurrence.id}::uuid`,
-					),
-				),
-			);
-			checks += 4;
-			await assert.rejects(
-				tx.transaction((nested) =>
-					restoreStructureComponent(nested, version, actor, removed.revision + 1, {
-						component: "program_episode_occurrence",
-						componentKey: first.id,
-						expectedHistoryId: removedOccurrence.id,
-						historyId: originalOccurrence.id,
-					}),
-				),
-				/component changed/u,
-			);
-			checks += 2;
-			checks++;
-			const work = await createPublishingWork(tx, actor, name("Work"));
-			const text = await createTextVersion(tx, actor, { name: name("Text"), languageTag: "en" });
-			const publication = await createPublication(tx, actor, {
-				name: name("Publication"),
-				pageCount: 320,
-			});
-			await putPublishingCoverage(tx, text, actor, text.revision, {
-				kind: "text_work",
-				targetId: work.id,
-				position: 0,
-			});
-			await putPublishingCoverage(tx, publication, actor, publication.revision, {
-				kind: "publication_text",
-				targetId: text.id,
-				position: 0,
-			});
-			const serialization = await createSerialization(tx, actor, {
-				name: name("Serial"),
-				textVersionId: text.id,
-			});
-			const kind = await ensureCatalogDefinition(tx, {
-				namespace: "catalog",
-				key: "chapter",
-				kind: "vocabulary",
-				valueKind: null,
-				constraints: {
-					targets: [{ owner: "publishing", shapes: ["serialization"] }],
-					slots: ["installment-kind"],
-				},
-			});
-			const classification = await ensureCatalogDefinition(tx, {
-				namespace: "catalog",
-				key: "program_fixture_class",
-				kind: "class",
-				valueKind: null,
-				constraints: {
-					targets: [
-						{ owner: "publishing", shapes: ["serialization"] },
-						{ owner: "program", shapes: ["program"] },
-					],
-					slots: ["installment-kind", "type"],
-				},
-			});
-			await assert.rejects(
-				tx.transaction((nested) =>
-					putPublishingInstallment(nested, serialization, actor, serialization.revision, {
-						position: "a0",
-						label: "Invalid class",
-						kindRevisionId: classification.revisionId,
-					}),
-				),
-				/Definition revision has the wrong semantic kind/,
-			);
-			await assert.rejects(
-				tx.transaction((nested) =>
-					createProgramStructure(
-						nested,
-						actor,
-						{
-							shape: "program",
-							fields: { typeRevisionId: classification.revisionId },
+						fields: { declaredMainEpisodeCount: 26, declaredTotalEpisodeCount: 31 },
+					},
+					name("Program"),
+				);
+				const season = await createProgramStructure(
+					tx,
+					actor,
+					{ shape: "season", fields: { programId: program.id, number: "I" } },
+					name("Season"),
+				);
+				const version = await createProgramStructure(
+					tx,
+					actor,
+					{ shape: "program_version", fields: { programId: program.id } },
+					name("Version"),
+				);
+				const episode = await createProgramStructure(
+					tx,
+					actor,
+					{
+						shape: "episode",
+						fields: {
+							programId: program.id,
+							seasonId: season.id,
+							sortNumber: 1.5,
+							episodeNumber: 2,
+							durationText: "00:24:43",
+							lengthMilliseconds: 1_483_000,
+							date: { year: 1998, month: 10, day: null },
 						},
-						name("Invalid program classification"),
+					},
+					name("Episode"),
+				);
+				const exported = await readProgramStructure(tx, episode, actor);
+				assert.ok("sortNumber" in exported.record);
+				assert.equal(exported.record.sortNumber, "1.5");
+				assert.ok("dateDay" in exported.record);
+				assert.equal(exported.record.dateDay, null);
+				checks += 2;
+				const first = await putProgramOccurrence(tx, version, actor, version.revision, {
+					episodeId: episode.id,
+					position: "a0",
+				});
+				const second = await putProgramOccurrence(tx, version, actor, first.revision, {
+					episodeId: episode.id,
+					position: "a1",
+					sourceNumber: "encore",
+				});
+				const page1 = await listProgramOccurrences(tx, version, actor, { limit: 1 });
+				assert.equal(page1.items[0]?.id, first.id);
+				assert.ok(page1.nextCursor);
+				const page2 = await listProgramOccurrences(tx, version, actor, {
+					limit: 1,
+					after: page1.nextCursor,
+				});
+				assert.equal(page2.items[0]?.id, second.id);
+				checks += 2;
+				await assert.rejects(
+					tx.transaction((nested) =>
+						updateProgramStructure(nested, program, actor, program.revision - 1, {
+							shape: "program",
+							fields: {},
+						}),
 					),
-				),
-				/Definition revision has the wrong semantic kind/,
-			);
-			checks += 2;
-			const chapter = await putPublishingInstallment(
-				tx,
-				serialization,
-				actor,
-				serialization.revision,
-				{ position: "a0", label: "I", kindRevisionId: kind.revisionId },
-			);
-			const part = await putPublishingInstallment(tx, serialization, actor, chapter.revision, {
-				parentId: chapter.id,
-				position: "a0",
-				label: "Opening",
-				kindRevisionId: kind.revisionId,
+				);
+				await assert.rejects(readProgramStructure(tx, episode, null));
+				checks += 2;
+				const originalOccurrence = await readStructureComponentHead(
+					tx,
+					version,
+					"program_episode_occurrence",
+					first.id,
+				);
+				assert.ok(originalOccurrence);
+				const removed = await removeProgramOccurrence(
+					tx,
+					version,
+					actor,
+					second.revision,
+					first.id,
+				);
+				assert.equal((await listProgramOccurrences(tx, version, actor)).items.length, 1);
+				const removedOccurrence = await readStructureComponentHead(
+					tx,
+					version,
+					"program_episode_occurrence",
+					first.id,
+				);
+				assert.ok(removedOccurrence);
+				await restoreStructureComponent(tx, version, actor, removed.revision, {
+					component: "program_episode_occurrence",
+					componentKey: first.id,
+					expectedHistoryId: removedOccurrence.id,
+					historyId: originalOccurrence.id,
+				});
+				assert.equal((await listProgramOccurrences(tx, version, actor)).items.length, 2);
+				const historyPage = await listStructureComponentHistory(
+					tx,
+					version,
+					actor,
+					"program_episode_occurrence",
+					first.id,
+					{ afterId: originalOccurrence.id },
+				);
+				assert.deepEqual(
+					historyPage.map((row) => row.componentSequence),
+					[2, 3],
+				);
+				assert.equal(
+					(await readStructureComponentHead(tx, version, "program_episode_occurrence", first.id))
+						?.id,
+					historyPage[1]?.id,
+				);
+				await assert.rejects(
+					tx.transaction((nested) =>
+						nested.execute(
+							sql`update program_component_head set history_id=${originalOccurrence.id}::uuid where owner_id=${version.id}::uuid and component='program_episode_occurrence' and component_key=${first.id}`,
+						),
+					),
+				);
+				await assert.rejects(
+					tx.transaction((nested) =>
+						nested.execute(
+							sql`insert into program_component_revision(owner_id,id,component,component_key,component_sequence,owner_revision,operation,value) select owner_id,uuidv7(),component,component_key,4,owner_revision,operation,value from program_component_revision where owner_id=${version.id}::uuid and id=${originalOccurrence.id}::uuid`,
+						),
+					),
+				);
+				checks += 4;
+				await assert.rejects(
+					tx.transaction((nested) =>
+						restoreStructureComponent(nested, version, actor, removed.revision + 1, {
+							component: "program_episode_occurrence",
+							componentKey: first.id,
+							expectedHistoryId: removedOccurrence.id,
+							historyId: originalOccurrence.id,
+						}),
+					),
+					/component changed/u,
+				);
+				checks += 2;
+				checks++;
+				const work = await createPublishingWork(tx, actor, name("Work"));
+				const text = await createTextVersion(tx, actor, { name: name("Text"), languageTag: "en" });
+				const publication = await createPublication(tx, actor, {
+					name: name("Publication"),
+					pageCount: 320,
+				});
+				await putPublishingCoverage(tx, text, actor, text.revision, {
+					kind: "text_work",
+					targetId: work.id,
+					position: 0,
+				});
+				await putPublishingCoverage(tx, publication, actor, publication.revision, {
+					kind: "publication_text",
+					targetId: text.id,
+					position: 0,
+				});
+				const serialization = await createSerialization(tx, actor, {
+					name: name("Serial"),
+					textVersionId: text.id,
+				});
+				const kind = await ensureCatalogDefinition(tx, {
+					namespace: "catalog",
+					key: "chapter",
+					kind: "vocabulary",
+					valueKind: null,
+					constraints: {
+						targets: [{ owner: "publishing", shapes: ["serialization"] }],
+						slots: ["installment-kind"],
+					},
+				});
+				const classification = await ensureCatalogDefinition(tx, {
+					namespace: "catalog",
+					key: "program_fixture_class",
+					kind: "class",
+					valueKind: null,
+					constraints: {
+						targets: [
+							{ owner: "publishing", shapes: ["serialization"] },
+							{ owner: "program", shapes: ["program"] },
+						],
+						slots: ["installment-kind", "type"],
+					},
+				});
+				await assert.rejects(
+					tx.transaction((nested) =>
+						putPublishingInstallment(nested, serialization, actor, serialization.revision, {
+							position: "a0",
+							label: "Invalid class",
+							kindRevisionId: classification.revisionId,
+						}),
+					),
+					/Definition revision has the wrong semantic kind/,
+				);
+				await assert.rejects(
+					tx.transaction((nested) =>
+						createProgramStructure(
+							nested,
+							actor,
+							{
+								shape: "program",
+								fields: { typeRevisionId: classification.revisionId },
+							},
+							name("Invalid program classification"),
+						),
+					),
+					/Definition revision has the wrong semantic kind/,
+				);
+				checks += 2;
+				const chapter = await putPublishingInstallment(
+					tx,
+					serialization,
+					actor,
+					serialization.revision,
+					{ position: "a0", label: "I", kindRevisionId: kind.revisionId },
+				);
+				const part = await putPublishingInstallment(tx, serialization, actor, chapter.revision, {
+					parentId: chapter.id,
+					position: "a0",
+					label: "Opening",
+					kindRevisionId: kind.revisionId,
+				});
+				await assert.rejects(
+					tx.transaction((nested) =>
+						putPublishingInstallment(nested, serialization, actor, part.revision, {
+							id: chapter.id,
+							parentId: part.id,
+							position: "a0",
+							kindRevisionId: kind.revisionId,
+						}),
+					),
+				);
+				assert.equal(
+					(await listPublishingInstallments(tx, serialization, actor, { parentId: chapter.id }))[0]
+						?.label,
+					"Opening",
+				);
+				assert.equal(
+					(await readPublishingStructure(tx, publication, actor)).identity.shape,
+					"publication",
+				);
+				checks += 3;
+				const plans = await tx.execute(
+					sql`explain (format json) select id from program_episode_occurrence where owner_id = ${version.id}::uuid and (position, id) > ('a0', ${first.id}::uuid) order by position, id limit 100`,
+				);
+				assert.ok(plans.rows.length);
+				console.log(JSON.stringify({ kind: "program-occurrence-explain", plans: plans.rows }));
+				throw rollback;
 			});
-			await assert.rejects(
-				tx.transaction((nested) =>
-					putPublishingInstallment(nested, serialization, actor, part.revision, {
-						id: chapter.id,
-						parentId: part.id,
-						position: "a0",
-						kindRevisionId: kind.revisionId,
-					}),
-				),
-			);
-			assert.equal(
-				(await listPublishingInstallments(tx, serialization, actor, { parentId: chapter.id }))[0]
-					?.label,
-				"Opening",
-			);
-			assert.equal(
-				(await readPublishingStructure(tx, publication, actor)).identity.shape,
-				"publication",
-			);
-			checks += 3;
-			const plans = await tx.execute(
-				sql`explain (format json) select id from program_episode_occurrence where owner_id = ${version.id}::uuid and (position, id) > ('a0', ${first.id}::uuid) order by position, id limit 100`,
-			);
-			assert.ok(plans.rows.length);
-			console.log(JSON.stringify({ kind: "program-occurrence-explain", plans: plans.rows }));
-			throw rollback;
 		});
 	} catch (error) {
 		if (error !== rollback) throw error;

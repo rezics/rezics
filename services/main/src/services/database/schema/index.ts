@@ -24,6 +24,7 @@ export * from "./catalog-music-source";
 export * from "./catalog-identity";
 export * from "./catalog-names";
 export * from "./catalog-program";
+export * from "./catalog-profile-source";
 export * from "./catalog-software";
 export * from "./catalog-software-participation";
 export * from "./operational-durability";

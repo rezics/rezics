@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import { Readable } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -71,261 +72,274 @@ try {
 				})
 				.returning();
 			assert.ok(actor);
-			const key = {
-				source: "vndb",
-				objectType: "vn",
-				externalId: `fixture-${crypto.randomUUID()}`,
-			};
-			const firstBytes = Buffer.from('{"value":"first"}');
-			const bucket = aggregateRoutingBucket("source_record", catalogSourceRecordId(key));
-			await tx.insert(operationalCapacity).values(
-				["event-outbox", "task-outbox", "task-intent", "receipt"].map((lane) => ({
-					routingBucket: bucket,
-					lane,
-					maximumRows: 1000n,
-					maximumBytes: 64_000_000n,
-				})),
-			);
-			const first = await recordCatalogSourceObservation(
-				tx,
-				await storeCatalogSourcePayload(key, firstBytes, "a".repeat(64), null, archive),
-			);
-			const native = await createCatalogIdentity(
-				tx,
-				{ owner: "reference", shape: "source-fixture" },
-				actor.id,
-			);
-			const binding = await bindCatalogSourceIdentity(tx, actor.id, {
-				sourceRecordId: first.record.id,
-				path: "/",
-				snapshotId: first.snapshot.id,
-				reference: native,
-			});
-			const old = await beginCatalogSourceAcquisition(tx, key);
-			const latest = await beginCatalogSourceAcquisition(tx, key);
-			const stale = await storeCatalogSourcePayload(
-				key,
-				Buffer.from('{"value":"stale"}'),
-				"a".repeat(64),
-				null,
-				archive,
-				old,
-			);
-			await assert.rejects(
-				tx.transaction((nested) => recordCatalogSourceObservation(nested, stale)),
-				/generation is stale/u,
-			);
-			const newestBytes = Buffer.from('{"value":"latest"}');
-			const newest = await recordCatalogSourceObservation(
-				tx,
-				await storeCatalogSourcePayload(key, newestBytes, "a".repeat(64), null, archive, latest),
-			);
-			const reopened = await loadCatalogSourceReceipt(
-				tx,
-				first.record.id,
-				newest.snapshot.id,
-				archive,
-			);
-			assert.deepEqual(Buffer.from(await readCatalogSourceBytes(reopened)), newestBytes);
-			const reopenedDocument = await loadCatalogSourceDocument(
-				tx,
-				first.record.id,
-				newest.snapshot.id,
-				reopened,
-				newestBytes,
-			);
-			assert.equal(reopenedDocument.referenceAt("/value").externalId, "latest");
-			const oldReceipt = await loadCatalogSourceReceipt(
-				tx,
-				first.record.id,
-				first.snapshot.id,
-				archive,
-			);
-			const oldDocument = await loadCatalogSourceDocument(
-				tx,
-				first.record.id,
-				first.snapshot.id,
-				oldReceipt,
-				firstBytes,
-			);
-			assert.equal(oldDocument.referenceAt("/value").externalId, "first");
-			assert.equal(oldDocument.record.headSnapshotId, newest.snapshot.id);
-			const reusedDocument = await recordCatalogSourceDocument(tx, oldReceipt, firstBytes);
-			assert.equal(reusedDocument.snapshot.id, first.snapshot.id);
-			assert.equal(reusedDocument.record.headSnapshotId, newest.snapshot.id);
-			await assert.rejects(
-				loadCatalogSourceDocument(tx, first.record.id, newest.snapshot.id, oldReceipt, firstBytes),
-				/exact committed snapshot/u,
-			);
-			const proposalInput = {
-				sourceRecordId: first.record.id,
-				mappingKey: binding.mappingKey,
-				snapshotId: newest.snapshot.id,
-				mappingVersion: "vndb.vn.1",
-			};
-			await assert.rejects(
-				() =>
-					enqueueCatalogSourceObservationProposal(tx, {
-						...proposalInput,
-						expectedBindingRevision: 1,
-						afterMappingKey: null,
-					}),
-				/fan-out and subscription fence/,
-			);
-			await tx
-				.insert(catalogSourceObservationFanout)
-				.values({ sourceRecordId: first.record.id, snapshotId: newest.snapshot.id });
-			const observedProposal = await enqueueCatalogSourceObservationProposal(tx, {
-				...proposalInput,
-				expectedBindingRevision: 1,
-				afterMappingKey: null,
-			});
-			assert.equal(observedProposal.status, "proposed");
-			if (observedProposal.status !== "proposed") throw new Error("Expected observed proposal");
-			assert.equal(
-				observedProposal.proposal.proposerAuthUserId,
-				null,
-				"Background source observations never impersonate the native creator",
-			);
-			await assert.rejects(
-				() =>
-					enqueueCatalogSourceObservationProposal(tx, {
-						...proposalInput,
-						expectedBindingRevision: 2,
-						afterMappingKey: null,
-					}),
-				/fan-out and subscription fence/,
-			);
-			const proposed = await proposeCatalogSourceAdoption(tx, actor.id, proposalInput);
-			assert.equal(proposed.status, "proposed");
-			if (proposed.status !== "proposed") throw new Error("Expected initial proposal");
-			const bindingKey = { sourceRecordId: first.record.id, mappingKey: binding.mappingKey };
-			await reviseCatalogSourceBinding(tx, actor.id, {
-				...bindingKey,
-				expectedRevision: 1,
-				state: "paused",
-				mode: "review",
-				reason: "Pause race fixture",
-			});
-			let calls = 0;
-			const decision = {
-				sourceRecordId: first.record.id,
-				proposalId: proposed.proposal.id,
-				mappingVersion: "vndb.vn.1",
-				action: "apply" as const,
-				reason: "Reviewed fixture",
-			};
-			const staleDecision = await decideCatalogSourceProposal(tx, actor.id, decision, async () => {
-				calls++;
-				return { revision: 2 };
-			});
-			assert.equal(staleDecision.status, "superseded");
-			assert.equal(calls, 0);
-			await reviseCatalogSourceBinding(tx, actor.id, {
-				...bindingKey,
-				expectedRevision: 2,
-				state: "active",
-				mode: "review",
-				reason: "Resume fixture",
-			});
-			const resumed = await proposeCatalogSourceAdoption(tx, actor.id, proposalInput);
-			assert.equal(resumed.status, "proposed");
-			if (resumed.status !== "proposed") throw new Error("Expected resumed proposal");
-			const apply = { ...decision, proposalId: resumed.proposal.id };
-			const abortedApply = new Error("Abort the native source command before publication");
-			await assert.rejects(
-				tx.transaction((nested) =>
-					decideCatalogSourceProposal(nested, actor.id, apply, async (applying, context) => {
-						await addCatalogName(
-							applying,
+			await runWithNativeFixtureActor(tx, actor.id, async () => {
+				const key = {
+					source: "vndb",
+					objectType: "vn",
+					externalId: `fixture-${crypto.randomUUID()}`,
+				};
+				const firstBytes = Buffer.from('{"value":"first"}');
+				const bucket = aggregateRoutingBucket("source_record", catalogSourceRecordId(key));
+				await tx.insert(operationalCapacity).values(
+					["event-outbox", "task-outbox", "task-intent", "receipt"].map((lane) => ({
+						routingBucket: bucket,
+						lane,
+						maximumRows: 1000n,
+						maximumBytes: 64_000_000n,
+					})),
+				);
+				const first = await recordCatalogSourceObservation(
+					tx,
+					await storeCatalogSourcePayload(key, firstBytes, "a".repeat(64), null, archive),
+				);
+				const native = await createCatalogIdentity(
+					tx,
+					{ owner: "reference", shape: "source-fixture" },
+					actor.id,
+				);
+				const binding = await bindCatalogSourceIdentity(tx, actor.id, {
+					sourceRecordId: first.record.id,
+					path: "/",
+					snapshotId: first.snapshot.id,
+					reference: native,
+				});
+				const old = await beginCatalogSourceAcquisition(tx, key);
+				const latest = await beginCatalogSourceAcquisition(tx, key);
+				const stale = await storeCatalogSourcePayload(
+					key,
+					Buffer.from('{"value":"stale"}'),
+					"a".repeat(64),
+					null,
+					archive,
+					old,
+				);
+				await assert.rejects(
+					tx.transaction((nested) => recordCatalogSourceObservation(nested, stale)),
+					/generation is stale/u,
+				);
+				const newestBytes = Buffer.from('{"value":"latest"}');
+				const newest = await recordCatalogSourceObservation(
+					tx,
+					await storeCatalogSourcePayload(key, newestBytes, "a".repeat(64), null, archive, latest),
+				);
+				const reopened = await loadCatalogSourceReceipt(
+					tx,
+					first.record.id,
+					newest.snapshot.id,
+					archive,
+				);
+				assert.deepEqual(Buffer.from(await readCatalogSourceBytes(reopened)), newestBytes);
+				const reopenedDocument = await loadCatalogSourceDocument(
+					tx,
+					first.record.id,
+					newest.snapshot.id,
+					reopened,
+					newestBytes,
+				);
+				assert.equal(reopenedDocument.referenceAt("/value").externalId, "latest");
+				const oldReceipt = await loadCatalogSourceReceipt(
+					tx,
+					first.record.id,
+					first.snapshot.id,
+					archive,
+				);
+				const oldDocument = await loadCatalogSourceDocument(
+					tx,
+					first.record.id,
+					first.snapshot.id,
+					oldReceipt,
+					firstBytes,
+				);
+				assert.equal(oldDocument.referenceAt("/value").externalId, "first");
+				assert.equal(oldDocument.record.headSnapshotId, newest.snapshot.id);
+				const reusedDocument = await recordCatalogSourceDocument(tx, oldReceipt, firstBytes);
+				assert.equal(reusedDocument.snapshot.id, first.snapshot.id);
+				assert.equal(reusedDocument.record.headSnapshotId, newest.snapshot.id);
+				await assert.rejects(
+					loadCatalogSourceDocument(
+						tx,
+						first.record.id,
+						newest.snapshot.id,
+						oldReceipt,
+						firstBytes,
+					),
+					/exact committed snapshot/u,
+				);
+				const proposalInput = {
+					sourceRecordId: first.record.id,
+					mappingKey: binding.mappingKey,
+					snapshotId: newest.snapshot.id,
+					mappingVersion: "vndb.vn.1",
+				};
+				await assert.rejects(
+					() =>
+						enqueueCatalogSourceObservationProposal(tx, {
+							...proposalInput,
+							expectedBindingRevision: 1,
+							afterMappingKey: null,
+						}),
+					/fan-out and subscription fence/,
+				);
+				await tx
+					.insert(catalogSourceObservationFanout)
+					.values({ sourceRecordId: first.record.id, snapshotId: newest.snapshot.id });
+				const observedProposal = await enqueueCatalogSourceObservationProposal(tx, {
+					...proposalInput,
+					expectedBindingRevision: 1,
+					afterMappingKey: null,
+				});
+				assert.equal(observedProposal.status, "proposed");
+				if (observedProposal.status !== "proposed") throw new Error("Expected observed proposal");
+				assert.equal(
+					observedProposal.proposal.proposerAuthUserId,
+					null,
+					"Background source observations never impersonate the native creator",
+				);
+				await assert.rejects(
+					() =>
+						enqueueCatalogSourceObservationProposal(tx, {
+							...proposalInput,
+							expectedBindingRevision: 2,
+							afterMappingKey: null,
+						}),
+					/fan-out and subscription fence/,
+				);
+				const proposed = await proposeCatalogSourceAdoption(tx, actor.id, proposalInput);
+				assert.equal(proposed.status, "proposed");
+				if (proposed.status !== "proposed") throw new Error("Expected initial proposal");
+				const bindingKey = { sourceRecordId: first.record.id, mappingKey: binding.mappingKey };
+				await reviseCatalogSourceBinding(tx, actor.id, {
+					...bindingKey,
+					expectedRevision: 1,
+					state: "paused",
+					mode: "review",
+					reason: "Pause race fixture",
+				});
+				let calls = 0;
+				const decision = {
+					sourceRecordId: first.record.id,
+					proposalId: proposed.proposal.id,
+					mappingVersion: "vndb.vn.1",
+					action: "apply" as const,
+					reason: "Reviewed fixture",
+				};
+				const staleDecision = await decideCatalogSourceProposal(
+					tx,
+					actor.id,
+					decision,
+					async () => {
+						calls++;
+						return { revision: 2 };
+					},
+				);
+				assert.equal(staleDecision.status, "superseded");
+				assert.equal(calls, 0);
+				await reviseCatalogSourceBinding(tx, actor.id, {
+					...bindingKey,
+					expectedRevision: 2,
+					state: "active",
+					mode: "review",
+					reason: "Resume fixture",
+				});
+				const resumed = await proposeCatalogSourceAdoption(tx, actor.id, proposalInput);
+				assert.equal(resumed.status, "proposed");
+				if (resumed.status !== "proposed") throw new Error("Expected resumed proposal");
+				const apply = { ...decision, proposalId: resumed.proposal.id };
+				const abortedApply = new Error("Abort the native source command before publication");
+				await assert.rejects(
+					tx.transaction((nested) =>
+						decideCatalogSourceProposal(nested, actor.id, apply, async (applying, context) => {
+							await addCatalogName(
+								applying,
+								context.reference,
+								context.actor,
+								context.expectedRevision,
+								{ kind: "source-primary", languageTag: null, value: "Rolled-back source value" },
+							);
+							throw abortedApply;
+						}),
+					),
+					(error: unknown) => error === abortedApply,
+				);
+				assert.equal((await loadCatalogIdentity(tx, native, actor.id, true)).revision, 1);
+				const applied = await decideCatalogSourceProposal(
+					tx,
+					actor.id,
+					apply,
+					async (nested, context) => {
+						calls++;
+						return addCatalogName(
+							nested,
 							context.reference,
 							context.actor,
 							context.expectedRevision,
-							{ kind: "source-primary", languageTag: null, value: "Rolled-back source value" },
+							{ kind: "source-primary", languageTag: null, value: "Adopted value" },
 						);
-						throw abortedApply;
-					}),
-				),
-				(error: unknown) => error === abortedApply,
-			);
-			assert.equal((await loadCatalogIdentity(tx, native, actor.id, true)).revision, 1);
-			const applied = await decideCatalogSourceProposal(
-				tx,
-				actor.id,
-				apply,
-				async (nested, context) => {
-					calls++;
-					return addCatalogName(
-						nested,
-						context.reference,
-						context.actor,
-						context.expectedRevision,
-						{ kind: "source-primary", languageTag: null, value: "Adopted value" },
-					);
-				},
-			);
-			assert.equal(applied.status, "applied");
-			assert.equal(calls, 1);
-			const repeated = await decideCatalogSourceProposal(tx, actor.id, apply, async () => {
-				throw new Error("Duplicate must not mutate");
-			});
-			assert.equal(repeated.status, "repeated");
-			await addCatalogName(tx, native, actor.id, 2, {
-				kind: "alias",
-				languageTag: null,
-				value: "Independent human edit",
-			});
-			await assert.rejects(
-				tx.transaction((nested) =>
-					decideCatalogSourceProposal(
-						nested,
-						actor.id,
-						{ ...apply, action: "withdraw" },
-						async () => ({ revision: 4 }),
+					},
+				);
+				assert.equal(applied.status, "applied");
+				assert.equal(calls, 1);
+				const repeated = await decideCatalogSourceProposal(tx, actor.id, apply, async () => {
+					throw new Error("Duplicate must not mutate");
+				});
+				assert.equal(repeated.status, "repeated");
+				await addCatalogName(tx, native, actor.id, 2, {
+					kind: "alias",
+					languageTag: null,
+					value: "Independent human edit",
+				});
+				await assert.rejects(
+					tx.transaction((nested) =>
+						decideCatalogSourceProposal(
+							nested,
+							actor.id,
+							{ ...apply, action: "withdraw" },
+							async () => ({ revision: 4 }),
+						),
 					),
-				),
-				/independent native edits/u,
-			);
-			await assert.rejects(
-				tx.transaction((nested) =>
-					nested
-						.update(catalogSourceSnapshot)
-						.set({ sourceRevision: "rewritten" })
-						.where(
-							and(
-								eq(catalogSourceSnapshot.sourceRecordId, first.record.id),
-								eq(catalogSourceSnapshot.id, newest.snapshot.id),
+					/independent native edits/u,
+				);
+				await assert.rejects(
+					tx.transaction((nested) =>
+						nested
+							.update(catalogSourceSnapshot)
+							.set({ sourceRevision: "rewritten" })
+							.where(
+								and(
+									eq(catalogSourceSnapshot.sourceRecordId, first.record.id),
+									eq(catalogSourceSnapshot.id, newest.snapshot.id),
+								),
 							),
-						),
-				),
-			);
-			await assert.rejects(
-				tx.transaction((nested) =>
-					nested
-						.update(catalogSourceBindingRevision)
-						.set({ reason: "rewrite" })
-						.where(
-							and(
-								eq(catalogSourceBindingRevision.sourceRecordId, first.record.id),
-								eq(catalogSourceBindingRevision.mappingKey, binding.mappingKey),
+					),
+				);
+				await assert.rejects(
+					tx.transaction((nested) =>
+						nested
+							.update(catalogSourceBindingRevision)
+							.set({ reason: "rewrite" })
+							.where(
+								and(
+									eq(catalogSourceBindingRevision.sourceRecordId, first.record.id),
+									eq(catalogSourceBindingRevision.mappingKey, binding.mappingKey),
+								),
 							),
-						),
-				),
-			);
-			await assert.rejects(
-				tx.transaction((nested) =>
-					nested
-						.update(catalogSourceRecord)
-						.set({ acquisitionGeneration: 0 })
-						.where(eq(catalogSourceRecord.id, first.record.id)),
-				),
-			);
-			await tx.execute(sql`set constraints all immediate`);
-			const plan = await tx.execute(
-				sql`explain (format json) select id from public.catalog_source_record where id = ${first.record.id}::uuid`,
-			);
-			assert.ok(plan.rows.length > 0);
-			throw rollback;
+					),
+				);
+				await assert.rejects(
+					tx.transaction((nested) =>
+						nested
+							.update(catalogSourceRecord)
+							.set({ acquisitionGeneration: 0 })
+							.where(eq(catalogSourceRecord.id, first.record.id)),
+					),
+				);
+				await tx.execute(sql`set constraints all immediate`);
+				const plan = await tx.execute(
+					sql`explain (format json) select id from public.catalog_source_record where id = ${first.record.id}::uuid`,
+				);
+				assert.ok(plan.rows.length > 0);
+				throw rollback;
+			});
 		});
 	} catch (error) {
 		if (error !== rollback) throw error;
