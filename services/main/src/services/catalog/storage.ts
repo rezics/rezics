@@ -1,7 +1,6 @@
 import { currentCatalogSemantic, publishCatalogSemanticRevision } from "./semantic-history";
 import { isDeepStrictEqual } from "node:util";
 import { and, asc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
-import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import {
@@ -202,31 +201,7 @@ export async function ensureCatalogDefinition(
 	return { definitionId: definition.id, revisionId: revision.id };
 }
 
-export async function addCatalogName(
-	tx: DatabaseTransaction,
-	reference: CatalogReference,
-	actor: string,
-	expectedVersion: number,
-	input: { readonly languageTag: string | null; readonly kind: string; readonly value: string },
-) {
-	const value = z
-		.strictObject({
-			languageTag: z.string().nullable(),
-			kind: z.string().min(1).max(96),
-			value: z.string().min(1).max(131_072),
-		})
-		.parse(input);
-	const languageTag =
-		value.languageTag === null ? null : canonicalizeContentLanguageTag(value.languageTag);
-	const version = await recordCatalogChange(tx, reference, actor, expectedVersion, "name.add");
-	const table = CatalogFactTables[reference.owner].name;
-	const [created] = await tx
-		.insert(table)
-		.values({ ownerId: reference.id, ...value, languageTag })
-		.returning({ id: table.id });
-	if (!created) throw new Error("Catalog name insertion returned no row");
-	return { id: created.id, revision: version };
-}
+export { addCatalogName } from "./names";
 
 export async function listCatalogNames(
 	tx: DatabaseTransaction,

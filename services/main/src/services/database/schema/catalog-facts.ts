@@ -1,3 +1,4 @@
+import { CatalogNameTables } from "./catalog-names";
 import { inArray, sql } from "drizzle-orm";
 import {
 	type AnyPgColumn,
@@ -56,65 +57,7 @@ export function catalogTargetCount(columns: TargetColumns) {
 }
 
 function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
-	const name = pgTable(
-		`${owner}_named_form`,
-		{
-			id: uuid().default(sql`uuidv7()`).notNull(),
-			ownerId: uuid()
-				.notNull()
-				.references(() => identityColumn(owner), { onDelete: "restrict" }),
-			languageTag: text(),
-			kind: text().notNull(),
-			value: text().notNull(),
-			state: text().$type<CatalogFactState>().default("active").notNull(),
-			createdAt: createCreatedAtColumn(),
-		},
-		(table) => [
-			primaryKey({ name: `${owner}_named_form_identity_key`, columns: [table.ownerId, table.id] }),
-			index(`${owner}_named_form_owner_idx`).on(table.ownerId, table.id),
-			index(`${owner}_named_form_language_idx`).on(table.ownerId, table.languageTag, table.id),
-			check(`${owner}_named_form_state_check`, inArray(table.state, CatalogFactStateValues)),
-			check(`${owner}_named_form_kind_check`, sql`length(${table.kind}) between 1 and 96`),
-			check(
-				`${owner}_named_form_language_check`,
-				sql`${table.languageTag} is null or octet_length(${table.languageTag}) between 1 and 255`,
-			),
-			check(`${owner}_named_form_value_check`, sql`length(${table.value}) > 0`),
-		],
-	);
-	const identifier = pgTable(
-		`${owner}_identifier_claim`,
-		{
-			id: uuid().default(sql`uuidv7()`).notNull(),
-			ownerId: uuid()
-				.notNull()
-				.references(() => identityColumn(owner), { onDelete: "restrict" }),
-			namespace: text().notNull(),
-			value: text().notNull(),
-			normalizedValue: text().notNull(),
-			state: text().$type<CatalogFactState>().default("active").notNull(),
-			createdAt: createCreatedAtColumn(),
-		},
-		(table) => [
-			primaryKey({ name: `${owner}_identifier_identity_key`, columns: [table.ownerId, table.id] }),
-			index(`${owner}_identifier_owner_idx`).on(table.ownerId, table.id),
-			index(`${owner}_identifier_lookup_idx`).on(
-				table.namespace,
-				table.normalizedValue,
-				table.ownerId,
-				table.id,
-			),
-			check(
-				`${owner}_identifier_namespace_check`,
-				sql`octet_length(${table.namespace}) between 1 and 128`,
-			),
-			check(
-				`${owner}_identifier_value_check`,
-				sql`octet_length(${table.normalizedValue}) between 1 and 512 and length(${table.value}) > 0`,
-			),
-			check(`${owner}_identifier_state_check`, inArray(table.state, CatalogFactStateValues)),
-		],
-	);
+	const { name, identifier } = CatalogNameTables[owner];
 	const fact = pgTable(
 		`${owner}_fact`,
 		{
