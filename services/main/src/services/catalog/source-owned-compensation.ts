@@ -93,7 +93,7 @@ export async function compensateCatalogSourceOwnedChange(
 						identity.revision,
 						change.componentKey,
 						change.afterRevision,
-						"withdrawn",
+						"superseded",
 					)
 				).headVersion;
 			else {
