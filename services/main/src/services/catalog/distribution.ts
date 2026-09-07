@@ -348,7 +348,13 @@ export async function readDistributionHistory(
 	z.number().int().min(1).max(128).parse(limit);
 	await requirePackage(tx, packageId, actor, false);
 	return tx
-		.select()
+		.select({
+			packageId: distributionRevision.packageId,
+			revision: distributionRevision.revision,
+			manifestId: distributionRevision.manifestId,
+			label: distributionRevision.label,
+			createdAt: distributionRevision.createdAt,
+		})
 		.from(distributionRevision)
 		.where(
 			and(
