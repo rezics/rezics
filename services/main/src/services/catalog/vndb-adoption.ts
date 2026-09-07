@@ -1,18 +1,18 @@
 import { createHash } from "node:crypto";
 import type { DatabaseTransaction } from "../database";
 import {
-	softwareContent,
 	softwareParticipationSourceOccurrence,
 	softwareVisualNovel,
 } from "../database/schema/catalog-software";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { catalogSourceMappingClaim } from "../database/schema/catalog-source";
-import { type CatalogSourceReceipt, recordCatalogSourceObservation } from "./source-observations";
+import { bindCatalogSourceIdentity, acceptCatalogSourceInitialization } from "./source-bindings";
+import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { VndbCatalogContractSha256, VndbVnSchema, vndbLanguage, vndbSourceKey } from "./vndb";
-import { addCatalogName, createCatalogIdentity } from "./storage";
-import { appendSourceFieldObservation } from "./source-fields";
+import { addCatalogName } from "./storage";
 import { createSoftwareParticipationContext } from "./software-contexts";
+import { createNativeSoftwareContent, reviseSoftwareContent } from "./software";
+import { appendVndbSemantics } from "./vndb-semantics";
 
 /** VN identity and snapshot-local participation observations; staff adoption remains separate. */
 export async function adoptVndbVn(
@@ -38,28 +38,44 @@ export async function adoptVndbVn(
 		receipt.key.externalId !== source.externalId
 	)
 		throw new TypeError("VNDB payload identity differs from its source key");
-	const observation = await recordCatalogSourceObservation(tx, receipt);
+	const observation = await recordCatalogSourceDocument(tx, receipt, bytes);
 	const existing = await inspectExistingSourceBinding(tx, actor, observation, "vndb.vn.1");
-	if (existing) return existing;
-	const identity = await createCatalogIdentity(tx, { owner: "software", shape: "content" }, actor);
-	await tx.insert(softwareContent).values({ id: identity.id });
+	if (existing && existing.status !== "initialize_reference") return existing;
+	const details = {
+		originalLanguageTag: record.olang ? vndbLanguage(record.olang) : null,
+		developmentStatus:
+			record.devstatus === 0
+				? ("finished" as const)
+				: record.devstatus === 1
+					? ("in_development" as const)
+					: record.devstatus === 2
+						? ("cancelled" as const)
+						: null,
+		description: record.description ?? null,
+	};
+	const identity = existing
+		? {
+				...existing.reference,
+				revision: (
+					await reviseSoftwareContent(tx, existing.reference, actor, existing.revision, details)
+				).revision,
+			}
+		: await createNativeSoftwareContent(tx, actor, {
+				name: { value: record.title, languageTag: null },
+				details,
+			});
 	const minutes = record.length_minutes;
-	await tx.insert(softwareVisualNovel).values({
-		id: identity.id,
-		lengthMinutes:
-			minutes !== null && minutes !== undefined && Number.isSafeInteger(minutes) && minutes >= 0
-				? minutes
-				: null,
-	});
+	await tx
+		.insert(softwareVisualNovel)
+		.values({
+			id: identity.id,
+			lengthMinutes:
+				minutes !== null && minutes !== undefined && Number.isSafeInteger(minutes) && minutes >= 0
+					? minutes
+					: null,
+		})
+		.onConflictDoNothing();
 	let revision = identity.revision;
-	if (record.title)
-		revision = (
-			await addCatalogName(tx, identity, actor, revision, {
-				kind: "source-primary",
-				languageTag: null,
-				value: record.title,
-			})
-		).revision;
 	for (const title of record.titles ?? []) {
 		const languageTag = vndbLanguage(title.lang);
 		if (title.title)
@@ -110,33 +126,31 @@ export async function adoptVndbVn(
 			sourceClaimedOfficial: edition.official,
 		});
 	}
-	await tx.insert(CatalogFactTables.software.identifier).values({
-		ownerId: identity.id,
-		namespace: "vndb.vn",
-		value: record.id,
-		normalizedValue: record.id,
-	});
-	for (const [field, value] of Object.entries(record))
-		revision = await appendSourceFieldObservation(tx, identity, actor, revision, {
-			namespace: "source.vndb.vn",
-			field,
-			value,
-			sourceRecordId: observation.record.id,
-			snapshotId: observation.snapshot.id,
+	if (!existing)
+		await tx.insert(CatalogFactTables.software.identifier).values({
+			ownerId: identity.id,
+			namespace: "vndb.vn",
+			value: record.id,
+			normalizedValue: record.id,
 		});
-	const [claim] = await tx
-		.insert(catalogSourceMappingClaim)
-		.values({
+	revision = await appendVndbSemantics(tx, identity, actor, revision, record, observation);
+	const reference = { owner: "software" as const, id: identity.id };
+	if (existing)
+		await acceptCatalogSourceInitialization(tx, actor, {
 			sourceRecordId: observation.record.id,
 			path: "/",
-			owner: "software",
-			observedSnapshotId: observation.snapshot.id,
-		})
-		.returning();
-	if (!claim) throw new Error("VNDB mapping claim insertion returned no row");
-	await tx
-		.insert(CatalogFactTables.software.sourceBinding)
-		.values({ ownerId: identity.id, mappingKey: claim.mappingKey, mappingOwner: "software" });
+			snapshotId: observation.snapshot.id,
+			reference,
+			expectedBaselineRevision: existing.revision,
+			finalRevision: revision,
+		});
+	else
+		await bindCatalogSourceIdentity(tx, actor, {
+			sourceRecordId: observation.record.id,
+			path: "/",
+			snapshotId: observation.snapshot.id,
+			reference,
+		});
 	return {
 		status: "created" as const,
 		reference: { owner: "software" as const, id: identity.id },
