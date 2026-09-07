@@ -29,6 +29,153 @@ const profile = {
 	nsfw: z.boolean().optional(),
 };
 
+/** Public curation attribution is catalog metadata; it does not create an Auth user. @internal */
+export const BangumiIndexSchema = z.strictObject({
+	id,
+	title: z.string(),
+	desc: z.string(),
+	created_at: z.string(),
+	updated_at: z.string(),
+	creator: z.strictObject({ username: z.string(), nickname: z.string() }),
+	total: count,
+	stat: z.strictObject({ comments: count, collects: count }),
+	nsfw: z.boolean(),
+	ban: z.boolean(),
+});
+export const BangumiIndexSubjectPageSchema = z.strictObject({
+	data: z
+		.array(
+			z.strictObject({
+				id,
+				type: subjectType,
+				name: z.string(),
+				name_cn: z.string().optional(),
+				date: z.string(),
+				images: images.extend({ common: z.string() }),
+				infobox: z.array(BangumiWikiEntrySchema),
+				comment: z.string(),
+				added_at: z.string(),
+			}),
+		)
+		.max(100),
+	total: count,
+	limit: count.max(100),
+	offset: count,
+});
+
+/** Revision APIs can return null/empty payloads; those responses are not complete wiki revisions. @internal */
+export const BangumiRevisionSchema = z.strictObject({
+	id,
+	type: integer,
+	created_at: z.string(),
+	creator: z.strictObject({ username: z.string(), nickname: z.string() }),
+	summary: z.string(),
+	data: z.record(z.string(), z.unknown()).nullable(),
+});
+
+/** Public relationship endpoint records preserve contextual actors separately from character identity. @internal */
+export const BangumiApiRelationSchemas = {
+	subject_persons: z.strictObject({
+		id,
+		type: integer,
+		name: z.string(),
+		images: images.nullable(),
+		relation: z.string(),
+		career: z.array(z.string()),
+		eps: z.string().optional(),
+	}),
+	subject_subjects: z.strictObject({
+		id,
+		type: subjectType,
+		name: z.string(),
+		name_cn: z.string(),
+		images: images.extend({ common: z.string() }).nullable(),
+		relation: z.string(),
+	}),
+	subject_characters: z.strictObject({
+		id,
+		type: integer,
+		name: z.string(),
+		images: images.nullable(),
+		summary: z.string().optional(),
+		relation: z.string(),
+		actors: z.array(
+			z.strictObject({
+				id,
+				type: integer,
+				name: z.string(),
+				images: images.nullable(),
+				short_summary: z.string().optional(),
+				career: z.array(z.string()),
+				locked: z.boolean().optional(),
+			}),
+		),
+	}),
+	person_subjects: z.strictObject({
+		id,
+		type: subjectType,
+		name: z.string(),
+		name_cn: z.string(),
+		image: z.string(),
+		staff: z.string(),
+		eps: z.string().optional(),
+	}),
+	character_subjects: z.strictObject({
+		id,
+		type: subjectType,
+		name: z.string(),
+		name_cn: z.string(),
+		image: z.string(),
+		staff: z.string(),
+	}),
+	person_characters: z.strictObject({
+		id,
+		type: integer,
+		name: z.string(),
+		images: images.nullable(),
+		subject_id: id,
+		subject_type: subjectType,
+		subject_name: z.string(),
+		subject_name_cn: z.string(),
+		staff: z.string(),
+	}),
+	character_persons: z.strictObject({
+		id,
+		type: integer,
+		name: z.string(),
+		images: images.nullable(),
+		subject_id: id,
+		subject_type: subjectType,
+		subject_name: z.string(),
+		subject_name_cn: z.string(),
+		staff: z.string(),
+	}),
+};
+
+/** Selects a literal revision member; dictionary keys are revision IDs, never inferred entity IDs. @internal */
+export function selectBangumiRevisionWiki(input: unknown, revisionItemId?: string) {
+	const revision = BangumiRevisionSchema.parse(input);
+	if (!revision.data) return { status: "unavailable" as const, revision };
+	if (typeof revision.data.field_infobox === "string")
+		return {
+			status: "available" as const,
+			revision,
+			path: "/data/field_infobox",
+			wiki: parseBangumiWiki(revision.data.field_infobox),
+		};
+	if (revisionItemId === undefined) return { status: "selection_required" as const, revision };
+	if (!/^\d+$/u.test(revisionItemId))
+		throw new TypeError("Revision member must be an exact numeric dictionary key");
+	const member = z.object({ infobox: z.string() }).safeParse(revision.data[revisionItemId]);
+	if (!member.success) return { status: "unavailable" as const, revision };
+	return {
+		status: "available" as const,
+		revision,
+		path: `/data/${revisionItemId}/infobox`,
+		wiki: parseBangumiWiki(member.data.infobox),
+	};
+}
+
 /** Public endpoint declarations plus explicit, independently observed wire corrections. @internal */
 export const BangumiPersonSchema = z.strictObject({
 	...profile,
@@ -174,9 +321,7 @@ export function bangumiSubjectOwner(type: z.infer<typeof subjectType>) {
 }
 
 /** The wiki spec permits repeated keys and ordered lists; parsing never builds a key-value map. @internal */
-export function parseBangumiWiki(
-	text: string,
-):
+export function parseBangumiWiki(text: string):
 	| {
 			status: "parsed";
 			type: string | null;

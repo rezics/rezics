@@ -148,6 +148,10 @@ try {
 				key: "chapter",
 				kind: "class",
 				valueKind: null,
+				constraints: {
+					targets: [{ owner: "publishing", shapes: ["serialization"] }],
+					slots: ["installment-kind"],
+				},
 			});
 			const chapter = await putPublishingInstallment(
 				tx,

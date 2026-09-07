@@ -18,8 +18,10 @@ import {
 	createCatalogIdentity,
 	ensureCatalogDefinition,
 	loadCatalogIdentity,
+	recordCatalogChange,
 } from "./storage";
 import { assignGroupingClass } from "./grouping";
+import { acceptCatalogSourceInitialization, bindCatalogSourceIdentity } from "./source-bindings";
 
 async function findBoundIdentity(tx: DatabaseTransaction, sourceRecordId: string) {
 	const [claim] = await tx
@@ -157,19 +159,36 @@ export async function adoptBangumiSubject(
 		throw new TypeError("Bangumi payload identity differs from its archived source record");
 	const observation = await recordCatalogSourceObservation(tx, receipt);
 	const existing = await inspectExistingSourceBinding(tx, actor, observation, "bangumi.subject.1");
-	if (existing) return existing;
-	const identity = await createCatalogIdentity(
-		tx,
-		{ owner: plan.owner, shape: plan.shape, contentRating: plan.contentRating },
-		actor,
-	);
+	if (existing && existing.status !== "initialize_reference") return existing;
+	if (existing) {
+		const target = await loadCatalogIdentity(tx, existing.reference, actor, true);
+		if (existing.reference.owner !== plan.owner || target.shape !== plan.shape)
+			throw new TypeError("Bangumi source grain needs reviewed native reclassification");
+	}
+	const identity = existing
+		? { ...existing.reference, revision: existing.revision }
+		: await createCatalogIdentity(
+				tx,
+				{ owner: plan.owner, shape: plan.shape, contentRating: plan.contentRating },
+				actor,
+			);
 	if (plan.owner === "program")
-		await tx.insert(programWork).values({
-			id: identity.id,
-			declaredMainEpisodeCount: plan.subject.eps,
-			declaredTotalEpisodeCount: plan.subject.total_episodes,
-		});
-	if (plan.owner === "software") await tx.insert(softwareContent).values({ id: identity.id });
+		await tx
+			.insert(programWork)
+			.values({
+				id: identity.id,
+				declaredMainEpisodeCount: plan.subject.eps,
+				declaredTotalEpisodeCount: plan.subject.total_episodes,
+			})
+			.onConflictDoUpdate({
+				target: programWork.id,
+				set: {
+					declaredMainEpisodeCount: plan.subject.eps,
+					declaredTotalEpisodeCount: plan.subject.total_episodes,
+				},
+			});
+	if (plan.owner === "software")
+		await tx.insert(softwareContent).values({ id: identity.id }).onConflictDoNothing();
 	let revision = identity.revision;
 	if (plan.owner === "grouping") {
 		const classification = await ensureCatalogDefinition(tx, {
@@ -177,6 +196,7 @@ export async function adoptBangumiSubject(
 			key: "series",
 			kind: "class",
 			valueKind: null,
+			constraints: { targets: [{ owner: "grouping", shapes: ["grouping"] }] },
 		});
 		revision = (await assignGroupingClass(tx, identity, actor, revision, classification.revisionId))
 			.revision;
@@ -210,24 +230,30 @@ export async function adoptBangumiSubject(
 		snapshotId: observation.snapshot.id,
 		sourcePath: "/id",
 	});
-	const [claim] = await tx
-		.insert(catalogSourceMappingClaim)
-		.values({
-			sourceRecordId: observation.record.id,
-			path: "/",
-			owner: plan.owner,
-			observedSnapshotId: observation.snapshot.id,
-		})
-		.returning();
-	if (!claim) throw new Error("Source mapping claim insertion returned no row");
-	await tx
-		.insert(tables.sourceBinding)
-		.values({
-			sourceRecordId: observation.record.id,
-			mappingKey: claim.mappingKey,
-			mappingOwner: plan.owner,
-			ownerId: identity.id,
+	if (existing && plan.contentRating === "r18") {
+		revision = await recordCatalogChange(
+			tx,
+			identity,
+			actor,
+			revision,
+			"subject.content-rating.initialize",
+		);
+		const table = CatalogIdentityTables[plan.owner];
+		await tx.update(table).set({ contentRating: "r18" }).where(eq(table.id, identity.id));
+	}
+	const binding = {
+		sourceRecordId: observation.record.id,
+		path: "/",
+		snapshotId: observation.snapshot.id,
+		reference: { owner: identity.owner, id: identity.id },
+	};
+	if (existing)
+		await acceptCatalogSourceInitialization(tx, actor, {
+			...binding,
+			expectedBaselineRevision: existing.revision,
+			finalRevision: revision,
 		});
+	else await bindCatalogSourceIdentity(tx, actor, binding);
 	return {
 		status: "created" as const,
 		reference: { owner: plan.owner, id: identity.id },

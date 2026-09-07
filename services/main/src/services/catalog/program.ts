@@ -11,6 +11,7 @@ import {
 import { programIdentity } from "../database/schema/catalog-identity";
 import { isFractionalPosition } from "../ordering/position";
 import { CatalogPartialDateSchema, type CatalogReference } from "./contracts";
+import { assertCatalogDefinitionTarget } from "./definitions";
 import {
 	addCatalogName,
 	assertReadableTargets,
@@ -79,6 +80,20 @@ async function validateParents(
 	actor: string,
 	value: z.output<typeof ProgramStructureSchema>,
 ) {
+	const typeId =
+		value.shape === "program_version"
+			? value.fields.versionTypeRevisionId
+			: value.shape === "season"
+				? null
+				: value.fields.typeRevisionId;
+	if (typeId)
+		await assertCatalogDefinitionTarget(
+			tx,
+			typeId,
+			["class", "vocabulary"],
+			{ owner: "program", shape: value.shape },
+			"type",
+		);
 	if (value.shape === "program") return;
 	if (value.fields.programId) await requireProgram(tx, value.fields.programId, actor, "program");
 	if (value.shape === "episode" && value.fields.seasonId) {
@@ -134,7 +149,7 @@ export async function createProgramStructure(
 		...titleValue,
 		kind: "primary",
 	});
-	return { ...identity, revision: named.revision };
+	return { ...identity, revision: named.revision, nameId: named.id };
 }
 
 /** Replaces explicit native fields under optimistic concurrency; source snapshots stay immutable. @internal */

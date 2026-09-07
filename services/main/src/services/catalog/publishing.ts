@@ -1,5 +1,6 @@
 import { and, eq, gt, isNull, or } from "drizzle-orm";
 import { z } from "zod";
+import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import type { DatabaseTransaction } from "../database";
 import {
 	publishingInstallment,
@@ -13,6 +14,7 @@ import {
 } from "../database/schema/catalog-publishing";
 import { isFractionalPosition } from "../ordering/position";
 import { CatalogPartialDateSchema, type CatalogReference } from "./contracts";
+import { assertCatalogDefinitionTarget } from "./definitions";
 import {
 	addCatalogName,
 	assertReadableTargets,
@@ -26,6 +28,94 @@ const title = z.strictObject({
 	value: z.string().min(1).max(131_072),
 });
 const count = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
+
+/** Complete provider-free fixed fields; unknown source grain can remain a catalog entry. @internal */
+export const PublishingStructureSchema = z.discriminatedUnion("shape", [
+	z.strictObject({ shape: z.literal("work"), fields: z.strictObject({}) }),
+	z.strictObject({
+		shape: z.literal("text_version"),
+		fields: z.strictObject({
+			languageTag: z.string().transform(canonicalizeContentLanguageTag).nullable().default(null),
+			methodRevisionId: z.uuid().nullable().default(null),
+		}),
+	}),
+	z.strictObject({
+		shape: z.literal("publication"),
+		fields: z.strictObject({
+			pageCount: count.nullable().default(null),
+			paginationText: z.string().max(131_072).nullable().default(null),
+		}),
+	}),
+	z.strictObject({
+		shape: z.literal("serialization"),
+		fields: z.strictObject({
+			textVersionId: z.uuid().nullable().default(null),
+			statusRevisionId: z.uuid().nullable().default(null),
+		}),
+	}),
+]);
+
+/** Native corrections do not overwrite a source snapshot or invent a missing parent layer. @internal */
+export async function updatePublishingStructure(
+	tx: DatabaseTransaction,
+	reference: CatalogReference,
+	actor: string,
+	expectedRevision: number,
+	input: z.input<typeof PublishingStructureSchema>,
+) {
+	if (reference.owner !== "publishing") throw new TypeError("Expected publishing owner");
+	const value = PublishingStructureSchema.parse(input);
+	await requirePublishing(tx, reference.id, actor, value.shape);
+	if (value.shape === "text_version" && value.fields.methodRevisionId)
+		await assertCatalogDefinitionTarget(
+			tx,
+			value.fields.methodRevisionId,
+			"vocabulary",
+			{ owner: "publishing", shape: "text_version" },
+			"method",
+		);
+	if (value.shape === "serialization" && value.fields.statusRevisionId)
+		await assertCatalogDefinitionTarget(
+			tx,
+			value.fields.statusRevisionId,
+			"vocabulary",
+			{ owner: "publishing", shape: "serialization" },
+			"status",
+		);
+	if (value.shape === "serialization" && value.fields.textVersionId)
+		await requirePublishing(tx, value.fields.textVersionId, actor, "text_version");
+	const revision = await recordCatalogChange(
+		tx,
+		reference,
+		actor,
+		expectedRevision,
+		"publishing.structure.replace",
+	);
+	switch (value.shape) {
+		case "work":
+			await tx.insert(publishingWork).values({ id: reference.id }).onConflictDoNothing();
+			break;
+		case "text_version":
+			await tx
+				.insert(publishingTextVersion)
+				.values({ id: reference.id, ...value.fields })
+				.onConflictDoUpdate({ target: publishingTextVersion.id, set: value.fields });
+			break;
+		case "publication":
+			await tx
+				.insert(publishingPublication)
+				.values({ id: reference.id, ...value.fields })
+				.onConflictDoUpdate({ target: publishingPublication.id, set: value.fields });
+			break;
+		case "serialization":
+			await tx
+				.insert(publishingSerialization)
+				.values({ id: reference.id, ...value.fields })
+				.onConflictDoUpdate({ target: publishingSerialization.id, set: value.fields });
+			break;
+	}
+	return { revision };
+}
 
 async function requirePublishing(
 	tx: DatabaseTransaction,
@@ -56,18 +146,24 @@ export async function createSerialization(
 		})
 		.parse(input);
 	if (value.textVersionId) await requirePublishing(tx, value.textVersionId, actor, "text_version");
+	if (value.statusRevisionId)
+		await assertCatalogDefinitionTarget(
+			tx,
+			value.statusRevisionId,
+			"vocabulary",
+			{ owner: "publishing", shape: "serialization" },
+			"status",
+		);
 	const identity = await createCatalogIdentity(
 		tx,
 		{ owner: "publishing", shape: "serialization" },
 		actor,
 	);
-	await tx
-		.insert(publishingSerialization)
-		.values({
-			id: identity.id,
-			textVersionId: value.textVersionId,
-			statusRevisionId: value.statusRevisionId,
-		});
+	await tx.insert(publishingSerialization).values({
+		id: identity.id,
+		textVersionId: value.textVersionId,
+		statusRevisionId: value.statusRevisionId,
+	});
 	const named = await addCatalogName(tx, identity, actor, identity.revision, {
 		...value.name,
 		kind: "primary",
@@ -153,6 +249,152 @@ export async function putPublishingCoverage(
 	return { revision };
 }
 
+/** Remove one known coverage edge under the owning resource's revision. @internal */
+export async function removePublishingCoverage(
+	tx: DatabaseTransaction,
+	reference: CatalogReference,
+	actor: string,
+	expectedRevision: number,
+	kind: z.output<typeof coverage>["kind"],
+	targetId: string,
+) {
+	z.uuid().parse(targetId);
+	if (reference.owner !== "publishing") throw new TypeError("Expected publishing owner");
+	await requirePublishing(
+		tx,
+		reference.id,
+		actor,
+		kind === "text_work" ? "text_version" : "publication",
+	);
+	const revision = await recordCatalogChange(
+		tx,
+		reference,
+		actor,
+		expectedRevision,
+		"publishing.coverage.remove",
+	);
+	if (kind === "text_work")
+		await tx
+			.delete(publishingTextWork)
+			.where(
+				and(
+					eq(publishingTextWork.textVersionId, reference.id),
+					eq(publishingTextWork.workId, targetId),
+				),
+			);
+	else if (kind === "publication_text")
+		await tx
+			.delete(publishingPublicationText)
+			.where(
+				and(
+					eq(publishingPublicationText.publicationId, reference.id),
+					eq(publishingPublicationText.textVersionId, targetId),
+				),
+			);
+	else if (kind === "publication_work")
+		await tx
+			.delete(publishingPublicationWork)
+			.where(
+				and(
+					eq(publishingPublicationWork.publicationId, reference.id),
+					eq(publishingPublicationWork.workId, targetId),
+				),
+			);
+	else throw new TypeError("Unknown publishing coverage kind");
+	return { revision };
+}
+
+/** Coverage exports have an explicit owner-local order and never scan across publications. @internal */
+export async function listPublishingCoverage(
+	tx: DatabaseTransaction,
+	reference: CatalogReference,
+	actor: string | null,
+	input: {
+		kind: z.output<typeof coverage>["kind"];
+		after?: { position: number; id: string };
+		limit?: number;
+	},
+) {
+	if (reference.owner !== "publishing") throw new TypeError("Expected publishing owner");
+	const page = z
+		.strictObject({
+			kind: z.enum(["text_work", "publication_text", "publication_work"]),
+			after: z.strictObject({ position: count, id: z.uuid() }).optional(),
+			limit: z.number().int().min(1).max(100).default(50),
+		})
+		.parse(input);
+	await requirePublishing(
+		tx,
+		reference.id,
+		actor,
+		page.kind === "text_work" ? "text_version" : "publication",
+	);
+	const table =
+		page.kind === "text_work"
+			? publishingTextWork
+			: page.kind === "publication_text"
+				? publishingPublicationText
+				: publishingPublicationWork;
+	const owner = "publicationId" in table ? table.publicationId : table.textVersionId;
+	const target = "workId" in table ? table.workId : table.textVersionId;
+	const rows = await tx
+		.select({ targetId: target, position: table.position, coverageText: table.coverageText })
+		.from(table)
+		.where(
+			and(
+				eq(owner, reference.id),
+				page.after
+					? or(
+							gt(table.position, page.after.position),
+							and(eq(table.position, page.after.position), gt(target, page.after.id)),
+						)
+					: undefined,
+			),
+		)
+		.orderBy(table.position, target)
+		.limit(page.limit);
+	await assertReadableTargets(
+		tx,
+		rows.map((row) => ({ owner: "publishing", id: row.targetId })),
+		actor,
+	);
+	const last = rows.at(-1);
+	return {
+		items: rows,
+		nextCursor:
+			rows.length === page.limit && last ? { position: last.position, id: last.targetId } : null,
+	};
+}
+
+/** A leaf can be removed without expanding the write into an entire serial tree. @internal */
+export async function removePublishingInstallment(
+	tx: DatabaseTransaction,
+	reference: CatalogReference,
+	actor: string,
+	expectedRevision: number,
+	id: string,
+) {
+	z.uuid().parse(id);
+	if (reference.owner !== "publishing") throw new TypeError("Expected publishing owner");
+	await requirePublishing(tx, reference.id, actor, "serialization");
+	const revision = await recordCatalogChange(
+		tx,
+		reference,
+		actor,
+		expectedRevision,
+		"publishing.installment.remove",
+	);
+	await tx
+		.delete(publishingInstallment)
+		.where(
+			and(
+				eq(publishingInstallment.serializationId, reference.id),
+				eq(publishingInstallment.id, id),
+			),
+		);
+	return { revision };
+}
+
 /** Ordered serial parts retain labels separately from their placement. @internal */
 export const PublishingInstallmentSchema = z.strictObject({
 	id: z.uuid().optional(),
@@ -175,6 +417,13 @@ export async function putPublishingInstallment(
 	const value = PublishingInstallmentSchema.parse(input);
 	if (reference.owner !== "publishing") throw new TypeError("Expected publishing owner");
 	await requirePublishing(tx, reference.id, actor, "serialization");
+	await assertCatalogDefinitionTarget(
+		tx,
+		value.kindRevisionId,
+		["class", "vocabulary"],
+		{ owner: "publishing", shape: "serialization" },
+		"installment-kind",
+	);
 	const revision = await recordCatalogChange(
 		tx,
 		reference,

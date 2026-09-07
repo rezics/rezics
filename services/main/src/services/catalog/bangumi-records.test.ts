@@ -6,6 +6,8 @@ import {
 	bangumiRelationKey,
 	parseBangumiWiki,
 	planBangumiEpisode,
+	selectBangumiRevisionWiki,
+	BangumiIndexSchema,
 } from "./bangumi-records";
 import { ProgramStructureSchema } from "./program";
 
@@ -41,6 +43,42 @@ const profile = {
 };
 
 describe("Bangumi native conformance", () => {
+	it("requires explicit selection of historical wiki members and retains unavailable revisions", () => {
+		const revision = {
+			id: 679589,
+			type: 2,
+			created_at: "2017-03-10T22:50:30+08:00",
+			creator: { username: "curator", nickname: "Curator" },
+			summary: "",
+			data: {
+				"46": { name: "A", infobox: "{{Infobox Crt\n|name=Earlier\n}}", summary: "", extra: {} },
+			},
+		};
+		expect(selectBangumiRevisionWiki(revision).status).toBe("selection_required");
+		expect(selectBangumiRevisionWiki(revision, "46")).toMatchObject({
+			status: "available",
+			path: "/data/46/infobox",
+			wiki: { entries: [{ key: "name", value: "Earlier" }] },
+		});
+		expect(selectBangumiRevisionWiki({ ...revision, data: null }).status).toBe("unavailable");
+		expect(selectBangumiRevisionWiki(revision, "77").status).toBe("unavailable");
+	});
+	it("treats index curator handles as external attribution while retaining source statistics", () => {
+		const index = BangumiIndexSchema.parse({
+			id: 1,
+			title: "Index",
+			desc: "",
+			created_at: "2010-06-05T20:36:14+08:00",
+			updated_at: "2025-05-09T22:20:08+08:00",
+			creator: { username: "curator", nickname: "Curator" },
+			total: 9,
+			stat: { comments: 2, collects: 16 },
+			nsfw: false,
+			ban: false,
+		});
+		expect(index.creator).toEqual({ username: "curator", nickname: "Curator" });
+		expect(index.stat.collects).toBe(16);
+	});
 	it("keeps source sort, episode number, source duration, and server duration separately", () => {
 		const result = planBangumiEpisode(episode);
 		expect(result.episode.sort).toBe(1.5);
