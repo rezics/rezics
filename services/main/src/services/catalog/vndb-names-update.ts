@@ -521,10 +521,10 @@ export async function initializeVndbNativeNames(
 		let name: { id: string; revision: number };
 		if (position === 0 && seed) {
 			const current = await requireCatalogNameRevision(tx, ref, actor, seed.id, seed.revision);
-			const values = CatalogNameValuesSchema.parse({
+			const values: CatalogNameInput = {
 				...catalogNameRevisionValues(current),
 				...fields,
-			});
+			};
 			const updated = isDeepStrictEqual(catalogNameRevisionValues(current), values)
 				? current
 				: await reviseCatalogName(tx, ref, actor, seed.id, seed.revision, values);

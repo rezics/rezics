@@ -47,10 +47,10 @@ export const vndbCharacterPropertyDefinitions: VndbSemanticFact[] = planVndbChar
 	constraints: {
 		nullable: true,
 		integer: value.valueKind === "number",
-		minimum: value.minimum,
-		maximum: value.maximum,
-		unit: value.unit,
-		allowedValues: value.allowedValues,
+		...(value.minimum === undefined ? {} : { minimum: value.minimum }),
+		...(value.maximum === undefined ? {} : { maximum: value.maximum }),
+		...(value.unit === undefined ? {} : { unit: value.unit }),
+		...(value.allowedValues === undefined ? {} : { allowedValues: value.allowedValues }),
 	},
 }));
 

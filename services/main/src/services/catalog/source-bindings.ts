@@ -180,7 +180,7 @@ export async function bindCatalogSourceIdentity(
 					eq(claims.mappingKey, claim.mappingKey),
 				),
 			);
-	return claim;
+	return { ...claim, appliedCorrespondenceRevision: value.initializing ? null : 1 };
 }
 
 /** @internal Only an unchanged reference stub may receive its first own-endpoint details without review. */
