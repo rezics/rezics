@@ -22,9 +22,10 @@ import {
 } from "./catalog-software";
 import { softwareParticipationRevision } from "./catalog-software-participation";
 
-function baselineColumns() {
+function baselineColumns(owner: CatalogOwner) {
 	return {
 		sourceRecordId: uuid().notNull(),
+		mappingOwner: text().$type<CatalogOwner>().default(owner).notNull(),
 		mappingKey: uuid().notNull(),
 		ownerId: uuid().notNull(),
 		sourceSnapshotId: uuid().notNull(),
@@ -41,6 +42,7 @@ function baselineConstraints(
 	t: {
 		sourceRecordId: AnyPgColumn;
 		mappingKey: AnyPgColumn;
+		mappingOwner: AnyPgColumn;
 		sourceSnapshotId: AnyPgColumn;
 		sourcePath: AnyPgColumn;
 		lastProposalId: AnyPgColumn;
@@ -48,14 +50,17 @@ function baselineConstraints(
 		sourceRevision: AnyPgColumn;
 		currentRevision: AnyPgColumn;
 	},
+	owner: CatalogOwner,
 ) {
 	return [
+		check(`${prefix}_owner`, sql`${t.mappingOwner} = ${owner}`),
 		foreignKey({
 			name: `${prefix}_mapping_fk`,
-			columns: [t.sourceRecordId, t.mappingKey],
+			columns: [t.sourceRecordId, t.mappingKey, t.mappingOwner],
 			foreignColumns: [
 				catalogSourceMappingClaim.sourceRecordId,
 				catalogSourceMappingClaim.mappingKey,
+				catalogSourceMappingClaim.owner,
 			],
 		}).onDelete("restrict"),
 		foreignKey({
@@ -84,7 +89,7 @@ function ownedBaseline(owner: CatalogOwner) {
 	return pgTable(
 		`${owner}_source_owned_baseline`,
 		{
-			...baselineColumns(),
+			...baselineColumns(owner),
 			kind: text()
 				.$type<"catalog-semantic" | "catalog-name" | "catalog-name-authority">()
 				.notNull(),
@@ -95,7 +100,7 @@ function ownedBaseline(owner: CatalogOwner) {
 		},
 		(t) => [
 			primaryKey({ columns: [t.sourceRecordId, t.mappingKey, t.ownerId, t.kind, t.componentKey] }),
-			...baselineConstraints(`${owner}_source_owned_base`, t),
+			...baselineConstraints(`${owner}_source_owned_base`, t, owner),
 			foreignKey({
 				name: `${owner}_owned_base_semantic_source_fk`,
 				columns: [t.ownerId, t.semanticId, t.sourceRevision],
@@ -160,10 +165,10 @@ function softwareChildBaseline(
 ) {
 	return pgTable(
 		`software_source_${kind}_baseline`,
-		{ ...baselineColumns(), componentKey: uuid().notNull() },
+		{ ...baselineColumns("software"), componentKey: uuid().notNull() },
 		(t) => [
 			primaryKey({ columns: [t.sourceRecordId, t.mappingKey, t.ownerId, t.componentKey] }),
-			...baselineConstraints(`software_source_${kind}_base`, t),
+			...baselineConstraints(`software_source_${kind}_base`, t, "software"),
 			foreignKey({
 				name: `software_${kind}_base_source_fk`,
 				columns: [t.ownerId, t.componentKey, t.sourceRevision],
@@ -191,7 +196,7 @@ export const softwareSourceParticipationBaseline = softwareChildBaseline("partic
 export const softwareSourceComponentBaseline = pgTable(
 	"software_source_component_baseline",
 	{
-		...baselineColumns(),
+		...baselineColumns("software"),
 		component: text().$type<typeof softwareComponentRevision.$inferSelect.kind>().notNull(),
 		componentKey: text().notNull(),
 	},
@@ -199,7 +204,7 @@ export const softwareSourceComponentBaseline = pgTable(
 		primaryKey({
 			columns: [t.sourceRecordId, t.mappingKey, t.ownerId, t.component, t.componentKey],
 		}),
-		...baselineConstraints("software_source_component_base", t),
+		...baselineConstraints("software_source_component_base", t, "software"),
 		foreignKey({
 			name: "software_component_base_source_fk",
 			columns: [t.ownerId, t.component, t.componentKey, t.sourceRevision],
@@ -227,7 +232,7 @@ export const softwareSourceRecordBaseline = pgTable(
 	{ ...baselineColumns() },
 	(t) => [
 		primaryKey({ columns: [t.sourceRecordId, t.mappingKey, t.ownerId] }),
-		...baselineConstraints("software_source_record_base", t),
+		...baselineConstraints("software_source_record_base", t, "software"),
 		foreignKey({
 			name: "software_record_base_source_fk",
 			columns: [t.ownerId, t.sourceRevision],
