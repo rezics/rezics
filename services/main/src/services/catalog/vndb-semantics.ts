@@ -1,10 +1,14 @@
+import {
+	prepareCatalogSourceChildCorrespondence,
+	sealCatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 import { and, eq } from "drizzle-orm";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { CatalogSourceNativeChange } from "./source-applications";
 import type { DatabaseTransaction } from "../database";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { acceptCatalogSourceInitialization, bindCatalogSourceIdentity } from "./source-bindings";
+import { acceptCatalogSourceInitialization } from "./source-bindings";
 import type { CatalogOwner, CatalogReference } from "./contracts";
 import { bindReferencedSourceIdentity } from "./source-references";
 import { inspectExistingSourceBinding } from "./source-adoption";
@@ -35,12 +39,23 @@ type Document = Awaited<ReturnType<typeof recordCatalogSourceDocument>>;
 type TargetRule = { owner: CatalogOwner; shapes: string[] };
 const subjectTargets: TargetRule[] = [
 	{ owner: "software", shapes: ["content", "release", "engine"] },
-	{ owner: "entity", shapes: ["person", "organization", "collective", "character", "unresolved"] },
-	{ owner: "reference", shapes: ["concept", "quotation", "image", "access-mechanism"] },
+	{
+		owner: "entity",
+		shapes: ["person", "organization", "collective", "character", "unresolved"],
+	},
+	{
+		owner: "reference",
+		shapes: ["concept", "quotation", "image", "access-mechanism"],
+	},
 ];
 const roleTargets: Record<string, TargetRule[]> = {
 	subject: subjectTargets,
-	producer: [{ owner: "entity", shapes: ["person", "organization", "collective", "unresolved"] }],
+	producer: [
+		{
+			owner: "entity",
+			shapes: ["person", "organization", "collective", "unresolved"],
+		},
+	],
 	image: [{ owner: "reference", shapes: ["image"] }],
 	content: [{ owner: "software", shapes: ["content"] }],
 	release: [{ owner: "software", shapes: ["release"] }],
@@ -50,7 +65,10 @@ const roleTargets: Record<string, TargetRule[]> = {
 	engine: [{ owner: "software", shapes: ["engine"] }],
 	related: [
 		{ owner: "software", shapes: ["content"] },
-		{ owner: "entity", shapes: ["person", "organization", "collective", "unresolved"] },
+		{
+			owner: "entity",
+			shapes: ["person", "organization", "collective", "unresolved"],
+		},
 	],
 };
 const scalarDefinitions: VndbSemanticFact[] = [
@@ -229,7 +247,10 @@ async function appendFact(
 		revision,
 		definitionId,
 		replacement
-			? { semanticId: replacement.semanticId, expectedHeadVersion: replacement.headVersion }
+			? {
+					semanticId: replacement.semanticId,
+					expectedHeadVersion: replacement.headVersion,
+				}
 			: {},
 	);
 	const appended = await appendCatalogFactNodes(tx, reference, actor, fact.revision, fact.id, -1, [
@@ -291,7 +312,12 @@ export async function appendVndbSemanticPlan(
 		replacements?: ReadonlyMap<string, { semanticId: string; headVersion: number }>;
 		reuse?: ReadonlyMap<
 			string,
-			{ id: string; semanticId: string; headVersion: number; kind: "fact" | "relation" }
+			{
+				id: string;
+				semanticId: string;
+				headVersion: number;
+				kind: "fact" | "relation";
+			}
 		>;
 		changes?: CatalogSourceNativeChange[];
 	} = {},
@@ -372,7 +398,10 @@ export async function appendVndbSemanticPlan(
 				});
 				targets.set(key, native);
 			}
-			participants.push({ roleRevisionId: mustGet(roles, participant.role), target: native });
+			participants.push({
+				roleRevisionId: mustGet(roles, participant.role),
+				target: native,
+			});
 		}
 		let definitionRevisionId = predicates.get(relation.key);
 		if (!definitionRevisionId) {
@@ -385,7 +414,10 @@ export async function appendVndbSemanticPlan(
 						? [{ owner: "software" as const, shapes: ["content"] }]
 						: (roleTargets[role] ?? []),
 			}));
-			const constraints = { roles: relationRoles, qualifierRevisionIds: [...definitions.values()] };
+			const constraints = {
+				roles: relationRoles,
+				qualifierRevisionIds: [...definitions.values()],
+			};
 			const predicate = await ensureCatalogDefinition(tx, {
 				namespace: "catalog.semantic-relation",
 				key: relation.key,
@@ -400,7 +432,10 @@ export async function appendVndbSemanticPlan(
 		const created = await createCatalogRelation(tx, reference, actor, revision, {
 			definitionRevisionId,
 			...(replacement
-				? { semanticId: replacement.semanticId, expectedHeadVersion: replacement.headVersion }
+				? {
+						semanticId: replacement.semanticId,
+						expectedHeadVersion: replacement.headVersion,
+					}
 				: {}),
 			participants,
 			...{ qualifiers, spoiler: relation.spoiler },
@@ -612,6 +647,12 @@ export async function adoptVndbSemanticObject(
 	const identity = existing
 		? { ...existing.reference, revision: existing.revision }
 		: await createCatalogIdentity(tx, { owner, shape }, actor);
+	await prepareCatalogSourceChildCorrespondence(tx, actor, {
+		sourceRecordId: document.record.id,
+		snapshotId: document.snapshot.id,
+		reference: identity,
+		mappingVersion: `vndb.${record.objectType}.2`,
+	});
 	let revision = identity.revision;
 	if ("name" in record)
 		revision = (
@@ -775,7 +816,7 @@ export async function adoptVndbSemanticObject(
 			finalRevision: revision,
 		});
 	else
-		await bindCatalogSourceIdentity(tx, actor, {
+		await sealCatalogSourceChildCorrespondence(tx, actor, {
 			sourceRecordId: document.record.id,
 			mappingVersion: `vndb.${record.objectType}.semantic.1`,
 			path: "/",
@@ -800,7 +841,10 @@ export function remapVndbSemanticPlan(
 		relations: plan.relations.map((value) => ({
 			...value,
 			path: path(value.path),
-			qualifiers: value.qualifiers.map((fact) => ({ ...fact, path: path(fact.path) })),
+			qualifiers: value.qualifiers.map((fact) => ({
+				...fact,
+				path: path(fact.path),
+			})),
 			participants: value.participants.map((participant) => ({
 				...participant,
 				target: { ...participant.target, path: path(participant.target.path) },

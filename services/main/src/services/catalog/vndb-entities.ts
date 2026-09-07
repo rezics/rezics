@@ -1,3 +1,7 @@
+import {
+	prepareCatalogSourceChildCorrespondence,
+	sealCatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -143,7 +147,11 @@ export const VndbCharacterSchema = z
 		traits: z
 			.array(
 				z
-					.object({ id: z.string().regex(/^i[1-9][0-9]*$/u), spoiler, lie: z.boolean() })
+					.object({
+						id: z.string().regex(/^i[1-9][0-9]*$/u),
+						spoiler,
+						lie: z.boolean(),
+					})
 					.passthrough(),
 			)
 			.max(4096)
@@ -225,7 +233,12 @@ export function planVndbCharacterFacts(input: unknown): ScalarFact[] {
 		});
 	}
 	const sexes = { m: "male", f: "female", b: "both", n: "sexless" } as const;
-	const genders = { m: "male", f: "female", o: "nonbinary", a: "ambiguous" } as const;
+	const genders = {
+		m: "male",
+		f: "female",
+		o: "nonbinary",
+		a: "ambiguous",
+	} as const;
 	for (const [index, scope] of [
 		[0, "apparent"],
 		[1, "actual"],
@@ -325,9 +338,7 @@ async function adoptVndbEntity(
 		throw new TypeError("VNDB entity identity differs from its archived source key");
 	const { recordCatalogSourceDocument } = await import("./source-observations");
 	const { inspectExistingSourceBinding } = await import("./source-adoption");
-	const { bindCatalogSourceIdentity, acceptCatalogSourceInitialization } = await import(
-		"./source-bindings"
-	);
+	const { acceptCatalogSourceInitialization } = await import("./source-bindings");
 	const { createEntity, initializeEntityProfile, resolveEntityShape } = await import("./entities");
 	const {
 		addCatalogName,
@@ -384,9 +395,18 @@ async function adoptVndbEntity(
 			revision = (await resolveEntityShape(tx, reference, actor, revision, shape)).revision;
 		else if (current.shape !== shape)
 			throw new TypeError("VNDB endpoint classification differs from the bound entity shape");
-		revision = (await initializeEntityProfile(tx, reference, actor, revision, { genderRevisionId }))
-			.revision;
+		revision = (
+			await initializeEntityProfile(tx, reference, actor, revision, {
+				genderRevisionId,
+			})
+		).revision;
 	}
+	await prepareCatalogSourceChildCorrespondence(tx, actor, {
+		sourceRecordId: document.record.id,
+		snapshotId: document.snapshot.id,
+		reference: reference,
+		mappingVersion: `vndb.${kind}.2`,
+	});
 	const tables = CatalogFactTables.entity;
 	let unusedPrimaryId = created?.nameId;
 	const writeName = async (
@@ -556,14 +576,19 @@ async function adoptVndbEntity(
 			finalRevision: revision,
 		});
 	else
-		await bindCatalogSourceIdentity(tx, actor, {
+		await sealCatalogSourceChildCorrespondence(tx, actor, {
 			sourceRecordId: document.record.id,
 			mappingVersion: `vndb.${kind}.2`,
 			path: "/",
 			snapshotId: document.snapshot.id,
 			reference,
 		});
-	return { status: "created" as const, reference, revision, snapshotId: document.snapshot.id };
+	return {
+		status: "created" as const,
+		reference,
+		revision,
+		snapshotId: document.snapshot.id,
+	};
 }
 
 /** @alpha @remarks Initial adoption or untouched reference completion. Subsequent snapshots require review. */

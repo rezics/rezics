@@ -1,3 +1,4 @@
+import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -177,6 +178,7 @@ export async function bindCatalogNameSourceOccurrence(
 	input: z.input<typeof sourceOccurrenceSchema>,
 ) {
 	const value = sourceOccurrenceSchema.parse(input);
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, value.sourceRecordId);
 	await loadCatalogIdentity(tx, reference, actor, true, "share");
 	await requireCatalogNameRevision(tx, reference, actor, value.nameId, value.nameRevision);
 	const { sourceBinding: binding, sourceOccurrence: occurrence } =
@@ -185,6 +187,7 @@ export async function bindCatalogNameSourceOccurrence(
 		.insert(binding)
 		.values({
 			ownerId: reference.id,
+			...scope,
 			sourceRecordId: value.sourceRecordId,
 			namespace: value.namespace,
 			localKey: value.localKey,
@@ -197,6 +200,9 @@ export async function bindCatalogNameSourceOccurrence(
 		.where(
 			and(
 				eq(binding.sourceRecordId, value.sourceRecordId),
+				eq(binding.mappingKey, scope.mappingKey),
+				eq(binding.correspondenceRevision, scope.correspondenceRevision),
+				eq(binding.ownerId, reference.id),
 				eq(binding.namespace, value.namespace),
 				eq(binding.localKey, value.localKey),
 			),
@@ -206,7 +212,7 @@ export async function bindCatalogNameSourceOccurrence(
 		throw new CatalogRevisionConflict("Source alias is bound to a different named-form identity");
 	await tx
 		.insert(occurrence)
-		.values({ ...value, ownerId: reference.id })
+		.values({ ...value, ...scope, ownerId: reference.id })
 		.onConflictDoNothing();
 	const [observed] = await tx
 		.select()
@@ -214,6 +220,9 @@ export async function bindCatalogNameSourceOccurrence(
 		.where(
 			and(
 				eq(occurrence.sourceRecordId, value.sourceRecordId),
+				eq(occurrence.mappingKey, scope.mappingKey),
+				eq(occurrence.correspondenceRevision, scope.correspondenceRevision),
+				eq(occurrence.ownerId, reference.id),
 				eq(occurrence.namespace, value.namespace),
 				eq(occurrence.localKey, value.localKey),
 				eq(occurrence.snapshotId, value.snapshotId),
@@ -240,6 +249,7 @@ export async function resolveCatalogNameSourceBinding(
 	input: z.input<typeof sourceBindingKeySchema>,
 ) {
 	const value = sourceBindingKeySchema.parse(input);
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, value.sourceRecordId);
 	await loadCatalogIdentity(tx, reference, actor, false);
 	const { sourceBinding: binding, name } = CatalogNameTables[reference.owner];
 	const [row] = await tx
@@ -250,6 +260,9 @@ export async function resolveCatalogNameSourceBinding(
 			and(
 				eq(binding.ownerId, reference.id),
 				eq(binding.sourceRecordId, value.sourceRecordId),
+				eq(binding.mappingKey, scope.mappingKey),
+				eq(binding.correspondenceRevision, scope.correspondenceRevision),
+				eq(binding.ownerId, reference.id),
 				eq(binding.namespace, value.namespace),
 				eq(binding.localKey, value.localKey),
 			),

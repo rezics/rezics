@@ -21,8 +21,21 @@ import {
 	softwareParticipationRevision,
 	softwareParticipationCreditSourceOccurrence,
 } from "../database/schema/catalog-software-participation";
+import { CatalogNameTables } from "../database/schema/catalog-names";
+import {
+	catalogSourceBindingRevision,
+	catalogSourceMappingClaim,
+} from "../database/schema/catalog-source";
+import { softwareParticipationSourceOccurrence } from "../database/schema/catalog-software";
 
 const tables: AnyPgTable[] = [
+	catalogSourceBindingRevision,
+	catalogSourceMappingClaim,
+	softwareParticipationSourceOccurrence,
+	...Object.values(CatalogNameTables).flatMap((value) => [
+		value.sourceBinding,
+		value.sourceOccurrence,
+	]),
 	...Object.values(CatalogSourceOwnedBaselines),
 	softwareSourceComponentBaseline,
 	softwareSourceContextBaseline,

@@ -1,3 +1,4 @@
+import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { and, eq } from "drizzle-orm";
@@ -47,7 +48,12 @@ export function planVndbNativeNames(
 	const namespace = family === "vn" ? "vndb.vn.name" : "vndb.release.name";
 	const record = family === "vn" ? VndbVnSchema.parse(input) : VndbReleaseSchema.parse(input);
 	const plan: VndbNativeNamePlan[] = [
-		{ namespace, key: "display", path: path("/title"), fields: { value: record.title } },
+		{
+			namespace,
+			key: "display",
+			path: path("/title"),
+			fields: { value: record.title },
+		},
 	];
 	if (family === "vn") {
 		const vn = VndbVnSchema.parse(record);
@@ -63,7 +69,10 @@ export function planVndbNativeNames(
 					origin: "original",
 					primaryForLanguage: true,
 				},
-				official: { value: title.official, path: path(`/titles/${index}/official`) },
+				official: {
+					value: title.official,
+					path: path(`/titles/${index}/official`),
+				},
 			});
 			if (title.latin)
 				plan.push({
@@ -89,7 +98,12 @@ export function planVndbNativeNames(
 				namespace,
 				key: `alias/${hash}/${occurrence}`,
 				path: path(`/aliases/${index}`),
-				fields: { value: alias, languageTag: null, origin: "variant", primaryForLanguage: null },
+				fields: {
+					value: alias,
+					languageTag: null,
+					origin: "variant",
+					primaryForLanguage: null,
+				},
 			});
 		}
 	}
@@ -108,6 +122,7 @@ async function sourceName(
 	document: Document,
 	item: VndbNativeNamePlan,
 ) {
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, document.record.id);
 	const t = CatalogNameTables[ref.owner].sourceOccurrence;
 	const [row] = await tx
 		.select()
@@ -115,6 +130,8 @@ async function sourceName(
 		.where(
 			and(
 				eq(t.sourceRecordId, document.record.id),
+				eq(t.mappingKey, scope.mappingKey),
+				eq(t.correspondenceRevision, scope.correspondenceRevision),
 				eq(t.namespace, item.namespace),
 				eq(t.localKey, item.key),
 				eq(t.snapshotId, document.snapshot.id),
@@ -223,6 +240,7 @@ export async function reconcileVndbNativeNames(
 	before: { plan: VndbNativeNamePlan[]; document: Document },
 	after: { plan: VndbNativeNamePlan[]; document: Document },
 ) {
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, after.document.record.id);
 	const old = new Map(before.plan.map((item) => [item.key, item]));
 	const next = new Map(after.plan.map((item) => [item.key, item]));
 	if (old.size !== before.plan.length || next.size !== after.plan.length)
@@ -269,6 +287,8 @@ export async function reconcileVndbNativeNames(
 			.where(
 				and(
 					eq(t.sourceBinding.sourceRecordId, after.document.record.id),
+					eq(t.sourceBinding.mappingKey, scope.mappingKey),
+					eq(t.sourceBinding.correspondenceRevision, scope.correspondenceRevision),
 					eq(t.sourceBinding.namespace, item.namespace),
 					eq(t.sourceBinding.localKey, item.key),
 					eq(t.sourceBinding.ownerId, ref.id),
@@ -403,7 +423,12 @@ export async function reconcileVndbNativeNames(
 		const expected = await resolveCatalogSourceOwnedBaseline(
 			tx,
 			{ sourceRecordId: before.document.record.id, mappingKey },
-			{ kind: "catalog-name", owner: ref.owner, ownerId: ref.id, componentKey: origin.nameId },
+			{
+				kind: "catalog-name",
+				owner: ref.owner,
+				ownerId: ref.id,
+				componentKey: origin.nameId,
+			},
 			origin.nameRevision,
 		);
 		const current = await requireCatalogNameRevision(tx, ref, actor, origin.nameId, expected);
@@ -424,7 +449,10 @@ export async function reconcileVndbNativeNames(
 			languageTag: null,
 			...item.fields,
 			...(original
-				? { derivationNameId: original.nameId, derivationRevision: original.nameRevision }
+				? {
+						derivationNameId: original.nameId,
+						derivationRevision: original.nameRevision,
+					}
 				: {}),
 		});
 		if (
@@ -461,6 +489,7 @@ export async function restoreVndbNameAuthority(
 	document: Document,
 ) {
 	const changes: CatalogSourceNativeChange[] = [];
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, document.record.id);
 	const t = CatalogNameTables[ref.owner];
 	for (const item of plan) {
 		if (!item.official) continue;
@@ -480,6 +509,8 @@ export async function restoreVndbNameAuthority(
 			.where(
 				and(
 					eq(t.sourceBinding.sourceRecordId, document.record.id),
+					eq(t.sourceBinding.mappingKey, scope.mappingKey),
+					eq(t.sourceBinding.correspondenceRevision, scope.correspondenceRevision),
 					eq(t.sourceBinding.namespace, item.namespace),
 					eq(t.sourceBinding.localKey, item.key),
 					eq(t.sourceBinding.ownerId, ref.id),

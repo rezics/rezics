@@ -1,3 +1,7 @@
+import {
+	prepareCatalogSourceChildCorrespondence,
+	sealCatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 import { createHash } from "node:crypto";
 import type { DatabaseTransaction } from "../database";
 import {
@@ -5,7 +9,7 @@ import {
 	softwareVisualNovel,
 } from "../database/schema/catalog-software";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { bindCatalogSourceIdentity, acceptCatalogSourceInitialization } from "./source-bindings";
+import { acceptCatalogSourceInitialization } from "./source-bindings";
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { VndbCatalogContractSha256, VndbVnSchema, vndbLanguage, vndbSourceKey } from "./vndb";
@@ -71,6 +75,12 @@ export async function writeVndbVnProjection(
 				name: { value: record.title, languageTag: null },
 				details,
 			});
+	const childScope = await prepareCatalogSourceChildCorrespondence(tx, actor, {
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		reference: identity,
+		mappingVersion: "vndb.vn.2",
+	});
 	await tx.insert(softwareVisualNovel).values({ id: identity.id }).onConflictDoNothing();
 	const displayRevision = await appendVndbDisplayName(
 		tx,
@@ -101,6 +111,7 @@ export async function writeVndbVnProjection(
 			state: "active",
 		});
 		await tx.insert(softwareParticipationSourceOccurrence).values({
+			...childScope,
 			sourceRecordId: observation.record.id,
 			snapshotId: observation.snapshot.id,
 			namespace: "editions",
@@ -144,7 +155,7 @@ export async function writeVndbVnProjection(
 			finalRevision: revision,
 		});
 	else
-		await bindCatalogSourceIdentity(tx, actor, {
+		await sealCatalogSourceChildCorrespondence(tx, actor, {
 			sourceRecordId: observation.record.id,
 			mappingVersion: "vndb.vn.2",
 			path: "/",

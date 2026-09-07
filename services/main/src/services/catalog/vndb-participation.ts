@@ -1,3 +1,4 @@
+import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -95,6 +96,9 @@ export async function resolveVndbStaffAlias(
 			claims,
 			and(
 				eq(claims.sourceRecordId, t.sourceRecordId),
+				eq(claims.mappingKey, t.mappingKey),
+				eq(claims.appliedCorrespondenceRevision, t.correspondenceRevision),
+				eq(claims.appliedCorrespondenceRevision, claims.correspondenceRevision),
 				eq(claims.observedSnapshotId, t.snapshotId),
 				eq(claims.path, "/"),
 				eq(claims.owner, "entity"),
@@ -122,6 +126,7 @@ export async function appendVndbParticipation(
 	document: Document,
 	sourcePath: (path: string) => string = (path) => path,
 ) {
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, document.record.id);
 	const plan = planVndbParticipation(input);
 	const cache: VndbParticipationResolutionCache = {
 		targets: new Map(),
@@ -142,6 +147,8 @@ export async function appendVndbParticipation(
 					.where(
 						and(
 							eq(t.sourceRecordId, document.record.id),
+							eq(t.mappingKey, scope.mappingKey),
+							eq(t.correspondenceRevision, scope.correspondenceRevision),
 							eq(t.snapshotId, document.snapshot.id),
 							eq(t.namespace, "editions"),
 							eq(t.localKey, item.contextKey),

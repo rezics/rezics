@@ -1,3 +1,4 @@
+import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { isDeepStrictEqual } from "node:util";
 import { and, eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
@@ -17,7 +18,7 @@ import { musicBrainzAliasName } from "./musicbrainz-names";
 
 type NameChange = {
 	kind: "catalog-name";
-	owner: "music";
+	owner: CatalogReference["owner"];
 	ownerId: string;
 	componentKey: string;
 	beforeRevision: number | null;
@@ -36,9 +37,10 @@ export async function applyMusicBrainzNameDelta(
 	snapshotId: string,
 	previous: Pick<MusicBrainzRelease, "title" | "aliases">,
 	incoming: Pick<MusicBrainzRelease, "title" | "aliases">,
+	primaryPath = "/title",
 ) {
-	if (reference.owner !== "music") throw new TypeError("Expected music owner");
-	const table = CatalogNameTables.music.sourceOccurrence;
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, sourceRecordId);
+	const table = CatalogNameTables[reference.owner].sourceOccurrence;
 	const rows = await tx
 		.select()
 		.from(table)
@@ -46,6 +48,9 @@ export async function applyMusicBrainzNameDelta(
 			and(
 				eq(table.ownerId, reference.id),
 				eq(table.sourceRecordId, sourceRecordId),
+				eq(table.mappingKey, scope.mappingKey),
+				eq(table.correspondenceRevision, scope.correspondenceRevision),
+				eq(table.ownerId, reference.id),
 				eq(table.snapshotId, previousSnapshotId),
 				eq(table.namespace, "musicbrainz.name"),
 			),
@@ -76,7 +81,12 @@ export async function applyMusicBrainzNameDelta(
 				const currentRevision = await resolveCatalogSourceOwnedBaseline(
 					tx,
 					{ sourceRecordId, mappingKey },
-					{ kind: "catalog-name", owner: "music", ownerId: reference.id, componentKey: nameId },
+					{
+						kind: "catalog-name",
+						owner: reference.owner,
+						ownerId: reference.id,
+						componentKey: nameId,
+					},
 					nameRevision,
 				);
 				const updated = await reviseCatalogName(tx, reference, actor, nameId, currentRevision, {
@@ -85,7 +95,7 @@ export async function applyMusicBrainzNameDelta(
 				});
 				changes.push({
 					kind: "catalog-name",
-					owner: "music",
+					owner: reference.owner,
 					ownerId: reference.id,
 					componentKey: nameId,
 					beforeRevision: currentRevision,
@@ -100,6 +110,9 @@ export async function applyMusicBrainzNameDelta(
 				.where(
 					and(
 						eq(table.sourceRecordId, sourceRecordId),
+						eq(table.mappingKey, scope.mappingKey),
+						eq(table.correspondenceRevision, scope.correspondenceRevision),
+						eq(table.ownerId, reference.id),
 						eq(table.snapshotId, snapshotId),
 						eq(table.ownerId, reference.id),
 						eq(table.namespace, "musicbrainz.name"),
@@ -122,7 +135,7 @@ export async function applyMusicBrainzNameDelta(
 					{ sourceRecordId, mappingKey },
 					{
 						kind: "catalog-name",
-						owner: "music",
+						owner: reference.owner,
 						ownerId: reference.id,
 						componentKey: target.nameId,
 					},
@@ -141,7 +154,7 @@ export async function applyMusicBrainzNameDelta(
 				localKey = target.localKey;
 				changes.push({
 					kind: "catalog-name",
-					owner: "music",
+					owner: reference.owner,
 					ownerId: reference.id,
 					componentKey: nameId,
 					beforeRevision: currentRevision,
@@ -155,7 +168,7 @@ export async function applyMusicBrainzNameDelta(
 				localKey = `${snapshotId}:${path}`;
 				changes.push({
 					kind: "catalog-name",
-					owner: "music",
+					owner: reference.owner,
 					ownerId: reference.id,
 					componentKey: nameId,
 					beforeRevision: null,
@@ -169,6 +182,9 @@ export async function applyMusicBrainzNameDelta(
 			.where(
 				and(
 					eq(table.sourceRecordId, sourceRecordId),
+					eq(table.mappingKey, scope.mappingKey),
+					eq(table.correspondenceRevision, scope.correspondenceRevision),
+					eq(table.ownerId, reference.id),
 					eq(table.snapshotId, snapshotId),
 					eq(table.namespace, "musicbrainz.name"),
 					eq(table.localKey, localKey),
@@ -189,9 +205,9 @@ export async function applyMusicBrainzNameDelta(
 	};
 	if (incoming.title)
 		await write(
-			"/title",
+			primaryPath,
 			{ kind: "source-primary", value: incoming.title, languageTag: null },
-			previous.title ? "/title" : undefined,
+			previous.title ? primaryPath : undefined,
 			previous.title === incoming.title,
 		);
 	const oldAliases = previous.aliases ?? [];
@@ -221,7 +237,12 @@ export async function applyMusicBrainzNameDelta(
 		const currentRevision = await resolveCatalogSourceOwnedBaseline(
 			tx,
 			{ sourceRecordId, mappingKey },
-			{ kind: "catalog-name", owner: "music", ownerId: reference.id, componentKey: old.nameId },
+			{
+				kind: "catalog-name",
+				owner: reference.owner,
+				ownerId: reference.id,
+				componentKey: old.nameId,
+			},
 			old.nameRevision,
 		);
 		const removed = await reviseCatalogName(tx, reference, actor, old.nameId, currentRevision, {
@@ -230,7 +251,7 @@ export async function applyMusicBrainzNameDelta(
 		});
 		changes.push({
 			kind: "catalog-name",
-			owner: "music",
+			owner: reference.owner,
 			ownerId: reference.id,
 			componentKey: old.nameId,
 			beforeRevision: currentRevision,

@@ -25,7 +25,11 @@ import {
 import { users } from "./auth";
 import { pgTable } from "./base";
 import { CatalogIdentityTables } from "./catalog-identity";
-import { catalogSourceRecord, catalogSourceSnapshot } from "./catalog-source";
+import {
+	catalogSourceRecord,
+	catalogSourceSnapshot,
+	catalogSourceBindingRevision,
+} from "./catalog-source";
 import { createCreatedAtColumn, createTimestampMsColumn } from "./columns";
 
 function identityValues(owner: CatalogOwner) {
@@ -313,6 +317,8 @@ export function createCatalogNameTables(owner: CatalogOwner) {
 			sourceRecordId: uuid()
 				.notNull()
 				.references(() => catalogSourceRecord.id, { onDelete: "restrict" }),
+			mappingKey: uuid().notNull(),
+			correspondenceRevision: bigint({ mode: "number" }).notNull(),
 			namespace: text().notNull(),
 			localKey: text().notNull(),
 			nameId: uuid().notNull(),
@@ -321,15 +327,33 @@ export function createCatalogNameTables(owner: CatalogOwner) {
 		(table) => [
 			primaryKey({
 				name: `${owner}_name_source_binding_key`,
-				columns: [table.sourceRecordId, table.namespace, table.localKey],
+				columns: [
+					table.sourceRecordId,
+					table.mappingKey,
+					table.correspondenceRevision,
+					table.ownerId,
+					table.namespace,
+					table.localKey,
+				],
 			}),
 			unique(`${owner}_name_source_binding_owner_key`).on(
 				table.ownerId,
 				table.sourceRecordId,
+				table.mappingKey,
+				table.correspondenceRevision,
 				table.namespace,
 				table.localKey,
 				table.nameId,
 			),
+			foreignKey({
+				name: `${owner}_name_source_binding_correspondence_fk`,
+				columns: [table.sourceRecordId, table.mappingKey, table.correspondenceRevision],
+				foreignColumns: [
+					catalogSourceBindingRevision.sourceRecordId,
+					catalogSourceBindingRevision.mappingKey,
+					catalogSourceBindingRevision.revision,
+				],
+			}).onDelete("restrict"),
 			foreignKey({
 				name: `${owner}_name_source_binding_name_fk`,
 				columns: [table.ownerId, table.nameId],
@@ -347,6 +371,8 @@ export function createCatalogNameTables(owner: CatalogOwner) {
 		{
 			ownerId: uuid().notNull(),
 			sourceRecordId: uuid().notNull(),
+			mappingKey: uuid().notNull(),
+			correspondenceRevision: bigint({ mode: "number" }).notNull(),
 			namespace: text().notNull(),
 			localKey: text().notNull(),
 			nameId: uuid().notNull(),
@@ -358,13 +384,23 @@ export function createCatalogNameTables(owner: CatalogOwner) {
 		(table) => [
 			primaryKey({
 				name: `${owner}_name_source_occurrence_key`,
-				columns: [table.sourceRecordId, table.namespace, table.localKey, table.snapshotId],
+				columns: [
+					table.sourceRecordId,
+					table.mappingKey,
+					table.correspondenceRevision,
+					table.ownerId,
+					table.namespace,
+					table.localKey,
+					table.snapshotId,
+				],
 			}),
 			foreignKey({
 				name: `${owner}_name_source_occurrence_binding_fk`,
 				columns: [
 					table.ownerId,
 					table.sourceRecordId,
+					table.mappingKey,
+					table.correspondenceRevision,
 					table.namespace,
 					table.localKey,
 					table.nameId,
@@ -372,6 +408,8 @@ export function createCatalogNameTables(owner: CatalogOwner) {
 				foreignColumns: [
 					sourceBinding.ownerId,
 					sourceBinding.sourceRecordId,
+					sourceBinding.mappingKey,
+					sourceBinding.correspondenceRevision,
 					sourceBinding.namespace,
 					sourceBinding.localKey,
 					sourceBinding.nameId,
@@ -394,6 +432,8 @@ export function createCatalogNameTables(owner: CatalogOwner) {
 			),
 			index(`${owner}_name_source_occurrence_snapshot_idx`).on(
 				table.sourceRecordId,
+				table.mappingKey,
+				table.correspondenceRevision,
 				table.snapshotId,
 			),
 			check(

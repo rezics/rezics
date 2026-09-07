@@ -61,7 +61,11 @@ async function findBoundIdentity(tx: DatabaseTransaction, sourceRecordId: string
 		.where(eq(identityTable.id, binding.ownerId))
 		.limit(1);
 	if (!identity) throw new Error("Source binding target is missing");
-	return { claim, identity, reference: { owner: claim.owner, id: identity.id } };
+	return {
+		claim,
+		identity,
+		reference: { owner: claim.owner, id: identity.id },
+	};
 }
 
 export async function inspectExistingSourceBinding(
@@ -106,6 +110,8 @@ export async function inspectExistingSourceBinding(
 						)
 						.limit(1);
 		if (
+			bound.claim.appliedCorrespondenceRevision === bound.claim.correspondenceRevision &&
+			bound.claim.mappingVersion === mappingVersion &&
 			acceptedSnapshot?.contentSha256 === observation.snapshot.contentSha256 &&
 			acceptedSnapshot.contractSha256 === observation.snapshot.contractSha256
 		)
@@ -179,7 +185,11 @@ export async function adoptBangumiSubject(
 		? { ...existing.reference, revision: existing.revision }
 		: await createCatalogIdentity(
 				tx,
-				{ owner: plan.owner, shape: plan.shape, contentRating: plan.contentRating },
+				{
+					owner: plan.owner,
+					shape: plan.shape,
+					contentRating: plan.contentRating,
+				},
 				actor,
 			);
 	if (plan.owner === "program") {

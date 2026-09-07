@@ -11,6 +11,7 @@ import {
 	text,
 	unique,
 	uuid,
+	type PgTableExtraConfigValue,
 } from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
 import { createCreatedAtColumn } from "./columns";
@@ -119,13 +120,24 @@ export const catalogSourceMappingClaim = pgTable(
 		evidenceSnapshotId: uuid(),
 		evidencePath: text(),
 		bindingRevision: bigint({ mode: "number" }).default(1).notNull(),
+		correspondenceRevision: bigint({ mode: "number" }).default(1).notNull(),
+		appliedCorrespondenceRevision: bigint({ mode: "number" }),
 		policyRevision: bigint({ mode: "number" }).default(1).notNull(),
 		state: text().$type<"active" | "paused" | "withdrawn">().default("active").notNull(),
 		baselineTargetRevision: bigint({ mode: "number" }),
 		mappingVersion: text().default("source.manual.1").notNull(),
 	},
-	(table) => [
+	(table): PgTableExtraConfigValue[] => [
 		primaryKey({ columns: [table.sourceRecordId, table.path] }),
+		foreignKey({
+			name: "catalog_source_mapping_applied_correspondence_fk",
+			columns: [table.sourceRecordId, table.mappingKey, table.appliedCorrespondenceRevision],
+			foreignColumns: [
+				catalogSourceBindingRevision.sourceRecordId,
+				catalogSourceBindingRevision.mappingKey,
+				catalogSourceBindingRevision.revision,
+			],
+		}).onDelete("restrict"),
 		unique("catalog_source_mapping_claim_record_key").on(
 			table.sourceRecordId,
 			table.mappingKey,
@@ -177,7 +189,9 @@ export const catalogSourceAdoptionProposal = pgTable(
 		decidedAt: timestamp({ withTimezone: true, precision: 3 }),
 		decisionReason: text(),
 		appliedTargetRevision: bigint({ mode: "number" }),
-		proposerAuthUserId: uuid().references(() => users.id, { onDelete: "set null" }),
+		proposerAuthUserId: uuid().references(() => users.id, {
+			onDelete: "set null",
+		}),
 		state: text()
 			.$type<"pending" | "applied" | "rejected" | "superseded" | "withdrawn">()
 			.default("pending")
@@ -250,6 +264,7 @@ export const catalogSourceBindingRevision = pgTable(
 		mappingKey: uuid().notNull(),
 		owner: text().$type<CatalogOwner>().notNull(),
 		revision: bigint({ mode: "number" }).notNull(),
+		correspondenceRevision: bigint({ mode: "number" }).notNull(),
 		policyRevision: bigint({ mode: "number" }).notNull(),
 		mappingVersion: text().notNull(),
 		state: text().$type<"active" | "paused" | "withdrawn">().notNull(),
@@ -257,12 +272,18 @@ export const catalogSourceBindingRevision = pgTable(
 		publishingId: uuid().references(() => CatalogIdentityTables.publishing.id, {
 			onDelete: "restrict",
 		}),
-		musicId: uuid().references(() => CatalogIdentityTables.music.id, { onDelete: "restrict" }),
-		programId: uuid().references(() => CatalogIdentityTables.program.id, { onDelete: "restrict" }),
+		musicId: uuid().references(() => CatalogIdentityTables.music.id, {
+			onDelete: "restrict",
+		}),
+		programId: uuid().references(() => CatalogIdentityTables.program.id, {
+			onDelete: "restrict",
+		}),
 		softwareId: uuid().references(() => CatalogIdentityTables.software.id, {
 			onDelete: "restrict",
 		}),
-		entityId: uuid().references(() => CatalogIdentityTables.entity.id, { onDelete: "restrict" }),
+		entityId: uuid().references(() => CatalogIdentityTables.entity.id, {
+			onDelete: "restrict",
+		}),
 		groupingId: uuid().references(() => CatalogIdentityTables.grouping.id, {
 			onDelete: "restrict",
 		}),
@@ -278,8 +299,19 @@ export const catalogSourceBindingRevision = pgTable(
 		createdAt: createCreatedAtColumn(),
 		reason: text().notNull(),
 	},
-	(table) => [
-		primaryKey({ columns: [table.sourceRecordId, table.mappingKey, table.revision] }),
+	(table): PgTableExtraConfigValue[] => [
+		primaryKey({
+			columns: [table.sourceRecordId, table.mappingKey, table.revision],
+		}),
+		foreignKey({
+			name: "catalog_source_binding_correspondence_fk",
+			columns: [table.sourceRecordId, table.mappingKey, table.correspondenceRevision],
+			foreignColumns: [table.sourceRecordId, table.mappingKey, table.revision],
+		}).onDelete("restrict"),
+		check(
+			"catalog_source_binding_correspondence_check",
+			sql`${table.correspondenceRevision} between 1 and ${table.revision}`,
+		),
 		foreignKey({
 			columns: [table.sourceRecordId, table.mappingKey, table.owner],
 			foreignColumns: [

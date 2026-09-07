@@ -1,3 +1,7 @@
+import {
+	prepareCatalogSourceChildCorrespondence,
+	sealCatalogSourceChildCorrespondence,
+} from "./source-child-correspondence";
 import { and, desc, eq } from "drizzle-orm";
 import { softwareRecordRevision } from "../database/schema/catalog-software";
 import {
@@ -9,7 +13,7 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { softwareContent, softwareVisualNovel } from "../database/schema/catalog-software";
-import { bindCatalogSourceIdentity, acceptCatalogSourceInitialization } from "./source-bindings";
+import { acceptCatalogSourceInitialization } from "./source-bindings";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import { CatalogPartialDateSchema } from "./contracts";
 import { ensureCatalogDefinition } from "./storage";
@@ -56,7 +60,11 @@ export function planVndbRelease(input: unknown) {
 			record.resolution === "non-standard"
 				? { kind: "non_standard" }
 				: record.resolution
-					? { kind: "pixels", width: record.resolution[0], height: record.resolution[1] }
+					? {
+							kind: "pixels",
+							width: record.resolution[0],
+							height: record.resolution[1],
+						}
 					: null,
 		engine: record.engine,
 		voicing:
@@ -128,6 +136,12 @@ export async function writeVndbReleaseProjection(
 				name: { value: record.title, languageTag: null },
 				details,
 			});
+	await prepareCatalogSourceChildCorrespondence(tx, actor, {
+		sourceRecordId: document.record.id,
+		snapshotId: document.snapshot.id,
+		reference: release,
+		mappingVersion: "vndb.release.2",
+	});
 	let revision = await appendVndbDisplayName(
 		tx,
 		release,
@@ -191,7 +205,7 @@ export async function writeVndbReleaseProjection(
 			finalRevision: revision,
 		});
 	else
-		await bindCatalogSourceIdentity(tx, actor, {
+		await sealCatalogSourceChildCorrespondence(tx, actor, {
 			sourceRecordId: document.record.id,
 			mappingVersion: "vndb.release.2",
 			path: "/",

@@ -13,7 +13,10 @@ import { loadCatalogIdentity } from "./storage";
 import { appendOperationalOutbox } from "../events/durability";
 import { aggregateRoutingBucket, eventEnvelopeSchema } from "../events/envelope";
 
-const keySchema = z.strictObject({ sourceRecordId: z.uuid(), mappingKey: z.uuid() });
+const keySchema = z.strictObject({
+	sourceRecordId: z.uuid(),
+	mappingKey: z.uuid(),
+});
 export type CatalogBindingKey = z.infer<typeof keySchema>;
 
 /** @internal All source and binding mutations use source -> mapping -> native lock order. */
@@ -43,7 +46,12 @@ export async function lockCatalogSourceBinding(tx: DatabaseTransaction, input: C
 		.limit(1)
 		.for("update");
 	if (!binding) throw new Error("Source binding has no checked native target");
-	return { source, claim, binding, reference: { owner: claim.owner, id: binding.ownerId } };
+	return {
+		source,
+		claim,
+		binding,
+		reference: { owner: claim.owner, id: binding.ownerId },
+	};
 }
 
 function targetColumns(reference: CatalogReference) {
@@ -74,6 +82,7 @@ export async function sealInitialCatalogSourceBinding(
 		mappingKey: key.mappingKey,
 		owner: current.claim.owner,
 		revision: 1,
+		correspondenceRevision: 1,
 		mappingVersion: current.claim.mappingVersion,
 		policyRevision: 1,
 		state: current.claim.state,
@@ -100,6 +109,7 @@ export async function bindCatalogSourceIdentity(
 		snapshotId: string;
 		reference: CatalogReference;
 		mappingVersion?: string;
+		initializing?: boolean;
 	},
 ) {
 	const value = z
@@ -109,8 +119,12 @@ export async function bindCatalogSourceIdentity(
 			snapshotId: z.uuid(),
 			reference: CatalogReferenceSchema,
 			mappingVersion: z.string().min(1).max(128).optional(),
+			initializing: z.boolean().optional(),
 		})
-		.parse({ ...input, reference: { owner: input.reference.owner, id: input.reference.id } });
+		.parse({
+			...input,
+			reference: { owner: input.reference.owner, id: input.reference.id },
+		});
 	const [source] = await tx
 		.select()
 		.from(catalogSourceRecord)
@@ -141,6 +155,7 @@ export async function bindCatalogSourceIdentity(
 		mappingKey: claim.mappingKey,
 		owner: value.reference.owner,
 		revision: 1,
+		correspondenceRevision: 1,
 		mappingVersion: claim.mappingVersion,
 		policyRevision: 1,
 		state: "active",
@@ -155,6 +170,16 @@ export async function bindCatalogSourceIdentity(
 		owner: value.reference.owner,
 		state: "active",
 	});
+	if (!value.initializing)
+		await tx
+			.update(claims)
+			.set({ appliedCorrespondenceRevision: 1 })
+			.where(
+				and(
+					eq(claims.sourceRecordId, value.sourceRecordId),
+					eq(claims.mappingKey, claim.mappingKey),
+				),
+			);
 	return claim;
 }
 
@@ -182,7 +207,10 @@ export async function acceptCatalogSourceInitialization(
 			finalRevision: z.number().int().positive(),
 			mappingVersion: z.string().min(1).max(128).optional(),
 		})
-		.parse({ ...input, reference: { owner: input.reference.owner, id: input.reference.id } });
+		.parse({
+			...input,
+			reference: { owner: input.reference.owner, id: input.reference.id },
+		});
 	const [locator] = await tx
 		.select()
 		.from(claims)
@@ -219,6 +247,10 @@ export async function acceptCatalogSourceInitialization(
 		.update(claims)
 		.set({
 			observedSnapshotId: value.snapshotId,
+			appliedCorrespondenceRevision:
+				value.mappingVersion && value.mappingVersion !== current.claim.mappingVersion
+					? current.claim.bindingRevision + 1
+					: current.claim.correspondenceRevision,
 			evidenceSourceRecordId: null,
 			evidenceSnapshotId: null,
 			evidencePath: null,
@@ -252,7 +284,11 @@ export async function appendSourceLifecycleEvent(
 			causationId: null,
 			routingEpoch: 1,
 			routingBucket: aggregateRoutingBucket("source_record", sourceRecordId),
-			aggregate: { owner: "source_record", key: sourceRecordId, revision: String(revision) },
+			aggregate: {
+				owner: "source_record",
+				key: sourceRecordId,
+				revision: String(revision),
+			},
 			payload,
 		}),
 	]);
@@ -302,10 +338,29 @@ export async function reviseCatalogSourceBinding(
 	const revision = current.claim.bindingRevision + 1;
 	const policyRevision = current.claim.policyRevision + 1;
 	const mappingVersion = value.mappingVersion ?? current.claim.mappingVersion;
+	const [previous] = await tx
+		.select({ correspondenceRevision: revisions.correspondenceRevision })
+		.from(revisions)
+		.where(
+			and(
+				eq(revisions.sourceRecordId, value.sourceRecordId),
+				eq(revisions.mappingKey, value.mappingKey),
+				eq(revisions.revision, current.claim.bindingRevision),
+			),
+		)
+		.limit(1);
+	if (!previous) throw new Error("Source binding revision is missing");
+	const correspondenceRevision =
+		reference.owner === current.reference.owner &&
+		reference.id === current.reference.id &&
+		mappingVersion === current.claim.mappingVersion
+			? previous.correspondenceRevision
+			: revision;
 	await tx.insert(revisions).values({
 		sourceRecordId: value.sourceRecordId,
 		mappingKey: value.mappingKey,
 		revision,
+		correspondenceRevision,
 		policyRevision,
 		mappingVersion,
 		owner: reference.owner,
@@ -319,6 +374,7 @@ export async function reviseCatalogSourceBinding(
 		.update(claims)
 		.set({
 			bindingRevision: revision,
+			correspondenceRevision,
 			policyRevision,
 			mappingVersion,
 			state: value.target ? "paused" : value.state,

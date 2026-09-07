@@ -112,3 +112,25 @@ multiple voiced characters and a credit edit made after proposal creation. The
 last edit is rejected atomically while preserving unrelated prior data. VN source
 credit observations are read once per admitted snapshot and inserted in batches
 of 128; no per-credit source-occurrence read loop scans an owner's lifetime.
+
+Source child correspondence uses an explicit root epoch. Policy-only revisions
+retain the epoch; a changed native root or mapping protocol starts another epoch.
+Name bindings and occurrences include the mapping UUID and epoch in their keys;
+context occurrences include the same checked immutable-root reference. The epoch
+is read through the current claim and exact binding-revision primary key, never
+by walking binding history. Cross-owner referenced names remain attributable to
+the containing source root, while keeping their concrete native name foreign key.
+
+Planning allowance: the mapping UUID plus 64-bit epoch adds 24 raw bytes per row,
+or 12 GB at 500M occurrences and 72 GB at 3B. Counting the heap and two affected
+index entries budgets at least 72 extra bytes per name occurrence (36 GB / 216 GB)
+before page slack, replication and WAL. Bindings have another affected unique
+index; allow at least 96 bytes each (48 GB / 288 GB). These are incremental lower
+bounds, not measured PostgreSQL sizes. Native rebinds create new child identities
+and evidence rows proportional to that admitted source record; historical rows
+are never rewritten. The existing 128-change transaction admission remains the
+upper bound on ordinary update fan-out. Peak reviewed-write targets remain
+unqualified until the combined source worker benchmark measures the changed
+index footprint, lock waits and WAL on representative skew. Root-source routing
+keeps epoch reads local to each partition and permits source-record sharding
+without a global historical scan.

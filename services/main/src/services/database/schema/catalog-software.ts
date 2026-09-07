@@ -17,7 +17,7 @@ import {
 import { pgTable } from "./base";
 import { createCreatedAtColumn } from "./columns";
 import { users } from "./auth";
-import { catalogSourceSnapshot } from "./catalog-source";
+import { catalogSourceSnapshot, catalogSourceBindingRevision } from "./catalog-source";
 import {
 	catalogDateColumns,
 	catalogDateConstraint,
@@ -66,7 +66,9 @@ export const softwareComponentRevision = pgTable(
 		value: jsonb().$type<unknown>().notNull(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.releaseId, table.kind, table.componentId, table.revision] }),
+		primaryKey({
+			columns: [table.releaseId, table.kind, table.componentId, table.revision],
+		}),
 		check(
 			"software_component_revision_check",
 			sql`${table.revision} between 1 and 9007199254740991 and ${table.kind} in ('content', 'platform', 'medium', 'language', 'event', 'patch_target', 'animation') and octet_length(${table.componentId}) between 1 and 96 and ${table.operation} in ('put', 'remove') and jsonb_typeof(${table.value}) = 'object' and octet_length(${table.value}::text) <= 524288`,
@@ -222,6 +224,8 @@ export const softwareParticipationSourceOccurrence = pgTable(
 	{
 		sourceRecordId: uuid().notNull(),
 		snapshotId: uuid().notNull(),
+		mappingKey: uuid().notNull(),
+		correspondenceRevision: bigint({ mode: "number" }).notNull(),
 		namespace: text().notNull(),
 		localKey: text().notNull(),
 		contentId: uuid().notNull(),
@@ -235,8 +239,24 @@ export const softwareParticipationSourceOccurrence = pgTable(
 	},
 	(table): PgTableExtraConfigValue[] => [
 		primaryKey({
-			columns: [table.sourceRecordId, table.snapshotId, table.namespace, table.localKey],
+			columns: [
+				table.sourceRecordId,
+				table.mappingKey,
+				table.correspondenceRevision,
+				table.snapshotId,
+				table.namespace,
+				table.localKey,
+			],
 		}),
+		foreignKey({
+			name: "software_context_occurrence_correspondence_fk",
+			columns: [table.sourceRecordId, table.mappingKey, table.correspondenceRevision],
+			foreignColumns: [
+				catalogSourceBindingRevision.sourceRecordId,
+				catalogSourceBindingRevision.mappingKey,
+				catalogSourceBindingRevision.revision,
+			],
+		}).onDelete("restrict"),
 		foreignKey({
 			name: "software_context_occurrence_snapshot_fk",
 			columns: [table.sourceRecordId, table.snapshotId],
@@ -277,7 +297,9 @@ export const softwareRelease = pgTable(
 	"software_release",
 	{
 		...catalogSubtypeColumns("release"),
-		typeRevisionId: uuid().references(() => catalogDefinitionRevision.id, { onDelete: "restrict" }),
+		typeRevisionId: uuid().references(() => catalogDefinitionRevision.id, {
+			onDelete: "restrict",
+		}),
 		isPatch: boolean(),
 		freeware: boolean(),
 		uncensored: boolean(),

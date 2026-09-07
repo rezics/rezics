@@ -1,3 +1,4 @@
+import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { isDeepStrictEqual } from "node:util";
 import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
@@ -31,12 +32,15 @@ async function snapshotContexts(
 	content: CatalogReference,
 	document: Document,
 ) {
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, document.record.id);
 	const rows = await tx
 		.select()
 		.from(occurrences)
 		.where(
 			and(
 				eq(occurrences.sourceRecordId, document.record.id),
+				eq(occurrences.mappingKey, scope.mappingKey),
+				eq(occurrences.correspondenceRevision, scope.correspondenceRevision),
 				eq(occurrences.snapshotId, document.snapshot.id),
 				eq(occurrences.contentId, content.id),
 				eq(occurrences.namespace, "editions"),
@@ -80,6 +84,7 @@ export async function reconcileVndbContexts(
 	before: { record: z.output<typeof VndbVnSchema> | null; document: Document },
 	after: { record: z.output<typeof VndbVnSchema>; document: Document },
 ) {
+	const scope = await resolveCatalogSourceChildCorrespondence(tx, after.document.record.id);
 	const oldRows = before.record
 		? await snapshotContexts(tx, content, before.document)
 		: new Map<string, typeof occurrences.$inferSelect>();
@@ -96,7 +101,10 @@ export async function reconcileVndbContexts(
 	for (const edition of oldEditions) {
 		const row = oldRows.get(String(edition.eid));
 		if (!row) throw new Error("VNDB context has no exact previous source occurrence");
-		oldContexts.set(String(edition.eid), { id: row.contextId, revision: row.contextRevision });
+		oldContexts.set(String(edition.eid), {
+			id: row.contextId,
+			revision: row.contextRevision,
+		});
 	}
 	const nextContexts = new Map<string, VndbNativeContext>(),
 		retained = new Set<string>(),
@@ -161,22 +169,21 @@ export async function reconcileVndbContexts(
 		)
 			throw new CatalogRevisionConflict("VNDB immutable context correspondence differs");
 		if (!incoming)
-			await tx
-				.insert(occurrences)
-				.values({
-					sourceRecordId: after.document.record.id,
-					snapshotId: after.document.snapshot.id,
-					namespace: "editions",
-					localKey: key,
-					contentId: content.id,
-					contextId: context.id,
-					contextRevision: context.revision,
-					sourcePointer: `/editions/${index}`,
-					sourceLabel: edition.name,
-					sourceLanguage: edition.lang,
-					sourceLanguageTag: edition.lang === null ? null : vndbLanguage(edition.lang),
-					sourceClaimedOfficial: edition.official,
-				});
+			await tx.insert(occurrences).values({
+				...scope,
+				sourceRecordId: after.document.record.id,
+				snapshotId: after.document.snapshot.id,
+				namespace: "editions",
+				localKey: key,
+				contentId: content.id,
+				contextId: context.id,
+				contextRevision: context.revision,
+				sourcePointer: `/editions/${index}`,
+				sourceLabel: edition.name,
+				sourceLanguage: edition.lang,
+				sourceLanguageTag: edition.lang === null ? null : vndbLanguage(edition.lang),
+				sourceClaimedOfficial: edition.official,
+			});
 		nextContexts.set(key, context);
 	}
 	const retire = async () => {
@@ -196,7 +203,11 @@ export async function reconcileVndbContexts(
 				actor,
 				previous.id,
 				expected,
-				{ label: current.label, languageTag: current.languageTag, state: "withdrawn" },
+				{
+					label: current.label,
+					languageTag: current.languageTag,
+					state: "withdrawn",
+				},
 			);
 			retired.push({
 				kind: "software-context",
