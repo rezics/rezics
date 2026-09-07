@@ -1,10 +1,13 @@
 import { sql } from "drizzle-orm";
 import {
 	boolean,
+	bigint,
 	check,
 	foreignKey,
 	index,
 	integer,
+	jsonb,
+	primaryKey,
 	smallint,
 	text,
 	uuid,
@@ -13,6 +16,7 @@ import { pgTable } from "./base";
 import { catalogDateConstraint } from "./catalog-domain-columns";
 import { catalogDefinitionRevision, entityIdentity } from "./catalog-identity";
 import { referenceArea } from "./catalog-reference";
+import { createCreatedAtColumn } from "./columns";
 
 /** Catalog subject data never grants login, delegation or publishing authority. */
 export const entityCatalogProfile = pgTable(
@@ -62,5 +66,29 @@ export const entityCatalogProfile = pgTable(
 		index("entity_catalog_profile_area_idx").on(table.areaId, table.id),
 		index("entity_catalog_profile_begin_area_idx").on(table.beginAreaId, table.id),
 		index("entity_catalog_profile_end_area_idx").on(table.endAreaId, table.id),
+	],
+);
+
+/** Bounded fixed profile snapshots; names, aliases and relations retain their own histories. */
+export const entityCatalogProfileRevision = pgTable(
+	"entity_catalog_profile_revision",
+	{
+		ownerId: uuid()
+			.notNull()
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
+		revision: bigint({ mode: "number" }).notNull(),
+		snapshot: jsonb().$type<unknown>().notNull(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.ownerId, table.revision] }),
+		check(
+			"entity_catalog_profile_revision_number_check",
+			sql`${table.revision} between 1 and 9007199254740991`,
+		),
+		check(
+			"entity_catalog_profile_revision_snapshot_check",
+			sql`jsonb_typeof(${table.snapshot}) = 'object' and octet_length(${table.snapshot}::text) <= 32768`,
+		),
 	],
 );

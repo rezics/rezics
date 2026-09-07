@@ -1,9 +1,11 @@
 import { sql } from "drizzle-orm";
 import {
 	boolean,
+	bigint,
 	check,
 	index,
 	integer,
+	jsonb,
 	numeric,
 	primaryKey,
 	smallint,
@@ -12,7 +14,8 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
-import { catalogDefinitionRevision } from "./catalog-identity";
+import { catalogDefinitionRevision, referenceIdentity } from "./catalog-identity";
+import { createCreatedAtColumn } from "./columns";
 import {
 	catalogDateColumns,
 	catalogDateConstraint,
@@ -20,14 +23,30 @@ import {
 	catalogSubtypeConstraints,
 } from "./catalog-domain-columns";
 
+const lifecycleColumns = () => ({
+	...catalogDateColumns(),
+	endYear: integer(),
+	endMonth: smallint(),
+	endDay: smallint(),
+	endText: text(),
+	ended: boolean(),
+});
+
 export const referenceArea = pgTable(
 	"reference_area",
 	{
 		...catalogSubtypeColumns("area"),
+		...lifecycleColumns(),
 		typeRevisionId: uuid().references(() => catalogDefinitionRevision.id, { onDelete: "restrict" }),
 	},
 	(table) => [
 		...catalogSubtypeConstraints("reference_area", "reference", "area", table),
+		catalogDateConstraint("reference_area_begin_check", table),
+		catalogDateConstraint("reference_area_end_check", {
+			dateYear: table.endYear,
+			dateMonth: table.endMonth,
+			dateDay: table.endDay,
+		}),
 		index("reference_area_type_idx").on(table.typeRevisionId, table.id),
 	],
 );
@@ -55,6 +74,7 @@ export const referencePlace = pgTable(
 	"reference_place",
 	{
 		...catalogSubtypeColumns("place"),
+		...lifecycleColumns(),
 		areaId: uuid().references(() => referenceArea.id, { onDelete: "restrict" }),
 		typeRevisionId: uuid().references(() => catalogDefinitionRevision.id, { onDelete: "restrict" }),
 		address: text(),
@@ -63,6 +83,12 @@ export const referencePlace = pgTable(
 	},
 	(table) => [
 		...catalogSubtypeConstraints("reference_place", "reference", "place", table),
+		catalogDateConstraint("reference_place_begin_check", table),
+		catalogDateConstraint("reference_place_end_check", {
+			dateYear: table.endYear,
+			dateMonth: table.endMonth,
+			dateDay: table.endDay,
+		}),
 		index("reference_place_area_idx").on(table.areaId, table.id),
 		index("reference_place_type_idx").on(table.typeRevisionId, table.id),
 		check(
@@ -110,5 +136,29 @@ export const referenceEvent = pgTable(
 		}),
 		index("reference_event_place_idx").on(table.placeId, table.id),
 		index("reference_event_type_idx").on(table.typeRevisionId, table.id),
+	],
+);
+
+/** One bounded fixed-profile snapshot per accepted owner revision. */
+export const referenceCatalogProfileRevision = pgTable(
+	"reference_catalog_profile_revision",
+	{
+		ownerId: uuid()
+			.notNull()
+			.references(() => referenceIdentity.id, { onDelete: "restrict" }),
+		revision: bigint({ mode: "number" }).notNull(),
+		snapshot: jsonb().$type<unknown>().notNull(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.ownerId, table.revision] }),
+		check(
+			"reference_catalog_profile_revision_number_check",
+			sql`${table.revision} between 1 and 9007199254740991`,
+		),
+		check(
+			"reference_catalog_profile_revision_snapshot_check",
+			sql`jsonb_typeof(${table.snapshot}) = 'object' and octet_length(${table.snapshot}::text) <= 131072`,
+		),
 	],
 );
