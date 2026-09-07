@@ -297,4 +297,3 @@ try {
 	await connection.drain();
 	await pool.end();
 }
-

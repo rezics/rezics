@@ -21,10 +21,10 @@ export async function checkConsumerRetention(
 	durable: string,
 ): Promise<void> {
 	const name = streamConfig(route).name;
-	const [stream, consumer] = await Promise.all([
-		manager.streams.info(name),
-		manager.consumers.info(name, durable),
-	]);
+	// Consumer state must be sampled after the stream head: the inverse race could
+	// mistake a newly appended but unread message for an already drained subject gap.
+	const stream = await manager.streams.info(name);
+	const consumer = await manager.consumers.info(name, durable);
 	const key = and(
 		eq(checkpoints.routingBucket, route.bucket),
 		eq(checkpoints.messageClass, route.class),

@@ -46,6 +46,35 @@ bounded by configured bytes/messages and admission rejects new work at capacity.
 An indefinite outage can retry indefinitely in time; it does not allocate an
 unbounded queue or bypass the persisted execution budget.
 
+## Source execution chain
+
+The process runs one due-plan scheduler lane per assigned bucket. Each scheduler
+transaction claims up to four plans and admits their source-check task intents
+and outbox records atomically. It performs no provider I/O. NATS delivers those
+ready tasks to `catalog-source-checks-v1`; the handler first claims the task,
+rechecks the exact source generation, plan revision and active subscription,
+then acquires the provider outside any database transaction. The final transaction
+commits the source-check outcome, observation/outbox and terminal task receipt
+together under both task and acquisition fences. The task allows three execution
+attempts and has a 110-second deadline. A paused subscription cancels pending
+execution before fetching; a lost ACK finds the terminal receipt and does not
+repeat acquisition.
+
+The source owner maps reviewed VNDB, MusicBrainz and Bangumi endpoints. It also
+consumes observed events into admitted fan-out tasks, each updating at most 32
+mapping claims before committing its cursor, next task and receipt. It never
+places an unbounded mapping list in a message. Its native proposal/adoption
+commands retain their own target/binding/policy authority checks.
+
+Normal backend storage configuration is also required by the source archive owner;
+the worker-specific environment does not replace that owner's credentials. Provider
+rate limits must be enforced across worker replicas, not inferred from per-process
+concurrency. Raw acquisition bodies are bounded to 8 MB; 16 assigned buckets with
+four simultaneous source handlers can hold up to 512 MB of body bytes before
+concatenation, JSON decoding, archive copies and network buffers. Budget at least
+those additional copies and reduce the bucket assignment before memory pressure;
+these upper bounds are not a measured deployment memory promise.
+
 ## Relay, failure and retention authority
 
 The SQL relay reads at most four pending envelopes per route in one transaction,
@@ -127,6 +156,12 @@ operational tables and removes its streams. It proves lost-publication-ACK
 recovery, committed-effect deduplication after consumer ACK loss, terminal fencing
 on exhausted delivery, idempotent quarantine, persisted replay-required state,
 and the skewed relay index plan. It does not reset any existing development DB.
+
+`check-source-check-runtime.ts` runs four real PostgreSQL/NATS checks with a synthetic
+provider callback: atomic due-plan/task admission, source/task receipt commit after
+delivery, no repeated acquisition after a lost ACK, and cancellation before I/O
+when a subscription is paused. Its isolated schema keeps the source scheduling
+owner dependencies and does not claim full native catalog or provider acceptance.
 
 Focused unit checks cover strict configuration, quarantine identities, interrupted
 shutdown backoff, transport parsing, ACK/commit ordering and attempt handling.

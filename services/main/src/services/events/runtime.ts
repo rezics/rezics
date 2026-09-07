@@ -6,6 +6,10 @@ import { checkConsumerRetention } from "./checkpoint";
 
 /** Health represents active work loops, not merely a listening port. @internal */
 export class EventWorkerHealth {
+	private initialized = false;
+	start() {
+		this.initialized = true;
+	}
 	private lanes = new Map<string, { ok: boolean; updatedAt: number; failure: string | null }>();
 	register(name: string) {
 		if (this.lanes.size >= 128) throw new RangeError("Too many event worker lanes");
@@ -25,6 +29,7 @@ export class EventWorkerHealth {
 		const lanes = Object.fromEntries(this.lanes);
 		return {
 			ready:
+				this.initialized &&
 				this.lanes.size > 0 &&
 				[...this.lanes.values()].every((lane) => lane.ok && Date.now() - lane.updatedAt < 60000),
 			lanes,

@@ -22,6 +22,16 @@ describe("event worker runtime", () => {
 		])
 			expect(() => parseEventWorkerConfig({ ...env, ...patch })).toThrow();
 	});
+	it("does not report readiness until every configured lane is registered", () => {
+		const health = new EventWorkerHealth();
+		health.register("one");
+		health.success("one");
+		expect(health.snapshot().ready).toBe(false);
+		health.start();
+		expect(health.snapshot().ready).toBe(true);
+		health.register("two");
+		expect(health.snapshot().ready).toBe(false);
+	});
 	it("quarantine identity is stable and independent of hostile envelope identifiers", () => {
 		const route = {
 			class: "task" as const,

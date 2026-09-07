@@ -9,4 +9,3 @@ $$;
 DROP TRIGGER IF EXISTS operational_outbox_relay ON public.operational_outbox;
 CREATE TRIGGER operational_outbox_relay AFTER INSERT ON public.operational_outbox
 FOR EACH ROW EXECUTE FUNCTION public.operational_enqueue_relay();
-
