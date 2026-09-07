@@ -651,7 +651,7 @@ export async function adoptVndbSemanticObject(
 		sourceRecordId: document.record.id,
 		snapshotId: document.snapshot.id,
 		reference: identity,
-		mappingVersion: `vndb.${record.objectType}.2`,
+		mappingVersion: `vndb.${record.objectType}.semantic.1`,
 	});
 	let revision = identity.revision;
 	if ("name" in record)
