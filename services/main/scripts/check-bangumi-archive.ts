@@ -9,7 +9,12 @@ import {
 } from "../src/services/catalog/bangumi-archive";
 
 const { values } = parseArgs({
-	options: { archive: { type: "string" }, sha256: { type: "string" }, output: { type: "string" }, family: { type: "string" } },
+	options: {
+		archive: { type: "string" },
+		sha256: { type: "string" },
+		output: { type: "string" },
+		family: { type: "string" },
+	},
 	strict: true,
 });
 const input = z
@@ -34,14 +39,23 @@ const report = Object.fromEntries(
 		},
 	]),
 );
-for await (const row of readBangumiArchive(resolve(input.archive), { sha256: input.sha256, family: input.family })) {
+for await (const row of readBangumiArchive(resolve(input.archive), {
+	sha256: input.sha256,
+	family: input.family,
+})) {
 	const family = report[row.family];
 	if (!family) throw new Error("Archive family was not declared");
 	family.rows++;
 	family.maximumRecordBytes = Math.max(family.maximumRecordBytes, row.bytes.byteLength);
 	try {
 		const parsed = parseBangumiArchiveRecord(row.family, row.bytes);
-		if (parsed.record && "kind" in parsed.record && parsed.record.kind === "person-relations" && (parsed.record.person_id === 0 || parsed.record.related_person_id === 0)) family.danglingReferenceRows++;
+		if (
+			parsed.record &&
+			"kind" in parsed.record &&
+			parsed.record.kind === "person-relations" &&
+			(parsed.record.person_id === 0 || parsed.record.related_person_id === 0)
+		)
+			family.danglingReferenceRows++;
 		family.accepted++;
 	} catch (error) {
 		family.rejected++;
