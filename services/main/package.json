@@ -34,6 +34,7 @@
 		"@rezics/license": "workspace:*",
 		"@rezics/observability": "workspace:*",
 		"@rezics/portable-text": "workspace:*",
+		"@rezics/reference": "workspace:*",
 		"@rezics/slug": "workspace:*",
 		"@t3-oss/env-core": "^0.13.11",
 		"better-auth": "1.7.2",

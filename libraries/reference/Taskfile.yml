@@ -1,0 +1,11 @@
+version: "3"
+tasks:
+    typecheck:
+        desc: Check shared owner reference contracts.
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json
+    test:
+        desc: Test shared owner reference parsing.
+        dir: ../..
+        cmds:
+            - yarn exec vitest run --project reference

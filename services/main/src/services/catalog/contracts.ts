@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { CatalogOwnerValues, CatalogReferenceSchema } from "@rezics/reference";
+export { CatalogOwnerValues, CatalogReferenceSchema };
 import {
 	ContentRatingValues,
 	ModerationStatusValues,
@@ -6,21 +8,7 @@ import {
 	UnitStatusValues,
 } from "../database/schema/contract-values";
 
-/** Storage protocol owners, not user-defined semantic classes or public Unit kinds. */
-export const CatalogOwnerValues = [
-	"publishing",
-	"music",
-	"program",
-	"software",
-	"entity",
-	"grouping",
-	"reference",
-] as const;
 export type CatalogOwner = (typeof CatalogOwnerValues)[number];
-export const CatalogReferenceSchema = z.strictObject({
-	owner: z.enum(CatalogOwnerValues),
-	id: z.uuid(),
-});
 export type CatalogReference = z.infer<typeof CatalogReferenceSchema>;
 
 export const CatalogFactStateValues = ["active", "disputed", "withdrawn", "superseded"] as const;

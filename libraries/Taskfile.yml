@@ -1,6 +1,9 @@
 version: "3"
 
 includes:
+    reference:
+        taskfile: ./reference/Taskfile.yml
+        dir: ./reference
     content-language:
         taskfile: ./content-language/Taskfile.yml
         dir: ./content-language
@@ -64,6 +67,7 @@ tasks:
     typecheck:
         desc: Type-check library packages.
         cmds:
+            - task: reference:typecheck
             - task: content-language:typecheck
             - task: access:typecheck
             - task: avatar:typecheck

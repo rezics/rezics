@@ -424,6 +424,7 @@ function participantTargetColumns(reference: CatalogReference) {
 		entityId: reference.owner === "entity" ? reference.id : null,
 		groupingId: reference.owner === "grouping" ? reference.id : null,
 		referenceId: reference.owner === "reference" ? reference.id : null,
+		distributionId: reference.owner === "distribution" ? reference.id : null,
 	};
 }
 
@@ -466,6 +467,7 @@ export async function findCatalogRelations(
 		entity: participant.entityId,
 		grouping: participant.groupingId,
 		reference: participant.referenceId,
+		distribution: participant.distributionId,
 	};
 	const participantConditions = input.participants.map(
 		(condition) => sql`exists (
@@ -500,6 +502,7 @@ export function readableRelation(reference: CatalogReference, actor: string | nu
 		entity: participant.entityId,
 		grouping: participant.groupingId,
 		reference: participant.referenceId,
+		distribution: participant.distributionId,
 	};
 	const visibleTargets = CatalogOwnerValues.map((owner) => {
 		const table = CatalogIdentityTables[owner];

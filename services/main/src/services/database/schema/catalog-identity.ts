@@ -145,6 +145,7 @@ export const softwareIdentity = createOwnerIdentity("software");
 export const entityIdentity = createOwnerIdentity("entity");
 export const groupingIdentity = createOwnerIdentity("grouping");
 export const referenceIdentity = createOwnerIdentity("reference");
+export const distributionIdentity = createOwnerIdentity("distribution");
 
 export const CatalogIdentityTables = {
 	publishing: publishingIdentity,
@@ -154,4 +155,5 @@ export const CatalogIdentityTables = {
 	entity: entityIdentity,
 	grouping: groupingIdentity,
 	reference: referenceIdentity,
+	distribution: distributionIdentity,
 } as const;

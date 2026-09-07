@@ -5607,6 +5607,7 @@ __metadata:
     "@rezics/license": "workspace:*"
     "@rezics/observability": "workspace:*"
     "@rezics/portable-text": "workspace:*"
+    "@rezics/reference": "workspace:*"
     "@rezics/slug": "workspace:*"
     "@t3-oss/env-core": "npm:^0.13.11"
     "@types/css-tree": "npm:^3"
@@ -5935,6 +5936,16 @@ __metadata:
     typebox: "npm:1.3.20"
     typescript: "npm:7"
     vitest: "npm:4.1.10"
+  languageName: unknown
+  linkType: soft
+
+"@rezics/reference@workspace:*, @rezics/reference@workspace:libraries/reference":
+  version: 0.0.0-use.local
+  resolution: "@rezics/reference@workspace:libraries/reference"
+  dependencies:
+    typescript: "npm:7"
+    vitest: "npm:4.1.10"
+    zod: "npm:^4.4.3"
   languageName: unknown
   linkType: soft
 

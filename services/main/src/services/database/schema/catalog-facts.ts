@@ -43,12 +43,15 @@ export function catalogTargetColumns() {
 		entityId: uuid().references(() => identityColumn("entity"), { onDelete: "restrict" }),
 		groupingId: uuid().references(() => identityColumn("grouping"), { onDelete: "restrict" }),
 		referenceId: uuid().references(() => identityColumn("reference"), { onDelete: "restrict" }),
+		distributionId: uuid().references(() => identityColumn("distribution"), {
+			onDelete: "restrict",
+		}),
 	};
 }
 
 type TargetColumns = { [Key in keyof ReturnType<typeof catalogTargetColumns>]: AnyPgColumn };
 export function catalogTargetCount(columns: TargetColumns) {
-	return sql`num_nonnulls(${columns.publishingId}, ${columns.musicId}, ${columns.programId}, ${columns.softwareId}, ${columns.entityId}, ${columns.groupingId}, ${columns.referenceId})`;
+	return sql`num_nonnulls(${columns.publishingId}, ${columns.musicId}, ${columns.programId}, ${columns.softwareId}, ${columns.entityId}, ${columns.groupingId}, ${columns.referenceId}, ${columns.distributionId})`;
 }
 
 function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
@@ -269,6 +272,9 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 			index(`${owner}_participant_reference_idx`)
 				.on(table.referenceId, table.roleRevisionId, table.relationId)
 				.where(sql`${table.referenceId} is not null`),
+			index(`${owner}_participant_distribution_idx`)
+				.on(table.distributionId, table.roleRevisionId, table.relationId)
+				.where(sql`${table.distributionId} is not null`),
 			check(`${owner}_participant_target_check`, sql`${catalogTargetCount(table)} = 1`),
 			check(
 				`${owner}_participant_position_check`,
@@ -438,6 +444,7 @@ const software = createOwnerFacts("software");
 const entity = createOwnerFacts("entity");
 const grouping = createOwnerFacts("grouping");
 const reference = createOwnerFacts("reference");
+const distribution = createOwnerFacts("distribution");
 
 export const {
 	name: publishingNamedForm,
@@ -518,7 +525,21 @@ export const CatalogFactTables = {
 	entity,
 	grouping,
 	reference,
+	distribution,
 } as const;
+
+export const {
+	name: distributionNamedForm,
+	identifier: distributionIdentifierClaim,
+	fact: distributionFact,
+	valueNode: distributionFactValueNode,
+	relation: distributionCatalogRelation,
+	participant: distributionRelationParticipant,
+	relationScope: distributionRelationScope,
+	change: distributionCatalogChange,
+	support: distributionFactSupport,
+	sourceBinding: distributionSourceBinding,
+} = distribution;
 
 export const publishingFactSupport = publishing.support;
 export const musicFactSupport = music.support;

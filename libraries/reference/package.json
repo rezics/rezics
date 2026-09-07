@@ -1,0 +1,18 @@
+{
+	"name": "@rezics/reference",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"license": "AGPL-3.0-only",
+	"sideEffects": false,
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"dependencies": {
+		"zod": "^4.4.3"
+	},
+	"devDependencies": {
+		"typescript": "7",
+		"vitest": "4.1.10"
+	}
+}
