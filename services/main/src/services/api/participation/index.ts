@@ -19,6 +19,18 @@ import {
 } from "../../participation/policy";
 import { CatalogReferenceSchema } from "../../catalog/contracts";
 import { ParticipationCapabilityValues } from "../../database/schema/participation";
+import {
+	CreateManagedOrganizationSchema,
+	createManagedOrganization,
+	listManagedOrganizations,
+} from "../../participation/organizations";
+import {
+	listEntityPresentationHistory,
+	readEntityPresentationRevision,
+	restoreEntityPresentation,
+	updateEntityPresentation,
+} from "../../participation/presentation";
+import { UpdateEntityPresentationBody } from "../users/schema";
 
 const GrantSelectionSchema = z.strictObject({
 	id: z.uuid(),
@@ -29,6 +41,67 @@ const RevisionSchema = z.strictObject({ expectedRevision: z.number().int().posit
 /** @alpha Account and delegated participation, kept distinct from public catalog metadata. */
 export default new Elysia({ prefix: "/participation", name: "participation-api" })
 	.use(session)
+	.get(
+		"/organizations",
+		{ access: "session-only", query: z.strictObject({ afterId: z.uuid().optional() }) },
+		({ user, query }) =>
+			runParticipationTransaction((tx) => listManagedOrganizations(tx, user.id, query.afterId)),
+	)
+	.post(
+		"/organizations",
+		{ access: "fresh-session-only", body: CreateManagedOrganizationSchema },
+		({ participation, body }) =>
+			runParticipationTransaction((tx) => createManagedOrganization(tx, participation, body)),
+	)
+	.patch(
+		"/presentation",
+		{ access: "session-only", body: UpdateEntityPresentationBody },
+		({ participation, body }) =>
+			runParticipationTransaction((tx) => updateEntityPresentation(tx, participation, body)),
+	)
+	.get(
+		"/presentation/:language/history",
+		{
+			access: "session-only",
+			params: z.strictObject({ language: z.string().min(1).max(255) }),
+			query: z.strictObject({
+				beforeRevision: z.coerce.number().int().positive().safe().optional(),
+			}),
+		},
+		({ participation, params, query }) =>
+			runParticipationTransaction((tx) =>
+				listEntityPresentationHistory(tx, participation, params.language, query.beforeRevision),
+			),
+	)
+	.get(
+		"/presentation/:language/history/:revision",
+		{
+			access: "session-only",
+			params: z.strictObject({
+				language: z.string().min(1).max(255),
+				revision: z.coerce.number().int().positive().safe(),
+			}),
+		},
+		({ participation, params }) =>
+			runParticipationTransaction((tx) =>
+				readEntityPresentationRevision(tx, participation, params.language, params.revision),
+			),
+	)
+	.post(
+		"/presentation/:language/restore",
+		{
+			access: "session-only",
+			params: z.strictObject({ language: z.string().min(1).max(255) }),
+			body: z.strictObject({
+				revision: z.number().int().positive().safe(),
+				expectedRevision: z.number().int().positive().safe(),
+			}),
+		},
+		({ participation, params, body }) =>
+			runParticipationTransaction((tx) =>
+				restoreEntityPresentation(tx, participation, { ...body, language: params.language }),
+			),
+	)
 	.get(
 		"/self",
 		{ access: "session-only" },

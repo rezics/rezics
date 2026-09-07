@@ -61,9 +61,11 @@ export function runParticipationSavepoint<T>(
 	work: (nested: DatabaseTransaction) => Promise<T>,
 ): Promise<T> {
 	const approved = approvedSourceApplications.getStore();
-	return tx.transaction((nested) => approved?.tx === tx
-		? approvedSourceApplications.run({ ...approved, tx: nested }, () => work(nested))
-		: work(nested));
+	return tx.transaction((nested) =>
+		approved?.tx === tx
+			? approvedSourceApplications.run({ ...approved, tx: nested }, () => work(nested))
+			: work(nested),
+	);
 }
 
 /**

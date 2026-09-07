@@ -3,7 +3,10 @@ import type { DatabaseTransaction } from "../database";
 import { createCatalogIdentity } from "../catalog/storage";
 import { CatalogNameValuesSchema } from "../catalog/name-contracts";
 import { CatalogNameTables } from "../database/schema/catalog-names";
-import { entityCatalogProfile, entityCatalogProfileRevision } from "../database/schema/catalog-entity";
+import {
+	entityCatalogProfile,
+	entityCatalogProfileRevision,
+} from "../database/schema/catalog-entity";
 import { EntityProfileSchema } from "../catalog/entity-contracts";
 import { entityParticipation } from "../database/schema/participation";
 import {
@@ -51,7 +54,9 @@ export async function createParticipantIdentity(
 	);
 	await tx.insert(entityCatalogProfile).values({ id: identity.id, identityShape: input.shape });
 	await tx.insert(entityCatalogProfileRevision).values({
-		ownerId: identity.id, revision: 1, snapshot: EntityProfileSchema.parse({}),
+		ownerId: identity.id,
+		revision: 1,
+		snapshot: EntityProfileSchema.parse({}),
 	});
 	await tx.insert(entityParticipation).values({ entityId: identity.id });
 	for (const value of values) {
@@ -71,15 +76,13 @@ export async function createParticipantIdentity(
 			})
 			.returning();
 		if (!presentation) throw new Error("Initial participant presentation insertion failed");
-		await tx
-			.insert(entityPresentationRevision)
-			.values({
-				entityId: identity.id,
-				language: value.languageTag,
-				revision: 1,
-				snapshot: presentation,
-				operatorAuthUserId: input.operatorAuthUserId,
-			});
+		await tx.insert(entityPresentationRevision).values({
+			entityId: identity.id,
+			language: value.languageTag,
+			revision: 1,
+			snapshot: presentation,
+			operatorAuthUserId: input.operatorAuthUserId,
+		});
 	}
 	return identity;
 }

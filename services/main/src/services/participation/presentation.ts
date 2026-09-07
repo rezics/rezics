@@ -1,9 +1,15 @@
-import { and, eq, inArray, isNull, sql, type SQLWrapper } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, lt, sql, type SQLWrapper } from "drizzle-orm";
+import { createSchemaFactory } from "drizzle-orm/zod";
 import { z } from "zod";
 import { Value } from "typebox/value";
 import { PortableTextDocument } from "@rezics/block";
 import { parseContentLanguageTag } from "@rezics/content-language";
-import type { AvatarReference, PresentedAvatar } from "@rezics/avatar";
+import {
+	AvatarTypeValues,
+	FontAwesomeIconPrefixValues,
+	type AvatarReference,
+	type PresentedAvatar,
+} from "@rezics/avatar";
 import { database, type DatabaseTransaction } from "../database";
 import { entityIdentity } from "../database/schema/catalog-identity";
 import {
@@ -21,6 +27,154 @@ import { ensureImageAssetsAttachable } from "../api/image-assets/service";
 
 const names = CatalogNameTables.entity.name;
 const nameVersions = CatalogNameTables.entity.nameRevision;
+const presentationSnapshotSchema = createSchemaFactory({ coerce: { date: true } })
+	.createSelectSchema(entityPresentation, {
+		avatarType: z.enum(AvatarTypeValues).nullable(),
+		avatarIconPrefix: z.enum(FontAwesomeIconPrefixValues).nullable(),
+	})
+	.omit({ createdAt: true, updatedAt: true });
+
+/** History pages project metadata only; each biography is fetched by exact revision. */
+export async function listEntityPresentationHistory(
+	tx: DatabaseTransaction,
+	authority: ParticipationAuthority,
+	languageInput: string,
+	beforeRevision?: number,
+) {
+	const language = parseContentLanguageTag(languageInput).tag;
+	await requireParticipation(tx, authority, "entity.publish", {
+		owner: "entity",
+		id: authority.actingEntityId,
+	});
+	const rows = await tx
+		.select({
+			revision: entityPresentationRevision.revision,
+			createdAt: entityPresentationRevision.createdAt,
+		})
+		.from(entityPresentationRevision)
+		.where(
+			and(
+				eq(entityPresentationRevision.entityId, authority.actingEntityId),
+				eq(entityPresentationRevision.language, language),
+				beforeRevision === undefined
+					? undefined
+					: lt(entityPresentationRevision.revision, beforeRevision),
+			),
+		)
+		.orderBy(desc(entityPresentationRevision.revision))
+		.limit(101);
+	const items = rows.slice(0, 100);
+	return { items, nextCursor: rows.length > 100 ? (items.at(-1)?.revision ?? null) : null };
+}
+
+export async function readEntityPresentationRevision(
+	tx: DatabaseTransaction,
+	authority: ParticipationAuthority,
+	languageInput: string,
+	revision: number,
+) {
+	const language = parseContentLanguageTag(languageInput).tag;
+	await requireParticipation(tx, authority, "entity.publish", {
+		owner: "entity",
+		id: authority.actingEntityId,
+	});
+	const [row] = await tx
+		.select({ snapshot: entityPresentationRevision.snapshot })
+		.from(entityPresentationRevision)
+		.where(
+			and(
+				eq(entityPresentationRevision.entityId, authority.actingEntityId),
+				eq(entityPresentationRevision.language, language),
+				eq(entityPresentationRevision.revision, z.number().int().positive().safe().parse(revision)),
+			),
+		)
+		.limit(1);
+	if (!row) throw new CatalogReferenceNotFound("Entity presentation revision is unavailable");
+	const snapshot = presentationSnapshotSchema.parse(row.snapshot);
+	if (
+		snapshot.entityId !== authority.actingEntityId ||
+		snapshot.language !== language ||
+		snapshot.revision !== revision
+	)
+		throw new Error("Entity presentation snapshot identity disagrees with its immutable key");
+	return {
+		...snapshot,
+		description:
+			snapshot.description == null
+				? null
+				: Value.Decode(PortableTextDocument, snapshot.description),
+	};
+}
+
+/** Restores the exact named-form revision and appends a new presentation revision. */
+export async function restoreEntityPresentation(
+	tx: DatabaseTransaction,
+	authority: ParticipationAuthority,
+	input: { language: string; revision: number; expectedRevision: number },
+) {
+	const snapshot = await readEntityPresentationRevision(
+		tx,
+		authority,
+		input.language,
+		input.revision,
+	);
+	const [identity] = await tx
+		.select({ id: entityIdentity.id })
+		.from(entityIdentity)
+		.where(and(eq(entityIdentity.id, authority.actingEntityId), isNull(entityIdentity.deletedAt)))
+		.limit(1)
+		.for("update");
+	if (!identity) throw new CatalogReferenceNotFound("Entity is unavailable");
+	const [current] = await tx
+		.select({ revision: entityPresentation.revision })
+		.from(entityPresentation)
+		.where(
+			and(
+				eq(entityPresentation.entityId, authority.actingEntityId),
+				eq(entityPresentation.language, snapshot.language),
+			),
+		)
+		.limit(1);
+	if (
+		!current ||
+		current.revision !==
+			z
+				.number()
+				.int()
+				.positive()
+				.max(Number.MAX_SAFE_INTEGER - 1)
+				.parse(input.expectedRevision)
+	)
+		throw new CatalogRevisionConflict("Entity presentation changed");
+	await ensureImageAssetsAttachable(tx, authority.actingEntityId, [
+		{ assetId: snapshot.avatarAssetId, role: "avatar" },
+		{ assetId: snapshot.bannerAssetId, role: "banner" },
+	]);
+	const values = { ...snapshot, revision: current.revision + 1, updatedAt: new Date() };
+	await tx
+		.update(entityPresentation)
+		.set(values)
+		.where(
+			and(
+				eq(entityPresentation.entityId, authority.actingEntityId),
+				eq(entityPresentation.language, snapshot.language),
+			),
+		);
+	await tx
+		.insert(entityPresentationRevision)
+		.values({
+			entityId: authority.actingEntityId,
+			language: snapshot.language,
+			revision: values.revision,
+			snapshot: values,
+			operatorAuthUserId: authority.principal.authUserId,
+		});
+	return {
+		entityId: authority.actingEntityId,
+		language: snapshot.language,
+		revision: values.revision,
+	};
+}
 
 /** Indexed public identity name projection; no private Auth information is selected. @internal */
 export function publicEntityName(entityId: string | SQLWrapper) {
@@ -336,14 +490,12 @@ export async function updateEntityPresentation(
 			target: [entityPresentation.entityId, entityPresentation.language],
 			set: values,
 		});
-	await tx
-		.insert(entityPresentationRevision)
-		.values({
-			entityId,
-			language,
-			revision: values.revision,
-			snapshot: { ...values, updatedAt: values.updatedAt.toISOString() },
-			operatorAuthUserId: authority.principal.authUserId,
-		});
+	await tx.insert(entityPresentationRevision).values({
+		entityId,
+		language,
+		revision: values.revision,
+		snapshot: { ...values, updatedAt: values.updatedAt.toISOString() },
+		operatorAuthUserId: authority.principal.authUserId,
+	});
 	return { entityId, language, revision: values.revision };
 }
