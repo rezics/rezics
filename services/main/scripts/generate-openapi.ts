@@ -164,6 +164,8 @@ for (const [pathTemplate, path] of Object.entries(paths)) {
 	for (const method of methods) {
 		const operation = path[method];
 		if (!operation) continue;
+		if (!operation.responses)
+			throw new Error(`Missing JSON response contract for ${method.toUpperCase()} ${pathTemplate}`);
 		const routeOperationId = apiRouteOperationId(
 			method,
 			pathTemplate.replaceAll(/\{([^}]+)\}/g, ":$1"),
