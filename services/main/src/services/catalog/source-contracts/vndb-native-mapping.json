@@ -1,0 +1,2060 @@
+{
+  "source": "vndb",
+  "kind": "reviewed-owner-ledger",
+  "complete": false,
+  "scope": "Principal public catalog objects, public dump associations and exact native source updates; this is separate from the generated broad declaration inventory.",
+  "pins": {
+    "apiReviewedSha256": "138e258e3475aa669b9c928922d817051bcdc84ffda96c7457e731ee72672bd4",
+    "apiObservedRawSha256": "5ac7d819ac42ea3c2852cb54bb0ef7ff91699c0c07921c14b1967a4ac86efa3b",
+    "apiObservation": "2026-09-07: only external-site array order differed; api_fields, enums and site records are equal after sorting site names.",
+    "dumpRevision": "514f2391cc12aa94ce420354863c52538641d9b1",
+    "dumpContractSha256": "d3bd70446cd39cc5bf0bfb0a3c3c2fd8031ab0ffc897a28da4b64001a77a5b31",
+    "officialApi": "https://api.vndb.org/kana",
+    "officialDump": "https://vndb.org/d14"
+  },
+  "evidence": {
+    "softwareNative": "services/main/scripts/check-software-native.ts: 17 rollback assertions",
+    "participation": "services/main/scripts/check-vndb-participation.ts: 8 rollback assertions",
+    "releaseUpdates": "services/main/scripts/check-vndb-native-updates.ts: 23 assertions over 3 apply/withdraw/reapply cycles; API fixture, local metadata preserved",
+    "queryFields": "vndbAcquisitionRequest: all 8 official endpoints accepted selected field syntax with results=0; this is not adoption proof",
+    "nativeQueries": "software.ts / software-participation.ts / storage.ts / semantic-history.ts",
+    "limits": "8 MB source records; 128 native changes per ordinary application; larger owners need central staged application protocol."
+  },
+  "apiLeaves": [
+    {
+      "objectType": "vn",
+      "path": "aliases",
+      "status": "native-initial",
+      "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "alttitle",
+      "status": "native-initial",
+      "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "average",
+      "status": "source-only",
+      "nativeMeaning": "Provider cached popularity/rating observations remain in the immutable archive, never REZICS user votes.",
+      "implementation": "source-export.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "description",
+      "status": "native-initial",
+      "nativeMeaning": "Native software content original language, development state and VNDB-markup description with immutable scalar history.",
+      "implementation": "software.ts / vndb-adoption.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "developers.id",
+      "status": "derived-gap",
+      "nativeMeaning": "VNDB aggregates over release availability/developer roles. Native releases carry inputs; dedicated complete aggregate queries and bulk completeness proof remain open.",
+      "implementation": "software.ts / vndb-release.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "devstatus",
+      "status": "native-initial",
+      "nativeMeaning": "Native software content original language, development state and VNDB-markup description with immutable scalar history.",
+      "implementation": "software.ts / vndb-adoption.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "editions.eid",
+      "status": "native-initial-sql",
+      "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "editions.lang",
+      "status": "native-initial-sql",
+      "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "editions.name",
+      "status": "native-initial-sql",
+      "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "editions.official",
+      "status": "native-initial-sql",
+      "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "extlinks.id",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "extlinks.label",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "extlinks.name",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "extlinks.url",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "id",
+      "status": "native-initial",
+      "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
+      "implementation": "source-bindings.ts / source-references.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "image.dims",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "image.id",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "image.sexual",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "image.thumbnail",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "image.thumbnail_dims",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "image.url",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "image.violence",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "image.votecount",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "languages",
+      "status": "derived-gap",
+      "nativeMeaning": "VNDB aggregates over release availability/developer roles. Native releases carry inputs; dedicated complete aggregate queries and bulk completeness proof remain open.",
+      "implementation": "software.ts / vndb-release.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "length",
+      "status": "native-initial",
+      "nativeMeaning": "Source-supported reported-playtime relation with average, sample count, estimator and separate rough fallback category; no intrinsic duration is inferred.",
+      "implementation": "vndb-semantics-contracts.ts / semantic-history.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "length_minutes",
+      "status": "native-initial",
+      "nativeMeaning": "Source-supported reported-playtime relation with average, sample count, estimator and separate rough fallback category; no intrinsic duration is inferred.",
+      "implementation": "vndb-semantics-contracts.ts / semantic-history.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "length_votes",
+      "status": "native-initial",
+      "nativeMeaning": "Source-supported reported-playtime relation with average, sample count, estimator and separate rough fallback category; no intrinsic duration is inferred.",
+      "implementation": "vndb-semantics-contracts.ts / semantic-history.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "olang",
+      "status": "native-initial",
+      "nativeMeaning": "Native software content original language, development state and VNDB-markup description with immutable scalar history.",
+      "implementation": "software.ts / vndb-adoption.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "platforms",
+      "status": "derived-gap",
+      "nativeMeaning": "VNDB aggregates over release availability/developer roles. Native releases carry inputs; dedicated complete aggregate queries and bulk completeness proof remain open.",
+      "implementation": "software.ts / vndb-release.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "popularity",
+      "status": "source-only",
+      "nativeMeaning": "Provider cached popularity/rating observations remain in the immutable archive, never REZICS user votes.",
+      "implementation": "source-export.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "rating",
+      "status": "source-only",
+      "nativeMeaning": "Provider cached popularity/rating observations remain in the immutable archive, never REZICS user votes.",
+      "implementation": "source-export.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "relations.id",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "relations.relation",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "relations.relation_official",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "released",
+      "status": "derived-gap",
+      "nativeMeaning": "VNDB aggregates over release availability/developer roles. Native releases carry inputs; dedicated complete aggregate queries and bulk completeness proof remain open.",
+      "implementation": "software.ts / vndb-release.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "screenshots.dims",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "screenshots.id",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "screenshots.release.id",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "screenshots.sexual",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "screenshots.thumbnail",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "screenshots.thumbnail_dims",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "screenshots.url",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "screenshots.violence",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "screenshots.votecount",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "staff.id",
+      "status": "native-initial-sql",
+      "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "staff.eid",
+      "status": "native-initial-sql",
+      "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "staff.note",
+      "status": "native-initial-sql",
+      "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "staff.role",
+      "status": "native-initial-sql",
+      "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "tags.id",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "tags.lie",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "tags.rating",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "tags.spoiler",
+      "status": "native-initial",
+      "nativeMeaning": "Governed current facts/relations with exact source support; image applicability, tag statistics, spoilers and relation codes stay scoped to their occurrence.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "title",
+      "status": "native-initial",
+      "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "titles.lang",
+      "status": "native-initial",
+      "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "titles.latin",
+      "status": "native-initial",
+      "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "titles.main",
+      "status": "native-initial",
+      "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "titles.official",
+      "status": "native-initial",
+      "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "titles.title",
+      "status": "native-initial",
+      "nativeMeaning": "Identified original names and transliterations, exact derivations, source-local named-form occurrences and title-authority claims; main title is the original-language title, not an official-language flag.",
+      "implementation": "vndb-names.ts / vndb-names-update.ts / names.ts / authority.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "va.character.id",
+      "status": "native-initial-sql",
+      "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "va.note",
+      "status": "native-initial-sql",
+      "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "va.staff.id",
+      "status": "native-initial-sql",
+      "nativeMeaning": "Snapshot-local staff context observations and exact actor/alias/context/character participation revisions; eid never denotes a content version.",
+      "implementation": "vndb-participation.ts / software-participation.ts / check-vndb-participation.ts"
+    },
+    {
+      "objectType": "vn",
+      "path": "votecount",
+      "status": "source-only",
+      "nativeMeaning": "Provider cached popularity/rating observations remain in the immutable archive, never REZICS user votes.",
+      "implementation": "source-export.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "alttitle",
+      "status": "native-update-sql",
+      "nativeMeaning": "Identified display name plus original-script language title; root alternate display is derivable from the main language title. Exact child revisions preserve local edits.",
+      "implementation": "vndb-release.ts / vndb-release-update.ts / vndb-names-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "catalog",
+      "status": "native-update-sql",
+      "nativeMeaning": "Release scalar metadata and source-qualified officialness, preserving unknown values, partial dates and resolution/voicing semantics.",
+      "implementation": "software.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "engine",
+      "status": "native-update-sql",
+      "nativeMeaning": "Release scalar metadata and source-qualified officialness, preserving unknown values, partial dates and resolution/voicing semantics.",
+      "implementation": "software.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "extlinks.id",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "extlinks.label",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "extlinks.name",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "extlinks.url",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "freeware",
+      "status": "native-update-sql",
+      "nativeMeaning": "Release scalar metadata and source-qualified officialness, preserving unknown values, partial dates and resolution/voicing semantics.",
+      "implementation": "software.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "gtin",
+      "status": "native-update-sql",
+      "nativeMeaning": "Release scalar metadata and source-qualified officialness, preserving unknown values, partial dates and resolution/voicing semantics.",
+      "implementation": "software.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "has_ero",
+      "status": "native-update-sql",
+      "nativeMeaning": "Release scalar metadata and source-qualified officialness, preserving unknown values, partial dates and resolution/voicing semantics.",
+      "implementation": "software.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "id",
+      "status": "native-initial",
+      "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
+      "implementation": "source-bindings.ts / source-references.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "images.dims",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "images.id",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "images.languages",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "images.photo",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "images.sexual",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "images.thumbnail",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "images.thumbnail_dims",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "images.type",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "images.url",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "images.violence",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "images.vn",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "images.votecount",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "languages.lang",
+      "status": "native-update-sql",
+      "nativeMeaning": "Native release contents, languages/machine translation/titles, carriers and platforms with stable occurrence identities, exact history and compensation.",
+      "implementation": "software-components.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "languages.latin",
+      "status": "native-update-sql",
+      "nativeMeaning": "Native release contents, languages/machine translation/titles, carriers and platforms with stable occurrence identities, exact history and compensation.",
+      "implementation": "software-components.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "languages.main",
+      "status": "native-update-sql",
+      "nativeMeaning": "Native release contents, languages/machine translation/titles, carriers and platforms with stable occurrence identities, exact history and compensation.",
+      "implementation": "software-components.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "languages.mtl",
+      "status": "native-update-sql",
+      "nativeMeaning": "Native release contents, languages/machine translation/titles, carriers and platforms with stable occurrence identities, exact history and compensation.",
+      "implementation": "software-components.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "languages.title",
+      "status": "native-update-sql",
+      "nativeMeaning": "Native release contents, languages/machine translation/titles, carriers and platforms with stable occurrence identities, exact history and compensation.",
+      "implementation": "software-components.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "media.medium",
+      "status": "native-update-sql",
+      "nativeMeaning": "Native release contents, languages/machine translation/titles, carriers and platforms with stable occurrence identities, exact history and compensation.",
+      "implementation": "software-components.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "media.qty",
+      "status": "native-update-sql",
+      "nativeMeaning": "Native release contents, languages/machine translation/titles, carriers and platforms with stable occurrence identities, exact history and compensation.",
+      "implementation": "software-components.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "minage",
+      "status": "native-update-sql",
+      "nativeMeaning": "Release scalar metadata and source-qualified officialness, preserving unknown values, partial dates and resolution/voicing semantics.",
+      "implementation": "software.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "notes",
+      "status": "native-update-sql",
+      "nativeMeaning": "Release scalar metadata and source-qualified officialness, preserving unknown values, partial dates and resolution/voicing semantics.",
+      "implementation": "software.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "official",
+      "status": "native-update-sql",
+      "nativeMeaning": "Release scalar metadata and source-qualified officialness, preserving unknown values, partial dates and resolution/voicing semantics.",
+      "implementation": "software.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "patch",
+      "status": "native-update-sql",
+      "nativeMeaning": "Release scalar metadata and source-qualified officialness, preserving unknown values, partial dates and resolution/voicing semantics.",
+      "implementation": "software.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "platforms",
+      "status": "native-update-sql",
+      "nativeMeaning": "Native release contents, languages/machine translation/titles, carriers and platforms with stable occurrence identities, exact history and compensation.",
+      "implementation": "software-components.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "producers.id",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "producers.developer",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "producers.publisher",
+      "status": "native-update-sql",
+      "nativeMeaning": "Qualified producer roles, images and external references; current source semantics update through exact semantic heads and immutable snapshot support. SQL exercises producer/link deltas; image-specific SQL expansion remains pending.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "released",
+      "status": "native-update-sql",
+      "nativeMeaning": "Release scalar metadata and source-qualified officialness, preserving unknown values, partial dates and resolution/voicing semantics.",
+      "implementation": "software.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "resolution",
+      "status": "native-update-sql",
+      "nativeMeaning": "Release scalar metadata and source-qualified officialness, preserving unknown values, partial dates and resolution/voicing semantics.",
+      "implementation": "software.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "title",
+      "status": "native-update-sql",
+      "nativeMeaning": "Identified display name plus original-script language title; root alternate display is derivable from the main language title. Exact child revisions preserve local edits.",
+      "implementation": "vndb-release.ts / vndb-release-update.ts / vndb-names-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "uncensored",
+      "status": "native-update-sql",
+      "nativeMeaning": "Release scalar metadata and source-qualified officialness, preserving unknown values, partial dates and resolution/voicing semantics.",
+      "implementation": "software.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "vns.id",
+      "status": "native-update-sql",
+      "nativeMeaning": "Native release contents, languages/machine translation/titles, carriers and platforms with stable occurrence identities, exact history and compensation.",
+      "implementation": "software-components.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "vns.rtype",
+      "status": "native-update-sql",
+      "nativeMeaning": "Native release contents, languages/machine translation/titles, carriers and platforms with stable occurrence identities, exact history and compensation.",
+      "implementation": "software-components.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "release",
+      "path": "voiced",
+      "status": "native-update-sql",
+      "nativeMeaning": "Release scalar metadata and source-qualified officialness, preserving unknown values, partial dates and resolution/voicing semantics.",
+      "implementation": "software.ts / vndb-release-update.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "aid",
+      "status": "native-initial-sql",
+      "nativeMeaning": "Selected alias identity and principal main-name preference; gender uses an explicit governed vocabulary. Staff query filters ismain=1 while retrieving all aliases.",
+      "implementation": "vndb-entities.ts / vndb-acquisition.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "aliases.aid",
+      "status": "native-initial",
+      "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
+      "implementation": "vndb-entities.ts / names.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "aliases.ismain",
+      "status": "native-initial",
+      "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
+      "implementation": "vndb-entities.ts / names.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "aliases.latin",
+      "status": "native-initial",
+      "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
+      "implementation": "vndb-entities.ts / names.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "aliases.name",
+      "status": "native-initial",
+      "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
+      "implementation": "vndb-entities.ts / names.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "description",
+      "status": "native-initial",
+      "nativeMeaning": "Primary-language and description facts on the principal, with source evidence; language labels are mapped before BCP 47 parsing.",
+      "implementation": "vndb-entities.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "extlinks.id",
+      "status": "native-initial",
+      "nativeMeaning": "Native qualified external-reference occurrences.",
+      "implementation": "vndb-semantics.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "extlinks.label",
+      "status": "native-initial",
+      "nativeMeaning": "Native qualified external-reference occurrences.",
+      "implementation": "vndb-semantics.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "extlinks.name",
+      "status": "native-initial",
+      "nativeMeaning": "Native qualified external-reference occurrences.",
+      "implementation": "vndb-semantics.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "extlinks.url",
+      "status": "native-initial",
+      "nativeMeaning": "Native qualified external-reference occurrences.",
+      "implementation": "vndb-semantics.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "gender",
+      "status": "native-initial-sql",
+      "nativeMeaning": "Selected alias identity and principal main-name preference; gender uses an explicit governed vocabulary. Staff query filters ismain=1 while retrieving all aliases.",
+      "implementation": "vndb-entities.ts / vndb-acquisition.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "id",
+      "status": "native-initial",
+      "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
+      "implementation": "source-bindings.ts / source-references.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "ismain",
+      "status": "native-initial-sql",
+      "nativeMeaning": "Selected alias identity and principal main-name preference; gender uses an explicit governed vocabulary. Staff query filters ismain=1 while retrieving all aliases.",
+      "implementation": "vndb-entities.ts / vndb-acquisition.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "lang",
+      "status": "native-initial",
+      "nativeMeaning": "Primary-language and description facts on the principal, with source evidence; language labels are mapped before BCP 47 parsing.",
+      "implementation": "vndb-entities.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "name",
+      "status": "native-initial",
+      "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
+      "implementation": "vndb-entities.ts / names.ts"
+    },
+    {
+      "objectType": "staff",
+      "path": "original",
+      "status": "native-initial",
+      "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
+      "implementation": "vndb-entities.ts / names.ts"
+    },
+    {
+      "objectType": "producer",
+      "path": "aliases",
+      "status": "native-initial",
+      "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
+      "implementation": "vndb-entities.ts / names.ts"
+    },
+    {
+      "objectType": "producer",
+      "path": "description",
+      "status": "native-initial",
+      "nativeMeaning": "Primary-language and description facts on the principal, with source evidence; language labels are mapped before BCP 47 parsing.",
+      "implementation": "vndb-entities.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "producer",
+      "path": "extlinks.id",
+      "status": "native-initial",
+      "nativeMeaning": "Native qualified external-reference occurrences.",
+      "implementation": "vndb-semantics.ts"
+    },
+    {
+      "objectType": "producer",
+      "path": "extlinks.label",
+      "status": "native-initial",
+      "nativeMeaning": "Native qualified external-reference occurrences.",
+      "implementation": "vndb-semantics.ts"
+    },
+    {
+      "objectType": "producer",
+      "path": "extlinks.name",
+      "status": "native-initial",
+      "nativeMeaning": "Native qualified external-reference occurrences.",
+      "implementation": "vndb-semantics.ts"
+    },
+    {
+      "objectType": "producer",
+      "path": "extlinks.url",
+      "status": "native-initial",
+      "nativeMeaning": "Native qualified external-reference occurrences.",
+      "implementation": "vndb-semantics.ts"
+    },
+    {
+      "objectType": "producer",
+      "path": "id",
+      "status": "native-initial",
+      "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
+      "implementation": "source-bindings.ts / source-references.ts"
+    },
+    {
+      "objectType": "producer",
+      "path": "lang",
+      "status": "native-initial",
+      "nativeMeaning": "Primary-language and description facts on the principal, with source evidence; language labels are mapped before BCP 47 parsing.",
+      "implementation": "vndb-entities.ts / vndb-semantics-contracts.ts"
+    },
+    {
+      "objectType": "producer",
+      "path": "name",
+      "status": "native-initial",
+      "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
+      "implementation": "vndb-entities.ts / names.ts"
+    },
+    {
+      "objectType": "producer",
+      "path": "original",
+      "status": "native-initial",
+      "nativeMeaning": "Independently identified named forms and exact alias keys. Object primary language does not assert each alias language.",
+      "implementation": "vndb-entities.ts / names.ts"
+    },
+    {
+      "objectType": "producer",
+      "path": "type",
+      "status": "native-initial",
+      "nativeMeaning": "co/in/ng map explicitly to organization/person/collective; no company-to-person coercion.",
+      "implementation": "vndb-entities.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "age",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "aliases",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "birthday",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "blood_type",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "bust",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "cup",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "description",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "gender",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "height",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "hips",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "id",
+      "status": "native-initial",
+      "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
+      "implementation": "source-bindings.ts / source-references.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "image.dims",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "image.id",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "image.sexual",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "image.url",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "image.violence",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "image.votecount",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "name",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "original",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "sex",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "traits.id",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "traits.lie",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "traits.spoiler",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "vns.id",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "vns.release.id",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "vns.role",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "vns.spoiler",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "waist",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "character",
+      "path": "weight",
+      "status": "native-initial",
+      "nativeMeaning": "Character named forms, measurements, recurring birthday, apparent/actual sex and gender, traits and release-scoped appearances retain null/spoiler/role distinctions.",
+      "implementation": "vndb-entities.ts / vndb-semantics.ts"
+    },
+    {
+      "objectType": "tag",
+      "path": "aliases",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "tag",
+      "path": "applicable",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "tag",
+      "path": "category",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "tag",
+      "path": "description",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "tag",
+      "path": "id",
+      "status": "native-initial",
+      "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
+      "implementation": "source-bindings.ts / source-references.ts"
+    },
+    {
+      "objectType": "tag",
+      "path": "name",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "tag",
+      "path": "searchable",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "tag",
+      "path": "vn_count",
+      "status": "source-only",
+      "nativeMeaning": "Source statistical metadata is archived separately from catalog semantic identity.",
+      "implementation": "source-export.ts"
+    },
+    {
+      "objectType": "trait",
+      "path": "aliases",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "trait",
+      "path": "applicable",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "trait",
+      "path": "char_count",
+      "status": "source-only",
+      "nativeMeaning": "Source statistical metadata is archived separately from catalog semantic identity.",
+      "implementation": "source-export.ts"
+    },
+    {
+      "objectType": "trait",
+      "path": "description",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "trait",
+      "path": "group_id",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "trait",
+      "path": "group_name",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "trait",
+      "path": "id",
+      "status": "native-initial",
+      "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
+      "implementation": "source-bindings.ts / source-references.ts"
+    },
+    {
+      "objectType": "trait",
+      "path": "name",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "trait",
+      "path": "searchable",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "trait",
+      "path": "sexual",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "quote",
+      "path": "character.id",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "quote",
+      "path": "id",
+      "status": "native-initial",
+      "nativeMeaning": "Exact provider object identity bound to a provider-independent catalog owner; source bindings do not parent native identities.",
+      "implementation": "source-bindings.ts / source-references.ts"
+    },
+    {
+      "objectType": "quote",
+      "path": "quote",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "objectType": "quote",
+      "path": "score",
+      "status": "source-only",
+      "nativeMeaning": "Source statistical metadata is archived separately from catalog semantic identity.",
+      "implementation": "source-export.ts"
+    },
+    {
+      "objectType": "quote",
+      "path": "vn.id",
+      "status": "native-initial",
+      "nativeMeaning": "Independent concept/quotation identity with names, governed taxonomy attributes and exact relation participants; trait group is distinct from a parent edge.",
+      "implementation": "vndb-semantics.ts / vndb-semantics-dump.ts"
+    }
+  ],
+  "dumpTables": [
+    {
+      "table": "anime",
+      "publicColumns": [
+        "id",
+        "ann_id",
+        "type",
+        "year",
+        "title_romaji",
+        "title_kanji",
+        "mal_id"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "chars",
+      "publicColumns": [
+        "id",
+        "image",
+        "bloodt",
+        "cup_size",
+        "sex",
+        "spoil_sex",
+        "gender",
+        "spoil_gender",
+        "main",
+        "main_spoil",
+        "s_bust",
+        "s_waist",
+        "s_hip",
+        "birthday",
+        "height",
+        "weight",
+        "age",
+        "description"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "chars_alias",
+      "publicColumns": [
+        "id",
+        "spoil",
+        "name",
+        "latin"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "chars_names",
+      "publicColumns": [
+        "id",
+        "lang",
+        "name",
+        "latin"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "chars_traits",
+      "publicColumns": [
+        "id",
+        "tid",
+        "spoil",
+        "lie"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "chars_vns",
+      "publicColumns": [
+        "id",
+        "vid",
+        "rid",
+        "role",
+        "spoil"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "docs",
+      "publicColumns": [
+        "id",
+        "title",
+        "content"
+      ],
+      "status": "out-of-scope",
+      "nativeMeaning": "Provider documentation is not native catalog content.",
+      "implementation": null
+    },
+    {
+      "table": "drm",
+      "publicColumns": [
+        "id",
+        "disc",
+        "cdkey",
+        "activate",
+        "alimit",
+        "account",
+        "online",
+        "cloud",
+        "physical",
+        "name",
+        "description"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Independent access-mechanism identity and checked mechanism capabilities.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "engines",
+      "publicColumns": [
+        "id",
+        "name",
+        "description"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Independent software-engine identity and description.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "entry_meta",
+      "publicColumns": [
+        "id",
+        "created",
+        "lastmod",
+        "revision",
+        "num_edits",
+        "num_users"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "extlinks",
+      "publicColumns": [
+        "id",
+        "site",
+        "value"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "images",
+      "publicColumns": [
+        "id",
+        "width",
+        "height",
+        "c_votecount",
+        "c_sexual_avg",
+        "c_sexual_stddev",
+        "c_violence_avg",
+        "c_violence_stddev",
+        "c_weight"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "image_votes",
+      "publicColumns": [
+        "id",
+        "uid",
+        "date",
+        "sexual",
+        "violence",
+        "ignore"
+      ],
+      "status": "out-of-scope",
+      "nativeMeaning": "Individual user moderation votes are source evidence, not REZICS votes.",
+      "implementation": null
+    },
+    {
+      "table": "producers",
+      "publicColumns": [
+        "id",
+        "type",
+        "lang",
+        "name",
+        "latin",
+        "alias",
+        "description"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "producers_extlinks",
+      "publicColumns": [
+        "id",
+        "link"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "producers_relations",
+      "publicColumns": [
+        "id",
+        "pid",
+        "relation"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "quotes",
+      "publicColumns": [
+        "id",
+        "vid",
+        "cid",
+        "score",
+        "quote"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Quotation identity/text and VN/character context; score remains source statistics.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "releases",
+      "publicColumns": [
+        "id",
+        "gtin",
+        "olang",
+        "released",
+        "voiced",
+        "reso_x",
+        "reso_y",
+        "minage",
+        "ani_story",
+        "ani_ero",
+        "ani_story_sp",
+        "ani_story_cg",
+        "ani_cutscene",
+        "ani_ero_sp",
+        "ani_ero_cg",
+        "ani_bg",
+        "ani_face",
+        "has_ero",
+        "patch",
+        "freeware",
+        "uncensored",
+        "official",
+        "catalog",
+        "notes",
+        "engine"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Native scalar release details; deprecated broad animation summaries remain separate from precise animation contexts.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "releases_drm",
+      "publicColumns": [
+        "id",
+        "drm",
+        "notes"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Access mechanism occurrence with its release-specific notes.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "releases_extlinks",
+      "publicColumns": [
+        "id",
+        "link"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "releases_images",
+      "publicColumns": [
+        "id",
+        "img",
+        "vid",
+        "itype",
+        "lang"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "releases_media",
+      "publicColumns": [
+        "id",
+        "medium",
+        "qty"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Carrier quantities, including unknown/non-countable zero.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "releases_platforms",
+      "publicColumns": [
+        "id",
+        "platform"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Governed platform occurrences.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "releases_producers",
+      "publicColumns": [
+        "id",
+        "pid",
+        "developer",
+        "publisher"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Independent developer/publisher roles on the release.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "releases_supersedes",
+      "publicColumns": [
+        "id",
+        "rid"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Native supersedes-release relation; never patch applicability.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "releases_titles",
+      "publicColumns": [
+        "id",
+        "lang",
+        "mtl",
+        "title",
+        "latin"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Release languages, nullable inherited titles and machine translation.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "releases_vn",
+      "publicColumns": [
+        "id",
+        "vid",
+        "rtype"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Release content coverage/completeness without invented versions.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "rlists",
+      "publicColumns": [
+        "uid",
+        "rid",
+        "added",
+        "status"
+      ],
+      "status": "out-of-scope",
+      "nativeMeaning": "Public user collection state is outside catalog ingestion.",
+      "implementation": null
+    },
+    {
+      "table": "staff",
+      "publicColumns": [
+        "id",
+        "gender",
+        "lang",
+        "main",
+        "description",
+        "prod"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "staff_alias",
+      "publicColumns": [
+        "id",
+        "aid",
+        "name",
+        "latin"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "staff_extlinks",
+      "publicColumns": [
+        "id",
+        "link"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "tags",
+      "publicColumns": [
+        "id",
+        "cat",
+        "defaultspoil",
+        "searchable",
+        "applicable",
+        "name",
+        "alias",
+        "description"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Independent concepts and taxonomy metadata.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "tags_parents",
+      "publicColumns": [
+        "id",
+        "parent",
+        "main"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Exact bounded DAG edges with main-parent flags.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "tags_vn",
+      "publicColumns": [
+        "date",
+        "tag",
+        "vid",
+        "uid",
+        "vote",
+        "spoiler",
+        "ignore",
+        "lie",
+        "notes"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Per-user tag voting is source evidence. A reviewed streaming aggregate mapper is still needed to produce canonical supported tag relations from the dump.",
+      "implementation": null
+    },
+    {
+      "table": "traits",
+      "publicColumns": [
+        "id",
+        "gid",
+        "gorder",
+        "defaultspoil",
+        "sexual",
+        "searchable",
+        "applicable",
+        "name",
+        "alias",
+        "description"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Concept identity, group/sort/sexual/applicability metadata.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "traits_parents",
+      "publicColumns": [
+        "id",
+        "parent",
+        "main"
+      ],
+      "status": "native-initial",
+      "nativeMeaning": "Exact bounded DAG edges.",
+      "implementation": "vndb-dump.ts / vndb-semantics-dump.ts"
+    },
+    {
+      "table": "ulist_labels",
+      "publicColumns": [
+        "uid",
+        "id",
+        "label"
+      ],
+      "status": "out-of-scope",
+      "nativeMeaning": "User list labels are outside catalog ingestion.",
+      "implementation": null
+    },
+    {
+      "table": "ulist_vns",
+      "publicColumns": [
+        "uid",
+        "vid",
+        "added",
+        "lastmod",
+        "vote_date",
+        "started",
+        "finished",
+        "vote",
+        "notes",
+        "labels"
+      ],
+      "status": "out-of-scope",
+      "nativeMeaning": "User list/progress/vote state is outside catalog ingestion.",
+      "implementation": null
+    },
+    {
+      "table": "users",
+      "publicColumns": [
+        "id",
+        "ign_votes",
+        "perm_imgvote",
+        "perm_tag",
+        "perm_lengthvote",
+        "username"
+      ],
+      "status": "out-of-scope",
+      "nativeMeaning": "Provider accounts do not become REZICS Auth or person identities.",
+      "implementation": null
+    },
+    {
+      "table": "vn",
+      "publicColumns": [
+        "id",
+        "image",
+        "c_image",
+        "olang",
+        "c_votecount",
+        "c_rating",
+        "c_average",
+        "c_length",
+        "c_lengthnum",
+        "length",
+        "devstatus",
+        "alias",
+        "description"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "vn_anime",
+      "publicColumns": [
+        "id",
+        "aid"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "vn_editions",
+      "publicColumns": [
+        "id",
+        "lang",
+        "eid",
+        "official",
+        "name"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "vn_extlinks",
+      "publicColumns": [
+        "id",
+        "link"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "vn_relations",
+      "publicColumns": [
+        "id",
+        "vid",
+        "relation",
+        "official"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "vn_screenshots",
+      "publicColumns": [
+        "id",
+        "scr",
+        "rid"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "vn_seiyuu",
+      "publicColumns": [
+        "id",
+        "cid",
+        "aid",
+        "note"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "vn_staff",
+      "publicColumns": [
+        "id",
+        "aid",
+        "role",
+        "eid",
+        "note"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "vn_titles",
+      "publicColumns": [
+        "id",
+        "lang",
+        "official",
+        "title",
+        "latin"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    },
+    {
+      "table": "vn_image_votes",
+      "publicColumns": [
+        "vid",
+        "uid",
+        "img"
+      ],
+      "status": "out-of-scope",
+      "nativeMeaning": "Individual image votes are source evidence, not REZICS votes.",
+      "implementation": null
+    },
+    {
+      "table": "vn_length_votes",
+      "publicColumns": [
+        "vid",
+        "uid",
+        "date",
+        "length",
+        "speed",
+        "rid",
+        "notes",
+        "lang"
+      ],
+      "status": "out-of-scope",
+      "nativeMeaning": "Individual user reports are outside canonical catalog state; aggregate playtime estimates remain native and source-qualified.",
+      "implementation": null
+    },
+    {
+      "table": "wikidata",
+      "publicColumns": [
+        "id",
+        "enwiki",
+        "jawiki",
+        "website",
+        "vndb",
+        "mobygames",
+        "mobygames_company",
+        "gamefaqs_game",
+        "gamefaqs_company",
+        "anidb_anime",
+        "anidb_person",
+        "ann_anime",
+        "ann_manga",
+        "musicbrainz_artist",
+        "twitter",
+        "vgmdb_product",
+        "vgmdb_artist",
+        "discogs_artist",
+        "acdb_char",
+        "acdb_source",
+        "indiedb_game",
+        "howlongtobeat",
+        "crunchyroll",
+        "igdb_game",
+        "giantbomb",
+        "pcgamingwiki",
+        "steam",
+        "gog",
+        "pixiv_user",
+        "doujinshi_author",
+        "soundcloud",
+        "humblestore",
+        "itchio",
+        "playstation_jp",
+        "playstation_na",
+        "playstation_eu",
+        "lutris",
+        "wine",
+        "mobygames_game"
+      ],
+      "status": "gap",
+      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
+      "implementation": null
+    }
+  ],
+  "remainingGates": [
+    "VN context/participation/name/semantic callback still needs complete source orchestration and cycle SQL.",
+    "Supporting principal native update callbacks remain open even where initial adoption is implemented.",
+    "Remaining dump assembly, image/link/anime/character/staff joins and table-specific bulk mapping must close individually.",
+    "API-to-dump and dump-to-API source-surface transitions need a reviewed combined projection; current release callbacks reject such switches rather than erase unobserved fields.",
+    "Applications above 128 native changes require the central staged protocol.",
+    "No all-corpus, all-field native source qualification or production capacity claim follows from selected fixtures."
+  ]
+}

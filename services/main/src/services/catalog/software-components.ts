@@ -12,9 +12,9 @@ import { SoftwareAnimationSchema } from "./software-animation";
 import { CatalogRevisionConflict, loadCatalogIdentity, recordCatalogChange } from "./storage";
 
 /** @alpha @remarks Complete native occurrence values, including the five bounded animation contexts. */
-export const SoftwareComponentValuesSchema = z.union([
-	SoftwareReleaseComponentSchema,
-	SoftwareAnimationSchema.transform((value) => ({ kind: "animation" as const, ...value })),
+export const SoftwareComponentValuesSchema = z.discriminatedUnion("kind", [
+	...SoftwareReleaseComponentSchema.options,
+	SoftwareAnimationSchema.safeExtend({ kind: z.literal("animation") }),
 ]);
 type Component = z.output<typeof SoftwareComponentValuesSchema>;
 export type SoftwareComponentKind = Component["kind"];
@@ -349,18 +349,6 @@ export async function restoreSoftwareComponent(
 			expectedComponentRevision,
 		);
 	const decoded = decodeSoftwareComponentSnapshot(kind, previous.value);
-	const input =
-		decoded.kind === "animation"
-			? SoftwareAnimationSchema.parse({
-					context: decoded.context,
-					state: decoded.state,
-					handDrawn: decoded.handDrawn,
-					vectorial: decoded.vectorial,
-					threeDimensional: decoded.threeDimensional,
-					liveAction: decoded.liveAction,
-					frequency: decoded.frequency,
-				})
-			: decoded;
 	return putSoftwareComponent(
 		tx,
 		reference,
@@ -368,6 +356,6 @@ export async function restoreSoftwareComponent(
 		expectedRevision,
 		componentId,
 		expectedComponentRevision,
-		input,
+		decoded,
 	);
 }

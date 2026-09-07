@@ -150,7 +150,12 @@ export async function createNativeSoftwareContent(
 		...title,
 		kind: "primary",
 	});
-	return { ...identity, revision: named.revision };
+	return {
+		...identity,
+		revision: named.revision,
+		nameId: named.id,
+		nameRevision: named.nameRevision,
+	};
 }
 
 export async function reviseSoftwareContent(
@@ -196,7 +201,12 @@ export async function createSoftwareVersion(
 		...title,
 		kind: "primary",
 	});
-	return { ...identity, revision: named.revision };
+	return {
+		...identity,
+		revision: named.revision,
+		nameId: named.id,
+		nameRevision: named.nameRevision,
+	};
 }
 
 export async function reviseSoftwareVersion(
@@ -232,7 +242,12 @@ export async function createNativeSoftwareRelease(
 		...title,
 		kind: "primary",
 	});
-	return { ...identity, revision: named.revision };
+	return {
+		...identity,
+		revision: named.revision,
+		nameId: named.id,
+		nameRevision: named.nameRevision,
+	};
 }
 
 export async function reviseSoftwareRelease(
@@ -382,13 +397,11 @@ export async function appendSoftwareReleaseComponents(
 				break;
 			}
 			case "patch_target":
-				await tx
-					.insert(softwarePatchTarget)
-					.values({
-						releaseId: reference.id,
-						baseReleaseId: value.baseReleaseId,
-						compatibility: value.compatibility,
-					});
+				await tx.insert(softwarePatchTarget).values({
+					releaseId: reference.id,
+					baseReleaseId: value.baseReleaseId,
+					compatibility: value.compatibility,
+				});
 				ids.push(value.baseReleaseId);
 				break;
 		}
@@ -700,31 +713,7 @@ export async function restoreSoftwareDetails(
 				reference,
 				actor,
 				expectedRevision,
-				SoftwareReleaseDetailsSchema.parse({
-					typeRevisionId: value.type_revision_id,
-					isPatch: value.is_patch,
-					freeware: value.freeware,
-					uncensored: value.uncensored,
-					hasEroticContent: value.has_erotic_content,
-					minimumAge: value.minimum_age,
-					resolution:
-						value.resolution_kind === "pixels"
-							? { kind: "pixels", width: value.resolution_width, height: value.resolution_height }
-							: value.resolution_kind === "non_standard"
-								? { kind: "non_standard" }
-								: null,
-					engine: value.engine,
-					voicing: value.voicing,
-					notes: value.notes,
-					gtin: value.gtin,
-					catalogNumber: value.catalog_number,
-					date: {
-						year: value.date_year,
-						month: value.date_month,
-						day: value.date_day,
-						text: value.date_text,
-					},
-				}),
+				decodeSoftwareReleaseSnapshot(value),
 			);
 	}
 }
@@ -819,4 +808,34 @@ export async function findSoftwareReleases(
 		)
 		.orderBy(r.id)
 		.limit(page.limit);
+}
+
+/** @internal Native row snapshots reenter the same canonical release-value parser on restore and source updates. */
+export function decodeSoftwareReleaseSnapshot(input: unknown) {
+	const value = z.record(z.string(), z.unknown()).parse(input);
+	return SoftwareReleaseDetailsSchema.parse({
+		typeRevisionId: value.type_revision_id,
+		isPatch: value.is_patch,
+		freeware: value.freeware,
+		uncensored: value.uncensored,
+		hasEroticContent: value.has_erotic_content,
+		minimumAge: value.minimum_age,
+		resolution:
+			value.resolution_kind === "pixels"
+				? { kind: "pixels", width: value.resolution_width, height: value.resolution_height }
+				: value.resolution_kind === "non_standard"
+					? { kind: "non_standard" }
+					: null,
+		engine: value.engine,
+		voicing: value.voicing,
+		notes: value.notes,
+		gtin: value.gtin,
+		catalogNumber: value.catalog_number,
+		date: {
+			year: value.date_year,
+			month: value.date_month,
+			day: value.date_day,
+			text: value.date_text,
+		},
+	});
 }

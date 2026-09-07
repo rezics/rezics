@@ -52,15 +52,21 @@ software-native PostgreSQL harness verifies identity/version ownership, correlat
 filters, stale writes, immutable snapshots and scalar restoration on the integrated
 disposable target. Its execution must be reported separately from unit tests.
 
-Current unfinished boundaries are explicit: VN staff/voice credits do not yet
-bind alias revisions and participation context revisions; software occurrence
-history can be read and removals recorded but occurrence restore/edit commands are
-not complete; dump release `supersedes`, legacy animation fields/background/face
-flags, producer membership, DRM notes and technology links still need full native
-adoption; dump VN/title and full field conformance is not complete. The safe source
-stub initialization path is implemented, but reviewed source-update callbacks for
-complete native graph replacement are not. No full VNDB/plan completion claim is
-made by this batch.
+The current slice now has native occurrence put/withdraw/restore, exact staff alias
+and context joins, title/romanization derivation and scoped title claims, and a
+real release source-update/compensation writer. Three apply/withdraw/reapply cycles
+exercise changed and added release components, producer/link semantic deltas and
+preservation of independent native catalog/channel metadata. Alias/participation
+and software SQL fixtures remain separate evidence. User-reported playtime is a
+qualified estimate with sample count and estimator, not a fixed intrinsic duration.
+
+Unfinished scope remains explicit in `source-contracts/vndb-native-mapping.json`:
+VN and supporting-principal update orchestration, complete remaining public dump
+assembly, API/dump source-surface transitions and centrally staged applications
+above the ordinary 128-change budget. A source-surface transition is rejected
+until a reviewed combined projection can retain unobserved fields safely. Native
+SQL fixtures do not establish full provider coverage, product integration or
+production throughput. No full VNDB/plan completion claim is made.
 
 ## Exact participation workload
 

@@ -9,6 +9,7 @@ import type { CatalogReference } from "./contracts";
 import { VndbVnSchema, vndbSourceKey } from "./vndb";
 import { catalogSourceRecordId, type recordCatalogSourceDocument } from "./source-observations";
 import { bindReferencedSourceIdentity } from "./source-references";
+import { requireCatalogNameRevision } from "./names";
 import { ensureCatalogDefinition } from "./storage";
 import { createSoftwareParticipation } from "./software-participation";
 
@@ -50,6 +51,7 @@ export function planVndbParticipation(input: unknown) {
 			staffPath: `/staff/${index}/id`,
 			staffId: entry.id,
 			aliasId: entry.aid,
+			expectedAlias: entry.original !== undefined ? (entry.original ?? entry.name) : undefined,
 			contextKey: entry.eid === null ? null : String(entry.eid),
 			characterId: null,
 			characterPath: null,
@@ -62,6 +64,8 @@ export function planVndbParticipation(input: unknown) {
 		staffPath: `/va/${index}/staff/id`,
 		staffId: entry.staff.id,
 		aliasId: entry.staff.aid ?? null,
+		expectedAlias:
+			entry.staff.original !== undefined ? (entry.staff.original ?? entry.staff.name) : undefined,
 		contextKey: null,
 		characterId: entry.character.id,
 		characterPath: `/va/${index}/character/id`,
@@ -113,6 +117,7 @@ export async function appendVndbParticipation(
 	actor: string,
 	input: unknown,
 	document: Document,
+	sourcePath: (path: string) => string = (path) => path,
 ) {
 	const plan = planVndbParticipation(input);
 	const targets = new Map<string, CatalogReference>();
@@ -127,7 +132,7 @@ export async function appendVndbParticipation(
 				...vndbSourceKey(id),
 				owner: "entity",
 				shape,
-				evidence: document.referenceAt(path),
+				evidence: document.referenceAt(sourcePath(path)),
 			});
 			targets.set(id, target);
 		}
@@ -141,6 +146,13 @@ export async function appendVndbParticipation(
 			alias =
 				aliases.get(key) ??
 				(await resolveVndbStaffAlias(tx, target.id, item.staffId, item.aliasId));
+			if (item.expectedAlias !== undefined) {
+				const exact = await requireCatalogNameRevision(tx, target, actor, alias.id, alias.revision);
+				if (exact.value !== item.expectedAlias)
+					throw new Error(
+						"VNDB staff alias snapshot differs from the VN credit spelling; refresh the dependent observations",
+					);
+			}
 			aliases.set(key, alias);
 		}
 		let context: { id: string; revision: number } | null = null;
@@ -191,16 +203,14 @@ export async function appendVndbParticipation(
 			note: item.note,
 			state: "active",
 		});
-		await tx
-			.insert(softwareParticipationCreditSourceOccurrence)
-			.values({
-				sourceRecordId: document.record.id,
-				snapshotId: document.snapshot.id,
-				sourcePath: item.path,
-				contentId: content.id,
-				participationId: participation.participationId,
-				participationRevision: participation.revision,
-			});
+		await tx.insert(softwareParticipationCreditSourceOccurrence).values({
+			sourceRecordId: document.record.id,
+			snapshotId: document.snapshot.id,
+			sourcePath: sourcePath(item.path),
+			contentId: content.id,
+			participationId: participation.participationId,
+			participationRevision: participation.revision,
+		});
 		created.push(participation);
 	}
 	return created;

@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import type { CatalogSourceReceipt } from "./source-observations";
 import type { CatalogReference } from "./contracts";
-import { VndbCatalogContractSha256, vndbLanguage } from "./vndb";
+import { VndbCatalogContractSha256 } from "./vndb";
 
 const integer = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const name = z.string().min(1).max(131_072);
@@ -259,7 +259,7 @@ export function planVndbCharacterFacts(input: unknown): ScalarFact[] {
 /** @alpha @remarks Exactly one identity per person; each alias keeps its provider alias key and source path. */
 export function planVndbStaffNames(input: unknown) {
 	const record = VndbStaffSchema.parse(input);
-	const languageTag = vndbLanguage(record.lang);
+	const languageTag = null;
 	return record.aliases
 		? record.aliases.map((value, position) => ({
 				aid: value.aid,
@@ -349,11 +349,7 @@ async function adoptVndbEntity(
 	const shape = staff ? "person" : producer ? vndbProducerShape(producer.type) : "character";
 	const nativeNames = staff ? planVndbStaffNames(staff) : [];
 	const mainAlias = nativeNames.find((value) => value.ismain) ?? nativeNames[0];
-	const languageTag = staff
-		? vndbLanguage(staff.lang)
-		: producer
-			? vndbLanguage(producer.lang)
-			: null;
+	const languageTag = null;
 	const primaryValue = mainAlias?.value ?? record.original ?? record.name;
 	const genderRevisionId = staff?.gender
 		? (
@@ -423,15 +419,13 @@ async function adoptVndbEntity(
 			nameId = named.id;
 			nameRevision = named.nameRevision;
 		}
-		await tx
-			.insert(tables.support)
-			.values({
-				ownerId: reference.id,
-				namedFormId: nameId,
-				sourceRecordId: document.record.id,
-				snapshotId: document.snapshot.id,
-				sourcePath: path,
-			});
+		await tx.insert(tables.support).values({
+			ownerId: reference.id,
+			namedFormId: nameId,
+			sourceRecordId: document.record.id,
+			snapshotId: document.snapshot.id,
+			sourcePath: path,
+		});
 		return { nameId, nameRevision };
 	};
 	if (staff) {
@@ -495,15 +489,13 @@ async function adoptVndbEntity(
 			})
 			.returning({ id: tables.identifier.id });
 		if (!identifier) throw new Error("VNDB identifier insert returned no row");
-		await tx
-			.insert(tables.support)
-			.values({
-				ownerId: reference.id,
-				identifierId: identifier.id,
-				sourceRecordId: document.record.id,
-				snapshotId: document.snapshot.id,
-				sourcePath: "/id",
-			});
+		await tx.insert(tables.support).values({
+			ownerId: reference.id,
+			identifierId: identifier.id,
+			sourceRecordId: document.record.id,
+			snapshotId: document.snapshot.id,
+			sourcePath: "/id",
+		});
 	}
 	if (kind === "character") {
 		for (const fact of planVndbCharacterFacts(record)) {
@@ -543,21 +535,20 @@ async function adoptVndbEntity(
 					appended.lastNodePosition,
 				)
 			).revision;
-			await tx
-				.insert(tables.support)
-				.values({
-					ownerId: reference.id,
-					factId: begun.id,
-					sourceRecordId: document.record.id,
-					snapshotId: document.snapshot.id,
-					sourcePath: fact.path,
-				});
+			await tx.insert(tables.support).values({
+				ownerId: reference.id,
+				factId: begun.id,
+				sourceRecordId: document.record.id,
+				snapshotId: document.snapshot.id,
+				sourcePath: fact.path,
+			});
 		}
 	}
 	revision = await appendVndbSemantics(tx, reference, actor, revision, record, document);
 	if (existing)
 		await acceptCatalogSourceInitialization(tx, actor, {
 			sourceRecordId: document.record.id,
+			mappingVersion: `vndb.${kind}.2`,
 			path: "/",
 			snapshotId: document.snapshot.id,
 			reference,
@@ -567,6 +558,7 @@ async function adoptVndbEntity(
 	else
 		await bindCatalogSourceIdentity(tx, actor, {
 			sourceRecordId: document.record.id,
+			mappingVersion: `vndb.${kind}.2`,
 			path: "/",
 			snapshotId: document.snapshot.id,
 			reference,

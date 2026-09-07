@@ -9,7 +9,9 @@ import { bindCatalogSourceIdentity, acceptCatalogSourceInitialization } from "./
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { VndbCatalogContractSha256, VndbVnSchema, vndbLanguage, vndbSourceKey } from "./vndb";
-import { addCatalogName } from "./storage";
+import type { z } from "zod";
+import { recordVndbSoftwareScalarOccurrence } from "./vndb-release";
+import { appendVndbVnNames, appendVndbDisplayName } from "./vndb-names";
 import { createSoftwareParticipationContext } from "./software-contexts";
 import { createNativeSoftwareContent, reviseSoftwareContent } from "./software";
 import { appendVndbSemantics } from "./vndb-semantics";
@@ -40,7 +42,18 @@ export async function adoptVndbVn(
 	)
 		throw new TypeError("VNDB payload identity differs from its source key");
 	const observation = await recordCatalogSourceDocument(tx, receipt, bytes);
-	const existing = await inspectExistingSourceBinding(tx, actor, observation, "vndb.vn.1");
+	return writeVndbVnProjection(tx, actor, record, observation);
+}
+
+/** @internal API and dump projections share canonical native writers and preserve exact evidence paths. */
+export async function writeVndbVnProjection(
+	tx: DatabaseTransaction,
+	actor: string,
+	record: z.output<typeof VndbVnSchema>,
+	observation: Awaited<ReturnType<typeof recordCatalogSourceDocument>>,
+	sourcePath: (path: string) => string = (path) => path,
+) {
+	const existing = await inspectExistingSourceBinding(tx, actor, observation, "vndb.vn.2");
 	if (existing && existing.status !== "initialize_reference") return existing;
 	const details = {
 		originalLanguageTag: record.olang ? vndbLanguage(record.olang) : null,
@@ -65,46 +78,28 @@ export async function adoptVndbVn(
 				name: { value: record.title, languageTag: null },
 				details,
 			});
-	const minutes = record.length_minutes;
-	await tx
-		.insert(softwareVisualNovel)
-		.values({
-			id: identity.id,
-			lengthMinutes:
-				minutes !== null && minutes !== undefined && Number.isSafeInteger(minutes) && minutes >= 0
-					? minutes
-					: null,
-		})
-		.onConflictDoNothing();
-	let revision = identity.revision;
-	for (const title of record.titles ?? []) {
-		const languageTag = vndbLanguage(title.lang);
-		if (title.title)
-			revision = (
-				await addCatalogName(tx, identity, actor, revision, {
-					kind: "source-title",
-					languageTag,
-					value: title.title,
-				})
-			).revision;
-		if (title.latin)
-			revision = (
-				await addCatalogName(tx, identity, actor, revision, {
-					kind: "source-transliteration",
-					languageTag: null,
-					value: title.latin,
-				})
-			).revision;
-	}
-	for (const alias of record.aliases ?? [])
-		if (alias)
-			revision = (
-				await addCatalogName(tx, identity, actor, revision, {
-					kind: "source-alias",
-					languageTag: null,
-					value: alias,
-				})
-			).revision;
+	await tx.insert(softwareVisualNovel).values({ id: identity.id }).onConflictDoNothing();
+	const displayRevision = await appendVndbDisplayName(
+		tx,
+		identity,
+		actor,
+		identity.revision,
+		record.title,
+		observation,
+		"vndb.vn.name",
+		sourcePath("/title"),
+		"nameId" in identity ? { id: identity.nameId, revision: identity.nameRevision } : undefined,
+	);
+	await recordVndbSoftwareScalarOccurrence(tx, observation, identity.id, sourcePath("/"));
+	let revision = await appendVndbVnNames(
+		tx,
+		identity,
+		actor,
+		displayRevision,
+		record,
+		observation,
+		sourcePath,
+	);
 	for (const [position, edition] of (record.editions ?? []).entries()) {
 		const languageTag = edition.lang === null ? null : vndbLanguage(edition.lang);
 		const context = await createSoftwareParticipationContext(tx, identity, actor, {
@@ -120,14 +115,14 @@ export async function adoptVndbVn(
 			contentId: identity.id,
 			contextId: context.contextId,
 			contextRevision: context.revision,
-			sourcePointer: `/editions/${position}`,
+			sourcePointer: sourcePath(`/editions/${position}`),
 			sourceLabel: edition.name,
 			sourceLanguage: edition.lang,
 			sourceLanguageTag: languageTag,
 			sourceClaimedOfficial: edition.official,
 		});
 	}
-	await appendVndbParticipation(tx, identity, actor, record, observation);
+	await appendVndbParticipation(tx, identity, actor, record, observation, sourcePath);
 	if (!existing)
 		await tx.insert(CatalogFactTables.software.identifier).values({
 			ownerId: identity.id,
@@ -135,11 +130,20 @@ export async function adoptVndbVn(
 			value: record.id,
 			normalizedValue: record.id,
 		});
-	revision = await appendVndbSemantics(tx, identity, actor, revision, record, observation);
+	revision = await appendVndbSemantics(
+		tx,
+		identity,
+		actor,
+		revision,
+		record,
+		observation,
+		sourcePath,
+	);
 	const reference = { owner: "software" as const, id: identity.id };
 	if (existing)
 		await acceptCatalogSourceInitialization(tx, actor, {
 			sourceRecordId: observation.record.id,
+			mappingVersion: "vndb.vn.2",
 			path: "/",
 			snapshotId: observation.snapshot.id,
 			reference,
@@ -149,6 +153,7 @@ export async function adoptVndbVn(
 	else
 		await bindCatalogSourceIdentity(tx, actor, {
 			sourceRecordId: observation.record.id,
+			mappingVersion: "vndb.vn.2",
 			path: "/",
 			snapshotId: observation.snapshot.id,
 			reference,

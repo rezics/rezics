@@ -137,25 +137,11 @@ export const softwareVersion = pgTable(
 	],
 );
 
-export const softwareVisualNovel = pgTable(
-	"software_visual_novel",
-	{
-		id: uuid()
-			.primaryKey()
-			.references(() => softwareContent.id, { onDelete: "restrict" }),
-		lengthTypeRevisionId: uuid().references(() => catalogDefinitionRevision.id, {
-			onDelete: "restrict",
-		}),
-		lengthMinutes: bigint({ mode: "number" }),
-	},
-	(table) => [
-		index("software_vn_length_type_idx").on(table.lengthTypeRevisionId, table.id),
-		check(
-			"software_vn_length_check",
-			sql`${table.lengthMinutes} is null or ${table.lengthMinutes} between 0 and 9007199254740991`,
-		),
-	],
-);
+export const softwareVisualNovel = pgTable("software_visual_novel", {
+	id: uuid()
+		.primaryKey()
+		.references(() => softwareContent.id, { onDelete: "restrict" }),
+});
 
 /** Provider-independent grouping of participation in one software content. */
 export const softwareParticipationContext = pgTable(

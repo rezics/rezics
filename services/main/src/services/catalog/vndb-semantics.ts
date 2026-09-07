@@ -1,5 +1,7 @@
+import { and, eq } from "drizzle-orm";
 import { createHash } from "node:crypto";
 import { z } from "zod";
+import type { CatalogSourceNativeChange } from "./source-applications";
 import type { DatabaseTransaction } from "../database";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import { acceptCatalogSourceInitialization, bindCatalogSourceIdentity } from "./source-bindings";
@@ -33,11 +35,12 @@ type Document = Awaited<ReturnType<typeof recordCatalogSourceDocument>>;
 type TargetRule = { owner: CatalogOwner; shapes: string[] };
 const subjectTargets: TargetRule[] = [
 	{ owner: "software", shapes: ["content", "release", "engine"] },
-	{ owner: "entity", shapes: ["person", "organization", "character", "unresolved"] },
+	{ owner: "entity", shapes: ["person", "organization", "collective", "character", "unresolved"] },
 	{ owner: "reference", shapes: ["concept", "quotation", "image", "access-mechanism"] },
 ];
 const roleTargets: Record<string, TargetRule[]> = {
 	subject: subjectTargets,
+	producer: [{ owner: "entity", shapes: ["person", "organization", "collective", "unresolved"] }],
 	image: [{ owner: "reference", shapes: ["image"] }],
 	content: [{ owner: "software", shapes: ["content"] }],
 	release: [{ owner: "software", shapes: ["release"] }],
@@ -47,7 +50,7 @@ const roleTargets: Record<string, TargetRule[]> = {
 	engine: [{ owner: "software", shapes: ["engine"] }],
 	related: [
 		{ owner: "software", shapes: ["content"] },
-		{ owner: "entity", shapes: ["person", "organization", "unresolved"] },
+		{ owner: "entity", shapes: ["person", "organization", "collective", "unresolved"] },
 	],
 };
 const scalarDefinitions: VndbSemanticFact[] = [
@@ -62,6 +65,13 @@ const scalarDefinitions: VndbSemanticFact[] = [
 		"quotation-text",
 		"access-mechanism-description",
 		"engine-description",
+		"primary-language",
+		"playtime-estimator",
+		"playtime-basis",
+		"playtime-rough-category",
+		"access-mechanism-note",
+		"story-animation-summary",
+		"erotic-animation-summary",
 	].map((key) => ({
 		namespace: "catalog.metadata" as const,
 		key,
@@ -70,6 +80,8 @@ const scalarDefinitions: VndbSemanticFact[] = [
 		path: "/",
 	})),
 	...[
+		"playtime-estimate-minutes",
+		"playtime-sample-count",
 		"image-dims-width",
 		"image-dims-height",
 		"image-thumbnail_dims-width",
@@ -82,6 +94,8 @@ const scalarDefinitions: VndbSemanticFact[] = [
 		path: "/",
 	})),
 	...[
+		"background-effects",
+		"animated-facial-features",
 		"is-photograph",
 		"image-all-release-languages",
 		"requires-disc-check",
@@ -205,8 +219,19 @@ async function appendFact(
 	item: VndbSemanticFact,
 	definitionId: string,
 	document: Document,
+	sourceKey: string,
+	replacement?: { semanticId: string; headVersion: number },
 ) {
-	const fact = await beginCatalogFact(tx, reference, actor, revision, definitionId);
+	const fact = await beginCatalogFact(
+		tx,
+		reference,
+		actor,
+		revision,
+		definitionId,
+		replacement
+			? { semanticId: replacement.semanticId, expectedHeadVersion: replacement.headVersion }
+			: {},
+	);
 	const appended = await appendCatalogFactNodes(tx, reference, actor, fact.revision, fact.id, -1, [
 		...catalogValueNodes(item.value),
 	]);
@@ -219,17 +244,27 @@ async function appendFact(
 		appended.lastNodePosition,
 	);
 	await tx.insert(CatalogFactTables[reference.owner].support).values({
+		id: vndbSemanticSupportId(document, sourceKey),
 		ownerId: reference.id,
 		factId: fact.id,
 		sourceRecordId: document.record.id,
 		snapshotId: document.snapshot.id,
 		sourcePath: item.path,
 	});
-	return { id: fact.id, revision: sealed.revision };
+	return {
+		id: fact.id,
+		revision: sealed.revision,
+		semanticId: sealed.semanticId,
+		headVersion: sealed.headVersion,
+	};
 }
 
 function allowedRoles(relation: VndbSemanticRelation) {
-	if (relation.key === "external-link") return ["subject"];
+	if (relation.key === "supersedes-release") return ["subject", "release"];
+	if (relation.key === "developed-by" || relation.key === "published-by")
+		return ["subject", "producer"];
+	if (relation.key === "external-link" || relation.key === "reported-playtime-estimate")
+		return ["subject"];
 	if (relation.key === "has-image") return ["subject", "image", "content", "release"];
 	if (
 		["has-subject-tag", "has-character-trait", "has-broader-concept", "has-trait-group"].includes(
@@ -244,50 +279,86 @@ function allowedRoles(relation: VndbSemanticRelation) {
 	return ["subject", "related"];
 }
 
-async function appendPlan(
+/** @internal Accepts only plans constructed by the reviewed VNDB semantic planners. */
+export async function appendVndbSemanticPlan(
 	tx: DatabaseTransaction,
 	reference: CatalogReference,
 	actor: string,
 	revision: number,
 	plan: VndbSemanticPlan,
 	document: Document,
+	options: {
+		replacements?: ReadonlyMap<string, { semanticId: string; headVersion: number }>;
+		reuse?: ReadonlyMap<
+			string,
+			{ id: string; semanticId: string; headVersion: number; kind: "fact" | "relation" }
+		>;
+		changes?: CatalogSourceNativeChange[];
+	} = {},
 ) {
 	if (!plan.facts.length && !plan.relations.length) return revision;
 	await loadCatalogIdentity(tx, reference, actor, true);
 	const { definitions, roles } = await semanticDefinitions(tx);
-	for (const item of plan.facts)
-		revision = (
-			await appendFact(
-				tx,
-				reference,
-				actor,
-				revision,
-				item,
-				mustGet(definitions, `${item.namespace}:${item.key}`),
-				document,
-			)
-		).revision;
+	const keys = vndbSemanticKeys(plan);
+	const writeFact = async (item: VndbSemanticFact, key: string) => {
+		const reused = options.reuse?.get(key);
+		if (reused) {
+			if (reused.kind !== "fact") throw new TypeError("Semantic reuse family changed");
+			await reuseVndbSemanticSupport(tx, reference, document, key, item.path, reused);
+			return reused.id;
+		}
+		const replacement = options.replacements?.get(key);
+		const created = await appendFact(
+			tx,
+			reference,
+			actor,
+			revision,
+			item,
+			mustGet(definitions, `${item.namespace}:${item.key}`),
+			document,
+			key,
+			replacement,
+		);
+		revision = created.revision;
+		options.changes?.push({
+			kind: "catalog-semantic",
+			owner: reference.owner,
+			ownerId: reference.id,
+			componentKey: created.semanticId,
+			beforeRevision: replacement?.headVersion ?? null,
+			afterRevision: created.headVersion,
+		});
+		return created.id;
+	};
+	for (const [index, item] of plan.facts.entries()) {
+		const key = keys.facts[index];
+		if (!key) throw new Error("Missing semantic fact key");
+		await writeFact(item, key);
+	}
 	const targets = new Map<string, CatalogReference>();
 	const predicates = new Map<string, string>();
-	for (const relation of plan.relations) {
+	for (const [relationIndex, relation] of plan.relations.entries()) {
+		const relationKey = keys.relations[relationIndex];
+		if (!relationKey) throw new Error("Missing semantic relation key");
 		if (relation.qualifiers.length > 64)
 			throw new RangeError(
 				"VNDB relation qualifier budget exceeded; split language scopes into bounded commands",
 			);
 		const qualifiers: { definitionRevisionId: string; valueFactId: string }[] = [];
-		for (const item of relation.qualifiers) {
-			const definitionId = mustGet(definitions, `${item.namespace}:${item.key}`);
-			const created = await appendFact(
-				tx,
-				reference,
-				actor,
-				revision,
-				item,
-				definitionId,
-				document,
-			);
-			revision = created.revision;
-			qualifiers.push({ definitionRevisionId: definitionId, valueFactId: created.id });
+		for (const [index, item] of relation.qualifiers.entries()) {
+			const key = keys.qualifiers[relationIndex]?.[index];
+			if (!key) throw new Error("Missing semantic qualifier key");
+			const id = await writeFact(item, key);
+			qualifiers.push({
+				definitionRevisionId: mustGet(definitions, `${item.namespace}:${item.key}`),
+				valueFactId: id,
+			});
+		}
+		const reused = options.reuse?.get(relationKey);
+		if (reused) {
+			if (reused.kind !== "relation") throw new TypeError("Semantic reuse family changed");
+			await reuseVndbSemanticSupport(tx, reference, document, relationKey, relation.path, reused);
+			continue;
 		}
 		const participants = [{ roleRevisionId: mustGet(roles, "subject"), target: reference }];
 		for (const participant of relation.participants) {
@@ -309,7 +380,10 @@ async function appendPlan(
 				roleRevisionId: mustGet(roles, role),
 				min: index < 2 ? 1 : 0,
 				max: 1,
-				targets: roleTargets[role] ?? [],
+				targets:
+					relation.key === "reported-playtime-estimate"
+						? [{ owner: "software" as const, shapes: ["content"] }]
+						: (roleTargets[role] ?? []),
 			}));
 			const constraints = { roles: relationRoles, qualifierRevisionIds: [...definitions.values()] };
 			const predicate = await ensureCatalogDefinition(tx, {
@@ -322,13 +396,26 @@ async function appendPlan(
 			definitionRevisionId = predicate.revisionId;
 			predicates.set(relation.key, definitionRevisionId);
 		}
+		const replacement = options.replacements?.get(relationKey);
 		const created = await createCatalogRelation(tx, reference, actor, revision, {
 			definitionRevisionId,
+			...(replacement
+				? { semanticId: replacement.semanticId, expectedHeadVersion: replacement.headVersion }
+				: {}),
 			participants,
 			...{ qualifiers, spoiler: relation.spoiler },
 		});
 		revision = created.revision;
+		options.changes?.push({
+			kind: "catalog-semantic",
+			owner: reference.owner,
+			ownerId: reference.id,
+			componentKey: created.semanticId,
+			beforeRevision: replacement?.headVersion ?? null,
+			afterRevision: created.headVersion,
+		});
 		await tx.insert(CatalogFactTables[reference.owner].support).values({
+			id: vndbSemanticSupportId(document, relationKey),
 			ownerId: reference.id,
 			relationId: created.id,
 			sourceRecordId: document.record.id,
@@ -351,8 +438,16 @@ export async function appendVndbSemantics(
 	expectedRevision: number,
 	record: unknown,
 	document: Document,
+	sourcePath: (path: string) => string = (path) => path,
 ): Promise<number> {
-	return appendPlan(tx, reference, actor, expectedRevision, planVndbSemantics(record), document);
+	return appendVndbSemanticPlan(
+		tx,
+		reference,
+		actor,
+		expectedRevision,
+		remapVndbSemanticPlan(planVndbSemantics(record), sourcePath),
+		document,
+	);
 }
 
 /** @alpha Import a single validated dump DAG edge without walking ancestors or inferring closure. */
@@ -378,7 +473,7 @@ export async function appendVndbHierarchyEdge(
 	});
 	if (reference.owner !== child.owner || reference.id !== child.id)
 		throw new TypeError("Hierarchy subject differs from the bound child concept");
-	return appendPlan(
+	return appendVndbSemanticPlan(
 		tx,
 		reference,
 		actor,
@@ -436,7 +531,7 @@ export async function appendVndbReleaseTechnology(
 		.parse(input);
 	if (document.referenceAt(value.path).externalId !== String(value.id))
 		throw new TypeError("Release technology differs from archived source reference");
-	return appendPlan(
+	return appendVndbSemanticPlan(
 		tx,
 		reference,
 		actor,
@@ -647,7 +742,7 @@ export async function adoptVndbSemanticObject(
 				participant.target.path = normalized.sourcePath(participant.target.path);
 		}
 	}
-	revision = await appendPlan(tx, identity, actor, revision, plan, document);
+	revision = await appendVndbSemanticPlan(tx, identity, actor, revision, plan, document);
 	const tables = CatalogFactTables[owner];
 	if (!existing) {
 		const [identifier] = await tx
@@ -672,6 +767,7 @@ export async function adoptVndbSemanticObject(
 	if (existing)
 		await acceptCatalogSourceInitialization(tx, actor, {
 			sourceRecordId: document.record.id,
+			mappingVersion: `vndb.${record.objectType}.semantic.1`,
 			path: "/",
 			snapshotId: document.snapshot.id,
 			reference,
@@ -681,6 +777,7 @@ export async function adoptVndbSemanticObject(
 	else
 		await bindCatalogSourceIdentity(tx, actor, {
 			sourceRecordId: document.record.id,
+			mappingVersion: `vndb.${record.objectType}.semantic.1`,
 			path: "/",
 			snapshotId: document.snapshot.id,
 			reference,
@@ -691,4 +788,107 @@ export async function adoptVndbSemanticObject(
 		revision,
 		snapshotId: document.snapshot.id,
 	};
+}
+
+/** @internal Normalized dump plans retain the original archived pointer at every evidence edge. */
+export function remapVndbSemanticPlan(
+	plan: VndbSemanticPlan,
+	path: (value: string) => string,
+): VndbSemanticPlan {
+	return {
+		facts: plan.facts.map((value) => ({ ...value, path: path(value.path) })),
+		relations: plan.relations.map((value) => ({
+			...value,
+			path: path(value.path),
+			qualifiers: value.qualifiers.map((fact) => ({ ...fact, path: path(fact.path) })),
+			participants: value.participants.map((participant) => ({
+				...participant,
+				target: { ...participant.target, path: path(participant.target.path) },
+			})),
+		})),
+	};
+}
+
+/** @internal Stable semantic occurrence keys exclude mutable qualifiers and source array positions. */
+export function vndbSemanticKeys(plan: VndbSemanticPlan) {
+	const duplicates = new Map<string, number>();
+	const identify = (parts: unknown[]) => {
+		const value = JSON.stringify(parts);
+		const index = duplicates.get(value) ?? 0;
+		duplicates.set(value, index + 1);
+		return `${createHash("sha256").update(value).digest("hex")}/${index}`;
+	};
+	const facts = plan.facts.map((fact) => identify(["fact", fact.namespace, fact.key]));
+	const relations = plan.relations.map((relation) =>
+		identify([
+			"relation",
+			relation.key,
+			relation.participants.map(({ role, target }) => [role, target.objectType, target.externalId]),
+			relation.qualifiers
+				.filter(
+					(fact) =>
+						["external-site", "external-identifier", "image-source-language"].includes(fact.key) ||
+						(fact.key === "url" &&
+							!relation.qualifiers.some((other) => other.key === "external-identifier")),
+				)
+				.map((fact) => [fact.namespace, fact.key, fact.value]),
+		]),
+	);
+	const qualifiers = plan.relations.map((relation, index) =>
+		relation.qualifiers.map((fact) =>
+			identify(["qualifier", relations[index], fact.namespace, fact.key]),
+		),
+	);
+	return { facts, relations, qualifiers };
+}
+
+/** @internal Exact per-snapshot source support identity avoids ambiguous repeated qualifiers. */
+export function vndbSemanticSupportId(
+	document: Pick<Document, "record" | "snapshot">,
+	key: string,
+) {
+	const bytes = createHash("sha256")
+		.update(`vndb-semantic-support\n${document.record.id}\n${document.snapshot.id}\n${key}`)
+		.digest();
+	bytes[6] = ((bytes[6] ?? 0) & 15) | 128;
+	bytes[8] = ((bytes[8] ?? 0) & 63) | 128;
+	const hex = bytes.subarray(0, 16).toString("hex");
+	return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+async function reuseVndbSemanticSupport(
+	tx: DatabaseTransaction,
+	reference: CatalogReference,
+	document: Document,
+	key: string,
+	sourcePath: string,
+	value: { id: string; kind: "fact" | "relation" },
+) {
+	const table = CatalogFactTables[reference.owner].support;
+	const id = vndbSemanticSupportId(document, key);
+	await tx
+		.insert(table)
+		.values({
+			id,
+			ownerId: reference.id,
+			factId: value.kind === "fact" ? value.id : null,
+			relationId: value.kind === "relation" ? value.id : null,
+			sourceRecordId: document.record.id,
+			snapshotId: document.snapshot.id,
+			sourcePath,
+		})
+		.onConflictDoNothing();
+	const [row] = await tx
+		.select()
+		.from(table)
+		.where(and(eq(table.ownerId, reference.id), eq(table.id, id)))
+		.limit(1);
+	if (
+		!row ||
+		row.sourceRecordId !== document.record.id ||
+		row.snapshotId !== document.snapshot.id ||
+		row.sourcePath !== sourcePath ||
+		(value.kind === "fact" ? row.factId : row.relationId) !== value.id
+	)
+		throw new Error("Immutable VNDB semantic source occurrence differs");
 }

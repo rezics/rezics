@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { vndbLanguage } from "./vndb";
 import type { CatalogOwner } from "./contracts";
 
 const count = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
@@ -61,6 +62,8 @@ const relations = z
 export const VndbSemanticFieldsSchema = z.object({
 	id: z.string().regex(/^[vrcspgiq]\d+$/u),
 	description: text.nullable().optional(),
+	official: z.boolean().optional(),
+	lang: z.string().optional(),
 	extlinks: z
 		.array(
 			z.object({
@@ -69,6 +72,18 @@ export const VndbSemanticFieldsSchema = z.object({
 				name: z.string().min(1).max(128).optional(),
 				id: externalId.optional(),
 			}),
+		)
+		.max(512)
+		.optional(),
+	producers: z
+		.array(
+			z
+				.object({
+					id: z.string().regex(/^p[1-9][0-9]*$/u),
+					developer: z.boolean(),
+					publisher: z.boolean(),
+				})
+				.refine((row) => row.developer || row.publisher, "Producer must have a role"),
 		)
 		.max(512)
 		.optional(),
@@ -242,8 +257,63 @@ export function planVndbSemantics(input: unknown): VndbSemanticPlan {
 			throw new RangeError("VNDB semantic command exceeds its bounded occurrence budget");
 		plan.relations.push(relation);
 	};
-	if (record.description !== undefined)
+	if ((record.id.startsWith("s") || record.id.startsWith("p")) && record.lang !== undefined)
+		plan.facts.push(fact("primary-language", vndbLanguage(record.lang), "/lang", "string"));
+	if (record.description !== undefined && !record.id.startsWith("v"))
 		plan.facts.push(fact("description.vndb-markup", record.description, "/description", "string"));
+	if (record.id.startsWith("r") && record.official !== undefined)
+		plan.facts.push(
+			fact("claimed-official", record.official, "/official", "boolean", "source.vndb.qualifier"),
+		);
+	if (
+		record.id.startsWith("v") &&
+		(record.length_minutes !== undefined ||
+			record.length_votes !== undefined ||
+			record.length !== undefined)
+	) {
+		const reported = record.length_minutes !== undefined || record.length_votes !== undefined;
+		const evidence =
+			record.length_minutes !== undefined
+				? "/length_minutes"
+				: record.length_votes !== undefined
+					? "/length_votes"
+					: "/length";
+		const qualifiers: VndbSemanticFact[] = [
+			fact(
+				"playtime-estimator",
+				reported ? "reported_average" : "editorial_category",
+				evidence,
+				"string",
+			),
+			fact("playtime-basis", reported ? "user_reports" : "source_editorial", evidence, "string"),
+		];
+		if (record.length_minutes !== undefined)
+			qualifiers.push(
+				fact("playtime-estimate-minutes", record.length_minutes, "/length_minutes", "number"),
+			);
+		if (record.length_votes !== undefined)
+			qualifiers.push(
+				fact("playtime-sample-count", record.length_votes, "/length_votes", "number"),
+			);
+		if (record.length !== undefined) {
+			const categories = ["very_short", "short", "medium", "long", "very_long"] as const;
+			qualifiers.push(
+				fact(
+					"playtime-rough-category",
+					record.length === null ? null : (categories[record.length - 1] ?? null),
+					"/length",
+					"string",
+				),
+			);
+		}
+		addRelation({
+			key: "reported-playtime-estimate",
+			path: "/",
+			spoiler: 0,
+			participants: [],
+			qualifiers,
+		});
+	}
 	// Cached source aggregates are available through the immutable source-field reader.
 	// They are not duplicated into corpus-scale native OLTP fact tables.
 	for (const [i, link] of (record.extlinks ?? []).entries()) {
@@ -436,6 +506,23 @@ export function planVndbSemantics(input: unknown): VndbSemanticPlan {
 				participants: [{ role: "concept", target: target(term.id, `${path}/id`, term.name) }],
 			});
 		}
+	}
+	for (const [index, producer] of (record.producers ?? []).entries()) {
+		if (!record.id.startsWith("r")) throw new TypeError("Release producer roles require a release");
+		for (const [field, key] of [
+			["developer", "developed-by"],
+			["publisher", "published-by"],
+		] as const)
+			if (producer[field])
+				addRelation({
+					key,
+					path: `/producers/${index}/${field}`,
+					spoiler: 0,
+					qualifiers: [],
+					participants: [
+						{ role: "producer", target: target(producer.id, `/producers/${index}/id`) },
+					],
+				});
 	}
 	if (record.id.startsWith("c"))
 		for (const [i, appearance] of (record.vns ?? []).entries()) {

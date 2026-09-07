@@ -4,6 +4,9 @@ import type { DatabaseTransaction } from "../database";
 import { VndbDumpContractSha256, VndbReleaseSchema } from "./vndb";
 import { planVndbRelease, writeVndbReleaseProjection } from "./vndb-release";
 import { recordCatalogSourceDocument, type CatalogSourceReceipt } from "./source-observations";
+import { appendVndbSemanticPlan } from "./vndb-semantics";
+import type { VndbSemanticFact, VndbSemanticPlan } from "./vndb-semantics-contracts";
+import { softwareComponentSourceOccurrence } from "../database/schema/catalog-software-source";
 import { setSoftwareAnimation, vndbAnimation } from "./software-animation";
 
 const count = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
@@ -75,6 +78,18 @@ export const VndbDumpReleaseSchema = z
 			.array(ownerRow.extend({ rid: releaseId }))
 			.max(4096)
 			.default([]),
+		producers: z
+			.array(
+				ownerRow
+					.extend({
+						pid: z.string().regex(/^p[1-9][0-9]*$/u),
+						developer: z.boolean(),
+						publisher: z.boolean(),
+					})
+					.refine((row) => row.developer || row.publisher, "Producer must have a role"),
+			)
+			.max(4096)
+			.default([]),
 		drm: z
 			.array(ownerRow.extend({ drm: count, notes: z.string() }))
 			.max(128)
@@ -82,7 +97,15 @@ export const VndbDumpReleaseSchema = z
 	})
 	.passthrough()
 	.superRefine((value, ctx) => {
-		for (const family of ["titles", "platforms", "media", "vns", "supersedes", "drm"] as const)
+		for (const family of [
+			"titles",
+			"platforms",
+			"media",
+			"vns",
+			"supersedes",
+			"drm",
+			"producers",
+		] as const)
 			for (const [index, row] of value[family].entries())
 				if (row.id !== value.release.id)
 					ctx.addIssue({
@@ -201,11 +224,184 @@ export async function adoptVndbDumpRelease(
 		plan.details,
 		document,
 		(position) => `/vns/${position}/vid`,
+		(path) => vndbDumpReleaseSourcePath(plan.document, path),
 	);
 	if (result.status !== "created") return result;
 	let revision = result.revision;
-	for (const animation of plan.animationContexts)
+	const animationFields = {
+		story_sprite: "ani_story_sp",
+		story_scene: "ani_story_cg",
+		cutscene: "ani_cutscene",
+		erotic_sprite: "ani_ero_sp",
+		erotic_scene: "ani_ero_cg",
+	} as const;
+	for (const animation of plan.animationContexts) {
 		revision = (await setSoftwareAnimation(tx, result.reference, actor, revision, animation))
 			.revision;
+		await tx
+			.insert(softwareComponentSourceOccurrence)
+			.values({
+				sourceRecordId: document.record.id,
+				snapshotId: document.snapshot.id,
+				ownerId: result.reference.id,
+				component: "animation",
+				componentKey: animation.context,
+				revision,
+				sourcePath: `/release/${animationFields[animation.context]}`,
+			});
+	}
+	revision = await appendVndbSemanticPlan(
+		tx,
+		result.reference,
+		actor,
+		revision,
+		planVndbDumpReleaseSemantics(plan.document),
+		document,
+	);
 	return { ...result, revision };
+}
+
+/** @alpha @remarks Dump associations are native qualified relations; supersession never implies patch applicability. */
+export function planVndbDumpReleaseSemantics(input: unknown): VndbSemanticPlan {
+	const document = VndbDumpReleaseSchema.parse(input);
+	const result: VndbSemanticPlan = {
+		facts: [
+			{
+				namespace: "source.vndb.qualifier",
+				key: "claimed-official",
+				value: document.release.official,
+				kind: "boolean",
+				path: "/release/official",
+			},
+		],
+		relations: [],
+	};
+	const fact = (
+		key: string,
+		value: VndbSemanticFact["value"],
+		path: string,
+		kind: VndbSemanticFact["kind"],
+	): VndbSemanticFact => ({ key, value, path, kind, namespace: "catalog.metadata" });
+	const animation = [
+		"unknown",
+		"none",
+		"simple",
+		"some_fully_animated_scenes",
+		"all_scenes_fully_animated",
+	] as const;
+	for (const [field, key] of [
+		["ani_story", "story-animation-summary"],
+		["ani_ero", "erotic-animation-summary"],
+	] as const) {
+		const code = document.release[field];
+		if (code !== undefined)
+			result.facts.push(fact(key, animation[code] ?? null, `/release/${field}`, "string"));
+	}
+	for (const [field, key] of [
+		["ani_bg", "background-effects"],
+		["ani_face", "animated-facial-features"],
+	] as const) {
+		const value = document.release[field];
+		if (value !== undefined) result.facts.push(fact(key, value, `/release/${field}`, "boolean"));
+	}
+	for (const [index, row] of document.supersedes.entries()) {
+		if (row.rid === document.release.id) throw new TypeError("A release cannot supersede itself");
+		result.relations.push({
+			key: "supersedes-release",
+			path: `/supersedes/${index}`,
+			spoiler: 0,
+			qualifiers: [],
+			participants: [
+				{
+					role: "release",
+					target: {
+						owner: "software",
+						shape: "release",
+						objectType: "release",
+						externalId: row.rid,
+						path: `/supersedes/${index}/rid`,
+					},
+				},
+			],
+		});
+	}
+	for (const [index, row] of document.drm.entries())
+		result.relations.push({
+			key: "uses-access-mechanism",
+			path: `/drm/${index}`,
+			spoiler: 0,
+			qualifiers: [fact("access-mechanism-note", row.notes, `/drm/${index}/notes`, "string")],
+			participants: [
+				{
+					role: "mechanism",
+					target: {
+						owner: "reference",
+						shape: "access-mechanism",
+						objectType: "drm",
+						externalId: String(row.drm),
+						path: `/drm/${index}/drm`,
+					},
+				},
+			],
+		});
+	if (document.release.engine !== null)
+		result.relations.push({
+			key: "uses-software-engine",
+			path: "/release/engine",
+			spoiler: 0,
+			qualifiers: [],
+			participants: [
+				{
+					role: "engine",
+					target: {
+						owner: "software",
+						shape: "engine",
+						objectType: "engine",
+						externalId: String(document.release.engine),
+						path: "/release/engine",
+					},
+				},
+			],
+		});
+	for (const [index, row] of document.producers.entries())
+		for (const [field, key] of [
+			["developer", "developed-by"],
+			["publisher", "published-by"],
+		] as const)
+			if (row[field])
+				result.relations.push({
+					key,
+					path: `/producers/${index}/${field}`,
+					spoiler: 0,
+					qualifiers: [],
+					participants: [
+						{
+							role: "producer",
+							target: {
+								owner: "entity",
+								shape: "unresolved",
+								objectType: "producer",
+								externalId: row.pid,
+								path: `/producers/${index}/pid`,
+							},
+						},
+					],
+				});
+	return result;
+}
+
+/** @internal API-shaped planning paths resolve to original assembled public dump columns. */
+export function vndbDumpReleaseSourcePath(
+	document: z.output<typeof VndbDumpReleaseSchema>,
+	path: string,
+) {
+	if (path === "/") return "/release";
+	if (path === "/title") {
+		const index = document.titles.findIndex((title) => title.lang === document.release.olang);
+		const main = document.titles[index];
+		if (!main) throw new TypeError("Dump main title is missing");
+		return `/titles/${index}/${main.latin ? "latin" : "title"}`;
+	}
+	if (path.startsWith("/languages/")) return path.replace("/languages/", "/titles/");
+	return path;
 }
