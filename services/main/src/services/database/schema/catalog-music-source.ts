@@ -1,4 +1,5 @@
-import { sql } from "drizzle-orm";
+import { sql, inArray } from "drizzle-orm";
+import { CatalogOwnerValues, type CatalogOwner } from "../../catalog/contracts";
 import {
 	bigint,
 	boolean,
@@ -21,7 +22,7 @@ export const musicComponentSourceBaseline = pgTable(
 		sourceRecordId: uuid().notNull(),
 		mappingKey: uuid().notNull(),
 		correspondenceRevision: bigint({ mode: "number" }).notNull(),
-		mappingOwner: text().$type<"music">().default("music").notNull(),
+		mappingOwner: text().$type<CatalogOwner>().notNull(),
 		ownerId: uuid().notNull(),
 		component: text().notNull(),
 		componentKey: text().notNull(),
@@ -95,6 +96,6 @@ export const musicComponentSourceBaseline = pgTable(
 		}).onDelete("restrict"),
 		index("music_source_baseline_current_idx").on(table.ownerId, table.currentHistoryId),
 		check("music_source_baseline_action_check", sql`${table.action} in ('apply','withdraw')`),
-		check("music_source_baseline_owner_check", sql`${table.mappingOwner} = 'music'`),
+		check("music_source_baseline_owner_check", inArray(table.mappingOwner, CatalogOwnerValues)),
 	],
 );

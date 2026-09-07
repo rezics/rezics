@@ -333,6 +333,7 @@ export async function advanceCatalogSourceOwnedBaselines(
 		};
 		const common = {
 			...locator,
+			mappingOwner: proposal.mappingOwner,
 			currentRevision: change.afterRevision,
 			lastProposalId: input.proposalId,
 			lastAction: input.action,

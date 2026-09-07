@@ -172,6 +172,7 @@ export async function advanceMusicSourceComponentBaselines(
 			.values({
 				sourceRecordId: input.sourceRecordId,
 				mappingKey: proposal.mappingKey,
+				mappingOwner: proposal.mappingOwner,
 				correspondenceRevision: scope.correspondenceRevision,
 				ownerId: change.ownerId,
 				component: change.component,
