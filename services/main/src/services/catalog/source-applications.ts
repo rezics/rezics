@@ -129,6 +129,9 @@ export async function recordCatalogSourceApplication(
 		proposalId: string;
 		action: "apply" | "withdraw";
 		previousSnapshotId: string | null;
+		previousEvidenceSourceRecordId?: string | null;
+		previousEvidenceSnapshotId?: string | null;
+		previousEvidencePath?: string | null;
 		beforeRevision: number;
 		afterRevision: number;
 	},
@@ -155,14 +158,12 @@ export async function recordCatalogSourceApplication(
 						: change.kind === "catalog-name"
 							? tables.name
 							: tables.authority;
-				await tx
-					.insert(table)
-					.values({
-						...common,
-						componentKey: change.componentKey,
-						beforeRevision: change.beforeRevision,
-						afterRevision: change.afterRevision,
-					});
+				await tx.insert(table).values({
+					...common,
+					componentKey: change.componentKey,
+					beforeRevision: change.beforeRevision,
+					afterRevision: change.afterRevision,
+				});
 				break;
 			}
 			case "software-context":
@@ -171,14 +172,12 @@ export async function recordCatalogSourceApplication(
 					change.kind === "software-context"
 						? softwareSourceContextApplicationChange
 						: softwareSourceParticipationApplicationChange;
-				await tx
-					.insert(table)
-					.values({
-						...common,
-						componentKey: change.componentKey,
-						beforeRevision: change.beforeRevision,
-						afterRevision: change.afterRevision,
-					});
+				await tx.insert(table).values({
+					...common,
+					componentKey: change.componentKey,
+					beforeRevision: change.beforeRevision,
+					afterRevision: change.afterRevision,
+				});
 				break;
 			}
 			case "music-component":

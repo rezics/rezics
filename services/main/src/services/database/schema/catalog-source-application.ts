@@ -31,6 +31,9 @@ export const catalogSourceApplication = pgTable(
 		proposalId: uuid().notNull(),
 		action: text().$type<"apply" | "withdraw">().notNull(),
 		previousSnapshotId: uuid(),
+		previousEvidenceSourceRecordId: uuid(),
+		previousEvidenceSnapshotId: uuid(),
+		previousEvidencePath: text(),
 		beforeRevision: bigint({ mode: "number" }).notNull(),
 		afterRevision: bigint({ mode: "number" }).notNull(),
 		changeCount: integer().notNull(),
@@ -49,6 +52,15 @@ export const catalogSourceApplication = pgTable(
 			columns: [t.sourceRecordId, t.previousSnapshotId],
 			foreignColumns: [catalogSourceSnapshot.sourceRecordId, catalogSourceSnapshot.id],
 		}).onDelete("restrict"),
+		foreignKey({
+			name: "catalog_source_application_previous_evidence_fk",
+			columns: [t.previousEvidenceSourceRecordId, t.previousEvidenceSnapshotId],
+			foreignColumns: [catalogSourceSnapshot.sourceRecordId, catalogSourceSnapshot.id],
+		}).onDelete("restrict"),
+		check(
+			"catalog_source_application_previous_evidence_check",
+			sql`num_nonnulls(${t.previousEvidenceSourceRecordId},${t.previousEvidenceSnapshotId},${t.previousEvidencePath}) = 0 or (${t.previousSnapshotId} is null and num_nonnulls(${t.previousEvidenceSourceRecordId},${t.previousEvidenceSnapshotId},${t.previousEvidencePath}) = 3 and octet_length(${t.previousEvidencePath}) between 1 and 512)`,
+		),
 		check(
 			"catalog_source_application_values",
 			sql`${t.action} in ('apply','withdraw') and ${t.beforeRevision} >= 1 and ${t.afterRevision} > ${t.beforeRevision} and ${t.afterRevision} <= 9007199254740991 and ${t.changeCount} between 0 and 128`,
