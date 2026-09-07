@@ -2,7 +2,12 @@ import { and, desc, eq, gt, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import type { DatabaseTransaction } from "../database";
-import { softwareIdentity } from "../database/schema/catalog-identity";
+import { softwareIdentity, referenceIdentity } from "../database/schema/catalog-identity";
+import {
+	readCatalogAuthorityScope,
+	catalogIdentityReadPredicate,
+	canAccessCatalog,
+} from "../participation/policy";
 import {
 	softwareContent,
 	softwareVersion,
@@ -464,13 +469,14 @@ export async function readSoftwareReleaseComponents(
 ) {
 	await softwareShape(tx, reference, actor, "release", false);
 	const page = CatalogPageSchema.parse(input);
+	const scope = await readCatalogAuthorityScope(tx, actor);
 	const visibleSoftware = (
 		column:
 			| typeof softwareReleaseContent.contentId
 			| typeof softwareReleaseContent.versionId
 			| typeof softwarePatchTarget.baseReleaseId,
 	) =>
-		sql`exists (select 1 from ${softwareIdentity} where ${softwareIdentity.id} = ${column} and ${softwareIdentity.deletedAt} is null and ((${softwareIdentity.createdByAuthUserId} = ${actor}::uuid) is true or (${softwareIdentity.visibility} in ('public','unlisted') and ${softwareIdentity.status} = 'published' and ${softwareIdentity.moderationStatus} = 'approved')))`;
+		sql`exists (select 1 from ${softwareIdentity} where ${softwareIdentity.id} = ${column} and ${catalogIdentityReadPredicate(scope, "software", softwareIdentity)})`;
 	switch (kind) {
 		case "content": {
 			const t = softwareReleaseContent;
@@ -526,18 +532,18 @@ export async function readSoftwareReleaseComponents(
 		}
 		case "event": {
 			const t = softwareReleaseEvent;
-			const rows = await tx
+			return tx
 				.select()
 				.from(t)
 				.where(
-					and(eq(t.releaseId, reference.id), page.afterId ? gt(t.id, page.afterId) : undefined),
+					and(
+						eq(t.releaseId, reference.id),
+						page.afterId ? gt(t.id, page.afterId) : undefined,
+						sql`(${t.areaId} is null or exists (select 1 from ${referenceIdentity} where ${referenceIdentity.id} = ${t.areaId} and ${catalogIdentityReadPredicate(scope, "reference", referenceIdentity)}))`,
+					),
 				)
 				.orderBy(t.id)
 				.limit(page.limit);
-			for (const row of rows)
-				if (row.areaId)
-					await loadCatalogIdentity(tx, { owner: "reference", id: row.areaId }, actor, false);
-			return rows;
 		}
 		case "patch_target": {
 			const t = softwarePatchTarget;
@@ -633,6 +639,15 @@ const historyPage = z.strictObject({
 	beforeRevision: integer.min(1).optional(),
 	limit: z.number().int().min(1).max(100).default(50),
 });
+const historicalUuidPattern =
+	"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+function historicalSoftwareTarget(
+	scope: Awaited<ReturnType<typeof readCatalogAuthorityScope>>,
+	value: typeof softwareRecordRevision.value | typeof softwareComponentRevision.value,
+	key: "content_id" | "version_id" | "base_release_id",
+) {
+	return sql`exists (select 1 from ${softwareIdentity} where ${softwareIdentity.id} = case when (${value}->>${key}) ~ ${historicalUuidPattern} then (${value}->>${key})::uuid else null end and ${catalogIdentityReadPredicate(scope, "software", softwareIdentity)})`;
+}
 export async function readSoftwareHistory(
 	tx: DatabaseTransaction,
 	reference: CatalogReference,
@@ -640,17 +655,19 @@ export async function readSoftwareHistory(
 	input: z.input<typeof historyPage> = {},
 ) {
 	const identity = await loadCatalogIdentity(tx, reference, actor, false);
-	if (identity.createdByAuthUserId !== actor)
+	if (!(await canAccessCatalog(tx, reference, actor, identity.createdByAuthUserId, false)))
 		throw new CatalogAccessDenied("Software history requires owner access");
 	if (reference.owner !== "software") throw new TypeError("Expected software owner");
 	const page = historyPage.parse(input);
 	const t = softwareRecordRevision;
+	const scope = await readCatalogAuthorityScope(tx, actor);
 	return tx
 		.select()
 		.from(t)
 		.where(
 			and(
 				eq(t.ownerId, reference.id),
+				sql`(${t.shape} <> 'version' or ${historicalSoftwareTarget(scope, t.value, "content_id")})`,
 				page.beforeRevision ? lt(t.revision, page.beforeRevision) : undefined,
 			),
 		)
@@ -727,11 +744,20 @@ export async function readSoftwareComponentHistory(
 	input: z.input<typeof historyPage> = {},
 ) {
 	const identity = await softwareShape(tx, reference, actor, "release", false);
-	if (identity.createdByAuthUserId !== actor)
+	if (!(await canAccessCatalog(tx, reference, actor, identity.createdByAuthUserId, false)))
 		throw new CatalogAccessDenied("Software history requires owner access");
 	z.uuid().parse(componentId);
 	const page = historyPage.parse(input);
 	const t = softwareComponentRevision;
+	const scope = await readCatalogAuthorityScope(tx, actor);
+	const visibleTargets =
+		kind === "content"
+			? sql`${historicalSoftwareTarget(scope, t.value, "content_id")} and (${t.value}->>'version_id' is null or ${historicalSoftwareTarget(scope, t.value, "version_id")})`
+			: kind === "patch_target"
+				? historicalSoftwareTarget(scope, t.value, "base_release_id")
+				: kind === "event"
+					? sql`(${t.value}->>'area_id' is null or exists (select 1 from ${referenceIdentity} where ${referenceIdentity.id} = case when (${t.value}->>'area_id') ~ ${historicalUuidPattern} then (${t.value}->>'area_id')::uuid else null end and ${catalogIdentityReadPredicate(scope, "reference", referenceIdentity)}))`
+					: undefined;
 	return tx
 		.select()
 		.from(t)
@@ -740,6 +766,7 @@ export async function readSoftwareComponentHistory(
 				eq(t.releaseId, reference.id),
 				eq(t.kind, kind),
 				eq(t.componentId, componentId),
+				visibleTargets,
 				page.beforeRevision ? lt(t.revision, page.beforeRevision) : undefined,
 			),
 		)
@@ -777,6 +804,7 @@ export async function findSoftwareReleases(
 	const c = softwareReleaseContent;
 	const r = softwareRelease;
 	const i = softwareIdentity;
+	const scope = await readCatalogAuthorityScope(tx, actor);
 	return tx
 		.selectDistinct({
 			id: r.id,
@@ -793,7 +821,7 @@ export async function findSoftwareReleases(
 			and(
 				eq(c.contentId, content.id),
 				page.afterId ? gt(r.id, page.afterId) : undefined,
-				sql`${i.deletedAt} is null and ((${i.createdByAuthUserId} = ${actor}::uuid) is true or (${i.visibility} in ('public','unlisted') and ${i.status} = 'published' and ${i.moderationStatus} = 'approved'))`,
+				catalogIdentityReadPredicate(scope, "software", i),
 				page.isPatch !== undefined ? eq(r.isPatch, page.isPatch) : undefined,
 				page.languageTag !== undefined || page.machineTranslated !== undefined
 					? sql`exists (select 1 from ${softwareReleaseLanguage} where ${softwareReleaseLanguage.releaseId} = ${r.id} ${page.languageTag ? sql`and ${softwareReleaseLanguage.languageTag} = ${page.languageTag}` : sql``} ${page.machineTranslated !== undefined ? sql`and ${softwareReleaseLanguage.machineTranslated} = ${page.machineTranslated}` : sql``})`

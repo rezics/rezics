@@ -7,6 +7,7 @@ describe("immutable software mapper values", () => {
 			sourceShape: "content",
 			sourceValue: { description: "Source description", originalLanguageTag: "ja" },
 		});
+		if (source.sourceShape !== "content") throw new Error("Expected content interpretation");
 		const native = { ...source.sourceValue, description: "Human description" };
 		expect(source.sourceValue.description).toBe("Source description");
 		expect(native.description).toBe("Human description");

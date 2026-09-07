@@ -1,6 +1,7 @@
 import { and, eq, gt, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
+import { readCatalogAuthorityScope, catalogIdentityReadPredicate } from "../participation/policy";
 import {
 	softwareParticipation as heads,
 	softwareParticipationRevision as revisions,
@@ -186,8 +187,9 @@ export async function readSoftwareParticipations(
 		})
 		.parse(input);
 	await requireContent(tx, content, actor, page.includeWithdrawn);
+	const scope = await readCatalogAuthorityScope(tx, actor);
 	const visibleEntity = (column: typeof revisions.entityId | typeof revisions.characterId) =>
-		sql`exists (select 1 from ${entityIdentity} where ${entityIdentity.id} = ${column} and ${entityIdentity.deletedAt} is null and ((${entityIdentity.createdByAuthUserId} = ${actor}::uuid) is true or (${entityIdentity.visibility} in ('public','unlisted') and ${entityIdentity.status} = 'published' and ${entityIdentity.moderationStatus} = 'approved')))`;
+		sql`exists (select 1 from ${entityIdentity} where ${entityIdentity.id} = ${column} and ${catalogIdentityReadPredicate(scope, "entity", entityIdentity)})`;
 	const rows = await tx
 		.select({ value: revisions })
 		.from(heads)
@@ -266,6 +268,9 @@ export async function readSoftwareParticipationHistory(
 		})
 		.parse(input);
 	await requireContent(tx, content, actor, true);
+	const scope = await readCatalogAuthorityScope(tx, actor);
+	const visibleEntity = (column: typeof revisions.entityId | typeof revisions.characterId) =>
+		sql`exists (select 1 from ${entityIdentity} where ${entityIdentity.id} = ${column} and ${catalogIdentityReadPredicate(scope, "entity", entityIdentity)})`;
 	return tx
 		.select()
 		.from(revisions)
@@ -273,6 +278,8 @@ export async function readSoftwareParticipationHistory(
 			and(
 				eq(revisions.contentId, content.id),
 				eq(revisions.participationId, participationId),
+				visibleEntity(revisions.entityId),
+				sql`(${revisions.characterId} is null or ${visibleEntity(revisions.characterId)})`,
 				page.afterRevision ? gt(revisions.revision, page.afterRevision) : undefined,
 			),
 		)
