@@ -1,4 +1,4 @@
-import { and, desc, eq, gt } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { CatalogStructureHistoryTables } from "../database/schema/catalog-structure-history";
@@ -149,6 +149,23 @@ export async function listStructureComponentHistory(
 	z.string().min(1).max(96).parse(component);
 	z.string().min(1).max(512).parse(componentKey);
 	const table = historyTables(reference).history;
+	let afterSequence: number | undefined;
+	if (page.afterId) {
+		const [cursor] = await tx
+			.select({ sequence: table.componentSequence })
+			.from(table)
+			.where(
+				and(
+					eq(table.ownerId, reference.id),
+					eq(table.id, page.afterId),
+					eq(table.component, component),
+					eq(table.componentKey, componentKey),
+				),
+			)
+			.limit(1);
+		if (!cursor) throw new TypeError("Structure history cursor belongs to another component");
+		afterSequence = cursor.sequence;
+	}
 	return tx
 		.select()
 		.from(table)
@@ -157,10 +174,10 @@ export async function listStructureComponentHistory(
 				eq(table.ownerId, reference.id),
 				eq(table.component, component),
 				eq(table.componentKey, componentKey),
-				page.afterId ? gt(table.id, page.afterId) : undefined,
+				afterSequence !== undefined ? gt(table.componentSequence, afterSequence) : undefined,
 			),
 		)
-		.orderBy(table.id)
+		.orderBy(table.componentSequence)
 		.limit(page.limit);
 }
 
@@ -171,18 +188,28 @@ export async function readStructureComponentHead(
 	component: string,
 	componentKey: string,
 ) {
-	const table = historyTables(reference).history;
+	const { history: table, head } = historyTables(reference);
 	const [row] = await tx
-		.select()
-		.from(table)
+		.select({
+			ownerId: table.ownerId,
+			id: table.id,
+			component: table.component,
+			componentKey: table.componentKey,
+			componentSequence: table.componentSequence,
+			ownerRevision: table.ownerRevision,
+			operation: table.operation,
+			value: table.value,
+			createdAt: table.createdAt,
+		})
+		.from(head)
+		.innerJoin(table, and(eq(table.ownerId, head.ownerId), eq(table.id, head.historyId)))
 		.where(
 			and(
-				eq(table.ownerId, reference.id),
-				eq(table.component, component),
-				eq(table.componentKey, componentKey),
+				eq(head.ownerId, reference.id),
+				eq(head.component, component),
+				eq(head.componentKey, componentKey),
 			),
 		)
-		.orderBy(desc(table.id))
 		.limit(1);
 	return row ?? null;
 }

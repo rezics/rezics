@@ -39,6 +39,12 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles = {
+	catalog_component_heads: [
+		"catalog-music-history.sql",
+		"music-source-lifecycle.sql",
+		"catalog-structure-history.sql",
+		"catalog-source-application.sql",
+	],
 	catalog_source_mapping_protocol: ["catalog-source-integrity.sql"],
 	catalog_source_owned_applications: [
 		"catalog-source-application.sql",
@@ -79,6 +85,11 @@ export const PostgreSqlSchemaMigrationBundles = {
 } as const satisfies Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>>;
 
 export const PostgreSqlSchemaFunctionNames = [
+	"catalog_guard_music_component_head",
+	"catalog_guard_music_revision_insert",
+	"catalog_check_music_definition_scope",
+	"catalog_guard_structure_head",
+	"catalog_guard_structure_revision_insert",
 	"catalog_source_guard_owned_baseline",
 	"catalog_capture_structure_revision",
 	"catalog_guard_structure_history",
@@ -270,6 +281,16 @@ export const PostgreSqlSchemaTriggers = [
 	{ table: "distribution_package", name: "distribution_package_head" },
 	{ table: "distribution_revision", name: "distribution_revision_head" },
 	{ table: "music_component_revision", name: "music_component_revision_immutable" },
+	{ table: "music_component_head", name: "music_component_head_maintained" },
+	{ table: "music_component_revision", name: "music_component_revision_capture_only" },
+	{ table: "music_alternative_track", name: "music_alternative_track_immutable" },
+	{ table: "music_release", name: "music_release_status_scope" },
+	{ table: "music_release", name: "music_release_packaging_scope" },
+	{ table: "music_medium", name: "music_medium_format_scope" },
+	{ table: "music_work", name: "music_work_type_scope" },
+	{ table: "music_release_group", name: "music_release_group_primary_scope" },
+	{ table: "music_release_group_secondary_type", name: "music_release_group_secondary_scope" },
+	{ table: "music_release_presentation", name: "music_release_presentation_type_scope" },
 	{ table: "music_disc_toc", name: "music_disc_toc_immutable" },
 	{ table: "music_disc_toc_offset", name: "music_disc_toc_offset_immutable" },
 	{ table: "music_disc_toc_offset", name: "music_disc_toc_offset_sealed" },
@@ -450,7 +471,6 @@ export const PostgreSqlSchemaTriggers = [
 	{ table: "program_work", name: "program_work_type_vocab_guard" },
 	{ table: "program_version", name: "program_version_version_type_vocab_guard" },
 	{ table: "program_episode", name: "program_episode_type_vocab_guard" },
-	{ table: "software_visual_novel", name: "software_visual_novel_length_type_vocab_guard" },
 	{ table: "software_release", name: "software_release_type_vocab_guard" },
 	{ table: "software_release_content", name: "software_release_content_release_type_vocab_guard" },
 	{ table: "software_release_platform", name: "software_release_platform_platform_vocab_guard" },
@@ -717,6 +737,8 @@ export const PostgreSqlSchemaDynamicTriggers = [
 		"publishing_installment",
 	].map((table) => ({ table, name: "catalog_capture_structure_revision" })),
 	...["program", "publishing"].flatMap((owner) => [
+		{ table: `${owner}_component_head`, name: "catalog_structure_head_maintained" },
+		{ table: `${owner}_component_revision`, name: "catalog_structure_revision_capture_only" },
 		{ table: `${owner}_component_revision`, name: "catalog_structure_history_immutable" },
 		{ table: `${owner}_component_source_occurrence`, name: "catalog_structure_history_immutable" },
 		{ table: `${owner}_component_source_occurrence`, name: "catalog_structure_source_exact" },
@@ -789,6 +811,8 @@ export const PostgreSqlSchemaDynamicTriggers = [
 
 /** Exact dynamic declarations permitted by the static manifest check. */
 export const PostgreSqlSchemaDynamicTriggerTemplates = [
+	"CREATE TRIGGER catalog_structure_head_maintained BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_structure_head(%L)",
+	"CREATE TRIGGER catalog_structure_revision_capture_only BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_structure_revision_insert()",
 	"CREATE TRIGGER catalog_source_baseline_guard BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_owned_baseline(%L,%L)",
 	"CREATE TRIGGER catalog_source_baseline_guard BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_owned_baseline(%L)",
 	"CREATE TRIGGER software_source_occurrence_immutable BEFORE UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_immutable_evidence()",

@@ -26,6 +26,7 @@ import {
 import { ensureCatalogDefinition } from "../src/services/catalog/storage";
 import {
 	readStructureComponentHead,
+	listStructureComponentHistory,
 	restoreStructureComponent,
 } from "../src/services/catalog/structure-history";
 
@@ -147,6 +148,37 @@ try {
 				historyId: originalOccurrence.id,
 			});
 			assert.equal((await listProgramOccurrences(tx, version, actor)).items.length, 2);
+			const historyPage = await listStructureComponentHistory(
+				tx,
+				version,
+				actor,
+				"program_episode_occurrence",
+				first.id,
+				{ afterId: originalOccurrence.id },
+			);
+			assert.deepEqual(
+				historyPage.map((row) => row.componentSequence),
+				[2, 3],
+			);
+			assert.equal(
+				(await readStructureComponentHead(tx, version, "program_episode_occurrence", first.id))?.id,
+				historyPage[1]?.id,
+			);
+			await assert.rejects(
+				tx.transaction((nested) =>
+					nested.execute(
+						sql`update program_component_head set history_id=${originalOccurrence.id}::uuid where owner_id=${version.id}::uuid and component='program_episode_occurrence' and component_key=${first.id}`,
+					),
+				),
+			);
+			await assert.rejects(
+				tx.transaction((nested) =>
+					nested.execute(
+						sql`insert into program_component_revision(owner_id,id,component,component_key,component_sequence,owner_revision,operation,value) select owner_id,uuidv7(),component,component_key,4,owner_revision,operation,value from program_component_revision where owner_id=${version.id}::uuid and id=${originalOccurrence.id}::uuid`,
+					),
+				),
+			);
+			checks += 4;
 			await assert.rejects(
 				tx.transaction((nested) =>
 					restoreStructureComponent(nested, version, actor, removed.revision + 1, {

@@ -132,10 +132,6 @@ CREATE TRIGGER program_episode_type_vocab_guard
 BEFORE INSERT OR UPDATE OF type_revision_id ON public.program_episode
 FOR EACH ROW EXECUTE FUNCTION public.catalog_require_definition_kind('type_revision_id', 'vocabulary', 'optional');
 
-DROP TRIGGER IF EXISTS software_visual_novel_length_type_vocab_guard ON public.software_visual_novel;
-CREATE TRIGGER software_visual_novel_length_type_vocab_guard
-BEFORE INSERT OR UPDATE OF length_type_revision_id ON public.software_visual_novel
-FOR EACH ROW EXECUTE FUNCTION public.catalog_require_definition_kind('length_type_revision_id', 'vocabulary', 'optional');
 
 DROP TRIGGER IF EXISTS software_release_type_vocab_guard ON public.software_release;
 CREATE TRIGGER software_release_type_vocab_guard
