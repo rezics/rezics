@@ -24,7 +24,7 @@ const nativeChangeSchema = z.discriminatedUnion("kind", [
 		kind: z.literal("music-component"),
 		ownerId: z.uuid(),
 		component: z.string().min(1).max(96),
-		componentKey: z.string().min(1).max(512),
+		componentKey: z.string().min(1).max(1536),
 		beforeRevisionId: z.uuid().nullable(),
 		afterRevisionId: z.uuid(),
 	}),

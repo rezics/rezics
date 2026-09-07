@@ -18,9 +18,26 @@ export async function listMusicComponentRevisions(
 	if (reference.owner !== "music") throw new TypeError("Expected music owner");
 	await loadCatalogIdentity(tx, reference, actor, true);
 	z.string().min(1).max(96).parse(component);
-	z.string().min(1).max(512).parse(componentKey);
+	z.string().min(1).max(1536).parse(componentKey);
 	const page = CatalogPageSchema.parse(input);
 	const table = musicComponentRevision;
+	let afterSequence: number | undefined;
+	if (page.afterId) {
+		const [cursor] = await tx
+			.select({ sequence: table.componentSequence })
+			.from(table)
+			.where(
+				and(
+					eq(table.ownerId, reference.id),
+					eq(table.id, page.afterId),
+					eq(table.component, component),
+					eq(table.componentKey, componentKey),
+				),
+			)
+			.limit(1);
+		if (!cursor) throw new TypeError("Music history cursor belongs to another component");
+		afterSequence = cursor.sequence;
+	}
 	return tx
 		.select()
 		.from(table)
@@ -29,10 +46,10 @@ export async function listMusicComponentRevisions(
 				eq(table.ownerId, reference.id),
 				eq(table.component, component),
 				eq(table.componentKey, componentKey),
-				page.afterId ? gt(table.id, page.afterId) : undefined,
+				afterSequence !== undefined ? gt(table.componentSequence, afterSequence) : undefined,
 			),
 		)
-		.orderBy(table.id)
+		.orderBy(table.componentSequence)
 		.limit(page.limit);
 }
 

@@ -10,6 +10,7 @@ import {
 	reviseCatalogName,
 } from "./names";
 import { catalogNameRevisionValues } from "./source-owned-compensation";
+import { resolveCatalogSourceOwnedBaseline } from "./source-owned-baselines";
 import type { CatalogNameInput } from "./name-contracts";
 import type { MusicBrainzRelease } from "./musicbrainz";
 import { musicBrainzAliasName } from "./musicbrainz-names";
@@ -30,10 +31,11 @@ export async function applyMusicBrainzNameDelta(
 	actor: string,
 	revision: number,
 	sourceRecordId: string,
+	mappingKey: string,
 	previousSnapshotId: string,
 	snapshotId: string,
-	previous: MusicBrainzRelease,
-	incoming: MusicBrainzRelease,
+	previous: Pick<MusicBrainzRelease, "title" | "aliases">,
+	incoming: Pick<MusicBrainzRelease, "title" | "aliases">,
 ) {
 	if (reference.owner !== "music") throw new TypeError("Expected music owner");
 	const table = CatalogNameTables.music.sourceOccurrence;
@@ -71,7 +73,13 @@ export async function applyMusicBrainzNameDelta(
 			localKey = old.localKey;
 			if (!unchanged) {
 				const row = await requireCatalogNameRevision(tx, reference, actor, nameId, nameRevision);
-				const updated = await reviseCatalogName(tx, reference, actor, nameId, nameRevision, {
+				const currentRevision = await resolveCatalogSourceOwnedBaseline(
+					tx,
+					{ sourceRecordId, mappingKey },
+					{ kind: "catalog-name", owner: "music", ownerId: reference.id, componentKey: nameId },
+					nameRevision,
+				);
+				const updated = await reviseCatalogName(tx, reference, actor, nameId, currentRevision, {
 					...catalogNameRevisionValues(row),
 					...input,
 				});
@@ -80,33 +88,102 @@ export async function applyMusicBrainzNameDelta(
 					owner: "music",
 					ownerId: reference.id,
 					componentKey: nameId,
-					beforeRevision: nameRevision,
+					beforeRevision: currentRevision,
 					afterRevision: updated.revision,
 				});
 				nameRevision = updated.revision;
 			}
 		} else {
-			const added = await addCatalogName(tx, reference, actor, revision, input);
-			revision = added.revision;
-			nameId = added.id;
-			nameRevision = added.nameRevision;
-			localKey = `${snapshotId}:${path}`;
-			changes.push({
-				kind: "catalog-name",
-				owner: "music",
-				ownerId: reference.id,
-				componentKey: nameId,
-				beforeRevision: null,
-				afterRevision: nameRevision,
-			});
+			const recovered = await tx
+				.select()
+				.from(table)
+				.where(
+					and(
+						eq(table.sourceRecordId, sourceRecordId),
+						eq(table.snapshotId, snapshotId),
+						eq(table.ownerId, reference.id),
+						eq(table.namespace, "musicbrainz.name"),
+						eq(table.sourcePath, path),
+					),
+				)
+				.limit(2);
+			if (recovered.length > 1) throw new Error("Source name occurrence is ambiguous");
+			if (recovered[0]) {
+				const target = recovered[0];
+				const original = await requireCatalogNameRevision(
+					tx,
+					reference,
+					actor,
+					target.nameId,
+					target.nameRevision,
+				);
+				const currentRevision = await resolveCatalogSourceOwnedBaseline(
+					tx,
+					{ sourceRecordId, mappingKey },
+					{
+						kind: "catalog-name",
+						owner: "music",
+						ownerId: reference.id,
+						componentKey: target.nameId,
+					},
+					target.nameRevision,
+				);
+				const restored = await reviseCatalogName(
+					tx,
+					reference,
+					actor,
+					target.nameId,
+					currentRevision,
+					{ ...catalogNameRevisionValues(original), ...input, state: "active" },
+				);
+				nameId = target.nameId;
+				nameRevision = restored.revision;
+				localKey = target.localKey;
+				changes.push({
+					kind: "catalog-name",
+					owner: "music",
+					ownerId: reference.id,
+					componentKey: nameId,
+					beforeRevision: currentRevision,
+					afterRevision: nameRevision,
+				});
+			} else {
+				const added = await addCatalogName(tx, reference, actor, revision, input);
+				revision = added.revision;
+				nameId = added.id;
+				nameRevision = added.nameRevision;
+				localKey = `${snapshotId}:${path}`;
+				changes.push({
+					kind: "catalog-name",
+					owner: "music",
+					ownerId: reference.id,
+					componentKey: nameId,
+					beforeRevision: null,
+					afterRevision: nameRevision,
+				});
+			}
 		}
+		const [existing] = await tx
+			.select()
+			.from(table)
+			.where(
+				and(
+					eq(table.sourceRecordId, sourceRecordId),
+					eq(table.snapshotId, snapshotId),
+					eq(table.namespace, "musicbrainz.name"),
+					eq(table.localKey, localKey),
+				),
+			)
+			.limit(1);
+		if (existing && (existing.nameId !== nameId || existing.sourcePath !== path))
+			throw new Error("Reapplied source name targets another native identity");
 		await bindCatalogNameSourceOccurrence(tx, reference, actor, {
 			sourceRecordId,
 			snapshotId,
 			namespace: "musicbrainz.name",
 			localKey,
 			nameId,
-			nameRevision,
+			nameRevision: existing?.nameRevision ?? nameRevision,
 			sourcePath: path,
 		});
 	};
@@ -141,7 +218,13 @@ export async function applyMusicBrainzNameDelta(
 			old.nameId,
 			old.nameRevision,
 		);
-		const removed = await reviseCatalogName(tx, reference, actor, old.nameId, old.nameRevision, {
+		const currentRevision = await resolveCatalogSourceOwnedBaseline(
+			tx,
+			{ sourceRecordId, mappingKey },
+			{ kind: "catalog-name", owner: "music", ownerId: reference.id, componentKey: old.nameId },
+			old.nameRevision,
+		);
+		const removed = await reviseCatalogName(tx, reference, actor, old.nameId, currentRevision, {
 			...catalogNameRevisionValues(value),
 			state: "withdrawn",
 		});
@@ -150,7 +233,7 @@ export async function applyMusicBrainzNameDelta(
 			owner: "music",
 			ownerId: reference.id,
 			componentKey: old.nameId,
-			beforeRevision: old.nameRevision,
+			beforeRevision: currentRevision,
 			afterRevision: removed.revision,
 		});
 	}

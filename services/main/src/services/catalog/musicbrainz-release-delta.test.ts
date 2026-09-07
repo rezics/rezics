@@ -60,7 +60,7 @@ describe("MusicBrainz archived structural delta admission", () => {
 	});
 	test("unsupported changed semantic fields cannot silently count as a successful projection", () => {
 		expect(() =>
-			preflightMusicBrainzReleaseDelta(release, { ...release, annotation: "New annotation" }),
+			preflightMusicBrainzReleaseDelta(release, { ...release, asin: "B000000001" }),
 		).toThrow("native semantic writer");
 	});
 });

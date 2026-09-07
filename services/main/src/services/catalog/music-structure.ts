@@ -1,14 +1,18 @@
-import { and, desc, eq, sql, type SQL } from "drizzle-orm";
+import { and, eq, getTableColumns, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import {
 	musicArtistCredit,
 	musicAlternativeTrack,
 	musicComponentRevision,
+	musicComponentHead,
 } from "../database/schema/catalog-music";
 import type { CatalogReference } from "./contracts";
 import { assertCatalogDefinitionTarget } from "./definitions";
-import { assertMusicMediumFormatCompatibility } from "./music-medium-attributes";
+import {
+	assertMusicMediumFormatCompatibility,
+	assertMusicMediumAttributeValue,
+} from "./music-medium-attributes";
 import {
 	CatalogAccessDenied,
 	CatalogRevisionConflict,
@@ -20,6 +24,8 @@ import {
 	MusicComponentKeys,
 	MusicComponentSchemas,
 	musicComponentCompensation,
+	musicComponentOwner,
+	musicComponentKey,
 	type MusicComponentChange,
 	type MusicComponentMutation,
 	type MusicComponentName,
@@ -33,17 +39,18 @@ export async function readMusicComponentHead(
 	componentKey: string,
 ) {
 	const table = musicComponentRevision;
+	const head = musicComponentHead;
 	const [row] = await tx
-		.select()
-		.from(table)
+		.select(getTableColumns(table))
+		.from(head)
+		.innerJoin(table, and(eq(table.ownerId, head.ownerId), eq(table.id, head.historyId)))
 		.where(
 			and(
-				eq(table.ownerId, ownerId),
-				eq(table.component, component),
-				eq(table.componentKey, componentKey),
+				eq(head.ownerId, ownerId),
+				eq(head.component, component),
+				eq(head.componentKey, componentKey),
 			),
 		)
-		.orderBy(desc(table.id))
 		.limit(1);
 	return row ?? null;
 }
@@ -68,6 +75,25 @@ async function validateReferences(
 	component: MusicComponentName,
 	row: Record<string, unknown>,
 ) {
+	if (component === "music_medium_attribute") {
+		await assertMusicMediumAttributeValue(
+			tx,
+			z.uuid().parse(row.release_id),
+			z.uuid().parse(row.medium_id),
+			row.text_value !== null
+				? {
+						valueMode: "text",
+						definitionRevisionId: z.uuid().parse(row.definition_revision_id),
+						textValue: z.string().parse(row.text_value),
+					}
+				: {
+						valueMode: "vocabulary",
+						definitionRevisionId: z.uuid().parse(row.definition_revision_id),
+						valueRevisionId: z.uuid().parse(row.value_revision_id),
+					},
+		);
+		return;
+	}
 	for (const [column, owner] of [
 		["recording_id", "music"],
 		["release_group_id", "music"],
@@ -83,7 +109,7 @@ async function validateReferences(
 				tx,
 				value,
 				"vocabulary",
-				{ owner: "music", shape: "release" },
+				{ owner: "music", shape: musicComponentOwner(component).shape },
 				`${component}.${column}`,
 			);
 	}
@@ -112,12 +138,12 @@ function rowPredicate(
 	ownerId: string,
 	row: Record<string, unknown>,
 ): SQL {
-	const ownerColumn = component === "music_release" ? "id" : "release_id";
+	const ownerColumn = musicComponentOwner(component).column;
 	return sql.join(
 		[
 			sql`${sql.identifier(ownerColumn)} = ${ownerId}::uuid`,
 			...MusicComponentKeys[component].map((key) =>
-				["namespace", "value"].includes(key)
+				!["id"].includes(key) && !key.endsWith("_id")
 					? sql`${sql.identifier(key)} = ${z.string().parse(row[key])}`
 					: sql`${sql.identifier(key)} = ${z.uuid().parse(row[key])}::uuid`,
 			),
@@ -141,12 +167,13 @@ export async function mutateMusicComponents(
 	const operations = MusicComponentBatchSchema.parse(input);
 	return tx.transaction(async (inner) => {
 		const identity = await loadCatalogIdentity(inner, reference, actor, true);
-		if (reference.owner !== "music" || identity.shape !== "release")
-			throw new TypeError("Expected a music release");
+		if (reference.owner !== "music") throw new TypeError("Expected music storage owner");
 		if (identity.revision !== expectedRevision)
 			throw new CatalogRevisionConflict("Music owner revision changed");
 		const prepared = [];
 		for (const operation of operations) {
+			if (identity.shape !== musicComponentOwner(operation.component).shape)
+				throw new TypeError("Music component belongs to another native shape");
 			const head = await readMusicComponentHead(
 				inner,
 				reference.id,
@@ -175,19 +202,17 @@ export async function mutateMusicComponents(
 				remove = history.operation === "DELETE";
 			}
 			const row = MusicComponentSchemas[operation.component].parse(value);
-			const ownerId = "release_id" in row ? row.release_id : row.id;
 			const body: Record<string, unknown> = row;
+			const ownerId = body[musicComponentOwner(operation.component).column];
 			if (
 				ownerId !== reference.id ||
-				MusicComponentKeys[operation.component].map((key) => body[key]).join("/") !==
-					operation.componentKey
+				musicComponentKey(operation.component, body) !== operation.componentKey
 			)
 				throw new TypeError("Component value has another owner or identity");
-			if (operation.component === "music_release" && remove)
-				throw new TypeError("A release header cannot be removed by a component command");
+			if (musicComponentOwner(operation.component).column === "id" && remove)
+				throw new TypeError("A native object header cannot be removed by a component command");
 			if (remove && (!head || head.operation === "DELETE"))
 				throw new TypeError("Cannot remove an absent component");
-			if (!remove) await validateReferences(inner, actor, operation.component, body);
 			prepared.push({ operation, head, row: body, remove });
 		}
 		const revision = await recordCatalogChange(
@@ -242,12 +267,14 @@ export async function mutateMusicComponents(
 					sql`delete from ${table} where ${rowPredicate(operation.component, reference.id, row)}`,
 				);
 			else {
+				await validateReferences(inner, actor, operation.component, row);
 				const columns = Object.keys(row);
 				const source = sql`jsonb_populate_record(null::${table}, ${JSON.stringify(row)}::jsonb)`;
 				if (head && head.operation !== "DELETE") {
 					const mutableColumns = columns.filter(
 						(column) =>
-							column !== "release_id" && !MusicComponentKeys[operation.component].includes(column),
+							column !== musicComponentOwner(operation.component).column &&
+							!MusicComponentKeys[operation.component].includes(column),
 					);
 					const mutable = mutableColumns.length
 						? mutableColumns
@@ -258,7 +285,7 @@ export async function mutateMusicComponents(
 								(column) => sql`${sql.identifier(column)} = incoming.${sql.identifier(column)}`,
 							),
 							sql`, `,
-						)} from ${source} incoming where ${sql.join([sql`${table}.${sql.identifier(operation.component === "music_release" ? "id" : "release_id")} = ${reference.id}::uuid`, ...MusicComponentKeys[operation.component].map((key) => sql`${table}.${sql.identifier(key)} = incoming.${sql.identifier(key)}`)], sql` and `)}`,
+						)} from ${source} incoming where ${sql.join([sql`${table}.${sql.identifier(musicComponentOwner(operation.component).column)} = ${reference.id}::uuid`, ...MusicComponentKeys[operation.component].map((key) => sql`${table}.${sql.identifier(key)} = incoming.${sql.identifier(key)}`)], sql` and `)}`,
 					);
 				} else
 					await inner.execute(

@@ -43,6 +43,14 @@ revisions and restores release metadata as a new revision. Native history is
 editor-only because old rows can reference private targets. The SQL history
 trigger derives snapshots from native table rows, never from arbitrary source JSON.
 
+Music components now have an explicit current-head pointer and a monotonically
+incremented component sequence. History pagination resolves its opaque revision
+cursor to that sequence; source journals compare component sequences rather than
+UUID timestamp order. Capture alone can advance heads or append history. The
+replacement target starts these heads at component creation; there is no runtime
+fallback that guesses old native current state from historical UUIDs. Composite
+identifier key tokens escape `~` and `/`, avoiding namespace/value collisions.
+
 `musicbrainz-adoption.ts`, `musicbrainz-object-adoption.ts` and
 `musicbrainz-relations.ts` project core endpoint fields and governed relationships.
 `musicbrainz-dump-candidates.ts` admits one bounded joined `release_raw` candidate
@@ -98,6 +106,38 @@ FK model does not claim distributed transactions or production throughput approv
 
 ## Acceptance and remaining work
 
+`musicbrainz-release-delta.ts` and `musicbrainz-object-delta.ts` apply archived
+release/work/recording/release-group changes through native writers, and compensate
+exact journaled heads. Names and scalar assertions use their own native histories.
+Original immutable source occurrences remain unchanged across reapplication;
+indexed source baselines point at the currently compensated native revision.
+Newly added media/tracks can be removed and reapplied with the same native identity.
+The ordinary atomic mapper admits 128 affected structural/name/semantic entries;
+larger scopes require staged activation and remain an explicit unfinished gate.
+
+`musicbrainz-alternatives.ts` admits a bounded joined SQL alternative release,
+medium and tracklist on an already evidenced physical release. Shared alternate
+track rows stay shared and are immutable; editing their presentation replaces the
+occurrence's value reference. This does not manufacture recordings. Alternative
+source update registration and SQL dump streaming remain separate work.
+
+MusicBrainz ISO language codes are converted by `musicbrainz-language.ts` using
+the generated 204-entry map from 7,923 pinned iso-codes records. The source commit,
+SHA-256, copyright and LGPL license accompany the artifact; the generator checks
+the full input digest. Every output still passes the native IANA-backed BCP47
+validator. In particular, `hbs`, `tgl` and `twi` retain `sh`, `tl` and `tw` rather
+than locale-preference substitutions. This fixes actual `jpn`/`eng` adoption.
+
+The source delta fixture passed on the isolated DB53 target before the explicit
+head/sequence overlay: duplicate events/labels, release edits, new medium/track
+identity across three repeat apply/compensate cycles, protected human corrections,
+changed/new names and text assertions, independent object updates, work languages,
+release-group types, and a shared SQL alternate track value. The new head/sequence
+DDL requires coordinated generated-migration replay and repeated SQL verification.
+Backend and script TypeScript checks and 80 focused music tests passed. Unit tests
+that import archive modules need the ordinary test environment variables; the
+fixture archive itself is in memory and no image binaries are fetched.
+
 `music-structure.ts` now supports complete checked row edits, collision-safe
 reorder, dependency-ordered removal and restoration for release headers, media,
 tracks, labels, regional events, presentation occurrences, TOC attachments and
@@ -116,6 +156,16 @@ queries are snapshot/component prefix pages of 128, O(log N + page size), with
 no recurring corpus scan. Reorder maximum-position probes use the release/medium
 position indexes rather than scanning the release's complete track lifetime.
 The existing owner hash partition/shard and history retention requirements apply.
+
+Current component heads cost approximately 200–400 bytes each including their
+primary index: 100–200 GB at 500M components and 0.6–1.2 TB at 3B, before replicas,
+WAL and free space. A native row mutation adds one exact history row and advances
+one head under the same transaction; it does not scan earlier revisions. The
+component sequence replaces the history timestamp-order lookup index. Reads use
+the head primary key or the owner/component/key/sequence unique index. Large key
+tokens have a 1,536-byte bound; source occurrence compound index width stays below
+PostgreSQL's B-tree tuple limit at that bound. Monitor write amplification and hot
+owner lock waits under the existing owner-hash partition and shard cutover plan.
 
 `check-music-structure.ts` passed against the isolated PostgreSQL fixture on
 2026-09-07: track swaps and compensation, exact child conflict after an independent

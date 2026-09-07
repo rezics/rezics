@@ -67,6 +67,8 @@ export function preflightMusicBrainzReleaseDelta(
 	const size = (release: MusicBrainzRelease) =>
 		2 +
 		(release.aliases?.length ?? 0) +
+		Number(Boolean(release.annotation)) +
+		Number(Boolean(release.disambiguation)) +
 		(release["label-info"]?.length ?? 0) +
 		(release["release-events"]?.length ?? (release.date ? 1 : 0)) +
 		release.media.reduce(
@@ -82,7 +84,7 @@ export function preflightMusicBrainzReleaseDelta(
 		throw new RangeError(
 			"Music release delta requires staged application before native activation",
 		);
-	for (const key of ["annotation", "disambiguation", "relations", "asin"] as const)
+	for (const key of ["relations", "asin"] as const)
 		if (!isDeepStrictEqual(previous[key], incoming[key]))
 			throw new TypeError(`Music release ${key} change requires its native semantic writer`);
 	for (const release of [previous, incoming]) {

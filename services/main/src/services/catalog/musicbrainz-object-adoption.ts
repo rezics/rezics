@@ -1,5 +1,4 @@
 import { createHash } from "node:crypto";
-import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { musicRecording, musicReleaseGroup, musicWork } from "../database/schema/catalog-music";
 import { bindCatalogSourceIdentity, acceptCatalogSourceInitialization } from "./source-bindings";
@@ -7,28 +6,18 @@ import { CatalogFactTables } from "../database/schema/catalog-facts";
 import { createCatalogIdentity } from "./storage";
 import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
 import { adoptMusicBrainzAliases, adoptMusicBrainzTitle } from "./musicbrainz-names";
+import { recordMusicSourceComponent } from "./music-source-occurrences";
+import { applyMusicBrainzFactDelta } from "./musicbrainz-facts";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
-import {
-	MusicBrainzCatalogContractSha256,
-	MusicBrainzRecordingSchema,
-	MusicBrainzReleaseGroupSchema,
-	MusicBrainzWorkSchema,
-} from "./musicbrainz";
+import { MusicBrainzCatalogContractSha256, MusicBrainzObjectDocumentSchema } from "./musicbrainz";
 import {
 	musicBrainzCreditWriter,
 	musicBrainzVocabulary,
 	projectMusicBrainzGroupTypes,
 	projectMusicBrainzIdentifiers,
 	projectMusicBrainzWorkLanguages,
-	projectMusicBrainzWorkAttributes,
 } from "./musicbrainz-native";
-
-const documentSchema = z.discriminatedUnion("kind", [
-	z.object({ kind: z.literal("work"), record: MusicBrainzWorkSchema }),
-	z.object({ kind: z.literal("recording"), record: MusicBrainzRecordingSchema }),
-	z.object({ kind: z.literal("release_group"), record: MusicBrainzReleaseGroupSchema }),
-]);
 
 /** @alpha Independent musical objects do not require a release or an invented work parent. */
 export async function adoptMusicBrainzObject(
@@ -47,7 +36,7 @@ export async function adoptMusicBrainzObject(
 		receipt.key.source !== "musicbrainz"
 	)
 		throw new TypeError("Unreviewed MusicBrainz source contract");
-	const document = documentSchema.parse({
+	const document = MusicBrainzObjectDocumentSchema.parse({
 		kind: receipt.key.objectType,
 		record: JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)),
 	});
@@ -87,7 +76,7 @@ export async function adoptMusicBrainzObject(
 								: musicWork.typeRevisionId,
 					},
 				});
-			await projectMusicBrainzWorkLanguages(tx, identity.id, document.record);
+			await projectMusicBrainzWorkLanguages(tx, identity.id, document.record, observation);
 			await projectMusicBrainzIdentifiers(tx, identity.id, "iswc", document.record.iswcs ?? []);
 			break;
 		}
@@ -144,10 +133,22 @@ export async function adoptMusicBrainzObject(
 								: musicReleaseGroup.primaryTypeRevisionId,
 					},
 				});
-			await projectMusicBrainzGroupTypes(tx, identity.id, document.record);
+			await projectMusicBrainzGroupTypes(tx, identity.id, document.record, observation);
 			break;
 		}
 	}
+	await recordMusicSourceComponent(
+		tx,
+		observation,
+		identity.id,
+		document.kind === "work"
+			? "music_work"
+			: document.kind === "recording"
+				? "music_recording"
+				: "music_release_group",
+		identity.id,
+		"/",
+	);
 
 	let revision = identity.revision;
 	if (document.record.title)
@@ -182,15 +183,24 @@ export async function adoptMusicBrainzObject(
 		observation,
 		document.record.relations ?? [],
 	);
-	if (document.kind === "work")
-		revision = await projectMusicBrainzWorkAttributes(
+	revision = (
+		await applyMusicBrainzFactDelta(
 			tx,
-			actor,
 			identity,
+			actor,
 			revision,
 			observation,
-			document.record,
-		);
+			null,
+			document.kind === "work"
+				? document.record
+				: {
+						annotation: document.record.annotation,
+						disambiguation: document.record.disambiguation,
+						"first-release-date":
+							document.kind === "release_group" ? document.record["first-release-date"] : undefined,
+					},
+		)
+	).revision;
 	if (existing)
 		await acceptCatalogSourceInitialization(tx, actor, {
 			sourceRecordId: observation.record.id,
@@ -199,6 +209,7 @@ export async function adoptMusicBrainzObject(
 			reference: identity,
 			expectedBaselineRevision: existing.revision,
 			finalRevision: revision,
+			mappingVersion: `musicbrainz.${document.kind}.2`,
 		});
 	else
 		await bindCatalogSourceIdentity(tx, actor, {
@@ -206,6 +217,7 @@ export async function adoptMusicBrainzObject(
 			path: "/",
 			snapshotId: observation.snapshot.id,
 			reference: identity,
+			mappingVersion: `musicbrainz.${document.kind}.2`,
 		});
 
 	return {

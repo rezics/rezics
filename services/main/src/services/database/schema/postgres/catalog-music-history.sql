@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION public.catalog_record_music_component()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
-DECLARE body jsonb; owner_key uuid; native_revision bigint; component_key text; i integer;
+DECLARE body jsonb; owner_key uuid; native_revision bigint; native_component_key text; i integer; next_sequence bigint; history_key uuid;
 BEGIN
   body := CASE WHEN TG_OP = 'DELETE' THEN to_jsonb(OLD) ELSE to_jsonb(NEW) END;
   owner_key := (body ->> TG_ARGV[0])::uuid;
@@ -13,12 +13,22 @@ BEGIN
     END LOOP;
   END IF;
   SELECT revision INTO STRICT native_revision FROM public.music_identity WHERE id = owner_key;
-  component_key := '';
+  native_component_key := '';
   FOR i IN 1..TG_NARGS - 1 LOOP
-    component_key := component_key || CASE WHEN i = 1 THEN '' ELSE '/' END || (body ->> TG_ARGV[i]);
+    native_component_key := native_component_key || CASE WHEN i = 1 THEN '' ELSE '/' END || replace(replace(body ->> TG_ARGV[i], '~', '~0'), '/', '~1');
   END LOOP;
-  INSERT INTO public.music_component_revision(owner_id, component, component_key, owner_revision, operation, value)
-    VALUES (owner_key, TG_TABLE_NAME, component_key, native_revision, TG_OP, body);
+  SELECT head.component_sequence INTO next_sequence FROM public.music_component_head head
+    WHERE head.owner_id=owner_key AND head.component=TG_TABLE_NAME AND head.component_key=native_component_key FOR UPDATE;
+  next_sequence := coalesce(next_sequence, 0) + 1;
+  INSERT INTO public.music_component_revision(owner_id, component, component_key, component_sequence, owner_revision, operation, value)
+    VALUES (owner_key, TG_TABLE_NAME, native_component_key, next_sequence, native_revision, TG_OP, body) RETURNING id INTO history_key;
+  IF next_sequence=1 THEN
+    INSERT INTO public.music_component_head(owner_id,component,component_key,component_sequence,history_id)
+      VALUES (owner_key,TG_TABLE_NAME,native_component_key,next_sequence,history_key);
+  ELSE
+    UPDATE public.music_component_head SET component_sequence=next_sequence,history_id=history_key
+      WHERE owner_id=owner_key AND component=TG_TABLE_NAME AND component_key=native_component_key;
+  END IF;
   RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
 END $$;
 

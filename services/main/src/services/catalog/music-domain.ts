@@ -3,7 +3,7 @@ import { z } from "zod";
 import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import type { DatabaseTransaction } from "../database";
 import { assertMusicMediumFormatCompatibility } from "./music-medium-attributes";
-import { catalogDefinition, catalogDefinitionRevision } from "../database/schema/catalog-identity";
+import { assertCatalogDefinitionTarget } from "./definitions";
 import {
 	musicDiscToc,
 	musicDiscTocOffset,
@@ -13,6 +13,7 @@ import {
 	musicMediumPresentation,
 	musicMediumToc,
 	musicRelease,
+	musicRecording,
 	musicReleasePresentation,
 	musicReleaseEvent,
 	musicReleaseLabel,
@@ -59,16 +60,20 @@ async function requireMusic(
 	return identity;
 }
 
-async function requireVocabulary(tx: DatabaseTransaction, revisionId: string | null | undefined) {
+async function requireVocabulary(
+	tx: DatabaseTransaction,
+	revisionId: string | null | undefined,
+	shape: "release" | "work" | "release_group",
+	slot: string,
+) {
 	if (revisionId == null) return;
-	const [revision] = await tx
-		.select({ kind: catalogDefinition.kind })
-		.from(catalogDefinitionRevision)
-		.innerJoin(catalogDefinition, eq(catalogDefinition.id, catalogDefinitionRevision.definitionId))
-		.where(eq(catalogDefinitionRevision.id, revisionId))
-		.limit(1);
-	if (!revision || revision.kind !== "vocabulary")
-		throw new TypeError("Expected a reviewed vocabulary revision");
+	await assertCatalogDefinitionTarget(
+		tx,
+		revisionId,
+		"vocabulary",
+		{ owner: "music", shape },
+		slot,
+	);
 }
 
 async function requireMedium(tx: DatabaseTransaction, releaseId: string, mediumId: string) {
@@ -134,8 +139,18 @@ export async function editMusicReleaseMetadata(
 ) {
 	const value = MusicReleaseMetadataSchema.parse(input);
 	await requireMusic(tx, release, actor, "release", true);
-	await requireVocabulary(tx, value.statusRevisionId);
-	await requireVocabulary(tx, value.packagingRevisionId);
+	await requireVocabulary(
+		tx,
+		value.statusRevisionId,
+		"release",
+		"music_release.status_revision_id",
+	);
+	await requireVocabulary(
+		tx,
+		value.packagingRevisionId,
+		"release",
+		"music_release.packaging_revision_id",
+	);
 	const revision = await recordCatalogChange(
 		tx,
 		release,
@@ -187,7 +202,7 @@ export async function editMusicMedium(
 		.parse(input);
 	await requireMusic(tx, release, actor, "release", true);
 	await requireMedium(tx, release.id, mediumId);
-	await requireVocabulary(tx, value.formatRevisionId);
+	await requireVocabulary(tx, value.formatRevisionId, "release", "music_medium.format_revision_id");
 	if (value.formatRevisionId !== undefined)
 		await assertMusicMediumFormatCompatibility(tx, release.id, mediumId, value.formatRevisionId);
 	const revision = await recordCatalogChange(
@@ -538,7 +553,7 @@ export async function setMusicWorkType(
 ) {
 	z.uuid().nullable().parse(typeRevisionId);
 	await requireMusic(tx, work, actor, "work", true);
-	await requireVocabulary(tx, typeRevisionId);
+	await requireVocabulary(tx, typeRevisionId, "work", "music_work.type_revision_id");
 	const revision = await recordCatalogChange(
 		tx,
 		work,
@@ -560,6 +575,59 @@ export async function readMusicWorkMetadata(
 	const [row] = await tx.select().from(musicWork).where(eq(musicWork.id, work.id)).limit(1);
 	if (!row) throw new CatalogReferenceNotFound("Music work is missing");
 	return { ...row, revision: identity.revision };
+}
+
+/** @alpha @remarks A recording is readable independently of any release or track occurrence. */
+export async function readMusicRecordingMetadata(
+	tx: DatabaseTransaction,
+	recording: CatalogReference,
+	actor: string | null,
+) {
+	const identity = await requireMusic(tx, recording, actor, "recording");
+	const [row] = await tx
+		.select()
+		.from(musicRecording)
+		.where(eq(musicRecording.id, recording.id))
+		.limit(1);
+	if (!row) throw new CatalogReferenceNotFound("Music recording is missing");
+	await requirePresentationCredits(tx, actor, [row.artistCreditId]);
+	return { ...row, revision: identity.revision };
+}
+
+/** @alpha @remarks Edits recording duration/video/credit without changing release-local track presentations. */
+export async function editMusicRecordingMetadata(
+	tx: DatabaseTransaction,
+	recording: CatalogReference,
+	actor: string,
+	expectedRevision: number,
+	input: {
+		lengthMilliseconds?: number | null;
+		video?: boolean | null;
+		artistCreditId?: string | null;
+	},
+) {
+	const value = z
+		.strictObject({
+			lengthMilliseconds: exactInteger.nullable().optional(),
+			video: z.boolean().nullable().optional(),
+			artistCreditId: z.uuid().nullable().optional(),
+		})
+		.refine(
+			(row) => Object.values(row).some((field) => field !== undefined),
+			"No recording changes supplied",
+		)
+		.parse(input);
+	await requireMusic(tx, recording, actor, "recording", true);
+	await requirePresentationCredits(tx, actor, [value.artistCreditId]);
+	const revision = await recordCatalogChange(
+		tx,
+		recording,
+		actor,
+		expectedRevision,
+		"music.recording.metadata.edit",
+	);
+	await tx.update(musicRecording).set(value).where(eq(musicRecording.id, recording.id));
+	return { revision };
 }
 
 /** @alpha @remarks Adds or removes a single language; corpus-scale sets are never replaced wholesale. */
@@ -632,7 +700,12 @@ export async function setMusicReleaseGroupPrimaryType(
 ) {
 	z.uuid().nullable().parse(primaryTypeRevisionId);
 	await requireMusic(tx, group, actor, "release_group", true);
-	await requireVocabulary(tx, primaryTypeRevisionId);
+	await requireVocabulary(
+		tx,
+		primaryTypeRevisionId,
+		"release_group",
+		"music_release_group.primary_type_revision_id",
+	);
 	const revision = await recordCatalogChange(
 		tx,
 		group,
@@ -676,7 +749,12 @@ export async function setMusicReleaseGroupSecondaryType(
 	z.uuid().parse(typeRevisionId);
 	z.boolean().parse(present);
 	await requireMusic(tx, group, actor, "release_group", true);
-	await requireVocabulary(tx, typeRevisionId);
+	await requireVocabulary(
+		tx,
+		typeRevisionId,
+		"release_group",
+		"music_release_group_secondary_type.type_revision_id",
+	);
 	const revision = await recordCatalogChange(
 		tx,
 		group,
@@ -769,7 +847,12 @@ export async function addMusicReleasePresentation(
 	const value = releasePresentationInput.parse(input);
 	await requireMusic(tx, release, actor, "release", true);
 	await requirePresentationCredits(tx, actor, [value.artistCreditId]);
-	await requireVocabulary(tx, value.typeRevisionId);
+	await requireVocabulary(
+		tx,
+		value.typeRevisionId,
+		"release",
+		"music_release_presentation.type_revision_id",
+	);
 	const revision = await recordCatalogChange(
 		tx,
 		release,

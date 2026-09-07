@@ -166,22 +166,18 @@ export async function installReviewedMusicMediumPolicy(
 	return { definitionRevisionId: value.definitionRevisionId };
 }
 
-/** @alpha @remarks Adds one governed carrier characteristic under the owning release revision. */
-export async function addMusicMediumAttribute(
+/** @internal Validates one complete carrier assertion against its immutable definition and format policy. */
+export async function assertMusicMediumAttributeValue(
 	tx: DatabaseTransaction,
-	release: CatalogReference,
-	actor: string,
-	expectedVersion: number,
+	releaseId: string,
 	mediumId: string,
 	input: z.input<typeof MusicMediumAttributeInputSchema>,
 ) {
-	z.uuid().parse(mediumId);
 	const value = MusicMediumAttributeInputSchema.parse(input);
-	await requireRelease(tx, release, actor, true);
 	const [medium] = await tx
 		.select()
 		.from(musicMedium)
-		.where(and(eq(musicMedium.releaseId, release.id), eq(musicMedium.id, mediumId)))
+		.where(and(eq(musicMedium.releaseId, releaseId), eq(musicMedium.id, mediumId)))
 		.limit(1);
 	if (!medium) throw new CatalogReferenceNotFound("Music medium is missing from this release");
 	if (medium.formatRevisionId === null)
@@ -245,6 +241,21 @@ export async function addMusicMediumAttribute(
 			.limit(1);
 		if (!allowed) throw new TypeError("Attribute value is not allowed for the medium format");
 	}
+}
+
+/** @alpha @remarks Adds one governed carrier characteristic under the owning release revision. */
+export async function addMusicMediumAttribute(
+	tx: DatabaseTransaction,
+	release: CatalogReference,
+	actor: string,
+	expectedVersion: number,
+	mediumId: string,
+	input: z.input<typeof MusicMediumAttributeInputSchema>,
+) {
+	z.uuid().parse(mediumId);
+	const value = MusicMediumAttributeInputSchema.parse(input);
+	await requireRelease(tx, release, actor, true);
+	await assertMusicMediumAttributeValue(tx, release.id, mediumId, value);
 	const revision = await recordCatalogChange(
 		tx,
 		release,

@@ -35,6 +35,7 @@ export const musicComponentRevision = pgTable(
 		id: uuid().default(sql`uuidv7()`).notNull(),
 		component: text().notNull(),
 		componentKey: text().notNull(),
+		componentSequence: bigint({ mode: "number" }).notNull(),
 		ownerRevision: bigint({ mode: "number" }).notNull(),
 		operation: text().$type<"INSERT" | "UPDATE" | "DELETE">().notNull(),
 		value: jsonb().$type<Record<string, unknown>>().notNull(),
@@ -42,11 +43,11 @@ export const musicComponentRevision = pgTable(
 	},
 	(table) => [
 		primaryKey({ columns: [table.ownerId, table.id] }),
-		index("music_component_revision_lookup_idx").on(
+		unique("music_component_revision_sequence_key").on(
 			table.ownerId,
 			table.component,
 			table.componentKey,
-			table.id,
+			table.componentSequence,
 		),
 		check(
 			"music_component_revision_operation_check",
@@ -54,7 +55,33 @@ export const musicComponentRevision = pgTable(
 		),
 		check(
 			"music_component_revision_value_check",
-			sql`jsonb_typeof(${table.value}) = 'object' and octet_length(${table.componentKey}) between 1 and 512 and ${table.ownerRevision} > 0`,
+			sql`jsonb_typeof(${table.value}) = 'object' and octet_length(${table.componentKey}) between 1 and 1536 and ${table.ownerRevision} > 0 and ${table.componentSequence} between 1 and 9007199254740991`,
+		),
+	],
+);
+
+/** Current component identity is an explicit pointer, independent of UUID timestamp ordering. */
+export const musicComponentHead = pgTable(
+	"music_component_head",
+	{
+		ownerId: uuid()
+			.notNull()
+			.references(() => musicIdentity.id, { onDelete: "restrict" }),
+		component: text().notNull(),
+		componentKey: text().notNull(),
+		componentSequence: bigint({ mode: "number" }).notNull(),
+		historyId: uuid().notNull(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.ownerId, table.component, table.componentKey] }),
+		foreignKey({
+			name: "music_component_head_history_fk",
+			columns: [table.ownerId, table.historyId],
+			foreignColumns: [musicComponentRevision.ownerId, musicComponentRevision.id],
+		}).onDelete("restrict"),
+		check(
+			"music_component_head_values",
+			sql`octet_length(${table.componentKey}) between 1 and 1536 and ${table.componentSequence} between 1 and 9007199254740991`,
 		),
 	],
 );
@@ -92,10 +119,17 @@ export const musicComponentSourceOccurrence = pgTable(
 			foreignColumns: [musicComponentRevision.ownerId, musicComponentRevision.id],
 		}).onDelete("restrict"),
 		index("music_component_source_history_idx").on(table.ownerId, table.historyId),
-		index("music_component_source_component_idx").on(table.sourceRecordId, table.snapshotId, table.ownerId, table.component, table.componentKey, table.sourcePath),
+		index("music_component_source_component_idx").on(
+			table.sourceRecordId,
+			table.snapshotId,
+			table.ownerId,
+			table.component,
+			table.componentKey,
+			table.sourcePath,
+		),
 		check(
 			"music_component_source_key_check",
-			sql`octet_length(${table.sourcePath}) between 1 and 512 and left(${table.sourcePath}, 1) = '/' and octet_length(${table.component}) between 1 and 96 and octet_length(${table.componentKey}) between 1 and 512`,
+			sql`octet_length(${table.sourcePath}) between 1 and 512 and left(${table.sourcePath}, 1) = '/' and octet_length(${table.component}) between 1 and 96 and octet_length(${table.componentKey}) between 1 and 1536`,
 		),
 	],
 );

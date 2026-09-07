@@ -94,13 +94,63 @@ try {
 				key: "native",
 				kind: "vocabulary",
 				valueKind: null,
+				constraints: {
+					targets: [{ owner: "music", shapes: ["release"] }],
+					slots: ["music_medium.format_revision_id"],
+				},
 			});
 			const otherVocabulary = await ensureCatalogDefinition(tx, {
 				namespace: "fixture.music",
 				key: "secondary",
 				kind: "vocabulary",
 				valueKind: null,
+				constraints: {
+					targets: [{ owner: "music", shapes: ["release"] }],
+					slots: ["music_medium.format_revision_id"],
+				},
 			});
+			const scopedVocabulary = (
+				key: string,
+				shape: "release" | "work" | "release_group",
+				slot: string,
+			) =>
+				ensureCatalogDefinition(tx, {
+					namespace: "fixture.music",
+					key,
+					kind: "vocabulary",
+					valueKind: null,
+					constraints: { targets: [{ owner: "music", shapes: [shape] }], slots: [slot] },
+				});
+			const statusVocabulary = await scopedVocabulary(
+				"status",
+				"release",
+				"music_release.status_revision_id",
+			);
+			const packagingVocabulary = await scopedVocabulary(
+				"packaging",
+				"release",
+				"music_release.packaging_revision_id",
+			);
+			const workVocabulary = await scopedVocabulary(
+				"work-type",
+				"work",
+				"music_work.type_revision_id",
+			);
+			const primaryVocabulary = await scopedVocabulary(
+				"group-primary",
+				"release_group",
+				"music_release_group.primary_type_revision_id",
+			);
+			const secondaryVocabulary = await scopedVocabulary(
+				"group-secondary",
+				"release_group",
+				"music_release_group_secondary_type.type_revision_id",
+			);
+			const anotherSecondaryVocabulary = await scopedVocabulary(
+				"group-secondary-other",
+				"release_group",
+				"music_release_group_secondary_type.type_revision_id",
+			);
 			const property = await ensureCatalogDefinition(tx, {
 				namespace: "fixture.music",
 				key: "property",
@@ -120,12 +170,12 @@ try {
 					editMusicReleaseMetadata(tx, release, actor, version, {
 						statusRevisionId: property.revisionId,
 					}),
-				/vocabulary/,
+				/wrong semantic kind/,
 			);
 			version = (
 				await editMusicReleaseMetadata(tx, release, actor, version, {
-					statusRevisionId: vocabulary.revisionId,
-					packagingRevisionId: vocabulary.revisionId,
+					statusRevisionId: statusVocabulary.revisionId,
+					packagingRevisionId: packagingVocabulary.revisionId,
 					languageTag: "EN-us",
 					scriptCode: "Latn",
 					barcode: "0012345678905",
@@ -134,7 +184,7 @@ try {
 			const metadata = await readMusicReleaseMetadata(tx, release, actor);
 			assert.equal(metadata.languageTag, "en-US");
 			assert.equal(metadata.barcode, "0012345678905");
-			assert.equal(metadata.packagingRevisionId, vocabulary.revisionId);
+			assert.equal(metadata.packagingRevisionId, packagingVocabulary.revisionId);
 			await assert.rejects(() => readMusicReleaseMetadata(tx, release, null), CatalogAccessDenied);
 			version = (await editMusicReleaseMetadata(tx, release, actor, version, { barcode: "" }))
 				.revision;
@@ -455,7 +505,7 @@ try {
 
 			const work = await createMusicalWork(tx, actor, name);
 			let workVersion = (
-				await setMusicWorkType(tx, work, actor, work.revision, vocabulary.revisionId)
+				await setMusicWorkType(tx, work, actor, work.revision, workVocabulary.revisionId)
 			).revision;
 			workVersion = (await setMusicWorkLanguage(tx, work, actor, workVersion, "JA", true)).revision;
 			workVersion = (await setMusicWorkLanguage(tx, work, actor, workVersion, "en", true)).revision;
@@ -471,7 +521,7 @@ try {
 			assert.equal((await listMusicWorkLanguages(tx, work, actor)).length, 1);
 			assert.equal(
 				(await tx.select().from(musicWork).where(eq(musicWork.id, work.id)))[0]?.typeRevisionId,
-				vocabulary.revisionId,
+				workVocabulary.revisionId,
 			);
 
 			const group = await createReleaseGroup(tx, actor, name);
@@ -481,7 +531,7 @@ try {
 					group,
 					actor,
 					group.revision,
-					vocabulary.revisionId,
+					primaryVocabulary.revisionId,
 				)
 			).revision;
 			groupVersion = (
@@ -490,7 +540,7 @@ try {
 					group,
 					actor,
 					groupVersion,
-					vocabulary.revisionId,
+					secondaryVocabulary.revisionId,
 					true,
 				)
 			).revision;
@@ -500,7 +550,7 @@ try {
 					group,
 					actor,
 					groupVersion,
-					otherVocabulary.revisionId,
+					anotherSecondaryVocabulary.revisionId,
 					true,
 				)
 			).revision;
@@ -511,24 +561,24 @@ try {
 			assert.equal(
 				(
 					await listMusicReleaseGroupSecondaryTypes(tx, group, actor, {
-						afterId: vocabulary.revisionId,
+						afterId: secondaryVocabulary.revisionId,
 					})
 				)[0]?.typeRevisionId,
-				otherVocabulary.revisionId,
+				anotherSecondaryVocabulary.revisionId,
 			);
 			await setMusicReleaseGroupSecondaryType(
 				tx,
 				group,
 				actor,
 				groupVersion,
-				vocabulary.revisionId,
+				secondaryVocabulary.revisionId,
 				false,
 			);
 			assert.equal((await listMusicReleaseGroupSecondaryTypes(tx, group, actor)).length, 1);
 			assert.equal(
 				(await tx.select().from(musicReleaseGroup).where(eq(musicReleaseGroup.id, group.id)))[0]
 					?.primaryTypeRevisionId,
-				vocabulary.revisionId,
+				primaryVocabulary.revisionId,
 			);
 
 			const [identity] = await tx

@@ -1,12 +1,9 @@
 import { isDeepStrictEqual } from "node:util";
-import { canonicalizeContentLanguageTag } from "@rezics/content-language";
-import { and, eq } from "drizzle-orm";
+import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import { z } from "zod";
 import { entityCatalogProfile } from "../database/schema/catalog-entity";
 import { referenceArea } from "../database/schema/catalog-reference";
 import {
-	musicComponentRevision,
-	musicComponentSourceOccurrence,
 	musicDiscToc,
 	musicDiscTocOffset,
 	musicRecording,
@@ -21,24 +18,14 @@ import {
 import { musicBrainzCreditWriter, musicBrainzVocabulary } from "./musicbrainz-native";
 import { bindReferencedSourceIdentity } from "./source-references";
 import { loadCatalogSourceDocument, type CatalogSourceReceipt } from "./source-observations";
-import { resolveMusicSourceComponentBaseline } from "./music-source-baselines";
 import { applyMusicBrainzNameDelta } from "./musicbrainz-name-delta";
-import { compensateCatalogSourceOwnedChange } from "./source-owned-compensation";
-import {
-	readCatalogSourceApplication,
-	type CatalogSourceNativeChange,
-} from "./source-applications";
+import { applyMusicBrainzFactDelta } from "./musicbrainz-facts";
+import { compensateMusicSourceApplication } from "./music-source-compensation";
 import type { CatalogSourceNativeWriter } from "./source-proposals";
-import { mutateMusicComponents, compensateMusicComponents } from "./music-structure";
 import {
-	MusicComponentChangeSchema,
-	MusicComponentKeys,
-	MusicComponentNameSchema,
-	MusicComponentSchemas,
-	type MusicComponentMutation,
-	type MusicComponentName,
-} from "./music-structure-contracts";
-import { recordCatalogChange, loadCatalogIdentity } from "./storage";
+	prepareMusicSourceProjection,
+	type MusicSourceComponentBaseline as Baseline,
+} from "./music-source-projection";
 
 import {
 	tracks,
@@ -47,15 +34,6 @@ import {
 } from "./musicbrainz-release-plan";
 
 type Archived = { receipt: CatalogSourceReceipt; bytes: Uint8Array };
-type Baseline = {
-	component: MusicComponentName;
-	componentKey: string;
-	sourcePath: string;
-	historyId: string;
-	currentHistoryId: string;
-	value: Record<string, unknown>;
-};
-
 /**
  * @internal Genuine structural proposal callback over two exact archived snapshots.
  * @remarks It never invokes first adoption. Unchanged rows retain their previous source baseline;
@@ -69,67 +47,7 @@ export function musicBrainzReleaseNativeWriter(
 		outer.transaction(async (tx) => {
 			if (context.reference.owner !== "music" || context.mappingVersion !== "musicbrainz.release.1")
 				throw new TypeError("Music release writer received another mapping");
-			if (context.action === "withdraw") {
-				const application = await readCatalogSourceApplication(tx, context.actor, {
-					sourceRecordId: context.sourceRecordId,
-					proposalId: context.proposalId,
-					action: "apply",
-				});
-				if (!application) throw new Error("Source application has no native compensation journal");
-				const inverse: CatalogSourceNativeChange[] = [];
-				for (const change of [...application.changes].reverse()) {
-					if (change.kind === "music-component") continue;
-					if (
-						!("owner" in change) ||
-						change.owner !== "music" ||
-						change.ownerId !== context.reference.id
-					)
-						throw new TypeError("Music compensation targets another native owner");
-					inverse.push(await compensateCatalogSourceOwnedChange(tx, context.actor, change));
-				}
-				const changes = application.changes
-					.filter((change) => change.kind === "music-component")
-					.map((change) => {
-						if (change.ownerId !== context.reference.id)
-							throw new TypeError("Music compensation journal targets another owner");
-						return MusicComponentChangeSchema.parse({
-							component: change.component,
-							componentKey: change.componentKey,
-							beforeRevisionId: change.beforeRevisionId,
-							afterRevisionId: change.afterRevisionId,
-						});
-					});
-				const current = await loadCatalogIdentity(tx, context.reference, context.actor, true);
-				const result = changes.length
-					? await compensateMusicComponents(
-							tx,
-							context.reference,
-							context.actor,
-							current.revision,
-							changes,
-						)
-					: {
-							revision: await recordCatalogChange(
-								tx,
-								context.reference,
-								context.actor,
-								current.revision,
-								"music.source.withdraw",
-							),
-							changes: [],
-						};
-				return {
-					revision: result.revision,
-					changes: [
-						...inverse,
-						...result.changes.map((change) => ({
-							kind: "music-component" as const,
-							ownerId: context.reference.id,
-							...change,
-						})),
-					],
-				};
-			}
+			if (context.action === "withdraw") return compensateMusicSourceApplication(tx, context);
 			if (!context.previousSnapshotId)
 				throw new TypeError("An update requires a previous adopted snapshot");
 			for (const archive of [previousArchive, incomingArchive])
@@ -165,78 +83,10 @@ export function musicBrainzReleaseNativeWriter(
 			)
 				throw new TypeError("Release document differs from its archived source key");
 			preflightMusicBrainzReleaseDelta(previous, incoming);
-			const occurrence = musicComponentSourceOccurrence;
-			const history = musicComponentRevision;
-			const rows = await tx
-				.select({
-					component: occurrence.component,
-					componentKey: occurrence.componentKey,
-					sourcePath: occurrence.sourcePath,
-					historyId: occurrence.historyId,
-					value: history.value,
-				})
-				.from(occurrence)
-				.innerJoin(
-					history,
-					and(eq(history.ownerId, occurrence.ownerId), eq(history.id, occurrence.historyId)),
-				)
-				.where(
-					and(
-						eq(occurrence.sourceRecordId, context.sourceRecordId),
-						eq(occurrence.snapshotId, context.previousSnapshotId),
-						eq(occurrence.ownerId, context.reference.id),
-					),
-				)
-				.limit(129);
-			if (rows.length > 128)
-				throw new RangeError("Music source occurrence scope requires staged application");
-			const baseline = new Map<string, Baseline>();
-			for (const row of rows) {
-				const component = MusicComponentNameSchema.parse(row.component);
-				baseline.set(`${component}:${row.sourcePath}`, {
-					...row,
-					component,
-					currentHistoryId: await resolveMusicSourceComponentBaseline(tx, {
-						sourceRecordId: context.sourceRecordId,
-						mappingKey: context.mappingKey,
-						ownerId: context.reference.id,
-						component,
-						componentKey: row.componentKey,
-						sourceHistoryId: row.historyId,
-					}),
-				});
-			}
-			const oldAt = (component: MusicComponentName, path: string) => {
-				const old = baseline.get(`${component}:${path}`);
-				if (!old)
-					throw new TypeError(`Missing exact native source occurrence: ${component} ${path}`);
-				return old;
-			};
-			const used = new Set<string>();
-			const pending: {
-				component: MusicComponentName;
-				componentKey: string;
-				path: string;
-				historyId?: string;
-			}[] = [];
-			const operations: MusicComponentMutation[] = [];
-			const put = (component: MusicComponentName, path: string, value: unknown, old?: Baseline) => {
-				const row: Record<string, unknown> = MusicComponentSchemas[component].parse(value);
-				const componentKey = MusicComponentKeys[component].map((key) => row[key]).join("/");
-				if (old) used.add(`${component}:${old.sourcePath}`);
-				if (old && isDeepStrictEqual(old.value, row))
-					pending.push({ component, componentKey, path, historyId: old.historyId });
-				else {
-					operations.push({
-						action: "put",
-						component,
-						componentKey,
-						expectedRevisionId: old?.currentHistoryId ?? null,
-						value: row,
-					});
-					pending.push({ component, componentKey, path });
-				}
-			};
+			const { oldAt, recoverAt, put, finish } = await prepareMusicSourceProjection(tx, {
+				...context,
+				previousSnapshotId: context.previousSnapshotId,
+			});
 			const credit = musicBrainzCreditWriter(tx, context.actor, observation);
 			const releaseId = context.reference.id;
 			const root = oldAt("music_release", "/");
@@ -278,7 +128,7 @@ export function musicBrainzReleaseNativeWriter(
 						incoming.packaging,
 					),
 					language_tag: incoming["text-representation"]?.language
-						? canonicalizeContentLanguageTag(incoming["text-representation"].language)
+						? musicBrainzLanguageTag(incoming["text-representation"].language)
 						: null,
 					script_code: incoming["text-representation"]?.script || null,
 					barcode: incoming.barcode ?? null,
@@ -294,7 +144,10 @@ export function musicBrainzReleaseNativeWriter(
 			for (const [index, medium] of incoming.media.entries()) {
 				const oldIndex = correspondence[index];
 				const oldMedium = oldIndex == null ? undefined : previous.media[oldIndex];
-				const old = oldIndex == null ? undefined : oldAt("music_medium", `/media/${oldIndex}`);
+				const old =
+					oldIndex == null
+						? recoverAt("music_medium", `/media/${index}`)
+						: oldAt("music_medium", `/media/${oldIndex}`);
 				const mediumId = old?.componentKey ?? crypto.randomUUID();
 				put(
 					"music_medium",
@@ -326,13 +179,13 @@ export function musicBrainzReleaseNativeWriter(
 						},
 						oldMedium?.id === medium.id
 							? oldAt("music_medium_identifier", `/media/${oldIndex}/id`)
-							: undefined,
+							: recoverAt("music_medium_identifier", `/media/${index}/id`),
 					);
 				for (const entry of tracks(medium, index)) {
 					const previousTrack = oldTracks.get(entry.track.id);
 					const oldTrack = previousTrack
 						? oldAt("music_track_occurrence", previousTrack.path)
-						: undefined;
+						: recoverAt("music_track_occurrence", entry.path);
 					const trackId = oldTrack?.componentKey ?? crypto.randomUUID();
 					let recordingId = oldTrack?.value.recording_id;
 					if (!previousTrack || previousTrack.track.recording.id !== entry.track.recording.id) {
@@ -344,17 +197,15 @@ export function musicBrainzReleaseNativeWriter(
 							evidence: observation.referenceAt(`${entry.path}/recording/id`),
 						});
 						if (target.created)
-							await tx
-								.insert(musicRecording)
-								.values({
-									id: target.id,
-									lengthMilliseconds: entry.track.recording.length ?? null,
-									video: entry.track.recording.video ?? null,
-									artistCreditId: await credit(
-										entry.track.recording["artist-credit"],
-										`${entry.path}/recording/artist-credit`,
-									),
-								});
+							await tx.insert(musicRecording).values({
+								id: target.id,
+								lengthMilliseconds: entry.track.recording.length ?? null,
+								video: entry.track.recording.video ?? null,
+								artistCreditId: await credit(
+									entry.track.recording["artist-credit"],
+									`${entry.path}/recording/artist-credit`,
+								),
+							});
 						recordingId = target.id;
 					}
 					put(
@@ -390,7 +241,9 @@ export function musicBrainzReleaseNativeWriter(
 							namespace: "musicbrainz.track",
 							value: entry.track.id,
 						},
-						previousTrack ? oldAt("music_track_identifier", `${previousTrack.path}/id`) : undefined,
+						previousTrack
+							? oldAt("music_track_identifier", `${previousTrack.path}/id`)
+							: recoverAt("music_track_identifier", `${entry.path}/id`),
 					);
 				}
 				const claimedDiscs = new Set<number>();
@@ -400,11 +253,16 @@ export function musicBrainzReleaseNativeWriter(
 							(candidate, candidateIndex) =>
 								!claimedDiscs.has(candidateIndex) && isDeepStrictEqual(candidate, disc),
 						) ?? -1;
-					let oldDisc: Baseline | undefined;
+					let oldDisc: Baseline | undefined = recoverAt(
+						"music_medium_toc",
+						`/media/${index}/discs/${discIndex}`,
+					);
 					let tocId: string;
 					if (oldDiscIndex >= 0) {
 						claimedDiscs.add(oldDiscIndex);
 						oldDisc = oldAt("music_medium_toc", `/media/${oldIndex}/discs/${oldDiscIndex}`);
+						tocId = z.uuid().parse(oldDisc.value.toc_id);
+					} else if (oldDisc) {
 						tocId = z.uuid().parse(oldDisc.value.toc_id);
 					} else {
 						const [toc] = await tx
@@ -440,7 +298,7 @@ export function musicBrainzReleaseNativeWriter(
 							"music_release_event",
 							previous["release-events"] ? `/release-events/${index}` : "/date",
 						)
-					: undefined;
+					: recoverAt("music_release_event", path);
 				let areaId: string | null = null;
 				if (event.area) {
 					const area = await bindReferencedSourceIdentity(tx, context.actor, {
@@ -473,7 +331,7 @@ export function musicBrainzReleaseNativeWriter(
 				const path = `/label-info/${index}`;
 				const old = previous["label-info"]?.[index]
 					? oldAt("music_release_label", path)
-					: undefined;
+					: recoverAt("music_release_label", path);
 				let labelId: string | null = null;
 				if (label.label) {
 					const target = await bindReferencedSourceIdentity(tx, context.actor, {
@@ -499,83 +357,34 @@ export function musicBrainzReleaseNativeWriter(
 					old,
 				);
 			}
-			const removals = [...baseline]
-				.filter(([key]) => !used.has(key))
-				.map(([, row]) => ({
-					action: "remove" as const,
-					component: row.component,
-					componentKey: row.componentKey,
-					expectedRevisionId: row.currentHistoryId,
-				}));
-			const removalRank: Record<MusicComponentName, number> = {
-				music_release: 9,
-				music_medium: 8,
-				music_track_occurrence: 6,
-				music_release_label: 0,
-				music_release_event: 0,
-				music_release_presentation: 7,
-				music_medium_presentation: 5,
-				music_track_presentation: 0,
-				music_medium_toc: 0,
-				music_track_identifier: 0,
-				music_medium_identifier: 0,
-			};
-			removals.sort((left, right) => removalRank[left.component] - removalRank[right.component]);
-			const plan = [...removals, ...operations];
-			if (plan.length > 128)
-				throw new RangeError("Music release delta requires staged native activation");
-			const result = plan.length
-				? await mutateMusicComponents(
-						tx,
-						context.reference,
-						context.actor,
-						context.expectedRevision,
-						plan,
-					)
-				: {
-						revision: await recordCatalogChange(
-							tx,
-							context.reference,
-							context.actor,
-							context.expectedRevision,
-							"music.source.observed",
-						),
-						changes: [],
-					};
-			const changed = new Map(
-				result.changes.map((change) => [
-					`${change.component}:${change.componentKey}`,
-					change.afterRevisionId,
-				]),
-			);
-			for (const row of pending) {
-				const historyId = row.historyId ?? changed.get(`${row.component}:${row.componentKey}`);
-				if (!historyId) throw new Error("Projected source occurrence has no exact native history");
-				await tx
-					.insert(occurrence)
-					.values({
-						sourceRecordId: context.sourceRecordId,
-						snapshotId: context.snapshotId,
-						ownerId: releaseId,
-						component: row.component,
-						componentKey: row.componentKey,
-						sourcePath: row.path,
-						historyId,
-					});
-			}
+			const result = await finish();
 			const names = await applyMusicBrainzNameDelta(
 				tx,
 				context.reference,
 				context.actor,
 				result.revision,
 				context.sourceRecordId,
+				context.mappingKey,
 				context.previousSnapshotId,
 				context.snapshotId,
 				previous,
 				incoming,
 			);
+			const facts = await applyMusicBrainzFactDelta(
+				tx,
+				context.reference,
+				context.actor,
+				names.revision,
+				observation,
+				{
+					snapshotId: context.previousSnapshotId,
+					mappingKey: context.mappingKey,
+					record: { annotation: previous.annotation, disambiguation: previous.disambiguation },
+				},
+				{ annotation: incoming.annotation, disambiguation: incoming.disambiguation },
+			);
 			return {
-				revision: names.revision,
+				revision: facts.revision,
 				changes: [
 					...result.changes.map((change) => ({
 						kind: "music-component" as const,
@@ -583,6 +392,7 @@ export function musicBrainzReleaseNativeWriter(
 						...change,
 					})),
 					...names.changes,
+					...facts.changes,
 				],
 			};
 		});

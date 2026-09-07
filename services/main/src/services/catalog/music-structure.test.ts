@@ -3,12 +3,41 @@ import {
 	MusicComponentBatchSchema,
 	MusicComponentSchemas,
 	musicComponentCompensation,
+	musicComponentKey,
 } from "./music-structure-contracts";
 import { musicBrainzAliasName } from "./musicbrainz-names";
 
 const id = "11111111-1111-4111-8111-111111111111";
 const history = "22222222-2222-4222-8222-222222222222";
 describe("native music exact structural contracts", () => {
+	test("identifier key tokens cannot alias through separator characters", () => {
+		const first = musicComponentKey("music_track_identifier", {
+			track_id: id,
+			namespace: "a/b",
+			value: "c",
+		});
+		const second = musicComponentKey("music_track_identifier", {
+			track_id: id,
+			namespace: "a",
+			value: "b/c",
+		});
+		expect(first).not.toBe(second);
+		expect(first).toBe(`${id}/a~1b/c`);
+		expect(
+			MusicComponentBatchSchema.safeParse([
+				{
+					component: "music_track_identifier",
+					componentKey: musicComponentKey("music_track_identifier", {
+						track_id: id,
+						namespace: "x",
+						value: "/".repeat(512),
+					}),
+					action: "remove",
+					expectedRevisionId: history,
+				},
+			]).success,
+		).toBe(true);
+	});
 	test("compensation reverses dependency order and pins each applied child", () => {
 		const result = musicComponentCompensation([
 			{ component: "music_medium", componentKey: id, beforeRevisionId: null, afterRevisionId: id },

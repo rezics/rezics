@@ -125,7 +125,7 @@ try {
 			assert.equal((await listMusicCandidateTracks(tx, candidate, actor.id))[0]?.name, "");
 			assert.equal((await listMusicCandidateTocs(tx, candidate, actor.id)).length, 1);
 			const plan = await tx.execute(
-				sql`explain (format json) select * from music_component_revision where owner_id = ${release.id}::uuid and component = 'music_release' and component_key = ${release.id} order by id limit 100`,
+				sql`explain (format json) select * from music_component_revision where owner_id = ${release.id}::uuid and component = 'music_release' and component_key = ${release.id} order by component_sequence limit 100`,
 			);
 			assert.ok(plan.rows.length);
 			throw rollback;

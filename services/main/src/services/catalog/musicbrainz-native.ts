@@ -1,4 +1,4 @@
-import { canonicalizeContentLanguageTag } from "@rezics/content-language";
+import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import type { DatabaseTransaction } from "../database";
 import { entityCatalogProfile } from "../database/schema/catalog-entity";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
@@ -13,15 +13,7 @@ import {
 	musicWorkLanguage,
 } from "../database/schema/catalog-music";
 import { beginMusicCredit, appendMusicCreditMembers, sealMusicCredit } from "./domains";
-import {
-	ensureCatalogDefinition,
-	addCatalogName,
-	beginCatalogFact,
-	appendCatalogFactNodes,
-	sealCatalogFact,
-} from "./storage";
-import { catalogValueNodes } from "./value-nodes";
-import type { CatalogReference } from "./contracts";
+import { ensureCatalogDefinition, addCatalogName } from "./storage";
 import { bindReferencedSourceIdentity } from "./source-references";
 import { recordMusicSourceComponent } from "./music-source-occurrences";
 import type { recordCatalogSourceDocument } from "./source-observations";
@@ -50,6 +42,9 @@ export async function musicBrainzVocabulary(
 		release_packaging: "music_release.packaging_revision_id",
 		medium_format: "music_medium.format_revision_id",
 		alternative_release_type: "music_release_presentation.type_revision_id",
+		work_type: "music_work.type_revision_id",
+		release_group_primary_type: "music_release_group.primary_type_revision_id",
+		release_group_secondary_type: "music_release_group_secondary_type.type_revision_id",
 	};
 	const slot = releaseSlots[family];
 	return (
@@ -61,7 +56,18 @@ export async function musicBrainzVocabulary(
 			...(slot
 				? {
 						constraints: {
-							targets: [{ owner: "music" as const, shapes: ["release"] }],
+							targets: [
+								{
+									owner: "music" as const,
+									shapes: [
+										family === "work_type"
+											? "work"
+											: family.startsWith("release_group_")
+												? "release_group"
+												: "release",
+									],
+								},
+							],
 							slots: [slot],
 						},
 					}
@@ -287,9 +293,11 @@ export async function projectMusicBrainzGroupTypes(
 	tx: DatabaseTransaction,
 	releaseGroupId: string,
 	record: MusicBrainzReleaseGroup,
+	observation?: Observation,
 ) {
 	const ids = record["secondary-type-ids"] ?? [];
 	const names = record["secondary-types"] ?? [];
+	const recorded = new Set<string>();
 	for (let position = 0; position < Math.max(ids.length, names.length); position++) {
 		const typeRevisionId = await musicBrainzVocabulary(
 			tx,
@@ -297,11 +305,22 @@ export async function projectMusicBrainzGroupTypes(
 			ids[position],
 			names[position],
 		);
-		if (typeRevisionId)
+		if (typeRevisionId && !recorded.has(typeRevisionId)) {
 			await tx
 				.insert(musicReleaseGroupSecondaryType)
 				.values({ releaseGroupId, typeRevisionId })
 				.onConflictDoNothing();
+			recorded.add(typeRevisionId);
+			if (observation)
+				await recordMusicSourceComponent(
+					tx,
+					observation,
+					releaseGroupId,
+					"music_release_group_secondary_type",
+					typeRevisionId,
+					`/secondary-types/${position}`,
+				);
+		}
 	}
 }
 
@@ -309,13 +328,25 @@ export async function projectMusicBrainzWorkLanguages(
 	tx: DatabaseTransaction,
 	workId: string,
 	record: MusicBrainzWork,
+	observation?: Observation,
 ) {
 	const languages = record.languages ?? (record.language ? [record.language] : []);
-	for (const language of new Set(languages))
-		await tx
-			.insert(musicWorkLanguage)
-			.values({ workId, languageTag: canonicalizeContentLanguageTag(language) })
-			.onConflictDoNothing();
+	const recorded = new Set<string>();
+	for (const [position, language] of languages.entries()) {
+		const languageTag = musicBrainzLanguageTag(language);
+		if (recorded.has(languageTag)) continue;
+		await tx.insert(musicWorkLanguage).values({ workId, languageTag }).onConflictDoNothing();
+		recorded.add(languageTag);
+		if (observation)
+			await recordMusicSourceComponent(
+				tx,
+				observation,
+				workId,
+				"music_work_language",
+				languageTag,
+				record.languages ? `/languages/${position}` : "/language",
+			);
+	}
 }
 
 /** Identifiers are many-valued: ISRC and ISWC are not assumed globally unique. */
@@ -332,52 +363,4 @@ export async function projectMusicBrainzIdentifiers(
 			value,
 			normalizedValue: value.replaceAll("-", "").replaceAll(".", "").toUpperCase(),
 		});
-}
-
-/** Composer-catalogue numbers and other governed work attributes remain queryable scalar facts. */
-export async function projectMusicBrainzWorkAttributes(
-	tx: DatabaseTransaction,
-	actor: string,
-	reference: CatalogReference,
-	expectedRevision: number,
-	observation: Observation,
-	record: MusicBrainzWork,
-) {
-	let revision = expectedRevision;
-	for (const [position, attribute] of (record.attributes ?? []).entries()) {
-		const definition = await ensureCatalogDefinition(tx, {
-			namespace: "musicbrainz.work_attribute",
-			key: attribute["type-id"] ?? attribute.type,
-			kind: "property",
-			valueKind: "string",
-		});
-		const fact = await beginCatalogFact(tx, reference, actor, revision, definition.revisionId);
-		const appended = await appendCatalogFactNodes(
-			tx,
-			reference,
-			actor,
-			fact.revision,
-			fact.id,
-			-1,
-			[...catalogValueNodes(attribute.value)],
-		);
-		revision = (
-			await sealCatalogFact(
-				tx,
-				reference,
-				actor,
-				appended.revision,
-				fact.id,
-				appended.lastNodePosition,
-			)
-		).revision;
-		await tx.insert(CatalogFactTables.music.support).values({
-			ownerId: reference.id,
-			factId: fact.id,
-			sourceRecordId: observation.record.id,
-			snapshotId: observation.snapshot.id,
-			sourcePath: `/attributes/${position}`,
-		});
-	}
-	return revision;
 }

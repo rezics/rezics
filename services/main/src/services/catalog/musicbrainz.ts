@@ -189,6 +189,13 @@ export const MusicBrainzTrackSchema = z
 		"artist-credit": MusicBrainzCreditSchema.optional(),
 	})
 	.passthrough();
+
+/** @alpha Own-endpoint music objects remain distinct from releases and track occurrences. */
+export const MusicBrainzObjectDocumentSchema = z.discriminatedUnion("kind", [
+	z.object({ kind: z.literal("work"), record: MusicBrainzWorkSchema }),
+	z.object({ kind: z.literal("recording"), record: MusicBrainzRecordingSchema }),
+	z.object({ kind: z.literal("release_group"), record: MusicBrainzReleaseGroupSchema }),
+]);
 export const MusicBrainzDiscSchema = z
 	.object({
 		id: z.string().regex(/^[A-Za-z0-9._-]{28}$/u),

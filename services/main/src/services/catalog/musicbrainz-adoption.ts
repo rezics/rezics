@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import type { DatabaseTransaction } from "../database";
-import { canonicalizeContentLanguageTag } from "@rezics/content-language";
+import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import {
 	musicRecording,
 	musicRelease,
@@ -24,6 +24,7 @@ import {
 import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
 import { adoptMusicBrainzAliases, adoptMusicBrainzTitle } from "./musicbrainz-names";
 import { recordMusicSourceComponent } from "./music-source-occurrences";
+import { applyMusicBrainzFactDelta } from "./musicbrainz-facts";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { bindReferencedSourceIdentity } from "./source-references";
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
@@ -124,7 +125,7 @@ export async function adoptMusicBrainzRelease(
 			record.packaging,
 		),
 		languageTag: record["text-representation"]?.language
-			? canonicalizeContentLanguageTag(record["text-representation"].language)
+			? musicBrainzLanguageTag(record["text-representation"].language)
 			: null,
 		scriptCode: record["text-representation"]?.script || null,
 		barcode: record.barcode ?? null,
@@ -298,6 +299,12 @@ export async function adoptMusicBrainzRelease(
 		observation,
 		record.relations ?? [],
 	);
+	revision = (
+		await applyMusicBrainzFactDelta(tx, identity, actor, revision, observation, null, {
+			annotation: record.annotation,
+			disambiguation: record.disambiguation,
+		})
+	).revision;
 	if (existing)
 		await acceptCatalogSourceInitialization(tx, actor, {
 			sourceRecordId: observation.record.id,

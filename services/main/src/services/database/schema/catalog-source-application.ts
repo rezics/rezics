@@ -108,7 +108,7 @@ export const musicSourceApplicationChange = pgTable(
 		}).onDelete("restrict"),
 		check(
 			"music_source_application_values",
-			sql`${t.position} between 0 and 127 and octet_length(${t.component}) between 1 and 96 and octet_length(${t.componentKey}) between 1 and 512 and (${t.beforeRevisionId} is null or ${t.beforeRevisionId} <> ${t.afterRevisionId})`,
+			sql`${t.position} between 0 and 127 and octet_length(${t.component}) between 1 and 96 and octet_length(${t.componentKey}) between 1 and 1536 and (${t.beforeRevisionId} is null or ${t.beforeRevisionId} <> ${t.afterRevisionId})`,
 		),
 	],
 );

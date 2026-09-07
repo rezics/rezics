@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION public.catalog_source_validate_application_change()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
-DECLARE history public.music_component_revision%ROWTYPE; application public.catalog_source_application%ROWTYPE; proposal_state text;
+DECLARE history public.music_component_revision%ROWTYPE; application public.catalog_source_application%ROWTYPE; proposal_state text; after_sequence bigint;
 BEGIN
   SELECT * INTO STRICT application FROM public.catalog_source_application WHERE source_record_id=NEW.source_record_id AND proposal_id=NEW.proposal_id AND action=NEW.action;
   SELECT state INTO STRICT proposal_state FROM public.catalog_source_adoption_proposal WHERE source_record_id=NEW.source_record_id AND id=NEW.proposal_id;
@@ -12,9 +12,10 @@ BEGIN
     IF history.component <> NEW.component OR history.component_key <> NEW.component_key THEN
       RAISE EXCEPTION 'Music application history has a different component key' USING ERRCODE = '23514';
     END IF;
+    after_sequence := history.component_sequence;
     IF NEW.before_revision_id IS NOT NULL THEN
       SELECT * INTO STRICT history FROM public.music_component_revision WHERE owner_id = NEW.owner_id AND id = NEW.before_revision_id;
-      IF history.component <> NEW.component OR history.component_key <> NEW.component_key OR NEW.before_revision_id >= NEW.after_revision_id THEN
+      IF history.component <> NEW.component OR history.component_key <> NEW.component_key OR history.component_sequence >= after_sequence THEN
         RAISE EXCEPTION 'Music application before history has a different component or order' USING ERRCODE = '23514';
       END IF;
     END IF;

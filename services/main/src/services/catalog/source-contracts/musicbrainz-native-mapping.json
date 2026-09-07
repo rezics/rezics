@@ -31,17 +31,26 @@
 				"music_name",
 				"music_artist_credit",
 				"music_component_revision",
-				"music_component_source_occurrence"
+				"music_component_source_occurrence",
+				"music_component_head",
+				"music_component_source_baseline"
 			],
 			"write": [
 				"musicbrainz-adoption.ts",
 				"musicbrainz-release-delta.ts",
 				"musicbrainz-name-delta.ts"
 			],
-			"queryExport": ["music-domain.ts:readMusicReleaseMetadata", "storage.ts:listCatalogNames"],
-			"checks": ["musicbrainz.test.ts", "check-music-structure.ts"],
+			"queryExport": [
+				"music-domain.ts:readMusicReleaseMetadata",
+				"storage.ts:listCatalogNames"
+			],
+			"checks": [
+				"musicbrainz.test.ts",
+				"check-music-structure.ts",
+				"check-music-source-delta.ts"
+			],
 			"remaining": [
-				"Complete proposal SQL qualification after combined source-baseline migration",
+				"Combined explicit-head/sequence migration and repeated SQL acceptance",
 				"Staged activation for large source scopes"
 			]
 		},
@@ -76,8 +85,14 @@
 				"music-structure.ts:mutateMusicComponents",
 				"musicbrainz-release-delta.ts"
 			],
-			"queryExport": ["music-domain.ts:listMusicMedia", "domains.ts:readMusicTracks"],
-			"checks": ["musicbrainz-release-delta.test.ts", "check-music-structure.ts"],
+			"queryExport": [
+				"music-domain.ts:listMusicMedia",
+				"domains.ts:readMusicTracks"
+			],
+			"checks": [
+				"musicbrainz-release-delta.test.ts",
+				"check-music-structure.ts"
+			],
 			"remaining": [
 				"Explicit reviewed correspondence for medium merges/splits",
 				"Large reorders need staged activation"
@@ -108,7 +123,10 @@
 				"music-domain.ts:listMusicReleaseEvents",
 				"music-domain.ts:listMusicReleaseLabels"
 			],
-			"checks": ["musicbrainz.test.ts", "check-music-domain.ts"],
+			"checks": [
+				"musicbrainz.test.ts",
+				"check-music-domain.ts"
+			],
 			"remaining": [
 				"Country-only summary without area/date needs explicit semantic disposition",
 				"Full public SQL join orchestration"
@@ -124,15 +142,27 @@
 				"cdtoc.track_offset",
 				"medium_cdtoc"
 			],
-			"native": ["music_disc_toc", "music_disc_toc_offset", "music_medium_toc"],
+			"native": [
+				"music_disc_toc",
+				"music_disc_toc_offset",
+				"music_medium_toc"
+			],
 			"write": [
 				"music-domain.ts:attachMusicDiscToc",
 				"musicbrainz-native.ts:projectMusicBrainzDiscs",
 				"musicbrainz-release-delta.ts"
 			],
-			"queryExport": ["music-domain.ts:listMusicDiscTocs", "music-domain.ts:readMusicDiscToc"],
-			"checks": ["musicbrainz.test.ts", "check-music-native-history.ts"],
-			"remaining": ["Public SQL acquisition must supply FreeDB IDs omitted by WS/2"]
+			"queryExport": [
+				"music-domain.ts:listMusicDiscTocs",
+				"music-domain.ts:readMusicDiscToc"
+			],
+			"checks": [
+				"musicbrainz.test.ts",
+				"check-music-native-history.ts"
+			],
+			"remaining": [
+				"Public SQL acquisition must supply FreeDB IDs omitted by WS/2"
+			]
 		},
 		{
 			"family": "recording-work-release-group",
@@ -157,18 +187,29 @@
 				"music_identifier",
 				"music_fact"
 			],
-			"write": ["musicbrainz-object-adoption.ts", "musicbrainz-native.ts"],
+			"write": [
+				"musicbrainz-object-adoption.ts",
+				"musicbrainz-native.ts",
+				"musicbrainz-object-delta.ts",
+				"musicbrainz-facts.ts"
+			],
 			"queryExport": [
 				"music-domain.ts:readMusicWorkMetadata",
 				"music-domain.ts:readMusicReleaseGroupMetadata",
 				"music-domain.ts:listMusicWorkLanguages",
-				"music-domain.ts:listMusicReleaseGroupSecondaryTypes"
+				"music-domain.ts:listMusicReleaseGroupSecondaryTypes",
+				"music-domain.ts:readMusicRecordingMetadata",
+				"semantic-history.ts:pageCatalogFacts"
 			],
-			"checks": ["musicbrainz.test.ts", "check-music-domain.ts"],
+			"checks": [
+				"musicbrainz.test.ts",
+				"check-music-domain.ts",
+				"check-music-source-delta.ts"
+			],
 			"remaining": [
-				"Independent endpoint native update/withdraw callbacks",
-				"First-release-date explicit derived-field disposition",
-				"Complete work-attribute vocabulary installation"
+				"ISRC/ISWC and relationship update integration",
+				"Complete work-attribute taxonomy hierarchy installation",
+				"Staged activation for large scopes"
 			]
 		},
 		{
@@ -198,12 +239,17 @@
 				"musicbrainz-name-delta.ts",
 				"musicbrainz-entities-adoption.ts"
 			],
-			"queryExport": ["names.ts:listCatalogNameRevisions", "storage.ts:listCatalogNames"],
-			"checks": ["music-structure.test.ts"],
+			"queryExport": [
+				"names.ts:listCatalogNameRevisions",
+				"storage.ts:listCatalogNames"
+			],
+			"checks": [
+				"music-structure.test.ts",
+				"check-music-source-delta.ts"
+			],
 			"remaining": [
 				"Unknown alias-type native vocabulary rather than default alias kind",
-				"Supporting endpoint update callbacks",
-				"Numeric compensation frontier integration"
+				"Supporting endpoint update callbacks"
 			]
 		},
 		{
@@ -230,9 +276,16 @@
 				"music_relation_scope",
 				"music_semantic_revision"
 			],
-			"write": ["musicbrainz-relations.ts"],
-			"queryExport": ["semantic-history.ts", "storage.ts"],
-			"checks": ["musicbrainz.test.ts"],
+			"write": [
+				"musicbrainz-relations.ts"
+			],
+			"queryExport": [
+				"semantic-history.ts",
+				"storage.ts"
+			],
+			"checks": [
+				"musicbrainz.test.ts"
+			],
 			"remaining": [
 				"Changed/removed relation reconciliation",
 				"Full upstream relationship-type/attribute hierarchy installation",
@@ -281,9 +334,18 @@
 				"reference_web_resource",
 				"grouping_identity"
 			],
-			"write": ["musicbrainz-entities-adoption.ts", "musicbrainz-entities.ts"],
-			"queryExport": ["entities.ts", "references.ts", "grouping.ts"],
-			"checks": ["musicbrainz-entities.test.ts"],
+			"write": [
+				"musicbrainz-entities-adoption.ts",
+				"musicbrainz-entities.ts"
+			],
+			"queryExport": [
+				"entities.ts",
+				"references.ts",
+				"grouping.ts"
+			],
+			"checks": [
+				"musicbrainz-entities.test.ts"
+			],
 			"remaining": [
 				"Runtime acquisition registration and periodic checks",
 				"Native update/withdraw writers",
@@ -309,18 +371,23 @@
 				"music-domain.ts:addMusicReleasePresentation",
 				"music-domain.ts:addMusicMediumPresentation",
 				"music-domain.ts:addMusicTrackPresentation",
-				"music-structure.ts"
+				"music-structure.ts",
+				"musicbrainz-alternatives.ts"
 			],
 			"queryExport": [
 				"music-domain.ts:listMusicReleasePresentations",
 				"music-domain.ts:listMusicMediumPresentations",
 				"music-domain.ts:listMusicTrackPresentations"
 			],
-			"checks": ["check-music-domain.ts"],
+			"checks": [
+				"check-music-domain.ts",
+				"musicbrainz-alternatives.test.ts",
+				"check-music-source-delta.ts"
+			],
 			"remaining": [
-				"Joined public SQL source adapter",
-				"Source adoption/update/withdraw fixtures",
-				"Shared alternative-track source row identity"
+				"Source update/withdraw callback",
+				"Full SQL dump join/acquisition orchestration",
+				"Staged activation for large alternative lists"
 			]
 		},
 		{
@@ -338,9 +405,16 @@
 				"music_medium_attribute_allowed_format",
 				"music_medium_attribute_allowed_value_format"
 			],
-			"write": ["music-medium-attributes.ts"],
-			"queryExport": ["music-medium-attributes.ts:listMusicMediumAttributes"],
-			"checks": ["music-medium-attributes.test.ts", "check-music-domain.ts"],
+			"write": [
+				"music-medium-attributes.ts"
+			],
+			"queryExport": [
+				"music-medium-attributes.ts:listMusicMediumAttributes"
+			],
+			"checks": [
+				"music-medium-attributes.test.ts",
+				"check-music-domain.ts"
+			],
 			"remaining": [
 				"Joined SQL source and reviewed taxonomy import",
 				"Exact source structural restoration"
@@ -348,15 +422,29 @@
 		},
 		{
 			"family": "incomplete-disc-candidates",
-			"objects": ["release_raw", "track_raw", "cdtoc_raw"],
-			"native": ["music_release_candidate", "music_candidate_track", "music_candidate_toc"],
-			"write": ["musicbrainz-dump-candidates.ts", "music-candidates.ts"],
+			"objects": [
+				"release_raw",
+				"track_raw",
+				"cdtoc_raw"
+			],
+			"native": [
+				"music_release_candidate",
+				"music_candidate_track",
+				"music_candidate_toc"
+			],
+			"write": [
+				"musicbrainz-dump-candidates.ts",
+				"music-candidates.ts"
+			],
 			"queryExport": [
 				"music-candidates.ts:readMusicReleaseCandidate",
 				"music-candidates.ts:listMusicCandidateTracks",
 				"music-candidates.ts:listMusicCandidateTocs"
 			],
-			"checks": ["musicbrainz-dump-candidates.test.ts", "check-music-native-history.ts"],
+			"checks": [
+				"musicbrainz-dump-candidates.test.ts",
+				"check-music-native-history.ts"
+			],
 			"remaining": [
 				"Streaming SQL join/acquisition orchestration",
 				"Candidate update/withdraw callbacks"
@@ -371,14 +459,16 @@
 				"track_gid_redirect"
 			],
 			"native": [],
-			"write": [],
+			"write": [
+				"musicbrainz-redirects.ts:planMusicBrainzRedirects"
+			],
 			"queryExport": [],
-			"checks": [],
+			"checks": [
+				"musicbrainz-redirects.test.ts"
+			],
 			"remaining": [
-				"Typed archived redirect adapter",
-				"Source identity redirect resolution",
-				"Secondary identifier redirect adoption",
-				"No automatic native identity merge"
+				"Shared source redirect edge persistence and canonical projection/repair integration",
+				"Primary transport redirect observation without native identity merge"
 			]
 		},
 		{
@@ -425,9 +515,25 @@
 		},
 		{
 			"family": "private-editor-account-data",
-			"fields": ["editor credentials", "OAuth tokens", "private *_rating_raw", "private *_tag_raw"],
+			"fields": [
+				"editor credentials",
+				"OAuth tokens",
+				"private *_rating_raw",
+				"private *_tag_raw"
+			],
 			"disposition": "Excluded from public native catalog adoption; no importer for secrets or private editor actions.",
-			"remaining": ["Complete reviewed declaration-level exclusion evidence"]
+			"remaining": [
+				"Complete reviewed declaration-level exclusion evidence"
+			]
 		}
-	]
+	],
+	"languageCodes": {
+		"input": "ISO639-3 and bibliographic codes",
+		"native": "registered BCP47 content-language tags",
+		"mapper": "musicbrainz-language.ts",
+		"artifact": "source-contracts/musicbrainz-language-map.json",
+		"tests": "musicbrainz-language.test.ts",
+		"sourceRows": 7923,
+		"aliases": 204
+	}
 }
