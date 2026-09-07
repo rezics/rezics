@@ -8,8 +8,6 @@ import {
 	catalogSourceMappingClaim as claims,
 	catalogSourceSnapshot as snapshots,
 } from "../database/schema/catalog-source";
-import { CatalogIdentityTables } from "../database/schema/catalog-identity";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
 import type { EventHandler } from "../events/consumer";
 import type { StreamRoute } from "../events/topology";
 import { encodeEnvelope, eventEnvelopeSchema, type EventEnvelope } from "../events/envelope";
@@ -21,7 +19,7 @@ import {
 	parseTaskRequest,
 } from "../events/durability";
 import { SourceObservationPayloadSchema, parseSourceObservationEvent } from "./source-events";
-import { proposeCatalogSourceAdoption } from "./source-proposals";
+import { enqueueCatalogSourceObservationProposal } from "./source-proposals";
 
 const taskSchema = SourceObservationPayloadSchema.extend({
 	afterMappingKey: z.uuid().nullable(),
@@ -112,22 +110,13 @@ async function applyPage(tx: DatabaseTransaction, envelope: EventEnvelope, signa
 	for (const claim of page) {
 		if (signal.aborted) throw signal.reason;
 		if (claim.state !== "active") continue;
-		const table = CatalogFactTables[claim.owner].sourceBinding;
-		const identity = CatalogIdentityTables[claim.owner];
-		const [target] = await tx
-			.select({ actor: identity.createdByAuthUserId })
-			.from(table)
-			.innerJoin(identity, eq(identity.id, table.ownerId))
-			.where(
-				and(eq(table.sourceRecordId, value.sourceRecordId), eq(table.mappingKey, claim.mappingKey)),
-			)
-			.limit(1);
-		if (!target?.actor) continue;
-		await proposeCatalogSourceAdoption(tx, target.actor, {
+		await enqueueCatalogSourceObservationProposal(tx, {
 			sourceRecordId: value.sourceRecordId,
 			mappingKey: claim.mappingKey,
 			snapshotId: value.snapshotId,
 			mappingVersion: claim.mappingVersion,
+			expectedBindingRevision: claim.bindingRevision,
+			afterMappingKey: cursor.afterMappingKey,
 		});
 	}
 	const last = page.at(-1);

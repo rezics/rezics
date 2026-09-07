@@ -1,10 +1,12 @@
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, isNull } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import {
 	catalogSourceAdoptionProposal as proposals,
 	catalogSourceMappingClaim as claims,
 	catalogSourceSnapshot as snapshots,
+	catalogSourceSubscription as subscriptions,
+	catalogSourceObservationFanout as fanout,
 } from "../database/schema/catalog-source";
 import { type CatalogReference } from "./contracts";
 import { loadCatalogIdentity } from "./storage";
@@ -18,6 +20,14 @@ import {
 	type CatalogSourceNativeChange,
 } from "./source-applications";
 import { catalogSourceApplication } from "../database/schema/catalog-source-application";
+import { CatalogIdentityTables } from "../database/schema/catalog-identity";
+
+const proposalInputSchema = z.strictObject({
+	sourceRecordId: z.uuid(),
+	mappingKey: z.uuid(),
+	snapshotId: z.uuid(),
+	mappingVersion: z.string().min(1).max(128),
+});
 
 /** @internal Owner commands supply the actual native mutation; this protocol supplies authority and replay fences. */
 export type CatalogSourceNativeWriter = (
@@ -42,19 +52,83 @@ export async function proposeCatalogSourceAdoption(
 	actor: string,
 	input: CatalogBindingKey & { snapshotId: string; mappingVersion: string },
 ) {
-	const value = z
-		.strictObject({
-			sourceRecordId: z.uuid(),
-			mappingKey: z.uuid(),
-			snapshotId: z.uuid(),
-			mappingVersion: z.string().min(1).max(128),
-		})
-		.parse(input);
+	const value = proposalInputSchema.parse(input);
 	const current = await lockCatalogSourceBinding(tx, {
 		sourceRecordId: value.sourceRecordId,
 		mappingKey: value.mappingKey,
 	});
 	const native = await loadCatalogIdentity(tx, current.reference, actor, true);
+	return writeCatalogSourceProposal(tx, current, value, native.revision, actor);
+}
+
+/** Enqueue from a committed source observation and its active subscription; no account is impersonated. @internal */
+export async function enqueueCatalogSourceObservationProposal(
+	tx: DatabaseTransaction,
+	input: z.infer<typeof proposalInputSchema> & {
+		expectedBindingRevision: number;
+		afterMappingKey: string | null;
+	},
+) {
+	const value = proposalInputSchema.parse({
+		sourceRecordId: input.sourceRecordId,
+		mappingKey: input.mappingKey,
+		snapshotId: input.snapshotId,
+		mappingVersion: input.mappingVersion,
+	});
+	z.number().int().positive().max(Number.MAX_SAFE_INTEGER).parse(input.expectedBindingRevision);
+	if (input.afterMappingKey !== null) z.uuid().parse(input.afterMappingKey);
+	const current = await lockCatalogSourceBinding(tx, {
+		sourceRecordId: value.sourceRecordId,
+		mappingKey: value.mappingKey,
+	});
+	const [continuation] = await tx
+		.select()
+		.from(fanout)
+		.where(
+			and(eq(fanout.sourceRecordId, value.sourceRecordId), eq(fanout.snapshotId, value.snapshotId)),
+		)
+		.limit(1);
+	const [subscription] = await tx
+		.select()
+		.from(subscriptions)
+		.where(
+			and(
+				eq(subscriptions.sourceRecordId, value.sourceRecordId),
+				eq(subscriptions.mappingKey, value.mappingKey),
+			),
+		)
+		.limit(1);
+	if (
+		!continuation ||
+		continuation.completedAt ||
+		continuation.afterMappingKey !== input.afterMappingKey ||
+		!subscription ||
+		subscription.revision !== input.expectedBindingRevision ||
+		current.claim.bindingRevision !== input.expectedBindingRevision ||
+		subscription.owner !== current.reference.owner
+	)
+		throw new Error(
+			"Source observation proposal requires its exact active fan-out and subscription fence",
+		);
+	if (subscription.state !== "active") return { status: "paused" as const };
+	const identity = CatalogIdentityTables[current.reference.owner];
+	const [native] = await tx
+		.select({ revision: identity.revision })
+		.from(identity)
+		.where(and(eq(identity.id, current.reference.id), isNull(identity.deletedAt)))
+		.limit(1)
+		.for("update");
+	if (!native) throw new Error("Source observation target is unavailable");
+	return writeCatalogSourceProposal(tx, current, value, native.revision, null);
+}
+
+async function writeCatalogSourceProposal(
+	tx: DatabaseTransaction,
+	current: Awaited<ReturnType<typeof lockCatalogSourceBinding>>,
+	value: z.infer<typeof proposalInputSchema>,
+	expectedTargetRevision: number,
+	proposerAuthUserId: string | null,
+) {
 	if (current.claim.state !== "active") return { status: "paused" as const };
 	if (value.mappingVersion !== current.claim.mappingVersion)
 		throw new Error("Source mapping protocol requires an explicit binding revision");
@@ -72,10 +146,10 @@ export async function proposeCatalogSourceAdoption(
 	const values = {
 		...value,
 		mappingOwner: current.claim.owner,
-		expectedTargetRevision: native.revision,
+		expectedTargetRevision,
 		expectedBindingRevision: current.claim.bindingRevision,
 		expectedPolicyRevision: current.claim.policyRevision,
-		proposerAuthUserId: actor,
+		proposerAuthUserId,
 	};
 	await tx.insert(proposals).values(values).onConflictDoNothing();
 	const [proposal] = await tx
@@ -89,7 +163,7 @@ export async function proposeCatalogSourceAdoption(
 				eq(proposals.mappingVersion, value.mappingVersion),
 				eq(proposals.expectedBindingRevision, current.claim.bindingRevision),
 				eq(proposals.expectedPolicyRevision, current.claim.policyRevision),
-				eq(proposals.expectedTargetRevision, native.revision),
+				eq(proposals.expectedTargetRevision, expectedTargetRevision),
 			),
 		)
 		.limit(1);

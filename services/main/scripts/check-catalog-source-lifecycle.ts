@@ -11,6 +11,7 @@ import {
 	catalogSourceRecord,
 	catalogSourceSnapshot,
 	catalogSourceBindingRevision,
+	catalogSourceObservationFanout,
 } from "../src/services/database/schema/catalog-source";
 import {
 	createCatalogIdentity,
@@ -33,6 +34,7 @@ import {
 } from "../src/services/catalog/source-bindings";
 import {
 	proposeCatalogSourceAdoption,
+	enqueueCatalogSourceObservationProposal,
 	decideCatalogSourceProposal,
 } from "../src/services/catalog/source-proposals";
 
@@ -161,6 +163,39 @@ try {
 				snapshotId: newest.snapshot.id,
 				mappingVersion: "vndb.vn.1",
 			};
+			await assert.rejects(
+				() =>
+					enqueueCatalogSourceObservationProposal(tx, {
+						...proposalInput,
+						expectedBindingRevision: 1,
+						afterMappingKey: null,
+					}),
+				/fan-out and subscription fence/,
+			);
+			await tx
+				.insert(catalogSourceObservationFanout)
+				.values({ sourceRecordId: first.record.id, snapshotId: newest.snapshot.id });
+			const observedProposal = await enqueueCatalogSourceObservationProposal(tx, {
+				...proposalInput,
+				expectedBindingRevision: 1,
+				afterMappingKey: null,
+			});
+			assert.equal(observedProposal.status, "proposed");
+			if (observedProposal.status !== "proposed") throw new Error("Expected observed proposal");
+			assert.equal(
+				observedProposal.proposal.proposerAuthUserId,
+				null,
+				"Background source observations never impersonate the native creator",
+			);
+			await assert.rejects(
+				() =>
+					enqueueCatalogSourceObservationProposal(tx, {
+						...proposalInput,
+						expectedBindingRevision: 2,
+						afterMappingKey: null,
+					}),
+				/fan-out and subscription fence/,
+			);
 			const proposed = await proposeCatalogSourceAdoption(tx, actor.id, proposalInput);
 			assert.equal(proposed.status, "proposed");
 			if (proposed.status !== "proposed") throw new Error("Expected initial proposal");
