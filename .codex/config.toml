@@ -7,6 +7,3 @@ network_access = true
 
 [windows]
 sandbox = "elevated"
-
-[agents]
-max_concurrent_threads_per_session = 20
