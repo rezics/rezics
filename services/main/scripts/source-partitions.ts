@@ -1,5 +1,27 @@
+import { CatalogOwnerValues } from "@rezics/reference";
+
 /** @internal Physical source placement preserves each typed primary/unique key. */
 export const sourcePartitionKeys = {
+	...Object.fromEntries(
+		CatalogOwnerValues.map((owner) => [`${owner}_source_owned_baseline`, "source_record_id"]),
+	),
+	software_source_record_baseline: "source_record_id",
+	software_source_component_baseline: "source_record_id",
+	software_source_context_baseline: "source_record_id",
+	software_source_participation_baseline: "source_record_id",
+	software_record_source_occurrence: "source_record_id",
+	software_component_source_occurrence: "source_record_id",
+	...Object.fromEntries(
+		CatalogOwnerValues.flatMap((owner) =>
+			["semantic", "name", "authority"].map((kind) => [
+				`${owner}_source_${kind}_application_change`,
+				"source_record_id",
+			]),
+		),
+	),
+	software_source_context_application_change: "source_record_id",
+	software_source_participation_application_change: "source_record_id",
+	music_component_source_baseline: "source_record_id",
 	catalog_source_record: "id",
 	catalog_source_snapshot: "source_record_id",
 	catalog_source_application: "source_record_id",

@@ -24,6 +24,10 @@ import {
 	createTextVersion,
 } from "../src/services/catalog/domains";
 import { ensureCatalogDefinition } from "../src/services/catalog/storage";
+import {
+	readStructureComponentHead,
+	restoreStructureComponent,
+} from "../src/services/catalog/structure-history";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
@@ -120,8 +124,41 @@ try {
 			);
 			await assert.rejects(readProgramStructure(tx, episode, null));
 			checks += 2;
-			await removeProgramOccurrence(tx, version, actor, second.revision, first.id);
+			const originalOccurrence = await readStructureComponentHead(
+				tx,
+				version,
+				"program_episode_occurrence",
+				first.id,
+			);
+			assert.ok(originalOccurrence);
+			const removed = await removeProgramOccurrence(tx, version, actor, second.revision, first.id);
 			assert.equal((await listProgramOccurrences(tx, version, actor)).items.length, 1);
+			const removedOccurrence = await readStructureComponentHead(
+				tx,
+				version,
+				"program_episode_occurrence",
+				first.id,
+			);
+			assert.ok(removedOccurrence);
+			await restoreStructureComponent(tx, version, actor, removed.revision, {
+				component: "program_episode_occurrence",
+				componentKey: first.id,
+				expectedHistoryId: removedOccurrence.id,
+				historyId: originalOccurrence.id,
+			});
+			assert.equal((await listProgramOccurrences(tx, version, actor)).items.length, 2);
+			await assert.rejects(
+				tx.transaction((nested) =>
+					restoreStructureComponent(nested, version, actor, removed.revision + 1, {
+						component: "program_episode_occurrence",
+						componentKey: first.id,
+						expectedHistoryId: removedOccurrence.id,
+						historyId: originalOccurrence.id,
+					}),
+				),
+				/component changed/u,
+			);
+			checks += 2;
 			checks++;
 			const work = await createPublishingWork(tx, actor, name("Work"));
 			const text = await createTextVersion(tx, actor, { name: name("Text"), languageTag: "en" });

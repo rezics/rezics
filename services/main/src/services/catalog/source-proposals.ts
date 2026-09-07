@@ -17,6 +17,7 @@ import {
 	recordCatalogSourceApplication,
 	type CatalogSourceNativeChange,
 } from "./source-applications";
+import { catalogSourceApplication } from "../database/schema/catalog-source-application";
 
 /** @internal Owner commands supply the actual native mutation; this protocol supplies authority and replay fences. */
 export type CatalogSourceNativeWriter = (
@@ -55,6 +56,8 @@ export async function proposeCatalogSourceAdoption(
 	});
 	const native = await loadCatalogIdentity(tx, current.reference, actor, true);
 	if (current.claim.state !== "active") return { status: "paused" as const };
+	if (value.mappingVersion !== current.claim.mappingVersion)
+		throw new Error("Source mapping protocol requires an explicit binding revision");
 	if (current.source.headSnapshotId !== value.snapshotId)
 		throw new Error("Proposal observation is no longer current");
 	const [snapshot] = await tx
@@ -156,6 +159,7 @@ export async function decideCatalogSourceProposal(
 	if (
 		value.action === "apply" &&
 		(!fenceMatches ||
+			proposal.mappingVersion !== current.claim.mappingVersion ||
 			!revisionMatches ||
 			current.claim.state !== "active" ||
 			current.source.headSnapshotId !== proposal.snapshotId ||
@@ -183,6 +187,22 @@ export async function decideCatalogSourceProposal(
 	let appliedTargetRevision = proposal.appliedTargetRevision;
 	if (value.action === "apply" || value.action === "withdraw") {
 		if (!nativeWriter) throw new Error("Source decision requires its canonical native command");
+		const [priorApplication] =
+			value.action === "withdraw"
+				? await tx
+						.select()
+						.from(catalogSourceApplication)
+						.where(
+							and(
+								eq(catalogSourceApplication.sourceRecordId, value.sourceRecordId),
+								eq(catalogSourceApplication.proposalId, proposal.id),
+								eq(catalogSourceApplication.action, "apply"),
+							),
+						)
+						.limit(1)
+				: [];
+		if (value.action === "withdraw" && !priorApplication)
+			throw new Error("Withdrawal requires the exact prior native application");
 		const result = await nativeWriter(tx, {
 			reference: current.reference,
 			actor,
@@ -210,6 +230,9 @@ export async function decideCatalogSourceProposal(
 				proposalId: proposal.id,
 				action: value.action,
 				previousSnapshotId: current.claim.observedSnapshotId,
+				previousEvidenceSourceRecordId: current.claim.evidenceSourceRecordId,
+				previousEvidenceSnapshotId: current.claim.evidenceSnapshotId,
+				previousEvidencePath: current.claim.evidencePath,
 				beforeRevision: native.revision,
 				afterRevision: result.revision,
 			},
@@ -224,6 +247,21 @@ export async function decideCatalogSourceProposal(
 					evidenceSourceRecordId: null,
 					evidenceSnapshotId: null,
 					evidencePath: null,
+				})
+				.where(
+					and(
+						eq(claims.sourceRecordId, value.sourceRecordId),
+						eq(claims.mappingKey, proposal.mappingKey),
+					),
+				);
+		else if (priorApplication)
+			await tx
+				.update(claims)
+				.set({
+					observedSnapshotId: priorApplication.previousSnapshotId,
+					evidenceSourceRecordId: priorApplication.previousEvidenceSourceRecordId,
+					evidenceSnapshotId: priorApplication.previousEvidenceSnapshotId,
+					evidencePath: priorApplication.previousEvidencePath,
 				})
 				.where(
 					and(

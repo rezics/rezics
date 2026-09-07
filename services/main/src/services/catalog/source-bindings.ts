@@ -74,6 +74,7 @@ export async function sealInitialCatalogSourceBinding(
 		mappingKey: key.mappingKey,
 		owner: current.claim.owner,
 		revision: 1,
+		mappingVersion: current.claim.mappingVersion,
 		policyRevision: 1,
 		state: current.claim.state,
 		mode: "review",
@@ -98,6 +99,7 @@ export async function bindCatalogSourceIdentity(
 		path: string;
 		snapshotId: string;
 		reference: CatalogReference;
+		mappingVersion?: string;
 	},
 ) {
 	const value = z
@@ -106,6 +108,7 @@ export async function bindCatalogSourceIdentity(
 			path: z.string().min(1).max(512),
 			snapshotId: z.uuid(),
 			reference: CatalogReferenceSchema,
+			mappingVersion: z.string().min(1).max(128).optional(),
 		})
 		.parse({ ...input, reference: { owner: input.reference.owner, id: input.reference.id } });
 	const [source] = await tx
@@ -123,7 +126,7 @@ export async function bindCatalogSourceIdentity(
 			path: value.path,
 			observedSnapshotId: value.snapshotId,
 			owner: value.reference.owner,
-			mappingVersion: `${source.source}.${source.objectType}.1`,
+			mappingVersion: value.mappingVersion ?? `${source.source}.${source.objectType}.1`,
 		})
 		.returning();
 	if (!claim) throw new Error("Source binding insert failed");
@@ -138,6 +141,7 @@ export async function bindCatalogSourceIdentity(
 		mappingKey: claim.mappingKey,
 		owner: value.reference.owner,
 		revision: 1,
+		mappingVersion: claim.mappingVersion,
 		policyRevision: 1,
 		state: "active",
 		mode: "review",
@@ -165,6 +169,7 @@ export async function acceptCatalogSourceInitialization(
 		reference: CatalogReference;
 		expectedBaselineRevision: number;
 		finalRevision: number;
+		mappingVersion?: string;
 	},
 ) {
 	const value = z
@@ -175,6 +180,7 @@ export async function acceptCatalogSourceInitialization(
 			reference: CatalogReferenceSchema,
 			expectedBaselineRevision: z.number().int().positive(),
 			finalRevision: z.number().int().positive(),
+			mappingVersion: z.string().min(1).max(128).optional(),
 		})
 		.parse({ ...input, reference: { owner: input.reference.owner, id: input.reference.id } });
 	const [locator] = await tx
@@ -199,6 +205,16 @@ export async function acceptCatalogSourceInitialization(
 		value.finalRevision < value.expectedBaselineRevision
 	)
 		throw new Error("Source reference initialization fence changed");
+	if (value.mappingVersion && value.mappingVersion !== current.claim.mappingVersion)
+		await reviseCatalogSourceBinding(tx, actor, {
+			sourceRecordId: value.sourceRecordId,
+			mappingKey: locator.mappingKey,
+			expectedRevision: current.claim.bindingRevision,
+			state: "active",
+			mode: "review",
+			reason: "Initialized exact native mapping protocol",
+			mappingVersion: value.mappingVersion,
+		});
 	await tx
 		.update(claims)
 		.set({
@@ -252,6 +268,7 @@ export async function reviseCatalogSourceBinding(
 		mode: "review" | "manual";
 		reason: string;
 		target?: CatalogReference;
+		mappingVersion?: string;
 	},
 ) {
 	const value = keySchema
@@ -265,6 +282,7 @@ export async function reviseCatalogSourceBinding(
 			mode: z.enum(["review", "manual"]),
 			reason: z.string().min(1).max(2048),
 			target: CatalogReferenceSchema.optional(),
+			mappingVersion: z.string().min(1).max(128).optional(),
 		})
 		.parse({
 			...input,
@@ -281,28 +299,15 @@ export async function reviseCatalogSourceBinding(
 	if (reference.owner !== current.reference.owner)
 		throw new Error("Cross-owner rebind requires a new checked mapping");
 	await loadCatalogIdentity(tx, reference, actor, true);
-	// Persist the initial legacy-in-transaction head before its first edit as well.
-	await tx
-		.insert(revisions)
-		.values({
-			...value,
-			revision: current.claim.bindingRevision,
-			policyRevision: current.claim.policyRevision,
-			owner: reference.owner,
-			state: current.claim.state,
-			mode: "review",
-			actorAuthUserId: actor,
-			reason: "Recorded initial source correspondence",
-			...targetColumns(current.reference),
-		})
-		.onConflictDoNothing();
 	const revision = current.claim.bindingRevision + 1;
 	const policyRevision = current.claim.policyRevision + 1;
+	const mappingVersion = value.mappingVersion ?? current.claim.mappingVersion;
 	await tx.insert(revisions).values({
 		sourceRecordId: value.sourceRecordId,
 		mappingKey: value.mappingKey,
 		revision,
 		policyRevision,
+		mappingVersion,
 		owner: reference.owner,
 		state: value.target ? "paused" : value.state,
 		mode: value.mode,
@@ -315,6 +320,7 @@ export async function reviseCatalogSourceBinding(
 		.set({
 			bindingRevision: revision,
 			policyRevision,
+			mappingVersion,
 			state: value.target ? "paused" : value.state,
 		})
 		.where(

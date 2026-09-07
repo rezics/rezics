@@ -1,12 +1,15 @@
 export const PostgreSqlSchemaFileNames = [
 	"catalog-distribution-integrity.sql",
 	"catalog-music-history.sql",
+	"music-source-lifecycle.sql",
 	"catalog-name-integrity.sql",
 	"catalog-semantics-integrity.sql",
 	"catalog-software-history.sql",
 	"catalog-software-participation-integrity.sql",
 	"catalog-source-integrity.sql",
 	"catalog-source-application.sql",
+	"catalog-source-owned-baseline.sql",
+	"catalog-structure-history.sql",
 	"catalog-supporting-integrity.sql",
 	"operational-runtime.sql",
 
@@ -36,6 +39,11 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles = {
+	catalog_source_mapping_protocol: ["catalog-source-integrity.sql"],
+	catalog_source_owned_applications: [
+		"catalog-source-application.sql",
+		"music-source-lifecycle.sql",
+	],
 	catalog_context_music_evidence: [
 		"catalog-software-participation-integrity.sql",
 		"catalog-music-history.sql",
@@ -71,6 +79,11 @@ export const PostgreSqlSchemaMigrationBundles = {
 } as const satisfies Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>>;
 
 export const PostgreSqlSchemaFunctionNames = [
+	"catalog_source_guard_owned_baseline",
+	"catalog_capture_structure_revision",
+	"catalog_guard_structure_history",
+	"catalog_validate_structure_source",
+	"catalog_check_music_source_baseline",
 	"catalog_guard_software_participation",
 	"catalog_require_software_participation_head",
 	"catalog_guard_software_participation_revision",
@@ -78,6 +91,7 @@ export const PostgreSqlSchemaFunctionNames = [
 	"catalog_validate_software_participation",
 	"catalog_check_music_source_occurrence",
 	"catalog_source_validate_application_change",
+	"catalog_source_guard_proposal",
 	"catalog_source_require_application_complete",
 	"catalog_guard_distribution_member",
 	"catalog_count_distribution_members",
@@ -209,6 +223,8 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "music_component_source_baseline", name: "music_source_baseline_proof" },
+	{ table: "catalog_source_adoption_proposal", name: "catalog_source_proposal_guard" },
 	{ table: "software_participation", name: "software_participation_guard" },
 	{ table: "software_participation", name: "software_participation_head_required" },
 	{ table: "software_participation_revision", name: "software_participation_revision_guard" },
@@ -653,24 +669,66 @@ const CatalogTriggerOwners = [
 	"distribution",
 ] as const;
 
+const CatalogSourceApplicationTables = [
+	"catalog_source_application",
+	"music_source_application_change",
+	"software_source_component_application_change",
+	"software_source_record_application_change",
+	"software_source_context_application_change",
+	"software_source_participation_application_change",
+	...CatalogTriggerOwners.flatMap((owner) =>
+		["semantic", "name", "authority"].map((kind) => `${owner}_source_${kind}_application_change`),
+	),
+];
+
 /**
  * Explicit bounded families created by canonical DO blocks. The live checker drops all
  * these identities inside its rollback transaction, requires recreation, and compares
  * complete definitions (including arguments, constraint timing and enabled status).
  */
 export const PostgreSqlSchemaDynamicTriggers = [
+	...CatalogTriggerOwners.map((owner) => ({
+		table: `${owner}_source_owned_baseline`,
+		name: "catalog_source_baseline_guard",
+	})),
+	...["record", "component", "context", "participation"].map((kind) => ({
+		table: `software_source_${kind}_baseline`,
+		name: "catalog_source_baseline_guard",
+	})),
+	...["software_record_source_occurrence", "software_component_source_occurrence"].map((table) => ({
+		table,
+		name: "software_source_occurrence_immutable",
+	})),
 	...[
-		"catalog_source_application",
-		"music_source_application_change",
-		"software_source_component_application_change",
-		"software_source_record_application_change",
-	].map((table) => ({ table, name: "catalog_source_application_immutable" })),
-	...[
-		"catalog_source_application",
-		"music_source_application_change",
-		"software_source_component_application_change",
-		"software_source_record_application_change",
-	].flatMap((parent) =>
+		"program_work",
+		"program_season",
+		"program_version",
+		"program_episode",
+		"program_episode_occurrence",
+		"publishing_work",
+		"publishing_text_version",
+		"publishing_publication",
+		"publishing_serialization",
+		"publishing_text_work",
+		"publishing_publication_text",
+		"publishing_publication_work",
+		"publishing_publication_facet",
+		"publishing_release_event",
+		"publishing_installment",
+	].map((table) => ({ table, name: "catalog_capture_structure_revision" })),
+	...["program", "publishing"].flatMap((owner) => [
+		{ table: `${owner}_component_revision`, name: "catalog_structure_history_immutable" },
+		{ table: `${owner}_component_source_occurrence`, name: "catalog_structure_history_immutable" },
+		{ table: `${owner}_component_source_occurrence`, name: "catalog_structure_source_exact" },
+	]),
+	...CatalogSourceApplicationTables.map((table) => ({
+		table,
+		name: "catalog_source_application_immutable",
+	})),
+	...CatalogSourceApplicationTables.filter(
+		(table) => !["catalog_source_application", "music_source_application_change"].includes(table),
+	).map((table) => ({ table, name: "catalog_source_application_change_guard" })),
+	...["catalog_source_application"].flatMap((parent) =>
 		Array.from({ length: 64 }, (_, index) => ({
 			table: `${parent}_p${String(index).padStart(2, "0")}`,
 			name: "catalog_source_application_complete",
@@ -731,6 +789,13 @@ export const PostgreSqlSchemaDynamicTriggers = [
 
 /** Exact dynamic declarations permitted by the static manifest check. */
 export const PostgreSqlSchemaDynamicTriggerTemplates = [
+	"CREATE TRIGGER catalog_source_baseline_guard BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_owned_baseline(%L,%L)",
+	"CREATE TRIGGER catalog_source_baseline_guard BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_owned_baseline(%L)",
+	"CREATE TRIGGER software_source_occurrence_immutable BEFORE UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_immutable_evidence()",
+	"CREATE TRIGGER catalog_capture_structure_revision AFTER INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_capture_structure_revision(%L,%L,%L)",
+	"CREATE TRIGGER catalog_structure_history_immutable BEFORE UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_structure_history()",
+	"CREATE TRIGGER catalog_structure_source_exact BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_validate_structure_source(%L)",
+	"CREATE TRIGGER catalog_source_application_change_guard BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_validate_application_change()",
 	"CREATE TRIGGER catalog_source_application_immutable BEFORE UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_immutable_evidence()",
 	"CREATE CONSTRAINT TRIGGER catalog_source_application_complete AFTER INSERT ON %s DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.catalog_source_require_application_complete()",
 	"CREATE TRIGGER catalog_source_evidence_guard BEFORE UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_immutable_evidence()",

@@ -1,3 +1,8 @@
+SET search_path TO public;
+
+-- Modify "catalog_source_binding_revision" table
+ALTER TABLE "catalog_source_binding_revision" ADD COLUMN "mapping_version" text NOT NULL;
+
 CREATE OR REPLACE FUNCTION public.catalog_source_guard_record()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 BEGIN

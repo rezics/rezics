@@ -58,12 +58,21 @@ a complete contiguous manifest; all evidence is immutable. Music history keys ar
 checked against the exact component, and readers require editor access to every
 disclosed native owner even after source rebinding.
 
-The initial application command admits at most 128 component changes. This is
+Native named-form, authority, semantic, software context and participation changes
+now have their own concrete revision foreign keys. Source-to-native baseline
+relations keep an indexed current compensation frontier backed by immutable source
+occurrences and exact application rows. Repeated apply/withdraw cycles do not walk
+the full history. Withdrawal restores the prior observed snapshot and, for a
+previously referenced stub, its original composite evidence key. A source proposal
+cannot be reopened after its terminal decision, and a decided application's
+manifest cannot accept later rows.
+
+The application command currently admits at most 128 component changes. This is
 a bounded atomic proposal slice, not qualification of an arbitrarily large
 source-record update. Larger owners require staged application and paged manifests;
 that remaining gate must not be hidden by increasing an in-memory array limit.
 
-Each of the four new growing relations has 64 source-key hash partitions and
+Each growing source application or baseline family has 64 source-key hash partitions and
 source-prefixed primary/foreign keys, following PostgreSQL's
 [partitioned-key rules](https://www.postgresql.org/docs/18/ddl-partitioning.html).
 At 256 bytes of estimated heap/key/index storage per application header and
@@ -72,11 +81,12 @@ At 256 bytes of estimated heap/key/index storage per application header and
 multiply child storage by four; history storage is additional and owned by the
 native domain. These are capacity estimates, not measured allocations. Use the
 existing 100 reads/s, 20 writes/s, 32-client workload with 5x bursts; a read makes
-one routed header lookup plus three bounded native-family pages. Updates write
+one routed header lookup plus bounded pages over the registered native families. Updates write
 one header, N change rows and their FK/index work in the canonical transaction.
-Deferred completeness checks have O(N squared) worst-case work within the proven
-128-row slice; staged large manifests must replace this with incremental sealed
-counts. Observe lock time, statement duration, WAL bytes/application and source
+The deferred completeness check runs once per application header; child insertion
+requires its still-pending decision and a position inside the declared manifest.
+Its work is O(F + N) for F registered families and at most N=128 changes. Observe
+lock time, statement duration, WAL bytes/application and source
 skew; keep source and native-history shard references checked at any cutover.
 
 Reproducible rollback SQL checks are `scripts/check-source-native-applications.ts`

@@ -351,7 +351,12 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 				columns: [table.sourceRecordId, table.snapshotId],
 				foreignColumns: [catalogSourceSnapshot.sourceRecordId, catalogSourceSnapshot.id],
 			}).onDelete("restrict"),
-			index(`${owner}_support_snapshot_idx`).on(table.sourceRecordId, table.snapshotId, table.id),
+			index(`${owner}_support_snapshot_idx`).on(
+				table.sourceRecordId,
+				table.snapshotId,
+				table.ownerId,
+				table.id,
+			),
 			index(`${owner}_support_fact_idx`)
 				.on(table.ownerId, table.factId, table.id)
 				.where(sql`${table.factId} is not null`),

@@ -51,3 +51,31 @@ The rollback-only `scripts/check-catalog-program-publishing.ts` harness exercise
 actual native create/read/edit/order/coverage operations and emits the occurrence
 EXPLAIN plan on the disposable target. Its tiny fixture is integrity evidence;
 representative cardinality/skew measurements remain a release capacity gate.
+
+## Immutable structure revisions
+
+`catalog-structure-history.ts` and `catalog-structure-history.sql` retain native
+row snapshots for program/season/version/episode/occurrence and publishing
+Work/text/publication/serialization/coverage/facet/release-event/installment rows.
+The history key is `(owner_id,id)` with a component/key/history index; exact source
+occurrences reference both the original snapshot and native revision through
+concrete foreign keys. These are independent domain histories, not an identity
+parent or source-shaped replacement for native data.
+
+`structure-history.ts` restores fixed fields, episode placements, publication
+coverage and serial installments through the owning commands after exact child
+history CAS. It rejects stale child edits and revalidates parent visibility,
+season ownership, hierarchy and vocabulary constraints. The SQL harness now passes
+14 assertions including same-ID occurrence removal/restoration and stale restore
+rejection. Release-event and publication-facet restore endpoints still need their
+own canonical edits; retaining their history alone does not close that gate.
+
+With a 512-byte mean snapshot plus 160 bytes of heap/key/index overhead, one
+growing history relation costs approximately 336 GB at 500M rows and 2.016 TB at
+3B, before WAL, replicas, reserve and larger texts. Five revisions multiply
+history count by five. Source support rows at an estimated 240 bytes add 120 GB
+or 720 GB at those scales. Each edit writes one bounded row snapshot; keyset
+history and latest-head reads cost O(log N + page), with at most 100 history
+rows per response. The existing owner-hash partition/shard and reference-preserving
+cutover applies to these growing histories; the local fixture is not a measured
+production allocation or full-corpus latency qualification.

@@ -4,6 +4,11 @@ import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { users } from "../src/services/database/schema/auth";
+import { softwareRecordSourceOccurrence } from "../src/services/database/schema/catalog-software-source";
+import {
+	catalogSourceMappingClaim,
+	catalogSourceAdoptionProposal,
+} from "../src/services/database/schema/catalog-source";
 import { operationalCapacity } from "../src/services/database/schema/operational-durability";
 import {
 	catalogSourceApplication,
@@ -89,7 +94,15 @@ try {
 				name: { value: "Application fixture", languageTag: null },
 				details: { description: "initial" },
 			});
+			await tx.insert(softwareRecordSourceOccurrence).values({
+				sourceRecordId: first.record.id,
+				snapshotId: first.snapshot.id,
+				ownerId: native.id,
+				revision: 1,
+				sourcePath: "/description",
+			});
 			const binding = await bindCatalogSourceIdentity(tx, actor.id, {
+				mappingVersion: "native.fixture.1",
 				sourceRecordId: first.record.id,
 				path: "/",
 				snapshotId: first.snapshot.id,
@@ -134,6 +147,13 @@ try {
 						context.expectedRevision,
 						{ description: "updated" },
 					);
+					await nested.insert(softwareRecordSourceOccurrence).values({
+						sourceRecordId: first.record.id,
+						snapshotId: second.snapshot.id,
+						ownerId: native.id,
+						revision: result.revision,
+						sourcePath: "/description",
+					});
 					return {
 						...result,
 						changes: [
@@ -206,7 +226,7 @@ try {
 				(error: unknown) =>
 					error instanceof Error &&
 					error.cause instanceof Error &&
-					/complete contiguous/u.test(error.cause.message),
+					/in-progress application/u.test(error.cause.message),
 			);
 			const withdrawn = await decideCatalogSourceProposal(
 				tx,
@@ -240,6 +260,37 @@ try {
 				action: "withdraw",
 			});
 			assert.equal(compensation?.changes[0]?.kind, "software-record");
+			const [restoredBinding] = await tx
+				.select()
+				.from(catalogSourceMappingClaim)
+				.where(
+					and(
+						eq(catalogSourceMappingClaim.sourceRecordId, first.record.id),
+						eq(catalogSourceMappingClaim.mappingKey, binding.mappingKey),
+					),
+				)
+				.limit(1);
+			assert.equal(restoredBinding?.observedSnapshotId, first.snapshot.id);
+			const reproposed = await proposeCatalogSourceAdoption(tx, actor.id, {
+				sourceRecordId: first.record.id,
+				mappingKey: binding.mappingKey,
+				snapshotId: second.snapshot.id,
+				mappingVersion: "native.fixture.1",
+			});
+			assert.equal(reproposed.status, "proposed");
+			await assert.rejects(
+				tx.transaction((nested) =>
+					nested
+						.update(catalogSourceAdoptionProposal)
+						.set({ state: "pending" })
+						.where(
+							and(
+								eq(catalogSourceAdoptionProposal.sourceRecordId, first.record.id),
+								eq(catalogSourceAdoptionProposal.id, proposal.proposal.id),
+							),
+						),
+				),
+			);
 			await tx.execute(sql`set constraints all immediate`);
 			throw rollback;
 		});

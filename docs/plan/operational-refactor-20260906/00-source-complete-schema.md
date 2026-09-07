@@ -315,6 +315,19 @@ commits and general test counts cannot replace that report.
 
 ### Continued native source application work
 
+Further integrated native slices add exact software staff/voice participation
+with alias/context revision FKs, music component edits/reorder/remove/restore,
+immutable source occurrences, and generic named/semantic/context application
+journals. Indexed source/native baselines support repeated compensation without
+walking historical chains; applied proposal withdrawal restores the original
+source snapshot. Program/publishing fixed structures now have immutable row
+history and canonical restore for placements, coverage and installments.
+The generated target has 52 migrations. Source application/lifecycle and
+program/publishing rollback SQL checks pass; the latter reports 14 assertions.
+The music owner also exercised repeated archived update/withdraw cycles with
+independent child-edit protection. Large staged source applications, complete
+source family mappings and global Unit/API/SDK/Web replacement remain open.
+
 The continuation verified `main` at `cfab1acf4` with a clean worktree and retained
 the unmerged P02 draft. Native source writers now receive exact action, proposal,
 mapping and previous snapshot context. Committed archived documents can be reopened

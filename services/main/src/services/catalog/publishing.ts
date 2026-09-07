@@ -93,7 +93,10 @@ export async function updatePublishingStructure(
 	);
 	switch (value.shape) {
 		case "work":
-			await tx.insert(publishingWork).values({ id: reference.id }).onConflictDoNothing();
+			await tx
+				.insert(publishingWork)
+				.values({ id: reference.id })
+				.onConflictDoUpdate({ target: publishingWork.id, set: { id: reference.id } });
 			break;
 		case "text_version":
 			await tx

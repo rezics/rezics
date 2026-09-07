@@ -15,6 +15,8 @@ import { lockCatalogSourceBinding } from "./source-bindings";
 import { CatalogIdentityTables } from "../database/schema/catalog-identity";
 import { CatalogOwnerValues } from "./contracts";
 import { loadCatalogIdentity } from "./storage";
+import { advanceMusicSourceComponentBaselines } from "./music-source-baselines";
+import { advanceCatalogSourceOwnedBaselines } from "./source-owned-baselines";
 
 const revision = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);
 const nativeChangeSchema = z.discriminatedUnion("kind", [
@@ -207,6 +209,8 @@ export async function recordCatalogSourceApplication(
 				break;
 		}
 	}
+	await advanceMusicSourceComponentBaselines(tx, input, changes);
+	await advanceCatalogSourceOwnedBaselines(tx, input, changes);
 }
 
 /** Editors may read exact before/after references; native restore rechecks current component heads. @internal */

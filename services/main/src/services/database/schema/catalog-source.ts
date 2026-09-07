@@ -251,6 +251,7 @@ export const catalogSourceBindingRevision = pgTable(
 		owner: text().$type<CatalogOwner>().notNull(),
 		revision: bigint({ mode: "number" }).notNull(),
 		policyRevision: bigint({ mode: "number" }).notNull(),
+		mappingVersion: text().notNull(),
 		state: text().$type<"active" | "paused" | "withdrawn">().notNull(),
 		mode: text().$type<"review" | "manual">().notNull(),
 		publishingId: uuid().references(() => CatalogIdentityTables.publishing.id, {
