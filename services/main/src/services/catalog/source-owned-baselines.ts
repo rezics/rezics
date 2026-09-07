@@ -217,7 +217,9 @@ export async function advanceCatalogSourceOwnedBaselines(
 		)
 		.limit(1);
 	if (!application) throw new Error("Source baseline requires its committed native journal");
-	const desiredSnapshot = input.action === "apply" ? proposal.snapshotId : input.previousSnapshotId;
+	const [applied] = input.action === "withdraw" ? await tx.select().from(catalogSourceApplication).where(and(eq(catalogSourceApplication.sourceRecordId, input.sourceRecordId), eq(catalogSourceApplication.proposalId, input.proposalId), eq(catalogSourceApplication.action, "apply"))).limit(1) : [];
+	if (input.action === "withdraw" && !applied) throw new Error("Source baseline compensation requires its original application");
+	const desiredSnapshot = input.action === "apply" ? proposal.snapshotId : applied?.previousSnapshotId;
 	for (const change of changes) {
 		if (!("afterRevision" in change)) continue;
 		const observed = desiredSnapshot
