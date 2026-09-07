@@ -29,7 +29,7 @@ const fullImage = `${image},thumbnail,thumbnail_dims`;
 const links = "id,name,label,url";
 /** All principal scalar fields and edge qualifiers; related principals are separately acquired by identity. */
 export const VndbAcquisitionFields = {
-	vn: `id,title,alttitle,titles{lang,title,latin,official,main},aliases,olang,description,devstatus,released,platforms,languages,length,length_minutes,length_votes,average,rating,popularity,votecount,image{${fullImage}},screenshots{${fullImage},release.id},relations{id,relation,relation_official},tags{id,rating,spoiler,lie},developers.id,editions{eid,lang,name,official},staff{id,aid,eid,role,note},va{staff{id,aid},character.id,note},extlinks{${links}}`,
+	vn: `id,title,alttitle,titles{lang,title,latin,official,main},aliases,olang,description,devstatus,released,platforms,languages,length,length_minutes,length_votes,average,rating,popularity,votecount,image{${fullImage}},screenshots{${fullImage},release.id},relations{id,relation,relation_official},tags{id,rating,spoiler,lie},developers.id,editions{eid,lang,name,official},staff{id,aid,name,original,eid,role,note},va{staff{id,aid,name,original},character.id,note},extlinks{${links}}`,
 	release: `id,title,alttitle,languages{lang,title,latin,main,mtl},platforms,media{medium,qty},vns{id,rtype},producers{id,developer,publisher},images{${fullImage},type,vn,languages,photo},released,minage,patch,freeware,uncensored,official,has_ero,resolution,engine,voiced,notes,gtin,catalog,extlinks{${links}}`,
 	staff: `id,name,original,aid,ismain,lang,gender,description,aliases{aid,name,latin,ismain},extlinks{${links}}`,
 	producer: `id,name,original,aliases,lang,type,description,extlinks{${links}}`,

@@ -30,7 +30,7 @@ describe("VNDB complete principal acquisition descriptors", () => {
 		expect(() => vndbAcquisitionRequest("vn", "v0")).toThrow();
 	});
 	it("retains alias keys and edge-local fields without recursively expanding all related principals", () => {
-		expect(VndbAcquisitionFields.vn).toContain("staff{id,aid,eid,role,note}");
+		expect(VndbAcquisitionFields.vn).toContain("staff{id,aid,name,original,eid,role,note}");
 		expect(VndbAcquisitionFields.staff).toContain("aliases{aid,name,latin,ismain}");
 		expect(VndbAcquisitionFields.release).toContain("vns{id,rtype}");
 		expect(VndbAcquisitionFields.character).toContain("vns{id,role,spoiler,release.id}");

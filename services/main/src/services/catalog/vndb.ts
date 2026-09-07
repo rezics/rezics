@@ -30,7 +30,12 @@ const externalLink = z
 	.object({ url: z.url(), label: z.string(), name: z.string(), id: z.union([z.string(), integer]) })
 	.passthrough();
 const staffReference = z
-	.object({ id: z.string().regex(/^s\d+$/u), aid: integer.optional() })
+	.object({
+		id: z.string().regex(/^s\d+$/u),
+		aid: integer.optional(),
+		name: text(131072).optional(),
+		original: text(131072).nullable().optional(),
+	})
 	.passthrough();
 
 export const VndbVnSchema = z
@@ -100,6 +105,8 @@ export const VndbVnSchema = z
 					.object({
 						id: z.string().regex(/^s\d+$/u),
 						aid: integer,
+						name: text(131072).optional(),
+						original: text(131072).nullable().optional(),
 						eid: integer.nullable(),
 						role: z.string(),
 						note: z.string().nullable(),
