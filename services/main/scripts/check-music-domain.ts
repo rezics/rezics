@@ -65,10 +65,10 @@ if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1"
 const url = new URL(connectionString);
 if (
 	!["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) ||
-	url.pathname !== "/rezics" ||
-	url.port !== (process.env.POSTGRES_LOCAL_PORT ?? "15432")
+	url.pathname !== `/${process.env.REZICS_CATALOG_FIXTURE_DATABASE ?? "rezics_atlas"}` ||
+	url.port !== (process.env.REZICS_CATALOG_FIXTURE_PORT ?? "25434")
 )
-	throw new Error("Native music acceptance requires rezics-dev PostgreSQL");
+	throw new Error("Native music acceptance requires explicitly selected isolated PostgreSQL");
 const pool = new Pool({ connectionString, max: 1, statement_timeout: 20_000 });
 const database = drizzle({ client: pool });
 const rollback = new Error("rollback native music acceptance");

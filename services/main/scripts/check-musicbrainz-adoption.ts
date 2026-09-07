@@ -35,10 +35,10 @@ if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1"
 const url = new URL(connectionString);
 if (
 	!["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) ||
-	url.pathname !== "/rezics" ||
-	url.port !== (process.env.POSTGRES_LOCAL_PORT ?? "15432")
+	url.pathname !== `/${process.env.REZICS_CATALOG_FIXTURE_DATABASE ?? "rezics_atlas"}` ||
+	url.port !== (process.env.REZICS_CATALOG_FIXTURE_PORT ?? "25434")
 )
-	throw new Error("MusicBrainz acceptance requires rezics-dev PostgreSQL");
+	throw new Error("MusicBrainz acceptance requires explicitly selected isolated PostgreSQL");
 const response = await fetch(
 	"https://musicbrainz.org/ws/2/release/f922ec87-4758-421d-a839-3193455345ff?fmt=json&inc=recordings+artist-credits+release-groups+labels+discids",
 	{

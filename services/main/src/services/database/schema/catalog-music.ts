@@ -6,6 +6,7 @@ import {
 	foreignKey,
 	index,
 	integer,
+	jsonb,
 	primaryKey,
 	text,
 	unique,
@@ -19,9 +20,43 @@ import {
 	catalogSubtypeColumns,
 	catalogSubtypeConstraints,
 } from "./catalog-domain-columns";
-import { catalogDefinitionRevision, entityIdentity } from "./catalog-identity";
+import { catalogDefinitionRevision, entityIdentity, musicIdentity } from "./catalog-identity";
 import { referenceArea } from "./catalog-reference";
 import { users } from "./auth";
+
+/** Exact native row revisions, including removals; this is not a source-payload archive. */
+export const musicComponentRevision = pgTable(
+	"music_component_revision",
+	{
+		ownerId: uuid()
+			.notNull()
+			.references(() => musicIdentity.id, { onDelete: "restrict" }),
+		id: uuid().default(sql`uuidv7()`).notNull(),
+		component: text().notNull(),
+		componentKey: text().notNull(),
+		ownerRevision: bigint({ mode: "number" }).notNull(),
+		operation: text().$type<"INSERT" | "UPDATE" | "DELETE">().notNull(),
+		value: jsonb().$type<Record<string, unknown>>().notNull(),
+		recordedAt: createTimestampMsColumn().defaultNow().notNull(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.ownerId, table.id] }),
+		index("music_component_revision_lookup_idx").on(
+			table.ownerId,
+			table.component,
+			table.componentKey,
+			table.id,
+		),
+		check(
+			"music_component_revision_operation_check",
+			sql`${table.operation} in ('INSERT', 'UPDATE', 'DELETE')`,
+		),
+		check(
+			"music_component_revision_value_check",
+			sql`jsonb_typeof(${table.value}) = 'object' and octet_length(${table.componentKey}) between 1 and 512 and ${table.ownerRevision} > 0`,
+		),
+	],
+);
 
 /** A shared presentation credit is not an artist, recording or social Unit. */
 export const musicArtistCredit = pgTable(
@@ -74,6 +109,41 @@ export const musicWork = pgTable(
 	(table) => [
 		...catalogSubtypeConstraints("music_work", "music", "work", table),
 		index("music_work_type_idx").on(table.typeRevisionId, table.id),
+	],
+);
+
+/** Incomplete disc catalog candidates are not silently promoted into issued releases. */
+export const musicReleaseCandidate = pgTable(
+	"music_release_candidate",
+	{
+		...catalogSubtypeColumns("release_candidate"),
+		creditedArtistText: text(),
+		barcode: text(),
+		comment: text(),
+	},
+	(table) => [
+		...catalogSubtypeConstraints("music_release_candidate", "music", "release_candidate", table),
+	],
+);
+
+export const musicCandidateTrack = pgTable(
+	"music_candidate_track",
+	{
+		candidateId: uuid()
+			.notNull()
+			.references(() => musicReleaseCandidate.id, { onDelete: "restrict" }),
+		id: uuid().default(sql`uuidv7()`).notNull(),
+		position: bigint({ mode: "number" }).notNull(),
+		name: text().notNull(),
+		creditedArtistText: text(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.candidateId, table.id] }),
+		unique("music_candidate_track_position_key").on(table.candidateId, table.position),
+		check(
+			"music_candidate_track_position_check",
+			sql`${table.position} between 0 and 9007199254740991`,
+		),
 	],
 );
 
@@ -311,6 +381,22 @@ export const musicDiscTocOffset = pgTable(
 			"music_disc_toc_offset_check",
 			sql`${table.position} between 0 and 98 and ${table.offset} between 0 and 9007199254740991`,
 		),
+	],
+);
+
+export const musicCandidateToc = pgTable(
+	"music_candidate_toc",
+	{
+		candidateId: uuid()
+			.notNull()
+			.references(() => musicReleaseCandidate.id, { onDelete: "restrict" }),
+		tocId: uuid()
+			.notNull()
+			.references(() => musicDiscToc.id, { onDelete: "restrict" }),
+	},
+	(table) => [
+		primaryKey({ columns: [table.candidateId, table.tocId] }),
+		index("music_candidate_toc_reverse_idx").on(table.tocId, table.candidateId),
 	],
 );
 
