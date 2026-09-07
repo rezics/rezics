@@ -152,6 +152,8 @@ async function origin(
 				.from(t)
 				.where(
 					and(
+						eq(t.mappingKey, scope.mappingKey),
+						eq(t.correspondenceRevision, scope.correspondenceRevision),
 						eq(t.sourceRecordId, sourceRecordId),
 						eq(t.snapshotId, snapshotId),
 						eq(t.ownerId, change.ownerId),
@@ -169,6 +171,8 @@ async function origin(
 				.from(t)
 				.where(
 					and(
+						eq(t.mappingKey, scope.mappingKey),
+						eq(t.correspondenceRevision, scope.correspondenceRevision),
 						eq(t.sourceRecordId, sourceRecordId),
 						eq(t.snapshotId, snapshotId),
 						eq(t.ownerId, change.ownerId),
@@ -202,6 +206,8 @@ async function origin(
 				.from(t)
 				.where(
 					and(
+						eq(t.mappingKey, scope.mappingKey),
+						eq(t.correspondenceRevision, scope.correspondenceRevision),
 						eq(t.sourceRecordId, sourceRecordId),
 						eq(t.snapshotId, snapshotId),
 						eq(t.contentId, change.ownerId),
