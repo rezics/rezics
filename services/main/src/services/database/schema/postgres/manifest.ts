@@ -14,6 +14,8 @@ export const PostgreSqlSchemaFileNames = [
 	"catalog-software-participation-integrity.sql",
 	"catalog-source-integrity.sql",
 	"catalog-source-correspondence.sql",
+	"catalog-source-support.sql",
+	"catalog-source-dependency.sql",
 	"catalog-definition-terms.sql",
 	"catalog-source-application.sql",
 	"catalog-source-owned-baseline.sql",
@@ -48,6 +50,16 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles = {
+	catalog_source_support_epochs: [
+		"content-label-policy.sql",
+		"catalog-source-support.sql",
+		"catalog-source-dependency.sql",
+		"catalog-source-correspondence.sql",
+		"catalog-source-application.sql",
+		"catalog-source-owned-baseline.sql",
+		"catalog-profile-source.sql",
+		"music-source-lifecycle.sql",
+	],
 	catalog_source_correspondence: [
 		"participation-private-state.sql",
 		"participation-messages.sql",
@@ -114,6 +126,8 @@ export const PostgreSqlSchemaMigrationBundles = {
 } as const satisfies Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>>;
 
 export const PostgreSqlSchemaFunctionNames = [
+	"catalog_guard_source_support",
+	"catalog_source_guard_dependency",
 	"catalog_source_guard_binding_correspondence",
 	"catalog_source_guard_child_correspondence",
 	"catalog_guard_definition_term",
@@ -305,6 +319,7 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "catalog_source_proposal_dependency", name: "catalog_source_dependency_guard" },
 	{
 		table: "software_participation_credit_source_occurrence",
 		name: "software_credit_correspondence_guard",
@@ -861,7 +876,7 @@ const CatalogSourceApplicationTables = [
 	"software_source_context_application_change",
 	"software_source_participation_application_change",
 	...CatalogTriggerOwners.flatMap((owner) =>
-		["semantic", "name", "authority"].map((kind) => `${owner}_source_${kind}_application_change`),
+		["semantic", "name", "authority", "identifier"].map((kind) => `${owner}_source_${kind}_application_change`),
 	),
 ];
 
@@ -871,6 +886,10 @@ const CatalogSourceApplicationTables = [
  * complete definitions (including arguments, constraint timing and enabled status).
  */
 export const PostgreSqlSchemaDynamicTriggers = [
+	...CatalogTriggerOwners.flatMap((owner) => [
+		{ table: `${owner}_fact_support`, name: "catalog_source_support_guard" },
+		{ table: `${owner}_fact_support`, name: "catalog_support_correspondence_guard" },
+	]),
 	...CatalogTriggerOwners.flatMap((owner) =>
 		["name_source_binding", "name_source_occurrence"].map((family) => ({
 			table: `${owner}_${family}`,
@@ -878,6 +897,7 @@ export const PostgreSqlSchemaDynamicTriggers = [
 		})),
 	),
 	...["entity", "reference"].flatMap((owner) => [
+		{ table: `${owner}_profile_source_occurrence`, name: "catalog_profile_correspondence_guard" },
 		{ table: `${owner}_profile_source_occurrence`, name: "catalog_profile_source_immutable" },
 		{ table: `${owner}_profile_source_occurrence`, name: "catalog_profile_source_exact" },
 		{ table: `${owner}_source_profile_baseline`, name: "catalog_profile_baseline_exact" },
@@ -987,6 +1007,9 @@ export const PostgreSqlSchemaDynamicTriggers = [
 /** Exact dynamic declarations permitted by the static manifest check. */
 export const PostgreSqlSchemaDynamicTriggerTemplates = [
 	"CREATE TRIGGER catalog_name_correspondence_guard BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence(%L)",
+	"CREATE TRIGGER catalog_support_correspondence_guard BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence(%L)",
+	"CREATE TRIGGER catalog_profile_correspondence_guard BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence(%L)",
+	"CREATE TRIGGER catalog_source_support_guard BEFORE UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_source_support()",
 	"CREATE TRIGGER catalog_profile_source_immutable BEFORE UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_immutable_evidence()",
 	"CREATE TRIGGER catalog_profile_source_exact BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_validate_profile_source(%L)",
 	"CREATE TRIGGER catalog_profile_baseline_exact BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_validate_profile_baseline(%L)",

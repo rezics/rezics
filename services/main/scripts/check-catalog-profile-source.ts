@@ -119,18 +119,18 @@ try {
 								});
 					const original = await readCatalogProfileHead(tx, reference, account.id);
 					assert.ok(original);
-					await bindCatalogProfileSourceOccurrence(tx, reference, account.id, {
-						sourceRecordId: before.record.id,
-						snapshotId: before.snapshot.id,
-						sourcePath: "/profile",
-						revision: original.revision,
-					});
 					const binding = await bindCatalogSourceIdentity(tx, account.id, {
 						sourceRecordId: before.record.id,
 						snapshotId: before.snapshot.id,
 						path: "/",
 						reference,
 						mappingVersion: "profile.fixture.1",
+					});
+					await bindCatalogProfileSourceOccurrence(tx, reference, account.id, {
+						sourceRecordId: before.record.id,
+						snapshotId: before.snapshot.id,
+						sourcePath: "/profile",
+						revision: original.revision,
 					});
 					const after = await recordCatalogSourceDocument(
 						tx,

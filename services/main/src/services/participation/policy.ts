@@ -1,5 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { HTTPError } from "elysia";
 import type { DatabaseTransaction } from "../database";
@@ -14,6 +14,8 @@ import { CatalogReferenceSchema, type CatalogReference } from "../catalog/contra
 import { users } from "../database/schema/auth";
 import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
 import { AccountAuthorization } from "../authorization/account/authorization";
+import { catalogSourceProposalDependency } from "../database/schema/catalog-source-dependency";
+import { catalogSourceMappingClaim } from "../database/schema/catalog-source";
 
 /** @alpha Request and queued command identity, including the revision approved at admission. */
 export const ParticipationAuthoritySchema = z.strictObject({
@@ -256,10 +258,57 @@ export async function catalogAccessDecisions(
 			sourceApplication.scope.reference,
 			sourceApplication.scope,
 		);
+		const readableDependencies = new Set<string>();
+		if (
+			!write &&
+			targets.some(
+				({ reference }) =>
+					reference.owner !== sourceApplication.scope.reference.owner ||
+					reference.id !== sourceApplication.scope.reference.id,
+			)
+		) {
+			const d = catalogSourceProposalDependency,
+				c = catalogSourceMappingClaim;
+			const prepared = await tx
+				.select({ dependency: d })
+				.from(d)
+				.innerJoin(users, and(eq(users.id, d.preparedByAuthUserId), isNull(users.erasedAt)))
+				.innerJoin(
+					c,
+					and(
+						eq(c.sourceRecordId, d.dependencySourceRecordId),
+						eq(c.mappingKey, d.dependencyMappingKey),
+						eq(c.bindingRevision, d.dependencyBindingRevision),
+						eq(c.state, "active"),
+					),
+				)
+				.where(
+					and(
+						eq(d.sourceRecordId, sourceApplication.scope.sourceRecordId),
+						eq(d.proposalId, sourceApplication.scope.proposalId),
+						isNull(d.revokedAt),
+					),
+				)
+				.limit(128)
+				.for("share", { of: [d, c, users] });
+			for (const { dependency } of prepared)
+				for (const [owner, id] of Object.entries({
+					publishing: dependency.publishingId,
+					music: dependency.musicId,
+					program: dependency.programId,
+					software: dependency.softwareId,
+					entity: dependency.entityId,
+					grouping: dependency.groupingId,
+					reference: dependency.referenceId,
+					distribution: dependency.distributionId,
+				}))
+					if (id !== null) readableDependencies.add(`${owner}:${id}`);
+		}
 		return targets.map(
 			({ reference }) =>
-				reference.owner === sourceApplication.scope.reference.owner &&
-				reference.id === sourceApplication.scope.reference.id,
+				(reference.owner === sourceApplication.scope.reference.owner &&
+					reference.id === sourceApplication.scope.reference.id) ||
+				(!write && readableDependencies.has(`${reference.owner}:${reference.id}`)),
 		);
 	}
 	if (!authority.grant) {

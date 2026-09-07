@@ -29,9 +29,15 @@ FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_binding_correspondence
 
 CREATE OR REPLACE FUNCTION public.catalog_source_guard_child_correspondence()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
-DECLARE anchor public.catalog_source_binding_revision%ROWTYPE;
+DECLARE anchor public.catalog_source_binding_revision%ROWTYPE; source_mapping uuid; source_epoch bigint;
 BEGIN
-  SELECT * INTO anchor FROM public.catalog_source_binding_revision WHERE source_record_id=NEW.source_record_id AND mapping_key=NEW.mapping_key AND revision=NEW.correspondence_revision;
+  IF TG_ARGV[0]='source-support' THEN
+    source_mapping := NEW.source_mapping_key; source_epoch := NEW.source_correspondence_revision;
+    IF source_mapping IS NULL AND source_epoch IS NULL THEN RETURN NEW; END IF;
+  ELSE
+    source_mapping := NEW.mapping_key; source_epoch := NEW.correspondence_revision;
+  END IF;
+  SELECT * INTO anchor FROM public.catalog_source_binding_revision WHERE source_record_id=NEW.source_record_id AND mapping_key=source_mapping AND revision=source_epoch;
   IF NOT FOUND OR anchor.correspondence_revision<>anchor.revision THEN RAISE EXCEPTION 'Source child correspondence requires its exact epoch anchor' USING ERRCODE='23514'; END IF;
   IF TG_ARGV[0]='software-context' THEN
     IF anchor.owner<>'software' OR anchor.software_id IS DISTINCT FROM NEW.content_id THEN
@@ -60,9 +66,15 @@ FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence('
 DO $$ DECLARE owner_name text; family text;
 BEGIN
   FOREACH owner_name IN ARRAY ARRAY['publishing','music','program','software','entity','grouping','reference','distribution'] LOOP
+    EXECUTE format('DROP TRIGGER IF EXISTS catalog_support_correspondence_guard ON public.%I',owner_name || '_fact_support');
+    EXECUTE format('CREATE TRIGGER catalog_support_correspondence_guard BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence(%L)',owner_name || '_fact_support','source-support');
     FOREACH family IN ARRAY ARRAY['name_source_binding','name_source_occurrence'] LOOP
       EXECUTE format('DROP TRIGGER IF EXISTS catalog_name_correspondence_guard ON public.%I',owner_name || '_' || family);
       EXECUTE format('CREATE TRIGGER catalog_name_correspondence_guard BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence(%L)',owner_name || '_' || family,'name');
     END LOOP;
+  END LOOP;
+  FOREACH owner_name IN ARRAY ARRAY['entity','reference'] LOOP
+    EXECUTE format('DROP TRIGGER IF EXISTS catalog_profile_correspondence_guard ON public.%I',owner_name || '_profile_source_occurrence');
+    EXECUTE format('CREATE TRIGGER catalog_profile_correspondence_guard BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence(%L)',owner_name || '_profile_source_occurrence','profile');
   END LOOP;
 END $$;

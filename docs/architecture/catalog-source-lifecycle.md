@@ -122,6 +122,35 @@ SQL correspondence fixture covers four graphs from one snapshot across pause,
 resume, rebind and protocol revision; lifecycle checks cover idempotent same-byte
 refresh proposals with no impersonated account.
 
+Source proposal dependencies are prepared in a separate human intake transaction.
+The preparer must own the root's editing authority and may share only a published
+public dependency or a draft they created. Each row holds the proposal snapshot,
+an exact issued source-reference pointer, the dependency's immutable binding
+revision and one of eight concrete owner foreign keys. Positions 0..127 impose a
+database-enforced maximum of 128 dependencies per proposal. Admission never
+accepts arbitrary raw pointers as evidence or expands a source grant to foreign
+writes. A missing dependency requires another intake step before approval.
+
+Within the exact approved proposal transaction and its tracked savepoints, native
+read checks admit only these non-revoked dependencies whose current binding still
+matches. Reads lock the dependency, binding and preparer account to serialize
+revocation, rebinding and account closure. Outside that transaction, ordinary
+catalog visibility/authority still applies; a source proposal cannot edit the
+dependency. Erased preparers cannot continue sharing private drafts. Immutable
+dependency evidence remains, with one-way revocation. Seventeen disposable SQL
+assertions cover actual private reads, foreign-write denial, savepoints, forged
+targets, bounded positions, stale snapshots, withdrawal of read delegation and
+changed binding fences.
+
+At an estimated 600 bytes including its three indexes, this growing dependency
+family needs approximately 300 GB for 500M rows or 1.8 TB for 3B, before replication,
+WAL and bloat. With six dependencies per changed proposal, the source workload
+below implies about 52 writes/s at 500M sources or 312 writes/s at 3B, with a 10x
+burst budget. The source ID routes 64 initial hash partitions and eventual shards;
+single-proposal reads touch at most 128 rows, and reverse maintenance uses the
+dependency-binding/preparer indexes. These estimates require representative WAL,
+hot-source and p99 tests before production activation.
+
 The minimum baseline is 500,000,000 rows **per growing family**, also estimated at
 3,000,000,000. These are planning estimates, not measured production row sizes.
 Typical source ID text is 36 bytes, path 64 bytes, payload reference 160 bytes;

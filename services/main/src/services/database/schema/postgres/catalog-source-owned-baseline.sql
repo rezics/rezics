@@ -70,12 +70,15 @@ DO $$
 DECLARE owner_name text; child text;
 BEGIN
   FOREACH owner_name IN ARRAY ARRAY['publishing','music','program','software','entity','grouping','reference','distribution'] LOOP
+    EXECUTE format('DROP TRIGGER IF EXISTS catalog_source_baseline_guard ON public.%I', owner_name || '_source_owned_baseline');
     EXECUTE format('CREATE TRIGGER catalog_source_baseline_guard BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_owned_baseline(%L,%L)', owner_name || '_source_owned_baseline', 'owned', owner_name);
   END LOOP;
   FOREACH child IN ARRAY ARRAY['record','component','context','participation'] LOOP
+    EXECUTE format('DROP TRIGGER IF EXISTS catalog_source_baseline_guard ON public.%I', 'software_source_' || child || '_baseline');
     EXECUTE format('CREATE TRIGGER catalog_source_baseline_guard BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_owned_baseline(%L)', 'software_source_' || child || '_baseline', child);
   END LOOP;
   FOREACH child IN ARRAY ARRAY['software_component_source_occurrence','software_record_source_occurrence'] LOOP
+    EXECUTE format('DROP TRIGGER IF EXISTS software_source_occurrence_immutable ON public.%I', child);
     EXECUTE format('CREATE TRIGGER software_source_occurrence_immutable BEFORE UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_immutable_evidence()', child);
   END LOOP;
 END $$;

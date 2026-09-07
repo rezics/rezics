@@ -14,6 +14,7 @@ export * from "./catalog-facts";
 export * from "./catalog-grouping";
 export * from "./catalog-source";
 export * from "./catalog-source-application";
+export * from "./catalog-source-dependency";
 export * from "./catalog-source-owned-baseline";
 export * from "./catalog-software-source";
 export * from "./catalog-structure-history";
