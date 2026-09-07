@@ -96,36 +96,30 @@ export async function bindCatalogSourceIdentity(
 		})
 		.returning();
 	if (!claim) throw new Error("Source binding insert failed");
-	await tx
-		.insert(CatalogFactTables[value.reference.owner].sourceBinding)
-		.values({
-			sourceRecordId: value.sourceRecordId,
-			mappingKey: claim.mappingKey,
-			mappingOwner: value.reference.owner,
-			ownerId: value.reference.id,
-		});
-	await tx
-		.insert(revisions)
-		.values({
-			sourceRecordId: value.sourceRecordId,
-			mappingKey: claim.mappingKey,
-			owner: value.reference.owner,
-			revision: 1,
-			policyRevision: 1,
-			state: "active",
-			mode: "review",
-			actorAuthUserId: actor,
-			reason: "Initial reviewed source correspondence",
-			...targetColumns(value.reference),
-		});
-	await tx
-		.insert(subscriptions)
-		.values({
-			sourceRecordId: value.sourceRecordId,
-			mappingKey: claim.mappingKey,
-			owner: value.reference.owner,
-			state: "active",
-		});
+	await tx.insert(CatalogFactTables[value.reference.owner].sourceBinding).values({
+		sourceRecordId: value.sourceRecordId,
+		mappingKey: claim.mappingKey,
+		mappingOwner: value.reference.owner,
+		ownerId: value.reference.id,
+	});
+	await tx.insert(revisions).values({
+		sourceRecordId: value.sourceRecordId,
+		mappingKey: claim.mappingKey,
+		owner: value.reference.owner,
+		revision: 1,
+		policyRevision: 1,
+		state: "active",
+		mode: "review",
+		actorAuthUserId: actor,
+		reason: "Initial reviewed source correspondence",
+		...targetColumns(value.reference),
+	});
+	await tx.insert(subscriptions).values({
+		sourceRecordId: value.sourceRecordId,
+		mappingKey: claim.mappingKey,
+		owner: value.reference.owner,
+		state: "active",
+	});
 	return claim;
 }
 
@@ -211,7 +205,7 @@ export async function appendSourceLifecycleEvent(
 			causationId: null,
 			routingEpoch: 1,
 			routingBucket: aggregateRoutingBucket("source_record", sourceRecordId),
-			aggregate: { owner: "source_record", key: sourceRecordId, revision },
+			aggregate: { owner: "source_record", key: sourceRecordId, revision: String(revision) },
 			payload,
 		}),
 	]);
@@ -270,20 +264,18 @@ export async function reviseCatalogSourceBinding(
 		.onConflictDoNothing();
 	const revision = current.claim.bindingRevision + 1;
 	const policyRevision = current.claim.policyRevision + 1;
-	await tx
-		.insert(revisions)
-		.values({
-			sourceRecordId: value.sourceRecordId,
-			mappingKey: value.mappingKey,
-			revision,
-			policyRevision,
-			owner: reference.owner,
-			state: value.target ? "paused" : value.state,
-			mode: value.mode,
-			actorAuthUserId: actor,
-			reason: value.reason,
-			...targetColumns(reference),
-		});
+	await tx.insert(revisions).values({
+		sourceRecordId: value.sourceRecordId,
+		mappingKey: value.mappingKey,
+		revision,
+		policyRevision,
+		owner: reference.owner,
+		state: value.target ? "paused" : value.state,
+		mode: value.mode,
+		actorAuthUserId: actor,
+		reason: value.reason,
+		...targetColumns(reference),
+	});
 	await tx
 		.update(claims)
 		.set({
