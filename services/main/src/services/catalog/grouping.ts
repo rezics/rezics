@@ -172,7 +172,7 @@ export async function orderGroupingRelation(
 				eq(groupingCatalogRelation.ownerId, ref.id),
 				eq(groupingCatalogRelation.id, value.relationId),
 				eq(currentCatalogSemanticState(ref, "relation"), "active"),
-				readableRelation(ref, actor),
+				await readableRelation(tx, ref, actor),
 			),
 		)
 		.limit(1);
@@ -237,7 +237,7 @@ export async function readGroupingOrder(
 				eq(table.ownerId, ref.id),
 				eq(table.profileId, profileId),
 				eq(currentCatalogSemanticState(ref, "relation"), "active"),
-				readableRelation(ref, actor),
+				await readableRelation(tx, ref, actor),
 				page.after
 					? or(
 							gt(table.position, page.after.position),

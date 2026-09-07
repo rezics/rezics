@@ -2,6 +2,7 @@ import { and, eq, gt, sql } from "drizzle-orm";
 import { isDeepStrictEqual } from "node:util";
 import { catalogSourceSupportColumns } from "./source-support";
 import { z } from "zod";
+import { readCatalogAuthorityScope, catalogIdentityReadPredicate } from "../participation/policy";
 import type { DatabaseTransaction } from "../database";
 import { CatalogNameTables } from "../database/schema/catalog-names";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
@@ -211,6 +212,7 @@ export async function findCatalogIdentifierClaims(
 		.parse(pageInput);
 	const table = CatalogNameTables[owner].identifier,
 		identity = CatalogIdentityTables[owner];
+	const scope = await readCatalogAuthorityScope(tx, actor);
 	return tx
 		.select({
 			ownerId: table.ownerId,
@@ -226,7 +228,7 @@ export async function findCatalogIdentifierClaims(
 				eq(table.namespace, values.namespace),
 				eq(table.normalizedValue, values.normalizedValue),
 				sql`${table.state} in ('active','disputed')`,
-				sql`${identity.deletedAt} is null and ((${identity.createdByAuthUserId} = ${actor}::uuid) is true or (${identity.visibility} in ('public','unlisted') and ${identity.status} = 'published' and ${identity.moderationStatus} = 'approved'))`,
+				catalogIdentityReadPredicate(scope, owner, identity),
 				page.afterOwnerId
 					? sql`(${table.ownerId},${table.id}) > (${page.afterOwnerId}::uuid,${page.afterId}::uuid)`
 					: undefined,

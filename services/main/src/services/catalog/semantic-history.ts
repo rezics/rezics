@@ -1,5 +1,6 @@
 import { and, eq, gt, getTableColumns, getTableName, inArray, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
+import { canAccessCatalog } from "../participation/policy";
 import type { DatabaseTransaction } from "../database";
 import { catalogDefinitionRevision } from "../database/schema/catalog-identity";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
@@ -160,7 +161,7 @@ export async function listCatalogSemanticHistory(
 	z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).parse(afterVersion);
 	z.number().int().min(1).max(100).parse(limit);
 	const identity = await loadCatalogIdentity(tx, reference, actor, false);
-	if (identity.createdByAuthUserId !== actor)
+	if (!(await canAccessCatalog(tx, reference, actor, identity.createdByAuthUserId, false)))
 		throw new CatalogReferenceNotFound("Semantic history requires owner authority");
 	const table = CatalogFactTables[reference.owner].semanticRevision;
 	return tx
@@ -252,7 +253,7 @@ export async function restoreCatalogSemanticRevision(
 				and(
 					eq(tables.relation.ownerId, reference.id),
 					eq(tables.relation.id, target.relationId),
-					readableRelation(reference, actor, 2),
+					await readableRelation(tx, reference, actor, 2),
 				),
 			)
 			.limit(1);

@@ -1,22 +1,29 @@
 import assert from "node:assert/strict";
 import { Readable } from "node:stream";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import type { DatabaseTransaction } from "../src/services/database";
 import { users } from "../src/services/database/schema/auth";
 import { operationalCapacity } from "../src/services/database/schema/operational-durability";
 import { catalogSourceProposalDependency } from "../src/services/database/schema/catalog-source-dependency";
+import { CatalogIdentityTables } from "../src/services/database/schema/catalog-identity";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { issueParticipationGrant } from "../src/services/participation/commands";
 import {
 	canAccessCatalog,
+	readCatalogAuthorityScope,
+	catalogIdentityReadPredicate,
 	runWithApprovedSourceProposal,
 	runWithParticipationAuthority,
 	runParticipationSavepoint,
 	type ParticipationAuthority,
 } from "../src/services/participation/policy";
-import { createCatalogIdentity, loadCatalogIdentity } from "../src/services/catalog/storage";
+import {
+	assertReadableTargets,
+	createCatalogIdentity,
+	loadCatalogIdentity,
+} from "../src/services/catalog/storage";
 import {
 	bindCatalogSourceIdentity,
 	reviseCatalogSourceBinding,
@@ -192,6 +199,45 @@ try {
 					proposal: { sourceRecordId: scope.sourceRecordId, proposalId: scope.proposalId },
 				});
 				const selected = { ...delegate.authority, grant };
+				const ownGrant = await issueParticipationGrant(tx, owner.authority, {
+					recipient: { kind: "auth", authUserId: owner.account.id },
+					actingEntityId: owner.authority.actingEntityId,
+					capability: "proposal.adopt",
+					target: root,
+					proposal: { sourceRecordId: scope.sourceRecordId, proposalId: scope.proposalId },
+				});
+				const ownSelected = { ...owner.authority, grant: ownGrant };
+				await runWithParticipationAuthority(ownSelected, () =>
+					runWithApprovedSourceProposal(tx, ownSelected, scope, async () => {
+						const readScope = await readCatalogAuthorityScope(tx, owner.account.id);
+						assert.equal(readScope.creatorAuthUserId, null);
+						assertions++;
+						const identities = CatalogIdentityTables.entity;
+						const visible = await tx
+							.select({ id: identities.id })
+							.from(identities)
+							.where(
+								and(
+									inArray(identities.id, [child.id, unrelated.id]),
+									catalogIdentityReadPredicate(readScope, "entity", identities),
+								),
+							);
+						assert.deepEqual(visible, [{ id: child.id }]);
+						assertions++;
+						assert.equal(
+							(await assertReadableTargets(tx, [child], owner.account.id)).get(
+								`entity:${child.id}`,
+							),
+							"person",
+						);
+						assertions++;
+						await assert.rejects(
+							() => assertReadableTargets(tx, [unrelated], owner.account.id),
+							/not readable/,
+						);
+						assertions++;
+					}),
+				);
 				const allowed = (nested: DatabaseTransaction, ref: typeof child, write = false) =>
 					canAccessCatalog(nested, ref, delegate.account.id, owner.account.id, write);
 				await runWithParticipationAuthority(selected, async () => {
@@ -221,20 +267,18 @@ try {
 				});
 				await assert.rejects(
 					tx.transaction((nested) =>
-						nested
-							.insert(catalogSourceProposalDependency)
-							.values({
-								sourceRecordId: key.sourceRecordId,
-								proposalId: key.proposalId,
-								position: 2,
-								snapshotId: incoming.snapshot.id,
-								sourcePath: "/artist",
-								dependencySourceRecordId: observedDependency.record.id,
-								dependencyMappingKey: childBinding.mappingKey,
-								dependencyBindingRevision: 1,
-								entityId: unrelated.id,
-								preparedByAuthUserId: owner.account.id,
-							}),
+						nested.insert(catalogSourceProposalDependency).values({
+							sourceRecordId: key.sourceRecordId,
+							proposalId: key.proposalId,
+							position: 2,
+							snapshotId: incoming.snapshot.id,
+							sourcePath: "/artist",
+							dependencySourceRecordId: observedDependency.record.id,
+							dependencyMappingKey: childBinding.mappingKey,
+							dependencyBindingRevision: 1,
+							entityId: unrelated.id,
+							preparedByAuthUserId: owner.account.id,
+						}),
 					),
 				);
 				assertions++;

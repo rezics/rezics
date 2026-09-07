@@ -137,10 +137,12 @@ matches. Reads lock the dependency, binding and preparer account to serialize
 revocation, rebinding and account closure. Outside that transaction, ordinary
 catalog visibility/authority still applies; a source proposal cannot edit the
 dependency. Erased preparers cannot continue sharing private drafts. Immutable
-dependency evidence remains, with one-way revocation. Seventeen disposable SQL
+dependency evidence remains, with one-way revocation. Twenty-one disposable SQL
 assertions cover actual private reads, foreign-write denial, savepoints, forged
 targets, bounded positions, stale snapshots, withdrawal of read delegation and
-changed binding fences.
+changed binding fences. Indexed catalog queries consume the same validated read
+scope as native target reads. A selected grant never gains the account's unrelated
+creator rights, even when the service or human principal uses that same Auth ID.
 
 At an estimated 600 bytes including its three indexes, this growing dependency
 family needs approximately 300 GB for 500M rows or 1.8 TB for 3B, before replication,

@@ -10,7 +10,12 @@ import {
 	catalogDefinitionRevision,
 	catalogUnitLocator,
 } from "../database/schema/catalog-identity";
-import { canAccessCatalog } from "../participation/policy";
+import {
+	canAccessCatalog,
+	catalogAccessDecisions,
+	readCatalogAuthorityScope,
+	catalogIdentityReadPredicate,
+} from "../participation/policy";
 import {
 	CatalogDefinitionInputSchema,
 	CatalogIdentityInputSchema,
@@ -480,7 +485,7 @@ export async function readCatalogFactNodes(
 	z.number().int().min(0).max(2).parse(maxSpoiler);
 	if (!fact?.sealedAt || !["active", "disputed"].includes(fact.state) || fact.spoiler > maxSpoiler)
 		throw new CatalogReferenceNotFound("Catalog fact is missing, withdrawn or not sealed");
-	if (identity.createdByAuthUserId !== actor) {
+	if (!(await canAccessCatalog(tx, reference, actor, identity.createdByAuthUserId, false))) {
 		const [current] = await tx
 			.select({ id: tables.fact.id })
 			.from(tables.fact)
@@ -514,7 +519,7 @@ export async function readCatalogFactNodes(
 						eq(tables.relationScope.relationId, relationId),
 						eq(tables.relationScope.valueFactId, factId),
 						currentCatalogSemantic(reference, "relation"),
-						readableRelation(reference, actor, maxSpoiler),
+						await readableRelation(tx, reference, actor, maxSpoiler),
 					),
 				)
 				.limit(1);
@@ -744,7 +749,7 @@ export async function findCatalogRelations(
 				eq(table.ownerId, reference.id),
 				eq(table.definitionRevisionId, definitionRevisionId),
 				eq(table.state, "active"),
-				readableRelation(reference, actor, input.maxSpoiler),
+				await readableRelation(tx, reference, actor, input.maxSpoiler),
 				currentCatalogSemantic(reference, "relation"),
 				input.afterId ? gt(table.id, input.afterId) : undefined,
 				...participantConditions,
@@ -754,13 +759,15 @@ export async function findCatalogRelations(
 		.limit(100);
 }
 
-export function readableRelation(
+export async function readableRelation(
+	tx: DatabaseTransaction,
 	reference: CatalogReference,
 	actor: string | null,
 	maxSpoiler: 0 | 1 | 2 = 0,
 ) {
 	z.number().int().min(0).max(2).parse(maxSpoiler);
 	const { relation, participant } = CatalogFactTables[reference.owner];
+	const scope = await readCatalogAuthorityScope(tx, actor);
 	const targets = {
 		publishing: participant.publishingId,
 		music: participant.musicId,
@@ -773,7 +780,7 @@ export function readableRelation(
 	};
 	const visibleTargets = CatalogOwnerValues.map((owner) => {
 		const table = CatalogIdentityTables[owner];
-		return sql`(${targets[owner]} is not null and exists (select 1 from ${table} where ${table.id} = ${targets[owner]} and ${table.deletedAt} is null and ((${table.createdByAuthUserId} = ${actor}::uuid) is true or (${table.visibility} in ('public', 'unlisted') and ${table.status} = 'published' and ${table.moderationStatus} = 'approved'))))`;
+		return sql`(${targets[owner]} is not null and exists (select 1 from ${table} where ${table.id} = ${targets[owner]} and ${catalogIdentityReadPredicate(scope, owner, table)}))`;
 	});
 	return sql`${relation.spoiler} <= ${maxSpoiler} and exists (select 1 from ${participant} where ${participant.ownerId} = ${relation.ownerId} and ${participant.relationId} = ${relation.id}) and not exists (select 1 from ${participant} where ${participant.ownerId} = ${relation.ownerId} and ${participant.relationId} = ${relation.id} and not (${sql.join(visibleTargets, sql` or `)}))`;
 }
@@ -784,6 +791,8 @@ export async function assertReadableTargets(
 	actor: string | null,
 ) {
 	const shapes = new Map<string, string>();
+	if (references.length > 128)
+		throw new RangeError("Catalog target batches are limited to 128 references");
 	for (const owner of CatalogOwnerValues) {
 		const ids = [
 			...new Set(references.filter((reference) => reference.owner === owner).map(({ id }) => id)),
@@ -798,10 +807,19 @@ export async function assertReadableTargets(
 		for (const row of rows) shapes.set(`${owner}:${row.id}`, row.shape);
 		if (rows.length !== ids.length)
 			throw new CatalogReferenceNotFound("Catalog participant target is missing");
+		const access = await catalogAccessDecisions(
+			tx,
+			rows.map((row) => ({
+				reference: { owner, id: row.id },
+				createdByAuthUserId: row.createdByAuthUserId,
+			})),
+			actor,
+			false,
+		);
 		if (
 			rows.some(
-				(row) =>
-					(actor === null || row.createdByAuthUserId !== actor) &&
+				(row, position) =>
+					!access[position] &&
 					(row.visibility === "private" ||
 						row.status !== "published" ||
 						row.moderationStatus !== "approved"),
@@ -833,8 +851,8 @@ export async function readCatalogParticipants(
 			and(
 				eq(tables.relation.ownerId, reference.id),
 				eq(tables.relation.id, relationId),
-				readableRelation(reference, actor, maxSpoiler),
-				identity.createdByAuthUserId === actor
+				await readableRelation(tx, reference, actor, maxSpoiler),
+				(await canAccessCatalog(tx, reference, actor, identity.createdByAuthUserId, false))
 					? undefined
 					: currentCatalogSemantic(reference, "relation"),
 			),
@@ -880,10 +898,10 @@ export async function readCatalogRelationQualifiers(
 			and(
 				eq(tables.relation.ownerId, reference.id),
 				eq(tables.relation.id, relationId),
-				identity.createdByAuthUserId === actor
+				(await canAccessCatalog(tx, reference, actor, identity.createdByAuthUserId, false))
 					? undefined
 					: currentCatalogSemantic(reference, "relation"),
-				readableRelation(reference, actor, page.maxSpoiler),
+				await readableRelation(tx, reference, actor, page.maxSpoiler),
 			),
 		)
 		.limit(1);
@@ -965,7 +983,7 @@ export async function pageCatalogRelations(
 					candidates.map((c) => c.id),
 				),
 				currentCatalogSemantic(reference, "relation"),
-				readableRelation(reference, actor, page.maxSpoiler),
+				await readableRelation(tx, reference, actor, page.maxSpoiler),
 			),
 		)
 		.orderBy(table.id)

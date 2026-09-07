@@ -1,5 +1,6 @@
 import { and, eq, gt, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
+import { readCatalogAuthorityScope, catalogIdentityReadPredicate } from "../participation/policy";
 import type { DatabaseTransaction } from "../database";
 import {
 	distributionPackage,
@@ -409,6 +410,7 @@ export async function queryDistributionPackages(
 		p = distributionPackage,
 		r = distributionRevision;
 	const identity = CatalogIdentityTables.distribution;
+	const scope = await readCatalogAuthorityScope(tx, actor);
 	// Bound historical candidates before checking live heads: a popular target may have billions of old occurrences.
 	const candidates = await tx
 		.select({ packageId: t.packageId, manifestId: t.manifestId, position: t.position })
@@ -433,7 +435,7 @@ export async function queryDistributionPackages(
 		.where(
 			and(
 				inArray(p.id, [...new Set(candidates.map((row) => row.packageId))]),
-				sql`${identity.deletedAt} is null and ((${identity.createdByAuthUserId} = ${actor}::uuid) is true or (${identity.visibility} in ('public', 'unlisted') and ${identity.status} = 'published' and ${identity.moderationStatus} = 'approved'))`,
+				catalogIdentityReadPredicate(scope, "distribution", identity),
 			),
 		)
 		.orderBy(p.id)

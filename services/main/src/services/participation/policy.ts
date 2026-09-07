@@ -1,5 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { HTTPError } from "elysia";
 import type { DatabaseTransaction } from "../database";
@@ -16,6 +17,7 @@ import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
 import { AccountAuthorization } from "../authorization/account/authorization";
 import { catalogSourceProposalDependency } from "../database/schema/catalog-source-dependency";
 import { catalogSourceMappingClaim } from "../database/schema/catalog-source";
+import { CatalogIdentityTables } from "../database/schema/catalog-identity";
 
 /** @alpha Request and queued command identity, including the revision approved at admission. */
 export const ParticipationAuthoritySchema = z.strictObject({
@@ -245,8 +247,65 @@ export async function catalogAccessDecisions(
 ): Promise<boolean[]> {
 	if (targets.length > 128)
 		throw new RangeError("Catalog authority batches are limited to 128 targets");
+	const scope = await resolveCatalogAuthorityScope(
+		tx,
+		actorAuthUserId,
+		write,
+		targets.map(({ reference }) => reference),
+	);
+	const allowed = new Set(scope.references.map(({ owner, id }) => `${owner}:${id}`));
+	return targets.map(
+		({ reference, createdByAuthUserId }) =>
+			(scope.creatorAuthUserId !== null && createdByAuthUserId === scope.creatorAuthUserId) ||
+			allowed.has(`${reference.owner}:${reference.id}`),
+	);
+}
+
+/** Validated current read authority; a selected grant never inherits its account's creator rights. @internal */
+export type CatalogAuthorityScope = Readonly<{
+	creatorAuthUserId: string | null;
+	references: readonly CatalogReference[];
+}>;
+
+export function readCatalogAuthorityScope(
+	tx: DatabaseTransaction,
+	actorAuthUserId: string | null,
+): Promise<CatalogAuthorityScope> {
+	return resolveCatalogAuthorityScope(tx, actorAuthUserId, false);
+}
+
+/** Uses the same authority as native reads inside indexed SQL queries and correlated target filters. @internal */
+export function catalogIdentityReadPredicate(
+	scope: CatalogAuthorityScope,
+	owner: CatalogReference["owner"],
+	table: {
+		id: AnyPgColumn;
+		createdByAuthUserId: AnyPgColumn;
+		visibility: AnyPgColumn;
+		status: AnyPgColumn;
+		moderationStatus: AnyPgColumn;
+		deletedAt: AnyPgColumn;
+	} = CatalogIdentityTables[owner],
+) {
+	const ids = scope.references
+		.filter((reference) => reference.owner === owner)
+		.map((reference) => reference.id);
+	const creator =
+		scope.creatorAuthUserId === null
+			? sql`false`
+			: eq(table.createdByAuthUserId, scope.creatorAuthUserId);
+	const granted = ids.length ? inArray(table.id, ids) : sql`false`;
+	return sql`${table.deletedAt} is null and ((${creator}) is true or (${granted}) is true or (${table.visibility} in ('public','unlisted') and ${table.status}='published' and ${table.moderationStatus}='approved'))`;
+}
+
+async function resolveCatalogAuthorityScope(
+	tx: DatabaseTransaction,
+	actorAuthUserId: string | null,
+	write: boolean,
+	requestedReferences?: readonly CatalogReference[],
+): Promise<CatalogAuthorityScope> {
 	const authority = currentParticipationAuthority();
-	if (!authority || actorAuthUserId === null) return targets.map(() => false);
+	if (!authority || actorAuthUserId === null) return { creatorAuthUserId: null, references: [] };
 	if (authority.principal.authUserId !== actorAuthUserId)
 		throw new ParticipationDenied("Catalog operator does not match current authority");
 	const sourceApplication = approvedSourceApplications.getStore();
@@ -258,14 +317,15 @@ export async function catalogAccessDecisions(
 			sourceApplication.scope.reference,
 			sourceApplication.scope,
 		);
-		const readableDependencies = new Set<string>();
+		const readableDependencies: CatalogReference[] = [];
 		if (
 			!write &&
-			targets.some(
-				({ reference }) =>
-					reference.owner !== sourceApplication.scope.reference.owner ||
-					reference.id !== sourceApplication.scope.reference.id,
-			)
+			(!requestedReferences ||
+				requestedReferences.some(
+					(reference) =>
+						reference.owner !== sourceApplication.scope.reference.owner ||
+						reference.id !== sourceApplication.scope.reference.id,
+				))
 		) {
 			const d = catalogSourceProposalDependency,
 				c = catalogSourceMappingClaim;
@@ -302,34 +362,32 @@ export async function catalogAccessDecisions(
 					reference: dependency.referenceId,
 					distribution: dependency.distributionId,
 				}))
-					if (id !== null) readableDependencies.add(`${owner}:${id}`);
+					if (id !== null) readableDependencies.push(CatalogReferenceSchema.parse({ owner, id }));
 		}
-		return targets.map(
-			({ reference }) =>
-				(reference.owner === sourceApplication.scope.reference.owner &&
-					reference.id === sourceApplication.scope.reference.id) ||
-				(!write && readableDependencies.has(`${reference.owner}:${reference.id}`)),
-		);
+		return {
+			creatorAuthUserId: null,
+			references: [sourceApplication.scope.reference, ...readableDependencies],
+		};
 	}
 	if (!authority.grant) {
-		if (authority.principal.kind !== "auth") return targets.map(() => false);
+		if (authority.principal.kind !== "auth") return { creatorAuthUserId: null, references: [] };
 		await requireParticipation(tx, authority, "entity.security", {
 			owner: "entity",
 			id: authority.actingEntityId,
 		});
 		if (write) await new AccountAuthorization(actorAuthUserId).ensureCanContribute(tx);
-		return targets.map(
-			({ reference, createdByAuthUserId }) =>
-				createdByAuthUserId === actorAuthUserId ||
-				(reference.owner === "entity" && reference.id === authority.actingEntityId),
-		);
+		return {
+			creatorAuthUserId: actorAuthUserId,
+			references: [{ owner: "entity", id: authority.actingEntityId }],
+		};
 	}
 	const [grant] = await tx
 		.select()
 		.from(participationGrant)
 		.where(eq(participationGrant.id, authority.grant.id))
 		.limit(1);
-	if (!grant || grant.capability === "proposal.adopt") return targets.map(() => false);
+	if (!grant || grant.capability === "proposal.adopt")
+		return { creatorAuthUserId: null, references: [] };
 	const alternatives = Object.entries({
 		publishing: grant.publishingId,
 		music: grant.musicId,
@@ -347,7 +405,5 @@ export async function catalogAccessDecisions(
 		id: alternatives[0][1],
 	});
 	await requireParticipation(tx, authority, write ? "catalog.edit" : "catalog.read", target);
-	return targets.map(
-		({ reference }) => reference.owner === target.owner && reference.id === target.id,
-	);
+	return { creatorAuthUserId: null, references: [target] };
 }

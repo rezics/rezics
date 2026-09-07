@@ -1,5 +1,6 @@
 import { and, eq, gt, or, sql } from "drizzle-orm";
 import { z } from "zod";
+import { readCatalogAuthorityScope, catalogIdentityReadPredicate } from "../participation/policy";
 import type { DatabaseTransaction } from "../database";
 import {
 	programEpisode,
@@ -317,7 +318,8 @@ export async function listProgramOccurrences(
 		})
 		.parse(input);
 	const row = programEpisodeOccurrence;
-	const visible = sql`exists (select 1 from ${programIdentity} where ${programIdentity.id} = ${row.episodeId} and ${programIdentity.deletedAt} is null and ((${programIdentity.createdByAuthUserId} = ${actor}::uuid) is true or (${programIdentity.visibility} in ('public','unlisted') and ${programIdentity.status} = 'published' and ${programIdentity.moderationStatus} = 'approved')))`;
+	const scope = await readCatalogAuthorityScope(tx, actor);
+	const visible = sql`exists (select 1 from ${programIdentity} where ${programIdentity.id} = ${row.episodeId} and ${catalogIdentityReadPredicate(scope, "program", programIdentity)})`;
 	const rows = await tx
 		.select({
 			id: row.id,
