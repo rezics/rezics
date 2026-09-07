@@ -44,3 +44,71 @@ describe("native source application manifest", () => {
 		).toHaveLength(2);
 	});
 });
+
+describe("owner-local native application history", () => {
+	it("keeps shared owner histories and software child heads exact", () => {
+		expect(
+			CatalogSourceNativeChangesSchema.parse([
+				{
+					kind: "catalog-name",
+					owner: "software",
+					ownerId,
+					componentKey: ownerId,
+					beforeRevision: 1,
+					afterRevision: 2,
+				},
+				{
+					kind: "catalog-semantic",
+					owner: "software",
+					ownerId,
+					componentKey: ownerId,
+					beforeRevision: null,
+					afterRevision: 1,
+				},
+				{
+					kind: "software-context",
+					ownerId,
+					componentKey: ownerId,
+					beforeRevision: 1,
+					afterRevision: 2,
+				},
+				{
+					kind: "software-participation",
+					ownerId,
+					componentKey: ownerId,
+					beforeRevision: 1,
+					afterRevision: 2,
+				},
+			]),
+		).toHaveLength(4);
+		expect(
+			CatalogSourceNativeChangesSchema.safeParse([
+				{
+					kind: "catalog-name",
+					owner: "unknown",
+					ownerId,
+					componentKey: ownerId,
+					beforeRevision: 1,
+					afterRevision: 2,
+				},
+			]).success,
+		).toBe(false);
+	});
+	it("rejects nonadvancing heads and duplicate exact owner components", () => {
+		const name = {
+			kind: "catalog-name",
+			owner: "entity",
+			ownerId,
+			componentKey: ownerId,
+			beforeRevision: 2,
+			afterRevision: 2,
+		};
+		expect(CatalogSourceNativeChangesSchema.safeParse([name]).success).toBe(false);
+		expect(
+			CatalogSourceNativeChangesSchema.safeParse([
+				{ ...name, afterRevision: 3 },
+				{ ...name, afterRevision: 4 },
+			]).success,
+		).toBe(false);
+	});
+});

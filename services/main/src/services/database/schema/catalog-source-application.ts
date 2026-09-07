@@ -1,10 +1,27 @@
 import { sql } from "drizzle-orm";
-import { bigint, check, foreignKey, integer, primaryKey, text, uuid } from "drizzle-orm/pg-core";
+import {
+	bigint,
+	check,
+	foreignKey,
+	integer,
+	primaryKey,
+	text,
+	uuid,
+	type AnyPgColumn,
+} from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
 import { createCreatedAtColumn } from "./columns";
 import { catalogSourceAdoptionProposal, catalogSourceSnapshot } from "./catalog-source";
 import { musicComponentRevision } from "./catalog-music";
-import { softwareComponentRevision, softwareRecordRevision } from "./catalog-software";
+import { CatalogFactTables } from "./catalog-facts";
+import { CatalogNameTables } from "./catalog-names";
+import { type CatalogOwner } from "../../catalog/contracts";
+import { softwareParticipationRevision } from "./catalog-software-participation";
+import {
+	softwareParticipationContextRevision,
+	softwareComponentRevision,
+	softwareRecordRevision,
+} from "./catalog-software";
 
 /** Immutable native application evidence, separate from both source bytes and current native authority. */
 export const catalogSourceApplication = pgTable(
@@ -157,5 +174,147 @@ export const softwareSourceRecordApplicationChange = pgTable(
 			"software_source_record_application_values",
 			sql`${t.position} between 0 and 127 and (${t.beforeRevision} is null or ${t.beforeRevision} < ${t.afterRevision})`,
 		),
+	],
+);
+
+function exactRevisionApplicationTable(
+	name: string,
+	prefix: string,
+	target: readonly [AnyPgColumn, AnyPgColumn, AnyPgColumn],
+) {
+	return pgTable(
+		name,
+		{
+			...applicationColumns(),
+			componentKey: uuid().notNull(),
+			beforeRevision: bigint({ mode: "number" }),
+			afterRevision: bigint({ mode: "number" }).notNull(),
+		},
+		(t) => [
+			primaryKey({
+				name: `${prefix}_pk`,
+				columns: [t.sourceRecordId, t.proposalId, t.action, t.position],
+			}),
+			foreignKey({
+				name: `${prefix}_app_fk`,
+				columns: [t.sourceRecordId, t.proposalId, t.action],
+				foreignColumns: [
+					catalogSourceApplication.sourceRecordId,
+					catalogSourceApplication.proposalId,
+					catalogSourceApplication.action,
+				],
+			}).onDelete("restrict"),
+			foreignKey({
+				name: `${prefix}_before_fk`,
+				columns: [t.ownerId, t.componentKey, t.beforeRevision],
+				foreignColumns: [...target],
+			}).onDelete("restrict"),
+			foreignKey({
+				name: `${prefix}_after_fk`,
+				columns: [t.ownerId, t.componentKey, t.afterRevision],
+				foreignColumns: [...target],
+			}).onDelete("restrict"),
+			check(
+				`${prefix}_values`,
+				sql`${t.position} between 0 and 127 and (${t.beforeRevision} is null or ${t.beforeRevision} < ${t.afterRevision})`,
+			),
+		],
+	);
+}
+function ownerApplicationTables(owner: CatalogOwner) {
+	const semantic = CatalogFactTables[owner].semanticRevision;
+	const { nameRevision: name, authorityRevision: authority } = CatalogNameTables[owner];
+	return {
+		semantic: exactRevisionApplicationTable(
+			`${owner}_source_semantic_application_change`,
+			`${owner}_semantic_app`,
+			[semantic.ownerId, semantic.semanticId, semantic.version],
+		),
+		name: exactRevisionApplicationTable(
+			`${owner}_source_name_application_change`,
+			`${owner}_name_app`,
+			[name.ownerId, name.id, name.revision],
+		),
+		authority: exactRevisionApplicationTable(
+			`${owner}_source_authority_application_change`,
+			`${owner}_authority_app`,
+			[authority.ownerId, authority.id, authority.revision],
+		),
+	};
+}
+
+/** Every owner has concrete native history FKs; this registry is not an unchecked polymorphic reference. */
+export const CatalogSourceOwnedApplicationTables = {
+	publishing: ownerApplicationTables("publishing"),
+	music: ownerApplicationTables("music"),
+	program: ownerApplicationTables("program"),
+	software: ownerApplicationTables("software"),
+	entity: ownerApplicationTables("entity"),
+	grouping: ownerApplicationTables("grouping"),
+	reference: ownerApplicationTables("reference"),
+	distribution: ownerApplicationTables("distribution"),
+};
+export const publishingSourceSemanticApplicationChange =
+	CatalogSourceOwnedApplicationTables.publishing.semantic;
+export const publishingSourceNameApplicationChange =
+	CatalogSourceOwnedApplicationTables.publishing.name;
+export const publishingSourceAuthorityApplicationChange =
+	CatalogSourceOwnedApplicationTables.publishing.authority;
+export const musicSourceSemanticApplicationChange =
+	CatalogSourceOwnedApplicationTables.music.semantic;
+export const musicSourceNameApplicationChange = CatalogSourceOwnedApplicationTables.music.name;
+export const musicSourceAuthorityApplicationChange =
+	CatalogSourceOwnedApplicationTables.music.authority;
+export const programSourceSemanticApplicationChange =
+	CatalogSourceOwnedApplicationTables.program.semantic;
+export const programSourceNameApplicationChange = CatalogSourceOwnedApplicationTables.program.name;
+export const programSourceAuthorityApplicationChange =
+	CatalogSourceOwnedApplicationTables.program.authority;
+export const softwareSourceSemanticApplicationChange =
+	CatalogSourceOwnedApplicationTables.software.semantic;
+export const softwareSourceNameApplicationChange =
+	CatalogSourceOwnedApplicationTables.software.name;
+export const softwareSourceAuthorityApplicationChange =
+	CatalogSourceOwnedApplicationTables.software.authority;
+export const entitySourceSemanticApplicationChange =
+	CatalogSourceOwnedApplicationTables.entity.semantic;
+export const entitySourceNameApplicationChange = CatalogSourceOwnedApplicationTables.entity.name;
+export const entitySourceAuthorityApplicationChange =
+	CatalogSourceOwnedApplicationTables.entity.authority;
+export const groupingSourceSemanticApplicationChange =
+	CatalogSourceOwnedApplicationTables.grouping.semantic;
+export const groupingSourceNameApplicationChange =
+	CatalogSourceOwnedApplicationTables.grouping.name;
+export const groupingSourceAuthorityApplicationChange =
+	CatalogSourceOwnedApplicationTables.grouping.authority;
+export const referenceSourceSemanticApplicationChange =
+	CatalogSourceOwnedApplicationTables.reference.semantic;
+export const referenceSourceNameApplicationChange =
+	CatalogSourceOwnedApplicationTables.reference.name;
+export const referenceSourceAuthorityApplicationChange =
+	CatalogSourceOwnedApplicationTables.reference.authority;
+export const distributionSourceSemanticApplicationChange =
+	CatalogSourceOwnedApplicationTables.distribution.semantic;
+export const distributionSourceNameApplicationChange =
+	CatalogSourceOwnedApplicationTables.distribution.name;
+export const distributionSourceAuthorityApplicationChange =
+	CatalogSourceOwnedApplicationTables.distribution.authority;
+
+export const softwareSourceContextApplicationChange = exactRevisionApplicationTable(
+	"software_source_context_application_change",
+	"software_context_app",
+	[
+		softwareParticipationContextRevision.contentId,
+		softwareParticipationContextRevision.contextId,
+		softwareParticipationContextRevision.revision,
+	],
+);
+export const softwareSourceParticipationApplicationChange = exactRevisionApplicationTable(
+	"software_source_participation_application_change",
+	"software_participation_app",
+	[
+		softwareParticipationRevision.contentId,
+		softwareParticipationRevision.participationId,
+		softwareParticipationRevision.revision,
 	],
 );

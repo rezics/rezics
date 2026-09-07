@@ -1,14 +1,19 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import {
 	catalogSourceApplication,
+	CatalogSourceOwnedApplicationTables,
+	softwareSourceContextApplicationChange,
+	softwareSourceParticipationApplicationChange,
 	musicSourceApplicationChange,
 	softwareSourceComponentApplicationChange,
 	softwareSourceRecordApplicationChange,
 } from "../database/schema/catalog-source-application";
 import { catalogSourceAdoptionProposal } from "../database/schema/catalog-source";
 import { lockCatalogSourceBinding } from "./source-bindings";
+import { CatalogIdentityTables } from "../database/schema/catalog-identity";
+import { CatalogOwnerValues } from "./contracts";
 import { loadCatalogIdentity } from "./storage";
 
 const revision = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);
@@ -43,6 +48,44 @@ const nativeChangeSchema = z.discriminatedUnion("kind", [
 		beforeRevision: revision.nullable(),
 		afterRevision: revision,
 	}),
+	z.strictObject({
+		kind: z.literal("catalog-semantic"),
+		owner: z.enum(CatalogOwnerValues),
+		ownerId: z.uuid(),
+		componentKey: z.uuid(),
+		beforeRevision: revision.nullable(),
+		afterRevision: revision,
+	}),
+	z.strictObject({
+		kind: z.literal("catalog-name"),
+		owner: z.enum(CatalogOwnerValues),
+		ownerId: z.uuid(),
+		componentKey: z.uuid(),
+		beforeRevision: revision.nullable(),
+		afterRevision: revision,
+	}),
+	z.strictObject({
+		kind: z.literal("catalog-name-authority"),
+		owner: z.enum(CatalogOwnerValues),
+		ownerId: z.uuid(),
+		componentKey: z.uuid(),
+		beforeRevision: revision.nullable(),
+		afterRevision: revision,
+	}),
+	z.strictObject({
+		kind: z.literal("software-context"),
+		ownerId: z.uuid(),
+		componentKey: z.uuid(),
+		beforeRevision: revision.nullable(),
+		afterRevision: revision,
+	}),
+	z.strictObject({
+		kind: z.literal("software-participation"),
+		ownerId: z.uuid(),
+		componentKey: z.uuid(),
+		beforeRevision: revision.nullable(),
+		afterRevision: revision,
+	}),
 ]);
 
 /** Exact native history references emitted by the owning canonical writer. @internal */
@@ -57,6 +100,7 @@ export const CatalogSourceNativeChangesSchema = z
 		for (const [index, change] of changes.entries()) {
 			const key = JSON.stringify([
 				change.kind,
+				"owner" in change ? change.owner : null,
 				change.ownerId,
 				"component" in change ? change.component : "record",
 				"componentKey" in change ? change.componentKey : "",
@@ -67,6 +111,12 @@ export const CatalogSourceNativeChangesSchema = z
 					path: [index],
 					message: "A native component occurs twice in one application",
 				});
+			if (
+				"afterRevision" in change &&
+				change.beforeRevision !== null &&
+				change.beforeRevision >= change.afterRevision
+			)
+				ctx.addIssue({ code: "custom", path: [index], message: "Native history must advance" });
 			seen.add(key);
 		}
 	});
@@ -95,36 +145,66 @@ export async function recordCatalogSourceApplication(
 			ownerId: change.ownerId,
 		};
 		switch (change.kind) {
-			case "music-component":
+			case "catalog-semantic":
+			case "catalog-name":
+			case "catalog-name-authority": {
+				const tables = CatalogSourceOwnedApplicationTables[change.owner];
+				const table =
+					change.kind === "catalog-semantic"
+						? tables.semantic
+						: change.kind === "catalog-name"
+							? tables.name
+							: tables.authority;
 				await tx
-					.insert(musicSourceApplicationChange)
+					.insert(table)
 					.values({
 						...common,
-						component: change.component,
 						componentKey: change.componentKey,
-						beforeRevisionId: change.beforeRevisionId,
-						afterRevisionId: change.afterRevisionId,
+						beforeRevision: change.beforeRevision,
+						afterRevision: change.afterRevision,
 					});
+				break;
+			}
+			case "software-context":
+			case "software-participation": {
+				const table =
+					change.kind === "software-context"
+						? softwareSourceContextApplicationChange
+						: softwareSourceParticipationApplicationChange;
+				await tx
+					.insert(table)
+					.values({
+						...common,
+						componentKey: change.componentKey,
+						beforeRevision: change.beforeRevision,
+						afterRevision: change.afterRevision,
+					});
+				break;
+			}
+			case "music-component":
+				await tx.insert(musicSourceApplicationChange).values({
+					...common,
+					component: change.component,
+					componentKey: change.componentKey,
+					beforeRevisionId: change.beforeRevisionId,
+					afterRevisionId: change.afterRevisionId,
+				});
 				break;
 			case "software-component":
-				await tx
-					.insert(softwareSourceComponentApplicationChange)
-					.values({
-						...common,
-						component: change.component,
-						componentKey: change.componentKey,
-						beforeRevision: change.beforeRevision,
-						afterRevision: change.afterRevision,
-					});
+				await tx.insert(softwareSourceComponentApplicationChange).values({
+					...common,
+					component: change.component,
+					componentKey: change.componentKey,
+					beforeRevision: change.beforeRevision,
+					afterRevision: change.afterRevision,
+				});
 				break;
 			case "software-record":
-				await tx
-					.insert(softwareSourceRecordApplicationChange)
-					.values({
-						...common,
-						beforeRevision: change.beforeRevision,
-						afterRevision: change.afterRevision,
-					});
+				await tx.insert(softwareSourceRecordApplicationChange).values({
+					...common,
+					beforeRevision: change.beforeRevision,
+					afterRevision: change.afterRevision,
+				});
 				break;
 		}
 	}
@@ -175,6 +255,8 @@ export async function readCatalogSourceApplication(
 		["music-component", musicSourceApplicationChange],
 		["software-component", softwareSourceComponentApplicationChange],
 		["software-record", softwareSourceRecordApplicationChange],
+		["software-context", softwareSourceContextApplicationChange],
+		["software-participation", softwareSourceParticipationApplicationChange],
 	] as const) {
 		const rows = await tx
 			.select()
@@ -197,14 +279,66 @@ export async function readCatalogSourceApplication(
 				...native
 			} = row;
 			const change = nativeChangeSchema.parse({ ...native, kind });
-			await loadCatalogIdentity(
-				tx,
-				{ owner: kind === "music-component" ? "music" : "software", id: change.ownerId },
-				actor,
-				true,
-			);
 			changes.push({ ...change, position });
 		}
+	}
+	for (const owner of CatalogOwnerValues) {
+		const tables = CatalogSourceOwnedApplicationTables[owner];
+		for (const [kind, table] of [
+			["catalog-semantic", tables.semantic],
+			["catalog-name", tables.name],
+			["catalog-name-authority", tables.authority],
+		] as const) {
+			const rows = await tx
+				.select()
+				.from(table)
+				.where(
+					and(
+						eq(table.sourceRecordId, value.sourceRecordId),
+						eq(table.proposalId, value.proposalId),
+						eq(table.action, value.action),
+					),
+				)
+				.orderBy(table.position)
+				.limit(128);
+			for (const row of rows) {
+				changes.push({
+					kind,
+					owner,
+					ownerId: row.ownerId,
+					componentKey: row.componentKey,
+					beforeRevision: row.beforeRevision,
+					afterRevision: row.afterRevision,
+					position: row.position,
+				});
+			}
+		}
+	}
+	for (const owner of CatalogOwnerValues) {
+		const ids = [
+			...new Set(
+				changes
+					.filter(
+						(change) =>
+							("owner" in change
+								? change.owner
+								: change.kind === "music-component"
+									? "music"
+									: "software") === owner,
+					)
+					.map((change) => change.ownerId),
+			),
+		];
+		if (!ids.length) continue;
+		const table = CatalogIdentityTables[owner];
+		const allowed = await tx
+			.select({ id: table.id })
+			.from(table)
+			.where(
+				and(inArray(table.id, ids), eq(table.createdByAuthUserId, actor), isNull(table.deletedAt)),
+			);
+		if (allowed.length !== ids.length)
+			throw new Error("Native application includes an inaccessible owner");
 	}
 	changes.sort((a, b) => a.position - b.position);
 	if (
