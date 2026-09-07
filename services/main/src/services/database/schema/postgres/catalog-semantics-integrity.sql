@@ -42,8 +42,8 @@ RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 DECLARE published boolean;
 BEGIN
  IF TG_ARGV[1]='fact' THEN
-  IF OLD.sealed_at IS NOT NULL AND (TG_OP='DELETE' OR NEW IS DISTINCT FROM OLD) THEN RAISE EXCEPTION 'Sealed facts are immutable' USING ERRCODE='23514'; END IF;
-  IF TG_OP='UPDATE' AND (NEW.semantic_id<>OLD.semantic_id OR NEW.expected_head_version<>OLD.expected_head_version OR NEW.spoiler<>OLD.spoiler) THEN RAISE EXCEPTION 'Staged fact identity is immutable' USING ERRCODE='23514'; END IF;
+  IF OLD.sealed_at IS NOT NULL AND (TG_OP='DELETE' OR NEW IS DISTINCT FROM OLD) THEN RAISE EXCEPTION 'Sealed facts are immutable' USING ERRCODE='23514', CONSTRAINT='catalog_fact_value_immutable'; END IF;
+  IF TG_OP='UPDATE' AND (NEW.semantic_id<>OLD.semantic_id OR NEW.expected_head_version<>OLD.expected_head_version OR NEW.spoiler<>OLD.spoiler) THEN RAISE EXCEPTION 'Staged fact identity is immutable' USING ERRCODE='23514', CONSTRAINT='catalog_fact_identity_immutable'; END IF;
   RETURN NEW;
  END IF;
  EXECUTE format('SELECT EXISTS(SELECT 1 FROM public.%I WHERE owner_id=$1 AND relation_id=$2)',TG_ARGV[0]||'_semantic_revision') INTO published USING NEW.owner_id,NEW.relation_id;

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { catalogSourceRecordId } from "../src/services/catalog/source-record-key";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
@@ -107,18 +108,6 @@ try {
 				kind: "class",
 				valueKind: null,
 			});
-			const setIn = await ensureCatalogDefinition(tx, {
-				namespace: "acceptance",
-				key: "set_in_universe",
-				kind: "predicate",
-				valueKind: null,
-			});
-			const about = await ensureCatalogDefinition(tx, {
-				namespace: "acceptance",
-				key: "about",
-				kind: "predicate",
-				valueKind: null,
-			});
 			const subject = await ensureCatalogDefinition(tx, {
 				namespace: "acceptance",
 				key: "subject",
@@ -137,11 +126,82 @@ try {
 				kind: "role",
 				valueKind: null,
 			});
+			const setIn = await ensureCatalogDefinition(tx, {
+				namespace: "acceptance",
+				key: "set_in_universe",
+				kind: "predicate",
+				valueKind: null,
+				constraints: {
+					roles: [
+						{
+							roleRevisionId: subject.revisionId,
+							min: 1,
+							max: 1,
+							targets: [{ owner: "publishing", shapes: ["work"] }],
+						},
+						{
+							roleRevisionId: object.revisionId,
+							min: 1,
+							max: 1,
+							targets: [{ owner: "grouping", shapes: ["grouping"] }],
+						},
+						{
+							roleRevisionId: context.revisionId,
+							min: 1,
+							max: 1,
+							targets: [{ owner: "grouping", shapes: ["continuity"] }],
+						},
+					],
+				},
+			});
+			const about = await ensureCatalogDefinition(tx, {
+				namespace: "acceptance",
+				key: "about",
+				kind: "predicate",
+				valueKind: null,
+				constraints: {
+					roles: [
+						{
+							roleRevisionId: subject.revisionId,
+							min: 0,
+							max: 1,
+							targets: [{ owner: "program", shapes: ["video"] }],
+						},
+						{
+							roleRevisionId: object.revisionId,
+							min: 1,
+							max: 1,
+							targets: [
+								{ owner: "grouping", shapes: ["grouping"] },
+								{ owner: "entity", shapes: ["person"] },
+							],
+						},
+						{
+							roleRevisionId: context.revisionId,
+							min: 0,
+							max: 1,
+							targets: [{ owner: "grouping", shapes: ["continuity"] }],
+						},
+					],
+				},
+			});
 			const infobox = await ensureCatalogDefinition(tx, {
 				namespace: "acceptance",
 				key: "ordered_infobox",
 				kind: "property",
 				valueKind: "array",
+				constraints: {
+					rules: [
+						{ position: 0, parent: null, memberKey: null, kind: "array" },
+						{ position: 1, parent: 0, memberKey: null, kind: "object" },
+						{ position: 2, parent: 1, memberKey: "key", kind: "string" },
+						{ position: 3, parent: 1, memberKey: "value", kind: "string" },
+						{ position: 4, parent: 1, memberKey: "samples", kind: "object" },
+						{ position: 5, parent: 4, memberKey: "unknown", kind: "null" },
+						{ position: 6, parent: 4, memberKey: "flag", kind: "boolean" },
+						{ position: 7, parent: 4, memberKey: "fraction", kind: "number" },
+					],
+				},
 			});
 			const groups = [];
 			for (const classification of [universeClass, franchiseClass, seriesClass]) {
@@ -168,10 +228,10 @@ try {
 			assert.ok(universe && franchise && series);
 			assert.equal(new Set(groups.map(({ id }) => id)).size, 3);
 			assert.equal((await resolveCatalogIdentity(tx, universe.id, null)).owner, "grouping");
-			const legacyCount = await tx.execute<{ present: boolean }>(
-				sql`select exists(select 1 from public.unit where id = ${universe.id}::uuid) as present`,
+			const route = await tx.execute<{ generation: number }>(
+				sql`select generation from public.catalog_unit_locator where id=${universe.id}::uuid and owner='grouping'`,
 			);
-			assert.equal(legacyCount.rows[0]?.present, false);
+			assert.equal(route.rows[0]?.generation, 1);
 			assertions += 3;
 
 			const work = await createCatalogIdentity(
@@ -299,7 +359,8 @@ try {
 
 			const values = Array.from({ length: 520 }, (_, i) => ({
 				key: "repeated",
-				value: i === 519 ? [null, false, 1.5] : `name-${i}`,
+				value: `name-${i}`,
+				...(i === 519 ? { samples: { unknown: null, flag: false, fraction: 1.5 } } : {}),
 			}));
 			const fact = await beginCatalogFact(tx, work, actor, work.revision, infobox.revisionId);
 			let factVersion = fact.revision;
@@ -372,20 +433,17 @@ try {
 					nested.insert(CatalogIdentityTables.entity).values({ id: universe.id, shape: "person" }),
 				"23505",
 			);
-			await rejected(
-				tx,
-				(nested) =>
-					nested.execute(
-						sql`insert into public.unit(id, kind) values (${universe.id}::uuid, 'entity')`,
-					),
-				"23505",
-			);
+			const [unsealedRelation] = await tx
+				.insert(CatalogFactTables.grouping.relation)
+				.values({ ownerId: universe.id, definitionRevisionId: setIn.revisionId })
+				.returning({ id: CatalogFactTables.grouping.relation.id });
+			assert.ok(unsealedRelation);
 			await rejected(
 				tx,
 				(nested) =>
 					nested.insert(CatalogFactTables.grouping.participant).values({
 						ownerId: universe.id,
-						relationId: membership.id,
+						relationId: unsealedRelation.id,
 						roleRevisionId: subject.revisionId,
 						position: 100,
 						entityId: work.id,
@@ -397,7 +455,7 @@ try {
 				(nested) =>
 					nested.insert(CatalogFactTables.grouping.participant).values({
 						ownerId: universe.id,
-						relationId: membership.id,
+						relationId: unsealedRelation.id,
 						roleRevisionId: subject.revisionId,
 						position: 100,
 						groupingId: universe.id,
@@ -410,7 +468,7 @@ try {
 				(nested) =>
 					nested.insert(CatalogFactTables.grouping.participant).values({
 						ownerId: franchise.id,
-						relationId: membership.id,
+						relationId: unsealedRelation.id,
 						roleRevisionId: subject.revisionId,
 						position: 100,
 						groupingId: universe.id,
@@ -465,7 +523,16 @@ try {
 
 			const [source] = await tx
 				.insert(catalogSourceRecord)
-				.values({ source: "acceptance", objectType: "subject", externalId: "1" })
+				.values({
+					id: catalogSourceRecordId({
+						source: "acceptance",
+						objectType: "subject",
+						externalId: "1",
+					}),
+					source: "acceptance",
+					objectType: "subject",
+					externalId: "1",
+				})
 				.returning();
 			assert.ok(source);
 			const [snapshot] = await tx
