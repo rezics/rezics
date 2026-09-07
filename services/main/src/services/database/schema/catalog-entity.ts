@@ -49,7 +49,11 @@ export const entityCatalogProfile = pgTable(
 		}).onDelete("restrict"),
 		check(
 			"entity_catalog_profile_shape_check",
-			sql`${table.identityShape} in ('person', 'organization', 'character', 'label', 'collective', 'unresolved')`,
+			sql`${table.identityShape} in ('person', 'organization', 'character', 'label', 'collective', 'unresolved', 'service_actor')`,
+		),
+		check(
+			"entity_catalog_profile_gender_shape_check",
+			sql`${table.genderRevisionId} is null or ${table.identityShape} in ('person','character','unresolved')`,
 		),
 		catalogDateConstraint("entity_catalog_profile_begin_check", {
 			dateYear: table.beginYear,

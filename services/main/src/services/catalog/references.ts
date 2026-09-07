@@ -8,6 +8,8 @@ import {
 	referenceInstrument,
 	referenceEvent,
 	referenceCatalogProfileRevision,
+	referenceConcept,
+	referenceWebResource,
 } from "../database/schema/catalog-reference";
 import type { CatalogReference } from "./contracts";
 import {
@@ -59,7 +61,8 @@ export async function initializeReferenceProfile(
 	const identity = await loadCatalogIdentity(tx, ref, actor, true);
 	if (identity.shape !== value.shape)
 		throw new TypeError("Reference profile shape differs from its identity");
-	await requireProfileDefinition(tx, value.typeRevisionId, ["class", "vocabulary"]);
+	if ("typeRevisionId" in value)
+		await requireProfileDefinition(tx, value.typeRevisionId, ["class", "vocabulary"]);
 	if (value.shape === "place") await requireProfileTarget(tx, value.areaId, actor, "area");
 	if (value.shape === "event") await requireProfileTarget(tx, value.placeId, actor, "place");
 	const revision = await recordCatalogChange(
@@ -69,21 +72,36 @@ export async function initializeReferenceProfile(
 		expectedVersion,
 		"reference.profile.set",
 	);
-	const lifecycle =
-		value.shape === "instrument"
-			? {}
-			: {
-					dateYear: value.begin?.year ?? null,
-					dateMonth: value.begin?.month ?? null,
-					dateDay: value.begin?.day ?? null,
-					dateText: value.begin?.text ?? null,
-					endYear: value.end?.year ?? null,
-					endMonth: value.end?.month ?? null,
-					endDay: value.end?.day ?? null,
-					endText: value.end?.text ?? null,
-					ended: value.ended,
-				};
+	const lifecycle = !("begin" in value)
+		? {}
+		: {
+				dateYear: value.begin?.year ?? null,
+				dateMonth: value.begin?.month ?? null,
+				dateDay: value.begin?.day ?? null,
+				dateText: value.begin?.text ?? null,
+				endYear: value.end?.year ?? null,
+				endMonth: value.end?.month ?? null,
+				endDay: value.end?.day ?? null,
+				endText: value.end?.text ?? null,
+				ended: value.ended,
+			};
 	switch (value.shape) {
+		case "concept": {
+			const fields = { typeRevisionId: value.typeRevisionId };
+			await tx
+				.insert(referenceConcept)
+				.values({ id: ref.id, ...fields })
+				.onConflictDoUpdate({ target: referenceConcept.id, set: fields });
+			break;
+		}
+		case "web_resource": {
+			const fields = { url: value.url };
+			await tx
+				.insert(referenceWebResource)
+				.values({ id: ref.id, ...fields })
+				.onConflictDoUpdate({ target: referenceWebResource.id, set: fields });
+			break;
+		}
 		case "area": {
 			const fields = { typeRevisionId: value.typeRevisionId, ...lifecycle };
 			await tx
@@ -150,8 +168,12 @@ export async function readReferenceProfile(
 		place: referencePlace,
 		event: referenceEvent,
 		instrument: referenceInstrument,
+		concept: referenceConcept,
+		web_resource: referenceWebResource,
 	};
-	const shape = z.enum(["area", "place", "event", "instrument"]).parse(identity.shape);
+	const shape = z
+		.enum(["area", "place", "event", "instrument", "concept", "web_resource"])
+		.parse(identity.shape);
 	const table = tables[shape];
 	const [row] = await tx.select().from(table).where(eq(table.id, ref.id)).limit(1);
 	if (!row) throw new CatalogReferenceNotFound("Reference profile is missing");
@@ -177,7 +199,8 @@ export async function readReferenceProfile(
 			: {};
 	const value = {
 		shape,
-		typeRevisionId: row.typeRevisionId,
+		...("typeRevisionId" in row ? { typeRevisionId: row.typeRevisionId } : {}),
+		...("url" in row ? { url: row.url } : {}),
 		...lifecycle,
 		...("latitude" in row
 			? {

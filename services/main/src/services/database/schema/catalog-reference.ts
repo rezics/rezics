@@ -32,6 +32,35 @@ const lifecycleColumns = () => ({
 	ended: boolean(),
 });
 
+/** Named subjects used by governed classifications; provider taxonomy IDs are external bindings. */
+export const referenceConcept = pgTable(
+	"reference_concept",
+	{
+		...catalogSubtypeColumns("concept"),
+		typeRevisionId: uuid().references(() => catalogDefinitionRevision.id, { onDelete: "restrict" }),
+	},
+	(table) => [
+		...catalogSubtypeConstraints("reference_concept", "reference", "concept", table),
+		index("reference_concept_type_idx").on(table.typeRevisionId, table.id),
+	],
+);
+
+/** An independently referenced network resource, distinct from a relation linking to it. */
+export const referenceWebResource = pgTable(
+	"reference_web_resource",
+	{
+		...catalogSubtypeColumns("web_resource"),
+		url: text().notNull(),
+	},
+	(table) => [
+		...catalogSubtypeConstraints("reference_web_resource", "reference", "web_resource", table),
+		check(
+			"reference_web_resource_url_check",
+			sql`octet_length(${table.url}) between 1 and 8192 and ${table.url} ~ '^[A-Za-z][A-Za-z0-9+.-]*:'`,
+		),
+	],
+);
+
 export const referenceArea = pgTable(
 	"reference_area",
 	{

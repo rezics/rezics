@@ -1,5 +1,15 @@
 import { sql } from "drizzle-orm";
-import { check, foreignKey, index, primaryKey, text, unique, uuid } from "drizzle-orm/pg-core";
+import {
+	bigint,
+	check,
+	foreignKey,
+	index,
+	jsonb,
+	primaryKey,
+	text,
+	unique,
+	uuid,
+} from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
 import {
 	createCreatedAtColumn,
@@ -76,6 +86,34 @@ export const groupingOrderEntry = pgTable(
 		createFractionalIndexPositionByteLengthConstraint(
 			"grouping_order_entry_position_check",
 			table.position,
+		),
+		check(
+			"grouping_order_entry_source_position_check",
+			sql`${table.sourcePosition} is null or octet_length(${table.sourcePosition}) <= 4096`,
+		),
+	],
+);
+
+/** Local command snapshots never copy the grouping's entire membership or ordering graph. */
+export const groupingCommandRevision = pgTable(
+	"grouping_command_revision",
+	{
+		ownerId: uuid()
+			.notNull()
+			.references(() => groupingIdentity.id, { onDelete: "restrict" }),
+		revision: bigint({ mode: "number" }).notNull(),
+		snapshot: jsonb().$type<unknown>().notNull(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.ownerId, table.revision] }),
+		check(
+			"grouping_command_revision_number_check",
+			sql`${table.revision} between 1 and 9007199254740991`,
+		),
+		check(
+			"grouping_command_revision_snapshot_check",
+			sql`jsonb_typeof(${table.snapshot}) = 'object' and octet_length(${table.snapshot}::text) <= 32768`,
 		),
 	],
 );

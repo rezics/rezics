@@ -15,6 +15,7 @@ export const EntityShapeSchema = z.enum([
 	"label",
 	"collective",
 	"unresolved",
+	"service_actor",
 ]);
 const date = CatalogPartialDateSchema.safeExtend({ text: text(4096).nullable().default(null) })
 	.nullable()
@@ -52,6 +53,11 @@ const lifecycle = { begin: date, end: date, ended: z.boolean().nullable().defaul
  * @remarks Partial dates retain unknown precision; coordinates must be supplied as a pair.
  */
 export const ReferenceProfileSchema = z.discriminatedUnion("shape", [
+	z.strictObject({ shape: z.literal("concept"), ...common }),
+	z.strictObject({
+		shape: z.literal("web_resource"),
+		url: z.url().refine((value) => Buffer.byteLength(value, "utf8") <= 8192),
+	}),
 	z.strictObject({ shape: z.literal("area"), ...common, ...lifecycle }),
 	z.strictObject({ shape: z.literal("instrument"), ...common }),
 	z

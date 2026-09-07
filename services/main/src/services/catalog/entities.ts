@@ -5,7 +5,11 @@ import {
 	entityCatalogProfile,
 	entityCatalogProfileRevision,
 } from "../database/schema/catalog-entity";
-import { catalogDefinition, catalogDefinitionRevision } from "../database/schema/catalog-identity";
+import {
+	catalogDefinition,
+	catalogDefinitionRevision,
+	entityIdentity,
+} from "../database/schema/catalog-identity";
 import { CatalogPartialDateSchema, type CatalogReference } from "./contracts";
 import {
 	CreateEntitySchema,
@@ -48,6 +52,45 @@ export async function requireProfileTarget(
 	if (id === null) return;
 	const row = await loadCatalogIdentity(tx, { owner: "reference", id }, actor, false);
 	if (row.shape !== shape) throw new TypeError(`Expected ${shape} reference`);
+}
+
+/**
+ * Resolve an explicitly uncertain entity's physical shape once, under the owner write lock.
+ * @alpha
+ * @remarks Known identities cannot be silently reinterpreted by a later source. Existing values survive.
+ */
+export async function resolveEntityShape(
+	tx: DatabaseTransaction,
+	ref: CatalogReference,
+	actor: string,
+	expectedVersion: number,
+	input: z.input<typeof EntityShapeSchema>,
+) {
+	if (ref.owner !== "entity") throw new TypeError("Expected entity owner");
+	const shape = EntityShapeSchema.parse(input);
+	const identity = await loadCatalogIdentity(tx, ref, actor, true);
+	if (identity.shape !== "unresolved")
+		throw new TypeError("Only an unresolved entity can have its shape resolved");
+	if (shape === "unresolved") throw new TypeError("Shape resolution requires a concrete shape");
+	const [profile] = await tx
+		.select()
+		.from(entityCatalogProfile)
+		.where(eq(entityCatalogProfile.id, ref.id))
+		.limit(1);
+	if (profile?.genderRevisionId && !["person", "character"].includes(shape))
+		throw new TypeError("The existing gender claim is incompatible with the resolved shape");
+	const revision = await recordCatalogChange(
+		tx,
+		ref,
+		actor,
+		expectedVersion,
+		`entity.shape.resolve.${shape}`,
+	);
+	// Replace the projection within the owner-locked transaction because the concrete shape FK is immediate.
+	if (profile) await tx.delete(entityCatalogProfile).where(eq(entityCatalogProfile.id, ref.id));
+	await tx.update(entityIdentity).set({ shape }).where(eq(entityIdentity.id, ref.id));
+	if (profile) await tx.insert(entityCatalogProfile).values({ ...profile, identityShape: shape });
+	return { revision };
 }
 
 /**
