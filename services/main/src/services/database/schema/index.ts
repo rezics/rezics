@@ -17,6 +17,7 @@ export * from "./catalog-publishing";
 export * from "./catalog-music";
 export * from "./catalog-program";
 export * from "./catalog-software";
+export * from "./catalog-software-participation";
 export * from "./operational-durability";
 export * from "./operational-runtime";
 export * from "./catalog-entity";

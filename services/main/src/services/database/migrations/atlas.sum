@@ -1,4 +1,4 @@
-h1:U+Oesdfdqplf/b/JJoy3edxrBnYmKbJHGHmbuY97r9U=
+h1:mXgKzpRszM86OzgIYzziZ42/WPp6q28KDwq4O7ZL0ys=
 20260801000000_v1_baseline.sql h1:RkSyDwLRpFOPI7iqWg+WlFc5TAshnB4gsRkBpsTMjGY=
 20260807000000_search_ordered_candidates.sql h1:rPOS8iAdRmWOfc9lpyCNNsFWjduRV1e27Q1Mc1QpTFc=
 20260807000001_backfill_search_best_score.sql h1:lmLn+kpWiNWEPlk40W4QRIGsqpWezY//UsNaaZ8FToc=
@@ -47,3 +47,4 @@ h1:U+Oesdfdqplf/b/JJoy3edxrBnYmKbJHGHmbuY97r9U=
 20260907063641_operational_contexts_and_events.sql h1:qrSPufnKjdaWIEAJ47/eFqrAJakNczuqZ7ufSwIQNa4=
 20260907082947_catalog_native_source_event_batch.sql h1:qgM/cCIFn8OSFXJDyL1lTCERqsbmKMWUWR2M4yhKRic=
 20260907090209_catalog_source_native_applications.sql h1:pIW3ULpU6/a2xJGi/0D4W3GdIkWAz8p9tsVT7vDSqaw=
+20260907091651_catalog_context_music_evidence.sql h1:Xz1GHq7dLXN67LYFgGIlyXl5bQr7bUWECFyA/uMSAys=

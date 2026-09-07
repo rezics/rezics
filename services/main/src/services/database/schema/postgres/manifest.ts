@@ -4,6 +4,7 @@ export const PostgreSqlSchemaFileNames = [
 	"catalog-name-integrity.sql",
 	"catalog-semantics-integrity.sql",
 	"catalog-software-history.sql",
+	"catalog-software-participation-integrity.sql",
 	"catalog-source-integrity.sql",
 	"catalog-source-application.sql",
 	"catalog-supporting-integrity.sql",
@@ -35,6 +36,10 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles = {
+	catalog_context_music_evidence: [
+		"catalog-software-participation-integrity.sql",
+		"catalog-music-history.sql",
+	],
 	catalog_source_native_applications: ["catalog-source-application.sql"],
 	catalog_native_source_event_batch: [
 		"catalog-integrity.sql",
@@ -66,6 +71,12 @@ export const PostgreSqlSchemaMigrationBundles = {
 } as const satisfies Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>>;
 
 export const PostgreSqlSchemaFunctionNames = [
+	"catalog_guard_software_participation",
+	"catalog_require_software_participation_head",
+	"catalog_guard_software_participation_revision",
+	"catalog_require_software_participation_revision_head",
+	"catalog_validate_software_participation",
+	"catalog_check_music_source_occurrence",
 	"catalog_source_validate_application_change",
 	"catalog_source_require_application_complete",
 	"catalog_guard_distribution_member",
@@ -198,6 +209,28 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "software_participation", name: "software_participation_guard" },
+	{ table: "software_participation", name: "software_participation_head_required" },
+	{ table: "software_participation_revision", name: "software_participation_revision_guard" },
+	{
+		table: "software_participation_revision",
+		name: "software_participation_revision_head_required",
+	},
+	{ table: "software_participation_revision", name: "software_participation_values" },
+	{
+		table: "software_participation_credit_source_occurrence",
+		name: "software_participation_occurrence_guard",
+	},
+	{ table: "music_medium_identifier", name: "music_medium_identifier_record_revision" },
+	{ table: "music_track_identifier", name: "music_track_identifier_record_revision" },
+	{
+		table: "music_component_source_occurrence",
+		name: "music_component_source_occurrence_exact_history",
+	},
+	{
+		table: "music_component_source_occurrence",
+		name: "music_component_source_occurrence_immutable",
+	},
 	{ table: "music_source_application_change", name: "music_source_application_exact_component" },
 	{ table: "distribution_identity", name: "distribution_identity_route_publish" },
 	{ table: "distribution_identity", name: "distribution_identity_route_remove" },

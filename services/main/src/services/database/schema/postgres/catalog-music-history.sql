@@ -29,10 +29,13 @@ BEGIN
     USING ERRCODE = '23514', CONSTRAINT = 'music_native_revision_immutable';
 END $$;
 
+DROP TRIGGER IF EXISTS music_component_revision_immutable ON public.music_component_revision;
 CREATE TRIGGER music_component_revision_immutable BEFORE UPDATE OR DELETE ON public.music_component_revision
   FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_music_history();
+DROP TRIGGER IF EXISTS music_disc_toc_immutable ON public.music_disc_toc;
 CREATE TRIGGER music_disc_toc_immutable BEFORE UPDATE OR DELETE ON public.music_disc_toc
   FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_music_history();
+DROP TRIGGER IF EXISTS music_disc_toc_offset_immutable ON public.music_disc_toc_offset;
 CREATE TRIGGER music_disc_toc_offset_immutable BEFORE UPDATE OR DELETE ON public.music_disc_toc_offset
   FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_music_history();
 
@@ -46,6 +49,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END $$;
+DROP TRIGGER IF EXISTS music_disc_toc_offset_sealed ON public.music_disc_toc_offset;
 CREATE TRIGGER music_disc_toc_offset_sealed BEFORE INSERT ON public.music_disc_toc_offset
   FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_music_toc_offset_append();
 
@@ -68,8 +72,10 @@ BEGIN
   RETURN NEW;
 END $$;
 
+DROP TRIGGER IF EXISTS music_medium_toc_complete ON public.music_medium_toc;
 CREATE TRIGGER music_medium_toc_complete BEFORE INSERT OR UPDATE ON public.music_medium_toc
   FOR EACH ROW EXECUTE FUNCTION public.catalog_check_music_toc_attachment();
+DROP TRIGGER IF EXISTS music_candidate_toc_complete ON public.music_candidate_toc;
 CREATE TRIGGER music_candidate_toc_complete BEFORE INSERT OR UPDATE ON public.music_candidate_toc
   FOR EACH ROW EXECUTE FUNCTION public.catalog_check_music_toc_attachment();
 
@@ -86,22 +92,29 @@ BEGIN
     ('music_candidate_track','candidate_id','id'), ('music_work_language','work_id','language_tag'),
     ('music_release_group_secondary_type','release_group_id','type_revision_id')
   ) items(table_name, owner_column, key_column) LOOP
+    EXECUTE format('DROP TRIGGER IF EXISTS %I ON public.%I', row.table_name || '_record_revision', row.table_name);
     EXECUTE format('CREATE TRIGGER %I AFTER INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_record_music_component(%L,%L)',
       row.table_name || '_record_revision', row.table_name, row.owner_column, row.key_column);
   END LOOP;
 END $$;
 
+DROP TRIGGER IF EXISTS music_medium_attribute_record_revision ON public.music_medium_attribute;
 CREATE TRIGGER music_medium_attribute_record_revision AFTER INSERT OR UPDATE OR DELETE ON public.music_medium_attribute
   FOR EACH ROW EXECUTE FUNCTION public.catalog_record_music_component('release_id','medium_id','id');
+DROP TRIGGER IF EXISTS music_track_presentation_record_revision ON public.music_track_presentation;
 CREATE TRIGGER music_track_presentation_record_revision AFTER INSERT OR UPDATE OR DELETE ON public.music_track_presentation
   FOR EACH ROW EXECUTE FUNCTION public.catalog_record_music_component('release_id','medium_presentation_id','track_id');
+DROP TRIGGER IF EXISTS music_medium_toc_record_revision ON public.music_medium_toc;
 CREATE TRIGGER music_medium_toc_record_revision AFTER INSERT OR UPDATE OR DELETE ON public.music_medium_toc
   FOR EACH ROW EXECUTE FUNCTION public.catalog_record_music_component('release_id','medium_id','toc_id');
+DROP TRIGGER IF EXISTS music_candidate_toc_record_revision ON public.music_candidate_toc;
 CREATE TRIGGER music_candidate_toc_record_revision AFTER INSERT OR UPDATE OR DELETE ON public.music_candidate_toc
   FOR EACH ROW EXECUTE FUNCTION public.catalog_record_music_component('candidate_id','toc_id');
 
+DROP TRIGGER IF EXISTS music_medium_identifier_record_revision ON public.music_medium_identifier;
 CREATE TRIGGER music_medium_identifier_record_revision AFTER INSERT OR UPDATE OR DELETE ON public.music_medium_identifier
   FOR EACH ROW EXECUTE FUNCTION public.catalog_record_music_component('release_id','medium_id','namespace','value');
+DROP TRIGGER IF EXISTS music_track_identifier_record_revision ON public.music_track_identifier;
 CREATE TRIGGER music_track_identifier_record_revision AFTER INSERT OR UPDATE OR DELETE ON public.music_track_identifier
   FOR EACH ROW EXECUTE FUNCTION public.catalog_record_music_component('release_id','track_id','namespace','value');
 
@@ -116,7 +129,9 @@ BEGIN
   END IF;
   RETURN NEW;
 END $$;
+DROP TRIGGER IF EXISTS music_component_source_occurrence_exact_history ON public.music_component_source_occurrence;
 CREATE TRIGGER music_component_source_occurrence_exact_history BEFORE INSERT ON public.music_component_source_occurrence
   FOR EACH ROW EXECUTE FUNCTION public.catalog_check_music_source_occurrence();
+DROP TRIGGER IF EXISTS music_component_source_occurrence_immutable ON public.music_component_source_occurrence;
 CREATE TRIGGER music_component_source_occurrence_immutable BEFORE UPDATE OR DELETE ON public.music_component_source_occurrence
   FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_music_history();
