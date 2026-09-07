@@ -33,7 +33,7 @@ The [language audit](../../report/REZICS-language-and-authority-audit-20260906.m
 3. Add identified named forms, translation derivations and language support per channel/edition. Connect officialness assertions through P01/P02, including multiple authorizers and partial scopes.
 4. Replace existing localization/alias consumers with the new named-form contract. P11's separate offline tool converts old document/localization IDs, history keys and metric references; this is not a prerequisite for replacement. For selected imported records, collision groups retain original evidence rather than last-write-wins, and historical `zh` remains `zh` without evidence.
 5. Replace fixed `text_zh`/`text_en`/`text_ja`-style search columns with owner projections that support open content-language tags. Update query fingerprints, URL negotiation, SSR/SEO, editor forms, source adapters and SDK. Keep current lookup fallback shared across server/client; separate lookup preference from factual content language.
-6. Publish canonical response values and version the changed API/cursors. Accept old *supported v1+* inputs only through explicit normalization where semantically unambiguous; do not maintain parallel authoritative spellings.
+6. Publish canonical response values and version the changed API/cursors. Normalize inputs accepted by the new language contract; old v1+ payloads have no compatibility requirement under `00`. Do not maintain parallel authoritative spellings. Scope authority to the actual named-form/content-version/publication/language-support revision; a source's edition label does not establish a universal Edition identity.
 
 ## Acceptance
 

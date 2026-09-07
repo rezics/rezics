@@ -1,6 +1,6 @@
 # P04 — Production source ingestion and continuous observation
 
-Status: planned, not implemented. Date: 2026-09-06. Parent: [program and gates](README.md).
+Status: initial observation/adoption slices exist; full source protocol, subscriptions and update jobs unqualified; further implementation gated by design review. Updated: 2026-09-07. Parent: [program and gates](README.md).
 
 Current priority is the [four-family native schema gate](00-source-complete-schema.md):
 VNDB, MusicBrainz, Bangumi and required book-index data. Implement complete mapping
@@ -18,13 +18,18 @@ the same canonicalization and proposal path; neither bypasses P01/P03/P05 invari
 
 ## Persistent protocol
 
-Separate SourceDefinition/terms revision, SourceRecord identity, immutable SourceObservation, semantic mapping revision, SourceBinding and AdoptionPolicy. Large raw payloads use object storage with checksums and exact observation references.
+Follow the [generic source binding/subscription contract](../../report/REZICS-source-integration-and-review-20260906.md#44-generic-source-bindings-and-subscriptions) and [scheduled event/job protocol](../../report/REZICS-source-integration-and-review-20260906.md#51-scheduled-checks-change-events-and-update-jobs). These are shared across all logical Unit owners, not owned by software or a provider. Source schemas map to the provider-independent native model; they do not create its object hierarchy.
+
+Separate SourceDefinition/terms revision, SourceRecord identity, immutable SourceObservation, semantic mapping revision, SourceBinding, current SourceSubscription, AdoptionPolicy and SourceCheckPlan. Large raw payloads use object storage with checksums and exact observation references.
 
 - A source record is keyed by source namespace, source entity type and source-native identity. Local/unstable source sub-IDs include containing record and observation context.
 - Bindings record exact/scope-specific/candidate/rejected correspondence; one source object may map to several local scopes where its grain differs. A URL is not proof of identity.
+- SourceRecord and logical Unit are many-to-many through individually scoped bindings. One binding has one source and one concrete target reference; occurrence/participation/revision targets use their own validated family. Confirmed exact-scope uniqueness and candidate correspondence have different rules. The current single-mapping shortcuts are not the final cardinality contract.
 - Source fetching happens once per source record/snapshot; many bindings subscribe to its changes. Adoption policy does not create independent duplicate crawlers.
 - Policies support reference-only, fill-missing, reviewed-follow and validated-auto-follow, by field/relation family and scope, with human protection and explicit overrides.
 - Pausing adoption preserves bindings/evidence; disabling acquisition is separate. Correcting a mistaken binding produces a reviewed new binding revision and recalculates only its adopted support.
+- One current subscription per binding records active/paused state, watched scope and versioned policy. Compatible subscription demand shares check plans, with credentials/visibility/response coverage isolated where needed. Unsubscribe/resume/rebind change the revision; final application checks it atomically so queued work cannot outlive its authority.
+- Indexed due plans enqueue durable check requests. Record/query/feed checks produce immutable observations and transactional change events; paged binding fan-out produces coalesced target update jobs, which invoke canonical commands or review. Saved-query discovery does not itself approve Unit creation. Specify schedule, observation, fan-out and application idempotency keys separately.
 - Observe no-change using content hashes. Repeated delivery is idempotent. Absence in a partial snapshot, filtering failure or timeout is not a tombstone.
 - Event/outbox publication occurs in the same database transaction as observation/proposal state; delivery is at least once, consumers deduplicate durable IDs and recheck expected revisions.
 - Mapping repairs reprocess stored eligible snapshots with new mapping versions; record corrected outputs without falsifying the old run.
@@ -33,10 +38,10 @@ Separate SourceDefinition/terms revision, SourceRecord identity, immutable Sourc
 
 ## Implementation slices
 
-1. Build the complete pinned object/field/relation inventory and native mapping matrix with P01/P03. Add source registry/run ledger, bounded job claims with fencing, snapshot manifest/checksum validation, staging/observation storage and resumable checkpoints usable for local conformance and eligible production runs. Do not make production credentials a prerequisite for writing the schema.
+1. Close the `00` design-review gate with P01/P03: native semantic mappings, source/binding/subscription cardinality, compatible composite uniqueness/FK/partition keys, snapshot-local identity, event/job schemas and acceptance scenarios. Then implement registry/run/check-plan/job owners, fenced claims, staging/observations and checkpoints. Production credentials are not a prerequisite for design or local conformance.
 2. Add identity namespace and typed field/relationship mapping contracts with unsupported-state reporting. Implement binding/adoption policy commands, permissions and operator views.
 3. Implement Bangumi snapshot adapter; use API only for allowed bounded enrichment. Parse ordered/repeated Infobox structures, subject/person/character/episode records and contextual relations; keep source relation constants versioned.
-4. Implement VNDB bulk adapter using an eligible acquisition route. Preserve VN/release, staff aliases, release languages, character roles/traits/spoilers, official/MTL qualifiers and contextual voice roles. Track snapshot schema changes; do not treat edition-local IDs as globally stable identities.
+4. Implement VNDB bulk adapter using an eligible acquisition route. Preserve VN/release, staff aliases, release languages, character roles/traits/spoilers, official/MTL qualifiers and contextual voice roles. Track snapshot schema changes. Edition-local IDs are unstable across edits; map them to snapshot-scoped participation contexts or evidenced native variants, not an automatically created Edition layer.
 5. Implement MusicBrainz adapter for release group, release, recording, work, artist/credit, medium/track and relationship attributes. Core, supplementary, image and replication inputs are separately selectable according to eligibility.
 6. Connect change diff/proposals to P05 and projection updates to P06. Implement pause/resume, checkpoint inspection, changed-field explanation and bounded replay.
 7. Run complete selected snapshot manifests, not just sample records. Reconcile input counts, duplicates, mapped items, unsupported fields and publication eligibility. Resolve every unexplained discrepancy before claiming scope completion.
@@ -88,6 +93,10 @@ Do not advertise broader rights because a record is publicly accessible. If comm
 
 ## Acceptance and throughput
 
+- A Unit binds multiple records and a coarse source binds multiple native scopes; confirmed equivalence cannot accidentally allocate duplicate identities. Manual and independent-provider inputs use the same native commands. Source local-key reorder/reuse preserves prior context and evidence without retargeting it.
+- Compatible subscribers share one acquisition, including different target policies. Pausing one leaves other demand active, preserves existing values and fences its already queued jobs. Resume uses latest eligible state with a three-way comparison. Private acquisition scopes cannot leak through shared checks.
+- Crash after due-plan advancement, observation commit, fan-out page or target commit; durable replay loses no work and applies no mutation twice. Duplicate events, expired/reclaimed leases, out-of-order observations and pause/rebind/policy edits racing with application are covered.
+- Unchanged conditional/hash checks update check metadata without new canonical updates. Partial source disappearance is not a tombstone. Query discovery, provider feed and direct-record checks converge on the same governed matching and adoption path.
 - Kill a run after fetch, normalization, proposal creation and commit; resume without duplicate canonical data.
 - Deliver observations out of order; current head cannot regress. Aggregate finite bursts per object without waiting for all sources.
 - Three conflicting sources preserve three claims and one policy-selected current value; a human correction remains protected.

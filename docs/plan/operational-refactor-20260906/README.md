@@ -3,6 +3,14 @@
 Date: 2026-09-06. Status: supporting implementation exists; **the current source-complete catalog schema milestone is not delivered**.
 Source baseline: `470aa6c0432fae1dacbd3be7d8ad62b566447ca9`.
 
+**Current boundary, 2026-09-07:** design review is open. The maintainer has
+authorized documentation updates; further schema/runtime implementation waits
+for the [design-review gate](00-source-complete-schema.md#design-review-gate).
+The native model must be provider-independent, with no mandatory Edition layer,
+checked cross-domain distribution composition and generic source bindings,
+subscriptions, scheduled checks and event-driven update jobs. Four-source
+coverage remains required but does not define the native abstraction boundary.
+
 ## Mandate and outcome
 
 **Current stage, clarified by the maintainer:** finish the database schema needed
@@ -36,16 +44,19 @@ adapters or old-URL guarantees. The authoritative
 [baseline in `00`](00-source-complete-schema.md#breaking-replacement-baseline)
 supersedes earlier preservation/cutover sequencing in this program.
 
-Implementation was authorized on 2026-09-06, including autonomous adjustments and
-verified commits. Production activation still requires the evidence below. This
-plan does not preserve old-version compatibility. Released SQL remains immutable
-as history; generated replacement DDL may drop obsolete structures without a
+Earlier implementation was authorized on 2026-09-06. The later design-review
+boundary above governs further work; it does not authorize new implementation or
+commits merely because this document is updated. Production activation still
+requires the evidence below. This plan does not preserve old-version compatibility.
+Released SQL remains immutable as history; generated replacement DDL may drop obsolete structures without a
 legacy transfer first. RomVer identifies the breaking release; it does not require
 old endpoints or rows to work in the target application.
 
 ## Research and decisions
 
 - [Source-complete catalog schema and actual API verification](../../report/REZICS-source-complete-catalog-schema-20260906.md) — current-stage authority.
+- [Provider-independent capabilities and Edition review](../../report/REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model) — native semantic model and cross-provider qualification.
+- [Generic source bindings, subscriptions and scheduled updates](../../report/REZICS-source-integration-and-review-20260906.md#44-generic-source-bindings-and-subscriptions) — common source lifecycle and execution protocol.
 - [Current-stage source baseline](source-contract-baseline.json) — pinned artifacts and observed HTTP/schema results, not implementation coverage.
 - [Integrated decisions and issue register](../../report/REZICS-operational-refactor-decisions-20260906.md).
 - [Product evidence and user scenarios](../../report/REZICS-product-opportunities-and-user-scenarios-20260906.md).
@@ -75,6 +86,11 @@ Prerequisites are contracts or integration gates, not a requirement to finish ev
 
 ## Delivery order and useful increments
 
+**Before the increments below:** close the design-review gate in `00`, including
+the native/source mapping matrix, exact references/revisions, physical routing
+and capacity design, and executable acceptance specifications. Current design
+selection and historical implementation evidence are separate statuses.
+
 1. **Finish the source-complete database milestone:** follow `00` in order: full
    source contract inventory, shared DDL, actual domain tables, canonical commands/
    reads/queries, destructive runtime replacement, four-source native conformance
@@ -93,7 +109,8 @@ Prerequisites are contracts or integration gates, not a requirement to finish ev
    follow independently. Legacy access or migration-tool completion does not
    block schema acceptance or removal of the old runtime contract.
 
-Implement on `main` in reviewed slices, with one target write authority per fact.
+After design approval and implementation authorization, implement on `main` in
+reviewed slices, with one target write authority per fact.
 The stopped old site need not run at intermediate commits. Complete affected
 new-contract call sites and deterministic checks before declaring a slice
 integrated; do not preserve compatibility merely to keep the old build runnable.

@@ -1,13 +1,47 @@
 # Current stage — source-complete database schema
 
-Priority: **the current implementation milestone**. Status: **in progress / not
-qualified**. The scope clarification was requested by the maintainer on 2026-09-06.
+Priority: **the current schema milestone**. Status: **design review open; existing
+implementation unqualified; further implementation gated**. The initial scope
+clarification was requested by the maintainer on 2026-09-06.
 This stage takes precedence over the program's earlier broad increment order.
 
 The 2026-09-07 clarification also makes the following mandatory in this same
 stage: **logical Unit with owner-local physical identities and no live global
 `unit` parent; explicit fixed-structure/dynamic-relation classification; native
 universe/world-setting, franchise and series models.** These gates remain unqualified.
+
+## Design-review gate
+
+**Maintainer clarification, 2026-09-07:** complete and review the design before
+continuing schema/runtime implementation. The current authorization covers these
+documentation updates. Earlier implementation/commit authorization recorded in
+this program is not evidence that the revised design has passed this gate.
+
+The selected direction is a [provider-independent native catalog](../../report/REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model)
+for objects REZICS elects to index. Four-source coverage is a required conformance
+suite, not the boundary or union of native abstractions. `edition` is not a
+mandatory universal layer; the existing `software_edition` slice remains subject
+to replacement after referent/variant/credit-context semantics are established.
+Cross-domain distribution composition and organizational grouping are separate
+required capabilities. [Generic source binding/subscription](../../report/REZICS-source-integration-and-review-20260906.md#44-generic-source-bindings-and-subscriptions)
+and its scheduled event/queue protocol apply across owners.
+
+Before implementation resumes, review the following concrete design artifacts
+in their owning reports/plans, without creating competing specifications:
+
+| Artifact | Required decision/evidence |
+| --- | --- |
+| Native semantics and source dispositions | Provider-independent identity, versions/variants, publication/distribution, grouping, carrier/resource and occurrence rules; complete required source-path mappings, ambiguity handling and source-free/cross-provider cases. |
+| Identity and reference matrix | Every retained catalog/platform consumer, permitted target family, owner key, concrete FK/checked alternative, deletion/merge/restore behavior and bounded locator publication/repair. Include scoped occurrences and exact revisions. |
+| Definitions, revisions and adoption | Predicate roles/cardinality/target shape, vocabulary membership and value rules; immutable revisions/current heads, fixed-field evidence, binding/subscription/policy revisions, withdrawal and staged restore. |
+| Physical keys and capacity | Compatible PK/UNIQUE/FK and partition/routing keys for all growing families; source-key uniqueness, reverse lookup/fan-out, hot-owner transactions, retention and 500M/3B amplification. Explicitly resolve the review's source mapping/binding key conflicts. |
+| Execution and acceptance specification | Scheduled checks, durable events/jobs, deduplication/fencing, pause/rebind races, canonical writes, source conformance, semantic edit/export/restore and representative capacity/EXPLAIN scenarios. |
+
+The [schema review disposition](../../report/REZICS-source-complete-catalog-schema-20260906.md#43-design-review-disposition)
+tracks unresolved work. Principles selected in this update do not make these
+artifacts complete. Design approval precedes implementation; passing actual
+schema replay, type/behavior checks and measured capacity evidence follows
+implementation. Legacy offline conversion and production reopening stay separate.
 
 ## Breaking replacement baseline
 
@@ -67,7 +101,7 @@ useful but does not complete any of the four source-schema gates below.
 | Source-schema gate | Required coverage | Current state |
 | --- | --- | --- |
 | Bangumi | Subject kinds/grains, Episode, Person, Character, all documented catalog relations, indices, ordered wiki/Infobox and revisions, source statistics and Archive-only relationship data | Not qualified |
-| VNDB | VN, release/patch, VN-local edition, producer, staff/alias identity, character, tag, trait, quote, all declared qualifiers/links/media/language metadata and taxonomy relationships | Not qualified |
+| VNDB | VN, release/patch, scoped edition/participation observations, producer, staff/alias identity, character, tag, trait, quote, all declared qualifiers/links/media/language metadata and taxonomy relationships; no prescribed native Edition layer | Not qualified |
 | MusicBrainz | Complete selected catalog schema: musical entities, supporting entities/vocabularies, credits/attributes, media/tracks, identifiers/redirects, dates, TOCs, source annotations/statistics and incomplete catalog candidates | Not qualified |
 | Book indexing | Work where evidenced, text/translation version, publication/edition, serialization, volume/chapter composition, identifiers, contributors, classifications, publishers and source release/update links/statuses | Not qualified |
 
@@ -133,8 +167,10 @@ Invoke-RestMethod -Headers $bangumiHeaders -Method Post -ContentType 'applicatio
 
 ## Implementation order and ownership
 
-1. **Complete the contract inventory, then write DDL.** P01/P03/P04 enumerate the
-   pinned catalog object families, nested field paths, source vocabularies and
+1. **Close design review, complete the contract inventory, then write DDL.** Define
+   native capabilities and source-free cases before mapping providers onto them.
+   P01/P03/P04 enumerate the pinned catalog object families, nested field paths,
+   source vocabularies and
    relationships. Classify each as fixed structure, dynamic semantic relation,
    typed value or derived/source observation. Each maps to a named native
    table/column or typed fact/relation definition, with identity, cardinality,
@@ -152,14 +188,17 @@ Invoke-RestMethod -Headers $bangumiHeaders -Method Post -ContentType 'applicatio
    Auth/private accounts separate from catalog creators; only the necessary P02
    reference integration is on this critical path, not a new account-management UI.
 3. **Implement the actual domain tables.** Publishing Work/text version/publication/
-   serialization/release events; VN/software releases and local editions; programs
-   and episode identities; MusicBrainz Work/Recording/Release Group/Release,
+   serialization/release events; software versions/variants and releases, with
+   scoped source participation contexts where independent versions are unproved;
+   programs and episode identities; MusicBrainz Work/Recording/Release Group/Release,
    credits/media/tracks/TOCs and required supporting catalog objects. Complete
    Area/Place/Event/Instrument/Label/Series/Genre/Mood metadata now where source
    contracts require it. They are not future feature placeholders.
    Implement shared grouping identities for universe, franchise and series now,
    with distinct membership predicates, continuity/canon/branch context, source
    support and named ordering profiles. Include native source-free commands.
+   Specify checked cross-domain distribution composition without duplicating
+   existing domain structural authority or forcing empty hierarchy levels.
 4. **Integrate one canonical write/read path per owner.** Source-free manual
    creation and versioned source adapters call the same invariant-enforcing
    commands. Wire history/restore, merge, reference/slug resolution, filters,
@@ -188,6 +227,15 @@ fixture qualification. Production conversion/activation remains separately gated
 
 ## Required schema acceptance cases
 
+- Manual and independent provider mappings express the same native semantics.
+  Revised/translated text, a parallel-language publication, repeated content,
+  a mixed-media boxed release and a cross-media franchise remain distinguishable.
+  Changing provider does not require duplicating the domain schema. Edition-local
+  identifiers are interpreted by scope/evidence, never by their field name alone.
+- One source record can supply multiple target scopes and one Unit can use
+  multiple sources. Compatible subscriptions share acquisition; pause/rebind
+  fences already queued work. Unchanged checks do not create canonical updates;
+  crashes, retries and out-of-order observations cannot duplicate or regress state.
 - The same UUID resolves through its physical owner without a global `unit` row.
   Concrete references reject missing/wrong-owner targets; concurrent ID ownership
   conflicts fail safely; stale/missing routing is bounded and the locator rebuilds
@@ -208,7 +256,9 @@ fixture qualification. Production conversion/activation remains separately gated
   ordered source structure, not overwritten global publisher/title fields.
 - Actor + character + subject/release conditions bind to the same contextual
   relation. Do not infer a voice language from an actor's name or nationality.
-- VNDB `aid` and VN-local `eid` survive credits and release references; official,
+- VNDB `aid` and snapshot-scoped VN-local `eid` survive contextual credits and
+  evidenced version/release mappings. Reorder, removal and reuse of a local `eid`
+  do not silently retarget old evidence. Official,
   MTL, spoiler and lie qualifiers keep their separate scopes. Quotes are not lost.
 - One recording on two releases has two track occurrences, retaining their own
   IDs, names, numbers, artist credits and durations. Medium IDs/TOC and source
@@ -253,6 +303,10 @@ native data-flow evidence and remaining schema blockers. Supporting maintenance
 commits and general test counts cannot replace that report.
 
 ## Implementation ledger — 2026-09-07
+
+This ledger records historical execution. It does not override the design-review
+gate above; in particular, an implemented local edition table or successful
+initial observation roundtrip does not qualify a provider-independent model.
 
 - `20260906171239_catalog_native_foundation.sql` adds 87 native tables: seven
   owner-local identities and their names, identifier claims, typed facts/value

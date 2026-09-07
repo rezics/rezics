@@ -94,6 +94,123 @@ Market 与 Catalog 的边界已确认；Market 的订单、交易、结算、二
 
 这不是先列尽世界上的所有类别再开始开发。新增普通语义类别可以复用既有结构；新增可执行行为需要实现与验收。领域分析与部署划分也应分别进行。[Microsoft 领域分析指南](https://learn.microsoft.com/en-us/azure/architecture/microservices/model/domain-analysis)
 
+### 2.3 Provider-independent native model
+
+**Maintainer decision, 2026-09-07.** REZICS models the objects it elects to index,
+including objects described by sources beyond the four current conformance
+families. Native identity, structure and meaning are defined by the object and
+its supported operations. Upstream schemas supply evidence and coverage cases;
+their union is not the REZICS domain model. A new provider describing an existing
+domain should normally require an adapter and reviewed mappings, not another
+native schema or a parallel identity for the same object.
+
+The following are composable capabilities, not mandatory successive levels or
+one universal physical table. An independently identifiable object may have a
+logical Unit identity under its physical owner; value nodes and occurrences do
+not automatically need social identities. Known concrete records can be indexed
+without manufacturing unknown Work, version, release or grouping parents.
+
+| Capability | Native distinction and responsibility |
+| --- | --- |
+| Identity and semantic classification | Identify the actual referent, such as a person, character, work, publication, place or selected external posting. Semantic classes and capabilities do not select physical ownership or grant permissions. |
+| Content versions, variants and derivations | Express translation, revision, cut, port, functional variant and adaptation with their own identity criteria and relationships. A catalog metadata revision is not a new content version; a version label alone is not identity proof. |
+| Publication and distribution | Identify the offered or distributed content/configuration where warranted, its selected contents and specifications. Dates, territory and channel belong to scoped release events. Product offers or entitlements need their own semantics when indexed; a price or source listing does not manufacture a content version. |
+| Composition and occurrences | Identify what a container contains, including repeated occurrences, order, quantities, source numbering and coverage. Contents may cross domain owners. Concrete endpoint eligibility, acyclicity and commands remain constrained. |
+| Grouping and membership | Express series, universe, franchise, project, release family and editorial grouping with distinct governed predicates. Membership is not physical containment, joint distribution, identity equality or rights inheritance. |
+| Carriers and resources | Distinguish a carrier format, an identified medium within a release, an actual file/stream and a particular physical copy. Only the referents selected for independent indexing need their own Unit identity. |
+| Facts, contextual relations and provenance | Use typed properties, identified relations, participants, qualifiers and exact evidence/revisions. Stable queried fields retain their domain columns and sole writer; new ordinary classifications or long-tail properties do not require a provider-specific table. |
+
+Shared semantics do not remove useful domain constraints. Recording reuse, track
+occurrences, publication pagination and software dependency rules remain valid
+when they describe real domain behavior. Their acceptance must be explainable
+without naming MusicBrainz, Open Library or VNDB. A genuinely new structural or
+executable invariant may require code and DDL; generic extensibility is not a
+promise that arbitrary new behavior can be installed through unchecked data.
+
+Library modeling independently distinguishes a work and its expression from
+manifestations and particular copies; its full mandatory entity chain is not adopted as a
+REZICS ingestion requirement. See [IFLA's resource distinctions](https://www.iflastandards.info/ISBDM/docs/intro/i024.html).
+The [Wikibase data model](https://www.mediawiki.org/wiki/Wikibase/DataModel)
+supports the separate need for typed statements, qualifiers and references;
+it does not prescribe our physical schema or executable domain invariants.
+
+### 2.4 Edition is not a universal intermediate identity
+
+The word `edition` alone is insufficient to define identity or cardinality.
+Classify the referent before choosing a native representation:
+
+| Observed use | Native interpretation to establish from evidence |
+| --- | --- |
+| Revised text or a different translation | A content version/translation and its derivation relationships. |
+| Hardcover/paperback using the same text | A publication/distribution specification; it need not be a different content version. |
+| Game deluxe edition with soundtrack and art book | A distribution composition or bundle; a different game build is a separate question. |
+| Professional/community software edition | A functional variant that may have multiple versions and releases. |
+| VNDB edition grouping | A scoped credit/participation context. Map to an independently identified content variant only when evidence establishes that referent. |
+
+VNDB's [Kana contract](https://api.vndb.org/kana#vn-fields) describes `editions.eid`
+as VN-local, unstable across edits and used to organize staff listings. Preserve
+that source-local identity with its record and observation context through the
+shared source protocol. Its label, language, claimed officialness and staff
+membership still need typed native contextual representation and evidence; they
+cannot remain an unqueryable raw-only exception. Do not automatically allocate
+a native version or release solely because an upstream field is called edition.
+
+The current `software_edition` table and `addSoftwareEdition` command are
+**unqualified implementation artifacts**, not an accepted universal Edition
+contract. They chiefly record a content parent, name and source-local key. Adding
+a snapshot key would repair only part of source identity, not establish native
+version semantics. P01 must replace or reshape this slice after the native
+referent, lifecycle and source-free commands are specified; released migration
+history remains intact. No mandatory Edition layer is selected for other owners.
+
+MusicBrainz's [release grouping](https://musicbrainz.org/doc/Release_Group) and
+Steam's [package contents](https://partner.steamgames.com/doc/store/application/packages)
+provide further independent cases for release families and distribution
+composition. Their provider-specific cardinalities, licenses and entitlement
+behavior are not automatically REZICS-wide rules.
+
+### 2.5 Grouping, cross-domain composition and design qualification
+
+A franchise containing a novel, animation and game is organizational membership.
+A boxed release containing a game, printed art book and soundtrack is actual
+distribution composition. Model both, with separately named relationships and
+one authoritative writer for each fact. A work can belong to several groupings;
+the same content can occur in several releases or twice in one container, with
+different position, presentation and credit context. An occurrence key must not
+collapse these cases to a unique pair of container and content IDs.
+
+Publication/medium/track and software-release memberships currently cover domain
+slices. They do not yet establish a checked cross-domain distribution container.
+Before DDL acceptance, name its identity owner, member reference alternatives,
+quantity/order rules, access behavior, revision/restore protocol and relationship
+to domain-specific composition. Reuse the composition protocol without adding a
+second independently writable copy of an existing track or publication edge.
+This catalog requirement does not authorize a marketplace or entitlement engine.
+
+Use these provider-independent qualification cases alongside the complete pinned
+source inventory:
+
+1. Author the same object manually and through two source mappings; obtain the
+   same native meanings without provider-dependent identity rules or duplicate
+   write authorities. Source observations and uncertainty remain attributable.
+2. Represent revised and translated texts, parallel-language publications,
+   omnibuses, repeated content occurrences and multiple carrier formats without
+   forcing them all into one Edition concept.
+3. Represent both a cross-media franchise and a mixed-media boxed release;
+   membership cannot imply containment or move reviews, scores or progress.
+4. Index a concrete publication/version or selected external posting whose
+   abstract Work is unknown. A coarse source record may map to multiple scopes;
+   sparse evidence must not manufacture the missing levels.
+5. Check an additional independent provider/manual case beyond the four primary
+   families. Extending a known domain should normally change mappings and
+   definitions; any new structural table needs a source-independent invariant.
+
+The capabilities and review criteria above are selected design requirements.
+They do not qualify the existing schema or authorize implementation before the
+[design-review gate](../plan/operational-refactor-20260906/00-source-complete-schema.md#design-review-gate)
+closes. Physical keys, transactions, 500M/3B growth and executable acceptance
+remain required; the four-source coverage denominator is not reduced.
+
 ## 3. Catalog 全领域归属地图
 
 ### 3.1 Catalog 是上层编目能力

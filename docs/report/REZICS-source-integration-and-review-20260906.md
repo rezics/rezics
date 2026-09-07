@@ -157,6 +157,8 @@ Use explicit concepts; names below indicate responsibilities, not a mandate for 
 | Source record | Provider + source entity type + full native identifier | Stable source locator; never keyed only by display URL or title |
 | Source observation | Source record + observation identity, raw object pointer/digest, upstream revision or artifact position, observed time, source effective time, availability state | Immutable evidence; many fetches with unchanged content may advance last-checked metadata without producing duplicate facts |
 | Source binding | Source record ↔ local reference + relation (`same_scope`, `contains`, `part_of`, `related`, `unresolved`), target scope, evidence, binding revision/status | Identity mapping owner; only validated exact-scope bindings may feed automatic identity-sensitive adoption |
+| Source subscription | Binding, enabled/paused state, watched field/relation scope, adoption policy reference and subscription revision | Target curation owner; source following is distinct from user notifications and shared acquisition scheduling |
+| Source check plan | Provider/record/query/feed scope, request coverage, interval or cursor, next due time, request validators, concurrency/rate budget and revision | Acquisition owner; compatible demand shares a fetch, while incompatible credentials, visibility or response scopes remain isolated |
 | Adoption policy | Target scope, selected bindings, fields/relationship families, strategy, source priority, protected fields, review/risk policy and revision | Catalog curation owner; subscription is separate from acquisition schedule |
 | Mapped source fact | Observation reference + source path/occurrence + definition mapping revision + typed value/relation + qualifiers | Domain source-evidence owner; provenance supports or contradicts a fact, without claiming source consensus |
 | Adopted current value | Domain field or relationship plus revision and selection basis | Domain owner is the only writer; no independently mutable generic copy of the same canonical field |
@@ -205,7 +207,139 @@ Rebinding is a first-class versioned operation:
 
 No user reviews, history, collections, or native votes move during this operation. If two local Units themselves need merging, invoke the separately governed merge workflow with an impact manifest. Incorrect canonical merging needs its own split/recovery design; do not pretend reassigning a source URL reverses all social-data movement.
 
+### 4.4 Generic source bindings and subscriptions
+
+**Maintainer decision, 2026-09-07.** The source protocol applies to every indexed
+logical Unit owner. It is not a software/VN-specific extension. The native
+[capability model](REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model)
+decides local identity; source schemas do not prescribe native object levels.
+
+```text
+SourceProvider 1 -- N SourceRecord 1 -- N SourceObservation
+                          |
+                          1
+                          |
+                          N
+                     SourceBinding N -- 1 LocalReference
+                          |
+                          1 -- 0..1 current SourceSubscription
+```
+
+Logical Units and source records therefore have a many-to-many correspondence.
+Each binding has one source record and one validated target/scope; several rows
+express multiple correspondences. `LocalReference` normally identifies a Unit,
+but may identify an occurrence, scoped participation context, named form or exact
+relation/version where needed. Each family must specify concrete owner-key FKs
+and checked alternatives. This diagram does not create a universal identity
+parent or authorize unchecked `target_type + uuid` storage.
+
+- A Unit may use several records from the same or different providers. A coarse
+  source record may describe several native objects or scopes. Distinct source
+  records may support the same native identity.
+- Equivalence, containment, partial coverage and candidate matches have different
+  meanings and eligibility. For a confirmed exact source scope, define a unique
+  canonical mapping per semantic referent; candidates can coexist without
+  permitting accidental duplicate canonical identities. Identity splitting or
+  merging is governed separately from binding.
+- Separate stable source-record keys from snapshot-local subobject keys and JSON
+  locations. For unstable local identifiers, retain containing record, observation
+  and local key/path. Cross-snapshot continuity requires explicit reconciliation;
+  equal positions or numbers are insufficient. This rule applies to every source,
+  including VNDB edition/staff contexts. Native versions do not embed provider-local
+  identity as their defining property.
+- Stable bindings follow a source record across observations rather than remaining
+  pinned to its first payload. Binding revisions retain exact observation evidence
+  for each mapping decision.
+
+The product action "subscribe to this source" configures the binding's current
+subscription. Keep its state and policy distinct from the correspondence:
+
+| Setting or transition | Required behavior |
+| --- | --- |
+| No subscription / reference only | Retain binding/provenance without requesting automatic target updates. Other consumers may still acquire the source. |
+| Active subscription | Watch selected fields/relationship families and generate bounded update work using the configured policy. |
+| Review-only policy | Produce reviewable proposals; no automatic canonical application. |
+| Fill-missing / approved automatic follow | Apply only eligible selected changes under current policy and authority, with protected human corrections. |
+| Pause or unsubscribe | Increment the subscription revision, retain bindings/evidence/current values, and fence old queued work from applying under the revoked subscription. |
+| Resume | Compare the latest eligible observation with last accepted source state and current local revision; do not blindly replay every missed intermediate change. |
+| Rebind | Freeze adoption, revise correspondence, supersede dependent work and compensate only still-derived values under section 4.3. |
+
+One current subscription per binding owns a bounded/versioned scope definition;
+history is separate. Different bindings may request different policies or freshness,
+but compatible acquisition coverage is shared at the source record, query or feed
+level. Credentials and visibility are part of compatibility: sharing must never
+leak private source material. Track active demand incrementally rather than
+rescanning all subscriptions for every job. Removing one subscription does not
+cancel another consumer's demand. Provider shutdown and acquisition eligibility
+are separate controls.
+
 ## 5. Pipeline and operational reliability
+
+### 5.1 Scheduled checks, change events and update jobs
+
+This is the selected protocol, not a claim that existing adapters or the worker
+scheduler implement it. Event names describe intent; final versioned contracts
+and physical keys are design-gate deliverables.
+
+```text
+Due SourceCheckPlan
+  -> SourceCheckRequested -> durable check job -> source worker
+  -> unchanged: record check result, validators and next due time
+  -> changed: immutable observation + SourceRecordChanged outbox event
+  -> paged active-binding/subscription lookup
+  -> target-scoped, coalesced update job
+  -> map and three-way compare -> policy decision / review proposal
+  -> canonical owner command + application receipt + local change event
+```
+
+1. Claim indexed due plans in bounded batches by routing bucket, due time and
+   stable ID. Advancing the schedule and enqueueing the request are atomic and
+   deduplicated by plan revision and scheduled occurrence. Missed runs coalesce
+   under an explicit catch-up policy, avoiding an unbounded timer backlog.
+2. A check can target a source record, saved discovery query, change feed or
+   snapshot manifest. New query results establish source records and enter
+   governed matching/creation; discovery alone does not approve a new Unit,
+   merge or binding. Initial import uses the same mapping path.
+3. Workers claim jobs with leases and fencing generations, then fetch outside
+   database transactions. Supported validators and [HTTP conditional requests](https://www.rfc-editor.org/rfc/rfc9110.html#section-13)
+   complement hashes. Timeout, authorization failure and partial-snapshot absence
+   are not source deletions.
+4. Commit changed observation state and its outbox event together. Unchanged
+   observations update check metadata without redundant canonical update work.
+   Preserve relevant schema/availability changes; mapping repairs can separately
+   request reprocessing of stored snapshots. Use provider ordering where available
+   and fenced per-record acquisition otherwise; arrival time alone cannot make an
+   older observation the current head. Opaque hashes/revision tokens prove equality,
+   not temporal order; adapters must state their ordering and uncertainty rules.
+5. Page indexed affected bindings/subscriptions with durable fan-out checkpoints
+   and enqueue idempotent target work. Watch filters eliminate irrelevant changes.
+   Coalesce under section 4.1 without waiting for every provider, retaining the
+   exact observation vector.
+6. Compute a bounded patch against prior accepted source state, new mapped state
+   and current local state. Apply through canonical owner commands or issue a
+   review proposal. Queue payloads contain references and manifest pointers, not
+   complete source graphs.
+7. At final application, atomically validate authority, lease generation,
+   subscription/binding/policy/mapping revisions, observation dependencies and
+   expected target revision. A pause/rebind racing with application fences the
+   old decision. Save the receipt and local outbox event with the mutation.
+   Durable idempotency keys suppress retries; newer relevant state supersedes or
+   replans stale work rather than silently overwriting local edits.
+8. Retry with delay/jitter and finite attempt/elapsed-time budgets. Bound active
+   jobs, payload bytes, per-provider concurrency, per-target work and connections;
+   expose failed/dead-letter work and explicit replay. PostgreSQL queues can use
+   `FOR UPDATE SKIP LOCKED` for competing claims, not for ordinary catalog read
+   consistency.
+
+At-least-once transport with transactional publication and durable application
+receipts is the contract. External calls do not become exactly once because a
+queue row is unique. See [transactional outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html)
+and [PostgreSQL locking clauses](https://www.postgresql.org/docs/18/sql-select.html#SQL-FOR-UPDATE-SHARE).
+Source and target transactions have separate owners. Initial same-database checks
+remain real constraints; cross-database extraction requires a separately reviewed
+fencing/reference protocol.
+
+### 5.2 Mapping and review pipeline
 
 ```text
 Source-level acquisition and manifest verification
@@ -341,6 +475,27 @@ Measure and retain:
 - Scale the implicated worker/partition/table group, rebalance hot keys by stable record/occurrence keys, and enforce per-target work quanta. Do not place every record from a popular provider/creator into one indivisible worker key.
 
 All scheduled work uses keyset cursors and bounded batches. No request fetches all evidence, all source bindings, all merge impacts, or all candidate Units. Large review patches use immutable manifests plus paged impact views and atomic publication of a validated revision pointer; they do not bypass size limits with an enormous JSON transaction.
+
+### 7.5 Subscription and scheduling amplification
+
+Let R be distinct source records requiring checks, S active bindings, T the check
+interval in seconds, u the changed-record fraction per interval and f=S/R the
+mean fan-out. Naive record polling costs R/T checks/s; unfiltered target work is
+approximately R*u*f/T, before retries, coalescing and mapping fan-out. Daily
+individual checks for R=500M/3B require about 5,787/34,722 checks/s even when no
+content changes. Sharing removes per-binding duplication but cannot remove the
+provider rate limit or full-snapshot cost.
+
+Budget subscriptions, check plans, observations, fan-out receipts, outbox events,
+pending jobs and retained execution history separately at 500M/3B rows and their
+actual induced counts. Plans can cover a feed/batch, so plan count need not equal
+R or S. State the bound for provider configuration; user-created queries and
+subscriptions are growing data, not implicitly bounded control tables. Include
+measured heap/index widths, WAL, retention/cleanup, rebuild reserve, network,
+source limits, hot-source fan-out and P10 latency/concurrency targets. Due/ready
+indexes must support selective claims; reverse source lookups and target receipts
+need independent routing. Final PK/UNIQUE/FK and partition choices remain an
+explicit design-review gate.
 
 ## 8. Implementation ownership and sequencing
 

@@ -15,6 +15,9 @@ of this same schema gate. Four-source conformance alone does not qualify them.
 
 | Gate | Required evidence | State |
 | --- | --- | --- |
+| Provider-independent design review | Native referents/capabilities and complete source dispositions; no mandatory Edition layer; reviewed reference/revision/key/capacity and execution contracts before further implementation | Open |
+| Cross-provider and cross-domain native model | Manual plus independent-source equivalence; translations/variants, parallel-language publications, repeated occurrences and mixed-media distribution; organizational grouping distinct from composition; no invented parents | Not qualified |
+| Generic source subscription and update execution | Scoped many-to-many bindings, shared acquisition, due checks/events, paged fan-out and canonical updates; pause/rebind races, unchanged checks, crash/retry and stale-lease rejection | Not qualified |
 | Logical Unit, physical owner identity | Fresh target with no global `unit`/universal parent or legacy runtime dependency; new-contract identity/address/privacy behavior; concrete reference rejection; concurrent ownership conflict handling; bounded routing and locator rebuild | Not qualified |
 | Fixed structure versus dynamic relation | Every required source path classified with actual storage/definition and sole writer; structural graph reads do not create duplicate writable facts; governed role additions keep target/value constraints | Not qualified |
 | Universe, franchise and series | Native source-free creation/edit/query/export/history/restore; same-name identities remain separate; two continuities in one franchise; `about` differs from `set_in_universe`; multiple memberships/order profiles/evidence survive without automatic behavior or rights propagation | Not qualified |
@@ -24,6 +27,12 @@ fresh-target evidence. Under the [breaking replacement baseline](00-source-compl
 legacy API/schema/data compatibility and offline conversion rehearsals are not
 schema acceptance gates. These are deterministic schema/service acceptance cases;
 broader human-rendered product acceptance remains separately scoped below.
+
+The new design-review row requires complete decisions and planned tests, not
+already implemented test results. All execution/conformance rows require actual
+evidence after implementation is authorized. Preserve the complete four-source
+denominator and add an independent provider/manual case to test generality;
+renaming source-specific tables or counting their rows does not pass either gate.
 
 ## Outcome
 

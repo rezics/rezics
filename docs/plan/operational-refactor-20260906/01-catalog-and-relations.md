@@ -1,6 +1,6 @@
 # P01 — Catalog identities, typed facts and content relations
 
-Status: native storage foundation implemented; full model and cutover unqualified. Updated: 2026-09-07. Parent: [program and gates](README.md).
+Status: native foundation exists; design review open and further implementation gated; full model and cutover unqualified. Updated: 2026-09-07. Parent: [program and gates](README.md).
 
 The [breaking replacement baseline](00-source-complete-schema.md#breaking-replacement-baseline)
 applies: implement on a fresh target without old API/schema/data compatibility.
@@ -20,6 +20,8 @@ Inspect [Unit](../../../services/main/src/services/database/schema/unit.ts), [Bo
 
 ## Selected contracts
 
+- Model [provider-independent capabilities](../../report/REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model) before mapping source schemas. New providers for existing semantics normally add mappings, not native table families. Edition is not a universal level: distinguish versions/variants, publications/distribution and scoped participation contexts; the current `software_edition` slice is unqualified and must be replaced or reshaped after this distinction is fixed.
+- Cross-domain distribution composition supports checked software/publication/music members with occurrence identity, quantity/order and one writer. Series/franchise membership remains separate from actual containment and joint distribution. No object requires an invented Work, Edition, release family or other empty parent.
 - Unit is the logical identity/reference/capability protocol. Physical identity/lifecycle belongs to publishing, music, program, software, public Entity, grouping and existing platform owners in one PostgreSQL business database, `public` schema. New-contract UUIDs are stable; old IDs may be retained or remapped by the offline tool. Retire the global `unit` parent in this refactor. Follow the [physical identity and reference contract](../../report/REZICS-source-complete-catalog-schema-20260906.md#41-logical-unit-and-owner-local-physical-identity); do not create future-domain placeholder tables.
 - Concrete publications/versions can exist independently. Work is an optional, scoped content identity, not a compulsory empty parent for every legacy Book. A legacy record of uncertain grain remains marked uncertain until evidence resolves it.
 - Core queried scalar fields stay typed columns; long-tail values use versioned definitions and typed storage. Fixed structural relations use their domain's constrained records; dynamic semantic relations use governed definitions and identified revisions. Apply the [explicit classification](../../report/REZICS-内容结构关系与查询模型-20260906.md#24-fixed-structural-relations-and-dynamic-semantic-relations) to every source path. Shared descriptors do not create two writable copies.
@@ -34,7 +36,7 @@ Inspect [Unit](../../../services/main/src/services/database/schema/unit.ts), [Bo
 
 ## Implementation slices
 
-1. Enumerate every required source object/field/relationship from the pinned contracts in `00`, assign native physical owners, then write accepted/rejected fixtures covering single volume, omnibus, serialization/translation updates, uncertain legacy Book, VN work/release/local edition/staff alias/quote, contextual character credit, all MusicBrainz catalog/supporting entities, music work/recording/release group/release/medium/track/TOC, MV and audiobook. A hand-selected happy-path sample is not the coverage denominator.
+1. Close the `00` design-review gate: define native source-free and cross-provider cases, then map every required source object/field/relationship from the pinned contracts to them. Specify accepted/rejected fixtures covering single volume, omnibus, parallel-language publication, serialization/translation updates, uncertain Book grain, software variant/release, snapshot-local participation context/staff alias/quote, contextual character credit, all MusicBrainz catalog/supporting entities, music work/recording/release group/release/medium/track/TOC, MV, audiobook and a mixed-media boxed release. A hand-selected happy-path sample is not the coverage denominator.
 2. Define owner/reference/definition revisions, source-free manual creation and bounded/rebuildable ID resolution. Name every target family, concrete owner-key FK/checked alternative and deletion/restore rule; inventory existing global-parent consumers. Replace fixed business-role restrictions with validated definitions while retaining database FK and value constraints.
 3. Introduce owner-local identities, necessary domain structures, grouping and composition extensions; move heavy localized facts/history by owner. Preserve existing Audio/Video content semantics rather than reinterpreting them as files. Classify every source mapping with its sole writer before DDL acceptance.
 4. Replace whole-structure mutation requirements with node commands, parent pagination and segmented immutable checkpoints. Published formal composition uses concurrency-safe acyclicity; drafts may contain diagnosed invalid structures but cannot advertise complete traversal.
@@ -48,6 +50,8 @@ stage even where older reports called a general-purpose domain a future expansio
 
 ## Acceptance
 
+- Native objects, their constraints and commands are explainable without naming a provider. Manual and independent-source mappings preserve the same semantics; source-local IDs cannot define native version identity. Edition renumbering/reuse, repeated occurrences and a mixed-media package pass without fabricated parents or duplicate writable authority.
+- Predicate role/target/cardinality and vocabulary-membership constraints reject semantically wrong but structurally well-typed inputs. Named forms, fixed fields, occurrences and relations have exact revision/evidence targets; source withdrawal preserves independent support, and staged restore cannot reactivate revoked data.
 - The final schema and service paths use owner-local identity without a global `unit` or renamed universal parent. New-contract references, addresses and privacy work without legacy data; wrong-owner/missing targets and concurrent ownership conflicts are rejected. Locator loss/staleness has bounded repair and a tested rebuild. Legacy IDs/URL preservation is not a schema gate.
 - Source coverage names fixed structure versus dynamic relation versus typed value/observation for every required path. Structural edits have one owner; adding a governed role preserves FK/value rules and needs no duplicate edge or hardcoded business enum.
 - Source-free universe, franchise and series creation/read/edit/export/history/restore pass. Same-name objects remain distinct; two continuities within one franchise remain distinct; `about` and `set_in_universe` are not conflated.

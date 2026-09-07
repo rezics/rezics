@@ -23,6 +23,12 @@ schema conformance and eventual legacy import/site reopening are separate gates.
 
 ## 1. Correction to the delivery priority
 
+The 2026-09-07 review further requires a [provider-independent native model](REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model).
+The four families below are mandatory coverage cases, not native schema templates
+or a ceiling on which selected objects can be indexed. Source-free semantics,
+cross-provider mapping and cross-domain composition must qualify alongside them.
+Further implementation waits for the [design-review gate](../plan/operational-refactor-20260906/00-source-complete-schema.md#design-review-gate).
+
 The current stage must deliver a database model that can fully represent the
 public catalog data of **VNDB, MusicBrainz, Bangumi and a book-index source**.
 Novel Updates is a book-index/serialization reference, not a mandatory website
@@ -212,7 +218,7 @@ permitted input fixtures and source mapping.
 | Bangumi Episode | Identified program/text content or music occurrence as appropriate; source ID, `sort`, meaningful `ep`, type, disc, duration text and dates survive |
 | Bangumi relations/wiki | Identified contextual relations, ordered participants and episode qualifiers; ordered typed Infobox entries including nested edition blocks; raw wiki and revision evidence retained |
 | Bangumi indices and Archive-only relationships | Public catalog indices/ordered entries retain external curator attribution; Archive person/character relationships retain participant type, relation code, spoiler and ended state even when no equivalent v0 endpoint exists |
-| VNDB VN/Release | VN content identity separate from distributable release/patch; VN-local editions are scoped identities; platforms, media quantities, engines, resolutions and language/MTL/official flags retained |
+| VNDB VN/Release | VN content identity separate from distributable release/patch; snapshot-scoped edition/participation contexts map to native variants only where evidenced; platforms, media quantities, engines, resolutions and language/MTL/official flags retained |
 | VNDB staff/characters/taxonomies/quotes | Alias identity used by credits; actor-character-VN context; release/role/spoiler/lie qualifiers; tag and trait vocabularies with taxonomy identity; attributed quotes linked to VN/character |
 | MusicBrainz musical entities | Work, Recording, Release Group and Release independent; ordered artist credits; recording reuse does not erase release-specific track text/credits |
 | MusicBrainz supporting catalog | Area/Place/Event/Instrument/Label/Series/Genre/Mood/URL, aliases, relationships and attributes; these are required source data, not deferred general-purpose product platforms |
@@ -336,7 +342,8 @@ read interface must not introduce a second writable edge for a structural fact.
 | Source records/observations/bindings | Namespace + source object type + native ID uniqueness; immutable observation headers/checksums, schema/mapping versions and payload references; revisioned scoped bindings. Typed Unit/occurrence/name/relation target FKs with exactly-one-target constraints, not unchecked `target_type + uuid`. |
 | Identifier claims | Namespace, normalized and original value, target scope, validation and evidence; plural ISBN/GTIN/ISRC/ISWC/MBID/source aliases. Identifier equality is evidence, not automatic Unit equality. |
 | Publishing | Domain membership; optional `publishing_work`, `publishing_text_version`, `publishing_publication`, `publishing_serialization`, ordered contents and `publishing_release_event`/links. Translator and translation state belong to the actual text/version; publisher/date/format/page count belong to the relevant publication. Book-index records need not host text. |
-| Software/VN | Software content identity plus VN-specific extension, `software_release`, scoped editions, platforms, media/distribution, language support and release-to-content membership. A patch, work, release and edition-local number are different referents. |
+| Software/VN | Software content, evidenced versions/functional variants, VN-specific attributes, release/distribution, platforms, language support and membership. Source-local edition numbers remain source references; no universal Edition table or mandatory intermediate identity is selected. |
+| Cross-domain distribution composition | An identified distributed package can contain software, publications and musical content through checked occurrence/member references. Name one identity/composition writer; domain extensions preserve their own constraints without duplicating writable edges. Organizational membership remains separate. |
 | Program | `program`, program versions and episode/content identities, hierarchy/occurrences and distinct expected/aired/cataloged counts. Bangumi's episodes and music tracks do not share one undifferentiated episode-count field. |
 | Music | `music_work`, `music_recording`, `music_release_group`, `music_release`, artist-credit group/names, release labels/events, media and track occurrences, TOC/disc identifiers and typed relationship attributes. Existing Audio remains content, not a file or universal replacement for these identities. |
 | Supporting catalog | Public Entity details plus catalog Area/Place/Event/Instrument/Label and governed Series/Genre/Mood/Tag/Trait owners. Reuse common protocols where semantics match; implement location/event/instrument facts required by MusicBrainz now. Ticketing, logistics and generic event products remain out of scope. |
@@ -355,8 +362,37 @@ mutable tags or interface language.
 Each replaced writer must be removed in the same owner cutover. In particular,
 the old single ISBN/opaque format fields, fixed localized title slots, fixed
 business-role checks and broad Media/Release semantics cannot remain competing
-authorities beside the new model. P11 accounts for original values, IDs, history
-and visibility before any destructive forward removal.
+authorities beside the new model. P11 Track A verifies the fresh target and
+retained consumers; Track B separately accounts for selected legacy values,
+identities, history and visibility. Legacy conversion does not gate removal.
+
+### 4.3 Design-review disposition
+
+**Review outcome, 2026-09-07: changes required; implementation remains gated.**
+The current DDL and commands are useful foundation evidence. Neither their table
+count nor successful selected-source observation roundtrips establish the final
+native model. The following are design obligations, not claims of implemented
+repairs:
+
+| Finding | Selected resolution and work required before design approval |
+| --- | --- |
+| Provider-shaped Edition identity | Follow the [Edition decision](REZICS-Catalog领域边界与实施分期-20260906.md#24-edition-is-not-a-universal-intermediate-identity). Distinguish actual content versions/variants, publication/distribution and scoped participation contexts. Replace or reshape `software_edition`; snapshot scoping alone does not validate the abstraction. |
+| Incomplete source denominator/mapping | Separate declarations from required catalog semantics. Each required path needs native grain, classification, table/definition, conversion/unknown rule, canonical command, query/export and positive/negative fixtures. Typed observation storage alone is not canonical semantic coverage. |
+| Definition kind is weaker than domain validity | `property`/`role`/`predicate`/`vocabulary` checks do not establish allowed roles, cardinality, target shape, vocabulary membership or units/value ranges. Specify definition revisions and the FK/UNIQUE/CHECK plus concurrency-safe command/trigger enforcement for each invariant. |
+| Incomplete revision/evidence targets | Current operation-name logs cannot reconstruct old values; supports target fact/relation/name/identifier IDs without full revision or structural-field coverage. Define stable identity, immutable revision, current head, exact support and adoption decision for native fields and occurrences as well as dynamic relations. Restore must stage bounded work and atomically publish a validated head, respecting later erasures/revocations. |
+| Incomplete reference and owner coverage | Seven catalog target alternatives do not cover all retained platform consumers or scoped/revision targets. Define the complete reference matrix, cross-capability identity ownership, owner moves, locator conflict/publication/repair and deletion/merge/restore behavior. Mixed-media distribution is an explicit native case. |
+| Source key/partition mismatch | `catalog_source_mapping_claim` has source-record scope but `UNIQUE(mapping_key, owner)` omits it; owner `source_binding` uses only `mapping_key` as PK. Specify uniqueness ownership and compatible composite partition/FK keys; these tables cannot simply adopt the proposed source-record/owner partitioning unchanged. |
+| High amplification and owner contention | Budget canonical rows, structured source observations, archived payloads and retained revisions separately. Current per-field value expansion and owner revision locking need explicit admission, transaction, staged publication and retention policies. The illustrative 72 value nodes/identity already imply 36B/216B rows and 13.248/79.488 TB at the documented widths, excluding WAL/replicas/history. This is a design estimate, not capacity proof. |
+| Incomplete subscription/update lifecycle | Specify the [generic bindings and subscriptions](REZICS-source-integration-and-review-20260906.md#44-generic-source-bindings-and-subscriptions) and [scheduled event/job protocol](REZICS-source-integration-and-review-20260906.md#51-scheduled-checks-change-events-and-update-jobs), including shared acquisition, target fan-out, pause/rebind races, exact preconditions and durable receipts. |
+
+The partition-key issue follows PostgreSQL's requirement that partitioned unique
+and primary keys include all partition columns. Domain validity must not be
+represented by a `CHECK` that assumes other rows cannot change. See
+[partition constraints](https://www.postgresql.org/docs/18/ddl-partitioning.html#DDL-PARTITIONING-DECLARATIVE-LIMITATIONS)
+and [constraint scope](https://www.postgresql.org/docs/18/ddl-constraints.html).
+P01/P03/P04 own semantics and invariant designs; P10 owns capacity and execution
+budgets. The stage gate distinguishes reviewed designs from the later actual
+schema/service/recovery and capacity qualification.
 
 ## 5. Schema qualification and capacity
 

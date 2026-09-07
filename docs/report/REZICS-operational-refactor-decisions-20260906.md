@@ -105,6 +105,21 @@ the fresh new system; Track B accepts legacy transfer; Track C owns reopening.
 This changes delivery sequencing, not the four-source, grouping or new-model
 integrity/history/restore requirements.
 
+The following additional decisions were selected during the 2026-09-07 review;
+their implementation is unqualified and waits for the stage's design-review gate:
+
+| ID | Decision | Authority and remaining work |
+| --- | --- | --- |
+| D32 | Native abstractions are provider-independent; four-source coverage is a conformance suite, not a union of source schemas | [Catalog capabilities](REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model). Define object meaning, source-free/cross-provider cases and sole writers before mappings/DDL. P01/P04/P12 |
+| D33 | Edition is not a universal required layer; the current software edition slice is unqualified | [Edition decision](REZICS-Catalog领域边界与实施分期-20260906.md#24-edition-is-not-a-universal-intermediate-identity). Distinguish content versions/variants, publication/distribution and participation contexts; source-local keys are generic source-protocol concerns. P01/P03/P04 |
+| D34 | Cross-domain distribution composition and organizational grouping have separate semantics | [Composition qualification](REZICS-Catalog领域边界与实施分期-20260906.md#25-grouping-cross-domain-composition-and-design-qualification). Specify mixed-media container ownership, checked occurrence/member targets, order/quantity and restore without duplicate structural authority. P01/P12 |
+| D35 | SourceRecord and logical Unit support scoped many-to-many binding; subscriptions configure target following while acquisition is shared | [Source protocol](REZICS-source-integration-and-review-20260906.md#44-generic-source-bindings-and-subscriptions). Specify exact/candidate cardinality, snapshot-local references, revisioned pause/resume/rebind and visibility-safe shared demand. P04 |
+| D36 | Scheduled source checks publish durable change events and bounded target update jobs | [Execution protocol](REZICS-source-integration-and-review-20260906.md#51-scheduled-checks-change-events-and-update-jobs). Canonical commands, review policies, transactional outbox, fences and receipts enforce replay and cancellation semantics. P04/P05/P10 |
+| D37 | Complete design review before further schema/runtime implementation | [Design gate](../plan/operational-refactor-20260906/00-source-complete-schema.md#design-review-gate) and [review disposition](REZICS-source-complete-catalog-schema-20260906.md#43-design-review-disposition). Documentation updates do not approve implementation; earlier authorization does not close the revised gate. |
+
+These decisions preserve D31's independent offline-conversion track and do not
+lower required source coverage, target integrity or the 500M/3B design baseline.
+
 ## 5. Language and authority: material report additions
 
 The maintainer's concern about custom language conventions exposed a wider problem, but the evidence does not support replacing everything that is lowercase. Main UI locales already use `zh-Hans`/`zh-Hant`; route/provider spellings may be adapters. Current content metadata is constrained by a small language enum, script-collapsing mappings and one localization/title per object/language. Fixed language search columns, document/history slots and metric foreign keys also participate in the migration.

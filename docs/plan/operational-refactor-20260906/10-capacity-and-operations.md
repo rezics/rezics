@@ -54,7 +54,31 @@ partition/shard cutovers before the existing protection thresholds are crossed.
 
 ## Capacity ledger required before risky implementation acceptance
 
+The [design-review gate](00-source-complete-schema.md#design-review-gate) first
+requires a compatible physical-key/routing plan and workload assumptions; actual
+benchmarks qualify the implementation later. Resolve the current source mapping
+claim's global `(mapping_key, owner)` uniqueness and source binding's
+`mapping_key`-only PK before claiming source-record/owner partitionability.
+Source-key admission, locator rebuild and reverse subscription fan-out need their
+own keys and fences; domain table separation does not solve these operations.
+
 For **every** corpus-scale relation, model 500M rows and 3B rows, and the larger child counts induced by object fan-out. Required columns: owner, row count formula, average/p99 row width, indexes, read/write rates, query order, latency, concurrency, hot key, WAL, memory, network, history retention, backup/rebuild space/time, and partition/cutover trigger.
+
+Include the [source subscription/scheduling workload](../../report/REZICS-source-integration-and-review-20260906.md#75-subscription-and-scheduling-amplification):
+active subscriptions, shared record/query/feed check plans, due/ready indexes,
+observation/outbox publication, resumable reverse fan-out and target application
+receipts. Separate source requests from local target mutations. Bound compatible
+fetch deduplication, credential scopes, timer catch-up, retries, queue age/bytes,
+per-provider rates and per-target coalescing. A feed plan may cover many records;
+do not create a timer per Unit or scan the corpus to discover due work.
+
+Also budget native structure, structured source observations and raw archives
+separately. The foundation's illustrative 72 value nodes per identity produce
+36B/216B rows at 500M/3B identities. Retention and justified structured storage
+must be selected before accepting that write/storage amplification; no required
+semantics may be dropped to make the estimate fit. Batched inserts inside one
+large owner-locked transaction are not resumable bounded processing. Specify
+staged publication and transaction/lock budgets for large records and containers.
 
 Illustrative decimal totals: identity at 240 B/row is 120 GB/720 GB; named forms at 288 B are 144 GB/864 GB; relationships at 240 B are 120 GB/720 GB; history at 256 B is 128 GB/768 GB. These exclude payloads and additional indexes unless the measured definition says otherwise. N objects × 20 relations means 10B/60B relations at 500M/3B objects, not 500M/3B relation rows.
 

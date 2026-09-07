@@ -19,7 +19,7 @@ Owners: P01 domain schemas/services, P03 named forms/support, P04 adapters, P06 
 - Define the CJK slice as source VNs whose stated original language or at least one associated release language is in the zh/ja/ko language families under the versioned source mapping. Record the exact snapshot/query denominator and exclusions.
 - Retain other-language names, global identities and related entities needed for those records; UI language is not a filter deleting source evidence.
 - Complete the three source adapters' declared public metadata conformance. Public promotion can focus on verified CJK slices while other eligible imported metadata stays usable.
-- Distinguish work, edition/release, platform, translation patch, developer/publisher, staff alias and character role. A release-local edition number cannot become a global identity.
+- Follow the [provider-independent capability and Edition decision](../../report/REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model): distinguish content versions/variants, publication/distribution, platforms, translation patches, developer/publisher, staff aliases and contextual roles. VN-local edition numbers are snapshot-scoped source references, not a native identity layer. Views must not make that layer mandatory.
 - Music preserves release group/release/recording/work and ordered artist credit; disc/track are occurrences where appropriate. Bangumi musical subjects map by evidence, not always to MusicBrainz Work.
 - Character traits filter characters and then return works through scoped participation. Episode/release/spoiler constraints remain attached to the same relationship.
 - Cross-media navigation uses explicit adaptation, soundtrack, performance, credit or series relations. Shared title or shared actor is not sufficient to assert adaptation or character song.
@@ -45,6 +45,7 @@ Owners: P01 domain schemas/services, P03 named forms/support, P04 adapters, P06 
 - MusicBrainz release group, concrete release and musical work are independently recognizable.
 - Character song attribution is based on a recording/performance context, not all songs by the voice actor.
 - Novel volume, anime adaptation and soundtrack can be navigated without merging their identities.
+- A franchise grouping and a mixed-media boxed release have distinct membership/containment semantics. The package can reference game, publication and soundtrack components without copying their identities or transferring reviews/progress.
 - Spoiler/adult visibility filters apply to matching evidence and previews, not only the final page.
 - Unmapped fields and unavailable sources remain visible in coverage diagnostics, not silently omitted from a “full compatibility” claim.
 - A repeated source update leading to one adopted release produces one allowed notification for an opted-in reader; a muted reader and a mere metadata correction produce none.

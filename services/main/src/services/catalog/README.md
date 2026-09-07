@@ -1,5 +1,18 @@
 # Native catalog storage
 
+**Design review, 2026-09-07:** this is implementation evidence for an incomplete
+foundation. Further schema/runtime work is gated by the [current design review](../../../../../docs/plan/operational-refactor-20260906/00-source-complete-schema.md#design-review-gate).
+The [provider-independent model](../../../../../docs/report/REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model)
+does not select a universal Edition layer. Existing `software_edition` rows and
+commands do not establish native version/variant semantics; that slice requires
+replacement or reshaping. Source-local keys belong to the shared source protocol.
+Cross-domain distribution composition and the [binding/subscription/check-job contract](../../../../../docs/report/REZICS-source-integration-and-review-20260906.md#44-generic-source-bindings-and-subscriptions)
+are requirements, not implemented capabilities of this module. The
+[review disposition](../../../../../docs/report/REZICS-source-complete-catalog-schema-20260906.md#43-design-review-disposition)
+also covers definition constraints, exact revision/evidence targets, retained
+reference owners and partition-key/capacity gaps. Historical checks below do not
+qualify those contracts.
+
 This module implements the first native storage foundation of the
 [source-complete schema program](../../../../../docs/plan/operational-refactor-20260906/00-source-complete-schema.md).
 It is not the completed four-source model or the global Unit cutover. Public
