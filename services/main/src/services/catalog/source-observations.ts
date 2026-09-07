@@ -71,6 +71,7 @@ export type CatalogSourceArchive = {
 	get(input: { Key: string }): Promise<{ Body?: unknown }>;
 };
 const receiptArchives = new WeakMap<object, CatalogSourceArchive>();
+const receiptSnapshots = new WeakMap<object, { sourceRecordId: string; snapshotId: string }>();
 export type CatalogSourceReceipt = Readonly<{
 	[storedReceipt]: true;
 	key: CatalogSourceKey;
@@ -201,6 +202,7 @@ export async function loadCatalogSourceReceipt(
 	});
 	issuedReceipts.add(receipt);
 	receiptArchives.set(receipt, archive);
+	receiptSnapshots.set(receipt, { sourceRecordId, snapshotId });
 	return receipt;
 }
 
@@ -312,6 +314,15 @@ export async function recordCatalogSourceDocument(
 	receipt: CatalogSourceReceipt,
 	bytes: Uint8Array,
 ) {
+	const committed = receiptSnapshots.get(receipt);
+	if (committed)
+		return loadCatalogSourceDocument(
+			tx,
+			committed.sourceRecordId,
+			committed.snapshotId,
+			receipt,
+			bytes,
+		);
 	const document = parseSourceDocument(receipt, bytes);
 	const observation = await recordCatalogSourceObservation(tx, receipt);
 	return sourceDocumentEvidence(receipt, document, observation);

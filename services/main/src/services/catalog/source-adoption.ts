@@ -12,7 +12,13 @@ import { programWork } from "../database/schema/catalog-program";
 import { softwareContent } from "../database/schema/catalog-software";
 import { type CatalogOwner } from "./contracts";
 import { BangumiSubjectContractSha256, planBangumiSubject } from "./bangumi";
-import { type CatalogSourceReceipt, recordCatalogSourceObservation } from "./source-observations";
+import { planBangumiArchiveSubject } from "./bangumi-records";
+import { BangumiArchiveContractSha256 } from "./bangumi-adoption";
+import {
+	type CatalogSourceReceipt,
+	recordCatalogSourceObservation,
+	recordCatalogSourceDocument,
+} from "./source-observations";
 import {
 	addCatalogName,
 	createCatalogIdentity,
@@ -140,24 +146,28 @@ export async function adoptBangumiSubject(
 	actor: string,
 	receipt: CatalogSourceReceipt,
 	bytes: Uint8Array,
+	format: "api" | "archive" = "api",
 ) {
 	if (
 		bytes.byteLength > 8_000_000 ||
 		createHash("sha256").update(bytes).digest("hex") !== receipt.contentSha256
 	)
 		throw new Error("Bangumi projection bytes differ from the archived observation");
-	if (receipt.contractSha256 !== BangumiSubjectContractSha256)
+	if (
+		receipt.contractSha256 !==
+		(format === "api" ? BangumiSubjectContractSha256 : BangumiArchiveContractSha256)
+	)
 		throw new Error("Bangumi source contract has not been reviewed for this mapper");
-	const plan = planBangumiSubject(
-		JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)),
-	);
+	const document: unknown = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+	const plan =
+		format === "api" ? planBangumiSubject(document) : planBangumiArchiveSubject(document);
 	if (
 		receipt.key.source !== "bangumi" ||
 		receipt.key.objectType !== "subject" ||
 		receipt.key.externalId !== String(plan.subject.id)
 	)
 		throw new TypeError("Bangumi payload identity differs from its archived source record");
-	const observation = await recordCatalogSourceObservation(tx, receipt);
+	const observation = await recordCatalogSourceDocument(tx, receipt, bytes);
 	const existing = await inspectExistingSourceBinding(tx, actor, observation, "bangumi.subject.1");
 	if (existing && existing.status !== "initialize_reference") return existing;
 	if (existing) {
@@ -172,21 +182,25 @@ export async function adoptBangumiSubject(
 				{ owner: plan.owner, shape: plan.shape, contentRating: plan.contentRating },
 				actor,
 			);
-	if (plan.owner === "program")
+	if (plan.owner === "program") {
+		const counts =
+			"eps" in plan.subject
+				? {
+						declaredMainEpisodeCount: plan.subject.eps,
+						declaredTotalEpisodeCount: plan.subject.total_episodes,
+					}
+				: {};
 		await tx
 			.insert(programWork)
 			.values({
 				id: identity.id,
-				declaredMainEpisodeCount: plan.subject.eps,
-				declaredTotalEpisodeCount: plan.subject.total_episodes,
+				...counts,
 			})
 			.onConflictDoUpdate({
 				target: programWork.id,
-				set: {
-					declaredMainEpisodeCount: plan.subject.eps,
-					declaredTotalEpisodeCount: plan.subject.total_episodes,
-				},
+				set: { id: identity.id, ...counts },
 			});
+	}
 	if (plan.owner === "software")
 		await tx.insert(softwareContent).values({ id: identity.id }).onConflictDoNothing();
 	let revision = identity.revision;
@@ -242,6 +256,7 @@ export async function adoptBangumiSubject(
 		await tx.update(table).set({ contentRating: "r18" }).where(eq(table.id, identity.id));
 	}
 	const binding = {
+		mappingVersion: "bangumi.subject.1",
 		sourceRecordId: observation.record.id,
 		path: "/",
 		snapshotId: observation.snapshot.id,

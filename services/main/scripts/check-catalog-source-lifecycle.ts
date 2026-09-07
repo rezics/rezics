@@ -24,6 +24,7 @@ import {
 	loadCatalogSourceReceipt,
 	readCatalogSourceBytes,
 	loadCatalogSourceDocument,
+	recordCatalogSourceDocument,
 	type CatalogSourceArchive,
 } from "../src/services/catalog/source-observations";
 import {
@@ -147,6 +148,9 @@ try {
 			);
 			assert.equal(oldDocument.referenceAt("/value").externalId, "first");
 			assert.equal(oldDocument.record.headSnapshotId, newest.snapshot.id);
+			const reusedDocument = await recordCatalogSourceDocument(tx, oldReceipt, firstBytes);
+			assert.equal(reusedDocument.snapshot.id, first.snapshot.id);
+			assert.equal(reusedDocument.record.headSnapshotId, newest.snapshot.id);
 			await assert.rejects(
 				loadCatalogSourceDocument(tx, first.record.id, newest.snapshot.id, oldReceipt, firstBytes),
 				/exact committed snapshot/u,

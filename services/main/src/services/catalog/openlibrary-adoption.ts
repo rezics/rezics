@@ -10,7 +10,7 @@ import {
 } from "../database/schema/catalog-publishing";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import { publishingIdentity } from "../database/schema/catalog-identity";
-import { type CatalogSourceReceipt, recordCatalogSourceObservation } from "./source-observations";
+import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import {
 	OpenLibraryEditionSchema,
@@ -118,7 +118,7 @@ export async function adoptOpenLibraryRecord(
 		source.externalId !== receipt.key.externalId
 	)
 		throw new TypeError("Open Library payload identity differs from its source key");
-	const observation = await recordCatalogSourceObservation(tx, receipt);
+	const observation = await recordCatalogSourceDocument(tx, receipt, bytes);
 	const existing = await inspectExistingSourceBinding(
 		tx,
 		actor,
@@ -193,6 +193,7 @@ export async function adoptOpenLibraryRecord(
 			})),
 		);
 	await bindCatalogSourceIdentity(tx, actor, {
+		mappingVersion: OpenLibraryMappingVersion,
 		sourceRecordId: observation.record.id,
 		snapshotId: observation.snapshot.id,
 		path: "/",
