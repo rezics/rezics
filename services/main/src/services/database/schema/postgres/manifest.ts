@@ -1,5 +1,7 @@
 export const PostgreSqlSchemaFileNames = [
 	"participation-integrity.sql",
+	"participation-studio.sql",
+	"participation-progress.sql",
 	"participation-messages.sql",
 	"participation-notifications.sql",
 	"catalog-distribution-integrity.sql",
@@ -42,6 +44,12 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles = {
+	participation_entity_cutover: [
+		"participation-integrity.sql",
+		"participation-messages.sql",
+		"participation-notifications.sql",
+		"book-chapter-progress.sql",
+	],
 	catalog_component_heads: [
 		"catalog-music-history.sql",
 		"music-source-lifecycle.sql",
@@ -107,6 +115,11 @@ export const PostgreSqlSchemaFunctionNames = [
 	"catalog_source_validate_application_change",
 	"catalog_source_guard_proposal",
 	"catalog_source_require_application_complete",
+	"refresh_studio_auth_editor_candidate",
+	"refresh_studio_realm_editor_candidate",
+	"maintain_studio_editor_candidate_from_ownership",
+	"maintain_studio_editor_candidate_from_grant",
+	"maintain_unit_progress_stats",
 	"participation_guard_conversation",
 	"participation_guard_message",
 	"participation_guard_account_block",
@@ -286,6 +299,9 @@ export const PostgreSqlSchemaTriggers = [
 		name: "music_component_source_occurrence_immutable",
 	},
 	{ table: "music_source_application_change", name: "music_source_application_exact_component" },
+	{ table: "unit_ownership", name: "studio_editor_candidate_from_ownership" },
+	{ table: "unit_access_grant", name: "studio_editor_candidate_from_grant" },
+	{ table: "unit_progress", name: "unit_progress_stats_maintain" },
 	{ table: "conversation", name: "participation_conversation_guard" },
 	{ table: "message", name: "participation_message_guard" },
 	{ table: "account_entity_block", name: "participation_account_block_guard" },

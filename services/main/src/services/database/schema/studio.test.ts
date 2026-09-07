@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	profileResourceParticipation,
-	studioProfileEditorCandidate,
+	studioAuthEditorCandidate,
 	studioRealmEditorCandidate,
 } from "./index";
 
@@ -26,10 +26,10 @@ describe("Studio workspace and contribution projections", () => {
 	});
 
 	it("indexes only current explicit editor candidates under Studio", () => {
-		const profileCandidate = getTableConfig(studioProfileEditorCandidate);
+		const profileCandidate = getTableConfig(studioAuthEditorCandidate);
 		const realmCandidate = getTableConfig(studioRealmEditorCandidate);
 		expect(profileCandidate.primaryKeys[0]?.columns.map(({ name }) => name)).toEqual([
-			"profile_id",
+			"auth_user_id",
 			"unit_id",
 		]);
 		expect(realmCandidate.primaryKeys[0]?.columns.map(({ name }) => name)).toEqual([
@@ -38,7 +38,7 @@ describe("Studio workspace and contribution projections", () => {
 			"unit_id",
 		]);
 		expect(profileCandidate.indexes.map(({ config }) => config.name)).toContain(
-			"studio_profile_editor_candidate_expiry_idx",
+			"studio_auth_editor_candidate_expiry_idx",
 		);
 		expect(realmCandidate.indexes.map(({ config }) => config.name)).toContain(
 			"studio_realm_editor_candidate_expiry_idx",

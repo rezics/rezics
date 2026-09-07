@@ -24,16 +24,16 @@ export async function cleanupExpiredStudioEditorCandidates(input: {
 	return database.transaction(async (tx) => {
 		const profileResult = await tx.execute<CleanupCount>(sql`
 			with batch as materialized (
-				select profile_id, unit_id
-				from studio_profile_editor_candidate
+				select auth_user_id, unit_id
+				from studio_auth_editor_candidate
 				where valid_until <= ${now}
-				order by valid_until, profile_id, unit_id
+				order by valid_until, auth_user_id, unit_id
 				limit ${input.batchSize}
 				for update skip locked
 			), deleted as (
-				delete from studio_profile_editor_candidate candidate
+				delete from studio_auth_editor_candidate candidate
 				using batch
-				where candidate.profile_id = batch.profile_id
+				where candidate.auth_user_id = batch.auth_user_id
 					and candidate.unit_id = batch.unit_id
 					and candidate.valid_until <= ${now}
 				returning 1

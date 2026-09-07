@@ -188,9 +188,9 @@ export default new Elysia({ name: "account-entity-api" })
 				tags: ["Users", "Studio"],
 			},
 		},
-		async ({ authorization, entity, params }) =>
+		async ({ authorization, user, params }) =>
 			recordStudioVisit({
-				profileId: entity.id,
+				authUserId: user.id,
 				unitId: params.unitId,
 				authorization: authorization.unit,
 			}),

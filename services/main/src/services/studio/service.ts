@@ -14,12 +14,13 @@ import {
 	getUnitReadCondition,
 } from "../authorization/unit/query";
 import { profileCanManageRealmAccess } from "../authorization/unit/realm-subject";
+import { selfAuthUserIdForEntity } from "../participation/account-query";
 import { database } from "../database";
 import {
 	post,
 	realm,
 	realmMember,
-	studioProfileEditorCandidate,
+	studioAuthEditorCandidate,
 	studioRealmEditorCandidate,
 	studioResourceVisit,
 	unit,
@@ -250,8 +251,8 @@ function profileCandidateStream(input: {
 			candidate.owner_since,
 			candidate.direct_grant_since,
 			null::timestamptz as realm_grant_since
-		from ${studioProfileEditorCandidate} candidate
-		where candidate.profile_id = ${input.profileId}
+		from ${studioAuthEditorCandidate} candidate
+		where candidate.auth_user_id = ${selfAuthUserIdForEntity(input.profileId)}
 			and (candidate.valid_until is null or candidate.valid_until > now())
 			and ${sourceCondition}
 			and ${cursorCondition(
@@ -543,7 +544,7 @@ async function selectWorkspaceCandidateBatch(input: {
 		left join ${unit} studio_workspace_resource on ${resource.id} = page.unit_id
 		left join ${post} studio_workspace_post on ${resourcePost.id} = ${resource.id}
 		left join ${studioResourceVisit} visit
-			on visit.profile_id = ${input.profileId}
+			on visit.auth_user_id = ${selfAuthUserIdForEntity(input.profileId)}
 			and visit.resource_unit_id = page.unit_id
 		order by
 			page.relevant_at desc nulls last,
@@ -672,7 +673,7 @@ export async function listStudioContent(input: {
 }
 
 export async function recordStudioVisit(input: {
-	readonly profileId: string;
+	readonly authUserId: string;
 	readonly unitId: string;
 	readonly authorization: UnitAuthorization<string>;
 }) {
@@ -681,12 +682,12 @@ export async function recordStudioVisit(input: {
 	const [visit] = await database
 		.insert(studioResourceVisit)
 		.values({
-			profileId: input.profileId,
+			authUserId: input.authUserId,
 			resourceUnitId: input.unitId,
 			lastVisitedAt: now,
 		})
 		.onConflictDoUpdate({
-			target: [studioResourceVisit.profileId, studioResourceVisit.resourceUnitId],
+			target: [studioResourceVisit.authUserId, studioResourceVisit.resourceUnitId],
 			set: { lastVisitedAt: now },
 		})
 		.returning({

@@ -235,7 +235,7 @@ export async function dispatchAccountErasureBatch() {
 				result = await deletePrivateBatch(
 					tx,
 					studioResourceVisit,
-					eq(studioResourceVisit.profileId, entityId),
+					eq(studioResourceVisit.authUserId, authId),
 				);
 				break;
 			case "complete":

@@ -3,7 +3,7 @@ import { check, index, primaryKey, uuid } from "drizzle-orm/pg-core";
 
 import { realmAccessSubjectRelation } from "./access";
 import { pgTable } from "./base";
-import { entityIdentity } from "./catalog-identity";
+import { users } from "./auth";
 import { createTimestampMsColumn, createUpdatedAtColumn } from "./columns";
 import { realm } from "./realm";
 import { unit } from "./unit";
@@ -15,12 +15,12 @@ import { unit } from "./unit";
  * ownership/grants, restrictions, expiry, and Unit readability. The row only
  * makes "list my editable Units" an ordered, Profile-selective operation.
  */
-export const studioProfileEditorCandidate = pgTable(
-	"studio_profile_editor_candidate",
+export const studioAuthEditorCandidate = pgTable(
+	"studio_auth_editor_candidate",
 	{
-		profileId: uuid()
+		authUserId: uuid()
 			.notNull()
-			.references(() => entityIdentity.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
@@ -34,26 +34,26 @@ export const studioProfileEditorCandidate = pgTable(
 		projectionUpdatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.profileId, table.unitId] }),
-		index("studio_profile_editor_candidate_profile_recent_idx").on(
-			table.profileId,
+		primaryKey({ columns: [table.authUserId, table.unitId] }),
+		index("studio_auth_editor_candidate_profile_recent_idx").on(
+			table.authUserId,
 			table.relevantAt.desc(),
 			table.unitId.desc(),
 		),
-		index("studio_profile_editor_candidate_unit_idx").on(table.unitId, table.profileId),
-		index("studio_profile_editor_candidate_expiry_idx")
-			.on(table.validUntil, table.profileId, table.unitId)
+		index("studio_auth_editor_candidate_unit_idx").on(table.unitId, table.authUserId),
+		index("studio_auth_editor_candidate_expiry_idx")
+			.on(table.validUntil, table.authUserId, table.unitId)
 			.where(sql`${table.validUntil} is not null`),
 		check(
-			"studio_profile_editor_candidate_source_check",
+			"studio_auth_editor_candidate_source_check",
 			sql`${table.ownerSince} is not null or ${table.directGrantSince} is not null`,
 		),
 		check(
-			"studio_profile_editor_candidate_relevant_at_check",
+			"studio_auth_editor_candidate_relevant_at_check",
 			sql`${table.relevantAt} = greatest(${table.ownerSince}, ${table.directGrantLastAt})`,
 		),
 		check(
-			"studio_profile_editor_candidate_direct_grant_time_check",
+			"studio_auth_editor_candidate_direct_grant_time_check",
 			sql`(
 				${table.directGrantSince} is null
 				and ${table.directGrantLastAt} is null
@@ -64,7 +64,7 @@ export const studioProfileEditorCandidate = pgTable(
 			)`,
 		),
 		check(
-			"studio_profile_editor_candidate_validity_check",
+			"studio_auth_editor_candidate_validity_check",
 			sql`${table.validUntil} is null or ${table.directGrantSince} is not null`,
 		),
 	],
@@ -120,21 +120,21 @@ export const studioRealmEditorCandidate = pgTable(
 export const studioResourceVisit = pgTable(
 	"studio_resource_visit",
 	{
-		profileId: uuid()
+		authUserId: uuid()
 			.notNull()
-			.references(() => entityIdentity.id, { onDelete: "cascade" }),
+			.references(() => users.id, { onDelete: "cascade" }),
 		resourceUnitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
 		lastVisitedAt: createTimestampMsColumn().defaultNow().notNull(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.profileId, table.resourceUnitId] }),
+		primaryKey({ columns: [table.authUserId, table.resourceUnitId] }),
 		index("studio_resource_visit_profile_recent_idx").on(
-			table.profileId,
+			table.authUserId,
 			table.lastVisitedAt.desc(),
 			table.resourceUnitId.desc(),
 		),
-		index("studio_resource_visit_resource_merge_idx").on(table.resourceUnitId, table.profileId),
+		index("studio_resource_visit_resource_merge_idx").on(table.resourceUnitId, table.authUserId),
 	],
 );

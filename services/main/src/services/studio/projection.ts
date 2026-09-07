@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 
 import { database } from "../database";
-import { studioProfileEditorCandidate, studioRealmEditorCandidate } from "../database/schema";
+import { studioAuthEditorCandidate, studioRealmEditorCandidate } from "../database/schema";
 
 /**
  * Maintenance-only rebuild of Studio's current editor candidate indexes.
@@ -15,16 +15,16 @@ export async function rebuildStudioEditorCandidates(): Promise<void> {
 		await tx.execute(sql`set local statement_timeout = 0`);
 		await tx.execute(sql`
 			lock table
-				studio_profile_editor_candidate,
+				studio_auth_editor_candidate,
 				studio_realm_editor_candidate
 			in access exclusive mode
 		`);
-		await tx.delete(studioProfileEditorCandidate);
+		await tx.delete(studioAuthEditorCandidate);
 		await tx.delete(studioRealmEditorCandidate);
 		await tx.execute(sql`
 			with editor_source as (
 				select
-					ownership.profile_id,
+					binding.auth_user_id,
 					ownership.unit_id,
 					ownership.created_at as owner_since,
 					null::timestamptz as direct_grant_since,
@@ -33,12 +33,13 @@ export async function rebuildStudioEditorCandidates(): Promise<void> {
 					true as non_expiring,
 					null::timestamptz as expires_at
 				from unit_ownership ownership
+				join auth_entity binding on binding.entity_id = ownership.profile_id
 				where ownership.revoked_at is null
 
 				union all
 
 				select
-					access_grant.profile_id,
+					access_grant.auth_user_id,
 					access_grant.unit_id,
 					null,
 					access_grant.created_at,
@@ -47,14 +48,14 @@ export async function rebuildStudioEditorCandidates(): Promise<void> {
 					access_grant.expires_at is null,
 					access_grant.expires_at
 				from unit_access_grant access_grant
-				where access_grant.subject_kind = 'profile'
-					and access_grant.profile_id is not null
+				where access_grant.subject_kind = 'auth'
+					and access_grant.auth_user_id is not null
 					and access_grant.permission = 'unit.update'
 					and access_grant.revoked_at is null
 					and (access_grant.expires_at is null or access_grant.expires_at > now())
 			)
-			insert into studio_profile_editor_candidate (
-				profile_id,
+			insert into studio_auth_editor_candidate (
+				auth_user_id,
 				unit_id,
 				owner_since,
 				direct_grant_since,
@@ -63,7 +64,7 @@ export async function rebuildStudioEditorCandidates(): Promise<void> {
 				valid_until
 			)
 			select
-				profile_id,
+				auth_user_id,
 				unit_id,
 				min(owner_since),
 				min(direct_grant_since),
@@ -71,7 +72,7 @@ export async function rebuildStudioEditorCandidates(): Promise<void> {
 				max(relevant_at),
 				case when bool_or(non_expiring) then null else max(expires_at) end
 			from editor_source
-			group by profile_id, unit_id
+			group by auth_user_id, unit_id
 		`);
 		await tx.execute(sql`
 			insert into studio_realm_editor_candidate (
