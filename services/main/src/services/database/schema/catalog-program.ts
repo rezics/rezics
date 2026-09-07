@@ -102,6 +102,14 @@ export const programEpisode = pgTable(
 		index("program_episode_season_idx").on(table.seasonId, table.programId, table.id),
 		index("program_episode_type_idx").on(table.typeRevisionId, table.id),
 		check(
+			"program_episode_season_owner_check",
+			sql`${table.seasonId} is null or ${table.programId} is not null`,
+		),
+		check(
+			"program_episode_disc_check",
+			sql`${table.discNumber} is null or ${table.discNumber} >= 0`,
+		),
+		check(
 			"program_episode_numbers_check",
 			sql`(${table.sortNumber} is null or ${table.sortNumber}::text not in ('NaN', 'Infinity', '-Infinity')) and (${table.episodeNumber} is null or ${table.episodeNumber}::text not in ('NaN', 'Infinity', '-Infinity'))`,
 		),

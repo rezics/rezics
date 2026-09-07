@@ -6,7 +6,7 @@ const count = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 /** Fully bundled upstream component graph recorded by the source-contract audit. */
 export const BangumiSubjectContractSha256 =
 	"1c60608e97a53129b6fa646e0813a2e02f2efcebbd0f9e3beb08488c02297c66";
-const wikiEntry = z.strictObject({
+export const BangumiWikiEntrySchema = z.strictObject({
 	key: z.string(),
 	// The pinned upstream WikiV0 incorrectly adds type: object around this union.
 	value: z.union([
@@ -34,7 +34,7 @@ export const BangumiSubjectSchema = z.strictObject({
 		medium: z.string(),
 		common: z.string(),
 	}),
-	infobox: z.array(wikiEntry).optional(),
+	infobox: z.array(BangumiWikiEntrySchema).optional(),
 	volumes: count,
 	eps: count,
 	total_episodes: count,
