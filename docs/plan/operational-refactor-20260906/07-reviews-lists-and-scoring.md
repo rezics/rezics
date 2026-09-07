@@ -25,7 +25,7 @@ Owners: `schema/score.ts`, `schema/collection.ts`, `api/reviews` (including its 
 2. Add per-item notes/linked reviews and bounded membership commands. Replace whole-collection loads for a single edit with indexed operations and segmented historical checkpoints.
 3. Complete useful review discovery, spoiler controls, filtering, posting/editing and feedback using current governance.
 4. Version scoring-context references and expose populations/counts clearly; add explicit round records only for the supported organized-evaluation pilot.
-5. Migrate public authorship through P02, language text through P03 and target references through P01. Preserve chosen visibility and live score behavior.
+5. Rewrite public-authorship consumers through P02, language text through P03 and target references through P01 against the new contract. Keep target visibility and live-score semantics correct; old-row conversion belongs to the separate offline tool and does not gate this implementation.
 6. Add chosen follow events to durable outbox delivery after P10 lease fixes; suppress duplicate or withdrawn events and honor unsubscribe.
 7. Seed only authentic, permitted editorial lists and invited reviews. Maintain attribution and do not copy external user text without permission.
 

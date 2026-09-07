@@ -10,6 +10,15 @@ MusicBrainz-required Area/Place/Event/Instrument/Label/Series/Genre/Mood/URL dat
 VNDB quotes/taxonomies and Bangumi source catalog structures are current scope.
 The future labels below apply to broader products, not those source-required facts.
 
+**Breaking replacement baseline, 2026-09-07:** old API/schema/data compatibility
+is not required, including v1+ contracts. The maintainer reports the website is
+stopped and approximately 400k legacy records will be converted by separate
+offline software. Implement the final model and rewrite retained consumers
+directly; do not wait for legacy transfer or add compatibility layers. The
+[current-stage baseline](../plan/operational-refactor-20260906/00-source-complete-schema.md#breaking-replacement-baseline)
+supersedes earlier incremental/backfill and compatibility sequencing in this
+historical report. Domain semantics and capacity requirements remain in force.
+
 **Maintainer clarification, 2026-09-07:** universe/world setting, franchise and
 series are also required native models in this stage, including source-free
 creation. Unit is a logical protocol with owner-local physical identities; a

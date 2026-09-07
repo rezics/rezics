@@ -14,7 +14,7 @@ the original audit boundary above describes the earlier report, not this new evi
 
 ## 1. Mandate and decision method
 
-The maintainer requests a complete operational refactor plan, independently researched product opportunities, and a comprehensive check of gaps beyond their examples. Destructive database migration is permitted. The old schema is not a compatibility constraint on the target design; legitimate user/catalog data, identity and provenance still require explicit preservation or a documented disposition.
+The maintainer requests a complete operational refactor plan, independently researched product opportunities, and a comprehensive check of gaps beyond their examples. The 2026-09-07 clarification permits complete breaking replacement: no old API, schema or persisted-format compatibility is required, including v1+ contracts. The maintainer reports the site is stopped and the legacy dataset totals approximately 400k records. Separate offline migration software owns legacy transfer; it does not block implementation or acceptance of the new schema. The [breaking replacement baseline](../plan/operational-refactor-20260906/00-source-complete-schema.md#breaking-replacement-baseline) supersedes earlier migration sequencing in these reports.
 
 The output is a [program with twelve implementation plans](../plan/operational-refactor-20260906/README.md), four specialist research reports and this shared decision/issue register. Ordinary engineering choices have a selected default and a reconsideration trigger. Missing measurements and external acquisition conditions are assigned to specific activation gates. No fundamental academic or logical blocker has been found.
 
@@ -61,7 +61,7 @@ U14 reading groups/challenges and U15 third-party catalog/API consumers proceed 
 | ID | Decision | Reason and implementation owner |
 | --- | --- | --- |
 | D01 | One PostgreSQL business database initially, domain-owned table groups, PGroonga with measured partition/cutover limits | Preserve relational execution and transactions; do not confuse a future extensible catalog with mandatory microservices. P01/P06/P10 |
-| D02 | Stable logical Unit IDs with owner-local physical identity/lifecycle; explicit concrete versions; optional evidenced Work | No mandatory global `unit` parent in the target. Preserve addresses and migrate every existing reference family. P01/P11 |
+| D02 | Stable logical Unit IDs with owner-local physical identity/lifecycle; explicit concrete versions; optional evidenced Work | No mandatory global `unit` parent in the target. Define new addresses and rewrite every retained reference consumer. Legacy address/ID mapping belongs to the offline tool. P01/P11 |
 | D03 | Typed stable columns, fixed domain structural relations, governed long-tail values and dynamic semantic relation revisions with one writer | Classify each source path explicitly; a shared relation interface cannot duplicate a structural writer. P01 |
 | D04 | Identified content occurrences; local commands, paged reads and segmented checkpoints | Existing whole-owner loads are unsafe for large structures/collections. P01/P07 |
 | D05 | Unified public Entity, private Auth and scoped delegated/service principals | Catalog editing is not impersonation authority; AI attribution cannot forge a human reviewer. P02 |
@@ -80,7 +80,7 @@ U14 reading groups/challenges and U15 third-party catalog/API consumers proceed 
 | D18 | Private-by-default new detailed history, explicit sharing, session-aware journal and data portability | Personal utility must not require public reading disclosure. Preserve intentional old visibility. P08 |
 | D19 | No fabricated reviews/ratings or automatic source-user account import | Metadata supply and community participation are different assets. P04/P07/P12 |
 | D20 | Isolated/fair worker workloads, fenced claims, durable enqueue and conditional application | Current serial coupling and email lease predicates need correction before introducing more external latency. P10 |
-| D21 | Fresh isolated target + final write freeze; in-place destructive forward migration only if rehearsals justify it | Broad contract changes favor repeatable conversion. Released migrations remain immutable. P11 |
+| D21 | Fresh target and direct breaking replacement; standalone offline transfer of approximately 400k legacy records | Site already stopped according to the maintainer. No dual writes, CDC, legacy adapters or online availability gate. Target acceptance precedes independent legacy transfer. Released SQL remains historical evidence. P11 |
 | D22 | Recovery must preserve target-era writes and reapply erasure/revocation decisions | Old backups/routing cannot silently resurrect deleted data or discard new records. P10/P11 |
 | D23 | Source-aware acquisition/display/processing/export/withdrawal policies | Data license, hosted service terms, source-reported officialness and processing permission are independent. P04/P05 |
 | D24 | Scenario acceptance, coverage manifests and measured operations define completion | A populated schema or raw import count does not establish usable, marketable coverage. P12 |
@@ -96,6 +96,14 @@ supersedes the earlier thin-global-parent proposal. The
 [fixed/dynamic classification](REZICS-内容结构关系与查询模型-20260906.md#24-fixed-structural-relations-and-dynamic-semantic-relations)
 is the source inventory rule; its examples are not a completed mapping suite.
 D29/D30 are selected requirements, not implementation evidence.
+
+**D31 — Compatibility and legacy conversion are removed from the schema critical
+path (2026-09-07).** Old APIs, schemas, IDs/URLs and serialized contracts may be
+broken. Complete retained consumers against the new model and remove obsolete
+authorities without waiting for the separate offline tool. P11 Track A accepts
+the fresh new system; Track B accepts legacy transfer; Track C owns reopening.
+This changes delivery sequencing, not the four-source, grouping or new-model
+integrity/history/restore requirements.
 
 ## 5. Language and authority: material report additions
 
@@ -166,7 +174,7 @@ AI is not mandatory per row. Deterministic mapping handles clear source records.
 
 | Gate | Current state | Concrete path / fallback | Decision deadline |
 | --- | --- | --- | --- |
-| G01 Live legacy inventory and version | Production not inspected; local inventory/tooling exists | P11 bounded production inventory, export manifest and two rehearsals; preserve unknowns/source-less records | Before production conversion execution/scheduling; not a blocker for local schema code |
+| G01 Offline input inventory and version | Maintainer reports approximately 400k total records and site stopped; export not inspected | P11 Track B inventories the frozen input and tests deterministic transform/retry/reconciliation | Separate offline-tool execution; not a prerequisite for target DDL, old-table removal or schema acceptance |
 | G02 Actual host/extension/connection capacity | Repository docs are not live measurements | P10 hardware/query/recovery capture; add capacity or reduce admitted workload | Before sustained source/public activation |
 | G03 Provider acquisition/processing/export eligibility | Public terms researched; no REZICS-specific grant inferred | Per-mode eligibility; permitted samples/private review; independent eligible inputs; obtain external arrangement if needed | Before that mode runs or material is published |
 | G04 Model selection, price and autonomy quality | No evaluated model or price commitment | P05 frozen evaluation; deterministic/human path remains available; action allowlist stays off until qualified | Before auto-adoption cohort |
@@ -186,7 +194,7 @@ These gates do not become fictional completed work because the maintainer permit
 | Broad organization self-service | Invited participation with explicit grants | Claim verification/abuse workload is sustainable |
 | More catalog domains/paid developer API | Preserve reusable contracts; no empty implementation | Named consumer, eligible data, workload and support budget |
 | Exact hardware, model and staffing procurement | Measured P10/P05 gates | Baseline/cost experiment selects a feasible configuration |
-| In-place instead of replacement migration | Replacement plus final freeze | Rehearsals demonstrate simpler equivalent preservation/recovery |
+| Legacy transfer | Separate offline software into the final target; no online catch-up | Reconsider only if the maintainer changes the stopped-site/offline premise |
 | New product/domain terminology | Reuse approved termbase; internal English contract names only | User-facing new concepts are implemented and reviewed under localization policy |
 
 No question is parked merely because several solutions exist. Defaults above allow the corresponding implementation plan to start. Reopen a decision only on new evidence or a changed product requirement.
@@ -196,7 +204,8 @@ No question is parked merely because several solutions exist. Defaults above all
 This task produces maintained English reports/plans as required by CONTRIBUTING. Existing Chinese architecture reports retain their historical discussion language. Documentation validation checks relative file links, whitespace, plan references, scenario coverage and cross-report policy consistency; it does not substitute for code tests or production acceptance.
 
 Next implementation follows the source-complete schema stage: source inventory,
-core and domain DDL, canonical commands, native source conformance, and conversion.
+core and domain DDL, canonical commands, new-contract consumer replacement and
+native source conformance. Legacy transfer is independent offline work.
 Supporting implementation is tracked separately in the program ledger. Do not
 resume a general maintenance stream or report its test/commit count as progress
 on the unimplemented catalog schema. No production operation is implied by this

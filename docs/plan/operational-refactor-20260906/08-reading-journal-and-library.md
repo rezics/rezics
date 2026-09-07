@@ -11,7 +11,7 @@ Make U04/U13 useful even without a large social community. Existing `schema/prog
 - Distinguish the personal library state (want/reading/completed/etc.), an occurrence of reading/re-reading, journal entries with dates/precision, and current resume position.
 - Visiting a page is not reading. Support manual history for paper books, external reading and incomplete dates. Actual reader checkpoints may update progress under explicit user control.
 - Journal entries can be edited/deleted by their owner. Catalog audit history is separate and never republished as personal reading history.
-- New detailed reading history, notes and checkpoints default private. Preserve explicit legacy visibility and account choices during migration; do not silently publish imported records.
+- New detailed reading history, notes and checkpoints default private. The separate offline converter must map selected legacy visibility/account choices without silently publishing imported records; preserving old storage or API formats is not required.
 - Add an explicit visibility control at first save and for imports. Sharing a review or public completion summary does not automatically share detailed sessions or private notes.
 - Each reading session targets the actual edition/content identity. Equivalent works can group navigation, but progress transfers only through an evidenced content alignment.
 - Define cross-device conflict behavior: checkpoints have session, device operation ID and expected revision; stale clients cannot overwrite a later explicitly selected position. Do not use max(page) for deliberate rereads.

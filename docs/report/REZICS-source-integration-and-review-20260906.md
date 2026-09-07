@@ -306,7 +306,7 @@ human cases/day    = proposals/day * p
 human hours/day    = human cases/day * mean_minutes_per_case / 60
 ```
 
-For the user's approximate 400,000 existing books, `b=2`, `r=1%`, `g=2`, `q=25%`, `p=1%` gives 8,000 changes, 4,000 proposals, 1,000 AI reviews and 40 human cases/day. At three minutes/case that is two staff hours/day. Binding counts and change rates have not been measured; these assumptions must not become an unexamined staffing forecast.
+For an illustrative 400,000 catalog objects (not a verified count of books or live acquisition demand), `b=2`, `r=1%`, `g=2`, `q=25%`, `p=1%` gives 8,000 changes, 4,000 proposals, 1,000 AI reviews and 40 human cases/day. At three minutes/case that is two staff hours/day. Binding counts and change rates have not been measured; these assumptions must not become an unexamined staffing forecast.
 
 At 500M objects the same assumptions produce 10M changes/day (116/s), 5M proposals/day, 1.25M AI reviews/day and 50,000 human cases/day. At 3B objects multiply by six. Human labor plainly does not scale at the same referral fraction: reduce scope, improve rules/evidence, increase automation only with measured quality, and allocate queue capacity by product priority. Never hide the unsatisfied work in an unbounded queue.
 
@@ -391,6 +391,6 @@ No academically or logically unsolved blocker was found in this source/review sc
 | Human staffing | Risk-based queue with measurable capacity; do not require four people for every correction | Staff coverage and latency targets before opening contribution traffic |
 | Model choice and cost | Provider-neutral assessment contract; no automatic selection by benchmark reputation | Adjudicated local evaluation, quotas and prices before purchasing/enabling |
 | Physical topology | Domain-owned current/evidence storage plus stable routing and resumable relocation | Measured row width, hot keys and deployment capacity before production sizing |
-| Existing ~400,000 books | Independent migration plan; destructive target-schema changes permitted | Source/identity/user-reference inventory and reconciliation ledger before migration execution |
+| Approximately 400k total legacy records; site stopped per maintainer | Separate offline migration software; no old API/schema/data compatibility requirement | Frozen-input inventory and reconciliation belong to offline-tool acceptance, not new-schema implementation or acceptance |
 
 The intended result is a working supply-and-maintenance system: usable coverage, transparent source choices, repairable mistakes, affordable ongoing review, and user contributions that improve REZICS rather than being overwritten by the next import.

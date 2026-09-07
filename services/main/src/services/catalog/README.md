@@ -4,7 +4,11 @@ This module implements the first native storage foundation of the
 [source-complete schema program](../../../../../docs/plan/operational-refactor-20260906/00-source-complete-schema.md).
 It is not the completed four-source model or the global Unit cutover. Public
 routes, shared Access integration, full revision/restore semantics, complete source adapters,
-complete domain/source coverage and legacy conversion still have separate outstanding work.
+complete domain/source coverage and replacement of old runtime consumers remain
+outstanding. Under the [breaking replacement baseline](../../../../../docs/plan/operational-refactor-20260906/00-source-complete-schema.md#breaking-replacement-baseline),
+old API/schema/data compatibility is not required. The stopped site's approximately
+400k legacy records belong to separate offline migration software; that work
+does not gate the new schema or removal of obsolete runtime structures.
 
 ## Implemented boundary
 
@@ -40,10 +44,11 @@ internal commands must not be exposed as the completed shared authorization API.
 Read paths filter drafts, removed objects and private targets; participant
 conjunctions correlate to the same owner and relation ID.
 
-During conversion, a temporary legacy insert guard and native insert guard share
+The existing implementation has a temporary legacy insert guard and native insert guard sharing
 an ID-scoped transaction lock. They reject concurrent ownership conflicts without
-rewriting old IDs. P11 must remove the legacy guard and all remaining global-parent
-dependencies before marking the final identity gate complete.
+rewriting old IDs. This is an implementation fact, not a compatibility requirement.
+Remove the legacy guard and all remaining global-parent dependencies with the
+new-contract consumer rewrite, without waiting for offline data conversion.
 
 ## Typed domain structures
 

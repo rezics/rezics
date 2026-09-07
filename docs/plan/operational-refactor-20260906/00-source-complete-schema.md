@@ -9,6 +9,45 @@ stage: **logical Unit with owner-local physical identities and no live global
 `unit` parent; explicit fixed-structure/dynamic-relation classification; native
 universe/world-setting, franchise and series models.** These gates remain unqualified.
 
+## Breaking replacement baseline
+
+**Maintainer decision, 2026-09-07; supersedes earlier compatibility and conversion
+sequencing in this program.** The maintainer reports that the website is already
+stopped and that the legacy dataset is approximately **400,000 records in total**.
+These are supplied operating assumptions, not a production inspection by the agent.
+
+- This refactor may be completely destructive. Existing APIs, SDK contracts,
+  routes, schema/table layouts and persisted record formats impose **no backward
+  compatibility requirement**, including the currently released v1+ contracts.
+- Design and implement the final model directly. Rewrite affected backend,
+  workers, frontend, generated API/SDK and tests to that contract; remove replaced
+  code, the global `unit` parent and its dependencies. Do not build legacy
+  adapters, compatibility views/aliases, dual writes, CDC, online backfills or
+  mixed-version support to keep the old application running.
+- Old data will be handled by **separate offline migration software** reading a
+  frozen legacy export and writing the new contract. That tool owns old-to-new
+  mappings, ID preservation/remapping, unresolved records and reconciliation.
+  It is not an application runtime dependency or a prerequisite for new-schema
+  implementation, removal of old tables, or the current schema acceptance gate.
+- Fresh-database installation, native/manual and source-fixture conformance,
+  new-model integrity/history/restore, integrated new consumers and required
+  deterministic/capacity checks define implementation acceptance. Production
+  legacy import and reopening the site are separate P11/P12 work.
+- Existing UUIDs, old URLs, old payloads and historical storage representations
+  need not remain accepted by the new application. New identities/references
+  still obey their own stable-identity, privacy and referential-integrity rules.
+- The approximately 400k legacy import is a bounded one-time task. It does not
+  replace the 500M-row / 3B-row capacity-planning requirements for the new model.
+- Released SQL/checksum history remains an audit artifact under CONTRIBUTING;
+  retaining it does not require retaining its schema at runtime or converting
+  old rows inside new DDL. Generate the replacement schema through repository
+  tooling. Rehearsing legacy transfer is not a condition for destructive target DDL.
+
+This document correction does not execute a database reset, delete the legacy
+export, run the separate migration program or reopen the site. It removes those
+operations from the critical path of implementing the new system. See
+[P11's separate acceptance tracks](11-migration-and-cutover.md).
+
 ## Required result
 
 REZICS must natively represent the public catalog data of **VNDB, MusicBrainz,
@@ -19,8 +58,9 @@ can change; the book-index capability cannot be dropped. Read the
 for the verified evidence, source-to-domain matrix and target physical owners.
 
 The deliverable is implemented PostgreSQL tables/constraints/indexes, canonical
-writes, native reads/queries/exports, source conformance and an explicit old-schema
-conversion. It is not another plan, raw-payload archive, sparse importer, parser,
+writes, native reads/queries/exports, source conformance and complete replacement
+of old runtime contracts. Offline legacy conversion is separate. It is not another
+plan, raw-payload archive, sparse importer, parser,
 email/worker fix, or list of commits. Previously delivered supporting work remains
 useful but does not complete any of the four source-schema gates below.
 
@@ -123,20 +163,22 @@ Invoke-RestMethod -Headers $bangumiHeaders -Method Post -ContentType 'applicatio
 4. **Integrate one canonical write/read path per owner.** Source-free manual
    creation and versioned source adapters call the same invariant-enforcing
    commands. Wire history/restore, merge, reference/slug resolution, filters,
-   projection lifecycle and generated API/SDK. Only frontend adaptations needed
-   to keep affected existing flows type-correct belong in this slice; broader
+   projection lifecycle and generated API/SDK. Adapt retained frontend flows
+   directly to the new contract and pass affected type checks; broader
    redesign, scoring pilots and notification polish wait.
-5. **Convert and retire the replaced catalog contract.** Inventory old Unit IDs,
-   Book/Media/Software/Release grain, localized rows/aliases, credit/subject edges,
-   compositions and historical references, including non-catalog consumers of
-   the old global parent. Preserve uncertain/source-less entries.
-   Replace old authorities through new forward migrations and reviewed bounded
-   conversion; retire the live global `unit` parent and its runtime consumers.
-   Do not maintain duplicate writable metadata or edit released SQL.
+5. **Replace and retire the old runtime contract.** Inventory code/schema
+   dependencies on the old Unit, Book/Media/Software/Release, localization,
+   credits, composition, history and non-catalog references. Rewrite or remove
+   these consumers against the new model in the same implementation; do not
+   translate old API payloads at runtime. Drop the old global `unit` parent and
+   obsolete structures without waiting for the separate legacy migration tool.
+   Validate installation on an empty database and the integrated new contract.
+   Keep released SQL as historical evidence, not duplicate writable authority.
 6. **Pass four-source database qualification.** Import permitted representative
    source graphs, query/export them from native tables, verify semantic roundtrips,
-   rejection/conflict/withdrawal cases, and complete two interrupted/repeatable
-   conversion rehearsals. Publish the field/object coverage and capacity evidence.
+   rejection/conflict/withdrawal cases and new-contract interruption/replay cases.
+   Publish the field/object coverage and capacity evidence. Rehearsals of the
+   approximately 400k legacy transfer belong to the separate offline tool.
    No gate exits with known required fields marked raw-only/unmapped/unsupported.
 
 Source-use rights affect the acquisition/display/processing mode, not whether the
@@ -149,7 +191,8 @@ fixture qualification. Production conversion/activation remains separately gated
 - The same UUID resolves through its physical owner without a global `unit` row.
   Concrete references reject missing/wrong-owner targets; concurrent ID ownership
   conflicts fail safely; stale/missing routing is bounded and the locator rebuilds
-  from authoritative owner records. Existing ID/slug/merge addresses survive.
+  from authoritative owner records. New-contract ID/slug/merge addresses obey
+  the new model; retaining legacy addresses is not an acceptance requirement.
 - Fixed containment/track references can be read through the relation interface,
   but only their owner command can change them. New governed semantic roles do
   not require a second fact store or removal of reference/value constraints.

@@ -11,6 +11,16 @@ Code inspection baseline: `4fbb0ce67`. This report owns the source-to-domain
 mapping and physical-schema milestone. [Source operations](REZICS-source-integration-and-review-20260906.md)
 continues to own acquisition, rights, continuous adoption and review.
 
+**Breaking replacement clarification, 2026-09-07:** the maintainer has stopped the
+site and reports approximately 400k legacy records in total. The target has no
+backward compatibility obligation to old APIs (including v1+), schemas or data
+formats. Rewrite affected consumers directly and remove the old runtime model;
+do not wait for legacy data conversion. A separate offline migration program
+owns old-to-new mappings and reconciliation. The
+[binding implementation baseline](../plan/operational-refactor-20260906/00-source-complete-schema.md#breaking-replacement-baseline)
+supersedes this report's earlier preservation/cutover requirements. Fresh-target
+schema conformance and eventual legacy import/site reopening are separate gates.
+
 ## 1. Correction to the delivery priority
 
 The current stage must deliver a database model that can fully represent the
@@ -27,7 +37,7 @@ does not establish that these catalogs fit the database.
 
 The next implementation work is the [schema milestone](../plan/operational-refactor-20260906/00-source-complete-schema.md).
 No further unrelated product/operations work should displace it. Fix supporting
-code only when necessary to exercise the new schema, preserve existing data, or
+code only when necessary to exercise the new schema, integrate new consumers, or
 pass an affected deterministic check.
 
 “Fully represent” means every in-scope catalog object, field, repeated value,
@@ -64,8 +74,8 @@ The API repository explicitly identifies `bangumi/server` as the owner of the
 synced v0 specification. External component references were resolved from one
 repository commit, not treated as absent schemas. The bundled specification's
 SHA-256 is `1c60608e97a53129b6fa646e0813a2e02f2efcebbd0f9e3beb08488c02297c66`.
-The upstream `/v0` path is Bangumi's contract, unrelated to REZICS's supported
-v1 compatibility baseline.
+The upstream `/v0` path is Bangumi's external contract, unrelated to REZICS's
+own version numbering or the removal of legacy REZICS compatibility requirements.
 
 Live verification completed at `2026-09-06T15:16:31.605Z`, using public reads and
 User-Agent `edge/REZICS-schema-audit (2026.09.06; +https://www.rezics.com)`:
@@ -250,8 +260,9 @@ Do not label them complete after adding a JSON column or a source URL.
 Use one PostgreSQL business database and `public` schema initially. The following
 are target physical owners, not claims about existing tables. The implementation
 must turn each row into DDL, constraints, indexes, canonical commands and mapping
-fixtures before describing it as supported. Preserve Unit IDs where the referent
-is unchanged; do not create empty Work parents or merge source-less legacy Books.
+fixtures before describing it as supported. New logical identities must be stable;
+legacy IDs may be preserved or remapped by the separate offline tool. Do not
+create empty Work parents or merge uncertain records to satisfy the new schema.
 
 ### 4.1 Logical Unit and owner-local physical identity
 
@@ -269,8 +280,9 @@ partitioning the old parent also does not complete this change. Initially all
 owner tables remain in one PostgreSQL database and `public` schema; separate
 databases or services are not required.
 
-- Preserve existing UUIDs and supported v1+ ID/slug addresses. Internally resolve
-  a Unit reference to a validated owner and ID before dispatch. Only registered
+- Old UUIDs, API payloads and v1+ ID/slug addresses impose no compatibility
+  requirement. Internally resolve a new-contract Unit reference to a validated
+  owner and ID before dispatch. Only registered
   server-side owners select SQL tables; a supplied class/kind is not proof of
   physical ownership or permission.
 - Owner-local extensions and cross-owner endpoints in this single database use
@@ -296,8 +308,10 @@ databases or services are not required.
   reviews/lists, tags, private progress, addresses, history, merge and search.
   Replacing the catalog alone while these still require a live global parent is
   not completion. [P11](../plan/operational-refactor-20260906/11-migration-and-cutover.md)
-  owns bounded conversion, writer fencing and retirement. Released migrations
-  remain intact; a restricted old-data archive is not an active identity service.
+  separates new-runtime replacement from offline legacy conversion. Rewrite
+  affected consumers and retire obsolete tables without a legacy import first.
+  Released migrations remain intact as history; an offline archive or converter
+  is not an active identity service and must not ship as a compatibility layer.
 
 PostgreSQL inheritance does not supply cross-child unique/FK guarantees, and
 partitioned uniqueness must include the partition key. Neither mechanism is an
@@ -408,7 +422,8 @@ WAL/index amplification and cutover headroom before choosing physical buckets.
 No request or recurring repair may rebuild all identities or all descendants.
 
 The current milestone is complete only after physical DDL/migrations, all four
-coverage matrices, native roundtrips and queries, legacy conversion rehearsals,
-affected API/SDK/type checks and representative plans pass. Production rights,
+coverage matrices, native roundtrips and queries on a fresh target, removal of
+old runtime dependencies, new API/SDK/type checks and representative plans pass.
+Legacy conversion rehearsals are separate offline-tool acceptance. Production rights,
 live inventory, recovery and human product acceptance remain activation gates;
 they must not redirect local development back to unrelated maintenance.

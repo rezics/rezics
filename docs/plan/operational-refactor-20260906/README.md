@@ -25,12 +25,23 @@ coverage alone does not complete these shared-model gates.
 
 Deliver multiple independently useful product lines: finding books and choosing through reviews, scores and lists; keeping a reading journal; discovering works through tags and characters; choosing languages and editions; exploring rich credits and cross-media relationships; contributing corrections to a maintained catalog. Three production source adapters (Bangumi, VNDB and MusicBrainz), continuous adoption and AI-assisted review are part of this program.
 
-The maintainer permits destructive database migration for this refactor. Design for the correct target contract instead of preserving obsolete columns indefinitely. Preserve legitimate existing data and its meaning through explicit conversion, quarantine or archival. Permission for destructive schema changes does not designate user records as disposable.
+**Breaking replacement baseline, confirmed 2026-09-07:** the maintainer reports
+the website is stopped and the entire legacy dataset is approximately 400k
+records. There is no old API, old schema or persisted-data compatibility
+requirement, including v1+ contracts. Implement the final model directly and
+rewrite affected internal clients together. Separate offline migration software
+owns legacy data conversion; it does not block new-schema implementation or
+retirement of old runtime structures. Do not add dual writes, CDC, compatibility
+adapters or old-URL guarantees. The authoritative
+[baseline in `00`](00-source-complete-schema.md#breaking-replacement-baseline)
+supersedes earlier preservation/cutover sequencing in this program.
 
 Implementation was authorized on 2026-09-06, including autonomous adjustments and
 verified commits. Production activation still requires the evidence below. This
-plan does not add pre-v1 compatibility. Released SQL remains immutable; a new
-forward migration may deliberately drop replaced structures after verified transfer.
+plan does not preserve old-version compatibility. Released SQL remains immutable
+as history; generated replacement DDL may drop obsolete structures without a
+legacy transfer first. RomVer identifies the breaking release; it does not require
+old endpoints or rows to work in the target application.
 
 ## Research and decisions
 
@@ -57,7 +68,7 @@ forward migration may deliberately drop replaced structures after verified trans
 | [P08 Reading journal and library](08-reading-journal-and-library.md) | Reliable personal history, resume, privacy, import/export | P01/P02/P03 identity/language contracts |
 | [P09 VN and cross-media catalogs](09-vn-and-cross-media-catalogs.md) | Usable multilingual VN, program and music experiences | P01/P03/P04/P05/P06 |
 | [P10 Capacity and operations](10-capacity-and-operations.md) | Isolated work, recovery, observability and measured resource gates | Starts immediately; integrates every write owner |
-| [P11 Migration and cutover](11-migration-and-cutover.md) | Preserved legacy data and coordinated replacement deployment | Design starts immediately; final run depends on P01–P10 |
+| [P11 Replacement and offline transfer](11-migration-and-cutover.md) | Separate new-system acceptance, standalone legacy conversion and site reopening | New-system implementation is independent of legacy import; the offline tool consumes the final target contract |
 | [P12 Product acceptance and activation](12-product-acceptance-and-activation.md) | Scenario acceptance, truthful coverage claims and launch scorecard | Starts immediately; operational activation after relevant gates |
 
 Prerequisites are contracts or integration gates, not a requirement to finish every upstream UI before starting downstream work. Plan drafting, fixture curation, baseline capture and operator work can proceed concurrently.
@@ -66,8 +77,8 @@ Prerequisites are contracts or integration gates, not a requirement to finish ev
 
 1. **Finish the source-complete database milestone:** follow `00` in order: full
    source contract inventory, shared DDL, actual domain tables, canonical commands/
-   reads/queries, old-schema conversion, four-source native conformance and local
-   capacity/rehearsal checks. P01/P03/P04/P09 are the primary owners. Use P02/P10/P11
+   reads/queries, destructive runtime replacement, four-source native conformance
+   and local capacity/replay checks on a fresh target. P01/P03/P04/P09 are the primary owners. Use P02/P10/P11
    only for dependencies that this work actually needs.
 2. **Complete source operations:** continuous acquisition/adoption, proposal and
    operator flows, full selected snapshot-count reconciliation and source freshness.
@@ -75,12 +86,18 @@ Prerequisites are contracts or integration gates, not a requirement to finish ev
 3. **Complete the wider product portfolio:** P06/P07/P08/P09 discovery, reviews,
    lists, scoring and journals on the new identities; invited participation and
    P12 human product acceptance. CJK campaigns do not narrow the schema milestone.
-4. **Production qualification and activation:** actual production inventory and
-   recoverable exports, migration rehearsals against that inventory, P10 recovery/
-   capacity, P05 AI shadow evaluation where enabled, then coordinated P11/P12 cutover.
-   Missing production access does not postpone local schema implementation.
+4. **Separate offline transfer and reopening:** the standalone migration software
+   inventories the frozen approximately 400k legacy export, transforms and
+   reconciles it against the final target, and records unresolved mappings.
+   P10 recovery/capacity, P05 AI evaluation where enabled and P11/P12 reopening
+   follow independently. Legacy access or migration-tool completion does not
+   block schema acceptance or removal of the old runtime contract.
 
-Every increment must leave a runnable integrated system with one authoritative write path per fact. A large final database cutover does not justify months of unintegrated feature branches. Small reviewed slices may merge before activation; commit policy follows the maintainer's session authorization.
+Implement on `main` in reviewed slices, with one target write authority per fact.
+The stopped old site need not run at intermediate commits. Complete affected
+new-contract call sites and deterministic checks before declaring a slice
+integrated; do not preserve compatibility merely to keep the old build runnable.
+Commit policy follows the maintainer's session authorization.
 
 ## Release acceptance matrix
 
@@ -130,7 +147,7 @@ supporting commit counts and general test totals cannot substitute for it.
 | P03 | Pinned IANA consumption-language validation, scoped private-use parsing, registry-bound Search hashes and bounded stored-value audit. | Open metadata localization, source mappings, named forms, authority and production/history conversion. |
 | P05 | Two-reviewer versioned merge policy, retired direct bypass, preserved historical decisions and actual transaction acceptance checks; repaired existing merge blockers. | Source proposal lifecycle, AI evaluation, actor independence and full operational review workflow. |
 | P08 | New progress defaults private in canonical writers and the Web editor; first-save visibility is selectable and existing choices are retained. | Session/checkpoint semantics, portability, account privacy defaults and user acceptance. |
-| P11 | Read-only schema/runtime inventory with explicit Profile/Auth reference inventory and evidence limits. | Production capture, recoverable exports, conversion and cutover rehearsals. |
+| P11 | Read-only schema/runtime inventory and the revised independent acceptance tracks. | Separate offline conversion software and reopening; these do not gate the new-schema implementation. |
 | P01 | Owner-local foundation, 50 typed domain tables, scoped relations/grouping, shared credits and local command/constraint/query evidence; see `00`. | Complete source mapping, full revisions/restore, shared authorization/API integration and global-parent cutover. |
 | P04 | Immutable source observations, checked inline reference evidence, first-adoption bindings, changed-snapshot proposals and four selected live-source native roundtrips. | Complete field/object semantic mapping, canonical-path integration, proposal application/withdrawal, dependency scheduling and operational qualification. |
 | P02, P07, P09, P12 | Planned; existing foundations do not imply the new acceptance contracts pass. | Owning implementation and acceptance slices. |

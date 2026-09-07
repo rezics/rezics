@@ -15,12 +15,14 @@ of this same schema gate. Four-source conformance alone does not qualify them.
 
 | Gate | Required evidence | State |
 | --- | --- | --- |
-| Logical Unit, physical owner identity | No live global `unit`/universal parent dependency; preserved IDs/addresses/private state; concrete reference rejection; concurrent ownership conflict handling; bounded routing and locator rebuild | Not qualified |
+| Logical Unit, physical owner identity | Fresh target with no global `unit`/universal parent or legacy runtime dependency; new-contract identity/address/privacy behavior; concrete reference rejection; concurrent ownership conflict handling; bounded routing and locator rebuild | Not qualified |
 | Fixed structure versus dynamic relation | Every required source path classified with actual storage/definition and sole writer; structural graph reads do not create duplicate writable facts; governed role additions keep target/value constraints | Not qualified |
 | Universe, franchise and series | Native source-free creation/edit/query/export/history/restore; same-name identities remain separate; two continuities in one franchise; `about` differs from `set_in_universe`; multiple memberships/order profiles/evidence survive without automatic behavior or rights propagation | Not qualified |
 
-Use [P01](01-catalog-and-relations.md) fixtures and [P11](11-migration-and-cutover.md)
-conversion evidence. These are deterministic schema/service acceptance cases;
+Use [P01](01-catalog-and-relations.md) fixtures and [P11 Track A](11-migration-and-cutover.md#track-a--implement-and-accept-the-new-system)
+fresh-target evidence. Under the [breaking replacement baseline](00-source-complete-schema.md#breaking-replacement-baseline),
+legacy API/schema/data compatibility and offline conversion rehearsals are not
+schema acceptance gates. These are deterministic schema/service acceptance cases;
 broader human-rendered product acceptance remains separately scoped below.
 
 ## Outcome
@@ -66,7 +68,7 @@ No invented retention or revenue promise is a launch fact. Set growth experiment
 
 ## Activation order and ownership
 
-- Internal acceptance on restored/mapped data, then invited real-user/curator/editor cohorts.
+- Complete internal schema acceptance on a fresh target first. The separate offline legacy import and production launch checks precede invited real-user/curator/editor cohorts; neither delays implementing or accepting the new schema.
 - Open already-qualified utilities first; expand source/campaign exposure according to coverage and operating evidence.
 - Enable low-risk AI allowlists only after P05 evaluation; revoke by action/source/model on drift.
 - Activate organized rounds and organization participation only after their distinct authority/result guarantees pass.

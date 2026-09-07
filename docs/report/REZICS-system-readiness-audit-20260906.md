@@ -4,9 +4,9 @@ Date: 2026-09-06. Status: source inspection, current primary-source research, an
 
 ## 1. Purpose and evidence boundary
 
-The intended release must support actual catalog discovery, reviews, book lists, organized ratings, reading history, multilingual metadata, source ingestion, and continuing editorial operation. A new database or destructive **new forward migration** is permitted in the design. Existing production data remains a migration input; permission to change its schema is not permission to discard user records or invent missing provenance.
+The intended release must support actual catalog discovery, reviews, book lists, organized ratings, reading history, multilingual metadata, source ingestion, and continuing editorial operation. Complete destructive API/schema replacement is authorized under the current baseline. Old data is input to separate offline software, not a compatibility constraint or a prerequisite for new-schema acceptance.
 
-This audit inspected the three architecture reports, current database schemas and services, API boundaries, worker entry point, release configuration, and deployment/recovery documentation. It did not connect to production, inspect private user data, start a frontend, perform browser acceptance, run a capacity benchmark, or change application code. The owner's approximately 400,000 books, approximately 300,000 with a source and over 100,000 without one, are approximate planning inputs rather than verified production counts.
+This audit inspected the three architecture reports, current database schemas and services, API boundaries, worker entry point, release configuration, and deployment/recovery documentation. It did not connect to production, inspect private user data, start a frontend, perform browser acceptance, run a capacity benchmark, or change application code. The latest maintainer clarification is approximately 400,000 legacy records in total and an already-stopped website; it supersedes the earlier rounded source/no-source category estimates. The agent has not independently verified production state or counts.
 
 Evidence labels used below:
 
@@ -21,7 +21,7 @@ The [existing report index](README.md) correctly separates design adoption from 
 
 | Foundation | Verified evidence | Consequence for the refactor |
 | --- | --- | --- |
-| Stable Unit identities with separate domain tables | [Book](../../services/main/src/services/database/schema/book.ts), [Entity](../../services/main/src/services/database/schema/entity.ts), [Profile](../../services/main/src/services/database/schema/profile.ts) | Preserve IDs where the referent is unchanged. Introduce new identities only when the new referent differs. |
+| Stable Unit identities with separate domain tables | [Book](../../services/main/src/services/database/schema/book.ts), [Entity](../../services/main/src/services/database/schema/entity.ts), [Profile](../../services/main/src/services/database/schema/profile.ts) | New identities stay stable under the new contract; the offline converter may preserve or remap old IDs. No legacy-ID compatibility gate applies. |
 | Reading journal and current state | [Progress schema](../../services/main/src/services/database/schema/progress.ts), [Progress API](../../services/main/src/services/api/progress/index.ts), [journal page](../../apps/web/features/progress/pages/unit-progress-page.tsx) | Reading history is already implemented. Qualify and extend it; do not plan an unnecessary replacement from zero. |
 | Stored ordered lists and reverse membership | [Collection schema](../../services/main/src/services/database/schema/collection.ts), [paged items](../../services/main/src/services/api/collections/service.ts) | Preserve stored list membership, ordering, attribution, and revision semantics. Dynamic query lists remain a separate capability. |
 | Realm-specific ratings and incremental distributions | [Score schema](../../services/main/src/services/database/schema/score.ts), [score statistics](../../services/main/src/services/database/schema/aggregate.ts), [Reviews API](../../services/main/src/services/api/reviews/index.ts) | Organized ratings have a foundation. Versioned rubrics, participant policy, and historical interpretation are additional guarantees. |
@@ -163,34 +163,38 @@ PostgreSQL requires a physical/base backup and an uninterrupted WAL chain for PI
 
 Web Worker, API/worker/database, and public API package have independent release boundaries. Server maintenance cutovers already stop writers before a breaking database migration. The component manifest currently lists maintenance cutovers; do not treat old prose describing one past release as the complete current allowlist. [deployment contract](../operations/production-deployment.md), [current component manifest](../../deploy/release/components.json)
 
-**Decision:** give the breaking persisted/API release a concrete contract generation and compatibility matrix. Stage new Web and API artifacts before freeze; preserve a maintenance response for old cached clients; resume traffic only after the correct API, worker, Web, and client generation are verified. Explicitly invalidate incompatible cursors and caches. A new client must not be promoted against an incompatible old API, and automatic application revert must not restore binaries that cannot read the new database.
+**Decision:** give the breaking persisted/API release a concrete target contract generation. Deploy the matching new Web, API and workers while the site remains stopped; old clients need not work. Resume traffic only after the new generation is verified. Explicitly invalidate incompatible cursors and caches. A new client must not be promoted against an incompatible old API, and automatic application revert must not restore binaries that cannot read the new database.
 
 **Acceptance:** test previous cached Web/API-client requests against the cutover boundary, distinguish expected upgrade errors from silent corruption, and verify the public health probe reflects the intended contract. Never reverse successful database migration automatically. The repository's advisory `Check` workflow remains advisory; deterministic implementation checks still have to pass locally and in the implementation evidence.
 
-## 4. Default deployment/migration design
+## 4. Destructive replacement and independent offline transfer
 
-**Default:** build and rehearse the new contract in an isolated database/environment, transform a consistent old-data snapshot, and use a bounded final write freeze for final reconciliation and routing cutover. Broad changes to identity, catalog facts, language, relations, and score/history interpretation make isolation and repeatable comparison more useful than a long chain of live dual writes. This is a recommended default, not proof that a particular host has spare capacity.
+**Revised 2026-09-07:** follow the [breaking replacement baseline](../plan/operational-refactor-20260906/00-source-complete-schema.md#breaking-replacement-baseline).
+The maintainer reports the site is stopped and the entire legacy dataset is
+approximately 400k records. The earlier final-freeze, online expand/contract and
+CDC alternatives are superseded; do not implement them for this refactor.
 
-| Alternative | Use when | Required evidence |
+| Track | Required result | Dependency boundary |
 | --- | --- | --- |
-| Isolated rebuild plus final freeze — default | Many core contracts change; migration can be rehearsed while existing service stays available | Full mapping ledger, reproducible transform, storage headroom, frozen final reconciliation time, independent recovery |
-| In-place maintenance migration | The transform is transactional or resumable with a measured short freeze, and isolated rebuild overhead is unnecessary | Lock/WAL/space measurements, old-writer stop, forward repair, backup restore rehearsal |
-| Expand/contract with incremental catch-up | Measured freeze would exceed the release's allowed outage and user write volume warrants added complexity | Durable change sequence or CDC contract, ordering/deletes/schema-version handling, lag budget, final barrier and reconciliation |
+| New system | Final owner-local schema, no old global parent or compatibility layer, rewritten consumers, fresh installation and full native conformance | Does not require old data or a working legacy converter |
+| Separate offline software | Frozen-export input, explicit old-to-new mappings/dispositions, bounded transform, retry and reconciliation | Consumes the final target contract; never ships as runtime compatibility |
+| Reopening | Matching new application generation, selected imported data, recovery and product checks | Later operational action; does not delay schema implementation/acceptance |
 
-Do not use `updated_at` alone as a universal catch-up cursor: deletions, equal timestamps, relation changes, and independently updated tables can be missed. Either recopy/reconcile the complete affected authoritative set while writes are frozen, or introduce a durable ordered change contract before taking the initial snapshot. Choose the first option for the early low-activity cutover unless rehearsal disproves its outage budget.
+Legacy IDs, old v1+ routes, Auth/session encodings and old record shapes may be
+remapped or retired. Imported records still need coherent new references,
+privacy and truthful provenance. The converter owns those dispositions; they
+do not require old tables, schema aliases or API adapters in the application.
+New-model stable IDs, history, restore and asset integrity remain required.
 
-Required migration properties:
+Keep released migration checksums as historical evidence and generate replacement
+DDL through repository tooling. A fresh target must reach the final schema without
+loading old data. Its correctness is accepted independently of production export
+access or offline transfer rehearsals. Before reopening, prevent old binaries from
+restarting against the new database; failure leaves the site stopped or restores
+the matching new deployment. No reverse conversion to the old schema is required.
 
-1. Install only supported v1-and-later history and new forward migrations. Released migration checksums remain unchanged. Generate with `task services-main:db:generate -- <name>`; maintain the migration manifest and validation workflow. No pre-v1 route/schema compatibility is introduced.
-2. Inventory IDs, domains, source links, raw source values, legacy unknowns, aliases/slugs/short links, histories, lists, reviews, scores, journals, account links, permissions, moderation, and media assets. Every old authoritative record has a disposition: unchanged identity, mapped identity, preserved legacy evidence, or explicitly justified tombstone. Totals alone are insufficient; compare keyed manifests and relation invariants.
-3. Preserve source-less books as REZICS legacy catalog records with their actual migration provenance. Do not label the migration process as an original external source and do not invent a source association. Dedupe/enrichment can continue after cutover without blocking preservation.
-4. Preserve personal Unit IDs, Auth IDs and provider links, credential hashes using their supported algorithm contract, and administrative recovery access. Rehearse restoration with isolated test identities. Plan session/token invalidation explicitly when secret/session contracts change; do not print or copy credentials into migration reports.
-5. Build derived indexes and projections independently from authoritative transformation, with checkpoints and resumable reconciliation. Preserve old journal precision and live-score semantics when historical facts are unavailable. No AI-generated inference is silently substituted for unknown legacy data.
-6. Freeze all relevant old writers, including API, background jobs, source importers, and operator tasks. Capture a final barrier, reconcile, verify, and only then switch. Keep old data immutable and isolated until retention conditions are met.
-7. Before new writes resume, rollback may select the unchanged old environment. After new writes resume, default to forward repair. Returning to the old database requires a proven reverse data transfer for post-cutover writes or an explicitly accepted data-loss boundary; retaining the old database alone is not rollback safety.
-8. Independent asset/object storage, encryption keys, external identity providers, and backup catalogs need their own inventory and recovery ownership. A database-only migration cannot claim to preserve attachments whose objects were omitted.
-
-The exact row inventory and deployment budget are later migration-plan execution inputs. They do not block implementing the new semantic contracts and migration ledger now.
+[P11](../plan/operational-refactor-20260906/11-migration-and-cutover.md) owns these
+separate tracks. The 400k one-time input does not lower the capacity baseline below.
 
 ## 5. Capacity, skew, and workload requirements
 
@@ -248,7 +252,7 @@ At deployment level, recompute connection admission using `API replicas × pool 
 | User contribution operations | Submission receipt and state, duplicate resolution, moderator queue, appeal/correction, abuse limits and audit; AI provider failure does not lose submissions |
 | Privacy lifecycle | User export and account closure/erasure policy, dependent data disposition, retention schedule, and deletion reapplication after backup restore; existing implementation coverage still requires verification |
 | Recovery | Measured RPO/RTO drill, isolated restore, extension/search checks, recoverable encryption keys, independent asset manifests, recovery identity and operator runbook |
-| Release | Supported migration checksums, forward migration rehearsal, old-writer freeze, version matrix, Web/API/cache/cursor coordination, fail-closed verification and forward-repair procedure |
+| Release | Historical migration checksums, fresh target-schema replay, matching new Web/API/worker generation, cache/cursor invalidation, fail-closed deployment and new-contract recovery; offline transfer has its own checks |
 | Deterministic integrity | Affected TypeScript checks, contract/runtime tests, schema and migration checks, generated client consistency, i18n checks when text changes; preserve advisory CI policy |
 | Product acceptance | Search relevance reference set plus maintainer acceptance of the promoted book/review/list/rating/history/tag scenarios; no claim of rendered acceptance from type checks |
 
