@@ -1,3 +1,6 @@
+import { randomUUID } from "node:crypto";
+import { currentCatalogSemantic, publishCatalogSemanticRevision } from "./semantic-history";
+import { isDeepStrictEqual } from "node:util";
 import { and, asc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import { z } from "zod";
@@ -19,6 +22,11 @@ import {
 	CatalogOwnerValues,
 } from "./contracts";
 import { CatalogValueNodeSchema } from "./value-nodes";
+import {
+	assertCatalogDefinitionRevision,
+	validateCatalogScalar,
+	validateCatalogParticipants,
+} from "./definitions";
 
 export class CatalogAccessDenied extends Error {}
 export class CatalogRevisionConflict extends Error {}
@@ -136,6 +144,22 @@ export async function ensureCatalogDefinition(
 	input: z.input<typeof CatalogDefinitionInputSchema>,
 ) {
 	const value = CatalogDefinitionInputSchema.parse(input);
+	for (const role of value.constraints.roles ?? [])
+		await assertCatalogDefinitionRevision(tx, role.roleRevisionId, "role");
+	for (const qualifier of value.constraints.qualifierRevisionIds ?? [])
+		await assertCatalogDefinitionRevision(tx, qualifier, "property");
+	if (value.constraints.vocabularyRevisionId)
+		await assertCatalogDefinitionRevision(tx, value.constraints.vocabularyRevisionId, "vocabulary");
+	for (const member of value.constraints.memberRevisionIds ?? [])
+		await assertCatalogDefinitionRevision(tx, member, ["class", "vocabulary"]);
+	if (value.kind === "predicate" && !value.constraints.roles?.length)
+		throw new TypeError("Predicates must declare governed roles");
+	if (
+		value.kind === "property" &&
+		["object", "array"].includes(value.valueKind ?? "") &&
+		!value.constraints.rules
+	)
+		throw new TypeError("Structured properties must declare a governed rule grammar");
 	await tx
 		.insert(catalogDefinition)
 		.values({ namespace: value.namespace, key: value.key, kind: value.kind })
@@ -151,19 +175,24 @@ export async function ensureCatalogDefinition(
 		throw new Error("Catalog definition identity has another meaning");
 	await tx
 		.insert(catalogDefinitionRevision)
-		.values({ definitionId: definition.id, version: 1, valueKind: value.valueKind })
+		.values({
+			definitionId: definition.id,
+			version: 1,
+			valueKind: value.valueKind,
+			constraints: value.constraints,
+		})
 		.onConflictDoNothing();
 	const [revision] = await tx
 		.select()
 		.from(catalogDefinitionRevision)
-		.where(
-			and(
-				eq(catalogDefinitionRevision.definitionId, definition.id),
-				eq(catalogDefinitionRevision.version, 1),
-			),
-		)
+		.where(and(eq(catalogDefinitionRevision.definitionId, definition.id)))
+		.orderBy(sql`${catalogDefinitionRevision.version} desc`)
 		.limit(1);
-	if (!revision || revision.valueKind !== value.valueKind)
+	if (
+		!revision ||
+		revision.valueKind !== value.valueKind ||
+		!isDeepStrictEqual(revision.constraints, value.constraints)
+	)
 		throw new Error("Catalog definition revision has another value shape");
 	return { definitionId: definition.id, revisionId: revision.id };
 }
@@ -219,13 +248,36 @@ export async function beginCatalogFact(
 	actor: string,
 	expectedVersion: number,
 	definitionRevisionId: string,
+	options: { spoiler?: 0 | 1 | 2; semanticId?: string; expectedHeadVersion?: number } = {},
 ) {
-	z.uuid().parse(definitionRevisionId);
+	const staged = z
+		.strictObject({
+			spoiler: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
+			semanticId: z.uuid().optional(),
+			expectedHeadVersion: z
+				.number()
+				.int()
+				.min(0)
+				.max(Number.MAX_SAFE_INTEGER - 1)
+				.default(0),
+		})
+		.parse(options);
+	if (Boolean(staged.semanticId) !== staged.expectedHeadVersion > 0)
+		throw new TypeError("Replacement requires an exact existing semantic head");
+	const id = randomUUID();
+	await assertCatalogDefinitionRevision(tx, definitionRevisionId, "property");
 	const revision = await recordCatalogChange(tx, reference, actor, expectedVersion, "fact.begin");
 	const table = CatalogFactTables[reference.owner].fact;
 	const [created] = await tx
 		.insert(table)
-		.values({ ownerId: reference.id, definitionRevisionId })
+		.values({
+			id,
+			ownerId: reference.id,
+			definitionRevisionId,
+			spoiler: staged.spoiler,
+			semanticId: staged.semanticId ?? id,
+			expectedHeadVersion: staged.expectedHeadVersion,
+		})
 		.returning({ id: table.id });
 	if (!created) throw new Error("Catalog fact insertion returned no row");
 	return { id: created.id, revision, lastNodePosition: -1 };
@@ -257,9 +309,86 @@ export async function appendCatalogFactNodes(
 	for (let i = 0; i < nodes.length; i++)
 		if (nodes[i]?.position !== expectedLastPosition + i + 1)
 			throw new TypeError("Catalog node batch must extend the exact contiguous prefix");
-	await tx
-		.insert(CatalogFactTables[reference.owner].valueNode)
-		.values(nodes.map((node) => ({ ...node, ownerId: reference.id, factId })));
+	const definition = await assertCatalogDefinitionRevision(
+		tx,
+		fact.definitionRevisionId,
+		"property",
+	);
+	const valueTable = CatalogFactTables[reference.owner].valueNode;
+	const parentPositions = [
+		...new Set(
+			nodes.flatMap((n) =>
+				n.parentPosition !== null && n.parentPosition <= expectedLastPosition
+					? [n.parentPosition]
+					: [],
+			),
+		),
+	];
+	const parents = parentPositions.length
+		? await tx
+				.select({ position: valueTable.position, rulePosition: valueTable.rulePosition })
+				.from(valueTable)
+				.where(
+					and(
+						eq(valueTable.ownerId, reference.id),
+						eq(valueTable.factId, factId),
+						inArray(valueTable.position, parentPositions),
+					),
+				)
+				.limit(512)
+		: [];
+	const rulesByPosition = new Map(parents.map((p) => [p.position, p.rulePosition]));
+	const values = nodes.map((node) => {
+		const rules = definition.constraints.rules;
+		const rule = rules
+			? node.position === 0
+				? rules[0]
+				: rules.find(
+						(r) =>
+							r.parent === rulesByPosition.get(node.parentPosition ?? -1) &&
+							r.memberKey === node.memberKey,
+					)
+			: undefined;
+		if (rules && !rule) throw new TypeError("Value member is not declared by the governed grammar");
+		validateCatalogScalar(
+			node,
+			rule ?? definition.constraints,
+			rule?.kind ?? definition.valueKind ?? "null",
+		);
+		const rulePosition = rule?.position ?? 0;
+		rulesByPosition.set(node.position, rulePosition);
+		return { ...node, rulePosition, ownerId: reference.id, factId };
+	});
+	const vocabularyIds = [
+		...new Set(
+			values.flatMap((node) => {
+				const rule = definition.constraints.rules?.[node.rulePosition] ?? definition.constraints;
+				return rule.vocabularyRevisionId ? [rule.vocabularyRevisionId] : [];
+			}),
+		),
+	];
+	const vocabularies = vocabularyIds.length
+		? await tx
+				.select({
+					id: catalogDefinitionRevision.id,
+					constraints: catalogDefinitionRevision.constraints,
+				})
+				.from(catalogDefinitionRevision)
+				.where(inArray(catalogDefinitionRevision.id, vocabularyIds))
+				.limit(128)
+		: [];
+	for (const node of values) {
+		const rule = definition.constraints.rules?.[node.rulePosition] ?? definition.constraints;
+		if (rule.vocabularyRevisionId && node.kind !== "null") {
+			const vocabulary = vocabularies.find((v) => v.id === rule.vocabularyRevisionId);
+			if (
+				node.kind !== "string" ||
+				!vocabulary?.constraints.memberRevisionIds?.includes(node.textValue ?? "")
+			)
+				throw new TypeError("Value is not a member of the exact vocabulary revision");
+		}
+	}
+	await tx.insert(valueTable).values(values);
 	const lastNodePosition = expectedLastPosition + nodes.length;
 	await tx
 		.update(table)
@@ -306,13 +435,30 @@ export async function sealCatalogFact(
 			),
 		)
 		.limit(1);
-	if (!root || (root.kind !== "null" && root.kind !== root.expectedKind))
+	const definition = await assertCatalogDefinitionRevision(
+		tx,
+		fact.definitionRevisionId,
+		"property",
+	);
+	if (
+		!root ||
+		(root.kind !== root.expectedKind &&
+			!(
+				root.kind === "null" &&
+				(definition.constraints.rules?.[0]?.nullable ?? definition.constraints.nullable)
+			))
+	)
 		throw new TypeError("Catalog value root differs from its property definition");
 	await tx
 		.update(tables.fact)
 		.set({ sealedAt: sql`current_timestamp` })
 		.where(and(eq(tables.fact.ownerId, reference.id), eq(tables.fact.id, factId)));
-	return { revision };
+	const head = await publishCatalogSemanticRevision(tx, reference, actor, {
+		semanticId: fact.semanticId,
+		expectedHeadVersion: fact.expectedHeadVersion,
+		factId,
+	});
+	return { revision, ...head };
 }
 
 export async function readCatalogFactNodes(
@@ -322,8 +468,9 @@ export async function readCatalogFactNodes(
 	factId: string,
 	afterPosition = -1,
 	limit = 100,
+	maxSpoiler: 0 | 1 | 2 = 0,
 ) {
-	await loadCatalogIdentity(tx, reference, actor, false);
+	const identity = await loadCatalogIdentity(tx, reference, actor, false);
 	z.uuid().parse(factId);
 	z.number().int().min(-1).max(Number.MAX_SAFE_INTEGER).parse(afterPosition);
 	z.number().int().min(1).max(512).parse(limit);
@@ -333,8 +480,23 @@ export async function readCatalogFactNodes(
 		.from(tables.fact)
 		.where(and(eq(tables.fact.id, factId), eq(tables.fact.ownerId, reference.id)))
 		.limit(1);
-	if (!fact?.sealedAt || !["active", "disputed"].includes(fact.state))
+	z.number().int().min(0).max(2).parse(maxSpoiler);
+	if (!fact?.sealedAt || !["active", "disputed"].includes(fact.state) || fact.spoiler > maxSpoiler)
 		throw new CatalogReferenceNotFound("Catalog fact is missing, withdrawn or not sealed");
+	if (identity.createdByAuthUserId !== actor) {
+		const [current] = await tx
+			.select({ id: tables.fact.id })
+			.from(tables.fact)
+			.where(
+				and(
+					eq(tables.fact.ownerId, reference.id),
+					eq(tables.fact.id, factId),
+					currentCatalogSemantic(reference, "fact"),
+				),
+			)
+			.limit(1);
+		if (!current) throw new CatalogReferenceNotFound("Historical fact requires owner authority");
+	}
 	return tx
 		.select()
 		.from(tables.valueNode)
@@ -356,6 +518,10 @@ export async function createCatalogRelation(
 	expectedVersion: number,
 	input: {
 		readonly definitionRevisionId: string;
+		readonly spoiler?: 0 | 1 | 2;
+		readonly semanticId?: string;
+		readonly expectedHeadVersion?: number;
+		readonly qualifiers?: readonly { definitionRevisionId: string; valueFactId: string }[];
 		readonly participants: readonly {
 			readonly roleRevisionId: string;
 			readonly target: CatalogReference;
@@ -366,6 +532,18 @@ export async function createCatalogRelation(
 	const value = z
 		.strictObject({
 			definitionRevisionId: z.uuid(),
+			semanticId: z.uuid().optional(),
+			expectedHeadVersion: z
+				.number()
+				.int()
+				.min(0)
+				.max(Number.MAX_SAFE_INTEGER - 1)
+				.default(0),
+			spoiler: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
+			qualifiers: z
+				.array(z.strictObject({ definitionRevisionId: z.uuid(), valueFactId: z.uuid() }))
+				.max(64)
+				.default([]),
 			participants: z
 				.array(
 					z.strictObject({
@@ -384,6 +562,9 @@ export async function createCatalogRelation(
 				target: { owner: participant.target.owner, id: participant.target.id },
 			})),
 		});
+	if (Boolean(value.semanticId) !== value.expectedHeadVersion > 0)
+		throw new TypeError("Replacement requires an exact existing semantic head");
+	const relationId = randomUUID();
 	const revision = await recordCatalogChange(
 		tx,
 		reference,
@@ -391,15 +572,54 @@ export async function createCatalogRelation(
 		expectedVersion,
 		"relation.create",
 	);
-	await assertReadableTargets(
+	const predicate = await assertCatalogDefinitionRevision(
+		tx,
+		value.definitionRevisionId,
+		"predicate",
+	);
+	const targetShapes = await assertReadableTargets(
 		tx,
 		value.participants.map(({ target }) => target),
 		actor,
 	);
+	validateCatalogParticipants(
+		predicate.constraints,
+		value.participants.map((p) => ({
+			roleRevisionId: p.roleRevisionId,
+			target: { ...p.target, shape: targetShapes.get(`${p.target.owner}:${p.target.id}`) ?? "" },
+		})),
+	);
+	for (const qualifier of value.qualifiers) {
+		if (!predicate.constraints.qualifierRevisionIds?.includes(qualifier.definitionRevisionId))
+			throw new TypeError("Qualifier is not allowed by this predicate revision");
+		const factTable = CatalogFactTables[reference.owner].fact;
+		const [fact] = await tx
+			.select()
+			.from(factTable)
+			.where(
+				and(
+					eq(factTable.ownerId, reference.id),
+					eq(factTable.id, qualifier.valueFactId),
+					eq(factTable.definitionRevisionId, qualifier.definitionRevisionId),
+				),
+			)
+			.limit(1);
+		if (!fact?.sealedAt || fact.state !== "active")
+			throw new TypeError(
+				"Relation qualifier requires an active sealed fact of the declared definition",
+			);
+	}
 	const tables = CatalogFactTables[reference.owner];
 	const [relation] = await tx
 		.insert(tables.relation)
-		.values({ ownerId: reference.id, definitionRevisionId: value.definitionRevisionId })
+		.values({
+			ownerId: reference.id,
+			definitionRevisionId: value.definitionRevisionId,
+			spoiler: value.spoiler,
+			id: relationId,
+			semanticId: value.semanticId ?? relationId,
+			expectedHeadVersion: value.expectedHeadVersion,
+		})
 		.returning({ id: tables.relation.id });
 	if (!relation) throw new Error("Catalog relation insertion returned no row");
 	await tx.insert(tables.participant).values(
@@ -412,7 +632,18 @@ export async function createCatalogRelation(
 			...participantTargetColumns(participant.target),
 		})),
 	);
-	return { id: relation.id, revision };
+	if (value.qualifiers.length)
+		await tx
+			.insert(tables.relationScope)
+			.values(
+				value.qualifiers.map((q) => ({ ...q, ownerId: reference.id, relationId: relation.id })),
+			);
+	const head = await publishCatalogSemanticRevision(tx, reference, actor, {
+		semanticId: value.semanticId ?? relation.id,
+		expectedHeadVersion: value.expectedHeadVersion,
+		relationId: relation.id,
+	});
+	return { id: relation.id, revision, ...head };
 }
 
 function participantTargetColumns(reference: CatalogReference) {
@@ -446,6 +677,7 @@ export async function findCatalogRelations(
 	const input = z
 		.strictObject({
 			afterId: z.uuid().optional(),
+			maxSpoiler: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
 			participants: z
 				.array(z.strictObject({ roleRevisionId: z.uuid(), target: CatalogReferenceSchema }))
 				.max(16)
@@ -483,7 +715,8 @@ export async function findCatalogRelations(
 				eq(table.ownerId, reference.id),
 				eq(table.definitionRevisionId, definitionRevisionId),
 				eq(table.state, "active"),
-				readableRelation(reference, actor),
+				readableRelation(reference, actor, input.maxSpoiler),
+				currentCatalogSemantic(reference, "relation"),
 				input.afterId ? gt(table.id, input.afterId) : undefined,
 				...participantConditions,
 			),
@@ -492,7 +725,12 @@ export async function findCatalogRelations(
 		.limit(100);
 }
 
-export function readableRelation(reference: CatalogReference, actor: string | null) {
+export function readableRelation(
+	reference: CatalogReference,
+	actor: string | null,
+	maxSpoiler: 0 | 1 | 2 = 0,
+) {
+	z.number().int().min(0).max(2).parse(maxSpoiler);
 	const { relation, participant } = CatalogFactTables[reference.owner];
 	const targets = {
 		publishing: participant.publishingId,
@@ -508,7 +746,7 @@ export function readableRelation(reference: CatalogReference, actor: string | nu
 		const table = CatalogIdentityTables[owner];
 		return sql`(${targets[owner]} is not null and exists (select 1 from ${table} where ${table.id} = ${targets[owner]} and ${table.deletedAt} is null and ((${table.createdByAuthUserId} = ${actor}::uuid) is true or (${table.visibility} in ('public', 'unlisted') and ${table.status} = 'published' and ${table.moderationStatus} = 'approved'))))`;
 	});
-	return sql`exists (select 1 from ${participant} where ${participant.ownerId} = ${relation.ownerId} and ${participant.relationId} = ${relation.id}) and not exists (select 1 from ${participant} where ${participant.ownerId} = ${relation.ownerId} and ${participant.relationId} = ${relation.id} and not (${sql.join(visibleTargets, sql` or `)}))`;
+	return sql`${relation.spoiler} <= ${maxSpoiler} and exists (select 1 from ${participant} where ${participant.ownerId} = ${relation.ownerId} and ${participant.relationId} = ${relation.id}) and not exists (select 1 from ${participant} where ${participant.ownerId} = ${relation.ownerId} and ${participant.relationId} = ${relation.id} and not (${sql.join(visibleTargets, sql` or `)}))`;
 }
 
 export async function assertReadableTargets(
@@ -516,6 +754,7 @@ export async function assertReadableTargets(
 	references: readonly CatalogReference[],
 	actor: string | null,
 ) {
+	const shapes = new Map<string, string>();
 	for (const owner of CatalogOwnerValues) {
 		const ids = [
 			...new Set(references.filter((reference) => reference.owner === owner).map(({ id }) => id)),
@@ -527,6 +766,7 @@ export async function assertReadableTargets(
 			.from(table)
 			.where(and(inArray(table.id, ids), isNull(table.deletedAt)))
 			.limit(ids.length);
+		for (const row of rows) shapes.set(`${owner}:${row.id}`, row.shape);
 		if (rows.length !== ids.length)
 			throw new CatalogReferenceNotFound("Catalog participant target is missing");
 		if (
@@ -540,6 +780,7 @@ export async function assertReadableTargets(
 		)
 			throw new CatalogAccessDenied("Catalog participant target is not readable");
 	}
+	return shapes;
 }
 
 export async function readCatalogParticipants(
@@ -549,12 +790,13 @@ export async function readCatalogParticipants(
 	actor: string | null,
 	afterPosition = -1,
 	limit = 100,
+	maxSpoiler: 0 | 1 | 2 = 0,
 ) {
 	z.uuid().parse(relationId);
 	z.number().int().min(-1).max(Number.MAX_SAFE_INTEGER).parse(afterPosition);
 	z.number().int().min(1).max(128).parse(limit);
 	const tables = CatalogFactTables[reference.owner];
-	await loadCatalogIdentity(tx, reference, actor, false);
+	const identity = await loadCatalogIdentity(tx, reference, actor, false);
 	const [relation] = await tx
 		.select()
 		.from(tables.relation)
@@ -562,7 +804,10 @@ export async function readCatalogParticipants(
 			and(
 				eq(tables.relation.ownerId, reference.id),
 				eq(tables.relation.id, relationId),
-				readableRelation(reference, actor),
+				readableRelation(reference, actor, maxSpoiler),
+				identity.createdByAuthUserId === actor
+					? undefined
+					: currentCatalogSemantic(reference, "relation"),
 			),
 		)
 		.limit(1);
@@ -579,4 +824,63 @@ export async function readCatalogParticipants(
 		)
 		.orderBy(tables.participant.position)
 		.limit(limit);
+}
+
+/** @alpha Qualifiers remain on the same immutable relation instance as its participants. */
+export async function readCatalogRelationQualifiers(
+	tx: DatabaseTransaction,
+	reference: CatalogReference,
+	actor: string | null,
+	relationId: string,
+	options: { afterId?: string; limit?: number; maxSpoiler?: 0 | 1 | 2 } = {},
+) {
+	const identity = await loadCatalogIdentity(tx, reference, actor, false);
+	const page = z
+		.strictObject({
+			afterId: z.uuid().optional(),
+			limit: z.number().int().min(1).max(64).default(64),
+			maxSpoiler: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
+		})
+		.parse(options);
+	z.uuid().parse(relationId);
+	const tables = CatalogFactTables[reference.owner];
+	const [relation] = await tx
+		.select({ id: tables.relation.id })
+		.from(tables.relation)
+		.where(
+			and(
+				eq(tables.relation.ownerId, reference.id),
+				eq(tables.relation.id, relationId),
+				identity.createdByAuthUserId === actor
+					? undefined
+					: currentCatalogSemantic(reference, "relation"),
+				readableRelation(reference, actor, page.maxSpoiler),
+			),
+		)
+		.limit(1);
+	if (!relation) throw new CatalogReferenceNotFound("Relation is not visible");
+	return tx
+		.select({
+			id: tables.relationScope.id,
+			definitionRevisionId: tables.relationScope.definitionRevisionId,
+			valueFactId: tables.relationScope.valueFactId,
+		})
+		.from(tables.relationScope)
+		.innerJoin(
+			tables.fact,
+			and(
+				eq(tables.fact.ownerId, tables.relationScope.ownerId),
+				eq(tables.fact.id, tables.relationScope.valueFactId),
+			),
+		)
+		.where(
+			and(
+				eq(tables.relationScope.ownerId, reference.id),
+				eq(tables.relationScope.relationId, relationId),
+				sql`${tables.fact.spoiler} <= ${page.maxSpoiler}`,
+				page.afterId ? gt(tables.relationScope.id, page.afterId) : undefined,
+			),
+		)
+		.orderBy(tables.relationScope.id)
+		.limit(page.limit);
 }

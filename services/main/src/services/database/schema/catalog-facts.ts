@@ -6,6 +6,7 @@ import {
 	check,
 	foreignKey,
 	index,
+	integer,
 	numeric,
 	primaryKey,
 	text,
@@ -124,8 +125,11 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 			definitionRevisionId: uuid()
 				.notNull()
 				.references(() => catalogDefinitionRevision.id, { onDelete: "restrict" }),
+			semanticId: uuid().notNull().default(sql`uuidv7()`),
+			expectedHeadVersion: bigint({ mode: "number" }).notNull().default(0),
 			state: text().$type<CatalogFactState>().default("active").notNull(),
 			lastNodePosition: bigint({ mode: "number" }).default(-1).notNull(),
+			spoiler: integer().notNull().default(0),
 			sealedAt: createTimestampMsColumn(),
 			createdAt: createCreatedAtColumn(),
 		},
@@ -133,6 +137,11 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 			primaryKey({ name: `${owner}_fact_identity_key`, columns: [table.ownerId, table.id] }),
 			index(`${owner}_fact_owner_idx`).on(table.ownerId, table.definitionRevisionId, table.id),
 			index(`${owner}_fact_definition_idx`).on(table.definitionRevisionId, table.id),
+			check(`${owner}_fact_spoiler_check`, sql`${table.spoiler} between 0 and 2`),
+			check(
+				`${owner}_fact_head_version_check`,
+				sql`${table.expectedHeadVersion} between 0 and 9007199254740990`,
+			),
 			check(`${owner}_fact_state_check`, inArray(table.state, CatalogFactStateValues)),
 			check(
 				`${owner}_fact_node_cursor_check`,
@@ -146,6 +155,7 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 			ownerId: uuid().notNull(),
 			factId: uuid().notNull(),
 			position: bigint({ mode: "number" }).notNull(),
+			rulePosition: integer().notNull().default(0),
 			parentPosition: bigint({ mode: "number" }),
 			parentKind: text().$type<"object" | "array">(),
 			memberKey: text(),
@@ -181,6 +191,13 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 				table.parentPosition,
 				table.position,
 			),
+			unique(`${owner}_fact_node_member_key`).on(
+				table.ownerId,
+				table.factId,
+				table.parentPosition,
+				table.memberKey,
+			),
+			check(`${owner}_fact_node_rule_check`, sql`${table.rulePosition} between 0 and 127`),
 			check(`${owner}_fact_node_kind_check`, inArray(table.kind, CatalogValueKindValues)),
 			check(
 				`${owner}_fact_node_position_check`,
@@ -210,14 +227,22 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 			definitionRevisionId: uuid()
 				.notNull()
 				.references(() => catalogDefinitionRevision.id, { onDelete: "restrict" }),
+			semanticId: uuid().notNull().default(sql`uuidv7()`),
+			expectedHeadVersion: bigint({ mode: "number" }).notNull().default(0),
 			state: text().$type<CatalogFactState>().default("active").notNull(),
 			revision: bigint({ mode: "number" }).default(1).notNull(),
+			spoiler: integer().default(0).notNull(),
 			createdAt: createCreatedAtColumn(),
 		},
 		(table) => [
 			primaryKey({ name: `${owner}_relation_owner_id_key`, columns: [table.ownerId, table.id] }),
 			index(`${owner}_relation_owner_idx`).on(table.ownerId, table.definitionRevisionId, table.id),
 			index(`${owner}_relation_definition_idx`).on(table.definitionRevisionId, table.id),
+			check(
+				`${owner}_relation_head_version_check`,
+				sql`${table.expectedHeadVersion} between 0 and 9007199254740990`,
+			),
+			check(`${owner}_relation_spoiler_check`, sql`${table.spoiler} between 0 and 2`),
 			check(`${owner}_relation_state_check`, inArray(table.state, CatalogFactStateValues)),
 			check(
 				`${owner}_relation_revision_check`,
@@ -403,6 +428,72 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 			check(`${owner}_support_source_path_check`, sql`length(${table.sourcePath}) > 0`),
 		],
 	);
+
+	const semanticRevision = pgTable(
+		`${owner}_semantic_revision`,
+		{
+			ownerId: uuid()
+				.notNull()
+				.references(() => identityColumn(owner), { onDelete: "restrict" }),
+			semanticId: uuid().notNull(),
+			version: bigint({ mode: "number" }).notNull(),
+			factId: uuid(),
+			relationId: uuid(),
+			state: text().$type<CatalogFactState>().notNull().default("active"),
+			actorAuthUserId: uuid().references(() => users.id, { onDelete: "set null" }),
+			createdAt: createCreatedAtColumn(),
+		},
+		(table) => [
+			primaryKey({
+				name: `${owner}_semantic_revision_key`,
+				columns: [table.ownerId, table.semanticId, table.version],
+			}),
+			foreignKey({
+				name: `${owner}_semantic_revision_fact_fk`,
+				columns: [table.ownerId, table.factId],
+				foreignColumns: [fact.ownerId, fact.id],
+			}).onDelete("restrict"),
+			foreignKey({
+				name: `${owner}_semantic_revision_relation_fk`,
+				columns: [table.ownerId, table.relationId],
+				foreignColumns: [relation.ownerId, relation.id],
+			}).onDelete("restrict"),
+			index(`${owner}_semantic_revision_fact_idx`).on(table.ownerId, table.factId),
+			index(`${owner}_semantic_revision_relation_idx`).on(table.ownerId, table.relationId),
+			check(
+				`${owner}_semantic_revision_target_check`,
+				sql`num_nonnulls(${table.factId},${table.relationId}) = 1`,
+			),
+			check(`${owner}_semantic_revision_state_check`, inArray(table.state, CatalogFactStateValues)),
+			check(
+				`${owner}_semantic_revision_version_check`,
+				sql`${table.version} between 1 and 9007199254740991`,
+			),
+		],
+	);
+	const semanticHead = pgTable(
+		`${owner}_semantic_head`,
+		{
+			ownerId: uuid().notNull(),
+			semanticId: uuid().notNull(),
+			version: bigint({ mode: "number" }).notNull(),
+		},
+		(table) => [
+			primaryKey({
+				name: `${owner}_semantic_head_key`,
+				columns: [table.ownerId, table.semanticId],
+			}),
+			foreignKey({
+				name: `${owner}_semantic_head_revision_fk`,
+				columns: [table.ownerId, table.semanticId, table.version],
+				foreignColumns: [
+					semanticRevision.ownerId,
+					semanticRevision.semanticId,
+					semanticRevision.version,
+				],
+			}).onDelete("restrict"),
+		],
+	);
 	const sourceBinding = pgTable(
 		`${owner}_source_binding`,
 		{
@@ -434,6 +525,8 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 		change,
 		support,
 		sourceBinding,
+		semanticRevision,
+		semanticHead,
 	};
 }
 
@@ -555,3 +648,24 @@ export const softwareSourceBinding = software.sourceBinding;
 export const entitySourceBinding = entity.sourceBinding;
 export const groupingSourceBinding = grouping.sourceBinding;
 export const referenceSourceBinding = reference.sourceBinding;
+
+export const publishingSemanticHead = publishing.semanticHead;
+export const publishingSemanticRevision = publishing.semanticRevision;
+
+export const musicSemanticHead = music.semanticHead;
+export const musicSemanticRevision = music.semanticRevision;
+
+export const programSemanticHead = program.semanticHead;
+export const programSemanticRevision = program.semanticRevision;
+
+export const softwareSemanticHead = software.semanticHead;
+export const softwareSemanticRevision = software.semanticRevision;
+
+export const entitySemanticHead = entity.semanticHead;
+export const entitySemanticRevision = entity.semanticRevision;
+
+export const groupingSemanticHead = grouping.semanticHead;
+export const groupingSemanticRevision = grouping.semanticRevision;
+
+export const referenceSemanticHead = reference.semanticHead;
+export const referenceSemanticRevision = reference.semanticRevision;

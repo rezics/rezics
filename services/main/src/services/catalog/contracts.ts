@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { CatalogOwnerValues, CatalogReferenceSchema } from "@rezics/reference";
 export { CatalogOwnerValues, CatalogReferenceSchema };
+import { CatalogDefinitionConstraintsSchema } from "./definition-contracts";
 import {
 	ContentRatingValues,
 	ModerationStatusValues,
@@ -65,6 +66,7 @@ export const CatalogDefinitionInputSchema = z
 		key: z.string().min(1).max(160),
 		kind: z.enum(["class", "property", "predicate", "role", "vocabulary"]),
 		valueKind: z.enum(CatalogValueKindValues).nullable(),
+		constraints: CatalogDefinitionConstraintsSchema.default({ nullable: false, integer: false }),
 	})
 	.refine((value) => (value.kind === "property") === (value.valueKind !== null), {
 		message: "Only property definitions declare a value kind",

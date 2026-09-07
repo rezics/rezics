@@ -1,5 +1,15 @@
 import { inArray, sql } from "drizzle-orm";
-import { bigint, boolean, check, index, integer, text, unique, uuid } from "drizzle-orm/pg-core";
+import {
+	bigint,
+	boolean,
+	check,
+	index,
+	integer,
+	jsonb,
+	text,
+	unique,
+	uuid,
+} from "drizzle-orm/pg-core";
 import {
 	CatalogOwnerValues,
 	type CatalogOwner,
@@ -80,10 +90,18 @@ export const catalogDefinitionRevision = pgTable(
 			.references(() => catalogDefinition.id, { onDelete: "restrict" }),
 		version: bigint({ mode: "number" }).notNull(),
 		valueKind: text().$type<CatalogValueKind>(),
+		constraints: jsonb()
+			.$type<import("../../catalog/definition-contracts").CatalogDefinitionConstraints>()
+			.notNull()
+			.default({ nullable: false, integer: false }),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
 		unique("catalog_definition_revision_version_key").on(table.definitionId, table.version),
+		check(
+			"catalog_definition_revision_constraints_check",
+			sql`jsonb_typeof(${table.constraints}) = 'object' and octet_length(${table.constraints}::text) <= 262144`,
+		),
 		check(
 			"catalog_definition_revision_version_check",
 			sql`${table.version} between 1 and 9007199254740991`,
