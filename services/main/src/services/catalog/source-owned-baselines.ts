@@ -75,7 +75,7 @@ async function origin(
 			const [row] = await tx
 				.select({
 					sourcePath: f.support.sourcePath,
-					sourceRevision: sql<number>`${value.expectedHeadVersion} + 1`,
+					sourceRevision: sql`${value.expectedHeadVersion} + 1`.mapWith(Number),
 				})
 				.from(f.support)
 				.innerJoin(value, and(eq(value.ownerId, f.support.ownerId), eq(value.id, sourceKey)))
@@ -217,16 +217,35 @@ export async function advanceCatalogSourceOwnedBaselines(
 		)
 		.limit(1);
 	if (!application) throw new Error("Source baseline requires its committed native journal");
-	const [applied] = input.action === "withdraw" ? await tx.select().from(catalogSourceApplication).where(and(eq(catalogSourceApplication.sourceRecordId, input.sourceRecordId), eq(catalogSourceApplication.proposalId, input.proposalId), eq(catalogSourceApplication.action, "apply"))).limit(1) : [];
-	if (input.action === "withdraw" && !applied) throw new Error("Source baseline compensation requires its original application");
-	const desiredSnapshot = input.action === "apply" ? proposal.snapshotId : applied?.previousSnapshotId;
+	const [applied] =
+		input.action === "withdraw"
+			? await tx
+					.select()
+					.from(catalogSourceApplication)
+					.where(
+						and(
+							eq(catalogSourceApplication.sourceRecordId, input.sourceRecordId),
+							eq(catalogSourceApplication.proposalId, input.proposalId),
+							eq(catalogSourceApplication.action, "apply"),
+						),
+					)
+					.limit(1)
+			: [];
+	if (input.action === "withdraw" && !applied)
+		throw new Error("Source baseline compensation requires its original application");
+	const desiredSnapshot =
+		input.action === "apply" ? proposal.snapshotId : applied?.previousSnapshotId;
 	for (const change of changes) {
 		if (!("afterRevision" in change)) continue;
 		const observed = desiredSnapshot
 			? await origin(tx, input.sourceRecordId, desiredSnapshot, change)
 			: undefined;
 		const fallback =
-			observed ?? (await origin(tx, input.sourceRecordId, proposal.snapshotId, change));
+			observed ??
+			(await origin(tx, input.sourceRecordId, proposal.snapshotId, change)) ??
+			(input.action === "apply" && input.previousSnapshotId
+				? await origin(tx, input.sourceRecordId, input.previousSnapshotId, change)
+				: undefined);
 		const locator = {
 			sourceRecordId: input.sourceRecordId,
 			mappingKey: proposal.mappingKey,
