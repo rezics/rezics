@@ -1,3 +1,8 @@
+import {
+	putSoftwareComponent,
+	restoreSoftwareComponent,
+	withdrawSoftwareComponent,
+} from "../src/services/catalog/software-components";
 import assert from "node:assert/strict";
 import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -198,6 +203,71 @@ try {
 			assert.equal(
 				(await readSoftwareReleaseComponents(tx, release, actor.id, "medium")).length,
 				0,
+			);
+			assertions++;
+			const removedHead = revision;
+			const originalMedium = (
+				await readSoftwareComponentHistory(tx, release, actor.id, "medium", mediumId)
+			).find((row) => row.operation === "put");
+			assert.ok(originalMedium);
+			revision = (
+				await restoreSoftwareComponent(
+					tx,
+					release,
+					actor.id,
+					revision,
+					"medium",
+					mediumId,
+					removedHead,
+					originalMedium.revision,
+				)
+			).revision;
+			const restoredMedium = await readSoftwareReleaseComponents(tx, release, actor.id, "medium");
+			assert.equal(
+				restoredMedium[0] && "id" in restoredMedium[0] ? restoredMedium[0].id : null,
+				mediumId,
+			);
+			assertions++;
+			const restoredHead = revision;
+			revision = (
+				await putSoftwareComponent(tx, release, actor.id, revision, mediumId, restoredHead, {
+					kind: "medium",
+					mediumTypeRevisionId: medium.revisionId,
+					quantity: 3,
+				})
+			).revision;
+			await assert.rejects(
+				tx.transaction((inner) =>
+					withdrawSoftwareComponent(
+						inner,
+						release,
+						actor.id,
+						revision,
+						"medium",
+						mediumId,
+						restoredHead,
+					),
+				),
+				/revision changed/,
+			);
+			assertions++;
+			const editedHead = revision;
+			revision = (
+				await restoreSoftwareComponent(
+					tx,
+					release,
+					actor.id,
+					revision,
+					"medium",
+					mediumId,
+					editedHead,
+					originalMedium.revision,
+				)
+			).revision;
+			const restoredAgain = await readSoftwareReleaseComponents(tx, release, actor.id, "medium");
+			assert.equal(
+				restoredAgain[0] && "quantity" in restoredAgain[0] ? restoredAgain[0].quantity : null,
+				2,
 			);
 			assertions++;
 			revision = (
