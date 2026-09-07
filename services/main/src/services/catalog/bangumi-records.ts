@@ -57,9 +57,9 @@ export const BangumiIndexSubjectPageSchema = z.strictObject({
 				added_at: z.string(),
 			}),
 		)
-		.max(100),
+		.max(50),
 	total: count,
-	limit: count.max(100),
+	limit: count.max(50),
 	offset: count,
 });
 
@@ -72,6 +72,37 @@ export const BangumiRevisionSchema = z.strictObject({
 	summary: z.string(),
 	data: z.record(z.string(), z.unknown()).nullable(),
 });
+
+export const BangumiRevisionPageSchema = z.strictObject({
+	data: z.array(BangumiRevisionSchema).max(50),
+	total: count,
+	limit: count.max(50),
+	offset: count,
+});
+
+/** A global revision ID alone does not establish which native subject it describes. @internal */
+export function validateBangumiRevisionContext(input: {
+	key: { objectType: string; externalId: string };
+	page: unknown;
+	entryIndex: number;
+	objectType: "subject" | "person" | "character";
+	externalId: number;
+	revisionId: number;
+}) {
+	const page = BangumiRevisionPageSchema.parse(input.page);
+	z.number().int().min(0).max(49).parse(input.entryIndex);
+	id.parse(input.externalId);
+	id.parse(input.revisionId);
+	if (
+		input.key.objectType !== `${input.objectType}_revisions` ||
+		input.key.externalId !== `${input.externalId}:${page.offset}` ||
+		page.data[input.entryIndex]?.id !== input.revisionId
+	)
+		throw new TypeError(
+			"Revision membership evidence does not identify the selected source entity and revision",
+		);
+	return `/data/${input.entryIndex}/id`;
+}
 
 /** Public relationship endpoint records preserve contextual actors separately from character identity. @internal */
 export const BangumiApiRelationSchemas = {
@@ -233,6 +264,73 @@ export const BangumiArchiveCharacterSchema = z.strictObject({
 	collects: count,
 });
 
+/** Archive Subject wire fields, verified against the complete pinned 2026-09-01 dump. @internal */
+export const BangumiArchiveSubjectSchema = z.strictObject({
+	id,
+	type: subjectType,
+	name: z.string(),
+	name_cn: z.string(),
+	infobox: z.string(),
+	platform: integer,
+	summary: z.string(),
+	nsfw: z.boolean(),
+	tags: z.array(z.strictObject({ name: z.string(), count })),
+	meta_tags: z.array(z.string()),
+	score: z.number().finite(),
+	score_details: z.partialRecord(
+		z.enum(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]),
+		count,
+	),
+	rank: count,
+	date: z.string(),
+	favorite: z.strictObject({
+		wish: count,
+		done: count,
+		doing: count,
+		on_hold: count,
+		dropped: count,
+	}),
+	series: z.boolean(),
+});
+
+/** API-only episode counts/images are absent in Archive; the mapper never manufactures them. @internal */
+export function planBangumiArchiveSubject(input: unknown) {
+	const subject = BangumiArchiveSubjectSchema.parse(input);
+	const owner =
+		subject.type === 1
+			? subject.series
+				? "grouping"
+				: "publishing"
+			: subject.type === 3
+				? "music"
+				: subject.type === 4
+					? "software"
+					: "program";
+	const shape =
+		subject.type === 1
+			? subject.series
+				? "grouping"
+				: "catalog_entry"
+			: subject.type === 3
+				? "catalog_entry"
+				: subject.type === 4
+					? "content"
+					: "program";
+	return {
+		subject,
+		owner,
+		shape,
+		names: [
+			...(subject.name ? [{ languageTag: null, kind: "source-primary", value: subject.name }] : []),
+			...(subject.name_cn
+				? [{ languageTag: "zh", kind: "source-translated", value: subject.name_cn }]
+				: []),
+		],
+		date: bangumiDate(subject.date),
+		contentRating: subject.nsfw ? "r18" : "general",
+	} as const;
+}
+
 /** Archive relation attributes remain on the relation, including contextual voice credits. @internal */
 export const BangumiArchiveRelationSchema = z.discriminatedUnion("kind", [
 	z.strictObject({
@@ -261,13 +359,14 @@ export const BangumiArchiveRelationSchema = z.discriminatedUnion("kind", [
 		subject_id: id,
 		person_id: id,
 		character_id: id,
+		type: integer,
 		summary: z.string(),
 	}),
 	z.strictObject({
 		kind: z.literal("person-relations"),
 		person_type: z.enum(["prsn", "crt"]),
-		person_id: id,
-		related_person_id: id,
+		person_id: count,
+		related_person_id: count,
 		relation_type: integer,
 		spoiler: flag,
 		ended: flag,

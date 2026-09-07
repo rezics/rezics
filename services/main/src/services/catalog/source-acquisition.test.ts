@@ -83,6 +83,16 @@ describe("source acquisition boundary", () => {
 					admit: async () => {},
 				})
 			).status,
+		).toBe("error");
+		const exactKey = { source: "bangumi", objectType: "subject", externalId: "253" };
+		expect(
+			(
+				await acquireCatalogSourceCheck(
+					{ ...lease, ...exactKey, sourceRecordId: catalogSourceRecordId(exactKey) },
+					new AbortController().signal,
+					{ fetch: gone, admit: async () => {} },
+				)
+			).status,
 		).toBe("tombstone");
 	});
 	it("rejects absent query rows, another identity and oversize responses before archive writes", async () => {

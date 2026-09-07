@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { database } from "../database";
 import { reserveCatalogSourceRequest } from "./source-rate";
-import { BangumiSubjectContractSha256, BangumiSubjectSchema } from "./bangumi";
-import { MusicBrainzCatalogContractSha256, MusicBrainzReleaseSchema } from "./musicbrainz";
-import { VndbCatalogContractSha256, VndbVnSchema, VndbReleaseSchema } from "./vndb";
+import { bangumiAcquisitionDescriptor } from "./bangumi-acquisition";
+import { musicBrainzAcquisitionDescriptor } from "./musicbrainz-acquisition";
+import { vndbAcquisitionRequest } from "./vndb-acquisition";
 import { storeCatalogSourcePayload, type CatalogSourceArchive } from "./source-observations";
 import type { CatalogSourceCheckLease, CatalogSourceCheckOutcome } from "./source-scheduling";
 
@@ -22,57 +22,22 @@ export function catalogSourceAcquisitionRequest(lease: CatalogSourceCheckLease) 
 		Accept: "application/json",
 		"Content-Type": "application/json",
 	};
-	if (lease.source === "bangumi" && lease.objectType === "subject") {
-		z.string()
-			.regex(/^[1-9][0-9]*$/u)
-			.parse(lease.externalId);
+	if (lease.source === "vndb")
 		return {
-			url: `https://api.bgm.tv/v0/subjects/${lease.externalId}`,
-			method: "GET",
+			...vndbAcquisitionRequest(lease.objectType, lease.externalId),
 			headers,
-			contractSha256: BangumiSubjectContractSha256,
-			parse: (value: unknown) => BangumiSubjectSchema.parse(value),
+			authoritativeGone: false,
 		};
-	}
-	if (lease.source === "musicbrainz" && lease.objectType === "release") {
-		z.uuid().parse(lease.externalId);
+	if (lease.source === "musicbrainz")
 		return {
-			url: `https://musicbrainz.org/ws/2/release/${lease.externalId}?fmt=json&inc=artists+artist-credits+recordings+release-groups+labels+discids+media+isrcs+recording-rels+work-rels`,
-			method: "GET",
+			...musicBrainzAcquisitionDescriptor(lease.objectType, lease.externalId),
 			headers,
-			contractSha256: MusicBrainzCatalogContractSha256,
-			parse: (value: unknown) => MusicBrainzReleaseSchema.parse(value),
+			authoritativeGone: true,
 		};
-	}
-	if (lease.source === "vndb" && ["vn", "release"].includes(lease.objectType)) {
-		z.string()
-			.regex(lease.objectType === "vn" ? /^v[1-9][0-9]*$/u : /^r[1-9][0-9]*$/u)
-			.parse(lease.externalId);
-		const fields =
-			lease.objectType === "vn"
-				? "id,title,titles.lang,titles.title,titles.latin,titles.official,titles.main,aliases,olang,platforms,languages,released,length,length_minutes,devstatus,editions.eid,editions.lang,editions.name,editions.official,staff.id,staff.aid,staff.name,staff.original,staff.eid,staff.role,staff.note,va.staff.id,va.staff.aid,va.character.id,va.note"
-				: "id,title,alttitle,languages.lang,languages.title,languages.latin,languages.main,languages.mtl,vns.id,released,platforms,patch,freeware,official,catalog,gtin,media.medium,media.qty,producers.id,producers.name,producers.developer,producers.publisher";
-		return {
-			url: `https://api.vndb.org/kana/${lease.objectType}`,
-			method: "POST",
-			headers,
-			body: JSON.stringify({ filters: ["id", "=", lease.externalId], fields, results: 1 }),
-			contractSha256: VndbCatalogContractSha256,
-			parse: (value: unknown) => {
-				const result = z
-					.object({ results: z.array(z.unknown()).max(1), more: z.boolean().optional() })
-					.parse(value);
-				if (result.results.length !== 1)
-					throw new Error("A missing query result is not a source tombstone");
-				return lease.objectType === "vn"
-					? VndbVnSchema.parse(result.results[0])
-					: VndbReleaseSchema.parse(result.results[0]);
-			},
-		};
-	}
+	if (lease.source === "bangumi")
+		return { ...bangumiAcquisitionDescriptor(lease.objectType, lease.externalId), headers };
 	throw new Error("No reviewed acquisition route is registered for this source object type");
 }
-
 /** @internal Network and archive I/O happen after acquisition admission and outside the applying transaction. */
 export async function acquireCatalogSourceCheck(
 	lease: CatalogSourceCheckLease,
@@ -93,7 +58,7 @@ export async function acquireCatalogSourceCheck(
 		redirect: "error",
 		signal: AbortSignal.any([ioSignal, AbortSignal.timeout(20_000)]),
 	});
-	if (response.status === 410)
+	if (response.status === 410 && request.authoritativeGone)
 		return {
 			status: "tombstone",
 			authoritative: true,
@@ -117,9 +82,7 @@ export async function acquireCatalogSourceCheck(
 	const sourceValue: unknown = JSON.parse(
 		new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks)),
 	);
-	const parsed = request.parse(sourceValue);
-	if (String(parsed.id) !== lease.externalId)
-		throw new Error("Acquired source identity differs from its admitted record");
+	request.parse(sourceValue);
 	// Preserve the upstream object, including admitted unknown fields; parsing never rewrites evidence.
 	const document =
 		lease.source === "vndb"

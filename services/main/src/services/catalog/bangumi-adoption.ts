@@ -16,6 +16,7 @@ import {
 	planBangumiEpisode,
 	parseBangumiWiki,
 	selectBangumiRevisionWiki,
+	validateBangumiRevisionContext,
 } from "./bangumi-records";
 import { bangumiDate, BangumiSubjectContractSha256, BangumiWikiEntrySchema } from "./bangumi";
 import { createEntity, initializeEntityProfile } from "./entities";
@@ -122,6 +123,8 @@ async function finish(
 		sourcePath: "/id",
 	});
 	const binding = {
+		mappingVersion:
+			receipt.key.objectType === "episode" ? "bangumi.program-episode.1" : "bangumi.entity.1",
 		sourceRecordId: observation.record.id,
 		path: "/",
 		snapshotId: observation.snapshot.id,
@@ -358,6 +361,7 @@ export async function adoptBangumiWikiValue(
 			externalId: number;
 			memberRevisionId?: string;
 		};
+		revisionContext?: { receipt: CatalogSourceReceipt; bytes: Uint8Array; entryIndex: number };
 	},
 ) {
 	z.number().int().min(0).parse(input.entryIndex);
@@ -381,13 +385,33 @@ export async function adoptBangumiWikiValue(
 	const raw = decode(input.receipt, input.bytes, input.receipt.contractSha256);
 	let entries: z.output<typeof BangumiWikiEntrySchema>[];
 	let sourcePath: string;
+	let membership: { receipt: CatalogSourceReceipt; bytes: Uint8Array; path: string } | undefined;
 	if (revisionTarget) {
 		const selected = selectBangumiRevisionWiki(raw, revisionTarget.memberRevisionId);
 		if (
 			input.receipt.key.objectType !== `${revisionTarget.objectType}_revision` ||
-			input.receipt.key.externalId !== `${revisionTarget.externalId}:${selected.revision.id}`
+			input.receipt.key.externalId !== String(selected.revision.id)
 		)
-			throw new TypeError("Revision receipt does not carry the selected entity's contextual key");
+			throw new TypeError("Revision receipt does not identify the selected global revision");
+		if (!input.revisionContext)
+			throw new TypeError(
+				"Historical wiki adoption requires archived revision membership evidence",
+			);
+		membership = {
+			...input.revisionContext,
+			path: validateBangumiRevisionContext({
+				key: input.revisionContext.receipt.key,
+				page: decode(
+					input.revisionContext.receipt,
+					input.revisionContext.bytes,
+					BangumiApiContractSha256,
+				),
+				entryIndex: input.revisionContext.entryIndex,
+				objectType: revisionTarget.objectType,
+				externalId: revisionTarget.externalId,
+				revisionId: selected.revision.id,
+			}),
+		};
 		if (selected.status !== "available" || selected.wiki.status !== "parsed")
 			throw new TypeError("Selected revision does not expose a parsed wiki");
 		entries = selected.wiki.entries;
@@ -412,6 +436,9 @@ export async function adoptBangumiWikiValue(
 	const entry = entries[input.entryIndex];
 	if (!entry) throw new RangeError("Wiki entry does not exist");
 	const observation = await recordCatalogSourceDocument(tx, input.receipt, input.bytes);
+	const membershipObservation = membership
+		? await recordCatalogSourceDocument(tx, membership.receipt, membership.bytes)
+		: null;
 	const bound = revisionTarget
 		? await resolveBangumiDependency(
 				tx,
@@ -476,5 +503,13 @@ export async function adoptBangumiWikiValue(
 		snapshotId: observation.snapshot.id,
 		sourcePath,
 	});
+	if (membership && membershipObservation)
+		await tx.insert(CatalogFactTables[reference.owner].support).values({
+			ownerId: reference.id,
+			factId: fact.id,
+			sourceRecordId: membershipObservation.record.id,
+			snapshotId: membershipObservation.snapshot.id,
+			sourcePath: membership.path,
+		});
 	return { id: fact.id, ...sealed };
 }

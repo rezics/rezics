@@ -3,6 +3,29 @@ import { planBangumiApiRelation } from "./bangumi-api-relations";
 import { planBangumiArchiveRelation } from "./bangumi-relations";
 
 describe("Bangumi relation contexts", () => {
+	it("keeps undocumented cast type and rejects dangling zero endpoints before native adoption", () => {
+		expect(
+			planBangumiArchiveRelation({
+				kind: "person-characters",
+				subject_id: 292,
+				person_id: 1,
+				character_id: 296,
+				type: 0,
+				summary: "",
+			}).qualifiers,
+		).toContainEqual({ key: "type", value: 0 });
+		expect(() =>
+			planBangumiArchiveRelation({
+				kind: "person-relations",
+				person_type: "crt",
+				person_id: 208734,
+				related_person_id: 0,
+				relation_type: 0,
+				spoiler: false,
+				ended: false,
+			}),
+		).toThrow("missing endpoint");
+	});
 	it("keeps each nested voice credit tied to its source subject and character", () => {
 		const row = {
 			id: 77,

@@ -31,6 +31,8 @@ export const BangumiRelationMappingSchema = z.strictObject({
 /** Every archive relation's context and qualifiers are explicit before any native write. @internal */
 export function planBangumiArchiveRelation(input: z.input<typeof BangumiArchiveRelationSchema>) {
 	const row = BangumiArchiveRelationSchema.parse(input);
+	if (row.kind === "person-relations" && (row.person_id === 0 || row.related_person_id === 0))
+		throw new BangumiUnresolvedSourceReference(bangumiRelationKey(row));
 	const participants: {
 		role: keyof z.output<typeof BangumiRelationMappingSchema>["roles"];
 		objectType: "subject" | "person" | "character";
@@ -73,7 +75,7 @@ export function planBangumiArchiveRelation(input: z.input<typeof BangumiArchiveR
 				{ role: "person", objectType: "person", id: row.person_id },
 				{ role: "character", objectType: "character", id: row.character_id },
 			);
-			qualifiers.push({ key: "summary", value: row.summary });
+			qualifiers.push({ key: "type", value: row.type }, { key: "summary", value: row.summary });
 			break;
 		case "person-relations": {
 			const objectType = row.person_type === "prsn" ? "person" : "character";
@@ -97,6 +99,14 @@ export function planBangumiArchiveRelation(input: z.input<typeof BangumiArchiveR
 				? (1 as const)
 				: (0 as const),
 	};
+}
+
+/** The public dump includes dangling zero-ID relations; they remain unresolved evidence, never invented native entities. @internal */
+export class BangumiUnresolvedSourceReference extends Error {
+	readonly code = "bangumi.unresolved_source_reference";
+	constructor(readonly sourceTuple: string) {
+		super(`Bangumi source relation has a missing endpoint: ${sourceTuple}`);
+	}
 }
 
 /**

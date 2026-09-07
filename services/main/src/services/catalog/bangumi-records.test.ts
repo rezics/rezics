@@ -7,7 +7,9 @@ import {
 	parseBangumiWiki,
 	planBangumiEpisode,
 	selectBangumiRevisionWiki,
+	validateBangumiRevisionContext,
 	BangumiIndexSchema,
+	planBangumiArchiveSubject,
 } from "./bangumi-records";
 import { ProgramStructureSchema } from "./program";
 
@@ -43,6 +45,34 @@ const profile = {
 };
 
 describe("Bangumi native conformance", () => {
+	it("maps Archive Subject grain without fabricating absent API metrics or replacing done with a local vote", () => {
+		const plan = planBangumiArchiveSubject({
+			id: 1,
+			type: 1,
+			name: "Book",
+			name_cn: "书",
+			infobox: "{{Infobox Book\n|页数=188\n}}",
+			platform: 1002,
+			summary: "Description",
+			nsfw: false,
+			tags: [{ name: "小说", count: 16 }],
+			meta_tags: [],
+			score: 7.7,
+			score_details: { "1": 1, "10": 6 },
+			rank: 1920,
+			date: "1998-09-25",
+			favorite: { wish: 56, done: 128, doing: 6, on_hold: 7, dropped: 2 },
+			series: false,
+		});
+		expect(plan).toMatchObject({
+			owner: "publishing",
+			shape: "catalog_entry",
+			subject: { platform: 1002, favorite: { done: 128 } },
+		});
+		expect(plan.subject).not.toHaveProperty("eps");
+		expect(plan.subject).not.toHaveProperty("images");
+		expect(() => planBangumiArchiveSubject({ ...plan.subject, platform: "Novel" })).toThrow();
+	});
 	it("requires explicit selection of historical wiki members and retains unavailable revisions", () => {
 		const revision = {
 			id: 679589,
@@ -62,6 +92,23 @@ describe("Bangumi native conformance", () => {
 		});
 		expect(selectBangumiRevisionWiki({ ...revision, data: null }).status).toBe("unavailable");
 		expect(selectBangumiRevisionWiki(revision, "77").status).toBe("unavailable");
+		const membership = {
+			key: { objectType: "character_revisions", externalId: "77:0" },
+			page: { data: [{ ...revision, data: null }], total: 1, limit: 50, offset: 0 },
+			entryIndex: 0,
+			objectType: "character" as const,
+			externalId: 77,
+			revisionId: revision.id,
+		};
+		expect(validateBangumiRevisionContext(membership)).toBe("/data/0/id");
+		expect(() => validateBangumiRevisionContext({ ...membership, externalId: 78 })).toThrow();
+		expect(() =>
+			validateBangumiRevisionContext({ ...membership, revisionId: revision.id + 1 }),
+		).toThrow();
+		expect(() => validateBangumiRevisionContext({ ...membership, objectType: "person" })).toThrow();
+		expect(() =>
+			validateBangumiRevisionContext({ ...membership, page: { ...membership.page, offset: 50 } }),
+		).toThrow();
 	});
 	it("treats index curator handles as external attribution while retaining source statistics", () => {
 		const index = BangumiIndexSchema.parse({
@@ -120,6 +167,7 @@ describe("Bangumi native conformance", () => {
 	it("voice credits retain the subject in their identity; archive flags retain explicit false", () => {
 		const row = {
 			kind: "person-characters" as const,
+			type: 0,
 			subject_id: 253,
 			person_id: 3914,
 			character_id: 77,
