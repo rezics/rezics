@@ -83,6 +83,7 @@ export const PostgreSqlSchemaMigrationBundles = {
 		"catalog-music-history.sql",
 	],
 	catalog_source_native_applications: ["catalog-source-application.sql"],
+	participation_private_tag_guard: ["content-label-policy.sql"],
 	catalog_native_source_event_batch: [
 		"catalog-integrity.sql",
 		"catalog-distribution-integrity.sql",
