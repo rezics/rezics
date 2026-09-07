@@ -15,13 +15,15 @@
   "evidence": {
     "softwareNative": "services/main/scripts/check-software-native.ts: 17 rollback assertions",
     "participation": "services/main/scripts/check-vndb-participation.ts: 8 rollback assertions",
-    "releaseUpdates": "services/main/scripts/check-vndb-native-updates.ts: 23 assertions over 3 apply/withdraw/reapply cycles; API fixture, local metadata preserved",
+    "releaseUpdates": "DB59: check-vndb-native-updates.ts passed 23 assertions over 3 apply/withdraw/reapply cycles under native Participation authority; API fixture preserves local metadata and exact native compensation.",
     "queryFields": "vndbAcquisitionRequest: all 8 official endpoints accepted selected field syntax with results=0; this is not adoption proof",
     "nativeQueries": "software.ts / software-participation.ts / storage.ts / semantic-history.ts",
     "limits": "8 MB source records; 128 native changes per ordinary application; larger owners need central staged application protocol.",
-    "vnUpdates": "services/main/scripts/check-vndb-vn-updates.ts: 38 assertions over 3 apply/withdraw/reapply cycles; exact renamed/renumbered contexts, staff/voice, playtime and name derivation/authority; post-proposal independent credit edit rejected atomically.",
-    "supportingUpdates": "createVndbSupportingNativeWriter and check-vndb-supporting-updates.ts cover eight support families in code; backend/script TypeScript and planner tests pass. The eight-family SQL fixture awaits the combined source-epoch schema and is not yet qualified.",
-    "correspondence": "Source root epochs scope names, contexts, software scalar/component/participation occurrences and VNDB semantic support IDs; check-source-child-correspondence.ts has 21 assertions prepared. SQL validation and shared baseline/support epoch integration remain pending."
+    "vnUpdates": "DB59: check-vndb-vn-updates.ts passed 38 assertions over 3 apply/withdraw/reapply cycles under native Participation authority; exact renamed/renumbered contexts, staff/voice, playtime and name derivation/authority; post-proposal independent credit edit rejected atomically.",
+    "supportingUpdates": "DB59 (20260907132609): check-vndb-supporting-updates.ts passed 144 rollback assertions across eight support families and three apply/withdraw/reapply cycles per family after exact source-support/baseline epoch integration. Native names, scalar/measurement/profile values, quotation, taxonomy and DRM/engine data were read; an independent staff begin date was retained.",
+    "correspondence": "DB57: check-source-child-correspondence.ts passed 21 rollback assertions. The same archived snapshot maps through distinct name/context/scalar epochs after A-to-B-to-A rebind and mapper protocol change; policy revisions retain their epoch. Shared baseline and fact-support epoch integration was applied and checked in DB58.",
+    "protocolRefresh": "DB59: check-vndb-protocol-refresh.ts passed 47 rollback assertions for actual v2-to-v3-to-v4 proposal apply/withdraw/reapply. Old unchanged source graph retires, new epoch graph is native, exact old graph/title claims restore, human name/description survive both upgrades, typed pure source interpretation remains source-authored, and a conflicting subsequent scalar source update rejects atomically.",
+    "softwareReadScope": "DB58: check-software-read-scope.ts passed 18 rollback assertions. Selected grants do not inherit same-Auth creator rights through software discovery, linked components, credit actors/characters, or historical JSON references; filters precede keyset pagination."
   },
   "apiLeaves": [
     {
@@ -2053,8 +2055,8 @@
     }
   ],
   "remainingGates": [
-    "Complete combined source-epoch SQL qualification, including shared baseline and fact-support scope, rebind and same-target protocol reinterpretation; code and the dedicated fixture are implemented.",
-    "Run and qualify eight-family supporting native update/withdraw/reapply fixtures; callbacks now exist, but their SQL qualification is pending.",
+    "Generalize and qualify native protocol replacement beyond the bounded VN implementation; source-context separation and VN multi-upgrade replacement are qualified, but no global all-mapper refresh claim is made.",
+    "Qualify complete dump surface/association mapping alongside the eight supporting native callbacks; existing SQL fixtures cover selected native graph behavior, not every public dump field.",
     "Remaining dump assembly, image/link/anime/character/staff joins and table-specific bulk mapping must close individually.",
     "API-to-dump and dump-to-API source-surface transitions need a reviewed combined projection; current release callbacks reject such switches rather than erase unobserved fields.",
     "Applications above 128 native changes require the central staged protocol.",

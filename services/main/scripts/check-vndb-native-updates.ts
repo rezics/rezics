@@ -1,3 +1,4 @@
+import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import assert from "node:assert/strict";
 import { Readable } from "node:stream";
 import { and, desc, eq, sql } from "drizzle-orm";
@@ -124,177 +125,179 @@ try {
 				})
 				.returning({ id: users.id });
 			assert.ok(actor);
-			for (const routingBucket of new Set(
-				[original.id, "v970001", "p970001", "p970002"].map((id) =>
-					aggregateRoutingBucket("source_record", catalogSourceRecordId(vndbSourceKey(id))),
-				),
-			))
-				await tx
-					.insert(operationalCapacity)
-					.values(
-						["event-outbox", "task-outbox", "task-intent", "receipt"].map((lane) => ({
-							routingBucket,
-							lane,
-							maximumRows: 5000n,
-							maximumBytes: 128_000_000n,
-						})),
-					)
-					.onConflictDoNothing();
-			const initial = await adoptVndbRelease(tx, actor.id, firstReceipt, firstBytes);
-			assert.equal(initial.status, "created");
-			if (initial.status !== "created") throw new Error("Fixture source was already bound");
-			const reference = initial.reference;
-			const [record] = await tx
-				.select()
-				.from(softwareRecordRevision)
-				.where(eq(softwareRecordRevision.ownerId, reference.id))
-				.orderBy(desc(softwareRecordRevision.revision))
-				.limit(1);
-			assert.ok(record);
-			let revision = (
-				await reviseSoftwareRelease(tx, reference, actor.id, initial.revision, {
-					...decodeSoftwareReleaseSnapshot(record.value),
-					catalogNumber: "LOCAL-CATALOG",
-				})
-			).revision;
-			const [language] = await tx
-				.select()
-				.from(softwareReleaseLanguage)
-				.where(eq(softwareReleaseLanguage.releaseId, reference.id))
-				.limit(1);
-			assert.ok(language);
-			const channel = await ensureCatalogDefinition(tx, {
-				namespace: "software.language_channel",
-				key: "interface",
-				kind: "vocabulary",
-				valueKind: null,
-			});
-			const [languageHistory] = await readSoftwareComponentHistory(
-				tx,
-				reference,
-				actor.id,
-				"language",
-				language.id,
-			);
-			assert.ok(languageHistory);
-			revision = (
-				await putSoftwareComponent(
+			await runWithNativeFixtureActor(tx, actor.id, async () => {
+				for (const routingBucket of new Set(
+					[original.id, "v970001", "p970001", "p970002"].map((id) =>
+						aggregateRoutingBucket("source_record", catalogSourceRecordId(vndbSourceKey(id))),
+					),
+				))
+					await tx
+						.insert(operationalCapacity)
+						.values(
+							["event-outbox", "task-outbox", "task-intent", "receipt"].map((lane) => ({
+								routingBucket,
+								lane,
+								maximumRows: 5000n,
+								maximumBytes: 128_000_000n,
+							})),
+						)
+						.onConflictDoNothing();
+				const initial = await adoptVndbRelease(tx, actor.id, firstReceipt, firstBytes);
+				assert.equal(initial.status, "created");
+				if (initial.status !== "created") throw new Error("Fixture source was already bound");
+				const reference = initial.reference;
+				const [record] = await tx
+					.select()
+					.from(softwareRecordRevision)
+					.where(eq(softwareRecordRevision.ownerId, reference.id))
+					.orderBy(desc(softwareRecordRevision.revision))
+					.limit(1);
+				assert.ok(record);
+				let revision = (
+					await reviseSoftwareRelease(tx, reference, actor.id, initial.revision, {
+						...decodeSoftwareReleaseSnapshot(record.value),
+						catalogNumber: "LOCAL-CATALOG",
+					})
+				).revision;
+				const [language] = await tx
+					.select()
+					.from(softwareReleaseLanguage)
+					.where(eq(softwareReleaseLanguage.releaseId, reference.id))
+					.limit(1);
+				assert.ok(language);
+				const channel = await ensureCatalogDefinition(tx, {
+					namespace: "software.language_channel",
+					key: "interface",
+					kind: "vocabulary",
+					valueKind: null,
+				});
+				const [languageHistory] = await readSoftwareComponentHistory(
 					tx,
 					reference,
 					actor.id,
-					revision,
+					"language",
 					language.id,
-					languageHistory.revision,
-					{
-						kind: "language",
-						languageTag: language.languageTag,
-						channelRevisionId: channel.revisionId,
-						machineTranslated: language.machineTranslated,
-						main: language.main,
-						title: language.title,
-						transliteratedTitle: language.transliteratedTitle,
-					},
-				)
-			).revision;
-			const second = await recordCatalogSourceObservation(tx, secondReceipt);
-			const sourceRecordId = second.record.id;
-			const [claim] = await tx
-				.select()
-				.from(catalogSourceMappingClaim)
-				.where(
-					and(
-						eq(catalogSourceMappingClaim.sourceRecordId, sourceRecordId),
-						eq(catalogSourceMappingClaim.path, "/"),
-					),
-				)
-				.limit(1);
-			assert.ok(claim);
-			const writer = createVndbReleaseNativeWriter({
-				before: { snapshotId: initial.snapshotId, receipt: firstReceipt, bytes: firstBytes },
-				after: { snapshotId: second.snapshot.id, receipt: secondReceipt, bytes: secondBytes },
-			});
-			for (let cycle = 0; cycle < 3; cycle++) {
-				const proposal = await proposeCatalogSourceAdoption(tx, actor.id, {
-					sourceRecordId,
-					mappingKey: claim.mappingKey,
-					snapshotId: second.snapshot.id,
-					mappingVersion: "vndb.release.2",
-				});
-				assert.equal(proposal.status, "proposed");
-				if (proposal.status !== "proposed") throw new Error("Expected source proposal");
-				const decision = {
-					sourceRecordId,
-					proposalId: proposal.proposal.id,
-					mappingVersion: "vndb.release.2",
-					reason: "Reviewed fixture",
-				};
-				const applied = await decideCatalogSourceProposal(
-					tx,
-					actor.id,
-					{ ...decision, action: "apply" },
-					writer,
 				);
-				assert.equal(applied.status, "applied");
-				assertions++;
-				const details = await readSoftwareDetails(tx, reference, actor.id);
-				assert.equal(details.kind, "release");
-				if (details.kind !== "release") throw new Error("Expected release");
-				assert.equal(details.value?.notes, "Source notes B");
-				assert.equal(details.value?.catalogNumber, "LOCAL-CATALOG");
-				assertions++;
-				const languages = await tx
-					.select()
-					.from(softwareReleaseLanguage)
-					.where(eq(softwareReleaseLanguage.releaseId, reference.id));
-				assert.equal(languages.length, 2);
-				assert.equal(
-					languages.find((row) => row.languageTag === "ja")?.channelRevisionId,
-					channel.revisionId,
-				);
-				assertions++;
-				const withdrawn = await decideCatalogSourceProposal(
-					tx,
-					actor.id,
-					{ ...decision, action: "withdraw" },
-					writer,
-				);
-				assert.equal(withdrawn.status, "withdrawn");
-				assertions++;
-				const restored = await readSoftwareDetails(tx, reference, actor.id);
-				if (restored.kind !== "release") throw new Error("Expected release");
-				assert.equal(restored.value?.notes, "Source notes A");
-				assert.equal(restored.value?.catalogNumber, "LOCAL-CATALOG");
-				assertions++;
-				assert.equal(
-					(await readSoftwareReleaseComponents(tx, reference, actor.id, "language")).length,
-					1,
-				);
-				assertions++;
-				const [restoredClaim] = await tx
+				assert.ok(languageHistory);
+				revision = (
+					await putSoftwareComponent(
+						tx,
+						reference,
+						actor.id,
+						revision,
+						language.id,
+						languageHistory.revision,
+						{
+							kind: "language",
+							languageTag: language.languageTag,
+							channelRevisionId: channel.revisionId,
+							machineTranslated: language.machineTranslated,
+							main: language.main,
+							title: language.title,
+							transliteratedTitle: language.transliteratedTitle,
+						},
+					)
+				).revision;
+				const second = await recordCatalogSourceObservation(tx, secondReceipt);
+				const sourceRecordId = second.record.id;
+				const [claim] = await tx
 					.select()
 					.from(catalogSourceMappingClaim)
 					.where(
 						and(
 							eq(catalogSourceMappingClaim.sourceRecordId, sourceRecordId),
-							eq(catalogSourceMappingClaim.mappingKey, claim.mappingKey),
+							eq(catalogSourceMappingClaim.path, "/"),
 						),
 					)
 					.limit(1);
-				assert.equal(restoredClaim?.observedSnapshotId, initial.snapshotId);
+				assert.ok(claim);
+				const writer = createVndbReleaseNativeWriter({
+					before: { snapshotId: initial.snapshotId, receipt: firstReceipt, bytes: firstBytes },
+					after: { snapshotId: second.snapshot.id, receipt: secondReceipt, bytes: secondBytes },
+				});
+				for (let cycle = 0; cycle < 3; cycle++) {
+					const proposal = await proposeCatalogSourceAdoption(tx, actor.id, {
+						sourceRecordId,
+						mappingKey: claim.mappingKey,
+						snapshotId: second.snapshot.id,
+						mappingVersion: "vndb.release.2",
+					});
+					assert.equal(proposal.status, "proposed");
+					if (proposal.status !== "proposed") throw new Error("Expected source proposal");
+					const decision = {
+						sourceRecordId,
+						proposalId: proposal.proposal.id,
+						mappingVersion: "vndb.release.2",
+						reason: "Reviewed fixture",
+					};
+					const applied = await decideCatalogSourceProposal(
+						tx,
+						actor.id,
+						{ ...decision, action: "apply" },
+						writer,
+					);
+					assert.equal(applied.status, "applied");
+					assertions++;
+					const details = await readSoftwareDetails(tx, reference, actor.id);
+					assert.equal(details.kind, "release");
+					if (details.kind !== "release") throw new Error("Expected release");
+					assert.equal(details.value?.notes, "Source notes B");
+					assert.equal(details.value?.catalogNumber, "LOCAL-CATALOG");
+					assertions++;
+					const languages = await tx
+						.select()
+						.from(softwareReleaseLanguage)
+						.where(eq(softwareReleaseLanguage.releaseId, reference.id));
+					assert.equal(languages.length, 2);
+					assert.equal(
+						languages.find((row) => row.languageTag === "ja")?.channelRevisionId,
+						channel.revisionId,
+					);
+					assertions++;
+					const withdrawn = await decideCatalogSourceProposal(
+						tx,
+						actor.id,
+						{ ...decision, action: "withdraw" },
+						writer,
+					);
+					assert.equal(withdrawn.status, "withdrawn");
+					assertions++;
+					const restored = await readSoftwareDetails(tx, reference, actor.id);
+					if (restored.kind !== "release") throw new Error("Expected release");
+					assert.equal(restored.value?.notes, "Source notes A");
+					assert.equal(restored.value?.catalogNumber, "LOCAL-CATALOG");
+					assertions++;
+					assert.equal(
+						(await readSoftwareReleaseComponents(tx, reference, actor.id, "language")).length,
+						1,
+					);
+					assertions++;
+					const [restoredClaim] = await tx
+						.select()
+						.from(catalogSourceMappingClaim)
+						.where(
+							and(
+								eq(catalogSourceMappingClaim.sourceRecordId, sourceRecordId),
+								eq(catalogSourceMappingClaim.mappingKey, claim.mappingKey),
+							),
+						)
+						.limit(1);
+					assert.equal(restoredClaim?.observedSnapshotId, initial.snapshotId);
+					assertions++;
+				}
+				const name = CatalogNameTables.software.name;
+				const [display] = await tx
+					.select()
+					.from(name)
+					.where(and(eq(name.ownerId, reference.id), eq(name.kind, "primary")))
+					.limit(1);
+				assert.equal(display?.value, "Release A");
 				assertions++;
-			}
-			const name = CatalogNameTables.software.name;
-			const [display] = await tx
-				.select()
-				.from(name)
-				.where(and(eq(name.ownerId, reference.id), eq(name.kind, "primary")))
-				.limit(1);
-			assert.equal(display?.value, "Release A");
-			assertions++;
-			const latest = await loadCatalogIdentity(tx, reference, actor.id, true);
-			assert.ok(latest.revision > revision);
-			assertions++;
-			await tx.execute(sql`set constraints all immediate`);
+				const latest = await loadCatalogIdentity(tx, reference, actor.id, true);
+				assert.ok(latest.revision > revision);
+				assertions++;
+				await tx.execute(sql`set constraints all immediate`);
+			});
 			throw rollback;
 		});
 	} catch (error) {

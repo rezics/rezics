@@ -80,7 +80,7 @@ const record = {
 			name: staff.name,
 			original: null,
 			eid: 1,
-			role: "programmer",
+			role: "scenario",
 			note: null,
 		},
 	],

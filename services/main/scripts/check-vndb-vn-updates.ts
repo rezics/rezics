@@ -1,3 +1,4 @@
+import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import assert from "node:assert/strict";
 import { Readable } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
@@ -173,300 +174,302 @@ try {
 				.values({ name: "VNDB VN update fixture", email: `${crypto.randomUUID()}@example.invalid` })
 				.returning({ id: users.id });
 			assert.ok(actor);
-			for (const routingBucket of new Set(
-				[staff.id, original.id, "c960001", "c960002"].map((id) =>
-					aggregateRoutingBucket("source_record", catalogSourceRecordId(vndbSourceKey(id))),
-				),
-			))
-				await tx
-					.insert(operationalCapacity)
-					.values(
-						["event-outbox", "task-outbox", "task-intent", "receipt"].map((lane) => ({
-							routingBucket,
-							lane,
-							maximumRows: 5000n,
-							maximumBytes: 128_000_000n,
-						})),
-					)
-					.onConflictDoNothing();
-			await adoptVndbStaff(tx, actor.id, staffReceipt, staffBytes);
-			const first = await adoptVndbVn(tx, actor.id, firstReceipt, firstBytes);
-			assert.equal(first.status, "created");
-			if (first.status !== "created") throw new Error("Expected created VN");
-			const ref = first.reference;
-			const [english] = await tx
-				.select()
-				.from(softwareParticipationSourceOccurrence)
-				.where(
-					and(
-						eq(softwareParticipationSourceOccurrence.contentId, ref.id),
-						eq(softwareParticipationSourceOccurrence.snapshotId, first.snapshotId),
+			await runWithNativeFixtureActor(tx, actor.id, async () => {
+				for (const routingBucket of new Set(
+					[staff.id, original.id, "c960001", "c960002"].map((id) =>
+						aggregateRoutingBucket("source_record", catalogSourceRecordId(vndbSourceKey(id))),
 					),
-				)
-				.limit(1);
-			assert.ok(english);
-			await reviseSoftwareParticipationContext(
-				tx,
-				ref,
-				actor.id,
-				english.contextId,
-				english.contextRevision,
-				{ label: "Locally curated heading", languageTag: "en", state: "active" },
-			);
-			const second = await recordCatalogSourceObservation(tx, secondReceipt),
-				sourceRecordId = second.record.id;
-			const [binding] = await tx
-				.select()
-				.from(catalogSourceMappingClaim)
-				.where(
-					and(
-						eq(catalogSourceMappingClaim.sourceRecordId, sourceRecordId),
-						eq(catalogSourceMappingClaim.path, "/"),
-					),
-				)
-				.limit(1);
-			assert.ok(binding);
-			const writer = createVndbVnNativeWriter({
-				before: { snapshotId: first.snapshotId, receipt: firstReceipt, bytes: firstBytes },
-				after: { snapshotId: second.snapshot.id, receipt: secondReceipt, bytes: secondBytes },
-			});
-			const [estimateDefinition] = await tx
-				.select({ id: catalogDefinitionRevision.id })
-				.from(catalogDefinition)
-				.innerJoin(
-					catalogDefinitionRevision,
-					eq(catalogDefinition.id, catalogDefinitionRevision.definitionId),
-				)
-				.where(
-					and(
-						eq(catalogDefinition.namespace, "catalog.semantic-relation"),
-						eq(catalogDefinition.key, "reported-playtime-estimate"),
-					),
-				)
-				.limit(1);
-			assert.ok(estimateDefinition);
-			const estimate = async () => {
-				const rows = await findCatalogRelations(tx, ref, actor.id, estimateDefinition.id);
-				assert.equal(rows.length, 1);
-				const relation = rows[0];
-				assert.ok(relation);
-				const result = new Map<string, string | null>();
-				for (const field of await readCatalogRelationQualifiers(tx, ref, actor.id, relation.id)) {
-					const [definition] = await tx
-						.select({ key: catalogDefinition.key })
-						.from(catalogDefinitionRevision)
-						.innerJoin(
-							catalogDefinition,
-							eq(catalogDefinition.id, catalogDefinitionRevision.definitionId),
+				))
+					await tx
+						.insert(operationalCapacity)
+						.values(
+							["event-outbox", "task-outbox", "task-intent", "receipt"].map((lane) => ({
+								routingBucket,
+								lane,
+								maximumRows: 5000n,
+								maximumBytes: 128_000_000n,
+							})),
 						)
-						.where(eq(catalogDefinitionRevision.id, field.definitionRevisionId))
-						.limit(1);
-					assert.ok(definition);
-					const [node] = await readCatalogFactNodes(tx, ref, actor.id, field.valueFactId);
-					assert.ok(node);
-					result.set(definition.key, node.numberValue ?? node.textValue);
-				}
-				return result;
-			};
-			let frenchId: string | undefined;
-			for (let cycle = 0; cycle < 3; cycle++) {
-				const proposed = await proposeCatalogSourceAdoption(tx, actor.id, {
-					sourceRecordId,
-					mappingKey: binding.mappingKey,
-					snapshotId: second.snapshot.id,
-					mappingVersion: "vndb.vn.2",
-				});
-				assert.equal(proposed.status, "proposed");
-				if (proposed.status !== "proposed") throw new Error("Expected proposal");
-				const decision = {
-					sourceRecordId,
-					proposalId: proposed.proposal.id,
-					mappingVersion: "vndb.vn.2",
-					reason: "Reviewed native fixture",
-				};
-				assert.equal(
-					(
-						await decideCatalogSourceProposal(
-							tx,
-							actor.id,
-							{ ...decision, action: "apply" },
-							writer,
-						)
-					).status,
-					"applied",
-				);
-				assertions++;
-				const current = await readSoftwareDetails(tx, ref, actor.id);
-				if (current.kind !== "content") throw new Error("Expected content");
-				assert.equal(current.value?.description, "Description B");
-				assertions++;
-				const playtime = await estimate();
-				assert.equal(playtime.get("playtime-estimate-minutes"), "120");
-				assert.equal(playtime.get("playtime-sample-count"), "5");
-				assert.equal(playtime.get("playtime-estimator"), "reported_average");
-				assertions++;
-				const credits = await readSoftwareParticipations(tx, ref, actor.id);
-				assert.equal(credits.length, 4);
-				assertions++;
-				const scopes = await tx
+						.onConflictDoNothing();
+				await adoptVndbStaff(tx, actor.id, staffReceipt, staffBytes);
+				const first = await adoptVndbVn(tx, actor.id, firstReceipt, firstBytes);
+				assert.equal(first.status, "created");
+				if (first.status !== "created") throw new Error("Expected created VN");
+				const ref = first.reference;
+				const [english] = await tx
 					.select()
 					.from(softwareParticipationSourceOccurrence)
 					.where(
 						and(
 							eq(softwareParticipationSourceOccurrence.contentId, ref.id),
-							eq(softwareParticipationSourceOccurrence.snapshotId, second.snapshot.id),
-						),
-					);
-				const french = scopes.find((row) => row.localKey === "1"),
-					renumbered = scopes.find((row) => row.localKey === "9");
-				assert.ok(french && renumbered);
-				assert.notEqual(french.contextId, english.contextId);
-				assert.equal(renumbered.contextId, english.contextId);
-				if (frenchId) assert.equal(french.contextId, frenchId);
-				frenchId = french.contextId;
-				assertions++;
-				assert.equal(
-					(await readSoftwareParticipationContext(tx, ref, actor.id, english.contextId)).label,
-					"Locally curated heading",
-				);
-				assertions++;
-				const names = CatalogNameTables.software.name;
-				const [romanized] = await tx
-					.select()
-					.from(names)
-					.where(and(eq(names.ownerId, ref.id), eq(names.kind, "source-transliteration")))
-					.limit(1);
-				assert.ok(romanized?.derivationNameId && romanized.derivationRevision);
-				const histories = CatalogNameTables.software.nameRevision;
-				const [derived] = await tx
-					.select()
-					.from(histories)
-					.where(
-						and(
-							eq(histories.ownerId, ref.id),
-							eq(histories.id, romanized.derivationNameId),
-							eq(histories.revision, romanized.derivationRevision),
+							eq(softwareParticipationSourceOccurrence.snapshotId, first.snapshotId),
 						),
 					)
 					.limit(1);
-				assert.equal(derived?.value, "作品乙");
-				assertions++;
-				assert.equal(
-					(
-						await decideCatalogSourceProposal(
-							tx,
-							actor.id,
-							{ ...decision, action: "withdraw" },
-							writer,
-						)
-					).status,
-					"withdrawn",
-				);
-				assertions++;
-				const restoredEstimate = await estimate();
-				assert.equal(restoredEstimate.get("playtime-estimate-minutes"), "100");
-				assert.equal(restoredEstimate.get("playtime-sample-count"), "3");
-				assertions++;
-				const [restoredTitle] = await tx
-					.select()
-					.from(names)
-					.where(
-						and(
-							eq(names.ownerId, ref.id),
-							eq(names.kind, "source-title"),
-							eq(names.languageTag, "ja"),
-						),
-					)
-					.limit(1);
-				assert.ok(restoredTitle);
-				const authority = await listCatalogNameAuthority(
+				assert.ok(english);
+				await reviseSoftwareParticipationContext(
 					tx,
 					ref,
 					actor.id,
-					restoredTitle.id,
-					restoredTitle.revision,
+					english.contextId,
+					english.contextRevision,
+					{ label: "Locally curated heading", languageTag: "en", state: "active" },
 				);
-				assert.ok(
-					authority.some(
-						(row) =>
-							row.claim === "official" &&
-							row.reviewState === "source_claim" &&
-							row.snapshotId === first.snapshotId,
-					),
-				);
-				assertions++;
-				assert.equal((await readSoftwareParticipations(tx, ref, actor.id)).length, 2);
-				assertions++;
-				assert.equal(
-					(await readSoftwareParticipationContext(tx, ref, actor.id, french.contextId)).state,
-					"withdrawn",
-				);
-				assert.equal(
-					(await readSoftwareParticipationContext(tx, ref, actor.id, english.contextId)).label,
-					"Locally curated heading",
-				);
-				assertions++;
-			}
-			const conflicting = await proposeCatalogSourceAdoption(tx, actor.id, {
-				sourceRecordId,
-				mappingKey: binding.mappingKey,
-				snapshotId: second.snapshot.id,
-				mappingVersion: "vndb.vn.2",
-			});
-			if (conflicting.status !== "proposed") throw new Error("Expected conflict proposal");
-			const englishCredit = (await readSoftwareParticipations(tx, ref, actor.id)).find(
-				(row) => row.contextId === english.contextId,
-			);
-			assert.ok(englishCredit);
-			await reviseSoftwareParticipation(
-				tx,
-				ref,
-				actor.id,
-				englishCredit.participationId,
-				englishCredit.revision,
-				{
-					entityId: englishCredit.entityId,
-					name:
-						englishCredit.nameId && englishCredit.nameRevision
-							? { id: englishCredit.nameId, revision: englishCredit.nameRevision }
-							: null,
-					context:
-						englishCredit.contextId && englishCredit.contextRevision
-							? { id: englishCredit.contextId, revision: englishCredit.contextRevision }
-							: null,
-					characterId: englishCredit.characterId,
-					roleRevisionId: englishCredit.roleRevisionId,
-					note: "Local credit correction",
-					state: "active",
-				},
-			);
-			await assert.rejects(
-				tx.transaction((inner) =>
-					decideCatalogSourceProposal(
-						inner,
+				const second = await recordCatalogSourceObservation(tx, secondReceipt),
+					sourceRecordId = second.record.id;
+				const [binding] = await tx
+					.select()
+					.from(catalogSourceMappingClaim)
+					.where(
+						and(
+							eq(catalogSourceMappingClaim.sourceRecordId, sourceRecordId),
+							eq(catalogSourceMappingClaim.path, "/"),
+						),
+					)
+					.limit(1);
+				assert.ok(binding);
+				const writer = createVndbVnNativeWriter({
+					before: { snapshotId: first.snapshotId, receipt: firstReceipt, bytes: firstBytes },
+					after: { snapshotId: second.snapshot.id, receipt: secondReceipt, bytes: secondBytes },
+				});
+				const [estimateDefinition] = await tx
+					.select({ id: catalogDefinitionRevision.id })
+					.from(catalogDefinition)
+					.innerJoin(
+						catalogDefinitionRevision,
+						eq(catalogDefinition.id, catalogDefinitionRevision.definitionId),
+					)
+					.where(
+						and(
+							eq(catalogDefinition.namespace, "catalog.semantic-relation"),
+							eq(catalogDefinition.key, "reported-playtime-estimate"),
+						),
+					)
+					.limit(1);
+				assert.ok(estimateDefinition);
+				const estimate = async () => {
+					const rows = await findCatalogRelations(tx, ref, actor.id, estimateDefinition.id);
+					assert.equal(rows.length, 1);
+					const relation = rows[0];
+					assert.ok(relation);
+					const result = new Map<string, string | null>();
+					for (const field of await readCatalogRelationQualifiers(tx, ref, actor.id, relation.id)) {
+						const [definition] = await tx
+							.select({ key: catalogDefinition.key })
+							.from(catalogDefinitionRevision)
+							.innerJoin(
+								catalogDefinition,
+								eq(catalogDefinition.id, catalogDefinitionRevision.definitionId),
+							)
+							.where(eq(catalogDefinitionRevision.id, field.definitionRevisionId))
+							.limit(1);
+						assert.ok(definition);
+						const [node] = await readCatalogFactNodes(tx, ref, actor.id, field.valueFactId);
+						assert.ok(node);
+						result.set(definition.key, node.numberValue ?? node.textValue);
+					}
+					return result;
+				};
+				let frenchId: string | undefined;
+				for (let cycle = 0; cycle < 3; cycle++) {
+					const proposed = await proposeCatalogSourceAdoption(tx, actor.id, {
+						sourceRecordId,
+						mappingKey: binding.mappingKey,
+						snapshotId: second.snapshot.id,
+						mappingVersion: "vndb.vn.2",
+					});
+					assert.equal(proposed.status, "proposed");
+					if (proposed.status !== "proposed") throw new Error("Expected proposal");
+					const decision = {
+						sourceRecordId,
+						proposalId: proposed.proposal.id,
+						mappingVersion: "vndb.vn.2",
+						reason: "Reviewed native fixture",
+					};
+					assert.equal(
+						(
+							await decideCatalogSourceProposal(
+								tx,
+								actor.id,
+								{ ...decision, action: "apply" },
+								writer,
+							)
+						).status,
+						"applied",
+					);
+					assertions++;
+					const current = await readSoftwareDetails(tx, ref, actor.id);
+					if (current.kind !== "content") throw new Error("Expected content");
+					assert.equal(current.value?.description, "Description B");
+					assertions++;
+					const playtime = await estimate();
+					assert.equal(playtime.get("playtime-estimate-minutes"), "120");
+					assert.equal(playtime.get("playtime-sample-count"), "5");
+					assert.equal(playtime.get("playtime-estimator"), "reported_average");
+					assertions++;
+					const credits = await readSoftwareParticipations(tx, ref, actor.id);
+					assert.equal(credits.length, 4);
+					assertions++;
+					const scopes = await tx
+						.select()
+						.from(softwareParticipationSourceOccurrence)
+						.where(
+							and(
+								eq(softwareParticipationSourceOccurrence.contentId, ref.id),
+								eq(softwareParticipationSourceOccurrence.snapshotId, second.snapshot.id),
+							),
+						);
+					const french = scopes.find((row) => row.localKey === "1"),
+						renumbered = scopes.find((row) => row.localKey === "9");
+					assert.ok(french && renumbered);
+					assert.notEqual(french.contextId, english.contextId);
+					assert.equal(renumbered.contextId, english.contextId);
+					if (frenchId) assert.equal(french.contextId, frenchId);
+					frenchId = french.contextId;
+					assertions++;
+					assert.equal(
+						(await readSoftwareParticipationContext(tx, ref, actor.id, english.contextId)).label,
+						"Locally curated heading",
+					);
+					assertions++;
+					const names = CatalogNameTables.software.name;
+					const [romanized] = await tx
+						.select()
+						.from(names)
+						.where(and(eq(names.ownerId, ref.id), eq(names.kind, "source-transliteration")))
+						.limit(1);
+					assert.ok(romanized?.derivationNameId && romanized.derivationRevision);
+					const histories = CatalogNameTables.software.nameRevision;
+					const [derived] = await tx
+						.select()
+						.from(histories)
+						.where(
+							and(
+								eq(histories.ownerId, ref.id),
+								eq(histories.id, romanized.derivationNameId),
+								eq(histories.revision, romanized.derivationRevision),
+							),
+						)
+						.limit(1);
+					assert.equal(derived?.value, "作品乙");
+					assertions++;
+					assert.equal(
+						(
+							await decideCatalogSourceProposal(
+								tx,
+								actor.id,
+								{ ...decision, action: "withdraw" },
+								writer,
+							)
+						).status,
+						"withdrawn",
+					);
+					assertions++;
+					const restoredEstimate = await estimate();
+					assert.equal(restoredEstimate.get("playtime-estimate-minutes"), "100");
+					assert.equal(restoredEstimate.get("playtime-sample-count"), "3");
+					assertions++;
+					const [restoredTitle] = await tx
+						.select()
+						.from(names)
+						.where(
+							and(
+								eq(names.ownerId, ref.id),
+								eq(names.kind, "source-title"),
+								eq(names.languageTag, "ja"),
+							),
+						)
+						.limit(1);
+					assert.ok(restoredTitle);
+					const authority = await listCatalogNameAuthority(
+						tx,
+						ref,
 						actor.id,
-						{
-							sourceRecordId,
-							proposalId: conflicting.proposal.id,
-							mappingVersion: "vndb.vn.2",
-							action: "apply",
-							reason: "Must retain independent credit edit",
-						},
-						writer,
+						restoredTitle.id,
+						restoredTitle.revision,
+					);
+					assert.ok(
+						authority.some(
+							(row) =>
+								row.claim === "official" &&
+								row.reviewState === "source_claim" &&
+								row.snapshotId === first.snapshotId,
+						),
+					);
+					assertions++;
+					assert.equal((await readSoftwareParticipations(tx, ref, actor.id)).length, 2);
+					assertions++;
+					assert.equal(
+						(await readSoftwareParticipationContext(tx, ref, actor.id, french.contextId)).state,
+						"withdrawn",
+					);
+					assert.equal(
+						(await readSoftwareParticipationContext(tx, ref, actor.id, english.contextId)).label,
+						"Locally curated heading",
+					);
+					assertions++;
+				}
+				const conflicting = await proposeCatalogSourceAdoption(tx, actor.id, {
+					sourceRecordId,
+					mappingKey: binding.mappingKey,
+					snapshotId: second.snapshot.id,
+					mappingVersion: "vndb.vn.2",
+				});
+				if (conflicting.status !== "proposed") throw new Error("Expected conflict proposal");
+				const englishCredit = (await readSoftwareParticipations(tx, ref, actor.id)).find(
+					(row) => row.contextId === english.contextId,
+				);
+				assert.ok(englishCredit);
+				await reviseSoftwareParticipation(
+					tx,
+					ref,
+					actor.id,
+					englishCredit.participationId,
+					englishCredit.revision,
+					{
+						entityId: englishCredit.entityId,
+						name:
+							englishCredit.nameId && englishCredit.nameRevision
+								? { id: englishCredit.nameId, revision: englishCredit.nameRevision }
+								: null,
+						context:
+							englishCredit.contextId && englishCredit.contextRevision
+								? { id: englishCredit.contextId, revision: englishCredit.contextRevision }
+								: null,
+						characterId: englishCredit.characterId,
+						roleRevisionId: englishCredit.roleRevisionId,
+						note: "Local credit correction",
+						state: "active",
+					},
+				);
+				await assert.rejects(
+					tx.transaction((inner) =>
+						decideCatalogSourceProposal(
+							inner,
+							actor.id,
+							{
+								sourceRecordId,
+								proposalId: conflicting.proposal.id,
+								mappingVersion: "vndb.vn.2",
+								action: "apply",
+								reason: "Must retain independent credit edit",
+							},
+							writer,
+						),
 					),
-				),
-				/independent native edit/,
-			);
-			assertions++;
-			const preserved = (await readSoftwareParticipations(tx, ref, actor.id)).find(
-				(row) => row.participationId === englishCredit.participationId,
-			);
-			assert.equal(preserved?.note, "Local credit correction");
-			const restoredContent = await readSoftwareDetails(tx, ref, actor.id);
-			if (restoredContent.kind !== "content") throw new Error("Expected content");
-			assert.equal(restoredContent.value?.description, "Description A");
-			assertions++;
-			await tx.execute(sql`set constraints all immediate`);
+					/independent native edit/,
+				);
+				assertions++;
+				const preserved = (await readSoftwareParticipations(tx, ref, actor.id)).find(
+					(row) => row.participationId === englishCredit.participationId,
+				);
+				assert.equal(preserved?.note, "Local credit correction");
+				const restoredContent = await readSoftwareDetails(tx, ref, actor.id);
+				if (restoredContent.kind !== "content") throw new Error("Expected content");
+				assert.equal(restoredContent.value?.description, "Description A");
+				assertions++;
+				await tx.execute(sql`set constraints all immediate`);
+			});
 			throw rollback;
 		});
 	} catch (error) {
