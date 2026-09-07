@@ -19,7 +19,7 @@ import {
 	openLibrarySourceKey,
 } from "./openlibrary";
 import { addCatalogName, createCatalogIdentity } from "./storage";
-import { appendSourceFieldObservation } from "./source-fields";
+import { bindCatalogSourceIdentity } from "./source-bindings";
 
 /** Pinned Open Library type-contract commit; its field artifacts remain in the source inventory. */
 export const OpenLibraryContractSha256 =
@@ -58,7 +58,13 @@ async function sourceWorkReferences(
 					eq(catalogSourceMappingClaim.owner, "publishing"),
 				),
 			)
-			.innerJoin(binding, eq(binding.mappingKey, catalogSourceMappingClaim.mappingKey))
+			.innerJoin(
+				binding,
+				and(
+					eq(binding.sourceRecordId, catalogSourceMappingClaim.sourceRecordId),
+					eq(binding.mappingKey, catalogSourceMappingClaim.mappingKey),
+				),
+			)
 			.innerJoin(publishingIdentity, eq(publishingIdentity.id, binding.ownerId))
 			.where(
 				and(
@@ -186,27 +192,12 @@ export async function adoptOpenLibraryRecord(
 				normalizedValue: identifier.value,
 			})),
 		);
-	for (const [field, value] of Object.entries(record))
-		revision = await appendSourceFieldObservation(tx, identity, actor, revision, {
-			namespace: `source.openlibrary.${source.objectType}`,
-			field,
-			value,
-			sourceRecordId: observation.record.id,
-			snapshotId: observation.snapshot.id,
-		});
-	const [claim] = await tx
-		.insert(catalogSourceMappingClaim)
-		.values({
-			sourceRecordId: observation.record.id,
-			path: "/",
-			owner: "publishing",
-			observedSnapshotId: observation.snapshot.id,
-		})
-		.returning();
-	if (!claim) throw new Error("Source mapping claim insertion returned no row");
-	await tx
-		.insert(CatalogFactTables.publishing.sourceBinding)
-		.values({ mappingKey: claim.mappingKey, mappingOwner: "publishing", ownerId: identity.id });
+	await bindCatalogSourceIdentity(tx, actor, {
+		sourceRecordId: observation.record.id,
+		snapshotId: observation.snapshot.id,
+		path: "/",
+		reference: { owner: "publishing", id: identity.id },
+	});
 	return {
 		status: "created" as const,
 		reference: { owner: "publishing" as const, id: identity.id },

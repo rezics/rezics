@@ -1,4 +1,4 @@
-import { and, eq, gt, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
+import { and, eq, gt, getTableColumns, getTableName, inArray, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { catalogDefinitionRevision } from "../database/schema/catalog-identity";
@@ -433,6 +433,10 @@ export function currentCatalogSemanticState(
 		relation,
 	} = CatalogFactTables[reference.owner];
 	const target = kind === "fact" ? fact : relation;
-	const targetId = kind === "fact" ? revision.factId : revision.relationId;
-	return sql<CatalogFactState>`(select ${revision.state} from ${revision} join ${head} on ${head.ownerId}=${revision.ownerId} and ${head.semanticId}=${revision.semanticId} and ${head.version}=${revision.version} where ${revision.ownerId}=${target.ownerId} and ${targetId}=${target.id} limit 1)`;
+	// A single-table Drizzle selection strips Column qualifiers even inside a SQL subquery.
+	const r = sql.identifier(getTableName(revision));
+	const h = sql.identifier(getTableName(head));
+	const t = sql.identifier(getTableName(target));
+	const targetKey = sql.identifier(kind === "fact" ? "fact_id" : "relation_id");
+	return sql<CatalogFactState>`(select ${r}."state" from ${revision} join ${head} on ${h}."owner_id"=${r}."owner_id" and ${h}."semantic_id"=${r}."semantic_id" and ${h}."version"=${r}."version" where ${r}."owner_id"=${t}."owner_id" and ${r}.${targetKey}=${t}."id" limit 1)`;
 }

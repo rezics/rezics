@@ -268,6 +268,9 @@ export const catalogSourceBindingRevision = pgTable(
 		referenceId: uuid().references(() => CatalogIdentityTables.reference.id, {
 			onDelete: "restrict",
 		}),
+		distributionId: uuid().references(() => CatalogIdentityTables.distribution.id, {
+			onDelete: "restrict",
+		}),
 		actorAuthUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "restrict" }),
@@ -286,7 +289,7 @@ export const catalogSourceBindingRevision = pgTable(
 		}).onDelete("restrict"),
 		check(
 			"catalog_source_binding_revision_target_check",
-			sql`num_nonnulls(${table.publishingId}, ${table.musicId}, ${table.programId}, ${table.softwareId}, ${table.entityId}, ${table.groupingId}, ${table.referenceId}) = 1 and case ${table.owner} when 'publishing' then ${table.publishingId} when 'music' then ${table.musicId} when 'program' then ${table.programId} when 'software' then ${table.softwareId} when 'entity' then ${table.entityId} when 'grouping' then ${table.groupingId} when 'reference' then ${table.referenceId} end is not null`,
+			sql`num_nonnulls(${table.publishingId}, ${table.musicId}, ${table.programId}, ${table.softwareId}, ${table.entityId}, ${table.groupingId}, ${table.referenceId}, ${table.distributionId}) = 1 and case ${table.owner} when 'publishing' then ${table.publishingId} when 'music' then ${table.musicId} when 'program' then ${table.programId} when 'software' then ${table.softwareId} when 'entity' then ${table.entityId} when 'grouping' then ${table.groupingId} when 'reference' then ${table.referenceId} when 'distribution' then ${table.distributionId} end is not null`,
 		),
 		check(
 			"catalog_source_binding_revision_values_check",

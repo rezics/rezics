@@ -124,9 +124,9 @@ try {
 			assert.equal(nativeWork.status, "created");
 			assert.equal(nativeEdition.status, "created");
 			assert.notEqual(nativeWork.reference.id, nativeEdition.reference.id);
-			for (const [original, native, kind] of [
-				[work, nativeWork, "work"],
-				[edition, nativeEdition, "edition"],
+			for (const [original, sourceReceipt, kind] of [
+				[work, workReceipt, "work"],
+				[edition, editionReceipt, "edition"],
 			] as const) {
 				const [record] = await tx
 					.select()
@@ -139,17 +139,7 @@ try {
 					)
 					.limit(1);
 				assert.ok(record);
-				assert.deepEqual(
-					await exportOpenLibraryRecord(
-						tx,
-						native.reference,
-						actor,
-						record.id,
-						native.snapshotId,
-						kind,
-					),
-					original,
-				);
+				assert.deepEqual(await exportOpenLibraryRecord(sourceReceipt, kind), original);
 			}
 			const [publication] = await tx
 				.select()

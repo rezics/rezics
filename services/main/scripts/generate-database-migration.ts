@@ -25,6 +25,7 @@ interface MigrationSqlSections {
 	readonly schemaDiff?: string;
 	readonly preOverlay?: string;
 	readonly canonicalSql?: string;
+	readonly beforeCanonicalOverlay?: string;
 	readonly postOverlay?: string;
 	readonly transactionModeNoneReason?: string;
 }
@@ -235,6 +236,7 @@ export function composeMigrationSql(sections: MigrationSqlSections): string {
 		...(transactionModeNoneReason ? [] : ["SET search_path TO public;"]),
 		sections.preOverlay?.trimEnd(),
 		sections.schemaDiff?.trimEnd(),
+		sections.beforeCanonicalOverlay?.trimEnd(),
 		sections.canonicalSql?.trimEnd(),
 		sections.postOverlay?.trimEnd(),
 	]
@@ -320,6 +322,9 @@ async function main(): Promise<void> {
 	const overlayDirectory = join(postgresSchemaDirectory, "migration-overlays");
 	const preOverlay = join(overlayDirectory, `${migrationName}.pre.sql`);
 	const postOverlay = join(overlayDirectory, `${migrationName}.post.sql`);
+	// Atlas Community omits physical children. Install them after parent DDL and
+	// before canonical leaf-only constraint triggers; post overlays remain last.
+	const beforeCanonicalOverlay = join(overlayDirectory, `${migrationName}.before-canonical.sql`);
 	const overlayOnlyMarker = join(overlayDirectory, `${migrationName}${OverlayOnlyMarkerSuffix}`);
 	const transactionModeNoneMarker = join(
 		overlayDirectory,
@@ -353,6 +358,7 @@ async function main(): Promise<void> {
 	try {
 		const hasPreOverlay = await exists(preOverlay);
 		const hasPostOverlay = await exists(postOverlay);
+		const hasBeforeCanonicalOverlay = await exists(beforeCanonicalOverlay);
 		const canonicalFileExistence = await Promise.all(canonicalFiles.map(exists));
 		if (bundledCanonicalFileNames && canonicalFileExistence.some((fileExists) => !fileExists))
 			throw new Error(
@@ -362,6 +368,8 @@ async function main(): Promise<void> {
 			(_file, index) => canonicalFileExistence[index],
 		);
 		const hasCanonicalFile = existingCanonicalFiles.length > 0;
+		if (hasBeforeCanonicalOverlay && !hasCanonicalFile)
+			throw new Error("Before-canonical overlay requires canonical SQL");
 		const hasOverlayOnlyMarker = await exists(overlayOnlyMarker);
 		const overlayOnlyReason = hasOverlayOnlyMarker
 			? await readFile(overlayOnlyMarker, "utf8")
@@ -476,6 +484,9 @@ async function main(): Promise<void> {
 		const migrationSql = composeMigrationSql({
 			...(hasPreOverlay ? { preOverlay: await readFile(preOverlay, "utf8") } : {}),
 			...(schemaDiff ? { schemaDiff } : {}),
+			...(hasBeforeCanonicalOverlay
+				? { beforeCanonicalOverlay: await readFile(beforeCanonicalOverlay, "utf8") }
+				: {}),
 			...(generationPlan.includeCanonicalSql
 				? {
 						canonicalSql: (

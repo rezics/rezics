@@ -352,6 +352,7 @@ BEGIN
     WHEN 'entity' THEN SELECT state, sealed_at INTO fact_state, sealed_time FROM public.entity_fact WHERE owner_id = target_owner AND id = target_fact FOR SHARE;
     WHEN 'grouping' THEN SELECT state, sealed_at INTO fact_state, sealed_time FROM public.grouping_fact WHERE owner_id = target_owner AND id = target_fact FOR SHARE;
     WHEN 'reference' THEN SELECT state, sealed_at INTO fact_state, sealed_time FROM public.reference_fact WHERE owner_id = target_owner AND id = target_fact FOR SHARE;
+    WHEN 'distribution' THEN SELECT state, sealed_at INTO fact_state, sealed_time FROM public.distribution_fact WHERE owner_id = target_owner AND id = target_fact FOR SHARE;
     ELSE RAISE EXCEPTION 'Unregistered catalog owner';
   END CASE;
   IF fact_state IS NULL THEN
@@ -413,6 +414,9 @@ BEGIN
     WHEN 'reference' THEN
       SELECT kind INTO root_kind FROM public.reference_fact_value_node WHERE owner_id = NEW.owner_id AND fact_id = NEW.id AND position = 0;
       SELECT position INTO last_position FROM public.reference_fact_value_node WHERE owner_id = NEW.owner_id AND fact_id = NEW.id ORDER BY position DESC LIMIT 1;
+    WHEN 'distribution' THEN
+      SELECT kind INTO root_kind FROM public.distribution_fact_value_node WHERE owner_id = NEW.owner_id AND fact_id = NEW.id AND position = 0;
+      SELECT position INTO last_position FROM public.distribution_fact_value_node WHERE owner_id = NEW.owner_id AND fact_id = NEW.id ORDER BY position DESC LIMIT 1;
     ELSE RAISE EXCEPTION 'Unregistered catalog owner';
   END CASE;
   SELECT value_kind INTO expected_kind FROM public.catalog_definition_revision WHERE id = NEW.definition_revision_id;
@@ -504,6 +508,41 @@ BEFORE UPDATE ON public.reference_fact
 FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_fact_header('reference');
 
 DROP TRIGGER IF EXISTS catalog_source_snapshot_immutable ON public.catalog_source_snapshot;
+
+DROP TRIGGER IF EXISTS distribution_identity_route_publish ON public.distribution_identity;
+CREATE TRIGGER distribution_identity_route_publish
+AFTER INSERT OR UPDATE OF id, routing_generation ON public.distribution_identity
+FOR EACH ROW EXECUTE FUNCTION public.catalog_publish_identity_route('distribution');
+
+DROP TRIGGER IF EXISTS distribution_identity_route_remove ON public.distribution_identity;
+CREATE TRIGGER distribution_identity_route_remove
+AFTER DELETE ON public.distribution_identity
+FOR EACH ROW EXECUTE FUNCTION public.catalog_remove_identity_route('distribution');
+
+DROP TRIGGER IF EXISTS distribution_fact_definition_guard ON public.distribution_fact;
+CREATE TRIGGER distribution_fact_definition_guard BEFORE INSERT OR UPDATE ON public.distribution_fact
+FOR EACH ROW EXECUTE FUNCTION public.catalog_require_definition_kind('definition_revision_id', 'property');
+
+DROP TRIGGER IF EXISTS distribution_catalog_relation_definition_guard ON public.distribution_catalog_relation;
+CREATE TRIGGER distribution_catalog_relation_definition_guard BEFORE INSERT OR UPDATE ON public.distribution_catalog_relation
+FOR EACH ROW EXECUTE FUNCTION public.catalog_require_definition_kind('definition_revision_id', 'predicate');
+
+DROP TRIGGER IF EXISTS distribution_relation_participant_definition_guard ON public.distribution_relation_participant;
+CREATE TRIGGER distribution_relation_participant_definition_guard BEFORE INSERT OR UPDATE ON public.distribution_relation_participant
+FOR EACH ROW EXECUTE FUNCTION public.catalog_require_definition_kind('role_revision_id', 'role');
+
+DROP TRIGGER IF EXISTS distribution_relation_scope_definition_guard ON public.distribution_relation_scope;
+CREATE TRIGGER distribution_relation_scope_definition_guard BEFORE INSERT OR UPDATE ON public.distribution_relation_scope
+FOR EACH ROW EXECUTE FUNCTION public.catalog_require_definition_kind('definition_revision_id', 'property');
+
+DROP TRIGGER IF EXISTS distribution_fact_value_node_value_guard ON public.distribution_fact_value_node;
+CREATE TRIGGER distribution_fact_value_node_value_guard BEFORE INSERT OR UPDATE OR DELETE ON public.distribution_fact_value_node
+FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_fact_value('distribution');
+
+DROP TRIGGER IF EXISTS distribution_fact_value_guard ON public.distribution_fact;
+CREATE TRIGGER distribution_fact_value_guard BEFORE UPDATE ON public.distribution_fact
+FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_fact_header('distribution');
+
 CREATE TRIGGER catalog_source_snapshot_immutable
 BEFORE UPDATE ON public.catalog_source_snapshot
 FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_source_snapshot();

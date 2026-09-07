@@ -10,7 +10,7 @@ import {
 } from "../src/services/database/schema/catalog-reference";
 import { referenceIdentity } from "../src/services/database/schema/catalog-identity";
 import { groupingOrderEntry } from "../src/services/database/schema/catalog-grouping";
-import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
+import { transitionCatalogSemanticState } from "../src/services/catalog/semantic-history";
 import {
 	createEntity,
 	initializeEntityProfile,
@@ -220,17 +220,29 @@ try {
 				cls.revisionId,
 			);
 			checks++;
-			const predicate = await ensureCatalogDefinition(tx, {
-				namespace: "supporting.fixture",
-				key: "membership",
-				kind: "predicate",
-				valueKind: null,
-			});
 			const role = await ensureCatalogDefinition(tx, {
 				namespace: "supporting.fixture",
 				key: "member",
 				kind: "role",
 				valueKind: null,
+				constraints: { targets: [{ owner: "entity", shapes: ["person"] }] },
+			});
+			const predicate = await ensureCatalogDefinition(tx, {
+				namespace: "supporting.fixture",
+				key: "membership",
+				kind: "predicate",
+				valueKind: null,
+				constraints: {
+					targets: [{ owner: "grouping", shapes: ["grouping"] }],
+					roles: [
+						{
+							roleRevisionId: role.revisionId,
+							min: 1,
+							max: 1,
+							targets: [{ owner: "entity", shapes: ["person"] }],
+						},
+					],
+				},
 			});
 			const relation = await createCatalogRelation(tx, grouping, actor, grouping.revision, {
 				definitionRevisionId: predicate.revisionId,
@@ -259,26 +271,32 @@ try {
 				relationId: relation.id,
 			});
 			assert.equal((await readGroupingOrder(tx, grouping, actor, order.id)).length, 0);
-			await restoreGroupingCommand(tx, grouping, actor, removed.revision, ordered.revision);
+			const restoredOrder = await restoreGroupingCommand(
+				tx,
+				grouping,
+				actor,
+				removed.revision,
+				ordered.revision,
+			);
 			assert.equal((await readGroupingOrder(tx, grouping, actor, order.id)).length, 1);
 			checks++;
 			const entries = await readGroupingHistory(tx, grouping, actor, { limit: 2 });
 			assert.equal(entries.length, 2);
 			checks++;
-			await tx
-				.update(CatalogFactTables.grouping.relation)
-				.set({ state: "withdrawn" })
-				.where(
-					and(
-						eq(CatalogFactTables.grouping.relation.ownerId, grouping.id),
-						eq(CatalogFactTables.grouping.relation.id, relation.id),
-					),
-				);
+			const withdrawn = await transitionCatalogSemanticState(
+				tx,
+				grouping,
+				actor,
+				restoredOrder.revision,
+				relation.semanticId,
+				relation.headVersion,
+				"withdrawn",
+			);
 			assert.equal((await readGroupingOrder(tx, grouping, actor, order.id)).length, 0);
 			checks++;
 			await assert.rejects(
 				tx.transaction((nested) =>
-					orderGroupingRelation(nested, grouping, actor, removed.revision + 1, {
+					orderGroupingRelation(nested, grouping, actor, withdrawn.revision, {
 						profileId: order.id,
 						relationId: relation.id,
 						position: "a1",

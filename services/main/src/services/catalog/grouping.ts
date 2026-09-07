@@ -20,6 +20,7 @@ import {
 } from "./storage";
 import { NativeCatalogNameSchema } from "./entity-contracts";
 import { requireProfileDefinition } from "./entities";
+import { currentCatalogSemanticState } from "./semantic-history";
 
 const groupingReferenceSchema = z.strictObject({ owner: z.literal("grouping"), id: z.uuid() });
 const orderKeySchema = z
@@ -67,12 +68,14 @@ export async function createGrouping(
 		.parse(input);
 	for (const id of value.classes) await requireProfileDefinition(tx, id, ["class"]);
 	const identity = await createCatalogIdentity(tx, { owner: "grouping", shape: "grouping" }, actor);
-	let revision = (
-		await addCatalogName(tx, identity, actor, identity.revision, { ...value.name, kind: "primary" })
-	).revision;
+	const name = await addCatalogName(tx, identity, actor, identity.revision, {
+		...value.name,
+		kind: "primary",
+	});
+	let revision = name.revision;
 	for (const id of value.classes)
 		revision = (await assignGroupingClass(tx, identity, actor, revision, id)).revision;
-	return { ...identity, revision };
+	return { ...identity, revision, nameId: name.id };
 }
 
 export async function assignGroupingClass(
@@ -168,7 +171,7 @@ export async function orderGroupingRelation(
 			and(
 				eq(groupingCatalogRelation.ownerId, ref.id),
 				eq(groupingCatalogRelation.id, value.relationId),
-				eq(groupingCatalogRelation.state, "active"),
+				eq(currentCatalogSemanticState(ref, "relation"), "active"),
 				readableRelation(ref, actor),
 			),
 		)
@@ -233,7 +236,7 @@ export async function readGroupingOrder(
 			and(
 				eq(table.ownerId, ref.id),
 				eq(table.profileId, profileId),
-				eq(groupingCatalogRelation.state, "active"),
+				eq(currentCatalogSemanticState(ref, "relation"), "active"),
 				readableRelation(ref, actor),
 				page.after
 					? or(

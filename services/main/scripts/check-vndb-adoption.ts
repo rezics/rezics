@@ -124,10 +124,7 @@ try {
 				)
 				.limit(1);
 			assert.ok(record);
-			assert.deepEqual(
-				await exportVndbVn(tx, adopted.reference, account.id, record.id, adopted.snapshotId),
-				original,
-			);
+			assert.deepEqual(await exportVndbVn(receipt), original);
 			assert.equal(
 				(
 					await tx
@@ -160,7 +157,7 @@ try {
 					{ label: "Locally revised participation", languageTag: "fr", state: "withdrawn" },
 				);
 				assert.deepEqual(
-					await exportVndbVn(tx, adopted.reference, account.id, record.id, adopted.snapshotId),
+					await exportVndbVn(receipt),
 					original,
 					"Source observation export preserves original claims after a native context edit",
 				);

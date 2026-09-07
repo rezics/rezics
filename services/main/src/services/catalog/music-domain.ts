@@ -358,7 +358,10 @@ export async function addMusicReleaseLabel(
 	expectedVersion: number,
 	input: z.input<typeof labelInput>,
 ) {
-	const value = labelInput.parse(input);
+	const value = labelInput.parse({
+		...input,
+		label: input.label ? { owner: input.label.owner, id: input.label.id } : input.label,
+	});
 	await requireMusic(tx, release, actor, "release", true);
 	if (value.label) {
 		if (value.label.owner !== "entity") throw new TypeError("Expected an entity label identity");
@@ -493,7 +496,10 @@ export async function editMusicReleaseEvent(
 			dateText: z.string().max(4096).nullable().optional(),
 			area: CatalogReferenceSchema.nullable(),
 		})
-		.parse(input);
+		.parse({
+			...input,
+			area: input.area ? { owner: input.area.owner, id: input.area.id } : input.area,
+		});
 	await requireMusic(tx, release, actor, "release", true);
 	if (value.area) {
 		if (value.area.owner !== "reference") throw new TypeError("Expected reference area");

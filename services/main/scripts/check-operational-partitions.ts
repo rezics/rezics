@@ -42,10 +42,12 @@ export async function checkOperationalPartitions(client: Client): Promise<void> 
             count(*)::int as "cloneCount", count(*) filter(where matches is not true)::int as "invalidCount" from clones`,
 			[table],
 		);
+		const parentCount =
+			table === "operational_outbox" ? 3 : table === "operational_relay_pending" ? 0 : 2;
 		assert.deepEqual(
 			triggers.rows,
-			[{ parentCount: 2, cloneCount: 128, invalidCount: 0 }],
-			`${table} must inherit both enabled canonical triggers on every child`,
+			[{ parentCount, cloneCount: parentCount * 64, invalidCount: 0 }],
+			`${table} must inherit every enabled canonical trigger on every child`,
 		);
 	}
 }
@@ -65,7 +67,7 @@ if (import.meta.main) {
 	try {
 		await checkOperationalPartitions(client);
 		console.info(
-			"Verified 192 operational partition names, ranges, parent keys and 384 enabled trigger clones",
+			"Verified 256 operational partition names, ranges, parent keys and 448 enabled trigger clones",
 		);
 	} finally {
 		await client.end();

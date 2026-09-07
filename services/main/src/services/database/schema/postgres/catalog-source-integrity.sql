@@ -87,7 +87,7 @@ BEGIN
   FOR physical IN
     WITH RECURSIVE roots AS (
       SELECT c.oid FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
-      WHERE n.nspname='public' AND c.relname IN ('catalog_source_mapping_claim','catalog_source_binding_revision','publishing_source_binding','music_source_binding','program_source_binding','software_source_binding','entity_source_binding','grouping_source_binding','reference_source_binding')
+      WHERE n.nspname='public' AND c.relname IN ('catalog_source_mapping_claim','catalog_source_binding_revision','publishing_source_binding','music_source_binding','program_source_binding','software_source_binding','entity_source_binding','grouping_source_binding','reference_source_binding','distribution_source_binding')
       UNION ALL SELECT i.inhrelid FROM pg_inherits i JOIN roots r ON r.oid=i.inhparent
     ) SELECT c.oid::regclass AS name FROM roots r JOIN pg_class c ON c.oid=r.oid WHERE c.relkind='r'
   LOOP

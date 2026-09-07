@@ -90,7 +90,7 @@ async function validateParents(
 		await assertCatalogDefinitionTarget(
 			tx,
 			typeId,
-			["class", "vocabulary"],
+			"vocabulary",
 			{ owner: "program", shape: value.shape },
 			"type",
 		);

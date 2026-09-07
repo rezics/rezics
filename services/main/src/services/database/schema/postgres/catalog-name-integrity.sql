@@ -38,7 +38,9 @@ $$;
 CREATE OR REPLACE FUNCTION public.catalog_snapshot_named_head()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 BEGIN
- EXECUTE format('INSERT INTO public.%I SELECT ($1).*', TG_TABLE_NAME || '_revision') USING NEW;
+ -- ALTER TABLE preserves old physical column order; history must match names, not positions.
+ EXECUTE format('INSERT INTO public.%I SELECT (jsonb_populate_record(NULL::public.%I, to_jsonb($1))).*',
+   TG_TABLE_NAME || '_revision', TG_TABLE_NAME || '_revision') USING NEW;
  RETURN NEW;
 END;
 $$;
@@ -69,7 +71,7 @@ $$;
 DO $$
 DECLARE owner text; suffix text; head_name text;
 BEGIN
- FOREACH owner IN ARRAY ARRAY['publishing','music','program','software','entity','grouping','reference'] LOOP
+ FOREACH owner IN ARRAY ARRAY['publishing','music','program','software','entity','grouping','reference','distribution'] LOOP
   FOREACH suffix IN ARRAY ARRAY['named_form','identifier_claim','name_authority'] LOOP
    head_name := owner || '_' || suffix;
    EXECUTE format('DROP TRIGGER IF EXISTS catalog_named_head_guard ON public.%I', head_name);

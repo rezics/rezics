@@ -157,6 +157,14 @@ U14 group challenges and U15 third-party commercial API are expansion experiment
 
 ## Completion ledger
 
+**Latest checkpoint:** the native/source/event integration batch is complete as
+a locally verified slice. The maintainer requested a pause and new session;
+use [the continuation handoff](NEXT_SESSION.md) and
+[current batch ledger](00-source-complete-schema.md#current-integrated-batch-and-pause).
+Complete VNDB/MusicBrainz/Bangumi coverage, native update writers, global identity
+cutover and product/API/Web integration remain required. P02 work is retained
+on a separate draft branch, not merged as a supposedly finished migration.
+
 **2026-09-07 autonomous wave:** source-coverage bookkeeping, native software
 participation-context replacement, JetStream transport, PostgreSQL task/outbox/
 receipt durability and transactional source-observation events are integrated.

@@ -146,13 +146,51 @@ try {
 			const kind = await ensureCatalogDefinition(tx, {
 				namespace: "catalog",
 				key: "chapter",
-				kind: "class",
+				kind: "vocabulary",
 				valueKind: null,
 				constraints: {
 					targets: [{ owner: "publishing", shapes: ["serialization"] }],
 					slots: ["installment-kind"],
 				},
 			});
+			const classification = await ensureCatalogDefinition(tx, {
+				namespace: "catalog",
+				key: "program_fixture_class",
+				kind: "class",
+				valueKind: null,
+				constraints: {
+					targets: [
+						{ owner: "publishing", shapes: ["serialization"] },
+						{ owner: "program", shapes: ["program"] },
+					],
+					slots: ["installment-kind", "type"],
+				},
+			});
+			await assert.rejects(
+				tx.transaction((nested) =>
+					putPublishingInstallment(nested, serialization, actor, serialization.revision, {
+						position: "a0",
+						label: "Invalid class",
+						kindRevisionId: classification.revisionId,
+					}),
+				),
+				/Definition revision has the wrong semantic kind/,
+			);
+			await assert.rejects(
+				tx.transaction((nested) =>
+					createProgramStructure(
+						nested,
+						actor,
+						{
+							shape: "program",
+							fields: { typeRevisionId: classification.revisionId },
+						},
+						name("Invalid program classification"),
+					),
+				),
+				/Definition revision has the wrong semantic kind/,
+			);
+			checks += 2;
 			const chapter = await putPublishingInstallment(
 				tx,
 				serialization,

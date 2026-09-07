@@ -2,13 +2,11 @@ import assert from "node:assert/strict";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import { registerCatalogSourceRecord } from "../src/services/catalog/source-observations";
 import type { DatabaseTransaction } from "../src/services/database";
 import { users } from "../src/services/database/schema/auth";
 import { CatalogNameTables } from "../src/services/database/schema/catalog-names";
-import {
-	catalogSourceRecord,
-	catalogSourceSnapshot,
-} from "../src/services/database/schema/catalog-source";
+import { catalogSourceSnapshot } from "../src/services/database/schema/catalog-source";
 import {
 	addCatalogName,
 	bindCatalogNameSourceOccurrence,
@@ -182,14 +180,11 @@ try {
 				3,
 			);
 			checks++;
-			const [record] = await tx
-				.insert(catalogSourceRecord)
-				.values({
-					source: "name-acceptance",
-					objectType: "person",
-					externalId: crypto.randomUUID(),
-				})
-				.returning();
+			const record = await registerCatalogSourceRecord(tx, {
+				source: "name-acceptance",
+				objectType: "person",
+				externalId: crypto.randomUUID(),
+			});
 			assert.ok(record);
 			const [snapshot] = await tx
 				.insert(catalogSourceSnapshot)

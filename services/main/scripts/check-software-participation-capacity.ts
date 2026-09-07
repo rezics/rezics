@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { Pool } from "pg";
 import { z } from "zod";
+import { catalogSourceRecordId } from "../src/services/catalog/source-record-key";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
@@ -54,21 +55,38 @@ try {
 			[revision],
 		);
 	}
+	await client.query("alter table context_capacity_keys add column source_id uuid");
+	const sourceKeys = z
+		.array(uuidRow)
+		.max(12016)
+		.parse((await client.query("select id from context_capacity_keys")).rows)
+		.map(({ id }) => ({
+			id,
+			source_id: catalogSourceRecordId({
+				source: "context-capacity",
+				objectType: "vn",
+				externalId: id,
+			}),
+		}));
 	await client.query(
-		"insert into catalog_source_record(id,source,object_type,external_id) select id,'context-capacity','vn',id::text from context_capacity_keys",
+		"update context_capacity_keys fixture set source_id = value.source_id from jsonb_to_recordset($1::jsonb) as value(id uuid,source_id uuid) where fixture.id = value.id",
+		[JSON.stringify(sourceKeys)],
 	);
 	await client.query(
-		"insert into catalog_source_snapshot(source_record_id,content_sha256,contract_sha256,payload_ref) select id,repeat('a',64),repeat('b',64),'fixture:context-capacity:' || n from context_capacity_keys cross join generate_series(1,2) n",
+		"insert into catalog_source_record(id,source,object_type,external_id) select source_id,'context-capacity','vn',id::text from context_capacity_keys",
 	);
 	await client.query(
-		"insert into software_participation_source_occurrence(source_record_id,snapshot_id,namespace,local_key,content_id,context_id,context_revision,source_pointer,source_label,source_language,source_language_tag,source_claimed_official) select snapshot.source_record_id,snapshot.id,'editions','0',fixture.content_id,fixture.id,1,'/editions/0','Participation context','en','en',false from catalog_source_snapshot snapshot join context_capacity_keys fixture on fixture.id = snapshot.source_record_id",
+		"insert into catalog_source_snapshot(source_record_id,content_sha256,contract_sha256,payload_ref) select source_id,repeat('a',64),repeat('b',64),'fixture:context-capacity:' || n from context_capacity_keys cross join generate_series(1,2) n",
+	);
+	await client.query(
+		"insert into software_participation_source_occurrence(source_record_id,snapshot_id,namespace,local_key,content_id,context_id,context_revision,source_pointer,source_label,source_language,source_language_tag,source_claimed_official) select snapshot.source_record_id,snapshot.id,'editions','0',fixture.content_id,fixture.id,1,'/editions/0','Participation context','en','en',false from catalog_source_snapshot snapshot join context_capacity_keys fixture on fixture.source_id = snapshot.source_record_id",
 	);
 	await client.query("set constraints all immediate");
 	await client.query("analyze software_participation_context");
 	await client.query("analyze software_participation_context_revision");
 	await client.query("analyze software_participation_source_occurrence");
 	const key = z
-		.object({ content_id: z.uuid(), id: z.uuid() })
+		.object({ content_id: z.uuid(), id: z.uuid(), source_id: z.uuid() })
 		.parse(
 			(
 				await client.query(
@@ -80,7 +98,7 @@ try {
 		(
 			await client.query(
 				"select id from catalog_source_snapshot where source_record_id = $1 order by id limit 1",
-				[key.id],
+				[key.source_id],
 			)
 		).rows[0],
 	);
@@ -101,7 +119,7 @@ try {
 			name: "exact-source-occurrence",
 			query:
 				"select * from software_participation_source_occurrence where source_record_id = $1 and snapshot_id = $2 and namespace = 'editions' and local_key = '0'",
-			params: [key.id, snapshot.id],
+			params: [key.source_id, snapshot.id],
 		},
 		{
 			name: "context-source-reverse",

@@ -3,13 +3,20 @@ import { Readable } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import { operationalCapacity } from "../src/services/database/schema/operational-durability";
+import { aggregateRoutingBucket } from "../src/services/events/envelope";
+import { catalogSourceRecordId } from "../src/services/catalog/source-record-key";
 import { users } from "../src/services/database/schema/auth";
 import {
 	catalogSourceRecord,
 	catalogSourceSnapshot,
 	catalogSourceBindingRevision,
 } from "../src/services/database/schema/catalog-source";
-import { createCatalogIdentity, addCatalogName } from "../src/services/catalog/storage";
+import {
+	createCatalogIdentity,
+	addCatalogName,
+	loadCatalogIdentity,
+} from "../src/services/catalog/storage";
 import {
 	beginCatalogSourceAcquisition,
 	storeCatalogSourcePayload,
@@ -66,6 +73,15 @@ try {
 				externalId: `fixture-${crypto.randomUUID()}`,
 			};
 			const firstBytes = Buffer.from('{"value":"first"}');
+			const bucket = aggregateRoutingBucket("source_record", catalogSourceRecordId(key));
+			await tx.insert(operationalCapacity).values(
+				["event-outbox", "task-outbox", "task-intent", "receipt"].map((lane) => ({
+					routingBucket: bucket,
+					lane,
+					maximumRows: 1000n,
+					maximumBytes: 64_000_000n,
+				})),
+			);
 			const first = await recordCatalogSourceObservation(
 				tx,
 				await storeCatalogSourcePayload(key, firstBytes, "a".repeat(64), null, archive),
@@ -149,6 +165,23 @@ try {
 			assert.equal(resumed.status, "proposed");
 			if (resumed.status !== "proposed") throw new Error("Expected resumed proposal");
 			const apply = { ...decision, proposalId: resumed.proposal.id };
+			const abortedApply = new Error("Abort the native source command before publication");
+			await assert.rejects(
+				tx.transaction((nested) =>
+					decideCatalogSourceProposal(nested, actor.id, apply, async (applying, context) => {
+						await addCatalogName(
+							applying,
+							context.reference,
+							context.actor,
+							context.expectedRevision,
+							{ kind: "source-primary", languageTag: null, value: "Rolled-back source value" },
+						);
+						throw abortedApply;
+					}),
+				),
+				(error: unknown) => error === abortedApply,
+			);
+			assert.equal((await loadCatalogIdentity(tx, native, actor.id, true)).revision, 1);
 			const applied = await decideCatalogSourceProposal(
 				tx,
 				actor.id,

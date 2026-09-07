@@ -1,5 +1,6 @@
 import { generateDrizzleJson, generateMigration } from "drizzle-kit/api-postgres";
 import { applyOperationalPartitions } from "./operational-partitions";
+import { applySourcePartitions } from "./source-partitions";
 
 import * as schema from "../src/services/database/schema";
 
@@ -14,7 +15,7 @@ async function main(): Promise<void> {
 		generateDrizzleJson(schema),
 	]);
 	const statements = applyOperationalPartitions(
-		await generateMigration(emptySnapshot, desiredSnapshot),
+		applySourcePartitions(await generateMigration(emptySnapshot, desiredSnapshot)),
 	).filter(
 		(statement) =>
 			!MigrationOwnedExpressionIndexes.some((indexName) => statement.includes(indexName)),

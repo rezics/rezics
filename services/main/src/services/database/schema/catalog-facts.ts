@@ -618,3 +618,5 @@ export const groupingSemanticRevision = grouping.semanticRevision;
 
 export const referenceSemanticHead = reference.semanticHead;
 export const referenceSemanticRevision = reference.semanticRevision;
+export const distributionSemanticHead = distribution.semanticHead;
+export const distributionSemanticRevision = distribution.semanticRevision;

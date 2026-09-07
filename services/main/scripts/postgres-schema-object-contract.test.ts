@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 
 import {
 	PostgreSqlSchemaFileNames,
+	PostgreSqlSchemaDynamicTriggers,
+	PostgreSqlSchemaDynamicTriggerTemplates,
 	PostgreSqlSchemaFunctionNames,
 	PostgreSqlSchemaTriggerContracts,
 	PostgreSqlSchemaTriggers,
@@ -48,11 +50,23 @@ describe("canonical PostgreSQL object manifest", () => {
 				PostgreSqlSchemaFunctionNames,
 				PostgreSqlSchemaTriggers,
 				PostgreSqlSchemaTriggerContracts,
+				PostgreSqlSchemaDynamicTriggers,
+				PostgreSqlSchemaDynamicTriggerTemplates,
 			),
 		).not.toThrow();
 	});
 
 	it("rejects missing files and duplicate catalog identities", () => {
+		expect(() =>
+			assertCanonicalPostgreSqlObjectManifest(
+				[
+					"DO $$ BEGIN EXECUTE format('CREATE TRIGGER unowned BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.guard()', 'example'); END $$;",
+				],
+				[],
+				[],
+				[],
+			),
+		).toThrow(/Unexpected PostgreSQL dynamic trigger template/);
 		expect(() => assertCanonicalPostgreSqlSchemaFiles([], ["owned.sql"])).toThrow(/Missing/);
 		expect(() =>
 			assertPostgreSqlDefinitionsComplete(

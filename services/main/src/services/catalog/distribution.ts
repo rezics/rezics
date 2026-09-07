@@ -307,7 +307,7 @@ export async function readDistributionMembers(
 	afterPosition = -1,
 	limit = 100,
 ) {
-	integer.min(-1).parse(afterPosition);
+	z.number().int().min(-1).max(Number.MAX_SAFE_INTEGER).parse(afterPosition);
 	z.number().int().min(1).max(128).parse(limit);
 	const header = await readDistributionPackage(tx, packageId, actor, revision);
 	const t = distributionMember;

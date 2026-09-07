@@ -1,5 +1,11 @@
 # Native catalog storage
 
+The latest integrated owner modules and their remaining gaps are indexed in the
+[continuation handoff](../../../../../docs/plan/operational-refactor-20260906/NEXT_SESSION.md).
+Native domain readers and semantic pages export canonical state; `source-export.ts`
+exports checksum-verified archived source evidence. Generic per-field source JSON
+wrappers are no longer a second OLTP copy or evidence of native semantic coverage.
+
 **Implementation, 2026-09-07:** this is evidence for reviewed slices of an incomplete
 foundation. Autonomous implementation and research-led document corrections are
 authorized; the [remaining design obligations](../../../../../docs/plan/operational-refactor-20260906/00-source-complete-schema.md#design-review-gate)

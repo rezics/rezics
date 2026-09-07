@@ -18,6 +18,7 @@ import {
 	operationalOutbox,
 } from "../src/services/database/schema/operational-durability";
 import { aggregateRoutingBucket, envelopeSubject } from "../src/services/events/envelope";
+import { catalogSourceRecordId } from "../src/services/catalog/source-record-key";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
@@ -46,13 +47,11 @@ const archive: CatalogSourceArchive = {
 		return { Body: bytes ? Readable.from([bytes]) : undefined };
 	},
 };
-// An exact preinserted owner ID makes every capacity and outbox lookup routable.
-const recordId = "019a0607-0000-7000-8000-000000000071";
-const bucket = aggregateRoutingBucket("source_record", recordId);
 const fixtureRun = randomUUID();
 const sourceKey = { source: "qualification", objectType: "source_event", externalId: fixtureRun };
+const recordId = catalogSourceRecordId(sourceKey);
+const bucket = aggregateRoutingBucket("source_record", recordId);
 const missingKey = { ...sourceKey, externalId: `${fixtureRun}-missing` };
-const renamedKey = { ...sourceKey, externalId: `${fixtureRun}-renamed` };
 const contractSha256 = "c".repeat(64);
 const firstBytes = Buffer.from(JSON.stringify({ title: "Source event fixture", revision: 1 }));
 const changedBytes = Buffer.from(
@@ -77,13 +76,6 @@ const missingReceipt = await storeCatalogSourcePayload(
 	firstBytes,
 	contractSha256,
 	"1",
-	archive,
-);
-const renamedReceipt = await storeCatalogSourcePayload(
-	renamedKey,
-	changedBytes,
-	contractSha256,
-	"2",
 	archive,
 );
 assert.deepEqual(Buffer.from(await readCatalogSourceBytes(firstReceipt)), firstBytes);
@@ -146,14 +138,12 @@ try {
 			);
 			checks.push("caught-new-source-admission-rolls-back-registration");
 
-			await tx
-				.insert(operationalCapacity)
-				.values({
-					routingBucket: bucket,
-					lane: "event-outbox",
-					maximumRows: 8n,
-					maximumBytes: 1_048_576n,
-				});
+			await tx.insert(operationalCapacity).values({
+				routingBucket: bucket,
+				lane: "event-outbox",
+				maximumRows: 8n,
+				maximumBytes: 1_048_576n,
+			});
 			await tx.insert(catalogSourceRecord).values({ id: recordId, ...sourceKey });
 			const first = await recordCatalogSourceObservation(tx, firstReceipt);
 			messageIds.push(first.snapshot.id);
@@ -213,21 +203,24 @@ try {
 			);
 			checks.push("caught-full-lane-rolls-back-snapshot-and-reservation");
 
+			const beforeOutcome = (
+				await tx.select().from(catalogSourceRecord).where(sourceRecordKey).limit(1)
+			)[0]?.lastCheckOutcome;
 			await assert.rejects(
 				() =>
 					tx.transaction(async (nested) => {
 						await nested
 							.update(catalogSourceRecord)
-							.set({ externalId: renamedKey.externalId })
+							.set({ lastCheckOutcome: "error" })
 							.where(sourceRecordKey);
-						await recordCatalogSourceObservation(nested, renamedReceipt);
+						await recordCatalogSourceObservation(nested, changedReceipt);
 					}),
 				(error: unknown) => hasPostgresCode(error, "53000"),
 			);
 			assert.equal(
 				(await tx.select().from(catalogSourceRecord).where(sourceRecordKey).limit(1))[0]
-					?.externalId,
-				sourceKey.externalId,
+					?.lastCheckOutcome,
+				beforeOutcome,
 			);
 			assert.equal(
 				(await tx.select().from(catalogSourceSnapshot).where(snapshotKey).limit(3)).length,

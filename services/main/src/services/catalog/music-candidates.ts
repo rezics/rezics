@@ -29,7 +29,7 @@ async function requireCandidate(
 	actor: string | null,
 	write = false,
 ) {
-	const ref = CatalogReferenceSchema.parse(reference);
+	const ref = CatalogReferenceSchema.parse({ owner: reference.owner, id: reference.id });
 	if (ref.owner !== "music") throw new TypeError("Expected music candidate owner");
 	const identity = await loadCatalogIdentity(tx, ref, actor, write);
 	if (identity.shape !== "release_candidate")
@@ -49,14 +49,12 @@ export async function createMusicReleaseCandidate(
 		{ owner: "music", shape: "release_candidate" },
 		actor,
 	);
-	await tx
-		.insert(musicReleaseCandidate)
-		.values({
-			id: identity.id,
-			creditedArtistText: value.creditedArtistText ?? null,
-			barcode: value.barcode ?? null,
-			comment: value.comment ?? null,
-		});
+	await tx.insert(musicReleaseCandidate).values({
+		id: identity.id,
+		creditedArtistText: value.creditedArtistText ?? null,
+		barcode: value.barcode ?? null,
+		comment: value.comment ?? null,
+	});
 	if (!value.name) return identity;
 	const name = await addCatalogName(tx, identity, actor, identity.revision, {
 		kind: "primary",

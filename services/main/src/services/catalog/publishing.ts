@@ -420,7 +420,7 @@ export async function putPublishingInstallment(
 	await assertCatalogDefinitionTarget(
 		tx,
 		value.kindRevisionId,
-		["class", "vocabulary"],
+		"vocabulary",
 		{ owner: "publishing", shape: "serialization" },
 		"installment-kind",
 	);

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import { registerCatalogSourceRecord } from "../src/services/catalog/source-observations";
 import type { DatabaseTransaction } from "../src/services/database";
 import { users } from "../src/services/database/schema/auth";
 import {
@@ -9,10 +10,7 @@ import {
 	softwareParticipationContextRevision,
 	softwareParticipationSourceOccurrence,
 } from "../src/services/database/schema/catalog-software";
-import {
-	catalogSourceRecord,
-	catalogSourceSnapshot,
-} from "../src/services/database/schema/catalog-source";
+import { catalogSourceSnapshot } from "../src/services/database/schema/catalog-source";
 import { createVisualNovel } from "../src/services/catalog/domains";
 import {
 	createSoftwareParticipationContext,
@@ -195,17 +193,15 @@ try {
 			await rejectsCode(
 				tx,
 				(nested) =>
-					nested
-						.insert(revision)
-						.values({
-							contentId: other.id,
-							contextId: original.contextId,
-							revision: 1,
-							label: null,
-							languageTag: null,
-							state: "active",
-							createdByAuthUserId: account.id,
-						}),
+					nested.insert(revision).values({
+						contentId: other.id,
+						contextId: original.contextId,
+						revision: 1,
+						label: null,
+						languageTag: null,
+						state: "active",
+						createdByAuthUserId: account.id,
+					}),
 				"23503",
 			);
 			await rejectsCode(
@@ -219,39 +215,31 @@ try {
 			await rejectsCode(
 				tx,
 				async (nested) => {
-					await nested
-						.insert(revision)
-						.values({
-							contentId: content.id,
-							contextId: original.contextId,
-							revision: 4,
-							label: null,
-							languageTag: null,
-							state: "active",
-							createdByAuthUserId: account.id,
-						});
+					await nested.insert(revision).values({
+						contentId: content.id,
+						contextId: original.contextId,
+						revision: 4,
+						label: null,
+						languageTag: null,
+						state: "active",
+						createdByAuthUserId: account.id,
+					});
 					await nested.execute(
 						sql`set constraints software_context_revision_head_required immediate`,
 					);
 				},
 				"23514",
 			);
-			const [source] = await tx
-				.insert(catalogSourceRecord)
-				.values({
-					source: "participation-fixture",
-					objectType: "vn",
-					externalId: crypto.randomUUID(),
-				})
-				.returning();
-			const [otherSource] = await tx
-				.insert(catalogSourceRecord)
-				.values({
-					source: "participation-fixture",
-					objectType: "vn",
-					externalId: crypto.randomUUID(),
-				})
-				.returning();
+			const source = await registerCatalogSourceRecord(tx, {
+				source: "participation-fixture",
+				objectType: "vn",
+				externalId: crypto.randomUUID(),
+			});
+			const otherSource = await registerCatalogSourceRecord(tx, {
+				source: "participation-fixture",
+				objectType: "vn",
+				externalId: crypto.randomUUID(),
+			});
 			assert.ok(source && otherSource);
 			const snapshots = await tx
 				.insert(catalogSourceSnapshot)
@@ -284,22 +272,20 @@ try {
 					languageTag: "en",
 					state: "active",
 				});
-				await tx
-					.insert(occurrence)
-					.values({
-						sourceRecordId: snapshot.sourceRecordId,
-						snapshotId: snapshot.id,
-						namespace: "editions",
-						localKey: "0",
-						contentId: content.id,
-						contextId: native.contextId,
-						contextRevision: 1,
-						sourcePointer: "/editions/0",
-						sourceLabel: "Observed team",
-						sourceLanguage: "en",
-						sourceLanguageTag: "en",
-						sourceClaimedOfficial: false,
-					});
+				await tx.insert(occurrence).values({
+					sourceRecordId: snapshot.sourceRecordId,
+					snapshotId: snapshot.id,
+					namespace: "editions",
+					localKey: "0",
+					contentId: content.id,
+					contextId: native.contextId,
+					contextRevision: 1,
+					sourcePointer: "/editions/0",
+					sourceLabel: "Observed team",
+					sourceLanguage: "en",
+					sourceLanguageTag: "en",
+					sourceClaimedOfficial: false,
+				});
 			}
 			const mappings = await tx
 				.select()

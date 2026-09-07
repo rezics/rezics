@@ -16,6 +16,18 @@ describe("database migration canonical bundles", () => {
 });
 
 describe("database migration transaction mode", () => {
+	it("creates physical partitions between parent DDL and canonical leaf triggers", () => {
+		const result = composeMigrationSql({
+			preOverlay: "-- prepare",
+			schemaDiff: "-- parents",
+			beforeCanonicalOverlay: "-- children",
+			canonicalSql: "-- leaf triggers",
+			postOverlay: "-- finalize",
+		});
+		expect(result).toBe(
+			"SET search_path TO public;\n\n-- prepare\n\n-- parents\n\n-- children\n\n-- leaf triggers\n\n-- finalize\n",
+		);
+	});
 	it("hashes portable LF SQL even when a Windows canonical source has CRLF", () => {
 		const result = composeMigrationSql({
 			preOverlay: "-- preparation\r\nSELECT 1;\r\n",

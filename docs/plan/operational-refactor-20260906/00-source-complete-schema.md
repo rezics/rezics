@@ -313,6 +313,55 @@ commits and general test counts cannot replace that report.
 
 ## Implementation ledger — 2026-09-07
 
+### Current integrated batch and pause
+
+The maintainer requested a temporary stop after this batch and a new-session
+continuation prompt. [NEXT_SESSION.md](NEXT_SESSION.md) records the unchanged
+full-product objective, retained draft, owner paths and concrete remaining work.
+
+`20260907082947_catalog_native_source_event_batch.sql` integrates reviewed native
+music/physical releases and disc candidates, software/VN metadata and revisions,
+program/publishing structures, supporting entities/reference profiles/groupings,
+mixed-media distribution manifests, governed facts/relations, names/identifiers/
+authority histories, source bindings/acquisition/proposals and event execution.
+Full source-family mapping and product integration are still not qualified.
+
+Source natural-key identity now has a deterministic UUID and database proof;
+bindings carry source-record-scoped compound keys. The migration has 1,088 source
+hash partitions and 256 operational range partitions. Reviewed pre-diff source
+replacement and before-canonical child creation preserve the supported Atlas
+workflow. Canonical verification reconstructs owned static/dynamic triggers in
+a rollback transaction and compares their definitions and enabled state.
+
+Validation: 47 migrations / 3,884 statements replayed from an empty target;
+canonical PostgreSQL definitions and partition checks pass. The affected backend
+and scripts typecheck; 246 targeted backend/tooling tests and the shared reference
+package's three tests pass. Nine isolated native/source SQL harnesses cover
+semantics, names, entities/grouping, distribution, software, physical music,
+music history, program/publishing and source lifecycle. Source-event rollback
+checks and the 12,016-context / 36,048-revision / 24,032-observation skew fixture
+also pass. These checks are local integrity/planner evidence, not full-corpus,
+frontend or production qualification. No global test suite or browser QA ran.
+
+Integration repaired actual PostgreSQL failures: history snapshots now match
+column names rather than physical column order after ALTER TABLE; correlated
+semantic state reads retain SQL qualification; internal references select their
+owner/ID without weakening strict serialized schemas; withdrawn grouping members
+use current semantic state; and fixture definition kinds match real SQL policy.
+
+The pinned Debezium relay and the Bun source task chain were exercised with
+real PostgreSQL/NATS, including offset/restart recovery, lost acknowledgments,
+deduplication and pause cancellation. Acquisition registration is still limited
+to selected principal endpoints; complete native structural update/compensation,
+retention rebuild/GC, all source families and production qualification remain.
+
+The P02 Profile/Entity/Auth draft is preserved only on
+`codex/delivery-participation-20260907` at
+`acdf5a5c5618f0d20d19a8281dbf7c38887050ea`. It is not merged because its downstream
+consumer migration and SQL lifecycle verification remain unfinished. The global
+`unit` table, retained platform owners, public API/SDK and Web conversion are
+next-session work. Neither this batch nor the handoff marks the plan complete.
+
 This ledger records scoped execution. Historical tables or successful selected
 observations do not qualify the whole provider-independent model.
 

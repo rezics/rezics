@@ -194,6 +194,28 @@ tasks:
         cmds:
             - bun scripts/check-operational-partitions.ts
 
+    events:worker:
+        desc: Run the source event/task worker with explicit broker, bucket and admission configuration.
+        env:
+            DATABASE_ADMIN_URL: ""
+        cmds:
+            - bun src/event-worker.ts
+
+    events:check-runtime:
+        desc: Verify event/task receipts, recovery and checkpoints on explicitly configured disposable services.
+        cmds:
+            - bun scripts/check-event-runtime.ts
+
+    events:check-source-runtime:
+        desc: Verify source checks through committed NATS task intents and database receipts.
+        cmds:
+            - bun scripts/check-source-check-runtime.ts
+
+    events:check-debezium:
+        desc: Qualify the pinned relay with explicitly opted-in isolated containers.
+        cmds:
+            - bun scripts/check-debezium-relay.ts
+
     catalog:check-local:
         desc: Verify native catalog commands and constraints on the loopback rezics-dev database with disposable fixtures.
         cmds:

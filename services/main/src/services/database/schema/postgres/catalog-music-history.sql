@@ -55,11 +55,11 @@ DECLARE expected_count integer; leadout bigint; actual_count bigint; valid boole
 BEGIN
   SELECT track_count, leadout_offset INTO STRICT expected_count, leadout
     FROM public.music_disc_toc WHERE id = NEW.toc_id FOR UPDATE;
-  SELECT count(*), coalesce(bool_and(position = ordinal - 1 AND offset < leadout
-    AND (previous_offset IS NULL OR previous_offset < offset)), false)
+  SELECT count(*), coalesce(bool_and(position = ordinal - 1 AND track_offset < leadout
+    AND (previous_offset IS NULL OR previous_offset < track_offset)), false)
     INTO actual_count, valid
-    FROM (SELECT position, offset, row_number() OVER (ORDER BY position) ordinal,
-      lag(offset) OVER (ORDER BY position) previous_offset
+    FROM (SELECT position, "offset" AS track_offset, row_number() OVER (ORDER BY position) ordinal,
+      lag("offset") OVER (ORDER BY position) previous_offset
       FROM public.music_disc_toc_offset WHERE toc_id = NEW.toc_id ORDER BY position LIMIT 100) offsets;
   IF actual_count <> expected_count OR NOT valid THEN
     RAISE EXCEPTION 'Disc TOC must have the declared contiguous increasing offsets before attachment'

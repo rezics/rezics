@@ -55,6 +55,7 @@ function targetColumns(reference: CatalogReference) {
 		entityId: reference.owner === "entity" ? reference.id : null,
 		groupingId: reference.owner === "grouping" ? reference.id : null,
 		referenceId: reference.owner === "reference" ? reference.id : null,
+		distributionId: reference.owner === "distribution" ? reference.id : null,
 	};
 }
 
@@ -68,28 +69,24 @@ export async function sealInitialCatalogSourceBinding(
 	await loadCatalogIdentity(tx, current.reference, actor, true);
 	if (current.claim.bindingRevision !== 1)
 		throw new Error("Initial source binding is already revised");
-	await tx
-		.insert(revisions)
-		.values({
-			sourceRecordId: key.sourceRecordId,
-			mappingKey: key.mappingKey,
-			owner: current.claim.owner,
-			revision: 1,
-			policyRevision: 1,
-			state: current.claim.state,
-			mode: "review",
-			actorAuthUserId: actor,
-			reason: "Initial evidenced source correspondence",
-			...targetColumns(current.reference),
-		});
-	await tx
-		.insert(subscriptions)
-		.values({
-			sourceRecordId: key.sourceRecordId,
-			mappingKey: key.mappingKey,
-			owner: current.claim.owner,
-			state: "active",
-		});
+	await tx.insert(revisions).values({
+		sourceRecordId: key.sourceRecordId,
+		mappingKey: key.mappingKey,
+		owner: current.claim.owner,
+		revision: 1,
+		policyRevision: 1,
+		state: current.claim.state,
+		mode: "review",
+		actorAuthUserId: actor,
+		reason: "Initial evidenced source correspondence",
+		...targetColumns(current.reference),
+	});
+	await tx.insert(subscriptions).values({
+		sourceRecordId: key.sourceRecordId,
+		mappingKey: key.mappingKey,
+		owner: current.claim.owner,
+		state: "active",
+	});
 }
 
 /** @internal Initial correspondence records an immutable target/policy revision atomically. */
@@ -110,7 +107,7 @@ export async function bindCatalogSourceIdentity(
 			snapshotId: z.uuid(),
 			reference: CatalogReferenceSchema,
 		})
-		.parse(input);
+		.parse({ ...input, reference: { owner: input.reference.owner, id: input.reference.id } });
 	const [source] = await tx
 		.select()
 		.from(catalogSourceRecord)
@@ -179,7 +176,7 @@ export async function acceptCatalogSourceInitialization(
 			expectedBaselineRevision: z.number().int().positive(),
 			finalRevision: z.number().int().positive(),
 		})
-		.parse(input);
+		.parse({ ...input, reference: { owner: input.reference.owner, id: input.reference.id } });
 	const [locator] = await tx
 		.select()
 		.from(claims)
@@ -269,7 +266,10 @@ export async function reviseCatalogSourceBinding(
 			reason: z.string().min(1).max(2048),
 			target: CatalogReferenceSchema.optional(),
 		})
-		.parse(input);
+		.parse({
+			...input,
+			...(input.target ? { target: { owner: input.target.owner, id: input.target.id } } : {}),
+		});
 	const current = await lockCatalogSourceBinding(tx, {
 		sourceRecordId: value.sourceRecordId,
 		mappingKey: value.mappingKey,

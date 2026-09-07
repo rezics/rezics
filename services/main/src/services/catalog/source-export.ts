@@ -1,14 +1,9 @@
-import { and, eq, gt, inArray, isNotNull, or } from "drizzle-orm";
 import { z } from "zod";
-import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import type { CatalogReference } from "./contracts";
 import { BangumiSubjectSchema } from "./bangumi";
 import { OpenLibraryWorkSchema, OpenLibraryEditionSchema } from "./openlibrary";
 import { VndbVnSchema } from "./vndb";
-import { softwareParticipationSourceOccurrence } from "../database/schema/catalog-software";
 import { MusicBrainzReleaseSchema } from "./musicbrainz";
-import { loadCatalogIdentity } from "./storage";
+import { readCatalogSourceBytes, type CatalogSourceReceipt } from "./source-observations";
 import type { CatalogValueNode } from "./value-nodes";
 
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
@@ -73,216 +68,41 @@ export function sourceValueFromNodes(nodes: readonly CatalogValueNode[]): JsonVa
 	return root;
 }
 
-/** Reconstruct from native typed rows, not from the archived payload. */
-async function readNativeSourceFields(
-	tx: DatabaseTransaction,
-	reference: CatalogReference,
-	actor: string | null,
-	sourceRecordId: string,
-	snapshotId: string,
-	maximumFields: number,
+/** Read exact archived source evidence outside a database transaction; this is not a native catalog export. */
+async function readSourceArchive(
+	receipt: CatalogSourceReceipt,
+	source: string,
+	objectType: string,
 ) {
-	await loadCatalogIdentity(tx, reference, actor, false);
-	z.uuid().parse(sourceRecordId);
-	z.uuid().parse(snapshotId);
-	const tables = CatalogFactTables[reference.owner];
-	const fields = await tx
-		.select({ factId: tables.support.factId, path: tables.support.sourcePath })
-		.from(tables.support)
-		.innerJoin(
-			tables.fact,
-			and(
-				eq(tables.fact.ownerId, tables.support.ownerId),
-				eq(tables.fact.id, tables.support.factId),
-			),
-		)
-		.where(
-			and(
-				eq(tables.support.ownerId, reference.id),
-				eq(tables.support.sourceRecordId, sourceRecordId),
-				eq(tables.support.snapshotId, snapshotId),
-				isNotNull(tables.support.factId),
-				isNotNull(tables.fact.sealedAt),
-				eq(tables.fact.state, "active"),
-			),
-		)
-		.orderBy(tables.support.id)
-		.limit(maximumFields + 1);
-	if (fields.length > maximumFields) throw new Error("Source field support set is ambiguous");
-	const byFact = new Map<string, { path: string; nodes: CatalogValueNode[] }>();
-	const paths = new Set<string>();
-	for (const field of fields) {
-		if (!field.factId || paths.has(field.path))
-			throw new Error("Source field support set is ambiguous");
-		paths.add(field.path);
-		byFact.set(field.factId, { path: field.path, nodes: [] });
-	}
-	if (!byFact.size) throw new Error("Source snapshot has no adopted native fields");
-	let cursor: { factId: string; position: number } | undefined;
-	let nodeCount = 0;
-	let bytes = 0;
-	for (;;) {
-		const node = tables.valueNode;
-		const page = await tx
-			.select()
-			.from(node)
-			.where(
-				and(
-					eq(node.ownerId, reference.id),
-					inArray(node.factId, [...byFact.keys()]),
-					cursor
-						? or(
-								gt(node.factId, cursor.factId),
-								and(eq(node.factId, cursor.factId), gt(node.position, cursor.position)),
-							)
-						: undefined,
-				),
-			)
-			.orderBy(node.factId, node.position)
-			.limit(512);
-		for (const value of page) {
-			nodeCount++;
-			bytes +=
-				Buffer.byteLength(value.textValue ?? "", "utf8") +
-				Buffer.byteLength(value.memberKey ?? "", "utf8") +
-				64;
-			if (nodeCount > 200_000 || bytes > 32_000_000)
-				throw new RangeError("Source native export exceeds its admitted record budget");
-			const field = byFact.get(value.factId);
-			if (!field) throw new Error("Unexpected source fact page");
-			field.nodes.push(value);
-		}
-		const last = page.at(-1);
-		if (page.length < 512 || !last) break;
-		cursor = { factId: last.factId, position: last.position };
-	}
-	const output: Record<string, JsonValue> = {};
-	for (const field of byFact.values())
-		Object.defineProperty(output, field.path.slice(1).replaceAll("~1", "/").replaceAll("~0", "~"), {
-			value: sourceValueFromNodes(field.nodes),
-			enumerable: true,
-		});
-	return output;
+	const bytes = await readCatalogSourceBytes(receipt);
+	if (receipt.key.source !== source || receipt.key.objectType !== objectType)
+		throw new TypeError("Archive receipt has another source object contract");
+	const document: unknown = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+	return document;
 }
 
-export async function exportBangumiSubject(
-	tx: DatabaseTransaction,
-	reference: CatalogReference,
-	actor: string | null,
-	sourceRecordId: string,
-	snapshotId: string,
-) {
-	return BangumiSubjectSchema.parse(
-		await readNativeSourceFields(
-			tx,
-			reference,
-			actor,
-			sourceRecordId,
-			snapshotId,
-			Object.keys(BangumiSubjectSchema.shape).length,
-		),
-	);
+/** Immutable source evidence; canonical edits are read through the native domain commands. @internal */
+export async function exportBangumiSubject(receipt: CatalogSourceReceipt) {
+	return BangumiSubjectSchema.parse(await readSourceArchive(receipt, "bangumi", "subject"));
 }
 
+/** Immutable source evidence; catalog fields are not reconstructed from source-shaped fact wrappers. @internal */
 export async function exportOpenLibraryRecord(
-	tx: DatabaseTransaction,
-	reference: CatalogReference,
-	actor: string | null,
-	sourceRecordId: string,
-	snapshotId: string,
+	receipt: CatalogSourceReceipt,
 	objectType: "work" | "edition",
 ) {
-	const fields = await readNativeSourceFields(
-		tx,
-		reference,
-		actor,
-		sourceRecordId,
-		snapshotId,
-		512,
-	);
-	const data: Record<string, unknown> = {};
-	for (const [field, envelope] of Object.entries(fields)) {
-		const value = z.strictObject({ value: z.json() }).parse(envelope).value;
-		Object.defineProperty(data, field, { value, enumerable: true });
-	}
+	const document = await readSourceArchive(receipt, "openlibrary", objectType);
 	return objectType === "work"
-		? OpenLibraryWorkSchema.parse(data)
-		: OpenLibraryEditionSchema.parse(data);
+		? OpenLibraryWorkSchema.parse(document)
+		: OpenLibraryEditionSchema.parse(document);
 }
 
-export async function exportVndbVn(
-	tx: DatabaseTransaction,
-	reference: CatalogReference,
-	actor: string | null,
-	sourceRecordId: string,
-	snapshotId: string,
-) {
-	const fields = await readNativeSourceFields(
-		tx,
-		reference,
-		actor,
-		sourceRecordId,
-		snapshotId,
-		512,
-	);
-	const data: Record<string, unknown> = {};
-	for (const [field, envelope] of Object.entries(fields))
-		Object.defineProperty(data, field, {
-			value: z.strictObject({ value: z.json() }).parse(envelope).value,
-			enumerable: true,
-		});
-	const record = VndbVnSchema.parse(data);
-	const mapping = softwareParticipationSourceOccurrence;
-	const occurrences = await tx
-		.select()
-		.from(mapping)
-		.where(
-			and(
-				eq(mapping.sourceRecordId, sourceRecordId),
-				eq(mapping.snapshotId, snapshotId),
-				eq(mapping.namespace, "editions"),
-				eq(mapping.contentId, reference.id),
-			),
-		)
-		.limit(129);
-	if (reference.owner !== "software" || occurrences.length !== (record.editions ?? []).length)
-		throw new Error("VNDB participation observation set differs from the selected snapshot");
-	const byLocalKey = new Map(occurrences.map((row) => [row.localKey, row]));
-	if (record.editions)
-		record.editions = record.editions.map((edition, position) => {
-			const occurrence = byLocalKey.get(String(edition.eid));
-			if (!occurrence || occurrence.sourcePointer !== `/editions/${position}`)
-				throw new Error("VNDB participation occurrence does not match its snapshot position");
-			return {
-				...edition,
-				name: occurrence.sourceLabel,
-				lang: occurrence.sourceLanguage,
-				official: occurrence.sourceClaimedOfficial,
-			};
-		});
-	return record;
+/** Exact source participation claims remain unchanged when a native context is edited. @internal */
+export async function exportVndbVn(receipt: CatalogSourceReceipt) {
+	return VndbVnSchema.parse(await readSourceArchive(receipt, "vndb", "vn"));
 }
 
-export async function exportMusicBrainzRelease(
-	tx: DatabaseTransaction,
-	reference: CatalogReference,
-	actor: string | null,
-	sourceRecordId: string,
-	snapshotId: string,
-) {
-	const fields = await readNativeSourceFields(
-		tx,
-		reference,
-		actor,
-		sourceRecordId,
-		snapshotId,
-		512,
-	);
-	const data: Record<string, unknown> = {};
-	for (const [field, envelope] of Object.entries(fields))
-		Object.defineProperty(data, field, {
-			value: z.strictObject({ value: z.json() }).parse(envelope).value,
-			enumerable: true,
-		});
-	return MusicBrainzReleaseSchema.parse(data);
+/** Physical release and recording exports use native music readers; this exports source evidence. @internal */
+export async function exportMusicBrainzRelease(receipt: CatalogSourceReceipt) {
+	return MusicBrainzReleaseSchema.parse(await readSourceArchive(receipt, "musicbrainz", "release"));
 }

@@ -184,6 +184,8 @@ export function assertCanonicalPostgreSqlObjectManifest(
 	expectedFunctionNames: readonly string[],
 	expectedTriggers: readonly PostgreSqlTriggerIdentity[],
 	expectedTriggerContracts: readonly PostgreSqlTriggerContract[],
+	expectedDynamicTriggers: readonly PostgreSqlTriggerIdentity[] = [],
+	expectedDynamicTriggerTemplates: readonly string[] = [],
 ): void {
 	assertExactKeys(
 		canonicalFunctionNames(schemaDefinitions),
@@ -191,6 +193,18 @@ export function assertCanonicalPostgreSqlObjectManifest(
 		"canonical function declaration",
 	);
 	const triggerDeclarations = canonicalTriggerDeclarations(schemaDefinitions);
+	const dynamicTemplates = schemaDefinitions.flatMap((definition) =>
+		[...definition.matchAll(/\bexecute\s+format\(\s*'((?:''|[^'])*)'/giu)]
+			.map((match) => (match[1] ?? "").replaceAll("''", "'"))
+			.filter((template) =>
+				/^create\s+(?:(?:or\s+replace|constraint)\s+)*trigger\s/iu.test(template),
+			),
+	);
+	assertExactKeys(dynamicTemplates, expectedDynamicTriggerTemplates, "dynamic trigger template");
+	assertUniqueKeys(
+		[...expectedTriggers, ...expectedDynamicTriggers].map(triggerKey),
+		"trigger manifest entry",
+	);
 	assertExactKeys(
 		triggerDeclarations.map(({ key }) => key),
 		expectedTriggers.map(triggerKey),

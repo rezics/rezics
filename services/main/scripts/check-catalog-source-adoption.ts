@@ -123,17 +123,11 @@ try {
 				.where(eq(catalogSourceRecord.externalId, sourceKey.externalId))
 				.limit(1);
 			assert.ok(record);
-			const native = await exportBangumiSubject(
-				tx,
-				initial.reference,
-				actor,
-				record.id,
-				initial.snapshotId,
-			);
+			const archived = await exportBangumiSubject(firstReceipt);
 			assert.deepEqual(
-				native,
+				archived,
 				original,
-				"Every supplied field must survive native typed-row export",
+				"Every supplied field must survive immutable source archive export",
 			);
 			const [program] = await tx
 				.select()

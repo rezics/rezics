@@ -3,6 +3,7 @@ export const operationalPartitionTables = [
 	"operational_outbox",
 	"operational_task_intent",
 	"operational_application_receipt",
+	"operational_relay_pending",
 ] as const;
 
 /** @internal Preserve every typed constraint and attach physical ranges before generated FKs. */

@@ -1,12 +1,13 @@
 import { expect, test } from "vitest";
 import { generateDrizzleJson, generateMigration } from "drizzle-kit/api-postgres";
-import * as schema from "../src/services/database/schema/operational-durability";
+import * as durability from "../src/services/database/schema/operational-durability";
+import * as runtime from "../src/services/database/schema/operational-runtime";
 import { applyOperationalPartitions, operationalPartitionTables } from "./operational-partitions";
 
 test("partition export preserves typed keys and creates every nonoverlapping routing range", async () => {
 	const original = await generateMigration(
 		await generateDrizzleJson({}),
-		await generateDrizzleJson(schema),
+		await generateDrizzleJson({ ...durability, ...runtime }),
 	);
 	const statements = applyOperationalPartitions(original);
 	for (const table of operationalPartitionTables) {

@@ -3,6 +3,8 @@ import { Client } from "pg";
 
 import {
 	PostgreSqlSchemaFileNames,
+	PostgreSqlSchemaDynamicTriggers,
+	PostgreSqlSchemaDynamicTriggerTemplates,
 	PostgreSqlSchemaFunctionNames,
 	PostgreSqlSchemaTriggerContracts,
 	PostgreSqlSchemaTriggers,
@@ -10,6 +12,7 @@ import {
 } from "../src/services/database/schema/postgres/manifest";
 import { adminDatabaseUrl } from "./admin-database";
 import { checkOperationalPartitions } from "./check-operational-partitions";
+import { checkSourcePartitions } from "./check-source-partitions";
 import {
 	assertCanonicalPostgreSqlObjectManifest,
 	assertCanonicalPostgreSqlSchemaFiles,
@@ -40,10 +43,12 @@ async function readFunctionDefinitions(client: Client): Promise<readonly Definit
 }
 
 async function readTriggerDefinitions(client: Client): Promise<readonly Definition[]> {
-	const names = PostgreSqlSchemaTriggers.map(({ name }) => name);
+	const names = [...PostgreSqlSchemaTriggers, ...PostgreSqlSchemaDynamicTriggers].map(
+		({ name }) => name,
+	);
 	const result = await client.query<Definition>(
 		`select relation.relname || '.' || trigger.tgname as key,
-		        pg_get_triggerdef(trigger.oid, true) as definition
+		        pg_get_triggerdef(trigger.oid, true) || ' ENABLED=' || trigger.tgenabled::text as definition
 		 from pg_catalog.pg_trigger trigger
 		 join pg_catalog.pg_class relation on relation.oid = trigger.tgrelid
 		 join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
@@ -120,15 +125,19 @@ async function main(): Promise<void> {
 		PostgreSqlSchemaFunctionNames,
 		PostgreSqlSchemaTriggers,
 		PostgreSqlSchemaTriggerContracts,
+		PostgreSqlSchemaDynamicTriggers,
+		PostgreSqlSchemaDynamicTriggerTemplates,
 	);
 
 	const client = new Client({ connectionString: adminDatabaseUrl });
 	await client.connect();
 	try {
-		const expectedTriggers = PostgreSqlSchemaTriggers.map(({ table, name }) => `${table}.${name}`);
+		const ownedTriggers = [...PostgreSqlSchemaTriggers, ...PostgreSqlSchemaDynamicTriggers];
+		const expectedTriggers = ownedTriggers.map(({ table, name }) => `${table}.${name}`);
 		const functionsBefore = await readFunctionDefinitions(client);
 		const triggersBefore = await readTriggerDefinitions(client);
 		await checkOperationalPartitions(client);
+		await checkSourcePartitions(client);
 		const viewsBefore = await readViewDefinitions(client);
 		assertPostgreSqlDefinitionsComplete(functionsBefore, PostgreSqlSchemaFunctionNames, "function");
 		assertPostgreSqlDefinitionsComplete(triggersBefore, expectedTriggers, "trigger");
@@ -136,10 +145,18 @@ async function main(): Promise<void> {
 		assertCanonicalPostgreSqlViewDeclarations(schemaDefinitions, PostgreSqlSchemaViews);
 		await client.query("begin");
 		try {
+			// Canonical DO loops must prove reconstruction rather than inherit migrated state.
+			// Names originate exclusively in the checked repository manifest.
+			for (const { table, name } of ownedTriggers) {
+				if (!/^[a-z_][a-z0-9_]*$/.test(table) || !/^[a-z_][a-z0-9_]*$/.test(name))
+					throw new Error("Invalid canonical trigger identity");
+				await client.query(`DROP TRIGGER "${name}" ON public."${table}"`);
+			}
 			for (const definition of schemaDefinitions) await client.query(definition);
 			const functionsAfter = await readFunctionDefinitions(client);
 			const triggersAfter = await readTriggerDefinitions(client);
 			await checkOperationalPartitions(client);
+			await checkSourcePartitions(client);
 			const viewsAfter = await readViewDefinitions(client);
 			assertPostgreSqlDefinitionsComplete(
 				functionsAfter,

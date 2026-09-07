@@ -419,7 +419,17 @@ export const CatalogNameTables = {
 	entity: createCatalogNameTables("entity"),
 	grouping: createCatalogNameTables("grouping"),
 	reference: createCatalogNameTables("reference"),
+	distribution: createCatalogNameTables("distribution"),
 } as const;
+
+export const {
+	nameRevision: distributionNamedFormRevision,
+	identifierRevision: distributionIdentifierClaimRevision,
+	authority: distributionNameAuthority,
+	authorityRevision: distributionNameAuthorityRevision,
+	sourceBinding: distributionNameSourceBinding,
+	sourceOccurrence: distributionNameSourceOccurrence,
+} = CatalogNameTables.distribution;
 
 export const {
 	nameRevision: publishingNamedFormRevision,

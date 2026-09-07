@@ -9,6 +9,8 @@
 	},
 	"scripts": {
 		"dev:api": "bun --watch src/index.ts",
+		"dev:event-worker": "bun --watch src/event-worker.ts",
+		"event-worker": "bun src/event-worker.ts",
 		"dev:worker": "bun --watch src/worker.ts"
 	},
 	"dependencies": {
