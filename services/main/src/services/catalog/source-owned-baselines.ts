@@ -165,7 +165,7 @@ async function origin(
 export async function resolveCatalogSourceOwnedBaseline(
 	tx: DatabaseTransaction,
 	key: { sourceRecordId: string; mappingKey: string },
-	change: CatalogSourceOwnedChange,
+	change: Pick<CatalogSourceOwnedChange, "owner" | "ownerId" | "kind" | "componentKey">,
 	sourceRevision: number,
 ) {
 	const t = CatalogSourceOwnedBaselines[change.owner];
