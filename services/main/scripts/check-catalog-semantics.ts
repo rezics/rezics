@@ -12,10 +12,12 @@ import {
 	sealCatalogFact,
 	createCatalogRelation,
 	findCatalogRelations,
+	pageCatalogRelations,
 	readCatalogFactNodes,
 } from "../src/services/catalog/storage";
 import {
 	listCatalogFacts,
+	pageCatalogFacts,
 	listCatalogSemanticHistory,
 	restoreCatalogSemanticRevision,
 	transitionCatalogSemanticState,
@@ -63,6 +65,22 @@ try {
 					appendCatalogFactNodes(nested, identity, actor, revision, draft.id, -1, [
 						...catalogValueNodes(-1),
 					]),
+				),
+			);
+			checks++;
+			await assert.rejects(
+				tx.transaction((nested) =>
+					nested.insert(CatalogFactTables.entity.valueNode).values({
+						ownerId: identity.id,
+						factId: draft.id,
+						position: 0,
+						parentPosition: null,
+						parentKind: null,
+						memberKey: null,
+						kind: "number",
+						numberValue: "-1",
+						rulePosition: 0,
+					}),
 				),
 			);
 			checks++;
@@ -133,21 +151,38 @@ try {
 				),
 			);
 			checks++;
-			const withdrawn = await transitionCatalogSemanticState(
+			const disputed = await transitionCatalogSemanticState(
 				tx,
 				identity,
 				actor,
 				revision,
 				first.semanticId,
 				3,
+				"disputed",
+			);
+			revision = disputed.revision;
+			assert.equal((await listCatalogFacts(tx, identity, null))[0]?.state, "disputed");
+			checks++;
+			const withdrawn = await transitionCatalogSemanticState(
+				tx,
+				identity,
+				actor,
+				revision,
+				first.semanticId,
+				4,
 				"withdrawn",
 			);
 			revision = withdrawn.revision;
 			assert.equal((await listCatalogFacts(tx, identity, null)).length, 0);
 			checks++;
+			const emptyPage = await pageCatalogFacts(tx, identity, null, { limit: 1 });
+			assert.equal(emptyPage.items.length, 0);
+			assert.ok(emptyPage.afterId);
+			checks++;
+
 			await assert.rejects(
 				tx.transaction((nested) =>
-					restoreCatalogSemanticRevision(nested, identity, actor, revision, first.semanticId, 4, 1),
+					restoreCatalogSemanticRevision(nested, identity, actor, revision, first.semanticId, 5, 1),
 				),
 			);
 			checks++;
@@ -208,17 +243,61 @@ try {
 			checks++;
 			await assert.rejects(
 				tx.transaction((nested) =>
-					nested
-						.insert(CatalogFactTables.entity.participant)
-						.values({
-							ownerId: identity.id,
-							relationId: relation.id,
-							roleRevisionId: role.revisionId,
-							position: 1,
-							entityId: identity.id,
-						}),
+					nested.insert(CatalogFactTables.entity.participant).values({
+						ownerId: identity.id,
+						relationId: relation.id,
+						roleRevisionId: role.revisionId,
+						position: 1,
+						entityId: identity.id,
+					}),
 				),
 			);
+			checks++;
+			const hiddenPage = await pageCatalogRelations(tx, identity, null, { limit: 1 });
+			assert.equal(hiddenPage.items.length, 0);
+			assert.ok(hiddenPage.afterId);
+			checks++;
+			const shape = await ensureCatalogDefinition(tx, {
+				namespace: `fixture.${crypto.randomUUID()}`,
+				key: "score",
+				kind: "property",
+				valueKind: "object",
+				constraints: {
+					rules: [
+						{ position: 0, parent: null, memberKey: null, kind: "object" },
+						{ position: 1, parent: 0, memberKey: "score", kind: "number", minimum: 0, maximum: 1 },
+					],
+				},
+			});
+			const structured = await beginCatalogFact(tx, identity, actor, revision, shape.revisionId);
+			revision = structured.revision;
+			await assert.rejects(
+				tx.transaction((nested) =>
+					appendCatalogFactNodes(nested, identity, actor, revision, structured.id, -1, [
+						...catalogValueNodes({ score: 2 }),
+					]),
+				),
+			);
+			checks++;
+			await assert.rejects(
+				tx.transaction((nested) =>
+					appendCatalogFactNodes(nested, identity, actor, revision, structured.id, -1, [
+						...catalogValueNodes({ unknown: 0.5 }),
+					]),
+				),
+			);
+			checks++;
+			const structuredAppend = await appendCatalogFactNodes(
+				tx,
+				identity,
+				actor,
+				revision,
+				structured.id,
+				-1,
+				[...catalogValueNodes({ score: 0.5 })],
+			);
+			revision = structuredAppend.revision;
+			revision = (await sealCatalogFact(tx, identity, actor, revision, structured.id, 1)).revision;
 			checks++;
 			await tx.execute(sql`SET CONSTRAINTS ALL IMMEDIATE`);
 			throw rollback;

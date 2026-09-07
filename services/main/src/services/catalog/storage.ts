@@ -1,6 +1,10 @@
-import { currentCatalogSemantic, publishCatalogSemanticRevision } from "./semantic-history";
+import {
+	currentCatalogSemantic,
+	currentCatalogSemanticState,
+	publishCatalogSemanticRevision,
+} from "./semantic-history";
 import { isDeepStrictEqual } from "node:util";
-import { and, asc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, gt, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import {
@@ -447,6 +451,7 @@ export async function readCatalogFactNodes(
 	afterPosition = -1,
 	limit = 100,
 	maxSpoiler: 0 | 1 | 2 = 0,
+	relationId?: string,
 ) {
 	const identity = await loadCatalogIdentity(tx, reference, actor, false);
 	z.uuid().parse(factId);
@@ -473,7 +478,37 @@ export async function readCatalogFactNodes(
 				),
 			)
 			.limit(1);
-		if (!current) throw new CatalogReferenceNotFound("Historical fact requires owner authority");
+		if (!current) {
+			if (!relationId)
+				throw new CatalogReferenceNotFound(
+					"Historical fact requires owner authority or a current exact relation",
+				);
+			z.uuid().parse(relationId);
+			const [scoped] = await tx
+				.select({ id: tables.relationScope.id })
+				.from(tables.relationScope)
+				.innerJoin(
+					tables.relation,
+					and(
+						eq(tables.relation.ownerId, tables.relationScope.ownerId),
+						eq(tables.relation.id, tables.relationScope.relationId),
+					),
+				)
+				.where(
+					and(
+						eq(tables.relationScope.ownerId, reference.id),
+						eq(tables.relationScope.relationId, relationId),
+						eq(tables.relationScope.valueFactId, factId),
+						currentCatalogSemantic(reference, "relation"),
+						readableRelation(reference, actor, maxSpoiler),
+					),
+				)
+				.limit(1);
+			if (!scoped)
+				throw new CatalogReferenceNotFound(
+					"Historical value is not supported by a visible exact relation",
+				);
+		}
 	}
 	return tx
 		.select()
@@ -685,7 +720,10 @@ export async function findCatalogRelations(
 		and ${targetColumns[condition.target.owner]} = ${condition.target.id}::uuid)`,
 	);
 	return tx
-		.select()
+		.select({
+			...getTableColumns(table),
+			state: currentCatalogSemanticState(reference, "relation"),
+		})
 		.from(table)
 		.where(
 			and(
@@ -860,4 +898,66 @@ export async function readCatalogRelationQualifiers(
 		)
 		.orderBy(tables.relationScope.id)
 		.limit(page.limit);
+}
+
+/** @alpha Candidate-bounded relation export; the cursor advances even across hidden rows. */
+export async function pageCatalogRelations(
+	tx: DatabaseTransaction,
+	reference: CatalogReference,
+	actor: string | null,
+	input: {
+		afterId?: string;
+		limit?: number;
+		definitionRevisionId?: string;
+		maxSpoiler?: 0 | 1 | 2;
+	} = {},
+) {
+	await loadCatalogIdentity(tx, reference, actor, false);
+	const page = z
+		.strictObject({
+			afterId: z.uuid().optional(),
+			limit: z.number().int().min(1).max(100).default(50),
+			definitionRevisionId: z.uuid().optional(),
+			maxSpoiler: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
+		})
+		.parse(input);
+	const table = CatalogFactTables[reference.owner].relation;
+	const candidates = await tx
+		.select({ id: table.id })
+		.from(table)
+		.where(
+			and(
+				eq(table.ownerId, reference.id),
+				page.afterId ? gt(table.id, page.afterId) : undefined,
+				page.definitionRevisionId
+					? eq(table.definitionRevisionId, page.definitionRevisionId)
+					: undefined,
+			),
+		)
+		.orderBy(table.id)
+		.limit(page.limit);
+	if (!candidates.length) return { items: [], afterId: null };
+	const items = await tx
+		.select({
+			...getTableColumns(table),
+			state: currentCatalogSemanticState(reference, "relation"),
+		})
+		.from(table)
+		.where(
+			and(
+				eq(table.ownerId, reference.id),
+				inArray(
+					table.id,
+					candidates.map((c) => c.id),
+				),
+				currentCatalogSemantic(reference, "relation"),
+				readableRelation(reference, actor, page.maxSpoiler),
+			),
+		)
+		.orderBy(table.id)
+		.limit(page.limit);
+	return {
+		items,
+		afterId: candidates.length === page.limit ? (candidates.at(-1)?.id ?? null) : null,
+	};
 }

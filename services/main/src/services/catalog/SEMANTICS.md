@@ -21,9 +21,13 @@ participants and 64 qualifiers. Their exact immutable IDs are used by source
 support and contextual attachments. Same-participant role/target predicates stay
 inside one relation instance.
 
-`listCatalogFacts`, `findCatalogRelations`, `readCatalogFactNodes`,
+`pageCatalogFacts`, `pageCatalogRelations`, `readCatalogFactNodes`,
 `readCatalogParticipants` and `readCatalogRelationQualifiers` form the canonical
-paged query/export path. Spoilers default to zero. Historical traversal requires
+paged query/export path. Page cursors advance over a maximum of 100 examined
+immutable headers even when every candidate is hidden or superseded; callers
+must follow a non-null cursor even when the visible item array is empty.
+`findCatalogRelations` is a selective exact-predicate query, rather than the
+corpus export path. Spoilers default to zero. Historical traversal requires
 the identity creator and still enforces current target visibility. History entries
 carry exact fact/relation IDs; restore appends a decision and switches the head,
 without copying or loading the value tree. Withdrawn heads and historical revisions

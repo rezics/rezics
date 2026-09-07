@@ -1,4 +1,4 @@
-import { and, eq, gt, isNull, sql } from "drizzle-orm";
+import { and, eq, gt, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { catalogDefinitionRevision } from "../database/schema/catalog-identity";
@@ -345,7 +345,7 @@ export async function listCatalogFacts(
 		.parse(input);
 	const table = CatalogFactTables[reference.owner].fact;
 	return tx
-		.select()
+		.select({ ...getTableColumns(table), state: currentCatalogSemanticState(reference, "fact") })
 		.from(table)
 		.where(
 			and(
@@ -360,4 +360,79 @@ export async function listCatalogFacts(
 		)
 		.orderBy(table.id)
 		.limit(page.limit);
+}
+
+/** @alpha Candidate-bounded fact export does not scan indefinitely through old or hidden revisions. */
+export async function pageCatalogFacts(
+	tx: DatabaseTransaction,
+	reference: CatalogReference,
+	actor: string | null,
+	input: {
+		afterId?: string;
+		limit?: number;
+		definitionRevisionId?: string;
+		maxSpoiler?: 0 | 1 | 2;
+	} = {},
+) {
+	await loadCatalogIdentity(tx, reference, actor, false);
+	const page = z
+		.strictObject({
+			afterId: z.uuid().optional(),
+			limit: z.number().int().min(1).max(100).default(50),
+			definitionRevisionId: z.uuid().optional(),
+			maxSpoiler: z.number().int().min(0).max(2).default(0),
+		})
+		.parse(input);
+	const table = CatalogFactTables[reference.owner].fact;
+	const candidates = await tx
+		.select({ id: table.id })
+		.from(table)
+		.where(
+			and(
+				eq(table.ownerId, reference.id),
+				page.afterId ? gt(table.id, page.afterId) : undefined,
+				page.definitionRevisionId
+					? eq(table.definitionRevisionId, page.definitionRevisionId)
+					: undefined,
+			),
+		)
+		.orderBy(table.id)
+		.limit(page.limit);
+	if (!candidates.length) return { items: [], afterId: null };
+	const items = await tx
+		.select({ ...getTableColumns(table), state: currentCatalogSemanticState(reference, "fact") })
+		.from(table)
+		.where(
+			and(
+				eq(table.ownerId, reference.id),
+				inArray(
+					table.id,
+					candidates.map((c) => c.id),
+				),
+				currentCatalogSemantic(reference, "fact"),
+				sql`${table.spoiler} <= ${page.maxSpoiler}`,
+			),
+		)
+		.orderBy(table.id)
+		.limit(page.limit);
+	return {
+		items,
+		afterId: candidates.length === page.limit ? (candidates.at(-1)?.id ?? null) : null,
+	};
+}
+
+/** @alpha State belongs to the current editorial decision, not its immutable value row. */
+export function currentCatalogSemanticState(
+	reference: CatalogReference,
+	kind: "fact" | "relation",
+) {
+	const {
+		semanticHead: head,
+		semanticRevision: revision,
+		fact,
+		relation,
+	} = CatalogFactTables[reference.owner];
+	const target = kind === "fact" ? fact : relation;
+	const targetId = kind === "fact" ? revision.factId : revision.relationId;
+	return sql<CatalogFactState>`(select ${revision.state} from ${revision} join ${head} on ${head.ownerId}=${revision.ownerId} and ${head.semanticId}=${revision.semanticId} and ${head.version}=${revision.version} where ${revision.ownerId}=${target.ownerId} and ${targetId}=${target.id} limit 1)`;
 }
