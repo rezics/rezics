@@ -1,4 +1,4 @@
-h1:Dsr0oliIp7Z78W3hLrklF0cwLrZMFUcrtFo3jLOEICY=
+h1:aNwiJqcNSdezONN+10WHAkHOS590IHpDz2Z7/64lAUg=
 20260801000000_v1_baseline.sql h1:RkSyDwLRpFOPI7iqWg+WlFc5TAshnB4gsRkBpsTMjGY=
 20260807000000_search_ordered_candidates.sql h1:rPOS8iAdRmWOfc9lpyCNNsFWjduRV1e27Q1Mc1QpTFc=
 20260807000001_backfill_search_best_score.sql h1:lmLn+kpWiNWEPlk40W4QRIGsqpWezY//UsNaaZ8FToc=
@@ -59,3 +59,4 @@ h1:Dsr0oliIp7Z78W3hLrklF0cwLrZMFUcrtFo3jLOEICY=
 20260907125340_catalog_source_support_epochs.sql h1:AcAlpLQXDgExoKbxIA43HQBOqfkWGNMwwngdIGgKbaw=
 20260907132609_catalog_source_reinterpretation.sql h1:BdWNCj4Wwcj9131tfl3PfVq+IutIzy3uWYx7Ux86yYk=
 20260908022908_participation_follow.sql h1:+9ieU5D4V+0xaGLaK6Rf8J6QpUKh7yv+eeiVaodU32A=
+20260908031435_catalog_source_interpretations.sql h1:WIhyhfujr/WIn9lELrWTpnrKXHata9x0bRMfja7lAfo=
