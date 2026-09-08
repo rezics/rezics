@@ -7,7 +7,7 @@ export default {
 	contextMeasurements: {
 		title: "内容ごとの身体計測値",
 		context: "関連する内容",
-		chooseContext: "作品・版・リリース・番組を選択",
+		chooseContext: "関連する内容を選択",
 		noVisibleMeasurement: "この内容では現在閲覧できる計測値がありません。",
 		edit: "この内容の計測値を編集",
 		millimetres: "ミリメートル",

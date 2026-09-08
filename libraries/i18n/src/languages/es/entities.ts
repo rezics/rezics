@@ -7,7 +7,7 @@ export default {
 	contextMeasurements: {
 		title: "Medidas según el contexto",
 		context: "Contenido relacionado",
-		chooseContext: "Elegir la obra, versión, lanzamiento o programa",
+		chooseContext: "Elegir contenido relacionado",
 		noVisibleMeasurement: "No hay medidas actuales visibles para este contexto.",
 		edit: "Editar medidas de este contexto",
 		millimetres: "milímetros",

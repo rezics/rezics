@@ -7,7 +7,7 @@ export default {
 	contextMeasurements: {
 		title: "Maße im jeweiligen Kontext",
 		context: "Zugehöriger Inhalt",
-		chooseContext: "Werk, Version, Veröffentlichung oder Programm wählen",
+		chooseContext: "Zugehörigen Inhalt wählen",
 		noVisibleMeasurement: "Für diesen Kontext sind derzeit keine Maße sichtbar.",
 		edit: "Maße für diesen Kontext bearbeiten",
 		millimetres: "Millimeter",

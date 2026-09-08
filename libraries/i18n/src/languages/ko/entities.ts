@@ -7,7 +7,7 @@ export default {
 	contextMeasurements: {
 		title: "내용별 신체 측정값",
 		context: "관련 내용",
-		chooseContext: "작품, 버전, 발매 또는 프로그램 선택",
+		chooseContext: "관련 내용 선택",
 		noVisibleMeasurement: "이 맥락에서 현재 볼 수 있는 측정값이 없습니다.",
 		edit: "이 맥락의 측정값 편집",
 		millimetres: "밀리미터",

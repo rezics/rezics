@@ -6,7 +6,7 @@ export default {
 	contextMeasurements: {
 		title: "特定內容中的測量值",
 		context: "相關內容",
-		chooseContext: "選擇作品、版本、發行記錄或節目",
+		chooseContext: "選擇相關內容",
 		noVisibleMeasurement: "此情境中沒有目前可見的測量值。",
 		edit: "編輯此情境的測量值",
 		millimetres: "毫米",
