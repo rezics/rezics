@@ -44,6 +44,7 @@ import {
 } from "../src/services/catalog/source-proposals";
 import { readCatalogSourceApplication } from "../src/services/catalog/source-applications";
 import type { CatalogReference } from "../src/services/catalog/contracts";
+import { prepareStructureSourceProjection } from "../src/services/catalog/structure-source-contracts";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
@@ -80,6 +81,23 @@ try {
 				.returning({ id: users.id });
 			assert.ok(actor);
 			await runWithNativeFixtureActor(tx, actor.id, async () => {
+				for (const [owner, shape, component] of [
+					["program", "program", "program_work"],
+					["program", "season", "program_season"],
+					["program", "program_version", "program_version"],
+					["program", "episode", "program_episode"],
+					["publishing", "work", "publishing_work"],
+					["publishing", "text_version", "publishing_text_version"],
+					["publishing", "publication", "publishing_publication"],
+					["publishing", "serialization", "publishing_serialization"],
+				] as const) {
+					const projection = prepareStructureSourceProjection(owner, { shape, fields: {} }, []);
+					const result = await tx.execute(
+						sql`select public.catalog_structure_source_projection_valid(${component},${JSON.stringify(projection.value)}::jsonb,array[]::text[]) as valid`,
+					);
+					assert.equal(result.rows[0]?.valid, true);
+					assertions++;
+				}
 				for (const owner of ["program", "publishing"] as const) {
 					const key = {
 							source: "fixture.structure",
@@ -357,6 +375,22 @@ try {
 						await verify(false);
 					}
 					const occurrence = CatalogStructureSourceTables[owner].occurrence;
+					const unobservedField =
+						owner === "program" ? "declaredMainEpisodeCount" : "paginationText";
+					const falseClaim = owner === "program" ? "9" : '"Fabricated source text"';
+					await assert.rejects(
+						() =>
+							tx.transaction((write) =>
+								write.execute(sql`insert into ${occurrence} (source_record_id,mapping_key,correspondence_revision,mapping_owner,snapshot_id,owner_id,component,component_key,source_path,history_id,source_value,observed_fields)
+						select source_record_id,mapping_key,correspondence_revision,mapping_owner,snapshot_id,owner_id,component,component_key,source_path,history_id,jsonb_set(source_value,array['fields',${unobservedField}],${falseClaim}::jsonb),observed_fields from ${occurrence} where ${occurrence.sourceRecordId}=${sourceRecordId} limit 1`),
+							),
+						(error: unknown) =>
+							error instanceof Error &&
+							error.cause instanceof Error &&
+							Reflect.get(error.cause, "code") === "23514" &&
+							/typed observed values/u.test(error.cause.message),
+					);
+					assertions++;
 					await assert.rejects(
 						() =>
 							tx.transaction((write) =>
@@ -364,7 +398,11 @@ try {
 									sql`update ${occurrence} set source_path='/changed' where ${occurrence.sourceRecordId}=${sourceRecordId}`,
 								),
 							),
-						/immutable|retained/i,
+						(error: unknown) =>
+							error instanceof Error &&
+							error.cause instanceof Error &&
+							Reflect.get(error.cause, "code") === "23514" &&
+							Reflect.get(error.cause, "constraint") === "catalog_source_evidence_immutable",
 					);
 					assertions++;
 					const proposal = await proposeCatalogSourceAdoption(tx, actor.id, {

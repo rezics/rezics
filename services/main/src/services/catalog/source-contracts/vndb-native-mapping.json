@@ -25,7 +25,8 @@
     "protocolRefresh": "DB59: check-vndb-protocol-refresh.ts passed 49 rollback assertions for v2-to-v3-to-v4 apply/withdraw/reapply. Old source graph/title claims restore, human name/description survive, typed pure source values remain source-authored, conflicting scalar edits reject, and a same-target API-to-dump protocol refresh rejects before native mutations because unobserved fields lack a combined projection.",
     "softwareReadScope": "DB58: check-software-read-scope.ts passed 18 rollback assertions. Selected grants do not inherit same-Auth creator rights through software discovery, linked components, credit actors/characters, or historical JSON references; filters precede keyset pagination.",
     "vnDumpUpdates": "DB59: REZICS_VNDB_DUMP_FIXTURE=1 check-vndb-vn-updates.ts passed 74 rollback assertions over three apply/withdraw/reapply cycles. Actual source alias joins, contexts, staff/voice, name derivation/authority, playtime, primary/screenshot image widths, release-scoped screenshots, external link URLs and sequel relations restore exactly. API mode separately passed 38 assertions.",
-    "releaseDumpUpdates": "DB59: REZICS_VNDB_DUMP_FIXTURE=1 check-vndb-native-updates.ts passed 71 rollback assertions across three apply/withdraw/reapply cycles. Native image type/width, all-language versus ja/en image scopes and exact URLs restore; unexported photograph metadata is not fabricated; independent catalog number and language channel remain. API mode separately passed 23 assertions."
+    "releaseDumpUpdates": "DB59: REZICS_VNDB_DUMP_FIXTURE=1 check-vndb-native-updates.ts passed 71 rollback assertions across three apply/withdraw/reapply cycles. Native image type/width, all-language versus ja/en image scopes and exact URLs restore; unexported photograph metadata is not fabricated; independent catalog number and language channel remain. API mode separately passed 23 assertions.",
+    "animeUpdates": "DB62 with exact corrected occurrence function installed only inside rollback transactions: structure-source fixture passed86 assertions (Program/Publishing,3 cycles,pure values,8 shape guards,immutable evidence,late-child rejection); anime fixture passed70 assertions (VN reference completion,type/names/IDs/year,3 cycles,human metadata preserved). Final baseline must include canonical fix1122a88a3; no persistent fixture DDL changes."
   },
   "apiLeaves": [
     {
@@ -1343,9 +1344,9 @@
         "title_kanji",
         "mal_id"
       ],
-      "status": "gap",
-      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
-      "implementation": null
+      "status": "native-update-sql",
+      "nativeMeaning": "Observed VNDB AniDB mirror materializes real Program type, native named forms, AniDB/ANN/MAL identifier claims and start-year fact with exact native updates and compensation. Main title language is unknown; no fabricated transliteration relationship.",
+      "implementation": "vndb-anime.ts / vndb-anime-plans.ts / structure-source.ts / check-vndb-anime-source.ts"
     },
     {
       "table": "chars",
@@ -1893,9 +1894,9 @@
         "id",
         "aid"
       ],
-      "status": "gap",
-      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
-      "implementation": null
+      "status": "native-update-sql",
+      "nativeMeaning": "Direction-neutral related Program identity is initialized canonically and later completed by the observed anime mirror; no invented adaptation direction.",
+      "implementation": "vndb-vn-dump.ts / vndb-semantics.ts / vndb-anime.ts"
     },
     {
       "table": "vn_editions",
@@ -2059,7 +2060,7 @@
   "remainingGates": [
     "Generalize and qualify native protocol replacement beyond the bounded VN implementation; source-context separation and VN multi-upgrade replacement are qualified, but no global all-mapper refresh claim is made.",
     "Qualify complete dump surface/association mapping alongside the eight supporting native callbacks; existing SQL fixtures cover selected native graph behavior, not every public dump field.",
-    "Remaining dump assembly, VN anime metadata, Wikidata enrichment and tag-vote aggregation and table-specific bulk mapping must close individually.",
+    "Remaining dump assembly, Wikidata enrichment and tag-vote aggregation and table-specific bulk mapping must close individually.",
     "API-to-dump and dump-to-API source-surface transitions need a reviewed combined projection; current release callbacks reject such switches rather than erase unobserved fields.",
     "Applications above 128 native changes require the central staged protocol.",
     "No all-corpus, all-field native source qualification or production capacity claim follows from selected fixtures."
