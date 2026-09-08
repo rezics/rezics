@@ -1,3 +1,4 @@
+import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
 import type { DatabaseTransaction } from "../database";
 import { z } from "zod";
 import type { CatalogOwner } from "./contracts";
@@ -24,6 +25,8 @@ import {
 	musicBrainzAreaReference,
 	musicBrainzLabelReference,
 	musicBrainzCreditWriter,
+	projectMusicBrainzIdentifiers,
+	projectMusicBrainzGroupTypes,
 } from "./musicbrainz-native";
 import { tracks } from "./musicbrainz-release-plan";
 import { parseMusicBrainzSupportingEndpoint } from "./musicbrainz-entities";
@@ -305,21 +308,21 @@ export async function prepareMusicBrainzProposalDependencies(
 						name: item.value.title,
 						evidence: observation.referenceAt(item.path),
 						initialize: async (created) => {
-							if (item.kind === "release_group")
-								await tx.insert(musicReleaseGroup).values({ id: created.id });
-							else
-								await tx.insert(musicRecording).values({
-									id: created.id,
-									lengthMilliseconds: item.value.length ?? null,
-									video: item.value.video ?? null,
-									artistCreditId: await musicBrainzCreditWriter(
-										tx,
-										actor,
-										observation,
-										created,
-									)(item.value["artist-credit"], `${path}/artist-credit`),
-								});
-							return created;
+							const credit = musicBrainzCreditWriter(tx, actor, observation, created);
+							if (item.kind === "release_group") {
+								await tx.insert(musicReleaseGroup).values({ id: created.id,
+									artistCreditId: await credit(item.value["artist-credit"], `${path}/artist-credit`),
+									primaryTypeRevisionId: await musicBrainzVocabulary(tx, "release_group_primary_type", item.value["primary-type-id"], item.value["primary-type"], {
+										actor, observation, idPath: `${path}/primary-type-id`, namePath: `${path}/primary-type` }) });
+								await projectMusicBrainzGroupTypes(tx, created.id, item.value, undefined, { actor, observation, path });
+							} else {
+								await tx.insert(musicRecording).values({ id: created.id, lengthMilliseconds: item.value.length ?? null,
+									video: item.value.video ?? null, artistCreditId: await credit(item.value["artist-credit"], `${path}/artist-credit`) });
+								await projectMusicBrainzIdentifiers(tx, created.id, "isrc", item.value.isrcs ?? [], observation, `${path}/isrcs`);
+							}
+							const revision = await adoptMusicBrainzRelations(tx, actor, created, created.revision, observation, item.value.relations ?? [], `${path}/relations`);
+							return { ...created, revision };
+
 						},
 					});
 				}
