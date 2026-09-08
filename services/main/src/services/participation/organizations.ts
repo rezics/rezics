@@ -9,6 +9,12 @@ import { reserveParticipationGrantCapacity } from "./lifecycle";
 import { ParticipationDenied, requireParticipation, type ParticipationAuthority } from "./policy";
 import { publicEntityName } from "./presentation";
 
+export const ManagedOrganizationCapabilityValues = [
+	"entity.publish",
+	"entity.membership",
+	"entity.security",
+] as const;
+
 export const CreateManagedOrganizationSchema = z.strictObject({
 	name: z.string().trim().min(1).max(120),
 	language: z.string().min(1).max(255),
@@ -63,11 +69,12 @@ export async function createManagedOrganization(
 	return { entityId: identity.id, grants };
 }
 
-/** Indexed, bounded list of organizations whose security this human can currently manage. */
+/** Indexed, bounded list of organizations with the requested explicit human capability. */
 export async function listManagedOrganizations(
 	tx: DatabaseTransaction,
 	authUserId: string,
 	afterId?: string,
+	capability: (typeof ManagedOrganizationCapabilityValues)[number] = "entity.security",
 ) {
 	const rows = await tx
 		.select({
@@ -81,7 +88,7 @@ export async function listManagedOrganizations(
 		.where(
 			and(
 				eq(participationGrant.authUserId, authUserId),
-				eq(participationGrant.capability, "entity.security"),
+				eq(participationGrant.capability, capability),
 				isNull(participationGrant.revokedAt),
 				or(isNull(participationGrant.expiresAt), gt(participationGrant.expiresAt, new Date())),
 				eq(entityIdentity.shape, "organization"),

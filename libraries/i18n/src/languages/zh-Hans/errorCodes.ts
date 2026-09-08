@@ -13,6 +13,9 @@ const { forms: zoneTerms } = zhHansTerminology.zone;
 const { forms: entityTerms } = zhHansTerminology.entity;
 
 export default {
+	OrganizationMembershipConflict: "邀请或成员状态已改变，请刷新后重试。",
+	OrganizationMembershipNotFound: "找不到此邀请或成员记录。",
+	OrganizationMembershipCapacityExceeded: "待处理邀请过多，请先处理部分邀请再发送。",
 	CatalogReferenceNotFound: "找不到这条记录。",
 	CatalogRevisionConflict: "这条记录已更改，请刷新后重试。",
 	FavoriteNotFound: "找不到这条收藏。",

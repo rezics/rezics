@@ -13,6 +13,9 @@ const { forms: zoneTerms } = esTerminology.zone;
 const { forms: entityTerms } = esTerminology.entity;
 
 export default {
+	OrganizationMembershipConflict: "La invitación o la membresía ha cambiado. Actualiza la página e inténtalo de nuevo.",
+	OrganizationMembershipNotFound: "Esta invitación o membresía no está disponible.",
+	OrganizationMembershipCapacityExceeded: "Hay demasiadas invitaciones pendientes. Resuelve algunas antes de enviar otra.",
 	CatalogReferenceNotFound: "No se encontró este registro.",
 	CatalogRevisionConflict: "Este registro ha cambiado. Actualiza la página e inténtalo de nuevo.",
 	FavoriteNotFound: "No se encontró este elemento guardado.",

@@ -24,6 +24,7 @@ import {
 	CreateManagedOrganizationSchema,
 	createManagedOrganization,
 	listManagedOrganizations,
+	ManagedOrganizationCapabilityValues,
 } from "../../participation/organizations";
 import {
 	listEntityPresentationHistory,
@@ -55,20 +56,27 @@ import {
 	presentParticipationGrant,
 	presentEntityPresentationRevision,
 } from "./present";
+import organizationMembershipApi from "./membership";
 
 /** @alpha Account and delegated participation, kept distinct from public catalog metadata. */
 export default new Elysia({ prefix: "/participation", name: "participation-api" })
 	.use(session)
+	.use(organizationMembershipApi)
 	.get(
 		"/organizations",
 		{
 			detail: { operationId: "listManagedOrganizations", tags: ["Participation"] },
 			response: ManagedOrganizationsSchema,
 			access: "session-only",
-			query: z.strictObject({ afterId: z.uuid().optional() }),
+			query: z.strictObject({
+				afterId: z.uuid().optional(),
+				capability: z.enum(ManagedOrganizationCapabilityValues).optional(),
+			}),
 		},
 		({ user, query }) =>
-			runParticipationTransaction((tx) => listManagedOrganizations(tx, user.id, query.afterId)),
+			runParticipationTransaction((tx) =>
+				listManagedOrganizations(tx, user.id, query.afterId, query.capability),
+			),
 	)
 	.post(
 		"/organizations",

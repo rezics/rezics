@@ -13,6 +13,9 @@ const { forms: zoneTerms } = deTerminology.zone;
 const { forms: entityTerms } = deTerminology.entity;
 
 export default {
+	OrganizationMembershipConflict: "Die Einladung oder Mitgliedschaft wurde geändert. Lade die Seite neu und versuche es erneut.",
+	OrganizationMembershipNotFound: "Diese Einladung oder Mitgliedschaft ist nicht verfügbar.",
+	OrganizationMembershipCapacityExceeded: "Es gibt zu viele offene Einladungen. Bearbeite einige, bevor du eine weitere sendest.",
 	CatalogReferenceNotFound: "Dieser Eintrag wurde nicht gefunden.",
 	CatalogRevisionConflict:
 		"Dieser Eintrag wurde geändert. Lade die Seite neu und versuche es erneut.",

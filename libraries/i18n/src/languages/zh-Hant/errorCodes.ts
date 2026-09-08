@@ -13,6 +13,9 @@ const { forms: zoneTerms } = zhHantTerminology.zone;
 const { forms: entityTerms } = zhHantTerminology.entity;
 
 export default {
+	OrganizationMembershipConflict: "邀請或成員狀態已變更，請重新整理後再試。",
+	OrganizationMembershipNotFound: "找不到此邀請或成員記錄。",
+	OrganizationMembershipCapacityExceeded: "待處理邀請過多，請先處理部分邀請再傳送。",
 	CatalogReferenceNotFound: "找不到這筆記錄。",
 	CatalogRevisionConflict: "這筆記錄已變更，請重新整理後再試。",
 	FavoriteNotFound: "找不到這筆收藏。",

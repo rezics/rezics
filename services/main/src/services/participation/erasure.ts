@@ -1,4 +1,9 @@
 import { accountFollowPreference } from "../database/schema/follow";
+import {
+	organizationMembership,
+	organizationMembershipInvitation,
+} from "../database/schema/organization-membership";
+import { invalidateErasedMembershipInvitations } from "./membership";
 import { erasePrivateImageBatch, type ImageErasureArchive } from "../image-assets/erasure";
 import { and, eq, isNull, lte, sql, type SQL } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
@@ -399,6 +404,23 @@ export async function dispatchAccountErasureBatch(
 					tx,
 					accountFollowPreference,
 					eq(accountFollowPreference.authUserId, authId),
+				);
+				break;
+			case "membership_sent_invitations":
+				result = await invalidateErasedMembershipInvitations(tx, authId);
+				break;
+			case "organization_memberships":
+				result = await deletePrivateBatch(
+					tx,
+					organizationMembership,
+					eq(organizationMembership.memberAuthUserId, authId),
+				);
+				break;
+			case "membership_received_invitations":
+				result = await deletePrivateBatch(
+					tx,
+					organizationMembershipInvitation,
+					eq(organizationMembershipInvitation.recipientAuthUserId, authId),
 				);
 				break;
 			case "favorite_history":

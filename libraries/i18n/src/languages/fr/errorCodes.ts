@@ -13,6 +13,9 @@ const { forms: zoneTerms } = frTerminology.zone;
 const { forms: entityTerms } = frTerminology.entity;
 
 export default {
+	OrganizationMembershipConflict: "Cette invitation ou adhésion a changé. Actualisez la page et réessayez.",
+	OrganizationMembershipNotFound: "Cette invitation ou adhésion est indisponible.",
+	OrganizationMembershipCapacityExceeded: "Il y a trop d’invitations en attente. Traitez-en quelques-unes avant d’en envoyer une autre.",
 	CatalogReferenceNotFound: "Cet enregistrement est introuvable.",
 	CatalogRevisionConflict: "Cet enregistrement a changé. Actualisez la page et réessayez.",
 	FavoriteNotFound: "Cet élément enregistré est introuvable.",

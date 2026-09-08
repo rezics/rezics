@@ -12,6 +12,9 @@ const { forms: unitSlugTerms } = koTerminology.unitSlug;
 const { forms: zoneTerms } = koTerminology.zone;
 
 export default {
+	OrganizationMembershipConflict: "초대 또는 구성원 상태가 변경되었습니다. 새로 고친 후 다시 시도하세요.",
+	OrganizationMembershipNotFound: "이 초대 또는 구성원 기록을 사용할 수 없습니다.",
+	OrganizationMembershipCapacityExceeded: "처리 대기 중인 초대가 너무 많습니다. 일부를 처리한 후 새 초대를 보내세요.",
 	CatalogReferenceNotFound: "이 기록을 찾을 수 없습니다.",
 	CatalogRevisionConflict: "이 기록이 변경되었습니다. 새로 고친 후 다시 시도하세요.",
 	FavoriteNotFound: "저장한 항목을 찾을 수 없습니다.",

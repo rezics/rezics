@@ -13,6 +13,9 @@ const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
+	OrganizationMembershipConflict: "招待またはメンバーの状態が変更されました。再読み込みしてからお試しください。",
+	OrganizationMembershipNotFound: "この招待またはメンバーの記録は利用できません。",
+	OrganizationMembershipCapacityExceeded: "未処理の招待が多すぎます。一部を処理してから新しい招待を送信してください。",
 	CatalogReferenceNotFound: "この記録が見つかりません。",
 	CatalogRevisionConflict: "この記録は変更されました。再読み込みしてからお試しください。",
 	FavoriteNotFound: "保存した項目が見つかりません。",

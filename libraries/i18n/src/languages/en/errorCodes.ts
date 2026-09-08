@@ -13,6 +13,9 @@ const { forms: zoneTerms } = enTerminology.zone;
 const { forms: entityTerms } = enTerminology.entity;
 
 export default {
+	OrganizationMembershipConflict: "This invitation or membership changed. Refresh and try again.",
+	OrganizationMembershipNotFound: "This invitation or membership is unavailable.",
+	OrganizationMembershipCapacityExceeded: "There are too many pending invitations. Resolve some before sending another.",
 	CatalogReferenceNotFound: "This record could not be found.",
 	CatalogRevisionConflict: "This record changed. Refresh and try again.",
 	FavoriteNotFound: "This saved item could not be found.",
