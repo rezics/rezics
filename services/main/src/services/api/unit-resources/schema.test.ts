@@ -1,12 +1,10 @@
 import { Value } from "typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { EntityKindValues, UnitKindValues } from "../../database/schema/contract-values";
+import { UnitOwnerValues } from "@rezics/reference";
 import {
 	AttributionUnitParams,
 	AddUnitExternalLinkBody,
-	CreateEntityBody,
-	ListEntityEntriesQuery,
 	UnitExternalLinkParams,
 	UnitExternalLinkUnitParams,
 	UnitTagParams,
@@ -15,32 +13,10 @@ import {
 } from "./schema";
 
 describe("Unit resource API schemas", () => {
-	it("accepts only the supported Entity kinds", () => {
-		const localization = { language: "en", title: "Example" };
-		for (const kind of EntityKindValues) {
-			expect(
-				Value.Check(CreateEntityBody, {
-					ownershipMode: "profile_owned",
-					kind,
-					localization,
-				}),
-			).toBe(true);
-			expect(Value.Check(ListEntityEntriesQuery, { kind })).toBe(true);
-		}
-		expect(
-			Value.Check(CreateEntityBody, {
-				ownershipMode: "profile_owned",
-				kind: "platform",
-				localization,
-			}),
-		).toBe(false);
-		expect(Value.Check(ListEntityEntriesQuery, { kind: "platform" })).toBe(false);
-	});
-
 	it("accepts Entity as a generic Tag owner", () => {
 		expect(
 			Value.Check(UnitTagParams, {
-				type: "entity",
+				owner: "entity",
 				unitId: "018ff2b7-7c00-7000-8000-000000000001",
 				tagId: "018ff2b7-7c00-7000-8000-000000000002",
 			}),
@@ -48,48 +24,17 @@ describe("Unit resource API schemas", () => {
 	});
 
 	it("accepts every registered generic credit attribution owner", () => {
-		for (const type of [
-			"book",
-			"software",
-			"media",
-			"series",
-			"entity",
-			"collection",
-			"release",
-			"video",
-			"audio",
-		] as const)
+		for (const owner of UnitOwnerValues)
 			expect(
 				Value.Check(AttributionUnitParams, {
-					type,
+					owner,
 					unitId: "018ff2b7-7c00-7000-8000-000000000001",
 				}),
 			).toBe(true);
 		expect(
 			Value.Check(AttributionUnitParams, {
-				type: "profile",
+				owner: "unknown-owner",
 				unitId: "018ff2b7-7c00-7000-8000-000000000001",
-			}),
-		).toBe(false);
-	});
-
-	it("accepts only direct-permission or public credit Entity searches", () => {
-		expect(
-			Value.Check(ListEntityEntriesQuery, {
-				creditAttributionSearch: "direct",
-				query: "Studio",
-			}),
-		).toBe(true);
-		expect(
-			Value.Check(ListEntityEntriesQuery, {
-				creditAttributionSearch: "public",
-				query: "Studio",
-			}),
-		).toBe(true);
-		expect(
-			Value.Check(ListEntityEntriesQuery, {
-				creditAttributionSearch: "owner",
-				query: "Studio",
 			}),
 		).toBe(false);
 	});
@@ -132,33 +77,33 @@ describe("Unit resource API schemas", () => {
 	});
 
 	it("accepts every registered Unit kind as a external-link owner", () => {
-		for (const type of UnitKindValues)
+		for (const owner of UnitOwnerValues)
 			expect(
 				Value.Check(UnitExternalLinkUnitParams, {
-					type,
+					owner,
 					unitId: "018ff2b7-7c00-7000-8000-000000000001",
 				}),
 			).toBe(true);
 		expect(
 			Value.Check(UnitExternalLinkUnitParams, {
-				type: "unknown",
+				owner: "unknown-owner",
 				unitId: "018ff2b7-7c00-7000-8000-000000000001",
 			}),
 		).toBe(false);
 	});
 
 	it("requires a Unit-scoped link identifier for external-link voting and curation", () => {
-		for (const type of UnitKindValues)
+		for (const owner of UnitOwnerValues)
 			expect(
 				Value.Check(UnitExternalLinkParams, {
-					type,
+					owner,
 					unitId: "018ff2b7-7c00-7000-8000-000000000001",
 					externalLinkId: "018ff2b7-7c00-7000-8000-000000000002",
 				}),
 			).toBe(true);
 		expect(
 			Value.Check(UnitExternalLinkParams, {
-				type: "profile",
+				owner: "unknown-owner",
 				unitId: "018ff2b7-7c00-7000-8000-000000000001",
 				externalLinkId: "not-a-unit-link-id",
 			}),

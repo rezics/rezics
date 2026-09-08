@@ -52,7 +52,7 @@ import { UnitNotFound } from "../../units/errors";
 import { ValidationError } from "../errors";
 import { RealmNotFound } from "../realms/errors";
 import { toApiErrorResponse, VoteBackpressureResponse } from "../schema/response";
-import { checkUnitType } from "../unit-resources/service";
+import { checkUnitOwner } from "../unit-resources/service";
 import {
 	ApplyTagPathBody,
 	CreateTagExpressionBody,
@@ -507,10 +507,10 @@ export default new Elysia()
 				},
 			),
 	)
-	.group("/units", (app) =>
+	.group("/resources", (app) =>
 		app
 			.get(
-				"/:type/:unitId/tags",
+				"/:owner/:unitId/tags",
 				{
 					params: UnitTagLandscapeParams,
 					query: UnitTagLandscapeQuery,
@@ -521,7 +521,7 @@ export default new Elysia()
 					detail: { summary: "Get visible Tag Expressions grouped by authority", tags: ["Tags"] },
 				},
 				async ({ params, query, request }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					const identity = await resolveIdentity(request, "unit:read");
 					await identity.authorization.unit.ensureCanRead(params.unitId, () => new UnitNotFound());
 					return getUnitTagLandscape({
@@ -536,7 +536,7 @@ export default new Elysia()
 				},
 			)
 			.post(
-				"/:type/:unitId/tag-path-applications",
+				"/:owner/:unitId/tag-path-applications",
 				{
 					access: "contribute:interaction:write",
 					params: UnitTagLandscapeParams,
@@ -549,7 +549,7 @@ export default new Elysia()
 					detail: { summary: "Apply one explicit global Path Sense", tags: ["Tags"] },
 				},
 				async ({ authorization, body, params, entity }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					return applyTagPath({
 						unitId: params.unitId,
@@ -561,7 +561,7 @@ export default new Elysia()
 				},
 			)
 			.delete(
-				"/:type/:unitId/tag-path-applications/:applicationId",
+				"/:owner/:unitId/tag-path-applications/:applicationId",
 				{
 					access: "write:unit:update",
 					params: TagPathApplicationParams,
@@ -572,7 +572,7 @@ export default new Elysia()
 					detail: { summary: "Remove one global Path Application", tags: ["Tags"] },
 				},
 				async ({ authorization, params }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
 					return removeTagPathApplication({
 						unitId: params.unitId,
@@ -581,7 +581,7 @@ export default new Elysia()
 				},
 			)
 			.put(
-				"/:type/:unitId/tag-path-applications/:applicationId/judgment",
+				"/:owner/:unitId/tag-path-applications/:applicationId/judgment",
 				{
 					access: "contribute:interaction:write",
 					params: TagPathApplicationParams,
@@ -594,7 +594,7 @@ export default new Elysia()
 					detail: { summary: "Judge one global semantic Application", tags: ["Tags"] },
 				},
 				async ({ authorization, body, params, entity }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					return judgeTagPathApplication({
 						applicationId: params.applicationId,
@@ -605,7 +605,7 @@ export default new Elysia()
 				},
 			)
 			.delete(
-				"/:type/:unitId/tag-path-applications/:applicationId/judgment",
+				"/:owner/:unitId/tag-path-applications/:applicationId/judgment",
 				{
 					access: "write:interaction:write",
 					params: TagPathApplicationParams,
@@ -616,7 +616,7 @@ export default new Elysia()
 					detail: { summary: "Clear one global Application judgment", tags: ["Tags"] },
 				},
 				async ({ authorization, params, entity }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					return clearTagPathApplicationJudgment({
 						applicationId: params.applicationId,

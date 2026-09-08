@@ -1,13 +1,11 @@
 import { t } from "elysia";
+import { UnitOwnerValues } from "@rezics/reference";
 import type { StaticDecode } from "typebox";
 
 import {
 	AliasKindValues,
 	CreditAttributionRoleValues,
-	CreditAttributionUnitKindValues,
-	EntityKindValues,
 	SubjectAssociationRoleValues,
-	UnitKindValues,
 	UnitReferencePageDefault,
 	UnitReferencePageMaximum,
 } from "../../database/schema/contract-values";
@@ -20,64 +18,15 @@ import {
 	UnitLocalizationInput,
 	Uuid,
 } from "../schema";
-import { UnitOwnershipMode, WorkUnitType } from "../units/schema";
 
 export const CreateUnitResourceBody = t.Object(
 	{
-		kind: t.Optional(t.String({ minLength: 1, maxLength: 64 })),
 		localization: UnitLocalizationInput,
 		revisionContext: t.Optional(RevisionContext),
 	},
 	{ additionalProperties: false },
 );
 export type CreateUnitResourceBody = StaticDecode<typeof CreateUnitResourceBody>;
-
-export const CreateEntityBody = t.Object(
-	{
-		ownershipMode: UnitOwnershipMode,
-		kind: t.Optional(t.UnionEnum(EntityKindValues, { default: undefined })),
-		localization: UnitLocalizationInput,
-		revisionContext: t.Optional(RevisionContext),
-	},
-	{ additionalProperties: false },
-);
-export type CreateEntityBody = StaticDecode<typeof CreateEntityBody>;
-
-export const ListEntityEntriesQuery = t.Object(
-	{
-		creditAttributionSearch: t.Optional(t.Union([t.Literal("direct"), t.Literal("public")])),
-		kind: t.Optional(t.UnionEnum(EntityKindValues, { default: undefined })),
-		query: t.Optional(t.String({ minLength: 1, maxLength: 200 })),
-		...LocalizationLanguageQuery,
-		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
-	},
-	{ additionalProperties: false },
-);
-export type ListEntityEntriesQuery = StaticDecode<typeof ListEntityEntriesQuery>;
-
-export const EntityDetailQuery = t.Object(LocalizationLanguageQuery, {
-	additionalProperties: false,
-});
-export type EntityDetailQuery = StaticDecode<typeof EntityDetailQuery>;
-
-const MeasurementValue = t.Nullable(t.Integer({ minimum: 1, maximum: 2_147_483_647 }));
-
-export const UpsertEntityMeasurementBody = t.Object(
-	{
-		contextUnitId: t.Optional(t.Nullable(Uuid)),
-		heightMillimetres: MeasurementValue,
-		weightGrams: MeasurementValue,
-		bustMillimetres: MeasurementValue,
-		waistMillimetres: MeasurementValue,
-		hipsMillimetres: MeasurementValue,
-		revisionContext: t.Optional(RevisionContext),
-	},
-	{ additionalProperties: false },
-);
-export type UpsertEntityMeasurementBody = StaticDecode<typeof UpsertEntityMeasurementBody>;
-
-export const EntityLocalizationParams = t.Object({ unitId: Uuid, language: ContentLanguage });
-export type EntityLocalizationParams = StaticDecode<typeof EntityLocalizationParams>;
 
 export const ListTagsQuery = t.Object(
 	{
@@ -140,38 +89,38 @@ export const AddUnitExternalLinkBody = t.Object(
 );
 export type AddUnitExternalLinkBody = StaticDecode<typeof AddUnitExternalLinkBody>;
 
-export const UnitUnitParams = t.Object({ type: WorkUnitType, unitId: Uuid });
+export const UnitUnitParams = t.Object({ owner: t.UnionEnum(UnitOwnerValues), unitId: Uuid });
 export type UnitUnitParams = StaticDecode<typeof UnitUnitParams>;
 
-export const AttributionUnitType = t.UnionEnum(CreditAttributionUnitKindValues);
+export const AttributionUnitType = t.UnionEnum(UnitOwnerValues);
 export type AttributionUnitType = StaticDecode<typeof AttributionUnitType>;
 
 /** Unit kinds currently exposed through the generic Tag landscape and curation APIs. */
-export const TaggableUnitType = t.Union([WorkUnitType, t.Literal("entity")]);
+export const TaggableUnitType = t.UnionEnum(UnitOwnerValues);
 export type TaggableUnitType = StaticDecode<typeof TaggableUnitType>;
 
 export const AttributionUnitParams = t.Object({
-	type: AttributionUnitType,
+	owner: AttributionUnitType,
 	unitId: Uuid,
 });
 export type AttributionUnitParams = StaticDecode<typeof AttributionUnitParams>;
 
 export const AttributionAssociationParams = t.Object({
-	type: AttributionUnitType,
+	owner: AttributionUnitType,
 	unitId: Uuid,
 	associationId: Uuid,
 });
 export type AttributionAssociationParams = StaticDecode<typeof AttributionAssociationParams>;
 
 export const UnitAssociationParams = t.Object({
-	type: WorkUnitType,
+	owner: t.UnionEnum(UnitOwnerValues),
 	unitId: Uuid,
 	associationId: Uuid,
 });
 export type UnitAssociationParams = StaticDecode<typeof UnitAssociationParams>;
 
 export const UnitExternalLinkUnitParams = t.Object({
-	type: t.Union(UnitKindValues.map((value) => t.Literal(value))),
+	owner: t.UnionEnum(UnitOwnerValues),
 	unitId: Uuid,
 });
 export type UnitExternalLinkUnitParams = StaticDecode<typeof UnitExternalLinkUnitParams>;
@@ -199,7 +148,7 @@ export const UnitExternalLinkParams = t.Object({
 });
 export type UnitExternalLinkParams = StaticDecode<typeof UnitExternalLinkParams>;
 
-export const UnitTagParams = t.Object({ type: TaggableUnitType, unitId: Uuid, tagId: Uuid });
+export const UnitTagParams = t.Object({ owner: TaggableUnitType, unitId: Uuid, tagId: Uuid });
 export type UnitTagParams = StaticDecode<typeof UnitTagParams>;
 
 export const TagUnitBody = t.Object({}, { additionalProperties: false });
@@ -240,7 +189,7 @@ export const AddUnitAliasBody = t.Object(
 export type AddUnitAliasBody = StaticDecode<typeof AddUnitAliasBody>;
 
 export const UnitAliasUnitParams = t.Object({
-	type: t.Union(UnitKindValues.map((value) => t.Literal(value))),
+	owner: t.UnionEnum(UnitOwnerValues),
 	unitId: Uuid,
 });
 export type UnitAliasUnitParams = StaticDecode<typeof UnitAliasUnitParams>;
@@ -251,7 +200,7 @@ export const UnitAliasListQuery = t.Object(UnitReferencePaginationQuery, {
 export type UnitAliasListQuery = StaticDecode<typeof UnitAliasListQuery>;
 
 export const UnitAliasParams = t.Object({
-	type: t.Union(UnitKindValues.map((value) => t.Literal(value))),
+	owner: t.UnionEnum(UnitOwnerValues),
 	unitId: Uuid,
 	aliasId: Uuid,
 });

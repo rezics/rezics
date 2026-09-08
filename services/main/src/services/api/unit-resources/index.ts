@@ -2,42 +2,24 @@ import { presentImageAsset } from "../image-assets/presentation";
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
 
-import {
-	and,
-	asc,
-	desc,
-	eq,
-	gt,
-	ilike,
-	inArray,
-	isNotNull,
-	isNull,
-	ne,
-	or,
-	sql,
-} from "drizzle-orm";
+import { and, asc, desc, eq, gt, isNotNull, isNull, ne, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import { RevisionContextBody } from "../schema";
 
 import { AuthenticationRequired } from "../../auth/errors";
 import session, { resolveIdentity } from "../../auth/session";
-import { getPlatformCapabilityCondition } from "../../authorization/platform/query";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
-import { unitOwnershipModeFromOwnerProfileId } from "../../authorization/unit/ownership";
-import { getUnitPermissionCondition } from "../../authorization/unit/query";
-import { associationTargetScope, unitScope } from "../../authorization/unit/scope";
+import { unitScope } from "../../authorization/unit/scope";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
 	creditAttribution,
-	entity,
-	entityMeasurement,
+	entityIdentity,
 	subjectAssociation,
 	subjectAssociationJudgment,
 	subjectAssociationJudgmentStat,
 	tag,
-	unit,
 	unitAlias,
 	unitAliasVote,
 	unitAliasVoteStat,
@@ -45,7 +27,6 @@ import {
 	unitExternalLinkVote,
 	unitExternalLinkVoteStat,
 	unitLocalization,
-	unitOwnership,
 	unitReferenceCurationHead,
 	unitTag,
 	unitTagJudgment,
@@ -53,8 +34,6 @@ import {
 } from "../../database/schema";
 import {
 	type UnitReferenceCurationKind,
-	isCreditAttributionRoleForUnitKind,
-	isEntityKind,
 	UnitReferenceActiveLimit,
 	UnitReferencePageDefault,
 } from "../../database/schema/contract-values";
@@ -66,32 +45,18 @@ import {
 	SubjectAssociationNotFound,
 } from "../../entities/errors";
 import { fractionalPositionBetween } from "../../ordering/position";
-import { getPendingUnitOwnershipClaim } from "../../ownership-claims/service";
 import { updateDirectUnitTagCuration } from "../../tags/curation";
-import {
-	ensureWikiAssociationContextPost,
-	getAssociationContextPostsByAssociationIds,
-} from "../../units/association-context";
-import {
-	getAttributionSummariesByUnitIds,
-	getPublicUnitSummariesByIds,
-} from "../../units/attribution";
+import { ensureWikiAssociationContextPost } from "../../units/association-context";
+import { getAttributionSummariesByUnitIds } from "../../units/attribution";
 import { ensureDirectCreditAttributionAllowed } from "../../units/attribution-authorization";
 import { presentAvatar } from "../../units/avatar";
 import { AssociationContextPostInvalid } from "../../units/errors";
-import {
-	attachReadableSourceEntities,
-	getUnitExternalLinkPreviewWithSources,
-} from "../../units/external-links";
-import { recordUnitRevision } from "../../units/history";
+import { attachReadableSourceEntities } from "../../units/external-links";
 import {
 	avatarReferenceFromColumns,
-	resolvedUnitLocalizationAvatar,
-	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 	resolveUnitLocalizationAvatarFromOrdered,
 	resolveUnitLocalizationFromOrdered,
-	resolveUnitLocalizationImageAssetIdFromOrdered,
 } from "../../units/localization";
 import {
 	ensureUnitReferenceCanBeCreated,
@@ -105,23 +70,13 @@ import {
 	unitReferenceRankingVersion,
 } from "../../units/reference-pagination";
 import { upsertLocalization } from "../../units/service";
-import {
-	getUnitVariantContext,
-	promoteUnitVariantToMain,
-	updateUnitVariantContext,
-} from "../../units/variants";
 import { presentBinaryVoteSummary } from "../../votes/binary";
-import { ValidationError } from "../errors";
-import { UnitIdParams } from "../schema";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import {
 	AliasCurationResponse,
 	AliasListResponse,
 	AliasResponse,
 	CreditAttributionResponse,
-	EntityDetailResponse,
-	EntityListResponse,
-	EntityMeasurementResponse,
 	SubjectAssociationResponse,
 	SubjectAssociationSpoilerResponse,
 	TagApplicationPolicyResponse,
@@ -137,11 +92,7 @@ import {
 	VoteResponse,
 } from "../schema/response";
 import { TagNotFound } from "../tags/errors";
-import {
-	PromoteUnitVariantBody,
-	UnitLocalizationBody,
-	UpdateUnitVariantContextBody,
-} from "../units/schema";
+import { UnitLocalizationBody } from "../units/schema";
 import {
 	AliasNotFound,
 	TagApplicationNotFound,
@@ -157,11 +108,7 @@ import {
 	AddUnitSubjectAssociationBody,
 	AttributionAssociationParams,
 	AttributionUnitParams,
-	CreateEntityBody,
 	CreateUnitResourceBody,
-	EntityDetailQuery,
-	EntityLocalizationParams,
-	ListEntityEntriesQuery,
 	ListTagsQuery,
 	SubjectAssociationSpoilerBody,
 	TagDetailParams,
@@ -179,15 +126,13 @@ import {
 	UnitUnitParams,
 	UpdateUnitReferenceCurationBody,
 	UpdateUnitTagCurationBody,
-	UpsertEntityMeasurementBody,
 	VoteBody,
 	WithdrawUnitReferenceQuery,
 } from "./schema";
-import { checkUnitType, createUnitResource } from "./service";
+import { creditRoleAllowedForReference } from "../../units/credit-role-contract";
+import { checkUnitOwner, createTagResource, recordResourceRevision } from "./service";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
-const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
-const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const UnitResourceMutationNotFoundResponse = toApiErrorResponse([
 	"UnitNotFound",
 	"ImageAssetNotFound",
@@ -200,18 +145,13 @@ const UnitInteractionForbiddenResponse = toApiErrorResponse([
 	"UnitAccessRestricted",
 	"UnitPermissionForbidden",
 ]);
-const publiclyReadableUnitCondition = () =>
+const publiclyReadableTagCondition = () =>
 	and(
-		eq(unit.status, "published"),
-		eq(unit.visibility, "public"),
-		eq(unit.moderationStatus, "approved"),
-		isNull(unit.deletedAt),
+		eq(tag.status, "published"),
+		eq(tag.visibility, "public"),
+		eq(tag.moderationStatus, "approved"),
+		isNull(tag.deletedAt),
 	);
-
-function requireEntityKind(value: string) {
-	if (!isEntityKind(value)) throw new Error("Persisted Entity kind is not supported");
-	return value;
-}
 
 async function ensureUnitMutationAuthorized(
 	authorization: UnitAuthorization<string>,
@@ -227,9 +167,9 @@ async function ensureReadableSourceEntity(
 ): Promise<void> {
 	await authorization.ensureCanRead(sourceEntityId, () => new EntityEntryNotFound());
 	const [sourceEntity] = await database
-		.select({ id: entity.id })
-		.from(entity)
-		.where(eq(entity.id, sourceEntityId))
+		.select({ id: entityIdentity.id })
+		.from(entityIdentity)
+		.where(eq(entityIdentity.id, sourceEntityId))
 		.limit(1);
 	if (!sourceEntity) throw new EntityEntryNotFound();
 }
@@ -458,471 +398,6 @@ async function getSubjectAssociationSpoilerSummary(associationId: string, profil
 
 export default new Elysia()
 	.use(session)
-	.group("/entities", (app) =>
-		app
-			.get(
-				"",
-				{
-					query: ListEntityEntriesQuery,
-					response: {
-						[StatusCodes.OK]: EntityListResponse,
-						[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
-					},
-					detail: { summary: "List entity entries", tags: ["Entity"] },
-				},
-				async ({ query, request }) => {
-					const localizationLanguages = query.localizationLanguages ?? [];
-					let entityCondition = publiclyReadableUnitCondition();
-					if (query.creditAttributionSearch === "direct") {
-						const identity = await resolveIdentity(request, "unit:read");
-						if (!identity.entity) throw new AuthenticationRequired();
-						const target = {
-							id: unit.id,
-							deletedAt: unit.deletedAt,
-						};
-						const scope = associationTargetScope("credit");
-						entityCondition = and(
-							eq(unit.status, "published"),
-							inArray(unit.visibility, ["public", "unlisted"]),
-							eq(unit.moderationStatus, "approved"),
-							isNull(unit.deletedAt),
-							or(
-								getPlatformCapabilityCondition(identity.entity.id, "entity.associations.override"),
-								getUnitPermissionCondition(
-									identity.entity.id,
-									"unit.association.manage",
-									scope,
-									target,
-								),
-								getUnitPermissionCondition(
-									identity.entity.id,
-									"entity.association.credit.direct",
-									scope,
-									target,
-								),
-							),
-						);
-					}
-					const items = await database
-						.select({
-							id: unit.id,
-							kind: entity.kind,
-							verified: entity.verified,
-							language: unitLocalization.language,
-							avatar: resolvedUnitLocalizationAvatar(unit.id, localizationLanguages),
-							bannerAssetId: resolvedUnitLocalizationImageAssetId(
-								unit.id,
-								"banner",
-								localizationLanguages,
-							),
-							coverAssetId: resolvedUnitLocalizationImageAssetId(
-								unit.id,
-								"cover",
-								localizationLanguages,
-							),
-							title: unitLocalization.title,
-							summary: unitLocalization.summary,
-						})
-						.from(entity)
-						.innerJoin(unit, eq(unit.id, entity.id))
-						.innerJoin(
-							unitLocalization,
-							and(
-								eq(unitLocalization.unitId, unit.id),
-								eq(
-									unitLocalization.language,
-									resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
-								),
-							),
-						)
-						.where(
-							and(
-								entityCondition,
-								query.kind ? eq(entity.kind, query.kind) : undefined,
-								query.query ? ilike(unitLocalization.title, `%${query.query}%`) : undefined,
-							),
-						)
-						.orderBy(desc(unit.createdAt))
-						.limit(query.limit ?? 20);
-					return {
-						items: items.map(({ avatar, bannerAssetId, coverAssetId, kind, ...item }) => ({
-							...item,
-							kind: requireEntityKind(kind),
-							avatar: presentAvatar(avatar),
-							banner: presentImageAsset(bannerAssetId, "banner"),
-							cover: presentImageAsset(coverAssetId, "cover"),
-						})),
-					};
-				},
-			)
-			.post(
-				"",
-				{
-					access: "contribute:unit:create",
-					body: CreateEntityBody,
-					response: {
-						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
-					},
-					detail: { summary: "Create entity entry", tags: ["Entity"] },
-				},
-				async ({ entity, body }) => ({
-					id: await createUnitResource("entity", entity.id, body),
-				}),
-			)
-			.get(
-				"/:unitId",
-				{
-					params: UnitIdParams,
-					query: EntityDetailQuery,
-					response: {
-						[StatusCodes.OK]: EntityDetailResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EntityEntryNotFound"]),
-					},
-					detail: { summary: "Get entity entry", tags: ["Entity"] },
-				},
-				async ({ params, query, request }) => {
-					const identity = await resolveIdentity(request, "unit:read");
-					const localizationLanguages = query.localizationLanguages ?? [];
-					const [entry] = await database
-						.select({
-							id: unit.id,
-							kind: entity.kind,
-							verified: entity.verified,
-							createdAt: unit.createdAt,
-							updatedAt: unit.updatedAt,
-						})
-						.from(entity)
-						.innerJoin(unit, eq(unit.id, entity.id))
-						.where(and(eq(entity.id, params.unitId), publiclyReadableUnitCondition()))
-						.limit(1);
-					if (!entry) throw new EntityEntryNotFound();
-					const storedLocalizations = await database
-						.select()
-						.from(unitLocalization)
-						.where(eq(unitLocalization.unitId, params.unitId))
-						.orderBy(asc(unitLocalization.position), asc(unitLocalization.language));
-					const selectedLocalization = resolveUnitLocalizationFromOrdered(
-						storedLocalizations,
-						localizationLanguages,
-					);
-					if (!selectedLocalization) throw new EntityEntryNotFound();
-					const attributions =
-						(await getAttributionSummariesByUnitIds([params.unitId], localizationLanguages)).get(
-							params.unitId,
-						) ?? [];
-					const localizations = storedLocalizations.map((row) => ({
-						unitId: row.unitId,
-						language: row.language,
-						position: row.position,
-						title: row.title,
-						summary: row.summary,
-						description:
-							row.description === null
-								? null
-								: toPortableTextResponse(row.description, "unit_localization.description"),
-						avatar: presentAvatar(avatarReferenceFromColumns(row)),
-						banner: presentImageAsset(row.bannerAssetId, "banner"),
-						cover: presentImageAsset(row.coverAssetId, "cover"),
-						createdAt: row.createdAt,
-						updatedAt: row.updatedAt,
-					}));
-					const externalLinks = await getUnitExternalLinkPreviewWithSources({
-						unitId: params.unitId,
-						localizationLanguages,
-						authorization: identity.authorization,
-					});
-					const variantContext = await getUnitVariantContext(
-						params.unitId,
-						identity.authorization.profileId,
-						localizationLanguages,
-					);
-					const measurements = await database
-						.select()
-						.from(entityMeasurement)
-						.where(eq(entityMeasurement.entityId, params.unitId))
-						.orderBy(
-							sql`case when ${entityMeasurement.contextUnitId} is null then 0 else 1 end`,
-							entityMeasurement.contextUnitId,
-							entityMeasurement.id,
-						);
-					const creditAttributions = await database
-						.select({
-							id: creditAttribution.id,
-							sourceUnitId: creditAttribution.sourceUnitId,
-							role: creditAttribution.role,
-						})
-						.from(creditAttribution)
-						.innerJoin(unit, eq(unit.id, creditAttribution.sourceUnitId))
-						.where(
-							and(
-								eq(creditAttribution.creditedEntityId, params.unitId),
-								publiclyReadableUnitCondition(),
-							),
-						);
-					const subjectAssociations = await database
-						.select({
-							id: subjectAssociation.id,
-							unitId: subjectAssociation.unitId,
-							role: subjectAssociation.role,
-						})
-						.from(subjectAssociation)
-						.innerJoin(unit, eq(unit.id, subjectAssociation.unitId))
-						.where(
-							and(eq(subjectAssociation.entityId, params.unitId), publiclyReadableUnitCondition()),
-						);
-					const contextPosts = await getAssociationContextPostsByAssociationIds(
-						subjectAssociations.map(({ id }) => id),
-						localizationLanguages,
-						identity.authorization.profileId,
-					);
-					const presentedSubjectAssociations = subjectAssociations.map((association) => ({
-						...association,
-						contextPost: contextPosts.get(association.id) ?? null,
-					}));
-					const [owner] = await database
-						.select({ profileId: unitOwnership.profileId })
-						.from(unitOwnership)
-						.where(and(eq(unitOwnership.unitId, params.unitId), isNull(unitOwnership.revokedAt)))
-						.limit(1);
-					const entityEntry = entry;
-					const ownerSummary = owner?.profileId
-						? ((await getPublicUnitSummariesByIds([owner.profileId], localizationLanguages)).get(
-								owner.profileId,
-							) ?? null)
-						: null;
-					const [
-						canEdit,
-						canEditCreditAttributions,
-						tagCurationDecision,
-						variantDecision,
-						accessDecision,
-						creditDecision,
-						subjectDecision,
-						ownershipClaim,
-					] = await Promise.all([
-						identity.authorization.unit.canUpdate(params.unitId, ["localizations"]),
-						identity.authorization.unit.canUpdate(params.unitId, ["credit-attributions"]),
-						identity.authorization.unit.decide(params.unitId, "unit.tag-curation.manage"),
-						identity.authorization.unit.decide(params.unitId, "unit.association.manage", [
-							"variant",
-						]),
-						identity.authorization.unit.decide(params.unitId, "unit.access.manage"),
-						identity.authorization.unit.decide(params.unitId, "unit.association.manage", [
-							"associations",
-							"credit",
-						]),
-						identity.authorization.unit.decide(params.unitId, "unit.association.manage", [
-							"associations",
-							"subject",
-						]),
-						getPendingUnitOwnershipClaim(params.unitId, identity.authorization.profileId),
-					]);
-					return {
-						...entityEntry,
-						ownershipMode: unitOwnershipModeFromOwnerProfileId(owner?.profileId ?? null),
-						kind: requireEntityKind(entry.kind),
-						language: selectedLocalization.language,
-						avatar: presentAvatar(
-							resolveUnitLocalizationAvatarFromOrdered(storedLocalizations, localizationLanguages),
-						),
-						banner: presentImageAsset(
-							resolveUnitLocalizationImageAssetIdFromOrdered(
-								storedLocalizations,
-								"banner",
-								localizationLanguages,
-							),
-							"banner",
-						),
-						cover: presentImageAsset(
-							resolveUnitLocalizationImageAssetIdFromOrdered(
-								storedLocalizations,
-								"cover",
-								localizationLanguages,
-							),
-							"cover",
-						),
-						localizations,
-						attributions,
-						owner: ownerSummary,
-						externalLinks,
-						variantContext,
-						measurements,
-						ownershipClaim: ownershipClaim
-							? { ...ownershipClaim, state: "pending" as const }
-							: null,
-						capabilities: {
-							canEdit,
-							canEditCreditAttributions,
-							canCurateTags: tagCurationDecision.allowed,
-							canManageVariants: variantDecision.allowed,
-							canManageAccess: accessDecision.allowed,
-							canManageCreditAssociations: creditDecision.allowed,
-							canManageSubjectAssociations: subjectDecision.allowed,
-						},
-						creditAttributions,
-						subjectAssociations: presentedSubjectAssociations,
-					};
-				},
-			)
-			.put(
-				"/:unitId/measurements",
-				{
-					access: "contribute:unit:update",
-					params: UnitIdParams,
-					body: UpsertEntityMeasurementBody,
-					response: {
-						[StatusCodes.OK]: EntityMeasurementResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-					},
-					detail: {
-						summary: "Create or replace a canonical Entity measurement set",
-						tags: ["Entity"],
-					},
-				},
-				async ({ params, body, authorization }) => {
-					await checkUnitType(params.unitId, "entity");
-					await authorization.unit.ensureCanUpdate(params.unitId, [["measurements"]]);
-					if (body.contextUnitId) await authorization.unit.ensureCanRead(body.contextUnitId);
-					const { revisionContext, contextUnitId = null, ...values } = body;
-					if (Object.values(values).every((value) => value === null))
-						throw new ValidationError("At least one measurement value is required");
-					return database.transaction(async (tx) => {
-						const [measurement] = await tx
-							.insert(entityMeasurement)
-							.values({ entityId: params.unitId, contextUnitId, ...values })
-							.onConflictDoUpdate({
-								target: [entityMeasurement.entityId, entityMeasurement.contextUnitId],
-								set: { ...values, updatedAt: new Date() },
-							})
-							.returning();
-						if (!measurement) throw new Error("Entity measurement upsert returned no row");
-						await recordUnitRevision(tx, {
-							unitId: params.unitId,
-							actorProfileId: authorization.profileId,
-							contribution: revisionContext?.contribution,
-							event: "update",
-						});
-						return measurement;
-					});
-				},
-			)
-			.patch(
-				"/:unitId/variant-context",
-				{
-					access: "contribute:unit:update",
-					params: UnitIdParams,
-					body: UpdateUnitVariantContextBody,
-					response: {
-						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"UnitVariantChanged",
-							"UnitVariantKindMismatch",
-							"UnitVariantMainUnavailable",
-							"UnitVariantSourceHasVariants",
-							"UnitVariantGroupLimitReached",
-							"UnitVariantTargetIsVariant",
-						]),
-					},
-					detail: { summary: "Update Entity Main relationship", tags: ["Entity"] },
-				},
-				async ({ params, authorization, body }) => {
-					await checkUnitType(params.unitId, "entity");
-					await updateUnitVariantContext({
-						kind: "entity",
-						variantUnitId: params.unitId,
-						mainUnitId: body.mainUnitId,
-						expectedMainUnitId: body.expectedMainUnitId,
-						actorProfileId: authorization.profileId,
-						contribution: body.revisionContext?.contribution,
-						authorization: authorization.unit,
-					});
-					return { id: params.unitId };
-				},
-			)
-			.post(
-				"/:unitId/variant-context/promote",
-				{
-					access: "contribute:unit:update",
-					params: UnitIdParams,
-					body: PromoteUnitVariantBody,
-					response: {
-						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse([
-							"UnitVariantChanged",
-							"UnitVariantKindMismatch",
-							"UnitVariantMainUnavailable",
-							"UnitVariantSourceHasVariants",
-							"UnitVariantGroupLimitReached",
-							"UnitVariantTargetIsVariant",
-						]),
-					},
-					detail: { summary: "Promote Entity Variant to Main", tags: ["Entity"] },
-				},
-				async ({ params, authorization, body }) => {
-					await checkUnitType(params.unitId, "entity");
-					await promoteUnitVariantToMain({
-						kind: "entity",
-						variantUnitId: params.unitId,
-						expectedMainUnitId: body.expectedMainUnitId,
-						actorProfileId: authorization.profileId,
-						contribution: body.revisionContext?.contribution,
-						authorization: authorization.unit,
-					});
-					return { id: params.unitId };
-				},
-			)
-			.put(
-				"/:unitId/localizations/:language",
-				{
-					access: "contribute:unit:update",
-					params: EntityLocalizationParams,
-					body: UnitLocalizationBody,
-					response: {
-						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.NOT_FOUND]: UnitResourceMutationNotFoundResponse,
-					},
-					detail: { summary: "Create or replace entity localization", tags: ["Entity"] },
-				},
-				async ({ params, authorization, body }) => {
-					await checkUnitType(params.unitId, "entity");
-					const { revisionContext, ...localization } = body;
-					await upsertLocalization(params.unitId, authorization, {
-						...localization,
-						revisionContribution: revisionContext?.contribution,
-						language: params.language,
-					});
-					return { id: params.unitId };
-				},
-			),
-	)
 	.group("/tags", (app) =>
 		app
 			.get(
@@ -934,33 +409,34 @@ export default new Elysia()
 				},
 				async ({ query }) => {
 					const localizationLanguages = query.localizationLanguages ?? [];
+					const candidates = database
+						.select({ id: tag.id, createdAt: tag.createdAt })
+						.from(tag)
+						.where(publiclyReadableTagCondition())
+						.orderBy(desc(tag.createdAt), desc(tag.id))
+						.limit(query.limit ?? 20)
+						.as("tag_candidates");
 					return {
 						items: await database
 							.select({
-								id: unit.id,
+								id: candidates.id,
 								language: unitLocalization.language,
 								title: unitLocalization.title,
 								summary: unitLocalization.summary,
 							})
-							.from(unit)
+							.from(candidates)
 							.innerJoin(
 								unitLocalization,
 								and(
-									eq(unitLocalization.unitId, unit.id),
+									eq(unitLocalization.unitId, candidates.id),
 									eq(
 										unitLocalization.language,
-										resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
+										resolvedUnitLocalizationLanguage(candidates.id, localizationLanguages),
 									),
 								),
 							)
-							.where(
-								and(
-									eq(unit.kind, "tag"),
-									eq(unit.status, "published"),
-									eq(unit.visibility, "public"),
-								),
-							)
-							.orderBy(desc(unit.createdAt))
+
+							.orderBy(desc(candidates.createdAt), desc(candidates.id))
 							.limit(query.limit ?? 20),
 					};
 				},
@@ -979,8 +455,8 @@ export default new Elysia()
 					},
 					detail: { summary: "Create tag", tags: ["Tags"] },
 				},
-				async ({ entity, body }) => ({
-					id: await createUnitResource("tag", entity.id, body),
+				async ({ authorization, body }) => ({
+					id: await createTagResource(authorization, body),
 				}),
 			)
 			.get(
@@ -999,13 +475,12 @@ export default new Elysia()
 					const localizationLanguages = query.localizationLanguages ?? [];
 					const [tagEntry] = await database
 						.select({
-							id: unit.id,
-							createdAt: unit.createdAt,
-							updatedAt: unit.updatedAt,
+							id: tag.id,
+							createdAt: tag.createdAt,
+							updatedAt: tag.updatedAt,
 						})
 						.from(tag)
-						.innerJoin(unit, eq(unit.id, tag.id))
-						.where(and(eq(tag.id, params.tagId), publiclyReadableUnitCondition()))
+						.where(and(eq(tag.id, params.tagId), publiclyReadableTagCondition()))
 						.limit(1);
 					if (!tagEntry) throw new TagNotFound();
 					const storedLocalizations = await database
@@ -1065,7 +540,7 @@ export default new Elysia()
 					detail: { summary: "Create or replace tag localization", tags: ["Tags"] },
 				},
 				async ({ params, authorization, body }) => {
-					await checkUnitType(params.tagId, "tag");
+					await checkUnitOwner(params.tagId, "tag");
 					const { revisionContext, ...localization } = body;
 					await upsertLocalization(params.tagId, authorization, {
 						...localization,
@@ -1076,7 +551,7 @@ export default new Elysia()
 				},
 			),
 	)
-	.group("/units/:type/:unitId", (app) =>
+	.group("/resources/:owner/:unitId", (app) =>
 		app
 			.get(
 				"/aliases",
@@ -1091,7 +566,7 @@ export default new Elysia()
 					detail: { summary: "List Unit alias references", tags: ["Units"] },
 				},
 				async ({ params, query, entity, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [rows, curationVersion] = await Promise.all([
 						database
@@ -1175,7 +650,7 @@ export default new Elysia()
 					detail: { summary: "Propose Unit alias", tags: ["Units"] },
 				},
 				async ({ params, entity, authorization, body }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const term = body.term.trim();
 					const normalizedTerm = normalizeAliasTerm(term);
@@ -1249,7 +724,7 @@ export default new Elysia()
 					detail: { summary: "Vote on Unit alias", tags: ["Units"] },
 				},
 				async ({ params, entity, authorization, body }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [target] = await database
 						.select({ id: unitAlias.id })
@@ -1291,7 +766,7 @@ export default new Elysia()
 					detail: { summary: "Remove Unit alias vote", tags: ["Units"] },
 				},
 				async ({ params, entity, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [target] = await database
 						.select({ id: unitAlias.id })
@@ -1334,7 +809,7 @@ export default new Elysia()
 					detail: { summary: "Update Unit Alias curation", tags: ["Units"] },
 				},
 				async ({ params, entity, authorization, body }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensure(
 						params.unitId,
 						"unit.reference-curation.manage",
@@ -1374,7 +849,7 @@ export default new Elysia()
 					},
 				},
 				async ({ params, query, entity, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensure(
 						params.unitId,
 						"unit.reference-curation.manage",
@@ -1412,9 +887,15 @@ export default new Elysia()
 				},
 				async ({ params, authorization, body }) => {
 					const { revisionContext, ...creditInput } = body;
-					await checkUnitType(params.unitId, params.type);
-					if (!isCreditAttributionRoleForUnitKind(params.type, creditInput.role))
-						throw new CreditAttributionRoleInvalid(params.type, creditInput.role);
+					await checkUnitOwner(params.unitId, params.owner);
+					if (
+						!(await creditRoleAllowedForReference(
+							database,
+							{ owner: params.owner, id: params.unitId },
+							creditInput.role,
+						))
+					)
+						throw new CreditAttributionRoleInvalid(params.owner, creditInput.role);
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
 						"credit-attributions",
 					]);
@@ -1437,7 +918,7 @@ export default new Elysia()
 								position: creditInput.position ?? fractionalPositionBetween(last?.position, null),
 							})
 							.returning();
-						await recordUnitRevision(tx, {
+						await recordResourceRevision(tx, authorization, {
 							unitId: params.unitId,
 							actorProfileId: authorization.profileId,
 							contribution: revisionContext?.contribution,
@@ -1478,7 +959,7 @@ export default new Elysia()
 					},
 				},
 				async ({ params, entity, authorization, body }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
 						"credit-attributions",
 					]);
@@ -1493,7 +974,7 @@ export default new Elysia()
 							)
 							.returning({ id: creditAttribution.id });
 						if (!deleted.length) throw new CreditAttributionNotFound();
-						await recordUnitRevision(tx, {
+						await recordResourceRevision(tx, authorization, {
 							unitId: params.unitId,
 							actorProfileId: entity.id,
 							contribution: body?.revisionContext?.contribution,
@@ -1526,7 +1007,7 @@ export default new Elysia()
 				},
 				async ({ params, authorization, body }) => {
 					const { revisionContext, ...associationInput } = body;
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
 						"subject-associations",
 					]);
@@ -1564,7 +1045,7 @@ export default new Elysia()
 							})
 							.returning();
 						if (!created) throw new Error("Subject association insertion returned no row");
-						await recordUnitRevision(tx, {
+						await recordResourceRevision(tx, authorization, {
 							unitId: params.unitId,
 							actorProfileId: authorization.profileId,
 							contribution: revisionContext?.contribution,
@@ -1596,7 +1077,7 @@ export default new Elysia()
 					},
 				},
 				async ({ params, body, entity, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [association] = await database
 						.select({ id: subjectAssociation.id })
@@ -1651,7 +1132,7 @@ export default new Elysia()
 					},
 				},
 				async ({ params, entity, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					await runVoteTransaction({ family: "unit_tag", authority: "global" }, (tx) =>
 						tx
@@ -1691,7 +1172,7 @@ export default new Elysia()
 					},
 				},
 				async ({ params, entity, authorization, body }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
 						"subject-associations",
 					]);
@@ -1706,7 +1187,7 @@ export default new Elysia()
 							)
 							.returning({ id: subjectAssociation.id });
 						if (!deleted.length) throw new SubjectAssociationNotFound();
-						await recordUnitRevision(tx, {
+						await recordResourceRevision(tx, authorization, {
 							unitId: params.unitId,
 							actorProfileId: entity.id,
 							contribution: body?.revisionContext?.contribution,
@@ -1730,7 +1211,7 @@ export default new Elysia()
 					detail: { summary: "List Unit external-link references", tags: ["Units"] },
 				},
 				async ({ params, query, entity, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const localizationLanguages = query.localizationLanguages ?? [];
 					const [rows, curationVersion] = await Promise.all([
@@ -1828,7 +1309,7 @@ export default new Elysia()
 					detail: { summary: "Propose Unit external link", tags: ["Units"] },
 				},
 				async ({ params, entity, authorization, body }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					await ensureReadableSourceEntity(authorization.unit, body.sourceEntityId);
 					const { url, normalizedUrl } = normalizeExternalWebUrl(body.url);
@@ -1906,7 +1387,7 @@ export default new Elysia()
 					detail: { summary: "Vote on Unit external link", tags: ["Units"] },
 				},
 				async ({ params, entity, authorization, body }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [target] = await database
 						.select({ id: unitExternalLink.id })
@@ -1951,7 +1432,7 @@ export default new Elysia()
 					detail: { summary: "Remove Unit external link vote", tags: ["Units"] },
 				},
 				async ({ params, entity, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [target] = await database
 						.select({ id: unitExternalLink.id })
@@ -1997,7 +1478,7 @@ export default new Elysia()
 					detail: { summary: "Update Unit external link curation", tags: ["Units"] },
 				},
 				async ({ params, entity, authorization, body }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensure(
 						params.unitId,
 						"unit.reference-curation.manage",
@@ -2040,7 +1521,7 @@ export default new Elysia()
 					},
 				},
 				async ({ params, query, entity, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensure(
 						params.unitId,
 						"unit.reference-curation.manage",
@@ -2079,7 +1560,7 @@ export default new Elysia()
 					detail: { summary: "Tag unit", tags: ["Units"] },
 				},
 				async ({ params, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await Promise.all([
 						authorization.unit.ensureCanRead(params.unitId),
 						authorization.unit.ensureCanRead(params.tagId),
@@ -2153,7 +1634,7 @@ export default new Elysia()
 					},
 				},
 				async ({ params, entity, authorization, body }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
 					return updateDirectUnitTagCuration({
 						unitId: params.unitId,
@@ -2196,7 +1677,7 @@ export default new Elysia()
 					},
 				},
 				async ({ params, entity, authorization, body }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensure(params.unitId, "unit.tag-curation.manage");
 					await runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
 						const deleted = await tx
@@ -2204,7 +1685,7 @@ export default new Elysia()
 							.where(and(eq(unitTag.unitId, params.unitId), eq(unitTag.tagId, params.tagId)))
 							.returning({ id: unitTag.tagId });
 						if (!deleted.length) throw new TagApplicationNotFound();
-						await recordUnitRevision(tx, {
+						await recordResourceRevision(tx, authorization, {
 							unitId: params.unitId,
 							actorProfileId: entity.id,
 							contribution: body?.revisionContext?.contribution,
@@ -2233,7 +1714,7 @@ export default new Elysia()
 					detail: { summary: "Vote on Unit tag", tags: ["Units"] },
 				},
 				async ({ params, entity, authorization, body }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const tagId = await runVoteTransaction(
 						{ family: "unit_tag", authority: "global" },
@@ -2281,7 +1762,7 @@ export default new Elysia()
 					detail: { summary: "Remove Unit tag vote", tags: ["Units"] },
 				},
 				async ({ params, entity, authorization }) => {
-					await checkUnitType(params.unitId, params.type);
+					await checkUnitOwner(params.unitId, params.owner);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const tagId = await runVoteTransaction(
 						{ family: "unit_tag", authority: "global" },

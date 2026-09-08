@@ -81,7 +81,7 @@ export const TagExpressionDefinitionResponse = t.Object({
 });
 
 export const UnitTagLandscapeParams = t.Object({
-	type: TaggableUnitType,
+	owner: TaggableUnitType,
 	unitId: Uuid,
 });
 export type UnitTagLandscapeParams = StaticDecode<typeof UnitTagLandscapeParams>;
@@ -611,7 +611,7 @@ export const ApplyTagPathBody = t.Object(
 	{ additionalProperties: false },
 );
 export const TagPathApplicationParams = t.Object({
-	type: TaggableUnitType,
+	owner: TaggableUnitType,
 	unitId: Uuid,
 	applicationId: Uuid,
 });

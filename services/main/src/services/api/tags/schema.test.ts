@@ -19,7 +19,7 @@ describe("Tag API schemas", () => {
 	it("accepts Entity Tag landscapes", () => {
 		expect(
 			Value.Check(UnitTagLandscapeParams, {
-				type: "entity",
+				owner: "entity",
 				unitId: "018f2f3a-7ac0-7000-8000-000000000001",
 			}),
 		).toBe(true);

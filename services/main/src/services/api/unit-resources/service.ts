@@ -1,124 +1,96 @@
-import { selfAuthUserIdForEntity } from "../../participation/account-query";
-import { eq } from "drizzle-orm";
-
-import { database } from "../../database";
-import {
-	entity,
-	tag,
-	unit,
-	unitAccessGrant,
-	unitLocalization,
-	vocabularyNode,
-} from "../../database/schema";
+import { z } from "zod";
+import { CatalogReferenceSchema, type UnitOwner } from "@rezics/reference";
+import type { Authorization } from "../../authorization";
+import { AuthenticationRequired } from "../../auth/errors";
+import { database, type DatabaseTransaction } from "../../database";
+import { unitLocalization, vocabularyNode } from "../../database/schema";
 import { ensureSimpleTagExpressionInTransaction } from "../../tag-expressions/service";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
-import {
-	createCommunityContributedUnitAccess,
-	createProfileOwnedUnitAccess,
-	createPublicEditableUnitAccess,
-} from "../../authorization/unit/ownership";
-import { insertUnit } from "../../units/create";
+import { createCommunityContributedUnitAccess } from "../../authorization/unit/ownership";
+import { insertPlatformUnit } from "../../units/create";
 import {
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
-import { createProfilePublisherAttribution } from "../../units/attribution";
-import { OfficialProfileIds } from "../../bootstrap/data";
-import type { CreateUnitResourceBody, CreateEntityBody } from "./schema";
+import { readUnitStateById } from "../../units/query";
+import { recordCatalogChange } from "../../catalog/storage";
+import { withCatalogViewerPolicy } from "../../catalog/read-policy";
+import { runWithParticipationAuthority } from "../../participation/policy";
+import type { CreateUnitResourceBody } from "./schema";
 
-export function createUnitResource(
-	type: "entity",
-	ownerId: string,
-	body: CreateEntityBody,
-): Promise<string>;
-export function createUnitResource(
-	type: "tag",
-	ownerId: string,
+export async function createTagResource(
+	authorization: Authorization<string>,
 	body: CreateUnitResourceBody,
-): Promise<string>;
-export async function createUnitResource(
-	type: "entity" | "tag",
-	ownerId: string,
-	body: CreateUnitResourceBody | CreateEntityBody,
 ) {
+	const actor = authorization.authUserId;
+	if (!actor) throw new AuthenticationRequired();
 	return database.transaction(async (tx) => {
 		await ensureImageAssetsAttachable(
 			tx,
-			selfAuthUserIdForEntity(ownerId),
+			actor,
 			unitLocalizationImageAssetReferences(body.localization),
 		);
-		const created = await insertUnit(tx, {
-			kind: type,
-			status: "published",
-			visibility: "public",
-			publishedAt: new Date(),
-			statusActor: { kind: "profile", profileId: ownerId },
+		const [node] = await tx
+			.insert(vocabularyNode)
+			.values({ kind: "concept", createdByProfileId: authorization.profileId })
+			.returning({ id: vocabularyNode.id });
+		if (!node) throw new Error("Vocabulary creation did not return an identity");
+		const created = await insertPlatformUnit(tx, {
+			owner: "tag",
+			values: {
+				id: node.id,
+				status: "published",
+				visibility: "public",
+				publishedAt: new Date(),
+				createdByAuthUserId: actor,
+			},
+			statusActor: { kind: "profile", profileId: authorization.profileId },
 		});
-		if (type === "entity") {
-			if (!("ownershipMode" in body))
-				throw new TypeError("Entity creation requires an ownership mode");
-			await tx.insert(entity).values({ id: created.id, kind: body.kind ?? "person" });
-			const grantedByProfileId =
-				body.ownershipMode === "community_owned" ? OfficialProfileIds.community : ownerId;
-			await tx.insert(unitAccessGrant).values(
-				(
-					[
-						"unit.read",
-						"entity.association.credit.request",
-						"entity.association.subject.request",
-						"entity.association.subject.direct",
-					] as const
-				).map((permission) => ({
-					unitId: created.id,
-					subjectKind: "authenticated" as const,
-					permission,
-					scope: [],
-					grantedByProfileId,
-				})),
-			);
-		} else {
-			await tx.insert(vocabularyNode).values({
-				id: created.id,
-				kind: "concept",
-				createdByProfileId: ownerId,
-			});
-			await tx.insert(tag).values({ id: created.id });
-			await ensureSimpleTagExpressionInTransaction(tx, {
-				tagId: created.id,
-				profileId: ownerId,
-			});
-		}
+		await ensureSimpleTagExpressionInTransaction(tx, {
+			tagId: created.id,
+			profileId: authorization.profileId,
+		});
 		await tx
 			.insert(unitLocalization)
 			.values({ unitId: created.id, ...toUnitLocalizationStorage(body.localization) });
-		if (type === "entity") {
-			if (!("ownershipMode" in body))
-				throw new TypeError("Entity creation requires an ownership mode");
-			if (body.ownershipMode === "profile_owned") {
-				await createProfileOwnedUnitAccess(tx, created.id, ownerId);
-				await createProfilePublisherAttribution(tx, {
-					sourceUnitId: created.id,
-					profileId: ownerId,
-				});
-			} else await createPublicEditableUnitAccess(tx, created.id);
-		} else await createCommunityContributedUnitAccess(tx, created.id, ownerId);
+		await createCommunityContributedUnitAccess(tx, created.id, authorization.profileId);
 		await recordUnitRevision(tx, {
 			unitId: created.id,
-			actorProfileId: ownerId,
+			actorProfileId: authorization.profileId,
 			contribution: body.revisionContext?.contribution,
 			event: "create",
 		});
 		return created.id;
 	});
 }
-
-export async function checkUnitType(unitId: string, type: (typeof unit.$inferSelect)["kind"]) {
-	const [unitRecord] = await database
-		.select({ type: unit.kind })
-		.from(unit)
-		.where(eq(unit.id, unitId))
-		.limit(1);
-	if (!unitRecord || unitRecord.type !== type) throw new UnitNotFound();
+/** Checks the immutable concrete owner named by the route; never guesses a legacy subtype. */
+export async function checkUnitOwner(unitId: string, owner: UnitOwner) {
+	z.uuid().parse(unitId);
+	const current = await readUnitStateById(database, unitId);
+	if (!current || current.reference.owner !== owner) throw new UnitNotFound();
+}
+/** Shared reference/association curation uses the owning native or platform ledger. */
+export async function recordResourceRevision(
+	tx: DatabaseTransaction,
+	authorization: Authorization<string>,
+	input: Parameters<typeof recordUnitRevision>[1],
+) {
+	const current = await readUnitStateById(tx, input.unitId, { lock: "update" });
+	if (!current) throw new UnitNotFound();
+	const native = CatalogReferenceSchema.safeParse(current.reference);
+	if (!native.success) {
+		await recordUnitRevision(tx, { ...input, actorProfileId: authorization.profileId });
+		return;
+	}
+	const actor = authorization.authUserId;
+	if (!actor) throw new AuthenticationRequired();
+	const write = () =>
+		withCatalogViewerPolicy(tx, actor, () =>
+			recordCatalogChange(tx, native.data, actor, current.revision, "resource.reference.change"),
+		);
+	if (authorization.participationAuthority)
+		await runWithParticipationAuthority(authorization.participationAuthority, write);
+	else await write();
 }
