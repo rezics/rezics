@@ -8,10 +8,17 @@ import {
 	accountFavoriteRevision,
 	accountFavoritesState,
 } from "../database/schema/favorites";
-import { unit, unitLocalization } from "../database/schema/unit";
-import { getUnitReadCondition } from "../authorization/unit/query";
+import { UnitReferenceSchema } from "@rezics/reference";
+import { unitReferenceValues } from "../database/schema/unit-reference-columns";
+import { readRegisteredUnitPreview, UnitReferenceUnavailable } from "../units/reference";
+import { withCatalogViewerPolicy } from "../catalog/read-policy";
+import { CatalogAccessDenied, CatalogReferenceNotFound } from "../catalog/storage";
 import { fractionalPositionBetween } from "../ordering/position";
-import { type ParticipationAuthority, ParticipationDenied } from "../participation/policy";
+import {
+	type ParticipationAuthority,
+	ParticipationDenied,
+	runWithParticipationAuthority,
+} from "../participation/policy";
 import {
 	FavoritePreviewSchema,
 	FavoriteSnapshotSchema,
@@ -47,7 +54,7 @@ async function admitFavorites(tx: DatabaseTransaction, authority: ParticipationA
 
 function presentFavorite(row: typeof accountFavorite.$inferSelect) {
 	return {
-		targetUnitId: row.targetUnitId,
+		target: UnitReferenceSchema.parse({ owner: row.targetOwner, id: row.targetUnitId }),
 		position: row.position,
 		note: row.note,
 		preview: FavoritePreviewSchema.parse(row.snapshot),
@@ -121,31 +128,62 @@ async function favoritePosition(
 	return fractionalPositionBetween(lower, next?.position ?? null);
 }
 
-async function capturePreview(tx: DatabaseTransaction, selfEntityId: string, targetUnitId: string) {
-	const [target] = await tx
-		.select({ id: unit.id, kind: unit.kind })
-		.from(unit)
-		.where(and(eq(unit.id, targetUnitId), getUnitReadCondition(selfEntityId)))
-		.limit(1)
-		.for("share");
-	if (!target) throw new FavoriteNotFound();
-	const [localization] = await tx
-		.select({
-			title: unitLocalization.title,
-			summary: unitLocalization.summary,
-			language: unitLocalization.language,
-		})
-		.from(unitLocalization)
-		.where(eq(unitLocalization.unitId, targetUnitId))
-		.orderBy(unitLocalization.position, unitLocalization.language)
-		.limit(1);
-	return FavoritePreviewSchema.parse({
-		kind: target.kind,
-		title: localization?.title ?? null,
-		summary: localization?.summary ?? null,
-		language: localization?.language ?? null,
-		capturedAt: new Date().toISOString(),
-	});
+function snippet(input: string | null, maximumBytes: number) {
+	if (input === null) return null;
+	let result = "",
+		bytes = 0;
+	for (const character of input
+		.replace(/\p{Cc}/gu, " ")
+		.replace(/\s+/gu, " ")
+		.trim()) {
+		const length = Buffer.byteLength(character, "utf8");
+		if (bytes + length > maximumBytes) break;
+		result += character;
+		bytes += length;
+	}
+	return result;
+}
+async function capturePreview(
+	tx: DatabaseTransaction,
+	authority: ParticipationAuthority,
+	selfEntityId: string,
+	targetUnitId: string,
+) {
+	const personal: ParticipationAuthority = {
+		principal: authority.principal,
+		actingEntityId: selfEntityId,
+		authorizationRevision: authority.authorizationRevision,
+	};
+	try {
+		return await runWithParticipationAuthority(personal, () =>
+			withCatalogViewerPolicy(tx, authority.principal.authUserId, async () => {
+				const target = await readRegisteredUnitPreview(tx, targetUnitId, {
+					authUserId: authority.principal.authUserId,
+					selfEntityId,
+				});
+				const preview = {
+					title: snippet(target.title, 2048),
+					summary: snippet(target.summary, 4096),
+					language: target.language,
+					capturedAt: new Date().toISOString(),
+				};
+				let summaryBytes = 4096;
+				while (Buffer.byteLength(JSON.stringify(preview), "utf8") > 7900) {
+					summaryBytes = Math.floor(summaryBytes / 2);
+					preview.summary = snippet(target.summary, summaryBytes);
+				}
+				return { target: target.reference, preview: FavoritePreviewSchema.parse(preview) };
+			}),
+		);
+	} catch (cause) {
+		if (
+			cause instanceof UnitReferenceUnavailable ||
+			cause instanceof CatalogAccessDenied ||
+			cause instanceof CatalogReferenceNotFound
+		)
+			throw new FavoriteNotFound();
+		throw cause;
+	}
 }
 
 export async function listFavorites(
@@ -235,11 +273,19 @@ export async function saveFavorite(
 			? undefined
 			: await readFavoriteRevision(tx, authority, targetUnitId, restoreRevision);
 	if (restored && !restored.snapshot) throw new FavoriteNotFound();
-	const preview =
-		restored?.snapshot?.preview ??
-		(current && !value.refreshPreview
-			? FavoritePreviewSchema.parse(current.snapshot)
-			: await capturePreview(tx, selfEntityId, targetUnitId));
+	const selected = restored?.snapshot
+		? { target: restored.snapshot.target, preview: restored.snapshot.preview }
+		: current && !value.refreshPreview
+			? {
+					target: UnitReferenceSchema.parse({
+						owner: current.targetOwner,
+						id: current.targetUnitId,
+					}),
+					preview: FavoritePreviewSchema.parse(current.snapshot),
+				}
+			: await capturePreview(tx, authority, selfEntityId, targetUnitId);
+	const { target, preview } = selected;
+	if (target.id !== targetUnitId) throw new FavoriteNotFound();
 	const note = restored?.snapshot
 		? restored.snapshot.note
 		: value.note === undefined
@@ -269,6 +315,7 @@ export async function saveFavorite(
 		.values({
 			authUserId,
 			targetUnitId,
+			...unitReferenceValues("targetUnit", target),
 			position,
 			note,
 			snapshot: preview,
@@ -286,8 +333,9 @@ export async function saveFavorite(
 		authUserId,
 		revision,
 		targetUnitId,
+		...unitReferenceValues("targetUnit", target),
 		operation: restored ? "restore" : current ? "update" : "save",
-		snapshot: { targetUnitId, position, note, preview },
+		snapshot: { target, position, note, preview },
 	});
 	await tx
 		.update(accountFavoritesState)
@@ -313,7 +361,7 @@ export async function deleteFavorite(
 			.max(Number.MAX_SAFE_INTEGER - 1)
 			.parse(expectedRevision),
 	);
-	const removed = await tx
+	const [removed] = await tx
 		.delete(accountFavorite)
 		.where(
 			and(
@@ -321,11 +369,18 @@ export async function deleteFavorite(
 				eq(accountFavorite.targetUnitId, z.uuid().parse(targetUnitId)),
 			),
 		)
-		.returning({ id: accountFavorite.targetUnitId });
-	if (!removed.length) throw new FavoriteNotFound();
+		.returning({ id: accountFavorite.targetUnitId, owner: accountFavorite.targetOwner });
+	if (!removed) throw new FavoriteNotFound();
 	await tx
 		.insert(accountFavoriteRevision)
-		.values({ authUserId, revision, targetUnitId, operation: "delete", snapshot: null });
+		.values({
+			authUserId,
+			revision,
+			targetUnitId,
+			...unitReferenceValues("targetUnit", { owner: removed.owner, id: targetUnitId }),
+			operation: "delete",
+			snapshot: null,
+		});
 	await tx
 		.update(accountFavoritesState)
 		.set({ revision })
@@ -384,7 +439,10 @@ export async function readFavoriteRevision(
 		.limit(1);
 	if (!row) throw new FavoriteNotFound();
 	const snapshot = row.snapshot === null ? null : FavoriteSnapshotSchema.parse(row.snapshot);
-	if (snapshot && snapshot.targetUnitId !== targetUnitId)
+	if (
+		snapshot &&
+		(snapshot.target.id !== targetUnitId || snapshot.target.owner !== row.targetOwner)
+	)
 		throw new Error("Favorite snapshot target disagrees with its history key");
 	return {
 		revision: row.revision,

@@ -15,6 +15,7 @@ import {
 import { accountFollowPreference, unitFollow } from "../src/services/database/schema/follow";
 import { imageAsset, imageObject } from "../src/services/database/schema/image";
 import { unit } from "../src/services/database/schema/unit";
+import { post } from "../src/services/database/schema/post";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import {
 	runWithParticipationAuthority,
@@ -138,13 +139,14 @@ try {
 				.insert(unit)
 				.values(
 					Array.from({ length: 515 }, (_, index) => ({
-						kind: "book" as const,
+						kind: "post" as const,
 						status: "published" as const,
 						publishedAt: new Date(),
 						visibility: index < 512 ? ("private" as const) : ("public" as const),
 					})),
 				)
 				.returning({ id: unit.id });
+			await tx.insert(post).values(targets.map(({ id }) => ({ id })));
 			const first = targets[512]!.id,
 				second = targets[513]!.id;
 			await tx
@@ -218,7 +220,7 @@ try {
 				expectedRevision: 0,
 				note: "Private note survives restore",
 			});
-			check(saved.entry.preview.kind, "book", "preview carries authoritative navigation kind");
+			check(saved.entry.target.owner, "post", "favorite retains its concrete owner reference");
 			await assert.rejects(
 				tx.transaction((nested) =>
 					saveFavorite(nested, human.authority, second, { expectedRevision: 0 }),

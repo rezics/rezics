@@ -1,4 +1,7 @@
 export const PostgreSqlSchemaFileNames = [
+	"unit-reference-integrity.sql",
+	"organization-membership.sql",
+	"catalog-structure-source.sql",
 	"participation-integrity.sql",
 	"participation-follow.sql",
 	"participation-private-state.sql",
@@ -51,6 +54,14 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles = {
+	operational_native_consumers: [
+		"unit-reference-integrity.sql",
+		"participation-private-state.sql",
+		"organization-membership.sql",
+		"catalog-source-application.sql",
+		"catalog-structure-source.sql",
+	],
+	catalog_source_interpretations: ["catalog-music-history.sql", "catalog-profile-source.sql"],
 	catalog_source_reinterpretation: [
 		"catalog-source-application.sql",
 		"catalog-source-correspondence.sql",
@@ -136,6 +147,19 @@ export const PostgreSqlSchemaMigrationBundles = {
 } as const satisfies Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>>;
 
 export const PostgreSqlSchemaFunctionNames = [
+	"organization_membership_lock_admission",
+	"organization_membership_assert_invitation_authority",
+	"organization_membership_guard_invitation",
+	"organization_membership_guard_member",
+	"organization_membership_guard_event",
+	"organization_membership_record_event",
+	"catalog_structure_source_projection_valid",
+	"catalog_structure_source_guard_occurrence",
+	"catalog_structure_source_guard_application",
+	"catalog_structure_source_guard_baseline",
+	"unit_publish_platform_route",
+	"unit_remove_platform_route",
+	"unit_populate_reference",
 	"catalog_source_application_includes_epoch",
 	"catalog_require_credit_creation_context",
 	"catalog_guard_source_support",
@@ -332,6 +356,12 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "organization_membership_invitation", name: "organization_membership_invitation_guard" },
+	{ table: "organization_membership", name: "organization_membership_guard" },
+	{ table: "organization_membership_event", name: "organization_membership_event_guard" },
+	{ table: "organization_membership", name: "organization_membership_event_record" },
+	{ table: "account_favorite", name: "favorite_target_reference" },
+	{ table: "account_favorite_revision", name: "favorite_history_target_reference" },
 	{ table: "music_artist_credit", name: "music_credit_creation_context" },
 	{ table: "catalog_source_proposal_dependency", name: "catalog_source_dependency_guard" },
 	{
@@ -891,7 +921,9 @@ const CatalogSourceApplicationTables = [
 	"software_source_context_application_change",
 	"software_source_participation_application_change",
 	...CatalogTriggerOwners.flatMap((owner) =>
-		["semantic", "name", "authority", "identifier"].map((kind) => `${owner}_source_${kind}_application_change`),
+		["semantic", "name", "authority", "identifier"].map(
+			(kind) => `${owner}_source_${kind}_application_change`,
+		),
 	),
 ];
 
@@ -901,6 +933,42 @@ const CatalogSourceApplicationTables = [
  * complete definitions (including arguments, constraint timing and enabled status).
  */
 export const PostgreSqlSchemaDynamicTriggers = [
+	...["program", "publishing"].flatMap((owner) => [
+		{ table: `${owner}_structure_source_occurrence`, name: "catalog_structure_source_immutable" },
+		{
+			table: `${owner}_structure_source_application_change`,
+			name: "catalog_structure_source_immutable",
+		},
+		{
+			table: `${owner}_structure_source_occurrence`,
+			name: "catalog_structure_source_occurrence_guard",
+		},
+		{
+			table: `${owner}_structure_source_application_change`,
+			name: "catalog_structure_source_application_guard",
+		},
+		{
+			table: `${owner}_structure_source_baseline`,
+			name: "catalog_structure_source_baseline_guard",
+		},
+	]),
+	...[
+		"video",
+		"audio",
+		"post",
+		"poll",
+		"zone",
+		"realm",
+		"realm_rule",
+		"custom_theme",
+		"collection",
+		"tag",
+		"tag_path",
+		"label",
+	].flatMap((table) => [
+		{ table, name: "unit_platform_route_publish" },
+		{ table, name: "unit_platform_route_remove" },
+	]),
 	...CatalogTriggerOwners.flatMap((owner) => [
 		{ table: `${owner}_fact_support`, name: "catalog_source_support_guard" },
 		{ table: `${owner}_fact_support`, name: "catalog_support_correspondence_guard" },
@@ -1021,6 +1089,12 @@ export const PostgreSqlSchemaDynamicTriggers = [
 
 /** Exact dynamic declarations permitted by the static manifest check. */
 export const PostgreSqlSchemaDynamicTriggerTemplates = [
+	"CREATE TRIGGER catalog_structure_source_immutable BEFORE UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_immutable_evidence()",
+	"CREATE TRIGGER catalog_structure_source_occurrence_guard BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_structure_source_guard_occurrence(%L)",
+	"CREATE TRIGGER catalog_structure_source_application_guard BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_structure_source_guard_application(%L)",
+	"CREATE TRIGGER catalog_structure_source_baseline_guard BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_structure_source_guard_baseline(%L)",
+	"CREATE TRIGGER unit_platform_route_publish AFTER INSERT OR UPDATE OF id ON public.%I FOR EACH ROW EXECUTE FUNCTION public.unit_publish_platform_route(%L)",
+	"CREATE TRIGGER unit_platform_route_remove AFTER DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.unit_remove_platform_route(%L)",
 	"CREATE TRIGGER catalog_name_correspondence_guard BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence(%L)",
 	"CREATE TRIGGER catalog_support_correspondence_guard BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence(%L)",
 	"CREATE TRIGGER catalog_profile_correspondence_guard BEFORE INSERT ON public.%I FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence(%L)",

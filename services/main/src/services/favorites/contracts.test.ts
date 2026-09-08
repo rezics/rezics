@@ -15,11 +15,10 @@ describe("private Favorite snapshots", () => {
 	});
 	it("retains authored note, exact preview and order in a private revision", () => {
 		const snapshot = {
-			targetUnitId: "019b76da-a800-7250-8000-000000000001",
+			target: { owner: "publishing", id: "019b76da-a800-7250-8000-000000000001" },
 			position: "a0",
 			note: "Read chapter 2 again",
 			preview: {
-				kind: "book",
 				title: "Captured title",
 				summary: null,
 				language: "en",

@@ -2,7 +2,12 @@ import { sql } from "drizzle-orm";
 import { bigint, check, index, jsonb, primaryKey, text, unique, uuid } from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
 import { users } from "./auth";
-import { unit } from "./unit";
+import type { UnitOwner } from "@rezics/reference";
+import {
+	unitReferenceColumns,
+	unitReferenceConstraints,
+	unitReferenceOwnerExpression,
+} from "./unit-reference-columns";
 import {
 	createCreatedAtColumn,
 	createUpdatedAtColumn,
@@ -34,9 +39,12 @@ export const accountFavorite = pgTable(
 		authUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "restrict" }),
-		targetUnitId: uuid()
+		targetUnitId: uuid().notNull(),
+		...unitReferenceColumns("targetUnit"),
+		targetOwner: text()
+			.$type<UnitOwner>()
 			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+			.generatedAlwaysAs(unitReferenceOwnerExpression("targetUnit")),
 		position: fractionalIndexPosition().notNull(),
 		note: text(),
 		snapshot: jsonb().$type<unknown>().notNull(),
@@ -45,6 +53,7 @@ export const accountFavorite = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints("account_favorite", "targetUnit", table, false, table.targetUnitId),
 		primaryKey({ columns: [table.authUserId, table.targetUnitId] }),
 		unique("account_favorite_position_key").on(table.authUserId, table.position),
 		index("account_favorite_target_idx").on(table.targetUnitId, table.authUserId),
@@ -72,14 +81,24 @@ export const accountFavoriteRevision = pgTable(
 			.notNull()
 			.references(() => users.id, { onDelete: "restrict" }),
 		revision: bigint({ mode: "number" }).notNull(),
-		targetUnitId: uuid()
+		targetUnitId: uuid().notNull(),
+		...unitReferenceColumns("targetUnit"),
+		targetOwner: text()
+			.$type<UnitOwner>()
 			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+			.generatedAlwaysAs(unitReferenceOwnerExpression("targetUnit")),
 		operation: text().$type<"save" | "update" | "delete" | "restore">().notNull(),
 		snapshot: jsonb().$type<unknown>(),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"account_favorite_revision",
+			"targetUnit",
+			table,
+			false,
+			table.targetUnitId,
+		),
 		primaryKey({ columns: [table.authUserId, table.revision] }),
 		index("account_favorite_revision_target_idx").on(
 			table.authUserId,
@@ -94,6 +113,10 @@ export const accountFavoriteRevision = pgTable(
 		check(
 			"account_favorite_revision_operation_check",
 			sql`${table.operation} in ('save','update','delete','restore')`,
+		),
+		check(
+			"account_favorite_revision_target_snapshot_check",
+			sql`${table.snapshot} is null or ((${table.snapshot}#>>'{target,id}'=${table.targetUnitId}::text and ${table.snapshot}#>>'{target,owner}'=${table.targetOwner}) is true)`,
 		),
 		check(
 			"account_favorite_revision_snapshot_check",

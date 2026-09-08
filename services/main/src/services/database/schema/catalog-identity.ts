@@ -1,4 +1,5 @@
 import { inArray, sql } from "drizzle-orm";
+import { UnitOwnerValues, type UnitOwner } from "@rezics/reference";
 import {
 	bigint,
 	boolean,
@@ -11,7 +12,6 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 import {
-	CatalogOwnerValues,
 	type CatalogOwner,
 	CatalogValueKindValues,
 	type CatalogValueKind,
@@ -38,11 +38,11 @@ export const catalogUnitLocator = pgTable(
 	"catalog_unit_locator",
 	{
 		id: uuid().primaryKey(),
-		owner: text().$type<CatalogOwner>().notNull(),
+		owner: text().$type<UnitOwner>().notNull(),
 		generation: integer().notNull(),
 	},
 	(table) => [
-		check("catalog_unit_locator_owner_check", inArray(table.owner, CatalogOwnerValues)),
+		check("catalog_unit_locator_owner_check", inArray(table.owner, UnitOwnerValues)),
 		check("catalog_unit_locator_generation_check", sql`${table.generation} > 0`),
 	],
 );

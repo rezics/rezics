@@ -18,6 +18,7 @@ export * from "./catalog-source-dependency";
 export * from "./catalog-source-owned-baseline";
 export * from "./catalog-software-source";
 export * from "./catalog-structure-history";
+export * from "./catalog-structure-source";
 export * from "./catalog-reference";
 export * from "./catalog-publishing";
 export * from "./catalog-music";
@@ -75,3 +76,4 @@ export * from "./zone";
 
 export * from "./entity-presentation";
 export * from "./participation";
+export * from "./organization-membership";

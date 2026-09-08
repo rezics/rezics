@@ -125,6 +125,8 @@ export function createCatalogNameTables(owner: CatalogOwner) {
 		index(`${owner}_named_form_active_idx`)
 			.on(table.ownerId, table.id)
 			.where(sql`${table.state} = 'active'`),
+		index(`${owner}_named_form_preview_idx`).on(table.ownerId,table.id)
+			.where(sql`${table.state}='active' and ${table.spoiler}=0 and ${table.scopeOwnerId} is null`),
 		index(`${owner}_named_form_scope_idx`)
 			.on(table.scopeOwnerId, table.id)
 			.where(sql`${table.scopeOwnerId} is not null`),

@@ -21,6 +21,13 @@ import {
 	GrantSelectionSchema,
 	CreatedOrganizationSchema,
 } from "../src/services/api/participation/schema";
+import {
+	FavoriteListSchema,
+	FavoriteMutationSchema,
+	FavoriteRevisionSchema,
+	FavoriteStateSchema,
+} from "../src/services/favorites/contracts";
+import { unit } from "../src/services/database/schema/unit";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
@@ -170,6 +177,92 @@ try {
 	);
 	const publication = created.get("publication");
 	assert.ok(publication);
+	let favoriteRevision = 0;
+	for (const resource of created.values()) {
+		const favorite = FavoriteMutationSchema.parse(
+			await request(
+				"PUT",
+				`/favorites/${resource.reference.id}`,
+				{ expectedRevision: favoriteRevision },
+				200,
+				owner.cookie,
+			),
+		);
+		assert.deepEqual(favorite.entry?.target, resource.reference);
+		assertions++;
+		favoriteRevision = favorite.revision;
+	}
+	assert.equal(
+		(
+			await database
+				.select({ id: unit.id })
+				.from(unit)
+				.where(
+					inArray(
+						unit.id,
+						[...created.values()].map((resource) => resource.reference.id),
+					),
+				)
+		).length,
+		0,
+	);
+	assertions++;
+	const privateFavorites = FavoriteListSchema.parse(
+		await request("GET", "/favorites", undefined, 200, delegate.cookie),
+	);
+	assert.equal(privateFavorites.items.length, 0);
+	assertions++;
+	await request(
+		"PUT",
+		`/favorites/${publication.reference.id}`,
+		{ expectedRevision: 0 },
+		404,
+		delegate.cookie,
+	);
+	await request(
+		"PUT",
+		`/favorites/${publication.reference.id}`,
+		{ expectedRevision: 0 },
+		409,
+		owner.cookie,
+	);
+	const savedState = FavoriteStateSchema.parse(
+		await request("GET", `/favorites/${publication.reference.id}`, undefined, 200, owner.cookie),
+	);
+	assert.ok(savedState.entry);
+	const savedRevision = savedState.entry.revision;
+	const savedHistory = FavoriteRevisionSchema.parse(
+		await request(
+			"GET",
+			`/favorites/${publication.reference.id}/history/${savedRevision}`,
+			undefined,
+			200,
+			owner.cookie,
+		),
+	);
+	assert.deepEqual(savedHistory.snapshot?.target, publication.reference);
+	assertions++;
+	favoriteRevision = FavoriteMutationSchema.parse(
+		await request(
+			"DELETE",
+			`/favorites/${publication.reference.id}`,
+			{ expectedRevision: favoriteRevision },
+			200,
+			owner.cookie,
+		),
+	).revision;
+	const restoredFavorite = FavoriteMutationSchema.parse(
+		await request(
+			"POST",
+			`/favorites/${publication.reference.id}/restore`,
+			{ expectedRevision: favoriteRevision, revision: savedRevision },
+			200,
+			owner.cookie,
+		),
+	);
+	assert.deepEqual(restoredFavorite.entry?.target, publication.reference);
+	assertions++;
+	favoriteRevision = restoredFavorite.revision;
 	const path = `/catalog/resources/${publication.reference.owner}/${publication.reference.id}`;
 	await request("GET", path, undefined, 404);
 	await request("GET", path, undefined, 404, delegate.cookie);
@@ -377,6 +470,21 @@ try {
 	);
 	const publishGrant = organization.grants.find((item) => item.capability === "entity.publish");
 	assert.ok(publishGrant);
+	const refreshedFavorite = FavoriteMutationSchema.parse(
+		await request(
+			"PUT",
+			`/favorites/${publication.reference.id}`,
+			{ expectedRevision: favoriteRevision, refreshPreview: true },
+			200,
+			owner.cookie,
+			{
+				actingEntityId: organization.entityId,
+				grant: { id: publishGrant.id, revision: publishGrant.revision },
+			},
+		),
+	);
+	assert.deepEqual(refreshedFavorite.entry?.target, publication.reference);
+	assertions++;
 	CatalogResourceSchema.parse(
 		await request("GET", path, undefined, 200, owner.cookie, {
 			actingEntityId: organization.entityId,

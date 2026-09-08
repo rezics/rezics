@@ -1,19 +1,18 @@
 import { z } from "zod";
 import { isStorageSafeFractionalPosition } from "../ordering/position";
-import { UnitKindValues } from "../database/schema/contract-values";
+import { UnitReferenceSchema } from "@rezics/reference";
 
 const bytes = (maximum: number) =>
 	z.string().refine((value) => Buffer.byteLength(value, "utf8") <= maximum);
 /** @alpha Account-private Favorites previews and notes; never public catalog metadata. */
 export const FavoritePreviewSchema = z.strictObject({
-	kind: z.enum(UnitKindValues),
 	title: bytes(2048).nullable(),
 	summary: bytes(4096).nullable(),
 	language: z.string().max(255).nullable(),
 	capturedAt: z.iso.datetime(),
 });
 export const FavoriteSnapshotSchema = z.strictObject({
-	targetUnitId: z.uuid(),
+	target: UnitReferenceSchema,
 	position: z.string().refine(isStorageSafeFractionalPosition),
 	note: bytes(65536).nullable(),
 	preview: FavoritePreviewSchema,

@@ -12,7 +12,8 @@ FOR EACH ROW EXECUTE FUNCTION public.participation_guard_private_history();
 CREATE OR REPLACE FUNCTION public.participation_guard_favorite_identity()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 BEGIN
-  IF (NEW.auth_user_id, NEW.target_unit_id, NEW.created_at) IS DISTINCT FROM (OLD.auth_user_id, OLD.target_unit_id, OLD.created_at) OR NEW.revision <= OLD.revision THEN
+  IF (to_jsonb(NEW)-ARRAY['position','note','snapshot','revision','updated_at','target_owner']) IS DISTINCT FROM
+    (to_jsonb(OLD)-ARRAY['position','note','snapshot','revision','updated_at','target_owner']) OR NEW.revision <= OLD.revision THEN
     RAISE EXCEPTION 'Favorite ownership and target are immutable; revisions must advance' USING ERRCODE = '23514';
   END IF;
   RETURN NEW;

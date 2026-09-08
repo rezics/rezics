@@ -149,7 +149,9 @@ export async function resolveCatalogIdentity(
 		.limit(1);
 	if (!locator)
 		throw new CatalogReferenceNotFound("Catalog routing is missing; owner repair is required");
-	const reference = { owner: locator.owner, id };
+	const parsed = CatalogReferenceSchema.safeParse({ owner: locator.owner, id });
+	if (!parsed.success) throw new CatalogReferenceNotFound("This identity has another registered owner");
+	const reference = parsed.data;
 	const row = await loadCatalogIdentity(tx, reference, actor, false);
 	if (row.routingGeneration !== locator.generation)
 		throw new CatalogReferenceNotFound("Catalog routing generation is stale");
