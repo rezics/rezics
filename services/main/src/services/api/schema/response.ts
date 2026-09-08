@@ -12,6 +12,7 @@ import type { StaticDecode } from "typebox";
 import {
 	ChineseContentDisplay,
 	ContentLanguage,
+	ContentLanguageTag,
 	ContentLanguageSupport,
 	ContentRating,
 	DateTime,
@@ -849,7 +850,7 @@ const FeedScoreCandidatesResponse = t.Object({
 const PostSubjectPresentationFields = {
 	id: Uuid,
 	type: t.String(),
-	language: ContentLanguage,
+	language: t.Nullable(ContentLanguageTag),
 	title: NullableText,
 	summary: NullableText,
 	cover: ImageAssetResponse,

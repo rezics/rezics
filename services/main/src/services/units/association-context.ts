@@ -4,12 +4,12 @@ import type { ContentLanguage } from "@rezics/i18n";
 
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database, type DatabaseTransaction } from "../database";
-import { unitTagJudgmentStat, post, subjectAssociation, unit, unitTag } from "../database/schema";
+import { unitTagJudgmentStat, post, subjectAssociation, tag, unitTag } from "../database/schema";
 import { toSafeInteger } from "../database/integer";
 import { resolvedUnitLocalizationTitle } from "./localization";
 import { AssociationContextPostInvalid } from "./errors";
 
-const associationContextTagUnit = alias(unit, "association_context_tag_unit");
+const associationContextTagUnit = alias(tag, "association_context_tag_unit");
 
 /**
  * Proves the cross-row invariant that a relationship context is a wiki Post.
@@ -71,12 +71,11 @@ export async function getAssociationContextPostsByAssociationIds(
 		})
 		.from(subjectAssociation)
 		.innerJoin(post, eq(post.id, subjectAssociation.contextPostId))
-		.innerJoin(unit, eq(unit.id, post.id))
 		.where(
 			and(
 				inArray(subjectAssociation.id, [...associationIds]),
 				eq(post.kind, "wiki"),
-				getUnitReadCondition(profileId),
+				getUnitReadCondition(profileId, {}, post),
 			),
 		);
 	const postIds = [...new Set(contextRows.map((row) => row.id))];
