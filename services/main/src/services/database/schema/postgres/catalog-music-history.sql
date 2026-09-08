@@ -130,12 +130,33 @@ CREATE TRIGGER music_track_identifier_record_revision AFTER INSERT OR UPDATE OR 
 
 CREATE OR REPLACE FUNCTION public.catalog_check_music_source_occurrence()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
+DECLARE native_value jsonb; normalized_value jsonb; component_table regclass; invalid boolean; checks text;
 BEGIN
-  IF NOT EXISTS(SELECT 1 FROM public.music_component_revision
+  SELECT value INTO native_value FROM public.music_component_revision
     WHERE owner_id = NEW.owner_id AND id = NEW.history_id AND component = NEW.component
-      AND component_key = NEW.component_key AND operation <> 'DELETE') THEN
+      AND component_key = NEW.component_key AND operation <> 'DELETE';
+  IF native_value IS NULL THEN
     RAISE EXCEPTION 'Music source occurrence must reference the exact native component revision'
       USING ERRCODE = '23514', CONSTRAINT = 'music_source_occurrence_exact_history';
+  END IF;
+  IF jsonb_typeof(NEW.source_value) IS DISTINCT FROM 'object'
+    OR ARRAY(SELECT jsonb_object_keys(NEW.source_value) ORDER BY 1) IS DISTINCT FROM ARRAY(SELECT jsonb_object_keys(native_value) ORDER BY 1)
+  THEN RAISE EXCEPTION 'Music interpretation must contain exactly the native component fields' USING ERRCODE='23514'; END IF;
+  component_table := to_regclass(format('public.%I',NEW.component));
+  EXECUTE format('SELECT to_jsonb(v) FROM jsonb_populate_record(NULL::public.%I,$1) v',NEW.component) INTO normalized_value USING NEW.source_value;
+  IF normalized_value IS DISTINCT FROM NEW.source_value THEN
+    RAISE EXCEPTION 'Music interpretation has invalid native field types' USING ERRCODE='23514';
+  END IF;
+  SELECT EXISTS(SELECT 1 FROM pg_attribute a WHERE a.attrelid=component_table AND a.attnum>0 AND NOT a.attisdropped AND a.attnotnull AND NEW.source_value->a.attname='null'::jsonb)
+    OR EXISTS(SELECT 1 FROM pg_index i JOIN pg_attribute a ON a.attrelid=i.indrelid AND a.attnum=ANY(i.indkey)
+      WHERE i.indrelid=component_table AND i.indisprimary AND NEW.source_value->a.attname IS DISTINCT FROM native_value->a.attname)
+    INTO invalid;
+  IF invalid THEN RAISE EXCEPTION 'Music interpretation changes native identity or required fields' USING ERRCODE='23514'; END IF;
+  SELECT string_agg('(' || pg_get_expr(c.conbin,c.conrelid) || ')',' AND ') INTO checks
+    FROM pg_constraint c WHERE c.conrelid=component_table AND c.contype='c';
+  IF checks IS NOT NULL THEN
+    EXECUTE format('SELECT NOT coalesce((%s),true) FROM jsonb_populate_record(NULL::public.%I,$1)', checks, NEW.component) INTO invalid USING NEW.source_value;
+    IF invalid THEN RAISE EXCEPTION 'Music interpretation violates native component constraints' USING ERRCODE='23514'; END IF;
   END IF;
   RETURN NEW;
 END $$;

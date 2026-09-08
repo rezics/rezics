@@ -1,9 +1,75 @@
 CREATE OR REPLACE FUNCTION public.catalog_validate_profile_source()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
-DECLARE valid boolean;
+DECLARE native_snapshot jsonb; expected_keys text[]; field_name text; field_value jsonb; date_part text; date_year integer; date_month integer; date_day integer; maximum_day integer;
 BEGIN
-  EXECUTE format('SELECT EXISTS(SELECT 1 FROM public.%I WHERE owner_id=$1 AND revision=$2 AND NOT removed)',TG_ARGV[0] || '_catalog_profile_revision') INTO valid USING NEW.owner_id,NEW.revision;
-  IF NOT valid THEN RAISE EXCEPTION 'Profile source occurrence requires exact present native history' USING ERRCODE='23514'; END IF;
+  EXECUTE format('SELECT snapshot FROM public.%I WHERE owner_id=$1 AND revision=$2 AND NOT removed',TG_ARGV[0] || '_catalog_profile_revision') INTO native_snapshot USING NEW.owner_id,NEW.revision;
+  IF native_snapshot IS NULL THEN RAISE EXCEPTION 'Profile source occurrence requires exact present native history' USING ERRCODE='23514'; END IF;
+  IF TG_ARGV[0]='entity' THEN
+    expected_keys := ARRAY['typeRevisionId','genderRevisionId','areaId','beginAreaId','endAreaId','begin','end','ended'];
+  ELSE
+    IF NEW.source_profile->>'shape' IS DISTINCT FROM native_snapshot->>'shape' THEN
+      RAISE EXCEPTION 'Source profile cannot reclassify its native history' USING ERRCODE='23514';
+    END IF;
+    expected_keys := CASE NEW.source_profile->>'shape'
+      WHEN 'concept' THEN ARRAY['shape','typeRevisionId']
+      WHEN 'instrument' THEN ARRAY['shape','typeRevisionId']
+      WHEN 'web_resource' THEN ARRAY['shape','url']
+      WHEN 'area' THEN ARRAY['shape','typeRevisionId','begin','end','ended']
+      WHEN 'place' THEN ARRAY['shape','typeRevisionId','begin','end','ended','areaId','address','latitude','longitude']
+      WHEN 'event' THEN ARRAY['shape','typeRevisionId','placeId','begin','end','localTime','cancelled','ended','setlist']
+      ELSE NULL END;
+  END IF;
+  IF expected_keys IS NULL OR jsonb_typeof(NEW.source_profile) IS DISTINCT FROM 'object'
+    OR NOT (NEW.source_profile ?& expected_keys) OR NEW.source_profile - expected_keys <> '{}'::jsonb
+    OR array_position(NEW.observed_fields,NULL) IS NOT NULL
+    OR coalesce(array_ndims(NEW.observed_fields),1) <> 1
+    OR cardinality(NEW.observed_fields) <> (SELECT count(DISTINCT f) FROM unnest(NEW.observed_fields) f)
+    OR NOT (NEW.observed_fields <@ expected_keys)
+  THEN RAISE EXCEPTION 'Source profile has an unknown shape, field or observation scope' USING ERRCODE='23514'; END IF;
+  FOR field_name,field_value IN SELECT key,value FROM jsonb_each(NEW.source_profile) LOOP
+    IF field_name <> 'shape' AND NOT (field_name=ANY(NEW.observed_fields)) AND field_value<>'null'::jsonb THEN
+      RAISE EXCEPTION 'Unobserved profile fields cannot retain native or human values' USING ERRCODE='23514';
+    END IF;
+    IF field_value='null'::jsonb THEN
+      IF field_name IN ('shape','url') THEN RAISE EXCEPTION 'Source profile requires its native discriminator/resource' USING ERRCODE='23514'; END IF;
+      CONTINUE;
+    END IF;
+    IF field_name ~ 'Id$' THEN
+      IF jsonb_typeof(field_value)<>'string' THEN RAISE EXCEPTION 'Source profile reference must be a UUID' USING ERRCODE='23514'; END IF;
+      PERFORM (field_value #>> '{}')::uuid;
+    ELSIF field_name IN ('ended','cancelled') THEN
+      IF jsonb_typeof(field_value)<>'boolean' THEN RAISE EXCEPTION 'Source profile flag must be boolean' USING ERRCODE='23514'; END IF;
+    ELSIF field_name IN ('latitude','longitude') THEN
+      IF jsonb_typeof(field_value)<>'number' OR abs((field_value #>> '{}')::numeric) > CASE field_name WHEN 'latitude' THEN 90 ELSE 180 END THEN
+        RAISE EXCEPTION 'Source profile coordinate is invalid' USING ERRCODE='23514';
+      END IF;
+    ELSIF field_name IN ('begin','end') THEN
+      IF jsonb_typeof(field_value)<>'object' OR NOT (field_value ?& ARRAY['year','month','day','text']) OR field_value - ARRAY['year','month','day','text'] <> '{}'::jsonb
+        OR jsonb_typeof(field_value->'text') NOT IN ('null','string') THEN
+        RAISE EXCEPTION 'Source profile partial date is invalid' USING ERRCODE='23514';
+      END IF;
+      FOREACH date_part IN ARRAY ARRAY['year','month','day'] LOOP
+        IF field_value->date_part <> 'null'::jsonb AND (jsonb_typeof(field_value->date_part)<>'number' OR (field_value->>date_part)::numeric <> trunc((field_value->>date_part)::numeric)) THEN
+          RAISE EXCEPTION 'Source profile date part must be an integer' USING ERRCODE='23514';
+        END IF;
+      END LOOP;
+      date_year := (field_value->>'year')::integer; date_month := (field_value->>'month')::integer; date_day := (field_value->>'day')::integer;
+      maximum_day := CASE WHEN date_month=2 THEN CASE WHEN date_year IS NULL OR date_year%400=0 OR (date_year%4=0 AND date_year%100<>0) THEN 29 ELSE 28 END WHEN date_month IN (4,6,9,11) THEN 30 ELSE 31 END;
+      IF date_month NOT BETWEEN 1 AND 12 OR date_day NOT BETWEEN 1 AND maximum_day OR octet_length(field_value->>'text')>4096 THEN
+        RAISE EXCEPTION 'Source profile date precision is invalid' USING ERRCODE='23514';
+      END IF;
+    ELSE
+      IF jsonb_typeof(field_value)<>'string' THEN RAISE EXCEPTION 'Source profile text must be a string' USING ERRCODE='23514'; END IF;
+      IF (field_name='url' AND ((field_value #>> '{}') !~ '^[A-Za-z][A-Za-z0-9+.-]*:' OR octet_length(field_value #>> '{}')>8192))
+        OR (field_name='localTime' AND (field_value #>> '{}') !~ '^([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9](\.[0-9]{1,6})?)?$')
+        OR (field_name='address' AND octet_length(field_value #>> '{}')>16384)
+        OR (field_name='setlist' AND octet_length(field_value #>> '{}')>65536)
+      THEN RAISE EXCEPTION 'Source profile text violates its native field contract' USING ERRCODE='23514'; END IF;
+    END IF;
+  END LOOP;
+  IF NEW.source_profile->>'shape'='place' AND (NEW.source_profile->'latitude'='null'::jsonb) IS DISTINCT FROM (NEW.source_profile->'longitude'='null'::jsonb) THEN
+    RAISE EXCEPTION 'Source profile coordinates must be paired' USING ERRCODE='23514';
+  END IF;
   RETURN NEW;
 END $$;
 

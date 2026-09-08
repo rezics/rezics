@@ -44,7 +44,7 @@ export async function prepareMusicSourceProjection(
 				componentKey: occurrence.componentKey,
 				sourcePath: occurrence.sourcePath,
 				historyId: occurrence.historyId,
-				value: history.value,
+				value: occurrence.sourceValue,
 			})
 			.from(occurrence)
 			.innerJoin(
@@ -66,6 +66,7 @@ export async function prepareMusicSourceProjection(
 		const result = new Map<string, MusicSourceComponentBaseline>();
 		for (const row of rows) {
 			const component = MusicComponentNameSchema.parse(row.component);
+			const value = MusicComponentSchemas[component].parse(row.value);
 			const currentHistoryId = await resolveMusicSourceComponentBaseline(tx, {
 				sourceRecordId: context.sourceRecordId,
 				mappingKey: context.mappingKey,
@@ -83,6 +84,7 @@ export async function prepareMusicSourceProjection(
 			if (!current) throw new Error("Source baseline current history is missing");
 			result.set(`${component}:${row.sourcePath}`, {
 				...row,
+				value,
 				component,
 				currentHistoryId,
 				absent: current.operation === "DELETE",
@@ -99,6 +101,7 @@ export async function prepareMusicSourceProjection(
 		componentKey: string;
 		path: string;
 		historyId?: string;
+		sourceValue: Record<string, unknown>;
 	}[] = [];
 	const oldAt = (component: MusicComponentName, path: string) => {
 		const old = before.get(`${component}:${path}`);
@@ -119,7 +122,7 @@ export async function prepareMusicSourceProjection(
 		const componentKey = musicComponentKey(component, row);
 		if (old) used.add(`${component}:${old.componentKey}`);
 		if (old && !old.absent && isDeepStrictEqual(old.value, row))
-			pending.push({ component, componentKey, path, historyId: old.historyId });
+			pending.push({ component, componentKey, path, historyId: old.historyId, sourceValue: row });
 		else {
 			operations.push({
 				action: "put",
@@ -128,7 +131,7 @@ export async function prepareMusicSourceProjection(
 				expectedRevisionId: old?.currentHistoryId ?? null,
 				value: row,
 			});
-			pending.push({ component, componentKey, path });
+			pending.push({ component, componentKey, path, sourceValue: row });
 		}
 	};
 	const finish = async () => {
@@ -194,6 +197,7 @@ export async function prepareMusicSourceProjection(
 					componentKey: row.componentKey,
 					sourcePath: row.path,
 					historyId,
+					sourceValue: row.sourceValue,
 				})
 				.onConflictDoNothing();
 			const [existing] = await tx
@@ -211,7 +215,14 @@ export async function prepareMusicSourceProjection(
 					),
 				)
 				.limit(1);
-			if (!existing || existing.componentKey !== row.componentKey)
+			if (
+				!existing ||
+				existing.componentKey !== row.componentKey ||
+				!isDeepStrictEqual(
+					MusicComponentSchemas[row.component].parse(existing.sourceValue),
+					row.sourceValue,
+				)
+			)
 				throw new Error("Reapplied source occurrence targets another native identity");
 		}
 		return result;

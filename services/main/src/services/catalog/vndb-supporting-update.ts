@@ -239,6 +239,8 @@ export function createVndbSupportingNativeWriter(input: {
 						{
 							expectedProfileRevision: head?.revision ?? null,
 							profile: desired,
+							sourceProfile: { genderRevisionId: desiredGender },
+							observedFields: ["genderRevisionId"],
 							sourceRecordId: context.sourceRecordId,
 							snapshotId: after.snapshotId,
 							sourcePath: after.path("/gender"),
@@ -252,6 +254,8 @@ export function createVndbSupportingNativeWriter(input: {
 						snapshotId: after.snapshotId,
 						sourcePath: after.path("/gender"),
 						revision: head.revision,
+						sourceProfile: { genderRevisionId: desiredGender },
+						observedFields: ["genderRevisionId"],
 					});
 			}
 			const names = await reconcileVndbNativeNames(

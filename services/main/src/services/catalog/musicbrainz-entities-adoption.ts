@@ -20,6 +20,7 @@ import { catalogValueNodes } from "./value-nodes";
 import {
 	musicBrainzSupportingTarget,
 	musicBrainzSupportingProfile,
+	musicBrainzSupportingObservedProfileFields,
 } from "./musicbrainz-supporting-profile";
 import { acceptCatalogSourceInitialization } from "./source-bindings";
 import {
@@ -161,6 +162,8 @@ export async function adoptMusicBrainzSupportingEndpoint(
 			snapshotId: observation.snapshot.id,
 			sourcePath: "/",
 			revision: initialized.revision,
+			sourceProfile: profile.profile,
+			observedFields: musicBrainzSupportingObservedProfileFields(parsed),
 		});
 	}
 	if (parsed.type === "area")

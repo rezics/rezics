@@ -131,6 +131,8 @@ try {
 						snapshotId: before.snapshot.id,
 						sourcePath: "/profile",
 						revision: original.revision,
+						sourceProfile: beforeProfile,
+						observedFields: Object.keys(beforeProfile),
 					});
 					const after = await recordCatalogSourceDocument(
 						tx,
@@ -153,6 +155,8 @@ try {
 								{
 									expectedProfileRevision: expected,
 									profile: afterProfile,
+									sourceProfile: afterProfile,
+									observedFields: Object.keys(afterProfile),
 									sourceRecordId: after.record.id,
 									snapshotId: after.snapshot.id,
 									sourcePath: "/profile",
@@ -286,6 +290,8 @@ try {
 					const filled = await writeCatalogSourceProfile(tx, stub, account.id, stub.revision, {
 						expectedProfileRevision: null,
 						profile: afterProfile,
+						sourceProfile: afterProfile,
+						observedFields: Object.keys(afterProfile),
 						sourceRecordId: after.record.id,
 						snapshotId: after.snapshot.id,
 						sourcePath: "/profile",

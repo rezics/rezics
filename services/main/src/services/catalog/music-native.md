@@ -311,3 +311,32 @@ release fixture's repeated cycles. Identifier lists admit at most 128 combined
 before/after occurrences; native identifiers remain many-valued and are never
 treated as automatic identity merge instructions. Identifier redirect adoption
 and larger staged applications remain separate coverage.
+
+### Pure source interpretations (next coordinated migration pending)
+
+`music_component_source_occurrence.source_value` stores the checked full native
+interpretation separately from the exact native history pointer. The source
+writer validates component shape/keys when recording and reading it, preserves
+that value across replay, and reuses archived credit fragments rather than
+minting another identity for the same interpretation. PostgreSQL validates the
+known native composite type, required and primary-key fields and native check
+constraints. The existing immutable evidence trigger and exact history FK remain.
+
+Entity/Reference profile occurrences likewise carry a pure `source_profile` and
+explicit `observed_fields`. Unobserved native defaults never become source-owned
+nulls. Profile binders compare immutable source interpretations rather than the
+merged native snapshot; the history pointer may therefore retain independent
+human fields. Read boundaries reparse the owner profile shape and field scope.
+MusicBrainz derives scope from present endpoint fields; VNDB staff captures only
+its observed gender field. This is the prerequisite for safe mapper refresh;
+the null-before MusicBrainz factory is still explicitly unqualified.
+
+These columns add no corpus index or scan. A 400-byte mean music interpretation
+adds approximately 200 GB at 500M occurrences or 1.2 TB at 3B, before TOAST,
+replicas/WAL and free space. A profile interpretation plus field scope averaging
+600 bytes adds approximately 300 GB or 1.8 TB respectively. Source-write guards
+inspect the bounded native component's system-catalog metadata and constraints,
+not catalog rows; measure this additional admission cost and cache/compile the
+bounded validation plan if it exceeds the ingest budget. The existing owner/source
+partition and retention plan applies. Runtime contract tests pass; SQL acceptance
+requires the centrally generated migration and rerun of rollback-only fixtures.

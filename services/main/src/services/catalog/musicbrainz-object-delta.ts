@@ -135,6 +135,7 @@ export function musicBrainzObjectNativeWriter(
 				}
 			} else if (incoming.kind === "recording" && previous.kind === "recording") {
 				const old = source.oldAt("music_recording", "/");
+				const recovered = source.recoverAt("music_recording", "/");
 				source.put(
 					"music_recording",
 					"/",
@@ -147,12 +148,15 @@ export function musicBrainzObjectNativeWriter(
 							incoming.record["artist-credit"],
 						)
 							? old.value.artist_credit_id
-							: await credit(incoming.record["artist-credit"], "/artist-credit"),
+							: recovered
+								? recovered.value.artist_credit_id
+								: await credit(incoming.record["artist-credit"], "/artist-credit"),
 					},
 					old,
 				);
 			} else if (incoming.kind === "release_group" && previous.kind === "release_group") {
 				const old = source.oldAt("music_release_group", "/");
+				const recovered = source.recoverAt("music_release_group", "/");
 				source.put(
 					"music_release_group",
 					"/",
@@ -176,7 +180,9 @@ export function musicBrainzObjectNativeWriter(
 							incoming.record["artist-credit"],
 						)
 							? old.value.artist_credit_id
-							: await credit(incoming.record["artist-credit"], "/artist-credit"),
+							: recovered
+								? recovered.value.artist_credit_id
+								: await credit(incoming.record["artist-credit"], "/artist-credit"),
 					},
 					old,
 				);

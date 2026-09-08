@@ -96,6 +96,7 @@ export function musicBrainzReleaseNativeWriter(
 			);
 			const releaseId = context.reference.id;
 			const root = oldAt("music_release", "/");
+			const recoveredRelease = recoverAt("music_release", "/");
 			let releaseGroupId = root.value.release_group_id;
 			if (incoming["release-group"]?.id !== previous["release-group"]?.id) {
 				const group = incoming["release-group"];
@@ -120,7 +121,9 @@ export function musicBrainzReleaseNativeWriter(
 					release_group_id: releaseGroupId,
 					artist_credit_id: isDeepStrictEqual(previous["artist-credit"], incoming["artist-credit"])
 						? root.value.artist_credit_id
-						: await credit(incoming["artist-credit"], "/artist-credit"),
+						: recoveredRelease
+							? recoveredRelease.value.artist_credit_id
+							: await credit(incoming["artist-credit"], "/artist-credit"),
 					status_revision_id: await musicBrainzVocabulary(
 						tx,
 						"release_status",
@@ -214,6 +217,7 @@ export function musicBrainzReleaseNativeWriter(
 						? oldAt("music_track_occurrence", previousTrack.path)
 						: recoverAt("music_track_occurrence", entry.path);
 					const trackId = oldTrack?.componentKey ?? crypto.randomUUID();
+					const recoveredTrack = recoverAt("music_track_occurrence", entry.path);
 					let recordingId = oldTrack?.value.recording_id;
 					if (!previousTrack || previousTrack.track.recording.id !== entry.track.recording.id) {
 						const target = await bindReferencedSourceIdentity(tx, context.actor, {
@@ -244,7 +248,9 @@ export function musicBrainzReleaseNativeWriter(
 									entry.track["artist-credit"],
 								)
 									? oldTrack?.value.artist_credit_id
-									: await credit(entry.track["artist-credit"], `${entry.path}/artist-credit`),
+									: recoveredTrack
+										? recoveredTrack.value.artist_credit_id
+										: await credit(entry.track["artist-credit"], `${entry.path}/artist-credit`),
 							length_milliseconds: entry.track.length ?? null,
 							is_data_track: entry.data,
 						},

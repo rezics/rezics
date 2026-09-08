@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, check, foreignKey, primaryKey, text, uuid } from "drizzle-orm/pg-core";
+import { bigint, check, foreignKey, primaryKey, text, uuid, jsonb } from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
 import { catalogSourceSnapshot, catalogSourceBindingRevision } from "./catalog-source";
 import { entityCatalogProfileRevision } from "./catalog-entity";
@@ -21,6 +21,8 @@ function profileSourceOccurrence(owner: keyof typeof CatalogProfileHistoryTables
 			ownerId: uuid().notNull(),
 			sourcePath: text().notNull(),
 			revision: bigint({ mode: "number" }).notNull(),
+			sourceProfile: jsonb().$type<Record<string, unknown>>().notNull(),
+			observedFields: text().array().notNull(),
 		},
 		(t) => [
 			primaryKey({
@@ -54,6 +56,10 @@ function profileSourceOccurrence(owner: keyof typeof CatalogProfileHistoryTables
 			check(
 				`${owner}_profile_source_values`,
 				sql`left(${t.sourcePath},1)='/' and octet_length(${t.sourcePath}) between 1 and 512 and ${t.revision} between 1 and 9007199254740991`,
+			),
+			check(
+				`${owner}_profile_source_interpretation`,
+				sql`jsonb_typeof(${t.sourceProfile})='object' and octet_length(${t.sourceProfile}::text)<=262144 and cardinality(${t.observedFields}) between 0 and 32`,
 			),
 		],
 	);

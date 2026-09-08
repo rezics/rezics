@@ -8,6 +8,7 @@ import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import type { CatalogSourceReceipt } from "./source-observations";
 import type { CatalogReference } from "./contracts";
+import { EntityProfileSchema } from "./entity-contracts";
 import { VndbCatalogContractSha256, VndbDumpContractSha256 } from "./vndb";
 import { normalizeVndbEntityDump } from "./vndb-entity-dump";
 import { normalizeVndbCharacterDump } from "./vndb-character-dump";
@@ -445,6 +446,8 @@ async function adoptVndbEntity(
 			snapshotId: document.snapshot.id,
 			sourcePath: sourcePath("/gender"),
 			revision: profile.revision,
+			sourceProfile: { genderRevisionId: EntityProfileSchema.parse(profile.snapshot).genderRevisionId },
+			observedFields: ["genderRevisionId"],
 		});
 	}
 	if (created) {

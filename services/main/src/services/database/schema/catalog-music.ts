@@ -99,6 +99,7 @@ export const musicComponentSourceOccurrence = pgTable(
 		componentKey: text().notNull(),
 		sourcePath: text().notNull(),
 		historyId: uuid().notNull(),
+		sourceValue: jsonb().$type<Record<string, unknown>>().notNull(),
 	},
 	(table) => [
 		primaryKey({
@@ -145,6 +146,10 @@ export const musicComponentSourceOccurrence = pgTable(
 		check(
 			"music_component_source_key_check",
 			sql`octet_length(${table.sourcePath}) between 1 and 512 and left(${table.sourcePath}, 1) = '/' and octet_length(${table.component}) between 1 and 96 and octet_length(${table.componentKey}) between 1 and 1536`,
+		),
+		check(
+			"music_component_source_value_object",
+			sql`jsonb_typeof(${table.sourceValue}) = 'object' and octet_length(${table.sourceValue}::text) <= 524288`,
 		),
 	],
 );

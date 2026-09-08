@@ -13,6 +13,45 @@ import type { recordCatalogSourceDocument } from "./source-observations";
 export type MusicBrainzSupportingDocument = ReturnType<typeof parseMusicBrainzSupportingEndpoint>;
 type Observation = Awaited<ReturnType<typeof recordCatalogSourceDocument>>;
 
+/** @internal A mapper owns only fields actually observed, plus the known source object's native class. */
+export function musicBrainzSupportingObservedProfileFields(
+	document: MusicBrainzSupportingDocument,
+) {
+	const record = document.record;
+	const fields: string[] =
+		document.type === "artist" || document.type === "label" || document.type === "series"
+			? []
+			: ["shape"];
+	const observed = (native: string, ...keys: string[]) => {
+		if (keys.some((key) => Object.hasOwn(record, key))) fields.push(native);
+	};
+	if (document.type !== "url" && document.type !== "series")
+		observed("typeRevisionId", "type", "type-id");
+	if (document.type === "artist") {
+		observed("genderRevisionId", "gender", "gender-id");
+		observed("beginAreaId", "begin-area");
+		observed("endAreaId", "end-area");
+	}
+	if (document.type === "artist" || document.type === "label" || document.type === "place")
+		observed("areaId", "area");
+	if ("life-span" in record && record["life-span"])
+		for (const key of ["begin", "end", "ended"])
+			if (Object.hasOwn(record["life-span"], key)) fields.push(key);
+	if (document.type === "place") {
+		observed("address", "address");
+		observed("latitude", "coordinates");
+		observed("longitude", "coordinates");
+	}
+	if (document.type === "event") {
+		observed("localTime", "time");
+		observed("cancelled", "cancelled");
+		observed("setlist", "setlist");
+	}
+	if (document.type === "url") fields.push("url");
+	if (document.type === "genre" || document.type === "mood") fields.push("typeRevisionId");
+	return [...new Set(fields)].sort();
+}
+
 /** @internal Determine native identity grain before initializing source children. */
 export function musicBrainzSupportingTarget(document: MusicBrainzSupportingDocument) {
 	if (document.type === "artist")

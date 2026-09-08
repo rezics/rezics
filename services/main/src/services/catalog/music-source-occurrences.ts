@@ -3,7 +3,11 @@ import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { musicComponentSourceOccurrence } from "../database/schema/catalog-music";
 import { readMusicComponentHead } from "./music-structure";
-import { MusicComponentNameSchema, type MusicComponentName } from "./music-structure-contracts";
+import {
+	MusicComponentNameSchema,
+	MusicComponentSchemas,
+	type MusicComponentName,
+} from "./music-structure-contracts";
 import type { recordCatalogSourceDocument } from "./source-observations";
 import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 
@@ -34,6 +38,7 @@ export async function recordMusicSourceComponent(
 		componentKey,
 		sourcePath,
 		historyId: head.id,
+		sourceValue: MusicComponentSchemas[component].parse(head.value),
 	});
 }
 
@@ -48,7 +53,7 @@ export async function listMusicSourceComponents(
 ) {
 	const table = musicComponentSourceOccurrence;
 	const scope = await resolveCatalogSourceChildCorrespondence(tx, sourceRecordId);
-	return tx
+	const rows = await tx
 		.select()
 		.from(table)
 		.where(
@@ -64,4 +69,8 @@ export async function listMusicSourceComponents(
 		)
 		.orderBy(table.sourcePath)
 		.limit(128);
+	return rows.map((row) => ({
+		...row,
+		sourceValue: MusicComponentSchemas[component].parse(row.sourceValue),
+	}));
 }
