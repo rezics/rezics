@@ -2,7 +2,7 @@
 
 import { useFeedFixtureData } from "@rezics/fixture-client";
 import type { FeedFixtureAssetId } from "@rezics/fixture-data";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { LibraryIcon, MessageCircleIcon } from "lucide-react";
 
 import { Badge, Button, Cover } from "@rezics/ui";
@@ -214,12 +214,3 @@ export function CollectionFeedCard() {
 		</FeedCard>
 	);
 }
-
-const fixtures = {
-	"Post · media and target": <PostFeedCard />,
-	"Post · review": <ReviewFeedCard />,
-	"Unit · book": <BookFeedCard />,
-	"Unit · collection": <CollectionFeedCard />,
-} satisfies Record<string, ReactNode>;
-
-export default fixtures;

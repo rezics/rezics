@@ -208,7 +208,7 @@ export function FeedPostCard({
 			/>
 			<FeedCardContent>
 				<div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-					<p className="font-semibold text-brand text-xs">
+					<p className="font-semibold text-brand-text text-xs">
 						{Object.entries(t.feed.content.kinds).find(
 							([key]) => key === `post:${post.postKind}`,
 						)?.[1] ?? t.feed.content.owners.post}
@@ -371,7 +371,7 @@ export function FeedUnitCard({
 			/>
 			{identityPresentation ? (
 				<CardContent className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-4 px-4 pb-0 pt-3 sm:grid-cols-[5rem_minmax(0,1fr)] sm:px-5">
-					<FeedItemMain className="block" href={href} onOpen={trackOpen}>
+					<FeedItemMain ariaLabel={title} className="block" href={href} onOpen={trackOpen}>
 						<IdentityAvatar
 							avatar={identityPresentation.avatar}
 							className="size-[4.5rem] border border-border-weak text-2xl shadow-sm/5 sm:size-20"
@@ -380,7 +380,7 @@ export function FeedUnitCard({
 						/>
 					</FeedItemMain>
 					<div className="min-w-0">
-						<p className="font-semibold text-brand text-xs">
+						<p className="font-semibold text-brand-text text-xs">
 							{Object.entries(t.feed.content.kinds).find(
 								([key]) => key === `${unit.owner}:${unit.shape}`,
 							)?.[1] ?? t.feed.content.owners[unit.owner]}
@@ -548,18 +548,20 @@ function FeedItemOverflowMenu({
 }
 
 function FeedItemMain({
+	ariaLabel,
 	children,
 	className,
 	href,
 	onOpen,
 }: {
+	ariaLabel?: string;
 	children: ReactNode;
 	className?: string;
 	href?: string;
 	onOpen: () => void;
 }) {
 	return href ? (
-		<Link className={cn("block", className)} href={href} onClick={onOpen}>
+		<Link aria-label={ariaLabel} className={cn("block", className)} href={href} onClick={onOpen}>
 			{children}
 		</Link>
 	) : (

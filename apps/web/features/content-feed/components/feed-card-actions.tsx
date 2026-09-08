@@ -87,7 +87,7 @@ export function FeedVoteControl({
 				aria-live="polite"
 				className={cn(
 					"min-w-9 justify-center border-0 bg-transparent px-1 text-xs shadow-none",
-					reaction === "upvote" && "text-primary",
+					reaction === "upvote" && "text-brand-text",
 					reaction === "downvote" && "text-info",
 				)}
 			>

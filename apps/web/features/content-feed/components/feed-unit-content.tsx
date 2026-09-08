@@ -56,7 +56,7 @@ export function FeedUnitContent({
 				/>
 			</FeedUnitContentLink>
 			<div className="min-w-0">
-				<p className="font-semibold text-brand text-xs">{kindLabel}</p>
+				<p className="font-semibold text-brand-text text-xs">{kindLabel}</p>
 				<FeedUnitContentLink href={href} onOpen={onOpen}>
 					<Heading
 						className="mt-1 font-heading font-black text-[1.05rem] leading-snug"

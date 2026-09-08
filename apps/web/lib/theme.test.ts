@@ -71,6 +71,30 @@ describe("app theme", () => {
 		}
 	});
 
+	it("keeps branded small text and filled actions at AA contrast without changing the identity color", () => {
+		for (const colors of Object.values(appTheme)) {
+			for (const background of [
+				colors.background,
+				colors.surfaceHover,
+				colors.surfaceSelected,
+				colors.secondary,
+			]) {
+				expect(contrastRatio(colors.brandText, background)).toBeGreaterThanOrEqual(4.5);
+			}
+			expect(contrastRatio(colors.brandAction, colors.brandForeground)).toBeGreaterThanOrEqual(4.5);
+			const hoveredOnWhite = `#${[1, 3, 5]
+				.map((offset) =>
+					Math.round(
+						Number.parseInt(colors.brandAction.slice(offset, offset + 2), 16) * 0.9 + 255 * 0.1,
+					)
+						.toString(16)
+						.padStart(2, "0"),
+				)
+				.join("")}`;
+			expect(contrastRatio(hoveredOnWhite, colors.brandForeground)).toBeGreaterThanOrEqual(4.5);
+		}
+	});
+
 	it("keeps ambient surfaces borderless and reserves visible edges for semantics", () => {
 		for (const colors of Object.values(appTheme)) {
 			expect(colors.border).toBe("transparent");

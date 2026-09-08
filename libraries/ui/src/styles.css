@@ -23,6 +23,8 @@
 	--color-sidebar: var(--sidebar);
 	--color-brand-foreground: var(--brand-foreground);
 	--color-brand: var(--brand);
+	--color-brand-text: var(--brand-text, var(--brand));
+	--color-brand-action: var(--brand-action, var(--primary));
 	--color-surface-hover: var(--surface-hover);
 	--color-surface-selected: var(--surface-selected);
 	--color-surface-container: var(--surface-container);

@@ -15,7 +15,7 @@ export default defineConfig({
 			"./libraries/fixture-data/vitest.config.ts",
 			"./libraries/filter/vitest.config.ts",
 			"./services/main/vitest.config.ts",
-			"./apps/web/vitest.config.ts",
+			"./apps/web/vitest.unit.config.ts",
 			"./apps/about/vitest.config.ts",
 		],
 		coverage: {

@@ -1,6 +1,48 @@
 version: "3"
 
 tasks:
+    storybook:
+        desc: Start the Storybook component and agent runtime.
+        cmds:
+            - yarn run storybook {{.CLI_ARGS}}
+
+    storybook:build:
+        desc: Build the static component documentation and preview.
+        cmds:
+            - yarn run storybook:build
+
+    storybook:test:
+        desc: Run stories and accessibility checks through the official agent tools.
+        cmds:
+            - yarn exec storybook tools test run {{.CLI_ARGS}}
+
+    storybook:tools:
+        desc: Invoke official Storybook discovery, docs, test, preview, and review tools.
+        cmds:
+            - yarn exec storybook tools {{.CLI_ARGS}}
+
+    storybook:skills:
+        desc: Read the installed Storybook version's agent workflow.
+        cmds:
+            - yarn exec storybook skills {{.CLI_ARGS}}
+
+    storybook:browsers:
+        desc: Install Chromium for the native Vitest Browser provider.
+        cmds:
+            - yarn exec playwright install chromium
+
+    storybook:coverage:
+        desc: Run the Storybook browser project with native coverage reporting.
+        cmds:
+            - yarn exec vitest run --project storybook --coverage {{.CLI_ARGS}}
+
+    storybook:visual:
+        desc: Compare selected stories with reviewed native Vitest screenshot baselines.
+        env:
+            STORYBOOK_VISUAL_REGRESSION: "true"
+        cmds:
+            - yarn exec vitest run --project storybook {{.CLI_ARGS}}
+
     dev:
         desc: Start the frontend development server.
         cmds:

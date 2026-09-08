@@ -32,7 +32,8 @@ function repoRelativePath(from: string, to: string): string {
 function isFixtureDevelopmentSurface(path: URL): boolean {
 	const fileName = basename(path.pathname);
 	return (
-		fileName === "cosmos.decorator.tsx" ||
+		repoRelativePath(FrontendRoot.pathname, path.pathname).startsWith(".storybook/") ||
+		fileName.includes(".stories.") ||
 		fileName.includes(".fixture.") ||
 		fileName.includes(".test.")
 	);
@@ -58,6 +59,21 @@ function FixtureProbe() {
 }
 
 describe("fixture package boundaries", () => {
+	it("allows Storybook-owned support without allowing production lookalikes", () => {
+		expect(isFixtureDevelopmentSurface(new URL(".storybook/providers.tsx", FrontendRoot))).toBe(
+			true,
+		);
+		expect(
+			isFixtureDevelopmentSurface(new URL("features/feed/card.stories.tsx", FrontendRoot)),
+		).toBe(true);
+		expect(
+			isFixtureDevelopmentSurface(new URL("features/storybook/providers.tsx", FrontendRoot)),
+		).toBe(false);
+		expect(isFixtureDevelopmentSurface(new URL("features/feed/card.tsx", FrontendRoot))).toBe(
+			false,
+		);
+	});
+
 	it("selects localized fixture data through the shared client provider", () => {
 		const markup = renderToStaticMarkup(
 			<FixtureProvider contentLanguage="en">

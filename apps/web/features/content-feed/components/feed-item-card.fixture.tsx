@@ -1,9 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
-
 import { useTranslation } from "@/i18n/client";
-import { FeedPostCard, FeedUnitCard, type FeedPost, type FeedUnit } from "./feed-item-card";
+import { FeedUnitCard, type FeedPost, type FeedUnit } from "./feed-item-card";
 import { FeedListItems } from "./feed-list";
 
 const attribution = {
@@ -79,7 +77,7 @@ const globalAggregate = {
 	totalCount: 100,
 } as const;
 
-const book = {
+export const book = {
 	...common,
 	id: "019f9d16-1000-7000-8000-000000000010",
 	owner: "publishing",
@@ -96,7 +94,7 @@ const book = {
 	},
 } satisfies FeedUnit;
 
-const mediaWithGlobalFallback = {
+export const mediaWithGlobalFallback = {
 	...common,
 	id: "019f9d16-1000-7000-8000-000000000020",
 	owner: "program",
@@ -110,7 +108,7 @@ const mediaWithGlobalFallback = {
 	},
 } satisfies FeedUnit;
 
-const unratedSoftware = {
+export const unratedSoftware = {
 	...common,
 	id: "019f9d16-1000-7000-8000-000000000030",
 	owner: "software",
@@ -124,7 +122,7 @@ const unratedSoftware = {
 	},
 } satisfies FeedUnit;
 
-const realm = {
+export const realm = {
 	...common,
 	id: "019f9d16-1000-7000-8000-000000000040",
 	owner: "realm",
@@ -144,7 +142,7 @@ const realm = {
 	},
 } satisfies FeedUnit;
 
-const zoneWithoutAvatar = {
+export const zoneWithoutAvatar = {
 	...common,
 	id: "019f9d16-1000-7000-8000-000000000050",
 	owner: "zone",
@@ -161,7 +159,7 @@ const zoneWithoutAvatar = {
 	},
 } satisfies FeedUnit;
 
-const contextualReview = {
+export const contextualReview = {
 	id: "019f9d16-1000-7000-8000-000000000060",
 	language: "zh",
 	availableLanguages: ["zh"],
@@ -209,7 +207,7 @@ const contextualReview = {
 	tracking: null,
 } satisfies FeedPost;
 
-function ProductionUnitCards() {
+export function ProductionUnitCards() {
 	const { t } = useTranslation(["feed"]);
 	return (
 		<FeedListItems aria-label={t.feed.title}>
@@ -221,23 +219,3 @@ function ProductionUnitCards() {
 		</FeedListItems>
 	);
 }
-
-const fixtures = {
-	"Production units · rating fallback and identity media": <ProductionUnitCards />,
-	"Work · preferred score": <FeedUnitCard canExclude={false} unit={book} />,
-	"Work · global fallback without cover": (
-		<FeedUnitCard canExclude={false} unit={mediaWithGlobalFallback} />
-	),
-	"Work · unrated without cover": <FeedUnitCard canExclude={false} unit={unratedSoftware} />,
-	"Identity · Realm avatar": <FeedUnitCard canExclude={false} unit={realm} />,
-	"Identity · Zone fallback": <FeedUnitCard canExclude={false} unit={zoneWithoutAvatar} />,
-	"Post · Unit context hides repeated subject": (
-		<FeedPostCard
-			canExclude={false}
-			displayContext={{ kind: "unit", unitId: book.id }}
-			post={contextualReview}
-		/>
-	),
-} satisfies Record<string, ReactNode>;
-
-export default fixtures;

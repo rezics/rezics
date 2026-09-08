@@ -1,0 +1,51 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Workflow" />
+
+# REZICS component workflow
+
+Use these stories to inspect real shared controls and Web components with the
+application's theme and typed translations. The toolbar selects the interface
+language, fixture content language, light or dark theme, and viewport.
+
+## Work with an agent
+
+From the repository root:
+
+```sh
+task apps-web:storybook
+task apps-web:storybook:skills -- stories
+task apps-web:storybook:tools -- docs list --withStoryIds true
+task apps-web:storybook:tools -- stories changed
+task apps-web:storybook:test
+```
+
+Read each tool's `--help` before using its arguments. Use discovered story IDs for
+focused tests and the official review tool. The local MCP endpoint is
+`http://127.0.0.1:6006/mcp`.
+
+## Authoring
+
+Write CSF Next stories beside feature components. Shared UI stories belong to the
+UI workspace, outside its upstream SharkUI mirror. Use the owning preview factory
+so providers, styles, and addon types are present in both Storybook and Vitest.
+
+Document realistic inputs and distinct states. Use interaction tests for outcomes
+such as a changed selection, toggled vote, retry callback, or restored focus.
+Fixture support may be shared; production modules must never import stories or
+fixture data. API-backed scenarios use MSW with explicit endpoint handlers.
+
+## Screenshots and acceptance
+
+The browser test lifecycle captures successful stories as well as failures through
+Vitest's native screenshot API. Filenames identify the story, test, locale, theme,
+and viewport. Generated files are under `.temp/storybook/` at the repository root.
+Use native `toMatchScreenshot()` assertions for reviewed visual baselines, and
+inspect actual images when judging layout or styling.
+
+The CSS check verifies that Tailwind utilities reach the browser. Component,
+accessibility, and screenshot results cover the selected stories. Vinext server
+behavior, full application flows, and deployment need their own acceptance.
+
+Agentic Review groups related rendered stories for human inspection. It is an
+agent-curated view of the work, not an exhaustive coverage report.

@@ -207,7 +207,7 @@ describe("FeedPostCard", () => {
 		expect(source.textContent).toBe("― Glorious Exploits");
 		expect(
 			within(source).getByRole("link", { name: "Glorious Exploits" }).getAttribute("href"),
-		).toBe(`/units/book/${excerpt.subject.id}`);
+		).toBe(`/catalog/publishing/${excerpt.subject.id}`);
 		expect(container.querySelector('[data-slot="feed-card-target"]')).toBeNull();
 	});
 
@@ -404,7 +404,7 @@ describe("FeedUnitCard", () => {
 		expect(screen.getByText("9.0／10 · 2 人評分")).toBeTruthy();
 		expect(screen.queryByText("全域評分")).toBeNull();
 		expect(screen.getByLabelText("discussion action").getAttribute("href")).toBe(
-			`/units/book/${book.id}/discussion`,
+			`/catalog/publishing/${book.id}/discussion`,
 		);
 	});
 
@@ -436,6 +436,9 @@ describe("FeedUnitCard", () => {
 		);
 
 		expect(container.querySelector('[data-slot="avatar-emoji"]')?.textContent).toBe("🧠");
+		expect(screen.getByRole("link", { name: realm.title }).getAttribute("href")).toBe(
+			`/realm/${realm.id}`,
+		);
 		expect(container.querySelector('[data-slot="cover"]')).toBeNull();
 		expect(container.querySelector('[data-slot="banner"]')).toBeNull();
 		expect(container.querySelector("time")).toBeNull();

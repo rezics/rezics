@@ -7,3 +7,7 @@ network_access = true
 
 [windows]
 sandbox = "elevated"
+
+[mcp_servers.rezics-storybook]
+url = "http://127.0.0.1:6006/mcp"
+tool_timeout_sec = 180

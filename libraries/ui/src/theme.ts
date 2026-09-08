@@ -1,6 +1,10 @@
 export interface AppThemeColors {
 	brand: string;
 	brandForeground: string;
+	/** Branded text on neutral surfaces, distinct from the identity color. */
+	brandText: string;
+	/** Filled action background with AA contrast against brandForeground. */
+	brandAction: string;
 	background: string;
 	foreground: string;
 	card: string;
@@ -52,6 +56,8 @@ export const appTheme = {
 	light: {
 		brand: "#D8404C",
 		brandForeground: "#FFFFFF",
+		brandText: "#AF2533",
+		brandAction: "#C6303E",
 		background: "#FFFFFF",
 		foreground: "#181C1F",
 		card: "#FFFFFF",
@@ -101,6 +107,8 @@ export const appTheme = {
 	dark: {
 		brand: "#D8404C",
 		brandForeground: "#FFFFFF",
+		brandText: "#FF8791",
+		brandAction: "#C6303E",
 		background: "#0E1113",
 		foreground: "#EEF1F3",
 		card: "#0E1113",

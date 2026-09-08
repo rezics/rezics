@@ -9,5 +9,5 @@
 		},
 		"lib": ["DOM", "DOM.Iterable", "ES2022"]
 	},
-	"include": ["src"]
+	"include": ["src", "stories"]
 }

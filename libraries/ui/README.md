@@ -24,6 +24,10 @@ Floating surfaces use shadow for elevation without an outline. Visible edges are
 - use an explicit component appearance such as `Card appearance="outlined"` or a filled button
   variant when the surface needs stronger emphasis.
 
+Use `text-brand-text` for small branded text on neutral surfaces. Filled brand
+buttons use `bg-brand-action` with `text-brand-foreground`; these contrast-qualified
+roles keep the approved identity color separate from text and action rendering.
+
 Import UI components from `@rezics/ui`. The upstream `src/ui` mirror is not a public application
 entry point, so project defaults cannot be bypassed accidentally.
 
@@ -56,6 +60,14 @@ Preview changes in this package before adding or updating a SharkUI component:
 yarn dlx shadcn@latest add @shark/<component> --dry-run --cwd libraries/ui
 yarn dlx shadcn@latest add @shark/<component> --diff --cwd libraries/ui
 ```
+
+## Component stories
+
+Shared CSF Next stories live in `stories/`, outside the upstream mirror. They use
+the UI preview and the shared theme/locale environment; Web's Storybook includes
+them without making the UI workspace depend on Web providers. Start with
+`task apps-web:storybook` and follow the
+[Storybook workflow](../../docs/architecture/storybook-workflow.md).
 
 ## SharkUI audit
 
