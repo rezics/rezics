@@ -15,7 +15,7 @@ export interface ManagementWorkspaceSection<SectionId extends string = string> {
 	id: SectionId;
 	href: string;
 	label: string;
-	description: string;
+	description?: string;
 	icon: ManagementWorkspaceIcon;
 	badge?: string;
 }
@@ -175,9 +175,11 @@ export function ManagementWorkspaceOverview<SectionId extends string>({
 											</Badge>
 										) : null}
 									</span>
-									<span className="mt-1 block text-sm leading-5 text-muted-foreground">
-										{section.description}
-									</span>
+									{section.description ? (
+										<span className="mt-1 block text-sm leading-5 text-muted-foreground">
+											{section.description}
+										</span>
+									) : null}
 								</span>
 								<ChevronRight
 									aria-hidden

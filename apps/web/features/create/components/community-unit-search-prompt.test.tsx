@@ -59,9 +59,9 @@ vi.mock("@/i18n/client", () => ({
 				policy: "Search before creating a public entry.",
 				prompt: ({ subject }: { readonly subject: string }) => `Search existing ${subject}`,
 				subjects: {
-					book: "books",
+					publishing: "publishing entries",
 					character: "characters",
-					media: "media entries",
+					program: "program entries",
 					organization: "organizations",
 					person: "people",
 					software: "software entries",
@@ -98,7 +98,7 @@ describe("CommunityUnitSearchPrompt", () => {
 			name: "Search existing organizations",
 		});
 		expect(searchLink.getAttribute("href")).toBe(
-			"/create/entity/search?kind=organization&q=OpenAI",
+			"/create/entity/search?shape=organization&q=OpenAI",
 		);
 		expect(searchLink.getAttribute("rel")).toBe("noopener noreferrer");
 		expect(searchLink.getAttribute("target")).toBe("_blank");

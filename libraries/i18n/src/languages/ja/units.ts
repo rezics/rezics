@@ -39,7 +39,7 @@ export default {
 		medium: jaTerminology.musicMedium.forms.label,
 		release: jaTerminology.musicRelease.forms.label,
 		release_group: jaTerminology.musicReleaseGroup.forms.label,
-		work: "楽曲",
+		work: jaTerminology.musicalWork.forms.label,
 		release_candidate: `未照合の${jaTerminology.musicRelease.forms.inline}`,
 		number: "番号",
 		position: "順序",
@@ -91,7 +91,7 @@ export default {
 		releases: "利用可能なリリース",
 		languages: "言語",
 		machineTranslated: "機械翻訳",
-		episodes: "エピソード",
+		episodes: `${jaTerminology.program.forms.episodeLabel}`,
 		emptyReleases: "条件に一致するリリースは登録されていません。",
 	},
 	types: {
@@ -309,8 +309,8 @@ export default {
 		mediaKind: "メディア種類",
 		releaseDate: "リリース日",
 		runtimeMinutes: "再生時間（分）",
-		episodeCount: "エピソード数",
-		seasonCount: "シーズン数",
+		episodeCount: `${jaTerminology.program.forms.episodeLabel}数`,
+		seasonCount: `${jaTerminology.program.forms.seasonLabel}数`,
 		durationSeconds: "再生時間（秒）",
 		adaptedAudio: `差し替え用${audioTerms.label}`,
 		adaptedAudioDescription: `この${videoTerms.inline}で元の${audioTerms.inline}の代わりに再生できる${audioTerms.inline}を選択します。`,
@@ -668,7 +668,7 @@ export default {
 		structure: "構造",
 		root: "(ルート)",
 		structureSummary: insert(
-			"書籍 {{books}} 件の${jaTerminology.textVersion.forms.label} · {{chapters}} 章 · {{labels}} ラベル",
+			`書籍 {{books}} 件の${jaTerminology.textVersion.forms.label} · {{chapters}} 章 · {{labels}} ラベル`,
 			{
 				books: Number,
 				chapters: Number,

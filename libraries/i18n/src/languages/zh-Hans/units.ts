@@ -39,7 +39,7 @@ export default {
 		medium: zhHansTerminology.musicMedium.forms.label,
 		release: zhHansTerminology.musicRelease.forms.label,
 		release_group: zhHansTerminology.musicReleaseGroup.forms.label,
-		work: `${zhHansTerminology.music.forms.label}作品`,
+		work: zhHansTerminology.musicalWork.forms.label,
 		release_candidate: `未匹配${zhHansTerminology.musicRelease.forms.label}`,
 		number: "编号",
 		position: "顺序",

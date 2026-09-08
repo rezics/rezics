@@ -14,7 +14,7 @@ import { isProgressTrackableUnitType } from "@/features/progress/model/progress-
 import { targetedReviewCreateHref } from "@/features/reviews/routing/review-routes";
 import { UnitTagSummary } from "@/features/tags/components/unit-tag-summary";
 import { useTranslation } from "@/i18n/client";
-import { findPrimaryBookAuthor } from "../attribution-role";
+import { findPrimaryAuthor } from "../attribution-role";
 import {
 	CompactCreditAttributionGroups,
 	PrimaryBookAuthorSection,
@@ -91,7 +91,7 @@ export function UnitOverviewPage() {
 		[t.units.detail.updatedAt, formatDate(unit.updatedAt, locale.current)],
 	] as const;
 	const domainFacts = getDomainFacts(detail, locale.current, t);
-	const primaryAuthor = type === "book" ? findPrimaryBookAuthor(unit.attributions) : undefined;
+	const primaryAuthor = type === "book" ? findPrimaryAuthor(unit.attributions) : undefined;
 	const creditsHref = unitCreditsHref(type, unit.id);
 
 	return (

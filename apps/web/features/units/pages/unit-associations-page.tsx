@@ -10,9 +10,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { UnitDetailSectionFrame } from "../components/unit-detail-section-frame";
-import { UnitSeriesMemberships } from "../components/unit-series-memberships";
 import { UnitSubjectGroups } from "../components/unit-subject-groups";
-import { UnitVariantList } from "../components/unit-variant-list";
 import { useUnitDetail } from "../components/unit-detail-workspace";
 import { unitDetailPageCopy } from "../model/unit-detail-copy";
 
@@ -69,13 +67,6 @@ export function UnitAssociationsPage() {
 					</Button>
 				) : null}
 			</section>
-
-			{detail.type === "series" ? null : (
-				<>
-					<UnitSeriesMemberships unitId={detail.unit.id} />
-					<UnitVariantList context={detail.unit.variantContext} />
-				</>
-			)}
 		</UnitDetailSectionFrame>
 	);
 }

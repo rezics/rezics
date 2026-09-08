@@ -17,12 +17,12 @@ describe("unit cache invalidation", () => {
 	it("invalidates a detail query without invalidating its list by default", async () => {
 		const { queryClient, invalidateQueries } = createQueryClient();
 
-		await invalidateUnitDetail(queryClient, "book", "unit-1");
+		await invalidateUnitDetail(queryClient, "audio", "unit-1");
 
 		expect(invalidateQueries).toHaveBeenCalledTimes(1);
 		expect(invalidateQueries).toHaveBeenCalledWith({
 			queryKey: [
-				{ url: "/api/v1/units/:type/:unitId", params: { type: "book", unitId: "unit-1" } },
+				{ url: "/api/v1/units/:type/:unitId", params: { type: "audio", unitId: "unit-1" } },
 			],
 		});
 	});
@@ -30,15 +30,15 @@ describe("unit cache invalidation", () => {
 	it("includes the list when a unit mutation changes list-visible data", async () => {
 		const { queryClient, invalidateQueries } = createQueryClient();
 
-		await invalidateUnitDetail(queryClient, "book", "unit-1", true);
+		await invalidateUnitDetail(queryClient, "audio", "unit-1", true);
 
 		expect(invalidateQueries).toHaveBeenNthCalledWith(1, {
 			queryKey: [
-				{ url: "/api/v1/units/:type/:unitId", params: { type: "book", unitId: "unit-1" } },
+				{ url: "/api/v1/units/:type/:unitId", params: { type: "audio", unitId: "unit-1" } },
 			],
 		});
 		expect(invalidateQueries).toHaveBeenNthCalledWith(2, {
-			queryKey: [{ url: "/api/v1/units/:type", params: { type: "book" } }],
+			queryKey: [{ url: "/api/v1/units/:type", params: { type: "audio" } }],
 		});
 	});
 

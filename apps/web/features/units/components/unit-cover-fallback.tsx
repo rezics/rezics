@@ -1,13 +1,21 @@
-import { AppWindowIcon, BookOpenIcon, ClapperboardIcon, LibraryIcon } from "lucide-react";
+import {
+	AppWindowIcon,
+	BookOpenIcon,
+	ClapperboardIcon,
+	LibraryIcon,
+	Music2Icon,
+} from "lucide-react";
 
 export function UnitCoverFallback({ kind }: { readonly kind: string }) {
 	const Icon =
-		kind === "book"
+		kind === "publishing"
 			? BookOpenIcon
-			: kind === "media"
+			: kind === "program" || kind === "video"
 				? ClapperboardIcon
 				: kind === "software"
 					? AppWindowIcon
-					: LibraryIcon;
+					: kind === "music" || kind === "audio"
+						? Music2Icon
+						: LibraryIcon;
 	return <Icon aria-hidden className="size-7 text-muted-foreground" />;
 }

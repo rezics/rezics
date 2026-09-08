@@ -8,6 +8,12 @@ import {
 } from "@rezics/ui";
 import {
 	BookOpen,
+	Music2,
+	Network,
+	Library,
+	Package,
+	Video,
+	AudioLines,
 	Clapperboard,
 	ClipboardPenLine,
 	Code2,
@@ -26,7 +32,7 @@ import { createContext, useContext, type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
-import type { StudioSectionId } from "../model/studio-section";
+import { StudioSectionIds, type StudioSectionId } from "../model/studio-section";
 import { parseStudioSection, studioSectionHref } from "../routing/studio-routes";
 
 const StudioSectionsContext = createContext<
@@ -43,93 +49,32 @@ export function StudioWorkspace({ children }: { readonly children: ReactNode }) 
 	const pathname = usePathname();
 	const { t } = useTranslation(["create"]);
 	const labels = t.create.sections;
-	const sections = [
-		{
-			id: "post",
-			href: studioSectionHref("post"),
-			label: labels.post.label,
-			description: labels.post.description,
-			icon: MessageSquareText,
-		},
-		{
-			id: "book",
-			href: studioSectionHref("book"),
-			label: labels.book.label,
-			description: labels.book.description,
-			icon: BookOpen,
-		},
-		{
-			id: "software",
-			href: studioSectionHref("software"),
-			label: labels.software.label,
-			description: labels.software.description,
-			icon: Code2,
-		},
-		{
-			id: "media",
-			href: studioSectionHref("media"),
-			label: labels.media.label,
-			description: labels.media.description,
-			icon: Clapperboard,
-		},
-		{
-			id: "entity",
-			href: studioSectionHref("entity"),
-			label: labels.entity.label,
-			description: labels.entity.description,
-			icon: Shapes,
-		},
-		{
-			id: "tag",
-			href: studioSectionHref("tag"),
-			label: labels.tag.label,
-			description: labels.tag.description,
-			icon: Tags,
-		},
-		{
-			id: "realm",
-			href: studioSectionHref("realm"),
-			label: labels.realm.label,
-			description: labels.realm.description,
-			icon: Landmark,
-		},
-		{
-			id: "zone",
-			href: studioSectionHref("zone"),
-			label: labels.zone.label,
-			description: labels.zone.description,
-			icon: PanelsTopLeft,
-			badge: t.create.developmentBadge,
-		},
-		{
-			id: "wiki",
-			href: studioSectionHref("wiki"),
-			label: labels.wiki.label,
-			description: labels.wiki.description,
-			icon: FileText,
-		},
-		{
-			id: "collection",
-			href: studioSectionHref("collection"),
-			label: labels.collection.label,
-			description: labels.collection.description,
-			icon: Folder,
-		},
-		{
-			id: "review",
-			href: studioSectionHref("review"),
-			label: labels.review.label,
-			description: labels.review.description,
-			icon: ClipboardPenLine,
-		},
-		{
-			id: "poll",
-			href: studioSectionHref("poll"),
-			label: labels.poll.label,
-			description: labels.poll.description,
-			icon: Vote,
-		},
-	] as const satisfies readonly ManagementWorkspaceSection<StudioSectionId>[];
+	const icons = {
+		publishing: BookOpen,
+		music: Music2,
+		program: Clapperboard,
+		software: Code2,
+		entity: Shapes,
+		grouping: Network,
+		reference: Library,
+		distribution: Package,
+		video: Video,
+		audio: AudioLines,
+		post: MessageSquareText,
+		wiki: FileText,
+		review: ClipboardPenLine,
+		poll: Vote,
+		realm: Landmark,
+		zone: PanelsTopLeft,
+		collection: Folder,
+		tag: Tags,
+	};
+	const sections = StudioSectionIds.map((id) => ({
+		id,
+		href: studioSectionHref(id),
+		label: labels[id].label,
+		icon: icons[id],
+	})) satisfies readonly ManagementWorkspaceSection<StudioSectionId>[];
 
 	return (
 		<RequireSession>

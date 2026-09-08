@@ -1,3 +1,4 @@
+import { jaTerminology } from "@rezics/i18n/terminology/ja";
 import type { FeedFixtureLocalizedContent } from "../../content-feed/localized-content";
 
 export default {
@@ -27,7 +28,7 @@ export default {
 		{
 			name: "集合知",
 			initials: "集",
-			summary: "集団が知識、判断、行動をどのように形づくるかを探ります。",
+			summary: `${jaTerminology.entity.forms.collectiveLabel}が知識、判断、行動をどのように形づくるかを探ります。`,
 		},
 		{
 			name: "サイエンス・フィクション研究",

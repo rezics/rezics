@@ -79,6 +79,9 @@ export const frTerminology = defineTerminology("fr", {
 	program: {
 		status: "approved",
 		forms: {
+			seasonLabel: "Saison",
+			versionLabel: "Version audiovisuelle",
+			episodeLabel: "Épisode",
 			label: "Œuvre audiovisuelle",
 			pluralLabel: "Œuvres audiovisuelles",
 			inline: "œuvre audiovisuelle",
@@ -165,11 +168,46 @@ export const frTerminology = defineTerminology("fr", {
 	referenceCatalog: {
 		status: "approved",
 		forms: {
+			webResourceLabel: "Ressource web",
+			areaLabel: "Zone géographique",
+			instrumentLabel: "Instrument de musique",
+			placeLabel: "Lieu géographique",
+			eventLabel: "Notice d’événement",
 			entryLabel: "Notice de référence",
 			label: "Notices de référence",
 			pluralLabel: "Notices de référence",
 			inline: "notices de référence",
 			plural: "notices de référence",
+		},
+		forbidden: [],
+	},
+	catalogEntry: {
+		status: "approved",
+		forms: {
+			label: "Notice du catalogue",
+			pluralLabel: "Notices du catalogue",
+			inline: "notice du catalogue",
+			plural: "notices du catalogue",
+		},
+		forbidden: [],
+	},
+	visualNovel: {
+		status: "approved",
+		forms: {
+			label: "Roman visuel",
+			pluralLabel: "Romans visuels",
+			inline: "roman visuel",
+			plural: "romans visuels",
+		},
+		forbidden: [],
+	},
+	musicalWork: {
+		status: "approved",
+		forms: {
+			label: "Œuvre musicale",
+			pluralLabel: "Œuvres musicales",
+			inline: "œuvre musicale",
+			plural: "œuvres musicales",
 		},
 		forbidden: [],
 	},
@@ -319,6 +357,10 @@ export const frTerminology = defineTerminology("fr", {
 	entity: {
 		status: "approved",
 		forms: {
+			labelLabel: "Label discographique",
+			collectiveLabel: "Collectif",
+			unresolvedLabel: "Entité non classée",
+			serviceActorLabel: "Service automatisé",
 			personLabel: "Personne réelle",
 			organizationLabel: "Organisation",
 			characterLabel: "Personnage fictif",

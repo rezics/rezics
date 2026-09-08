@@ -48,7 +48,15 @@ export const zhHansTerminology = defineTerminology("zh-Hans", {
 	},
 	program: {
 		status: "approved",
-		forms: { label: "影视作品", pluralLabel: "影视作品", inline: "影视作品", plural: "影视作品" },
+		forms: {
+			seasonLabel: "剧集分季",
+			versionLabel: "影视版本",
+			episodeLabel: "单集",
+			label: "影视作品",
+			pluralLabel: "影视作品",
+			inline: "影视作品",
+			plural: "影视作品",
+		},
 		forbidden: [],
 	},
 	softwareContent: {
@@ -105,12 +113,32 @@ export const zhHansTerminology = defineTerminology("zh-Hans", {
 	referenceCatalog: {
 		status: "approved",
 		forms: {
+			webResourceLabel: "网络资源",
+			areaLabel: "地理区域",
+			instrumentLabel: "乐器",
+			placeLabel: "地理地点",
+			eventLabel: "活动条目",
 			entryLabel: "参照条目",
 			label: "参照条目",
 			pluralLabel: "参照条目",
 			inline: "参照条目",
 			plural: "参照条目",
 		},
+		forbidden: [],
+	},
+	catalogEntry: {
+		status: "approved",
+		forms: { label: "目录条目", pluralLabel: "目录条目", inline: "目录条目", plural: "目录条目" },
+		forbidden: [],
+	},
+	visualNovel: {
+		status: "approved",
+		forms: { label: "视觉小说", pluralLabel: "视觉小说", inline: "视觉小说", plural: "视觉小说" },
+		forbidden: [],
+	},
+	musicalWork: {
+		status: "approved",
+		forms: { label: "音乐作品", pluralLabel: "音乐作品", inline: "音乐作品", plural: "音乐作品" },
 		forbidden: [],
 	},
 	music: {
@@ -236,6 +264,10 @@ export const zhHansTerminology = defineTerminology("zh-Hans", {
 	entity: {
 		status: "approved",
 		forms: {
+			labelLabel: "唱片厂牌",
+			collectiveLabel: "团体",
+			unresolvedLabel: "未分类实体",
+			serviceActorLabel: "自动化服务",
 			personLabel: "现实人物",
 			organizationLabel: "组织机构",
 			characterLabel: "虚构角色",

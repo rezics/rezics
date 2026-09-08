@@ -4,23 +4,14 @@ import { isLicenseId } from "@rezics/license";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
-import {
-	AudioLines,
-	BookOpen,
-	Gamepad2,
-	LibraryBig,
-	Package,
-	PlaySquare,
-	Video,
-} from "lucide-react";
+import { AudioLines, Video } from "lucide-react";
 
 import { FavoriteButton } from "@/features/collections/components/favorite-button";
 import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { ContentLanguageSupportDisplay } from "@/features/content-language-support/components/content-language-support-display";
 import { isContentLanguageSupportOwner } from "@/features/content-language-support/model/content-language-support";
-import { UnitDockRenderer, useDockManagementAccess } from "@/features/docks";
-import { UnitShelf } from "@/features/explore/unit-shelf";
+
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -42,24 +33,15 @@ import {
 	QueryPending,
 } from "@rezics/ui";
 import { isKnownAttributionRole } from "./attribution-role";
-import { BookContents } from "./components/book-contents";
+
 import { presentUnitLicenses } from "./components/present-unit-licenses";
 import { UnitReferenceCandidates } from "./components/unit-reference-candidates";
 import { UnitSubjectGroups } from "./components/unit-subject-groups";
 import { canOpenUnitManagement } from "./model/unit-management-section";
 import { publicUnitHref } from "./routing/public-unit-route";
 import type { UnitType } from "./unit-types";
-import { isVariantUnitType } from "./unit-types";
 
-const Icons = {
-	book: BookOpen,
-	software: Gamepad2,
-	media: PlaySquare,
-	series: LibraryBig,
-	video: Video,
-	audio: AudioLines,
-	release: Package,
-};
+const Icons = { video: Video, audio: AudioLines };
 
 function formatDate(value: string | null, language: string) {
 	if (!value) return undefined;
@@ -96,9 +78,7 @@ function DetailSection({ title, children }: { title: string; children: React.Rea
 export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 	const localizationLanguages = useLocalizationLanguages();
 	const { data: session } = useHydratedSession();
-	const timedMedia = type === "video" || type === "audio";
-	const compactNavigation = timedMedia || type === "release";
-	const dockAccess = useDockManagementAccess(unit, type, Boolean(session) && !timedMedia);
+
 	const { t, locale } = useTranslation([
 		"engagement",
 		"feed",
@@ -125,10 +105,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 	if (!query.data) return <QueryPending />;
 
 	const item = query.data;
-	const canOpenManagement = canOpenUnitManagement(
-		item.capabilities,
-		dockAccess.allowedKinds.length > 0,
-	);
+	const canOpenManagement = canOpenUnitManagement(item.capabilities);
 	const localization = selectLocalization(item.localizations, item.language ?? "");
 	const Icon = Icons[type];
 	const rating =
@@ -153,13 +130,8 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 		item.licenses.map((grant) => grant.licenseId).filter(isLicenseId),
 		t,
 	);
-	const releaseStatus =
-		item.details.type === "book" || item.details.type === "media"
-			? t.units.releaseStatuses[item.details.releaseStatus]
-			: undefined;
 	const facts = [
 		[t.units.detail.type, t.units.types[type]],
-		[t.units.fields.releaseStatus, releaseStatus],
 		[
 			t.ui.status,
 			item.status === "published"
@@ -178,21 +150,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 		],
 		[t.ui.contentRating, rating],
 		[t.units.detail.aiDisclosure, aiDisclosure],
-		[t.units.detail.releasedOn, formatDate(item.releasedOn, locale.current)],
-		[
-			t.units.fields.durationSeconds,
-			item.details.type === "video" || item.details.type === "audio"
-				? formatDuration(item.details.durationSeconds)
-				: undefined,
-		],
-		[
-			t.units.fields.parentUnit,
-			item.details.type === "release" ? item.details.parentUnitId : undefined,
-		],
-		[
-			t.units.fields.versionLabel,
-			item.details.type === "release" ? item.details.versionLabel : undefined,
-		],
+		[t.units.fields.durationSeconds, formatDuration(item.details.durationSeconds)],
 		[t.units.detail.license, licenseValue],
 		[t.units.detail.updatedAt, formatDate(item.updatedAt, locale.current)],
 	] as const;
@@ -229,24 +187,9 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 								<Link href={`/units/${type}/${item.id}/edit`}>{t.ui.edit}</Link>
 							</Button>
 						) : null}
-						{item.capabilities.canEdit && (
-							<>
-								{(type === "book" || type === "media") && (
-									<Button variant="outline" asChild>
-										<Link href={`/units/${type}/${item.id}/edit/content-structure`}>
-											{t.units.content.edit}
-										</Link>
-									</Button>
-								)}
-							</>
-						)}
-						{item.capabilities.canManageAccess || item.capabilities.canManageAssociations ? (
+						{item.capabilities.canManageAccess ? (
 							<Button variant="outline" asChild>
-								<Link
-									href={`/units/${type}/${item.id}/edit/${item.capabilities.canManageAccess ? "access" : "relationships"}`}
-								>
-									{t.governance.open}
-								</Link>
+								<Link href={`/units/${type}/${item.id}/edit/access`}>{t.governance.open}</Link>
 							</Button>
 						) : null}
 					</div>
@@ -256,20 +199,10 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 				className="-mt-8 flex gap-1 overflow-x-auto border-b"
 				aria-label={t.units.detail.sections}
 			>
-				{(compactNavigation
-					? [
-							[t.units.detail.information, "#overview"],
-							...(session ? [[t.units.references.title, "#references"]] : []),
-						]
-					: [
-							[t.units.detail.information, "#overview"],
-							...(session ? [[t.units.references.title, "#references"]] : []),
-							[t.units.content.title, "#contents"],
-							[t.posts.replies, "#replies"],
-							[t.engagement.reviews, "#reviews"],
-							[t.units.detail.versions, "#versions"],
-						]
-				).map(([label, href], index) => (
+				{[
+					[t.units.detail.information, "#overview"],
+					...(session ? [[t.units.references.title, "#references"]] : []),
+				].map(([label, href], index) => (
 					<a
 						key={href}
 						className={
@@ -306,17 +239,9 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 							</CardContent>
 						</Card>
 					</DetailSection>
-
-					{type === "book" && <BookContents bookId={item.id} />}
 				</div>
 
 				<aside className="flex min-w-0 flex-col gap-6">
-					{isVariantUnitType(type) ? (
-						<UnitDockRenderer
-							ownerUnitId={item.id}
-							target={{ ownerKind: type, dockKind: "main" }}
-						/>
-					) : null}
 					<DetailSection title={t.units.detail.information}>
 						<Card>
 							<CardContent className="p-5">
@@ -476,11 +401,6 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 					type={type}
 					unitId={item.id}
 				/>
-			) : null}
-			{isVariantUnitType(type) ? (
-				<DetailSection title={t.feed.relatedWorks}>
-					<UnitShelf type={type} seedUnitId={item.id} />
-				</DetailSection>
 			) : null}
 		</main>
 	);

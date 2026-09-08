@@ -1,12 +1,8 @@
 export const UnitManagementSectionIds = [
 	"content",
 	"metadata",
-	"relationships",
 	"tags",
 	"realms",
-	"content-structure",
-	"releases",
-	"docks",
 	"access",
 	"history",
 ] as const;
@@ -19,9 +15,8 @@ export function isUnitManagementSectionId(value: string): value is UnitManagemen
 
 type UnitCapabilities = GetApiUnitsByTypeByUnitIdStatus200["capabilities"];
 
-export function canOpenUnitManagement(capabilities: UnitCapabilities, canManageDocks = false) {
+export function canOpenUnitManagement(capabilities: UnitCapabilities) {
 	return (
-		canManageDocks ||
 		capabilities.canEdit ||
 		capabilities.canManageAccess ||
 		capabilities.canManageAssociations ||
@@ -31,40 +26,22 @@ export function canOpenUnitManagement(capabilities: UnitCapabilities, canManageD
 }
 
 export function getUnitManagementSectionIds(
-	type: UnitType,
+	_type: UnitType,
 	capabilities: UnitCapabilities,
-	canManageDocks = false,
 ): readonly UnitManagementSectionId[] {
-	if (!canOpenUnitManagement(capabilities, canManageDocks)) return [];
+	if (!canOpenUnitManagement(capabilities)) return [];
 	const hasUnitCapability =
 		capabilities.canEdit ||
 		capabilities.canManageAccess ||
 		capabilities.canManageAssociations ||
 		capabilities.canCurateTags ||
 		capabilities.canManageRealmPublications;
-	if (type === "video" || type === "audio" || type === "release")
-		return UnitManagementSectionIds.filter((sectionId) => {
-			if (sectionId === "content" || sectionId === "metadata") return capabilities.canEdit;
-			if (sectionId === "realms") return capabilities.canManageRealmPublications;
-			if (sectionId === "access") return capabilities.canManageAccess;
-			return sectionId === "history" && hasUnitCapability;
-		});
 	return UnitManagementSectionIds.filter((sectionId) => {
 		if (sectionId === "content" || sectionId === "metadata") return capabilities.canEdit;
-		if (sectionId === "relationships")
-			return capabilities.canEdit || capabilities.canManageAssociations;
-		if (sectionId === "tags") return capabilities.canEdit || capabilities.canCurateTags;
+		if (sectionId === "tags") return capabilities.canCurateTags;
 		if (sectionId === "realms") return capabilities.canManageRealmPublications;
-		if (sectionId === "content-structure")
-			return (
-				type !== "series" &&
-				capabilities.canEdit &&
-				(type === "book" || type === "media" || capabilities.hasDevelopmentPreviewAccess)
-			);
-		if (sectionId === "releases") return type === "series" && capabilities.canEdit;
-		if (sectionId === "docks") return type !== "series" && canManageDocks;
 		if (sectionId === "access") return capabilities.canManageAccess;
-		return hasUnitCapability;
+		return sectionId === "history" && hasUnitCapability;
 	});
 }
 import type { GetApiUnitsByTypeByUnitIdStatus200 } from "@rezics/openapi-tanstack-query";

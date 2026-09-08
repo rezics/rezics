@@ -39,7 +39,7 @@ export default {
 		medium: frTerminology.musicMedium.forms.label,
 		release: frTerminology.musicRelease.forms.label,
 		release_group: frTerminology.musicReleaseGroup.forms.label,
-		work: "Composition",
+		work: frTerminology.musicalWork.forms.label,
 		release_candidate: `${frTerminology.musicRelease.forms.label} non rapprochée`,
 		number: "Numéro",
 		position: "Position",

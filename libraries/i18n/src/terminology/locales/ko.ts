@@ -64,6 +64,9 @@ export const koTerminology = defineTerminology("ko", {
 	program: {
 		status: "approved",
 		forms: {
+			seasonLabel: "시즌",
+			versionLabel: "영상 작품 판본",
+			episodeLabel: "에피소드",
 			label: "영상 작품",
 			pluralLabel: "영상 작품",
 			inline: "영상 작품",
@@ -155,11 +158,46 @@ export const koTerminology = defineTerminology("ko", {
 	referenceCatalog: {
 		status: "approved",
 		forms: {
+			webResourceLabel: "웹 리소스",
+			areaLabel: "지리적 지역",
+			instrumentLabel: "악기",
+			placeLabel: "지리적 장소",
+			eventLabel: "행사 항목",
 			entryLabel: "참조 항목",
 			label: "참조 항목",
 			pluralLabel: "참조 항목",
 			inline: "참조 항목",
 			plural: "참조 항목",
+		},
+		forbidden: [],
+	},
+	catalogEntry: {
+		status: "approved",
+		forms: {
+			label: "카탈로그 항목",
+			pluralLabel: "카탈로그 항목",
+			inline: "카탈로그 항목",
+			plural: "카탈로그 항목",
+		},
+		forbidden: [],
+	},
+	visualNovel: {
+		status: "approved",
+		forms: {
+			label: "비주얼 노벨",
+			pluralLabel: "비주얼 노벨",
+			inline: "비주얼 노벨",
+			plural: "비주얼 노벨",
+		},
+		forbidden: [],
+	},
+	musicalWork: {
+		status: "approved",
+		forms: {
+			label: "음악 저작물",
+			pluralLabel: "음악 저작물",
+			inline: "음악 저작물",
+			plural: "음악 저작물",
 		},
 		forbidden: [],
 	},
@@ -291,6 +329,10 @@ export const koTerminology = defineTerminology("ko", {
 	entity: {
 		status: "approved",
 		forms: {
+			labelLabel: "음반 레이블",
+			collectiveLabel: "집단",
+			unresolvedLabel: "미분류 엔티티",
+			serviceActorLabel: "자동화 서비스",
 			personLabel: "실존 인물",
 			organizationLabel: "단체·기관",
 			characterLabel: "가상 인물",

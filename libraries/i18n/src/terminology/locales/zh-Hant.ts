@@ -48,7 +48,15 @@ export const zhHantTerminology = defineTerminology("zh-Hant", {
 	},
 	program: {
 		status: "approved",
-		forms: { label: "影視作品", pluralLabel: "影視作品", inline: "影視作品", plural: "影視作品" },
+		forms: {
+			seasonLabel: "影集分季",
+			versionLabel: "影視版本",
+			episodeLabel: "單集",
+			label: "影視作品",
+			pluralLabel: "影視作品",
+			inline: "影視作品",
+			plural: "影視作品",
+		},
 		forbidden: [],
 	},
 	softwareContent: {
@@ -105,12 +113,32 @@ export const zhHantTerminology = defineTerminology("zh-Hant", {
 	referenceCatalog: {
 		status: "approved",
 		forms: {
+			webResourceLabel: "網路資源",
+			areaLabel: "地理區域",
+			instrumentLabel: "樂器",
+			placeLabel: "地理地點",
+			eventLabel: "活動條目",
 			entryLabel: "參照條目",
 			label: "參照條目",
 			pluralLabel: "參照條目",
 			inline: "參照條目",
 			plural: "參照條目",
 		},
+		forbidden: [],
+	},
+	catalogEntry: {
+		status: "approved",
+		forms: { label: "目錄條目", pluralLabel: "目錄條目", inline: "目錄條目", plural: "目錄條目" },
+		forbidden: [],
+	},
+	visualNovel: {
+		status: "approved",
+		forms: { label: "視覺小說", pluralLabel: "視覺小說", inline: "視覺小說", plural: "視覺小說" },
+		forbidden: [],
+	},
+	musicalWork: {
+		status: "approved",
+		forms: { label: "音樂作品", pluralLabel: "音樂作品", inline: "音樂作品", plural: "音樂作品" },
 		forbidden: [],
 	},
 	music: {
@@ -236,6 +264,10 @@ export const zhHantTerminology = defineTerminology("zh-Hant", {
 	entity: {
 		status: "approved",
 		forms: {
+			labelLabel: "唱片廠牌",
+			collectiveLabel: "團體",
+			unresolvedLabel: "未分類實體",
+			serviceActorLabel: "自動化服務",
 			personLabel: "現實人物",
 			organizationLabel: "組織機構",
 			characterLabel: "虛構角色",

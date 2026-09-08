@@ -1,3 +1,4 @@
+import { koTerminology } from "@rezics/i18n/terminology/ko";
 import type { FeedFixtureLocalizedContent } from "../../content-feed/localized-content";
 
 export default {
@@ -25,9 +26,9 @@ export default {
 			summary: "허구 작품의 세계관과 등장인물, 이야기, 사상적 주제를 논의합니다.",
 		},
 		{
-			name: "집단 지성",
+			name: `${koTerminology.entity.forms.collectiveLabel} 지성`,
 			initials: "집",
-			summary: "집단이 지식과 판단, 행동을 어떻게 함께 만들어 가는지 탐구합니다.",
+			summary: `${koTerminology.entity.forms.collectiveLabel}이 지식과 판단, 행동을 어떻게 함께 만들어 가는지 탐구합니다.`,
 		},
 		{
 			name: "과학소설 연구",
@@ -36,7 +37,7 @@ export default {
 		},
 	],
 	post: {
-		title: "격자 네트워크는 왜 이 허구 세계에서 가장 독특한 집단의식일까?",
+		title: `격자 네트워크는 왜 이 허구 세계에서 가장 독특한 ${koTerminology.entity.forms.collectiveLabel}의식일까?`,
 		body: "격자 네트워크는 개별 의식을 단순히 합친 것이 아닙니다. 전자기적 매개를 통해 개인 능력의 한계를 넘으면서도 각자의 차이를 유지합니다.",
 		mediaAlt: "빛나는 네트워크 경로가 교차하는 밤의 도시",
 	},

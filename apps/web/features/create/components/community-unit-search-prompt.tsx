@@ -15,6 +15,7 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import { useTranslation } from "@/i18n/client";
 import {
 	communityUnitSearchHref,
+	communityUnitSearchLabelKey,
 	type CommunityUnitSearchSubject,
 } from "@/features/create/model/community-unit-search";
 
@@ -34,7 +35,7 @@ export function CommunityUnitSearchPrompt({
 }) {
 	const { t } = useTranslation("create");
 	const messages = t.communityUnitSearch;
-	const subjectLabel = messages.subjects[subject.kind];
+	const subjectLabel = messages.subjects[communityUnitSearchLabelKey(subject)];
 	const confirmationInputId = useId();
 	const confirmationLabelId = useId();
 

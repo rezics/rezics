@@ -117,7 +117,6 @@ function StudioSectionContent({ sectionId }: { readonly sectionId: StudioSection
 				action={<StudioCreateActions sectionId={sectionId} />}
 				backHref={StudioOverviewHref}
 				backLabel={t.create.workspace.backToOverview}
-				description={section.description}
 				link={Link}
 				title={section.label}
 			/>

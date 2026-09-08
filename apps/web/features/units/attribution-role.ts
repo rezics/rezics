@@ -5,8 +5,6 @@ import {
 	type GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum as SubjectAssociationRole,
 } from "@rezics/openapi-tanstack-query";
 
-import type { UnitType } from "./unit-types";
-
 export const CreditAttributionRoles = Object.values(
 	GetApiUnitsByTypeByUnitIdStatus200AttributionsRoleEnum,
 );
@@ -16,51 +14,15 @@ export const SubjectAssociationRoles = Object.values(
 
 export type { CreditAttributionRole, SubjectAssociationRole };
 
-export const CreditAttributionRolesByUnitType = {
-	book: [
-		"author",
-		"co-author",
-		"translator",
-		"illustrator",
-		"editor",
-		"publisher",
-		"letterer",
-		"colorist",
-	],
-	software: ["developer", "publisher", "composer", "designer", "director", "producer", "writer"],
-	media: [
-		"director",
-		"producer",
-		"writer",
-		"publisher",
-		"composer",
-		"actor",
-		"narrator",
-		"studio",
-		"distributor",
-	],
-	video: [],
-	audio: [],
-	release: [],
-	series: ["author", "editor", "publisher"],
-} as const satisfies Record<UnitType, readonly CreditAttributionRole[]>;
-
 export function isKnownAttributionRole(role: string): role is CreditAttributionRole {
 	return (CreditAttributionRoles as readonly string[]).includes(role);
-}
-
-export function isCreditAttributionRoleForUnitType(
-	type: UnitType,
-	role: string,
-): role is CreditAttributionRole {
-	return (CreditAttributionRolesByUnitType[type] as readonly string[]).includes(role);
 }
 
 export function isSubjectAssociationRole(role: string): role is SubjectAssociationRole {
 	return (SubjectAssociationRoles as readonly string[]).includes(role);
 }
 
-export function findPrimaryBookAuthor<Item extends { readonly role: CreditAttributionRole }>(
+export function findPrimaryAuthor<Item extends { readonly role: CreditAttributionRole }>(
 	attributions: readonly Item[],
 ): Item | undefined {
 	return attributions.find(({ role }) => role === "author");

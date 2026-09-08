@@ -20,10 +20,11 @@ vi.mock("@/i18n/client", async () => {
 const translation = await create(resources).getTranslation(["create", "tags"], ["zh-Hant"]);
 const resource = {
 	id: "019b76da-a800-7300-8000-000000000002",
-	section: "book",
-	resourceKind: "book",
+	section: "publishing",
+	resourceOwner: "publishing",
+	shape: "work",
 	presentation: {
-		kind: "localized_unit",
+		kind: "resource",
 		slugAddress: null,
 		language: "zh",
 		title: "測試書籍",
@@ -51,7 +52,8 @@ const pathItem = {
 	resource: {
 		id: "019b76da-a800-7300-8000-000000000010",
 		section: "tag",
-		resourceKind: "tag_path",
+		resourceOwner: "tag_path",
+		shape: "tag_path",
 		presentation: {
 			kind: "tag_path",
 			members: [
@@ -94,7 +96,7 @@ afterEach(cleanup);
 
 describe("Studio content presentation", () => {
 	it("reserves a cover for cover-led sections and honors an actual cover elsewhere", () => {
-		expect(studioContentShowsCover({ cover: null, section: "book" })).toBe(true);
+		expect(studioContentShowsCover({ cover: null, section: "publishing" })).toBe(true);
 		expect(studioContentShowsCover({ cover: null, section: "tag" })).toBe(false);
 		expect(studioContentShowsCover({ cover: resource.presentation.cover, section: "tag" })).toBe(
 			true,
@@ -121,7 +123,9 @@ describe("Studio content presentation", () => {
 		expect(container.querySelector('[data-slot="feed-engagement-bar"]')).toBeNull();
 
 		const link = screen.getByRole("link", { name: "測試書籍" });
-		expect(link.getAttribute("href")).toBe("/units/book/019b76da-a800-7300-8000-000000000002");
+		expect(link.getAttribute("href")).toBe(
+			"/catalog/publishing/019b76da-a800-7300-8000-000000000002",
+		);
 		link.addEventListener("click", (event) => event.preventDefault(), { once: true });
 		fireEvent.click(link);
 		expect(onOpen).toHaveBeenCalledOnce();

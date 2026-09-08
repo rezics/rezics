@@ -1,148 +1,82 @@
-import { studioSectionCreateHref } from "@/features/create/model/studio-section";
-
-export const CommunityUnitEntityKinds = ["person", "organization", "character"] as const;
-export type CommunityUnitEntityKind = (typeof CommunityUnitEntityKinds)[number];
-
-export function isCommunityUnitEntityKind(value: string | null): value is CommunityUnitEntityKind {
-	return value !== null && CommunityUnitEntityKinds.some((kind) => kind === value);
+import { CatalogOwnerValues, type CatalogOwner } from "@rezics/reference";
+import { studioSectionCreateHref } from "./studio-section";
+export const PrimaryEntityShapes = ["person", "organization", "character"] as const;
+export type PrimaryEntityShape = (typeof PrimaryEntityShapes)[number];
+export function isPrimaryEntityShape(
+	value: string | null | undefined,
+): value is PrimaryEntityShape {
+	return value != null && PrimaryEntityShapes.some((shape) => shape === value);
 }
-
 export type CommunityUnitSearchSubject =
 	| {
-			readonly filterKind: "book";
-			readonly kind: "book";
-			readonly searchIndex: "units";
-			readonly section: "book";
+			readonly owner: CatalogOwner;
+			readonly shape?: string;
+			readonly searchIndex: "units" | "entities";
+			readonly section: CatalogOwner;
 	  }
-	| {
-			readonly filterKind: "software";
-			readonly kind: "software";
-			readonly searchIndex: "units";
-			readonly section: "software";
-	  }
-	| {
-			readonly filterKind: "media";
-			readonly kind: "media";
-			readonly searchIndex: "units";
-			readonly section: "media";
-	  }
-	| {
-			readonly filterKind: CommunityUnitEntityKind;
-			readonly kind: CommunityUnitEntityKind;
-			readonly searchIndex: "entities";
-			readonly section: "entity";
-	  }
-	| {
-			readonly kind: "tag";
-			readonly searchIndex: "tags";
-			readonly section: "tag";
-	  };
-
-export function unitCommunityUnitSearchSubject(
-	section: "book" | "software" | "media",
+	| { readonly owner: "tag"; readonly searchIndex: "tags"; readonly section: "tag" };
+export function nativeCommunityUnitSearchSubject(
+	owner: CatalogOwner,
+	shape?: string,
 ): CommunityUnitSearchSubject {
-	switch (section) {
-		case "book":
-			return { filterKind: "book", kind: "book", searchIndex: "units", section };
-		case "software":
-			return {
-				filterKind: "software",
-				kind: "software",
-				searchIndex: "units",
-				section,
-			};
-		case "media":
-			return { filterKind: "media", kind: "media", searchIndex: "units", section };
-	}
+	return {
+		owner,
+		...(shape ? { shape } : {}),
+		searchIndex: owner === "entity" ? "entities" : "units",
+		section: owner,
+	};
 }
-
 export function entityCommunityUnitSearchSubject(
-	kind: CommunityUnitEntityKind,
+	shape: PrimaryEntityShape,
 ): CommunityUnitSearchSubject {
-	return { filterKind: kind, kind, searchIndex: "entities", section: "entity" };
+	return nativeCommunityUnitSearchSubject("entity", shape);
 }
-
 export const TagCommunityUnitSearchSubject = {
-	kind: "tag",
+	owner: "tag",
 	searchIndex: "tags",
 	section: "tag",
 } as const satisfies CommunityUnitSearchSubject;
-
 export function parseCommunityUnitSearchSubject(
 	section: string,
-	kind: string | undefined,
+	shape?: string,
 ): CommunityUnitSearchSubject | undefined {
-	switch (section) {
-		case "book":
-		case "software":
-		case "media":
-			return kind === section ? unitCommunityUnitSearchSubject(section) : undefined;
-		case "entity":
-			switch (kind) {
-				case "person":
-				case "organization":
-				case "character":
-					return entityCommunityUnitSearchSubject(kind);
-				default:
-					return undefined;
-			}
-		case "tag":
-			return kind === "tag" ? TagCommunityUnitSearchSubject : undefined;
-		default:
-			return undefined;
-	}
+	if (shape !== undefined && !/^[a-z][a-z0-9_.-]{0,95}$/u.test(shape)) return;
+	if (section === "tag")
+		return shape === undefined || shape === "tag" ? TagCommunityUnitSearchSubject : undefined;
+	const owner = CatalogOwnerValues.find((owner) => owner === section);
+	return owner ? nativeCommunityUnitSearchSubject(owner, shape) : undefined;
 }
-
+export function communityUnitSearchLabelKey(
+	subject: CommunityUnitSearchSubject,
+): CatalogOwner | "tag" | PrimaryEntityShape {
+	return subject.owner === "entity" && "shape" in subject && isPrimaryEntityShape(subject.shape)
+		? subject.shape
+		: subject.owner;
+}
 export function normalizeCommunityUnitSearchQuery(query: string): string {
-	return query.trim().replace(/\s+/g, " ").toLowerCase();
+	return query.trim().replace(/\s+/gu, " ").toLowerCase();
 }
-
 export function communityUnitSearchHref(
 	subject: CommunityUnitSearchSubject,
 	query: string,
 ): string {
-	const search = new URLSearchParams({ kind: subject.kind });
-	const trimmedQuery = query.trim();
-	if (trimmedQuery) search.set("q", trimmedQuery);
-	return `/create/${subject.section}/search?${search}`;
+	const search = new URLSearchParams();
+	if ("shape" in subject && subject.shape) search.set("shape", subject.shape);
+	if (query.trim()) search.set("q", query.trim());
+	return `/create/${subject.section}/search${search.size ? `?${search}` : ""}`;
 }
-
 export function communityUnitCreationHref(
 	subject: CommunityUnitSearchSubject,
 	query: string,
 ): string {
-	const trimmedQuery = query.trim();
-	const search = new URLSearchParams({
-		title: trimmedQuery,
-	});
-	switch (subject.section) {
-		case "book":
-		case "software":
-		case "media":
-			search.set("ownershipMode", "community_owned");
-			break;
-		case "entity":
-			search.set("ownershipMode", "community_owned");
-			search.set("kind", subject.kind);
-			break;
-		case "tag":
-			break;
-	}
-	return `${studioSectionCreateHref(subject.section)}?${search}`;
+	const search = new URLSearchParams();
+	if (query.trim()) search.set("title", query.trim());
+	if ("shape" in subject && subject.shape) search.set("shape", subject.shape);
+	return `${studioSectionCreateHref(subject.section)}${search.size ? `?${search}` : ""}`;
 }
-
 export function communityUnitSearchResultHref(
 	subject: CommunityUnitSearchSubject,
 	unitId: string,
 ): string {
-	switch (subject.section) {
-		case "book":
-		case "software":
-		case "media":
-			return `/units/${subject.section}/${unitId}`;
-		case "entity":
-			return `/entities/${unitId}`;
-		case "tag":
-			return `/tags/${unitId}`;
-	}
+	return subject.owner === "tag" ? `/tags/${unitId}` : `/catalog/${subject.owner}/${unitId}`;
 }

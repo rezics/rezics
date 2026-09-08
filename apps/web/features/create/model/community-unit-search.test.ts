@@ -1,84 +1,57 @@
 import { describe, expect, it } from "vitest";
-
 import {
+	nativeCommunityUnitSearchSubject,
 	entityCommunityUnitSearchSubject,
 	parseCommunityUnitSearchSubject,
 	communityUnitCreationHref,
 	communityUnitSearchHref,
 	communityUnitSearchResultHref,
 	TagCommunityUnitSearchSubject,
-	unitCommunityUnitSearchSubject,
 } from "./community-unit-search";
-
-describe("unit public-entry search subjects", () => {
-	it("keeps each public-entry type aligned with its exact search domain", () => {
-		expect(unitCommunityUnitSearchSubject("book")).toEqual({
-			filterKind: "book",
-			kind: "book",
+describe("native duplicate-search routes", () => {
+	it("keeps owner and shape independent", () => {
+		expect(nativeCommunityUnitSearchSubject("publishing", "text_version")).toEqual({
+			owner: "publishing",
+			shape: "text_version",
+			section: "publishing",
 			searchIndex: "units",
-			section: "book",
 		});
 		expect(entityCommunityUnitSearchSubject("organization")).toEqual({
-			filterKind: "organization",
-			kind: "organization",
-			searchIndex: "entities",
+			owner: "entity",
+			shape: "organization",
 			section: "entity",
-		});
-		expect(TagCommunityUnitSearchSubject).toEqual({
-			kind: "tag",
-			searchIndex: "tags",
-			section: "tag",
+			searchIndex: "entities",
 		});
 	});
-
-	it("rejects a route whose section and kind do not describe the same subject", () => {
-		expect(parseCommunityUnitSearchSubject("book", "software")).toBeUndefined();
-		expect(parseCommunityUnitSearchSubject("entity", "entity")).toBeUndefined();
-		expect(parseCommunityUnitSearchSubject("tag", undefined)).toBeUndefined();
-		expect(parseCommunityUnitSearchSubject("entity", "character")).toEqual(
-			entityCommunityUnitSearchSubject("character"),
-		);
+	it("rejects retired owner routes and malformed shape input", () => {
+		expect(parseCommunityUnitSearchSubject("book", "work")).toBeUndefined();
+		expect(parseCommunityUnitSearchSubject("publishing", "../../work")).toBeUndefined();
+		expect(parseCommunityUnitSearchSubject("tag")).toEqual(TagCommunityUnitSearchSubject);
 	});
-});
-
-describe("public-entry search routes", () => {
-	it("carries the exact subject and current title into Studio search", () => {
-		expect(communityUnitSearchHref(unitCommunityUnitSearchSubject("media"), "  The Bear  ")).toBe(
-			"/create/media/search?kind=media&q=The+Bear",
-		);
-		expect(communityUnitSearchHref(entityCommunityUnitSearchSubject("person"), "")).toBe(
-			"/create/entity/search?kind=person",
-		);
-	});
-
-	it("returns to the correct creator after an optional duplicate search", () => {
-		const href = communityUnitCreationHref(
-			entityCommunityUnitSearchSubject("organization"),
-			"OpenAI",
-		);
-		const url = new URL(href, "https://rezics.example");
-
-		expect(url.pathname).toBe("/create/entity/new");
-		expect(url.searchParams.get("ownershipMode")).toBe("community_owned");
-		expect(url.searchParams.get("kind")).toBe("organization");
-		expect(url.searchParams.get("title")).toBe("OpenAI");
-		expect(url.searchParams.get("communityUnitSearch")).toBeNull();
-	});
-
-	it("keeps Tag creation inside Studio", () => {
-		const href = communityUnitCreationHref(TagCommunityUnitSearchSubject, "Science");
-		const url = new URL(href, "https://rezics.example");
-
-		expect(url.pathname).toBe("/create/tag/new");
-		expect(url.searchParams.get("title")).toBe("Science");
-	});
-
-	it("links search hits to the subject's public detail route", () => {
+	it("carries precise shape and text into search", () => {
 		expect(
-			communityUnitSearchResultHref(unitCommunityUnitSearchSubject("software"), "unit-id"),
-		).toBe("/units/software/unit-id");
-		expect(communityUnitSearchResultHref(TagCommunityUnitSearchSubject, "tag-id")).toBe(
-			"/tags/tag-id",
+			communityUnitSearchHref(nativeCommunityUnitSearchSubject("program", "program"), " The Bear "),
+		).toBe("/create/program/search?shape=program&q=The+Bear");
+		expect(communityUnitSearchHref(entityCommunityUnitSearchSubject("person"), "")).toBe(
+			"/create/entity/search?shape=person",
 		);
+	});
+	it("returns to creation without imposing old ownership", () => {
+		const url = new URL(
+			communityUnitCreationHref(entityCommunityUnitSearchSubject("organization"), "Example"),
+			"https://example.test",
+		);
+		expect(url.pathname).toBe("/create/entity/new");
+		expect(url.searchParams.get("shape")).toBe("organization");
+		expect(url.searchParams.get("ownershipMode")).toBeNull();
+	});
+	it("uses native public addresses for search results", () => {
+		expect(
+			communityUnitSearchResultHref(
+				nativeCommunityUnitSearchSubject("software", "content"),
+				"item",
+			),
+		).toBe("/catalog/software/item");
+		expect(communityUnitSearchResultHref(TagCommunityUnitSearchSubject, "tag")).toBe("/tags/tag");
 	});
 });

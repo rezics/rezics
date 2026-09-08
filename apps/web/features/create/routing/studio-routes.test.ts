@@ -24,7 +24,7 @@ describe("Studio routes", () => {
 	});
 
 	it("links every section to its released detail route", () => {
-		expect(studioContentHref("book", { id: "unit-id" })).toBe("/units/book/unit-id");
+		expect(studioContentHref("publishing", { id: "unit-id" })).toBe("/catalog/publishing/unit-id");
 		expect(studioContentHref("realm", { id: "unit-id", slugAddress: null })).toBe("/realm/unit-id");
 		expect(
 			studioContentHref("zone", {
@@ -32,35 +32,33 @@ describe("Studio routes", () => {
 				slugAddress: {
 					slug: "artists",
 					scopeUnitId: null,
- scopeNamespaceId: TopLevelSlugNamespaceIds.zones,
+					scopeNamespaceId: TopLevelSlugNamespaceIds.zones,
 					canonicalPath: ["zones", "artists"],
 				},
 			}),
 		).toBe("/z/artists");
-		expect(studioContentHref("review", { id: "unit-id" })).toBe("/posts/unit-id");
-		expect(studioContentHref("wiki", { id: "unit-id" })).toBe("/posts/unit-id");
-		expect(studioSectionCreateHref("book")).toBe("/create/book/new");
+		expect(studioContentHref("post", { id: "unit-id" })).toBe("/posts/unit-id");
+		expect(studioContentHref("post", { id: "unit-id" })).toBe("/posts/unit-id");
+		expect(studioSectionCreateHref("publishing")).toBe("/create/publishing/new");
 		expect(studioSectionCreateHref("wiki")).toBe("/create/wiki/new");
 		expect(studioSectionCreateHref("tag")).toBe("/create/tag/new");
 		expect(StudioTagPathCreateHref).toBe("/create/tag/path/new");
 	});
 
-	it("preserves legacy creation context on canonical Studio routes", () => {
+	it("preserves explicit native creation context on canonical Studio routes", () => {
 		expect(
 			studioSectionCreateHref("entity", {
-				kind: "organization",
-				ownershipMode: "community_owned",
+				kind: "entity",
+				shape: "organization",
 				title: ["OpenAI", "Research"],
 				unused: undefined,
 			}),
-		).toBe(
-			"/create/entity/new?kind=organization&ownershipMode=community_owned&title=OpenAI&title=Research",
-		);
+		).toBe("/create/entity/new?kind=entity&shape=organization&title=OpenAI&title=Research");
 	});
 
 	it("describes the creation lifecycle at the point of action", () => {
-		expect(studioSectionCreateActions("book")).toEqual([
-			{ kind: "section", href: "/create/book/new", lifecycle: "configurable" },
+		expect(studioSectionCreateActions("publishing")).toEqual([
+			{ kind: "section", href: "/create/publishing/new", lifecycle: "private_first" },
 		]);
 		expect(studioSectionCreateActions("collection")[0]?.lifecycle).toBe("private_first");
 		expect(studioSectionCreateActions("zone")[0]?.lifecycle).toBe("preview");
@@ -75,8 +73,8 @@ describe("Studio routes", () => {
 		expect(grouped).toHaveLength(StudioSectionIds.length);
 		expect(new Set(grouped)).toEqual(new Set(StudioSectionIds));
 		expect(StudioSectionGroups.map((group) => group.id)).toEqual([
-			"works",
-			"publishing",
+			"catalog",
+			"content",
 			"organization",
 			"vocabulary",
 		]);

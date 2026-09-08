@@ -21,6 +21,7 @@ import { type FormEvent, useState } from "react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import {
 	normalizeCommunityUnitSearchQuery,
+	communityUnitSearchLabelKey,
 	communityUnitCreationHref,
 	communityUnitSearchResultHref,
 	type CommunityUnitSearchSubject,
@@ -56,13 +57,13 @@ export function CommunityUnitSearchPage({
 	const { t } = useTranslation("create");
 	const localizationLanguages = useLocalizationLanguages();
 	const messages = t.communityUnitSearch;
-	const subjectLabel = messages.subjects[subject.kind];
+	const subjectLabel = messages.subjects[communityUnitSearchLabelKey(subject)];
 	const [query, setQuery] = useState(initialQuery);
 	const [state, setState] = useState<CommunityUnitSearchState>({ status: "idle" });
 	const search = usePostApiSearchByIndex();
 	const realmTagContextRealmId =
 		unitTagVoteTarget?.context.kind === "realm" ? unitTagVoteTarget.context.realmId : undefined;
-	const canCreateTag = subject.kind !== "tag" || unitTagVoteTarget?.context.kind !== "realm";
+	const canCreateTag = subject.owner !== "tag" || unitTagVoteTarget?.context.kind !== "realm";
 	const normalizedQuery = normalizeCommunityUnitSearchQuery(query);
 	const displayedState =
 		state.status !== "idle" && normalizeCommunityUnitSearchQuery(state.query) === normalizedQuery
@@ -81,7 +82,8 @@ export function CommunityUnitSearchPage({
 					limit: 20,
 					localizationLanguages: [...localizationLanguages],
 					...(realmTagContextRealmId ? { realmTagContextRealmId } : {}),
-					...("filterKind" in subject ? { kinds: [subject.filterKind] } : {}),
+					owners: [subject.owner],
+					...("shape" in subject && subject.shape ? { shapes: [subject.shape] } : {}),
 				},
 			});
 			setState({ hits: result.hits, query: submittedQuery, status: "ready" });
@@ -177,7 +179,7 @@ export function CommunityUnitSearchPage({
 									<Button asChild size="sm" variant="solid">
 										<Link
 											href={
-												subject.kind === "tag" && unitTagVoteTarget?.context.kind === "global"
+												subject.owner === "tag" && unitTagVoteTarget?.context.kind === "global"
 													? unitTagVoteCreateHref(displayedState.query, {
 															type: unitTagVoteTarget.type,
 															unitId: unitTagVoteTarget.unitId,

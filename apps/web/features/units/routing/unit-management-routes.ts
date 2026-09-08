@@ -26,13 +26,8 @@ export function parseUnitManagementSection(
 	if (pathname === base || pathname === `${base}/`) return undefined;
 	if (pathname === `${base}/content`) return "content";
 	if (pathname === `${base}/metadata`) return "metadata";
-	if (pathname === `${base}/relationships`) return "relationships";
 	if (pathname === `${base}/tags`) return "tags";
 	if (pathname === `${base}/realms`) return "realms";
-	if (pathname === `${base}/content-structure` || pathname.startsWith(`${base}/content-structure/`))
-		return "content-structure";
-	if (pathname === `${base}/releases`) return "releases";
-	if (pathname === `${base}/docks`) return "docks";
 	if (pathname === `${base}/access`) return "access";
 	if (pathname === `${base}/history` || pathname.startsWith(`${base}/history/`)) return "history";
 	return undefined;

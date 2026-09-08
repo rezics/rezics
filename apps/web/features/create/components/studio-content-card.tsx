@@ -23,7 +23,13 @@ export type StudioContentItem =
 	| { readonly kind: "workspace"; readonly resource: WorkspaceResource }
 	| { readonly kind: "contribution"; readonly resource: ContributionResource };
 
-const StudioCoverSections = new Set<StudioSectionId>(["book", "software", "media", "collection"]);
+const StudioCoverSections = new Set<StudioSectionId>([
+	"publishing",
+	"music",
+	"program",
+	"software",
+	"collection",
+]);
 
 export function studioContentShowsCover(item: {
 	readonly cover: { readonly url: string } | null;
@@ -54,7 +60,7 @@ export function StudioContentCard({
 	const presentation =
 		item.kind === "workspace"
 			? {
-					kind: "localized_unit" as const,
+					kind: "resource" as const,
 					slugAddress: item.resource.slugAddress,
 					language: item.resource.language,
 					title: item.resource.title,
@@ -68,7 +74,7 @@ export function StudioContentCard({
 	const title = isTagPath ? t.tags.paths.pathLabel : (presentation.title ?? t.create.list.untitled);
 	const href = isTagPath
 		? tagPathHref(resource.id)
-		: studioContentHref(resource.section, {
+		: studioContentHref(resource.resourceOwner, {
 				id: resource.id,
 				slugAddress: presentation.slugAddress,
 			});
@@ -87,7 +93,7 @@ export function StudioContentCard({
 		item.kind === "contribution" ? toNonNegativeApiInteger(item.resource.contributionCount) : 0;
 	const titleId = `studio-content-${resource.id}`;
 	const showCover =
-		presentation.kind === "localized_unit" &&
+		presentation.kind === "resource" &&
 		studioContentShowsCover({ cover: presentation.cover, section: resource.section });
 
 	return (
@@ -110,7 +116,7 @@ export function StudioContentCard({
 						className="w-full rounded-xl border border-border-weak shadow-sm/5"
 						fallback={<UnitCoverFallback kind={resource.section} />}
 						sizes="(min-width: 640px) 96px, 80px"
-						src={presentation.kind === "localized_unit" ? presentation.cover?.url : undefined}
+						src={presentation.kind === "resource" ? presentation.cover?.url : undefined}
 					/>
 				) : null}
 				<CardContent className="min-w-0 p-0">

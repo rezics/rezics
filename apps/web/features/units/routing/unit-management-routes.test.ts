@@ -1,69 +1,52 @@
 import { describe, expect, it } from "vitest";
-
 import {
 	chapterEditorHref,
+	contentStructureHistoryHref,
 	parseUnitManagementSection,
 	unitManagementSectionHref,
 } from "./unit-management-routes";
 
 describe("unit management routes", () => {
-	it("builds typed section routes", () => {
-		expect(unitManagementSectionHref("series", "unit-1", "releases")).toBe(
-			"/units/series/unit-1/edit/releases",
+	it("builds typed timed-resource section routes", () => {
+		expect(unitManagementSectionHref("video", "unit-1", "metadata")).toBe(
+			"/units/video/unit-1/edit/metadata",
+		);
+		expect(unitManagementSectionHref("audio", "unit-1", "tags")).toBe(
+			"/units/audio/unit-1/edit/tags",
 		);
 	});
-
-	it("maps Tag curation to its own management section", () => {
-		expect(unitManagementSectionHref("book", "unit-1", "tags")).toBe(
-			"/units/book/unit-1/edit/tags",
-		);
-		expect(parseUnitManagementSection("/units/book/unit-1/edit/tags", "book", "unit-1")).toBe(
-			"tags",
-		);
-	});
-
-	it("keeps the management root as the overview and gives content its own route", () => {
-		expect(unitManagementSectionHref("book", "unit-1", "content")).toBe(
-			"/units/book/unit-1/edit/content",
-		);
-		expect(unitManagementSectionHref("book", "unit-1", "metadata")).toBe(
-			"/units/book/unit-1/edit/metadata",
-		);
-		expect(parseUnitManagementSection("/units/book/unit-1/edit", "book", "unit-1")).toBe(undefined);
-		expect(parseUnitManagementSection("/units/book/unit-1/edit/content", "book", "unit-1")).toBe(
+	it("keeps the overview separate from content and nested history", () => {
+		expect(
+			parseUnitManagementSection("/units/audio/unit-1/edit", "audio", "unit-1"),
+		).toBeUndefined();
+		expect(parseUnitManagementSection("/units/audio/unit-1/edit/content", "audio", "unit-1")).toBe(
 			"content",
 		);
 		expect(
-			parseUnitManagementSection("/units/book/unit-1/edit/basic", "book", "unit-1"),
-		).toBeUndefined();
-		expect(
-			parseUnitManagementSection("/units/book/unit-1/edit/localizations", "book", "unit-1"),
-		).toBeUndefined();
-	});
-
-	it("keeps the focused chapter editor outside the management shell", () => {
-		expect(chapterEditorHref("book-1", "chapter-1")).toBe("/posts/chapter-1/edit");
-	});
-
-	it("maps comparison routes to history", () => {
-		expect(
-			parseUnitManagementSection("/units/book/unit-1/edit/history/compare", "book", "unit-1"),
+			parseUnitManagementSection("/units/audio/unit-1/edit/history/compare", "audio", "unit-1"),
 		).toBe("history");
 	});
-
-	it("maps Dock management to the Dock section", () => {
-		expect(parseUnitManagementSection("/units/media/unit-1/edit/docks", "media", "unit-1")).toBe(
+	it("does not admit retired facade sections", () => {
+		for (const section of [
+			"relationships",
+			"releases",
 			"docks",
-		);
+			"content-structure/history",
+			"basic",
+			"localizations",
+		]) {
+			expect(
+				parseUnitManagementSection(`/units/audio/unit-1/edit/${section}`, "audio", "unit-1"),
+			).toBeUndefined();
+		}
 	});
-
-	it("keeps nested content-structure history in the content section", () => {
-		expect(
-			parseUnitManagementSection(
-				"/units/book/unit-1/edit/content-structure/history",
-				"book",
-				"unit-1",
-			),
-		).toBe("content-structure");
+	it("addresses chapter text and native structures through their real owners", () => {
+		expect(chapterEditorHref("text-version", "chapter-1")).toBe("/posts/chapter-1/edit");
+		expect(contentStructureHistoryHref("publishing", "text-version")).toBe(
+			"/catalog/publishing/text-version/contents/history",
+		);
+		expect(contentStructureHistoryHref("program", "program-1")).toBe(
+			"/catalog/program/program-1/contents/history",
+		);
 	});
 });

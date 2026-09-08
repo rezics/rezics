@@ -18,12 +18,11 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { ContentLanguageVersionMenu } from "@/features/content-languages/components/content-language-version-menu";
-import { isCommunityUnitEntityKind } from "@/features/create/model/community-unit-search";
+import { isPrimaryEntityShape } from "@/features/create/model/community-unit-search";
 import { EntityOwnershipClaimButton } from "@/features/ownership-claims/components/unit-ownership-claim-actions";
 import { profileHref } from "@/features/profiles/profile-route";
 import { UnitReportOverflowMenu } from "@/features/reports/components/unit-report-dialog";
 import { UnitTagSummary } from "@/features/tags/components/unit-tag-summary";
-import { UnitVariantList } from "@/features/units/components/unit-variant-list";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -76,7 +75,7 @@ export function EntityDetailPage({ id }: { readonly id: string }) {
 	const avatar = localization?.avatar ?? query.data.avatar;
 	const banner = localization?.banner ?? query.data.banner;
 	const cover = localization?.cover ?? query.data.cover;
-	const entityKindLabel = isCommunityUnitEntityKind(query.data.kind)
+	const entityKindLabel = isPrimaryEntityShape(query.data.kind)
 		? t.ui[query.data.kind]
 		: query.data.kind;
 	const canonicalMeasurement = query.data.measurements.find(
@@ -243,7 +242,6 @@ export function EntityDetailPage({ id }: { readonly id: string }) {
 				</Card>
 			) : null}
 			<UnitTagSummary type="entity" unitId={query.data.id} />
-			<UnitVariantList context={query.data.variantContext} showEmpty={false} />
 			<EntityExternalLinks
 				entityId={query.data.id}
 				initialExternalLinks={query.data.externalLinks}

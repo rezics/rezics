@@ -258,26 +258,44 @@ An audiovisual screen work, including film, television and animation; separate f
 
 | Locale | Status | Slot | Approved form | Forbidden forms |
 | --- | --- | --- | --- | --- |
+| en | approved | seasonLabel | Season |  |
+| en | approved | versionLabel | Screen work version |  |
+| en | approved | episodeLabel | Episode |  |
 | en | approved | label | Screen work |  |
 | en | approved | pluralLabel | Screen works |  |
 | en | approved | inline | screen work |  |
 | en | approved | plural | screen works |  |
+| zh-Hant | approved | seasonLabel | 影集分季 |  |
+| zh-Hant | approved | versionLabel | 影視版本 |  |
+| zh-Hant | approved | episodeLabel | 單集 |  |
 | zh-Hant | approved | label | 影視作品 |  |
 | zh-Hant | approved | pluralLabel | 影視作品 |  |
 | zh-Hant | approved | inline | 影視作品 |  |
 | zh-Hant | approved | plural | 影視作品 |  |
+| zh-Hans | approved | seasonLabel | 剧集分季 |  |
+| zh-Hans | approved | versionLabel | 影视版本 |  |
+| zh-Hans | approved | episodeLabel | 单集 |  |
 | zh-Hans | approved | label | 影视作品 |  |
 | zh-Hans | approved | pluralLabel | 影视作品 |  |
 | zh-Hans | approved | inline | 影视作品 |  |
 | zh-Hans | approved | plural | 影视作品 |  |
+| de | approved | seasonLabel | Staffel |  |
+| de | approved | versionLabel | Fassung des Film- und Fernsehwerks |  |
+| de | approved | episodeLabel | Episode |  |
 | de | approved | label | Film- und Fernsehwerk |  |
 | de | approved | pluralLabel | Film- und Fernsehwerke |  |
 | de | approved | inline | Film- und Fernsehwerk |  |
 | de | approved | plural | Film- und Fernsehwerke |  |
+| ja | approved | seasonLabel | シーズン |  |
+| ja | approved | versionLabel | 映像作品の版 |  |
+| ja | approved | episodeLabel | エピソード |  |
 | ja | approved | label | 映像作品 |  |
 | ja | approved | pluralLabel | 映像作品 |  |
 | ja | approved | inline | 映像作品 |  |
 | ja | approved | plural | 映像作品 |  |
+| ko | approved | seasonLabel | 시즌 |  |
+| ko | approved | versionLabel | 영상 작품 판본 |  |
+| ko | approved | episodeLabel | 에피소드 |  |
 | ko | approved | label | 영상 작품 |  |
 | ko | approved | pluralLabel | 영상 작품 |  |
 | ko | approved | inline | 영상 작품 |  |
@@ -543,36 +561,159 @@ The catalog family of reference concepts, places, instruments and events.
 
 | Locale | Status | Slot | Approved form | Forbidden forms |
 | --- | --- | --- | --- | --- |
+| en | approved | webResourceLabel | Web resource |  |
+| en | approved | areaLabel | Geographic area |  |
+| en | approved | instrumentLabel | Musical instrument |  |
+| en | approved | placeLabel | Geographic place |  |
+| en | approved | eventLabel | Event entry |  |
 | en | approved | entryLabel | Reference entry |  |
 | en | approved | label | Reference entries |  |
 | en | approved | pluralLabel | Reference entries |  |
 | en | approved | inline | reference entries |  |
 | en | approved | plural | reference entries |  |
+| zh-Hant | approved | webResourceLabel | 網路資源 |  |
+| zh-Hant | approved | areaLabel | 地理區域 |  |
+| zh-Hant | approved | instrumentLabel | 樂器 |  |
+| zh-Hant | approved | placeLabel | 地理地點 |  |
+| zh-Hant | approved | eventLabel | 活動條目 |  |
 | zh-Hant | approved | entryLabel | 參照條目 |  |
 | zh-Hant | approved | label | 參照條目 |  |
 | zh-Hant | approved | pluralLabel | 參照條目 |  |
 | zh-Hant | approved | inline | 參照條目 |  |
 | zh-Hant | approved | plural | 參照條目 |  |
+| zh-Hans | approved | webResourceLabel | 网络资源 |  |
+| zh-Hans | approved | areaLabel | 地理区域 |  |
+| zh-Hans | approved | instrumentLabel | 乐器 |  |
+| zh-Hans | approved | placeLabel | 地理地点 |  |
+| zh-Hans | approved | eventLabel | 活动条目 |  |
 | zh-Hans | approved | entryLabel | 参照条目 |  |
 | zh-Hans | approved | label | 参照条目 |  |
 | zh-Hans | approved | pluralLabel | 参照条目 |  |
 | zh-Hans | approved | inline | 参照条目 |  |
 | zh-Hans | approved | plural | 参照条目 |  |
+| de | approved | webResourceLabel | Webressource |  |
+| de | approved | areaLabel | Geografisches Gebiet |  |
+| de | approved | instrumentLabel | Musikinstrument |  |
+| de | approved | placeLabel | Geografischer Ort |  |
+| de | approved | eventLabel | Ereigniseintrag |  |
 | de | approved | entryLabel | Referenzeintrag |  |
 | de | approved | label | Referenzeinträge |  |
 | de | approved | pluralLabel | Referenzeinträge |  |
 | de | approved | inline | Referenzeinträge |  |
 | de | approved | plural | Referenzeinträge |  |
+| ja | approved | webResourceLabel | ウェブリソース |  |
+| ja | approved | areaLabel | 地理的地域 |  |
+| ja | approved | instrumentLabel | 楽器 |  |
+| ja | approved | placeLabel | 地理的な場所 |  |
+| ja | approved | eventLabel | イベント項目 |  |
 | ja | approved | entryLabel | 参照項目 |  |
 | ja | approved | label | 参照項目 |  |
 | ja | approved | pluralLabel | 参照項目 |  |
 | ja | approved | inline | 参照項目 |  |
 | ja | approved | plural | 参照項目 |  |
+| ko | approved | webResourceLabel | 웹 리소스 |  |
+| ko | approved | areaLabel | 지리적 지역 |  |
+| ko | approved | instrumentLabel | 악기 |  |
+| ko | approved | placeLabel | 지리적 장소 |  |
+| ko | approved | eventLabel | 행사 항목 |  |
 | ko | approved | entryLabel | 참조 항목 |  |
 | ko | approved | label | 참조 항목 |  |
 | ko | approved | pluralLabel | 참조 항목 |  |
 | ko | approved | inline | 참조 항목 |  |
 | ko | approved | plural | 참조 항목 |  |
+
+## catalogEntry
+
+One catalog identity in its native domain, independent of accounts and platform content.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Catalog entry |  |
+| en | approved | pluralLabel | Catalog entries |  |
+| en | approved | inline | catalog entry |  |
+| en | approved | plural | catalog entries |  |
+| zh-Hant | approved | label | 目錄條目 |  |
+| zh-Hant | approved | pluralLabel | 目錄條目 |  |
+| zh-Hant | approved | inline | 目錄條目 |  |
+| zh-Hant | approved | plural | 目錄條目 |  |
+| zh-Hans | approved | label | 目录条目 |  |
+| zh-Hans | approved | pluralLabel | 目录条目 |  |
+| zh-Hans | approved | inline | 目录条目 |  |
+| zh-Hans | approved | plural | 目录条目 |  |
+| de | approved | label | Katalogeintrag |  |
+| de | approved | pluralLabel | Katalogeinträge |  |
+| de | approved | inline | Katalogeintrag |  |
+| de | approved | plural | Katalogeinträge |  |
+| ja | approved | label | カタログ項目 |  |
+| ja | approved | pluralLabel | カタログ項目 |  |
+| ja | approved | inline | カタログ項目 |  |
+| ja | approved | plural | カタログ項目 |  |
+| ko | approved | label | 카탈로그 항목 |  |
+| ko | approved | pluralLabel | 카탈로그 항목 |  |
+| ko | approved | inline | 카탈로그 항목 |  |
+| ko | approved | plural | 카탈로그 항목 |  |
+
+## visualNovel
+
+An interactive narrative software work in the visual-novel form.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Visual novel |  |
+| en | approved | pluralLabel | Visual novels |  |
+| en | approved | inline | visual novel |  |
+| en | approved | plural | visual novels |  |
+| zh-Hant | approved | label | 視覺小說 |  |
+| zh-Hant | approved | pluralLabel | 視覺小說 |  |
+| zh-Hant | approved | inline | 視覺小說 |  |
+| zh-Hant | approved | plural | 視覺小說 |  |
+| zh-Hans | approved | label | 视觉小说 |  |
+| zh-Hans | approved | pluralLabel | 视觉小说 |  |
+| zh-Hans | approved | inline | 视觉小说 |  |
+| zh-Hans | approved | plural | 视觉小说 |  |
+| de | approved | label | Visueller Roman |  |
+| de | approved | pluralLabel | Visuelle Romane |  |
+| de | approved | inline | visueller Roman |  |
+| de | approved | plural | visuelle Romane |  |
+| ja | approved | label | ビジュアルノベル |  |
+| ja | approved | pluralLabel | ビジュアルノベル |  |
+| ja | approved | inline | ビジュアルノベル |  |
+| ja | approved | plural | ビジュアルノベル |  |
+| ko | approved | label | 비주얼 노벨 |  |
+| ko | approved | pluralLabel | 비주얼 노벨 |  |
+| ko | approved | inline | 비주얼 노벨 |  |
+| ko | approved | plural | 비주얼 노벨 |  |
+
+## musicalWork
+
+A musical intellectual work, distinct from recordings and releases.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Musical work |  |
+| en | approved | pluralLabel | Musical works |  |
+| en | approved | inline | musical work |  |
+| en | approved | plural | musical works |  |
+| zh-Hant | approved | label | 音樂作品 |  |
+| zh-Hant | approved | pluralLabel | 音樂作品 |  |
+| zh-Hant | approved | inline | 音樂作品 |  |
+| zh-Hant | approved | plural | 音樂作品 |  |
+| zh-Hans | approved | label | 音乐作品 |  |
+| zh-Hans | approved | pluralLabel | 音乐作品 |  |
+| zh-Hans | approved | inline | 音乐作品 |  |
+| zh-Hans | approved | plural | 音乐作品 |  |
+| de | approved | label | Musikwerk |  |
+| de | approved | pluralLabel | Musikwerke |  |
+| de | approved | inline | Musikwerk |  |
+| de | approved | plural | Musikwerke |  |
+| ja | approved | label | 音楽作品 |  |
+| ja | approved | pluralLabel | 音楽作品 |  |
+| ja | approved | inline | 音楽作品 |  |
+| ja | approved | plural | 音楽作品 |  |
+| ko | approved | label | 음악 저작물 |  |
+| ko | approved | pluralLabel | 음악 저작물 |  |
+| ko | approved | inline | 음악 저작물 |  |
+| ko | approved | plural | 음악 저작물 |  |
 
 ## music
 
@@ -1116,10 +1257,14 @@ A registered legal instrument or rights statement that a Unit grants independent
 
 ## entity
 
-A Unit representing a person, organization, or character that can participate in attributions and subject associations.
+A catalog identity for people, organizations, characters, collectives, labels, or automated services; independent of account and representation authority.
 
 | Locale | Status | Slot | Approved form | Forbidden forms |
 | --- | --- | --- | --- | --- |
+| en | approved | labelLabel | Record label | Catalog, catalog |
+| en | approved | collectiveLabel | Collective | Catalog, catalog |
+| en | approved | unresolvedLabel | Unclassified entity | Catalog, catalog |
+| en | approved | serviceActorLabel | Automated service | Catalog, catalog |
 | en | approved | personLabel | Real person | Catalog, catalog |
 | en | approved | organizationLabel | Organization | Catalog, catalog |
 | en | approved | characterLabel | Fictional character | Catalog, catalog |
@@ -1127,6 +1272,10 @@ A Unit representing a person, organization, or character that can participate in
 | en | approved | pluralLabel | Entities | Catalog, catalog |
 | en | approved | inline | entity | Catalog, catalog |
 | en | approved | plural | entities | Catalog, catalog |
+| zh-Hant | approved | labelLabel | 唱片廠牌 | Catalog, Entity |
+| zh-Hant | approved | collectiveLabel | 團體 | Catalog, Entity |
+| zh-Hant | approved | unresolvedLabel | 未分類實體 | Catalog, Entity |
+| zh-Hant | approved | serviceActorLabel | 自動化服務 | Catalog, Entity |
 | zh-Hant | approved | personLabel | 現實人物 | Catalog, Entity |
 | zh-Hant | approved | organizationLabel | 組織機構 | Catalog, Entity |
 | zh-Hant | approved | characterLabel | 虛構角色 | Catalog, Entity |
@@ -1134,6 +1283,10 @@ A Unit representing a person, organization, or character that can participate in
 | zh-Hant | approved | pluralLabel | 實體 | Catalog, Entity |
 | zh-Hant | approved | inline | 實體 | Catalog, Entity |
 | zh-Hant | approved | plural | 實體 | Catalog, Entity |
+| zh-Hans | approved | labelLabel | 唱片厂牌 | Catalog, Entity |
+| zh-Hans | approved | collectiveLabel | 团体 | Catalog, Entity |
+| zh-Hans | approved | unresolvedLabel | 未分类实体 | Catalog, Entity |
+| zh-Hans | approved | serviceActorLabel | 自动化服务 | Catalog, Entity |
 | zh-Hans | approved | personLabel | 现实人物 | Catalog, Entity |
 | zh-Hans | approved | organizationLabel | 组织机构 | Catalog, Entity |
 | zh-Hans | approved | characterLabel | 虚构角色 | Catalog, Entity |
@@ -1141,6 +1294,10 @@ A Unit representing a person, organization, or character that can participate in
 | zh-Hans | approved | pluralLabel | 实体 | Catalog, Entity |
 | zh-Hans | approved | inline | 实体 | Catalog, Entity |
 | zh-Hans | approved | plural | 实体 | Catalog, Entity |
+| de | approved | labelLabel | Plattenlabel | Catalog |
+| de | approved | collectiveLabel | Kollektiv | Catalog |
+| de | approved | unresolvedLabel | Nicht eingeordnete Entität | Catalog |
+| de | approved | serviceActorLabel | Automatisierter Dienst | Catalog |
 | de | approved | personLabel | Reale Person | Catalog |
 | de | approved | organizationLabel | Organisation | Catalog |
 | de | approved | characterLabel | Fiktive Figur | Catalog |
@@ -1148,6 +1305,10 @@ A Unit representing a person, organization, or character that can participate in
 | de | approved | pluralLabel | Entitäten | Catalog |
 | de | approved | inline | Entität | Catalog |
 | de | approved | plural | Entitäten | Catalog |
+| ja | approved | labelLabel | レコードレーベル | Catalog |
+| ja | approved | collectiveLabel | 集団 | Catalog |
+| ja | approved | unresolvedLabel | 未分類のエンティティ | Catalog |
+| ja | approved | serviceActorLabel | 自動化サービス | Catalog |
 | ja | approved | personLabel | 実在の人物 | Catalog |
 | ja | approved | organizationLabel | 団体・組織 | Catalog |
 | ja | approved | characterLabel | 架空の登場人物 | Catalog |
@@ -1155,6 +1316,10 @@ A Unit representing a person, organization, or character that can participate in
 | ja | approved | pluralLabel | エンティティ | Catalog |
 | ja | approved | inline | エンティティ | Catalog |
 | ja | approved | plural | エンティティ | Catalog |
+| ko | approved | labelLabel | 음반 레이블 | Catalog |
+| ko | approved | collectiveLabel | 집단 | Catalog |
+| ko | approved | unresolvedLabel | 미분류 엔티티 | Catalog |
+| ko | approved | serviceActorLabel | 자동화 서비스 | Catalog |
 | ko | approved | personLabel | 실존 인물 | Catalog |
 | ko | approved | organizationLabel | 단체·기관 | Catalog |
 | ko | approved | characterLabel | 가상 인물 | Catalog |

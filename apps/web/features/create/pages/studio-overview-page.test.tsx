@@ -25,7 +25,7 @@ vi.mock("@rezics/openapi-tanstack-query", () => ({
 	useListCurrentUserStudioContent: (input: unknown) => {
 		api.workspace(input);
 		return {
-			data: { items: [{ id: "workspace-id", section: "book" }] },
+			data: { items: [{ id: "workspace-id", section: "publishing" }] },
 			isError: false,
 			isPending: false,
 			queryKey: ["workspace"],
@@ -49,9 +49,15 @@ vi.mock("@/features/application-shell/components/app-link", () => ({
 
 const sectionIds = [
 	"post",
-	"book",
+	"publishing",
+	"music",
+	"program",
+	"grouping",
+	"reference",
+	"distribution",
+	"audio",
+	"video",
 	"software",
-	"media",
 	"entity",
 	"tag",
 	"realm",
@@ -109,8 +115,8 @@ vi.mock("@/i18n/client", () => ({
 					createTitle: "Create",
 					recentContributionsTitle: "Recent contributions",
 					groups: {
-						works: "Works",
-						publishing: "Publishing",
+						catalog: "Catalog",
+						content: "Content",
 						organization: "Organization",
 						vocabulary: "Vocabulary",
 					},
@@ -144,8 +150,10 @@ describe("StudioOverviewPage", () => {
 		});
 		expect(screen.getByRole("heading", { name: "Continue" })).toBeTruthy();
 		expect(screen.getByRole("heading", { name: "Recent contributions" })).toBeTruthy();
-		expect(screen.getAllByTestId("create-action")).toHaveLength(12);
-		expect(screen.getByRole("link", { name: "book" }).getAttribute("href")).toBe("/create/book");
+		expect(screen.getAllByTestId("create-action")).toHaveLength(18);
+		expect(screen.getByRole("link", { name: "publishing" }).getAttribute("href")).toBe(
+			"/create/publishing",
+		);
 
 		fireEvent.click(screen.getByTestId("workspace-list"));
 		expect(api.visit).toHaveBeenCalledWith({ path: { unitId: "workspace-id" } });

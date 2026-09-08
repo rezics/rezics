@@ -39,7 +39,7 @@ export default {
 		medium: deTerminology.musicMedium.forms.label,
 		release: deTerminology.musicRelease.forms.label,
 		release_group: deTerminology.musicReleaseGroup.forms.label,
-		work: "Komposition",
+		work: deTerminology.musicalWork.forms.label,
 		release_candidate: `Nicht zugeordnete ${deTerminology.musicRelease.forms.inline}`,
 		number: "Nummer",
 		position: "Position",

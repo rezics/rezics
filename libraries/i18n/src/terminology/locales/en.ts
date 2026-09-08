@@ -79,6 +79,9 @@ export const enTerminology = defineTerminology("en", {
 	program: {
 		status: "approved",
 		forms: {
+			seasonLabel: "Season",
+			versionLabel: "Screen work version",
+			episodeLabel: "Episode",
 			label: "Screen work",
 			pluralLabel: "Screen works",
 			inline: "screen work",
@@ -165,11 +168,46 @@ export const enTerminology = defineTerminology("en", {
 	referenceCatalog: {
 		status: "approved",
 		forms: {
+			webResourceLabel: "Web resource",
+			areaLabel: "Geographic area",
+			instrumentLabel: "Musical instrument",
+			placeLabel: "Geographic place",
+			eventLabel: "Event entry",
 			entryLabel: "Reference entry",
 			label: "Reference entries",
 			pluralLabel: "Reference entries",
 			inline: "reference entries",
 			plural: "reference entries",
+		},
+		forbidden: [],
+	},
+	catalogEntry: {
+		status: "approved",
+		forms: {
+			label: "Catalog entry",
+			pluralLabel: "Catalog entries",
+			inline: "catalog entry",
+			plural: "catalog entries",
+		},
+		forbidden: [],
+	},
+	visualNovel: {
+		status: "approved",
+		forms: {
+			label: "Visual novel",
+			pluralLabel: "Visual novels",
+			inline: "visual novel",
+			plural: "visual novels",
+		},
+		forbidden: [],
+	},
+	musicalWork: {
+		status: "approved",
+		forms: {
+			label: "Musical work",
+			pluralLabel: "Musical works",
+			inline: "musical work",
+			plural: "musical works",
 		},
 		forbidden: [],
 	},
@@ -296,6 +334,10 @@ export const enTerminology = defineTerminology("en", {
 	entity: {
 		status: "approved",
 		forms: {
+			labelLabel: "Record label",
+			collectiveLabel: "Collective",
+			unresolvedLabel: "Unclassified entity",
+			serviceActorLabel: "Automated service",
 			personLabel: "Real person",
 			organizationLabel: "Organization",
 			characterLabel: "Fictional character",

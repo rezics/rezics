@@ -4,8 +4,7 @@ import {
 	studioSectionCreateHref,
 	type StudioCreateSearchParams,
 } from "@/features/create/model/studio-section";
-import { UnitCreatePage } from "@/features/units/unit-pages";
-import { isWorkUnitType } from "@/features/units/unit-types";
+import { isUnitType } from "@/features/units/unit-types";
 
 export default async function Page({
 	params,
@@ -15,7 +14,6 @@ export default async function Page({
 	searchParams: Promise<StudioCreateSearchParams>;
 }) {
 	const [{ type }, query] = await Promise.all([params, searchParams]);
-	if (!isWorkUnitType(type)) notFound();
-	if (type !== "series") redirect(studioSectionCreateHref(type, query));
-	return <UnitCreatePage type={type} />;
+	if (!isUnitType(type)) notFound();
+	redirect(studioSectionCreateHref(type, query));
 }

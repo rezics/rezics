@@ -16,81 +16,36 @@ const denied = {
 	hasDevelopmentPreviewAccess: false,
 };
 
-describe("unit management section manifest", () => {
-	it("keeps access and history separate for an access-only manager", () => {
-		expect(getUnitManagementSectionIds("media", { ...denied, canManageAccess: true })).toEqual([
+describe("timed-media management capabilities", () => {
+	it("keeps access separate from editing", () => {
+		expect(getUnitManagementSectionIds("audio", { ...denied, canManageAccess: true })).toEqual([
 			"access",
 			"history",
 		]);
 	});
-
-	it("keeps Realm publication and history available to a publication-only manager", () => {
+	it("exposes bounded Tag curation to its explicit manager", () => {
+		expect(getUnitManagementSectionIds("video", { ...denied, canCurateTags: true })).toEqual([
+			"tags",
+			"history",
+		]);
+	});
+	it("exposes publication management independently", () => {
 		expect(
-			getUnitManagementSectionIds("book", {
-				...denied,
-				canManageRealmPublications: true,
-			}),
+			getUnitManagementSectionIds("audio", { ...denied, canManageRealmPublications: true }),
 		).toEqual(["realms", "history"]);
 	});
-
-	it("keeps Tag curation and history available to a Tag-only manager", () => {
-		expect(getUnitManagementSectionIds("book", { ...denied, canCurateTags: true })).toEqual([
-			"tags",
-			"history",
-		]);
+	it.each(["video", "audio"] as const)("keeps %s on its concrete editor paths", (type) => {
+		expect(
+			getUnitManagementSectionIds(type, {
+				...denied,
+				canEdit: true,
+				canCurateTags: true,
+				canManageAccess: true,
+			}),
+		).toEqual(["content", "metadata", "tags", "access", "history"]);
 	});
-
-	it("adds type-owned editors only to their matching unit unit", () => {
-		const editable = { ...denied, canEdit: true };
-		expect(getUnitManagementSectionIds("book", editable)).toContain("tags");
-		expect(getUnitManagementSectionIds("book", { ...editable, canCurateTags: true })).toContain(
-			"tags",
-		);
-		expect(getUnitManagementSectionIds("book", editable)).toContain("content-structure");
-		expect(getUnitManagementSectionIds("series", editable)).toContain("releases");
-		expect(getUnitManagementSectionIds("software", editable)).not.toContain("content-structure");
-		expect(getUnitManagementSectionIds("media", editable)).toContain("content-structure");
-		const previewEditor = { ...editable, hasDevelopmentPreviewAccess: true };
-		expect(getUnitManagementSectionIds("software", previewEditor)).toContain("content-structure");
-		expect(getUnitManagementSectionIds("media", previewEditor)).toContain("content-structure");
-	});
-
-	it("keeps non-Work manageable Units on the standard editable section template", () => {
-		const capabilities = {
-			...denied,
-			canEdit: true,
-			canManageAccess: true,
-			canManageAssociations: true,
-			canCurateTags: true,
-		};
-		expect(getUnitManagementSectionIds("video", capabilities)).toEqual([
-			"content",
-			"metadata",
-			"access",
-			"history",
-		]);
-		expect(getUnitManagementSectionIds("audio", capabilities)).toEqual([
-			"content",
-			"metadata",
-			"access",
-			"history",
-		]);
-		expect(getUnitManagementSectionIds("release", capabilities)).toEqual([
-			"content",
-			"metadata",
-			"access",
-			"history",
-		]);
-	});
-
-	it("does not expose a management workspace without a server capability", () => {
+	it("does not expose management without a capability", () => {
 		expect(canOpenUnitManagement(denied)).toBe(false);
-		expect(getUnitManagementSectionIds("book", denied)).toEqual([]);
-	});
-
-	it("opens only Dock management for a Dock-scoped editor", () => {
-		expect(canOpenUnitManagement(denied, true)).toBe(true);
-		expect(getUnitManagementSectionIds("book", denied, true)).toEqual(["docks"]);
-		expect(getUnitManagementSectionIds("series", denied, true)).toEqual([]);
+		expect(getUnitManagementSectionIds("audio", denied)).toEqual([]);
 	});
 });

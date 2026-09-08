@@ -12,11 +12,11 @@ export default async function Page({
 	readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
 	const [{ section }, route] = await Promise.all([params, searchParams]);
-	const kind = typeof route.kind === "string" ? route.kind : undefined;
+	const shape = typeof route.shape === "string" ? route.shape : undefined;
 	const query = typeof route.q === "string" ? route.q : "";
-	const subject = parseCommunityUnitSearchSubject(section, kind);
+	const subject = parseCommunityUnitSearchSubject(section, shape);
 	if (!subject) notFound();
-	const tagCreateRoute = subject.kind === "tag" ? await loadTagCreateRoute(route) : null;
+	const tagCreateRoute = subject.owner === "tag" ? await loadTagCreateRoute(route) : null;
 	if (tagCreateRoute?.status === "invalid") notFound();
 	return (
 		<CommunityUnitSearchPage

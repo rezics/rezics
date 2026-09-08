@@ -81,12 +81,6 @@ vi.mock("@/features/tags/components/unit-tag-summary", () => ({
 	),
 }));
 
-vi.mock("@/features/units/components/unit-variant-list", () => ({
-	UnitVariantList: ({ context }: { readonly context: { readonly role: string } }) => (
-		<div data-testid="entity-variants">{context.role}</div>
-	),
-}));
-
 vi.mock("@/i18n/client", () => ({
 	useTranslation: () => ({
 		t: {
@@ -179,18 +173,6 @@ const entity = {
 	owner: null,
 	externalLinks: [],
 	measurements: [],
-	variantContext: {
-		role: "main",
-		variants: [
-			{
-				id: "00000000-0000-7000-8000-000000000002",
-				type: "entity",
-				language: "en",
-				title: "Saber Alter",
-				cover: null,
-			},
-		],
-	},
 	capabilities: {
 		canEdit: true,
 		canEditCreditAttributions: false,

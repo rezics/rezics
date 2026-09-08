@@ -27,7 +27,7 @@ describe("StudioContentList", () => {
 					loadMore={vi.fn()}
 					mode="workspace"
 					onOpen={vi.fn()}
-					sectionId="book"
+					sectionId="publishing"
 					state={{ status: "pending" }}
 				/>
 			</TranslationProvider>,

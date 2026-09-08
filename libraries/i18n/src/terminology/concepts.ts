@@ -83,7 +83,15 @@ export const terminologyConcepts = defineTerminologyConcepts({
 	program: {
 		definition:
 			"An audiovisual screen work, including film, television and animation; separate from its versions and episodes.",
-		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		slots: [
+			"seasonLabel",
+			"versionLabel",
+			"episodeLabel",
+			"label",
+			"pluralLabel",
+			"inline",
+			"plural",
+		] as const,
 		locales: WebTerminologyLocales,
 	},
 	softwareContent: {
@@ -130,7 +138,34 @@ export const terminologyConcepts = defineTerminologyConcepts({
 	},
 	referenceCatalog: {
 		definition: "The catalog family of reference concepts, places, instruments and events.",
-		slots: ["label", "pluralLabel", "inline", "plural", "entryLabel"] as const,
+		slots: [
+			"webResourceLabel",
+			"areaLabel",
+			"instrumentLabel",
+			"placeLabel",
+			"eventLabel",
+			"label",
+			"pluralLabel",
+			"inline",
+			"plural",
+			"entryLabel",
+		] as const,
+		locales: WebTerminologyLocales,
+	},
+	catalogEntry: {
+		definition:
+			"One catalog identity in its native domain, independent of accounts and platform content.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	visualNovel: {
+		definition: "An interactive narrative software work in the visual-novel form.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	musicalWork: {
+		definition: "A musical intellectual work, distinct from recordings and releases.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
 		locales: WebTerminologyLocales,
 	},
 	music: {
@@ -243,8 +278,12 @@ export const terminologyConcepts = defineTerminologyConcepts({
 	},
 	entity: {
 		definition:
-			"A Unit representing a person, organization, or character that can participate in attributions and subject associations.",
+			"A catalog identity for people, organizations, characters, collectives, labels, or automated services; independent of account and representation authority.",
 		slots: [
+			"labelLabel",
+			"collectiveLabel",
+			"unresolvedLabel",
+			"serviceActorLabel",
 			"label",
 			"pluralLabel",
 			"inline",

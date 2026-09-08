@@ -74,6 +74,9 @@ export const esTerminology = defineTerminology("es", {
 	program: {
 		status: "approved",
 		forms: {
+			seasonLabel: "Temporada",
+			versionLabel: "Versión audiovisual",
+			episodeLabel: "Episodio",
 			label: "Obra audiovisual",
 			pluralLabel: "Obras audiovisuales",
 			inline: "obra audiovisual",
@@ -160,11 +163,46 @@ export const esTerminology = defineTerminology("es", {
 	referenceCatalog: {
 		status: "approved",
 		forms: {
+			webResourceLabel: "Recurso web",
+			areaLabel: "Área geográfica",
+			instrumentLabel: "Instrumento musical",
+			placeLabel: "Lugar geográfico",
+			eventLabel: "Entrada de evento",
 			entryLabel: "Entrada de referencia",
 			label: "Entradas de referencia",
 			pluralLabel: "Entradas de referencia",
 			inline: "entradas de referencia",
 			plural: "entradas de referencia",
+		},
+		forbidden: [],
+	},
+	catalogEntry: {
+		status: "approved",
+		forms: {
+			label: "Entrada del catálogo",
+			pluralLabel: "Entradas del catálogo",
+			inline: "entrada del catálogo",
+			plural: "entradas del catálogo",
+		},
+		forbidden: [],
+	},
+	visualNovel: {
+		status: "approved",
+		forms: {
+			label: "Novela visual",
+			pluralLabel: "Novelas visuales",
+			inline: "novela visual",
+			plural: "novelas visuales",
+		},
+		forbidden: [],
+	},
+	musicalWork: {
+		status: "approved",
+		forms: {
+			label: "Obra musical",
+			pluralLabel: "Obras musicales",
+			inline: "obra musical",
+			plural: "obras musicales",
 		},
 		forbidden: [],
 	},
@@ -305,6 +343,10 @@ export const esTerminology = defineTerminology("es", {
 	entity: {
 		status: "approved",
 		forms: {
+			labelLabel: "Sello discográfico",
+			collectiveLabel: "Colectivo",
+			unresolvedLabel: "Entidad sin clasificar",
+			serviceActorLabel: "Servicio automatizado",
 			personLabel: "Persona real",
 			organizationLabel: "Organización",
 			characterLabel: "Personaje ficticio",

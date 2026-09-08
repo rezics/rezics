@@ -8,7 +8,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TranslationProvider } from "@/i18n/client";
 import { UnitSubjectGroups } from "./unit-subject-groups";
-import { UnitVariantList } from "./unit-variant-list";
 
 vi.mock("@/features/application-shell/components/app-link", () => ({
 	AppLink: ({ href, ...props }: ComponentProps<"a"> & { readonly href: string }) => (
@@ -131,39 +130,5 @@ describe("Unit association cards", () => {
 		expect(await screen.findByRole("img", { name: subjectAssociation.title })).toBeTruthy();
 		expect(screen.getAllByRole("link", { name: subjectAssociation.title })).toHaveLength(2);
 		expect(screen.queryByText("E")).toBeNull();
-	});
-
-	it("renders Variant navigation through FeedCard content without a Select action", () => {
-		const variantId = "01941f29-7c00-7000-8000-000000000005";
-		const variantTitle = "Realta Nua edition";
-		const context = {
-			role: "main",
-			variants: [
-				{
-					id: variantId,
-					type: "software",
-					language: "en",
-					title: variantTitle,
-					cover: {
-						id: "01941f29-7c00-7000-8000-000000000006",
-						url: "https://example.test/realta-nua.webp",
-					},
-				},
-			],
-		} satisfies ComponentProps<typeof UnitVariantList>["context"];
-
-		const { container } = renderWithTranslation(<UnitVariantList context={context} />);
-
-		const href = `/units/software/${variantId}`;
-		const variantLinks = container.querySelectorAll(`a[href="${href}"]`);
-		expect(variantLinks).toHaveLength(2);
-		expect(
-			Array.from(variantLinks).some((link) => link.querySelector(`img[alt="${variantTitle}"]`)),
-		).toBe(true);
-		expect(
-			screen.getByRole("heading", { name: variantTitle }).closest("a")?.getAttribute("href"),
-		).toBe(href);
-		expect(screen.queryByRole("link", { name: "Select" })).toBeNull();
-		expect(screen.getByRole("button", { name: "More actions" })).toBeTruthy();
 	});
 });

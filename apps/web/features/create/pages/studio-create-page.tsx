@@ -13,35 +13,35 @@ export async function StudioCreatePage({
 	readonly sectionId: StudioGenericCreateSectionId;
 }) {
 	switch (sectionId) {
-		case "book":
+		case "publishing":
+		case "music":
+		case "program":
 		case "software":
-		case "media": {
-			const { UnitCreatePage } = await import("@/features/units/unit-pages");
+		case "entity":
+		case "grouping":
+		case "reference":
+		case "distribution": {
+			const { NativeCatalogCreatePage } = await import("./native-catalog-create-page");
+			const initialKind = typeof searchParams.kind === "string" ? searchParams.kind : undefined,
+				initialName = typeof searchParams.title === "string" ? searchParams.title : undefined,
+				initialShape = typeof searchParams.shape === "string" ? searchParams.shape : undefined;
 			return (
-				<TranslationBoundary
-					namespaces={[
-						"actions",
-						"cover",
-						"create",
-						"licenses",
-						"media",
-						"search",
-						"tags",
-						"ui",
-						"units",
-					]}
-				>
-					<UnitCreatePage type={sectionId} />
+				<TranslationBoundary namespaces={["actions", "create", "ui"]}>
+					<NativeCatalogCreatePage
+						owner={sectionId}
+						initialKind={initialKind}
+						initialName={initialName}
+						initialShape={initialShape}
+					/>
 				</TranslationBoundary>
 			);
 		}
-		case "entity": {
-			const { EntityCreatePage } = await import("@/features/units/unit-resource-pages");
+		case "video":
+		case "audio": {
+			const { UnitCreatePage } = await import("@/features/units/unit-pages");
 			return (
-				<TranslationBoundary
-					namespaces={["actions", "create", "entities", "errors", "media", "search", "ui", "units"]}
-				>
-					<EntityCreatePage />
+				<TranslationBoundary namespaces={["actions", "create", "locale", "media", "ui", "units"]}>
+					<UnitCreatePage type={sectionId} />
 				</TranslationBoundary>
 			);
 		}

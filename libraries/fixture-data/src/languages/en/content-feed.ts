@@ -26,7 +26,7 @@ export default {
 			summary: "Discussion of a fictional series, its setting, characters, and ideas.",
 		},
 		{
-			name: "Collective Intelligence",
+			name: `${enTerminology.entity.forms.collectiveLabel} Intelligence`,
 			initials: "C",
 			summary: "How groups coordinate knowledge, judgment, and action.",
 		},

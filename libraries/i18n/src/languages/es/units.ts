@@ -39,7 +39,7 @@ export default {
 		medium: esTerminology.musicMedium.forms.label,
 		release: esTerminology.musicRelease.forms.label,
 		release_group: esTerminology.musicReleaseGroup.forms.label,
-		work: "Composición",
+		work: esTerminology.musicalWork.forms.label,
 		release_candidate: `${esTerminology.musicRelease.forms.label} sin vincular`,
 		number: "Número",
 		position: "Posición",

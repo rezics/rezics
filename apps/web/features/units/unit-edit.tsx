@@ -47,20 +47,16 @@ import { FeedCard } from "@/features/content-feed/components/feed-card";
 import { UnitLicensesField } from "./components/unit-licenses-field";
 import { readSubmittedLicenses } from "./model/unit-licenses";
 import { FeedUnitContent } from "@/features/content-feed/components/feed-unit-content";
-import { isWorkUnitType, type UnitType } from "./unit-types";
-import { WorkReleaseStatusField } from "./components/work-release-status-field";
-import { MetadataOnlyField } from "./components/metadata-only-field";
-import { isWorkReleaseStatus } from "./model/work-release-status";
+import type { UnitType } from "./unit-types";
+
 import { ContentLanguageSupportField } from "@/features/content-language-support/components/content-language-support-field";
 import { ContentLanguageSupportEvidence } from "@/features/content-language-support/components/content-language-support-evidence";
 import {
 	adoptContentLanguageEvidence,
 	contentLanguageSupportChanged,
 	createContentLanguageSupportDraft,
-	isContentLanguageSupportOwner,
 } from "@/features/content-language-support/model/content-language-support";
 import { AdaptedAudioField } from "./components/adapted-audio-field";
-import { adaptedAudioUnitIdsChanged } from "./model/adapted-audio";
 
 export type EditableUnit = GetApiUnitsByTypeByUnitIdStatus200;
 type Unit = EditableUnit;
@@ -92,455 +88,165 @@ function readPositiveInteger(form: FormData, name: string): number | null | unde
 }
 
 export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit }) {
-	const { t } = useTranslation(["cover", "errors", "licenses", "ui", "units"]);
-	const queryClient = useQueryClient();
-	const [status, setStatus] = useState(unit.status);
-	const [bookChapterDraftAction, setBookChapterDraftAction] = useState<
-		"" | "book_only" | "book_and_chapters"
-	>("");
-	const [chapterDraftQueued, setChapterDraftQueued] = useState(false);
-	const [metadataOnly, setMetadataOnly] = useState(
-		() =>
-			(unit.details.type === "book" ||
-				unit.details.type === "software" ||
-				unit.details.type === "media") &&
-			unit.details.metadataOnly,
-	);
-	const [contentLanguageSupportDraft, setContentLanguageSupportDraft] = useState(() =>
+	const { t } = useTranslation(["create", "ui", "units"]),
+		cache = useQueryClient();
+	const [languages, setLanguages] = useState(() =>
 		createContentLanguageSupportDraft(unit.contentLanguageSupport),
 	);
-	const [adaptedAudioUnitIds, setAdaptedAudioUnitIds] = useState<readonly string[]>(() =>
+	const [tracks, setTracks] = useState<readonly string[]>(() =>
 		unit.details.type === "video" ? (unit.details.adaptedAudioUnitIds ?? []) : [],
 	);
-	const supportsContentLanguage = isContentLanguageSupportOwner(type);
+	const [invalidDuration, setInvalidDuration] = useState(false);
 	const update = usePatchApiUnitsByTypeByUnitId({
-		mutation: {
-			onSuccess: async () => invalidateUnitDetail(queryClient, type, unit.id, true),
-		},
+		mutation: { onSuccess: () => invalidateUnitDetail(cache, type, unit.id, true) },
 	});
-	const openLicenseIds = unit.licenseOfferings.map((grant) => grant.licenseId).filter(isLicenseId);
-
+	const licenses = unit.licenseOfferings.map((grant) => grant.licenseId).filter(isLicenseId);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const form = new FormData(event.currentTarget);
-		const releasedOn = String(form.get("releasedOn") ?? "").trim();
-		const submittedStatus = form.get("status");
-		const submittedVisibility = form.get("visibility");
-		const submittedContentRating = form.get("contentRating");
-		const submittedAiDisclosure = form.get("aiDisclosure");
-		const submittedReleaseStatus = form.get("releaseStatus");
-		const submittedLicenses = readSubmittedLicenses(form);
-		const contentLanguageChanged =
-			supportsContentLanguage &&
-			contentLanguageSupportChanged(unit.contentLanguageSupport, contentLanguageSupportDraft);
-		const adaptedAudioChanged =
-			unit.details.type === "video" &&
-			adaptedAudioUnitIdsChanged(unit.details.adaptedAudioUnitIds ?? [], adaptedAudioUnitIds);
-		const submittedUnitStatus =
-			submittedStatus === "published" || submittedStatus === "archived" ? submittedStatus : "draft";
-		const draftsBook =
-			unit.details.type === "book" && unit.status !== "draft" && submittedUnitStatus === "draft";
-		if (draftsBook && !bookChapterDraftAction) return;
-		const visibility =
-			submittedVisibility === "unlisted" || submittedVisibility === "private"
-				? submittedVisibility
-				: "public";
-		const contentRating =
-			submittedContentRating === "r15" ||
-			submittedContentRating === "r18" ||
-			submittedContentRating === "r18g"
-				? submittedContentRating
-				: "general";
-		const aiDisclosure =
-			submittedAiDisclosure === "none" ||
-			submittedAiDisclosure === "ai_assisted" ||
-			submittedAiDisclosure === "ai_originated" ||
-			submittedAiDisclosure === "machine_generated"
-				? submittedAiDisclosure
-				: "unknown";
-		const details = (() => {
-			if (unit.details.type === "book") {
-				if (!isWorkReleaseStatus(submittedReleaseStatus)) return undefined;
-				const pageCount = readPositiveInteger(form, "pageCount");
-				if (pageCount === undefined) return undefined;
-				return {
-					releaseStatus: submittedReleaseStatus,
-					...(unit.capabilities.canUpdateMetadataOnly ? { metadataOnly } : {}),
-					isbn13: String(form.get("isbn13") ?? "").trim() || null,
-					publicationDate: releasedOn || null,
-					pageCount,
-				};
-			}
-			if (unit.details.type === "software")
-				return {
-					...(unit.capabilities.canUpdateMetadataOnly ? { metadataOnly } : {}),
-					versionLabel: String(form.get("versionLabel") ?? "").trim() || null,
-				};
-			if (unit.details.type === "media") {
-				if (!isWorkReleaseStatus(submittedReleaseStatus)) return undefined;
-				const runtimeMinutes = readPositiveInteger(form, "runtimeMinutes");
-				const episodeCount = readPositiveInteger(form, "episodeCount");
-				const seasonCount = readPositiveInteger(form, "seasonCount");
-				if (runtimeMinutes === undefined || episodeCount === undefined || seasonCount === undefined)
-					return undefined;
-				const kind = String(form.get("kind") ?? "").trim();
-				if (!kind) return undefined;
-				return {
-					releaseStatus: submittedReleaseStatus,
-					...(unit.capabilities.canUpdateMetadataOnly ? { metadataOnly } : {}),
-					kind,
-					runtimeMinutes,
-					episodeCount,
-					seasonCount,
-				};
-			}
-			if (unit.details.type === "video" || unit.details.type === "audio") {
-				const durationSeconds = readPositiveInteger(form, "durationSeconds");
-				if (durationSeconds === undefined) return undefined;
-				return unit.details.type === "video"
-					? {
-							durationSeconds,
-							...(adaptedAudioChanged
-								? {
-										adaptedAudioUnitIds: adaptedAudioUnitIds.length
-											? [...adaptedAudioUnitIds]
-											: null,
-									}
-								: {}),
-						}
-					: { durationSeconds };
-			}
-			if (unit.details.type === "release") {
-				const versionLabel = String(form.get("versionLabel") ?? "").trim();
-				return versionLabel ? { versionLabel } : undefined;
-			}
-			const kind = String(form.get("kind") ?? "").trim();
-			return kind ? { kind } : undefined;
-		})();
-		if (!details) return;
-		try {
-			setChapterDraftQueued(false);
-			await update.mutateAsync({
+		if (update.isPending) return;
+		const form = new FormData(event.currentTarget),
+			duration = readPositiveInteger(form, "durationSeconds");
+		if (duration === undefined || (duration !== null && duration > 2147483647)) {
+			setInvalidDuration(true);
+			return;
+		}
+		setInvalidDuration(false);
+		const submittedStatus = form.get("status"),
+			submittedVisibility = form.get("visibility"),
+			submittedRating = form.get("contentRating"),
+			submittedAi = form.get("aiDisclosure");
+		const status =
+				submittedStatus === "published" || submittedStatus === "archived"
+					? submittedStatus
+					: "draft",
+			visibility =
+				submittedVisibility === "public" || submittedVisibility === "unlisted"
+					? submittedVisibility
+					: "private",
+			contentRating =
+				submittedRating === "r15" || submittedRating === "r18" || submittedRating === "r18g"
+					? submittedRating
+					: "general",
+			aiDisclosure =
+				submittedAi === "none" ||
+				submittedAi === "ai_assisted" ||
+				submittedAi === "ai_originated" ||
+				submittedAi === "machine_generated"
+					? submittedAi
+					: "unknown";
+		await update
+			.mutateAsync({
 				path: { type, unitId: unit.id },
 				body: {
 					updatedAt: unit.updatedAt,
-					...(contentLanguageChanged
+					status,
+					visibility,
+					contentRating,
+					aiDisclosure,
+					licenses: readSubmittedLicenses(form),
+					...(contentLanguageSupportChanged(unit.contentLanguageSupport, languages)
 						? {
-								contentLanguageSupport: contentLanguageSupportDraft.map((entry) => ({
+								contentLanguageSupport: languages.map((entry) => ({
 									languageTag: entry.languageTag,
 									...(entry.channels ? { channels: [...entry.channels] } : {}),
 								})),
 							}
 						: {}),
-					...(draftsBook
-						? {
-								bookChapterDraftScope:
-									bookChapterDraftAction === "book_and_chapters"
-										? ("manageable_published_chapters" as const)
-										: ("book_only" as const),
-							}
-						: {}),
-					status: submittedUnitStatus,
-					visibility,
-					contentRating,
-					aiDisclosure,
-					licenses: submittedLicenses,
-					unit: {
-						...(unit.details.type === "series" ||
-						unit.details.type === "video" ||
-						unit.details.type === "audio"
-							? {}
-							: { releasedOn: releasedOn || null }),
+					details: {
+						durationSeconds: duration,
+						...(type === "video" ? { adaptedAudioUnitIds: [...tracks] } : {}),
 					},
-					details,
 				},
-			});
-			if (draftsBook && bookChapterDraftAction === "book_and_chapters") setChapterDraftQueued(true);
-		} catch {
-			// The typed mutation state supplies the visible API error.
-		}
+			})
+			.catch(() => undefined);
 	}
-
 	return (
 		<Card appearance="outlined">
 			<CardContent className="p-6">
-				<form onSubmit={submit}>
+				<form onSubmit={(event) => void submit(event)}>
 					<FieldGroup>
 						<h2 className="font-heading text-xl font-bold">{t.units.editor.settings}</h2>
 						<Field>
 							<FieldLabel>{t.ui.status}</FieldLabel>
-							<NativeSelect
-								name="status"
-								onChange={(event) => {
-									const next = event.currentTarget.value;
-									if (next === "draft" || next === "published" || next === "archived")
-										setStatus(next);
-								}}
-								value={status}
-							>
-								<NativeSelectOption value="draft">{t.ui.draft}</NativeSelectOption>
-								<NativeSelectOption value="published">{t.ui.published}</NativeSelectOption>
-								<NativeSelectOption value="archived">{t.ui.archived}</NativeSelectOption>
+							<NativeSelect name="status" defaultValue={unit.status}>
+								{(["draft", "published", "archived"] as const).map((value) => (
+									<NativeSelectOption key={value} value={value}>
+										{t.ui[value]}
+									</NativeSelectOption>
+								))}
 							</NativeSelect>
 						</Field>
-						{unit.details.type === "book" && unit.status !== "draft" && status === "draft" ? (
-							<Field required>
-								<FieldLabel>{t.units.editor.bookDraftScope}</FieldLabel>
-								<p className="text-sm text-muted-foreground">
-									{t.units.editor.bookDraftScopeDescription}
-								</p>
-								<NativeSelect
-									onChange={(event) => {
-										const action = event.currentTarget.value;
-										if (action === "book_only" || action === "book_and_chapters")
-											setBookChapterDraftAction(action);
-										else setBookChapterDraftAction("");
-									}}
-									required
-									value={bookChapterDraftAction}
-								>
-									<NativeSelectOption disabled value="">
-										{t.units.editor.bookDraftChoose}
-									</NativeSelectOption>
-									<NativeSelectOption value="book_only">
-										{t.units.editor.bookDraftBookOnly}
-									</NativeSelectOption>
-									<NativeSelectOption value="book_and_chapters">
-										{t.units.editor.bookDraftBookAndChapters}
-									</NativeSelectOption>
-								</NativeSelect>
-							</Field>
-						) : null}
 						<Field>
 							<FieldLabel>{t.ui.visibility}</FieldLabel>
 							<NativeSelect name="visibility" defaultValue={unit.visibility}>
-								<NativeSelectOption value="public">{t.ui.public}</NativeSelectOption>
-								<NativeSelectOption value="unlisted">{t.ui.unlisted}</NativeSelectOption>
-								<NativeSelectOption value="private">{t.ui.private}</NativeSelectOption>
+								{(["private", "unlisted", "public"] as const).map((value) => (
+									<NativeSelectOption key={value} value={value}>
+										{t.ui[value]}
+									</NativeSelectOption>
+								))}
 							</NativeSelect>
 						</Field>
 						<Field>
 							<FieldLabel>{t.ui.contentRating}</FieldLabel>
 							<NativeSelect name="contentRating" defaultValue={unit.contentRating}>
-								<NativeSelectOption value="general">{t.units.rating.general}</NativeSelectOption>
-								<NativeSelectOption value="r15">{t.units.rating.r15}</NativeSelectOption>
-								<NativeSelectOption value="r18">{t.units.rating.r18}</NativeSelectOption>
-								<NativeSelectOption value="r18g">{t.units.rating.r18g}</NativeSelectOption>
+								{(["general", "r15", "r18", "r18g"] as const).map((value) => (
+									<NativeSelectOption key={value} value={value}>
+										{t.units.rating[value]}
+									</NativeSelectOption>
+								))}
 							</NativeSelect>
 						</Field>
 						<Field>
 							<FieldLabel>{t.units.detail.aiDisclosure}</FieldLabel>
 							<NativeSelect name="aiDisclosure" defaultValue={unit.aiDisclosure}>
-								<NativeSelectOption value="unknown">
-									{t.units.aiDisclosure.unknown}
-								</NativeSelectOption>
-								<NativeSelectOption value="none">{t.units.aiDisclosure.none}</NativeSelectOption>
-								<NativeSelectOption value="ai_assisted">
-									{t.units.aiDisclosure.ai_assisted}
-								</NativeSelectOption>
-								<NativeSelectOption value="ai_originated">
-									{t.units.aiDisclosure.ai_originated}
-								</NativeSelectOption>
-								<NativeSelectOption value="machine_generated">
-									{t.units.aiDisclosure.machine_generated}
-								</NativeSelectOption>
+								{(
+									["unknown", "none", "ai_assisted", "ai_originated", "machine_generated"] as const
+								).map((value) => (
+									<NativeSelectOption key={value} value={value}>
+										{t.units.aiDisclosure[value]}
+									</NativeSelectOption>
+								))}
 							</NativeSelect>
 						</Field>
-						{unit.details.type !== "series" &&
-						unit.details.type !== "video" &&
-						unit.details.type !== "audio" ? (
-							<Field>
-								<FieldLabel>
-									{unit.details.type === "book"
-										? t.units.fields.publicationDate
-										: t.units.fields.releaseDate}
-								</FieldLabel>
-								<Input defaultValue={unit.releasedOn ?? ""} name="releasedOn" type="date" />
-							</Field>
-						) : null}
-						<UnitTypeSpecificFields
-							adaptedAudioUnitIds={adaptedAudioUnitIds}
-							metadataOnly={metadataOnly}
-							onAdaptedAudioUnitIdsChange={setAdaptedAudioUnitIds}
-							onMetadataOnlyChange={setMetadataOnly}
-							unit={unit}
+						<Field invalid={invalidDuration}>
+							<FieldLabel>{t.units.fields.durationSeconds}</FieldLabel>
+							<Input
+								name="durationSeconds"
+								type="number"
+								min={1}
+								max={2147483647}
+								step={1}
+								defaultValue={unit.details.durationSeconds ?? ""}
+							/>
+							{invalidDuration ? (
+								<p role="alert" className="text-destructive text-sm">
+									{t.create.native.errors.number}
+								</p>
+							) : null}
+						</Field>
+						{type === "video" ? <AdaptedAudioField value={tracks} onChange={setTracks} /> : null}
+						<ContentLanguageSupportField
+							value={languages}
+							onChange={setLanguages}
+							disabled={update.isPending}
 						/>
-						{supportsContentLanguage ? (
-							<>
-								<ContentLanguageSupportField
-									disabled={update.isPending}
-									onChange={setContentLanguageSupportDraft}
-									value={contentLanguageSupportDraft}
-								/>
-								<ContentLanguageSupportEvidence
-									onAdopt={(evidence) =>
-										setContentLanguageSupportDraft((current) =>
-											adoptContentLanguageEvidence(current, evidence),
-										)
-									}
-									type={type}
-									unitId={unit.id}
-								/>
-							</>
-						) : null}
-						<UnitLicensesField defaultValue={openLicenseIds} />
-						<Button variant="solid" isLoading={update.isPending} type="submit">
+						<ContentLanguageSupportEvidence
+							type={type}
+							unitId={unit.id}
+							onAdopt={(value) =>
+								setLanguages((current) => adoptContentLanguageEvidence(current, value))
+							}
+						/>
+						<UnitLicensesField defaultValue={licenses} />
+						<Button type="submit" isLoading={update.isPending} disabled={update.isPending}>
 							{t.units.editor.saveSettings}
 						</Button>
-						<RequestFailure error={update.error} fallback={t.ui.retryLater} />
-						{chapterDraftQueued ? (
-							<p aria-live="polite" className="text-sm text-muted-foreground">
-								{t.units.editor.bookChapterDraftQueued}
-							</p>
-						) : null}
+						<RequestFailure error={update.error} />
 					</FieldGroup>
 				</form>
 			</CardContent>
 		</Card>
 	);
-}
-
-function UnitTypeSpecificFields({
-	unit,
-	adaptedAudioUnitIds,
-	metadataOnly,
-	onAdaptedAudioUnitIdsChange,
-	onMetadataOnlyChange,
-}: {
-	readonly unit: Unit;
-	readonly adaptedAudioUnitIds: readonly string[];
-	readonly metadataOnly: boolean;
-	readonly onAdaptedAudioUnitIdsChange: (value: readonly string[]) => void;
-	readonly onMetadataOnlyChange: (value: boolean) => void;
-}) {
-	const { t } = useTranslation(["ui", "units"]);
-	const details = unit.details;
-	if (details.type === "book")
-		return (
-			<>
-				<WorkReleaseStatusField defaultValue={details.releaseStatus} />
-				<MetadataOnlyField
-					disabled={!unit.capabilities.canUpdateMetadataOnly}
-					onChange={onMetadataOnlyChange}
-					type="book"
-					value={metadataOnly}
-				/>
-				<Field>
-					<FieldLabel>{t.units.fields.isbn13}</FieldLabel>
-					<Input defaultValue={details.isbn13 ?? ""} name="isbn13" pattern="[0-9]{13}" />
-				</Field>
-				<Field>
-					<FieldLabel>{t.units.fields.pageCount}</FieldLabel>
-					<Input defaultValue={details.pageCount ?? ""} min={1} name="pageCount" type="number" />
-				</Field>
-			</>
-		);
-	if (details.type === "software")
-		return (
-			<>
-				<MetadataOnlyField
-					disabled={!unit.capabilities.canUpdateMetadataOnly}
-					onChange={onMetadataOnlyChange}
-					type="software"
-					value={metadataOnly}
-				/>
-				<Field>
-					<FieldLabel>{t.units.fields.versionLabel}</FieldLabel>
-					<Input defaultValue={details.versionLabel ?? ""} name="versionLabel" />
-				</Field>
-			</>
-		);
-	if (details.type === "media")
-		return (
-			<>
-				<WorkReleaseStatusField defaultValue={details.releaseStatus} />
-				<MetadataOnlyField
-					disabled={!unit.capabilities.canUpdateMetadataOnly}
-					onChange={onMetadataOnlyChange}
-					type="media"
-					value={metadataOnly}
-				/>
-				<Field required>
-					<FieldLabel>{t.units.fields.mediaKind}</FieldLabel>
-					<Input defaultValue={details.kind} name="kind" required />
-				</Field>
-				<Field>
-					<FieldLabel>{t.units.fields.runtimeMinutes}</FieldLabel>
-					<Input
-						defaultValue={details.runtimeMinutes ?? ""}
-						min={1}
-						name="runtimeMinutes"
-						type="number"
-					/>
-				</Field>
-				<Field>
-					<FieldLabel>{t.units.fields.episodeCount}</FieldLabel>
-					<Input
-						defaultValue={details.episodeCount ?? ""}
-						min={1}
-						name="episodeCount"
-						type="number"
-					/>
-				</Field>
-				<Field>
-					<FieldLabel>{t.units.fields.seasonCount}</FieldLabel>
-					<Input
-						defaultValue={details.seasonCount ?? ""}
-						min={1}
-						name="seasonCount"
-						type="number"
-					/>
-				</Field>
-			</>
-		);
-	if (details.type === "video")
-		return (
-			<>
-				<Field>
-					<FieldLabel>{t.units.fields.durationSeconds}</FieldLabel>
-					<Input
-						defaultValue={details.durationSeconds ?? ""}
-						min={1}
-						name="durationSeconds"
-						type="number"
-					/>
-				</Field>
-				<AdaptedAudioField onChange={onAdaptedAudioUnitIdsChange} value={adaptedAudioUnitIds} />
-			</>
-		);
-	if (details.type === "audio")
-		return (
-			<Field>
-				<FieldLabel>{t.units.fields.durationSeconds}</FieldLabel>
-				<Input
-					defaultValue={details.durationSeconds ?? ""}
-					min={1}
-					name="durationSeconds"
-					type="number"
-				/>
-			</Field>
-		);
-	if (details.type === "release")
-		return (
-			<>
-				<Field>
-					<FieldLabel>{t.units.fields.parentUnit}</FieldLabel>
-					<Input readOnly value={details.parentUnitId} />
-				</Field>
-				<Field required>
-					<FieldLabel>{t.units.fields.versionLabel}</FieldLabel>
-					<Input defaultValue={details.versionLabel} name="versionLabel" required />
-				</Field>
-			</>
-		);
-	if ("kind" in details)
-		return (
-			<Field required>
-				<FieldLabel>{t.units.series.kind}</FieldLabel>
-				<Input defaultValue={details.kind} maxLength={64} name="kind" required />
-			</Field>
-		);
-	return null;
 }
 
 export function UnitContentEditor({ type, unit }: { type: UnitType; unit: Unit }) {
@@ -626,9 +332,7 @@ function UnitLocalizationForm({
 			// The typed mutation state supplies the visible API error.
 		}
 	}
-	const previewKindLabel = isWorkUnitType(type)
-		? t.feed.content.kinds[`unit:${type}`]
-		: t.units.types[type];
+	const previewKindLabel = t.units.types[type];
 	return (
 		<LocalizedDraftGate
 			hydrated={draft.hydrated}

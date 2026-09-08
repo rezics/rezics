@@ -47,9 +47,9 @@ vi.mock("@/i18n/client", () => ({
 				searchLabel: ({ subject }: { readonly subject: string }) => `Search ${subject}`,
 				searchPlaceholder: ({ subject }: { readonly subject: string }) => `Enter ${subject}`,
 				subjects: {
-					book: "books",
+					publishing: "publishing entries",
 					character: "characters",
-					media: "media entries",
+					program: "program entries",
 					organization: "organizations",
 					person: "people",
 					software: "software entries",
@@ -66,7 +66,7 @@ vi.mock("@/i18n/use-localization-languages", () => ({
 
 import {
 	TagCommunityUnitSearchSubject,
-	unitCommunityUnitSearchSubject,
+	nativeCommunityUnitSearchSubject,
 } from "@/features/create/model/community-unit-search";
 import { CommunityUnitSearchPage } from "./community-unit-search-page";
 
@@ -77,11 +77,11 @@ beforeEach(() => {
 });
 
 describe("CommunityUnitSearchPage", () => {
-	it("searches Units with the exact public-entry kind before offering creation", async () => {
+	it("searches the exact catalog owner and shape before offering creation", async () => {
 		render(
 			<CommunityUnitSearchPage
 				initialQuery="Dune"
-				subject={unitCommunityUnitSearchSubject("book")}
+				subject={nativeCommunityUnitSearchSubject("publishing", "work")}
 			/>,
 		);
 
@@ -90,7 +90,8 @@ describe("CommunityUnitSearchPage", () => {
 		await waitFor(() =>
 			expect(api.mutateAsync).toHaveBeenCalledWith({
 				body: {
-					kinds: ["book"],
+					owners: ["publishing"],
+					shapes: ["work"],
 					limit: 20,
 					localizationLanguages: ["zh-Hant", "en"],
 					query: "Dune",
@@ -100,8 +101,8 @@ describe("CommunityUnitSearchPage", () => {
 		);
 		const createLink = await screen.findByRole("link", { name: "Continue to create" });
 		const url = new URL(createLink.getAttribute("href") ?? "", "https://rezics.example");
-		expect(url.pathname).toBe("/create/book/new");
-		expect(url.searchParams.get("ownershipMode")).toBe("community_owned");
+		expect(url.pathname).toBe("/create/publishing/new");
+		expect(url.searchParams.get("shape")).toBe("work");
 		expect(url.searchParams.get("title")).toBe("Dune");
 	});
 
@@ -118,6 +119,7 @@ describe("CommunityUnitSearchPage", () => {
 					limit: 20,
 					localizationLanguages: ["zh-Hant", "en"],
 					query: "science",
+					owners: ["tag"],
 				},
 				path: { index: "tags" },
 			}),
@@ -133,7 +135,7 @@ describe("CommunityUnitSearchPage", () => {
 				initialQuery="science"
 				subject={TagCommunityUnitSearchSubject}
 				unitTagVoteTarget={{
-					type: "book",
+					type: "audio",
 					unitId: "00000000-0000-7000-8000-000000000001",
 					context: {
 						kind: "realm",
@@ -151,6 +153,7 @@ describe("CommunityUnitSearchPage", () => {
 					limit: 20,
 					localizationLanguages: ["zh-Hant", "en"],
 					query: "science",
+					owners: ["tag"],
 					realmTagContextRealmId: "00000000-0000-7000-8000-000000000002",
 				},
 				path: { index: "tags" },

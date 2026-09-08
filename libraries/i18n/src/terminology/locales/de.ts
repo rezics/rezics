@@ -74,6 +74,9 @@ export const deTerminology = defineTerminology("de", {
 	program: {
 		status: "approved",
 		forms: {
+			seasonLabel: "Staffel",
+			versionLabel: "Fassung des Film- und Fernsehwerks",
+			episodeLabel: "Episode",
 			label: "Film- und Fernsehwerk",
 			pluralLabel: "Film- und Fernsehwerke",
 			inline: "Film- und Fernsehwerk",
@@ -160,11 +163,46 @@ export const deTerminology = defineTerminology("de", {
 	referenceCatalog: {
 		status: "approved",
 		forms: {
+			webResourceLabel: "Webressource",
+			areaLabel: "Geografisches Gebiet",
+			instrumentLabel: "Musikinstrument",
+			placeLabel: "Geografischer Ort",
+			eventLabel: "Ereigniseintrag",
 			entryLabel: "Referenzeintrag",
 			label: "Referenzeinträge",
 			pluralLabel: "Referenzeinträge",
 			inline: "Referenzeinträge",
 			plural: "Referenzeinträge",
+		},
+		forbidden: [],
+	},
+	catalogEntry: {
+		status: "approved",
+		forms: {
+			label: "Katalogeintrag",
+			pluralLabel: "Katalogeinträge",
+			inline: "Katalogeintrag",
+			plural: "Katalogeinträge",
+		},
+		forbidden: [],
+	},
+	visualNovel: {
+		status: "approved",
+		forms: {
+			label: "Visueller Roman",
+			pluralLabel: "Visuelle Romane",
+			inline: "visueller Roman",
+			plural: "visuelle Romane",
+		},
+		forbidden: [],
+	},
+	musicalWork: {
+		status: "approved",
+		forms: {
+			label: "Musikwerk",
+			pluralLabel: "Musikwerke",
+			inline: "Musikwerk",
+			plural: "Musikwerke",
 		},
 		forbidden: [],
 	},
@@ -314,6 +352,10 @@ export const deTerminology = defineTerminology("de", {
 	entity: {
 		status: "approved",
 		forms: {
+			labelLabel: "Plattenlabel",
+			collectiveLabel: "Kollektiv",
+			unresolvedLabel: "Nicht eingeordnete Entität",
+			serviceActorLabel: "Automatisierter Dienst",
 			personLabel: "Reale Person",
 			organizationLabel: "Organisation",
 			characterLabel: "Fiktive Figur",

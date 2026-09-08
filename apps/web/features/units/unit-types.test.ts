@@ -1,9 +1,11 @@
-import { describe, expect, it } from "vitest";
-
+import { expect, it } from "vitest";
 import { isUnitType } from "./unit-types";
-
-describe("Unit type routing", () => {
-	it("accepts Release through the generic Unit route guard", () => {
-		expect(isUnitType("release")).toBe(true);
-	});
+it.each(["audio", "video"])("admits the concrete %s platform owner", (owner) => {
+	expect(isUnitType(owner)).toBe(true);
 });
+it.each(["book", "media", "series", "release", "software", "publishing"])(
+	"does not substitute %s for timed media",
+	(owner) => {
+		expect(isUnitType(owner)).toBe(false);
+	},
+);

@@ -24,11 +24,7 @@ export function StudioCreateActions({
 						? t.tags.createPath.title
 						: sectionId === "tag"
 							? t.tags.create.title
-							: context === "overview"
-								? t.create.overview.createAction({
-										subject: t.create.sections[sectionId].label,
-									})
-								: t.create.list.create;
+							: t.create.list.create;
 				return (
 					<div className="flex items-center gap-2" key={action.kind}>
 						<Button

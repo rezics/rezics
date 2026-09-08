@@ -2,26 +2,19 @@
 import type { ContentLanguage } from "@rezics/i18n";
 
 import {
-	getApiEntitiesQueryKey,
 	getApiEntitiesByUnitIdQueryKey,
 	type GetApiEntitiesByUnitIdStatus200,
 	useGetApiEntities,
 	useGetApiEntitiesByUnitId,
 	useGetApiTags,
-	usePostApiEntities,
 	usePutApiEntitiesByUnitIdLocalizationsByLanguage,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
-import { CommunityUnitSearchPrompt } from "@/features/create/components/community-unit-search-prompt";
-import {
-	entityCommunityUnitSearchSubject,
-	isCommunityUnitEntityKind,
-	type CommunityUnitEntityKind,
-} from "@/features/create/model/community-unit-search";
-import { type FormEvent, useState } from "react";
-import { useSearchParams } from "next/navigation";
+
+import { type FormEvent } from "react";
+
 import { BookOpenIcon } from "lucide-react";
 
 import { Cover, PageHeading } from "@rezics/ui";
@@ -33,11 +26,10 @@ import { Item, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } f
 import { LinkBox, LinkOverlay } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
-import { NativeSelect, NativeSelectOption } from "@rezics/ui";
+
 import { Textarea } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
-import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
-import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
+
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
 import { ContentLanguageEditorProvider } from "@/features/content-languages/hooks/use-content-language-editor";
@@ -58,12 +50,10 @@ import {
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetOption,
-	type LocalizationImageAssetValue,
 } from "@/features/media/components/localization-image-upload-field";
 import {
 	AvatarField,
 	type AvatarFieldOption,
-	type AvatarFieldValue,
 	avatarPresentationToInput,
 } from "@/features/media/components/avatar-field";
 import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
@@ -422,166 +412,5 @@ function CreateFrame({
 				{children}
 			</main>
 		</RequireSession>
-	);
-}
-
-export function EntityCreatePage() {
-	const { t } = useTranslation([
-		"actions",
-		"entities",
-		"create",
-		"errors",
-		"governance",
-		"media",
-		"ui",
-		"units",
-	]);
-	const router = useApplicationRouter();
-	const queryClient = useQueryClient();
-	const searchParams = useSearchParams();
-	const [title, setTitle] = useState(() => searchParams.get("title") ?? "");
-	const [searchConfirmed, setSearchConfirmed] = useState(false);
-	const [kind, setKind] = useState<CommunityUnitEntityKind>(() => {
-		const candidate = searchParams.get("kind");
-		return isCommunityUnitEntityKind(candidate) ? candidate : "person";
-	});
-	const searchSubject = entityCommunityUnitSearchSubject(kind);
-	const [error, setError] = useState(false);
-	const [ownershipMode, setOwnershipMode] = useState<"profile_owned" | "community_owned">(() =>
-		searchParams.get("ownershipMode") === "community_owned" ? "community_owned" : "profile_owned",
-	);
-	const [avatar, setAvatar] = useState<AvatarFieldValue | null>(null);
-	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(null);
-	const language = useFormDraftContentLanguage(["title", "summary"]);
-	const create = usePostApiEntities({
-		mutation: {
-			onSuccess: async (result) => {
-				await queryClient.invalidateQueries({ queryKey: getApiEntitiesQueryKey() });
-				router.push(`/entities/${result.id}`);
-			},
-		},
-	});
-	async function submit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		setError(false);
-		const formElement = event.currentTarget;
-		const form = new FormData(formElement);
-		const submittedTitle = String(form.get("title") ?? "").trim();
-		if (ownershipMode === "community_owned" && !searchConfirmed) return;
-		const contentLanguage = await language.resolveLanguage(formElement);
-		try {
-			await create.mutateAsync({
-				body: {
-					ownershipMode,
-					kind,
-					localization: {
-						language: contentLanguage,
-						title: submittedTitle,
-						avatar: avatarPresentationToInput(avatar),
-						bannerAssetId: banner?.id ?? null,
-						...(String(form.get("summary") ?? "").trim()
-							? { summary: String(form.get("summary")).trim() }
-							: {}),
-					},
-				},
-			});
-		} catch {
-			setError(true);
-		}
-	}
-	return (
-		<CreateFrame title={t.entities.newEntity}>
-			<form onInput={language.onInput} onSubmit={(event) => void submit(event)}>
-				<FieldGroup>
-					<Field required>
-						<FieldLabel>{t.units.creation.entryOwnershipLabel}</FieldLabel>
-						<NativeSelect
-							name="ownershipMode"
-							onChange={(event) =>
-								setOwnershipMode(
-									event.currentTarget.value === "community_owned"
-										? "community_owned"
-										: "profile_owned",
-								)
-							}
-							value={ownershipMode}
-						>
-							<NativeSelectOption value="profile_owned">
-								{t.units.creation.ownedEntry}
-							</NativeSelectOption>
-							<NativeSelectOption value="community_owned">
-								{t.units.creation.publicEntry}
-							</NativeSelectOption>
-						</NativeSelect>
-						<p className="text-muted-foreground text-sm">
-							{ownershipMode === "profile_owned"
-								? t.units.creation.ownedEntryDescription
-								: t.units.creation.publicEntryDescription}
-						</p>
-					</Field>
-					<Field required>
-						<FieldLabel>{t.ui.title}</FieldLabel>
-						<Input
-							maxLength={500}
-							name="title"
-							onChange={(event) => {
-								setTitle(event.currentTarget.value);
-								setSearchConfirmed(false);
-							}}
-							required
-							value={title}
-						/>
-					</Field>
-					<Field required>
-						<FieldLabel>{t.entities.kind}</FieldLabel>
-						<NativeSelect
-							name="kind"
-							onChange={(event) => {
-								const candidate = event.currentTarget.value;
-								if (isCommunityUnitEntityKind(candidate)) {
-									setKind(candidate);
-									setSearchConfirmed(false);
-								}
-							}}
-							value={kind}
-						>
-							<NativeSelectOption value="person">{t.ui.person}</NativeSelectOption>
-							<NativeSelectOption value="organization">{t.ui.organization}</NativeSelectOption>
-							<NativeSelectOption value="character">{t.ui.character}</NativeSelectOption>
-						</NativeSelect>
-					</Field>
-					{ownershipMode === "community_owned" ? (
-						<CommunityUnitSearchPrompt
-							confirmed={searchConfirmed}
-							onConfirmedChange={setSearchConfirmed}
-							query={title}
-							subject={searchSubject}
-						/>
-					) : null}
-					<Field>
-						<FieldLabel>{t.ui.summary}</FieldLabel>
-						<Textarea name="summary" maxLength={2000} />
-					</Field>
-					<DraftContentLanguageField controller={language.controller} />
-					<Field>
-						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-						<AvatarField onChange={setAvatar} value={avatar} />
-					</Field>
-					<Field>
-						<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
-						<LocalizationImageUploadField onChange={setBanner} role="banner" value={banner} />
-					</Field>
-					{error && <p className="text-destructive text-sm">{t.ui.retryLater}</p>}
-					<Button
-						disabled={ownershipMode === "community_owned" && !searchConfirmed}
-						variant="solid"
-						type="submit"
-						isLoading={create.isPending}
-					>
-						{t.ui.submit}
-					</Button>
-				</FieldGroup>
-			</form>
-		</CreateFrame>
 	);
 }

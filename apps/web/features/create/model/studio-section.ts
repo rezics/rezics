@@ -1,3 +1,4 @@
+import { CatalogOwnerValues, type UnitOwner } from "@rezics/reference";
 import type { ListCurrentUserStudioContentSection } from "@rezics/openapi-tanstack-query";
 
 import {
@@ -6,18 +7,24 @@ import {
 } from "@/features/units/routing/public-unit-route";
 
 export const StudioSectionIds = [
-	"post",
-	"book",
+	"publishing",
+	"music",
+	"program",
 	"software",
-	"media",
 	"entity",
-	"tag",
-	"realm",
-	"zone",
+	"grouping",
+	"reference",
+	"distribution",
+	"video",
+	"audio",
+	"post",
 	"wiki",
-	"collection",
 	"review",
 	"poll",
+	"realm",
+	"zone",
+	"collection",
+	"tag",
 ] as const satisfies readonly ListCurrentUserStudioContentSection[];
 
 export type StudioSectionId = (typeof StudioSectionIds)[number];
@@ -30,8 +37,20 @@ export function isStudioSectionId(value: string): value is StudioSectionId {
 }
 
 export const StudioSectionGroups = [
-	{ id: "works", sectionIds: ["book", "software", "media", "entity"] },
-	{ id: "publishing", sectionIds: ["post", "wiki", "review", "poll"] },
+	{
+		id: "catalog",
+		sectionIds: [
+			"publishing",
+			"music",
+			"program",
+			"software",
+			"entity",
+			"grouping",
+			"reference",
+			"distribution",
+		],
+	},
+	{ id: "content", sectionIds: ["post", "wiki", "review", "poll", "video", "audio"] },
 	{ id: "organization", sectionIds: ["realm", "zone", "collection"] },
 	{ id: "vocabulary", sectionIds: ["tag"] },
 ] as const satisfies readonly {
@@ -45,10 +64,16 @@ export const StudioTagCreateHref = "/create/tag/new";
 export const StudioTagPathCreateHref = "/create/tag/path/new";
 
 export const StudioSectionCreateHrefs = {
-	book: "/create/book/new",
+	publishing: "/create/publishing/new",
+	music: "/create/music/new",
+	program: "/create/program/new",
 	software: "/create/software/new",
-	media: "/create/media/new",
 	entity: "/create/entity/new",
+	grouping: "/create/grouping/new",
+	reference: "/create/reference/new",
+	distribution: "/create/distribution/new",
+	video: "/create/video/new",
+	audio: "/create/audio/new",
 	tag: StudioTagCreateHref,
 	realm: "/create/realm/new",
 	zone: "/create/zone/new",
@@ -99,10 +124,16 @@ export const StudioCreationLifecycleIds = [
 export type StudioCreationLifecycleId = (typeof StudioCreationLifecycleIds)[number];
 
 const StudioSectionCreationLifecycles = {
-	book: "configurable",
-	software: "configurable",
-	media: "configurable",
-	entity: "configurable",
+	publishing: "private_first",
+	music: "private_first",
+	program: "private_first",
+	software: "private_first",
+	entity: "private_first",
+	grouping: "private_first",
+	reference: "private_first",
+	distribution: "private_first",
+	video: "private_first",
+	audio: "private_first",
 	tag: "publish_now",
 	realm: "publish_now",
 	zone: "preview",
@@ -138,26 +169,11 @@ export function studioSectionCreateActions(
 		: [sectionAction];
 }
 
-const StudioPublicUnitKinds = {
-	book: "book",
-	software: "software",
-	media: "media",
-	entity: "entity",
-	tag: "tag",
-	realm: "realm",
-	zone: "zone",
-	post: "post",
-	wiki: "post",
-	collection: "collection",
-	review: "post",
-	poll: "poll",
-} as const satisfies Record<StudioSectionId, string>;
-
-export function studioContentHref(
-	sectionId: StudioSectionId,
-	resource: PublicUnitRouteValue,
-): string {
-	const href = publicUnitHref(StudioPublicUnitKinds[sectionId], resource);
-	if (!href) throw new Error("Unsupported Studio section");
+export function studioContentHref(owner: UnitOwner, resource: PublicUnitRouteValue): string {
+	if (CatalogOwnerValues.some((candidate) => candidate === owner))
+		return `/catalog/${owner}/${resource.id}`;
+	if (owner === "tag_path") return `/tag-paths/${resource.id}`;
+	const href = publicUnitHref(owner, resource);
+	if (!href) throw new Error("Unsupported Studio resource owner");
 	return href;
 }

@@ -53,7 +53,15 @@ export const jaTerminology = defineTerminology("ja", {
 	},
 	program: {
 		status: "approved",
-		forms: { label: "映像作品", pluralLabel: "映像作品", inline: "映像作品", plural: "映像作品" },
+		forms: {
+			seasonLabel: "シーズン",
+			versionLabel: "映像作品の版",
+			episodeLabel: "エピソード",
+			label: "映像作品",
+			pluralLabel: "映像作品",
+			inline: "映像作品",
+			plural: "映像作品",
+		},
 		forbidden: [],
 	},
 	softwareContent: {
@@ -135,12 +143,42 @@ export const jaTerminology = defineTerminology("ja", {
 	referenceCatalog: {
 		status: "approved",
 		forms: {
+			webResourceLabel: "ウェブリソース",
+			areaLabel: "地理的地域",
+			instrumentLabel: "楽器",
+			placeLabel: "地理的な場所",
+			eventLabel: "イベント項目",
 			entryLabel: "参照項目",
 			label: "参照項目",
 			pluralLabel: "参照項目",
 			inline: "参照項目",
 			plural: "参照項目",
 		},
+		forbidden: [],
+	},
+	catalogEntry: {
+		status: "approved",
+		forms: {
+			label: "カタログ項目",
+			pluralLabel: "カタログ項目",
+			inline: "カタログ項目",
+			plural: "カタログ項目",
+		},
+		forbidden: [],
+	},
+	visualNovel: {
+		status: "approved",
+		forms: {
+			label: "ビジュアルノベル",
+			pluralLabel: "ビジュアルノベル",
+			inline: "ビジュアルノベル",
+			plural: "ビジュアルノベル",
+		},
+		forbidden: [],
+	},
+	musicalWork: {
+		status: "approved",
+		forms: { label: "音楽作品", pluralLabel: "音楽作品", inline: "音楽作品", plural: "音楽作品" },
 		forbidden: [],
 	},
 	music: {
@@ -266,6 +304,10 @@ export const jaTerminology = defineTerminology("ja", {
 	entity: {
 		status: "approved",
 		forms: {
+			labelLabel: "レコードレーベル",
+			collectiveLabel: "集団",
+			unresolvedLabel: "未分類のエンティティ",
+			serviceActorLabel: "自動化サービス",
 			personLabel: "実在の人物",
 			organizationLabel: "団体・組織",
 			characterLabel: "架空の登場人物",
