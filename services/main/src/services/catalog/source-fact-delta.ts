@@ -1,3 +1,4 @@
+import { assertCatalogDefinitionRevision } from "./definitions";
 import { catalogSourceSupportColumns } from "./source-support";
 import { isDeepStrictEqual } from "node:util";
 import { and, eq, ne, isNull, or } from "drizzle-orm";
@@ -17,25 +18,42 @@ import {
 import { transitionCatalogSemanticState, restoreCatalogSemanticRevision } from "./semantic-history";
 import { resolveCatalogSourceOwnedBaseline } from "./source-owned-baselines";
 
-const descriptorSchema = z.discriminatedUnion("kind", [
-	z.strictObject({
-		identity: z.string().min(1).max(1024),
-		path: z.string().startsWith("/").max(512),
-		namespace: z.string().min(1).max(256),
-		key: z.string().min(1).max(1024),
-		value: z.string().max(131072),
-		kind: z.literal("string"),
-	}),
-	z.strictObject({
-		identity: z.string().min(1).max(1024),
-		path: z.string().startsWith("/").max(512),
-		namespace: z.string().min(1).max(256),
-		key: z.string().min(1).max(1024),
-		value: CatalogPartialDateSchema,
-		kind: z.literal("object"),
-	}),
-]);
+const identityFields = {
+	identity: z.string().min(1).max(1024),
+	path: z.string().startsWith("/").max(512),
+};
+const namedFields = {
+	...identityFields,
+	namespace: z.string().min(1).max(256),
+	key: z.string().min(1).max(1024),
+};
+const registeredFields = { ...identityFields, definitionRevisionId: z.uuid() };
+const scalarVariants = [
+	z.strictObject({ ...namedFields, kind: z.literal("string"), value: z.string().max(131072) }),
+	z.strictObject({ ...namedFields, kind: z.literal("number"), value: z.number().finite() }),
+	z.strictObject({ ...namedFields, kind: z.literal("boolean"), value: z.boolean() }),
+	z.strictObject({ ...namedFields, kind: z.literal("object"), value: CatalogPartialDateSchema }),
+	z.strictObject({ ...registeredFields, kind: z.literal("string"), value: z.string().max(131072) }),
+	z.strictObject({ ...registeredFields, kind: z.literal("number"), value: z.number().finite() }),
+	z.strictObject({ ...registeredFields, kind: z.literal("boolean"), value: z.boolean() }),
+] as const;
+export const CatalogSourceFactDescriptorSchema = z.union(scalarVariants);
+const descriptorSchema = CatalogSourceFactDescriptorSchema;
 export type CatalogSourceFactDescriptor = z.output<typeof descriptorSchema>;
+export type CatalogSourceFactResult = {
+	identity: string;
+	path: string;
+	factId: string;
+	semanticId: string;
+	sourceHeadRevision: number;
+};
+const sameDefinition = (left: CatalogSourceFactDescriptor, right: CatalogSourceFactDescriptor) =>
+	left.kind === right.kind &&
+	("definitionRevisionId" in left
+		? "definitionRevisionId" in right && left.definitionRevisionId === right.definitionRevisionId
+		: !("definitionRevisionId" in right) &&
+			left.namespace === right.namespace &&
+			left.key === right.key);
 
 type FactChange = {
 	kind: "catalog-semantic";
@@ -71,51 +89,58 @@ export async function applyCatalogSourceFactDelta(
 		mappingKey: previous?.mappingKey ?? scope.sourceMappingKey,
 	};
 	const changes: FactChange[] = [];
+	const facts: CatalogSourceFactResult[] = [];
 	const consumed = new Set<number>();
 	const support = async (snapshotId: string, descriptor: CatalogSourceFactDescriptor) => {
-		const definition = await ensureCatalogDefinition(tx, {
-			namespace: descriptor.namespace,
-			key: descriptor.key,
-			kind: "property",
-			valueKind: descriptor.kind,
-			...(descriptor.kind === "object"
-				? {
-						constraints: {
-							rules: [
-								{ position: 0, parent: null, memberKey: null, kind: "object" as const },
-								{
-									position: 1,
-									parent: 0,
-									memberKey: "year",
-									kind: "number" as const,
-									nullable: true,
-									integer: true,
-								},
-								{
-									position: 2,
-									parent: 0,
-									memberKey: "month",
-									kind: "number" as const,
-									nullable: true,
-									integer: true,
-									minimum: 1,
-									maximum: 12,
-								},
-								{
-									position: 3,
-									parent: 0,
-									memberKey: "day",
-									kind: "number" as const,
-									nullable: true,
-									integer: true,
-									minimum: 1,
-									maximum: 31,
-								},
-							],
-						},
-					}
-				: {}),
-		});
+		const definition =
+			"definitionRevisionId" in descriptor
+				? { revisionId: descriptor.definitionRevisionId }
+				: await ensureCatalogDefinition(tx, {
+						namespace: descriptor.namespace,
+						key: descriptor.key,
+						kind: "property",
+						valueKind: descriptor.kind,
+						...(descriptor.kind === "object"
+							? {
+									constraints: {
+										rules: [
+											{ position: 0, parent: null, memberKey: null, kind: "object" as const },
+											{
+												position: 1,
+												parent: 0,
+												memberKey: "year",
+												kind: "number" as const,
+												nullable: true,
+												integer: true,
+											},
+											{
+												position: 2,
+												parent: 0,
+												memberKey: "month",
+												kind: "number" as const,
+												nullable: true,
+												integer: true,
+												minimum: 1,
+												maximum: 12,
+											},
+											{
+												position: 3,
+												parent: 0,
+												memberKey: "day",
+												kind: "number" as const,
+												nullable: true,
+												integer: true,
+												minimum: 1,
+												maximum: 31,
+											},
+										],
+									},
+								}
+							: {}),
+					});
+		const meaning = await assertCatalogDefinitionRevision(tx, definition.revisionId, "property");
+		if (meaning.valueKind !== descriptor.kind)
+			throw new TypeError("Source fact value kind differs from its reviewed definition");
 		const [row] = await tx
 			.select({
 				factId: f.fact.id,
@@ -172,6 +197,8 @@ export async function applyCatalogSourceFactDelta(
 				(candidate, index) => !consumed.has(index) && candidate.identity === descriptor.identity,
 			);
 		const old = before[oldIndex];
+		if (old && !sameDefinition(old, descriptor))
+			throw new TypeError("Source fact definition changed for a stable semantic identity");
 		if (old) consumed.add(oldIndex);
 		const proof =
 			old && previous
@@ -191,6 +218,13 @@ export async function applyCatalogSourceFactDelta(
 				});
 			else if (target.row.semanticId !== proof.row.semanticId)
 				throw new Error("Source fact occurrence changed native semantic identity");
+			facts.push({
+				identity: descriptor.identity,
+				path: descriptor.path,
+				factId: proof.row.factId,
+				semanticId: proof.row.semanticId,
+				sourceHeadRevision: proof.row.expectedHeadVersion + 1,
+			});
 			continue;
 		}
 		const sourceRevision = proof.row ? proof.row.expectedHeadVersion + 1 : 0;
@@ -240,6 +274,13 @@ export async function applyCatalogSourceFactDelta(
 				componentKey: target.row.semanticId,
 				beforeRevision: expected,
 				afterRevision: restored.headVersion,
+			});
+			facts.push({
+				identity: descriptor.identity,
+				path: descriptor.path,
+				factId: target.row.factId,
+				semanticId: target.row.semanticId,
+				sourceHeadRevision: target.row.expectedHeadVersion + 1,
 			});
 			continue;
 		}
@@ -296,6 +337,13 @@ export async function applyCatalogSourceFactDelta(
 			beforeRevision: replacement ? currentRevision : null,
 			afterRevision: native.expectedHeadVersion + 1,
 		});
+		facts.push({
+			identity: descriptor.identity,
+			path: descriptor.path,
+			factId: native.id,
+			semanticId: native.semanticId,
+			sourceHeadRevision: native.expectedHeadVersion + 1,
+		});
 	}
 	for (const [index, descriptor] of before.entries()) {
 		if (consumed.has(index) || !previous) continue;
@@ -332,5 +380,5 @@ export async function applyCatalogSourceFactDelta(
 			afterRevision: removed.headVersion,
 		});
 	}
-	return { revision, changes };
+	return { revision, changes, facts };
 }
