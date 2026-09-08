@@ -14,11 +14,13 @@ import {
 	BootstrapAuthUserIds,
 	BootstrapEntityIds,
 	BootstrapUnitIds,
+	BootstrapNamespaceIds,
 } from "./data";
 
 const allIdentityIds = new Set([
 	...BootstrapEntityIds,
 	...BootstrapUnitIds,
+	...BootstrapNamespaceIds,
 	...BootstrapAuthUserIds,
 	...BootstrapAccountIds,
 ]);

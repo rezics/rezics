@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const insertUnit = vi.hoisted(() => vi.fn());
+const insertPlatformUnit = vi.hoisted(() => vi.fn());
 
-vi.mock("../../units/create", () => ({ insertUnit }));
+vi.mock("../../units/create", () => ({ insertPlatformUnit }));
 
 import type { DatabaseTransaction } from "../../database";
 import { ensureBootstrapAddressedUnit, insertStarterLocalization } from "./common";
@@ -35,24 +35,25 @@ function transactionWithReads(
 
 describe("bootstrap identity primitives", () => {
 	beforeEach(() => {
-		insertUnit.mockReset();
+		insertPlatformUnit.mockReset();
 	});
 
 	it("creates a missing reserved Unit and writes its first canonical address", async () => {
 		const { transaction, insert, update } = transactionWithReads([], []);
-		insertUnit.mockResolvedValue({ id: UnitId });
+		insertPlatformUnit.mockResolvedValue({ id: UnitId });
 
 		await expect(
 			ensureBootstrapAddressedUnit(transaction, {
 				id: UnitId,
-				kind: "zone",
-				scopeUnitId: ScopeId,
+				owner: "zone",
+				values: { filterDocument: {}, appearanceDocument: {} },
+				scopeNamespaceId: ScopeId,
 				slug: "explore",
 			}),
 		).resolves.toBe(true);
-		expect(insertUnit).toHaveBeenCalledWith(
+		expect(insertPlatformUnit).toHaveBeenCalledWith(
 			transaction,
-			expect.objectContaining({ id: UnitId, kind: "zone" }),
+			expect.objectContaining({ owner: "zone", values: expect.objectContaining({ id: UnitId }) }),
 		);
 		expect(insert).toHaveBeenCalled();
 		expect(update).not.toHaveBeenCalled();
@@ -67,12 +68,13 @@ describe("bootstrap identity primitives", () => {
 		await expect(
 			ensureBootstrapAddressedUnit(transaction, {
 				id: UnitId,
-				kind: "zone",
-				scopeUnitId: ScopeId,
+				owner: "zone",
+				values: { filterDocument: {}, appearanceDocument: {} },
+				scopeNamespaceId: ScopeId,
 				slug: "renamed",
 			}),
 		).resolves.toBe(false);
-		expect(insertUnit).not.toHaveBeenCalled();
+		expect(insertPlatformUnit).not.toHaveBeenCalled();
 		expect(insert).not.toHaveBeenCalled();
 		expect(update).not.toHaveBeenCalled();
 	});

@@ -2,11 +2,12 @@ import type { AvatarReference } from "@rezics/avatar";
 import { and, eq, isNull } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../../database";
-import { unit, unitLocalization, unitOwnership, unitSlugAddress } from "../../database/schema";
+import { unitLocalization, unitOwnership, unitSlugAddress } from "../../database/schema";
 import type { ContentLanguage } from "../../database/schema/contract-values";
-import { insertUnit } from "../../units/create";
+import { insertPlatformUnit, type CreatePlatformUnitInput } from "../../units/create";
+import { unitOwnerTable } from "../../database/schema/unit-reference-columns";
 import { avatarReferenceToColumns } from "../../units/localization";
-import { BootstrapEpochIso } from "../data";
+import { BootstrapEpochIso, BootstrapPlatformAdministratorProfile } from "../data";
 import { bootstrapValuesEqual } from "../value-comparison";
 
 export function bootstrapEpoch(): Date {
@@ -33,40 +34,61 @@ export function assertFields(
  * Inserts the factory canonical slug only when that Unit has no canonical address.
  * Never updates an existing address, status, visibility, or deletion state.
  */
+type BootstrapAddressedInput = {
+	[Owner in "realm" | "tag" | "zone"]: Omit<
+		Extract<CreatePlatformUnitInput, { owner: Owner }>,
+		"statusActor"
+	> & {
+		readonly id: string;
+		readonly scopeNamespaceId: string;
+		readonly slug: string;
+	};
+}["realm" | "tag" | "zone"];
+
 export async function ensureBootstrapAddressedUnit(
 	tx: DatabaseTransaction,
-	input: {
-		readonly id: string;
-		readonly kind: "realm" | "tag" | "zone";
-		readonly scopeUnitId: string;
-		readonly slug: string;
-	},
+	input: BootstrapAddressedInput,
 ): Promise<boolean> {
+	const table = unitOwnerTable(input.owner);
 	const [existing] = await tx
-		.select({
-			id: unit.id,
-			kind: unit.kind,
-		})
-		.from(unit)
-		.where(eq(unit.id, input.id))
+		.select({ id: table.id })
+		.from(table)
+		.where(eq(table.id, input.id))
 		.limit(1);
-	if (existing) {
-		assertFields(`${input.kind} Unit ${input.id}`, existing, {
-			id: input.id,
-			kind: input.kind,
-		});
-	} else {
+	if (!existing) {
 		const createdAt = bootstrapEpoch();
-		await insertUnit(tx, {
+		const metadata = {
 			id: input.id,
-			kind: input.kind,
-			status: "published",
-			visibility: "public",
+			status: "published" as const,
+			visibility: "public" as const,
 			publishedAt: createdAt,
 			createdAt,
 			updatedAt: createdAt,
-			statusActor: { kind: "system" },
-		});
+			createdByAuthUserId: BootstrapPlatformAdministratorProfile.authUserId,
+		};
+		switch (input.owner) {
+			case "realm":
+				await insertPlatformUnit(tx, {
+					owner: input.owner,
+					values: { ...input.values, ...metadata },
+					statusActor: { kind: "system" },
+				});
+				break;
+			case "tag":
+				await insertPlatformUnit(tx, {
+					owner: input.owner,
+					values: { ...input.values, ...metadata },
+					statusActor: { kind: "system" },
+				});
+				break;
+			case "zone":
+				await insertPlatformUnit(tx, {
+					owner: input.owner,
+					values: { ...input.values, ...metadata },
+					statusActor: { kind: "system" },
+				});
+				break;
+		}
 	}
 
 	const createdAt = bootstrapEpoch();
@@ -78,7 +100,7 @@ export async function ensureBootstrapAddressedUnit(
 	if (!canonicalAddress)
 		await tx.insert(unitSlugAddress).values({
 			kind: "canonical",
-			scopeUnitId: input.scopeUnitId,
+			scopeNamespaceId: input.scopeNamespaceId,
 			slug: input.slug,
 			targetUnitId: input.id,
 			createdAt,

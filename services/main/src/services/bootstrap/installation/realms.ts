@@ -10,7 +10,6 @@ import {
 	contentStructure,
 	imageAsset,
 	imageObject,
-	realm,
 	realmMember,
 	unitAccessGrant,
 } from "../../database/schema";
@@ -23,7 +22,7 @@ import {
 	BootstrapRealmManifest,
 	OfficialRealmAvatarAsset,
 	RezicsScoreRealmManifest,
-	TopLevelSlugNamespaceUnitIds,
+	TopLevelSlugNamespaceIds,
 } from "../data";
 import {
 	bootstrapEpoch,
@@ -51,14 +50,11 @@ export async function ensureBootstrapRealm(
 	const createdAt = bootstrapEpoch();
 	const createdUnit = await ensureBootstrapAddressedUnit(tx, {
 		id: value.id,
-		kind: "realm",
-		scopeUnitId: TopLevelSlugNamespaceUnitIds.realms,
+		owner: "realm",
+		values: { joinPolicy: "open" },
+		scopeNamespaceId: TopLevelSlugNamespaceIds.realms,
 		slug: value.slug,
 	});
-	await tx
-		.insert(realm)
-		.values({ id: value.id, joinPolicy: "open", createdAt, updatedAt: createdAt })
-		.onConflictDoNothing();
 	const [storedTaxonomy] = await tx
 		.select({ id: contentStructure.id })
 		.from(contentStructure)

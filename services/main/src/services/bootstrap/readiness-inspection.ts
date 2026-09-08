@@ -1,4 +1,5 @@
-import { and, asc, count, eq, inArray, isNull, notInArray } from "drizzle-orm";
+import { readBootstrapPlatformIdentityIds } from "./core";
+import { and, asc, count, eq, inArray, isNull, notInArray, sql } from "drizzle-orm";
 
 import { DefaultApiQuotaPolicies } from "../auth/api-quota/policy-schema";
 import { ContentStructureNotFound } from "../content-structure/errors";
@@ -25,7 +26,6 @@ import {
 	post,
 	realm,
 	realmMember,
-	unit,
 	unitDock,
 	accountFollowPreference,
 	unitLocalization,
@@ -79,14 +79,12 @@ export async function inspectInitialInstallationBundle() {
 		localizations,
 		defaultApiQuotaPolicies,
 	] = await Promise.all([
-		database
-			.select({ value: count() })
-			.from(unit)
-			.where(inArray(unit.id, [...BootstrapUnitIds])),
+		readBootstrapPlatformIdentityIds(database).then((ids) => [{ value: ids.length }]),
 		database
 			.select({
 				targetUnitId: unitSlugAddress.targetUnitId,
 				scopeUnitId: unitSlugAddress.scopeUnitId,
+				scopeNamespaceId: unitSlugAddress.scopeNamespaceId,
 				slug: unitSlugAddress.slug,
 			})
 			.from(unitSlugAddress)
@@ -241,14 +239,13 @@ export async function inspectInitialInstallationBundle() {
 			.select({
 				id: zonePage.id,
 				zoneId: zonePage.zoneId,
-				unitKind: unit.kind,
-				deletedAt: unit.deletedAt,
+				unitKind: sql<"post">`'post'`,
+				deletedAt: post.deletedAt,
 				postKind: post.kind,
 				subjectUnitId: post.subjectUnitId,
 				structureId: contentStructure.id,
 			})
 			.from(zonePage)
-			.innerJoin(unit, eq(unit.id, zonePage.id))
 			.innerJoin(post, eq(post.id, zonePage.id))
 			.innerJoin(
 				contentStructureNode,

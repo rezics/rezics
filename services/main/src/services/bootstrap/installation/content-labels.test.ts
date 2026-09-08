@@ -55,7 +55,7 @@ describe("content-label bootstrap installation", () => {
 
 		await ensureContentLabelRegistry(transaction);
 
-		expect(insert).toHaveBeenCalledTimes(ContentLabelRegistryManifest.length * 2);
+		expect(insert).toHaveBeenCalledTimes(ContentLabelRegistryManifest.length);
 		expect(ensureSimpleTagExpressionInTransaction).toHaveBeenCalledTimes(
 			ContentLabelRegistryManifest.length,
 		);

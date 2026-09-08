@@ -29,12 +29,13 @@ compatibility re-export when an internal module moves; update its callers togeth
 
 ## Workload and capacity
 
-The current manifest is a strictly bounded control dataset: 5 slug namespaces, 4 platform
-Profiles and Favorites Collections, 7 curated Tag Collections, 4 content-label Tags, 3 Realms,
-5 Zones, 5 Wiki Posts, and 5 home Pages (42 Unit identities total). It also reserves 4 auth users,
-4 accounts, 5 page structures, 5 navigations, and 2 avatar identities. Manifest values and
-expected projections are
-well below 1 MiB of process memory.
+The current manifest is a strictly bounded control dataset: 5 routing namespaces, 4 public
+Entities, 7 curated Tag Collections, 4 content-label Tags, 3 Realms, 5 Zones,
+5 Wiki Posts, and 5 home Page Posts. The 29 platform identities live in their
+concrete owner tables; routing namespaces are separate control rows. One administrator
+Auth account owns its private Favorites state and receives explicit control grants for the
+3 official organizations. The manifest also reserves 5 page structures, 5 navigations,
+and 2 avatar identities. Manifest values and expected projections remain below 1 MiB.
 
 Ensure writes at most the missing identity subset under one PostgreSQL advisory lock and one
 transaction. Concurrent attempts serialize on the installation key; there is no queue, fan-out,
@@ -43,8 +44,8 @@ existing avatar identity is left untouched. A failed attempt is retried from the
 
 Fresh-install readiness performs fixed-ID primary-key, unique-key, or selective-index probes and
 returns only manifest-bounded rows. The one check against mutable follow ordering reads the first
-ordinary follow for each of the four platform Profiles through
-`unit_follow_follower_favorite_position_idx`; it does not materialize a Profile's sequence. Thus the
+ordinary follow for the administrator Auth account through
+the account follow preference index; it does not materialize a Profile's sequence. Thus the
 work remains `O(B log N)` for fixed bootstrap bound `B`, with bounded memory and network results,
 at both 500,000,000 and 3,000,000,000 corpus rows. Corpus growth changes index depth and storage,
 not result cardinality or application fan-out. No bootstrap-specific partition is required; if the

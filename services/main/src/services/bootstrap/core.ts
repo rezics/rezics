@@ -1,17 +1,26 @@
+import { UnitOwnerValues } from "@rezics/reference";
+import { unitOwnerTable } from "../database/schema/unit-reference-columns";
 import { inArray } from "drizzle-orm";
 
 import { database, type DatabaseExecutor } from "../database";
-import { accounts, entityIdentity, unit, users } from "../database/schema";
+import { accounts, entityIdentity, users, slugNamespace } from "../database/schema";
 import {
 	BootstrapAccountIds,
 	BootstrapAuthUserIds,
 	BootstrapEntityIds,
 	BootstrapUnitIds,
+	BootstrapPlatformReferences,
+	BootstrapNamespaceIds,
 } from "./data";
 
 export const PlatformInstallationLockName = "rezics-platform-installation";
 
-export type PlatformCoreIdentityKind = "unit" | "entity" | "auth_user" | "account";
+export type PlatformCoreIdentityKind =
+	| "unit"
+	| "entity"
+	| "auth_user"
+	| "account"
+	| "slug_namespace";
 
 export interface PlatformCoreIdentity {
 	readonly kind: PlatformCoreIdentityKind;
@@ -19,6 +28,7 @@ export interface PlatformCoreIdentity {
 }
 
 const PlatformCoreIdentities: readonly PlatformCoreIdentity[] = [
+	...BootstrapNamespaceIds.map((id) => ({ kind: "slug_namespace" as const, id })),
 	...BootstrapEntityIds.map((id) => ({ kind: "entity" as const, id })),
 	...BootstrapUnitIds.map((id) => ({ kind: "unit" as const, id })),
 	...BootstrapAuthUserIds.map((id) => ({ kind: "auth_user" as const, id })),
@@ -64,14 +74,35 @@ export function classifyPlatformCore(
  * Inspect only permanent platform identities. Product-owned fields and content
  * are deliberately outside this deployment gate after installation.
  */
+export async function readBootstrapPlatformIdentityIds(executor: DatabaseExecutor) {
+	const result: string[] = [];
+	for (const owner of new Set(BootstrapPlatformReferences.map((reference) => reference.owner))) {
+		const table = unitOwnerTable(owner);
+		const rows = await executor
+			.select({ id: table.id })
+			.from(table)
+			.where(
+				inArray(
+					table.id,
+					BootstrapPlatformReferences.filter((reference) => reference.owner === owner).map(
+						(reference) => reference.id,
+					),
+				),
+			);
+		result.push(...rows.map((row) => row.id));
+	}
+	return result;
+}
+
 export async function inspectPlatformCore(
 	executor: DatabaseExecutor = database,
 ): Promise<PlatformCoreState> {
 	// A transaction executor owns one PostgreSQL client, so keep these reads sequential.
-	const storedUnits = await executor
-		.select({ id: unit.id })
-		.from(unit)
-		.where(inArray(unit.id, [...BootstrapUnitIds]));
+	const storedUnits = await readBootstrapPlatformIdentityIds(executor);
+	const storedNamespaces = await executor
+		.select({ id: slugNamespace.id })
+		.from(slugNamespace)
+		.where(inArray(slugNamespace.id, BootstrapNamespaceIds));
 	const storedEntities = await executor
 		.select({ id: entityIdentity.id })
 		.from(entityIdentity)
@@ -86,13 +117,22 @@ export async function inspectPlatformCore(
 		.where(inArray(accounts.id, BootstrapAccountIds));
 	const presentIdentityIds = new Set([
 		...storedEntities.map(({ id }) => id),
-		...storedUnits.map(({ id }) => id),
+		...storedUnits,
+		...storedNamespaces.map((row) => row.id),
 		...storedUsers.map(({ id }) => id),
 		...storedAccounts.map(({ id }) => id),
 	]);
 	if (presentIdentityIds.size > 0) return classifyPlatformCore(presentIdentityIds, true);
 
-	const [anyUnit] = await executor.select({ id: unit.id }).from(unit).limit(1);
+	let anyUnit = false;
+	for (const owner of UnitOwnerValues) {
+		const table = unitOwnerTable(owner);
+		const [row] = await executor.select({ id: table.id }).from(table).limit(1);
+		if (row) {
+			anyUnit = true;
+			break;
+		}
+	}
 	const [anyUser] = await executor.select({ id: users.id }).from(users).limit(1);
 	const [anyAccount] = await executor.select({ id: accounts.id }).from(accounts).limit(1);
 	return classifyPlatformCore(presentIdentityIds, Boolean(anyUnit || anyUser || anyAccount));

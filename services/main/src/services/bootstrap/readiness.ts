@@ -18,8 +18,7 @@ import {
 	OfficialProfileIds,
 	OfficialRealmAvatarAsset,
 	OfficialZoneManifest,
-	SlugNamespaceManifest,
-	TopLevelSlugNamespaceUnitIds,
+	TopLevelSlugNamespaceIds,
 } from "./data";
 import { isContentLabelRegistryReady } from "./readiness-content-labels";
 import { inspectInitialInstallationBundle } from "./readiness-inspection";
@@ -28,29 +27,28 @@ import { bootstrapValuesEqual } from "./value-comparison";
 /** Factory snapshot for a fresh empty-database install. Not an operational deploy gate. */
 export async function isInitialInstallationBundleReady(): Promise<boolean> {
 	const expectedAddresses = [
-		...SlugNamespaceManifest.map((namespace) => ({
-			targetUnitId: namespace.id,
-			scopeUnitId: null,
-			slug: namespace.slug,
-		})),
 		...ContentLabelRegistryManifest.map((label) => ({
 			targetUnitId: label.id,
-			scopeUnitId: TopLevelSlugNamespaceUnitIds.tags,
+			scopeUnitId: null,
+			scopeNamespaceId: TopLevelSlugNamespaceIds.tags,
 			slug: label.slug,
 		})),
 		...BootstrapRealmManifest.map((bootstrapRealm) => ({
 			targetUnitId: bootstrapRealm.id,
-			scopeUnitId: TopLevelSlugNamespaceUnitIds.realms,
+			scopeUnitId: null,
+			scopeNamespaceId: TopLevelSlugNamespaceIds.realms,
 			slug: bootstrapRealm.slug,
 		})),
 		...OfficialZoneManifest.map((officialZone) => ({
 			targetUnitId: officialZone.id,
-			scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
+			scopeUnitId: null,
+			scopeNamespaceId: TopLevelSlugNamespaceIds.zones,
 			slug: officialZone.slug,
 		})),
 		...OfficialZoneManifest.map((officialZone) => ({
 			targetUnitId: officialZone.homePage.id,
 			scopeUnitId: officialZone.id,
+			scopeNamespaceId: null,
 			slug: officialZone.homePage.slug,
 		})),
 	];
@@ -162,6 +160,7 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 				(actual) =>
 					actual.targetUnitId === expected.targetUnitId &&
 					actual.scopeUnitId === expected.scopeUnitId &&
+					actual.scopeNamespaceId === expected.scopeNamespaceId &&
 					actual.slug === expected.slug,
 			),
 		) &&
@@ -259,7 +258,7 @@ export async function isInitialInstallationBundleReady(): Promise<boolean> {
 				(actual) =>
 					actual.id === expected.homePage.id &&
 					actual.zoneId === expected.id &&
-					actual.unitKind === "zone_page" &&
+					actual.unitKind === "post" &&
 					actual.deletedAt === null &&
 					actual.postKind === "page" &&
 					actual.subjectUnitId === expected.id &&

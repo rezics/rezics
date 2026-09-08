@@ -1,7 +1,7 @@
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, inArray, isNull, sql } from "drizzle-orm";
 
 import { database } from "../database";
-import { tag, unit, unitLocalization, unitOwnership } from "../database/schema";
+import { tag, unitLocalization, unitOwnership } from "../database/schema";
 import { fractionalPositionAt } from "../ordering/position";
 import { ContentLabelRegistryIds, ContentLabelRegistryManifest } from "./data";
 
@@ -10,18 +10,17 @@ export async function isContentLabelRegistryReady(): Promise<boolean> {
 	const [tags, owners, localizations] = await Promise.all([
 		database
 			.select({
-				id: unit.id,
-				kind: unit.kind,
-				status: unit.status,
-				visibility: unit.visibility,
-				moderationStatus: unit.moderationStatus,
-				deletedAt: unit.deletedAt,
+				id: tag.id,
+				kind: sql<"tag">`'tag'`,
+				status: tag.status,
+				visibility: tag.visibility,
+				moderationStatus: tag.moderationStatus,
+				deletedAt: tag.deletedAt,
 				directlyApplicable: tag.directlyApplicable,
 				defaultSpoilerLevel: tag.defaultSpoilerLevel,
 			})
-			.from(unit)
-			.innerJoin(tag, eq(tag.id, unit.id))
-			.where(inArray(unit.id, ContentLabelRegistryIds)),
+			.from(tag)
+			.where(inArray(tag.id, ContentLabelRegistryIds)),
 		database
 			.select({ unitId: unitOwnership.unitId, profileId: unitOwnership.profileId })
 			.from(unitOwnership)

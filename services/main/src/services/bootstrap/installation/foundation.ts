@@ -1,58 +1,24 @@
-import { and, eq } from "drizzle-orm";
-
+import { eq } from "drizzle-orm";
 import type { DatabaseTransaction } from "../../database";
-import { unit, unitSlugAddress } from "../../database/schema";
-import { insertUnitIfMissing } from "../../units/create";
-import { recordUnitRevision } from "../../units/history";
+import { slugNamespace } from "../../database/schema";
 import { SlugNamespaceManifest } from "../data";
-import { assertFields, bootstrapEpoch } from "./common";
+import { assertFields } from "./common";
 
+/** Permanent routing namespaces are bounded control rows, not logical Unit identities. */
 export async function ensureSlugNamespaces(tx: DatabaseTransaction): Promise<void> {
-	const createdAt = bootstrapEpoch();
 	for (const namespace of SlugNamespaceManifest) {
-		const created = await insertUnitIfMissing(tx, {
-			id: namespace.id,
-			kind: "slug_namespace",
-			status: "published",
-			visibility: "public",
-			publishedAt: createdAt,
-			createdAt,
-			updatedAt: createdAt,
-			statusActor: { kind: "system" },
-		});
+		await tx
+			.insert(slugNamespace)
+			.values({ id: namespace.id, name: namespace.slug })
+			.onConflictDoNothing();
 		const [stored] = await tx
-			.select({
-				id: unit.id,
-				kind: unit.kind,
-			})
-			.from(unit)
-			.where(eq(unit.id, namespace.id))
+			.select({ id: slugNamespace.id, name: slugNamespace.name })
+			.from(slugNamespace)
+			.where(eq(slugNamespace.id, namespace.id))
 			.limit(1);
 		assertFields(`slug namespace ${namespace.id}`, stored, {
 			id: namespace.id,
-			kind: "slug_namespace",
+			name: namespace.slug,
 		});
-		const [canonicalAddress] = await tx
-			.select({ id: unitSlugAddress.id })
-			.from(unitSlugAddress)
-			.where(
-				and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, namespace.id)),
-			)
-			.limit(1);
-		if (!canonicalAddress)
-			await tx.insert(unitSlugAddress).values({
-				kind: "canonical",
-				scopeUnitId: null,
-				slug: namespace.slug,
-				targetUnitId: namespace.id,
-				createdAt,
-				updatedAt: createdAt,
-			});
-		if (created)
-			await recordUnitRevision(tx, {
-				unitId: namespace.id,
-				actorProfileId: null,
-				event: "create",
-			});
 	}
 }

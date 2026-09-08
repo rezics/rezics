@@ -1,16 +1,19 @@
 import { PlatformCapabilityValues } from "@rezics/access";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
-import { TopLevelSlugNamespaceUnitIds } from "../../units/slug-system";
+import { TopLevelSlugNamespaceIds } from "../../units/slug-system";
 
-export { TopLevelSlugNamespaceUnitIds };
+export { TopLevelSlugNamespaceIds };
 
 export const BootstrapEpochIso = "2026-01-01T00:00:00.000Z";
 export const BootstrapEpochUnixMilliseconds = 1_767_225_600_000;
 export const RezicsBrandName = verbatimTerms.rezics.value;
 
 export const SlugNamespaceManifest = [
-	...Object.entries(TopLevelSlugNamespaceUnitIds).map(([slug, id]) => ({ id, slug })),
+	...(["users", "realms", "tags", "zones", "entities"] as const).map((slug) => ({
+		id: TopLevelSlugNamespaceIds[slug],
+		slug,
+	})),
 ] as const;
 
 export const OfficialProfileManifest = [

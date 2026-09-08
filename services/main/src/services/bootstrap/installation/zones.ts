@@ -3,13 +3,11 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../../database";
 import {
 	contentStructure,
-	post,
 	realmUnit,
 	unitDock,
 	unitLocalization,
 	unitOwnership,
 	unitSlugAddress,
-	zone,
 	zonePage,
 } from "../../database/schema";
 import { createNavigationStructure } from "../../content-structure/navigation";
@@ -19,7 +17,7 @@ import {
 } from "../../content-structure/service";
 import { createDockHistory } from "../../api/docks/history";
 import { fractionalPositionAt } from "../../ordering/position";
-import { insertUnitIfMissing } from "../../units/create";
+import { insertPlatformUnitIfMissing } from "../../units/create";
 import { recordUnitRevision } from "../../units/history";
 import { recordInitialRealmUnitPublicationEvents } from "../../units/realm-publication";
 import { replaceZonePageSlugAddress } from "../../units/slug-address";
@@ -27,7 +25,12 @@ import {
 	ensureZoneDefaultExperienceInTransaction,
 	type ProvisionZoneDefaultExperienceInput,
 } from "../../zones/default-experience";
-import { OfficialRealmManifest, OfficialZoneManifest, TopLevelSlugNamespaceUnitIds } from "../data";
+import {
+	OfficialRealmManifest,
+	OfficialZoneManifest,
+	TopLevelSlugNamespaceIds,
+	BootstrapPlatformAdministratorProfile,
+} from "../data";
 import {
 	bootstrapEpoch,
 	ensureBootstrapAddressedUnit,
@@ -40,26 +43,21 @@ async function ensureOfficialWikiPost(
 	value: (typeof OfficialZoneManifest)[number],
 ): Promise<boolean> {
 	const createdAt = bootstrapEpoch();
-	const created = await insertUnitIfMissing(tx, {
-		id: value.wikiPost.id,
-		kind: "post",
-		status: "published",
-		visibility: "public",
-		publishedAt: createdAt,
-		createdAt,
-		updatedAt: createdAt,
-		statusActor: { kind: "system" },
-	});
-	await tx
-		.insert(post)
-		.values({
+	const created = await insertPlatformUnitIfMissing(tx, {
+		owner: "post",
+		values: {
 			id: value.wikiPost.id,
 			kind: "wiki",
 			subjectUnitId: value.id,
+			createdByAuthUserId: BootstrapPlatformAdministratorProfile.authUserId,
+			status: "published",
+			visibility: "public",
+			publishedAt: createdAt,
 			createdAt,
 			updatedAt: createdAt,
-		})
-		.onConflictDoNothing();
+		},
+		statusActor: { kind: "system" },
+	});
 	if (created)
 		for (const [index, localization] of value.wikiPost.localizations.entries())
 			await insertStarterLocalization(tx, {
@@ -102,26 +100,21 @@ async function ensureOfficialZonePage(
 	value: (typeof OfficialZoneManifest)[number],
 ): Promise<boolean> {
 	const createdAt = bootstrapEpoch();
-	const created = await insertUnitIfMissing(tx, {
-		id: value.homePage.id,
-		kind: "zone_page",
-		status: "published",
-		visibility: "public",
-		publishedAt: createdAt,
-		createdAt,
-		updatedAt: createdAt,
-		statusActor: { kind: "system" },
-	});
-	await tx
-		.insert(post)
-		.values({
+	const created = await insertPlatformUnitIfMissing(tx, {
+		owner: "post",
+		values: {
 			id: value.homePage.id,
-			subjectUnitId: value.id,
 			kind: "page",
+			subjectUnitId: value.id,
+			createdByAuthUserId: BootstrapPlatformAdministratorProfile.authUserId,
+			status: "published",
+			visibility: "public",
+			publishedAt: createdAt,
 			createdAt,
 			updatedAt: createdAt,
-		})
-		.onConflictDoNothing();
+		},
+		statusActor: { kind: "system" },
+	});
 	await tx
 		.insert(zonePage)
 		.values({
@@ -211,20 +204,14 @@ export async function ensureOfficialZones(tx: DatabaseTransaction): Promise<read
 		);
 		const createdUnit = await ensureBootstrapAddressedUnit(tx, {
 			id: value.id,
-			kind: "zone",
-			scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
-			slug: value.slug,
-		});
-		await tx
-			.insert(zone)
-			.values({
-				id: value.id,
+			owner: "zone",
+			values: {
 				filterDocument: value.filterDocument,
 				appearanceDocument: value.appearanceDocument,
-				createdAt,
-				updatedAt: createdAt,
-			})
-			.onConflictDoNothing();
+			},
+			scopeNamespaceId: TopLevelSlugNamespaceIds.zones,
+			slug: value.slug,
+		});
 		await ensureOfficialWikiPost(tx, value);
 		await ensureOfficialZonePage(tx, value);
 		const [storedNavigation] = await tx
@@ -332,6 +319,7 @@ async function getZoneDefaultExperienceInput(
 	return {
 		zoneId,
 		actorProfileId: owner.profileId,
+		actorAuthUserId: BootstrapPlatformAdministratorProfile.authUserId,
 		language: localization.language,
 		title: localization.title,
 	};
