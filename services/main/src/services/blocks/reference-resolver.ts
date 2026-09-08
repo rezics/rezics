@@ -2,13 +2,16 @@ import { selfAuthUserIdForEntity } from "../participation/account-query";
 import { and, eq, inArray, isNull, or } from "drizzle-orm";
 import type { BlockReferenceResolver } from "@rezics/block";
 
-import { getUnitReadCondition } from "../authorization/unit/query";
+import { Authorization } from "../authorization";
+import type { UnitAuthorization } from "../authorization/unit/authorization";
+import { currentParticipationAuthority } from "../participation/policy";
+import type { UnitOwner } from "@rezics/reference";
 import type { DatabaseTransaction } from "../database";
-import { imageAsset, post, contentStructure, unit, type UnitKind } from "../database/schema";
+import { imageAsset, post, label, contentStructure, authEntity } from "../database/schema";
 
 export interface UnitBlockReferenceHost {
 	readonly unitId: string;
-	readonly kind: UnitKind;
+	readonly kind: UnitOwner;
 }
 
 export function createUnitBlockReferenceResolver(
@@ -16,43 +19,21 @@ export function createUnitBlockReferenceResolver(
 	input: {
 		readonly host: UnitBlockReferenceHost;
 		readonly profileId: string;
+		readonly authorization?: UnitAuthorization<string>;
 	},
 ): BlockReferenceResolver {
 	return {
 		async resolve(kind, identifiers) {
 			if (!identifiers.length) return new Set<string>();
-			if (kind === "label") {
-				const rows = await tx
-					.select({ id: unit.id })
-					.from(unit)
-					.where(
-						and(
-							inArray(unit.id, [...identifiers]),
-							eq(unit.kind, "label"),
-							getUnitReadCondition(input.profileId),
-						),
-					);
-				return new Set(rows.map((row) => row.id));
-			}
-			if (kind === "unit") {
-				const rows = await tx
-					.select({ id: unit.id })
-					.from(unit)
-					.where(and(inArray(unit.id, [...identifiers]), getUnitReadCondition(input.profileId)));
-				return new Set(rows.map((row) => row.id));
-			}
-			if (kind === "wiki-post") {
-				const rows = await tx
-					.select({ id: post.id })
-					.from(post)
-					.innerJoin(unit, eq(unit.id, post.id))
-					.where(
-						and(
-							inArray(post.id, [...identifiers]),
-							eq(post.kind, "wiki"),
-							getUnitReadCondition(input.profileId),
-						),
-					);
+			if (kind === "label" || kind === "unit" || kind === "wiki-post") {
+				const selected = [...new Set(identifiers)];
+				if (selected.length > 500) throw new RangeError("Block reference batches cannot exceed 500 targets");
+				const [binding] = input.authorization ? [] : await tx.select({ authUserId: authEntity.authUserId }).from(authEntity).where(and(eq(authEntity.entityId, input.profileId), eq(authEntity.state, "active"))).limit(1);
+				const authorization = input.authorization ?? new Authorization(input.profileId, binding?.authUserId, currentParticipationAuthority()).unit;
+				const readable = await authorization.readableUnitIdsInTransaction(tx, selected);
+				if (kind === "unit" || !readable.size) return readable;
+				const table = kind === "label" ? label : post;
+				const rows = await tx.select({ id: table.id }).from(table).where(and(inArray(table.id, [...readable]), kind === "wiki-post" ? eq(post.kind, "wiki") : undefined));
 				return new Set(rows.map((row) => row.id));
 			}
 			if (kind === "asset") {

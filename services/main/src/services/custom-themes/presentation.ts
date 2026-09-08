@@ -26,7 +26,7 @@ import {
 	customThemeRevision,
 	customThemeRevisionExternalResource,
 	customThemeRevisionFile,
-	unit,
+	zone,
 	unitCustomThemeInstallation,
 	unitPresentationDocument,
 	unitPresentationRevision,
@@ -66,9 +66,9 @@ function parsePresentationDocument(value: unknown) {
 
 async function ensureSupportedHost(executor: DatabaseExecutor, hostUnitId: string): Promise<void> {
 	const [host] = await executor
-		.select({ id: unit.id })
-		.from(unit)
-		.where(and(eq(unit.id, hostUnitId), eq(unit.kind, "zone"), isNull(unit.deletedAt)))
+		.select({ id: zone.id })
+		.from(zone)
+		.where(and(eq(zone.id, hostUnitId), isNull(zone.deletedAt)))
 		.limit(1);
 	if (!host) throw new UnitPresentationHostUnsupported();
 }

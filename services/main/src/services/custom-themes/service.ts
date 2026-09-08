@@ -41,13 +41,13 @@ import {
 	customThemeRevisionExternalResource,
 	customThemeRevisionFile,
 	customThemeRevisionReviewEvent,
-	unit,
+	zone,
 	unitLocalization,
 	unitCustomThemeInstallation,
 } from "../database/schema";
 import { canonicalRevisionJson } from "../history/content";
 import { storage } from "../storage";
-import { insertUnit } from "../units/create";
+import { insertPlatformUnit } from "../units/create";
 import { toUnitLocalizationStorage } from "../units/localization";
 import { validateSubmittedCustomThemePackage, type SubmittedCustomThemeFileInput } from "./package";
 
@@ -188,8 +188,7 @@ async function ensureThemeExists(executor: DatabaseExecutor, themeUnitId: string
 	const [theme] = await executor
 		.select({ id: customTheme.id })
 		.from(customTheme)
-		.innerJoin(unit, and(eq(unit.id, customTheme.id), eq(unit.kind, "custom_theme")))
-		.where(and(eq(customTheme.id, themeUnitId), isNull(unit.deletedAt)))
+		.where(and(eq(customTheme.id, themeUnitId), isNull(customTheme.deletedAt)))
 		.limit(1);
 	if (!theme) throw new CustomThemeNotFound();
 }
@@ -207,14 +206,16 @@ export async function createCustomTheme(input: {
 			{ assetId: input.localization.bannerAssetId, role: "banner" },
 			{ assetId: input.localization.coverAssetId, role: "cover" },
 		]);
-		const created = await insertUnit(tx, {
-			kind: "custom_theme",
-			status: "published",
-			visibility: "public",
-			publishedAt: new Date(),
+		const created = await insertPlatformUnit(tx, {
+			owner: "custom_theme",
+			values: {
+				status: "published",
+				visibility: "public",
+				publishedAt: new Date(),
+				createdByAuthUserId: selfAuthUserIdForEntity(input.ownerProfileId),
+			},
 			statusActor: { kind: "profile", profileId: input.ownerProfileId },
 		});
-		await tx.insert(customTheme).values({ id: created.id });
 		await tx
 			.insert(unitLocalization)
 			.values({ unitId: created.id, ...toUnitLocalizationStorage(input.localization) });
@@ -586,9 +587,9 @@ export async function decideCustomThemeRevision(input: {
 			)
 				throw new CustomThemeReviewEvidenceInvalid();
 			const [host] = await tx
-				.select({ id: unit.id })
-				.from(unit)
-				.where(and(eq(unit.id, input.hostUnitId), eq(unit.kind, "zone"), isNull(unit.deletedAt)))
+				.select({ id: zone.id })
+				.from(zone)
+				.where(and(eq(zone.id, input.hostUnitId), isNull(zone.deletedAt)))
 				.limit(1);
 			if (!host) throw new CustomThemeInstallationInvalid();
 			const resourceHealth = await tx
