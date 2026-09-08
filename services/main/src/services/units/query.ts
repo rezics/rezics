@@ -2,6 +2,7 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { UnitReferenceSchema, type UnitReference } from "@rezics/reference";
 import type { DatabaseExecutor } from "../database";
+import { post } from "../database/schema/post";
 import { catalogRoutingControl, catalogUnitLocator } from "../database/schema/catalog-identity";
 import { unitOwnerTable } from "../database/schema/unit-reference-columns";
 
@@ -19,7 +20,12 @@ export async function readUnitState(
 	const query = executor
 		.select({
 			id: table.id,
-			shape: "shape" in table ? table.shape : sql<string>`${reference.owner}`,
+			shape:
+				reference.owner === "post"
+					? post.kind
+					: "shape" in table
+						? table.shape
+						: sql<string>`${reference.owner}`,
 			status: table.status,
 			visibility: table.visibility,
 			contentRating: table.contentRating,
