@@ -19,6 +19,7 @@ BEGIN
   IF component_name='program_episode' THEN allowed:=allowed||ARRAY['date']; END IF;
   IF NOT fields ?& allowed OR fields-allowed<>'{}'::jsonb OR observed_fields IS NULL OR cardinality(observed_fields)>32
     OR NOT observed_fields<@allowed OR (SELECT count(*)<>count(DISTINCT k) FROM unnest(observed_fields) k) THEN RETURN false; END IF;
+  IF component_name='program_episode' AND fields->'seasonId'<>'null'::jsonb AND fields->'programId'='null'::jsonb THEN RETURN false; END IF;
   FOREACH field_name IN ARRAY allowed LOOP
     scalar:=fields->field_name;
     IF NOT field_name=ANY(observed_fields) THEN
@@ -36,6 +37,7 @@ BEGIN
       IF jsonb_typeof(scalar)<>'number' THEN RETURN false; END IF;
       numeric_value:=(fields->>field_name)::numeric;
       IF field_name=ANY(integers) AND (numeric_value<0 OR numeric_value>9007199254740991 OR trunc(numeric_value)<>numeric_value) THEN RETURN false; END IF;
+      IF field_name='discNumber' AND numeric_value>2147483647 THEN RETURN false; END IF;
       IF abs(numeric_value)>1.7976931348623157e308::numeric THEN RETURN false; END IF;
     ELSIF field_name=ANY(strings) THEN
       IF jsonb_typeof(scalar)<>'string' OR char_length(fields->>field_name)>CASE WHEN field_name IN('number','durationText','dateText') THEN 4096 WHEN field_name='languageTag' THEN 255 ELSE 131072 END THEN RETURN false; END IF;

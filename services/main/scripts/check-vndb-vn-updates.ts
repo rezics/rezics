@@ -193,6 +193,7 @@ function dumpVn(record: typeof original | typeof updated, changed: boolean) {
 		})),
 		links: [{ id: record.id, link: 1 }],
 		extlinks: [{ id: 1, site: "website", value: `https://example.invalid/${changed ? "b" : "a"}` }],
+		anime: [],
 	};
 }
 const staffBytes = Buffer.from(JSON.stringify(staff)),

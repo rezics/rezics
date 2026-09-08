@@ -20,10 +20,10 @@ const descriptorSchema = z.strictObject({
 	value: z.string().min(1).max(8192),
 	path: z.string().startsWith("/").max(512),
 });
-export type MusicBrainzIdentifierDescriptor = z.infer<typeof descriptorSchema>;
+export type CatalogSourceIdentifierDescriptor = z.infer<typeof descriptorSchema>;
 
 /** @internal Identifier evidence is an immutable claim revision; additions/removals never overwrite unrelated claims. */
-export async function applyMusicBrainzIdentifierDelta(
+export async function applyCatalogSourceIdentifierDelta(
 	tx: DatabaseTransaction,
 	reference: CatalogReference,
 	actor: string,
@@ -34,8 +34,8 @@ export async function applyMusicBrainzIdentifierDelta(
 		previousSnapshotId: string;
 		snapshotId: string;
 	},
-	previousInput: readonly MusicBrainzIdentifierDescriptor[],
-	incomingInput: readonly MusicBrainzIdentifierDescriptor[],
+	previousInput: readonly CatalogSourceIdentifierDescriptor[],
+	incomingInput: readonly CatalogSourceIdentifierDescriptor[],
 ) {
 	const previous = z.array(descriptorSchema).max(128).parse(previousInput),
 		incoming = z.array(descriptorSchema).max(128).parse(incomingInput);
@@ -44,12 +44,12 @@ export async function applyMusicBrainzIdentifierDelta(
 	const f = CatalogFactTables[reference.owner],
 		t = CatalogNameTables[reference.owner];
 	const scope = await catalogSourceSupportColumns(tx, source.sourceRecordId);
-	const identity = (entry: MusicBrainzIdentifierDescriptor) => {
+	const identity = (entry: CatalogSourceIdentifierDescriptor) => {
 		const value = normalizeCatalogIdentifier({ namespace: entry.namespace, value: entry.value });
 		return JSON.stringify([value.namespace, value.normalizedValue]);
 	};
-	const unique = (entries: readonly MusicBrainzIdentifierDescriptor[]) => {
-		const result = new Map<string, MusicBrainzIdentifierDescriptor>();
+	const unique = (entries: readonly CatalogSourceIdentifierDescriptor[]) => {
+		const result = new Map<string, CatalogSourceIdentifierDescriptor>();
 		for (const entry of entries)
 			if (!result.has(identity(entry))) result.set(identity(entry), entry);
 		return result;
@@ -57,7 +57,7 @@ export async function applyMusicBrainzIdentifierDelta(
 	const before = unique(previous),
 		after = unique(incoming);
 	const changes: CatalogSourceNativeChange[] = [];
-	const locate = async (snapshotId: string, entry: MusicBrainzIdentifierDescriptor) => {
+	const locate = async (snapshotId: string, entry: CatalogSourceIdentifierDescriptor) => {
 		const rows = await tx
 			.select(getTableColumns(t.identifierRevision))
 			.from(f.support)

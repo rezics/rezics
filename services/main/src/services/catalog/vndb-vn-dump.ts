@@ -118,6 +118,7 @@ export const VndbVnDumpSchema = z.object({
 	images: z.array(VndbDumpImageSchema).max(4098),
 	links: z.array(VndbDumpExternalBindingSchema).max(512),
 	extlinks: z.array(VndbDumpExternalLinkSchema).max(512),
+	anime: z.array(owner.extend({ aid: integer.positive().max(2147483647) })).max(4096),
 });
 
 /** @alpha One bounded VN packet joins exact staff aliases and snapshot-local contexts before native adoption. */
@@ -131,6 +132,7 @@ export function normalizeVndbVnDump(input: unknown) {
 		"seiyuu",
 		"relations",
 		"screenshots",
+		"anime",
 	] as const)
 		if (packet[family].some((value) => value.id !== row.id))
 			throw new TypeError("VN dump join belongs to another source owner");
@@ -144,6 +146,7 @@ export function normalizeVndbVnDump(input: unknown) {
 		packet.relations.map((value) => value.vid),
 		packet.screenshots.map((value) => value.scr),
 		packet.seiyuu.map((value) => `${value.aid}/${value.cid}`),
+		packet.anime.map((value) => value.aid),
 	])
 		if (new Set<string | number>(values).size !== values.length)
 			throw new TypeError("Duplicate VN dump join key");
@@ -285,6 +288,25 @@ export function normalizeVndbVnDump(input: unknown) {
 		return `/vn/${fields[path] ?? path.slice(1)}`;
 	};
 	const extraSemantics = planVndbDumpExternalLinks(row.id, packet.links, packet.extlinks, "/links");
+	for (const [index, anime] of packet.anime.entries())
+		extraSemantics.relations.push({
+			key: "related-program",
+			path: `/anime/${index}`,
+			spoiler: 0,
+			qualifiers: [],
+			participants: [
+				{
+					role: "program",
+					target: {
+						owner: "program",
+						shape: "program",
+						objectType: "anime",
+						externalId: String(anime.aid),
+						path: `/anime/${index}/aid`,
+					},
+				},
+			],
+		});
 	if (editorialImage) {
 		const editorial = planVndbSemantics({ id: row.id, image: editorialImage });
 		for (const relation of editorial.relations) {

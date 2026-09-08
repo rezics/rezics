@@ -232,6 +232,7 @@ try {
 								images: [],
 								links: [],
 								extlinks: [],
+								anime: [],
 							}),
 						);
 						const dumpReceipt = await storeCatalogSourcePayload(

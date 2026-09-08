@@ -14,6 +14,11 @@ differs from the currently adopted structure. Partial reverse indexes keep those
 reference checks bounded. The canonical guard checks shape, field grammar,
 observation neutrality, parent shape and vocabulary kind.
 
+The derived UUID columns are stored, use only immutable row-local expressions,
+and are not partition keys. BEFORE guards inspect the source JSON directly because
+generated values are computed afterward, as specified by the
+[PostgreSQL generated-column contract](https://www.postgresql.org/docs/current/ddl-generated-columns.html).
+
 Ordinary updates read the exact preceding snapshot in the same root epoch, merge
 only observed fields, preserve independent native fields, and reject competing
 edits to a changed source field. A source field set cannot silently narrow.

@@ -9,8 +9,8 @@ import { applyMusicBrainzNameDelta } from "./musicbrainz-name-delta";
 import { applyMusicBrainzFactDelta, musicBrainzFactDescriptors } from "./musicbrainz-facts";
 import { compensateMusicSourceApplication } from "./music-source-compensation";
 import { prepareMusicSourceProjection } from "./music-source-projection";
-import { applyMusicBrainzIdentifierDelta } from "./musicbrainz-identifier-delta";
 import { applyMusicBrainzRelationDelta } from "./musicbrainz-relation-delta";
+import { applyCatalogSourceIdentifierDelta } from "./source-identifier-delta";
 
 type Archived = { receipt: CatalogSourceReceipt; bytes: Uint8Array };
 
@@ -256,7 +256,7 @@ export function musicBrainzObjectNativeWriter(
 								path: `/isrcs/${index}`,
 							}))
 						: [];
-			const identifiers = await applyMusicBrainzIdentifierDelta(
+			const identifiers = await applyCatalogSourceIdentifierDelta(
 				tx,
 				context.reference,
 				context.actor,

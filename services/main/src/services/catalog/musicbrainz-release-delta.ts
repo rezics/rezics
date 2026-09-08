@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
-import { applyMusicBrainzIdentifierDelta } from "./musicbrainz-identifier-delta";
 import { applyMusicBrainzRelationDelta } from "./musicbrainz-relation-delta";
+import { applyCatalogSourceIdentifierDelta } from "./source-identifier-delta";
 import { runParticipationSavepoint } from "../participation/policy";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import { z } from "zod";
@@ -411,7 +411,7 @@ export function musicBrainzReleaseNativeWriter(
 			);
 			const identifierEntries = (record: typeof incoming) =>
 				record.asin ? [{ namespace: "asin", value: record.asin, path: "/asin" }] : [];
-			const identifiers = await applyMusicBrainzIdentifierDelta(
+			const identifiers = await applyCatalogSourceIdentifierDelta(
 				tx,
 				context.reference,
 				context.actor,

@@ -49,7 +49,8 @@ export type VndbNativeNamePlan = {
 		| "vndb.trait.name"
 		| "vndb.quote.name"
 		| "vndb.drm.name"
-		| "vndb.engine.name";
+		| "vndb.engine.name"
+		| "vndb.anime.name";
 	path: string;
 	fields: SourceFields;
 	official?: { value: boolean; path: string };

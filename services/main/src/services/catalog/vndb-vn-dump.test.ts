@@ -4,6 +4,7 @@ import { planVndbParticipation } from "./vndb-participation";
 import { planVndbSemantics } from "./vndb-semantics-contracts";
 import { remapVndbSemanticPlan } from "./vndb-semantics";
 const packet = {
+	anime: [],
 	vn: {
 		id: "v1",
 		image: null,

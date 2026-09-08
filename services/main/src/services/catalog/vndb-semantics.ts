@@ -34,6 +34,7 @@ import {
 import { catalogValueNodes } from "./value-nodes";
 import { VndbCatalogContractSha256, VndbDumpContractSha256 } from "./vndb";
 import { normalizeVndbSemanticDump } from "./vndb-semantics-dump";
+import { updateProgramStructure } from "./program";
 import {
 	planVndbSemantics,
 	VndbHierarchyEdgeSchema,
@@ -57,6 +58,7 @@ const subjectTargets: TargetRule[] = [
 	},
 ];
 const roleTargets: Record<string, TargetRule[]> = {
+	program: [{ owner: "program", shapes: ["program"] }],
 	subject: subjectTargets,
 	producer: [
 		{
@@ -208,7 +210,18 @@ function propertyConstraints(item: VndbSemanticFact) {
  */
 async function semanticDefinitions(tx: DatabaseTransaction) {
 	const definitions = new Map<string, string>();
-	for (const item of scalarDefinitions) {
+	// New standalone facts must not change existing immutable predicate qualifier contracts.
+	const standalone: VndbSemanticFact[] = [
+		{
+			namespace: "catalog.metadata",
+			key: "program-start-year",
+			kind: "number",
+			value: null,
+			path: "/",
+			constraints: { nullable: true, integer: true, minimum: -32768, maximum: 32767 },
+		},
+	];
+	for (const item of [...scalarDefinitions, ...standalone]) {
 		const input = {
 			namespace: item.namespace,
 			key: item.key,
@@ -289,6 +302,7 @@ async function appendFact(
 }
 
 function allowedRoles(relation: VndbSemanticRelation) {
+	if (relation.key === "related-program") return ["subject", "program"];
 	if (relation.key === "supersedes-release") return ["subject", "release"];
 	if (
 		relation.key === "developed-by" ||
@@ -418,6 +432,21 @@ export async function appendVndbSemanticPlan(
 					...participant.target,
 					source: "vndb",
 					evidence: document.referenceAt(participant.target.path),
+					...(participant.target.owner === "program" && participant.target.shape === "program"
+						? {
+								initialize: async (
+									reference: Readonly<CatalogReference & { revision: number }>,
+								) => ({
+									...reference,
+									revision: (
+										await updateProgramStructure(tx, reference, actor, reference.revision, {
+											shape: "program",
+											fields: {},
+										})
+									).revision,
+								}),
+							}
+						: {}),
 				});
 				targets.set(key, native);
 			}
