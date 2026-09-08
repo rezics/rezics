@@ -2,7 +2,12 @@ import { and, asc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 
 import { getUnitPermissionCondition } from "../authorization/unit/query";
 import { database } from "../database";
-import { bookChapterDraftJob, contentStructureNode, post, unit } from "../database/schema";
+import {
+	bookChapterDraftJob,
+	contentStructureNode,
+	post,
+	publishingIdentity,
+} from "../database/schema";
 import { transitionUnitStatus } from "./status";
 import {
 	bookChapterDraftRetryDelayMilliseconds,
@@ -83,9 +88,9 @@ async function processBatch(claimed: ClaimedJob): Promise<void> {
 			.for("update");
 		if (!job) return;
 		const [bookState] = await tx
-			.select({ status: unit.status })
-			.from(unit)
-			.where(and(eq(unit.id, job.bookId), isNull(unit.deletedAt)))
+			.select({ status: publishingIdentity.status })
+			.from(publishingIdentity)
+			.where(and(eq(publishingIdentity.id, job.bookId), isNull(publishingIdentity.deletedAt)))
 			.limit(1);
 		if (bookState?.status !== "draft") {
 			const now = new Date();
@@ -125,22 +130,23 @@ async function processBatch(claimed: ClaimedJob): Promise<void> {
 		const chapters = nodes.length
 			? await tx
 					.select({
-						id: unit.id,
-						status: unit.status,
+						id: post.id,
+						status: post.status,
 						allowed: sql<boolean>`${getUnitPermissionCondition(
 							job.requestedByProfileId,
 							"unit.status.update",
 							["unit"],
+							post,
 						)}`,
 					})
-					.from(unit)
+					.from(post)
 					.where(
 						and(
 							inArray(
-								unit.id,
+								post.id,
 								nodes.map(({ chapterId }) => chapterId),
 							),
-							isNull(unit.deletedAt),
+							isNull(post.deletedAt),
 						),
 					)
 			: [];

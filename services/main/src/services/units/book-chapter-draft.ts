@@ -1,7 +1,12 @@
 import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import { database, type DatabaseTransaction } from "../database";
-import { book, bookChapterDraftJob, contentStructure, unit } from "../database/schema";
+import {
+	publishingIdentity,
+	publishingTextVersion,
+	bookChapterDraftJob,
+	contentStructure,
+} from "../database/schema";
 import { UnitChanged, UnitNotFound } from "./errors";
 
 export type BookChapterDraftJobSummary = {
@@ -22,25 +27,25 @@ export async function enqueueBookChapterDraftJobInTransaction(
 ): Promise<BookChapterDraftJobSummary> {
 	const [current] = await tx
 		.select({
-			id: book.id,
-			status: unit.status,
-			updatedAt: unit.updatedAt,
+			id: publishingTextVersion.id,
+			status: publishingIdentity.status,
+			updatedAt: publishingIdentity.updatedAt,
 			structureId: contentStructure.id,
 		})
-		.from(book)
-		.innerJoin(unit, eq(unit.id, book.id))
+		.from(publishingTextVersion)
+		.innerJoin(publishingIdentity, eq(publishingIdentity.id, publishingTextVersion.id))
 		.leftJoin(
 			contentStructure,
 			and(
-				eq(contentStructure.ownerUnitId, book.id),
+				eq(contentStructure.ownerUnitId, publishingTextVersion.id),
 				eq(contentStructure.kind, "book.contents"),
 				isNull(contentStructure.deletedAt),
 			),
 		)
-		.where(and(eq(book.id, input.bookId), isNull(unit.deletedAt)))
+		.where(and(eq(publishingTextVersion.id, input.bookId), isNull(publishingIdentity.deletedAt)))
 		.limit(1)
-		.for("update", { of: unit });
-	if (!current) throw new UnitNotFound("book");
+		.for("update", { of: publishingIdentity });
+	if (!current) throw new UnitNotFound("publishing.text_version");
 	if (current.status !== "draft" || current.updatedAt.getTime() !== input.bookUpdatedAt.getTime())
 		throw new UnitChanged(current.updatedAt);
 
