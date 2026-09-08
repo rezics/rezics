@@ -27,13 +27,15 @@ export function RelationEditorLoader({
 		definition = useGetCatalogDefinitionRevision({ path: { id: relation.definitionRevisionId } });
 	const values = useQuery({
 		queryKey: ["catalog-relation-edit", reference.owner, reference.id, relation.id, locale.target],
-		queryFn: async () => {
+		queryFn: async ({ signal }) => {
 			const participants: ParticipantDraft[] = [],
 				qualifiers: QualifierDraft[] = [];
 			let afterPosition = -1,
 				afterId: string | undefined;
 			for (let page = 0; page < 3; page++) {
 				const { data } = await listCatalogRelationParticipants({
+					signal,
+					throwOnError: true,
 					path: { ...reference, relationId: relation.id },
 					query: {
 						limit: 64,
@@ -63,6 +65,8 @@ export function RelationEditorLoader({
 			}
 			for (let page = 0; page < 3; page++) {
 				const { data } = await listCatalogRelationQualifiers({
+					signal,
+					throwOnError: true,
 					path: { ...reference, relationId: relation.id },
 					query: { limit: 32, afterId, maxSpoiler: relation.spoiler },
 				});

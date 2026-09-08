@@ -1,6 +1,7 @@
 import type {
 	WriteCatalogFactBody,
 	WriteCatalogRelationBody,
+	ListCatalogFactNodesStatus200,
 } from "@rezics/openapi-tanstack-query";
 import type { CatalogReference } from "@rezics/reference";
 import type {
@@ -8,6 +9,7 @@ import type {
 	DefinitionRevision,
 } from "@/features/catalog-definitions/model/definition-draft";
 export type ValueNode = WriteCatalogFactBody["nodes"][number];
+export type ReadValueNode = ListCatalogFactNodesStatus200["items"][number];
 export type ValueRule = NonNullable<DefinitionConstraints["rules"]>[number];
 export type ValueDraftNode = {
 	rulePosition: number;
@@ -119,7 +121,7 @@ export function setValueUnknown(
 }
 export function valueDraftFromNodes(
 	definition: DefinitionRevision,
-	nodes: readonly ValueNode[],
+	nodes: readonly ReadValueNode[],
 ): ValueDraftNode[] | null {
 	const rules = valueRules(definition),
 		result: ValueDraftNode[] = [];
@@ -127,13 +129,19 @@ export function valueDraftFromNodes(
 	for (const [index, node] of nodes.entries()) {
 		if (node.position !== index) return null;
 		const parent = node.parentPosition === null ? undefined : result[node.parentPosition];
-		const rule =
-			index === 0
-				? rules[0]
-				: rules.find(
-						(rule) => rule.parent === parent?.rulePosition && rule.memberKey === node.memberKey,
-					);
-		if (!rule || (node.kind !== rule.kind && !(node.kind === "null" && rule.nullable))) return null;
+		const rule = rules[node.rulePosition];
+		if (
+			!rule ||
+			rule.position !== node.rulePosition ||
+			(index === 0
+				? node.parentPosition !== null || rule.parent !== null
+				: !parent ||
+					node.parentPosition === null ||
+					node.parentPosition >= index ||
+					rule.parent !== parent.rulePosition) ||
+			(node.kind !== rule.kind && !(node.kind === "null" && rule.nullable))
+		)
+			return null;
 		result.push({
 			rulePosition: rule.position,
 			parentPosition: node.parentPosition,

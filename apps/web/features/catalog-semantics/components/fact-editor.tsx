@@ -24,7 +24,7 @@ import {
 	initialValueDraft,
 	valueDraftFromNodes,
 	type ValueDraftNode,
-	type ValueNode,
+	type ReadValueNode,
 	type Replacement,
 } from "../model/semantic-draft";
 export type FactSummary = ListCatalogFactsStatus200["items"][number];
@@ -117,11 +117,13 @@ export function FactEditorLoader({
 	const nodes = useQuery({
 		queryKey: ["catalog-fact-edit", reference.owner, reference.id, fact.id, fact.lastNodePosition],
 		enabled: fact.lastNodePosition < 512,
-		queryFn: async () => {
-			const result: ValueNode[] = [];
+		queryFn: async ({ signal }) => {
+			const result: ReadValueNode[] = [];
 			let afterPosition = -1;
 			for (let page = 0; page < 4; page++) {
 				const { data } = await listCatalogFactNodes({
+					signal,
+					throwOnError: true,
 					path: { ...reference, factId: fact.id },
 					query: { afterPosition, limit: 128, maxSpoiler: fact.spoiler },
 				});
