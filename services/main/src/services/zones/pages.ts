@@ -455,7 +455,11 @@ async function loadOrCreatePageStructure(
 async function nodeForPageId(tx: DatabaseTransaction, structureId: string, pageId: string) {
 	return (
 		await tx
-			.select()
+			.select({
+				id: contentStructureNode.id,
+				parentId: contentStructureNode.parentId,
+				position: contentStructureNode.position,
+			})
 			.from(contentStructureNode)
 			.where(
 				and(
