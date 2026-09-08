@@ -39,7 +39,7 @@
 				"musicbrainz-adoption.ts",
 				"musicbrainz-release-delta.ts",
 				"musicbrainz-name-delta.ts",
-				"musicbrainz-identifier-delta.ts",
+				"source-identifier-delta.ts",
 				"musicbrainz-writer.ts"
 			],
 			"queryExport": [
@@ -195,7 +195,7 @@
 				"musicbrainz-native.ts",
 				"musicbrainz-object-delta.ts",
 				"musicbrainz-facts.ts",
-				"musicbrainz-identifier-delta.ts",
+				"source-identifier-delta.ts",
 				"musicbrainz-writer.ts"
 			],
 			"queryExport": [

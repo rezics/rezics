@@ -40,7 +40,7 @@ BEGIN
       IF field_name='discNumber' AND numeric_value>2147483647 THEN RETURN false; END IF;
       IF abs(numeric_value)>1.7976931348623157e308::numeric THEN RETURN false; END IF;
     ELSIF field_name=ANY(strings) THEN
-      IF jsonb_typeof(scalar)<>'string' OR char_length(fields->>field_name)>CASE WHEN field_name IN('number','durationText','dateText') THEN 4096 WHEN field_name='languageTag' THEN 255 ELSE 131072 END THEN RETURN false; END IF;
+      IF jsonb_typeof(scalar)<>'string' OR char_length(fields->>field_name)>(CASE WHEN field_name IN('number','durationText','dateText') THEN 4096 WHEN field_name='languageTag' THEN 255 ELSE 131072 END) THEN RETURN false; END IF;
     ELSE
       IF jsonb_typeof(scalar)<>'object' OR NOT scalar ?& ARRAY['year','month','day'] OR scalar-'year'-'month'-'day'<>'{}'::jsonb THEN RETURN false; END IF;
       IF EXISTS(SELECT 1 FROM jsonb_each(scalar) f WHERE jsonb_typeof(f.value) NOT IN ('number','null')) THEN RETURN false; END IF;
@@ -70,7 +70,7 @@ BEGIN
   IF root.correspondence_revision<>root.revision OR root.owner<>NEW.mapping_owner THEN RAISE EXCEPTION 'Structure source requires its exact root correspondence epoch' USING ERRCODE='23514'; END IF;
   EXECUTE format('SELECT component,component_key,operation FROM public.%I WHERE owner_id=$1 AND id=$2',TG_ARGV[0]||'_component_revision') INTO STRICT native USING NEW.owner_id,NEW.history_id;
   IF native.component<>NEW.component OR native.component_key<>NEW.component_key OR native.operation='DELETE' THEN RAISE EXCEPTION 'Structure source history belongs to another native component' USING ERRCODE='23514'; END IF;
-  FOREACH field_name IN ARRAY CASE WHEN TG_ARGV[0]='program' THEN ARRAY['programId','seasonId'] ELSE ARRAY['textVersionId'] END LOOP
+  FOREACH field_name IN ARRAY (CASE WHEN TG_ARGV[0]='program' THEN ARRAY['programId','seasonId'] ELSE ARRAY['textVersionId'] END) LOOP
     parent_id:=(NEW.source_value->'fields'->>field_name)::uuid;
     IF parent_id IS NULL THEN CONTINUE; END IF;
     expected_shape:=CASE field_name WHEN 'programId' THEN 'program' WHEN 'seasonId' THEN 'season' ELSE 'text_version' END;

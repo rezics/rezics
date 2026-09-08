@@ -27,9 +27,9 @@ import { CatalogRevisionConflict, loadCatalogIdentity, recordCatalogChange } fro
 import { applyMusicBrainzNameDelta } from "./musicbrainz-name-delta";
 import { applyMusicBrainzFactDelta } from "./musicbrainz-facts";
 import {
-	applyMusicBrainzIdentifierDelta,
-	type MusicBrainzIdentifierDescriptor,
-} from "./musicbrainz-identifier-delta";
+	applyCatalogSourceIdentifierDelta,
+	type CatalogSourceIdentifierDescriptor,
+} from "./source-identifier-delta";
 import { compensateMusicSourceApplication } from "./music-source-compensation";
 import { applyMusicBrainzRelationDelta } from "./musicbrainz-relation-delta";
 
@@ -43,7 +43,7 @@ function names(document: MusicBrainzSupportingDocument) {
 				"sort-name": document.record["sort-name"],
 			};
 }
-function identifiers(document: MusicBrainzSupportingDocument): MusicBrainzIdentifierDescriptor[] {
+function identifiers(document: MusicBrainzSupportingDocument): CatalogSourceIdentifierDescriptor[] {
 	if (document.type !== "artist" && document.type !== "label") return [];
 	const result = [
 		...(document.record.ipis ?? []).map((value, index) => ({
@@ -286,7 +286,7 @@ export function musicBrainzSupportingNativeWriter(
 			);
 			changes.push(...assertions.changes);
 			revision = assertions.revision;
-			const claims = await applyMusicBrainzIdentifierDelta(
+			const claims = await applyCatalogSourceIdentifierDelta(
 				tx,
 				context.reference,
 				context.actor,
