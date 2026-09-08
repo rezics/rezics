@@ -85,11 +85,11 @@ export async function enqueueMusicReleaseSourceIntakeJob(tx: DatabaseTransaction
 /** @alpha Admission only: no archive I/O or native component work in the HTTP transaction. */
 export async function enqueueMusicReleaseSourceJob(tx: DatabaseTransaction, actor: string, input: z.input<typeof inputSchema>) {
 	const value = inputSchema.parse(input);
-	const { proposal, authority } = await authorize(tx, actor, value);
+	const { proposal, binding, authority } = await authorize(tx, actor, value);
 	const prior = await tx.select().from(jobs).where(and(eq(jobs.sourceRecordId, value.sourceRecordId), eq(jobs.proposalId, value.proposalId), eq(jobs.action, value.action))).limit(1);
 	if (prior[0]) return present(prior[0]);
-	if (!proposal || proposal.state !== (value.action === "apply" ? "pending" : "applied")) throw new TypeError("Release proposal cannot enter the requested job");
-	const [row] = await tx.insert(jobs).values({ ...value, snapshotId: proposal.snapshotId, authority: ParticipationAuthoritySchema.parse(authority) }).returning();
+	if (!proposal || !binding || proposal.state !== (value.action === "apply" ? "pending" : "applied")) throw new TypeError("Release proposal cannot enter the requested job");
+	const [row] = await tx.insert(jobs).values({ ...value, snapshotId: proposal.snapshotId, musicId: binding.reference.id, authority: ParticipationAuthoritySchema.parse(authority) }).returning();
 	if (!row) throw new Error("Music release job admission returned no row");
 	await admitStage(tx, row, "prepare");
 	return present(row);
