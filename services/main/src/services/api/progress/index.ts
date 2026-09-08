@@ -1,3 +1,4 @@
+import {presentImageAsset} from "../image-assets/presentation";
 import { SearchFeatureDefinition } from "@rezics/filter";
 import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -23,7 +24,7 @@ import {
 	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 } from "../../units/localization";
-import { presentImageAsset } from "../../units/service";
+
 import { ContentStructureNodeNotFound } from "../content-structure/errors";
 import { NoContentResponse } from "../schema/action-response";
 import {

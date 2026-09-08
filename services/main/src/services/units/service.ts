@@ -1,3 +1,4 @@
+import { presentImageAsset } from "../api/image-assets/presentation";
 import { AuthenticationRequired } from "../auth/errors";
 import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
 import { DevelopmentPreviewCapability } from "@rezics/access";
@@ -10,8 +11,8 @@ import type { StaticDecode } from "typebox";
 import { selfAuthUserIdForEntity } from "../participation/account-query";
 
 import { ValidationError } from "../api/errors";
-import { imageAssetPresentationContentUrl } from "../api/image-assets/presentation";
-import { ensureImageAssetsAttachable, imageAssetContentUrl } from "../api/image-assets/service";
+
+import {ensureImageAssetsAttachable} from "../api/image-assets/service";
 import { UnitDetailResponse } from "../api/schema/response";
 import type { Authorization } from "../authorization";
 import { createProfileOwnedUnitAccess } from "../authorization/unit/ownership";
@@ -144,15 +145,6 @@ export type TimedMediaCreation = CreateTimedMediaUnitInput & {
 		| "machine_generated";
 	readonly revisionContribution?: RevisionContributionInput;
 };
-
-export function presentImageAsset(assetId: string | null, role?: "avatar" | "banner" | "cover") {
-	return assetId
-		? {
-				id: assetId,
-				url: role ? imageAssetPresentationContentUrl(assetId, role) : imageAssetContentUrl(assetId),
-			}
-		: null;
-}
 
 export function presentUnitLocalization({
 	content: _content,

@@ -1,3 +1,4 @@
+import {presentImageAsset} from "../image-assets/presentation";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
@@ -20,7 +21,6 @@ import {
 	collectionStat,
 	collectionStructureRevisionHead,
 	creditAttribution,
-	unit,
 	unitLocalization,
 	unitOwnership,
 	unitRevisionHead,
@@ -29,7 +29,7 @@ import {
 	createProfilePublisherAttribution,
 	getAttributionSummariesByUnitIds,
 } from "../../units/attribution";
-import { insertUnit } from "../../units/create";
+import { insertPlatformUnit } from "../../units/create";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import {
@@ -38,7 +38,7 @@ import {
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
-import { presentImageAsset } from "../../units/service";
+
 import { transitionUnitStatus } from "../../units/status";
 import { toUnitVisibilityUpdate } from "../../units/visibility-update";
 import { ValidationError } from "../errors";
@@ -175,8 +175,8 @@ export default new Elysia({ prefix: "/collections" })
 				: undefined;
 			const cursorCondition = cursor
 				? or(
-						lt(unit.updatedAt, cursor.updatedAt),
-						and(eq(unit.updatedAt, cursor.updatedAt), lt(collection.id, cursor.id)),
+						lt(collection.updatedAt, cursor.updatedAt),
+						and(eq(collection.updatedAt, cursor.updatedAt), lt(collection.id, cursor.id)),
 					)
 				: undefined;
 			const candidates = await database
@@ -192,16 +192,15 @@ export default new Elysia({ prefix: "/collections" })
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
 					coverAssetId: resolvedUnitLocalizationImageAssetId(
-						unit.id,
+						collection.id,
 						"cover",
 						localizationLanguages,
 					),
-					updatedAt: unit.updatedAt,
+					updatedAt: collection.updatedAt,
 				})
 				.from(collection)
-				.innerJoin(unit, eq(unit.id, collection.id))
 				.innerJoin(collectionStat, eq(collectionStat.collectionId, collection.id))
-				.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unit.id))
+				.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, collection.id))
 				.innerJoin(
 					collectionStructureRevisionHead,
 					eq(collectionStructureRevisionHead.collectionId, collection.id),
@@ -209,22 +208,22 @@ export default new Elysia({ prefix: "/collections" })
 				.innerJoin(
 					unitLocalization,
 					and(
-						eq(unitLocalization.unitId, unit.id),
+						eq(unitLocalization.unitId, collection.id),
 						eq(
 							unitLocalization.language,
-							resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
+							resolvedUnitLocalizationLanguage(collection.id, localizationLanguages),
 						),
 					),
 				)
 				.where(
 					and(
 						query.editableOnly
-							? getUnitUpdateCondition(viewerId!, unit)
+							? getUnitUpdateCondition(viewerId!, collection)
 							: and(
-									eq(unit.status, "published"),
-									eq(unit.visibility, "public"),
-									eq(unit.moderationStatus, "approved"),
-									isNull(unit.deletedAt),
+									eq(collection.status, "published"),
+									eq(collection.visibility, "public"),
+									eq(collection.moderationStatus, "approved"),
+									isNull(collection.deletedAt),
 								),
 						query.publisherProfileId
 							? sql`exists(
@@ -242,7 +241,7 @@ export default new Elysia({ prefix: "/collections" })
 						cursorCondition,
 					),
 				)
-				.orderBy(desc(unit.updatedAt), desc(collection.id))
+				.orderBy(desc(collection.updatedAt), desc(collection.id))
 				.limit(limit + 1);
 			const items = candidates.slice(0, limit);
 			const last = items.at(-1);
@@ -286,19 +285,18 @@ export default new Elysia({ prefix: "/collections" })
 			},
 			detail: { summary: "Create collection", tags: ["Collections"] },
 		},
-		async ({ entity, authorization, body }) => {
+		async ({ entity, authorization, body, principal }) => {
 			const id = await database.transaction(async (tx) => {
 				await ensureImageAssetsAttachable(
 					tx,
 					selfAuthUserIdForEntity(entity.id),
 					unitLocalizationImageAssetReferences(body.localization),
 				);
-				const created = await insertUnit(tx, {
-					kind: "collection",
-					visibility: body.visibility ?? "private",
+				const created = await insertPlatformUnit(tx, {
+					owner: "collection",
+					values: {visibility: body.visibility ?? "private", createdByAuthUserId: principal.authUserId},
 					statusActor: { kind: "profile", profileId: entity.id },
 				});
-				await tx.insert(collection).values({ id: created.id });
 				await tx.insert(unitLocalization).values({
 					unitId: created.id,
 					...toUnitLocalizationStorage(body.localization),
@@ -387,9 +385,9 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Update collection", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.update");
+			await authorization.unit.ensure(params.collectionId, "collection.update");
 			const statusUpdateDecision = body.status
-				? await authorization.unit.decide(params.collectionId, "unit.status.update", ["unit"])
+				? await authorization.unit.decide(params.collectionId, "collection.status.update", ["unit"])
 				: undefined;
 			await database.transaction(async (tx) => {
 				if (body.localization)
@@ -400,7 +398,7 @@ export default new Elysia({ prefix: "/collections" })
 					);
 				const unitUpdate = toUnitVisibilityUpdate(body.visibility);
 				if (unitUpdate)
-					await tx.update(unit).set(unitUpdate).where(eq(unit.id, params.collectionId));
+					await tx.update(collection).set(unitUpdate).where(eq(collection.id, params.collectionId));
 				if (body.localization) {
 					const storedLocalization = toUnitLocalizationStorage(body.localization);
 					await tx
@@ -455,7 +453,7 @@ export default new Elysia({ prefix: "/collections" })
 			},
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.update");
+			await authorization.unit.ensure(params.collectionId, "collection.update");
 			const result = await database.transaction((tx) =>
 				applyCollectionBatch(tx, {
 					collectionId: params.collectionId,
@@ -467,7 +465,7 @@ export default new Elysia({ prefix: "/collections" })
 						const decision = await authorization.unit.decideInTransaction(
 							tx,
 							targetId,
-							"unit.read",
+							"collection.read",
 						);
 						if (!decision.allowed) throw new UnitNotFound();
 					},
@@ -496,7 +494,7 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Add collection items atomically", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.update");
+			await authorization.unit.ensure(params.collectionId, "collection.update");
 			if (new Set(body.items.map(({ targetId }) => targetId)).size !== body.items.length)
 				throw new ValidationError({ items: "targetId values must be unique" });
 			if (body.items.some(({ targetId }) => targetId === params.collectionId))
@@ -516,7 +514,7 @@ export default new Elysia({ prefix: "/collections" })
 						const decision = await authorization.unit.decideInTransaction(
 							tx,
 							targetId,
-							"unit.read",
+							"collection.read",
 						);
 						if (!decision.allowed) throw new UnitNotFound();
 					},
@@ -548,7 +546,7 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Move collection items atomically", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.update");
+			await authorization.unit.ensure(params.collectionId, "collection.update");
 			const result = await database.transaction((tx) =>
 				applyCollectionBatch(tx, {
 					collectionId: params.collectionId,
@@ -585,7 +583,7 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Save collection item", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.update");
+			await authorization.unit.ensure(params.collectionId, "collection.update");
 			if (params.targetId === params.collectionId)
 				throw new ValidationError({ targetId: "a Collection cannot contain itself" });
 			await authorization.unit.ensureCanRead(params.targetId);
@@ -600,7 +598,7 @@ export default new Elysia({ prefix: "/collections" })
 						const decision = await authorization.unit.decideInTransaction(
 							tx,
 							targetId,
-							"unit.read",
+							"collection.read",
 						);
 						if (!decision.allowed) throw new UnitNotFound();
 					},
@@ -623,7 +621,7 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Remove collection item", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.update");
+			await authorization.unit.ensure(params.collectionId, "collection.update");
 			const result = await database.transaction((tx) =>
 				applyCollectionBatch(tx, {
 					collectionId: params.collectionId,
@@ -705,7 +703,7 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Restore a Collection item revision", tags: ["Collections"] },
 		},
 		async ({ params, body, entity, authorization }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.history.restore");
+			await authorization.unit.ensure(params.collectionId, "collection.history.restore");
 			const result = await database.transaction(async (tx) => {
 				await ensureEditableCollection(tx, params.collectionId);
 				return restoreCollectionStructureRevision(tx, {

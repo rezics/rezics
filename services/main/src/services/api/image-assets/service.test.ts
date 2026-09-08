@@ -1,7 +1,8 @@
+import {imageAssetContentUrl} from "./presentation";
 import { describe, expect, it } from "vitest";
 
 import { imageAssetPresentationContentUrl } from "./presentation";
-import { imageAssetContentUrl, imageObjectTracking, imageObjectUploadHeaders } from "./service";
+import {imageObjectTracking, imageObjectUploadHeaders} from "./service";
 
 describe("image asset identity", () => {
 	it("derives a stable canonical content URL from the asset id", () => {

@@ -2,7 +2,7 @@ import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { TagNotFound } from "../api/tags/errors";
 import type { DatabaseTransaction } from "../database";
-import { tag, unit, unitTag, unitTagJudgment } from "../database/schema";
+import { tag, unitTag, unitTagJudgment } from "../database/schema";
 
 /** Keeps creation-time Tag validation and writes bounded independently of corpus size. */
 export const InitialTagApplicationLimit = 32;
@@ -54,15 +54,13 @@ export async function applyInitialTags(
 	const availableTags = await tx
 		.select({ id: tag.id })
 		.from(tag)
-		.innerJoin(unit, eq(unit.id, tag.id))
 		.where(
 			and(
 				inArray(tag.id, input.tagIds),
-				eq(unit.kind, "tag"),
-				eq(unit.status, "published"),
-				eq(unit.visibility, "public"),
-				eq(unit.moderationStatus, "approved"),
-				isNull(unit.deletedAt),
+				eq(tag.status, "published"),
+				eq(tag.visibility, "public"),
+				eq(tag.moderationStatus, "approved"),
+				isNull(tag.deletedAt),
 			),
 		);
 	if (availableTags.length !== input.tagIds.length) throw new TagNotFound();

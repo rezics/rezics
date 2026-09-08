@@ -1,3 +1,4 @@
+import {presentImageAsset} from "../api/image-assets/presentation";
 import { and, eq, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { ContentLanguage } from "@rezics/i18n";
@@ -19,7 +20,7 @@ import {
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
-import { presentImageAsset } from "../units/service";
+
 import {
 	resourceSectionFromKinds,
 	studioResourceScopeCondition,

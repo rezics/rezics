@@ -1,3 +1,4 @@
+import {presentImageAsset} from "../api/image-assets/presentation";
 import type { ContentLanguage } from "@rezics/i18n";
 import { and, eq, exists, isNull, not, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -43,7 +44,7 @@ import {
 	studioResourceScopeCondition,
 	type ResourceSection,
 } from "../units/resource-section";
-import { presentImageAsset } from "../units/service";
+
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import { decodeStudioCursor, encodeStudioCursor, type StudioCursorBoundary } from "./cursor";
 

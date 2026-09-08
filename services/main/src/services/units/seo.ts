@@ -1,3 +1,4 @@
+import {presentImageAsset} from "../api/image-assets/presentation";
 import type { ContentLanguage } from "@rezics/i18n";
 import { and, asc, eq, isNull, or, sql } from "drizzle-orm";
 
@@ -17,7 +18,7 @@ import {
 	type PublicUnitSeoIndexing,
 	type PublicUnitSeoKind,
 } from "./seo-contract";
-import { presentImageAsset } from "./service";
+
 
 export type PublicUnitSeoImageRole = "avatar" | "banner" | "cover";
 

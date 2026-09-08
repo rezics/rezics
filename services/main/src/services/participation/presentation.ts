@@ -1,4 +1,6 @@
-import { and, desc, eq, inArray, isNull, lt, sql, type SQLWrapper } from "drizzle-orm";
+import {presentImageAsset} from "../api/image-assets/presentation";
+import { and, desc, eq, inArray, isNull, lt, sql, getTableName, is, type SQLWrapper } from "drizzle-orm";
+import { PgColumn } from "drizzle-orm/pg-core";
 import { createSchemaFactory } from "drizzle-orm/zod";
 import { z } from "zod";
 import { Value } from "typebox/value";
@@ -21,7 +23,7 @@ import { CatalogNameValuesSchema } from "../catalog/name-contracts";
 import { CatalogReferenceNotFound, CatalogRevisionConflict } from "../catalog/storage";
 import { avatarReferenceFromColumns, avatarReferenceToColumns } from "../units/localization";
 import { presentAvatar } from "../units/avatar";
-import { presentImageAsset } from "../units/service";
+
 import { requireParticipation, type ParticipationAuthority } from "./policy";
 import { ensureImageAssetsAttachable } from "../api/image-assets/service";
 
@@ -176,11 +178,16 @@ export async function restoreEntityPresentation(
 
 /** Indexed public identity name projection; no private Auth information is selected. @internal */
 export function publicEntityName(entityId: string | SQLWrapper) {
-	return sql<string | null>`coalesce((select ${nameVersions.value} from ${entityPresentation}
-		join ${nameVersions} on ${nameVersions.ownerId} = ${entityPresentation.entityId} and ${nameVersions.id} = ${entityPresentation.nameId} and ${nameVersions.revision} = ${entityPresentation.nameRevision}
-		where ${entityPresentation.entityId} = ${entityId} order by ${entityPresentation.language} limit 1), (select ${names.value} from ${names}
-		where ${names.ownerId} = ${entityId} and ${names.state} = 'active'
-		order by ${names.id} limit 1))`;
+	// Drizzle unqualifies column objects in single-table SELECT projections, including nested SQL.
+	const target = is(entityId, PgColumn)
+		? sql`${sql.identifier(getTableName(entityId.table))}.${sql.identifier(entityId.name)}`
+		: entityId;
+	return sql<string | null>`coalesce((select named.value from public.entity_presentation presented
+		join public.entity_named_form_revision named on named.owner_id=presented.entity_id and named.id=presented.name_id and named.revision=presented.name_revision
+		where presented.entity_id=${target} order by presented.language limit 1),
+		(select current_name.value from public.entity_named_form current_name
+		where current_name.owner_id=${target} and current_name.state='active' and current_name.spoiler=0 and current_name.scope_owner_id is null
+		order by current_name.id limit 1))`;
 }
 
 export interface PublicEntitySummary {

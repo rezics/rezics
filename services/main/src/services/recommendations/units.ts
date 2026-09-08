@@ -1,3 +1,4 @@
+import {presentImageAsset} from "../api/image-assets/presentation";
 import { and, eq, exists, inArray, isNull, lte, not, sql } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
 
@@ -8,7 +9,7 @@ import { unit, unitBestScore, unitLocalization, unitVariant } from "../database/
 import { compareFractionalPositions } from "../ordering/position";
 import { searchGlobalIdentifiers } from "../search/service";
 import { resolvedUnitLocalizationImageAssetId } from "../units/localization";
-import { presentImageAsset } from "../units/service";
+
 import type { RecommendationSnapshotContext, RecommendationViewer } from "./context";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
 import { rankRecommendations, type RecommendationCandidate } from "./ranking";

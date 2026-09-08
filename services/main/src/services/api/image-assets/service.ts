@@ -40,10 +40,6 @@ const maximumImageBytes = 10_485_760;
 const maximumImagePixels = 40_000_000;
 const maximumImageDimension = 32_768;
 
-export function imageAssetContentUrl(assetId: string): string {
-	return `/image-assets/${assetId}/content`;
-}
-
 export function imageObjectTracking(input: {
 	assetId: string;
 	objectId: string;

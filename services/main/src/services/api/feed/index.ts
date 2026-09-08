@@ -1,3 +1,4 @@
+import {presentImageAsset} from "../image-assets/presentation";
 import type { PresentedAvatar } from "@rezics/avatar";
 import {
 	assertUnitFilter,
@@ -78,7 +79,7 @@ import {
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
 } from "../../units/localization";
-import { presentImageAsset } from "../../units/service";
+
 import type { PublicCanonicalUnitSlugAddress } from "../../units/slug-address";
 import {
 	RecommendationPolicyVersionSchema,

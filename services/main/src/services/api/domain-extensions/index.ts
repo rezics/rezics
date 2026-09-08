@@ -1,3 +1,4 @@
+import {presentImageAsset} from "../image-assets/presentation";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
 import {
 	CustomThemeExternalLiveAccessCapability,
@@ -94,7 +95,7 @@ import {
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
-import { presentImageAsset } from "../../units/service";
+
 import {
 	getPublicCanonicalUnitSlugAddress,
 	replaceZoneSlugAddress,

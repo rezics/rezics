@@ -6,7 +6,6 @@ import {
 	ContentRatingValues,
 	DefaultContentRatingValues,
 	accountPreference,
-	unit,
 	type ContentRating,
 } from "../database/schema";
 
@@ -82,7 +81,7 @@ export function contentRatingPolicyKey(policy: ContentRatingPolicy): string {
 
 export function getContentRatingCondition(
 	policy: ContentRatingPolicy,
-	target: SQLWrapper = sql`${unit.contentRating}`,
+	target: SQLWrapper,
 ): SQL {
 	if (policy.kind === "none") return sql`false`;
 	return sql`${target} in (${sql.join(

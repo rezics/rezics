@@ -10,7 +10,6 @@ import {
 	realm,
 	realmRule,
 	realmRuleRevision,
-	unit,
 	zone,
 } from "../database/schema";
 import {
@@ -165,8 +164,8 @@ export async function validateGovernanceRuleReferences(
 			.select({ id: realmRuleRevision.id })
 			.from(realmRuleRevision)
 			.innerJoin(
-				unit,
-				and(eq(unit.id, realmRuleRevision.realmId), eq(unit.kind, "realm"), isNull(unit.deletedAt)),
+				realm,
+				and(eq(realm.id, realmRuleRevision.realmId), isNull(realm.deletedAt)),
 			)
 			.where(eq(realmRuleRevision.realmId, sourceRealmId))
 			.orderBy(desc(realmRuleRevision.version))

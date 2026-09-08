@@ -1,3 +1,4 @@
+import {presentImageAsset} from "../image-assets/presentation";
 import { unitStateRelation } from "../../units/state-relation";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
 import { DevelopmentPreviewCapability, RealmUnitCreatePermissionValues } from "@rezics/access";
@@ -88,7 +89,7 @@ import {
 	toUnitLocalizationStorage,
 	unitLocalizationImageAssetReferences,
 } from "../../units/localization";
-import { presentImageAsset } from "../../units/service";
+
 import {
 	getPublicCanonicalUnitSlugAddress,
 	getPublicCanonicalUnitSlugAddresses,

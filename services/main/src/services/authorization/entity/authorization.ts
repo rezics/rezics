@@ -1,7 +1,7 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { database, type DatabaseTransaction } from "../../database";
-import { entity, unit } from "../../database/schema";
+import { entityIdentity } from "../../database/schema";
 import { EntityAssociationRestricted, EntityEntryNotFound } from "../../entities/errors";
 import type { PlatformAuthorization } from "../platform/authorization";
 import type { UnitAuthorization } from "../unit/authorization";
@@ -26,10 +26,9 @@ async function entityExists(
 	entityId: string,
 ): Promise<boolean> {
 	const [record] = await executor
-		.select({ id: entity.id })
-		.from(entity)
-		.innerJoin(unit, eq(unit.id, entity.id))
-		.where(and(eq(entity.id, entityId), isNull(unit.deletedAt)))
+		.select({ id: entityIdentity.id })
+		.from(entityIdentity)
+		.where(and(eq(entityIdentity.id, entityId), isNull(entityIdentity.deletedAt)))
 		.limit(1);
 	return Boolean(record);
 }
@@ -124,10 +123,9 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 	): Promise<void> {
 		await lockEntityAssociationState(tx, targetUnitId);
 		const [record] = await tx
-			.select({ deletedAt: unit.deletedAt })
-			.from(entity)
-			.innerJoin(unit, eq(unit.id, entity.id))
-			.where(eq(entity.id, targetUnitId))
+			.select({ deletedAt: entityIdentity.deletedAt })
+			.from(entityIdentity)
+			.where(eq(entityIdentity.id, targetUnitId))
 			.limit(1);
 		if (!record) return;
 		if (record.deletedAt) throw new EntityEntryNotFound();

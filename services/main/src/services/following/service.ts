@@ -1,3 +1,4 @@
+import {presentImageAsset} from "../api/image-assets/presentation";
 import type { ContentLanguage } from "@rezics/i18n";
 import { and, desc, eq, gt, inArray, isNull, ne, or } from "drizzle-orm";
 import { selfAuthUserIdForEntity } from "../participation/account-query";
@@ -35,7 +36,7 @@ import {
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
-import { presentImageAsset } from "../units/service";
+
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import {
 	decodeFollowingCursor,

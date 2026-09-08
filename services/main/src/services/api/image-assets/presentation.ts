@@ -134,3 +134,16 @@ export const imageAssetPresentationOutputSize = {
 	ImageAssetPresentationRole,
 	{ readonly width: number; readonly height: number }
 >;
+
+export function imageAssetContentUrl(assetId: string): string {
+	return `/image-assets/${assetId}/content`;
+}
+
+export function presentImageAsset(assetId: string | null, role?: "avatar" | "banner" | "cover") {
+	return assetId
+		? {
+				id: assetId,
+				url: role ? imageAssetPresentationContentUrl(assetId, role) : imageAssetContentUrl(assetId),
+			}
+		: null;
+}

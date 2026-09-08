@@ -1,9 +1,9 @@
-import { and, eq, isNull, ne, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 import type { Authorization } from "../authorization";
 import { associationTargetScope } from "../authorization/unit/scope";
 import type { DatabaseTransaction } from "../database";
-import { entity, unit } from "../database/schema";
+import { readUnitStateById } from "./query";
 import {
 	CreditAttributionRequestConfirmationRequired,
 	EntityAssociationRestricted,
@@ -12,22 +12,9 @@ import {
 import { UnitNotFound } from "./errors";
 
 async function isEntityTarget(tx: DatabaseTransaction, targetUnitId: string): Promise<boolean> {
-	const [record] = await tx
-		.select({ id: unit.id, entityId: entity.id })
-		.from(unit)
-		.leftJoin(entity, eq(entity.id, unit.id))
-		.where(
-			and(
-				eq(unit.id, targetUnitId),
-				eq(unit.status, "published"),
-				ne(unit.visibility, "private"),
-				eq(unit.moderationStatus, "approved"),
-				isNull(unit.deletedAt),
-			),
-		)
-		.limit(1);
-	if (!record) throw new UnitNotFound();
-	return record.entityId !== null;
+	const record = await readUnitStateById(tx, targetUnitId);
+	if (!record || record.status !== "published" || record.visibility === "private" || record.moderationStatus !== "approved") throw new UnitNotFound();
+	return record.reference.owner === "entity";
 }
 
 async function lockAttributionTarget(tx: DatabaseTransaction, targetUnitId: string): Promise<void> {

@@ -2,7 +2,7 @@ import { and, eq, exists, isNull, or, sql, type SQLWrapper } from "drizzle-orm";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
 import { database } from "../../database";
-import { platformCapabilityGrant, realmMember, unit } from "../../database/schema";
+import { platformCapabilityGrant, realmMember, realm } from "../../database/schema";
 import { getUnitRootPermissionCondition } from "../unit/query";
 
 type RealmParticipationTarget = {
@@ -17,7 +17,7 @@ type RealmParticipationTarget = {
  */
 export function getRealmParticipationCondition(
 	profileId: string,
-	target: RealmParticipationTarget = unit,
+	target: RealmParticipationTarget = realm,
 ) {
 	const activeMembership = exists(
 		database
@@ -41,7 +41,7 @@ export function getRealmParticipationCondition(
  */
 export function getRealmContributionCondition(
 	profileId: string,
-	target: RealmParticipationTarget = unit,
+	target: RealmParticipationTarget = realm,
 ) {
 	const platformParticipation = exists(
 		database

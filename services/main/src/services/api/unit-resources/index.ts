@@ -1,3 +1,4 @@
+import {presentImageAsset} from "../image-assets/presentation";
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
 
@@ -103,7 +104,7 @@ import {
 	paginateUnitReferences,
 	unitReferenceRankingVersion,
 } from "../../units/reference-pagination";
-import { presentImageAsset, upsertLocalization } from "../../units/service";
+import {upsertLocalization} from "../../units/service";
 import {
 	getUnitVariantContext,
 	promoteUnitVariantToMain,

@@ -1,3 +1,4 @@
+import {presentImageAsset} from "../image-assets/presentation";
 import type { StaticDecode } from "typebox";
 import { and, asc, eq, gt, or } from "drizzle-orm";
 import { t, type UnwrapSchema } from "elysia";
@@ -16,14 +17,13 @@ import {
 	collectionItem,
 	collectionStat,
 	collectionStructureRevisionHead,
-	unit,
 	unitLocalization,
 	unitRevisionHead,
 } from "../../database/schema";
 import { CollectionNotFound } from "./errors";
 import { CollectionContentResponse, CollectionDetailResponse } from "../schema/response";
 import { FractionalPosition, Uuid } from "../schema";
-import { presentImageAsset } from "../../units/service";
+
 import { presentAvatar } from "../../units/avatar";
 import { parseJsonCursor } from "../../pagination";
 import { InvalidPaginationCursor } from "../../pagination/errors";
@@ -82,19 +82,18 @@ export async function getCollection(
 ): Promise<UnwrapSchema<typeof CollectionDetailResponse>> {
 	const [record] = await database
 		.select({
-			id: unit.id,
-			status: unit.status,
-			visibility: unit.visibility,
+			id: collectionTable.id,
+			status: collectionTable.status,
+			visibility: collectionTable.visibility,
 			itemCount: collectionStat.itemCount,
 			latestRevisionId: unitRevisionHead.revisionId,
 			latestItemsRevisionId: collectionStructureRevisionHead.revisionId,
-			createdAt: unit.createdAt,
-			updatedAt: unit.updatedAt,
+			createdAt: collectionTable.createdAt,
+			updatedAt: collectionTable.updatedAt,
 		})
 		.from(collectionTable)
-		.innerJoin(unit, eq(unit.id, collectionTable.id))
 		.innerJoin(collectionStat, eq(collectionStat.collectionId, collectionTable.id))
-		.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unit.id))
+		.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, collectionTable.id))
 		.innerJoin(
 			collectionStructureRevisionHead,
 			eq(collectionStructureRevisionHead.collectionId, collectionTable.id),
@@ -102,7 +101,7 @@ export async function getCollection(
 		.where(eq(collectionTable.id, collectionId))
 		.limit(1);
 	if (!record) throw new CollectionNotFound();
-	const readDecision = await authorization.unit.decide(collectionId, "unit.read");
+	const readDecision = await authorization.unit.decide(collectionId, "collectionTable.read");
 	if (!readDecision.allowed) throw new CollectionNotFound();
 	const [localizations, attributionMap] = await Promise.all([
 		database
@@ -131,10 +130,10 @@ export async function getCollection(
 	if (!selectedLocalization) throw new CollectionNotFound();
 	const [updateDecision, accessDecision, restoreDecision, realmPublicationDecision] =
 		await Promise.all([
-			authorization.unit.decide(collectionId, "unit.update"),
-			authorization.unit.decide(collectionId, "unit.access.manage"),
-			authorization.unit.decide(collectionId, "unit.history.restore"),
-			authorization.unit.decide(collectionId, "unit.realm-publication.manage"),
+			authorization.unit.decide(collectionId, "collectionTable.update"),
+			authorization.unit.decide(collectionId, "collectionTable.access.manage"),
+			authorization.unit.decide(collectionId, "collectionTable.history.restore"),
+			authorization.unit.decide(collectionId, "collectionTable.realm-publication.manage"),
 		]);
 	const canUpdate = updateDecision.allowed;
 	const detail = record;

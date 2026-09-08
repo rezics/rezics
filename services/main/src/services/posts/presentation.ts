@@ -1,3 +1,4 @@
+import {presentImageAsset} from "../api/image-assets/presentation";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
 import { CatalogReferenceSchema } from "@rezics/reference";
@@ -11,7 +12,7 @@ import {
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
-import { presentImageAsset } from "../units/service";
+
 
 export async function getPostSubjectPresentation(
 	subjectId: string,
