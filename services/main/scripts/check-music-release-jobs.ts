@@ -1,6 +1,10 @@
 import { planMusicBrainzDependencies } from "../src/services/catalog/musicbrainz-dependencies";
 import { MUSIC_SOURCE_DEPENDENCY_LIMIT } from "../src/services/database/schema/catalog-source-limits";
 import assert from "node:assert/strict";
+import { readFile, stat } from "node:fs/promises";
+import { resolve } from "node:path";
+import { createHash } from "node:crypto";
+import { z } from "zod";
 import { Readable } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -9,10 +13,14 @@ import { users } from "../src/services/database/schema/auth";
 import { authEntity } from "../src/services/database/schema/participation";
 import { operationalCapacity, operationalOutbox } from "../src/services/database/schema/operational-durability";
 import { catalogSourceMappingClaim, catalogSourceProposalDependency } from "../src/services/database/schema";
-import { musicTrackOccurrence, musicComponentRevision } from "../src/services/database/schema/catalog-music";
+import { musicTrackOccurrence, musicComponentRevision, musicComponentSourceOccurrence } from "../src/services/database/schema/catalog-music";
+import { catalogSourceSnapshotBundle, catalogSourceSnapshotPart } from "../src/services/database/schema/catalog-source-multipart";
 import { musicReleaseSourceJob } from "../src/services/database/schema/catalog-music-source-job";
 import { MusicBrainzCatalogContractSha256, type MusicBrainzRelease } from "../src/services/catalog/musicbrainz";
-import { recordCatalogSourceDocument, storeCatalogSourcePayload, catalogSourceRecordId, type CatalogSourceArchive } from "../src/services/catalog/source-observations";
+import { recordCatalogSourceDocument, recordCatalogSourceObservation, storeCatalogSourcePayload, storeCatalogSourceMultipartPayload, catalogSourceRecordId, type CatalogSourceArchive } from "../src/services/catalog/source-observations";
+import { MusicBrainzReleaseBundleProfile, MusicBrainzReleaseBundleDerivationSha256, musicBrainzReleaseAcquisitionProfiles, normalizeMusicBrainzReleaseBundle } from "../src/services/catalog/musicbrainz-release-bundle";
+import { SOURCE_DOCUMENT_BYTE_LIMIT } from "../src/services/database/schema/catalog-source-limits";
+import { catalogSourceRecord } from "../src/services/database/schema/catalog-source";
 import { aggregateRoutingBucket, eventEnvelopeSchema, type EventEnvelope } from "../src/services/events/envelope";
 import { proposeCatalogSourceAdoption } from "../src/services/catalog/source-proposals";
 import { readCatalogSourceApplication } from "../src/services/catalog/source-applications";
@@ -32,7 +40,28 @@ const archive: CatalogSourceArchive = {
 	async put(input) { objects.set(input.Key, new Uint8Array(input.Body)); },
 	async get(input) { const bytes = objects.get(input.Key); return { Body: bytes ? Readable.from([bytes]) : undefined }; },
 };
-const sourceKey = { source: "musicbrainz", objectType: "release", externalId: crypto.randomUUID() };
+const captureDirectory = process.env.REZICS_MUSIC_RELEASE_BUNDLE_DIRECTORY;
+async function readCapturedPart(key: "tracks" | "media" | "metadata") {
+	assert.ok(captureDirectory);
+	const path = resolve(captureDirectory, `${key}.json`);
+	assert.ok((await stat(path)).size <= SOURCE_DOCUMENT_BYTE_LIMIT);
+	return new Uint8Array(await readFile(path));
+}
+const captured = captureDirectory ? { tracks: await readCapturedPart("tracks"), media: await readCapturedPart("media"), metadata: await readCapturedPart("metadata") } : null;
+const capture = captureDirectory ? z.strictObject({ id: z.uuid(), profiles: z.array(z.strictObject({ key: z.enum(["tracks", "media", "metadata"]), profile: z.string(), requestUrl: z.url(), observedAt: z.iso.datetime({ offset: true }) })).length(3), hashes: z.array(z.strictObject({ profile: z.enum(["tracks", "media", "metadata"]), bytes: z.number().int().positive(), sha256: z.string().regex(/^[a-f0-9]{64}$/u) })).length(3) }).parse(JSON.parse(await readFile(resolve(captureDirectory, "capture.json"), "utf8"))) : null;
+if (captured && capture) for (const profile of musicBrainzReleaseAcquisitionProfiles(capture.id)) {
+	const receipt = capture.profiles.find((candidate) => candidate.key === profile.key), hash = capture.hashes.find((candidate) => candidate.profile === profile.key);
+	assert.ok(receipt && hash);
+	assert.equal(receipt.requestUrl, profile.url); assert.equal(receipt.profile, profile.profile);
+	assert.equal(captured[profile.key].byteLength, hash.bytes);
+	assert.equal(createHash("sha256").update(captured[profile.key]).digest("hex"), hash.sha256);
+}
+const capturedMetadata: unknown = captured ? JSON.parse(new TextDecoder().decode(captured.metadata)) : null;
+const capturedId = capturedMetadata !== null && typeof capturedMetadata === "object" && "id" in capturedMetadata ? capturedMetadata.id : null;
+assert.ok(!captured || typeof capturedId === "string");
+const sourceKey = { source: "musicbrainz", objectType: "release", externalId: typeof capturedId === "string" ? capturedId : crypto.randomUUID() };
+if (capture) assert.equal(capture.id, sourceKey.externalId);
+const capturedNative = captured ? normalizeMusicBrainzReleaseBundle(sourceKey.externalId, captured).document : null;
 const sourceRecordId = catalogSourceRecordId(sourceKey);
 const bucket = aggregateRoutingBucket("source_record", sourceRecordId);
 const route: StreamRoute = { class: "task", epoch: 1, bucket, maxBytes: 64_000_000, maxMessages: 1000, maxConsumers: 16, deployment: "qualification" };
@@ -55,6 +84,7 @@ async function message(jobId: string, generation: number, position: number, phas
 	return eventEnvelopeSchema.parse(row.payload);
 }
 try {
+	assert.equal((await db.select({ id: catalogSourceRecord.id }).from(catalogSourceRecord).where(eq(catalogSourceRecord.id, sourceRecordId)).limit(1)).length, 0, "Fixture source must not already exist; use a fresh qualification database");
 	const admission = await db.transaction(async (tx) => {
 		const [actor] = await tx.insert(users).values({ name: "Music release job fixture", email: `${crypto.randomUUID()}@example.invalid` }).returning({ id: users.id });
 		assert.ok(actor);
@@ -75,13 +105,13 @@ try {
 		}
 		throw new Error("Fixture exceeded its bounded job steps");
 	}
-	const count = Number(process.env.REZICS_MUSIC_RELEASE_JOB_TRACKS ?? 260);
-	const mediumCount = Number(process.env.REZICS_MUSIC_RELEASE_JOB_MEDIA ?? 1);
+	const count = capturedNative?.media.reduce((sum, medium) => sum + (medium.tracks?.length ?? 0), 0) ?? Number(process.env.REZICS_MUSIC_RELEASE_JOB_TRACKS ?? 260);
+	const mediumCount = capturedNative?.media.length ?? Number(process.env.REZICS_MUSIC_RELEASE_JOB_MEDIA ?? 1);
 	assert.ok(Number.isSafeInteger(count) && count >= 260 && count <= 8000);
 	assert.ok(Number.isSafeInteger(mediumCount) && mediumCount >= 1 && mediumCount <= Math.min(count, 1000));
 	const credit = [{ artist: { id: crypto.randomUUID(), name: "Fixture orchestra", type: "Orchestra" }, name: "Fixture orchestra", joinphrase: "" }];
 	const physical = Math.ceil(count / mediumCount) <= 99;
-	const original: MusicBrainzRelease = { id: sourceKey.externalId, title: "Large staged fixture", barcode: "before", "artist-credit": credit,
+	const original: MusicBrainzRelease = capturedNative ?? { id: sourceKey.externalId, title: "Large staged fixture", barcode: "before", "artist-credit": credit,
 		media: Array.from({ length: mediumCount }, (_, mediumIndex) => {
 			const start = Math.floor(mediumIndex * count / mediumCount), end = Math.floor((mediumIndex + 1) * count / mediumCount);
 			return { id: crypto.randomUUID(), position: mediumIndex + 1,
@@ -89,12 +119,34 @@ try {
 		}) };
 
 	async function observe(document: MusicBrainzRelease) {
+		if (captureDirectory || process.env.REZICS_MUSIC_RELEASE_MULTIPART === "1") {
+			const encode = (value: unknown) => new TextEncoder().encode(JSON.stringify(value));
+			const { media: _media, ...metadata } = document;
+			// Only the first capture is live evidence. Later documents deliberately simulate upstream edits.
+			const raw = captured && document === original ? captured : { tracks: encode(document), media: encode(document), metadata: encode(metadata) };
+			const normalized = normalizeMusicBrainzReleaseBundle(sourceKey.externalId, raw);
+			const profiles = musicBrainzReleaseAcquisitionProfiles(sourceKey.externalId);
+			const observedAt = new Date().toISOString();
+			const parts = profiles.map((profile) => ({ key: profile.key, profile: profile.profile, kind: "upstream_response" as const, bytes: raw[profile.key], requestUrl: profile.url,
+				observedAt: captured && document === original ? capture!.profiles.find((item) => item.key === profile.key)!.observedAt : observedAt }));
+			const receipt = await storeCatalogSourceMultipartPayload(sourceKey, MusicBrainzReleaseBundleProfile, MusicBrainzReleaseBundleDerivationSha256,
+				[...parts, { key: "native_view", profile: MusicBrainzReleaseBundleProfile, kind: "derived_view", bytes: normalized.bytes, requestUrl: null, observedAt }], MusicBrainzCatalogContractSha256, archive);
+			return db.transaction((tx) => recordCatalogSourceObservation(tx, receipt));
+		}
 		const bytes = new TextEncoder().encode(JSON.stringify(document));
 		const receipt = await storeCatalogSourcePayload(sourceKey, bytes, MusicBrainzCatalogContractSha256, null, archive);
 		return db.transaction((tx) => recordCatalogSourceDocument(tx, receipt, bytes));
 	}
 	const expectedDependencies = planMusicBrainzDependencies("release", original, MUSIC_SOURCE_DEPENDENCY_LIMIT).length;
 	const first = await observe(original);
+	if (captureDirectory || process.env.REZICS_MUSIC_RELEASE_MULTIPART === "1") {
+		const headers = await db.select().from(catalogSourceSnapshotBundle).where(and(eq(catalogSourceSnapshotBundle.sourceRecordId, sourceRecordId), eq(catalogSourceSnapshotBundle.snapshotId, first.snapshot.id))).limit(1);
+		const parts = await db.select().from(catalogSourceSnapshotPart).where(and(eq(catalogSourceSnapshotPart.sourceRecordId, sourceRecordId), eq(catalogSourceSnapshotPart.snapshotId, first.snapshot.id))).limit(5);
+		assert.equal(headers[0]?.partCount, 4); assert.equal(parts.length, 4);
+		assert.equal(parts.filter((part) => part.key === "native_view" && part.kind === "derived_view").length, 1);
+		const repeated = await observe(original);
+		assert.equal(repeated.snapshot.id, first.snapshot.id, "Changed receipt times alone must not create another snapshot");
+	}
 	const initial = await asActor(() => db.transaction((tx) => enqueueMusicReleaseSourceIntakeJob(tx, admission.actor, { sourceRecordId, snapshotId: first.snapshot.id })));
 	const firstMessage = await message(initial.id, initial.generation, 0, "prepare");
 	const paused = await control(initial.id, "pause");
@@ -112,12 +164,16 @@ try {
 	assert.equal(initialDone.state, "succeeded");
 	assert.ok(initialDone.reference);
 	const reference = initialDone.reference;
-	const nativeTracks = () => db.select({ id: musicTrackOccurrence.id, name: musicTrackOccurrence.name, position: musicTrackOccurrence.position, mediumId: musicTrackOccurrence.mediumId }).from(musicTrackOccurrence).where(eq(musicTrackOccurrence.releaseId, reference.id)).orderBy(musicTrackOccurrence.mediumId, musicTrackOccurrence.position).limit(count + 1);
+	if (captureDirectory || process.env.REZICS_MUSIC_RELEASE_MULTIPART === "1") {
+		const [wrong] = await db.select({ path: musicComponentSourceOccurrence.sourcePath }).from(musicComponentSourceOccurrence).where(and(eq(musicComponentSourceOccurrence.sourceRecordId, sourceRecordId), eq(musicComponentSourceOccurrence.snapshotId, first.snapshot.id), sql`${musicComponentSourceOccurrence.sourcePath} not like '/parts/native_view%'`)).limit(1);
+		assert.equal(wrong, undefined, "All native component evidence points to the actual archived native view");
+	}
+	const nativeTracks = () => db.select({ id: musicTrackOccurrence.id, name: musicTrackOccurrence.name, position: musicTrackOccurrence.position, mediumId: musicTrackOccurrence.mediumId, artistCreditId: musicTrackOccurrence.artistCreditId, lengthMilliseconds: musicTrackOccurrence.lengthMilliseconds, number: musicTrackOccurrence.number }).from(musicTrackOccurrence).where(eq(musicTrackOccurrence.releaseId, reference.id)).orderBy(musicTrackOccurrence.mediumId, musicTrackOccurrence.position).limit(count + 1);
 	const before = await nativeTracks();
 	assert.equal(before.length, count);
 	const oldIds = new Set(before.map((track) => track.id));
 	let updateIndex = 0;
-	const incoming: MusicBrainzRelease = { ...original, media: original.media.map((medium) => ({ ...medium, tracks: [...medium.tracks!].reverse().map((track, index) => {
+	const incoming: MusicBrainzRelease = { ...original, media: original.media.map((medium) => ({ ...medium, tracks: [...(medium.tracks ?? [])].reverse().map((track, index) => {
 		const ordinal = updateIndex++;
 		return { ...track, position: index + 1, number: String(index + 1), title: ordinal === 190 ? "Reject publication fixture" : `Updated ${ordinal}` };
 	}) })) };
@@ -183,7 +239,7 @@ try {
 	assert.equal((await advance(tinyJob.id)).state, "succeeded");
 	const tinyJournal = await asActor(() => db.transaction((tx) => readCatalogSourceApplication(tx, admission.actor, { sourceRecordId, proposalId: tinyProposalId, action: "apply" })));
 	assert.equal(tinyJournal?.changes.filter((change) => change.kind === "music-component").length, 1);
-	console.info(JSON.stringify({ status: "passed", tracks: count, media: mediumCount, physical, dependencyRows: dependencies.length, initialJobId: initial.id, applyJobId: appliedJob.id,
+	console.info(JSON.stringify({ status: "passed", tracks: count, media: mediumCount, physical, captureDirectory, sourceEvidence: captured ? "captured initial profiles; simulated update/withdrawal" : "synthetic source fixture", multipart: Boolean(captureDirectory || process.env.REZICS_MUSIC_RELEASE_MULTIPART === "1"), dependencyRows: dependencies.length, initialJobId: initial.id, applyJobId: appliedJob.id,
 		checks: ["initial background adoption", "pause before preparation", "260 dependency references paged", "no partial root visibility", "reorder across 128 boundaries", "mid-publication rollback", "resume prepared publication", "complete exact journal", "withdrawal", "revoked authority", "one-change large snapshot"] }));
 } finally {
 	await pool.end();

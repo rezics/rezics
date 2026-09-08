@@ -1,4 +1,4 @@
-import { SOURCE_DOCUMENT_BYTE_LIMIT } from "../database/schema/catalog-source-limits";
+import { SOURCE_DOCUMENT_BYTE_LIMIT, SOURCE_ACQUISITION_IO_TIMEOUT_MS } from "../database/schema/catalog-source-limits";
 import { setTimeout as delay } from "node:timers/promises";
 import { CatalogSourceRateLimited } from "./source-rate";
 import { MusicBrainzCatalogContractSha256 } from "./musicbrainz";
@@ -11,7 +11,7 @@ import type { CatalogSourceCheckOutcome } from "./source-scheduling";
 export async function acquireMusicBrainzReleaseBundle(lease: CatalogSourceAcquisition & CatalogSourceKey, signal: AbortSignal,
 	dependencies: { fetch: CatalogSourceFetch; archive?: CatalogSourceArchive; admit: () => Promise<void> },
 ): Promise<CatalogSourceCheckOutcome> {
-	const ioSignal = AbortSignal.any([signal, AbortSignal.timeout(75_000)]);
+	const ioSignal = AbortSignal.any([signal, AbortSignal.timeout(SOURCE_ACQUISITION_IO_TIMEOUT_MS)]);
 	const parts: { key: string; profile: string; kind: "upstream_response" | "derived_view"; bytes: Uint8Array; requestUrl: string | null; observedAt: string }[] = [];
 	const raw: Partial<Record<"tracks" | "media" | "metadata", Uint8Array>> = {};
 	for (const profile of musicBrainzReleaseAcquisitionProfiles(lease.externalId)) {

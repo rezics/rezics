@@ -12,3 +12,5 @@ export const SOURCE_DOCUMENT_BYTE_LIMIT = 8_000_000;
 export const SOURCE_MULTIPART_BYTE_LIMIT = 32_000_000;
 export const SOURCE_MULTIPART_PART_LIMIT = 4;
 export const SOURCE_MANIFEST_BYTE_LIMIT = 65_536;
+/** Includes shared provider waits, all response bodies and archive writes under a 30-second task lease. */
+export const SOURCE_ACQUISITION_IO_TIMEOUT_MS = 25_000;

@@ -1,4 +1,5 @@
 import { acquireMusicBrainzReleaseBundle } from "./musicbrainz-release-acquisition";
+import { SOURCE_DOCUMENT_BYTE_LIMIT, SOURCE_ACQUISITION_IO_TIMEOUT_MS } from "../database/schema/catalog-source-limits";
 import { z } from "zod";
 import { database } from "../database";
 import { reserveCatalogSourceRequest } from "./source-rate";
@@ -14,7 +15,7 @@ export type CatalogSourceFetch = (
 ) => Promise<Response>;
 
 const userAgent = "REZICS-source-check/1.0 (+https://www.rezics.com)";
-const maximumBytes = 8_000_000;
+const maximumBytes = SOURCE_DOCUMENT_BYTE_LIMIT;
 
 /** @internal Transport routes are code-owned; upstream identifiers never become arbitrary fetch URLs. */
 export function catalogSourceAcquisitionRequest(lease: CatalogSourceCheckLease) {
@@ -55,7 +56,7 @@ export async function acquireCatalogSourceCheck(
 		admit: dependencies.admit ?? (() => reserveCatalogSourceRequest(database, lease.source)),
 	});
 	await (dependencies.admit ?? (() => reserveCatalogSourceRequest(database, lease.source)))();
-	const ioSignal = AbortSignal.any([signal, AbortSignal.timeout(25_000)]);
+	const ioSignal = AbortSignal.any([signal, AbortSignal.timeout(SOURCE_ACQUISITION_IO_TIMEOUT_MS)]);
 	const response = await (dependencies.fetch ?? fetch)(request.url, {
 		method: request.method,
 		headers: request.headers,
