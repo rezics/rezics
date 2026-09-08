@@ -5,7 +5,6 @@ import { getAuditRequestContext } from "../audit";
 import { toTagPolicyConstraintError } from "../database/errors";
 import { toPostTargetingConstraintError } from "../posts/targeting";
 import { toTagPathConstraintError } from "../tag-paths/service";
-import { toUnitVariantConstraintError } from "../units/variants";
 import {
 	apiErrorRetryAfterSeconds,
 	InternalError,
@@ -31,12 +30,6 @@ export default new Elysia({ name: "api-error-boundary" }).error(
 			return status(
 				tagPolicyConstraintError.status,
 				toApiErrorBody(tagPolicyConstraintError, requestId),
-			);
-		const variantConstraintError = toUnitVariantConstraintError(error);
-		if (variantConstraintError)
-			return status(
-				variantConstraintError.status,
-				toApiErrorBody(variantConstraintError, requestId),
 			);
 		const postTargetingConstraintError = toPostTargetingConstraintError(error);
 		if (postTargetingConstraintError)

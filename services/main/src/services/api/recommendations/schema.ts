@@ -7,7 +7,7 @@ import {
 	RecommendationSurfaceValues,
 } from "../../database/schema/contract-values";
 import { DateTime, DisplayPosition, LocalizationLanguageHints, Uuid } from "../schema";
-import { VariantUnitType } from "../units/schema";
+import { CatalogOwnerValues } from "@rezics/reference";
 
 export const RecommendationSurfaceSchema = t.UnionEnum(RecommendationSurfaceValues);
 export type RecommendationSurface = StaticDecode<typeof RecommendationSurfaceSchema>;
@@ -71,7 +71,8 @@ export const RecommendationExclusionBody = t.Object(
 export type RecommendationExclusionBody = StaticDecode<typeof RecommendationExclusionBody>;
 
 export const UnitRecommendationQuery = t.Object({
-	type: t.Optional(VariantUnitType),
+	owner: t.Optional(t.UnionEnum(CatalogOwnerValues)),
+	shape: t.Optional(t.String({ minLength: 1, maxLength: 96 })),
 	seedUnitId: t.Optional(Uuid),
 	personalized: t.Optional(t.Boolean()),
 	cursor: t.Optional(t.String({ maxLength: 1_024 })),
@@ -105,7 +106,8 @@ export const UnitRecommendationResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
-			type: VariantUnitType,
+			owner: t.UnionEnum(CatalogOwnerValues),
+			shape: t.String(),
 			language: t.Nullable(t.String()),
 			contentRating: t.String(),
 			publishedAt: t.Nullable(DateTime),
