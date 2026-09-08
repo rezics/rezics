@@ -174,7 +174,7 @@ export async function createSerialization(
 	return { ...identity, revision: named.revision };
 }
 
-const coverage = z.discriminatedUnion("kind", [
+export const PublishingCoverageSchema = z.discriminatedUnion("kind", [
 	z.strictObject({
 		kind: z.literal("text_work"),
 		targetId: z.uuid(),
@@ -201,9 +201,9 @@ export async function putPublishingCoverage(
 	reference: CatalogReference,
 	actor: string,
 	expectedRevision: number,
-	input: z.input<typeof coverage>,
+	input: z.input<typeof PublishingCoverageSchema>,
 ) {
-	const value = coverage.parse(input);
+	const value = PublishingCoverageSchema.parse(input);
 	if (reference.owner !== "publishing") throw new TypeError("Expected publishing owner");
 	await requirePublishing(
 		tx,
@@ -258,7 +258,7 @@ export async function removePublishingCoverage(
 	reference: CatalogReference,
 	actor: string,
 	expectedRevision: number,
-	kind: z.output<typeof coverage>["kind"],
+	kind: z.output<typeof PublishingCoverageSchema>["kind"],
 	targetId: string,
 ) {
 	z.uuid().parse(targetId);
@@ -313,7 +313,7 @@ export async function listPublishingCoverage(
 	reference: CatalogReference,
 	actor: string | null,
 	input: {
-		kind: z.output<typeof coverage>["kind"];
+		kind: z.output<typeof PublishingCoverageSchema>["kind"];
 		after?: { position: number; id: string };
 		limit?: number;
 	},

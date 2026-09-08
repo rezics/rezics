@@ -1,3 +1,8 @@
+import {
+	publishingComponentRevisionValue,
+	putPublishingComponent,
+	removePublishingComponent,
+} from "./publishing-components";
 import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -298,6 +303,29 @@ export async function restoreStructureComponent(
 					programStructureRevisionValue(history.component, row),
 				);
 			}
+		} else if (
+			history.component === "publishing_release_event" ||
+			history.component === "publishing_publication_facet"
+		) {
+			const componentValue = publishingComponentRevisionValue(history.component, row);
+			result =
+				history.operation === "DELETE"
+					? await removePublishingComponent(
+							write,
+							reference,
+							actor,
+							expectedRevision,
+							componentValue.kind,
+							history.componentKey,
+						)
+					: await putPublishingComponent(
+							write,
+							reference,
+							actor,
+							expectedRevision,
+							history.componentKey,
+							componentValue,
+						);
 		} else if (history.component === "publishing_installment") {
 			const installment = z
 				.object({
