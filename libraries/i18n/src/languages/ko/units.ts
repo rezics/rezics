@@ -97,6 +97,10 @@ export default {
 		},
 	},
 	nativeSources: {
+		releaseTypes: {
+			vndb: koTerminology.softwareRelease.forms.label,
+			musicbrainz: koTerminology.musicRelease.forms.label,
+		},
 		previewProfile: "비교할 내용",
 		rawProfile: "원본 응답",
 		nativeProfile: "매핑된 출처 보기",
@@ -197,7 +201,6 @@ export default {
 			failed: "실패",
 		},
 		objectTypes: {
-			release: "발매 기록",
 			staff: "제작진",
 			producer: "제작사",
 			trait: "특성",

@@ -100,6 +100,10 @@ export default {
 		},
 	},
 	nativeSources: {
+		releaseTypes: {
+			vndb: deTerminology.softwareRelease.forms.label,
+			musicbrainz: deTerminology.musicRelease.forms.label,
+		},
 		previewProfile: "Quelldaten vergleichen",
 		rawProfile: "Originalantwort",
 		nativeProfile: "Zugeordnete Quellenansicht",
@@ -202,7 +206,6 @@ export default {
 			failed: "Fehlgeschlagen",
 		},
 		objectTypes: {
-			release: "Veröffentlichung",
 			staff: "Mitwirkende Person",
 			producer: "Produzent",
 			trait: "Merkmal",

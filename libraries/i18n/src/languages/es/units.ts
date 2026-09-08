@@ -99,6 +99,10 @@ export default {
 		},
 	},
 	nativeSources: {
+		releaseTypes: {
+			vndb: esTerminology.softwareRelease.forms.label,
+			musicbrainz: esTerminology.musicRelease.forms.label,
+		},
 		previewProfile: "Comparar datos de origen",
 		rawProfile: "Respuesta original",
 		nativeProfile: "Vista de origen adaptada",
@@ -201,7 +205,6 @@ export default {
 			failed: "Fallida",
 		},
 		objectTypes: {
-			release: "Lanzamiento",
 			staff: "Miembro del equipo",
 			producer: "Productor",
 			trait: "Característica",

@@ -98,6 +98,10 @@ export default {
 		},
 	},
 	nativeSources: {
+		releaseTypes: {
+			vndb: enTerminology.softwareRelease.forms.label,
+			musicbrainz: enTerminology.musicRelease.forms.label,
+		},
 		previewProfile: "Compare source data",
 		rawProfile: "Original response",
 		nativeProfile: "Mapped source view",
@@ -199,7 +203,6 @@ export default {
 			failed: "Failed",
 		},
 		objectTypes: {
-			release: "Release",
 			staff: "Staff member",
 			producer: "Producer",
 			trait: "Trait",

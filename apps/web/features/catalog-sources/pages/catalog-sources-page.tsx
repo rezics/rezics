@@ -108,7 +108,15 @@ function SourceBinding({
 		<section className="grid gap-4 rounded-xl border p-5">
 			<h2 className="font-semibold">
 				{provider ? copy.providers[provider] : binding.source} ·{" "}
-				{type ? copy.objectTypes[type] : binding.objectType}
+				{type === "release"
+					? provider === "musicbrainz"
+						? copy.releaseTypes.musicbrainz
+						: provider === "vndb"
+							? copy.releaseTypes.vndb
+							: binding.objectType
+					: type
+						? copy.objectTypes[type]
+						: binding.objectType}
 			</h2>
 			<p className="break-all">{binding.externalId}</p>
 			<div className="flex flex-wrap gap-2">

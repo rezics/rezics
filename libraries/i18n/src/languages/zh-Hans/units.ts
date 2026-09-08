@@ -97,6 +97,10 @@ export default {
 		},
 	},
 	nativeSources: {
+		releaseTypes: {
+			vndb: zhHansTerminology.softwareRelease.forms.label,
+			musicbrainz: zhHansTerminology.musicRelease.forms.label,
+		},
 		previewProfile: "选择比较内容",
 		rawProfile: "原始响应",
 		nativeProfile: "映射后的来源视图",
@@ -195,7 +199,6 @@ export default {
 			failed: "失败",
 		},
 		objectTypes: {
-			release: "发行记录",
 			staff: "制作人员",
 			producer: "制作方",
 			trait: "特征",

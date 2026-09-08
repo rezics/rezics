@@ -78,6 +78,10 @@ function SourceIntakeForm() {
 					values={SourceObjectTypes[source]}
 					labelFor={(value) => {
 						const type = SourceObjectTypes[source].find((item) => item === value);
+						if (type === "release")
+							return source === "musicbrainz"
+								? copy.releaseTypes.musicbrainz
+								: copy.releaseTypes.vndb;
 						return type ? copy.objectTypes[type] : value;
 					}}
 					onChange={(value) => {

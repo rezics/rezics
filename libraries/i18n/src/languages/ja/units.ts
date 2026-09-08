@@ -97,6 +97,10 @@ export default {
 		},
 	},
 	nativeSources: {
+		releaseTypes: {
+			vndb: jaTerminology.softwareRelease.forms.label,
+			musicbrainz: jaTerminology.musicRelease.forms.label,
+		},
 		previewProfile: "比較する内容",
 		rawProfile: "元の応答",
 		nativeProfile: "対応付け後の出典表示",
@@ -197,7 +201,6 @@ export default {
 			failed: "失敗",
 		},
 		objectTypes: {
-			release: "発売記録",
 			staff: "制作スタッフ",
 			producer: "制作元",
 			trait: "特徴",

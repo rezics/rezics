@@ -97,6 +97,10 @@ export default {
 		},
 	},
 	nativeSources: {
+		releaseTypes: {
+			vndb: zhHantTerminology.softwareRelease.forms.label,
+			musicbrainz: zhHantTerminology.musicRelease.forms.label,
+		},
 		previewProfile: "選擇比較內容",
 		rawProfile: "原始回應",
 		nativeProfile: "對應後的來源檢視",
@@ -195,7 +199,6 @@ export default {
 			failed: "失敗",
 		},
 		objectTypes: {
-			release: "發行記錄",
 			staff: "製作人員",
 			producer: "製作方",
 			trait: "特徵",
