@@ -4,6 +4,21 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: entityTerms } = deTerminology.entity;
 
 export default {
+	contextMeasurements: {
+		title: "Maße im jeweiligen Kontext",
+		context: "Zugehöriger Inhalt",
+		chooseContext: "Werk, Version, Veröffentlichung oder Programm wählen",
+		noVisibleMeasurement: "Für diesen Kontext sind derzeit keine Maße sichtbar.",
+		edit: "Maße für diesen Kontext bearbeiten",
+		millimetres: "Millimeter",
+		grams: "Gramm",
+		scopeNotice:
+			"Diese Werte gelten nur für den gewählten Inhalt. Beim Speichern wird der vollständige Maßsatz dieses Kontexts ersetzt.",
+		unknownNotice: "Unbekannte Werte bleiben leer. Null wird als Null gespeichert.",
+		invalid:
+			"Gib nichtnegative ganze Zahlen im unterstützten Bereich ein oder lasse unbekannte Werte leer.",
+		save: "Maße für diesen Kontext speichern",
+	},
 	entities: entityTerms.pluralLabel,
 	tags: "Tags",
 	kind: "Art",

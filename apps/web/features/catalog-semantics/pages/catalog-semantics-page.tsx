@@ -26,6 +26,7 @@ import { RelationEditorLoader, type RelationSummary } from "../components/relati
 import { FactValue } from "../components/fact-value";
 import { RelationValue } from "../components/relation-value";
 import { SemanticHistory, SemanticStateActions } from "../components/semantic-history";
+import { EntityContextMeasurements } from "../components/entity-context-measurements";
 type PageContext = {
 	reference: CatalogReference;
 	revision: number;
@@ -110,6 +111,9 @@ function CatalogSemanticsContent({ reference }: { reference: CatalogReference })
 					value={includeInactive}
 					onChange={setIncludeInactive}
 				/>
+			) : null}
+			{reference.owner === "entity" && resource.data.shape === "character" ? (
+				<EntityContextMeasurements entityId={reference.id} onSaved={onChanged} />
 			) : null}
 			{context.canEdit && creating === "fact" ? (
 				<FactEditor reference={reference} revision={resource.data.revision} onSaved={onChanged} />

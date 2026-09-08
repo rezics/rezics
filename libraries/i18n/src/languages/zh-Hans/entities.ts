@@ -3,6 +3,19 @@ import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 const { forms: entityTerms } = zhHansTerminology.entity;
 
 export default {
+	contextMeasurements: {
+		title: "特定内容中的测量值",
+		context: "相关内容",
+		chooseContext: "选择作品、版本、发行记录或节目",
+		noVisibleMeasurement: "此上下文中没有当前可见的测量值。",
+		edit: "编辑此上下文的测量值",
+		millimetres: "毫米",
+		grams: "克",
+		scopeNotice: "这些数值仅适用于所选内容。保存会替换该上下文的整组测量值。",
+		unknownNotice: "未知数值请留空。零会按零保存。",
+		invalid: "请输入支持范围内的非负整数，未知数值请留空。",
+		save: "保存此上下文的测量值",
+	},
 	entities: entityTerms.pluralLabel,
 	tags: "标签",
 	kind: "类别",

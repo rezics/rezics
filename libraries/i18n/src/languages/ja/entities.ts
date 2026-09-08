@@ -4,6 +4,20 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
+	contextMeasurements: {
+		title: "内容ごとの身体計測値",
+		context: "関連する内容",
+		chooseContext: "作品・版・リリース・番組を選択",
+		noVisibleMeasurement: "この内容では現在閲覧できる計測値がありません。",
+		edit: "この内容の計測値を編集",
+		millimetres: "ミリメートル",
+		grams: "グラム",
+		scopeNotice:
+			"これらの値は選択した内容だけに適用されます。保存すると、その内容の計測値一式を置き換えます。",
+		unknownNotice: "不明な値は空欄にしてください。ゼロはゼロとして保存されます。",
+		invalid: "対応範囲内の非負整数を入力するか、不明な値を空欄にしてください。",
+		save: "この内容の計測値を保存",
+	},
 	entities: entityTerms.pluralLabel,
 	tags: "タグ",
 	kind: "種類",

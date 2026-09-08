@@ -4,6 +4,20 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: entityTerms } = koTerminology.entity;
 
 export default {
+	contextMeasurements: {
+		title: "내용별 신체 측정값",
+		context: "관련 내용",
+		chooseContext: "작품, 버전, 발매 또는 프로그램 선택",
+		noVisibleMeasurement: "이 맥락에서 현재 볼 수 있는 측정값이 없습니다.",
+		edit: "이 맥락의 측정값 편집",
+		millimetres: "밀리미터",
+		grams: "그램",
+		scopeNotice:
+			"이 값은 선택한 내용에만 적용됩니다. 저장하면 해당 맥락의 측정값 전체를 대체합니다.",
+		unknownNotice: "알 수 없는 값은 비워 두세요. 0은 0으로 저장됩니다.",
+		invalid: "지원 범위 내의 음이 아닌 정수를 입력하거나 알 수 없는 값은 비워 두세요.",
+		save: "이 맥락의 측정값 저장",
+	},
 	entities: entityTerms.pluralLabel,
 	tags: "태그",
 	kind: "종류",

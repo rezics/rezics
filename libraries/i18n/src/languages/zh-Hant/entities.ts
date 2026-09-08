@@ -3,6 +3,19 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 const { forms: entityTerms } = zhHantTerminology.entity;
 
 export default {
+	contextMeasurements: {
+		title: "特定內容中的測量值",
+		context: "相關內容",
+		chooseContext: "選擇作品、版本、發行記錄或節目",
+		noVisibleMeasurement: "此情境中沒有目前可見的測量值。",
+		edit: "編輯此情境的測量值",
+		millimetres: "毫米",
+		grams: "克",
+		scopeNotice: "這些數值僅適用於所選內容。儲存會取代該情境的整組測量值。",
+		unknownNotice: "未知數值請留空。零會以零儲存。",
+		invalid: "請輸入支援範圍內的非負整數，未知數值請留空。",
+		save: "儲存此情境的測量值",
+	},
 	entities: entityTerms.pluralLabel,
 	tags: "標籤",
 	kind: "類別",

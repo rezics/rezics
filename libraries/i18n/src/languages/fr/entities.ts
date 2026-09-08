@@ -4,6 +4,21 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: entityTerms } = frTerminology.entity;
 
 export default {
+	contextMeasurements: {
+		title: "Mensurations selon le contexte",
+		context: "Contenu associé",
+		chooseContext: "Choisir l’œuvre, la version, la sortie ou le programme",
+		noVisibleMeasurement: "Aucune mensuration actuelle n’est visible pour ce contexte.",
+		edit: "Modifier les mensurations de ce contexte",
+		millimetres: "millimètres",
+		grams: "grammes",
+		scopeNotice:
+			"Ces valeurs ne s’appliquent qu’au contenu choisi. L’enregistrement remplace l’ensemble de ses mensurations.",
+		unknownNotice: "Laissez les valeurs inconnues vides. Zéro est enregistré comme zéro.",
+		invalid:
+			"Saisissez des entiers positifs ou nuls dans la plage prise en charge, ou laissez les valeurs inconnues vides.",
+		save: "Enregistrer les mensurations de ce contexte",
+	},
 	entities: entityTerms.pluralLabel,
 	tags: "Tags",
 	kind: "Type",
