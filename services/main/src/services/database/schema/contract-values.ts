@@ -1,3 +1,4 @@
+import type { UnitOwner } from "@rezics/reference";
 export {
 	ChineseContentDisplayValues,
 	ContentLanguageValues,
@@ -378,21 +379,37 @@ export function isSubjectAssociationRole(value: string): value is SubjectAssocia
 
 export const DockKindValues = ["main", "wiki"] as const;
 export type DockKind = (typeof DockKindValues)[number];
-export const DockOwnerUnitKindValues = ["book", "software", "media", "zone", "realm"] as const;
+export const DockOwnerUnitKindValues = [
+	"publishing",
+	"music",
+	"program",
+	"software",
+	"entity",
+	"grouping",
+	"reference",
+	"distribution",
+	"zone",
+	"realm",
+] as const;
 export type DockOwnerUnitKind = (typeof DockOwnerUnitKindValues)[number];
 export const DockKindsByUnitKind = {
-	book: ["main"],
+	publishing: ["main"],
+	music: ["main"],
 	software: ["main"],
-	media: ["main"],
+	program: ["main"],
+	entity: ["main"],
+	grouping: ["main"],
+	reference: ["main"],
+	distribution: ["main"],
 	zone: ["main"],
 	realm: ["main", "wiki"],
 } as const satisfies Record<DockOwnerUnitKind, readonly DockKind[]>;
 
-export function isDockOwnerUnitKind(kind: UnitKind): kind is DockOwnerUnitKind {
-	return (DockOwnerUnitKindValues as readonly UnitKind[]).includes(kind);
+export function isDockOwnerUnitKind(kind: string): kind is DockOwnerUnitKind {
+	return (DockOwnerUnitKindValues as readonly string[]).includes(kind);
 }
 
-export function isDockKindSupported(kind: UnitKind, dockKind: DockKind): boolean {
+export function isDockKindSupported(kind: UnitOwner, dockKind: DockKind): boolean {
 	return isDockOwnerUnitKind(kind)
 		? (DockKindsByUnitKind[kind] as readonly DockKind[]).includes(dockKind)
 		: false;

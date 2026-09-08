@@ -4,7 +4,9 @@ import Elysia from "elysia";
 import { StatusCodes } from "http-status-codes";
 
 import session from "../../auth/session";
-import { getUnitReadCondition } from "../../authorization/unit/query";
+import type { UnitAuthorization } from "../../authorization/unit/authorization";
+import { readContentStructureContentRows } from "../../content-structure/content-preview";
+import { unitStateRelation } from "../../units/state-relation";
 import { database } from "../../database";
 import {
 	ActiveContentReviewCaseStateValues,
@@ -20,7 +22,6 @@ import {
 	realmRule,
 	realmRuleRevision,
 	realmUnit,
-	unit,
 	unitLicenseGrant,
 	unitRevisionHead,
 	type ContentLanguage,
@@ -206,19 +207,22 @@ function presentReport(report: HydratedReport) {
 
 async function listReadableReportTargets(
 	unitIds: readonly string[],
-	profileId: string,
+	authorization: UnitAuthorization<string>,
 	localizationLanguages: LocalizationLanguages,
 ) {
 	if (!unitIds.length) return [];
-	return database
-		.select({
-			id: unit.id,
-			kind: unit.kind,
-			language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
-			title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
-		})
-		.from(unit)
-		.where(and(inArray(unit.id, [...new Set(unitIds)]), getUnitReadCondition(profileId)));
+	return database.transaction(async (tx) => {
+		const readable = await authorization.readableUnitIdsInTransaction(tx, unitIds);
+		const targets = await readContentStructureContentRows(tx, [...readable], localizationLanguages);
+		return targets.map((row) => ({
+			id: row.id,
+			kind: row.unitKind,
+			shape: row.shape,
+			language: row.language,
+			languageTag: row.languageTag,
+			title: row.title,
+		}));
+	});
 }
 
 type ReadableReportTarget = Awaited<ReturnType<typeof listReadableReportTargets>>[number];
@@ -319,9 +323,12 @@ export default new Elysia().use(session).group("", (app) =>
 					[StatusCodes.OK]: MyReportListResponse,
 					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
 				},
-				detail: { summary: "List current user's content reports", tags: ["Reports"] },
+				detail: {
+					summary: "List current user's content reports",
+					tags: ["Reports"],
+				},
 			},
-			async ({ entity, query }) => {
+			async ({ entity, query, authorization }) => {
 				const requestedReportId = query.reportId;
 				const limit = requestedReportId ? 1 : (query.limit ?? 30);
 				const cursor = requestedReportId ? undefined : decodeMyReportCursor(query.cursor);
@@ -341,7 +348,7 @@ export default new Elysia().use(session).group("", (app) =>
 				const reports = await hydrateReports(pageRows, query.localizationLanguages);
 				const unitIds = reports.map((report) => report.unitId);
 				const [targets, slugAddresses] = await Promise.all([
-					listReadableReportTargets(unitIds, entity.id, query.localizationLanguages),
+					listReadableReportTargets(unitIds, authorization.unit, query.localizationLanguages),
 					getPublicCanonicalUnitSlugAddresses(unitIds),
 				]);
 				const targetById = new Map(targets.map((target) => [target.id, target]));
@@ -422,7 +429,10 @@ export default new Elysia().use(session).group("", (app) =>
 					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
 					[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 				},
-				detail: { summary: "List content reports referred to a Realm", tags: ["Reports"] },
+				detail: {
+					summary: "List content reports referred to a Realm",
+					tags: ["Reports"],
+				},
 			},
 			async ({ params, query, authorization }) => {
 				await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
@@ -486,7 +496,10 @@ export default new Elysia().use(session).group("", (app) =>
 						"PlatformCapabilityRequired",
 					]),
 				},
-				detail: { summary: "List reports in one content review case", tags: ["Reports"] },
+				detail: {
+					summary: "List reports in one content review case",
+					tags: ["Reports"],
+				},
 			},
 			async ({ params, query, authorization }) => {
 				const [caseRow] = await database
@@ -563,26 +576,15 @@ export default new Elysia().use(session).group("", (app) =>
 				const canManageLicenses = await authorization.platform.hasCapability("unit.license.manage");
 				const limit = query.limit ?? 50;
 				const cursor = decodeMyReportCursor(query.cursor);
-				const rows = await database
+				const candidates = database
 					.select({
-						caseId: contentReviewCase.id,
-						caseState: contentReviewCase.state,
-						unitId: unit.id,
-						unitKind: unit.kind,
-						language: resolvedUnitLocalizationLanguage(unit.id, query.localizationLanguages),
-						title: resolvedUnitLocalizationTitle(unit.id, query.localizationLanguages),
-						moderationStatus: unit.moderationStatus,
-						postTargetingLocked: unit.postTargetingLocked,
-						reportCount: sql<number>`coalesce((
-							select sum(${contentReviewCaseReportCounter.count})::int
-							from ${contentReviewCaseReportCounter}
-							where ${contentReviewCaseReportCounter.caseId} = ${contentReviewCase.id}
-						), 0)`,
+						id: contentReviewCase.id,
+						state: contentReviewCase.state,
+						targetUnitId: contentReviewCase.targetUnitId,
 						createdAt: contentReviewCase.createdAt,
 						updatedAt: contentReviewCase.updatedAt,
 					})
 					.from(contentReviewCase)
-					.innerJoin(unit, eq(unit.id, contentReviewCase.targetUnitId))
 					.where(
 						and(
 							eq(contentReviewCase.authority, "platform"),
@@ -603,9 +605,35 @@ export default new Elysia().use(session).group("", (app) =>
 						),
 					)
 					.orderBy(desc(contentReviewCase.updatedAt), desc(contentReviewCase.id))
-					.limit(limit + 1);
+					.limit(limit + 1)
+					.as("report_case_candidates");
+				const state = unitStateRelation(candidates.targetUnitId, "report_target_state", true);
+				const rows = await database
+					.select({
+						caseId: candidates.id,
+						caseState: candidates.state,
+						unitId: candidates.targetUnitId,
+						unitKind: state.owner,
+						shape: state.shape,
+						moderationStatus: state.moderationStatus,
+						postTargetingLocked: state.postTargetingLocked,
+						reportCount: sql<number>`coalesce((select sum(${contentReviewCaseReportCounter.count})::int from ${contentReviewCaseReportCounter} where ${contentReviewCaseReportCounter.caseId} = ${candidates.id}), 0)`,
+						createdAt: candidates.createdAt,
+						updatedAt: candidates.updatedAt,
+					})
+					.from(candidates)
+					.innerJoinLateral(state, sql`true`)
+					.orderBy(desc(candidates.updatedAt), desc(candidates.id));
 				const page = rows.slice(0, limit);
 				if (!page.length) return { items: [], nextCursor: null };
+				const previews = await database.transaction((tx) =>
+					readContentStructureContentRows(
+						tx,
+						page.map((row) => row.unitId),
+						query.localizationLanguages,
+					),
+				);
+				const previewById = new Map(previews.map((row) => [row.id, row]));
 				const licenseGrantRows = await database
 					.select({
 						id: unitLicenseGrant.id,
@@ -665,7 +693,7 @@ export default new Elysia().use(session).group("", (app) =>
 				const last = page.at(-1);
 				return {
 					items: page.map((row) => {
-						if (!row.language) throw new Error(`Reported Unit ${row.unitId} has no localization`);
+						const preview = previewById.get(row.unitId);
 						const grants = (grantsByUnit.get(row.unitId) ?? []).map((grant) =>
 							grant.recognitionStatus === "invalidated"
 								? {
@@ -689,22 +717,31 @@ export default new Elysia().use(session).group("", (app) =>
 						const hasOpenReports = isActiveContentReviewCaseState(row.caseState);
 						return {
 							...row,
-							language: row.language,
+							language: preview?.language ?? null,
+							languageTag: preview?.languageTag ?? null,
+							title: preview?.title ?? null,
 							licenseGrants: grants,
 							reportCount: Number(row.reportCount),
 							allowedCommands: [
 								...getPlatformUnitModerationCommands(
 									row.moderationStatus,
-									row.postTargetingLocked,
+									row.postTargetingLocked ?? false,
 									canManageLicenses ? grants.map((grant) => grant.recognitionStatus) : [],
 									hasOpenReports,
+								).filter(
+									(command) =>
+										row.postTargetingLocked !== null ||
+										(command !== "lock_post_targeting" && command !== "unlock_post_targeting"),
 								),
 							],
 						};
 					}),
 					nextCursor:
 						rows.length > limit && last
-							? encodeMyReportCursor({ createdAt: last.updatedAt, id: last.caseId })
+							? encodeMyReportCursor({
+									createdAt: last.updatedAt,
+									id: last.caseId,
+								})
 							: null,
 				};
 			},

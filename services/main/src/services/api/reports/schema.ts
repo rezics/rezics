@@ -1,3 +1,4 @@
+import { UnitOwnerValues } from "@rezics/reference";
 import type { StaticDecode } from "typebox";
 import { t } from "elysia";
 
@@ -5,7 +6,7 @@ import {
 	GovernanceMaxRuleReferences,
 	ContentReviewCaseStateValues,
 } from "../../database/schema/contract-values";
-import { ContentLanguage, DateTime, LocalizationLanguageQuery, UnitKind, Uuid } from "../schema";
+import { ContentLanguage, DateTime, LocalizationLanguageQuery, Uuid } from "../schema";
 import { GovernanceRuleReference } from "../governance/schema";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 
@@ -112,7 +113,9 @@ export const ReportReferralResponse = t.Object(
 		caseId: Uuid,
 		scope: t.Union([t.Literal("realm"), t.Literal("platform")]),
 		realmId: t.Nullable(Uuid),
-		caseState: t.UnionEnum(ContentReviewCaseStateValues, { default: undefined }),
+		caseState: t.UnionEnum(ContentReviewCaseStateValues, {
+			default: undefined,
+		}),
 	},
 	{ additionalProperties: false },
 );
@@ -151,7 +154,9 @@ export const MyReportStatusValues = [
 	"merged",
 	"not_actioned",
 ] as const;
-export const MyReportStatus = t.UnionEnum(MyReportStatusValues, { default: undefined });
+export const MyReportStatus = t.UnionEnum(MyReportStatusValues, {
+	default: undefined,
+});
 export type MyReportStatus = StaticDecode<typeof MyReportStatus>;
 
 const MyReportTargetResponse = t.Union([
@@ -161,7 +166,9 @@ const MyReportTargetResponse = t.Union([
 			unit: t.Object(
 				{
 					id: Uuid,
-					kind: UnitKind,
+					kind: t.UnionEnum(UnitOwnerValues),
+					shape: t.String(),
+					languageTag: t.Nullable(t.String()),
 					language: t.Nullable(ContentLanguage),
 					title: t.Nullable(t.String()),
 					slugAddress: NullablePublicSlugAddressResponse,
@@ -280,13 +287,17 @@ const PlatformReportCaseLicenseGrant = t.Union([
 export const PlatformReportCaseResponse = t.Object(
 	{
 		caseId: Uuid,
-		caseState: t.UnionEnum(ContentReviewCaseStateValues, { default: undefined }),
+		caseState: t.UnionEnum(ContentReviewCaseStateValues, {
+			default: undefined,
+		}),
 		unitId: Uuid,
-		unitKind: t.String(),
-		language: ContentLanguage,
+		unitKind: t.UnionEnum(UnitOwnerValues),
+		shape: t.String(),
+		language: t.Nullable(ContentLanguage),
+		languageTag: t.Nullable(t.String()),
 		title: t.Nullable(t.String()),
 		moderationStatus: PlatformModerationStatus,
-		postTargetingLocked: t.Boolean(),
+		postTargetingLocked: t.Nullable(t.Boolean()),
 		licenseGrants: t.Array(PlatformReportCaseLicenseGrant),
 		reportCount: t.Integer({ minimum: 1 }),
 		allowedCommands: t.Array(PlatformModerationCommand, { minItems: 1 }),

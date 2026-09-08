@@ -27,13 +27,31 @@ export function createUnitBlockReferenceResolver(
 			if (!identifiers.length) return new Set<string>();
 			if (kind === "label" || kind === "unit" || kind === "wiki-post") {
 				const selected = [...new Set(identifiers)];
-				if (selected.length > 500) throw new RangeError("Block reference batches cannot exceed 500 targets");
-				const [binding] = input.authorization ? [] : await tx.select({ authUserId: authEntity.authUserId }).from(authEntity).where(and(eq(authEntity.entityId, input.profileId), eq(authEntity.state, "active"))).limit(1);
-				const authorization = input.authorization ?? new Authorization(input.profileId, binding?.authUserId, currentParticipationAuthority()).unit;
+				if (selected.length > 500)
+					throw new RangeError("Block reference batches cannot exceed 500 targets");
+				const [binding] = input.authorization
+					? []
+					: await tx
+							.select({ authUserId: authEntity.authUserId })
+							.from(authEntity)
+							.where(and(eq(authEntity.entityId, input.profileId), eq(authEntity.state, "active")))
+							.limit(1);
+				const authorization =
+					input.authorization ??
+					new Authorization(input.profileId, binding?.authUserId, currentParticipationAuthority())
+						.unit;
 				const readable = await authorization.readableUnitIdsInTransaction(tx, selected);
 				if (kind === "unit" || !readable.size) return readable;
 				const table = kind === "label" ? label : post;
-				const rows = await tx.select({ id: table.id }).from(table).where(and(inArray(table.id, [...readable]), kind === "wiki-post" ? eq(post.kind, "wiki") : undefined));
+				const rows = await tx
+					.select({ id: table.id })
+					.from(table)
+					.where(
+						and(
+							inArray(table.id, [...readable]),
+							kind === "wiki-post" ? eq(post.kind, "wiki") : undefined,
+						),
+					);
 				return new Set(rows.map((row) => row.id));
 			}
 			if (kind === "asset") {
