@@ -1,3 +1,4 @@
+import { readAuthorizedChildNameLabels } from "./child-name-labels";
 import { and, eq, gt, lt, desc, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -392,9 +393,16 @@ export async function pageSoftwareApiReleases(
 		limit,
 		afterId: after === undefined ? undefined : z.uuid().parse(after),
 	});
+	const labels = await readAuthorizedChildNameLabels(
+		tx,
+		"software",
+		rows.map((row) => row.id),
+	);
 	return domainPage(
 		scope,
-		rows.map((row) => SoftwareReleaseSummarySchema.parse(row)),
+		rows.map((row) =>
+			SoftwareReleaseSummarySchema.parse({ ...row, name: labels.get(row.id) ?? null }),
+		),
 		limit,
 		(row) => row.id,
 	);

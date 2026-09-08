@@ -8,6 +8,7 @@ import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { ensureCatalogDefinition } from "../src/services/catalog/storage";
 import { CatalogCreatedSchema } from "../src/services/catalog/resource-contracts";
 import {
+	SoftwareReleaseSummarySchema,
 	SoftwareDetailSchema,
 	SoftwareMutationSchema,
 	SoftwareComponentMutationSchema,
@@ -397,7 +398,11 @@ try {
 		200,
 		owner,
 	);
-	await request("GET", `${c}/releases?languageTag=ja`, undefined, 200, owner);
+	const matchingReleases = softwarePage(SoftwareReleaseSummarySchema).parse(
+		await request("GET", `${c}/releases?languageTag=ja`, undefined, 200, owner),
+	);
+	assert.equal(matchingReleases.items[0]?.name?.value, "Native release");
+	assertions++;
 	await request("GET", `${c}/contexts?cursor=AAAA`, undefined, 422, owner);
 	const p = await create(
 			{
@@ -476,6 +481,8 @@ try {
 	const occurrences = programPage(ProgramOccurrenceSchema).parse(
 		await request("GET", `${path}/occurrences?limit=1`, undefined, 200, owner),
 	);
+	assert.equal(occurrences.items[0]?.name?.value, "Episode one");
+	assertions++;
 	assert.equal(occurrences.items[0]?.historyId, occurrence.historyId);
 	assertions++;
 	const deleted = ProgramMutationSchema.parse(

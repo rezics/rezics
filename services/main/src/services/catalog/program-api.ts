@@ -1,9 +1,14 @@
+import { readAuthorizedChildNameLabels } from "./child-name-labels";
 import { and, eq, gt, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { CatalogStructureHistoryTables } from "../database/schema/catalog-structure-history";
 import { programIdentity } from "../database/schema/catalog-identity";
-import { readCatalogAuthorityScope, catalogIdentityReadPredicate, canAccessCatalog } from "../participation/policy";
+import {
+	readCatalogAuthorityScope,
+	catalogIdentityReadPredicate,
+	canAccessCatalog,
+} from "../participation/policy";
 import { loadCatalogIdentity, CatalogRevisionConflict, CatalogReferenceNotFound } from "./storage";
 import {
 	readProgramStructure,
@@ -64,7 +69,13 @@ export async function readProgramApiDetails(
 	const head = await readStructureComponentHead(tx, reference(id), component, id);
 	if (!head) throw new CatalogReferenceNotFound("Program component history is missing");
 	return ProgramDetailsSchema.parse({
-		canEdit: await canAccessCatalog(tx, reference(id), actor, result.identity.createdByAuthUserId, true),
+		canEdit: await canAccessCatalog(
+			tx,
+			reference(id),
+			actor,
+			result.identity.createdByAuthUserId,
+			true,
+		),
 		id,
 		revision: result.identity.revision,
 		historyId: head.id,
@@ -198,8 +209,14 @@ export async function pageProgramApiOccurrences(
 			.parse(result.rows)
 			.map((row) => [row.id, row]),
 	);
+	const labels = await readAuthorizedChildNameLabels(
+		tx,
+		"program",
+		native.items.map((row) => row.episodeId),
+	);
 	const items = native.items.map((row) =>
 		ProgramOccurrenceSchema.parse({
+			name: labels.get(row.episodeId) ?? null,
 			id: row.id,
 			historyId: histories.get(row.id)?.history_id,
 			componentSequence: histories.get(row.id)?.component_sequence,

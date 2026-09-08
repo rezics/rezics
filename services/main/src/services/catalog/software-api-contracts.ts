@@ -1,3 +1,4 @@
+import { CatalogNameLabelSchema } from "./child-name-labels";
 import { z } from "zod";
 import {
 	SoftwareContentDetailsSchema,
@@ -140,6 +141,7 @@ export const SoftwareReleaseSearchSchema = DomainPageQuerySchema.extend({
 	isPatch: z.enum(["true", "false"]).optional(),
 });
 export const SoftwareReleaseSummarySchema = z.strictObject({
+	name: CatalogNameLabelSchema.nullable(),
 	id: z.uuid(),
 	isPatch: z.boolean().nullable(),
 	engine: z.string().nullable(),

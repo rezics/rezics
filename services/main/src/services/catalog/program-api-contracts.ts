@@ -1,3 +1,4 @@
+import { CatalogNameLabelSchema } from "./child-name-labels";
 import { z } from "zod";
 import { ProgramStructureSchema } from "./program";
 import { isFractionalPosition } from "../ordering/position";
@@ -34,6 +35,7 @@ export const ProgramOccurrenceValueSchema = z.strictObject({
 	sourceNumber: z.string().max(4096).nullable(),
 });
 export const ProgramOccurrenceSchema = z.strictObject({
+	name: CatalogNameLabelSchema.nullable(),
 	id: z.uuid(),
 	historyId: z.uuid(),
 	componentSequence: revision,
