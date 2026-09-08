@@ -1,3 +1,4 @@
+import { ParticipationDenied } from "../participation/policy";
 import { selfAuthUserIdForEntity } from "../participation/account-query";
 import type { StaticDecode } from "typebox";
 import { createHash } from "node:crypto";
@@ -36,6 +37,7 @@ import {
 	type DatabaseTransaction,
 } from "../database";
 import {
+	authEntity,
 	customTheme,
 	customThemeRevision,
 	customThemeRevisionExternalResource,
@@ -202,6 +204,13 @@ export async function createCustomTheme(input: {
 	readonly localization: CustomThemeLocalizationInput;
 }) {
 	return database.transaction(async (tx) => {
+		const [owner] = await tx
+			.select({ authUserId: authEntity.authUserId })
+			.from(authEntity)
+			.where(and(eq(authEntity.entityId, input.ownerProfileId), eq(authEntity.state, "active")))
+			.limit(1)
+			.for("share");
+		if (!owner) throw new ParticipationDenied("A Custom Theme requires an active account owner");
 		await ensureImageAssetsAttachable(tx, selfAuthUserIdForEntity(input.ownerProfileId), [
 			{ assetId: input.localization.bannerAssetId, role: "banner" },
 			{ assetId: input.localization.coverAssetId, role: "cover" },
@@ -212,7 +221,7 @@ export async function createCustomTheme(input: {
 				status: "published",
 				visibility: "public",
 				publishedAt: new Date(),
-				createdByAuthUserId: selfAuthUserIdForEntity(input.ownerProfileId),
+				createdByAuthUserId: owner.authUserId,
 			},
 			statusActor: { kind: "profile", profileId: input.ownerProfileId },
 		});

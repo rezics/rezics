@@ -126,7 +126,7 @@ async function mutateDockOwner<T>(
 					tx,
 					input.owner.id,
 					"unit.update",
-					[["dock", input.kind]],
+					["dock", input.kind],
 				);
 				if (!decision.allowed) throw new ParticipationDenied();
 			}
@@ -472,7 +472,7 @@ export default new Elysia({ prefix: "/units/by-id" })
 					authorization: authorization.unit,
 					participation,
 				},
-				async (tx, ownerRevision) => {
+				async (tx) => {
 					await tx.execute(
 						sql`select pg_advisory_xact_lock(hashtextextended(${unitBlockGraphLockName({ unitId: owner.id, kind: owner.kind })}::text, 0))`,
 					);

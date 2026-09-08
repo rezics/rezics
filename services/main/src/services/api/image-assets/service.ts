@@ -25,6 +25,7 @@ import {
 } from "./errors";
 import {
 	defaultImageAssetPresentation,
+	imageAssetContentUrl,
 	imageAssetPresentationContentUrl,
 	toImageAssetPresentationColumns,
 	validateImageAssetPresentation,
