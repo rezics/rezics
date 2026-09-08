@@ -1,3 +1,12 @@
+import {
+	catalogDefinition,
+	catalogDefinitionRevision,
+} from "../src/services/database/schema/catalog-identity";
+import { beginCatalogFact, CatalogRevisionConflict } from "../src/services/catalog/storage";
+import {
+	contentLanguageDeclarationSemanticId,
+	ContentLanguageDeclarationReferenceSchema,
+} from "../src/services/catalog/content-language-declaration";
 import assert from "node:assert/strict";
 import Elysia from "elysia";
 import { inArray } from "drizzle-orm";
@@ -7,7 +16,7 @@ import { users, sessions } from "../src/services/database/schema/auth";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { CatalogCreatedSchema } from "../src/services/catalog/resource-contracts";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { unitContentLanguageSupport } from "../src/services/database/schema";
 import {
 	ContentLanguageDeclarationSchema,
@@ -266,6 +275,41 @@ try {
 		);
 		assert.equal(current.headVersion, 4);
 		assert.deepEqual(current.value, value);
+		assertions += 2;
+		const nativeReference = ContentLanguageDeclarationReferenceSchema.parse(resource.reference);
+		const actorId = accounts[0];
+		assert.ok(actorId);
+		const [meaning] = await database
+			.select({ id: catalogDefinitionRevision.id })
+			.from(catalogDefinitionRevision)
+			.innerJoin(
+				catalogDefinition,
+				eq(catalogDefinition.id, catalogDefinitionRevision.definitionId),
+			)
+			.where(
+				and(
+					eq(catalogDefinition.namespace, "catalog"),
+					eq(catalogDefinition.key, "content_consumption_languages"),
+				),
+			)
+			.orderBy(catalogDefinitionRevision.version)
+			.limit(1);
+		assert.ok(meaning);
+		await assert.rejects(
+			database.transaction((tx) =>
+				beginCatalogFact(tx, nativeReference, actorId, current.revision, meaning.id, {
+					initialSemanticId: contentLanguageDeclarationSemanticId(nativeReference),
+					expectedHeadVersion: 0,
+				}),
+			),
+			CatalogRevisionConflict,
+		);
+		assertions++;
+		const afterRejected = ContentLanguageDeclarationSchema.parse(
+			await request("GET", path, undefined, 200, owner),
+		);
+		assert.equal(afterRejected.revision, current.revision);
+		assert.equal(afterRejected.headVersion, 4);
 		assertions += 2;
 	}
 	const program = targets.find((item) => item.reference.owner === "program");
