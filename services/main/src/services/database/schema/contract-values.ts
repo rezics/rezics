@@ -77,12 +77,9 @@ export const MaximumContentLanguageEvidencePageSize = 50;
 /** Unit kinds whose content-hosting choice is persisted as descriptive metadata. */
 export const MetadataOnlyUnitKindValues = ["book", "software", "media"] as const;
 export type MetadataOnlyUnitKind = (typeof MetadataOnlyUnitKindValues)[number];
-/** Unit kinds released for irreversible identity convergence in merge policy v1. */
-export const UnitMergeEligibleKindValues = ["book", "software", "media", "entity"] as const;
-export type UnitMergeEligibleKind = (typeof UnitMergeEligibleKindValues)[number];
-
-export const UnitMergeRequestModeValues = ["reviewed", "privileged_direct"] as const;
-export type UnitMergeRequestMode = (typeof UnitMergeRequestModeValues)[number];
+/** Reviewed native identity convergence; platform resources do not enter this workflow. */
+export { CatalogOwnerValues as UnitMergeEligibleOwnerValues } from "@rezics/reference";
+export type { CatalogOwner as UnitMergeEligibleOwner } from "@rezics/reference";
 export const UnitMergeRequestStateValues = [
 	"pending_review",
 	"accepted",
@@ -90,6 +87,7 @@ export const UnitMergeRequestStateValues = [
 	"expired",
 	"superseded",
 	"executing",
+	"action_required",
 	"completed",
 	"failed",
 ] as const;
@@ -100,68 +98,44 @@ export const UnitMergeOperationStateValues = [
 	"pending",
 	"processing",
 	"retry_wait",
+	"action_required",
 	"completed",
 	"failed",
 ] as const;
 export type UnitMergeOperationState = (typeof UnitMergeOperationStateValues)[number];
-export const UnitMergeGraphRoleValues = ["standalone", "variant", "main"] as const;
-export type UnitMergeGraphRole = (typeof UnitMergeGraphRoleValues)[number];
-export const UnitMergeGraphActionValues = [
-	"none",
-	"detach_source",
-	"reparent_source_variants_to_target",
-	"reparent_source_variants_to_target_main",
-	"promote_target_from_source",
-] as const;
-export type UnitMergeGraphAction = (typeof UnitMergeGraphActionValues)[number];
-
-/**
- * Durable, ordered execution phases. Appending before `finalize` is a persisted
- * contract change; renaming or reordering a released phase requires a cutover.
- */
 export const UnitMergeOperationPhaseValues = [
-	"entity_measurement_preflight",
-	"entity_measurement_entities",
-	"entity_measurement_contexts",
-	"variant_graph",
-	"slug_addresses",
-	"slug_scopes",
-	"aliases",
-	"external_links",
-	"external_link_sources",
-	"software_requirements",
-	"software_requirement_platforms",
-	"unit_reactions",
-	"unit_shares",
-	"unit_follows",
-	"scores",
-	"collection_items",
-	"unit_tags",
-	"realm_tag_judgments",
-	"account_unit_tags",
-	"realm_pins",
-	"realm_units",
-	"realm_unit_tags",
-	"post_subjects",
-	"association_proposal_sources",
-	"association_proposal_targets",
-	"credit_sources",
-	"credit_targets",
-	"subject_sources",
-	"subject_entities",
-	"release_parents",
-	"series_releases",
-	"poll_options",
-	"content_nodes_content",
-	"content_nodes_target",
-	"tag_path_applications",
-	"progress_entries",
-	"progress_snapshots",
-	"notification_subjects",
-	"derived_state",
+	"canonicalize",
+	"names",
+	"identifiers",
+	"semantics",
+	"bindings",
+	"structure",
+	"settle",
 	"finalize",
 ] as const;
 export type UnitMergeOperationPhase = (typeof UnitMergeOperationPhaseValues)[number];
+export const UnitMergeItemKindValues = [
+	"name",
+	"identifier",
+	"semantic",
+	"source_binding",
+	"structure",
+] as const;
+export const UnitMergeItemStateValues = [
+	"pending",
+	"applied",
+	"retained",
+	"action_required",
+] as const;
+export type UnitMergeItemKind = (typeof UnitMergeItemKindValues)[number];
+export type UnitMergeItemState = (typeof UnitMergeItemStateValues)[number];
+export interface UnitMergeReconciliationPlan {
+	readonly names: "copy_alternates" | "retain_source";
+	readonly identifiers: "copy_claims" | "retain_source";
+	readonly semantics: "retain_source";
+	readonly structure: "retain_source";
+	readonly bindings: "rebind_paused" | "pause_at_source";
+}
 export const TimedMediaUnitKindValues = ["video", "audio"] as const;
 /** Request-path bound for replacing or reading external Audio tracks on one Video. */
 export const MaximumAudioTracksPerVideo = 64;

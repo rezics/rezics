@@ -503,7 +503,11 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 					catalogSourceMappingClaim.owner,
 				],
 			}).onDelete("restrict"),
-			index(`${owner}_source_binding_owner_idx`).on(table.ownerId, table.mappingKey),
+			index(`${owner}_source_binding_owner_idx`).on(
+				table.ownerId,
+				table.mappingKey,
+				table.sourceRecordId,
+			),
 			check(`${owner}_source_binding_owner_check`, sql`${table.mappingOwner} = ${owner}`),
 		],
 	);
