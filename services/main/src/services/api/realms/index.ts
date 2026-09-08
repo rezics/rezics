@@ -3086,7 +3086,7 @@ export default new Elysia({ prefix: "/realms" })
 				};
 				const executed = await executeAuthorizedContentGovernanceAction(tx, {
 					caseRow,
-					actorProfileId: entity.id,
+					authorization,
 					body: actionBody,
 				});
 				const [updatedTarget] = await tx

@@ -1,7 +1,13 @@
 import { createHash } from "node:crypto";
 
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 
+import type { Authorization } from "../../authorization";
+import { CatalogReferenceSchema } from "@rezics/reference";
+import { nextUnitUpdatedAt } from "../../units/update-values";
+import { readUnitStateById } from "../../units/query";
+import { unitOwnerTable } from "../../database/schema/unit-reference-columns";
+import { CatalogFactTables } from "../../database/schema/catalog-facts";
 import { recordAuditEvent } from "../../audit";
 import type { DatabaseTransaction } from "../../database";
 import {
@@ -11,7 +17,6 @@ import {
 	contentReviewCase,
 	realmUnit,
 	realmUnitStatusEvent,
-	unit,
 	unitLicenseGrant,
 	unitOwnership,
 } from "../../database/schema";
@@ -169,11 +174,7 @@ async function getModerationTargetContext(
 			subjectUnitId: target.unitId,
 		};
 	}
-	const [target] = await tx
-		.select({ id: unit.id })
-		.from(unit)
-		.where(eq(unit.id, row.targetUnitId))
-		.limit(1);
+	const target = await readUnitStateById(tx, row.targetUnitId, { includeDeleted: true });
 	if (!target) throw new ModerationTargetNotFound();
 	const owners = await tx
 		.select({ profileId: unitOwnership.profileId })
@@ -182,17 +183,25 @@ async function getModerationTargetContext(
 	return { recipientEntityIds: presentProfileIds(owners), subjectUnitId: target.id };
 }
 
+async function loadModerationState(tx: DatabaseTransaction, id: string) {
+	const current = await readUnitStateById(tx, id, { includeDeleted: true, lock: "update" });
+	return current
+		? { ...current, state: current.moderationStatus, status: current.moderationStatus }
+		: null;
+}
+async function loadPostTargetingState(tx: DatabaseTransaction, id: string) {
+	const current = await readUnitStateById(tx, id, { includeDeleted: true, lock: "update" });
+	if (!current) return null;
+	if (current.postTargetingLocked === null) throw new ModerationActionIncompatible();
+	return { ...current, postTargetingLocked: current.postTargetingLocked };
+}
+
 async function loadUnitStatePlan(
 	tx: DatabaseTransaction,
 	row: ContentReviewCaseRecord,
 	action: "approve" | "remove" | "restore",
 ): Promise<StateActionPlan> {
-	const [current] = await tx
-		.select({ status: unit.moderationStatus })
-		.from(unit)
-		.where(eq(unit.id, row.targetUnitId))
-		.for("update")
-		.limit(1);
+	const current = await loadModerationState(tx, row.targetUnitId);
 	if (!current) throw new ModerationTargetNotFound();
 	return {
 		type: "unit_state",
@@ -228,12 +237,10 @@ async function loadPostTargetingLockPlan(
 ): Promise<LockActionPlan> {
 	if (row.authority === "realm") {
 		if (!row.realmId) throw new ModerationRealmMissing();
-		const [targetUnit] = await tx
-			.select({ id: unit.id })
-			.from(unit)
-			.where(eq(unit.id, row.targetUnitId))
-			.for("share")
-			.limit(1);
+		const targetUnit = await readUnitStateById(tx, row.targetUnitId, {
+			includeDeleted: true,
+			lock: "share",
+		});
 		if (!targetUnit) throw new ModerationTargetNotFound();
 		const [current] = await tx
 			.select({ postTargetingLocked: realmUnit.postTargetingLocked })
@@ -251,12 +258,7 @@ async function loadPostTargetingLockPlan(
 			),
 		};
 	}
-	const [current] = await tx
-		.select({ postTargetingLocked: unit.postTargetingLocked })
-		.from(unit)
-		.where(eq(unit.id, row.targetUnitId))
-		.for("update")
-		.limit(1);
+	const current = await loadPostTargetingState(tx, row.targetUnitId);
 	if (!current) throw new ModerationTargetNotFound();
 	return {
 		type: "unit_post_targeting_lock",
@@ -273,12 +275,10 @@ async function lockLicenseGrantTargetUnit(
 	row: ContentReviewCaseRecord,
 ): Promise<void> {
 	if (row.authority !== "platform") throw new ModerationActionIncompatible();
-	const [target] = await tx
-		.select({ id: unit.id })
-		.from(unit)
-		.where(eq(unit.id, row.targetUnitId))
-		.for("update")
-		.limit(1);
+	const target = await readUnitStateById(tx, row.targetUnitId, {
+		includeDeleted: true,
+		lock: "update",
+	});
 	if (!target) throw new ModerationTargetNotFound();
 }
 
@@ -417,12 +417,7 @@ async function loadReversalPlan(
 				!isUnitModerationStatus(reversed.resultingState)
 			)
 				throw new ModerationReversalUnavailable();
-			const [current] = await tx
-				.select({ state: unit.moderationStatus })
-				.from(unit)
-				.where(eq(unit.id, row.targetUnitId))
-				.for("update")
-				.limit(1);
+			const current = await loadModerationState(tx, row.targetUnitId);
 			if (!current) throw new ModerationTargetNotFound();
 			if (current.state !== reversed.resultingState) throw new ModerationReversalUnavailable();
 			return {
@@ -457,12 +452,10 @@ async function loadReversalPlan(
 	) {
 		if (row.authority === "realm") {
 			if (!row.realmId) throw new ModerationRealmMissing();
-			const [targetUnit] = await tx
-				.select({ id: unit.id })
-				.from(unit)
-				.where(eq(unit.id, row.targetUnitId))
-				.for("share")
-				.limit(1);
+			const targetUnit = await readUnitStateById(tx, row.targetUnitId, {
+				includeDeleted: true,
+				lock: "share",
+			});
 			if (!targetUnit) throw new ModerationTargetNotFound();
 			const [current] = await tx
 				.select({ postTargetingLocked: realmUnit.postTargetingLocked })
@@ -480,12 +473,7 @@ async function loadReversalPlan(
 			};
 		}
 		if (row.authority === "platform") {
-			const [current] = await tx
-				.select({ postTargetingLocked: unit.postTargetingLocked })
-				.from(unit)
-				.where(eq(unit.id, row.targetUnitId))
-				.for("update")
-				.limit(1);
+			const current = await loadPostTargetingState(tx, row.targetUnitId);
 			if (!current) throw new ModerationTargetNotFound();
 			if (current.postTargetingLocked !== reversed.resultingPostTargetingLocked)
 				throw new ModerationReversalUnavailable();
@@ -526,16 +514,43 @@ async function executeActionPlan(
 	plan: ContentGovernanceActionPlan,
 	input: {
 		actorProfileId: string;
+		actorAuthUserId: string;
 		actionId: string;
 	},
 ): Promise<void> {
 	if (plan.type === "unit_state") {
+		const current = await readUnitStateById(tx, row.targetUnitId, {
+			includeDeleted: true,
+			lock: "update",
+		});
+		if (!current) throw new ModerationTargetNotFound();
+		const table = unitOwnerTable(current.reference.owner);
 		const [updated] = await tx
-			.update(unit)
-			.set({ moderationStatus: plan.resultingState })
-			.where(and(eq(unit.id, row.targetUnitId), eq(unit.moderationStatus, plan.previousState)))
-			.returning({ id: unit.id });
+			.update(table)
+			.set({
+				moderationStatus: plan.resultingState,
+				revision: sql`${table.revision}+1`,
+				updatedAt: nextUnitUpdatedAt(current.updatedAt),
+			})
+			.where(
+				and(
+					eq(table.id, row.targetUnitId),
+					eq(table.revision, current.revision),
+					eq(table.moderationStatus, plan.previousState),
+				),
+			)
+			.returning({ revision: table.revision });
 		if (!updated) throw new ModerationTransitionInvalid();
+		const native = CatalogReferenceSchema.safeParse(current.reference);
+		if (native.success)
+			await tx
+				.insert(CatalogFactTables[native.data.owner].change)
+				.values({
+					ownerId: current.id,
+					version: updated.revision,
+					actorAuthUserId: input.actorAuthUserId,
+					operation: "platform.moderation.change",
+				});
 		return;
 	}
 	if (plan.type === "realm_unit_state") {
@@ -563,18 +578,29 @@ async function executeActionPlan(
 		return;
 	}
 	if (plan.type === "unit_post_targeting_lock") {
+		const current = await loadPostTargetingState(tx, row.targetUnitId);
+		if (!current) throw new ModerationTargetNotFound();
+		const table = unitOwnerTable(current.reference.owner);
+		if (!("postTargetingLocked" in table)) throw new ModerationActionIncompatible();
 		const [updated] = await tx
-			.update(unit)
-			.set({ postTargetingLocked: plan.resultingPostTargetingLocked })
+			.update(table)
+			.set({
+				postTargetingLocked: plan.resultingPostTargetingLocked,
+				revision: sql`${table.revision}+1`,
+				updatedAt: nextUnitUpdatedAt(current.updatedAt),
+			})
 			.where(
 				and(
-					eq(unit.id, row.targetUnitId),
-					eq(unit.postTargetingLocked, plan.previousPostTargetingLocked),
+					eq(table.id, row.targetUnitId),
+					eq(table.revision, current.revision),
+					eq(table.postTargetingLocked, plan.previousPostTargetingLocked),
 				),
 			)
-			.returning({ id: unit.id });
+			.returning({ revision: table.revision });
 		if (!updated) throw new ModerationTransitionInvalid();
-		return;
+  const native=CatalogReferenceSchema.safeParse(current.reference);
+  if(native.success) await tx.insert(CatalogFactTables[native.data.owner].change).values({ownerId:current.id,version:updated.revision,actorAuthUserId:input.actorAuthUserId,operation:"platform.post-targeting.change"});
+  return;
 	}
 	if (plan.type === "realm_unit_post_targeting_lock") {
 		if (!row.realmId) throw new ModerationRealmMissing();
@@ -613,10 +639,23 @@ export async function executeAuthorizedContentGovernanceAction(
 	tx: DatabaseTransaction,
 	input: {
 		caseRow: ContentReviewCaseRecord;
-		actorProfileId: string;
+		authorization: Authorization<string>;
 		body: CreateContentGovernanceActionBody;
 	},
 ) {
+	const actorProfileId = input.authorization.profileId,
+		actorAuthUserId = input.authorization.authUserId;
+	if (!actorAuthUserId) throw new ModerationActionIncompatible();
+	if (input.caseRow.authority === "realm") {
+		if (!input.caseRow.realmId) throw new ModerationRealmMissing();
+		await input.authorization.realm.ensureCapabilityInTransaction(
+			tx,
+			input.caseRow.realmId,
+			"realm.units.moderate",
+		);
+	} else await input.authorization.platform.ensureCapability("platform.moderate", tx);
+	if (input.body.kind === "invalidate_license" || input.body.kind === "restore_license")
+		await input.authorization.platform.ensureCapability("unit.license.manage", tx);
 	const fingerprint = fingerprintContentGovernanceAction(input.body);
 	if (input.body.idempotencyKey) {
 		const [existing] = await tx
@@ -628,7 +667,7 @@ export async function executeAuthorizedContentGovernanceAction(
 			.from(contentGovernanceAction)
 			.where(
 				and(
-					eq(contentGovernanceAction.actorProfileId, input.actorProfileId),
+					eq(contentGovernanceAction.actorProfileId, actorProfileId),
 					eq(contentGovernanceAction.caseId, input.caseRow.id),
 					eq(contentGovernanceAction.idempotencyKey, input.body.idempotencyKey),
 				),
@@ -699,7 +738,7 @@ export async function executeAuthorizedContentGovernanceAction(
 	}
 	const decision = await createGovernanceDecision(tx, {
 		action: `content_governance.${input.body.kind}`,
-		actorProfileId: input.actorProfileId,
+		actorProfileId: actorProfileId,
 		authority: contentGovernanceAuthority(input.caseRow),
 		targetUnitId: input.caseRow.targetUnitId,
 		subject: { kind: "content_review_case", id: input.caseRow.id },
@@ -714,7 +753,7 @@ export async function executeAuthorizedContentGovernanceAction(
 		.values({
 			decisionId: decision.id,
 			caseId: input.caseRow.id,
-			actorProfileId: input.actorProfileId,
+			actorProfileId: actorProfileId,
 			kind: input.body.kind,
 			previousState,
 			resultingState,
@@ -739,7 +778,7 @@ export async function executeAuthorizedContentGovernanceAction(
 	const createNotes = async () => {
 		for (const note of input.body.notes ?? []) {
 			const binding = await createGovernanceNotePost(tx, {
-				actorProfileId: input.actorProfileId,
+				actorProfileId: actorProfileId,
 				subjectKind: "content_governance_action",
 				subjectId: created.id,
 				subjectUnitId: target.subjectUnitId,
@@ -755,7 +794,8 @@ export async function executeAuthorizedContentGovernanceAction(
 	};
 	if (isPostTargetingLockPlan && plan.resultingPostTargetingLocked) await createNotes();
 	await executeActionPlan(tx, input.caseRow, plan, {
-		actorProfileId: input.actorProfileId,
+		actorProfileId,
+		actorAuthUserId,
 		actionId: created.id,
 	});
 	if (!(isPostTargetingLockPlan && plan.resultingPostTargetingLocked)) await createNotes();
@@ -772,7 +812,7 @@ export async function executeAuthorizedContentGovernanceAction(
 	for (const recipientEntityId of target.recipientEntityIds) {
 		await createNotification(tx, {
 			recipientEntityId,
-			actorProfileId: input.actorProfileId,
+			actorProfileId: actorProfileId,
 			kind: "moderation",
 			subjectUnitId: target.subjectUnitId,
 			payload: {
@@ -787,7 +827,7 @@ export async function executeAuthorizedContentGovernanceAction(
 		for (const caseReport of caseReports) {
 			await createNotification(tx, {
 				recipientEntityId: caseReport.reporterProfileId,
-				actorProfileId: input.actorProfileId,
+				actorProfileId: actorProfileId,
 				kind: "moderation",
 				subjectUnitId: target.subjectUnitId,
 				payload: {
@@ -803,7 +843,7 @@ export async function executeAuthorizedContentGovernanceAction(
 	await recordAuditEvent(tx, {
 		category: "admin_activity",
 		outcome: "succeeded",
-		actor: { kind: "profile", profileId: input.actorProfileId },
+		actor: { kind: "auth", authUserId: actorAuthUserId },
 		authority:
 			input.caseRow.authority === "realm" && input.caseRow.realmId
 				? { kind: "realm", id: input.caseRow.realmId }

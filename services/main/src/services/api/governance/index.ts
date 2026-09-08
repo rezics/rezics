@@ -523,7 +523,7 @@ export default new Elysia({ prefix: "/governance" })
 			},
 			detail: { summary: "Apply content governance action", tags: ["Governance"] },
 		},
-		async ({ authorization, entity, body }) => {
+		async ({ authorization, body }) => {
 			const result = await database.transaction(async (tx) => {
 				const caseRow = await loadContentReviewCaseForAction(tx, body.caseId);
 				if (!caseRow) throw new ModerationCaseNotFound();
@@ -532,7 +532,7 @@ export default new Elysia({ prefix: "/governance" })
 					await authorization.platform.ensureCapability("unit.license.manage");
 				return executeAuthorizedContentGovernanceAction(tx, {
 					caseRow,
-					actorProfileId: entity.id,
+					authorization,
 					body,
 				});
 			});
