@@ -26,6 +26,11 @@ import {
 	requireMusicCreditAccess,
 } from "../src/services/catalog/music-credit-access";
 import { readMusicReleaseMetadata } from "../src/services/catalog/music-domain";
+import {
+	readMusicComponentHead,
+	mutateMusicComponents,
+} from "../src/services/catalog/music-structure";
+import { loadCatalogIdentity } from "../src/services/catalog/storage";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
@@ -61,6 +66,9 @@ try {
 				});
 				const recording = await createRecording(tx, account.id, {
 					name: { value: "Private recording", languageTag: "en" },
+				});
+				const otherRecording = await createRecording(tx, account.id, {
+					name: { value: "Another private recording", languageTag: "en" },
 				});
 				const root = { owner: album.owner, id: album.id },
 					foreign = { owner: recording.owner, id: recording.id };
@@ -147,6 +155,50 @@ try {
 					assert.equal(tracks[0]?.recordingId, null);
 					checks++;
 					assert.equal(tracks[0]?.artistCreditId, ownCredit);
+					checks++;
+					const track = tracks[0];
+					assert.ok(track);
+					const head = await readMusicComponentHead(
+						tx,
+						root.id,
+						"music_track_occurrence",
+						track.id,
+					);
+					assert.ok(head);
+					const current = await loadCatalogIdentity(tx, root, account.id, true);
+					const changed = await mutateMusicComponents(tx, root, account.id, current.revision, [
+						{
+							action: "put",
+							component: "music_track_occurrence",
+							componentKey: track.id,
+							expectedRevisionId: head.id,
+							value: { ...head.value, name: "Updated presentation" },
+						},
+					]);
+					const changedHead = await readMusicComponentHead(
+						tx,
+						root.id,
+						"music_track_occurrence",
+						track.id,
+					);
+					assert.equal(changedHead?.value.recording_id, foreign.id);
+					checks++;
+					assert.equal(changedHead?.value.name, "Updated presentation");
+					checks++;
+					assert.ok(changedHead);
+					await assert.rejects(
+						() =>
+							mutateMusicComponents(tx, root, account.id, changed.revision, [
+								{
+									action: "put",
+									component: "music_track_occurrence",
+								componentKey: track.id,
+									expectedRevisionId: changedHead.id,
+									value: { ...changedHead.value, recording_id: otherRecording.id },
+								},
+							]),
+						/cannot access/,
+					);
 					checks++;
 				});
 				await assert.rejects(

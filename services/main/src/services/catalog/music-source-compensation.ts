@@ -30,11 +30,17 @@ export async function compensateMusicSourceApplication(
 			change.ownerId !== context.reference.id
 		)
 			throw new TypeError("Music compensation targets another native owner");
-		inverse.push(
-			change.kind === "catalog-profile"
-				? await compensateCatalogProfileSourceChange(tx, context.actor, change)
-				: await compensateCatalogSourceOwnedChange(tx, context.actor, change),
-		);
+		if (change.kind === "catalog-profile")
+			inverse.push(await compensateCatalogProfileSourceChange(tx, context.actor, change));
+		else if (
+			change.kind === "catalog-name" ||
+			change.kind === "catalog-name-authority" ||
+			change.kind === "catalog-semantic" ||
+			change.kind === "catalog-identifier"
+		)
+			inverse.push(await compensateCatalogSourceOwnedChange(tx, context.actor, change));
+		else
+			throw new TypeError("MusicBrainz compensation contains an unsupported native journal family");
 	}
 	const changes = application.changes
 		.filter((change) => change.kind === "music-component")

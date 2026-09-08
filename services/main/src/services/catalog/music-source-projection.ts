@@ -15,8 +15,8 @@ import {
 	type MusicComponentName,
 	type MusicComponentMutation,
 } from "./music-structure-contracts";
-import { mutateMusicComponents } from "./music-structure";
-import { recordCatalogChange } from "./storage";
+import { mutateMusicComponents, readMusicComponentHead } from "./music-structure";
+import { CatalogRevisionConflict, recordCatalogChange } from "./storage";
 import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 
 export type MusicSourceComponentBaseline = {
@@ -27,7 +27,34 @@ export type MusicSourceComponentBaseline = {
 	currentHistoryId: string;
 	absent: boolean;
 	value: Record<string, unknown>;
+	actualHistoryId: string;
+	actualValue: Record<string, unknown> | null;
 };
+
+/** @internal Reconcile native fields against pure source values without overwriting independent edits. */
+export function mergeMusicSourceValue(
+	component: MusicComponentName,
+	previous: unknown,
+	incoming: unknown,
+	current: unknown,
+) {
+	const before: Record<string, unknown> = MusicComponentSchemas[component].parse(previous),
+		after: Record<string, unknown> = MusicComponentSchemas[component].parse(incoming),
+		native: Record<string, unknown> = MusicComponentSchemas[component].parse(current);
+	const desired = { ...native };
+	for (const [field, value] of Object.entries(after)) {
+		if (isDeepStrictEqual(before[field], value)) continue;
+		if (
+			!isDeepStrictEqual(native[field], before[field]) &&
+			!isDeepStrictEqual(native[field], value)
+		)
+			throw new CatalogRevisionConflict(
+				`Music source ${component}.${field} conflicts with an independent native edit`,
+			);
+		desired[field] = value;
+	}
+	return MusicComponentSchemas[component].parse(desired);
+}
 
 /** @internal Snapshot-local source support and the journal-proved current frontier jointly authorize native deltas. */
 export async function prepareMusicSourceProjection(
@@ -82,12 +109,24 @@ export async function prepareMusicSourceProjection(
 				.where(and(eq(history.ownerId, context.reference.id), eq(history.id, currentHistoryId)))
 				.limit(1);
 			if (!current) throw new Error("Source baseline current history is missing");
+			const actual = await readMusicComponentHead(
+				tx,
+				context.reference.id,
+				component,
+				row.componentKey,
+			);
+			if (!actual) throw new Error("Music source component is missing its native head");
 			result.set(`${component}:${row.sourcePath}`, {
 				...row,
 				value,
 				component,
 				currentHistoryId,
 				absent: current.operation === "DELETE",
+				actualHistoryId: actual.id,
+				actualValue:
+					actual.operation === "DELETE"
+						? null
+						: MusicComponentSchemas[component].parse(actual.value),
 			});
 		}
 		return result;
@@ -124,12 +163,17 @@ export async function prepareMusicSourceProjection(
 		if (old && !old.absent && isDeepStrictEqual(old.value, row))
 			pending.push({ component, componentKey, path, historyId: old.historyId, sourceValue: row });
 		else {
+			if (old && old.actualValue === null && old.actualHistoryId !== old.currentHistoryId)
+				throw new CatalogRevisionConflict("Music source component was independently removed");
+			const desired = old?.actualValue
+				? mergeMusicSourceValue(component, old.value, row, old.actualValue)
+				: row;
 			operations.push({
 				action: "put",
 				component,
 				componentKey,
-				expectedRevisionId: old?.currentHistoryId ?? null,
-				value: row,
+				expectedRevisionId: old?.actualHistoryId ?? null,
+				value: desired,
 			});
 			pending.push({ component, componentKey, path, sourceValue: row });
 		}

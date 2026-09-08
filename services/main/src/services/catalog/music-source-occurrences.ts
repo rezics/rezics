@@ -19,6 +19,7 @@ export async function recordMusicSourceComponent(
 	component: MusicComponentName,
 	componentKey: string,
 	sourcePath: string,
+	sourceValue?: unknown,
 ) {
 	z.string()
 		.startsWith("/")
@@ -38,7 +39,9 @@ export async function recordMusicSourceComponent(
 		componentKey,
 		sourcePath,
 		historyId: head.id,
-		sourceValue: MusicComponentSchemas[component].parse(head.value),
+		sourceValue: MusicComponentSchemas[component].parse(
+			sourceValue === undefined ? head.value : sourceValue,
+		),
 	});
 }
 

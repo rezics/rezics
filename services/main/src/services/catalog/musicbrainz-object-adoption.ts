@@ -66,6 +66,7 @@ export async function adoptMusicBrainzObject(
 		mappingVersion: `musicbrainz.${document.kind}.2`,
 	});
 	const credit = musicBrainzCreditWriter(tx, actor, observation, identity);
+	let sourceValue: Record<string, unknown> = { id: identity.id, identity_shape: document.kind };
 	switch (document.kind) {
 		case "work": {
 			const typeRevisionId = await musicBrainzVocabulary(
@@ -75,6 +76,7 @@ export async function adoptMusicBrainzObject(
 				document.record.type,
 				{ actor, observation, idPath: "/type-id", namePath: "/type" },
 			);
+			sourceValue = { ...sourceValue, type_revision_id: typeRevisionId };
 			await tx
 				.insert(musicWork)
 				.values({ id: identity.id, typeRevisionId })
@@ -100,6 +102,12 @@ export async function adoptMusicBrainzObject(
 		}
 		case "recording": {
 			const artistCreditId = await credit(document.record["artist-credit"], "/artist-credit");
+			sourceValue = {
+				...sourceValue,
+				artist_credit_id: artistCreditId,
+				length_milliseconds: document.record.length ?? null,
+				video: document.record.video ?? null,
+			};
 			await tx
 				.insert(musicRecording)
 				.values({
@@ -142,6 +150,11 @@ export async function adoptMusicBrainzObject(
 				document.record["primary-type"],
 				{ actor, observation, idPath: "/primary-type-id", namePath: "/primary-type" },
 			);
+			sourceValue = {
+				...sourceValue,
+				artist_credit_id: artistCreditId,
+				primary_type_revision_id: primaryTypeRevisionId,
+			};
 			await tx
 				.insert(musicReleaseGroup)
 				.values({ id: identity.id, artistCreditId, primaryTypeRevisionId })
@@ -178,6 +191,7 @@ export async function adoptMusicBrainzObject(
 				: "music_release_group",
 		identity.id,
 		"/",
+		sourceValue,
 	);
 
 	let revision = identity.revision;

@@ -340,7 +340,7 @@ try {
 		if (error !== rollback) throw error;
 	}
 	console.info(
-		`Verified ${checks} native MusicBrainz supporting update, compensation and pure-profile assertions across 10 endpoint kinds; fixture rolled back`,
+		`Verified ${checks} native MusicBrainz supporting update, compensation and pure-profile assertions across 10 supporting object kinds; fixture rolled back`,
 	);
 } finally {
 	await pool.end();

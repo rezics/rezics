@@ -354,7 +354,7 @@ the relation's current baseline from its previous occurrence when the same
 semantic identity spans both source snapshots.
 
 `check-music-supporting-updates.ts` passed 176 tracked assertions across ten
-endpoint kinds and two apply/withdraw cycles, including changed relationship
+supporting object kinds (including SQL-only mood) and two apply/withdraw cycles, including changed relationship
 credits and dates, and an independently authored artist field retained in native
 history but absent from pure source ownership. `check-catalog-profile-source.ts`
 passed 30 checks across Entity/Reference and three cycles. The names-enabled
@@ -375,3 +375,19 @@ fail explicitly pending their exact native journals. Null-before mapper refresh,
 taxonomy hierarchy installation, CAA/EAA artwork metadata, redirect persistence,
 SQL dump orchestration and full source counter dispositions remain unqualified.
 The machine-readable mapping inventory retains those gaps and `qualified: false`.
+
+The 176-check supporting fixture also passes against the actual centrally migrated
+DB61 target without any fixture DDL. On that target, the names-enabled core source
+fixture passes with an independent native script-code edit preserved while the
+source changes the barcode, including subsequent compensation. Music component
+merging compares pure old/new interpretations field by field against the current
+native row, retaining unchanged native fields and rejecting actual conflicts.
+Existing references may be preserved without reading their targets; changing or
+restoring a reference still requires its proper authorization. The credit fixture
+passes 17 checks, including scoped editing around a hidden recording reference and
+rejection of a new hidden target. Initial work/recording/family source headers now
+record independently compiled source values instead of inherited native fields.
+
+One additional live-head primary-key probe per admitted component supports the
+merge; the operation stays bounded by 128 components. This improves preservation
+of human fields but does not yet implement the null-before whole-mapper refresh.

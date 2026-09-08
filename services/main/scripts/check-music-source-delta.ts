@@ -40,6 +40,7 @@ import {
 	listMusicTrackPresentations,
 	listMusicWorkLanguages,
 	readMusicRecordingMetadata,
+	editMusicReleaseMetadata,
 } from "../src/services/catalog/music-domain";
 import { readMusicTracks } from "../src/services/catalog/domains";
 import { readCatalogSourceApplication } from "../src/services/catalog/source-applications";
@@ -246,6 +247,9 @@ try {
 				assert.equal(adopted.status, "created");
 				assert.ok("reference" in adopted);
 				const reference = adopted.reference;
+				await editMusicReleaseMetadata(tx, reference, actor.id, adopted.revision, {
+					scriptCode: "Latn",
+				});
 				for (const [objectType, externalId, owner] of [
 					["artist", artistId, "entity"],
 					["label", labelId, "entity"],
@@ -440,6 +444,7 @@ try {
 					writer,
 				);
 				assert.equal(decision.status, "applied");
+				assert.equal((await readMusicReleaseMetadata(tx, reference, actor.id)).scriptCode, "Latn");
 				const related = await pageCatalogRelations(tx, reference, actor.id);
 				assert.equal(related.items.length, 1);
 				assert.ok(related.items[0]);
@@ -536,6 +541,7 @@ try {
 					)
 					.limit(1);
 				assert.equal(after?.observedSnapshotId, originalSnapshotId);
+				assert.equal((await readMusicReleaseMetadata(tx, reference, actor.id)).scriptCode, "Latn");
 				for (let cycle = 0; cycle < 3; cycle++) {
 					const repeat = await proposeCatalogSourceAdoption(tx, actor.id, {
 						sourceRecordId,

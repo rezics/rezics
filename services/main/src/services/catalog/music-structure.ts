@@ -56,6 +56,7 @@ async function validateReferences(
 	actor: string,
 	component: MusicComponentName,
 	row: Record<string, unknown>,
+	current?: Record<string, unknown>,
 ) {
 	if (component === "music_medium_attribute") {
 		await assertMusicMediumAttributeValue(
@@ -83,7 +84,9 @@ async function validateReferences(
 		["area_id", "reference"],
 	] as const) {
 		const id = row[column];
-		if (typeof id === "string") await loadCatalogIdentity(tx, { owner, id }, actor, false);
+		// Preserving an already validated edge does not read or grant access to its target.
+		if (typeof id === "string" && current?.[column] !== id)
+			await loadCatalogIdentity(tx, { owner, id }, actor, false);
 	}
 	for (const [column, value] of Object.entries(row)) {
 		if (column.endsWith("_revision_id") && typeof value === "string")
@@ -271,7 +274,15 @@ export async function mutateMusicComponents(
 					sql`delete from ${table} where ${rowPredicate(operation.component, reference.id, row)}`,
 				);
 			else {
-				await validateReferences(inner, actor, operation.component, row);
+				await validateReferences(
+					inner,
+					actor,
+					operation.component,
+					row,
+					head && head.operation !== "DELETE"
+						? MusicComponentSchemas[operation.component].parse(head.value)
+						: undefined,
+				);
 				const columns = Object.keys(row);
 				const source = sql`jsonb_populate_record(null::${table}, ${JSON.stringify(row)}::jsonb)`;
 				if (head && head.operation !== "DELETE") {
