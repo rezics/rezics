@@ -263,21 +263,18 @@ export default new Elysia({ prefix: "/units" })
 		async ({ params, query, authorization }) => {
 			const limit = query.limit ?? 50;
 			const cursor = decodeCursor(query.cursor);
-			const rows = await listUnitRealmPublications({
+			const page = await listUnitRealmPublications({
 				unitId: params.unitId,
 				authorization,
 				localizationLanguages: query.localizationLanguages ?? [],
 				publicationState: query.publicationState ?? "active",
 				status: query.realmStatus ?? "current",
 				cursor: cursor ? [new Date(cursor[0]), cursor[1]] : undefined,
-				limit: limit + 1,
+				limit,
 			});
-			const hasMore = rows.length > limit;
-			const items = hasMore ? rows.slice(0, limit) : rows;
-			const last = items.at(-1);
 			return {
-				items,
-				nextCursor: hasMore && last ? encodeCursor(last.updatedAt, last.realmId) : null,
+				items: page.items,
+				nextCursor: page.nextCursor ? encodeCursor(page.nextCursor[0], page.nextCursor[1]) : null,
 			};
 		},
 	)

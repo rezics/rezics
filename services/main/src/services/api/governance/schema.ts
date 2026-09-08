@@ -15,7 +15,6 @@ import {
 	ContentReviewCaseStateValues,
 	EnforcementKindValues,
 	GovernanceMaxRuleReferences,
-	UnitKindValues,
 	UnitMergeEligibleKindValues,
 	UnitMergeGraphActionValues,
 	UnitMergeGraphRoleValues,

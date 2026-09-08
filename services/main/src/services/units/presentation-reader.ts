@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { canonicalizeContentLanguageTag } from "@rezics/content-language";
+import { isContentLanguage } from "@rezics/i18n";
 import { sql } from "drizzle-orm";
 import { CatalogOwnerValues, type UnitOwner } from "@rezics/reference";
 import type { PresentedAvatar } from "@rezics/avatar";
@@ -11,7 +13,6 @@ import {
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
-	type LocalizationLanguageQuery,
 } from "./localization";
 
 export type UnitPresentation = {
@@ -27,7 +28,7 @@ export type UnitPresentation = {
 export async function readUnitPresentationsInTransaction(
 	tx: DatabaseTransaction,
 	unitIds: readonly string[],
-	languages: LocalizationLanguageQuery = [],
+	languages: readonly string[] = [],
 	options: { readonly includeDeleted?: boolean } = {},
 ): Promise<Map<string, UnitPresentation>> {
 	const ids = z
@@ -37,6 +38,8 @@ export async function readUnitPresentationsInTransaction(
 	if (!ids.length) return new Map();
 	if (languages.length > 32)
 		throw new RangeError("Presentation language preferences exceed the bounded grammar");
+	const canonicalLanguages = [...new Set(languages.map(canonicalizeContentLanguageTag))];
+	const platformLanguages = canonicalLanguages.filter(isContentLanguage);
 	const candidates = database
 		.select({ id: sql<string>`requested.id`.as("id") })
 		.from(sql`unnest(${sql.param(ids)}::uuid[]) as requested(id)`)
@@ -51,10 +54,10 @@ export async function readUnitPresentationsInTransaction(
 			id: state.id,
 			owner: state.owner,
 			shape: state.shape,
-			language: resolvedUnitLocalizationLanguage(state.id, languages),
-			title: resolvedUnitLocalizationTitle(state.id, languages),
-			summary: resolvedUnitLocalizationSummary(state.id, languages),
-			avatar: resolvedUnitLocalizationAvatar(state.id, languages),
+			language: resolvedUnitLocalizationLanguage(state.id, platformLanguages),
+			title: resolvedUnitLocalizationTitle(state.id, platformLanguages),
+			summary: resolvedUnitLocalizationSummary(state.id, platformLanguages),
+			avatar: resolvedUnitLocalizationAvatar(state.id, platformLanguages),
 		})
 		.from(candidates)
 		.innerJoinLateral(state, sql`true`)
@@ -81,7 +84,7 @@ export async function readUnitPresentationsInTransaction(
   select requested.owner_id,selected_name.value,selected_name.language_tag
   from unnest(${sql.param(batch)}::uuid[]) requested(owner_id)
   left join lateral (
-   select candidate.id from unnest(${sql.param([...new Set(languages)])}::text[]) with ordinality wanted(language_tag,priority)
+   select candidate.id from unnest(${sql.param(canonicalLanguages)}::text[]) with ordinality wanted(language_tag,priority)
    cross join lateral (
     select ${names.id} as id from ${names}
     where ${names.ownerId}=requested.owner_id and ${names.languageTag}=wanted.language_tag and ${names.state}='active' and ${names.spoiler}=0 and ${names.scopeOwnerId} is null

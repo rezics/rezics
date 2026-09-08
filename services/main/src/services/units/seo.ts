@@ -3,7 +3,8 @@ import { CatalogOwnerValues, type UnitOwner } from "@rezics/reference";
 import type { DatabaseTransaction } from "../database";
 import { readUnitStateById } from "./query";
 import { readUnitPresentationsInTransaction } from "./presentation-reader";
-import type { LocalizationLanguageQuery } from "./localization";
+import { canonicalizeContentLanguageTag } from "@rezics/content-language";
+import { isContentLanguage } from "@rezics/i18n";
 import { and, asc, eq, isNull, or, sql } from "drizzle-orm";
 
 import { database } from "../database";
@@ -113,7 +114,7 @@ async function getPublicUnitSeoContext(
 	owner: PublicUnitSeoOwner,
 	shape: string,
 	unitId: string,
-	localizationLanguages: LocalizationLanguageQuery,
+	localizationLanguages: readonly string[],
 ): Promise<PublicUnitSeoContext | null> {
 	if (owner === "entity") return { kind: "entity", shape };
 
@@ -121,7 +122,10 @@ async function getPublicUnitSeoContext(
 		const [row] = await tx
 			.select({
 				zoneId: zonePage.zoneId,
-				zoneTitle: resolvedUnitLocalizationTitle(zonePage.zoneId, localizationLanguages),
+				zoneTitle: resolvedUnitLocalizationTitle(
+					zonePage.zoneId,
+					localizationLanguages.filter(isContentLanguage),
+				),
 			})
 			.from(zonePage)
 			.where(eq(zonePage.id, unitId))
@@ -168,10 +172,13 @@ async function getPublicUnitSeoContext(
  */
 export async function getPublicUnitSeoProjection(
 	unitId: string,
-	localizationLanguages: LocalizationLanguageQuery = [],
+	localizationLanguages: readonly string[] = [],
 ): Promise<PublicUnitSeoProjection> {
 	if (localizationLanguages.length > 32)
 		throw new RangeError("SEO language preferences exceed the request bound");
+	const canonicalLanguages = [
+		...new Set(localizationLanguages.map(canonicalizeContentLanguageTag)),
+	];
 	return database.transaction(
 		async (tx) => {
 			const state = await readUnitStateById(tx, unitId);
@@ -244,7 +251,10 @@ export async function getPublicUnitSeoProjection(
 					),
 				)
 				.orderBy(
-					localizationLanguageOrder(unitLocalization.language, localizationLanguages),
+					localizationLanguageOrder(
+						unitLocalization.language,
+						canonicalLanguages.filter(isContentLanguage),
+					),
 					asc(unitLocalization.position),
 					asc(unitLocalization.language),
 				)
@@ -252,9 +262,7 @@ export async function getPublicUnitSeoProjection(
 
 			const native = new Set<string>(CatalogOwnerValues).has(base.owner);
 			const nativePresentation = native
-				? (await readUnitPresentationsInTransaction(tx, [base.id], localizationLanguages)).get(
-						base.id,
-					)
+				? (await readUnitPresentationsInTransaction(tx, [base.id], canonicalLanguages)).get(base.id)
 				: null;
 			const title = normalizeSeoText(
 				native ? (nativePresentation?.title ?? null) : (localization?.title ?? null),
@@ -279,7 +287,7 @@ export async function getPublicUnitSeoProjection(
 				base.owner,
 				base.shape,
 				base.id,
-				localizationLanguages,
+				canonicalLanguages,
 			);
 			const presentation = {
 				language: native

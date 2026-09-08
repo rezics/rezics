@@ -1,6 +1,7 @@
 import { type PlatformCapability } from "@rezics/access";
 import { inArray, sql } from "drizzle-orm";
 import {
+	type AnyPgColumn,
 	boolean,
 	check,
 	index,
@@ -13,6 +14,7 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 import { users } from "./auth";
+import { contentGovernanceAction } from "./governance";
 import { createPlatformIdentityColumns, platformIdentityConstraints } from "./platform-identity";
 import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 
@@ -283,6 +285,10 @@ export const realmUnit = pgTable(
 		postTargetingLocked: boolean().default(false).notNull(),
 		status: realmUnitStatus().default("visible").notNull(),
 		publicationState: realmUnitPublicationState("publication_state").default("active").notNull(),
+		/** Maintained atomically by the owning governance action trigger. */
+		latestGovernanceActionId: uuid().references((): AnyPgColumn => contentGovernanceAction.id, {
+			onDelete: "restrict",
+		}),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -303,6 +309,14 @@ export const realmUnit = pgTable(
 			table.updatedAt.desc(),
 			table.unitId.desc(),
 		),
+		index("realm_unit_unit_updated_idx").on(
+			table.unitId,
+			table.updatedAt.desc(),
+			table.realmId.desc(),
+		),
+		index("realm_unit_latest_governance_idx")
+			.on(table.latestGovernanceActionId)
+			.where(sql`${table.latestGovernanceActionId} is not null`),
 		index("realm_unit_unit_publication_status_updated_idx").on(
 			table.unitId,
 			table.publicationState,

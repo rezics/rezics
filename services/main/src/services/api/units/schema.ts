@@ -112,8 +112,8 @@ export const UnitRealmPublicationListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			realmId: Uuid,
-			realmKind: t.Literal("realm"),
-			language: ContentLanguage,
+			realmOwner: t.Literal("realm"),
+			language: t.Nullable(ContentLanguageTag),
 			title: t.Nullable(t.String()),
 			publicationState: t.UnionEnum(RealmUnitPublicationStateValues),
 			status: t.UnionEnum(RealmUnitStatusValues),
@@ -248,7 +248,10 @@ export const UnitSubjectAssociationsQuery = t.Object(
 export type UnitSubjectAssociationsQuery = StaticDecode<typeof UnitSubjectAssociationsQuery>;
 
 export const PublicUnitSeoParams = t.Object({ unitId: Uuid });
-export const PublicUnitSeoQuery = UnitDetailQuery;
+export const PublicUnitSeoQuery = t.Object(
+	{ localizationLanguages: t.Optional(t.Array(ContentLanguageTag, { maxItems: 32 })) },
+	{ additionalProperties: false },
+);
 const PublicUnitSeoContextResponse = t.Union([
 	t.Object(
 		{ kind: t.Literal("entity"), shape: t.String({ minLength: 1 }) },

@@ -1,16 +1,11 @@
-import type { ContentLanguage } from "@rezics/i18n";
-import { and, desc, eq, inArray, isNotNull, lt, or, sql } from "drizzle-orm";
+import { z } from "zod";
+import type { LocalizationLanguageQuery } from "./localization";
+import { readUnitPresentationsInTransaction } from "./presentation-reader";
+import { and, desc, eq, lt, or, sql } from "drizzle-orm";
 
 import type { Authorization } from "../authorization";
 import { database, type DatabaseTransaction } from "../database";
-import {
-	contentGovernanceAction,
-	contentReviewCase,
-	realmUnit,
-	realmUnitPublicationEvent,
-	unit,
-} from "../database/schema";
-import { resolvedUnitLocalizationLanguage, resolvedUnitLocalizationTitle } from "./localization";
+import { contentGovernanceAction, realmUnit, realmUnitPublicationEvent } from "../database/schema";
 import {
 	UnitRealmPublicationAlreadyExists,
 	UnitRealmPublicationNotFound,
@@ -178,95 +173,98 @@ export function republishUnitRealmPublication(
 export async function listUnitRealmPublications(input: {
 	readonly unitId: string;
 	readonly authorization: Authorization<string>;
-	readonly localizationLanguages: readonly ContentLanguage[];
+	readonly localizationLanguages: LocalizationLanguageQuery;
 	readonly publicationState: UnitRealmPublicationStateFilter;
 	readonly status: UnitRealmPublicationStatusFilter;
 	readonly cursor?: PublicationCursor;
 	readonly limit: number;
 }) {
-	await input.authorization.unit.ensure(input.unitId, "unit.realm-publication.manage");
-	const rows = await database
-		.select({
-			realmId: realmUnit.realmId,
-			realmKind: sql<"realm">`'realm'`,
-			language: resolvedUnitLocalizationLanguage(realmUnit.realmId, input.localizationLanguages),
-			title: resolvedUnitLocalizationTitle(realmUnit.realmId, input.localizationLanguages),
-			publicationState: realmUnit.publicationState,
-			status: realmUnit.status,
-			createdAt: realmUnit.createdAt,
-			updatedAt: realmUnit.updatedAt,
-		})
-		.from(realmUnit)
-		.innerJoin(unit, eq(unit.id, realmUnit.realmId))
-		.where(
-			and(
-				eq(realmUnit.unitId, input.unitId),
-				input.publicationState === "all"
-					? undefined
-					: eq(realmUnit.publicationState, input.publicationState),
-				input.status === "current"
-					? inArray(realmUnit.status, ["pending", "visible", "hidden"])
-					: input.status === "all"
-						? undefined
-						: eq(realmUnit.status, input.status),
-				input.cursor
-					? or(
-							lt(realmUnit.updatedAt, input.cursor[0]),
-							and(eq(realmUnit.updatedAt, input.cursor[0]), lt(realmUnit.realmId, input.cursor[1])),
-						)
-					: undefined,
-			),
-		)
-		.orderBy(desc(realmUnit.updatedAt), desc(realmUnit.realmId))
-		.limit(input.limit);
-	const realmIds = rows.map((row) => row.realmId);
-	const governanceRows = realmIds.length
-		? await database
-				.selectDistinctOn([contentReviewCase.realmId], {
-					realmId: contentReviewCase.realmId,
-					actionId: contentGovernanceAction.id,
-					actionKind: contentGovernanceAction.kind,
-					createdAt: contentGovernanceAction.createdAt,
+	const limit = z.number().int().min(1).max(100).parse(input.limit),
+		window = Math.min(500, limit * 5);
+	return database.transaction(
+		async (tx) => {
+			await input.authorization.unit.ensureInTransaction(
+				tx,
+				input.unitId,
+				"unit.realm-publication.manage",
+			);
+			const candidates = await tx
+				.select({
+					realmId: realmUnit.realmId,
+					publicationState: realmUnit.publicationState,
+					status: realmUnit.status,
+					createdAt: realmUnit.createdAt,
+					updatedAt: realmUnit.updatedAt,
+					latestGovernanceActionId: realmUnit.latestGovernanceActionId,
 				})
-				.from(contentGovernanceAction)
-				.innerJoin(contentReviewCase, eq(contentReviewCase.id, contentGovernanceAction.caseId))
+				.from(realmUnit)
 				.where(
 					and(
-						eq(contentReviewCase.authority, "realm"),
-						inArray(contentReviewCase.realmId, realmIds),
-						eq(contentReviewCase.targetUnitId, input.unitId),
-						isNotNull(contentGovernanceAction.resultingState),
+						eq(realmUnit.unitId, input.unitId),
+						input.cursor
+							? or(
+									lt(realmUnit.updatedAt, input.cursor[0]),
+									and(
+										eq(realmUnit.updatedAt, input.cursor[0]),
+										lt(realmUnit.realmId, input.cursor[1]),
+									),
+								)
+							: undefined,
 					),
 				)
-				.orderBy(
-					contentReviewCase.realmId,
-					desc(contentGovernanceAction.createdAt),
-					desc(contentGovernanceAction.id),
-				)
-		: [];
-	const governanceByRealm = new Map(
-		governanceRows.flatMap((row) =>
-			row.realmId
-				? [
-						[
-							row.realmId,
-							{
-								actionId: row.actionId,
-								actionKind: row.actionKind,
-								createdAt: row.createdAt,
-							},
-						] as const,
-					]
-				: [],
-		),
+				.orderBy(desc(realmUnit.updatedAt), desc(realmUnit.realmId))
+				.limit(window);
+			const matched = candidates.filter(
+				(row) =>
+					(input.publicationState === "all" || row.publicationState === input.publicationState) &&
+					(input.status === "all" ||
+						(input.status === "current" ? row.status !== "removed" : row.status === input.status)),
+			);
+			const page = matched.slice(0, limit);
+			const readable = await input.authorization.unit.readableUnitIdsInTransaction(
+				tx,
+				page.map((row) => row.realmId),
+			);
+			const presentations = await readUnitPresentationsInTransaction(
+				tx,
+				[...readable],
+				input.localizationLanguages,
+			);
+			const actionIds = page.flatMap((row) =>
+				row.latestGovernanceActionId ? [row.latestGovernanceActionId] : [],
+			);
+			const actions = actionIds.length
+				? await tx
+						.select({
+							actionId: contentGovernanceAction.id,
+							actionKind: contentGovernanceAction.kind,
+							createdAt: contentGovernanceAction.createdAt,
+						})
+						.from(contentGovernanceAction)
+						.where(sql`${contentGovernanceAction.id}=any(${sql.param(actionIds)}::uuid[])`)
+						.limit(actionIds.length)
+				: [];
+			const byId = new Map(actions.map((row) => [row.actionId, row]));
+			const last =
+				matched.length > limit
+					? page.at(-1)
+					: candidates.length === window
+						? candidates.at(-1)
+						: undefined;
+			return {
+				items: page.map(({ latestGovernanceActionId, ...row }) => ({
+					...row,
+					realmOwner: "realm" as const,
+					language: presentations.get(row.realmId)?.language ?? null,
+					title: presentations.get(row.realmId)?.title ?? null,
+					effectivelyVisible: row.publicationState === "active" && row.status === "visible",
+					latestGovernance: latestGovernanceActionId
+						? (byId.get(latestGovernanceActionId) ?? null)
+						: null,
+				})),
+				nextCursor: last ? ([last.updatedAt, last.realmId] as const) : null,
+			};
+		},
+		{ isolationLevel: "repeatable read" },
 	);
-	return rows.map((row) => {
-		if (!row.language) throw new Error(`Realm ${row.realmId} has no localization`);
-		return {
-			...row,
-			language: row.language,
-			effectivelyVisible: row.publicationState === "active" && row.status === "visible",
-			latestGovernance: governanceByRealm.get(row.realmId) ?? null,
-		};
-	});
 }
