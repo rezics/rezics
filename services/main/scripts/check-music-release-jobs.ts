@@ -1,3 +1,5 @@
+import { planMusicBrainzDependencies } from "../src/services/catalog/musicbrainz-dependencies";
+import { MUSIC_SOURCE_DEPENDENCY_LIMIT } from "../src/services/database/schema/catalog-source-limits";
 import assert from "node:assert/strict";
 import { Readable } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
@@ -77,10 +79,13 @@ try {
 	const mediumCount = Number(process.env.REZICS_MUSIC_RELEASE_JOB_MEDIA ?? 1);
 	assert.ok(Number.isSafeInteger(count) && count >= 260 && count <= 8000);
 	assert.ok(Number.isSafeInteger(mediumCount) && mediumCount >= 1 && mediumCount <= Math.min(count, 1000));
-	const original: MusicBrainzRelease = { id: sourceKey.externalId, title: "Large staged fixture", barcode: "before",
+	const credit = [{ artist: { id: crypto.randomUUID(), name: "Fixture orchestra", type: "Orchestra" }, name: "Fixture orchestra", joinphrase: "" }];
+	const physical = Math.ceil(count / mediumCount) <= 99;
+	const original: MusicBrainzRelease = { id: sourceKey.externalId, title: "Large staged fixture", barcode: "before", "artist-credit": credit,
 		media: Array.from({ length: mediumCount }, (_, mediumIndex) => {
 			const start = Math.floor(mediumIndex * count / mediumCount), end = Math.floor((mediumIndex + 1) * count / mediumCount);
-			return { id: crypto.randomUUID(), position: mediumIndex + 1, tracks: Array.from({ length: end - start }, (_, index) => ({ id: crypto.randomUUID(), title: `Original ${start + index}`, number: String(index + 1), position: index + 1, recording: { id: crypto.randomUUID(), title: `Recording ${start + index}` } })) };
+			return { id: crypto.randomUUID(), position: mediumIndex + 1,
+				...(physical ? { format: "CD", discs: [{ id: crypto.randomUUID().replaceAll("-", "").slice(0, 28), "offset-count": end - start, offsets: Array.from({ length: end - start }, (_, index) => 150 + index * 15000), sectors: 150 + (end - start) * 15000 }] } : {}), tracks: Array.from({ length: end - start }, (_, index) => ({ id: crypto.randomUUID(), title: `Original ${start + index}`, "artist-credit": credit, number: String(index + 1), position: index + 1, recording: { id: crypto.randomUUID(), title: `Recording ${start + index}` } })) };
 		}) };
 
 	async function observe(document: MusicBrainzRelease) {
@@ -88,6 +93,7 @@ try {
 		const receipt = await storeCatalogSourcePayload(sourceKey, bytes, MusicBrainzCatalogContractSha256, null, archive);
 		return db.transaction((tx) => recordCatalogSourceDocument(tx, receipt, bytes));
 	}
+	const expectedDependencies = planMusicBrainzDependencies("release", original, MUSIC_SOURCE_DEPENDENCY_LIMIT).length;
 	const first = await observe(original);
 	const initial = await asActor(() => db.transaction((tx) => enqueueMusicReleaseSourceIntakeJob(tx, admission.actor, { sourceRecordId, snapshotId: first.snapshot.id })));
 	const firstMessage = await message(initial.id, initial.generation, 0, "prepare");
@@ -99,7 +105,7 @@ try {
 	await control(initial.id, "resume");
 	const staged = await advance(initial.id, true);
 	assert.equal(staged.state, "prepared");
-	assert.equal(staged.preparedDependencies, count);
+	assert.equal(staged.preparedDependencies, expectedDependencies);
 	assert.equal(staged.reference, null);
 	assert.equal((await db.select().from(catalogSourceMappingClaim).where(eq(catalogSourceMappingClaim.sourceRecordId, sourceRecordId)).limit(1)).length, 0, "No root is visible during dependency preparation");
 	const initialDone = await advance(initial.id);
@@ -125,8 +131,8 @@ try {
 	const appliedJob = await asActor(() => db.transaction((tx) => enqueueMusicReleaseSourceJob(tx, admission.actor, { sourceRecordId, proposalId, action: "apply", reason: "Qualify a multi-page native reorder" })));
 	assert.deepEqual(appliedJob.reference, reference);
 	await advance(appliedJob.id, true);
-	const dependencies = await db.select({ position: catalogSourceProposalDependency.position }).from(catalogSourceProposalDependency).where(and(eq(catalogSourceProposalDependency.sourceRecordId, sourceRecordId), eq(catalogSourceProposalDependency.proposalId, proposalId))).limit(count * 2 + 1);
-	assert.equal(dependencies.length, count * 2, "Incoming and compensation references are prepared in their own pages");
+	const dependencies = await db.select({ position: catalogSourceProposalDependency.position }).from(catalogSourceProposalDependency).where(and(eq(catalogSourceProposalDependency.sourceRecordId, sourceRecordId), eq(catalogSourceProposalDependency.proposalId, proposalId))).limit(expectedDependencies * 2 + 1);
+	assert.equal(dependencies.length, expectedDependencies * 2, "Incoming and compensation references are prepared in their own pages");
 	const historyCount = async () => (await db.select({ count: sql<number>`count(*)::integer` }).from(musicComponentRevision).where(eq(musicComponentRevision.ownerId, reference.id)))[0]!.count;
 	const historyBefore = await historyCount();
 	// The injected trigger is restricted to this newly created fixture owner and is removed below.
@@ -177,7 +183,7 @@ try {
 	assert.equal((await advance(tinyJob.id)).state, "succeeded");
 	const tinyJournal = await asActor(() => db.transaction((tx) => readCatalogSourceApplication(tx, admission.actor, { sourceRecordId, proposalId: tinyProposalId, action: "apply" })));
 	assert.equal(tinyJournal?.changes.filter((change) => change.kind === "music-component").length, 1);
-	console.info(JSON.stringify({ status: "passed", tracks: count, media: mediumCount, dependencyRows: dependencies.length, initialJobId: initial.id, applyJobId: appliedJob.id,
+	console.info(JSON.stringify({ status: "passed", tracks: count, media: mediumCount, physical, dependencyRows: dependencies.length, initialJobId: initial.id, applyJobId: appliedJob.id,
 		checks: ["initial background adoption", "pause before preparation", "260 dependency references paged", "no partial root visibility", "reorder across 128 boundaries", "mid-publication rollback", "resume prepared publication", "complete exact journal", "withdrawal", "revoked authority", "one-change large snapshot"] }));
 } finally {
 	await pool.end();
