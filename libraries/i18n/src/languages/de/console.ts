@@ -26,6 +26,12 @@ export default {
 	},
 	caseNotes: "Fallnotizen",
 	nativeMerge: {
+		currentBinding: "Aktuelle Quellenverknüpfung",
+		keepCurrentBinding: "Aktuelle Verknüpfung behalten",
+		bindingMoved:
+			"Diese Verknüpfung verweist inzwischen auf einen anderen Eintrag. Beim Beibehalten wird genau diese Verknüpfung bestätigt, ohne sie zu verschieben.",
+		bindingUnavailable:
+			"Die aktuelle Verknüpfung ist nicht verfügbar. Aktualisiere die Belege vor der Entscheidung.",
 		previous: "Zurück",
 		refresh: "Aktualisieren",
 		plan: "Plan zur Datenabstimmung",

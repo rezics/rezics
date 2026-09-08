@@ -26,6 +26,12 @@ export default {
 	},
 	caseNotes: "Notas del caso",
 	nativeMerge: {
+		currentBinding: "Vínculo actual con la fuente",
+		keepCurrentBinding: "Conservar el vínculo actual",
+		bindingMoved:
+			"Este vínculo ahora apunta a otro registro. Conservarlo confirma ese vínculo exacto sin moverlo.",
+		bindingUnavailable:
+			"El vínculo actual no está disponible. Actualiza las pruebas antes de decidir.",
 		previous: "Anterior",
 		refresh: "Actualizar",
 		plan: "Plan de conciliación de datos",

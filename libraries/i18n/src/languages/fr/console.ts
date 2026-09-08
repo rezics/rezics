@@ -26,6 +26,12 @@ export default {
 	},
 	caseNotes: "Notes du dossier",
 	nativeMerge: {
+		currentBinding: "Liaison actuelle à la source",
+		keepCurrentBinding: "Conserver la liaison actuelle",
+		bindingMoved:
+			"Cette liaison pointe désormais vers une autre fiche. La conserver confirme cette liaison exacte sans la déplacer.",
+		bindingUnavailable:
+			"La liaison actuelle est indisponible. Actualisez les preuves avant de décider.",
 		previous: "Précédent",
 		refresh: "Actualiser",
 		plan: "Plan de rapprochement des données",

@@ -25,6 +25,11 @@ export default {
 	},
 	caseNotes: "사건 메모",
 	nativeMerge: {
+		currentBinding: "현재 출처 연결",
+		keepCurrentBinding: "현재 연결 유지",
+		bindingMoved:
+			"이 연결은 현재 다른 기록을 가리킵니다. 유지하면 연결을 옮기지 않고 해당 연결을 확인한 것으로 기록합니다.",
+		bindingUnavailable: "현재 연결을 확인할 수 없습니다. 결정하기 전에 근거를 새로 고치세요.",
 		previous: "이전",
 		refresh: "새로 고침",
 		plan: "데이터 처리 계획",

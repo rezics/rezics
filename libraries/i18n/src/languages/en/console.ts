@@ -25,6 +25,11 @@ export default {
 	},
 	caseNotes: "Case notes",
 	nativeMerge: {
+		currentBinding: "Current source binding",
+		keepCurrentBinding: "Keep the current binding",
+		bindingMoved:
+			"This binding now points to another entry. Keeping it acknowledges that exact binding without moving it.",
+		bindingUnavailable: "The current binding is unavailable. Refresh the evidence before deciding.",
 		previous: "Previous",
 		refresh: "Refresh",
 		plan: "Data reconciliation plan",

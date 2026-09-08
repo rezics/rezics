@@ -25,6 +25,11 @@ export default {
 	},
 	caseNotes: "案件の注記",
 	nativeMerge: {
+		currentBinding: "現在の出典連携",
+		keepCurrentBinding: "現在の連携を保持",
+		bindingMoved:
+			"この連携は現在、別の記録を指しています。保持すると、その正確な連携を移動せずに確認済みとします。",
+		bindingUnavailable: "現在の連携を確認できません。判断する前に根拠を更新してください。",
 		previous: "前へ",
 		refresh: "更新",
 		plan: "データの統合方針",

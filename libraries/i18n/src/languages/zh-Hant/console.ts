@@ -25,6 +25,10 @@ export default {
 	},
 	caseNotes: "案件備註",
 	nativeMerge: {
+		currentBinding: "目前的來源綁定",
+		keepCurrentBinding: "保留目前的綁定",
+		bindingMoved: "此綁定目前指向另一筆記錄。保留操作會確認這個確切綁定，不會將其移走。",
+		bindingUnavailable: "目前的綁定無法使用。請重新整理證據後再作決定。",
 		previous: "上一頁",
 		refresh: "重新整理",
 		plan: "資料處理方案",

@@ -58,7 +58,7 @@ export function NativeMergeReconciliation({
 				<>
 					{items.data.items.map((item) => (
 						<ReconciliationItem
-							key={item.id}
+							key={`${item.id}:${item.currentBinding?.revision ?? 0}`}
 							item={item}
 							request={request}
 							onChanged={() => {
@@ -101,7 +101,7 @@ function ReconciliationItem({
 	request: ReadNativeMergeRequestStatus200;
 	onChanged: () => void;
 }) {
-	const { t } = useTranslation(["console"]),
+	const { t } = useTranslation(["console", "units"]),
 		copy = t.console.nativeMerge;
 	const { canRetryUnitMerges } = useConsoleWorkspace();
 	const [resolving, setResolving] = useState(false),
@@ -111,12 +111,30 @@ function ReconciliationItem({
 		{ query: { enabled: resolving } },
 	);
 	const mutation = useResolveNativeMergeReconciliation();
+	const currentBinding = item.currentBinding;
+	const bindingAtSource =
+		currentBinding?.reference.owner === item.sourceReference.owner &&
+		currentBinding.reference.id === item.sourceReference.id;
+	const missingBinding = item.kind === "source_binding" && !currentBinding;
 	async function resolve(action: "retry" | "retain_source") {
-		if (!target.data || !reason.trim()) return;
+		if (
+			!target.data ||
+			!reason.trim() ||
+			missingBinding ||
+			(action === "retry" && item.kind === "source_binding" && !bindingAtSource)
+		)
+			return;
 		try {
 			await mutation.mutateAsync({
 				path: { requestId: request.id, itemId: item.id },
-				body: { action, expectedTargetRevision: target.data.revision, reason: reason.trim() },
+				body: {
+					action,
+					expectedTargetRevision: target.data.revision,
+					reason: reason.trim(),
+					...(item.kind === "source_binding" && currentBinding
+						? { expectedBindingRevision: currentBinding.revision }
+						: {}),
+				},
 			});
 			setResolving(false);
 			onChanged();
@@ -131,6 +149,26 @@ function ReconciliationItem({
 				<span>{copy.kinds[item.kind]}</span>
 				<Badge>{copy.itemStates[item.state]}</Badge>
 			</div>
+			{item.kind === "source_binding" ? (
+				currentBinding ? (
+					<section className="grid gap-2 rounded border p-3">
+						<h4 className="font-medium">{copy.currentBinding}</h4>
+						<AppLink
+							className="break-all underline"
+							href={`/catalog/${currentBinding.reference.owner}/${currentBinding.reference.id}/sources`}
+						>
+							{currentBinding.reference.id}
+						</AppLink>
+						<p>
+							{copy.revision}: {currentBinding.revision} ·{" "}
+							{t.units.nativeSources.bindingStates[currentBinding.state]}
+						</p>
+						{!bindingAtSource ? <p>{copy.bindingMoved}</p> : null}
+					</section>
+				) : (
+					<p>{copy.bindingUnavailable}</p>
+				)
+			) : null}
 			<details>
 				<summary>{copy.evidence}</summary>
 				<dl className="mt-2 grid gap-2 text-xs">
@@ -218,17 +256,24 @@ function ReconciliationItem({
 							/>
 							<div className="flex gap-2">
 								<Button
-									disabled={mutation.isPending || !reason.trim()}
+									disabled={
+										mutation.isPending ||
+										!reason.trim() ||
+										missingBinding ||
+										(item.kind === "source_binding" && !bindingAtSource)
+									}
 									onClick={() => void resolve("retry")}
 								>
 									{copy.retryItem}
 								</Button>
 								<Button
 									variant="outline"
-									disabled={mutation.isPending || !reason.trim()}
+									disabled={mutation.isPending || !reason.trim() || missingBinding}
 									onClick={() => void resolve("retain_source")}
 								>
-									{copy.retainItem}
+									{item.kind === "source_binding" && !bindingAtSource
+										? copy.keepCurrentBinding
+										: copy.retainItem}
 								</Button>
 							</div>
 						</>

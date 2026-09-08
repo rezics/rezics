@@ -25,6 +25,10 @@ export default {
 	},
 	caseNotes: "案件备注",
 	nativeMerge: {
+		currentBinding: "当前来源绑定",
+		keepCurrentBinding: "保留当前绑定",
+		bindingMoved: "此绑定目前指向另一条记录。保留操作会确认这一确切绑定，不会将其移走。",
+		bindingUnavailable: "当前绑定不可用。请刷新证据后再作决定。",
 		previous: "上一页",
 		refresh: "刷新",
 		plan: "数据处理方案",
