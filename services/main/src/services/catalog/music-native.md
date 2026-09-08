@@ -407,3 +407,22 @@ withdrawn twice. It verifies unchanged former-target revisions and preservation
 of curated new-target names. Paused rebinding is explicitly reviewed and resumed
 before application. This qualifies new-target initialization for the exercised
 semantics; same-target mapper refresh remains open.
+
+Named-form reconciliation now reads its prior native plan from immutable source-
+bound name history; callers no longer provide a previous provider name document.
+It supports an explicit prior correspondence epoch and preserves the proved
+native frontier when an unchanged form crosses epochs. WS/2 aliases are an
+unordered set without stable alias IDs, so only exact canonical native forms
+retain correspondence; changed entries are additions/removals rather than guessed
+positional identity edits. Opaque provider-field changes do not overwrite an
+independent correction to an unchanged native form.
+
+`check-music-name-epochs.ts` passes 21 checks across three apply/withdraw cycles on
+DB61 using prior native histories without loading the old provider document.
+The names-enabled core fixture also passes with a curator-corrected alias retained
+through changed source data and reorder. Four alias-plan tests cover unordered
+replacement, exact-match reservation, duplicate occurrence determinism and native
+language canonicalization. This qualifies the name owner across epochs; complete
+core/profile/relationship mapper refresh remains an integration gap. Name-plan
+reads add one bounded native-history query and index exact canonical signatures
+in a document-local map, rather than comparing every large name to every other.

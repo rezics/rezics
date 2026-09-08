@@ -53,6 +53,8 @@ import {
 import { listCatalogFacts } from "../src/services/catalog/semantic-history";
 import { bindReferencedSourceIdentity } from "../src/services/catalog/source-references";
 import { runWithNativeFixtureActor } from "./native-fixture-actor";
+import { requireCatalogNameRevision, reviseCatalogName } from "../src/services/catalog/names";
+import { catalogNameRevisionValues } from "../src/services/catalog/source-owned-compensation";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
@@ -133,7 +135,15 @@ try {
 						},
 					],
 					...(testNames ? { annotation: "First annotation" } : {}),
-					aliases: [{ name: "Alias before", locale: "en", primary: true }],
+					aliases: [
+						{ name: "Alias before", locale: "en", primary: true },
+						{
+							name: "Stable source alias",
+							locale: "en",
+							primary: false,
+							"provider-note": "before",
+						},
+					],
 					"artist-credit": [
 						{
 							artist: {
@@ -247,6 +257,21 @@ try {
 				assert.equal(adopted.status, "created");
 				assert.ok("reference" in adopted);
 				const reference = adopted.reference;
+				const stableAlias = (await listCatalogNames(tx, reference, actor.id)).find(
+					(name) => name.value === "Stable source alias",
+				);
+				assert.ok(stableAlias);
+				const stableRevision = await requireCatalogNameRevision(
+					tx,
+					reference,
+					actor.id,
+					stableAlias.id,
+					stableAlias.revision,
+				);
+				await reviseCatalogName(tx, reference, actor.id, stableAlias.id, stableAlias.revision, {
+					...catalogNameRevisionValues(stableRevision),
+					value: "Curator stable alias",
+				});
 				await editMusicReleaseMetadata(tx, reference, actor.id, adopted.revision, {
 					scriptCode: "Latn",
 				});
@@ -338,6 +363,12 @@ try {
 						? [
 								{ name: "Alias after", locale: "en", primary: true },
 								{ name: "New alias", locale: "de" },
+								{
+									name: "Stable source alias",
+									locale: "en",
+									primary: false,
+									"provider-note": "after",
+								},
 							]
 						: previous.aliases,
 					media: [
@@ -444,6 +475,11 @@ try {
 					writer,
 				);
 				assert.equal(decision.status, "applied");
+				assert.ok(
+					(await listCatalogNames(tx, reference, actor.id)).some(
+						(name) => name.value === "Curator stable alias",
+					),
+				);
 				assert.equal((await readMusicReleaseMetadata(tx, reference, actor.id)).scriptCode, "Latn");
 				const related = await pageCatalogRelations(tx, reference, actor.id);
 				assert.equal(related.items.length, 1);
@@ -541,6 +577,11 @@ try {
 					)
 					.limit(1);
 				assert.equal(after?.observedSnapshotId, originalSnapshotId);
+				assert.ok(
+					(await listCatalogNames(tx, reference, actor.id)).some(
+						(name) => name.value === "Curator stable alias",
+					),
+				);
 				assert.equal((await readMusicReleaseMetadata(tx, reference, actor.id)).scriptCode, "Latn");
 				for (let cycle = 0; cycle < 3; cycle++) {
 					const repeat = await proposeCatalogSourceAdoption(tx, actor.id, {

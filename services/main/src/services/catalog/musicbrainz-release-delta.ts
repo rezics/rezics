@@ -389,11 +389,12 @@ export function musicBrainzReleaseNativeWriter(
 				context.reference,
 				context.actor,
 				result.revision,
-				context.sourceRecordId,
-				context.mappingKey,
-				context.previousSnapshotId,
-				context.snapshotId,
-				previous,
+				{
+					sourceRecordId: context.sourceRecordId,
+					mappingKey: context.mappingKey,
+					previousSnapshotId: context.previousSnapshotId,
+					snapshotId: context.snapshotId,
+				},
 				incoming,
 			);
 			const facts = await applyMusicBrainzFactDelta(

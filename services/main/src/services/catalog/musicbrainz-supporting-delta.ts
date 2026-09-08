@@ -259,11 +259,12 @@ export function musicBrainzSupportingNativeWriter(
 				context.reference,
 				context.actor,
 				revision,
-				context.sourceRecordId,
-				context.mappingKey,
-				context.previousSnapshotId,
-				context.snapshotId,
-				before ? names(before) : null,
+				{
+					sourceRecordId: context.sourceRecordId,
+					mappingKey: context.mappingKey,
+					previousSnapshotId: context.previousSnapshotId,
+					snapshotId: context.snapshotId,
+				},
 				names(after),
 				after.type === "url" ? "/resource" : "/name",
 			);

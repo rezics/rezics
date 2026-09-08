@@ -222,11 +222,12 @@ export function musicBrainzObjectNativeWriter(
 				context.reference,
 				context.actor,
 				structural.revision,
-				context.sourceRecordId,
-				context.mappingKey,
-				context.previousSnapshotId,
-				context.snapshotId,
-				previous.record,
+				{
+					sourceRecordId: context.sourceRecordId,
+					mappingKey: context.mappingKey,
+					previousSnapshotId: context.previousSnapshotId,
+					snapshotId: context.snapshotId,
+				},
 				incoming.record,
 			);
 			const facts = await applyMusicBrainzFactDelta(

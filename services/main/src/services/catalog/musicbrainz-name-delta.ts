@@ -1,6 +1,6 @@
 import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { isDeepStrictEqual } from "node:util";
-import { and, eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import { CatalogNameTables } from "../database/schema/catalog-names";
 import type { CatalogReference } from "./contracts";
@@ -12,9 +12,10 @@ import {
 } from "./names";
 import { catalogNameRevisionValues } from "./source-owned-compensation";
 import { resolveCatalogSourceOwnedBaseline } from "./source-owned-baselines";
-import type { CatalogNameInput } from "./name-contracts";
+import { CatalogNameValuesSchema, type CatalogNameInput } from "./name-contracts";
 import type { MusicBrainzRelease } from "./musicbrainz";
 import { musicBrainzAliasName } from "./musicbrainz-names";
+import { correlateMusicBrainzNativeAliases } from "./musicbrainz-name-plan";
 
 type NameChange = {
 	kind: "catalog-name";
@@ -31,17 +32,19 @@ export async function applyMusicBrainzNameDelta(
 	reference: CatalogReference,
 	actor: string,
 	revision: number,
-	sourceRecordId: string,
-	mappingKey: string,
-	previousSnapshotId: string | null,
-	snapshotId: string,
-	previous:
-		| (Pick<MusicBrainzRelease, "title" | "aliases"> & { "sort-name"?: string | null })
-		| null,
+	source: {
+		sourceRecordId: string;
+		mappingKey: string;
+		previousSnapshotId: string | null;
+		snapshotId: string;
+		previousCorrespondenceRevision?: number;
+	},
 	incoming: Pick<MusicBrainzRelease, "title" | "aliases"> & { "sort-name"?: string | null },
 	primaryPath = "/title",
 ) {
+	const { sourceRecordId, mappingKey, previousSnapshotId, snapshotId } = source;
 	const scope = await resolveCatalogSourceChildCorrespondence(tx, sourceRecordId);
+	const previousEpoch = source.previousCorrespondenceRevision ?? scope.correspondenceRevision;
 	const table = CatalogNameTables[reference.owner].sourceOccurrence;
 	const rows = previousSnapshotId
 		? await tx
@@ -52,7 +55,7 @@ export async function applyMusicBrainzNameDelta(
 						eq(table.ownerId, reference.id),
 						eq(table.sourceRecordId, sourceRecordId),
 						eq(table.mappingKey, scope.mappingKey),
-						eq(table.correspondenceRevision, scope.correspondenceRevision),
+						eq(table.correspondenceRevision, previousEpoch),
 						eq(table.ownerId, reference.id),
 						eq(table.snapshotId, previousSnapshotId),
 						eq(table.namespace, "musicbrainz.name"),
@@ -63,14 +66,36 @@ export async function applyMusicBrainzNameDelta(
 	if (rows.length > 128 || (incoming.aliases?.length ?? 0) > 128)
 		throw new RangeError("Music name delta requires staged application");
 	const byPath = new Map(rows.map((row) => [row.sourcePath, row]));
+	if (byPath.size !== rows.length)
+		throw new TypeError("Native source name paths require explicit correspondence");
+	const history = CatalogNameTables[reference.owner].nameRevision;
+	const nativeNames = rows.length
+		? await tx
+				.select()
+				.from(history)
+				.where(
+					and(
+						eq(history.ownerId, reference.id),
+						or(
+							...rows.map((row) =>
+								and(eq(history.id, row.nameId), eq(history.revision, row.nameRevision)),
+							),
+						),
+					),
+				)
+				.limit(rows.length)
+		: [];
+	const originals = new Map(nativeNames.map((row) => [`${row.id}:${row.revision}`, row]));
+	const canonical = (input: CatalogNameInput) => CatalogNameValuesSchema.parse(input);
+	const originalValues = (row: (typeof rows)[number]) => {
+		const original = originals.get(`${row.nameId}:${row.nameRevision}`);
+		if (!original)
+			throw new TypeError("Source name interpretation is missing its exact native history");
+		return catalogNameRevisionValues(original);
+	};
 	const used = new Set<string>();
 	const changes: NameChange[] = [];
-	const write = async (
-		path: string,
-		input: CatalogNameInput,
-		previousPath?: string,
-		unchanged = false,
-	) => {
+	const write = async (path: string, input: CatalogNameInput, previousPath?: string) => {
 		const old = previousPath ? byPath.get(previousPath) : undefined;
 		if (previousPath && !old)
 			throw new TypeError(`Missing exact MusicBrainz named-form occurrence: ${previousPath}`);
@@ -80,11 +105,12 @@ export async function applyMusicBrainzNameDelta(
 			nameId = old.nameId;
 			nameRevision = old.nameRevision;
 			localKey = old.localKey;
+			const unchanged = isDeepStrictEqual(canonical(originalValues(old)), canonical(input));
 			if (!unchanged) {
 				const row = await requireCatalogNameRevision(tx, reference, actor, nameId, nameRevision);
 				const currentRevision = await resolveCatalogSourceOwnedBaseline(
 					tx,
-					{ sourceRecordId, mappingKey },
+					{ sourceRecordId, mappingKey, correspondenceRevision: previousEpoch },
 					{
 						kind: "catalog-name",
 						owner: reference.owner,
@@ -106,6 +132,30 @@ export async function applyMusicBrainzNameDelta(
 					afterRevision: updated.revision,
 				});
 				nameRevision = updated.revision;
+			} else if (previousEpoch !== scope.correspondenceRevision) {
+				const frontier = await resolveCatalogSourceOwnedBaseline(
+					tx,
+					{ sourceRecordId, mappingKey, correspondenceRevision: previousEpoch },
+					{
+						kind: "catalog-name",
+						owner: reference.owner,
+						ownerId: reference.id,
+						componentKey: nameId,
+					},
+					nameRevision,
+				);
+				const currentSource = await requireCatalogNameRevision(
+					tx,
+					reference,
+					actor,
+					nameId,
+					frontier,
+				);
+				if (
+					!isDeepStrictEqual(canonical(catalogNameRevisionValues(currentSource)), canonical(input))
+				)
+					throw new TypeError("Prior source name frontier has another canonical interpretation");
+				nameRevision = frontier;
 			}
 		} else {
 			const recovered = await tx
@@ -211,30 +261,22 @@ export async function applyMusicBrainzNameDelta(
 		await write(
 			primaryPath,
 			{ kind: "source-primary", value: incoming.title, languageTag: null },
-			previous?.title ? primaryPath : undefined,
-			previous?.title === incoming.title,
+			byPath.has(primaryPath) ? primaryPath : undefined,
 		);
 	if (incoming["sort-name"])
 		await write(
 			"/sort-name",
 			{ kind: "sort", value: incoming["sort-name"], languageTag: null },
-			previous?.["sort-name"] ? "/sort-name" : undefined,
-			previous?.["sort-name"] === incoming["sort-name"],
+			byPath.has("/sort-name") ? "/sort-name" : undefined,
 		);
-	const oldAliases = previous?.aliases ?? [];
-	const aliasesUsed = new Set<number>();
-	for (const [index, alias] of (incoming.aliases ?? []).entries()) {
-		let oldIndex = oldAliases.findIndex(
-			(candidate, position) => !aliasesUsed.has(position) && isDeepStrictEqual(candidate, alias),
-		);
-		if (oldIndex === -1 && oldAliases[index] && !aliasesUsed.has(index)) oldIndex = index;
-		if (oldIndex !== -1) aliasesUsed.add(oldIndex);
-		await write(
-			`/aliases/${index}`,
-			musicBrainzAliasName(alias),
-			oldIndex === -1 ? undefined : `/aliases/${oldIndex}`,
-			oldIndex !== -1 && isDeepStrictEqual(oldAliases[oldIndex], alias),
-		);
+	const oldAliases = rows.filter((row) => row.sourcePath.startsWith("/aliases/"));
+	const aliases = (incoming.aliases ?? []).map(musicBrainzAliasName);
+	const correspondence = correlateMusicBrainzNativeAliases(
+		oldAliases.map((row) => ({ path: row.sourcePath, value: originalValues(row) })),
+		aliases,
+	);
+	for (const [index, input] of aliases.entries()) {
+		await write(`/aliases/${index}`, input, correspondence[index]);
 	}
 	for (const old of rows) {
 		if (used.has(old.sourcePath)) continue;
@@ -247,7 +289,7 @@ export async function applyMusicBrainzNameDelta(
 		);
 		const currentRevision = await resolveCatalogSourceOwnedBaseline(
 			tx,
-			{ sourceRecordId, mappingKey },
+			{ sourceRecordId, mappingKey, correspondenceRevision: previousEpoch },
 			{
 				kind: "catalog-name",
 				owner: reference.owner,
