@@ -291,10 +291,10 @@ export async function pageSoftwareApiContexts(
 	actor: string | null,
 	input: z.output<typeof SoftwareChildrenQuerySchema>,
 ) {
-	const identity = await loadCatalogIdentity(tx, ref(id), actor, input.includeWithdrawn === true);
+	const identity = await loadCatalogIdentity(tx, ref(id), actor, input.includeWithdrawn === "true");
 	if (identity.shape !== "content")
 		throw new TypeError("Participation contexts require software content");
-	const scope = `software/${id}/contexts/${input.includeWithdrawn === true}`,
+	const scope = `software/${id}/contexts/${input.includeWithdrawn === "true"}`,
 		after = decodeDomainCursor(scope, input.cursor, z.uuid()),
 		head = softwareParticipationContext,
 		revision = softwareParticipationContextRevision;
@@ -312,7 +312,7 @@ export async function pageSoftwareApiContexts(
 		.where(
 			and(
 				eq(head.contentId, id),
-				input.includeWithdrawn ? undefined : eq(revision.state, "active"),
+				input.includeWithdrawn === "true" ? undefined : eq(revision.state, "active"),
 				after === undefined ? undefined : gt(head.id, z.uuid().parse(after)),
 			),
 		)
@@ -331,12 +331,12 @@ export async function pageSoftwareApiCredits(
 	actor: string | null,
 	input: z.output<typeof SoftwareChildrenQuerySchema>,
 ) {
-	const scope = `software/${id}/credits/${input.includeWithdrawn === true}`,
+	const scope = `software/${id}/credits/${input.includeWithdrawn === "true"}`,
 		after = decodeDomainCursor(scope, input.cursor, z.uuid());
 	const rows = await readSoftwareParticipations(tx, ref(id), actor, {
 		limit: input.limit,
 		afterId: after === undefined ? undefined : z.uuid().parse(after),
-		includeWithdrawn: input.includeWithdrawn,
+		includeWithdrawn: input.includeWithdrawn === "true",
 	});
 	return domainPage(scope, rows.map(presentSoftwareCredit), input.limit, (row) => row.id);
 }
@@ -378,7 +378,13 @@ export async function pageSoftwareApiReleases(
 	actor: string | null,
 	input: z.output<typeof SoftwareReleaseSearchSchema>,
 ) {
-	const { cursor, limit, ...filters } = input,
+	const { cursor, limit, ...rawFilters } = input,
+		filters = {
+			...rawFilters,
+			machineTranslated:
+				input.machineTranslated === undefined ? undefined : input.machineTranslated === "true",
+			isPatch: input.isPatch === undefined ? undefined : input.isPatch === "true",
+		},
 		scope = `software/${id}/releases/${JSON.stringify(filters)}`,
 		after = decodeDomainCursor(scope, cursor, z.uuid());
 	const rows = await findSoftwareReleases(tx, ref(id), actor, {
