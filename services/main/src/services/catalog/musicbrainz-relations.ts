@@ -148,7 +148,7 @@ export async function adoptMusicBrainzRelations(
 				valueKind: qualifier.kind,
 				constraints: { nullable: true, ...(qualifier.kind === "number" ? { integer: true } : {}) },
 			});
-			const fact = await beginCatalogFact(tx, reference, actor, revision, definition.revisionId);
+			const fact = await beginCatalogFact(tx, reference, actor, revision, definition.revisionId, { purpose: "qualifier" });
 			const nodes = [...catalogValueNodes(qualifier.value)];
 			const appended = await appendCatalogFactNodes(
 				tx,
@@ -173,7 +173,7 @@ export async function adoptMusicBrainzRelations(
 		}
 		if (attributes.length) {
 			const definition = await attributeDefinition(tx);
-			const fact = await beginCatalogFact(tx, reference, actor, revision, definition.revisionId);
+			const fact = await beginCatalogFact(tx, reference, actor, revision, definition.revisionId, { purpose: "qualifier" });
 			revision = fact.revision;
 			let lastPosition = -1;
 			const nodes = [...catalogValueNodes(attributes)];
