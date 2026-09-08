@@ -131,3 +131,46 @@ END $$;
 DROP TRIGGER IF EXISTS organization_membership_guard ON public.organization_membership;
 CREATE TRIGGER organization_membership_guard BEFORE INSERT OR UPDATE OR DELETE ON public.organization_membership
 FOR EACH ROW EXECUTE FUNCTION public.organization_membership_guard_member();
+
+CREATE OR REPLACE FUNCTION public.organization_membership_guard_event()
+RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
+DECLARE member public.organization_membership%ROWTYPE;
+DECLARE expected_operation text;
+DECLARE expected_operator uuid;
+BEGIN
+  IF TG_OP = 'DELETE' THEN
+    IF EXISTS (SELECT 1 FROM public.users WHERE id = OLD.member_auth_user_id AND erased_at IS NOT NULL) THEN RETURN OLD; END IF;
+    RAISE EXCEPTION 'Membership events are retained until member account erasure' USING ERRCODE = '23514';
+  END IF;
+  IF TG_OP = 'UPDATE' THEN RAISE EXCEPTION 'Membership events are immutable' USING ERRCODE = '23514'; END IF;
+  SELECT * INTO member FROM public.organization_membership WHERE organization_entity_id = NEW.organization_entity_id
+    AND member_auth_user_id = NEW.member_auth_user_id FOR SHARE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Membership event requires its current owner' USING ERRCODE = '23514'; END IF;
+  expected_operation := CASE WHEN member.removed_at IS NULL THEN 'join'
+    WHEN member.removed_by_auth_user_id = member.member_auth_user_id THEN 'leave' ELSE 'remove' END;
+  expected_operator := coalesce(member.removed_by_auth_user_id, member.member_auth_user_id);
+  IF (NEW.member_entity_id, NEW.revision, NEW.accepted_invitation_id, NEW.created_at, NEW.operation, NEW.operator_auth_user_id)
+    IS DISTINCT FROM (member.member_entity_id, member.revision, member.accepted_invitation_id, member.updated_at, expected_operation, expected_operator) THEN
+    RAISE EXCEPTION 'Membership event must capture its exact validated transition' USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END $$;
+
+CREATE OR REPLACE FUNCTION public.organization_membership_record_event()
+RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
+BEGIN
+  INSERT INTO public.organization_membership_event (
+    organization_entity_id, member_auth_user_id, member_entity_id, revision, operation,
+    operator_auth_user_id, accepted_invitation_id, created_at)
+  VALUES (NEW.organization_entity_id, NEW.member_auth_user_id, NEW.member_entity_id, NEW.revision,
+    CASE WHEN NEW.removed_at IS NULL THEN 'join' WHEN NEW.removed_by_auth_user_id = NEW.member_auth_user_id THEN 'leave' ELSE 'remove' END,
+    coalesce(NEW.removed_by_auth_user_id, NEW.member_auth_user_id), NEW.accepted_invitation_id, NEW.updated_at);
+  RETURN NEW;
+END $$;
+
+DROP TRIGGER IF EXISTS organization_membership_event_guard ON public.organization_membership_event;
+CREATE TRIGGER organization_membership_event_guard BEFORE INSERT OR UPDATE OR DELETE ON public.organization_membership_event
+FOR EACH ROW EXECUTE FUNCTION public.organization_membership_guard_event();
+DROP TRIGGER IF EXISTS organization_membership_event_record ON public.organization_membership;
+CREATE TRIGGER organization_membership_event_record AFTER INSERT OR UPDATE ON public.organization_membership
+FOR EACH ROW EXECUTE FUNCTION public.organization_membership_record_event();

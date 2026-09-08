@@ -186,5 +186,67 @@ export const organizationMembership = pgTable(
 			"organization_membership_removal_check",
 			sql`(${table.removedAt} is null and ${table.removedByAuthUserId} is null) or (${table.removedAt} is not null and ${table.removedByAuthUserId} is not null and ${table.removedAt} >= ${table.joinedAt})`,
 		),
+		check(
+			"organization_membership_time_check",
+			sql`${table.updatedAt} >= ${table.createdAt} and ${table.updatedAt} >= ${table.joinedAt} and (${table.removedAt} is null or ${table.updatedAt} >= ${table.removedAt})`,
+		),
+	],
+);
+
+/** Private immutable membership transition evidence; the member's erasure drains this before current rows. */
+export const organizationMembershipEvent = pgTable(
+	"organization_membership_event",
+	{
+		organizationEntityId: uuid().notNull(),
+		memberAuthUserId: uuid()
+			.notNull()
+			.references(() => users.id, { onDelete: "restrict" }),
+		memberEntityId: uuid()
+			.notNull()
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
+		revision: bigint({ mode: "number" }).notNull(),
+		operation: text().$type<"join" | "remove" | "leave">().notNull(),
+		operatorAuthUserId: uuid()
+			.notNull()
+			.references(() => users.id, { onDelete: "restrict" }),
+		acceptedInvitationId: uuid()
+			.notNull()
+			.references(() => organizationMembershipInvitation.id, { onDelete: "restrict" }),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.organizationEntityId, table.memberAuthUserId, table.revision] }),
+		foreignKey({
+			name: "organization_membership_event_member_fk",
+			columns: [table.organizationEntityId, table.memberAuthUserId],
+			foreignColumns: [
+				organizationMembership.organizationEntityId,
+				organizationMembership.memberAuthUserId,
+			],
+		}).onDelete("restrict"),
+		index("organization_membership_event_account_idx").on(
+			table.memberAuthUserId,
+			table.organizationEntityId,
+			table.revision,
+		),
+		index("organization_membership_event_entity_idx").on(
+			table.memberEntityId,
+			table.organizationEntityId,
+			table.revision,
+		),
+		index("organization_membership_event_operator_idx").on(
+			table.operatorAuthUserId,
+			table.organizationEntityId,
+			table.revision,
+		),
+		index("organization_membership_event_invitation_idx").on(table.acceptedInvitationId),
+		check(
+			"organization_membership_event_revision_check",
+			sql`${table.revision} between 1 and 9007199254740991`,
+		),
+		check(
+			"organization_membership_event_operation_check",
+			sql`${table.operation} in ('join','remove','leave')`,
+		),
 	],
 );

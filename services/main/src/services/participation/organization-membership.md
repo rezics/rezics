@@ -25,14 +25,16 @@ and the per-request validation rule in the [OWASP Authorization Cheat Sheet](htt
 
 Pending invitations become accepted, declined, cancelled, expired or invalidated;
 terminal invitations never reopen. Rejoining requires a new accepted invitation
-and advances the existing membership revision. Concrete composite foreign keys
+and advances the existing membership revision. An immutable account-owned event
+records every join, removal and voluntary departure with the actual operator;
+rejoining cannot overwrite prior removal evidence. Concrete composite foreign keys
 bind a roster entry to its exact recipient/organization invitation and bind the
 invitation to immutable grant evidence. Database guards reject wrong self pairs,
 uncontrolled/non-organization targets, stale admissions and revision rollback.
 
 Erasure immediately fences acceptance via Auth/grant admission. Bounded worker
 stages invalidate pending invitations sent by the erased operator, delete the
-erased member's roster rows, then delete received invitations. Accepted
+erased member's transition events and roster rows, then delete received invitations. Accepted
 invitations owned by another recipient retain the PII-free operator reference;
 deleting an inviter never removes another person's accepted membership.
 
@@ -59,8 +61,10 @@ primary/member/active/account/invitation/operator indexes: 215-320 GB at 500M
 rows or 1.29-1.92 TB at 3B. Invitations are about 240-320 bytes heap and 350-500
 bytes indexed, including the explicit four-column membership FK target and grant
 evidence key: 295-410 GB at 500M or 1.77-2.46 TB at 3B. Width, fillfactor, bloat,
-WAL, backups and replication must be measured separately. Acceptance writes the
-invitation and membership once; rejoin updates the same roster identity. At
+WAL, backups and replication must be measured separately. A transition event
+including its five indexes is estimated at 300-450 bytes: 150-225 GB at 500M or
+900 GB-1.35 TB at 3B events. Acceptance writes the invitation, current membership
+and one event; rejoin updates the same roster identity and adds an event. At
 2,000 acceptances/second, roughly 2-3 MB/second of logical writes precede WAL and
 replica amplification. Responses are bounded metadata, with no invitation body
 or copied biography.

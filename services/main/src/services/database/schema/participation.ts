@@ -124,6 +124,7 @@ export const AccountErasureStageValues = [
 	"studio_candidates",
 	"follow_preferences",
 	"membership_sent_invitations",
+	"organization_membership_events",
 	"organization_memberships",
 	"membership_received_invitations",
 	"favorite_history",

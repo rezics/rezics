@@ -1,6 +1,7 @@
 import { accountFollowPreference } from "../database/schema/follow";
 import {
 	organizationMembership,
+	organizationMembershipEvent,
 	organizationMembershipInvitation,
 } from "../database/schema/organization-membership";
 import { invalidateErasedMembershipInvitations } from "./membership";
@@ -414,6 +415,13 @@ export async function dispatchAccountErasureBatch(
 					tx,
 					organizationMembership,
 					eq(organizationMembership.memberAuthUserId, authId),
+				);
+				break;
+			case "organization_membership_events":
+				result = await deletePrivateBatch(
+					tx,
+					organizationMembershipEvent,
+					eq(organizationMembershipEvent.memberAuthUserId, authId),
 				);
 				break;
 			case "membership_received_invitations":
