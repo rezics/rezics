@@ -9,12 +9,14 @@ vi.mock("./attribution", () => ({
 }));
 
 import { attachReadableSourceEntities } from "./external-links";
+import { Authorization } from "../authorization";
 
 describe("external-link source presentation", () => {
 	it("attaches localized readable sources and omits links without a readable source", async () => {
 		const sourceEntity = {
 			id: "source-readable",
-			kind: "entity" as const,
+			owner: "entity" as const,
+			shape: "unresolved",
 			language: "ja" as const,
 			title: "情報源",
 			summary: null,
@@ -30,16 +32,17 @@ describe("external-link source presentation", () => {
 		};
 		const unreadableLink = { id: "link-unreadable", sourceEntityId: "source-unreadable" };
 
+		const authorization = new Authorization("viewer-profile");
 		const result = await attachReadableSourceEntities(
 			[readableLink, duplicateSourceLink, unreadableLink],
 			["ja"],
-			"viewer-profile",
+			authorization,
 		);
 
 		expect(mocks.getReadableUnitPresentationsByIds).toHaveBeenCalledWith({
 			unitIds: [sourceEntity.id, "source-unreadable"],
 			localizationLanguages: ["ja"],
-			profileId: "viewer-profile",
+			authorization,
 		});
 		expect(result).toEqual([
 			{ ...readableLink, sourceEntity },

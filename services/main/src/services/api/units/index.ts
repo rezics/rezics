@@ -233,7 +233,7 @@ export default new Elysia({ prefix: "/units" })
 			const presentations = await getReadableUnitPresentationsByIds({
 				unitIds: body.ids,
 				localizationLanguages: body.localizationLanguages ?? [],
-				profileId: identity.authorization.profileId,
+				authorization: identity.authorization,
 			});
 			return {
 				items: body.ids.flatMap((id) => {

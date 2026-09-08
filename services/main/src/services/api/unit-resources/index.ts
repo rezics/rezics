@@ -1,4 +1,4 @@
-import {presentImageAsset} from "../image-assets/presentation";
+import { presentImageAsset } from "../image-assets/presentation";
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
 
@@ -104,7 +104,7 @@ import {
 	paginateUnitReferences,
 	unitReferenceRankingVersion,
 } from "../../units/reference-pagination";
-import {upsertLocalization} from "../../units/service";
+import { upsertLocalization } from "../../units/service";
 import {
 	getUnitVariantContext,
 	promoteUnitVariantToMain,
@@ -634,7 +634,7 @@ export default new Elysia()
 					const externalLinks = await getUnitExternalLinkPreviewWithSources({
 						unitId: params.unitId,
 						localizationLanguages,
-						profileId: identity.authorization.profileId,
+						authorization: identity.authorization,
 					});
 					const variantContext = await getUnitVariantContext(
 						params.unitId,
@@ -1800,7 +1800,11 @@ export default new Elysia()
 						limit: query.limit ?? UnitReferencePageDefault,
 					});
 					return {
-						items: await attachReadableSourceEntities(page.items, localizationLanguages, entity.id),
+						items: await attachReadableSourceEntities(
+							page.items,
+							localizationLanguages,
+							authorization,
+						),
 						nextCursor: page.nextCursor,
 						curationVersion,
 					};

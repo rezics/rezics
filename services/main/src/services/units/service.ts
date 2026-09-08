@@ -12,7 +12,7 @@ import { selfAuthUserIdForEntity } from "../participation/account-query";
 
 import { ValidationError } from "../api/errors";
 
-import {ensureImageAssetsAttachable} from "../api/image-assets/service";
+import { ensureImageAssetsAttachable } from "../api/image-assets/service";
 import { UnitDetailResponse } from "../api/schema/response";
 import type { Authorization } from "../authorization";
 import { createProfileOwnedUnitAccess } from "../authorization/unit/ownership";
@@ -396,7 +396,7 @@ export async function getUnit(
 	const externalLinks = await getUnitExternalLinkPreviewWithSources({
 		unitId: base.id,
 		localizationLanguages,
-		profileId: authorization.profileId,
+		authorization,
 	});
 	const tags = await database
 		.select({

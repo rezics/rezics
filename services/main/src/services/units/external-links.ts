@@ -1,3 +1,4 @@
+import type { Authorization } from "../authorization";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
 
@@ -81,12 +82,12 @@ export async function attachReadableSourceEntities<
 >(
 	externalLinks: readonly ExternalLink[],
 	localizationLanguages: readonly ContentLanguage[],
-	profileId?: string,
+	authorization: Authorization,
 ) {
 	const sourceEntities = await getReadableUnitPresentationsByIds({
 		unitIds: [...new Set(externalLinks.map(({ sourceEntityId }) => sourceEntityId))],
 		localizationLanguages,
-		profileId,
+		authorization,
 	});
 	return externalLinks.flatMap((link) => {
 		const sourceEntity = sourceEntities.get(link.sourceEntityId);
@@ -98,8 +99,15 @@ export async function attachReadableSourceEntities<
 export async function getUnitExternalLinkPreviewWithSources(input: {
 	readonly unitId: string;
 	readonly localizationLanguages: readonly ContentLanguage[];
-	readonly profileId?: string;
+	readonly authorization: Authorization;
 }) {
-	const externalLinks = await getUnitExternalLinkPreview(input.unitId, input.profileId);
-	return attachReadableSourceEntities(externalLinks, input.localizationLanguages, input.profileId);
+	const externalLinks = await getUnitExternalLinkPreview(
+		input.unitId,
+		input.authorization.profileId,
+	);
+	return attachReadableSourceEntities(
+		externalLinks,
+		input.localizationLanguages,
+		input.authorization,
+	);
 }
