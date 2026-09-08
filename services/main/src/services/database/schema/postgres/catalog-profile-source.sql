@@ -40,7 +40,7 @@ BEGIN
     ELSIF field_name IN ('ended','cancelled') THEN
       IF jsonb_typeof(field_value)<>'boolean' THEN RAISE EXCEPTION 'Source profile flag must be boolean' USING ERRCODE='23514'; END IF;
     ELSIF field_name IN ('latitude','longitude') THEN
-      IF jsonb_typeof(field_value)<>'number' OR abs((field_value #>> '{}')::numeric) > CASE field_name WHEN 'latitude' THEN 90 ELSE 180 END THEN
+      IF jsonb_typeof(field_value)<>'number' OR abs((field_value #>> '{}')::numeric) > (CASE field_name WHEN 'latitude' THEN 90 ELSE 180 END) THEN
         RAISE EXCEPTION 'Source profile coordinate is invalid' USING ERRCODE='23514';
       END IF;
     ELSIF field_name IN ('begin','end') THEN
