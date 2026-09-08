@@ -36,6 +36,20 @@ const scalarVariants = [
 	z.strictObject({ ...registeredFields, kind: z.literal("string"), value: z.string().max(131072) }),
 	z.strictObject({ ...registeredFields, kind: z.literal("number"), value: z.number().finite() }),
 	z.strictObject({ ...registeredFields, kind: z.literal("boolean"), value: z.boolean() }),
+	z.strictObject({
+		...registeredFields,
+		kind: z.literal("object"),
+		value: z
+			.record(
+				z.string().max(256),
+				z.union([z.string().max(131072), z.number().finite(), z.boolean(), z.null()]),
+			)
+			.refine(
+				(value) =>
+					Object.keys(value).length <= 127 &&
+					Buffer.byteLength(JSON.stringify(value), "utf8") <= 1048576,
+			),
+	}),
 ] as const;
 export const CatalogSourceFactDescriptorSchema = z.union(scalarVariants);
 const descriptorSchema = CatalogSourceFactDescriptorSchema;

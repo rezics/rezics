@@ -31,7 +31,7 @@ describe("reviewed source fact descriptors", () => {
 			}),
 		).toThrow();
 	});
-	it("keeps named date facts strict and does not accept unreviewed structured objects", () => {
+	it("keeps named dates strict and requires reviewed definitions for flat structured facts", () => {
 		expect(() =>
 			CatalogSourceFactDescriptorSchema.parse({
 				identity: "date",
@@ -48,7 +48,7 @@ describe("reviewed source fact descriptors", () => {
 				path: "/date",
 				definitionRevisionId: crypto.randomUUID(),
 				kind: "object",
-				value: { arbitrary: "value" },
+				value: { nested: { arbitrary: "value" } },
 			}),
 		).toThrow();
 	});
