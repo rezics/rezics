@@ -1,11 +1,14 @@
 "use client";
 
+import { AppLink } from "@/features/application-shell/components/app-link";
+import { RequireSession } from "@/features/auth/require-session";
+import { publicUnitHref } from "@/features/units/routing/public-unit-route";
+import { useTranslation } from "@/i18n/client";
+import { RequestFailure } from "@/i18n/request-failure";
 import {
-	useGetApiFavorites,
-	useGetApiFavoritesByTargetUnitIdHistory,
-	usePostApiFavoritesByTargetUnitIdRestore,
-	usePutApiFavoritesByTargetUnitId,
 	useDeleteApiFavoritesByTargetUnitId,
+	useGetApiFavorites,
+	usePutApiFavoritesByTargetUnitId,
 	type GetApiFavoritesStatus200,
 } from "@rezics/openapi-tanstack-query";
 import {
@@ -21,12 +24,8 @@ import {
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
-import { publicUnitHref } from "@/features/units/routing/public-unit-route";
-import { RequireSession } from "@/features/auth/require-session";
-import { AppLink } from "@/features/application-shell/components/app-link";
-import { useTranslation } from "@/i18n/client";
-import { RequestFailure } from "@/i18n/request-failure";
 import { invalidateFavorites } from "./favorite-cache";
+import { FavoriteHistory } from "./favorite-history";
 
 export function FavoritesPage() {
 	return (
@@ -181,71 +180,5 @@ function FavoriteEntry({
 				) : null}
 			</CardContent>
 		</Card>
-	);
-}
-
-function FavoriteHistory({
-	targetUnitId,
-	revision,
-	onChanged,
-}: {
-	targetUnitId: string;
-	revision: number;
-	onChanged: () => void;
-}) {
-	const { t, locale } = useTranslation(["collections", "actions", "ui"]);
-	const client = useQueryClient();
-	const [beforeRevision, setBeforeRevision] = useState<number>();
-	const history = useGetApiFavoritesByTargetUnitIdHistory({
-		path: { targetUnitId },
-		query: { beforeRevision },
-	});
-	const restore = usePostApiFavoritesByTargetUnitIdRestore();
-	async function restoreRevision(selectedRevision: number) {
-		try {
-			await restore.mutateAsync({
-				path: { targetUnitId },
-				body: { revision: selectedRevision, expectedRevision: revision },
-			});
-			onChanged();
-			await invalidateFavorites(client);
-		} catch {
-			await invalidateFavorites(client);
-		}
-	}
-	if (history.isPending) return <QueryPending />;
-	if (history.isError)
-		return <QueryFailure error={history.error} retry={() => void history.refetch()} />;
-	return (
-		<div className="grid gap-2">
-			{history.data.items.map((item) => (
-				<div className="flex items-center justify-between gap-3" key={item.revision}>
-					<time dateTime={item.createdAt}>
-						{new Intl.DateTimeFormat(locale.target, {
-							dateStyle: "medium",
-							timeStyle: "short",
-						}).format(new Date(item.createdAt))}
-					</time>
-					{item.operation !== "delete" ? (
-						<Button
-							variant="outline"
-							disabled={restore.isPending}
-							onClick={() => void restoreRevision(item.revision)}
-						>
-							{t.collections.privateFavorites.restore}
-						</Button>
-					) : null}
-				</div>
-			))}
-			{history.data.nextCursor ? (
-				<Button
-					variant="quiet"
-					onClick={() => setBeforeRevision(history.data.nextCursor ?? undefined)}
-				>
-					{t.actions.loadMore}
-				</Button>
-			) : null}
-			<RequestFailure error={restore.error} />
-		</div>
 	);
 }

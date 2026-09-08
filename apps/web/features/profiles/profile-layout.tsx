@@ -9,7 +9,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { Banner, Button, cn, IdentityAvatar, QueryFailure, QueryPending } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import { CalendarDaysIcon, PencilIcon } from "lucide-react";
+import { PencilIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 
@@ -36,7 +36,7 @@ export function useProfileContext(): ProfileContextValue {
 }
 
 export function ProfileLayout({ children, profileId }: { children: ReactNode; profileId: string }) {
-	const { t, locale } = useTranslation(["profiles", "search", "ui"]);
+	const { t } = useTranslation(["profiles", "search", "ui"]);
 	const pathname = usePathname();
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
@@ -80,10 +80,7 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 			: pathname === activityHref || pathname.startsWith(`${activityHref}/`)
 				? "activity"
 				: "profile";
-	const joinedAt = new Date(user.createdAt);
-	const joinedDate = Number.isNaN(joinedAt.getTime())
-		? null
-		: new Intl.DateTimeFormat(locale.target, { dateStyle: "medium" }).format(joinedAt);
+
 	const tabs = [
 		{ value: "profile", label: t.profiles.tabs.profile, href: profileHref(user) },
 		{ value: "content", label: t.profiles.tabs.content, href: contentHref },
@@ -140,12 +137,6 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 							{user.summary ? (
 								<p className="mt-2 max-w-2xl text-muted-foreground text-sm leading-6 sm:text-base">
 									<LocalizedText language={user.language} value={user.summary} />
-								</p>
-							) : null}
-							{joinedDate ? (
-								<p className="mt-3 flex items-center gap-2 text-muted-foreground text-sm">
-									<CalendarDaysIcon aria-hidden className="size-4" />
-									{t.profiles.memberSince({ date: joinedDate })}
 								</p>
 							) : null}
 						</div>

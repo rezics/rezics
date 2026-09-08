@@ -9,6 +9,49 @@ const { forms: licenseTerms } = zhHansTerminology.license;
 const { forms: postTerms } = zhHansTerminology.post;
 
 export default {
+	participation: {
+		scope: "范围",
+		noExpiry: "不设到期时间",
+		sourceChange: "来源变更",
+		history: "历史记录",
+		restore: "恢复",
+		title: "组织与权限",
+		description: "创建组织、管理其公开身份并控制委托权限。",
+		organizations: "组织",
+		createOrganization: "创建组织",
+		name: "名称",
+		manage: "管理权限",
+		identity: "操作身份",
+		grantAccess: "授予权限",
+		recipient: "账户的公开身份",
+		permission: "权限",
+		expiresAt: "到期时间",
+		revoke: "撤销",
+		revoked: "已撤销",
+		grants: "授权记录",
+		noGrants: "暂无授权。",
+		services: "自动化身份",
+		createService: "创建自动化身份",
+		credential: "凭据",
+		credentialDescription: "请立即复制此凭据，关闭后将不再显示。",
+		securityWarning: "撤销最后一位人工安全管理者的权限会暂停此身份，直到平台核验并完成恢复。",
+		revokeWarning: "此权限将立即失效，已完成的操作仍会保留记录。",
+		erasedRecipient: "账户已注销",
+		currentAccount: "我的身份",
+		eraseTitle: "注销账户",
+		eraseDescription: "登录将立即停止。私人备注、收藏、进度、消息和上传内容将分批清除，公开署名与审计记录会保留。此操作无法撤销。",
+		eraseConfirmation: "我理解账户及私人数据无法恢复。",
+		erase: "注销我的账户",
+		erased: "账户注销已开始。",
+		capabilities: {
+			"catalog.read": "读取记录",
+			"catalog.edit": "编辑记录",
+			"entity.publish": "以此身份发布",
+			"entity.membership": "管理成员",
+			"entity.security": "管理安全",
+			"proposal.adopt": "批准一项来源变更",
+		},
+	},
 	workspace: {
 		title: "设置",
 		description: `管理个人资料、使用偏好、标签来源、账户安全与 ${verbatimTerms.api.value} 令牌。`,
@@ -19,7 +62,7 @@ export default {
 		sections: {
 			profile: {
 				label: "个人资料",
-				description: "更新公开名称、简介、头像、横幅与个人网址。",
+				description: "更新公开名称、简介、头像和横幅。",
 			},
 			preferences: {
 				label: "偏好设置",

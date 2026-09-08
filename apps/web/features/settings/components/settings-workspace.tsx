@@ -1,28 +1,28 @@
 "use client";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import type { ManagementWorkspaceSection } from "@rezics/ui";
 import {
-	ManagementWorkspace,
-	ManagementWorkspaceHeader,
-	ManagementWorkspaceNavigation,
+ManagementWorkspace,
+ManagementWorkspaceHeader,
+ManagementWorkspaceNavigation,
 } from "@rezics/ui";
 import {
-	CircleUserRound,
-	EyeOff,
-	KeyRound,
-	Settings2,
-	ShieldCheck,
-	Tags,
-	UserRound,
+CircleUserRound,
+EyeOff,
+KeyRound,
+Settings2,
+ShieldCheck,
+Tags,
+UserRound,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext,useContext,type ReactNode } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
 import type { SettingsSectionId } from "../model/settings-section";
-import { parseSettingsSection, settingsSectionHref } from "../routing/settings-routes";
+import { parseSettingsSection,settingsSectionHref } from "../routing/settings-routes";
 
 const SettingsSectionsContext = createContext<
 	readonly ManagementWorkspaceSection<SettingsSectionId>[] | undefined
@@ -39,6 +39,13 @@ export function SettingsWorkspace({ children }: { children: ReactNode }) {
 	const { t } = useTranslation(["settings"]);
 	const labels = t.settings.workspace.sections;
 	const sections = [
+		{
+			id: "participation",
+			href: settingsSectionHref("participation"),
+			label: t.settings.participation.title,
+			description: t.settings.participation.description,
+			icon: UserRound,
+		},
 		{
 			id: "profile",
 			href: settingsSectionHref("profile"),

@@ -9,6 +9,49 @@ const { forms: licenseTerms } = zhHantTerminology.license;
 const { forms: postTerms } = zhHantTerminology.post;
 
 export default {
+	participation: {
+		scope: "範圍",
+		noExpiry: "不設到期時間",
+		sourceChange: "來源變更",
+		history: "歷史記錄",
+		restore: "還原",
+		title: "組織與權限",
+		description: "建立組織、管理其公開身分並控制委派權限。",
+		organizations: "組織",
+		createOrganization: "建立組織",
+		name: "名稱",
+		manage: "管理權限",
+		identity: "操作身分",
+		grantAccess: "授予權限",
+		recipient: "帳戶的公開身分",
+		permission: "權限",
+		expiresAt: "到期時間",
+		revoke: "撤銷",
+		revoked: "已撤銷",
+		grants: "權限記錄",
+		noGrants: "尚無權限。",
+		services: "自動化身分",
+		createService: "建立自動化身分",
+		credential: "憑證",
+		credentialDescription: "請立即複製此憑證，關閉後將不再顯示。",
+		securityWarning: "撤銷最後一位人工安全管理者的權限會暫停此身分，直到平台核驗並完成復原。",
+		revokeWarning: "此權限將立即失效，已完成的操作仍會保留記錄。",
+		erasedRecipient: "帳戶已刪除",
+		currentAccount: "我的身分",
+		eraseTitle: "刪除帳戶",
+		eraseDescription: "登入將立即停止。私人備註、收藏、進度、訊息和上傳內容將分批清除，公開署名與稽核記錄會保留。此操作無法復原。",
+		eraseConfirmation: "我了解帳戶及私人資料無法復原。",
+		erase: "刪除我的帳戶",
+		erased: "帳戶刪除已開始。",
+		capabilities: {
+			"catalog.read": "讀取記錄",
+			"catalog.edit": "編輯記錄",
+			"entity.publish": "以此身分發布",
+			"entity.membership": "管理成員",
+			"entity.security": "管理安全",
+			"proposal.adopt": "核准一項來源變更",
+		},
+	},
 	workspace: {
 		title: "設定",
 		description: `管理個人資料、使用偏好、隱私、標籤來源、帳戶安全與 ${verbatimTerms.api.value} 權杖。`,
@@ -19,7 +62,7 @@ export default {
 		sections: {
 			profile: {
 				label: "個人資料",
-				description: "更新公開名稱、簡介、頭像、橫幅與個人網址。",
+				description: "更新公開名稱、簡介、大頭貼和橫幅。",
 			},
 			preferences: {
 				label: "偏好設定",

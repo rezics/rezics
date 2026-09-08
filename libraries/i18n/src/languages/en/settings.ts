@@ -11,6 +11,49 @@ const { forms: postTerms } = enTerminology.post;
 const { forms: zoneTerms } = enTerminology.zone;
 
 export default {
+	participation: {
+		scope: "Scope",
+		noExpiry: "No expiration",
+		sourceChange: "Source change",
+		history: "History",
+		restore: "Restore",
+		title: "Organizations and access",
+		description: "Create organizations, manage their public identities, and control delegated access.",
+		organizations: "Organizations",
+		createOrganization: "Create organization",
+		name: "Name",
+		manage: "Manage access",
+		identity: "Acting identity",
+		grantAccess: "Grant access",
+		recipient: "Account public identity",
+		permission: "Permission",
+		expiresAt: "Expires at",
+		revoke: "Revoke",
+		revoked: "Revoked",
+		grants: "Access grants",
+		noGrants: "No access grants.",
+		services: "Automation identities",
+		createService: "Create automation identity",
+		credential: "Credential",
+		credentialDescription: "Copy this credential now. It will not be shown again.",
+		securityWarning: "Revoking the last human security controller suspends this identity until the platform verifies a recovery.",
+		revokeWarning: "This permission will stop working immediately. Completed actions remain recorded.",
+		erasedRecipient: "Account erased",
+		currentAccount: "My identity",
+		eraseTitle: "Erase account",
+		eraseDescription: "Signing in will stop immediately. Private notes, favorites, progress, messages and uploads will be erased in batches. Public authorship and audit records remain. This cannot be undone.",
+		eraseConfirmation: "I understand that my account and private data cannot be recovered.",
+		erase: "Erase my account",
+		erased: "Account erasure has started.",
+		capabilities: {
+			"catalog.read": "Read records",
+			"catalog.edit": "Edit records",
+			"entity.publish": "Publish under this identity",
+			"entity.membership": "Manage members",
+			"entity.security": "Manage security",
+			"proposal.adopt": "Approve one source change",
+		},
+	},
 	workspace: {
 		title: "Settings",
 		description: `Manage your profile, preferences, privacy, Tag sources, account security, and ${verbatimTerms.api.value} tokens.`,
@@ -21,7 +64,7 @@ export default {
 		sections: {
 			profile: {
 				label: "Profile",
-				description: "Update your public name, bio, avatar, banner, and profile address.",
+				description: "Update your public name, introduction, avatar and banner.",
 			},
 			preferences: {
 				label: "Preferences",

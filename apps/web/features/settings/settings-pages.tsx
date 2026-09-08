@@ -3,51 +3,52 @@
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import {
-	getApiAccountMePreferencesQueryKey,
-	useGetApiAccountMePreferences,
-	useGetApiRealmsByRealmId,
-	usePutApiAccountMePreferences,
-	type PutApiAccountMePreferencesRequestContentRatingsEnum as ContentRating,
+getApiAccountMePreferencesQueryKey,
+useGetApiAccountMePreferences,
+useGetApiRealmsByRealmId,
+usePutApiAccountMePreferences,
+type PutApiAccountMePreferencesRequestContentRatingsEnum as ContentRating,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, GripVertical, Plus, Trash2 } from "lucide-react";
-import { useState, type DragEvent, type FormEvent } from "react";
+import { ArrowDown,ArrowUp,GripVertical,Plus,Trash2 } from "lucide-react";
+import { useState,type DragEvent,type FormEvent } from "react";
 
 import { resetContentRatingDependentQueries } from "@/features/content-feed/data/content-rating-cache";
 import { FeedQueryKey } from "@/features/content-feed/query";
+import { AccountErasureControl } from "@/features/participation/account-erasure-control";
 import { setPresentationPreferencesQueryData } from "@/features/preferences/data/use-presentation-preferences";
 import { UnitLicensesField } from "@/features/units/components/unit-licenses-field";
 import { readSubmittedLicenses } from "@/features/units/model/unit-licenses";
-import { useSetLocale, useTranslation } from "@/i18n/client";
+import { useSetLocale,useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { authClient } from "@/lib/auth-client";
-import { buildLocalizationLanguages, selectLocalization } from "@/lib/localization";
+import { buildLocalizationLanguages,selectLocalization } from "@/lib/localization";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import {
-	ChineseContentDisplayValues,
-	ContentLanguageValues,
-	isChineseContentDisplay,
-	isContentLanguage,
-	isStoredUiLocale,
-	StoredUiLocaleValues,
-	toContentLanguage,
-	toUiLocale,
-	type ContentLanguage,
+ChineseContentDisplayValues,
+ContentLanguageValues,
+isChineseContentDisplay,
+isContentLanguage,
+isStoredUiLocale,
+StoredUiLocaleValues,
+toContentLanguage,
+toUiLocale,
+type ContentLanguage,
 } from "@rezics/i18n";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 import {
-	Button,
-	Card,
-	CardContent,
-	EntityPicker,
-	Field,
-	FieldGroup,
-	FieldLabel,
-	ManagementWorkspaceSectionHeader,
-	NativeSelect,
-	NativeSelectOption,
-	QueryFailure,
-	QueryPending,
+Button,
+Card,
+CardContent,
+EntityPicker,
+Field,
+FieldGroup,
+FieldLabel,
+ManagementWorkspaceSectionHeader,
+NativeSelect,
+NativeSelectOption,
+QueryFailure,
+QueryPending,
 } from "@rezics/ui";
 import { ContentRatingPreferenceField } from "./components/content-rating-preference-field";
 import { SettingsOverviewHref } from "./routing/settings-routes";
@@ -498,6 +499,7 @@ export function AccountSettings() {
 					</Button>
 				</CardContent>
 			</Card>
+			<AccountErasureControl />
 		</SettingsFrame>
 	);
 }

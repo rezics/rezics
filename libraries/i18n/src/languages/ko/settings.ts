@@ -11,6 +11,49 @@ const { forms: metadataTerms } = koTerminology.metadata;
 const { forms: postTerms } = koTerminology.post;
 
 export default {
+	participation: {
+		scope: "적용 범위",
+		noExpiry: "만료 없음",
+		sourceChange: "출처 변경",
+		history: "기록",
+		restore: "복원",
+		title: "조직과 권한",
+		description: "조직을 만들고 공개 신원과 위임 권한을 관리하세요.",
+		organizations: "조직",
+		createOrganization: "조직 만들기",
+		name: "이름",
+		manage: "권한 관리",
+		identity: "작업 신원",
+		grantAccess: "권한 부여",
+		recipient: "계정의 공개 신원",
+		permission: "권한",
+		expiresAt: "만료 시각",
+		revoke: "철회",
+		revoked: "철회됨",
+		grants: "부여된 권한",
+		noGrants: "부여된 권한이 없습니다.",
+		services: "자동화 신원",
+		createService: "자동화 신원 만들기",
+		credential: "인증 정보",
+		credentialDescription: "지금 인증 정보를 복사하세요. 닫으면 다시 표시되지 않습니다.",
+		securityWarning: "마지막 사람 보안 관리자의 권한을 철회하면 플랫폼의 확인과 복구가 완료될 때까지 이 신원이 정지됩니다.",
+		revokeWarning: "이 권한은 즉시 사용할 수 없게 됩니다. 완료된 작업 기록은 유지됩니다.",
+		erasedRecipient: "삭제된 계정",
+		currentAccount: "내 신원",
+		eraseTitle: "계정 삭제",
+		eraseDescription: "로그인이 즉시 중단됩니다. 비공개 메모, 즐겨찾기, 진행 상황, 메시지, 업로드 내용은 순차적으로 삭제됩니다. 공개 작성자 표시와 감사 기록은 유지됩니다. 되돌릴 수 없습니다.",
+		eraseConfirmation: "계정과 비공개 데이터를 복구할 수 없음을 이해합니다.",
+		erase: "내 계정 삭제",
+		erased: "계정 삭제가 시작되었습니다.",
+		capabilities: {
+			"catalog.read": "기록 읽기",
+			"catalog.edit": "기록 편집",
+			"entity.publish": "이 신원으로 게시",
+			"entity.membership": "구성원 관리",
+			"entity.security": "보안 관리",
+			"proposal.adopt": "출처 변경 한 건 승인",
+		},
+	},
 	workspace: {
 		title: "설정",
 		description: `프로필, 환경 설정, 태그 소스, 계정 보안 및 ${verbatimTerms.api.value} 토큰을 관리하세요.`,
@@ -21,7 +64,7 @@ export default {
 		sections: {
 			profile: {
 				label: "프로필",
-				description: "공개 이름, 소개, 아바타, 배너, 프로필 주소를 업데이트하세요.",
+				description: "공개 이름, 소개, 프로필 사진, 배너를 수정하세요.",
 			},
 			preferences: {
 				label: "환경 설정",

@@ -12,6 +12,49 @@ const { forms: postTerms } = jaTerminology.post;
 const { forms: zoneTerms } = jaTerminology.zone;
 
 export default {
+	participation: {
+		scope: "対象範囲",
+		noExpiry: "有効期限なし",
+		sourceChange: "出典の変更",
+		history: "履歴",
+		restore: "復元",
+		title: "組織と権限",
+		description: "組織を作成し、公開名義と委任する権限を管理します。",
+		organizations: "組織",
+		createOrganization: "組織を作成",
+		name: "名前",
+		manage: "権限を管理",
+		identity: "操作する名義",
+		grantAccess: "権限を付与",
+		recipient: "アカウントの公開名義",
+		permission: "権限",
+		expiresAt: "有効期限",
+		revoke: "取り消す",
+		revoked: "取り消し済み",
+		grants: "付与された権限",
+		noGrants: "権限はありません。",
+		services: "自動化用の名義",
+		createService: "自動化用の名義を作成",
+		credential: "認証情報",
+		credentialDescription: "今すぐ認証情報をコピーしてください。閉じると再表示できません。",
+		securityWarning: "最後の人間のセキュリティ管理者の権限を取り消すと、運営による確認と復旧が完了するまでこの名義は停止されます。",
+		revokeWarning: "この権限は直ちに無効になります。完了した操作の記録は残ります。",
+		erasedRecipient: "削除済みアカウント",
+		currentAccount: "自分の名義",
+		eraseTitle: "アカウントを削除",
+		eraseDescription: "直ちにサインインできなくなります。非公開のメモ、お気に入り、進捗、メッセージ、アップロード内容は順次削除されます。公開の署名と監査記録は残ります。取り消しはできません。",
+		eraseConfirmation: "アカウントと非公開データを復元できないことを理解しました。",
+		erase: "自分のアカウントを削除",
+		erased: "アカウントの削除を開始しました。",
+		capabilities: {
+			"catalog.read": "記録を読む",
+			"catalog.edit": "記録を編集",
+			"entity.publish": "この名義で公開",
+			"entity.membership": "メンバーを管理",
+			"entity.security": "セキュリティを管理",
+			"proposal.adopt": "出典の変更を一件承認",
+		},
+	},
 	workspace: {
 		title: "設定",
 		description: `プロフィール、設定、タグソース、アカウントセキュリティ、および${verbatimTerms.api.value}トークンを管理します。`,
@@ -22,7 +65,7 @@ export default {
 		sections: {
 			profile: {
 				label: "プロフィール",
-				description: "公開名、自己紹介、アバター、バナー、プロフィールアドレスを更新します。",
+				description: "公開名、自己紹介、アバター、バナーを更新します。",
 			},
 			preferences: {
 				label: "設定",

@@ -166,7 +166,7 @@ above still requiring production qualification. The referencing indexes also
 bound follow deletion to its single preference, consistent with PostgreSQL's
 [foreign-key indexing guidance](https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-FK).
 
-`scripts/check-private-account-lifecycle.ts` passed 27 assertions on the generated
+`scripts/check-private-account-lifecycle.ts` passed 32 assertions on the generated
 60-migration disposable target. It uses the real service commands and PostgreSQL:
 515 public follows with 512 invisible candidates, cursor continuation, wrong
 Auth/self and missing-follow FK denial, exact Favorites lookup, stale revision
@@ -176,6 +176,32 @@ rolls back. Its 502-object versioned archive is an in-memory test double: it
 proves orchestration and retained-empty-fence behavior, not live S3/R2 races or
 retention qualification. The independently tested missing/nonempty/truncated
 fence and oversized-page failures leave erasure incomplete.
+
+## Current Web consumers
+
+The Web application consumes generated account/Entity/Favorites contracts, with
+Auth-scoped preferences and caches. Public Entity pages do not infer account
+membership from an identity creation date. Self presentation settings and the
+organization access page use native versioned presentation writes and exact
+history previews/restoration. Unsupported native Entity slug controls no longer
+call global Unit language/address editors.
+
+`/settings/participation` lists named organizations, admits an explicit current
+security grant, inspects its bounded recipient grant page and issues/revokes
+public-identity-addressed publication/security grants. Each delegated operation
+uses an isolated generated client with its exact grant revision; account requests
+are never given a global acting-identity header. Service creation shows a secret
+once and supports revocation; the account page starts the actual erasure job.
+Favorites has a separate private page with notes, preview refresh, ordering and
+history. A removed entry can still be inspected/restored from the target's Save
+dialog, where the exact stored snapshot is shown before restoration.
+
+Web and localization TypeScript, localization policy and 42 non-rendering Web
+checks passed for this checkpoint. These are code-integrity results, not browser
+or visual acceptance. Native Catalog/Entity follow and Favorites targets still
+depend on the coordinated global Unit interaction cutover. Organization roster
+membership is a separate lifecycle; no publication/security privilege is inferred
+from that future relation or from a sourced catalog membership.
 
 Favorites now has its own `/favorites` API and three Auth-owned relations:
 `account_favorite`, `account_favorite_revision`, and `account_favorites_state`.

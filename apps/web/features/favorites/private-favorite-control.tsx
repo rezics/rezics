@@ -1,20 +1,23 @@
 "use client";
 
+import { useTranslation } from "@/i18n/client";
+import { RequestFailure } from "@/i18n/request-failure";
 import {
+	useDeleteApiFavoritesByTargetUnitId,
 	useGetApiFavoritesByTargetUnitId,
 	usePutApiFavoritesByTargetUnitId,
-	useDeleteApiFavoritesByTargetUnitId,
 } from "@rezics/openapi-tanstack-query";
 import { Button, QueryFailure } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { BookmarkIcon, CheckIcon } from "lucide-react";
-import { useTranslation } from "@/i18n/client";
-import { RequestFailure } from "@/i18n/request-failure";
+import { useState } from "react";
 import { invalidateFavorites } from "./favorite-cache";
+import { FavoriteHistory } from "./favorite-history";
 
 export function PrivateFavoriteControl({ targetUnitId }: { targetUnitId: string }) {
 	const { t } = useTranslation(["collections"]);
 	const client = useQueryClient();
+	const [historyOpen, setHistoryOpen] = useState(false);
 	const state = useGetApiFavoritesByTargetUnitId({ path: { targetUnitId } });
 	const save = usePutApiFavoritesByTargetUnitId();
 	const remove = useDeleteApiFavoritesByTargetUnitId();
@@ -45,6 +48,16 @@ export function PrivateFavoriteControl({ targetUnitId }: { targetUnitId: string 
 					: t.collections.privateFavorites.save}
 			</Button>
 			<RequestFailure error={save.error ?? remove.error} />
+			<Button
+				variant="quiet"
+				aria-expanded={historyOpen}
+				onClick={() => setHistoryOpen((open) => !open)}
+			>
+				{t.collections.privateFavorites.history}
+			</Button>
+			{historyOpen && state.data ? (
+				<FavoriteHistory targetUnitId={targetUnitId} revision={state.data.revision} />
+			) : null}
 		</div>
 	);
 }
