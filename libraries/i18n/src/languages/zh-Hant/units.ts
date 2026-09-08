@@ -41,6 +41,10 @@ export default {
 	},
 	nativeCatalog: { names: "名稱", identifiers: "識別碼" },
 	nativeDomain: {
+		any: "不限",
+		yes: "是",
+		no: "否",
+
 		duration: "長度（毫秒）",
 		details: metadataTerms.label,
 		history: "修訂歷史",

@@ -41,6 +41,10 @@ export default {
 	},
 	nativeCatalog: { names: "이름", identifiers: "식별자" },
 	nativeDomain: {
+		any: "전체",
+		yes: "예",
+		no: "아니요",
+
 		duration: "재생 시간(밀리초)",
 		details: metadataTerms.label,
 		history: "수정 이력",

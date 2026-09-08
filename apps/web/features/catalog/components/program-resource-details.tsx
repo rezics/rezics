@@ -16,6 +16,8 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { DomainField, optionalText, optionalNumber } from "./domain-field";
 
+import { ProgramEpisodeList } from "./native-related-lists";
+
 type Structure = ReadProgramDetailsStatus200["structure"];
 const componentFor = (shape: Structure["shape"]) =>
 	(
@@ -31,7 +33,13 @@ export function ProgramResourceDetails({ id }: { id: string }) {
 	if (query.isPending) return <QueryPending />;
 	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	return (
-		<ProgramEditor key={`${id}:${query.data.revision}:${query.data.historyId}`} data={query.data} />
+		<>
+			<ProgramEditor
+				key={`${id}:${query.data.revision}:${query.data.historyId}`}
+				data={query.data}
+			/>
+			{query.data.structure.shape !== "episode" ? <ProgramEpisodeList key={id} id={id} /> : null}
+		</>
 	);
 }
 function ProgramEditor({ data }: { data: ReadProgramDetailsStatus200 }) {
@@ -254,10 +262,24 @@ function ProgramHistory({
 		<div className="grid gap-3">
 			<ol className="grid gap-2">
 				{query.data.items.map((item) => (
-					<li key={item.id} className="flex items-center justify-between gap-2">
-						<time dateTime={item.recordedAt}>
-							{new Date(item.recordedAt).toLocaleString(locale.target)}
-						</time>
+					<li key={item.id} className="grid gap-2">
+						<details>
+							<summary className="cursor-pointer">
+								<time dateTime={item.recordedAt}>
+									{new Date(item.recordedAt).toLocaleString(locale.target)}
+								</time>
+							</summary>
+							{item.snapshot.kind === "structure" ? (
+								<ProgramEditor
+									data={{
+										...data,
+										historyId: item.id,
+										structure: item.snapshot.value,
+										canEdit: false,
+									}}
+								/>
+							) : null}
+						</details>
 						<Button
 							variant="outline"
 							disabled={restoring || item.id === data.historyId}

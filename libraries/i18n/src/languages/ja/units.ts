@@ -41,6 +41,10 @@ export default {
 	},
 	nativeCatalog: { names: "名称", identifiers: "識別子" },
 	nativeDomain: {
+		any: "すべて",
+		yes: "はい",
+		no: "いいえ",
+
 		duration: "長さ（ミリ秒）",
 		details: metadataTerms.label,
 		history: "変更履歴",

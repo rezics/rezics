@@ -41,6 +41,10 @@ export default {
 	},
 	nativeCatalog: { names: "Noms", identifiers: "Identifiants" },
 	nativeDomain: {
+		any: "Tous",
+		yes: "Oui",
+		no: "Non",
+
 		duration: "Durée (millisecondes)",
 		details: metadataTerms.label,
 		history: "Historique des modifications",

@@ -16,12 +16,19 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { DomainField, optionalText, optionalNumber } from "./domain-field";
 
+import { SoftwareReleaseList } from "./native-related-lists";
+
 type Details = ReadSoftwareDetailsStatus200["details"];
 export function SoftwareResourceDetails({ id }: { id: string }) {
 	const query = useReadSoftwareDetails({ path: { id } });
 	if (query.isPending) return <QueryPending />;
 	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	return <SoftwareEditor key={`${id}:${query.data.revision}`} data={query.data} />;
+	return (
+		<>
+			<SoftwareEditor key={`${id}:${query.data.revision}`} data={query.data} />
+			{query.data.details.kind !== "release" ? <SoftwareReleaseList key={id} id={id} /> : null}
+		</>
+	);
 }
 function SoftwareEditor({ data }: { data: ReadSoftwareDetailsStatus200 }) {
 	const { t } = useTranslation(["units", "ui"]);
@@ -228,8 +235,7 @@ function SoftwareEditor({ data }: { data: ReadSoftwareDetailsStatus200 }) {
 			</form>
 			{history ? (
 				<SoftwareHistory
-					id={data.id}
-					currentRevision={data.revision}
+					data={data}
 					restoring={restore.isPending}
 					restore={(revision) =>
 						restore.mutate({
@@ -244,20 +250,18 @@ function SoftwareEditor({ data }: { data: ReadSoftwareDetailsStatus200 }) {
 	);
 }
 function SoftwareHistory({
-	id,
-	currentRevision,
+	data,
 	restoring,
 	restore,
 }: {
-	id: string;
-	currentRevision: number;
+	data: ReadSoftwareDetailsStatus200;
 	restoring: boolean;
 	restore: (revision: number) => void;
 }) {
 	const { t, locale } = useTranslation(["units", "actions", "ui"]);
 	const [cursors, setCursors] = useState<string[]>([]);
 	const query = useListSoftwareDetailsHistory({
-		path: { id },
+		path: { id: data.id },
 		query: { limit: 20, cursor: cursors.at(-1) },
 	});
 	if (query.isPending) return <QueryPending />;
@@ -266,13 +270,20 @@ function SoftwareHistory({
 		<div className="grid gap-3">
 			<ol className="grid gap-2">
 				{query.data.items.map((item) => (
-					<li key={item.revision} className="flex items-center justify-between gap-2">
-						<time dateTime={item.recordedAt}>
-							{new Date(item.recordedAt).toLocaleString(locale.target)}
-						</time>
+					<li key={item.revision} className="grid gap-2">
+						<details>
+							<summary className="cursor-pointer">
+								<time dateTime={item.recordedAt}>
+									{new Date(item.recordedAt).toLocaleString(locale.target)}
+								</time>
+							</summary>
+							<SoftwareEditor
+								data={{ ...data, revision: item.revision, details: item.details, canEdit: false }}
+							/>
+						</details>
 						<Button
 							variant="outline"
-							disabled={restoring || item.revision === currentRevision}
+							disabled={restoring || item.revision === data.revision}
 							onClick={() => restore(item.revision)}
 						>
 							{t.units.nativeDomain.restore}
