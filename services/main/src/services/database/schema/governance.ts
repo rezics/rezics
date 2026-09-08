@@ -483,6 +483,7 @@ export const contentReportReferral = pgTable(
 			table.id.desc(),
 		),
 		index("content_report_referral_report_idx").on(table.reportId, table.caseId),
+		index("content_report_referral_case_id_idx").on(table.caseId, table.id),
 	],
 );
 

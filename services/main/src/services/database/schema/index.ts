@@ -46,6 +46,7 @@ export * from "./entity";
 export * from "./follow";
 export * from "./favorites";
 export * from "./governance";
+export * from "./governance-delivery";
 export * from "./history";
 export * from "./image";
 export * from "./label";
