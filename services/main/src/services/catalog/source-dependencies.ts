@@ -22,7 +22,7 @@ import {
 const keySchema = z.strictObject({
 	sourceRecordId: z.uuid(),
 	proposalId: z.uuid(),
-	position: z.number().int().min(0).max(127),
+	position: z.number().int().min(0).max(8191),
 });
 
 /** Separately authorized intake may share its own draft dependencies with one exact proposal. @internal */
@@ -59,6 +59,8 @@ export async function prepareCatalogSourceProposalDependency(
 		.where(and(eq(proposals.sourceRecordId, key.sourceRecordId), eq(proposals.id, key.proposalId)))
 		.limit(1);
 	if (!located) throw new Error("Source proposal is missing");
+	if (key.position > 127 && located.mappingVersion !== "musicbrainz.release.1")
+		throw new RangeError("Only staged music release proposals admit extended dependency pages");
 	const root = await lockCatalogSourceBinding(tx, {
 		sourceRecordId: key.sourceRecordId,
 		mappingKey: located.mappingKey,

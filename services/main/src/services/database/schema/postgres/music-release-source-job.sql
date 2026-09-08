@@ -18,6 +18,9 @@ BEGIN
   IF OLD.preparation IS NOT NULL AND NEW.preparation IS DISTINCT FROM OLD.preparation THEN
    RAISE EXCEPTION 'Prepared release evidence is immutable' USING ERRCODE='23514';
   END IF;
+  IF NEW.next_dependency_position < OLD.next_dependency_position OR (OLD.preparation_complete AND NOT NEW.preparation_complete) THEN
+   RAISE EXCEPTION 'Release preparation progress is monotone' USING ERRCODE='23514';
+  END IF;
   IF OLD.music_id IS NOT NULL AND NEW.music_id IS DISTINCT FROM OLD.music_id THEN
    RAISE EXCEPTION 'Release job native target is immutable' USING ERRCODE='23514';
   END IF;

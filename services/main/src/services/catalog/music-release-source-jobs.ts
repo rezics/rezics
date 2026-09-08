@@ -1,3 +1,4 @@
+import { planMusicBrainzDependencies, prepareMusicBrainzProposalDependencies } from "./musicbrainz-dependencies";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseExecutor, DatabaseTransaction } from "../database";
@@ -21,10 +22,10 @@ import type { EventHandler } from "../events/consumer";
 
 const locatorSchema = z.strictObject({ sourceRecordId: z.uuid(), jobId: z.uuid() });
 const inputSchema = z.strictObject({ sourceRecordId: z.uuid(), proposalId: z.uuid(), action: z.enum(["apply", "withdraw"]), reason: z.string().min(1).max(2048) });
-const taskSchema = z.strictObject({ sourceRecordId: z.uuid(), jobId: z.uuid(), generation: z.number().int().positive().max(Number.MAX_SAFE_INTEGER), operationId: z.uuid(), consumerKey: z.enum(["music-release-prepare-v1", "music-release-publish-v1"]), maximumAttempts: z.literal(10), deadline: z.iso.datetime({ offset: true }) });
+const taskSchema = z.strictObject({ afterPosition: z.number().int().min(0).max(8192), sourceRecordId: z.uuid(), jobId: z.uuid(), generation: z.number().int().positive().max(Number.MAX_SAFE_INTEGER), operationId: z.uuid(), consumerKey: z.enum(["music-release-prepare-v1", "music-release-publish-v1"]), maximumAttempts: z.literal(10), deadline: z.iso.datetime({ offset: true }) });
 const preparationSchema = z.strictObject({ beforeSnapshotId: z.uuid(), afterSnapshotId: z.uuid(), beforeSha256: z.string().regex(/^[0-9a-f]{64}$/), afterSha256: z.string().regex(/^[0-9a-f]{64}$/) });
-export const MusicReleaseSourceJobSchema = z.strictObject({ id: z.uuid(), sourceRecordId: z.uuid(), proposalId: z.uuid().nullable(), action: z.enum(["initialize", "apply", "withdraw"]), reference: z.strictObject({ owner: z.literal("music"), id: z.uuid() }).nullable(), generation: z.number().int().positive(), state: z.enum(["queued", "prepared", "paused", "succeeded", "superseded", "blocked", "failed"]), prepared: z.boolean(), outcomeCode: z.string().nullable() });
-function present(row: typeof jobs.$inferSelect) { return MusicReleaseSourceJobSchema.parse({ id: row.id, sourceRecordId: row.sourceRecordId, proposalId: row.proposalId, action: row.action, reference: row.musicId ? { owner: "music", id: row.musicId } : null, generation: row.generation, state: row.state, prepared: row.preparation !== null, outcomeCode: row.outcomeCode }); }
+export const MusicReleaseSourceJobSchema = z.strictObject({ id: z.uuid(), sourceRecordId: z.uuid(), proposalId: z.uuid().nullable(), action: z.enum(["initialize", "apply", "withdraw"]), reference: z.strictObject({ owner: z.literal("music"), id: z.uuid() }).nullable(), generation: z.number().int().positive(), state: z.enum(["queued", "prepared", "paused", "succeeded", "superseded", "blocked", "failed"]), prepared: z.boolean(), preparedDependencies: z.number().int().min(0).max(8192), outcomeCode: z.string().nullable() });
+function present(row: typeof jobs.$inferSelect) { return MusicReleaseSourceJobSchema.parse({ id: row.id, sourceRecordId: row.sourceRecordId, proposalId: row.proposalId, action: row.action, reference: row.musicId ? { owner: "music", id: row.musicId } : null, generation: row.generation, state: row.state, prepared: row.preparationComplete, preparedDependencies: row.nextDependencyPosition, outcomeCode: row.outcomeCode }); }
 function key(input: { sourceRecordId: string; jobId: string }) { return and(eq(jobs.sourceRecordId, input.sourceRecordId), eq(jobs.id, input.jobId)); }
 
 async function authorize(tx: DatabaseTransaction, actor: string, input: { sourceRecordId: string; proposalId: string | null; authority?: z.infer<typeof ParticipationAuthoritySchema> }) {
@@ -51,7 +52,7 @@ async function admitStage(tx: DatabaseTransaction, row: typeof jobs.$inferSelect
 		occurredAt: new Date().toISOString(), correlationId: row.id, causationId: null, routingEpoch: 1,
 		routingBucket: aggregateRoutingBucket("source_record", row.sourceRecordId),
 		aggregate: { owner: "source_record", key: row.sourceRecordId, revision: String(row.generation) },
-		payload: { sourceRecordId: row.sourceRecordId, jobId: row.id, generation: row.generation, operationId,
+		payload: { afterPosition: row.nextDependencyPosition, sourceRecordId: row.sourceRecordId, jobId: row.id, generation: row.generation, operationId,
 			consumerKey: `music-release-${phase}-v1`, maximumAttempts: 10, deadline: new Date(Date.now() + 86_400_000).toISOString() },
 	}));
 }
@@ -115,10 +116,10 @@ export async function controlMusicReleaseSourceJob(tx: DatabaseTransaction, acto
 	if (["succeeded", "superseded"].includes(row.state)) return present(row);
 	if (value.action === "pause" && row.state === "paused") return present(row);
 	if (value.action === "resume" && !["paused", "failed"].includes(row.state)) return present(row);
-	const [updated] = await tx.update(jobs).set({ state: value.action === "pause" ? "paused" : row.preparation ? "prepared" : "queued",
+	const [updated] = await tx.update(jobs).set({ state: value.action === "pause" ? "paused" : row.preparationComplete ? "prepared" : "queued",
 		generation: row.generation + 1, authority: ParticipationAuthoritySchema.parse(authority), outcomeCode: null }).where(key(value)).returning();
 	if (!updated) throw new Error("Music release job disappeared");
-	if (value.action === "resume") await admitStage(tx, updated, updated.preparation ? "publish" : "prepare");
+	if (value.action === "resume") await admitStage(tx, updated, updated.preparationComplete ? "publish" : "prepare");
 	return present(updated);
 }
 
@@ -166,7 +167,7 @@ export function createMusicReleaseSourceHandlers(database: DatabaseExecutor, rou
 				const loaded = await database.transaction(async (tx) => {
 					const [row] = await tx.select().from(jobs).where(key(value)).limit(1);
 					if (!row) throw new CatalogReferenceNotFound();
-					if (row.generation !== value.generation || row.state !== (phase === "prepare" ? "queued" : "prepared")) return { row, evidence: null };
+					if (row.generation !== value.generation || row.nextDependencyPosition !== value.afterPosition || row.state !== (phase === "prepare" ? "queued" : "prepared")) return { row, evidence: null };
 					return runWithParticipationAuthority(ParticipationAuthoritySchema.parse(row.authority), async () => {
 						await authorize(tx, row.authority.principal.authUserId, row);
 						return { row, evidence: await archived(tx, row, archive) };
@@ -182,12 +183,30 @@ export function createMusicReleaseSourceHandlers(database: DatabaseExecutor, rou
 						await runWithParticipationAuthority(ParticipationAuthoritySchema.parse(loaded.row.authority), async () => {
 							await authorize(tx, loaded.row.authority.principal.authUserId, loaded.row);
 							const [row] = await tx.select().from(jobs).where(key(value)).limit(1).for("update");
-							if (!row || row.generation !== value.generation || row.state !== (phase === "prepare" ? "queued" : "prepared")) return;
+							if (!row || row.generation !== value.generation || row.nextDependencyPosition !== value.afterPosition || row.state !== (phase === "prepare" ? "queued" : "prepared")) return;
 							if (!loaded.evidence || !bytes) throw new Error("Release job lost its prepared evidence");
 							if (phase === "prepare") {
-								const [prepared] = await tx.update(jobs).set({ preparation: loaded.evidence.preparation, state: "prepared" }).where(key(value)).returning();
-								if (!prepared) throw new Error("Release preparation disappeared");
-								await admitStage(tx, prepared, "publish");
+								const direct = row.authority.principal.kind === "auth" && !row.authority.grant;
+								const previous = row.nextDependencyPosition >= 4096;
+								const documentIndex = previous ? 0 : 1;
+								const parsedDocument = MusicBrainzReleaseSchema.parse(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes[documentIndex]!)));
+								const plan = planMusicBrainzDependencies("release", parsedDocument, 4096);
+								const position = row.nextDependencyPosition % 4096;
+								let nextPosition = row.nextDependencyPosition;
+								let prepared = true;
+								if (direct && row.action !== "withdraw") {
+									await prepareMusicBrainzProposalDependencies(tx, row.authority.principal.authUserId, { proposalId: row.proposalId,
+										sourceRecordId: row.sourceRecordId, snapshotId: previous ? loaded.evidence.preparation.beforeSnapshotId : row.snapshotId,
+										receipt: previous ? loaded.evidence.before : loaded.evidence.after, bytes: bytes[documentIndex]!,
+										afterPosition: position, sourcePage: true, purpose: previous ? "previous-for-withdrawal" : "incoming" });
+									nextPosition += Math.min(128, Math.max(0, plan.length - position));
+									if (position + 128 < plan.length) prepared = false;
+									else if (!previous && row.action === "apply") { nextPosition = 4096; prepared = false; }
+								}
+								const [updated] = await tx.update(jobs).set({ preparation: loaded.evidence.preparation,
+									preparationComplete: prepared, nextDependencyPosition: nextPosition, state: prepared ? "prepared" : "queued" }).where(key(value)).returning();
+								if (!updated) throw new Error("Release preparation disappeared");
+								await admitStage(tx, updated, prepared ? "publish" : "prepare");
 							} else if (row.action === "initialize") {
 								const [source] = await tx.select({ head: records.headSnapshotId }).from(records).where(eq(records.id, row.sourceRecordId)).limit(1);
 								if (source?.head !== row.snapshotId) {

@@ -77,7 +77,7 @@ export const catalogSourceProposalDependency = pgTable(
 				catalogSourceBindingRevision.revision,
 			],
 		}).onDelete("restrict"),
-		check("catalog_source_dependency_position_check", sql`${t.position} between 0 and 127`),
+		check("catalog_source_dependency_position_check", sql`${t.position} between 0 and 8191`),
 		check(
 			"catalog_source_dependency_path_check",
 			sql`left(${t.sourcePath},1)='/' and octet_length(${t.sourcePath}) between 1 and 512`,

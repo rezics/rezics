@@ -388,9 +388,13 @@ async function resolveCatalogAuthorityScope(
 								: sql`false`,
 						),
 						isNull(d.revokedAt),
+						requestedReferences ? or(...requestedReferences.map((reference) => eq({
+							publishing: d.publishingId, music: d.musicId, program: d.programId, software: d.softwareId,
+							entity: d.entityId, grouping: d.groupingId, reference: d.referenceId, distribution: d.distributionId,
+						}[reference.owner], reference.id))) : undefined,
 					),
 				)
-				.limit(128)
+				.limit(requestedReferences ? 256 : 128)
 				.for("share", { of: [d, c, users] });
 			for (const { dependency } of prepared)
 				for (const [owner, id] of Object.entries({

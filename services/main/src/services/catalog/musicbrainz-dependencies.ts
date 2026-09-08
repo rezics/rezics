@@ -76,14 +76,16 @@ function sourceKey(item: Dependency) {
 export function planMusicBrainzDependencies(
 	objectType: string,
 	input: unknown,
+	maximum = 128,
 ): readonly Dependency[] {
+	if (maximum !== 128 && maximum !== 4096) throw new TypeError("Unreviewed dependency plan capacity");
 	const dependencies = new Map<string, Dependency>();
 	const add = (item: Dependency) => {
 		const key = sourceKey(item);
 		if (!key.externalId) return;
 		const identity = catalogSourceRecordId(key);
 		if (!dependencies.has(identity)) dependencies.set(identity, item);
-		if (dependencies.size > 128)
+		if (dependencies.size > maximum)
 			throw new RangeError("MusicBrainz dependencies require staged preparation");
 	};
 	const vocabulary = (
@@ -222,13 +224,18 @@ export async function prepareMusicBrainzProposalDependencies(
 	outer: DatabaseTransaction,
 	actor: string,
 	input: {
-		proposalId: string;
+		proposalId: string | null;
+		afterPosition?: number;
+		sourcePage?: true;
+		purpose?: "incoming" | "previous-for-withdrawal";
 		sourceRecordId: string;
 		snapshotId: string;
 		receipt: CatalogSourceReceipt;
 		bytes: Uint8Array;
 	},
 ) {
+	const afterPosition = z.number().int().min(0).max(4096).parse(input.afterPosition ?? 0);
+	if (input.proposalId === null && !input.sourcePage) throw new TypeError("Unscoped dependency preparation requires an admitted source page");
 	const authority = currentParticipationAuthority();
 	if (
 		!authority ||
@@ -255,12 +262,14 @@ export async function prepareMusicBrainzProposalDependencies(
 		const plan = planMusicBrainzDependencies(
 			observation.record.objectType,
 			JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(input.bytes)),
+			input.sourcePage ? 4096 : 128,
 		);
 		for (const item of plan)
 			if (observation.referenceAt(item.path).externalId !== sourceKey(item).externalId)
 				throw new TypeError("MusicBrainz dependency identity differs from archived evidence");
 		const prepared = [];
-		for (const [position, item] of plan.entries()) {
+		for (const [offset, item] of plan.slice(afterPosition, afterPosition + 128).entries()) {
+			const position = afterPosition + offset + (input.purpose === "previous-for-withdrawal" ? 4096 : 0);
 			const path = item.path.slice(0, -3);
 			switch (item.kind) {
 				case "relation":
@@ -315,11 +324,12 @@ export async function prepareMusicBrainzProposalDependencies(
 					});
 				}
 			}
-			prepared.push(
+			if (input.proposalId) prepared.push(
 				await prepareCatalogSourceProposalDependency(tx, actor, {
 					sourceRecordId: observation.record.id,
 					proposalId: input.proposalId,
 					position,
+					purpose: input.purpose,
 					dependencySourceRecordId: catalogSourceRecordId(sourceKey(item)),
 					evidence: observation.referenceAt(item.path),
 				}),
