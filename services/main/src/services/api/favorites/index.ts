@@ -8,6 +8,7 @@ import {
 	FavoriteListSchema,
 	FavoriteMutationSchema,
 	FavoriteRevisionSchema,
+	FavoriteStateSchema,
 	SaveFavoriteSchema,
 } from "../../favorites/contracts";
 import {
@@ -15,6 +16,7 @@ import {
 	listFavoriteHistory,
 	listFavorites,
 	readFavoriteRevision,
+	readFavorite,
 	saveFavorite,
 } from "../../favorites/service";
 
@@ -34,6 +36,12 @@ export default new Elysia({ prefix: "/favorites", name: "favorites-api" })
 		{ access: "account:read", query: FavoriteListQuerySchema, response: FavoriteListSchema },
 		({ participation, query }) =>
 			runParticipationTransaction((tx) => listFavorites(tx, participation, query)),
+	)
+	.get(
+		"/:targetUnitId",
+		{ access: "account:read", params: target, response: FavoriteStateSchema },
+		({ participation, params }) =>
+			runParticipationTransaction((tx) => readFavorite(tx, participation, params.targetUnitId)),
 	)
 	.put(
 		"/:targetUnitId",

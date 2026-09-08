@@ -180,6 +180,34 @@ export async function listFavorites(
 	};
 }
 
+/** Read one private entry and the account revision from the same serialized snapshot. */
+export async function readFavorite(
+	tx: DatabaseTransaction,
+	authority: ParticipationAuthority,
+	targetUnitId: string,
+) {
+	const { authUserId } = await admitFavorites(tx, authority);
+	z.uuid().parse(targetUnitId);
+	await tx.insert(accountFavoritesState).values({ authUserId }).onConflictDoNothing();
+	const [state] = await tx
+		.select({ revision: accountFavoritesState.revision })
+		.from(accountFavoritesState)
+		.where(eq(accountFavoritesState.authUserId, authUserId))
+		.limit(1)
+		.for("share");
+	const [entry] = await tx
+		.select()
+		.from(accountFavorite)
+		.where(
+			and(
+				eq(accountFavorite.authUserId, authUserId),
+				eq(accountFavorite.targetUnitId, targetUnitId),
+			),
+		)
+		.limit(1);
+	return { revision: state?.revision ?? 0, entry: entry ? presentFavorite(entry) : null };
+}
+
 export async function saveFavorite(
 	tx: DatabaseTransaction,
 	authority: ParticipationAuthority,
@@ -253,15 +281,13 @@ export async function saveFavorite(
 		})
 		.returning();
 	if (!row) throw new Error("Favorite mutation returned no row");
-	await tx
-		.insert(accountFavoriteRevision)
-		.values({
-			authUserId,
-			revision,
-			targetUnitId,
-			operation: restored ? "restore" : current ? "update" : "save",
-			snapshot: { targetUnitId, position, note, preview },
-		});
+	await tx.insert(accountFavoriteRevision).values({
+		authUserId,
+		revision,
+		targetUnitId,
+		operation: restored ? "restore" : current ? "update" : "save",
+		snapshot: { targetUnitId, position, note, preview },
+	});
 	await tx
 		.update(accountFavoritesState)
 		.set({ revision })

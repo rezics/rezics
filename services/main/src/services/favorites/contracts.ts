@@ -45,6 +45,10 @@ export const FavoriteMutationSchema = z.strictObject({
 	revision: z.number().int().positive().safe(),
 	entry: FavoriteEntrySchema.nullable(),
 });
+export const FavoriteStateSchema = z.strictObject({
+	revision: z.number().int().nonnegative().safe(),
+	entry: FavoriteEntrySchema.nullable(),
+});
 export const FavoriteHistoryItemSchema = z.strictObject({
 	revision: z.number().int().positive().safe(),
 	operation: z.enum(["save", "update", "delete", "restore"]),
