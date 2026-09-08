@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "typesafe": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/typesafe/SKILL.md",
+      "computedHash": "4031e1bf75bbe9d0b7d952ba3539f97ac728e3b4b68934b95fd76b733a7ef2bc"
+    }
+  }
+}
