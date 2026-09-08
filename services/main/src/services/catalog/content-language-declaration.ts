@@ -55,7 +55,17 @@ export const ConsumptionLanguagesSchema = z
 		}),
 	)
 	.max(MaximumContentLanguageSupportEntries)
-	.transform((value) => presentContentLanguageSupport(normalizeContentLanguageSupport(value)));
+	.superRefine((value, context) => {
+		try {
+			normalizeContentLanguageSupport(value);
+		} catch (error) {
+			context.addIssue({
+				code: "custom",
+				message:
+					error instanceof Error ? error.message : "Invalid consumption language declaration",
+			});
+		}
+	});
 export const ContentLanguageDeclarationPutSchema = z.strictObject({
 	expectedRevision: version.positive(),
 	expectedHeadVersion: version,
@@ -186,7 +196,9 @@ export function declarationFromValueNodes(input: readonly unknown[]) {
 		throw new TypeError("Unexpected language declaration node");
 	}
 	const raw = [...entries.values()];
-	const value = ConsumptionLanguagesSchema.parse(raw);
+	const value = presentContentLanguageSupport(
+		normalizeContentLanguageSupport(ConsumptionLanguagesSchema.parse(raw)),
+	);
 	if (!isDeepStrictEqual(raw, value))
 		throw new TypeError("Language declaration requires an explicit policy migration");
 	return value;
@@ -320,7 +332,11 @@ export async function replaceCatalogContentLanguageSupport(
 	forceNewRevision = false,
 ) {
 	const reference = ContentLanguageDeclarationReferenceSchema.parse(input),
-		value = ContentLanguageDeclarationPutSchema.parse(body);
+		submitted = ContentLanguageDeclarationPutSchema.parse(body);
+	const value = {
+		...submitted,
+		value: presentContentLanguageSupport(normalizeContentLanguageSupport(submitted.value)),
+	};
 	const identity = await loadCatalogIdentity(tx, reference, actor, true);
 	const head = await current(tx, reference);
 	if (identity.revision !== value.expectedRevision || head.version !== value.expectedHeadVersion)

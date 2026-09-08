@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { describe, expect, it } from "vitest";
 import { catalogValueNodes } from "./value-nodes";
 import {
@@ -6,9 +7,25 @@ import {
 	ConsumptionLanguagesSchema,
 	MaximumLanguageDeclarationNodes,
 	ContentLanguageDeclarationPutSchema,
+	ContentLanguageDeclarationSchema,
+	ContentLanguageDeclarationMutationSchema,
+	ContentLanguageDeclarationHistorySchema,
+	ContentLanguageDeclarationHistoryValueSchema,
+	ContentLanguageDeclarationRestoreSchema,
 } from "./content-language-declaration";
 const id = "019b0000-0000-7000-8000-000000000001";
 describe("native consumption language declarations", () => {
+	it("exports every public declaration contract as JSON Schema", () => {
+		for (const schema of [
+			ContentLanguageDeclarationPutSchema,
+			ContentLanguageDeclarationSchema,
+			ContentLanguageDeclarationMutationSchema,
+			ContentLanguageDeclarationHistorySchema,
+			ContentLanguageDeclarationHistoryValueSchema,
+			ContentLanguageDeclarationRestoreSchema,
+		])
+			expect(() => z.toJSONSchema(schema)).not.toThrow();
+	});
 	it("has a stable owner-separated internal semantic identity", () => {
 		const ref = { owner: "publishing" as const, id };
 		expect(contentLanguageDeclarationSemanticId(ref)).toBe(
