@@ -2,12 +2,7 @@ import { isDeepStrictEqual } from "node:util";
 import { runParticipationSavepoint } from "../participation/policy";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import { z } from "zod";
-import {
-	musicDiscToc,
-	musicDiscTocOffset,
-	musicRecording,
-	musicReleaseGroup,
-} from "../database/schema/catalog-music";
+import { musicDiscToc, musicDiscTocOffset } from "../database/schema/catalog-music";
 import {
 	MusicBrainzCatalogContractSha256,
 	MusicBrainzReleaseSchema,
@@ -91,7 +86,13 @@ export function musicBrainzReleaseNativeWriter(
 				...context,
 				previousSnapshotId: context.previousSnapshotId,
 			});
-			const credit = musicBrainzCreditWriter(tx, context.actor, observation, context.reference);
+			const credit = musicBrainzCreditWriter(
+				tx,
+				context.actor,
+				observation,
+				context.reference,
+				"prepared",
+			);
 			const releaseId = context.reference.id;
 			const root = oldAt("music_release", "/");
 			let releaseGroupId = root.value.release_group_id;
@@ -100,13 +101,13 @@ export function musicBrainzReleaseNativeWriter(
 				if (!group) releaseGroupId = null;
 				else {
 					const target = await bindReferencedSourceIdentity(tx, context.actor, {
+						mode: "prepared",
 						...musicBrainzSourceKey("release_group", group.id),
 						owner: "music",
 						shape: "release_group",
 						name: group.title,
 						evidence: observation.referenceAt("/release-group/id"),
 					});
-					if (target.created) await tx.insert(musicReleaseGroup).values({ id: target.id });
 					releaseGroupId = target.id;
 				}
 			}
@@ -124,14 +125,26 @@ export function musicBrainzReleaseNativeWriter(
 						"release_status",
 						incoming["status-id"],
 						incoming.status,
-						{ actor: context.actor, observation, idPath: "/status-id", namePath: "/status" },
+						{
+							actor: context.actor,
+							observation,
+							idPath: "/status-id",
+							namePath: "/status",
+							mode: "prepared",
+						},
 					),
 					packaging_revision_id: await musicBrainzVocabulary(
 						tx,
 						"release_packaging",
 						incoming["packaging-id"],
 						incoming.packaging,
-						{ actor: context.actor, observation, idPath: "/packaging-id", namePath: "/packaging" },
+						{
+							actor: context.actor,
+							observation,
+							idPath: "/packaging-id",
+							namePath: "/packaging",
+							mode: "prepared",
+						},
 					),
 					language_tag: incoming["text-representation"]?.language
 						? musicBrainzLanguageTag(incoming["text-representation"].language)
@@ -170,6 +183,7 @@ export function musicBrainzReleaseNativeWriter(
 							medium.format,
 							{
 								actor: context.actor,
+								mode: "prepared",
 								observation,
 								idPath: `/media/${index}/format-id`,
 								namePath: `/media/${index}/format`,
@@ -202,22 +216,13 @@ export function musicBrainzReleaseNativeWriter(
 					let recordingId = oldTrack?.value.recording_id;
 					if (!previousTrack || previousTrack.track.recording.id !== entry.track.recording.id) {
 						const target = await bindReferencedSourceIdentity(tx, context.actor, {
+							mode: "prepared",
 							...musicBrainzSourceKey("recording", entry.track.recording.id),
 							owner: "music",
 							shape: "recording",
 							name: entry.track.recording.title,
 							evidence: observation.referenceAt(`${entry.path}/recording/id`),
 						});
-						if (target.created)
-							await tx.insert(musicRecording).values({
-								id: target.id,
-								lengthMilliseconds: entry.track.recording.length ?? null,
-								video: entry.track.recording.video ?? null,
-								artistCreditId: await credit(
-									entry.track.recording["artist-credit"],
-									`${entry.path}/recording/artist-credit`,
-								),
-							});
 						recordingId = target.id;
 					}
 					put(
@@ -320,6 +325,7 @@ export function musicBrainzReleaseNativeWriter(
 							observation,
 							event.area,
 							`${path}/area`,
+							"prepared",
 						)
 					).id;
 
@@ -353,6 +359,7 @@ export function musicBrainzReleaseNativeWriter(
 							observation,
 							label.label,
 							`${path}/label`,
+							"prepared",
 						)
 					).id;
 

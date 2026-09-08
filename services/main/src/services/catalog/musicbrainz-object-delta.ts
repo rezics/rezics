@@ -84,7 +84,13 @@ export function musicBrainzObjectNativeWriter(
 				previousSnapshotId: context.previousSnapshotId,
 			});
 			const ownerId = context.reference.id;
-			const credit = musicBrainzCreditWriter(tx, context.actor, observation, context.reference);
+			const credit = musicBrainzCreditWriter(
+				tx,
+				context.actor,
+				observation,
+				context.reference,
+				"prepared",
+			);
 			if (incoming.kind === "work" && previous.kind === "work") {
 				if (!isDeepStrictEqual(previous.record.iswcs, incoming.record.iswcs))
 					throw new TypeError("Work identifier delta requires its native identifier writer");
@@ -99,7 +105,13 @@ export function musicBrainzObjectNativeWriter(
 							"work_type",
 							incoming.record["type-id"],
 							incoming.record.type,
-							{ actor: context.actor, observation, idPath: "/type-id", namePath: "/type" },
+							{
+								actor: context.actor,
+								observation,
+								idPath: "/type-id",
+								namePath: "/type",
+								mode: "prepared",
+							},
 						),
 					},
 					old,
@@ -156,6 +168,7 @@ export function musicBrainzObjectNativeWriter(
 							incoming.record["primary-type"],
 							{
 								actor: context.actor,
+								mode: "prepared",
 								observation,
 								idPath: "/primary-type-id",
 								namePath: "/primary-type",
@@ -183,6 +196,7 @@ export function musicBrainzObjectNativeWriter(
 						names[index],
 						{
 							actor: context.actor,
+							mode: "prepared",
 							observation,
 							idPath: `/secondary-type-ids/${index}`,
 							namePath: `/secondary-types/${index}`,

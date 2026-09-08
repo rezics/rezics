@@ -1,0 +1,254 @@
+import type { DatabaseTransaction } from "../database";
+import { musicRecording, musicReleaseGroup } from "../database/schema/catalog-music";
+import {
+	currentParticipationAuthority,
+	ParticipationDenied,
+	runParticipationSavepoint,
+} from "../participation/policy";
+import {
+	MusicBrainzReleaseSchema,
+	MusicBrainzObjectDocumentSchema,
+	MusicBrainzCatalogContractSha256,
+	type MusicBrainzCredit,
+	type MusicBrainzRelease,
+	type MusicBrainzRecording,
+	type MusicBrainzReleaseGroup,
+} from "./musicbrainz";
+import {
+	musicBrainzVocabulary,
+	musicBrainzArtistReference,
+	musicBrainzAreaReference,
+	musicBrainzLabelReference,
+	musicBrainzCreditWriter,
+} from "./musicbrainz-native";
+import { tracks } from "./musicbrainz-release-plan";
+import { bindReferencedSourceIdentity } from "./source-references";
+import { prepareCatalogSourceProposalDependency } from "./source-dependencies";
+import { catalogSourceRecordId } from "./source-record-key";
+import { loadCatalogSourceDocument, type CatalogSourceReceipt } from "./source-observations";
+type Area = NonNullable<NonNullable<MusicBrainzRelease["release-events"]>[number]["area"]>;
+type Label = NonNullable<NonNullable<MusicBrainzRelease["label-info"]>[number]["label"]>;
+type Dependency = { path: string } & (
+	| { kind: "artist"; value: MusicBrainzCredit[number]["artist"] }
+	| { kind: "area"; value: Area }
+	| { kind: "label"; value: Label }
+	| { kind: "recording"; value: MusicBrainzRecording }
+	| { kind: "release_group"; value: MusicBrainzReleaseGroup }
+	| {
+			kind: "vocabulary";
+			family: string;
+			id: string | null | undefined;
+			name: string | null | undefined;
+			namePath: string;
+	  }
+);
+
+function sourceKey(item: Dependency) {
+	return {
+		source: "musicbrainz",
+		objectType: item.kind === "vocabulary" ? item.family : item.kind,
+		externalId: item.kind === "vocabulary" ? item.id || item.name || "" : item.value.id,
+	};
+}
+
+/** @internal A document-local plan admits at most 128 distinct native read dependencies. */
+export function planMusicBrainzDependencies(
+	objectType: string,
+	input: unknown,
+): readonly Dependency[] {
+	const dependencies = new Map<string, Dependency>();
+	const add = (item: Dependency) => {
+		const key = sourceKey(item);
+		if (!key.externalId) return;
+		const identity = catalogSourceRecordId(key);
+		if (!dependencies.has(identity)) dependencies.set(identity, item);
+		if (dependencies.size > 128)
+			throw new RangeError("MusicBrainz dependencies require staged preparation");
+	};
+	const vocabulary = (
+		family: string,
+		id: string | null | undefined,
+		name: string | null | undefined,
+		idPath: string,
+		namePath: string,
+	) => add({ kind: "vocabulary", family, id, name, path: id ? idPath : namePath, namePath });
+	const credit = (members: MusicBrainzCredit | undefined, path: string) => {
+		for (const [position, member] of (members ?? []).entries())
+			add({ kind: "artist", value: member.artist, path: `${path}/${position}/artist/id` });
+	};
+	if (objectType === "release") {
+		const release = MusicBrainzReleaseSchema.parse(input);
+		credit(release["artist-credit"], "/artist-credit");
+		vocabulary("release_status", release["status-id"], release.status, "/status-id", "/status");
+		vocabulary(
+			"release_packaging",
+			release["packaging-id"],
+			release.packaging,
+			"/packaging-id",
+			"/packaging",
+		);
+		if (release["release-group"])
+			add({ kind: "release_group", value: release["release-group"], path: "/release-group/id" });
+		for (const [index, medium] of release.media.entries()) {
+			vocabulary(
+				"medium_format",
+				medium["format-id"],
+				medium.format,
+				`/media/${index}/format-id`,
+				`/media/${index}/format`,
+			);
+			for (const entry of tracks(medium, index)) {
+				credit(entry.track["artist-credit"], `${entry.path}/artist-credit`);
+				add({
+					kind: "recording",
+					value: entry.track.recording,
+					path: `${entry.path}/recording/id`,
+				});
+			}
+		}
+		for (const [index, event] of (release["release-events"] ?? []).entries())
+			if (event.area)
+				add({ kind: "area", value: event.area, path: `/release-events/${index}/area/id` });
+		for (const [index, label] of (release["label-info"] ?? []).entries())
+			if (label.label)
+				add({ kind: "label", value: label.label, path: `/label-info/${index}/label/id` });
+	} else {
+		const document = MusicBrainzObjectDocumentSchema.parse({ kind: objectType, record: input });
+		if (document.kind === "work")
+			vocabulary(
+				"work_type",
+				document.record["type-id"],
+				document.record.type,
+				"/type-id",
+				"/type",
+			);
+		else {
+			credit(document.record["artist-credit"], "/artist-credit");
+			if (document.kind === "release_group") {
+				vocabulary(
+					"release_group_primary_type",
+					document.record["primary-type-id"],
+					document.record["primary-type"],
+					"/primary-type-id",
+					"/primary-type",
+				);
+				const ids = document.record["secondary-type-ids"] ?? [],
+					names = document.record["secondary-types"] ?? [];
+				for (let index = 0; index < Math.max(ids.length, names.length); index++)
+					vocabulary(
+						"release_group_secondary_type",
+						ids[index],
+						names[index],
+						`/secondary-type-ids/${index}`,
+						`/secondary-types/${index}`,
+					);
+			}
+		}
+	}
+	return [...dependencies.values()];
+}
+
+/** @internal Direct human intake materializes references and shares only their exact pending-proposal read scope. */
+export async function prepareMusicBrainzProposalDependencies(
+	outer: DatabaseTransaction,
+	actor: string,
+	input: {
+		proposalId: string;
+		sourceRecordId: string;
+		snapshotId: string;
+		receipt: CatalogSourceReceipt;
+		bytes: Uint8Array;
+	},
+) {
+	const authority = currentParticipationAuthority();
+	if (
+		!authority ||
+		authority.principal.kind !== "auth" ||
+		authority.principal.authUserId !== actor ||
+		authority.grant
+	)
+		throw new ParticipationDenied(
+			"MusicBrainz dependency preparation requires direct human intake authority",
+		);
+	return runParticipationSavepoint(outer, async (tx) => {
+		const observation = await loadCatalogSourceDocument(
+			tx,
+			input.sourceRecordId,
+			input.snapshotId,
+			input.receipt,
+			input.bytes,
+		);
+		if (
+			observation.record.source !== "musicbrainz" ||
+			input.receipt.contractSha256 !== MusicBrainzCatalogContractSha256
+		)
+			throw new TypeError("MusicBrainz dependency document has another source kind");
+		const plan = planMusicBrainzDependencies(
+			observation.record.objectType,
+			JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(input.bytes)),
+		);
+		for (const item of plan)
+			if (observation.referenceAt(item.path).externalId !== sourceKey(item).externalId)
+				throw new TypeError("MusicBrainz dependency identity differs from archived evidence");
+		const prepared = [];
+		for (const [position, item] of plan.entries()) {
+			const path = item.path.slice(0, -3);
+			switch (item.kind) {
+				case "vocabulary":
+					await musicBrainzVocabulary(tx, item.family, item.id, item.name, {
+						actor,
+						observation,
+						idPath: item.path,
+						namePath: item.namePath,
+					});
+					break;
+				case "artist":
+					await musicBrainzArtistReference(tx, actor, observation, item.value, path);
+					break;
+				case "area":
+					await musicBrainzAreaReference(tx, actor, observation, item.value, path);
+					break;
+				case "label":
+					await musicBrainzLabelReference(tx, actor, observation, item.value, path);
+					break;
+				case "recording":
+				case "release_group": {
+					await bindReferencedSourceIdentity(tx, actor, {
+						...sourceKey(item),
+						owner: "music",
+						shape: item.kind,
+						name: item.value.title,
+						evidence: observation.referenceAt(item.path),
+						initialize: async (created) => {
+							if (item.kind === "release_group")
+								await tx.insert(musicReleaseGroup).values({ id: created.id });
+							else
+								await tx.insert(musicRecording).values({
+									id: created.id,
+									lengthMilliseconds: item.value.length ?? null,
+									video: item.value.video ?? null,
+									artistCreditId: await musicBrainzCreditWriter(
+										tx,
+										actor,
+										observation,
+										created,
+									)(item.value["artist-credit"], `${path}/artist-credit`),
+								});
+							return created;
+						},
+					});
+				}
+			}
+			prepared.push(
+				await prepareCatalogSourceProposalDependency(tx, actor, {
+					sourceRecordId: observation.record.id,
+					proposalId: input.proposalId,
+					position,
+					dependencySourceRecordId: catalogSourceRecordId(sourceKey(item)),
+					evidence: observation.referenceAt(item.path),
+				}),
+			);
+		}
+		return prepared;
+	});
+}

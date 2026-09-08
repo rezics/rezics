@@ -26,6 +26,8 @@ export async function bindReferencedSourceIdentity(
 		readonly shape: string;
 		readonly name?: string;
 		readonly evidence: CatalogSourceReferenceEvidence;
+		/** Proposal callbacks resolve prepared correspondences without creating or editing foreign owners. */
+		readonly mode?: "intake" | "prepared";
 		/** Initial owner state must be completed before sealing the pristine-source baseline. */
 		readonly initialize?: (
 			reference: Readonly<CatalogReference & { revision: number }>,
@@ -54,6 +56,10 @@ export async function bindReferencedSourceIdentity(
 		.where(eq(catalogSourceRecord.id, catalogSourceRecordId(key)))
 		.limit(1)
 		.for("share");
+	if (!known && input.mode === "prepared")
+		throw new Error(
+			`Source dependency requires separately authorized intake: ${key.source}/${key.objectType}/${key.externalId}`,
+		);
 	const record = known?.record ?? (await registerCatalogSourceRecord(tx, key));
 	if (
 		record.source !== key.source ||

@@ -1,4 +1,8 @@
 import { catalogSourceSupportColumns } from "./source-support";
+import { and, eq, desc } from "drizzle-orm";
+import { isDeepStrictEqual } from "node:util";
+import { catalogDefinition, catalogDefinitionRevision } from "../database/schema/catalog-identity";
+import { CatalogDefinitionInputSchema } from "./contracts";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import type { DatabaseTransaction } from "../database";
 import type { CatalogReference } from "./contracts";
@@ -20,7 +24,7 @@ import {
 import { beginMusicCredit, appendMusicCreditMembers, sealMusicCredit } from "./domains";
 import { ensureCatalogDefinition, addCatalogName } from "./storage";
 import { bindCatalogNameSourceOccurrence } from "./names";
-import { attachCatalogDefinitionTerm } from "./definition-terms";
+import { attachCatalogDefinitionTerm, readCatalogDefinitionTerm } from "./definition-terms";
 import { bindReferencedSourceIdentity } from "./source-references";
 import { recordMusicSourceComponent } from "./music-source-occurrences";
 import type { recordCatalogSourceDocument } from "./source-observations";
@@ -41,7 +45,13 @@ export async function musicBrainzVocabulary(
 	family: string,
 	id: string | null | undefined,
 	name: string | null | undefined,
-	source?: { actor: string; observation: Observation; idPath: string; namePath: string },
+	source?: {
+		actor: string;
+		observation: Observation;
+		idPath: string;
+		namePath: string;
+		mode?: "intake" | "prepared";
+	},
 ) {
 	const key = id || name;
 	if (!key) return null;
@@ -55,7 +65,7 @@ export async function musicBrainzVocabulary(
 		release_group_secondary_type: "music_release_group_secondary_type.type_revision_id",
 	};
 	const slot = releaseSlots[family];
-	const definition = await ensureCatalogDefinition(tx, {
+	const definitionInput = CatalogDefinitionInputSchema.parse({
 		namespace: `musicbrainz.${family}`,
 		key,
 		kind: "vocabulary",
@@ -80,11 +90,48 @@ export async function musicBrainzVocabulary(
 				}
 			: {}),
 	});
+	const definition =
+		source?.mode === "prepared"
+			? await (async () => {
+					const [row] = await tx
+						.select({
+							definitionId: catalogDefinition.id,
+							revisionId: catalogDefinitionRevision.id,
+							kind: catalogDefinition.kind,
+							valueKind: catalogDefinitionRevision.valueKind,
+							constraints: catalogDefinitionRevision.constraints,
+						})
+						.from(catalogDefinition)
+						.innerJoin(
+							catalogDefinitionRevision,
+							eq(catalogDefinitionRevision.definitionId, catalogDefinition.id),
+						)
+						.where(
+							and(
+								eq(catalogDefinition.namespace, definitionInput.namespace),
+								eq(catalogDefinition.key, definitionInput.key),
+							),
+						)
+						.orderBy(desc(catalogDefinitionRevision.version))
+						.limit(1);
+					if (
+						!row ||
+						row.kind !== definitionInput.kind ||
+						row.valueKind !== definitionInput.valueKind ||
+						!isDeepStrictEqual(row.constraints, definitionInput.constraints)
+					)
+						throw new TypeError(
+							"MusicBrainz vocabulary requires separately prepared exact definition semantics",
+						);
+					return row;
+				})()
+			: await ensureCatalogDefinition(tx, definitionInput);
 	if (source) {
 		const evidence = source.observation.referenceAt(id ? source.idPath : source.namePath);
 		if (name && source.observation.referenceAt(source.namePath).externalId !== name)
 			throw new TypeError("Taxonomy label differs from its recorded source evidence");
 		const concept = await bindReferencedSourceIdentity(tx, source.actor, {
+			mode: source.mode,
 			source: "musicbrainz",
 			objectType: family,
 			externalId: key,
@@ -126,13 +173,72 @@ export async function musicBrainzVocabulary(
 				return { ...created, revision };
 			},
 		});
-		await attachCatalogDefinitionTerm(tx, source.actor, {
-			definitionRevisionId: definition.revisionId,
-			conceptId: concept.id,
-			evidence,
-		});
+		if (source.mode === "prepared") {
+			const linked = await readCatalogDefinitionTerm(tx, source.actor, definition.revisionId);
+			if (linked?.conceptId !== concept.id)
+				throw new TypeError(
+					"MusicBrainz vocabulary requires a separately prepared native concept binding",
+				);
+		} else {
+			await attachCatalogDefinitionTerm(tx, source.actor, {
+				definitionRevisionId: definition.revisionId,
+				conceptId: concept.id,
+				evidence,
+			});
+		}
 	}
 	return definition.revisionId;
+}
+
+/** @internal Materialize an evidenced artist independently of the credit fragment that refers to it. */
+export async function musicBrainzArtistReference(
+	tx: DatabaseTransaction,
+	actor: string,
+	observation: Observation,
+	artist: MusicBrainzCredit[number]["artist"],
+	path: string,
+	mode: "intake" | "prepared" = "intake",
+) {
+	const shape = musicBrainzArtistShape(artist.type);
+	return bindReferencedSourceIdentity(tx, actor, {
+		mode,
+		...musicBrainzSourceKey("artist", artist.id),
+		owner: "entity",
+		shape: "unresolved",
+		name: artist.name,
+		evidence: observation.referenceAt(`${path}/id`),
+		initialize: async (created) => {
+			let revision = created.revision;
+			if (shape !== "unresolved")
+				revision = (await resolveEntityShape(tx, created, actor, revision, shape)).revision;
+			revision = (
+				await initializeEntityProfile(tx, created, actor, revision, {
+					typeRevisionId: await musicBrainzVocabulary(
+						tx,
+						"artist_type",
+						artist["type-id"],
+						artist.type,
+						{
+							actor,
+							observation,
+							idPath: `${path}/type-id`,
+							namePath: `${path}/type`,
+						},
+					),
+				})
+			).revision;
+			revision = await adoptMusicBrainzAliases(
+				tx,
+				actor,
+				created,
+				revision,
+				observation,
+				artist.aliases ?? [],
+				`${path}/aliases`,
+			);
+			return { ...created, revision };
+		},
+	});
 }
 
 /** Cache lifetime is one admitted document; it never grows with the source corpus. */
@@ -141,6 +247,7 @@ export function musicBrainzCreditWriter(
 	actor: string,
 	observation: Observation,
 	createdFor: CatalogReference,
+	mode: "intake" | "prepared" = "intake",
 ) {
 	const cache = new Map<string, string>();
 	return async (members: MusicBrainzCredit | undefined, path: string) => {
@@ -152,45 +259,14 @@ export function musicBrainzCreditWriter(
 		if (cached) return cached;
 		const values = [];
 		for (const [position, member] of members.entries()) {
-			const shape = musicBrainzArtistShape(member.artist.type);
-			const artist = await bindReferencedSourceIdentity(tx, actor, {
-				...musicBrainzSourceKey("artist", member.artist.id),
-				owner: "entity",
-				shape: "unresolved",
-				name: member.artist.name,
-				evidence: observation.referenceAt(`${path}/${position}/artist/id`),
-				initialize: async (created) => {
-					let revision = created.revision;
-					if (shape !== "unresolved")
-						revision = (await resolveEntityShape(tx, created, actor, revision, shape)).revision;
-					revision = (
-						await initializeEntityProfile(tx, created, actor, revision, {
-							typeRevisionId: await musicBrainzVocabulary(
-								tx,
-								"artist_type",
-								member.artist["type-id"],
-								member.artist.type,
-								{
-									actor,
-									observation,
-									idPath: `${path}/${position}/artist/type-id`,
-									namePath: `${path}/${position}/artist/type`,
-								},
-							),
-						})
-					).revision;
-					revision = await adoptMusicBrainzAliases(
-						tx,
-						actor,
-						created,
-						revision,
-						observation,
-						member.artist.aliases ?? [],
-						`${path}/${position}/artist/aliases`,
-					);
-					return { ...created, revision };
-				},
-			});
+			const artist = await musicBrainzArtistReference(
+				tx,
+				actor,
+				observation,
+				member.artist,
+				`${path}/${position}/artist`,
+				mode,
+			);
 			values.push({
 				artist,
 				creditedName: member.name,
@@ -219,8 +295,10 @@ export async function musicBrainzAreaReference(
 	observation: Observation,
 	area: NonNullable<NonNullable<MusicBrainzRelease["release-events"]>[number]["area"]>,
 	path: string,
+	mode: "intake" | "prepared" = "intake",
 ) {
 	return bindReferencedSourceIdentity(tx, actor, {
+		mode,
 		...musicBrainzSourceKey("area", area.id),
 		owner: "reference",
 		shape: "area",
@@ -261,8 +339,10 @@ export async function musicBrainzLabelReference(
 	observation: Observation,
 	label: NonNullable<NonNullable<MusicBrainzRelease["label-info"]>[number]["label"]>,
 	path: string,
+	mode: "intake" | "prepared" = "intake",
 ) {
 	return bindReferencedSourceIdentity(tx, actor, {
+		mode,
 		...musicBrainzSourceKey("label", label.id),
 		owner: "entity",
 		shape: "unresolved",

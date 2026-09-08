@@ -269,3 +269,34 @@ retired identity. These are SQL authorization checks, not UI acceptance.
 Native component writes gather at most 128 credit identities and 256 explicitly
 named history rows. Current reference proofs use owner/component/key head probes;
 no credit-to-whole-catalog reverse scan or unrestricted history search is used.
+
+`musicbrainz-dependencies.ts` now plans at most 128 distinct root references from
+one checked release/work/recording/release-group document. A direct human intake
+transaction materializes the referenced artists, recordings, families, labels,
+areas and vocabulary concepts, then prepares exact pending-proposal read grants.
+The archive owner verifies bytes, receipt, source identity and snapshot before
+planning. Proposal callbacks resolve those dependencies read-only, including
+definition-to-concept links; they never initialize foreign catalog owners or attach
+taxonomy concepts under the root proposal grant. Intake failures roll back the
+whole bounded preparation transaction. Existing private dependencies can be shared
+only by their direct creator under the common dependency policy.
+
+On 2026-09-08 the DB59 delta fixture passed with title/alias changes enabled,
+new artist and recording dependencies, rejection before dependency preparation,
+then native application and repeated compensation. The fixture invokes the
+offline `createMusicBrainzNativeWriter` factory over exact preloaded snapshot IDs
+and archive receipts. It covers release/work/recording/release-group updates;
+supporting endpoint update dispatch and null-before correspondence refresh still
+fail explicitly pending their persisted interpretation writers. Initial referenced
+release-group materialization retains the existing minimal native family header;
+it is not full inline family metadata adoption. The test does not establish those
+remaining semantics or production capacity.
+
+Dependency preparation holds at most one 8 MB source document and 128 distinct
+root reference descriptors. It makes one indexed correspondence/identity lookup
+per dependency and one exact proposal-dependency insert, with no corpus scan.
+Nested recording credits remain bounded by the source document/credit batch
+limits and can materialize their own evidenced artist references during direct
+intake. Very large nested documents need staged admission before operational
+activation. The existing source correspondence, owner partition and 500M/3B
+storage/routing estimates apply; representative skewed load remains unqualified.
