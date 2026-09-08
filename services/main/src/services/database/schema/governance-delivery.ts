@@ -28,6 +28,8 @@ export const governanceReportDelivery = pgTable("governance_report_delivery", {
 	uniqueIndex("governance_report_delivery_dismissal_key").on(table.caseId).where(sql`${table.kind} = 'dismissal'`),
 	uniqueIndex("governance_report_delivery_notice_key").on(table.publicNoticePostId).where(sql`${table.kind} = 'notice'`),
 	index("governance_report_delivery_ready_idx").on(table.shard, table.availableAt, table.id).where(sql`${table.completedAt} is null`),
+	index("governance_report_delivery_shard_idx").on(table.shard, table.id),
+	index("governance_report_delivery_completed_idx").on(table.completedAt, table.id).where(sql`${table.completedAt} is not null`),
 	index("governance_report_delivery_case_idx").on(table.caseId, table.id),
 	index("governance_report_delivery_case_pending_idx").on(table.caseId).where(sql`${table.completedAt} is null`),
 	index("governance_report_delivery_actor_idx").on(table.actorEntityId),

@@ -22,6 +22,7 @@ BEGIN
     RETURN OLD;
   END IF;
 END $$;
+DROP TRIGGER IF EXISTS governance_delivery_referral_guard ON public.content_report_referral;
 CREATE TRIGGER governance_delivery_referral_guard BEFORE INSERT OR UPDATE OR DELETE ON public.content_report_referral
 FOR EACH ROW EXECUTE FUNCTION public.guard_governance_delivery_referral();
 
@@ -44,6 +45,10 @@ BEGIN
     SELECT 1 FROM public.content_governance_action WHERE id=NEW.action_id AND case_id=NEW.case_id AND actor_profile_id=NEW.actor_entity_id
   ) THEN RAISE EXCEPTION 'Delivery action does not belong to the case and operator' USING ERRCODE='23514'; END IF;
   IF TG_OP='INSERT' THEN
+    PERFORM pg_advisory_xact_lock(hashtextextended('governance-delivery-shard:'||NEW.shard::text, 0));
+    IF (SELECT count(*) FROM (SELECT id FROM public.governance_report_delivery WHERE shard=NEW.shard LIMIT 4096) admitted) >= 4096 THEN
+      RAISE EXCEPTION 'Governance delivery shard is full; retry after backlog drains' USING ERRCODE='23514', CONSTRAINT='governance_report_delivery_capacity';
+    END IF;
     PERFORM 1 FROM public.content_review_case WHERE id=NEW.case_id FOR UPDATE;
     IF NEW.after_referral_id IS NOT NULL OR NEW.completed_at IS NOT NULL THEN
       RAISE EXCEPTION 'Delivery starts before its first referral' USING ERRCODE='23514'; END IF;
@@ -52,6 +57,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END $$;
+DROP TRIGGER IF EXISTS governance_report_delivery_guard ON public.governance_report_delivery;
 CREATE TRIGGER governance_report_delivery_guard BEFORE INSERT OR UPDATE ON public.governance_report_delivery
 FOR EACH ROW EXECUTE FUNCTION public.guard_governance_report_delivery();
 
@@ -66,5 +72,6 @@ BEGIN
   IF NOT FOUND THEN RAISE EXCEPTION 'Notice recipient account is unavailable' USING ERRCODE='23514'; END IF;
   RETURN NEW;
 END $$;
+DROP TRIGGER IF EXISTS governance_notice_recipient_guard ON public.governance_notice_recipient;
 CREATE TRIGGER governance_notice_recipient_guard BEFORE INSERT OR UPDATE ON public.governance_notice_recipient
 FOR EACH ROW EXECUTE FUNCTION public.guard_governance_notice_recipient();
