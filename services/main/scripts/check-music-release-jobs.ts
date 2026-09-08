@@ -67,11 +67,15 @@ const bucket = aggregateRoutingBucket("source_record", sourceRecordId);
 const route: StreamRoute = { class: "task", epoch: 1, bucket, maxBytes: 64_000_000, maxMessages: 1000, maxConsumers: 16, deployment: "qualification" };
 const handlers = createMusicReleaseSourceHandlers(db, route, async () => { throw new Error("Unexpected task disposal"); }, archive);
 let sequence = 0;
+const deliveryTimings: { phase: string; status: string; milliseconds: number }[] = [];
 async function deliver(envelope: EventEnvelope) {
 	const handler = handlers.find((candidate) => candidate.kind === envelope.kind);
 	assert.ok(handler);
-	return handler.apply({ envelope, payload: handler.parsePayload(envelope.payload), signal: AbortSignal.timeout(30000),
+	const started = performance.now();
+	const result = await handler.apply({ envelope, payload: handler.parsePayload(envelope.payload), signal: AbortSignal.timeout(30000),
 		delivery: { stream: "fixture", consumer: handler.durable, sequence: ++sequence, deliveryCount: 1, payloadSha256: "0".repeat(64) } });
+	deliveryTimings.push({ phase: envelope.kind, status: result.status, milliseconds: performance.now() - started });
+	return result;
 }
 async function message(jobId: string, generation: number, position: number, phase: "prepare" | "publish") {
 	const [row] = await db.select({ payload: operationalOutbox.payload }).from(operationalOutbox)
@@ -239,7 +243,7 @@ try {
 	assert.equal((await advance(tinyJob.id)).state, "succeeded");
 	const tinyJournal = await asActor(() => db.transaction((tx) => readCatalogSourceApplication(tx, admission.actor, { sourceRecordId, proposalId: tinyProposalId, action: "apply" })));
 	assert.equal(tinyJournal?.changes.filter((change) => change.kind === "music-component").length, 1);
-	console.info(JSON.stringify({ status: "passed", tracks: count, media: mediumCount, physical, captureDirectory, sourceEvidence: captured ? "captured initial profiles; simulated update/withdrawal" : "synthetic source fixture", multipart: Boolean(captureDirectory || process.env.REZICS_MUSIC_RELEASE_MULTIPART === "1"), dependencyRows: dependencies.length, initialJobId: initial.id, applyJobId: appliedJob.id,
+	console.info(JSON.stringify({ status: "passed", tracks: count, media: mediumCount, physical, captureDirectory, sourceEvidence: captured ? "captured initial profiles; simulated update/withdrawal" : "synthetic source fixture", multipart: Boolean(captureDirectory || process.env.REZICS_MUSIC_RELEASE_MULTIPART === "1"), dependencyRows: dependencies.length, initialJobId: initial.id, applyJobId: appliedJob.id, deliveryTimings,
 		checks: ["initial background adoption", "pause before preparation", "260 dependency references paged", "no partial root visibility", "reorder across 128 boundaries", "mid-publication rollback", "resume prepared publication", "complete exact journal", "withdrawal", "revoked authority", "one-change large snapshot"] }));
 } finally {
 	await pool.end();
