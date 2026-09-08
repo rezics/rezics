@@ -60,7 +60,7 @@ END $$;
 
 CREATE OR REPLACE FUNCTION public.catalog_structure_source_guard_occurrence()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
-DECLARE root public.catalog_source_binding_revision%ROWTYPE; native record; shape_name text; parent_id uuid; definition_id uuid; field_name text; expected_shape text;
+DECLARE root public.catalog_source_binding_revision%ROWTYPE; native record; shape_name text; parent_id uuid; source_definition_id uuid; field_name text; expected_shape text;
 BEGIN
   IF TG_ARGV[0] NOT IN ('program','publishing') OR NEW.component NOT LIKE TG_ARGV[0]||'_%' OR NEW.component_key<>NEW.owner_id::text
     OR NOT public.catalog_structure_source_projection_valid(NEW.component,NEW.source_value,NEW.observed_fields) THEN
@@ -78,8 +78,8 @@ BEGIN
     IF shape_name<>expected_shape THEN RAISE EXCEPTION 'Structure source parent has another native shape' USING ERRCODE='23514'; END IF;
   END LOOP;
   FOREACH field_name IN ARRAY ARRAY['typeRevisionId','versionTypeRevisionId','methodRevisionId','statusRevisionId'] LOOP
-    definition_id:=(NEW.source_value->'fields'->>field_name)::uuid;
-    IF definition_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM public.catalog_definition_revision r JOIN public.catalog_definition d ON d.id=r.definition_id WHERE r.id=definition_id AND d.kind='vocabulary') THEN
+    source_definition_id:=(NEW.source_value->'fields'->>field_name)::uuid;
+    IF source_definition_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM public.catalog_definition_revision r JOIN public.catalog_definition d ON d.id=r.definition_id WHERE r.id=source_definition_id AND d.kind='vocabulary') THEN
       RAISE EXCEPTION 'Structure source type or method requires an exact vocabulary revision' USING ERRCODE='23514';
     END IF;
   END LOOP;
