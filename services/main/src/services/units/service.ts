@@ -31,7 +31,7 @@ import { toSafeInteger } from "../database/integer";
 import {
 	accountPreference,
 	audio,
-	entity,
+	entityIdentity,
 	subjectAssociation,
 	subjectAssociationJudgment,
 	subjectAssociationJudgmentStat,
@@ -192,7 +192,9 @@ export async function createTimedMediaUnit(
 	const authUserId = authorization.authUserId;
 	if (
 		input.durationSeconds != null &&
-		(!Number.isSafeInteger(input.durationSeconds) || input.durationSeconds <= 0)
+		(!Number.isSafeInteger(input.durationSeconds) ||
+			input.durationSeconds <= 0 ||
+			input.durationSeconds > 2147483647)
 	)
 		throw new ValidationError({ details: { durationSeconds: "must be a positive integer" } });
 	if (input.owner === "video" && input.adaptedAudioUnitIds?.length)
@@ -315,7 +317,7 @@ export async function getUnit(
 		.select({
 			id: subjectAssociation.id,
 			entityEntryId: subjectAssociation.entityId,
-			entityKind: entity.kind,
+			entityKind: entityIdentity.shape,
 			role: subjectAssociation.role,
 			position: subjectAssociation.position,
 			language: resolvedUnitLocalizationLanguage(
@@ -344,7 +346,7 @@ export async function getUnit(
 				: sql<number | null>`null`,
 		})
 		.from(subjectAssociation)
-		.innerJoin(entity, eq(entity.id, subjectAssociation.entityId))
+		.innerJoin(entityIdentity, eq(entityIdentity.id, subjectAssociation.entityId))
 		.leftJoin(
 			subjectAssociationJudgmentStat,
 			eq(subjectAssociationJudgmentStat.associationId, subjectAssociation.id),
