@@ -4,7 +4,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { SOURCE_DOCUMENT_BYTE_LIMIT, MUSIC_SOURCE_AUXILIARY_ROW_LIMIT } from "../src/services/database/schema/catalog-source-limits";
 import { musicBrainzReleaseAuxiliaryRows } from "../src/services/catalog/musicbrainz-release-plan";
-import { musicBrainzReleaseAcquisitionProfiles, normalizeMusicBrainzReleaseBundle } from "../src/services/catalog/musicbrainz-release-bundle";
+import { boundedSourceJson, musicBrainzReleaseAcquisitionProfiles, normalizeMusicBrainzReleaseBundle } from "../src/services/catalog/musicbrainz-release-bundle";
 
 const id = process.env.REZICS_MUSICBRAINZ_BUNDLE_RELEASE_ID ?? "d996abaa-ce14-45c7-944a-9c62adee19fe";
 const parts: Partial<Record<"tracks" | "media" | "metadata", Uint8Array>> = {};
@@ -24,6 +24,14 @@ for (const profile of musicBrainzReleaseAcquisitionProfiles(id)) {
 }
 if (!parts.tracks || !parts.media || !parts.metadata) throw new Error("Missing raw profile");
 const normalized = normalizeMusicBrainzReleaseBundle(id, { tracks: parts.tracks, media: parts.media, metadata: parts.metadata });
+const normalizationMemory = process.memoryUsage();
+function jsonNodes(bytes: Uint8Array) {
+	const stack = [boundedSourceJson(bytes)]; let count = 0;
+	while (stack.length) { const value = stack.pop(); count++; if (value !== null && typeof value === "object") for (const child of Object.values(value)) stack.push(child); }
+	return count;
+}
+const profileNodes = (["tracks", "media", "metadata"] as const).map((key): { profile: string; nodes: number } => ({ profile: key, nodes: jsonNodes(parts[key]!) }));
+profileNodes.push({ profile: "native_view", nodes: jsonNodes(normalized.bytes) });
 const initialAuxiliaryRows = musicBrainzReleaseAuxiliaryRows(null, normalized.document);
 if (initialAuxiliaryRows > MUSIC_SOURCE_AUXILIARY_ROW_LIMIT) throw new RangeError(`Initial auxiliary writes exceed the publication budget: ${initialAuxiliaryRows}`);
 let captureDirectory: string | undefined;
@@ -35,7 +43,7 @@ if (process.env.REZICS_MUSICBRAINZ_BUNDLE_CAPTURE === "1") {
 }
 console.info(JSON.stringify({ id, raw: sizes, normalizedBytes: normalized.bytes.byteLength, nativeSha256: createHash("sha256").update(normalized.bytes).digest("hex"),
 	media: normalized.document.media.length, tracks: normalized.document.media.reduce((sum, medium) => sum + (medium.tracks?.length ?? 0), 0),
-	rssBefore, rssAfterNormalization: process.memoryUsage().rss, heapAfterNormalization: process.memoryUsage().heapUsed,
+	rssBefore, rssAfterNormalization: normalizationMemory.rss, heapAfterNormalization: normalizationMemory.heapUsed, profileNodes,
 	initialAuxiliaryRows, acquisitionAndNormalizationMs: performance.now() - started,
 	captureDirectory,
 	observationScope: "independent HTTP profiles with validated overlaps; not an upstream atomic snapshot" }));
