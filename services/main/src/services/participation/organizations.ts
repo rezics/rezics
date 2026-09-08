@@ -7,6 +7,7 @@ import { participationGrant, participationGrantEvent } from "../database/schema/
 import { createParticipantIdentity } from "./identity";
 import { reserveParticipationGrantCapacity } from "./lifecycle";
 import { ParticipationDenied, requireParticipation, type ParticipationAuthority } from "./policy";
+import { publicEntityName } from "./presentation";
 
 export const CreateManagedOrganizationSchema = z.strictObject({
 	name: z.string().trim().min(1).max(120),
@@ -71,6 +72,7 @@ export async function listManagedOrganizations(
 	const rows = await tx
 		.select({
 			entityId: entityIdentity.id,
+			name: publicEntityName(entityIdentity.id),
 			grantId: participationGrant.id,
 			revision: participationGrant.revision,
 		})

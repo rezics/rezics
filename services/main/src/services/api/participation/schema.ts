@@ -49,7 +49,14 @@ export const ParticipationGrantsSchema = z.strictObject({
 	nextCursor: z.uuid().nullable(),
 });
 export const ManagedOrganizationsSchema = z.strictObject({
-	items: z.array(z.strictObject({ entityId: z.uuid(), grantId: z.uuid(), revision })),
+	items: z.array(
+		z.strictObject({
+			entityId: z.uuid(),
+			name: z.string().nullable(),
+			grantId: z.uuid(),
+			revision,
+		}),
+	),
 	nextCursor: z.uuid().nullable(),
 });
 export const CreatedOrganizationSchema = z.strictObject({
