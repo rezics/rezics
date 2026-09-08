@@ -1,10 +1,12 @@
-import type { GetApiUnitsBookByUnitIdContentStructureNodesStatus200 } from "@rezics/openapi-tanstack-query";
+import type { ListTextVersionContentNodesStatus200 } from "@rezics/openapi-tanstack-query";
 import { generateKeyBetween } from "fractional-indexing";
 
-type RemoteContentStructureNode =
-	GetApiUnitsBookByUnitIdContentStructureNodesStatus200["items"][number];
+type RemoteContentStructureNode = ListTextVersionContentNodesStatus200["items"][number];
 
-export type ContentStructureNode = Omit<RemoteContentStructureNode, "contentMetrics">;
+export type ContentStructureNode = Pick<
+	RemoteContentStructureNode,
+	"id" | "parentId" | "contentUnitId" | "contentKind" | "language" | "title" | "position"
+> & { readonly languageTag?: string | null };
 
 type PositionedContentStructureNode = {
 	readonly id: string;

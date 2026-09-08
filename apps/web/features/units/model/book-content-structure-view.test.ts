@@ -12,7 +12,7 @@ type TestNode = {
 	readonly id: string;
 	readonly title: string;
 	readonly language: "en";
-	readonly contentKind: "book" | "chapter" | "label";
+	readonly contentKind: "text_version" | "chapter" | "label";
 };
 
 function entry(
@@ -47,18 +47,20 @@ describe("book content structure presentation kinds", () => {
 	});
 
 	it("counts Book occurrences separately from chapters", () => {
-		const book = entry("book", "book", [entry("explicit-child", "chapter")]);
+		const book = entry("text_version", "text_version", [entry("explicit-child", "chapter")]);
 		expect(countBookStructureDisplayedKinds([book])).toEqual({
 			bookCount: 1,
 			chapterCount: 1,
 			labelCount: 0,
 		});
-		expect(collectBookStructureExpandableIds([book])).toEqual(["book"]);
+		expect(collectBookStructureExpandableIds([book])).toEqual(["text_version"]);
 		expect(
 			flattenVisibleBookStructureTree([book], new Set()).map(({ entry }) => entry.node.id),
-		).toEqual(["book"]);
+		).toEqual(["text_version"]);
 		expect(
-			flattenVisibleBookStructureTree([book], new Set(["book"])).map(({ entry }) => entry.node.id),
-		).toEqual(["book", "explicit-child"]);
+			flattenVisibleBookStructureTree([book], new Set(["text_version"])).map(
+				({ entry }) => entry.node.id,
+			),
+		).toEqual(["text_version", "explicit-child"]);
 	});
 });

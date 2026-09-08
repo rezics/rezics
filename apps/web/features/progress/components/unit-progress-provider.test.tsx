@@ -93,8 +93,8 @@ vi.mock("@rezics/openapi-tanstack-query", async (importOriginal) => {
 			reset: actions.resetRemoveProgress,
 		}),
 		useGetApiProgressByUnitId: () => queryResults.progress,
-		useGetApiUnitsBookByUnitIdContentStructureNodes: () => queryResults.chapters,
-		useGetApiUnitsMediaByUnitIdContentStructureNodes: () => queryResults.mediaItems,
+		useListTextVersionContentNodes: () => queryResults.chapters,
+		useListProgramContentNodes: () => queryResults.mediaItems,
 		usePostApiProgressByUnitIdComplete: () => ({
 			error: undefined,
 			mutateAsync: actions.completeProgress,

@@ -1,4 +1,4 @@
-import type { GetApiUnitsMediaByUnitIdContentStructureNodesStatus200 } from "@rezics/openapi-tanstack-query";
+import type { ListProgramContentNodesStatus200 } from "@rezics/openapi-tanstack-query";
 
 import {
 	buildContentStructureTree,
@@ -6,7 +6,10 @@ import {
 } from "@/features/units/content-structure-tree";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 
-type MediaContentNode = GetApiUnitsMediaByUnitIdContentStructureNodesStatus200["items"][number];
+type MediaContentNode = Pick<
+	ListProgramContentNodesStatus200["items"][number],
+	"id" | "parentId" | "position" | "contentKind" | "durationSeconds"
+>;
 
 export interface MediaItemProgressEstimate {
 	readonly id: string;

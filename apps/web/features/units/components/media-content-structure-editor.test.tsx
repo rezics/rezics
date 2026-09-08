@@ -1,9 +1,9 @@
 /** @vitest-environment jsdom */
 
 import type {
-	GetApiUnitsMediaByUnitIdContentStructureNodesStatus200,
-	PutApiUnitsMediaByUnitIdContentStructureOptions,
-	PutApiUnitsMediaByUnitIdContentStructureStatus200,
+	ListProgramContentNodesStatus200,
+	SaveProgramContentDraftOptions,
+	SaveProgramContentDraftStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { resources } from "@rezics/i18n/resources";
 import { UiProvider } from "@rezics/ui";
@@ -30,13 +30,10 @@ const state = vi.hoisted(() => ({
 	push: vi.fn(),
 }));
 
-function savedResponse(
-	options: PutApiUnitsMediaByUnitIdContentStructureOptions,
-): PutApiUnitsMediaByUnitIdContentStructureStatus200 {
+function savedResponse(options: SaveProgramContentDraftOptions): SaveProgramContentDraftStatus200 {
 	const node = options.body.nodes.at(-1);
 	if (!node || node.state !== "new") throw new Error("Expected a newly inserted node");
 	return {
-		state: "initialized",
 		structureId: ids.structure,
 		latestRevisionId: ids.revision,
 		revisionCreated: true,
@@ -45,6 +42,9 @@ function savedResponse(
 				id: node.id,
 				parentId: node.parentId,
 				contentUnitId: ids.createdUnit,
+				reference: { owner: node.contentKind, id: ids.createdUnit, shape: node.contentKind },
+				languageTag: node.language,
+				contentMetrics: null,
 				contentKind: node.contentKind,
 				language: node.language,
 				title: node.title,
@@ -66,7 +66,7 @@ vi.mock("@rezics/openapi-tanstack-query", async () => {
 	);
 	return {
 		...actual,
-		usePutApiUnitsMediaByUnitIdContentStructure: () => ({
+		useSaveProgramContentDraft: () => ({
 			error: null,
 			isPending: false,
 			mutateAsync: state.mutateAsync,
@@ -91,8 +91,8 @@ vi.mock("@/features/application-shell/components/app-link", () => ({
 	AppLink: (props: ComponentProps<"a">) => <a {...props} />,
 }));
 
-vi.mock("./unit-section-header", () => ({
-	UnitSectionHeader: ({
+vi.mock("./native-content-structure-header", () => ({
+	NativeContentStructureHeader: ({
 		action,
 		description,
 		title,
@@ -139,9 +139,10 @@ const translation = await create(resources).getTranslation(
 );
 
 const initial = {
-	state: "uninitialized",
+	structureId: null,
+	latestRevisionId: null,
 	items: [],
-} satisfies GetApiUnitsMediaByUnitIdContentStructureNodesStatus200;
+} satisfies ListProgramContentNodesStatus200;
 
 function renderEditor() {
 	return render(
@@ -157,9 +158,8 @@ beforeEach(() => {
 	state.invalidate.mockClear();
 	state.mutateAsync.mockReset();
 	state.mutateAsync.mockImplementation(
-		async (
-			options: PutApiUnitsMediaByUnitIdContentStructureOptions,
-		): Promise<PutApiUnitsMediaByUnitIdContentStructureStatus200> => savedResponse(options),
+		async (options: SaveProgramContentDraftOptions): Promise<SaveProgramContentDraftStatus200> =>
+			savedResponse(options),
 	);
 	state.reset.mockClear();
 	state.push.mockClear();

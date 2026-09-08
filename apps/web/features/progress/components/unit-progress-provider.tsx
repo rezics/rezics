@@ -5,8 +5,8 @@ import {
 	type GetApiProgressByUnitIdStatus200,
 	useDeleteApiProgressByUnitId,
 	useGetApiProgressByUnitId,
-	useGetApiUnitsBookByUnitIdContentStructureNodes,
-	useGetApiUnitsMediaByUnitIdContentStructureNodes,
+	useListTextVersionContentNodes,
+	useListProgramContentNodes,
 	usePostApiProgressByUnitIdComplete,
 	usePutApiProgressByUnitId,
 } from "@rezics/openapi-tanstack-query";
@@ -107,11 +107,11 @@ export function UnitProgressProvider({
 		{ path: { unitId: domain.unitId } },
 		{ query: { enabled: authenticated } },
 	);
-	const chaptersQuery = useGetApiUnitsBookByUnitIdContentStructureNodes(
+	const chaptersQuery = useListTextVersionContentNodes(
 		{ path: { unitId: domain.unitId }, query: { localizationLanguages } },
 		{ query: { enabled: authenticated && domain.type === "book" } },
 	);
-	const mediaItemsQuery = useGetApiUnitsMediaByUnitIdContentStructureNodes(
+	const mediaItemsQuery = useListProgramContentNodes(
 		{ path: { unitId: domain.unitId }, query: { localizationLanguages } },
 		{ query: { enabled: authenticated && domain.type === "media" } },
 	);
@@ -133,7 +133,7 @@ export function UnitProgressProvider({
 		reset: resetRemoveProgress,
 	} = useDeleteApiProgressByUnitId();
 	const queryClient = useQueryClient();
-	const { t } = useTranslation(["engagement"]);
+	const { t } = useTranslation(["engagement", "ui"]);
 	const [editorOpen, setEditorOpen] = useState(initialEditorOpen);
 	const [completionPreview, setCompletionPreview] = useState<UnitProgressRecord>();
 	const [completionFeedbackCount, setCompletionFeedbackCount] = useState<number>();
@@ -164,13 +164,13 @@ export function UnitProgressProvider({
 				? [
 						{
 							id: estimate.id,
-							title,
+							title: title ?? t.ui.unnamed,
 							estimatedPercentage: estimate.percentage,
 						},
 					]
 				: [];
 		});
-	}, [chaptersQuery.data?.items]);
+	}, [chaptersQuery.data?.items, t.ui.unnamed]);
 	const mediaItems = useMemo(() => {
 		const nodes = mediaItemsQuery.data?.items ?? [];
 		const titleById = new Map(nodes.map((node) => [node.id, node.title]));
@@ -180,13 +180,13 @@ export function UnitProgressProvider({
 				? [
 						{
 							id: estimate.id,
-							title,
+							title: title ?? t.ui.unnamed,
 							estimatedPercentage: estimate.percentage,
 						},
 					]
 				: [];
 		});
-	}, [mediaItemsQuery.data?.items]);
+	}, [mediaItemsQuery.data?.items, t.ui.unnamed]);
 	const contentStructureNodes =
 		domain.type === "book"
 			? chapters

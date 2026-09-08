@@ -2,10 +2,10 @@
 
 import {
 	getApiProgressByUnitIdNodesQueryKey,
-	type GetApiUnitsMediaByUnitIdContentStructureNodesStatus200,
+	type ListProgramContentNodesStatus200,
 	useDeleteApiProgressByUnitIdNodesByNodeId,
 	useGetApiProgressByUnitIdNodes,
-	useGetApiUnitsMediaByUnitIdContentStructureNodes,
+	useListProgramContentNodes,
 	usePutApiProgressByUnitIdNodesByNodeId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
@@ -38,9 +38,8 @@ import {
 	BookContentStructureRowFrame,
 	VirtualizedBookContentStructureRows,
 } from "./book-content-structure-list";
-import { unitDetailHref } from "../routing/unit-detail-routes";
 
-type MediaNode = GetApiUnitsMediaByUnitIdContentStructureNodesStatus200["items"][number];
+type MediaNode = ListProgramContentNodesStatus200["items"][number];
 
 function formatDuration(value: string | number | null): string | undefined {
 	if (value === null) return undefined;
@@ -59,7 +58,7 @@ export function MediaContents({ mediaId }: { readonly mediaId: string }) {
 	const { data: session } = useHydratedSession();
 	const queryClient = useQueryClient();
 	const localizationLanguages = useLocalizationLanguages();
-	const structure = useGetApiUnitsMediaByUnitIdContentStructureNodes({
+	const structure = useListProgramContentNodes({
 		path: { unitId: mediaId },
 		query: { localizationLanguages },
 	});
@@ -153,7 +152,10 @@ function MediaContentsList({
 			items.reduce(
 				(result, node) => ({
 					...result,
-					[node.contentKind]: result[node.contentKind] + 1,
+					media: result.media + (node.contentKind === "program" ? 1 : 0),
+					video: result.video + (node.contentKind === "video" ? 1 : 0),
+					audio: result.audio + (node.contentKind === "audio" ? 1 : 0),
+					label: result.label + (node.contentKind === "label" ? 1 : 0),
 				}),
 				{ media: 0, video: 0, audio: 0, label: 0 },
 			),
@@ -209,7 +211,7 @@ function MediaContentsList({
 						const expanded = expandedIds.has(node.id);
 						const completed = completedNodeIds.has(node.id);
 						const Icon =
-							node.contentKind === "media"
+							node.contentKind === "program"
 								? Film
 								: node.contentKind === "video"
 									? Video
@@ -230,7 +232,9 @@ function MediaContentsList({
 												)}
 											/>
 										) : null}
-										<span className="truncate font-heading font-semibold">{node.title}</span>
+										<span className="truncate font-heading font-semibold">
+											{node.title || t.ui.unnamed}
+										</span>
 									</span>
 									<span className="mt-2 flex gap-4 text-sm text-muted-foreground">
 										{label
@@ -276,8 +280,8 @@ function MediaContentsList({
 										<Link
 											className="flex min-w-0 flex-1 items-center gap-3 self-stretch"
 											href={
-												node.contentKind === "media"
-													? unitDetailHref("media", node.contentUnitId)
+												node.contentKind === "program"
+													? `/catalog/program/${node.contentUnitId}`
 													: `/units/${node.contentKind}/${node.contentUnitId}`
 											}
 										>

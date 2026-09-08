@@ -2,10 +2,10 @@
 
 import {
 	getApiProgressByUnitIdNodesQueryKey,
-	type GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
+	type ListTextVersionContentNodesStatus200,
 	useDeleteApiProgressByUnitIdNodesByNodeId,
 	useGetApiProgressByUnitIdNodes,
-	useGetApiUnitsBookByUnitIdContentStructureNodes,
+	useListTextVersionContentNodes,
 	usePutApiProgressByUnitIdNodesByNodeId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
@@ -31,7 +31,7 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { buildContentStructureTree } from "../content-structure-tree";
-import { bookReaderHref, unitDetailHref } from "../routing/unit-detail-routes";
+import { bookReaderHref } from "../routing/unit-detail-routes";
 import {
 	collectBookStructureExpandableIds,
 	countBookStructureDisplayedKinds,
@@ -51,7 +51,7 @@ import {
 } from "./book-content-structure-list";
 import { UnitShareDialog } from "./unit-share-action";
 
-type BookStructureResponse = GetApiUnitsBookByUnitIdContentStructureNodesStatus200;
+type BookStructureResponse = ListTextVersionContentNodesStatus200;
 type BookStructureNode = BookStructureResponse["items"][number];
 
 type ShareTarget = {
@@ -64,7 +64,7 @@ export function BookContents({ bookId }: { readonly bookId: string }) {
 	const { data: session } = useHydratedSession();
 	const queryClient = useQueryClient();
 	const localizationLanguages = useLocalizationLanguages();
-	const structure = useGetApiUnitsBookByUnitIdContentStructureNodes({
+	const structure = useListTextVersionContentNodes({
 		path: { unitId: bookId },
 		query: { localizationLanguages },
 	});
@@ -267,6 +267,7 @@ function BookContentsList({
 									expanded={expanded}
 									label={displayAsLabel}
 									language={node.language}
+									languageTag={node.languageTag}
 									metadataAfter={
 										displayAsLabel ? null : (
 											<BookContentStructureChapterViewMetric label={t.units.content.views} />
@@ -310,8 +311,8 @@ function BookContentsList({
 											<Link
 												className={mainClassName}
 												href={
-													node.contentKind === "book"
-														? unitDetailHref("book", node.contentUnitId)
+													node.contentKind === "text_version"
+														? `/catalog/publishing/${node.contentUnitId}`
 														: bookReaderHref(bookId, node.id)
 												}
 											>
@@ -356,8 +357,8 @@ function BookContentsList({
 													setShareTarget({
 														href: displayAsLabel
 															? `/units/book/${bookId}/contents#content-node-${encodeURIComponent(node.id)}`
-															: node.contentKind === "book"
-																? unitDetailHref("book", node.contentUnitId)
+															: node.contentKind === "text_version"
+																? `/catalog/publishing/${node.contentUnitId}`
 																: bookReaderHref(bookId, node.id),
 														unitId: node.contentUnitId,
 													})
@@ -415,8 +416,8 @@ function indexOwnContentMetrics(
 		nodes.map((node) => [
 			node.id,
 			{
-				wordCount: toNonNegativeApiInteger(node.contentMetrics.wordCount),
-				characterCount: toNonNegativeApiInteger(node.contentMetrics.characterCount),
+				wordCount: toNonNegativeApiInteger(node.contentMetrics?.wordCount),
+				characterCount: toNonNegativeApiInteger(node.contentMetrics?.characterCount),
 			},
 		]),
 	);

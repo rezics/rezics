@@ -1,14 +1,13 @@
 "use client";
 
 import {
-	useGetApiUnitsBookByUnitIdContentStructureNodes,
-	useGetApiUnitsMediaByUnitIdContentStructureNodes,
+	useReadCatalogResource,
+	useListTextVersionContentNodes,
+	useListProgramContentNodes,
 } from "@rezics/openapi-tanstack-query";
 import { ManagementWorkspaceSectionHeader, QueryFailure, QueryPending } from "@rezics/ui";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
-import { useUnitManagement } from "@/features/units/components/unit-management-workspace";
-import { unitManagementSectionHref } from "@/features/units/routing/unit-management-routes";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { ContentStructureRevisionHistory } from "../components/content-structure-revision-history";
@@ -21,42 +20,57 @@ type ContentStructureHistorySource =
 			readonly structureId: string;
 	  };
 
-export function ContentStructureHistoryPage() {
-	const { t } = useTranslation(["errors"]);
-	const { type, unit } = useUnitManagement();
+export function ContentStructureHistoryPage({
+	owner,
+	unitId,
+}: {
+	owner: "publishing" | "program";
+	unitId: string;
+}) {
+	const resource = useReadCatalogResource({ path: { owner, id: unitId } });
 	const localizationLanguages = useLocalizationLanguages();
-	const bookQuery = useGetApiUnitsBookByUnitIdContentStructureNodes(
+	const bookQuery = useListTextVersionContentNodes(
 		{
-			path: { unitId: unit.id },
+			path: { unitId: unitId },
 			query: { localizationLanguages },
 		},
-		{ query: { enabled: type === "book" } },
+		{ query: { enabled: owner === "publishing" } },
 	);
-	const mediaQuery = useGetApiUnitsMediaByUnitIdContentStructureNodes(
+	const mediaQuery = useListProgramContentNodes(
 		{
-			path: { unitId: unit.id },
+			path: { unitId: unitId },
 			query: { localizationLanguages },
 		},
-		{ query: { enabled: type === "media" } },
+		{ query: { enabled: owner === "program" } },
 	);
-	if ((type !== "book" && type !== "media") || !unit.capabilities.canEdit)
-		return <p className="text-sm text-destructive">{t.errors.forbidden}</p>;
-	if (type === "book") {
+
+	if (resource.isPending) return <QueryPending />;
+	if (resource.isError)
+		return <QueryFailure error={resource.error} retry={() => void resource.refetch()} />;
+
+	if (owner === "publishing") {
 		if (bookQuery.isPending) return <QueryPending />;
 		if (bookQuery.isError)
 			return <QueryFailure error={bookQuery.error} retry={() => void bookQuery.refetch()} />;
 		if (!bookQuery.data.structureId || !bookQuery.data.latestRevisionId)
-			return <p className="text-sm text-destructive">{t.errors.invalid}</p>;
+			return (
+				<ContentStructureHistoryView
+					canRestore={resource.data.canEdit}
+					source={{ kind: "uninitialized" }}
+					owner={owner}
+					unitId={unitId}
+				/>
+			);
 		return (
 			<ContentStructureHistoryView
-				canRestore={unit.capabilities.canEdit}
+				canRestore={resource.data.canEdit}
 				source={{
 					kind: "initialized",
 					latestRevisionId: bookQuery.data.latestRevisionId,
 					structureId: bookQuery.data.structureId,
 				}}
-				type={type}
-				unitId={unit.id}
+				owner={owner}
+				unitId={unitId}
 			/>
 		);
 	}
@@ -65,9 +79,9 @@ export function ContentStructureHistoryPage() {
 		return <QueryFailure error={mediaQuery.error} retry={() => void mediaQuery.refetch()} />;
 	return (
 		<ContentStructureHistoryView
-			canRestore={unit.capabilities.canEdit}
+			canRestore={resource.data.canEdit}
 			source={
-				mediaQuery.data.state === "initialized"
+				mediaQuery.data.structureId !== null && mediaQuery.data.latestRevisionId !== null
 					? {
 							kind: "initialized",
 							latestRevisionId: mediaQuery.data.latestRevisionId,
@@ -75,8 +89,8 @@ export function ContentStructureHistoryPage() {
 						}
 					: { kind: "uninitialized" }
 			}
-			type={type}
-			unitId={unit.id}
+			owner={owner}
+			unitId={unitId}
 		/>
 	);
 }
@@ -84,19 +98,19 @@ export function ContentStructureHistoryPage() {
 function ContentStructureHistoryView({
 	canRestore,
 	source,
-	type,
+	owner,
 	unitId,
 }: {
 	readonly canRestore: boolean;
 	readonly source: ContentStructureHistorySource;
-	readonly type: "book" | "media";
+	readonly owner: "publishing" | "program";
 	readonly unitId: string;
 }) {
 	const { t } = useTranslation(["history", "units"]);
 	return (
 		<section>
 			<ManagementWorkspaceSectionHeader
-				backHref={unitManagementSectionHref(type, unitId, "content-structure")}
+				backHref={`/catalog/${owner}/${unitId}/contents`}
 				backLabel={t.units.chapter.backToStructure}
 				description={t.history.description}
 				link={Link}

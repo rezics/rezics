@@ -11,7 +11,6 @@ import {
 	EntityPicker,
 	type EntityPickerValue,
 	Field,
-	FieldDescription,
 	FieldLabel,
 	Input,
 	NativeSelect,
@@ -34,7 +33,7 @@ import {
 } from "./book-content-structure-destination-dialog";
 
 export type BookContentNodeDialogRequest = {
-	readonly kind: "book" | "chapter" | "label";
+	readonly kind: "text_version" | "chapter" | "label";
 	readonly destination: BookStructureDestination;
 };
 
@@ -55,7 +54,7 @@ type DialogInput = {
 	readonly mode: "create" | "attach";
 	readonly create: {
 		readonly title: string;
-		readonly ownershipMode: "book_default" | WorkOwnershipMode;
+		readonly ownershipMode: WorkOwnershipMode;
 	};
 	readonly attach: { readonly unit?: EntityPickerValue };
 };
@@ -63,7 +62,7 @@ type DialogInput = {
 function isChapterOwnershipSelection(
 	value: string,
 ): value is DialogInput["create"]["ownershipMode"] {
-	return value === "book_default" || value === "profile_owned" || value === "community_owned";
+	return value === "profile_owned" || value === "community_owned";
 }
 
 function isDialogMode(value: string): value is DialogInput["mode"] {
@@ -80,7 +79,6 @@ function destinationLabel(
 }
 
 export function BookContentNodeDialog({
-	bookOwnershipMode,
 	error,
 	nodes,
 	ownerUnitId,
@@ -91,7 +89,6 @@ export function BookContentNodeDialog({
 	unsavedChanges,
 }: {
 	readonly error: unknown;
-	readonly bookOwnershipMode: WorkOwnershipMode;
 	readonly nodes: readonly BookDraftNode[];
 	readonly ownerUnitId: string;
 	readonly onClose: () => void;
@@ -103,8 +100,8 @@ export function BookContentNodeDialog({
 	const { t } = useTranslation(["engagement", "units", "ui"]);
 	const formId = useId();
 	const [input, setInput] = useState<DialogInput>({
-		mode: request.kind === "book" ? "attach" : "create",
-		create: { title: "", ownershipMode: "book_default" },
+		mode: request.kind === "text_version" ? "attach" : "create",
+		create: { title: "", ownershipMode: "profile_owned" },
 		attach: {},
 	});
 	const [destination, setDestination] = useState<BookStructureDestination>(request.destination);
@@ -112,13 +109,13 @@ export function BookContentNodeDialog({
 	const excludedUnitIds = useMemo(() => new Set([ownerUnitId]), [ownerUnitId]);
 	const contentKind = request.kind;
 	const title =
-		contentKind === "book"
+		contentKind === "text_version"
 			? t.units.content.addBook
 			: contentKind === "chapter"
 				? t.units.content.addChapter
 				: t.units.content.addLabel;
 	const description =
-		contentKind === "book"
+		contentKind === "text_version"
 			? t.units.content.addBookDescription
 			: contentKind === "chapter"
 				? t.units.content.addChapterDescription
@@ -128,19 +125,15 @@ export function BookContentNodeDialog({
 			? contentKind === "chapter"
 				? t.units.content.createChapterAndSave
 				: t.units.content.createLabelAndSave
-			: contentKind === "book"
+			: contentKind === "text_version"
 				? t.units.content.attachBookAndSave
 				: contentKind === "chapter"
 					? t.units.content.attachChapterAndSave
 					: t.units.content.attachLabelAndSave;
 	const canSubmit =
 		input.mode === "create"
-			? contentKind !== "book" && Boolean(input.create.title.trim())
+			? contentKind !== "text_version" && Boolean(input.create.title.trim())
 			: Boolean(input.attach.unit);
-	const defaultOwnershipLabel =
-		bookOwnershipMode === "community_owned"
-			? t.units.content.communityOwnedChapter
-			: t.units.content.profileOwnedChapter;
 
 	return (
 		<>
@@ -159,16 +152,14 @@ export function BookContentNodeDialog({
 							onSubmit={(event) => {
 								event.preventDefault();
 								if (pending) return;
-								if (input.mode === "create" && contentKind !== "book") {
+								if (input.mode === "create" && contentKind !== "text_version") {
 									const normalizedTitle = input.create.title.trim();
 									if (normalizedTitle)
 										onSubmit({
 											mode: "create",
 											title: normalizedTitle,
 											destination,
-											...(input.create.ownershipMode === "book_default"
-												? {}
-												: { ownershipMode: input.create.ownershipMode }),
+											ownershipMode: input.create.ownershipMode,
 										});
 									return;
 								}
@@ -188,7 +179,7 @@ export function BookContentNodeDialog({
 								value={input.mode}
 							>
 								<TabsList aria-label={t.units.content.addMode} className="w-full">
-									<TabsTrigger disabled={pending || contentKind === "book"} value="create">
+									<TabsTrigger disabled={pending || contentKind === "text_version"} value="create">
 										{t.units.content.createMode}
 									</TabsTrigger>
 									<TabsTrigger disabled={pending} value="attach">
@@ -231,9 +222,6 @@ export function BookContentNodeDialog({
 												}}
 												value={input.create.ownershipMode}
 											>
-												<NativeSelectOption value="book_default">
-													{t.units.content.bookDefaultOwnership}
-												</NativeSelectOption>
 												<NativeSelectOption value="profile_owned">
 													{t.units.content.profileOwnedChapter}
 												</NativeSelectOption>
@@ -241,20 +229,13 @@ export function BookContentNodeDialog({
 													{t.units.content.communityOwnedChapter}
 												</NativeSelectOption>
 											</NativeSelect>
-											<FieldDescription>
-												{input.create.ownershipMode === "book_default"
-													? t.units.content.chapterOwnershipDefaultDescription({
-															ownership: defaultOwnershipLabel,
-														})
-													: t.units.content.chapterOwnershipOverrideDescription}
-											</FieldDescription>
 										</Field>
 									) : null}
 								</TabsContent>
 								<TabsContent className="pt-3" value="attach">
 									<Field required>
 										<FieldLabel>
-											{contentKind === "book"
+											{contentKind === "text_version"
 												? t.units.content.existingBook
 												: contentKind === "chapter"
 													? t.units.content.existingChapter
@@ -263,15 +244,28 @@ export function BookContentNodeDialog({
 										<fieldset className="contents" disabled={pending}>
 											<EntityPicker
 												ariaLabel={
-													contentKind === "book"
+													contentKind === "text_version"
 														? t.units.content.searchExistingBook
 														: contentKind === "chapter"
 															? t.units.content.searchExistingChapter
 															: t.units.content.searchExistingLabel
 												}
 												excludedIds={excludedUnitIds}
-												index={contentKind === "chapter" ? "posts" : "units"}
-												kind={contentKind}
+												index="units"
+												owners={
+													contentKind === "text_version"
+														? ["publishing"]
+														: contentKind === "chapter"
+															? ["post"]
+															: ["label"]
+												}
+												shapes={
+													contentKind === "text_version"
+														? ["text_version"]
+														: contentKind === "chapter"
+															? ["chapter"]
+															: undefined
+												}
 												onChange={(unit) =>
 													setInput((current) => ({
 														...current,

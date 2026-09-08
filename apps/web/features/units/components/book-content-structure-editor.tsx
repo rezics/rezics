@@ -2,8 +2,8 @@
 
 import { toContentLanguage } from "@rezics/i18n";
 import {
-	type GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
-	usePutApiUnitsBookByUnitIdContentStructure,
+	type ListTextVersionContentNodesStatus200,
+	useSaveTextVersionContentDraft,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -92,7 +92,6 @@ import {
 import {
 	bookContentStructureHistoryHref,
 	chapterEditorHref,
-	unitManagementSectionHref,
 } from "../routing/unit-management-routes";
 import {
 	bookStructureDestinationForNode,
@@ -110,9 +109,9 @@ import {
 	BookContentStructureSection,
 	EmptyBookContentStructureList,
 } from "./book-content-structure-list";
-import { UnitSectionHeader } from "./unit-section-header";
+import { NativeContentStructureHeader } from "./native-content-structure-header";
 
-type BookStructureResponse = GetApiUnitsBookByUnitIdContentStructureNodesStatus200;
+type BookStructureResponse = ListTextVersionContentNodesStatus200;
 
 type EditorDocument = {
 	readonly baseRevisionId: string;
@@ -186,7 +185,7 @@ export function BookContentStructureEditor({
 		ownContentMetricsByNodeId: initialContentMetrics,
 	});
 	const [createRequest, setCreateRequest] = useState<CreateRequest>();
-	const save = usePutApiUnitsBookByUnitIdContentStructure();
+	const save = useSaveTextVersionContentDraft();
 	const draftFingerprint = useMemo(
 		() => bookContentStructureDraftFingerprint(document.draft),
 		[document.draft],
@@ -233,15 +232,15 @@ export function BookContentStructureEditor({
 		}
 		if (!contentUnitId) return;
 		router.push(
-			node.contentKind === "book"
-				? unitManagementSectionHref("book", contentUnitId, "content")
+			node.contentKind === "text_version"
+				? `/catalog/publishing/${contentUnitId}/contents/edit`
 				: chapterEditorHref(bookId, contentUnitId),
 		);
 	}
 
 	async function submitNode(submission: BookContentNodeDialogSubmission) {
 		if (!createRequest || save.isPending) return;
-		if (submission.mode === "create" && createRequest.kind === "book") return;
+		if (submission.mode === "create" && createRequest.kind === "text_version") return;
 		const placement = resolveCreatePlacement(document.draft, submission.destination);
 		if (!placement) return;
 		const common = {
@@ -254,7 +253,7 @@ export function BookContentStructureEditor({
 						...common,
 						state: "attached",
 						title: submission.unit.label,
-						language: toContentLanguage(locale.target),
+						language: null,
 						contentKind: createRequest.kind,
 						contentUnitId: submission.unit.id,
 					}
@@ -292,7 +291,9 @@ export function BookContentStructureEditor({
 
 	return (
 		<section>
-			<UnitSectionHeader
+			<NativeContentStructureHeader
+				owner="publishing"
+				unitId={bookId}
 				action={
 					<>
 						<Button
@@ -330,8 +331,6 @@ export function BookContentStructureEditor({
 						</Button>
 					</>
 				}
-				description={t.units.workspace.sections.contentStructure.description}
-				title={t.units.workspace.sections.contentStructure.label}
 			/>
 			<div className="grid gap-4">
 				<div className="flex min-h-6 items-center gap-3">
@@ -355,7 +354,6 @@ export function BookContentStructureEditor({
 			</div>
 			{createRequest ? (
 				<BookContentNodeDialog
-					bookOwnershipMode={initial.ownershipMode}
 					error={save.error}
 					nodes={document.draft}
 					ownerUnitId={bookId}
@@ -573,7 +571,7 @@ function BookContentStructureTree({
 	function requestMainBook() {
 		const lastLabelId = findLastBookDraftLabelId(nodes);
 		requestCreate({
-			kind: "book",
+			kind: "text_version",
 			destination: lastLabelId
 				? { kind: "node", nodeId: lastLabelId, placement: "inside" }
 				: { kind: "root" },
@@ -755,8 +753,8 @@ function indexOwnContentMetrics(
 		nodes.map((node) => [
 			node.id,
 			{
-				wordCount: toNonNegativeApiInteger(node.contentMetrics.wordCount),
-				characterCount: toNonNegativeApiInteger(node.contentMetrics.characterCount),
+				wordCount: toNonNegativeApiInteger(node.contentMetrics?.wordCount),
+				characterCount: toNonNegativeApiInteger(node.contentMetrics?.characterCount),
 			},
 		]),
 	);
@@ -866,6 +864,7 @@ function BookContentStructureRow(props: StructureRowProps) {
 					expanded={expanded}
 					label={acceptsChildren}
 					language={node.language}
+					languageTag={node.languageTag}
 					metadataAfter={
 						acceptsChildren ? null : (
 							<BookContentStructureChapterViewMetric label={t.units.content.views} />
@@ -1156,7 +1155,11 @@ function NodeActionMenu({
 					<Move aria-hidden />
 					{t.units.content.move}
 				</MenuItem>
-				<MenuItem onSelect={() => onRename(node)} value="rename">
+				<MenuItem
+					disabled={node.contentKind === "text_version"}
+					onSelect={() => onRename(node)}
+					value="rename"
+				>
 					<Pencil aria-hidden />
 					{t.units.content.rename}
 				</MenuItem>
@@ -1259,7 +1262,11 @@ function NodeContextMenuItems({
 				<Move aria-hidden />
 				{t.units.content.move}
 			</ContextMenuItem>
-			<ContextMenuItem disabled={pending} onSelect={() => onRename(node)} value="context-rename">
+			<ContextMenuItem
+				disabled={pending || node.contentKind === "text_version"}
+				onSelect={() => onRename(node)}
+				value="context-rename"
+			>
 				<Pencil aria-hidden />
 				{t.units.content.rename}
 			</ContextMenuItem>

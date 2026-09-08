@@ -2,9 +2,9 @@ import type { ContentLanguage } from "@rezics/i18n";
 
 export type BookStructureViewNode = {
 	readonly id: string;
-	readonly title: string;
-	readonly language: ContentLanguage;
-	readonly contentKind: "book" | "media" | "chapter" | "video" | "audio" | "label";
+	readonly title: string | null;
+	readonly language: ContentLanguage | null;
+	readonly contentKind: "text_version" | "program" | "chapter" | "video" | "audio" | "label";
 };
 
 export type BookStructureViewTreeNode<Node extends BookStructureViewNode> = {
@@ -104,7 +104,7 @@ export function countBookStructureDisplayedKinds<Node extends BookStructureViewN
 		const entry = stack.pop();
 		if (!entry) continue;
 		if (isBookStructureDisplayLabel(entry)) labelCount += 1;
-		else if (entry.node.contentKind === "book") bookCount += 1;
+		else if (entry.node.contentKind === "text_version") bookCount += 1;
 		else chapterCount += 1;
 		stack.push(...entry.children);
 	}

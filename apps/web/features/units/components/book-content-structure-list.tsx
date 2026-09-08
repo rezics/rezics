@@ -38,7 +38,7 @@ export function BookContentStructureSection({
 	readonly children: ReactNode;
 	readonly labelCount: number;
 }) {
-	const { t } = useTranslation(["units"]);
+	const { t } = useTranslation(["units", "ui"]);
 
 	return (
 		<section>
@@ -63,7 +63,7 @@ export function BookContentStructureSection({
 }
 
 export function EmptyBookContentStructureList() {
-	const { t } = useTranslation(["units"]);
+	const { t } = useTranslation(["units", "ui"]);
 
 	return (
 		<div className="grid min-h-[36rem] place-items-center px-6 text-center">
@@ -255,6 +255,7 @@ export function BookContentStructureRowText({
 	expanded,
 	label,
 	language,
+	languageTag,
 	metadataAfter,
 	title,
 }: {
@@ -263,10 +264,11 @@ export function BookContentStructureRowText({
 	readonly expanded: boolean;
 	readonly label: boolean;
 	readonly language: BookStructureViewNode["language"];
+	readonly languageTag?: string | null;
 	readonly metadataAfter?: ReactNode;
-	readonly title: string;
+	readonly title: string | null;
 }) {
-	const { t } = useTranslation(["units"]);
+	const { t } = useTranslation(["units", "ui"]);
 
 	return (
 		<span className="min-w-0 flex-1">
@@ -280,8 +282,11 @@ export function BookContentStructureRowText({
 						)}
 					/>
 				) : null}
-				<span className="truncate font-heading font-semibold text-base text-foreground">
-					{title}
+				<span
+					lang={languageTag ?? language ?? undefined}
+					className="truncate font-heading font-semibold text-base text-foreground"
+				>
+					{title || t.ui.unnamed}
 				</span>
 			</span>
 			<span className="mt-2 flex items-center gap-4 text-muted-foreground text-sm">

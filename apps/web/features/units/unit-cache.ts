@@ -1,7 +1,7 @@
 import {
 	getApiPostsByPostIdQueryKey,
-	getApiUnitsBookByUnitIdContentStructureNodesQueryKey,
-	getApiUnitsMediaByUnitIdContentStructureNodesQueryKey,
+	listTextVersionContentNodesQueryKey,
+	listProgramContentNodesQueryKey,
 	getApiUnitsByTypeByUnitIdQueryKey,
 	getApiUnitsByTypeQueryKey,
 } from "@rezics/openapi-tanstack-query";
@@ -31,7 +31,7 @@ export async function invalidateUnitDetail(
 
 export async function invalidateBookContentStructure(queryClient: QueryClient, bookId: string) {
 	await queryClient.invalidateQueries({
-		queryKey: getApiUnitsBookByUnitIdContentStructureNodesQueryKey({
+		queryKey: listTextVersionContentNodesQueryKey({
 			path: { unitId: bookId },
 		}),
 	});
@@ -39,7 +39,7 @@ export async function invalidateBookContentStructure(queryClient: QueryClient, b
 
 export async function invalidateMediaContentStructure(queryClient: QueryClient, mediaId: string) {
 	await queryClient.invalidateQueries({
-		queryKey: getApiUnitsMediaByUnitIdContentStructureNodesQueryKey({
+		queryKey: listProgramContentNodesQueryKey({
 			path: { unitId: mediaId },
 		}),
 	});
@@ -51,10 +51,10 @@ export async function invalidateChapterContent(queryClient: QueryClient, chapter
 			queryKey: getApiPostsByPostIdQueryKey({ path: { postId: chapterId } }),
 		}),
 		queryClient.invalidateQueries({
-			queryKey: [{ url: "/api/v1/books/:bookId/content-nodes/:nodeId" }],
+			queryKey: [{ url: "/api/v1/publishing/text-versions/:bookId/content-nodes/:nodeId" }],
 		}),
 		queryClient.invalidateQueries({
-			queryKey: [{ url: "/api/v1/units/book/:unitId/content-structure/nodes" }],
+			queryKey: [{ url: "/api/v1/publishing/text-versions/:unitId/content-structure/nodes" }],
 		}),
 	]);
 }

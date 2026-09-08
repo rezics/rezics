@@ -38,18 +38,21 @@ export function parseUnitManagementSection(
 	return undefined;
 }
 
-export function chapterEditorHref(bookId: string, chapterId: string): string {
-	return `/units/book/${bookId}/chapters/${chapterId}/edit`;
+export function chapterEditorHref(_bookId: string, chapterId: string): string {
+	return `/posts/${chapterId}/edit`;
 }
 
-export function chapterHistoryHref(bookId: string, chapterId: string): string {
-	return `/units/book/${bookId}/chapters/${chapterId}/history`;
+export function chapterHistoryHref(_bookId: string, chapterId: string): string {
+	return `/posts/${chapterId}/history`;
 }
 
 export function bookContentStructureHistoryHref(bookId: string): string {
-	return contentStructureHistoryHref("book", bookId);
+	return contentStructureHistoryHref("publishing", bookId);
 }
 
-export function contentStructureHistoryHref(type: "book" | "media", unitId: string): string {
-	return `${unitManagementSectionHref(type, unitId, "content-structure")}/history`;
+export function contentStructureHistoryHref(
+	type: "publishing" | "program",
+	unitId: string,
+): string {
+	return `/catalog/${type}/${unitId}/contents/history`;
 }

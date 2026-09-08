@@ -43,7 +43,9 @@ export function contentStructureDestinationForNode(
 		kind: "node",
 		nodeId: node.id,
 		placement:
-			node.contentKind === "book" || node.contentKind === "media" || node.contentKind === "label"
+			node.contentKind === "text_version" ||
+			node.contentKind === "program" ||
+			node.contentKind === "label"
 				? "inside"
 				: "after",
 	};

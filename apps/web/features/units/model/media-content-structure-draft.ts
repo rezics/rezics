@@ -1,31 +1,43 @@
 import type { ContentLanguage } from "@rezics/i18n";
 import type {
-	GetApiUnitsMediaByUnitIdContentStructureNodesStatus200,
-	PutApiUnitsMediaByUnitIdContentStructureBody,
+	ListProgramContentNodesStatus200,
+	SaveProgramContentDraftBody,
 } from "@rezics/openapi-tanstack-query";
 
-type RemoteMediaNode = GetApiUnitsMediaByUnitIdContentStructureNodesStatus200["items"][number];
-export type MediaContentStructureSaveNode =
-	PutApiUnitsMediaByUnitIdContentStructureBody["nodes"][number];
+type RemoteMediaNode = Pick<
+	ListProgramContentNodesStatus200["items"][number],
+	| "id"
+	| "parentId"
+	| "contentUnitId"
+	| "contentKind"
+	| "language"
+	| "title"
+	| "position"
+	| "durationSeconds"
+> & { readonly languageTag?: string | null };
+export type MediaContentStructureSaveNode = SaveProgramContentDraftBody["nodes"][number];
 
 type MediaDraftNodeBase = {
 	readonly id: string;
 	readonly parentId: string | null;
 	readonly order: number;
 	readonly title: string;
-	readonly contentKind: "media" | "video" | "audio" | "label";
-	readonly language: ContentLanguage;
+	readonly languageTag?: string | null;
+	readonly contentKind: "program" | "video" | "audio" | "label";
+	readonly language: ContentLanguage | null;
 	readonly durationSeconds: string | number | null;
 };
 
-type NewMediaContentKind = Exclude<MediaDraftNodeBase["contentKind"], "media">;
+type NewMediaContentKind = Exclude<MediaDraftNodeBase["contentKind"], "program">;
 
 export type ExistingMediaDraftNode = MediaDraftNodeBase & {
 	readonly state: "existing";
+	readonly originalTitle: string | null;
 	readonly contentUnitId: string;
 };
 
-export type NewMediaDraftNode = Omit<MediaDraftNodeBase, "contentKind"> & {
+export type NewMediaDraftNode = Omit<MediaDraftNodeBase, "contentKind" | "language"> & {
+	readonly language: ContentLanguage;
 	readonly state: "new";
 	readonly contentKind: NewMediaContentKind;
 };
@@ -59,7 +71,7 @@ export type MediaDraftDropTarget =
  * This does not traverse a referenced Media structure and is not validation.
  */
 export function isMediaDraftParentTarget(node: MediaDraftNode): boolean {
-	return node.contentKind === "media" || node.contentKind === "label";
+	return node.contentKind === "program" || node.contentKind === "label";
 }
 
 function compareRemoteNodes(left: RemoteMediaNode, right: RemoteMediaNode): number {
@@ -93,17 +105,28 @@ export function createMediaContentStructureDraft(
 	const orderByNodeId = new Map<string, number>();
 	for (const siblings of children.values())
 		siblings.forEach((node, order) => orderByNodeId.set(node.id, order));
-	return remoteNodes.map((node) => ({
-		state: "existing",
-		id: node.id,
-		parentId: node.parentId && knownIds.has(node.parentId) ? node.parentId : null,
-		order: orderByNodeId.get(node.id) ?? 0,
-		title: node.title,
-		contentUnitId: node.contentUnitId,
-		contentKind: node.contentKind,
-		language: node.language,
-		durationSeconds: node.durationSeconds,
-	}));
+	return remoteNodes.map((node) => {
+		if (
+			node.contentKind !== "program" &&
+			node.contentKind !== "audio" &&
+			node.contentKind !== "video" &&
+			node.contentKind !== "label"
+		)
+			throw new Error("Program structure returned an incompatible content owner");
+		return {
+			state: "existing",
+			id: node.id,
+			parentId: node.parentId && knownIds.has(node.parentId) ? node.parentId : null,
+			order: orderByNodeId.get(node.id) ?? 0,
+			title: node.title ?? "",
+			originalTitle: node.title,
+			languageTag: node.languageTag,
+			contentUnitId: node.contentUnitId,
+			contentKind: node.contentKind,
+			language: node.language,
+			durationSeconds: node.durationSeconds,
+		};
+	});
 }
 
 export function buildMediaDraftTree(nodes: readonly MediaDraftNode[]): MediaDraftTreeNode[] {
@@ -404,7 +427,9 @@ export function toMediaContentStructureSaveNodes(
 					id: node.id,
 					parentId: node.parentId,
 					order: node.order,
-					title: node.title,
+					...(node.contentKind !== "program" && node.title !== (node.originalTitle ?? "")
+						? { title: node.title, expectedTitle: node.originalTitle }
+						: {}),
 				};
 			if (node.state === "attached")
 				return {

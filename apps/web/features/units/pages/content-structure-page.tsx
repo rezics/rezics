@@ -1,40 +1,48 @@
 "use client";
 
 import {
-	useGetApiUnitsBookByUnitIdContentStructureNodes,
-	useGetApiUnitsMediaByUnitIdContentStructureNodes,
+	useReadCatalogResource,
+	useListTextVersionContentNodes,
+	useListProgramContentNodes,
+	usePostApiUnitsByIdByUnitIdContentStructures,
 } from "@rezics/openapi-tanstack-query";
-import { Card, CardContent, QueryFailure, QueryPending } from "@rezics/ui";
+import { Button, QueryFailure, QueryPending } from "@rezics/ui";
 
-import { DevelopmentPreviewBoundary } from "@/features/preview-access/components/development-preview-boundary";
+import { RequestFailure } from "@/i18n/request-failure";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { BookContentStructureEditor } from "../components/book-content-structure-editor";
 import { MediaContentStructureEditor } from "../components/media-content-structure-editor";
-import { UnitSectionHeader } from "../components/unit-section-header";
-import type { UnitType } from "../unit-types";
+import { NativeContentStructureHeader } from "../components/native-content-structure-header";
 
 export function ContentStructurePage({
-	type,
+	owner,
 	unitId,
 }: {
-	type: Exclude<UnitType, "series">;
+	owner: "publishing" | "program";
 	unitId: string;
 }) {
-	return type === "book" ? (
-		<BookContentStructurePage bookId={unitId} />
-	) : type === "media" ? (
-		<MediaContentStructurePage mediaId={unitId} />
-	) : (
-		<DevelopmentPreviewBoundary>
-			<UnreleasedContentStructurePage />
-		</DevelopmentPreviewBoundary>
+	const { t } = useTranslation(["errors"]);
+	const resource = useReadCatalogResource({ path: { owner, id: unitId } });
+	if (resource.isPending) return <QueryPending />;
+	if (resource.isError)
+		return <QueryFailure error={resource.error} retry={() => void resource.refetch()} />;
+	if (!resource.data.canEdit || (owner === "publishing" && resource.data.shape !== "text_version"))
+		return <p className="text-destructive">{t.errors.forbidden}</p>;
+	return (
+		<main className="mx-auto w-full max-w-6xl px-4 py-8">
+			{owner === "publishing" ? (
+				<BookContentStructurePage bookId={unitId} />
+			) : (
+				<MediaContentStructurePage mediaId={unitId} />
+			)}
+		</main>
 	);
 }
 
 function MediaContentStructurePage({ mediaId }: { mediaId: string }) {
 	const localizationLanguages = useLocalizationLanguages();
-	const query = useGetApiUnitsMediaByUnitIdContentStructureNodes(
+	const query = useListProgramContentNodes(
 		{
 			path: { unitId: mediaId },
 			query: { localizationLanguages },
@@ -51,16 +59,17 @@ function MediaContentStructurePage({ mediaId }: { mediaId: string }) {
 	return (
 		<MediaContentStructureEditor
 			initial={query.data}
-			key={query.data.state === "initialized" ? query.data.latestRevisionId : "uninitialized"}
+			key={query.data.latestRevisionId ?? "uninitialized"}
 			mediaId={mediaId}
 		/>
 	);
 }
 
 function BookContentStructurePage({ bookId }: { bookId: string }) {
-	const { t } = useTranslation(["ui"]);
+	const { t } = useTranslation(["ui", "actions", "units"]);
+	const initialize = usePostApiUnitsByIdByUnitIdContentStructures();
 	const localizationLanguages = useLocalizationLanguages();
-	const query = useGetApiUnitsBookByUnitIdContentStructureNodes(
+	const query = useListTextVersionContentNodes(
 		{
 			path: { unitId: bookId },
 			query: { localizationLanguages },
@@ -74,12 +83,29 @@ function BookContentStructurePage({ bookId }: { bookId: string }) {
 	);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!query.data?.structureId || !query.data.latestRevisionId)
+	if (!query.data.structureId || !query.data.latestRevisionId)
 		return (
-			<div className="grid min-h-64 w-full place-items-center">
-				<p className="text-sm text-destructive">{t.ui.retryLater}</p>
-			</div>
+			<section className="grid gap-4">
+				<NativeContentStructureHeader owner="publishing" unitId={bookId} />
+				<Button
+					disabled={initialize.isPending}
+					onClick={() =>
+						initialize.mutate(
+							{ path: { unitId: bookId }, body: { kind: "book.contents" } },
+							{
+								onSuccess: () => {
+									void query.refetch();
+								},
+							},
+						)
+					}
+				>
+					{t.actions.create}
+				</Button>
+				{initialize.error ? <RequestFailure error={initialize.error} /> : null}
+			</section>
 		);
+
 	return (
 		<BookContentStructureEditor
 			bookId={bookId}
@@ -90,33 +116,5 @@ function BookContentStructurePage({ bookId }: { bookId: string }) {
 			}}
 			key={query.data.latestRevisionId}
 		/>
-	);
-}
-
-/**
- * Placeholder for a future type-owned Content Structure editor.
- *
- * @alpha
- * @remarks
- * Software remains visibly unavailable in the product. Its generic API surface
- * is independently protected by the development preview capability.
- */
-export function UnreleasedContentStructurePage() {
-	const { t } = useTranslation(["units"]);
-	return (
-		<section>
-			<UnitSectionHeader
-				description={t.units.workspace.sections.contentStructure.description}
-				title={t.units.workspace.sections.contentStructure.label}
-			/>
-			<Card appearance="outlined">
-				<CardContent className="grid min-h-48 place-items-center gap-2 p-8 text-center">
-					<h2 className="font-heading text-lg font-semibold">{t.units.content.development}</h2>
-					<p className="max-w-xl text-sm leading-6 text-muted-foreground">
-						{t.units.content.developmentDescription}
-					</p>
-				</CardContent>
-			</Card>
-		</section>
 	);
 }

@@ -1,4 +1,4 @@
-import type { GetApiUnitsBookByUnitIdContentStructureNodesStatus200 } from "@rezics/openapi-tanstack-query";
+import type { ListTextVersionContentNodesStatus200 } from "@rezics/openapi-tanstack-query";
 
 import {
 	buildContentStructureTree,
@@ -6,7 +6,10 @@ import {
 } from "@/features/units/content-structure-tree";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
 
-type BookContentNode = GetApiUnitsBookByUnitIdContentStructureNodesStatus200["items"][number];
+type BookContentNode = Pick<
+	ListTextVersionContentNodesStatus200["items"][number],
+	"id" | "parentId" | "position" | "contentKind" | "contentMetrics"
+>;
 
 export interface BookProgressEstimate {
 	readonly method: "content-metrics" | "chapter-order";
@@ -32,9 +35,11 @@ export function estimateBookChapterProgresses(
 		.filter((node) => node.contentKind === "chapter");
 	if (chapters.length === 0) return [];
 
-	const wordCounts = chapters.map((node) => toNonNegativeApiInteger(node.contentMetrics.wordCount));
+	const wordCounts = chapters.map((node) =>
+		toNonNegativeApiInteger(node.contentMetrics?.wordCount),
+	);
 	const characterCounts = chapters.map((node) =>
-		toNonNegativeApiInteger(node.contentMetrics.characterCount),
+		toNonNegativeApiInteger(node.contentMetrics?.characterCount),
 	);
 	const weights = wordCounts.every((value) => value > 0)
 		? wordCounts

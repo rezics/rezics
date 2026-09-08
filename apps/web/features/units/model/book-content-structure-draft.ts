@@ -1,12 +1,14 @@
 import type {
-	GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
-	PutApiUnitsBookByUnitIdContentStructureBody,
+	ListTextVersionContentNodesStatus200,
+	SaveTextVersionContentDraftBody,
 } from "@rezics/openapi-tanstack-query";
 import type { ContentLanguage } from "@rezics/i18n";
 
-type RemoteBookNode = GetApiUnitsBookByUnitIdContentStructureNodesStatus200["items"][number];
-export type BookContentStructureSaveNode =
-	PutApiUnitsBookByUnitIdContentStructureBody["nodes"][number];
+type RemoteBookNode = Pick<
+	ListTextVersionContentNodesStatus200["items"][number],
+	"id" | "parentId" | "contentUnitId" | "contentKind" | "language" | "title" | "position"
+> & { readonly languageTag?: string | null };
+export type BookContentStructureSaveNode = SaveTextVersionContentDraftBody["nodes"][number];
 type NewBookContentStructureSaveNode = Extract<BookContentStructureSaveNode, { state: "new" }>;
 type AttachedBookContentStructureSaveNode = Extract<
 	BookContentStructureSaveNode,
@@ -18,13 +20,15 @@ type BookDraftNodeBase = {
 	readonly parentId: string | null;
 	readonly order: number;
 	readonly title: string;
+	readonly languageTag?: string | null;
 };
 
 export type ExistingBookDraftNode = BookDraftNodeBase & {
 	readonly state: "existing";
+	readonly originalTitle: string | null;
 	readonly contentUnitId: string;
-	readonly contentKind: "book" | "chapter" | "label";
-	readonly language: ContentLanguage;
+	readonly contentKind: "text_version" | "chapter" | "label";
+	readonly language: ContentLanguage | null;
 };
 
 export type NewBookDraftNode = BookDraftNodeBase &
@@ -40,8 +44,8 @@ export type NewBookDraftNode = BookDraftNodeBase &
 export type AttachedBookDraftNode = BookDraftNodeBase &
 	AttachedBookContentStructureSaveNode & {
 		readonly state: "attached";
-		readonly contentKind: "book" | "chapter" | "label";
-		readonly language: ContentLanguage;
+		readonly contentKind: "text_version" | "chapter" | "label";
+		readonly language: ContentLanguage | null;
 	};
 
 export type InsertedBookDraftNode = NewBookDraftNode | AttachedBookDraftNode;
@@ -74,7 +78,7 @@ export type BookDraftDropTarget =
  * It does not traverse the referenced Book and is not a backend invariant.
  */
 export function isBookDraftParentTarget(node: BookDraftNode): boolean {
-	return node.contentKind === "book" || node.contentKind === "label";
+	return node.contentKind === "text_version" || node.contentKind === "label";
 }
 
 function compareRemoteNodes(left: RemoteBookNode, right: RemoteBookNode): number {
@@ -88,6 +92,13 @@ function compareDraftNodes(left: BookDraftNode, right: BookDraftNode): number {
 export function createBookContentStructureDraft(
 	remoteNodes: readonly RemoteBookNode[],
 ): BookDraftNode[] {
+	for (const node of remoteNodes)
+		if (
+			node.contentKind !== "text_version" &&
+			node.contentKind !== "chapter" &&
+			node.contentKind !== "label"
+		)
+			throw new Error("Text Version structure returned an incompatible content owner");
 	const knownIds = new Set(remoteNodes.map(({ id }) => id));
 	const children = new Map<string | null, RemoteBookNode[]>();
 	for (const node of remoteNodes) {
@@ -101,13 +112,21 @@ export function createBookContentStructureDraft(
 	for (const siblings of children.values())
 		siblings.forEach((node, order) => orderByNodeId.set(node.id, order));
 	return remoteNodes.map((node) => {
+		if (
+			node.contentKind !== "text_version" &&
+			node.contentKind !== "chapter" &&
+			node.contentKind !== "label"
+		)
+			throw new Error("Text Version structure returned an incompatible content owner");
 		const parentId = node.parentId && knownIds.has(node.parentId) ? node.parentId : null;
 		return {
 			state: "existing",
 			id: node.id,
 			parentId,
 			order: orderByNodeId.get(node.id) ?? 0,
-			title: node.title,
+			title: node.title ?? "",
+			originalTitle: node.title,
+			languageTag: node.languageTag,
 			contentUnitId: node.contentUnitId,
 			contentKind: node.contentKind,
 			language: node.language,
@@ -411,7 +430,9 @@ export function toBookContentStructureSaveNodes(
 					id: node.id,
 					parentId: node.parentId,
 					order: node.order,
-					title: node.title,
+					...(node.contentKind !== "text_version" && node.title !== (node.originalTitle ?? "")
+						? { title: node.title, expectedTitle: node.originalTitle }
+						: {}),
 				};
 			if (node.state === "attached")
 				return {

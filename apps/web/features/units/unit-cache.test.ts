@@ -51,7 +51,7 @@ describe("unit cache invalidation", () => {
 		expect(invalidateQueries).toHaveBeenNthCalledWith(1, {
 			queryKey: [
 				{
-					url: "/api/v1/units/book/:unitId/content-structure/nodes",
+					url: "/api/v1/publishing/text-versions/:unitId/content-structure/nodes",
 					params: { unitId: "book-1" },
 				},
 			],
@@ -60,10 +60,10 @@ describe("unit cache invalidation", () => {
 			queryKey: [{ url: "/api/v1/posts/:postId", params: { postId: "chapter-1" } }],
 		});
 		expect(invalidateQueries).toHaveBeenNthCalledWith(3, {
-			queryKey: [{ url: "/api/v1/books/:bookId/content-nodes/:nodeId" }],
+			queryKey: [{ url: "/api/v1/publishing/text-versions/:bookId/content-nodes/:nodeId" }],
 		});
 		expect(invalidateQueries).toHaveBeenNthCalledWith(4, {
-			queryKey: [{ url: "/api/v1/units/book/:unitId/content-structure/nodes" }],
+			queryKey: [{ url: "/api/v1/publishing/text-versions/:unitId/content-structure/nodes" }],
 		});
 	});
 });

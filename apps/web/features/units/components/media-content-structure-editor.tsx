@@ -2,9 +2,9 @@
 
 import { toContentLanguage } from "@rezics/i18n";
 import {
-	type GetApiUnitsMediaByUnitIdContentStructureNodesStatus200,
-	type PutApiUnitsMediaByUnitIdContentStructureBody,
-	usePutApiUnitsMediaByUnitIdContentStructure,
+	type ListProgramContentNodesStatus200,
+	type SaveProgramContentDraftBody,
+	useSaveProgramContentDraft,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -98,10 +98,10 @@ import {
 	type MediaContentNodeDialogRequest,
 	type MediaContentNodeDialogSubmission,
 } from "./media-content-node-dialog";
-import { UnitSectionHeader } from "./unit-section-header";
+import { NativeContentStructureHeader } from "./native-content-structure-header";
 
-type MediaStructureResponse = GetApiUnitsMediaByUnitIdContentStructureNodesStatus200;
-type MediaStructureDraftBase = PutApiUnitsMediaByUnitIdContentStructureBody["base"];
+type MediaStructureResponse = ListProgramContentNodesStatus200;
+type MediaStructureDraftBase = SaveProgramContentDraftBody["base"];
 
 type EditorDocument = {
 	readonly base: MediaStructureDraftBase;
@@ -144,7 +144,7 @@ export function MediaContentStructureEditor({
 		const initialDraft = createMediaContentStructureDraft(initial.items);
 		return {
 			base:
-				initial.state === "initialized"
+				initial.latestRevisionId !== null
 					? { kind: "revision", revisionId: initial.latestRevisionId }
 					: { kind: "uninitialized" },
 			baseline: initialDraft,
@@ -152,7 +152,7 @@ export function MediaContentStructureEditor({
 		};
 	});
 	const [createRequest, setCreateRequest] = useState<MediaContentNodeDialogRequest>();
-	const save = usePutApiUnitsMediaByUnitIdContentStructure();
+	const save = useSaveProgramContentDraft();
 	const draftFingerprint = useMemo(
 		() => mediaContentStructureDraftFingerprint(document.draft),
 		[document.draft],
@@ -203,7 +203,8 @@ export function MediaContentStructureEditor({
 						...common,
 						state: "attached" as const,
 						title: submission.unit.label,
-						contentKind: submission.unit.kind,
+						language: null,
+						contentKind: submission.unit.owner,
 						contentUnitId: submission.unit.id,
 					}
 				: {
@@ -228,12 +229,18 @@ export function MediaContentStructureEditor({
 			contentUnitId = saved?.items.find(({ id }) => id === nodeId)?.contentUnitId;
 		}
 		if (contentUnitId)
-			router.push(unitManagementSectionHref(node.contentKind, contentUnitId, "content"));
+			router.push(
+				node.contentKind === "program"
+					? `/catalog/program/${contentUnitId}/contents/edit`
+					: unitManagementSectionHref(node.contentKind, contentUnitId, "content"),
+			);
 	}
 
 	return (
 		<section>
-			<UnitSectionHeader
+			<NativeContentStructureHeader
+				owner="program"
+				unitId={mediaId}
 				action={
 					<>
 						<Button
@@ -260,7 +267,7 @@ export function MediaContentStructureEditor({
 							<Button asChild size="icon-md" variant="outline">
 								<Link
 									aria-label={t.units.workspace.sections.history.label}
-									href={contentStructureHistoryHref("media", mediaId)}
+									href={contentStructureHistoryHref("program", mediaId)}
 								>
 									<HistoryIcon aria-hidden />
 								</Link>
@@ -268,8 +275,6 @@ export function MediaContentStructureEditor({
 						) : null}
 					</>
 				}
-				description={t.units.workspace.sections.contentStructure.description}
-				title={t.units.workspace.sections.contentStructure.label}
 			/>
 			<div className="grid gap-4">
 				<div className="flex min-h-6 items-center gap-3">
@@ -410,7 +415,10 @@ function MediaStructureTree({
 			nodes.reduce(
 				(result, node) => ({
 					...result,
-					[node.contentKind]: result[node.contentKind] + 1,
+					media: result.media + (node.contentKind === "program" ? 1 : 0),
+					video: result.video + (node.contentKind === "video" ? 1 : 0),
+					audio: result.audio + (node.contentKind === "audio" ? 1 : 0),
+					label: result.label + (node.contentKind === "label" ? 1 : 0),
 				}),
 				{ media: 0, video: 0, audio: 0, label: 0 },
 			),
@@ -424,7 +432,7 @@ function MediaStructureTree({
 		onCreate(request);
 	}
 
-	function requestMainMediaItem(kind: "media" | "video" | "audio") {
+	function requestMainMediaItem(kind: "program" | "video" | "audio") {
 		const lastLabelId = findLastMediaDraftLabelId(nodes);
 		requestCreate({
 			kind,
@@ -607,7 +615,7 @@ function MediaStructureTree({
 								</Button>
 							</MenuTrigger>
 							<MenuContent>
-								<MenuItem onSelect={() => requestMainMediaItem("media")} value="add-media">
+								<MenuItem onSelect={() => requestMainMediaItem("program")} value="add-media">
 									<Film aria-hidden />
 									{t.units.content.addMedia}
 								</MenuItem>
@@ -767,7 +775,7 @@ function MediaContentStructureRow(props: MediaStructureRowProps) {
 		onRename,
 		onToggle,
 	} = props;
-	const { t } = useTranslation(["units"]);
+	const { t } = useTranslation(["units", "ui"]);
 	const { entry, depth, positionInSet, setSize } = visibleEntry;
 	const { node, children } = entry;
 	const label = isMediaDraftParentTarget(node);
@@ -787,7 +795,7 @@ function MediaContentStructureRow(props: MediaStructureRowProps) {
 	}
 
 	const Icon =
-		node.contentKind === "media"
+		node.contentKind === "program"
 			? Film
 			: node.contentKind === "video"
 				? Video
@@ -795,7 +803,7 @@ function MediaContentStructureRow(props: MediaStructureRowProps) {
 					? AudioLines
 					: ListTree;
 	const kindLabel =
-		node.contentKind === "media"
+		node.contentKind === "program"
 			? t.units.types.media
 			: node.contentKind === "video"
 				? t.units.types.video
@@ -869,7 +877,7 @@ function MediaContentStructureRow(props: MediaStructureRowProps) {
 							/>
 						) : null}
 						<span className="truncate font-heading text-base font-semibold text-foreground">
-							{node.title}
+							{node.title || t.ui.unnamed}
 						</span>
 					</span>
 					<span className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
@@ -1147,7 +1155,11 @@ function MediaNodeActionMenu(props: MediaNodeMenuProps) {
 					<Move aria-hidden />
 					{t.units.content.move}
 				</MenuItem>
-				<MenuItem onSelect={() => onRename(node)} value="rename">
+				<MenuItem
+					disabled={node.contentKind === "program"}
+					onSelect={() => onRename(node)}
+					value="rename"
+				>
 					<Pencil aria-hidden />
 					{t.units.content.rename}
 				</MenuItem>
@@ -1235,7 +1247,11 @@ function MediaNodeContextMenuItems(props: MediaNodeMenuProps) {
 				<Move aria-hidden />
 				{t.units.content.move}
 			</ContextMenuItem>
-			<ContextMenuItem disabled={pending} onSelect={() => onRename(node)} value="context-rename">
+			<ContextMenuItem
+				disabled={pending || node.contentKind === "program"}
+				onSelect={() => onRename(node)}
+				value="context-rename"
+			>
 				<Pencil aria-hidden />
 				{t.units.content.rename}
 			</ContextMenuItem>
@@ -1272,7 +1288,13 @@ function RenameMediaNodeDialog({
 					<DialogBody>
 						<Field required>
 							<FieldLabel>{t.ui.title}</FieldLabel>
-							<Input autoFocus defaultValue={node.title} maxLength={500} name="title" required />
+							<Input
+								autoFocus
+								defaultValue={node.title || t.ui.unnamed}
+								maxLength={500}
+								name="title"
+								required
+							/>
 						</Field>
 					</DialogBody>
 					<DialogFooter>

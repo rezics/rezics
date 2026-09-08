@@ -10,7 +10,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { profileHref } from "@/features/profiles/profile-route";
-import { invalidateBookContentStructure } from "@/features/units/unit-cache";
+import {
+	invalidateBookContentStructure,
+	invalidateMediaContentStructure,
+} from "@/features/units/unit-cache";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 
@@ -35,6 +38,7 @@ export function ContentStructureRevisionHistory({
 				queryKey: getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsQueryKey(options),
 			}),
 			invalidateBookContentStructure(queryClient, unitId),
+			invalidateMediaContentStructure(queryClient, unitId),
 		]);
 	};
 	const restore =

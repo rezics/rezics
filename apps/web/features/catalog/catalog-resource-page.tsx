@@ -1,4 +1,5 @@
 "use client";
+import { AppLink } from "@/features/application-shell/components/app-link";
 import type { CatalogReference } from "@rezics/reference";
 import {
 	useListCatalogIdentifiers,
@@ -36,6 +37,29 @@ export function CatalogResourcePage({ reference }: { reference: CatalogReference
 				) : null}
 			</div>
 			{session ? <PrivateFavoriteControl targetUnitId={reference.id} /> : null}
+			{(reference.owner === "publishing" && resource.data.shape === "text_version") ||
+			reference.owner === "program" ? (
+				<nav className="flex flex-wrap gap-2" aria-label={t.units.content.title}>
+					<Button asChild variant="outline">
+						<AppLink href={`/catalog/${reference.owner}/${reference.id}/contents`}>
+							{t.units.content.title}
+						</AppLink>
+					</Button>
+					{resource.data.canEdit ? (
+						<Button asChild variant="outline">
+							<AppLink href={`/catalog/${reference.owner}/${reference.id}/contents/edit`}>
+								{t.units.workspace.sections.contentStructure.label}
+							</AppLink>
+						</Button>
+					) : null}
+					<Button asChild variant="outline">
+						<AppLink href={`/catalog/${reference.owner}/${reference.id}/contents/history`}>
+							{t.units.workspace.sections.history.label}
+						</AppLink>
+					</Button>
+				</nav>
+			) : null}
+
 			<section className="grid gap-3">
 				<h2 className="text-lg font-semibold">{t.units.nativeCatalog.names}</h2>
 				<NamePage key={reference.id} reference={reference} />

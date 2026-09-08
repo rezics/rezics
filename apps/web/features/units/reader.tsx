@@ -3,8 +3,8 @@
 import { isContentLanguage, type ContentLanguage } from "@rezics/i18n";
 
 import {
-	useGetApiBooksByBookIdContentNodesByNodeId,
-	useGetApiUnitsBookByUnitIdContentStructureNodes,
+	useReadTextVersionChapterNode,
+	useListTextVersionContentNodes,
 } from "@rezics/openapi-tanstack-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
@@ -54,7 +54,7 @@ import {
 	flattenVisibleBookStructureTree,
 	isBookStructureDisplayLabel,
 } from "./model/book-content-structure-view";
-import { bookReaderHref, unitDetailHref } from "./routing/unit-detail-routes";
+import { bookReaderHref } from "./routing/unit-detail-routes";
 
 const ReaderOutlineRowHeight = 36;
 const NestedMenuPositioning = { placement: "right-start", gutter: -2 } as const;
@@ -74,7 +74,7 @@ function ContentReadTree({
 	language?: ContentLanguage;
 	className?: string;
 }) {
-	const { t } = useTranslation(["units"]);
+	const { t } = useTranslation(["units", "ui"]);
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const expandableIds = useMemo(() => collectBookStructureExpandableIds(nodes), [nodes]);
 	const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(() => new Set(expandableIds));
@@ -184,7 +184,7 @@ function ContentReadTree({
 										)}
 									/>
 									<span className="truncate">
-										<LocalizedText language={node.language} value={node.title} />
+										<span lang={node.languageTag ?? undefined}>{node.title ?? t.ui.unnamed}</span>
 									</span>
 								</button>
 							) : (
@@ -210,12 +210,12 @@ function ContentReadTree({
 										aria-current={current ? "page" : undefined}
 										className="min-w-0 flex-1 truncate outline-none focus-visible:ring-2 focus-visible:ring-ring"
 										href={
-											node.contentKind === "book"
-												? unitDetailHref("book", node.contentUnitId)
+											node.contentKind === "text_version"
+												? `/catalog/publishing/${node.contentUnitId}`
 												: withContentLanguage(bookReaderHref(bookId, node.id), language)
 										}
 									>
-										<LocalizedText language={node.language} value={node.title} />
+										<span lang={node.languageTag ?? undefined}>{node.title ?? t.ui.unnamed}</span>
 									</Link>
 								</div>
 							)}
@@ -305,7 +305,7 @@ export function Reader({ bookId, nodeId }: { bookId: string; nodeId: string }) {
 	}, []);
 	const selectedLanguage = useRequestedContentLanguage();
 	const { replaceCurrentLanguage } = useContentLanguageNavigation();
-	const query = useGetApiBooksByBookIdContentNodesByNodeId({
+	const query = useReadTextVersionChapterNode({
 		path: { bookId, nodeId },
 		query: {
 			localizationLanguages,
@@ -317,7 +317,7 @@ export function Reader({ bookId, nodeId }: { bookId: string; nodeId: string }) {
 		localizationLanguages,
 		unitId: query.data?.chapterId ?? nodeId,
 	});
-	const outline = useGetApiUnitsBookByUnitIdContentStructureNodes({
+	const outline = useListTextVersionContentNodes({
 		path: { unitId: bookId },
 		query: { localizationLanguages },
 	});
@@ -342,7 +342,7 @@ export function Reader({ bookId, nodeId }: { bookId: string; nodeId: string }) {
 				<Button asChild className="size-11 sm:size-10" size="icon-xl" variant="quiet">
 					<Link
 						aria-label={t.units.reader.backToContents}
-						href={unitDetailHref("book", bookId, "contents")}
+						href={`/catalog/publishing/${bookId}/contents`}
 					>
 						<ArrowLeftIcon aria-hidden />
 					</Link>
@@ -541,7 +541,7 @@ function ReaderOutline({
 	className?: string;
 	currentNodeId: string;
 	language?: ContentLanguage;
-	outline: ReturnType<typeof useGetApiUnitsBookByUnitIdContentStructureNodes>;
+	outline: ReturnType<typeof useListTextVersionContentNodes>;
 	tree: readonly ContentStructureTreeNode[];
 }) {
 	const { t } = useTranslation(["actions", "errors", "state", "ui", "units"]);

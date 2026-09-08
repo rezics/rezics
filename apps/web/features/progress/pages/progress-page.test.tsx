@@ -114,7 +114,7 @@ vi.mock("@rezics/openapi-tanstack-query", async (importOriginal) => {
 			isPending: false,
 			refetch: vi.fn(),
 		}),
-		useGetApiUnitsBookByUnitIdContentStructureNodes: () => ({
+		useListTextVersionContentNodes: () => ({
 			data: { items: [] },
 			error: undefined,
 			isPending: false,

@@ -31,8 +31,8 @@ import {
 	type ContentStructureDestination,
 } from "./book-content-structure-destination-dialog";
 
-export type MediaContentNodeKind = "media" | "video" | "audio" | "label";
-type CreatableMediaContentNodeKind = Exclude<MediaContentNodeKind, "media">;
+export type MediaContentNodeKind = "program" | "video" | "audio" | "label";
+type CreatableMediaContentNodeKind = Exclude<MediaContentNodeKind, "program">;
 
 export type MediaContentNodeDialogRequest = {
 	readonly kind: MediaContentNodeKind;
@@ -48,7 +48,7 @@ export type MediaContentNodeDialogSubmission =
 	  }
 	| {
 			readonly mode: "attach";
-			readonly unit: EntityPickerValue & { readonly kind: MediaContentNodeKind };
+			readonly unit: EntityPickerValue & { readonly owner: MediaContentNodeKind };
 			readonly destination: ContentStructureDestination;
 	  };
 
@@ -64,7 +64,7 @@ function isTimedMediaKindFilter(value: string): value is TimedMediaKindFilter {
 }
 
 function isMediaContentNodeKind(value: string | undefined): value is MediaContentNodeKind {
-	return value === "media" || value === "video" || value === "audio" || value === "label";
+	return value === "program" || value === "video" || value === "audio" || value === "label";
 }
 
 function destinationLabel(
@@ -97,7 +97,7 @@ export function MediaContentNodeDialog({
 }) {
 	const { t } = useTranslation(["engagement", "units", "ui"]);
 	const formId = useId();
-	const [mode, setMode] = useState<DialogMode>(request.kind === "media" ? "attach" : "create");
+	const [mode, setMode] = useState<DialogMode>(request.kind === "program" ? "attach" : "create");
 	const [title, setTitle] = useState("");
 	const [unit, setUnit] = useState<EntityPickerValue>();
 	const [mediaKindFilter, setMediaKindFilter] = useState<TimedMediaKindFilter>("all");
@@ -105,7 +105,7 @@ export function MediaContentNodeDialog({
 	const [destinationDialogOpen, setDestinationDialogOpen] = useState(false);
 	const excludedUnitIds = useMemo(() => new Set([ownerUnitId]), [ownerUnitId]);
 	const label = request.kind === "label";
-	const media = request.kind === "media";
+	const media = request.kind === "program";
 	const dialogTitle = media
 		? t.units.content.addMedia
 		: request.kind === "video"
@@ -121,15 +121,15 @@ export function MediaContentNodeDialog({
 				? t.units.content.addAudioDescription
 				: t.units.content.addLabelDescription;
 	const attachKind = media
-		? unit?.kind === "media"
-			? "media"
+		? unit?.owner === "program"
+			? "program"
 			: undefined
 		: label
-			? unit?.kind === "label"
+			? unit?.owner === "label"
 				? "label"
 				: undefined
-			: isMediaContentNodeKind(unit?.kind) && unit.kind !== "label" && unit.kind !== "media"
-				? unit.kind
+			: isMediaContentNodeKind(unit?.owner) && unit.owner !== "label" && unit.owner !== "program"
+				? unit.owner
 				: undefined;
 	const canSubmit =
 		mode === "create" ? !media && Boolean(title.trim()) : Boolean(unit && attachKind);
@@ -151,7 +151,7 @@ export function MediaContentNodeDialog({
 							onSubmit={(event) => {
 								event.preventDefault();
 								if (pending) return;
-								if (mode === "create" && request.kind !== "media") {
+								if (mode === "create" && request.kind !== "program") {
 									const normalizedTitle = title.trim();
 									if (normalizedTitle)
 										onSubmit({
@@ -165,7 +165,7 @@ export function MediaContentNodeDialog({
 								if (unit && attachKind)
 									onSubmit({
 										mode: "attach",
-										unit: { ...unit, kind: attachKind },
+										unit: { ...unit, owner: attachKind },
 										destination,
 									});
 							}}
@@ -239,11 +239,11 @@ export function MediaContentNodeDialog({
 												excludedIds={excludedUnitIds}
 												index="units"
 												{...(media
-													? { kind: "media" }
+													? { owners: ["program"], shapes: ["program"] }
 													: label
-														? { kind: "label" }
+														? { owners: ["label"] }
 														: {
-																kinds:
+																owners:
 																	mediaKindFilter === "all"
 																		? ["video", "audio"]
 																		: [mediaKindFilter],

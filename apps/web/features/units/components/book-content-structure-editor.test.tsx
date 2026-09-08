@@ -1,9 +1,9 @@
 /** @vitest-environment jsdom */
 
 import type {
-	GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
-	PutApiUnitsBookByUnitIdContentStructureOptions,
-	PutApiUnitsBookByUnitIdContentStructureStatus200,
+	ListTextVersionContentNodesStatus200,
+	SaveTextVersionContentDraftOptions,
+	SaveTextVersionContentDraftStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { resources } from "@rezics/i18n/resources";
 import { UiProvider } from "@rezics/ui";
@@ -15,7 +15,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TranslationProvider } from "@/i18n/client";
 import { BookContentStructureEditor } from "./book-content-structure-editor";
 
-type SaveNode = PutApiUnitsBookByUnitIdContentStructureOptions["body"]["nodes"][number];
+type SaveNode = SaveTextVersionContentDraftOptions["body"]["nodes"][number];
 
 const ids = {
 	book: "019f0000-0000-7000-8000-000000000001",
@@ -38,12 +38,11 @@ const state = vi.hoisted(() => ({
 }));
 
 function savedResponse(
-	options: PutApiUnitsBookByUnitIdContentStructureOptions,
-): PutApiUnitsBookByUnitIdContentStructureStatus200 {
+	options: SaveTextVersionContentDraftOptions,
+): SaveTextVersionContentDraftStatus200 {
 	const node = options.body.nodes.at(-1);
 	if (!node || node.state === "existing") throw new Error("Expected a newly inserted node");
 	return {
-		ownershipMode: "community_owned",
 		structureId: ids.structure,
 		latestRevisionId: ids.revision,
 		revisionCreated: true,
@@ -52,6 +51,13 @@ function savedResponse(
 				id: node.id,
 				parentId: node.parentId,
 				contentUnitId: node.state === "attached" ? node.contentUnitId : ids.createdUnit,
+				reference: {
+					owner: node.state === "new" && node.contentKind === "label" ? "label" : "post",
+					id: node.state === "attached" ? node.contentUnitId : ids.createdUnit,
+					shape: node.state === "new" && node.contentKind === "label" ? "label" : "chapter",
+				},
+				languageTag: node.state === "new" ? node.language : "zh",
+				durationSeconds: null,
 				contentKind: node.state === "new" ? node.contentKind : ("chapter" as const),
 				language: node.state === "new" ? node.language : "zh",
 				title: node.state === "new" ? node.title : "既有章節",
@@ -73,7 +79,7 @@ vi.mock("@rezics/openapi-tanstack-query", async () => {
 	);
 	return {
 		...actual,
-		usePutApiUnitsBookByUnitIdContentStructure: () => ({
+		useSaveTextVersionContentDraft: () => ({
 			error: state.error,
 			isPending: false,
 			mutateAsync: state.mutateAsync,
@@ -98,8 +104,8 @@ vi.mock("@/features/application-shell/components/app-link", () => ({
 	AppLink: (props: ComponentProps<"a">) => <a {...props} />,
 }));
 
-vi.mock("./unit-section-header", () => ({
-	UnitSectionHeader: ({
+vi.mock("./native-content-structure-header", () => ({
+	NativeContentStructureHeader: ({
 		action,
 		description,
 		title,
@@ -170,11 +176,10 @@ const translation = await create(resources).getTranslation(
 	["zh-Hant"],
 );
 
-const initial: GetApiUnitsBookByUnitIdContentStructureNodesStatus200 & {
+const initial: ListTextVersionContentNodesStatus200 & {
 	readonly structureId: string;
 	readonly latestRevisionId: string;
 } = {
-	ownershipMode: "community_owned",
 	structureId: ids.structure,
 	latestRevisionId: ids.revision,
 	items: [],
@@ -187,6 +192,9 @@ const initialWithChapter = {
 			id: ids.existingNode,
 			parentId: null,
 			contentUnitId: ids.existingUnit,
+			reference: { owner: "post", id: ids.existingUnit, shape: "chapter" },
+			languageTag: "zh",
+			durationSeconds: null,
 			contentKind: "chapter",
 			language: "zh",
 			title: "既有第一章",
@@ -194,7 +202,7 @@ const initialWithChapter = {
 			contentMetrics: { wordCount: 10, characterCount: 20 },
 		},
 	],
-} satisfies GetApiUnitsBookByUnitIdContentStructureNodesStatus200 & {
+} satisfies ListTextVersionContentNodesStatus200 & {
 	readonly structureId: string;
 	readonly latestRevisionId: string;
 };
@@ -218,8 +226,8 @@ beforeEach(() => {
 	state.mutateAsync.mockReset();
 	state.mutateAsync.mockImplementation(
 		async (
-			options: PutApiUnitsBookByUnitIdContentStructureOptions,
-		): Promise<PutApiUnitsBookByUnitIdContentStructureStatus200> => {
+			options: SaveTextVersionContentDraftOptions,
+		): Promise<SaveTextVersionContentDraftStatus200> => {
 			if (state.reject) throw new Error("save failed");
 			return savedResponse(options);
 		},
@@ -257,7 +265,7 @@ describe("BookContentStructureEditor node dialog", () => {
 
 		await vi.waitFor(() => expect(state.mutateAsync).toHaveBeenCalledOnce());
 		const options = state.mutateAsync.mock.calls[0]?.[0] as
-			| PutApiUnitsBookByUnitIdContentStructureOptions
+			| SaveTextVersionContentDraftOptions
 			| undefined;
 		expect(options).toEqual({
 			path: { unitId: ids.book },
@@ -294,7 +302,7 @@ describe("BookContentStructureEditor node dialog", () => {
 
 		await vi.waitFor(() => expect(state.mutateAsync).toHaveBeenCalledOnce());
 		const options = state.mutateAsync.mock.calls[0]?.[0] as
-			| PutApiUnitsBookByUnitIdContentStructureOptions
+			| SaveTextVersionContentDraftOptions
 			| undefined;
 		expect(options?.body.nodes.at(-1)).toEqual(
 			expect.objectContaining({ ownershipMode: "profile_owned" }),
@@ -313,14 +321,13 @@ describe("BookContentStructureEditor node dialog", () => {
 
 		await vi.waitFor(() => expect(state.mutateAsync).toHaveBeenCalledOnce());
 		const options = state.mutateAsync.mock.calls[0]?.[0] as
-			| PutApiUnitsBookByUnitIdContentStructureOptions
+			| SaveTextVersionContentDraftOptions
 			| undefined;
 		expect(options?.body.nodes[0]).toEqual({
 			state: "existing",
 			id: ids.existingNode,
 			parentId: null,
 			order: 0,
-			title: "既有第一章",
 		});
 		const attached = options?.body.nodes.find((node: SaveNode) => node.state === "attached");
 		expect(attached).toEqual({
