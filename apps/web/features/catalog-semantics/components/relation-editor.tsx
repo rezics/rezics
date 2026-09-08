@@ -20,7 +20,8 @@ import {
 	DefinitionRevisionOptions,
 	ExactDefinitionName,
 } from "./definition-revision-options";
-import { QualifierPicker } from "./qualifier-picker";
+import { QualifierAuthoring } from "./qualifier-authoring";
+import { ValueEditor } from "./value-editor";
 import {
 	buildRelationBody,
 	type ParticipantDraft,
@@ -194,9 +195,23 @@ export function RelationEditor({
 					</Button>
 				) : null}
 				{qualifiers.map((qualifier, index) => (
-					<div key={qualifier.definitionRevisionId} className="flex items-center gap-3">
+					<div key={qualifier.definitionRevisionId} className="grid gap-3 rounded border p-3">
 						<ExactDefinitionName id={qualifier.definitionRevisionId} />
-						<span>{copy.valueSelected}</span>
+						{"nodes" in qualifier ? (
+							<ValueEditor
+								definition={qualifier.definition}
+								rows={qualifier.nodes}
+								onChange={(nodes) =>
+									setQualifiers((current) =>
+										current.map((value, position) =>
+											index === position && "nodes" in value ? { ...value, nodes } : value,
+										),
+									)
+								}
+							/>
+						) : (
+							<span>{copy.valueSelected}</span>
+						)}
 						<Button
 							type="button"
 							variant="ghost"
@@ -219,16 +234,14 @@ export function RelationEditor({
 							onSelect={setQualifierDefinition}
 						/>
 						{qualifierDefinition ? (
-							<QualifierPicker
+							<QualifierAuthoring
 								key={qualifierDefinition}
 								reference={reference}
+								revision={revision}
 								definitionRevisionId={qualifierDefinition}
 								spoiler={spoiler}
-								onPick={(valueFactId) => {
-									setQualifiers((current) => [
-										...current,
-										{ definitionRevisionId: qualifierDefinition, valueFactId },
-									]);
+								onPick={(qualifier) => {
+									setQualifiers((current) => [...current, qualifier]);
 									setQualifierDefinition(undefined);
 								}}
 							/>

@@ -33,6 +33,8 @@ export default {
 		events: `${zhHantTerminology.publisher.forms.label}與日期`,
 	},
 	nativeSemantics: {
+		authorQualifier: "填寫限定值",
+		reuseQualifier: "重用現有屬性",
 		includeInactive: "顯示已撤回和已被取代的記錄",
 		title: "屬性與關係",
 		facts: "屬性",

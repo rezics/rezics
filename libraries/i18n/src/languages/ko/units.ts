@@ -33,6 +33,8 @@ export default {
 		events: `${koTerminology.publisher.forms.label} 및 날짜`,
 	},
 	nativeSemantics: {
+		authorQualifier: "한정 값 작성",
+		reuseQualifier: "기존 속성 재사용",
 		includeInactive: "철회되거나 대체된 기록 표시",
 		title: "속성 및 관계",
 		facts: "속성",

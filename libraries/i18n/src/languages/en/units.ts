@@ -33,6 +33,8 @@ export default {
 		events: `Dates and ${enTerminology.publisher.forms.plural}`,
 	},
 	nativeSemantics: {
+		authorQualifier: "Write a qualifier value",
+		reuseQualifier: "Reuse an existing attribute",
 		includeInactive: "Show withdrawn and superseded decisions",
 		title: "Attributes and relations",
 		facts: "Attributes",

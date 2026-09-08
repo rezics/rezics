@@ -24,7 +24,9 @@ export type ParticipantDraft = {
 	target?: { reference: CatalogReference; shape: string; label: string };
 	creditedAs: string;
 };
-export type QualifierDraft = { definitionRevisionId: string; valueFactId: string };
+export type QualifierDraft =
+	| { definitionRevisionId: string; valueFactId: string }
+	| { definitionRevisionId: string; definition: DefinitionRevision; nodes: ValueDraftNode[] };
 export type Replacement = { semanticId: string; headVersion: number };
 export const SpoilerLevels = [0, 1, 2] as const;
 export function valueRules(definition: DefinitionRevision): ValueRule[] {
@@ -300,12 +302,32 @@ export function buildRelationBody(
 		new Set(qualifiers.map((value) => value.definitionRevisionId)).size !== qualifiers.length
 	)
 		return null;
+	const qualifierValues: NonNullable<WriteCatalogRelationBody["qualifiers"]> = [];
+	let inlineNodes = 0;
+	for (const qualifier of qualifiers) {
+		if ("valueFactId" in qualifier) {
+			qualifierValues.push({
+				definitionRevisionId: qualifier.definitionRevisionId,
+				valueFactId: qualifier.valueFactId,
+			});
+		} else {
+			if (qualifier.definition.id !== qualifier.definitionRevisionId) return null;
+			const value = buildFactBody(qualifier.definition, qualifier.nodes, expectedRevision, spoiler);
+			if (!value) return null;
+			inlineNodes += value.nodes.length;
+			if (inlineNodes > 512) return null;
+			qualifierValues.push({
+				definitionRevisionId: qualifier.definitionRevisionId,
+				nodes: value.nodes,
+			});
+		}
+	}
 	const body: WriteCatalogRelationBody = {
 		expectedRevision,
 		definitionRevisionId: definition.id,
 		spoiler,
 		participants: admitted,
-		qualifiers: [...qualifiers],
+		qualifiers: qualifierValues,
 		...(replaces ? { replaces } : {}),
 	};
 	return new TextEncoder().encode(JSON.stringify(body)).length <= 512_000 ? body : null;

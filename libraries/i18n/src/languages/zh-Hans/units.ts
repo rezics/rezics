@@ -33,6 +33,8 @@ export default {
 		events: `${zhHansTerminology.publisher.forms.label}与日期`,
 	},
 	nativeSemantics: {
+		authorQualifier: "填写限定值",
+		reuseQualifier: "复用已有属性",
 		includeInactive: "显示已撤回和已被取代的记录",
 		title: "属性与关系",
 		facts: "属性",

@@ -33,6 +33,8 @@ export default {
 		events: `Dates et ${frTerminology.publisher.forms.plural}`,
 	},
 	nativeSemantics: {
+		authorQualifier: "Saisir une valeur de qualification",
+		reuseQualifier: "Réutiliser un attribut existant",
 		includeInactive: "Afficher les décisions retirées et remplacées",
 		title: "Attributs et relations",
 		facts: "Attributs",

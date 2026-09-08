@@ -33,6 +33,8 @@ export default {
 		events: `${jaTerminology.publisher.forms.label}と日付`,
 	},
 	nativeSemantics: {
+		authorQualifier: "限定値を入力",
+		reuseQualifier: "既存の属性を再利用",
 		includeInactive: "取り消し済み・置換済みの記録を表示",
 		title: "属性と関係",
 		facts: "属性",
