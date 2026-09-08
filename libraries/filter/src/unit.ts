@@ -1,3 +1,5 @@
+import { UnitOwnerValues, PlatformOwnerValues } from "@rezics/reference";
+export { UnitOwnerValues } from "@rezics/reference";
 import {
 	canonicalizeContentLanguageTag,
 	ContentLanguageChannelValues,
@@ -14,29 +16,14 @@ function stringEnum<const Values extends readonly [string, ...string[]]>(values:
 	);
 }
 
-export const FilterUnitKindValues = [
-	"slug_namespace",
-	"book",
-	"software",
-	"media",
-	"video",
-	"audio",
-	"release",
-	"entity",
-	"label",
-	"tag",
-	"series",
-	"zone",
-	"zone_page",
-	"custom_theme",
-	"collection",
-	"post",
-	"poll",
-	"realm",
-	"realm_rule",
-] as const;
-export type FilterUnitKind = (typeof FilterUnitKindValues)[number];
-export const FilterUnitKind = stringEnum(FilterUnitKindValues);
+export const FilterUnitOwner = stringEnum(UnitOwnerValues);
+export type FilterUnitOwner = Static<typeof FilterUnitOwner>;
+export const FilterUnitShape = Type.String({
+	pattern: "^[a-z][a-z0-9_.-]{0,95}$",
+	minLength: 1,
+	maxLength: 96,
+});
+export type FilterUnitShape = Static<typeof FilterUnitShape>;
 
 export const FilterPostKindValues = [
 	"post",
@@ -53,17 +40,29 @@ export type FilterPostKind = (typeof FilterPostKindValues)[number];
 export const FilterPostKind = stringEnum(FilterPostKindValues);
 
 const SimpleFeedContentDefinitions = {
-	"unit:book": { group: "unit", kind: "book" },
-	"unit:software": { group: "unit", kind: "software" },
-	"unit:media": { group: "unit", kind: "media" },
-	"unit:release": { group: "unit", kind: "release" },
-	"unit:entity": { group: "unit", kind: "entity" },
-	"unit:tag": { group: "unit", kind: "tag" },
-	"unit:series": { group: "unit", kind: "series" },
-	"unit:zone": { group: "unit", kind: "zone" },
-	"unit:collection": { group: "unit", kind: "collection" },
-	"unit:poll": { group: "unit", kind: "poll" },
-	"unit:realm": { group: "unit", kind: "realm" },
+	"publishing:work": { group: "unit", owner: "publishing", shape: "work" },
+	"publishing:text_version": { group: "unit", owner: "publishing", shape: "text_version" },
+	"publishing:publication": { group: "unit", owner: "publishing", shape: "publication" },
+	"music:recording": { group: "unit", owner: "music", shape: "recording" },
+	"music:release": { group: "unit", owner: "music", shape: "release" },
+	"music:release_group": { group: "unit", owner: "music", shape: "release_group" },
+	"program:program": { group: "unit", owner: "program", shape: "program" },
+	"software:content": { group: "unit", owner: "software", shape: "content" },
+	"software:version": { group: "unit", owner: "software", shape: "version" },
+	"software:release": { group: "unit", owner: "software", shape: "release" },
+	"grouping:grouping": { group: "unit", owner: "grouping", shape: "grouping" },
+	"entity:person": { group: "unit", owner: "entity", shape: "person" },
+	"entity:organization": { group: "unit", owner: "entity", shape: "organization" },
+	"entity:character": { group: "unit", owner: "entity", shape: "character" },
+	"reference:concept": { group: "unit", owner: "reference", shape: "concept" },
+	"distribution:package": { group: "unit", owner: "distribution", shape: "package" },
+	"video:video": { group: "unit", owner: "video", shape: "video" },
+	"audio:audio": { group: "unit", owner: "audio", shape: "audio" },
+	"tag:tag": { group: "unit", owner: "tag", shape: "tag" },
+	"zone:zone": { group: "unit", owner: "zone", shape: "zone" },
+	"collection:collection": { group: "unit", owner: "collection", shape: "collection" },
+	"poll:poll": { group: "unit", owner: "poll", shape: "poll" },
+	"realm:realm": { group: "unit", owner: "realm", shape: "realm" },
 	"post:post": { group: "post", kind: "post" },
 	"post:excerpt": { group: "post", kind: "excerpt" },
 	"post:review": { group: "post", kind: "review" },
@@ -72,22 +71,34 @@ const SimpleFeedContentDefinitions = {
 	"post:picture": { group: "post", kind: "picture" },
 } as const satisfies Record<
 	string,
-	| { readonly group: "unit"; readonly kind: FilterUnitKind }
+	| { readonly group: "unit"; readonly owner: FilterUnitOwner; readonly shape: string }
 	| { readonly group: "post"; readonly kind: FilterPostKind }
 >;
 
 export const SimpleFeedContentKindValues = [
-	"unit:book",
-	"unit:software",
-	"unit:media",
-	"unit:release",
-	"unit:entity",
-	"unit:tag",
-	"unit:series",
-	"unit:zone",
-	"unit:collection",
-	"unit:poll",
-	"unit:realm",
+	"publishing:work",
+	"publishing:text_version",
+	"publishing:publication",
+	"music:recording",
+	"music:release",
+	"music:release_group",
+	"program:program",
+	"software:content",
+	"software:version",
+	"software:release",
+	"grouping:grouping",
+	"entity:person",
+	"entity:organization",
+	"entity:character",
+	"reference:concept",
+	"distribution:package",
+	"video:video",
+	"audio:audio",
+	"tag:tag",
+	"zone:zone",
+	"collection:collection",
+	"poll:poll",
+	"realm:realm",
 	"post:post",
 	"post:excerpt",
 	"post:review",
@@ -129,15 +140,6 @@ export const FilterContentLanguageValues = ["zh", "en", "ja", "ko", "de", "fr", 
 export type FilterContentLanguage = (typeof FilterContentLanguageValues)[number];
 export const FilterContentLanguage = stringEnum(FilterContentLanguageValues);
 
-export const FilterWorkReleaseStatusValues = [
-	"ongoing",
-	"hiatus",
-	"completed",
-	"cancelled",
-] as const;
-export type FilterWorkReleaseStatus = (typeof FilterWorkReleaseStatusValues)[number];
-export const FilterWorkReleaseStatus = stringEnum(FilterWorkReleaseStatusValues);
-
 export const FilterUuid = Type.String({
 	pattern:
 		"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
@@ -152,8 +154,10 @@ function inFilter<Value extends TSchema>(value: Value, maxItems: number) {
 
 export const UuidFilter = inFilter(FilterUuid, 50);
 export type UuidFilter = Static<typeof UuidFilter>;
-export const UnitKindFilter = inFilter(FilterUnitKind, FilterUnitKindValues.length);
-export type UnitKindFilter = Static<typeof UnitKindFilter>;
+export const UnitOwnerFilter = inFilter(FilterUnitOwner, UnitOwnerValues.length);
+export type UnitOwnerFilter = Static<typeof UnitOwnerFilter>;
+export const UnitShapeFilter = inFilter(FilterUnitShape, 50);
+export type UnitShapeFilter = Static<typeof UnitShapeFilter>;
 export const PostKindFilter = inFilter(FilterPostKind, FilterPostKindValues.length);
 export type PostKindFilter = Static<typeof PostKindFilter>;
 export const ContentLanguageFilter = inFilter(
@@ -238,7 +242,8 @@ export type ScoreValueFilter = Static<typeof ScoreValueFilter>;
 export const UnitReferenceFilter = Type.Object(
 	{
 		id: Type.Optional(UuidFilter),
-		kind: Type.Optional(UnitKindFilter),
+		owner: Type.Optional(UnitOwnerFilter),
+		shape: Type.Optional(UnitShapeFilter),
 	},
 	{ minProperties: 1, additionalProperties: false },
 );
@@ -396,20 +401,6 @@ export const RealmTagContextFilter = Type.Object(
 );
 export type RealmTagContextFilter = Static<typeof RealmTagContextFilter>;
 
-export const BookFilter = Type.Cyclic(
-	{
-		BookFilter: Type.Object(
-			{
-				...logicFields(Type.Ref("BookFilter")),
-				releaseStatus: Type.Optional(inFilter(FilterWorkReleaseStatus, 4)),
-			},
-			{ minProperties: 1, additionalProperties: false },
-		),
-	},
-	"BookFilter",
-);
-export type BookFilter = Static<typeof BookFilter>;
-
 function toMany<Schema extends TSchema>(schema: Schema) {
 	return Type.Union([
 		Type.Object({ some: schema }, { additionalProperties: false }),
@@ -464,7 +455,8 @@ export const UnitPredicate = Type.Cyclic(
 			{
 				...logicFields(Type.Ref("UnitPredicate")),
 				id: Type.Optional(UuidFilter),
-				kind: Type.Optional(UnitKindFilter),
+				owner: Type.Optional(UnitOwnerFilter),
+				shape: Type.Optional(UnitShapeFilter),
 				localizations: Type.Optional(toMany(LocalizationFilter)),
 				contentLanguageSupport: Type.Optional(toMany(ContentLanguageSupportFilter)),
 				realms: Type.Optional(toMany(RealmPlacementFilter)),
@@ -487,12 +479,6 @@ export const UnitPredicate = Type.Cyclic(
 				collection: Type.Optional(
 					Type.Union([
 						Type.Object({ is: CollectionFilter }, { additionalProperties: false }),
-						Type.Object({ absent: Type.Literal(true) }, { additionalProperties: false }),
-					]),
-				),
-				book: Type.Optional(
-					Type.Union([
-						Type.Object({ is: BookFilter }, { additionalProperties: false }),
 						Type.Object({ absent: Type.Literal(true) }, { additionalProperties: false }),
 					]),
 				),
@@ -570,7 +556,6 @@ export const UnitPredicateSchemaModels = {
 	PostFilter: PostFilter.$defs.PostFilter,
 	RealmTagContextFilter,
 	CollectionFilter: CollectionFilter.$defs.CollectionFilter,
-	BookFilter: BookFilter.$defs.BookFilter,
 	UnitPredicate: UnitPredicate.$defs.UnitPredicate,
 } as const;
 
@@ -642,21 +627,30 @@ function uniqueSortedStrings(values: readonly string[]): string[] {
 	return [...new Set(values)].sort();
 }
 
+const PlatformOwners: ReadonlySet<string> = new Set(PlatformOwnerValues);
+
 function createSimpleFeedContentFilter(
 	values: readonly SimpleFeedContentKind[],
 ): UnitPredicate | undefined {
-	const unitKinds: FilterUnitKind[] = [];
+	const platformOwners: FilterUnitOwner[] = [];
+	const nativeShapes = new Map<FilterUnitOwner, string[]>();
 	const postKinds: FilterPostKind[] = [];
-	for (const contentKind of normalizeSimpleFeedContentKinds(values)) {
-		const definition = SimpleFeedContentDefinitions[contentKind];
-		if (definition.group === "unit") unitKinds.push(definition.kind);
-		else postKinds.push(definition.kind);
+	for (const token of normalizeSimpleFeedContentKinds(values)) {
+		const definition = SimpleFeedContentDefinitions[token];
+		if (definition.group === "post") postKinds.push(definition.kind);
+		else if (PlatformOwners.has(definition.owner)) platformOwners.push(definition.owner);
+		else {
+			const shapes = nativeShapes.get(definition.owner) ?? [];
+			shapes.push(definition.shape);
+			nativeShapes.set(definition.owner, shapes);
+		}
 	}
 	const branches: UnitPredicate[] = [];
-	if (unitKinds.length) branches.push({ kind: { in: unitKinds } });
+	for (const [owner, shapes] of nativeShapes)
+		branches.push({ owner: { in: [owner] }, shape: { in: shapes } });
+	if (platformOwners.length) branches.push({ owner: { in: platformOwners } });
 	if (postKinds.length) branches.push({ post: { is: { kind: { in: postKinds } } } });
-	if (!branches.length) return undefined;
-	return branches.length === 1 ? branches[0] : { any: branches };
+	return !branches.length ? undefined : branches.length === 1 ? branches[0] : { any: branches };
 }
 
 export function createSimpleFeedFilter(input: {
@@ -791,26 +785,39 @@ type SimpleFeedContentBranch =
 			contentKinds: readonly SimpleFeedContentKind[];
 	  }>;
 
-const SimpleFeedUnitContentKinds = new Map<FilterUnitKind, SimpleFeedContentKind>(
-	SimpleFeedContentKindValues.flatMap((contentKind) => {
-		const definition = SimpleFeedContentDefinitions[contentKind];
-		return definition.group === "unit" ? [[definition.kind, contentKind]] : [];
-	}),
-);
-const SimpleFeedPostContentKinds = new Map<FilterPostKind, SimpleFeedContentKind>(
-	SimpleFeedContentKindValues.flatMap((contentKind) => {
-		const definition = SimpleFeedContentDefinitions[contentKind];
-		return definition.group === "post" ? [[definition.kind, contentKind]] : [];
-	}),
-);
+const SimpleFeedNativeKinds = new Map<string, SimpleFeedContentKind>();
+const SimpleFeedPlatformKinds = new Map<FilterUnitOwner, SimpleFeedContentKind>();
+const SimpleFeedPostContentKinds = new Map<FilterPostKind, SimpleFeedContentKind>();
+for (const token of SimpleFeedContentKindValues) {
+	const definition = SimpleFeedContentDefinitions[token];
+	if (definition.group === "post") SimpleFeedPostContentKinds.set(definition.kind, token);
+	else if (PlatformOwners.has(definition.owner))
+		SimpleFeedPlatformKinds.set(definition.owner, token);
+	else SimpleFeedNativeKinds.set(`${definition.owner}:${definition.shape}`, token);
+}
 
 function readSimpleFeedContentBranch(value: UnitPredicate): SimpleFeedContentBranch | undefined {
-	if (value.kind && Object.keys(value).length === 1) {
-		const contentKinds = value.kind.in.flatMap((kind) => {
-			const contentKind = SimpleFeedUnitContentKinds.get(kind);
-			return contentKind ? [contentKind] : [];
+	if (
+		value.owner &&
+		value.shape &&
+		Object.keys(value).length === 2 &&
+		value.owner.in.length === 1
+	) {
+		const owner = value.owner.in[0];
+		const contentKinds = value.shape.in.flatMap((shape) => {
+			const token = SimpleFeedNativeKinds.get(`${owner}:${shape}`);
+			return token ? [token] : [];
 		});
-		return contentKinds.length === value.kind.in.length
+		return contentKinds.length === value.shape.in.length
+			? { group: "unit", contentKinds }
+			: undefined;
+	}
+	if (value.owner && !value.shape && Object.keys(value).length === 1) {
+		const contentKinds = value.owner.in.flatMap((owner) => {
+			const token = SimpleFeedPlatformKinds.get(owner);
+			return token ? [token] : [];
+		});
+		return contentKinds.length === value.owner.in.length
 			? { group: "unit", contentKinds }
 			: undefined;
 	}
@@ -822,8 +829,8 @@ function readSimpleFeedContentBranch(value: UnitPredicate): SimpleFeedContentBra
 		Object.keys(value.post.is).length === 1
 	) {
 		const contentKinds = value.post.is.kind.in.flatMap((kind) => {
-			const contentKind = SimpleFeedPostContentKinds.get(kind);
-			return contentKind ? [contentKind] : [];
+			const token = SimpleFeedPostContentKinds.get(kind);
+			return token ? [token] : [];
 		});
 		return contentKinds.length === value.post.is.kind.in.length
 			? { group: "post", contentKinds }
@@ -835,13 +842,16 @@ function readSimpleFeedContentBranch(value: UnitPredicate): SimpleFeedContentBra
 function readSimpleFeedContentFilter(value: UnitPredicate): SimpleFeedContentKind[] | undefined {
 	const direct = readSimpleFeedContentBranch(value);
 	if (direct) return [...direct.contentKinds];
-	if (!value.any || Object.keys(value).length !== 1 || value.any.length !== 2) return undefined;
+	if (!value.any || Object.keys(value).length !== 1) return undefined;
 	const branches = value.any.map(readSimpleFeedContentBranch);
-	const unit = branches.find((branch) => branch?.group === "unit");
-	const post = branches.find((branch) => branch?.group === "post");
-	if (!unit || !post) return undefined;
-	const requested = new Set([...unit.contentKinds, ...post.contentKinds]);
-	return SimpleFeedContentKindValues.filter((contentKind) => requested.has(contentKind));
+	if (branches.some((branch) => !branch)) return undefined;
+	const tokens = normalizeSimpleFeedContentKinds(
+		branches.flatMap((branch) => branch?.contentKinds ?? []),
+	);
+	const reconstructed = createSimpleFeedContentFilter(tokens);
+	return reconstructed && canonicalUnitPredicate(reconstructed) === canonicalUnitPredicate(value)
+		? tokens
+		: undefined;
 }
 
 /**
@@ -900,7 +910,8 @@ export function readSimpleFeedFilter(value: unknown): SimpleFeedFilterSelection 
 			Object.keys(clause).length === 1 &&
 			"some" in clause.realms &&
 			clause.realms.some.realm?.id &&
-			!clause.realms.some.realm.kind &&
+			!clause.realms.some.realm.owner &&
+			!clause.realms.some.realm.shape &&
 			clause.realms.some.status?.in.length === 1 &&
 			clause.realms.some.status.in[0] === "visible" &&
 			clause.realms.some.publicationState?.in.length === 1 &&
@@ -915,7 +926,8 @@ export function readSimpleFeedFilter(value: unknown): SimpleFeedFilterSelection 
 			Object.keys(clause).length === 1 &&
 			"some" in clause.tags &&
 			clause.tags.some.tag?.id &&
-			!clause.tags.some.tag.kind &&
+			!clause.tags.some.tag.owner &&
+			!clause.tags.some.tag.shape &&
 			clause.tags.some.authority?.kind === "global" &&
 			clause.tags.some.authority.view.kind === "effective" &&
 			!clause.tags.some.authority.view.consensus &&

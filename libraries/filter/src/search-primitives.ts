@@ -63,7 +63,8 @@ export function isSearchSortAvailable(sort: SearchSort, query: string): boolean 
 /** Scalar fields that retain the general operator/value grammar. */
 const SearchGenericScalarFieldValues = [
 	"category",
-	"kind",
+	"unit-owner",
+	"unit-shape",
 	"language",
 	"content-rating",
 	"ai-disclosure",
@@ -87,20 +88,6 @@ const SearchGenericScalarFieldValues = [
 	"updated-at",
 	"published-at",
 	"closes-at",
-	"book-isbn13",
-	"book-publication-date",
-	"book-page-count",
-	"book-word-count",
-	"book-format",
-	"media-kind",
-	"media-release-date",
-	"media-runtime-minutes",
-	"media-episode-count",
-	"media-season-count",
-	"software-release-date",
-	"software-version-label",
-	"software-platform",
-	"software-requirement-tier",
 ] as const;
 
 /** Engine-independent scalar fields that a product surface may expose. */
