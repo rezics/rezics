@@ -66,6 +66,7 @@ export default {
 	inviteAssociation: "関連を招待",
 	noProposals: "関連提案はありません。",
 	capabilities: {
+		"catalog.definition.manage": "目録用語の意味と検証規則を管理",
 		"platform.access.read": "プラットフォームアクセス割り当てを表示",
 		"platform.access.manage": "プラットフォームアクセス割り当てを管理",
 		"platform.audit.read": "プラットフォーム監査ログを表示",

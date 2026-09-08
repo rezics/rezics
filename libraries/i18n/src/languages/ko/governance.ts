@@ -67,6 +67,7 @@ export default {
 	inviteAssociation: "연결 초대",
 	noProposals: "연결 제안이 없습니다.",
 	capabilities: {
+		"catalog.definition.manage": "목록 용어의 의미와 검증 규칙 관리",
 		"platform.access.read": "플랫폼 접근 할당 보기",
 		"platform.access.manage": "플랫폼 접근 할당 관리",
 		"platform.audit.read": "플랫폼 감사 로그 보기",

@@ -67,6 +67,7 @@ export default {
 	inviteAssociation: "Invite association",
 	noProposals: "There are no association proposals.",
 	capabilities: {
+		"catalog.definition.manage": "Manage catalog meanings and validation rules",
 		"platform.access.read": "View platform access assignments",
 		"platform.access.manage": "Manage platform access assignments",
 		"platform.audit.read": "View the platform audit log",

@@ -66,6 +66,7 @@ export default {
 	inviteAssociation: "邀请关联",
 	noProposals: "当前没有关联提案。",
 	capabilities: {
+		"catalog.definition.manage": "管理目录术语含义与校验规则",
 		"platform.access.read": "查看平台权限指派",
 		"platform.access.manage": "管理平台权限指派",
 		"platform.audit.read": "查看平台审计记录",

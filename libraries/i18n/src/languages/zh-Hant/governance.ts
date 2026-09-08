@@ -66,6 +66,7 @@ export default {
 	inviteAssociation: "邀請關聯",
 	noProposals: "目前沒有關聯提案。",
 	capabilities: {
+		"catalog.definition.manage": "管理目錄術語定義與驗證規則",
 		"platform.access.read": "檢視平台權限指派",
 		"platform.access.manage": "管理平台權限指派",
 		"platform.audit.read": "檢視平台稽核紀錄",

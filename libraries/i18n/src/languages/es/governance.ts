@@ -68,6 +68,7 @@ export default {
 	inviteAssociation: "Invitar a la asociación",
 	noProposals: "No hay ninguna propuesta de asociación.",
 	capabilities: {
+		"catalog.definition.manage": "Gestionar las definiciones y reglas de validación del catálogo",
 		"platform.access.read": "Consultar las asignaciones de acceso a la plataforma",
 		"platform.access.manage": "Gestionar las asignaciones de acceso a la plataforma",
 		"platform.audit.read": "Consultar el registro de auditoría de la plataforma",

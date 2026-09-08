@@ -69,6 +69,7 @@ export default {
 	inviteAssociation: "Zu Zuordnung einladen",
 	noProposals: "Es gibt keine Zuordnungsvorschläge.",
 	capabilities: {
+		"catalog.definition.manage": "Katalogbedeutungen und Prüfregeln verwalten",
 		"platform.access.read": "Vergaben von Plattformzugriff anzeigen",
 		"platform.access.manage": "Vergaben von Plattformzugriff verwalten",
 		"platform.audit.read": "Plattformprotokoll anzeigen",
