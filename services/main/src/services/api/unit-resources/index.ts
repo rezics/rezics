@@ -2,12 +2,11 @@ import { presentImageAsset } from "../image-assets/presentation";
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
 
-import { and, asc, desc, eq, gt, isNotNull, isNull, ne, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, isNotNull, isNull, ne, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import { RevisionContextBody } from "../schema";
 
-import { AuthenticationRequired } from "../../auth/errors";
 import session, { resolveIdentity } from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { unitScope } from "../../authorization/unit/scope";

@@ -3,7 +3,7 @@ import {
 	isUnitPermissionDelegable,
 	type RealmAccessSubjectRelation,
 } from "@rezics/access";
-import { and, eq, exists, gt, inArray, isNull, ne, notExists, or, sql } from "drizzle-orm";
+import { and, eq, exists, inArray, isNull, ne, notExists, or, sql } from "drizzle-orm";
 import Elysia from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { users } from "../../database/schema/auth";
@@ -26,7 +26,6 @@ import { database, type DatabaseTransaction } from "../../database";
 import {
 	entityIdentity,
 	realm,
-	unit,
 	unitAccessGrant,
 	unitAccessInvitation,
 	unitAccessRestriction,
@@ -34,6 +33,10 @@ import {
 	unitSlugAddress,
 } from "../../database/schema";
 import { createGovernanceDecision } from "../../governance/decision-service";
+import type { Authorization } from "../../authorization";
+import { listNativeAccessCandidates } from "../../units/access-candidates";
+import { readUnitStateById } from "../../units/query";
+import { readUnitPresentationsInTransaction } from "../../units/presentation-reader";
 import { UnitNotFound } from "../../units/errors";
 import { firstUnitLocalizationTitle } from "../../units/localization";
 import { RealmNotFound } from "../realms/errors";
@@ -49,7 +52,7 @@ import {
 } from "./errors";
 import {
 	ListUnitAccessCandidatesQuery,
-	ListUnitOwnershipCandidatesQuery,
+	ListOwnershipTransferCandidatesQuery,
 	RelinquishUnitOwnershipBody,
 	ReplaceUnitSubjectAccessBody,
 	TransferUnitOwnershipBody,
@@ -214,196 +217,199 @@ async function recordAccessAudit(
 async function getAccessSnapshot(
 	unitId: string,
 	scope: readonly string[],
-	viewerProfileId: string,
+	authorization: Authorization<string>,
 ) {
-	const [target] = await database
-		.select({
-			id: unit.id,
-			title: firstUnitLocalizationTitle(unit.id),
-			kind: unit.kind,
-			status: unit.status,
-			visibility: unit.visibility,
-			moderationStatus: unit.moderationStatus,
-		})
-		.from(unit)
-		.where(and(eq(unit.id, unitId), isNull(unit.deletedAt)))
-		.limit(1);
-	if (!target) throw new UnitNotFound();
+	return database.transaction(
+		async (tx) => {
+			await authorization.unit.ensureInTransaction(tx, unitId, "unit.access.manage", scope);
+			const target = await readUnitStateById(tx, unitId);
+			if (!target) throw new UnitNotFound();
+			const presentations = await readUnitPresentationsInTransaction(tx, [unitId]);
+			const viewerProfileId = authorization.profileId;
 
-	const [ownership, grants, restrictions] = await Promise.all([
-		database
-			.select({
-				profileId: unitOwnership.profileId,
-				authUserId: selfAuthUserIdForEntity(unitOwnership.profileId),
-				label: publicEntityName(unitOwnership.profileId),
-			})
-			.from(unitOwnership)
-			.where(and(eq(unitOwnership.unitId, unitId), isNull(unitOwnership.revokedAt)))
-			.limit(1),
-		database
-			.select()
-			.from(unitAccessGrant)
-			.where(
-				and(
-					eq(unitAccessGrant.unitId, unitId),
-					eq(unitAccessGrant.scope, [...scope]),
-					isNull(unitAccessGrant.revokedAt),
-					or(isNull(unitAccessGrant.expiresAt), sql`${unitAccessGrant.expiresAt} > now()`),
-				),
-			),
-		database
-			.select()
-			.from(unitAccessRestriction)
-			.where(
-				and(
-					eq(unitAccessRestriction.unitId, unitId),
-					eq(unitAccessRestriction.scope, [...scope]),
-					isNull(unitAccessRestriction.revokedAt),
-					or(
-						isNull(unitAccessRestriction.expiresAt),
-						sql`${unitAccessRestriction.expiresAt} > now()`,
+			const [ownership, grants, restrictions] = await Promise.all([
+				tx
+					.select({
+						profileId: unitOwnership.profileId,
+						authUserId: selfAuthUserIdForEntity(unitOwnership.profileId),
+						label: publicEntityName(unitOwnership.profileId),
+					})
+					.from(unitOwnership)
+					.where(and(eq(unitOwnership.unitId, unitId), isNull(unitOwnership.revokedAt)))
+					.limit(1),
+				tx
+					.select()
+					.from(unitAccessGrant)
+					.where(
+						and(
+							eq(unitAccessGrant.unitId, unitId),
+							eq(unitAccessGrant.scope, [...scope]),
+							isNull(unitAccessGrant.revokedAt),
+							or(isNull(unitAccessGrant.expiresAt), sql`${unitAccessGrant.expiresAt} > now()`),
+						),
 					),
-				),
-			),
-	]);
-
-	const subjects = new Map<
-		string,
-		{
-			subject: AccessSubject;
-			grants: Set<UnitPermission>;
-			restrictions: Set<UnitPermission>;
-			expiries: Set<number | null>;
-		}
-	>();
-	const ensureSubject = (subject: AccessSubject) => {
-		const key = subjectKey(subject);
-		const current = subjects.get(key);
-		if (current) return current;
-		const created = {
-			subject,
-			grants: new Set<UnitPermission>(),
-			restrictions: new Set<UnitPermission>(),
-			expiries: new Set<number | null>(),
-		};
-		subjects.set(key, created);
-		return created;
-	};
-	ensureSubject({ kind: "authenticated" });
-	if (target.kind === "realm")
-		ensureSubject({ kind: "realm", realmId: unitId, relation: "member" });
-	if (ownership[0]?.authUserId)
-		ensureSubject({ kind: "auth", authUserId: ownership[0].authUserId });
-	for (const grant of grants) {
-		const row = ensureSubject(grantSubject(grant));
-		row.grants.add(grant.permission);
-		row.expiries.add(grant.expiresAt?.getTime() ?? null);
-	}
-	for (const restriction of restrictions) {
-		const row = ensureSubject(restrictionSubject(restriction));
-		row.restrictions.add(restriction.permission);
-		row.expiries.add(restriction.expiresAt?.getTime() ?? null);
-	}
-
-	const authIds = [...subjects.values()].flatMap(({ subject }) =>
-		subject.kind === "auth" ? [subject.authUserId] : [],
-	);
-	const realmIds = [...subjects.values()].flatMap(({ subject }) =>
-		subject.kind === "realm" ? [subject.realmId] : [],
-	);
-	const [accounts, realms] = await Promise.all([
-		authIds.length
-			? database
-					.select({ id: users.id, label: users.name })
-					.from(users)
-					.where(inArray(users.id, authIds))
-			: [],
-		realmIds.length
-			? database
-					.select({ id: unit.id, label: firstUnitLocalizationTitle(unit.id) })
-					.from(unit)
-					.where(inArray(unit.id, realmIds))
-			: [],
-	]);
-	const labelByKey = new Map([
-		...accounts.map((row) => [`auth:${row.id}`, row.label] as const),
-		...realms.map((row) => [`realm:${row.id}`, row.label] as const),
-	]);
-	const authenticated = subjects.get("authenticated");
-	const publicRead =
-		target.status === "published" &&
-		target.moderationStatus === "approved" &&
-		(target.visibility === "public" || target.visibility === "unlisted");
-	const inheritedBase = new Set<UnitPermission>([
-		...(publicRead ? (["unit.read"] as const) : []),
-		...(authenticated?.grants ?? []),
-	]);
-	const orderedPermissions = unitPermissionsForKind(target.kind);
-	const delegablePermissions = orderedPermissions.filter(isUnitPermissionDelegable);
-
-	return {
-		unitId,
-		unitTitle: target.title,
-		unitKind: target.kind,
-		permissions: delegablePermissions,
-		authenticatedGrantablePermissions: AuthenticatedGrantableUnitPermissionValues.filter(
-			(permission) => delegablePermissions.includes(permission),
-		),
-		owner: ownership[0] ?? null,
-		canTransferOwnership: ownership[0]?.profileId === viewerProfileId,
-		canRelinquishOwnership:
-			ownership[0]?.profileId === viewerProfileId &&
-			ownership[0].profileId !== OfficialProfileIds.community,
-		subjects: [...subjects.values()]
-			.map((row) => {
-				const inherited =
-					row.subject.kind === "authenticated"
-						? publicRead
-							? ["unit.read" as const]
-							: []
-						: delegablePermissions.filter((permission) => inheritedBase.has(permission));
-				const expiryValues = [...row.expiries];
-				return {
-					subject: row.subject,
-					label:
-						row.subject.kind === "auth"
-							? (labelByKey.get(`auth:${row.subject.authUserId}`) ?? null)
-							: row.subject.kind === "realm"
-								? (labelByKey.get(`realm:${row.subject.realmId}`) ?? null)
-								: null,
-					grants: delegablePermissions.filter((permission) => row.grants.has(permission)),
-					restrictions: delegablePermissions.filter((permission) =>
-						row.restrictions.has(permission),
+				tx
+					.select()
+					.from(unitAccessRestriction)
+					.where(
+						and(
+							eq(unitAccessRestriction.unitId, unitId),
+							eq(unitAccessRestriction.scope, [...scope]),
+							isNull(unitAccessRestriction.revokedAt),
+							or(
+								isNull(unitAccessRestriction.expiresAt),
+								sql`${unitAccessRestriction.expiresAt} > now()`,
+							),
+						),
 					),
-					inherited,
-					expiresAt:
-						expiryValues.length === 1 && expiryValues[0] != null ? new Date(expiryValues[0]) : null,
+			]);
+
+			const subjects = new Map<
+				string,
+				{
+					subject: AccessSubject;
+					grants: Set<UnitPermission>;
+					restrictions: Set<UnitPermission>;
+					expiries: Set<number | null>;
+				}
+			>();
+			const ensureSubject = (subject: AccessSubject) => {
+				const key = subjectKey(subject);
+				const current = subjects.get(key);
+				if (current) return current;
+				const created = {
+					subject,
+					grants: new Set<UnitPermission>(),
+					restrictions: new Set<UnitPermission>(),
+					expiries: new Set<number | null>(),
 				};
-			})
-			.sort((left, right) => {
-				const leftIsTargetMembers =
-					left.subject.kind === "realm" &&
-					left.subject.realmId === unitId &&
-					left.subject.relation === "member";
-				const rightIsTargetMembers =
-					right.subject.kind === "realm" &&
-					right.subject.realmId === unitId &&
-					right.subject.relation === "member";
-				if (leftIsTargetMembers) return -1;
-				if (rightIsTargetMembers) return 1;
-				if (left.subject.kind === "authenticated") return -1;
-				if (right.subject.kind === "authenticated") return 1;
-				return (left.label ?? subjectKey(left.subject)).localeCompare(
-					right.label ?? subjectKey(right.subject),
-				);
-			}),
-	};
+				subjects.set(key, created);
+				return created;
+			};
+			ensureSubject({ kind: "authenticated" });
+			if (target.reference.owner === "realm")
+				ensureSubject({ kind: "realm", realmId: unitId, relation: "member" });
+			if (ownership[0]?.authUserId)
+				ensureSubject({ kind: "auth", authUserId: ownership[0].authUserId });
+			for (const grant of grants) {
+				const row = ensureSubject(grantSubject(grant));
+				row.grants.add(grant.permission);
+				row.expiries.add(grant.expiresAt?.getTime() ?? null);
+			}
+			for (const restriction of restrictions) {
+				const row = ensureSubject(restrictionSubject(restriction));
+				row.restrictions.add(restriction.permission);
+				row.expiries.add(restriction.expiresAt?.getTime() ?? null);
+			}
+
+			const authIds = [...subjects.values()].flatMap(({ subject }) =>
+				subject.kind === "auth" ? [subject.authUserId] : [],
+			);
+			const realmIds = [...subjects.values()].flatMap(({ subject }) =>
+				subject.kind === "realm" ? [subject.realmId] : [],
+			);
+			const [accounts, realms] = await Promise.all([
+				authIds.length
+					? tx
+							.select({ id: users.id, label: users.name })
+							.from(users)
+							.where(inArray(users.id, authIds))
+					: [],
+				realmIds.length
+					? tx
+							.select({ id: realm.id, label: firstUnitLocalizationTitle(realm.id) })
+							.from(realm)
+							.where(inArray(realm.id, realmIds))
+					: [],
+			]);
+			const labelByKey = new Map([
+				...accounts.map((row) => [`auth:${row.id}`, row.label] as const),
+				...realms.map((row) => [`realm:${row.id}`, row.label] as const),
+			]);
+			const authenticated = subjects.get("authenticated");
+			const publicRead =
+				target.status === "published" &&
+				target.moderationStatus === "approved" &&
+				(target.visibility === "public" || target.visibility === "unlisted");
+			const inheritedBase = new Set<UnitPermission>([
+				...(publicRead ? (["unit.read"] as const) : []),
+				...(authenticated?.grants ?? []),
+			]);
+			const orderedPermissions = unitPermissionsForKind(target.reference.owner);
+			const delegablePermissions = orderedPermissions.filter(isUnitPermissionDelegable);
+
+			return {
+				unitId,
+				unitTitle: presentations.get(unitId)?.title ?? null,
+				unitOwner: target.reference.owner,
+				shape: target.shape,
+				permissions: delegablePermissions,
+				authenticatedGrantablePermissions: AuthenticatedGrantableUnitPermissionValues.filter(
+					(permission) => delegablePermissions.includes(permission),
+				),
+				owner: ownership[0]
+					? { entityId: ownership[0].profileId, label: ownership[0].label }
+					: null,
+				canTransferOwnership: ownership[0]?.profileId === viewerProfileId,
+				canRelinquishOwnership:
+					ownership[0]?.profileId === viewerProfileId &&
+					ownership[0].profileId !== OfficialProfileIds.community,
+				subjects: [...subjects.values()]
+					.map((row) => {
+						const inherited =
+							row.subject.kind === "authenticated"
+								? publicRead
+									? ["unit.read" as const]
+									: []
+								: delegablePermissions.filter((permission) => inheritedBase.has(permission));
+						const expiryValues = [...row.expiries];
+						return {
+							subject: row.subject,
+							label:
+								row.subject.kind === "auth"
+									? (labelByKey.get(`auth:${row.subject.authUserId}`) ?? null)
+									: row.subject.kind === "realm"
+										? (labelByKey.get(`realm:${row.subject.realmId}`) ?? null)
+										: null,
+							grants: delegablePermissions.filter((permission) => row.grants.has(permission)),
+							restrictions: delegablePermissions.filter((permission) =>
+								row.restrictions.has(permission),
+							),
+							inherited,
+							expiresAt:
+								expiryValues.length === 1 && expiryValues[0] != null
+									? new Date(expiryValues[0])
+									: null,
+						};
+					})
+					.sort((left, right) => {
+						const leftIsTargetMembers =
+							left.subject.kind === "realm" &&
+							left.subject.realmId === unitId &&
+							left.subject.relation === "member";
+						const rightIsTargetMembers =
+							right.subject.kind === "realm" &&
+							right.subject.realmId === unitId &&
+							right.subject.relation === "member";
+						if (leftIsTargetMembers) return -1;
+						if (rightIsTargetMembers) return 1;
+						if (left.subject.kind === "authenticated") return -1;
+						if (right.subject.kind === "authenticated") return 1;
+						return (left.label ?? subjectKey(left.subject)).localeCompare(
+							right.label ?? subjectKey(right.subject),
+						);
+					}),
+			};
+		},
+		{ isolationLevel: "repeatable read" },
+	);
 }
 
 function eligibleOwnershipCandidateCondition(unitId: string) {
 	return and(
 		ne(entityIdentity.id, OfficialProfileIds.community),
-		isNull(unit.deletedAt),
+		isNull(entityIdentity.deletedAt),
+		sql`exists(select 1 from public.auth_entity active_self join public.users active_account on active_account.id=active_self.auth_user_id where active_self.entity_id=${entityIdentity.id} and active_self.state='active' and active_account.erased_at is null)`,
 		exists(
 			database
 				.select({ id: unitAccessInvitation.id })
@@ -477,7 +483,6 @@ async function isEligibleOwnershipCandidate(
 	const [candidate] = await tx
 		.select({ id: entityIdentity.id })
 		.from(entityIdentity)
-		.innerJoin(unit, eq(unit.id, entityIdentity.id))
 		.where(and(eq(entityIdentity.id, profileId), eligibleOwnershipCandidateCondition(unitId)))
 		.limit(1);
 	return Boolean(candidate);
@@ -498,9 +503,9 @@ export default new Elysia({ prefix: "/unit" })
 			},
 			detail: { summary: "Get Unit access configuration", tags: ["Governance"] },
 		},
-		async ({ authorization, entity, params, query }) => {
+		async ({ authorization, params, query }) => {
 			await authorization.unit.ensure(params.unitId, "unit.access.manage", query.scope ?? []);
-			return getAccessSnapshot(params.unitId, query.scope ?? [], entity.id);
+			return getAccessSnapshot(params.unitId, query.scope ?? [], authorization);
 		},
 	)
 	.put(
@@ -538,11 +543,7 @@ export default new Elysia({ prefix: "/unit" })
 			await ensureSubjectExists(body.subject);
 			await database.transaction(async (tx) => {
 				await lockUnitAccessState(tx, [params.unitId]);
-				const [target] = await tx
-					.select({ kind: unit.kind })
-					.from(unit)
-					.where(and(eq(unit.id, params.unitId), isNull(unit.deletedAt)))
-					.limit(1);
+				const target = await readUnitStateById(tx, params.unitId);
 				if (!target) throw new UnitNotFound();
 				await authorization.unit.ensureInTransaction(
 					tx,
@@ -555,7 +556,7 @@ export default new Elysia({ prefix: "/unit" })
 				for (const permission of [...requestedGrants, ...requestedRestrictions]) {
 					if (
 						!isUnitPermissionDelegable(permission) ||
-						!isUnitPermissionApplicable(target.kind, permission)
+						!isUnitPermissionApplicable(target.reference.owner, permission)
 					)
 						throw new UnitAccessConfigurationInvalid();
 					await authorization.unit.ensureInTransaction(tx, params.unitId, permission, body.scope);
@@ -571,7 +572,7 @@ export default new Elysia({ prefix: "/unit" })
 				if (
 					body.subject.kind === "realm" &&
 					body.subject.relation === "access_manager" &&
-					target.kind === "realm"
+					target.reference.owner === "realm"
 				)
 					throw new UnitAccessConfigurationInvalid();
 				const grantSet = new Set(requestedGrants);
@@ -710,7 +711,7 @@ export default new Elysia({ prefix: "/unit" })
 					},
 				});
 			});
-			return getAccessSnapshot(params.unitId, body.scope, entity.id);
+			return getAccessSnapshot(params.unitId, body.scope, authorization);
 		},
 	)
 	.get(
@@ -726,46 +727,16 @@ export default new Elysia({ prefix: "/unit" })
 			detail: { summary: "Search Unit access candidates", tags: ["Governance"] },
 		},
 		async ({ authorization, params, query }) => {
-			await authorization.unit.ensure(params.unitId, "unit.access.manage");
-			const search = query.query?.trim();
-			if (query.kind === "auth") {
-				const rows = await database
-					.select({ id: users.id, label: users.name })
-					.from(users)
-					.where(
-						and(
-							isNull(users.erasedAt),
-							search ? sql`${users.name} ilike ${`%${search}%`}` : undefined,
-						),
-					)
-					.orderBy(users.id)
-					.limit(query.limit ?? 20);
-				return {
-					items: rows.map((row) => ({
-						subject: { kind: "auth" as const, authUserId: row.id },
-						label: row.label,
-					})),
-				};
-			}
-			const rows = await database
-				.select({ id: unit.id, label: firstUnitLocalizationTitle(unit.id) })
-				.from(unit)
-				.where(
-					and(
-						eq(unit.kind, "realm"),
-						isNull(unit.deletedAt),
-						search
-							? sql`coalesce(${firstUnitLocalizationTitle(unit.id)}, '') ilike ${`%${search}%`}`
-							: undefined,
-					),
-				)
-				.orderBy(unit.id)
-				.limit(query.limit ?? 20);
+			const result = await listNativeAccessCandidates(authorization, {
+				unitId: params.unitId,
+				kind: query.kind,
+				query: query.query,
+				cursor: query.cursor,
+				limit: query.limit ?? 20,
+			});
 			return {
-				items: rows.map((row) => ({
-					subject: { kind: "realm" as const, realmId: row.id, relation: "member" as const },
-					label: row.label,
-				})),
+				items: result.items.map(({ subject, label }) => ({ subject, label })),
+				nextCursor: result.nextCursor,
 			};
 		},
 	)
@@ -783,17 +754,13 @@ export default new Elysia({ prefix: "/unit" })
 		},
 		async ({ authorization, params, query }) => {
 			const scope = query.scope ?? [];
-			const [target] = await database
-				.select({ kind: unit.kind })
-				.from(unit)
-				.where(eq(unit.id, params.unitId))
-				.limit(1);
+			const target = await readUnitStateById(database, params.unitId);
 			if (!target) throw new UnitNotFound();
 			return {
 				unitId: params.unitId,
 				scope,
 				decisions: await Promise.all(
-					unitPermissionsForKind(target.kind).map(async (permission) => ({
+					unitPermissionsForKind(target.reference.owner).map(async (permission) => ({
 						permission,
 						decision: await authorization.unit.decide(params.unitId, permission, scope),
 					})),
@@ -806,7 +773,7 @@ export default new Elysia({ prefix: "/unit" })
 		{
 			access: "session-only",
 			params: UnitGovernanceParams,
-			query: ListUnitOwnershipCandidatesQuery,
+			query: ListOwnershipTransferCandidatesQuery,
 			response: {
 				[StatusCodes.OK]: UnitOwnershipCandidateListResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
@@ -815,44 +782,52 @@ export default new Elysia({ prefix: "/unit" })
 			detail: { summary: "Search eligible Unit ownership recipients", tags: ["Governance"] },
 		},
 		async ({ authorization, params, query }) => {
-			await authorization.unit.ensure(params.unitId, "unit.ownership.transfer");
-			const search = query.query?.trim();
-			const limit = query.limit ?? 50;
-			const rows = await database
-				.select({
-					profileId: entityIdentity.id,
-					label: publicEntityName(entityIdentity.id),
-					slug: unitSlugAddress.slug,
-				})
-				.from(entityIdentity)
-				.innerJoin(unit, eq(unit.id, entityIdentity.id))
-				.leftJoin(
-					unitSlugAddress,
-					and(
-						eq(unitSlugAddress.targetUnitId, entityIdentity.id),
-						eq(unitSlugAddress.kind, "canonical"),
-					),
-				)
-				.where(
-					and(
-						eligibleOwnershipCandidateCondition(params.unitId),
-						query.cursor ? gt(entityIdentity.id, query.cursor) : undefined,
-						search
-							? or(
-									sql`${entityIdentity.id}::text ilike ${`%${search}%`}`,
-									sql`coalesce(${publicEntityName(entityIdentity.id)}, '') ilike ${`%${search}%`}`,
-									sql`coalesce(${unitSlugAddress.slug}, '') ilike ${`%${search}%`}`,
+			const page = await listNativeAccessCandidates(authorization, {
+				unitId: params.unitId,
+				kind: "auth",
+				query: query.query,
+				cursor: query.cursor,
+				limit: query.limit ?? 50,
+				permission: "unit.ownership.transfer",
+			});
+			const ids = page.items.flatMap((item) => (item.entityId ? [item.entityId] : []));
+			return database.transaction(
+				async (tx) => {
+					await authorization.unit.ensureInTransaction(
+						tx,
+						params.unitId,
+						"unit.ownership.transfer",
+					);
+					const eligible = ids.length
+						? await tx
+								.select({ entityId: entityIdentity.id, slug: unitSlugAddress.slug })
+								.from(entityIdentity)
+								.leftJoin(
+									unitSlugAddress,
+									and(
+										eq(unitSlugAddress.targetUnitId, entityIdentity.id),
+										eq(unitSlugAddress.kind, "canonical"),
+									),
 								)
-							: undefined,
-					),
-				)
-				.orderBy(entityIdentity.id)
-				.limit(limit + 1);
-			const items = rows.slice(0, limit);
-			return {
-				items,
-				nextCursor: rows.length > limit ? (items.at(-1)?.profileId ?? null) : null,
-			};
+								.where(
+									and(
+										inArray(entityIdentity.id, ids),
+										eligibleOwnershipCandidateCondition(params.unitId),
+									),
+								)
+								.limit(ids.length)
+						: [];
+					const byId = new Map(eligible.map((row) => [row.entityId, row]));
+					return {
+						items: page.items.flatMap((item) => {
+							const match = item.entityId ? byId.get(item.entityId) : undefined;
+							return match ? [{ ...match, label: item.label }] : [];
+						}),
+						nextCursor: page.nextCursor,
+					};
+				},
+				{ isolationLevel: "repeatable read" },
+			);
 		},
 	)
 	.put(
@@ -879,14 +854,14 @@ export default new Elysia({ prefix: "/unit" })
 			return database.transaction(async (tx) => {
 				await lockUnitAccessState(tx, [params.unitId]);
 				await authorization.unit.ensureInTransaction(tx, params.unitId, "unit.ownership.transfer");
-				if (body.expectedOwnerProfileId !== entity.id) throw new UnitOwnershipChanged();
-				if (!(await isEligibleOwnershipCandidate(tx, params.unitId, body.targetProfileId)))
+				if (body.expectedOwnerEntityId !== entity.id) throw new UnitOwnershipChanged();
+				if (!(await isEligibleOwnershipCandidate(tx, params.unitId, body.targetEntityId)))
 					throw new UnitOwnershipTargetIneligible();
 				const now = new Date();
 				const replaced = await replaceUnitOwnership(tx, {
 					unitId: params.unitId,
-					expectedOwnerProfileId: body.expectedOwnerProfileId,
-					targetProfileId: body.targetProfileId,
+					expectedOwnerProfileId: body.expectedOwnerEntityId,
+					targetProfileId: body.targetEntityId,
 					actorProfileId: entity.id,
 					now,
 				});
@@ -900,7 +875,7 @@ export default new Elysia({ prefix: "/unit" })
 					unitId: params.unitId,
 					metadata: {
 						previousOwnerProfileId: replaced.previousOwnerProfileId,
-						ownerProfileId: body.targetProfileId,
+						ownerProfileId: body.targetEntityId,
 					},
 				});
 				const [owner] = await tx
@@ -909,7 +884,7 @@ export default new Elysia({ prefix: "/unit" })
 						label: publicEntityName(entityIdentity.id),
 					})
 					.from(entityIdentity)
-					.where(eq(entityIdentity.id, body.targetProfileId))
+					.where(eq(entityIdentity.id, body.targetEntityId))
 					.limit(1);
 				if (!owner) throw new UnitOwnershipTargetIneligible();
 				return {
@@ -942,13 +917,13 @@ export default new Elysia({ prefix: "/unit" })
 			const result = await database.transaction(async (tx) => {
 				await lockUnitAccessState(tx, [params.unitId]);
 				await authorization.unit.ensureInTransaction(tx, params.unitId, "unit.ownership.transfer");
-				if (body.expectedOwnerProfileId !== entity.id) throw new UnitOwnershipChanged();
-				if (body.expectedOwnerProfileId === OfficialProfileIds.community)
+				if (body.expectedOwnerEntityId !== entity.id) throw new UnitOwnershipChanged();
+				if (body.expectedOwnerEntityId === OfficialProfileIds.community)
 					throw new UnitOwnershipRelinquishmentForbidden();
 				const now = new Date();
 				const replaced = await replaceUnitOwnership(tx, {
 					unitId: params.unitId,
-					expectedOwnerProfileId: body.expectedOwnerProfileId,
+					expectedOwnerProfileId: body.expectedOwnerEntityId,
 					targetProfileId: OfficialProfileIds.community,
 					actorProfileId: entity.id,
 					now,

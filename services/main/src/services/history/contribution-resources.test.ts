@@ -27,9 +27,6 @@ import { listCurrentProfileContributionResources } from "./contribution-resource
 
 const ProfileId = "019b76da-a800-7300-8000-000000000001";
 const authorization = new Authorization(ProfileId, "019b76da-a800-7300-8000-000000000009");
-vi.spyOn(authorization.unit, "readableUnitIdsInTransaction").mockImplementation(
-	async (_tx, ids) => new Set(ids),
-);
 const ResourceUnitId = "019b76da-a800-7300-8000-000000000002";
 
 function contributionCandidate(overrides: Record<string, unknown> = {}) {
@@ -57,6 +54,10 @@ function contributionCandidate(overrides: Record<string, unknown> = {}) {
 
 describe("public contribution resources", () => {
 	beforeEach(() => {
+		vi.spyOn(authorization.unit, "readableUnitIdsInTransaction").mockImplementation(
+			async (_tx, ids) => new Set(ids),
+		);
+
 		execute.mockReset();
 		getPublicCanonicalUnitSlugAddresses.mockReset();
 		getPublicCanonicalUnitSlugAddresses.mockResolvedValue(new Map());

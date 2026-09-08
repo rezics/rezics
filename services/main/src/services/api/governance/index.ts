@@ -17,7 +17,6 @@ import {
 	realm,
 	realmRule,
 	realmRuleRevision,
-	unit,
 	unitLocalization,
 } from "../../database/schema";
 import {
@@ -123,8 +122,7 @@ async function loadGovernanceRuleSource(
 				title: resolvedUnitLocalizationTitle(realm.id, localizationLanguages),
 			})
 			.from(realm)
-			.innerJoin(unit, and(eq(unit.id, realm.id), eq(unit.kind, "realm"), isNull(unit.deletedAt)))
-			.where(eq(realm.id, realmId))
+			.where(and(eq(realm.id, realmId), isNull(realm.deletedAt)))
 			.limit(1),
 		tx
 			.select({ id: realmRuleRevision.id })

@@ -314,13 +314,13 @@ export const CreateUnitAccessInvitationBody = t.Object(
 );
 export const TransferUnitOwnershipBody = t.Object(
 	{
-		expectedOwnerProfileId: Uuid,
-		targetProfileId: Uuid,
+		expectedOwnerEntityId: Uuid,
+		targetEntityId: Uuid,
 	},
 	{ additionalProperties: false },
 );
 export const RelinquishUnitOwnershipBody = t.Object(
-	{ expectedOwnerProfileId: Uuid },
+	{ expectedOwnerEntityId: Uuid },
 	{ additionalProperties: false },
 );
 export const OverrideUnitOwnershipBody = t.Object(
@@ -339,6 +339,14 @@ export const UnitOwnershipResponse = t.Object({
 		label: t.Nullable(t.String()),
 	}),
 });
+export const ListOwnershipTransferCandidatesQuery = t.Object(
+	{
+		query: t.Optional(t.String({ maxLength: 200 })),
+		cursor: t.Optional(t.String({ maxLength: 8192 })),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 50 })),
+	},
+	{ additionalProperties: false },
+);
 export const ListUnitOwnershipCandidatesQuery = t.Object(
 	{
 		query: t.Optional(
@@ -579,6 +587,7 @@ export const ListUnitAccessCandidatesQuery = t.Object(
 	{
 		kind: t.Union([t.Literal("auth"), t.Literal("realm")]),
 		query: t.Optional(t.String({ maxLength: 200 })),
+		cursor: t.Optional(t.String({ maxLength: 8192 })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 	},
 	{ additionalProperties: false },
@@ -684,12 +693,13 @@ const UnitAccessSubjectRow = t.Object({
 export const UnitAccessSnapshotResponse = t.Object({
 	unitId: Uuid,
 	unitTitle: t.Nullable(t.String()),
-	unitKind: t.String(),
+	unitOwner: t.UnionEnum(UnitOwnerValues),
+	shape: t.String({ minLength: 1 }),
 	permissions: t.Array(DelegableUnitPermission),
 	authenticatedGrantablePermissions: t.Array(
 		t.UnionEnum(AuthenticatedGrantableUnitPermissionValues),
 	),
-	owner: t.Nullable(t.Object({ profileId: Uuid, label: t.Nullable(t.String()) })),
+	owner: t.Nullable(t.Object({ entityId: Uuid, label: t.Nullable(t.String()) })),
 	canTransferOwnership: t.Boolean(),
 	canRelinquishOwnership: t.Boolean(),
 	subjects: t.Array(UnitAccessSubjectRow),
@@ -701,6 +711,7 @@ export const UnitAccessCandidateListResponse = t.Object({
 			label: t.Nullable(t.String()),
 		}),
 	),
+	nextCursor: t.Nullable(t.String()),
 });
 export const UnitOwnershipCandidateListResponse = t.Object({
 	items: t.Array(
@@ -717,7 +728,12 @@ const UnitAllowedDecisionResponse = t.Union([
 	t.Object(
 		{
 			allowed: t.Literal(true),
-			source: t.Union([t.Literal("public"), t.Literal("platform"), t.Literal("owner")]),
+			source: t.Union([
+				t.Literal("public"),
+				t.Literal("platform"),
+				t.Literal("owner"),
+				t.Literal("native"),
+			]),
 		},
 		{ additionalProperties: false },
 	),
