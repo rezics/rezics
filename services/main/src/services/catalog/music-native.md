@@ -258,3 +258,14 @@ index supports bounded draft pages. Estimate 16 bytes of row data and 48–80 by
 of index storage per contextual fragment: 32–48 GB at 500 million fragments,
 192–288 GB at 3 billion, before replicas/WAL. Source admission still caps one
 credit batch at 128 members and 512 KB; larger credits use bounded append batches.
+
+On 2026-09-08, `check-music-credit-access.ts` passed 14 rollback-only PostgreSQL
+checks on the isolated DB59 target: selected grants cannot use account creator
+rights for unrelated drafts or sealed credits; contextual creation/append/seal
+requires the root's write authority; native readers expose a referenced credit
+while hiding an unreadable recording; an authorized public native referencer
+exposes its sealed credit; creation contexts are immutable and cannot target a
+retired identity. These are SQL authorization checks, not UI acceptance.
+Native component writes gather at most 128 credit identities and 256 explicitly
+named history rows. Current reference proofs use owner/component/key head probes;
+no credit-to-whole-catalog reverse scan or unrestricted history search is used.

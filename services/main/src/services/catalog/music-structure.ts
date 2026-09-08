@@ -1,9 +1,9 @@
-import { and, eq, getTableColumns, sql, type SQL } from "drizzle-orm";
+import { and, eq, inArray, getTableColumns, sql, type SQL } from "drizzle-orm";
+import { requireMusicCreditAccess } from "./music-credit-access";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { runParticipationSavepoint } from "../participation/policy";
 import {
-	musicArtistCredit,
 	musicAlternativeTrack,
 	musicComponentRevision,
 	musicComponentHead,
@@ -14,12 +14,7 @@ import {
 	assertMusicMediumFormatCompatibility,
 	assertMusicMediumAttributeValue,
 } from "./music-medium-attributes";
-import {
-	CatalogAccessDenied,
-	CatalogRevisionConflict,
-	loadCatalogIdentity,
-	recordCatalogChange,
-} from "./storage";
+import { CatalogRevisionConflict, loadCatalogIdentity, recordCatalogChange } from "./storage";
 import {
 	MusicComponentBatchSchema,
 	MusicComponentKeys,
@@ -54,20 +49,6 @@ export async function readMusicComponentHead(
 		)
 		.limit(1);
 	return row ?? null;
-}
-
-async function readableCredit(tx: DatabaseTransaction, actor: string, id: string) {
-	const [credit] = await tx
-		.select()
-		.from(musicArtistCredit)
-		.where(eq(musicArtistCredit.id, id))
-		.limit(1);
-	if (
-		!credit?.sealedAt ||
-		credit.retiredAt ||
-		(!credit.publiclyReusable && credit.createdByAuthUserId !== actor)
-	)
-		throw new CatalogAccessDenied("Artist credit is not available to this actor");
 }
 
 async function validateReferences(
@@ -113,17 +94,6 @@ async function validateReferences(
 				{ owner: "music", shape: musicComponentOwner(component).shape },
 				`${component}.${column}`,
 			);
-	}
-	if (typeof row.artist_credit_id === "string")
-		await readableCredit(tx, actor, row.artist_credit_id);
-	if (typeof row.alternative_track_id === "string") {
-		const [alternative] = await tx
-			.select()
-			.from(musicAlternativeTrack)
-			.where(eq(musicAlternativeTrack.id, row.alternative_track_id))
-			.limit(1);
-		if (!alternative) throw new TypeError("Alternative track is missing");
-		if (alternative.artistCreditId) await readableCredit(tx, actor, alternative.artistCreditId);
 	}
 	if (component === "music_medium")
 		await assertMusicMediumFormatCompatibility(
@@ -216,6 +186,39 @@ export async function mutateMusicComponents(
 				throw new TypeError("Cannot remove an absent component");
 			prepared.push({ operation, head, row: body, remove });
 		}
+		const creditIds = prepared.flatMap((item) =>
+			!item.remove && typeof item.row.artist_credit_id === "string"
+				? [item.row.artist_credit_id]
+				: [],
+		);
+		const alternativeIds = [
+			...new Set(
+				prepared.flatMap((item) =>
+					!item.remove && typeof item.row.alternative_track_id === "string"
+						? [item.row.alternative_track_id]
+						: [],
+				),
+			),
+		];
+		if (alternativeIds.length) {
+			const alternatives = await inner
+				.select({ id: musicAlternativeTrack.id, creditId: musicAlternativeTrack.artistCreditId })
+				.from(musicAlternativeTrack)
+				.where(inArray(musicAlternativeTrack.id, alternativeIds))
+				.limit(alternativeIds.length);
+			if (alternatives.length !== alternativeIds.length)
+				throw new TypeError("Alternative track is missing");
+			for (const alternative of alternatives)
+				if (alternative.creditId) creditIds.push(alternative.creditId);
+		}
+		await requireMusicCreditAccess(inner, actor, creditIds, {
+			reference,
+			write: true,
+			historyIds: prepared.flatMap((item) => [
+				...(item.head ? [item.head.id] : []),
+				...(item.operation.action === "restore" ? [item.operation.historyId] : []),
+			]),
+		});
 		const revision = await recordCatalogChange(
 			inner,
 			reference,

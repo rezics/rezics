@@ -1,13 +1,13 @@
-import { and, eq, gt, inArray } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import type { DatabaseTransaction } from "../database";
+import { musicCreditReferenceHeads, requireMusicCreditAccess } from "./music-credit-access";
 import { assertMusicMediumFormatCompatibility } from "./music-medium-attributes";
 import { assertCatalogDefinitionTarget } from "./definitions";
 import {
 	musicDiscToc,
 	musicDiscTocOffset,
-	musicArtistCredit,
 	musicAlternativeTrack,
 	musicMedium,
 	musicMediumPresentation,
@@ -32,7 +32,6 @@ import {
 } from "./contracts";
 import {
 	assertReadableTargets,
-	CatalogAccessDenied,
 	CatalogReferenceNotFound,
 	loadCatalogIdentity,
 	recordCatalogChange,
@@ -91,24 +90,26 @@ async function requirePresentationCredits(
 	tx: DatabaseTransaction,
 	actor: string | null,
 	input: readonly (string | null | undefined)[],
+	context: {
+		reference: CatalogReference;
+		component: string;
+		keys: readonly string[];
+		write?: boolean;
+	},
 ) {
 	const ids = [...new Set(input.filter((id): id is string => id != null))];
 	if (!ids.length) return;
-	const credits = await tx
-		.select()
-		.from(musicArtistCredit)
-		.where(inArray(musicArtistCredit.id, ids))
-		.limit(ids.length);
-	if (
-		credits.length !== ids.length ||
-		credits.some(
-			(credit) =>
-				!credit.sealedAt ||
-				credit.retiredAt ||
-				(!credit.publiclyReusable && (actor === null || credit.createdByAuthUserId !== actor)),
-		)
-	)
-		throw new CatalogAccessDenied("Presentation artist credit is not available to this actor");
+	const historyIds = await musicCreditReferenceHeads(
+		tx,
+		context.reference.id,
+		context.component,
+		context.keys,
+	);
+	await requireMusicCreditAccess(tx, actor, ids, {
+		reference: context.reference,
+		write: context.write,
+		historyIds,
+	});
 }
 
 /** @alpha @remarks Native authoring contract; callers supply an authenticated actor and transaction. */
@@ -177,7 +178,11 @@ export async function readMusicReleaseMetadata(
 	if (!row) throw new CatalogReferenceNotFound("Music release is missing");
 	if (row.releaseGroupId)
 		await assertReadableTargets(tx, [{ owner: "music", id: row.releaseGroupId }], actor);
-	await requirePresentationCredits(tx, actor, [row.artistCreditId]);
+	await requirePresentationCredits(tx, actor, [row.artistCreditId], {
+		reference: release,
+		component: "music_release",
+		keys: [release.id],
+	});
 	return { ...row, revision: identity.revision };
 }
 
@@ -590,7 +595,11 @@ export async function readMusicRecordingMetadata(
 		.where(eq(musicRecording.id, recording.id))
 		.limit(1);
 	if (!row) throw new CatalogReferenceNotFound("Music recording is missing");
-	await requirePresentationCredits(tx, actor, [row.artistCreditId]);
+	await requirePresentationCredits(tx, actor, [row.artistCreditId], {
+		reference: recording,
+		component: "music_recording",
+		keys: [recording.id],
+	});
 	return { ...row, revision: identity.revision };
 }
 
@@ -618,7 +627,12 @@ export async function editMusicRecordingMetadata(
 		)
 		.parse(input);
 	await requireMusic(tx, recording, actor, "recording", true);
-	await requirePresentationCredits(tx, actor, [value.artistCreditId]);
+	await requirePresentationCredits(tx, actor, [value.artistCreditId], {
+		reference: recording,
+		component: "music_recording",
+		keys: [recording.id],
+		write: true,
+	});
 	const revision = await recordCatalogChange(
 		tx,
 		recording,
@@ -733,7 +747,11 @@ export async function readMusicReleaseGroupMetadata(
 		.where(eq(musicReleaseGroup.id, group.id))
 		.limit(1);
 	if (!row) throw new CatalogReferenceNotFound("Music release group is missing");
-	await requirePresentationCredits(tx, actor, [row.artistCreditId]);
+	await requirePresentationCredits(tx, actor, [row.artistCreditId], {
+		reference: group,
+		component: "music_release_group",
+		keys: [group.id],
+	});
 	return { ...row, revision: identity.revision };
 }
 
@@ -846,7 +864,12 @@ export async function addMusicReleasePresentation(
 ) {
 	const value = releasePresentationInput.parse(input);
 	await requireMusic(tx, release, actor, "release", true);
-	await requirePresentationCredits(tx, actor, [value.artistCreditId]);
+	await requirePresentationCredits(tx, actor, [value.artistCreditId], {
+		reference: release,
+		component: "music_release",
+		keys: [release.id],
+		write: true,
+	});
 	await requireVocabulary(
 		tx,
 		value.typeRevisionId,
@@ -892,6 +915,11 @@ export async function listMusicReleasePresentations(
 		tx,
 		actor,
 		rows.map((row) => row.artistCreditId),
+		{
+			reference: release,
+			component: "music_release_presentation",
+			keys: rows.map((row) => row.id),
+		},
 	);
 	return rows;
 }
@@ -991,7 +1019,12 @@ export async function addMusicTrackPresentation(
 		)
 		.parse(input);
 	await requireMusic(tx, release, actor, "release", true);
-	await requirePresentationCredits(tx, actor, [value.artistCreditId]);
+	await requirePresentationCredits(tx, actor, [value.artistCreditId], {
+		reference: release,
+		component: "music_track_occurrence",
+		keys: [value.trackId],
+		write: true,
+	});
 	const [medium] = await tx
 		.select({ mediumId: musicMediumPresentation.mediumId })
 		.from(musicMediumPresentation)
@@ -1074,6 +1107,11 @@ export async function listMusicTrackPresentations(
 		tx,
 		actor,
 		rows.map((row) => row.artistCreditId),
+		{
+			reference: release,
+			component: "music_track_presentation",
+			keys: rows.map((row) => `${mediumPresentationId}/${row.trackId}`),
+		},
 	);
 	return rows;
 }

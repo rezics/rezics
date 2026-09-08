@@ -28,7 +28,8 @@ import {
 } from "../database/schema/catalog-software";
 import { referenceArea } from "../database/schema/catalog-reference";
 import { musicIdentity } from "../database/schema/catalog-identity";
-import { readCatalogAuthorityScope } from "../participation/policy";
+import { readCatalogAuthorityScope, catalogIdentityReadPredicate } from "../participation/policy";
+import { requireMusicCreditAccess, musicCreditReferenceHeads } from "./music-credit-access";
 import {
 	CatalogPartialDateSchema,
 	CatalogReferenceSchema,
@@ -298,21 +299,23 @@ async function requireCredit(
 	tx: DatabaseTransaction,
 	creditId: string | null | undefined,
 	actor: string,
+	context?: CatalogReference,
 ) {
 	if (!creditId) return;
-	z.uuid().parse(creditId);
-	const [credit] = await tx
-		.select()
-		.from(musicArtistCredit)
-		.where(eq(musicArtistCredit.id, creditId))
-		.limit(1);
-	if (
-		!credit ||
-		!credit.sealedAt ||
-		credit.retiredAt ||
-		(!credit.publiclyReusable && credit.createdByAuthUserId !== actor)
-	)
-		throw new CatalogAccessDenied("Artist credit is not available to this actor");
+	await requireMusicCreditAccess(
+		tx,
+		actor,
+		[creditId],
+		context
+			? {
+					reference: context,
+					write: true,
+					historyIds: await musicCreditReferenceHeads(tx, context.id, "music_release", [
+						context.id,
+					]),
+				}
+			: undefined,
+	);
 }
 
 export async function createMusicalWork(tx: DatabaseTransaction, actor: string, name: NativeName) {
@@ -443,7 +446,7 @@ export async function addMusicTrack(
 ) {
 	await requireShape(tx, release, actor, "music", "release", true);
 	if (input.recording) await requireShape(tx, input.recording, actor, "music", "recording");
-	await requireCredit(tx, input.artistCreditId, actor);
+	await requireCredit(tx, input.artistCreditId, actor, release);
 	const value = z
 		.strictObject({
 			mediumId: z.uuid(),
@@ -491,8 +494,10 @@ export async function readMusicTracks(
 	z.number().int().min(-1).max(Number.MAX_SAFE_INTEGER).parse(afterPosition);
 	z.number().int().min(1).max(100).parse(limit);
 	const track = musicTrackOccurrence;
-	const recordingVisible = sql`exists (select 1 from ${musicIdentity} where ${musicIdentity.id} = ${track.recordingId} and ${musicIdentity.deletedAt} is null and ((${musicIdentity.createdByAuthUserId} = ${actor}::uuid) is true or (${musicIdentity.visibility} in ('public', 'unlisted') and ${musicIdentity.status} = 'published' and ${musicIdentity.moderationStatus} = 'approved')))`;
-	const creditVisible = sql`exists (select 1 from ${musicArtistCredit} where ${musicArtistCredit.id} = ${track.artistCreditId} and ${musicArtistCredit.retiredAt} is null and ((${musicArtistCredit.createdByAuthUserId} = ${actor}::uuid) is true or ${musicArtistCredit.publiclyReusable}))`;
+	const scope = await readCatalogAuthorityScope(tx, actor);
+	const recordingVisible = sql`exists (select 1 from ${musicIdentity} where ${musicIdentity.id} = ${track.recordingId} and ${catalogIdentityReadPredicate(scope, "music", musicIdentity)})`;
+	// This row is the actual authorized native referencer; the credit fragment is not an independent catalog identity.
+	const creditVisible = sql`exists (select 1 from ${musicArtistCredit} where ${musicArtistCredit.id} = ${track.artistCreditId} and ${musicArtistCredit.sealedAt} is not null and ${musicArtistCredit.retiredAt} is null)`;
 	return tx
 		.select({
 			releaseId: track.releaseId,
@@ -514,6 +519,7 @@ export async function readMusicTracks(
 		.where(
 			and(
 				eq(track.releaseId, release.id),
+				sql`exists (select 1 from ${musicIdentity} where ${musicIdentity.id}=${track.releaseId} and ${catalogIdentityReadPredicate(scope, "music", musicIdentity)})`,
 				eq(track.mediumId, mediumId),
 				gt(track.position, afterPosition),
 			),
