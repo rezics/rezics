@@ -284,7 +284,8 @@ CREATE OR REPLACE FUNCTION public.repair_studio_catalog_creator_candidates(
 LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 DECLARE candidate record; stale_creator uuid;
 BEGIN
-  IF target_owner NOT IN ('publishing','music','program','software','entity','grouping','reference','distribution')
+  IF target_owner IS NULL OR batch_limit IS NULL
+     OR target_owner NOT IN ('publishing','music','program','software','entity','grouping','reference','distribution')
      OR batch_limit < 1 OR batch_limit > 512 THEN
     RAISE EXCEPTION 'Studio repair requires a catalog owner and batch limit 1..512';
   END IF;

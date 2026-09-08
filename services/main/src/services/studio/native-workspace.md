@@ -55,3 +55,8 @@ the existing `participation-studio.sql` manifest entry.
 Fresh baseline replay, actual HTTP/SQL fixtures, representative EXPLAIN plans,
 hot-account latency, WAL throughput and deployment storage remain the integrated
 qualification gates. The calculations above do not replace those measurements.
+
+The trigger ordering and transactional rollback assumptions follow PostgreSQL's
+[trigger behavior](https://www.postgresql.org/docs/current/trigger-definition.html).
+Selective leading keys follow its
+[multicolumn index rules](https://www.postgresql.org/docs/current/indexes-multicolumn.html).
