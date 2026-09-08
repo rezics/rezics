@@ -426,3 +426,46 @@ language canonicalization. This qualifies the name owner across epochs; complete
 core/profile/relationship mapper refresh remains an integration gap. Name-plan
 reads add one bounded native-history query and index exact canonical signatures
 in a document-local map, rather than comparing every large name to every other.
+
+### Native HTTP authoring and web entry
+
+`/api/v1/catalog/music/:id` returns a discriminated native work, recording,
+release group, release or incomplete candidate. Release detail includes an
+initial bounded media/track window. Dedicated media and track routes use
+position keysets (25 default, 50 maximum), and exact component history uses
+sequence keysets. History and live structure require owner write authority;
+their payloads omit private foreign identities independently of owner authority.
+Full-row replacement requires all native fields, while dedicated metadata,
+medium and track patches preserve fields not supplied by the caller.
+
+The `/catalog/music/:id` web entry composes shared resource management with
+release carrier/track reading, add/edit/remove, metadata edits and exact version
+restoration for current components. A structural write supplies both the owner
+revision and exact component head; conflicts remain visible without automatic
+mutation retries. Intermediate reorder history is not independently restorable.
+The screen currently exposes barcode, language/script and recording duration
+edits. Taxonomy, physical TOC, alternate presentations, release labels/dates,
+work-language edits, candidate promotion and discovery of previously deleted
+components remain API/service capabilities or separate UI work; the current
+screen does not claim to author every native music component.
+
+These endpoints add no persisted relations or indexes. Existing owner-prefixed
+native primary keys, unique position indexes and component-history sequence
+indexes serve all selected pages. At both 500M and 3B corpus rows, page work is
+O(log N + k) per bounded index lookup with k <= 51; history foreign-visibility
+checks batch at most 51 keys for each of four known foreign-reference columns.
+Responses have a 2 MiB serialization budget. Writes are bounded to 128 exact
+components and serialized by the existing owner revision fence. Very large or
+hot releases still share that owner fence; write contention must be observed
+per owner and queued with bounded retries by ingestion callers. Media/track
+pagination does not scan historical tombstones or count an entire album.
+The earlier 500M/3B native row/index and history growth estimates remain the
+storage plan; this API work adds only request memory and read/write traffic.
+No production latency or throughput target is claimed from these fixtures.
+
+`check-music-credit-access.ts` now passes 25 SQL assertions on the actual migrated
+target, including native HTTP-service detail/patch/history/structure reads,
+private foreign-reference omission, partial preservation and exact write access.
+All 21 public Music schemas convert to JSON Schema without transforms. This is
+SQL and contract evidence; HTTP transport and frontend human acceptance are
+separate qualification boundaries.
