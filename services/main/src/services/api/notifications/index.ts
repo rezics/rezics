@@ -1,12 +1,12 @@
+import type { UnitAuthorization } from "../../authorization/unit/authorization";
+import { readUnitPresentationsInTransaction } from "../../units/presentation-reader";
 import { toUiLocale } from "@rezics/i18n";
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import type { StaticDecode } from "typebox";
 import { Check } from "typebox/value";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
-import { publicEntityName } from "../../participation/presentation";
 
 import session from "../../auth/session";
 import { estimateCount } from "../../counts/contract";
@@ -16,14 +16,11 @@ import {
 	accountPreference,
 	contentReport,
 	conversation,
-	entityIdentity,
 	notification,
 	notificationPreference,
 	notificationRecipientStat,
-	unit,
 	unitAccessInvitation,
 } from "../../database/schema";
-import type { UnitKind } from "../../database/schema/contract-values";
 import { DefaultStoredUiLocale } from "../../database/schema/contract-values";
 import { emailIntentDeliveryEnabled } from "../../email/policy";
 import i18n from "../../i18n";
@@ -68,8 +65,6 @@ const preferenceKinds = [
 	"system",
 ] as const;
 const notificationEmailDeliveryEnabled = emailIntentDeliveryEnabled("notification");
-const notificationActor = alias(entityIdentity, "notification_actor");
-const notificationSubject = alias(unit, "notification_subject");
 
 function notificationRecipientMutationLockName(profileId: string): string {
 	return `notification-recipient:${profileId}`;
@@ -79,9 +74,7 @@ type NotificationCandidate = {
 	readonly id: string;
 	readonly kind: (typeof notification.$inferSelect)["kind"];
 	readonly actorProfileId: string | null;
-	readonly actorName: string | null;
 	readonly subjectUnitId: string | null;
-	readonly subjectUnitKind: UnitKind | null;
 	readonly payload: (typeof notification.$inferSelect)["payload"];
 	readonly physicalReadAt: Date | null;
 	readonly readThroughCreatedAt: Date | null;
@@ -203,7 +196,8 @@ function laterTuple(
 
 async function hydrateNotifications(
 	candidates: readonly NotificationCandidate[],
-	profileId: string,
+	authUserId: string,
+	authorization: UnitAuthorization<string>,
 	copyFor: (
 		kind: (typeof notification.$inferSelect)["kind"],
 		payload: (typeof notification.$inferSelect)["payload"],
@@ -218,6 +212,10 @@ async function hydrateNotifications(
 			(value): value is string => value !== null,
 		),
 	);
+	const presentations = await database.transaction(async (tx) => {
+		const readable = await authorization.readableUnitIdsInTransaction(tx, unitIds);
+		return readUnitPresentationsInTransaction(tx, [...readable]);
+	});
 	const conversationIds = presented.flatMap(({ presented: value }) =>
 		value.kind === "direct_message" && value.context.type === "direct_message"
 			? [value.context.conversationId]
@@ -245,8 +243,8 @@ async function hydrateNotifications(
 						and(
 							inArray(conversation.id, [...new Set(conversationIds)]),
 							or(
-								eq(conversation.participantLowAuthUserId, profileId),
-								eq(conversation.participantHighAuthUserId, profileId),
+								eq(conversation.participantLowAuthUserId, authUserId),
+								eq(conversation.participantHighAuthUserId, authUserId),
 							),
 						),
 					)
@@ -258,7 +256,7 @@ async function hydrateNotifications(
 					.where(
 						and(
 							inArray(contentReport.id, [...new Set(reportIds)]),
-							eq(selfAuthUserIdForEntity(contentReport.reporterProfileId), profileId),
+							eq(selfAuthUserIdForEntity(contentReport.reporterProfileId), authUserId),
 						),
 					)
 			: Promise.resolve([]),
@@ -269,7 +267,7 @@ async function hydrateNotifications(
 					.where(
 						and(
 							inArray(unitAccessInvitation.id, [...new Set(invitationIds)]),
-							eq(unitAccessInvitation.invitedAuthUserId, profileId),
+							eq(unitAccessInvitation.invitedAuthUserId, authUserId),
 						),
 					)
 			: Promise.resolve([]),
@@ -279,18 +277,26 @@ async function hydrateNotifications(
 	const availableInvitations = new Map(invitationRows.map((row) => [row.id, row.unitId]));
 
 	return presented.map(({ candidate, presented: value }) => {
-		const actor = candidate.actorProfileId
-			? {
-					id: candidate.actorProfileId,
-					name: candidate.actorName,
-					slugAddress: slugAddresses.get(candidate.actorProfileId) ?? null,
-				}
-			: null;
+		const actorPresentation = candidate.actorProfileId
+			? presentations.get(candidate.actorProfileId)
+			: undefined;
+		const actor =
+			candidate.actorProfileId && actorPresentation?.owner === "entity"
+				? {
+						id: candidate.actorProfileId,
+						name: actorPresentation.title,
+						slugAddress: slugAddresses.get(candidate.actorProfileId) ?? null,
+					}
+				: null;
+		const subjectPresentation = candidate.subjectUnitId
+			? presentations.get(candidate.subjectUnitId)
+			: undefined;
 		const subject =
-			candidate.subjectUnitId && candidate.subjectUnitKind
+			candidate.subjectUnitId && subjectPresentation
 				? {
 						id: candidate.subjectUnitId,
-						kind: candidate.subjectUnitKind,
+						owner: subjectPresentation.owner,
+						shape: subjectPresentation.shape,
 						slugAddress: slugAddresses.get(candidate.subjectUnitId) ?? null,
 					}
 				: null;
@@ -309,7 +315,7 @@ async function hydrateNotifications(
 		switch (value.kind) {
 			case "reply": {
 				const destination =
-					value.context.type === "reply" && subject?.kind === "post"
+					value.context.type === "reply" && subject?.owner === "post"
 						? { kind: "post" as const, postId: subject.id }
 						: detailsDestination;
 				return { ...base, ...value, destination };
@@ -345,7 +351,7 @@ async function hydrateNotifications(
 			}
 			case "realm": {
 				const destination =
-					value.context.type === "realm_event" && subject?.kind === "realm"
+					value.context.type === "realm_event" && subject?.owner === "realm"
 						? ({
 								kind: "realm",
 								realm: { id: subject.id, slugAddress: subject.slugAddress },
@@ -384,9 +390,7 @@ function notificationSelection() {
 		id: notification.id,
 		kind: notification.kind,
 		actorProfileId: notification.actorProfileId,
-		actorName: publicEntityName(notificationActor.id),
 		subjectUnitId: notification.subjectUnitId,
-		subjectUnitKind: notificationSubject.kind,
 		payload: notification.payload,
 		physicalReadAt: notification.readAt,
 		readThroughCreatedAt: notificationRecipientStat.readThroughCreatedAt,
@@ -428,7 +432,7 @@ export default new Elysia({ prefix: "/notifications" })
 			},
 			detail: { summary: "Poll notifications with a cursor", tags: ["Notifications"] },
 		},
-		async ({ i18n, user, query }) => {
+		async ({ i18n, user, query, authorization }) => {
 			const unreadOnly = Boolean(query.unreadOnly);
 			const direction = query.direction ?? "before";
 			const cursor = decodeCursor(query.cursor, unreadOnly);
@@ -460,8 +464,6 @@ export default new Elysia({ prefix: "/notifications" })
 			const candidates = await database
 				.select(notificationSelection())
 				.from(notification)
-				.leftJoin(notificationActor, eq(notificationActor.id, notification.actorProfileId))
-				.leftJoin(notificationSubject, eq(notificationSubject.id, notification.subjectUnitId))
 				.leftJoin(
 					notificationRecipientStat,
 					eq(notificationRecipientStat.authUserId, notification.recipientAuthUserId),
@@ -483,6 +485,7 @@ export default new Elysia({ prefix: "/notifications" })
 			const items = await hydrateNotifications(
 				page,
 				user.id,
+				authorization.unit,
 				(kind, payload) => translations[notificationTranslationKey(kind, payload)],
 			);
 			const newest = direction === "after" ? page.at(-1) : page[0];
@@ -548,14 +551,12 @@ export default new Elysia({ prefix: "/notifications" })
 			},
 			detail: { summary: "Get one notification", tags: ["Notifications"] },
 		},
-		async ({ i18n, user, params }) => {
+		async ({ i18n, user, params, authorization }) => {
 			const locale = await loadRecipientLocale(user.id);
 			const { t: translations } = await i18n.getTranslation("notifications", [locale]);
 			const [candidate] = await database
 				.select(notificationSelection())
 				.from(notification)
-				.leftJoin(notificationActor, eq(notificationActor.id, notification.actorProfileId))
-				.leftJoin(notificationSubject, eq(notificationSubject.id, notification.subjectUnitId))
 				.leftJoin(
 					notificationRecipientStat,
 					eq(notificationRecipientStat.authUserId, notification.recipientAuthUserId),
@@ -572,6 +573,7 @@ export default new Elysia({ prefix: "/notifications" })
 			const [item] = await hydrateNotifications(
 				[candidate],
 				user.id,
+				authorization.unit,
 				(kind, payload) => translations[notificationTranslationKey(kind, payload)],
 			);
 			if (!item) throw new NotificationNotFound();
@@ -590,9 +592,9 @@ export default new Elysia({ prefix: "/notifications" })
 			detail: { summary: "Mark notifications read", tags: ["Notifications"] },
 		},
 		async ({ user, authorization, body }) => {
-			await authorization.unit.ensureCanUpdate(user.id, [["notification-preferences"]]);
 			const through = decodeCursor(body.through, false);
 			return database.transaction(async (tx) => {
+				await authorization.account.ensureCanWrite(tx);
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${notificationRecipientMutationLockName(user.id)}::text, 0))`,
 				);

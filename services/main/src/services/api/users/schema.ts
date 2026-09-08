@@ -17,11 +17,11 @@ import {
 	ContentLanguage,
 	ContentRating,
 	DateTime,
-	FollowableUnitKind,
+	FollowableUnitOwner,
 	FractionalPositionInput,
 	License,
 	LocalizationLanguageQuery,
-	NonRealmFollowableUnitKind,
+	NonRealmFollowableUnitOwner,
 	ResourceVisibility,
 	RevisionContext,
 	StoredUiLocale,
@@ -208,7 +208,7 @@ export type FollowingUnitParams = StaticDecode<typeof FollowingUnitParams>;
 
 export const FollowingListQuery = t.Object(
 	{
-		kind: t.Optional(FollowableUnitKind),
+		owner: t.Optional(FollowableUnitOwner),
 		...LocalizationLanguageQuery,
 		cursor: t.Optional(t.String({ maxLength: 1_024 })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 30 })),
@@ -233,7 +233,7 @@ const FollowingNotificationSettings = {
 export const ReplaceFollowingSettingsBody = t.Union([
 	t.Object(
 		{
-			kind: t.Literal("realm"),
+			owner: t.Literal("realm"),
 			...FollowingNotificationSettings,
 			realmTagSourceSubscribed: t.Boolean(),
 		},
@@ -241,7 +241,7 @@ export const ReplaceFollowingSettingsBody = t.Union([
 	),
 	t.Object(
 		{
-			kind: NonRealmFollowableUnitKind,
+			owner: NonRealmFollowableUnitOwner,
 			...FollowingNotificationSettings,
 			realmTagSourceSubscribed: t.Null(),
 		},

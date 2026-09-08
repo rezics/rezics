@@ -1,3 +1,5 @@
+import { unitStateRelation } from "../../units/state-relation";
+import { readUnitPresentationsInTransaction } from "../../units/presentation-reader";
 import { DevelopmentPreviewCapability, PlatformCapabilityValues } from "@rezics/access";
 import { parseLicenseId } from "@rezics/license";
 import { OfficialRealmUnitIds } from "@rezics/slug";
@@ -17,7 +19,7 @@ import {
 	accountEntityBlock,
 	accountPreference,
 	score,
-	unit,
+	realm,
 	unitFollow,
 	unitProgress,
 } from "../../database/schema";
@@ -36,10 +38,6 @@ import {
 } from "../../participation/presentation";
 import { resolveRecommendationViewer } from "../../recommendations/context";
 import { listStudioContent, recordStudioVisit } from "../../studio/service";
-import {
-	resolvedUnitLocalizationLanguage,
-	resolvedUnitLocalizationTitle,
-} from "../../units/localization";
 import {
 	BlockResponse,
 	FollowResponse,
@@ -104,9 +102,7 @@ function presentPreferences(preference: typeof accountPreference.$inferSelect) {
 	};
 }
 
-const activityScoreTargetUnit = alias(unit, "profile_activity_score_target_unit");
-const activityScoreRealm = alias(unit, "profile_activity_score_realm");
-const activityProgressTargetUnit = alias(unit, "profile_activity_progress_target_unit");
+const activityScoreRealm = alias(realm, "profile_activity_score_realm");
 
 export default new Elysia({ name: "account-entity-api" })
 	.use(session)
@@ -363,12 +359,13 @@ export default new Elysia({ name: "account-entity-api" })
 			},
 			detail: { summary: "List Units followed by the current user", tags: ["Users"] },
 		},
-		async ({ user, entity, query }) => {
+		async ({ user, entity, query, authorization }) => {
 			const viewer = await resolveRecommendationViewer(entity.id, false);
 			return listFollowing({
 				authUserId: user.id,
 				followerProfileId: entity.id,
-				kind: query.kind,
+				owner: query.owner,
+				authorization: authorization.unit,
 				localizationLanguages: query.localizationLanguages,
 				cursor: query.cursor,
 				limit: query.limit ?? 30,
@@ -486,28 +483,16 @@ export default new Elysia({ name: "account-entity-api" })
 		async ({ params, query, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
 			const viewerProfileId = identity.entity?.id;
-			const referencedUnitReadOptions = {
-				discoverableOnly: viewerProfileId !== params.id,
-			};
-			await readPublicEntityProfile(params.id, query.localizationLanguages);
+
+			const ownActivity = viewerProfileId === params.id;
 			const localizationLanguages = query.localizationLanguages ?? [];
 			const limit = query.limit ?? 20;
-			const [scores, progress] = await Promise.all([
-				database
+			return database.transaction(async (tx) => {
+				const scoreCandidates = database
 					.select({
-						scoreId: score.id,
+						id: score.id,
 						unitId: score.unitId,
-						unitKind: activityScoreTargetUnit.kind,
-						unitLanguage: resolvedUnitLocalizationLanguage(
-							activityScoreTargetUnit.id,
-							localizationLanguages,
-						),
-						unitTitle: resolvedUnitLocalizationTitle(
-							activityScoreTargetUnit.id,
-							localizationLanguages,
-						),
 						realmId: score.realmId,
-						realmTitle: resolvedUnitLocalizationTitle(activityScoreRealm.id, localizationLanguages),
 						value: score.value,
 						visibility: score.visibility,
 						updatedAt: score.updatedAt,
@@ -517,8 +502,6 @@ export default new Elysia({ name: "account-entity-api" })
 						accountPreference,
 						eq(accountPreference.authUserId, selfAuthUserIdForEntity(score.profileId)),
 					)
-					.innerJoin(activityScoreTargetUnit, eq(activityScoreTargetUnit.id, score.unitId))
-					.innerJoin(activityScoreRealm, eq(activityScoreRealm.id, score.realmId))
 					.where(
 						and(
 							eq(score.profileId, params.id),
@@ -529,28 +512,14 @@ export default new Elysia({ name: "account-entity-api" })
 								viewerProfileId,
 								surface: "profile",
 							}),
-							getUnitReadCondition(
-								viewerProfileId,
-								referencedUnitReadOptions,
-								activityScoreTargetUnit,
-							),
-							getUnitReadCondition(viewerProfileId, referencedUnitReadOptions, activityScoreRealm),
 						),
 					)
 					.orderBy(desc(score.updatedAt), desc(score.id))
-					.limit(limit),
-				database
+					.limit(512)
+					.as("activity_score_candidates");
+				const progressCandidates = database
 					.select({
 						unitId: unitProgress.unitId,
-						unitKind: activityProgressTargetUnit.kind,
-						unitLanguage: resolvedUnitLocalizationLanguage(
-							activityProgressTargetUnit.id,
-							localizationLanguages,
-						),
-						unitTitle: resolvedUnitLocalizationTitle(
-							activityProgressTargetUnit.id,
-							localizationLanguages,
-						),
 						status: unitProgress.status,
 						progress: unitProgress.progress,
 						completedCount: unitProgress.completedCount,
@@ -559,10 +528,6 @@ export default new Elysia({ name: "account-entity-api" })
 					})
 					.from(unitProgress)
 					.innerJoin(accountPreference, eq(accountPreference.authUserId, unitProgress.authUserId))
-					.innerJoin(
-						activityProgressTargetUnit,
-						eq(activityProgressTargetUnit.id, unitProgress.unitId),
-					)
 					.where(
 						and(
 							eq(unitProgress.authUserId, selfAuthUserIdForEntity(params.id)),
@@ -574,17 +539,100 @@ export default new Elysia({ name: "account-entity-api" })
 								viewerProfileId,
 								surface: "profile",
 							}),
-							getUnitReadCondition(
-								viewerProfileId,
-								referencedUnitReadOptions,
-								activityProgressTargetUnit,
-							),
 						),
 					)
 					.orderBy(desc(unitProgress.lastSeenAt), desc(unitProgress.unitId))
-					.limit(limit),
-			]);
-			return { scores, progress } satisfies StaticDecode<typeof EntityActivityResponse>;
+					.limit(512)
+					.as("activity_progress_candidates");
+				const scoreState = unitStateRelation(scoreCandidates.unitId, "activity_score_target");
+				const progressState = unitStateRelation(
+					progressCandidates.unitId,
+					"activity_progress_target",
+				);
+				const scoreRows = await tx
+					.select({
+						id: scoreCandidates.id,
+						unitId: scoreCandidates.unitId,
+						unitOwner: scoreState.owner,
+						unitShape: scoreState.shape,
+						realmId: scoreCandidates.realmId,
+						value: scoreCandidates.value,
+						visibility: scoreCandidates.visibility,
+						updatedAt: scoreCandidates.updatedAt,
+					})
+					.from(scoreCandidates)
+					.innerJoinLateral(scoreState, sql`true`)
+					.innerJoin(activityScoreRealm, eq(activityScoreRealm.id, scoreCandidates.realmId))
+					.where(
+						ownActivity
+							? undefined
+							: and(
+									getUnitReadCondition(undefined, { discoverableOnly: true }, scoreState),
+									getUnitReadCondition(undefined, { discoverableOnly: true }, activityScoreRealm),
+								),
+					)
+					.orderBy(desc(scoreCandidates.updatedAt), desc(scoreCandidates.id));
+				const progressRows = await tx
+					.select({
+						unitId: progressCandidates.unitId,
+						unitOwner: progressState.owner,
+						unitShape: progressState.shape,
+						status: progressCandidates.status,
+						progress: progressCandidates.progress,
+						completedCount: progressCandidates.completedCount,
+						visibility: progressCandidates.visibility,
+						lastSeenAt: progressCandidates.lastSeenAt,
+					})
+					.from(progressCandidates)
+					.innerJoinLateral(progressState, sql`true`)
+					.where(
+						ownActivity
+							? undefined
+							: getUnitReadCondition(undefined, { discoverableOnly: true }, progressState),
+					)
+					.orderBy(desc(progressCandidates.lastSeenAt), desc(progressCandidates.unitId));
+				const candidates = [
+					...new Set([
+						...scoreRows.flatMap((row) => [row.unitId, row.realmId]),
+						...progressRows.map((row) => row.unitId),
+					]),
+				];
+				const readable = new Set<string>();
+				for (let offset = 0; offset < candidates.length; offset += 500) {
+					for (const id of await identity.authorization.unit.readableUnitIdsInTransaction(
+						tx,
+						candidates.slice(offset, offset + 500),
+					))
+						readable.add(id);
+				}
+				const scores = scoreRows
+					.filter((row) => readable.has(row.unitId) && readable.has(row.realmId))
+					.slice(0, limit);
+				const progress = progressRows.filter((row) => readable.has(row.unitId)).slice(0, limit);
+				const presentations = await readUnitPresentationsInTransaction(
+					tx,
+					[
+						...new Set([
+							...scores.flatMap((row) => [row.unitId, row.realmId]),
+							...progress.map((row) => row.unitId),
+						]),
+					],
+					localizationLanguages,
+				);
+				return {
+					scores: scores.map((row) => ({
+						...row,
+						unitLanguage: presentations.get(row.unitId)?.language ?? null,
+						unitTitle: presentations.get(row.unitId)?.title ?? null,
+						realmTitle: presentations.get(row.realmId)?.title ?? null,
+					})),
+					progress: progress.map((row) => ({
+						...row,
+						unitLanguage: presentations.get(row.unitId)?.language ?? null,
+						unitTitle: presentations.get(row.unitId)?.title ?? null,
+					})),
+				} satisfies StaticDecode<typeof EntityActivityResponse>;
+			});
 		},
 	)
 	.get(

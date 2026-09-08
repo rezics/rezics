@@ -54,7 +54,6 @@ import {
 	ContentReviewCaseNotFound as ModerationCaseNotFound,
 	GovernanceNoteRoleDuplicate as ModerationNoteRoleDuplicate,
 } from "./errors";
-import ownershipClaimRoutes from "./ownership-claims";
 import {
 	AccountEnforcementParams,
 	ContentGovernanceActionResponse,
@@ -243,7 +242,6 @@ export default new Elysia({ prefix: "/governance" })
 	.use(unitAccessInvitationRoutes)
 	.use(unitLifecycleRoutes)
 	.use(unitMergeRoutes)
-	.use(ownershipClaimRoutes)
 	.get(
 		"/rule-sources",
 		{

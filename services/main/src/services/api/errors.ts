@@ -8,7 +8,6 @@ import { CatalogReferenceNotFound, CatalogRevisionConflict } from "../catalog/st
 import { DatabaseErrors } from "../database/errors";
 import { EntityErrors } from "../entities/errors";
 import { FollowingErrors } from "../following/errors";
-import { OwnershipClaimErrors } from "../ownership-claims/errors";
 import { PaginationErrors } from "../pagination/errors";
 import { FavoriteNotFound, FavoriteRevisionConflict } from "../favorites/errors";
 import {
@@ -111,7 +110,6 @@ export const ApiErrors = [
 	...ReportErrors,
 	...PostErrors,
 	...NotificationErrors,
-	...OwnershipClaimErrors,
 	...UnitResourceErrors,
 	...MessageErrors,
 	...CollectionErrors,

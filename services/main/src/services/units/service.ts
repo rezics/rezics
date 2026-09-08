@@ -48,7 +48,6 @@ import { isEntityKind } from "../database/schema/contract-values";
 
 import { presentNullablePortableTextDocument } from "../documents/portable-text-presentation";
 
-import { getPendingUnitOwnershipClaim } from "../ownership-claims/service";
 import { WorkPolicy } from "../performance/policy";
 
 import { wilsonLowerBoundSql } from "../tags/ranking";
@@ -458,7 +457,6 @@ export async function getUnit(
 		accessDecision,
 		associationDecision,
 		hasDevelopmentPreviewAccess,
-		ownershipClaim,
 		activeOwnership,
 	] = await Promise.all([
 		authorization.unit.canUpdate(base.id),
@@ -478,7 +476,6 @@ export async function getUnit(
 		authorization.unit.decide(base.id, "unit.access.manage"),
 		authorization.unit.decide(base.id, "unit.association.manage"),
 		authorization.platform.hasCapability(DevelopmentPreviewCapability),
-		getPendingUnitOwnershipClaim(base.id, authorization.profileId),
 		database
 			.select({ profileId: unitOwnership.profileId })
 			.from(unitOwnership)
@@ -548,7 +545,6 @@ export async function getUnit(
 			activeOwnership?.profileId === OfficialProfileIds.community
 				? "community_owned"
 				: "profile_owned",
-		ownershipClaim: ownershipClaim ? { ...ownershipClaim, state: "pending" as const } : null,
 		capabilities: {
 			canEdit,
 			canUpdateMetadataOnly: canEdit && metadataOnlyUpdateDecision.allowed,

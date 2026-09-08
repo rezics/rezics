@@ -18,11 +18,17 @@ vi.mock("../database", () => ({
 		transaction,
 	},
 }));
+vi.mock("../units/query", () => ({
+	readUnitStateById: async () => {
+		const [row] = await targetLimit();
+		return row ? { ...row, reference: { id: row.id, owner: row.kind } } : null;
+	},
+}));
 vi.mock("../realms/service", () => ({ acknowledgeCurrentRealmRulesOnFollow }));
 vi.mock("../notifications/service", () => ({ createNotification }));
 
 import { users, authEntity } from "../database/schema";
-import { FollowableUnitKindValues } from "../database/schema/contract-values";
+import { FollowableUnitOwnerValues } from "../database/schema/contract-values";
 import { UnitNotFound } from "../units/errors";
 import { UserFollowBlocked, UserSelfFollowForbidden } from "./errors";
 import { followUnit } from "./service";
@@ -82,7 +88,7 @@ describe("followUnit", () => {
 		createNotification.mockResolvedValue(undefined);
 	});
 
-	it.each(FollowableUnitKindValues)("follows a readable %s Unit", async (kind) => {
+	it.each(FollowableUnitOwnerValues)("follows a readable %s Unit", async (kind) => {
 		targetLimit.mockResolvedValue([{ id: TargetUnitId, kind }]);
 
 		await expect(

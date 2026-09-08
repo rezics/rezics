@@ -3,6 +3,8 @@ import { CatalogOwnerValues, type UnitOwner } from "@rezics/reference";
 
 export const ResourceSectionValues = [
 	...CatalogOwnerValues,
+	"video",
+	"audio",
 	"tag",
 	"realm",
 	"zone",
@@ -16,6 +18,8 @@ export type ResourceSection = (typeof ResourceSectionValues)[number];
 type SectionTarget = { readonly owner: SQLWrapper; readonly shape: SQLWrapper };
 const DirectStudioOwners = [
 	...CatalogOwnerValues,
+	"video",
+	"audio",
 	"tag",
 	"tag_path",
 	"realm",

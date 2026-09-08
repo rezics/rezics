@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const state = vi.hoisted(() => ({
 	rows: new Map<unknown, unknown[]>(),
+	targetOwner: "realm",
 	writes: [] as { table: unknown; values: unknown }[],
 	deleted: [] as unknown[],
 }));
@@ -38,6 +39,13 @@ vi.mock("../database", () => {
 		database: { select, transaction: async (work: (value: typeof tx) => unknown) => work(tx) },
 	};
 });
+vi.mock("../units/query", () => ({
+	readUnitStateById: async (_executor: unknown, id: string) => ({
+		id,
+		reference: { id, owner: state.targetOwner },
+		shape: state.targetOwner,
+	}),
+}));
 vi.mock("../realms/service", () => ({ acknowledgeCurrentRealmRulesOnFollow: vi.fn() }));
 
 import {
@@ -45,7 +53,6 @@ import {
 	accountFollowPreference,
 	users,
 	authEntity,
-	unit,
 } from "../database/schema";
 import { FollowingTargetKindMismatch } from "./errors";
 import { getFollowingStatus, replaceFollowingSettings } from "./service";
@@ -62,7 +69,7 @@ beforeEach(() => {
 	state.deleted.length = 0;
 	state.rows.set(users, [{ id: authUserId }]);
 	state.rows.set(authEntity, [{ id: followerProfileId }]);
-	state.rows.set(unit, [{ id: unitId, kind: "realm" }]);
+	state.targetOwner = "realm";
 	state.rows.set(accountFollowPreference, [
 		{ favorite: false, position: "a0V", inAppNotificationsEnabled: true },
 	]);
@@ -72,7 +79,7 @@ describe("private Following settings", () => {
 		state.rows.set(accountRealmTagSubscription, [{ realmId: unitId }]);
 		expect(await getFollowingStatus(input)).toEqual({
 			following: true,
-			kind: "realm",
+			owner: "realm",
 			favorite: false,
 			position: "a0V",
 			inAppNotificationsEnabled: true,
@@ -84,7 +91,7 @@ describe("private Following settings", () => {
 			await replaceFollowingSettings({
 				...input,
 				settings: {
-					kind: "realm",
+					owner: "realm",
 					inAppNotificationsEnabled: false,
 					realmTagSourceSubscribed: true,
 				},
@@ -101,7 +108,11 @@ describe("private Following settings", () => {
 	it("removes the private Tag source without changing public follow identity", async () => {
 		await replaceFollowingSettings({
 			...input,
-			settings: { kind: "realm", inAppNotificationsEnabled: true, realmTagSourceSubscribed: false },
+			settings: {
+				owner: "realm",
+				inAppNotificationsEnabled: true,
+				realmTagSourceSubscribed: false,
+			},
 		});
 		expect(state.deleted).toEqual([accountRealmTagSubscription]);
 		expect(state.writes[0]).toEqual({
@@ -113,7 +124,11 @@ describe("private Following settings", () => {
 		await expect(
 			replaceFollowingSettings({
 				...input,
-				settings: { kind: "book", inAppNotificationsEnabled: true, realmTagSourceSubscribed: null },
+				settings: {
+					owner: "publishing",
+					inAppNotificationsEnabled: true,
+					realmTagSourceSubscribed: null,
+				},
 			}),
 		).rejects.toThrow(FollowingTargetKindMismatch);
 		expect(state.writes).toHaveLength(0);

@@ -1,3 +1,4 @@
+import { UnitOwnerValues } from "@rezics/reference";
 import type { StaticDecode } from "typebox";
 import { t } from "elysia";
 
@@ -7,7 +8,7 @@ import {
 	NotificationKindValues,
 } from "../../database/schema/contract-values";
 import { CountResultSchema } from "../../counts/contract";
-import { DateTime, UnitKind, Uuid } from "../schema";
+import { DateTime, Uuid } from "../schema";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 
 export const NotificationCursorQuery = t.Object({
@@ -49,7 +50,8 @@ const NotificationActorResponse = t.Object(
 export const NotificationUnitResponse = t.Object(
 	{
 		id: Uuid,
-		kind: UnitKind,
+		owner: t.UnionEnum(UnitOwnerValues),
+		shape: t.String(),
 		slugAddress: NullablePublicSlugAddressResponse,
 	},
 	{ additionalProperties: false },
@@ -138,24 +140,6 @@ export const SystemNotificationPayload = t.Union([
 				{
 					ownershipId: Uuid,
 					role: t.Union([t.Literal("owner"), t.Literal("previous_owner")]),
-				},
-				{ additionalProperties: false },
-			),
-		},
-		{ additionalProperties: false },
-	),
-	t.Object(
-		{
-			type: t.Literal("system_event"),
-			event: t.Literal("unit_ownership_claim_resolution"),
-			references: t.Object(
-				{
-					claimId: Uuid,
-					resolution: t.Union([
-						t.Literal("approved"),
-						t.Literal("rejected"),
-						t.Literal("superseded"),
-					]),
 				},
 				{ additionalProperties: false },
 			),

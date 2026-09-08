@@ -25,7 +25,6 @@ import imageAssets from "./image-assets";
 import imageAssetContent from "./image-assets/content";
 import messages from "./messages";
 import notifications from "./notifications";
-import ownershipClaims from "./ownership-claims";
 import participation from "./participation";
 import platformAccess from "./platform-access";
 import platformUsers from "./platform-users";
@@ -85,7 +84,6 @@ export default new Elysia()
 				.use(associationProposals)
 				.use(health)
 				.use(notifications)
-				.use(ownershipClaims)
 				.use(recommendations)
 				.use(messages)
 				.use(tokens)

@@ -97,14 +97,6 @@ export type NotificationInput = NotificationBase &
 								ownershipId: string;
 								role: "owner" | "previous_owner";
 							};
-					  }
-					| {
-							type: "system_event";
-							event: "unit_ownership_claim_resolution";
-							references: {
-								claimId: string;
-								resolution: "approved" | "rejected" | "superseded";
-							};
 					  };
 		  }
 	);
@@ -113,10 +105,7 @@ export type NotificationTranslationKey =
 	| NotificationInput["kind"]
 	| "report_resolution"
 	| "unit_access_invitation"
-	| "unit_ownership_override"
-	| "unit_ownership_claim_approved"
-	| "unit_ownership_claim_rejected"
-	| "unit_ownership_claim_superseded";
+	| "unit_ownership_override";
 
 export function notificationTranslationKey(
 	kind: NotificationInput["kind"],
@@ -150,26 +139,6 @@ export function notificationTranslationKey(
 		payload.event === "unit_ownership_override"
 	)
 		return "unit_ownership_override";
-	if (
-		kind === "system" &&
-		typeof payload === "object" &&
-		payload !== null &&
-		"type" in payload &&
-		payload.type === "system_event" &&
-		"event" in payload &&
-		payload.event === "unit_ownership_claim_resolution"
-	) {
-		const references =
-			"references" in payload &&
-			typeof payload.references === "object" &&
-			payload.references !== null
-				? payload.references
-				: null;
-		const resolution = references && "resolution" in references ? references.resolution : undefined;
-		if (resolution === "approved") return "unit_ownership_claim_approved";
-		if (resolution === "rejected") return "unit_ownership_claim_rejected";
-		if (resolution === "superseded") return "unit_ownership_claim_superseded";
-	}
 	return kind;
 }
 

@@ -1,10 +1,13 @@
-import {presentImageAsset} from "../api/image-assets/presentation";
+import { presentImageAsset } from "../api/image-assets/presentation";
 import type { ContentLanguage } from "@rezics/i18n";
-import { and, desc, eq, gt, inArray, isNull, ne, or } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { selfAuthUserIdForEntity } from "../participation/account-query";
 
 import type { UnitAuthorization } from "../authorization/unit/authorization";
-import { getUnitReadCondition } from "../authorization/unit/query";
+import { unitStateRelation } from "../units/state-relation";
+import { readUnitStateById } from "../units/query";
+import { readUnitPresentationsInTransaction } from "../units/presentation-reader";
+import type { UnitOwner } from "@rezics/reference";
 import {
 	DefaultContentRatingPolicy,
 	getContentRatingCondition,
@@ -14,28 +17,20 @@ import { database, type DatabaseTransaction } from "../database";
 import {
 	accountEntityBlock,
 	accountRealmTagSubscription,
-	unit,
 	unitFollow,
 	accountFollowPreference,
 } from "../database/schema";
 import type {
-	FollowableUnitKind,
-	NonRealmFollowableUnitKind,
-	UnitKind,
+	FollowableUnitOwner,
+	NonRealmFollowableUnitOwner,
 } from "../database/schema/contract-values";
 import { users } from "../database/schema/auth";
 import { authEntity } from "../database/schema/participation";
 import { ParticipationDenied } from "../participation/policy";
 import { createNotification } from "../notifications/service";
 import { acknowledgeCurrentRealmRulesOnFollow } from "../realms/service";
-import { presentAvatar } from "../units/avatar";
 import { UnitNotFound } from "../units/errors";
-import {
-	resolvedUnitLocalizationAvatar,
-	resolvedUnitLocalizationImageAssetId,
-	resolvedUnitLocalizationLanguage,
-	resolvedUnitLocalizationTitle,
-} from "../units/localization";
+import { resolvedUnitLocalizationImageAssetId } from "../units/localization";
 
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import {
@@ -47,24 +42,24 @@ import { FollowingTargetKindMismatch, UserFollowBlocked, UserSelfFollowForbidden
 
 type FollowTarget = {
 	readonly id: string;
-	readonly kind: FollowableUnitKind;
+	readonly owner: FollowableUnitOwner;
 };
 
 type FollowAuthorization = Pick<UnitAuthorization<string>, "ensureCanRead">;
 
-function requireFollowableUnitKind(kind: UnitKind): FollowableUnitKind {
-	if (kind === "tag_path") throw new Error("Tag Path Units cannot enter generic Following");
-	return kind;
+function requireFollowableUnitOwner(owner: UnitOwner): FollowableUnitOwner {
+	if (owner === "tag_path") throw new Error("Tag Path Units cannot enter generic Following");
+	return owner;
 }
 
 type ReplaceFollowingSettings =
 	| {
-			readonly kind: "realm";
+			readonly owner: "realm";
 			readonly inAppNotificationsEnabled: boolean;
 			readonly realmTagSourceSubscribed: boolean;
 	  }
 	| {
-			readonly kind: NonRealmFollowableUnitKind;
+			readonly owner: NonRealmFollowableUnitOwner;
 			readonly inAppNotificationsEnabled: boolean;
 			readonly realmTagSourceSubscribed: null;
 	  };
@@ -72,7 +67,8 @@ type ReplaceFollowingSettings =
 type ListFollowingInput = {
 	readonly authUserId: string;
 	readonly followerProfileId: string;
-	readonly kind?: FollowableUnitKind;
+	readonly authorization: UnitAuthorization<string>;
+	readonly owner?: FollowableUnitOwner;
 	readonly localizationLanguages?: readonly ContentLanguage[];
 	readonly cursor?: string;
 	readonly limit: number;
@@ -125,7 +121,7 @@ export async function listFollowing(input: ListFollowingInput) {
 	const contentRatingPolicy = input.contentRatingPolicy ?? DefaultContentRatingPolicy;
 	const cursor = decodeFollowingCursor(
 		input.cursor,
-		input.kind,
+		input.owner,
 		localizationLanguages,
 		contentRatingPolicy.kind === "allow" ? contentRatingPolicy.ratings : [],
 	);
@@ -154,28 +150,39 @@ export async function listFollowing(input: ListFollowingInput) {
 			.limit(512);
 		if (!candidates.length) return { rows: [], lastScanned: undefined, exhausted: true };
 
+		const readable = new Set<string>();
+		for (let offset = 0; offset < candidates.length; offset += 500) {
+			const ids = await input.authorization.readableUnitIdsInTransaction(
+				tx,
+				candidates.slice(offset, offset + 500).map((row) => row.unitId),
+			);
+			for (const id of ids) readable.add(id);
+		}
+		const state = unitStateRelation(accountFollowPreference.unitId, "following_target_state");
 		const rows = await tx
 			.select({
-				id: unit.id,
-				kind: unit.kind,
-				language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
-				title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
-				avatar: resolvedUnitLocalizationAvatar(unit.id, localizationLanguages),
-				coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", localizationLanguages),
+				id: state.id,
+				owner: state.owner,
+				shape: state.shape,
+				coverAssetId: resolvedUnitLocalizationImageAssetId(
+					state.id,
+					"cover",
+					localizationLanguages,
+				),
 				position: accountFollowPreference.position,
 				favorite: accountFollowPreference.favorite,
 				createdAt: accountFollowPreference.createdAt,
 				updatedAt: accountFollowPreference.updatedAt,
 			})
 			.from(accountFollowPreference)
-			.innerJoin(unit, eq(unit.id, accountFollowPreference.unitId))
+			.innerJoinLateral(state, sql`true`)
 			.where(
 				and(
 					eq(accountFollowPreference.authUserId, input.authUserId),
-					ne(unit.kind, "tag_path"),
-					input.kind ? eq(unit.kind, input.kind) : undefined,
-					getUnitReadCondition(input.followerProfileId),
-					getContentRatingCondition(contentRatingPolicy),
+					ne(state.owner, "tag_path"),
+					input.owner ? eq(state.owner, input.owner) : undefined,
+					inArray(state.id, [...readable]),
+					getContentRatingCondition(contentRatingPolicy, state.contentRating),
 					inArray(
 						accountFollowPreference.unitId,
 						candidates.map((item) => item.unitId),
@@ -189,31 +196,45 @@ export async function listFollowing(input: ListFollowingInput) {
 			)
 			.limit(input.limit + 1);
 
-		return { rows, lastScanned: candidates.at(-1), exhausted: candidates.length < 512 };
+		const presentations = await readUnitPresentationsInTransaction(
+			tx,
+			rows.map((row) => row.id),
+			localizationLanguages,
+		);
+		return {
+			rows: rows.map((row) => ({
+				...row,
+				title: presentations.get(row.id)?.title ?? null,
+				language: presentations.get(row.id)?.language ?? null,
+				presentedAvatar: presentations.get(row.id)?.avatar ?? null,
+			})),
+			lastScanned: candidates.at(-1),
+			exhausted: candidates.length < 512,
+		};
 	});
 	const rows = scan.rows;
 	const items = rows.slice(0, input.limit);
 	const last = items.at(-1);
 	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(items.map((item) => item.id));
 	return {
-		items: items.map(({ avatar, coverAssetId, ...record }) => ({
+		items: items.map(({ presentedAvatar, coverAssetId, ...record }) => ({
 			...record,
-			kind: requireFollowableUnitKind(record.kind),
+			owner: requireFollowableUnitOwner(record.owner),
 			slugAddress: slugAddresses.get(record.id) ?? null,
-			avatar: presentAvatar(avatar),
+			avatar: presentedAvatar,
 			cover: presentImageAsset(coverAssetId, "cover"),
 		})),
 		nextCursor:
 			rows.length > input.limit && last
 				? encodeFollowingCursor(
-						input.kind,
+						input.owner,
 						localizationLanguages,
 						contentRatingPolicy.kind === "allow" ? contentRatingPolicy.ratings : [],
 						{ favorite: last.favorite, position: last.position, unitId: last.id },
 					)
 				: !scan.exhausted && scan.lastScanned
 					? encodeFollowingCursor(
-							input.kind,
+							input.owner,
 							localizationLanguages,
 							contentRatingPolicy.kind === "allow" ? contentRatingPolicy.ratings : [],
 							scan.lastScanned,
@@ -227,17 +248,9 @@ async function resolveFollowTarget(
 	authorization: FollowAuthorization,
 ): Promise<FollowTarget> {
 	await authorization.ensureCanRead(unitId, () => new UnitNotFound());
-	const [target] = await database
-		.select({
-			id: unit.id,
-			kind: unit.kind,
-		})
-		.from(unit)
-		.where(eq(unit.id, unitId))
-		.limit(1);
-	if (!target) throw new UnitNotFound();
-	if (target.kind === "tag_path") throw new UnitNotFound();
-	return { id: target.id, kind: target.kind };
+	const target = await readUnitStateById(database, unitId);
+	if (!target || target.reference.owner === "tag_path") throw new UnitNotFound();
+	return { id: target.id, owner: target.reference.owner };
 }
 
 export async function followUnit(input: {
@@ -251,7 +264,7 @@ export async function followUnit(input: {
 
 	await database.transaction(async (tx) => {
 		await lockFollowingAccount(tx, input.authUserId, input.followerProfileId);
-		if (target.kind === "entity") {
+		if (target.owner === "entity") {
 			const [blocked] = await tx
 				.select({ id: accountEntityBlock.blockedEntityId })
 				.from(accountEntityBlock)
@@ -287,14 +300,14 @@ export async function followUnit(input: {
 				unitId: target.id,
 			})
 			.onConflictDoNothing();
-		if (created && target.kind === "entity")
+		if (created && target.owner === "entity")
 			await createNotification(tx, {
 				kind: "new_follower",
 				recipientEntityId: target.id,
 				actorProfileId: input.followerProfileId,
 				dedupeKey: `new-follower:${input.followerProfileId}:${target.id}`,
 			});
-		if (target.kind === "realm")
+		if (target.owner === "realm")
 			await acknowledgeCurrentRealmRulesOnFollow(tx, target.id, input.followerProfileId);
 	});
 	return { following: true as const };
@@ -335,7 +348,7 @@ export async function getFollowingStatus(input: {
 				),
 			)
 			.limit(1);
-		if (target.kind === "realm") {
+		if (target.owner === "realm") {
 			const realmTagSourceSubscribed = Boolean(
 				(
 					await tx
@@ -353,7 +366,7 @@ export async function getFollowingStatus(input: {
 			if (!record)
 				return {
 					following: false as const,
-					kind: target.kind,
+					owner: target.owner,
 					favorite: null,
 					position: null,
 					inAppNotificationsEnabled: null,
@@ -361,7 +374,7 @@ export async function getFollowingStatus(input: {
 				};
 			return {
 				following: true as const,
-				kind: target.kind,
+				owner: target.owner,
 				favorite: record.favorite,
 				position: record.position,
 				inAppNotificationsEnabled: record.inAppNotificationsEnabled ?? true,
@@ -371,7 +384,7 @@ export async function getFollowingStatus(input: {
 		if (!record)
 			return {
 				following: false as const,
-				kind: target.kind,
+				owner: target.owner,
 				favorite: null,
 				position: null,
 				inAppNotificationsEnabled: null,
@@ -379,7 +392,7 @@ export async function getFollowingStatus(input: {
 			};
 		return {
 			following: true as const,
-			kind: target.kind,
+			owner: target.owner,
 			favorite: record.favorite,
 			position: record.position,
 			inAppNotificationsEnabled: record.inAppNotificationsEnabled ?? true,
@@ -396,7 +409,7 @@ export async function replaceFollowingSettings(input: {
 	readonly settings: ReplaceFollowingSettings;
 }) {
 	const target = await resolveFollowTarget(input.unitId, input.authorization);
-	if (target.kind !== input.settings.kind) throw new FollowingTargetKindMismatch();
+	if (target.owner !== input.settings.owner) throw new FollowingTargetKindMismatch();
 
 	const follow = await database.transaction(async (tx) => {
 		await lockFollowingAccount(tx, input.authUserId, input.followerProfileId);
@@ -431,7 +444,7 @@ export async function replaceFollowingSettings(input: {
 				},
 			});
 
-		if (input.settings.kind === "realm") {
+		if (input.settings.owner === "realm") {
 			if (input.settings.realmTagSourceSubscribed)
 				await tx
 					.insert(accountRealmTagSubscription)
@@ -453,10 +466,10 @@ export async function replaceFollowingSettings(input: {
 		return record;
 	});
 
-	if (input.settings.kind === "realm")
+	if (input.settings.owner === "realm")
 		return {
 			following: true as const,
-			kind: input.settings.kind,
+			owner: input.settings.owner,
 			favorite: follow.favorite,
 			position: follow.position,
 			inAppNotificationsEnabled: input.settings.inAppNotificationsEnabled,
@@ -464,7 +477,7 @@ export async function replaceFollowingSettings(input: {
 		};
 	return {
 		following: true as const,
-		kind: input.settings.kind,
+		owner: input.settings.owner,
 		favorite: follow.favorite,
 		position: follow.position,
 		inAppNotificationsEnabled: input.settings.inAppNotificationsEnabled,

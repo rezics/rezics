@@ -3,8 +3,8 @@ import { t } from "elysia";
 import {
 	ContentRatingValues,
 	ContentLanguageValues,
-	type FollowableUnitKind,
-	FollowableUnitKindValues,
+	type FollowableUnitOwner,
+	FollowableUnitOwnerValues,
 } from "../database/schema/contract-values";
 import type { ContentLanguage } from "@rezics/i18n";
 import { InvalidPaginationCursor } from "../pagination/errors";
@@ -14,7 +14,7 @@ import { isStorageSafeFractionalPosition } from "../ordering/position";
 const FollowingCursor = t.Object(
 	{
 		v: t.Literal(3),
-		kind: t.Nullable(t.UnionEnum(FollowableUnitKindValues)),
+		owner: t.Nullable(t.UnionEnum(FollowableUnitOwnerValues)),
 		localizationLanguages: t.Array(t.UnionEnum(ContentLanguageValues), {
 			uniqueItems: true,
 		}),
@@ -33,7 +33,7 @@ export type FollowingCursorBoundary = {
 };
 
 export function encodeFollowingCursor(
-	kind: FollowableUnitKind | undefined,
+	owner: FollowableUnitOwner | undefined,
 	localizationLanguages: readonly ContentLanguage[],
 	contentRatings: readonly (typeof ContentRatingValues)[number][],
 	boundary: FollowingCursorBoundary,
@@ -41,7 +41,7 @@ export function encodeFollowingCursor(
 	return Buffer.from(
 		JSON.stringify({
 			v: 3,
-			kind: kind ?? null,
+			owner: owner ?? null,
 			localizationLanguages,
 			contentRatings,
 			...boundary,
@@ -51,7 +51,7 @@ export function encodeFollowingCursor(
 
 export function decodeFollowingCursor(
 	value: string | undefined,
-	kind: FollowableUnitKind | undefined,
+	owner: FollowableUnitOwner | undefined,
 	localizationLanguages: readonly ContentLanguage[],
 	contentRatings: readonly (typeof ContentRatingValues)[number][],
 ): FollowingCursorBoundary | undefined {
@@ -59,7 +59,7 @@ export function decodeFollowingCursor(
 	try {
 		const cursor = parseJsonCursor(value, FollowingCursor);
 		if (
-			cursor.kind !== (kind ?? null) ||
+			cursor.owner !== (owner ?? null) ||
 			cursor.localizationLanguages.length !== localizationLanguages.length ||
 			cursor.localizationLanguages.some(
 				(language, index) => language !== localizationLanguages[index],
