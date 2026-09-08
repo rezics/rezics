@@ -41,7 +41,12 @@ export async function compensateVndbSoftwareApplication(
 	for (const change of [...application.changes].reverse()) {
 		if (change.ownerId !== context.reference.id)
 			throw new TypeError("VNDB software compensation cannot mutate another native owner");
-		if ("owner" in change && change.kind !== "catalog-profile") {
+		if (
+			change.kind === "catalog-semantic" ||
+			change.kind === "catalog-name" ||
+			change.kind === "catalog-name-authority" ||
+			change.kind === "catalog-identifier"
+		) {
 			changes.push(await compensateCatalogSourceOwnedChange(tx, context.actor, change));
 			revision = (await loadCatalogIdentity(tx, context.reference, context.actor, true)).revision;
 		} else if (change.kind === "software-component") {

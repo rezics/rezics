@@ -19,9 +19,13 @@ import { loadCatalogIdentity } from "./storage";
 import { advanceMusicSourceComponentBaselines } from "./music-source-baselines";
 import { advanceCatalogSourceOwnedBaselines } from "./source-owned-baselines";
 import { catalogAccessDecisions } from "../participation/policy";
+import { CatalogStructureSourceChangeSchema } from "./structure-source-contracts";
+import { CatalogStructureSourceTables } from "../database/schema/catalog-structure-source";
+import { advanceStructureSourceBaselines } from "./structure-source";
 
 const revision = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);
 const nativeChangeSchema = z.discriminatedUnion("kind", [
+	CatalogStructureSourceChangeSchema,
 	z.strictObject({
 		kind: z.literal("catalog-identifier"),
 		owner: z.enum(CatalogOwnerValues),
@@ -170,6 +174,18 @@ export async function recordCatalogSourceApplication(
 			ownerId: change.ownerId,
 		};
 		switch (change.kind) {
+			case "catalog-structure": {
+				await tx
+					.insert(CatalogStructureSourceTables[change.owner].application)
+					.values({
+						...common,
+						component: change.component,
+						componentKey: change.componentKey,
+						beforeRevisionId: change.beforeRevisionId,
+						afterRevisionId: change.afterRevisionId,
+					});
+				break;
+			}
 			case "catalog-profile": {
 				await tx.insert(CatalogSourceProfileApplicationTables[change.owner]).values({
 					...common,
@@ -242,6 +258,11 @@ export async function recordCatalogSourceApplication(
 	}
 	await advanceMusicSourceComponentBaselines(tx, input, changes);
 	await advanceCatalogSourceOwnedBaselines(tx, input, changes);
+	await advanceStructureSourceBaselines(
+		tx,
+		input,
+		changes.filter((change) => change.kind === "catalog-structure"),
+	);
 }
 
 /** Editors may read exact before/after references; native restore rechecks current component heads. @internal */
@@ -285,6 +306,34 @@ export async function readCatalogSourceApplication(
 		.limit(1);
 	if (!application) return null;
 	const changes: (CatalogSourceNativeChange & { position: number })[] = [];
+	for (const owner of ["program", "publishing"] as const) {
+		const table = CatalogStructureSourceTables[owner].application;
+		const rows = await tx
+			.select()
+			.from(table)
+			.where(
+				and(
+					eq(table.sourceRecordId, value.sourceRecordId),
+					eq(table.proposalId, value.proposalId),
+					eq(table.action, value.action),
+				),
+			)
+			.orderBy(table.position)
+			.limit(128);
+		for (const row of rows)
+			changes.push({
+				...CatalogStructureSourceChangeSchema.parse({
+					kind: "catalog-structure",
+					owner,
+					ownerId: row.ownerId,
+					component: row.component,
+					componentKey: row.componentKey,
+					beforeRevisionId: row.beforeRevisionId,
+					afterRevisionId: row.afterRevisionId,
+				}),
+				position: row.position,
+			});
+	}
 	for (const owner of ["entity", "reference"] as const) {
 		const table = CatalogSourceProfileApplicationTables[owner];
 		const rows = await tx

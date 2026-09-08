@@ -96,7 +96,13 @@ export async function compensateCatalogSourceOwnedChange(
 	input: CatalogSourceOwnedChange,
 ): Promise<CatalogSourceOwnedChange> {
 	const [change] = CatalogSourceNativeChangesSchema.parse([input]);
-	if (!change || !("owner" in change) || change.kind === "catalog-profile")
+	if (
+		!change ||
+		(change.kind !== "catalog-semantic" &&
+			change.kind !== "catalog-name" &&
+			change.kind !== "catalog-name-authority" &&
+			change.kind !== "catalog-identifier")
+	)
 		throw new TypeError("Expected an owner-local semantic or named-form change");
 	const reference: CatalogReference = { owner: change.owner, id: change.ownerId };
 	const identity = await loadCatalogIdentity(tx, reference, actor, true);
