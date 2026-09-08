@@ -4,7 +4,6 @@ import { z } from "zod";
 import {
 	audio,
 	MaximumAudioTracksPerVideo,
-	unit,
 	videoAudioTrack,
 	type UnitKind,
 } from "../database/schema";
@@ -94,8 +93,7 @@ async function assertLiveAudioUnits(
 	const rows = await tx
 		.select({ id: audio.id })
 		.from(audio)
-		.innerJoin(unit, eq(unit.id, audio.id))
-		.where(and(inArray(audio.id, audioUnitIds), eq(unit.kind, "audio"), isNull(unit.deletedAt)));
+		.where(and(inArray(audio.id, audioUnitIds), isNull(audio.deletedAt)));
 	if (rows.length !== audioUnitIds.length)
 		throw new VideoAudioTrackInvalid(VideoAudioTrackPath, "contains an unavailable Audio Unit");
 }
