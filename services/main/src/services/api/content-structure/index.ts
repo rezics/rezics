@@ -103,8 +103,12 @@ import {
 	UpsertChapterLocalizationBody,
 } from "./schema";
 
-const UnitForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden"]);
+const UnitForbiddenResponse = toApiErrorResponse([
+	"UnitPermissionForbidden",
+	"ParticipationDenied",
+]);
 const ContentStructureForbiddenResponse = toApiErrorResponse([
+	"ParticipationDenied",
 	"RealmCapabilityRequired",
 	"UnitPermissionForbidden",
 	"PlatformCapabilityRequired",
@@ -767,7 +771,8 @@ export default new Elysia()
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["BookNotFound"]),
 			},
 			detail: {
-				summary: "List book Content Structure nodes",
+				operationId: "listTextVersionContentNodes",
+				summary: "List TextVersion content occurrences",
 				tags: ["Content Structure"],
 			},
 		},
@@ -811,7 +816,8 @@ export default new Elysia()
 				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
 			},
 			detail: {
-				summary: "Save a complete Book Content Structure draft",
+				operationId: "saveTextVersionContentDraft",
+				summary: "Save a TextVersion content draft",
 				tags: ["Content Structure"],
 			},
 		},
@@ -863,7 +869,8 @@ export default new Elysia()
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["MediaNotFound"]),
 			},
 			detail: {
-				summary: "List Media Content Structure nodes",
+				operationId: "listProgramContentNodes",
+				summary: "List Program content occurrences",
 				tags: ["Content Structure"],
 			},
 		},
@@ -902,7 +909,8 @@ export default new Elysia()
 				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
 			},
 			detail: {
-				summary: "Save a complete Media Content Structure draft",
+				operationId: "saveProgramContentDraft",
+				summary: "Save a Program content draft",
 				tags: ["Content Structure"],
 			},
 		},
@@ -954,7 +962,11 @@ export default new Elysia()
 				[StatusCodes.OK]: BookChapterNodeDetailResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ChapterNotFound", "ChapterLanguageNotFound"]),
 			},
-			detail: { summary: "Read a Chapter occurrence in a Book", tags: ["Books"] },
+			detail: {
+				operationId: "readTextVersionChapterNode",
+				summary: "Read a Chapter occurrence in a TextVersion",
+				tags: ["Publishing"],
+			},
 		},
 		async ({ params, query, request }) => {
 			const identity = await resolveIdentity(request, "unit:read");
