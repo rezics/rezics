@@ -1,7 +1,9 @@
-import { sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import type { ContentLanguage } from "@rezics/i18n";
+import { CatalogReferenceSchema } from "@rezics/reference";
 
 import { database } from "../database";
+import { CatalogNameTables } from "../database/schema/catalog-names";
 import { unitStateRelation } from "../units/state-relation";
 import {
 	resolvedUnitLocalizationImageAssetId,
@@ -27,6 +29,32 @@ export async function getPostSubjectPresentation(
 		})
 		.from(unit)
 		.limit(1);
+	if (!subject) return null;
+	const native = CatalogReferenceSchema.safeParse({ owner: subject.type, id: subject.id });
+	if (native.success) {
+		const names = CatalogNameTables[native.data.owner].name;
+		const [name] = await database
+			.select({ title: names.value, language: names.languageTag })
+			.from(names)
+			.where(
+				and(
+					eq(names.ownerId, subject.id),
+					eq(names.state, "active"),
+					eq(names.spoiler, 0),
+					isNull(names.scopeOwnerId),
+				),
+			)
+			.orderBy(names.id)
+			.limit(1);
+		return {
+			id: subject.id,
+			type: subject.type,
+			language: name?.language ?? null,
+			title: name?.title ?? null,
+			summary: null,
+			cover: null,
+		};
+	}
 	if (!subject?.language) return null;
 	const { coverAssetId, language, ...presentation } = subject;
 	return {
