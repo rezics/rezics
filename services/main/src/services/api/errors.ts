@@ -71,6 +71,10 @@ export class InternalError extends HTTPError.id(
 	}
 }
 
+export class RouteNotFound extends HTTPError.id("RouteNotFound", StatusCodes.NOT_FOUND) {
+	override readonly message = "API route not found";
+}
+
 export const ApiErrors = [
 	CatalogReferenceNotFound,
 	CatalogRevisionConflict,
@@ -83,6 +87,7 @@ export const ApiErrors = [
 	MalformedRequestBody,
 	ValidationError,
 	InternalError,
+	RouteNotFound,
 	...DatabaseErrors,
 	...AuthErrors,
 	...AuthorizationErrors,

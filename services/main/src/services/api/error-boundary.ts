@@ -1,5 +1,5 @@
 import { getActiveObservability } from "@rezics/observability";
-import Elysia, { ParseError, ValidationError as ElysiaValidationError } from "elysia";
+import Elysia, { NotFound, ParseError, ValidationError as ElysiaValidationError } from "elysia";
 
 import { getAuditRequestContext } from "../audit";
 import { toTagPolicyConstraintError } from "../database/errors";
@@ -10,6 +10,7 @@ import {
 	InternalError,
 	isApiError,
 	MalformedRequestBody,
+	RouteNotFound,
 	toApiErrorBody,
 } from "./errors";
 import { classifyValidationFailure } from "./validation-failure";
@@ -20,6 +21,10 @@ export default new Elysia({ name: "api-error-boundary" }).error(
 	"global",
 	({ error, request, route, set, status }) => {
 		const requestId = getAuditRequestContext()?.requestId ?? crypto.randomUUID();
+		if (error instanceof NotFound) {
+			const notFound = new RouteNotFound();
+			return status(notFound.status, toApiErrorBody(notFound, requestId));
+		}
 		if (isApiError(error)) {
 			const retryAfterSeconds = apiErrorRetryAfterSeconds(error);
 			if (retryAfterSeconds !== undefined) set.headers["Retry-After"] = String(retryAfterSeconds);

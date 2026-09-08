@@ -25,6 +25,12 @@ import {
 } from "./errors";
 
 describe("API errors", () => {
+	it("keeps an unmatched route a 404 through the global boundary", async () => {
+		const app = new Elysia().use(errorBoundary).get("/present", () => "ok");
+		const response = await app.handle(new Request("http://localhost/missing/resource"));
+		expect(response.status).toBe(404);
+		expect(await response.json()).toMatchObject({ error: { code: "RouteNotFound" } });
+	});
 	it("preserves the native and wire contract across representative status classes", () => {
 		const diagnostic = new Error("private database diagnostic");
 		const requestId = "019f9e37-a504-7dde-be38-0757f2d31411";
