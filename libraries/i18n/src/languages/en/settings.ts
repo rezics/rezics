@@ -11,6 +11,37 @@ const { forms: postTerms } = enTerminology.post;
 const { forms: zoneTerms } = enTerminology.zone;
 
 export default {
+	memberships: {
+		expiryHint: "Choose an expiration within the next thirty days.",
+		title: "Organization memberships",
+		description: "Review invitations, leave organizations, and manage member lists where you have permission.",
+		invitations: "Invitations",
+		organizations: "My organizations",
+		managing: "Member lists I manage",
+		members: "Members",
+		invite: "Invite member",
+		accept: "Accept",
+		decline: "Decline",
+		cancelInvitation: "Cancel invitation",
+		leave: "Leave organization",
+		remove: "Remove member",
+		emptyInvitations: "No pending invitations.",
+		emptyMembers: "No members yet.",
+		emptyOrganizations: "You have not joined an organization.",
+		emptyManagement: "You do not currently manage any member lists.",
+		acceptPrompt: "Accepting adds your public identity to this organization’s member list, visible to its membership managers.",
+		removePrompt: "Removing membership leaves separately granted publishing, security and management permissions unchanged.",
+		leavePrompt: "Leaving removes your membership. Any separate permissions you hold remain unchanged.",
+		recipientHint: "Use the public identity of an existing account.",
+		states: {
+			pending: "Pending",
+			accepted: "Accepted",
+			declined: "Declined",
+			cancelled: "Cancelled",
+			expired: "Expired",
+			invalidated: "No longer valid",
+		},
+	},
 	participation: {
 		scope: "Scope",
 		noExpiry: "No expiration",

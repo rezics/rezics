@@ -38,10 +38,13 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { AppLink } from "@/features/application-shell/components/app-link";
-import { EntityPresentationEditor } from "./entity-presentation-editor";
+import { EntityPresentationEditor } from "../components/entity-presentation-editor";
 import { isUnitId } from "@/features/units/model/unit-id";
-import { createParticipationClient, type ParticipationSelection } from "./participation-client";
-import { ServiceIdentities } from "./service-identities";
+import {
+	createParticipationClient,
+	type ParticipationSelection,
+} from "../data/participation-client";
+import { ServiceIdentities } from "../components/service-identities";
 
 type NamedSelection = ParticipationSelection & { name: string };
 
@@ -183,7 +186,7 @@ export function ParticipationSettingsPage() {
 }
 
 type ManagedGrant = ListManagedEntityGrantsStatus200["items"][number];
-const EntityPermissions = ["entity.publish", "entity.security"] as const;
+const EntityPermissions = ["entity.publish", "entity.membership", "entity.security"] as const;
 type EntityPermission = (typeof EntityPermissions)[number];
 
 function ManagedIdentity({
@@ -199,6 +202,9 @@ function ManagedIdentity({
 	const [afterId, setAfterId] = useState<string>();
 	const [recipient, setRecipient] = useState("");
 	const [capability, setCapability] = useState<EntityPermission>("entity.publish");
+	const permissionChoices = selection.grant
+		? EntityPermissions
+		: EntityPermissions.filter((value) => value !== "entity.membership");
 	const [expiresAt, setExpiresAt] = useState("");
 	const [revoking, setRevoking] = useState<ManagedGrant>();
 	const [editSelection, setEditSelection] = useState<ParticipationSelection>();
@@ -370,13 +376,13 @@ function ManagedIdentity({
 							id="grant-permission"
 							value={capability}
 							onChange={(event) => {
-								const value = EntityPermissions.find(
+								const value = permissionChoices.find(
 									(value) => value === event.currentTarget.value,
 								);
 								if (value) setCapability(value);
 							}}
 						>
-							{EntityPermissions.map((value) => (
+							{permissionChoices.map((value) => (
 								<NativeSelectOption key={value} value={value}>
 									{t.settings.participation.capabilities[value]}
 								</NativeSelectOption>

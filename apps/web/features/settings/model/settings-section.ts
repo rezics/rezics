@@ -1,6 +1,7 @@
 export const SettingsSectionIds = [
 	"profile",
 	"participation",
+	"memberships",
 	"preferences",
 	"privacy",
 	"tag-sources",

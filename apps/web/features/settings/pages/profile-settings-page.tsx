@@ -1,6 +1,6 @@
 "use client";
 
-import { EntityPresentationEditor } from "@/features/participation/entity-presentation-editor";
+import { EntityPresentationEditor } from "@/features/participation/components/entity-presentation-editor";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { ContentLanguageValues, isContentLanguage, type ContentLanguage } from "@rezics/i18n";

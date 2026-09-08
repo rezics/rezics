@@ -31,7 +31,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import { createParticipationClient } from "./participation-client";
+import { createParticipationClient } from "../data/participation-client";
 
 type ServiceIdentity = ListControlledServicePrincipalsStatus200["items"][number];
 

@@ -9,6 +9,37 @@ const { forms: licenseTerms } = zhHansTerminology.license;
 const { forms: postTerms } = zhHansTerminology.post;
 
 export default {
+	memberships: {
+		expiryHint: "请选择未来三十天内的到期时间。",
+		title: "组织成员关系",
+		description: "查看邀请、退出组织，并管理你有权限负责的成员名单。",
+		invitations: "邀请",
+		organizations: "我加入的组织",
+		managing: "我管理的成员名单",
+		members: "成员",
+		invite: "邀请成员",
+		accept: "接受",
+		decline: "拒绝",
+		cancelInvitation: "取消邀请",
+		leave: "退出组织",
+		remove: "移除成员",
+		emptyInvitations: "没有待处理邀请。",
+		emptyMembers: "还没有成员。",
+		emptyOrganizations: "你尚未加入组织。",
+		emptyManagement: "你目前没有成员名单管理权限。",
+		acceptPrompt: "接受后，你的公开身份将加入此组织的成员名单，成员管理者可以查看。",
+		removePrompt: "移除成员关系不会更改另行授予的发布、安全或管理权限。",
+		leavePrompt: "退出后将移除你的成员关系，另行授予的权限保持不变。",
+		recipientHint: "请使用已有账户的公开身份。",
+		states: {
+			pending: "待处理",
+			accepted: "已接受",
+			declined: "已拒绝",
+			cancelled: "已取消",
+			expired: "已过期",
+			invalidated: "已失效",
+		},
+	},
 	participation: {
 		scope: "范围",
 		noExpiry: "不设到期时间",

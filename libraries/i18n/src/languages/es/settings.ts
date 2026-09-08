@@ -12,6 +12,37 @@ const { forms: postTerms } = esTerminology.post;
 const { forms: zoneTerms } = esTerminology.zone;
 
 export default {
+	memberships: {
+		expiryHint: "Elige una fecha de caducidad dentro de los próximos treinta días.",
+		title: "Membresías de organizaciones",
+		description: "Revisa invitaciones, abandona organizaciones y administra las listas de miembros que te correspondan.",
+		invitations: "Invitaciones",
+		organizations: "Mis organizaciones",
+		managing: "Listas de miembros que administro",
+		members: "Miembros",
+		invite: "Invitar miembro",
+		accept: "Aceptar",
+		decline: "Rechazar",
+		cancelInvitation: "Cancelar invitación",
+		leave: "Abandonar organización",
+		remove: "Quitar miembro",
+		emptyInvitations: "No hay invitaciones pendientes.",
+		emptyMembers: "Todavía no hay miembros.",
+		emptyOrganizations: "No te has unido a ninguna organización.",
+		emptyManagement: "Actualmente no administras ninguna lista de miembros.",
+		acceptPrompt: "Al aceptar, tu identidad pública se añadirá a la lista de miembros visible para sus responsables.",
+		removePrompt: "Quitar la membresía no modifica los permisos concedidos por separado para publicar, administrar la seguridad o gestionar.",
+		leavePrompt: "Al abandonar la organización se eliminará tu membresía. Los permisos concedidos por separado no cambiarán.",
+		recipientHint: "Usa la identidad pública de una cuenta existente.",
+		states: {
+			pending: "Pendiente",
+			accepted: "Aceptada",
+			declined: "Rechazada",
+			cancelled: "Cancelada",
+			expired: "Caducada",
+			invalidated: "Ya no es válida",
+		},
+	},
 	participation: {
 		scope: "Alcance",
 		noExpiry: "Sin caducidad",

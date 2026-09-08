@@ -11,6 +11,37 @@ const { forms: metadataTerms } = koTerminology.metadata;
 const { forms: postTerms } = koTerminology.post;
 
 export default {
+	memberships: {
+		expiryHint: "앞으로 30일 이내의 만료 시각을 선택하세요.",
+		title: "조직 소속",
+		description: "초대를 확인하고 조직에서 탈퇴하거나 권한이 있는 구성원 목록을 관리하세요.",
+		invitations: "초대",
+		organizations: "내가 속한 조직",
+		managing: "내가 관리하는 구성원 목록",
+		members: "구성원",
+		invite: "구성원 초대",
+		accept: "수락",
+		decline: "거절",
+		cancelInvitation: "초대 취소",
+		leave: "조직 탈퇴",
+		remove: "구성원 제거",
+		emptyInvitations: "처리 대기 중인 초대가 없습니다.",
+		emptyMembers: "아직 구성원이 없습니다.",
+		emptyOrganizations: "가입한 조직이 없습니다.",
+		emptyManagement: "현재 구성원 목록을 관리할 권한이 없습니다.",
+		acceptPrompt: "수락하면 공개 신원이 이 조직의 구성원 목록에 추가되며 구성원 관리자가 볼 수 있습니다.",
+		removePrompt: "구성원에서 제거해도 별도로 부여된 게시, 보안, 관리 권한은 변경되지 않습니다.",
+		leavePrompt: "탈퇴하면 소속이 해제됩니다. 별도로 부여된 권한은 유지됩니다.",
+		recipientHint: "기존 계정의 공개 신원을 사용하세요.",
+		states: {
+			pending: "대기 중",
+			accepted: "수락됨",
+			declined: "거절됨",
+			cancelled: "취소됨",
+			expired: "만료됨",
+			invalidated: "무효",
+		},
+	},
 	participation: {
 		scope: "적용 범위",
 		noExpiry: "만료 없음",

@@ -15,7 +15,7 @@ import { useState,type DragEvent,type FormEvent } from "react";
 
 import { resetContentRatingDependentQueries } from "@/features/content-feed/data/content-rating-cache";
 import { FeedQueryKey } from "@/features/content-feed/query";
-import { AccountErasureControl } from "@/features/participation/account-erasure-control";
+import { AccountErasureControl } from "@/features/participation/components/account-erasure-control";
 import { setPresentationPreferencesQueryData } from "@/features/preferences/data/use-presentation-preferences";
 import { UnitLicensesField } from "@/features/units/components/unit-licenses-field";
 import { readSubmittedLicenses } from "@/features/units/model/unit-licenses";

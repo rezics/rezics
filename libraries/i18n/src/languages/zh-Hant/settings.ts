@@ -9,6 +9,37 @@ const { forms: licenseTerms } = zhHantTerminology.license;
 const { forms: postTerms } = zhHantTerminology.post;
 
 export default {
+	memberships: {
+		expiryHint: "請選擇未來三十天內的到期時間。",
+		title: "組織成員關係",
+		description: "查看邀請、退出組織，並管理你有權限負責的成員名單。",
+		invitations: "邀請",
+		organizations: "我加入的組織",
+		managing: "我管理的成員名單",
+		members: "成員",
+		invite: "邀請成員",
+		accept: "接受",
+		decline: "拒絕",
+		cancelInvitation: "取消邀請",
+		leave: "退出組織",
+		remove: "移除成員",
+		emptyInvitations: "沒有待處理邀請。",
+		emptyMembers: "還沒有成員。",
+		emptyOrganizations: "你尚未加入組織。",
+		emptyManagement: "你目前沒有成員名單管理權限。",
+		acceptPrompt: "接受後，你的公開身分將加入此組織的成員名單，成員管理者可以查看。",
+		removePrompt: "移除成員關係不會變更另行授予的發布、安全或管理權限。",
+		leavePrompt: "退出後將移除你的成員關係，另行授予的權限保持不變。",
+		recipientHint: "請使用既有帳戶的公開身分。",
+		states: {
+			pending: "待處理",
+			accepted: "已接受",
+			declined: "已拒絕",
+			cancelled: "已取消",
+			expired: "已過期",
+			invalidated: "已失效",
+		},
+	},
 	participation: {
 		scope: "範圍",
 		noExpiry: "不設到期時間",

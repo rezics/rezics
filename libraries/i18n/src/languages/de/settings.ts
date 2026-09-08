@@ -9,6 +9,37 @@ const { forms: licenseTerms } = deTerminology.license;
 const { forms: metadataTerms } = deTerminology.metadata;
 
 export default {
+	memberships: {
+		expiryHint: "Wähle ein Ablaufdatum innerhalb der nächsten dreißig Tage.",
+		title: "Organisationsmitgliedschaften",
+		description: "Prüfe Einladungen, verlasse Organisationen und verwalte Mitgliederlisten mit entsprechender Berechtigung.",
+		invitations: "Einladungen",
+		organizations: "Meine Organisationen",
+		managing: "Von mir verwaltete Mitgliederlisten",
+		members: "Mitglieder",
+		invite: "Mitglied einladen",
+		accept: "Annehmen",
+		decline: "Ablehnen",
+		cancelInvitation: "Einladung zurückziehen",
+		leave: "Organisation verlassen",
+		remove: "Mitglied entfernen",
+		emptyInvitations: "Keine offenen Einladungen.",
+		emptyMembers: "Noch keine Mitglieder.",
+		emptyOrganizations: "Du bist keiner Organisation beigetreten.",
+		emptyManagement: "Du verwaltest derzeit keine Mitgliederlisten.",
+		acceptPrompt: "Wenn du annimmst, wird deine öffentliche Identität in die für Mitgliedschaftsverantwortliche sichtbare Mitgliederliste aufgenommen.",
+		removePrompt: "Das Entfernen der Mitgliedschaft ändert keine gesondert vergebenen Veröffentlichungs-, Sicherheits- oder Verwaltungsrechte.",
+		leavePrompt: "Beim Verlassen endet deine Mitgliedschaft. Gesondert vergebene Berechtigungen bleiben unverändert.",
+		recipientHint: "Verwende die öffentliche Identität eines bestehenden Kontos.",
+		states: {
+			pending: "Offen",
+			accepted: "Angenommen",
+			declined: "Abgelehnt",
+			cancelled: "Zurückgezogen",
+			expired: "Abgelaufen",
+			invalidated: "Nicht mehr gültig",
+		},
+	},
 	participation: {
 		scope: "Geltungsbereich",
 		noExpiry: "Kein Ablaufdatum",

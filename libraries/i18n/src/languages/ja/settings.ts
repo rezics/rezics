@@ -12,6 +12,37 @@ const { forms: postTerms } = jaTerminology.post;
 const { forms: zoneTerms } = jaTerminology.zone;
 
 export default {
+	memberships: {
+		expiryHint: "今後30日以内の有効期限を指定してください。",
+		title: "組織への所属",
+		description: "招待の確認、組織からの脱退、権限のあるメンバー一覧の管理を行います。",
+		invitations: "招待",
+		organizations: "所属する組織",
+		managing: "管理するメンバー一覧",
+		members: "メンバー",
+		invite: "メンバーを招待",
+		accept: "承認",
+		decline: "辞退",
+		cancelInvitation: "招待を取り消す",
+		leave: "組織を脱退",
+		remove: "メンバーから外す",
+		emptyInvitations: "未処理の招待はありません。",
+		emptyMembers: "まだメンバーがいません。",
+		emptyOrganizations: "所属する組織はありません。",
+		emptyManagement: "現在、メンバー一覧の管理権限はありません。",
+		acceptPrompt: "承認すると公開名義がこの組織のメンバー一覧に追加され、メンバー管理者が閲覧できます。",
+		removePrompt: "所属を解除しても、別途付与された公開、セキュリティ、管理の権限は変わりません。",
+		leavePrompt: "脱退すると所属は解除されます。別途付与された権限は変わりません。",
+		recipientHint: "既存のアカウントの公開名義を指定してください。",
+		states: {
+			pending: "未処理",
+			accepted: "承認済み",
+			declined: "辞退済み",
+			cancelled: "取り消し済み",
+			expired: "期限切れ",
+			invalidated: "無効",
+		},
+	},
 	participation: {
 		scope: "対象範囲",
 		noExpiry: "有効期限なし",

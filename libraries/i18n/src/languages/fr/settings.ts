@@ -11,6 +11,37 @@ const { forms: metadataTerms } = frTerminology.metadata;
 const { forms: postTerms } = frTerminology.post;
 
 export default {
+	memberships: {
+		expiryHint: "Choisissez une date d’expiration dans les trente prochains jours.",
+		title: "Adhésions aux organisations",
+		description: "Consultez les invitations, quittez des organisations et gérez les listes de membres pour lesquelles vous avez une autorisation.",
+		invitations: "Invitations",
+		organizations: "Mes organisations",
+		managing: "Listes de membres que je gère",
+		members: "Membres",
+		invite: "Inviter un membre",
+		accept: "Accepter",
+		decline: "Refuser",
+		cancelInvitation: "Annuler l’invitation",
+		leave: "Quitter l’organisation",
+		remove: "Retirer le membre",
+		emptyInvitations: "Aucune invitation en attente.",
+		emptyMembers: "Aucun membre pour le moment.",
+		emptyOrganizations: "Vous n’avez rejoint aucune organisation.",
+		emptyManagement: "Vous ne gérez actuellement aucune liste de membres.",
+		acceptPrompt: "En acceptant, votre identité publique sera ajoutée à la liste des membres consultable par les responsables des adhésions.",
+		removePrompt: "Retirer une adhésion ne modifie pas les autorisations distinctes pour publier, gérer la sécurité ou administrer.",
+		leavePrompt: "Quitter l’organisation met fin à votre adhésion. Vos autorisations distinctes restent inchangées.",
+		recipientHint: "Utilisez l’identité publique d’un compte existant.",
+		states: {
+			pending: "En attente",
+			accepted: "Acceptée",
+			declined: "Refusée",
+			cancelled: "Annulée",
+			expired: "Expirée",
+			invalidated: "Non valide",
+		},
+	},
 	participation: {
 		scope: "Portée",
 		noExpiry: "Sans expiration",

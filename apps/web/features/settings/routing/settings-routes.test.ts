@@ -5,6 +5,7 @@ import { parseSettingsSection, settingsSectionHref } from "./settings-routes";
 describe("settings routes", () => {
 	it("builds section routes", () => {
 		expect(settingsSectionHref("security")).toBe("/settings/security");
+		expect(settingsSectionHref("memberships")).toBe("/settings/memberships");
 		expect(settingsSectionHref("tokens")).toBe("/settings/tokens");
 		expect(settingsSectionHref("privacy")).toBe("/settings/privacy");
 		expect(settingsSectionHref("tag-sources")).toBe("/settings/tag-sources");
@@ -12,6 +13,7 @@ describe("settings routes", () => {
 
 	it.each([
 		["/settings/profile", "profile"],
+		["/settings/memberships", "memberships"],
 		["/settings/preferences/", "preferences"],
 		["/settings/privacy", "privacy"],
 		["/settings/tag-sources", "tag-sources"],
