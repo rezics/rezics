@@ -11,11 +11,10 @@ import {
 	pollOption,
 	pollOptionVoteStat,
 	pollVote,
-	unit,
 	unitLocalization,
 	unitOwnership,
 } from "../../database/schema";
-import { insertUnit } from "../../units/create";
+import { insertPlatformUnit } from "../../units/create";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { resolvedUnitLocalizationLanguage } from "../../units/localization";
@@ -49,7 +48,7 @@ export default new Elysia({ prefix: "/polls" })
 			},
 			detail: { summary: "Create poll", tags: ["Polls"] },
 		},
-		async ({ entity, authorization, body }) => {
+		async ({ principal, entity, authorization, body }) => {
 			const optionKeys = body.options.map((option) =>
 				option.sourceKind === "unit"
 					? `unit:${option.targetUnitId}`
@@ -65,20 +64,21 @@ export default new Elysia({ prefix: "/polls" })
 			];
 			await authorization.unit.ensureCanReadMany(targetUnitIds);
 			const id = await database.transaction(async (tx) => {
-				const pollUnit = await insertUnit(tx, {
-					kind: "poll",
-					status: "published",
-					visibility: "public",
-					publishedAt: new Date(),
+				const pollUnit = await insertPlatformUnit(tx, {
+					owner: "poll",
+					values: {
+						createdByAuthUserId: principal.authUserId,
+						status: "published",
+						visibility: "public",
+						publishedAt: new Date(),
+						mode: body.voteMode,
+						anonymous: body.anonymous,
+						resultVisibility: body.resultsVisibility,
+						closesAt: body.closesAt ? new Date(body.closesAt) : undefined,
+					},
 					statusActor: { kind: "profile", profileId: entity.id },
 				});
-				await tx.insert(poll).values({
-					id: pollUnit.id,
-					mode: body.voteMode,
-					anonymous: body.anonymous,
-					resultVisibility: body.resultsVisibility,
-					closesAt: body.closesAt ? new Date(body.closesAt) : undefined,
-				});
+
 				const options = await tx
 					.insert(pollOption)
 					.values(
@@ -143,10 +143,9 @@ export default new Elysia({ prefix: "/polls" })
 					resultsVisibility: poll.resultVisibility,
 					closesAt: poll.closesAt,
 					closedAt: poll.closedAt,
-					createdAt: unit.createdAt,
+					createdAt: poll.createdAt,
 				})
 				.from(poll)
-				.innerJoin(unit, eq(unit.id, poll.id))
 				.innerJoin(
 					unitLocalization,
 					and(

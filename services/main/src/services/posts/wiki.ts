@@ -1,3 +1,4 @@
+import { AuthenticationRequired } from "../auth/errors";
 import {
 	WikiPostBlockHostPolicy,
 	assertBlockQueryBudget,
@@ -13,13 +14,13 @@ import {
 	grantRealmAccessManagersUnitGovernance,
 } from "../authorization/unit/ownership";
 import type { DatabaseTransaction } from "../database";
-import { post, unitLocalization } from "../database/schema";
+import { unitLocalization } from "../database/schema";
 import { shouldCreateProfilePublisherAttributionForPost } from "./attribution-policy";
 import { applyNewPostTagMentionVotes } from "./tag-mentions";
 import { publishPostToRealms } from "./publication";
 import { ensureSubjectPostTargetingAllowed } from "./targeting";
 import { createProfilePublisherAttribution } from "../units/attribution";
-import { insertUnit } from "../units/create";
+import { insertPlatformUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import type { RevisionContributionInput } from "../units/revision-contribution";
 import { resolveCanonicalUnitId } from "../units/merge/canonical";
@@ -57,15 +58,21 @@ export async function createWikiPost(
 	tx: DatabaseTransaction,
 	input: CreateWikiPostInput,
 ): Promise<{ readonly id: string; readonly revisionId: string }> {
+	if (!input.authorization.authUserId) throw new AuthenticationRequired();
 	assertWikiPostWriteDocument(input.body);
 	const subjectId = input.subjectId ? await resolveCanonicalUnitId(tx, input.subjectId) : undefined;
 	if (subjectId)
 		await input.authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, subjectId);
-	const created = await insertUnit(tx, {
-		kind: "post",
-		status: "published",
-		visibility: "public",
-		publishedAt: new Date(),
+	const created = await insertPlatformUnit(tx, {
+		owner: "post",
+		values: {
+			createdByAuthUserId: input.authorization.authUserId,
+			status: "published",
+			visibility: "public",
+			publishedAt: new Date(),
+			kind: "wiki",
+			subjectUnitId: subjectId,
+		},
 		statusActor: { kind: "profile", profileId: input.profileId },
 	});
 	await ensureSubjectPostTargetingAllowed(tx, {
@@ -73,11 +80,7 @@ export async function createWikiPost(
 		subjectUnitId: subjectId,
 		realmIds: input.publishRealmIds,
 	});
-	await tx.insert(post).values({
-		id: created.id,
-		kind: "wiki",
-		subjectUnitId: subjectId,
-	});
+
 	await tx.insert(unitLocalization).values({
 		unitId: created.id,
 		language: input.language,

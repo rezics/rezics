@@ -19,7 +19,6 @@ import {
 	postReplyStat,
 	postScore,
 	score,
-	unit,
 	unitLocalization,
 	unitOwnership,
 	unitRevisionHead,
@@ -46,7 +45,7 @@ import {
 	getAttributionSummariesByUnitIds,
 	type UnitAttributionSummary,
 } from "../../units/attribution";
-import { insertUnit } from "../../units/create";
+import { insertPlatformUnit } from "../../units/create";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { resolvedUnitLocalizationLanguage } from "../../units/localization";
@@ -209,11 +208,11 @@ const replySelection = {
 	parentPostId: postReply.parentPostId,
 	depth: postReply.depth,
 	body: unitLocalization.content,
-	moderationStatus: unit.moderationStatus,
-	deletedAt: unit.deletedAt,
+	moderationStatus: post.moderationStatus,
+	deletedAt: post.deletedAt,
 	latestRevisionId: unitRevisionHead.revisionId,
-	createdAt: unit.createdAt,
-	updatedAt: unit.updatedAt,
+	createdAt: post.createdAt,
+	updatedAt: post.updatedAt,
 };
 
 export default new Elysia()
@@ -241,7 +240,7 @@ export default new Elysia()
 						.limit(1);
 					if (!record) throw new PostNotFound();
 					return {
-						items: await selectPostScores(params.postId, identity.entity?.id),
+						items: await selectPostScores(params.postId, identity.authorization),
 					};
 				},
 			)
@@ -319,7 +318,7 @@ export default new Elysia()
 							);
 					});
 					return {
-						items: await selectPostScores(params.postId, entity.id),
+						items: await selectPostScores(params.postId, authorization),
 					};
 				},
 			)
@@ -346,8 +345,8 @@ export default new Elysia()
 							title: unitLocalization.title,
 							summary: unitLocalization.summary,
 							latestRevisionId: unitRevisionHead.revisionId,
-							createdAt: unit.createdAt,
-							updatedAt: unit.updatedAt,
+							createdAt: post.createdAt,
+							updatedAt: post.updatedAt,
 							contentSpoilerLevel: sql<number>`coalesce((
 								select manifest.spoiler_level
 								from (values
@@ -366,7 +365,6 @@ export default new Elysia()
 							)`,
 						})
 						.from(post)
-						.innerJoin(unit, eq(unit.id, post.id))
 						.leftJoin(postReply, eq(postReply.postId, post.id))
 						.leftJoin(postReplyStat, eq(postReplyStat.postId, post.id))
 						.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, post.id))
@@ -383,16 +381,16 @@ export default new Elysia()
 						.where(
 							and(
 								sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind)`,
-								eq(unit.status, "published"),
-								eq(unit.visibility, "public"),
-								isNull(unit.deletedAt),
+								eq(post.status, "published"),
+								eq(post.visibility, "public"),
+								isNull(post.deletedAt),
 								query.realmId
 									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible' and rc.publication_state = 'active')`
 									: undefined,
 								query.subjectId ? eq(post.subjectUnitId, query.subjectId) : undefined,
 							),
 						)
-						.orderBy(desc(unit.createdAt), desc(unit.id))
+						.orderBy(desc(post.createdAt), desc(post.id))
 						.limit(query.limit ?? 20);
 					const attributions = await getAttributionSummariesByUnitIds(
 						rows.map(({ id }) => id),
@@ -463,7 +461,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Create post or excerpt", tags: ["Posts"] },
 				},
-				async ({ entity, authorization, body }) => {
+				async ({ principal, entity, authorization, body }) => {
 					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
 					const subjectId = body.subjectId
 						? await resolveCanonicalUnitId(database, body.subjectId)
@@ -476,11 +474,16 @@ export default new Elysia()
 						async (tx) => {
 							if (subjectId)
 								await authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, subjectId);
-							const created = await insertUnit(tx, {
-								kind: "post",
-								status: "published",
-								visibility: "public",
-								publishedAt: new Date(),
+							const created = await insertPlatformUnit(tx, {
+								owner: "post",
+								values: {
+									createdByAuthUserId: principal.authUserId,
+									status: "published",
+									visibility: "public",
+									publishedAt: new Date(),
+									kind: body.postKind,
+									subjectUnitId: subjectId,
+								},
 								statusActor: { kind: "profile", profileId: entity.id },
 							});
 							await ensureSubjectPostTargetingAllowed(tx, {
@@ -488,11 +491,7 @@ export default new Elysia()
 								subjectUnitId: subjectId,
 								realmIds: body.publishRealmIds,
 							});
-							await tx.insert(post).values({
-								id: created.id,
-								kind: body.postKind,
-								subjectUnitId: subjectId,
-							});
+
 							await tx.insert(unitLocalization).values({
 								unitId: created.id,
 								language: body.language,
@@ -625,8 +624,8 @@ export default new Elysia()
 							summary: unitLocalization.summary,
 							body: unitLocalization.content,
 							latestRevisionId: unitRevisionHead.revisionId,
-							createdAt: unit.createdAt,
-							updatedAt: unit.updatedAt,
+							createdAt: post.createdAt,
+							updatedAt: post.updatedAt,
 							contentSpoilerLevel: sql<number>`coalesce((
 								select manifest.spoiler_level
 								from (values
@@ -645,7 +644,6 @@ export default new Elysia()
 							)`,
 						})
 						.from(post)
-						.innerJoin(unit, eq(unit.id, post.id))
 						.leftJoin(postReply, eq(postReply.postId, post.id))
 						.leftJoin(postReplyStat, eq(postReplyStat.postId, post.id))
 						.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, post.id))
@@ -714,7 +712,7 @@ export default new Elysia()
 							.where(eq(unitLocalization.unitId, row.id))
 							.orderBy(unitLocalization.position, unitLocalization.language),
 						getAttributionSummariesByUnitIds([row.id], localizationLanguages),
-						selectPostScores(row.id, viewerProfileId, localizationLanguages).then((items) =>
+						selectPostScores(row.id, authorization, localizationLanguages).then((items) =>
 							items.map(({ scoreId, realmId, realmTitle, value }) => ({
 								scoreId,
 								realmId,
@@ -723,7 +721,7 @@ export default new Elysia()
 							})),
 						),
 						row.postKind === "review"
-							? selectPostProgressEntry(row.id, viewerProfileId)
+							? selectPostProgressEntry(row.id, authorization)
 							: Promise.resolve([]),
 						subjectPromise,
 						authorization.unit.canUpdate(row.id, ["localizations"]),
@@ -990,7 +988,6 @@ export default new Elysia()
 						.select(replySelection)
 						.from(postReply)
 						.innerJoin(post, eq(post.id, postReply.postId))
-						.innerJoin(unit, eq(unit.id, postReply.postId))
 						.innerJoin(
 							unitLocalization,
 							and(
@@ -1091,7 +1088,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Create reply post", tags: ["Posts"] },
 				},
-				async ({ params, entity, authorization, body }) => {
+				async ({ principal, params, entity, authorization, body }) => {
 					await authorization.unit.ensureCanRead(params.postId, () => new UnitNotFound("Post"));
 					await ensureRootPost(params.postId, body.realmId);
 					await authorization.realm.ensureUnitCreation(
@@ -1117,11 +1114,10 @@ export default new Elysia()
 									})
 									.from(postReply)
 									.innerJoin(post, eq(post.id, postReply.postId))
-									.innerJoin(unit, eq(unit.id, postReply.postId))
 									.where(
 										and(
 											eq(postReply.postId, body.parentPostId),
-											isNull(unit.deletedAt),
+											isNull(post.deletedAt),
 											body.realmId
 												? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${postReply.postId} and rc.realm_id = ${body.realmId} and rc.status = 'visible' and rc.publication_state = 'active')`
 												: undefined,
@@ -1133,11 +1129,15 @@ export default new Elysia()
 								depth = parent.depth + 1;
 								recipientUnitId = body.parentPostId;
 							}
-							const created = await insertUnit(tx, {
-								kind: "post",
-								status: "published",
-								visibility: "public",
-								publishedAt: new Date(),
+							const created = await insertPlatformUnit(tx, {
+								owner: "post",
+								values: {
+									createdByAuthUserId: principal.authUserId,
+									status: "published",
+									visibility: "public",
+									publishedAt: new Date(),
+									kind: "reply",
+								},
 								statusActor: { kind: "profile", profileId: entity.id },
 							});
 							await ensureReplyPostTargetingAllowed(tx, {
@@ -1146,10 +1146,7 @@ export default new Elysia()
 								parentPostId: body.parentPostId,
 								...(body.realmId ? { realmId: body.realmId } : {}),
 							});
-							await tx.insert(post).values({
-								id: created.id,
-								kind: "reply",
-							});
+
 							await tx.insert(postReply).values({
 								postId: created.id,
 								rootPostId: params.postId,
@@ -1313,12 +1310,12 @@ async function getReplyPost(rootPostId: string, postId: string) {
 	const [row] = await database
 		.select({ postId: postReply.postId })
 		.from(postReply)
-		.innerJoin(unit, eq(unit.id, postReply.postId))
+		.innerJoin(post, eq(post.id, postReply.postId))
 		.where(
 			and(
 				eq(postReply.postId, postId),
 				eq(postReply.rootPostId, rootPostId),
-				isNull(unit.deletedAt),
+				isNull(post.deletedAt),
 			),
 		)
 		.limit(1);
@@ -1330,12 +1327,11 @@ async function ensureRootPost(postId: string, realmId?: string) {
 	const [row] = await database
 		.select({ id: post.id })
 		.from(post)
-		.innerJoin(unit, eq(unit.id, post.id))
 		.where(
 			and(
 				eq(post.id, postId),
 				ne(post.kind, "reply"),
-				isNull(unit.deletedAt),
+				isNull(post.deletedAt),
 				realmId
 					? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${realmId} and rc.status = 'visible' and rc.publication_state = 'active')`
 					: undefined,

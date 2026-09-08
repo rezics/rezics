@@ -1,13 +1,68 @@
+import { PlatformOwnerValues } from "@rezics/reference";
+import { z } from "zod";
+import { unitOwnerTable } from "../database/schema/unit-reference-columns";
 import { and, eq, inArray, sql } from "drizzle-orm";
 
 import type { DatabaseExecutor, DatabaseTransaction } from "../database";
 import { databaseConstraintName } from "../database/constraint";
-import { post, postReply, realmUnit, unit } from "../database/schema";
+import {
+	post,
+	postReply,
+	realmUnit,
+	catalogUnitLocator,
+	catalogRoutingControl,
+} from "../database/schema";
 import {
 	PostTargetingLocked,
 	type PostTargetRelation,
 	type PostTargetingLockDetails,
 } from "./errors";
+
+/** At most one bounded PK batch per concrete platform owner, with deterministic owner/ID lock ordering. */
+async function readTargetingStates(
+	executor: DatabaseExecutor,
+	ids: readonly string[],
+	lock = false,
+) {
+	if (ids.length > 500) throw new RangeError("Post targeting batches cannot exceed 500 identities");
+	if (!ids.length) return [];
+	const [control] = await executor
+		.select({ ready: catalogRoutingControl.ready })
+		.from(catalogRoutingControl)
+		.where(eq(catalogRoutingControl.singleton, true))
+		.limit(1);
+	if (!control?.ready) throw new Error("Unit routing is unavailable");
+	const routes = await executor
+		.select()
+		.from(catalogUnitLocator)
+		.where(inArray(catalogUnitLocator.id, [...ids]));
+	const result: { id: string; postTargetingLocked: boolean }[] = [];
+	for (const owner of [...new Set(routes.map((route) => route.owner))].sort()) {
+		const parsed = z.enum(PlatformOwnerValues).safeParse(owner);
+		if (!parsed.success) continue;
+		const table = unitOwnerTable(parsed.data);
+		if (!("postTargetingLocked" in table)) throw new Error("Platform owner lacks targeting state");
+		const group = routes.filter((route) => route.owner === owner);
+		const query = executor
+			.select({
+				id: table.id,
+				postTargetingLocked: table.postTargetingLocked,
+				generation: table.routingGeneration,
+			})
+			.from(table)
+			.where(
+				inArray(
+					table.id,
+					group.map((route) => route.id),
+				),
+			)
+			.orderBy(table.id);
+		const rows = lock ? await query.for("share") : await query;
+		const generations = new Map(group.map((route) => [route.id, route.generation]));
+		for (const row of rows) if (generations.get(row.id) === row.generation) result.push(row);
+	}
+	return result;
+}
 
 const PostTargetingAdvisoryLockNamespace = 4;
 const RelationOrder = {
@@ -71,12 +126,7 @@ async function ensurePostTargetingAllowed(
 	await lockPostTargetingSource(tx, input.sourcePostId);
 
 	const targetIds = [...new Set(targets.map((target) => target.unitId))].sort();
-	const globalTargets = await tx
-		.select({ id: unit.id, postTargetingLocked: unit.postTargetingLocked })
-		.from(unit)
-		.where(inArray(unit.id, targetIds))
-		.orderBy(unit.id)
-		.for("share");
+	const globalTargets = await readTargetingStates(tx, targetIds, true);
 	const globalLock = globalTargets.find((target) => target.postTargetingLocked);
 	if (globalLock)
 		throw new PostTargetingLocked({
@@ -192,11 +242,7 @@ export async function findPostTargetingLock(
 	const targets = normalizeTargets(input.targets);
 	if (!targets.length) return null;
 	const targetIds = [...new Set(targets.map((target) => target.unitId))].sort();
-	const globalTargets = await executor
-		.select({ id: unit.id, postTargetingLocked: unit.postTargetingLocked })
-		.from(unit)
-		.where(inArray(unit.id, targetIds))
-		.orderBy(unit.id);
+	const globalTargets = await readTargetingStates(executor, targetIds);
 	const globalLock = globalTargets.find((target) => target.postTargetingLocked);
 	if (globalLock)
 		return {
@@ -233,11 +279,8 @@ export async function getPostTargetingLockedUnitIds(
 ): Promise<ReadonlySet<string>> {
 	const targetUnitIds = [...new Set(input.targetUnitIds)].sort();
 	if (!targetUnitIds.length) return new Set();
-	const globalRows = await executor
-		.select({ unitId: unit.id })
-		.from(unit)
-		.where(and(inArray(unit.id, targetUnitIds), eq(unit.postTargetingLocked, true)));
-	const locked = new Set(globalRows.map((row) => row.unitId));
+	const globalRows = await readTargetingStates(executor, targetUnitIds);
+	const locked = new Set(globalRows.filter((row) => row.postTargetingLocked).map((row) => row.id));
 	if (!input.realmId) return locked;
 	const realmRows = await executor
 		.select({ unitId: realmUnit.unitId })

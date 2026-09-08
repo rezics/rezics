@@ -10,10 +10,10 @@ import { ZoneHomePageSlug } from "@rezics/slug";
 import { sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
-import { post, unitLocalization, unitOwnership, zonePage } from "../database/schema";
+import { unitLocalization, unitOwnership, zonePage } from "../database/schema";
 import { createContentStructure, insertContentStructureNode } from "../content-structure/service";
 import { fractionalPositionAt } from "../ordering/position";
-import { insertUnit } from "../units/create";
+import { insertPlatformUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { getZonePageStructureProjection, listZonePageUnits } from "./pages";
@@ -21,6 +21,7 @@ import { getZonePageStructureProjection, listZonePageUnits } from "./pages";
 export interface ProvisionZoneDefaultExperienceInput {
 	readonly zoneId: string;
 	readonly actorProfileId: string;
+	readonly actorAuthUserId: string;
 	readonly language: ContentLanguage;
 	readonly title: string;
 }
@@ -39,14 +40,19 @@ async function createDefaultFeedPage(
 		},
 	]);
 	assertUnitReferencedBlockDocument(pageDocument, ZonePageBlockHostPolicy);
-	const page = await insertUnit(tx, {
-		kind: "zone_page",
-		status: "published",
-		visibility: "public",
-		publishedAt: new Date(),
+	const page = await insertPlatformUnit(tx, {
+		owner: "post",
+		values: {
+			createdByAuthUserId: input.actorAuthUserId,
+			status: "published",
+			visibility: "public",
+			publishedAt: new Date(),
+			subjectUnitId: input.zoneId,
+			kind: "page",
+		},
 		statusActor: { kind: "profile", profileId: input.actorProfileId },
 	});
-	await tx.insert(post).values({ id: page.id, subjectUnitId: input.zoneId, kind: "page" });
+
 	await tx.insert(zonePage).values({ id: page.id, zoneId: input.zoneId });
 	if (useHomeSlug)
 		await replaceZonePageSlugAddress(tx, {

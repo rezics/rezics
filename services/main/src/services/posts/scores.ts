@@ -1,25 +1,27 @@
+import type { Authorization } from "../authorization";
+import { MaximumPostScoreCount } from "../api/posts/schema";
 import { and, asc, eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { selfAuthUserIdForEntity } from "../participation/account-query";
 
 import { getProfileActivityReadCondition } from "../authorization/profile-activity/query";
-import { getUnitReadCondition } from "../authorization/unit/query";
+
 import { database } from "../database";
-import { accountPreference, postScore, score, unit } from "../database/schema";
+import { accountPreference, postScore, score, realm } from "../database/schema";
 import {
 	resolvedUnitLocalizationTitle,
 	type LocalizationLanguageQuery,
 } from "../units/localization";
 
-const scoreTargetUnit = alias(unit, "post_score_target_unit");
-const scoreRealm = alias(unit, "post_score_realm");
+const scoreRealm = alias(realm, "post_score_realm");
 
-export function selectPostScores(
+export async function selectPostScores(
 	postId: string,
-	viewerProfileId?: string,
+	authorization: Authorization,
 	localizationLanguages: LocalizationLanguageQuery = [],
 ) {
-	return database
+	const viewerProfileId = authorization.profileId;
+	const rows = await database
 		.select({
 			scoreId: score.id,
 			profileId: score.profileId,
@@ -37,7 +39,6 @@ export function selectPostScores(
 			accountPreference,
 			eq(accountPreference.authUserId, selfAuthUserIdForEntity(score.profileId)),
 		)
-		.innerJoin(scoreTargetUnit, eq(scoreTargetUnit.id, score.unitId))
 		.innerJoin(scoreRealm, eq(scoreRealm.id, score.realmId))
 		.where(
 			and(
@@ -49,9 +50,13 @@ export function selectPostScores(
 					viewerProfileId,
 					surface: "linked",
 				}),
-				getUnitReadCondition(viewerProfileId, {}, scoreTargetUnit),
-				getUnitReadCondition(viewerProfileId, {}, scoreRealm),
 			),
 		)
-		.orderBy(asc(postScore.position), asc(postScore.scoreId));
+		.orderBy(asc(postScore.position), asc(postScore.scoreId))
+		.limit(MaximumPostScoreCount + 1);
+	if (rows.length > MaximumPostScoreCount) throw new Error("Post score attachment bound exceeded");
+	const readable = await authorization.unit.readableUnitIds(
+		rows.flatMap((row) => [row.unitId, row.realmId]),
+	);
+	return rows.filter((row) => readable.has(row.unitId) && readable.has(row.realmId));
 }

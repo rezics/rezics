@@ -20,7 +20,6 @@ import { database, type DatabaseTransaction } from "../database";
 import {
 	contentStructureNode,
 	post,
-	unit,
 	unitLocalization,
 	unitOwnership,
 	unitRevisionHead,
@@ -40,7 +39,7 @@ import {
 	ContentStructureInvalid,
 	ContentStructureRevisionConflict,
 } from "../content-structure/errors";
-import { insertUnit } from "../units/create";
+import { insertPlatformUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import type { RevisionContributionInput } from "../units/revision-contribution";
 import { replaceZonePageSlugAddress } from "../units/slug-address";
@@ -57,6 +56,7 @@ export interface ZonePageMutationInput {
 	readonly pageId?: string;
 	readonly slug?: string | null;
 	readonly actorProfileId: string;
+	readonly actorAuthUserId: string;
 	readonly contribution?: RevisionContributionInput;
 	readonly localization: ZonePageLocalizationInput;
 	readonly baseUnitRevisionId?: string;
@@ -280,12 +280,11 @@ async function loadZonePageUnits(
 	if (requestedPageIds && requestedPageIds.length === 0) return [];
 	const pages = await tx
 		.select({
-			id: unit.id,
-			createdAt: unit.createdAt,
-			updatedAt: unit.updatedAt,
+			id: post.id,
+			createdAt: post.createdAt,
+			updatedAt: post.updatedAt,
 		})
 		.from(zonePage)
-		.innerJoin(unit, eq(unit.id, zonePage.id))
 		.innerJoin(
 			post,
 			and(eq(post.id, zonePage.id), eq(post.kind, "page"), eq(post.subjectUnitId, zonePage.zoneId)),
@@ -293,12 +292,12 @@ async function loadZonePageUnits(
 		.where(
 			and(
 				eq(zonePage.zoneId, zoneId),
-				eq(unit.kind, "zone_page"),
-				isNull(unit.deletedAt),
+				eq(post.kind, "page"),
+				isNull(post.deletedAt),
 				requestedPageIds ? inArray(zonePage.id, requestedPageIds) : undefined,
 			),
 		)
-		.orderBy(asc(unit.createdAt), asc(unit.id));
+		.orderBy(asc(post.createdAt), asc(post.id));
 	if (!pages.length) return [];
 
 	const pageIds = pages.map((page) => page.id);
@@ -488,7 +487,6 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 			? await tx
 					.select({ id: zonePage.id })
 					.from(zonePage)
-					.innerJoin(unit, eq(unit.id, zonePage.id))
 					.innerJoin(
 						post,
 						and(
@@ -501,8 +499,8 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 						and(
 							eq(zonePage.id, input.pageId),
 							eq(zonePage.zoneId, input.zoneId),
-							eq(unit.kind, "zone_page"),
-							isNull(unit.deletedAt),
+							eq(post.kind, "page"),
+							isNull(post.deletedAt),
 						),
 					)
 					.limit(1)
@@ -512,15 +510,20 @@ export async function upsertZonePageUnit(input: ZonePageMutationInput) {
 
 		let pageId = identifiedPage?.id;
 		if (!pageId) {
-			const created = await insertUnit(tx, {
-				kind: "zone_page",
-				status: "published",
-				visibility: "public",
-				publishedAt: new Date(),
+			const created = await insertPlatformUnit(tx, {
+				owner: "post",
+				values: {
+					createdByAuthUserId: input.actorAuthUserId,
+					status: "published",
+					visibility: "public",
+					publishedAt: new Date(),
+					subjectUnitId: input.zoneId,
+					kind: "page",
+				},
 				statusActor: { kind: "profile", profileId: input.actorProfileId },
 			});
 			pageId = created.id;
-			await tx.insert(post).values({ id: pageId, subjectUnitId: input.zoneId, kind: "page" });
+
 			await tx.insert(zonePage).values({ id: pageId, zoneId: input.zoneId });
 			if (input.slug !== undefined && input.slug !== null)
 				await replaceZonePageSlugAddress(tx, {

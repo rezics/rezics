@@ -1,22 +1,21 @@
+import type { Authorization } from "../authorization";
 import { and, eq, isNull } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
+
 import { authEntity } from "../database/schema/participation";
 
 import { getProfileActivityReadCondition } from "../authorization/profile-activity/query";
-import { getUnitReadCondition } from "../authorization/unit/query";
+
 import { database } from "../database";
 import {
 	accountPreference,
 	postProgressEntry,
-	unit,
 	unitProgress,
 	unitProgressEntry,
 } from "../database/schema";
 
-const progressTargetUnit = alias(unit, "post_progress_target_unit");
-
-export function selectPostProgressEntry(postId: string, viewerProfileId?: string) {
-	return database
+export async function selectPostProgressEntry(postId: string, authorization: Authorization) {
+	const viewerProfileId = authorization.profileId;
+	const rows = await database
 		.select({
 			id: unitProgressEntry.id,
 			entityId: authEntity.entityId,
@@ -44,7 +43,6 @@ export function selectPostProgressEntry(postId: string, viewerProfileId?: string
 		)
 		.innerJoin(authEntity, eq(authEntity.authUserId, unitProgressEntry.authUserId))
 		.innerJoin(accountPreference, eq(accountPreference.authUserId, unitProgressEntry.authUserId))
-		.innerJoin(progressTargetUnit, eq(progressTargetUnit.id, unitProgressEntry.unitId))
 		.where(
 			and(
 				eq(postProgressEntry.postId, postId),
@@ -57,8 +55,9 @@ export function selectPostProgressEntry(postId: string, viewerProfileId?: string
 					viewerProfileId,
 					surface: "linked",
 				}),
-				getUnitReadCondition(viewerProfileId, {}, progressTargetUnit),
 			),
 		)
 		.limit(1);
+	const row = rows[0];
+	return row && (await authorization.unit.canRead(row.unitId)) ? [row] : [];
 }

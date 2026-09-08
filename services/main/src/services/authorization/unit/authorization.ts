@@ -361,8 +361,15 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		unitIds: readonly string[],
 		onDenied: (unitId: string) => E | UnitNotFound = () => new UnitNotFound(),
 	): Promise<void> {
+		const readableIds = await this.readableUnitIds(unitIds);
+		const deniedId = unitIds.find((id) => !readableIds.has(id));
+		if (deniedId) throw onDenied(deniedId);
+	}
+
+	/** Bounded mixed-owner visibility filtering with the same native/private policy as point reads. */
+	async readableUnitIds(unitIds: readonly string[]): Promise<ReadonlySet<string>> {
 		const uniqueIds = [...new Set(unitIds)];
-		if (!uniqueIds.length) return;
+		if (!uniqueIds.length) return new Set<string>();
 		if (uniqueIds.length > 500) throw new RangeError("Unit read batches cannot exceed 500 targets");
 		const readableIds = await this.#withParticipation(() =>
 			database.transaction(async (tx) => {
@@ -374,7 +381,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 						.from(catalogRoutingControl)
 						.where(eq(catalogRoutingControl.singleton, true))
 						.limit(1);
-					if (!control?.ready) throw onDenied(uniqueIds[0]!);
+					if (!control?.ready) return new Set<string>();
 					const routes = await tx
 						.select()
 						.from(catalogUnitLocator)
@@ -407,8 +414,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 				});
 			}),
 		);
-		const deniedId = uniqueIds.find((id) => !readableIds.has(id));
-		if (deniedId) throw onDenied(deniedId);
+		return readableIds;
 	}
 
 	async canUpdate(unitId: string, scope: UnitScope = []): Promise<boolean> {

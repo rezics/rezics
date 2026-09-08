@@ -1,3 +1,4 @@
+import { unitStateRelation } from "../../units/state-relation";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
 import { DevelopmentPreviewCapability, RealmUnitCreatePermissionValues } from "@rezics/access";
 import type { ContentLanguage } from "@rezics/i18n";
@@ -48,7 +49,6 @@ import {
 	realmUnit,
 	realmUnitTag,
 	tag,
-	unit,
 	unitAccessGrant,
 	unitFollow,
 	unitLocalization,
@@ -71,7 +71,7 @@ import { resolveRecommendationViewer } from "../../recommendations/context";
 import { applyInitialTags } from "../../tags/initial-applications";
 import { listRealmVotedTags } from "../../tags/service";
 import { presentAvatar } from "../../units/avatar";
-import { insertUnit } from "../../units/create";
+import { insertPlatformUnit } from "../../units/create";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import {
@@ -235,14 +235,15 @@ function presentRealmUnitStatus(value: string | null) {
 }
 
 function realmUnitModerationSelection(
+	targetState: ReturnType<typeof unitStateRelation>,
 	localizationLanguages: ListRealmUnitsQuery["localizationLanguages"],
 ) {
 	return {
 		realmId: realmUnit.realmId,
 		unitId: realmUnit.unitId,
-		unitKind: unit.kind,
-		language: resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
-		title: resolvedUnitLocalizationTitle(unit.id, localizationLanguages),
+		unitKind: targetState.owner,
+		language: resolvedUnitLocalizationLanguage(targetState.id, localizationLanguages),
+		title: resolvedUnitLocalizationTitle(targetState.id, localizationLanguages),
 		status: realmUnit.status,
 		publicationState: realmUnit.publicationState,
 		postTargetingLocked: realmUnit.postTargetingLocked,
@@ -256,7 +257,7 @@ function realmUnitModerationSelection(
 				and ${contentReviewCase.targetUnitId} = ${realmUnit.unitId}
 				and ${inArray(contentReviewCase.state, ActiveContentReviewCaseStateValues)}
 		), 0)`,
-		moderationStatus: unit.moderationStatus,
+		moderationStatus: targetState.moderationStatus,
 		createdAt: realmUnit.createdAt,
 		updatedAt: realmUnit.updatedAt,
 	};
@@ -296,9 +297,8 @@ async function ensureRealmFieldsAuthorized(
 
 async function ensureRealmVisible(realmId: string, request: Request) {
 	const [record] = await database
-		.select({ status: unit.status, visibility: unit.visibility })
+		.select({ status: realm.status, visibility: realm.visibility })
 		.from(realm)
-		.innerJoin(unit, eq(unit.id, realm.id))
 		.where(eq(realm.id, realmId))
 		.limit(1);
 	if (!record) throw new RealmNotFound();
@@ -354,14 +354,14 @@ async function ensureRealmTagVoteEligibility(
 				eq(realmUnit.unitId, realmTagContext.contextPostId),
 			),
 		)
-		.innerJoin(unit, eq(unit.id, realmTagContext.contextPostId))
+		.innerJoin(post, eq(post.id, realmTagContext.contextPostId))
 		.where(
 			and(
 				eq(realmTagContext.realmId, input.realmId),
 				eq(realmTagContext.tagId, input.tagId),
 				eq(realmUnit.status, "visible"),
 				eq(realmUnit.publicationState, "active"),
-				getUnitReadCondition(input.viewerProfileId),
+				getUnitReadCondition(input.viewerProfileId, {}, post),
 			),
 		)
 		.for("share")
@@ -448,7 +448,7 @@ async function readRealmTaxonomy(
 	tx: DatabaseTransaction,
 	realmId: string,
 	localizationLanguages: readonly ContentLanguage[],
-	canReadUnit?: (unitId: string) => Promise<boolean>,
+	authorization: Authorization,
 ) {
 	const [structure] = await tx
 		.select({ id: contentStructure.id })
@@ -462,12 +462,29 @@ async function readRealmTaxonomy(
 		)
 		.limit(1);
 	if (!structure) throw new RealmNotFound();
+	const candidates = await tx
+		.select({ id: contentStructureNode.id })
+		.from(contentStructureNode)
+		.where(
+			and(
+				eq(contentStructureNode.structureId, structure.id),
+				isNull(contentStructureNode.deletedAt),
+			),
+		)
+		.orderBy(contentStructureNode.position, contentStructureNode.id)
+		.limit(501);
+	if (candidates.length > 500)
+		throw new ValidationError({ path: "nodes", reason: "maximum_500_nodes" });
+	const taxonomyState = unitStateRelation(
+		contentStructureNode.contentUnitId,
+		"realm_taxonomy_target",
+	);
 	const rows = await tx
 		.select({
 			id: contentStructureNode.id,
 			parentId: contentStructureNode.parentId,
 			contentUnitId: contentStructureNode.contentUnitId,
-			unitKind: unit.kind,
+			unitKind: taxonomyState.owner,
 			postKind: post.kind,
 			language: unitLocalization.language,
 			title: unitLocalization.title,
@@ -480,7 +497,7 @@ async function readRealmTaxonomy(
 			queryStrategy: contentStructureNode.realmTagQueryStrategy,
 		})
 		.from(contentStructureNode)
-		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+		.innerJoinLateral(taxonomyState, sql`true`)
 		.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 		.innerJoin(
 			unitLocalization,
@@ -497,23 +514,20 @@ async function readRealmTaxonomy(
 		)
 		.where(
 			and(
-				eq(contentStructureNode.structureId, structure.id),
+				candidates.length
+					? inArray(
+							contentStructureNode.id,
+							candidates.map((row) => row.id),
+						)
+					: sql`false`,
 				isNull(contentStructureNode.deletedAt),
 			),
 		)
 		.orderBy(contentStructureNode.position, contentStructureNode.id);
-	const readableRows = canReadUnit
-		? (
-				await Promise.all(
-					rows.map(async (row) => ({
-						row,
-						readable: await canReadUnit(row.contentUnitId),
-					})),
-				)
-			)
-				.filter(({ readable }) => readable)
-				.map(({ row }) => row)
-		: rows;
+	const readableIds = await authorization.unit.readableUnitIds(
+		rows.map((row) => row.contentUnitId),
+	);
+	const readableRows = rows.filter((row) => readableIds.has(row.contentUnitId));
 	const tagIds = readableRows
 		.filter((row) => row.unitKind === "tag")
 		.map((row) => row.contentUnitId);
@@ -539,18 +553,10 @@ async function readRealmTaxonomy(
 				)
 				.where(and(eq(realmTagContext.realmId, realmId), inArray(realmTagContext.tagId, tagIds)))
 		: [];
-	const readableContexts = canReadUnit
-		? (
-				await Promise.all(
-					contexts.map(async (context) => ({
-						context,
-						readable: await canReadUnit(context.contextPostId),
-					})),
-				)
-			)
-				.filter(({ readable }) => readable)
-				.map(({ context }) => context)
-		: contexts;
+	const readableContextIds = await authorization.unit.readableUnitIds(
+		contexts.map((row) => row.contextPostId),
+	);
+	const readableContexts = contexts.filter((row) => readableContextIds.has(row.contextPostId));
 	const contextByTagId = new Map(readableContexts.map((context) => [context.tagId, context]));
 	const latestRevisionId = await getContentStructureRevision(tx, realmId, structure.id);
 	if (!latestRevisionId) throw new Error("Realm taxonomy has no Content Structure revision");
@@ -605,35 +611,34 @@ export default new Elysia({ prefix: "/realms" })
 					language: unitLocalization.language,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
-					avatar: resolvedUnitLocalizationAvatar(unit.id, localizationLanguages),
+					avatar: resolvedUnitLocalizationAvatar(realm.id, localizationLanguages),
 					bannerAssetId: resolvedUnitLocalizationImageAssetId(
-						unit.id,
+						realm.id,
 						"banner",
 						localizationLanguages,
 					),
 					coverAssetId: resolvedUnitLocalizationImageAssetId(
-						unit.id,
+						realm.id,
 						"cover",
 						localizationLanguages,
 					),
-					createdAt: unit.createdAt,
-					updatedAt: unit.updatedAt,
+					createdAt: realm.createdAt,
+					updatedAt: realm.updatedAt,
 				})
 				.from(realm)
-				.innerJoin(unit, eq(unit.id, realm.id))
 				.leftJoin(realmStat, eq(realmStat.realmId, realm.id))
 				.innerJoin(
 					unitLocalization,
 					and(
-						eq(unitLocalization.unitId, unit.id),
+						eq(unitLocalization.unitId, realm.id),
 						eq(
 							unitLocalization.language,
-							resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
+							resolvedUnitLocalizationLanguage(realm.id, localizationLanguages),
 						),
 					),
 				)
-				.where(and(eq(unit.status, "published"), eq(unit.visibility, "public")))
-				.orderBy(desc(unit.createdAt), desc(unit.id))
+				.where(and(eq(realm.status, "published"), eq(realm.visibility, "public")))
+				.orderBy(desc(realm.createdAt), desc(realm.id))
 				.limit(query.limit ?? 20);
 			const slugAddresses = await getPublicCanonicalUnitSlugAddresses(items.map((item) => item.id));
 			return {
@@ -664,7 +669,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Create Realm", tags: ["Realms"] },
 		},
-		async ({ entity, body }) => {
+		async ({ principal, entity, body }) => {
 			const id = await runVoteTransaction(
 				{ family: "unit_tag", authority: "global" },
 				async (tx) => {
@@ -673,14 +678,18 @@ export default new Elysia({ prefix: "/realms" })
 						selfAuthUserIdForEntity(entity.id),
 						unitLocalizationImageAssetReferences(body.localization),
 					);
-					const created = await insertUnit(tx, {
-						kind: "realm",
-						status: "published",
-						visibility: body.visibility,
-						publishedAt: new Date(),
+					const created = await insertPlatformUnit(tx, {
+						owner: "realm",
+						values: {
+							createdByAuthUserId: principal.authUserId,
+							status: "published",
+							visibility: body.visibility,
+							publishedAt: new Date(),
+							joinPolicy: body.joinPolicy,
+						},
 						statusActor: { kind: "profile", profileId: entity.id },
 					});
-					await tx.insert(realm).values({ id: created.id, joinPolicy: body.joinPolicy });
+
 					const [taxonomy] = await tx
 						.insert(contentStructure)
 						.values({ ownerUnitId: created.id, kind: "realm.taxonomy" })
@@ -795,18 +804,17 @@ export default new Elysia({ prefix: "/realms" })
 			const [record] = await database
 				.select({
 					id: realm.id,
-					status: unit.status,
-					visibility: unit.visibility,
+					status: realm.status,
+					visibility: realm.visibility,
 					joinPolicy: realm.joinPolicy,
 					realmTagVotingEnabled: realm.realmTagVotingEnabled,
 					pages: realm.enabledPages,
 					latestRevisionId: unitRevisionHead.revisionId,
 					memberCount: realmStat.activeMemberCount,
-					createdAt: unit.createdAt,
-					updatedAt: unit.updatedAt,
+					createdAt: realm.createdAt,
+					updatedAt: realm.updatedAt,
 				})
 				.from(realm)
-				.innerJoin(unit, eq(unit.id, realm.id))
 				.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, realm.id))
 				.leftJoin(realmStat, eq(realmStat.realmId, realm.id))
 				.where(eq(realm.id, params.realmId))
@@ -1004,9 +1012,7 @@ export default new Elysia({ prefix: "/realms" })
 		async ({ params, query, request }) => {
 			const { authorization } = await ensureRealmVisible(params.realmId, request);
 			return database.transaction((tx) =>
-				readRealmTaxonomy(tx, params.realmId, query.localizationLanguages ?? [], (unitId) =>
-					authorization.unit.canRead(unitId),
-				),
+				readRealmTaxonomy(tx, params.realmId, query.localizationLanguages ?? [], authorization),
 			);
 		},
 	)
@@ -1026,7 +1032,7 @@ export default new Elysia({ prefix: "/realms" })
 		async ({ params, query, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
 			return database.transaction((tx) =>
-				readRealmTaxonomy(tx, params.realmId, query.localizationLanguages ?? []),
+				readRealmTaxonomy(tx, params.realmId, query.localizationLanguages ?? [], authorization),
 			);
 		},
 	)
@@ -1070,7 +1076,7 @@ export default new Elysia({ prefix: "/realms" })
 					contribution: body.revisionContext?.contribution,
 					nodes: body.nodes,
 				});
-				const saved = await readRealmTaxonomy(tx, params.realmId, []);
+				const saved = await readRealmTaxonomy(tx, params.realmId, [], authorization);
 				return { ...saved, revisionCreated: result.revisionCreated };
 			});
 		},
@@ -1241,9 +1247,9 @@ export default new Elysia({ prefix: "/realms" })
 				? await authorization.unit.decide(params.realmId, "unit.status.update", ["unit"])
 				: undefined;
 			const [current] = await database
-				.select({ id: unit.id })
-				.from(unit)
-				.where(and(eq(unit.id, params.realmId), eq(unit.kind, "realm")))
+				.select({ id: realm.id })
+				.from(realm)
+				.where(and(eq(realm.id, params.realmId)))
 				.limit(1);
 			if (!current) throw new RealmNotFound();
 			await database.transaction(async (tx) => {
@@ -1256,10 +1262,10 @@ export default new Elysia({ prefix: "/realms" })
 				const unitUpdate = toUnitVisibilityUpdate(body.visibility);
 				if (unitUpdate) {
 					const updated = await tx
-						.update(unit)
+						.update(realm)
 						.set(unitUpdate)
-						.where(and(eq(unit.id, params.realmId), eq(unit.kind, "realm")))
-						.returning({ id: unit.id });
+						.where(and(eq(realm.id, params.realmId)))
+						.returning({ id: realm.id });
 					if (!updated.length) throw new RealmNotFound();
 				}
 				if (body.joinPolicy)
@@ -1353,12 +1359,11 @@ export default new Elysia({ prefix: "/realms" })
 		async ({ params, entity }) => {
 			const [record] = await database
 				.select({
-					status: unit.status,
-					visibility: unit.visibility,
+					status: realm.status,
+					visibility: realm.visibility,
 					joinPolicy: realm.joinPolicy,
 				})
 				.from(realm)
-				.innerJoin(unit, eq(unit.id, realm.id))
 				.where(eq(realm.id, params.realmId))
 				.limit(1);
 			if (!record) throw new RealmNotFound();
@@ -2114,7 +2119,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "List Realm Tag Context relationships", tags: ["Realms"] },
 		},
-		async ({ params, query, entity, authorization }) => {
+		async ({ params, query, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tag-contexts.manage");
 			const localizationLanguages = query.localizationLanguages ?? [];
 			const limit = query.limit ?? 50;
@@ -2160,16 +2165,7 @@ export default new Elysia({ prefix: "/realms" })
 				.limit(limit + 1);
 			const page = rows.slice(0, limit);
 			const referencedUnitIds = [...new Set(page.flatMap((row) => [row.tagId, row.contextPostId]))];
-			const readableUnitIds = referencedUnitIds.length
-				? new Set(
-						(
-							await database
-								.select({ id: unit.id })
-								.from(unit)
-								.where(and(inArray(unit.id, referencedUnitIds), getUnitReadCondition(entity.id)))
-						).map((row) => row.id),
-					)
-				: new Set<string>();
+			const readableUnitIds = await authorization.unit.readableUnitIds(referencedUnitIds);
 			const items = page.map((row) => {
 				const tagReadable = readableUnitIds.has(row.tagId);
 				const contextReadable = readableUnitIds.has(row.contextPostId);
@@ -2727,9 +2723,12 @@ export default new Elysia({ prefix: "/realms" })
 			});
 			const statusOrder = sql<number>`case ${realmUnit.status} when 'pending' then 0 when 'hidden' then 1 when 'removed' then 2 else 3 end`;
 			const rows = await database
-				.select(realmUnitModerationSelection(query.localizationLanguages))
+				.select({
+					unitId: realmUnit.unitId,
+					status: realmUnit.status,
+					updatedAt: realmUnit.updatedAt,
+				})
 				.from(realmUnit)
-				.innerJoin(unit, eq(unit.id, realmUnit.unitId))
 				.where(
 					and(
 						eq(realmUnit.realmId, params.realmId),
@@ -2774,7 +2773,23 @@ export default new Elysia({ prefix: "/realms" })
 				.limit(limit + 1);
 			const hasMore = rows.length > limit;
 			const page = rows.slice(0, limit);
-			const items = page.map(presentRealmUnitModeration);
+			const readable = await authorization.unit.readableUnitIds(page.map((row) => row.unitId));
+			const visibleIds = page.filter((row) => readable.has(row.unitId)).map((row) => row.unitId);
+			const targetState = unitStateRelation(realmUnit.unitId, "realm_moderation_target");
+			const hydrated = visibleIds.length
+				? await database
+						.select(realmUnitModerationSelection(targetState, query.localizationLanguages))
+						.from(realmUnit)
+						.innerJoinLateral(targetState, sql`true`)
+						.where(
+							and(eq(realmUnit.realmId, params.realmId), inArray(realmUnit.unitId, visibleIds)),
+						)
+				: [];
+			const byId = new Map(hydrated.map((row) => [row.unitId, row]));
+			const items = page.flatMap((row) => {
+				const value = byId.get(row.unitId);
+				return value ? [presentRealmUnitModeration(value)] : [];
+			});
 			const last = page.at(-1);
 			return {
 				items,
@@ -2812,10 +2827,12 @@ export default new Elysia({ prefix: "/realms" })
 		},
 		async ({ params, query, authorization }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
+			await authorization.unit.ensureCanRead(params.unitId, () => new RealmUnitNotFound());
+			const targetState = unitStateRelation(sql`${params.unitId}::uuid`, "realm_moderation_target");
 			const [item] = await database
-				.select(realmUnitModerationSelection(query.localizationLanguages))
+				.select(realmUnitModerationSelection(targetState, query.localizationLanguages))
 				.from(realmUnit)
-				.innerJoin(unit, eq(unit.id, realmUnit.unitId))
+				.innerJoinLateral(targetState, sql`true`)
 				.where(and(eq(realmUnit.realmId, params.realmId), eq(realmUnit.unitId, params.unitId)))
 				.limit(1);
 			if (!item) throw new RealmUnitNotFound();
