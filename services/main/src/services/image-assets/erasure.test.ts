@@ -64,6 +64,41 @@ function fixture(objects: StoredObject[]) {
 }
 
 describe("private image content erasure", () => {
+	it.each([
+		{ label: "missing fence", objects: [], truncated: false },
+		{
+			label: "nonempty fence",
+			objects: [{ key: original, versionId: "empty-fence", size: 8 }],
+			truncated: false,
+		},
+		{
+			label: "incomplete listing",
+			objects: [{ key: original, versionId: "empty-fence", size: 0 }],
+			truncated: true,
+		},
+	])("does not complete with a $label", async ({ objects, truncated }) => {
+		const { tx, archive, state } = fixture([]);
+		await erasePrivateImageBatch(tx, authUserId, archive);
+		vi.mocked(archive.listErasurePage).mockResolvedValueOnce({ objects, truncated });
+		await expect(erasePrivateImageBatch(tx, authUserId, archive)).rejects.toThrow();
+		expect(state.row.contentErasedAt).toBeNull();
+		expect(archive.deleteErasurePage).not.toHaveBeenCalled();
+	});
+	it("rejects an oversized provider page before deleting any object", async () => {
+		const { tx, archive, state } = fixture([]);
+		await erasePrivateImageBatch(tx, authUserId, archive);
+		vi.mocked(archive.listErasurePage).mockResolvedValueOnce({
+			objects: Array.from({ length: 501 }, (_, index) => ({
+				key: `${original}/${index}`,
+				versionId: undefined,
+				size: 1,
+			})),
+			truncated: false,
+		});
+		await expect(erasePrivateImageBatch(tx, authUserId, archive)).rejects.toThrow("page bound");
+		expect(state.row.contentErasedAt).toBeNull();
+		expect(archive.deleteErasurePage).not.toHaveBeenCalled();
+	});
 	it("drains historical originals and more than one page of derived objects while retaining an empty upload fence", async () => {
 		const { tx, archive, state } = fixture([
 			{ key: original, versionId: "old-original", size: 9000 },

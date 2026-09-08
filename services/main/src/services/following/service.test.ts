@@ -21,11 +21,13 @@ vi.mock("../database", () => ({
 vi.mock("../realms/service", () => ({ acknowledgeCurrentRealmRulesOnFollow }));
 vi.mock("../notifications/service", () => ({ createNotification }));
 
+import { users, authEntity } from "../database/schema";
 import { FollowableUnitKindValues } from "../database/schema/contract-values";
 import { UnitNotFound } from "../units/errors";
 import { UserFollowBlocked, UserSelfFollowForbidden } from "./errors";
 import { followUnit } from "./service";
 
+const FollowerAuthUserId = "019f94d1-c8ca-7110-b984-b0614ba4db99";
 const FollowerProfileId = "019f94d1-c8ca-7110-b984-b0614ba4db9c";
 const TargetUnitId = "019f94d1-c8ca-7110-b984-b0614ba4db9d";
 
@@ -52,9 +54,13 @@ describe("followUnit", () => {
 		transactionInsert.mockImplementation(() => ({ values: insertValues }));
 		transactionSelect.mockReset();
 		transactionSelect.mockImplementation(() => ({
-			from: vi.fn(() => ({
-				where: vi.fn(() => ({ limit: blockedLimit })),
-			})),
+			from: vi.fn((table: unknown) =>
+				table === users || table === authEntity
+					? { where: () => ({ limit: () => ({ for: async () => [{ id: FollowerAuthUserId }] }) }) }
+					: {
+							where: vi.fn(() => ({ limit: blockedLimit })),
+						},
+			),
 		}));
 		transaction.mockReset();
 		transaction.mockImplementation(
@@ -81,6 +87,7 @@ describe("followUnit", () => {
 
 		await expect(
 			followUnit({
+				authUserId: FollowerAuthUserId,
 				followerProfileId: FollowerProfileId,
 				unitId: TargetUnitId,
 				authorization: { ensureCanRead },
@@ -92,9 +99,9 @@ describe("followUnit", () => {
 			followerProfileId: FollowerProfileId,
 			unitId: TargetUnitId,
 		});
-		expect(onConflictDoNothing).toHaveBeenCalledOnce();
-		if (kind === "entity") expect(transactionSelect).toHaveBeenCalledOnce();
-		else expect(transactionSelect).not.toHaveBeenCalled();
+		expect(onConflictDoNothing).toHaveBeenCalledTimes(2);
+		if (kind === "entity") expect(transactionSelect).toHaveBeenCalledTimes(3);
+		else expect(transactionSelect).toHaveBeenCalledTimes(2);
 		if (kind === "realm")
 			expect(acknowledgeCurrentRealmRulesOnFollow).toHaveBeenCalledWith(
 				expect.anything(),
@@ -117,6 +124,7 @@ describe("followUnit", () => {
 
 		await expect(
 			followUnit({
+				authUserId: FollowerAuthUserId,
 				followerProfileId: FollowerProfileId,
 				unitId: TargetUnitId,
 				authorization: { ensureCanRead },
@@ -131,6 +139,7 @@ describe("followUnit", () => {
 
 		await expect(
 			followUnit({
+				authUserId: FollowerAuthUserId,
 				followerProfileId: FollowerProfileId,
 				unitId: TargetUnitId,
 				authorization: { ensureCanRead },
@@ -145,6 +154,7 @@ describe("followUnit", () => {
 
 		await expect(
 			followUnit({
+				authUserId: FollowerAuthUserId,
 				followerProfileId: FollowerProfileId,
 				unitId: FollowerProfileId,
 				authorization: { ensureCanRead },
@@ -162,13 +172,14 @@ describe("followUnit", () => {
 
 		await expect(
 			followUnit({
+				authUserId: FollowerAuthUserId,
 				followerProfileId: FollowerProfileId,
 				unitId: TargetUnitId,
 				authorization: { ensureCanRead },
 			}),
 		).rejects.toBeInstanceOf(UserFollowBlocked);
 
-		expect(transactionSelect).toHaveBeenCalledOnce();
+		expect(transactionSelect).toHaveBeenCalledTimes(3);
 		expect(transactionInsert).not.toHaveBeenCalled();
 	});
 
@@ -180,6 +191,7 @@ describe("followUnit", () => {
 
 		await expect(
 			followUnit({
+				authUserId: FollowerAuthUserId,
 				followerProfileId: FollowerProfileId,
 				unitId: TargetUnitId,
 				authorization: { ensureCanRead: ensureCanReadDenied },

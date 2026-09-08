@@ -129,6 +129,7 @@ import {
 	unitExternalLink,
 	unitExternalLinkVote,
 	unitFollow,
+	accountFollowPreference,
 	unitLicenseGrant,
 	unitLocalization,
 	unitOwnership,
@@ -1979,7 +1980,17 @@ async function seedStructure(
 				}),
 			),
 		),
-		(batch) => tx.insert(unitFollow).values(batch),
+		async (batch) => {
+			await tx.insert(unitFollow).values(batch);
+			await tx.insert(accountFollowPreference).values(
+				batch.map((follow) => ({
+					authUserId: selfAuthUserIdForEntity(follow.followerProfileId),
+					followerEntityId: follow.followerProfileId,
+					unitId: follow.unitId,
+					createdAt: follow.createdAt,
+				})),
+			);
+		},
 	);
 
 	const revisions: (typeof realmRuleRevision.$inferSelect)[] = [];
@@ -2127,7 +2138,17 @@ async function seedStructure(
 				createdAt: zoneUnit.createdAt,
 			})),
 		),
-		(batch) => tx.insert(unitFollow).values(batch),
+		async (batch) => {
+			await tx.insert(unitFollow).values(batch);
+			await tx.insert(accountFollowPreference).values(
+				batch.map((follow) => ({
+					authUserId: selfAuthUserIdForEntity(follow.followerProfileId),
+					followerEntityId: follow.followerProfileId,
+					unitId: follow.unitId,
+					createdAt: follow.createdAt,
+				})),
+			);
+		},
 	);
 
 	return { realmMembers: memberRows, realmUnits: realmUnitRows };
@@ -2152,7 +2173,17 @@ async function seedInteractions(
 				};
 			});
 		}),
-		(batch) => tx.insert(unitFollow).values(batch),
+		async (batch) => {
+			await tx.insert(unitFollow).values(batch);
+			await tx.insert(accountFollowPreference).values(
+				batch.map((follow) => ({
+					authUserId: selfAuthUserIdForEntity(follow.followerProfileId),
+					followerEntityId: follow.followerProfileId,
+					unitId: follow.unitId,
+					createdAt: follow.createdAt,
+				})),
+			);
+		},
 	);
 	await writeBatches(
 		profiles.map((blocker, index) => {
@@ -3368,11 +3399,12 @@ export class DatabaseSeedService {
 
 				console.info("Seeding identities scenario");
 				const profiles = await seedProfiles(tx, data, demoPasswordHash);
-				await ensureOfficialZoneFollows(
-					tx,
-					profiles.map(({ id }) => id),
-					{ sequenceIsEmpty: true },
-				);
+				for (const batch of chunks(profiles, 512))
+					await ensureOfficialZoneFollows(
+						tx,
+						batch.map(({ id }) => id),
+						{ sequenceIsEmpty: true },
+					);
 				console.info("Seeding Unit fixtures scenario");
 				const unitFixtures = await seedUnitFixtures(tx, data, profiles);
 				console.info("Seeding Example Wiki scenario");

@@ -1,78 +1,76 @@
-import { SQL } from "drizzle-orm";
-import { PgDialect } from "drizzle-orm/pg-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const databaseSelect = vi.hoisted(() => vi.fn());
-const transaction = vi.hoisted(() => vi.fn());
-
-vi.mock("../database", () => ({
-	database: {
-		select: databaseSelect,
-		transaction,
-	},
+const state = vi.hoisted(() => ({
+	rows: new Map<unknown, unknown[]>(),
+	writes: [] as { table: unknown; values: unknown }[],
+	deleted: [] as unknown[],
 }));
-vi.mock("../realms/service", () => ({
-	acknowledgeCurrentRealmRulesOnFollow: vi.fn(),
-}));
+vi.mock("../database", () => {
+	const select = () => ({
+		from: (table: unknown) => {
+			const query = {
+				where: () => query,
+				limit: () => query,
+				for: async () => state.rows.get(table) ?? [],
+				then: (resolve: (rows: unknown[]) => unknown) => resolve(state.rows.get(table) ?? []),
+			};
+			return query;
+		},
+	});
+	const tx = {
+		select,
+		insert: (table: unknown) => ({
+			values: (values: unknown) => {
+				state.writes.push({ table, values });
+				return {
+					onConflictDoUpdate: async () => undefined,
+					onConflictDoNothing: async () => undefined,
+				};
+			},
+		}),
+		delete: (table: unknown) => ({
+			where: async () => {
+				state.deleted.push(table);
+			},
+		}),
+	};
+	return {
+		database: { select, transaction: async (work: (value: typeof tx) => unknown) => work(tx) },
+	};
+});
+vi.mock("../realms/service", () => ({ acknowledgeCurrentRealmRulesOnFollow: vi.fn() }));
 
-import { accountRealmTagSubscription, unitFollowNotificationPreference } from "../database/schema";
+import {
+	accountRealmTagSubscription,
+	accountFollowPreference,
+	users,
+	authEntity,
+	unit,
+} from "../database/schema";
 import { FollowingTargetKindMismatch } from "./errors";
 import { getFollowingStatus, replaceFollowingSettings } from "./service";
 
-const FollowerProfileId = "019f94d1-c8ca-7110-b984-b0614ba4db9c";
-const TargetUnitId = "019f94d1-c8ca-7110-b984-b0614ba4db9d";
+const authUserId = "019f94d1-c8ca-7110-b984-b0614ba4db99";
+const followerProfileId = "019f94d1-c8ca-7110-b984-b0614ba4db9c";
+const unitId = "019f94d1-c8ca-7110-b984-b0614ba4db9d";
 const ensureCanRead = vi.fn(async () => undefined);
+const input = { authUserId, followerProfileId, unitId, authorization: { ensureCanRead } };
 
-function selectBuilder(rows: readonly unknown[]) {
-	return {
-		from: vi.fn(() => ({
-			where: vi.fn(() => ({
-				limit: vi.fn(async () => rows),
-			})),
-		})),
-	};
-}
-
-function joinedSelectBuilder(rows: readonly unknown[]) {
-	return {
-		from: vi.fn(() => ({
-			leftJoin: vi.fn(() => ({
-				where: vi.fn(() => ({
-					limit: vi.fn(async () => rows),
-				})),
-			})),
-		})),
-	};
-}
-
-describe("following settings", () => {
-	beforeEach(() => {
-		databaseSelect.mockReset();
-		transaction.mockReset();
-		ensureCanRead.mockClear();
-	});
-
-	it("defaults an existing follow to in-app notifications and reads its Realm Tag source", async () => {
-		databaseSelect
-			.mockReturnValueOnce(selectBuilder([{ id: TargetUnitId, kind: "realm" }]))
-			.mockReturnValueOnce(
-				joinedSelectBuilder([
-					{
-						favorite: false,
-						position: "a0V",
-						inAppNotificationsEnabled: null,
-					},
-				]),
-			)
-			.mockReturnValueOnce(selectBuilder([{ realmId: TargetUnitId }]));
-
-		await expect(
-			getFollowingStatus({
-				followerProfileId: FollowerProfileId,
-				unitId: TargetUnitId,
-				authorization: { ensureCanRead },
-			}),
-		).resolves.toEqual({
+beforeEach(() => {
+	state.rows.clear();
+	state.writes.length = 0;
+	state.deleted.length = 0;
+	state.rows.set(users, [{ id: authUserId }]);
+	state.rows.set(authEntity, [{ id: followerProfileId }]);
+	state.rows.set(unit, [{ id: unitId, kind: "realm" }]);
+	state.rows.set(accountFollowPreference, [
+		{ favorite: false, position: "a0V", inAppNotificationsEnabled: true },
+	]);
+});
+describe("private Following settings", () => {
+	it("reads the account's delivery and Tag-source choices", async () => {
+		state.rows.set(accountRealmTagSubscription, [{ realmId: unitId }]);
+		expect(await getFollowingStatus(input)).toEqual({
 			following: true,
 			kind: "realm",
 			favorite: false,
@@ -81,123 +79,48 @@ describe("following settings", () => {
 			realmTagSourceSubscribed: true,
 		});
 	});
-
-	it("atomically replaces notification and Realm Tag-source settings", async () => {
-		databaseSelect.mockReturnValueOnce(selectBuilder([{ id: TargetUnitId, kind: "realm" }]));
-		const preferenceConflict = vi.fn(async () => undefined);
-		const tagConflict = vi.fn(async () => undefined);
-		const insert = vi.fn((table) => ({
-			values: vi.fn((values) => {
-				if (table === unitFollowNotificationPreference) {
-					expect(values).toEqual({
-						followerProfileId: FollowerProfileId,
-						unitId: TargetUnitId,
-						inApp: false,
-					});
-					return { onConflictDoUpdate: preferenceConflict };
-				}
-				expect(table).toBe(accountRealmTagSubscription);
-				expect(values.realmId).toBe(TargetUnitId);
-				expect(values.authUserId).toBeInstanceOf(SQL);
-				if (!(values.authUserId instanceof SQL))
-					throw new Error("Expected an Auth self binding query");
-				const binding = new PgDialect().sqlToQuery(values.authUserId);
-				expect(binding.sql).toContain("auth_entity");
-				expect(binding.sql).toContain("auth_user_id");
-				expect(binding.params).toEqual([FollowerProfileId]);
-				return { onConflictDoNothing: tagConflict };
-			}),
-		}));
-		transaction.mockImplementation(async (operation) =>
-			operation({
-				select: vi.fn(() => selectBuilder([{ favorite: true, position: "a1V" }])),
-				insert,
-			}),
-		);
-
-		await expect(
-			replaceFollowingSettings({
-				followerProfileId: FollowerProfileId,
-				unitId: TargetUnitId,
-				authorization: { ensureCanRead },
+	it("writes actual Auth ownership while retaining the public self Entity reference", async () => {
+		expect(
+			await replaceFollowingSettings({
+				...input,
 				settings: {
 					kind: "realm",
 					inAppNotificationsEnabled: false,
 					realmTagSourceSubscribed: true,
 				},
 			}),
-		).resolves.toEqual({
-			following: true,
-			kind: "realm",
-			favorite: true,
-			position: "a1V",
-			inAppNotificationsEnabled: false,
-			realmTagSourceSubscribed: true,
-		});
-		expect(transaction).toHaveBeenCalledOnce();
-		expect(insert).toHaveBeenCalledTimes(2);
-		expect(preferenceConflict).toHaveBeenCalledOnce();
-		expect(tagConflict).toHaveBeenCalledOnce();
+		).toMatchObject({ inAppNotificationsEnabled: false, realmTagSourceSubscribed: true });
+		expect(state.writes).toEqual([
+			{
+				table: accountFollowPreference,
+				values: { authUserId, followerEntityId: followerProfileId, unitId, inApp: false },
+			},
+			{ table: accountRealmTagSubscription, values: { authUserId, realmId: unitId } },
+		]);
 	});
-
-	it("removes a Realm Tag source without coupling it to unfollowing", async () => {
-		databaseSelect.mockReturnValueOnce(selectBuilder([{ id: TargetUnitId, kind: "realm" }]));
-		const preferenceConflict = vi.fn(async () => undefined);
-		const deleteWhere = vi.fn(async () => undefined);
-		const remove = vi.fn((table) => {
-			expect(table).toBe(accountRealmTagSubscription);
-			return { where: deleteWhere };
+	it("removes the private Tag source without changing public follow identity", async () => {
+		await replaceFollowingSettings({
+			...input,
+			settings: { kind: "realm", inAppNotificationsEnabled: true, realmTagSourceSubscribed: false },
 		});
-		transaction.mockImplementation(async (operation) =>
-			operation({
-				select: vi.fn(() => selectBuilder([{ favorite: false, position: "a0V" }])),
-				insert: vi.fn((table) => {
-					expect(table).toBe(unitFollowNotificationPreference);
-					return {
-						values: vi.fn(() => ({
-							onConflictDoUpdate: preferenceConflict,
-						})),
-					};
-				}),
-				delete: remove,
-			}),
-		);
-
+		expect(state.deleted).toEqual([accountRealmTagSubscription]);
+		expect(state.writes[0]).toEqual({
+			table: accountFollowPreference,
+			values: { authUserId, followerEntityId: followerProfileId, unitId, inApp: true },
+		});
+	});
+	it("rejects a target-kind mismatch before writing settings", async () => {
 		await expect(
 			replaceFollowingSettings({
-				followerProfileId: FollowerProfileId,
-				unitId: TargetUnitId,
-				authorization: { ensureCanRead },
-				settings: {
-					kind: "realm",
-					inAppNotificationsEnabled: true,
-					realmTagSourceSubscribed: false,
-				},
+				...input,
+				settings: { kind: "book", inAppNotificationsEnabled: true, realmTagSourceSubscribed: null },
 			}),
-		).resolves.toMatchObject({
-			following: true,
-			kind: "realm",
-			realmTagSourceSubscribed: false,
-		});
-		expect(remove).toHaveBeenCalledOnce();
-		expect(deleteWhere).toHaveBeenCalledOnce();
+		).rejects.toThrow(FollowingTargetKindMismatch);
+		expect(state.writes).toHaveLength(0);
 	});
-
-	it("rejects a stale target kind before opening a transaction", async () => {
-		databaseSelect.mockReturnValueOnce(selectBuilder([{ id: TargetUnitId, kind: "realm" }]));
-
-		await expect(
-			replaceFollowingSettings({
-				followerProfileId: FollowerProfileId,
-				unitId: TargetUnitId,
-				authorization: { ensureCanRead },
-				settings: {
-					kind: "book",
-					inAppNotificationsEnabled: true,
-					realmTagSourceSubscribed: null,
-				},
-			}),
-		).rejects.toBeInstanceOf(FollowingTargetKindMismatch);
-		expect(transaction).not.toHaveBeenCalled();
+	it("does not expose private choices when self participation is unavailable", async () => {
+		state.rows.set(authEntity, []);
+		await expect(getFollowingStatus(input)).rejects.toThrow("Personal Following requires");
+		expect(state.writes).toHaveLength(0);
 	});
 });

@@ -1,7 +1,7 @@
-import { and, asc, eq, notInArray } from "drizzle-orm";
+import { and, asc, eq, inArray, notInArray } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
-import { entityIdentity, unitFollow } from "../database/schema";
+import { authEntity, accountFollowPreference, unitFollow } from "../database/schema";
 import { fractionalPositionBetween } from "../ordering/position";
 import { OfficialZoneManifest } from "./data";
 
@@ -22,12 +22,24 @@ function officialPositionsBefore(rightBoundary: string | null): string[] {
  */
 export async function ensureOfficialZoneFollows(
 	tx: DatabaseTransaction,
-	profileIds?: readonly string[],
+	profileIds: readonly string[],
 	options: { readonly sequenceIsEmpty?: boolean } = {},
 ): Promise<void> {
-	const targets = profileIds
-		? [...new Set(profileIds)]
-		: (await tx.select({ id: entityIdentity.id }).from(entityIdentity)).map(({ id }) => id);
+	const targets = [...new Set(profileIds)];
+	if (targets.length > 512)
+		throw new RangeError("Official defaults accept at most 512 admitted accounts per batch");
+	if (!targets.length) return;
+	const bindings = await tx
+		.select({ authUserId: authEntity.authUserId, entityId: authEntity.entityId })
+		.from(authEntity)
+		.where(inArray(authEntity.entityId, targets));
+	const authByEntity = new Map(bindings.map((binding) => [binding.entityId, binding.authUserId]));
+	const authFor = (entityId: string) => {
+		const id = authByEntity.get(entityId);
+		if (!id) throw new Error("Official defaults require admitted accounts, not catalog subjects");
+		return id;
+	};
+	for (const entityId of targets) authFor(entityId);
 	const officialZoneIds = OfficialZoneManifest.map(({ id }) => id);
 	if (options.sequenceIsEmpty) {
 		const positions = officialPositionsBefore(null);
@@ -35,11 +47,20 @@ export async function ensureOfficialZoneFollows(
 			.insert(unitFollow)
 			.values(
 				targets.flatMap((profileId) =>
-					officialZoneIds.map((zoneId, index) => {
-						const position = positions[index];
-						if (!position) throw new Error("Missing official Zone follow position");
-						return { followerProfileId: profileId, unitId: zoneId, position };
-					}),
+					officialZoneIds.map((unitId) => ({ followerProfileId: profileId, unitId })),
+				),
+			)
+			.onConflictDoNothing();
+		await tx
+			.insert(accountFollowPreference)
+			.values(
+				targets.flatMap((profileId) =>
+					officialZoneIds.map((unitId, index) => ({
+						authUserId: authFor(profileId),
+						followerEntityId: profileId,
+						unitId,
+						position: positions[index]!,
+					})),
 				),
 			)
 			.onConflictDoNothing();
@@ -48,16 +69,16 @@ export async function ensureOfficialZoneFollows(
 
 	for (const profileId of targets) {
 		const [firstOrdinaryFollow] = await tx
-			.select({ position: unitFollow.position })
-			.from(unitFollow)
+			.select({ position: accountFollowPreference.position })
+			.from(accountFollowPreference)
 			.where(
 				and(
-					eq(unitFollow.followerProfileId, profileId),
-					eq(unitFollow.favorite, false),
-					notInArray(unitFollow.unitId, officialZoneIds),
+					eq(accountFollowPreference.authUserId, authFor(profileId)),
+					eq(accountFollowPreference.favorite, false),
+					notInArray(accountFollowPreference.unitId, officialZoneIds),
 				),
 			)
-			.orderBy(asc(unitFollow.position), asc(unitFollow.unitId))
+			.orderBy(asc(accountFollowPreference.position), asc(accountFollowPreference.unitId))
 			.limit(1);
 		const positions = officialPositionsBefore(firstOrdinaryFollow?.position ?? null);
 		for (const [index, zoneId] of officialZoneIds.entries()) {
@@ -65,7 +86,16 @@ export async function ensureOfficialZoneFollows(
 			if (!position) throw new Error("Missing official Zone follow position");
 			await tx
 				.insert(unitFollow)
-				.values({ followerProfileId: profileId, unitId: zoneId, position })
+				.values({ followerProfileId: profileId, unitId: zoneId })
+				.onConflictDoNothing();
+			await tx
+				.insert(accountFollowPreference)
+				.values({
+					authUserId: authFor(profileId),
+					followerEntityId: profileId,
+					unitId: zoneId,
+					position,
+				})
 				.onConflictDoNothing();
 		}
 	}

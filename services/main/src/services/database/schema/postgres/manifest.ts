@@ -1,5 +1,6 @@
 export const PostgreSqlSchemaFileNames = [
 	"participation-integrity.sql",
+	"participation-follow.sql",
 	"participation-private-state.sql",
 	"participation-studio.sql",
 	"participation-progress.sql",
@@ -103,6 +104,7 @@ export const PostgreSqlSchemaMigrationBundles = {
 		"catalog-music-history.sql",
 	],
 	catalog_source_native_applications: ["catalog-source-application.sql"],
+	participation_follow: ["participation-follow.sql"],
 	participation_private_tag_guard: ["content-label-policy.sql"],
 	catalog_native_source_event_batch: [
 		"catalog-integrity.sql",
@@ -162,6 +164,7 @@ export const PostgreSqlSchemaFunctionNames = [
 	"catalog_source_validate_application_change",
 	"catalog_source_guard_proposal",
 	"catalog_source_require_application_complete",
+	"participation_guard_follow_preference",
 	"maintain_recommendation_event_signals",
 	"participation_guard_favorite_identity",
 	"participation_guard_image_owner",
@@ -372,6 +375,7 @@ export const PostgreSqlSchemaTriggers = [
 		name: "music_component_source_occurrence_immutable",
 	},
 	{ table: "music_source_application_change", name: "music_source_application_exact_component" },
+	{ table: "account_follow_preference", name: "participation_follow_preference_guard" },
 	{ table: "recommendation_event", name: "recommendation_event_signals_maintain" },
 	{ table: "account_favorite", name: "participation_favorite_identity_guard" },
 	{ table: "image_asset", name: "participation_image_owner_guard" },

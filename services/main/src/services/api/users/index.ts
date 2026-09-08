@@ -363,9 +363,10 @@ export default new Elysia({ name: "account-entity-api" })
 			},
 			detail: { summary: "List Units followed by the current user", tags: ["Users"] },
 		},
-		async ({ entity, query }) => {
+		async ({ user, entity, query }) => {
 			const viewer = await resolveRecommendationViewer(entity.id, false);
 			return listFollowing({
+				authUserId: user.id,
 				followerProfileId: entity.id,
 				kind: query.kind,
 				localizationLanguages: query.localizationLanguages,
@@ -386,8 +387,9 @@ export default new Elysia({ name: "account-entity-api" })
 			},
 			detail: { summary: "Get current user's follow state for a Unit", tags: ["Users"] },
 		},
-		async ({ entity, authorization, params }) =>
+		async ({ user, entity, authorization, params }) =>
 			getFollowingStatus({
+				authUserId: user.id,
 				followerProfileId: entity.id,
 				unitId: params.unitId,
 				authorization: authorization.unit,
@@ -409,8 +411,9 @@ export default new Elysia({ name: "account-entity-api" })
 				tags: ["Users"],
 			},
 		},
-		async ({ entity, authorization, params, body }) =>
+		async ({ user, entity, authorization, params, body }) =>
 			replaceFollowingSettings({
+				authUserId: user.id,
 				followerProfileId: entity.id,
 				unitId: params.unitId,
 				authorization: authorization.unit,
@@ -432,8 +435,9 @@ export default new Elysia({ name: "account-entity-api" })
 			},
 			detail: { summary: "Follow a Unit", tags: ["Users"] },
 		},
-		async ({ entity, authorization, params }) =>
+		async ({ user, entity, authorization, params }) =>
 			followUnit({
+				authUserId: user.id,
 				followerProfileId: entity.id,
 				unitId: params.unitId,
 				authorization: authorization.unit,
@@ -447,7 +451,7 @@ export default new Elysia({ name: "account-entity-api" })
 			response: { [StatusCodes.OK]: FollowResponse },
 			detail: { summary: "Unfollow a Unit", tags: ["Users"] },
 		},
-		async ({ entity, params }) => unfollowUnit(entity.id, params.unitId),
+		async ({ user, entity, params }) => unfollowUnit(user.id, entity.id, params.unitId),
 	)
 	.patch(
 		"/account/me/following/:unitId",
@@ -461,7 +465,8 @@ export default new Elysia({ name: "account-entity-api" })
 			},
 			detail: { summary: "Update followed Unit presentation", tags: ["Users"] },
 		},
-		async ({ entity, params, body }) => updateFollowingPresentation(entity.id, params.unitId, body),
+		async ({ user, entity, params, body }) =>
+			updateFollowingPresentation(user.id, entity.id, params.unitId, body),
 	)
 	.get(
 		"/entities/:id/activity",

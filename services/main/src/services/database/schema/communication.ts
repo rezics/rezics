@@ -2,7 +2,6 @@ import { inArray, sql } from "drizzle-orm";
 import {
 	boolean,
 	check,
-	foreignKey,
 	index,
 	integer,
 	pgEnum,
@@ -30,7 +29,6 @@ import {
 	NotificationKindValues,
 	toEnumValues,
 } from "./contract-values";
-import { unitFollow } from "./follow";
 import { unit } from "./unit";
 
 export const notificationKind = pgEnum("notification_kind", toEnumValues(NotificationKindValues));
@@ -249,28 +247,6 @@ export const notificationPreference = pgTable(
  * remains independent from notification settings. The composite foreign key
  * makes the preference lifecycle follow the underlying relation.
  */
-export const unitFollowNotificationPreference = pgTable(
-	"unit_follow_notification_preference",
-	{
-		followerProfileId: uuid().notNull(),
-		unitId: uuid().notNull(),
-		inApp: boolean().default(true).notNull(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.followerProfileId, table.unitId] }),
-		foreignKey({
-			name: "unit_follow_notification_preference_follow_fkey",
-			columns: [table.followerProfileId, table.unitId],
-			foreignColumns: [unitFollow.followerProfileId, unitFollow.unitId],
-		}).onDelete("cascade"),
-		index("unit_follow_notification_preference_enabled_unit_idx")
-			.on(table.unitId, table.followerProfileId)
-			.where(sql`${table.inApp}`),
-	],
-);
-
 export const conversation = pgTable(
 	"conversation",
 	{

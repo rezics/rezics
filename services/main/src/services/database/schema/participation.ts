@@ -122,6 +122,7 @@ export const AccountErasureStageValues = [
 	"recommendation_exclusions",
 	"studio_visits",
 	"studio_candidates",
+	"follow_preferences",
 	"favorite_history",
 	"favorites",
 	"favorites_state",

@@ -806,14 +806,15 @@ async function followBatch(
 		tx,
 		sql`
 			with batch as materialized (
-				select follow.follower_profile_id, follow.position, follow.favorite,
+				select follow.follower_profile_id, preference.position, preference.favorite,
+					preference.auth_user_id,
 					follow.created_at, follow.updated_at,
 					preference.in_app as preference_in_app,
 					preference.created_at as preference_created_at,
 					preference.updated_at as preference_updated_at
 				from unit_follow as follow
-				left join unit_follow_notification_preference as preference
-					on preference.follower_profile_id = follow.follower_profile_id
+				left join account_follow_preference as preference
+					on preference.follower_entity_id = follow.follower_profile_id
 					and preference.unit_id = follow.unit_id
 				where follow.unit_id = ${input.sourceUnitId}::uuid
 				order by follow.created_at desc, follow.follower_profile_id
@@ -821,33 +822,32 @@ async function followBatch(
 				for update of follow skip locked
 			), copied_follows as (
 				insert into unit_follow (
-					follower_profile_id, unit_id, position, favorite, created_at, updated_at
+					follower_profile_id, unit_id, created_at, updated_at
 				)
-				select follower_profile_id, ${input.targetUnitId}::uuid, position, favorite,
-					created_at, updated_at
+				select follower_profile_id, ${input.targetUnitId}::uuid, created_at, updated_at
 				from batch
 				on conflict (follower_profile_id, unit_id) do update
-				set favorite = unit_follow.favorite or excluded.favorite,
-					created_at = least(unit_follow.created_at, excluded.created_at),
+				set created_at = least(unit_follow.created_at, excluded.created_at),
 					updated_at = greatest(unit_follow.updated_at, excluded.updated_at)
 				returning follower_profile_id
 			), copied_preferences as (
-				insert into unit_follow_notification_preference (
-					follower_profile_id, unit_id, in_app, created_at, updated_at
+				insert into account_follow_preference (
+					auth_user_id, follower_entity_id, unit_id, position, favorite, in_app, created_at, updated_at
 				)
-				select follower_profile_id, ${input.targetUnitId}::uuid, preference_in_app,
+				select auth_user_id, follower_profile_id, ${input.targetUnitId}::uuid, position, favorite, preference_in_app,
 					preference_created_at, preference_updated_at
 				from batch
 				join copied_follows using (follower_profile_id)
-				where preference_in_app is not null
-				on conflict (follower_profile_id, unit_id) do update
-				set in_app = unit_follow_notification_preference.in_app and excluded.in_app,
+				where preference_in_app is not null and exists(select 1 from users where id = batch.auth_user_id and erased_at is null)
+				on conflict (auth_user_id, unit_id) do update
+				set favorite = account_follow_preference.favorite or excluded.favorite,
+					in_app = account_follow_preference.in_app and excluded.in_app,
 					created_at = least(
-						unit_follow_notification_preference.created_at,
+						account_follow_preference.created_at,
 						excluded.created_at
 					),
 					updated_at = greatest(
-						unit_follow_notification_preference.updated_at,
+						account_follow_preference.updated_at,
 						excluded.updated_at
 					)
 				returning 1

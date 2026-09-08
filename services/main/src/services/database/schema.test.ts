@@ -105,7 +105,7 @@ import {
 	unitExternalLinkVote,
 	unitExternalLinkVoteStat,
 	unitFollow,
-	unitFollowNotificationPreference,
+	accountFollowPreference,
 	UnitKindValues,
 	unitLicenseGrant,
 	unitLocalization,
@@ -237,7 +237,7 @@ describe("database schema contracts", () => {
 		]);
 		expect(follow.foreignKeys.map((key) => key.getName())).toEqual(
 			expect.arrayContaining([
-				"unit_follow_follower_profile_id_profile_id_fk",
+				"unit_follow_follower_profile_id_entity_identity_id_fk",
 				"unit_follow_unit_id_unit_id_fk",
 			]),
 		);
@@ -253,7 +253,7 @@ describe("database schema contracts", () => {
 			"shared_search_query_document_check",
 		);
 		expect(table.foreignKeys.map((key) => key.getName())).toContain(
-			"shared_search_query_created_by_profile_id_profile_id_fk",
+			"shared_search_query_created_by_profile_id_entity_identity_id_fk",
 		);
 	});
 
@@ -316,18 +316,18 @@ describe("database schema contracts", () => {
 		);
 		expect(restriction.indexes.map((index) => index.config.name)).toEqual(
 			expect.arrayContaining([
-				"unit_access_restriction_active_profile_scope_key",
+				"unit_access_restriction_active_auth_user_scope_key",
 				"unit_access_restriction_active_realm_scope_key",
 			]),
 		);
-		expect(unitAccessRestriction.subjectKind.enumValues).toEqual(["profile", "realm"]);
+		expect(unitAccessRestriction.subjectKind.enumValues).toEqual(["auth", "realm"]);
 		expect(realmAccessSubjectRelation.enumValues).toEqual(RealmAccessSubjectRelationValues);
 		expect(grant.columns.map((column) => column.name)).toContain("realm_relation");
 		expect(restriction.columns.map((column) => column.name)).toContain("realm_relation");
-		expect(unitAccessGrant.subjectKind.enumValues).toEqual(["profile", "realm", "authenticated"]);
+		expect(unitAccessGrant.subjectKind.enumValues).toEqual(["auth", "realm", "authenticated"]);
 		expect(grant.indexes.map((index) => index.config.name)).toEqual(
 			expect.arrayContaining([
-				"unit_access_grant_active_profile_scope_key",
+				"unit_access_grant_active_auth_user_scope_key",
 				"unit_access_grant_active_realm_scope_key",
 				"unit_access_grant_active_authenticated_scope_key",
 				"unit_access_grant_unit_transfer_candidate_idx",
@@ -370,7 +370,7 @@ describe("database schema contracts", () => {
 		expect(invitation.indexes.map((index) => index.config.name)).toEqual(
 			expect.arrayContaining([
 				"unit_access_invitation_unit_unresolved_idx",
-				"unit_access_invitation_profile_unresolved_idx",
+				"unit_access_invitation_auth_user_unresolved_idx",
 				"unit_access_invitation_unit_transfer_candidate_idx",
 			]),
 		);
@@ -577,7 +577,7 @@ describe("database schema contracts", () => {
 		expect(attribution.foreignKeys.map((key) => key.getName())).toEqual(
 			expect.arrayContaining([
 				"credit_attribution_source_unit_id_unit_id_fk",
-				"credit_attribution_credited_entity_id_unit_id_fk",
+				"credit_attribution_credited_entity_id_entity_identity_id_fk",
 			]),
 		);
 		expect(attribution.uniqueConstraints.map((constraint) => constraint.name)).toContain(
@@ -807,7 +807,7 @@ describe("database schema contracts", () => {
 			expect(decisionId?.notNull).toBe(false);
 		}
 		expect(getTableConfig(accountEnforcementAction).columns.map(({ name }) => name)).toEqual(
-			expect.arrayContaining(["target_profile_id", "kind", "enforcement_kind"]),
+			expect.arrayContaining(["target_auth_user_id", "kind", "enforcement_kind"]),
 		);
 		expect(getTableConfig(auditEvent).columns.map((column) => column.name)).toEqual(
 			expect.arrayContaining(["outcome_code", "governance_decision_id"]),
@@ -1184,16 +1184,16 @@ describe("database schema contracts", () => {
 	});
 
 	it("scopes in-app notification delivery to an existing follow relation", () => {
-		const preference = getTableConfig(unitFollowNotificationPreference);
+		const preference = getTableConfig(accountFollowPreference);
 		expect(preference.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
-			"follower_profile_id",
+			"auth_user_id",
 			"unit_id",
 		]);
 		expect(preference.foreignKeys.map((key) => key.getName())).toContain(
-			"unit_follow_notification_preference_follow_fkey",
+			"account_follow_preference_follow_fk",
 		);
 		expect(preference.indexes.map((index) => index.config.name)).toContain(
-			"unit_follow_notification_preference_enabled_unit_idx",
+			"account_follow_preference_enabled_unit_idx",
 		);
 	});
 

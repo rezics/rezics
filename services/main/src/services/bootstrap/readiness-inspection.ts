@@ -27,7 +27,7 @@ import {
 	realmMember,
 	unit,
 	unitDock,
-	unitFollow,
+	accountFollowPreference,
 	unitLocalization,
 	unitOwnership,
 	unitSlugAddress,
@@ -340,17 +340,17 @@ export async function inspectInitialInstallationBundle() {
 			),
 		database
 			.select({
-				profileId: unitFollow.followerProfileId,
-				unitId: unitFollow.unitId,
-				position: unitFollow.position,
-				favorite: unitFollow.favorite,
+				profileId: accountFollowPreference.followerEntityId,
+				unitId: accountFollowPreference.unitId,
+				position: accountFollowPreference.position,
+				favorite: accountFollowPreference.favorite,
 			})
-			.from(unitFollow)
+			.from(accountFollowPreference)
 			.where(
 				and(
-					inArray(unitFollow.followerProfileId, BootstrapProfileIdValues),
+					inArray(accountFollowPreference.followerEntityId, BootstrapProfileIdValues),
 					inArray(
-						unitFollow.unitId,
+						accountFollowPreference.unitId,
 						OfficialZoneManifest.map(({ id }) => id),
 					),
 				),
@@ -358,19 +358,19 @@ export async function inspectInitialInstallationBundle() {
 		Promise.all(
 			BootstrapProfileIdValues.map(async (profileId) => {
 				const [follow] = await database
-					.select({ position: unitFollow.position })
-					.from(unitFollow)
+					.select({ position: accountFollowPreference.position })
+					.from(accountFollowPreference)
 					.where(
 						and(
-							eq(unitFollow.followerProfileId, profileId),
-							eq(unitFollow.favorite, false),
+							eq(accountFollowPreference.followerEntityId, profileId),
+							eq(accountFollowPreference.favorite, false),
 							notInArray(
-								unitFollow.unitId,
+								accountFollowPreference.unitId,
 								OfficialZoneManifest.map(({ id }) => id),
 							),
 						),
 					)
-					.orderBy(asc(unitFollow.position), asc(unitFollow.unitId))
+					.orderBy(asc(accountFollowPreference.position), asc(accountFollowPreference.unitId))
 					.limit(1);
 				return { profileId, position: follow?.position ?? null };
 			}),

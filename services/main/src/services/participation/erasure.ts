@@ -1,3 +1,4 @@
+import { accountFollowPreference } from "../database/schema/follow";
 import { erasePrivateImageBatch, type ImageErasureArchive } from "../image-assets/erasure";
 import { and, eq, isNull, lte, sql, type SQL } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
@@ -391,6 +392,13 @@ export async function dispatchAccountErasureBatch(
 					tx,
 					studioAuthEditorCandidate,
 					eq(studioAuthEditorCandidate.authUserId, authId),
+				);
+				break;
+			case "follow_preferences":
+				result = await deletePrivateBatch(
+					tx,
+					accountFollowPreference,
+					eq(accountFollowPreference.authUserId, authId),
 				);
 				break;
 			case "favorite_history":
