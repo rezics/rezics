@@ -32,6 +32,7 @@ export async function prepareCatalogSourceProposalDependency(
 	input: z.infer<typeof keySchema> & {
 		dependencySourceRecordId: string;
 		evidence: CatalogSourceReferenceEvidence;
+		purpose?: "incoming" | "previous-for-withdrawal";
 	},
 ) {
 	const key = keySchema.parse({
@@ -40,6 +41,9 @@ export async function prepareCatalogSourceProposalDependency(
 		position: input.position,
 	});
 	z.uuid().parse(input.dependencySourceRecordId);
+	const purpose = z
+		.enum(["incoming", "previous-for-withdrawal"])
+		.parse(input.purpose ?? "incoming");
 	const evidence = requireCatalogSourceReferenceEvidence(input.evidence);
 	const authority = currentParticipationAuthority();
 	if (
@@ -71,7 +75,10 @@ export async function prepareCatalogSourceProposalDependency(
 		proposal.state !== "pending" ||
 		proposal.expectedBindingRevision !== root.claim.bindingRevision ||
 		evidence.sourceRecordId !== proposal.sourceRecordId ||
-		evidence.snapshotId !== proposal.snapshotId
+		(purpose === "incoming"
+			? evidence.snapshotId !== proposal.snapshotId
+			: root.claim.appliedCorrespondenceRevision !== root.claim.correspondenceRevision ||
+				evidence.snapshotId !== root.claim.observedSnapshotId)
 	)
 		throw new Error("Dependency preparation requires the exact pending source proposal evidence");
 	const [record] = await tx
@@ -101,7 +108,7 @@ export async function prepareCatalogSourceProposalDependency(
 		throw new ParticipationDenied("Only the draft creator may share a private source dependency");
 	const values = {
 		...key,
-		snapshotId: proposal.snapshotId,
+		snapshotId: evidence.snapshotId,
 		sourcePath: evidence.path,
 		dependencySourceRecordId: record.id,
 		dependencyMappingKey: claim.mappingKey,
@@ -134,7 +141,7 @@ export async function prepareCatalogSourceProposalDependency(
 		persisted.dependencySourceRecordId !== record.id ||
 		persisted.dependencyMappingKey !== claim.mappingKey ||
 		persisted.dependencyBindingRevision !== dependency.claim.bindingRevision ||
-		persisted.snapshotId !== proposal.snapshotId ||
+		persisted.snapshotId !== evidence.snapshotId ||
 		persisted.sourcePath !== evidence.path
 	)
 		throw new Error("Source dependency position already identifies different or revoked evidence");

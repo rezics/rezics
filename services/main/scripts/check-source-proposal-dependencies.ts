@@ -23,12 +23,17 @@ import {
 	assertReadableTargets,
 	createCatalogIdentity,
 	loadCatalogIdentity,
+	recordCatalogChange,
 } from "../src/services/catalog/storage";
 import {
 	bindCatalogSourceIdentity,
 	reviseCatalogSourceBinding,
 } from "../src/services/catalog/source-bindings";
-import { proposeCatalogSourceAdoption } from "../src/services/catalog/source-proposals";
+import {
+	proposeCatalogSourceAdoption,
+	decideCatalogSourceProposal,
+	type CatalogSourceNativeWriter,
+} from "../src/services/catalog/source-proposals";
 import {
 	prepareCatalogSourceProposalDependency,
 	revokeCatalogSourceProposalDependency,
@@ -95,7 +100,8 @@ try {
 					objectType: "artist",
 					externalId: crypto.randomUUID(),
 				};
-				for (const key of [rootKey, dependencyKey])
+				const previousDependencyKey = { ...dependencyKey, externalId: crypto.randomUUID() };
+				for (const key of [rootKey, dependencyKey, previousDependencyKey])
 					await tx
 						.insert(operationalCapacity)
 						.values(
@@ -115,7 +121,11 @@ try {
 						bytes,
 					);
 				};
-				const first = await observe(rootKey, { artist: dependencyKey.externalId, version: 1 });
+				const first = await observe(rootKey, {
+					artist: dependencyKey.externalId,
+					formerArtist: previousDependencyKey.externalId,
+					version: 1,
+				});
 				const rootCreated = await createCatalogIdentity(
 					tx,
 					{ owner: "music", shape: "release" },
@@ -147,6 +157,15 @@ try {
 					owner.account.id,
 				);
 				const unrelated = { owner: unrelatedCreated.owner, id: unrelatedCreated.id };
+				const previousDependency = await observe(previousDependencyKey, {
+					id: previousDependencyKey.externalId,
+				});
+				await bindCatalogSourceIdentity(tx, owner.account.id, {
+					sourceRecordId: previousDependency.record.id,
+					path: "/",
+					snapshotId: previousDependency.snapshot.id,
+					reference: unrelated,
+				});
 				const incoming = await observe(rootKey, { artist: dependencyKey.externalId, version: 2 });
 				const proposal = await proposeCatalogSourceAdoption(tx, owner.account.id, {
 					sourceRecordId: first.record.id,
@@ -156,6 +175,7 @@ try {
 				});
 				if (proposal.status !== "proposed") throw new Error("Expected proposal");
 				const scope = {
+					action: "apply" as const,
 					sourceRecordId: first.record.id,
 					proposalId: proposal.proposal.id,
 					reference: root,
@@ -171,6 +191,13 @@ try {
 					evidence: incoming.referenceAt("/artist"),
 				};
 				const prepared = await prepareCatalogSourceProposalDependency(tx, owner.account.id, input);
+				await prepareCatalogSourceProposalDependency(tx, owner.account.id, {
+					...key,
+					position: 3,
+					dependencySourceRecordId: previousDependency.record.id,
+					evidence: first.referenceAt("/formerArtist"),
+					purpose: "previous-for-withdrawal",
+				});
 				assert.deepEqual(prepared.reference, child);
 				assertions++;
 				assert.deepEqual(
@@ -320,6 +347,66 @@ try {
 						assertions++;
 					}),
 				);
+				const writer: CatalogSourceNativeWriter = async (nested, context) => {
+					assert.equal(
+						await allowed(nested, unrelated),
+						context.action === "withdraw",
+						"previous-only dependency is readable only during its exact withdrawal",
+					);
+					assertions++;
+					assert.equal(await allowed(nested, unrelated, true), false);
+					assertions++;
+					return {
+						revision: await recordCatalogChange(
+							nested,
+							context.reference,
+							context.actor,
+							context.expectedRevision,
+							"fixture.dependency.scope",
+						),
+						changes: [],
+					};
+				};
+				const decision = {
+					sourceRecordId: scope.sourceRecordId,
+					proposalId: scope.proposalId,
+					mappingVersion: "musicbrainz.release.1",
+					reason: "Qualify exact dependency read scope",
+				};
+				await runWithParticipationAuthority(selected, async () => {
+					assert.equal(
+						(
+							await decideCatalogSourceProposal(
+								tx,
+								delegate.account.id,
+								{ ...decision, action: "apply" },
+								writer,
+							)
+						).status,
+						"applied",
+					);
+					assertions++;
+					await runWithApprovedSourceProposal(tx, selected, scope, async () => {
+						assert.equal(
+							await allowed(tx, unrelated),
+							false,
+							"apply phase cannot consume previous dependency after an application exists",
+						);
+						assertions++;
+					});
+					assert.equal(
+						(
+							await decideCatalogSourceProposal(
+								tx,
+								delegate.account.id,
+								{ ...decision, action: "withdraw" },
+								writer,
+							)
+						).status,
+						"withdrawn",
+					);
+					assertions++;
+				});
 				await tx.execute(sql`set constraints all immediate`);
 				throw rollback;
 			});

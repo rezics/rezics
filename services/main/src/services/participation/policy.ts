@@ -1,5 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { and, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { HTTPError } from "elysia";
@@ -16,7 +16,12 @@ import { users } from "../database/schema/auth";
 import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
 import { AccountAuthorization } from "../authorization/account/authorization";
 import { catalogSourceProposalDependency } from "../database/schema/catalog-source-dependency";
-import { catalogSourceMappingClaim } from "../database/schema/catalog-source";
+import {
+	catalogSourceMappingClaim,
+	catalogSourceAdoptionProposal,
+	catalogSourceBindingRevision,
+} from "../database/schema/catalog-source";
+import { catalogSourceApplication } from "../database/schema/catalog-source-application";
 import { CatalogIdentityTables } from "../database/schema/catalog-identity";
 import { catalogReadRatingPredicate } from "../catalog/read-policy";
 
@@ -57,6 +62,7 @@ const ApprovedSourceProposalSchema = z.strictObject({
 	sourceRecordId: z.uuid(),
 	proposalId: z.uuid(),
 	reference: CatalogReferenceSchema,
+	action: z.enum(["apply", "withdraw", "reject", "supersede"]),
 });
 export type ApprovedSourceProposal = z.infer<typeof ApprovedSourceProposalSchema>;
 
@@ -330,10 +336,33 @@ async function resolveCatalogAuthorityScope(
 				))
 		) {
 			const d = catalogSourceProposalDependency,
-				c = catalogSourceMappingClaim;
+				c = catalogSourceMappingClaim,
+				p = catalogSourceAdoptionProposal,
+				b = catalogSourceBindingRevision,
+				a = catalogSourceApplication;
+			const boundTarget = {
+				publishing: b.publishingId,
+				music: b.musicId,
+				program: b.programId,
+				software: b.softwareId,
+				entity: b.entityId,
+				grouping: b.groupingId,
+				reference: b.referenceId,
+				distribution: b.distributionId,
+			}[sourceApplication.scope.reference.owner];
 			const prepared = await tx
 				.select({ dependency: d })
 				.from(d)
+				.innerJoin(p, and(eq(p.sourceRecordId, d.sourceRecordId), eq(p.id, d.proposalId)))
+				.innerJoin(
+					b,
+					and(
+						eq(b.sourceRecordId, p.sourceRecordId),
+						eq(b.mappingKey, p.mappingKey),
+						eq(b.revision, p.expectedBindingRevision),
+						eq(boundTarget, sourceApplication.scope.reference.id),
+					),
+				)
 				.innerJoin(users, and(eq(users.id, d.preparedByAuthUserId), isNull(users.erasedAt)))
 				.innerJoin(
 					c,
@@ -348,6 +377,16 @@ async function resolveCatalogAuthorityScope(
 					and(
 						eq(d.sourceRecordId, sourceApplication.scope.sourceRecordId),
 						eq(d.proposalId, sourceApplication.scope.proposalId),
+						or(
+							eq(d.snapshotId, p.snapshotId),
+							sourceApplication.scope.action === "withdraw"
+								? sql`exists (
+							select 1 from ${a} where ${a.sourceRecordId}=${p.sourceRecordId} and ${a.proposalId}=${p.id} and ${a.action}='apply'
+							and ${a.mappingKey}=${p.mappingKey} and ${a.previousSnapshotId}=${d.snapshotId}
+							and ${a.previousObservedSnapshotId}=${d.snapshotId} and ${a.previousCorrespondenceRevision}=${b.correspondenceRevision}
+						)`
+								: sql`false`,
+						),
 						isNull(d.revokedAt),
 					),
 				)

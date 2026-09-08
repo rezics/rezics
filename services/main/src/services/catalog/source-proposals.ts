@@ -480,6 +480,7 @@ export async function decideCatalogSourceProposal(
 				sourceRecordId: value.sourceRecordId,
 				proposalId: proposal.id,
 				reference: current.reference,
+				action: value.action,
 			},
 			executeDecision,
 		);
