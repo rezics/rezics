@@ -1,6 +1,6 @@
 # REZICS operational refactor program
 
-Date: 2026-09-06. Status: supporting implementation exists; **the current source-complete catalog schema milestone is not delivered**.
+Program opened: 2026-09-06. The native replacement is delivered; full source-complete acceptance remains open.
 Source baseline: `470aa6c0432fae1dacbd3be7d8ad62b566447ca9`.
 
 **Convergence decision, 2026-09-08:** retain the implemented native replacement
@@ -10,7 +10,7 @@ records current evidence and the remaining product/qualification gaps. It does
 not waive the full source-complete milestone below. Continue from
 [NEXT_SESSION.md](NEXT_SESSION.md), not historical temporary reboot files.
 
-**Current boundary, 2026-09-07:** the maintainer has authorized autonomous
+**Historical implementation scope, 2026-09-07:** the maintainer authorized autonomous
 implementation, independent worktrees and research-led design decisions.
 Documents are revisable records, not a reason to stop implementation. Resolve
 the relevant [design obligations](00-source-complete-schema.md#design-review-gate)
@@ -27,9 +27,13 @@ preferred outbox relay, and retain Bun business consumers. PostgreSQL owns
 transactional state/plans/outbox/receipts. This closes service selection only;
 the catalog design gate and integration/production qualification remain open.
 
-## Mandate and outcome
+## Historical mandate and target
 
-**Current stage, clarified by the maintainer:** finish the database schema needed
+The mandate below describes the broader target. Its earlier approvals and
+implementation order do not expand a new task; select current work through the
+handoff and the user's request.
+
+**Schema target, clarified by the maintainer:** finish the database schema needed
 to natively carry **VNDB, MusicBrainz, Bangumi and book-index data**. Novel Updates
 is a reference for book/translation indexing, not an irreplaceable provider.
 Start with [Current-stage schema plan](00-source-complete-schema.md) and its

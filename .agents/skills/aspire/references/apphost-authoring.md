@@ -3,15 +3,14 @@
 ## Find the authored boundary
 
 - Read the rooted `aspire.config.json` when present and follow its AppHost path and language.
-- Support the project style already in use: project-based C#, file-based C#, TypeScript, or a
-  compatible legacy layout.
+- Follow the configured project style. REZICS owns a TypeScript AppHost under
+  `aspire-apphost/`; its Taskfile owns restore and typechecking.
 - Inspect the AppHost's package or project definition and the applications it orchestrates
   before changing their relationship.
 
-Edit only authored sources and configuration. For TypeScript AppHosts, `.aspire/modules/`
-and legacy `.modules/` contain generated SDK code; inspect declarations when useful, but run
-`aspire restore` or `aspire add` instead of editing generated files. Treat compiler and build
-outputs in other AppHost styles as generated as well.
+Edit authored sources and configuration. `aspire-apphost/.aspire/modules/`
+contains generated SDK code; inspect declarations when useful and regenerate
+through the owning restore task when SDK inputs change.
 
 ## Author from verified APIs
 

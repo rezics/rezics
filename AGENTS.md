@@ -1,60 +1,34 @@
-STUDY DEEPLY BEFORE ANYTHING, PROACTIVELY RESEARCH ONLINE TO ENSURE BEST PRACTICES.
+# AI agent instructions
 
-# AI Agent Instructions
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing files.
 
-- Read [CONTRIBUTING.md](./CONTRIBUTING.md) before making changes.
-- Put all agent-generated temporary artifacts under `.temp/`, including reports and any notes or checklists used to keep implementation aligned with an agreed plan. Remove artifacts created for the current task before finishing unless the user explicitly asks to retain them; never delete pre-existing or user-provided files.
-- Treat v1.0.0 as the first supported compatibility baseline. Remove and do not restore pre-v1 routes, schema versions, migrations, adapters, compatibility aliases, or removal guards. REZICS uses Romantic Versioning (RomVer) after v1.0.0: versions are `PROJECT.MAJOR.MINOR`, the second segment is for significant or breaking product, public API, or persisted-contract changes, and the third segment is for smaller additions, fixes, and maintenance releases. A breaking release must still include an explicit migration or cutover plan; it does not require a PROJECT bump.
+## Task scope and evidence
 
-## Local fixture changes
+- Complete the requested outcome within its owner boundary. A research-only or plan-only request permits read-only investigation, not implementation.
+- Apply the user's current instructions and existing authorization before skill defaults. Historical plans and approvals do not expand a new task. Continue independent authorized work while a material question is unresolved; do not ask again for approval already given.
+- Inspect relevant code first. Research official sources when an API is unfamiliar, behavior is version-sensitive, or a design decision needs external evidence. Stop researching when the evidence supports the current decision.
+- If a repository rule or skill blocks completion, identify the exact file and instruction, explain the concrete conflict, and report the remaining work.
+- Put task-created temporary files in `.temp/`. Remove only those files before finishing unless retention was requested. Durable requested deliverables belong in their owning location; preserve pre-existing and user-provided files.
 
-- Treat the showcase loader's fresh-database requirement as a constraint on that loader, not as blanket authorization or a requirement to reset the whole development database for every fixture edit.
-- Before resetting local state, classify the changed contract. When a change only replaces bounded content on an existing resource, such as one Zone Page document, Dock document, or approved theme revision, prefer the owning authenticated API, service operation, or reviewed loopback-only maintenance command that updates exactly that resource, then verify the persisted value. Do not bypass invariants with ad hoc SQL.
-- Use reset-and-reload when identities, relations, slugs, structures, pack-wide invariants, or multiple interdependent resources changed; when the supported loader is the only safe write path; or when the maintainer explicitly requests a full reset. If no safe targeted path exists and a reset would delete unrelated local work, ask the maintainer before resetting.
-- State the exact local scope and recovery consequence before any reset. A fixture loader refusing partial reconciliation does not by itself justify expanding a bounded change into a destructive whole-database operation.
+## Data and verification boundaries
 
-## Performance and scalability
+- A fixture loader requiring a fresh database does not authorize resetting development data. Prefer an owning API or service for bounded content changes; follow the [fixture workflow](README.md#data-authority-and-showcase-fixtures) for interdependent changes. Before any reset, establish the exact target, authorization, scope and recovery consequence. Ask before deleting unrelated data when authorization is missing.
+- For frontend changes, run the affected workspace's TypeScript check and relevant deterministic checks. Browser, screenshot, visual, responsive and rendered-interaction QA, including starting a frontend server solely for it, requires the user's explicit request in the current task. Otherwise rendered acceptance belongs to the maintainer. This boundary also applies to skills.
+- Preserve deterministic checks and CI. Passing static checks is code-integrity evidence, not rendered, production or capacity acceptance.
+- Do not hand off affected frontend code as complete with TypeScript or equivalent deterministic integrity failures.
+- For potentially corpus-scale data, retain the 500,000,000-row baseline and 3,000,000,000-row estimate. Read the capacity policy below when the change affects workload assumptions or costs.
 
-- Treat performance and scalability as design requirements whenever changing database schemas, queries, indexes, persisted data flows, backend services, APIs, search or recommendation systems, queues, workers, caches, batching, or background jobs.
-- Use 500,000,000 rows as the minimum capacity-planning baseline for every potentially corpus-scale relation or dataset, and also estimate behavior at 3,000,000,000 rows. Prefer designs whose work can be partitioned or horizontally scaled beyond that rather than designs with a fixed single-node, whole-corpus, or in-memory ceiling. A strictly bounded control or configuration dataset may use its proven bound, but the bound must be stated explicitly.
-- Record the relevant workload assumptions and growth math before accepting a performance-sensitive design: cardinality and data distribution, read and write rates, access patterns, latency or throughput targets, query complexity, row and index storage, write amplification, memory and network costs, concurrency, skew or hot keys, backpressure, and maintenance and migration costs. Do not extrapolate results from toy-sized data without evidence that the plan remains valid at the target cardinalities.
-- Keep request-path and recurring-work costs bounded with appropriate techniques such as selective indexes, keyset pagination, bounded fan-out and batches, incremental computation, partition pruning, caching, and backpressure. Avoid full-corpus scans or recomputation, deep offset pagination, N+1 access, unbounded queues, and loading corpus-scale data into one process unless a documented workload analysis proves them safe.
-- Validate risky database work with representative data distributions and `EXPLAIN` or `EXPLAIN ANALYZE`, and benchmark performance-sensitive backend paths when practical. Capacity calculations do not require every local test environment to contain 500,000,000 physical rows, but the evidence must cover the 500,000,000-row baseline and the 3,000,000,000-row estimate.
-- If a design cannot meet the baseline, document the limiting resource, expected failure mode, observable thresholds, and an explicit partitioning, sharding, archival, or cutover path, and obtain maintainer approval before treating the design as complete.
+## Read when relevant
 
-## Frontend verification
+Follow only the owners relevant to the requested change:
 
-- Do not automatically perform AI-assisted browser, screenshot, visual, or design QA after frontend changes. This includes starting a frontend server solely for validation, controlling a browser, capturing or comparing rendered output, and assessing visual fidelity, responsive layout, or rendered interactions. Perform this validation only when the user explicitly requests it in the current task; otherwise, frontend acceptance belongs to the human maintainer.
-- Before handing off a frontend change, run the affected frontend workspace's TypeScript check at minimum. TypeScript errors and equivalent deterministic code-integrity failures are not acceptable. Run narrower non-rendering checks when they directly cover changed logic, but report them only as code-integrity evidence, not as frontend acceptance.
-- Do not remove, disable, or weaken deterministic repository checks or CI to implement this policy. They are code-integrity gates, not AI frontend acceptance.
-
-## Project stack
-
-- The main frontend uses React, Vinext, and Tailwind CSS; consume shared UI through `@rezics/ui`.
-- SharkUI is the canonical UI system. Do not introduce or substitute another UI library.
-- Treat `libraries/ui/src/ui` as the upstream SharkUI mirror; put project-owned shared components in `libraries/ui/src/custom`.
-
-## Localization
-
-- Put every user-visible frontend string in its owner's typed localization resources (`@rezics/i18n` for `apps/web`, and the locale content contract for `apps/about`). This includes visible copy, accessibility labels, placeholders, validation feedback, notifications, empty/loading states, and user-visible metadata; do not write these strings directly in components.
-- Write each locale in natural, locally appropriate language. Do not leave source-language wording in another locale. If a product or domain term has no approved localized wording, ask the maintainer instead of retaining the foreign term or inventing a translation.
-- Treat `zh-Hant` as region-neutral Traditional Chinese, using Taiwan terminology and orthography as the project's house style.
-- Take invariant brands, protocols, formats, and technical identifiers only from [`libraries/i18n/src/verbatim-terms.ts`](./libraries/i18n/src/verbatim-terms.ts). Do not create another allowlist or duplicate their spellings in TypeScript locale resources; keep all other visible wording localized and run the i18n policy check when locale content changes.
-- Take localized product and domain terminology only from the typed termbase under [`libraries/i18n/src/terminology`](./libraries/i18n/src/terminology). Keep complete messages in their owner locale resources, use the termbase's semantic slot that fits the sentence, and do not invent synonyms or duplicate approved forms in TypeScript locale resources. Generated terminology documents are read-only views, not additional sources of truth.
-
-## External content value
-
-- Every user-visible or externally published text unit must serve a named audience need on the surface where it appears. Keep it only when it helps that audience identify or distinguish the subject, answer a real question, complete a task or decision, understand a non-obvious state, consequence, scope, or constraint, or meet a safety, legal, accessibility, rights, provenance, or trust requirement.
-- Omit copy that only restates adjacent labels or visible state, narrates the interface, says that content will appear there, repeats the same fact in different words, or exposes internal data models, storage, implementation, or authoring rationale without a user-visible consequence. Optional content may be absent; do not fill a field merely because it exists.
-- Explanation is allowed when it meets a real need. Put decision-critical detail at the point of action, move optional or specialist detail to progressive disclosure or the appropriate documentation, and keep maintainer rationale in internal documentation.
-- Review copy with its surrounding content and intended audience. If its audience, need, new information, and reason for appearing on that surface cannot be stated, remove or relocate it. Do not use word or sentence-pattern bans as a substitute for this test.
-
-## Frontend architecture
-
-- Treat `apps/web/app` as a framework adapter layer, not an implementation layer. Keep only App Router special files and narrowly scoped adapters that must run at the routing or request boundary there. A route entry may read and validate framework inputs such as `params`, `searchParams`, headers, and cookies; declare metadata or route configuration; invoke framework control flow such as `redirect` or `notFound`; compose required root providers and boundaries; and then delegate immediately to project-owned code.
-- Put page and screen composition, application-shell UI, feature behavior, data access, client state and effects, and reusable components under the owning `apps/web/features/<capability>` module, or under an existing non-`app` infrastructure owner such as `lib` or `i18n`. App Router entries should import, re-export, or pass request-derived values into those owners; do not add ordinary implementation modules under `apps/web/app`.
-- Follow [Web feature organization](./docs/architecture/web-feature-organization.md) when adding, growing, or moving code under `apps/web/features`. Keep cohesive features flat, introduce only the role directories justified by current responsibilities, and migrate existing features when touched rather than through repository-wide path churn. Use `apps/web/features/following` as the reference structure.
-
-## Slug addressing
-
-- Treat Unit IDs as immutable identities and scoped slugs as optional, human-facing addresses. Follow [Unit slug addressing](./docs/architecture/unit-slug-addressing.md) whenever changing Unit references, API resource responses, lookups, frontend routes, canonical URLs, redirects, or short-link mappings.
+| Change | Owner and constraints |
+| --- | --- |
+| Web routes, screens or feature organization | [Web feature organization](docs/architecture/web-feature-organization.md). `apps/web/app` contains framework boundary adapters; implementation belongs to features or existing infrastructure owners. |
+| Shared UI or controls | [UI conventions](libraries/ui/README.md). Use `@rezics/ui` and SharkUI; do not introduce another UI library. Preserve `src/ui` as the upstream mirror; project components belong in `src/custom`. |
+| Visible text or localization | [Localization](libraries/i18n/README.md). Every frontend string belongs to its owner's typed locale resources. For external content, use [external-content-value](.agents/skills/external-content-value/SKILL.md); optional copy must serve an audience need. |
+| Identity, resource responses, URLs or redirects | [Slug addressing](docs/architecture/unit-slug-addressing.md). IDs are immutable identities; scoped slugs are optional addresses. |
+| Schema, queries, APIs, queues, workers, caches or persisted flows | [Capacity planning](docs/architecture/data-integrity-and-workload-budgets.md#capacity-planning) when costs or workload assumptions change; [database conventions](CONTRIBUTING.md#database-and-catalog) for schema and catalog changes. |
+| Permissions or grantability | [Access model](libraries/access/README.md); use the shared vocabulary and server-side enforcement. |
+| Aspire topology, lifecycle or diagnostics | [Aspire skill](.agents/skills/aspire/SKILL.md). Ordinary application edits do not trigger it. |
+| Operational-refactor continuation | [Current handoff](docs/plan/operational-refactor-20260906/NEXT_SESSION.md). Select a gap within the current request; earlier program mandates are historical scope. |

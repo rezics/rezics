@@ -1,36 +1,31 @@
 # Native catalog storage
 
-The latest integrated owner modules and their remaining gaps are indexed in the
-[continuation handoff](../../../../../docs/plan/operational-refactor-20260906/NEXT_SESSION.md).
-Native domain readers and semantic pages export canonical state; `source-export.ts`
-exports checksum-verified archived source evidence. Generic per-field source JSON
-wrappers are no longer a second OLTP copy or evidence of native semantic coverage.
+Use the [current handoff](../../../../../docs/plan/operational-refactor-20260906/NEXT_SESSION.md)
+for integrated delivery evidence and remaining gaps. Work on a gap only within
+the current request; historical autonomous-work authorizations do not expand it.
 
-**Implementation, 2026-09-07:** this is evidence for reviewed slices of an incomplete
-foundation. Autonomous implementation and research-led document corrections are
-authorized; the [remaining design obligations](../../../../../docs/plan/operational-refactor-20260906/00-source-complete-schema.md#design-review-gate)
-still distinguish a delivered slice from complete catalog acceptance.
-The [provider-independent model](../../../../../docs/report/REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model)
-does not select a universal Edition layer. Software participation contexts now have
-provider-free owner-local identities, immutable revisions and a validated current
-head. VNDB edition keys are exact snapshot-local observations; they establish no
-native software version or authority. Source-local keys belong to the source protocol.
-Cross-domain distribution composition and the [binding/subscription/check-job contract](../../../../../docs/report/REZICS-source-integration-and-review-20260906.md#44-generic-source-bindings-and-subscriptions)
-are requirements, not implemented capabilities of this module. The
-[review disposition](../../../../../docs/report/REZICS-source-complete-catalog-schema-20260906.md#43-design-review-disposition)
-also covers definition constraints, exact revision/evidence targets, retained
-reference owners and partition-key/capacity gaps. Historical checks below do not
-qualify those contracts.
+Unit is a logical identity/reference/capability contract. Physical identity and
+lifecycle belong to domain owners, with concrete foreign keys and checked
+reference alternatives. Do not restore a global `unit` parent or replace it
+with a universal entity table. The
+[provider-independent model](../../../../../docs/report/REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model)
+uses source schemas for conformance rather than native ownership; it does not
+select a universal Edition layer.
 
-This module implements the first native storage foundation of the
-[source-complete schema program](../../../../../docs/plan/operational-refactor-20260906/00-source-complete-schema.md).
-It is not the completed four-source model or the global Unit cutover. Public
-routes, shared Access integration, full revision/restore semantics, complete source adapters,
-complete domain/source coverage and replacement of old runtime consumers remain
-outstanding. Under the [breaking replacement baseline](../../../../../docs/plan/operational-refactor-20260906/00-source-complete-schema.md#breaking-replacement-baseline),
-old API/schema/data compatibility is not required. The stopped site's approximately
-400k legacy records belong to separate offline migration software; that work
-does not gate the new schema or removal of obsolete runtime structures.
+Native readers and semantic pages export canonical state; `source-export.ts`
+exports checksum-verified archived source evidence. Generic source JSON is not
+a second OLTP authority or proof of native semantic coverage. Source-local keys
+belong to the source protocol.
+
+The native baseline and old-parent replacement are delivered. Full source
+coverage and production qualification remain separate acceptance tracks.
+Legacy data conversion is an offline program, not a runtime compatibility layer.
+
+## Historical foundation evidence — 2026-09-07
+
+The following slice descriptions, counts, commands and outstanding-work notes
+record that foundation stage. Check the current Taskfile, code and handoff before
+reusing them; they are not the current implementation inventory or authorization.
 
 ## Implemented boundary
 

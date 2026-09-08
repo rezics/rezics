@@ -1,6 +1,10 @@
 # Implementation plans
 
-The active operational refactor is [REZICS operational refactor, 2026-09-06](operational-refactor-20260906/README.md).
+The operational-refactor program is [REZICS operational refactor, 2026-09-06](operational-refactor-20260906/README.md).
+Start with its [current handoff](operational-refactor-20260906/NEXT_SESSION.md) when the
+user requests continuation. Historical approvals and implementation orders apply
+to their recorded work; they do not independently authorize a new task.
+
 It contains a program index and twelve dependency-linked implementation plans, backed by the [research and decision reports](../report/README.md).
 
 Plans describe selected work and acceptance requirements; they do not establish implementation, migration or production readiness. Record completed code and qualification evidence in the owning plan/program ledger when delivered.

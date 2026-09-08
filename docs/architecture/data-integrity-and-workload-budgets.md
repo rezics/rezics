@@ -1,5 +1,48 @@
 # Data integrity and workload budgets
 
+## Capacity planning
+
+Apply this policy when schema, query, index, API, persisted-flow, search,
+recommendation, queue, worker, cache or background-job changes affect workload
+assumptions or resource costs. Reuse an existing analysis only after checking
+that its assumptions and evidence still cover the changed path. A rename or
+documentation-only edit does not require a new capacity report.
+
+Every potentially corpus-scale relation or dataset uses a minimum planning
+baseline of **500,000,000 rows**, plus an estimate at **3,000,000,000 rows**.
+A strictly bounded control/configuration dataset may use its stated, justified
+bound. Account for relation amplification rather than assuming one row per
+catalog object.
+
+Record the relevant assumptions and growth math in the owning design:
+cardinality/distribution, read/write rates, access patterns, latency/throughput
+targets, query complexity, row/index storage, write amplification, memory and
+network costs, concurrency, skew/hot keys, backpressure, and maintenance/migration
+costs. Distinguish measurements from estimates.
+
+Keep request and recurring work bounded using selective indexes, keyset pages,
+bounded fan-out/batches, incremental computation, partition pruning and admission
+control as appropriate. Full-corpus scans/recomputation, deep offsets, N+1
+access, unbounded queues and single-process corpus loading require workload
+evidence establishing safety. Prefer partitionable or horizontally scalable
+designs beyond the planning baseline.
+
+Validate risky queries with representative distributions and EXPLAIN or
+EXPLAIN ANALYZE; benchmark affected backend paths when practical. The local
+fixture need not contain 500 million rows, but the analysis must cover both
+planning scales, including storage, skew and operational costs. Toy timings
+alone are insufficient.
+
+If the baseline cannot be met, record the limiting resource, failure mode,
+observable thresholds and a concrete partitioning, sharding, archival or
+cutover path. Obtain maintainer approval before accepting that limitation as a
+complete design. Unrelated work can continue; an accepted limitation does not
+constitute capacity qualification.
+
+The audit counts and worked examples below describe their recorded scenarios.
+Verify their schema and workload assumptions against the current native target
+before reusing them as evidence.
+
 ## Decision
 
 REZICS optimizes for a high-throughput public forum, not for treating every

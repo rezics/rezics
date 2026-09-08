@@ -19,8 +19,9 @@ dependency, configuration, or infrastructure failure:
 1. Describe or list resources to inspect state, health, and endpoints.
 2. Inspect structured telemetry and resource logs for the failing scope.
 3. Inspect traces when a failure crosses resources.
-4. Export a diagnostic bundle only when requested, after checking that it will not disclose
-   secrets.
+4. Create a local diagnostic bundle only when it adds needed evidence to the
+   authorized investigation. Check secret handling first and store task-created
+   temporary artifacts under `.temp/`; external sharing requires authorization.
 
 Do not poll guessed ports. Wait on the named resource or discover its endpoint through Aspire
 before interacting with it.
@@ -34,3 +35,8 @@ before interacting with it.
 - Stop only the selected AppHost or resource unless the task also requires stopping external
   infrastructure.
 - Treat deployment destroy and teardown as separate, explicitly authorized operations.
+- Check wrapper side effects before invoking them: setup/smoke tasks can start
+  infrastructure or prepare a database. A diagnostic request does not authorize
+  resetting data or rendered frontend QA. Stop polling once the requested state
+  is established; if progress stalls, investigate the failure instead of waiting
+  indefinitely.

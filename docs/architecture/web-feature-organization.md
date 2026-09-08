@@ -6,15 +6,22 @@ Owner: Web
 
 ## Decision
 
+The main frontend uses React, Vinext and Tailwind CSS, with shared controls
+from `@rezics/ui` and the canonical SharkUI system.
+
 Organize Web application code by business capability first. A feature starts
 flat and introduces role directories only when its implementation has distinct
 responsibilities that benefit from separation. Do not apply a complete folder
 template to every feature in advance.
 
-The App Router remains a framework adapter. Route entries under `apps/web/app`
-may validate framework inputs, invoke routing control flow, declare route
-configuration or metadata, and delegate to feature-owned pages. Page
-composition and feature behavior remain under `apps/web/features`.
+The App Router remains a framework adapter. Keep only App Router special files
+and narrowly scoped routing/request adapters under `apps/web/app`. Entries may
+validate params, search params, headers and cookies; invoke routing control flow;
+declare configuration or metadata; compose required root providers and boundaries;
+then delegate to project-owned code. Page composition, feature behavior, data
+access, client state/effects and reusable components belong in
+`apps/web/features` or existing non-`app` infrastructure owners such as `lib`
+and `i18n`. Do not add ordinary implementation modules under `apps/web/app`.
 
 This is a progressive convention. Existing features migrate when they are
 being changed and have reached the structural triggers below. Do not perform a

@@ -1,9 +1,14 @@
-# Current stage — source-complete database schema
+# Source-complete schema target and implementation history
 
-Priority: **the current schema milestone**. Status: **autonomous implementation
-authorized; complete schema acceptance remains open**. The initial scope
-clarification was requested by the maintainer on 2026-09-06.
-This stage takes precedence over the program's earlier broad increment order.
+This document records the target and the 2026-09-06/07 implementation mandate.
+The native baseline and global-parent replacement were subsequently delivered.
+The 2026-09-08 convergence decision stopped expansion for that delivery; use
+[NEXT_SESSION.md](NEXT_SESSION.md) for current evidence and remaining gaps.
+Full source-complete acceptance remains open.
+
+The historical authorizations, sequencing and ledger below retain their original
+scope. They do not authorize new work, baseline regeneration or database resets.
+Continue only the gap selected by the current request.
 
 The 2026-09-07 clarification also makes the following mandatory in this same
 stage: **logical Unit with owner-local physical identities and no live global
@@ -12,7 +17,7 @@ universe/world-setting, franchise and series models.** These gates remain unqual
 
 ## Design-review gate
 
-**Latest maintainer clarification, 2026-09-07:** autonomously organize and advance
+**Historical maintainer clarification, 2026-09-07:** autonomously organize and advance
 implementation with native agents and isolated worktrees. Online research and
 learning inform decisions; update documents when implementation evidence exposes
 a problem. This supersedes the earlier documentation-only pause. Review the

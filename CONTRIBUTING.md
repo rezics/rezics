@@ -1,69 +1,54 @@
 # Contributing
 
-- Inspect existing code before changing it. Make the smallest complete change within the relevant owner boundary; update internal call sites together unless the boundary is a real external contract.
-- Put durable knowledge where it belongs: types, tests, comments, or the commit. Write comments only for irreducible "why."
-- Do not hand-edit generated files or upstream mirrors.
-- Run the nearest relevant checks first, then broader checks affected by the change. Preserve unrelated worktree changes.
-- Maintainer-facing repository language is English. Keep localization content, test fixtures, and native-language names in their target language.
+- Inspect existing code and make the smallest complete change within the affected owner. Update internal consumers together; respect real external contract boundaries and preserve unrelated work.
+- Use the owning Taskfile and existing generators. Do not hand-edit generated files or upstream mirrors.
+- Keep durable knowledge in its owner: types, tests, architecture decisions or the commit. Comments explain non-obvious reasons.
+- Maintainer-facing repository language is English; locale content, fixtures and native-language names retain their target language.
+- Abstractions should capture an invariant, protocol, lifecycle or reusable semantics. Within the affected code, inline wrappers that only rename or forward when equally clear. Framework/public entry points and generated/upstream boundaries are not judged by call count.
+
+## Contracts and verification
+
+- A type or assertion must not claim more than its source or validation proves. Use existing schemas and runtime checks at the narrowest trust boundary.
+- Preserve meaning, missing values and failure states through transformations to their consumers. Same-shaped values need not have the same semantics; do not hide lost guarantees with casts.
+- Run the nearest checks that cover changed contracts, including important rejected states. Start from the [Taskfile](Taskfile.yml); expand testing only for affected dependencies, failures or unresolved risk. Once required checks pass, stop unless new changes invalidate them.
+- Report evidence and limitations for the changed scope. Do not imply whole-system proof from focused checks. Frontend work also follows [the agent verification boundary](AGENTS.md#data-and-verification-boundaries).
 
 ## Versioning
 
-REZICS uses Romantic Versioning (RomVer) in `PROJECT.MAJOR.MINOR` form.
+The first supported compatibility baseline is v1.0.0. Do not restore pre-v1
+routes, formats or compatibility layers. Remove obsolete code only within the
+requested scope.
 
-- Increment `PROJECT` only when REZICS becomes a separate product generation.
-- Increment `MAJOR` for significant or breaking product, public API, or persisted-contract changes.
-- Increment `MINOR` for smaller additions, fixes, and maintenance releases.
+REZICS uses Romantic Versioning: `PROJECT.MAJOR.MINOR`. PROJECT changes for a
+separate product generation; MAJOR for significant or breaking product, public
+API or persisted-contract changes; MINOR for smaller additions and fixes.
+Packages have independent release lines. Breaking releases require an explicit
+migration or cutover plan, not a PROJECT bump.
 
-For example, `1.2.0` is Project 1, Major 2, Minor 0. Independent packages keep
-their own RomVer release lines, so `@rezics/api@1.6.0` is valid independently of
-the platform version. A breaking release must include an explicit migration or
-cutover plan, even though it remains within Project 1.
+Root `vPROJECT.MAJOR.MINOR` tags define the server/database release boundary;
+prefixed product tags do not. Released SQL is append-only: add forward
+migrations after the released history rather than editing, deleting or renaming it.
 
-Root `vMAJOR.MINOR.PATCH` tags are the server and database release boundary.
-Every SQL migration present in the preceding root release is append-only:
-do not edit, delete, or rename it after release. Repair a released database
-contract with a new forward migration whose filename sorts after the released
-history. Prefixed product tags such as `web/v*`, `about/v*`, and `api/v*` do not
-advance the database migration boundary.
+## Database and catalog
 
-The maintainer's 2026-09-08 operational-refactor authorization explicitly replaces
-the entire old migration chain with a fresh native target baseline. Delete the
-old migrations and global `unit` model; their Git history is the recovery/audit
-record. Do not replay obsolete schemas before installing this target or generate
-successive compatibility cutovers. Once the new baseline is released, the
-ordinary append-only rule applies to that new history. Legacy import remains a
-separate offline program.
+- Use the `public` schema, snake_case physical names and lower camel case TypeScript exports. Declare Drizzle `relations` only for actual `database.query` consumers; foreign keys enforce integrity.
+- The current [installation baseline](services/main/src/services/database/baseline.json) records the completed native replacement. Preserve that epoch and its recovery record; historical replacement authorization is not an instruction to regenerate it. Released-history checks enforce immutability.
+- Generate changes with `task services-main:db:generate -- <name>` and qualify them with `task services-main:db:check` on the disposable shadow target. Use the repository replay workflow rather than raw `atlas migrate diff`; see [migration operations](README.md#database-migrations).
+- Unit is a logical identity/reference/capability contract. Domain owners hold physical identity and lifecycle; do not restore a global `unit` parent or substitute a universal entity table. Preserve concrete foreign keys and validated reference alternatives.
+- Follow the [provider-independent catalog model](docs/report/REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model). Source schemas test conformance; they do not dictate native ownership or a universal Edition layer.
+- The completed [native cutover](docs/plan/operational-refactor-20260906/00-source-complete-schema.md#breaking-replacement-baseline) replaced old contracts, including v1+ contracts. Offline legacy import is separate from the runtime. New changes follow the current target and normal release rules.
 
-Generate database migrations with `task services-main:db:generate -- <name>`.
-For the authorized replacement, generate the fresh baseline with
-`task services-main:db:baseline`, then qualify it with `task services-main:db:check`.
-The task replays the versioned directory with production-equivalent file
-transactions into the disposable shadow database, then runs `atlas schema diff`
-against the typed Drizzle exporter. Do not replace this workflow with
-`atlas migrate diff`: released data migrations contain transaction-scoped
-temporary relations that Atlas's migration-directory state reader cannot replay.
+## Exported TypeScript APIs
+
+Use TSDoc on owning exported boundaries. Use `@alpha` for intended public APIs
+not yet released, with audience and product state in `@remarks`; `@beta` only
+for supported previews; `@internal` only for APIs not intended for third parties.
+Tags do not enforce authorization: restricted APIs need typed runtime policy,
+server enforcement and allowed/denied tests.
 
 ## Advisory GitHub checks
 
-The GitHub `Check` workflow is advisory. Its result does not block merging,
-tagging, release dispatch, or production deployment. Failures remain visible
-and should be fixed when practical, but release workflows must never depend on
-the workflow's completion or conclusion. Do not configure `Check` as a required
-status check.
-
-## Existing conventions
-
-- Abstractions must compress meaning, not merely shorten syntax: they should capture invariants, protocols, lifecycles, or genuinely reusable complete semantics. Delete one-use wrappers that only forward, rename, or pass arguments when the inline form is equally clear. Framework entry points, public package entry points, generated code, and upstream mirrors are external-contract boundaries and are not judged by call count; within a boundary, still express intent directly.
-- Follow the [access permission schema](./libraries/access/README.md) when adding or changing authorization keys, implications, or grantability.
-- Use only the `public` database schema. Use `snake_case` for physical table, column, constraint, and index names; use lower camel case for TypeScript exports.
-- For the operational catalog refactor, follow the maintainer-approved [breaking replacement baseline](./docs/plan/operational-refactor-20260906/00-source-complete-schema.md#breaking-replacement-baseline): old APIs (including v1+), schema and persisted formats require no backward compatibility. Rewrite affected consumers and replace obsolete tables directly; do not retain global `unit` dependencies or add compatibility adapters while waiting for data conversion. The stopped site's approximately 400k legacy records are a separate offline migration-software input. Target integrity constraints and deterministic checks remain mandatory; legacy import is not a prerequisite for target DDL or its acceptance.
-- The [catalog refactor target](./docs/report/REZICS-source-complete-catalog-schema-20260906.md#41-logical-unit-and-owner-local-physical-identity) uses Unit as a logical identity/reference/capability contract, with physical identity and lifecycle owned by domain table groups. New target subtypes reference their owner's identity key; there is no mandatory global `unit` parent or replacement universal entity table. Keep concrete database foreign keys and validated target alternatives in the initial single database; semantic classes, API kinds and storage ownership are separate. Verify the new integrated runtime on a fresh target and remove the old parent and all dependent writes. Released migration immutability is an audit requirement, not a requirement to keep old schemas or APIs running.
-- Declare Drizzle `relations` only when a `database.query` relation query needs them. Table-definition foreign keys provide integrity; do not pre-maintain bidirectional relation metadata.
-- Design native catalog abstractions from [provider-independent object semantics](./docs/report/REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model). Source schemas are conformance inputs, not native schema templates. Do not introduce a universal Edition layer or a provider-specific native identity merely to mirror an upstream field. Resolve each slice's [design obligations](./docs/plan/operational-refactor-20260906/00-source-complete-schema.md#design-review-gate) through online research, code and deterministic checks, updating the design when evidence requires it. Independent implementation may proceed while broader program acceptance remains open.
-
-## TSDoc release maturity
-
-- Use TSDoc syntax for exported TypeScript boundaries. Mark an API intended to become public but not yet released with `@alpha`, and explain the current product state and intended audience in `@remarks`.
-- Promote the release tag to `@beta` only after an API is deliberately available as a supported preview or beta. Use `@internal` only for APIs that are not intended for third-party use. No release tag is a synonym for "unfinished."
-- Put the maturity annotation on the owning exported boundary instead of repeating it on every implementation helper.
-- Documentation tags never enforce authorization. Any platform-restricted API must also have a typed runtime policy, server-side enforcement, and tests for allowed and denied callers.
+The GitHub `Check` workflow is advisory, not a merge, tag, release or deployment
+gate. Keep failures visible and fix them when practical. Do not make release
+workflows depend on its conclusion or configure it as a required status check.
+This does not waive the checks required for a change.

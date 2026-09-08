@@ -28,7 +28,7 @@ General product exposition, implementation explanation, and prose that merely so
 
 ## Issue taxonomy
 
-Use one or more of these labels during an audit:
+Use these optional labels when they help explain an audit finding:
 
 - **N — No audience need:** no concrete audience task, question, decision, or obligation supports publication.
 - **R — Redundant:** repeats a label, visible state, nearby sentence, or information already communicated by the structure.
@@ -69,7 +69,8 @@ These labels diagnose the content; they are not phrase-matching rules.
 
 ## Audit record
 
-For a deliberate audit, record enough context to review decisions consistently:
+For a deliberate audit, record enough context to review decisions consistently.
+The following table is optional; use only the columns needed for the requested review:
 
 | Surface | Audience | User need | Original content | New information | Issue | Disposition | Proposed result |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -79,7 +80,10 @@ Do not assign a numeric quality score. A count of words or flagged phrases canno
 ## Review practice
 
 - Review content in the consuming context, including labels, controls, layout hierarchy, and preceding or following messages.
-- Use a second reviewer for broad audits or consequential public content. The reviewer should challenge the stated need, not merely proofread the wording.
+- Consider a second reviewer for broad audits or consequential public content when
+  independent review would resolve a material uncertainty and delegation is available
+  and authorized. It is not a prerequisite for ordinary edits. Review the stated
+  audience need rather than merely proofreading.
 - Treat automated searches for phrases such as `will appear here`, `this page`, `not`, `used to`, or internal type names as inventory aids only.
 - Split cleanup by owning surface so each change can preserve local behavior, terminology, and verification.
 

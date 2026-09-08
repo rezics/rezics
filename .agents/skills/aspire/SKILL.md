@@ -1,52 +1,37 @@
 ---
 name: aspire
-description: Operate, diagnose, or modify an Aspire AppHost or Aspire-managed resources. Use only when the requested work directly involves the Aspire CLI, an AppHost, or Aspire-managed resource lifecycle, topology, deployment, or telemetry. Do not use merely because a repository contains or mentions Aspire, including when reviewing ordinary application code, package or workspace organization, documentation, or reports that require no Aspire-specific action or decision.
+description: Operate or diagnose Aspire-managed resources and edit AppHost topology. Use for Aspire CLI, lifecycle, integration or telemetry work; ordinary application code, repository organization and documentation do not trigger this skill merely by mentioning Aspire.
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Aspire
 
-## Scope gate
+Use the repository's rooted `aspire.config.json` and
+[AppHost tasks](../../../aspire-apphost/Taskfile.yml) to select the authored
+AppHost, pinned tools and lifecycle wrappers. Discover resource names and
+endpoints from the model instead of guessing ports.
 
-Use this skill only when the requested outcome requires an Aspire-specific operation or
-decision. The presence of `aspire.config.json`, an AppHost, generated Aspire files, or an
-Aspire-related passage in background material is not enough.
+## Choose the relevant workflow
 
-If the task is about an application's own code, repository structure, package boundaries,
-documentation, or a general development workflow, use the owner of that work instead.
+- For AppHost authorship or topology review, read
+  [apphost-authoring.md](references/apphost-authoring.md).
+- For runtime failures or resource lifecycle operations, read
+  [lifecycle-diagnostics.md](references/lifecycle-diagnostics.md). Use health,
+  logs and traces to distinguish application failures from orchestration failures.
 
-## Workflow
+## Operating boundaries
 
-1. Find the rooted Aspire configuration and AppHost. Detect its language and project style
-   from configuration and project files rather than from assumptions.
-2. Inspect repository scripts, task runners, and pinned tool versions before choosing raw
-   Aspire CLI commands. Prefer wrappers that prepare required dependencies and environment.
-3. For runtime failures, inspect the resource model, health, endpoints, logs, and telemetry
-   before changing code.
-4. Choose the narrowest operation that matches the task: an AppHost edit, a resource command,
-   a lifecycle action, integration restore, diagnostics, or deployment work.
-5. Change authored AppHost sources and configuration only. Regenerate derived artifacts with
-   Aspire tooling.
-6. Validate with the repository's checks. Restore integrations and run the language's static
-   checks when AppHost packages, generated APIs, or authored topology changed.
-7. Restart only the scope whose model or runtime requires it. Clean up processes when cleanup
-   is part of the task.
+Use non-interactive CLI options and structured output when parsing state.
+Verify unfamiliar CLI options and builder APIs against the pinned tool and
+official docs. Edit authored inputs and regenerate derived SDK files.
 
-Read [references/apphost-authoring.md](references/apphost-authoring.md) before authoring or
-reviewing an AppHost. Read
-[references/lifecycle-diagnostics.md](references/lifecycle-diagnostics.md) before starting,
-stopping, waiting for, or diagnosing resources.
+Preserve repository lifecycle ownership and restart only the affected scope.
+Keep parameter and secret values out of commands, logs and diagnostic artifacts.
+Destructive deployment or teardown requires authorization for the exact target;
+existing authorization within that scope does not need to be requested again.
 
-## Guardrails
-
-- Run agent-driven CLI operations non-interactively and request structured output when parsing
-  state.
-- Discover resource names and endpoints from Aspire instead of guessing names or ports.
-- Search current Aspire documentation before using an unfamiliar CLI option, integration, or
-  builder API.
-- Do not expose parameter or secret values in commands, logs, reports, or diagnostic bundles.
-- Do not replace repository-owned lifecycle, infrastructure, or deployment workflows unless
-  the task explicitly changes them.
-- Do not run destructive deployment or teardown commands without explicit authorization for
-  the exact target.
+Validate the affected contract with the owning static or bounded runtime checks.
+A runtime check must fit the task's authorization and the repository frontend
+verification boundary. Stop when the requested operation is verified or report
+the specific missing evidence; do not repeatedly restart healthy resources.

@@ -1,31 +1,26 @@
 # Canonical PostgreSQL and physical partitions
 
-`manifest.ts` owns canonical functions, static trigger declarations and bounded
-dynamic trigger families. `check-postgres-schema.ts` compares migrated definitions,
-drops every owned trigger in a rollback transaction, reconstructs canonical SQL,
-and compares full definitions and enabled status. This proves that DO-block
-triggers were recreated, including argument lists and deferred leaf constraints.
-Inherited triggers are checked against their parents on every physical child.
+`manifest.ts` owns canonical SQL inputs, static trigger declarations and bounded
+dynamic trigger families. `check-postgres-schema.ts` verifies migrated definitions
+and trigger reconstruction against those inputs.
 
-The `catalog_native_source_event_batch` migration bundle installs native history,
-governance, source and relay contracts. Its `.before-canonical.sql` overlay runs
-after Atlas's parent-table diff and before canonical SQL. Atlas Community omits
-children; this ordering ensures that source leaf constraint triggers have concrete
-tables to attach to. Existing `.post.sql` overlays still run last. Generate through
-`task services-main:db:generate -- catalog_native_source_event_batch`; never edit
-the resulting migration manually.
+The current installation epoch is recorded in [baseline.json](../../baseline.json).
+The native baseline has replaced the old incremental migration chain. Maintain
+authored schema and canonical SQL, then use
+`task services-main:db:generate -- <name>` and
+`task services-main:db:check` for subsequent changes. Preserve released migration
+history and use the explicitly disposable shadow target for qualification.
 
-The bundle's `.pre.sql` overlay drops only the four preexisting source parents
-(record, snapshot, mapping claim, adoption proposal) and seven preexisting native
-source-binding tables. This is a destructive fresh-target replacement, not an
-in-place source-data conversion. `CASCADE` removes inbound foreign keys so the
-typed diff can recreate their target keys; it does not request removal of their
-owning native/support tables. New source UUIDs use deterministic natural-key
-derivation. Existing native support referencing discarded evidence is not assumed
-convertible, and retaining those rows is not promised. The stopped site's legacy
-records remain a separate offline migration input. Generation and verification
-use the explicitly disposable target; this workflow does not authorize operating
-on the ordinary development database. Released SQL remains immutable.
+The former `catalog_native_source_event_batch` bundle and its destructive source
+parent replacement are historical implementation steps. Do not regenerate that
+retired bundle or repeat its drops to maintain the current schema. The original
+cutover decision is retained in the
+[historical baseline record](../../../../../../../docs/plan/operational-refactor-20260906/00-source-complete-schema.md#breaking-replacement-baseline).
+This history does not authorize resetting ordinary development data.
+
+The placement calculations below are workload assumptions to revalidate against
+the typed exporter and current SQL when changing the affected families. They do
+not establish current production capacity.
 
 ## Source placement and capacity assumptions
 
