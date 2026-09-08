@@ -1,28 +1,21 @@
-import {presentImageAsset} from "../api/image-assets/presentation";
 import { and, eq, sql, type SQL } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
-import type { ContentLanguage } from "@rezics/i18n";
+import {
+	FollowableUnitOwnerValues,
+	UnitOwnerValues,
+	type FollowableUnitOwner,
+	type UnitOwner,
+} from "@rezics/reference";
+import type { Authorization } from "../authorization";
+import { readUnitPresentationsInTransaction } from "../units/presentation-reader";
 
 import type { ContributionResourceListQuery } from "../api/history/schema";
-import { database } from "../database";
-import { post, profileResourceParticipation, unit } from "../database/schema";
-import {
-	PostKindValues,
-	UnitKindValues,
-	type FollowableUnitKind,
-	type PostKind,
-	type UnitKind,
-} from "../database/schema/contract-values";
+import { database, type DatabaseTransaction } from "../database";
+import { profileResourceParticipation } from "../database/schema";
 import { listPathMembers, type TagPathMember } from "../tag-paths/service";
-import {
-	resolvedUnitLocalizationImageAssetId,
-	resolvedUnitLocalizationLanguage,
-	resolvedUnitLocalizationTitle,
-} from "../units/localization";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 
 import {
-	resourceSectionFromKinds,
+	resourceSectionFromReference,
 	studioResourceScopeCondition,
 	type ResourceSection,
 } from "../units/resource-section";
@@ -32,16 +25,16 @@ import {
 	type ParticipationCursorBoundary,
 } from "./participation-cursor";
 
-const ParticipationScanBudget = 4_096;
+const ParticipationScanBudget = 256;
 const ParticipationBatchMaximum = 256;
 
 type RawContributionCandidate = {
 	readonly resourceUnitId: string;
 	readonly sortAt: unknown;
 	readonly accepted: boolean;
-	readonly resourceKind: string | null;
-	readonly postKind: string | null;
-	readonly language: ContentLanguage | null;
+	readonly resourceOwner: string | null;
+	readonly shape: string | null;
+	readonly language: string | null;
 	readonly title: string | null;
 	readonly coverAssetId: string | null;
 	readonly status: "draft" | "published" | "archived" | null;
@@ -70,11 +63,12 @@ type ContributionActivity = {
 
 type PresentedContributionCandidate =
 	| (ContributionActivity & {
-			readonly resourceKind: FollowableUnitKind;
+			readonly resourceOwner: FollowableUnitOwner;
+			readonly shape: string;
 			readonly presentation: {
-				readonly kind: "localized_unit";
+				readonly kind: "resource";
 				readonly slugAddress: null;
-				readonly language: ContentLanguage;
+				readonly language: string | null;
 				readonly title: string | null;
 				readonly cover: { readonly id: string; readonly url: string } | null;
 				readonly status: "draft" | "published" | "archived";
@@ -83,7 +77,8 @@ type PresentedContributionCandidate =
 	  })
 	| (ContributionActivity & {
 			readonly section: "tag";
-			readonly resourceKind: "tag_path";
+			readonly resourceOwner: "tag_path";
+			readonly shape: string;
 			readonly presentation: {
 				readonly kind: "tag_path";
 				readonly members: readonly TagPathMember[];
@@ -105,12 +100,11 @@ function countValue(value: number | string): number {
 	return parsed;
 }
 
-function unitKindValue(value: string | null): UnitKind | undefined {
-	return UnitKindValues.find((kind) => kind === value);
+function ownerValue(value: string | null): UnitOwner | undefined {
+	return UnitOwnerValues.find((owner) => owner === value);
 }
-
-function postKindValue(value: string | null): PostKind | undefined {
-	return PostKindValues.find((kind) => kind === value);
+function followable(owner: UnitOwner): owner is FollowableUnitOwner {
+	return FollowableUnitOwnerValues.some((value) => value === owner);
 }
 
 function participationSortColumn(kind: NonNullable<ContributionResourceListQuery["kind"]>): SQL {
@@ -135,13 +129,16 @@ function participationKindCondition(kind: NonNullable<ContributionResourceListQu
 	}
 }
 
-async function selectContributionCandidateBatch(input: {
-	readonly profileId: string;
-	readonly query: ContributionResourceListQuery;
-	readonly includeDevelopmentPreview: boolean;
-	readonly cursor?: ParticipationCursorBoundary;
-	readonly scanLimit: number;
-}): Promise<RawContributionCandidate[]> {
+async function selectContributionCandidateBatch(
+	tx: DatabaseTransaction,
+	input: {
+		readonly profileId: string;
+		readonly query: ContributionResourceListQuery;
+		readonly includeDevelopmentPreview: boolean;
+		readonly cursor?: ParticipationCursorBoundary;
+		readonly scanLimit: number;
+	},
+): Promise<RawContributionCandidate[]> {
 	const kind = input.query.kind ?? "all";
 	const sortAt = participationSortColumn(kind);
 	const cursorCondition = input.cursor
@@ -150,9 +147,17 @@ async function selectContributionCandidateBatch(input: {
 			${input.cursor.resourceUnitId}::uuid
 		)`
 		: sql``;
-	const resource = alias(unit, "contribution_resource");
-	const resourcePost = alias(post, "contribution_post");
-	const localizationLanguages = input.query.localizationLanguages ?? [];
+	const resource = {
+		id: sql`contribution_resource.id`,
+		owner: sql`contribution_resource.owner`,
+		shape: sql`contribution_resource.shape`,
+		status: sql`contribution_resource.status`,
+		visibility: sql`contribution_resource.visibility`,
+		moderationStatus: sql`contribution_resource.moderation_status`,
+		deletedAt: sql`contribution_resource.deleted_at`,
+		createdAt: sql`contribution_resource.created_at`,
+		updatedAt: sql`contribution_resource.updated_at`,
+	};
 	const accepted = and(
 		eq(resource.status, "published"),
 		eq(resource.visibility, "public"),
@@ -160,17 +165,11 @@ async function selectContributionCandidateBatch(input: {
 		sql`${resource.deletedAt} is null`,
 		studioResourceScopeCondition(
 			input.query.section,
-			{
-				id: resource.id,
-				kind: resource.kind,
-				postKind: resourcePost.kind,
-			},
-			{
-				includeDevelopmentPreview: input.includeDevelopmentPreview,
-			},
+			{ owner: resource.owner, shape: resource.shape },
+			{ includeDevelopmentPreview: input.includeDevelopmentPreview },
 		),
-	) as SQL;
-	const result = await database.execute<RawContributionCandidate>(sql`
+	);
+	const result = await tx.execute<RawContributionCandidate>(sql`
 		with scanned as materialized (
 			select
 				participation.resource_unit_id,
@@ -193,11 +192,11 @@ async function selectContributionCandidateBatch(input: {
 			scanned.resource_unit_id as "resourceUnitId",
 			scanned.sort_at as "sortAt",
 			${accepted} as accepted,
-			${resource.kind} as "resourceKind",
-			${resourcePost.kind} as "postKind",
-			${resolvedUnitLocalizationLanguage(resource.id, localizationLanguages)} as language,
-			${resolvedUnitLocalizationTitle(resource.id, localizationLanguages)} as title,
-			${resolvedUnitLocalizationImageAssetId(resource.id, "cover", localizationLanguages)} as "coverAssetId",
+			${resource.owner} as "resourceOwner",
+			${resource.shape} as "shape",
+			null::text as language,
+			null::text as title,
+			null::uuid as "coverAssetId",
 			${resource.status} as status,
 			${resource.visibility} as visibility,
 			scanned.created_resource_at as "createdResourceAt",
@@ -208,8 +207,7 @@ async function selectContributionCandidateBatch(input: {
 			${resource.createdAt} as "createdAt",
 			${resource.updatedAt} as "updatedAt"
 		from scanned
-		left join ${unit} contribution_resource on ${resource.id} = scanned.resource_unit_id
-		left join ${post} contribution_post on ${resourcePost.id} = ${resource.id}
+		left join lateral public.read_unit_state(scanned.resource_unit_id,false) contribution_resource on true
 		order by
 			scanned.sort_at desc nulls last,
 			scanned.resource_unit_id desc nulls last
@@ -220,17 +218,18 @@ async function selectContributionCandidateBatch(input: {
 function presentContributionCandidate(
 	row: RawContributionCandidate,
 ): PresentedContributionCandidate | undefined {
-	const resourceKind = unitKindValue(row.resourceKind);
+	const resourceOwner = ownerValue(row.resourceOwner);
 	if (
 		!row.accepted ||
-		!resourceKind ||
+		!resourceOwner ||
+		!row.shape ||
 		!row.status ||
 		!row.visibility ||
 		row.createdAt === null ||
 		row.updatedAt === null
 	)
 		return undefined;
-	const section = resourceSectionFromKinds(resourceKind, postKindValue(row.postKind) ?? null);
+	const section = resourceSectionFromReference(resourceOwner, row.shape);
 	if (!section) return undefined;
 	const activity = {
 		id: row.resourceUnitId,
@@ -252,25 +251,27 @@ function presentContributionCandidate(
 			resourceUnitId: row.resourceUnitId,
 		},
 	};
-	if (resourceKind === "tag_path") {
+	if (resourceOwner === "tag_path") {
 		if (section !== "tag") return undefined;
 		return {
 			...activity,
 			section,
-			resourceKind,
+			resourceOwner,
+			shape: row.shape,
 			presentation: { kind: "tag_path", members: [] },
 		};
 	}
-	if (!row.language) return undefined;
+	if (!followable(resourceOwner)) return undefined;
 	return {
 		...activity,
-		resourceKind,
+		resourceOwner,
+		shape: row.shape,
 		presentation: {
-			kind: "localized_unit",
+			kind: "resource",
 			slugAddress: null,
 			language: row.language,
 			title: row.title,
-			cover: presentImageAsset(row.coverAssetId, "cover"),
+			cover: null,
 			status: row.status,
 			visibility: row.visibility,
 		},
@@ -278,78 +279,94 @@ function presentContributionCandidate(
 }
 
 export async function listCurrentProfileContributionResources(input: {
-	readonly profileId: string;
+	readonly authorization: Authorization<string>;
 	readonly query: ContributionResourceListQuery;
 	readonly includeDevelopmentPreview: boolean;
 }) {
-	const limit = input.query.limit ?? 30;
-	const initialCursor = decodeParticipationCursor(input.query.cursor, input.query);
-	const items: PresentedContributionCandidate[] = [];
-	let scanCursor = initialCursor;
-	let scanned = 0;
-	let exhausted = false;
-	while (items.length < limit + 1 && scanned < ParticipationScanBudget && !exhausted) {
-		const scanLimit = Math.min(
-			ParticipationBatchMaximum,
-			ParticipationScanBudget - scanned,
-			Math.max(64, (limit + 1 - items.length) * 3),
-		);
-		const rows = await selectContributionCandidateBatch({
-			profileId: input.profileId,
-			query: input.query,
-			includeDevelopmentPreview: input.includeDevelopmentPreview,
-			cursor: scanCursor,
-			scanLimit,
-		});
-		if (!rows.length) {
-			exhausted = true;
-			break;
-		}
-		for (const row of rows) {
-			scanned += 1;
-			scanCursor = {
-				sortAt: dateValue(row.sortAt, "sortAt"),
-				resourceUnitId: row.resourceUnitId,
-			};
-			const item = presentContributionCandidate(row);
-			if (item) items.push(item);
-			if (items.length >= limit + 1 || scanned >= ParticipationScanBudget) break;
-		}
-		exhausted = rows.length < scanLimit;
-	}
+	return database.transaction(
+		async (tx) => {
+			const limit = input.query.limit ?? 30;
+			const initialCursor = decodeParticipationCursor(input.query.cursor, input.query);
+			const items: PresentedContributionCandidate[] = [];
+			let scanCursor = initialCursor;
+			let scanned = 0;
+			let exhausted = false;
+			while (items.length < limit + 1 && scanned < ParticipationScanBudget && !exhausted) {
+				const scanLimit = Math.min(
+					ParticipationBatchMaximum,
+					ParticipationScanBudget - scanned,
+					Math.max(64, (limit + 1 - items.length) * 3),
+				);
+				const rows = await selectContributionCandidateBatch(tx, {
+					profileId: input.authorization.profileId,
+					query: input.query,
+					includeDevelopmentPreview: input.includeDevelopmentPreview,
+					cursor: scanCursor,
+					scanLimit,
+				});
+				if (!rows.length) {
+					exhausted = true;
+					break;
+				}
+				const readable = await input.authorization.unit.readableUnitIdsInTransaction(
+					tx,
+					rows.filter((row) => row.accepted).map((row) => row.resourceUnitId),
+				);
+				for (const row of rows) {
+					scanned += 1;
+					scanCursor = {
+						sortAt: dateValue(row.sortAt, "sortAt"),
+						resourceUnitId: row.resourceUnitId,
+					};
+					const item = readable.has(row.resourceUnitId)
+						? presentContributionCandidate(row)
+						: undefined;
+					if (item) items.push(item);
+					if (items.length >= limit + 1 || scanned >= ParticipationScanBudget) break;
+				}
+				exhausted = rows.length < scanLimit;
+			}
 
-	const page = items.slice(0, limit);
-	const last = page.at(-1);
-	const localizedIds = page.flatMap((item) => (item.resourceKind === "tag_path" ? [] : [item.id]));
-	const pathIds = page.flatMap((item) => (item.resourceKind === "tag_path" ? [item.id] : []));
-	const [slugAddresses, pathMembers] = await Promise.all([
-		getPublicCanonicalUnitSlugAddresses(localizedIds),
-		listPathMembers(pathIds, input.query.localizationLanguages),
-	]);
-	const nextBoundary =
-		items.length > limit
-			? last?.cursorBoundary
-			: !exhausted && scanned >= ParticipationScanBudget
-				? scanCursor
-				: undefined;
-	return {
-		items: page.map(({ cursorBoundary: _cursorBoundary, ...item }) =>
-			item.resourceKind === "tag_path"
-				? {
-						...item,
-						presentation: {
-							...item.presentation,
-							members: pathMembers.get(item.id) ?? [],
-						},
-					}
-				: {
-						...item,
-						presentation: {
-							...item.presentation,
-							slugAddress: slugAddresses.get(item.id) ?? null,
-						},
-					},
-		),
-		nextCursor: nextBoundary ? encodeParticipationCursor(input.query, nextBoundary) : null,
-	};
+			const page = items.slice(0, limit);
+			const last = page.at(-1);
+			const localizedIds = page.flatMap((item) =>
+				item.resourceOwner === "tag_path" ? [] : [item.id],
+			);
+			const pathIds = page.flatMap((item) => (item.resourceOwner === "tag_path" ? [item.id] : []));
+			const [slugAddresses, pathMembers, presentations] = await Promise.all([
+				getPublicCanonicalUnitSlugAddresses(localizedIds),
+				listPathMembers(pathIds, input.query.localizationLanguages),
+				readUnitPresentationsInTransaction(tx, localizedIds, input.query.localizationLanguages),
+			]);
+			const nextBoundary =
+				items.length > limit
+					? last?.cursorBoundary
+					: !exhausted && scanned >= ParticipationScanBudget
+						? scanCursor
+						: undefined;
+			return {
+				items: page.map(({ cursorBoundary: _cursorBoundary, ...item }) =>
+					item.resourceOwner === "tag_path"
+						? {
+								...item,
+								presentation: {
+									...item.presentation,
+									members: pathMembers.get(item.id) ?? [],
+								},
+							}
+						: {
+								...item,
+								presentation: {
+									...item.presentation,
+									slugAddress: slugAddresses.get(item.id) ?? null,
+									title: presentations.get(item.id)?.title ?? null,
+									language: presentations.get(item.id)?.language ?? null,
+								},
+							},
+				),
+				nextCursor: nextBoundary ? encodeParticipationCursor(input.query, nextBoundary) : null,
+			};
+		},
+		{ isolationLevel: "repeatable read" },
+	);
 }

@@ -1,23 +1,21 @@
-import { and, desc, eq, exists, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import type { StaticDecode } from "typebox";
 
 import { DevelopmentPreviewCapability } from "@rezics/access";
+import { publicEntityName } from "../../participation/presentation";
 import { recordAuditEvent } from "../../audit";
 import session, { resolveIdentity } from "../../auth/session";
-import { getUnitReadCondition } from "../../authorization/unit/query";
+import { readUnitPresentationsInTransaction } from "../../units/presentation-reader";
 import { database, type DatabaseExecutor } from "../../database";
 import {
-	entityIdentity,
 	revisionContent,
-	unit,
 	unitRevision,
 	unitRevisionCreditAttribution,
 	unitRevisionHead,
 	unitRevisionSlot,
-	unitRevisionTag,
 } from "../../database/schema";
 import { runVoteTransaction } from "../../database/vote-admission";
 import { createGovernanceDecision } from "../../governance/decision-service";
@@ -42,7 +40,6 @@ import {
 	UnitRevisionChangeTags,
 	unitRevisionDocumentsToComparisonValue,
 } from "../../units/history";
-import { firstUnitLocalizationTitle } from "../../units/localization";
 import { presentStoredRevisionPrimaryContribution } from "../../units/revision-contribution";
 import { toApiErrorResponse, VoteBackpressureResponse } from "../schema/response";
 import {
@@ -113,7 +110,9 @@ const summarySelection = {
 	creditedEntityId: unitRevisionCreditAttribution.creditedEntityId,
 	creditRole: unitRevisionCreditAttribution.role,
 	attributionAssurance: unitRevisionCreditAttribution.assurance,
-	actorName: firstUnitLocalizationTitle(entityIdentity.id),
+	actorName: sql<
+		string | null
+	>`case when exists(select 1 from public.entity_identity entity_actor where entity_actor.id=${unitRevision.actorProfileId} and entity_actor.status='published' and entity_actor.visibility in ('public','unlisted') and entity_actor.moderation_status='approved' and entity_actor.deleted_at is null) then ${publicEntityName(unitRevision.actorProfileId)} else null end`,
 	editSummary: unitRevision.editSummary,
 	minor: unitRevision.minor,
 	byteSize: unitRevision.byteSize,
@@ -140,7 +139,6 @@ function selectSummaries(executor: DatabaseExecutor = database) {
 			eq(unitRevisionCreditAttribution.revisionId, unitRevision.id),
 		)
 		.leftJoin(parentRevision, eq(parentRevision.id, unitRevision.parentRevisionId))
-		.leftJoin(entityIdentity, eq(entityIdentity.id, unitRevision.actorProfileId))
 		.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unitRevision.unitId));
 }
 
@@ -219,17 +217,72 @@ function cursorCondition(cursor: ReturnType<typeof decodeCursor>) {
 		: undefined;
 }
 
-function revisionTagCondition(tag: string | undefined) {
-	return tag
-		? exists(
-				database
-					.select({ id: unitRevisionTag.revisionId })
-					.from(unitRevisionTag)
-					.where(
-						and(eq(unitRevisionTag.revisionId, unitRevision.id), eq(unitRevisionTag.tag, tag)),
+/** Bounded platform revision feed. Native domain histories are served by their exact owner APIs. */
+async function listRevisionFeed(input: {
+	authorization: Awaited<ReturnType<typeof resolveIdentity>>["authorization"];
+	query: StaticDecode<typeof RevisionFeedQuery>;
+	profileId?: string;
+	scope: string;
+}) {
+	const cursor = decodeCursor(input.query.cursor, input.scope),
+		limit = input.query.limit ?? 30;
+	return database.transaction(
+		async (tx) => {
+			const [moderate, suppress] = await Promise.all([
+				input.authorization.platform.hasCapability("platform.moderate", tx),
+				input.authorization.platform.hasCapability("platform.suppress", tx),
+			]);
+			const access = { moderate, suppress };
+			const candidates = await selectSummaries(tx)
+				.where(
+					and(
+						cursorCondition(cursor),
+						input.profileId ? eq(unitRevision.actorProfileId, input.profileId) : undefined,
 					),
-			)
-		: undefined;
+				)
+				.orderBy(desc(unitRevision.createdAt), desc(unitRevision.id))
+				.limit(256);
+			const readable = await input.authorization.unit.readableUnitIdsInTransaction(
+				tx,
+				candidates.map((row) => row.unitId),
+			);
+			const matching = candidates.filter(
+				(row) =>
+					readable.has(row.unitId) &&
+					(input.query.minor === undefined || row.minor === input.query.minor) &&
+					(input.query.tag === undefined || row.tags.includes(input.query.tag)) &&
+					(!input.profileId || !row.actorHidden || (!row.suppressed && moderate) || suppress),
+			);
+			const page = matching.slice(0, limit);
+			const actors = page.flatMap((row) => (row.actorProfileId ? [row.actorProfileId] : []));
+			const readableActors = await input.authorization.unit.readableUnitIdsInTransaction(
+				tx,
+				actors,
+			);
+			const labels = await readUnitPresentationsInTransaction(tx, [...readableActors]);
+			const last =
+				matching.length > limit
+					? page.at(-1)
+					: candidates.length === 256
+						? candidates.at(-1)
+						: undefined;
+			return {
+				items: page.map((row) =>
+					presentSummary(
+						{
+							...row,
+							actorName: row.actorProfileId
+								? (labels.get(row.actorProfileId)?.title ?? null)
+								: null,
+						},
+						access,
+					),
+				),
+				nextCursor: last ? encodeCursor(input.scope, last.createdAt, last.id) : null,
+			};
+		},
+		{ isolationLevel: "repeatable read" },
+	);
 }
 
 export default new Elysia({ prefix: "/history" })
@@ -250,7 +303,7 @@ export default new Elysia({ prefix: "/history" })
 				tags: ["History"],
 			},
 		},
-		async ({ authorization, entity, query }) => {
+		async ({ authorization, query }) => {
 			let includeDevelopmentPreview = false;
 			if (query.section === "zone") {
 				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
@@ -261,7 +314,7 @@ export default new Elysia({ prefix: "/history" })
 				);
 			}
 			return listCurrentProfileContributionResources({
-				profileId: entity.id,
+				authorization,
 				query,
 				includeDevelopmentPreview,
 			});
@@ -590,33 +643,15 @@ export default new Elysia({ prefix: "/history" })
 				[StatusCodes.OK]: UnitHistoryResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidHistoryCursor"]),
 			},
-			detail: { summary: "List recent changes", tags: ["History"] },
+			detail: { summary: "List recent platform resource revisions", tags: ["History"] },
 		},
 		async ({ query, request }) => {
-			const { entity, authorization } = await resolveIdentity(request, "unit:read");
-			const access = await getVisibilityAccess(authorization);
-			const scope = `recent:${query.tag ?? ""}:${query.minor ?? ""}`;
-			const cursor = decodeCursor(query.cursor, scope);
-			const limit = query.limit ?? 30;
-			const rows = await selectSummaries()
-				.innerJoin(unit, eq(unit.id, unitRevision.unitId))
-				.where(
-					and(
-						getUnitReadCondition(entity?.id),
-						cursorCondition(cursor),
-						query.minor === undefined ? undefined : eq(unitRevision.minor, query.minor),
-						revisionTagCondition(query.tag),
-					),
-				)
-				.orderBy(desc(unitRevision.createdAt), desc(unitRevision.id))
-				.limit(limit + 1);
-			const items = rows.slice(0, limit);
-			const last = items.at(-1);
-			return {
-				items: items.map((row) => presentSummary(row, access)),
-				nextCursor:
-					rows.length > limit && last ? encodeCursor(scope, last.createdAt, last.id) : null,
-			};
+			const { authorization } = await resolveIdentity(request, "unit:read");
+			return listRevisionFeed({
+				authorization,
+				query,
+				scope: `recent:${query.tag ?? ""}:${query.minor ?? ""}`,
+			});
 		},
 	)
 	.get(
@@ -628,39 +663,16 @@ export default new Elysia({ prefix: "/history" })
 				[StatusCodes.OK]: UnitHistoryResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidHistoryCursor"]),
 			},
-			detail: { summary: "List profile contributions", tags: ["History"] },
+			detail: { summary: "List platform resource revisions by contributor", tags: ["History"] },
 		},
 		async ({ params, query, request }) => {
-			const { entity, authorization } = await resolveIdentity(request, "unit:read");
-			const access = await getVisibilityAccess(authorization);
-			const scope = `contributions:${params.profileId}:${query.tag ?? ""}:${query.minor ?? ""}`;
-			const cursor = decodeCursor(query.cursor, scope);
-			const limit = query.limit ?? 30;
-			const rows = await selectSummaries()
-				.innerJoin(unit, eq(unit.id, unitRevision.unitId))
-				.where(
-					and(
-						eq(unitRevision.actorProfileId, params.profileId),
-						getUnitReadCondition(entity?.id),
-						cursorCondition(cursor),
-						query.minor === undefined ? undefined : eq(unitRevision.minor, query.minor),
-						revisionTagCondition(query.tag),
-						or(
-							eq(unitRevision.actorHidden, false),
-							and(eq(unitRevision.suppressed, false), sql`${access.moderate}`),
-							sql`${access.suppress}`,
-						),
-					),
-				)
-				.orderBy(desc(unitRevision.createdAt), desc(unitRevision.id))
-				.limit(limit + 1);
-			const items = rows.slice(0, limit);
-			const last = items.at(-1);
-			return {
-				items: items.map((row) => presentSummary(row, access)),
-				nextCursor:
-					rows.length > limit && last ? encodeCursor(scope, last.createdAt, last.id) : null,
-			};
+			const { authorization } = await resolveIdentity(request, "unit:read");
+			return listRevisionFeed({
+				authorization,
+				query,
+				profileId: params.profileId,
+				scope: `contributions:${params.profileId}:${query.tag ?? ""}:${query.minor ?? ""}`,
+			});
 		},
 	)
 	.get(

@@ -1,3 +1,4 @@
+import { FollowableUnitOwnerValues } from "@rezics/reference";
 import type { StaticDecode } from "typebox";
 import { t } from "elysia";
 import { ResourceVisibilityValues, UnitStatusValues } from "../../database/schema/contract-values";
@@ -6,9 +7,8 @@ import { RevisionHiddenFieldValues } from "../../history/visibility";
 import { UnitRevisionChangeTags } from "../../units/history";
 import { ResourceSectionValues } from "../../units/resource-section";
 import {
-	ContentLanguage,
+	ContentLanguageTag,
 	DateTime,
-	FollowableUnitKind,
 	LocalizationLanguageQuery,
 	RevisionContext,
 	RevisionPrimaryContribution,
@@ -75,11 +75,12 @@ export const ContributionResourceListResponse = t.Object({
 		t.Union([
 			t.Object({
 				...ContributionResourceActivity,
-				resourceKind: FollowableUnitKind,
+				resourceOwner: t.UnionEnum(FollowableUnitOwnerValues),
+				shape: t.String({ minLength: 1 }),
 				presentation: t.Object({
-					kind: t.Literal("localized_unit"),
+					kind: t.Literal("resource"),
 					slugAddress: NullablePublicSlugAddressResponse,
-					language: ContentLanguage,
+					language: t.Nullable(ContentLanguageTag),
 					title: t.Nullable(t.String()),
 					cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
 					status: t.UnionEnum(UnitStatusValues),
@@ -89,7 +90,8 @@ export const ContributionResourceListResponse = t.Object({
 			t.Object({
 				...ContributionResourceActivity,
 				section: t.Literal("tag"),
-				resourceKind: t.Literal("tag_path"),
+				resourceOwner: t.Literal("tag_path"),
+				shape: t.String({ minLength: 1 }),
 				presentation: t.Object({
 					kind: t.Literal("tag_path"),
 					members: t.Array(TagPathMemberResponse, {
@@ -194,7 +196,7 @@ export const RevisionSlotResponse = t.Union([
 	}),
 	t.Object({
 		role: t.Literal("localization"),
-		language: ContentLanguage,
+		language: t.Nullable(ContentLanguageTag),
 		...RevisionSlotContentResponse,
 	}),
 ]);
