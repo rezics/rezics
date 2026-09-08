@@ -1,15 +1,8 @@
-import { and, eq, exists, inArray, or, sql, type SQL } from "drizzle-orm";
-import type { AnyPgColumn } from "drizzle-orm/pg-core";
-
-import { database } from "../database";
-import { post } from "../database/schema";
-import type { PostKind, UnitKind } from "../database/schema/contract-values";
+import { and, eq, inArray, or, sql, type SQL, type SQLWrapper } from "drizzle-orm";
+import { CatalogOwnerValues, type UnitOwner } from "@rezics/reference";
 
 export const ResourceSectionValues = [
-	"book",
-	"software",
-	"media",
-	"entity",
+	...CatalogOwnerValues,
 	"tag",
 	"realm",
 	"zone",
@@ -20,112 +13,53 @@ export const ResourceSectionValues = [
 	"poll",
 ] as const;
 export type ResourceSection = (typeof ResourceSectionValues)[number];
-
-type SectionTarget = { readonly id: AnyPgColumn; readonly kind: AnyPgColumn };
-type StudioScopeTarget = SectionTarget & { readonly postKind?: AnyPgColumn };
-
-const DirectStudioUnitKinds = [
-	"book",
-	"software",
-	"media",
-	"entity",
+type SectionTarget = { readonly owner: SQLWrapper; readonly shape: SQLWrapper };
+const DirectStudioOwners = [
+	...CatalogOwnerValues,
 	"tag",
 	"tag_path",
 	"realm",
 	"zone",
 	"collection",
 	"poll",
-] as const satisfies readonly UnitKind[];
+] as const satisfies readonly UnitOwner[];
+const StudioPostShapes = ["post", "wiki", "review"] as const;
 
-const StudioPostKinds = ["post", "wiki", "review"] as const satisfies readonly PostKind[];
-
-/** Resolves the canonical Studio section after persisted discriminators are validated. */
-export function resourceSectionFromKinds(
-	unitKind: UnitKind,
-	postKind: PostKind | null,
+/** Resolves the product section from the actual concrete owner and native shape. */
+export function resourceSectionFromReference(
+	owner: UnitOwner,
+	shape: string | null,
 ): ResourceSection | undefined {
-	switch (unitKind) {
-		case "book":
-		case "software":
-		case "media":
-		case "entity":
-		case "realm":
-		case "zone":
-		case "collection":
-		case "poll":
-			return unitKind;
-		case "tag":
-		case "tag_path":
-			return "tag";
-		case "post":
-			return StudioPostKinds.find((kind) => kind === postKind);
-		default:
-			return undefined;
-	}
+	if (owner === "post") return StudioPostShapes.find((item) => item === shape);
+	if (owner === "tag_path") return "tag";
+	return ResourceSectionValues.find((section) => section === owner);
 }
 
-/** Maps a product resource section to its canonical Unit discriminator. */
+/** Product sections never manufacture a legacy physical subtype. */
 export function resourceSectionCondition(section: ResourceSection, target: SectionTarget): SQL {
-	switch (section) {
-		case "post":
-		case "review":
-		case "wiki":
-			return and(
-				eq(target.kind, "post"),
-				exists(
-					database
-						.select({ id: post.id })
-						.from(post)
-						.where(and(eq(post.id, target.id), eq(post.kind, section))),
-				),
-			) as SQL;
-		case "book":
-		case "software":
-		case "media":
-		case "entity":
-		case "realm":
-		case "zone":
-		case "collection":
-		case "poll":
-			return eq(target.kind, section);
-		case "tag":
-			return inArray(target.kind, ["tag", "tag_path"]);
-		default:
-			section satisfies never;
-			return sql`false`;
-	}
+	if (section === "post" || section === "wiki" || section === "review")
+		return sql`${target.owner} = 'post' and ${target.shape} = ${section}`;
+	if (section === "tag") return inArray(target.owner, ["tag", "tag_path"]);
+	return eq(target.owner, section);
 }
 
-/**
- * Bounds aggregate Studio reads to supported resources and hides preview-only Zones by default.
- */
+/** Callers apply this predicate to a bounded source candidate page. */
 export function studioResourceScopeCondition(
 	section: ResourceSection | undefined,
-	target: StudioScopeTarget,
+	target: SectionTarget,
 	options: { readonly includeDevelopmentPreview: boolean },
 ): SQL {
-	if (section) {
-		if (target.postKind && (section === "post" || section === "review" || section === "wiki"))
-			return and(eq(target.kind, "post"), eq(target.postKind, section)) as SQL;
+	if (section)
 		return section === "zone" && !options.includeDevelopmentPreview
 			? sql`false`
 			: resourceSectionCondition(section, target);
-	}
-	const directKinds = options.includeDevelopmentPreview
-		? DirectStudioUnitKinds
-		: DirectStudioUnitKinds.filter((kind) => kind !== "zone");
-	return or(
-		inArray(target.kind, directKinds),
-		and(
-			eq(target.kind, "post"),
-			target.postKind
-				? inArray(target.postKind, StudioPostKinds)
-				: exists(
-						database
-							.select({ id: post.id })
-							.from(post)
-							.where(and(eq(post.id, target.id), inArray(post.kind, StudioPostKinds))),
-					),
-		),
-	) as SQL;
+	const owners = options.includeDevelopmentPreview
+		? DirectStudioOwners
+		: DirectStudioOwners.filter((owner) => owner !== "zone");
+	return (
+		or(
+			inArray(target.owner, owners),
+			and(eq(target.owner, "post"), inArray(target.shape, StudioPostShapes)),
+		) ?? sql`false`
+	);
 }

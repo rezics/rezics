@@ -34,6 +34,29 @@ export type CatalogOwner = (typeof CatalogOwnerValues)[number];
 export type PlatformOwner = (typeof PlatformOwnerValues)[number];
 export type UnitOwner = (typeof UnitOwnerValues)[number];
 
+/** Owners eligible for public Following; Tag Path uses its dedicated curation contract. @alpha */
+export type FollowableUnitOwner = Exclude<UnitOwner, "tag_path">;
+export type NonRealmFollowableUnitOwner = Exclude<FollowableUnitOwner, "realm">;
+function followableUnitOwners(): readonly [FollowableUnitOwner, ...FollowableUnitOwner[]] {
+	const [first, ...rest] = UnitOwnerValues.filter(
+		(owner): owner is FollowableUnitOwner => owner !== "tag_path",
+	);
+	if (!first) throw new Error("Unit owners require a followable owner");
+	return [first, ...rest];
+}
+export const FollowableUnitOwnerValues = followableUnitOwners();
+function nonRealmFollowableUnitOwners(): readonly [
+	NonRealmFollowableUnitOwner,
+	...NonRealmFollowableUnitOwner[],
+] {
+	const [first, ...rest] = FollowableUnitOwnerValues.filter(
+		(owner): owner is NonRealmFollowableUnitOwner => owner !== "realm",
+	);
+	if (!first) throw new Error("Following requires a non-Realm owner");
+	return [first, ...rest];
+}
+export const NonRealmFollowableUnitOwnerValues = nonRealmFollowableUnitOwners();
+
 /**
  * Serialized logical Unit reference.
  * @alpha
