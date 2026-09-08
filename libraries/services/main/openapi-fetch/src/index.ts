@@ -1,6 +1,6 @@
 import { client } from "./generated/.kubb/client";
 
-client.setConfig({ credentials: "include" });
+client.setConfig({ options: { credentials: "include" } });
 
 export * from "./generated/.kubb/client";
 export * from "./generated/client";

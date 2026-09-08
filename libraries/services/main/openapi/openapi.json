@@ -5216,6 +5216,9 @@
 					"ParticipationDenied",
 					"FavoriteNotFound",
 					"FavoriteRevisionConflict",
+					"OrganizationMembershipConflict",
+					"OrganizationMembershipNotFound",
+					"OrganizationMembershipCapacityExceeded",
 					"MalformedRequestBody",
 					"ValidationError",
 					"InternalError",
@@ -57608,9 +57611,1129 @@
 				"x-rezics-quota-cost-units": 1
 			}
 		},
-		"/api/v1/participation/organizations": {
+		"/api/v1/participation/membership/organizations/{organizationEntityId}/members": {
 			"get": {
-				"operationId": "listManagedOrganizations",
+				"operationId": "listManagedOrganizationMembers",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "organizationEntityId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "afterId",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"items": {
+											"maxItems": 100,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"organizationEntityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"organizationName": {
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"memberEntityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"memberName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+													"revision": {
+														"type": "integer",
+														"exclusiveMinimum": 0,
+														"maximum": 9007199254740991
+													},
+													"joinedAt": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+													},
+													"removedAt": {
+														"anyOf": [
+															{
+																"type": "string",
+																"format": "date-time",
+																"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+															},
+															{ "type": "null" }
+														]
+													}
+												},
+												"required": [
+													"organizationEntityId",
+													"organizationName",
+													"memberEntityId",
+													"memberName",
+													"revision",
+													"joinedAt",
+													"removedAt"
+												],
+												"additionalProperties": false
+											}
+										},
+										"nextCursor": {
+											"anyOf": [
+												{
+													"type": "string",
+													"format": "uuid",
+													"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+												},
+												{ "type": "null" }
+											]
+										}
+									},
+									"required": ["items", "nextCursor"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": ["ParticipationDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipNotFound",
+													"enum": ["OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipConflict",
+													"enum": [
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiParticipationMembershipOrganizationsByOrganizationEntityIdMembers",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/organizations/{organizationEntityId}/invitations": {
+			"get": {
+				"operationId": "listManagedOrganizationInvitations",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "organizationEntityId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "afterId",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"items": {
+											"maxItems": 100,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"organizationEntityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"organizationName": {
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"recipientEntityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"recipientName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+													"state": {
+														"type": "string",
+														"enum": [
+															"pending",
+															"accepted",
+															"declined",
+															"cancelled",
+															"expired",
+															"invalidated"
+														]
+													},
+													"revision": {
+														"type": "integer",
+														"exclusiveMinimum": 0,
+														"maximum": 9007199254740991
+													},
+													"expiresAt": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+													},
+													"createdAt": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+													},
+													"resolvedAt": {
+														"anyOf": [
+															{
+																"type": "string",
+																"format": "date-time",
+																"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+															},
+															{ "type": "null" }
+														]
+													}
+												},
+												"required": [
+													"id",
+													"organizationEntityId",
+													"organizationName",
+													"recipientEntityId",
+													"recipientName",
+													"state",
+													"revision",
+													"expiresAt",
+													"createdAt",
+													"resolvedAt"
+												],
+												"additionalProperties": false
+											}
+										},
+										"nextCursor": {
+											"anyOf": [
+												{
+													"type": "string",
+													"format": "uuid",
+													"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+												},
+												{ "type": "null" }
+											]
+										}
+									},
+									"required": ["items", "nextCursor"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": ["ParticipationDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipNotFound",
+													"enum": ["OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipConflict",
+													"enum": [
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiParticipationMembershipOrganizationsByOrganizationEntityIdInvitations",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			},
+			"post": {
+				"operationId": "inviteOrganizationMember",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "organizationEntityId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"recipientEntityId": {
+										"type": "string",
+										"format": "uuid",
+										"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+									},
+									"expiresAt": {
+										"type": "string",
+										"format": "date-time",
+										"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+									}
+								},
+								"required": ["recipientEntityId"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"organizationEntityId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"organizationName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+										"recipientEntityId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"recipientName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+										"state": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"accepted",
+												"declined",
+												"cancelled",
+												"expired",
+												"invalidated"
+											]
+										},
+										"revision": {
+											"type": "integer",
+											"exclusiveMinimum": 0,
+											"maximum": 9007199254740991
+										},
+										"expiresAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+										},
+										"createdAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+										},
+										"resolvedAt": {
+											"anyOf": [
+												{
+													"type": "string",
+													"format": "date-time",
+													"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+												},
+												{ "type": "null" }
+											]
+										}
+									},
+									"required": [
+										"id",
+										"organizationEntityId",
+										"organizationName",
+										"recipientEntityId",
+										"recipientName",
+										"state",
+										"revision",
+										"expiresAt",
+										"createdAt",
+										"resolvedAt"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": ["ParticipationDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipNotFound",
+													"enum": ["OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipConflict",
+													"enum": [
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipOrganizationsByOrganizationEntityIdInvitations",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/organizations/{organizationEntityId}/invitations/{invitationId}/cancel": {
+			"post": {
+				"operationId": "cancelOrganizationMembershipInvitation",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "organizationEntityId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "invitationId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"expectedRevision": {
+										"type": "integer",
+										"exclusiveMinimum": 0,
+										"maximum": 9007199254740990
+									}
+								},
+								"required": ["expectedRevision"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"organizationEntityId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"organizationName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+										"recipientEntityId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"recipientName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+										"state": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"accepted",
+												"declined",
+												"cancelled",
+												"expired",
+												"invalidated"
+											]
+										},
+										"revision": {
+											"type": "integer",
+											"exclusiveMinimum": 0,
+											"maximum": 9007199254740991
+										},
+										"expiresAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+										},
+										"createdAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+										},
+										"resolvedAt": {
+											"anyOf": [
+												{
+													"type": "string",
+													"format": "date-time",
+													"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+												},
+												{ "type": "null" }
+											]
+										}
+									},
+									"required": [
+										"id",
+										"organizationEntityId",
+										"organizationName",
+										"recipientEntityId",
+										"recipientName",
+										"state",
+										"revision",
+										"expiresAt",
+										"createdAt",
+										"resolvedAt"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": ["ParticipationDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipNotFound",
+													"enum": ["OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipConflict",
+													"enum": [
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipOrganizationsByOrganizationEntityIdInvitationsByInvitationIdCancel",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/organizations/{organizationEntityId}/members/{memberEntityId}/remove": {
+			"post": {
+				"operationId": "removeOrganizationMember",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "organizationEntityId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "memberEntityId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"expectedRevision": {
+										"type": "integer",
+										"exclusiveMinimum": 0,
+										"maximum": 9007199254740990
+									}
+								},
+								"required": ["expectedRevision"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"organizationEntityId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"organizationName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+										"memberEntityId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"memberName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+										"revision": {
+											"type": "integer",
+											"exclusiveMinimum": 0,
+											"maximum": 9007199254740991
+										},
+										"joinedAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+										},
+										"removedAt": {
+											"anyOf": [
+												{
+													"type": "string",
+													"format": "date-time",
+													"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+												},
+												{ "type": "null" }
+											]
+										}
+									},
+									"required": [
+										"organizationEntityId",
+										"organizationName",
+										"memberEntityId",
+										"memberName",
+										"revision",
+										"joinedAt",
+										"removedAt"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": ["ParticipationDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipNotFound",
+													"enum": ["OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipConflict",
+													"enum": [
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipOrganizationsByOrganizationEntityIdMembersByMemberEntityIdRemove",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/me/invitations": {
+			"get": {
+				"operationId": "listOwnOrganizationMembershipInvitations",
 				"tags": ["Participation"],
 				"security": [{ "SessionCookie": [] }],
 				"parameters": [
@@ -57635,6 +58758,1092 @@
 									"type": "object",
 									"properties": {
 										"items": {
+											"maxItems": 100,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"organizationEntityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"organizationName": {
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"recipientEntityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"recipientName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+													"state": {
+														"type": "string",
+														"enum": [
+															"pending",
+															"accepted",
+															"declined",
+															"cancelled",
+															"expired",
+															"invalidated"
+														]
+													},
+													"revision": {
+														"type": "integer",
+														"exclusiveMinimum": 0,
+														"maximum": 9007199254740991
+													},
+													"expiresAt": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+													},
+													"createdAt": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+													},
+													"resolvedAt": {
+														"anyOf": [
+															{
+																"type": "string",
+																"format": "date-time",
+																"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+															},
+															{ "type": "null" }
+														]
+													}
+												},
+												"required": [
+													"id",
+													"organizationEntityId",
+													"organizationName",
+													"recipientEntityId",
+													"recipientName",
+													"state",
+													"revision",
+													"expiresAt",
+													"createdAt",
+													"resolvedAt"
+												],
+												"additionalProperties": false
+											}
+										},
+										"nextCursor": {
+											"anyOf": [
+												{
+													"type": "string",
+													"format": "uuid",
+													"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+												},
+												{ "type": "null" }
+											]
+										}
+									},
+									"required": ["items", "nextCursor"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": ["ParticipationDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipNotFound",
+													"enum": ["OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipConflict",
+													"enum": [
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiParticipationMembershipMeInvitations",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/me/organizations": {
+			"get": {
+				"operationId": "listOwnOrganizationMemberships",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "afterId",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"items": {
+											"maxItems": 100,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"organizationEntityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"organizationName": {
+														"anyOf": [{ "type": "string" }, { "type": "null" }]
+													},
+													"memberEntityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"memberName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+													"revision": {
+														"type": "integer",
+														"exclusiveMinimum": 0,
+														"maximum": 9007199254740991
+													},
+													"joinedAt": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+													},
+													"removedAt": {
+														"anyOf": [
+															{
+																"type": "string",
+																"format": "date-time",
+																"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+															},
+															{ "type": "null" }
+														]
+													}
+												},
+												"required": [
+													"organizationEntityId",
+													"organizationName",
+													"memberEntityId",
+													"memberName",
+													"revision",
+													"joinedAt",
+													"removedAt"
+												],
+												"additionalProperties": false
+											}
+										},
+										"nextCursor": {
+											"anyOf": [
+												{
+													"type": "string",
+													"format": "uuid",
+													"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+												},
+												{ "type": "null" }
+											]
+										}
+									},
+									"required": ["items", "nextCursor"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": ["ParticipationDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipNotFound",
+													"enum": ["OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipConflict",
+													"enum": [
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiParticipationMembershipMeOrganizations",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/invitations/{invitationId}/accept": {
+			"post": {
+				"operationId": "acceptOrganizationMembershipInvitation",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "invitationId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"expectedRevision": {
+										"type": "integer",
+										"exclusiveMinimum": 0,
+										"maximum": 9007199254740990
+									}
+								},
+								"required": ["expectedRevision"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"organizationEntityId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"organizationName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+										"recipientEntityId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"recipientName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+										"state": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"accepted",
+												"declined",
+												"cancelled",
+												"expired",
+												"invalidated"
+											]
+										},
+										"revision": {
+											"type": "integer",
+											"exclusiveMinimum": 0,
+											"maximum": 9007199254740991
+										},
+										"expiresAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+										},
+										"createdAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+										},
+										"resolvedAt": {
+											"anyOf": [
+												{
+													"type": "string",
+													"format": "date-time",
+													"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+												},
+												{ "type": "null" }
+											]
+										}
+									},
+									"required": [
+										"id",
+										"organizationEntityId",
+										"organizationName",
+										"recipientEntityId",
+										"recipientName",
+										"state",
+										"revision",
+										"expiresAt",
+										"createdAt",
+										"resolvedAt"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": ["ParticipationDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipNotFound",
+													"enum": ["OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipConflict",
+													"enum": [
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipInvitationsByInvitationIdAccept",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/invitations/{invitationId}/decline": {
+			"post": {
+				"operationId": "declineOrganizationMembershipInvitation",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "invitationId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"expectedRevision": {
+										"type": "integer",
+										"exclusiveMinimum": 0,
+										"maximum": 9007199254740990
+									}
+								},
+								"required": ["expectedRevision"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"organizationEntityId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"organizationName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+										"recipientEntityId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"recipientName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+										"state": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"accepted",
+												"declined",
+												"cancelled",
+												"expired",
+												"invalidated"
+											]
+										},
+										"revision": {
+											"type": "integer",
+											"exclusiveMinimum": 0,
+											"maximum": 9007199254740991
+										},
+										"expiresAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+										},
+										"createdAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+										},
+										"resolvedAt": {
+											"anyOf": [
+												{
+													"type": "string",
+													"format": "date-time",
+													"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+												},
+												{ "type": "null" }
+											]
+										}
+									},
+									"required": [
+										"id",
+										"organizationEntityId",
+										"organizationName",
+										"recipientEntityId",
+										"recipientName",
+										"state",
+										"revision",
+										"expiresAt",
+										"createdAt",
+										"resolvedAt"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": ["ParticipationDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipNotFound",
+													"enum": ["OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipConflict",
+													"enum": [
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipInvitationsByInvitationIdDecline",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/membership/me/organizations/{organizationEntityId}/leave": {
+			"post": {
+				"operationId": "leaveOrganizationMembership",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "organizationEntityId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$schema": "https://json-schema.org/draft/2020-12/schema",
+								"type": "object",
+								"properties": {
+									"expectedRevision": {
+										"type": "integer",
+										"exclusiveMinimum": 0,
+										"maximum": 9007199254740990
+									}
+								},
+								"required": ["expectedRevision"],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"organizationEntityId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"organizationName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+										"memberEntityId": {
+											"type": "string",
+											"format": "uuid",
+											"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+										},
+										"memberName": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+										"revision": {
+											"type": "integer",
+											"exclusiveMinimum": 0,
+											"maximum": 9007199254740991
+										},
+										"joinedAt": {
+											"type": "string",
+											"format": "date-time",
+											"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+										},
+										"removedAt": {
+											"anyOf": [
+												{
+													"type": "string",
+													"format": "date-time",
+													"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+												},
+												{ "type": "null" }
+											]
+										}
+									},
+									"required": [
+										"organizationEntityId",
+										"organizationName",
+										"memberEntityId",
+										"memberName",
+										"revision",
+										"joinedAt",
+										"removedAt"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Request body could not be parsed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/MalformedRequestBody" }
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": ["ParticipationDenied"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipNotFound",
+													"enum": ["OrganizationMembershipNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "OrganizationMembershipConflict",
+													"enum": [
+														"OrganizationMembershipConflict",
+														"OrganizationMembershipCapacityExceeded"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "postApiParticipationMembershipMeOrganizationsByOrganizationEntityIdLeave",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/organizations": {
+			"get": {
+				"operationId": "listManagedOrganizations",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "afterId",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "capability",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": ["entity.publish", "entity.membership", "entity.security"]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"items": {
 											"type": "array",
 											"items": {
 												"type": "object",
@@ -57644,6 +59853,7 @@
 														"format": "uuid",
 														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
 													},
+													"name": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 													"grantId": {
 														"type": "string",
 														"format": "uuid",
@@ -57655,7 +59865,7 @@
 														"maximum": 9007199254740991
 													}
 												},
-												"required": ["entityId", "grantId", "revision"],
+												"required": ["entityId", "name", "grantId", "revision"],
 												"additionalProperties": false
 											}
 										},
@@ -58711,6 +60921,233 @@
 					}
 				},
 				"x-rezics-quota-route-operation-id": "postApiParticipationGrants",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			}
+		},
+		"/api/v1/participation/entities/{id}/grants": {
+			"get": {
+				"operationId": "listManagedEntityGrants",
+				"tags": ["Participation"],
+				"security": [{ "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					},
+					{
+						"name": "afterId",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"revision": {
+														"type": "integer",
+														"exclusiveMinimum": 0,
+														"maximum": 9007199254740991
+													},
+													"actingEntityId": {
+														"type": "string",
+														"format": "uuid",
+														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													},
+													"capability": {
+														"type": "string",
+														"enum": [
+															"catalog.read",
+															"catalog.edit",
+															"entity.publish",
+															"entity.membership",
+															"entity.security",
+															"proposal.adopt"
+														]
+													},
+													"target": {
+														"type": "object",
+														"properties": {
+															"owner": {
+																"type": "string",
+																"enum": [
+																	"publishing",
+																	"music",
+																	"program",
+																	"software",
+																	"entity",
+																	"grouping",
+																	"reference",
+																	"distribution"
+																]
+															},
+															"id": {
+																"type": "string",
+																"format": "uuid",
+																"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+															}
+														},
+														"required": ["owner", "id"],
+														"additionalProperties": false
+													},
+													"proposal": {
+														"anyOf": [
+															{
+																"type": "object",
+																"properties": {
+																	"sourceRecordId": {
+																		"type": "string",
+																		"format": "uuid",
+																		"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																	},
+																	"proposalId": {
+																		"type": "string",
+																		"format": "uuid",
+																		"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																	}
+																},
+																"required": ["sourceRecordId", "proposalId"],
+																"additionalProperties": false
+															},
+															{ "type": "null" }
+														]
+													},
+													"createdAt": {
+														"type": "string",
+														"format": "date-time",
+														"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+													},
+													"expiresAt": {
+														"anyOf": [
+															{
+																"type": "string",
+																"format": "date-time",
+																"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+															},
+															{ "type": "null" }
+														]
+													},
+													"revokedAt": {
+														"anyOf": [
+															{
+																"type": "string",
+																"format": "date-time",
+																"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+															},
+															{ "type": "null" }
+														]
+													},
+													"recipient": {
+														"anyOf": [
+															{
+																"oneOf": [
+																	{
+																		"type": "object",
+																		"properties": {
+																			"kind": { "type": "string", "const": "account" },
+																			"entityId": {
+																				"type": "string",
+																				"format": "uuid",
+																				"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																			}
+																		},
+																		"required": ["kind", "entityId"],
+																		"additionalProperties": false
+																	},
+																	{
+																		"type": "object",
+																		"properties": {
+																			"kind": { "type": "string", "const": "service" },
+																			"servicePrincipalId": {
+																				"type": "string",
+																				"format": "uuid",
+																				"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																			}
+																		},
+																		"required": ["kind", "servicePrincipalId"],
+																		"additionalProperties": false
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"recipientName": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+												},
+												"required": [
+													"id",
+													"revision",
+													"actingEntityId",
+													"capability",
+													"target",
+													"proposal",
+													"createdAt",
+													"expiresAt",
+													"revokedAt",
+													"recipient",
+													"recipientName"
+												],
+												"additionalProperties": false
+											}
+										},
+										"nextCursor": {
+											"anyOf": [
+												{
+													"type": "string",
+													"format": "uuid",
+													"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+												},
+												{ "type": "null" }
+											]
+										}
+									},
+									"required": ["items", "nextCursor"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"x-rezics-quota-route-operation-id": "getApiParticipationEntitiesByIdGrants",
 				"x-rezics-quota-operation-id": "*",
 				"x-rezics-quota-cost-units": 1
 			}
@@ -120931,41 +123368,48 @@
 											"items": {
 												"type": "object",
 												"properties": {
-													"targetUnitId": {
-														"type": "string",
-														"format": "uuid",
-														"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+													"target": {
+														"type": "object",
+														"properties": {
+															"owner": {
+																"type": "string",
+																"enum": [
+																	"publishing",
+																	"music",
+																	"program",
+																	"software",
+																	"entity",
+																	"grouping",
+																	"reference",
+																	"distribution",
+																	"video",
+																	"audio",
+																	"post",
+																	"poll",
+																	"zone",
+																	"realm",
+																	"realm_rule",
+																	"custom_theme",
+																	"collection",
+																	"tag",
+																	"tag_path",
+																	"label"
+																]
+															},
+															"id": {
+																"type": "string",
+																"format": "uuid",
+																"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+															}
+														},
+														"required": ["owner", "id"],
+														"additionalProperties": false
 													},
 													"position": { "type": "string" },
 													"note": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 													"preview": {
 														"type": "object",
 														"properties": {
-															"kind": {
-																"type": "string",
-																"enum": [
-																	"slug_namespace",
-																	"book",
-																	"software",
-																	"media",
-																	"video",
-																	"audio",
-																	"release",
-																	"entity",
-																	"label",
-																	"tag",
-																	"tag_path",
-																	"series",
-																	"zone",
-																	"zone_page",
-																	"custom_theme",
-																	"collection",
-																	"post",
-																	"poll",
-																	"realm",
-																	"realm_rule"
-																]
-															},
 															"title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 															"summary": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 															"language": {
@@ -120980,7 +123424,7 @@
 																"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
 															}
 														},
-														"required": ["kind", "title", "summary", "language", "capturedAt"],
+														"required": ["title", "summary", "language", "capturedAt"],
 														"additionalProperties": false
 													},
 													"revision": {
@@ -121000,7 +123444,7 @@
 													}
 												},
 												"required": [
-													"targetUnitId",
+													"target",
 													"position",
 													"note",
 													"preview",
@@ -121104,41 +123548,48 @@
 												{
 													"type": "object",
 													"properties": {
-														"targetUnitId": {
-															"type": "string",
-															"format": "uuid",
-															"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+														"target": {
+															"type": "object",
+															"properties": {
+																"owner": {
+																	"type": "string",
+																	"enum": [
+																		"publishing",
+																		"music",
+																		"program",
+																		"software",
+																		"entity",
+																		"grouping",
+																		"reference",
+																		"distribution",
+																		"video",
+																		"audio",
+																		"post",
+																		"poll",
+																		"zone",
+																		"realm",
+																		"realm_rule",
+																		"custom_theme",
+																		"collection",
+																		"tag",
+																		"tag_path",
+																		"label"
+																	]
+																},
+																"id": {
+																	"type": "string",
+																	"format": "uuid",
+																	"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																}
+															},
+															"required": ["owner", "id"],
+															"additionalProperties": false
 														},
 														"position": { "type": "string" },
 														"note": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 														"preview": {
 															"type": "object",
 															"properties": {
-																"kind": {
-																	"type": "string",
-																	"enum": [
-																		"slug_namespace",
-																		"book",
-																		"software",
-																		"media",
-																		"video",
-																		"audio",
-																		"release",
-																		"entity",
-																		"label",
-																		"tag",
-																		"tag_path",
-																		"series",
-																		"zone",
-																		"zone_page",
-																		"custom_theme",
-																		"collection",
-																		"post",
-																		"poll",
-																		"realm",
-																		"realm_rule"
-																	]
-																},
 																"title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"summary": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"language": {
@@ -121153,7 +123604,7 @@
 																	"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
 																}
 															},
-															"required": ["kind", "title", "summary", "language", "capturedAt"],
+															"required": ["title", "summary", "language", "capturedAt"],
 															"additionalProperties": false
 														},
 														"revision": {
@@ -121173,7 +123624,7 @@
 														}
 													},
 													"required": [
-														"targetUnitId",
+														"target",
 														"position",
 														"note",
 														"preview",
@@ -121308,41 +123759,48 @@
 												{
 													"type": "object",
 													"properties": {
-														"targetUnitId": {
-															"type": "string",
-															"format": "uuid",
-															"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+														"target": {
+															"type": "object",
+															"properties": {
+																"owner": {
+																	"type": "string",
+																	"enum": [
+																		"publishing",
+																		"music",
+																		"program",
+																		"software",
+																		"entity",
+																		"grouping",
+																		"reference",
+																		"distribution",
+																		"video",
+																		"audio",
+																		"post",
+																		"poll",
+																		"zone",
+																		"realm",
+																		"realm_rule",
+																		"custom_theme",
+																		"collection",
+																		"tag",
+																		"tag_path",
+																		"label"
+																	]
+																},
+																"id": {
+																	"type": "string",
+																	"format": "uuid",
+																	"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																}
+															},
+															"required": ["owner", "id"],
+															"additionalProperties": false
 														},
 														"position": { "type": "string" },
 														"note": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 														"preview": {
 															"type": "object",
 															"properties": {
-																"kind": {
-																	"type": "string",
-																	"enum": [
-																		"slug_namespace",
-																		"book",
-																		"software",
-																		"media",
-																		"video",
-																		"audio",
-																		"release",
-																		"entity",
-																		"label",
-																		"tag",
-																		"tag_path",
-																		"series",
-																		"zone",
-																		"zone_page",
-																		"custom_theme",
-																		"collection",
-																		"post",
-																		"poll",
-																		"realm",
-																		"realm_rule"
-																	]
-																},
 																"title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"summary": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"language": {
@@ -121357,7 +123815,7 @@
 																	"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
 																}
 															},
-															"required": ["kind", "title", "summary", "language", "capturedAt"],
+															"required": ["title", "summary", "language", "capturedAt"],
 															"additionalProperties": false
 														},
 														"revision": {
@@ -121377,7 +123835,7 @@
 														}
 													},
 													"required": [
-														"targetUnitId",
+														"target",
 														"position",
 														"note",
 														"preview",
@@ -121508,41 +123966,48 @@
 												{
 													"type": "object",
 													"properties": {
-														"targetUnitId": {
-															"type": "string",
-															"format": "uuid",
-															"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+														"target": {
+															"type": "object",
+															"properties": {
+																"owner": {
+																	"type": "string",
+																	"enum": [
+																		"publishing",
+																		"music",
+																		"program",
+																		"software",
+																		"entity",
+																		"grouping",
+																		"reference",
+																		"distribution",
+																		"video",
+																		"audio",
+																		"post",
+																		"poll",
+																		"zone",
+																		"realm",
+																		"realm_rule",
+																		"custom_theme",
+																		"collection",
+																		"tag",
+																		"tag_path",
+																		"label"
+																	]
+																},
+																"id": {
+																	"type": "string",
+																	"format": "uuid",
+																	"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																}
+															},
+															"required": ["owner", "id"],
+															"additionalProperties": false
 														},
 														"position": { "type": "string" },
 														"note": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 														"preview": {
 															"type": "object",
 															"properties": {
-																"kind": {
-																	"type": "string",
-																	"enum": [
-																		"slug_namespace",
-																		"book",
-																		"software",
-																		"media",
-																		"video",
-																		"audio",
-																		"release",
-																		"entity",
-																		"label",
-																		"tag",
-																		"tag_path",
-																		"series",
-																		"zone",
-																		"zone_page",
-																		"custom_theme",
-																		"collection",
-																		"post",
-																		"poll",
-																		"realm",
-																		"realm_rule"
-																	]
-																},
 																"title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"summary": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"language": {
@@ -121557,7 +124022,7 @@
 																	"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
 																}
 															},
-															"required": ["kind", "title", "summary", "language", "capturedAt"],
+															"required": ["title", "summary", "language", "capturedAt"],
 															"additionalProperties": false
 														},
 														"revision": {
@@ -121577,7 +124042,7 @@
 														}
 													},
 													"required": [
-														"targetUnitId",
+														"target",
 														"position",
 														"note",
 														"preview",
@@ -121823,41 +124288,48 @@
 												{
 													"type": "object",
 													"properties": {
-														"targetUnitId": {
-															"type": "string",
-															"format": "uuid",
-															"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+														"target": {
+															"type": "object",
+															"properties": {
+																"owner": {
+																	"type": "string",
+																	"enum": [
+																		"publishing",
+																		"music",
+																		"program",
+																		"software",
+																		"entity",
+																		"grouping",
+																		"reference",
+																		"distribution",
+																		"video",
+																		"audio",
+																		"post",
+																		"poll",
+																		"zone",
+																		"realm",
+																		"realm_rule",
+																		"custom_theme",
+																		"collection",
+																		"tag",
+																		"tag_path",
+																		"label"
+																	]
+																},
+																"id": {
+																	"type": "string",
+																	"format": "uuid",
+																	"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																}
+															},
+															"required": ["owner", "id"],
+															"additionalProperties": false
 														},
 														"position": { "type": "string" },
 														"note": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 														"preview": {
 															"type": "object",
 															"properties": {
-																"kind": {
-																	"type": "string",
-																	"enum": [
-																		"slug_namespace",
-																		"book",
-																		"software",
-																		"media",
-																		"video",
-																		"audio",
-																		"release",
-																		"entity",
-																		"label",
-																		"tag",
-																		"tag_path",
-																		"series",
-																		"zone",
-																		"zone_page",
-																		"custom_theme",
-																		"collection",
-																		"post",
-																		"poll",
-																		"realm",
-																		"realm_rule"
-																	]
-																},
 																"title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"summary": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"language": {
@@ -121872,11 +124344,11 @@
 																	"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
 																}
 															},
-															"required": ["kind", "title", "summary", "language", "capturedAt"],
+															"required": ["title", "summary", "language", "capturedAt"],
 															"additionalProperties": false
 														}
 													},
-													"required": ["targetUnitId", "position", "note", "preview"],
+													"required": ["target", "position", "note", "preview"],
 													"additionalProperties": false
 												},
 												{ "type": "null" }
@@ -122009,41 +124481,48 @@
 												{
 													"type": "object",
 													"properties": {
-														"targetUnitId": {
-															"type": "string",
-															"format": "uuid",
-															"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+														"target": {
+															"type": "object",
+															"properties": {
+																"owner": {
+																	"type": "string",
+																	"enum": [
+																		"publishing",
+																		"music",
+																		"program",
+																		"software",
+																		"entity",
+																		"grouping",
+																		"reference",
+																		"distribution",
+																		"video",
+																		"audio",
+																		"post",
+																		"poll",
+																		"zone",
+																		"realm",
+																		"realm_rule",
+																		"custom_theme",
+																		"collection",
+																		"tag",
+																		"tag_path",
+																		"label"
+																	]
+																},
+																"id": {
+																	"type": "string",
+																	"format": "uuid",
+																	"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+																}
+															},
+															"required": ["owner", "id"],
+															"additionalProperties": false
 														},
 														"position": { "type": "string" },
 														"note": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 														"preview": {
 															"type": "object",
 															"properties": {
-																"kind": {
-																	"type": "string",
-																	"enum": [
-																		"slug_namespace",
-																		"book",
-																		"software",
-																		"media",
-																		"video",
-																		"audio",
-																		"release",
-																		"entity",
-																		"label",
-																		"tag",
-																		"tag_path",
-																		"series",
-																		"zone",
-																		"zone_page",
-																		"custom_theme",
-																		"collection",
-																		"post",
-																		"poll",
-																		"realm",
-																		"realm_rule"
-																	]
-																},
 																"title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"summary": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"language": {
@@ -122058,7 +124537,7 @@
 																	"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
 																}
 															},
-															"required": ["kind", "title", "summary", "language", "capturedAt"],
+															"required": ["title", "summary", "language", "capturedAt"],
 															"additionalProperties": false
 														},
 														"revision": {
@@ -122078,7 +124557,7 @@
 														}
 													},
 													"required": [
-														"targetUnitId",
+														"target",
 														"position",
 														"note",
 														"preview",

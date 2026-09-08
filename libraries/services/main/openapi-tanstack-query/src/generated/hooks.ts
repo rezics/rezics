@@ -13,6 +13,14 @@ import type {
 } from "@tanstack/react-query";
 import type { RequestConfig, ResponseErrorConfig } from "./.kubb/client";
 import type {
+	AcceptOrganizationMembershipInvitationOptions,
+	AcceptOrganizationMembershipInvitationStatus200,
+	AcceptOrganizationMembershipInvitationStatus400,
+	AcceptOrganizationMembershipInvitationStatus403,
+	AcceptOrganizationMembershipInvitationStatus404,
+	AcceptOrganizationMembershipInvitationStatus409,
+	AcceptOrganizationMembershipInvitationStatus422,
+	AcceptOrganizationMembershipInvitationStatus500,
 	AddCatalogIdentifierOptions,
 	AddCatalogIdentifierStatus200,
 	AddCatalogIdentifierStatus400,
@@ -1024,6 +1032,74 @@ import type {
 	DeleteApiAccountBlocksByIdStatus422,
 	DeleteApiAccountBlocksByIdStatus429,
 	DeleteApiAccountBlocksByIdStatus500,
+	ListManagedOrganizationMembersOptions,
+	ListManagedOrganizationMembersStatus200,
+	ListManagedOrganizationMembersStatus403,
+	ListManagedOrganizationMembersStatus404,
+	ListManagedOrganizationMembersStatus409,
+	ListManagedOrganizationMembersStatus422,
+	ListManagedOrganizationMembersStatus500,
+	ListManagedOrganizationInvitationsOptions,
+	ListManagedOrganizationInvitationsStatus200,
+	ListManagedOrganizationInvitationsStatus403,
+	ListManagedOrganizationInvitationsStatus404,
+	ListManagedOrganizationInvitationsStatus409,
+	ListManagedOrganizationInvitationsStatus422,
+	ListManagedOrganizationInvitationsStatus500,
+	InviteOrganizationMemberOptions,
+	InviteOrganizationMemberStatus200,
+	InviteOrganizationMemberStatus400,
+	InviteOrganizationMemberStatus403,
+	InviteOrganizationMemberStatus404,
+	InviteOrganizationMemberStatus409,
+	InviteOrganizationMemberStatus422,
+	InviteOrganizationMemberStatus500,
+	CancelOrganizationMembershipInvitationOptions,
+	CancelOrganizationMembershipInvitationStatus200,
+	CancelOrganizationMembershipInvitationStatus400,
+	CancelOrganizationMembershipInvitationStatus403,
+	CancelOrganizationMembershipInvitationStatus404,
+	CancelOrganizationMembershipInvitationStatus409,
+	CancelOrganizationMembershipInvitationStatus422,
+	CancelOrganizationMembershipInvitationStatus500,
+	RemoveOrganizationMemberOptions,
+	RemoveOrganizationMemberStatus200,
+	RemoveOrganizationMemberStatus400,
+	RemoveOrganizationMemberStatus403,
+	RemoveOrganizationMemberStatus404,
+	RemoveOrganizationMemberStatus409,
+	RemoveOrganizationMemberStatus422,
+	RemoveOrganizationMemberStatus500,
+	ListOwnOrganizationMembershipInvitationsOptions,
+	ListOwnOrganizationMembershipInvitationsStatus200,
+	ListOwnOrganizationMembershipInvitationsStatus403,
+	ListOwnOrganizationMembershipInvitationsStatus404,
+	ListOwnOrganizationMembershipInvitationsStatus409,
+	ListOwnOrganizationMembershipInvitationsStatus422,
+	ListOwnOrganizationMembershipInvitationsStatus500,
+	ListOwnOrganizationMembershipsOptions,
+	ListOwnOrganizationMembershipsStatus200,
+	ListOwnOrganizationMembershipsStatus403,
+	ListOwnOrganizationMembershipsStatus404,
+	ListOwnOrganizationMembershipsStatus409,
+	ListOwnOrganizationMembershipsStatus422,
+	ListOwnOrganizationMembershipsStatus500,
+	DeclineOrganizationMembershipInvitationOptions,
+	DeclineOrganizationMembershipInvitationStatus200,
+	DeclineOrganizationMembershipInvitationStatus400,
+	DeclineOrganizationMembershipInvitationStatus403,
+	DeclineOrganizationMembershipInvitationStatus404,
+	DeclineOrganizationMembershipInvitationStatus409,
+	DeclineOrganizationMembershipInvitationStatus422,
+	DeclineOrganizationMembershipInvitationStatus500,
+	LeaveOrganizationMembershipOptions,
+	LeaveOrganizationMembershipStatus200,
+	LeaveOrganizationMembershipStatus400,
+	LeaveOrganizationMembershipStatus403,
+	LeaveOrganizationMembershipStatus404,
+	LeaveOrganizationMembershipStatus409,
+	LeaveOrganizationMembershipStatus422,
+	LeaveOrganizationMembershipStatus500,
 	ListManagedOrganizationsOptions,
 	ListManagedOrganizationsStatus200,
 	ListManagedOrganizationsStatus422,
@@ -1062,6 +1138,10 @@ import type {
 	IssueParticipationGrantStatus400,
 	IssueParticipationGrantStatus422,
 	IssueParticipationGrantStatus500,
+	ListManagedEntityGrantsOptions,
+	ListManagedEntityGrantsStatus200,
+	ListManagedEntityGrantsStatus422,
+	ListManagedEntityGrantsStatus500,
 	SelectParticipationOptions,
 	SelectParticipationStatus200,
 	SelectParticipationStatus400,
@@ -3046,6 +3126,7 @@ import type {
 } from "./models";
 import { mutationOptions, queryOptions, useQuery, useMutation } from "@tanstack/react-query";
 import {
+	acceptOrganizationMembershipInvitation,
 	addCatalogIdentifier,
 	addCatalogName,
 	createCatalogResource,
@@ -3199,6 +3280,15 @@ import {
 	getApiAccountMeBlocks,
 	putApiAccountBlocksById,
 	deleteApiAccountBlocksById,
+	listManagedOrganizationMembers,
+	listManagedOrganizationInvitations,
+	inviteOrganizationMember,
+	cancelOrganizationMembershipInvitation,
+	removeOrganizationMember,
+	listOwnOrganizationMembershipInvitations,
+	listOwnOrganizationMemberships,
+	declineOrganizationMembershipInvitation,
+	leaveOrganizationMembership,
 	listManagedOrganizations,
 	createManagedOrganization,
 	updateActingEntityPresentation,
@@ -3208,6 +3298,7 @@ import {
 	getCurrentParticipation,
 	listParticipationGrants,
 	issueParticipationGrant,
+	listManagedEntityGrants,
 	selectParticipation,
 	revokeParticipationGrant,
 	listControlledServicePrincipals,
@@ -19045,6 +19136,1104 @@ export function useDeleteApiAccountBlocksById<TContext>(
 	>;
 }
 
+export const listManagedOrganizationMembersQueryKey = ({
+	path,
+	query,
+}: Omit<ListManagedOrganizationMembersOptions, "headers">) =>
+	[
+		{
+			url: "/api/v1/participation/membership/organizations/:organizationEntityId/members",
+			params: path,
+		},
+		...(query ? [query] : []),
+	] as const;
+
+type ListManagedOrganizationMembersQueryKey = ReturnType<
+	typeof listManagedOrganizationMembersQueryKey
+>;
+
+export function listManagedOrganizationMembersQueryOptions(
+	{ path, query }: ListManagedOrganizationMembersOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listManagedOrganizationMembersQueryKey({ path, query });
+	return queryOptions<
+		ListManagedOrganizationMembersStatus200,
+		ResponseErrorConfig<
+			| ListManagedOrganizationMembersStatus403
+			| ListManagedOrganizationMembersStatus404
+			| ListManagedOrganizationMembersStatus409
+			| ListManagedOrganizationMembersStatus422
+			| ListManagedOrganizationMembersStatus500
+		>,
+		ListManagedOrganizationMembersStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await listManagedOrganizationMembers({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/members}
+ */
+export function useListManagedOrganizationMembers<
+	TData = ListManagedOrganizationMembersStatus200,
+	TQueryData = ListManagedOrganizationMembersStatus200,
+	TQueryKey extends QueryKey = ListManagedOrganizationMembersQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| ListManagedOrganizationMembersOptions["path"]
+			| (() => ListManagedOrganizationMembersOptions["path"]);
+		query?:
+			| ListManagedOrganizationMembersOptions["query"]
+			| (() => ListManagedOrganizationMembersOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListManagedOrganizationMembersStatus200,
+				ResponseErrorConfig<
+					| ListManagedOrganizationMembersStatus403
+					| ListManagedOrganizationMembersStatus404
+					| ListManagedOrganizationMembersStatus409
+					| ListManagedOrganizationMembersStatus422
+					| ListManagedOrganizationMembersStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? listManagedOrganizationMembersQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listManagedOrganizationMembersQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListManagedOrganizationMembersStatus403
+			| ListManagedOrganizationMembersStatus404
+			| ListManagedOrganizationMembersStatus409
+			| ListManagedOrganizationMembersStatus422
+			| ListManagedOrganizationMembersStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const listManagedOrganizationInvitationsQueryKey = ({
+	path,
+	query,
+}: Omit<ListManagedOrganizationInvitationsOptions, "headers">) =>
+	[
+		{
+			url: "/api/v1/participation/membership/organizations/:organizationEntityId/invitations",
+			params: path,
+		},
+		...(query ? [query] : []),
+	] as const;
+
+type ListManagedOrganizationInvitationsQueryKey = ReturnType<
+	typeof listManagedOrganizationInvitationsQueryKey
+>;
+
+export function listManagedOrganizationInvitationsQueryOptions(
+	{ path, query }: ListManagedOrganizationInvitationsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listManagedOrganizationInvitationsQueryKey({ path, query });
+	return queryOptions<
+		ListManagedOrganizationInvitationsStatus200,
+		ResponseErrorConfig<
+			| ListManagedOrganizationInvitationsStatus403
+			| ListManagedOrganizationInvitationsStatus404
+			| ListManagedOrganizationInvitationsStatus409
+			| ListManagedOrganizationInvitationsStatus422
+			| ListManagedOrganizationInvitationsStatus500
+		>,
+		ListManagedOrganizationInvitationsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await listManagedOrganizationInvitations({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/invitations}
+ */
+export function useListManagedOrganizationInvitations<
+	TData = ListManagedOrganizationInvitationsStatus200,
+	TQueryData = ListManagedOrganizationInvitationsStatus200,
+	TQueryKey extends QueryKey = ListManagedOrganizationInvitationsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| ListManagedOrganizationInvitationsOptions["path"]
+			| (() => ListManagedOrganizationInvitationsOptions["path"]);
+		query?:
+			| ListManagedOrganizationInvitationsOptions["query"]
+			| (() => ListManagedOrganizationInvitationsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListManagedOrganizationInvitationsStatus200,
+				ResponseErrorConfig<
+					| ListManagedOrganizationInvitationsStatus403
+					| ListManagedOrganizationInvitationsStatus404
+					| ListManagedOrganizationInvitationsStatus409
+					| ListManagedOrganizationInvitationsStatus422
+					| ListManagedOrganizationInvitationsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? listManagedOrganizationInvitationsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listManagedOrganizationInvitationsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListManagedOrganizationInvitationsStatus403
+			| ListManagedOrganizationInvitationsStatus404
+			| ListManagedOrganizationInvitationsStatus409
+			| ListManagedOrganizationInvitationsStatus422
+			| ListManagedOrganizationInvitationsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const inviteOrganizationMemberMutationKey = () =>
+	[
+		{ url: "/api/v1/participation/membership/organizations/:organizationEntityId/invitations" },
+	] as const;
+
+export function inviteOrganizationMemberMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = inviteOrganizationMemberMutationKey();
+	return mutationOptions<
+		InviteOrganizationMemberStatus200,
+		ResponseErrorConfig<
+			| InviteOrganizationMemberStatus400
+			| InviteOrganizationMemberStatus403
+			| InviteOrganizationMemberStatus404
+			| InviteOrganizationMemberStatus409
+			| InviteOrganizationMemberStatus422
+			| InviteOrganizationMemberStatus500
+		>,
+		InviteOrganizationMemberOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await inviteOrganizationMember({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/invitations}
+ */
+export function useInviteOrganizationMember<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			InviteOrganizationMemberStatus200,
+			ResponseErrorConfig<
+				| InviteOrganizationMemberStatus400
+				| InviteOrganizationMemberStatus403
+				| InviteOrganizationMemberStatus404
+				| InviteOrganizationMemberStatus409
+				| InviteOrganizationMemberStatus422
+				| InviteOrganizationMemberStatus500
+			>,
+			InviteOrganizationMemberOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? inviteOrganizationMemberMutationKey();
+
+	const baseOptions = inviteOrganizationMemberMutationOptions(config) as UseMutationOptions<
+		InviteOrganizationMemberStatus200,
+		ResponseErrorConfig<
+			| InviteOrganizationMemberStatus400
+			| InviteOrganizationMemberStatus403
+			| InviteOrganizationMemberStatus404
+			| InviteOrganizationMemberStatus409
+			| InviteOrganizationMemberStatus422
+			| InviteOrganizationMemberStatus500
+		>,
+		InviteOrganizationMemberOptions,
+		TContext
+	>;
+
+	return useMutation<
+		InviteOrganizationMemberStatus200,
+		ResponseErrorConfig<
+			| InviteOrganizationMemberStatus400
+			| InviteOrganizationMemberStatus403
+			| InviteOrganizationMemberStatus404
+			| InviteOrganizationMemberStatus409
+			| InviteOrganizationMemberStatus422
+			| InviteOrganizationMemberStatus500
+		>,
+		InviteOrganizationMemberOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		InviteOrganizationMemberStatus200,
+		ResponseErrorConfig<
+			| InviteOrganizationMemberStatus400
+			| InviteOrganizationMemberStatus403
+			| InviteOrganizationMemberStatus404
+			| InviteOrganizationMemberStatus409
+			| InviteOrganizationMemberStatus422
+			| InviteOrganizationMemberStatus500
+		>,
+		InviteOrganizationMemberOptions,
+		TContext
+	>;
+}
+
+export const cancelOrganizationMembershipInvitationMutationKey = () =>
+	[
+		{
+			url: "/api/v1/participation/membership/organizations/:organizationEntityId/invitations/:invitationId/cancel",
+		},
+	] as const;
+
+export function cancelOrganizationMembershipInvitationMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = cancelOrganizationMembershipInvitationMutationKey();
+	return mutationOptions<
+		CancelOrganizationMembershipInvitationStatus200,
+		ResponseErrorConfig<
+			| CancelOrganizationMembershipInvitationStatus400
+			| CancelOrganizationMembershipInvitationStatus403
+			| CancelOrganizationMembershipInvitationStatus404
+			| CancelOrganizationMembershipInvitationStatus409
+			| CancelOrganizationMembershipInvitationStatus422
+			| CancelOrganizationMembershipInvitationStatus500
+		>,
+		CancelOrganizationMembershipInvitationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await cancelOrganizationMembershipInvitation({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/invitations/:invitationId/cancel}
+ */
+export function useCancelOrganizationMembershipInvitation<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			CancelOrganizationMembershipInvitationStatus200,
+			ResponseErrorConfig<
+				| CancelOrganizationMembershipInvitationStatus400
+				| CancelOrganizationMembershipInvitationStatus403
+				| CancelOrganizationMembershipInvitationStatus404
+				| CancelOrganizationMembershipInvitationStatus409
+				| CancelOrganizationMembershipInvitationStatus422
+				| CancelOrganizationMembershipInvitationStatus500
+			>,
+			CancelOrganizationMembershipInvitationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? cancelOrganizationMembershipInvitationMutationKey();
+
+	const baseOptions = cancelOrganizationMembershipInvitationMutationOptions(
+		config,
+	) as UseMutationOptions<
+		CancelOrganizationMembershipInvitationStatus200,
+		ResponseErrorConfig<
+			| CancelOrganizationMembershipInvitationStatus400
+			| CancelOrganizationMembershipInvitationStatus403
+			| CancelOrganizationMembershipInvitationStatus404
+			| CancelOrganizationMembershipInvitationStatus409
+			| CancelOrganizationMembershipInvitationStatus422
+			| CancelOrganizationMembershipInvitationStatus500
+		>,
+		CancelOrganizationMembershipInvitationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		CancelOrganizationMembershipInvitationStatus200,
+		ResponseErrorConfig<
+			| CancelOrganizationMembershipInvitationStatus400
+			| CancelOrganizationMembershipInvitationStatus403
+			| CancelOrganizationMembershipInvitationStatus404
+			| CancelOrganizationMembershipInvitationStatus409
+			| CancelOrganizationMembershipInvitationStatus422
+			| CancelOrganizationMembershipInvitationStatus500
+		>,
+		CancelOrganizationMembershipInvitationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		CancelOrganizationMembershipInvitationStatus200,
+		ResponseErrorConfig<
+			| CancelOrganizationMembershipInvitationStatus400
+			| CancelOrganizationMembershipInvitationStatus403
+			| CancelOrganizationMembershipInvitationStatus404
+			| CancelOrganizationMembershipInvitationStatus409
+			| CancelOrganizationMembershipInvitationStatus422
+			| CancelOrganizationMembershipInvitationStatus500
+		>,
+		CancelOrganizationMembershipInvitationOptions,
+		TContext
+	>;
+}
+
+export const removeOrganizationMemberMutationKey = () =>
+	[
+		{
+			url: "/api/v1/participation/membership/organizations/:organizationEntityId/members/:memberEntityId/remove",
+		},
+	] as const;
+
+export function removeOrganizationMemberMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = removeOrganizationMemberMutationKey();
+	return mutationOptions<
+		RemoveOrganizationMemberStatus200,
+		ResponseErrorConfig<
+			| RemoveOrganizationMemberStatus400
+			| RemoveOrganizationMemberStatus403
+			| RemoveOrganizationMemberStatus404
+			| RemoveOrganizationMemberStatus409
+			| RemoveOrganizationMemberStatus422
+			| RemoveOrganizationMemberStatus500
+		>,
+		RemoveOrganizationMemberOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await removeOrganizationMember({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/members/:memberEntityId/remove}
+ */
+export function useRemoveOrganizationMember<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RemoveOrganizationMemberStatus200,
+			ResponseErrorConfig<
+				| RemoveOrganizationMemberStatus400
+				| RemoveOrganizationMemberStatus403
+				| RemoveOrganizationMemberStatus404
+				| RemoveOrganizationMemberStatus409
+				| RemoveOrganizationMemberStatus422
+				| RemoveOrganizationMemberStatus500
+			>,
+			RemoveOrganizationMemberOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? removeOrganizationMemberMutationKey();
+
+	const baseOptions = removeOrganizationMemberMutationOptions(config) as UseMutationOptions<
+		RemoveOrganizationMemberStatus200,
+		ResponseErrorConfig<
+			| RemoveOrganizationMemberStatus400
+			| RemoveOrganizationMemberStatus403
+			| RemoveOrganizationMemberStatus404
+			| RemoveOrganizationMemberStatus409
+			| RemoveOrganizationMemberStatus422
+			| RemoveOrganizationMemberStatus500
+		>,
+		RemoveOrganizationMemberOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RemoveOrganizationMemberStatus200,
+		ResponseErrorConfig<
+			| RemoveOrganizationMemberStatus400
+			| RemoveOrganizationMemberStatus403
+			| RemoveOrganizationMemberStatus404
+			| RemoveOrganizationMemberStatus409
+			| RemoveOrganizationMemberStatus422
+			| RemoveOrganizationMemberStatus500
+		>,
+		RemoveOrganizationMemberOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RemoveOrganizationMemberStatus200,
+		ResponseErrorConfig<
+			| RemoveOrganizationMemberStatus400
+			| RemoveOrganizationMemberStatus403
+			| RemoveOrganizationMemberStatus404
+			| RemoveOrganizationMemberStatus409
+			| RemoveOrganizationMemberStatus422
+			| RemoveOrganizationMemberStatus500
+		>,
+		RemoveOrganizationMemberOptions,
+		TContext
+	>;
+}
+
+export const listOwnOrganizationMembershipInvitationsQueryKey = ({
+	query,
+}: Omit<ListOwnOrganizationMembershipInvitationsOptions, "headers"> = {}) =>
+	[{ url: "/api/v1/participation/membership/me/invitations" }, ...(query ? [query] : [])] as const;
+
+type ListOwnOrganizationMembershipInvitationsQueryKey = ReturnType<
+	typeof listOwnOrganizationMembershipInvitationsQueryKey
+>;
+
+export function listOwnOrganizationMembershipInvitationsQueryOptions(
+	{ query }: ListOwnOrganizationMembershipInvitationsOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listOwnOrganizationMembershipInvitationsQueryKey({ query });
+	return queryOptions<
+		ListOwnOrganizationMembershipInvitationsStatus200,
+		ResponseErrorConfig<
+			| ListOwnOrganizationMembershipInvitationsStatus403
+			| ListOwnOrganizationMembershipInvitationsStatus404
+			| ListOwnOrganizationMembershipInvitationsStatus409
+			| ListOwnOrganizationMembershipInvitationsStatus422
+			| ListOwnOrganizationMembershipInvitationsStatus500
+		>,
+		ListOwnOrganizationMembershipInvitationsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await listOwnOrganizationMembershipInvitations({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/me/invitations}
+ */
+export function useListOwnOrganizationMembershipInvitations<
+	TData = ListOwnOrganizationMembershipInvitationsStatus200,
+	TQueryData = ListOwnOrganizationMembershipInvitationsStatus200,
+	TQueryKey extends QueryKey = ListOwnOrganizationMembershipInvitationsQueryKey,
+>(
+	{
+		query,
+	}: {
+		query?:
+			| ListOwnOrganizationMembershipInvitationsOptions["query"]
+			| (() => ListOwnOrganizationMembershipInvitationsOptions["query"]);
+	} = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListOwnOrganizationMembershipInvitationsStatus200,
+				ResponseErrorConfig<
+					| ListOwnOrganizationMembershipInvitationsStatus403
+					| ListOwnOrganizationMembershipInvitationsStatus404
+					| ListOwnOrganizationMembershipInvitationsStatus409
+					| ListOwnOrganizationMembershipInvitationsStatus422
+					| ListOwnOrganizationMembershipInvitationsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey =
+		resolvedOptions?.queryKey ?? listOwnOrganizationMembershipInvitationsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listOwnOrganizationMembershipInvitationsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListOwnOrganizationMembershipInvitationsStatus403
+			| ListOwnOrganizationMembershipInvitationsStatus404
+			| ListOwnOrganizationMembershipInvitationsStatus409
+			| ListOwnOrganizationMembershipInvitationsStatus422
+			| ListOwnOrganizationMembershipInvitationsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const listOwnOrganizationMembershipsQueryKey = ({
+	query,
+}: Omit<ListOwnOrganizationMembershipsOptions, "headers"> = {}) =>
+	[
+		{ url: "/api/v1/participation/membership/me/organizations" },
+		...(query ? [query] : []),
+	] as const;
+
+type ListOwnOrganizationMembershipsQueryKey = ReturnType<
+	typeof listOwnOrganizationMembershipsQueryKey
+>;
+
+export function listOwnOrganizationMembershipsQueryOptions(
+	{ query }: ListOwnOrganizationMembershipsOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listOwnOrganizationMembershipsQueryKey({ query });
+	return queryOptions<
+		ListOwnOrganizationMembershipsStatus200,
+		ResponseErrorConfig<
+			| ListOwnOrganizationMembershipsStatus403
+			| ListOwnOrganizationMembershipsStatus404
+			| ListOwnOrganizationMembershipsStatus409
+			| ListOwnOrganizationMembershipsStatus422
+			| ListOwnOrganizationMembershipsStatus500
+		>,
+		ListOwnOrganizationMembershipsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await listOwnOrganizationMemberships({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/me/organizations}
+ */
+export function useListOwnOrganizationMemberships<
+	TData = ListOwnOrganizationMembershipsStatus200,
+	TQueryData = ListOwnOrganizationMembershipsStatus200,
+	TQueryKey extends QueryKey = ListOwnOrganizationMembershipsQueryKey,
+>(
+	{
+		query,
+	}: {
+		query?:
+			| ListOwnOrganizationMembershipsOptions["query"]
+			| (() => ListOwnOrganizationMembershipsOptions["query"]);
+	} = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListOwnOrganizationMembershipsStatus200,
+				ResponseErrorConfig<
+					| ListOwnOrganizationMembershipsStatus403
+					| ListOwnOrganizationMembershipsStatus404
+					| ListOwnOrganizationMembershipsStatus409
+					| ListOwnOrganizationMembershipsStatus422
+					| ListOwnOrganizationMembershipsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey =
+		resolvedOptions?.queryKey ?? listOwnOrganizationMembershipsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listOwnOrganizationMembershipsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ListOwnOrganizationMembershipsStatus403
+			| ListOwnOrganizationMembershipsStatus404
+			| ListOwnOrganizationMembershipsStatus409
+			| ListOwnOrganizationMembershipsStatus422
+			| ListOwnOrganizationMembershipsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const acceptOrganizationMembershipInvitationMutationKey = () =>
+	[{ url: "/api/v1/participation/membership/invitations/:invitationId/accept" }] as const;
+
+export function acceptOrganizationMembershipInvitationMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = acceptOrganizationMembershipInvitationMutationKey();
+	return mutationOptions<
+		AcceptOrganizationMembershipInvitationStatus200,
+		ResponseErrorConfig<
+			| AcceptOrganizationMembershipInvitationStatus400
+			| AcceptOrganizationMembershipInvitationStatus403
+			| AcceptOrganizationMembershipInvitationStatus404
+			| AcceptOrganizationMembershipInvitationStatus409
+			| AcceptOrganizationMembershipInvitationStatus422
+			| AcceptOrganizationMembershipInvitationStatus500
+		>,
+		AcceptOrganizationMembershipInvitationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await acceptOrganizationMembershipInvitation({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/invitations/:invitationId/accept}
+ */
+export function useAcceptOrganizationMembershipInvitation<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			AcceptOrganizationMembershipInvitationStatus200,
+			ResponseErrorConfig<
+				| AcceptOrganizationMembershipInvitationStatus400
+				| AcceptOrganizationMembershipInvitationStatus403
+				| AcceptOrganizationMembershipInvitationStatus404
+				| AcceptOrganizationMembershipInvitationStatus409
+				| AcceptOrganizationMembershipInvitationStatus422
+				| AcceptOrganizationMembershipInvitationStatus500
+			>,
+			AcceptOrganizationMembershipInvitationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? acceptOrganizationMembershipInvitationMutationKey();
+
+	const baseOptions = acceptOrganizationMembershipInvitationMutationOptions(
+		config,
+	) as UseMutationOptions<
+		AcceptOrganizationMembershipInvitationStatus200,
+		ResponseErrorConfig<
+			| AcceptOrganizationMembershipInvitationStatus400
+			| AcceptOrganizationMembershipInvitationStatus403
+			| AcceptOrganizationMembershipInvitationStatus404
+			| AcceptOrganizationMembershipInvitationStatus409
+			| AcceptOrganizationMembershipInvitationStatus422
+			| AcceptOrganizationMembershipInvitationStatus500
+		>,
+		AcceptOrganizationMembershipInvitationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		AcceptOrganizationMembershipInvitationStatus200,
+		ResponseErrorConfig<
+			| AcceptOrganizationMembershipInvitationStatus400
+			| AcceptOrganizationMembershipInvitationStatus403
+			| AcceptOrganizationMembershipInvitationStatus404
+			| AcceptOrganizationMembershipInvitationStatus409
+			| AcceptOrganizationMembershipInvitationStatus422
+			| AcceptOrganizationMembershipInvitationStatus500
+		>,
+		AcceptOrganizationMembershipInvitationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		AcceptOrganizationMembershipInvitationStatus200,
+		ResponseErrorConfig<
+			| AcceptOrganizationMembershipInvitationStatus400
+			| AcceptOrganizationMembershipInvitationStatus403
+			| AcceptOrganizationMembershipInvitationStatus404
+			| AcceptOrganizationMembershipInvitationStatus409
+			| AcceptOrganizationMembershipInvitationStatus422
+			| AcceptOrganizationMembershipInvitationStatus500
+		>,
+		AcceptOrganizationMembershipInvitationOptions,
+		TContext
+	>;
+}
+
+export const declineOrganizationMembershipInvitationMutationKey = () =>
+	[{ url: "/api/v1/participation/membership/invitations/:invitationId/decline" }] as const;
+
+export function declineOrganizationMembershipInvitationMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = declineOrganizationMembershipInvitationMutationKey();
+	return mutationOptions<
+		DeclineOrganizationMembershipInvitationStatus200,
+		ResponseErrorConfig<
+			| DeclineOrganizationMembershipInvitationStatus400
+			| DeclineOrganizationMembershipInvitationStatus403
+			| DeclineOrganizationMembershipInvitationStatus404
+			| DeclineOrganizationMembershipInvitationStatus409
+			| DeclineOrganizationMembershipInvitationStatus422
+			| DeclineOrganizationMembershipInvitationStatus500
+		>,
+		DeclineOrganizationMembershipInvitationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await declineOrganizationMembershipInvitation({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/invitations/:invitationId/decline}
+ */
+export function useDeclineOrganizationMembershipInvitation<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeclineOrganizationMembershipInvitationStatus200,
+			ResponseErrorConfig<
+				| DeclineOrganizationMembershipInvitationStatus400
+				| DeclineOrganizationMembershipInvitationStatus403
+				| DeclineOrganizationMembershipInvitationStatus404
+				| DeclineOrganizationMembershipInvitationStatus409
+				| DeclineOrganizationMembershipInvitationStatus422
+				| DeclineOrganizationMembershipInvitationStatus500
+			>,
+			DeclineOrganizationMembershipInvitationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? declineOrganizationMembershipInvitationMutationKey();
+
+	const baseOptions = declineOrganizationMembershipInvitationMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeclineOrganizationMembershipInvitationStatus200,
+		ResponseErrorConfig<
+			| DeclineOrganizationMembershipInvitationStatus400
+			| DeclineOrganizationMembershipInvitationStatus403
+			| DeclineOrganizationMembershipInvitationStatus404
+			| DeclineOrganizationMembershipInvitationStatus409
+			| DeclineOrganizationMembershipInvitationStatus422
+			| DeclineOrganizationMembershipInvitationStatus500
+		>,
+		DeclineOrganizationMembershipInvitationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeclineOrganizationMembershipInvitationStatus200,
+		ResponseErrorConfig<
+			| DeclineOrganizationMembershipInvitationStatus400
+			| DeclineOrganizationMembershipInvitationStatus403
+			| DeclineOrganizationMembershipInvitationStatus404
+			| DeclineOrganizationMembershipInvitationStatus409
+			| DeclineOrganizationMembershipInvitationStatus422
+			| DeclineOrganizationMembershipInvitationStatus500
+		>,
+		DeclineOrganizationMembershipInvitationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeclineOrganizationMembershipInvitationStatus200,
+		ResponseErrorConfig<
+			| DeclineOrganizationMembershipInvitationStatus400
+			| DeclineOrganizationMembershipInvitationStatus403
+			| DeclineOrganizationMembershipInvitationStatus404
+			| DeclineOrganizationMembershipInvitationStatus409
+			| DeclineOrganizationMembershipInvitationStatus422
+			| DeclineOrganizationMembershipInvitationStatus500
+		>,
+		DeclineOrganizationMembershipInvitationOptions,
+		TContext
+	>;
+}
+
+export const leaveOrganizationMembershipMutationKey = () =>
+	[
+		{ url: "/api/v1/participation/membership/me/organizations/:organizationEntityId/leave" },
+	] as const;
+
+export function leaveOrganizationMembershipMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = leaveOrganizationMembershipMutationKey();
+	return mutationOptions<
+		LeaveOrganizationMembershipStatus200,
+		ResponseErrorConfig<
+			| LeaveOrganizationMembershipStatus400
+			| LeaveOrganizationMembershipStatus403
+			| LeaveOrganizationMembershipStatus404
+			| LeaveOrganizationMembershipStatus409
+			| LeaveOrganizationMembershipStatus422
+			| LeaveOrganizationMembershipStatus500
+		>,
+		LeaveOrganizationMembershipOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await leaveOrganizationMembership({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/membership/me/organizations/:organizationEntityId/leave}
+ */
+export function useLeaveOrganizationMembership<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			LeaveOrganizationMembershipStatus200,
+			ResponseErrorConfig<
+				| LeaveOrganizationMembershipStatus400
+				| LeaveOrganizationMembershipStatus403
+				| LeaveOrganizationMembershipStatus404
+				| LeaveOrganizationMembershipStatus409
+				| LeaveOrganizationMembershipStatus422
+				| LeaveOrganizationMembershipStatus500
+			>,
+			LeaveOrganizationMembershipOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? leaveOrganizationMembershipMutationKey();
+
+	const baseOptions = leaveOrganizationMembershipMutationOptions(config) as UseMutationOptions<
+		LeaveOrganizationMembershipStatus200,
+		ResponseErrorConfig<
+			| LeaveOrganizationMembershipStatus400
+			| LeaveOrganizationMembershipStatus403
+			| LeaveOrganizationMembershipStatus404
+			| LeaveOrganizationMembershipStatus409
+			| LeaveOrganizationMembershipStatus422
+			| LeaveOrganizationMembershipStatus500
+		>,
+		LeaveOrganizationMembershipOptions,
+		TContext
+	>;
+
+	return useMutation<
+		LeaveOrganizationMembershipStatus200,
+		ResponseErrorConfig<
+			| LeaveOrganizationMembershipStatus400
+			| LeaveOrganizationMembershipStatus403
+			| LeaveOrganizationMembershipStatus404
+			| LeaveOrganizationMembershipStatus409
+			| LeaveOrganizationMembershipStatus422
+			| LeaveOrganizationMembershipStatus500
+		>,
+		LeaveOrganizationMembershipOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		LeaveOrganizationMembershipStatus200,
+		ResponseErrorConfig<
+			| LeaveOrganizationMembershipStatus400
+			| LeaveOrganizationMembershipStatus403
+			| LeaveOrganizationMembershipStatus404
+			| LeaveOrganizationMembershipStatus409
+			| LeaveOrganizationMembershipStatus422
+			| LeaveOrganizationMembershipStatus500
+		>,
+		LeaveOrganizationMembershipOptions,
+		TContext
+	>;
+}
+
 export const listManagedOrganizationsQueryKey = ({
 	query,
 }: Omit<ListManagedOrganizationsOptions, "headers"> = {}) =>
@@ -19822,6 +21011,97 @@ export function useIssueParticipationGrant<TContext>(
 		IssueParticipationGrantOptions,
 		TContext
 	>;
+}
+
+export const listManagedEntityGrantsQueryKey = ({
+	path,
+	query,
+}: Omit<ListManagedEntityGrantsOptions, "headers">) =>
+	[
+		{ url: "/api/v1/participation/entities/:id/grants", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ListManagedEntityGrantsQueryKey = ReturnType<typeof listManagedEntityGrantsQueryKey>;
+
+export function listManagedEntityGrantsQueryOptions(
+	{ path, query }: ListManagedEntityGrantsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listManagedEntityGrantsQueryKey({ path, query });
+	return queryOptions<
+		ListManagedEntityGrantsStatus200,
+		ResponseErrorConfig<ListManagedEntityGrantsStatus422 | ListManagedEntityGrantsStatus500>,
+		ListManagedEntityGrantsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await listManagedEntityGrants({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/entities/:id/grants}
+ */
+export function useListManagedEntityGrants<
+	TData = ListManagedEntityGrantsStatus200,
+	TQueryData = ListManagedEntityGrantsStatus200,
+	TQueryKey extends QueryKey = ListManagedEntityGrantsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListManagedEntityGrantsOptions["path"] | (() => ListManagedEntityGrantsOptions["path"]);
+		query?:
+			| ListManagedEntityGrantsOptions["query"]
+			| (() => ListManagedEntityGrantsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListManagedEntityGrantsStatus200,
+				ResponseErrorConfig<ListManagedEntityGrantsStatus422 | ListManagedEntityGrantsStatus500>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listManagedEntityGrantsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listManagedEntityGrantsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<ListManagedEntityGrantsStatus422 | ListManagedEntityGrantsStatus500>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
 }
 
 export const selectParticipationMutationKey = () =>

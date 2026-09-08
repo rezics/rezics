@@ -4408,6 +4408,9 @@ export const ApiErrorCode = {
 	ParticipationDenied: "ParticipationDenied",
 	FavoriteNotFound: "FavoriteNotFound",
 	FavoriteRevisionConflict: "FavoriteRevisionConflict",
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipNotFound: "OrganizationMembershipNotFound",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
 	MalformedRequestBody: "MalformedRequestBody",
 	ValidationError: "ValidationError",
 	InternalError: "InternalError",
@@ -59886,6 +59889,2148 @@ export type DeleteApiAccountBlocksByIdResponse =
 /**
  * @type object
  */
+export type ListManagedOrganizationMembersPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationMembersQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	afterId?: string;
+};
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationMembersStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		organizationEntityId: string;
+		organizationName: string | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		memberEntityId: string;
+		memberName: string | null;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		revision: number;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		joinedAt: string;
+		removedAt: string | null;
+	}[];
+	nextCursor: string | null;
+};
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationMembersStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: "ParticipationDenied";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationMembersStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipNotFound'
+		 * @type string
+		 */
+		code: "OrganizationMembershipNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const ListManagedOrganizationMembersStatus409ErrorCodeEnum = {
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type ListManagedOrganizationMembersStatus409ErrorCodeEnum =
+	(typeof ListManagedOrganizationMembersStatus409ErrorCodeEnum)[keyof typeof ListManagedOrganizationMembersStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationMembersStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipConflict'
+		 * @type string
+		 */
+		code: ListManagedOrganizationMembersStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationMembersStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationMembersStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationMembersOptions = {
+	body?: never;
+	path: ListManagedOrganizationMembersPath;
+	query?: ListManagedOrganizationMembersQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationMembersResponses = {
+	"200": ListManagedOrganizationMembersStatus200;
+	"403": ListManagedOrganizationMembersStatus403;
+	"404": ListManagedOrganizationMembersStatus404;
+	"409": ListManagedOrganizationMembersStatus409;
+	"422": ListManagedOrganizationMembersStatus422;
+	"500": ListManagedOrganizationMembersStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListManagedOrganizationMembersResponse =
+	| ListManagedOrganizationMembersStatus200
+	| ListManagedOrganizationMembersStatus403
+	| ListManagedOrganizationMembersStatus404
+	| ListManagedOrganizationMembersStatus409
+	| ListManagedOrganizationMembersStatus422
+	| ListManagedOrganizationMembersStatus500;
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationInvitationsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationInvitationsQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	afterId?: string;
+};
+
+export const ListManagedOrganizationInvitationsStatus200ItemsStateEnum = {
+	pending: "pending",
+	accepted: "accepted",
+	declined: "declined",
+	cancelled: "cancelled",
+	expired: "expired",
+	invalidated: "invalidated",
+} as const;
+
+export type ListManagedOrganizationInvitationsStatus200ItemsStateEnum =
+	(typeof ListManagedOrganizationInvitationsStatus200ItemsStateEnum)[keyof typeof ListManagedOrganizationInvitationsStatus200ItemsStateEnum];
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationInvitationsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		organizationEntityId: string;
+		organizationName: string | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		recipientEntityId: string;
+		recipientName: string | null;
+		/**
+		 * @type string
+		 */
+		state: ListManagedOrganizationInvitationsStatus200ItemsStateEnum;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		revision: number;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		expiresAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		resolvedAt: string | null;
+	}[];
+	nextCursor: string | null;
+};
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationInvitationsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: "ParticipationDenied";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationInvitationsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipNotFound'
+		 * @type string
+		 */
+		code: "OrganizationMembershipNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const ListManagedOrganizationInvitationsStatus409ErrorCodeEnum = {
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type ListManagedOrganizationInvitationsStatus409ErrorCodeEnum =
+	(typeof ListManagedOrganizationInvitationsStatus409ErrorCodeEnum)[keyof typeof ListManagedOrganizationInvitationsStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationInvitationsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipConflict'
+		 * @type string
+		 */
+		code: ListManagedOrganizationInvitationsStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationInvitationsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationInvitationsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationInvitationsOptions = {
+	body?: never;
+	path: ListManagedOrganizationInvitationsPath;
+	query?: ListManagedOrganizationInvitationsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type ListManagedOrganizationInvitationsResponses = {
+	"200": ListManagedOrganizationInvitationsStatus200;
+	"403": ListManagedOrganizationInvitationsStatus403;
+	"404": ListManagedOrganizationInvitationsStatus404;
+	"409": ListManagedOrganizationInvitationsStatus409;
+	"422": ListManagedOrganizationInvitationsStatus422;
+	"500": ListManagedOrganizationInvitationsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListManagedOrganizationInvitationsResponse =
+	| ListManagedOrganizationInvitationsStatus200
+	| ListManagedOrganizationInvitationsStatus403
+	| ListManagedOrganizationInvitationsStatus404
+	| ListManagedOrganizationInvitationsStatus409
+	| ListManagedOrganizationInvitationsStatus422
+	| ListManagedOrganizationInvitationsStatus500;
+
+/**
+ * @type object
+ */
+export type InviteOrganizationMemberPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+};
+
+export const InviteOrganizationMemberStatus200StateEnum = {
+	pending: "pending",
+	accepted: "accepted",
+	declined: "declined",
+	cancelled: "cancelled",
+	expired: "expired",
+	invalidated: "invalidated",
+} as const;
+
+export type InviteOrganizationMemberStatus200StateEnum =
+	(typeof InviteOrganizationMemberStatus200StateEnum)[keyof typeof InviteOrganizationMemberStatus200StateEnum];
+
+/**
+ * @type object
+ */
+export type InviteOrganizationMemberStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+	organizationName: string | null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	recipientEntityId: string;
+	recipientName: string | null;
+	/**
+	 * @type string
+	 */
+	state: InviteOrganizationMemberStatus200StateEnum;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	revision: number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	resolvedAt: string | null;
+};
+
+/**
+ * @type object
+ */
+export type InviteOrganizationMemberStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type InviteOrganizationMemberStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: "ParticipationDenied";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type InviteOrganizationMemberStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipNotFound'
+		 * @type string
+		 */
+		code: "OrganizationMembershipNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const InviteOrganizationMemberStatus409ErrorCodeEnum = {
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type InviteOrganizationMemberStatus409ErrorCodeEnum =
+	(typeof InviteOrganizationMemberStatus409ErrorCodeEnum)[keyof typeof InviteOrganizationMemberStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type InviteOrganizationMemberStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipConflict'
+		 * @type string
+		 */
+		code: InviteOrganizationMemberStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type InviteOrganizationMemberStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type InviteOrganizationMemberStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type InviteOrganizationMemberBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	recipientEntityId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string | undefined
+	 */
+	expiresAt?: string;
+};
+
+/**
+ * @type object
+ */
+export type InviteOrganizationMemberOptions = {
+	body: InviteOrganizationMemberBody;
+	path: InviteOrganizationMemberPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type InviteOrganizationMemberResponses = {
+	"200": InviteOrganizationMemberStatus200;
+	"400": InviteOrganizationMemberStatus400;
+	"403": InviteOrganizationMemberStatus403;
+	"404": InviteOrganizationMemberStatus404;
+	"409": InviteOrganizationMemberStatus409;
+	"422": InviteOrganizationMemberStatus422;
+	"500": InviteOrganizationMemberStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type InviteOrganizationMemberResponse =
+	| InviteOrganizationMemberStatus200
+	| InviteOrganizationMemberStatus400
+	| InviteOrganizationMemberStatus403
+	| InviteOrganizationMemberStatus404
+	| InviteOrganizationMemberStatus409
+	| InviteOrganizationMemberStatus422
+	| InviteOrganizationMemberStatus500;
+
+/**
+ * @type object
+ */
+export type CancelOrganizationMembershipInvitationPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	invitationId: string;
+};
+
+export const CancelOrganizationMembershipInvitationStatus200StateEnum = {
+	pending: "pending",
+	accepted: "accepted",
+	declined: "declined",
+	cancelled: "cancelled",
+	expired: "expired",
+	invalidated: "invalidated",
+} as const;
+
+export type CancelOrganizationMembershipInvitationStatus200StateEnum =
+	(typeof CancelOrganizationMembershipInvitationStatus200StateEnum)[keyof typeof CancelOrganizationMembershipInvitationStatus200StateEnum];
+
+/**
+ * @type object
+ */
+export type CancelOrganizationMembershipInvitationStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+	organizationName: string | null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	recipientEntityId: string;
+	recipientName: string | null;
+	/**
+	 * @type string
+	 */
+	state: CancelOrganizationMembershipInvitationStatus200StateEnum;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	revision: number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	resolvedAt: string | null;
+};
+
+/**
+ * @type object
+ */
+export type CancelOrganizationMembershipInvitationStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type CancelOrganizationMembershipInvitationStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: "ParticipationDenied";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type CancelOrganizationMembershipInvitationStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipNotFound'
+		 * @type string
+		 */
+		code: "OrganizationMembershipNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const CancelOrganizationMembershipInvitationStatus409ErrorCodeEnum = {
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type CancelOrganizationMembershipInvitationStatus409ErrorCodeEnum =
+	(typeof CancelOrganizationMembershipInvitationStatus409ErrorCodeEnum)[keyof typeof CancelOrganizationMembershipInvitationStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type CancelOrganizationMembershipInvitationStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipConflict'
+		 * @type string
+		 */
+		code: CancelOrganizationMembershipInvitationStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type CancelOrganizationMembershipInvitationStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type CancelOrganizationMembershipInvitationStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type CancelOrganizationMembershipInvitationBody = {
+	/**
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedRevision: number;
+};
+
+/**
+ * @type object
+ */
+export type CancelOrganizationMembershipInvitationOptions = {
+	body: CancelOrganizationMembershipInvitationBody;
+	path: CancelOrganizationMembershipInvitationPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type CancelOrganizationMembershipInvitationResponses = {
+	"200": CancelOrganizationMembershipInvitationStatus200;
+	"400": CancelOrganizationMembershipInvitationStatus400;
+	"403": CancelOrganizationMembershipInvitationStatus403;
+	"404": CancelOrganizationMembershipInvitationStatus404;
+	"409": CancelOrganizationMembershipInvitationStatus409;
+	"422": CancelOrganizationMembershipInvitationStatus422;
+	"500": CancelOrganizationMembershipInvitationStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type CancelOrganizationMembershipInvitationResponse =
+	| CancelOrganizationMembershipInvitationStatus200
+	| CancelOrganizationMembershipInvitationStatus400
+	| CancelOrganizationMembershipInvitationStatus403
+	| CancelOrganizationMembershipInvitationStatus404
+	| CancelOrganizationMembershipInvitationStatus409
+	| CancelOrganizationMembershipInvitationStatus422
+	| CancelOrganizationMembershipInvitationStatus500;
+
+/**
+ * @type object
+ */
+export type RemoveOrganizationMemberPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	memberEntityId: string;
+};
+
+/**
+ * @type object
+ */
+export type RemoveOrganizationMemberStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+	organizationName: string | null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	memberEntityId: string;
+	memberName: string | null;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	revision: number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	joinedAt: string;
+	removedAt: string | null;
+};
+
+/**
+ * @type object
+ */
+export type RemoveOrganizationMemberStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type RemoveOrganizationMemberStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: "ParticipationDenied";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type RemoveOrganizationMemberStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipNotFound'
+		 * @type string
+		 */
+		code: "OrganizationMembershipNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const RemoveOrganizationMemberStatus409ErrorCodeEnum = {
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type RemoveOrganizationMemberStatus409ErrorCodeEnum =
+	(typeof RemoveOrganizationMemberStatus409ErrorCodeEnum)[keyof typeof RemoveOrganizationMemberStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type RemoveOrganizationMemberStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipConflict'
+		 * @type string
+		 */
+		code: RemoveOrganizationMemberStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type RemoveOrganizationMemberStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type RemoveOrganizationMemberStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type RemoveOrganizationMemberBody = {
+	/**
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedRevision: number;
+};
+
+/**
+ * @type object
+ */
+export type RemoveOrganizationMemberOptions = {
+	body: RemoveOrganizationMemberBody;
+	path: RemoveOrganizationMemberPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type RemoveOrganizationMemberResponses = {
+	"200": RemoveOrganizationMemberStatus200;
+	"400": RemoveOrganizationMemberStatus400;
+	"403": RemoveOrganizationMemberStatus403;
+	"404": RemoveOrganizationMemberStatus404;
+	"409": RemoveOrganizationMemberStatus409;
+	"422": RemoveOrganizationMemberStatus422;
+	"500": RemoveOrganizationMemberStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type RemoveOrganizationMemberResponse =
+	| RemoveOrganizationMemberStatus200
+	| RemoveOrganizationMemberStatus400
+	| RemoveOrganizationMemberStatus403
+	| RemoveOrganizationMemberStatus404
+	| RemoveOrganizationMemberStatus409
+	| RemoveOrganizationMemberStatus422
+	| RemoveOrganizationMemberStatus500;
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipInvitationsQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	afterId?: string;
+};
+
+export const ListOwnOrganizationMembershipInvitationsStatus200ItemsStateEnum = {
+	pending: "pending",
+	accepted: "accepted",
+	declined: "declined",
+	cancelled: "cancelled",
+	expired: "expired",
+	invalidated: "invalidated",
+} as const;
+
+export type ListOwnOrganizationMembershipInvitationsStatus200ItemsStateEnum =
+	(typeof ListOwnOrganizationMembershipInvitationsStatus200ItemsStateEnum)[keyof typeof ListOwnOrganizationMembershipInvitationsStatus200ItemsStateEnum];
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipInvitationsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		organizationEntityId: string;
+		organizationName: string | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		recipientEntityId: string;
+		recipientName: string | null;
+		/**
+		 * @type string
+		 */
+		state: ListOwnOrganizationMembershipInvitationsStatus200ItemsStateEnum;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		revision: number;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		expiresAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		resolvedAt: string | null;
+	}[];
+	nextCursor: string | null;
+};
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipInvitationsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: "ParticipationDenied";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipInvitationsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipNotFound'
+		 * @type string
+		 */
+		code: "OrganizationMembershipNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const ListOwnOrganizationMembershipInvitationsStatus409ErrorCodeEnum = {
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type ListOwnOrganizationMembershipInvitationsStatus409ErrorCodeEnum =
+	(typeof ListOwnOrganizationMembershipInvitationsStatus409ErrorCodeEnum)[keyof typeof ListOwnOrganizationMembershipInvitationsStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipInvitationsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipConflict'
+		 * @type string
+		 */
+		code: ListOwnOrganizationMembershipInvitationsStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipInvitationsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipInvitationsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipInvitationsOptions = {
+	body?: never;
+	path?: never;
+	query?: ListOwnOrganizationMembershipInvitationsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipInvitationsResponses = {
+	"200": ListOwnOrganizationMembershipInvitationsStatus200;
+	"403": ListOwnOrganizationMembershipInvitationsStatus403;
+	"404": ListOwnOrganizationMembershipInvitationsStatus404;
+	"409": ListOwnOrganizationMembershipInvitationsStatus409;
+	"422": ListOwnOrganizationMembershipInvitationsStatus422;
+	"500": ListOwnOrganizationMembershipInvitationsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListOwnOrganizationMembershipInvitationsResponse =
+	| ListOwnOrganizationMembershipInvitationsStatus200
+	| ListOwnOrganizationMembershipInvitationsStatus403
+	| ListOwnOrganizationMembershipInvitationsStatus404
+	| ListOwnOrganizationMembershipInvitationsStatus409
+	| ListOwnOrganizationMembershipInvitationsStatus422
+	| ListOwnOrganizationMembershipInvitationsStatus500;
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipsQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	afterId?: string;
+};
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		organizationEntityId: string;
+		organizationName: string | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		memberEntityId: string;
+		memberName: string | null;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		revision: number;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		joinedAt: string;
+		removedAt: string | null;
+	}[];
+	nextCursor: string | null;
+};
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: "ParticipationDenied";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipNotFound'
+		 * @type string
+		 */
+		code: "OrganizationMembershipNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const ListOwnOrganizationMembershipsStatus409ErrorCodeEnum = {
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type ListOwnOrganizationMembershipsStatus409ErrorCodeEnum =
+	(typeof ListOwnOrganizationMembershipsStatus409ErrorCodeEnum)[keyof typeof ListOwnOrganizationMembershipsStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipConflict'
+		 * @type string
+		 */
+		code: ListOwnOrganizationMembershipsStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipsOptions = {
+	body?: never;
+	path?: never;
+	query?: ListOwnOrganizationMembershipsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type ListOwnOrganizationMembershipsResponses = {
+	"200": ListOwnOrganizationMembershipsStatus200;
+	"403": ListOwnOrganizationMembershipsStatus403;
+	"404": ListOwnOrganizationMembershipsStatus404;
+	"409": ListOwnOrganizationMembershipsStatus409;
+	"422": ListOwnOrganizationMembershipsStatus422;
+	"500": ListOwnOrganizationMembershipsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListOwnOrganizationMembershipsResponse =
+	| ListOwnOrganizationMembershipsStatus200
+	| ListOwnOrganizationMembershipsStatus403
+	| ListOwnOrganizationMembershipsStatus404
+	| ListOwnOrganizationMembershipsStatus409
+	| ListOwnOrganizationMembershipsStatus422
+	| ListOwnOrganizationMembershipsStatus500;
+
+/**
+ * @type object
+ */
+export type AcceptOrganizationMembershipInvitationPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	invitationId: string;
+};
+
+export const AcceptOrganizationMembershipInvitationStatus200StateEnum = {
+	pending: "pending",
+	accepted: "accepted",
+	declined: "declined",
+	cancelled: "cancelled",
+	expired: "expired",
+	invalidated: "invalidated",
+} as const;
+
+export type AcceptOrganizationMembershipInvitationStatus200StateEnum =
+	(typeof AcceptOrganizationMembershipInvitationStatus200StateEnum)[keyof typeof AcceptOrganizationMembershipInvitationStatus200StateEnum];
+
+/**
+ * @type object
+ */
+export type AcceptOrganizationMembershipInvitationStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+	organizationName: string | null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	recipientEntityId: string;
+	recipientName: string | null;
+	/**
+	 * @type string
+	 */
+	state: AcceptOrganizationMembershipInvitationStatus200StateEnum;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	revision: number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	resolvedAt: string | null;
+};
+
+/**
+ * @type object
+ */
+export type AcceptOrganizationMembershipInvitationStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type AcceptOrganizationMembershipInvitationStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: "ParticipationDenied";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type AcceptOrganizationMembershipInvitationStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipNotFound'
+		 * @type string
+		 */
+		code: "OrganizationMembershipNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const AcceptOrganizationMembershipInvitationStatus409ErrorCodeEnum = {
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type AcceptOrganizationMembershipInvitationStatus409ErrorCodeEnum =
+	(typeof AcceptOrganizationMembershipInvitationStatus409ErrorCodeEnum)[keyof typeof AcceptOrganizationMembershipInvitationStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type AcceptOrganizationMembershipInvitationStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipConflict'
+		 * @type string
+		 */
+		code: AcceptOrganizationMembershipInvitationStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type AcceptOrganizationMembershipInvitationStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type AcceptOrganizationMembershipInvitationStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type AcceptOrganizationMembershipInvitationBody = {
+	/**
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedRevision: number;
+};
+
+/**
+ * @type object
+ */
+export type AcceptOrganizationMembershipInvitationOptions = {
+	body: AcceptOrganizationMembershipInvitationBody;
+	path: AcceptOrganizationMembershipInvitationPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type AcceptOrganizationMembershipInvitationResponses = {
+	"200": AcceptOrganizationMembershipInvitationStatus200;
+	"400": AcceptOrganizationMembershipInvitationStatus400;
+	"403": AcceptOrganizationMembershipInvitationStatus403;
+	"404": AcceptOrganizationMembershipInvitationStatus404;
+	"409": AcceptOrganizationMembershipInvitationStatus409;
+	"422": AcceptOrganizationMembershipInvitationStatus422;
+	"500": AcceptOrganizationMembershipInvitationStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type AcceptOrganizationMembershipInvitationResponse =
+	| AcceptOrganizationMembershipInvitationStatus200
+	| AcceptOrganizationMembershipInvitationStatus400
+	| AcceptOrganizationMembershipInvitationStatus403
+	| AcceptOrganizationMembershipInvitationStatus404
+	| AcceptOrganizationMembershipInvitationStatus409
+	| AcceptOrganizationMembershipInvitationStatus422
+	| AcceptOrganizationMembershipInvitationStatus500;
+
+/**
+ * @type object
+ */
+export type DeclineOrganizationMembershipInvitationPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	invitationId: string;
+};
+
+export const DeclineOrganizationMembershipInvitationStatus200StateEnum = {
+	pending: "pending",
+	accepted: "accepted",
+	declined: "declined",
+	cancelled: "cancelled",
+	expired: "expired",
+	invalidated: "invalidated",
+} as const;
+
+export type DeclineOrganizationMembershipInvitationStatus200StateEnum =
+	(typeof DeclineOrganizationMembershipInvitationStatus200StateEnum)[keyof typeof DeclineOrganizationMembershipInvitationStatus200StateEnum];
+
+/**
+ * @type object
+ */
+export type DeclineOrganizationMembershipInvitationStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+	organizationName: string | null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	recipientEntityId: string;
+	recipientName: string | null;
+	/**
+	 * @type string
+	 */
+	state: DeclineOrganizationMembershipInvitationStatus200StateEnum;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	revision: number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	resolvedAt: string | null;
+};
+
+/**
+ * @type object
+ */
+export type DeclineOrganizationMembershipInvitationStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type DeclineOrganizationMembershipInvitationStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: "ParticipationDenied";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeclineOrganizationMembershipInvitationStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipNotFound'
+		 * @type string
+		 */
+		code: "OrganizationMembershipNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeclineOrganizationMembershipInvitationStatus409ErrorCodeEnum = {
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type DeclineOrganizationMembershipInvitationStatus409ErrorCodeEnum =
+	(typeof DeclineOrganizationMembershipInvitationStatus409ErrorCodeEnum)[keyof typeof DeclineOrganizationMembershipInvitationStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeclineOrganizationMembershipInvitationStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipConflict'
+		 * @type string
+		 */
+		code: DeclineOrganizationMembershipInvitationStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeclineOrganizationMembershipInvitationStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeclineOrganizationMembershipInvitationStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeclineOrganizationMembershipInvitationBody = {
+	/**
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedRevision: number;
+};
+
+/**
+ * @type object
+ */
+export type DeclineOrganizationMembershipInvitationOptions = {
+	body: DeclineOrganizationMembershipInvitationBody;
+	path: DeclineOrganizationMembershipInvitationPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeclineOrganizationMembershipInvitationResponses = {
+	"200": DeclineOrganizationMembershipInvitationStatus200;
+	"400": DeclineOrganizationMembershipInvitationStatus400;
+	"403": DeclineOrganizationMembershipInvitationStatus403;
+	"404": DeclineOrganizationMembershipInvitationStatus404;
+	"409": DeclineOrganizationMembershipInvitationStatus409;
+	"422": DeclineOrganizationMembershipInvitationStatus422;
+	"500": DeclineOrganizationMembershipInvitationStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeclineOrganizationMembershipInvitationResponse =
+	| DeclineOrganizationMembershipInvitationStatus200
+	| DeclineOrganizationMembershipInvitationStatus400
+	| DeclineOrganizationMembershipInvitationStatus403
+	| DeclineOrganizationMembershipInvitationStatus404
+	| DeclineOrganizationMembershipInvitationStatus409
+	| DeclineOrganizationMembershipInvitationStatus422
+	| DeclineOrganizationMembershipInvitationStatus500;
+
+/**
+ * @type object
+ */
+export type LeaveOrganizationMembershipPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+};
+
+/**
+ * @type object
+ */
+export type LeaveOrganizationMembershipStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	organizationEntityId: string;
+	organizationName: string | null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	memberEntityId: string;
+	memberName: string | null;
+	/**
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	revision: number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	joinedAt: string;
+	removedAt: string | null;
+};
+
+/**
+ * @type object
+ */
+export type LeaveOrganizationMembershipStatus400 = MalformedRequestBody;
+
+/**
+ * @type object
+ */
+export type LeaveOrganizationMembershipStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: "ParticipationDenied";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type LeaveOrganizationMembershipStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipNotFound'
+		 * @type string
+		 */
+		code: "OrganizationMembershipNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const LeaveOrganizationMembershipStatus409ErrorCodeEnum = {
+	OrganizationMembershipConflict: "OrganizationMembershipConflict",
+	OrganizationMembershipCapacityExceeded: "OrganizationMembershipCapacityExceeded",
+} as const;
+
+export type LeaveOrganizationMembershipStatus409ErrorCodeEnum =
+	(typeof LeaveOrganizationMembershipStatus409ErrorCodeEnum)[keyof typeof LeaveOrganizationMembershipStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type LeaveOrganizationMembershipStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'OrganizationMembershipConflict'
+		 * @type string
+		 */
+		code: LeaveOrganizationMembershipStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type LeaveOrganizationMembershipStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type LeaveOrganizationMembershipStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type LeaveOrganizationMembershipBody = {
+	/**
+	 * @maxLength 9007199254740990
+	 * @type integer
+	 */
+	expectedRevision: number;
+};
+
+/**
+ * @type object
+ */
+export type LeaveOrganizationMembershipOptions = {
+	body: LeaveOrganizationMembershipBody;
+	path: LeaveOrganizationMembershipPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type LeaveOrganizationMembershipResponses = {
+	"200": LeaveOrganizationMembershipStatus200;
+	"400": LeaveOrganizationMembershipStatus400;
+	"403": LeaveOrganizationMembershipStatus403;
+	"404": LeaveOrganizationMembershipStatus404;
+	"409": LeaveOrganizationMembershipStatus409;
+	"422": LeaveOrganizationMembershipStatus422;
+	"500": LeaveOrganizationMembershipStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type LeaveOrganizationMembershipResponse =
+	| LeaveOrganizationMembershipStatus200
+	| LeaveOrganizationMembershipStatus400
+	| LeaveOrganizationMembershipStatus403
+	| LeaveOrganizationMembershipStatus404
+	| LeaveOrganizationMembershipStatus409
+	| LeaveOrganizationMembershipStatus422
+	| LeaveOrganizationMembershipStatus500;
+
+export const ListManagedOrganizationsCapability = {
+	"entity.publish": "entity.publish",
+	"entity.membership": "entity.membership",
+	"entity.security": "entity.security",
+} as const;
+
+export type ListManagedOrganizationsCapability =
+	(typeof ListManagedOrganizationsCapability)[keyof typeof ListManagedOrganizationsCapability];
+
+/**
+ * @type object
+ */
 export type ListManagedOrganizationsQuery = {
 	/**
 	 * @description
@@ -59893,6 +62038,10 @@ export type ListManagedOrganizationsQuery = {
 	 * @type string | undefined
 	 */
 	afterId?: string;
+	/**
+	 * @type string | undefined
+	 */
+	capability?: ListManagedOrganizationsCapability;
 };
 
 /**
@@ -59909,6 +62058,7 @@ export type ListManagedOrganizationsStatus200 = {
 		 * @type string
 		 */
 		entityId: string;
+		name: string | null;
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -61009,6 +63159,192 @@ export type IssueParticipationGrantResponse =
 	| IssueParticipationGrantStatus400
 	| IssueParticipationGrantStatus422
 	| IssueParticipationGrantStatus500;
+
+/**
+ * @type object
+ */
+export type ListManagedEntityGrantsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+};
+
+/**
+ * @type object
+ */
+export type ListManagedEntityGrantsQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	afterId?: string;
+};
+
+export const ListManagedEntityGrantsStatus200ItemsCapabilityEnum = {
+	"catalog.read": "catalog.read",
+	"catalog.edit": "catalog.edit",
+	"entity.publish": "entity.publish",
+	"entity.membership": "entity.membership",
+	"entity.security": "entity.security",
+	"proposal.adopt": "proposal.adopt",
+} as const;
+
+export type ListManagedEntityGrantsStatus200ItemsCapabilityEnum =
+	(typeof ListManagedEntityGrantsStatus200ItemsCapabilityEnum)[keyof typeof ListManagedEntityGrantsStatus200ItemsCapabilityEnum];
+
+export const ListManagedEntityGrantsStatus200ItemsTargetOwnerEnum = {
+	publishing: "publishing",
+	music: "music",
+	program: "program",
+	software: "software",
+	entity: "entity",
+	grouping: "grouping",
+	reference: "reference",
+	distribution: "distribution",
+} as const;
+
+export type ListManagedEntityGrantsStatus200ItemsTargetOwnerEnum =
+	(typeof ListManagedEntityGrantsStatus200ItemsTargetOwnerEnum)[keyof typeof ListManagedEntityGrantsStatus200ItemsTargetOwnerEnum];
+
+/**
+ * @type object
+ */
+export type ListManagedEntityGrantsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		revision: number;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		actingEntityId: string;
+		/**
+		 * @type string
+		 */
+		capability: ListManagedEntityGrantsStatus200ItemsCapabilityEnum;
+		/**
+		 * @type object
+		 */
+		target: {
+			/**
+			 * @type string
+			 */
+			owner: ListManagedEntityGrantsStatus200ItemsTargetOwnerEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+		};
+		proposal: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			sourceRecordId: string;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			proposalId: string;
+		} | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		expiresAt: string | null;
+		revokedAt: string | null;
+		recipient:
+			| (
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "account";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							entityId: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "service";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							servicePrincipalId: string;
+					  }
+			  )
+			| null;
+		recipientName: string | null;
+	}[];
+	nextCursor: string | null;
+};
+
+/**
+ * @type object
+ */
+export type ListManagedEntityGrantsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type ListManagedEntityGrantsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type ListManagedEntityGrantsOptions = {
+	body?: never;
+	path: ListManagedEntityGrantsPath;
+	query?: ListManagedEntityGrantsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type ListManagedEntityGrantsResponses = {
+	"200": ListManagedEntityGrantsStatus200;
+	"422": ListManagedEntityGrantsStatus422;
+	"500": ListManagedEntityGrantsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ListManagedEntityGrantsResponse =
+	| ListManagedEntityGrantsStatus200
+	| ListManagedEntityGrantsStatus422
+	| ListManagedEntityGrantsStatus500;
 
 /**
  * @type object
@@ -129810,31 +132146,31 @@ export type GetApiFavoritesQuery = {
 	limit?: number;
 };
 
-export const GetApiFavoritesStatus200ItemsPreviewKindEnum = {
-	slug_namespace: "slug_namespace",
-	book: "book",
+export const GetApiFavoritesStatus200ItemsTargetOwnerEnum = {
+	publishing: "publishing",
+	music: "music",
+	program: "program",
 	software: "software",
-	media: "media",
+	entity: "entity",
+	grouping: "grouping",
+	reference: "reference",
+	distribution: "distribution",
 	video: "video",
 	audio: "audio",
-	release: "release",
-	entity: "entity",
-	label: "label",
-	tag: "tag",
-	tag_path: "tag_path",
-	series: "series",
-	zone: "zone",
-	zone_page: "zone_page",
-	custom_theme: "custom_theme",
-	collection: "collection",
 	post: "post",
 	poll: "poll",
+	zone: "zone",
 	realm: "realm",
 	realm_rule: "realm_rule",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	tag: "tag",
+	tag_path: "tag_path",
+	label: "label",
 } as const;
 
-export type GetApiFavoritesStatus200ItemsPreviewKindEnum =
-	(typeof GetApiFavoritesStatus200ItemsPreviewKindEnum)[keyof typeof GetApiFavoritesStatus200ItemsPreviewKindEnum];
+export type GetApiFavoritesStatus200ItemsTargetOwnerEnum =
+	(typeof GetApiFavoritesStatus200ItemsTargetOwnerEnum)[keyof typeof GetApiFavoritesStatus200ItemsTargetOwnerEnum];
 
 /**
  * @type object
@@ -129851,11 +132187,20 @@ export type GetApiFavoritesStatus200 = {
 	 */
 	items: {
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type object
 		 */
-		targetUnitId: string;
+		target: {
+			/**
+			 * @type string
+			 */
+			owner: GetApiFavoritesStatus200ItemsTargetOwnerEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+		};
 		/**
 		 * @type string
 		 */
@@ -129865,10 +132210,6 @@ export type GetApiFavoritesStatus200 = {
 		 * @type object
 		 */
 		preview: {
-			/**
-			 * @type string
-			 */
-			kind: GetApiFavoritesStatus200ItemsPreviewKindEnum;
 			title: string | null;
 			summary: string | null;
 			language: string | null;
@@ -129983,31 +132324,31 @@ export type GetApiFavoritesByTargetUnitIdPath = {
 	targetUnitId: string;
 };
 
-export const GetApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum = {
-	slug_namespace: "slug_namespace",
-	book: "book",
+export const GetApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum = {
+	publishing: "publishing",
+	music: "music",
+	program: "program",
 	software: "software",
-	media: "media",
+	entity: "entity",
+	grouping: "grouping",
+	reference: "reference",
+	distribution: "distribution",
 	video: "video",
 	audio: "audio",
-	release: "release",
-	entity: "entity",
-	label: "label",
-	tag: "tag",
-	tag_path: "tag_path",
-	series: "series",
-	zone: "zone",
-	zone_page: "zone_page",
-	custom_theme: "custom_theme",
-	collection: "collection",
 	post: "post",
 	poll: "poll",
+	zone: "zone",
 	realm: "realm",
 	realm_rule: "realm_rule",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	tag: "tag",
+	tag_path: "tag_path",
+	label: "label",
 } as const;
 
-export type GetApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum =
-	(typeof GetApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum)[keyof typeof GetApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum];
+export type GetApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum =
+	(typeof GetApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum)[keyof typeof GetApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum];
 
 /**
  * @type object
@@ -130021,11 +132362,20 @@ export type GetApiFavoritesByTargetUnitIdStatus200 = {
 	revision: number;
 	entry: {
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type object
 		 */
-		targetUnitId: string;
+		target: {
+			/**
+			 * @type string
+			 */
+			owner: GetApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+		};
 		/**
 		 * @type string
 		 */
@@ -130035,10 +132385,6 @@ export type GetApiFavoritesByTargetUnitIdStatus200 = {
 		 * @type object
 		 */
 		preview: {
-			/**
-			 * @type string
-			 */
-			kind: GetApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum;
 			title: string | null;
 			summary: string | null;
 			language: string | null;
@@ -130152,31 +132498,31 @@ export type PutApiFavoritesByTargetUnitIdPath = {
 	targetUnitId: string;
 };
 
-export const PutApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum = {
-	slug_namespace: "slug_namespace",
-	book: "book",
+export const PutApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum = {
+	publishing: "publishing",
+	music: "music",
+	program: "program",
 	software: "software",
-	media: "media",
+	entity: "entity",
+	grouping: "grouping",
+	reference: "reference",
+	distribution: "distribution",
 	video: "video",
 	audio: "audio",
-	release: "release",
-	entity: "entity",
-	label: "label",
-	tag: "tag",
-	tag_path: "tag_path",
-	series: "series",
-	zone: "zone",
-	zone_page: "zone_page",
-	custom_theme: "custom_theme",
-	collection: "collection",
 	post: "post",
 	poll: "poll",
+	zone: "zone",
 	realm: "realm",
 	realm_rule: "realm_rule",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	tag: "tag",
+	tag_path: "tag_path",
+	label: "label",
 } as const;
 
-export type PutApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum =
-	(typeof PutApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum)[keyof typeof PutApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum];
+export type PutApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum =
+	(typeof PutApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum)[keyof typeof PutApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum];
 
 /**
  * @type object
@@ -130189,11 +132535,20 @@ export type PutApiFavoritesByTargetUnitIdStatus200 = {
 	revision: number;
 	entry: {
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type object
 		 */
-		targetUnitId: string;
+		target: {
+			/**
+			 * @type string
+			 */
+			owner: PutApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+		};
 		/**
 		 * @type string
 		 */
@@ -130203,10 +132558,6 @@ export type PutApiFavoritesByTargetUnitIdStatus200 = {
 		 * @type object
 		 */
 		preview: {
-			/**
-			 * @type string
-			 */
-			kind: PutApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum;
 			title: string | null;
 			summary: string | null;
 			language: string | null;
@@ -130346,31 +132697,31 @@ export type DeleteApiFavoritesByTargetUnitIdPath = {
 	targetUnitId: string;
 };
 
-export const DeleteApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum = {
-	slug_namespace: "slug_namespace",
-	book: "book",
+export const DeleteApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum = {
+	publishing: "publishing",
+	music: "music",
+	program: "program",
 	software: "software",
-	media: "media",
+	entity: "entity",
+	grouping: "grouping",
+	reference: "reference",
+	distribution: "distribution",
 	video: "video",
 	audio: "audio",
-	release: "release",
-	entity: "entity",
-	label: "label",
-	tag: "tag",
-	tag_path: "tag_path",
-	series: "series",
-	zone: "zone",
-	zone_page: "zone_page",
-	custom_theme: "custom_theme",
-	collection: "collection",
 	post: "post",
 	poll: "poll",
+	zone: "zone",
 	realm: "realm",
 	realm_rule: "realm_rule",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	tag: "tag",
+	tag_path: "tag_path",
+	label: "label",
 } as const;
 
-export type DeleteApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum =
-	(typeof DeleteApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum)[keyof typeof DeleteApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum];
+export type DeleteApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum =
+	(typeof DeleteApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum)[keyof typeof DeleteApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum];
 
 /**
  * @type object
@@ -130383,11 +132734,20 @@ export type DeleteApiFavoritesByTargetUnitIdStatus200 = {
 	revision: number;
 	entry: {
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type object
 		 */
-		targetUnitId: string;
+		target: {
+			/**
+			 * @type string
+			 */
+			owner: DeleteApiFavoritesByTargetUnitIdStatus200EntryTargetOwnerEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+		};
 		/**
 		 * @type string
 		 */
@@ -130397,10 +132757,6 @@ export type DeleteApiFavoritesByTargetUnitIdStatus200 = {
 		 * @type object
 		 */
 		preview: {
-			/**
-			 * @type string
-			 */
-			kind: DeleteApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum;
 			title: string | null;
 			summary: string | null;
 			language: string | null;
@@ -130679,31 +133035,31 @@ export const GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200OperationEnu
 export type GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200OperationEnum =
 	(typeof GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200OperationEnum)[keyof typeof GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200OperationEnum];
 
-export const GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotPreviewKindEnum = {
-	slug_namespace: "slug_namespace",
-	book: "book",
+export const GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotTargetOwnerEnum = {
+	publishing: "publishing",
+	music: "music",
+	program: "program",
 	software: "software",
-	media: "media",
+	entity: "entity",
+	grouping: "grouping",
+	reference: "reference",
+	distribution: "distribution",
 	video: "video",
 	audio: "audio",
-	release: "release",
-	entity: "entity",
-	label: "label",
-	tag: "tag",
-	tag_path: "tag_path",
-	series: "series",
-	zone: "zone",
-	zone_page: "zone_page",
-	custom_theme: "custom_theme",
-	collection: "collection",
 	post: "post",
 	poll: "poll",
+	zone: "zone",
 	realm: "realm",
 	realm_rule: "realm_rule",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	tag: "tag",
+	tag_path: "tag_path",
+	label: "label",
 } as const;
 
-export type GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotPreviewKindEnum =
-	(typeof GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotPreviewKindEnum)[keyof typeof GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotPreviewKindEnum];
+export type GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotTargetOwnerEnum =
+	(typeof GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotTargetOwnerEnum)[keyof typeof GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotTargetOwnerEnum];
 
 /**
  * @type object
@@ -130726,11 +133082,20 @@ export type GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200 = {
 	createdAt: string;
 	snapshot: {
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type object
 		 */
-		targetUnitId: string;
+		target: {
+			/**
+			 * @type string
+			 */
+			owner: GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotTargetOwnerEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+		};
 		/**
 		 * @type string
 		 */
@@ -130740,10 +133105,6 @@ export type GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200 = {
 		 * @type object
 		 */
 		preview: {
-			/**
-			 * @type string
-			 */
-			kind: GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotPreviewKindEnum;
 			title: string | null;
 			summary: string | null;
 			language: string | null;
@@ -130840,31 +133201,31 @@ export type PostApiFavoritesByTargetUnitIdRestorePath = {
 	targetUnitId: string;
 };
 
-export const PostApiFavoritesByTargetUnitIdRestoreStatus200EntryPreviewKindEnum = {
-	slug_namespace: "slug_namespace",
-	book: "book",
+export const PostApiFavoritesByTargetUnitIdRestoreStatus200EntryTargetOwnerEnum = {
+	publishing: "publishing",
+	music: "music",
+	program: "program",
 	software: "software",
-	media: "media",
+	entity: "entity",
+	grouping: "grouping",
+	reference: "reference",
+	distribution: "distribution",
 	video: "video",
 	audio: "audio",
-	release: "release",
-	entity: "entity",
-	label: "label",
-	tag: "tag",
-	tag_path: "tag_path",
-	series: "series",
-	zone: "zone",
-	zone_page: "zone_page",
-	custom_theme: "custom_theme",
-	collection: "collection",
 	post: "post",
 	poll: "poll",
+	zone: "zone",
 	realm: "realm",
 	realm_rule: "realm_rule",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	tag: "tag",
+	tag_path: "tag_path",
+	label: "label",
 } as const;
 
-export type PostApiFavoritesByTargetUnitIdRestoreStatus200EntryPreviewKindEnum =
-	(typeof PostApiFavoritesByTargetUnitIdRestoreStatus200EntryPreviewKindEnum)[keyof typeof PostApiFavoritesByTargetUnitIdRestoreStatus200EntryPreviewKindEnum];
+export type PostApiFavoritesByTargetUnitIdRestoreStatus200EntryTargetOwnerEnum =
+	(typeof PostApiFavoritesByTargetUnitIdRestoreStatus200EntryTargetOwnerEnum)[keyof typeof PostApiFavoritesByTargetUnitIdRestoreStatus200EntryTargetOwnerEnum];
 
 /**
  * @type object
@@ -130877,11 +133238,20 @@ export type PostApiFavoritesByTargetUnitIdRestoreStatus200 = {
 	revision: number;
 	entry: {
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type object
 		 */
-		targetUnitId: string;
+		target: {
+			/**
+			 * @type string
+			 */
+			owner: PostApiFavoritesByTargetUnitIdRestoreStatus200EntryTargetOwnerEnum;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+		};
 		/**
 		 * @type string
 		 */
@@ -130891,10 +133261,6 @@ export type PostApiFavoritesByTargetUnitIdRestoreStatus200 = {
 		 * @type object
 		 */
 		preview: {
-			/**
-			 * @type string
-			 */
-			kind: PostApiFavoritesByTargetUnitIdRestoreStatus200EntryPreviewKindEnum;
 			title: string | null;
 			summary: string | null;
 			language: string | null;

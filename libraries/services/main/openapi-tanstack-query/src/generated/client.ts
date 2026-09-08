@@ -5,6 +5,8 @@
 
 import type { Options, RequestResult } from "./.kubb/client";
 import type {
+	AcceptOrganizationMembershipInvitationOptions,
+	AcceptOrganizationMembershipInvitationResponses,
 	AddCatalogIdentifierOptions,
 	AddCatalogIdentifierResponses,
 	AddCatalogNameOptions,
@@ -311,6 +313,24 @@ import type {
 	PutApiAccountBlocksByIdResponses,
 	DeleteApiAccountBlocksByIdOptions,
 	DeleteApiAccountBlocksByIdResponses,
+	ListManagedOrganizationMembersOptions,
+	ListManagedOrganizationMembersResponses,
+	ListManagedOrganizationInvitationsOptions,
+	ListManagedOrganizationInvitationsResponses,
+	InviteOrganizationMemberOptions,
+	InviteOrganizationMemberResponses,
+	CancelOrganizationMembershipInvitationOptions,
+	CancelOrganizationMembershipInvitationResponses,
+	RemoveOrganizationMemberOptions,
+	RemoveOrganizationMemberResponses,
+	ListOwnOrganizationMembershipInvitationsOptions,
+	ListOwnOrganizationMembershipInvitationsResponses,
+	ListOwnOrganizationMembershipsOptions,
+	ListOwnOrganizationMembershipsResponses,
+	DeclineOrganizationMembershipInvitationOptions,
+	DeclineOrganizationMembershipInvitationResponses,
+	LeaveOrganizationMembershipOptions,
+	LeaveOrganizationMembershipResponses,
 	ListManagedOrganizationsOptions,
 	ListManagedOrganizationsResponses,
 	CreateManagedOrganizationOptions,
@@ -329,6 +349,8 @@ import type {
 	ListParticipationGrantsResponses,
 	IssueParticipationGrantOptions,
 	IssueParticipationGrantResponses,
+	ListManagedEntityGrantsOptions,
+	ListManagedEntityGrantsResponses,
 	SelectParticipationOptions,
 	SelectParticipationResponses,
 	RevokeParticipationGrantOptions,
@@ -3847,6 +3869,166 @@ export function deleteApiAccountBlocksById<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/members}
+ */
+export function listManagedOrganizationMembers<ThrowOnError extends boolean = true>(
+	options: Options<ListManagedOrganizationMembersOptions, ThrowOnError>,
+): Promise<RequestResult<ListManagedOrganizationMembersResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/participation/membership/organizations/{organizationEntityId}/members",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<ListManagedOrganizationMembersResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/invitations}
+ */
+export function listManagedOrganizationInvitations<ThrowOnError extends boolean = true>(
+	options: Options<ListManagedOrganizationInvitationsOptions, ThrowOnError>,
+): Promise<RequestResult<ListManagedOrganizationInvitationsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/participation/membership/organizations/{organizationEntityId}/invitations",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<ListManagedOrganizationInvitationsResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/invitations}
+ */
+export function inviteOrganizationMember<ThrowOnError extends boolean = true>(
+	options: Options<InviteOrganizationMemberOptions, ThrowOnError>,
+): Promise<RequestResult<InviteOrganizationMemberResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/membership/organizations/{organizationEntityId}/invitations",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<InviteOrganizationMemberResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/invitations/:invitationId/cancel}
+ */
+export function cancelOrganizationMembershipInvitation<ThrowOnError extends boolean = true>(
+	options: Options<CancelOrganizationMembershipInvitationOptions, ThrowOnError>,
+): Promise<RequestResult<CancelOrganizationMembershipInvitationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/membership/organizations/{organizationEntityId}/invitations/{invitationId}/cancel",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<CancelOrganizationMembershipInvitationResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/membership/organizations/:organizationEntityId/members/:memberEntityId/remove}
+ */
+export function removeOrganizationMember<ThrowOnError extends boolean = true>(
+	options: Options<RemoveOrganizationMemberOptions, ThrowOnError>,
+): Promise<RequestResult<RemoveOrganizationMemberResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/membership/organizations/{organizationEntityId}/members/{memberEntityId}/remove",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<RemoveOrganizationMemberResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/membership/me/invitations}
+ */
+export function listOwnOrganizationMembershipInvitations<ThrowOnError extends boolean = true>(
+	options: Options<ListOwnOrganizationMembershipInvitationsOptions, ThrowOnError> = {},
+): Promise<RequestResult<ListOwnOrganizationMembershipInvitationsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/participation/membership/me/invitations",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<ListOwnOrganizationMembershipInvitationsResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/membership/me/organizations}
+ */
+export function listOwnOrganizationMemberships<ThrowOnError extends boolean = true>(
+	options: Options<ListOwnOrganizationMembershipsOptions, ThrowOnError> = {},
+): Promise<RequestResult<ListOwnOrganizationMembershipsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/participation/membership/me/organizations",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<ListOwnOrganizationMembershipsResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/membership/invitations/:invitationId/accept}
+ */
+export function acceptOrganizationMembershipInvitation<ThrowOnError extends boolean = true>(
+	options: Options<AcceptOrganizationMembershipInvitationOptions, ThrowOnError>,
+): Promise<RequestResult<AcceptOrganizationMembershipInvitationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/membership/invitations/{invitationId}/accept",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<AcceptOrganizationMembershipInvitationResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/membership/invitations/:invitationId/decline}
+ */
+export function declineOrganizationMembershipInvitation<ThrowOnError extends boolean = true>(
+	options: Options<DeclineOrganizationMembershipInvitationOptions, ThrowOnError>,
+): Promise<RequestResult<DeclineOrganizationMembershipInvitationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/membership/invitations/{invitationId}/decline",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<DeclineOrganizationMembershipInvitationResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/membership/me/organizations/:organizationEntityId/leave}
+ */
+export function leaveOrganizationMembership<ThrowOnError extends boolean = true>(
+	options: Options<LeaveOrganizationMembershipOptions, ThrowOnError>,
+): Promise<RequestResult<LeaveOrganizationMembershipResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/membership/me/organizations/{organizationEntityId}/leave",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<LeaveOrganizationMembershipResponses, ThrowOnError>>;
+}
+
+/**
  * {@link /api/v1/participation/organizations}
  */
 export function listManagedOrganizations<ThrowOnError extends boolean = true>(
@@ -3988,6 +4170,22 @@ export function issueParticipationGrant<ThrowOnError extends boolean = true>(
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<IssueParticipationGrantResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/entities/:id/grants}
+ */
+export function listManagedEntityGrants<ThrowOnError extends boolean = true>(
+	options: Options<ListManagedEntityGrantsOptions, ThrowOnError>,
+): Promise<RequestResult<ListManagedEntityGrantsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/participation/entities/{id}/grants",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<ListManagedEntityGrantsResponses, ThrowOnError>>;
 }
 
 /**
