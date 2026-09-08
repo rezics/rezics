@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { inArray, sql } from "drizzle-orm";
 import { check, foreignKey, index, text, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
@@ -18,16 +19,14 @@ import {
 	type RealmTagQueryStrategy,
 	RealmTagQueryStrategyValues,
 } from "./contract-values";
-import { contentRating, unit } from "./unit";
+import { contentRating } from "./platform-identity";
 
 /** A stable Unit-owned ordered-tree resource. */
 export const contentStructure = pgTable(
 	"content_structure",
 	{
 		id: createUuidv7PrimaryKey(),
-		ownerUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		ownerUnitId: uuid().notNull(),
 		/** Runtime kind schemas provide the stronger discriminated-union proof. */
 		kind: text().$type<ContentStructureKind>().notNull(),
 		/** NavigationDocument root key; null for non-navigation structures. */
@@ -35,8 +34,12 @@ export const contentStructure = pgTable(
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("ownerUnit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("content_structure", "ownerUnit", table, false, table.ownerUnitId),
+
 		unique("content_structure_id_owner_key").on(table.id, table.ownerUnitId),
 		uniqueIndex("content_structure_singleton_kind_key")
 			.on(table.ownerUnitId, table.kind)
@@ -75,12 +78,10 @@ export const contentStructureNode = pgTable(
 		structureId: uuid().notNull(),
 		ownerUnitId: uuid().notNull(),
 		parentId: uuid(),
-		contentUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+		contentUnitId: uuid().notNull(),
 		documentKey: text(),
 		targetKind: text().$type<ContentStructureTargetKind>().default("content").notNull(),
-		targetUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
+		targetUnitId: uuid(),
 		targetUrl: text(),
 		position: fractionalIndexPosition().notNull(),
 		contentRating: contentRating(),
@@ -92,8 +93,26 @@ export const contentStructureNode = pgTable(
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("contentUnit", "restrict"),
+		...unitReferenceColumns("targetUnit", "restrict"),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"content_structure_node",
+			"contentUnit",
+			table,
+			false,
+			table.contentUnitId,
+		),
+		...unitReferenceConstraints(
+			"content_structure_node",
+			"targetUnit",
+			table,
+			true,
+			table.targetUnitId,
+		),
+
 		unique("content_structure_node_id_structure_key").on(table.id, table.structureId),
 		unique("content_structure_node_id_owner_key").on(table.id, table.ownerUnitId),
 		foreignKey({

@@ -1,9 +1,8 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { inArray, sql } from "drizzle-orm";
 import {
-	boolean,
 	check,
 	index,
-	integer,
 	pgEnum,
 	primaryKey,
 	smallint,
@@ -34,7 +33,6 @@ import {
 	toEnumValues,
 } from "./contract-values";
 import { post } from "./post";
-import { unit } from "./unit";
 
 export const associationKind = pgEnum("association_kind", toEnumValues(AssociationKindValues));
 export const associationProposalDirection = pgEnum(
@@ -46,34 +44,13 @@ export const associationProposalResolution = pgEnum(
 	toEnumValues(AssociationProposalResolutionValues),
 );
 
-export const entity = pgTable(
-	"entity",
-	{
-		id: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		kind: text().notNull(),
-		verified: boolean().default(false).notNull(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		index("entity_kind_idx").on(table.kind),
-		check("entity_kind_not_blank", sql`btrim(${table.kind}) <> ''`),
-	],
-);
-
 /** Two-sided consent workflow for a relationship stored on a source Unit. */
 export const unitAssociationProposal = pgTable(
 	"unit_association_proposal",
 	{
 		id: createUuidv7PrimaryKey(),
-		sourceUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		targetUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		sourceUnitId: uuid().notNull(),
+		targetUnitId: uuid().notNull(),
 		/**
 		 * Optional evidence context for subject proposals. Credit proposals do
 		 * not use a context Post; any stored context must be a wiki Post.
@@ -91,8 +68,26 @@ export const unitAssociationProposal = pgTable(
 		resolvedByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("sourceUnit", "cascade"),
+		...unitReferenceColumns("targetUnit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"unit_association_proposal",
+			"sourceUnit",
+			table,
+			false,
+			table.sourceUnitId,
+		),
+		...unitReferenceConstraints(
+			"unit_association_proposal",
+			"targetUnit",
+			table,
+			false,
+			table.targetUnitId,
+		),
+
 		index("unit_association_proposal_source_unresolved_idx")
 			.on(table.sourceUnitId, table.createdAt.desc(), table.id.desc())
 			.where(sql`${table.resolution} is null`),
@@ -145,9 +140,7 @@ export const creditAttribution = pgTable(
 	"credit_attribution",
 	{
 		id: createUuidv7PrimaryKey(),
-		sourceUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		sourceUnitId: uuid().notNull(),
 		creditedEntityId: uuid()
 			.notNull()
 			.references(() => entityIdentity.id, { onDelete: "restrict" }),
@@ -155,8 +148,18 @@ export const creditAttribution = pgTable(
 		position: fractionalIndexPosition().default(sql`'a0'::text`).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("sourceUnit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"credit_attribution",
+			"sourceUnit",
+			table,
+			false,
+			table.sourceUnitId,
+		),
+
 		unique("credit_attribution_source_credited_role_key").on(
 			table.sourceUnitId,
 			table.creditedEntityId,
@@ -192,19 +195,21 @@ export const subjectAssociation = pgTable(
 	"subject_association",
 	{
 		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		entityId: uuid()
 			.notNull()
-			.references(() => entity.id, { onDelete: "restrict" }),
+			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		contextPostId: uuid().references(() => post.id, { onDelete: "restrict" }),
 		role: text().$type<SubjectAssociationRole>().notNull(),
 		position: fractionalIndexPosition().default(sql`'a0'::text`).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("subject_association", "unit", table, false, table.unitId),
+
 		unique("subject_association_unit_entity_role_key").on(table.unitId, table.entityId, table.role),
 		index("subject_association_entity_role_idx").on(table.entityId, table.role),
 		index("subject_association_search_unit_idx").on(table.entityId, table.unitId),
@@ -241,60 +246,6 @@ export const subjectAssociationJudgment = pgTable(
 		check(
 			"subject_association_judgment_spoiler_level_check",
 			sql`${table.spoilerLevel} between 0 and 2`,
-		),
-	],
-);
-
-/**
- * Canonical or context-specific point measurements for an Entity.
- *
- * Cross-row cardinality and context-kind checks are installed by the canonical
- * PostgreSQL guard: one canonical row plus at most eight contextual rows.
- */
-export const entityMeasurement = pgTable(
-	"entity_measurement",
-	{
-		id: createUuidv7PrimaryKey(),
-		entityId: uuid()
-			.notNull()
-			.references(() => entity.id, { onDelete: "cascade" }),
-		contextUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
-		heightMillimetres: integer(),
-		weightGrams: integer(),
-		bustMillimetres: integer(),
-		waistMillimetres: integer(),
-		hipsMillimetres: integer(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		unique("entity_measurement_entity_context_key")
-			.on(table.entityId, table.contextUnitId)
-			.nullsNotDistinct(),
-		index("entity_measurement_context_idx")
-			.on(table.contextUnitId, table.entityId)
-			.where(sql`${table.contextUnitId} is not null`),
-		check(
-			"entity_measurement_value_present_check",
-			sql`num_nonnulls(
-				${table.heightMillimetres},
-				${table.weightGrams},
-				${table.bustMillimetres},
-				${table.waistMillimetres},
-				${table.hipsMillimetres}
-			) > 0`,
-		),
-		check(
-			"entity_measurement_positive_check",
-			sql`coalesce(${table.heightMillimetres} > 0, true)
-				and coalesce(${table.weightGrams} > 0, true)
-				and coalesce(${table.bustMillimetres} > 0, true)
-				and coalesce(${table.waistMillimetres} > 0, true)
-				and coalesce(${table.hipsMillimetres} > 0, true)`,
-		),
-		check(
-			"entity_measurement_context_not_self_check",
-			sql`${table.contextUnitId} is null or ${table.contextUnitId} <> ${table.entityId}`,
 		),
 	],
 );

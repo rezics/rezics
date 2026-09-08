@@ -1,10 +1,10 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { inArray, sql } from "drizzle-orm";
 import { check, index, text, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn, createUuidv7PrimaryKey } from "./columns";
 import { SlugAddressKindValues, type SlugAddressKind } from "./contract-values";
-import { unit } from "./unit";
 
 /**
  * Optional address entries for ID-addressed Units.
@@ -29,17 +29,25 @@ export const unitSlugAddress = pgTable(
 	{
 		id: createUuidv7PrimaryKey(),
 		kind: text().$type<SlugAddressKind>().notNull(),
-		scopeUnitId: uuid("scope_unit_id").references(() => unit.id, {
-			onDelete: "restrict",
-		}),
+		scopeUnitId: uuid("scope_unit_id"),
 		slug: text().notNull(),
-		targetUnitId: uuid("target_unit_id")
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		targetUnitId: uuid("target_unit_id").notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("scopeUnit", "restrict"),
+		...unitReferenceColumns("targetUnit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_slug_address", "scopeUnit", table, true, table.scopeUnitId),
+		...unitReferenceConstraints(
+			"unit_slug_address",
+			"targetUnit",
+			table,
+			false,
+			table.targetUnitId,
+		),
+
 		unique("unit_slug_address_scope_slug_key").on(table.scopeUnitId, table.slug).nullsNotDistinct(),
 		uniqueIndex("unit_slug_address_target_canonical_key")
 			.on(table.targetUnitId)

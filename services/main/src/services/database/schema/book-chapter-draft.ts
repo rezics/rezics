@@ -11,7 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { book } from "./book";
+import { publishingTextVersion } from "./catalog-publishing";
 import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
@@ -37,7 +37,7 @@ export const bookChapterDraftJob = pgTable(
 		id: createUuidv7PrimaryKey(),
 		bookId: uuid()
 			.notNull()
-			.references(() => book.id, { onDelete: "restrict" }),
+			.references(() => publishingTextVersion.id, { onDelete: "restrict" }),
 		structureId: uuid().references(() => contentStructure.id, { onDelete: "restrict" }),
 		requestedByProfileId: uuid()
 			.notNull()

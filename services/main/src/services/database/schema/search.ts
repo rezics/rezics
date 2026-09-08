@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import type { SharedSearchQueryDocument } from "@rezics/filter";
 import { sql } from "drizzle-orm";
 import { bigint, check, index, jsonb, text, uuid } from "drizzle-orm/pg-core";
@@ -7,7 +8,6 @@ import { entityIdentity } from "./catalog-identity";
 import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
 import type { UnitKind } from "./contract-values";
 import { CanonicalPgroongaIndexes } from "./pgroonga";
-import { unit } from "./unit";
 
 const UnitSearchTextColumnNames = [
 	"unit_kind",
@@ -35,9 +35,7 @@ const UnitSearchDocumentLargeOptions = {
 export const unitSearchDocument = pgTable(
 	"unit_search_document",
 	{
-		unitId: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().primaryKey(),
 		unitKind: text().$type<UnitKind>().notNull(),
 		unitUpdatedAtMicros: bigint({ mode: "bigint" }).notNull(),
 		searchOrderKey: text().notNull(),
@@ -49,8 +47,12 @@ export const unitSearchDocument = pgTable(
 		textDe: text(),
 		textFr: text(),
 		textEs: text(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_search_document", "unit", table, false, table.unitId),
+
 		index(CanonicalPgroongaIndexes[3])
 			.using(
 				"pgroonga",

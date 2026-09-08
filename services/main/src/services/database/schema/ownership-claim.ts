@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { inArray, sql } from "drizzle-orm";
 import { check, index, pgEnum, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
@@ -15,7 +16,6 @@ import {
 	UnitOwnershipClaimResolutionValues,
 	type UnitOwnershipClaimResolution,
 } from "./contract-values";
-import { unit } from "./unit";
 
 export const unitOwnershipClaimResolution = pgEnum(
 	"unit_ownership_claim_resolution",
@@ -32,9 +32,7 @@ export const unitOwnershipClaim = pgTable(
 	"unit_ownership_claim",
 	{
 		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+		unitId: uuid().notNull(),
 		claimantProfileId: uuid()
 			.notNull()
 			.references(() => entityIdentity.id, { onDelete: "restrict" }),
@@ -51,8 +49,12 @@ export const unitOwnershipClaim = pgTable(
 		}),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "restrict"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_ownership_claim", "unit", table, false, table.unitId),
+
 		uniqueIndex("unit_ownership_claim_pending_profile_unit_key")
 			.on(table.unitId, table.claimantProfileId)
 			.where(sql`${table.resolution} is null`),

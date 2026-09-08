@@ -23,7 +23,7 @@ import {
 	StoredUiLocaleValues,
 } from "./contract-values";
 import { users } from "./auth";
-import { contentRating, resourceVisibility } from "./unit";
+import { contentRating, resourceVisibility } from "./platform-identity";
 import { realm } from "./realm";
 
 export const accountPreference = pgTable(

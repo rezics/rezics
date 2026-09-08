@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { inArray, sql } from "drizzle-orm";
 import {
 	bigint,
@@ -31,8 +32,8 @@ import {
 	UnitStatusActorKindValues,
 	toEnumValues,
 } from "./contract-values";
-import { entity } from "./entity";
-import { unit, unitStatus } from "./unit";
+
+import { unitStatus } from "./platform-identity";
 
 /**
  * History-owned, rebuildable summary of one Profile's participation in one resource.
@@ -46,17 +47,25 @@ export const profileResourceParticipation = pgTable(
 		profileId: uuid()
 			.notNull()
 			.references(() => entityIdentity.id, { onDelete: "cascade" }),
-		resourceUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		resourceUnitId: uuid().notNull(),
 		createdResourceAt: createTimestampMsColumn(),
 		firstContributedAt: createTimestampMsColumn(),
 		lastContributedAt: createTimestampMsColumn(),
 		contributionCount: bigint({ mode: "number" }).default(0).notNull(),
 		lastParticipatedAt: createTimestampMsColumn().notNull(),
 		projectionUpdatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("resourceUnit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"profile_resource_participation",
+			"resourceUnit",
+			table,
+			false,
+			table.resourceUnitId,
+		),
+
 		primaryKey({ columns: [table.profileId, table.resourceUnitId] }),
 		index("profile_resource_participation_profile_recent_idx").on(
 			table.profileId,
@@ -176,9 +185,7 @@ export const unitRevision = pgTable(
 	"unit_revision",
 	{
 		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+		unitId: uuid().notNull(),
 		parentRevisionId: uuid(),
 		actorProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		primaryContributionKind: unitRevisionPrimaryContributionKind()
@@ -193,8 +200,12 @@ export const unitRevision = pgTable(
 		actorHidden: boolean().default(false).notNull(),
 		suppressed: boolean().default(false).notNull(),
 		createdAt: createCreatedAtColumn(),
+
+		...unitReferenceColumns("unit", "restrict"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_revision", "unit", table, false, table.unitId),
+
 		unique("unit_revision_id_unit_key").on(table.id, table.unitId),
 		foreignKey({
 			columns: [table.parentRevisionId, table.unitId],
@@ -241,7 +252,7 @@ export const unitRevisionCreditAttribution = pgTable(
 		}).onDelete("cascade"),
 		foreignKey({
 			columns: [table.creditedEntityId],
-			foreignColumns: [entity.id],
+			foreignColumns: [entityIdentity.id],
 			name: "unit_revision_credit_entity_fkey",
 		}).onDelete("restrict"),
 		index("unit_revision_credit_attribution_entity_revision_idx").on(
@@ -256,9 +267,7 @@ export const unitStatusEvent = pgTable(
 	"unit_status_event",
 	{
 		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+		unitId: uuid().notNull(),
 		fromStatus: unitStatus(),
 		toStatus: unitStatus().notNull(),
 		actorKind: unitStatusActorKind().notNull(),
@@ -266,8 +275,12 @@ export const unitStatusEvent = pgTable(
 		revisionId: uuid(),
 		actorHidden: boolean().default(false).notNull(),
 		createdAt: createCreatedAtColumn(),
+
+		...unitReferenceColumns("unit", "restrict"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_status_event", "unit", table, false, table.unitId),
+
 		foreignKey({
 			columns: [table.revisionId, table.unitId],
 			foreignColumns: [unitRevision.id, unitRevision.unitId],
@@ -348,12 +361,14 @@ export const unitRevisionSlot = pgTable(
 export const unitRevisionHead = pgTable(
 	"unit_revision_head",
 	{
-		unitId: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().primaryKey(),
 		revisionId: uuid().notNull(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_revision_head", "unit", table, false, table.unitId),
+
 		unique("unit_revision_head_revision_key").on(table.revisionId),
 		foreignKey({
 			columns: [table.revisionId, table.unitId],

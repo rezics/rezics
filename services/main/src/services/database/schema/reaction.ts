@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { index, pgEnum, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
@@ -5,7 +6,6 @@ import { entityIdentity } from "./catalog-identity";
 import { createCreatedAtColumn, createUpdatedAtColumn, createUuidv7PrimaryKey } from "./columns";
 import { ReactionKindValues, toEnumValues } from "./contract-values";
 import { realm } from "./realm";
-import { unit } from "./unit";
 
 export const reactionKind = pgEnum("reaction_kind", toEnumValues(ReactionKindValues));
 
@@ -16,15 +16,17 @@ export const unitReaction = pgTable(
 		profileId: uuid()
 			.notNull()
 			.references(() => entityIdentity.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		realmId: uuid().references(() => realm.id, { onDelete: "cascade" }),
 		reaction: reactionKind().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_reaction", "unit", table, false, table.unitId),
+
 		unique("unit_reaction_identity_key")
 			.on(table.profileId, table.unitId, table.realmId)
 			.nullsNotDistinct(),
@@ -44,12 +46,14 @@ export const unitShare = pgTable(
 		profileId: uuid()
 			.notNull()
 			.references(() => entityIdentity.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		createdAt: createCreatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_share", "unit", table, false, table.unitId),
+
 		primaryKey({ columns: [table.profileId, table.unitId] }),
 		index("unit_share_unit_created_at_idx").on(
 			table.unitId,

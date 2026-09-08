@@ -1,3 +1,5 @@
+import { publishingTextVersion } from "./catalog-publishing";
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { inArray, sql } from "drizzle-orm";
 import {
 	bigint,
@@ -31,16 +33,14 @@ import {
 	tagPath,
 	unitTagPathApplication,
 } from "./tag-path";
-import { unit, unitAlias, unitExternalLink } from "./unit";
+import { unitAlias, unitExternalLink } from "./unit";
 
 const aggregateCount = () => bigint({ mode: "bigint" }).default(0n).notNull();
 
 export const scoreStat = pgTable(
 	"score_stat",
 	{
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		realmId: uuid()
 			.notNull()
 			.references(() => realm.id, { onDelete: "cascade" }),
@@ -57,8 +57,12 @@ export const scoreStat = pgTable(
 		score9Count: bigint("score_9_count", { mode: "bigint" }).default(0n).notNull(),
 		score10Count: bigint("score_10_count", { mode: "bigint" }).default(0n).notNull(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("score_stat", "unit", table, false, table.unitId),
+
 		primaryKey({ columns: [table.unitId, table.realmId] }),
 		index("score_stat_realm_idx").on(table.realmId, table.unitId),
 		check(
@@ -340,19 +344,19 @@ export const realmTagJudgmentStat = pgTable(
 		spoilerMinorCount: aggregateCount(),
 		spoilerMajorCount: aggregateCount(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("realm_tag_judgment_stat", "unit", table, false, table.unitId),
+
 		primaryKey({ columns: [table.realmId, table.unitId, table.tagId] }),
 		foreignKey({
 			columns: [table.realmId],
 			foreignColumns: [realm.id],
 			name: "realm_tag_judgment_stat_realm_fkey",
 		}).onDelete("cascade"),
-		foreignKey({
-			columns: [table.unitId],
-			foreignColumns: [unit.id],
-			name: "realm_tag_judgment_stat_unit_fkey",
-		}).onDelete("cascade"),
+
 		foreignKey({
 			columns: [table.tagId],
 			foreignColumns: [tag.id],
@@ -430,13 +434,15 @@ export const subjectAssociationJudgmentStat = pgTable(
 export const unitFollowStat = pgTable(
 	"unit_follow_stat",
 	{
-		unitId: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().primaryKey(),
 		followerCount: aggregateCount(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_follow_stat", "unit", table, false, table.unitId),
+
 		index("unit_follow_stat_count_asc_idx").on(table.followerCount.asc(), table.unitId.asc()),
 		index("unit_follow_stat_count_desc_idx").on(
 			table.followerCount.desc().nullsFirst(),
@@ -450,15 +456,17 @@ export const unitReactionStat = pgTable(
 	"unit_reaction_stat",
 	{
 		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		realmId: uuid().references(() => realm.id, { onDelete: "cascade" }),
 		reaction: reactionKind().notNull(),
 		reactionCount: aggregateCount(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_reaction_stat", "unit", table, false, table.unitId),
+
 		unique("unit_reaction_stat_identity_key")
 			.on(table.unitId, table.realmId, table.reaction)
 			.nullsNotDistinct(),
@@ -470,14 +478,16 @@ export const unitReactionStat = pgTable(
 export const unitReactionGlobalStat = pgTable(
 	"unit_reaction_global_stat",
 	{
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		reaction: reactionKind().notNull(),
 		reactionCount: aggregateCount(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_reaction_global_stat", "unit", table, false, table.unitId),
+
 		primaryKey({ columns: [table.unitId, table.reaction] }),
 		check("unit_reaction_global_stat_count_check", sql`${table.reactionCount} >= 0`),
 	],
@@ -583,7 +593,7 @@ export const bookChapterStat = pgTable(
 	{
 		bookUnitId: uuid("book_unit_id")
 			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
+			.references(() => publishingTextVersion.id, { onDelete: "cascade" }),
 		allCount: aggregateCount(),
 		publicCount: aggregateCount(),
 		updatedAt: createUpdatedAtColumn(),
@@ -608,7 +618,7 @@ export const bookChapterProgressStat = pgTable(
 			.references(() => users.id, { onDelete: "cascade" }),
 		bookUnitId: uuid("book_unit_id")
 			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+			.references(() => publishingTextVersion.id, { onDelete: "cascade" }),
 		allCompletedCount: aggregateCount(),
 		publicCompletedCount: aggregateCount(),
 		updatedAt: createUpdatedAtColumn(),
@@ -628,7 +638,7 @@ export const bookLocalizedContentMetricStat = pgTable(
 	{
 		bookUnitId: uuid("book_unit_id")
 			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+			.references(() => publishingTextVersion.id, { onDelete: "cascade" }),
 		language: text().$type<ContentLanguage>().notNull(),
 		chapterCount: aggregateCount(),
 		wordCount: aggregateCount(),
@@ -703,9 +713,7 @@ export const conversationParticipantStat = pgTable(
 export const unitEngagementStat = pgTable(
 	"unit_engagement_stat",
 	{
-		unitId: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().primaryKey(),
 		upvotes: aggregateCount(),
 		downvotes: aggregateCount(),
 		replies: aggregateCount(),
@@ -716,8 +724,12 @@ export const unitEngagementStat = pgTable(
 		completions: aggregateCount(),
 		negativeProgress: aggregateCount(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_engagement_stat", "unit", table, false, table.unitId),
+
 		check(
 			"unit_engagement_stat_count_check",
 			sql`${table.upvotes} >= 0 and ${table.downvotes} >= 0 and ${table.replies} >= 0 and ${table.favorites} >= 0 and ${table.shares} >= 0 and ${table.highScores} >= 0 and ${table.activeProgress} >= 0 and ${table.completions} >= 0 and ${table.negativeProgress} >= 0`,
@@ -746,16 +758,24 @@ export const recommendationSignalKind = pgEnum("recommendation_signal_kind", [
 export const recommendationUnitSignalHourly = pgTable(
 	"recommendation_unit_signal_hourly",
 	{
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		bucketStart: createTimestampMsColumn().notNull(),
 		kind: recommendationSignalKind().notNull(),
 		signalCount: aggregateCount(),
 		weight: doublePrecision().default(0).notNull(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"recommendation_unit_signal_hourly",
+			"unit",
+			table,
+			false,
+			table.unitId,
+		),
+
 		primaryKey({ columns: [table.unitId, table.bucketStart, table.kind] }),
 		index("recommendation_unit_signal_hourly_bucket_idx").on(table.bucketStart, table.unitId),
 		check("recommendation_unit_signal_hourly_count_check", sql`${table.signalCount} >= 0`),

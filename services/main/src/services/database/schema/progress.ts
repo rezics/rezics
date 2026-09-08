@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { inArray, sql } from "drizzle-orm";
 import {
 	bigint,
@@ -38,7 +39,7 @@ import {
 	toEnumValues,
 } from "./contract-values";
 import { post } from "./post";
-import { resourceVisibility, unit } from "./unit";
+import { resourceVisibility } from "./platform-identity";
 
 export const progressStatus = pgEnum("progress_status", toEnumValues(ProgressStatusValues));
 
@@ -76,9 +77,7 @@ export const unitProgressEntry = pgTable(
 		authUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		entryKind: text().$type<ProgressEntryKind>().notNull(),
 		status: progressStatus().notNull(),
 		progress: doublePrecision().notNull(),
@@ -92,8 +91,12 @@ export const unitProgressEntry = pgTable(
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_progress_entry", "unit", table, false, table.unitId),
+
 		unique("unit_progress_entry_id_auth_user_unit_key").on(
 			table.id,
 			table.authUserId,
@@ -170,9 +173,7 @@ export const unitProgress = pgTable(
 		authUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		progress: doublePrecision().default(0).notNull(),
 		status: progressStatus().default("backlog").notNull(),
 		completedCount: integer().default(0).notNull(),
@@ -186,8 +187,12 @@ export const unitProgress = pgTable(
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_progress", "unit", table, false, table.unitId),
+
 		primaryKey({ columns: [table.authUserId, table.unitId] }),
 		foreignKey({
 			columns: [table.lastContentStructureNodeId, table.unitId],

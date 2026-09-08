@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { sql } from "drizzle-orm";
 import { check, index, primaryKey, uuid } from "drizzle-orm/pg-core";
 
@@ -6,7 +7,6 @@ import { pgTable } from "./base";
 import { users } from "./auth";
 import { createTimestampMsColumn, createUpdatedAtColumn } from "./columns";
 import { realm } from "./realm";
-import { unit } from "./unit";
 
 /**
  * Rebuildable access-owned candidate index for a Profile's explicit editor assignments.
@@ -21,9 +21,7 @@ export const studioAuthEditorCandidate = pgTable(
 		authUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		ownerSince: createTimestampMsColumn(),
 		directGrantSince: createTimestampMsColumn(),
 		directGrantLastAt: createTimestampMsColumn(),
@@ -32,8 +30,12 @@ export const studioAuthEditorCandidate = pgTable(
 		/** Null when ownership or a non-expiring direct grant keeps the candidate live. */
 		validUntil: createTimestampMsColumn(),
 		projectionUpdatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("studio_auth_editor_candidate", "unit", table, false, table.unitId),
+
 		primaryKey({ columns: [table.authUserId, table.unitId] }),
 		index("studio_auth_editor_candidate_auth_recent_idx").on(
 			table.authUserId,
@@ -83,17 +85,25 @@ export const studioRealmEditorCandidate = pgTable(
 			.notNull()
 			.references(() => realm.id, { onDelete: "cascade" }),
 		realmRelation: realmAccessSubjectRelation().notNull(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		grantSince: createTimestampMsColumn().notNull(),
 		/** Latest matching grant assignment; the keyset ordering column. */
 		relevantAt: createTimestampMsColumn().notNull(),
 		/** Null when at least one matching Realm grant does not expire. */
 		validUntil: createTimestampMsColumn(),
 		projectionUpdatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"studio_realm_editor_candidate",
+			"unit",
+			table,
+			false,
+			table.unitId,
+		),
+
 		primaryKey({ columns: [table.realmId, table.realmRelation, table.unitId] }),
 		index("studio_realm_editor_candidate_subject_recent_idx").on(
 			table.realmId,
@@ -123,12 +133,20 @@ export const studioResourceVisit = pgTable(
 		authUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "cascade" }),
-		resourceUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		resourceUnitId: uuid().notNull(),
 		lastVisitedAt: createTimestampMsColumn().defaultNow().notNull(),
+
+		...unitReferenceColumns("resourceUnit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"studio_resource_visit",
+			"resourceUnit",
+			table,
+			false,
+			table.resourceUnitId,
+		),
+
 		primaryKey({ columns: [table.authUserId, table.resourceUnitId] }),
 		index("studio_resource_visit_auth_recent_idx").on(
 			table.authUserId,

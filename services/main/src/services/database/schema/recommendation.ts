@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { sql } from "drizzle-orm";
 import {
 	bigint,
@@ -30,7 +31,6 @@ import {
 	type UnitKind,
 	toEnumValues,
 } from "./contract-values";
-import { unit } from "./unit";
 
 export const recommendationSurface = pgEnum(
 	"recommendation_surface",
@@ -84,15 +84,23 @@ export const recommendationEvent = pgTable(
 		requestId: uuid().notNull(),
 		surface: recommendationSurface().notNull(),
 		type: recommendationEventType().notNull(),
-		targetUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		targetUnitId: uuid().notNull(),
 		position: displayPosition().notNull(),
 		policyVersion: text().notNull(),
 		occurredAt: createTimestampMsColumn().notNull(),
 		createdAt: createCreatedAtColumn(),
+
+		...unitReferenceColumns("targetUnit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"recommendation_event",
+			"targetUnit",
+			table,
+			false,
+			table.targetUnitId,
+		),
+
 		unique("recommendation_event_request_target_type_key").on(
 			table.requestId,
 			table.targetUnitId,
@@ -122,12 +130,14 @@ export const recommendationExclusion = pgTable(
 		authUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		createdAt: createCreatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("recommendation_exclusion", "unit", table, false, table.unitId),
+
 		primaryKey({ columns: [table.authUserId, table.unitId] }),
 		index("recommendation_exclusion_unit_idx").on(table.unitId, table.authUserId),
 	],
@@ -148,19 +158,19 @@ export const unitBestScore = pgTable(
 		unitKind: text().$type<UnitKind>().notNull(),
 		score: doublePrecision().notNull(),
 		unitUpdatedAt: createTimestampMsColumn().notNull(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_best_score", "unit", table, false, table.unitId),
+
 		primaryKey({ columns: [table.snapshotId, table.unitId] }),
 		foreignKey({
 			columns: [table.snapshotId],
 			foreignColumns: [recommendationSnapshot.id],
 			name: "unit_best_score_snapshot_fkey",
 		}).onDelete("cascade"),
-		foreignKey({
-			columns: [table.unitId, table.unitKind],
-			foreignColumns: [unit.id, unit.kind],
-			name: "unit_best_score_unit_fkey",
-		}).onDelete("cascade"),
+
 		index("unit_best_score_order_idx").on(
 			table.snapshotId,
 			table.score.desc().nullsFirst(),

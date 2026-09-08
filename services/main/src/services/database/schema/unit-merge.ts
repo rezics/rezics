@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { sql } from "drizzle-orm";
 import {
 	bigint,
@@ -40,7 +41,6 @@ import {
 	toEnumValues,
 } from "./contract-values";
 import { governanceDecision } from "./governance";
-import { unit } from "./unit";
 
 export const unitMergeRequestMode = pgEnum(
 	"unit_merge_request_mode",
@@ -78,12 +78,8 @@ export const unitMergeRequest = pgTable(
 	"unit_merge_request",
 	{
 		id: createUuidv7PrimaryKey(),
-		sourceUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
-		targetUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+		sourceUnitId: uuid().notNull(),
+		targetUnitId: uuid().notNull(),
 		unitKind: text().$type<UnitMergeEligibleKind>().notNull(),
 		mode: unitMergeRequestMode().notNull(),
 		state: unitMergeRequestState().notNull(),
@@ -113,8 +109,26 @@ export const unitMergeRequest = pgTable(
 		failedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("sourceUnit", "restrict"),
+		...unitReferenceColumns("targetUnit", "restrict"),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"unit_merge_request",
+			"sourceUnit",
+			table,
+			false,
+			table.sourceUnitId,
+		),
+		...unitReferenceConstraints(
+			"unit_merge_request",
+			"targetUnit",
+			table,
+			false,
+			table.targetUnitId,
+		),
+
 		foreignKey({
 			columns: [table.overrideOfRequestId],
 			foreignColumns: [table.id],
@@ -245,19 +259,33 @@ export const unitMergeReview = pgTable(
 export const unitMergeRedirect = pgTable(
 	"unit_merge_redirect",
 	{
-		sourceUnitId: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "restrict" }),
-		targetUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+		sourceUnitId: uuid().primaryKey(),
+		targetUnitId: uuid().notNull(),
 		maxDepth: smallint().default(1).notNull(),
 		requestId: uuid()
 			.notNull()
 			.references(() => unitMergeRequest.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
+
+		...unitReferenceColumns("sourceUnit", "restrict"),
+		...unitReferenceColumns("targetUnit", "restrict"),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"unit_merge_redirect",
+			"sourceUnit",
+			table,
+			false,
+			table.sourceUnitId,
+		),
+		...unitReferenceConstraints(
+			"unit_merge_redirect",
+			"targetUnit",
+			table,
+			false,
+			table.targetUnitId,
+		),
+
 		unique("unit_merge_redirect_request_key").on(table.requestId),
 		index("unit_merge_redirect_target_depth_idx").on(
 			table.targetUnitId,
@@ -276,13 +304,16 @@ export const unitMergeRedirect = pgTable(
 export const unitMergeGraphGuard = pgTable(
 	"unit_merge_graph_guard",
 	{
-		unitId: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().primaryKey(),
 		revision: bigint({ mode: "number" }).default(0).notNull(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
-	(table) => [check("unit_merge_graph_guard_revision_check", sql`${table.revision} >= 0`)],
+	(table) => [
+		...unitReferenceConstraints("unit_merge_graph_guard", "unit", table, false, table.unitId),
+		check("unit_merge_graph_guard_revision_check", sql`${table.revision} >= 0`),
+	],
 );
 
 /** Retryable execution ledger; one worker lease advances one bounded phase. */
@@ -293,12 +324,8 @@ export const unitMergeOperation = pgTable(
 		requestId: uuid()
 			.notNull()
 			.references(() => unitMergeRequest.id, { onDelete: "restrict" }),
-		sourceUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
-		targetUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+		sourceUnitId: uuid().notNull(),
+		targetUnitId: uuid().notNull(),
 		state: unitMergeOperationState().default("pending").notNull(),
 		phase: unitMergeOperationPhase().default("entity_measurement_preflight").notNull(),
 		attemptCount: integer().default(0).notNull(),
@@ -313,8 +340,26 @@ export const unitMergeOperation = pgTable(
 		completedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("sourceUnit", "restrict"),
+		...unitReferenceColumns("targetUnit", "restrict"),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"unit_merge_operation",
+			"sourceUnit",
+			table,
+			false,
+			table.sourceUnitId,
+		),
+		...unitReferenceConstraints(
+			"unit_merge_operation",
+			"targetUnit",
+			table,
+			false,
+			table.targetUnitId,
+		),
+
 		unique("unit_merge_operation_request_key").on(table.requestId),
 		unique("unit_merge_operation_source_key").on(table.sourceUnitId),
 		index("unit_merge_operation_claim_idx")
@@ -350,15 +395,18 @@ export const unitMergeOperation = pgTable(
 export const unitMergeGraphLock = pgTable(
 	"unit_merge_graph_lock",
 	{
-		unitId: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "restrict" }),
+		unitId: uuid().primaryKey(),
 		operationId: uuid()
 			.notNull()
 			.references(() => unitMergeOperation.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
+
+		...unitReferenceColumns("unit", "restrict"),
 	},
-	(table) => [index("unit_merge_graph_lock_operation_idx").on(table.operationId, table.unitId)],
+	(table) => [
+		...unitReferenceConstraints("unit_merge_graph_lock", "unit", table, false, table.unitId),
+		index("unit_merge_graph_lock_operation_idx").on(table.operationId, table.unitId),
+	],
 );
 
 export type StoredUnitMergeOperationPhase = UnitMergeOperationPhase;

@@ -1,19 +1,11 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import type { ContentLanguageSupport } from "@rezics/content-language";
 import {
 	MaximumContentLanguageSupportEntries,
 	MaximumContentLanguageTagLength,
 } from "@rezics/content-language";
 import { inArray, sql } from "drizzle-orm";
-import {
-	check,
-	foreignKey,
-	index,
-	jsonb,
-	primaryKey,
-	smallint,
-	text,
-	uuid,
-} from "drizzle-orm/pg-core";
+import { check, index, jsonb, primaryKey, smallint, text, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { createUpdatedAtColumn } from "./columns";
@@ -21,7 +13,6 @@ import {
 	type ContentLanguageSupportUnitKind,
 	ContentLanguageSupportUnitKindValues,
 } from "./contract-values";
-import { unit } from "./unit";
 
 /**
  * Sparse, authoritative content-consumption language support for one Unit.
@@ -37,13 +28,18 @@ export const unitContentLanguageSupport = pgTable(
 		unitKind: text().$type<ContentLanguageSupportUnitKind>().notNull(),
 		value: jsonb().$type<ContentLanguageSupport>().notNull(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
-		foreignKey({
-			columns: [table.unitId, table.unitKind],
-			foreignColumns: [unit.id, unit.kind],
-			name: "unit_content_language_support_unit_kind_fkey",
-		}).onDelete("cascade"),
+		...unitReferenceConstraints(
+			"unit_content_language_support",
+			"unit",
+			table,
+			false,
+			table.unitId,
+		),
+
 		check(
 			"unit_content_language_support_kind_check",
 			inArray(table.unitKind, ContentLanguageSupportUnitKindValues),
@@ -70,17 +66,17 @@ export const unitContentLanguageSearch = pgTable(
 		unitKind: text().$type<ContentLanguageSupportUnitKind>().notNull(),
 		languageTag: text().notNull(),
 		channelMask: smallint().notNull(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_content_language_search", "unit", table, false, table.unitId),
+
 		primaryKey({
 			columns: [table.unitId, table.languageTag],
 			name: "unit_content_language_search_pkey",
 		}),
-		foreignKey({
-			columns: [table.unitId, table.unitKind],
-			foreignColumns: [unit.id, unit.kind],
-			name: "unit_content_language_search_unit_kind_fkey",
-		}).onDelete("cascade"),
+
 		check(
 			"unit_content_language_search_kind_check",
 			inArray(table.unitKind, ContentLanguageSupportUnitKindValues),

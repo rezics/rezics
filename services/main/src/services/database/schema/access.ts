@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { sql } from "drizzle-orm";
 import {
 	type AnyPgColumn,
@@ -32,7 +33,6 @@ import {
 import { toEnumValues } from "./contract-values";
 import { governanceDecision } from "./governance";
 import { realm } from "./realm";
-import { unit } from "./unit";
 
 export const unitAccessSubjectKind = pgEnum(
 	"unit_access_subject_kind",
@@ -103,9 +103,7 @@ export const unitOwnership = pgTable(
 	"unit_ownership",
 	{
 		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		profileId: uuid()
 			.notNull()
 			.references(() => entityIdentity.id, { onDelete: "restrict" }),
@@ -116,8 +114,12 @@ export const unitOwnership = pgTable(
 		revokedByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_ownership", "unit", table, false, table.unitId),
+
 		uniqueIndex("unit_ownership_active_unit_key")
 			.on(table.unitId)
 			.where(sql`${table.revokedAt} is null`),
@@ -141,9 +143,7 @@ export const unitAccessGrant = pgTable(
 	"unit_access_grant",
 	{
 		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		subjectKind: unitAccessSubjectKind().notNull(),
 		authUserId: uuid().references(() => users.id, { onDelete: "cascade" }),
 		realmId: uuid().references(() => realm.id, { onDelete: "cascade" }),
@@ -156,8 +156,12 @@ export const unitAccessGrant = pgTable(
 		revokedByAuthUserId: uuid().references(() => users.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_access_grant", "unit", table, false, table.unitId),
+
 		uniqueIndex("unit_access_grant_active_auth_user_scope_key")
 			.on(table.unitId, table.authUserId, table.permission, table.scope)
 			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'auth'`),
@@ -216,9 +220,7 @@ export const unitAccessInvitation = pgTable(
 	"unit_access_invitation",
 	{
 		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		invitedAuthUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "cascade" }),
@@ -234,8 +236,12 @@ export const unitAccessInvitation = pgTable(
 		resolvedByAuthUserId: uuid().references(() => users.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_access_invitation", "unit", table, false, table.unitId),
+
 		index("unit_access_invitation_unit_unresolved_idx")
 			.on(table.unitId, table.createdAt.desc(), table.id.desc())
 			.where(sql`${table.resolution} is null`),
@@ -282,9 +288,7 @@ export const unitAccessRestriction = pgTable(
 	"unit_access_restriction",
 	{
 		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		subjectKind: unitAccessRestrictionSubjectKind().notNull(),
 		authUserId: uuid().references(() => users.id, { onDelete: "cascade" }),
 		realmId: uuid().references(() => realm.id, { onDelete: "cascade" }),
@@ -300,8 +304,12 @@ export const unitAccessRestriction = pgTable(
 		revokedByAuthUserId: uuid().references(() => users.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_access_restriction", "unit", table, false, table.unitId),
+
 		uniqueIndex("unit_access_restriction_active_auth_user_scope_key")
 			.on(table.unitId, table.authUserId, table.permission, table.scope)
 			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'auth'`),

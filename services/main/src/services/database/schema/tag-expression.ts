@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { inArray, sql } from "drizzle-orm";
 import {
 	bigint,
@@ -25,7 +26,6 @@ import {
 } from "./columns";
 import { realmUnit } from "./realm";
 import { tag } from "./tag";
-import { unit } from "./unit";
 
 export const TagExpressionKindValues = ["simple", "facet_value", "relation"] as const;
 export type TagExpressionKind = (typeof TagExpressionKindValues)[number];
@@ -332,9 +332,7 @@ export const tagExpressionEffectiveTag = pgTable(
 export const unitExpressionAssertion = pgTable(
 	"unit_expression_assertion",
 	{
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		expressionId: uuid()
 			.notNull()
 			.references(() => tagExpression.id, { onDelete: "cascade" }),
@@ -342,8 +340,12 @@ export const unitExpressionAssertion = pgTable(
 		pathApplicationCount: bigint({ mode: "bigint" }).default(0n).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_expression_assertion", "unit", table, false, table.unitId),
+
 		primaryKey({ columns: [table.unitId, table.expressionId] }),
 		index("unit_expression_assertion_expression_idx").on(table.expressionId, table.unitId),
 		check(
@@ -358,9 +360,7 @@ export const unitExpressionAssertion = pgTable(
 export const unitEffectiveTag = pgTable(
 	"unit_effective_tag",
 	{
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		tagId: uuid()
 			.notNull()
 			.references(() => tag.id, { onDelete: "cascade" }),
@@ -370,8 +370,12 @@ export const unitEffectiveTag = pgTable(
 		retrievalExpressionCount: bigint({ mode: "bigint" }).default(0n).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_effective_tag", "unit", table, false, table.unitId),
+
 		primaryKey({ columns: [table.unitId, table.tagId] }),
 		index("unit_effective_tag_tag_idx").on(table.tagId, table.unitId),
 		check(

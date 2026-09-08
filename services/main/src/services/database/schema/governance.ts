@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { sql } from "drizzle-orm";
 import {
 	boolean,
@@ -48,7 +49,7 @@ import {
 	realmUnitPublicationState,
 	realmUnitStatus,
 } from "./realm";
-import { unit, unitLicenseGrant, unitLicenseRecognitionStatus } from "./unit";
+import { unitLicenseGrant, unitLicenseRecognitionStatus } from "./unit";
 import { zone } from "./zone";
 
 export const governanceAuthorityKind = pgEnum(
@@ -123,8 +124,8 @@ export const governanceDecision = pgTable(
 		authorityKind: governanceAuthorityKind().notNull(),
 		authorityRealmId: uuid().references(() => realm.id, { onDelete: "restrict" }),
 		authorityZoneId: uuid().references(() => zone.id, { onDelete: "restrict" }),
-		authorityUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
-		targetUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
+		authorityUnitId: uuid(),
+		targetUnitId: uuid(),
 		targetUserId: uuid().references(() => users.id, { onDelete: "restrict" }),
 		subjectKind: text().notNull(),
 		subjectId: uuid().notNull(),
@@ -132,8 +133,26 @@ export const governanceDecision = pgTable(
 		requestId: text(),
 		finalized: boolean().notNull().default(false),
 		createdAt: createCreatedAtColumn(),
+
+		...unitReferenceColumns("authorityUnit", "restrict"),
+		...unitReferenceColumns("targetUnit", "restrict"),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"governance_decision",
+			"authorityUnit",
+			table,
+			true,
+			table.authorityUnitId,
+		),
+		...unitReferenceConstraints(
+			"governance_decision",
+			"targetUnit",
+			table,
+			true,
+			table.targetUnitId,
+		),
+
 		foreignKey({
 			columns: [table.reversesDecisionId],
 			foreignColumns: [table.id],
@@ -256,15 +275,23 @@ export const contentReviewCase = pgTable(
 		state: contentReviewCaseState().default("new").notNull(),
 		authority: contentReviewAuthority().default("platform").notNull(),
 		realmId: uuid().references(() => realm.id, { onDelete: "restrict" }),
-		targetUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+		targetUnitId: uuid().notNull(),
 		assignedProfileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
 		duplicateOfCaseId: uuid(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("targetUnit", "restrict"),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"content_review_case",
+			"targetUnit",
+			table,
+			false,
+			table.targetUnitId,
+		),
+
 		foreignKey({
 			columns: [table.duplicateOfCaseId],
 			foreignColumns: [table.id],
@@ -349,15 +376,17 @@ export const contentReport = pgTable(
 			.notNull()
 			.references(() => entityIdentity.id, { onDelete: "restrict" }),
 		contextRealmId: uuid().references(() => realm.id, { onDelete: "restrict" }),
-		targetUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+		targetUnitId: uuid().notNull(),
 		/** Reporter-authored evidence, stored verbatim without content-language metadata. */
 		details: text(),
 		reportedRevisionId: uuid().notNull(),
 		createdAt: createCreatedAtColumn(),
+
+		...unitReferenceColumns("targetUnit", "restrict"),
 	},
 	(table) => [
+		...unitReferenceConstraints("content_report", "targetUnit", table, false, table.targetUnitId),
+
 		foreignKey({
 			columns: [table.reportedRevisionId, table.targetUnitId],
 			foreignColumns: [unitRevision.id, unitRevision.unitId],
@@ -623,9 +652,7 @@ export const realmUnitStatusEvent = pgTable(
 		realmId: uuid()
 			.notNull()
 			.references(() => realm.id, { onDelete: "restrict" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+		unitId: uuid().notNull(),
 		fromStatus: realmUnitStatus(),
 		toStatus: realmUnitStatus().notNull(),
 		changedByProfileId: uuid().references(() => entityIdentity.id, {
@@ -633,8 +660,12 @@ export const realmUnitStatusEvent = pgTable(
 		}),
 		contentGovernanceActionId: uuid(),
 		createdAt: createCreatedAtColumn(),
+
+		...unitReferenceColumns("unit", "restrict"),
 	},
 	(table) => [
+		...unitReferenceConstraints("realm_unit_status_event", "unit", table, false, table.unitId),
+
 		foreignKey({
 			columns: [table.contentGovernanceActionId],
 			foreignColumns: [contentGovernanceAction.id],

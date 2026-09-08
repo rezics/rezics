@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { sql } from "drizzle-orm";
 import { check, foreignKey, index, integer, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
 
@@ -13,7 +14,7 @@ import {
 import { DefaultResourceVisibility } from "./contract-values";
 import { post } from "./post";
 import { realm, realmUnit } from "./realm";
-import { resourceVisibility, unit } from "./unit";
+import { resourceVisibility } from "./platform-identity";
 
 /**
  * Current Score state for a Profile, target Unit, and Realm.
@@ -27,9 +28,7 @@ export const score = pgTable(
 		profileId: uuid()
 			.notNull()
 			.references(() => entityIdentity.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		realmId: uuid()
 			.notNull()
 			.references(() => realm.id, { onDelete: "cascade" }),
@@ -37,8 +36,12 @@ export const score = pgTable(
 		visibility: resourceVisibility().default(DefaultResourceVisibility).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("score", "unit", table, false, table.unitId),
+
 		unique("score_profile_unit_realm_key").on(table.profileId, table.unitId, table.realmId),
 		index("score_unit_realm_value_idx").on(table.unitId, table.realmId, table.value),
 		index("score_realm_idx").on(table.realmId, table.unitId),

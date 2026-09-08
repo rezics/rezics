@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { sql } from "drizzle-orm";
 import { boolean, check, foreignKey, index, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
 
@@ -10,7 +11,6 @@ import {
 	createUpdatedAtColumn,
 	fractionalIndexPosition,
 } from "./columns";
-import { unit } from "./unit";
 
 /**
  * An Entity's one-way interest relation to a Unit and the source of truth for
@@ -26,13 +26,15 @@ export const unitFollow = pgTable(
 		followerProfileId: uuid()
 			.notNull()
 			.references(() => entityIdentity.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_follow", "unit", table, false, table.unitId),
+
 		primaryKey({ columns: [table.followerProfileId, table.unitId] }),
 		index("unit_follow_unit_created_at_idx").on(
 			table.unitId,

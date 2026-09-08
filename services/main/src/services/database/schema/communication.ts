@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { inArray, sql } from "drizzle-orm";
 import {
 	boolean,
@@ -29,7 +30,6 @@ import {
 	NotificationKindValues,
 	toEnumValues,
 } from "./contract-values";
-import { unit } from "./unit";
 
 export const notificationKind = pgEnum("notification_kind", toEnumValues(NotificationKindValues));
 export const notificationEmailStatus = pgEnum("notification_email_status", [
@@ -64,7 +64,7 @@ export const notification = pgTable(
 			.references(() => users.id, { onDelete: "cascade" }),
 		actorProfileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
 		kind: notificationKind().notNull(),
-		subjectUnitId: uuid().references(() => unit.id, { onDelete: "set null" }),
+		subjectUnitId: uuid(),
 		payload: createJsonObjectColumn(),
 		dedupeKey: text(),
 		inAppVisible: boolean().default(true).notNull(),
@@ -75,8 +75,12 @@ export const notification = pgTable(
 		emailError: text(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("subjectUnit", "set null"),
 	},
 	(table) => [
+		...unitReferenceConstraints("notification", "subjectUnit", table, true, table.subjectUnitId),
+
 		uniqueIndex("notification_recipient_dedupe_key")
 			.on(table.recipientAuthUserId, table.dedupeKey)
 			.where(sql`${table.dedupeKey} is not null`),

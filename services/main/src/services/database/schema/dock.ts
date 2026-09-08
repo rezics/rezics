@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { sql } from "drizzle-orm";
 import { check, text, unique, uuid } from "drizzle-orm/pg-core";
 
@@ -10,24 +11,25 @@ import {
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { unit } from "./unit";
 
 /** A Unit-owned composition surface whose placement is decided by its product route. */
 export const unitDock = pgTable(
 	"unit_dock",
 	{
 		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		kind: text().$type<DockKind>().notNull(),
 		/** @UNIT_LOCALIZATION_EXEMPT Structured contract: Dock display copy is referenced through localized Units. */
 		document: createJsonDocumentColumn().notNull(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_dock", "unit", table, false, table.unitId),
+
 		unique("unit_dock_unit_kind_key").on(table.unitId, table.kind),
 		check("unit_dock_kind_check", sql`${table.kind} in ('main', 'wiki')`),
 		check(

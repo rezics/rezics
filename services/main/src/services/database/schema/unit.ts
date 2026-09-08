@@ -1,3 +1,4 @@
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import {
 	type AvatarType,
 	AvatarTypeValues,
@@ -38,23 +39,15 @@ import {
 	fractionalIndexPosition,
 } from "./columns";
 import {
-	AiDisclosureValues,
 	AliasKindValues,
 	type ContentLanguage,
 	ContentLanguageValues,
-	ContentRatingValues,
 	ContentStatusValues,
-	ModerationStatusValues,
-	ResourceVisibilityValues,
 	toEnumValues,
-	type UnitKind,
-	UnitKindValues,
 	type UnitReferenceCurationKind,
 	UnitReferenceCurationKindValues,
-	UnitStatusValues,
-	type VariantCapableUnitKind,
 } from "./contract-values";
-import { entity } from "./entity";
+
 import { imageAsset } from "./image";
 import { CanonicalPgroongaIndexes } from "./pgroonga";
 
@@ -68,106 +61,12 @@ const PgroongaContentLargeOptions = {
 	index_flags_mapping: `'{"current_search_text_v1":["LARGE"]}'`,
 } as const;
 
-export const unitStatus = pgEnum("unit_status", toEnumValues(UnitStatusValues));
-export const resourceVisibility = pgEnum(
-	"resource_visibility",
-	toEnumValues(ResourceVisibilityValues),
-);
-export const contentRating = pgEnum("content_rating", toEnumValues(ContentRatingValues));
-export const aiDisclosure = pgEnum("ai_disclosure", toEnumValues(AiDisclosureValues));
-export const moderationStatus = pgEnum("moderation_status", toEnumValues(ModerationStatusValues));
-
-export const unit = pgTable(
-	"unit",
-	{
-		id: createUuidv7PrimaryKey(),
-		kind: text().$type<UnitKind>().notNull(),
-		status: unitStatus().default("draft").notNull(),
-		visibility: resourceVisibility().default("public").notNull(),
-		contentRating: contentRating().default("general").notNull(),
-		aiDisclosure: aiDisclosure().default("unknown").notNull(),
-		moderationStatus: moderationStatus().default("approved").notNull(),
-		/** Rejects creation of new Post relations that target this Unit. */
-		postTargetingLocked: boolean().default(false).notNull(),
-		publishedAt: createTimestampMsColumn(),
-		deletedAt: createTimestampMsColumn(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		index("unit_public_discoverable_idx")
-			.on(table.id)
-			.where(
-				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
-			),
-		index("unit_public_created_at_asc_idx")
-			.on(table.createdAt.asc(), table.id.asc())
-			.where(
-				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
-			),
-		index("unit_public_created_at_desc_idx")
-			.on(table.createdAt.desc().nullsFirst(), table.id.desc().nullsFirst())
-			.where(
-				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
-			),
-		index("unit_public_updated_at_asc_idx")
-			.on(table.updatedAt.asc(), table.id.asc())
-			.where(
-				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
-			),
-		index("unit_public_updated_at_desc_idx")
-			.on(table.updatedAt.desc().nullsFirst(), table.id.desc().nullsFirst())
-			.where(
-				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
-			),
-		index("unit_public_kind_created_at_desc_idx")
-			.on(table.kind, table.createdAt.desc().nullsFirst(), table.id.desc().nullsFirst())
-			.where(
-				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
-			),
-		index("unit_public_kind_updated_at_desc_idx")
-			.on(table.kind, table.updatedAt.desc().nullsFirst(), table.id.desc().nullsFirst())
-			.where(
-				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
-			),
-		index("unit_public_published_at_asc_idx")
-			.on(table.publishedAt.asc(), table.id.asc())
-			.where(
-				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
-			),
-		index("unit_public_published_at_desc_idx")
-			.on(table.publishedAt.desc().nullsLast(), table.id.desc().nullsFirst())
-			.where(
-				sql`${table.status} = 'published'::unit_status and ${table.visibility} = 'public'::resource_visibility and ${table.moderationStatus} = 'approved'::moderation_status and ${table.deletedAt} is null`,
-			),
-		index("unit_kind_status_created_at_idx")
-			.on(table.kind, table.status, table.createdAt.desc(), table.id.desc())
-			.where(sql`${table.deletedAt} is null`),
-		index("unit_status_visibility_created_at_idx")
-			.on(table.status, table.visibility, table.createdAt.desc(), table.id.desc())
-			.where(sql`${table.deletedAt} is null`),
-		index("unit_moderation_status_idx").on(table.moderationStatus),
-		unique("unit_id_kind_key").on(table.id, table.kind),
-		check("unit_kind_check", inArray(table.kind, UnitKindValues)),
-		check(
-			"unit_publication_check",
-			sql`${table.status} <> 'published'::unit_status or ${table.publishedAt} is not null`,
-		),
-		check(
-			"unit_deleted_at_check",
-			sql`${table.deletedAt} is null or ${table.deletedAt} >= ${table.createdAt}`,
-		),
-	],
-);
-
 export const contentStatus = pgEnum("content_status", toEnumValues(ContentStatusValues));
 
 export const unitLocalization = pgTable(
 	"unit_localization",
 	{
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		language: text().$type<ContentLanguage>().notNull(),
 		/**
 		 * Fractional index in the Unit's content-language fallback sequence.
@@ -200,8 +99,12 @@ export const unitLocalization = pgTable(
 		contentStatus: contentStatus(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_localization", "unit", table, false, table.unitId),
+
 		primaryKey({ columns: [table.unitId, table.language] }),
 		unique("unit_localization_unit_position_key").on(table.unitId, table.position),
 		index("unit_localization_unit_position_idx").on(table.unitId, table.position, table.language),
@@ -277,9 +180,7 @@ export const unitAlias = pgTable(
 	"unit_alias",
 	{
 		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		/** @UNIT_LOCALIZATION_EXEMPT Search synonym: language-tagged lookup term, never canonical Unit display copy. */
 		term: text().notNull(),
 		normalizedTerm: text().notNull(),
@@ -293,8 +194,12 @@ export const unitAlias = pgTable(
 		position: fractionalIndexPosition(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_alias", "unit", table, false, table.unitId),
+
 		unique("unit_alias_unit_language_normalized_key")
 			.on(table.unitId, table.language, table.normalizedTerm)
 			.nullsNotDistinct(),
@@ -351,35 +256,6 @@ export const unitAliasVote = pgTable(
 	],
 );
 
-export const unitVariant = pgTable(
-	"unit_variant",
-	{
-		variantUnitId: uuid().primaryKey(),
-		mainUnitId: uuid().notNull(),
-		unitKind: text().$type<VariantCapableUnitKind>().notNull(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		foreignKey({
-			columns: [table.variantUnitId, table.unitKind],
-			foreignColumns: [unit.id, unit.kind],
-			name: "unit_variant_variant_kind_fkey",
-		}).onDelete("cascade"),
-		foreignKey({
-			columns: [table.mainUnitId, table.unitKind],
-			foreignColumns: [unit.id, unit.kind],
-			name: "unit_variant_main_kind_fkey",
-		}).onDelete("restrict"),
-		index("unit_variant_main_created_at_idx").on(
-			table.mainUnitId,
-			table.createdAt,
-			table.variantUnitId,
-		),
-		check("unit_variant_not_self_check", sql`${table.variantUnitId} <> ${table.mainUnitId}`),
-	],
-);
-
 export const unitLicenseRecognitionStatus = pgEnum(
 	"unit_license_recognition_status",
 	toEnumValues(LicenseRecognitionStatusValues),
@@ -406,13 +282,12 @@ export const unitLicenseGrant = pgTable(
 			.$type<LicenseRecognitionStatus>()
 			.default("recognized")
 			.notNull(),
+
+		...unitReferenceColumns("unit", "restrict"),
 	},
 	(table) => [
-		foreignKey({
-			name: "unit_license_grant_unit_id_unit_id_fkey",
-			columns: [table.unitId],
-			foreignColumns: [unit.id],
-		}).onDelete("restrict"),
+		...unitReferenceConstraints("unit_license_grant", "unit", table, false, table.unitId),
+
 		foreignKey({
 			name: "unit_license_grant_granted_by_profile_id_profile_id_fkey",
 			columns: [table.grantedByProfileId],
@@ -449,12 +324,10 @@ export const unitExternalLink = pgTable(
 	"unit_external_link",
 	{
 		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		sourceEntityId: uuid()
 			.notNull()
-			.references((): AnyPgColumn => entity.id, { onDelete: "restrict" }),
+			.references((): AnyPgColumn => entityIdentity.id, { onDelete: "restrict" }),
 		url: text().notNull(),
 		normalizedUrl: text().notNull(),
 		normalizedUrlHash: text().notNull(),
@@ -466,8 +339,12 @@ export const unitExternalLink = pgTable(
 		position: fractionalIndexPosition(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_external_link", "unit", table, false, table.unitId),
+
 		unique("unit_external_link_unit_source_hash_key").on(
 			table.unitId,
 			table.sourceEntityId,
@@ -526,14 +403,16 @@ export const unitExternalLinkVote = pgTable(
 export const unitReferenceCurationHead = pgTable(
 	"unit_reference_curation_head",
 	{
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
 		kind: text().$type<UnitReferenceCurationKind>().notNull(),
 		version: integer().default(0).notNull(),
 		updatedAt: createUpdatedAtColumn(),
+
+		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_reference_curation_head", "unit", table, false, table.unitId),
+
 		primaryKey({ columns: [table.unitId, table.kind] }),
 		check(
 			"unit_reference_curation_head_kind_check",
