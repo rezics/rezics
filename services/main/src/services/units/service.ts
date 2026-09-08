@@ -1,9 +1,11 @@
+import { AuthenticationRequired } from "../auth/errors";
+import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
 import { DevelopmentPreviewCapability } from "@rezics/access";
 import type { AvatarReference } from "@rezics/avatar";
 import type { PortableTextDocument as PortableTextDocumentValue } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
-import { type LicenseId } from "@rezics/license";
-import { and, desc, eq, exists, gt, isNull, lt, not, or, sql } from "drizzle-orm";
+
+import { and, desc, eq, gt, isNull, lt, or, sql } from "drizzle-orm";
 import type { StaticDecode } from "typebox";
 import { selfAuthUserIdForEntity } from "../participation/account-query";
 
@@ -12,97 +14,62 @@ import { imageAssetPresentationContentUrl } from "../api/image-assets/presentati
 import { ensureImageAssetsAttachable, imageAssetContentUrl } from "../api/image-assets/service";
 import { UnitDetailResponse } from "../api/schema/response";
 import type { Authorization } from "../authorization";
-import {
-	createProfileOwnedUnitAccess,
-	createPublicEditableUnitAccess,
-} from "../authorization/unit/ownership";
+import { createProfileOwnedUnitAccess } from "../authorization/unit/ownership";
 import { unitScope } from "../authorization/unit/scope";
 import { OfficialProfileIds } from "../bootstrap/data";
-import { listPublishedBookContentMetrics } from "../content-metrics/service";
+
 import {
 	contentRatingAllowlistFromStored,
 	DefaultContentRatingPolicy,
 	getContentRatingCondition,
 	type ContentRatingPolicy,
 } from "../content-rating/policy";
-import { ContentStructureSnapshotSchema } from "../content-structure/contracts";
-import { createContentStructureHistory } from "../content-structure/history";
+
 import { exactCount, lowerBoundCount } from "../counts/contract";
 import { database, type DatabaseTransaction } from "../database";
 import { toSafeInteger } from "../database/integer";
 import {
 	accountPreference,
 	audio,
-	book,
-	contentStructure,
-	creditAttribution,
 	entity,
-	media,
-	release,
-	series,
-	software,
 	subjectAssociation,
 	subjectAssociationJudgment,
 	subjectAssociationJudgmentStat,
-	unit,
+	authEntity,
 	unitLocalization,
 	unitOwnership,
 	unitProgress,
 	unitTag,
 	unitTagJudgmentStat,
-	unitVariant,
 	video,
 } from "../database/schema";
-import {
-	isCreditAttributionRoleForUnitKind,
-	isEntityKind,
-	type CreditAttributionRole,
-	type WorkReleaseStatus,
-} from "../database/schema/contract-values";
-import { runVoteTransaction } from "../database/vote-admission";
+import { isEntityKind } from "../database/schema/contract-values";
+
 import { presentNullablePortableTextDocument } from "../documents/portable-text-presentation";
-import { CreditAttributionRoleInvalid } from "../entities/errors";
-import { fractionalPositionBetween } from "../ordering/position";
+
 import { getPendingUnitOwnershipClaim } from "../ownership-claims/service";
 import { WorkPolicy } from "../performance/policy";
-import { applyInitialTags } from "../tags/initial-applications";
+
 import { wilsonLowerBoundSql } from "../tags/ranking";
 import { getAssociationContextPostsByAssociationIds } from "./association-context";
-import { createAssociationRequestInTransaction } from "./association-proposals";
+
 import {
 	getAttributionSummariesByUnitIds,
 	getAttributionSummariesWithStatisticsByUnitIds,
 } from "./attribution";
-import {
-	ensureCreditAttributionRequestsConfirmed,
-	resolveEntityCreditAttributionCreationMode,
-	type CreditAttributionRequestConsent,
-	type EntityCreditAttributionCreationMode,
-} from "./attribution-authorization";
+
 import { presentAvatar } from "./avatar";
-import {
-	cancelBookChapterDraftJobs,
-	enqueueBookChapterDraftJobInTransaction,
-} from "./book-chapter-draft";
+
 import {
 	getUnitContentLanguageSupport,
-	normalizeContentLanguageSupportInput,
 	presentContentLanguageSupport,
 	replaceUnitContentLanguageSupport,
 } from "./content-language-support";
-import { insertUnit } from "./create";
-import {
-	UnitChanged,
-	UnitNotFound,
-	UnitVariantKindMismatch,
-	UnitVariantMainUnavailable,
-	UnitVariantTargetIsVariant,
-	VideoAudioTrackInvalid,
-} from "./errors";
+import { insertPlatformUnit } from "./create";
+import { UnitChanged, UnitNotFound, VideoAudioTrackInvalid } from "./errors";
 import { getUnitExternalLinkPreviewWithSources } from "./external-links";
 import { recordUnitRevision } from "./history";
 import {
-	insertLicenseGrants,
 	listEffectiveUnitLicenses,
 	listOpenUnitLicenseOfferings,
 	syncLicenseOfferings,
@@ -124,37 +91,21 @@ import {
 	unitLocalizationImageAssetReferences,
 } from "./localization";
 import { resolveCanonicalUnitId } from "./merge/canonical";
-import {
-	ensureMetadataOnlyChangeAllowed,
-	isMetadataOnlyUnitKind,
-	resolveCreatedMetadataOnly,
-} from "./metadata-only";
+
 import type { RevisionContributionInput } from "./revision-contribution";
 import { transitionUnitStatus } from "./status";
 import { presentSubjectAssociationSpoiler } from "./subject-association-spoiler";
 import { getSubjectAssociationExpressionPreviews } from "./subject-association-tags";
-import {
-	nextUnitUpdatedAt,
-	toBookUpdateValues,
-	toMediaUpdateValues,
-	toReleaseUpdateValues,
-	toSeriesUpdateValues,
-	toSoftwareUpdateValues,
-	toTimedMediaUpdateValues,
-	type UpdateUnitInput,
-} from "./update-values";
-import { ensureUnitVariantLifecycle, isDiscoverableVariantUnit } from "./variant-policy";
-import { getUnitVariantContext } from "./variants";
+import { nextUnitUpdatedAt, toTimedMediaUpdateValues, type UpdateUnitInput } from "./update-values";
+
 import {
 	listAdaptedAudioUnitIds,
 	normalizeAdaptedAudioUnitIds,
 	replaceAdaptedAudioUnitTracks,
 } from "./video-audio-tracks";
 
-export type VariantUnitKind = "book" | "software" | "media";
-export type WorkUnitKind = VariantUnitKind | "series";
 export type TimedMediaUnitKind = "video" | "audio";
-export type ManageableUnitKind = WorkUnitKind | TimedMediaUnitKind | "release";
+export type ManageableUnitKind = TimedMediaUnitKind;
 export type UnitDetail = StaticDecode<typeof UnitDetailResponse>;
 type StoredUnitLocalization = typeof unitLocalization.$inferSelect;
 
@@ -163,55 +114,35 @@ function requireEntityKind(value: string) {
 	return value;
 }
 
-const CreditAttributionRequestLifetimeMs = 30 * 24 * 60 * 60 * 1_000;
-
-type CreateUnitAccessInput =
+export type CreateTimedMediaUnitInput =
 	| {
-			readonly ownershipMode: "profile_owned";
-			readonly creditAttributions: readonly {
-				readonly entityId: string;
-				readonly role: CreditAttributionRole;
-			}[];
+			readonly owner: "audio";
+			readonly durationSeconds?: number | null;
 	  }
 	| {
-			readonly ownershipMode: "community_owned";
-			readonly creditAttributions: readonly {
-				readonly entityId: string;
-				readonly role: CreditAttributionRole;
-			}[];
+			readonly owner: "video";
+			readonly durationSeconds?: number | null;
+			readonly adaptedAudioUnitIds?: readonly string[];
 	  };
-
-export type CreateUnitInput = CreateUnitAccessInput & {
-	revisionContribution?: RevisionContributionInput;
-	contentLanguageSupport?: unknown;
-	initialTagIds: readonly string[];
-	creditAttributionRequestConsent: CreditAttributionRequestConsent;
-	version: { readonly kind: "main" } | { readonly kind: "variant"; readonly mainUnitId: string };
-	localization: {
-		language: ContentLanguage;
-		title: string;
-		summary?: string;
-		description?: PortableTextDocumentValue;
-		avatar?: AvatarReference | null;
-		bannerAssetId?: string | null;
-		coverAssetId?: string | null;
+export type TimedMediaCreation = CreateTimedMediaUnitInput & {
+	readonly localization: {
+		readonly language: ContentLanguage;
+		readonly title: string;
+		readonly summary?: string;
+		readonly description?: PortableTextDocumentValue;
+		readonly avatar?: AvatarReference | null;
+		readonly bannerAssetId?: string | null;
+		readonly coverAssetId?: string | null;
 	};
-	visibility?: "public" | "unlisted" | "private";
-	contentRating?: "general" | "r15" | "r18" | "r18g";
-	aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
-	licenses?: readonly LicenseId[];
-	details:
-		| {
-				readonly type: "book";
-				readonly releaseStatus: WorkReleaseStatus;
-				readonly metadataOnly?: boolean;
-		  }
-		| { readonly type: "software"; readonly metadataOnly?: boolean }
-		| {
-				readonly type: "media";
-				readonly releaseStatus: WorkReleaseStatus;
-				readonly metadataOnly?: boolean;
-		  };
+	readonly visibility?: "public" | "unlisted" | "private";
+	readonly contentRating?: "general" | "r15" | "r18" | "r18g";
+	readonly aiDisclosure?:
+		| "unknown"
+		| "none"
+		| "ai_assisted"
+		| "ai_originated"
+		| "machine_generated";
+	readonly revisionContribution?: RevisionContributionInput;
 };
 
 export function presentImageAsset(assetId: string | null, role?: "avatar" | "banner" | "cover") {
@@ -253,223 +184,72 @@ export function presentUnitLocalization({
 	};
 }
 
-export async function createUnit(
+export async function createTimedMediaUnit(
 	authorization: Authorization<string>,
-	input: CreateUnitInput,
+	input: TimedMediaCreation,
 ): Promise<UnitDetail> {
-	const kind = input.details.type;
-	const ownerId = authorization.profileId;
-	const contentLanguageSupport = normalizeContentLanguageSupportInput(
-		input.contentLanguageSupport ?? [],
-	);
-	const unitId = await runVoteTransaction(
-		{ family: "unit_tag", authority: "global" },
-		async (tx) => {
-			await ensureImageAssetsAttachable(
-				tx,
-				selfAuthUserIdForEntity(ownerId),
-				unitLocalizationImageAssetReferences(input.localization),
-			);
-			const resolvedCreditAttributions: {
-				readonly entityId: string;
-				readonly role: CreditAttributionRole;
-				readonly creationMode: EntityCreditAttributionCreationMode;
-			}[] = [];
-			for (const attribution of input.creditAttributions) {
-				if (!isCreditAttributionRoleForUnitKind(kind, attribution.role))
-					throw new CreditAttributionRoleInvalid(kind, attribution.role);
-				resolvedCreditAttributions.push({
-					...attribution,
-					creationMode: await resolveEntityCreditAttributionCreationMode(
-						authorization,
-						tx,
-						attribution.entityId,
-					),
-				});
-			}
-			ensureCreditAttributionRequestsConfirmed(
-				input.creditAttributionRequestConsent,
-				resolvedCreditAttributions,
-			);
-			const created = await insertUnit(tx, {
-				kind,
-				visibility: input.visibility ?? "public",
-				contentRating: input.contentRating ?? "general",
-				aiDisclosure: input.aiDisclosure ?? "unknown",
-				statusActor: { kind: "profile", profileId: ownerId },
-			});
-			let createdStructure: typeof contentStructure.$inferSelect | undefined;
-			if (input.details.type === "book") {
-				await tx.insert(book).values({
-					id: created.id,
-					releaseStatus: input.details.releaseStatus,
-					metadataOnly: resolveCreatedMetadataOnly(input.ownershipMode, input.details.metadataOnly),
-				});
-				[createdStructure] = await tx
-					.insert(contentStructure)
-					.values({ ownerUnitId: created.id, kind: "book.contents" })
-					.returning();
-				if (!createdStructure) throw new Error("Book Content Structure insertion returned no row");
-			}
-			if (input.details.type === "software")
-				await tx.insert(software).values({
-					id: created.id,
-					metadataOnly: resolveCreatedMetadataOnly(input.ownershipMode, input.details.metadataOnly),
-				});
-			if (input.details.type === "media") {
-				await tx.insert(media).values({
-					id: created.id,
-					kind: "other",
-					releaseStatus: input.details.releaseStatus,
-					metadataOnly: resolveCreatedMetadataOnly(input.ownershipMode, input.details.metadataOnly),
-				});
-				[createdStructure] = await tx
-					.insert(contentStructure)
-					.values({ ownerUnitId: created.id, kind: "media.contents" })
-					.returning();
-				if (!createdStructure) throw new Error("Media Content Structure insertion returned no row");
-			}
-			await tx.insert(unitLocalization).values({
-				unitId: created.id,
-				...toUnitLocalizationStorage(input.localization),
-			});
-			if (contentLanguageSupport.length)
-				await replaceUnitContentLanguageSupport(tx, created.id, kind, contentLanguageSupport);
-			if (input.ownershipMode === "profile_owned")
-				await createProfileOwnedUnitAccess(tx, created.id, ownerId);
-			else
-				await createPublicEditableUnitAccess(tx, created.id, ["unit.update", "unit.status.update"]);
-			if (input.licenses?.length)
-				await insertLicenseGrants(tx, {
-					unitId: created.id,
-					grantedByProfileId: ownerId,
-					licenseIds: input.licenses,
-					unitKind: kind,
-				});
-			await applyInitialTags(tx, {
-				unitId: created.id,
-				profileId: ownerId,
-				tagIds: input.initialTagIds,
-			});
-			if (input.version.kind === "variant") {
-				const [main] = await tx
-					.select({
-						id: unit.id,
-						kind: unit.kind,
-						status: unit.status,
-						visibility: unit.visibility,
-						moderationStatus: unit.moderationStatus,
-						deletedAt: unit.deletedAt,
-						parentMainUnitId: unitVariant.mainUnitId,
-					})
-					.from(unit)
-					.leftJoin(unitVariant, eq(unitVariant.variantUnitId, unit.id))
-					.where(eq(unit.id, input.version.mainUnitId))
-					.limit(1);
-				if (!main || main.deletedAt) throw new UnitVariantMainUnavailable();
-				if (main.kind !== kind) throw new UnitVariantKindMismatch();
-				if (main.parentMainUnitId) throw new UnitVariantTargetIsVariant();
-				const decision = await authorization.unit.decideInTransaction(tx, main.id, "unit.read");
-				if (!decision.allowed) throw new UnitVariantMainUnavailable();
-				if (isDiscoverableVariantUnit(created) && !isDiscoverableVariantUnit(main))
-					throw new UnitVariantMainUnavailable();
-				await tx.insert(unitVariant).values({
-					variantUnitId: created.id,
-					mainUnitId: main.id,
-					unitKind: kind,
-				});
-			}
-			let lastCreditAttributionPosition: string | undefined;
-			for (const attribution of resolvedCreditAttributions) {
-				const position = fractionalPositionBetween(lastCreditAttributionPosition, null);
-				lastCreditAttributionPosition = position;
-				if (attribution.creationMode === "direct")
-					await tx.insert(creditAttribution).values({
-						sourceUnitId: created.id,
-						creditedEntityId: attribution.entityId,
-						role: attribution.role,
-						position,
-					});
-				else
-					await createAssociationRequestInTransaction(tx, authorization, ownerId, {
-						sourceUnitId: created.id,
-						targetUnitId: attribution.entityId,
-						kind: "credit",
-						role: attribution.role,
-						expiresAt: new Date(Date.now() + CreditAttributionRequestLifetimeMs),
-					});
-			}
-			const structureSnapshot = createdStructure
-				? ContentStructureSnapshotSchema.parse({
-						version: 1,
-						structure: createdStructure,
-						nodes: [],
-					})
-				: null;
-			await recordUnitRevision(tx, {
-				unitId: created.id,
-				actorProfileId: ownerId,
-				contribution: input.revisionContribution,
-				event: "create",
-			});
-			if (structureSnapshot)
-				await createContentStructureHistory(tx, {
-					structureId: structureSnapshot.structure.id,
-					actorProfileId: ownerId,
-					state: structureSnapshot,
-				});
-			return created.id;
-		},
-	);
-	return getUnit(kind, unitId, authorization);
+	if (!authorization.authUserId) throw new AuthenticationRequired();
+	const authUserId = authorization.authUserId;
+	if (
+		input.durationSeconds != null &&
+		(!Number.isSafeInteger(input.durationSeconds) || input.durationSeconds <= 0)
+	)
+		throw new ValidationError({ details: { durationSeconds: "must be a positive integer" } });
+	if (input.owner === "video" && input.adaptedAudioUnitIds?.length)
+		await authorization.unit.ensureCanReadMany(input.adaptedAudioUnitIds);
+	const id = await database.transaction(async (tx) => {
+		await ensureAccountAuthenticationAllowed(authUserId, tx);
+		await authorization.account.ensureCanWrite(tx);
+		const [binding] = await tx
+			.select({ id: authEntity.entityId })
+			.from(authEntity)
+			.where(
+				and(
+					eq(authEntity.authUserId, authUserId),
+					eq(authEntity.entityId, authorization.profileId),
+					eq(authEntity.state, "active"),
+				),
+			)
+			.limit(1)
+			.for("share");
+		if (!binding) throw new AuthenticationRequired();
+		await ensureImageAssetsAttachable(
+			tx,
+			authUserId,
+			unitLocalizationImageAssetReferences(input.localization),
+		);
+		const created = await insertPlatformUnit(tx, {
+			owner: input.owner,
+			values: {
+				createdByAuthUserId: authUserId,
+				durationSeconds: input.durationSeconds,
+				visibility: input.visibility,
+				contentRating: input.contentRating,
+				aiDisclosure: input.aiDisclosure,
+			},
+			statusActor: { kind: "profile", profileId: authorization.profileId },
+		});
+		await createProfileOwnedUnitAccess(tx, created.id, authorization.profileId);
+		await tx
+			.insert(unitLocalization)
+			.values({ unitId: created.id, ...toUnitLocalizationStorage(input.localization) });
+		if (input.owner === "video")
+			await replaceAdaptedAudioUnitTracks(tx, created.id, input.adaptedAudioUnitIds);
+		await recordUnitRevision(tx, {
+			unitId: created.id,
+			actorProfileId: authorization.profileId,
+			contribution: input.revisionContribution,
+			event: "create",
+		});
+		return created.id;
+	});
+	return getUnit(input.owner, id, authorization);
 }
 
 async function getUnitDetails(
 	kind: ManageableUnitKind,
 	unitId: string,
 ): Promise<UnitDetail["details"]> {
-	if (kind === "book") {
-		const [details] = await database.select().from(book).where(eq(book.id, unitId)).limit(1);
-		if (!details) throw new UnitNotFound(kind);
-		return {
-			type: "book",
-			releaseStatus: details.releaseStatus,
-			metadataOnly: details.metadataOnly,
-			isbn13: details.isbn13,
-			publicationDate: details.publicationDate,
-			pageCount: details.pageCount,
-			wordCount: details.wordCount,
-			publishedContentMetrics: await listPublishedBookContentMetrics(database, unitId),
-		};
-	}
-	if (kind === "software") {
-		const [details] = await database
-			.select()
-			.from(software)
-			.where(eq(software.id, unitId))
-			.limit(1);
-		if (!details) throw new UnitNotFound(kind);
-		return {
-			type: "software",
-			metadataOnly: details.metadataOnly,
-			releaseDate: details.releaseDate,
-			versionLabel: details.versionLabel,
-		};
-	}
-	if (kind === "media") {
-		const [details] = await database.select().from(media).where(eq(media.id, unitId)).limit(1);
-		if (!details) throw new UnitNotFound(kind);
-		return {
-			type: "media",
-			releaseStatus: details.releaseStatus,
-			metadataOnly: details.metadataOnly,
-			releaseDate: details.releaseDate,
-			kind: details.kind,
-			runtimeMinutes: details.runtimeMinutes,
-			episodeCount: details.episodeCount,
-			seasonCount: details.seasonCount,
-		};
-	}
 	if (kind === "video") {
 		const [[details], adaptedAudioUnitIds] = await Promise.all([
 			database.select().from(video).where(eq(video.id, unitId)).limit(1),
@@ -487,19 +267,7 @@ async function getUnitDetails(
 		if (!details) throw new UnitNotFound(kind);
 		return { type: "audio", durationSeconds: details.durationSeconds };
 	}
-	if (kind === "release") {
-		const [details] = await database.select().from(release).where(eq(release.id, unitId)).limit(1);
-		if (!details) throw new UnitNotFound(kind);
-		return {
-			type: "release",
-			parentUnitId: details.parentUnitId,
-			versionLabel: details.versionLabel,
-			releasedOn: details.releasedOn,
-		};
-	}
-	const [details] = await database.select().from(series).where(eq(series.id, unitId)).limit(1);
-	if (!details) throw new UnitNotFound(kind);
-	return { type: "series", kind: details.kind };
+	throw new UnitNotFound(kind);
 }
 
 export async function getUnit(
@@ -509,10 +277,11 @@ export async function getUnit(
 	localizationLanguages: readonly ContentLanguage[] = [],
 ): Promise<UnitDetail> {
 	const canonicalUnitId = await resolveCanonicalUnitId(database, unitId);
+	const unit = kind === "audio" ? audio : video;
 	const [base] = await database
 		.select()
 		.from(unit)
-		.where(and(eq(unit.id, canonicalUnitId), eq(unit.kind, kind), isNull(unit.deletedAt)))
+		.where(and(eq(unit.id, canonicalUnitId), isNull(unit.deletedAt)))
 		.limit(1);
 	if (!base) throw new UnitNotFound(kind);
 	await authorization.unit.ensureCanRead(base.id, () => new UnitNotFound(kind));
@@ -684,10 +453,7 @@ export async function getUnit(
 		const value = visibleProgressRows.filter((row) => row.status === status).length;
 		return progressCountIsExact ? exactCount(value) : lowerBoundCount(value);
 	};
-	const variantContext: UnitDetail["variantContext"] =
-		kind === "series" || kind === "video" || kind === "audio" || kind === "release"
-			? { role: "standalone" }
-			: await getUnitVariantContext(base.id, authorization.profileId, localizationLanguages);
+	const variantContext = { role: "standalone" as const };
 	const [
 		canEdit,
 		canCurateTags,
@@ -714,9 +480,7 @@ export async function getUnit(
 			unitScope("references", "external-links"),
 		),
 		authorization.unit.decide(base.id, "unit.realm-publication.manage"),
-		isMetadataOnlyUnitKind(kind)
-			? authorization.unit.decide(base.id, "unit.metadata-only.update", ["unit"])
-			: Promise.resolve({ allowed: false as const, reason: "ungranted" as const }),
+		Promise.resolve({ allowed: false as const, reason: "ungranted" as const }),
 		authorization.unit.decide(base.id, "unit.access.manage"),
 		authorization.unit.decide(base.id, "unit.association.manage"),
 		authorization.platform.hasCapability(DevelopmentPreviewCapability),
@@ -750,14 +514,7 @@ export async function getUnit(
 		attributions,
 		createdAt: base.createdAt,
 		updatedAt: base.updatedAt,
-		releasedOn:
-			details.type === "book"
-				? details.publicationDate
-				: details.type === "software" || details.type === "media"
-					? details.releaseDate
-					: details.type === "release"
-						? details.releasedOn
-						: null,
+		releasedOn: null,
 		details,
 		avatar: presentAvatar(
 			resolveUnitLocalizationAvatarFromOrdered(localizations, localizationLanguages),
@@ -791,29 +548,7 @@ export async function getUnit(
 						active: progressCount("active"),
 						backlog: progressCount("backlog"),
 					},
-		versions:
-			kind === "series" || kind === "video" || kind === "audio" || kind === "release"
-				? []
-				: variantContext.role === "standalone"
-					? [{ id: base.id, kind: "primary", canonicalUnitId: null }]
-					: variantContext.role === "main"
-						? [
-								{ id: base.id, kind: "primary", canonicalUnitId: null },
-								...variantContext.variants.map(({ id }) => ({
-									id,
-									kind: "version",
-									canonicalUnitId: base.id,
-								})),
-							]
-						: variantContext.main.state === "available"
-							? [
-									{
-										id: base.id,
-										kind: "version",
-										canonicalUnitId: variantContext.main.unit.id,
-									},
-								]
-							: [],
+		versions: [],
 		variantContext,
 		ownershipMode:
 			activeOwnership?.profileId === OfficialProfileIds.community
@@ -837,12 +572,15 @@ export async function getUnit(
 }
 
 export async function listUnits(
-	kind: WorkUnitKind,
+	kind: TimedMediaUnitKind,
 	cursor?: [string, string],
 	limit = 20,
 	localizationLanguages: readonly ContentLanguage[] = [],
 	contentRatingPolicy: ContentRatingPolicy = DefaultContentRatingPolicy,
 ) {
+	if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100)
+		throw new RangeError("Timed media pages require 1 through 100 items");
+	const unit = kind === "audio" ? audio : video;
 	const rows = await database
 		.select({
 			id: unit.id,
@@ -870,20 +608,11 @@ export async function listUnits(
 		)
 		.where(
 			and(
-				eq(unit.kind, kind),
 				eq(unit.status, "published"),
 				eq(unit.visibility, "public"),
 				eq(unit.moderationStatus, "approved"),
 				isNull(unit.deletedAt),
-				getContentRatingCondition(contentRatingPolicy),
-				not(
-					exists(
-						database
-							.select({ id: unitVariant.variantUnitId })
-							.from(unitVariant)
-							.where(eq(unitVariant.variantUnitId, unit.id)),
-					),
-				),
+				getContentRatingCondition(contentRatingPolicy, unit.contentRating),
 				cursor
 					? or(
 							lt(unit.createdAt, new Date(cursor[0])),
@@ -928,18 +657,21 @@ export async function updateUnitInTransaction(
 	statusUpdateAllowed: boolean,
 	body: UpdateUnitInput,
 ): Promise<void> {
+	const unit = kind === "audio" ? audio : video;
 	const hasAdaptedAudioUpdate = hasAdaptedAudioRelationUpdate(kind, body);
 	const updatedAt = nextUnitUpdatedAt(body.expectedUpdatedAt);
 	const [updated] = await tx
 		.update(unit)
 		.set({
 			updatedAt,
+			revision: sql`${unit.revision} + 1`,
+			...toTimedMediaUpdateValues(body),
 			visibility: body.visibility,
 			contentRating: body.contentRating,
 			aiDisclosure: body.aiDisclosure,
 		})
 		.where(
-			and(eq(unit.id, unitId), eq(unit.kind, kind), eq(unit.updatedAt, body.expectedUpdatedAt)),
+			and(eq(unit.id, unitId), isNull(unit.deletedAt), eq(unit.updatedAt, body.expectedUpdatedAt)),
 		)
 		.returning({ id: unit.id, status: unit.status });
 	if (!updated) {
@@ -951,26 +683,8 @@ export async function updateUnitInTransaction(
 		if (!current) throw new UnitNotFound(kind);
 		throw new UnitChanged(current.updatedAt);
 	}
-	const bookUpdate = kind === "book" ? toBookUpdateValues(body) : undefined;
-	if (bookUpdate) await tx.update(book).set(bookUpdate).where(eq(book.id, unitId));
-	const softwareUpdate = kind === "software" ? toSoftwareUpdateValues(body) : undefined;
-	if (softwareUpdate) await tx.update(software).set(softwareUpdate).where(eq(software.id, unitId));
-	const mediaUpdate = kind === "media" ? toMediaUpdateValues(body) : undefined;
-	if (mediaUpdate) await tx.update(media).set(mediaUpdate).where(eq(media.id, unitId));
-	const timedMediaUpdate =
-		kind === "video" || kind === "audio" ? toTimedMediaUpdateValues(body) : undefined;
-	if (kind === "video" && timedMediaUpdate)
-		await tx.update(video).set(timedMediaUpdate).where(eq(video.id, unitId));
-	if (kind === "audio" && timedMediaUpdate)
-		await tx.update(audio).set(timedMediaUpdate).where(eq(audio.id, unitId));
 	if (kind === "video" && hasAdaptedAudioUpdate)
 		await replaceAdaptedAudioUnitTracks(tx, unitId, body.details?.adaptedAudioUnitIds);
-	if (kind === "release") {
-		if (body.details?.versionLabel === null)
-			throw new ValidationError({ details: { versionLabel: "must not be null" } });
-		const releaseUpdate = toReleaseUpdateValues(body);
-		if (releaseUpdate) await tx.update(release).set(releaseUpdate).where(eq(release.id, unitId));
-	}
 	if (Object.hasOwn(body, "licenses")) {
 		await syncLicenseOfferings(tx, {
 			unitId,
@@ -981,16 +695,12 @@ export async function updateUnitInTransaction(
 	}
 	if (Object.hasOwn(body, "contentLanguageSupport"))
 		await replaceUnitContentLanguageSupport(tx, unitId, kind, body.contentLanguageSupport);
-	const seriesUpdate = kind === "series" ? toSeriesUpdateValues(body) : undefined;
-	if (seriesUpdate) await tx.update(series).set(seriesUpdate).where(eq(series.id, unitId));
 	const revision = await recordUnitRevision(tx, {
 		unitId,
 		actorProfileId,
 		contribution: body.revisionContribution,
 		event: "update",
 	});
-	const changesBookStatus = kind === "book" && body.status && body.status !== updated.status;
-	if (changesBookStatus) await cancelBookChapterDraftJobs(tx, unitId);
 	if (body.status) {
 		await transitionUnitStatus(tx, {
 			unitId,
@@ -1003,18 +713,6 @@ export async function updateUnitInTransaction(
 			revisionId: revision.revisionId,
 		});
 	}
-	if (
-		changesBookStatus &&
-		body.status === "draft" &&
-		body.bookChapterDraftScope === "manageable_published_chapters"
-	)
-		await enqueueBookChapterDraftJobInTransaction(tx, {
-			bookId: unitId,
-			bookUpdatedAt: updatedAt,
-			requestedByProfileId: actorProfileId,
-		});
-	if (kind === "book" || kind === "software" || kind === "media")
-		await ensureUnitVariantLifecycle(tx, unitId);
 }
 
 export async function updateUnit(
@@ -1040,9 +738,9 @@ export async function updateUnit(
 		? await authorization.unit.decide(unitId, "unit.status.update", ["unit"])
 		: undefined;
 	await database.transaction(async (tx) => {
-		const nextMetadataOnly = body.details?.metadataOnly;
-		if (nextMetadataOnly !== undefined && isMetadataOnlyUnitKind(kind))
-			await ensureMetadataOnlyChangeAllowed(tx, authorization, kind, unitId, nextMetadataOnly);
+		await authorization.unit.ensureInTransaction(tx, unitId, "unit.update", ["unit"]);
+		if (body.status)
+			await authorization.unit.ensureInTransaction(tx, unitId, "unit.status.update", ["unit"]);
 		await updateUnitInTransaction(
 			tx,
 			kind,
