@@ -9,7 +9,9 @@ import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
 import { database } from "../database";
-import { unit, unitLicenseGrant } from "../database/schema";
+import { readUnitStateById } from "./query";
+import type { UnitOwner } from "@rezics/reference";
+import { unitLicenseGrant } from "../database/schema";
 import {
 	UnitLicenseGrantForbidden,
 	UnitLicenseGrantConflict,
@@ -61,15 +63,10 @@ function isPostgresUniqueViolation(error: unknown): boolean {
 export async function lockUnitForLicenseMutation(
 	tx: DatabaseTransaction,
 	unitId: string,
-): Promise<{ readonly id: string; readonly kind: string }> {
-	const [row] = await tx
-		.select({ id: unit.id, kind: unit.kind })
-		.from(unit)
-		.where(eq(unit.id, unitId))
-		.for("update")
-		.limit(1);
-	if (!row) throw new UnitNotFound();
-	return row;
+): Promise<{ readonly id: string; readonly owner: UnitOwner; readonly shape: string }> {
+ const row = await readUnitStateById(tx,unitId,{lock:"update"});
+ if (!row) throw new UnitNotFound();
+ return {id:row.id,owner:row.reference.owner,shape:row.shape};
 }
 
 function assertGrantPreconditions(
@@ -100,10 +97,10 @@ export async function insertLicenseGrants(
 		readonly unitKind: string;
 	},
 ): Promise<void> {
-	await lockUnitForLicenseMutation(tx, input.unitId);
+	const current = await lockUnitForLicenseMutation(tx, input.unitId);
 	const licenseIds = uniqueLicenseIds(input.licenseIds);
 	if (licenseIds.length === 0) return;
-	assertGrantPreconditions(licenseIds, input);
+	assertGrantPreconditions(licenseIds, { ...input, unitKind: current.owner });
 	try {
 		await tx.insert(unitLicenseGrant).values(
 			licenseIds.map((licenseId) => ({
