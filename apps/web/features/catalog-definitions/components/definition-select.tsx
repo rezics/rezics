@@ -43,7 +43,10 @@ export function DefinitionBrowser({
 		setLoading(item.id);
 		setError(undefined);
 		try {
-			const { data } = await getCatalogDefinitionRevision({ path: { id: item.current.id } });
+			const { data } = await getCatalogDefinitionRevision({
+				path: { id: item.current.id },
+				throwOnError: true,
+			});
 			onPick({
 				definitionId: item.id,
 				namespace: item.namespace,

@@ -35,6 +35,11 @@ type PageContext = {
 	onChanged: () => void;
 };
 export function CatalogSemanticsPage({ reference }: { reference: CatalogReference }) {
+	return (
+		<CatalogSemanticsContent key={`${reference.owner}:${reference.id}`} reference={reference} />
+	);
+}
+function CatalogSemanticsContent({ reference }: { reference: CatalogReference }) {
 	const { t } = useTranslation(["units"]),
 		copy = t.units.nativeSemantics;
 	const [spoiler, setSpoiler] = useState<0 | 1 | 2>(0),
@@ -106,9 +111,9 @@ export function CatalogSemanticsPage({ reference }: { reference: CatalogReferenc
 					onChange={setIncludeInactive}
 				/>
 			) : null}
-			{creating === "fact" ? (
+			{context.canEdit && creating === "fact" ? (
 				<FactEditor reference={reference} revision={resource.data.revision} onSaved={onChanged} />
-			) : creating === "relation" ? (
+			) : context.canEdit && creating === "relation" ? (
 				<RelationEditor
 					reference={reference}
 					revision={resource.data.revision}
