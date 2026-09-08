@@ -236,6 +236,7 @@ export const ZoneNavigationResponse = t.Object({
 export const ZoneNavigationListResponse = t.Object({ items: t.Array(ZoneNavigationResponse) });
 
 export const ZoneRenderUnitResponse = t.Object({
+	languageTag: t.Optional(t.Nullable(t.String({ maxLength: 255 }))),
 	id: Uuid,
 	kind: t.String(),
 	zonePageSlug: t.Nullable(t.String()),

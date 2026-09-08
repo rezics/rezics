@@ -1,3 +1,4 @@
+import { readNativeZoneRenderReferences } from "./render-native-references";
 import { catalogUnitLocator } from "../../database/schema/catalog-identity";
 import { unitStateRelation } from "../../units/state-relation";
 import { AuthenticationRequired } from "../../auth/errors";
@@ -42,7 +43,6 @@ import type { StaticDecode } from "typebox";
 import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
-import { getUnitReadCondition } from "../../authorization/unit/query";
 import { createUnitBlockReferenceResolver } from "../../blocks/reference-resolver";
 import { ContentStructureInvalid, ContentStructureNotFound } from "../../content-structure/errors";
 import {
@@ -143,6 +143,7 @@ import {
 	ZoneParams,
 	ZoneRenderQuery,
 	ZoneRenderResponse,
+	ZoneRenderUnitResponse,
 	ZoneResponse,
 } from "./schema";
 
@@ -333,11 +334,14 @@ function rethrowZoneNavigationNotFound(cause: unknown): never {
 	throw cause;
 }
 
-async function getReadableRenderLocalizationRows(ids: readonly string[], profileId?: string) {
+async function getReadableRenderLocalizationRows(
+	ids: readonly string[],
+	authorization: UnitAuthorization<string | undefined>,
+) {
 	if (!ids.length) return [];
-	if (ids.length > 512) throw new RangeError("Zone render reference limit exceeded");
+	if (ids.length > 500) throw new RangeError("Zone render reference limit exceeded");
 	const state = unitStateRelation(unitLocalization.unitId, "render_unit_state");
-	return database
+	const rows = await database
 		.select({
 			id: state.id,
 			kind: state.owner,
@@ -356,10 +360,10 @@ async function getReadableRenderLocalizationRows(ids: readonly string[], profile
 		})
 		.from(unitLocalization)
 		.innerJoinLateral(state, sql`true`)
-		.where(
-			and(inArray(unitLocalization.unitId, [...ids]), getUnitReadCondition(profileId, {}, state)),
-		)
+		.where(inArray(unitLocalization.unitId, [...ids]))
 		.orderBy(unitLocalization.unitId, unitLocalization.position, unitLocalization.language);
+	const readableIds = await authorization.readableUnitIds(ids);
+	return rows.filter((row) => readableIds.has(row.id));
 }
 
 function presentRenderUnit(
@@ -430,7 +434,7 @@ async function ensureZoneFilterReferences(
 	const predicateIds = document.where ? collectUnitPredicateReferenceIds(document.where) : [];
 	const ids = [...new Set([...labelIds, ...tagIds, ...predicateIds])];
 	if (!ids.length) return;
-	if (ids.length > 512) throw new ZoneDocumentInvalid();
+	if (ids.length > 500) throw new ZoneDocumentInvalid();
 	const state = unitStateRelation(catalogUnitLocator.id, "zone_filter_state");
 	const records = await tx
 		.select({
@@ -713,7 +717,7 @@ export default new Elysia()
 
 					const wikiRows = await getReadableRenderLocalizationRows(
 						[...wikiPostIds],
-						identity.authorization.profileId,
+						identity.authorization.unit,
 					);
 					const wikiPosts = [...wikiPostIds].flatMap((id) => {
 						const rows = wikiRows.filter((row) => row.id === id);
@@ -733,12 +737,19 @@ export default new Elysia()
 					for (const id of wikiPostIds) unitIds.delete(id);
 					const referenceRows = await getReadableRenderLocalizationRows(
 						[...unitIds],
-						identity.authorization.profileId,
+						identity.authorization.unit,
 					);
 					const zonePageSlugs = await database.transaction((tx) =>
 						listZonePageCanonicalSlugs(tx, params.zoneId, [...unitIds]),
 					);
-					const units = [...unitIds].flatMap((id) => {
+					const nativeReferences = await readNativeZoneRenderReferences(
+						[...unitIds],
+						identity.authorization.unit,
+					);
+					const nativeById = new Map(nativeReferences.map((item) => [item.id, item]));
+					const units = [...unitIds].flatMap<StaticDecode<typeof ZoneRenderUnitResponse>>((id) => {
+						const native = nativeById.get(id);
+						if (native) return [native];
 						const presented = presentRenderUnit(
 							referenceRows.filter((row) => row.id === id),
 							query.localizationLanguages,
