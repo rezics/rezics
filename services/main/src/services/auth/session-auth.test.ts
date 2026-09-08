@@ -13,6 +13,7 @@ const resolveApiAccountQuotaPolicy = vi.hoisted(() => vi.fn());
 const resolveApiTokenQuotaPolicy = vi.hoisted(() => vi.fn());
 const getApiTokenQuotaOverride = vi.hoisted(() => vi.fn());
 const setAuditCredentialContext = vi.hoisted(() => vi.fn());
+const authorizationArguments = vi.hoisted(() => vi.fn());
 
 vi.mock("./index", () => ({
 	auth: { api: { getSession, verifyApiKey } },
@@ -35,7 +36,10 @@ vi.mock("../authorization", () => ({
 		constructor(
 			readonly entityId: string | undefined,
 			readonly authUserId?: string,
-		) {}
+			readonly participationAuthority?: unknown,
+		) {
+			authorizationArguments(entityId, authUserId, participationAuthority);
+		}
 	},
 }));
 vi.mock("./api-quota/limit-store", () => ({ enforceApiQuota }));
@@ -120,6 +124,11 @@ describe("session access macro", () => {
 
 		expect(response.status).toBe(200);
 		expect(await response.text()).toBe("session");
+		expect(authorizationArguments).toHaveBeenCalledWith(
+			expect.any(String),
+			user.id,
+			expect.objectContaining({ principal: { kind: "auth", authUserId: user.id } }),
+		);
 		expect(ensureAccountAuthenticationAllowed).toHaveBeenCalledWith(user.id);
 		expect(setAuditCredentialContext).toHaveBeenCalledWith({
 			authUserId: user.id,
@@ -240,6 +249,11 @@ describe("session access macro", () => {
 
 		expect(response.status).toBe(200);
 		expect(await response.text()).toBe("apiKey");
+		expect(authorizationArguments).toHaveBeenCalledWith(
+			expect.any(String),
+			user.id,
+			expect.objectContaining({ principal: { kind: "auth", authUserId: user.id } }),
+		);
 		expect(enforceApiQuota).toHaveBeenCalledOnce();
 		expect(release).toHaveBeenCalledOnce();
 		expect(setAuditCredentialContext).toHaveBeenCalledWith({

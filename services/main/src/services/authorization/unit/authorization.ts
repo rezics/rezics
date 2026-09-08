@@ -11,6 +11,8 @@ import {
 	currentParticipationAuthority,
 	readCatalogAuthorityScope,
 	catalogIdentityReadPredicate,
+	runWithParticipationAuthority,
+	type ParticipationAuthority,
 } from "../../participation/policy";
 import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 
@@ -76,7 +78,17 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		readonly profileId: ProfileId,
 		private readonly platform: PlatformAuthorization<ProfileId>,
 		readonly authUserId?: string,
-	) {}
+		readonly participationAuthority?: ParticipationAuthority,
+	) {
+		if (participationAuthority && participationAuthority.principal.authUserId !== authUserId)
+			throw new Error("Request participation authority does not match its authenticated account");
+	}
+
+	#withParticipation<T>(work: () => T): T {
+		return this.participationAuthority
+			? runWithParticipationAuthority(this.participationAuthority, work)
+			: work();
+	}
 
 	async #authenticatedSelf(executor: DatabaseExecutor): Promise<boolean> {
 		if (!this.profileId || !this.authUserId) return false;
@@ -108,6 +120,15 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 	}
 
 	async #decide(
+		executor: DatabaseTransaction,
+		unitId: string,
+		permission: UnitPermission,
+		scope: UnitScope,
+	): Promise<UnitAccessDecision> {
+		return this.#withParticipation(() => this.#decideCurrent(executor, unitId, permission, scope));
+	}
+
+	async #decideCurrent(
 		executor: DatabaseTransaction,
 		unitId: string,
 		permission: UnitPermission,
@@ -338,47 +359,49 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		const uniqueIds = [...new Set(unitIds)];
 		if (!uniqueIds.length) return;
 		if (uniqueIds.length > 500) throw new RangeError("Unit read batches cannot exceed 500 targets");
-		const readableIds = await database.transaction(async (tx) => {
-			const actor = currentParticipationAuthority()?.principal.authUserId ?? null;
-			return withCatalogViewerPolicy(tx, actor, async () => {
-				const viewerId = (await this.#authenticatedSelf(tx)) ? this.profileId : undefined;
-				const [control] = await tx
-					.select({ ready: catalogRoutingControl.ready })
-					.from(catalogRoutingControl)
-					.where(eq(catalogRoutingControl.singleton, true))
-					.limit(1);
-				if (!control?.ready) throw onDenied(uniqueIds[0]!);
-				const routes = await tx
-					.select()
-					.from(catalogUnitLocator)
-					.where(inArray(catalogUnitLocator.id, uniqueIds));
-				const nativeScope = await readCatalogAuthorityScope(tx, actor);
-				const result = new Set<string>();
-				for (const owner of new Set(routes.map((route) => route.owner))) {
-					const table = unitOwnerTable(owner);
-					const group = routes.filter((route) => route.owner === owner);
-					const native = CatalogReferenceSchema.safeParse({ owner, id: group[0]!.id });
-					const rows = await tx
-						.select({ id: table.id, generation: table.routingGeneration })
-						.from(table)
-						.where(
-							and(
-								inArray(
-									table.id,
-									group.map((route) => route.id),
+		const readableIds = await this.#withParticipation(() =>
+			database.transaction(async (tx) => {
+				const actor = currentParticipationAuthority()?.principal.authUserId ?? null;
+				return withCatalogViewerPolicy(tx, actor, async () => {
+					const viewerId = (await this.#authenticatedSelf(tx)) ? this.profileId : undefined;
+					const [control] = await tx
+						.select({ ready: catalogRoutingControl.ready })
+						.from(catalogRoutingControl)
+						.where(eq(catalogRoutingControl.singleton, true))
+						.limit(1);
+					if (!control?.ready) throw onDenied(uniqueIds[0]!);
+					const routes = await tx
+						.select()
+						.from(catalogUnitLocator)
+						.where(inArray(catalogUnitLocator.id, uniqueIds));
+					const nativeScope = await readCatalogAuthorityScope(tx, actor);
+					const result = new Set<string>();
+					for (const owner of new Set(routes.map((route) => route.owner))) {
+						const table = unitOwnerTable(owner);
+						const group = routes.filter((route) => route.owner === owner);
+						const native = CatalogReferenceSchema.safeParse({ owner, id: group[0]!.id });
+						const rows = await tx
+							.select({ id: table.id, generation: table.routingGeneration })
+							.from(table)
+							.where(
+								and(
+									inArray(
+										table.id,
+										group.map((route) => route.id),
+									),
+									native.success
+										? catalogIdentityReadPredicate(nativeScope, native.data.owner, table)
+										: getUnitReadCondition(viewerId, {}, table),
 								),
-								native.success
-									? catalogIdentityReadPredicate(nativeScope, native.data.owner, table)
-									: getUnitReadCondition(viewerId, {}, table),
-							),
-						);
-					const generations = new Map(group.map((route) => [route.id, route.generation]));
-					for (const row of rows)
-						if (generations.get(row.id) === row.generation) result.add(row.id);
-				}
-				return result;
-			});
-		});
+							);
+						const generations = new Map(group.map((route) => [route.id, route.generation]));
+						for (const row of rows)
+							if (generations.get(row.id) === row.generation) result.add(row.id);
+					}
+					return result;
+				});
+			}),
+		);
 		const deniedId = uniqueIds.find((id) => !readableIds.has(id));
 		if (deniedId) throw onDenied(deniedId);
 	}

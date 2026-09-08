@@ -183,7 +183,7 @@ async function resolveInteractiveSession(headers: Headers): Promise<SessionIdent
 		authorizationRevision: entity.authorizationRevision,
 		session: session.session,
 		entity,
-		authorization: new Authorization(entity.id, session.user.id),
+		authorization: new Authorization(entity.id, session.user.id, participation),
 		credential: { kind: "session", session: session.session },
 	};
 }
@@ -225,7 +225,7 @@ async function resolveApiKeyIdentity(
 	await ensureAccountAuthenticationAllowed(user.id);
 	const entity = await ensureSelfEntity(user);
 	const participation = await resolveRequestParticipation(headers, entity, user.id);
-	const authorization = new Authorization(entity.id, user.id);
+	const authorization = new Authorization(entity.id, user.id, participation);
 	if (accountAccess === "write" || accountAccess === "contribute") {
 		if (!user.emailVerified) throw new EmailVerificationRequired();
 		if (accountAccess === "write") await authorization.account.ensureCanWrite();

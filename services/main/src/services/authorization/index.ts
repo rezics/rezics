@@ -5,6 +5,7 @@ import { PlatformAuthorization } from "./platform/authorization";
 import { RealmAuthorization } from "./realm/authorization";
 import { UnitAuthorization } from "./unit/authorization";
 import { ZoneAuthorization } from "./zone/authorization";
+import type { ParticipationAuthority } from "../participation/policy";
 
 /** Request-scoped authorization for one profile, including anonymous requests. */
 export class Authorization<ProfileId extends string | undefined = string | undefined> {
@@ -19,11 +20,12 @@ export class Authorization<ProfileId extends string | undefined = string | undef
 	constructor(
 		readonly profileId: ProfileId,
 		readonly authUserId?: string,
+		readonly participationAuthority?: ParticipationAuthority,
 	) {
 		this.account = new AccountAuthorization(authUserId);
 		this.collection = new CollectionAuthorization(profileId);
 		this.platform = new PlatformAuthorization(profileId, authUserId);
-		this.unit = new UnitAuthorization(profileId, this.platform, authUserId);
+		this.unit = new UnitAuthorization(profileId, this.platform, authUserId, participationAuthority);
 		this.zone = new ZoneAuthorization(this.platform, this.unit);
 		this.entity = new EntityAuthorization(profileId, this.platform, this.unit);
 		this.realm = new RealmAuthorization(profileId, this.platform, this.unit);
