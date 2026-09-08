@@ -129810,6 +129810,32 @@ export type GetApiFavoritesQuery = {
 	limit?: number;
 };
 
+export const GetApiFavoritesStatus200ItemsPreviewKindEnum = {
+	slug_namespace: "slug_namespace",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	tag_path: "tag_path",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiFavoritesStatus200ItemsPreviewKindEnum =
+	(typeof GetApiFavoritesStatus200ItemsPreviewKindEnum)[keyof typeof GetApiFavoritesStatus200ItemsPreviewKindEnum];
+
 /**
  * @type object
  */
@@ -129839,6 +129865,10 @@ export type GetApiFavoritesStatus200 = {
 		 * @type object
 		 */
 		preview: {
+			/**
+			 * @type string
+			 */
+			kind: GetApiFavoritesStatus200ItemsPreviewKindEnum;
 			title: string | null;
 			summary: string | null;
 			language: string | null;
@@ -129944,6 +129974,175 @@ export type GetApiFavoritesResponse =
 /**
  * @type object
  */
+export type GetApiFavoritesByTargetUnitIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetUnitId: string;
+};
+
+export const GetApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum = {
+	slug_namespace: "slug_namespace",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	tag_path: "tag_path",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum =
+	(typeof GetApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum)[keyof typeof GetApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum];
+
+/**
+ * @type object
+ */
+export type GetApiFavoritesByTargetUnitIdStatus200 = {
+	/**
+	 * @minLength -9007199254740991
+	 * @maxLength 9007199254740991
+	 * @type integer
+	 */
+	revision: number;
+	entry: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		targetUnitId: string;
+		/**
+		 * @type string
+		 */
+		position: string;
+		note: string | null;
+		/**
+		 * @type object
+		 */
+		preview: {
+			/**
+			 * @type string
+			 */
+			kind: GetApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum;
+			title: string | null;
+			summary: string | null;
+			language: string | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			capturedAt: string;
+		};
+		/**
+		 * @maxLength 9007199254740991
+		 * @type integer
+		 */
+		revision: number;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	} | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiFavoritesByTargetUnitIdStatus422 = ValidationError;
+
+export const GetApiFavoritesByTargetUnitIdStatus429ErrorCodeEnum = {
+	ApiQuotaExceeded: "ApiQuotaExceeded",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+} as const;
+
+export type GetApiFavoritesByTargetUnitIdStatus429ErrorCodeEnum =
+	(typeof GetApiFavoritesByTargetUnitIdStatus429ErrorCodeEnum)[keyof typeof GetApiFavoritesByTargetUnitIdStatus429ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiFavoritesByTargetUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: GetApiFavoritesByTargetUnitIdStatus429ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiFavoritesByTargetUnitIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiFavoritesByTargetUnitIdOptions = {
+	body?: never;
+	path: GetApiFavoritesByTargetUnitIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiFavoritesByTargetUnitIdResponses = {
+	"200": GetApiFavoritesByTargetUnitIdStatus200;
+	"422": GetApiFavoritesByTargetUnitIdStatus422;
+	"429": GetApiFavoritesByTargetUnitIdStatus429;
+	"500": GetApiFavoritesByTargetUnitIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiFavoritesByTargetUnitIdResponse =
+	| GetApiFavoritesByTargetUnitIdStatus200
+	| GetApiFavoritesByTargetUnitIdStatus422
+	| GetApiFavoritesByTargetUnitIdStatus429
+	| GetApiFavoritesByTargetUnitIdStatus500;
+
+/**
+ * @type object
+ */
 export type PutApiFavoritesByTargetUnitIdPath = {
 	/**
 	 * @description
@@ -129952,6 +130151,32 @@ export type PutApiFavoritesByTargetUnitIdPath = {
 	 */
 	targetUnitId: string;
 };
+
+export const PutApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum = {
+	slug_namespace: "slug_namespace",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	tag_path: "tag_path",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PutApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum =
+	(typeof PutApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum)[keyof typeof PutApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum];
 
 /**
  * @type object
@@ -129978,6 +130203,10 @@ export type PutApiFavoritesByTargetUnitIdStatus200 = {
 		 * @type object
 		 */
 		preview: {
+			/**
+			 * @type string
+			 */
+			kind: PutApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum;
 			title: string | null;
 			summary: string | null;
 			language: string | null;
@@ -130117,6 +130346,32 @@ export type DeleteApiFavoritesByTargetUnitIdPath = {
 	targetUnitId: string;
 };
 
+export const DeleteApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum = {
+	slug_namespace: "slug_namespace",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	tag_path: "tag_path",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type DeleteApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum =
+	(typeof DeleteApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum)[keyof typeof DeleteApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum];
+
 /**
  * @type object
  */
@@ -130142,6 +130397,10 @@ export type DeleteApiFavoritesByTargetUnitIdStatus200 = {
 		 * @type object
 		 */
 		preview: {
+			/**
+			 * @type string
+			 */
+			kind: DeleteApiFavoritesByTargetUnitIdStatus200EntryPreviewKindEnum;
 			title: string | null;
 			summary: string | null;
 			language: string | null;
@@ -130420,6 +130679,32 @@ export const GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200OperationEnu
 export type GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200OperationEnum =
 	(typeof GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200OperationEnum)[keyof typeof GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200OperationEnum];
 
+export const GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotPreviewKindEnum = {
+	slug_namespace: "slug_namespace",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	tag_path: "tag_path",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotPreviewKindEnum =
+	(typeof GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotPreviewKindEnum)[keyof typeof GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotPreviewKindEnum];
+
 /**
  * @type object
  */
@@ -130455,6 +130740,10 @@ export type GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200 = {
 		 * @type object
 		 */
 		preview: {
+			/**
+			 * @type string
+			 */
+			kind: GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200SnapshotPreviewKindEnum;
 			title: string | null;
 			summary: string | null;
 			language: string | null;
@@ -130551,6 +130840,32 @@ export type PostApiFavoritesByTargetUnitIdRestorePath = {
 	targetUnitId: string;
 };
 
+export const PostApiFavoritesByTargetUnitIdRestoreStatus200EntryPreviewKindEnum = {
+	slug_namespace: "slug_namespace",
+	book: "book",
+	software: "software",
+	media: "media",
+	video: "video",
+	audio: "audio",
+	release: "release",
+	entity: "entity",
+	label: "label",
+	tag: "tag",
+	tag_path: "tag_path",
+	series: "series",
+	zone: "zone",
+	zone_page: "zone_page",
+	custom_theme: "custom_theme",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type PostApiFavoritesByTargetUnitIdRestoreStatus200EntryPreviewKindEnum =
+	(typeof PostApiFavoritesByTargetUnitIdRestoreStatus200EntryPreviewKindEnum)[keyof typeof PostApiFavoritesByTargetUnitIdRestoreStatus200EntryPreviewKindEnum];
+
 /**
  * @type object
  */
@@ -130576,6 +130891,10 @@ export type PostApiFavoritesByTargetUnitIdRestoreStatus200 = {
 		 * @type object
 		 */
 		preview: {
+			/**
+			 * @type string
+			 */
+			kind: PostApiFavoritesByTargetUnitIdRestoreStatus200EntryPreviewKindEnum;
 			title: string | null;
 			summary: string | null;
 			language: string | null;

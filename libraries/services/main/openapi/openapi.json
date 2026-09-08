@@ -120941,6 +120941,31 @@
 													"preview": {
 														"type": "object",
 														"properties": {
+															"kind": {
+																"type": "string",
+																"enum": [
+																	"slug_namespace",
+																	"book",
+																	"software",
+																	"media",
+																	"video",
+																	"audio",
+																	"release",
+																	"entity",
+																	"label",
+																	"tag",
+																	"tag_path",
+																	"series",
+																	"zone",
+																	"zone_page",
+																	"custom_theme",
+																	"collection",
+																	"post",
+																	"poll",
+																	"realm",
+																	"realm_rule"
+																]
+															},
 															"title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 															"summary": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 															"language": {
@@ -120955,7 +120980,7 @@
 																"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
 															}
 														},
-														"required": ["title", "summary", "language", "capturedAt"],
+														"required": ["kind", "title", "summary", "language", "capturedAt"],
 														"additionalProperties": false
 													},
 													"revision": {
@@ -121046,6 +121071,178 @@
 			}
 		},
 		"/api/v1/favorites/{targetUnitId}": {
+			"get": {
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "targetUnitId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$schema": "https://json-schema.org/draft/2020-12/schema",
+									"type": "object",
+									"properties": {
+										"revision": {
+											"type": "integer",
+											"minimum": -9007199254740991,
+											"maximum": 9007199254740991
+										},
+										"entry": {
+											"anyOf": [
+												{
+													"type": "object",
+													"properties": {
+														"targetUnitId": {
+															"type": "string",
+															"format": "uuid",
+															"pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+														},
+														"position": { "type": "string" },
+														"note": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+														"preview": {
+															"type": "object",
+															"properties": {
+																"kind": {
+																	"type": "string",
+																	"enum": [
+																		"slug_namespace",
+																		"book",
+																		"software",
+																		"media",
+																		"video",
+																		"audio",
+																		"release",
+																		"entity",
+																		"label",
+																		"tag",
+																		"tag_path",
+																		"series",
+																		"zone",
+																		"zone_page",
+																		"custom_theme",
+																		"collection",
+																		"post",
+																		"poll",
+																		"realm",
+																		"realm_rule"
+																	]
+																},
+																"title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+																"summary": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+																"language": {
+																	"anyOf": [
+																		{ "type": "string", "maxLength": 255 },
+																		{ "type": "null" }
+																	]
+																},
+																"capturedAt": {
+																	"type": "string",
+																	"format": "date-time",
+																	"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+																}
+															},
+															"required": ["kind", "title", "summary", "language", "capturedAt"],
+															"additionalProperties": false
+														},
+														"revision": {
+															"type": "integer",
+															"exclusiveMinimum": 0,
+															"maximum": 9007199254740991
+														},
+														"createdAt": {
+															"type": "string",
+															"format": "date-time",
+															"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+														},
+														"updatedAt": {
+															"type": "string",
+															"format": "date-time",
+															"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+														}
+													},
+													"required": [
+														"targetUnitId",
+														"position",
+														"note",
+														"preview",
+														"revision",
+														"createdAt",
+														"updatedAt"
+													],
+													"additionalProperties": false
+												},
+												{ "type": "null" }
+											]
+										}
+									},
+									"required": ["revision", "entry"],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } }
+						}
+					},
+					"429": {
+						"description": "API quota exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until this request can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiQuotaExceeded", "ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": { "$ref": "#/components/schemas/JsonValue" }
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/InternalError" } }
+						}
+					}
+				},
+				"operationId": "getApiFavoritesByTargetUnitId",
+				"x-rezics-quota-route-operation-id": "getApiFavoritesByTargetUnitId",
+				"x-rezics-quota-operation-id": "*",
+				"x-rezics-quota-cost-units": 1
+			},
 			"put": {
 				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
 				"parameters": [
@@ -121121,6 +121318,31 @@
 														"preview": {
 															"type": "object",
 															"properties": {
+																"kind": {
+																	"type": "string",
+																	"enum": [
+																		"slug_namespace",
+																		"book",
+																		"software",
+																		"media",
+																		"video",
+																		"audio",
+																		"release",
+																		"entity",
+																		"label",
+																		"tag",
+																		"tag_path",
+																		"series",
+																		"zone",
+																		"zone_page",
+																		"custom_theme",
+																		"collection",
+																		"post",
+																		"poll",
+																		"realm",
+																		"realm_rule"
+																	]
+																},
 																"title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"summary": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"language": {
@@ -121135,7 +121357,7 @@
 																	"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
 																}
 															},
-															"required": ["title", "summary", "language", "capturedAt"],
+															"required": ["kind", "title", "summary", "language", "capturedAt"],
 															"additionalProperties": false
 														},
 														"revision": {
@@ -121296,6 +121518,31 @@
 														"preview": {
 															"type": "object",
 															"properties": {
+																"kind": {
+																	"type": "string",
+																	"enum": [
+																		"slug_namespace",
+																		"book",
+																		"software",
+																		"media",
+																		"video",
+																		"audio",
+																		"release",
+																		"entity",
+																		"label",
+																		"tag",
+																		"tag_path",
+																		"series",
+																		"zone",
+																		"zone_page",
+																		"custom_theme",
+																		"collection",
+																		"post",
+																		"poll",
+																		"realm",
+																		"realm_rule"
+																	]
+																},
 																"title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"summary": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"language": {
@@ -121310,7 +121557,7 @@
 																	"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
 																}
 															},
-															"required": ["title", "summary", "language", "capturedAt"],
+															"required": ["kind", "title", "summary", "language", "capturedAt"],
 															"additionalProperties": false
 														},
 														"revision": {
@@ -121586,6 +121833,31 @@
 														"preview": {
 															"type": "object",
 															"properties": {
+																"kind": {
+																	"type": "string",
+																	"enum": [
+																		"slug_namespace",
+																		"book",
+																		"software",
+																		"media",
+																		"video",
+																		"audio",
+																		"release",
+																		"entity",
+																		"label",
+																		"tag",
+																		"tag_path",
+																		"series",
+																		"zone",
+																		"zone_page",
+																		"custom_theme",
+																		"collection",
+																		"post",
+																		"poll",
+																		"realm",
+																		"realm_rule"
+																	]
+																},
 																"title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"summary": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"language": {
@@ -121600,7 +121872,7 @@
 																	"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
 																}
 															},
-															"required": ["title", "summary", "language", "capturedAt"],
+															"required": ["kind", "title", "summary", "language", "capturedAt"],
 															"additionalProperties": false
 														}
 													},
@@ -121747,6 +122019,31 @@
 														"preview": {
 															"type": "object",
 															"properties": {
+																"kind": {
+																	"type": "string",
+																	"enum": [
+																		"slug_namespace",
+																		"book",
+																		"software",
+																		"media",
+																		"video",
+																		"audio",
+																		"release",
+																		"entity",
+																		"label",
+																		"tag",
+																		"tag_path",
+																		"series",
+																		"zone",
+																		"zone_page",
+																		"custom_theme",
+																		"collection",
+																		"post",
+																		"poll",
+																		"realm",
+																		"realm_rule"
+																	]
+																},
 																"title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"summary": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
 																"language": {
@@ -121761,7 +122058,7 @@
 																	"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
 																}
 															},
-															"required": ["title", "summary", "language", "capturedAt"],
+															"required": ["kind", "title", "summary", "language", "capturedAt"],
 															"additionalProperties": false
 														},
 														"revision": {

@@ -713,6 +713,8 @@ import type {
 	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreResponses,
 	GetApiFavoritesOptions,
 	GetApiFavoritesResponses,
+	GetApiFavoritesByTargetUnitIdOptions,
+	GetApiFavoritesByTargetUnitIdResponses,
 	PutApiFavoritesByTargetUnitIdOptions,
 	PutApiFavoritesByTargetUnitIdResponses,
 	DeleteApiFavoritesByTargetUnitIdOptions,
@@ -8009,6 +8011,25 @@ export function getApiFavorites<ThrowOnError extends boolean = true>(
 		],
 		...config,
 	}) as Promise<RequestResult<GetApiFavoritesResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/favorites/:targetUnitId}
+ */
+export function getApiFavoritesByTargetUnitId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiFavoritesByTargetUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiFavoritesByTargetUnitIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/favorites/{targetUnitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiFavoritesByTargetUnitIdResponses, ThrowOnError>>;
 }
 
 /**

@@ -2352,6 +2352,11 @@ import type {
 	GetApiFavoritesStatus422,
 	GetApiFavoritesStatus429,
 	GetApiFavoritesStatus500,
+	GetApiFavoritesByTargetUnitIdOptions,
+	GetApiFavoritesByTargetUnitIdStatus200,
+	GetApiFavoritesByTargetUnitIdStatus422,
+	GetApiFavoritesByTargetUnitIdStatus429,
+	GetApiFavoritesByTargetUnitIdStatus500,
 	PutApiFavoritesByTargetUnitIdOptions,
 	PutApiFavoritesByTargetUnitIdStatus200,
 	PutApiFavoritesByTargetUnitIdStatus400,
@@ -3395,6 +3400,7 @@ import {
 	getApiCollectionsByCollectionIdItemRevisionsCompare,
 	postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore,
 	getApiFavorites,
+	getApiFavoritesByTargetUnitId,
 	putApiFavoritesByTargetUnitId,
 	deleteApiFavoritesByTargetUnitId,
 	getApiFavoritesByTargetUnitIdHistory,
@@ -39789,6 +39795,102 @@ export function useGetApiFavorites<
 		TData,
 		ResponseErrorConfig<
 			GetApiFavoritesStatus422 | GetApiFavoritesStatus429 | GetApiFavoritesStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiFavoritesByTargetUnitIdQueryKey = ({
+	path,
+}: Omit<GetApiFavoritesByTargetUnitIdOptions, "headers">) =>
+	[{ url: "/api/v1/favorites/:targetUnitId", params: path }] as const;
+
+type GetApiFavoritesByTargetUnitIdQueryKey = ReturnType<
+	typeof getApiFavoritesByTargetUnitIdQueryKey
+>;
+
+export function getApiFavoritesByTargetUnitIdQueryOptions(
+	{ path }: GetApiFavoritesByTargetUnitIdOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiFavoritesByTargetUnitIdQueryKey({ path });
+	return queryOptions<
+		GetApiFavoritesByTargetUnitIdStatus200,
+		ResponseErrorConfig<
+			| GetApiFavoritesByTargetUnitIdStatus422
+			| GetApiFavoritesByTargetUnitIdStatus429
+			| GetApiFavoritesByTargetUnitIdStatus500
+		>,
+		GetApiFavoritesByTargetUnitIdStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiFavoritesByTargetUnitId({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/favorites/:targetUnitId}
+ */
+export function useGetApiFavoritesByTargetUnitId<
+	TData = GetApiFavoritesByTargetUnitIdStatus200,
+	TQueryData = GetApiFavoritesByTargetUnitIdStatus200,
+	TQueryKey extends QueryKey = GetApiFavoritesByTargetUnitIdQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiFavoritesByTargetUnitIdOptions["path"]
+			| (() => GetApiFavoritesByTargetUnitIdOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiFavoritesByTargetUnitIdStatus200,
+				ResponseErrorConfig<
+					| GetApiFavoritesByTargetUnitIdStatus422
+					| GetApiFavoritesByTargetUnitIdStatus429
+					| GetApiFavoritesByTargetUnitIdStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiFavoritesByTargetUnitIdQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiFavoritesByTargetUnitIdQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiFavoritesByTargetUnitIdStatus422
+			| GetApiFavoritesByTargetUnitIdStatus429
+			| GetApiFavoritesByTargetUnitIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 
