@@ -72,6 +72,7 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 			semanticId: uuid().notNull().default(sql`uuidv7()`),
 			expectedHeadVersion: bigint({ mode: "number" }).notNull().default(0),
 			state: text().$type<CatalogFactState>().default("active").notNull(),
+			purpose: text({ enum: ["assertion", "qualifier"] }).default("assertion").notNull(),
 			lastNodePosition: bigint({ mode: "number" }).default(-1).notNull(),
 			spoiler: integer().notNull().default(0),
 			sealedAt: createTimestampMsColumn(),
@@ -87,6 +88,7 @@ function createOwnerFacts<const Owner extends CatalogOwner>(owner: Owner) {
 				sql`${table.expectedHeadVersion} between 0 and 9007199254740990`,
 			),
 			check(`${owner}_fact_state_check`, inArray(table.state, CatalogFactStateValues)),
+			check(`${owner}_fact_purpose_check`, sql`${table.purpose} in ('assertion','qualifier')`),
 			check(
 				`${owner}_fact_node_cursor_check`,
 				sql`${table.lastNodePosition} between -1 and 9007199254740991 and (${table.sealedAt} is null or ${table.lastNodePosition} >= 0)`,

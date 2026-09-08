@@ -43,7 +43,7 @@ DECLARE published boolean;
 BEGIN
  IF TG_ARGV[1]='fact' THEN
   IF OLD.sealed_at IS NOT NULL AND (TG_OP='DELETE' OR NEW IS DISTINCT FROM OLD) THEN RAISE EXCEPTION 'Sealed facts are immutable' USING ERRCODE='23514', CONSTRAINT='catalog_fact_value_immutable'; END IF;
-  IF TG_OP='UPDATE' AND (NEW.semantic_id<>OLD.semantic_id OR NEW.expected_head_version<>OLD.expected_head_version OR NEW.spoiler<>OLD.spoiler) THEN RAISE EXCEPTION 'Staged fact identity is immutable' USING ERRCODE='23514', CONSTRAINT='catalog_fact_identity_immutable'; END IF;
+  IF TG_OP='UPDATE' AND (NEW.semantic_id<>OLD.semantic_id OR NEW.expected_head_version<>OLD.expected_head_version OR NEW.spoiler<>OLD.spoiler OR NEW.purpose<>OLD.purpose) THEN RAISE EXCEPTION 'Staged fact identity and purpose are immutable' USING ERRCODE='23514', CONSTRAINT='catalog_fact_identity_immutable'; END IF;
   RETURN NEW;
  END IF;
  EXECUTE format('SELECT EXISTS(SELECT 1 FROM public.%I WHERE owner_id=$1 AND relation_id=$2)',TG_ARGV[0]||'_semantic_revision') INTO published USING NEW.owner_id,NEW.relation_id;
@@ -54,15 +54,23 @@ $$;
 
 CREATE OR REPLACE FUNCTION public.catalog_guard_semantic_revision()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
-DECLARE current_version bigint; target record; predicate jsonb; role jsonb; participant record; target_owner text; target_id uuid; target_shape text; role_count integer; total integer;
+DECLARE current_version bigint; target record; prior record; predicate jsonb; role jsonb; participant record; target_owner text; target_id uuid; target_shape text; role_count integer; total integer;
 BEGIN
  EXECUTE format('SELECT id FROM public.%I WHERE id=$1 FOR UPDATE',TG_ARGV[0]||'_identity') USING NEW.owner_id;
  EXECUTE format('SELECT version FROM public.%I WHERE owner_id=$1 AND semantic_id=$2 FOR UPDATE',TG_ARGV[0]||'_semantic_head') INTO current_version USING NEW.owner_id,NEW.semantic_id;
  IF NEW.version<>coalesce(current_version,0)+1 THEN RAISE EXCEPTION 'Semantic head version conflict' USING ERRCODE='40001'; END IF;
  IF NEW.fact_id IS NOT NULL THEN
-  EXECUTE format('SELECT semantic_id,sealed_at FROM public.%I WHERE owner_id=$1 AND id=$2',TG_ARGV[0]||'_fact') INTO target USING NEW.owner_id,NEW.fact_id;
+  EXECUTE format('SELECT semantic_id,sealed_at,purpose FROM public.%I WHERE owner_id=$1 AND id=$2',TG_ARGV[0]||'_fact') INTO target USING NEW.owner_id,NEW.fact_id;
   IF target.semantic_id IS DISTINCT FROM NEW.semantic_id OR target.sealed_at IS NULL THEN RAISE EXCEPTION 'Unsealed or wrong semantic fact' USING ERRCODE='23514'; END IF;
+  IF current_version IS NOT NULL THEN
+   EXECUTE format('SELECT r.fact_id,f.purpose FROM public.%I r LEFT JOIN public.%I f ON f.owner_id=r.owner_id AND f.id=r.fact_id WHERE r.owner_id=$1 AND r.semantic_id=$2 AND r.version=$3',TG_ARGV[0]||'_semantic_revision',TG_ARGV[0]||'_fact') INTO prior USING NEW.owner_id,NEW.semantic_id,current_version;
+   IF prior.fact_id IS NULL OR prior.purpose IS DISTINCT FROM target.purpose THEN RAISE EXCEPTION 'Semantic fact purpose cannot change across revisions' USING ERRCODE='23514',CONSTRAINT='catalog_semantic_fact_purpose_immutable'; END IF;
+  END IF;
  ELSE
+  IF current_version IS NOT NULL THEN
+   EXECUTE format('SELECT fact_id FROM public.%I WHERE owner_id=$1 AND semantic_id=$2 AND version=$3',TG_ARGV[0]||'_semantic_revision') INTO prior USING NEW.owner_id,NEW.semantic_id,current_version;
+   IF prior.fact_id IS NOT NULL THEN RAISE EXCEPTION 'A fact semantic cannot become a relation' USING ERRCODE='23514',CONSTRAINT='catalog_semantic_fact_purpose_immutable'; END IF;
+  END IF;
   EXECUTE format('SELECT r.semantic_id,d.constraints FROM public.%I r JOIN public.catalog_definition_revision d ON d.id=r.definition_revision_id WHERE r.owner_id=$1 AND r.id=$2',TG_ARGV[0]||'_catalog_relation') INTO target USING NEW.owner_id,NEW.relation_id;
   IF target.semantic_id IS DISTINCT FROM NEW.semantic_id THEN RAISE EXCEPTION 'Wrong semantic relation' USING ERRCODE='23514'; END IF;
   predicate:=target.constraints;
