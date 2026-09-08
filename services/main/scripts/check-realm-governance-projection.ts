@@ -56,10 +56,37 @@ try {
 		"insert into content_review_case(authority,realm_id,target_unit_id) values ('realm',$1,$2) returning id",
 		[otherRealm, resource],
 	);
+	const rules = new Map<string, { revisionId: string; ruleId: string }>();
+	for (const realmId of [realm, otherRealm]) {
+		const revisionId = await id(
+			"insert into realm_rule_revision(realm_id,version,created_by_profile_id) values ($1,1,$2) returning id",
+			[realmId, actor],
+		);
+		const ruleId = await id(
+			"insert into realm_rule(revision_id,position) values ($1,1) returning id",
+			[revisionId],
+		);
+		rules.set(realmId, { revisionId, ruleId });
+	}
+	async function decision(caseRef: string, kind: string) {
+		const realmId = caseRef === caseId ? realm : otherRealm,
+			rule = rules.get(realmId);
+		assert.ok(rule);
+		const decisionId = await id(
+			"insert into governance_decision(action,basis_kind,actor_profile_id,authority_kind,authority_realm_id,target_unit_id,subject_kind,subject_id) values ($1,'rules',$2,'realm',$3,$4,'content_review_case',$5) returning id",
+			[`content_governance.${kind}`, actor, realmId, resource, caseRef],
+		);
+		await db.query(
+			"insert into governance_decision_rule(decision_id,rule_source_realm_id,rule_revision_id,rule_id) values ($1,$2,$3,$4)",
+			[decisionId, realmId, rule.revisionId, rule.ruleId],
+		);
+		await db.query("update governance_decision set finalized=true where id=$1", [decisionId]);
+		return decisionId;
+	}
 	async function action(caseRef: string, instant: string) {
 		return id(
-			"insert into content_governance_action(case_id,actor_profile_id,kind,previous_state,resulting_state,created_at) values ($1,$2,'hide','visible','hidden',$3) returning id",
-			[caseRef, actor, instant],
+			"insert into content_governance_action(case_id,actor_profile_id,kind,previous_state,resulting_state,created_at,decision_id) values ($1,$2,'hide','visible','hidden',$3,$4) returning id",
+			[caseRef, actor, instant, await decision(caseRef, "hide")],
 		);
 	}
 	async function pointer() {
@@ -102,8 +129,8 @@ try {
 		);
 		await rejects("update content_review_case set realm_id=$1 where id=$2", [otherRealm, caseId]);
 		const lock = await id(
-			"insert into content_governance_action(case_id,actor_profile_id,kind,previous_post_targeting_locked,resulting_post_targeting_locked,created_at) values ($1,$2,'lock_post_targeting',false,true,$3) returning id",
-			[caseId, actor, `${year}-01-05T00:00:00Z`],
+			"insert into content_governance_action(case_id,actor_profile_id,kind,previous_post_targeting_locked,resulting_post_targeting_locked,created_at,decision_id) values ($1,$2,'lock_post_targeting',false,true,$3,$4) returning id",
+			[caseId, actor, `${year}-01-05T00:00:00Z`, await decision(caseId, "lock_post_targeting")],
 		);
 		equal(await pointer(), latest);
 		await rejects(
@@ -117,6 +144,8 @@ try {
 			);
 		prior = latest;
 	}
+	await db.query("set constraints governance_decision_rule_basis_from_decision immediate");
+	assertions++;
 	const plan = await db.query(
 		"explain (format json) select realm_id,latest_governance_action_id from realm_unit where unit_id=$1 order by updated_at desc,realm_id desc limit 100",
 		[resource],
