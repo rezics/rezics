@@ -86,7 +86,11 @@ export async function reconcileVndbContexts(
 	actor: string,
 	mappingKey: string,
 	before: { record: z.output<typeof VndbVnSchema> | null; document: Document },
-	after: { record: z.output<typeof VndbVnSchema>; document: Document },
+	after: {
+		record: z.output<typeof VndbVnSchema>;
+		document: Document;
+		sourcePath?: (path: string) => string;
+	},
 ) {
 	const scope = await resolveCatalogSourceChildCorrespondence(tx, after.document.record.id);
 	if (scope.mappingKey !== mappingKey) throw new Error("VNDB context root mapping differs");
@@ -183,7 +187,9 @@ export async function reconcileVndbContexts(
 				contentId: content.id,
 				contextId: context.id,
 				contextRevision: context.revision,
-				sourcePointer: `/editions/${index}`,
+				sourcePointer: after.sourcePath
+					? after.sourcePath(`/editions/${index}`)
+					: `/editions/${index}`,
 				sourceLabel: edition.name,
 				sourceLanguage: edition.lang,
 				sourceLanguageTag: edition.lang === null ? null : vndbLanguage(edition.lang),

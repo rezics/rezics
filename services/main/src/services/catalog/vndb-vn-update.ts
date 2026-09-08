@@ -3,7 +3,9 @@ import { isDeepStrictEqual } from "node:util";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { softwareRecordRevision, softwareVisualNovel } from "../database/schema/catalog-software";
-import { VndbVnSchema, VndbCatalogContractSha256 } from "./vndb";
+import { VndbVnSchema, VndbCatalogContractSha256, VndbDumpContractSha256 } from "./vndb";
+import { normalizeVndbVnDump } from "./vndb-vn-dump";
+import { remapVndbSemanticPlan } from "./vndb-semantics";
 import { loadCatalogSourceDocument } from "./source-observations";
 import type { CatalogSourceNativeWriter } from "./source-proposals";
 import {
@@ -38,17 +40,23 @@ function prepare(input: VndbPreparedSnapshot) {
 	if (
 		bytes.byteLength > 8_000_000 ||
 		createHash("sha256").update(bytes).digest("hex") !== receipt.contentSha256 ||
-		receipt.contractSha256 !== VndbCatalogContractSha256 ||
+		![VndbCatalogContractSha256, VndbDumpContractSha256].includes(receipt.contractSha256) ||
 		receipt.key.source !== "vndb" ||
 		receipt.key.objectType !== "vn"
 	)
 		throw new TypeError("VNDB VN archive differs from its reviewed receipt");
-	const record = VndbVnSchema.parse(
-		JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)),
-	);
+	const raw: unknown = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+	const dump = receipt.contractSha256 === VndbDumpContractSha256 ? normalizeVndbVnDump(raw) : null;
+	const record = dump ? dump.record : VndbVnSchema.parse(raw);
+	const path = dump?.sourcePath ?? ((value: string) => value);
+	const semantic = remapVndbSemanticPlan(planVndbSemantics(record), path);
+	if (dump) {
+		semantic.facts.push(...dump.extraSemantics.facts);
+		semantic.relations.push(...dump.extraSemantics.relations);
+	}
 	if (record.id !== receipt.key.externalId)
 		throw new TypeError("VNDB VN archive identifies another source object");
-	return { snapshotId, bytes, receipt, record };
+	return { snapshotId, bytes, receipt, record, path, semantic };
 }
 
 /** @alpha @remarks Native VN updates preserve unrelated local edits and never treat snapshot-local eid as version identity. */
@@ -62,6 +70,8 @@ export function createVndbVnNativeWriter(input: {
 		after = prepare(input.after);
 	if (before && before.record.id !== after.record.id)
 		throw new TypeError("VNDB VN delta crosses source identities");
+	if (before && before.receipt.contractSha256 !== after.receipt.contractSha256)
+		throw new TypeError("VNDB source-surface transition requires explicit field observation scope");
 	return async (tx, context) => {
 		if (
 			context.mappingVersion !== mappingVersion ||
@@ -113,7 +123,7 @@ export function createVndbVnNativeWriter(input: {
 						tx,
 						context.reference,
 						context.actor,
-						planVndbNativeNames(before.record, "vn"),
+						planVndbNativeNames(before.record, "vn", before.path),
 						previousDocument,
 					)),
 				);
@@ -190,7 +200,7 @@ export function createVndbVnNativeWriter(input: {
 			});
 		}
 		await tx.insert(softwareVisualNovel).values({ id: context.reference.id }).onConflictDoNothing();
-		await recordVndbSoftwareScalarOccurrence(tx, document, context.reference.id, "/", {
+		await recordVndbSoftwareScalarOccurrence(tx, document, context.reference.id, after.path("/"), {
 			sourceShape: "content",
 			sourceValue: vndbVnDetails(after.record),
 		});
@@ -200,8 +210,11 @@ export function createVndbVnNativeWriter(input: {
 			context.actor,
 			revision,
 			context.mappingKey,
-			{ plan: before ? planVndbNativeNames(before.record, "vn") : [], document: previousDocument },
-			{ plan: planVndbNativeNames(after.record, "vn"), document },
+			{
+				plan: before ? planVndbNativeNames(before.record, "vn", before.path) : [],
+				document: previousDocument,
+			},
+			{ plan: planVndbNativeNames(after.record, "vn", after.path), document },
 		);
 		revision = names.revision;
 		changes.push(...names.changes);
@@ -211,7 +224,7 @@ export function createVndbVnNativeWriter(input: {
 			context.actor,
 			context.mappingKey,
 			{ record: before?.record ?? null, document: previousDocument },
-			{ record: after.record, document },
+			{ record: after.record, document, sourcePath: after.path },
 		);
 		changes.push(...contexts.changes);
 		changes.push(
@@ -224,8 +237,9 @@ export function createVndbVnNativeWriter(input: {
 					record: before?.record ?? null,
 					document: previousDocument,
 					contexts: contexts.oldContexts,
+					sourcePath: before?.path,
 				},
-				{ record: after.record, document, contexts: contexts.nextContexts },
+				{ record: after.record, document, contexts: contexts.nextContexts, sourcePath: after.path },
 			)),
 		);
 		const semantics = await reconcileVndbSemanticPlan(
@@ -235,10 +249,10 @@ export function createVndbVnNativeWriter(input: {
 			revision,
 			context.mappingKey,
 			{
-				plan: before ? planVndbSemantics(before.record) : { facts: [], relations: [] },
+				plan: before ? before.semantic : { facts: [], relations: [] },
 				document: previousDocument,
 			},
-			{ plan: planVndbSemantics(after.record), document },
+			{ plan: after.semantic, document },
 		);
 		revision = semantics.revision;
 		changes.push(...semantics.changes);

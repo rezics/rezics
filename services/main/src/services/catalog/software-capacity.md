@@ -212,3 +212,34 @@ coverage reads back native original/romanized names, changed alias spoilers,
 measurement values, restored image relations and exact
 instance/trait/VN-release relation counts. Seven focused test files passed; these
 fixtures do not qualify cross-surface source transitions or bulk acquisition.
+
+## VN dump assembly and observation surfaces
+
+The VN initializer and native callback now accept public dump packets with titles,
+editions, staff and voice rows, exact global staff-alias dependencies, VN relations,
+screenshots, image rows and external links. Staff/voice evidence points to joined
+alias rows and original credit rows; the same alias and context resolution protocol
+is shared with API imports. Current `c_image` and a distinct editorial `image`
+remain separate image-purpose relations. Aggregate provider rating values remain
+external statistics and do not create REZICS votes.
+
+Admission caps titles/contexts at 128 each, staff and voice at 4,096 each, joined
+aliases at 8,192, screenshots and VN relations at 4,096 each, image dependencies
+at 4,098, and links at 512. Every join uses a packet-local map and rejects missing,
+duplicate-key or unrelated dependency rows. Work is O(packet rows), remains inside
+the 8 MB document and ordinary 128-change application bounds, and does not scan
+the 500M/3B source corpus. The prior name/credit/semantic storage and shard-routing
+budgets still apply. Large VNs require central staged processing, not larger local
+transactions or a whole-dump in-memory join.
+
+DB59 VN dump mode (`REZICS_VNDB_DUMP_FIXTURE=1`) passed 74 rollback assertions over
+three apply/withdraw/reapply cycles. Native reads cover title authority/derivation,
+staff/voice/context revisions, preserved human context headings, playtime, image
+widths, release-scoped screenshots, URLs and sequel relations. API mode separately
+passed its existing 38 assertions. Protocol refresh passed 49 assertions, including
+an attempted API-to-dump switch through a new mapper epoch: it rejects before any
+native retirement because a combined observation projection is still required.
+Four affected test files passed 15 tests; backend and script TypeScript checks pass.
+Release remaining media/link joins, anime metadata and source tag-vote aggregation,
+source status/redirect interpretation and cross-surface combined projections remain
+open. Complete public dump streaming acquisition is not implied by packet adoption.

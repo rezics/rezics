@@ -12,7 +12,14 @@ import { CatalogFactTables } from "../database/schema/catalog-facts";
 import { acceptCatalogSourceInitialization } from "./source-bindings";
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
 import { inspectExistingSourceBinding } from "./source-adoption";
-import { VndbCatalogContractSha256, VndbVnSchema, vndbLanguage, vndbSourceKey } from "./vndb";
+import {
+	VndbCatalogContractSha256,
+	VndbDumpContractSha256,
+	VndbVnSchema,
+	vndbLanguage,
+	vndbSourceKey,
+} from "./vndb";
+import { normalizeVndbVnDump } from "./vndb-vn-dump";
 import type { z } from "zod";
 import { recordVndbSoftwareScalarOccurrence } from "./vndb-release";
 import { appendVndbVnNames, appendVndbDisplayName } from "./vndb-names";
@@ -22,7 +29,8 @@ import {
 	createNativeSoftwareContent,
 	reviseSoftwareContent,
 } from "./software";
-import { appendVndbSemantics } from "./vndb-semantics";
+import { appendVndbSemanticPlan, remapVndbSemanticPlan } from "./vndb-semantics";
+import { planVndbSemantics, type VndbSemanticPlan } from "./vndb-semantics-contracts";
 import { appendVndbParticipation } from "./vndb-participation";
 
 /** VN identity and snapshot-local participation observations; staff adoption remains separate. */
@@ -37,11 +45,11 @@ export async function adoptVndbVn(
 		createHash("sha256").update(bytes).digest("hex") !== receipt.contentSha256
 	)
 		throw new Error("VNDB projection bytes differ from the archived observation");
-	if (receipt.contractSha256 !== VndbCatalogContractSha256)
+	if (![VndbCatalogContractSha256, VndbDumpContractSha256].includes(receipt.contractSha256))
 		throw new Error("VNDB source contract has not been reviewed for this mapper");
-	const record = VndbVnSchema.parse(
-		JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)),
-	);
+	const raw: unknown = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+	const dump = receipt.contractSha256 === VndbDumpContractSha256 ? normalizeVndbVnDump(raw) : null;
+	const record = dump ? dump.record : VndbVnSchema.parse(raw);
 	const source = vndbSourceKey(record.id);
 	if (
 		receipt.key.source !== source.source ||
@@ -50,7 +58,14 @@ export async function adoptVndbVn(
 	)
 		throw new TypeError("VNDB payload identity differs from its source key");
 	const observation = await recordCatalogSourceDocument(tx, receipt, bytes);
-	return writeVndbVnProjection(tx, actor, record, observation);
+	return writeVndbVnProjection(
+		tx,
+		actor,
+		record,
+		observation,
+		dump?.sourcePath,
+		dump?.extraSemantics,
+	);
 }
 
 /** @internal API and dump projections share canonical native writers and preserve exact evidence paths. */
@@ -60,6 +75,7 @@ export async function writeVndbVnProjection(
 	record: z.output<typeof VndbVnSchema>,
 	observation: Awaited<ReturnType<typeof recordCatalogSourceDocument>>,
 	sourcePath: (path: string) => string = (path) => path,
+	extraSemantics?: VndbSemanticPlan,
 ) {
 	const existing = await inspectExistingSourceBinding(tx, actor, observation, "vndb.vn.2");
 	if (existing && existing.status !== "initialize_reference") return existing;
@@ -137,15 +153,12 @@ export async function writeVndbVnProjection(
 			value: record.id,
 			normalizedValue: record.id,
 		});
-	revision = await appendVndbSemantics(
-		tx,
-		identity,
-		actor,
-		revision,
-		record,
-		observation,
-		sourcePath,
-	);
+	const semantic = remapVndbSemanticPlan(planVndbSemantics(record), sourcePath);
+	if (extraSemantics) {
+		semantic.facts.push(...extraSemantics.facts);
+		semantic.relations.push(...extraSemantics.relations);
+	}
+	revision = await appendVndbSemanticPlan(tx, identity, actor, revision, semantic, observation);
 	const reference = { owner: "software" as const, id: identity.id };
 	if (existing)
 		await acceptCatalogSourceInitialization(tx, actor, {

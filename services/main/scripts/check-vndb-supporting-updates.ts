@@ -40,6 +40,7 @@ import { EntityProfileSchema } from "../src/services/catalog/entity-contracts";
 import { initializeEntityProfile } from "../src/services/catalog/entities";
 import { readCatalogProfileHead } from "../src/services/catalog/profile-source";
 import { runWithNativeFixtureActor } from "./native-fixture-actor";
+import type { CatalogReference } from "../src/services/catalog/contracts";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
@@ -443,7 +444,9 @@ try {
 							null,
 							archive,
 						);
-					const adopted =
+					const adopted:
+						| Awaited<ReturnType<typeof adoptVndbStaff>>
+						| Awaited<ReturnType<typeof adoptVndbSemanticObject>> =
 						entry.kind === "staff"
 							? await adoptVndbStaff(tx, actor.id, beforeReceipt, beforeBytes)
 							: entry.kind === "producer"
@@ -452,9 +455,12 @@ try {
 									? await adoptVndbCharacter(tx, actor.id, beforeReceipt, beforeBytes)
 									: await adoptVndbSemanticObject(tx, actor.id, beforeReceipt, beforeBytes);
 					if (adopted.status !== "created") throw new Error(`Expected initial ${entry.kind}`);
-					const reference = adopted.reference;
+					const reference: CatalogReference = adopted.reference;
 					if (entry.dump && entry.kind === "staff") {
-						assert.equal((await loadCatalogIdentity(tx, reference, actor.id)).shape, "unresolved");
+						assert.equal(
+							(await loadCatalogIdentity(tx, reference, actor.id, false)).shape,
+							"unresolved",
+						);
 						assertions++;
 					}
 					if (entry.kind === "staff") {

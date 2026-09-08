@@ -3,6 +3,7 @@ import type { DatabaseTransaction } from "../database";
 import {
 	catalogSourceMappingClaim as claims,
 	catalogSourceBindingRevision as bindingRevisions,
+	catalogSourceSnapshot as snapshots,
 } from "../database/schema/catalog-source";
 import { CatalogNameTables } from "../database/schema/catalog-names";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
@@ -80,6 +81,22 @@ export async function retirePreviousSoftwareSourceEpoch(tx: DatabaseTransaction,
 	)
 		return null;
 	if (oldBinding.mappingVersion === context.mappingVersion) return null;
+	const surfaces = await tx
+		.select({ id: snapshots.id, contract: snapshots.contractSha256 })
+		.from(snapshots)
+		.where(
+			and(
+				eq(snapshots.sourceRecordId, context.sourceRecordId),
+				inArray(snapshots.id, [claim.observedSnapshotId, context.snapshotId]),
+			),
+		)
+		.limit(2);
+	const previousContract = surfaces.find((row) => row.id === claim.observedSnapshotId)?.contract;
+	const incomingContract = surfaces.find((row) => row.id === context.snapshotId)?.contract;
+	if (!previousContract || !incomingContract || previousContract !== incomingContract)
+		throw new TypeError(
+			"Source epoch refresh across observation surfaces requires a reviewed combined projection",
+		);
 	const oldEpoch = claim.appliedCorrespondenceRevision,
 		snapshotId = claim.observedSnapshotId,
 		ownerId = context.reference.id;

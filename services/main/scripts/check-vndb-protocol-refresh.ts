@@ -8,7 +8,11 @@ import { operationalCapacity } from "../src/services/database/schema/operational
 import { catalogSourceMappingClaim } from "../src/services/database/schema/catalog-source";
 import { softwareRecordSourceOccurrence } from "../src/services/database/schema/catalog-software-source";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
-import { VndbCatalogContractSha256, vndbSourceKey } from "../src/services/catalog/vndb";
+import {
+	VndbCatalogContractSha256,
+	VndbDumpContractSha256,
+	vndbSourceKey,
+} from "../src/services/catalog/vndb";
 import {
 	catalogSourceRecordId,
 	storeCatalogSourcePayload,
@@ -200,6 +204,86 @@ try {
 						mappingVersion,
 					});
 					bindingRevision = revised.revision;
+					if (mappingVersion === "vndb.vn.3") {
+						const dumpBytes = Buffer.from(
+							JSON.stringify({
+								vn: {
+									id: record.id,
+									image: null,
+									c_image: null,
+									olang: record.olang,
+									c_votecount: 0,
+									c_rating: null,
+									c_average: null,
+									c_length: 80,
+									c_lengthnum: 2,
+									length: 2,
+									devstatus: 0,
+									alias: "",
+									description: "Dump description",
+								},
+								titles: record.titles.map((title) => ({ ...title, id: record.id })),
+								editions: [],
+								staff: [],
+								seiyuu: [],
+								staff_alias: [],
+								relations: [],
+								screenshots: [],
+								images: [],
+								links: [],
+								extlinks: [],
+							}),
+						);
+						const dumpReceipt = await storeCatalogSourcePayload(
+							vndbSourceKey(record.id),
+							dumpBytes,
+							VndbDumpContractSha256,
+							null,
+							archive,
+						);
+						const nativeBefore = await loadCatalogIdentity(tx, reference, actor.id, true);
+						await assert.rejects(
+							() =>
+								tx.transaction(async (nested) => {
+									const dumpObservation = await recordCatalogSourceObservation(nested, dumpReceipt);
+									const proposal = await proposeCatalogSourceAdoption(nested, actor.id, {
+										sourceRecordId,
+										mappingKey: binding.mappingKey,
+										snapshotId: dumpObservation.snapshot.id,
+										mappingVersion,
+									});
+									if (proposal.status !== "proposed")
+										throw new Error("Expected cross-surface refresh proposal");
+									await decideCatalogSourceProposal(
+										nested,
+										actor.id,
+										{
+											sourceRecordId,
+											proposalId: proposal.proposal.id,
+											mappingVersion,
+											action: "apply",
+											reason: "Cross-surface refresh must retain unobserved API fields",
+										},
+										createVndbVnNativeWriter({
+											before: null,
+											after: {
+												snapshotId: dumpObservation.snapshot.id,
+												receipt: dumpReceipt,
+												bytes: dumpBytes,
+											},
+											mappingVersion,
+										}),
+									);
+								}),
+							/observation surfaces/,
+						);
+						assertions++;
+						assert.equal(
+							(await loadCatalogIdentity(tx, reference, actor.id, true)).revision,
+							nativeBefore.revision,
+						);
+						assertions++;
+					}
 					const writer = createVndbVnNativeWriter({
 						before: null,
 						after: prepared,

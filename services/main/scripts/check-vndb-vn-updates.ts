@@ -20,7 +20,11 @@ import {
 import { listCatalogNameAuthority } from "../src/services/catalog/authority";
 import { CatalogNameTables } from "../src/services/database/schema/catalog-names";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
-import { VndbCatalogContractSha256, vndbSourceKey } from "../src/services/catalog/vndb";
+import {
+	VndbCatalogContractSha256,
+	VndbDumpContractSha256,
+	vndbSourceKey,
+} from "../src/services/catalog/vndb";
 import {
 	storeCatalogSourcePayload,
 	recordCatalogSourceObservation,
@@ -138,9 +142,62 @@ const updated = {
 		},
 	],
 };
+const useDump = process.env.REZICS_VNDB_DUMP_FIXTURE === "1";
+function dumpVn(record: typeof original | typeof updated, changed: boolean) {
+	return {
+		vn: {
+			id: record.id,
+			image: null,
+			c_image: "cv960001",
+			olang: record.olang,
+			c_votecount: 0,
+			c_rating: null,
+			c_average: null,
+			c_length: record.length_minutes,
+			c_lengthnum: record.length_votes,
+			length: record.length,
+			devstatus: record.devstatus,
+			alias: record.aliases.join("\n"),
+			description: record.description,
+		},
+		titles: record.titles.map((title) => ({ ...title, id: record.id })),
+		editions: record.editions.map((edition) => ({ ...edition, id: record.id })),
+		staff: record.staff.map((credit) => ({
+			id: record.id,
+			aid: credit.aid,
+			role: credit.role,
+			eid: credit.eid,
+			note: credit.note,
+		})),
+		seiyuu: record.va.map((credit) => ({
+			id: record.id,
+			aid: credit.staff.aid,
+			cid: credit.character.id,
+			note: credit.note ?? "",
+		})),
+		staff_alias: staff.aliases.map((alias) => ({
+			id: staff.id,
+			aid: alias.aid,
+			name: alias.name,
+			latin: alias.latin,
+		})),
+		relations: changed ? [{ id: record.id, vid: "v960003", relation: "seq", official: false }] : [],
+		screenshots: [{ id: record.id, scr: "sf960001", rid: "r960001" }],
+		images: ["cv960001", "sf960001"].map((id) => ({
+			id,
+			width: changed ? 640 : 600,
+			height: 400,
+			c_votecount: 2,
+			c_sexual_avg: 100,
+			c_violence_avg: 0,
+		})),
+		links: [{ id: record.id, link: 1 }],
+		extlinks: [{ id: 1, site: "website", value: `https://example.invalid/${changed ? "b" : "a"}` }],
+	};
+}
 const staffBytes = Buffer.from(JSON.stringify(staff)),
-	firstBytes = Buffer.from(JSON.stringify(original)),
-	secondBytes = Buffer.from(JSON.stringify(updated));
+	firstBytes = Buffer.from(JSON.stringify(useDump ? dumpVn(original, false) : original)),
+	secondBytes = Buffer.from(JSON.stringify(useDump ? dumpVn(updated, true) : updated));
 const staffReceipt = await storeCatalogSourcePayload(
 		vndbSourceKey(staff.id),
 		staffBytes,
@@ -151,14 +208,14 @@ const staffReceipt = await storeCatalogSourcePayload(
 	firstReceipt = await storeCatalogSourcePayload(
 		vndbSourceKey(original.id),
 		firstBytes,
-		VndbCatalogContractSha256,
+		useDump ? VndbDumpContractSha256 : VndbCatalogContractSha256,
 		null,
 		archive,
 	),
 	secondReceipt = await storeCatalogSourcePayload(
 		vndbSourceKey(original.id),
 		secondBytes,
-		VndbCatalogContractSha256,
+		useDump ? VndbDumpContractSha256 : VndbCatalogContractSha256,
 		null,
 		archive,
 	);
@@ -176,8 +233,24 @@ try {
 			assert.ok(actor);
 			await runWithNativeFixtureActor(tx, actor.id, async () => {
 				for (const routingBucket of new Set(
-					[staff.id, original.id, "c960001", "c960002"].map((id) =>
-						aggregateRoutingBucket("source_record", catalogSourceRecordId(vndbSourceKey(id))),
+					[
+						staff.id,
+						original.id,
+						"c960001",
+						"c960002",
+						"v960003",
+						"r960001",
+						"cv960001",
+						"sf960001",
+					].map((id) =>
+						aggregateRoutingBucket(
+							"source_record",
+							catalogSourceRecordId(
+								/^(?:cv|sf)/u.test(id)
+									? { source: "vndb", objectType: "image", externalId: id }
+									: vndbSourceKey(id),
+							),
+						),
 					),
 				))
 					await tx
@@ -271,6 +344,62 @@ try {
 					return result;
 				};
 				let frenchId: string | undefined;
+				const verifyDumpGraph = async (updated: boolean) => {
+					if (!useDump) return;
+					for (const [key, expected] of [
+						["has-image", 2],
+						["external-link", 1],
+						["has-sequel", updated ? 1 : 0],
+					] as const) {
+						const [definition] = await tx
+							.select({ id: catalogDefinitionRevision.id })
+							.from(catalogDefinition)
+							.innerJoin(
+								catalogDefinitionRevision,
+								eq(catalogDefinition.id, catalogDefinitionRevision.definitionId),
+							)
+							.where(
+								and(
+									eq(catalogDefinition.namespace, "catalog.semantic-relation"),
+									eq(catalogDefinition.key, key),
+								),
+							)
+							.limit(1);
+						assert.ok(definition);
+						const relations = await findCatalogRelations(tx, ref, actor.id, definition.id);
+						assert.equal(relations.length, expected);
+						assertions++;
+						for (const relation of relations)
+							for (const qualifier of await readCatalogRelationQualifiers(
+								tx,
+								ref,
+								actor.id,
+								relation.id,
+							)) {
+								const [property] = await tx
+									.select({ key: catalogDefinition.key })
+									.from(catalogDefinitionRevision)
+									.innerJoin(
+										catalogDefinition,
+										eq(catalogDefinition.id, catalogDefinitionRevision.definitionId),
+									)
+									.where(eq(catalogDefinitionRevision.id, qualifier.definitionRevisionId))
+									.limit(1);
+								if (property?.key !== "image-dims-width" && property?.key !== "url") continue;
+								const [value] = await readCatalogFactNodes(
+									tx,
+									ref,
+									actor.id,
+									qualifier.valueFactId,
+								);
+								if (property.key === "image-dims-width")
+									assert.equal(Number(value?.numberValue), updated ? 640 : 600);
+								else
+									assert.equal(value?.textValue, `https://example.invalid/${updated ? "b" : "a"}`);
+								assertions++;
+							}
+					}
+				};
 				for (let cycle = 0; cycle < 3; cycle++) {
 					const proposed = await proposeCatalogSourceAdoption(tx, actor.id, {
 						sourceRecordId,
@@ -308,6 +437,7 @@ try {
 					assert.equal(playtime.get("playtime-estimator"), "reported_average");
 					assertions++;
 					const credits = await readSoftwareParticipations(tx, ref, actor.id);
+					await verifyDumpGraph(true);
 					assert.equal(credits.length, 4);
 					assertions++;
 					const scopes = await tx
@@ -366,6 +496,7 @@ try {
 					);
 					assertions++;
 					const restoredEstimate = await estimate();
+					await verifyDumpGraph(false);
 					assert.equal(restoredEstimate.get("playtime-estimate-minutes"), "100");
 					assert.equal(restoredEstimate.get("playtime-sample-count"), "3");
 					assertions++;
@@ -476,7 +607,13 @@ try {
 		if (error !== rollback) throw error;
 	}
 	console.log(
-		JSON.stringify({ check: "vndb-vn-updates", assertions, cycles: 3, rolledBack: true }),
+		JSON.stringify({
+			check: "vndb-vn-updates",
+			surface: useDump ? "dump" : "api",
+			assertions,
+			cycles: 3,
+			rolledBack: true,
+		}),
 	);
 } finally {
 	await pool.end();

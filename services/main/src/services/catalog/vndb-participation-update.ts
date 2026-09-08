@@ -79,17 +79,19 @@ export async function reconcileVndbParticipation(
 		record: z.output<typeof VndbVnSchema> | null;
 		document: Document;
 		contexts: ReadonlyMap<string, VndbNativeContext>;
+		sourcePath?: (path: string) => string;
 	},
 	after: {
 		record: z.output<typeof VndbVnSchema>;
 		document: Document;
 		contexts: ReadonlyMap<string, VndbNativeContext>;
+		sourcePath?: (path: string) => string;
 	},
 ) {
 	const scope = await resolveCatalogSourceChildCorrespondence(tx, after.document.record.id);
 	if (scope.mappingKey !== mappingKey) throw new Error("VNDB participation root mapping differs");
-	const oldRows = before.record ? planVndbParticipation(before.record) : [],
-		nextRows = planVndbParticipation(after.record);
+	const oldRows = before.record ? planVndbParticipation(before.record, before.sourcePath) : [],
+		nextRows = planVndbParticipation(after.record, after.sourcePath);
 	const counts = new Map<string, number>();
 	for (const [rows, contexts] of [
 		[oldRows, before.contexts],

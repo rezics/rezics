@@ -22,8 +22,9 @@
     "vnUpdates": "DB59: check-vndb-vn-updates.ts passed 38 assertions over 3 apply/withdraw/reapply cycles under native Participation authority; exact renamed/renumbered contexts, staff/voice, playtime and name derivation/authority; post-proposal independent credit edit rejected atomically.",
     "supportingUpdates": "DB59: check-vndb-supporting-updates.ts passed 259 rollback assertions across eight support families plus assembled staff/producer/character dump surfaces and three apply/withdraw/reapply cycles per case. Character names and alias spoilers, measurements, image and instance/trait/VN-release links, dump staff links and unresolved classification, directed producer relations and exact compensation were checked; independent staff begin dates were retained.",
     "correspondence": "DB57: check-source-child-correspondence.ts passed 21 rollback assertions. The same archived snapshot maps through distinct name/context/scalar epochs after A-to-B-to-A rebind and mapper protocol change; policy revisions retain their epoch. Shared baseline and fact-support epoch integration was applied and checked in DB58.",
-    "protocolRefresh": "DB59: check-vndb-protocol-refresh.ts passed 47 rollback assertions for actual v2-to-v3-to-v4 proposal apply/withdraw/reapply. Old unchanged source graph retires, new epoch graph is native, exact old graph/title claims restore, human name/description survive both upgrades, typed pure source interpretation remains source-authored, and a conflicting subsequent scalar source update rejects atomically.",
-    "softwareReadScope": "DB58: check-software-read-scope.ts passed 18 rollback assertions. Selected grants do not inherit same-Auth creator rights through software discovery, linked components, credit actors/characters, or historical JSON references; filters precede keyset pagination."
+    "protocolRefresh": "DB59: check-vndb-protocol-refresh.ts passed 49 rollback assertions for v2-to-v3-to-v4 apply/withdraw/reapply. Old source graph/title claims restore, human name/description survive, typed pure source values remain source-authored, conflicting scalar edits reject, and a same-target API-to-dump protocol refresh rejects before native mutations because unobserved fields lack a combined projection.",
+    "softwareReadScope": "DB58: check-software-read-scope.ts passed 18 rollback assertions. Selected grants do not inherit same-Auth creator rights through software discovery, linked components, credit actors/characters, or historical JSON references; filters precede keyset pagination.",
+    "vnDumpUpdates": "DB59: REZICS_VNDB_DUMP_FIXTURE=1 check-vndb-vn-updates.ts passed 74 rollback assertions over three apply/withdraw/reapply cycles. Actual source alias joins, contexts, staff/voice, name derivation/authority, playtime, primary/screenshot image widths, release-scoped screenshots, external link URLs and sequel relations restore exactly. API mode separately passed 38 assertions."
   },
   "apiLeaves": [
     {
@@ -1483,7 +1484,7 @@
         "value"
       ],
       "status": "native-partial",
-      "nativeMeaning": "Pinned formatting for all 82 public sites with exact parent/link evidence is wired to staff/producer dump writers. VN/release packet assembly remains open.",
+      "nativeMeaning": "Pinned formatting for all 82 public sites with exact parent/link evidence is wired to staff/producer/VN dump writers. Release packet assembly remains open.",
       "implementation": "vndb-dump-media.ts / source-contracts/vndb-dump-link-formats.json / vndb-entity-dump.ts"
     },
     {
@@ -1500,8 +1501,8 @@
         "c_weight"
       ],
       "status": "native-partial",
-      "nativeMeaning": "Character dump joins map image identity, dimensions, canonical URL and average moderation ratings into native relations. Complete VN/release joins and additional dispersion/weight statistics remain open.",
-      "implementation": "vndb-dump-media.ts / vndb-character-dump.ts"
+      "nativeMeaning": "Character and VN dump joins map image identity, dimensions, canonical URL and average moderation ratings into native relations. Complete release joins and additional vote-count/dispersion/weight statistics remain open.",
+      "implementation": "vndb-dump-media.ts / vndb-character-dump.ts / vndb-vn-dump.ts"
     },
     {
       "table": "image_votes",
@@ -1881,9 +1882,9 @@
         "alias",
         "description"
       ],
-      "status": "gap",
-      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
-      "implementation": null
+      "status": "native-partial",
+      "nativeMeaning": "Content language, development state, description, aliases, playtime estimates and current/editorial image references are mapped. Aggregate provider user ratings stay source statistics, not REZICS votes. VN anime metadata and raw tag-vote aggregation remain separate open dump families.",
+      "implementation": "vndb-vn-dump.ts / vndb-adoption.ts / vndb-vn-update.ts"
     },
     {
       "table": "vn_anime",
@@ -1904,9 +1905,9 @@
         "official",
         "name"
       ],
-      "status": "gap",
-      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
-      "implementation": null
+      "status": "native-update-sql",
+      "nativeMeaning": "Snapshot-local participation contexts; reused or renumbered eid never creates a software content version.",
+      "implementation": "vndb-vn-dump.ts / vndb-adoption.ts / vndb-vn-update.ts / check-vndb-vn-updates.ts"
     },
     {
       "table": "vn_extlinks",
@@ -1914,9 +1915,9 @@
         "id",
         "link"
       ],
-      "status": "gap",
-      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
-      "implementation": null
+      "status": "native-update-sql",
+      "nativeMeaning": "Pinned external-link formatter and bounded exact join rows; native link URL replacement and compensation qualified.",
+      "implementation": "vndb-vn-dump.ts / vndb-adoption.ts / vndb-vn-update.ts / check-vndb-vn-updates.ts"
     },
     {
       "table": "vn_relations",
@@ -1926,9 +1927,9 @@
         "relation",
         "official"
       ],
-      "status": "gap",
-      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
-      "implementation": null
+      "status": "native-update-sql",
+      "nativeMeaning": "Native directed VN relations and official-claim qualifier; sequel additions and compensation have real SQL evidence.",
+      "implementation": "vndb-vn-dump.ts / vndb-adoption.ts / vndb-vn-update.ts / check-vndb-vn-updates.ts"
     },
     {
       "table": "vn_screenshots",
@@ -1937,9 +1938,9 @@
         "scr",
         "rid"
       ],
-      "status": "gap",
-      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
-      "implementation": null
+      "status": "native-update-sql",
+      "nativeMeaning": "Source screenshot/image identity, dimensions, moderation averages and optional release context retained as native qualified relations.",
+      "implementation": "vndb-vn-dump.ts / vndb-adoption.ts / vndb-vn-update.ts / check-vndb-vn-updates.ts"
     },
     {
       "table": "vn_seiyuu",
@@ -1949,9 +1950,9 @@
         "aid",
         "note"
       ],
-      "status": "gap",
-      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
-      "implementation": null
+      "status": "native-update-sql",
+      "nativeMeaning": "Exact actor/alias/character voice roles with original row pointers; no fabricated edition context.",
+      "implementation": "vndb-vn-dump.ts / vndb-adoption.ts / vndb-vn-update.ts / check-vndb-vn-updates.ts"
     },
     {
       "table": "vn_staff",
@@ -1962,9 +1963,9 @@
         "eid",
         "note"
       ],
-      "status": "gap",
-      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
-      "implementation": null
+      "status": "native-update-sql",
+      "nativeMeaning": "Global staff_alias join resolves actor and exact alias; source roles, notes and snapshot-local context are native participation revisions.",
+      "implementation": "vndb-vn-dump.ts / vndb-adoption.ts / vndb-vn-update.ts / check-vndb-vn-updates.ts"
     },
     {
       "table": "vn_titles",
@@ -1975,9 +1976,9 @@
         "title",
         "latin"
       ],
-      "status": "gap",
-      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
-      "implementation": null
+      "status": "native-update-sql",
+      "nativeMeaning": "Language-local original titles, exact romanization derivation and official source claims with original dump pointers.",
+      "implementation": "vndb-vn-dump.ts / vndb-adoption.ts / vndb-vn-update.ts / check-vndb-vn-updates.ts"
     },
     {
       "table": "vn_image_votes",
@@ -2057,7 +2058,7 @@
   "remainingGates": [
     "Generalize and qualify native protocol replacement beyond the bounded VN implementation; source-context separation and VN multi-upgrade replacement are qualified, but no global all-mapper refresh claim is made.",
     "Qualify complete dump surface/association mapping alongside the eight supporting native callbacks; existing SQL fixtures cover selected native graph behavior, not every public dump field.",
-    "Remaining dump assembly, VN/release image/link/anime/staff-credit joins and table-specific bulk mapping must close individually.",
+    "Remaining dump assembly, release image/link joins, VN anime metadata and tag-vote aggregation and table-specific bulk mapping must close individually.",
     "API-to-dump and dump-to-API source-surface transitions need a reviewed combined projection; current release callbacks reject such switches rather than erase unobserved fields.",
     "Applications above 128 native changes require the central staged protocol.",
     "No all-corpus, all-field native source qualification or production capacity claim follows from selected fixtures."

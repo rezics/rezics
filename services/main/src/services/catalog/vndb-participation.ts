@@ -44,7 +44,10 @@ const roleSchema = z.enum([
 type Document = Awaited<ReturnType<typeof recordCatalogSourceDocument>>;
 
 /** @alpha @remarks VNDB eid is snapshot-local; voice credits do not imply an edition context. */
-export function planVndbParticipation(input: unknown) {
+export function planVndbParticipation(
+	input: unknown,
+	sourcePath: (path: string) => string = (path) => path,
+) {
 	const record = VndbVnSchema.parse(input);
 	const contexts = new Set((record.editions ?? []).map((value) => value.eid));
 	const staff = (record.staff ?? []).map((entry, index) => {
@@ -76,7 +79,12 @@ export function planVndbParticipation(input: unknown) {
 		role: "voice_actor",
 		note: entry.note,
 	}));
-	return [...staff, ...voice];
+	return [...staff, ...voice].map((item) => ({
+		...item,
+		path: sourcePath(item.path),
+		staffPath: sourcePath(item.staffPath),
+		characterPath: item.characterPath === null ? null : sourcePath(item.characterPath),
+	}));
 }
 
 /** @alpha @remarks Resolves an adopted staff alias to its immutable source-observed native name revision. */
