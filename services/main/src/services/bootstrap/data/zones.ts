@@ -110,12 +110,12 @@ function createOfficialZoneContent(input: {
 
 const WorkZoneCategories = ["units", "posts", "reviews", "collections"] as const;
 
-function createWorkZoneFilterDocument(kind: "book" | "media" | "software") {
+function createWorkZoneFilterDocument(owner: "publishing" | "program" | "software") {
 	const where = {
 		any: [
-			{ kind: { in: [kind] } },
-			{ post: { is: { subject: { is: { kind: { in: [kind] } } } } } },
-			{ collection: { is: { items: { some: { kind: { in: [kind] } } } } } },
+			{ owner: { in: [owner] } },
+			{ post: { is: { subject: { is: { owner: { in: [owner] } } } } } },
+			{ collection: { is: { items: { some: { owner: { in: [owner] } } } } } },
 		],
 	} satisfies UnitPredicate;
 	return createFilterDocument({ categories: [...WorkZoneCategories], where });
@@ -138,7 +138,7 @@ export const OfficialZoneManifest = [
 			},
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
-		filterDocument: createWorkZoneFilterDocument("book"),
+		filterDocument: createWorkZoneFilterDocument("publishing"),
 		appearanceDocument: createZoneAppearanceDocument({ accent: "#a16207" }, "b00757a70002"),
 		avatar: officialZoneIcon("book-open"),
 		...createOfficialZoneContent({
@@ -179,7 +179,7 @@ export const OfficialZoneManifest = [
 			},
 		],
 		ownerProfileId: OfficialProfileIds.editorial,
-		filterDocument: createWorkZoneFilterDocument("media"),
+		filterDocument: createWorkZoneFilterDocument("program"),
 		appearanceDocument: createZoneAppearanceDocument({ accent: "#db2777" }, "b00757a70005"),
 		avatar: officialZoneIcon("clapperboard"),
 		...createOfficialZoneContent({
@@ -304,7 +304,7 @@ export const OfficialZoneManifest = [
 		ownerProfileId: OfficialProfileIds.editorial,
 		filterDocument: createFilterDocument({
 			categories: ["units"],
-			where: { kind: { in: ["zone"] } },
+			where: { owner: { in: ["zone"] } },
 		}),
 		appearanceDocument: createZoneAppearanceDocument({ accent: "#2563eb" }, "b00757a7000e"),
 		avatar: officialZoneIcon("compass"),
