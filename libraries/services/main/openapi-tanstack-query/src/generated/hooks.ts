@@ -13,14 +13,24 @@ import type {
 } from "@tanstack/react-query";
 import type { RequestConfig, ResponseErrorConfig } from "./.kubb/client";
 import type {
-	AssignCurrentProfileSlugOptions,
-	AssignCurrentProfileSlugStatus200,
-	AssignCurrentProfileSlugStatus400,
-	AssignCurrentProfileSlugStatus401,
-	AssignCurrentProfileSlugStatus404,
-	AssignCurrentProfileSlugStatus409,
-	AssignCurrentProfileSlugStatus422,
-	AssignCurrentProfileSlugStatus500,
+	AddCatalogIdentifierOptions,
+	AddCatalogIdentifierStatus200,
+	AddCatalogIdentifierStatus400,
+	AddCatalogIdentifierStatus422,
+	AddCatalogIdentifierStatus429,
+	AddCatalogIdentifierStatus500,
+	AddCatalogNameOptions,
+	AddCatalogNameStatus200,
+	AddCatalogNameStatus400,
+	AddCatalogNameStatus422,
+	AddCatalogNameStatus429,
+	AddCatalogNameStatus500,
+	CreateCatalogResourceOptions,
+	CreateCatalogResourceStatus200,
+	CreateCatalogResourceStatus400,
+	CreateCatalogResourceStatus422,
+	CreateCatalogResourceStatus429,
+	CreateCatalogResourceStatus500,
 	DeleteApiApiQuotaPoliciesAccountsByUserIdOptions,
 	DeleteApiApiQuotaPoliciesAccountsByUserIdStatus200,
 	DeleteApiApiQuotaPoliciesAccountsByUserIdStatus400,
@@ -821,6 +831,36 @@ import type {
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500,
+	ReadCatalogResourceOptions,
+	ReadCatalogResourceStatus200,
+	ReadCatalogResourceStatus422,
+	ReadCatalogResourceStatus500,
+	UpdateCatalogLifecycleOptions,
+	UpdateCatalogLifecycleStatus200,
+	UpdateCatalogLifecycleStatus400,
+	UpdateCatalogLifecycleStatus422,
+	UpdateCatalogLifecycleStatus429,
+	UpdateCatalogLifecycleStatus500,
+	ListCatalogNamesOptions,
+	ListCatalogNamesStatus200,
+	ListCatalogNamesStatus422,
+	ListCatalogNamesStatus500,
+	ReviseCatalogNameOptions,
+	ReviseCatalogNameStatus200,
+	ReviseCatalogNameStatus400,
+	ReviseCatalogNameStatus422,
+	ReviseCatalogNameStatus429,
+	ReviseCatalogNameStatus500,
+	ListCatalogIdentifiersOptions,
+	ListCatalogIdentifiersStatus200,
+	ListCatalogIdentifiersStatus422,
+	ListCatalogIdentifiersStatus500,
+	ReviseCatalogIdentifierOptions,
+	ReviseCatalogIdentifierStatus200,
+	ReviseCatalogIdentifierStatus400,
+	ReviseCatalogIdentifierStatus422,
+	ReviseCatalogIdentifierStatus429,
+	ReviseCatalogIdentifierStatus500,
 	GetApiUnitsByIdByUnitIdDocksOptions,
 	GetApiUnitsByIdByUnitIdDocksStatus200,
 	GetApiUnitsByIdByUnitIdDocksStatus400,
@@ -866,21 +906,21 @@ import type {
 	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus422,
 	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429,
 	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus500,
-	GetApiUsersMeOptions,
-	GetApiUsersMeStatus200,
-	GetApiUsersMeStatus404,
-	GetApiUsersMeStatus422,
-	GetApiUsersMeStatus429,
-	GetApiUsersMeStatus500,
-	PatchApiUsersMeOptions,
-	PatchApiUsersMeStatus200,
-	PatchApiUsersMeStatus400,
-	PatchApiUsersMeStatus403,
-	PatchApiUsersMeStatus404,
-	PatchApiUsersMeStatus409,
-	PatchApiUsersMeStatus422,
-	PatchApiUsersMeStatus429,
-	PatchApiUsersMeStatus500,
+	GetApiAccountMeOptions,
+	GetApiAccountMeStatus200,
+	GetApiAccountMeStatus404,
+	GetApiAccountMeStatus422,
+	GetApiAccountMeStatus429,
+	GetApiAccountMeStatus500,
+	PatchApiAccountMeOptions,
+	PatchApiAccountMeStatus200,
+	PatchApiAccountMeStatus400,
+	PatchApiAccountMeStatus403,
+	PatchApiAccountMeStatus404,
+	PatchApiAccountMeStatus409,
+	PatchApiAccountMeStatus422,
+	PatchApiAccountMeStatus429,
+	PatchApiAccountMeStatus500,
 	ListCurrentUserStudioContentOptions,
 	ListCurrentUserStudioContentStatus200,
 	ListCurrentUserStudioContentStatus400,
@@ -894,25 +934,25 @@ import type {
 	RecordCurrentUserStudioVisitStatus422,
 	RecordCurrentUserStudioVisitStatus429,
 	RecordCurrentUserStudioVisitStatus500,
-	GetApiUsersMePreferencesStatus200,
-	GetApiUsersMePreferencesStatus404,
-	GetApiUsersMePreferencesStatus429,
-	GetApiUsersMePreferencesStatus500,
-	PatchApiUsersMePreferencesOptions,
-	PatchApiUsersMePreferencesStatus200,
-	PatchApiUsersMePreferencesStatus400,
-	PatchApiUsersMePreferencesStatus404,
-	PatchApiUsersMePreferencesStatus422,
-	PatchApiUsersMePreferencesStatus429,
-	PatchApiUsersMePreferencesStatus500,
-	PutApiUsersMePreferencesOptions,
-	PutApiUsersMePreferencesStatus200,
-	PutApiUsersMePreferencesStatus400,
-	PutApiUsersMePreferencesStatus403,
-	PutApiUsersMePreferencesStatus404,
-	PutApiUsersMePreferencesStatus422,
-	PutApiUsersMePreferencesStatus429,
-	PutApiUsersMePreferencesStatus500,
+	GetApiAccountMePreferencesStatus200,
+	GetApiAccountMePreferencesStatus404,
+	GetApiAccountMePreferencesStatus429,
+	GetApiAccountMePreferencesStatus500,
+	PatchApiAccountMePreferencesOptions,
+	PatchApiAccountMePreferencesStatus200,
+	PatchApiAccountMePreferencesStatus400,
+	PatchApiAccountMePreferencesStatus404,
+	PatchApiAccountMePreferencesStatus422,
+	PatchApiAccountMePreferencesStatus429,
+	PatchApiAccountMePreferencesStatus500,
+	PutApiAccountMePreferencesOptions,
+	PutApiAccountMePreferencesStatus200,
+	PutApiAccountMePreferencesStatus400,
+	PutApiAccountMePreferencesStatus403,
+	PutApiAccountMePreferencesStatus404,
+	PutApiAccountMePreferencesStatus422,
+	PutApiAccountMePreferencesStatus429,
+	PutApiAccountMePreferencesStatus500,
 	UpdateCurrentUserPrivacyOptions,
 	UpdateCurrentUserPrivacyStatus200,
 	UpdateCurrentUserPrivacyStatus400,
@@ -920,70 +960,139 @@ import type {
 	UpdateCurrentUserPrivacyStatus404,
 	UpdateCurrentUserPrivacyStatus422,
 	UpdateCurrentUserPrivacyStatus500,
-	GetApiUsersMeFollowingOptions,
-	GetApiUsersMeFollowingStatus200,
-	GetApiUsersMeFollowingStatus400,
-	GetApiUsersMeFollowingStatus422,
-	GetApiUsersMeFollowingStatus429,
-	GetApiUsersMeFollowingStatus500,
-	GetApiUsersMeFollowingByUnitIdOptions,
-	GetApiUsersMeFollowingByUnitIdStatus200,
-	GetApiUsersMeFollowingByUnitIdStatus404,
-	GetApiUsersMeFollowingByUnitIdStatus422,
-	GetApiUsersMeFollowingByUnitIdStatus429,
-	GetApiUsersMeFollowingByUnitIdStatus500,
-	PutApiUsersMeFollowingByUnitIdOptions,
-	PutApiUsersMeFollowingByUnitIdStatus200,
-	PutApiUsersMeFollowingByUnitIdStatus404,
-	PutApiUsersMeFollowingByUnitIdStatus409,
-	PutApiUsersMeFollowingByUnitIdStatus422,
-	PutApiUsersMeFollowingByUnitIdStatus429,
-	PutApiUsersMeFollowingByUnitIdStatus500,
-	DeleteApiUsersMeFollowingByUnitIdOptions,
-	DeleteApiUsersMeFollowingByUnitIdStatus200,
-	DeleteApiUsersMeFollowingByUnitIdStatus422,
-	DeleteApiUsersMeFollowingByUnitIdStatus429,
-	DeleteApiUsersMeFollowingByUnitIdStatus500,
-	PatchApiUsersMeFollowingByUnitIdOptions,
-	PatchApiUsersMeFollowingByUnitIdStatus200,
-	PatchApiUsersMeFollowingByUnitIdStatus400,
-	PatchApiUsersMeFollowingByUnitIdStatus404,
-	PatchApiUsersMeFollowingByUnitIdStatus422,
-	PatchApiUsersMeFollowingByUnitIdStatus429,
-	PatchApiUsersMeFollowingByUnitIdStatus500,
-	PutApiUsersMeFollowingByUnitIdSettingsOptions,
-	PutApiUsersMeFollowingByUnitIdSettingsStatus200,
-	PutApiUsersMeFollowingByUnitIdSettingsStatus400,
-	PutApiUsersMeFollowingByUnitIdSettingsStatus404,
-	PutApiUsersMeFollowingByUnitIdSettingsStatus409,
-	PutApiUsersMeFollowingByUnitIdSettingsStatus422,
-	PutApiUsersMeFollowingByUnitIdSettingsStatus429,
-	PutApiUsersMeFollowingByUnitIdSettingsStatus500,
+	GetApiAccountMeFollowingOptions,
+	GetApiAccountMeFollowingStatus200,
+	GetApiAccountMeFollowingStatus400,
+	GetApiAccountMeFollowingStatus422,
+	GetApiAccountMeFollowingStatus429,
+	GetApiAccountMeFollowingStatus500,
+	GetApiAccountMeFollowingByUnitIdOptions,
+	GetApiAccountMeFollowingByUnitIdStatus200,
+	GetApiAccountMeFollowingByUnitIdStatus404,
+	GetApiAccountMeFollowingByUnitIdStatus422,
+	GetApiAccountMeFollowingByUnitIdStatus429,
+	GetApiAccountMeFollowingByUnitIdStatus500,
+	PutApiAccountMeFollowingByUnitIdOptions,
+	PutApiAccountMeFollowingByUnitIdStatus200,
+	PutApiAccountMeFollowingByUnitIdStatus404,
+	PutApiAccountMeFollowingByUnitIdStatus409,
+	PutApiAccountMeFollowingByUnitIdStatus422,
+	PutApiAccountMeFollowingByUnitIdStatus429,
+	PutApiAccountMeFollowingByUnitIdStatus500,
+	DeleteApiAccountMeFollowingByUnitIdOptions,
+	DeleteApiAccountMeFollowingByUnitIdStatus200,
+	DeleteApiAccountMeFollowingByUnitIdStatus422,
+	DeleteApiAccountMeFollowingByUnitIdStatus429,
+	DeleteApiAccountMeFollowingByUnitIdStatus500,
+	PatchApiAccountMeFollowingByUnitIdOptions,
+	PatchApiAccountMeFollowingByUnitIdStatus200,
+	PatchApiAccountMeFollowingByUnitIdStatus400,
+	PatchApiAccountMeFollowingByUnitIdStatus404,
+	PatchApiAccountMeFollowingByUnitIdStatus422,
+	PatchApiAccountMeFollowingByUnitIdStatus429,
+	PatchApiAccountMeFollowingByUnitIdStatus500,
+	PutApiAccountMeFollowingByUnitIdSettingsOptions,
+	PutApiAccountMeFollowingByUnitIdSettingsStatus200,
+	PutApiAccountMeFollowingByUnitIdSettingsStatus400,
+	PutApiAccountMeFollowingByUnitIdSettingsStatus404,
+	PutApiAccountMeFollowingByUnitIdSettingsStatus409,
+	PutApiAccountMeFollowingByUnitIdSettingsStatus422,
+	PutApiAccountMeFollowingByUnitIdSettingsStatus429,
+	PutApiAccountMeFollowingByUnitIdSettingsStatus500,
 	GetUserProfileActivityOptions,
 	GetUserProfileActivityStatus200,
 	GetUserProfileActivityStatus404,
 	GetUserProfileActivityStatus422,
 	GetUserProfileActivityStatus500,
-	GetApiUsersByIdOptions,
-	GetApiUsersByIdStatus200,
-	GetApiUsersByIdStatus404,
-	GetApiUsersByIdStatus422,
-	GetApiUsersByIdStatus500,
-	GetApiUsersMeBlocksStatus200,
-	GetApiUsersMeBlocksStatus429,
-	GetApiUsersMeBlocksStatus500,
-	PutApiUsersByIdBlockOptions,
-	PutApiUsersByIdBlockStatus200,
-	PutApiUsersByIdBlockStatus404,
-	PutApiUsersByIdBlockStatus409,
-	PutApiUsersByIdBlockStatus422,
-	PutApiUsersByIdBlockStatus429,
-	PutApiUsersByIdBlockStatus500,
-	DeleteApiUsersByIdBlockOptions,
-	DeleteApiUsersByIdBlockStatus200,
-	DeleteApiUsersByIdBlockStatus422,
-	DeleteApiUsersByIdBlockStatus429,
-	DeleteApiUsersByIdBlockStatus500,
+	GetApiEntitiesByIdProfileOptions,
+	GetApiEntitiesByIdProfileStatus200,
+	GetApiEntitiesByIdProfileStatus404,
+	GetApiEntitiesByIdProfileStatus422,
+	GetApiEntitiesByIdProfileStatus500,
+	GetApiAccountMeBlocksStatus200,
+	GetApiAccountMeBlocksStatus429,
+	GetApiAccountMeBlocksStatus500,
+	PutApiAccountBlocksByIdOptions,
+	PutApiAccountBlocksByIdStatus200,
+	PutApiAccountBlocksByIdStatus404,
+	PutApiAccountBlocksByIdStatus409,
+	PutApiAccountBlocksByIdStatus422,
+	PutApiAccountBlocksByIdStatus429,
+	PutApiAccountBlocksByIdStatus500,
+	DeleteApiAccountBlocksByIdOptions,
+	DeleteApiAccountBlocksByIdStatus200,
+	DeleteApiAccountBlocksByIdStatus422,
+	DeleteApiAccountBlocksByIdStatus429,
+	DeleteApiAccountBlocksByIdStatus500,
+	ListManagedOrganizationsOptions,
+	ListManagedOrganizationsStatus200,
+	ListManagedOrganizationsStatus422,
+	ListManagedOrganizationsStatus500,
+	CreateManagedOrganizationOptions,
+	CreateManagedOrganizationStatus200,
+	CreateManagedOrganizationStatus400,
+	CreateManagedOrganizationStatus422,
+	CreateManagedOrganizationStatus500,
+	UpdateActingEntityPresentationOptions,
+	UpdateActingEntityPresentationStatus200,
+	UpdateActingEntityPresentationStatus400,
+	UpdateActingEntityPresentationStatus422,
+	UpdateActingEntityPresentationStatus500,
+	ListActingEntityPresentationHistoryOptions,
+	ListActingEntityPresentationHistoryStatus200,
+	ListActingEntityPresentationHistoryStatus422,
+	ListActingEntityPresentationHistoryStatus500,
+	GetActingEntityPresentationRevisionOptions,
+	GetActingEntityPresentationRevisionStatus200,
+	GetActingEntityPresentationRevisionStatus422,
+	GetActingEntityPresentationRevisionStatus500,
+	RestoreActingEntityPresentationOptions,
+	RestoreActingEntityPresentationStatus200,
+	RestoreActingEntityPresentationStatus400,
+	RestoreActingEntityPresentationStatus422,
+	RestoreActingEntityPresentationStatus500,
+	GetCurrentParticipationStatus200,
+	GetCurrentParticipationStatus500,
+	ListParticipationGrantsOptions,
+	ListParticipationGrantsStatus200,
+	ListParticipationGrantsStatus422,
+	ListParticipationGrantsStatus500,
+	IssueParticipationGrantOptions,
+	IssueParticipationGrantStatus200,
+	IssueParticipationGrantStatus400,
+	IssueParticipationGrantStatus422,
+	IssueParticipationGrantStatus500,
+	SelectParticipationOptions,
+	SelectParticipationStatus200,
+	SelectParticipationStatus400,
+	SelectParticipationStatus422,
+	SelectParticipationStatus500,
+	RevokeParticipationGrantOptions,
+	RevokeParticipationGrantStatus200,
+	RevokeParticipationGrantStatus400,
+	RevokeParticipationGrantStatus422,
+	RevokeParticipationGrantStatus500,
+	ListControlledServicePrincipalsOptions,
+	ListControlledServicePrincipalsStatus200,
+	ListControlledServicePrincipalsStatus422,
+	ListControlledServicePrincipalsStatus500,
+	CreateServicePrincipalOptions,
+	CreateServicePrincipalStatus200,
+	CreateServicePrincipalStatus400,
+	CreateServicePrincipalStatus422,
+	CreateServicePrincipalStatus500,
+	RevokeServicePrincipalOptions,
+	RevokeServicePrincipalStatus200,
+	RevokeServicePrincipalStatus400,
+	RevokeServicePrincipalStatus422,
+	RevokeServicePrincipalStatus500,
+	EraseOwnAccountStatus200,
+	EraseOwnAccountStatus500,
+	RecoverEntityControllerOptions,
+	RecoverEntityControllerStatus200,
+	RecoverEntityControllerStatus400,
+	RecoverEntityControllerStatus422,
+	RecoverEntityControllerStatus500,
 	GetApiCustomThemesExecutionControlStatus200,
 	GetApiCustomThemesExecutionControlStatus403,
 	GetApiCustomThemesExecutionControlStatus500,
@@ -1100,47 +1209,47 @@ import type {
 	DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus422,
 	DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus429,
 	DeleteApiUnitsByIdByUnitIdCustomThemeInstallationStatus500,
-	GetApiPlatformAccessCustomThemeExternalLiveProfilesOptions,
-	GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200,
-	GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus403,
-	GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus422,
-	GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus500,
-	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
-	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
-	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403,
-	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404,
-	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422,
-	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500,
-	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
-	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
-	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus400,
-	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403,
-	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404,
-	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus409,
-	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422,
-	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500,
+	GetApiPlatformAccessCustomThemeExternalLiveAccountsOptions,
+	GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus200,
+	GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus403,
+	GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus422,
+	GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus500,
+	GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions,
+	GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus200,
+	GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus403,
+	GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus404,
+	GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus422,
+	GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus500,
+	PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions,
+	PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus200,
+	PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus400,
+	PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus403,
+	PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus404,
+	PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus409,
+	PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus422,
+	PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus500,
 	GetApiPlatformAccessPolicyStatus200,
 	GetApiPlatformAccessPolicyStatus403,
 	GetApiPlatformAccessPolicyStatus500,
-	GetApiPlatformAccessProfilesOptions,
-	GetApiPlatformAccessProfilesStatus200,
-	GetApiPlatformAccessProfilesStatus403,
-	GetApiPlatformAccessProfilesStatus422,
-	GetApiPlatformAccessProfilesStatus500,
-	GetApiPlatformAccessProfilesByProfileIdOptions,
-	GetApiPlatformAccessProfilesByProfileIdStatus200,
-	GetApiPlatformAccessProfilesByProfileIdStatus403,
-	GetApiPlatformAccessProfilesByProfileIdStatus404,
-	GetApiPlatformAccessProfilesByProfileIdStatus422,
-	GetApiPlatformAccessProfilesByProfileIdStatus500,
-	PutApiPlatformAccessProfilesByProfileIdOptions,
-	PutApiPlatformAccessProfilesByProfileIdStatus200,
-	PutApiPlatformAccessProfilesByProfileIdStatus400,
-	PutApiPlatformAccessProfilesByProfileIdStatus403,
-	PutApiPlatformAccessProfilesByProfileIdStatus404,
-	PutApiPlatformAccessProfilesByProfileIdStatus409,
-	PutApiPlatformAccessProfilesByProfileIdStatus422,
-	PutApiPlatformAccessProfilesByProfileIdStatus500,
+	GetApiPlatformAccessAccountsOptions,
+	GetApiPlatformAccessAccountsStatus200,
+	GetApiPlatformAccessAccountsStatus403,
+	GetApiPlatformAccessAccountsStatus422,
+	GetApiPlatformAccessAccountsStatus500,
+	GetApiPlatformAccessAccountsByAuthUserIdOptions,
+	GetApiPlatformAccessAccountsByAuthUserIdStatus200,
+	GetApiPlatformAccessAccountsByAuthUserIdStatus403,
+	GetApiPlatformAccessAccountsByAuthUserIdStatus404,
+	GetApiPlatformAccessAccountsByAuthUserIdStatus422,
+	GetApiPlatformAccessAccountsByAuthUserIdStatus500,
+	PutApiPlatformAccessAccountsByAuthUserIdOptions,
+	PutApiPlatformAccessAccountsByAuthUserIdStatus200,
+	PutApiPlatformAccessAccountsByAuthUserIdStatus400,
+	PutApiPlatformAccessAccountsByAuthUserIdStatus403,
+	PutApiPlatformAccessAccountsByAuthUserIdStatus404,
+	PutApiPlatformAccessAccountsByAuthUserIdStatus409,
+	PutApiPlatformAccessAccountsByAuthUserIdStatus422,
+	PutApiPlatformAccessAccountsByAuthUserIdStatus500,
 	GetApiPlatformUsersOptions,
 	GetApiPlatformUsersStatus200,
 	GetApiPlatformUsersStatus400,
@@ -2155,12 +2264,6 @@ import type {
 	PostApiCollectionsStatus422,
 	PostApiCollectionsStatus429,
 	PostApiCollectionsStatus500,
-	GetApiCollectionsFavoritesOptions,
-	GetApiCollectionsFavoritesStatus200,
-	GetApiCollectionsFavoritesStatus404,
-	GetApiCollectionsFavoritesStatus422,
-	GetApiCollectionsFavoritesStatus429,
-	GetApiCollectionsFavoritesStatus500,
 	GetApiCollectionsByCollectionIdItemsOptions,
 	GetApiCollectionsByCollectionIdItemsStatus200,
 	GetApiCollectionsByCollectionIdItemsStatus400,
@@ -2244,21 +2347,39 @@ import type {
 	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus409,
 	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus422,
 	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus500,
-	PutApiCollectionsFavoritesItemsByTargetIdOptions,
-	PutApiCollectionsFavoritesItemsByTargetIdStatus200,
-	PutApiCollectionsFavoritesItemsByTargetIdStatus400,
-	PutApiCollectionsFavoritesItemsByTargetIdStatus404,
-	PutApiCollectionsFavoritesItemsByTargetIdStatus409,
-	PutApiCollectionsFavoritesItemsByTargetIdStatus422,
-	PutApiCollectionsFavoritesItemsByTargetIdStatus429,
-	PutApiCollectionsFavoritesItemsByTargetIdStatus500,
-	DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
-	DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
-	DeleteApiCollectionsFavoritesItemsByTargetIdStatus400,
-	DeleteApiCollectionsFavoritesItemsByTargetIdStatus409,
-	DeleteApiCollectionsFavoritesItemsByTargetIdStatus422,
-	DeleteApiCollectionsFavoritesItemsByTargetIdStatus429,
-	DeleteApiCollectionsFavoritesItemsByTargetIdStatus500,
+	GetApiFavoritesOptions,
+	GetApiFavoritesStatus200,
+	GetApiFavoritesStatus422,
+	GetApiFavoritesStatus429,
+	GetApiFavoritesStatus500,
+	PutApiFavoritesByTargetUnitIdOptions,
+	PutApiFavoritesByTargetUnitIdStatus200,
+	PutApiFavoritesByTargetUnitIdStatus400,
+	PutApiFavoritesByTargetUnitIdStatus422,
+	PutApiFavoritesByTargetUnitIdStatus429,
+	PutApiFavoritesByTargetUnitIdStatus500,
+	DeleteApiFavoritesByTargetUnitIdOptions,
+	DeleteApiFavoritesByTargetUnitIdStatus200,
+	DeleteApiFavoritesByTargetUnitIdStatus400,
+	DeleteApiFavoritesByTargetUnitIdStatus422,
+	DeleteApiFavoritesByTargetUnitIdStatus429,
+	DeleteApiFavoritesByTargetUnitIdStatus500,
+	GetApiFavoritesByTargetUnitIdHistoryOptions,
+	GetApiFavoritesByTargetUnitIdHistoryStatus200,
+	GetApiFavoritesByTargetUnitIdHistoryStatus422,
+	GetApiFavoritesByTargetUnitIdHistoryStatus429,
+	GetApiFavoritesByTargetUnitIdHistoryStatus500,
+	GetApiFavoritesByTargetUnitIdHistoryByRevisionOptions,
+	GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200,
+	GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus422,
+	GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus429,
+	GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus500,
+	PostApiFavoritesByTargetUnitIdRestoreOptions,
+	PostApiFavoritesByTargetUnitIdRestoreStatus200,
+	PostApiFavoritesByTargetUnitIdRestoreStatus400,
+	PostApiFavoritesByTargetUnitIdRestoreStatus422,
+	PostApiFavoritesByTargetUnitIdRestoreStatus429,
+	PostApiFavoritesByTargetUnitIdRestoreStatus500,
 	GetApiReviewsOptions,
 	GetApiReviewsStatus200,
 	GetApiReviewsStatus400,
@@ -2920,7 +3041,9 @@ import type {
 } from "./models";
 import { mutationOptions, queryOptions, useQuery, useMutation } from "@tanstack/react-query";
 import {
-	assignCurrentProfileSlug,
+	addCatalogIdentifier,
+	addCatalogName,
+	createCatalogResource,
 	deleteApiApiQuotaPoliciesAccountsByUserId,
 	deleteApiApiTokensByTokenId,
 	deleteApiMessagesByMessageId,
@@ -3040,31 +3163,53 @@ import {
 	postApiSoftwareBySoftwareIdSystemRequirements,
 	putApiSoftwareBySoftwareIdSystemRequirementsByRequirementId,
 	deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId,
+	readCatalogResource,
+	updateCatalogLifecycle,
+	listCatalogNames,
+	reviseCatalogName,
+	listCatalogIdentifiers,
+	reviseCatalogIdentifier,
 	getApiUnitsByIdByUnitIdDocks,
 	getApiUnitsByIdByUnitIdDocksByKind,
 	putApiUnitsByIdByUnitIdDocksByKind,
 	deleteApiUnitsByIdByUnitIdDocksByKind,
 	getApiUnitsByIdByUnitIdDocksByKindRevisions,
 	postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore,
-	getApiUsersMe,
-	patchApiUsersMe,
+	getApiAccountMe,
+	patchApiAccountMe,
 	listCurrentUserStudioContent,
 	recordCurrentUserStudioVisit,
-	getApiUsersMePreferences,
-	patchApiUsersMePreferences,
-	putApiUsersMePreferences,
+	getApiAccountMePreferences,
+	patchApiAccountMePreferences,
+	putApiAccountMePreferences,
 	updateCurrentUserPrivacy,
-	getApiUsersMeFollowing,
-	getApiUsersMeFollowingByUnitId,
-	putApiUsersMeFollowingByUnitId,
-	deleteApiUsersMeFollowingByUnitId,
-	patchApiUsersMeFollowingByUnitId,
-	putApiUsersMeFollowingByUnitIdSettings,
+	getApiAccountMeFollowing,
+	getApiAccountMeFollowingByUnitId,
+	putApiAccountMeFollowingByUnitId,
+	deleteApiAccountMeFollowingByUnitId,
+	patchApiAccountMeFollowingByUnitId,
+	putApiAccountMeFollowingByUnitIdSettings,
 	getUserProfileActivity,
-	getApiUsersById,
-	getApiUsersMeBlocks,
-	putApiUsersByIdBlock,
-	deleteApiUsersByIdBlock,
+	getApiEntitiesByIdProfile,
+	getApiAccountMeBlocks,
+	putApiAccountBlocksById,
+	deleteApiAccountBlocksById,
+	listManagedOrganizations,
+	createManagedOrganization,
+	updateActingEntityPresentation,
+	listActingEntityPresentationHistory,
+	getActingEntityPresentationRevision,
+	restoreActingEntityPresentation,
+	getCurrentParticipation,
+	listParticipationGrants,
+	issueParticipationGrant,
+	selectParticipation,
+	revokeParticipationGrant,
+	listControlledServicePrincipals,
+	createServicePrincipal,
+	revokeServicePrincipal,
+	eraseOwnAccount,
+	recoverEntityController,
 	getApiCustomThemesExecutionControl,
 	putApiCustomThemesExecutionControl,
 	postApiCustomThemes,
@@ -3082,13 +3227,13 @@ import {
 	getApiUnitsByIdByUnitIdPresentationDocument,
 	putApiUnitsByIdByUnitIdCustomThemeInstallation,
 	deleteApiUnitsByIdByUnitIdCustomThemeInstallation,
-	getApiPlatformAccessCustomThemeExternalLiveProfiles,
-	getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess,
-	putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess,
+	getApiPlatformAccessCustomThemeExternalLiveAccounts,
+	getApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccess,
+	putApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccess,
 	getApiPlatformAccessPolicy,
-	getApiPlatformAccessProfiles,
-	getApiPlatformAccessProfilesByProfileId,
-	putApiPlatformAccessProfilesByProfileId,
+	getApiPlatformAccessAccounts,
+	getApiPlatformAccessAccountsByAuthUserId,
+	putApiPlatformAccessAccountsByAuthUserId,
 	getApiPlatformUsers,
 	getApiPlatformUsersByUserId,
 	putApiPlatformUsersByUserIdAccountState,
@@ -3238,7 +3383,6 @@ import {
 	deleteApiProgressByUnitIdNodesByNodeId,
 	getApiCollections,
 	postApiCollections,
-	getApiCollectionsFavorites,
 	getApiCollectionsByCollectionIdItems,
 	getApiCollectionsByCollectionId,
 	patchApiCollectionsByCollectionId,
@@ -3250,8 +3394,12 @@ import {
 	getApiCollectionsByCollectionIdItemRevisions,
 	getApiCollectionsByCollectionIdItemRevisionsCompare,
 	postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore,
-	putApiCollectionsFavoritesItemsByTargetId,
-	deleteApiCollectionsFavoritesItemsByTargetId,
+	getApiFavorites,
+	putApiFavoritesByTargetUnitId,
+	deleteApiFavoritesByTargetUnitId,
+	getApiFavoritesByTargetUnitIdHistory,
+	getApiFavoritesByTargetUnitIdHistoryByRevision,
+	postApiFavoritesByTargetUnitIdRestore,
 	getApiReviews,
 	postApiReviews,
 	getApiReviewsByReviewId,
@@ -15593,6 +15741,816 @@ export function useDeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementI
 	>;
 }
 
+export const createCatalogResourceMutationKey = () =>
+	[{ url: "/api/v1/catalog/resources" }] as const;
+
+export function createCatalogResourceMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = createCatalogResourceMutationKey();
+	return mutationOptions<
+		CreateCatalogResourceStatus200,
+		ResponseErrorConfig<
+			| CreateCatalogResourceStatus400
+			| CreateCatalogResourceStatus422
+			| CreateCatalogResourceStatus429
+			| CreateCatalogResourceStatus500
+		>,
+		CreateCatalogResourceOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await createCatalogResource({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create a native catalog resource
+ * {@link /api/v1/catalog/resources}
+ */
+export function useCreateCatalogResource<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			CreateCatalogResourceStatus200,
+			ResponseErrorConfig<
+				| CreateCatalogResourceStatus400
+				| CreateCatalogResourceStatus422
+				| CreateCatalogResourceStatus429
+				| CreateCatalogResourceStatus500
+			>,
+			CreateCatalogResourceOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? createCatalogResourceMutationKey();
+
+	const baseOptions = createCatalogResourceMutationOptions(config) as UseMutationOptions<
+		CreateCatalogResourceStatus200,
+		ResponseErrorConfig<
+			| CreateCatalogResourceStatus400
+			| CreateCatalogResourceStatus422
+			| CreateCatalogResourceStatus429
+			| CreateCatalogResourceStatus500
+		>,
+		CreateCatalogResourceOptions,
+		TContext
+	>;
+
+	return useMutation<
+		CreateCatalogResourceStatus200,
+		ResponseErrorConfig<
+			| CreateCatalogResourceStatus400
+			| CreateCatalogResourceStatus422
+			| CreateCatalogResourceStatus429
+			| CreateCatalogResourceStatus500
+		>,
+		CreateCatalogResourceOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		CreateCatalogResourceStatus200,
+		ResponseErrorConfig<
+			| CreateCatalogResourceStatus400
+			| CreateCatalogResourceStatus422
+			| CreateCatalogResourceStatus429
+			| CreateCatalogResourceStatus500
+		>,
+		CreateCatalogResourceOptions,
+		TContext
+	>;
+}
+
+export const readCatalogResourceQueryKey = ({
+	path,
+}: Omit<ReadCatalogResourceOptions, "headers">) =>
+	[{ url: "/api/v1/catalog/resources/:owner/:id", params: path }] as const;
+
+type ReadCatalogResourceQueryKey = ReturnType<typeof readCatalogResourceQueryKey>;
+
+export function readCatalogResourceQueryOptions(
+	{ path }: ReadCatalogResourceOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = readCatalogResourceQueryKey({ path });
+	return queryOptions<
+		ReadCatalogResourceStatus200,
+		ResponseErrorConfig<ReadCatalogResourceStatus422 | ReadCatalogResourceStatus500>,
+		ReadCatalogResourceStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await readCatalogResource({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Read native catalog metadata
+ * {@link /api/v1/catalog/resources/:owner/:id}
+ */
+export function useReadCatalogResource<
+	TData = ReadCatalogResourceStatus200,
+	TQueryData = ReadCatalogResourceStatus200,
+	TQueryKey extends QueryKey = ReadCatalogResourceQueryKey,
+>(
+	{
+		path,
+	}: { path: ReadCatalogResourceOptions["path"] | (() => ReadCatalogResourceOptions["path"]) },
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ReadCatalogResourceStatus200,
+				ResponseErrorConfig<ReadCatalogResourceStatus422 | ReadCatalogResourceStatus500>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey = resolvedOptions?.queryKey ?? readCatalogResourceQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...readCatalogResourceQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<ReadCatalogResourceStatus422 | ReadCatalogResourceStatus500>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const updateCatalogLifecycleMutationKey = () =>
+	[{ url: "/api/v1/catalog/resources/:owner/:id/lifecycle" }] as const;
+
+export function updateCatalogLifecycleMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = updateCatalogLifecycleMutationKey();
+	return mutationOptions<
+		UpdateCatalogLifecycleStatus200,
+		ResponseErrorConfig<
+			| UpdateCatalogLifecycleStatus400
+			| UpdateCatalogLifecycleStatus422
+			| UpdateCatalogLifecycleStatus429
+			| UpdateCatalogLifecycleStatus500
+		>,
+		UpdateCatalogLifecycleOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await updateCatalogLifecycle({ ...config, path, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Change catalog publication and visibility
+ * {@link /api/v1/catalog/resources/:owner/:id/lifecycle}
+ */
+export function useUpdateCatalogLifecycle<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			UpdateCatalogLifecycleStatus200,
+			ResponseErrorConfig<
+				| UpdateCatalogLifecycleStatus400
+				| UpdateCatalogLifecycleStatus422
+				| UpdateCatalogLifecycleStatus429
+				| UpdateCatalogLifecycleStatus500
+			>,
+			UpdateCatalogLifecycleOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? updateCatalogLifecycleMutationKey();
+
+	const baseOptions = updateCatalogLifecycleMutationOptions(config) as UseMutationOptions<
+		UpdateCatalogLifecycleStatus200,
+		ResponseErrorConfig<
+			| UpdateCatalogLifecycleStatus400
+			| UpdateCatalogLifecycleStatus422
+			| UpdateCatalogLifecycleStatus429
+			| UpdateCatalogLifecycleStatus500
+		>,
+		UpdateCatalogLifecycleOptions,
+		TContext
+	>;
+
+	return useMutation<
+		UpdateCatalogLifecycleStatus200,
+		ResponseErrorConfig<
+			| UpdateCatalogLifecycleStatus400
+			| UpdateCatalogLifecycleStatus422
+			| UpdateCatalogLifecycleStatus429
+			| UpdateCatalogLifecycleStatus500
+		>,
+		UpdateCatalogLifecycleOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		UpdateCatalogLifecycleStatus200,
+		ResponseErrorConfig<
+			| UpdateCatalogLifecycleStatus400
+			| UpdateCatalogLifecycleStatus422
+			| UpdateCatalogLifecycleStatus429
+			| UpdateCatalogLifecycleStatus500
+		>,
+		UpdateCatalogLifecycleOptions,
+		TContext
+	>;
+}
+
+export const listCatalogNamesQueryKey = ({
+	path,
+	query,
+}: Omit<ListCatalogNamesOptions, "headers">) =>
+	[
+		{ url: "/api/v1/catalog/resources/:owner/:id/names", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ListCatalogNamesQueryKey = ReturnType<typeof listCatalogNamesQueryKey>;
+
+export function listCatalogNamesQueryOptions(
+	{ path, query }: ListCatalogNamesOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listCatalogNamesQueryKey({ path, query });
+	return queryOptions<
+		ListCatalogNamesStatus200,
+		ResponseErrorConfig<ListCatalogNamesStatus422 | ListCatalogNamesStatus500>,
+		ListCatalogNamesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await listCatalogNames({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List independently versioned catalog names
+ * {@link /api/v1/catalog/resources/:owner/:id/names}
+ */
+export function useListCatalogNames<
+	TData = ListCatalogNamesStatus200,
+	TQueryData = ListCatalogNamesStatus200,
+	TQueryKey extends QueryKey = ListCatalogNamesQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListCatalogNamesOptions["path"] | (() => ListCatalogNamesOptions["path"]);
+		query?: ListCatalogNamesOptions["query"] | (() => ListCatalogNamesOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListCatalogNamesStatus200,
+				ResponseErrorConfig<ListCatalogNamesStatus422 | ListCatalogNamesStatus500>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listCatalogNamesQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listCatalogNamesQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<ListCatalogNamesStatus422 | ListCatalogNamesStatus500>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const addCatalogNameMutationKey = () =>
+	[{ url: "/api/v1/catalog/resources/:owner/:id/names" }] as const;
+
+export function addCatalogNameMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = addCatalogNameMutationKey();
+	return mutationOptions<
+		AddCatalogNameStatus200,
+		ResponseErrorConfig<
+			| AddCatalogNameStatus400
+			| AddCatalogNameStatus422
+			| AddCatalogNameStatus429
+			| AddCatalogNameStatus500
+		>,
+		AddCatalogNameOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await addCatalogName({ ...config, path, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Add a catalog name
+ * {@link /api/v1/catalog/resources/:owner/:id/names}
+ */
+export function useAddCatalogName<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			AddCatalogNameStatus200,
+			ResponseErrorConfig<
+				| AddCatalogNameStatus400
+				| AddCatalogNameStatus422
+				| AddCatalogNameStatus429
+				| AddCatalogNameStatus500
+			>,
+			AddCatalogNameOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? addCatalogNameMutationKey();
+
+	const baseOptions = addCatalogNameMutationOptions(config) as UseMutationOptions<
+		AddCatalogNameStatus200,
+		ResponseErrorConfig<
+			| AddCatalogNameStatus400
+			| AddCatalogNameStatus422
+			| AddCatalogNameStatus429
+			| AddCatalogNameStatus500
+		>,
+		AddCatalogNameOptions,
+		TContext
+	>;
+
+	return useMutation<
+		AddCatalogNameStatus200,
+		ResponseErrorConfig<
+			| AddCatalogNameStatus400
+			| AddCatalogNameStatus422
+			| AddCatalogNameStatus429
+			| AddCatalogNameStatus500
+		>,
+		AddCatalogNameOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		AddCatalogNameStatus200,
+		ResponseErrorConfig<
+			| AddCatalogNameStatus400
+			| AddCatalogNameStatus422
+			| AddCatalogNameStatus429
+			| AddCatalogNameStatus500
+		>,
+		AddCatalogNameOptions,
+		TContext
+	>;
+}
+
+export const reviseCatalogNameMutationKey = () =>
+	[{ url: "/api/v1/catalog/resources/:owner/:id/names/:nameId" }] as const;
+
+export function reviseCatalogNameMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = reviseCatalogNameMutationKey();
+	return mutationOptions<
+		ReviseCatalogNameStatus200,
+		ResponseErrorConfig<
+			| ReviseCatalogNameStatus400
+			| ReviseCatalogNameStatus422
+			| ReviseCatalogNameStatus429
+			| ReviseCatalogNameStatus500
+		>,
+		ReviseCatalogNameOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await reviseCatalogName({ ...config, path, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Revise a catalog name with its exact current revision
+ * {@link /api/v1/catalog/resources/:owner/:id/names/:nameId}
+ */
+export function useReviseCatalogName<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ReviseCatalogNameStatus200,
+			ResponseErrorConfig<
+				| ReviseCatalogNameStatus400
+				| ReviseCatalogNameStatus422
+				| ReviseCatalogNameStatus429
+				| ReviseCatalogNameStatus500
+			>,
+			ReviseCatalogNameOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? reviseCatalogNameMutationKey();
+
+	const baseOptions = reviseCatalogNameMutationOptions(config) as UseMutationOptions<
+		ReviseCatalogNameStatus200,
+		ResponseErrorConfig<
+			| ReviseCatalogNameStatus400
+			| ReviseCatalogNameStatus422
+			| ReviseCatalogNameStatus429
+			| ReviseCatalogNameStatus500
+		>,
+		ReviseCatalogNameOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ReviseCatalogNameStatus200,
+		ResponseErrorConfig<
+			| ReviseCatalogNameStatus400
+			| ReviseCatalogNameStatus422
+			| ReviseCatalogNameStatus429
+			| ReviseCatalogNameStatus500
+		>,
+		ReviseCatalogNameOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ReviseCatalogNameStatus200,
+		ResponseErrorConfig<
+			| ReviseCatalogNameStatus400
+			| ReviseCatalogNameStatus422
+			| ReviseCatalogNameStatus429
+			| ReviseCatalogNameStatus500
+		>,
+		ReviseCatalogNameOptions,
+		TContext
+	>;
+}
+
+export const listCatalogIdentifiersQueryKey = ({
+	path,
+	query,
+}: Omit<ListCatalogIdentifiersOptions, "headers">) =>
+	[
+		{ url: "/api/v1/catalog/resources/:owner/:id/identifiers", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ListCatalogIdentifiersQueryKey = ReturnType<typeof listCatalogIdentifiersQueryKey>;
+
+export function listCatalogIdentifiersQueryOptions(
+	{ path, query }: ListCatalogIdentifiersOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listCatalogIdentifiersQueryKey({ path, query });
+	return queryOptions<
+		ListCatalogIdentifiersStatus200,
+		ResponseErrorConfig<ListCatalogIdentifiersStatus422 | ListCatalogIdentifiersStatus500>,
+		ListCatalogIdentifiersStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await listCatalogIdentifiers({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List catalog identifier claims
+ * {@link /api/v1/catalog/resources/:owner/:id/identifiers}
+ */
+export function useListCatalogIdentifiers<
+	TData = ListCatalogIdentifiersStatus200,
+	TQueryData = ListCatalogIdentifiersStatus200,
+	TQueryKey extends QueryKey = ListCatalogIdentifiersQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path: ListCatalogIdentifiersOptions["path"] | (() => ListCatalogIdentifiersOptions["path"]);
+		query?: ListCatalogIdentifiersOptions["query"] | (() => ListCatalogIdentifiersOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListCatalogIdentifiersStatus200,
+				ResponseErrorConfig<ListCatalogIdentifiersStatus422 | ListCatalogIdentifiersStatus500>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? listCatalogIdentifiersQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listCatalogIdentifiersQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<ListCatalogIdentifiersStatus422 | ListCatalogIdentifiersStatus500>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const addCatalogIdentifierMutationKey = () =>
+	[{ url: "/api/v1/catalog/resources/:owner/:id/identifiers" }] as const;
+
+export function addCatalogIdentifierMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = addCatalogIdentifierMutationKey();
+	return mutationOptions<
+		AddCatalogIdentifierStatus200,
+		ResponseErrorConfig<
+			| AddCatalogIdentifierStatus400
+			| AddCatalogIdentifierStatus422
+			| AddCatalogIdentifierStatus429
+			| AddCatalogIdentifierStatus500
+		>,
+		AddCatalogIdentifierOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await addCatalogIdentifier({ ...config, path, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Add an identifier claim without merging identities
+ * {@link /api/v1/catalog/resources/:owner/:id/identifiers}
+ */
+export function useAddCatalogIdentifier<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			AddCatalogIdentifierStatus200,
+			ResponseErrorConfig<
+				| AddCatalogIdentifierStatus400
+				| AddCatalogIdentifierStatus422
+				| AddCatalogIdentifierStatus429
+				| AddCatalogIdentifierStatus500
+			>,
+			AddCatalogIdentifierOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? addCatalogIdentifierMutationKey();
+
+	const baseOptions = addCatalogIdentifierMutationOptions(config) as UseMutationOptions<
+		AddCatalogIdentifierStatus200,
+		ResponseErrorConfig<
+			| AddCatalogIdentifierStatus400
+			| AddCatalogIdentifierStatus422
+			| AddCatalogIdentifierStatus429
+			| AddCatalogIdentifierStatus500
+		>,
+		AddCatalogIdentifierOptions,
+		TContext
+	>;
+
+	return useMutation<
+		AddCatalogIdentifierStatus200,
+		ResponseErrorConfig<
+			| AddCatalogIdentifierStatus400
+			| AddCatalogIdentifierStatus422
+			| AddCatalogIdentifierStatus429
+			| AddCatalogIdentifierStatus500
+		>,
+		AddCatalogIdentifierOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		AddCatalogIdentifierStatus200,
+		ResponseErrorConfig<
+			| AddCatalogIdentifierStatus400
+			| AddCatalogIdentifierStatus422
+			| AddCatalogIdentifierStatus429
+			| AddCatalogIdentifierStatus500
+		>,
+		AddCatalogIdentifierOptions,
+		TContext
+	>;
+}
+
+export const reviseCatalogIdentifierMutationKey = () =>
+	[{ url: "/api/v1/catalog/resources/:owner/:id/identifiers/:identifierId" }] as const;
+
+export function reviseCatalogIdentifierMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = reviseCatalogIdentifierMutationKey();
+	return mutationOptions<
+		ReviseCatalogIdentifierStatus200,
+		ResponseErrorConfig<
+			| ReviseCatalogIdentifierStatus400
+			| ReviseCatalogIdentifierStatus422
+			| ReviseCatalogIdentifierStatus429
+			| ReviseCatalogIdentifierStatus500
+		>,
+		ReviseCatalogIdentifierOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await reviseCatalogIdentifier({ ...config, path, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Revise an exact identifier claim
+ * {@link /api/v1/catalog/resources/:owner/:id/identifiers/:identifierId}
+ */
+export function useReviseCatalogIdentifier<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ReviseCatalogIdentifierStatus200,
+			ResponseErrorConfig<
+				| ReviseCatalogIdentifierStatus400
+				| ReviseCatalogIdentifierStatus422
+				| ReviseCatalogIdentifierStatus429
+				| ReviseCatalogIdentifierStatus500
+			>,
+			ReviseCatalogIdentifierOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? reviseCatalogIdentifierMutationKey();
+
+	const baseOptions = reviseCatalogIdentifierMutationOptions(config) as UseMutationOptions<
+		ReviseCatalogIdentifierStatus200,
+		ResponseErrorConfig<
+			| ReviseCatalogIdentifierStatus400
+			| ReviseCatalogIdentifierStatus422
+			| ReviseCatalogIdentifierStatus429
+			| ReviseCatalogIdentifierStatus500
+		>,
+		ReviseCatalogIdentifierOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ReviseCatalogIdentifierStatus200,
+		ResponseErrorConfig<
+			| ReviseCatalogIdentifierStatus400
+			| ReviseCatalogIdentifierStatus422
+			| ReviseCatalogIdentifierStatus429
+			| ReviseCatalogIdentifierStatus500
+		>,
+		ReviseCatalogIdentifierOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ReviseCatalogIdentifierStatus200,
+		ResponseErrorConfig<
+			| ReviseCatalogIdentifierStatus400
+			| ReviseCatalogIdentifierStatus422
+			| ReviseCatalogIdentifierStatus429
+			| ReviseCatalogIdentifierStatus500
+		>,
+		ReviseCatalogIdentifierOptions,
+		TContext
+	>;
+}
+
 export const getApiUnitsByIdByUnitIdDocksQueryKey = ({
 	path,
 }: Omit<GetApiUnitsByIdByUnitIdDocksOptions, "headers">) =>
@@ -16251,30 +17209,30 @@ export function usePostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdResto
 	>;
 }
 
-export const getApiUsersMeQueryKey = ({ query }: Omit<GetApiUsersMeOptions, "headers"> = {}) =>
-	[{ url: "/api/v1/users/me" }, ...(query ? [query] : [])] as const;
+export const getApiAccountMeQueryKey = ({ query }: Omit<GetApiAccountMeOptions, "headers"> = {}) =>
+	[{ url: "/api/v1/account/me" }, ...(query ? [query] : [])] as const;
 
-type GetApiUsersMeQueryKey = ReturnType<typeof getApiUsersMeQueryKey>;
+type GetApiAccountMeQueryKey = ReturnType<typeof getApiAccountMeQueryKey>;
 
-export function getApiUsersMeQueryOptions(
-	{ query }: GetApiUsersMeOptions = {},
+export function getApiAccountMeQueryOptions(
+	{ query }: GetApiAccountMeOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUsersMeQueryKey({ query });
+	const queryKey = getApiAccountMeQueryKey({ query });
 	return queryOptions<
-		GetApiUsersMeStatus200,
+		GetApiAccountMeStatus200,
 		ResponseErrorConfig<
-			| GetApiUsersMeStatus404
-			| GetApiUsersMeStatus422
-			| GetApiUsersMeStatus429
-			| GetApiUsersMeStatus500
+			| GetApiAccountMeStatus404
+			| GetApiAccountMeStatus422
+			| GetApiAccountMeStatus429
+			| GetApiAccountMeStatus500
 		>,
-		GetApiUsersMeStatus200,
+		GetApiAccountMeStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUsersMe({
+			const { data } = await getApiAccountMe({
 				...config,
 				query,
 				signal: config.signal ?? signal,
@@ -16287,23 +17245,25 @@ export function getApiUsersMeQueryOptions(
 
 /**
  * @summary Current user profile
- * {@link /api/v1/users/me}
+ * {@link /api/v1/account/me}
  */
-export function useGetApiUsersMe<
-	TData = GetApiUsersMeStatus200,
-	TQueryData = GetApiUsersMeStatus200,
-	TQueryKey extends QueryKey = GetApiUsersMeQueryKey,
+export function useGetApiAccountMe<
+	TData = GetApiAccountMeStatus200,
+	TQueryData = GetApiAccountMeStatus200,
+	TQueryKey extends QueryKey = GetApiAccountMeQueryKey,
 >(
-	{ query }: { query?: GetApiUsersMeOptions["query"] | (() => GetApiUsersMeOptions["query"]) } = {},
+	{
+		query,
+	}: { query?: GetApiAccountMeOptions["query"] | (() => GetApiAccountMeOptions["query"]) } = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiUsersMeStatus200,
+				GetApiAccountMeStatus200,
 				ResponseErrorConfig<
-					| GetApiUsersMeStatus404
-					| GetApiUsersMeStatus422
-					| GetApiUsersMeStatus429
-					| GetApiUsersMeStatus500
+					| GetApiAccountMeStatus404
+					| GetApiAccountMeStatus422
+					| GetApiAccountMeStatus429
+					| GetApiAccountMeStatus500
 				>,
 				TData,
 				TQueryData,
@@ -16316,11 +17276,11 @@ export function useGetApiUsersMe<
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { query: typeof query === "function" ? query() : query };
-	const queryKey = resolvedOptions?.queryKey ?? getApiUsersMeQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiAccountMeQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiUsersMeQueryOptions(resolvedParams, config),
+			...getApiAccountMeQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -16328,10 +17288,10 @@ export function useGetApiUsersMe<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiUsersMeStatus404
-			| GetApiUsersMeStatus422
-			| GetApiUsersMeStatus429
-			| GetApiUsersMeStatus500
+			| GetApiAccountMeStatus404
+			| GetApiAccountMeStatus422
+			| GetApiAccountMeStatus429
+			| GetApiAccountMeStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -16340,29 +17300,29 @@ export function useGetApiUsersMe<
 	return queryResult;
 }
 
-export const patchApiUsersMeMutationKey = () => [{ url: "/api/v1/users/me" }] as const;
+export const patchApiAccountMeMutationKey = () => [{ url: "/api/v1/account/me" }] as const;
 
-export function patchApiUsersMeMutationOptions<TContext = unknown>(
+export function patchApiAccountMeMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = patchApiUsersMeMutationKey();
+	const mutationKey = patchApiAccountMeMutationKey();
 	return mutationOptions<
-		PatchApiUsersMeStatus200,
+		PatchApiAccountMeStatus200,
 		ResponseErrorConfig<
-			| PatchApiUsersMeStatus400
-			| PatchApiUsersMeStatus403
-			| PatchApiUsersMeStatus404
-			| PatchApiUsersMeStatus409
-			| PatchApiUsersMeStatus422
-			| PatchApiUsersMeStatus429
-			| PatchApiUsersMeStatus500
+			| PatchApiAccountMeStatus400
+			| PatchApiAccountMeStatus403
+			| PatchApiAccountMeStatus404
+			| PatchApiAccountMeStatus409
+			| PatchApiAccountMeStatus422
+			| PatchApiAccountMeStatus429
+			| PatchApiAccountMeStatus500
 		>,
-		PatchApiUsersMeOptions,
+		PatchApiAccountMeOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await patchApiUsersMe({ ...config, body, throwOnError: true });
+			const { data } = await patchApiAccountMe({ ...config, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -16370,22 +17330,22 @@ export function patchApiUsersMeMutationOptions<TContext = unknown>(
 
 /**
  * @summary Update current profile
- * {@link /api/v1/users/me}
+ * {@link /api/v1/account/me}
  */
-export function usePatchApiUsersMe<TContext>(
+export function usePatchApiAccountMe<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PatchApiUsersMeStatus200,
+			PatchApiAccountMeStatus200,
 			ResponseErrorConfig<
-				| PatchApiUsersMeStatus400
-				| PatchApiUsersMeStatus403
-				| PatchApiUsersMeStatus404
-				| PatchApiUsersMeStatus409
-				| PatchApiUsersMeStatus422
-				| PatchApiUsersMeStatus429
-				| PatchApiUsersMeStatus500
+				| PatchApiAccountMeStatus400
+				| PatchApiAccountMeStatus403
+				| PatchApiAccountMeStatus404
+				| PatchApiAccountMeStatus409
+				| PatchApiAccountMeStatus422
+				| PatchApiAccountMeStatus429
+				| PatchApiAccountMeStatus500
 			>,
-			PatchApiUsersMeOptions,
+			PatchApiAccountMeOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -16393,35 +17353,35 @@ export function usePatchApiUsersMe<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? patchApiUsersMeMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? patchApiAccountMeMutationKey();
 
-	const baseOptions = patchApiUsersMeMutationOptions(config) as UseMutationOptions<
-		PatchApiUsersMeStatus200,
+	const baseOptions = patchApiAccountMeMutationOptions(config) as UseMutationOptions<
+		PatchApiAccountMeStatus200,
 		ResponseErrorConfig<
-			| PatchApiUsersMeStatus400
-			| PatchApiUsersMeStatus403
-			| PatchApiUsersMeStatus404
-			| PatchApiUsersMeStatus409
-			| PatchApiUsersMeStatus422
-			| PatchApiUsersMeStatus429
-			| PatchApiUsersMeStatus500
+			| PatchApiAccountMeStatus400
+			| PatchApiAccountMeStatus403
+			| PatchApiAccountMeStatus404
+			| PatchApiAccountMeStatus409
+			| PatchApiAccountMeStatus422
+			| PatchApiAccountMeStatus429
+			| PatchApiAccountMeStatus500
 		>,
-		PatchApiUsersMeOptions,
+		PatchApiAccountMeOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PatchApiUsersMeStatus200,
+		PatchApiAccountMeStatus200,
 		ResponseErrorConfig<
-			| PatchApiUsersMeStatus400
-			| PatchApiUsersMeStatus403
-			| PatchApiUsersMeStatus404
-			| PatchApiUsersMeStatus409
-			| PatchApiUsersMeStatus422
-			| PatchApiUsersMeStatus429
-			| PatchApiUsersMeStatus500
+			| PatchApiAccountMeStatus400
+			| PatchApiAccountMeStatus403
+			| PatchApiAccountMeStatus404
+			| PatchApiAccountMeStatus409
+			| PatchApiAccountMeStatus422
+			| PatchApiAccountMeStatus429
+			| PatchApiAccountMeStatus500
 		>,
-		PatchApiUsersMeOptions,
+		PatchApiAccountMeOptions,
 		TContext
 	>(
 		{
@@ -16431,120 +17391,17 @@ export function usePatchApiUsersMe<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PatchApiUsersMeStatus200,
+		PatchApiAccountMeStatus200,
 		ResponseErrorConfig<
-			| PatchApiUsersMeStatus400
-			| PatchApiUsersMeStatus403
-			| PatchApiUsersMeStatus404
-			| PatchApiUsersMeStatus409
-			| PatchApiUsersMeStatus422
-			| PatchApiUsersMeStatus429
-			| PatchApiUsersMeStatus500
+			| PatchApiAccountMeStatus400
+			| PatchApiAccountMeStatus403
+			| PatchApiAccountMeStatus404
+			| PatchApiAccountMeStatus409
+			| PatchApiAccountMeStatus422
+			| PatchApiAccountMeStatus429
+			| PatchApiAccountMeStatus500
 		>,
-		PatchApiUsersMeOptions,
-		TContext
-	>;
-}
-
-export const assignCurrentProfileSlugMutationKey = () =>
-	[{ url: "/api/v1/users/me/profile-slug" }] as const;
-
-export function assignCurrentProfileSlugMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = assignCurrentProfileSlugMutationKey();
-	return mutationOptions<
-		AssignCurrentProfileSlugStatus200,
-		ResponseErrorConfig<
-			| AssignCurrentProfileSlugStatus400
-			| AssignCurrentProfileSlugStatus401
-			| AssignCurrentProfileSlugStatus404
-			| AssignCurrentProfileSlugStatus409
-			| AssignCurrentProfileSlugStatus422
-			| AssignCurrentProfileSlugStatus500
-		>,
-		AssignCurrentProfileSlugOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ body }) => {
-			const { data } = await assignCurrentProfileSlug({ ...config, body, throwOnError: true });
-			return data;
-		},
-	});
-}
-
-/**
- * @description Temporary first-party endpoint. An interactive signed-in user may assign their own Profile slug once without an additional permission. Reserved labels are rejected, and only an idempotent repeat is accepted after assignment.
- * @summary Assign the current Profile slug once
- * {@link /api/v1/users/me/profile-slug}
- */
-export function useAssignCurrentProfileSlug<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			AssignCurrentProfileSlugStatus200,
-			ResponseErrorConfig<
-				| AssignCurrentProfileSlugStatus400
-				| AssignCurrentProfileSlugStatus401
-				| AssignCurrentProfileSlugStatus404
-				| AssignCurrentProfileSlugStatus409
-				| AssignCurrentProfileSlugStatus422
-				| AssignCurrentProfileSlugStatus500
-			>,
-			AssignCurrentProfileSlugOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? assignCurrentProfileSlugMutationKey();
-
-	const baseOptions = assignCurrentProfileSlugMutationOptions(config) as UseMutationOptions<
-		AssignCurrentProfileSlugStatus200,
-		ResponseErrorConfig<
-			| AssignCurrentProfileSlugStatus400
-			| AssignCurrentProfileSlugStatus401
-			| AssignCurrentProfileSlugStatus404
-			| AssignCurrentProfileSlugStatus409
-			| AssignCurrentProfileSlugStatus422
-			| AssignCurrentProfileSlugStatus500
-		>,
-		AssignCurrentProfileSlugOptions,
-		TContext
-	>;
-
-	return useMutation<
-		AssignCurrentProfileSlugStatus200,
-		ResponseErrorConfig<
-			| AssignCurrentProfileSlugStatus400
-			| AssignCurrentProfileSlugStatus401
-			| AssignCurrentProfileSlugStatus404
-			| AssignCurrentProfileSlugStatus409
-			| AssignCurrentProfileSlugStatus422
-			| AssignCurrentProfileSlugStatus500
-		>,
-		AssignCurrentProfileSlugOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		AssignCurrentProfileSlugStatus200,
-		ResponseErrorConfig<
-			| AssignCurrentProfileSlugStatus400
-			| AssignCurrentProfileSlugStatus401
-			| AssignCurrentProfileSlugStatus404
-			| AssignCurrentProfileSlugStatus409
-			| AssignCurrentProfileSlugStatus422
-			| AssignCurrentProfileSlugStatus500
-		>,
-		AssignCurrentProfileSlugOptions,
+		PatchApiAccountMeOptions,
 		TContext
 	>;
 }
@@ -16552,7 +17409,7 @@ export function useAssignCurrentProfileSlug<TContext>(
 export const listCurrentUserStudioContentQueryKey = ({
 	query,
 }: Omit<ListCurrentUserStudioContentOptions, "headers"> = {}) =>
-	[{ url: "/api/v1/users/me/studio" }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/account/me/studio" }, ...(query ? [query] : [])] as const;
 
 type ListCurrentUserStudioContentQueryKey = ReturnType<typeof listCurrentUserStudioContentQueryKey>;
 
@@ -16588,7 +17445,7 @@ export function listCurrentUserStudioContentQueryOptions(
 
 /**
  * @summary List current user's actionable Studio workspace resources
- * {@link /api/v1/users/me/studio}
+ * {@link /api/v1/account/me/studio}
  */
 export function useListCurrentUserStudioContent<
 	TData = ListCurrentUserStudioContentStatus200,
@@ -16651,7 +17508,7 @@ export function useListCurrentUserStudioContent<
 }
 
 export const recordCurrentUserStudioVisitMutationKey = () =>
-	[{ url: "/api/v1/users/me/studio/:unitId/visit" }] as const;
+	[{ url: "/api/v1/account/me/studio/:unitId/visit" }] as const;
 
 export function recordCurrentUserStudioVisitMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -16678,7 +17535,7 @@ export function recordCurrentUserStudioVisitMutationOptions<TContext = unknown>(
 
 /**
  * @summary Record a Studio resource visit
- * {@link /api/v1/users/me/studio/:unitId/visit}
+ * {@link /api/v1/account/me/studio/:unitId/visit}
  */
 export function useRecordCurrentUserStudioVisit<TContext>(
 	options: {
@@ -16742,28 +17599,28 @@ export function useRecordCurrentUserStudioVisit<TContext>(
 	>;
 }
 
-export const getApiUsersMePreferencesQueryKey = () =>
-	[{ url: "/api/v1/users/me/preferences" }] as const;
+export const getApiAccountMePreferencesQueryKey = () =>
+	[{ url: "/api/v1/account/me/preferences" }] as const;
 
-type GetApiUsersMePreferencesQueryKey = ReturnType<typeof getApiUsersMePreferencesQueryKey>;
+type GetApiAccountMePreferencesQueryKey = ReturnType<typeof getApiAccountMePreferencesQueryKey>;
 
-export function getApiUsersMePreferencesQueryOptions(
+export function getApiAccountMePreferencesQueryOptions(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUsersMePreferencesQueryKey();
+	const queryKey = getApiAccountMePreferencesQueryKey();
 	return queryOptions<
-		GetApiUsersMePreferencesStatus200,
+		GetApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
-			| GetApiUsersMePreferencesStatus404
-			| GetApiUsersMePreferencesStatus429
-			| GetApiUsersMePreferencesStatus500
+			| GetApiAccountMePreferencesStatus404
+			| GetApiAccountMePreferencesStatus429
+			| GetApiAccountMePreferencesStatus500
 		>,
-		GetApiUsersMePreferencesStatus200,
+		GetApiAccountMePreferencesStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUsersMePreferences({
+			const { data } = await getApiAccountMePreferences({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
@@ -16775,21 +17632,21 @@ export function getApiUsersMePreferencesQueryOptions(
 
 /**
  * @summary Current user preferences
- * {@link /api/v1/users/me/preferences}
+ * {@link /api/v1/account/me/preferences}
  */
-export function useGetApiUsersMePreferences<
-	TData = GetApiUsersMePreferencesStatus200,
-	TQueryData = GetApiUsersMePreferencesStatus200,
-	TQueryKey extends QueryKey = GetApiUsersMePreferencesQueryKey,
+export function useGetApiAccountMePreferences<
+	TData = GetApiAccountMePreferencesStatus200,
+	TQueryData = GetApiAccountMePreferencesStatus200,
+	TQueryKey extends QueryKey = GetApiAccountMePreferencesQueryKey,
 >(
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiUsersMePreferencesStatus200,
+				GetApiAccountMePreferencesStatus200,
 				ResponseErrorConfig<
-					| GetApiUsersMePreferencesStatus404
-					| GetApiUsersMePreferencesStatus429
-					| GetApiUsersMePreferencesStatus500
+					| GetApiAccountMePreferencesStatus404
+					| GetApiAccountMePreferencesStatus429
+					| GetApiAccountMePreferencesStatus500
 				>,
 				TData,
 				TQueryData,
@@ -16801,11 +17658,11 @@ export function useGetApiUsersMePreferences<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const queryKey = resolvedOptions?.queryKey ?? getApiUsersMePreferencesQueryKey();
+	const queryKey = resolvedOptions?.queryKey ?? getApiAccountMePreferencesQueryKey();
 
 	const queryResult = useQuery(
 		{
-			...getApiUsersMePreferencesQueryOptions(config),
+			...getApiAccountMePreferencesQueryOptions(config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -16813,9 +17670,9 @@ export function useGetApiUsersMePreferences<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiUsersMePreferencesStatus404
-			| GetApiUsersMePreferencesStatus429
-			| GetApiUsersMePreferencesStatus500
+			| GetApiAccountMePreferencesStatus404
+			| GetApiAccountMePreferencesStatus429
+			| GetApiAccountMePreferencesStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -16824,28 +17681,28 @@ export function useGetApiUsersMePreferences<
 	return queryResult;
 }
 
-export const patchApiUsersMePreferencesMutationKey = () =>
-	[{ url: "/api/v1/users/me/preferences" }] as const;
+export const patchApiAccountMePreferencesMutationKey = () =>
+	[{ url: "/api/v1/account/me/preferences" }] as const;
 
-export function patchApiUsersMePreferencesMutationOptions<TContext = unknown>(
+export function patchApiAccountMePreferencesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = patchApiUsersMePreferencesMutationKey();
+	const mutationKey = patchApiAccountMePreferencesMutationKey();
 	return mutationOptions<
-		PatchApiUsersMePreferencesStatus200,
+		PatchApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
-			| PatchApiUsersMePreferencesStatus400
-			| PatchApiUsersMePreferencesStatus404
-			| PatchApiUsersMePreferencesStatus422
-			| PatchApiUsersMePreferencesStatus429
-			| PatchApiUsersMePreferencesStatus500
+			| PatchApiAccountMePreferencesStatus400
+			| PatchApiAccountMePreferencesStatus404
+			| PatchApiAccountMePreferencesStatus422
+			| PatchApiAccountMePreferencesStatus429
+			| PatchApiAccountMePreferencesStatus500
 		>,
-		PatchApiUsersMePreferencesOptions,
+		PatchApiAccountMePreferencesOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await patchApiUsersMePreferences({ ...config, body, throwOnError: true });
+			const { data } = await patchApiAccountMePreferences({ ...config, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -16853,20 +17710,20 @@ export function patchApiUsersMePreferencesMutationOptions<TContext = unknown>(
 
 /**
  * @summary Update current user display preferences
- * {@link /api/v1/users/me/preferences}
+ * {@link /api/v1/account/me/preferences}
  */
-export function usePatchApiUsersMePreferences<TContext>(
+export function usePatchApiAccountMePreferences<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PatchApiUsersMePreferencesStatus200,
+			PatchApiAccountMePreferencesStatus200,
 			ResponseErrorConfig<
-				| PatchApiUsersMePreferencesStatus400
-				| PatchApiUsersMePreferencesStatus404
-				| PatchApiUsersMePreferencesStatus422
-				| PatchApiUsersMePreferencesStatus429
-				| PatchApiUsersMePreferencesStatus500
+				| PatchApiAccountMePreferencesStatus400
+				| PatchApiAccountMePreferencesStatus404
+				| PatchApiAccountMePreferencesStatus422
+				| PatchApiAccountMePreferencesStatus429
+				| PatchApiAccountMePreferencesStatus500
 			>,
-			PatchApiUsersMePreferencesOptions,
+			PatchApiAccountMePreferencesOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -16874,31 +17731,31 @@ export function usePatchApiUsersMePreferences<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? patchApiUsersMePreferencesMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? patchApiAccountMePreferencesMutationKey();
 
-	const baseOptions = patchApiUsersMePreferencesMutationOptions(config) as UseMutationOptions<
-		PatchApiUsersMePreferencesStatus200,
+	const baseOptions = patchApiAccountMePreferencesMutationOptions(config) as UseMutationOptions<
+		PatchApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
-			| PatchApiUsersMePreferencesStatus400
-			| PatchApiUsersMePreferencesStatus404
-			| PatchApiUsersMePreferencesStatus422
-			| PatchApiUsersMePreferencesStatus429
-			| PatchApiUsersMePreferencesStatus500
+			| PatchApiAccountMePreferencesStatus400
+			| PatchApiAccountMePreferencesStatus404
+			| PatchApiAccountMePreferencesStatus422
+			| PatchApiAccountMePreferencesStatus429
+			| PatchApiAccountMePreferencesStatus500
 		>,
-		PatchApiUsersMePreferencesOptions,
+		PatchApiAccountMePreferencesOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PatchApiUsersMePreferencesStatus200,
+		PatchApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
-			| PatchApiUsersMePreferencesStatus400
-			| PatchApiUsersMePreferencesStatus404
-			| PatchApiUsersMePreferencesStatus422
-			| PatchApiUsersMePreferencesStatus429
-			| PatchApiUsersMePreferencesStatus500
+			| PatchApiAccountMePreferencesStatus400
+			| PatchApiAccountMePreferencesStatus404
+			| PatchApiAccountMePreferencesStatus422
+			| PatchApiAccountMePreferencesStatus429
+			| PatchApiAccountMePreferencesStatus500
 		>,
-		PatchApiUsersMePreferencesOptions,
+		PatchApiAccountMePreferencesOptions,
 		TContext
 	>(
 		{
@@ -16908,42 +17765,42 @@ export function usePatchApiUsersMePreferences<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PatchApiUsersMePreferencesStatus200,
+		PatchApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
-			| PatchApiUsersMePreferencesStatus400
-			| PatchApiUsersMePreferencesStatus404
-			| PatchApiUsersMePreferencesStatus422
-			| PatchApiUsersMePreferencesStatus429
-			| PatchApiUsersMePreferencesStatus500
+			| PatchApiAccountMePreferencesStatus400
+			| PatchApiAccountMePreferencesStatus404
+			| PatchApiAccountMePreferencesStatus422
+			| PatchApiAccountMePreferencesStatus429
+			| PatchApiAccountMePreferencesStatus500
 		>,
-		PatchApiUsersMePreferencesOptions,
+		PatchApiAccountMePreferencesOptions,
 		TContext
 	>;
 }
 
-export const putApiUsersMePreferencesMutationKey = () =>
-	[{ url: "/api/v1/users/me/preferences" }] as const;
+export const putApiAccountMePreferencesMutationKey = () =>
+	[{ url: "/api/v1/account/me/preferences" }] as const;
 
-export function putApiUsersMePreferencesMutationOptions<TContext = unknown>(
+export function putApiAccountMePreferencesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = putApiUsersMePreferencesMutationKey();
+	const mutationKey = putApiAccountMePreferencesMutationKey();
 	return mutationOptions<
-		PutApiUsersMePreferencesStatus200,
+		PutApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersMePreferencesStatus400
-			| PutApiUsersMePreferencesStatus403
-			| PutApiUsersMePreferencesStatus404
-			| PutApiUsersMePreferencesStatus422
-			| PutApiUsersMePreferencesStatus429
-			| PutApiUsersMePreferencesStatus500
+			| PutApiAccountMePreferencesStatus400
+			| PutApiAccountMePreferencesStatus403
+			| PutApiAccountMePreferencesStatus404
+			| PutApiAccountMePreferencesStatus422
+			| PutApiAccountMePreferencesStatus429
+			| PutApiAccountMePreferencesStatus500
 		>,
-		PutApiUsersMePreferencesOptions,
+		PutApiAccountMePreferencesOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await putApiUsersMePreferences({ ...config, body, throwOnError: true });
+			const { data } = await putApiAccountMePreferences({ ...config, body, throwOnError: true });
 			return data;
 		},
 	});
@@ -16951,21 +17808,21 @@ export function putApiUsersMePreferencesMutationOptions<TContext = unknown>(
 
 /**
  * @summary Replace current user preferences
- * {@link /api/v1/users/me/preferences}
+ * {@link /api/v1/account/me/preferences}
  */
-export function usePutApiUsersMePreferences<TContext>(
+export function usePutApiAccountMePreferences<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiUsersMePreferencesStatus200,
+			PutApiAccountMePreferencesStatus200,
 			ResponseErrorConfig<
-				| PutApiUsersMePreferencesStatus400
-				| PutApiUsersMePreferencesStatus403
-				| PutApiUsersMePreferencesStatus404
-				| PutApiUsersMePreferencesStatus422
-				| PutApiUsersMePreferencesStatus429
-				| PutApiUsersMePreferencesStatus500
+				| PutApiAccountMePreferencesStatus400
+				| PutApiAccountMePreferencesStatus403
+				| PutApiAccountMePreferencesStatus404
+				| PutApiAccountMePreferencesStatus422
+				| PutApiAccountMePreferencesStatus429
+				| PutApiAccountMePreferencesStatus500
 			>,
-			PutApiUsersMePreferencesOptions,
+			PutApiAccountMePreferencesOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -16973,33 +17830,33 @@ export function usePutApiUsersMePreferences<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? putApiUsersMePreferencesMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? putApiAccountMePreferencesMutationKey();
 
-	const baseOptions = putApiUsersMePreferencesMutationOptions(config) as UseMutationOptions<
-		PutApiUsersMePreferencesStatus200,
+	const baseOptions = putApiAccountMePreferencesMutationOptions(config) as UseMutationOptions<
+		PutApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersMePreferencesStatus400
-			| PutApiUsersMePreferencesStatus403
-			| PutApiUsersMePreferencesStatus404
-			| PutApiUsersMePreferencesStatus422
-			| PutApiUsersMePreferencesStatus429
-			| PutApiUsersMePreferencesStatus500
+			| PutApiAccountMePreferencesStatus400
+			| PutApiAccountMePreferencesStatus403
+			| PutApiAccountMePreferencesStatus404
+			| PutApiAccountMePreferencesStatus422
+			| PutApiAccountMePreferencesStatus429
+			| PutApiAccountMePreferencesStatus500
 		>,
-		PutApiUsersMePreferencesOptions,
+		PutApiAccountMePreferencesOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiUsersMePreferencesStatus200,
+		PutApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersMePreferencesStatus400
-			| PutApiUsersMePreferencesStatus403
-			| PutApiUsersMePreferencesStatus404
-			| PutApiUsersMePreferencesStatus422
-			| PutApiUsersMePreferencesStatus429
-			| PutApiUsersMePreferencesStatus500
+			| PutApiAccountMePreferencesStatus400
+			| PutApiAccountMePreferencesStatus403
+			| PutApiAccountMePreferencesStatus404
+			| PutApiAccountMePreferencesStatus422
+			| PutApiAccountMePreferencesStatus429
+			| PutApiAccountMePreferencesStatus500
 		>,
-		PutApiUsersMePreferencesOptions,
+		PutApiAccountMePreferencesOptions,
 		TContext
 	>(
 		{
@@ -17009,22 +17866,22 @@ export function usePutApiUsersMePreferences<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiUsersMePreferencesStatus200,
+		PutApiAccountMePreferencesStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersMePreferencesStatus400
-			| PutApiUsersMePreferencesStatus403
-			| PutApiUsersMePreferencesStatus404
-			| PutApiUsersMePreferencesStatus422
-			| PutApiUsersMePreferencesStatus429
-			| PutApiUsersMePreferencesStatus500
+			| PutApiAccountMePreferencesStatus400
+			| PutApiAccountMePreferencesStatus403
+			| PutApiAccountMePreferencesStatus404
+			| PutApiAccountMePreferencesStatus422
+			| PutApiAccountMePreferencesStatus429
+			| PutApiAccountMePreferencesStatus500
 		>,
-		PutApiUsersMePreferencesOptions,
+		PutApiAccountMePreferencesOptions,
 		TContext
 	>;
 }
 
 export const updateCurrentUserPrivacyMutationKey = () =>
-	[{ url: "/api/v1/users/me/privacy" }] as const;
+	[{ url: "/api/v1/account/me/privacy" }] as const;
 
 export function updateCurrentUserPrivacyMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
@@ -17052,7 +17909,7 @@ export function updateCurrentUserPrivacyMutationOptions<TContext = unknown>(
 
 /**
  * @summary Update current user's Score and Progress privacy
- * {@link /api/v1/users/me/privacy}
+ * {@link /api/v1/account/me/privacy}
  */
 export function useUpdateCurrentUserPrivacy<TContext>(
 	options: {
@@ -17120,32 +17977,32 @@ export function useUpdateCurrentUserPrivacy<TContext>(
 	>;
 }
 
-export const getApiUsersMeFollowingQueryKey = ({
+export const getApiAccountMeFollowingQueryKey = ({
 	query,
-}: Omit<GetApiUsersMeFollowingOptions, "headers"> = {}) =>
-	[{ url: "/api/v1/users/me/following" }, ...(query ? [query] : [])] as const;
+}: Omit<GetApiAccountMeFollowingOptions, "headers"> = {}) =>
+	[{ url: "/api/v1/account/me/following" }, ...(query ? [query] : [])] as const;
 
-type GetApiUsersMeFollowingQueryKey = ReturnType<typeof getApiUsersMeFollowingQueryKey>;
+type GetApiAccountMeFollowingQueryKey = ReturnType<typeof getApiAccountMeFollowingQueryKey>;
 
-export function getApiUsersMeFollowingQueryOptions(
-	{ query }: GetApiUsersMeFollowingOptions = {},
+export function getApiAccountMeFollowingQueryOptions(
+	{ query }: GetApiAccountMeFollowingOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUsersMeFollowingQueryKey({ query });
+	const queryKey = getApiAccountMeFollowingQueryKey({ query });
 	return queryOptions<
-		GetApiUsersMeFollowingStatus200,
+		GetApiAccountMeFollowingStatus200,
 		ResponseErrorConfig<
-			| GetApiUsersMeFollowingStatus400
-			| GetApiUsersMeFollowingStatus422
-			| GetApiUsersMeFollowingStatus429
-			| GetApiUsersMeFollowingStatus500
+			| GetApiAccountMeFollowingStatus400
+			| GetApiAccountMeFollowingStatus422
+			| GetApiAccountMeFollowingStatus429
+			| GetApiAccountMeFollowingStatus500
 		>,
-		GetApiUsersMeFollowingStatus200,
+		GetApiAccountMeFollowingStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUsersMeFollowing({
+			const { data } = await getApiAccountMeFollowing({
 				...config,
 				query,
 				signal: config.signal ?? signal,
@@ -17158,27 +18015,29 @@ export function getApiUsersMeFollowingQueryOptions(
 
 /**
  * @summary List Units followed by the current user
- * {@link /api/v1/users/me/following}
+ * {@link /api/v1/account/me/following}
  */
-export function useGetApiUsersMeFollowing<
-	TData = GetApiUsersMeFollowingStatus200,
-	TQueryData = GetApiUsersMeFollowingStatus200,
-	TQueryKey extends QueryKey = GetApiUsersMeFollowingQueryKey,
+export function useGetApiAccountMeFollowing<
+	TData = GetApiAccountMeFollowingStatus200,
+	TQueryData = GetApiAccountMeFollowingStatus200,
+	TQueryKey extends QueryKey = GetApiAccountMeFollowingQueryKey,
 >(
 	{
 		query,
 	}: {
-		query?: GetApiUsersMeFollowingOptions["query"] | (() => GetApiUsersMeFollowingOptions["query"]);
+		query?:
+			| GetApiAccountMeFollowingOptions["query"]
+			| (() => GetApiAccountMeFollowingOptions["query"]);
 	} = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiUsersMeFollowingStatus200,
+				GetApiAccountMeFollowingStatus200,
 				ResponseErrorConfig<
-					| GetApiUsersMeFollowingStatus400
-					| GetApiUsersMeFollowingStatus422
-					| GetApiUsersMeFollowingStatus429
-					| GetApiUsersMeFollowingStatus500
+					| GetApiAccountMeFollowingStatus400
+					| GetApiAccountMeFollowingStatus422
+					| GetApiAccountMeFollowingStatus429
+					| GetApiAccountMeFollowingStatus500
 				>,
 				TData,
 				TQueryData,
@@ -17191,11 +18050,11 @@ export function useGetApiUsersMeFollowing<
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { query: typeof query === "function" ? query() : query };
-	const queryKey = resolvedOptions?.queryKey ?? getApiUsersMeFollowingQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiAccountMeFollowingQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiUsersMeFollowingQueryOptions(resolvedParams, config),
+			...getApiAccountMeFollowingQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -17203,10 +18062,10 @@ export function useGetApiUsersMeFollowing<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiUsersMeFollowingStatus400
-			| GetApiUsersMeFollowingStatus422
-			| GetApiUsersMeFollowingStatus429
-			| GetApiUsersMeFollowingStatus500
+			| GetApiAccountMeFollowingStatus400
+			| GetApiAccountMeFollowingStatus422
+			| GetApiAccountMeFollowingStatus429
+			| GetApiAccountMeFollowingStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -17215,34 +18074,34 @@ export function useGetApiUsersMeFollowing<
 	return queryResult;
 }
 
-export const getApiUsersMeFollowingByUnitIdQueryKey = ({
+export const getApiAccountMeFollowingByUnitIdQueryKey = ({
 	path,
-}: Omit<GetApiUsersMeFollowingByUnitIdOptions, "headers">) =>
-	[{ url: "/api/v1/users/me/following/:unitId", params: path }] as const;
+}: Omit<GetApiAccountMeFollowingByUnitIdOptions, "headers">) =>
+	[{ url: "/api/v1/account/me/following/:unitId", params: path }] as const;
 
-type GetApiUsersMeFollowingByUnitIdQueryKey = ReturnType<
-	typeof getApiUsersMeFollowingByUnitIdQueryKey
+type GetApiAccountMeFollowingByUnitIdQueryKey = ReturnType<
+	typeof getApiAccountMeFollowingByUnitIdQueryKey
 >;
 
-export function getApiUsersMeFollowingByUnitIdQueryOptions(
-	{ path }: GetApiUsersMeFollowingByUnitIdOptions,
+export function getApiAccountMeFollowingByUnitIdQueryOptions(
+	{ path }: GetApiAccountMeFollowingByUnitIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUsersMeFollowingByUnitIdQueryKey({ path });
+	const queryKey = getApiAccountMeFollowingByUnitIdQueryKey({ path });
 	return queryOptions<
-		GetApiUsersMeFollowingByUnitIdStatus200,
+		GetApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			| GetApiUsersMeFollowingByUnitIdStatus404
-			| GetApiUsersMeFollowingByUnitIdStatus422
-			| GetApiUsersMeFollowingByUnitIdStatus429
-			| GetApiUsersMeFollowingByUnitIdStatus500
+			| GetApiAccountMeFollowingByUnitIdStatus404
+			| GetApiAccountMeFollowingByUnitIdStatus422
+			| GetApiAccountMeFollowingByUnitIdStatus429
+			| GetApiAccountMeFollowingByUnitIdStatus500
 		>,
-		GetApiUsersMeFollowingByUnitIdStatus200,
+		GetApiAccountMeFollowingByUnitIdStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUsersMeFollowingByUnitId({
+			const { data } = await getApiAccountMeFollowingByUnitId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
@@ -17255,29 +18114,29 @@ export function getApiUsersMeFollowingByUnitIdQueryOptions(
 
 /**
  * @summary Get current user's follow state for a Unit
- * {@link /api/v1/users/me/following/:unitId}
+ * {@link /api/v1/account/me/following/:unitId}
  */
-export function useGetApiUsersMeFollowingByUnitId<
-	TData = GetApiUsersMeFollowingByUnitIdStatus200,
-	TQueryData = GetApiUsersMeFollowingByUnitIdStatus200,
-	TQueryKey extends QueryKey = GetApiUsersMeFollowingByUnitIdQueryKey,
+export function useGetApiAccountMeFollowingByUnitId<
+	TData = GetApiAccountMeFollowingByUnitIdStatus200,
+	TQueryData = GetApiAccountMeFollowingByUnitIdStatus200,
+	TQueryKey extends QueryKey = GetApiAccountMeFollowingByUnitIdQueryKey,
 >(
 	{
 		path,
 	}: {
 		path:
-			| GetApiUsersMeFollowingByUnitIdOptions["path"]
-			| (() => GetApiUsersMeFollowingByUnitIdOptions["path"]);
+			| GetApiAccountMeFollowingByUnitIdOptions["path"]
+			| (() => GetApiAccountMeFollowingByUnitIdOptions["path"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiUsersMeFollowingByUnitIdStatus200,
+				GetApiAccountMeFollowingByUnitIdStatus200,
 				ResponseErrorConfig<
-					| GetApiUsersMeFollowingByUnitIdStatus404
-					| GetApiUsersMeFollowingByUnitIdStatus422
-					| GetApiUsersMeFollowingByUnitIdStatus429
-					| GetApiUsersMeFollowingByUnitIdStatus500
+					| GetApiAccountMeFollowingByUnitIdStatus404
+					| GetApiAccountMeFollowingByUnitIdStatus422
+					| GetApiAccountMeFollowingByUnitIdStatus429
+					| GetApiAccountMeFollowingByUnitIdStatus500
 				>,
 				TData,
 				TQueryData,
@@ -17291,11 +18150,11 @@ export function useGetApiUsersMeFollowingByUnitId<
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
-		resolvedOptions?.queryKey ?? getApiUsersMeFollowingByUnitIdQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiAccountMeFollowingByUnitIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiUsersMeFollowingByUnitIdQueryOptions(resolvedParams, config),
+			...getApiAccountMeFollowingByUnitIdQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -17303,10 +18162,10 @@ export function useGetApiUsersMeFollowingByUnitId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiUsersMeFollowingByUnitIdStatus404
-			| GetApiUsersMeFollowingByUnitIdStatus422
-			| GetApiUsersMeFollowingByUnitIdStatus429
-			| GetApiUsersMeFollowingByUnitIdStatus500
+			| GetApiAccountMeFollowingByUnitIdStatus404
+			| GetApiAccountMeFollowingByUnitIdStatus422
+			| GetApiAccountMeFollowingByUnitIdStatus429
+			| GetApiAccountMeFollowingByUnitIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -17315,28 +18174,28 @@ export function useGetApiUsersMeFollowingByUnitId<
 	return queryResult;
 }
 
-export const putApiUsersMeFollowingByUnitIdMutationKey = () =>
-	[{ url: "/api/v1/users/me/following/:unitId" }] as const;
+export const putApiAccountMeFollowingByUnitIdMutationKey = () =>
+	[{ url: "/api/v1/account/me/following/:unitId" }] as const;
 
-export function putApiUsersMeFollowingByUnitIdMutationOptions<TContext = unknown>(
+export function putApiAccountMeFollowingByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = putApiUsersMeFollowingByUnitIdMutationKey();
+	const mutationKey = putApiAccountMeFollowingByUnitIdMutationKey();
 	return mutationOptions<
-		PutApiUsersMeFollowingByUnitIdStatus200,
+		PutApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersMeFollowingByUnitIdStatus404
-			| PutApiUsersMeFollowingByUnitIdStatus409
-			| PutApiUsersMeFollowingByUnitIdStatus422
-			| PutApiUsersMeFollowingByUnitIdStatus429
-			| PutApiUsersMeFollowingByUnitIdStatus500
+			| PutApiAccountMeFollowingByUnitIdStatus404
+			| PutApiAccountMeFollowingByUnitIdStatus409
+			| PutApiAccountMeFollowingByUnitIdStatus422
+			| PutApiAccountMeFollowingByUnitIdStatus429
+			| PutApiAccountMeFollowingByUnitIdStatus500
 		>,
-		PutApiUsersMeFollowingByUnitIdOptions,
+		PutApiAccountMeFollowingByUnitIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await putApiUsersMeFollowingByUnitId({
+			const { data } = await putApiAccountMeFollowingByUnitId({
 				...config,
 				path,
 				throwOnError: true,
@@ -17348,20 +18207,20 @@ export function putApiUsersMeFollowingByUnitIdMutationOptions<TContext = unknown
 
 /**
  * @summary Follow a Unit
- * {@link /api/v1/users/me/following/:unitId}
+ * {@link /api/v1/account/me/following/:unitId}
  */
-export function usePutApiUsersMeFollowingByUnitId<TContext>(
+export function usePutApiAccountMeFollowingByUnitId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiUsersMeFollowingByUnitIdStatus200,
+			PutApiAccountMeFollowingByUnitIdStatus200,
 			ResponseErrorConfig<
-				| PutApiUsersMeFollowingByUnitIdStatus404
-				| PutApiUsersMeFollowingByUnitIdStatus409
-				| PutApiUsersMeFollowingByUnitIdStatus422
-				| PutApiUsersMeFollowingByUnitIdStatus429
-				| PutApiUsersMeFollowingByUnitIdStatus500
+				| PutApiAccountMeFollowingByUnitIdStatus404
+				| PutApiAccountMeFollowingByUnitIdStatus409
+				| PutApiAccountMeFollowingByUnitIdStatus422
+				| PutApiAccountMeFollowingByUnitIdStatus429
+				| PutApiAccountMeFollowingByUnitIdStatus500
 			>,
-			PutApiUsersMeFollowingByUnitIdOptions,
+			PutApiAccountMeFollowingByUnitIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -17369,31 +18228,31 @@ export function usePutApiUsersMeFollowingByUnitId<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? putApiUsersMeFollowingByUnitIdMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? putApiAccountMeFollowingByUnitIdMutationKey();
 
-	const baseOptions = putApiUsersMeFollowingByUnitIdMutationOptions(config) as UseMutationOptions<
-		PutApiUsersMeFollowingByUnitIdStatus200,
+	const baseOptions = putApiAccountMeFollowingByUnitIdMutationOptions(config) as UseMutationOptions<
+		PutApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersMeFollowingByUnitIdStatus404
-			| PutApiUsersMeFollowingByUnitIdStatus409
-			| PutApiUsersMeFollowingByUnitIdStatus422
-			| PutApiUsersMeFollowingByUnitIdStatus429
-			| PutApiUsersMeFollowingByUnitIdStatus500
+			| PutApiAccountMeFollowingByUnitIdStatus404
+			| PutApiAccountMeFollowingByUnitIdStatus409
+			| PutApiAccountMeFollowingByUnitIdStatus422
+			| PutApiAccountMeFollowingByUnitIdStatus429
+			| PutApiAccountMeFollowingByUnitIdStatus500
 		>,
-		PutApiUsersMeFollowingByUnitIdOptions,
+		PutApiAccountMeFollowingByUnitIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiUsersMeFollowingByUnitIdStatus200,
+		PutApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersMeFollowingByUnitIdStatus404
-			| PutApiUsersMeFollowingByUnitIdStatus409
-			| PutApiUsersMeFollowingByUnitIdStatus422
-			| PutApiUsersMeFollowingByUnitIdStatus429
-			| PutApiUsersMeFollowingByUnitIdStatus500
+			| PutApiAccountMeFollowingByUnitIdStatus404
+			| PutApiAccountMeFollowingByUnitIdStatus409
+			| PutApiAccountMeFollowingByUnitIdStatus422
+			| PutApiAccountMeFollowingByUnitIdStatus429
+			| PutApiAccountMeFollowingByUnitIdStatus500
 		>,
-		PutApiUsersMeFollowingByUnitIdOptions,
+		PutApiAccountMeFollowingByUnitIdOptions,
 		TContext
 	>(
 		{
@@ -17403,39 +18262,39 @@ export function usePutApiUsersMeFollowingByUnitId<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiUsersMeFollowingByUnitIdStatus200,
+		PutApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersMeFollowingByUnitIdStatus404
-			| PutApiUsersMeFollowingByUnitIdStatus409
-			| PutApiUsersMeFollowingByUnitIdStatus422
-			| PutApiUsersMeFollowingByUnitIdStatus429
-			| PutApiUsersMeFollowingByUnitIdStatus500
+			| PutApiAccountMeFollowingByUnitIdStatus404
+			| PutApiAccountMeFollowingByUnitIdStatus409
+			| PutApiAccountMeFollowingByUnitIdStatus422
+			| PutApiAccountMeFollowingByUnitIdStatus429
+			| PutApiAccountMeFollowingByUnitIdStatus500
 		>,
-		PutApiUsersMeFollowingByUnitIdOptions,
+		PutApiAccountMeFollowingByUnitIdOptions,
 		TContext
 	>;
 }
 
-export const deleteApiUsersMeFollowingByUnitIdMutationKey = () =>
-	[{ url: "/api/v1/users/me/following/:unitId" }] as const;
+export const deleteApiAccountMeFollowingByUnitIdMutationKey = () =>
+	[{ url: "/api/v1/account/me/following/:unitId" }] as const;
 
-export function deleteApiUsersMeFollowingByUnitIdMutationOptions<TContext = unknown>(
+export function deleteApiAccountMeFollowingByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = deleteApiUsersMeFollowingByUnitIdMutationKey();
+	const mutationKey = deleteApiAccountMeFollowingByUnitIdMutationKey();
 	return mutationOptions<
-		DeleteApiUsersMeFollowingByUnitIdStatus200,
+		DeleteApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUsersMeFollowingByUnitIdStatus422
-			| DeleteApiUsersMeFollowingByUnitIdStatus429
-			| DeleteApiUsersMeFollowingByUnitIdStatus500
+			| DeleteApiAccountMeFollowingByUnitIdStatus422
+			| DeleteApiAccountMeFollowingByUnitIdStatus429
+			| DeleteApiAccountMeFollowingByUnitIdStatus500
 		>,
-		DeleteApiUsersMeFollowingByUnitIdOptions,
+		DeleteApiAccountMeFollowingByUnitIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiUsersMeFollowingByUnitId({
+			const { data } = await deleteApiAccountMeFollowingByUnitId({
 				...config,
 				path,
 				throwOnError: true,
@@ -17447,18 +18306,18 @@ export function deleteApiUsersMeFollowingByUnitIdMutationOptions<TContext = unkn
 
 /**
  * @summary Unfollow a Unit
- * {@link /api/v1/users/me/following/:unitId}
+ * {@link /api/v1/account/me/following/:unitId}
  */
-export function useDeleteApiUsersMeFollowingByUnitId<TContext>(
+export function useDeleteApiAccountMeFollowingByUnitId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			DeleteApiUsersMeFollowingByUnitIdStatus200,
+			DeleteApiAccountMeFollowingByUnitIdStatus200,
 			ResponseErrorConfig<
-				| DeleteApiUsersMeFollowingByUnitIdStatus422
-				| DeleteApiUsersMeFollowingByUnitIdStatus429
-				| DeleteApiUsersMeFollowingByUnitIdStatus500
+				| DeleteApiAccountMeFollowingByUnitIdStatus422
+				| DeleteApiAccountMeFollowingByUnitIdStatus429
+				| DeleteApiAccountMeFollowingByUnitIdStatus500
 			>,
-			DeleteApiUsersMeFollowingByUnitIdOptions,
+			DeleteApiAccountMeFollowingByUnitIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -17466,29 +18325,30 @@ export function useDeleteApiUsersMeFollowingByUnitId<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? deleteApiUsersMeFollowingByUnitIdMutationKey();
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiAccountMeFollowingByUnitIdMutationKey();
 
-	const baseOptions = deleteApiUsersMeFollowingByUnitIdMutationOptions(
+	const baseOptions = deleteApiAccountMeFollowingByUnitIdMutationOptions(
 		config,
 	) as UseMutationOptions<
-		DeleteApiUsersMeFollowingByUnitIdStatus200,
+		DeleteApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUsersMeFollowingByUnitIdStatus422
-			| DeleteApiUsersMeFollowingByUnitIdStatus429
-			| DeleteApiUsersMeFollowingByUnitIdStatus500
+			| DeleteApiAccountMeFollowingByUnitIdStatus422
+			| DeleteApiAccountMeFollowingByUnitIdStatus429
+			| DeleteApiAccountMeFollowingByUnitIdStatus500
 		>,
-		DeleteApiUsersMeFollowingByUnitIdOptions,
+		DeleteApiAccountMeFollowingByUnitIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		DeleteApiUsersMeFollowingByUnitIdStatus200,
+		DeleteApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUsersMeFollowingByUnitIdStatus422
-			| DeleteApiUsersMeFollowingByUnitIdStatus429
-			| DeleteApiUsersMeFollowingByUnitIdStatus500
+			| DeleteApiAccountMeFollowingByUnitIdStatus422
+			| DeleteApiAccountMeFollowingByUnitIdStatus429
+			| DeleteApiAccountMeFollowingByUnitIdStatus500
 		>,
-		DeleteApiUsersMeFollowingByUnitIdOptions,
+		DeleteApiAccountMeFollowingByUnitIdOptions,
 		TContext
 	>(
 		{
@@ -17498,39 +18358,39 @@ export function useDeleteApiUsersMeFollowingByUnitId<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		DeleteApiUsersMeFollowingByUnitIdStatus200,
+		DeleteApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUsersMeFollowingByUnitIdStatus422
-			| DeleteApiUsersMeFollowingByUnitIdStatus429
-			| DeleteApiUsersMeFollowingByUnitIdStatus500
+			| DeleteApiAccountMeFollowingByUnitIdStatus422
+			| DeleteApiAccountMeFollowingByUnitIdStatus429
+			| DeleteApiAccountMeFollowingByUnitIdStatus500
 		>,
-		DeleteApiUsersMeFollowingByUnitIdOptions,
+		DeleteApiAccountMeFollowingByUnitIdOptions,
 		TContext
 	>;
 }
 
-export const patchApiUsersMeFollowingByUnitIdMutationKey = () =>
-	[{ url: "/api/v1/users/me/following/:unitId" }] as const;
+export const patchApiAccountMeFollowingByUnitIdMutationKey = () =>
+	[{ url: "/api/v1/account/me/following/:unitId" }] as const;
 
-export function patchApiUsersMeFollowingByUnitIdMutationOptions<TContext = unknown>(
+export function patchApiAccountMeFollowingByUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = patchApiUsersMeFollowingByUnitIdMutationKey();
+	const mutationKey = patchApiAccountMeFollowingByUnitIdMutationKey();
 	return mutationOptions<
-		PatchApiUsersMeFollowingByUnitIdStatus200,
+		PatchApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			| PatchApiUsersMeFollowingByUnitIdStatus400
-			| PatchApiUsersMeFollowingByUnitIdStatus404
-			| PatchApiUsersMeFollowingByUnitIdStatus422
-			| PatchApiUsersMeFollowingByUnitIdStatus429
-			| PatchApiUsersMeFollowingByUnitIdStatus500
+			| PatchApiAccountMeFollowingByUnitIdStatus400
+			| PatchApiAccountMeFollowingByUnitIdStatus404
+			| PatchApiAccountMeFollowingByUnitIdStatus422
+			| PatchApiAccountMeFollowingByUnitIdStatus429
+			| PatchApiAccountMeFollowingByUnitIdStatus500
 		>,
-		PatchApiUsersMeFollowingByUnitIdOptions,
+		PatchApiAccountMeFollowingByUnitIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiUsersMeFollowingByUnitId({
+			const { data } = await patchApiAccountMeFollowingByUnitId({
 				...config,
 				path,
 				body,
@@ -17543,20 +18403,20 @@ export function patchApiUsersMeFollowingByUnitIdMutationOptions<TContext = unkno
 
 /**
  * @summary Update followed Unit presentation
- * {@link /api/v1/users/me/following/:unitId}
+ * {@link /api/v1/account/me/following/:unitId}
  */
-export function usePatchApiUsersMeFollowingByUnitId<TContext>(
+export function usePatchApiAccountMeFollowingByUnitId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PatchApiUsersMeFollowingByUnitIdStatus200,
+			PatchApiAccountMeFollowingByUnitIdStatus200,
 			ResponseErrorConfig<
-				| PatchApiUsersMeFollowingByUnitIdStatus400
-				| PatchApiUsersMeFollowingByUnitIdStatus404
-				| PatchApiUsersMeFollowingByUnitIdStatus422
-				| PatchApiUsersMeFollowingByUnitIdStatus429
-				| PatchApiUsersMeFollowingByUnitIdStatus500
+				| PatchApiAccountMeFollowingByUnitIdStatus400
+				| PatchApiAccountMeFollowingByUnitIdStatus404
+				| PatchApiAccountMeFollowingByUnitIdStatus422
+				| PatchApiAccountMeFollowingByUnitIdStatus429
+				| PatchApiAccountMeFollowingByUnitIdStatus500
 			>,
-			PatchApiUsersMeFollowingByUnitIdOptions,
+			PatchApiAccountMeFollowingByUnitIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -17564,31 +18424,34 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? patchApiUsersMeFollowingByUnitIdMutationKey();
+	const mutationKey =
+		mutationOptions.mutationKey ?? patchApiAccountMeFollowingByUnitIdMutationKey();
 
-	const baseOptions = patchApiUsersMeFollowingByUnitIdMutationOptions(config) as UseMutationOptions<
-		PatchApiUsersMeFollowingByUnitIdStatus200,
+	const baseOptions = patchApiAccountMeFollowingByUnitIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PatchApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			| PatchApiUsersMeFollowingByUnitIdStatus400
-			| PatchApiUsersMeFollowingByUnitIdStatus404
-			| PatchApiUsersMeFollowingByUnitIdStatus422
-			| PatchApiUsersMeFollowingByUnitIdStatus429
-			| PatchApiUsersMeFollowingByUnitIdStatus500
+			| PatchApiAccountMeFollowingByUnitIdStatus400
+			| PatchApiAccountMeFollowingByUnitIdStatus404
+			| PatchApiAccountMeFollowingByUnitIdStatus422
+			| PatchApiAccountMeFollowingByUnitIdStatus429
+			| PatchApiAccountMeFollowingByUnitIdStatus500
 		>,
-		PatchApiUsersMeFollowingByUnitIdOptions,
+		PatchApiAccountMeFollowingByUnitIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PatchApiUsersMeFollowingByUnitIdStatus200,
+		PatchApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			| PatchApiUsersMeFollowingByUnitIdStatus400
-			| PatchApiUsersMeFollowingByUnitIdStatus404
-			| PatchApiUsersMeFollowingByUnitIdStatus422
-			| PatchApiUsersMeFollowingByUnitIdStatus429
-			| PatchApiUsersMeFollowingByUnitIdStatus500
+			| PatchApiAccountMeFollowingByUnitIdStatus400
+			| PatchApiAccountMeFollowingByUnitIdStatus404
+			| PatchApiAccountMeFollowingByUnitIdStatus422
+			| PatchApiAccountMeFollowingByUnitIdStatus429
+			| PatchApiAccountMeFollowingByUnitIdStatus500
 		>,
-		PatchApiUsersMeFollowingByUnitIdOptions,
+		PatchApiAccountMeFollowingByUnitIdOptions,
 		TContext
 	>(
 		{
@@ -17598,42 +18461,42 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PatchApiUsersMeFollowingByUnitIdStatus200,
+		PatchApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			| PatchApiUsersMeFollowingByUnitIdStatus400
-			| PatchApiUsersMeFollowingByUnitIdStatus404
-			| PatchApiUsersMeFollowingByUnitIdStatus422
-			| PatchApiUsersMeFollowingByUnitIdStatus429
-			| PatchApiUsersMeFollowingByUnitIdStatus500
+			| PatchApiAccountMeFollowingByUnitIdStatus400
+			| PatchApiAccountMeFollowingByUnitIdStatus404
+			| PatchApiAccountMeFollowingByUnitIdStatus422
+			| PatchApiAccountMeFollowingByUnitIdStatus429
+			| PatchApiAccountMeFollowingByUnitIdStatus500
 		>,
-		PatchApiUsersMeFollowingByUnitIdOptions,
+		PatchApiAccountMeFollowingByUnitIdOptions,
 		TContext
 	>;
 }
 
-export const putApiUsersMeFollowingByUnitIdSettingsMutationKey = () =>
-	[{ url: "/api/v1/users/me/following/:unitId/settings" }] as const;
+export const putApiAccountMeFollowingByUnitIdSettingsMutationKey = () =>
+	[{ url: "/api/v1/account/me/following/:unitId/settings" }] as const;
 
-export function putApiUsersMeFollowingByUnitIdSettingsMutationOptions<TContext = unknown>(
+export function putApiAccountMeFollowingByUnitIdSettingsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = putApiUsersMeFollowingByUnitIdSettingsMutationKey();
+	const mutationKey = putApiAccountMeFollowingByUnitIdSettingsMutationKey();
 	return mutationOptions<
-		PutApiUsersMeFollowingByUnitIdSettingsStatus200,
+		PutApiAccountMeFollowingByUnitIdSettingsStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus400
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus404
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus409
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus422
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus429
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus500
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus400
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus404
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus409
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus422
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus429
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus500
 		>,
-		PutApiUsersMeFollowingByUnitIdSettingsOptions,
+		PutApiAccountMeFollowingByUnitIdSettingsOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiUsersMeFollowingByUnitIdSettings({
+			const { data } = await putApiAccountMeFollowingByUnitIdSettings({
 				...config,
 				path,
 				body,
@@ -17646,21 +18509,21 @@ export function putApiUsersMeFollowingByUnitIdSettingsMutationOptions<TContext =
 
 /**
  * @summary Replace notification and personalization settings for a followed Unit
- * {@link /api/v1/users/me/following/:unitId/settings}
+ * {@link /api/v1/account/me/following/:unitId/settings}
  */
-export function usePutApiUsersMeFollowingByUnitIdSettings<TContext>(
+export function usePutApiAccountMeFollowingByUnitIdSettings<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiUsersMeFollowingByUnitIdSettingsStatus200,
+			PutApiAccountMeFollowingByUnitIdSettingsStatus200,
 			ResponseErrorConfig<
-				| PutApiUsersMeFollowingByUnitIdSettingsStatus400
-				| PutApiUsersMeFollowingByUnitIdSettingsStatus404
-				| PutApiUsersMeFollowingByUnitIdSettingsStatus409
-				| PutApiUsersMeFollowingByUnitIdSettingsStatus422
-				| PutApiUsersMeFollowingByUnitIdSettingsStatus429
-				| PutApiUsersMeFollowingByUnitIdSettingsStatus500
+				| PutApiAccountMeFollowingByUnitIdSettingsStatus400
+				| PutApiAccountMeFollowingByUnitIdSettingsStatus404
+				| PutApiAccountMeFollowingByUnitIdSettingsStatus409
+				| PutApiAccountMeFollowingByUnitIdSettingsStatus422
+				| PutApiAccountMeFollowingByUnitIdSettingsStatus429
+				| PutApiAccountMeFollowingByUnitIdSettingsStatus500
 			>,
-			PutApiUsersMeFollowingByUnitIdSettingsOptions,
+			PutApiAccountMeFollowingByUnitIdSettingsOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -17669,35 +18532,35 @@ export function usePutApiUsersMeFollowingByUnitIdSettings<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? putApiUsersMeFollowingByUnitIdSettingsMutationKey();
+		mutationOptions.mutationKey ?? putApiAccountMeFollowingByUnitIdSettingsMutationKey();
 
-	const baseOptions = putApiUsersMeFollowingByUnitIdSettingsMutationOptions(
+	const baseOptions = putApiAccountMeFollowingByUnitIdSettingsMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PutApiUsersMeFollowingByUnitIdSettingsStatus200,
+		PutApiAccountMeFollowingByUnitIdSettingsStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus400
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus404
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus409
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus422
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus429
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus500
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus400
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus404
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus409
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus422
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus429
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus500
 		>,
-		PutApiUsersMeFollowingByUnitIdSettingsOptions,
+		PutApiAccountMeFollowingByUnitIdSettingsOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiUsersMeFollowingByUnitIdSettingsStatus200,
+		PutApiAccountMeFollowingByUnitIdSettingsStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus400
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus404
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus409
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus422
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus429
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus500
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus400
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus404
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus409
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus422
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus429
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus500
 		>,
-		PutApiUsersMeFollowingByUnitIdSettingsOptions,
+		PutApiAccountMeFollowingByUnitIdSettingsOptions,
 		TContext
 	>(
 		{
@@ -17707,16 +18570,16 @@ export function usePutApiUsersMeFollowingByUnitIdSettings<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiUsersMeFollowingByUnitIdSettingsStatus200,
+		PutApiAccountMeFollowingByUnitIdSettingsStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus400
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus404
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus409
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus422
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus429
-			| PutApiUsersMeFollowingByUnitIdSettingsStatus500
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus400
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus404
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus409
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus422
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus429
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus500
 		>,
-		PutApiUsersMeFollowingByUnitIdSettingsOptions,
+		PutApiAccountMeFollowingByUnitIdSettingsOptions,
 		TContext
 	>;
 }
@@ -17725,7 +18588,7 @@ export const getUserProfileActivityQueryKey = ({
 	path,
 	query,
 }: Omit<GetUserProfileActivityOptions, "headers">) =>
-	[{ url: "/api/v1/users/:id/activity", params: path }, ...(query ? [query] : [])] as const;
+	[{ url: "/api/v1/entities/:id/activity", params: path }, ...(query ? [query] : [])] as const;
 
 type GetUserProfileActivityQueryKey = ReturnType<typeof getUserProfileActivityQueryKey>;
 
@@ -17760,7 +18623,7 @@ export function getUserProfileActivityQueryOptions(
 
 /**
  * @summary Get visible Score and Progress activity for a public Profile
- * {@link /api/v1/users/:id/activity}
+ * {@link /api/v1/entities/:id/activity}
  */
 export function useGetUserProfileActivity<
 	TData = GetUserProfileActivityStatus200,
@@ -17820,27 +18683,32 @@ export function useGetUserProfileActivity<
 	return queryResult;
 }
 
-export const getApiUsersByIdQueryKey = ({ path, query }: Omit<GetApiUsersByIdOptions, "headers">) =>
-	[{ url: "/api/v1/users/:id", params: path }, ...(query ? [query] : [])] as const;
+export const getApiEntitiesByIdProfileQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiEntitiesByIdProfileOptions, "headers">) =>
+	[{ url: "/api/v1/entities/:id/profile", params: path }, ...(query ? [query] : [])] as const;
 
-type GetApiUsersByIdQueryKey = ReturnType<typeof getApiUsersByIdQueryKey>;
+type GetApiEntitiesByIdProfileQueryKey = ReturnType<typeof getApiEntitiesByIdProfileQueryKey>;
 
-export function getApiUsersByIdQueryOptions(
-	{ path, query }: GetApiUsersByIdOptions,
+export function getApiEntitiesByIdProfileQueryOptions(
+	{ path, query }: GetApiEntitiesByIdProfileOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUsersByIdQueryKey({ path, query });
+	const queryKey = getApiEntitiesByIdProfileQueryKey({ path, query });
 	return queryOptions<
-		GetApiUsersByIdStatus200,
+		GetApiEntitiesByIdProfileStatus200,
 		ResponseErrorConfig<
-			GetApiUsersByIdStatus404 | GetApiUsersByIdStatus422 | GetApiUsersByIdStatus500
+			| GetApiEntitiesByIdProfileStatus404
+			| GetApiEntitiesByIdProfileStatus422
+			| GetApiEntitiesByIdProfileStatus500
 		>,
-		GetApiUsersByIdStatus200,
+		GetApiEntitiesByIdProfileStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUsersById({
+			const { data } = await getApiEntitiesByIdProfile({
 				...config,
 				path,
 				query,
@@ -17854,26 +18722,32 @@ export function getApiUsersByIdQueryOptions(
 
 /**
  * @summary Public user profile
- * {@link /api/v1/users/:id}
+ * {@link /api/v1/entities/:id/profile}
  */
-export function useGetApiUsersById<
-	TData = GetApiUsersByIdStatus200,
-	TQueryData = GetApiUsersByIdStatus200,
-	TQueryKey extends QueryKey = GetApiUsersByIdQueryKey,
+export function useGetApiEntitiesByIdProfile<
+	TData = GetApiEntitiesByIdProfileStatus200,
+	TQueryData = GetApiEntitiesByIdProfileStatus200,
+	TQueryKey extends QueryKey = GetApiEntitiesByIdProfileQueryKey,
 >(
 	{
 		path,
 		query,
 	}: {
-		path: GetApiUsersByIdOptions["path"] | (() => GetApiUsersByIdOptions["path"]);
-		query?: GetApiUsersByIdOptions["query"] | (() => GetApiUsersByIdOptions["query"]);
+		path:
+			| GetApiEntitiesByIdProfileOptions["path"]
+			| (() => GetApiEntitiesByIdProfileOptions["path"]);
+		query?:
+			| GetApiEntitiesByIdProfileOptions["query"]
+			| (() => GetApiEntitiesByIdProfileOptions["query"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiUsersByIdStatus200,
+				GetApiEntitiesByIdProfileStatus200,
 				ResponseErrorConfig<
-					GetApiUsersByIdStatus404 | GetApiUsersByIdStatus422 | GetApiUsersByIdStatus500
+					| GetApiEntitiesByIdProfileStatus404
+					| GetApiEntitiesByIdProfileStatus422
+					| GetApiEntitiesByIdProfileStatus500
 				>,
 				TData,
 				TQueryData,
@@ -17889,11 +18763,11 @@ export function useGetApiUsersById<
 		path: typeof path === "function" ? path() : path,
 		query: typeof query === "function" ? query() : query,
 	};
-	const queryKey = resolvedOptions?.queryKey ?? getApiUsersByIdQueryKey(resolvedParams);
+	const queryKey = resolvedOptions?.queryKey ?? getApiEntitiesByIdProfileQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiUsersByIdQueryOptions(resolvedParams, config),
+			...getApiEntitiesByIdProfileQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -17901,7 +18775,9 @@ export function useGetApiUsersById<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			GetApiUsersByIdStatus404 | GetApiUsersByIdStatus422 | GetApiUsersByIdStatus500
+			| GetApiEntitiesByIdProfileStatus404
+			| GetApiEntitiesByIdProfileStatus422
+			| GetApiEntitiesByIdProfileStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -17910,23 +18786,23 @@ export function useGetApiUsersById<
 	return queryResult;
 }
 
-export const getApiUsersMeBlocksQueryKey = () => [{ url: "/api/v1/users/me/blocks" }] as const;
+export const getApiAccountMeBlocksQueryKey = () => [{ url: "/api/v1/account/me/blocks" }] as const;
 
-type GetApiUsersMeBlocksQueryKey = ReturnType<typeof getApiUsersMeBlocksQueryKey>;
+type GetApiAccountMeBlocksQueryKey = ReturnType<typeof getApiAccountMeBlocksQueryKey>;
 
-export function getApiUsersMeBlocksQueryOptions(
+export function getApiAccountMeBlocksQueryOptions(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUsersMeBlocksQueryKey();
+	const queryKey = getApiAccountMeBlocksQueryKey();
 	return queryOptions<
-		GetApiUsersMeBlocksStatus200,
-		ResponseErrorConfig<GetApiUsersMeBlocksStatus429 | GetApiUsersMeBlocksStatus500>,
-		GetApiUsersMeBlocksStatus200,
+		GetApiAccountMeBlocksStatus200,
+		ResponseErrorConfig<GetApiAccountMeBlocksStatus429 | GetApiAccountMeBlocksStatus500>,
+		GetApiAccountMeBlocksStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUsersMeBlocks({
+			const { data } = await getApiAccountMeBlocks({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
@@ -17938,18 +18814,18 @@ export function getApiUsersMeBlocksQueryOptions(
 
 /**
  * @summary List blocked users
- * {@link /api/v1/users/me/blocks}
+ * {@link /api/v1/account/me/blocks}
  */
-export function useGetApiUsersMeBlocks<
-	TData = GetApiUsersMeBlocksStatus200,
-	TQueryData = GetApiUsersMeBlocksStatus200,
-	TQueryKey extends QueryKey = GetApiUsersMeBlocksQueryKey,
+export function useGetApiAccountMeBlocks<
+	TData = GetApiAccountMeBlocksStatus200,
+	TQueryData = GetApiAccountMeBlocksStatus200,
+	TQueryKey extends QueryKey = GetApiAccountMeBlocksQueryKey,
 >(
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiUsersMeBlocksStatus200,
-				ResponseErrorConfig<GetApiUsersMeBlocksStatus429 | GetApiUsersMeBlocksStatus500>,
+				GetApiAccountMeBlocksStatus200,
+				ResponseErrorConfig<GetApiAccountMeBlocksStatus429 | GetApiAccountMeBlocksStatus500>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -17960,18 +18836,18 @@ export function useGetApiUsersMeBlocks<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const queryKey = resolvedOptions?.queryKey ?? getApiUsersMeBlocksQueryKey();
+	const queryKey = resolvedOptions?.queryKey ?? getApiAccountMeBlocksQueryKey();
 
 	const queryResult = useQuery(
 		{
-			...getApiUsersMeBlocksQueryOptions(config),
+			...getApiAccountMeBlocksQueryOptions(config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<GetApiUsersMeBlocksStatus429 | GetApiUsersMeBlocksStatus500>
+		ResponseErrorConfig<GetApiAccountMeBlocksStatus429 | GetApiAccountMeBlocksStatus500>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
@@ -17979,27 +18855,28 @@ export function useGetApiUsersMeBlocks<
 	return queryResult;
 }
 
-export const putApiUsersByIdBlockMutationKey = () => [{ url: "/api/v1/users/:id/block" }] as const;
+export const putApiAccountBlocksByIdMutationKey = () =>
+	[{ url: "/api/v1/account/blocks/:id" }] as const;
 
-export function putApiUsersByIdBlockMutationOptions<TContext = unknown>(
+export function putApiAccountBlocksByIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = putApiUsersByIdBlockMutationKey();
+	const mutationKey = putApiAccountBlocksByIdMutationKey();
 	return mutationOptions<
-		PutApiUsersByIdBlockStatus200,
+		PutApiAccountBlocksByIdStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersByIdBlockStatus404
-			| PutApiUsersByIdBlockStatus409
-			| PutApiUsersByIdBlockStatus422
-			| PutApiUsersByIdBlockStatus429
-			| PutApiUsersByIdBlockStatus500
+			| PutApiAccountBlocksByIdStatus404
+			| PutApiAccountBlocksByIdStatus409
+			| PutApiAccountBlocksByIdStatus422
+			| PutApiAccountBlocksByIdStatus429
+			| PutApiAccountBlocksByIdStatus500
 		>,
-		PutApiUsersByIdBlockOptions,
+		PutApiAccountBlocksByIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await putApiUsersByIdBlock({ ...config, path, throwOnError: true });
+			const { data } = await putApiAccountBlocksById({ ...config, path, throwOnError: true });
 			return data;
 		},
 	});
@@ -18007,20 +18884,20 @@ export function putApiUsersByIdBlockMutationOptions<TContext = unknown>(
 
 /**
  * @summary Block user
- * {@link /api/v1/users/:id/block}
+ * {@link /api/v1/account/blocks/:id}
  */
-export function usePutApiUsersByIdBlock<TContext>(
+export function usePutApiAccountBlocksById<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiUsersByIdBlockStatus200,
+			PutApiAccountBlocksByIdStatus200,
 			ResponseErrorConfig<
-				| PutApiUsersByIdBlockStatus404
-				| PutApiUsersByIdBlockStatus409
-				| PutApiUsersByIdBlockStatus422
-				| PutApiUsersByIdBlockStatus429
-				| PutApiUsersByIdBlockStatus500
+				| PutApiAccountBlocksByIdStatus404
+				| PutApiAccountBlocksByIdStatus409
+				| PutApiAccountBlocksByIdStatus422
+				| PutApiAccountBlocksByIdStatus429
+				| PutApiAccountBlocksByIdStatus500
 			>,
-			PutApiUsersByIdBlockOptions,
+			PutApiAccountBlocksByIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -18028,31 +18905,31 @@ export function usePutApiUsersByIdBlock<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? putApiUsersByIdBlockMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? putApiAccountBlocksByIdMutationKey();
 
-	const baseOptions = putApiUsersByIdBlockMutationOptions(config) as UseMutationOptions<
-		PutApiUsersByIdBlockStatus200,
+	const baseOptions = putApiAccountBlocksByIdMutationOptions(config) as UseMutationOptions<
+		PutApiAccountBlocksByIdStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersByIdBlockStatus404
-			| PutApiUsersByIdBlockStatus409
-			| PutApiUsersByIdBlockStatus422
-			| PutApiUsersByIdBlockStatus429
-			| PutApiUsersByIdBlockStatus500
+			| PutApiAccountBlocksByIdStatus404
+			| PutApiAccountBlocksByIdStatus409
+			| PutApiAccountBlocksByIdStatus422
+			| PutApiAccountBlocksByIdStatus429
+			| PutApiAccountBlocksByIdStatus500
 		>,
-		PutApiUsersByIdBlockOptions,
+		PutApiAccountBlocksByIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiUsersByIdBlockStatus200,
+		PutApiAccountBlocksByIdStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersByIdBlockStatus404
-			| PutApiUsersByIdBlockStatus409
-			| PutApiUsersByIdBlockStatus422
-			| PutApiUsersByIdBlockStatus429
-			| PutApiUsersByIdBlockStatus500
+			| PutApiAccountBlocksByIdStatus404
+			| PutApiAccountBlocksByIdStatus409
+			| PutApiAccountBlocksByIdStatus422
+			| PutApiAccountBlocksByIdStatus429
+			| PutApiAccountBlocksByIdStatus500
 		>,
-		PutApiUsersByIdBlockOptions,
+		PutApiAccountBlocksByIdOptions,
 		TContext
 	>(
 		{
@@ -18062,39 +18939,39 @@ export function usePutApiUsersByIdBlock<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiUsersByIdBlockStatus200,
+		PutApiAccountBlocksByIdStatus200,
 		ResponseErrorConfig<
-			| PutApiUsersByIdBlockStatus404
-			| PutApiUsersByIdBlockStatus409
-			| PutApiUsersByIdBlockStatus422
-			| PutApiUsersByIdBlockStatus429
-			| PutApiUsersByIdBlockStatus500
+			| PutApiAccountBlocksByIdStatus404
+			| PutApiAccountBlocksByIdStatus409
+			| PutApiAccountBlocksByIdStatus422
+			| PutApiAccountBlocksByIdStatus429
+			| PutApiAccountBlocksByIdStatus500
 		>,
-		PutApiUsersByIdBlockOptions,
+		PutApiAccountBlocksByIdOptions,
 		TContext
 	>;
 }
 
-export const deleteApiUsersByIdBlockMutationKey = () =>
-	[{ url: "/api/v1/users/:id/block" }] as const;
+export const deleteApiAccountBlocksByIdMutationKey = () =>
+	[{ url: "/api/v1/account/blocks/:id" }] as const;
 
-export function deleteApiUsersByIdBlockMutationOptions<TContext = unknown>(
+export function deleteApiAccountBlocksByIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = deleteApiUsersByIdBlockMutationKey();
+	const mutationKey = deleteApiAccountBlocksByIdMutationKey();
 	return mutationOptions<
-		DeleteApiUsersByIdBlockStatus200,
+		DeleteApiAccountBlocksByIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUsersByIdBlockStatus422
-			| DeleteApiUsersByIdBlockStatus429
-			| DeleteApiUsersByIdBlockStatus500
+			| DeleteApiAccountBlocksByIdStatus422
+			| DeleteApiAccountBlocksByIdStatus429
+			| DeleteApiAccountBlocksByIdStatus500
 		>,
-		DeleteApiUsersByIdBlockOptions,
+		DeleteApiAccountBlocksByIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiUsersByIdBlock({ ...config, path, throwOnError: true });
+			const { data } = await deleteApiAccountBlocksById({ ...config, path, throwOnError: true });
 			return data;
 		},
 	});
@@ -18102,18 +18979,18 @@ export function deleteApiUsersByIdBlockMutationOptions<TContext = unknown>(
 
 /**
  * @summary Unblock user
- * {@link /api/v1/users/:id/block}
+ * {@link /api/v1/account/blocks/:id}
  */
-export function useDeleteApiUsersByIdBlock<TContext>(
+export function useDeleteApiAccountBlocksById<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			DeleteApiUsersByIdBlockStatus200,
+			DeleteApiAccountBlocksByIdStatus200,
 			ResponseErrorConfig<
-				| DeleteApiUsersByIdBlockStatus422
-				| DeleteApiUsersByIdBlockStatus429
-				| DeleteApiUsersByIdBlockStatus500
+				| DeleteApiAccountBlocksByIdStatus422
+				| DeleteApiAccountBlocksByIdStatus429
+				| DeleteApiAccountBlocksByIdStatus500
 			>,
-			DeleteApiUsersByIdBlockOptions,
+			DeleteApiAccountBlocksByIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -18121,27 +18998,27 @@ export function useDeleteApiUsersByIdBlock<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? deleteApiUsersByIdBlockMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? deleteApiAccountBlocksByIdMutationKey();
 
-	const baseOptions = deleteApiUsersByIdBlockMutationOptions(config) as UseMutationOptions<
-		DeleteApiUsersByIdBlockStatus200,
+	const baseOptions = deleteApiAccountBlocksByIdMutationOptions(config) as UseMutationOptions<
+		DeleteApiAccountBlocksByIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUsersByIdBlockStatus422
-			| DeleteApiUsersByIdBlockStatus429
-			| DeleteApiUsersByIdBlockStatus500
+			| DeleteApiAccountBlocksByIdStatus422
+			| DeleteApiAccountBlocksByIdStatus429
+			| DeleteApiAccountBlocksByIdStatus500
 		>,
-		DeleteApiUsersByIdBlockOptions,
+		DeleteApiAccountBlocksByIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		DeleteApiUsersByIdBlockStatus200,
+		DeleteApiAccountBlocksByIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUsersByIdBlockStatus422
-			| DeleteApiUsersByIdBlockStatus429
-			| DeleteApiUsersByIdBlockStatus500
+			| DeleteApiAccountBlocksByIdStatus422
+			| DeleteApiAccountBlocksByIdStatus429
+			| DeleteApiAccountBlocksByIdStatus500
 		>,
-		DeleteApiUsersByIdBlockOptions,
+		DeleteApiAccountBlocksByIdOptions,
 		TContext
 	>(
 		{
@@ -18151,13 +19028,1373 @@ export function useDeleteApiUsersByIdBlock<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		DeleteApiUsersByIdBlockStatus200,
+		DeleteApiAccountBlocksByIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUsersByIdBlockStatus422
-			| DeleteApiUsersByIdBlockStatus429
-			| DeleteApiUsersByIdBlockStatus500
+			| DeleteApiAccountBlocksByIdStatus422
+			| DeleteApiAccountBlocksByIdStatus429
+			| DeleteApiAccountBlocksByIdStatus500
 		>,
-		DeleteApiUsersByIdBlockOptions,
+		DeleteApiAccountBlocksByIdOptions,
+		TContext
+	>;
+}
+
+export const listManagedOrganizationsQueryKey = ({
+	query,
+}: Omit<ListManagedOrganizationsOptions, "headers"> = {}) =>
+	[{ url: "/api/v1/participation/organizations" }, ...(query ? [query] : [])] as const;
+
+type ListManagedOrganizationsQueryKey = ReturnType<typeof listManagedOrganizationsQueryKey>;
+
+export function listManagedOrganizationsQueryOptions(
+	{ query }: ListManagedOrganizationsOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listManagedOrganizationsQueryKey({ query });
+	return queryOptions<
+		ListManagedOrganizationsStatus200,
+		ResponseErrorConfig<ListManagedOrganizationsStatus422 | ListManagedOrganizationsStatus500>,
+		ListManagedOrganizationsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await listManagedOrganizations({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/organizations}
+ */
+export function useListManagedOrganizations<
+	TData = ListManagedOrganizationsStatus200,
+	TQueryData = ListManagedOrganizationsStatus200,
+	TQueryKey extends QueryKey = ListManagedOrganizationsQueryKey,
+>(
+	{
+		query,
+	}: {
+		query?:
+			| ListManagedOrganizationsOptions["query"]
+			| (() => ListManagedOrganizationsOptions["query"]);
+	} = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListManagedOrganizationsStatus200,
+				ResponseErrorConfig<ListManagedOrganizationsStatus422 | ListManagedOrganizationsStatus500>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? listManagedOrganizationsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listManagedOrganizationsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<ListManagedOrganizationsStatus422 | ListManagedOrganizationsStatus500>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const createManagedOrganizationMutationKey = () =>
+	[{ url: "/api/v1/participation/organizations" }] as const;
+
+export function createManagedOrganizationMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = createManagedOrganizationMutationKey();
+	return mutationOptions<
+		CreateManagedOrganizationStatus200,
+		ResponseErrorConfig<
+			| CreateManagedOrganizationStatus400
+			| CreateManagedOrganizationStatus422
+			| CreateManagedOrganizationStatus500
+		>,
+		CreateManagedOrganizationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await createManagedOrganization({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/organizations}
+ */
+export function useCreateManagedOrganization<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			CreateManagedOrganizationStatus200,
+			ResponseErrorConfig<
+				| CreateManagedOrganizationStatus400
+				| CreateManagedOrganizationStatus422
+				| CreateManagedOrganizationStatus500
+			>,
+			CreateManagedOrganizationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? createManagedOrganizationMutationKey();
+
+	const baseOptions = createManagedOrganizationMutationOptions(config) as UseMutationOptions<
+		CreateManagedOrganizationStatus200,
+		ResponseErrorConfig<
+			| CreateManagedOrganizationStatus400
+			| CreateManagedOrganizationStatus422
+			| CreateManagedOrganizationStatus500
+		>,
+		CreateManagedOrganizationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		CreateManagedOrganizationStatus200,
+		ResponseErrorConfig<
+			| CreateManagedOrganizationStatus400
+			| CreateManagedOrganizationStatus422
+			| CreateManagedOrganizationStatus500
+		>,
+		CreateManagedOrganizationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		CreateManagedOrganizationStatus200,
+		ResponseErrorConfig<
+			| CreateManagedOrganizationStatus400
+			| CreateManagedOrganizationStatus422
+			| CreateManagedOrganizationStatus500
+		>,
+		CreateManagedOrganizationOptions,
+		TContext
+	>;
+}
+
+export const updateActingEntityPresentationMutationKey = () =>
+	[{ url: "/api/v1/participation/presentation" }] as const;
+
+export function updateActingEntityPresentationMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = updateActingEntityPresentationMutationKey();
+	return mutationOptions<
+		UpdateActingEntityPresentationStatus200,
+		ResponseErrorConfig<
+			| UpdateActingEntityPresentationStatus400
+			| UpdateActingEntityPresentationStatus422
+			| UpdateActingEntityPresentationStatus500
+		>,
+		UpdateActingEntityPresentationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await updateActingEntityPresentation({
+				...config,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/presentation}
+ */
+export function useUpdateActingEntityPresentation<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			UpdateActingEntityPresentationStatus200,
+			ResponseErrorConfig<
+				| UpdateActingEntityPresentationStatus400
+				| UpdateActingEntityPresentationStatus422
+				| UpdateActingEntityPresentationStatus500
+			>,
+			UpdateActingEntityPresentationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? updateActingEntityPresentationMutationKey();
+
+	const baseOptions = updateActingEntityPresentationMutationOptions(config) as UseMutationOptions<
+		UpdateActingEntityPresentationStatus200,
+		ResponseErrorConfig<
+			| UpdateActingEntityPresentationStatus400
+			| UpdateActingEntityPresentationStatus422
+			| UpdateActingEntityPresentationStatus500
+		>,
+		UpdateActingEntityPresentationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		UpdateActingEntityPresentationStatus200,
+		ResponseErrorConfig<
+			| UpdateActingEntityPresentationStatus400
+			| UpdateActingEntityPresentationStatus422
+			| UpdateActingEntityPresentationStatus500
+		>,
+		UpdateActingEntityPresentationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		UpdateActingEntityPresentationStatus200,
+		ResponseErrorConfig<
+			| UpdateActingEntityPresentationStatus400
+			| UpdateActingEntityPresentationStatus422
+			| UpdateActingEntityPresentationStatus500
+		>,
+		UpdateActingEntityPresentationOptions,
+		TContext
+	>;
+}
+
+export const listActingEntityPresentationHistoryQueryKey = ({
+	path,
+	query,
+}: Omit<ListActingEntityPresentationHistoryOptions, "headers">) =>
+	[
+		{ url: "/api/v1/participation/presentation/:language/history", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ListActingEntityPresentationHistoryQueryKey = ReturnType<
+	typeof listActingEntityPresentationHistoryQueryKey
+>;
+
+export function listActingEntityPresentationHistoryQueryOptions(
+	{ path, query }: ListActingEntityPresentationHistoryOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listActingEntityPresentationHistoryQueryKey({ path, query });
+	return queryOptions<
+		ListActingEntityPresentationHistoryStatus200,
+		ResponseErrorConfig<
+			ListActingEntityPresentationHistoryStatus422 | ListActingEntityPresentationHistoryStatus500
+		>,
+		ListActingEntityPresentationHistoryStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await listActingEntityPresentationHistory({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/presentation/:language/history}
+ */
+export function useListActingEntityPresentationHistory<
+	TData = ListActingEntityPresentationHistoryStatus200,
+	TQueryData = ListActingEntityPresentationHistoryStatus200,
+	TQueryKey extends QueryKey = ListActingEntityPresentationHistoryQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| ListActingEntityPresentationHistoryOptions["path"]
+			| (() => ListActingEntityPresentationHistoryOptions["path"]);
+		query?:
+			| ListActingEntityPresentationHistoryOptions["query"]
+			| (() => ListActingEntityPresentationHistoryOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListActingEntityPresentationHistoryStatus200,
+				ResponseErrorConfig<
+					| ListActingEntityPresentationHistoryStatus422
+					| ListActingEntityPresentationHistoryStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? listActingEntityPresentationHistoryQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listActingEntityPresentationHistoryQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			ListActingEntityPresentationHistoryStatus422 | ListActingEntityPresentationHistoryStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getActingEntityPresentationRevisionQueryKey = ({
+	path,
+}: Omit<GetActingEntityPresentationRevisionOptions, "headers">) =>
+	[
+		{ url: "/api/v1/participation/presentation/:language/history/:revision", params: path },
+	] as const;
+
+type GetActingEntityPresentationRevisionQueryKey = ReturnType<
+	typeof getActingEntityPresentationRevisionQueryKey
+>;
+
+export function getActingEntityPresentationRevisionQueryOptions(
+	{ path }: GetActingEntityPresentationRevisionOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getActingEntityPresentationRevisionQueryKey({ path });
+	return queryOptions<
+		GetActingEntityPresentationRevisionStatus200,
+		ResponseErrorConfig<
+			GetActingEntityPresentationRevisionStatus422 | GetActingEntityPresentationRevisionStatus500
+		>,
+		GetActingEntityPresentationRevisionStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getActingEntityPresentationRevision({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/presentation/:language/history/:revision}
+ */
+export function useGetActingEntityPresentationRevision<
+	TData = GetActingEntityPresentationRevisionStatus200,
+	TQueryData = GetActingEntityPresentationRevisionStatus200,
+	TQueryKey extends QueryKey = GetActingEntityPresentationRevisionQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetActingEntityPresentationRevisionOptions["path"]
+			| (() => GetActingEntityPresentationRevisionOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetActingEntityPresentationRevisionStatus200,
+				ResponseErrorConfig<
+					| GetActingEntityPresentationRevisionStatus422
+					| GetActingEntityPresentationRevisionStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getActingEntityPresentationRevisionQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getActingEntityPresentationRevisionQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			GetActingEntityPresentationRevisionStatus422 | GetActingEntityPresentationRevisionStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const restoreActingEntityPresentationMutationKey = () =>
+	[{ url: "/api/v1/participation/presentation/:language/restore" }] as const;
+
+export function restoreActingEntityPresentationMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = restoreActingEntityPresentationMutationKey();
+	return mutationOptions<
+		RestoreActingEntityPresentationStatus200,
+		ResponseErrorConfig<
+			| RestoreActingEntityPresentationStatus400
+			| RestoreActingEntityPresentationStatus422
+			| RestoreActingEntityPresentationStatus500
+		>,
+		RestoreActingEntityPresentationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await restoreActingEntityPresentation({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/presentation/:language/restore}
+ */
+export function useRestoreActingEntityPresentation<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RestoreActingEntityPresentationStatus200,
+			ResponseErrorConfig<
+				| RestoreActingEntityPresentationStatus400
+				| RestoreActingEntityPresentationStatus422
+				| RestoreActingEntityPresentationStatus500
+			>,
+			RestoreActingEntityPresentationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? restoreActingEntityPresentationMutationKey();
+
+	const baseOptions = restoreActingEntityPresentationMutationOptions(config) as UseMutationOptions<
+		RestoreActingEntityPresentationStatus200,
+		ResponseErrorConfig<
+			| RestoreActingEntityPresentationStatus400
+			| RestoreActingEntityPresentationStatus422
+			| RestoreActingEntityPresentationStatus500
+		>,
+		RestoreActingEntityPresentationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RestoreActingEntityPresentationStatus200,
+		ResponseErrorConfig<
+			| RestoreActingEntityPresentationStatus400
+			| RestoreActingEntityPresentationStatus422
+			| RestoreActingEntityPresentationStatus500
+		>,
+		RestoreActingEntityPresentationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RestoreActingEntityPresentationStatus200,
+		ResponseErrorConfig<
+			| RestoreActingEntityPresentationStatus400
+			| RestoreActingEntityPresentationStatus422
+			| RestoreActingEntityPresentationStatus500
+		>,
+		RestoreActingEntityPresentationOptions,
+		TContext
+	>;
+}
+
+export const getCurrentParticipationQueryKey = () =>
+	[{ url: "/api/v1/participation/self" }] as const;
+
+type GetCurrentParticipationQueryKey = ReturnType<typeof getCurrentParticipationQueryKey>;
+
+export function getCurrentParticipationQueryOptions(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getCurrentParticipationQueryKey();
+	return queryOptions<
+		GetCurrentParticipationStatus200,
+		ResponseErrorConfig<GetCurrentParticipationStatus500>,
+		GetCurrentParticipationStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getCurrentParticipation({
+				...config,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/self}
+ */
+export function useGetCurrentParticipation<
+	TData = GetCurrentParticipationStatus200,
+	TQueryData = GetCurrentParticipationStatus200,
+	TQueryKey extends QueryKey = GetCurrentParticipationQueryKey,
+>(
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetCurrentParticipationStatus200,
+				ResponseErrorConfig<GetCurrentParticipationStatus500>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const queryKey = resolvedOptions?.queryKey ?? getCurrentParticipationQueryKey();
+
+	const queryResult = useQuery(
+		{
+			...getCurrentParticipationQueryOptions(config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<TData, ResponseErrorConfig<GetCurrentParticipationStatus500>> & {
+		queryKey: TQueryKey;
+	};
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const listParticipationGrantsQueryKey = ({
+	query,
+}: Omit<ListParticipationGrantsOptions, "headers"> = {}) =>
+	[{ url: "/api/v1/participation/grants" }, ...(query ? [query] : [])] as const;
+
+type ListParticipationGrantsQueryKey = ReturnType<typeof listParticipationGrantsQueryKey>;
+
+export function listParticipationGrantsQueryOptions(
+	{ query }: ListParticipationGrantsOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listParticipationGrantsQueryKey({ query });
+	return queryOptions<
+		ListParticipationGrantsStatus200,
+		ResponseErrorConfig<ListParticipationGrantsStatus422 | ListParticipationGrantsStatus500>,
+		ListParticipationGrantsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await listParticipationGrants({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/grants}
+ */
+export function useListParticipationGrants<
+	TData = ListParticipationGrantsStatus200,
+	TQueryData = ListParticipationGrantsStatus200,
+	TQueryKey extends QueryKey = ListParticipationGrantsQueryKey,
+>(
+	{
+		query,
+	}: {
+		query?:
+			| ListParticipationGrantsOptions["query"]
+			| (() => ListParticipationGrantsOptions["query"]);
+	} = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListParticipationGrantsStatus200,
+				ResponseErrorConfig<ListParticipationGrantsStatus422 | ListParticipationGrantsStatus500>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? listParticipationGrantsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listParticipationGrantsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<ListParticipationGrantsStatus422 | ListParticipationGrantsStatus500>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const issueParticipationGrantMutationKey = () =>
+	[{ url: "/api/v1/participation/grants" }] as const;
+
+export function issueParticipationGrantMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = issueParticipationGrantMutationKey();
+	return mutationOptions<
+		IssueParticipationGrantStatus200,
+		ResponseErrorConfig<
+			| IssueParticipationGrantStatus400
+			| IssueParticipationGrantStatus422
+			| IssueParticipationGrantStatus500
+		>,
+		IssueParticipationGrantOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await issueParticipationGrant({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/grants}
+ */
+export function useIssueParticipationGrant<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			IssueParticipationGrantStatus200,
+			ResponseErrorConfig<
+				| IssueParticipationGrantStatus400
+				| IssueParticipationGrantStatus422
+				| IssueParticipationGrantStatus500
+			>,
+			IssueParticipationGrantOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? issueParticipationGrantMutationKey();
+
+	const baseOptions = issueParticipationGrantMutationOptions(config) as UseMutationOptions<
+		IssueParticipationGrantStatus200,
+		ResponseErrorConfig<
+			| IssueParticipationGrantStatus400
+			| IssueParticipationGrantStatus422
+			| IssueParticipationGrantStatus500
+		>,
+		IssueParticipationGrantOptions,
+		TContext
+	>;
+
+	return useMutation<
+		IssueParticipationGrantStatus200,
+		ResponseErrorConfig<
+			| IssueParticipationGrantStatus400
+			| IssueParticipationGrantStatus422
+			| IssueParticipationGrantStatus500
+		>,
+		IssueParticipationGrantOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		IssueParticipationGrantStatus200,
+		ResponseErrorConfig<
+			| IssueParticipationGrantStatus400
+			| IssueParticipationGrantStatus422
+			| IssueParticipationGrantStatus500
+		>,
+		IssueParticipationGrantOptions,
+		TContext
+	>;
+}
+
+export const selectParticipationMutationKey = () =>
+	[{ url: "/api/v1/participation/acting" }] as const;
+
+export function selectParticipationMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = selectParticipationMutationKey();
+	return mutationOptions<
+		SelectParticipationStatus200,
+		ResponseErrorConfig<
+			SelectParticipationStatus400 | SelectParticipationStatus422 | SelectParticipationStatus500
+		>,
+		SelectParticipationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await selectParticipation({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/acting}
+ */
+export function useSelectParticipation<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			SelectParticipationStatus200,
+			ResponseErrorConfig<
+				SelectParticipationStatus400 | SelectParticipationStatus422 | SelectParticipationStatus500
+			>,
+			SelectParticipationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? selectParticipationMutationKey();
+
+	const baseOptions = selectParticipationMutationOptions(config) as UseMutationOptions<
+		SelectParticipationStatus200,
+		ResponseErrorConfig<
+			SelectParticipationStatus400 | SelectParticipationStatus422 | SelectParticipationStatus500
+		>,
+		SelectParticipationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		SelectParticipationStatus200,
+		ResponseErrorConfig<
+			SelectParticipationStatus400 | SelectParticipationStatus422 | SelectParticipationStatus500
+		>,
+		SelectParticipationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		SelectParticipationStatus200,
+		ResponseErrorConfig<
+			SelectParticipationStatus400 | SelectParticipationStatus422 | SelectParticipationStatus500
+		>,
+		SelectParticipationOptions,
+		TContext
+	>;
+}
+
+export const revokeParticipationGrantMutationKey = () =>
+	[{ url: "/api/v1/participation/grants/:id/revoke" }] as const;
+
+export function revokeParticipationGrantMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = revokeParticipationGrantMutationKey();
+	return mutationOptions<
+		RevokeParticipationGrantStatus200,
+		ResponseErrorConfig<
+			| RevokeParticipationGrantStatus400
+			| RevokeParticipationGrantStatus422
+			| RevokeParticipationGrantStatus500
+		>,
+		RevokeParticipationGrantOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await revokeParticipationGrant({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/grants/:id/revoke}
+ */
+export function useRevokeParticipationGrant<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RevokeParticipationGrantStatus200,
+			ResponseErrorConfig<
+				| RevokeParticipationGrantStatus400
+				| RevokeParticipationGrantStatus422
+				| RevokeParticipationGrantStatus500
+			>,
+			RevokeParticipationGrantOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? revokeParticipationGrantMutationKey();
+
+	const baseOptions = revokeParticipationGrantMutationOptions(config) as UseMutationOptions<
+		RevokeParticipationGrantStatus200,
+		ResponseErrorConfig<
+			| RevokeParticipationGrantStatus400
+			| RevokeParticipationGrantStatus422
+			| RevokeParticipationGrantStatus500
+		>,
+		RevokeParticipationGrantOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RevokeParticipationGrantStatus200,
+		ResponseErrorConfig<
+			| RevokeParticipationGrantStatus400
+			| RevokeParticipationGrantStatus422
+			| RevokeParticipationGrantStatus500
+		>,
+		RevokeParticipationGrantOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RevokeParticipationGrantStatus200,
+		ResponseErrorConfig<
+			| RevokeParticipationGrantStatus400
+			| RevokeParticipationGrantStatus422
+			| RevokeParticipationGrantStatus500
+		>,
+		RevokeParticipationGrantOptions,
+		TContext
+	>;
+}
+
+export const listControlledServicePrincipalsQueryKey = ({
+	query,
+}: Omit<ListControlledServicePrincipalsOptions, "headers"> = {}) =>
+	[{ url: "/api/v1/participation/service-principals" }, ...(query ? [query] : [])] as const;
+
+type ListControlledServicePrincipalsQueryKey = ReturnType<
+	typeof listControlledServicePrincipalsQueryKey
+>;
+
+export function listControlledServicePrincipalsQueryOptions(
+	{ query }: ListControlledServicePrincipalsOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = listControlledServicePrincipalsQueryKey({ query });
+	return queryOptions<
+		ListControlledServicePrincipalsStatus200,
+		ResponseErrorConfig<
+			ListControlledServicePrincipalsStatus422 | ListControlledServicePrincipalsStatus500
+		>,
+		ListControlledServicePrincipalsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await listControlledServicePrincipals({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/service-principals}
+ */
+export function useListControlledServicePrincipals<
+	TData = ListControlledServicePrincipalsStatus200,
+	TQueryData = ListControlledServicePrincipalsStatus200,
+	TQueryKey extends QueryKey = ListControlledServicePrincipalsQueryKey,
+>(
+	{
+		query,
+	}: {
+		query?:
+			| ListControlledServicePrincipalsOptions["query"]
+			| (() => ListControlledServicePrincipalsOptions["query"]);
+	} = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ListControlledServicePrincipalsStatus200,
+				ResponseErrorConfig<
+					ListControlledServicePrincipalsStatus422 | ListControlledServicePrincipalsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey =
+		resolvedOptions?.queryKey ?? listControlledServicePrincipalsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...listControlledServicePrincipalsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			ListControlledServicePrincipalsStatus422 | ListControlledServicePrincipalsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const createServicePrincipalMutationKey = () =>
+	[{ url: "/api/v1/participation/service-principals" }] as const;
+
+export function createServicePrincipalMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = createServicePrincipalMutationKey();
+	return mutationOptions<
+		CreateServicePrincipalStatus200,
+		ResponseErrorConfig<
+			| CreateServicePrincipalStatus400
+			| CreateServicePrincipalStatus422
+			| CreateServicePrincipalStatus500
+		>,
+		CreateServicePrincipalOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await createServicePrincipal({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/service-principals}
+ */
+export function useCreateServicePrincipal<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			CreateServicePrincipalStatus200,
+			ResponseErrorConfig<
+				| CreateServicePrincipalStatus400
+				| CreateServicePrincipalStatus422
+				| CreateServicePrincipalStatus500
+			>,
+			CreateServicePrincipalOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? createServicePrincipalMutationKey();
+
+	const baseOptions = createServicePrincipalMutationOptions(config) as UseMutationOptions<
+		CreateServicePrincipalStatus200,
+		ResponseErrorConfig<
+			| CreateServicePrincipalStatus400
+			| CreateServicePrincipalStatus422
+			| CreateServicePrincipalStatus500
+		>,
+		CreateServicePrincipalOptions,
+		TContext
+	>;
+
+	return useMutation<
+		CreateServicePrincipalStatus200,
+		ResponseErrorConfig<
+			| CreateServicePrincipalStatus400
+			| CreateServicePrincipalStatus422
+			| CreateServicePrincipalStatus500
+		>,
+		CreateServicePrincipalOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		CreateServicePrincipalStatus200,
+		ResponseErrorConfig<
+			| CreateServicePrincipalStatus400
+			| CreateServicePrincipalStatus422
+			| CreateServicePrincipalStatus500
+		>,
+		CreateServicePrincipalOptions,
+		TContext
+	>;
+}
+
+export const revokeServicePrincipalMutationKey = () =>
+	[{ url: "/api/v1/participation/service-principals/:id/revoke" }] as const;
+
+export function revokeServicePrincipalMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = revokeServicePrincipalMutationKey();
+	return mutationOptions<
+		RevokeServicePrincipalStatus200,
+		ResponseErrorConfig<
+			| RevokeServicePrincipalStatus400
+			| RevokeServicePrincipalStatus422
+			| RevokeServicePrincipalStatus500
+		>,
+		RevokeServicePrincipalOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await revokeServicePrincipal({ ...config, path, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/service-principals/:id/revoke}
+ */
+export function useRevokeServicePrincipal<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RevokeServicePrincipalStatus200,
+			ResponseErrorConfig<
+				| RevokeServicePrincipalStatus400
+				| RevokeServicePrincipalStatus422
+				| RevokeServicePrincipalStatus500
+			>,
+			RevokeServicePrincipalOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? revokeServicePrincipalMutationKey();
+
+	const baseOptions = revokeServicePrincipalMutationOptions(config) as UseMutationOptions<
+		RevokeServicePrincipalStatus200,
+		ResponseErrorConfig<
+			| RevokeServicePrincipalStatus400
+			| RevokeServicePrincipalStatus422
+			| RevokeServicePrincipalStatus500
+		>,
+		RevokeServicePrincipalOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RevokeServicePrincipalStatus200,
+		ResponseErrorConfig<
+			| RevokeServicePrincipalStatus400
+			| RevokeServicePrincipalStatus422
+			| RevokeServicePrincipalStatus500
+		>,
+		RevokeServicePrincipalOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RevokeServicePrincipalStatus200,
+		ResponseErrorConfig<
+			| RevokeServicePrincipalStatus400
+			| RevokeServicePrincipalStatus422
+			| RevokeServicePrincipalStatus500
+		>,
+		RevokeServicePrincipalOptions,
+		TContext
+	>;
+}
+
+export const eraseOwnAccountMutationKey = () =>
+	[{ url: "/api/v1/participation/account/erase" }] as const;
+
+export function eraseOwnAccountMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = eraseOwnAccountMutationKey();
+	return mutationOptions<
+		EraseOwnAccountStatus200,
+		ResponseErrorConfig<EraseOwnAccountStatus500>,
+		undefined,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async (_) => {
+			const { data } = await eraseOwnAccount({ ...config, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/account/erase}
+ */
+export function useEraseOwnAccount<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			EraseOwnAccountStatus200,
+			ResponseErrorConfig<EraseOwnAccountStatus500>,
+			undefined,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? eraseOwnAccountMutationKey();
+
+	const baseOptions = eraseOwnAccountMutationOptions(config) as UseMutationOptions<
+		EraseOwnAccountStatus200,
+		ResponseErrorConfig<EraseOwnAccountStatus500>,
+		undefined,
+		TContext
+	>;
+
+	return useMutation<
+		EraseOwnAccountStatus200,
+		ResponseErrorConfig<EraseOwnAccountStatus500>,
+		undefined,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		EraseOwnAccountStatus200,
+		ResponseErrorConfig<EraseOwnAccountStatus500>,
+		undefined,
+		TContext
+	>;
+}
+
+export const recoverEntityControllerMutationKey = () =>
+	[{ url: "/api/v1/participation/entities/:id/recover" }] as const;
+
+export function recoverEntityControllerMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = recoverEntityControllerMutationKey();
+	return mutationOptions<
+		RecoverEntityControllerStatus200,
+		ResponseErrorConfig<
+			| RecoverEntityControllerStatus400
+			| RecoverEntityControllerStatus422
+			| RecoverEntityControllerStatus500
+		>,
+		RecoverEntityControllerOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await recoverEntityController({ ...config, path, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/participation/entities/:id/recover}
+ */
+export function useRecoverEntityController<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			RecoverEntityControllerStatus200,
+			ResponseErrorConfig<
+				| RecoverEntityControllerStatus400
+				| RecoverEntityControllerStatus422
+				| RecoverEntityControllerStatus500
+			>,
+			RecoverEntityControllerOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? recoverEntityControllerMutationKey();
+
+	const baseOptions = recoverEntityControllerMutationOptions(config) as UseMutationOptions<
+		RecoverEntityControllerStatus200,
+		ResponseErrorConfig<
+			| RecoverEntityControllerStatus400
+			| RecoverEntityControllerStatus422
+			| RecoverEntityControllerStatus500
+		>,
+		RecoverEntityControllerOptions,
+		TContext
+	>;
+
+	return useMutation<
+		RecoverEntityControllerStatus200,
+		ResponseErrorConfig<
+			| RecoverEntityControllerStatus400
+			| RecoverEntityControllerStatus422
+			| RecoverEntityControllerStatus500
+		>,
+		RecoverEntityControllerOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		RecoverEntityControllerStatus200,
+		ResponseErrorConfig<
+			| RecoverEntityControllerStatus400
+			| RecoverEntityControllerStatus422
+			| RecoverEntityControllerStatus500
+		>,
+		RecoverEntityControllerOptions,
 		TContext
 	>;
 }
@@ -19993,36 +22230,36 @@ export function useDeleteApiUnitsByIdByUnitIdCustomThemeInstallation<TContext>(
 	>;
 }
 
-export const getApiPlatformAccessCustomThemeExternalLiveProfilesQueryKey = ({
+export const getApiPlatformAccessCustomThemeExternalLiveAccountsQueryKey = ({
 	query,
-}: Omit<GetApiPlatformAccessCustomThemeExternalLiveProfilesOptions, "headers"> = {}) =>
+}: Omit<GetApiPlatformAccessCustomThemeExternalLiveAccountsOptions, "headers"> = {}) =>
 	[
-		{ url: "/api/v1/platform-access/custom-theme-external-live/profiles" },
+		{ url: "/api/v1/platform-access/custom-theme-external-live/accounts" },
 		...(query ? [query] : []),
 	] as const;
 
-type GetApiPlatformAccessCustomThemeExternalLiveProfilesQueryKey = ReturnType<
-	typeof getApiPlatformAccessCustomThemeExternalLiveProfilesQueryKey
+type GetApiPlatformAccessCustomThemeExternalLiveAccountsQueryKey = ReturnType<
+	typeof getApiPlatformAccessCustomThemeExternalLiveAccountsQueryKey
 >;
 
-export function getApiPlatformAccessCustomThemeExternalLiveProfilesQueryOptions(
-	{ query }: GetApiPlatformAccessCustomThemeExternalLiveProfilesOptions = {},
+export function getApiPlatformAccessCustomThemeExternalLiveAccountsQueryOptions(
+	{ query }: GetApiPlatformAccessCustomThemeExternalLiveAccountsOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiPlatformAccessCustomThemeExternalLiveProfilesQueryKey({ query });
+	const queryKey = getApiPlatformAccessCustomThemeExternalLiveAccountsQueryKey({ query });
 	return queryOptions<
-		GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200,
+		GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus200,
 		ResponseErrorConfig<
-			| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus403
-			| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus422
-			| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus500
+			| GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus403
+			| GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus422
+			| GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus500
 		>,
-		GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200,
+		GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPlatformAccessCustomThemeExternalLiveProfiles({
+			const { data } = await getApiPlatformAccessCustomThemeExternalLiveAccounts({
 				...config,
 				query,
 				signal: config.signal ?? signal,
@@ -20035,28 +22272,28 @@ export function getApiPlatformAccessCustomThemeExternalLiveProfilesQueryOptions(
 
 /**
  * @summary List or search Profiles for Custom Theme external-live access
- * {@link /api/v1/platform-access/custom-theme-external-live/profiles}
+ * {@link /api/v1/platform-access/custom-theme-external-live/accounts}
  */
-export function useGetApiPlatformAccessCustomThemeExternalLiveProfiles<
-	TData = GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200,
-	TQueryData = GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200,
-	TQueryKey extends QueryKey = GetApiPlatformAccessCustomThemeExternalLiveProfilesQueryKey,
+export function useGetApiPlatformAccessCustomThemeExternalLiveAccounts<
+	TData = GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus200,
+	TQueryData = GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus200,
+	TQueryKey extends QueryKey = GetApiPlatformAccessCustomThemeExternalLiveAccountsQueryKey,
 >(
 	{
 		query,
 	}: {
 		query?:
-			| GetApiPlatformAccessCustomThemeExternalLiveProfilesOptions["query"]
-			| (() => GetApiPlatformAccessCustomThemeExternalLiveProfilesOptions["query"]);
+			| GetApiPlatformAccessCustomThemeExternalLiveAccountsOptions["query"]
+			| (() => GetApiPlatformAccessCustomThemeExternalLiveAccountsOptions["query"]);
 	} = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus200,
+				GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus200,
 				ResponseErrorConfig<
-					| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus403
-					| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus422
-					| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus500
+					| GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus403
+					| GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus422
+					| GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus500
 				>,
 				TData,
 				TQueryData,
@@ -20071,11 +22308,11 @@ export function useGetApiPlatformAccessCustomThemeExternalLiveProfiles<
 	const resolvedParams = { query: typeof query === "function" ? query() : query };
 	const queryKey =
 		resolvedOptions?.queryKey ??
-		getApiPlatformAccessCustomThemeExternalLiveProfilesQueryKey(resolvedParams);
+		getApiPlatformAccessCustomThemeExternalLiveAccountsQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiPlatformAccessCustomThemeExternalLiveProfilesQueryOptions(resolvedParams, config),
+			...getApiPlatformAccessCustomThemeExternalLiveAccountsQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -20083,9 +22320,9 @@ export function useGetApiPlatformAccessCustomThemeExternalLiveProfiles<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus403
-			| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus422
-			| GetApiPlatformAccessCustomThemeExternalLiveProfilesStatus500
+			| GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus403
+			| GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus422
+			| GetApiPlatformAccessCustomThemeExternalLiveAccountsStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -20094,41 +22331,41 @@ export function useGetApiPlatformAccessCustomThemeExternalLiveProfiles<
 	return queryResult;
 }
 
-export const getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryKey = ({
+export const getApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessQueryKey = ({
 	path,
-}: Omit<GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions, "headers">) =>
+}: Omit<GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions, "headers">) =>
 	[
 		{
-			url: "/api/v1/platform-access/profiles/:profileId/custom-theme-external-live-access",
+			url: "/api/v1/platform-access/accounts/:authUserId/custom-theme-external-live-access",
 			params: path,
 		},
 	] as const;
 
-type GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryKey = ReturnType<
-	typeof getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryKey
+type GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessQueryKey = ReturnType<
+	typeof getApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessQueryKey
 >;
 
-export function getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryOptions(
-	{ path }: GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+export function getApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessQueryOptions(
+	{ path }: GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryKey({
+	const queryKey = getApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessQueryKey({
 		path,
 	});
 	return queryOptions<
-		GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+		GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus200,
 		ResponseErrorConfig<
-			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
-			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
-			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
-			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
+			| GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus403
+			| GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus404
+			| GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus422
+			| GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus500
 		>,
-		GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+		GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess({
+			const { data } = await getApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccess({
 				...config,
 				path,
 				signal: config.signal ?? signal,
@@ -20141,30 +22378,30 @@ export function getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAc
 
 /**
  * @summary Get one Profile's Custom Theme external-live access
- * {@link /api/v1/platform-access/profiles/:profileId/custom-theme-external-live-access}
+ * {@link /api/v1/platform-access/accounts/:authUserId/custom-theme-external-live-access}
  */
-export function useGetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess<
-	TData = GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
-	TQueryData = GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+export function useGetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccess<
+	TData = GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus200,
+	TQueryData = GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus200,
 	TQueryKey extends
-		QueryKey = GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryKey,
+		QueryKey = GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessQueryKey,
 >(
 	{
 		path,
 	}: {
 		path:
-			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions["path"]
-			| (() => GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions["path"]);
+			| GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions["path"]
+			| (() => GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions["path"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+				GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus200,
 				ResponseErrorConfig<
-					| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
-					| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
-					| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
-					| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
+					| GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus403
+					| GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus404
+					| GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus422
+					| GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus500
 				>,
 				TData,
 				TQueryData,
@@ -20179,11 +22416,11 @@ export function useGetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiv
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
 		resolvedOptions?.queryKey ??
-		getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryKey(resolvedParams);
+		getApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessQueryOptions(
+			...getApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessQueryOptions(
 				resolvedParams,
 				config,
 			),
@@ -20194,10 +22431,10 @@ export function useGetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiv
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
-			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
-			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
-			| GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
+			| GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus403
+			| GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus404
+			| GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus422
+			| GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -20206,32 +22443,33 @@ export function useGetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiv
 	return queryResult;
 }
 
-export const putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessMutationKey = () =>
-	[
-		{ url: "/api/v1/platform-access/profiles/:profileId/custom-theme-external-live-access" },
-	] as const;
+export const putApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessMutationKey =
+	() =>
+		[
+			{ url: "/api/v1/platform-access/accounts/:authUserId/custom-theme-external-live-access" },
+		] as const;
 
-export function putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessMutationOptions<
+export function putApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessMutationOptions<
 	TContext = unknown,
 >(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
 	const mutationKey =
-		putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessMutationKey();
+		putApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessMutationKey();
 	return mutationOptions<
-		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+		PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus200,
 		ResponseErrorConfig<
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus400
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus409
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus400
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus403
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus404
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus409
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus422
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus500
 		>,
-		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+		PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess({
+			const { data } = await putApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccess({
 				...config,
 				path,
 				body,
@@ -20244,21 +22482,21 @@ export function putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAc
 
 /**
  * @summary Grant, renew, or revoke Custom Theme external-live access
- * {@link /api/v1/platform-access/profiles/:profileId/custom-theme-external-live-access}
+ * {@link /api/v1/platform-access/accounts/:authUserId/custom-theme-external-live-access}
  */
-export function usePutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess<TContext>(
+export function usePutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccess<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+			PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus200,
 			ResponseErrorConfig<
-				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus400
-				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
-				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
-				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus409
-				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
-				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
+				| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus400
+				| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus403
+				| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus404
+				| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus409
+				| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus422
+				| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus500
 			>,
-			PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+			PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -20268,36 +22506,36 @@ export function usePutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiv
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
 		mutationOptions.mutationKey ??
-		putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessMutationKey();
+		putApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessMutationKey();
 
 	const baseOptions =
-		putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessMutationOptions(
+		putApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessMutationOptions(
 			config,
 		) as UseMutationOptions<
-			PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+			PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus200,
 			ResponseErrorConfig<
-				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus400
-				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
-				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
-				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus409
-				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
-				| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
+				| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus400
+				| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus403
+				| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus404
+				| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus409
+				| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus422
+				| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus500
 			>,
-			PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+			PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions,
 			TContext
 		>;
 
 	return useMutation<
-		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+		PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus200,
 		ResponseErrorConfig<
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus400
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus409
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus400
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus403
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus404
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus409
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus422
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus500
 		>,
-		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+		PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions,
 		TContext
 	>(
 		{
@@ -20307,16 +22545,16 @@ export function usePutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiv
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus200,
+		PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus200,
 		ResponseErrorConfig<
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus400
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus403
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus404
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus409
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus422
-			| PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessStatus500
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus400
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus403
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus404
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus409
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus422
+			| PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessStatus500
 		>,
-		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+		PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions,
 		TContext
 	>;
 }
@@ -20393,31 +22631,31 @@ export function useGetApiPlatformAccessPolicy<
 	return queryResult;
 }
 
-export const getApiPlatformAccessProfilesQueryKey = ({
+export const getApiPlatformAccessAccountsQueryKey = ({
 	query,
-}: Omit<GetApiPlatformAccessProfilesOptions, "headers"> = {}) =>
-	[{ url: "/api/v1/platform-access/profiles" }, ...(query ? [query] : [])] as const;
+}: Omit<GetApiPlatformAccessAccountsOptions, "headers"> = {}) =>
+	[{ url: "/api/v1/platform-access/accounts" }, ...(query ? [query] : [])] as const;
 
-type GetApiPlatformAccessProfilesQueryKey = ReturnType<typeof getApiPlatformAccessProfilesQueryKey>;
+type GetApiPlatformAccessAccountsQueryKey = ReturnType<typeof getApiPlatformAccessAccountsQueryKey>;
 
-export function getApiPlatformAccessProfilesQueryOptions(
-	{ query }: GetApiPlatformAccessProfilesOptions = {},
+export function getApiPlatformAccessAccountsQueryOptions(
+	{ query }: GetApiPlatformAccessAccountsOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiPlatformAccessProfilesQueryKey({ query });
+	const queryKey = getApiPlatformAccessAccountsQueryKey({ query });
 	return queryOptions<
-		GetApiPlatformAccessProfilesStatus200,
+		GetApiPlatformAccessAccountsStatus200,
 		ResponseErrorConfig<
-			| GetApiPlatformAccessProfilesStatus403
-			| GetApiPlatformAccessProfilesStatus422
-			| GetApiPlatformAccessProfilesStatus500
+			| GetApiPlatformAccessAccountsStatus403
+			| GetApiPlatformAccessAccountsStatus422
+			| GetApiPlatformAccessAccountsStatus500
 		>,
-		GetApiPlatformAccessProfilesStatus200,
+		GetApiPlatformAccessAccountsStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPlatformAccessProfiles({
+			const { data } = await getApiPlatformAccessAccounts({
 				...config,
 				query,
 				signal: config.signal ?? signal,
@@ -20430,28 +22668,28 @@ export function getApiPlatformAccessProfilesQueryOptions(
 
 /**
  * @summary List or search Profiles and their platform access
- * {@link /api/v1/platform-access/profiles}
+ * {@link /api/v1/platform-access/accounts}
  */
-export function useGetApiPlatformAccessProfiles<
-	TData = GetApiPlatformAccessProfilesStatus200,
-	TQueryData = GetApiPlatformAccessProfilesStatus200,
-	TQueryKey extends QueryKey = GetApiPlatformAccessProfilesQueryKey,
+export function useGetApiPlatformAccessAccounts<
+	TData = GetApiPlatformAccessAccountsStatus200,
+	TQueryData = GetApiPlatformAccessAccountsStatus200,
+	TQueryKey extends QueryKey = GetApiPlatformAccessAccountsQueryKey,
 >(
 	{
 		query,
 	}: {
 		query?:
-			| GetApiPlatformAccessProfilesOptions["query"]
-			| (() => GetApiPlatformAccessProfilesOptions["query"]);
+			| GetApiPlatformAccessAccountsOptions["query"]
+			| (() => GetApiPlatformAccessAccountsOptions["query"]);
 	} = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiPlatformAccessProfilesStatus200,
+				GetApiPlatformAccessAccountsStatus200,
 				ResponseErrorConfig<
-					| GetApiPlatformAccessProfilesStatus403
-					| GetApiPlatformAccessProfilesStatus422
-					| GetApiPlatformAccessProfilesStatus500
+					| GetApiPlatformAccessAccountsStatus403
+					| GetApiPlatformAccessAccountsStatus422
+					| GetApiPlatformAccessAccountsStatus500
 				>,
 				TData,
 				TQueryData,
@@ -20465,11 +22703,11 @@ export function useGetApiPlatformAccessProfiles<
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { query: typeof query === "function" ? query() : query };
 	const queryKey =
-		resolvedOptions?.queryKey ?? getApiPlatformAccessProfilesQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiPlatformAccessAccountsQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiPlatformAccessProfilesQueryOptions(resolvedParams, config),
+			...getApiPlatformAccessAccountsQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -20477,9 +22715,9 @@ export function useGetApiPlatformAccessProfiles<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiPlatformAccessProfilesStatus403
-			| GetApiPlatformAccessProfilesStatus422
-			| GetApiPlatformAccessProfilesStatus500
+			| GetApiPlatformAccessAccountsStatus403
+			| GetApiPlatformAccessAccountsStatus422
+			| GetApiPlatformAccessAccountsStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -20488,34 +22726,34 @@ export function useGetApiPlatformAccessProfiles<
 	return queryResult;
 }
 
-export const getApiPlatformAccessProfilesByProfileIdQueryKey = ({
+export const getApiPlatformAccessAccountsByAuthUserIdQueryKey = ({
 	path,
-}: Omit<GetApiPlatformAccessProfilesByProfileIdOptions, "headers">) =>
-	[{ url: "/api/v1/platform-access/profiles/:profileId", params: path }] as const;
+}: Omit<GetApiPlatformAccessAccountsByAuthUserIdOptions, "headers">) =>
+	[{ url: "/api/v1/platform-access/accounts/:authUserId", params: path }] as const;
 
-type GetApiPlatformAccessProfilesByProfileIdQueryKey = ReturnType<
-	typeof getApiPlatformAccessProfilesByProfileIdQueryKey
+type GetApiPlatformAccessAccountsByAuthUserIdQueryKey = ReturnType<
+	typeof getApiPlatformAccessAccountsByAuthUserIdQueryKey
 >;
 
-export function getApiPlatformAccessProfilesByProfileIdQueryOptions(
-	{ path }: GetApiPlatformAccessProfilesByProfileIdOptions,
+export function getApiPlatformAccessAccountsByAuthUserIdQueryOptions(
+	{ path }: GetApiPlatformAccessAccountsByAuthUserIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiPlatformAccessProfilesByProfileIdQueryKey({ path });
+	const queryKey = getApiPlatformAccessAccountsByAuthUserIdQueryKey({ path });
 	return queryOptions<
-		GetApiPlatformAccessProfilesByProfileIdStatus200,
+		GetApiPlatformAccessAccountsByAuthUserIdStatus200,
 		ResponseErrorConfig<
-			| GetApiPlatformAccessProfilesByProfileIdStatus403
-			| GetApiPlatformAccessProfilesByProfileIdStatus404
-			| GetApiPlatformAccessProfilesByProfileIdStatus422
-			| GetApiPlatformAccessProfilesByProfileIdStatus500
+			| GetApiPlatformAccessAccountsByAuthUserIdStatus403
+			| GetApiPlatformAccessAccountsByAuthUserIdStatus404
+			| GetApiPlatformAccessAccountsByAuthUserIdStatus422
+			| GetApiPlatformAccessAccountsByAuthUserIdStatus500
 		>,
-		GetApiPlatformAccessProfilesByProfileIdStatus200,
+		GetApiPlatformAccessAccountsByAuthUserIdStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPlatformAccessProfilesByProfileId({
+			const { data } = await getApiPlatformAccessAccountsByAuthUserId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
@@ -20528,29 +22766,29 @@ export function getApiPlatformAccessProfilesByProfileIdQueryOptions(
 
 /**
  * @summary Get one Profile's platform access
- * {@link /api/v1/platform-access/profiles/:profileId}
+ * {@link /api/v1/platform-access/accounts/:authUserId}
  */
-export function useGetApiPlatformAccessProfilesByProfileId<
-	TData = GetApiPlatformAccessProfilesByProfileIdStatus200,
-	TQueryData = GetApiPlatformAccessProfilesByProfileIdStatus200,
-	TQueryKey extends QueryKey = GetApiPlatformAccessProfilesByProfileIdQueryKey,
+export function useGetApiPlatformAccessAccountsByAuthUserId<
+	TData = GetApiPlatformAccessAccountsByAuthUserIdStatus200,
+	TQueryData = GetApiPlatformAccessAccountsByAuthUserIdStatus200,
+	TQueryKey extends QueryKey = GetApiPlatformAccessAccountsByAuthUserIdQueryKey,
 >(
 	{
 		path,
 	}: {
 		path:
-			| GetApiPlatformAccessProfilesByProfileIdOptions["path"]
-			| (() => GetApiPlatformAccessProfilesByProfileIdOptions["path"]);
+			| GetApiPlatformAccessAccountsByAuthUserIdOptions["path"]
+			| (() => GetApiPlatformAccessAccountsByAuthUserIdOptions["path"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiPlatformAccessProfilesByProfileIdStatus200,
+				GetApiPlatformAccessAccountsByAuthUserIdStatus200,
 				ResponseErrorConfig<
-					| GetApiPlatformAccessProfilesByProfileIdStatus403
-					| GetApiPlatformAccessProfilesByProfileIdStatus404
-					| GetApiPlatformAccessProfilesByProfileIdStatus422
-					| GetApiPlatformAccessProfilesByProfileIdStatus500
+					| GetApiPlatformAccessAccountsByAuthUserIdStatus403
+					| GetApiPlatformAccessAccountsByAuthUserIdStatus404
+					| GetApiPlatformAccessAccountsByAuthUserIdStatus422
+					| GetApiPlatformAccessAccountsByAuthUserIdStatus500
 				>,
 				TData,
 				TQueryData,
@@ -20564,11 +22802,11 @@ export function useGetApiPlatformAccessProfilesByProfileId<
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
-		resolvedOptions?.queryKey ?? getApiPlatformAccessProfilesByProfileIdQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ?? getApiPlatformAccessAccountsByAuthUserIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiPlatformAccessProfilesByProfileIdQueryOptions(resolvedParams, config),
+			...getApiPlatformAccessAccountsByAuthUserIdQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -20576,10 +22814,10 @@ export function useGetApiPlatformAccessProfilesByProfileId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiPlatformAccessProfilesByProfileIdStatus403
-			| GetApiPlatformAccessProfilesByProfileIdStatus404
-			| GetApiPlatformAccessProfilesByProfileIdStatus422
-			| GetApiPlatformAccessProfilesByProfileIdStatus500
+			| GetApiPlatformAccessAccountsByAuthUserIdStatus403
+			| GetApiPlatformAccessAccountsByAuthUserIdStatus404
+			| GetApiPlatformAccessAccountsByAuthUserIdStatus422
+			| GetApiPlatformAccessAccountsByAuthUserIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -20588,29 +22826,29 @@ export function useGetApiPlatformAccessProfilesByProfileId<
 	return queryResult;
 }
 
-export const putApiPlatformAccessProfilesByProfileIdMutationKey = () =>
-	[{ url: "/api/v1/platform-access/profiles/:profileId" }] as const;
+export const putApiPlatformAccessAccountsByAuthUserIdMutationKey = () =>
+	[{ url: "/api/v1/platform-access/accounts/:authUserId" }] as const;
 
-export function putApiPlatformAccessProfilesByProfileIdMutationOptions<TContext = unknown>(
+export function putApiPlatformAccessAccountsByAuthUserIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = putApiPlatformAccessProfilesByProfileIdMutationKey();
+	const mutationKey = putApiPlatformAccessAccountsByAuthUserIdMutationKey();
 	return mutationOptions<
-		PutApiPlatformAccessProfilesByProfileIdStatus200,
+		PutApiPlatformAccessAccountsByAuthUserIdStatus200,
 		ResponseErrorConfig<
-			| PutApiPlatformAccessProfilesByProfileIdStatus400
-			| PutApiPlatformAccessProfilesByProfileIdStatus403
-			| PutApiPlatformAccessProfilesByProfileIdStatus404
-			| PutApiPlatformAccessProfilesByProfileIdStatus409
-			| PutApiPlatformAccessProfilesByProfileIdStatus422
-			| PutApiPlatformAccessProfilesByProfileIdStatus500
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus400
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus403
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus404
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus409
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus422
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus500
 		>,
-		PutApiPlatformAccessProfilesByProfileIdOptions,
+		PutApiPlatformAccessAccountsByAuthUserIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiPlatformAccessProfilesByProfileId({
+			const { data } = await putApiPlatformAccessAccountsByAuthUserId({
 				...config,
 				path,
 				body,
@@ -20623,21 +22861,21 @@ export function putApiPlatformAccessProfilesByProfileIdMutationOptions<TContext 
 
 /**
  * @summary Replace one Profile's platform access
- * {@link /api/v1/platform-access/profiles/:profileId}
+ * {@link /api/v1/platform-access/accounts/:authUserId}
  */
-export function usePutApiPlatformAccessProfilesByProfileId<TContext>(
+export function usePutApiPlatformAccessAccountsByAuthUserId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiPlatformAccessProfilesByProfileIdStatus200,
+			PutApiPlatformAccessAccountsByAuthUserIdStatus200,
 			ResponseErrorConfig<
-				| PutApiPlatformAccessProfilesByProfileIdStatus400
-				| PutApiPlatformAccessProfilesByProfileIdStatus403
-				| PutApiPlatformAccessProfilesByProfileIdStatus404
-				| PutApiPlatformAccessProfilesByProfileIdStatus409
-				| PutApiPlatformAccessProfilesByProfileIdStatus422
-				| PutApiPlatformAccessProfilesByProfileIdStatus500
+				| PutApiPlatformAccessAccountsByAuthUserIdStatus400
+				| PutApiPlatformAccessAccountsByAuthUserIdStatus403
+				| PutApiPlatformAccessAccountsByAuthUserIdStatus404
+				| PutApiPlatformAccessAccountsByAuthUserIdStatus409
+				| PutApiPlatformAccessAccountsByAuthUserIdStatus422
+				| PutApiPlatformAccessAccountsByAuthUserIdStatus500
 			>,
-			PutApiPlatformAccessProfilesByProfileIdOptions,
+			PutApiPlatformAccessAccountsByAuthUserIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -20646,35 +22884,35 @@ export function usePutApiPlatformAccessProfilesByProfileId<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? putApiPlatformAccessProfilesByProfileIdMutationKey();
+		mutationOptions.mutationKey ?? putApiPlatformAccessAccountsByAuthUserIdMutationKey();
 
-	const baseOptions = putApiPlatformAccessProfilesByProfileIdMutationOptions(
+	const baseOptions = putApiPlatformAccessAccountsByAuthUserIdMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PutApiPlatformAccessProfilesByProfileIdStatus200,
+		PutApiPlatformAccessAccountsByAuthUserIdStatus200,
 		ResponseErrorConfig<
-			| PutApiPlatformAccessProfilesByProfileIdStatus400
-			| PutApiPlatformAccessProfilesByProfileIdStatus403
-			| PutApiPlatformAccessProfilesByProfileIdStatus404
-			| PutApiPlatformAccessProfilesByProfileIdStatus409
-			| PutApiPlatformAccessProfilesByProfileIdStatus422
-			| PutApiPlatformAccessProfilesByProfileIdStatus500
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus400
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus403
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus404
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus409
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus422
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus500
 		>,
-		PutApiPlatformAccessProfilesByProfileIdOptions,
+		PutApiPlatformAccessAccountsByAuthUserIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiPlatformAccessProfilesByProfileIdStatus200,
+		PutApiPlatformAccessAccountsByAuthUserIdStatus200,
 		ResponseErrorConfig<
-			| PutApiPlatformAccessProfilesByProfileIdStatus400
-			| PutApiPlatformAccessProfilesByProfileIdStatus403
-			| PutApiPlatformAccessProfilesByProfileIdStatus404
-			| PutApiPlatformAccessProfilesByProfileIdStatus409
-			| PutApiPlatformAccessProfilesByProfileIdStatus422
-			| PutApiPlatformAccessProfilesByProfileIdStatus500
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus400
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus403
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus404
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus409
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus422
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus500
 		>,
-		PutApiPlatformAccessProfilesByProfileIdOptions,
+		PutApiPlatformAccessAccountsByAuthUserIdOptions,
 		TContext
 	>(
 		{
@@ -20684,16 +22922,16 @@ export function usePutApiPlatformAccessProfilesByProfileId<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiPlatformAccessProfilesByProfileIdStatus200,
+		PutApiPlatformAccessAccountsByAuthUserIdStatus200,
 		ResponseErrorConfig<
-			| PutApiPlatformAccessProfilesByProfileIdStatus400
-			| PutApiPlatformAccessProfilesByProfileIdStatus403
-			| PutApiPlatformAccessProfilesByProfileIdStatus404
-			| PutApiPlatformAccessProfilesByProfileIdStatus409
-			| PutApiPlatformAccessProfilesByProfileIdStatus422
-			| PutApiPlatformAccessProfilesByProfileIdStatus500
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus400
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus403
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus404
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus409
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus422
+			| PutApiPlatformAccessAccountsByAuthUserIdStatus500
 		>,
-		PutApiPlatformAccessProfilesByProfileIdOptions,
+		PutApiPlatformAccessAccountsByAuthUserIdOptions,
 		TContext
 	>;
 }
@@ -36241,103 +38479,6 @@ export function usePostApiCollections<TContext>(
 	>;
 }
 
-export const getApiCollectionsFavoritesQueryKey = ({
-	query,
-}: Omit<GetApiCollectionsFavoritesOptions, "headers"> = {}) =>
-	[{ url: "/api/v1/collections/favorites" }, ...(query ? [query] : [])] as const;
-
-type GetApiCollectionsFavoritesQueryKey = ReturnType<typeof getApiCollectionsFavoritesQueryKey>;
-
-export function getApiCollectionsFavoritesQueryOptions(
-	{ query }: GetApiCollectionsFavoritesOptions = {},
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const queryKey = getApiCollectionsFavoritesQueryKey({ query });
-	return queryOptions<
-		GetApiCollectionsFavoritesStatus200,
-		ResponseErrorConfig<
-			| GetApiCollectionsFavoritesStatus404
-			| GetApiCollectionsFavoritesStatus422
-			| GetApiCollectionsFavoritesStatus429
-			| GetApiCollectionsFavoritesStatus500
-		>,
-		GetApiCollectionsFavoritesStatus200,
-		typeof queryKey
-	>({
-		queryKey,
-		queryFn: async ({ signal }) => {
-			const { data } = await getApiCollectionsFavorites({
-				...config,
-				query,
-				signal: config.signal ?? signal,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Get Favorites collection
- * {@link /api/v1/collections/favorites}
- */
-export function useGetApiCollectionsFavorites<
-	TData = GetApiCollectionsFavoritesStatus200,
-	TQueryData = GetApiCollectionsFavoritesStatus200,
-	TQueryKey extends QueryKey = GetApiCollectionsFavoritesQueryKey,
->(
-	{
-		query,
-	}: {
-		query?:
-			| GetApiCollectionsFavoritesOptions["query"]
-			| (() => GetApiCollectionsFavoritesOptions["query"]);
-	} = {},
-	options: {
-		query?: Partial<
-			QueryObserverOptions<
-				GetApiCollectionsFavoritesStatus200,
-				ResponseErrorConfig<
-					| GetApiCollectionsFavoritesStatus404
-					| GetApiCollectionsFavoritesStatus422
-					| GetApiCollectionsFavoritesStatus429
-					| GetApiCollectionsFavoritesStatus500
-				>,
-				TData,
-				TQueryData,
-				TQueryKey
-			>
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { query: queryConfig = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { query: typeof query === "function" ? query() : query };
-	const queryKey = resolvedOptions?.queryKey ?? getApiCollectionsFavoritesQueryKey(resolvedParams);
-
-	const queryResult = useQuery(
-		{
-			...getApiCollectionsFavoritesQueryOptions(resolvedParams, config),
-			...resolvedOptions,
-			queryKey,
-		} as unknown as QueryObserverOptions,
-		queryClient,
-	) as UseQueryResult<
-		TData,
-		ResponseErrorConfig<
-			| GetApiCollectionsFavoritesStatus404
-			| GetApiCollectionsFavoritesStatus422
-			| GetApiCollectionsFavoritesStatus429
-			| GetApiCollectionsFavoritesStatus500
-		>
-	> & { queryKey: TQueryKey };
-
-	queryResult.queryKey = queryKey as TQueryKey;
-
-	return queryResult;
-}
-
 export const getApiCollectionsByCollectionIdItemsQueryKey = ({
 	path,
 	query,
@@ -37575,29 +39716,108 @@ export function usePostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRest
 	>;
 }
 
-export const putApiCollectionsFavoritesItemsByTargetIdMutationKey = () =>
-	[{ url: "/api/v1/collections/favorites/items/:targetId" }] as const;
+export const getApiFavoritesQueryKey = ({ query }: Omit<GetApiFavoritesOptions, "headers"> = {}) =>
+	[{ url: "/api/v1/favorites" }, ...(query ? [query] : [])] as const;
 
-export function putApiCollectionsFavoritesItemsByTargetIdMutationOptions<TContext = unknown>(
+type GetApiFavoritesQueryKey = ReturnType<typeof getApiFavoritesQueryKey>;
+
+export function getApiFavoritesQueryOptions(
+	{ query }: GetApiFavoritesOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = putApiCollectionsFavoritesItemsByTargetIdMutationKey();
-	return mutationOptions<
-		PutApiCollectionsFavoritesItemsByTargetIdStatus200,
+	const queryKey = getApiFavoritesQueryKey({ query });
+	return queryOptions<
+		GetApiFavoritesStatus200,
 		ResponseErrorConfig<
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus400
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus404
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus409
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus422
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus429
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus500
+			GetApiFavoritesStatus422 | GetApiFavoritesStatus429 | GetApiFavoritesStatus500
 		>,
-		PutApiCollectionsFavoritesItemsByTargetIdOptions,
+		GetApiFavoritesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiFavorites({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/favorites}
+ */
+export function useGetApiFavorites<
+	TData = GetApiFavoritesStatus200,
+	TQueryData = GetApiFavoritesStatus200,
+	TQueryKey extends QueryKey = GetApiFavoritesQueryKey,
+>(
+	{
+		query,
+	}: { query?: GetApiFavoritesOptions["query"] | (() => GetApiFavoritesOptions["query"]) } = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiFavoritesStatus200,
+				ResponseErrorConfig<
+					GetApiFavoritesStatus422 | GetApiFavoritesStatus429 | GetApiFavoritesStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? getApiFavoritesQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiFavoritesQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			GetApiFavoritesStatus422 | GetApiFavoritesStatus429 | GetApiFavoritesStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiFavoritesByTargetUnitIdMutationKey = () =>
+	[{ url: "/api/v1/favorites/:targetUnitId" }] as const;
+
+export function putApiFavoritesByTargetUnitIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiFavoritesByTargetUnitIdMutationKey();
+	return mutationOptions<
+		PutApiFavoritesByTargetUnitIdStatus200,
+		ResponseErrorConfig<
+			| PutApiFavoritesByTargetUnitIdStatus400
+			| PutApiFavoritesByTargetUnitIdStatus422
+			| PutApiFavoritesByTargetUnitIdStatus429
+			| PutApiFavoritesByTargetUnitIdStatus500
+		>,
+		PutApiFavoritesByTargetUnitIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiCollectionsFavoritesItemsByTargetId({
+			const { data } = await putApiFavoritesByTargetUnitId({
 				...config,
 				path,
 				body,
@@ -37609,22 +39829,19 @@ export function putApiCollectionsFavoritesItemsByTargetIdMutationOptions<TContex
 }
 
 /**
- * @summary Favorite unit
- * {@link /api/v1/collections/favorites/items/:targetId}
+ * {@link /api/v1/favorites/:targetUnitId}
  */
-export function usePutApiCollectionsFavoritesItemsByTargetId<TContext>(
+export function usePutApiFavoritesByTargetUnitId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiCollectionsFavoritesItemsByTargetIdStatus200,
+			PutApiFavoritesByTargetUnitIdStatus200,
 			ResponseErrorConfig<
-				| PutApiCollectionsFavoritesItemsByTargetIdStatus400
-				| PutApiCollectionsFavoritesItemsByTargetIdStatus404
-				| PutApiCollectionsFavoritesItemsByTargetIdStatus409
-				| PutApiCollectionsFavoritesItemsByTargetIdStatus422
-				| PutApiCollectionsFavoritesItemsByTargetIdStatus429
-				| PutApiCollectionsFavoritesItemsByTargetIdStatus500
+				| PutApiFavoritesByTargetUnitIdStatus400
+				| PutApiFavoritesByTargetUnitIdStatus422
+				| PutApiFavoritesByTargetUnitIdStatus429
+				| PutApiFavoritesByTargetUnitIdStatus500
 			>,
-			PutApiCollectionsFavoritesItemsByTargetIdOptions,
+			PutApiFavoritesByTargetUnitIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -37632,36 +39849,29 @@ export function usePutApiCollectionsFavoritesItemsByTargetId<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiCollectionsFavoritesItemsByTargetIdMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? putApiFavoritesByTargetUnitIdMutationKey();
 
-	const baseOptions = putApiCollectionsFavoritesItemsByTargetIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PutApiCollectionsFavoritesItemsByTargetIdStatus200,
+	const baseOptions = putApiFavoritesByTargetUnitIdMutationOptions(config) as UseMutationOptions<
+		PutApiFavoritesByTargetUnitIdStatus200,
 		ResponseErrorConfig<
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus400
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus404
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus409
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus422
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus429
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus500
+			| PutApiFavoritesByTargetUnitIdStatus400
+			| PutApiFavoritesByTargetUnitIdStatus422
+			| PutApiFavoritesByTargetUnitIdStatus429
+			| PutApiFavoritesByTargetUnitIdStatus500
 		>,
-		PutApiCollectionsFavoritesItemsByTargetIdOptions,
+		PutApiFavoritesByTargetUnitIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiCollectionsFavoritesItemsByTargetIdStatus200,
+		PutApiFavoritesByTargetUnitIdStatus200,
 		ResponseErrorConfig<
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus400
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus404
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus409
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus422
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus429
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus500
+			| PutApiFavoritesByTargetUnitIdStatus400
+			| PutApiFavoritesByTargetUnitIdStatus422
+			| PutApiFavoritesByTargetUnitIdStatus429
+			| PutApiFavoritesByTargetUnitIdStatus500
 		>,
-		PutApiCollectionsFavoritesItemsByTargetIdOptions,
+		PutApiFavoritesByTargetUnitIdOptions,
 		TContext
 	>(
 		{
@@ -37671,42 +39881,39 @@ export function usePutApiCollectionsFavoritesItemsByTargetId<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiCollectionsFavoritesItemsByTargetIdStatus200,
+		PutApiFavoritesByTargetUnitIdStatus200,
 		ResponseErrorConfig<
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus400
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus404
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus409
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus422
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus429
-			| PutApiCollectionsFavoritesItemsByTargetIdStatus500
+			| PutApiFavoritesByTargetUnitIdStatus400
+			| PutApiFavoritesByTargetUnitIdStatus422
+			| PutApiFavoritesByTargetUnitIdStatus429
+			| PutApiFavoritesByTargetUnitIdStatus500
 		>,
-		PutApiCollectionsFavoritesItemsByTargetIdOptions,
+		PutApiFavoritesByTargetUnitIdOptions,
 		TContext
 	>;
 }
 
-export const deleteApiCollectionsFavoritesItemsByTargetIdMutationKey = () =>
-	[{ url: "/api/v1/collections/favorites/items/:targetId" }] as const;
+export const deleteApiFavoritesByTargetUnitIdMutationKey = () =>
+	[{ url: "/api/v1/favorites/:targetUnitId" }] as const;
 
-export function deleteApiCollectionsFavoritesItemsByTargetIdMutationOptions<TContext = unknown>(
+export function deleteApiFavoritesByTargetUnitIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = deleteApiCollectionsFavoritesItemsByTargetIdMutationKey();
+	const mutationKey = deleteApiFavoritesByTargetUnitIdMutationKey();
 	return mutationOptions<
-		DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
+		DeleteApiFavoritesByTargetUnitIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus400
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus409
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500
+			| DeleteApiFavoritesByTargetUnitIdStatus400
+			| DeleteApiFavoritesByTargetUnitIdStatus422
+			| DeleteApiFavoritesByTargetUnitIdStatus429
+			| DeleteApiFavoritesByTargetUnitIdStatus500
 		>,
-		DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
+		DeleteApiFavoritesByTargetUnitIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiCollectionsFavoritesItemsByTargetId({
+			const { data } = await deleteApiFavoritesByTargetUnitId({
 				...config,
 				path,
 				body,
@@ -37718,21 +39925,19 @@ export function deleteApiCollectionsFavoritesItemsByTargetIdMutationOptions<TCon
 }
 
 /**
- * @summary Remove favorite unit
- * {@link /api/v1/collections/favorites/items/:targetId}
+ * {@link /api/v1/favorites/:targetUnitId}
  */
-export function useDeleteApiCollectionsFavoritesItemsByTargetId<TContext>(
+export function useDeleteApiFavoritesByTargetUnitId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
+			DeleteApiFavoritesByTargetUnitIdStatus200,
 			ResponseErrorConfig<
-				| DeleteApiCollectionsFavoritesItemsByTargetIdStatus400
-				| DeleteApiCollectionsFavoritesItemsByTargetIdStatus409
-				| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
-				| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
-				| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500
+				| DeleteApiFavoritesByTargetUnitIdStatus400
+				| DeleteApiFavoritesByTargetUnitIdStatus422
+				| DeleteApiFavoritesByTargetUnitIdStatus429
+				| DeleteApiFavoritesByTargetUnitIdStatus500
 			>,
-			DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
+			DeleteApiFavoritesByTargetUnitIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -37740,34 +39945,29 @@ export function useDeleteApiCollectionsFavoritesItemsByTargetId<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? deleteApiCollectionsFavoritesItemsByTargetIdMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? deleteApiFavoritesByTargetUnitIdMutationKey();
 
-	const baseOptions = deleteApiCollectionsFavoritesItemsByTargetIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
+	const baseOptions = deleteApiFavoritesByTargetUnitIdMutationOptions(config) as UseMutationOptions<
+		DeleteApiFavoritesByTargetUnitIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus400
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus409
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500
+			| DeleteApiFavoritesByTargetUnitIdStatus400
+			| DeleteApiFavoritesByTargetUnitIdStatus422
+			| DeleteApiFavoritesByTargetUnitIdStatus429
+			| DeleteApiFavoritesByTargetUnitIdStatus500
 		>,
-		DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
+		DeleteApiFavoritesByTargetUnitIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
+		DeleteApiFavoritesByTargetUnitIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus400
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus409
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500
+			| DeleteApiFavoritesByTargetUnitIdStatus400
+			| DeleteApiFavoritesByTargetUnitIdStatus422
+			| DeleteApiFavoritesByTargetUnitIdStatus429
+			| DeleteApiFavoritesByTargetUnitIdStatus500
 		>,
-		DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
+		DeleteApiFavoritesByTargetUnitIdOptions,
 		TContext
 	>(
 		{
@@ -37777,15 +39977,318 @@ export function useDeleteApiCollectionsFavoritesItemsByTargetId<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
+		DeleteApiFavoritesByTargetUnitIdStatus200,
 		ResponseErrorConfig<
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus400
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus409
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
-			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500
+			| DeleteApiFavoritesByTargetUnitIdStatus400
+			| DeleteApiFavoritesByTargetUnitIdStatus422
+			| DeleteApiFavoritesByTargetUnitIdStatus429
+			| DeleteApiFavoritesByTargetUnitIdStatus500
 		>,
-		DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
+		DeleteApiFavoritesByTargetUnitIdOptions,
+		TContext
+	>;
+}
+
+export const getApiFavoritesByTargetUnitIdHistoryQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiFavoritesByTargetUnitIdHistoryOptions, "headers">) =>
+	[
+		{ url: "/api/v1/favorites/:targetUnitId/history", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiFavoritesByTargetUnitIdHistoryQueryKey = ReturnType<
+	typeof getApiFavoritesByTargetUnitIdHistoryQueryKey
+>;
+
+export function getApiFavoritesByTargetUnitIdHistoryQueryOptions(
+	{ path, query }: GetApiFavoritesByTargetUnitIdHistoryOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiFavoritesByTargetUnitIdHistoryQueryKey({ path, query });
+	return queryOptions<
+		GetApiFavoritesByTargetUnitIdHistoryStatus200,
+		ResponseErrorConfig<
+			| GetApiFavoritesByTargetUnitIdHistoryStatus422
+			| GetApiFavoritesByTargetUnitIdHistoryStatus429
+			| GetApiFavoritesByTargetUnitIdHistoryStatus500
+		>,
+		GetApiFavoritesByTargetUnitIdHistoryStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiFavoritesByTargetUnitIdHistory({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/favorites/:targetUnitId/history}
+ */
+export function useGetApiFavoritesByTargetUnitIdHistory<
+	TData = GetApiFavoritesByTargetUnitIdHistoryStatus200,
+	TQueryData = GetApiFavoritesByTargetUnitIdHistoryStatus200,
+	TQueryKey extends QueryKey = GetApiFavoritesByTargetUnitIdHistoryQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiFavoritesByTargetUnitIdHistoryOptions["path"]
+			| (() => GetApiFavoritesByTargetUnitIdHistoryOptions["path"]);
+		query?:
+			| GetApiFavoritesByTargetUnitIdHistoryOptions["query"]
+			| (() => GetApiFavoritesByTargetUnitIdHistoryOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiFavoritesByTargetUnitIdHistoryStatus200,
+				ResponseErrorConfig<
+					| GetApiFavoritesByTargetUnitIdHistoryStatus422
+					| GetApiFavoritesByTargetUnitIdHistoryStatus429
+					| GetApiFavoritesByTargetUnitIdHistoryStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiFavoritesByTargetUnitIdHistoryQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiFavoritesByTargetUnitIdHistoryQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiFavoritesByTargetUnitIdHistoryStatus422
+			| GetApiFavoritesByTargetUnitIdHistoryStatus429
+			| GetApiFavoritesByTargetUnitIdHistoryStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiFavoritesByTargetUnitIdHistoryByRevisionQueryKey = ({
+	path,
+}: Omit<GetApiFavoritesByTargetUnitIdHistoryByRevisionOptions, "headers">) =>
+	[{ url: "/api/v1/favorites/:targetUnitId/history/:revision", params: path }] as const;
+
+type GetApiFavoritesByTargetUnitIdHistoryByRevisionQueryKey = ReturnType<
+	typeof getApiFavoritesByTargetUnitIdHistoryByRevisionQueryKey
+>;
+
+export function getApiFavoritesByTargetUnitIdHistoryByRevisionQueryOptions(
+	{ path }: GetApiFavoritesByTargetUnitIdHistoryByRevisionOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiFavoritesByTargetUnitIdHistoryByRevisionQueryKey({ path });
+	return queryOptions<
+		GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200,
+		ResponseErrorConfig<
+			| GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus422
+			| GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus429
+			| GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus500
+		>,
+		GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiFavoritesByTargetUnitIdHistoryByRevision({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/favorites/:targetUnitId/history/:revision}
+ */
+export function useGetApiFavoritesByTargetUnitIdHistoryByRevision<
+	TData = GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200,
+	TQueryData = GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200,
+	TQueryKey extends QueryKey = GetApiFavoritesByTargetUnitIdHistoryByRevisionQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiFavoritesByTargetUnitIdHistoryByRevisionOptions["path"]
+			| (() => GetApiFavoritesByTargetUnitIdHistoryByRevisionOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus200,
+				ResponseErrorConfig<
+					| GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus422
+					| GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus429
+					| GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiFavoritesByTargetUnitIdHistoryByRevisionQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiFavoritesByTargetUnitIdHistoryByRevisionQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus422
+			| GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus429
+			| GetApiFavoritesByTargetUnitIdHistoryByRevisionStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiFavoritesByTargetUnitIdRestoreMutationKey = () =>
+	[{ url: "/api/v1/favorites/:targetUnitId/restore" }] as const;
+
+export function postApiFavoritesByTargetUnitIdRestoreMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiFavoritesByTargetUnitIdRestoreMutationKey();
+	return mutationOptions<
+		PostApiFavoritesByTargetUnitIdRestoreStatus200,
+		ResponseErrorConfig<
+			| PostApiFavoritesByTargetUnitIdRestoreStatus400
+			| PostApiFavoritesByTargetUnitIdRestoreStatus422
+			| PostApiFavoritesByTargetUnitIdRestoreStatus429
+			| PostApiFavoritesByTargetUnitIdRestoreStatus500
+		>,
+		PostApiFavoritesByTargetUnitIdRestoreOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiFavoritesByTargetUnitIdRestore({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * {@link /api/v1/favorites/:targetUnitId/restore}
+ */
+export function usePostApiFavoritesByTargetUnitIdRestore<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiFavoritesByTargetUnitIdRestoreStatus200,
+			ResponseErrorConfig<
+				| PostApiFavoritesByTargetUnitIdRestoreStatus400
+				| PostApiFavoritesByTargetUnitIdRestoreStatus422
+				| PostApiFavoritesByTargetUnitIdRestoreStatus429
+				| PostApiFavoritesByTargetUnitIdRestoreStatus500
+			>,
+			PostApiFavoritesByTargetUnitIdRestoreOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiFavoritesByTargetUnitIdRestoreMutationKey();
+
+	const baseOptions = postApiFavoritesByTargetUnitIdRestoreMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiFavoritesByTargetUnitIdRestoreStatus200,
+		ResponseErrorConfig<
+			| PostApiFavoritesByTargetUnitIdRestoreStatus400
+			| PostApiFavoritesByTargetUnitIdRestoreStatus422
+			| PostApiFavoritesByTargetUnitIdRestoreStatus429
+			| PostApiFavoritesByTargetUnitIdRestoreStatus500
+		>,
+		PostApiFavoritesByTargetUnitIdRestoreOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiFavoritesByTargetUnitIdRestoreStatus200,
+		ResponseErrorConfig<
+			| PostApiFavoritesByTargetUnitIdRestoreStatus400
+			| PostApiFavoritesByTargetUnitIdRestoreStatus422
+			| PostApiFavoritesByTargetUnitIdRestoreStatus429
+			| PostApiFavoritesByTargetUnitIdRestoreStatus500
+		>,
+		PostApiFavoritesByTargetUnitIdRestoreOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiFavoritesByTargetUnitIdRestoreStatus200,
+		ResponseErrorConfig<
+			| PostApiFavoritesByTargetUnitIdRestoreStatus400
+			| PostApiFavoritesByTargetUnitIdRestoreStatus422
+			| PostApiFavoritesByTargetUnitIdRestoreStatus429
+			| PostApiFavoritesByTargetUnitIdRestoreStatus500
+		>,
+		PostApiFavoritesByTargetUnitIdRestoreOptions,
 		TContext
 	>;
 }

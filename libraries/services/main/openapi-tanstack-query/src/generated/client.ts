@@ -5,8 +5,12 @@
 
 import type { Options, RequestResult } from "./.kubb/client";
 import type {
-	AssignCurrentProfileSlugOptions,
-	AssignCurrentProfileSlugResponses,
+	AddCatalogIdentifierOptions,
+	AddCatalogIdentifierResponses,
+	AddCatalogNameOptions,
+	AddCatalogNameResponses,
+	CreateCatalogResourceOptions,
+	CreateCatalogResourceResponses,
 	DeleteApiApiQuotaPoliciesAccountsByUserIdOptions,
 	DeleteApiApiQuotaPoliciesAccountsByUserIdResponses,
 	DeleteApiApiTokensByTokenIdOptions,
@@ -245,6 +249,18 @@ import type {
 	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
+	ReadCatalogResourceOptions,
+	ReadCatalogResourceResponses,
+	UpdateCatalogLifecycleOptions,
+	UpdateCatalogLifecycleResponses,
+	ListCatalogNamesOptions,
+	ListCatalogNamesResponses,
+	ReviseCatalogNameOptions,
+	ReviseCatalogNameResponses,
+	ListCatalogIdentifiersOptions,
+	ListCatalogIdentifiersResponses,
+	ReviseCatalogIdentifierOptions,
+	ReviseCatalogIdentifierResponses,
 	GetApiUnitsByIdByUnitIdDocksOptions,
 	GetApiUnitsByIdByUnitIdDocksResponses,
 	GetApiUnitsByIdByUnitIdDocksByKindOptions,
@@ -257,44 +273,76 @@ import type {
 	GetApiUnitsByIdByUnitIdDocksByKindRevisionsResponses,
 	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreOptions,
 	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreResponses,
-	GetApiUsersMeOptions,
-	GetApiUsersMeResponses,
-	PatchApiUsersMeOptions,
-	PatchApiUsersMeResponses,
+	GetApiAccountMeOptions,
+	GetApiAccountMeResponses,
+	PatchApiAccountMeOptions,
+	PatchApiAccountMeResponses,
 	ListCurrentUserStudioContentOptions,
 	ListCurrentUserStudioContentResponses,
 	RecordCurrentUserStudioVisitOptions,
 	RecordCurrentUserStudioVisitResponses,
-	GetApiUsersMePreferencesOptions,
-	GetApiUsersMePreferencesResponses,
-	PatchApiUsersMePreferencesOptions,
-	PatchApiUsersMePreferencesResponses,
-	PutApiUsersMePreferencesOptions,
-	PutApiUsersMePreferencesResponses,
+	GetApiAccountMePreferencesOptions,
+	GetApiAccountMePreferencesResponses,
+	PatchApiAccountMePreferencesOptions,
+	PatchApiAccountMePreferencesResponses,
+	PutApiAccountMePreferencesOptions,
+	PutApiAccountMePreferencesResponses,
 	UpdateCurrentUserPrivacyOptions,
 	UpdateCurrentUserPrivacyResponses,
-	GetApiUsersMeFollowingOptions,
-	GetApiUsersMeFollowingResponses,
-	GetApiUsersMeFollowingByUnitIdOptions,
-	GetApiUsersMeFollowingByUnitIdResponses,
-	PutApiUsersMeFollowingByUnitIdOptions,
-	PutApiUsersMeFollowingByUnitIdResponses,
-	DeleteApiUsersMeFollowingByUnitIdOptions,
-	DeleteApiUsersMeFollowingByUnitIdResponses,
-	PatchApiUsersMeFollowingByUnitIdOptions,
-	PatchApiUsersMeFollowingByUnitIdResponses,
-	PutApiUsersMeFollowingByUnitIdSettingsOptions,
-	PutApiUsersMeFollowingByUnitIdSettingsResponses,
+	GetApiAccountMeFollowingOptions,
+	GetApiAccountMeFollowingResponses,
+	GetApiAccountMeFollowingByUnitIdOptions,
+	GetApiAccountMeFollowingByUnitIdResponses,
+	PutApiAccountMeFollowingByUnitIdOptions,
+	PutApiAccountMeFollowingByUnitIdResponses,
+	DeleteApiAccountMeFollowingByUnitIdOptions,
+	DeleteApiAccountMeFollowingByUnitIdResponses,
+	PatchApiAccountMeFollowingByUnitIdOptions,
+	PatchApiAccountMeFollowingByUnitIdResponses,
+	PutApiAccountMeFollowingByUnitIdSettingsOptions,
+	PutApiAccountMeFollowingByUnitIdSettingsResponses,
 	GetUserProfileActivityOptions,
 	GetUserProfileActivityResponses,
-	GetApiUsersByIdOptions,
-	GetApiUsersByIdResponses,
-	GetApiUsersMeBlocksOptions,
-	GetApiUsersMeBlocksResponses,
-	PutApiUsersByIdBlockOptions,
-	PutApiUsersByIdBlockResponses,
-	DeleteApiUsersByIdBlockOptions,
-	DeleteApiUsersByIdBlockResponses,
+	GetApiEntitiesByIdProfileOptions,
+	GetApiEntitiesByIdProfileResponses,
+	GetApiAccountMeBlocksOptions,
+	GetApiAccountMeBlocksResponses,
+	PutApiAccountBlocksByIdOptions,
+	PutApiAccountBlocksByIdResponses,
+	DeleteApiAccountBlocksByIdOptions,
+	DeleteApiAccountBlocksByIdResponses,
+	ListManagedOrganizationsOptions,
+	ListManagedOrganizationsResponses,
+	CreateManagedOrganizationOptions,
+	CreateManagedOrganizationResponses,
+	UpdateActingEntityPresentationOptions,
+	UpdateActingEntityPresentationResponses,
+	ListActingEntityPresentationHistoryOptions,
+	ListActingEntityPresentationHistoryResponses,
+	GetActingEntityPresentationRevisionOptions,
+	GetActingEntityPresentationRevisionResponses,
+	RestoreActingEntityPresentationOptions,
+	RestoreActingEntityPresentationResponses,
+	GetCurrentParticipationOptions,
+	GetCurrentParticipationResponses,
+	ListParticipationGrantsOptions,
+	ListParticipationGrantsResponses,
+	IssueParticipationGrantOptions,
+	IssueParticipationGrantResponses,
+	SelectParticipationOptions,
+	SelectParticipationResponses,
+	RevokeParticipationGrantOptions,
+	RevokeParticipationGrantResponses,
+	ListControlledServicePrincipalsOptions,
+	ListControlledServicePrincipalsResponses,
+	CreateServicePrincipalOptions,
+	CreateServicePrincipalResponses,
+	RevokeServicePrincipalOptions,
+	RevokeServicePrincipalResponses,
+	EraseOwnAccountOptions,
+	EraseOwnAccountResponses,
+	RecoverEntityControllerOptions,
+	RecoverEntityControllerResponses,
 	GetApiCustomThemesExecutionControlOptions,
 	GetApiCustomThemesExecutionControlResponses,
 	PutApiCustomThemesExecutionControlOptions,
@@ -329,20 +377,20 @@ import type {
 	PutApiUnitsByIdByUnitIdCustomThemeInstallationResponses,
 	DeleteApiUnitsByIdByUnitIdCustomThemeInstallationOptions,
 	DeleteApiUnitsByIdByUnitIdCustomThemeInstallationResponses,
-	GetApiPlatformAccessCustomThemeExternalLiveProfilesOptions,
-	GetApiPlatformAccessCustomThemeExternalLiveProfilesResponses,
-	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
-	GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessResponses,
-	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
-	PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessResponses,
+	GetApiPlatformAccessCustomThemeExternalLiveAccountsOptions,
+	GetApiPlatformAccessCustomThemeExternalLiveAccountsResponses,
+	GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions,
+	GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessResponses,
+	PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions,
+	PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessResponses,
 	GetApiPlatformAccessPolicyOptions,
 	GetApiPlatformAccessPolicyResponses,
-	GetApiPlatformAccessProfilesOptions,
-	GetApiPlatformAccessProfilesResponses,
-	GetApiPlatformAccessProfilesByProfileIdOptions,
-	GetApiPlatformAccessProfilesByProfileIdResponses,
-	PutApiPlatformAccessProfilesByProfileIdOptions,
-	PutApiPlatformAccessProfilesByProfileIdResponses,
+	GetApiPlatformAccessAccountsOptions,
+	GetApiPlatformAccessAccountsResponses,
+	GetApiPlatformAccessAccountsByAuthUserIdOptions,
+	GetApiPlatformAccessAccountsByAuthUserIdResponses,
+	PutApiPlatformAccessAccountsByAuthUserIdOptions,
+	PutApiPlatformAccessAccountsByAuthUserIdResponses,
 	GetApiPlatformUsersOptions,
 	GetApiPlatformUsersResponses,
 	GetApiPlatformUsersByUserIdOptions,
@@ -641,8 +689,6 @@ import type {
 	GetApiCollectionsResponses,
 	PostApiCollectionsOptions,
 	PostApiCollectionsResponses,
-	GetApiCollectionsFavoritesOptions,
-	GetApiCollectionsFavoritesResponses,
 	GetApiCollectionsByCollectionIdItemsOptions,
 	GetApiCollectionsByCollectionIdItemsResponses,
 	GetApiCollectionsByCollectionIdOptions,
@@ -665,10 +711,18 @@ import type {
 	GetApiCollectionsByCollectionIdItemRevisionsCompareResponses,
 	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreOptions,
 	PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreResponses,
-	PutApiCollectionsFavoritesItemsByTargetIdOptions,
-	PutApiCollectionsFavoritesItemsByTargetIdResponses,
-	DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
-	DeleteApiCollectionsFavoritesItemsByTargetIdResponses,
+	GetApiFavoritesOptions,
+	GetApiFavoritesResponses,
+	PutApiFavoritesByTargetUnitIdOptions,
+	PutApiFavoritesByTargetUnitIdResponses,
+	DeleteApiFavoritesByTargetUnitIdOptions,
+	DeleteApiFavoritesByTargetUnitIdResponses,
+	GetApiFavoritesByTargetUnitIdHistoryOptions,
+	GetApiFavoritesByTargetUnitIdHistoryResponses,
+	GetApiFavoritesByTargetUnitIdHistoryByRevisionOptions,
+	GetApiFavoritesByTargetUnitIdHistoryByRevisionResponses,
+	PostApiFavoritesByTargetUnitIdRestoreOptions,
+	PostApiFavoritesByTargetUnitIdRestoreResponses,
 	GetApiReviewsOptions,
 	GetApiReviewsResponses,
 	PostApiReviewsOptions,
@@ -3135,6 +3189,174 @@ export function deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
 }
 
 /**
+ * @summary Create a native catalog resource
+ * {@link /api/v1/catalog/resources}
+ */
+export function createCatalogResource<ThrowOnError extends boolean = true>(
+	options: Options<CreateCatalogResourceOptions, ThrowOnError>,
+): Promise<RequestResult<CreateCatalogResourceResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/resources",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<CreateCatalogResourceResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read native catalog metadata
+ * {@link /api/v1/catalog/resources/:owner/:id}
+ */
+export function readCatalogResource<ThrowOnError extends boolean = true>(
+	options: Options<ReadCatalogResourceOptions, ThrowOnError>,
+): Promise<RequestResult<ReadCatalogResourceResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}",
+		...config,
+	}) as Promise<RequestResult<ReadCatalogResourceResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Change catalog publication and visibility
+ * {@link /api/v1/catalog/resources/:owner/:id/lifecycle}
+ */
+export function updateCatalogLifecycle<ThrowOnError extends boolean = true>(
+	options: Options<UpdateCatalogLifecycleOptions, ThrowOnError>,
+): Promise<RequestResult<UpdateCatalogLifecycleResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/v1/catalog/resources/{owner}/{id}/lifecycle",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<UpdateCatalogLifecycleResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List independently versioned catalog names
+ * {@link /api/v1/catalog/resources/:owner/:id/names}
+ */
+export function listCatalogNames<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogNamesOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogNamesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/names",
+		...config,
+	}) as Promise<RequestResult<ListCatalogNamesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Add a catalog name
+ * {@link /api/v1/catalog/resources/:owner/:id/names}
+ */
+export function addCatalogName<ThrowOnError extends boolean = true>(
+	options: Options<AddCatalogNameOptions, ThrowOnError>,
+): Promise<RequestResult<AddCatalogNameResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/resources/{owner}/{id}/names",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<AddCatalogNameResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Revise a catalog name with its exact current revision
+ * {@link /api/v1/catalog/resources/:owner/:id/names/:nameId}
+ */
+export function reviseCatalogName<ThrowOnError extends boolean = true>(
+	options: Options<ReviseCatalogNameOptions, ThrowOnError>,
+): Promise<RequestResult<ReviseCatalogNameResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/resources/{owner}/{id}/names/{nameId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ReviseCatalogNameResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List catalog identifier claims
+ * {@link /api/v1/catalog/resources/:owner/:id/identifiers}
+ */
+export function listCatalogIdentifiers<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogIdentifiersOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogIdentifiersResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/identifiers",
+		...config,
+	}) as Promise<RequestResult<ListCatalogIdentifiersResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Add an identifier claim without merging identities
+ * {@link /api/v1/catalog/resources/:owner/:id/identifiers}
+ */
+export function addCatalogIdentifier<ThrowOnError extends boolean = true>(
+	options: Options<AddCatalogIdentifierOptions, ThrowOnError>,
+): Promise<RequestResult<AddCatalogIdentifierResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/resources/{owner}/{id}/identifiers",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<AddCatalogIdentifierResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Revise an exact identifier claim
+ * {@link /api/v1/catalog/resources/:owner/:id/identifiers/:identifierId}
+ */
+export function reviseCatalogIdentifier<ThrowOnError extends boolean = true>(
+	options: Options<ReviseCatalogIdentifierOptions, ThrowOnError>,
+): Promise<RequestResult<ReviseCatalogIdentifierResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/resources/{owner}/{id}/identifiers/{identifierId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ReviseCatalogIdentifierResponses, ThrowOnError>>;
+}
+
+/**
  * @summary List configured Unit Docks
  * {@link /api/v1/units/by-id/:unitId/docks}
  */
@@ -3259,65 +3481,47 @@ export function postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore<
 
 /**
  * @summary Current user profile
- * {@link /api/v1/users/me}
+ * {@link /api/v1/account/me}
  */
-export function getApiUsersMe<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUsersMeOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiUsersMeResponses, ThrowOnError>> {
+export function getApiAccountMe<ThrowOnError extends boolean = true>(
+	options: Options<GetApiAccountMeOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiAccountMeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/users/me",
+		url: "/api/v1/account/me",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<GetApiUsersMeResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiAccountMeResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Update current profile
- * {@link /api/v1/users/me}
+ * {@link /api/v1/account/me}
  */
-export function patchApiUsersMe<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiUsersMeOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiUsersMeResponses, ThrowOnError>> {
+export function patchApiAccountMe<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiAccountMeOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiAccountMeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PATCH",
-		url: "/api/v1/users/me",
+		url: "/api/v1/account/me",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PatchApiUsersMeResponses, ThrowOnError>>;
-}
-
-/**
- * @description Temporary first-party endpoint. An interactive signed-in user may assign their own Profile slug once without an additional permission. Reserved labels are rejected, and only an idempotent repeat is accepted after assignment.
- * @summary Assign the current Profile slug once
- * {@link /api/v1/users/me/profile-slug}
- */
-export function assignCurrentProfileSlug<ThrowOnError extends boolean = true>(
-	options: Options<AssignCurrentProfileSlugOptions, ThrowOnError>,
-): Promise<RequestResult<AssignCurrentProfileSlugResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/v1/users/me/profile-slug",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<AssignCurrentProfileSlugResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PatchApiAccountMeResponses, ThrowOnError>>;
 }
 
 /**
  * @summary List current user's actionable Studio workspace resources
- * {@link /api/v1/users/me/studio}
+ * {@link /api/v1/account/me/studio}
  */
 export function listCurrentUserStudioContent<ThrowOnError extends boolean = true>(
 	options: Options<ListCurrentUserStudioContentOptions, ThrowOnError> = {},
@@ -3326,7 +3530,7 @@ export function listCurrentUserStudioContent<ThrowOnError extends boolean = true
 
 	return request({
 		method: "GET",
-		url: "/api/v1/users/me/studio",
+		url: "/api/v1/account/me/studio",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3337,7 +3541,7 @@ export function listCurrentUserStudioContent<ThrowOnError extends boolean = true
 
 /**
  * @summary Record a Studio resource visit
- * {@link /api/v1/users/me/studio/:unitId/visit}
+ * {@link /api/v1/account/me/studio/:unitId/visit}
  */
 export function recordCurrentUserStudioVisit<ThrowOnError extends boolean = true>(
 	options: Options<RecordCurrentUserStudioVisitOptions, ThrowOnError>,
@@ -3346,7 +3550,7 @@ export function recordCurrentUserStudioVisit<ThrowOnError extends boolean = true
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/users/me/studio/{unitId}/visit",
+		url: "/api/v1/account/me/studio/{unitId}/visit",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -3357,67 +3561,67 @@ export function recordCurrentUserStudioVisit<ThrowOnError extends boolean = true
 
 /**
  * @summary Current user preferences
- * {@link /api/v1/users/me/preferences}
+ * {@link /api/v1/account/me/preferences}
  */
-export function getApiUsersMePreferences<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUsersMePreferencesOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiUsersMePreferencesResponses, ThrowOnError>> {
+export function getApiAccountMePreferences<ThrowOnError extends boolean = true>(
+	options: Options<GetApiAccountMePreferencesOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiAccountMePreferencesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/users/me/preferences",
+		url: "/api/v1/account/me/preferences",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<GetApiUsersMePreferencesResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiAccountMePreferencesResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Update current user display preferences
- * {@link /api/v1/users/me/preferences}
+ * {@link /api/v1/account/me/preferences}
  */
-export function patchApiUsersMePreferences<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiUsersMePreferencesOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiUsersMePreferencesResponses, ThrowOnError>> {
+export function patchApiAccountMePreferences<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiAccountMePreferencesOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiAccountMePreferencesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PATCH",
-		url: "/api/v1/users/me/preferences",
+		url: "/api/v1/account/me/preferences",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PatchApiUsersMePreferencesResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PatchApiAccountMePreferencesResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Replace current user preferences
- * {@link /api/v1/users/me/preferences}
+ * {@link /api/v1/account/me/preferences}
  */
-export function putApiUsersMePreferences<ThrowOnError extends boolean = true>(
-	options: Options<PutApiUsersMePreferencesOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUsersMePreferencesResponses, ThrowOnError>> {
+export function putApiAccountMePreferences<ThrowOnError extends boolean = true>(
+	options: Options<PutApiAccountMePreferencesOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiAccountMePreferencesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/users/me/preferences",
+		url: "/api/v1/account/me/preferences",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PutApiUsersMePreferencesResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PutApiAccountMePreferencesResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Update current user's Score and Progress privacy
- * {@link /api/v1/users/me/privacy}
+ * {@link /api/v1/account/me/privacy}
  */
 export function updateCurrentUserPrivacy<ThrowOnError extends boolean = true>(
 	options: Options<UpdateCurrentUserPrivacyOptions, ThrowOnError>,
@@ -3426,7 +3630,7 @@ export function updateCurrentUserPrivacy<ThrowOnError extends boolean = true>(
 
 	return request({
 		method: "PATCH",
-		url: "/api/v1/users/me/privacy",
+		url: "/api/v1/account/me/privacy",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<UpdateCurrentUserPrivacyResponses, ThrowOnError>>;
@@ -3434,210 +3638,466 @@ export function updateCurrentUserPrivacy<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List Units followed by the current user
- * {@link /api/v1/users/me/following}
+ * {@link /api/v1/account/me/following}
  */
-export function getApiUsersMeFollowing<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUsersMeFollowingOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiUsersMeFollowingResponses, ThrowOnError>> {
+export function getApiAccountMeFollowing<ThrowOnError extends boolean = true>(
+	options: Options<GetApiAccountMeFollowingOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiAccountMeFollowingResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/users/me/following",
+		url: "/api/v1/account/me/following",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<GetApiUsersMeFollowingResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiAccountMeFollowingResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Get current user's follow state for a Unit
- * {@link /api/v1/users/me/following/:unitId}
+ * {@link /api/v1/account/me/following/:unitId}
  */
-export function getApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUsersMeFollowingByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUsersMeFollowingByUnitIdResponses, ThrowOnError>> {
+export function getApiAccountMeFollowingByUnitId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiAccountMeFollowingByUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiAccountMeFollowingByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/users/me/following/{unitId}",
+		url: "/api/v1/account/me/following/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<GetApiUsersMeFollowingByUnitIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiAccountMeFollowingByUnitIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Follow a Unit
- * {@link /api/v1/users/me/following/:unitId}
+ * {@link /api/v1/account/me/following/:unitId}
  */
-export function putApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = true>(
-	options: Options<PutApiUsersMeFollowingByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUsersMeFollowingByUnitIdResponses, ThrowOnError>> {
+export function putApiAccountMeFollowingByUnitId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiAccountMeFollowingByUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiAccountMeFollowingByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/users/me/following/{unitId}",
+		url: "/api/v1/account/me/following/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PutApiUsersMeFollowingByUnitIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PutApiAccountMeFollowingByUnitIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Unfollow a Unit
- * {@link /api/v1/users/me/following/:unitId}
+ * {@link /api/v1/account/me/following/:unitId}
  */
-export function deleteApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiUsersMeFollowingByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUsersMeFollowingByUnitIdResponses, ThrowOnError>> {
+export function deleteApiAccountMeFollowingByUnitId<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiAccountMeFollowingByUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiAccountMeFollowingByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/users/me/following/{unitId}",
+		url: "/api/v1/account/me/following/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<DeleteApiUsersMeFollowingByUnitIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<DeleteApiAccountMeFollowingByUnitIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Update followed Unit presentation
- * {@link /api/v1/users/me/following/:unitId}
+ * {@link /api/v1/account/me/following/:unitId}
  */
-export function patchApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiUsersMeFollowingByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiUsersMeFollowingByUnitIdResponses, ThrowOnError>> {
+export function patchApiAccountMeFollowingByUnitId<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiAccountMeFollowingByUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiAccountMeFollowingByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PATCH",
-		url: "/api/v1/users/me/following/{unitId}",
+		url: "/api/v1/account/me/following/{unitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PatchApiUsersMeFollowingByUnitIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PatchApiAccountMeFollowingByUnitIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Replace notification and personalization settings for a followed Unit
- * {@link /api/v1/users/me/following/:unitId/settings}
+ * {@link /api/v1/account/me/following/:unitId/settings}
  */
-export function putApiUsersMeFollowingByUnitIdSettings<ThrowOnError extends boolean = true>(
-	options: Options<PutApiUsersMeFollowingByUnitIdSettingsOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUsersMeFollowingByUnitIdSettingsResponses, ThrowOnError>> {
+export function putApiAccountMeFollowingByUnitIdSettings<ThrowOnError extends boolean = true>(
+	options: Options<PutApiAccountMeFollowingByUnitIdSettingsOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiAccountMeFollowingByUnitIdSettingsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/users/me/following/{unitId}/settings",
+		url: "/api/v1/account/me/following/{unitId}/settings",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PutApiUsersMeFollowingByUnitIdSettingsResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PutApiAccountMeFollowingByUnitIdSettingsResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Get visible Score and Progress activity for a public Profile
- * {@link /api/v1/users/:id/activity}
+ * {@link /api/v1/entities/:id/activity}
  */
 export function getUserProfileActivity<ThrowOnError extends boolean = true>(
 	options: Options<GetUserProfileActivityOptions, ThrowOnError>,
 ): Promise<RequestResult<GetUserProfileActivityResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/users/{id}/activity", ...config }) as Promise<
+	return request({ method: "GET", url: "/api/v1/entities/{id}/activity", ...config }) as Promise<
 		RequestResult<GetUserProfileActivityResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Public user profile
- * {@link /api/v1/users/:id}
+ * {@link /api/v1/entities/:id/profile}
  */
-export function getApiUsersById<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUsersByIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUsersByIdResponses, ThrowOnError>> {
+export function getApiEntitiesByIdProfile<ThrowOnError extends boolean = true>(
+	options: Options<GetApiEntitiesByIdProfileOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiEntitiesByIdProfileResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/users/{id}", ...config }) as Promise<
-		RequestResult<GetApiUsersByIdResponses, ThrowOnError>
+	return request({ method: "GET", url: "/api/v1/entities/{id}/profile", ...config }) as Promise<
+		RequestResult<GetApiEntitiesByIdProfileResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary List blocked users
- * {@link /api/v1/users/me/blocks}
+ * {@link /api/v1/account/me/blocks}
  */
-export function getApiUsersMeBlocks<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUsersMeBlocksOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiUsersMeBlocksResponses, ThrowOnError>> {
+export function getApiAccountMeBlocks<ThrowOnError extends boolean = true>(
+	options: Options<GetApiAccountMeBlocksOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiAccountMeBlocksResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/users/me/blocks",
+		url: "/api/v1/account/me/blocks",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<GetApiUsersMeBlocksResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiAccountMeBlocksResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Block user
- * {@link /api/v1/users/:id/block}
+ * {@link /api/v1/account/blocks/:id}
  */
-export function putApiUsersByIdBlock<ThrowOnError extends boolean = true>(
-	options: Options<PutApiUsersByIdBlockOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUsersByIdBlockResponses, ThrowOnError>> {
+export function putApiAccountBlocksById<ThrowOnError extends boolean = true>(
+	options: Options<PutApiAccountBlocksByIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiAccountBlocksByIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/users/{id}/block",
+		url: "/api/v1/account/blocks/{id}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PutApiUsersByIdBlockResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PutApiAccountBlocksByIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Unblock user
- * {@link /api/v1/users/:id/block}
+ * {@link /api/v1/account/blocks/:id}
  */
-export function deleteApiUsersByIdBlock<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiUsersByIdBlockOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUsersByIdBlockResponses, ThrowOnError>> {
+export function deleteApiAccountBlocksById<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiAccountBlocksByIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiAccountBlocksByIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/users/{id}/block",
+		url: "/api/v1/account/blocks/{id}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<DeleteApiUsersByIdBlockResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<DeleteApiAccountBlocksByIdResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/organizations}
+ */
+export function listManagedOrganizations<ThrowOnError extends boolean = true>(
+	options: Options<ListManagedOrganizationsOptions, ThrowOnError> = {},
+): Promise<RequestResult<ListManagedOrganizationsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/participation/organizations",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<ListManagedOrganizationsResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/organizations}
+ */
+export function createManagedOrganization<ThrowOnError extends boolean = true>(
+	options: Options<CreateManagedOrganizationOptions, ThrowOnError>,
+): Promise<RequestResult<CreateManagedOrganizationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/organizations",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<CreateManagedOrganizationResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/presentation}
+ */
+export function updateActingEntityPresentation<ThrowOnError extends boolean = true>(
+	options: Options<UpdateActingEntityPresentationOptions, ThrowOnError>,
+): Promise<RequestResult<UpdateActingEntityPresentationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/v1/participation/presentation",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<UpdateActingEntityPresentationResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/presentation/:language/history}
+ */
+export function listActingEntityPresentationHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListActingEntityPresentationHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<ListActingEntityPresentationHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/participation/presentation/{language}/history",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<ListActingEntityPresentationHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/presentation/:language/history/:revision}
+ */
+export function getActingEntityPresentationRevision<ThrowOnError extends boolean = true>(
+	options: Options<GetActingEntityPresentationRevisionOptions, ThrowOnError>,
+): Promise<RequestResult<GetActingEntityPresentationRevisionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/participation/presentation/{language}/history/{revision}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetActingEntityPresentationRevisionResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/presentation/:language/restore}
+ */
+export function restoreActingEntityPresentation<ThrowOnError extends boolean = true>(
+	options: Options<RestoreActingEntityPresentationOptions, ThrowOnError>,
+): Promise<RequestResult<RestoreActingEntityPresentationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/presentation/{language}/restore",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<RestoreActingEntityPresentationResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/self}
+ */
+export function getCurrentParticipation<ThrowOnError extends boolean = true>(
+	options: Options<GetCurrentParticipationOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetCurrentParticipationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/participation/self",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetCurrentParticipationResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/grants}
+ */
+export function listParticipationGrants<ThrowOnError extends boolean = true>(
+	options: Options<ListParticipationGrantsOptions, ThrowOnError> = {},
+): Promise<RequestResult<ListParticipationGrantsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/participation/grants",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<ListParticipationGrantsResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/grants}
+ */
+export function issueParticipationGrant<ThrowOnError extends boolean = true>(
+	options: Options<IssueParticipationGrantOptions, ThrowOnError>,
+): Promise<RequestResult<IssueParticipationGrantResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/grants",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<IssueParticipationGrantResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/acting}
+ */
+export function selectParticipation<ThrowOnError extends boolean = true>(
+	options: Options<SelectParticipationOptions, ThrowOnError>,
+): Promise<RequestResult<SelectParticipationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/acting",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<SelectParticipationResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/grants/:id/revoke}
+ */
+export function revokeParticipationGrant<ThrowOnError extends boolean = true>(
+	options: Options<RevokeParticipationGrantOptions, ThrowOnError>,
+): Promise<RequestResult<RevokeParticipationGrantResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/grants/{id}/revoke",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<RevokeParticipationGrantResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/service-principals}
+ */
+export function listControlledServicePrincipals<ThrowOnError extends boolean = true>(
+	options: Options<ListControlledServicePrincipalsOptions, ThrowOnError> = {},
+): Promise<RequestResult<ListControlledServicePrincipalsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/participation/service-principals",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<ListControlledServicePrincipalsResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/service-principals}
+ */
+export function createServicePrincipal<ThrowOnError extends boolean = true>(
+	options: Options<CreateServicePrincipalOptions, ThrowOnError>,
+): Promise<RequestResult<CreateServicePrincipalResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/service-principals",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<CreateServicePrincipalResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/service-principals/:id/revoke}
+ */
+export function revokeServicePrincipal<ThrowOnError extends boolean = true>(
+	options: Options<RevokeServicePrincipalOptions, ThrowOnError>,
+): Promise<RequestResult<RevokeServicePrincipalResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/service-principals/{id}/revoke",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<RevokeServicePrincipalResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/account/erase}
+ */
+export function eraseOwnAccount<ThrowOnError extends boolean = true>(
+	options: Options<EraseOwnAccountOptions, ThrowOnError> = {},
+): Promise<RequestResult<EraseOwnAccountResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/account/erase",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<EraseOwnAccountResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/participation/entities/:id/recover}
+ */
+export function recoverEntityController<ThrowOnError extends boolean = true>(
+	options: Options<RecoverEntityControllerOptions, ThrowOnError>,
+): Promise<RequestResult<RecoverEntityControllerResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/participation/entities/{id}/recover",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<RecoverEntityControllerResponses, ThrowOnError>>;
 }
 
 /**
@@ -4017,41 +4477,41 @@ export function deleteApiUnitsByIdByUnitIdCustomThemeInstallation<
 
 /**
  * @summary List or search Profiles for Custom Theme external-live access
- * {@link /api/v1/platform-access/custom-theme-external-live/profiles}
+ * {@link /api/v1/platform-access/custom-theme-external-live/accounts}
  */
-export function getApiPlatformAccessCustomThemeExternalLiveProfiles<
+export function getApiPlatformAccessCustomThemeExternalLiveAccounts<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<GetApiPlatformAccessCustomThemeExternalLiveProfilesOptions, ThrowOnError> = {},
+	options: Options<GetApiPlatformAccessCustomThemeExternalLiveAccountsOptions, ThrowOnError> = {},
 ): Promise<
-	RequestResult<GetApiPlatformAccessCustomThemeExternalLiveProfilesResponses, ThrowOnError>
+	RequestResult<GetApiPlatformAccessCustomThemeExternalLiveAccountsResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/platform-access/custom-theme-external-live/profiles",
+		url: "/api/v1/platform-access/custom-theme-external-live/accounts",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
-		RequestResult<GetApiPlatformAccessCustomThemeExternalLiveProfilesResponses, ThrowOnError>
+		RequestResult<GetApiPlatformAccessCustomThemeExternalLiveAccountsResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Get one Profile's Custom Theme external-live access
- * {@link /api/v1/platform-access/profiles/:profileId/custom-theme-external-live-access}
+ * {@link /api/v1/platform-access/accounts/:authUserId/custom-theme-external-live-access}
  */
-export function getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess<
+export function getApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccess<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<
-		GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+		GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions,
 		ThrowOnError
 	>,
 ): Promise<
 	RequestResult<
-		GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessResponses,
+		GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessResponses,
 		ThrowOnError
 	>
 > {
@@ -4059,12 +4519,12 @@ export function getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAc
 
 	return request({
 		method: "GET",
-		url: "/api/v1/platform-access/profiles/{profileId}/custom-theme-external-live-access",
+		url: "/api/v1/platform-access/accounts/{authUserId}/custom-theme-external-live-access",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
-			GetApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessResponses,
+			GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessResponses,
 			ThrowOnError
 		>
 	>;
@@ -4072,18 +4532,18 @@ export function getApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAc
 
 /**
  * @summary Grant, renew, or revoke Custom Theme external-live access
- * {@link /api/v1/platform-access/profiles/:profileId/custom-theme-external-live-access}
+ * {@link /api/v1/platform-access/accounts/:authUserId/custom-theme-external-live-access}
  */
-export function putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccess<
+export function putApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccess<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<
-		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessOptions,
+		PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions,
 		ThrowOnError
 	>,
 ): Promise<
 	RequestResult<
-		PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessResponses,
+		PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessResponses,
 		ThrowOnError
 	>
 > {
@@ -4091,12 +4551,12 @@ export function putApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAc
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/platform-access/profiles/{profileId}/custom-theme-external-live-access",
+		url: "/api/v1/platform-access/accounts/{authUserId}/custom-theme-external-live-access",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
-			PutApiPlatformAccessProfilesByProfileIdCustomThemeExternalLiveAccessResponses,
+			PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessResponses,
 			ThrowOnError
 		>
 	>;
@@ -4121,53 +4581,53 @@ export function getApiPlatformAccessPolicy<ThrowOnError extends boolean = true>(
 
 /**
  * @summary List or search Profiles and their platform access
- * {@link /api/v1/platform-access/profiles}
+ * {@link /api/v1/platform-access/accounts}
  */
-export function getApiPlatformAccessProfiles<ThrowOnError extends boolean = true>(
-	options: Options<GetApiPlatformAccessProfilesOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiPlatformAccessProfilesResponses, ThrowOnError>> {
+export function getApiPlatformAccessAccounts<ThrowOnError extends boolean = true>(
+	options: Options<GetApiPlatformAccessAccountsOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiPlatformAccessAccountsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/platform-access/profiles",
+		url: "/api/v1/platform-access/accounts",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<GetApiPlatformAccessProfilesResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiPlatformAccessAccountsResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Get one Profile's platform access
- * {@link /api/v1/platform-access/profiles/:profileId}
+ * {@link /api/v1/platform-access/accounts/:authUserId}
  */
-export function getApiPlatformAccessProfilesByProfileId<ThrowOnError extends boolean = true>(
-	options: Options<GetApiPlatformAccessProfilesByProfileIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiPlatformAccessProfilesByProfileIdResponses, ThrowOnError>> {
+export function getApiPlatformAccessAccountsByAuthUserId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiPlatformAccessAccountsByAuthUserIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiPlatformAccessAccountsByAuthUserIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/platform-access/profiles/{profileId}",
+		url: "/api/v1/platform-access/accounts/{authUserId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<GetApiPlatformAccessProfilesByProfileIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiPlatformAccessAccountsByAuthUserIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Replace one Profile's platform access
- * {@link /api/v1/platform-access/profiles/:profileId}
+ * {@link /api/v1/platform-access/accounts/:authUserId}
  */
-export function putApiPlatformAccessProfilesByProfileId<ThrowOnError extends boolean = true>(
-	options: Options<PutApiPlatformAccessProfilesByProfileIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiPlatformAccessProfilesByProfileIdResponses, ThrowOnError>> {
+export function putApiPlatformAccessAccountsByAuthUserId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiPlatformAccessAccountsByAuthUserIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiPlatformAccessAccountsByAuthUserIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/platform-access/profiles/{profileId}",
+		url: "/api/v1/platform-access/accounts/{authUserId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<PutApiPlatformAccessProfilesByProfileIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PutApiPlatformAccessAccountsByAuthUserIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -7299,26 +7759,6 @@ export function postApiCollections<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Get Favorites collection
- * {@link /api/v1/collections/favorites}
- */
-export function getApiCollectionsFavorites<ThrowOnError extends boolean = true>(
-	options: Options<GetApiCollectionsFavoritesOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiCollectionsFavoritesResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/v1/collections/favorites",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiCollectionsFavoritesResponses, ThrowOnError>>;
-}
-
-/**
  * @summary List hydrated collection content
  * {@link /api/v1/collections/:collectionId/items}
  */
@@ -7553,43 +7993,119 @@ export function postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore
 }
 
 /**
- * @summary Favorite unit
- * {@link /api/v1/collections/favorites/items/:targetId}
+ * {@link /api/v1/favorites}
  */
-export function putApiCollectionsFavoritesItemsByTargetId<ThrowOnError extends boolean = true>(
-	options: Options<PutApiCollectionsFavoritesItemsByTargetIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiCollectionsFavoritesItemsByTargetIdResponses, ThrowOnError>> {
+export function getApiFavorites<ThrowOnError extends boolean = true>(
+	options: Options<GetApiFavoritesOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiFavoritesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/favorites",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiFavoritesResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/favorites/:targetUnitId}
+ */
+export function putApiFavoritesByTargetUnitId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiFavoritesByTargetUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiFavoritesByTargetUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/collections/favorites/items/{targetId}",
+		url: "/api/v1/favorites/{targetUnitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PutApiCollectionsFavoritesItemsByTargetIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PutApiFavoritesByTargetUnitIdResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Remove favorite unit
- * {@link /api/v1/collections/favorites/items/:targetId}
+ * {@link /api/v1/favorites/:targetUnitId}
  */
-export function deleteApiCollectionsFavoritesItemsByTargetId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiCollectionsFavoritesItemsByTargetIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiCollectionsFavoritesItemsByTargetIdResponses, ThrowOnError>> {
+export function deleteApiFavoritesByTargetUnitId<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiFavoritesByTargetUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiFavoritesByTargetUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/collections/favorites/items/{targetId}",
+		url: "/api/v1/favorites/{targetUnitId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<DeleteApiCollectionsFavoritesItemsByTargetIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<DeleteApiFavoritesByTargetUnitIdResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/favorites/:targetUnitId/history}
+ */
+export function getApiFavoritesByTargetUnitIdHistory<ThrowOnError extends boolean = true>(
+	options: Options<GetApiFavoritesByTargetUnitIdHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiFavoritesByTargetUnitIdHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/favorites/{targetUnitId}/history",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiFavoritesByTargetUnitIdHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * {@link /api/v1/favorites/:targetUnitId/history/:revision}
+ */
+export function getApiFavoritesByTargetUnitIdHistoryByRevision<ThrowOnError extends boolean = true>(
+	options: Options<GetApiFavoritesByTargetUnitIdHistoryByRevisionOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiFavoritesByTargetUnitIdHistoryByRevisionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/favorites/{targetUnitId}/history/{revision}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<GetApiFavoritesByTargetUnitIdHistoryByRevisionResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * {@link /api/v1/favorites/:targetUnitId/restore}
+ */
+export function postApiFavoritesByTargetUnitIdRestore<ThrowOnError extends boolean = true>(
+	options: Options<PostApiFavoritesByTargetUnitIdRestoreOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiFavoritesByTargetUnitIdRestoreResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/favorites/{targetUnitId}/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiFavoritesByTargetUnitIdRestoreResponses, ThrowOnError>>;
 }
 
 /**
