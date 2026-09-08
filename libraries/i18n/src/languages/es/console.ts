@@ -18,9 +18,9 @@ export default {
 		},
 		identifier: "Identificador",
 		address: "Nombre de la dirección",
-		scopeIdentifier: "Identificador del ámbito",
+		scopeIdentifier: "Identificador del espacio de direcciones",
 		invalid:
-			"Comprueba el identificador o indica el nombre de la dirección y el identificador exacto de su ámbito.",
+			"Comprueba el identificador o indica el nombre de la dirección y el identificador exacto de su espacio de direcciones.",
 	},
 	caseNotes: "Notas del caso",
 	nativeMerge: {

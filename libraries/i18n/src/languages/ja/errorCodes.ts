@@ -14,6 +14,15 @@ const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
+	GovernanceDeliveryCapacityExceeded:
+		"通知配信キューが混み合っています。しばらくしてからこの管理操作を再試行してください。",
+	CatalogSourceRequestLimited:
+		"この出典へのリクエストが多すぎます。しばらくしてから再試行してください。",
+	CatalogSourceUnavailable:
+		"この出典は一時的に利用できません。しばらくしてから再試行してください。",
+	RouteNotFound: "指定されたページまたはリソースが見つかりません。",
+	UnitGovernanceLookupInvalid:
+		"正確な識別子、またはアドレス名とその正確なアドレス範囲を入力してください。",
 	OrganizationMembershipConflict:
 		"招待またはメンバーの状態が変更されました。再読み込みしてからお試しください。",
 	OrganizationMembershipNotFound: "この招待またはメンバーの記録は利用できません。",

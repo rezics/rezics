@@ -12,6 +12,12 @@ const { forms: unitSlugTerms } = koTerminology.unitSlug;
 const { forms: zoneTerms } = koTerminology.zone;
 
 export default {
+	GovernanceDeliveryCapacityExceeded:
+		"알림 전송 대기열이 혼잡합니다. 잠시 후 이 관리 작업을 다시 시도하세요.",
+	CatalogSourceRequestLimited: "이 출처에 요청이 너무 많이 몰렸습니다. 나중에 다시 시도하세요.",
+	CatalogSourceUnavailable: "이 출처를 일시적으로 사용할 수 없습니다. 나중에 다시 시도하세요.",
+	RouteNotFound: "요청한 페이지 또는 리소스를 찾을 수 없습니다.",
+	UnitGovernanceLookupInvalid: "정확한 식별자 또는 주소 이름과 정확한 주소 범위를 입력하세요.",
 	OrganizationMembershipConflict:
 		"초대 또는 구성원 상태가 변경되었습니다. 새로 고친 후 다시 시도하세요.",
 	OrganizationMembershipNotFound: "이 초대 또는 구성원 기록을 사용할 수 없습니다.",

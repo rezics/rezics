@@ -14,6 +14,13 @@ const { forms: zoneTerms } = enTerminology.zone;
 const { forms: entityTerms } = enTerminology.entity;
 
 export default {
+	GovernanceDeliveryCapacityExceeded:
+		"The notification delivery queue is busy. Retry this governance action shortly.",
+	CatalogSourceRequestLimited: "This source is receiving too many requests. Try again later.",
+	CatalogSourceUnavailable: "This source is temporarily unavailable. Try again later.",
+	RouteNotFound: "The requested page or resource was not found.",
+	UnitGovernanceLookupInvalid:
+		"Enter an exact identifier, or an address label with its exact address scope.",
 	OrganizationMembershipConflict: "This invitation or membership changed. Refresh and try again.",
 	OrganizationMembershipNotFound: "This invitation or membership is unavailable.",
 	OrganizationMembershipCapacityExceeded:

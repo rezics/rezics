@@ -13,6 +13,13 @@ const { forms: zoneTerms } = frTerminology.zone;
 const { forms: entityTerms } = frTerminology.entity;
 
 export default {
+	GovernanceDeliveryCapacityExceeded:
+		"La file d’envoi des notifications est occupée. Réessayez cette action de gouvernance dans un instant.",
+	CatalogSourceRequestLimited: "Cette source reçoit trop de requêtes. Réessayez plus tard.",
+	CatalogSourceUnavailable: "Cette source est temporairement indisponible. Réessayez plus tard.",
+	RouteNotFound: "La page ou la ressource demandée est introuvable.",
+	UnitGovernanceLookupInvalid:
+		"Indiquez un identifiant exact, ou un libellé d’adresse avec sa portée exacte.",
 	OrganizationMembershipConflict:
 		"Cette invitation ou adhésion a changé. Actualisez la page et réessayez.",
 	OrganizationMembershipNotFound: "Cette invitation ou adhésion est indisponible.",

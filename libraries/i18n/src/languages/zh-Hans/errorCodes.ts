@@ -14,6 +14,11 @@ const { forms: zoneTerms } = zhHansTerminology.zone;
 const { forms: entityTerms } = zhHansTerminology.entity;
 
 export default {
+	GovernanceDeliveryCapacityExceeded: "通知发送队列繁忙，请稍后重试此治理操作。",
+	CatalogSourceRequestLimited: "该来源收到的请求过多，请稍后重试。",
+	CatalogSourceUnavailable: "该来源暂时不可用，请稍后重试。",
+	RouteNotFound: "未找到请求的页面或资源。",
+	UnitGovernanceLookupInvalid: "请输入精确标识符，或填写地址名称及其确切的地址作用域。",
 	OrganizationMembershipConflict: "邀请或成员状态已改变，请刷新后重试。",
 	OrganizationMembershipNotFound: "找不到此邀请或成员记录。",
 	OrganizationMembershipCapacityExceeded: "待处理邀请过多，请先处理部分邀请再发送。",

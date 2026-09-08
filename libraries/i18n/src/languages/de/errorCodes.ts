@@ -14,6 +14,14 @@ const { forms: zoneTerms } = deTerminology.zone;
 const { forms: entityTerms } = deTerminology.entity;
 
 export default {
+	GovernanceDeliveryCapacityExceeded:
+		"Die Warteschlange für Benachrichtigungen ist ausgelastet. Versuche diese Verwaltungsaktion in Kürze erneut.",
+	CatalogSourceRequestLimited: "Diese Quelle erhält zu viele Anfragen. Versuche es später erneut.",
+	CatalogSourceUnavailable:
+		"Diese Quelle ist vorübergehend nicht verfügbar. Versuche es später erneut.",
+	RouteNotFound: "Die angeforderte Seite oder Ressource wurde nicht gefunden.",
+	UnitGovernanceLookupInvalid:
+		"Gib eine genaue Kennung oder eine Adressbezeichnung mit ihrem genauen Adressbereich ein.",
 	OrganizationMembershipConflict:
 		"Die Einladung oder Mitgliedschaft wurde geändert. Lade die Seite neu und versuche es erneut.",
 	OrganizationMembershipNotFound: "Diese Einladung oder Mitgliedschaft ist nicht verfügbar.",

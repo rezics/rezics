@@ -14,6 +14,15 @@ const { forms: zoneTerms } = esTerminology.zone;
 const { forms: entityTerms } = esTerminology.entity;
 
 export default {
+	GovernanceDeliveryCapacityExceeded:
+		"La cola de envío de notificaciones está ocupada. Vuelve a intentar esta acción de gobernanza en breve.",
+	CatalogSourceRequestLimited:
+		"Esta fuente recibe demasiadas solicitudes. Inténtalo de nuevo más tarde.",
+	CatalogSourceUnavailable:
+		"Esta fuente no está disponible temporalmente. Inténtalo de nuevo más tarde.",
+	RouteNotFound: "No se encontró la página o el recurso solicitado.",
+	UnitGovernanceLookupInvalid:
+		"Introduce un identificador exacto o un nombre de dirección con su espacio de direcciones exacto.",
 	OrganizationMembershipConflict:
 		"La invitación o la membresía ha cambiado. Actualiza la página e inténtalo de nuevo.",
 	OrganizationMembershipNotFound: "Esta invitación o membresía no está disponible.",
