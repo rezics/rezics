@@ -61,7 +61,7 @@ export function isAvailableProfileSlug(value: string): value is SlugLabel {
 	return isSlugLabel(value) && !isProfileSlugReserved(value);
 }
 
-export const TopLevelSlugNamespaceUnitIds = {
+export const TopLevelSlugNamespaceIds = {
 	users: "019b76da-a800-7000-8000-000000000001",
 	realms: "019b76da-a800-7000-8000-000000000002",
 	tags: "019b76da-a800-7000-8000-000000000003",
@@ -103,12 +103,12 @@ export const OfficialZoneUnitIds = {
 	zone: "019b76da-a800-7400-8000-000000000005",
 } as const;
 
-export type TopLevelSlugNamespace = keyof typeof TopLevelSlugNamespaceUnitIds;
+export type TopLevelSlugNamespace = keyof typeof TopLevelSlugNamespaceIds;
 
 export const PublicSlugRouteManifest = [
 	{
 		namespaceSlug: "users",
-		namespaceUnitId: TopLevelSlugNamespaceUnitIds.users,
+		namespaceId: TopLevelSlugNamespaceIds.users,
 		idSegment: "user",
 		slugSegment: "u",
 		targetKind: "profile",
@@ -116,7 +116,7 @@ export const PublicSlugRouteManifest = [
 	},
 	{
 		namespaceSlug: "realms",
-		namespaceUnitId: TopLevelSlugNamespaceUnitIds.realms,
+		namespaceId: TopLevelSlugNamespaceIds.realms,
 		idSegment: "realm",
 		slugSegment: "r",
 		targetKind: "realm",
@@ -124,7 +124,7 @@ export const PublicSlugRouteManifest = [
 	},
 	{
 		namespaceSlug: "zones",
-		namespaceUnitId: TopLevelSlugNamespaceUnitIds.zones,
+		namespaceId: TopLevelSlugNamespaceIds.zones,
 		idSegment: "zone",
 		slugSegment: "z",
 		targetKind: "zone",
@@ -138,7 +138,8 @@ export type PublicSlugSegment = (typeof PublicSlugRouteManifest)[number]["slugSe
 
 export interface PublicSlugAddressValue {
 	readonly slug: string;
-	readonly scopeUnitId: string;
+	readonly scopeUnitId: string | null;
+	readonly scopeNamespaceId: string | null;
 	readonly canonicalPath: readonly string[];
 }
 
@@ -161,7 +162,7 @@ export function publicSlugHref(
 			candidate.targetKind === kind &&
 			candidate.targetDepth === address.canonicalPath.length,
 	);
-	if (!route || route.namespaceUnitId !== address.scopeUnitId) return undefined;
+	if (!route || route.namespaceId !== address.scopeNamespaceId || address.scopeUnitId !== null) return undefined;
 	return `/${[route.slugSegment, ...address.canonicalPath.slice(1)].join("/")}`;
 }
 

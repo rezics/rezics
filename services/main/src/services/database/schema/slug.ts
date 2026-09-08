@@ -5,6 +5,13 @@ import { check, index, text, unique, uniqueIndex, uuid } from "drizzle-orm/pg-co
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn, createUuidv7PrimaryKey } from "./columns";
 import { SlugAddressKindValues, type SlugAddressKind } from "./contract-values";
+import { TopLevelSlugNamespaceIds, type TopLevelSlugNamespace } from "@rezics/slug";
+
+/** Five immutable routing namespaces are control data, not content identities. */
+export const slugNamespace = pgTable("slug_namespace", {
+ id: uuid().primaryKey(),
+ name: text().$type<TopLevelSlugNamespace>().notNull().unique(),
+}, table => [check("slug_namespace_registered_check", sql.join(Object.entries(TopLevelSlugNamespaceIds).map(([name,id])=>sql`(${table.id}=${id}::uuid and ${table.name}=${name})`),sql` or `))]);
 
 /**
  * Optional address entries for ID-addressed Units.
@@ -30,6 +37,7 @@ export const unitSlugAddress = pgTable(
 		id: createUuidv7PrimaryKey(),
 		kind: text().$type<SlugAddressKind>().notNull(),
 		scopeUnitId: uuid("scope_unit_id"),
+		scopeNamespaceId: uuid().references(() => slugNamespace.id, { onDelete: "restrict" }),
 		slug: text().notNull(),
 		targetUnitId: uuid("target_unit_id").notNull(),
 		createdAt: createCreatedAtColumn(),
@@ -48,7 +56,9 @@ export const unitSlugAddress = pgTable(
 			table.targetUnitId,
 		),
 
-		unique("unit_slug_address_scope_slug_key").on(table.scopeUnitId, table.slug).nullsNotDistinct(),
+		check("unit_slug_address_scope_check", sql`num_nonnulls(${table.scopeNamespaceId},${table.scopeUnitId})=1`),
+		unique("unit_slug_address_scope_slug_key").on(table.scopeNamespaceId, table.scopeUnitId, table.slug).nullsNotDistinct(),
+		index("unit_slug_address_namespace_idx").on(table.scopeNamespaceId).where(sql`${table.scopeNamespaceId} is not null`),
 		uniqueIndex("unit_slug_address_target_canonical_key")
 			.on(table.targetUnitId)
 			.where(sql`${table.kind} = 'canonical'`),

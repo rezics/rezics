@@ -1,6 +1,6 @@
-import { TopLevelSlugNamespaceUnitIds, type TopLevelSlugNamespace } from "@rezics/slug";
+import { TopLevelSlugNamespaceIds, type TopLevelSlugNamespace } from "@rezics/slug";
 
-export { TopLevelSlugNamespaceUnitIds, type TopLevelSlugNamespace };
+export { TopLevelSlugNamespaceIds, type TopLevelSlugNamespace };
 
 /**
  * Immutable process-local routing data for permanent platform namespaces.
@@ -13,16 +13,16 @@ export { TopLevelSlugNamespaceUnitIds, type TopLevelSlugNamespace };
  * @todo
  * Revisit cache invalidation if permanent namespace mutation is ever allowed.
  */
-export const TopLevelSlugNamespaceUnitIdBySlug: ReadonlyMap<string, string> = new Map(
-	Object.entries(TopLevelSlugNamespaceUnitIds),
+export const TopLevelSlugNamespaceIdBySlug: ReadonlyMap<string, string> = new Map(
+	Object.entries(TopLevelSlugNamespaceIds),
 );
 
-export const TopLevelSlugNamespaceSlugByUnitId: ReadonlyMap<string, string> = new Map(
-	Object.entries(TopLevelSlugNamespaceUnitIds).map(([slug, unitId]) => [unitId, slug]),
+export const TopLevelSlugNamespaceSlugById: ReadonlyMap<string, string> = new Map(
+	Object.entries(TopLevelSlugNamespaceIds).map(([slug, unitId]) => [unitId, slug]),
 );
 
-export const TopLevelSlugNamespaceUnitIdSet: ReadonlySet<string> = new Set(
-	Object.values(TopLevelSlugNamespaceUnitIds),
+export const TopLevelSlugNamespaceIdSet: ReadonlySet<string> = new Set(
+	Object.values(TopLevelSlugNamespaceIds),
 );
 
-export const SystemSlugNamespaceUnitIds = Object.values(TopLevelSlugNamespaceUnitIds);
+export const SystemSlugNamespaceIds = Object.values(TopLevelSlugNamespaceIds);
