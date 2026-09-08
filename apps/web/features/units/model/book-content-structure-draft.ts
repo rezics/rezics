@@ -92,13 +92,6 @@ function compareDraftNodes(left: BookDraftNode, right: BookDraftNode): number {
 export function createBookContentStructureDraft(
 	remoteNodes: readonly RemoteBookNode[],
 ): BookDraftNode[] {
-	for (const node of remoteNodes)
-		if (
-			node.contentKind !== "text_version" &&
-			node.contentKind !== "chapter" &&
-			node.contentKind !== "label"
-		)
-			throw new Error("Text Version structure returned an incompatible content owner");
 	const knownIds = new Set(remoteNodes.map(({ id }) => id));
 	const children = new Map<string | null, RemoteBookNode[]>();
 	for (const node of remoteNodes) {

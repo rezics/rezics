@@ -17,7 +17,7 @@ const UnitId = "019b76da-a800-7300-8000-000000000001";
 
 describe("unit detail routes", () => {
 	it("addresses Reader context by content node occurrence", () => {
-		expect(bookReaderHref(UnitId, "node-id")).toBe(`/units/book/${UnitId}/read/node-id`);
+		expect(bookReaderHref(UnitId, "node-id")).toBe(`/catalog/publishing/${UnitId}/read/node-id`);
 	});
 
 	it("keeps the overview at the immutable Unit identity route", () => {

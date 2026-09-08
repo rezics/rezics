@@ -239,7 +239,7 @@ export function MediaContentNodeDialog({
 												excludedIds={excludedUnitIds}
 												index="units"
 												{...(media
-													? { owners: ["program"], shapes: ["program"] }
+													? { owners: ["program"] }
 													: label
 														? { owners: ["label"] }
 														: {

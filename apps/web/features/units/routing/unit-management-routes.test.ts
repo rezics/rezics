@@ -42,9 +42,7 @@ describe("unit management routes", () => {
 	});
 
 	it("keeps the focused chapter editor outside the management shell", () => {
-		expect(chapterEditorHref("book-1", "chapter-1")).toBe(
-			"/units/book/book-1/chapters/chapter-1/edit",
-		);
+		expect(chapterEditorHref("book-1", "chapter-1")).toBe("/posts/chapter-1/edit");
 	});
 
 	it("maps comparison routes to history", () => {
