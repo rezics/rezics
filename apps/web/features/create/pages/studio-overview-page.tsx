@@ -59,7 +59,7 @@ function StudioOverviewList({
 }
 
 export function StudioOverviewPage() {
-	const { t } = useTranslation(["create"]);
+	const { t } = useTranslation(["create", "units"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const sections = useStudioWorkspaceSections();
 	const queryClient = useQueryClient();
@@ -104,6 +104,9 @@ export function StudioOverviewPage() {
 
 	return (
 		<div className="grid gap-10">
+			<Link className="w-fit underline underline-offset-4" href="/catalog/definitions">
+				{t.units.nativeDefinitions.title}
+			</Link>
 			<StudioOverviewList
 				emptyMessage={t.create.overview.empty.workspace}
 				mode="workspace"
