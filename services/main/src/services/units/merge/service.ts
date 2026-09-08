@@ -16,6 +16,7 @@ import {
 import {
 	ParticipationAuthoritySchema,
 	ParticipationDenied,
+	runWithParticipationAuthority,
 	type ParticipationAuthority,
 } from "../../participation/policy";
 import { createGovernanceDecision } from "../../governance/decision-service";
@@ -45,6 +46,7 @@ import {
 	MergePlanSchema,
 } from "./contracts";
 import { unitMergeRequestExpiry } from "./policy";
+import { withCatalogViewerPolicy } from "../../catalog/read-policy";
 
 type RequestRow = typeof unitMergeRequest.$inferSelect;
 export async function humanMergeAuthority(
@@ -188,8 +190,9 @@ export async function preflightUnitMerge(
 	const value = MergePreflightSchema.parse(input);
 	return database.transaction(async (tx) => {
 		await authorization.platform.ensureCapability("unit.merge.propose", tx);
-		await humanMergeAuthority(tx, authorization);
-		return buildUnitMergeManifest(tx, authorization, value);
+		const authority = await humanMergeAuthority(tx, authorization);
+		return runWithParticipationAuthority(authority, () => withCatalogViewerPolicy(tx, authority.principal.authUserId,
+			() => buildUnitMergeManifest(tx, authorization, value)));
 	});
 }
 export async function createReviewedUnitMerge(
@@ -220,7 +223,8 @@ export async function createReviewedUnitMerge(
 				throw new UnitMergeIdempotencyConflict();
 			return oneView(tx, existing);
 		}
-		const manifest = await buildUnitMergeManifest(tx, authorization, value);
+		const manifest = await runWithParticipationAuthority(authority, () => withCatalogViewerPolicy(tx, authority.principal.authUserId,
+			() => buildUnitMergeManifest(tx, authorization, value)));
 		assertMergeManifestFingerprint(manifest, value.requestFingerprint);
 		if (
 			manifest.sourceRevision !== value.expectedSourceRevision ||
@@ -347,11 +351,12 @@ export async function reviewUnitMerge(
 			)
 			.limit(1);
 		if (existing) throw new UnitMergeReviewDuplicate();
-		const current = await buildUnitMergeManifest(tx, authorization, {
+		const current = await runWithParticipationAuthority(authority, () => withCatalogViewerPolicy(tx, authority.principal.authUserId,
+			() => buildUnitMergeManifest(tx, authorization, {
 			sourceUnitId: row.sourceUnitId,
 			targetUnitId: row.targetUnitId,
 			plan: MergePlanSchema.parse(row.plan),
-		});
+		}, "read")));
 		assertMergeManifestFingerprint(current, row.requestFingerprint);
 		await tx.insert(unitMergeReview).values({
 			requestId,

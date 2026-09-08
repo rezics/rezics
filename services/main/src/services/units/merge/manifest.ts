@@ -17,6 +17,7 @@ import {
 } from "../../api/governance/errors";
 import { readUnitStateById, type UnitState } from "../query";
 import { readUnitPresentationsInTransaction } from "../presentation-reader";
+import { loadCatalogIdentity } from "../../catalog/storage";
 import { UnitNotFound } from "../errors";
 import { MergePlanSchema, MergeManifestSchema, type DefaultMergePlan } from "./contracts";
 import type { z } from "zod";
@@ -60,6 +61,7 @@ export async function buildUnitMergeManifest(
 		plan: typeof DefaultMergePlan;
 		operationId?: string;
 	},
+	access: "write" | "read" = "write",
 ): Promise<UnitMergeManifest> {
 	if (input.sourceUnitId === input.targetUnitId) throw new UnitMergeRequestConflict();
 	await lockMergePair(tx, [input.sourceUnitId, input.targetUnitId]);
@@ -76,9 +78,10 @@ export async function buildUnitMergeManifest(
 		targetReference = CatalogReferenceSchema.safeParse(target.reference);
 	if (!sourceReference.success || !targetReference.success) throw new UnitMergeKindIneligible();
 	if (!compatibleMergeIdentities(source, target)) throw new UnitMergeKindMismatch();
-	for (const id of [source.id, target.id]) {
-		await authorization.unit.ensureInTransaction(tx, id, "unit.read");
-		await authorization.unit.ensureInTransaction(tx, id, "unit.update");
+	for (const reference of [sourceReference.data, targetReference.data]) {
+		await loadCatalogIdentity(tx, reference, authorization.authUserId ?? null, false);
+		if (access === "write")
+			await loadCatalogIdentity(tx, reference, authorization.authUserId ?? null, true);
 	}
 	const ids = [source.id, target.id];
 	const [controls, selves, redirects, locks] = await Promise.all([
