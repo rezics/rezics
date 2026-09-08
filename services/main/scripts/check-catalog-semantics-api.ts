@@ -127,6 +127,25 @@ async function current(reference: CatalogReference, cookie: string) {
 		await request("GET", pathFor(reference), undefined, 200, cookie),
 	);
 }
+async function publishWithVisibility(
+	reference: CatalogReference,
+	cookie: string,
+	visibility: "public" | "private",
+) {
+	const metadata = await current(reference, cookie);
+	await request(
+		"PATCH",
+		pathFor(reference) + "/lifecycle",
+		{
+			expectedRevision: metadata.revision,
+			status: "published",
+			visibility,
+			contentRating: metadata.contentRating,
+		},
+		200,
+		cookie,
+	);
+}
 async function snapshot(reference: CatalogReference, cookie: string) {
 	const tables = CatalogFactTables[reference.owner];
 	const metadata = await current(reference, cookie);
@@ -755,6 +774,45 @@ try {
 			stranger,
 		);
 		await request("GET", `${path}/relations/${relationA.id}/qualifiers`, undefined, 404, stranger);
+		await publishWithVisibility(privateForeign.reference, stranger, "public");
+		const publicParticipantRelation = CatalogSemanticCreatedSchema.parse(
+			await request(
+				"POST",
+				path + "/relations",
+				{
+					...relationValues,
+					expectedRevision: (await current(reference, owner)).revision,
+					participants: [
+						relationValues.participants[0],
+						{ roleRevisionId: meanings.actorRole.revisionId, target: privateForeign.reference },
+					],
+				},
+				200,
+				owner,
+			),
+		);
+		await publishWithVisibility(privateForeign.reference, stranger, "private");
+		await request(
+			"GET",
+			`${path}/relations/${publicParticipantRelation.id}/participants`,
+			undefined,
+			404,
+			owner,
+		);
+		await rejectedWithoutMutation(reference, owner, () =>
+			request(
+				"POST",
+				`${path}/semantics/${publicParticipantRelation.semanticId}/restore`,
+				{
+					expectedRevision: publicParticipantRelation.revision,
+					expectedHeadVersion: 1,
+					restoreVersion: 1,
+				},
+				422,
+				owner,
+			),
+		);
+		await changeState(reference, owner, publicParticipantRelation, "withdrawn");
 		const replacedRelation = await writeRelation(qualifierB.id, relationA);
 		const historicalQualifier = qualifiersPage.parse(
 			await request("GET", `${path}/relations/${relationA.id}/qualifiers`, undefined, 200, owner),
