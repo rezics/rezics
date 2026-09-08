@@ -1,3 +1,4 @@
+import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import { describe, expect, it } from "vitest";
 
 import { buildUnitLandingLocalizationLanguages } from "./unit-landing-language-order";
@@ -41,5 +42,14 @@ describe("Unit landing localization language order", () => {
 				browserLanguages: ["zh"],
 			}),
 		).toEqual(["de", "fr", "en", "zh"]);
+	});
+	it("retains script and region preferences ahead of base-language fallbacks", () => {
+		expect(
+			buildUnitLandingLocalizationLanguages({
+				requestedLanguage: canonicalizeContentLanguageTag("zh-Hant"),
+				interfaceLanguage: "zh",
+				browserLanguages: ["en-GB", "*", "zh-Hant"],
+			}),
+		).toEqual(["zh-Hant", "zh", "en-GB"]);
 	});
 });

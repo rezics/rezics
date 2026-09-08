@@ -1,19 +1,21 @@
-import type { ContentLanguage } from "@rezics/i18n";
-import { createSearchParamsCache } from "nuqs/server";
-
-import { searchParamsParsers } from "@/lib/search-params";
-
+import { canonicalizeContentLanguageTag, type ContentLanguageTag } from "@rezics/content-language";
+import { createParser, createSearchParamsCache } from "nuqs/server";
 const unitLandingSearchParams = createSearchParamsCache({
-	language: searchParamsParsers.language,
+	language: createParser({
+		parse(value) {
+			try {
+				return canonicalizeContentLanguageTag(value);
+			} catch {
+				return null;
+			}
+		},
+		serialize: String,
+	}),
 });
-
-export type UnitLandingSearchParams = Promise<{
-	readonly language?: string | string[];
-}>;
-
+export type UnitLandingSearchParams = Promise<{ readonly language?: string | string[] }>;
 export async function getRequestedUnitLandingLanguage(
 	searchParams: UnitLandingSearchParams,
-): Promise<ContentLanguage | undefined> {
+): Promise<ContentLanguageTag | undefined> {
 	const { language } = await unitLandingSearchParams.parse(searchParams);
 	return language ?? undefined;
 }

@@ -1,15 +1,7 @@
 import { insert } from "native-i18n";
 
-import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 import ui from "./ui";
-import units from "./units";
-
-const { forms: audioTerms } = zhHantTerminology.audio;
-const { forms: entityTerms } = zhHantTerminology.entity;
-const { forms: postTerms } = zhHantTerminology.post;
-const { forms: realmTerms } = zhHantTerminology.realm;
-const { forms: videoTerms } = zhHantTerminology.video;
-const { forms: zoneTerms } = zhHantTerminology.zone;
+import feed from "./feed";
 
 export default {
 	titles: {
@@ -41,24 +33,8 @@ export default {
 		restricted: "此頁面的內容分級不提供搜尋引擎索引資訊。",
 		unavailable: "此頁面的公開資訊目前無法用於搜尋引擎索引。",
 	},
-	kinds: {
-		profile: ui.profile,
-		book: units.types.book,
-		software: units.types.software,
-		release: units.types.release,
-		media: units.types.media,
-		video: videoTerms.label,
-		audio: audioTerms.label,
-		entity: entityTerms.label,
-		tag: "標籤",
-		series: units.types.series,
-		zone: zoneTerms.label,
-		zone_page: `${zoneTerms.label}頁面`,
-		collection: ui.collection,
-		post: postTerms.label,
-		poll: "投票",
-		realm: realmTerms.label,
-	},
-	entityKinds: { person: ui.person, organization: ui.organization, character: ui.character },
+	owners: feed.content.owners,
+	shapes: feed.content.kinds,
+	entityShapes: { person: ui.person, organization: ui.organization, character: ui.character },
 	breadcrumbs: { home: "首頁" },
 };

@@ -26,7 +26,8 @@ function projection(overrides: PresentedProjectionOverrides = {}): PresentedProj
 	};
 	const shared: Omit<PresentedProjection, "indexing"> = {
 		id: overrides.id ?? UnitId,
-		kind: overrides.kind ?? "book",
+		owner: overrides.owner ?? "publishing",
+		shape: overrides.shape ?? "text_version",
 		contentRating: overrides.contentRating ?? "general",
 		publishedAt: overrides.publishedAt ?? "2026-08-01T00:00:00.000Z",
 		updatedAt: overrides.updatedAt ?? "2026-08-02T00:00:00.000Z",
@@ -38,12 +39,12 @@ function projection(overrides: PresentedProjectionOverrides = {}): PresentedProj
 
 function build(
 	value: GetPublicUnitSeoProjectionStatus200 | null,
-	expectedKind: GetPublicUnitSeoProjectionStatus200["kind"] = "book",
+	expectedOwner: GetPublicUnitSeoProjectionStatus200["owner"] = "publishing",
 ) {
 	return buildUnitLandingSeoDocument({
 		unitId: UnitId,
-		expectedKind,
-		canonicalPath: `/units/${expectedKind}/${UnitId}`,
+		expectedOwner,
+		canonicalPath: `/catalog/${expectedOwner}/${UnitId}`,
 		projection: value,
 		frontendOrigin: new URL("https://www.rezics.com"),
 		t: translation.t,
@@ -54,14 +55,14 @@ describe("Unit landing SEO metadata", () => {
 	it.each(["general", "r15"] as const)("indexes a public %s Unit", (contentRating) => {
 		const document = build(projection({ contentRating }));
 
-		expect(document.metadata.title).toBe("Types and Proofs (Book) | REZICS");
+		expect(document.metadata.title).toBe("Types and Proofs (Text version) | REZICS");
 		expect(document.metadata.alternates).toEqual({
-			canonical: `/units/book/${UnitId}`,
+			canonical: `/catalog/publishing/${UnitId}`,
 		});
 		expect(document.metadata.robots).toEqual({ index: true, follow: true });
 		expect(document.metadata.openGraph).toMatchObject({
-			url: `/units/book/${UnitId}`,
-			title: "Types and Proofs (Book) | REZICS",
+			url: `/catalog/publishing/${UnitId}`,
+			title: "Types and Proofs (Text version) | REZICS",
 		});
 		expect(document.structuredData).not.toBeNull();
 	});
@@ -69,8 +70,8 @@ describe("Unit landing SEO metadata", () => {
 	it("keeps an explicit presentation language out of the canonical identity", () => {
 		const document = buildUnitLandingSeoDocument({
 			unitId: UnitId,
-			expectedKind: "book",
-			canonicalPath: `/units/book/${UnitId}`,
+			expectedOwner: "publishing",
+			canonicalPath: `/catalog/publishing/${UnitId}`,
 			requestedLanguage: "ja",
 			projection: projection({
 				presentation: {
@@ -86,15 +87,16 @@ describe("Unit landing SEO metadata", () => {
 		});
 
 		expect(document.metadata.alternates).toEqual({
-			canonical: `/units/book/${UnitId}`,
+			canonical: `/catalog/publishing/${UnitId}`,
 		});
-		expect(document.metadata.title).toBe("型と証明 (Book) | REZICS");
+		expect(document.metadata.title).toBe("型と証明 (Text version) | REZICS");
 	});
 
 	it.each(["r18", "r18g"] as const)("does not leak authored metadata for %s", (contentRating) => {
 		const adult: GetPublicUnitSeoProjectionStatus200 = {
 			id: UnitId,
-			kind: "book",
+			owner: "publishing",
+			shape: "text_version",
 			contentRating,
 			publishedAt: "2026-08-01T00:00:00.000Z",
 			updatedAt: "2026-08-02T00:00:00.000Z",
@@ -119,7 +121,7 @@ describe("Unit landing SEO metadata", () => {
 		const value = projection({ indexing: { state: "noindex", reason: "unlisted" } });
 		const document = build(value);
 
-		expect(document.metadata.title).toBe("Types and Proofs (Book) | REZICS");
+		expect(document.metadata.title).toBe("Types and Proofs (Text version) | REZICS");
 		expect(document.metadata.robots).toMatchObject({ index: false, noimageindex: true });
 		expect(document.structuredData).toBeNull();
 	});
@@ -135,24 +137,26 @@ describe("Unit landing SEO metadata", () => {
 			},
 		});
 
-		expect(build(value).metadata.description).toBe("View the Book “Types and Proofs” on REZICS.");
+		expect(build(value).metadata.description).toBe(
+			"View the Text version “Types and Proofs” on REZICS.",
+		);
 	});
 
-	it("presents a Release through the shared software work SEO", () => {
-		const document = build(projection({ kind: "release" }), "release");
+	it("presents a native software release without asserting an application shape", () => {
+		const document = build(projection({ owner: "software", shape: "release" }), "software");
 
-		expect(document.metadata.title).toBe("Types and Proofs (Release) | REZICS");
+		expect(document.metadata.title).toBe("Types and Proofs (Software release) | REZICS");
 		expect(document.metadata.alternates).toEqual({
-			canonical: `/units/release/${UnitId}`,
+			canonical: `/catalog/software/${UnitId}`,
 		});
 		expect(document.structuredData).toMatchObject({
 			"@graph": expect.arrayContaining([
-				expect.objectContaining({ "@type": "SoftwareApplication", name: "Types and Proofs" }),
+				expect.objectContaining({ "@type": "CreativeWork", name: "Types and Proofs" }),
 			]),
 		});
 	});
 
-	it("refuses a projection whose immutable identity or kind does not match the route", () => {
+	it("refuses a projection whose immutable identity or owner does not match the route", () => {
 		const document = build(projection(), "software");
 
 		expect(document.metadata.title).toBe("Page information unavailable | REZICS");
@@ -162,7 +166,8 @@ describe("Unit landing SEO metadata", () => {
 
 	it("adds the owning Zone to a Zone Page breadcrumb", () => {
 		const value = projection({
-			kind: "zone_page",
+			owner: "post",
+			shape: "page",
 			presentation: {
 				language: "en",
 				title: "Reading guide",
@@ -173,7 +178,8 @@ describe("Unit landing SEO metadata", () => {
 		});
 		const document = buildUnitLandingSeoDocument({
 			unitId: UnitId,
-			expectedKind: "zone_page",
+			expectedOwner: "post",
+			expectedShape: "page",
 			canonicalPath: "/z/books/guide",
 			parentCanonicalPath: "/z/books",
 			projection: value,
@@ -183,5 +189,63 @@ describe("Unit landing SEO metadata", () => {
 
 		expect(document.metadata.title).toBe("Reading guide — Books | REZICS");
 		expect(JSON.stringify(document.structuredData)).toContain("https://www.rezics.com/z/books");
+	});
+	it("omits an unknown source language from structured metadata", () => {
+		const value = projection({
+			presentation: {
+				language: null,
+				title: "Unspecified language",
+				description: null,
+				image: null,
+				context: null,
+			},
+		});
+		expect(JSON.stringify(build(value).structuredData)).not.toContain("inLanguage");
+	});
+	it("keeps character identities distinct from real people", () => {
+		const value = projection({
+			owner: "entity",
+			shape: "character",
+			presentation: {
+				language: "en",
+				title: "Fictional character",
+				description: null,
+				image: null,
+				context: { kind: "entity", shape: "character" },
+			},
+		});
+		expect(build(value, "entity").structuredData).toMatchObject({
+			"@graph": expect.arrayContaining([expect.objectContaining({ "@type": "Thing" })]),
+		});
+	});
+	it("checks the concrete page shape at a Zone Page route", () => {
+		const document = buildUnitLandingSeoDocument({
+			unitId: UnitId,
+			expectedOwner: "post",
+			expectedShape: "page",
+			canonicalPath: "/z/example/home",
+			projection: projection({ owner: "post", shape: "review" }),
+			frontendOrigin: new URL("https://www.rezics.com"),
+			t: translation.t,
+		});
+		expect(document.structuredData).toBeNull();
+		expect(document.metadata.robots).toMatchObject({ index: false });
+	});
+	it("does not turn a publisher attribution label into a person author", () => {
+		const document = build(
+			projection({
+				owner: "post",
+				shape: "post",
+				presentation: {
+					language: "en",
+					title: "Announcement",
+					description: null,
+					image: null,
+					context: { kind: "post", attributionTitle: "Publishing organization" },
+				},
+			}),
+			"post",
+		);
+		expect(JSON.stringify(document.structuredData)).not.toContain('"author"');
 	});
 });

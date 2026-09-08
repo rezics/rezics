@@ -27,7 +27,7 @@ export async function generateMetadata({
 	return (
 		await getUnitLandingSeoDocument({
 			unitId: resolved.id,
-			expectedKind: "zone",
+			expectedOwner: "zone",
 			canonicalPath: resolved.canonicalHref,
 			requestedLanguage,
 		})
@@ -53,7 +53,7 @@ export default async function Page({
 		<>
 			<UnitLandingStructuredData
 				canonicalPath={resolved.canonicalHref}
-				expectedKind="zone"
+				expectedOwner="zone"
 				unitId={resolved.id}
 				requestedLanguage={requestedLanguage}
 			/>

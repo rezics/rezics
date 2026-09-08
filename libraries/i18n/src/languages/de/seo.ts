@@ -2,15 +2,9 @@ import { insert } from "native-i18n";
 
 import { deTerminology } from "@rezics/i18n/terminology/de";
 import ui from "./ui";
-import units from "./units";
+import feed from "./feed";
 
-const { forms: audioTerms } = deTerminology.audio;
-const { forms: entityTerms } = deTerminology.entity;
 const { forms: metadataTerms } = deTerminology.metadata;
-const { forms: postTerms } = deTerminology.post;
-const { forms: realmTerms } = deTerminology.realm;
-const { forms: videoTerms } = deTerminology.video;
-const { forms: zoneTerms } = deTerminology.zone;
 
 export default {
 	titles: {
@@ -43,24 +37,8 @@ export default {
 		unavailable:
 			"Die öffentlichen Informationen dieser Seite sind derzeit nicht für die Suchindexierung verfügbar.",
 	},
-	kinds: {
-		profile: ui.profile,
-		book: units.types.book,
-		software: units.types.software,
-		release: units.types.release,
-		media: units.types.media,
-		video: videoTerms.label,
-		audio: audioTerms.label,
-		entity: entityTerms.label,
-		tag: "Tag",
-		series: units.types.series,
-		zone: zoneTerms.label,
-		zone_page: `${zoneTerms.label}-Seite`,
-		collection: ui.collection,
-		post: postTerms.label,
-		poll: "Umfrage",
-		realm: realmTerms.label,
-	},
-	entityKinds: { person: ui.person, organization: ui.organization, character: ui.character },
+	owners: feed.content.owners,
+	shapes: feed.content.kinds,
+	entityShapes: { person: ui.person, organization: ui.organization, character: ui.character },
 	breadcrumbs: { home: "Startseite" },
 } satisfies typeof import("../zh-Hant/seo").default;

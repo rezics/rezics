@@ -11,11 +11,16 @@ describe("Unit landing language search parameter", () => {
 
 	it("does not strengthen an invalid external value into a content language", async () => {
 		await expect(
-			getRequestedUnitLandingLanguage(Promise.resolve({ language: "zh-Hant" })),
+			getRequestedUnitLandingLanguage(Promise.resolve({ language: "not_a_language" })),
 		).resolves.toBeUndefined();
 	});
 
 	it("leaves an omitted language unspecified", async () => {
 		await expect(getRequestedUnitLandingLanguage(Promise.resolve({}))).resolves.toBeUndefined();
+	});
+	it("preserves an explicitly requested script tag", async () => {
+		await expect(
+			getRequestedUnitLandingLanguage(Promise.resolve({ language: "zh-hant" })),
+		).resolves.toBe("zh-Hant");
 	});
 });

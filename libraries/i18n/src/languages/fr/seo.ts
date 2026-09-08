@@ -2,15 +2,9 @@ import { insert } from "native-i18n";
 
 import { frTerminology } from "@rezics/i18n/terminology/fr";
 import ui from "./ui";
-import units from "./units";
+import feed from "./feed";
 
-const { forms: audioTerms } = frTerminology.audio;
-const { forms: entityTerms } = frTerminology.entity;
 const { forms: metadataTerms } = frTerminology.metadata;
-const { forms: postTerms } = frTerminology.post;
-const { forms: realmTerms } = frTerminology.realm;
-const { forms: videoTerms } = frTerminology.video;
-const { forms: zoneTerms } = frTerminology.zone;
 
 export default {
 	titles: {
@@ -43,24 +37,8 @@ export default {
 		unavailable:
 			"Les informations publiques de cette page sont actuellement indisponibles pour l’indexation.",
 	},
-	kinds: {
-		profile: ui.profile,
-		book: units.types.book,
-		software: units.types.software,
-		release: units.types.release,
-		media: units.types.media,
-		video: videoTerms.label,
-		audio: audioTerms.label,
-		entity: entityTerms.label,
-		tag: "étiquette",
-		series: units.types.series,
-		zone: zoneTerms.label,
-		zone_page: `page de ${zoneTerms.inline}`,
-		collection: ui.collection,
-		post: postTerms.label,
-		poll: "sondage",
-		realm: realmTerms.label,
-	},
-	entityKinds: { person: ui.person, organization: ui.organization, character: ui.character },
+	owners: feed.content.owners,
+	shapes: feed.content.kinds,
+	entityShapes: { person: ui.person, organization: ui.organization, character: ui.character },
 	breadcrumbs: { home: "Accueil" },
 } satisfies typeof import("../zh-Hant/seo").default;

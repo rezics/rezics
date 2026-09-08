@@ -1,8 +1,10 @@
+import { isSimpleFeedContentKind } from "@rezics/filter";
+import type { ContentLanguageTag } from "@rezics/content-language";
 import type { ContentLanguage, Translation } from "@rezics/i18n";
 import type { GetPublicUnitSeoProjectionStatus200 } from "@rezics/openapi-tanstack-query";
 import type { Metadata } from "next";
 
-export type PublicUnitSeoKind = GetPublicUnitSeoProjectionStatus200["kind"];
+export type PublicUnitSeoOwner = GetPublicUnitSeoProjectionStatus200["owner"];
 type PresentedProjection = Exclude<
 	GetPublicUnitSeoProjectionStatus200,
 	{ readonly presentation: null }
@@ -10,10 +12,11 @@ type PresentedProjection = Exclude<
 
 export interface UnitLandingSeoRoute {
 	readonly unitId: string;
-	readonly expectedKind: PublicUnitSeoKind;
+	readonly expectedOwner: PublicUnitSeoOwner;
 	readonly canonicalPath: string;
 	readonly parentCanonicalPath?: string;
-	readonly requestedLanguage?: ContentLanguage;
+	readonly requestedLanguage?: ContentLanguage | ContentLanguageTag;
+	readonly expectedShape?: string;
 }
 
 export interface UnitLandingSeoDocument {
@@ -27,15 +30,22 @@ interface BuildUnitLandingSeoDocumentInput extends UnitLandingSeoRoute {
 	readonly t: Pick<Translation, "brand" | "seo">;
 }
 
-const WorkKinds = new Set<PublicUnitSeoKind>([
-	"book",
+const CatalogOwners = new Set<PublicUnitSeoOwner>([
+	"publishing",
+	"music",
+	"program",
 	"software",
-	"release",
-	"media",
-	"series",
+	"grouping",
+	"reference",
+	"distribution",
 	"video",
 	"audio",
 ]);
+
+function resourceLabel(t: Pick<Translation, "seo">, projection: PresentedProjection): string {
+	const token = `${projection.owner}:${projection.shape}`;
+	return isSimpleFeedContentKind(token) ? t.seo.shapes[token] : t.seo.owners[projection.owner];
+}
 
 function truncate(value: string, maximumLength: number): string {
 	const normalized = value.replaceAll(/\s+/g, " ").trim();
@@ -53,12 +63,12 @@ function profileSlug(canonicalPath: string): string | null {
 	return match?.[1] ?? null;
 }
 
-function entityKindLabel(
+function entityShapeLabel(
 	t: Pick<Translation, "seo">,
-	entityKind: string | undefined,
+	entityShape: string | undefined,
 ): string | null {
-	if (entityKind === "person" || entityKind === "organization" || entityKind === "character")
-		return t.seo.entityKinds[entityKind];
+	if (entityShape === "person" || entityShape === "organization" || entityShape === "character")
+		return t.seo.entityShapes[entityShape];
 	return null;
 }
 
@@ -75,7 +85,7 @@ function metadataTitle(
 			: presentation.context?.kind === "post"
 				? presentation.context.attributionTitle
 				: null;
-	const slug = projection.kind === "entity" ? profileSlug(input.canonicalPath) : null;
+	const slug = projection.owner === "entity" ? profileSlug(input.canonicalPath) : null;
 
 	if (slug) return input.t.seo.titles.profile({ name: presentation.title, slug, brand });
 	if (contextLabel)
@@ -84,11 +94,10 @@ function metadataTitle(
 			context: contextLabel,
 			brand,
 		});
-	if (WorkKinds.has(projection.kind) || projection.kind === "entity")
+	if (CatalogOwners.has(projection.owner) || projection.owner === "entity")
 		return input.t.seo.titles.typed({
 			name: presentation.title,
-			kind:
-				entityKindLabel(input.t, entityContext?.entityKind) ?? input.t.seo.kinds[projection.kind],
+			kind: entityShapeLabel(input.t, entityContext?.shape) ?? resourceLabel(input.t, projection),
 			brand,
 		});
 	return input.t.seo.titles.standard({ name: presentation.title, brand });
@@ -146,42 +155,62 @@ function structuredMainEntity(
 			: {}),
 		...(projection.presentation.image ? { image: projection.presentation.image.url } : {}),
 	};
-	switch (projection.kind) {
-		case "book":
-			return { "@type": "Book", ...shared };
+
+	switch (projection.owner) {
+		case "publishing":
+		case "program":
+			return { "@type": "CreativeWork", ...shared };
 		case "software":
-		case "release":
-			return { "@type": "SoftwareApplication", ...shared };
+			return {
+				"@type": projection.shape === "release" ? "CreativeWork" : "SoftwareApplication",
+				...shared,
+			};
+		case "music":
+			return {
+				"@type":
+					projection.shape === "recording"
+						? "MusicRecording"
+						: projection.shape === "work"
+							? "MusicComposition"
+							: projection.shape === "release"
+								? "MusicRelease"
+								: "CreativeWork",
+				...shared,
+			};
 		case "video":
 			return { "@type": "VideoObject", ...shared };
 		case "audio":
 			return { "@type": "AudioObject", ...shared };
-		case "series":
-			return { "@type": "CreativeWorkSeries", ...shared };
-		case "media":
-			return { "@type": "CreativeWork", ...shared };
-		case "entity": {
-			const context =
-				projection.presentation.context?.kind === "entity" ? projection.presentation.context : null;
-			const type =
-				context?.entityKind === "person"
-					? "Person"
-					: context?.entityKind === "organization"
-						? "Organization"
-						: "Thing";
-			return { "@type": type, ...shared };
-		}
-		case "post": {
-			const author =
-				projection.presentation.context?.kind === "post"
-					? projection.presentation.context.attributionTitle
-					: null;
+		case "grouping":
+		case "distribution":
+			return { "@type": "Thing", ...shared };
+		case "reference":
+			return { "@type": projection.shape === "concept" ? "DefinedTerm" : "Thing", ...shared };
+		case "entity":
 			return {
-				"@type": "Article",
+				"@type":
+					projection.shape === "person"
+						? "Person"
+						: projection.shape === "organization"
+							? "Organization"
+							: "Thing",
 				...shared,
-				headline: projection.presentation.title,
-				...(author ? { author: { "@type": "Person", name: author } } : {}),
 			};
+		case "post": {
+			if (projection.shape === "page") return null;
+			const type =
+				projection.shape === "chapter"
+					? "Chapter"
+					: projection.shape === "reply"
+						? "Comment"
+						: projection.shape === "review"
+							? "Review"
+							: projection.shape === "excerpt"
+								? "Quotation"
+								: projection.shape === "picture"
+									? "CreativeWork"
+									: "Article";
+			return { "@type": type, ...shared, headline: projection.presentation.title };
 		}
 		case "poll":
 			return { "@type": "Question", ...shared };
@@ -190,7 +219,6 @@ function structuredMainEntity(
 		case "collection":
 		case "realm":
 		case "zone":
-		case "zone_page":
 			return null;
 	}
 }
@@ -205,7 +233,12 @@ export function buildUnitLandingSeoDocument(
 	input: BuildUnitLandingSeoDocumentInput,
 ): UnitLandingSeoDocument {
 	const { projection } = input;
-	if (!projection || projection.id !== input.unitId || projection.kind !== input.expectedKind)
+	if (
+		!projection ||
+		projection.id !== input.unitId ||
+		projection.owner !== input.expectedOwner ||
+		(input.expectedShape !== undefined && projection.shape !== input.expectedShape)
+	)
 		return unavailableDocument(input);
 	if (!hasPresentation(projection)) {
 		const adult = projection.indexing.reason === "adult";
@@ -235,7 +268,7 @@ export function buildUnitLandingSeoDocument(
 	}
 
 	const title = truncate(metadataTitle(input, projection), 120);
-	const kindLabel = input.t.seo.kinds[projection.kind];
+	const kindLabel = resourceLabel(input.t, projection);
 	const description = truncate(
 		projection.presentation.description ??
 			input.t.seo.descriptions.fallback({
@@ -259,12 +292,12 @@ export function buildUnitLandingSeoDocument(
 			: null;
 	const mainEntity = structuredMainEntity(projection, canonicalUrl);
 	const webPage: Record<string, unknown> = {
-		"@type": projection.kind === "collection" ? "CollectionPage" : "WebPage",
+		"@type": projection.owner === "collection" ? "CollectionPage" : "WebPage",
 		"@id": `${canonicalUrl}#webpage`,
 		url: canonicalUrl,
 		name: title,
 		description,
-		inLanguage: projection.presentation.language,
+		...(projection.presentation.language ? { inLanguage: projection.presentation.language } : {}),
 		dateModified: projection.updatedAt,
 		...(projection.publishedAt ? { datePublished: projection.publishedAt } : {}),
 		...(projection.presentation.image
@@ -303,13 +336,13 @@ export function buildUnitLandingSeoDocument(
 			alternates: { canonical: input.canonicalPath },
 			robots: indexable ? { index: true, follow: true } : noindexRobots(),
 			openGraph: {
-				type: projection.kind === "post" ? "article" : "website",
+				type: projection.owner === "post" ? "article" : "website",
 				url: input.canonicalPath,
 				title,
 				description,
 				siteName: input.t.brand.name,
 				images: image,
-				...(projection.kind === "post"
+				...(projection.owner === "post"
 					? {
 							publishedTime: projection.publishedAt ?? undefined,
 							modifiedTime: projection.updatedAt,

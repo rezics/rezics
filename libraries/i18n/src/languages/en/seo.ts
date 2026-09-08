@@ -2,15 +2,9 @@ import { insert } from "native-i18n";
 
 import { enTerminology } from "@rezics/i18n/terminology/en";
 import ui from "./ui";
-import units from "./units";
+import feed from "./feed";
 
-const { forms: audioTerms } = enTerminology.audio;
-const { forms: entityTerms } = enTerminology.entity;
 const { forms: metadataTerms } = enTerminology.metadata;
-const { forms: postTerms } = enTerminology.post;
-const { forms: realmTerms } = enTerminology.realm;
-const { forms: videoTerms } = enTerminology.video;
-const { forms: zoneTerms } = enTerminology.zone;
 
 export default {
 	titles: {
@@ -42,24 +36,8 @@ export default {
 		restricted: `This page’s content rating is not eligible for search indexing ${metadataTerms.inline}.`,
 		unavailable: "Public information for this page is currently unavailable for search indexing.",
 	},
-	kinds: {
-		profile: ui.profile,
-		book: units.types.book,
-		software: units.types.software,
-		release: units.types.release,
-		media: units.types.media,
-		video: videoTerms.label,
-		audio: audioTerms.label,
-		entity: entityTerms.label,
-		tag: "Tag",
-		series: units.types.series,
-		zone: zoneTerms.label,
-		zone_page: `${zoneTerms.label} page`,
-		collection: ui.collection,
-		post: postTerms.label,
-		poll: "Poll",
-		realm: realmTerms.label,
-	},
-	entityKinds: { person: ui.person, organization: ui.organization, character: ui.character },
+	owners: feed.content.owners,
+	shapes: feed.content.kinds,
+	entityShapes: { person: ui.person, organization: ui.organization, character: ui.character },
 	breadcrumbs: { home: "Home" },
 } satisfies typeof import("../zh-Hant/seo").default;

@@ -2,15 +2,9 @@ import { insert } from "native-i18n";
 
 import { esTerminology } from "@rezics/i18n/terminology/es";
 import ui from "./ui";
-import units from "./units";
+import feed from "./feed";
 
-const { forms: audioTerms } = esTerminology.audio;
-const { forms: entityTerms } = esTerminology.entity;
 const { forms: metadataTerms } = esTerminology.metadata;
-const { forms: postTerms } = esTerminology.post;
-const { forms: realmTerms } = esTerminology.realm;
-const { forms: videoTerms } = esTerminology.video;
-const { forms: zoneTerms } = esTerminology.zone;
 
 export default {
 	titles: {
@@ -45,24 +39,8 @@ export default {
 		unavailable:
 			"La información pública de esta página no está disponible actualmente para la indexación.",
 	},
-	kinds: {
-		profile: ui.profile,
-		book: units.types.book,
-		software: units.types.software,
-		release: units.types.release,
-		media: units.types.media,
-		video: videoTerms.label,
-		audio: audioTerms.label,
-		entity: entityTerms.label,
-		tag: "etiqueta",
-		series: units.types.series,
-		zone: zoneTerms.label,
-		zone_page: `página de ${zoneTerms.inline}`,
-		collection: ui.collection,
-		post: postTerms.label,
-		poll: "encuesta",
-		realm: realmTerms.label,
-	},
-	entityKinds: { person: ui.person, organization: ui.organization, character: ui.character },
+	owners: feed.content.owners,
+	shapes: feed.content.kinds,
+	entityShapes: { person: ui.person, organization: ui.organization, character: ui.character },
 	breadcrumbs: { home: "Inicio" },
 } satisfies typeof import("../zh-Hant/seo").default;

@@ -22,7 +22,7 @@ export async function generateMetadata({
 	return (
 		await getUnitLandingSeoDocument({
 			unitId: id,
-			expectedKind: "collection",
+			expectedOwner: "collection",
 			canonicalPath: `/collections/${id}`,
 			requestedLanguage,
 		})
@@ -42,7 +42,7 @@ export default async function Page({
 	]);
 	const seo = {
 		unitId: id,
-		expectedKind: "collection",
+		expectedOwner: "collection",
 		canonicalPath: `/collections/${id}`,
 		requestedLanguage,
 	} as const;

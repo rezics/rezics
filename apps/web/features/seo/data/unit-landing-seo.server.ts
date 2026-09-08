@@ -1,4 +1,5 @@
-import { toContentLanguage, type ContentLanguage } from "@rezics/i18n";
+import type { ContentLanguageTag } from "@rezics/content-language";
+import { toContentLanguage } from "@rezics/i18n";
 import {
 	getPublicUnitSeoProjection,
 	type GetPublicUnitSeoProjectionStatus200,
@@ -11,7 +12,6 @@ import { getInitialPresentationPreferences } from "@/features/preferences/server
 import { getTranslation } from "@/i18n/server";
 import { getBackendOrigin } from "@/lib/backend-origin.server";
 import { getFrontendOrigin } from "@/lib/frontend-origin.server";
-import { contentLanguagesFromLocaleTags } from "@/lib/localization";
 import {
 	buildUnitLandingSeoDocument,
 	type UnitLandingSeoDocument,
@@ -32,7 +32,7 @@ const getUnitLandingProfileLanguagePreferences = cache(async () => {
 const fetchPublicUnitSeoProjection = cache(
 	async (
 		unitId: string,
-		localizationLanguages: readonly ContentLanguage[],
+		localizationLanguages: readonly ContentLanguageTag[],
 	): Promise<GetPublicUnitSeoProjectionStatus200 | null> => {
 		try {
 			const query = localizationLanguages.length
@@ -55,10 +55,11 @@ const fetchPublicUnitSeoProjection = cache(
 const getCachedUnitLandingSeoDocument = cache(
 	async (
 		unitId: string,
-		expectedKind: UnitLandingSeoRoute["expectedKind"],
+		expectedOwner: UnitLandingSeoRoute["expectedOwner"],
 		canonicalPath: string,
 		parentCanonicalPath: string | undefined,
 		requestedLanguage: UnitLandingSeoRoute["requestedLanguage"],
+		expectedShape: string | undefined,
 	): Promise<UnitLandingSeoDocument> => {
 		const [translation, profile, requestHeaders] = await Promise.all([
 			getTranslation(["brand", "seo"]),
@@ -69,14 +70,13 @@ const getCachedUnitLandingSeoDocument = cache(
 			requestedLanguage,
 			profile,
 			interfaceLanguage: toContentLanguage(translation.locale.current),
-			browserLanguages: contentLanguagesFromLocaleTags(
-				parseAcceptLanguage(requestHeaders.get("accept-language")),
-			),
+			browserLanguages: parseAcceptLanguage(requestHeaders.get("accept-language")),
 		});
 		const projection = await fetchPublicUnitSeoProjection(unitId, localizationLanguages);
 		return buildUnitLandingSeoDocument({
 			unitId,
-			expectedKind,
+			expectedOwner,
+			expectedShape,
 			canonicalPath,
 			parentCanonicalPath,
 			projection,
@@ -91,9 +91,10 @@ export function getUnitLandingSeoDocument(
 ): Promise<UnitLandingSeoDocument> {
 	return getCachedUnitLandingSeoDocument(
 		route.unitId,
-		route.expectedKind,
+		route.expectedOwner,
 		route.canonicalPath,
 		route.parentCanonicalPath,
 		route.requestedLanguage,
+		route.expectedShape,
 	);
 }

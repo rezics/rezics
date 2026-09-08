@@ -2,15 +2,9 @@ import { insert } from "native-i18n";
 
 import { koTerminology } from "@rezics/i18n/terminology/ko";
 import ui from "./ui";
-import units from "./units";
+import feed from "./feed";
 
-const { forms: audioTerms } = koTerminology.audio;
-const { forms: entityTerms } = koTerminology.entity;
 const { forms: metadataTerms } = koTerminology.metadata;
-const { forms: postTerms } = koTerminology.post;
-const { forms: realmTerms } = koTerminology.realm;
-const { forms: videoTerms } = koTerminology.video;
-const { forms: zoneTerms } = koTerminology.zone;
 
 export default {
 	titles: {
@@ -42,24 +36,8 @@ export default {
 		restricted: `이 페이지의 콘텐츠 등급은 검색 색인 ${metadataTerms.label} 제공 대상이 아닙니다.`,
 		unavailable: "이 페이지의 공개 정보는 현재 검색 색인에 사용할 수 없습니다.",
 	},
-	kinds: {
-		profile: ui.profile,
-		book: units.types.book,
-		software: units.types.software,
-		release: units.types.release,
-		media: units.types.media,
-		video: videoTerms.label,
-		audio: audioTerms.label,
-		entity: entityTerms.label,
-		tag: "태그",
-		series: units.types.series,
-		zone: zoneTerms.label,
-		zone_page: `${zoneTerms.label} 페이지`,
-		collection: ui.collection,
-		post: postTerms.label,
-		poll: "투표",
-		realm: realmTerms.label,
-	},
-	entityKinds: { person: ui.person, organization: ui.organization, character: ui.character },
+	owners: feed.content.owners,
+	shapes: feed.content.kinds,
+	entityShapes: { person: ui.person, organization: ui.organization, character: ui.character },
 	breadcrumbs: { home: "홈" },
 } satisfies typeof import("../zh-Hant/seo").default;

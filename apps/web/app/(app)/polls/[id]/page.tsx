@@ -22,7 +22,7 @@ export async function generateMetadata({
 	return (
 		await getUnitLandingSeoDocument({
 			unitId: id,
-			expectedKind: "poll",
+			expectedOwner: "poll",
 			canonicalPath: `/polls/${id}`,
 			requestedLanguage,
 		})
@@ -42,7 +42,7 @@ export default async function Page({
 	]);
 	const seo = {
 		unitId: id,
-		expectedKind: "poll",
+		expectedOwner: "poll",
 		canonicalPath: `/polls/${id}`,
 		requestedLanguage,
 	} as const;
