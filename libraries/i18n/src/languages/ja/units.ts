@@ -97,6 +97,15 @@ export default {
 		},
 	},
 	nativeSources: {
+		previewProfile: "比較する内容",
+		rawProfile: "元の応答",
+		nativeProfile: "対応付け後の出典表示",
+		archiveDigest: "アーカイブの要約値",
+		profileCaptureNotice:
+			"これらの応答は個別に取得されています。時刻とハッシュは正確な根拠を識別しますが、提供元の同一時点の状態を保証するものではありません。",
+		capturedAt: "取得日時",
+		captureRequest: "リクエスト先",
+		derivedFrom: "派生元",
 		title: "出典と更新",
 		intake: "出典から取り込む",
 		privateDraft:

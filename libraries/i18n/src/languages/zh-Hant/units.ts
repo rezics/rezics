@@ -97,6 +97,15 @@ export default {
 		},
 	},
 	nativeSources: {
+		previewProfile: "選擇比較內容",
+		rawProfile: "原始回應",
+		nativeProfile: "對應後的來源檢視",
+		archiveDigest: "封存摘要",
+		profileCaptureNotice:
+			"這些回應分別擷取。時間和摘要標示了確切證據，但不代表上游在同一時刻的完整狀態。",
+		capturedAt: "擷取時間",
+		captureRequest: "請求位址",
+		derivedFrom: "衍生來源",
 		title: "來源與更新",
 		intake: "從來源匯入",
 		privateDraft: "新條目儲存為私人草稿。已有條目的來源變化需要審核後才能採納。",

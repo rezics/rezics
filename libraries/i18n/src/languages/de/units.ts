@@ -100,6 +100,15 @@ export default {
 		},
 	},
 	nativeSources: {
+		previewProfile: "Quelldaten vergleichen",
+		rawProfile: "Originalantwort",
+		nativeProfile: "Zugeordnete Quellenansicht",
+		archiveDigest: "Prüfsumme des Archivs",
+		profileCaptureNotice:
+			"Diese Antworten wurden getrennt erfasst. Zeitstempel und Prüfsummen kennzeichnen die genauen Belege, garantieren aber keinen einheitlichen Zeitpunkt im Quellsystem.",
+		capturedAt: "Erfasst am",
+		captureRequest: "Anfrageadresse",
+		derivedFrom: "Abgeleitet aus",
 		title: "Quellen und Aktualisierungen",
 		intake: "Aus einer Quelle importieren",
 		privateDraft:

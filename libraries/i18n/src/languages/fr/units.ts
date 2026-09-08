@@ -99,6 +99,15 @@ export default {
 		},
 	},
 	nativeSources: {
+		previewProfile: "Comparer les données sources",
+		rawProfile: "Réponse originale",
+		nativeProfile: "Vue source adaptée",
+		archiveDigest: "Empreinte de l’archive",
+		profileCaptureNotice:
+			"Ces réponses ont été recueillies séparément. Les dates et empreintes identifient les preuves exactes, sans garantir un état simultané chez le fournisseur.",
+		capturedAt: "Date de collecte",
+		captureRequest: "Adresse de la requête",
+		derivedFrom: "Dérivé de",
 		title: "Sources et mises à jour",
 		intake: "Importer depuis une source",
 		privateDraft:

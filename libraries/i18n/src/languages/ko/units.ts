@@ -97,6 +97,15 @@ export default {
 		},
 	},
 	nativeSources: {
+		previewProfile: "비교할 내용",
+		rawProfile: "원본 응답",
+		nativeProfile: "매핑된 출처 보기",
+		archiveDigest: "보관본 요약값",
+		profileCaptureNotice:
+			"응답은 각각 수집되었습니다. 시각과 해시는 정확한 근거를 식별하지만 제공처의 동일 시점 상태를 보장하지 않습니다.",
+		capturedAt: "수집 시각",
+		captureRequest: "요청 주소",
+		derivedFrom: "파생 출처",
 		title: "출처 및 업데이트",
 		intake: "출처에서 가져오기",
 		privateDraft:

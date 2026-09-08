@@ -98,6 +98,15 @@ export default {
 		},
 	},
 	nativeSources: {
+		previewProfile: "Compare source data",
+		rawProfile: "Original response",
+		nativeProfile: "Mapped source view",
+		archiveDigest: "Archive digest",
+		profileCaptureNotice:
+			"These responses were captured separately. Their timestamps and hashes identify the exact evidence; they do not guarantee a single simultaneous upstream state.",
+		capturedAt: "Captured at",
+		captureRequest: "Request address",
+		derivedFrom: "Derived from",
 		title: "Sources and updates",
 		intake: "Import from a source",
 		privateDraft:

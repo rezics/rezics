@@ -97,6 +97,15 @@ export default {
 		},
 	},
 	nativeSources: {
+		previewProfile: "选择比较内容",
+		rawProfile: "原始响应",
+		nativeProfile: "映射后的来源视图",
+		archiveDigest: "归档摘要",
+		profileCaptureNotice:
+			"这些响应分别采集。时间和摘要标识了确切证据，但不代表上游在同一时刻的完整状态。",
+		capturedAt: "采集时间",
+		captureRequest: "请求地址",
+		derivedFrom: "派生来源",
 		title: "来源与更新",
 		intake: "从来源导入",
 		privateDraft: "新条目保存为私有草稿。已有条目的来源变化需要审核后才能采纳。",
