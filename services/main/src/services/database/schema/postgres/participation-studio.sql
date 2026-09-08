@@ -9,6 +9,7 @@ SET search_path = pg_catalog, public
 AS $$
 DECLARE
     current_owner_since timestamp(3) with time zone;
+    current_catalog_creator_since timestamp(3) with time zone;
     current_direct_since timestamp(3) with time zone;
     current_direct_last_at timestamp(3) with time zone;
     current_direct_valid_until timestamp(3) with time zone;
@@ -23,6 +24,12 @@ BEGIN
       DELETE FROM public.studio_auth_editor_candidate WHERE auth_user_id = candidate_auth_user_id AND unit_id = candidate_unit_id;
       RETURN;
     END IF;
+    PERFORM pg_advisory_xact_lock(hashtextextended('studio-candidate:' || candidate_unit_id::text, 0));
+    SELECT state.created_at INTO current_catalog_creator_since
+    FROM public.read_unit_state(candidate_unit_id, true) state
+    WHERE state.owner IN ('publishing','music','program','software','entity','grouping','reference','distribution')
+      AND state.created_by_auth_user_id = candidate_auth_user_id AND state.deleted_at IS NULL;
+
     SELECT min(ownership.created_at)
     INTO current_owner_since
     FROM public.unit_ownership AS ownership
@@ -48,7 +55,7 @@ BEGIN
       AND access_grant.permission = 'unit.update'::public.unit_permission
       AND access_grant.revoked_at IS NULL;
 
-    IF current_owner_since IS NULL AND current_direct_since IS NULL THEN
+    IF current_owner_since IS NULL AND current_direct_since IS NULL AND current_catalog_creator_since IS NULL THEN
         DELETE FROM public.studio_auth_editor_candidate
         WHERE auth_user_id = candidate_auth_user_id
           AND unit_id = candidate_unit_id;
@@ -59,6 +66,7 @@ BEGIN
         auth_user_id,
         unit_id,
         owner_since,
+        catalog_creator_since,
         direct_grant_since,
         direct_grant_last_at,
         relevant_at,
@@ -68,11 +76,12 @@ BEGIN
         candidate_auth_user_id,
         candidate_unit_id,
         current_owner_since,
+        current_catalog_creator_since,
         current_direct_since,
         current_direct_last_at,
-        greatest(current_owner_since, current_direct_last_at),
+        greatest(current_owner_since, current_direct_last_at, current_catalog_creator_since),
         CASE
-            WHEN current_owner_since IS NOT NULL OR coalesce(has_non_expiring_direct, false)
+            WHEN current_owner_since IS NOT NULL OR current_catalog_creator_since IS NOT NULL OR coalesce(has_non_expiring_direct, false)
                 THEN NULL
             ELSE current_direct_valid_until
         END,
@@ -80,6 +89,7 @@ BEGIN
     )
     ON CONFLICT (auth_user_id, unit_id) DO UPDATE SET
         owner_since = excluded.owner_since,
+        catalog_creator_since = excluded.catalog_creator_since,
         direct_grant_since = excluded.direct_grant_since,
         direct_grant_last_at = excluded.direct_grant_last_at,
         relevant_at = excluded.relevant_at,
@@ -240,3 +250,56 @@ FOR EACH ROW EXECUTE FUNCTION public.maintain_studio_editor_candidate_from_grant
 
 
 DROP FUNCTION IF EXISTS public.refresh_studio_profile_editor_candidate(uuid, uuid);
+
+-- Identity triggers run after the owner route publication trigger; they never grant authority.
+CREATE OR REPLACE FUNCTION public.maintain_studio_catalog_creator_candidate() RETURNS trigger
+LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    PERFORM public.refresh_studio_auth_editor_candidate(NEW.created_by_auth_user_id, NEW.id);
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    PERFORM public.refresh_studio_auth_editor_candidate(OLD.created_by_auth_user_id, OLD.id);
+    RETURN OLD;
+  END IF;
+  PERFORM public.refresh_studio_auth_editor_candidate(OLD.created_by_auth_user_id, OLD.id);
+  IF NEW.created_by_auth_user_id IS DISTINCT FROM OLD.created_by_auth_user_id THEN
+    PERFORM public.refresh_studio_auth_editor_candidate(NEW.created_by_auth_user_id, NEW.id);
+  END IF;
+  RETURN NEW;
+END $$;
+
+DO $$ DECLARE owner_name text;
+BEGIN
+  FOREACH owner_name IN ARRAY ARRAY['publishing','music','program','software','entity','grouping','reference','distribution'] LOOP
+    EXECUTE format('DROP TRIGGER IF EXISTS zz_studio_catalog_creator_candidate ON public.%I', owner_name || '_identity');
+    EXECUTE format('CREATE TRIGGER zz_studio_catalog_creator_candidate AFTER INSERT OR DELETE OR UPDATE OF created_by_auth_user_id, deleted_at ON public.%I FOR EACH ROW EXECUTE FUNCTION public.maintain_studio_catalog_creator_candidate()', owner_name || '_identity');
+  END LOOP;
+END $$;
+
+-- Maintenance callers persist this owner-local PK cursor between transactions.
+CREATE OR REPLACE FUNCTION public.repair_studio_catalog_creator_candidates(
+  target_owner text, after_id uuid DEFAULT NULL, batch_limit integer DEFAULT 256
+) RETURNS TABLE(last_id uuid, scanned integer, exhausted boolean)
+LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
+DECLARE candidate record; stale_creator uuid;
+BEGIN
+  IF target_owner NOT IN ('publishing','music','program','software','entity','grouping','reference','distribution')
+     OR batch_limit < 1 OR batch_limit > 512 THEN
+    RAISE EXCEPTION 'Studio repair requires a catalog owner and batch limit 1..512';
+  END IF;
+  last_id := after_id; scanned := 0;
+  FOR candidate IN EXECUTE format('SELECT id, created_by_auth_user_id FROM public.%I WHERE ($1 IS NULL OR id > $1) ORDER BY id LIMIT $2', target_owner || '_identity') USING after_id, batch_limit LOOP
+    SELECT auth_user_id INTO stale_creator FROM public.studio_auth_editor_candidate
+    WHERE unit_id = candidate.id AND catalog_creator_since IS NOT NULL LIMIT 1;
+    IF stale_creator IS NOT NULL AND stale_creator IS DISTINCT FROM candidate.created_by_auth_user_id THEN
+      PERFORM public.refresh_studio_auth_editor_candidate(stale_creator, candidate.id);
+    END IF;
+    IF candidate.created_by_auth_user_id IS NOT NULL THEN
+      PERFORM public.refresh_studio_auth_editor_candidate(candidate.created_by_auth_user_id, candidate.id);
+    END IF;
+    last_id := candidate.id; scanned := scanned + 1;
+  END LOOP;
+  exhausted := scanned < batch_limit;
+  RETURN NEXT;
+END $$;

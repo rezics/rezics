@@ -179,7 +179,7 @@ describe("profile content language contract", () => {
 describe("Studio content list contract", () => {
 	it("accepts only supported sections and bounded limits", () => {
 		expect(Check(StudioContentListQuery, {})).toBe(true);
-		expect(Check(StudioContentListQuery, { section: "book" })).toBe(true);
+		expect(Check(StudioContentListQuery, { section: "publishing" })).toBe(true);
 		expect(StudioContentListQuery.properties.source).toHaveProperty("default", "all");
 		expect(Reflect.get(StudioContentListQuery.properties.status, "default")).toBeUndefined();
 		expect(Reflect.get(StudioContentListQuery.properties.visibility, "default")).toBeUndefined();
@@ -196,9 +196,11 @@ describe("Studio content list contract", () => {
 		).toBe(true);
 		expect(Check(StudioContentListQuery, { section: "zone" })).toBe(true);
 		expect(Check(StudioContentListQuery, { section: "unknown" })).toBe(false);
-		expect(Check(StudioContentListQuery, { section: "book", source: "created" })).toBe(false);
-		expect(Check(StudioContentListQuery, { section: "book", view: "contributed" })).toBe(false);
-		expect(Check(StudioContentListQuery, { section: "book", limit: 101 })).toBe(false);
+		expect(Check(StudioContentListQuery, { section: "publishing", source: "created" })).toBe(true);
+		expect(Check(StudioContentListQuery, { section: "publishing", view: "contributed" })).toBe(
+			false,
+		);
+		expect(Check(StudioContentListQuery, { section: "publishing", limit: 101 })).toBe(false);
 	});
 });
 

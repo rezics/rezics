@@ -152,7 +152,7 @@ export default new Elysia({ name: "account-entity-api" })
 				tags: ["Users", "Studio"],
 			},
 		},
-		async ({ authorization, entity, query }) => {
+		async ({ authorization, entity, query, user, participation }) => {
 			let includeDevelopmentPreview = false;
 			if (query.section === "zone") {
 				await authorization.platform.ensureCapability(DevelopmentPreviewCapability);
@@ -163,6 +163,9 @@ export default new Elysia({ name: "account-entity-api" })
 				);
 			}
 			return listStudioContent({
+				authUserId: user.id,
+				authority: participation,
+				authorization: authorization.unit,
 				profileId: entity.id,
 				query,
 				includeDevelopmentPreview,

@@ -123,6 +123,9 @@ export const unitOwnership = pgTable(
 		uniqueIndex("unit_ownership_active_unit_key")
 			.on(table.unitId)
 			.where(sql`${table.revokedAt} is null`),
+		index("unit_ownership_profile_realm_active_idx")
+			.on(table.profileId, table.unitRealmId)
+			.where(sql`${table.revokedAt} is null and ${table.unitRealmId} is not null`),
 		index("unit_ownership_profile_active_idx")
 			.on(table.profileId, table.unitId)
 			.where(sql`${table.revokedAt} is null`),
@@ -171,6 +174,16 @@ export const unitAccessGrant = pgTable(
 		uniqueIndex("unit_access_grant_active_authenticated_scope_key")
 			.on(table.unitId, table.permission, table.scope)
 			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'authenticated'`),
+		index("unit_access_grant_auth_managed_realm_idx")
+			.on(table.authUserId, table.unitRealmId)
+			.where(
+				sql`${table.subjectKind} = 'auth' and ${table.permission} = 'unit.access.manage' and cardinality(${table.scope}) = 0 and ${table.revokedAt} is null and ${table.unitRealmId} is not null`,
+			),
+		index("unit_access_grant_member_managed_realm_idx")
+			.on(table.realmId, table.unitRealmId)
+			.where(
+				sql`${table.subjectKind} = 'realm' and ${table.realmRelation} = 'member' and ${table.permission} = 'unit.access.manage' and cardinality(${table.scope}) = 0 and ${table.revokedAt} is null and ${table.unitRealmId} is not null`,
+			),
 		index("unit_access_grant_auth_user_active_idx")
 			.on(table.authUserId, table.unitId, table.permission)
 			.where(sql`${table.revokedAt} is null`),

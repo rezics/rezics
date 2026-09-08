@@ -1,3 +1,4 @@
+import { UnitOwnerValues } from "@rezics/reference";
 import { PortableTextDocument } from "@rezics/block";
 import { LicenseIds } from "@rezics/license";
 import { t } from "elysia";
@@ -7,7 +8,6 @@ import { Value } from "typebox/value";
 import {
 	ContentLanguageValues,
 	ResourceVisibilityValues,
-	UnitKindValues,
 	UnitStatusValues,
 } from "../../database/schema/contract-values";
 import { ResourceSectionValues, type ResourceSection } from "../../units/resource-section";
@@ -32,11 +32,23 @@ import { NullablePublicSlugAddressResponse, SlugLabelInput } from "../slug-addre
 export const StudioSection = t.UnionEnum(ResourceSectionValues, { default: undefined });
 export type StudioSection = ResourceSection;
 
-export const StudioWorkspaceSourceValues = ["all", "owned", "direct", "delegated"] as const;
+export const StudioWorkspaceSourceValues = [
+	"all",
+	"created",
+	"owned",
+	"direct",
+	"delegated",
+] as const;
 export const StudioWorkspaceSource = t.UnionEnum(StudioWorkspaceSourceValues, { default: "all" });
 export type StudioWorkspaceSource = StaticDecode<typeof StudioWorkspaceSource>;
 
-export const StudioAccessSourceValues = ["owner", "direct", "realm"] as const;
+export const StudioAccessSourceValues = [
+	"owner",
+	"direct",
+	"realm",
+	"catalog_creator",
+	"catalog_grant",
+] as const;
 export const StudioAccessSource = t.UnionEnum(StudioAccessSourceValues, {
 	default: undefined,
 });
@@ -62,8 +74,9 @@ export const StudioContentListResponse = t.Object({
 			id: Uuid,
 			slugAddress: NullablePublicSlugAddressResponse,
 			section: StudioSection,
-			resourceKind: t.UnionEnum(UnitKindValues),
-			language: ContentLanguage,
+			resourceOwner: t.UnionEnum(UnitOwnerValues),
+			resourceShape: t.String(),
+			language: t.Nullable(t.String({ maxLength: 255 })),
 			title: t.Nullable(t.String()),
 			cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
 			status: t.UnionEnum(UnitStatusValues),

@@ -9,7 +9,7 @@ const UnitId = "019b76da-a800-7300-8000-000000000002";
 describe("Studio workspace cursor", () => {
 	it("round-trips its source-aware boundary inside the complete filter scope", () => {
 		const query = {
-			section: "book",
+			section: "publishing",
 			source: "direct",
 			status: "published",
 			visibility: "public",
@@ -25,7 +25,7 @@ describe("Studio workspace cursor", () => {
 	});
 
 	it("rejects malformed cursors and reuse under another source filter", () => {
-		const query = { section: "book", source: "owned" } as const;
+		const query = { section: "publishing", source: "owned" } as const;
 		const cursor = encodeStudioCursor(query, {
 			relevantAt: new Date("2026-07-27T08:00:00.000Z"),
 			unitId: UnitId,
@@ -46,7 +46,7 @@ describe("Studio workspace cursor", () => {
 		};
 		const cursor = encodeStudioCursor(aggregateQuery, boundary);
 		expect(decodeStudioCursor(cursor, aggregateQuery)).toEqual(boundary);
-		expect(() => decodeStudioCursor(cursor, { ...aggregateQuery, section: "book" })).toThrow(
+		expect(() => decodeStudioCursor(cursor, { ...aggregateQuery, section: "publishing" })).toThrow(
 			InvalidPaginationCursor,
 		);
 	});

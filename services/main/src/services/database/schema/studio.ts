@@ -1,6 +1,6 @@
 import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { sql } from "drizzle-orm";
-import { check, index, primaryKey, uuid } from "drizzle-orm/pg-core";
+import { check, index, primaryKey, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 import { realmAccessSubjectRelation } from "./access";
 import { pgTable } from "./base";
@@ -23,6 +23,8 @@ export const studioAuthEditorCandidate = pgTable(
 			.references(() => users.id, { onDelete: "cascade" }),
 		unitId: uuid().notNull(),
 		ownerSince: createTimestampMsColumn(),
+		/** Source-only projection of native catalog creation; never platform ownership. */
+		catalogCreatorSince: createTimestampMsColumn(),
 		directGrantSince: createTimestampMsColumn(),
 		directGrantLastAt: createTimestampMsColumn(),
 		/** Latest source assignment; the keyset ordering column. */
@@ -43,16 +45,24 @@ export const studioAuthEditorCandidate = pgTable(
 			table.unitId.desc(),
 		),
 		index("studio_auth_editor_candidate_unit_idx").on(table.unitId, table.authUserId),
+		uniqueIndex("studio_auth_editor_candidate_catalog_creator_key")
+			.on(table.unitId)
+			.where(sql`${table.catalogCreatorSince} is not null`),
+		check(
+			"studio_auth_editor_candidate_catalog_creator_owner_check",
+			sql`${table.catalogCreatorSince} is null or num_nonnulls(${table.unitPublishingId}, ${table.unitMusicId}, ${table.unitProgramId}, ${table.unitSoftwareId}, ${table.unitEntityId}, ${table.unitGroupingId}, ${table.unitReferenceId}, ${table.unitDistributionId}) = 1`,
+		),
+
 		index("studio_auth_editor_candidate_expiry_idx")
 			.on(table.validUntil, table.authUserId, table.unitId)
 			.where(sql`${table.validUntil} is not null`),
 		check(
 			"studio_auth_editor_candidate_source_check",
-			sql`${table.ownerSince} is not null or ${table.directGrantSince} is not null`,
+			sql`${table.ownerSince} is not null or ${table.directGrantSince} is not null or ${table.catalogCreatorSince} is not null`,
 		),
 		check(
 			"studio_auth_editor_candidate_relevant_at_check",
-			sql`${table.relevantAt} = greatest(${table.ownerSince}, ${table.directGrantLastAt})`,
+			sql`${table.relevantAt} = greatest(${table.ownerSince}, ${table.directGrantLastAt}, ${table.catalogCreatorSince})`,
 		),
 		check(
 			"studio_auth_editor_candidate_direct_grant_time_check",

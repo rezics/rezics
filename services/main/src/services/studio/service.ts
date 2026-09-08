@@ -1,6 +1,20 @@
-import {presentImageAsset} from "../api/image-assets/presentation";
-import type { ContentLanguage } from "@rezics/i18n";
-import { and, eq, exists, isNull, not, or, sql, type SQL } from "drizzle-orm";
+import {
+	CatalogOwnerValues,
+	CatalogReferenceSchema,
+	UnitOwnerValues,
+	type UnitOwner,
+} from "@rezics/reference";
+import {
+	catalogAccessDecisions,
+	runWithParticipationAuthority,
+	ParticipationDenied,
+	type ParticipationAuthority,
+} from "../participation/policy";
+import { unitStateRelation } from "../units/state-relation";
+import { readUnitPresentationsInTransaction } from "../units/presentation-reader";
+import { z } from "zod";
+import { presentImageAsset } from "../api/image-assets/presentation";
+import { and, eq, exists, inArray, isNull, not, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { StudioRealmSubjectLimitExceeded } from "../api/users/errors";
@@ -18,29 +32,22 @@ import { profileCanManageRealmAccess } from "../authorization/unit/realm-subject
 import { selfAuthUserIdForEntity } from "../participation/account-query";
 import { database } from "../database";
 import {
-	post,
 	realm,
+	participationGrant,
 	realmMember,
 	studioAuthEditorCandidate,
 	studioRealmEditorCandidate,
 	studioResourceVisit,
-	unit,
 	unitAccessGrant,
 	unitOwnership,
 } from "../database/schema";
-import {
-	PostKindValues,
-	UnitKindValues,
-	type PostKind,
-	type UnitKind,
-} from "../database/schema/contract-values";
 import {
 	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
 import {
-	resourceSectionFromKinds,
+	resourceSectionFromReference,
 	studioResourceScopeCondition,
 	type ResourceSection,
 } from "../units/resource-section";
@@ -60,6 +67,7 @@ type RealmSubject = {
 type RawRealmSubject = {
 	readonly realmId: string;
 	readonly realmRelation: string;
+	readonly sourceLimitExceeded: boolean;
 };
 
 type RawWorkspaceCandidate = {
@@ -68,6 +76,10 @@ type RawWorkspaceCandidate = {
 	readonly sourceKey: string;
 	readonly relevantAt: unknown;
 	readonly ownerSince: unknown | null;
+	readonly catalogCreatorSince: unknown | null;
+	readonly catalogGrantSince: unknown | null;
+	readonly hasCatalogCreatorAccess: boolean;
+	readonly hasCatalogGrantAccess: boolean;
 	readonly directGrantSince: unknown | null;
 	readonly realmGrantSince: unknown | null;
 	readonly lastVisitedAt: unknown | null;
@@ -75,9 +87,10 @@ type RawWorkspaceCandidate = {
 	readonly hasOwnerAccess: boolean;
 	readonly hasDirectAccess: boolean;
 	readonly hasRealmAccess: boolean;
-	readonly resourceKind: string | null;
-	readonly postKind: string | null;
-	readonly language: ContentLanguage | null;
+	readonly resourceOwner: string | null;
+	readonly resourceShape: string | null;
+	readonly creatorAuthUserId: string | null;
+	readonly language: string | null;
 	readonly title: string | null;
 	readonly coverAssetId: string | null;
 	readonly status: "draft" | "published" | "archived" | null;
@@ -89,8 +102,9 @@ type RawWorkspaceCandidate = {
 type PresentedWorkspaceCandidate = {
 	readonly id: string;
 	readonly section: ResourceSection;
-	readonly resourceKind: UnitKind;
-	readonly language: ContentLanguage;
+	readonly resourceOwner: UnitOwner;
+	readonly resourceShape: string;
+	readonly language: string | null;
 	readonly title: string | null;
 	readonly cover: { readonly id: string; readonly url: string } | null;
 	readonly status: "draft" | "published" | "archived";
@@ -116,62 +130,59 @@ function realmRelation(value: string): RealmSubject["realmRelation"] {
 	throw new TypeError("Studio Realm subject relation is invalid");
 }
 
-function unitKindValue(value: string | null): UnitKind | undefined {
-	return UnitKindValues.find((kind) => kind === value);
-}
-
-function postKindValue(value: string | null): PostKind | undefined {
-	return PostKindValues.find((kind) => kind === value);
+function unitOwnerValue(value: string | null): UnitOwner | undefined {
+	return UnitOwnerValues.find((owner) => owner === value);
 }
 
 /** Loads the small dynamic userset used to seek Realm candidate streams. */
 async function loadRealmSubjects(profileId: string): Promise<RealmSubject[]> {
-	const managedRealm = alias(unit, "studio_managed_realm_subject");
+	const managedRealm = alias(realm, "studio_managed_realm_subject");
 	const result = await database.execute<RawRealmSubject>(sql`
 		with possible_subject as (
-			select member.realm_id, 'member'::text as realm_relation
+			(select member.realm_id, 'member'::text as realm_relation
 			from ${realmMember} member
 			where member.profile_id = ${profileId}
 				and member.state = 'active'
+			order by member.realm_id limit 257)
 
 			union all
 
-			select ownership.unit_id, 'access_manager'
+			(select ownership.unit_realm_id, 'access_manager'
 			from ${unitOwnership} ownership
 			where ownership.profile_id = ${profileId}
-				and ownership.revoked_at is null
+				and ownership.revoked_at is null and ownership.unit_realm_id is not null
+			order by ownership.unit_realm_id limit 257)
 
 			union all
 
-			select access_grant.unit_id, 'access_manager'
+			(select access_grant.unit_realm_id, 'access_manager'
 			from ${unitAccessGrant} access_grant
 			where access_grant.subject_kind = 'auth'
 				and access_grant.auth_user_id = ${selfAuthUserIdForEntity(profileId)}
 				and access_grant.permission = 'unit.access.manage'
 				and cardinality(access_grant.scope) = 0
 				and access_grant.revoked_at is null
-				and (access_grant.expires_at is null or access_grant.expires_at > now())
+				and access_grant.unit_realm_id is not null
+			order by access_grant.unit_realm_id limit 257)
 
 			union all
 
-			select access_grant.unit_id, 'access_manager'
-			from ${unitAccessGrant} access_grant
-			join ${realmMember} member
-				on member.realm_id = access_grant.realm_id
-				and member.profile_id = ${profileId}
-				and member.state = 'active'
-			where access_grant.subject_kind = 'realm'
-				and access_grant.realm_relation = 'member'
-				and access_grant.permission = 'unit.access.manage'
-				and cardinality(access_grant.scope) = 0
-				and access_grant.revoked_at is null
-				and (access_grant.expires_at is null or access_grant.expires_at > now())
+			(select delegated.unit_realm_id, 'access_manager'
+			from (select realm_id from ${realmMember} where profile_id = ${profileId} and state = 'active' order by realm_id limit 257) member
+			cross join lateral (
+				select unit_realm_id from ${unitAccessGrant} access_grant
+				where access_grant.realm_id = member.realm_id and access_grant.subject_kind = 'realm'
+				and access_grant.realm_relation = 'member' and access_grant.permission = 'unit.access.manage'
+				and cardinality(access_grant.scope) = 0 and access_grant.revoked_at is null and access_grant.unit_realm_id is not null
+				order by access_grant.unit_realm_id limit 257
+			) delegated order by delegated.unit_realm_id limit 257)
 		)
 		select distinct
+			(select count(*) > 256 from possible_subject) as "sourceLimitExceeded",
 			possible_subject.realm_id as "realmId",
 			possible_subject.realm_relation as "realmRelation"
 		from possible_subject
-		where exists (
+		where (select count(*) > 256 from possible_subject) or (exists (
 			select 1
 			from ${realm}
 			where ${realm.id} = possible_subject.realm_id
@@ -180,15 +191,19 @@ async function loadRealmSubjects(profileId: string): Promise<RealmSubject[]> {
 				possible_subject.realm_relation = 'member'
 			or exists (
 					select 1
-					from ${unit} studio_managed_realm_subject
+					from ${realm} studio_managed_realm_subject
 					where ${managedRealm.id} = possible_subject.realm_id
 						and ${profileCanManageRealmAccess(database, managedRealm.id, profileId)}
 				)
 			)
+		)
 		order by possible_subject.realm_id, possible_subject.realm_relation
 		limit ${StudioRealmSubjectLimit + 1}
 	`);
-	if (result.rows.length > StudioRealmSubjectLimit)
+	if (
+		result.rows.length > StudioRealmSubjectLimit ||
+		result.rows.some((row) => row.sourceLimitExceeded)
+	)
 		throw new StudioRealmSubjectLimitExceeded(StudioRealmSubjectLimit);
 	return result.rows.map((subject) => ({
 		realmId: subject.realmId,
@@ -221,6 +236,8 @@ function emptyCandidateStream(): SQL {
 			null::uuid as realm_id,
 			null::realm_access_subject_relation as realm_relation,
 			null::timestamptz as owner_since,
+			null::timestamptz as catalog_creator_since,
+			null::timestamptz as catalog_grant_since,
 			null::timestamptz as direct_grant_since,
 			null::timestamptz as realm_grant_since
 		where false
@@ -234,12 +251,6 @@ function profileCandidateStream(input: {
 	readonly scanLimit: number;
 }): SQL {
 	if (input.source === "delegated") return emptyCandidateStream();
-	const sourceCondition =
-		input.source === "owned"
-			? sql`candidate.owner_since is not null`
-			: input.source === "direct"
-				? sql`candidate.direct_grant_since is not null`
-				: sql`true`;
 	const sourceKey = sql`'profile'::text`;
 	return sql`
 		select
@@ -250,12 +261,12 @@ function profileCandidateStream(input: {
 			null::uuid as realm_id,
 			null::realm_access_subject_relation as realm_relation,
 			candidate.owner_since,
+			candidate.catalog_creator_since,
+			null::timestamptz as catalog_grant_since,
 			candidate.direct_grant_since,
 			null::timestamptz as realm_grant_since
 		from ${studioAuthEditorCandidate} candidate
 		where candidate.auth_user_id = ${selfAuthUserIdForEntity(input.profileId)}
-			and (candidate.valid_until is null or candidate.valid_until > now())
-			and ${sourceCondition}
 			and ${cursorCondition(
 				input.cursor,
 				sql`candidate.relevant_at`,
@@ -287,7 +298,8 @@ function realmCandidateStream(input: {
 	readonly cursor?: StudioCursorBoundary;
 	readonly scanLimit: number;
 }): SQL {
-	if (input.source === "owned" || input.source === "direct") return emptyCandidateStream();
+	if (input.source === "owned" || input.source === "direct" || input.source === "created")
+		return emptyCandidateStream();
 	const sourceKey = sql`(
 		'realm:' || candidate.realm_id::text || ':' || candidate.realm_relation::text
 	)`;
@@ -300,6 +312,8 @@ function realmCandidateStream(input: {
 			candidate.realm_id,
 			candidate.realm_relation,
 			null::timestamptz as owner_since,
+			null::timestamptz as catalog_creator_since,
+			null::timestamptz as catalog_grant_since,
 			null::timestamptz as direct_grant_since,
 			candidate.grant_since as realm_grant_since
 		from realm_subject subject
@@ -308,7 +322,6 @@ function realmCandidateStream(input: {
 			from ${studioRealmEditorCandidate} realm_candidate
 			where realm_candidate.realm_id = subject.realm_id
 				and realm_candidate.realm_relation = subject.realm_relation
-				and (realm_candidate.valid_until is null or realm_candidate.valid_until > now())
 				and ${cursorCondition(
 					input.cursor,
 					sql`realm_candidate.relevant_at`,
@@ -328,6 +341,23 @@ function realmCandidateStream(input: {
 	`;
 }
 
+function selectedCatalogGrantStream(input: {
+	readonly authority: ParticipationAuthority;
+	readonly source: StudioWorkspaceSource;
+	readonly cursor?: StudioCursorBoundary;
+}): SQL {
+	if (!input.authority.grant || (input.source !== "all" && input.source !== "direct"))
+		return emptyCandidateStream();
+	const target = sql`coalesce(selected_grant.publishing_id,selected_grant.music_id,selected_grant.program_id,selected_grant.software_id,selected_grant.entity_id,selected_grant.grouping_id,selected_grant.reference_id,selected_grant.distribution_id)`;
+	const sourceKey = sql`('catalog-grant:' || selected_grant.id::text)`;
+	return sql`select ${target} as unit_id, selected_grant.created_at as relevant_at, 'catalog_grant'::text as source_kind,
+		${sourceKey} as source_key, null::uuid as realm_id, null::realm_access_subject_relation as realm_relation,
+		null::timestamptz as owner_since, null::timestamptz as catalog_creator_since, selected_grant.created_at as catalog_grant_since,
+		null::timestamptz as direct_grant_since, null::timestamptz as realm_grant_since
+		from ${participationGrant} selected_grant where selected_grant.id = ${input.authority.grant.id} and selected_grant.capability = 'catalog.edit'
+		and ${cursorCondition(input.cursor, sql`selected_grant.created_at`, target, sourceKey)} limit 1`;
+}
+
 function profileEffectiveCondition(
 	source: StudioWorkspaceSource,
 	ownerAccess: SQL,
@@ -341,11 +371,15 @@ function profileEffectiveCondition(
 		case "direct":
 			return directAccess;
 		case "delegated":
+		case "created":
 			return sql`false`;
 	}
 }
 
 async function selectWorkspaceCandidateBatch(input: {
+	readonly authUserId: string;
+	readonly authority: ParticipationAuthority;
+	readonly authorization: UnitAuthorization<string>;
 	readonly profileId: string;
 	readonly query: StudioContentListQuery;
 	readonly realmSubjects: readonly RealmSubject[];
@@ -354,9 +388,8 @@ async function selectWorkspaceCandidateBatch(input: {
 	readonly scanLimit: number;
 }): Promise<RawWorkspaceCandidate[]> {
 	const source = input.query.source ?? "all";
-	const resource = alias(unit, "studio_workspace_resource");
-	const resourcePost = alias(post, "studio_workspace_post");
-	const subjectRealm = alias(unit, "studio_workspace_subject_realm");
+	const resource = unitStateRelation(sql`page.unit_id`, "studio_workspace_resource");
+	const subjectRealm = alias(realm, "studio_workspace_subject_realm");
 	const otherRealmCandidate = alias(
 		studioRealmEditorCandidate,
 		"studio_other_realm_editor_candidate",
@@ -459,6 +492,8 @@ async function selectWorkspaceCandidateBatch(input: {
 		not(earlierRealmSource),
 	) as SQL;
 	const acceptedSource = sql`case
+		when page.source_kind = 'profile' and page.catalog_creator_since is not null then ${source === "all" || source === "created"}
+		when page.source_kind = 'catalog_grant' then true
 		when page.source_kind = 'profile' then ${profileEffectiveCondition(
 			source,
 			ownerAccess,
@@ -474,13 +509,15 @@ async function selectWorkspaceCandidateBatch(input: {
 	const localizationLanguages = input.query.localizationLanguages ?? [];
 	const accepted = and(
 		sql`${resource.id} is not null`,
-		getUnitReadCondition(input.profileId, {}, resource),
+		or(
+			inArray(resource.owner, CatalogOwnerValues),
+			getUnitReadCondition(input.profileId, {}, resource),
+		),
 		studioResourceScopeCondition(
 			input.query.section,
 			{
-				id: resource.id,
-				kind: resource.kind,
-				postKind: resourcePost.kind,
+				owner: resource.owner,
+				shape: resource.shape,
 			},
 			{
 				includeDevelopmentPreview: input.includeDevelopmentPreview,
@@ -490,7 +527,9 @@ async function selectWorkspaceCandidateBatch(input: {
 		visibilityCondition,
 		acceptedSource,
 	) as SQL;
-	const result = await database.execute<RawWorkspaceCandidate>(sql`
+	return runWithParticipationAuthority(input.authority, () =>
+		database.transaction(async (tx) => {
+			const result = await tx.execute<RawWorkspaceCandidate>(sql`
 		with realm_subject (realm_id, realm_relation) as materialized (
 			${realmSubjectValues(input.realmSubjects)}
 		), profile_scan as materialized (
@@ -510,6 +549,8 @@ async function selectWorkspaceCandidateBatch(input: {
 			select * from profile_scan
 			union all
 			select * from realm_scan
+			union all
+			select * from (${selectedCatalogGrantStream({ authority: input.authority, source, cursor: input.cursor })}) selected_catalog_grant_scan
 		), page as materialized (
 			select *
 			from scanned
@@ -525,6 +566,9 @@ async function selectWorkspaceCandidateBatch(input: {
 			page.source_key as "sourceKey",
 			page.relevant_at as "relevantAt",
 			page.owner_since as "ownerSince",
+			page.catalog_creator_since as "catalogCreatorSince",
+			page.catalog_grant_since as "catalogGrantSince",
+			false as "hasCatalogCreatorAccess", false as "hasCatalogGrantAccess",
 			page.direct_grant_since as "directGrantSince",
 			page.realm_grant_since as "realmGrantSince",
 			visit.last_visited_at as "lastVisitedAt",
@@ -532,8 +576,9 @@ async function selectWorkspaceCandidateBatch(input: {
 			${ownerAccess} as "hasOwnerAccess",
 			${directAccess} as "hasDirectAccess",
 			case when page.source_kind = 'realm' then ${realmAccess} else false end as "hasRealmAccess",
-			${resource.kind} as "resourceKind",
-			${resourcePost.kind} as "postKind",
+			${resource.owner} as "resourceOwner",
+			${resource.shape} as "resourceShape",
+			${resource.createdByAuthUserId} as "creatorAuthUserId",
 			${resolvedUnitLocalizationLanguage(resource.id, localizationLanguages)} as language,
 			${resolvedUnitLocalizationTitle(resource.id, localizationLanguages)} as title,
 			${resolvedUnitLocalizationImageAssetId(resource.id, "cover", localizationLanguages)} as "coverAssetId",
@@ -542,8 +587,7 @@ async function selectWorkspaceCandidateBatch(input: {
 			${resource.createdAt} as "createdAt",
 			${resource.updatedAt} as "updatedAt"
 		from page
-		left join ${unit} studio_workspace_resource on ${resource.id} = page.unit_id
-		left join ${post} studio_workspace_post on ${resourcePost.id} = ${resource.id}
+		left join lateral public.read_unit_state(page.unit_id) studio_workspace_resource on true
 		left join ${studioResourceVisit} visit
 			on visit.auth_user_id = ${selfAuthUserIdForEntity(input.profileId)}
 			and visit.resource_unit_id = page.unit_id
@@ -552,26 +596,93 @@ async function selectWorkspaceCandidateBatch(input: {
 			page.unit_id desc nulls last,
 			page.source_key desc nulls last
 	`);
-	return result.rows;
+
+			const readable = await input.authorization.readableUnitIdsInTransaction(
+				tx,
+				result.rows.map((row) => row.unitId),
+			);
+			const native = result.rows.flatMap((row) => {
+				const parsed = CatalogReferenceSchema.safeParse({
+					owner: row.resourceOwner,
+					id: row.unitId,
+				});
+				return parsed.success
+					? [{ reference: parsed.data, createdByAuthUserId: row.creatorAuthUserId }]
+					: [];
+			});
+			const nativeWritable = new Set<string>();
+			for (let offset = 0; offset < native.length; offset += 128) {
+				const batch = native.slice(offset, offset + 128);
+				const decisions = await catalogAccessDecisions(tx, batch, input.authUserId, true);
+				batch.forEach((target, index) => {
+					if (decisions[index]) nativeWritable.add(target.reference.id);
+				});
+			}
+			const nativeIds = new Set(native.map((target) => target.reference.id));
+			const authorized = result.rows.map((row) => {
+				if (!nativeIds.has(row.unitId))
+					return { ...row, accepted: row.accepted && readable.has(row.unitId) };
+				const hasCatalogCreatorAccess =
+					!input.authority.grant &&
+					input.authority.principal.kind === "auth" &&
+					row.creatorAuthUserId === input.authUserId &&
+					row.catalogCreatorSince !== null;
+				const hasCatalogGrantAccess = row.sourceKind === "catalog_grant";
+				return {
+					...row,
+					hasOwnerAccess: false,
+					hasDirectAccess: false,
+					hasRealmAccess: false,
+					hasCatalogCreatorAccess,
+					hasCatalogGrantAccess,
+					accepted:
+						row.accepted &&
+						readable.has(row.unitId) &&
+						nativeWritable.has(row.unitId) &&
+						((row.sourceKind === "profile" && hasCatalogCreatorAccess) || hasCatalogGrantAccess),
+				};
+			});
+			const presentations = await readUnitPresentationsInTransaction(
+				tx,
+				authorized.filter((row) => row.accepted).map((row) => row.unitId),
+				localizationLanguages,
+			);
+			return authorized.map((row) =>
+				row.accepted
+					? {
+							...row,
+							title: presentations.get(row.unitId)?.title ?? null,
+							language: presentations.get(row.unitId)?.language ?? null,
+						}
+					: row,
+			);
+		}),
+	);
 }
 
 function presentCandidate(row: RawWorkspaceCandidate): PresentedWorkspaceCandidate | undefined {
-	const resourceKind = unitKindValue(row.resourceKind);
+	const resourceOwner = unitOwnerValue(row.resourceOwner);
 	if (
 		!row.accepted ||
-		!resourceKind ||
-		!row.language ||
+		!resourceOwner ||
+		!row.resourceShape ||
 		!row.status ||
 		!row.visibility ||
 		row.createdAt === null ||
 		row.updatedAt === null
 	)
 		return undefined;
-	const section = resourceSectionFromKinds(resourceKind, postKindValue(row.postKind) ?? null);
+	const section = resourceSectionFromReference(resourceOwner, row.resourceShape);
 	if (!section) return undefined;
 	const accessSources: StudioAccessSource[] = [];
 	const assignedDates: Date[] = [];
-	if (row.sourceKind === "profile") {
+	if (row.hasCatalogCreatorAccess && row.catalogCreatorSince !== null) {
+		accessSources.push("catalog_creator");
+		assignedDates.push(dateValue(row.catalogCreatorSince, "candidate.catalogCreatorSince"));
+	} else if (row.hasCatalogGrantAccess && row.catalogGrantSince !== null) {
+		accessSources.push("catalog_grant");
+		assignedDates.push(dateValue(row.catalogGrantSince, "candidate.catalogGrantSince"));
+	} else if (row.sourceKind === "profile") {
 		if (row.hasOwnerAccess && row.ownerSince !== null) {
 			accessSources.push("owner");
 			assignedDates.push(dateValue(row.ownerSince, "candidate.ownerSince"));
@@ -589,7 +700,8 @@ function presentCandidate(row: RawWorkspaceCandidate): PresentedWorkspaceCandida
 	return {
 		id: row.unitId,
 		section,
-		resourceKind,
+		resourceOwner,
+		resourceShape: row.resourceShape,
 		language: row.language,
 		title: row.title,
 		cover: presentImageAsset(row.coverAssetId, "cover"),
@@ -610,11 +722,21 @@ function presentCandidate(row: RawWorkspaceCandidate): PresentedWorkspaceCandida
 }
 
 export async function listStudioContent(input: {
+	readonly authUserId: string;
+	readonly authority: ParticipationAuthority;
+	readonly authorization: UnitAuthorization<string>;
 	readonly profileId: string;
 	readonly query: StudioContentListQuery;
 	readonly includeDevelopmentPreview: boolean;
 }) {
+	if (
+		input.authorization.authUserId !== input.authUserId ||
+		input.authorization.profileId !== input.profileId
+	)
+		throw new ParticipationDenied();
 	const limit = input.query.limit ?? 30;
+	if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100)
+		throw new RangeError("Studio page limit must be 1..100");
 	const initialCursor = decodeStudioCursor(input.query.cursor, input.query);
 	const source = input.query.source ?? "all";
 	const realmSubjects =
@@ -630,6 +752,9 @@ export async function listStudioContent(input: {
 			Math.max(64, (limit + 1 - items.length) * 3),
 		);
 		const rows = await selectWorkspaceCandidateBatch({
+			authUserId: input.authUserId,
+			authority: input.authority,
+			authorization: input.authorization,
 			profileId: input.profileId,
 			query: input.query,
 			realmSubjects,
@@ -697,4 +822,37 @@ export async function recordStudioVisit(input: {
 		});
 	if (!visit) throw new Error("Studio visit upsert returned no row");
 	return visit;
+}
+
+/** Repairs one owner-local projection page; operators persist the returned PK cursor between transactions. */
+export async function repairStudioCatalogCreatorProjection(input: {
+	readonly owner: (typeof CatalogOwnerValues)[number];
+	readonly afterId?: string;
+	readonly limit?: number;
+}) {
+	const owner = z.enum(CatalogOwnerValues).parse(input.owner);
+	const afterId = z.uuid().optional().parse(input.afterId);
+	const limit = z
+		.number()
+		.int()
+		.min(1)
+		.max(512)
+		.parse(input.limit ?? 256);
+	return database.transaction(async (tx) => {
+		const result = await tx.execute(
+			sql`select * from public.repair_studio_catalog_creator_candidates(${owner},${afterId ?? null}::uuid,${limit})`,
+		);
+		const [page] = z
+			.array(
+				z.object({
+					last_id: z.uuid().nullable(),
+					scanned: z.number().int().min(0).max(512),
+					exhausted: z.boolean(),
+				}),
+			)
+			.length(1)
+			.parse(result.rows);
+		if (!page) throw new Error("Studio repair did not return its cursor");
+		return { afterId: page.last_id, scanned: page.scanned, exhausted: page.exhausted };
+	});
 }
