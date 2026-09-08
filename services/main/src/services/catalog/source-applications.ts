@@ -1,3 +1,6 @@
+import { CatalogChildSourceChangeSchema } from "./child-source-contracts";
+import { CatalogChildSourceTables } from "../database/schema/catalog-child-source";
+import { advanceChildSourceBaselines } from "./child-source-baselines";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -25,6 +28,7 @@ import { advanceStructureSourceBaselines } from "./structure-source";
 
 const revision = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);
 const nativeChangeSchema = z.discriminatedUnion("kind", [
+	CatalogChildSourceChangeSchema,
 	CatalogStructureSourceChangeSchema,
 	z.strictObject({
 		kind: z.literal("catalog-identifier"),
@@ -174,16 +178,24 @@ export async function recordCatalogSourceApplication(
 			ownerId: change.ownerId,
 		};
 		switch (change.kind) {
+			case "catalog-child": {
+				await tx.insert(CatalogChildSourceTables[change.owner].application).values({
+					...common,
+					component: change.component,
+					componentKey: change.componentKey,
+					beforeRevisionId: change.beforeRevisionId,
+					afterRevisionId: change.afterRevisionId,
+				});
+				break;
+			}
 			case "catalog-structure": {
-				await tx
-					.insert(CatalogStructureSourceTables[change.owner].application)
-					.values({
-						...common,
-						component: change.component,
-						componentKey: change.componentKey,
-						beforeRevisionId: change.beforeRevisionId,
-						afterRevisionId: change.afterRevisionId,
-					});
+				await tx.insert(CatalogStructureSourceTables[change.owner].application).values({
+					...common,
+					component: change.component,
+					componentKey: change.componentKey,
+					beforeRevisionId: change.beforeRevisionId,
+					afterRevisionId: change.afterRevisionId,
+				});
 				break;
 			}
 			case "catalog-profile": {
@@ -258,6 +270,11 @@ export async function recordCatalogSourceApplication(
 	}
 	await advanceMusicSourceComponentBaselines(tx, input, changes);
 	await advanceCatalogSourceOwnedBaselines(tx, input, changes);
+	await advanceChildSourceBaselines(
+		tx,
+		input,
+		changes.filter((change) => change.kind === "catalog-child"),
+	);
 	await advanceStructureSourceBaselines(
 		tx,
 		input,
@@ -306,6 +323,34 @@ export async function readCatalogSourceApplication(
 		.limit(1);
 	if (!application) return null;
 	const changes: (CatalogSourceNativeChange & { position: number })[] = [];
+	for (const owner of ["program", "publishing"] as const) {
+		const table = CatalogChildSourceTables[owner].application;
+		const rows = await tx
+			.select()
+			.from(table)
+			.where(
+				and(
+					eq(table.sourceRecordId, value.sourceRecordId),
+					eq(table.proposalId, value.proposalId),
+					eq(table.action, value.action),
+				),
+			)
+			.orderBy(table.position)
+			.limit(128);
+		for (const row of rows)
+			changes.push({
+				...CatalogChildSourceChangeSchema.parse({
+					kind: "catalog-child",
+					owner,
+					ownerId: row.ownerId,
+					component: row.component,
+					componentKey: row.componentKey,
+					beforeRevisionId: row.beforeRevisionId,
+					afterRevisionId: row.afterRevisionId,
+				}),
+				position: row.position,
+			});
+	}
 	for (const owner of ["program", "publishing"] as const) {
 		const table = CatalogStructureSourceTables[owner].application;
 		const rows = await tx

@@ -3,7 +3,6 @@ import {
 	bigint,
 	check,
 	foreignKey,
-	index,
 	jsonb,
 	primaryKey,
 	text,
@@ -13,7 +12,6 @@ import {
 import { pgTable } from "./base";
 import { createCreatedAtColumn } from "./columns";
 import { CatalogIdentityTables } from "./catalog-identity";
-import { catalogSourceSnapshot } from "./catalog-source";
 
 function structureHistory(owner: "program" | "publishing") {
 	const history = pgTable(
@@ -69,44 +67,7 @@ function structureHistory(owner: "program" | "publishing") {
 			),
 		],
 	);
-	const sourceOccurrence = pgTable(
-		`${owner}_component_source_occurrence`,
-		{
-			sourceRecordId: uuid().notNull(),
-			snapshotId: uuid().notNull(),
-			ownerId: uuid().notNull(),
-			component: text().notNull(),
-			componentKey: text().notNull(),
-			sourcePath: text().notNull(),
-			historyId: uuid().notNull(),
-		},
-		(t) => [
-			primaryKey({
-				columns: [t.sourceRecordId, t.snapshotId, t.ownerId, t.component, t.sourcePath],
-			}),
-			foreignKey({
-				columns: [t.sourceRecordId, t.snapshotId],
-				foreignColumns: [catalogSourceSnapshot.sourceRecordId, catalogSourceSnapshot.id],
-			}).onDelete("restrict"),
-			foreignKey({
-				columns: [t.ownerId, t.historyId],
-				foreignColumns: [history.ownerId, history.id],
-			}).onDelete("restrict"),
-			index(`${owner}_source_component_idx`).on(
-				t.sourceRecordId,
-				t.snapshotId,
-				t.ownerId,
-				t.component,
-				t.componentKey,
-				t.sourcePath,
-			),
-			check(
-				`${owner}_source_component_path`,
-				sql`left(${t.sourcePath},1)='/' and octet_length(${t.sourcePath}) between 1 and 512`,
-			),
-		],
-	);
-	return { history, head, sourceOccurrence };
+	return { history, head };
 }
 
 /** Independent native structure histories; these are not a new common identity parent. */
@@ -116,9 +77,5 @@ export const CatalogStructureHistoryTables = {
 };
 export const programComponentRevision = CatalogStructureHistoryTables.program.history;
 export const programComponentHead = CatalogStructureHistoryTables.program.head;
-export const programComponentSourceOccurrence =
-	CatalogStructureHistoryTables.program.sourceOccurrence;
 export const publishingComponentRevision = CatalogStructureHistoryTables.publishing.history;
 export const publishingComponentHead = CatalogStructureHistoryTables.publishing.head;
-export const publishingComponentSourceOccurrence =
-	CatalogStructureHistoryTables.publishing.sourceOccurrence;
