@@ -96,7 +96,7 @@ describe("loadPack", () => {
 				{ ...object, localizations: [...object.localizations, object.localizations[0]] },
 			]);
 			await expect(loadPack(fixture.root, FixtureId)).rejects.toThrow(
-				/each localization language only once/,
+				/Each language may occur only once/,
 			);
 		} finally {
 			await fixture.dispose();

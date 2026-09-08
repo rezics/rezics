@@ -84,16 +84,6 @@ export async function applyContentPack(
 	pack: LoadedPack,
 	sourceRoot: string,
 ): Promise<{ readonly status: "created" | "noop"; readonly created: number }> {
-	return withSeedAuthority(tx, BootstrapPlatformAdministratorProfile.profileId, (authority) =>
-		applyContentPackAsOperator(tx, pack, sourceRoot, authority.principal.authUserId),
-	);
-}
-async function applyContentPackAsOperator(
-	tx: DatabaseTransaction,
-	pack: LoadedPack,
-	sourceRoot: string,
-	actor: string,
-): Promise<{ readonly status: "created" | "noop"; readonly created: number }> {
 	assertContentPackDocuments(pack);
 	await assertContentPackThemeAssets(tx, pack);
 	await tx.execute(
@@ -112,28 +102,35 @@ async function applyContentPackAsOperator(
 	await verifyExistingPackObjects(tx, pack, plan.objects);
 	if (plan.alreadyInstalled || plan.createCount === 0) return { status: "noop", created: 0 };
 
-	const createKeys = new Set(
-		plan.objects.filter((item) => item.action === "create").map((item) => item.sourceKey),
+	return withSeedAuthority(
+		tx,
+		BootstrapPlatformAdministratorProfile.profileId,
+		async (authority) => {
+			const actor = authority.principal.authUserId;
+			const createKeys = new Set(
+				plan.objects.filter((item) => item.action === "create").map((item) => item.sourceKey),
+			);
+			const objects = orderPackObjects(pack).filter((object) => createKeys.has(object.sourceKey));
+			for (const object of objects) await importUnit(tx, pack, object, actor);
+			await importNativePackAssertions(tx, pack, actor);
+
+			await importVocabularyDefinitions(tx, pack);
+			await importRelations(tx, pack, createKeys);
+			await importStructures(tx, pack);
+			await importSlugs(tx, pack, createKeys);
+			await recordImportedCollectionStructureHistories(tx, pack, objects);
+
+			for (const object of objects) {
+				if (object.native) continue;
+				await recordUnitRevision(tx, {
+					unitId: requireId(pack.ids.units, object.sourceKey),
+					actorProfileId: ImportOwnerProfileId,
+					event: "create",
+				});
+			}
+			return { status: "created", created: objects.length };
+		},
 	);
-	const objects = orderPackObjects(pack).filter((object) => createKeys.has(object.sourceKey));
-	for (const object of objects) await importUnit(tx, pack, object, actor);
-	await importNativePackAssertions(tx, pack, actor);
-
-	await importVocabularyDefinitions(tx, pack);
-	await importRelations(tx, pack, createKeys);
-	await importStructures(tx, pack);
-	await importSlugs(tx, pack, createKeys);
-	await recordImportedCollectionStructureHistories(tx, pack, objects);
-
-	for (const object of objects) {
-		if (object.native) continue;
-		await recordUnitRevision(tx, {
-			unitId: requireId(pack.ids.units, object.sourceKey),
-			actorProfileId: ImportOwnerProfileId,
-			event: "create",
-		});
-	}
-	return { status: "created", created: objects.length };
 }
 
 export async function recordImportedCollectionStructureHistories(
