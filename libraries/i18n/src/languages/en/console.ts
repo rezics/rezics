@@ -10,6 +10,19 @@ const { forms: zoneTerms } = enTerminology.zone;
 const { forms: postTerms } = enTerminology.post;
 
 export default {
+	nativeLookup: {
+		mode: "Find entries by",
+		modes: {
+			browse: "Browse entries",
+			id: "Exact identifier",
+			namespace: "Root address",
+			unit: "Address inside an entry",
+		},
+		identifier: "Identifier",
+		address: "Address label",
+		scopeIdentifier: "Scope identifier",
+		invalid: "Check the identifier, or provide an address label and its exact scope identifier.",
+	},
 	caseNotes: "Case notes",
 	nativeMerge: {
 		previous: "Previous",

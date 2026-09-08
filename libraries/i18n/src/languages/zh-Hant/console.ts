@@ -10,6 +10,19 @@ const { forms: zoneTerms } = zhHantTerminology.zone;
 const { forms: postTerms } = zhHantTerminology.post;
 
 export default {
+	nativeLookup: {
+		mode: "尋找方式",
+		modes: {
+			browse: "瀏覽記錄",
+			id: "精確識別碼",
+			namespace: "根層級位址",
+			unit: "記錄內的位址",
+		},
+		identifier: "識別碼",
+		address: "位址名稱",
+		scopeIdentifier: "範圍識別碼",
+		invalid: "請核對識別碼，或填寫位址名稱及其確切的範圍識別碼。",
+	},
 	caseNotes: "案件備註",
 	nativeMerge: {
 		previous: "上一頁",

@@ -10,6 +10,19 @@ const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: postTerms } = jaTerminology.post;
 
 export default {
+	nativeLookup: {
+		mode: "検索方法",
+		modes: {
+			browse: "記録を一覧表示",
+			id: "正確な識別子",
+			namespace: "最上位のアドレス",
+			unit: "記録内のアドレス",
+		},
+		identifier: "識別子",
+		address: "アドレス名",
+		scopeIdentifier: "範囲の識別子",
+		invalid: "識別子を確認するか、アドレス名とその範囲の正確な識別子を指定してください。",
+	},
 	caseNotes: "案件の注記",
 	nativeMerge: {
 		previous: "前へ",

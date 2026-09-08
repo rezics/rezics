@@ -10,6 +10,20 @@ const { forms: zoneTerms } = deTerminology.zone;
 const { forms: postTerms } = deTerminology.post;
 
 export default {
+	nativeLookup: {
+		mode: "Einträge finden über",
+		modes: {
+			browse: "Einträge durchsuchen",
+			id: "Genaue Kennung",
+			namespace: "Adresse auf oberster Ebene",
+			unit: "Adresse innerhalb eines Eintrags",
+		},
+		identifier: "Kennung",
+		address: "Adressbezeichnung",
+		scopeIdentifier: "Bereichskennung",
+		invalid:
+			"Prüfe die Kennung oder gib eine Adressbezeichnung und die genaue Kennung ihres Bereichs an.",
+	},
 	caseNotes: "Fallnotizen",
 	nativeMerge: {
 		previous: "Zurück",

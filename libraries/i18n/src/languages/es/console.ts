@@ -10,6 +10,20 @@ const { forms: zoneTerms } = esTerminology.zone;
 const { forms: postTerms } = esTerminology.post;
 
 export default {
+	nativeLookup: {
+		mode: "Buscar por",
+		modes: {
+			browse: "Explorar registros",
+			id: "Identificador exacto",
+			namespace: "Dirección raíz",
+			unit: "Dirección dentro de un registro",
+		},
+		identifier: "Identificador",
+		address: "Nombre de la dirección",
+		scopeIdentifier: "Identificador del ámbito",
+		invalid:
+			"Comprueba el identificador o indica el nombre de la dirección y el identificador exacto de su ámbito.",
+	},
 	caseNotes: "Notas del caso",
 	nativeMerge: {
 		previous: "Anterior",

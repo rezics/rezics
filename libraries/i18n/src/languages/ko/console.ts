@@ -10,6 +10,19 @@ const { forms: zoneTerms } = koTerminology.zone;
 const { forms: postTerms } = koTerminology.post;
 
 export default {
+	nativeLookup: {
+		mode: "검색 방식",
+		modes: {
+			browse: "기록 둘러보기",
+			id: "정확한 식별자",
+			namespace: "최상위 주소",
+			unit: "기록 내 주소",
+		},
+		identifier: "식별자",
+		address: "주소 이름",
+		scopeIdentifier: "범위 식별자",
+		invalid: "식별자를 확인하거나 주소 이름과 정확한 범위 식별자를 입력하세요.",
+	},
 	caseNotes: "사건 메모",
 	nativeMerge: {
 		previous: "이전",

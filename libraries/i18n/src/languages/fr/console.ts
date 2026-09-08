@@ -10,6 +10,20 @@ const { forms: zoneTerms } = frTerminology.zone;
 const { forms: postTerms } = frTerminology.post;
 
 export default {
+	nativeLookup: {
+		mode: "Rechercher par",
+		modes: {
+			browse: "Parcourir les fiches",
+			id: "Identifiant exact",
+			namespace: "Adresse racine",
+			unit: "Adresse dans une fiche",
+		},
+		identifier: "Identifiant",
+		address: "Libellé de l’adresse",
+		scopeIdentifier: "Identifiant de la portée",
+		invalid:
+			"Vérifiez l’identifiant, ou indiquez le libellé d’adresse et l’identifiant exact de sa portée.",
+	},
 	caseNotes: "Notes du dossier",
 	nativeMerge: {
 		previous: "Précédent",

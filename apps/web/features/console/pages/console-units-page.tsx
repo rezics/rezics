@@ -34,11 +34,12 @@ import {
 	Textarea,
 	cn,
 } from "@rezics/ui";
+import { CatalogOwnerValues } from "@rezics/reference";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ArchiveRestore, GitMerge, Search, Trash2, UserRoundCog } from "lucide-react";
+import { ArchiveRestore, GitMerge, Trash2, UserRoundCog } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -46,6 +47,10 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import { GovernanceRulePicker } from "@/features/governance/components/governance-rule-picker";
 import type { GovernanceRuleReference } from "@/features/governance/model/governance-rule-selection";
 import { useConsoleWorkspace } from "../components/console-workspace";
+import {
+	GovernanceLookupFields,
+	type GovernanceLookup,
+} from "../components/governance-lookup-fields";
 
 type PlatformUnit =
 	| GetApiGovernancePlatformUnitsStatus200["items"][number]
@@ -67,8 +72,9 @@ export function ConsoleUnitsPage({ initialUnitId }: { readonly initialUnitId?: s
 		canProposeUnitMerges,
 	} = useConsoleWorkspace();
 	const queryClient = useQueryClient();
-	const [search, setSearch] = useState(() => searchParams.get("query")?.trim() ?? "");
-	const deferredSearch = useDeferredValue(search.trim());
+	const [lookup, setLookup] = useState<GovernanceLookup>(() => ({
+		query: searchParams.get("query")?.trim() || undefined,
+	}));
 	const [state, setState] = useState<UnitListState>("active");
 	const [selectedUnitId, setSelectedUnitId] = useState(initialUnitId ?? "");
 	const [command, setCommand] = useState<LifecycleCommand | null>(null);
@@ -79,9 +85,9 @@ export function ConsoleUnitsPage({ initialUnitId }: { readonly initialUnitId?: s
 		() => ({
 			state,
 			limit: 50,
-			...(deferredSearch ? { query: deferredSearch } : {}),
+			...lookup,
 		}),
-		[deferredSearch, state],
+		[lookup, state],
 	);
 	const units = useInfiniteQuery({
 		queryKey: getApiGovernancePlatformUnitsQueryKey({ query: baseQuery }),
@@ -140,8 +146,6 @@ export function ConsoleUnitsPage({ initialUnitId }: { readonly initialUnitId?: s
 	if (initialUnitId && !selectedFromList && directUnit.isPending) return <QueryPending />;
 	if (initialUnitId && !selectedFromList && directUnit.isError)
 		return <QueryFailure error={directUnit.error} retry={() => void directUnit.refetch()} />;
-	if (units.isPending) return <QueryPending />;
-	if (units.isError) return <QueryFailure error={units.error} retry={() => void units.refetch()} />;
 
 	function openCommand(nextCommand: LifecycleCommand) {
 		setCommand(nextCommand);
@@ -199,20 +203,18 @@ export function ConsoleUnitsPage({ initialUnitId }: { readonly initialUnitId?: s
 			<div className="grid min-h-0 flex-1 lg:grid-cols-[24rem_minmax(0,1fr)]">
 				<div className="flex min-h-0 flex-col border-border/70 lg:border-e">
 					<div className="grid gap-3 border-border/70 border-b p-3">
-						<label className="relative">
-							<Search
-								aria-hidden
-								className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-							/>
-							<Input
-								aria-label={t.console.units.searchLabel}
-								className="ps-9"
-								onChange={(event) => setSearch(event.currentTarget.value)}
-								placeholder={t.console.units.searchPlaceholder}
-								type="search"
-								value={search}
-							/>
-						</label>
+						<GovernanceLookupFields
+							initialQuery={searchParams.get("query") ?? ""}
+							onApply={(value) => {
+								setLookup(value);
+								setSelectedUnitId("");
+							}}
+						/>
+						{units.isPending ? (
+							<QueryPending />
+						) : units.isError ? (
+							<QueryFailure error={units.error} retry={() => void units.refetch()} />
+						) : null}
 						<Field>
 							<FieldLabel>{t.console.units.stateFilter}</FieldLabel>
 							<NativeSelect
@@ -264,7 +266,9 @@ export function ConsoleUnitsPage({ initialUnitId }: { readonly initialUnitId?: s
 												{item.title ?? t.console.units.untitled}
 											</span>
 											<span className="flex min-w-0 items-center gap-2 text-muted-foreground text-xs">
-												<code>{item.kind}</code>
+												<code>
+													{item.owner} / {item.shape}
+												</code>
 												<span aria-hidden>·</span>
 												<span className="truncate">{item.id}</span>
 											</span>
@@ -304,13 +308,17 @@ export function ConsoleUnitsPage({ initialUnitId }: { readonly initialUnitId?: s
 								<div>
 									<dt className="text-muted-foreground text-sm">{t.console.units.kind}</dt>
 									<dd className="mt-1 font-medium">
-										<code>{selected.kind}</code>
+										<code>
+											{selected.owner} / {selected.shape}
+										</code>
 									</dd>
 								</div>
 								<div>
 									<dt className="text-muted-foreground text-sm">{t.console.units.owner}</dt>
 									<dd className="mt-1 font-medium">
-										{selected.owner?.label ?? selected.owner?.profileId ?? t.console.units.noOwner}
+										{selected.ownership?.label ??
+											selected.ownership?.entityId ??
+											t.console.units.noOwner}
 									</dd>
 								</div>
 								<div>
@@ -337,10 +345,7 @@ export function ConsoleUnitsPage({ initialUnitId }: { readonly initialUnitId?: s
 							<div className="flex flex-wrap gap-3">
 								{canProposeUnitMerges &&
 								!selected.deletedAt &&
-								(selected.kind === "book" ||
-									selected.kind === "software" ||
-									selected.kind === "media" ||
-									selected.kind === "entity") ? (
+								CatalogOwnerValues.some((owner) => owner === selected.owner) ? (
 									<Button asChild type="button" variant="outline">
 										<Link href={`/console/unit-merges?source=${selected.id}`}>
 											<GitMerge />
@@ -409,8 +414,7 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 	const { t } = useTranslation(["console", "governance"]);
 	const queryClient = useQueryClient();
 	const [step, setStep] = useState<"picker" | "confirmation" | null>(null);
-	const [search, setSearch] = useState("");
-	const deferredSearch = useDeferredValue(search.trim());
+	const [candidateLookup, setCandidateLookup] = useState<GovernanceLookup>({});
 	const [candidate, setCandidate] = useState<OwnershipCandidate | null>(null);
 	const [rules, setRules] = useState<GovernanceRuleReference[]>([]);
 	const [note, setNote] = useState("");
@@ -418,9 +422,9 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 	const candidateQuery = useMemo(
 		() => ({
 			limit: 50,
-			...(deferredSearch ? { query: deferredSearch } : {}),
+			...candidateLookup,
 		}),
-		[deferredSearch],
+		[candidateLookup],
 	);
 	const candidates = useInfiniteQuery({
 		queryKey: getApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesQueryKey({
@@ -469,14 +473,14 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 		lastCandidateIndex,
 	]);
 	const overrideOwnership = usePostApiGovernancePlatformUnitsByUnitIdOwnershipOverride();
-	const currentOwner = item.owner?.label ?? item.owner?.profileId ?? t.console.units.noOwner;
+	const currentOwner = item.ownership?.label ?? item.ownership?.entityId ?? t.console.units.noOwner;
 	const candidateName =
-		candidate?.label ?? candidate?.slug ?? candidate?.profileId ?? t.console.units.unnamedProfile;
+		candidate?.label ?? candidate?.slug ?? candidate?.entityId ?? t.console.units.unnamedProfile;
 	const confirmationValid =
 		confirmationUnitId === item.id && candidate !== null && rules.length > 0;
 
 	function openPicker() {
-		setSearch("");
+		setCandidateLookup({});
 		setCandidate(null);
 		setRules([]);
 		setNote("");
@@ -496,8 +500,8 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 			await overrideOwnership.mutateAsync({
 				path: { unitId: item.id },
 				body: {
-					expectedOwnerProfileId: item.owner?.profileId ?? null,
-					targetProfileId: candidate.profileId,
+					expectedOwnerEntityId: item.ownership?.entityId ?? null,
+					targetEntityId: candidate.entityId,
 					confirmationUnitId,
 					rules,
 					...(note.trim() ? { note: note.trim() } : {}),
@@ -535,21 +539,7 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 						title={t.console.units.ownershipPickerTitle}
 					/>
 					<DialogBody className="grid min-h-0 gap-4">
-						<label className="relative">
-							<Search
-								aria-hidden
-								className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-							/>
-							<Input
-								aria-label={t.console.units.ownershipSearchLabel}
-								autoFocus
-								className="ps-9"
-								onChange={(event) => setSearch(event.currentTarget.value)}
-								placeholder={t.console.units.ownershipSearchPlaceholder}
-								type="search"
-								value={search}
-							/>
-						</label>
+						<GovernanceLookupFields onApply={setCandidateLookup} />
 						<div
 							aria-label={t.console.units.ownershipCandidateListLabel}
 							className="h-80 overflow-auto rounded-lg border"
@@ -566,17 +556,14 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 										const entry = items[virtualRow.index];
 										if (!entry) return null;
 										const label =
-											entry.label ??
-											entry.slug ??
-											entry.profileId ??
-											t.console.units.unnamedProfile;
+											entry.label ?? entry.slug ?? entry.entityId ?? t.console.units.unnamedProfile;
 										return (
 											<button
 												aria-label={t.console.units.ownershipCandidateSelect({
 													profile: label,
 												})}
 												className="absolute inset-x-0 grid gap-1 border-b px-4 py-3 text-start hover:bg-muted/48 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-												key={entry.profileId}
+												key={entry.entityId}
 												onClick={() => selectCandidate(entry)}
 												role="option"
 												style={{
@@ -588,7 +575,7 @@ function OwnershipOverrideControl({ item }: { readonly item: PlatformUnit }) {
 												<span className="truncate font-medium">{label}</span>
 												<span className="truncate text-muted-foreground text-xs">
 													{entry.slug ? `@${entry.slug} · ` : ""}
-													{entry.profileId}
+													{entry.entityId}
 												</span>
 											</button>
 										);

@@ -10,6 +10,19 @@ const { forms: zoneTerms } = zhHansTerminology.zone;
 const { forms: postTerms } = zhHansTerminology.post;
 
 export default {
+	nativeLookup: {
+		mode: "查找方式",
+		modes: {
+			browse: "浏览记录",
+			id: "精确标识符",
+			namespace: "根级地址",
+			unit: "记录内的地址",
+		},
+		identifier: "标识符",
+		address: "地址名称",
+		scopeIdentifier: "作用域标识符",
+		invalid: "请核对标识符，或填写地址名称及其确切的作用域标识符。",
+	},
 	caseNotes: "案件备注",
 	nativeMerge: {
 		previous: "上一页",
