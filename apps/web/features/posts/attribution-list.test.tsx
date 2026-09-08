@@ -16,12 +16,12 @@ vi.mock("@/i18n/client", () => ({
 afterEach(cleanup);
 
 function createAttribution({
-	creditedUnitId,
+	creditedEntityId,
 	creditId,
 	role = "publisher",
 	title,
 }: {
-	readonly creditedUnitId: string;
+	readonly creditedEntityId: string;
 	readonly creditId: string;
 	readonly role?: string;
 	readonly title: string;
@@ -29,8 +29,8 @@ function createAttribution({
 	return {
 		id: creditId,
 		role,
-		creditedUnit: {
-			id: creditedUnitId,
+		creditedEntity: {
+			id: creditedEntityId,
 			kind: "slug_namespace",
 			title,
 		},
@@ -40,12 +40,12 @@ function createAttribution({
 describe("ReplyAttributionLinks", () => {
 	it("derives displayed-Post publisher identities without including other credit roles", () => {
 		const publisher = createAttribution({
-			creditedUnitId: "post-publisher",
+			creditedEntityId: "post-publisher",
 			creditId: "publisher-credit",
 			title: "Publisher",
 		});
 		const author = createAttribution({
-			creditedUnitId: "post-author",
+			creditedEntityId: "post-author",
 			creditId: "author-credit",
 			role: "author",
 			title: "Author",
@@ -59,12 +59,12 @@ describe("ReplyAttributionLinks", () => {
 			<ReplyAttributionLinks
 				attributions={[
 					createAttribution({
-						creditedUnitId: "post-publisher",
+						creditedEntityId: "post-publisher",
 						creditId: "owner-reply-credit",
 						title: "Post owner",
 					}),
 					createAttribution({
-						creditedUnitId: "other-publisher",
+						creditedEntityId: "other-publisher",
 						creditId: "visitor-reply-credit",
 						title: "Visitor",
 					}),
@@ -83,13 +83,13 @@ describe("ReplyAttributionLinks", () => {
 			<ReplyAttributionLinks
 				attributions={[
 					createAttribution({
-						creditedUnitId: "post-publisher",
+						creditedEntityId: "post-publisher",
 						creditId: "matching-author-credit",
 						role: "author",
 						title: "Same name",
 					}),
 					createAttribution({
-						creditedUnitId: "different-unit",
+						creditedEntityId: "different-unit",
 						creditId: "nonmatching-publisher-credit",
 						title: "Same name",
 					}),

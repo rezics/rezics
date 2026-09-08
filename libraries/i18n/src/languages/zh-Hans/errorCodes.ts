@@ -13,6 +13,12 @@ const { forms: zoneTerms } = zhHansTerminology.zone;
 const { forms: entityTerms } = zhHansTerminology.entity;
 
 export default {
+	CatalogReferenceNotFound: "找不到这条记录。",
+	CatalogRevisionConflict: "这条记录已更改，请刷新后重试。",
+	FavoriteNotFound: "找不到这条收藏。",
+	FavoriteRevisionConflict: "你的收藏已更改，请刷新后重试。",
+	ParticipationDenied: "你已无权使用此身份执行操作。",
+
 	MalformedRequestBody: "无法解析提交内容的格式。",
 	ValidationError: "提交的内容不符合要求。",
 	InternalError: "服务暂时不可用，请稍后重试。",

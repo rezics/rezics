@@ -2,6 +2,7 @@
 
 import { isLicenseId } from "@rezics/license";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
 import {
 	AudioLines,
@@ -12,37 +13,43 @@ import {
 	PlaySquare,
 	Video,
 } from "lucide-react";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
-import { Card, CardContent } from "@rezics/ui";
-import { Badge } from "@rezics/ui";
-import { Button } from "@rezics/ui";
-import { Cover } from "@rezics/ui";
-import { DataList, DataListItem, DataListItemLabel, DataListItemValue } from "@rezics/ui";
-import { QueryFailure, QueryPending } from "@rezics/ui";
+import { FavoriteButton } from "@/features/collections/components/favorite-button";
+import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
+import { ContentLanguageSupportDisplay } from "@/features/content-language-support/components/content-language-support-display";
+import { isContentLanguageSupportUnitType } from "@/features/content-language-support/model/content-language-support";
+import { UnitDockRenderer, useDockManagementAccess } from "@/features/docks";
+import { UnitShelf } from "@/features/explore/unit-shelf";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
-import { isKnownAttributionRole } from "./attribution-role";
-import { publicUnitHref } from "./routing/public-unit-route";
+import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { readPortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
-import { FavoriteButton } from "@/features/collections/components/favorite-button";
-import { UnitDockRenderer, useDockManagementAccess } from "@/features/docks";
-import { UnitShelf } from "@/features/explore/unit-shelf";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { presentUnitLicenses } from "./components/present-unit-licenses";
+import {
+	Badge,
+	Button,
+	Card,
+	CardContent,
+	Cover,
+	DataList,
+	DataListItem,
+	DataListItemLabel,
+	DataListItemValue,
+	QueryFailure,
+	QueryPending,
+} from "@rezics/ui";
+import { isKnownAttributionRole } from "./attribution-role";
 import { BookContents } from "./components/book-contents";
-import type { UnitType } from "./unit-types";
+import { presentUnitLicenses } from "./components/present-unit-licenses";
+import { UnitReferenceCandidates } from "./components/unit-reference-candidates";
 import { UnitSubjectGroups } from "./components/unit-subject-groups";
 import { canOpenUnitManagement } from "./model/unit-management-section";
-import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
-import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
-import { toNonNegativeApiInteger } from "@/lib/api-number";
+import { publicUnitHref } from "./routing/public-unit-route";
+import type { UnitType } from "./unit-types";
 import { isVariantUnitType } from "./unit-types";
-import { UnitReferenceCandidates } from "./components/unit-reference-candidates";
-import { ContentLanguageSupportDisplay } from "@/features/content-language-support/components/content-language-support-display";
-import { isContentLanguageSupportUnitType } from "@/features/content-language-support/model/content-language-support";
 
 const Icons = {
 	book: BookOpen,
@@ -375,13 +382,13 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 								<CardContent className="grid gap-2 p-5 text-sm">
 									{item.attributions.map((attribution) => {
 										const href = publicUnitHref(
-											attribution.creditedUnit.kind,
-											attribution.creditedUnit,
+											attribution.creditedEntity.kind,
+											attribution.creditedEntity,
 										);
 										const role = isKnownAttributionRole(attribution.role)
 											? t.units.attributionRoles[attribution.role]
 											: attribution.role;
-										const label = `${attribution.creditedUnit.title ?? t.ui.unnamed} · ${role}`;
+										const label = `${attribution.creditedEntity.title ?? t.ui.unnamed} · ${role}`;
 										return href ? (
 											<Link
 												key={attribution.id}

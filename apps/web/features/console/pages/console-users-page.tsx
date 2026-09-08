@@ -2,7 +2,7 @@
 
 import {
 	GetApiPlatformUsersState,
-	getApiPlatformAccessProfilesByProfileIdQueryKey,
+	getApiPlatformAccessAccountsByAuthUserIdQueryKey,
 	getApiPlatformUsers,
 	getApiPlatformUsersByUserIdQueryKey,
 	getApiPlatformUsersByUserIdSessionsQueryKey,
@@ -11,7 +11,7 @@ import {
 	useDeleteApiPlatformUsersByUserIdSessionsBySessionId,
 	useGetApiAuditEvents,
 	useGetApiPlatformAccessPolicy,
-	useGetApiPlatformAccessProfilesByProfileId,
+	useGetApiPlatformAccessAccountsByAuthUserId,
 	useGetApiPlatformUsersByUserId,
 	useGetApiPlatformUsersByUserIdSessions,
 	usePutApiPlatformUsersByUserIdAccountState,
@@ -359,7 +359,7 @@ function UserInspector({ userId }: { readonly userId: string }) {
 						<UserOverview formatter={formatter} user={user.data} userId={userId} />
 					</TabsContent>
 					<TabsContent value="access">
-						<UserPlatformAccess profileId={user.data.profileId} userId={userId} />
+						<UserPlatformAccess userId={userId} />
 					</TabsContent>
 					<TabsContent value="apiQuota">
 						<div className="grid gap-6">
@@ -465,7 +465,7 @@ function UserOverview({
 					<div>
 						<p className="text-muted-foreground">{t.console.users.profileId}</p>
 						<code className="mt-1 block break-all text-xs">
-							{user.profileId ?? t.console.users.noProfile}
+							{user.entityId ?? t.console.users.noProfile}
 						</code>
 					</div>
 					<div>
@@ -547,29 +547,17 @@ function UserOverview({
 	);
 }
 
-function UserPlatformAccess({
-	profileId,
-	userId,
-}: {
-	readonly profileId: string | null;
-	readonly userId: string;
-}) {
-	const { t } = useTranslation(["console"]);
+function UserPlatformAccess({ userId }: { readonly userId: string }) {
 	const { canReadAccess, canManageAccess } = useConsoleWorkspace();
 	const queryClient = useQueryClient();
 	const policy = useGetApiPlatformAccessPolicy({
-		query: { enabled: canReadAccess && Boolean(profileId) },
+		query: { enabled: canReadAccess },
 	});
-	const access = useGetApiPlatformAccessProfilesByProfileId(
-		{ path: { profileId: profileId ?? userId } },
-		{ query: { enabled: canReadAccess && Boolean(profileId) } },
+	const access = useGetApiPlatformAccessAccountsByAuthUserId(
+		{ path: { authUserId: userId } },
+		{ query: { enabled: canReadAccess } },
 	);
-	if (!profileId)
-		return (
-			<p className="rounded-lg border border-border p-4 text-muted-foreground text-sm">
-				{t.console.users.platformAccessUnavailable}
-			</p>
-		);
+
 	if (policy.isPending || access.isPending) return <QueryPending />;
 	if (policy.isError || !policy.data)
 		return <QueryFailure error={policy.error} retry={() => void policy.refetch()} />;
@@ -579,11 +567,11 @@ function UserPlatformAccess({
 		<PlatformAccessEditor
 			canManage={canManageAccess}
 			capabilities={policy.data.capabilities}
-			key={`${access.data.profileId}:${access.data.revision}`}
+			key={`${access.data.authUserId}:${access.data.revision}`}
 			onSaved={async () => {
 				await queryClient.invalidateQueries({
-					queryKey: getApiPlatformAccessProfilesByProfileIdQueryKey({
-						path: { profileId },
+					queryKey: getApiPlatformAccessAccountsByAuthUserIdQueryKey({
+						path: { authUserId: userId },
 					}),
 				});
 			}}

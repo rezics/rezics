@@ -1,10 +1,10 @@
 "use client";
 
 import {
-	useDeleteApiUsersMeFollowingByUnitId,
-	useGetApiUsersMeFollowingByUnitId,
-	usePutApiUsersMeFollowingByUnitId,
-	usePutApiUsersMeFollowingByUnitIdSettings,
+	useDeleteApiAccountMeFollowingByUnitId,
+	useGetApiAccountMeFollowingByUnitId,
+	usePutApiAccountMeFollowingByUnitId,
+	usePutApiAccountMeFollowingByUnitIdSettings,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Button,
@@ -56,7 +56,7 @@ export function FollowButton({
 	const realmTagInputId = useId();
 	const realmTagLabelId = useId();
 	const realmTagDescriptionId = useId();
-	const status = useGetApiUsersMeFollowingByUnitId(
+	const status = useGetApiAccountMeFollowingByUnitId(
 		{ path: { unitId } },
 		{ query: { enabled: Boolean(session) } },
 	);
@@ -64,13 +64,13 @@ export function FollowButton({
 		await invalidateFollowingQueries(queryClient, unitId);
 		await onChanged?.();
 	};
-	const follow = usePutApiUsersMeFollowingByUnitId({
+	const follow = usePutApiAccountMeFollowingByUnitId({
 		mutation: { onSuccess: afterMutation },
 	});
-	const unfollow = useDeleteApiUsersMeFollowingByUnitId({
+	const unfollow = useDeleteApiAccountMeFollowingByUnitId({
 		mutation: { onSuccess: afterMutation },
 	});
-	const replaceSettings = usePutApiUsersMeFollowingByUnitIdSettings({
+	const replaceSettings = usePutApiAccountMeFollowingByUnitIdSettings({
 		mutation: {
 			onSuccess: async (updated) => {
 				await invalidateFollowingQueries(queryClient, unitId);

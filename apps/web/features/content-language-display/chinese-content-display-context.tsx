@@ -1,12 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import {
-	DefaultChineseContentDisplay,
-	type ChineseContentDisplay,
-	type ContentLanguage,
-} from "@rezics/i18n";
+import { DefaultChineseContentDisplay, type ChineseContentDisplay } from "@rezics/i18n";
 import type { PortableTextValue } from "@rezics/portable-text";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 import {
 	convertChineseContentText,
@@ -14,7 +10,7 @@ import {
 } from "./chinese-content-conversion";
 
 interface ChineseContentTextEntry {
-	readonly language: ContentLanguage | null | undefined;
+	readonly language: string | null | undefined;
 	readonly value: string;
 }
 
@@ -24,7 +20,7 @@ async function convertChineseContentTextEntries(
 ): Promise<readonly ChineseContentTextEntry[]> {
 	return Promise.all(
 		entries.map(async (entry) =>
-			entry.language === "zh"
+			entry.language?.split("-")[0] === "zh"
 				? {
 						...entry,
 						value: await convertChineseContentText(entry.value, display),
@@ -64,12 +60,12 @@ interface ConvertedValue<Input, Output> {
 
 function useChineseDisplayProjection<Input, Output>(
 	input: Input,
-	language: ContentLanguage | null | undefined,
+	language: string | null | undefined,
 	project: (input: Input, display: ChineseContentDisplay) => Promise<Output>,
 ): Input | Output {
 	const display = useChineseContentDisplay();
 	const [converted, setConverted] = useState<ConvertedValue<Input, Output>>();
-	const shouldConvert = language === "zh" && display !== "original";
+	const shouldConvert = language?.split("-")[0] === "zh" && display !== "original";
 
 	useEffect(() => {
 		if (!shouldConvert) return;
@@ -91,10 +87,7 @@ function useChineseDisplayProjection<Input, Output>(
 		: input;
 }
 
-export function useChineseContentText(
-	value: string,
-	language: ContentLanguage | null | undefined,
-): string {
+export function useChineseContentText(value: string, language: string | null | undefined): string {
 	return useChineseDisplayProjection(value, language, convertChineseContentText);
 }
 
@@ -103,7 +96,7 @@ export function useChineseContentTexts(
 ): readonly string[] {
 	const projected = useChineseDisplayProjection(
 		entries,
-		entries.some(({ language }) => language === "zh") ? "zh" : undefined,
+		entries.some(({ language }) => language?.split("-")[0] === "zh") ? "zh" : undefined,
 		convertChineseContentTextEntries,
 	);
 	return projected.map(({ value }) => value);
@@ -113,7 +106,7 @@ export function LocalizedText({
 	language,
 	value,
 }: {
-	readonly language: ContentLanguage | null | undefined;
+	readonly language: string | null | undefined;
 	readonly value: string;
 }) {
 	return <>{useChineseContentText(value, language)}</>;
@@ -121,15 +114,13 @@ export function LocalizedText({
 
 export function useChinesePortableText(
 	value: PortableTextValue,
-	language: ContentLanguage | null | undefined,
+	language: string | null | undefined,
 ): PortableTextValue {
 	return useChineseDisplayProjection(value, language, convertChinesePortableText);
 }
 
-export function useRenderedContentLocale(
-	language: ContentLanguage | null | undefined,
-): ContentLanguage | "zh-Hant" | "zh-Hans" | undefined {
+export function useRenderedContentLocale(language: string | null | undefined): string | undefined {
 	const display = useChineseContentDisplay();
-	if (language !== "zh" || display === "original") return language ?? undefined;
+	if (language?.split("-")[0] !== "zh" || display === "original") return language ?? undefined;
 	return display === "hant" ? "zh-Hant" : "zh-Hans";
 }

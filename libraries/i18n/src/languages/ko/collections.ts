@@ -4,6 +4,17 @@ import { koTerminology } from "@rezics/i18n/terminology/ko";
 const { forms: metadataTerms } = koTerminology.metadata;
 
 export default {
+	privateFavorites: {
+		note: "비공개 메모",
+		remove: "즐겨찾기에서 삭제",
+		save: "비공개로 저장",
+		empty: "저장한 항목이 없습니다.",
+		refreshPreview: "저장된 미리 보기 새로 고침",
+		moveFirst: "맨 앞으로 이동",
+		history: "기록",
+		restore: "복원",
+		privacy: "저장한 항목과 메모는 본인만 볼 수 있습니다.",
+	},
 	title: "컬렉션",
 	favorites: "즐겨찾기",
 	newCollection: "새 컬렉션",

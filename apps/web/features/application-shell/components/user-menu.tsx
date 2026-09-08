@@ -1,12 +1,13 @@
 "use client";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { isUiLocale, UiLocaleValues, type UiLocale } from "@rezics/i18n";
-import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import type { GetApiUsersMeStatus200 } from "@rezics/openapi-tanstack-query";
+import type { GetApiAccountMeStatus200 } from "@rezics/openapi-tanstack-query";
 import {
 	Button,
-	type ButtonProps,
 	cn,
+	IdentityAvatar,
 	Menu,
 	MenuContent,
 	MenuItem,
@@ -21,7 +22,6 @@ import {
 	RadioGroupItem,
 	RadioGroupLabel,
 	Separator,
-	IdentityAvatar,
 	Sheet,
 	SheetBody,
 	SheetClose,
@@ -31,6 +31,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 	useIsMobile,
+	type ButtonProps,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -47,14 +48,12 @@ import {
 	UserRound,
 	X,
 } from "lucide-react";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { profileHref } from "@/features/profiles/profile-route";
-import { AccessInvitationsHref } from "@/features/notifications/routing/notification-routes";
-import { MyReportsHref } from "@/features/reports/routing/report-routes";
 import { hasConsoleAccess } from "@/features/console/model/console-access";
+import { AccessInvitationsHref } from "@/features/notifications/routing/notification-routes";
+import { profileHref } from "@/features/profiles/profile-route";
+import { MyReportsHref } from "@/features/reports/routing/report-routes";
 import { useTranslation } from "@/i18n/client";
 import { authClient } from "@/lib/auth-client";
 import type { ThemePreference } from "../hooks/use-theme-preference";
@@ -66,7 +65,7 @@ const MobileMenuItemClassName = "min-h-12 w-full justify-start px-3 py-2.5 text-
 type MobileUserMenuPage = "root" | "theme" | "locale";
 
 interface UserMenuProps {
-	profile?: GetApiUsersMeStatus200;
+	profile?: GetApiAccountMeStatus200;
 	fallbackName: string;
 	locale: UiLocale;
 	onLocaleChange: (locale: UiLocale) => void;
@@ -86,12 +85,12 @@ function UserMenuTriggerButton({
 	...props
 }: Omit<ButtonProps, "children"> & {
 	initial?: string;
-	profile?: GetApiUsersMeStatus200;
+	profile?: GetApiAccountMeStatus200;
 }) {
 	return (
 		<Button className={cn("size-11 p-0", className)} pill size="icon-xl" {...props}>
 			<IdentityAvatar
-				avatar={profile?.avatar}
+				avatar={profile?.entity.avatar}
 				fallback={initial ?? <UserRound aria-hidden />}
 				size="lg"
 			/>
@@ -111,9 +110,9 @@ function useUserMenuModel({
 	const { t } = useTranslation(["locale", "nav", "ui"]);
 	const router = useApplicationRouter();
 	const queryClient = useQueryClient();
-	const name = profile?.name?.trim() || fallbackName.trim() || t.ui.unnamed;
+	const name = profile?.entity.name?.trim() || fallbackName.trim() || t.ui.unnamed;
 	const initial = Array.from(name)[0]?.toLocaleUpperCase(locale);
-	const publicProfileHref = profile ? profileHref(profile) : "/settings/profile";
+	const publicProfileHref = profile ? profileHref(profile.entity) : "/settings/profile";
 	const canAccessConsole = profile ? hasConsoleAccess(profile.platformCapabilities) : false;
 
 	const signOut = async () => {
@@ -174,16 +173,14 @@ function DesktopUserMenu({
 				<MenuItem asChild className="gap-3 px-3 py-2.5" value="view-profile">
 					<Link href={publicProfileHref}>
 						<IdentityAvatar
-							avatar={profile?.avatar}
+							avatar={profile?.entity.avatar}
 							fallback={initial ?? <UserRound aria-hidden />}
 							size="lg"
 						/>
 						<span className="min-w-0 flex-1">
 							<span className="block truncate font-medium">{name}</span>
 							<span className="block truncate text-muted-foreground text-xs">
-								{profile?.slugAddress
-									? `${verbatimTerms.profileSlugPrefix.value}${profile.slugAddress.slug}`
-									: t.nav.userMenu.viewProfile}
+								{t.nav.userMenu.viewProfile}
 							</span>
 						</span>
 					</Link>
@@ -191,7 +188,7 @@ function DesktopUserMenu({
 
 				{profile ? (
 					<MenuItem asChild value="my-content">
-						<Link href={profileHref(profile, "content")}>
+						<Link href={profileHref(profile.entity, "content")}>
 							<FileText aria-hidden />
 							{t.nav.userMenu.myContent}
 						</Link>
@@ -385,16 +382,14 @@ function MobileUserMenu(model: UserMenuModel) {
 							>
 								<Link href={publicProfileHref} onClick={close} ref={rootFocusRef}>
 									<IdentityAvatar
-										avatar={profile?.avatar}
+										avatar={profile?.entity.avatar}
 										fallback={initial ?? <UserRound aria-hidden />}
 										size="lg"
 									/>
 									<span className="min-w-0 flex-1">
 										<span className="block truncate font-medium">{name}</span>
 										<span className="block truncate text-muted-foreground text-xs">
-											{profile?.slugAddress
-												? `${verbatimTerms.profileSlugPrefix.value}${profile.slugAddress.slug}`
-												: t.nav.userMenu.viewProfile}
+											{t.nav.userMenu.viewProfile}
 										</span>
 									</span>
 								</Link>
@@ -402,7 +397,7 @@ function MobileUserMenu(model: UserMenuModel) {
 
 							{profile ? (
 								<Button asChild className={MobileMenuItemClassName} variant="quiet">
-									<Link href={profileHref(profile, "content")} onClick={close}>
+									<Link href={profileHref(profile.entity, "content")} onClick={close}>
 										<FileText aria-hidden />
 										{t.nav.userMenu.myContent}
 									</Link>

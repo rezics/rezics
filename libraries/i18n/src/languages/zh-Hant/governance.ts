@@ -34,7 +34,7 @@ export default {
 	accessInvitations: "存取邀請",
 	receivedInvitations: "收到的存取邀請",
 	accessInvitationDescription: "接受邀請前不會產生任何存取權限。",
-	invitedProfile: "受邀使用者",
+	invitedAccount: "受邀帳戶",
 	invitedBy: "邀請人",
 	unitId: `條目 ${verbatimTerms.id.value}`,
 	scope: "權限範圍",
@@ -149,7 +149,7 @@ export default {
 		filterLabel: `${zhHantTerminology.license.forms.label}對象類型篩選`,
 		filters: {
 			all: "全部",
-			profile: "使用者",
+			auth: "帳戶",
 			realm: realmTerms.label,
 		},
 		alreadyAdded: "已加入",
@@ -184,7 +184,7 @@ export default {
 		cancel: "取消",
 		inheritedDescription: "這項權限另有繼承來源；直接限制仍然優先。",
 		subjectKinds: {
-			profile: "使用者",
+			auth: "帳戶",
 			realm: realmTerms.label,
 			authenticated: "所有已登入使用者",
 		},

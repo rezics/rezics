@@ -1,6 +1,7 @@
 "use client";
 
-import { useGetApiUsersMe } from "@rezics/openapi-tanstack-query";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useGetApiAccountMe } from "@rezics/openapi-tanstack-query";
 import {
 	Button,
 	Logo,
@@ -20,15 +21,14 @@ import {
 	Boxes,
 	FileClock,
 	Gauge,
-	Handshake,
 	GitMerge,
+	Handshake,
 	KeyRound,
 	Menu,
 	ShieldCheck,
 	Users,
 	type LucideIcon,
 } from "lucide-react";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 
@@ -145,7 +145,7 @@ function ConsoleNavigation({
 function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode }) {
 	const pathname = usePathname();
 	const { t } = useTranslation(["console"]);
-	const me = useGetApiUsersMe();
+	const me = useGetApiAccountMe();
 	if (me.isPending) return <QueryPending />;
 	if (me.isError || !me.data)
 		return <QueryFailure error={me.error} retry={() => void me.refetch()} />;
@@ -285,7 +285,7 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 		canProposeUnitMerges,
 		canReviewUnitMerges,
 		canRetryUnitMerges,
-		currentProfileId: me.data.id,
+		currentProfileId: me.data.entity.id,
 		canDecideOwnershipClaims,
 		canDeleteUnits,
 		canRestoreUnits,
@@ -327,7 +327,7 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 					) : null}
 					<div className="ms-auto flex items-center gap-2">
 						<span className="hidden max-w-48 truncate text-muted-foreground text-sm sm:block">
-							{me.data.name ?? me.data.email}
+							{me.data.entity.name ?? me.data.email}
 						</span>
 						<Link
 							className="inline-flex min-h-9 items-center gap-2 rounded-lg px-3 text-muted-foreground text-sm hover:bg-accent hover:text-foreground"

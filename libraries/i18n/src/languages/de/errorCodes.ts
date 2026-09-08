@@ -13,6 +13,14 @@ const { forms: zoneTerms } = deTerminology.zone;
 const { forms: entityTerms } = deTerminology.entity;
 
 export default {
+	CatalogReferenceNotFound: "Dieser Eintrag wurde nicht gefunden.",
+	CatalogRevisionConflict:
+		"Dieser Eintrag wurde geändert. Lade die Seite neu und versuche es erneut.",
+	FavoriteNotFound: "Dieser gespeicherte Eintrag wurde nicht gefunden.",
+	FavoriteRevisionConflict:
+		"Deine gespeicherten Einträge wurden geändert. Lade die Seite neu und versuche es erneut.",
+	ParticipationDenied: "Du darfst nicht mehr mit dieser Identität handeln.",
+
 	MalformedRequestBody: "Der übermittelte Inhalt konnte nicht gelesen werden.",
 	ValidationError: "Der übermittelte Inhalt ist ungültig.",
 	InternalError: "Der Dienst ist vorübergehend nicht verfügbar. Versuche es später erneut.",

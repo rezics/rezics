@@ -1,4 +1,4 @@
-import type { GetApiUsersMeStatus200PlatformCapabilitiesEnum as PlatformCapability } from "@rezics/openapi-tanstack-query";
+import type { GetApiAccountMeStatus200PlatformCapabilitiesEnum as PlatformCapability } from "@rezics/openapi-tanstack-query";
 
 import { ConsoleSectionIds, type ConsoleSectionId } from "./console-section";
 

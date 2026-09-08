@@ -34,7 +34,7 @@ export default {
 	accessInvitations: "访问邀请",
 	receivedInvitations: "收到的访问邀请",
 	accessInvitationDescription: "接受邀请前不会产生任何访问权限。",
-	invitedProfile: "受邀用户",
+	invitedAccount: "受邀账户",
 	invitedBy: "邀请人",
 	unitId: `条目 ${verbatimTerms.id.value}`,
 	scope: "权限范围",
@@ -149,7 +149,7 @@ export default {
 		filterLabel: "授权对象类型筛选",
 		filters: {
 			all: "全部",
-			profile: "用户",
+			auth: "账户",
 			realm: realmTerms.label,
 		},
 		alreadyAdded: "已加入",
@@ -184,7 +184,7 @@ export default {
 		cancel: "取消",
 		inheritedDescription: "这项权限另有继承来源；直接限制仍然优先。",
 		subjectKinds: {
-			profile: "用户",
+			auth: "账户",
 			realm: realmTerms.label,
 			authenticated: "所有已登录用户",
 		},

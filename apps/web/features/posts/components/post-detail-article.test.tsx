@@ -81,7 +81,7 @@ describe("PostDetailArticle", () => {
 							{
 								id: "publisher-credit",
 								role: "publisher",
-								creditedUnit: {
+								creditedEntity: {
 									id: "publisher",
 									kind: "profile",
 									title: "海豚號編輯部",
@@ -90,7 +90,7 @@ describe("PostDetailArticle", () => {
 							{
 								id: "author-credit",
 								role: "author",
-								creditedUnit: {
+								creditedEntity: {
 									id: "author",
 									kind: "profile",
 									title: "不應顯示的作者署名",

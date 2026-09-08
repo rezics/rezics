@@ -8,7 +8,6 @@ import {
 } from "@rezics/i18n";
 
 export interface PresentationPreferences {
-	readonly profileId: string;
 	readonly interfaceLocale: StoredUiLocale;
 	readonly chineseContentDisplay: ChineseContentDisplay;
 	readonly filterFeedByPreferredLanguages: boolean;
@@ -32,7 +31,6 @@ export function parsePresentationPreferences(value: unknown): PresentationPrefer
 	if (!isRecord(value)) return undefined;
 	const preferredLanguages = value.preferredLanguages;
 	if (
-		typeof value.profileId !== "string" ||
 		typeof value.interfaceLocale !== "string" ||
 		!isStoredUiLocale(value.interfaceLocale) ||
 		typeof value.chineseContentDisplay !== "string" ||
@@ -51,7 +49,6 @@ export function parsePresentationPreferences(value: unknown): PresentationPrefer
 		return undefined;
 
 	return {
-		profileId: value.profileId,
 		interfaceLocale: value.interfaceLocale,
 		chineseContentDisplay: value.chineseContentDisplay,
 		filterFeedByPreferredLanguages: value.filterFeedByPreferredLanguages,

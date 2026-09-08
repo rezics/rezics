@@ -4,6 +4,17 @@ import { jaTerminology } from "@rezics/i18n/terminology/ja";
 const { forms: metadataTerms } = jaTerminology.metadata;
 
 export default {
+	privateFavorites: {
+		note: "自分用メモ",
+		remove: "お気に入りから削除",
+		save: "自分用に保存",
+		empty: "保存した項目はありません。",
+		refreshPreview: "保存したプレビューを更新",
+		moveFirst: "先頭に移動",
+		history: "履歴",
+		restore: "復元",
+		privacy: "保存した項目とメモは自分だけが閲覧できます。",
+	},
 	title: "コレクション",
 	favorites: "お気に入り",
 	newCollection: "新しいコレクション",

@@ -75,7 +75,7 @@ function metadataTitle(
 			: presentation.context?.kind === "post"
 				? presentation.context.attributionTitle
 				: null;
-	const slug = projection.kind === "profile" ? profileSlug(input.canonicalPath) : null;
+	const slug = projection.kind === "entity" ? profileSlug(input.canonicalPath) : null;
 
 	if (slug) return input.t.seo.titles.profile({ name: presentation.title, slug, brand });
 	if (contextLabel)
@@ -147,8 +147,6 @@ function structuredMainEntity(
 		...(projection.presentation.image ? { image: projection.presentation.image.url } : {}),
 	};
 	switch (projection.kind) {
-		case "profile":
-			return { "@type": "Person", ...shared };
 		case "book":
 			return { "@type": "Book", ...shared };
 		case "software":

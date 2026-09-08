@@ -2,15 +2,15 @@ import { AppLink as Link } from "@/features/application-shell/components/app-lin
 import type { PresentedAvatar } from "@rezics/avatar";
 import type { PublicSlugAddressValue } from "@rezics/slug";
 
-import { IdentityAvatar } from "@rezics/ui";
 import { isKnownAttributionRole } from "@/features/units/attribution-role";
 import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { useTranslation } from "@/i18n/client";
+import { IdentityAvatar } from "@rezics/ui";
 
 export type AttributionSummary = {
 	readonly id: string;
 	readonly role: string;
-	readonly creditedUnit: {
+	readonly creditedEntity: {
 		readonly id: string;
 		readonly kind: string;
 		readonly slugAddress?: PublicSlugAddressValue | null;
@@ -30,7 +30,7 @@ export function getPublisherUnitIds(
 ): ReadonlySet<string> {
 	const publisherUnitIds = new Set<string>();
 	for (const attribution of attributions) {
-		if (attribution.role === "publisher") publisherUnitIds.add(attribution.creditedUnit.id);
+		if (attribution.role === "publisher") publisherUnitIds.add(attribution.creditedEntity.id);
 	}
 	return publisherUnitIds;
 }
@@ -51,8 +51,8 @@ export function AttributionLinks({
 	const { t } = useTranslation(["units"]);
 	if (!attributions.length) return <span className={className}>{emptyLabel}</span>;
 	return attributions.map((attribution, index) => {
-		const href = publicUnitHref(attribution.creditedUnit.kind, attribution.creditedUnit);
-		const label = attribution.creditedUnit.title ?? emptyLabel;
+		const href = publicUnitHref(attribution.creditedEntity.kind, attribution.creditedEntity);
+		const label = attribution.creditedEntity.title ?? emptyLabel;
 		const roleLabel =
 			resolveRoleLabel === undefined
 				? attribution.role === "publisher" && publisherLabel
@@ -112,7 +112,7 @@ export function ReplyAttributionLinks({
 			className={className}
 			emptyLabel={emptyLabel}
 			resolveRoleLabel={(attribution) =>
-				postPublisherUnitIds.has(attribution.creditedUnit.id) ? publisherLabel : null
+				postPublisherUnitIds.has(attribution.creditedEntity.id) ? publisherLabel : null
 			}
 		/>
 	);
@@ -140,13 +140,13 @@ export function PublisherAttributionLinks({
 			role="list"
 		>
 			{publishers.map((attribution) => {
-				const creditedUnit = attribution.creditedUnit;
-				const label = creditedUnit.title ?? emptyLabel;
-				const href = publicUnitHref(creditedUnit.kind, creditedUnit);
+				const creditedEntity = attribution.creditedEntity;
+				const label = creditedEntity.title ?? emptyLabel;
+				const href = publicUnitHref(creditedEntity.kind, creditedEntity);
 				const initials = Array.from(label.trim())[0]?.toLocaleUpperCase() ?? label;
 				const content = (
 					<>
-						<IdentityAvatar avatar={creditedUnit.avatar} fallback={initials} size="sm" />
+						<IdentityAvatar avatar={creditedEntity.avatar} fallback={initials} size="sm" />
 						<span className="max-w-48 truncate font-semibold text-sm">{label}</span>
 					</>
 				);

@@ -12,7 +12,7 @@ import { useTranslation } from "./client";
 import { useLocalizationLanguageState } from "./use-localization-languages";
 
 export function useLocalizationFallbackToast(input: {
-	readonly actualLanguage: ContentLanguage | null;
+	readonly actualLanguage: string | null;
 	readonly localizationLanguages: readonly ContentLanguage[];
 	readonly unitId: string;
 }) {
@@ -28,7 +28,7 @@ export function useLocalizationFallbackToast(input: {
 		(requestedLanguage
 			? input.actualLanguage !== requestedLanguage
 			: input.localizationLanguages.length > 0 &&
-				!input.localizationLanguages.includes(input.actualLanguage));
+				!input.localizationLanguages.some((language) => language === input.actualLanguage));
 
 	useEffect(() => {
 		if (!preferencesReady || !fallback || !input.actualLanguage) return;

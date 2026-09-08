@@ -13,6 +13,13 @@ const { forms: zoneTerms } = esTerminology.zone;
 const { forms: entityTerms } = esTerminology.entity;
 
 export default {
+	CatalogReferenceNotFound: "No se encontró este registro.",
+	CatalogRevisionConflict: "Este registro ha cambiado. Actualiza la página e inténtalo de nuevo.",
+	FavoriteNotFound: "No se encontró este elemento guardado.",
+	FavoriteRevisionConflict:
+		"Tus elementos guardados han cambiado. Actualiza la página e inténtalo de nuevo.",
+	ParticipationDenied: "Ya no tienes permiso para actuar con esta identidad.",
+
 	MalformedRequestBody: "No se ha podido leer el contenido enviado.",
 	ValidationError: "El contenido enviado no es válido.",
 	InternalError: "El servicio no está disponible temporalmente. Inténtalo de nuevo más tarde.",

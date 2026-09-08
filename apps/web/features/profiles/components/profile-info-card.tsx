@@ -1,7 +1,6 @@
 "use client";
 
 import type { PresentedAvatar } from "@rezics/avatar";
-import type { ContentLanguage } from "@rezics/i18n";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { IdentityAvatar } from "@rezics/ui";
 
@@ -11,7 +10,7 @@ export interface ProfileInfoCardData {
 	readonly id: string;
 	readonly name: string;
 	readonly initials: string;
-	readonly language?: ContentLanguage | null;
+	readonly language?: string | null;
 	readonly avatar?: PresentedAvatar | null;
 	readonly slug?: string;
 	readonly summary?: string;

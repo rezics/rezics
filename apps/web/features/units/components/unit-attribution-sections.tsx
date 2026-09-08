@@ -1,5 +1,6 @@
 "use client";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import type {
 	GetApiUnitsByTypeByUnitIdStatus200,
 	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
@@ -12,11 +13,10 @@ import {
 	HoverCardTrigger,
 	IdentityAvatar,
 } from "@rezics/ui";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { Fragment } from "react";
 
-import { FollowButton } from "@/features/following/components/follow-button";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
+import { FollowButton } from "@/features/following/components/follow-button";
 import { ProfileInfoCard } from "@/features/profiles/components/profile-info-card";
 import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
@@ -28,7 +28,7 @@ type CompactCreditAttribution =
 	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200["items"][number]["attributions"][number];
 
 function attributionHref(attribution: CompactCreditAttribution): string | undefined {
-	return publicUnitHref(attribution.creditedUnit.kind, attribution.creditedUnit);
+	return publicUnitHref(attribution.creditedEntity.kind, attribution.creditedEntity);
 }
 
 function AttributionName({
@@ -40,10 +40,10 @@ function AttributionName({
 }) {
 	const { t } = useTranslation(["ui"]);
 	const href = attributionHref(attribution);
-	const sourceName = attribution.creditedUnit.title ?? t.ui.unnamed;
+	const sourceName = attribution.creditedEntity.title ?? t.ui.unnamed;
 	const name = useChineseContentText(
 		sourceName,
-		attribution.creditedUnit.title ? attribution.creditedUnit.language : undefined,
+		attribution.creditedEntity.title ? attribution.creditedEntity.language : undefined,
 	);
 	const nameContent = href ? (
 		<Link
@@ -62,15 +62,15 @@ function AttributionName({
 			<HoverCardContent className="w-72">
 				<ProfileInfoCard
 					profile={{
-						id: attribution.creditedUnit.id,
+						id: attribution.creditedEntity.id,
 						name: sourceName,
 						initials: sourceName.slice(0, 1).toUpperCase(),
-						language: attribution.creditedUnit.title
-							? attribution.creditedUnit.language
+						language: attribution.creditedEntity.title
+							? attribution.creditedEntity.language
 							: undefined,
-						avatar: attribution.creditedUnit.avatar,
-						slug: attribution.creditedUnit.slugAddress?.slug,
-						summary: attribution.creditedUnit.summary ?? undefined,
+						avatar: attribution.creditedEntity.avatar,
+						slug: attribution.creditedEntity.slugAddress?.slug,
+						summary: attribution.creditedEntity.summary ?? undefined,
 					}}
 				/>
 			</HoverCardContent>
@@ -119,7 +119,7 @@ export function DetailedCreditAttributionGroups({
 					<Card>
 						<CardContent className="divide-y divide-border-weak p-0">
 							{group.items.map((attribution) => {
-								const name = attribution.creditedUnit.title ?? t.ui.unnamed;
+								const name = attribution.creditedEntity.title ?? t.ui.unnamed;
 								return (
 									<article
 										className="scroll-mt-6 grid grid-cols-[3.5rem_minmax(0,1fr)] gap-4 p-5"
@@ -127,16 +127,16 @@ export function DetailedCreditAttributionGroups({
 										key={attribution.id}
 									>
 										<IdentityAvatar
-											avatar={attribution.creditedUnit.avatar}
+											avatar={attribution.creditedEntity.avatar}
 											className="size-14"
 											fallback={name.slice(0, 1).toUpperCase()}
 											imageAlt={name}
 										/>
 										<div className="grid min-w-0 content-center gap-1">
 											<AttributionName attribution={attribution} />
-											{attribution.creditedUnit.summary ? (
+											{attribution.creditedEntity.summary ? (
 												<p className="text-sm leading-6 text-muted-foreground">
-													{attribution.creditedUnit.summary}
+													{attribution.creditedEntity.summary}
 												</p>
 											) : null}
 										</div>
@@ -153,12 +153,12 @@ export function DetailedCreditAttributionGroups({
 
 export function PrimaryBookAuthorSection({ attribution }: { attribution: CreditAttribution }) {
 	const { locale, t } = useTranslation(["ui", "units"]);
-	const name = attribution.creditedUnit.title ?? t.ui.unnamed;
+	const name = attribution.creditedEntity.title ?? t.ui.unnamed;
 	const creditedBookCount = toNonNegativeApiInteger(
-		attribution.creditedUnit.creditedBookCount.value,
+		attribution.creditedEntity.creditedBookCount.value,
 	);
-	const creditedBookCountIsExact = attribution.creditedUnit.creditedBookCount.kind === "exact";
-	const followerCount = toNonNegativeApiInteger(attribution.creditedUnit.followerCount);
+	const creditedBookCountIsExact = attribution.creditedEntity.creditedBookCount.kind === "exact";
+	const followerCount = toNonNegativeApiInteger(attribution.creditedEntity.followerCount);
 	const numberFormat = new Intl.NumberFormat(locale.target);
 	const statistics = t.units.detail.authorStatistics;
 	const bookCountLabel =
@@ -178,7 +178,7 @@ export function PrimaryBookAuthorSection({ attribution }: { attribution: CreditA
 				<div className="flex items-center justify-between gap-4">
 					<div className="grid min-w-0 grid-cols-[4rem_minmax(0,1fr)] items-center gap-4">
 						<IdentityAvatar
-							avatar={attribution.creditedUnit.avatar}
+							avatar={attribution.creditedEntity.avatar}
 							className="size-16"
 							fallback={name.slice(0, 1).toUpperCase()}
 							imageAlt={name}
@@ -195,12 +195,12 @@ export function PrimaryBookAuthorSection({ attribution }: { attribution: CreditA
 					<FollowButton
 						className="shrink-0"
 						size="sm"
-						unitId={attribution.creditedUnit.id}
+						unitId={attribution.creditedEntity.id}
 						variant="solid"
 					/>
 				</div>
-				{attribution.creditedUnit.summary ? (
-					<p className="leading-7 text-muted-foreground">{attribution.creditedUnit.summary}</p>
+				{attribution.creditedEntity.summary ? (
+					<p className="leading-7 text-muted-foreground">{attribution.creditedEntity.summary}</p>
 				) : null}
 			</div>
 		</section>

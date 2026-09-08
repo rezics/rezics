@@ -5,7 +5,7 @@ import { ContentAgentPermissions, ReadOnlyPermissions } from "./token-permission
 describe("API token permission templates", () => {
 	it("allows content agents to propose and vote on Unit references", () => {
 		expect(ContentAgentPermissions).toEqual(
-			expect.arrayContaining(["unit:read", "interaction:write", "profile:read"]),
+			expect.arrayContaining(["unit:read", "interaction:write", "account:read"]),
 		);
 	});
 

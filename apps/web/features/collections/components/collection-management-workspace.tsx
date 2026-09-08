@@ -1,8 +1,9 @@
 "use client";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import {
-	type GetApiCollectionsByCollectionIdStatus200,
 	useGetApiCollectionsByCollectionId,
+	type GetApiCollectionsByCollectionIdStatus200,
 } from "@rezics/openapi-tanstack-query";
 import type { ManagementWorkspaceSection } from "@rezics/ui";
 import {
@@ -22,7 +23,6 @@ import {
 	ListTree,
 	ShieldCheck,
 } from "lucide-react";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 
@@ -155,10 +155,7 @@ function CollectionManagementWorkspaceContent({
 	const requestedSection = allSections.find(({ id }) => id === currentSectionId);
 	const sectionAllowed = currentSectionId === undefined || visibleSectionIds.has(currentSectionId);
 	const localization = selectLocalization(collection.localizations, collection.language);
-	const title =
-		collection.purpose === "favorites"
-			? t.collections.favorites
-			: (localization?.title ?? t.collections.workspace.title);
+	const title = localization?.title ?? t.collections.workspace.title;
 	const navigation = (
 		<ManagementWorkspaceNavigation
 			ariaLabel={t.collections.workspace.navigation}

@@ -13,6 +13,12 @@ const { forms: zoneTerms } = zhHantTerminology.zone;
 const { forms: entityTerms } = zhHantTerminology.entity;
 
 export default {
+	CatalogReferenceNotFound: "找不到這筆記錄。",
+	CatalogRevisionConflict: "這筆記錄已變更，請重新整理後再試。",
+	FavoriteNotFound: "找不到這筆收藏。",
+	FavoriteRevisionConflict: "你的收藏已變更，請重新整理後再試。",
+	ParticipationDenied: "你已無權使用此身分執行操作。",
+
 	MalformedRequestBody: "無法解析提交內容的格式。",
 	ValidationError: "提交的內容不符合要求。",
 	InternalError: "服務暫時不可用，請稍後重試。",

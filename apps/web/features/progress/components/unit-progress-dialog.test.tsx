@@ -38,7 +38,7 @@ vi.mock("./unit-progress-provider", () => ({
 }));
 
 vi.mock("@rezics/openapi-tanstack-query", () => ({
-	useGetApiUsersMePreferences: () => ({
+	useGetApiAccountMePreferences: () => ({
 		data: { progressVisibility: privacyState.progressVisibility },
 	}),
 }));

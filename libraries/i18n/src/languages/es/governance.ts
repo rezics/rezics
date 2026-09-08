@@ -34,7 +34,7 @@ export default {
 	accessInvitations: "Invitaciones de acceso",
 	receivedInvitations: "Invitaciones de acceso recibidas",
 	accessInvitationDescription: "No se concede ningún acceso hasta que se acepta la invitación.",
-	invitedProfile: "Perfil invitado",
+	invitedAccount: "Cuenta invitada",
 	invitedBy: "Invitación enviada por",
 	unitId: `${verbatimTerms.id.value} de la Unit`,
 	scope: "Alcance del acceso",
@@ -152,7 +152,7 @@ export default {
 		filterLabel: "Filtrar tipos de sujetos de autorización",
 		filters: {
 			all: "Todos",
-			profile: "Perfiles",
+			auth: "Cuentas",
 			realm: realmTerms.pluralLabel,
 		},
 		alreadyAdded: "Añadido",
@@ -189,7 +189,7 @@ export default {
 		inheritedDescription:
 			"Este permiso también tiene un origen heredado; una restricción directa sigue teniendo prioridad.",
 		subjectKinds: {
-			profile: "Perfil",
+			auth: "Cuenta",
 			realm: realmTerms.label,
 			authenticated: "Todos los usuarios que hayan iniciado sesión",
 		},

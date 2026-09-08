@@ -1,16 +1,16 @@
 "use client";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useGetApiCollectionsByCollectionId } from "@rezics/openapi-tanstack-query";
 import { Badge, Button, Cover, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
+import { PublisherAttributionLinks } from "@/features/posts/attribution-list";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { selectLocalization } from "@/lib/localization";
 import { CollectionContentFeed } from "../components/collection-content-feed";
-import { PublisherAttributionLinks } from "@/features/posts/attribution-list";
 
 export function CollectionDetailPage({ collectionId }: { readonly collectionId: string }) {
 	const localizationLanguages = useLocalizationLanguages();
@@ -28,10 +28,8 @@ export function CollectionDetailPage({ collectionId }: { readonly collectionId: 
 		? selectLocalization(query.data.localizations, query.data.language)
 		: null;
 	const title = useChineseContentText(
-		query.data?.purpose === "favorites"
-			? t.collections.favorites
-			: (localization?.title ?? t.ui.unnamed),
-		query.data?.purpose !== "favorites" && localization?.title ? localization.language : null,
+		localization?.title ?? t.ui.unnamed,
+		localization?.title ? localization.language : null,
 	);
 	const summary = useChineseContentText(localization?.summary ?? "", localization?.language);
 	if (query.isPending) return <QueryPending />;

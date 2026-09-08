@@ -1,8 +1,8 @@
 "use client";
 
 import {
-	useGetApiUsersMe,
-	type GetApiUsersMeStatus200PlatformCapabilitiesEnum,
+	useGetApiAccountMe,
+	type GetApiAccountMeStatus200PlatformCapabilitiesEnum,
 } from "@rezics/openapi-tanstack-query";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import type { ReactNode } from "react";
@@ -11,7 +11,7 @@ import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { PreviewAccessNotice } from "./preview-access-notice";
 
 const DevelopmentPreviewCapability =
-	"platform.development_preview.access" satisfies GetApiUsersMeStatus200PlatformCapabilitiesEnum;
+	"platform.development_preview.access" satisfies GetApiAccountMeStatus200PlatformCapabilitiesEnum;
 
 export type DevelopmentPreviewAccess =
 	| { readonly state: "pending" }
@@ -21,7 +21,7 @@ export type DevelopmentPreviewAccess =
 
 export function useDevelopmentPreviewAccess(): DevelopmentPreviewAccess {
 	const session = useHydratedSession();
-	const profile = useGetApiUsersMe({}, { query: { enabled: Boolean(session.data) } });
+	const profile = useGetApiAccountMe({}, { query: { enabled: Boolean(session.data) } });
 
 	if (session.isPending || (session.data && profile.isPending)) return { state: "pending" };
 	if (!session.data) return { state: "denied" };

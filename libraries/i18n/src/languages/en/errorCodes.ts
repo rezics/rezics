@@ -13,6 +13,12 @@ const { forms: zoneTerms } = enTerminology.zone;
 const { forms: entityTerms } = enTerminology.entity;
 
 export default {
+	CatalogReferenceNotFound: "This record could not be found.",
+	CatalogRevisionConflict: "This record changed. Refresh and try again.",
+	FavoriteNotFound: "This saved item could not be found.",
+	FavoriteRevisionConflict: "Your saved items changed. Refresh and try again.",
+	ParticipationDenied: "You no longer have permission to act with this identity.",
+
 	MalformedRequestBody: "The submitted content could not be read.",
 	ValidationError: "The submitted content is invalid.",
 	InternalError: "The service is temporarily unavailable. Try again later.",

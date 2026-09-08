@@ -4,6 +4,17 @@ import { deTerminology } from "@rezics/i18n/terminology/de";
 const { forms: metadataTerms } = deTerminology.metadata;
 
 export default {
+	privateFavorites: {
+		note: "Private Notiz",
+		remove: "Aus Favoriten entfernen",
+		save: "Privat speichern",
+		empty: "Noch keine gespeicherten Einträge.",
+		refreshPreview: "Gespeicherte Vorschau aktualisieren",
+		moveFirst: "An den Anfang verschieben",
+		history: "Verlauf",
+		restore: "Wiederherstellen",
+		privacy: "Nur du kannst diese gespeicherten Einträge und Notizen sehen.",
+	},
 	title: "Sammlungen",
 	favorites: "Favoriten",
 	newCollection: "Neue Sammlung",

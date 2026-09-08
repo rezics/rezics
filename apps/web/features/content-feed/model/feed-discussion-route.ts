@@ -18,7 +18,6 @@ export function feedUnitDiscussionHref(
 		case "collection":
 		case "entity":
 		case "poll":
-		case "profile":
 		case "realm":
 		case "video":
 		case "audio":

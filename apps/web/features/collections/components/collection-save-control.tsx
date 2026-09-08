@@ -1,30 +1,29 @@
 "use client";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import {
 	useDeleteApiCollectionsByCollectionIdItemsByTargetId,
-	useDeleteApiCollectionsFavoritesItemsByTargetId,
-	useGetApiUsersMe,
+	useGetApiAccountMe,
 	usePostApiCollections,
 	usePutApiCollectionsByCollectionIdItemsByTargetId,
-	usePutApiCollectionsFavoritesItemsByTargetId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { BookmarkIcon, PlusIcon } from "lucide-react";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useCallback, useDeferredValue, useId, useState, type FormEvent } from "react";
 
-import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, Input } from "@rezics/ui";
 import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
 import { useDraftContentLanguage } from "@/features/content-languages/hooks/use-draft-content-language";
+import { PrivateFavoriteControl } from "@/features/favorites/private-favorite-control";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
+import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, Input } from "@rezics/ui";
 import { invalidateCollections } from "../data/collection-cache";
 import {
 	collectionListItems,
-	type CollectionListItem,
 	useCollectionList,
+	type CollectionListItem,
 } from "../data/collection-list";
 import { CollectionDestinationList } from "./collection-destination-list";
 
@@ -63,25 +62,18 @@ export function CollectionSaveControl({
 	const newCollectionLanguage = useDraftContentLanguage(newCollectionTitle);
 	const open = controlledOpen ?? internalOpen;
 	const setOpen = onOpenChange ?? setInternalOpen;
-	const me = useGetApiUsersMe({}, { query: { enabled: open && Boolean(session) } });
+	const me = useGetApiAccountMe({}, { query: { enabled: open && Boolean(session) } });
 	const collections = useCollectionList({
 		acceptsItemsOnly: true,
 		editableOnly: true,
-		enabled: open && Boolean(me.data?.id),
+		enabled: open && Boolean(me.data?.entity.id),
 		search: deferredDestinationQuery,
 		targetId,
 	});
 	const create = usePostApiCollections();
 	const add = usePutApiCollectionsByCollectionIdItemsByTargetId();
 	const remove = useDeleteApiCollectionsByCollectionIdItemsByTargetId();
-	const addFavorite = usePutApiCollectionsFavoritesItemsByTargetId();
-	const removeFavorite = useDeleteApiCollectionsFavoritesItemsByTargetId();
-	const pending =
-		create.isPending ||
-		add.isPending ||
-		remove.isPending ||
-		addFavorite.isPending ||
-		removeFavorite.isPending;
+	const pending = create.isPending || add.isPending || remove.isPending;
 
 	function requestOpen() {
 		if (!session) openAuthPortal("login");
@@ -92,26 +84,7 @@ export function CollectionSaveControl({
 		setChangingCollectionId(collection.id);
 		try {
 			let latestItemsRevisionId: string;
-			if (collection.purpose === "favorites") {
-				if (collection.containsTarget)
-					latestItemsRevisionId = (
-						await removeFavorite.mutateAsync({
-							path: { targetId },
-							body: {
-								baseItemsRevisionId: collection.latestItemsRevisionId,
-							},
-						})
-					).latestItemsRevisionId;
-				else
-					latestItemsRevisionId = (
-						await addFavorite.mutateAsync({
-							path: { targetId },
-							body: {
-								baseItemsRevisionId: collection.latestItemsRevisionId,
-							},
-						})
-					).latestItemsRevisionId;
-			} else if (collection.containsTarget) {
+			if (collection.containsTarget) {
 				latestItemsRevisionId = (
 					await remove.mutateAsync({
 						path: { collectionId: collection.id, targetId },
@@ -228,12 +201,12 @@ export function CollectionSaveControl({
 							value={destinationQuery}
 						/>
 					</div>
+					{open && session ? <PrivateFavoriteControl targetUnitId={targetId} /> : null}
 					<CollectionDestinationList
 						ariaLabel={t.collections.save.title}
 						changingCollectionId={changingCollectionId}
 						disabled={pending}
 						emptyLabel={listEmptyLabel}
-						favoritesLabel={t.collections.favorites}
 						hasNextPage={collections.hasNextPage}
 						isFetchingNextPage={collections.isFetchingNextPage}
 						items={destinations}
@@ -279,9 +252,7 @@ export function CollectionSaveControl({
 							(collections.isError && !collections.data ? collections.error : null) ??
 							create.error ??
 							add.error ??
-							remove.error ??
-							addFavorite.error ??
-							removeFavorite.error
+							remove.error
 						}
 						fallback={t.ui.retryLater}
 					/>

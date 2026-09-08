@@ -1,39 +1,39 @@
 "use client";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import {
-	getApiUsersMeFollowing,
-	getApiUsersMeFollowingQueryKey,
-	useDeleteApiUsersMeFollowingByUnitId,
-	usePatchApiUsersMeFollowingByUnitId,
-	type GetApiUsersMeFollowingQuery,
-	type GetApiUsersMeFollowingStatus200,
+	getApiAccountMeFollowing,
+	getApiAccountMeFollowingQueryKey,
+	useDeleteApiAccountMeFollowingByUnitId,
+	usePatchApiAccountMeFollowingByUnitId,
+	type GetApiAccountMeFollowingQuery,
+	type GetApiAccountMeFollowingStatus200,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Button,
 	ChoiceSelect,
-	type ChoiceOption,
 	IdentityAvatar,
 	PageHeading,
 	QueryFailure,
 	QueryPending,
+	type ChoiceOption,
 } from "@rezics/ui";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Star, UserMinus } from "lucide-react";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useQueryState } from "nuqs";
 import type { ComponentProps } from "react";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { useTranslation } from "@/i18n/client";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { invalidateFollowingQueries } from "../data/following-cache";
 import {
 	AllFollowingKinds,
 	followingFilterParser,
-	FollowingKinds,
 	followingHref,
+	FollowingKinds,
 	type FollowingFilter,
 } from "../routing/following-route";
 
@@ -54,11 +54,11 @@ function FollowingContent() {
 		localizationLanguages,
 		limit: 30,
 		...(kind === AllFollowingKinds ? {} : { kind }),
-	} satisfies GetApiUsersMeFollowingQuery;
+	} satisfies GetApiAccountMeFollowingQuery;
 	const query = useInfiniteQuery({
-		queryKey: getApiUsersMeFollowingQueryKey({ query: baseQuery }),
+		queryKey: getApiAccountMeFollowingQueryKey({ query: baseQuery }),
 		queryFn: async ({ pageParam, signal }) => {
-			const { data } = await getApiUsersMeFollowing({
+			const { data } = await getApiAccountMeFollowing({
 				query: { ...baseQuery, ...(pageParam ? { cursor: pageParam } : {}) },
 				signal,
 				throwOnError: true,
@@ -69,12 +69,12 @@ function FollowingContent() {
 		getNextPageParam: (page) => page.nextCursor ?? undefined,
 	});
 	const refreshFollowing = (unitId: string) => invalidateFollowingQueries(queryClient, unitId);
-	const update = usePatchApiUsersMeFollowingByUnitId({
+	const update = usePatchApiAccountMeFollowingByUnitId({
 		mutation: {
 			onSuccess: (_data, variables) => refreshFollowing(variables.path.unitId),
 		},
 	});
-	const unfollow = useDeleteApiUsersMeFollowingByUnitId({
+	const unfollow = useDeleteApiAccountMeFollowingByUnitId({
 		mutation: {
 			onSuccess: (_data, variables) => refreshFollowing(variables.path.unitId),
 		},
@@ -182,7 +182,7 @@ function FollowingIdentity({
 	item,
 }: {
 	readonly avatar: ComponentProps<typeof IdentityAvatar>["avatar"];
-	readonly item: GetApiUsersMeFollowingStatus200["items"][number];
+	readonly item: GetApiAccountMeFollowingStatus200["items"][number];
 }) {
 	const { t } = useTranslation(["nav", "ui"]);
 	const title = useChineseContentText(

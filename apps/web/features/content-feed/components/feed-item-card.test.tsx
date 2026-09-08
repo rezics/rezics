@@ -6,7 +6,7 @@ import { create } from "native-i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TranslationProvider } from "@/i18n/client";
-import { FeedPostCard, type FeedPost, FeedUnitCard, type FeedUnit } from "./feed-item-card";
+import { FeedPostCard, FeedUnitCard, type FeedPost, type FeedUnit } from "./feed-item-card";
 
 vi.mock("@/i18n/client", async () => {
 	const { create: createReactI18n } = await import("native-i18n/react/client");
@@ -148,9 +148,9 @@ describe("FeedPostCard", () => {
 					id: "publisher-attribution",
 					role: "publisher",
 					position: "a0",
-					creditedUnit: {
+					creditedEntity: {
 						id: "publisher",
-						kind: "profile",
+						kind: "entity",
 						language: "zh",
 						slugAddress: null,
 						title: "海豚號編輯部",

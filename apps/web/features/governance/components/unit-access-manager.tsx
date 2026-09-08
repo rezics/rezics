@@ -72,7 +72,7 @@ type Permission = AccessSnapshot["permissions"][number];
 type Subject = AccessSubject["subject"];
 type EditableMode = "grant" | "restrict";
 type MatrixValue = `${Permission}:${EditableMode}`;
-type SubjectFilter = "all" | "profile" | "realm";
+type SubjectFilter = "all" | "auth" | "realm";
 type OwnershipCandidate = GetApiGovernanceUnitByUnitIdOwnershipCandidatesStatus200["items"][number];
 const AccessScopeOptions = [
 	{ id: "root", scope: [] },
@@ -85,8 +85,8 @@ type AccessScopeId = (typeof AccessScopeOptions)[number]["id"];
 
 function subjectKey(subject: Subject) {
 	switch (subject.kind) {
-		case "profile":
-			return `profile:${subject.profileId}`;
+		case "auth":
+			return `auth:${subject.authUserId}`;
 		case "realm":
 			return `realm:${subject.realmId}:${subject.relation}`;
 		case "authenticated":
@@ -116,7 +116,7 @@ function displayLabel(
 	target?: { readonly unitId: string; readonly unitKind: string },
 ) {
 	if (subject.subject.kind === "authenticated") return labels.authenticated;
-	if (subject.subject.kind === "profile") return subject.label ?? subjectKey(subject.subject);
+	if (subject.subject.kind === "auth") return subject.label ?? subjectKey(subject.subject);
 	if (
 		target?.unitKind === "realm" &&
 		target.unitId === subject.subject.realmId &&
@@ -338,7 +338,7 @@ function SubjectAccessTable({
 						/>
 					</div>
 					<div className="flex flex-wrap gap-2" aria-label={t.governance.access.filterLabel}>
-						{(["all", "profile", "realm"] as const).map((kind) => (
+						{(["all", "auth", "realm"] as const).map((kind) => (
 							<Button
 								aria-pressed={filter === kind}
 								key={kind}
@@ -371,8 +371,8 @@ function SubjectAccessTable({
 									const subject = subjects[virtualRow.index];
 									if (!subject) return null;
 									const isOwner =
-										subject.subject.kind === "profile" &&
-										snapshot.owner?.profileId === subject.subject.profileId;
+										subject.subject.kind === "auth" &&
+										snapshot.owner?.profileId === subject.subject.authUserId;
 									const label = displayLabel(subject, subjectLabels, snapshot);
 									const isBuiltInAudience =
 										subject.subject.kind === "authenticated" ||
@@ -394,7 +394,7 @@ function SubjectAccessTable({
 										>
 											<span className="flex min-w-0 items-center gap-3" role="cell">
 												<span className="grid size-8 shrink-0 place-items-center rounded-full bg-muted">
-													{subject.subject.kind === "profile" ? (
+													{subject.subject.kind === "auth" ? (
 														<KeyRoundIcon className="size-4" />
 													) : (
 														<UsersRoundIcon className="size-4" />
@@ -797,7 +797,7 @@ function AddSubjectDialog({
 	existing: ReadonlySet<string>;
 }) {
 	const { t } = useTranslation(["governance"]);
-	const [kind, setKind] = useState<"profile" | "realm">("profile");
+	const [kind, setKind] = useState<"auth" | "realm">("auth");
 	const [search, setSearch] = useState("");
 	const deferredSearch = useDeferredValue(search.trim());
 	const query = useGetApiGovernanceUnitByUnitIdAccessCandidates(
@@ -817,7 +817,7 @@ function AddSubjectDialog({
 				/>
 				<DialogBody className="grid gap-4">
 					<div className="flex gap-2">
-						{(["profile", "realm"] as const).map((candidateKind) => (
+						{(["auth", "realm"] as const).map((candidateKind) => (
 							<Button
 								aria-pressed={kind === candidateKind}
 								key={candidateKind}

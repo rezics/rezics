@@ -2,7 +2,7 @@ import type { ContentLanguage } from "@rezics/i18n";
 
 interface PresentationAttribution {
 	readonly role: string;
-	readonly creditedUnit: { readonly title: string | null };
+	readonly creditedEntity: { readonly title: string | null };
 }
 
 interface PresentationSubject {
@@ -34,7 +34,7 @@ function presentationAuthor(
 	unknownAttribution: string,
 ) {
 	const attribution = attributions.find(({ role }) => role === "publisher") ?? attributions[0];
-	return attribution?.creditedUnit.title?.trim() || unknownAttribution;
+	return attribution?.creditedEntity.title?.trim() || unknownAttribution;
 }
 
 export function resolvePostPresentationTitle(

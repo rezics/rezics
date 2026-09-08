@@ -4,6 +4,17 @@ import { esTerminology } from "@rezics/i18n/terminology/es";
 const { forms: metadataTerms } = esTerminology.metadata;
 
 export default {
+	privateFavorites: {
+		note: "Nota privada",
+		remove: "Quitar de favoritos",
+		save: "Guardar en privado",
+		empty: "Aún no hay elementos guardados.",
+		refreshPreview: "Actualizar vista previa guardada",
+		moveFirst: "Mover al principio",
+		history: "Historial",
+		restore: "Restaurar",
+		privacy: "Solo tú puedes ver estos elementos guardados y sus notas.",
+	},
 	title: "Colecciones",
 	favorites: "Favoritos",
 	newCollection: "Nueva colección",

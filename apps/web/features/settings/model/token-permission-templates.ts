@@ -9,14 +9,14 @@ export const ContentAgentPermissions = [
 	"unit:create",
 	"unit:update",
 	"interaction:write",
-	"profile:read",
+	"account:read",
 	"upload:read",
 	"upload:write",
 ] as const satisfies readonly ApiTokenPermission[];
 
 export const ReadOnlyPermissions = [
 	"unit:read",
-	"profile:read",
+	"account:read",
 	"interaction:read",
 	"realm:read",
 	"message:read",

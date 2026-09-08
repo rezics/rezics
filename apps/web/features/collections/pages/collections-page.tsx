@@ -1,9 +1,9 @@
 "use client";
 
-import { useGetApiUsersMe } from "@rezics/openapi-tanstack-query";
-import { Button, PageHeading, QueryFailure, QueryPending, UnitList } from "@rezics/ui";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { studioSectionCreateHref } from "@/features/create/model/studio-section";
+import { useGetApiAccountMe } from "@rezics/openapi-tanstack-query";
+import { Button, PageHeading, QueryFailure, QueryPending, UnitList } from "@rezics/ui";
 
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -12,10 +12,10 @@ import { collectionListItems, useCollectionList } from "../data/collection-list"
 
 export function CollectionsPage() {
 	const session = useHydratedSession();
-	const me = useGetApiUsersMe({}, { query: { enabled: Boolean(session.data) } });
+	const me = useGetApiAccountMe({}, { query: { enabled: Boolean(session.data) } });
 	const query = useCollectionList({
-		editableOnly: Boolean(me.data?.id),
-		enabled: !session.data || Boolean(me.data?.id),
+		editableOnly: Boolean(me.data?.entity.id),
+		enabled: !session.data || Boolean(me.data?.entity.id),
 	});
 	const { t } = useTranslation(["actions", "collections"]);
 	if (session.isPending || (session.data && me.isPending)) return <QueryPending />;
@@ -37,11 +37,7 @@ export function CollectionsPage() {
 			<UnitList
 				error={false}
 				href={(collection) => `/collections/${collection.id}`}
-				items={items.map((collection) =>
-					collection.purpose === "favorites"
-						? { ...collection, title: t.collections.favorites }
-						: collection,
-				)}
+				items={items}
 				pending={false}
 				variant="shelf"
 			/>

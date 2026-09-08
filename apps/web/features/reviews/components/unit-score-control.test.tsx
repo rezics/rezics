@@ -75,7 +75,7 @@ vi.mock("@rezics/openapi-tanstack-query", () => ({
 		error: null,
 		isPending: false,
 	}),
-	useGetApiUsersMePreferences: () => ({
+	useGetApiAccountMePreferences: () => ({
 		data: { scoreVisibility: state.scoreVisibility },
 	}),
 	usePutApiScoresByTargetId: () => ({

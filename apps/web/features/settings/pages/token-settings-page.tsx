@@ -1,22 +1,25 @@
 "use client";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useAuthPortal } from "@/features/auth/auth-portal-context";
 import {
 	getApiApiTokensQueryKey,
-	type GetApiApiTokensStatus200,
 	useDeleteApiApiTokensByTokenId,
+	useDeleteApiApiTokensByTokenIdQuotaOverride,
 	useGetApiApiTokens,
 	usePatchApiApiTokensByTokenId,
 	usePostApiApiTokens,
 	usePutApiApiTokensByTokenIdQuotaOverride,
-	useDeleteApiApiTokensByTokenIdQuotaOverride,
+	type GetApiApiTokensStatus200,
 	type PutApiApiTokensByTokenIdQuotaOverrideBody,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { ExternalLink, KeyRound, Plus, ShieldAlert, Trash2, XIcon } from "lucide-react";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { useAuthPortal } from "@/features/auth/auth-portal-context";
-import { useState, useCallback, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent } from "react";
 
+import { useTranslation } from "@/i18n/client";
+import { hasErrorCode } from "@/i18n/errors";
+import { RequestFailure } from "@/i18n/request-failure";
 import {
 	Alert,
 	AlertDescription,
@@ -57,14 +60,16 @@ import {
 	NativeSelect,
 	NativeSelectOption,
 	PermissionMatrix,
-	type PermissionMatrixLabels,
-	type PermissionMatrixResource,
 	QueryFailure,
 	QueryPending,
+	type PermissionMatrixLabels,
+	type PermissionMatrixResource,
 } from "@rezics/ui";
-import { hasErrorCode } from "@/i18n/errors";
-import { RequestFailure } from "@/i18n/request-failure";
-import { useTranslation } from "@/i18n/client";
+import {
+	ContentAgentPermissions,
+	ReadOnlyPermissions,
+	type ApiTokenPermission,
+} from "../model/token-permission-templates";
 import {
 	getTokenQuotaLimitRanges,
 	parseTokenQuotaLimit,
@@ -74,11 +79,6 @@ import {
 	type TokenQuotaLimitValues,
 	type ValidTokenQuotaLimits,
 } from "../model/token-quota-limits";
-import {
-	ContentAgentPermissions,
-	ReadOnlyPermissions,
-	type ApiTokenPermission,
-} from "../model/token-permission-templates";
 import { SettingsOverviewHref } from "../routing/settings-routes";
 
 type TokenRecord = GetApiApiTokensStatus200["items"][number];
@@ -111,8 +111,8 @@ const PermissionGroups = [
 		id: "profile",
 		category: "identity",
 		actions: [
-			["profile:read", "read"],
-			["profile:update", "update"],
+			["account:read", "read"],
+			["account:update", "update"],
 		],
 	},
 	{
@@ -231,8 +231,8 @@ function PermissionFields({
 								"unit:read": "unitRead",
 								"unit:create": "unitCreate",
 								"unit:update": "unitUpdate",
-								"profile:read": "profileRead",
-								"profile:update": "profileUpdate",
+								"account:read": "profileRead",
+								"account:update": "profileUpdate",
 								"interaction:read": "interactionRead",
 								"interaction:write": "interactionWrite",
 								"realm:read": "realmRead",

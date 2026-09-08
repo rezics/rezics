@@ -2,8 +2,8 @@
 
 import { toContentLanguage } from "@rezics/i18n";
 import {
+	useGetApiAccountMePreferences,
 	useGetApiRealmsByRealmId,
-	useGetApiUsersMePreferences,
 } from "@rezics/openapi-tanstack-query";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 
@@ -18,7 +18,7 @@ export interface ScoreRealmSelection {
 
 export function useDefaultScoreRealm() {
 	const session = useHydratedSession();
-	const preferences = useGetApiUsersMePreferences({
+	const preferences = useGetApiAccountMePreferences({
 		query: { enabled: !session.isPending && Boolean(session.data) },
 	});
 	const realmId = preferences.data?.defaultScoreRealmId ?? OfficialRealmUnitIds.score;

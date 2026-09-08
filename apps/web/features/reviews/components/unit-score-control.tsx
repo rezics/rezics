@@ -2,11 +2,10 @@
 
 import {
 	getApiScoresByTargetIdViewerQueryKey,
+	useGetApiAccountMePreferences,
 	useGetApiScoresByTargetIdViewer,
-	useGetApiUsersMePreferences,
 	usePutApiScoresByTargetId,
 } from "@rezics/openapi-tanstack-query";
-import { useQueryClient } from "@tanstack/react-query";
 import {
 	Button,
 	Dialog,
@@ -21,6 +20,7 @@ import {
 	NativeSelectOption,
 	Rating,
 } from "@rezics/ui";
+import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
 import { useAuthPortal } from "@/features/auth/auth-portal-context";
@@ -31,12 +31,12 @@ import {
 	ResourceVisibilityValues,
 	type ResourceVisibility,
 } from "@/features/privacy/model/resource-visibility";
+import { RealmScoreContextLink } from "@/features/realms/components/realm-score-context-link";
 import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { useTranslation } from "@/i18n/client";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { RealmScoreContextLink } from "@/features/realms/components/realm-score-context-link";
 import { useDefaultScoreRealm } from "../data/default-score-realm";
 import { invalidateReviews } from "../data/review-cache";
 import { apiValueToUnitScore, starValueToUnitScore, type UnitScore } from "../model/score-value";
@@ -58,7 +58,7 @@ export function UnitScoreControl({
 	const { t } = useTranslation(["engagement", "ui"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const defaultScoreRealm = useDefaultScoreRealm();
-	const preferences = useGetApiUsersMePreferences({
+	const preferences = useGetApiAccountMePreferences({
 		query: { enabled: !sessionPending && Boolean(session) },
 	});
 	const viewerScores = useGetApiScoresByTargetIdViewer(

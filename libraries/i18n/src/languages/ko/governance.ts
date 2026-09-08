@@ -34,7 +34,7 @@ export default {
 	accessInvitations: "접근 초대",
 	receivedInvitations: "받은 접근 초대",
 	accessInvitationDescription: "초대가 수락될 때까지 접근이 허용되지 않습니다.",
-	invitedProfile: "초대받은 사람 프로필",
+	invitedAccount: "초대할 계정",
 	invitedBy: "초대자",
 	unitId: `유닛 ${verbatimTerms.id.value}`,
 	scope: "접근 범위",
@@ -149,7 +149,7 @@ export default {
 		filterLabel: "인증 주체 유형 필터",
 		filters: {
 			all: "모두",
-			profile: "프로필",
+			auth: "계정",
 			realm: `${realmTerms.label}들`,
 		},
 		alreadyAdded: "추가됨",
@@ -185,7 +185,7 @@ export default {
 		cancel: "취소",
 		inheritedDescription: "이 권한은 상속된 소스도 가지고 있습니다; 직접 제한이 여전히 우선합니다.",
 		subjectKinds: {
-			profile: "프로필",
+			auth: "계정",
 			realm: realmTerms.label,
 			authenticated: "모든 로그인 사용자",
 		},

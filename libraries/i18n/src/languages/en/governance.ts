@@ -34,7 +34,7 @@ export default {
 	accessInvitations: "Access invitations",
 	receivedInvitations: "Received access invitations",
 	accessInvitationDescription: "No access is granted until the invitation is accepted.",
-	invitedProfile: "Invitee Profile",
+	invitedAccount: "Invitee account",
 	invitedBy: "Invited by",
 	unitId: `Unit ${verbatimTerms.id.value}`,
 	scope: "Access scope",
@@ -151,7 +151,7 @@ export default {
 		filterLabel: "Filter authorization subject types",
 		filters: {
 			all: "All",
-			profile: "Profiles",
+			auth: "Accounts",
 			realm: `${realmTerms.label}s`,
 		},
 		alreadyAdded: "Added",
@@ -188,7 +188,7 @@ export default {
 		inheritedDescription:
 			"This permission also has an inherited source; a direct restriction still takes precedence.",
 		subjectKinds: {
-			profile: "Profile",
+			auth: "Account",
 			realm: realmTerms.label,
 			authenticated: "Every signed-in user",
 		},

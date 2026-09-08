@@ -1,9 +1,8 @@
 "use client";
 
+import type { PortableTextValue } from "@rezics/portable-text";
 import { PortableTextContent } from "@rezics/ui";
 import type { ComponentProps } from "react";
-import type { ContentLanguage } from "@rezics/i18n";
-import type { PortableTextValue } from "@rezics/portable-text";
 
 import {
 	useChinesePortableText,
@@ -17,7 +16,7 @@ export function LocalizedPortableTextContent({
 	value,
 	...props
 }: PortableTextContentProps & {
-	readonly language: ContentLanguage | null | undefined;
+	readonly language: string | null | undefined;
 	readonly value: PortableTextValue;
 }) {
 	const displayedValue = useChinesePortableText(value, language);

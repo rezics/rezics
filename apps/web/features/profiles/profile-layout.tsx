@@ -1,22 +1,21 @@
 "use client";
 
-import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import {
-	getApiUsersByIdQueryKey,
-	type GetApiUsersByIdStatus200,
-	useGetApiUsersById,
-	useGetApiUsersMe,
+	getApiEntitiesByIdProfileQueryKey,
+	useGetApiAccountMe,
+	useGetApiEntitiesByIdProfile,
+	type GetApiEntitiesByIdProfileStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { Banner, Button, cn, IdentityAvatar, QueryFailure, QueryPending } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { CalendarDaysIcon, PencilIcon } from "lucide-react";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 
 import { useHeaderSearchOverride } from "@/features/application-shell/header-search";
-import { FollowButton } from "@/features/following/components/follow-button";
 import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
+import { FollowButton } from "@/features/following/components/follow-button";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -24,7 +23,7 @@ import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { profileHref, type ProfileSection } from "./profile-route";
 
 interface ProfileContextValue {
-	profile: GetApiUsersByIdStatus200;
+	profile: GetApiEntitiesByIdProfileStatus200;
 	isCurrentUser: boolean;
 }
 
@@ -42,11 +41,11 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
 	const localizationLanguages = useLocalizationLanguages();
-	const profile = useGetApiUsersById({
+	const profile = useGetApiEntitiesByIdProfile({
 		path: { id: profileId },
 		query: { localizationLanguages },
 	});
-	const me = useGetApiUsersMe({}, { query: { enabled: Boolean(session) } });
+	const me = useGetApiAccountMe({}, { query: { enabled: Boolean(session) } });
 	useLocalizationFallbackToast({
 		actualLanguage: profile.data?.language ?? null,
 		localizationLanguages,
@@ -71,7 +70,7 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 
 	const user = profile.data;
 	const name = user.name ?? t.ui.unnamed;
-	const isCurrentUser = me.data?.id === user.id;
+	const isCurrentUser = me.data?.entity.id === user.id;
 	const canFollow = Boolean(session && me.data && !isCurrentUser);
 	const contentHref = profileHref(user, "content");
 	const activityHref = profileHref(user, "activity");
@@ -119,10 +118,9 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 									</Button>
 								) : canFollow ? (
 									<FollowButton
-										initialFollowing={user.viewerFollowing}
 										onChanged={() =>
 											queryClient.invalidateQueries({
-												queryKey: getApiUsersByIdQueryKey({
+												queryKey: getApiEntitiesByIdProfileQueryKey({
 													path: { id: user.id },
 												}),
 											})
@@ -138,12 +136,7 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 							<h1 className="font-heading font-black text-2xl tracking-tight text-balance sm:text-4xl">
 								<LocalizedText language={user.language} value={name} />
 							</h1>
-							{user.slugAddress ? (
-								<p className="mt-1 font-mono text-muted-foreground text-sm">
-									{verbatimTerms.profileSlugPrefix.value}
-									{user.slugAddress.slug}
-								</p>
-							) : null}
+
 							{user.summary ? (
 								<p className="mt-2 max-w-2xl text-muted-foreground text-sm leading-6 sm:text-base">
 									<LocalizedText language={user.language} value={user.summary} />

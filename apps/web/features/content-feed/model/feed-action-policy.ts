@@ -48,7 +48,6 @@ function getUnitActionPolicy(kind: PostApiFeedQueryStatus200ItemsUnitKindEnum): 
 		case "tag":
 		case "series":
 			return { discussion: "discussions", primary: "collect" };
-		case "profile":
 		case "video":
 		case "audio":
 		case "release":

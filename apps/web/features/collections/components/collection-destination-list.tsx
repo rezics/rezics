@@ -2,7 +2,7 @@
 
 import { Button, Spinner } from "@rezics/ui";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { BookmarkIcon, CheckIcon, LibraryIcon } from "lucide-react";
+import { CheckIcon, LibraryIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 
 import type { CollectionListItem } from "../data/collection-list";
@@ -14,7 +14,6 @@ export function CollectionDestinationList({
 	changingCollectionId,
 	disabled,
 	emptyLabel,
-	favoritesLabel,
 	hasNextPage,
 	isFetchingNextPage,
 	items,
@@ -30,7 +29,6 @@ export function CollectionDestinationList({
 	readonly changingCollectionId?: string;
 	readonly disabled: boolean;
 	readonly emptyLabel: string;
-	readonly favoritesLabel: string;
 	readonly hasNextPage: boolean;
 	readonly isFetchingNextPage: boolean;
 	readonly items: readonly CollectionListItem[];
@@ -123,10 +121,9 @@ export function CollectionDestinationList({
 					{virtualItems.map((virtualItem) => {
 						const collection = items[virtualItem.index];
 						if (!collection) return null;
-						const isFavorite = collection.purpose === "favorites";
 						const isSelfReference = collection.id === targetId;
 						const isChanging = changingCollectionId === collection.id;
-						const title = isFavorite ? favoritesLabel : (collection.title ?? unnamedLabel);
+						const title = collection.title ?? unnamedLabel;
 						return (
 							<div
 								className="absolute inset-x-0 p-1"
@@ -151,11 +148,7 @@ export function CollectionDestinationList({
 									variant={collection.containsTarget ? "secondary" : "outline"}
 								>
 									<span className="flex min-w-0 items-center gap-2">
-										{isFavorite ? (
-											<BookmarkIcon aria-hidden className="shrink-0" />
-										) : (
-											<LibraryIcon aria-hidden className="shrink-0" />
-										)}
+										<LibraryIcon aria-hidden className="shrink-0" />
 										<span className="truncate">{title}</span>
 									</span>
 									{collection.containsTarget ? (

@@ -1,9 +1,9 @@
 /** @vitest-environment jsdom */
 
+import type { GetApiAccountMePreferencesStatus200 } from "@rezics/openapi-tanstack-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { GetApiUsersMePreferencesStatus200 } from "@rezics/openapi-tanstack-query";
 
 const mocks = vi.hoisted(() => ({
 	getPreferences: vi.fn(),
@@ -13,21 +13,20 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@rezics/openapi-tanstack-query", () => ({
-	getApiUsersMePreferences: mocks.getPreferences,
+	getApiAccountMePreferences: mocks.getPreferences,
 }));
 
 vi.mock("@/lib/use-hydrated-session", () => ({
 	useHydratedSession: () => mocks.session,
 }));
 
+import { presentationPreferencesQueryKey } from "../model/presentation-preferences";
 import {
 	setPresentationPreferencesQueryData,
 	usePresentationPreferences,
 } from "./use-presentation-preferences";
-import { presentationPreferencesQueryKey } from "../model/presentation-preferences";
 
 const response = {
-	profileId: "profile-unit-a",
 	interfaceLocale: "zh-Hant" as const,
 	chineseContentDisplay: "original" as const,
 	defaultLicenses: [],
@@ -43,10 +42,9 @@ const response = {
 	customThemesEnabled: false,
 	contentRatings: ["general" as const],
 	preferredLanguages: ["en" as const],
-} satisfies GetApiUsersMePreferencesStatus200;
+} satisfies GetApiAccountMePreferencesStatus200;
 
 const preferences = {
-	profileId: response.profileId,
 	interfaceLocale: response.interfaceLocale,
 	chineseContentDisplay: response.chineseContentDisplay,
 	filterFeedByPreferredLanguages: response.filterFeedByPreferredLanguages,
@@ -78,7 +76,7 @@ describe("presentation preferences query", () => {
 			preferences,
 		);
 		expect(
-			queryClient.getQueryData(presentationPreferencesQueryKey(preferences.profileId)),
+			queryClient.getQueryData(presentationPreferencesQueryKey("public-entity-id")),
 		).toBeUndefined();
 	});
 
@@ -91,7 +89,7 @@ describe("presentation preferences query", () => {
 			preferences,
 		);
 		expect(
-			queryClient.getQueryData(presentationPreferencesQueryKey(preferences.profileId)),
+			queryClient.getQueryData(presentationPreferencesQueryKey("public-entity-id")),
 		).toBeUndefined();
 	});
 });

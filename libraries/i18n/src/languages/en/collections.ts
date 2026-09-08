@@ -4,6 +4,17 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 const { forms: metadataTerms } = enTerminology.metadata;
 
 export default {
+	privateFavorites: {
+		note: "Private note",
+		remove: "Remove from favorites",
+		save: "Save privately",
+		empty: "No saved items yet.",
+		refreshPreview: "Refresh saved preview",
+		moveFirst: "Move to beginning",
+		history: "History",
+		restore: "Restore",
+		privacy: "Only you can see these saved items and notes.",
+	},
 	title: "Collections",
 	favorites: "Favorites",
 	newCollection: "New collection",

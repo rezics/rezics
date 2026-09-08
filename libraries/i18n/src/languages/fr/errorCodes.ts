@@ -13,6 +13,12 @@ const { forms: zoneTerms } = frTerminology.zone;
 const { forms: entityTerms } = frTerminology.entity;
 
 export default {
+	CatalogReferenceNotFound: "Cet enregistrement est introuvable.",
+	CatalogRevisionConflict: "Cet enregistrement a changé. Actualisez la page et réessayez.",
+	FavoriteNotFound: "Cet élément enregistré est introuvable.",
+	FavoriteRevisionConflict: "Vos éléments enregistrés ont changé. Actualisez la page et réessayez.",
+	ParticipationDenied: "Vous ne pouvez plus agir sous cette identité.",
+
 	MalformedRequestBody: "Le contenu envoyé n’a pas pu être lu.",
 	ValidationError: "Le contenu envoyé n’est pas valide.",
 	InternalError: "Le service est temporairement indisponible. Réessayez plus tard.",

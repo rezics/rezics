@@ -1,5 +1,5 @@
-import type { GetApiPostsByPostIdRepliesStatus200 } from "@rezics/openapi-tanstack-query";
 import { createPortableTextDocument } from "@rezics/block";
+import type { GetApiPostsByPostIdRepliesStatus200 } from "@rezics/openapi-tanstack-query";
 import { describe, expect, it } from "vitest";
 
 import { buildReplyPostTree, flattenReplyPostTree } from "./reply-tree";
@@ -17,10 +17,10 @@ function createReplyPost(id: string, parentPostId: string | null = null): ApiRep
 				id: "019b1234-1234-7000-8000-000000000002",
 				role: "publisher",
 				position: "a0",
-				creditedUnit: {
+				creditedEntity: {
 					avatar: null,
 					id: "019b1234-1234-7000-8000-000000000001",
-					kind: "profile",
+					kind: "entity",
 					language: "en",
 					slugAddress: null,
 					title: "Publisher",

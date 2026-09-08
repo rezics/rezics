@@ -2,15 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import {
 	AllFollowingKinds,
-	followingManagementHref,
 	FollowingFilters,
 	FollowingKinds,
 	followingHref,
+	followingManagementHref,
 } from "./following-route";
 
 describe("following routes", () => {
 	it("maps every navigable Unit kind to its canonical route", () => {
-		expect(followingHref("profile", "profile-id")).toBe("/user/profile-id");
+		expect(followingHref("entity", "profile-id")).toBe("/entities/profile-id");
 		expect(followingHref("zone", "zone-id")).toBe("/zone/zone-id");
 		expect(followingHref("realm", "realm-id")).toBe("/realm/realm-id");
 		expect(followingHref("book", "book-id")).toBe("/units/book/book-id");
@@ -41,7 +41,6 @@ describe("following routes", () => {
 	it("derives filter choices from the generated API contract", () => {
 		expect(FollowingKinds).toEqual([
 			"slug_namespace",
-			"profile",
 			"book",
 			"software",
 			"media",

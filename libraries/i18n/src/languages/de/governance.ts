@@ -35,7 +35,7 @@ export default {
 	accessInvitations: "Zugriffseinladungen",
 	receivedInvitations: "Erhaltene Zugriffseinladungen",
 	accessInvitationDescription: "Zugriff wird erst gewährt, wenn die Einladung angenommen wurde.",
-	invitedProfile: "Eingeladenes Profil",
+	invitedAccount: "Eingeladenes Konto",
 	invitedBy: "Eingeladen von",
 	unitId: `Unit-${verbatimTerms.id.value}`,
 	scope: "Zugriffsbereich",
@@ -151,7 +151,7 @@ export default {
 		filterLabel: "Arten von Berechtigungssubjekten filtern",
 		filters: {
 			all: "Alle",
-			profile: "Profile",
+			auth: "Konten",
 			realm: realmTerms.pluralLabel,
 		},
 		alreadyAdded: "Hinzugefügt",
@@ -188,7 +188,7 @@ export default {
 		inheritedDescription:
 			"Diese Berechtigung hat zusätzlich eine geerbte Quelle; eine direkte Einschränkung hat dennoch Vorrang.",
 		subjectKinds: {
-			profile: "Profil",
+			auth: "Konto",
 			realm: realmTerms.label,
 			authenticated: "Alle angemeldeten Benutzer",
 		},

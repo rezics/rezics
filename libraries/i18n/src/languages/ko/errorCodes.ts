@@ -12,6 +12,12 @@ const { forms: unitSlugTerms } = koTerminology.unitSlug;
 const { forms: zoneTerms } = koTerminology.zone;
 
 export default {
+	CatalogReferenceNotFound: "이 기록을 찾을 수 없습니다.",
+	CatalogRevisionConflict: "이 기록이 변경되었습니다. 새로 고친 후 다시 시도하세요.",
+	FavoriteNotFound: "저장한 항목을 찾을 수 없습니다.",
+	FavoriteRevisionConflict: "저장한 항목이 변경되었습니다. 새로 고친 후 다시 시도하세요.",
+	ParticipationDenied: "이 신원으로 작업할 권한이 없습니다.",
+
 	MalformedRequestBody: "제출된 내용을 읽을 수 없습니다.",
 	ValidationError: "제출된 내용이 유효하지 않습니다.",
 	InternalError: "서비스가 일시적으로 이용 불가합니다. 나중에 다시 시도하세요.",

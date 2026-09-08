@@ -32,8 +32,8 @@ describe("Post presentation title", () => {
 					title: null,
 					postKind: "post",
 					attributions: [
-						{ role: "author", creditedUnit: { title: "Author" } },
-						{ role: "publisher", creditedUnit: { title: "Publisher" } },
+						{ role: "author", creditedEntity: { title: "Author" } },
+						{ role: "publisher", creditedEntity: { title: "Publisher" } },
 					],
 				},
 				messages,

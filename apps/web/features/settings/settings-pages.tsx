@@ -1,34 +1,28 @@
 "use client";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
+import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import {
-	getApiUsersByIdQueryKey,
-	getApiUsersMePreferencesQueryKey,
-	getApiUsersMeQueryKey,
+	getApiAccountMePreferencesQueryKey,
+	useGetApiAccountMePreferences,
 	useGetApiRealmsByRealmId,
-	useGetApiUsersMe,
-	useGetApiUsersMePreferences,
-	usePatchApiUsersMe,
-	usePutApiUsersMePreferences,
-	useAssignCurrentProfileSlug,
-	type GetApiUsersMeStatus200,
-	type PutApiUsersMePreferencesRequestContentRatingsEnum as ContentRating,
+	usePutApiAccountMePreferences,
+	type PutApiAccountMePreferencesRequestContentRatingsEnum as ContentRating,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
-import { useSearchParams } from "next/navigation";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import { useState, type DragEvent, type FormEvent } from "react";
 import { ArrowDown, ArrowUp, GripVertical, Plus, Trash2 } from "lucide-react";
+import { useState, type DragEvent, type FormEvent } from "react";
 
-import { Button } from "@rezics/ui";
-import { Card, CardContent } from "@rezics/ui";
-import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
-import { EntityPicker } from "@rezics/ui";
-import { Input } from "@rezics/ui";
-import { ManagementWorkspaceSectionHeader } from "@rezics/ui";
-import { NativeSelect, NativeSelectOption } from "@rezics/ui";
-import { Textarea } from "@rezics/ui";
-import { QueryFailure, QueryPending } from "@rezics/ui";
+import { resetContentRatingDependentQueries } from "@/features/content-feed/data/content-rating-cache";
+import { FeedQueryKey } from "@/features/content-feed/query";
+import { setPresentationPreferencesQueryData } from "@/features/preferences/data/use-presentation-preferences";
+import { UnitLicensesField } from "@/features/units/components/unit-licenses-field";
+import { readSubmittedLicenses } from "@/features/units/model/unit-licenses";
+import { useSetLocale, useTranslation } from "@/i18n/client";
+import { RequestFailure } from "@/i18n/request-failure";
+import { authClient } from "@/lib/auth-client";
+import { buildLocalizationLanguages, selectLocalization } from "@/lib/localization";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 import {
 	ChineseContentDisplayValues,
 	ContentLanguageValues,
@@ -40,48 +34,23 @@ import {
 	toUiLocale,
 	type ContentLanguage,
 } from "@rezics/i18n";
-import { UnitLicensesField } from "@/features/units/components/unit-licenses-field";
-import { readSubmittedLicenses } from "@/features/units/model/unit-licenses";
 import { OfficialRealmUnitIds } from "@rezics/slug";
-import { SlugAddressForm } from "@/features/slugs/slug-address-form";
 import {
-	LocalizationImageUploadField,
-	type LocalizationImageAssetOption,
-	type LocalizationImageAssetValue,
-} from "@/features/media/components/localization-image-upload-field";
-import {
-	AvatarField,
-	type AvatarFieldOption,
-	type AvatarFieldValue,
-	avatarPresentationToInput,
-} from "@/features/media/components/avatar-field";
-import { LocalizationMediaFallbackNotice } from "@/features/media/components/localization-media-fallback-notice";
-import { useSetLocale, useTranslation } from "@/i18n/client";
-import { RequestFailure } from "@/i18n/request-failure";
-import { authClient } from "@/lib/auth-client";
-import { buildLocalizationLanguages, selectLocalization } from "@/lib/localization";
-import { SettingsOverviewHref } from "./routing/settings-routes";
-import { ProfileAttributionProposalManager } from "@/features/governance/unit-workflows";
-import { resetContentRatingDependentQueries } from "@/features/content-feed/data/content-rating-cache";
-import { FeedQueryKey } from "@/features/content-feed/query";
-import { setPresentationPreferencesQueryData } from "@/features/preferences/data/use-presentation-preferences";
+	Button,
+	Card,
+	CardContent,
+	EntityPicker,
+	Field,
+	FieldGroup,
+	FieldLabel,
+	ManagementWorkspaceSectionHeader,
+	NativeSelect,
+	NativeSelectOption,
+	QueryFailure,
+	QueryPending,
+} from "@rezics/ui";
 import { ContentRatingPreferenceField } from "./components/content-rating-preference-field";
-import { ContentLanguageControl } from "@/features/content-languages/components/content-language-control";
-import { ContentLanguageEditorBoundary } from "@/features/content-languages/components/content-language-editor-boundary";
-import { LocalizedDraftGate } from "@/features/content-languages/components/localized-draft-gate";
-import {
-	useContentLanguageEditor,
-	useLocalizedDraft,
-	type LocalizedDraftCodec,
-} from "@/features/content-languages/hooks/use-content-language-editor";
-import {
-	decodeDraftAvatar,
-	decodeDraftImageAsset,
-	decodeDraftString,
-	isDraftRecord,
-} from "@/features/content-languages/model/localized-draft-codec";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
-import { useHydratedSession } from "@/lib/use-hydrated-session";
+import { SettingsOverviewHref } from "./routing/settings-routes";
 
 function SettingsFrame({
 	title,
@@ -112,221 +81,7 @@ interface PickedRealm {
 	readonly label: string;
 }
 
-type ProfileLocalizationDraft = {
-	readonly name: string;
-	readonly summary: string;
-	readonly avatar: AvatarFieldValue | null;
-	readonly banner: LocalizationImageAssetValue | null;
-};
-
-const ProfileLocalizationDraftCodec: LocalizedDraftCodec<ProfileLocalizationDraft> = {
-	version: 1,
-	decode(value) {
-		if (!isDraftRecord(value)) return;
-		const name = decodeDraftString(value.name);
-		const summary = decodeDraftString(value.summary);
-		const avatar = decodeDraftAvatar(value.avatar);
-		const banner = decodeDraftImageAsset(value.banner);
-		return name === undefined ||
-			summary === undefined ||
-			avatar === undefined ||
-			banner === undefined
-			? undefined
-			: { name, summary, avatar, banner };
-	},
-};
-
-export function ProfileSettings() {
-	const searchParams = useSearchParams();
-	const requestedLanguage = searchParams.get("language");
-	const fallbackLanguages = useLocalizationLanguages();
-	const localizationLanguages =
-		requestedLanguage && isContentLanguage(requestedLanguage)
-			? [
-					requestedLanguage,
-					...fallbackLanguages.filter((language) => language !== requestedLanguage),
-				]
-			: fallbackLanguages;
-	const profile = useGetApiUsersMe({ query: { localizationLanguages } });
-	if (profile.isPending) return <QueryPending />;
-	if (profile.isError || !profile.data)
-		return <QueryFailure error={profile.error} retry={() => void profile.refetch()} />;
-	return (
-		<ContentLanguageEditorBoundary
-			onLanguagesChanged={async () => {
-				await profile.refetch();
-			}}
-			unitId={profile.data.id}
-		>
-			<ProfileSettingsForLanguage current={profile.data} />
-		</ContentLanguageEditorBoundary>
-	);
-}
-
-function ProfileSettingsForLanguage({ current }: { readonly current: GetApiUsersMeStatus200 }) {
-	const { selectedLanguage } = useContentLanguageEditor();
-	return <ProfileSettingsForm current={current} key={`${current.updatedAt}:${selectedLanguage}`} />;
-}
-
-function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
-	const { t } = useTranslation([
-		"errors",
-		"feed",
-		"governance",
-		"locale",
-		"media",
-		"settings",
-		"ui",
-	]);
-	const queryClient = useQueryClient();
-	const { selectedLanguage, selectedLanguageIsPending, languagesChanged } =
-		useContentLanguageEditor();
-	const localization = current.localizations.find((entry) => entry.language === selectedLanguage);
-	const avatarOptions: AvatarFieldOption[] = current.localizations.flatMap((entry) =>
-		entry.language !== selectedLanguage && entry.avatar
-			? [{ ...entry.avatar, label: t.locale.contentLanguages[entry.language] }]
-			: [],
-	);
-	const bannerOptions: LocalizationImageAssetOption[] = current.localizations.flatMap((entry) =>
-		entry.language !== selectedLanguage && entry.banner
-			? [{ ...entry.banner, label: t.locale.contentLanguages[entry.language] }]
-			: [],
-	);
-	const update = usePatchApiUsersMe({
-		mutation: {
-			onSuccess: (profile) =>
-				Promise.all([
-					queryClient.invalidateQueries({ queryKey: getApiUsersMeQueryKey() }),
-					queryClient.invalidateQueries({
-						queryKey: getApiUsersByIdQueryKey({ path: { id: profile.id } }),
-					}),
-				]),
-		},
-	});
-	const assignSlug = useAssignCurrentProfileSlug({
-		mutation: {
-			retry: false,
-			throwOnError: false,
-			onSuccess: () =>
-				Promise.all([
-					queryClient.invalidateQueries({ queryKey: getApiUsersMeQueryKey() }),
-					queryClient.invalidateQueries({
-						queryKey: getApiUsersByIdQueryKey({ path: { id: current.id } }),
-					}),
-				]),
-		},
-	});
-	const [saved, setSaved] = useState(false);
-	const draft = useLocalizedDraft<ProfileLocalizationDraft>({
-		scope: "profile-localization",
-		baseVersion: localization?.updatedAt ?? null,
-		codec: ProfileLocalizationDraftCodec,
-		createInitialValue: () => ({
-			name: selectedLanguageIsPending ? "" : (localization?.title ?? ""),
-			summary: selectedLanguageIsPending ? "" : (localization?.summary ?? ""),
-			avatar: selectedLanguageIsPending ? null : (localization?.avatar ?? null),
-			banner: selectedLanguageIsPending ? null : (localization?.banner ?? null),
-		}),
-	});
-	const { value } = draft;
-	async function submit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		setSaved(false);
-		const name = value.name.trim();
-		if (!name) return;
-		try {
-			await update.mutateAsync({
-				body: {
-					updatedAt: current.updatedAt,
-					language: selectedLanguage,
-					name,
-					summary: value.summary.trim(),
-					avatar: avatarPresentationToInput(value.avatar),
-					bannerAssetId: value.banner?.id ?? null,
-				},
-			});
-			draft.commit();
-			await languagesChanged();
-			setSaved(true);
-		} catch {
-			setSaved(false);
-		}
-	}
-	return (
-		<SettingsFrame action={<ContentLanguageControl />} title={t.settings.profile}>
-			<LocalizationMediaFallbackNotice />
-			<LocalizedDraftGate
-				hydrated={draft.hydrated}
-				onDiscard={draft.discard}
-				serverChanged={draft.serverChanged}
-			>
-				<form onSubmit={submit}>
-					<FieldGroup>
-						<Field>
-							<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-							<AvatarField
-								fallback={avatarOptions[0] ?? null}
-								onChange={(avatar) => draft.setValue((current) => ({ ...current, avatar }))}
-								options={avatarOptions}
-								value={value.avatar}
-							/>
-						</Field>
-						<Field>
-							<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
-							<LocalizationImageUploadField
-								fallback={bannerOptions[0] ?? null}
-								onChange={(banner) => draft.setValue((current) => ({ ...current, banner }))}
-								options={bannerOptions}
-								role="banner"
-								value={value.banner}
-							/>
-						</Field>
-						<Field required>
-							<FieldLabel>{t.ui.displayName}</FieldLabel>
-							<Input
-								maxLength={120}
-								name="name"
-								onChange={(event) => {
-									const name = event.currentTarget.value;
-									draft.setValue((current) => ({ ...current, name }));
-								}}
-								required
-								value={value.name}
-							/>
-						</Field>
-						<Field>
-							<FieldLabel>{t.ui.introduction}</FieldLabel>
-							<Textarea
-								name="summary"
-								onChange={(event) => {
-									const summary = event.currentTarget.value;
-									draft.setValue((current) => ({ ...current, summary }));
-								}}
-								value={value.summary}
-							/>
-						</Field>
-						{saved && <p className="text-success-foreground text-sm">{t.ui.saved}</p>}
-						<Button variant="solid" type="submit" isLoading={update.isPending}>
-							{t.ui.save}
-						</Button>
-					</FieldGroup>
-				</form>
-			</LocalizedDraftGate>
-			<Card>
-				<CardContent className="p-5">
-					<SlugAddressForm
-						error={assignSlug.error}
-						initialSlug={current.slugAddress?.slug}
-						isPending={assignSlug.isPending}
-						mode="assign-once"
-						onSubmit={(slug) => assignSlug.mutateAsync({ body: { slug } })}
-					/>
-				</CardContent>
-			</Card>
-			<ProfileAttributionProposalManager profileId={current.id} />
-		</SettingsFrame>
-	);
-}
+export { ProfileSettings } from "./pages/profile-settings-page";
 
 export function PreferenceSettings() {
 	const { locale, t } = useTranslation([
@@ -341,7 +96,7 @@ export function PreferenceSettings() {
 	]);
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
-	const preferences = useGetApiUsersMePreferences();
+	const preferences = useGetApiAccountMePreferences();
 	const localizationLanguages = buildLocalizationLanguages(
 		preferences.data?.preferredLanguages ?? [],
 		toContentLanguage(locale.target),
@@ -355,7 +110,7 @@ export function PreferenceSettings() {
 		},
 		{ query: { enabled: Boolean(preferences.data) } },
 	);
-	const update = usePutApiUsersMePreferences({
+	const update = usePutApiAccountMePreferences({
 		mutation: {
 			onSuccess: async (data) => {
 				const previousRatings = preferences.data?.contentRatings;
@@ -363,7 +118,7 @@ export function PreferenceSettings() {
 					!previousRatings ||
 					previousRatings.length !== data.contentRatings.length ||
 					previousRatings.some((rating, index) => rating !== data.contentRatings[index]);
-				queryClient.setQueryData(getApiUsersMePreferencesQueryKey(), data);
+				queryClient.setQueryData(getApiAccountMePreferencesQueryKey(), data);
 				if (session) setPresentationPreferencesQueryData(queryClient, session.user.id, data);
 				if (contentRatingsChanged) await resetContentRatingDependentQueries(queryClient);
 				else await queryClient.invalidateQueries({ queryKey: FeedQueryKey });

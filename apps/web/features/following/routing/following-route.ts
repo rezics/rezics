@@ -1,14 +1,13 @@
 import {
-	GetApiUsersMeFollowingStatus200ItemsKindEnum,
-	type GetApiUsersMeFollowingStatus200ItemsKindEnum as FollowingKind,
+	GetApiAccountMeFollowingStatus200ItemsKindEnum,
+	type GetApiAccountMeFollowingStatus200ItemsKindEnum as FollowingKind,
 } from "@rezics/openapi-tanstack-query";
 import { parseAsStringLiteral } from "nuqs/server";
 
-import { profileHref } from "@/features/profiles/profile-route";
-import { realmHref, type AddressableUnit, zoneHref } from "@/features/slugs/unit-route";
+import { realmHref, zoneHref, type AddressableUnit } from "@/features/slugs/unit-route";
 import { urlStateOptions } from "@/lib/search-params";
 
-export const FollowingKinds = Object.values(GetApiUsersMeFollowingStatus200ItemsKindEnum);
+export const FollowingKinds = Object.values(GetApiAccountMeFollowingStatus200ItemsKindEnum);
 export const AllFollowingKinds = "all" as const;
 export const FollowingFilters = [AllFollowingKinds, ...FollowingKinds] as const;
 export type FollowingFilter = (typeof FollowingFilters)[number];
@@ -32,8 +31,6 @@ export function followingHref(
 			return zoneHref(unit);
 		case "realm":
 			return realmHref(unit);
-		case "profile":
-			return profileHref(unit);
 		case "book":
 		case "software":
 		case "media":

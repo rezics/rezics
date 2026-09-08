@@ -13,6 +13,12 @@ const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
+	CatalogReferenceNotFound: "この記録が見つかりません。",
+	CatalogRevisionConflict: "この記録は変更されました。再読み込みしてからお試しください。",
+	FavoriteNotFound: "保存した項目が見つかりません。",
+	FavoriteRevisionConflict: "保存した項目が変更されました。再読み込みしてからお試しください。",
+	ParticipationDenied: "この名義で操作する権限がありません。",
+
 	MalformedRequestBody: "提出されたコンテンツを読み取ることができませんでした。",
 	ValidationError: "提出されたコンテンツは無効です。",
 	InternalError: "サービスは一時的に利用できません。後でもう一度お試しください。",

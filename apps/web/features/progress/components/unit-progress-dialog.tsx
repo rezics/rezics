@@ -1,7 +1,7 @@
 "use client";
 
 import type { Translation } from "@rezics/i18n";
-import { useGetApiUsersMePreferences } from "@rezics/openapi-tanstack-query";
+import { useGetApiAccountMePreferences } from "@rezics/openapi-tanstack-query";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -34,13 +34,13 @@ import {
 import { RotateCcw, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
-import { useTranslation } from "@/i18n/client";
 import {
 	isResourceVisibility,
 	resolveEffectiveResourceVisibility,
 	ResourceVisibilityValues,
 	type ResourceVisibility,
 } from "@/features/privacy/model/resource-visibility";
+import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import {
@@ -84,7 +84,7 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 	const progress = useUnitProgress();
 	const { t } = useTranslation(["engagement", "errors", "ui"]);
 	const session = useHydratedSession();
-	const preferences = useGetApiUsersMePreferences({
+	const preferences = useGetApiAccountMePreferences({
 		query: { enabled: !session.isPending && Boolean(session.data) },
 	});
 	const [sourceRecord] = useState(record);

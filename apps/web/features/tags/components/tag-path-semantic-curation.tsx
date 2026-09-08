@@ -4,7 +4,7 @@ import type { GetApiTagPathsByPathIdStatus200 } from "@rezics/openapi-tanstack-q
 import {
 	useDeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleId,
 	useDeleteApiTagPathsByPathIdSensesBySenseId,
-	useGetApiUsersMe,
+	useGetApiAccountMe,
 	usePostApiTagExpressions,
 	usePostApiTagExpressionsByExpressionIdInferenceRules,
 	usePostApiTagPathsByPathIdSenses,
@@ -40,7 +40,7 @@ export function TagPathSemanticCuration({
 }) {
 	const { t } = useTranslation(["tags", "ui"]);
 	const { data: session } = useHydratedSession();
-	const me = useGetApiUsersMe({}, { query: { enabled: Boolean(session) } });
+	const me = useGetApiAccountMe({}, { query: { enabled: Boolean(session) } });
 	const canCurate = Boolean(me.data?.platformCapabilities.includes("unit.merge.propose"));
 	const conceptMembers = useMemo(
 		() => path.members.filter((member) => member.nodeKind === "concept"),

@@ -1,8 +1,8 @@
 "use client";
 
 import {
-	getApiUsersMePreferences,
-	type GetApiUsersMePreferencesStatus200,
+	getApiAccountMePreferences,
+	type GetApiAccountMePreferencesStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { skipToken, useQuery, type QueryClient } from "@tanstack/react-query";
 
@@ -14,7 +14,7 @@ import {
 } from "../model/presentation-preferences";
 
 function selectPresentationPreferences(
-	preferences: GetApiUsersMePreferencesStatus200,
+	preferences: GetApiAccountMePreferencesStatus200,
 ): PresentationPreferences {
 	const selected = parsePresentationPreferences(preferences);
 	if (!selected) throw new Error("The current-user presentation preferences response is invalid");
@@ -29,7 +29,7 @@ export function usePresentationPreferences() {
 		queryKey: presentationPreferencesQueryKey(accountId),
 		queryFn: accountId
 			? async ({ signal }) => {
-					const { data } = await getApiUsersMePreferences({ signal, throwOnError: true });
+					const { data } = await getApiAccountMePreferences({ signal, throwOnError: true });
 					return selectPresentationPreferences(data);
 				}
 			: skipToken,
@@ -40,7 +40,7 @@ export function usePresentationPreferences() {
 export function setPresentationPreferencesQueryData(
 	queryClient: QueryClient,
 	accountId: string,
-	preferences: GetApiUsersMePreferencesStatus200,
+	preferences: GetApiAccountMePreferencesStatus200,
 ) {
 	const selected = selectPresentationPreferences(preferences);
 	queryClient.setQueryData(presentationPreferencesQueryKey(accountId), selected);

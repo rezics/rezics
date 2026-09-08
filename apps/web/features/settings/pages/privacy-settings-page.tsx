@@ -1,8 +1,9 @@
 "use client";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import {
-	getApiUsersMePreferencesQueryKey,
-	useGetApiUsersMePreferences,
+	getApiAccountMePreferencesQueryKey,
+	useGetApiAccountMePreferences,
 	useUpdateCurrentUserPrivacy,
 } from "@rezics/openapi-tanstack-query";
 import {
@@ -20,7 +21,6 @@ import {
 	QueryPending,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { useState, type FormEvent } from "react";
 
 import {
@@ -56,7 +56,7 @@ function PrivacySettingsForm({
 				body: { scoreVisibility, progressVisibility },
 			});
 			await queryClient.invalidateQueries({
-				queryKey: getApiUsersMePreferencesQueryKey(),
+				queryKey: getApiAccountMePreferencesQueryKey(),
 			});
 			setSaved(true);
 		} catch {
@@ -139,7 +139,7 @@ function PrivacySettingsForm({
 
 export function PrivacySettingsPage() {
 	const { t } = useTranslation(["settings"]);
-	const preferences = useGetApiUsersMePreferences();
+	const preferences = useGetApiAccountMePreferences();
 	if (preferences.isPending) return <QueryPending />;
 	if (preferences.isError || !preferences.data)
 		return <QueryFailure error={preferences.error} retry={() => void preferences.refetch()} />;

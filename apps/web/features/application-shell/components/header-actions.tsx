@@ -1,7 +1,7 @@
 "use client";
 
 import type { UiLocale } from "@rezics/i18n";
-import type { GetApiUsersMeStatus200 } from "@rezics/openapi-tanstack-query";
+import type { GetApiAccountMeStatus200 } from "@rezics/openapi-tanstack-query";
 import { useGetApiNotificationsUnreadCount } from "@rezics/openapi-tanstack-query";
 import { Button, ChoiceSelect, Skeleton } from "@rezics/ui";
 import { Bell, Plus } from "lucide-react";
@@ -12,8 +12,8 @@ import {
 } from "@/features/notifications/model/unread-count";
 import { NotificationsHref } from "@/features/notifications/routing/notification-routes";
 import { useTranslation } from "@/i18n/client";
-import { AppLink } from "./app-link";
 import type { ThemePreference } from "../hooks/use-theme-preference";
+import { AppLink } from "./app-link";
 import { ThemePreferenceMenu } from "./theme-preference-menu";
 import { UserMenu } from "./user-menu";
 
@@ -88,7 +88,7 @@ export function SignedInHeaderActions({
 	theme,
 }: {
 	createLabel: string;
-	profile?: GetApiUsersMeStatus200;
+	profile?: GetApiAccountMeStatus200;
 	fallbackName: string;
 	locale: HeaderLocaleSelection;
 	theme: HeaderThemeSelection;

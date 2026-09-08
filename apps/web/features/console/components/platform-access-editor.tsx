@@ -2,10 +2,10 @@
 
 import type {
 	GetApiPlatformAccessPolicyStatus200,
-	GetApiPlatformAccessProfilesStatus200,
-	PutApiPlatformAccessProfilesByProfileIdStatus200,
+	GetApiPlatformAccessAccountsStatus200,
+	PutApiPlatformAccessAccountsByAuthUserIdStatus200,
 } from "@rezics/openapi-tanstack-query";
-import { usePutApiPlatformAccessProfilesByProfileId } from "@rezics/openapi-tanstack-query";
+import { usePutApiPlatformAccessAccountsByAuthUserId } from "@rezics/openapi-tanstack-query";
 import {
 	AlertDialog,
 	AlertDialogCancel,
@@ -36,7 +36,7 @@ import { useState } from "react";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 
-export type PlatformAccessProfile = GetApiPlatformAccessProfilesStatus200["items"][number];
+export type PlatformAccessProfile = GetApiPlatformAccessAccountsStatus200["items"][number];
 type PlatformCapability = GetApiPlatformAccessPolicyStatus200["capabilities"][number];
 
 interface CapabilityEditorState {
@@ -76,12 +76,12 @@ export function PlatformAccessEditor({
 }: {
 	readonly canManage: boolean;
 	readonly capabilities: readonly PlatformCapability[];
-	readonly onSaved: (profile: PutApiPlatformAccessProfilesByProfileIdStatus200) => void;
+	readonly onSaved: (profile: PutApiPlatformAccessAccountsByAuthUserIdStatus200) => void;
 	readonly profile: PlatformAccessProfile;
 }) {
 	const { locale, t } = useTranslation(["console", "governance", "ui"]);
 	const [state, setState] = useState(() => initialState(capabilities, profile));
-	const replace = usePutApiPlatformAccessProfilesByProfileId();
+	const replace = usePutApiPlatformAccessAccountsByAuthUserId();
 	const enabledCount = [...state.values()].filter(({ enabled }) => enabled).length;
 
 	const update = (
@@ -98,7 +98,7 @@ export function PlatformAccessEditor({
 	const save = () => {
 		replace.mutate(
 			{
-				path: { profileId: profile.profileId },
+				path: { authUserId: profile.authUserId },
 				body: {
 					expectedRevision: profile.revision,
 					grants: capabilities.flatMap((capability) => {
@@ -216,7 +216,7 @@ export function PlatformAccessEditor({
 									<TableCell className="max-w-64 whitespace-normal text-muted-foreground text-xs">
 										{grant
 											? t.console.access.grantProvenance({
-													profileId: grant.grantedByProfileId,
+													profileId: grant.grantedByAuthUserId,
 													date: new Intl.DateTimeFormat(locale.current, {
 														dateStyle: "medium",
 													}).format(new Date(grant.createdAt)),

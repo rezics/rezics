@@ -35,7 +35,7 @@ export default {
 	receivedInvitations: "Invitations d’accès reçues",
 	accessInvitationDescription:
 		"Aucun accès n’est accordé tant que l’invitation n’est pas acceptée.",
-	invitedProfile: "Profil invité",
+	invitedAccount: "Compte invité",
 	invitedBy: "Invitation envoyée par",
 	unitId: `${verbatimTerms.id.value} de la Unit`,
 	scope: "Étendue de l’accès",
@@ -153,7 +153,7 @@ export default {
 		filterLabel: "Filtrer les types de sujets d’autorisation",
 		filters: {
 			all: "Tous",
-			profile: "Profils",
+			auth: "Comptes",
 			realm: realmTerms.pluralLabel,
 		},
 		alreadyAdded: "Ajouté",
@@ -190,7 +190,7 @@ export default {
 		inheritedDescription:
 			"Cette autorisation possède également une source héritée ; une restriction directe reste prioritaire.",
 		subjectKinds: {
-			profile: "Profil",
+			auth: "Compte",
 			realm: realmTerms.label,
 			authenticated: "Tous les utilisateurs connectés",
 		},

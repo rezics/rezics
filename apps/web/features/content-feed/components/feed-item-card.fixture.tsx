@@ -2,17 +2,17 @@
 
 import type { ReactNode } from "react";
 
-import { FeedListItems } from "./feed-list";
-import { FeedPostCard, type FeedPost, FeedUnitCard, type FeedUnit } from "./feed-item-card";
 import { useTranslation } from "@/i18n/client";
+import { FeedPostCard, FeedUnitCard, type FeedPost, type FeedUnit } from "./feed-item-card";
+import { FeedListItems } from "./feed-list";
 
 const attribution = {
 	id: "019f9d16-1000-7000-8000-000000000001",
 	role: "publisher",
 	position: "a0",
-	creditedUnit: {
+	creditedEntity: {
 		id: "019f9d16-1000-7000-8000-000000000002",
-		kind: "profile",
+		kind: "entity",
 		language: "zh",
 		slugAddress: null,
 		title: "海豚號編輯部",

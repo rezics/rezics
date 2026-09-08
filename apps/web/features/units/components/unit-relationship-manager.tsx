@@ -1,8 +1,8 @@
 "use client";
 
 import type {
-	GetApiUnitsByTypeByUnitIdStatus200,
 	GetApiUnitByUnitIdAssociationProposalsStatus200,
+	GetApiUnitsByTypeByUnitIdStatus200,
 } from "@rezics/openapi-tanstack-query";
 import {
 	getApiUnitByUnitIdAssociationProposalsQueryKey,
@@ -18,7 +18,6 @@ import {
 	usePostApiUnitsByTypeByUnitIdSubjectAssociations,
 	usePostApiUnitsByTypeByUnitIdVariantContextPromote,
 } from "@rezics/openapi-tanstack-query";
-import { useQueryClient } from "@tanstack/react-query";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -51,14 +50,15 @@ import {
 	QueryFailure,
 	QueryPending,
 	toast,
-	type EntitySearch,
-	type UnitMentionPresentation,
 	UnitPicker,
 	useEntitySearch,
 	useUnitMentionResolver,
+	type EntitySearch,
+	type UnitMentionPresentation,
 } from "@rezics/ui";
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowUpRight, GitBranch, Plus, Trash2, UserRound, UsersRound } from "lucide-react";
-import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { hasErrorCode } from "@/i18n/errors";
@@ -308,7 +308,7 @@ export function AddCreditDialog({
 		try {
 			await create.mutateAsync({
 				path: { type, unitId },
-				body: { creditedUnitId: entity.id, role: roleValue },
+				body: { creditedEntityId: entity.id, role: roleValue },
 			});
 			await invalidateUnitDetail(queryClient, type, unitId);
 			setEntity(undefined);
@@ -745,7 +745,7 @@ function CreditSection({
 			{unit.attributions.length ? (
 				<div>
 					{unit.attributions.map((attribution) => {
-						const title = attribution.creditedUnit.title ?? t.ui.unnamed;
+						const title = attribution.creditedEntity.title ?? t.ui.unnamed;
 						return (
 							<RelationshipRow
 								actions={
@@ -779,7 +779,7 @@ function CreditSection({
 										title={t.units.relationshipManagement.removeCreditTitle}
 									/>
 								}
-								avatar={attribution.creditedUnit.avatar}
+								avatar={attribution.creditedEntity.avatar}
 								description={
 									<Badge size="sm" variant="outline">
 										{t.units.attributionRoles[attribution.role]}

@@ -17,7 +17,7 @@ vi.mock("@/i18n/client", async () => {
 });
 
 vi.mock("@rezics/openapi-tanstack-query", () => ({
-	useGetApiUsersMe: () => profile,
+	useGetApiAccountMe: () => profile,
 }));
 
 vi.stubGlobal("matchMedia", (query: string) => ({

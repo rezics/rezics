@@ -4,6 +4,17 @@ import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 const { forms: metadataTerms } = zhHansTerminology.metadata;
 
 export default {
+	privateFavorites: {
+		note: "私人备注",
+		remove: "取消收藏",
+		save: "私人收藏",
+		empty: "还没有收藏。",
+		refreshPreview: "更新收藏预览",
+		moveFirst: "移到最前",
+		history: "历史记录",
+		restore: "恢复",
+		privacy: "只有你能看到这些收藏和备注。",
+	},
 	title: "收藏集",
 	favorites: "我的收藏",
 	newCollection: "创建收藏集",

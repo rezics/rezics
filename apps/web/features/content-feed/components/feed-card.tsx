@@ -1,10 +1,21 @@
 "use client";
 
-import { type ComponentProps, type ReactNode, useState } from "react";
 import type { PresentedAvatar } from "@rezics/avatar";
-import type { ContentLanguage } from "@rezics/i18n";
 import { BookOpenIcon, ChevronRightIcon, StarIcon } from "lucide-react";
+import { type ComponentProps, type ReactNode, useState } from "react";
 
+import {
+	LocalizedText,
+	useChineseContentText,
+} from "@/features/content-language-display/chinese-content-display-context";
+import { ProfileInfoCard } from "@/features/profiles/components/profile-info-card";
+import {
+	RealmInfoCard,
+	type RealmInfoCardData,
+} from "@/features/realms/components/realm-info-card";
+import type { UnitScore } from "@/features/reviews/model/score-value";
+import { isKnownAttributionRole } from "@/features/units/attribution-role";
+import { useTranslation } from "@/i18n/client";
 import {
 	Button,
 	CardContent,
@@ -22,24 +33,12 @@ import {
 	ItemTitle,
 	cn,
 } from "@rezics/ui";
-import {
-	RealmInfoCard,
-	type RealmInfoCardData,
-} from "@/features/realms/components/realm-info-card";
-import { ProfileInfoCard } from "@/features/profiles/components/profile-info-card";
-import {
-	LocalizedText,
-	useChineseContentText,
-} from "@/features/content-language-display/chinese-content-display-context";
-import type { UnitScore } from "@/features/reviews/model/score-value";
-import { isKnownAttributionRole } from "@/features/units/attribution-role";
-import { useTranslation } from "@/i18n/client";
 import { useFineHover } from "../hooks/use-fine-hover";
 
 interface FeedContextItem {
 	readonly id: string;
 	readonly name: string;
-	readonly language?: ContentLanguage;
+	readonly language?: string;
 	readonly href?: string;
 	readonly avatar?: PresentedAvatar | null;
 	readonly initials: string;

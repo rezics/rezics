@@ -2,7 +2,7 @@
 
 import {
 	useGetZoneRenderProjection,
-	usePatchApiUsersMePreferences,
+	usePatchApiAccountMePreferences,
 } from "@rezics/openapi-tanstack-query";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { useCallback, useMemo, type ReactNode } from "react";
@@ -18,10 +18,10 @@ import { zoneDockPresentation } from "../model/zone-dock-presentation";
 import { parseZoneRenderProjection, type ZoneRenderProjection } from "../model/zone-render";
 import { zoneHomeSearchHref } from "../model/zone-search-entry";
 import { ZoneBlockProvider, ZoneDocument } from "./block-renderer";
+import { ZoneAppearanceContent } from "./zone-appearance-content";
 import { ZoneDockContent } from "./zone-dock-content";
 import { ZoneHeader } from "./zone-header";
 import { ZonePageAggregateProvider } from "./zone-page-aggregate-provider";
-import { ZoneAppearanceContent } from "./zone-appearance-content";
 import { ZoneSurfaceContainerClassName } from "./zone-surface-layout";
 
 export type ZonePageSelection =
@@ -67,7 +67,7 @@ export function ZoneSurface({
 		[query.data],
 	);
 	const refetchProjection = useCallback(() => void query.refetch(), [query.refetch]);
-	const useDefaultTheme = usePatchApiUsersMePreferences({
+	const useDefaultTheme = usePatchApiAccountMePreferences({
 		mutation: { onSuccess: () => window.location.reload() },
 	});
 	const headerSearch = useMemo(() => {

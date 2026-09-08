@@ -1,5 +1,6 @@
 "use client";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import {
 	getApiPostsByPostIdReplies,
 	getApiPostsByPostIdRepliesQueryKey,
@@ -9,7 +10,6 @@ import {
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDownIcon, MessageCircleIcon, MessagesSquareIcon } from "lucide-react";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import {
 	useCallback,
 	useEffect,
@@ -19,6 +19,26 @@ import {
 	type FormEvent,
 } from "react";
 
+import { SignInButton } from "@/features/auth/auth-portal";
+import { ConnectedFeedEngagementBar } from "@/features/content-feed/components/feed-card-actions";
+import type { FeedActionPolicy } from "@/features/content-feed/model/feed-action-policy";
+import { formatRelativeTime } from "@/features/content-feed/model/format-relative-time";
+import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
+import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
+import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
+import { portableTextDraftContentLanguageSample } from "@/features/content-languages/model/draft-content-language-sample";
+import {
+	PortableTextEditor,
+	preloadPortableTextEditor,
+	spoilerPortableTextEditorCapabilities,
+} from "@/features/editor/portable-text-editor";
+import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
+import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
+import { useTranslation } from "@/i18n/client";
+import { RequestFailure } from "@/i18n/request-failure";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import { readPortableText, writePortableText } from "@/lib/block";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 import {
 	Button,
 	cn,
@@ -28,35 +48,15 @@ import {
 	Spinner,
 	ThreadBranch,
 } from "@rezics/ui";
-import { SignInButton } from "@/features/auth/auth-portal";
-import { DraftContentLanguageField } from "@/features/content-languages/components/draft-content-language-field";
-import { useFormDraftContentLanguage } from "@/features/content-languages/hooks/use-form-draft-content-language";
-import { portableTextDraftContentLanguageSample } from "@/features/content-languages/model/draft-content-language-sample";
-import { ConnectedFeedEngagementBar } from "@/features/content-feed/components/feed-card-actions";
-import type { FeedActionPolicy } from "@/features/content-feed/model/feed-action-policy";
-import {
-	PortableTextEditor,
-	preloadPortableTextEditor,
-	spoilerPortableTextEditorCapabilities,
-} from "@/features/editor/portable-text-editor";
-import { RealmRulesAcknowledgementPrompt } from "@/features/realms/components/realm-rules-acknowledgement-prompt";
-import { useRealmRulesAcknowledgement } from "@/features/realms/hooks/use-realm-rules-acknowledgement";
-import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { useTranslation } from "@/i18n/client";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
-import { RequestFailure } from "@/i18n/request-failure";
-import { readPortableText, writePortableText } from "@/lib/block";
-import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
-import { formatRelativeTime } from "@/features/content-feed/model/format-relative-time";
+import { ReplyAttributionLinks } from "./attribution-list";
+import { PostOverflowMenu } from "./components/post-overflow-menu";
+import { invalidatePostQueries } from "./query";
 import {
 	buildReplyPostTree,
 	flattenReplyPostTree,
 	type ReplyPost,
 	type ReplyPostTreeNode,
 } from "./reply-tree";
-import { PostOverflowMenu } from "./components/post-overflow-menu";
-import { invalidatePostQueries } from "./query";
-import { ReplyAttributionLinks } from "./attribution-list";
 import { postHref } from "./url";
 
 const ReplyEngagementPolicy = {
@@ -280,7 +280,7 @@ function ReplyPostNode({
 	const primaryAttribution =
 		reply.attributions.find((attribution) => attribution.role === "publisher") ??
 		reply.attributions[0];
-	const primaryName = primaryAttribution?.creditedUnit.title ?? t.posts.unknownAttribution;
+	const primaryName = primaryAttribution?.creditedEntity.title ?? t.posts.unknownAttribution;
 	const primaryInitials = Array.from(primaryName.trim())[0]?.toLocaleUpperCase() ?? primaryName;
 	const childTree = useMemo(
 		() =>
@@ -500,7 +500,7 @@ function ReplyPostNode({
 				}
 				marker={
 					<IdentityAvatar
-						avatar={primaryAttribution?.creditedUnit.avatar}
+						avatar={primaryAttribution?.creditedEntity.avatar}
 						className="size-6 text-[0.625rem]"
 						fallback={primaryInitials}
 						size="sm"

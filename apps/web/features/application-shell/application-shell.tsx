@@ -1,29 +1,29 @@
 "use client";
 
+import { FontAwesomeProvider } from "@rezics/avatar";
+import { toStoredUiLocale, toUiLocale, UiLocaleValues } from "@rezics/i18n";
+import {
+	getApiAccountMePreferencesQueryKey,
+	useGetApiAccountMe,
+	useGetApiAccountMeFollowing,
+	usePatchApiAccountMePreferences,
+} from "@rezics/openapi-tanstack-query";
+import { OfficialZoneUnitIds } from "@rezics/slug";
+import { Button, AppShell as SharedAppShell } from "@rezics/ui";
+import { useQueryClient } from "@tanstack/react-query";
 import { Bookmark, Gauge, Globe2, House, PanelsTopLeft } from "lucide-react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
-import { FontAwesomeProvider } from "@rezics/avatar";
-import {
-	getApiUsersMePreferencesQueryKey,
-	useGetApiUsersMe,
-	useGetApiUsersMeFollowing,
-	usePatchApiUsersMePreferences,
-} from "@rezics/openapi-tanstack-query";
-import { useQueryClient } from "@tanstack/react-query";
-import { AppShell as SharedAppShell, Button } from "@rezics/ui";
-import { toStoredUiLocale, toUiLocale, UiLocaleValues } from "@rezics/i18n";
-import { OfficialZoneUnitIds } from "@rezics/slug";
 
-import { followingManagementHref } from "@/features/following/routing/following-route";
 import { ChineseContentDisplayProvider } from "@/features/content-language-display/chinese-content-display-context";
+import { followingManagementHref } from "@/features/following/routing/following-route";
 import {
 	setPresentationPreferencesQueryData,
 	usePresentationPreferences,
 } from "@/features/preferences/data/use-presentation-preferences";
 import { useSetLocale, useTranslation } from "@/i18n/client";
-import { useLocalizationLanguageState } from "@/i18n/use-localization-languages";
 import { RequestFailure } from "@/i18n/request-failure";
+import { useLocalizationLanguageState } from "@/i18n/use-localization-languages";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { AppLink } from "./components/app-link";
 import {
@@ -90,12 +90,12 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 	const theme = useThemePreference();
 	const localeChangedByUser = useRef(false);
 	const queryClient = useQueryClient();
-	const currentProfile = useGetApiUsersMe({}, { query: { enabled: Boolean(session) } });
+	const currentProfile = useGetApiAccountMe({}, { query: { enabled: Boolean(session) } });
 	const preferences = usePresentationPreferences();
 	const localizationState = useLocalizationLanguageState();
 	const localizationLanguages =
 		localizationState.status === "ready" ? localizationState.languages : [];
-	const followedZones = useGetApiUsersMeFollowing(
+	const followedZones = useGetApiAccountMeFollowing(
 		{ query: { kind: "zone", localizationLanguages, limit: 50 } },
 		{
 			query: {
@@ -103,7 +103,7 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 			},
 		},
 	);
-	const followedRealms = useGetApiUsersMeFollowing(
+	const followedRealms = useGetApiAccountMeFollowing(
 		{ query: { kind: "realm", localizationLanguages, limit: 50 } },
 		{
 			query: {
@@ -111,11 +111,11 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 			},
 		},
 	);
-	const updateInterfaceLocale = usePatchApiUsersMePreferences({
+	const updateInterfaceLocale = usePatchApiAccountMePreferences({
 		mutation: {
 			scope: { id: "interface-locale" },
 			onSuccess: (data) => {
-				queryClient.setQueryData(getApiUsersMePreferencesQueryKey(), data);
+				queryClient.setQueryData(getApiAccountMePreferencesQueryKey(), data);
 				if (session) setPresentationPreferencesQueryData(queryClient, session.user.id, data);
 			},
 		},
@@ -188,19 +188,9 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 	useEffect(() => {
 		if (localeChangedByUser.current) return;
 		const storedLocale = preferences.data?.interfaceLocale;
-		if (
-			!storedLocale ||
-			!currentProfile.data?.id ||
-			preferences.data?.profileId !== currentProfile.data.id
-		)
-			return;
+		if (!storedLocale || !session) return;
 		setLocale(toUiLocale(storedLocale));
-	}, [
-		currentProfile.data?.id,
-		preferences.data?.interfaceLocale,
-		preferences.data?.profileId,
-		setLocale,
-	]);
+	}, [session, preferences.data?.interfaceLocale, setLocale]);
 
 	const chineseContentDisplay = preferences.data?.chineseContentDisplay ?? "original";
 

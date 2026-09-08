@@ -180,7 +180,7 @@ function isAttribution(value: unknown): boolean {
 		isUuid(value.id) &&
 		typeof value.role === "string" &&
 		typeof value.position === "string" &&
-		isUnitSummary(value.creditedUnit)
+		isUnitSummary(value.creditedEntity)
 	);
 }
 

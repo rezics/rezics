@@ -2,10 +2,10 @@
 
 import {
 	getApiMessagesConversationsByConversationIdMessages,
+	type GetApiMessagesConversationsByConversationIdMessagesQuery,
 	getApiMessagesConversationsByConversationIdMessagesQueryKey,
 	getApiMessagesConversationsByConversationIdQueryKey,
 	getApiMessagesConversationsQueryKey,
-	type GetApiMessagesConversationsByConversationIdMessagesQuery,
 	useGetApiMessagesConversationsByConversationId,
 	usePostApiMessagesConversationsByConversationIdMessages,
 	usePutApiMessagesConversationsByConversationIdRead,
@@ -25,8 +25,8 @@ import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { RequireSession } from "@/features/auth/require-session";
-import { NotificationsHref } from "@/features/notifications/routing/notification-routes";
 import { normalizeUnreadCount } from "@/features/notifications/model/unread-count";
+import { NotificationsHref } from "@/features/notifications/routing/notification-routes";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { messageAnchorId } from "../routing/message-routes";
@@ -180,7 +180,7 @@ function ConversationContent({ conversationId }: { conversationId: string }) {
 			{orderedMessages.length ? (
 				<ol className="flex flex-col gap-3">
 					{orderedMessages.map((message) => {
-						const fromParticipant = message.senderProfileId === conversation.data.otherProfileId;
+						const fromParticipant = message.senderEntityId === conversation.data.otherEntityId;
 						return (
 							<li
 								className="scroll-mt-24 rounded-xl border border-border-weak px-4 py-3 target:ring-2 target:ring-primary/40"

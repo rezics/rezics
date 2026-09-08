@@ -18,7 +18,7 @@ vi.mock("@/lib/use-hydrated-session", () => ({
 	useHydratedSession: () => mocks.session,
 }));
 vi.mock("@rezics/openapi-tanstack-query", () => ({
-	useGetApiUsersMe: () => mocks.profile,
+	useGetApiAccountMe: () => mocks.profile,
 }));
 vi.mock("./preview-access-notice", () => ({
 	PreviewAccessNotice: () => <div>preview-access-notice</div>,

@@ -34,7 +34,7 @@ export default {
 	accessInvitations: "アクセス招待",
 	receivedInvitations: "受け取ったアクセス招待",
 	accessInvitationDescription: "招待が承諾されるまでアクセスは許可されません。",
-	invitedProfile: "招待先のプロフィール",
+	invitedAccount: "招待するアカウント",
 	invitedBy: "招待者",
 	unitId: `ユニット ${verbatimTerms.id.value}`,
 	scope: "アクセス範囲",
@@ -149,7 +149,7 @@ export default {
 		filterLabel: "認可対象の種類をフィルター",
 		filters: {
 			all: "すべて",
-			profile: "プロフィール",
+			auth: "アカウント",
 			realm: `${realmTerms.label}`,
 		},
 		alreadyAdded: "追加済み",
@@ -185,7 +185,7 @@ export default {
 		cancel: "キャンセル",
 		inheritedDescription: "この権限には継承されたソースもあります; 直接の制限が優先されます。",
 		subjectKinds: {
-			profile: "プロフィール",
+			auth: "アカウント",
 			realm: realmTerms.label,
 			authenticated: "サインインしているすべてのユーザー",
 		},

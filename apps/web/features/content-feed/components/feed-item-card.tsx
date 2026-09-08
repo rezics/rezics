@@ -1,31 +1,39 @@
 "use client";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import {
-	type PostApiFeedQueryStatus200,
 	usePutApiRecommendationsExclusionsByUnitId,
+	type PostApiFeedQueryStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import type { ReactNode } from "react";
 
-import { CardContent, cn, IdentityAvatar } from "@rezics/ui";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
 import { ContentLanguageVersionMenu } from "@/features/content-languages/components/content-language-version-menu";
 import { withContentLanguage } from "@/features/content-languages/routing/content-language-route";
 import { resolvePostPresentationTitle } from "@/features/posts/model/post-presentation-title";
 import { postHref, type PostInteractionContext } from "@/features/posts/url";
-import { apiValueToUnitScore } from "@/features/reviews/model/score-value";
-import { realmHref } from "@/features/slugs/unit-route";
-import { SearchTagMatchReasons } from "@/features/tags/components/search-tag-match-reasons";
-import { publicUnitHref } from "@/features/units/routing/public-unit-route";
-import { UnitCoverFallback } from "@/features/units/components/unit-cover-fallback";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
 import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { useRecommendationTracking } from "@/features/recommendations/tracking";
+import { apiValueToUnitScore } from "@/features/reviews/model/score-value";
+import { realmHref } from "@/features/slugs/unit-route";
+import { SearchTagMatchReasons } from "@/features/tags/components/search-tag-match-reasons";
+import { UnitCoverFallback } from "@/features/units/components/unit-cover-fallback";
+import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
+import { CardContent, cn, IdentityAvatar } from "@rezics/ui";
 import { getFeedActionPolicy } from "../model/feed-action-policy";
 import { feedUnitDiscussionHref } from "../model/feed-discussion-route";
+import {
+	isCurrentFeedSubject,
+	UnscopedFeedDisplayContext,
+	type FeedDisplayContext,
+} from "../model/feed-display-context";
+import { selectFeedRating, type FeedRatingAggregate } from "../model/feed-rating";
+import { parseFeedReaction } from "../model/feed-reaction";
+import { formatRelativeTime } from "../model/format-relative-time";
 import {
 	FeedCard,
 	FeedCardContent,
@@ -39,14 +47,6 @@ import {
 } from "./feed-card";
 import { FeedEngagementBar, FeedOverflowMenu } from "./feed-card-actions";
 import { FeedUnitContent } from "./feed-unit-content";
-import {
-	isCurrentFeedSubject,
-	type FeedDisplayContext,
-	UnscopedFeedDisplayContext,
-} from "../model/feed-display-context";
-import { parseFeedReaction } from "../model/feed-reaction";
-import { selectFeedRating, type FeedRatingAggregate } from "../model/feed-rating";
-import { formatRelativeTime } from "../model/format-relative-time";
 
 export type FeedItem = PostApiFeedQueryStatus200["items"][number];
 export type FeedPost = Extract<FeedItem, { itemType: "post" }>;
@@ -592,20 +592,20 @@ function toFeedAttributionContexts(
 	unknownAttribution: string,
 ): FeedAttributionContext[] {
 	return attributions.map((attribution) => {
-		const creditedUnit = attribution.creditedUnit;
-		const name = creditedUnit.title ?? unknownAttribution;
-		const href = publicUnitHref(creditedUnit.kind, creditedUnit);
+		const creditedEntity = attribution.creditedEntity;
+		const name = creditedEntity.title ?? unknownAttribution;
+		const href = publicUnitHref(creditedEntity.kind, creditedEntity);
 		return {
 			id: attribution.id,
-			kind: creditedUnit.kind,
+			kind: creditedEntity.kind,
 			role: attribution.role,
-			...(creditedUnit.title ? { language: creditedUnit.language } : {}),
+			...(creditedEntity.title ? { language: creditedEntity.language } : {}),
 			...(href ? { href } : {}),
 			initials: contextInitials(name),
 			name,
-			...(creditedUnit.avatar ? { avatar: creditedUnit.avatar } : {}),
-			...(creditedUnit.slugAddress ? { slug: creditedUnit.slugAddress.slug } : {}),
-			...(creditedUnit.summary ? { summary: creditedUnit.summary } : {}),
+			...(creditedEntity.avatar ? { avatar: creditedEntity.avatar } : {}),
+			...(creditedEntity.slugAddress ? { slug: creditedEntity.slugAddress.slug } : {}),
+			...(creditedEntity.summary ? { summary: creditedEntity.summary } : {}),
 		};
 	});
 }

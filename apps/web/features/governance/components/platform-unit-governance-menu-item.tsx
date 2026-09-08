@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetApiUsersMe } from "@rezics/openapi-tanstack-query";
+import { useGetApiAccountMe } from "@rezics/openapi-tanstack-query";
 import { MenuItem, MenuSeparator } from "@rezics/ui";
 import { ShieldCheck } from "lucide-react";
 
@@ -17,7 +17,7 @@ import { useTranslation } from "@/i18n/client";
  */
 export function PlatformUnitGovernanceMenuItem({ unitId }: { readonly unitId: string }) {
 	const { t } = useTranslation(["governance"]);
-	const me = useGetApiUsersMe();
+	const me = useGetApiAccountMe();
 	if (!me.data?.platformCapabilities.includes("unit.governance.read")) return null;
 
 	return (

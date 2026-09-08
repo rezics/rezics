@@ -1,6 +1,6 @@
 "use client";
 
-import { PutApiUsersMePreferencesRequestContentRatingsEnum } from "@rezics/openapi-tanstack-query";
+import { PutApiAccountMePreferencesRequestContentRatingsEnum } from "@rezics/openapi-tanstack-query";
 import {
 	Alert,
 	AlertDescription,
@@ -12,7 +12,7 @@ import {
 	FieldSet,
 } from "@rezics/ui";
 
-const ContentRatings = Object.values(PutApiUsersMePreferencesRequestContentRatingsEnum);
+const ContentRatings = Object.values(PutApiAccountMePreferencesRequestContentRatingsEnum);
 export type ContentRating = (typeof ContentRatings)[number];
 
 function isContentRating(value: string): value is ContentRating {

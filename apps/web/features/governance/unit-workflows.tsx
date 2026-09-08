@@ -1,19 +1,21 @@
 "use client";
 
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import {
-	type GetApiEntitiesByUnitIdStatus200,
-	type GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum,
 	getApiEntitiesByUnitIdQueryKey,
+	type GetApiEntitiesByUnitIdStatus200,
 	getApiGovernanceUnitAccessInvitationsQueryKey,
 	getApiGovernanceUnitByUnitIdAccessInvitationsQueryKey,
+	type GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum,
 	getApiUnitByUnitIdAssociationProposalsQueryKey,
-	useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId,
 	useDeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId,
 	useDeleteApiUnitByUnitIdAssociationProposalsByProposalId,
+	useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId,
 	useGetApiEntitiesByUnitId,
 	useGetApiGovernanceUnitAccessInvitations,
 	useGetApiGovernanceUnitByUnitIdAccess,
 	useGetApiGovernanceUnitByUnitIdAccessInvitations,
+	useGetApiGovernanceUnitByUnitIdAccessCandidates,
 	useGetApiUnitByUnitIdAssociationProposals,
 	usePostApiGovernanceUnitByUnitIdAccessInvitations,
 	usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAccept,
@@ -25,32 +27,11 @@ import {
 	usePostApiUnitsByTypeByUnitIdCreditAttributions,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { type FormEvent, useState } from "react";
 
-import {
-	Badge,
-	cn,
-	EntityPicker,
-	PermissionMatrix,
-	type PermissionMatrixLabels,
-	type PermissionMatrixResource,
-	UnitPicker,
-} from "@rezics/ui";
-import { Button } from "@rezics/ui";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rezics/ui";
-import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
-import { Input } from "@rezics/ui";
-import { NativeSelect, NativeSelectOption } from "@rezics/ui";
-import { PageHeading } from "@rezics/ui";
-import { QueryFailure, QueryPending } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
-import { profileHref } from "@/features/profiles/profile-route";
-import { useTranslation } from "@/i18n/client";
-import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
-import { RequestFailure } from "@/i18n/request-failure";
-import { UnitAccessManager } from "./components/unit-access-manager";
 import { accessInvitationAnchorId } from "@/features/notifications/routing/notification-routes";
+import { profileHref } from "@/features/profiles/profile-route";
 import {
 	type CreditAttributionRole,
 	CreditAttributionRoles,
@@ -58,6 +39,34 @@ import {
 	isSubjectAssociationRole,
 	SubjectAssociationRoles,
 } from "@/features/units/attribution-role";
+import { useTranslation } from "@/i18n/client";
+import { RequestFailure } from "@/i18n/request-failure";
+import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
+import {
+	Badge,
+	Button,
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+	cn,
+	EntityPicker,
+	Field,
+	FieldGroup,
+	FieldLabel,
+	Input,
+	NativeSelect,
+	NativeSelectOption,
+	PageHeading,
+	PermissionMatrix,
+	type PermissionMatrixLabels,
+	type PermissionMatrixResource,
+	QueryFailure,
+	QueryPending,
+	UnitPicker,
+} from "@rezics/ui";
+import { UnitAccessManager } from "./components/unit-access-manager";
 
 type AssociationKind = "credit" | "subject";
 type AssociationSide = "source" | "target";
@@ -106,7 +115,12 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 	const cancel = useDeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId({
 		mutation: { onSuccess: refresh },
 	});
-	const [invitedProfileId, setInvitedProfileId] = useState<string>();
+	const [invitedAuthUserId, setInvitedAuthUserId] = useState<string>();
+	const [candidateSearch, setCandidateSearch] = useState("");
+	const candidates = useGetApiGovernanceUnitByUnitIdAccessCandidates({
+		path: { unitId },
+		query: { kind: "auth", query: candidateSearch.trim() || undefined, limit: 30 },
+	});
 	const [permissions, setPermissions] = useState<
 		ReadonlySet<GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum>
 	>(() => new Set(["unit.read"]));
@@ -120,12 +134,12 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 			.map((segment) => segment.trim())
 			.filter(Boolean);
 		const accessExpiry = String(form.get("accessExpiresAt") ?? "");
-		if (!invitedProfileId || permissions.size === 0) return;
+		if (!invitedAuthUserId || permissions.size === 0) return;
 		try {
 			await create.mutateAsync({
 				path: { unitId },
 				body: {
-					invitedProfileId,
+					invitedAuthUserId,
 					permissions: [...permissions],
 					scope,
 					invitationExpiresAt: toIsoDate(form.get("invitationExpiresAt")),
@@ -133,7 +147,7 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 				},
 			});
 			formElement.reset();
-			setInvitedProfileId(undefined);
+			setInvitedAuthUserId(undefined);
 			setPermissions(new Set(["unit.read"]));
 		} catch {
 			// The typed mutation state supplies the visible API error.
@@ -150,15 +164,35 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 				<form onSubmit={submit}>
 					<FieldGroup>
 						<Field required>
-							<FieldLabel>{t.governance.invitedProfile}</FieldLabel>
-							<UnitPicker
-								ariaLabel={t.governance.invitedProfile}
-								index="users"
-								kinds={["profile"]}
-								onValueChange={setInvitedProfileId}
+							<FieldLabel>{t.governance.invitedAccount}</FieldLabel>
+							<Input
+								aria-label={t.governance.access.searchCandidates}
+								value={candidateSearch}
+								onChange={(event) => setCandidateSearch(event.currentTarget.value)}
 								placeholder={t.ui.pickerPlaceholders.user}
-								value={invitedProfileId}
 							/>
+							<NativeSelect
+								aria-label={t.governance.invitedAccount}
+								value={invitedAuthUserId ?? ""}
+								onChange={(event) => setInvitedAuthUserId(event.currentTarget.value || undefined)}
+							>
+								<NativeSelectOption value="">
+									{t.governance.access.searchCandidates}
+								</NativeSelectOption>
+								{candidates.data?.items.flatMap((candidate) =>
+									candidate.subject.kind === "auth"
+										? [
+												<NativeSelectOption
+													key={candidate.subject.authUserId}
+													value={candidate.subject.authUserId}
+												>
+													{candidate.label ?? candidate.subject.authUserId}
+												</NativeSelectOption>,
+											]
+										: [],
+								)}
+							</NativeSelect>
+							<RequestFailure error={candidates.error} />
 						</Field>
 						<Field>
 							<FieldLabel>{t.governance.scope}</FieldLabel>
@@ -239,9 +273,7 @@ export function AccessInvitationManager({ unitId }: { unitId: string }) {
 						<div className="rounded-lg border p-4 text-sm" key={invitation.id}>
 							<div className="flex flex-wrap items-center justify-between gap-3">
 								<div className="grid gap-1">
-									<Link href={profileHref(invitation.invitedProfileId)}>
-										{invitation.invitedProfileId}
-									</Link>
+									<code>{invitation.invitedAuthUserId}</code>
 									<span className="text-muted-foreground">
 										{invitation.permissions
 											.map((permission) => t.governance.access.permissions[permission])
@@ -329,7 +361,7 @@ export function ReceivedAccessInvitations({
 								{formatDate(invitation.expiresAt, locale.current)}
 							</span>
 							<span className="text-muted-foreground">
-								{t.governance.invitedBy}: {invitation.invitedByProfileId}
+								{t.governance.invitedBy}: {invitation.invitedByAuthUserId}
 							</span>
 						</div>
 						<div className="mt-3 flex flex-wrap items-center gap-2">
@@ -751,7 +783,7 @@ function EntityPublisherManager({ entity }: { entity: GetApiEntitiesByUnitIdStat
 							await add.mutateAsync({
 								path: { type: "entity", unitId: entity.id },
 								body: {
-									creditedUnitId: publisherProfileId,
+									creditedEntityId: publisherProfileId,
 									role: "publisher",
 								},
 							});
@@ -786,17 +818,17 @@ function EntityPublisherManager({ entity }: { entity: GetApiEntitiesByUnitIdStat
 				</form>
 				<div className="grid gap-3">
 					{entity.attributions.map((attribution) => {
-						const label = attribution.creditedUnit.title ?? attribution.creditedUnit.id;
+						const label = attribution.creditedEntity.title ?? attribution.creditedEntity.id;
 						return (
 							<div
 								className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4 text-sm"
 								key={attribution.id}
 							>
-								{attribution.creditedUnit.kind === "profile" ? (
+								{attribution.creditedEntity.kind === "entity" ? (
 									<Link
 										href={profileHref({
-											id: attribution.creditedUnit.id,
-											slugAddress: attribution.creditedUnit.slugAddress,
+											id: attribution.creditedEntity.id,
+											slugAddress: attribution.creditedEntity.slugAddress,
 										})}
 									>
 										{label}
