@@ -123,7 +123,7 @@ async function favoritePosition(
 
 async function capturePreview(tx: DatabaseTransaction, selfEntityId: string, targetUnitId: string) {
 	const [target] = await tx
-		.select({ id: unit.id })
+		.select({ id: unit.id, kind: unit.kind })
 		.from(unit)
 		.where(and(eq(unit.id, targetUnitId), getUnitReadCondition(selfEntityId)))
 		.limit(1)
@@ -140,6 +140,7 @@ async function capturePreview(tx: DatabaseTransaction, selfEntityId: string, tar
 		.orderBy(unitLocalization.position, unitLocalization.language)
 		.limit(1);
 	return FavoritePreviewSchema.parse({
+		kind: target.kind,
 		title: localization?.title ?? null,
 		summary: localization?.summary ?? null,
 		language: localization?.language ?? null,

@@ -19,6 +19,7 @@ describe("private Favorite snapshots", () => {
 			position: "a0",
 			note: "Read chapter 2 again",
 			preview: {
+				kind: "book",
 				title: "Captured title",
 				summary: null,
 				language: "en",
