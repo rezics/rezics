@@ -1,4 +1,3 @@
-import { frTerminology } from "@rezics/i18n/terminology/fr";
 export default {
 	title: "Historique des révisions",
 	description:

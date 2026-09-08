@@ -650,7 +650,7 @@ export default {
 		structure: "Structure",
 		root: "(Root)",
 		structureSummary: insert(
-			`{{books}} books · {{${enTerminology.chapter.forms.plural}}} ${enTerminology.chapter.forms.plural} · {{labels}} labels`,
+			`{{books}} books · {{chapters}} ${enTerminology.chapter.forms.plural} · {{labels}} labels`,
 			{
 				books: Number,
 				chapters: Number,
