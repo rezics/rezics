@@ -10,6 +10,74 @@ const { forms: zoneTerms } = esTerminology.zone;
 const { forms: postTerms } = esTerminology.post;
 
 export default {
+	nativeMerge: {
+		previous: "Anterior",
+		refresh: "Actualizar",
+		plan: "Plan de conciliación de datos",
+		names: "Nombres",
+		identifiers: "Identificadores",
+		bindings: "Vínculos con fuentes",
+		retainedContent:
+			"Los atributos, relaciones y estructuras de la fuente se conservan como pruebas y no sustituyen los valores actuales del destino.",
+		retainedAccess:
+			"Al aprobar este plan, el contenido conservado de la fuente será accesible para quienes puedan leer el destino. En registros privados, esto puede dar acceso a personas que antes no podían leer la fuente.",
+		convergence:
+			"Tras la aprobación, la fuente redirigirá permanentemente al destino. La conciliación puede requerir decisiones adicionales incluso después de activar la redirección.",
+		revision: "Revisión",
+		resolved: "Elementos resueltos",
+		items: "Pruebas de conciliación",
+		itemState: "Estado de las pruebas",
+		noItems: "Ninguna prueba coincide con este filtro.",
+		evidence: "Examinar pruebas",
+		sourceKey: "Clave de origen",
+		semantic: "Atributo o relación",
+		issue: "Código del problema",
+		openEvidence: "Abrir pruebas conservadas",
+		resolve: "Resolver elemento",
+		reason: "Motivo de esta decisión",
+		retryItem: "Reintentar este elemento",
+		retainItem: "Conservar en la fuente",
+		namePlans: {
+			copy_alternates: "Copiar como nombres alternativos",
+			retain_source: "Conservar en la fuente",
+		},
+		identifierPlans: {
+			copy_claims: "Copiar declaraciones de identificadores",
+			retain_source: "Conservar en la fuente",
+		},
+		bindingPlans: {
+			rebind_paused: "Mover vínculos al destino y pausarlos",
+			pause_at_source: "Pausar vínculos en la fuente",
+		},
+		visibility: {
+			public: "Público",
+			unlisted: "No listado",
+			private: "Privado",
+		},
+		itemStates: {
+			pending: "Pendiente",
+			applied: "Copiado",
+			retained: "Conservado en la fuente",
+			action_required: "Decisión necesaria",
+		},
+		kinds: {
+			name: "Nombres",
+			identifier: "Identificadores",
+			semantic: "Atributo o relación",
+			source_binding: "Vínculos con fuentes",
+			structure: "Estructura",
+		},
+		phases: {
+			canonicalize: "Redirigiendo identidad",
+			names: "Nombres",
+			identifiers: "Identificadores",
+			semantics: "Atributo o relación",
+			bindings: "Vínculos con fuentes",
+			structure: "Estructura",
+			settle: "Comprobando decisiones",
+			finalize: "Finalizando",
+		},
+	},
 	title: "Consola de gestión",
 	description:
 		"Las capacidades de la plataforma habilitan cada área de gestión; no representan una identidad de usuario ni una relación laboral.",
@@ -64,6 +132,7 @@ export default {
 		searchPlaceholder: `Buscar por título, ${verbatimTerms.id.value} de Unit o dirección pública`,
 		stateFilter: "Estado del ciclo de vida",
 		states: {
+			action_required: "Decisión necesaria",
 			active: "Units activas",
 			deleted: "Eliminadas provisionalmente",
 			all: "Todas las Units",
@@ -149,33 +218,14 @@ export default {
 		target: "Destino canónico",
 		openUnit: "Abrir Unit",
 		kind: "Tipo de Unit",
-		kinds: {
-			book: units.types.book,
-			software: units.types.software,
-			media: units.types.media,
-			entity: entityTerms.label,
-		},
-		mode: "Vía de decisión",
-		modes: {
-			reviewed: "Requiere revisión",
-			privileged_direct: "Fusión directa privilegiada",
-		},
 		proposer: "Propuesta por",
 		approvalProgress: insert("{{count}} de {{required}} aprobaciones", {
 			count: Number,
 			required: Number,
 		}),
-		graphActions: {
-			none: "No se requiere cambiar el grafo de Variants.",
-			detach_source: "Separar la Variant de origen de su Main actual.",
-			reparent_source_variants_to_target: "Mover las Variants del origen bajo el destino.",
-			reparent_source_variants_to_target_main:
-				"Mover las Variants del origen bajo la Main del destino.",
-			promote_target_from_source:
-				"Promover la Variant de destino y mover debajo las demás Variants del origen.",
-		},
 		operation: "Convergencia de referencias",
 		operationStates: {
+			action_required: "Decisión necesaria",
 			pending: "En cola",
 			processing: "Procesando",
 			retry_wait: "Esperando reintento",
@@ -193,13 +243,9 @@ export default {
 		selectRequestDescription:
 			"Elige una solicitud para consultar su manifiesto inmutable, revisiones y estado de ejecución.",
 		createTitle: "Fusionar una identidad de Unit con otra",
-		createDescription:
-			"La comprobación previa valida el tipo, las revisiones actuales y el grafo de Variants antes de crear la solicitud.",
 		sourceId: `${verbatimTerms.id.value} de la Unit de origen`,
 		targetId: `${verbatimTerms.id.value} de la Unit de destino`,
 		preflight: "Ejecutar comprobación previa",
-		irreversibleWarning:
-			"La aceptación es irreversible. El origen se convierte en una redirección permanente y todas las referencias activas convergen en el destino.",
 		internalNote: "Nota interna (opcional)",
 		notePlaceholder:
 			"Registra las pruebas de duplicidad, las fuentes verificadas y por qué este destino es canónico.",

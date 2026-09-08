@@ -10,6 +10,74 @@ const { forms: zoneTerms } = deTerminology.zone;
 const { forms: postTerms } = deTerminology.post;
 
 export default {
+	nativeMerge: {
+		previous: "Zurück",
+		refresh: "Aktualisieren",
+		plan: "Plan zur Datenabstimmung",
+		names: "Namen",
+		identifiers: "Kennungen",
+		bindings: "Quellenverknüpfungen",
+		retainedContent:
+			"Attribute, Beziehungen und Struktur der Quelle bleiben als Belege erhalten. Sie ersetzen nicht die aktuellen Werte des Ziels.",
+		retainedAccess:
+			"Mit der Genehmigung werden erhaltene Quellinhalte für alle Personen lesbar, die das Ziel lesen dürfen. Bei privaten Einträgen können dadurch Personen Zugriff erhalten, die die Quelle zuvor nicht lesen durften.",
+		convergence:
+			"Nach der Genehmigung verweist die Quelle dauerhaft auf das Ziel. Auch nach Aktivierung der Weiterleitung können weitere Entscheidungen zur Datenabstimmung nötig sein.",
+		revision: "Revision",
+		resolved: "Erledigte Einträge",
+		items: "Belege zur Datenabstimmung",
+		itemState: "Belegstatus",
+		noItems: "Keine Belege entsprechen diesem Filter.",
+		evidence: "Belege prüfen",
+		sourceKey: "Quellschlüssel",
+		semantic: "Attribut oder Beziehung",
+		issue: "Problemcode",
+		openEvidence: "Erhaltene Belege öffnen",
+		resolve: "Eintrag klären",
+		reason: "Begründung dieser Entscheidung",
+		retryItem: "Diesen Eintrag erneut versuchen",
+		retainItem: "In der Quelle behalten",
+		namePlans: {
+			copy_alternates: "Als alternative Namen kopieren",
+			retain_source: "In der Quelle behalten",
+		},
+		identifierPlans: {
+			copy_claims: "Kennungsangaben kopieren",
+			retain_source: "In der Quelle behalten",
+		},
+		bindingPlans: {
+			rebind_paused: "Verknüpfungen zum Ziel verschieben und pausieren",
+			pause_at_source: "Verknüpfungen an der Quelle pausieren",
+		},
+		visibility: {
+			public: "Öffentlich",
+			unlisted: "Nicht gelistet",
+			private: "Privat",
+		},
+		itemStates: {
+			pending: "Ausstehend",
+			applied: "Kopiert",
+			retained: "In der Quelle behalten",
+			action_required: "Entscheidung erforderlich",
+		},
+		kinds: {
+			name: "Namen",
+			identifier: "Kennungen",
+			semantic: "Attribut oder Beziehung",
+			source_binding: "Quellenverknüpfungen",
+			structure: "Struktur",
+		},
+		phases: {
+			canonicalize: "Identität weiterleiten",
+			names: "Namen",
+			identifiers: "Kennungen",
+			semantics: "Attribut oder Beziehung",
+			bindings: "Quellenverknüpfungen",
+			structure: "Struktur",
+			settle: "Entscheidungen prüfen",
+			finalize: "Abschließen",
+		},
+	},
 	title: "Verwaltungskonsole",
 	description:
 		"Plattformberechtigungen schalten die einzelnen Verwaltungsbereiche frei; sie stellen weder eine Benutzeridentität noch ein Beschäftigungsverhältnis dar.",
@@ -62,6 +130,7 @@ export default {
 		searchPlaceholder: `Nach Titel, Unit-${verbatimTerms.id.value} oder öffentlicher Adresse suchen`,
 		stateFilter: "Lebenszyklusstatus",
 		states: {
+			action_required: "Entscheidung erforderlich",
 			active: "Aktive Units",
 			deleted: "Vorläufig gelöscht",
 			all: "Alle Units",
@@ -147,33 +216,14 @@ export default {
 		target: "Kanonisches Ziel",
 		openUnit: "Unit öffnen",
 		kind: "Unit-Art",
-		kinds: {
-			book: units.types.book,
-			software: units.types.software,
-			media: units.types.media,
-			entity: entityTerms.label,
-		},
-		mode: "Entscheidungsweg",
-		modes: {
-			reviewed: "Prüfung erforderlich",
-			privileged_direct: "Direkte privilegierte Zusammenführung",
-		},
 		proposer: "Vorgeschlagen von",
 		approvalProgress: insert("{{count}} von {{required}} Zustimmungen", {
 			count: Number,
 			required: Number,
 		}),
-		graphActions: {
-			none: "Keine Änderung am Variant-Graphen erforderlich.",
-			detach_source: "Quell-Variant von seiner aktuellen Main-Unit trennen.",
-			reparent_source_variants_to_target: "Variants der Quelle dem Ziel unterordnen.",
-			reparent_source_variants_to_target_main:
-				"Variants der Quelle der Main-Unit des Ziels unterordnen.",
-			promote_target_from_source:
-				"Ziel-Variant hochstufen und die übrigen Quell-Variants darunter verschieben.",
-		},
 		operation: "Konvergenz der Referenzen",
 		operationStates: {
+			action_required: "Entscheidung erforderlich",
 			pending: "Eingereiht",
 			processing: "In Bearbeitung",
 			retry_wait: "Wartet auf Wiederholung",
@@ -191,13 +241,9 @@ export default {
 		selectRequestDescription:
 			"Wähle einen Antrag aus, um sein unveränderliches Manifest, die Prüfungen und den Ausführungsstatus einzusehen.",
 		createTitle: "Eine Unit-Identität mit einer anderen zusammenführen",
-		createDescription:
-			"Die Vorprüfung validiert Art, aktuelle Revisionen und Variant-Graph, bevor ein Antrag erstellt wird.",
 		sourceId: `Quell-Unit-${verbatimTerms.id.value}`,
 		targetId: `Ziel-Unit-${verbatimTerms.id.value}`,
 		preflight: "Vorprüfung ausführen",
-		irreversibleWarning:
-			"Die Annahme ist unumkehrbar. Die Quelle wird zu einer dauerhaften Weiterleitung und alle aktiven Referenzen werden auf das Ziel umgestellt.",
 		internalNote: "Interne Notiz (optional)",
 		notePlaceholder:
 			"Belege für das Duplikat, Prüfquellen und die Wahl des kanonischen Ziels festhalten.",

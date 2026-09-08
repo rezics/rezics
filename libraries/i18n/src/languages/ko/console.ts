@@ -10,6 +10,74 @@ const { forms: zoneTerms } = koTerminology.zone;
 const { forms: postTerms } = koTerminology.post;
 
 export default {
+	nativeMerge: {
+		previous: "이전",
+		refresh: "새로 고침",
+		plan: "데이터 처리 계획",
+		names: "이름",
+		identifiers: "식별자",
+		bindings: "출처 연결",
+		retainedContent:
+			"출처의 속성, 관계, 구조는 근거로 보존되며 대상의 현재 값을 대체하지 않습니다.",
+		retainedAccess:
+			"이 계획을 승인하면 대상을 읽을 수 있는 사람은 보존된 출처 내용도 읽을 수 있습니다. 비공개 기록의 경우 이전에 출처를 읽을 수 없었던 사람에게 접근 권한이 생길 수 있습니다.",
+		convergence:
+			"승인 후 출처는 대상으로 영구 연결됩니다. 연결이 적용된 뒤에도 데이터 처리에 대한 개별 결정이 필요할 수 있습니다.",
+		revision: "개정",
+		resolved: "해결한 항목",
+		items: "처리 근거",
+		itemState: "근거 상태",
+		noItems: "이 조건에 맞는 근거가 없습니다.",
+		evidence: "근거 확인",
+		sourceKey: "출처 키",
+		semantic: "속성 또는 관계",
+		issue: "문제 코드",
+		openEvidence: "보존된 근거 열기",
+		resolve: "항목 해결",
+		reason: "결정 이유",
+		retryItem: "이 항목 다시 시도",
+		retainItem: "출처에 보존",
+		namePlans: {
+			copy_alternates: "다른 이름으로 복사",
+			retain_source: "출처에 보존",
+		},
+		identifierPlans: {
+			copy_claims: "식별자 주장 복사",
+			retain_source: "출처에 보존",
+		},
+		bindingPlans: {
+			rebind_paused: "대상으로 연결을 옮기고 일시 중지",
+			pause_at_source: "출처에서 연결 일시 중지",
+		},
+		visibility: {
+			public: "공개",
+			unlisted: "목록에서 숨김",
+			private: "비공개",
+		},
+		itemStates: {
+			pending: "대기 중",
+			applied: "복사됨",
+			retained: "출처에 보존됨",
+			action_required: "결정 필요",
+		},
+		kinds: {
+			name: "이름",
+			identifier: "식별자",
+			semantic: "속성 또는 관계",
+			source_binding: "출처 연결",
+			structure: "구조",
+		},
+		phases: {
+			canonicalize: "식별 대상 연결 중",
+			names: "이름",
+			identifiers: "식별자",
+			semantics: "속성 또는 관계",
+			bindings: "출처 연결",
+			structure: "구조",
+			settle: "결정 확인 중",
+			finalize: "완료 처리 중",
+		},
+	},
 	title: "관리 콘솔",
 	description:
 		"플랫폼 기능은 각 관리 작업을 활성화합니다. 이는 사용자 신원이나 고용 관계를 나타내지 않습니다.",
@@ -60,6 +128,7 @@ export default {
 		searchPlaceholder: `제목, 유닛 ${verbatimTerms.id.value} 또는 공개 주소로 검색`,
 		stateFilter: "수명 주기 상태",
 		states: {
+			action_required: "결정 필요",
 			active: "활성 유닛",
 			deleted: "소프트 삭제됨",
 			all: "모든 유닛",
@@ -142,35 +211,6 @@ export default {
 		target: "정식 대상",
 		openUnit: "유닛 열기",
 		kind: "유닛 종류",
-		kinds: {
-			book: units.types.book,
-			software: units.types.software,
-			media: units.types.media,
-			entity: entityTerms.label,
-		},
-		mode: "결정 경로",
-		modes: { reviewed: "검토 필요", privileged_direct: "고권한 직접 병합" },
-		proposer: "제안자",
-		approvalProgress: insert("승인 {{required}}건 중 {{count}}건", {
-			count: Number,
-			required: Number,
-		}),
-		graphActions: {
-			none: "변형 관계도 변경이 필요하지 않습니다.",
-			detach_source: "원본 변형본을 현재 기준본에서 분리합니다.",
-			reparent_source_variants_to_target: "원본의 변형본을 대상 아래로 이동합니다.",
-			reparent_source_variants_to_target_main: "원본의 변형본을 대상의 기준본 아래로 이동합니다.",
-			promote_target_from_source:
-				"대상 변형본을 기준본으로 승격하고 원본의 다른 변형본을 그 아래로 이동합니다.",
-		},
-		operation: "참조 수렴",
-		operationStates: {
-			pending: "대기열에 등록됨",
-			processing: "처리 중",
-			retry_wait: "재시도 대기",
-			completed: "완료됨",
-			failed: "수동 재시도 필요",
-		},
 		processedRows: insert("참조 {{count}}건 처리됨", { count: Number }),
 		reviews: "검토 기록",
 		decisions: { approve: "승인", reject: "거부" },
@@ -182,12 +222,9 @@ export default {
 		selectRequestDescription:
 			"요청을 선택하여 변경 불가능한 병합 명세, 검토 기록, 실행 상태를 확인합니다.",
 		createTitle: "한 유닛 식별자를 다른 식별자로 병합",
-		createDescription: "요청을 만들기 전에 종류, 현재 리비전, 변형 관계도를 사전 검사합니다.",
 		sourceId: `원본 유닛 ${verbatimTerms.id.value}`,
 		targetId: `대상 유닛 ${verbatimTerms.id.value}`,
 		preflight: "사전 검사 실행",
-		irreversibleWarning:
-			"수락 후에는 되돌릴 수 없습니다. 원본은 영구 리디렉션이 되며 모든 활성 참조가 대상으로 수렴합니다.",
 		internalNote: "내부 메모(선택 사항)",
 		notePlaceholder: "중복 근거, 확인한 출처, 이 대상을 정식 항목으로 선택한 이유를 기록하세요.",
 		confirmSource: `원본 유닛 ${verbatimTerms.id.value} 다시 입력`,

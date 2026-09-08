@@ -10,6 +10,74 @@ const { forms: zoneTerms } = enTerminology.zone;
 const { forms: postTerms } = enTerminology.post;
 
 export default {
+	nativeMerge: {
+		previous: "Previous",
+		refresh: "Refresh",
+		plan: "Data reconciliation plan",
+		names: "Names",
+		identifiers: "Identifiers",
+		bindings: "Source bindings",
+		retainedContent:
+			"Source attributes, relations, and structure remain available as retained evidence; they do not replace the target’s current values.",
+		retainedAccess:
+			"Approving this plan makes retained source content readable to anyone who can read the target. For private records, this can grant access to people who could not read the source before.",
+		convergence:
+			"Acceptance permanently redirects the source to the target. Reconciliation can still require explicit decisions after the redirect is active.",
+		revision: "Revision",
+		resolved: "Items resolved",
+		items: "Reconciliation evidence",
+		itemState: "Evidence state",
+		noItems: "No evidence matches this filter.",
+		evidence: "Inspect evidence",
+		sourceKey: "Source key",
+		semantic: "Attribute or relation",
+		issue: "Issue code",
+		openEvidence: "Open retained evidence",
+		resolve: "Resolve item",
+		reason: "Reason for this decision",
+		retryItem: "Retry this item",
+		retainItem: "Keep at source",
+		namePlans: {
+			copy_alternates: "Copy as alternate names",
+			retain_source: "Keep names at source",
+		},
+		identifierPlans: {
+			copy_claims: "Copy identifier claims",
+			retain_source: "Keep identifiers at source",
+		},
+		bindingPlans: {
+			rebind_paused: "Move bindings to target and pause",
+			pause_at_source: "Pause bindings at source",
+		},
+		visibility: {
+			public: "Public",
+			unlisted: "Unlisted",
+			private: "Private",
+		},
+		itemStates: {
+			pending: "Pending",
+			applied: "Copied",
+			retained: "Retained at source",
+			action_required: "Decision required",
+		},
+		kinds: {
+			name: "Name",
+			identifier: "Identifier",
+			semantic: "Attribute or relation",
+			source_binding: "Source binding",
+			structure: "Structure",
+		},
+		phases: {
+			canonicalize: "Redirecting identity",
+			names: "Names",
+			identifiers: "Identifiers",
+			semantics: "Attributes and relations",
+			bindings: "Source bindings",
+			structure: "Structure",
+			settle: "Checking decisions",
+			finalize: "Completing",
+		},
+	},
 	title: "Management console",
 	description:
 		"Platform capabilities unlock each management area; this does not represent a user identity or employment relationship.",
@@ -63,6 +131,7 @@ export default {
 		searchPlaceholder: `Search by title, Unit ${verbatimTerms.id.value}, or public address`,
 		stateFilter: "Lifecycle state",
 		states: {
+			action_required: "Decision required",
 			active: "Active Units",
 			deleted: "Soft-deleted",
 			all: "All Units",
@@ -148,32 +217,14 @@ export default {
 		target: "Canonical target",
 		openUnit: "Open Unit",
 		kind: "Unit kind",
-		kinds: {
-			book: units.types.book,
-			software: units.types.software,
-			media: units.types.media,
-			entity: entityTerms.label,
-		},
-		mode: "Decision path",
-		modes: {
-			reviewed: "Review required",
-			privileged_direct: "Administrative direct merge",
-		},
 		proposer: "Proposed by",
 		approvalProgress: insert("{{count}} of {{required}} approvals", {
 			count: Number,
 			required: Number,
 		}),
-		graphActions: {
-			none: "No Variant graph change is required.",
-			detach_source: "Detach the source Variant from its current Main.",
-			reparent_source_variants_to_target: "Move source Variants under the target.",
-			reparent_source_variants_to_target_main: "Move source Variants under the target’s Main.",
-			promote_target_from_source:
-				"Promote the target Variant and move the source’s other Variants under it.",
-		},
 		operation: "Reference convergence",
 		operationStates: {
+			action_required: "Decision required",
 			pending: "Queued",
 			processing: "Processing",
 			retry_wait: "Waiting to retry",
@@ -191,13 +242,9 @@ export default {
 		selectRequestDescription:
 			"Choose a request to inspect its immutable manifest, reviews, and execution state.",
 		createTitle: "Merge one Unit identity into another",
-		createDescription:
-			"Preflight validates kind, current revisions, and the Variant graph before any request is created.",
 		sourceId: `Source Unit ${verbatimTerms.id.value}`,
 		targetId: `Target Unit ${verbatimTerms.id.value}`,
 		preflight: "Run preflight",
-		irreversibleWarning:
-			"Acceptance is irreversible. The source becomes a permanent redirect and all live references converge on the target.",
 		internalNote: "Internal note (optional)",
 		notePlaceholder:
 			"Record duplicate evidence, verification sources, and why this target is canonical.",

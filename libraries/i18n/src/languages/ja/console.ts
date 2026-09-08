@@ -10,6 +10,74 @@ const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: postTerms } = jaTerminology.post;
 
 export default {
+	nativeMerge: {
+		previous: "前へ",
+		refresh: "更新",
+		plan: "データの統合方針",
+		names: "名前",
+		identifiers: "識別子",
+		bindings: "出典との連携",
+		retainedContent:
+			"出典の属性・関係・構造は根拠として保持され、統合先の現在の値を置き換えません。",
+		retainedAccess:
+			"この方針を承認すると、統合先を閲覧できる人は保持された出典の内容も閲覧できます。非公開の記録では、これまで出典を閲覧できなかった人にも閲覧権限が及ぶ場合があります。",
+		convergence:
+			"承認後、出典は統合先へ恒久的に転送されます。転送が有効になった後も、データの処理について個別の判断が必要な場合があります。",
+		revision: "改訂",
+		resolved: "解決済み項目",
+		items: "統合の根拠",
+		itemState: "根拠の状態",
+		noItems: "この条件に一致する根拠はありません。",
+		evidence: "根拠を確認",
+		sourceKey: "出典キー",
+		semantic: "属性または関係",
+		issue: "問題コード",
+		openEvidence: "保持された根拠を開く",
+		resolve: "項目を解決",
+		reason: "判断の理由",
+		retryItem: "この項目を再試行",
+		retainItem: "出典に保持",
+		namePlans: {
+			copy_alternates: "別名としてコピー",
+			retain_source: "出典に保持",
+		},
+		identifierPlans: {
+			copy_claims: "識別子の主張をコピー",
+			retain_source: "出典に保持",
+		},
+		bindingPlans: {
+			rebind_paused: "連携を統合先に移して一時停止",
+			pause_at_source: "出典側で連携を一時停止",
+		},
+		visibility: {
+			public: "公開",
+			unlisted: "一覧に非表示",
+			private: "非公開",
+		},
+		itemStates: {
+			pending: "処理待ち",
+			applied: "コピー済み",
+			retained: "出典に保持",
+			action_required: "判断が必要",
+		},
+		kinds: {
+			name: "名前",
+			identifier: "識別子",
+			semantic: "属性または関係",
+			source_binding: "出典との連携",
+			structure: "構造",
+		},
+		phases: {
+			canonicalize: "転送を設定中",
+			names: "名前",
+			identifiers: "識別子",
+			semantics: "属性または関係",
+			bindings: "出典との連携",
+			structure: "構造",
+			settle: "判断を確認中",
+			finalize: "完了処理中",
+		},
+	},
 	title: "管理コンソール",
 	description:
 		"プラットフォームの機能は各管理分野を解放します; これはユーザーの身元や雇用関係を示すものではありません。",
@@ -62,6 +130,7 @@ export default {
 		searchPlaceholder: `タイトル、ユニット ${verbatimTerms.id.value}、公開アドレスで検索`,
 		stateFilter: "ライフサイクル状態",
 		states: {
+			action_required: "判断が必要",
 			active: "有効なユニット",
 			deleted: "論理削除済み",
 			all: "すべてのユニット",
@@ -145,35 +214,6 @@ export default {
 		target: "正規の統合先",
 		openUnit: "ユニットを開く",
 		kind: "ユニット種別",
-		kinds: {
-			book: units.types.book,
-			software: units.types.software,
-			media: units.types.media,
-			entity: entityTerms.label,
-		},
-		mode: "決定経路",
-		modes: { reviewed: "審査が必要", privileged_direct: "特権による直接統合" },
-		proposer: "提案者",
-		approvalProgress: insert("{{required}} 件中 {{count}} 件の承認", {
-			count: Number,
-			required: Number,
-		}),
-		graphActions: {
-			none: "派生関係図の変更は不要です。",
-			detach_source: "統合元の派生版を現在の基準版から切り離します。",
-			reparent_source_variants_to_target: "統合元の派生版を統合先の配下へ移します。",
-			reparent_source_variants_to_target_main: "統合元の派生版を統合先の基準版配下へ移します。",
-			promote_target_from_source:
-				"統合先の派生版を基準版に昇格し、統合元のほかの派生版をその配下へ移します。",
-		},
-		operation: "参照の収束",
-		operationStates: {
-			pending: "キュー登録済み",
-			processing: "処理中",
-			retry_wait: "再試行待ち",
-			completed: "完了",
-			failed: "手動での再試行が必要",
-		},
 		processedRows: insert("{{count}} 件の参照を処理済み", { count: Number }),
 		reviews: "審査履歴",
 		decisions: { approve: "承認", reject: "却下" },
@@ -185,12 +225,9 @@ export default {
 		selectRequestDescription:
 			"申請を選択して、変更不能な統合仕様、審査履歴、実行状態を確認します。",
 		createTitle: "ユニット識別子を別の識別子へ統合",
-		createDescription: "申請を作成する前に、種別、現在のリビジョン、派生関係図を事前検証します。",
 		sourceId: `統合元ユニットの ${verbatimTerms.id.value}`,
 		targetId: `統合先ユニットの ${verbatimTerms.id.value}`,
 		preflight: "事前検証を実行",
-		irreversibleWarning:
-			"承認後は元に戻せません。統合元は恒久的なリダイレクトとなり、すべての有効な参照が統合先へ収束します。",
 		internalNote: "内部メモ（任意）",
 		notePlaceholder: "重複の根拠、確認した情報源、この統合先を正規とする理由を記録します。",
 		confirmSource: `統合元ユニットの ${verbatimTerms.id.value} を再入力`,

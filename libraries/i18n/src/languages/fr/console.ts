@@ -10,6 +10,74 @@ const { forms: zoneTerms } = frTerminology.zone;
 const { forms: postTerms } = frTerminology.post;
 
 export default {
+	nativeMerge: {
+		previous: "Précédent",
+		refresh: "Actualiser",
+		plan: "Plan de rapprochement des données",
+		names: "Noms",
+		identifiers: "Identifiants",
+		bindings: "Liaisons aux sources",
+		retainedContent:
+			"Les attributs, relations et structures de la source restent consultables comme preuves, sans remplacer les valeurs actuelles de la cible.",
+		retainedAccess:
+			"En approuvant ce plan, vous rendez le contenu source conservé accessible à toute personne pouvant lire la cible. Pour les fiches privées, cela peut donner accès à des personnes qui ne pouvaient pas lire la source auparavant.",
+		convergence:
+			"Après approbation, la source redirige définitivement vers la cible. Le rapprochement peut encore nécessiter des décisions une fois la redirection active.",
+		revision: "Révision",
+		resolved: "Éléments résolus",
+		items: "Preuves du rapprochement",
+		itemState: "État des preuves",
+		noItems: "Aucune preuve ne correspond à ce filtre.",
+		evidence: "Examiner les preuves",
+		sourceKey: "Clé source",
+		semantic: "Attribut ou relation",
+		issue: "Code du problème",
+		openEvidence: "Ouvrir les preuves conservées",
+		resolve: "Résoudre cet élément",
+		reason: "Motif de cette décision",
+		retryItem: "Réessayer cet élément",
+		retainItem: "Conserver dans la source",
+		namePlans: {
+			copy_alternates: "Copier comme autres noms",
+			retain_source: "Conserver dans la source",
+		},
+		identifierPlans: {
+			copy_claims: "Copier les déclarations d’identifiants",
+			retain_source: "Conserver dans la source",
+		},
+		bindingPlans: {
+			rebind_paused: "Déplacer les liaisons vers la cible et les suspendre",
+			pause_at_source: "Suspendre les liaisons dans la source",
+		},
+		visibility: {
+			public: "Public",
+			unlisted: "Non répertorié",
+			private: "Privé",
+		},
+		itemStates: {
+			pending: "En attente",
+			applied: "Copié",
+			retained: "Conservé dans la source",
+			action_required: "Décision requise",
+		},
+		kinds: {
+			name: "Noms",
+			identifier: "Identifiants",
+			semantic: "Attribut ou relation",
+			source_binding: "Liaisons aux sources",
+			structure: "Structure",
+		},
+		phases: {
+			canonicalize: "Redirection de l’identité",
+			names: "Noms",
+			identifiers: "Identifiants",
+			semantics: "Attribut ou relation",
+			bindings: "Liaisons aux sources",
+			structure: "Structure",
+			settle: "Vérification des décisions",
+			finalize: "Finalisation",
+		},
+	},
 	title: "Console de gestion",
 	description:
 		"Les capacités de la plateforme donnent accès à chaque zone de gestion ; elles ne représentent ni une identité d’utilisateur ni une relation de travail.",
@@ -63,6 +131,7 @@ export default {
 		searchPlaceholder: "Rechercher par titre, identifiant de Unit ou adresse publique",
 		stateFilter: "État du cycle de vie",
 		states: {
+			action_required: "Décision requise",
 			active: "Units actives",
 			deleted: "Supprimées provisoirement",
 			all: "Toutes les Units",
@@ -149,33 +218,14 @@ export default {
 		target: "Cible canonique",
 		openUnit: "Ouvrir la Unit",
 		kind: "Type d’Unit",
-		kinds: {
-			book: units.types.book,
-			software: units.types.software,
-			media: units.types.media,
-			entity: entityTerms.label,
-		},
-		mode: "Circuit de décision",
-		modes: {
-			reviewed: "Examen requis",
-			privileged_direct: "Fusion directe privilégiée",
-		},
 		proposer: "Proposée par",
 		approvalProgress: insert("{{count}} approbations sur {{required}}", {
 			count: Number,
 			required: Number,
 		}),
-		graphActions: {
-			none: "Aucune modification du graphe des Variants n’est requise.",
-			detach_source: "Détacher la Variant source de sa Main actuelle.",
-			reparent_source_variants_to_target: "Déplacer les Variants de la source sous la cible.",
-			reparent_source_variants_to_target_main:
-				"Déplacer les Variants de la source sous la Main de la cible.",
-			promote_target_from_source:
-				"Promouvoir la Variant cible et placer sous elle les autres Variants de la source.",
-		},
 		operation: "Convergence des références",
 		operationStates: {
+			action_required: "Décision requise",
 			pending: "En file d’attente",
 			processing: "Traitement en cours",
 			retry_wait: "En attente d’une nouvelle tentative",
@@ -193,13 +243,9 @@ export default {
 		selectRequestDescription:
 			"Choisissez une demande pour consulter son manifeste immuable, ses examens et son état d’exécution.",
 		createTitle: "Fusionner une identité d’Unit dans une autre",
-		createDescription:
-			"Le contrôle préalable valide le type, les révisions actuelles et le graphe des Variants avant de créer une demande.",
 		sourceId: `${verbatimTerms.id.value} de la Unit source`,
 		targetId: `${verbatimTerms.id.value} de la Unit cible`,
 		preflight: "Lancer le contrôle préalable",
-		irreversibleWarning:
-			"L’acceptation est irréversible. La source devient une redirection permanente et toutes les références actives convergent vers la cible.",
 		internalNote: "Note interne (facultative)",
 		notePlaceholder:
 			"Consignez les preuves de doublon, les sources vérifiées et le choix de cette cible canonique.",
