@@ -15,7 +15,7 @@ import { alias } from "drizzle-orm/pg-core";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
 import { database } from "../../database";
-import { unit, unitAccessGrant, unitAccessRestriction, unitOwnership } from "../../database/schema";
+import { unitAccessGrant, unitAccessRestriction, unitOwnership } from "../../database/schema";
 import { getPlatformCapabilityCondition } from "../platform/query";
 import { profileMatchesRealmAccessSubject } from "./realm-subject";
 import type { UnitScope } from "./scope";
@@ -43,9 +43,9 @@ function activeRestriction() {
 }
 
 export function getUnitReadCondition(
-	profileId?: string,
-	options: { readonly discoverableOnly?: boolean } = {},
-	target: UnitReadTarget = unit,
+	profileId: string | undefined,
+	options: { readonly discoverableOnly?: boolean },
+	target: UnitReadTarget,
 ) {
 	const visible = and(
 		eq(target.status, "published"),
@@ -185,7 +185,7 @@ export function getExplicitUnitAnyScopePermissionCondition(
 		readonly source: ExplicitAnyScopeGrantSource;
 		readonly includeOwnership: boolean;
 	},
-	target: Pick<UnitReadTarget, "id" | "deletedAt"> = unit,
+	target: Pick<UnitReadTarget, "id" | "deletedAt">,
 ): SQL {
 	const candidateGrant = alias(unitAccessGrant, "explicit_any_scope_grant");
 	const candidateRestriction = alias(unitAccessRestriction, "explicit_any_scope_restriction");
@@ -271,7 +271,7 @@ export function getUnitPermissionCondition(
 	profileId: string,
 	permission: DelegableUnitPermission,
 	scope: UnitScope,
-	target: Pick<UnitReadTarget, "id" | "deletedAt"> = unit,
+	target: Pick<UnitReadTarget, "id" | "deletedAt">,
 ) {
 	const ownership = exists(
 		database
@@ -364,7 +364,7 @@ export function getUnitPermissionCondition(
 export function getUnitRootPermissionCondition(
 	profileId: string,
 	permission: DelegableUnitPermission,
-	target: Pick<UnitReadTarget, "id" | "deletedAt"> = unit,
+	target: Pick<UnitReadTarget, "id" | "deletedAt">,
 ) {
 	return getUnitPermissionCondition(profileId, permission, [], target);
 }
@@ -372,7 +372,7 @@ export function getUnitRootPermissionCondition(
 /** Return the SQL predicate equivalent of a root-scoped `unit.update` decision. */
 export function getUnitUpdateCondition(
 	profileId: string,
-	target: Pick<UnitReadTarget, "id" | "deletedAt"> = unit,
+	target: Pick<UnitReadTarget, "id" | "deletedAt">,
 ) {
 	return getUnitRootPermissionCondition(profileId, "unit.update", target);
 }

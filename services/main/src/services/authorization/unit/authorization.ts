@@ -1,10 +1,26 @@
+import { CatalogReferenceSchema } from "@rezics/reference";
+import { readUnitStateById } from "../../units/query";
+import { unitOwnerTable } from "../../database/schema/unit-reference-columns";
+import { withCatalogViewerPolicy } from "../../catalog/read-policy";
+import {
+	loadCatalogIdentity,
+	CatalogAccessDenied,
+	CatalogReferenceNotFound,
+} from "../../catalog/storage";
+import {
+	currentParticipationAuthority,
+	readCatalogAuthorityScope,
+	catalogIdentityReadPredicate,
+} from "../../participation/policy";
 import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 
 import { ensureAccountAuthenticationAllowed } from "../../auth/account-state";
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../../database";
 import {
 	authEntity,
-	unit,
+	realm,
+	catalogUnitLocator,
+	catalogRoutingControl,
 	unitAccessGrant,
 	unitAccessRestriction,
 	unitOwnership,
@@ -24,7 +40,7 @@ import { profileMatchesRealmAccessSubject } from "./realm-subject";
 import { scopeCovers, scopeKey, type UnitScope } from "./scope";
 
 export type UnitAccessDecision =
-	| { readonly allowed: true; readonly source: "public" | "platform" | "owner" }
+	| { readonly allowed: true; readonly source: "public" | "platform" | "owner" | "native" }
 	| {
 			readonly allowed: true;
 			readonly source: "grant";
@@ -86,13 +102,13 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		const key = `unit:${unitId}:${permission}:${scopeKey(scope)}`;
 		const current = this.#decisions.get(key);
 		if (current) return current;
-		const decision = this.#decide(database, unitId, permission, scope);
+		const decision = database.transaction((tx) => this.#decide(tx, unitId, permission, scope));
 		this.#decisions.set(key, decision);
 		return decision;
 	}
 
 	async #decide(
-		executor: DatabaseExecutor,
+		executor: DatabaseTransaction,
 		unitId: string,
 		permission: UnitPermission,
 		scope: UnitScope,
@@ -100,20 +116,25 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		await executor.execute(
 			sql`select pg_advisory_xact_lock_shared(hashtextextended(${`unit-access:${unitId}`}::text, 0))`,
 		);
-		const [record] = await executor
-			.select({
-				kind: unit.kind,
-				status: unit.status,
-				visibility: unit.visibility,
-				moderationStatus: unit.moderationStatus,
-				deletedAt: unit.deletedAt,
-			})
-			.from(unit)
-			.where(eq(unit.id, unitId))
-			.limit(1);
+		const record = await readUnitStateById(executor, unitId);
 		if (!record || record.deletedAt) return { allowed: false, reason: "missing" };
-		if (!isUnitPermissionApplicable(record.kind, permission))
+		if (!isUnitPermissionApplicable(record.reference.owner, permission))
 			return { allowed: false, reason: "ungranted" };
+		const nativeReference = CatalogReferenceSchema.safeParse(record.reference);
+		if (nativeReference.success) {
+			if (permission !== "unit.read") return { allowed: false, reason: "ungranted" };
+			const actor = currentParticipationAuthority()?.principal.authUserId ?? null;
+			try {
+				await withCatalogViewerPolicy(executor, actor, () =>
+					loadCatalogIdentity(executor, nativeReference.data, actor, false),
+				);
+				return { allowed: true, source: "native" };
+			} catch (error) {
+				if (error instanceof CatalogAccessDenied || error instanceof CatalogReferenceNotFound)
+					return { allowed: false, reason: "missing" };
+				throw error;
+			}
+		}
 		if (!(await this.#authenticatedSelf(executor)))
 			return permission === "unit.read" &&
 				record.status === "published" &&
@@ -316,12 +337,48 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 	): Promise<void> {
 		const uniqueIds = [...new Set(unitIds)];
 		if (!uniqueIds.length) return;
-		const viewerId = (await this.#authenticatedSelf(database)) ? this.profileId : undefined;
-		const readable = await database
-			.select({ id: unit.id })
-			.from(unit)
-			.where(and(inArray(unit.id, uniqueIds), getUnitReadCondition(viewerId)));
-		const readableIds = new Set(readable.map(({ id }) => id));
+		if (uniqueIds.length > 500) throw new RangeError("Unit read batches cannot exceed 500 targets");
+		const readableIds = await database.transaction(async (tx) => {
+			const actor = currentParticipationAuthority()?.principal.authUserId ?? null;
+			return withCatalogViewerPolicy(tx, actor, async () => {
+				const viewerId = (await this.#authenticatedSelf(tx)) ? this.profileId : undefined;
+				const [control] = await tx
+					.select({ ready: catalogRoutingControl.ready })
+					.from(catalogRoutingControl)
+					.where(eq(catalogRoutingControl.singleton, true))
+					.limit(1);
+				if (!control?.ready) throw onDenied(uniqueIds[0]!);
+				const routes = await tx
+					.select()
+					.from(catalogUnitLocator)
+					.where(inArray(catalogUnitLocator.id, uniqueIds));
+				const nativeScope = await readCatalogAuthorityScope(tx, actor);
+				const result = new Set<string>();
+				for (const owner of new Set(routes.map((route) => route.owner))) {
+					const table = unitOwnerTable(owner);
+					const group = routes.filter((route) => route.owner === owner);
+					const native = CatalogReferenceSchema.safeParse({ owner, id: group[0]!.id });
+					const rows = await tx
+						.select({ id: table.id, generation: table.routingGeneration })
+						.from(table)
+						.where(
+							and(
+								inArray(
+									table.id,
+									group.map((route) => route.id),
+								),
+								native.success
+									? catalogIdentityReadPredicate(nativeScope, native.data.owner, table)
+									: getUnitReadCondition(viewerId, {}, table),
+							),
+						);
+					const generations = new Map(group.map((route) => [route.id, route.generation]));
+					for (const row of rows)
+						if (generations.get(row.id) === row.generation) result.add(row.id);
+				}
+				return result;
+			});
+		});
 		const deniedId = uniqueIds.find((id) => !readableIds.has(id));
 		if (deniedId) throw onDenied(deniedId);
 	}
@@ -402,14 +459,14 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		if (grant.subjectKind === "auth") return grant.authUserId === this.authUserId;
 		if (!grant.realmId || !grant.realmRelation) return false;
 		const [match] = await database
-			.select({ id: unit.id })
-			.from(unit)
+			.select({ id: realm.id })
+			.from(realm)
 			.where(
 				and(
-					eq(unit.id, grant.realmId),
+					eq(realm.id, grant.realmId),
 					profileMatchesRealmAccessSubject(
 						database,
-						unit.id,
+						realm.id,
 						sql`${grant.realmRelation}`,
 						this.profileId,
 					),

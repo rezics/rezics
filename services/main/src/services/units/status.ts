@@ -1,9 +1,12 @@
+import type { UnitReference } from "@rezics/reference";
+import { CatalogReferenceSchema } from "@rezics/reference";
+import { unitOwnerTable } from "../database/schema/unit-reference-columns";
+import { readUnitState, readUnitStateById } from "./query";
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 
 import { database, type DatabaseTransaction } from "../database";
 import {
 	entityIdentity,
-	unit,
 	unitRevision,
 	unitRevisionHead,
 	UnitStatusActorKindValues,
@@ -14,7 +17,6 @@ import { recordProfileResourceParticipation } from "../history/participation";
 import { UnitChanged, UnitNotFound, UnitPermissionForbidden } from "./errors";
 import { firstUnitLocalizationTitle } from "./localization";
 import { nextUnitUpdatedAt } from "./update-values";
-import { ensureUnitVariantLifecycle } from "./variant-policy";
 
 export type UnitStatus = (typeof UnitStatusValues)[number];
 export type UnitStatusActorKind = (typeof UnitStatusActorKindValues)[number];
@@ -61,21 +63,20 @@ export async function recordInitialUnitStatus(
 	tx: DatabaseTransaction,
 	input: {
 		readonly unitId: string;
+		readonly reference?: UnitReference;
 		readonly actor: UnitStatusActor;
 		readonly revisionId?: string | null;
 	},
 ): Promise<string> {
 	await lockStatus(tx, input.unitId);
-	const [current] = await tx
-		.select({
-			status: unit.status,
-			publishedAt: unit.publishedAt,
-			createdAt: unit.createdAt,
-			deletedAt: unit.deletedAt,
-		})
-		.from(unit)
-		.where(eq(unit.id, input.unitId))
-		.limit(1);
+	const current = input.reference
+		? await readUnitState(tx, input.reference, { lock: "update" })
+		: await readUnitStateById(tx, input.unitId, { lock: "update" });
+	if (
+		current &&
+		(current.id !== input.unitId || CatalogReferenceSchema.safeParse(current.reference).success)
+	)
+		throw new Error("Platform status events require the exact platform owner");
 	if (!current || current.deletedAt) throw new UnitNotFound();
 	const [existing] = await tx
 		.select({ id: unitStatusEvent.id })
@@ -164,18 +165,9 @@ export async function transitionUnitStatus(
 	},
 ): Promise<TransitionUnitStatusResult> {
 	await lockStatus(tx, input.unitId);
-	const [current] = await tx
-		.select({
-			status: unit.status,
-			publishedAt: unit.publishedAt,
-			updatedAt: unit.updatedAt,
-			deletedAt: unit.deletedAt,
-			headRevisionId: unitRevisionHead.revisionId,
-		})
-		.from(unit)
-		.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unit.id))
-		.where(eq(unit.id, input.unitId))
-		.limit(1);
+	const current = await readUnitStateById(tx, input.unitId, { lock: "update" });
+	if (current && CatalogReferenceSchema.safeParse(current.reference).success)
+		throw new Error("Native catalog lifecycle changes require the owning command");
 	if (!current || current.deletedAt) throw new UnitNotFound();
 	if (input.expectedUpdatedAt && current.updatedAt.getTime() !== input.expectedUpdatedAt.getTime())
 		throw new UnitChanged(current.updatedAt);
@@ -184,7 +176,12 @@ export async function transitionUnitStatus(
 	if (input.authorization.kind === "interactive" && !input.authorization.statusUpdateAllowed)
 		throw new UnitPermissionForbidden("unit.status.update", ["unit"]);
 
-	const revisionId = input.revisionId ?? current.headRevisionId ?? null;
+	const [head] = await tx
+		.select({ revisionId: unitRevisionHead.revisionId })
+		.from(unitRevisionHead)
+		.where(eq(unitRevisionHead.unitId, input.unitId))
+		.limit(1);
+	const revisionId = input.revisionId ?? head?.revisionId ?? null;
 	if (revisionId) {
 		const [revision] = await tx
 			.select({ id: unitRevision.id })
@@ -196,15 +193,16 @@ export async function transitionUnitStatus(
 
 	const occurredAt = new Date();
 	const publishedAt = input.toStatus === "published" ? occurredAt : current.publishedAt;
+	const table = unitOwnerTable(current.reference.owner);
 	await tx
-		.update(unit)
+		.update(table)
 		.set({
 			status: input.toStatus,
+			revision: sql`${table.revision} + 1`,
 			updatedAt: nextUnitUpdatedAt(current.updatedAt),
 			...(input.toStatus === "published" ? { publishedAt: occurredAt } : {}),
 		})
-		.where(eq(unit.id, input.unitId));
-	await ensureUnitVariantLifecycle(tx, input.unitId);
+		.where(eq(table.id, input.unitId));
 	const [event] = await tx
 		.insert(unitStatusEvent)
 		.values({

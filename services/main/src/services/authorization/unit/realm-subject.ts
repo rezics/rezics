@@ -5,13 +5,13 @@ import { selfAuthUserIdForEntity } from "../../participation/account-query";
 import type { DatabaseExecutor } from "../../database";
 import {
 	realmMember,
-	unit,
+	realm,
 	unitAccessGrant,
 	unitAccessRestriction,
 	unitOwnership,
 } from "../../database/schema";
 
-const managerUnit = alias(unit, "realm_access_manager_unit");
+const managerUnit = alias(realm, "realm_access_manager_unit");
 const managerOwnership = alias(unitOwnership, "realm_access_manager_ownership");
 const managerGrant = alias(unitAccessGrant, "realm_access_manager_grant");
 const managerGrantMember = alias(realmMember, "realm_access_manager_grant_member");

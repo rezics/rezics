@@ -10,7 +10,7 @@ import {
 	unitPermissionsForTarget,
 } from "@rezics/access";
 
-import type { UnitKind } from "../../database/schema/contract-values";
+import type { UnitOwner } from "@rezics/reference";
 
 export {
 	expandDelegableUnitPermissions,
@@ -33,15 +33,15 @@ export type UnitAccessOverride =
 	  }
 	| undefined;
 
-export function isUnitPermissionApplicable(kind: UnitKind, permission: UnitPermission): boolean {
+export function isUnitPermissionApplicable(kind: UnitOwner, permission: UnitPermission): boolean {
 	return isPermissionApplicableToTarget(permissionTargetForUnitKind(kind), permission);
 }
 
-export function unitPermissionsForKind(kind: UnitKind): UnitPermission[] {
+export function unitPermissionsForKind(kind: UnitOwner): UnitPermission[] {
 	return unitPermissionsForTarget(permissionTargetForUnitKind(kind));
 }
 
-function permissionTargetForUnitKind(kind: UnitKind): PermissionResourceKind {
+function permissionTargetForUnitKind(kind: UnitOwner): PermissionResourceKind {
 	if (kind === "realm") return "realm";
 	if (kind === "entity") return "entity";
 	if (kind === "zone") return "zone";
