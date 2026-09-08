@@ -1,6 +1,9 @@
 import { replaceCatalogContentLanguageSupport } from "../catalog/content-language-declaration";
 import { loadCatalogIdentity } from "../catalog/storage";
-import { replaceUnitContentLanguageSupport } from "../units/content-language-support";
+import {
+	replaceUnitContentLanguageSupport,
+	presentContentLanguageSupport,
+} from "../units/content-language-support";
 import { createHash } from "node:crypto";
 
 import { normalizeContentLanguageSupport } from "@rezics/content-language";
@@ -380,7 +383,7 @@ async function insertContentLanguageSupport(
 		await replaceCatalogContentLanguageSupport(tx, reference, actor, {
 			expectedRevision: (await loadCatalogIdentity(tx, reference, actor, true)).revision,
 			expectedHeadVersion: 0,
-			value,
+			value: presentContentLanguageSupport(value),
 		});
 		return;
 	}

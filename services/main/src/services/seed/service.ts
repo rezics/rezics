@@ -1,3 +1,4 @@
+import { RecommendationSurfaceValues } from "../database/schema/contract-values";
 import { saveFavorite } from "../favorites/service";
 import { CatalogReferenceSchema, type UnitOwner } from "@rezics/reference";
 import type { SeedIdentityDescriptor } from "./identity";
@@ -2802,14 +2803,7 @@ async function seedRecommendations(
 		...content.rootPosts,
 		...content.reviews,
 	];
-	const surfaces = [
-		"home_feed",
-		"home_book",
-		"home_software",
-		"home_media",
-		"unit_related",
-		"post_related",
-	] as const;
+	const surfaces = RecommendationSurfaceValues;
 	const eventTypes = ["impression", "open", "dwell_30s", "not_interested"] as const;
 	await writeBatches(
 		Array.from({ length: SeedPlan.recommendationEvents }, (_, index) => {
