@@ -2,9 +2,9 @@
 
 import {
 	getApiTagsQueryKey,
-	getApiUnitsByTypeByUnitIdTagsQueryKey,
+	getApiResourcesByOwnerByUnitIdTagsQueryKey,
 	usePostApiTags,
-	usePutApiUnitsByTypeByUnitIdTagsByTagId,
+	usePutApiResourcesByOwnerByUnitIdTagsByTagId,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Alert,
@@ -64,7 +64,7 @@ export function TagCreatePage({
 		portableTextDraftContentLanguageSample(body),
 	);
 	const create = usePostApiTags();
-	const applyGlobal = usePutApiUnitsByTypeByUnitIdTagsByTagId();
+	const applyGlobal = usePutApiResourcesByOwnerByUnitIdTagsByTagId();
 	const returnHref =
 		intent.kind === "unit-tag-vote"
 			? unitTagsHref(intent.type, intent.unitId, { context: intent.context })
@@ -76,7 +76,7 @@ export function TagCreatePage({
 		setVoteCompletion({ status: "applying", tagId });
 		try {
 			await applyGlobal.mutateAsync({
-				path: { type: intent.type, unitId: intent.unitId, tagId },
+				path: { owner: intent.type, unitId: intent.unitId, tagId },
 				body: {},
 			});
 		} catch {
@@ -85,8 +85,8 @@ export function TagCreatePage({
 		}
 		await Promise.all([
 			queryClient.invalidateQueries({
-				queryKey: getApiUnitsByTypeByUnitIdTagsQueryKey({
-					path: { type: intent.type, unitId: intent.unitId },
+				queryKey: getApiResourcesByOwnerByUnitIdTagsQueryKey({
+					path: { owner: intent.type, unitId: intent.unitId },
 				}),
 			}),
 		]);

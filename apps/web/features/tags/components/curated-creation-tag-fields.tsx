@@ -56,7 +56,7 @@ function toTagChoice(
 	const { content } = item;
 	if (
 		content.itemType !== "unit" ||
-		content.unitKind !== "tag" ||
+		content.owner !== "tag" ||
 		typeof content.title !== "string" ||
 		content.title.length === 0
 	)

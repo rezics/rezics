@@ -129,7 +129,6 @@ const commonUnit = {
 	versions: [],
 	variantContext: { role: "standalone" },
 	ownershipMode: "community_owned",
-	ownershipClaim: null,
 	capabilities: {
 		canEdit: true,
 		canUpdateMetadataOnly: true,
@@ -147,7 +146,7 @@ afterEach(() => {
 	api.mutateAsync.mockReset().mockResolvedValue(undefined);
 });
 
-async function renderEditor(type: "video" | "release", unit: EditableUnit) {
+async function renderEditor(type: "video" | "audio", unit: EditableUnit) {
 	const queryClient = new QueryClient();
 	await act(async () => {
 		render(
@@ -221,50 +220,42 @@ describe("UnitMetadataEditor content language integration", () => {
 		});
 	});
 
-	it("edits Release metadata and its single language field through the generic PATCH", async () => {
+	it("edits Audio metadata and its language field through the generic PATCH", async () => {
 		const unit = {
 			...commonUnit,
-			type: "release",
-			releasedOn: "2026-08-01",
+			type: "audio",
 			contentLanguageSupport: [{ languageTag: "ja" }],
-			details: {
-				type: "release",
-				parentUnitId: ParentUnitId,
-				versionLabel: "1.0",
-				releasedOn: "2026-08-01",
-			},
+			details: { type: "audio", durationSeconds: 90 },
 		} satisfies EditableUnit;
-		await renderEditor("release", unit);
+		await renderEditor("audio", unit);
 
-		expect(screen.getByDisplayValue(ParentUnitId).hasAttribute("readonly")).toBe(true);
-		fireEvent.change(screen.getByDisplayValue("1.0"), { target: { value: "1.1" } });
+		expect(screen.queryByDisplayValue(ParentUnitId)).toBeNull();
+		fireEvent.change(screen.getByDisplayValue("90"), { target: { value: "120" } });
 		fireEvent.click(screen.getByRole("button", { name: "Set content language" }));
 		fireEvent.click(screen.getByRole("button", { name: "Save settings" }));
 
 		await waitFor(() => expect(api.mutateAsync).toHaveBeenCalledTimes(1));
 		expect(api.mutateAsync.mock.calls[0]?.[0]).toMatchObject({
-			path: { type: "release", unitId: unit.id },
+			path: { type: "audio", unitId: unit.id },
 			body: {
 				contentLanguageSupport: [{ languageTag: "en", channels: ["audio"] }],
-				unit: { releasedOn: "2026-08-01" },
-				details: { versionLabel: "1.1" },
+				details: { durationSeconds: 120 },
 			},
 		});
+		expect(api.mutateAsync.mock.calls[0]?.[0].body.details).not.toHaveProperty(
+			"adaptedAudioUnitIds",
+		);
+		expect(api.mutateAsync.mock.calls[0]?.[0].body).not.toHaveProperty("unit");
 	});
 
-	it("serializes clearing Release language support as the authoritative empty field", async () => {
+	it("serializes clearing Audio language support as the authoritative empty field", async () => {
 		const unit = {
 			...commonUnit,
-			type: "release",
+			type: "audio",
 			contentLanguageSupport: [{ languageTag: "ja" }],
-			details: {
-				type: "release",
-				parentUnitId: ParentUnitId,
-				versionLabel: "1.0",
-				releasedOn: null,
-			},
+			details: { type: "audio", durationSeconds: 90 },
 		} satisfies EditableUnit;
-		await renderEditor("release", unit);
+		await renderEditor("audio", unit);
 
 		fireEvent.click(screen.getByRole("button", { name: "Clear content languages" }));
 		fireEvent.click(screen.getByRole("button", { name: "Save settings" }));

@@ -370,7 +370,7 @@ function DockUnit({
 }) {
 	const { t } = useTranslation(["ui"]);
 	const title = unit.title ?? t.ui.unnamed;
-	const href = publicUnitHref(unit.kind, unit);
+	const href = publicUnitHref(unit.owner, unit);
 	const content =
 		appearance === "inline" ? (
 			<span className="font-medium" data-part="title">
@@ -409,7 +409,7 @@ function DockUnitCard({
 }) {
 	const { t } = useTranslation(["ui"]);
 	const title = unit.title ?? t.ui.unnamed;
-	const href = publicUnitHref(unit.kind, unit);
+	const href = publicUnitHref(unit.owner, unit);
 	if (!href) return <DockUnit appearance="card" unit={unit} />;
 	return (
 		<UnitCard
@@ -431,7 +431,7 @@ function DockUnitIdentityBadge({ unit }: { readonly unit: UnitPresentation }) {
 	const { t } = useTranslation(["ui"]);
 	const title = unit.title ?? t.ui.unnamed;
 	return (
-		<IdentityBadgeLink avatar={unit.avatar} href={publicUnitHref(unit.kind, unit)} label={title} />
+		<IdentityBadgeLink avatar={unit.avatar} href={publicUnitHref(unit.owner, unit)} label={title} />
 	);
 }
 
@@ -641,5 +641,5 @@ function navigationTargetHref(
 ): string | undefined {
 	if (target.kind === "external") return target.url;
 	const unit = units.get(target.unitId);
-	return unit ? (publicUnitHref(unit.kind, unit) ?? undefined) : undefined;
+	return unit ? (publicUnitHref(unit.owner, unit) ?? undefined) : undefined;
 }

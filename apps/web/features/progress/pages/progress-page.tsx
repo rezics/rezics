@@ -1,4 +1,8 @@
 "use client";
+import {
+	progressCopyKey,
+	ProgressTrackableUnitTypes,
+} from "@/features/progress/model/progress-record";
 
 import {
 	type PostApiProgressSearchStatus200,
@@ -215,20 +219,21 @@ function ProgressListItem({
 	);
 	const summary = useChineseContentText(item.summary ?? "", item.summary ? item.language : null);
 	const percent = Math.round(clampProgress(item.progress) * 100);
-	const copy = t.engagement.progressByType[item.type];
-	const href = publicUnitHref(item.type, { id: item.unitId });
+	const type = ProgressTrackableUnitTypes.find((owner) => owner === item.owner);
+	const copy = t.engagement.progressByType[type ? progressCopyKey(type) : "generic"];
+	const href = publicUnitHref(item.owner, { id: item.unitId });
 	const listSummary =
-		item.type === "software"
+		item.owner === "software"
 			? t.engagement.progressByType.software.listSummary({
 					count: toNonNegativeApiInteger(item.completedCount),
 					minutes: Math.round((toFiniteApiNumber(item.totalTimeMs) ?? 0) / 60_000),
 				})
-			: item.type === "media"
+			: item.owner === "program"
 				? t.engagement.progressByType.media.listSummary({
 						count: toNonNegativeApiInteger(item.completedCount),
 						percent,
 					})
-				: t.engagement.progressByType.book.listSummary({
+				: t.engagement.progressByType.generic.listSummary({
 						count: toNonNegativeApiInteger(item.completedCount),
 						percent,
 					});
@@ -241,7 +246,7 @@ function ProgressListItem({
 						<Cover
 							alt={title}
 							className="w-full rounded-xl border border-border-weak shadow-sm/5"
-							fallback={<UnitCoverFallback kind={item.type} />}
+							fallback={<UnitCoverFallback kind={item.owner} />}
 							sizes="(min-width: 640px) 120px, 80px"
 							src={item.cover?.url}
 						/>
@@ -250,7 +255,7 @@ function ProgressListItem({
 					<Cover
 						alt={title}
 						className="w-full rounded-xl border border-border-weak shadow-sm/5"
-						fallback={<UnitCoverFallback kind={item.type} />}
+						fallback={<UnitCoverFallback kind={item.owner} />}
 						sizes="(min-width: 640px) 120px, 80px"
 						src={item.cover?.url}
 					/>
@@ -301,14 +306,23 @@ function ProgressListItem({
 					</div>
 					<div className="mt-4 flex flex-wrap gap-2">
 						<Button
-							onClick={() => onEdit({ type: item.type, unitId: item.unitId })}
+							disabled={!type}
+							onClick={() => {
+								if (type) onEdit({ type, shape: item.shape, unitId: item.unitId });
+							}}
 							size="sm"
 							variant="solid"
 						>
 							{t.engagement.updateProgress}
 						</Button>
 						<Button asChild size="sm" variant="outline">
-							<Link href={unitProgressHref(item.type, item.unitId)}>
+							<Link
+								href={
+									type
+										? unitProgressHref(type, item.unitId)
+										: (publicUnitHref(item.owner, { id: item.unitId }) ?? "/me/progress")
+								}
+							>
 								{t.engagement.viewProgressHistory}
 							</Link>
 						</Button>

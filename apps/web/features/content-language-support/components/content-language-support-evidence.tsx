@@ -3,6 +3,7 @@
 import {
 	getApiUnitsByTypeByUnitIdContentLanguageSupportEvidenceQueryOptions,
 	type GetApiUnitsByTypeByUnitIdContentLanguageSupportEvidenceStatus200,
+	type GetApiUnitsByTypeByUnitIdContentLanguageSupportEvidencePath,
 } from "@rezics/openapi-tanstack-query";
 import { Badge, Button } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
@@ -10,7 +11,6 @@ import { useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
-import type { ContentLanguageSupportOwner } from "../model/content-language-support";
 import { ContentLanguageSupportDisplay } from "./content-language-support-display";
 
 type EvidenceItem =
@@ -40,7 +40,7 @@ const EvidencePageSize = 20;
 
 export type ContentLanguageSupportEvidenceProps = {
 	readonly onAdopt: (value: EvidenceItem["contentLanguageSupport"]) => void;
-	readonly type: ContentLanguageSupportOwner;
+	readonly type: GetApiUnitsByTypeByUnitIdContentLanguageSupportEvidencePath["type"];
 	readonly unitId: string;
 };
 

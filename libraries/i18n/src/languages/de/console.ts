@@ -8,6 +8,7 @@ const { forms: zoneTerms } = deTerminology.zone;
 const { forms: postTerms } = deTerminology.post;
 
 export default {
+	caseEvidence: "Belege",
 	nativeLookup: {
 		mode: "Einträge finden über",
 		modes: {

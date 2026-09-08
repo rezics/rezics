@@ -85,7 +85,8 @@ describe("Portable Text content spoilers", () => {
 				"019f73cb-926e-7e50-9a7f-da67701accb3",
 				{
 					id: "019f73cb-926e-7e50-9a7f-da67701accb3",
-					kind: "entity",
+					owner: "publishing" as const,
+					shape: "work",
 					label: "Example Story",
 				},
 			],

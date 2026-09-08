@@ -41,8 +41,8 @@ export function PostList({
 				source: "link",
 				removable: false,
 				value: {
-					controlKey: "kind",
-					filter: { field: "kind", operator: "equals", value: "post" },
+					controlKey: "unit-shape",
+					filter: { field: "unit-shape", operator: "equals", value: "post" },
 				},
 			},
 			...(subjectId

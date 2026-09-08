@@ -1,6 +1,6 @@
 "use client";
 
-import { isContentLanguage, type ContentLanguage } from "@rezics/i18n";
+import { isContentLanguage, ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 
 import {
 	useReadTextVersionChapterNode,
@@ -303,7 +303,11 @@ export function Reader({ bookId, nodeId }: { bookId: string; nodeId: string }) {
 		const storedFontSize = loadReaderFontSize();
 		if (storedFontSize) setFontSize(storedFontSize);
 	}, []);
-	const selectedLanguage = useRequestedContentLanguage();
+	const requestedLanguage = useRequestedContentLanguage();
+	const selectedLanguage: ContentLanguage | undefined =
+		requestedLanguage === undefined
+			? undefined
+			: ContentLanguageValues.find((value) => value === requestedLanguage);
 	const { replaceCurrentLanguage } = useContentLanguageNavigation();
 	const query = useReadTextVersionChapterNode({
 		path: { bookId, nodeId },

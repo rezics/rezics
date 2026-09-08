@@ -12,6 +12,17 @@ const { forms: metadataTerms } = deTerminology.metadata;
 const { forms: entityTerms } = deTerminology.entity;
 
 export default {
+	nativeEditorial: {
+		title: "Beschreibung und Bilder",
+		edit: "Beschreibung und Bilder bearbeiten",
+		language: "Sprachkennzeichnung",
+		openLanguage: "Sprache öffnen",
+		invalidLanguage: "Gib eine gültige Sprachkennzeichnung ein.",
+		withdraw: "Aktuelle Beschreibung und Bilder löschen",
+		name: "Name",
+		primaryName: "Als Hauptnamen für diese Sprache verwenden",
+		addName: "Namen hinzufügen",
+	},
 	nativeGrouping: {
 		classes: "Klassifizierungen",
 		orders: "Benannte Reihenfolgen",

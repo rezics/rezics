@@ -7,16 +7,24 @@ export const ProgressStatuses = ["backlog", "active", "paused", "completed", "dr
 
 export type ProgressStatus = (typeof ProgressStatuses)[number];
 
-export const ProgressTrackableUnitTypes = ["book", "media", "software"] as const;
+export const ProgressTrackableUnitTypes = [
+	"publishing",
+	"program",
+	"music",
+	"software",
+	"video",
+	"audio",
+] as const;
 export type ProgressTrackableUnitType = (typeof ProgressTrackableUnitTypes)[number];
 
 export type UnitProgressDomain = {
 	readonly type: ProgressTrackableUnitType;
+	readonly shape?: string;
 	readonly unitId: string;
 };
 
 export type ProgressContinuation =
-	| { readonly kind: "book-node"; readonly bookId: string; readonly nodeId: string }
+	| { readonly kind: "text-version-node"; readonly textVersionId: string; readonly nodeId: string }
 	| {
 			readonly kind: "unit";
 			readonly unitId: string;
@@ -25,7 +33,7 @@ export type ProgressContinuation =
 	| {
 			readonly kind: "contents";
 			readonly unitId: string;
-			readonly unitType: "book" | "media";
+			readonly unitType: "publishing" | "program";
 	  }
 	| { readonly kind: "none" };
 
@@ -157,9 +165,9 @@ export function createResumeUpdate(
 	return {
 		status: "active",
 		progress: type === "software" ? 0 : record.progress,
-		...(type === "book"
+		...(type === "publishing"
 			? { lastContentStructureNodeId: record.lastContentStructureNodeId }
-			: type === "media"
+			: type === "program"
 				? {
 						lastContentStructureNodeId: record.lastContentStructureNodeId,
 						totalTimeMs: record.totalTimeMs,
@@ -209,7 +217,7 @@ export function createProgressUpdate(
 	if (percentage === undefined) return undefined;
 	const progress = percentage / 100;
 
-	if (type === "book") {
+	if (type === "publishing") {
 		return {
 			status: draft.status,
 			progress,
@@ -222,7 +230,9 @@ export function createProgressUpdate(
 	return {
 		status: draft.status,
 		progress,
-		lastContentStructureNodeId: atBoundary ? null : draft.lastNodeId || null,
+		...(type === "program"
+			? { lastContentStructureNodeId: atBoundary ? null : draft.lastNodeId || null }
+			: {}),
 		totalTimeMs: totalMinutes * 60_000,
 	};
 }
@@ -246,4 +256,14 @@ export function parseNonNegativeInteger(value: string): number | undefined {
 function parseTotalMinutes(value: string): number | undefined {
 	const parsed = parseNonNegativeInteger(value);
 	return parsed !== undefined && parsed <= MaximumTotalMinutes ? parsed : undefined;
+}
+
+export function progressCopyKey(owner: ProgressTrackableUnitType) {
+	return owner === "publishing"
+		? "book"
+		: owner === "program" || owner === "video"
+			? "media"
+			: owner === "software"
+				? "software"
+				: "generic";
 }

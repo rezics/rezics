@@ -1,13 +1,13 @@
 import {
-	GetApiAccountMeFollowingStatus200ItemsKindEnum,
-	type GetApiAccountMeFollowingStatus200ItemsKindEnum as FollowingKind,
+	GetApiAccountMeFollowingStatus200ItemsOwnerEnum,
+	type GetApiAccountMeFollowingStatus200ItemsOwnerEnum as FollowingKind,
 } from "@rezics/openapi-tanstack-query";
 import { parseAsStringLiteral } from "nuqs/server";
 
 import { realmHref, zoneHref, type AddressableUnit } from "@/features/slugs/unit-route";
 import { urlStateOptions } from "@/lib/search-params";
 
-export const FollowingKinds = Object.values(GetApiAccountMeFollowingStatus200ItemsKindEnum);
+export const FollowingKinds = Object.values(GetApiAccountMeFollowingStatus200ItemsOwnerEnum);
 export const AllFollowingKinds = "all" as const;
 export const FollowingFilters = [AllFollowingKinds, ...FollowingKinds] as const;
 export type FollowingFilter = (typeof FollowingFilters)[number];
@@ -31,15 +31,18 @@ export function followingHref(
 			return zoneHref(unit);
 		case "realm":
 			return realmHref(unit);
-		case "book":
+		case "publishing":
+		case "music":
+		case "program":
+		case "grouping":
+		case "reference":
+		case "distribution":
+		case "entity":
 		case "software":
-		case "media":
+			return `/catalog/${kind}/${id}`;
 		case "video":
 		case "audio":
-		case "release":
 			return `/units/${kind}/${id}`;
-		case "entity":
-			return `/entities/${id}`;
 		case "tag":
 			return `/tags/${id}`;
 		case "collection":
@@ -48,11 +51,8 @@ export function followingHref(
 			return `/posts/${id}`;
 		case "poll":
 			return `/polls/${id}`;
-		case "slug_namespace":
 		case "label":
-		case "series":
 		case "realm_rule":
-		case "zone_page":
 		case "custom_theme":
 			return undefined;
 	}

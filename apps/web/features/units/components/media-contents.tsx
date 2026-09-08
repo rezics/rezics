@@ -139,7 +139,7 @@ function MediaContentsList({
 	readonly onToggleCompletion: (nodeId: string) => void;
 	readonly showCompletion: boolean;
 }) {
-	const { t } = useTranslation(["units"]);
+	const { t } = useTranslation(["units", "ui"]);
 	const tree = useMemo(() => buildContentStructureTree(items), [items]);
 	const expandableIds = useMemo(() => collectBookStructureExpandableIds(tree), [tree]);
 	const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(() => new Set(expandableIds));

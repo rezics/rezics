@@ -12,6 +12,17 @@ const { forms: metadataTerms } = enTerminology.metadata;
 const { forms: entityTerms } = enTerminology.entity;
 
 export default {
+	nativeEditorial: {
+		title: "Description and images",
+		edit: "Edit description and images",
+		language: "Language tag",
+		openLanguage: "Open language",
+		invalidLanguage: "Enter a valid language tag.",
+		withdraw: "Clear current description and images",
+		name: "Name",
+		primaryName: "Use as the primary name for this language",
+		addName: "Add name",
+	},
 	nativeGrouping: {
 		classes: "Classifications",
 		orders: "Named orders",

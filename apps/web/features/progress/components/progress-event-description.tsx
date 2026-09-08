@@ -1,4 +1,5 @@
 "use client";
+import { progressCopyKey } from "@/features/progress/model/progress-record";
 
 import { useTranslation } from "@/i18n/client";
 import {
@@ -29,7 +30,7 @@ export function ProgressEventDescription({
 		locale.current,
 		t.engagement.progressJournal.unknownDate,
 	);
-	const copy = t.engagement.progressByType[type].history;
+	const copy = t.engagement.progressByType[progressCopyKey(type)].history;
 	return (
 		<>
 			{entry.entryKind === "completion"

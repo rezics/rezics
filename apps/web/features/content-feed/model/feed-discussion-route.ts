@@ -1,18 +1,18 @@
-import type { PostApiFeedQueryStatus200ItemsUnitKindEnum } from "@rezics/openapi-tanstack-query";
+import type { PostApiFeedQueryStatus200ItemsOwnerEnum } from "@rezics/openapi-tanstack-query";
 
 import { tagDetailHref } from "@/features/tags/routing/tag-links";
-import { unitDetailHref } from "@/features/units/routing/unit-detail-routes";
 
 export function feedUnitDiscussionHref(
-	kind: PostApiFeedQueryStatus200ItemsUnitKindEnum,
+	kind: PostApiFeedQueryStatus200ItemsOwnerEnum,
 	unitId: string,
 ): string | undefined {
 	switch (kind) {
-		case "book":
-		case "media":
+		case "publishing":
+		case "music":
+		case "program":
 		case "software":
-		case "series":
-			return unitDetailHref(kind, unitId, "discussion");
+		case "grouping":
+			return `/catalog/${kind}/${unitId}/discussion`;
 		case "tag":
 			return tagDetailHref(unitId, "discussion");
 		case "collection":
@@ -21,7 +21,8 @@ export function feedUnitDiscussionHref(
 		case "realm":
 		case "video":
 		case "audio":
-		case "release":
+		case "reference":
+		case "distribution":
 		case "zone":
 			return undefined;
 		default:

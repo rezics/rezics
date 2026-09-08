@@ -64,7 +64,7 @@ describe("PostList", () => {
 				{
 					removable: false,
 					value: {
-						filter: { field: "kind", operator: "equals", value: "post" },
+						filter: { field: "unit-shape", operator: "equals", value: "post" },
 					},
 				},
 				{

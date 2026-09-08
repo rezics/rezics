@@ -32,7 +32,6 @@ import {
 	type ResourceVisibility,
 } from "@/features/privacy/model/resource-visibility";
 import { RealmScoreContextLink } from "@/features/realms/components/realm-score-context-link";
-import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
@@ -44,13 +43,7 @@ import { ScoreRealmPicker, type ScoreRealmOption } from "./score-realm-picker";
 
 const RatingCount = 5;
 
-export function UnitScoreControl({
-	targetId,
-	type,
-}: {
-	readonly targetId: string;
-	readonly type: UnitDetailUnitType;
-}) {
+export function UnitScoreControl({ targetId }: { readonly targetId: string }) {
 	const { data: session, isPending: sessionPending } = useHydratedSession();
 	const { openAuthPortal } = useAuthPortal();
 	const queryClient = useQueryClient();
@@ -74,7 +67,7 @@ export function UnitScoreControl({
 	const [draftVisibility, setDraftVisibility] =
 		useState<ResourceVisibility>(DefaultResourceVisibility);
 	const [pendingDefaultScore, setPendingDefaultScore] = useState<UnitScore>();
-	const scoreAction = t.engagement.scoreActionByType[type];
+	const scoreAction = t.engagement.progressByType.generic.scoreAction;
 
 	const scoredRealms = useMemo(
 		() =>

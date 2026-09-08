@@ -143,7 +143,7 @@ function renderControl() {
 	return render(
 		<TranslationProvider initial={translation.snapshot}>
 			<UiProvider searchEntities={() => Promise.resolve([])}>
-				<UnitScoreControl targetId="019f92b9-cb0d-7cb6-a55a-1d5ecedc0949" type="book" />
+				<UnitScoreControl targetId="019f92b9-cb0d-7cb6-a55a-1d5ecedc0949" />
 			</UiProvider>
 		</TranslationProvider>,
 	);

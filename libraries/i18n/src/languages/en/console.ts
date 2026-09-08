@@ -8,6 +8,7 @@ const { forms: zoneTerms } = enTerminology.zone;
 const { forms: postTerms } = enTerminology.post;
 
 export default {
+	caseEvidence: "Evidence",
 	nativeLookup: {
 		mode: "Find entries by",
 		modes: {

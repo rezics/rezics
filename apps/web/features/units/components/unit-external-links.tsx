@@ -1,7 +1,7 @@
 "use client";
 
 import type {
-	GetApiUnitsByTypeByUnitIdExternalLinksStatus200,
+	GetApiResourcesByOwnerByUnitIdExternalLinksStatus200,
 	GetApiUnitsByTypeByUnitIdStatus200,
 } from "@rezics/openapi-tanstack-query";
 import {
@@ -22,7 +22,7 @@ import { toFiniteApiNumber } from "@/lib/api-number";
 type UnitDetailExternalLinkPresentation =
 	GetApiUnitsByTypeByUnitIdStatus200["externalLinks"][number];
 type UnitExternalLinkListItemPresentation =
-	GetApiUnitsByTypeByUnitIdExternalLinksStatus200["items"][number];
+	GetApiResourcesByOwnerByUnitIdExternalLinksStatus200["items"][number];
 
 export type UnitExternalLinkPresentation =
 	| UnitDetailExternalLinkPresentation

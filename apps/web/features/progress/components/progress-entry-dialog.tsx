@@ -1,4 +1,5 @@
 "use client";
+import { progressCopyKey } from "@/features/progress/model/progress-record";
 
 import {
 	usePostApiProgressByUnitIdEntries,
@@ -128,7 +129,10 @@ function ProgressEntryEditor({
 									>
 										{ProgressStatuses.map((status) => (
 											<NativeSelectOption key={status} value={status}>
-												{t.engagement.progressByType[progress.domain.type].statuses[status]}
+												{
+													t.engagement.progressByType[progressCopyKey(progress.domain.type)]
+														.statuses[status]
+												}
 											</NativeSelectOption>
 										))}
 									</NativeSelect>
@@ -208,13 +212,13 @@ function PositionFields({
 	const { t } = useTranslation(["engagement", "ui"]);
 	const copy = t.engagement.progressJournal;
 	const contentStructureCopy =
-		type === "book"
+		type === "publishing"
 			? {
 					description: t.engagement.progressByType.book.estimatedFromContents,
 					label: t.engagement.progressByType.book.lastChapter,
 					noSelectionLabel: t.engagement.progressByType.book.noChapter,
 				}
-			: type === "media"
+			: type === "program"
 				? {
 						description: t.engagement.progressByType.media.estimatedFromItem,
 						label: t.engagement.progressByType.media.currentItem,
@@ -285,7 +289,7 @@ function PositionFields({
 					<RequestFailure error={progress.contentStructureNodesError} fallback={t.ui.retryLater} />
 				</Field>
 			) : null}
-			{type === "book" ? null : (
+			{type === "publishing" ? null : (
 				<Field required>
 					<FieldLabel htmlFor="progress-entry-minutes">{copy.totalMinutes}</FieldLabel>
 					<Input

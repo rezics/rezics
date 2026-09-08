@@ -25,7 +25,7 @@ describe("PostSubjectHero", () => {
 				<PostSubjectHero
 					subject={{
 						id: "019f9872-bd49-7bb4-a6b7-ec621fca2051",
-						type: "book",
+						owner: "publishing",
 						language: "zh",
 						title: "上下文書籍",
 						summary: "作品摘要",
@@ -44,7 +44,7 @@ describe("PostSubjectHero", () => {
 	it("applies the viewer's Chinese display preference without changing the source model", async () => {
 		const subject = {
 			id: "019f9872-bd49-7bb4-a6b7-ec621fca2052",
-			type: "book",
+			owner: "publishing",
 			language: "zh" as const,
 			title: "學習與軟體",
 			summary: "這是繁體內容。",

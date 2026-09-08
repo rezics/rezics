@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { CatalogReference } from "@rezics/reference";
 import {
 	useListCatalogRelationParticipants,
+	type ListCatalogRelationParticipantsStatus200,
 	useListCatalogRelationQualifiers,
 	useListCatalogDefinitionRevisionLabels,
 } from "@rezics/openapi-tanstack-query";
@@ -92,11 +93,7 @@ function RelationParticipants({
 		</section>
 	);
 }
-function ParticipantRows({
-	items,
-}: {
-	items: NonNullable<ReturnType<typeof useListCatalogRelationParticipants>["data"]>["items"];
-}) {
+function ParticipantRows({ items }: { items: ListCatalogRelationParticipantsStatus200["items"] }) {
 	const { t, locale } = useTranslation(["units"]),
 		copy = t.units.nativeSemantics,
 		query = useListCatalogDefinitionRevisionLabels({

@@ -4,7 +4,6 @@ import { Button } from "@rezics/ui";
 import { BookOpen } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
-import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { useTranslation } from "@/i18n/client";
 import { UnitScoreControl } from "./unit-score-control";
 import { UnitReviewFeed } from "./unit-review-feed";
@@ -12,12 +11,10 @@ import { UnitReviewFeed } from "./unit-review-feed";
 export function UnitRatingsReviewsSection({
 	moreReviewsHref,
 	targetId,
-	type,
 	writeReviewHref,
 }: {
 	readonly moreReviewsHref: string;
 	readonly targetId: string;
-	readonly type: UnitDetailUnitType;
 	readonly writeReviewHref: string;
 }) {
 	const { t } = useTranslation(["engagement"]);
@@ -36,7 +33,7 @@ export function UnitRatingsReviewsSection({
 					{t.engagement.whatDoYouThink}
 				</h3>
 				<div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-					<UnitScoreControl targetId={targetId} type={type} />
+					<UnitScoreControl targetId={targetId} />
 					<Button asChild className="mt-1 rounded-full px-6" variant="solid">
 						<Link href={writeReviewHref}>{t.engagement.newReview}</Link>
 					</Button>

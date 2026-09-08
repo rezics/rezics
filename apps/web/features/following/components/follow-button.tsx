@@ -74,7 +74,7 @@ export function FollowButton({
 		mutation: {
 			onSuccess: async (updated) => {
 				await invalidateFollowingQueries(queryClient, unitId);
-				if (updated.kind === "realm") await invalidatePersonalizedTagQueries(queryClient);
+				if (updated.owner === "realm") await invalidatePersonalizedTagQueries(queryClient);
 			},
 		},
 	});
@@ -87,7 +87,7 @@ export function FollowButton({
 	const followingStatus = status.data?.following ? status.data : undefined;
 	const dirty = followingStatus
 		? followingStatus.inAppNotificationsEnabled !== inAppNotificationsEnabled ||
-			(followingStatus.kind === "realm" &&
+			(followingStatus.owner === "realm" &&
 				followingStatus.realmTagSourceSubscribed !== realmTagSourceSubscribed)
 		: false;
 
@@ -97,7 +97,7 @@ export function FollowButton({
 			if (!followingStatus) return;
 			setInAppNotificationsEnabled(followingStatus.inAppNotificationsEnabled);
 			setRealmTagSourceSubscribed(
-				followingStatus.kind === "realm" ? followingStatus.realmTagSourceSubscribed : false,
+				followingStatus.owner === "realm" ? followingStatus.realmTagSourceSubscribed : false,
 			);
 			replaceSettings.reset();
 			unfollow.reset();
@@ -111,14 +111,14 @@ export function FollowButton({
 			await replaceSettings.mutateAsync({
 				path: { unitId },
 				body:
-					followingStatus.kind === "realm"
+					followingStatus.owner === "realm"
 						? {
-								kind: followingStatus.kind,
+								owner: followingStatus.owner,
 								inAppNotificationsEnabled,
 								realmTagSourceSubscribed,
 							}
 						: {
-								kind: followingStatus.kind,
+								owner: followingStatus.owner,
 								inAppNotificationsEnabled,
 								realmTagSourceSubscribed: null,
 							},
@@ -195,7 +195,7 @@ export function FollowButton({
 										}
 									/>
 								</Field>
-								{followingStatus?.kind === "realm" ? (
+								{followingStatus?.owner === "realm" ? (
 									<>
 										<Field className="rounded-xl border bg-muted/24 p-4" orientation="horizontal">
 											<FieldContent>

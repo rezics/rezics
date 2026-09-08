@@ -1,5 +1,3 @@
-import type { ContentLanguage } from "@rezics/i18n";
-
 interface PresentationAttribution {
 	readonly role: string;
 	readonly creditedEntity: { readonly title: string | null };
@@ -11,7 +9,7 @@ interface PresentationSubject {
 
 interface PostPresentationTitleInput {
 	readonly title?: string | null;
-	readonly language?: ContentLanguage | null;
+	readonly language?: string | null;
 	readonly postKind: string;
 	readonly attributions: readonly PresentationAttribution[];
 	readonly subject?: PresentationSubject | null;
@@ -25,7 +23,7 @@ interface PostPresentationTitleMessages {
 }
 
 export interface ResolvedPostPresentationTitle {
-	readonly language?: ContentLanguage;
+	readonly language?: string;
 	readonly value: string;
 }
 

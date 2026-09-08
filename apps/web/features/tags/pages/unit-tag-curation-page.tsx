@@ -18,9 +18,9 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
-	getApiUnitsByTypeByUnitIdTagsQueryKey,
+	getApiResourcesByOwnerByUnitIdTagsQueryKey,
 	type GetApiUnitsByTypeByUnitIdStatus200,
-	usePatchApiUnitsByTypeByUnitIdTagsByTagId,
+	usePatchApiResourcesByOwnerByUnitIdTagsByTagId,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Badge,
@@ -130,13 +130,13 @@ function UnitTagCurationEditor({
 		await Promise.all([
 			invalidateUnitDetail(queryClient, type, unitId),
 			queryClient.invalidateQueries({
-				queryKey: getApiUnitsByTypeByUnitIdTagsQueryKey({
-					path: { type, unitId },
+				queryKey: getApiResourcesByOwnerByUnitIdTagsQueryKey({
+					path: { owner: type, unitId },
 				}),
 			}),
 		]);
 	};
-	const mutation = usePatchApiUnitsByTypeByUnitIdTagsByTagId({
+	const mutation = usePatchApiResourcesByOwnerByUnitIdTagsByTagId({
 		mutation: {
 			onSuccess: refresh,
 			onError: refresh,
@@ -147,7 +147,7 @@ function UnitTagCurationEditor({
 		const position = nextFeaturedUnitTagPosition(featured);
 		try {
 			await mutation.mutateAsync({
-				path: { type, unitId, tagId: tag.tagId },
+				path: { owner: type, unitId, tagId: tag.tagId },
 				body: {
 					pinned: true,
 					position,
@@ -169,7 +169,7 @@ function UnitTagCurationEditor({
 	async function unfeature(tag: FeaturedTag) {
 		try {
 			await mutation.mutateAsync({
-				path: { type, unitId, tagId: tag.tagId },
+				path: { owner: type, unitId, tagId: tag.tagId },
 				body: {
 					pinned: false,
 					position: null,
@@ -196,7 +196,7 @@ function UnitTagCurationEditor({
 		setDisplayedFeatured(arrayMove([...displayedFeatured], sourceIndex, targetIndex));
 		try {
 			await mutation.mutateAsync({
-				path: { type, unitId, tagId },
+				path: { owner: type, unitId, tagId },
 				body: {
 					pinned: true,
 					position: move.position,

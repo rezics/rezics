@@ -19,8 +19,8 @@ import {
 const activeBook: UnitProgressRecord = {
 	completedCount: 2,
 	continuation: {
-		kind: "book-node",
-		bookId: "019f0000-0000-7000-8000-000000000002",
+		kind: "text-version-node",
+		textVersionId: "019f0000-0000-7000-8000-000000000002",
 		nodeId: "019f0000-0000-7000-8000-000000000001",
 	},
 	lastContentStructureNodeId: "019f0000-0000-7000-8000-000000000001",
@@ -81,28 +81,28 @@ describe("progress record input", () => {
 	});
 
 	it("resets transient reading position without changing completion count inputs", () => {
-		expect(createBacklogUpdate("book")).toEqual({
+		expect(createBacklogUpdate("publishing")).toEqual({
 			status: "backlog",
 			progress: 0,
 			lastContentStructureNodeId: null,
 		});
-		expect(createBacklogUpdate("media")).toEqual({
+		expect(createBacklogUpdate("program")).toEqual({
 			status: "backlog",
 			progress: 0,
 			lastContentStructureNodeId: null,
 		});
-		expect(createRereadUpdate("book")).toEqual({
+		expect(createRereadUpdate("publishing")).toEqual({
 			status: "active",
 			progress: 0,
 			lastContentStructureNodeId: null,
 		});
-		expect(createRereadUpdate("media")).toEqual({
+		expect(createRereadUpdate("program")).toEqual({
 			status: "active",
 			progress: 0,
 			lastContentStructureNodeId: null,
 		});
 		expect(
-			createProgressUpdate("book", {
+			createProgressUpdate("publishing", {
 				status: "backlog",
 				percentage: "42",
 				totalMinutes: "0",
@@ -113,13 +113,13 @@ describe("progress record input", () => {
 			progress: 0,
 			lastContentStructureNodeId: null,
 		});
-		expect(createResumeUpdate("book", { ...activeBook, status: "paused" })).toEqual({
+		expect(createResumeUpdate("publishing", { ...activeBook, status: "paused" })).toEqual({
 			status: "active",
 			progress: 0.42,
 			lastContentStructureNodeId: activeBook.lastContentStructureNodeId,
 		});
 		expect(
-			createResumeUpdate("media", {
+			createResumeUpdate("program", {
 				...activeBook,
 				status: "paused",
 				totalTimeMs: 5_400_000,
@@ -141,7 +141,7 @@ describe("progress record input", () => {
 
 	it("validates domain-specific progress updates", () => {
 		expect(
-			createProgressUpdate("book", {
+			createProgressUpdate("publishing", {
 				status: "completed",
 				percentage: "not-used-at-completion",
 				totalMinutes: "0",
@@ -153,7 +153,7 @@ describe("progress record input", () => {
 			lastContentStructureNodeId: null,
 		});
 		expect(
-			createProgressUpdate("media", {
+			createProgressUpdate("program", {
 				status: "paused",
 				percentage: "67",
 				totalMinutes: "90",

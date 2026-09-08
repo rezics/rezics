@@ -1,4 +1,5 @@
 "use client";
+import { progressCopyKey } from "@/features/progress/model/progress-record";
 
 import {
 	getApiProgressByUnitIdQueryKey,
@@ -109,11 +110,15 @@ export function UnitProgressProvider({
 	);
 	const chaptersQuery = useListTextVersionContentNodes(
 		{ path: { unitId: domain.unitId }, query: { localizationLanguages } },
-		{ query: { enabled: authenticated && domain.type === "book" } },
+		{
+			query: {
+				enabled: authenticated && domain.type === "publishing" && domain.shape === "text_version",
+			},
+		},
 	);
 	const mediaItemsQuery = useListProgramContentNodes(
 		{ path: { unitId: domain.unitId }, query: { localizationLanguages } },
-		{ query: { enabled: authenticated && domain.type === "media" } },
+		{ query: { enabled: authenticated && domain.type === "program" } },
 	);
 	const {
 		error: saveError,
@@ -188,21 +193,21 @@ export function UnitProgressProvider({
 		});
 	}, [mediaItemsQuery.data?.items, t.ui.unnamed]);
 	const contentStructureNodes =
-		domain.type === "book"
+		domain.type === "publishing"
 			? chapters
-			: domain.type === "media"
+			: domain.type === "program"
 				? mediaItems
 				: EmptyContentStructureNodes;
 	const contentStructureNodesError =
-		domain.type === "book"
+		domain.type === "publishing"
 			? chaptersQuery.error
-			: domain.type === "media"
+			: domain.type === "program"
 				? mediaItemsQuery.error
 				: undefined;
 	const contentStructureNodesPending =
-		domain.type === "book"
-			? chaptersQuery.isPending
-			: domain.type === "media"
+		domain.type === "publishing"
+			? domain.shape === "text_version" && chaptersQuery.isPending
+			: domain.type === "program"
 				? mediaItemsQuery.isPending
 				: false;
 	const displayedRecord = completionPreview ?? confirmedRecord;
@@ -396,7 +401,7 @@ export function UnitProgressProvider({
 			<span aria-live="polite" className="sr-only" role="status">
 				{completionFeedbackCount === undefined
 					? ""
-					: t.engagement.progressByType[domain.type].completedFeedback({
+					: t.engagement.progressByType[progressCopyKey(domain.type)].completedFeedback({
 							count: completionFeedbackCount,
 						})}
 			</span>

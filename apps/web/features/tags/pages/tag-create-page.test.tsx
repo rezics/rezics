@@ -14,13 +14,13 @@ const state = vi.hoisted(() => ({
 vi.mock("@rezics/openapi-tanstack-query", () => ({
 	PostApiSearchByIndexIndex: { Tags: "tags" },
 	getApiTagsQueryKey: () => ["tags"],
-	getApiUnitsByTypeByUnitIdTagsQueryKey: (input: unknown) => ["unit-tags", input],
+	getApiResourcesByOwnerByUnitIdTagsQueryKey: (input: unknown) => ["unit-tags", input],
 	usePostApiTags: () => ({
 		error: null,
 		isPending: false,
 		mutateAsync: state.create,
 	}),
-	usePutApiUnitsByTypeByUnitIdTagsByTagId: () => ({
+	usePutApiResourcesByOwnerByUnitIdTagsByTagId: () => ({
 		error: null,
 		isPending: false,
 		mutateAsync: state.applyGlobal,
@@ -236,7 +236,7 @@ describe("TagCreatePage", () => {
 				initialTitle={Title}
 				intent={{
 					kind: "unit-tag-vote",
-					type: "book",
+					type: "publishing",
 					unitId: UnitId,
 					context: { kind: "global" },
 				}}
@@ -260,12 +260,12 @@ describe("TagCreatePage", () => {
 			}),
 		);
 		expect(state.applyGlobal).toHaveBeenCalledWith({
-			path: { type: "book", unitId: UnitId, tagId: TagId },
+			path: { type: "publishing", unitId: UnitId, tagId: TagId },
 			body: {},
 		});
 		await waitFor(() => expect(state.push).toHaveBeenCalledOnce());
 		const destination = new URL(state.push.mock.calls[0]?.[0], "https://rezics.example");
-		expect(destination.pathname).toBe(`/units/book/${UnitId}/tags`);
+		expect(destination.pathname).toBe(`/catalog/publishing/${UnitId}/tags`);
 		expect(destination.searchParams.get("context")).toBe("global");
 		expect(destination.searchParams.get("createdTagId")).toBe(TagId);
 	});

@@ -6,10 +6,13 @@ import {
 	usePutApiRecommendationsExclusionsByUnitId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookOpenIcon, Ellipsis, EyeOff, Gamepad2Icon, PlaySquareIcon } from "lucide-react";
+import { Ellipsis, EyeOff } from "lucide-react";
 import { useState } from "react";
 
 import { Button, Menu, MenuContent, MenuItem, MenuTrigger, Skeleton, UnitCard } from "@rezics/ui";
+import type { CatalogOwner } from "@rezics/reference";
+import { publicUnitHref } from "@/features/units/routing/public-unit-route";
+import { UnitCoverFallback } from "@/features/units/components/unit-cover-fallback";
 import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
 import { useRecommendationTracking } from "@/features/recommendations/tracking";
@@ -20,18 +23,12 @@ import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 type RecommendedUnit = GetApiRecommendationsUnitsStatus200["items"][number];
 
-const UnitIcons = {
-	book: BookOpenIcon,
-	software: Gamepad2Icon,
-	media: PlaySquareIcon,
-};
-
 export function UnitShelf({
 	type,
 	personalized,
 	seedUnitId,
 }: {
-	type: "book" | "software" | "media";
+	type: CatalogOwner;
 	personalized?: boolean;
 	seedUnitId?: string;
 }) {
@@ -41,7 +38,7 @@ export function UnitShelf({
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
 	const query = useGetApiRecommendationsUnits({
 		query: {
-			type,
+			owner: type,
 			limit: 6,
 			localizationLanguages,
 			...(personalized === undefined ? {} : { personalized }),
@@ -99,7 +96,6 @@ function UnitRecommendationCard({
 		},
 	});
 	const reason = recommendationReasonLabel(item.recommendationReason, t.feed);
-	const UnitIcon = UnitIcons[item.type];
 	const markNotInterested = () => {
 		onHiddenChange(true);
 		exclude.mutate({
@@ -120,9 +116,9 @@ function UnitRecommendationCard({
 			<UnitCard
 				cover={item.cover}
 				description={reason}
-				fallback={<UnitIcon aria-hidden className="size-8" />}
+				fallback={<UnitCoverFallback kind={item.owner} />}
 				headingAs="h3"
-				href={`/units/${item.type}/${item.id}`}
+				href={publicUnitHref(item.owner, item)}
 				onClick={trackOpen}
 				sizes="(min-width: 1024px) 160px, (min-width: 640px) 30vw, 44vw"
 				title={item.title ?? t.ui.unnamed}

@@ -31,7 +31,7 @@ const mocks = vi.hoisted(() => ({
 				lastContentStructureNodeId: null,
 				lastReadAnchor: null,
 				visibility: "private",
-				type: "book",
+				type: "publishing",
 				language: "zh",
 				title: "沙丘",
 				summary: "一場橫跨星際的旅程。",
@@ -59,7 +59,7 @@ vi.mock("@rezics/openapi-tanstack-query", async (importOriginal) => {
 			data: {
 				filterDocument: {
 					categories: ["units"],
-					where: { kind: { in: ["book", "media", "software"] } },
+					where: { kind: { in: ["publishing", "program", "software"] } },
 				},
 				categories: ["units"],
 				query: { enabled: true, required: false },

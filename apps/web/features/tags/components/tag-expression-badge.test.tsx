@@ -170,7 +170,7 @@ describe("TagExpressionBadge Path presentation", () => {
 				onSpoilerChange={() => undefined}
 				onVote={() => undefined}
 				presentation="path"
-				type="book"
+				type="publishing"
 			/>,
 		);
 

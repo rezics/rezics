@@ -12,6 +12,17 @@ const { forms: metadataTerms } = jaTerminology.metadata;
 const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
+	nativeEditorial: {
+		title: "紹介と画像",
+		edit: "紹介と画像を編集",
+		language: "言語タグ",
+		openLanguage: "この言語を開く",
+		invalidLanguage: "有効な言語タグを入力してください。",
+		withdraw: "現在の紹介と画像を消去",
+		name: "名前",
+		primaryName: "この言語の主な名前として使用",
+		addName: "名前を追加",
+	},
 	nativeGrouping: {
 		classes: "分類",
 		orders: "名前付きの順序",

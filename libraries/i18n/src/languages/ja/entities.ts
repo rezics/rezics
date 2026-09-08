@@ -4,6 +4,23 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
+	fixedProfile: {
+		title: "基本情報",
+		typeRevisionId: "種類の定義改訂の識別子",
+		genderRevisionId: "性別の定義改訂の識別子",
+		areaId: "地域項目の識別子",
+		beginAreaId: "開始地域の項目識別子",
+		endAreaId: "終了地域の項目識別子",
+		begin: "開始時期",
+		end: "終了時期",
+		ended: "終了済み",
+		referenceNotice:
+			"種類と性別には正確な定義改訂の識別子を、地域には既存の地域項目の識別子を入力してください。不明な値は空欄にしてください。",
+		remove: "基本情報を削除",
+		removed: "基本情報は削除済み",
+		resolve: "具体的な種類を確定",
+		resolveNotice: "種類が未確定の場合のみ確定できます。ほかの変更を先に保存してください。",
+	},
 	contextMeasurements: {
 		title: "内容ごとの身体計測値",
 		context: "関連する内容",

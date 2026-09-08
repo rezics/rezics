@@ -96,7 +96,7 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 	const localizationLanguages =
 		localizationState.status === "ready" ? localizationState.languages : [];
 	const followedZones = useGetApiAccountMeFollowing(
-		{ query: { kind: "zone", localizationLanguages, limit: 50 } },
+		{ query: { owner: "zone", localizationLanguages, limit: 50 } },
 		{
 			query: {
 				enabled: Boolean(session) && localizationState.status === "ready",
@@ -104,7 +104,7 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 		},
 	);
 	const followedRealms = useGetApiAccountMeFollowing(
-		{ query: { kind: "realm", localizationLanguages, limit: 50 } },
+		{ query: { owner: "realm", localizationLanguages, limit: 50 } },
 		{
 			query: {
 				enabled: Boolean(session) && localizationState.status === "ready",
@@ -139,7 +139,7 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 		isPending: updateInterfaceLocale.isPending,
 	} as const;
 	const zoneItems = (followedZones.data?.items ?? []).flatMap((item) =>
-		item.kind === "zone"
+		item.owner === "zone"
 			? [
 					{
 						id: item.id,
@@ -152,7 +152,7 @@ function ApplicationShellContent({ children }: { readonly children: ReactNode })
 			: [],
 	);
 	const realmItems = (followedRealms.data?.items ?? []).flatMap((item) =>
-		item.kind === "realm"
+		item.owner === "realm"
 			? [
 					{
 						id: item.id,

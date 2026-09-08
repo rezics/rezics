@@ -1,3 +1,4 @@
+import { CatalogOwnerValues } from "@rezics/reference";
 import { createLoader, createSerializer, parseAsString, parseAsStringLiteral } from "nuqs/server";
 
 import { isUnitId } from "@/features/units/model/unit-id";
@@ -57,7 +58,9 @@ export function unitTagsHref(
 	unitId: string,
 	state?: UnitTagsRouteState,
 ): string {
-	const pathname = type === "entity" ? `/entities/${unitId}/tags` : `/units/${type}/${unitId}/tags`;
+	const pathname = CatalogOwnerValues.some((owner) => owner === type)
+		? `/catalog/${type}/${unitId}/tags`
+		: `/units/${type}/${unitId}/tags`;
 	if (!state) return pathname;
 	return `${pathname}${serializeUnitTagsRouteSearchParams({
 		context: state.context.kind,

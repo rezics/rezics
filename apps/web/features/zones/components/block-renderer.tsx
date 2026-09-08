@@ -1150,7 +1150,7 @@ function ZoneBlock({ block, path }: { block: Block; path: BlockPath }) {
 				block={block}
 				blockPath={path}
 				resolveNavigationHref={(target) => navigationHref(target, context)}
-				resolveSearchResultHref={(result) => unitIdHref(result.kind, result.id)}
+				resolveSearchResultHref={(result) => unitIdHref(result.owner, result.id)}
 				resolveUnitHref={(unit) => unitHref(unit, context)}
 				surface={surface?.kind === "dock" || surface?.kind === "page" ? surface : null}
 				units={context.units}

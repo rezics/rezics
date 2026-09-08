@@ -12,7 +12,8 @@ const attribution = {
 	position: "a0",
 	creditedEntity: {
 		id: "019f9d16-1000-7000-8000-000000000002",
-		kind: "entity",
+		owner: "entity",
+		shape: "person",
 		language: "zh",
 		slugAddress: null,
 		title: "海豚號編輯部",
@@ -81,7 +82,8 @@ const globalAggregate = {
 const book = {
 	...common,
 	id: "019f9d16-1000-7000-8000-000000000010",
-	unitKind: "book",
+	owner: "publishing",
+	shape: "work",
 	title: "科學與魔法的交會點",
 	summary: "從不同角色與世界觀切入，重新閱讀科學和魔法共同塑造的社會。",
 	cover: {
@@ -97,7 +99,8 @@ const book = {
 const mediaWithGlobalFallback = {
 	...common,
 	id: "019f9d16-1000-7000-8000-000000000020",
-	unitKind: "media",
+	owner: "program",
+	shape: "program",
 	title: "沒有封面、預設語境也沒有評分的媒體作品",
 	summary: "這個情境驗證固定媒體槽，以及逐作品回退到全域評分。",
 	cover: null,
@@ -110,7 +113,8 @@ const mediaWithGlobalFallback = {
 const unratedSoftware = {
 	...common,
 	id: "019f9d16-1000-7000-8000-000000000030",
-	unitKind: "software",
+	owner: "software",
+	shape: "content",
 	title: "尚無任何評分的軟體",
 	summary: "偏好與全域語境都沒有 aggregate 時，仍保留評分列。",
 	cover: null,
@@ -123,7 +127,8 @@ const unratedSoftware = {
 const realm = {
 	...common,
 	id: "019f9d16-1000-7000-8000-000000000040",
-	unitKind: "realm",
+	owner: "realm",
+	shape: "realm",
 	title: "群體智慧",
 	summary: "探索群體如何共同形成知識、判斷與行動。",
 	cover: null,
@@ -142,7 +147,8 @@ const realm = {
 const zoneWithoutAvatar = {
 	...common,
 	id: "019f9d16-1000-7000-8000-000000000050",
-	unitKind: "zone",
+	owner: "zone",
+	shape: "zone",
 	title: "開放研究專區",
 	summary: "沒有 avatar 時使用穩定的文字 fallback；標準 Feed 不渲染 banner。",
 	cover: null,
@@ -160,7 +166,8 @@ const contextualReview = {
 	language: "zh",
 	availableLanguages: ["zh"],
 	itemType: "post",
-	unitKind: "post",
+	owner: "post",
+	shape: "post",
 	postKind: "review",
 	attributions: [attribution],
 	realmId: realmContext.id,
@@ -178,7 +185,8 @@ const contextualReview = {
 	replyContext: null,
 	subject: {
 		id: book.id,
-		type: book.unitKind,
+		owner: book.owner,
+		shape: book.shape,
 		language: book.language,
 		title: book.title,
 		summary: book.summary,

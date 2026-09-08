@@ -162,7 +162,7 @@ describe("UnitProgressDialog", () => {
 	});
 
 	it("keeps the entered percentage when updating the draft", async () => {
-		setProgressState(null, "media");
+		setProgressState(null, "program");
 		renderDialog();
 
 		const percentage = screen.getByRole("spinbutton", { name: "播放進度" });
@@ -184,7 +184,7 @@ describe("UnitProgressDialog", () => {
 	});
 
 	it("selects a media content item and estimates its progress", async () => {
-		setProgressState(null, "media");
+		setProgressState(null, "program");
 		progressContext.current = {
 			...progressContext.current,
 			contentStructureNodes: [
@@ -217,7 +217,7 @@ describe("UnitProgressDialog", () => {
 	});
 
 	it("shows the editable percentage without a duplicate slider value", () => {
-		setProgressState({ ...existingRecord, progress: 0.57 }, "media");
+		setProgressState({ ...existingRecord, progress: 0.57 }, "program");
 		renderDialog();
 
 		expect((screen.getByRole("spinbutton", { name: "播放進度" }) as HTMLInputElement).value).toBe(

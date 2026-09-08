@@ -20,7 +20,8 @@ function createReplyPost(id: string, parentPostId: string | null = null): ApiRep
 				creditedEntity: {
 					avatar: null,
 					id: "019b1234-1234-7000-8000-000000000001",
-					kind: "entity",
+					owner: "entity",
+					shape: "person",
 					language: "en",
 					slugAddress: null,
 					title: "Publisher",

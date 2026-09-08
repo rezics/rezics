@@ -1,4 +1,5 @@
 "use client";
+import { progressCopyKey } from "@/features/progress/model/progress-record";
 
 import { useTranslation } from "@/i18n/client";
 import { toNonNegativeApiInteger } from "@/lib/api-number";
@@ -19,7 +20,7 @@ export function UnitProgressStatistics({
 	readonly type: UnitProgressDomain["type"];
 }) {
 	const { locale, t } = useTranslation(["engagement"]);
-	const statistics = t.engagement.progressByType[type].statistics;
+	const statistics = t.engagement.progressByType[progressCopyKey(type)].statistics;
 	const numberFormat = new Intl.NumberFormat(locale.target);
 	const activeValue = toNonNegativeApiInteger(active.value);
 	const backlogValue = toNonNegativeApiInteger(backlog.value);

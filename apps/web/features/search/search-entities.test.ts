@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const api = vi.hoisted(() => ({
-	getApiEntities: vi.fn(),
+	listCatalogEntityCandidates: vi.fn(),
 	postApiSearch: vi.fn(),
 	postApiSearchByIndex: vi.fn(),
 	postApiUnitsPresentations: vi.fn(),
@@ -31,7 +31,7 @@ beforeEach(() => {
 	api.postApiSearch.mockReset();
 	api.postApiSearchByIndex.mockReset();
 	api.postApiUnitsPresentations.mockReset();
-	api.getApiEntities.mockReset();
+	api.listCatalogEntityCandidates.mockReset();
 });
 
 describe("searchEntities", () => {
@@ -110,7 +110,7 @@ describe("searchEntities", () => {
 	});
 
 	it("uses the permission-aware Entity endpoint for direct-credit searches", async () => {
-		api.getApiEntities.mockResolvedValue({ data: { items: [] } });
+		api.listCatalogEntityCandidates.mockResolvedValue({ data: { items: [] } });
 
 		await searchEntities("entities", unitId, new AbortController().signal, {
 			creditAttributionSearch: "direct",
@@ -118,10 +118,10 @@ describe("searchEntities", () => {
 
 		expect(api.postApiUnitsPresentations).not.toHaveBeenCalled();
 		expect(api.postApiSearchByIndex).not.toHaveBeenCalled();
-		expect(api.getApiEntities).toHaveBeenCalledWith(
+		expect(api.listCatalogEntityCandidates).toHaveBeenCalledWith(
 			expect.objectContaining({
 				query: expect.objectContaining({
-					creditAttributionSearch: "direct",
+					mode: "direct",
 					localizationLanguages: ["zh", "en"],
 				}),
 			}),
@@ -129,15 +129,15 @@ describe("searchEntities", () => {
 	});
 
 	it("omits the text query for an initial direct-credit list", async () => {
-		api.getApiEntities.mockResolvedValue({ data: { items: [] } });
+		api.listCatalogEntityCandidates.mockResolvedValue({ data: { items: [] } });
 
 		await searchEntities("entities", "", new AbortController().signal, {
 			creditAttributionSearch: "direct",
 		});
 
-		const request = api.getApiEntities.mock.calls[0]?.[0];
+		const request = api.listCatalogEntityCandidates.mock.calls[0]?.[0];
 		expect(request?.query).toEqual({
-			creditAttributionSearch: "direct",
+			mode: "direct",
 			limit: 10,
 			localizationLanguages: ["zh", "en"],
 		});

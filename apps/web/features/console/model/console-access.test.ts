@@ -12,7 +12,6 @@ describe("console access", () => {
 		expect(ConsoleSectionRequiredCapability).toEqual({
 			users: "platform.user.read",
 			units: "unit.governance.read",
-			"ownership-claims": "unit.governance.read",
 			"unit-merges": "unit.governance.read",
 			moderation: "platform.moderate",
 			audit: "platform.audit.read",
@@ -25,7 +24,6 @@ describe("console access", () => {
 
 		expect(getAccessibleConsoleSectionIds(capabilities)).toEqual([
 			"units",
-			"ownership-claims",
 			"unit-merges",
 			"moderation",
 			"audit",

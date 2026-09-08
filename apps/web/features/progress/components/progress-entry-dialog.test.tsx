@@ -38,7 +38,7 @@ vi.mock("./unit-progress-provider", () => ({
 		contentStructureNodesError: undefined,
 		contentStructureNodesPending: false,
 		domain: {
-			type: "book",
+			type: "publishing",
 			unitId: "019fa3ab-72a9-7792-b2e3-43aa8a9c755d",
 		},
 	}),

@@ -12,6 +12,17 @@ const { forms: metadataTerms } = zhHantTerminology.metadata;
 const { forms: entityTerms } = zhHantTerminology.entity;
 
 export default {
+	nativeEditorial: {
+		title: "介紹與圖片",
+		edit: "編輯介紹與圖片",
+		language: "語言標籤",
+		openLanguage: "開啟此語言",
+		invalidLanguage: "請輸入有效的語言標籤。",
+		withdraw: "清除目前的介紹與圖片",
+		name: "名稱",
+		primaryName: "用作此語言的主要名稱",
+		addName: "新增名稱",
+	},
 	nativeGrouping: {
 		classes: "分類",
 		orders: "具名順序",

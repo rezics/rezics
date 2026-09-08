@@ -1,6 +1,6 @@
 import {
 	PostApiFeedQueryStatus200ItemsPostKindEnum,
-	PostApiFeedQueryStatus200ItemsUnitKindEnum,
+	PostApiFeedQueryStatus200ItemsOwnerEnum,
 } from "@rezics/openapi-tanstack-query";
 import { describe, expect, it } from "vitest";
 
@@ -19,28 +19,25 @@ describe("getFeedActionPolicy", () => {
 		}
 	});
 
-	it.each(["collection", "realm", "zone"] as const)(
-		"gives %s Units a follow action",
-		(unitKind) => {
-			expect(getFeedActionPolicy({ itemType: "unit", unitKind })).toEqual({
-				discussion: "none",
-				primary: "follow",
-			});
-		},
-	);
+	it.each(["collection", "realm", "zone"] as const)("gives %s Units a follow action", (owner) => {
+		expect(getFeedActionPolicy({ itemType: "unit", owner })).toEqual({
+			discussion: "none",
+			primary: "follow",
+		});
+	});
 
-	it.each(["book", "media", "software", "series", "tag"] as const)(
+	it.each(["publishing", "music", "program", "software", "grouping", "tag"] as const)(
 		"gives %s Units a discussion destination",
-		(unitKind) => {
-			expect(getFeedActionPolicy({ itemType: "unit", unitKind })).toMatchObject({
+		(owner) => {
+			expect(getFeedActionPolicy({ itemType: "unit", owner })).toMatchObject({
 				discussion: "discussions",
 			});
 		},
 	);
 
 	it("covers every generated unit kind", () => {
-		for (const unitKind of Object.values(PostApiFeedQueryStatus200ItemsUnitKindEnum)) {
-			expect(() => getFeedActionPolicy({ itemType: "unit", unitKind })).not.toThrow();
+		for (const owner of Object.values(PostApiFeedQueryStatus200ItemsOwnerEnum)) {
+			expect(() => getFeedActionPolicy({ itemType: "unit", owner })).not.toThrow();
 		}
 	});
 });

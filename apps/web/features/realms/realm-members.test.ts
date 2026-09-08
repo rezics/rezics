@@ -9,6 +9,7 @@ const members: Parameters<typeof filterRealmMembers>[0] = [
 		name: "Edge Coordinates",
 		slugAddress: {
 			slug: "edge",
+			scopeNamespaceId: null,
 			scopeUnitId: "019f995d-7595-7c99-9183-250790bbfe30",
 			canonicalPath: ["users", "edge"],
 		},
@@ -23,6 +24,7 @@ const members: Parameters<typeof filterRealmMembers>[0] = [
 		name: "Jety",
 		slugAddress: {
 			slug: "jetywolf",
+			scopeNamespaceId: null,
 			scopeUnitId: "019f995d-7595-7c99-9183-250790bbfe30",
 			canonicalPath: ["users", "jetywolf"],
 		},

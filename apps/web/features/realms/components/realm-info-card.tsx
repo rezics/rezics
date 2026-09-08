@@ -1,7 +1,6 @@
 "use client";
 
 import type { PresentedAvatar } from "@rezics/avatar";
-import type { ContentLanguage } from "@rezics/i18n";
 import { IdentityAvatar } from "@rezics/ui";
 
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
@@ -10,7 +9,7 @@ export interface RealmInfoCardData {
 	readonly id: string;
 	readonly name: string;
 	readonly initials: string;
-	readonly language?: ContentLanguage | null;
+	readonly language?: string | null;
 	readonly avatar?: PresentedAvatar | null;
 	readonly slug?: string;
 	readonly summary?: string;

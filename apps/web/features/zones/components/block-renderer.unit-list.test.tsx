@@ -388,7 +388,8 @@ function searchHit(title = "Search item") {
 	return {
 		category: "units",
 		id: ItemId,
-		kind: "book",
+		owner: "publishing",
+		shape: "work",
 		summary: "A stored-query result",
 		title,
 	};

@@ -48,7 +48,7 @@ const baseProps = {
 	canVote: true,
 	onAddSelections: vi.fn(async () => []),
 	tagCreateTarget: {
-		type: "book",
+		type: "publishing",
 		unitId: "00000000-0000-7000-8000-000000000001",
 		context: { kind: "global" },
 	},
@@ -99,7 +99,7 @@ describe("UnitTagManagement", () => {
 		expect(url.pathname).toBe("/create/tag/new");
 		expect(url.searchParams.get("title")).toBeNull();
 		expect(url.searchParams.get("intent")).toBe("unit-tag-vote");
-		expect(url.searchParams.get("unitType")).toBe("book");
+		expect(url.searchParams.get("unitType")).toBe("publishing");
 		expect(url.searchParams.get("unitId")).toBe("00000000-0000-7000-8000-000000000001");
 		expect(url.searchParams.get("context")).toBe("global");
 		expect(url.searchParams.get("realmId")).toBeNull();

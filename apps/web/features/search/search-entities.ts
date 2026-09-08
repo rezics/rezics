@@ -1,5 +1,5 @@
 import {
-	getApiEntities,
+	listCatalogEntityCandidates,
 	PostApiSearchByIndexIndex,
 	postApiSearch,
 	postApiSearchByIndex,
@@ -70,9 +70,9 @@ export function createEntitySearch(
 ): EntitySearch {
 	return async (index, query, signal, options) => {
 		if (index === "entities" && options?.creditAttributionSearch) {
-			const { data } = await getApiEntities({
+			const { data } = await listCatalogEntityCandidates({
 				query: {
-					creditAttributionSearch: options.creditAttributionSearch,
+					mode: options.creditAttributionSearch,
 					...(query ? { query } : {}),
 					limit: 10,
 					localizationLanguages: [...localizationLanguages],

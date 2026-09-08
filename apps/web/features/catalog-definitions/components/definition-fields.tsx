@@ -99,7 +99,7 @@ export function DefinitionFlag({
 		<Field orientation="horizontal">
 			<Checkbox
 				checked={value}
-				hiddenInput={{ id }}
+				ids={{ hiddenInput: id }}
 				onCheckedChange={(detail) => onChange(detail.checked === true)}
 			/>
 			<FieldLabel htmlFor={id}>{label}</FieldLabel>

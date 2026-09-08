@@ -186,7 +186,7 @@ export function DefinitionSelect({
 							value.revision.labels[0]?.label ??
 							value.key}
 					</span>
-					<Button type="button" variant="ghost" onClick={() => onChange(undefined)}>
+					<Button type="button" variant="quiet" onClick={() => onChange(undefined)}>
 						{copy.remove}
 					</Button>
 				</div>

@@ -12,7 +12,7 @@ export type AttributionSummary = {
 	readonly role: string;
 	readonly creditedEntity: {
 		readonly id: string;
-		readonly kind: string;
+		readonly owner: "entity";
 		readonly slugAddress?: PublicSlugAddressValue | null;
 		readonly title: string | null;
 		readonly summary?: string | null;
@@ -51,7 +51,7 @@ export function AttributionLinks({
 	const { t } = useTranslation(["units"]);
 	if (!attributions.length) return <span className={className}>{emptyLabel}</span>;
 	return attributions.map((attribution, index) => {
-		const href = publicUnitHref(attribution.creditedEntity.kind, attribution.creditedEntity);
+		const href = publicUnitHref(attribution.creditedEntity.owner, attribution.creditedEntity);
 		const label = attribution.creditedEntity.title ?? emptyLabel;
 		const roleLabel =
 			resolveRoleLabel === undefined
@@ -142,7 +142,7 @@ export function PublisherAttributionLinks({
 			{publishers.map((attribution) => {
 				const creditedEntity = attribution.creditedEntity;
 				const label = creditedEntity.title ?? emptyLabel;
-				const href = publicUnitHref(creditedEntity.kind, creditedEntity);
+				const href = publicUnitHref(creditedEntity.owner, creditedEntity);
 				const initials = Array.from(label.trim())[0]?.toLocaleUpperCase() ?? label;
 				const content = (
 					<>

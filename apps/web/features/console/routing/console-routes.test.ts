@@ -6,7 +6,6 @@ describe("console routes", () => {
 	it("builds section routes", () => {
 		expect(consoleSectionHref("users")).toBe("/console/users");
 		expect(consoleSectionHref("units")).toBe("/console/units");
-		expect(consoleSectionHref("ownership-claims")).toBe("/console/ownership-claims");
 		expect(consoleSectionHref("unit-merges")).toBe("/console/unit-merges");
 		expect(consoleSectionHref("moderation")).toBe("/console/moderation");
 		expect(consoleSectionHref("audit")).toBe("/console/audit");
@@ -23,7 +22,6 @@ describe("console routes", () => {
 		["/console/users", "users"],
 		["/console/users/user-id", "users"],
 		["/console/units", "units"],
-		["/console/ownership-claims", "ownership-claims"],
 		["/console/unit-merges", "unit-merges"],
 		["/console/moderation", "moderation"],
 		["/console/audit/", "audit"],

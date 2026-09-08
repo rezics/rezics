@@ -51,10 +51,10 @@ const adaptedAudioEvidence = {
 } satisfies EvidenceItem;
 
 const parentEvidence = {
-	source: "parent",
+	source: "adapted_audio",
 	unit: {
 		id: "00000000-0000-4000-8000-000000000002",
-		kind: "software",
+		kind: "audio",
 		language: "en",
 		title: "Parent software",
 	},
@@ -133,7 +133,7 @@ describe("ContentLanguageSupportEvidence", () => {
 				<TranslationProvider initial={translation.snapshot}>
 					<ContentLanguageSupportEvidence
 						onAdopt={vi.fn()}
-						type="release"
+						type="video"
 						unitId="00000000-0000-4000-8000-000000000005"
 					/>
 				</TranslationProvider>

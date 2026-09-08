@@ -1,6 +1,7 @@
 "use client";
 
 import { isContentLanguage, toContentLanguage, type ContentLanguage } from "@rezics/i18n";
+import type { ContentLanguageTag } from "@rezics/content-language";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
 	createContext,
@@ -181,15 +182,26 @@ export function useLocalizedDraft<Value extends object>({
 	createInitialValue,
 	codec,
 	partition = "selected-language",
+	resource,
 }: {
 	readonly scope: string;
 	readonly baseVersion: string | null;
 	readonly createInitialValue: () => Value;
 	readonly codec: LocalizedDraftCodec<Value>;
 	readonly partition?: "selected-language" | "shared";
+	readonly resource?: {
+		readonly id: string;
+		readonly language: ContentLanguageTag;
+		readonly onDirtyChange: (dirty: boolean) => void;
+	};
 }): LocalizedDraftState<Value> {
 	const session = useAuthSession();
-	const { unitId, selectedLanguage, setDirty } = useContentLanguageEditor();
+	const editor = useContext(ContentLanguageEditorContext);
+	const identity = resource
+		? { unitId: resource.id, selectedLanguage: resource.language, setDirty: resource.onDirtyChange }
+		: editor;
+	if (!identity) throw new Error("A localized draft requires its resource or editor context");
+	const { unitId, selectedLanguage, setDirty } = identity;
 	const partitionKey = partition === "shared" ? "shared" : `language:${selectedLanguage}`;
 	const accountId = session.data?.user.id ?? null;
 	const ownerKey = JSON.stringify(["localized-draft", 1, accountId, unitId]);

@@ -134,7 +134,7 @@ export function FeedPostCard({
 		preserveDisplayedLanguage && post.language
 			? withContentLanguage(baseHref, post.language)
 			: baseHref;
-	const subjectHref = post.subject ? unitHref(post.subject.type, post.subject.id) : undefined;
+	const subjectHref = post.subject ? unitHref(post.subject.owner, post.subject.id) : undefined;
 	const subjectTitle = useChineseContentText(
 		post.subject?.title ?? t.actions.view,
 		post.subject?.language,
@@ -178,7 +178,7 @@ export function FeedPostCard({
 				}
 			: undefined;
 	const subjectRating: FeedTargetRating | undefined =
-		post.subject && isRatedWorkKind(post.subject.type)
+		post.subject && isRatedWorkKind(post.subject.owner)
 			? attachedRating
 				? attachedRating
 				: {
@@ -209,7 +209,9 @@ export function FeedPostCard({
 			<FeedCardContent>
 				<div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
 					<p className="font-semibold text-brand text-xs">
-						{t.feed.content.kinds[`post:${post.postKind}`]}
+						{Object.entries(t.feed.content.kinds).find(
+							([key]) => key === `post:${post.postKind}`,
+						)?.[1] ?? t.feed.content.owners.post}
 					</p>
 					{subjectIsCurrentUnit && attachedRating ? (
 						<FeedCardRating className="mt-0" rating={attachedRating} />
@@ -262,7 +264,7 @@ export function FeedPostCard({
 					{...(post.subject.cover ? { imageUrl: post.subject.cover.url } : {})}
 					href={subjectHref}
 					imageAlt={subjectTitle}
-					imageFallback={<UnitCoverFallback kind={post.subject.type} />}
+					imageFallback={<UnitCoverFallback kind={post.subject.owner} />}
 					label={t.feed.relatedWork}
 					rating={subjectRating}
 					title={subjectTitle}
@@ -331,8 +333,8 @@ export function FeedUnitCard({
 				}
 			: undefined;
 	const identityPresentation = unit.presentation.kind === "identity" ? unit.presentation : null;
-	const realmTagContext = unit.unitKind === "tag" ? identityPresentation?.realmTagContext : null;
-	const unitBaseHref = unitHref(unit.unitKind, unit.id);
+	const realmTagContext = unit.owner === "tag" ? identityPresentation?.realmTagContext : null;
+	const unitBaseHref = unitHref(unit.owner, unit.id);
 	const href = realmTagContext
 		? postHref(realmTagContext.contextPostId, {
 				kind: "realm",
@@ -345,13 +347,13 @@ export function FeedUnitCard({
 		realmTagContext?.summary ?? unit.summary ?? "",
 		realmTagContext?.language ?? unit.language,
 	);
-	const discussionBaseHref = feedUnitDiscussionHref(unit.unitKind, unit.id);
+	const discussionBaseHref = feedUnitDiscussionHref(unit.owner, unit.id);
 	const discussionHref =
 		preserveDisplayedLanguage && unit.language && discussionBaseHref
 			? withContentLanguage(discussionBaseHref, unit.language)
 			: discussionBaseHref;
-	const isRealm = unit.unitKind === "realm";
-	const tagHasOtherPositions = unit.unitKind === "tag" && unit.tagHasOtherPositions === true;
+	const isRealm = unit.owner === "realm";
+	const tagHasOtherPositions = unit.owner === "tag" && unit.tagHasOtherPositions === true;
 
 	return (
 		<FeedCard
@@ -379,7 +381,9 @@ export function FeedUnitCard({
 					</FeedItemMain>
 					<div className="min-w-0">
 						<p className="font-semibold text-brand text-xs">
-							{t.feed.content.kinds[`unit:${unit.unitKind}`]}
+							{Object.entries(t.feed.content.kinds).find(
+								([key]) => key === `${unit.owner}:${unit.shape}`,
+							)?.[1] ?? t.feed.content.owners[unit.owner]}
 						</p>
 						<FeedItemMain href={href} onOpen={trackOpen}>
 							<h2
@@ -408,8 +412,12 @@ export function FeedUnitCard({
 					coverUrl={unit.cover?.url}
 					headingId={`feed-item-${unit.id}`}
 					href={href}
-					kind={unit.unitKind}
-					kindLabel={t.feed.content.kinds[`unit:${unit.unitKind}`]}
+					kind={unit.owner}
+					kindLabel={
+						Object.entries(t.feed.content.kinds).find(
+							([key]) => key === `${unit.owner}:${unit.shape}`,
+						)?.[1] ?? t.feed.content.owners[unit.owner]
+					}
 					metadata={
 						unit.collection ? (
 							<p className="mt-2 text-xs font-medium text-muted-foreground">
@@ -457,8 +465,14 @@ export function FeedUnitCard({
 	);
 }
 
-function isRatedWorkKind(kind: string): kind is "book" | "media" | "software" | "series" {
-	return kind === "book" || kind === "media" || kind === "software" || kind === "series";
+function isRatedWorkKind(kind: string): boolean {
+	return (
+		kind === "publishing" ||
+		kind === "music" ||
+		kind === "program" ||
+		kind === "software" ||
+		kind === "grouping"
+	);
 }
 
 function toFeedTargetScore(
@@ -569,7 +583,7 @@ function FeedItemActions({
 	const policy = getFeedActionPolicy(
 		item.itemType === "post"
 			? { itemType: "post", postKind: item.postKind }
-			: { itemType: "unit", unitKind: item.unitKind },
+			: { itemType: "unit", owner: item.owner },
 	);
 	return (
 		<FeedEngagementBar
@@ -594,12 +608,13 @@ function toFeedAttributionContexts(
 	return attributions.map((attribution) => {
 		const creditedEntity = attribution.creditedEntity;
 		const name = creditedEntity.title ?? unknownAttribution;
-		const href = publicUnitHref(creditedEntity.kind, creditedEntity);
+		const href = publicUnitHref(creditedEntity.owner, creditedEntity);
 		return {
 			id: attribution.id,
-			kind: creditedEntity.kind,
 			role: attribution.role,
-			...(creditedEntity.title ? { language: creditedEntity.language } : {}),
+			...(creditedEntity.title && creditedEntity.language
+				? { language: creditedEntity.language }
+				: {}),
 			...(href ? { href } : {}),
 			initials: contextInitials(name),
 			name,
@@ -618,7 +633,7 @@ function toFeedRealmContexts(realms: FeedItem["realms"], unnamedRealm: string): 
 			href: realmHref({ id: realm.id, slugAddress: realm.slugAddress }),
 			initials: contextInitials(name),
 			name,
-			...(realm.title ? { language: realm.language } : {}),
+			...(realm.title && realm.language ? { language: realm.language } : {}),
 			...(realm.avatar ? { avatar: realm.avatar } : {}),
 			...(realm.slugAddress ? { slug: realm.slugAddress.slug } : {}),
 			...(realm.summary ? { summary: realm.summary } : {}),

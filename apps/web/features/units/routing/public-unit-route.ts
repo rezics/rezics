@@ -1,4 +1,5 @@
 import type { PublicSlugAddressValue } from "@rezics/slug";
+import type { CatalogOwner } from "@rezics/reference";
 
 import { profileHref } from "@/features/profiles/profile-route";
 import { realmHref, zoneHref } from "@/features/slugs/unit-route";
@@ -9,17 +10,12 @@ export interface PublicUnitRouteValue {
 }
 
 export type PublicUnitKind =
+	| CatalogOwner
 	| "profile"
 	| "realm"
 	| "zone"
-	| "book"
-	| "software"
-	| "media"
-	| "series"
 	| "video"
 	| "audio"
-	| "release"
-	| "entity"
 	| "tag"
 	| "collection"
 	| "post"
@@ -35,16 +31,18 @@ export function publicUnitHref(kind: string, value: PublicUnitRouteValue): strin
 			return realmHref(value);
 		case "zone":
 			return zoneHref(value);
-		case "book":
+		case "publishing":
+		case "music":
+		case "program":
 		case "software":
-		case "media":
-		case "series":
+		case "grouping":
+		case "entity":
+		case "reference":
+		case "distribution":
+			return `/catalog/${kind}/${value.id}`;
 		case "video":
 		case "audio":
-		case "release":
 			return `/units/${kind}/${value.id}`;
-		case "entity":
-			return `/entities/${value.id}`;
 		case "tag":
 			return `/tags/${value.id}`;
 		case "collection":

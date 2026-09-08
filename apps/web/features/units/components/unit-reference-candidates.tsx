@@ -1,20 +1,20 @@
 "use client";
 
 import {
-	getApiUnitsByTypeByUnitIdAliases,
-	getApiUnitsByTypeByUnitIdAliasesQueryKey,
-	getApiUnitsByTypeByUnitIdExternalLinks,
-	getApiUnitsByTypeByUnitIdExternalLinksQueryKey,
-	useDeleteApiUnitsByTypeByUnitIdAliasesByAliasId,
-	useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote,
-	useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId,
-	useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote,
-	usePatchApiUnitsByTypeByUnitIdAliasesByAliasId,
-	usePatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId,
-	usePostApiUnitsByTypeByUnitIdAliases,
-	usePostApiUnitsByTypeByUnitIdExternalLinks,
-	usePutApiUnitsByTypeByUnitIdAliasesByAliasIdVote,
-	usePutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote,
+	getApiResourcesByOwnerByUnitIdAliases,
+	getApiResourcesByOwnerByUnitIdAliasesQueryKey,
+	getApiResourcesByOwnerByUnitIdExternalLinks,
+	getApiResourcesByOwnerByUnitIdExternalLinksQueryKey,
+	useDeleteApiResourcesByOwnerByUnitIdAliasesByAliasId,
+	useDeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVote,
+	useDeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId,
+	useDeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote,
+	usePatchApiResourcesByOwnerByUnitIdAliasesByAliasId,
+	usePatchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId,
+	usePostApiResourcesByOwnerByUnitIdAliases,
+	usePostApiResourcesByOwnerByUnitIdExternalLinks,
+	usePutApiResourcesByOwnerByUnitIdAliasesByAliasIdVote,
+	usePutApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Badge,
@@ -211,12 +211,12 @@ function AliasCandidates({
 	const { t } = useTranslation(["actions", "errors", "units"]);
 	const queryClient = useQueryClient();
 	const [queryGeneration, setQueryGeneration] = useState(0);
-	const queryOptions = { path: { type, unitId }, query: { limit: 50 } } as const;
-	const queryKey = getApiUnitsByTypeByUnitIdAliasesQueryKey(queryOptions);
+	const queryOptions = { path: { owner: type, unitId }, query: { limit: 50 } } as const;
+	const queryKey = getApiResourcesByOwnerByUnitIdAliasesQueryKey(queryOptions);
 	const query = useInfiniteQuery({
 		queryKey: [...queryKey, queryGeneration],
 		queryFn: async ({ pageParam, signal }) => {
-			const { data } = await getApiUnitsByTypeByUnitIdAliases({
+			const { data } = await getApiResourcesByOwnerByUnitIdAliases({
 				path: queryOptions.path,
 				query: { ...queryOptions.query, ...(pageParam ? { cursor: pageParam } : {}) },
 				signal,
@@ -227,11 +227,11 @@ function AliasCandidates({
 		initialPageParam: "",
 		getNextPageParam: (page) => page.nextCursor ?? undefined,
 	});
-	const create = usePostApiUnitsByTypeByUnitIdAliases();
-	const vote = usePutApiUnitsByTypeByUnitIdAliasesByAliasIdVote();
-	const clearVote = useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote();
-	const curate = usePatchApiUnitsByTypeByUnitIdAliasesByAliasId();
-	const withdraw = useDeleteApiUnitsByTypeByUnitIdAliasesByAliasId();
+	const create = usePostApiResourcesByOwnerByUnitIdAliases();
+	const vote = usePutApiResourcesByOwnerByUnitIdAliasesByAliasIdVote();
+	const clearVote = useDeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVote();
+	const curate = usePatchApiResourcesByOwnerByUnitIdAliasesByAliasId();
+	const withdraw = useDeleteApiResourcesByOwnerByUnitIdAliasesByAliasId();
 	const refresh = () => {
 		queryClient.removeQueries({ queryKey });
 		setQueryGeneration((current) => current + 1);
@@ -245,7 +245,7 @@ function AliasCandidates({
 		const term = String(form.get("term") ?? "").trim();
 		if (!term) return;
 		try {
-			await create.mutateAsync({ path: { type, unitId }, body: { term } });
+			await create.mutateAsync({ path: { owner: type, unitId }, body: { term } });
 			event.currentTarget.reset();
 			await refresh();
 			toast.create({ title: t.units.references.aliasProposed, type: "success" });
@@ -292,7 +292,7 @@ function AliasCandidates({
 									onClear={() =>
 										void clearVote
 											.mutateAsync({
-												path: { type, unitId, aliasId: candidate.id },
+												path: { owner: type, unitId, aliasId: candidate.id },
 											})
 											.then(refresh)
 											.catch(() => undefined)
@@ -300,7 +300,7 @@ function AliasCandidates({
 									onVote={(value) =>
 										void vote
 											.mutateAsync({
-												path: { type, unitId, aliasId: candidate.id },
+												path: { owner: type, unitId, aliasId: candidate.id },
 												body: { value },
 											})
 											.then(refresh)
@@ -320,7 +320,7 @@ function AliasCandidates({
 												void curate
 													.mutateAsync({
 														path: {
-															type,
+															owner: type,
 															unitId,
 															aliasId: candidate.id,
 														},
@@ -347,7 +347,7 @@ function AliasCandidates({
 												void withdraw
 													.mutateAsync({
 														path: {
-															type,
+															owner: type,
 															unitId,
 															aliasId: candidate.id,
 														},
@@ -400,12 +400,12 @@ function ExternalLinkCandidates({
 	const queryClient = useQueryClient();
 	const [source, setSource] = useState<SelectedEntity>();
 	const [queryGeneration, setQueryGeneration] = useState(0);
-	const queryOptions = { path: { type, unitId }, query: { limit: 50 } } as const;
-	const queryKey = getApiUnitsByTypeByUnitIdExternalLinksQueryKey(queryOptions);
+	const queryOptions = { path: { owner: type, unitId }, query: { limit: 50 } } as const;
+	const queryKey = getApiResourcesByOwnerByUnitIdExternalLinksQueryKey(queryOptions);
 	const query = useInfiniteQuery({
 		queryKey: [...queryKey, queryGeneration],
 		queryFn: async ({ pageParam, signal }) => {
-			const { data } = await getApiUnitsByTypeByUnitIdExternalLinks({
+			const { data } = await getApiResourcesByOwnerByUnitIdExternalLinks({
 				path: queryOptions.path,
 				query: { ...queryOptions.query, ...(pageParam ? { cursor: pageParam } : {}) },
 				signal,
@@ -416,11 +416,11 @@ function ExternalLinkCandidates({
 		initialPageParam: "",
 		getNextPageParam: (page) => page.nextCursor ?? undefined,
 	});
-	const create = usePostApiUnitsByTypeByUnitIdExternalLinks();
-	const vote = usePutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote();
-	const clearVote = useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote();
-	const curate = usePatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId();
-	const withdraw = useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId();
+	const create = usePostApiResourcesByOwnerByUnitIdExternalLinks();
+	const vote = usePutApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote();
+	const clearVote = useDeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote();
+	const curate = usePatchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId();
+	const withdraw = useDeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId();
 	const refresh = async () => {
 		queryClient.removeQueries({ queryKey });
 		setQueryGeneration((current) => current + 1);
@@ -435,7 +435,7 @@ function ExternalLinkCandidates({
 		if (!url) return;
 		try {
 			await create.mutateAsync({
-				path: { type, unitId },
+				path: { owner: type, unitId },
 				body: { sourceEntityId: source.id, url },
 			});
 			event.currentTarget.reset();
@@ -509,7 +509,7 @@ function ExternalLinkCandidates({
 										void clearVote
 											.mutateAsync({
 												path: {
-													type,
+													owner: type,
 													unitId,
 													externalLinkId: candidate.id,
 												},
@@ -521,7 +521,7 @@ function ExternalLinkCandidates({
 										void vote
 											.mutateAsync({
 												path: {
-													type,
+													owner: type,
 													unitId,
 													externalLinkId: candidate.id,
 												},
@@ -544,7 +544,7 @@ function ExternalLinkCandidates({
 												void curate
 													.mutateAsync({
 														path: {
-															type,
+															owner: type,
 															unitId,
 															externalLinkId: candidate.id,
 														},
@@ -571,7 +571,7 @@ function ExternalLinkCandidates({
 												void withdraw
 													.mutateAsync({
 														path: {
-															type,
+															owner: type,
 															unitId,
 															externalLinkId: candidate.id,
 														},

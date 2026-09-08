@@ -1,6 +1,6 @@
 import type {
 	GetApiRealmsByRealmIdUnitsByUnitIdTagsStatus200,
-	GetApiUnitsByTypeByUnitIdTagsStatus200,
+	GetApiResourcesByOwnerByUnitIdTagsStatus200,
 } from "@rezics/openapi-tanstack-query";
 
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
@@ -9,7 +9,7 @@ import type {
 	RealmTagVoteContextPresentation,
 	TagPresentation,
 } from "../model/tag-presentation";
-type UnitTagLandscape = GetApiUnitsByTypeByUnitIdTagsStatus200;
+type UnitTagLandscape = GetApiResourcesByOwnerByUnitIdTagsStatus200;
 
 export function presentRealmTagGroups(input: {
 	readonly data: UnitTagLandscape;

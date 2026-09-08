@@ -397,13 +397,13 @@ export function RealmDetailPage({ id, page = "main" }: { id: string; page?: Real
 													language: item.language,
 													summary:
 														item.itemType === "unit" &&
-														item.unitKind === "tag" &&
+														item.owner === "tag" &&
 														item.presentation.kind === "identity"
 															? (item.presentation.realmTagContext?.summary ?? item.summary)
 															: item.summary,
 													summaryLanguage:
 														item.itemType === "unit" &&
-														item.unitKind === "tag" &&
+														item.owner === "tag" &&
 														item.presentation.kind === "identity"
 															? (item.presentation.realmTagContext?.language ?? item.language)
 															: item.language,
@@ -590,14 +590,14 @@ function realmPinnedContentHref(
 		if (item.postKind === "review") return postHref(item.id, { kind: "realm", realmId });
 		return undefined;
 	}
-	if (item.unitKind === "tag")
+	if (item.owner === "tag")
 		return item.presentation.kind === "identity" && item.presentation.realmTagContext
 			? postHref(item.presentation.realmTagContext.contextPostId, {
 					kind: "realm",
 					realmId: item.presentation.realmTagContext.realmId,
 				})
 			: tagDetailHref(item.id);
-	return publicUnitHref(item.unitKind, item);
+	return publicUnitHref(item.owner, item);
 }
 
 function RealmActions({

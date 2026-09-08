@@ -9,7 +9,7 @@ export function UnitDetailSectionFrame({
 	action,
 }: {
 	children: ReactNode;
-	description: string;
+	description?: string;
 	title: string;
 	action?: ReactNode;
 }) {

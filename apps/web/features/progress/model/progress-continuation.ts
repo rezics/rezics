@@ -3,7 +3,8 @@ import { bookReaderHref, unitDetailHref } from "@/features/units/routing/unit-de
 import type { ProgressContinuation, UnitProgressDomain } from "./progress-record";
 
 export function defaultProgressContinuation(domain: UnitProgressDomain): ProgressContinuation {
-	return domain.type === "book" || domain.type === "media"
+	return (domain.type === "publishing" && domain.shape === "text_version") ||
+		domain.type === "program"
 		? { kind: "contents", unitId: domain.unitId, unitType: domain.type }
 		: { kind: "none" };
 }
@@ -12,29 +13,33 @@ export function parseProgressContinuation(
 	value: unknown,
 	domain: UnitProgressDomain,
 ): ProgressContinuation {
-	if (!value || typeof value !== "object") return defaultProgressContinuation(domain);
-	const candidate = value as Readonly<Record<string, unknown>>;
+	if (!isRecord(value)) return defaultProgressContinuation(domain);
+	const candidate = value;
 	if (
-		candidate.kind === "book-node" &&
-		typeof candidate.bookId === "string" &&
+		candidate.kind === "text-version-node" &&
+		typeof candidate.textVersionId === "string" &&
 		typeof candidate.nodeId === "string"
 	)
-		return { kind: "book-node", bookId: candidate.bookId, nodeId: candidate.nodeId };
+		return {
+			kind: "text-version-node",
+			textVersionId: candidate.textVersionId,
+			nodeId: candidate.nodeId,
+		};
 	if (candidate.kind === "unit" && isRecord(candidate.contentUnit)) {
 		const contentUnit = candidate.contentUnit;
 		if (
 			typeof contentUnit.id === "string" &&
-			(contentUnit.type === "video" || contentUnit.type === "audio")
+			(contentUnit.owner === "video" || contentUnit.owner === "audio")
 		)
-			return { kind: "unit", unitId: contentUnit.id, unitType: contentUnit.type };
+			return { kind: "unit", unitId: contentUnit.id, unitType: contentUnit.owner };
 	}
 	if (candidate.kind === "contents" && isRecord(candidate.ownerUnit)) {
 		const ownerUnit = candidate.ownerUnit;
 		if (
 			typeof ownerUnit.id === "string" &&
-			(ownerUnit.type === "book" || ownerUnit.type === "media")
+			(ownerUnit.owner === "publishing" || ownerUnit.owner === "program")
 		)
-			return { kind: "contents", unitId: ownerUnit.id, unitType: ownerUnit.type };
+			return { kind: "contents", unitId: ownerUnit.id, unitType: ownerUnit.owner };
 	}
 	if (candidate.kind === "none") return { kind: "none" };
 	return defaultProgressContinuation(domain);
@@ -46,8 +51,8 @@ function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
 
 export function progressContinuationHref(continuation: ProgressContinuation): string | null {
 	switch (continuation.kind) {
-		case "book-node":
-			return bookReaderHref(continuation.bookId, continuation.nodeId);
+		case "text-version-node":
+			return bookReaderHref(continuation.textVersionId, continuation.nodeId);
 		case "unit":
 			return `/units/${continuation.unitType}/${continuation.unitId}`;
 		case "contents":

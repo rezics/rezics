@@ -1,6 +1,7 @@
 "use client";
 
-import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
+import { useUnitSummary } from "@/features/units/hooks/use-unit-summary";
+import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import {
 	Alert,
 	AlertDescription,
@@ -14,13 +15,10 @@ import { ArrowLeft, CircleCheck } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { UnitTagExplorer } from "@/features/tags/components/unit-tag-explorer";
 import { useChineseContentText } from "@/features/content-language-display/chinese-content-display-context";
-import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
-import { isUnitDetailUnitFor } from "@/features/units/model/unit-detail-unit";
 import { unitDetailHref } from "@/features/units/routing/unit-detail-routes";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
-import { selectLocalization } from "@/lib/localization";
 import type { UnitTagsRouteState } from "../routing/tag-links";
 
 export function UnitTagsPage({
@@ -34,19 +32,13 @@ export function UnitTagsPage({
 }) {
 	const { t } = useTranslation(["tags", "ui", "units"]);
 	const localizationLanguages = useLocalizationLanguages();
-	const query = useGetApiUnitsByTypeByUnitId({
-		path: { type, unitId },
-		query: { localizationLanguages },
-	});
+	const query = useUnitSummary({ owner: type, id: unitId });
 	useLocalizationFallbackToast({
 		actualLanguage: query.data?.language ?? null,
 		localizationLanguages,
 		unitId,
 	});
-	const localization =
-		query.data && isUnitDetailUnitFor(query.data, type)
-			? selectLocalization(query.data.localizations, query.data.language, query.data.language)
-			: null;
+	const localization = query.data;
 	const displayedTitle = useChineseContentText(
 		localization?.title ?? t.ui.unnamed,
 		localization?.language,
@@ -54,13 +46,6 @@ export function UnitTagsPage({
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!isUnitDetailUnitFor(query.data, type))
-		return (
-			<QueryFailure
-				error={new Error("Unit Unit type mismatch")}
-				retry={() => void query.refetch()}
-			/>
-		);
 
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-10">

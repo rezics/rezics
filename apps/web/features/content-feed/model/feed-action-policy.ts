@@ -1,6 +1,6 @@
 import type {
 	PostApiFeedQueryStatus200,
-	PostApiFeedQueryStatus200ItemsUnitKindEnum,
+	PostApiFeedQueryStatus200ItemsOwnerEnum,
 } from "@rezics/openapi-tanstack-query";
 
 export type FeedPrimaryAction = "collect" | "follow" | "none";
@@ -22,7 +22,7 @@ export type FeedActionPolicyInput =
 	  }>
 	| Readonly<{
 			itemType: "unit";
-			unitKind: PostApiFeedQueryStatus200ItemsUnitKindEnum;
+			owner: PostApiFeedQueryStatus200ItemsOwnerEnum;
 	  }>;
 
 export function getFeedActionPolicy(input: FeedActionPolicyInput): FeedActionPolicy {
@@ -30,11 +30,11 @@ export function getFeedActionPolicy(input: FeedActionPolicyInput): FeedActionPol
 		case "post":
 			return { discussion: "replies", primary: "none" };
 		case "unit":
-			return getUnitActionPolicy(input.unitKind);
+			return getUnitActionPolicy(input.owner);
 	}
 }
 
-function getUnitActionPolicy(kind: PostApiFeedQueryStatus200ItemsUnitKindEnum): FeedActionPolicy {
+function getUnitActionPolicy(kind: PostApiFeedQueryStatus200ItemsOwnerEnum): FeedActionPolicy {
 	switch (kind) {
 		case "collection":
 		case "realm":
@@ -42,16 +42,18 @@ function getUnitActionPolicy(kind: PostApiFeedQueryStatus200ItemsUnitKindEnum): 
 			return { discussion: "none", primary: "follow" };
 		case "poll":
 			return { discussion: "none", primary: "none" };
-		case "book":
+		case "publishing":
+		case "music":
+		case "program":
 		case "software":
-		case "media":
 		case "tag":
-		case "series":
+		case "grouping":
 			return { discussion: "discussions", primary: "collect" };
 		case "video":
 		case "audio":
-		case "release":
 		case "entity":
+		case "reference":
+		case "distribution":
 			return { discussion: "none", primary: "collect" };
 		default:
 			return assertNever(kind);

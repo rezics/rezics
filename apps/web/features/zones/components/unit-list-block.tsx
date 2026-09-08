@@ -47,7 +47,8 @@ export type ZoneUnitListSurface =
 export interface ZoneUnitListSearchResult {
 	readonly id: string;
 	readonly category: string;
-	readonly kind: string;
+	readonly owner: string;
+	readonly shape: string;
 	readonly title: string | null;
 	readonly name?: string | null;
 	readonly summary: string | null;
@@ -407,7 +408,7 @@ function SearchResults({
 					{results.map((result) => {
 						const { href, title } = resultPresentation(result);
 						return (
-							<li data-part="item" key={`${result.kind}:${result.id}`}>
+							<li data-part="item" key={`${result.owner}:${result.id}`}>
 								<IdentityBadgeLink href={href} label={title} />
 							</li>
 						);
@@ -418,7 +419,7 @@ function SearchResults({
 					{results.map((result) => {
 						const { href, title } = resultPresentation(result);
 						return (
-							<div data-part="item" key={`${result.kind}:${result.id}`}>
+							<div data-part="item" key={`${result.owner}:${result.id}`}>
 								<ShelfUnitCard
 									fallback={<span aria-hidden>{title.slice(0, 1)}</span>}
 									headingAs={shelf.cardHeadingAs}
@@ -451,7 +452,7 @@ function SearchResults({
 							</div>
 						);
 						return (
-							<li data-part="item" key={`${result.kind}:${result.id}`}>
+							<li data-part="item" key={`${result.owner}:${result.id}`}>
 								{href ? <AppLink href={href}>{content}</AppLink> : content}
 							</li>
 						);

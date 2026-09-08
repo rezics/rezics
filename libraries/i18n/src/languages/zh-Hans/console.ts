@@ -8,6 +8,7 @@ const { forms: zoneTerms } = zhHansTerminology.zone;
 const { forms: postTerms } = zhHansTerminology.post;
 
 export default {
+	caseEvidence: "证据",
 	nativeLookup: {
 		mode: "查找方式",
 		modes: {

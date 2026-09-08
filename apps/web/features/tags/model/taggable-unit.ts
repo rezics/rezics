@@ -1,14 +1,10 @@
-import type { GetApiUnitsByTypeByUnitIdTagsPath } from "@rezics/openapi-tanstack-query";
+import {
+	GetApiResourcesByOwnerByUnitIdTagsOwner,
+	type GetApiResourcesByOwnerByUnitIdTagsPath,
+} from "@rezics/openapi-tanstack-query";
 
-import { UnitDetailUnitTypes } from "@/features/units/model/unit-detail-section";
-
-export type TaggableUnitType = GetApiUnitsByTypeByUnitIdTagsPath["type"];
-
-export const TaggableUnitTypes = [
-	...UnitDetailUnitTypes,
-	"entity",
-] as const satisfies readonly TaggableUnitType[];
-
+export type TaggableUnitType = GetApiResourcesByOwnerByUnitIdTagsPath["owner"];
+export const TaggableUnitTypes = Object.values(GetApiResourcesByOwnerByUnitIdTagsOwner);
 export function isTaggableUnitType(value: string): value is TaggableUnitType {
-	return TaggableUnitTypes.some((candidate) => candidate === value);
+	return TaggableUnitTypes.some((owner) => owner === value);
 }

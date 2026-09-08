@@ -10,24 +10,27 @@ export function unitDetailHref<Type extends UnitDetailUnitType>(
 	unitId: string,
 	sectionId: UnitDetailSectionIdFor<Type> = "overview",
 ): string {
-	const base = `/units/${type}/${unitId}`;
+	const base =
+		type === "video" || type === "audio"
+			? `/units/${type}/${unitId}`
+			: `/catalog/${type}/${unitId}`;
 	return sectionId === "overview" ? base : `${base}/${sectionId}`;
 }
 
 export function unitCreditsHref(type: UnitDetailUnitType, unitId: string): string {
-	return `/units/${type}/${unitId}/credits`;
+	return `${unitDetailHref(type, unitId)}/credits`;
 }
 
 export function unitReviewsHref(type: UnitDetailUnitType, unitId: string): string {
-	return `/units/${type}/${unitId}/reviews`;
+	return `${unitDetailHref(type, unitId)}/reviews`;
 }
 
 export function unitExcerptsHref(type: UnitDetailUnitType, unitId: string): string {
-	return `/units/${type}/${unitId}/excerpts`;
+	return `${unitDetailHref(type, unitId)}/excerpts`;
 }
 
 export function unitQuestionsHref(type: UnitDetailUnitType, unitId: string): string {
-	return `/units/${type}/${unitId}/questions`;
+	return `${unitDetailHref(type, unitId)}/questions`;
 }
 
 /** Addresses one Chapter occurrence in a Book; `nodeId` is not the Chapter Post ID. */
@@ -36,7 +39,7 @@ export function bookReaderHref(bookId: string, nodeId: string): string {
 }
 
 export function unitTagsHref(type: UnitDetailUnitType, unitId: string): string {
-	return `/units/${type}/${unitId}/tags`;
+	return `${unitDetailHref(type, unitId)}/tags`;
 }
 
 export function parseUnitDetailSection<Type extends UnitDetailUnitType>(

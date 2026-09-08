@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetApiEntitiesByUnitId } from "@rezics/openapi-tanstack-query";
+import { useUnitSummary } from "@/features/units/hooks/use-unit-summary";
 import {
 	Alert,
 	AlertDescription,
@@ -18,7 +18,6 @@ import type { UnitTagsRouteState } from "@/features/tags/routing/tag-links";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
-import { selectLocalization } from "@/lib/localization";
 
 export function EntityTagsPage({
 	entityId,
@@ -29,18 +28,13 @@ export function EntityTagsPage({
 }) {
 	const { t } = useTranslation(["tags", "ui", "units"]);
 	const localizationLanguages = useLocalizationLanguages();
-	const query = useGetApiEntitiesByUnitId({
-		path: { unitId: entityId },
-		query: { localizationLanguages },
-	});
+	const query = useUnitSummary({ owner: "entity", id: entityId });
 	useLocalizationFallbackToast({
 		actualLanguage: query.data?.language ?? null,
 		localizationLanguages,
 		unitId: entityId,
 	});
-	const localization = query.data
-		? selectLocalization(query.data.localizations, query.data.language ?? "")
-		: null;
+	const localization = query.data;
 	const displayedTitle = useChineseContentText(
 		localization?.title ?? t.ui.unnamed,
 		localization?.language,
@@ -53,7 +47,7 @@ export function EntityTagsPage({
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-10">
 			<Button asChild className="w-fit" variant="outline">
-				<Link href={`/entities/${entityId}`}>
+				<Link href={`/catalog/entity/${entityId}`}>
 					<ArrowLeft aria-hidden />
 					{t.units.detail.backToOverview}
 				</Link>

@@ -2,7 +2,6 @@
 
 import { ChevronRightIcon } from "lucide-react";
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
-import type { ContentLanguage } from "@rezics/i18n";
 
 import { Card, Cover } from "@rezics/ui";
 import { UnitCoverFallback } from "@/features/units/components/unit-cover-fallback";
@@ -12,8 +11,8 @@ import { useChineseContentText } from "@/features/content-language-display/chine
 
 export interface PostSubjectPresentation {
 	readonly id: string;
-	readonly type: string;
-	readonly language: ContentLanguage;
+	readonly owner: string;
+	readonly language: string | null;
 	readonly title: string | null;
 	readonly summary: string | null;
 	readonly cover: { readonly id: string; readonly url: string } | null;
@@ -21,7 +20,7 @@ export interface PostSubjectPresentation {
 
 export function PostSubjectHero({ subject }: { readonly subject: PostSubjectPresentation }) {
 	const { t } = useTranslation(["feed", "ui"]);
-	const href = publicUnitHref(subject.type, subject);
+	const href = publicUnitHref(subject.owner, subject);
 	const title = subject.title ?? t.ui.unnamed;
 	const displayedTitle = useChineseContentText(title, subject.language);
 	const displayedSummary = useChineseContentText(subject.summary ?? "", subject.language);
@@ -31,7 +30,7 @@ export function PostSubjectHero({ subject }: { readonly subject: PostSubjectPres
 				<Cover
 					alt={displayedTitle}
 					className="w-full rounded-xl border border-border-weak shadow-sm/5"
-					fallback={<UnitCoverFallback kind={subject.type} />}
+					fallback={<UnitCoverFallback kind={subject.owner} />}
 					sizes="(min-width: 640px) 96px, 72px"
 					src={subject.cover?.url}
 				/>

@@ -53,10 +53,10 @@ vi.mock("@rezics/openapi-tanstack-query", async (importOriginal) => {
 		}),
 		useGetApiUnitsByTypeByUnitId: () => ({
 			data: {
-				details: { type: "book" },
+				details: { type: "publishing" },
 				language: "zh",
 				localizations: [],
-				type: "book",
+				type: "publishing",
 			},
 			error: undefined,
 			isError: false,
@@ -154,7 +154,7 @@ function setProgressContext(currentEntryId: string | null) {
 		contentStructureNodesError: undefined,
 		contentStructureNodesPending: false,
 		currentEntryId,
-		domain: { type: "book", unitId: UnitId },
+		domain: { type: "publishing", unitId: UnitId },
 		openEditor: vi.fn(),
 		retryProgress: vi.fn(),
 		state: {
@@ -179,7 +179,7 @@ function renderPage() {
 		<QueryClientProvider client={queryClient}>
 			<TranslationProvider initial={translation.snapshot}>
 				<UiProvider searchEntities={() => Promise.resolve([])}>
-					<UnitProgressPage type="book" unitId={UnitId} />
+					<UnitProgressPage type="publishing" unitId={UnitId} />
 				</UiProvider>
 			</TranslationProvider>
 		</QueryClientProvider>,

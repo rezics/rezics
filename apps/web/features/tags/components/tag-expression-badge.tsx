@@ -1,6 +1,6 @@
 "use client";
 
-import type { GetApiUnitsByTypeByUnitIdTagsStatus200 } from "@rezics/openapi-tanstack-query";
+import type { GetApiResourcesByOwnerByUnitIdTagsStatus200 } from "@rezics/openapi-tanstack-query";
 import { getApiTagsByTagIdPaths } from "@rezics/openapi-tanstack-query";
 import {
 	Badge,
@@ -33,7 +33,7 @@ import { tagDetailHref, tagPathHref, tagSearchHref } from "../routing/tag-links"
 import { TagPathPath } from "./tag-path";
 import { TagVoteControls } from "./tag-vote-controls";
 
-type UnitTagLandscape = GetApiUnitsByTypeByUnitIdTagsStatus200;
+type UnitTagLandscape = GetApiResourcesByOwnerByUnitIdTagsStatus200;
 export type UnitExpressionApplication =
 	UnitTagLandscape["expressions"][number]["applications"][number];
 export type UnitRenderedExpression = RenderedTagExpression<UnitExpressionApplication>;

@@ -95,7 +95,7 @@ export function DefinitionTargetsEditor({
 					</fieldset>
 					<Button
 						type="button"
-						variant="ghost"
+						variant="quiet"
 						onClick={() => onChange(value.filter((_, i) => i !== index))}
 					>
 						{copy.remove}
@@ -287,7 +287,7 @@ export function DefinitionScalarEditor({
 						)}
 						<Button
 							type="button"
-							variant="ghost"
+							variant="quiet"
 							onClick={() =>
 								onChange({
 									...value,
@@ -409,7 +409,7 @@ export function DefinitionConstraintsEditor({
 								/>
 								<Button
 									type="button"
-									variant="ghost"
+									variant="quiet"
 									onClick={() => onChange({ ...value, roles: roles.filter((_, i) => i !== index) })}
 								>
 									{copy.remove}
@@ -522,7 +522,7 @@ export function DefinitionConstraintsEditor({
 							{index === rules.length - 1 ? (
 								<Button
 									type="button"
-									variant="ghost"
+									variant="quiet"
 									onClick={() => onChange({ ...value, rules: rules.slice(0, -1) })}
 								>
 									{copy.remove}
@@ -583,7 +583,7 @@ function DefinitionDependencyList({
 					<DefinitionRevisionLabel id={id} />
 					<Button
 						type="button"
-						variant="ghost"
+						variant="quiet"
 						onClick={() => onChange(value.filter((_, i) => i !== index))}
 					>
 						{copy.remove}

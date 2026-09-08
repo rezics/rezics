@@ -60,7 +60,8 @@ const attributions = [
 	},
 	{
 		id: "attribution-2",
-		kind: "entity",
+		owner: "entity",
+		shape: "person",
 		role: "author",
 		name: "共同作者",
 		initials: "二",

@@ -2,23 +2,23 @@
 
 import {
 	getApiRealmsByRealmIdUnitsByUnitIdTagsQueryKey,
-	getApiUnitsByTypeByUnitIdTagsQueryKey,
+	getApiResourcesByOwnerByUnitIdTagsQueryKey,
 	useDeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationId,
 	useDeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote,
-	useDeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationId,
-	useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote,
+	useDeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationId,
+	useDeleteApiResourcesByOwnerByUnitIdTagsByTagIdVote,
 	useGetApiRealmsByRealmIdUnitsByUnitIdTags,
-	useGetApiUnitsByTypeByUnitId,
-	useGetApiUnitsByTypeByUnitIdTags,
+	useGetApiGovernanceUnitByUnitIdAccessEffective,
+	useGetApiResourcesByOwnerByUnitIdTags,
 	usePostApiRealmsByRealmIdUnitsByUnitIdTagPathApplications,
-	usePostApiUnitsByTypeByUnitIdTagPathApplications,
+	usePostApiResourcesByOwnerByUnitIdTagPathApplications,
 	usePutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgment,
 	usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote,
-	usePutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgment,
-	usePutApiUnitsByTypeByUnitIdTagsByTagId,
-	usePutApiUnitsByTypeByUnitIdTagsByTagIdVote,
+	usePutApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgment,
+	usePutApiResourcesByOwnerByUnitIdTagsByTagId,
+	usePutApiResourcesByOwnerByUnitIdTagsByTagIdVote,
 } from "@rezics/openapi-tanstack-query";
-import type { GetApiUnitsByTypeByUnitIdTagsStatus200 } from "@rezics/openapi-tanstack-query";
+import type { GetApiResourcesByOwnerByUnitIdTagsStatus200 } from "@rezics/openapi-tanstack-query";
 import type { Translation } from "@rezics/i18n";
 import { Button, QueryFailure, QueryPending } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
@@ -78,20 +78,17 @@ export function UnitTagExplorer({
 	const [requestedVoteContext, setRequestedVoteContext] =
 		useState<TagVoteContextRequest>(initialVoteContext);
 	const queryInput = {
-		path: { type, unitId },
+		path: { owner: type, unitId },
 		query: {
 			localizationLanguages,
 			includeExpressions: true,
 			...SurfaceLimits[surface],
 		},
 	} as const;
-	const query = useGetApiUnitsByTypeByUnitIdTags(queryInput);
-	const unitQuery = useGetApiUnitsByTypeByUnitId(
-		{
-			path: { type: type === "entity" ? "media" : type, unitId },
-			query: { localizationLanguages },
-		},
-		{ query: { enabled: surface === "page" && type !== "entity" } },
+	const query = useGetApiResourcesByOwnerByUnitIdTags(queryInput);
+	const unitQuery = useGetApiGovernanceUnitByUnitIdAccessEffective(
+		{ path: { unitId } },
+		{ query: { enabled: surface === "page" && Boolean(session) } },
 	);
 	const voteRealms = query.data ? presentRealmTagVoteContexts(query.data) : [];
 	const activeVoteContext = resolveTagVoteContext(requestedVoteContext, voteRealms);
@@ -106,7 +103,7 @@ export function UnitTagExplorer({
 
 	const invalidateLandscape = () =>
 		queryClient.invalidateQueries({
-			queryKey: getApiUnitsByTypeByUnitIdTagsQueryKey({ path: { type, unitId } }),
+			queryKey: getApiResourcesByOwnerByUnitIdTagsQueryKey({ path: { owner: type, unitId } }),
 		});
 	const invalidateRealm = (realmId: string) =>
 		Promise.all([
@@ -118,12 +115,12 @@ export function UnitTagExplorer({
 			}),
 		]);
 
-	const addDirect = usePutApiUnitsByTypeByUnitIdTagsByTagId();
+	const addDirect = usePutApiResourcesByOwnerByUnitIdTagsByTagId();
 	const addRealmDirect = usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote();
-	const globalVote = usePutApiUnitsByTypeByUnitIdTagsByTagIdVote({
+	const globalVote = usePutApiResourcesByOwnerByUnitIdTagsByTagIdVote({
 		mutation: { onSuccess: invalidateLandscape },
 	});
-	const clearGlobalVote = useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote({
+	const clearGlobalVote = useDeleteApiResourcesByOwnerByUnitIdTagsByTagIdVote({
 		mutation: { onSuccess: invalidateLandscape },
 	});
 	const realmVote = usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote({
@@ -132,11 +129,12 @@ export function UnitTagExplorer({
 	const clearRealmVote = useDeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote({
 		mutation: { onSuccess: (_data, variables) => invalidateRealm(variables.path.realmId) },
 	});
-	const applyGlobalPath = usePostApiUnitsByTypeByUnitIdTagPathApplications();
-	const judgeGlobalPath = usePutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgment({
-		mutation: { onSuccess: invalidateLandscape },
-	});
-	const removeGlobalPath = useDeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationId({
+	const applyGlobalPath = usePostApiResourcesByOwnerByUnitIdTagPathApplications();
+	const judgeGlobalPath =
+		usePutApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgment({
+			mutation: { onSuccess: invalidateLandscape },
+		});
+	const removeGlobalPath = useDeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationId({
 		mutation: { onSuccess: invalidateLandscape },
 	});
 	const applyRealmPath = usePostApiRealmsByRealmIdUnitsByUnitIdTagPathApplications();
@@ -176,12 +174,18 @@ export function UnitTagExplorer({
 		t,
 		!showExpressionPathBadges,
 	);
-	const canCurateGlobal = Boolean(unitQuery.data?.capabilities.canCurateTags);
+	const canCurateGlobal = Boolean(
+		unitQuery.data?.decisions.find((item) => item.permission === "unit.tag-curation.manage")
+			?.decision.allowed,
+	);
 
 	const voteOnApplication = (application: UnitExpressionApplication, value: -1 | 1) => {
 		if (application.sourceKind === "direct" && application.tagId) {
 			if (application.authority.kind === "global")
-				globalVote.mutate({ path: { type, unitId, tagId: application.tagId }, body: { value } });
+				globalVote.mutate({
+					path: { owner: type, unitId, tagId: application.tagId },
+					body: { value },
+				});
 			else
 				realmVote.mutate({
 					path: {
@@ -196,7 +200,7 @@ export function UnitTagExplorer({
 		if (!application.applicationId) return;
 		if (application.authority.kind === "global")
 			judgeGlobalPath.mutate({
-				path: { type, unitId, applicationId: application.applicationId },
+				path: { owner: type, unitId, applicationId: application.applicationId },
 				body: { fitVote: value },
 			});
 		else
@@ -212,7 +216,7 @@ export function UnitTagExplorer({
 	const clearApplicationJudgment = (application: UnitExpressionApplication) => {
 		if (application.sourceKind === "direct" && application.tagId) {
 			if (application.authority.kind === "global")
-				clearGlobalVote.mutate({ path: { type, unitId, tagId: application.tagId } });
+				clearGlobalVote.mutate({ path: { owner: type, unitId, tagId: application.tagId } });
 			else
 				clearRealmVote.mutate({
 					path: {
@@ -226,7 +230,7 @@ export function UnitTagExplorer({
 		if (!application.applicationId) return;
 		if (application.authority.kind === "global")
 			judgeGlobalPath.mutate({
-				path: { type, unitId, applicationId: application.applicationId },
+				path: { owner: type, unitId, applicationId: application.applicationId },
 				body: { fitVote: null },
 			});
 		else
@@ -246,7 +250,7 @@ export function UnitTagExplorer({
 		if (!application.applicationId || application.sourceKind !== "path") return;
 		if (application.authority.kind === "global")
 			judgeGlobalPath.mutate({
-				path: { type, unitId, applicationId: application.applicationId },
+				path: { owner: type, unitId, applicationId: application.applicationId },
 				body: { spoilerLevel },
 			});
 		else
@@ -263,7 +267,7 @@ export function UnitTagExplorer({
 		if (!application.applicationId || application.sourceKind !== "path") return;
 		if (application.authority.kind === "global")
 			removeGlobalPath.mutate({
-				path: { type, unitId, applicationId: application.applicationId },
+				path: { owner: type, unitId, applicationId: application.applicationId },
 			});
 		else
 			removeRealmPath.mutate({
@@ -305,7 +309,7 @@ export function UnitTagExplorer({
 		if (item.vote.kind !== "available") return;
 		const target = item.vote.target;
 		if (target.kind === "global")
-			globalVote.mutate({ path: { type, unitId, tagId: target.tagId }, body: { value } });
+			globalVote.mutate({ path: { owner: type, unitId, tagId: target.tagId }, body: { value } });
 		else
 			realmVote.mutate({
 				path: { realmId: target.realmId, unitId, tagId: target.tagId },
@@ -316,7 +320,7 @@ export function UnitTagExplorer({
 		if (item.vote.kind !== "available") return;
 		const target = item.vote.target;
 		if (target.kind === "global")
-			clearGlobalVote.mutate({ path: { type, unitId, tagId: target.tagId } });
+			clearGlobalVote.mutate({ path: { owner: type, unitId, tagId: target.tagId } });
 		else
 			clearRealmVote.mutate({
 				path: { realmId: target.realmId, unitId, tagId: target.tagId },
@@ -463,7 +467,7 @@ export function UnitTagExplorer({
 												if (selection.kind === "direct_expression") {
 													if (activeVoteContext.kind === "global")
 														await addDirect.mutateAsync({
-															path: { type, unitId, tagId: selection.tagId },
+															path: { owner: type, unitId, tagId: selection.tagId },
 															body: {},
 														});
 													else
@@ -478,7 +482,7 @@ export function UnitTagExplorer({
 												} else {
 													if (activeVoteContext.kind === "global")
 														await applyGlobalPath.mutateAsync({
-															path: { type, unitId },
+															path: { owner: type, unitId },
 															body: { senseId: selection.senseId, fitVote: 1 },
 														});
 													else
@@ -569,7 +573,7 @@ function authorityKey(authority: TagExpressionAuthority): string {
 }
 
 function expressionAuthoritySections(
-	expressions: GetApiUnitsByTypeByUnitIdTagsStatus200["expressions"],
+	expressions: GetApiResourcesByOwnerByUnitIdTagsStatus200["expressions"],
 	realmTitleById: ReadonlyMap<string, string>,
 	t: Pick<Translation, "tags">,
 	groupByExpressionKey: boolean,

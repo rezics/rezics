@@ -27,7 +27,7 @@ describe("Tag creation routes", () => {
 
 	it("creates and validates a global Unit Tag-vote continuation", async () => {
 		const href = unitTagVoteCreateHref("  science  ", {
-			type: "book",
+			type: "publishing",
 			unitId: UnitId,
 			context: { kind: "global" },
 		});
@@ -40,7 +40,7 @@ describe("Tag creation routes", () => {
 			initialTitle: "science",
 			intent: {
 				kind: "unit-tag-vote",
-				type: "book",
+				type: "publishing",
 				unitId: UnitId,
 				context: { kind: "global" },
 			},

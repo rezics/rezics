@@ -5,8 +5,12 @@ import { parseProgressContinuation, progressContinuationHref } from "./progress-
 describe("progressContinuationHref", () => {
 	it("addresses a Book occurrence in its contextual reader", () => {
 		expect(
-			progressContinuationHref({ kind: "book-node", bookId: "book-id", nodeId: "node-id" }),
-		).toBe("/units/book/book-id/read/node-id");
+			progressContinuationHref({
+				kind: "text-version-node",
+				textVersionId: "book-id",
+				nodeId: "node-id",
+			}),
+		).toBe("/catalog/publishing/book-id/read/node-id");
 	});
 
 	it("addresses timed Media items directly", () => {
@@ -17,22 +21,22 @@ describe("progressContinuationHref", () => {
 
 	it("falls back to the owner's Contents section", () => {
 		expect(
-			progressContinuationHref({ kind: "contents", unitId: "media-id", unitType: "media" }),
-		).toBe("/units/media/media-id/contents");
+			progressContinuationHref({ kind: "contents", unitId: "media-id", unitType: "program" }),
+		).toBe("/catalog/program/media-id/contents");
 	});
 
 	it("proves generated union fields before exposing a continuation", () => {
 		expect(
 			parseProgressContinuation(
-				{ kind: "unit", contentUnit: { id: "audio-id", type: "audio" } },
-				{ type: "media", unitId: "media-id" },
+				{ kind: "unit", contentUnit: { id: "audio-id", owner: "audio", shape: "audio" } },
+				{ type: "program", unitId: "media-id" },
 			),
 		).toEqual({ kind: "unit", unitId: "audio-id", unitType: "audio" });
 		expect(
 			parseProgressContinuation(
-				{ kind: "unit", contentUnit: { id: "book-id", type: "book" } },
-				{ type: "book", unitId: "book-id" },
+				{ kind: "unit", contentUnit: { id: "book-id", owner: "publishing", shape: "work" } },
+				{ type: "publishing", shape: "text_version", unitId: "book-id" },
 			),
-		).toEqual({ kind: "contents", unitId: "book-id", unitType: "book" });
+		).toEqual({ kind: "contents", unitId: "book-id", unitType: "publishing" });
 	});
 });

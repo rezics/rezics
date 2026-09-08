@@ -46,14 +46,14 @@ export function FollowingPage() {
 }
 
 function FollowingContent() {
-	const { t } = useTranslation(["actions", "nav", "ui"]);
+	const { t } = useTranslation(["actions", "nav", "ui", "feed"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const queryClient = useQueryClient();
 	const [kind, setKind] = useQueryState("kind", followingFilterParser);
 	const baseQuery = {
 		localizationLanguages,
 		limit: 30,
-		...(kind === AllFollowingKinds ? {} : { kind }),
+		...(kind === AllFollowingKinds ? {} : { owner: kind }),
 	} satisfies GetApiAccountMeFollowingQuery;
 	const query = useInfiniteQuery({
 		queryKey: getApiAccountMeFollowingQueryKey({ query: baseQuery }),
@@ -83,7 +83,7 @@ function FollowingContent() {
 		{ value: AllFollowingKinds, label: t.nav.following.all },
 		...FollowingKinds.map((value) => ({
 			value,
-			label: t.nav.following.types[value],
+			label: t.feed.content.owners[value],
 		})),
 	];
 
@@ -110,7 +110,7 @@ function FollowingContent() {
 					{items.map((item) => {
 						const avatar =
 							item.avatar ?? (item.cover ? { type: "image" as const, image: item.cover } : null);
-						const destination = followingHref(item.kind, item);
+						const destination = followingHref(item.owner, item);
 						return (
 							<article className="flex min-w-0 items-center gap-2 py-3" key={item.id}>
 								{destination ? (
@@ -184,7 +184,7 @@ function FollowingIdentity({
 	readonly avatar: ComponentProps<typeof IdentityAvatar>["avatar"];
 	readonly item: GetApiAccountMeFollowingStatus200["items"][number];
 }) {
-	const { t } = useTranslation(["nav", "ui"]);
+	const { t } = useTranslation(["nav", "ui", "feed"]);
 	const title = useChineseContentText(
 		item.title ?? t.ui.unnamed,
 		item.title ? item.language : null,
@@ -198,7 +198,7 @@ function FollowingIdentity({
 			/>
 			<span className="min-w-0">
 				<strong className="block truncate text-sm">{title}</strong>
-				<span className="text-muted-foreground text-xs">{t.nav.following.types[item.kind]}</span>
+				<span className="text-muted-foreground text-xs">{t.feed.content.owners[item.owner]}</span>
 			</span>
 		</>
 	);

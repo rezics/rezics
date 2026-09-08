@@ -1,8 +1,8 @@
 "use client";
 
 import {
-	getApiUnitsByTypeByUnitIdSubjectAssociations,
-	getApiUnitsByTypeByUnitIdSubjectAssociationsQueryKey,
+	getApiUnitsByIdByUnitIdSubjectAssociations,
+	getApiUnitsByIdByUnitIdSubjectAssociationsQueryKey,
 } from "@rezics/openapi-tanstack-query";
 import { Button, QueryFailure, QueryPending } from "@rezics/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -11,22 +11,19 @@ import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { UnitDetailSectionFrame } from "../components/unit-detail-section-frame";
 import { UnitSubjectGroups } from "../components/unit-subject-groups";
-import { useUnitDetail } from "../components/unit-detail-workspace";
-import { unitDetailPageCopy } from "../model/unit-detail-copy";
+import type { CatalogReference } from "@rezics/reference";
 
 const AssociationPageSize = 8;
 
-export function UnitAssociationsPage() {
-	const detail = useUnitDetail();
+export function UnitAssociationsPage({ reference }: { reference: CatalogReference }) {
 	const localizationLanguages = useLocalizationLanguages();
 	const { t } = useTranslation(["actions", "engagement", "feed", "state", "ui", "units"]);
-	const labels = unitDetailPageCopy(t, detail.type, "associations");
-	const path = { type: detail.type, unitId: detail.unit.id };
+	const path = { unitId: reference.id };
 	const baseQuery = { limit: AssociationPageSize, localizationLanguages };
 	const associations = useInfiniteQuery({
-		queryKey: getApiUnitsByTypeByUnitIdSubjectAssociationsQueryKey({ path, query: baseQuery }),
+		queryKey: getApiUnitsByIdByUnitIdSubjectAssociationsQueryKey({ path, query: baseQuery }),
 		queryFn: async ({ pageParam, signal }) => {
-			const { data } = await getApiUnitsByTypeByUnitIdSubjectAssociations({
+			const { data } = await getApiUnitsByIdByUnitIdSubjectAssociations({
 				path,
 				query: { ...baseQuery, ...(pageParam ? { cursor: pageParam } : {}) },
 				signal,
@@ -40,7 +37,7 @@ export function UnitAssociationsPage() {
 	const items = associations.data?.pages.flatMap((page) => page.items) ?? [];
 
 	return (
-		<UnitDetailSectionFrame description={labels.description} title={labels.title}>
+		<UnitDetailSectionFrame title={t.units.detail.subjectAssociations}>
 			<section className="grid gap-3">
 				<div className="grid gap-1">
 					<h2 className="font-heading text-xl font-bold">{t.units.detail.subjectAssociations}</h2>

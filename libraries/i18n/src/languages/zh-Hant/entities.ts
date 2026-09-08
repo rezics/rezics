@@ -3,6 +3,23 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 const { forms: entityTerms } = zhHantTerminology.entity;
 
 export default {
+	fixedProfile: {
+		title: "基本資料",
+		typeRevisionId: "類型定義修訂識別碼",
+		genderRevisionId: "性別定義修訂識別碼",
+		areaId: "地區條目識別碼",
+		beginAreaId: "起始地區條目識別碼",
+		endAreaId: "結束地區條目識別碼",
+		begin: "起始時間",
+		end: "結束時間",
+		ended: "是否已結束",
+		referenceNotice:
+			"類型和性別需填寫確切的定義修訂識別碼；地區需填寫既有地區條目的識別碼。未知值請留空。",
+		remove: "移除基本資料",
+		removed: "基本資料已移除",
+		resolve: "確認具體類型",
+		resolveNotice: "僅尚未確定類型的條目可以確認具體類型。請先儲存其他修改。",
+	},
 	contextMeasurements: {
 		title: "特定內容中的測量值",
 		context: "相關內容",

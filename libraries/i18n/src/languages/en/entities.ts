@@ -4,6 +4,24 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: entityTerms } = enTerminology.entity;
 
 export default {
+	fixedProfile: {
+		title: "Basic details",
+		typeRevisionId: "Type definition revision",
+		genderRevisionId: "Gender definition revision",
+		areaId: "Area entry",
+		beginAreaId: "Place of origin entry",
+		endAreaId: "Place of ending entry",
+		begin: "Beginning",
+		end: "Ending",
+		ended: "Has ended",
+		referenceNotice:
+			"Enter the exact definition revision identifiers for type and gender, and existing area entry identifiers for locations. Leave unknown values blank.",
+		remove: "Remove basic details",
+		removed: "Basic details removed",
+		resolve: "Confirm specific type",
+		resolveNotice:
+			"The specific type can be confirmed only while it is unresolved. Save any other changes first.",
+	},
 	contextMeasurements: {
 		title: "Measurements in context",
 		context: "Related content",

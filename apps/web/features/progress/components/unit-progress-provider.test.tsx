@@ -62,7 +62,7 @@ const queryResults = vi.hoisted(() => ({
 				kind: "contents",
 				ownerUnit: {
 					id: "019f0000-0000-7000-8000-000000000099",
-					type: "media",
+					type: "program",
 				},
 			},
 			record: {
@@ -127,7 +127,7 @@ vi.mock("@/lib/use-hydrated-session", () => ({
 
 const translation = await create(resources).getTranslation(["engagement"], ["zh-Hant"]);
 const domain = {
-	type: "book",
+	type: "publishing",
 	unitId: "019f9000-0000-7000-8000-000000000001",
 } as const;
 
@@ -214,7 +214,7 @@ describe("UnitProgressProvider editor lifecycle", () => {
 	it("exposes duration-weighted Media content structure positions", () => {
 		renderProvider({
 			domain: {
-				type: "media",
+				type: "program",
 				unitId: "019f9000-0000-7000-8000-000000000002",
 			},
 		});

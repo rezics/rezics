@@ -172,7 +172,7 @@ export function RelationEditor({
 							/>
 							<Button
 								type="button"
-								variant="ghost"
+								variant="quiet"
 								onClick={() =>
 									setParticipants((current) => current.filter((_, position) => position !== index))
 								}
@@ -214,7 +214,7 @@ export function RelationEditor({
 						)}
 						<Button
 							type="button"
-							variant="ghost"
+							variant="quiet"
 							onClick={() =>
 								setQualifiers((current) => current.filter((_, position) => index !== position))
 							}

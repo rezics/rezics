@@ -8,7 +8,6 @@ import {
 	LocalizedText,
 	useChineseContentText,
 } from "@/features/content-language-display/chinese-content-display-context";
-import { ProfileInfoCard } from "@/features/profiles/components/profile-info-card";
 import {
 	RealmInfoCard,
 	type RealmInfoCardData,
@@ -45,7 +44,6 @@ interface FeedContextItem {
 }
 
 export type FeedAttributionContext = FeedContextItem & {
-	readonly kind: string;
 	readonly role: string;
 	readonly slug?: string;
 	readonly summary?: string;
@@ -466,20 +464,7 @@ function FeedAttributionInfoCard({
 	const name = useChineseContentText(attribution.name, attribution.language);
 	const initials = useChineseContentText(attribution.initials, attribution.language);
 	const summary = useChineseContentText(attribution.summary ?? "", attribution.language);
-	if (attribution.kind === "profile")
-		return (
-			<ProfileInfoCard
-				profile={{
-					id: attribution.id,
-					name: attribution.name,
-					initials: attribution.initials,
-					language: attribution.language,
-					avatar: attribution.avatar,
-					slug: attribution.slug,
-					summary: attribution.summary,
-				}}
-			/>
-		);
+
 	return (
 		<div className="grid gap-3" data-slot="attribution-info-card">
 			<div className="flex min-w-0 items-center gap-3">

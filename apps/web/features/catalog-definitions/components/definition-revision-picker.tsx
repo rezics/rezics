@@ -12,7 +12,7 @@ export function DefinitionRevisionLabel({ id }: { id: string }) {
 	return expanded ? (
 		<ResolvedRevisionLabel id={id} />
 	) : (
-		<Button type="button" variant="ghost" onClick={() => setExpanded(true)}>
+		<Button type="button" variant="quiet" onClick={() => setExpanded(true)}>
 			{t.units.nativeDefinitions.details}
 		</Button>
 	);
@@ -51,7 +51,7 @@ export function DefinitionRevisionPicker({
 			{value ? (
 				<div className="flex flex-wrap items-center gap-3">
 					<DefinitionRevisionLabel id={value} />
-					<Button type="button" variant="ghost" onClick={() => onChange(undefined)}>
+					<Button type="button" variant="quiet" onClick={() => onChange(undefined)}>
 						{copy.remove}
 					</Button>
 				</div>

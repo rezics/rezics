@@ -3,6 +3,23 @@ import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 const { forms: entityTerms } = zhHansTerminology.entity;
 
 export default {
+	fixedProfile: {
+		title: "基本资料",
+		typeRevisionId: "类型定义修订标识",
+		genderRevisionId: "性别定义修订标识",
+		areaId: "地区条目标识",
+		beginAreaId: "起始地区条目标识",
+		endAreaId: "结束地区条目标识",
+		begin: "起始时间",
+		end: "结束时间",
+		ended: "是否已结束",
+		referenceNotice:
+			"类型和性别需填写准确的定义修订标识；地区需填写已有地区条目的标识。未知值请留空。",
+		remove: "移除基本资料",
+		removed: "基本资料已移除",
+		resolve: "确认具体类型",
+		resolveNotice: "仅未确定类型的条目可以确认具体类型。请先保存其他修改。",
+	},
 	contextMeasurements: {
 		title: "特定内容中的测量值",
 		context: "相关内容",

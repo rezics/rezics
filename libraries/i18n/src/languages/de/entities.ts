@@ -4,6 +4,24 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: entityTerms } = deTerminology.entity;
 
 export default {
+	fixedProfile: {
+		title: "Grunddaten",
+		typeRevisionId: "Kennung der Typdefinitionsrevision",
+		genderRevisionId: "Kennung der Geschlechtsdefinitionsrevision",
+		areaId: "Gebietseintrag",
+		beginAreaId: "Eintrag des Ursprungsgebiets",
+		endAreaId: "Eintrag des Endgebiets",
+		begin: "Beginn",
+		end: "Ende",
+		ended: "Beendet",
+		referenceNotice:
+			"Für Typ und Geschlecht die genauen Kennungen der Definitionsrevisionen und für Orte die Kennungen bestehender Gebietseinträge eingeben. Unbekannte Werte leer lassen.",
+		remove: "Grunddaten entfernen",
+		removed: "Grunddaten entfernt",
+		resolve: "Genauen Typ bestätigen",
+		resolveNotice:
+			"Der genaue Typ kann nur bestätigt werden, solange er ungeklärt ist. Andere Änderungen zuerst speichern.",
+	},
 	contextMeasurements: {
 		title: "Maße im jeweiligen Kontext",
 		context: "Zugehöriger Inhalt",

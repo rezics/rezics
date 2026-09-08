@@ -11,9 +11,21 @@ describe("publicUnitHref", () => {
 		expect(publicUnitHref("tag_path", { id: "path-id" })).toBeUndefined();
 	});
 
-	it.each(["video", "audio", "release"])("routes top-level manageable Units", (kind) => {
+	it.each(["video", "audio"])("routes top-level manageable Units", (kind) => {
 		expect(publicUnitHref(kind, { id: "manageable-unit-id" })).toBe(
 			`/units/${kind}/manageable-unit-id`,
 		);
+	});
+	it.each([
+		"publishing",
+		"music",
+		"program",
+		"software",
+		"grouping",
+		"entity",
+		"reference",
+		"distribution",
+	])("routes native %s identities", (owner) => {
+		expect(publicUnitHref(owner, { id: "native-id" })).toBe(`/catalog/${owner}/native-id`);
 	});
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { toContentLanguage, type ContentLanguage } from "@rezics/i18n";
+import { toContentLanguage, isContentLanguage, type ContentLanguage } from "@rezics/i18n";
 import { useMemo } from "react";
 
 import { useRequestedContentLanguage } from "@/features/content-languages/hooks/use-content-language-navigation";
@@ -79,8 +79,9 @@ export function useLocalizationLanguages() {
 
 	return useMemo(() => {
 		const languages = state.status === "ready" ? state.languages : interfaceLanguages;
-		return requestedLanguage
-			? [requestedLanguage, ...languages.filter((language) => language !== requestedLanguage)]
+		const primary = requestedLanguage?.split("-")[0];
+		return primary && isContentLanguage(primary)
+			? [primary, ...languages.filter((language) => language !== primary)]
 			: languages;
 	}, [interfaceLanguages, requestedLanguage, state]);
 }

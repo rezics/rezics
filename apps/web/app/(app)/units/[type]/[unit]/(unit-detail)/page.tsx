@@ -7,9 +7,7 @@ import {
 	type UnitLandingSearchParams,
 } from "@/features/seo/data/unit-landing-search-params.server";
 import { getUnitLandingSeoDocument } from "@/features/seo/data/unit-landing-seo.server";
-import { isUnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { isUnitId } from "@/features/units/model/unit-id";
-import { UnitOverviewPage } from "@/features/units/pages/unit-overview-page";
 import { UnitDetail } from "@/features/units/unit-detail";
 import { isUnitType } from "@/features/units/unit-types";
 
@@ -55,7 +53,7 @@ export default async function Page({
 				unitId={unit}
 				requestedLanguage={requestedLanguage}
 			/>
-			{isUnitDetailUnitType(type) ? <UnitOverviewPage /> : <UnitDetail type={type} unit={unit} />}
+			<UnitDetail type={type} unit={unit} />
 		</>
 	);
 }

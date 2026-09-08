@@ -152,9 +152,9 @@ function FactPage(context: PageContext) {
 						<SemanticCard key={fact.id} context={context} item={{ kind: "fact", value: fact }} />
 					))}
 				</DefinitionLabelBatch>
-			) : (
+			) : !query.data.afterId && !cursors.length ? (
 				<p>{t.units.nativeSemantics.noFacts}</p>
-			)}
+			) : null}
 			<div className="flex gap-2">
 				{cursors.length ? (
 					<Button variant="outline" onClick={() => setCursors((current) => current.slice(0, -1))}>
@@ -203,9 +203,9 @@ function RelationPage(context: PageContext) {
 						/>
 					))}
 				</DefinitionLabelBatch>
-			) : (
+			) : !query.data.afterId && !cursors.length ? (
 				<p>{t.units.nativeSemantics.noRelations}</p>
-			)}
+			) : null}
 			<div className="flex gap-2">
 				{cursors.length ? (
 					<Button variant="outline" onClick={() => setCursors((current) => current.slice(0, -1))}>

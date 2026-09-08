@@ -4,6 +4,24 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: entityTerms } = frTerminology.entity;
 
 export default {
+	fixedProfile: {
+		title: "Informations générales",
+		typeRevisionId: "Identifiant de révision du type",
+		genderRevisionId: "Identifiant de révision du genre",
+		areaId: "Entrée de la région",
+		beginAreaId: "Entrée de la région d’origine",
+		endAreaId: "Entrée de la région de fin",
+		begin: "Début",
+		end: "Fin",
+		ended: "Terminé",
+		referenceNotice:
+			"Saisissez les identifiants exacts des révisions de définition pour le type et le genre, et ceux des entrées de région existantes pour les lieux. Laissez les valeurs inconnues vides.",
+		remove: "Supprimer les informations générales",
+		removed: "Informations générales supprimées",
+		resolve: "Confirmer le type précis",
+		resolveNotice:
+			"Le type précis ne peut être confirmé que s’il est encore indéterminé. Enregistrez d’abord les autres modifications.",
+	},
 	contextMeasurements: {
 		title: "Mensurations selon le contexte",
 		context: "Contenu associé",

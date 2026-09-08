@@ -26,7 +26,10 @@ export function ContentReviewCaseNotes({ caseId }: { caseId: string }) {
 				>
 					<p className="text-sm text-muted-foreground">
 						{t.realms.annotationRoleLanguage({
-							role: t.realms.annotationRoles[note.role],
+							role:
+								note.role === "evidence"
+									? t.console.caseEvidence
+									: t.realms.annotationRoles[note.role],
 							language: t.locale.contentLanguages[note.language],
 						})}
 					</p>

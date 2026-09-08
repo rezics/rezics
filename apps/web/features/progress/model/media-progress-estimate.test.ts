@@ -5,7 +5,7 @@ import { estimateMediaItemProgresses } from "./media-progress-estimate";
 const node = (
 	id: string,
 	input: {
-		readonly contentKind?: "media" | "video" | "audio" | "label";
+		readonly contentKind?: "program" | "video" | "audio" | "label";
 		readonly durationSeconds?: number | null;
 		readonly parentId?: string | null;
 		readonly position: string;
@@ -61,7 +61,7 @@ describe("media progress estimation", () => {
 	it("excludes referenced Media occurrences from progress", () => {
 		const nodes = [
 			node("referenced-media", {
-				contentKind: "media",
+				contentKind: "program",
 				durationSeconds: 600,
 				position: "a0",
 			}),

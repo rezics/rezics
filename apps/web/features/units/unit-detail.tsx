@@ -1,5 +1,6 @@
 "use client";
 
+import { ResourceProgressControls } from "@/features/progress/components/resource-progress-controls";
 import { isLicenseId } from "@rezics/license";
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
@@ -150,13 +151,21 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 		],
 		[t.ui.contentRating, rating],
 		[t.units.detail.aiDisclosure, aiDisclosure],
-		[t.units.fields.durationSeconds, formatDuration(item.details.durationSeconds)],
+		[
+			t.units.fields.durationSeconds,
+			formatDuration(
+				item.details.type === "video" || item.details.type === "audio"
+					? item.details.durationSeconds
+					: null,
+			),
+		],
 		[t.units.detail.license, licenseValue],
 		[t.units.detail.updatedAt, formatDate(item.updatedAt, locale.current)],
 	] as const;
 
 	return (
 		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-10">
+			<ResourceProgressControls reference={{ owner: type, id: item.id }} shape={type} />
 			<section className="grid grid-cols-[7.5rem_minmax(0,1fr)] gap-4 border-b pb-8 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-6">
 				<Cover
 					alt={localization?.title ?? t.ui.unnamed}
@@ -307,7 +316,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 								<CardContent className="grid gap-2 p-5 text-sm">
 									{item.attributions.map((attribution) => {
 										const href = publicUnitHref(
-											attribution.creditedEntity.kind,
+											attribution.creditedEntity.owner,
 											attribution.creditedEntity,
 										);
 										const role = isKnownAttributionRole(attribution.role)

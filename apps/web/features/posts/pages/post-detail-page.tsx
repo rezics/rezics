@@ -80,7 +80,7 @@ export function PostDetailPage({
 	const selectedRealm = realmContext.kind === "realm" ? realmContext.realm : undefined;
 	const realmId = selectedRealm?.id;
 	const wikiZone =
-		query.data?.postKind === "wiki" && query.data.subject?.type === "zone"
+		query.data?.postKind === "wiki" && query.data.subject?.owner === "zone"
 			? query.data.subject
 			: undefined;
 	useEffect(() => {
@@ -118,8 +118,8 @@ export function PostDetailPage({
 	const post = query.data;
 	const postPublisherUnitIds = getPublisherUnitIds(post.attributions);
 	const discussionHref =
-		returnToDiscussion && post.subject && isUnitDetailUnitType(post.subject.type)
-			? unitDetailHref(post.subject.type, post.subject.id, "discussion")
+		returnToDiscussion && post.subject && isUnitDetailUnitType(post.subject.owner)
+			? unitDetailHref(post.subject.owner, post.subject.id, "discussion")
 			: undefined;
 	if (wikiZone && context?.kind !== "zone") return <QueryPending />;
 	const changeRealm = (nextContext: PostRealmContextSelection) => {

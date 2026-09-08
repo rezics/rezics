@@ -1,14 +1,13 @@
 "use client";
 
 import {
-	getApiEntitiesByUnitIdQueryKey,
-	getApiUnitsByTypeByUnitIdExternalLinksQueryKey,
-	type GetApiEntitiesByUnitIdStatus200,
-	type GetApiUnitsByTypeByUnitIdExternalLinksStatus200,
-	useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote,
-	useGetApiUnitsByTypeByUnitIdExternalLinks,
-	usePostApiUnitsByTypeByUnitIdExternalLinks,
-	usePutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote,
+	readCatalogResourceQueryKey,
+	getApiResourcesByOwnerByUnitIdExternalLinksQueryKey,
+	type GetApiResourcesByOwnerByUnitIdExternalLinksStatus200,
+	useDeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote,
+	useGetApiResourcesByOwnerByUnitIdExternalLinks,
+	usePostApiResourcesByOwnerByUnitIdExternalLinks,
+	usePutApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Button,
@@ -36,8 +35,10 @@ import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
-type EntityDetailExternalLink = GetApiEntitiesByUnitIdStatus200["externalLinks"][number];
-type EntityExternalLinkCandidate = GetApiUnitsByTypeByUnitIdExternalLinksStatus200["items"][number];
+type EntityDetailExternalLink =
+	GetApiResourcesByOwnerByUnitIdExternalLinksStatus200["items"][number];
+type EntityExternalLinkCandidate =
+	GetApiResourcesByOwnerByUnitIdExternalLinksStatus200["items"][number];
 type SelectedEntity = { readonly id: string; readonly label: string };
 
 function ExternalLinkVoteControls({
@@ -133,10 +134,10 @@ function ExternalLinkCard({
 
 export function EntityExternalLinks({
 	entityId,
-	initialExternalLinks,
+	initialExternalLinks = [],
 }: {
 	readonly entityId: string;
-	readonly initialExternalLinks: readonly EntityDetailExternalLink[];
+	readonly initialExternalLinks?: readonly EntityDetailExternalLink[];
 }) {
 	const { t } = useTranslation(["entities", "errors", "ui", "units"]);
 	const { data: session } = useHydratedSession();
@@ -147,27 +148,26 @@ export function EntityExternalLinks({
 	const [source, setSource] = useState<SelectedEntity>();
 	const [url, setUrl] = useState("");
 	const queryOptions = {
-		path: { type: "entity" as const, unitId: entityId },
+		path: { owner: "entity" as const, unitId: entityId },
 		query: { localizationLanguages },
 	};
-	const query = useGetApiUnitsByTypeByUnitIdExternalLinks(queryOptions, {
-		query: { enabled: Boolean(session) },
+	const query = useGetApiResourcesByOwnerByUnitIdExternalLinks(queryOptions, {
+		query: { enabled: true },
 	});
-	const create = usePostApiUnitsByTypeByUnitIdExternalLinks();
-	const vote = usePutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote();
-	const clearVote = useDeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote();
+	const create = usePostApiResourcesByOwnerByUnitIdExternalLinks();
+	const vote = usePutApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote();
+	const clearVote = useDeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote();
 	const refresh = () =>
 		Promise.all([
 			queryClient.invalidateQueries({
-				queryKey: getApiUnitsByTypeByUnitIdExternalLinksQueryKey(queryOptions),
+				queryKey: getApiResourcesByOwnerByUnitIdExternalLinksQueryKey(queryOptions),
 			}),
 			queryClient.invalidateQueries({
-				queryKey: getApiEntitiesByUnitIdQueryKey({ path: { unitId: entityId } }),
+				queryKey: readCatalogResourceQueryKey({ path: { owner: "entity", id: entityId } }),
 			}),
 		]);
-	const externalLinks: readonly EntityExternalLinkCandidate[] = session
-		? (query.data?.items ?? initialExternalLinks)
-		: initialExternalLinks;
+	const externalLinks: readonly EntityExternalLinkCandidate[] =
+		query.data?.items ?? initialExternalLinks;
 	const voteBusy = vote.isPending || clearVote.isPending;
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
@@ -175,7 +175,7 @@ export function EntityExternalLinks({
 		if (!source || !url.trim() || create.isPending) return;
 		try {
 			await create.mutateAsync({
-				path: { type: "entity", unitId: entityId },
+				path: { owner: "entity", unitId: entityId },
 				body: { sourceEntityId: source.id, url: url.trim() },
 			});
 			await refresh();
@@ -214,7 +214,7 @@ export function EntityExternalLinks({
 								void clearVote
 									.mutateAsync({
 										path: {
-											type: "entity",
+											owner: "entity",
 											unitId: entityId,
 											externalLinkId: link.id,
 										},
@@ -226,7 +226,7 @@ export function EntityExternalLinks({
 								void vote
 									.mutateAsync({
 										path: {
-											type: "entity",
+											owner: "entity",
 											unitId: entityId,
 											externalLinkId: link.id,
 										},

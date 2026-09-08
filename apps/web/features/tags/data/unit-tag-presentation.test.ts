@@ -1,4 +1,4 @@
-import type { GetApiUnitsByTypeByUnitIdTagsStatus200 } from "@rezics/openapi-tanstack-query";
+import type { GetApiResourcesByOwnerByUnitIdTagsStatus200 } from "@rezics/openapi-tanstack-query";
 import { describe, expect, it } from "vitest";
 
 import { presentRealmTagGroups } from "./unit-tag-presentation";
@@ -6,7 +6,7 @@ import { presentRealmTagGroups } from "./unit-tag-presentation";
 const Timestamp = "2026-07-24T00:00:00.000Z";
 const UnitId = "019b76da-a800-7300-8000-000000000001";
 
-function landscape(): GetApiUnitsByTypeByUnitIdTagsStatus200 {
+function landscape(): GetApiResourcesByOwnerByUnitIdTagsStatus200 {
 	return {
 		expressions: [],
 		totals: { expressions: 0 },

@@ -5,7 +5,6 @@ import {
 	type BlockPath as BlockPathValue,
 } from "@rezics/block";
 import { SearchSortValues, type SearchSort } from "@rezics/filter";
-import { isContentLanguage, type ContentLanguage } from "@rezics/i18n";
 import type {
 	PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200,
 	PostApiSearchZonesByZoneIdDockFeedBlockExecutionsStatus200,
@@ -15,7 +14,8 @@ type SearchExecution = PostApiSearchZonesByZoneIdDockBlockExecutionsStatus200;
 export interface ZoneAggregateSearchHit {
 	readonly id: string;
 	readonly category: string;
-	readonly kind: string;
+	readonly owner: string;
+	readonly shape: string;
 	readonly title: string | null;
 	readonly name?: string | null;
 	readonly summary: string | null;
@@ -37,8 +37,9 @@ export interface ZoneAggregateSortAdvisory {
 
 export interface ZoneAggregateSelectedUnit {
 	readonly id: string;
-	readonly kind: string;
-	readonly language: ContentLanguage;
+	readonly owner: string;
+	readonly shape: string;
+	readonly language: string | null;
 	readonly title: string | null;
 	readonly summary: string | null;
 	readonly avatar: unknown;
@@ -151,9 +152,9 @@ function isUnitSummary(value: unknown): boolean {
 	return (
 		isRecord(value) &&
 		isUuid(value.id) &&
-		typeof value.kind === "string" &&
-		typeof value.language === "string" &&
-		isContentLanguage(value.language) &&
+		typeof value.owner === "string" &&
+		typeof value.shape === "string" &&
+		isNullableString(value.language) &&
 		isSlugAddress(value.slugAddress) &&
 		isNullableString(value.title) &&
 		isNullableString(value.summary) &&
@@ -165,9 +166,9 @@ function isSelectedUnit(value: unknown): value is ZoneAggregateSelectedUnit {
 	return (
 		isRecord(value) &&
 		isUuid(value.id) &&
-		typeof value.kind === "string" &&
-		typeof value.language === "string" &&
-		isContentLanguage(value.language) &&
+		typeof value.owner === "string" &&
+		typeof value.shape === "string" &&
+		isNullableString(value.language) &&
 		isNullableString(value.title) &&
 		isNullableString(value.summary) &&
 		isAvatar(value.avatar)
@@ -276,7 +277,7 @@ function isFeedUnit(value: Record<string, unknown>): value is ZoneAggregateFeedI
 	return (
 		isFeedItemBase(value) &&
 		value.itemType === "unit" &&
-		typeof value.unitKind === "string" &&
+		typeof value.owner === "string" &&
 		value.postKind === null &&
 		isNullableString(value.summary) &&
 		isImage(value.cover) &&
@@ -303,8 +304,9 @@ function isSubject(value: unknown): boolean {
 		value === null ||
 		(isRecord(value) &&
 			isUuid(value.id) &&
-			typeof value.type === "string" &&
-			typeof value.language === "string" &&
+			typeof value.owner === "string" &&
+			typeof value.shape === "string" &&
+			isNullableString(value.language) &&
 			isNullableString(value.title) &&
 			isNullableString(value.summary) &&
 			isImage(value.cover) &&
@@ -345,7 +347,7 @@ function isFeedPost(value: Record<string, unknown>): value is ZoneAggregateFeedI
 	if (
 		!isFeedItemBase(value) ||
 		value.itemType !== "post" ||
-		value.unitKind !== "post" ||
+		value.owner !== "post" ||
 		typeof value.postKind !== "string" ||
 		!isNullableString(value.summary) ||
 		!isImage(value.cover) ||
@@ -372,7 +374,8 @@ function isSearchHit(value: unknown): value is ZoneAggregateSearchHit {
 		isRecord(value) &&
 		isUuid(value.id) &&
 		typeof value.category === "string" &&
-		typeof value.kind === "string" &&
+		typeof value.owner === "string" &&
+		typeof value.shape === "string" &&
 		isNullableString(value.title) &&
 		(value.name === undefined || isNullableString(value.name)) &&
 		isNullableString(value.summary)

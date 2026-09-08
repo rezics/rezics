@@ -30,14 +30,14 @@ export function ReviewPostDetail({ review }: { readonly review: ReviewPost }) {
 		<>
 			{review.progressEntry &&
 			review.subject &&
-			isProgressTrackableUnitType(review.subject.type) ? (
+			isProgressTrackableUnitType(review.subject.owner) ? (
 				<Card appearance="outlined" className="mb-5">
 					<CardHeader>
 						<CardTitle>{t.engagement.progressJournal.linkedReview}</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<p className="text-sm">
-							<ProgressEventDescription entry={review.progressEntry} type={review.subject.type} />
+							<ProgressEventDescription entry={review.progressEntry} type={review.subject.owner} />
 						</p>
 					</CardContent>
 				</Card>

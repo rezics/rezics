@@ -43,8 +43,8 @@ const actions = {
 const activeRecord: UnitProgressRecord = {
 	completedCount: 1,
 	continuation: {
-		kind: "book-node",
-		bookId: "019f0000-0000-7000-8000-000000000001",
+		kind: "text-version-node",
+		textVersionId: "019f0000-0000-7000-8000-000000000001",
 		nodeId: "019f0000-0000-7000-8000-000000000002",
 	},
 	lastContentStructureNodeId: null,
@@ -61,7 +61,7 @@ function setProgressState(
 				readonly kind: ProgressStatus;
 				readonly record: UnitProgressRecord;
 		  },
-	type: "book" | "media" | "software" = "book",
+	type: "publishing" | "program" | "software" = "publishing",
 ) {
 	progressContext.current = {
 		...actions,
@@ -146,7 +146,7 @@ describe("UnitProgressAction", () => {
 					status: "active",
 				},
 			},
-			"media",
+			"program",
 		);
 		renderAction();
 
@@ -156,15 +156,18 @@ describe("UnitProgressAction", () => {
 		expect(actions.openEditor).not.toHaveBeenCalled();
 	});
 
-	it.each(["book", "media"] as const)("keeps active metadata-only %s progress manual", (type) => {
-		setProgressState({ kind: "active", record: { ...activeRecord, status: "active" } }, type);
-		renderAction(true);
+	it.each(["publishing", "program"] as const)(
+		"keeps active metadata-only %s progress manual",
+		(type) => {
+			setProgressState({ kind: "active", record: { ...activeRecord, status: "active" } }, type);
+			renderAction(true);
 
-		fireEvent.click(screen.getByRole("button", { name: "更新進度" }));
+			fireEvent.click(screen.getByRole("button", { name: "更新進度" }));
 
-		expect(actions.openEditor).toHaveBeenCalledOnce();
-		expect(push).not.toHaveBeenCalled();
-	});
+			expect(actions.openEditor).toHaveBeenCalledOnce();
+			expect(push).not.toHaveBeenCalled();
+		},
+	);
 
 	it("keeps Software progress manual even when full content is provided", () => {
 		setProgressState(

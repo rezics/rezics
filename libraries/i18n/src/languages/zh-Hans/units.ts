@@ -12,6 +12,17 @@ const { forms: metadataTerms } = zhHansTerminology.metadata;
 const { forms: entityTerms } = zhHansTerminology.entity;
 
 export default {
+	nativeEditorial: {
+		title: "介绍与图片",
+		edit: "编辑介绍与图片",
+		language: "语言标签",
+		openLanguage: "打开此语言",
+		invalidLanguage: "请输入有效的语言标签。",
+		withdraw: "清除当前介绍与图片",
+		name: "名称",
+		primaryName: "用作该语言的主要名称",
+		addName: "添加名称",
+	},
 	nativeGrouping: {
 		classes: "分类",
 		orders: "命名顺序",

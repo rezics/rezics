@@ -42,19 +42,19 @@ afterEach(cleanup);
 
 describe("ChapterReadingProgress", () => {
 	it("records a successfully loaded visible chapter once", () => {
-		const view = render(<ChapterReadingProgress nodeId="node" unitId="book" />);
+		const view = render(<ChapterReadingProgress nodeId="node" unitId="publishing" />);
 
 		expect(state.mutate).toHaveBeenCalledOnce();
-		expect(state.mutate).toHaveBeenCalledWith({ path: { nodeId: "node", unitId: "book" } });
+		expect(state.mutate).toHaveBeenCalledWith({ path: { nodeId: "node", unitId: "publishing" } });
 
-		view.rerender(<ChapterReadingProgress nodeId="node" unitId="book" />);
+		view.rerender(<ChapterReadingProgress nodeId="node" unitId="publishing" />);
 		act(() => document.dispatchEvent(new Event("visibilitychange")));
 		expect(state.mutate).toHaveBeenCalledOnce();
 	});
 
 	it("waits until a hidden chapter becomes visible", () => {
 		setVisibility("hidden");
-		render(<ChapterReadingProgress nodeId="node" unitId="book" />);
+		render(<ChapterReadingProgress nodeId="node" unitId="publishing" />);
 		expect(state.mutate).not.toHaveBeenCalled();
 
 		setVisibility("visible");
@@ -64,7 +64,7 @@ describe("ChapterReadingProgress", () => {
 
 	it("does not write progress for an anonymous reader", () => {
 		state.authenticated = false;
-		render(<ChapterReadingProgress nodeId="node" unitId="book" />);
+		render(<ChapterReadingProgress nodeId="node" unitId="publishing" />);
 
 		expect(state.mutate).not.toHaveBeenCalled();
 	});

@@ -4,6 +4,23 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 const { forms: entityTerms } = koTerminology.entity;
 
 export default {
+	fixedProfile: {
+		title: "기본 정보",
+		typeRevisionId: "유형 정의 개정 식별자",
+		genderRevisionId: "성별 정의 개정 식별자",
+		areaId: "지역 항목 식별자",
+		beginAreaId: "시작 지역 항목 식별자",
+		endAreaId: "종료 지역 항목 식별자",
+		begin: "시작 시점",
+		end: "종료 시점",
+		ended: "종료 여부",
+		referenceNotice:
+			"유형과 성별에는 정확한 정의 개정 식별자를, 지역에는 기존 지역 항목 식별자를 입력하세요. 알 수 없는 값은 비워 두세요.",
+		remove: "기본 정보 삭제",
+		removed: "기본 정보가 삭제됨",
+		resolve: "구체적인 유형 확정",
+		resolveNotice: "유형이 미정일 때만 확정할 수 있습니다. 다른 변경 사항을 먼저 저장하세요.",
+	},
 	contextMeasurements: {
 		title: "내용별 신체 측정값",
 		context: "관련 내용",

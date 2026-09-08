@@ -3,7 +3,8 @@
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import type {
 	GetApiUnitsByTypeByUnitIdStatus200,
-	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+	ListResourceCreditAttributionsStatus200,
+	GetApiUnitsByIdByUnitIdSubjectAssociationsStatus200,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Card,
@@ -23,12 +24,13 @@ import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { groupByAssociationRole } from "../attribution-role";
 import { publicUnitHref } from "../routing/public-unit-route";
 
-type CreditAttribution = GetApiUnitsByTypeByUnitIdStatus200["attributions"][number];
+type CreditAttribution = ListResourceCreditAttributionsStatus200["items"][number];
+type CountedCreditAttribution = GetApiUnitsByTypeByUnitIdStatus200["attributions"][number];
 type CompactCreditAttribution =
-	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200["items"][number]["attributions"][number];
+	GetApiUnitsByIdByUnitIdSubjectAssociationsStatus200["items"][number]["attributions"][number];
 
 function attributionHref(attribution: CompactCreditAttribution): string | undefined {
-	return publicUnitHref(attribution.creditedEntity.kind, attribution.creditedEntity);
+	return publicUnitHref(attribution.creditedEntity.owner, attribution.creditedEntity);
 }
 
 function AttributionName({
@@ -151,7 +153,7 @@ export function DetailedCreditAttributionGroups({
 	);
 }
 
-export function PrimaryBookAuthorSection({ attribution }: { attribution: CreditAttribution }) {
+export function PrimaryBookAuthorSection({ attribution }: { attribution: CountedCreditAttribution }) {
 	const { locale, t } = useTranslation(["ui", "units"]);
 	const name = attribution.creditedEntity.title ?? t.ui.unnamed;
 	const creditedBookCount = toNonNegativeApiInteger(

@@ -1,4 +1,5 @@
 "use client";
+import { progressCopyKey } from "@/features/progress/model/progress-record";
 
 import { Button, ButtonGroup, cn, type ButtonVariant } from "@rezics/ui";
 import {
@@ -61,7 +62,7 @@ export function UnitProgressAction({
 function SignedOutProgressAction({ buttonClassName, className }: UnitProgressActionLayoutProps) {
 	const { domain } = useUnitProgress();
 	const { t } = useTranslation(["engagement"]);
-	const copy = t.engagement.progressByType[domain.type];
+	const copy = t.engagement.progressByType[progressCopyKey(domain.type)];
 
 	return (
 		<ButtonGroup className={cn("w-full", className)}>
@@ -88,7 +89,7 @@ function SignedOutProgressAction({ buttonClassName, className }: UnitProgressAct
 function LoadingProgressAction({ buttonClassName, className }: UnitProgressActionLayoutProps) {
 	const { domain } = useUnitProgress();
 	const { t } = useTranslation(["engagement"]);
-	const copy = t.engagement.progressByType[domain.type];
+	const copy = t.engagement.progressByType[progressCopyKey(domain.type)];
 
 	return (
 		<ProgressSplitButton
@@ -133,7 +134,7 @@ function FailedProgressAction({
 function UntrackedProgressAction({ buttonClassName, className }: UnitProgressActionLayoutProps) {
 	const { addToBacklog, domain, isSaving, openEditor, saveError } = useUnitProgress();
 	const { t } = useTranslation(["engagement", "ui"]);
-	const copy = t.engagement.progressByType[domain.type];
+	const copy = t.engagement.progressByType[progressCopyKey(domain.type)];
 
 	return (
 		<ProgressSplitButton
@@ -155,7 +156,7 @@ function UntrackedProgressAction({ buttonClassName, className }: UnitProgressAct
 function BacklogProgressAction({ buttonClassName, className }: UnitProgressActionLayoutProps) {
 	const { domain, isSaving, openEditor, resumeProgress, saveError } = useUnitProgress();
 	const { t } = useTranslation(["engagement", "ui"]);
-	const copy = t.engagement.progressByType[domain.type];
+	const copy = t.engagement.progressByType[progressCopyKey(domain.type)];
 
 	return (
 		<ProgressSplitButton
@@ -185,10 +186,11 @@ function ActiveProgressAction({
 }) {
 	const { domain, openEditor, saveError } = useUnitProgress();
 	const { t } = useTranslation(["engagement", "ui"]);
-	const copy = t.engagement.progressByType[domain.type];
+	const copy = t.engagement.progressByType[progressCopyKey(domain.type)];
 	const router = useApplicationRouter();
 	const continuationHref = progressContinuationHref(record.continuation);
-	const continuesContent = !metadataOnly && (domain.type === "book" || domain.type === "media");
+	const continuesContent =
+		!metadataOnly && (domain.type === "publishing" || domain.type === "program");
 
 	return (
 		<ProgressSplitButton
@@ -211,7 +213,7 @@ function ActiveProgressAction({
 function PausedProgressAction({ buttonClassName, className }: UnitProgressActionLayoutProps) {
 	const { domain, isSaving, openEditor, resumeProgress, saveError } = useUnitProgress();
 	const { t } = useTranslation(["engagement", "ui"]);
-	const copy = t.engagement.progressByType[domain.type];
+	const copy = t.engagement.progressByType[progressCopyKey(domain.type)];
 
 	return (
 		<ProgressSplitButton
@@ -247,7 +249,7 @@ function CompletedProgressAction({
 		startAgain,
 	} = useUnitProgress();
 	const { t } = useTranslation(["engagement", "ui"]);
-	const copy = t.engagement.progressByType[domain.type];
+	const copy = t.engagement.progressByType[progressCopyKey(domain.type)];
 	const feedbackCount =
 		completionFeedbackCount ?? (isCompleting ? record.completedCount : undefined);
 	const showingFeedback = feedbackCount !== undefined;
@@ -276,7 +278,7 @@ function CompletedProgressAction({
 function DroppedProgressAction({ buttonClassName, className }: UnitProgressActionLayoutProps) {
 	const { domain, isSaving, openEditor, saveError, startAgain } = useUnitProgress();
 	const { t } = useTranslation(["engagement", "ui"]);
-	const copy = t.engagement.progressByType[domain.type];
+	const copy = t.engagement.progressByType[progressCopyKey(domain.type)];
 
 	return (
 		<ProgressSplitButton

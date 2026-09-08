@@ -35,7 +35,7 @@ export function FeedItemIdentityBadge({
 	return (
 		<IdentityBadgeLink
 			avatar={item.presentation.kind === "identity" ? item.presentation.avatar : null}
-			href={publicUnitHref(item.unitKind, item)}
+			href={publicUnitHref(item.owner, item)}
 			label={label}
 		/>
 	);

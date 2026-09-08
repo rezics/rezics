@@ -120,7 +120,7 @@ export function ValueEditor({
 						{index > 0 ? (
 							<Button
 								type="button"
-								variant="ghost"
+								variant="quiet"
 								onClick={() => onChange(removeValueNode(rows, index))}
 							>
 								{copy.remove}

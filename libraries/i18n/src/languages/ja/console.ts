@@ -8,6 +8,7 @@ const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: postTerms } = jaTerminology.post;
 
 export default {
+	caseEvidence: "根拠",
 	nativeLookup: {
 		mode: "検索方法",
 		modes: {

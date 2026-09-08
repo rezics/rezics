@@ -167,7 +167,7 @@ export function DefinitionEditor({
 						{draft.labels.length > 1 ? (
 							<Button
 								type="button"
-								variant="ghost"
+								variant="quiet"
 								onClick={() =>
 									setDraft((current) => ({
 										...current,

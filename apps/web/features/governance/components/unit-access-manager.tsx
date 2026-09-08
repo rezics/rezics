@@ -113,12 +113,12 @@ function displayLabel(
 		readonly realmMembers: (input: { realm: string }) => string;
 		readonly realmAccessManagers: (input: { realm: string }) => string;
 	},
-	target?: { readonly unitId: string; readonly unitKind: string },
+	target?: { readonly unitId: string; readonly unitOwner: string },
 ) {
 	if (subject.subject.kind === "authenticated") return labels.authenticated;
 	if (subject.subject.kind === "auth") return subject.label ?? subjectKey(subject.subject);
 	if (
-		target?.unitKind === "realm" &&
+		target?.unitOwner === "realm" &&
 		target.unitId === subject.subject.realmId &&
 		subject.subject.relation === "member"
 	)
@@ -264,7 +264,7 @@ function SubjectAccessTable({
 		};
 		byKey.delete("authenticated");
 		const targetMembersKey = `realm:${snapshot.unitId}:member`;
-		const targetMembers = snapshot.unitKind === "realm" ? byKey.get(targetMembersKey) : undefined;
+		const targetMembers = snapshot.unitOwner === "realm" ? byKey.get(targetMembersKey) : undefined;
 		byKey.delete(targetMembersKey);
 		const targetMembersMatches =
 			Boolean(targetMembers) &&
@@ -370,9 +370,6 @@ function SubjectAccessTable({
 								{virtualizer.getVirtualItems().map((virtualRow) => {
 									const subject = subjects[virtualRow.index];
 									if (!subject) return null;
-									const isOwner =
-										subject.subject.kind === "auth" &&
-										snapshot.owner?.profileId === subject.subject.authUserId;
 									const label = displayLabel(subject, subjectLabels, snapshot);
 									const isBuiltInAudience =
 										subject.subject.kind === "authenticated" ||
@@ -383,7 +380,6 @@ function SubjectAccessTable({
 										<button
 											className="absolute inset-x-0 grid grid-cols-[minmax(0,1fr)_7rem_7rem] items-center gap-3 border-b px-4 text-start transition-colors hover:bg-muted/48 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 											key={subjectKey(subject.subject)}
-											disabled={isOwner}
 											onClick={() => setSelected(subject)}
 											role="row"
 											style={{
@@ -401,9 +397,6 @@ function SubjectAccessTable({
 													)}
 												</span>
 												<span className="truncate font-medium">{label}</span>
-												{isOwner ? (
-													<Badge variant="secondary">{t.governance.access.owner}</Badge>
-												) : null}
 												{isBuiltInAudience ? (
 													<Badge variant="outline">{t.governance.access.builtInAudience}</Badge>
 												) : null}
@@ -469,7 +462,7 @@ function SubjectAccessTable({
 					authenticatedPermissions={snapshot.authenticatedGrantablePermissions}
 					scope={scope}
 					subject={selected}
-					target={{ unitId: snapshot.unitId, unitKind: snapshot.unitKind }}
+					target={{ unitId: snapshot.unitId, unitOwner: snapshot.unitOwner }}
 					unitId={unitId}
 				/>
 			) : null}
@@ -478,7 +471,7 @@ function SubjectAccessTable({
 }
 
 function candidateLabel(candidate: OwnershipCandidate) {
-	return candidate.label ?? candidate.slug ?? candidate.profileId;
+	return candidate.label ?? candidate.slug ?? candidate.entityId;
 }
 
 function OwnershipTransferDialogs({
@@ -559,8 +552,8 @@ function OwnershipTransferDialogs({
 			await transfer.mutateAsync({
 				path: { unitId },
 				body: {
-					expectedOwnerProfileId: owner.profileId,
-					targetProfileId: selected.profileId,
+					expectedOwnerEntityId: owner.entityId,
+					targetEntityId: selected.entityId,
 				},
 			});
 			await queryClient.invalidateQueries({
@@ -624,7 +617,7 @@ function OwnershipTransferDialogs({
 											<button
 												aria-selected="false"
 												className="absolute inset-x-0 flex items-center justify-between gap-4 border-b px-4 text-start hover:bg-muted/48 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-												key={candidate.profileId}
+												key={candidate.entityId}
 												onClick={() => {
 													setSelected(candidate);
 													onOpenChange(false);
@@ -642,7 +635,7 @@ function OwnershipTransferDialogs({
 														{candidateLabel(candidate)}
 													</span>
 													<span className="block truncate text-muted-foreground text-xs">
-														{candidate.slug ? `@${candidate.slug}` : candidate.profileId}
+														{candidate.slug ? `@${candidate.slug}` : candidate.entityId}
 													</span>
 												</span>
 												<span className="text-muted-foreground text-sm">
@@ -737,7 +730,7 @@ function OwnershipRelinquishmentDialog({
 		try {
 			await relinquish.mutateAsync({
 				path: { unitId },
-				body: { expectedOwnerProfileId: owner.profileId },
+				body: { expectedOwnerEntityId: owner.entityId },
 			});
 			await queryClient.invalidateQueries({
 				queryKey: getApiGovernanceUnitByUnitIdAccessQueryKey({
@@ -903,7 +896,7 @@ function SubjectAccessSheet({
 	authenticatedPermissions: readonly Permission[];
 	scope: readonly string[];
 	subject: AccessSubject;
-	target: { readonly unitId: string; readonly unitKind: string };
+	target: { readonly unitId: string; readonly unitOwner: string };
 	onOpenChange: (open: boolean) => void;
 }) {
 	const { t } = useTranslation(["governance"]);

@@ -16,7 +16,6 @@ import {
 	Shelf,
 	Skeleton,
 } from "@rezics/ui";
-import type { ContentLanguage } from "@rezics/i18n";
 import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 import { useTranslation } from "@/i18n/client";
 
@@ -26,9 +25,9 @@ export interface RealmPinnedContentItem {
 	readonly avatar?: PresentedAvatar | null;
 	readonly identity?: boolean;
 	readonly imageUrl?: string | null;
-	readonly language?: ContentLanguage | null;
+	readonly language?: string | null;
 	readonly summary?: string | null;
-	readonly summaryLanguage?: ContentLanguage | null;
+	readonly summaryLanguage?: string | null;
 	readonly title?: string | null;
 }
 

@@ -1,3 +1,4 @@
+import { unitDetailHref } from "@/features/units/routing/unit-detail-routes";
 import { urlStateOptions } from "@/lib/search-params";
 import { parseAsStringLiteral } from "nuqs/server";
 import type { ProgressTrackableUnitType } from "../model/progress-record";
@@ -17,7 +18,7 @@ export function toProgressHistoryFilter(value: string | null | undefined): Progr
 }
 
 export function unitProgressHref(type: ProgressTrackableUnitType, unitId: string): string {
-	return `/units/${type}/${unitId}/progress`;
+	return `${unitDetailHref(type, unitId)}/progress`;
 }
 
 export function progressEntryReviewHref(
@@ -26,5 +27,5 @@ export function progressEntryReviewHref(
 	entryId: string,
 ): string {
 	const search = new URLSearchParams({ progressEntryId: entryId });
-	return `/units/${type}/${unitId}/reviews/new?${search}`;
+	return `${unitDetailHref(type, unitId)}/reviews/new?${search}`;
 }

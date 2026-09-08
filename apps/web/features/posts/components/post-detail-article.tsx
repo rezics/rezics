@@ -2,7 +2,6 @@
 
 import type { PostApiFeedQueryStatus200 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextDocument } from "@rezics/block";
-import type { ContentLanguage } from "@rezics/i18n";
 import { type ReactNode, useState } from "react";
 
 import { Button, Card, CardContent, CardHeader } from "@rezics/ui";
@@ -34,9 +33,9 @@ export interface PostDetailArticleValue {
 	readonly postKind: PostKind;
 	readonly attributions: readonly AttributionSummary[];
 	readonly realmId: string | null;
-	readonly language: ContentLanguage;
+	readonly language: string;
 	readonly title: string | null;
-	readonly titleLanguage: ContentLanguage | null;
+	readonly titleLanguage: string | null;
 	readonly summary?: string | null;
 	readonly body: PortableTextDocument | null;
 	readonly createdAt: string;
@@ -69,7 +68,9 @@ export function PostDetailArticle({
 	const content = (
 		<>
 			<p className="font-semibold text-brand text-xs">
-				{t.feed.content.kinds[`post:${post.postKind}`]}
+				{Object.entries(t.feed.content.kinds).find(
+					([key]) => key === `post:${post.postKind}`,
+				)?.[1] ?? t.feed.content.owners.post}
 			</p>
 			{post.title ? (
 				<h1

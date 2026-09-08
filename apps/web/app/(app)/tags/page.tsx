@@ -1,1 +1,1 @@
-export { TagsPage as default } from "@/features/units/unit-resource-pages";
+export { TagsPage as default } from "@/features/tags/pages/tag-directory-page";

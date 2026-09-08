@@ -1,17 +1,15 @@
 "use client";
 
-import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
+import { useUnitSummary } from "@/features/units/hooks/use-unit-summary";
+import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { postHref } from "@/features/posts/url";
-import { isUnitDetailUnitFor } from "@/features/units/model/unit-detail-unit";
-import type { UnitDetailUnitType } from "@/features/units/model/unit-detail-section";
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
-import { selectLocalization } from "@/lib/localization";
 import { ReviewComposer } from "../components/review-composer";
 
 export function TargetedReviewCreatePage({
@@ -24,10 +22,7 @@ export function TargetedReviewCreatePage({
 	readonly type: UnitDetailUnitType;
 }) {
 	const localizationLanguages = useLocalizationLanguages();
-	const query = useGetApiUnitsByTypeByUnitId({
-		path: { type, unitId: targetId },
-		query: { localizationLanguages },
-	});
+	const query = useUnitSummary({ owner: type, id: targetId });
 	const router = useApplicationRouter();
 	const { t } = useTranslation(["engagement", "ui"]);
 	useLocalizationFallbackToast({
@@ -39,19 +34,8 @@ export function TargetedReviewCreatePage({
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!isUnitDetailUnitFor(query.data, type))
-		return (
-			<QueryFailure
-				error={new Error("Unit Unit type mismatch")}
-				retry={() => void query.refetch()}
-			/>
-		);
 
-	const title = selectLocalization(
-		query.data.localizations,
-		query.data.language,
-		query.data.language,
-	)?.title;
+	const title = query.data.title;
 
 	return (
 		<RequireSession>

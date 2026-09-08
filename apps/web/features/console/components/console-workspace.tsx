@@ -22,7 +22,6 @@ import {
 	FileClock,
 	Gauge,
 	GitMerge,
-	Handshake,
 	KeyRound,
 	Menu,
 	ShieldCheck,
@@ -68,13 +67,11 @@ interface ConsoleWorkspaceModel {
 	readonly canReadTokenApiQuotas: boolean;
 	readonly canUpdateTokenApiQuotas: boolean;
 	readonly canReadUnits: boolean;
-	readonly canReadOwnershipClaims: boolean;
 	readonly canReadUnitMerges: boolean;
 	readonly canProposeUnitMerges: boolean;
 	readonly canReviewUnitMerges: boolean;
 	readonly canRetryUnitMerges: boolean;
 	readonly currentProfileId: string;
-	readonly canDecideOwnershipClaims: boolean;
 	readonly canDeleteUnits: boolean;
 	readonly canRestoreUnits: boolean;
 	readonly canOverrideUnitOwnership: boolean;
@@ -156,12 +153,10 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 	);
 	const canReadUsers = accessibleSectionIds.has("users");
 	const canReadUnits = accessibleSectionIds.has("units");
-	const canReadOwnershipClaims = accessibleSectionIds.has("ownership-claims");
 	const canReadUnitMerges = accessibleSectionIds.has("unit-merges");
 	const canProposeUnitMerges = capabilities.has("unit.merge.propose");
 	const canReviewUnitMerges = capabilities.has("unit.merge.review");
 	const canRetryUnitMerges = capabilities.has("unit.merge");
-	const canDecideOwnershipClaims = capabilities.has("unit.ownership.override");
 	const canDeleteUnits = capabilities.has("unit.delete");
 	const canRestoreUnits = capabilities.has("unit.restore");
 	const canOverrideUnitOwnership = capabilities.has("unit.ownership.override");
@@ -199,17 +194,6 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 						label: labels.units.label,
 						description: labels.units.description,
 						icon: Boxes,
-					},
-				]
-			: []),
-		...(canReadOwnershipClaims
-			? [
-					{
-						id: "ownership-claims" as const,
-						href: consoleSectionHref("ownership-claims"),
-						label: labels.ownershipClaims.label,
-						description: labels.ownershipClaims.description,
-						icon: Handshake,
 					},
 				]
 			: []),
@@ -280,13 +264,11 @@ function ConsoleWorkspaceContent({ children }: { readonly children: ReactNode })
 		canReadTokenApiQuotas,
 		canUpdateTokenApiQuotas,
 		canReadUnits,
-		canReadOwnershipClaims,
 		canReadUnitMerges,
 		canProposeUnitMerges,
 		canReviewUnitMerges,
 		canRetryUnitMerges,
 		currentProfileId: me.data.entity.id,
-		canDecideOwnershipClaims,
 		canDeleteUnits,
 		canRestoreUnits,
 		canOverrideUnitOwnership,

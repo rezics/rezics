@@ -1,4 +1,5 @@
 "use client";
+import { progressCopyKey } from "@/features/progress/model/progress-record";
 
 import {
 	Button,
@@ -24,7 +25,7 @@ import { useUnitProgress } from "./unit-progress-provider";
 export function UnitProgressSummaryCard({ className }: { readonly className?: string }) {
 	const progress = useUnitProgress();
 	const { t } = useTranslation(["engagement", "ui"]);
-	const copy = t.engagement.progressByType[progress.domain.type];
+	const copy = t.engagement.progressByType[progressCopyKey(progress.domain.type)];
 
 	if (progress.state.kind === "signed-out") return null;
 	if (progress.state.kind === "loading")

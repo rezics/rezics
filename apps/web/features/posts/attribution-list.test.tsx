@@ -31,7 +31,7 @@ function createAttribution({
 		role,
 		creditedEntity: {
 			id: creditedEntityId,
-			kind: "slug_namespace",
+			owner: "entity",
 			title,
 		},
 	};

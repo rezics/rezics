@@ -1,4 +1,5 @@
 "use client";
+import { progressCopyKey } from "@/features/progress/model/progress-record";
 
 import type { Translation } from "@rezics/i18n";
 import { useGetApiAccountMePreferences } from "@rezics/openapi-tanstack-query";
@@ -94,7 +95,7 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 	);
 	const [invalid, setInvalid] = useState(false);
 	const [removeOpen, setRemoveOpen] = useState(false);
-	const copy = t.engagement.progressByType[progress.domain.type];
+	const copy = t.engagement.progressByType[progressCopyKey(progress.domain.type)];
 	const completing = isCompletionTransition(sourceRecord, draft.status);
 	const nextCompletedCount = (sourceRecord?.completedCount ?? 0) + 1;
 	const effectiveVisibility = preferences.data
@@ -174,12 +175,12 @@ function ProgressEditor({ record }: { readonly record: UnitProgressRecord | null
 								</FieldDescription>
 							) : null}
 						</Field>
-						{progress.domain.type === "book" ? (
+						{progress.domain.type === "publishing" ? (
 							<BookProgressFields draft={draft} onChange={setDraft} />
-						) : progress.domain.type === "media" ? (
-							<MediaProgressFields draft={draft} onChange={setDraft} />
-						) : (
+						) : progress.domain.type === "software" ? (
 							<SoftwareProgressFields draft={draft} onChange={setDraft} />
+						) : (
+							<MediaProgressFields draft={draft} onChange={setDraft} />
 						)}
 					</FieldGroup>
 				</form>
@@ -308,7 +309,7 @@ function ProgressStatusField({
 	readonly t: Pick<Translation, "engagement">;
 	readonly type: UnitProgressDomain["type"];
 }) {
-	const copy = t.engagement.progressByType[type];
+	const copy = t.engagement.progressByType[progressCopyKey(type)];
 	return (
 		<Field>
 			<RadioGroup
@@ -344,6 +345,7 @@ function BookProgressFields({
 }) {
 	const { t } = useTranslation(["engagement"]);
 	const copy = t.engagement.progressByType.book;
+	const progress = useUnitProgress();
 	const showPosition = draft.status !== "backlog" && draft.status !== "completed";
 
 	if (!showPosition) return null;
@@ -351,13 +353,15 @@ function BookProgressFields({
 	return (
 		<>
 			<PercentageField draft={draft} label={copy.progress} onChange={onChange} />
-			<ContentStructureNodeField
-				description={copy.estimatedFromContents}
-				draft={draft}
-				label={copy.lastChapter}
-				noSelectionLabel={copy.noChapter}
-				onChange={onChange}
-			/>
+			{progress.domain.shape === "text_version" ? (
+				<ContentStructureNodeField
+					description={copy.estimatedFromContents}
+					draft={draft}
+					label={copy.lastChapter}
+					noSelectionLabel={copy.noChapter}
+					onChange={onChange}
+				/>
+			) : null}
 		</>
 	);
 }
@@ -370,20 +374,26 @@ function MediaProgressFields({
 	readonly onChange: (draft: ProgressDraft | ((draft: ProgressDraft) => ProgressDraft)) => void;
 }) {
 	const { t } = useTranslation(["engagement"]);
-	const copy = t.engagement.progressByType.media;
+	const progress = useUnitProgress();
+	const copy =
+		progress.domain.type === "program" || progress.domain.type === "video"
+			? t.engagement.progressByType.media
+			: t.engagement.progressByType.generic;
 	const showPosition = draft.status !== "backlog" && draft.status !== "completed";
 	return (
 		<>
 			{showPosition ? (
 				<>
 					<PercentageField draft={draft} label={copy.progress} onChange={onChange} />
-					<ContentStructureNodeField
-						description={copy.estimatedFromItem}
-						draft={draft}
-						label={copy.currentItem}
-						noSelectionLabel={copy.noItem}
-						onChange={onChange}
-					/>
+					{progress.domain.type === "program" ? (
+						<ContentStructureNodeField
+							description={t.engagement.progressByType.media.estimatedFromItem}
+							draft={draft}
+							label={t.engagement.progressByType.media.currentItem}
+							noSelectionLabel={t.engagement.progressByType.media.noItem}
+							onChange={onChange}
+						/>
+					) : null}
 				</>
 			) : null}
 			<TotalMinutesField draft={draft} label={copy.totalMinutes} onChange={onChange} />

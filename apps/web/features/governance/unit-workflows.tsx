@@ -2,16 +2,18 @@
 
 import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import {
-	getApiEntitiesByUnitIdQueryKey,
-	type GetApiEntitiesByUnitIdStatus200,
+	listResourceCreditAttributionsQueryKey,
+	useListResourceCreditAttributions,
+	useListCatalogEntityCandidates,
+	useGetApiAccountMe,
+	useReadCatalogResource,
 	getApiGovernanceUnitAccessInvitationsQueryKey,
 	getApiGovernanceUnitByUnitIdAccessInvitationsQueryKey,
 	type GetApiGovernanceUnitByUnitIdAccessStatus200PermissionsEnum,
 	getApiUnitByUnitIdAssociationProposalsQueryKey,
 	useDeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId,
 	useDeleteApiUnitByUnitIdAssociationProposalsByProposalId,
-	useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId,
-	useGetApiEntitiesByUnitId,
+	useDeleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociationId,
 	useGetApiGovernanceUnitAccessInvitations,
 	useGetApiGovernanceUnitByUnitIdAccess,
 	useGetApiGovernanceUnitByUnitIdAccessInvitations,
@@ -24,7 +26,7 @@ import {
 	usePostApiUnitByUnitIdAssociationProposalsByProposalIdDecline,
 	usePostApiUnitByUnitIdAssociationProposalsInvitations,
 	usePostApiUnitByUnitIdAssociationProposalsRequests,
-	usePostApiUnitsByTypeByUnitIdCreditAttributions,
+	usePostApiResourcesByOwnerByUnitIdCreditAttributions,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
@@ -66,7 +68,6 @@ import {
 	QueryPending,
 	UnitPicker,
 } from "@rezics/ui";
-import { UnitAccessManager } from "./components/unit-access-manager";
 
 type AssociationKind = "credit" | "subject";
 type AssociationSide = "source" | "target";
@@ -749,22 +750,25 @@ export function ProfileAttributionProposalManager({ profileId }: { profileId: st
 	return <AssociationProposalManager kind="credit" side="target" unitId={profileId} />;
 }
 
-function EntityPublisherManager({ entity }: { entity: GetApiEntitiesByUnitIdStatus200 }) {
+function EntityPublisherManager({ id }: { id: string }) {
 	const { t } = useTranslation(["errors", "governance", "ui"]);
 	const localizationLanguages = useLocalizationLanguages();
 	const queryClient = useQueryClient();
+	const [cursors, setCursors] = useState<string[]>([]);
 	const queryOptions = {
-		path: { unitId: entity.id },
-		query: { localizationLanguages },
+		path: { owner: "entity", unitId: id },
+		query: { localizationLanguages, limit: 25, cursor: cursors.at(-1) },
 	} as const;
+	const listing = useListResourceCreditAttributions(queryOptions);
+	const attributions = listing.data?.items.filter((item) => item.role === "publisher") ?? [];
 	const refresh = () =>
 		queryClient.invalidateQueries({
-			queryKey: getApiEntitiesByUnitIdQueryKey(queryOptions),
+			queryKey: listResourceCreditAttributionsQueryKey(queryOptions),
 		});
-	const add = usePostApiUnitsByTypeByUnitIdCreditAttributions({
+	const add = usePostApiResourcesByOwnerByUnitIdCreditAttributions({
 		mutation: { onSuccess: refresh },
 	});
-	const remove = useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId({
+	const remove = useDeleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociationId({
 		mutation: { onSuccess: refresh },
 	});
 	const [publisherProfileId, setPublisherProfileId] = useState<string>();
@@ -782,7 +786,7 @@ function EntityPublisherManager({ entity }: { entity: GetApiEntitiesByUnitIdStat
 						if (!publisherProfileId) return;
 						try {
 							await add.mutateAsync({
-								path: { type: "entity", unitId: entity.id },
+								path: { owner: "entity", unitId: id },
 								body: {
 									creditedEntityId: publisherProfileId,
 									role: "publisher",
@@ -818,14 +822,14 @@ function EntityPublisherManager({ entity }: { entity: GetApiEntitiesByUnitIdStat
 					</FieldGroup>
 				</form>
 				<div className="grid gap-3">
-					{entity.attributions.map((attribution) => {
+					{attributions.map((attribution) => {
 						const label = attribution.creditedEntity.title ?? attribution.creditedEntity.id;
 						return (
 							<div
 								className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4 text-sm"
 								key={attribution.id}
 							>
-								{attribution.creditedEntity.kind === "entity" ? (
+								{attribution.creditedEntity.owner === "entity" ? (
 									<Link
 										href={profileHref({
 											id: attribution.creditedEntity.id,
@@ -844,8 +848,8 @@ function EntityPublisherManager({ entity }: { entity: GetApiEntitiesByUnitIdStat
 									onClick={() =>
 										void remove.mutateAsync({
 											path: {
-												type: "entity",
-												unitId: entity.id,
+												owner: "entity",
+												unitId: id,
 												associationId: attribution.id,
 											},
 											body: {},
@@ -859,8 +863,31 @@ function EntityPublisherManager({ entity }: { entity: GetApiEntitiesByUnitIdStat
 							</div>
 						);
 					})}
-					{entity.attributions.length === 0 ? (
+					{attributions.length === 0 ? (
 						<p className="text-muted-foreground text-sm">{t.governance.noPublishers}</p>
+					) : null}
+				</div>
+				{listing.isPending ? (
+					<QueryPending />
+				) : listing.isError ? (
+					<QueryFailure error={listing.error} retry={() => void listing.refetch()} />
+				) : null}
+				<div className="flex gap-2">
+					{cursors.length ? (
+						<Button variant="outline" onClick={() => setCursors((value) => value.slice(0, -1))}>
+							{t.ui.shelf.previous}
+						</Button>
+					) : null}
+					{listing.data?.nextCursor ? (
+						<Button
+							variant="outline"
+							onClick={() => {
+								const next = listing.data?.nextCursor;
+								if (next) setCursors((value) => [...value, next]);
+							}}
+						>
+							{t.ui.shelf.next}
+						</Button>
 					) : null}
 				</div>
 				<RequestFailure error={remove.error} />
@@ -879,23 +906,29 @@ export function ReceivedAccessInvitationsPage() {
 }
 
 export function EntityGovernancePage({ id }: { id: string }) {
-	const { t } = useTranslation(["errors", "governance", "ui"]);
-	const localizationLanguages = useLocalizationLanguages();
-	const entity = useGetApiEntitiesByUnitId({
-		path: { unitId: id },
-		query: { localizationLanguages },
+	const { t } = useTranslation(["errors", "governance", "ui", "settings"]);
+	const me = useGetApiAccountMe();
+	const entity = useReadCatalogResource({ path: { owner: "entity", id } });
+	const consent = useListCatalogEntityCandidates({
+		query: { mode: "direct", query: id, limit: 1 },
 	});
 	if (entity.isPending) return <QueryPending />;
 	if (entity.isError || !entity.data)
 		return <QueryFailure error={entity.error} retry={() => void entity.refetch()} />;
-	const { capabilities } = entity.data;
+	if (consent.isPending) return <QueryPending />;
+	if (consent.isError)
+		return <QueryFailure error={consent.error} retry={() => void consent.refetch()} />;
+	const canConsent =
+		Boolean(me.data?.platformCapabilities.includes("entity.associations.override")) ||
+		consent.data.items.some((item) => item.id === id);
+	const capabilities = {
+		canEditCreditAttributions: entity.data.canEdit,
+		canManageCreditAssociations: canConsent,
+		canManageSubjectAssociations: canConsent,
+	};
 	const canManageAssociations =
 		capabilities.canManageCreditAssociations || capabilities.canManageSubjectAssociations;
-	if (
-		!capabilities.canManageAccess &&
-		!capabilities.canEditCreditAttributions &&
-		!canManageAssociations
-	)
+	if (!capabilities.canEditCreditAttributions && !canManageAssociations)
 		return (
 			<WorkflowFrame title={t.governance.title}>
 				<p className="text-destructive text-sm">{t.errors.forbidden}</p>
@@ -903,12 +936,12 @@ export function EntityGovernancePage({ id }: { id: string }) {
 		);
 	return (
 		<WorkflowFrame title={t.governance.title}>
-			{capabilities.canManageAccess ? (
-				<UnitAccessManager includeEntityTargetScopes unitId={id} />
-			) : null}
+			<Button asChild variant="outline">
+				<Link href="/settings/participation">{t.settings.participation.title}</Link>
+			</Button>
 			{capabilities.canEditCreditAttributions ? (
 				<>
-					<EntityPublisherManager entity={entity.data} />
+					<EntityPublisherManager id={id} />
 					<AssociationProposalManager
 						creditRoles={["publisher"]}
 						entityPublisherOnly

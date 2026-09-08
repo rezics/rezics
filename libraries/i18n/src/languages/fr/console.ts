@@ -8,6 +8,7 @@ const { forms: zoneTerms } = frTerminology.zone;
 const { forms: postTerms } = frTerminology.post;
 
 export default {
+	caseEvidence: "Preuve",
 	nativeLookup: {
 		mode: "Rechercher par",
 		modes: {

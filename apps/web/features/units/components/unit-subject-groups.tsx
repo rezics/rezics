@@ -2,7 +2,7 @@
 
 import type {
 	GetApiUnitsByTypeByUnitIdStatus200,
-	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
+	GetApiUnitsByIdByUnitIdSubjectAssociationsStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { Button, CardContent, Cover, ShowMoreContent } from "@rezics/ui";
 import { useState } from "react";
@@ -22,7 +22,7 @@ import { CompactCreditAttributionGroups } from "./unit-attribution-sections";
 
 type PreviewSubjectAssociation = GetApiUnitsByTypeByUnitIdStatus200["subjectAssociations"][number];
 type CompleteSubjectAssociation =
-	GetApiUnitsByTypeByUnitIdSubjectAssociationsStatus200["items"][number];
+	GetApiUnitsByIdByUnitIdSubjectAssociationsStatus200["items"][number];
 type SubjectAssociation = PreviewSubjectAssociation | CompleteSubjectAssociation;
 type CompleteMeasurement = NonNullable<CompleteSubjectAssociation["measurement"]>;
 

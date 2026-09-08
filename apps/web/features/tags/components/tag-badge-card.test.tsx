@@ -56,7 +56,7 @@ const pinnedTag = {
 		kind: "available",
 		target: {
 			kind: "global",
-			type: "book",
+			type: "publishing",
 			unitId: "019f995d-73ad-7692-88d4-39741cbe6c34",
 			tagId: "019f995d-731c-71dd-b8cd-2bc781fb07e7",
 		},
@@ -103,7 +103,7 @@ describe("TagBadgeCard", () => {
 					onVote={vi.fn()}
 					selected={false}
 					selectionMode={false}
-					type="book"
+					type="publishing"
 				/>
 			</TranslationProvider>,
 		);
@@ -131,7 +131,7 @@ describe("TagBadgeCard", () => {
 						onVote={vi.fn()}
 						selected={false}
 						selectionMode={false}
-						type="book"
+						type="publishing"
 					/>
 				</TranslationProvider>
 			</ChineseContentDisplayProvider>,
@@ -152,7 +152,7 @@ describe("TagBadgeCard", () => {
 					onVote={vi.fn()}
 					selected={false}
 					selectionMode={false}
-					type="book"
+					type="publishing"
 				/>
 			</TranslationProvider>,
 		);

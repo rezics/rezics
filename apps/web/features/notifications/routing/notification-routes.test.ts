@@ -34,8 +34,21 @@ describe("notification destinations", () => {
 			notificationHref(item({ kind: "access_invitation", unitId: id, invitationId: id })),
 		).toBe(`/notifications/invitations?invitationId=${id}&unitId=${id}#invitation-${id}`);
 		expect(
-			notificationHref(item({ kind: "unit", unit: { id, kind: "book", slugAddress: null } })),
-		).toBe(`/units/book/${id}`);
+			notificationHref(
+				item({
+					kind: "unit",
+					unit: { id, owner: "publishing", shape: "work", slugAddress: null },
+				}),
+			),
+		).toBe(`/catalog/publishing/${id}`);
+		expect(
+			notificationHref(
+				item({
+					kind: "unit",
+					unit: { id, owner: "video", shape: "video", slugAddress: null },
+				}),
+			),
+		).toBe(`/units/video/${id}`);
 		expect(notificationHref(item({ kind: "notification_details", notificationId: id }))).toBe(
 			`/notifications/${id}`,
 		);
@@ -49,7 +62,8 @@ describe("notification destinations", () => {
 					kind: "unit",
 					unit: {
 						id: "019b76da-a800-7300-8000-000000000002",
-						kind: "realm_rule",
+						owner: "realm_rule",
+						shape: "realm_rule",
 						slugAddress: null,
 					},
 				}),

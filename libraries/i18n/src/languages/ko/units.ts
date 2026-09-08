@@ -12,6 +12,17 @@ const { forms: metadataTerms } = koTerminology.metadata;
 const { forms: entityTerms } = koTerminology.entity;
 
 export default {
+	nativeEditorial: {
+		title: "소개와 이미지",
+		edit: "소개와 이미지 편집",
+		language: "언어 태그",
+		openLanguage: "이 언어 열기",
+		invalidLanguage: "올바른 언어 태그를 입력하세요.",
+		withdraw: "현재 소개와 이미지 지우기",
+		name: "이름",
+		primaryName: "이 언어의 기본 이름으로 사용",
+		addName: "이름 추가",
+	},
 	nativeGrouping: {
 		classes: "분류",
 		orders: "이름이 있는 순서",

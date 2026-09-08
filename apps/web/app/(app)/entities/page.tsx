@@ -1,1 +1,1 @@
-export { EntitiesPage as default } from "@/features/units/unit-resource-pages";
+export { EntitiesPage as default } from "@/features/entities/pages/entity-directory-page";

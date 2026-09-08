@@ -8,6 +8,7 @@ const { forms: zoneTerms } = koTerminology.zone;
 const { forms: postTerms } = koTerminology.post;
 
 export default {
+	caseEvidence: "근거",
 	nativeLookup: {
 		mode: "검색 방식",
 		modes: {

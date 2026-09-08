@@ -40,7 +40,7 @@ function NotificationDetailsContent({ notificationId }: { notificationId: string
 		return <QueryFailure error={notification.error} retry={() => void notification.refetch()} />;
 
 	const item = notification.data;
-	const subjectHref = item.subject ? publicUnitHref(item.subject.kind, item.subject) : undefined;
+	const subjectHref = item.subject ? publicUnitHref(item.subject.owner, item.subject) : undefined;
 	const publicNoticePostId =
 		item.context.type === "content_governance_action" ||
 		item.context.type === "report_resolution" ||

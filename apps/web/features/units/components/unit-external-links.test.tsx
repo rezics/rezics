@@ -44,8 +44,8 @@ const link = {
 	id: "00000000-0000-7000-8000-000000000001",
 	unitId: "00000000-0000-7000-8000-000000000002",
 	sourceEntityId: "00000000-0000-7000-8000-000000000003",
-	url: "https://catalog.example.test/books/example",
-	normalizedUrl: "https://catalog.example.test/books/example",
+	url: "https://catalog.example.test/works/example",
+	normalizedUrl: "https://catalog.example.test/works/example",
 	normalizedUrlHash: "a".repeat(64),
 	createdByProfileId: null,
 	voteSummary: {
@@ -62,7 +62,8 @@ const link = {
 	updatedAt: "2026-08-08T00:00:00.000Z",
 	sourceEntity: {
 		id: "00000000-0000-7000-8000-000000000003",
-		kind: "entity",
+		owner: "entity",
+		shape: "organization",
 		language: "en",
 		title: "Example Catalog",
 		summary: "The source catalog entry.",

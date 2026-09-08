@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 
-import type { GetApiUnitsByTypeByUnitIdTagsStatus200 } from "@rezics/openapi-tanstack-query";
+import type { GetApiResourcesByOwnerByUnitIdTagsStatus200 } from "@rezics/openapi-tanstack-query";
 import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -107,7 +107,7 @@ const tagData = {
 	totals: { expressions: 1 },
 	realms: [],
 	voteRealms: [],
-} satisfies GetApiUnitsByTypeByUnitIdTagsStatus200;
+} satisfies GetApiResourcesByOwnerByUnitIdTagsStatus200;
 
 vi.mock("@rezics/openapi-tanstack-query", async (importOriginal) => {
 	const actual = await importOriginal<typeof import("@rezics/openapi-tanstack-query")>();
@@ -121,11 +121,11 @@ vi.mock("@rezics/openapi-tanstack-query", async (importOriginal) => {
 	return {
 		...actual,
 		getApiRealmsByRealmIdUnitsByUnitIdTagsQueryKey: vi.fn(() => []),
-		getApiUnitsByTypeByUnitIdTagsQueryKey: vi.fn(() => []),
+		getApiResourcesByOwnerByUnitIdTagsQueryKey: vi.fn(() => []),
 		useDeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationId: mutation,
 		useDeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote: mutation,
-		useDeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationId: mutation,
-		useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote: mutation,
+		useDeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationId: mutation,
+		useDeleteApiResourcesByOwnerByUnitIdTagsByTagIdVote: mutation,
 		useGetApiRealmsByRealmIdUnitsByUnitIdTags: () => ({
 			data: undefined,
 			error: null,
@@ -134,7 +134,7 @@ vi.mock("@rezics/openapi-tanstack-query", async (importOriginal) => {
 			refetch: vi.fn(),
 		}),
 		useGetApiUnitsByTypeByUnitId: () => ({ data: undefined }),
-		useGetApiUnitsByTypeByUnitIdTags: () => ({
+		useGetApiResourcesByOwnerByUnitIdTags: () => ({
 			data: tagData,
 			error: null,
 			isError: false,
@@ -142,12 +142,12 @@ vi.mock("@rezics/openapi-tanstack-query", async (importOriginal) => {
 			refetch: vi.fn(),
 		}),
 		usePostApiRealmsByRealmIdUnitsByUnitIdTagPathApplications: mutation,
-		usePostApiUnitsByTypeByUnitIdTagPathApplications: mutation,
+		usePostApiResourcesByOwnerByUnitIdTagPathApplications: mutation,
 		usePutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgment: mutation,
 		usePutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote: mutation,
-		usePutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgment: mutation,
-		usePutApiUnitsByTypeByUnitIdTagsByTagId: mutation,
-		usePutApiUnitsByTypeByUnitIdTagsByTagIdVote: mutation,
+		usePutApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgment: mutation,
+		usePutApiResourcesByOwnerByUnitIdTagsByTagId: mutation,
+		usePutApiResourcesByOwnerByUnitIdTagsByTagIdVote: mutation,
 	};
 });
 
@@ -232,7 +232,7 @@ describe("UnitTagExplorer expression presentation", () => {
 			<UnitTagExplorer
 				expressionPresentation="path-badges"
 				surface="section"
-				type="book"
+				type="publishing"
 				unitId="01941f29-7c00-70cc-86c5-5f5227cc68b9"
 			/>,
 		);

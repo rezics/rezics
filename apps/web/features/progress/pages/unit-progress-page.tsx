@@ -1,8 +1,8 @@
 "use client";
+import { progressCopyKey } from "@/features/progress/model/progress-record";
 
 import {
 	useDeleteApiProgressByUnitIdEntriesByEntryId,
-	useGetApiUnitsByTypeByUnitId,
 	usePutApiProgressByUnitIdEntriesByEntryIdCurrent,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
@@ -39,14 +39,13 @@ import {
 import { useQueryState } from "nuqs";
 import { RequireSession } from "@/features/auth/require-session";
 import { postHref } from "@/features/posts/url";
-import { isUnitDetailUnitFor } from "@/features/units/model/unit-detail-unit";
+import { useUnitSummary } from "@/features/units/hooks/use-unit-summary";
 import { unitDetailHref } from "@/features/units/routing/unit-detail-routes";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationFallbackToast } from "@/i18n/use-localization-fallback-toast";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { toFiniteApiNumber, toNonNegativeApiInteger } from "@/lib/api-number";
-import { selectLocalization } from "@/lib/localization";
 import { ProgressEntryDialog } from "../components/progress-entry-dialog";
 import { ProgressEventDescription } from "../components/progress-event-description";
 import { ProgressImportDialog } from "../components/progress-import-dialog";
@@ -74,9 +73,7 @@ export function UnitProgressPage({
 }) {
 	return (
 		<RequireSession>
-			<UnitProgressProvider domain={{ type, unitId }}>
-				<UnitProgressPageContent type={type} unitId={unitId} />
-			</UnitProgressProvider>
+			<UnitProgressPageContent type={type} unitId={unitId} />
 		</RequireSession>
 	);
 }
@@ -89,10 +86,7 @@ function UnitProgressPageContent({
 	readonly unitId: string;
 }) {
 	const localizationLanguages = useLocalizationLanguages();
-	const query = useGetApiUnitsByTypeByUnitId({
-		path: { type, unitId },
-		query: { localizationLanguages },
-	});
+	const query = useUnitSummary({ owner: type, id: unitId });
 	useLocalizationFallbackToast({
 		actualLanguage: query.data?.language ?? null,
 		localizationLanguages,
@@ -101,20 +95,12 @@ function UnitProgressPageContent({
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!isUnitDetailUnitFor(query.data, type))
-		return (
-			<QueryFailure
-				error={new Error("Unit Unit type mismatch")}
-				retry={() => void query.refetch()}
-			/>
-		);
 
-	const localization = selectLocalization(
-		query.data.localizations,
-		query.data.language,
-		query.data.language,
+	return (
+		<UnitProgressProvider domain={{ type, unitId, shape: query.data.shape }}>
+			<ProgressJournal title={query.data.title ?? undefined} />
+		</UnitProgressProvider>
 	);
-	return <ProgressJournal title={localization?.title ?? undefined} />;
 }
 
 function ProgressJournal({ title }: { readonly title?: string }) {
@@ -325,7 +311,7 @@ function ProgressJournal({ title }: { readonly title?: string }) {
 function CurrentProgressCard() {
 	const progress = useUnitProgress();
 	const { t } = useTranslation(["engagement", "ui"]);
-	const copy = t.engagement.progressByType[progress.domain.type];
+	const copy = t.engagement.progressByType[progressCopyKey(progress.domain.type)];
 	if (progress.state.kind === "loading") return <QueryPending />;
 	if (progress.state.kind === "error")
 		return <QueryFailure error={progress.state.error} retry={() => progress.retryProgress()} />;
@@ -419,7 +405,7 @@ function ProgressTimelineItem({
 			</span>
 			<span className="flex flex-col items-end gap-1">
 				<Badge variant="secondary">
-					{t.engagement.progressByType[type].statuses[entry.status]}
+					{t.engagement.progressByType[progressCopyKey(type)].statuses[entry.status]}
 				</Badge>
 				{entry.id === progress.currentEntryId ? (
 					<span className="text-muted-foreground text-xs">
@@ -458,9 +444,9 @@ function ProgressEntryDetails({
 					(candidate) => candidate.id === entry.lastContentStructureNodeId,
 				);
 	const contentStructureNodeLabel =
-		type === "book"
+		type === "publishing"
 			? t.engagement.progressByType.book.lastChapter
-			: type === "media"
+			: type === "program"
 				? t.engagement.progressByType.media.currentItem
 				: undefined;
 	const date = formatProgressEntryDate(
@@ -484,7 +470,9 @@ function ProgressEntryDetails({
 					<dt className="text-muted-foreground">{copy.occurredAt}</dt>
 					<dd className="text-right">{date}</dd>
 					<dt className="text-muted-foreground">{copy.status}</dt>
-					<dd className="text-right">{t.engagement.progressByType[type].statuses[entry.status]}</dd>
+					<dd className="text-right">
+						{t.engagement.progressByType[progressCopyKey(type)].statuses[entry.status]}
+					</dd>
 					<dt className="text-muted-foreground">{copy.percentage}</dt>
 					<dd className="text-right tabular-nums">
 						{t.engagement.progressPercent({
@@ -497,7 +485,7 @@ function ProgressEntryDetails({
 							<dd className="text-right">{contentStructureNode.title}</dd>
 						</>
 					) : null}
-					{type === "book" ? null : (
+					{type === "publishing" ? null : (
 						<>
 							<dt className="text-muted-foreground">{copy.totalMinutes}</dt>
 							<dd className="text-right tabular-nums">{minutes}</dd>

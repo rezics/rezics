@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { TargetedReviewCreatePage } from "@/features/reviews/pages/targeted-review-create-page";
-import { isUnitDetailUnitType } from "@/features/units/model/unit-detail-section";
+import { isUnitType } from "@/features/units/unit-types";
 import { isUnitId } from "@/features/units/model/unit-id";
 
 export default async function Page({
@@ -13,7 +13,7 @@ export default async function Page({
 }) {
 	const { type, unit } = await params;
 	const { progressEntryId } = await searchParams;
-	if (!isUnitDetailUnitType(type) || !isUnitId(unit)) notFound();
+	if (!isUnitType(type) || !isUnitId(unit)) notFound();
 	if (progressEntryId !== undefined && !isUnitId(progressEntryId)) notFound();
 	return <TargetedReviewCreatePage progressEntryId={progressEntryId} targetId={unit} type={type} />;
 }

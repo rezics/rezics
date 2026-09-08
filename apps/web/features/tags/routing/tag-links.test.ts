@@ -17,14 +17,14 @@ const TagId = "00000000-0000-7000-8000-000000000003";
 
 describe("tagSearchHref", () => {
 	it("serializes one Tag through the shared search URL contract", () => {
-		expect(tagSearchHref("book", [{ tagId: "tag-a", label: "Fantasy" }])).toBe(
+		expect(tagSearchHref("publishing", [{ tagId: "tag-a", label: "Fantasy" }])).toBe(
 			"/search?tag=tag-a&tagLabel=Fantasy",
 		);
 	});
 
 	it("keeps multiple Tag identities aligned and removes duplicates", () => {
 		expect(
-			tagSearchHref("media", [
+			tagSearchHref("program", [
 				{ tagId: "tag-a", label: "Fantasy" },
 				{ tagId: "tag-b", label: "Mystery" },
 				{ tagId: "tag-a", label: "Fantasy duplicate" },
@@ -33,7 +33,7 @@ describe("tagSearchHref", () => {
 	});
 
 	it("uses the same Filter search contract for a series", () => {
-		expect(tagSearchHref("series", [{ tagId: "tag-a", label: "Fantasy" }])).toBe(
+		expect(tagSearchHref("grouping", [{ tagId: "tag-a", label: "Fantasy" }])).toBe(
 			"/search?tag=tag-a&tagLabel=Fantasy",
 		);
 	});
@@ -41,17 +41,17 @@ describe("tagSearchHref", () => {
 
 describe("Unit Tag page routes", () => {
 	it("uses the dedicated Entity Tag route", () => {
-		expect(unitTagsHref("entity", UnitId)).toBe(`/entities/${UnitId}/tags`);
+		expect(unitTagsHref("entity", UnitId)).toBe(`/catalog/entity/${UnitId}/tags`);
 	});
 
 	it("round-trips a Realm context and newly created Tag", async () => {
-		const href = unitTagsHref("book", UnitId, {
+		const href = unitTagsHref("publishing", UnitId, {
 			context: { kind: "realm", realmId: RealmId },
 			createdTagId: TagId,
 		});
 		const url = new URL(href, "https://rezics.example");
 
-		expect(url.pathname).toBe(`/units/book/${UnitId}/tags`);
+		expect(url.pathname).toBe(`/catalog/publishing/${UnitId}/tags`);
 		await expect(loadUnitTagsRouteState(Object.fromEntries(url.searchParams))).resolves.toEqual({
 			context: { kind: "realm", realmId: RealmId },
 			createdTagId: TagId,
