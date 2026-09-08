@@ -47,7 +47,7 @@ export type BookReadingNode = {
 	readonly contentUnitId: string;
 	readonly parentId: string | null;
 	readonly position: string;
-	readonly contentKind: "book" | "chapter" | "label";
+	readonly contentKind: "text_version" | "chapter" | "label";
 };
 
 function compareNodes(left: BookReadingNode, right: BookReadingNode): number {

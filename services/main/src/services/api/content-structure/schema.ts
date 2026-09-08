@@ -1,9 +1,12 @@
+import { MaximumContentStructureNodes } from "../../content-structure/contracts";
+import { UnitOwnerValues } from "@rezics/reference";
 import type { StaticDecode } from "typebox";
 import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
 import {
 	ContentLanguage,
+	FractionalPosition,
 	FractionalPositionInput,
 	LocalizationLanguageQuery,
 	RevisionContext,
@@ -263,6 +266,7 @@ export const SaveBookContentStructureDraftBody = t.Object(
 				NewBookContentStructureChapterDraftNode,
 				AttachedBookContentStructureDraftNode,
 			]),
+			{ maxItems: MaximumContentStructureNodes },
 		),
 	},
 	{ additionalProperties: false },
@@ -322,6 +326,7 @@ export const SaveMediaContentStructureDraftBody = t.Object(
 				NewMediaContentStructureDraftNode,
 				AttachedMediaContentStructureDraftNode,
 			]),
+			{ maxItems: MaximumContentStructureNodes },
 		),
 	},
 	{ additionalProperties: false },
@@ -356,3 +361,30 @@ export const UpsertChapterLocalizationBody = t.Object({
 	revisionContext: t.Optional(RevisionContext),
 });
 export type UpsertChapterLocalizationBody = StaticDecode<typeof UpsertChapterLocalizationBody>;
+
+const NativeContentNode = t.Object({
+	id: Uuid,
+	parentId: t.Nullable(Uuid),
+	contentUnitId: Uuid,
+	reference: t.Object({ owner: t.UnionEnum(UnitOwnerValues), id: Uuid, shape: t.String() }),
+	contentKind: t.UnionEnum(["text_version", "chapter", "program", "video", "audio", "label"]),
+	language: t.Nullable(ContentLanguage),
+	languageTag: t.Nullable(t.String({ maxLength: 255 })),
+	title: t.Nullable(t.String()),
+	position: FractionalPosition,
+	contentMetrics: t.Nullable(
+		t.Object({ wordCount: t.Integer({ minimum: 0 }), characterCount: t.Integer({ minimum: 0 }) }),
+	),
+	durationSeconds: t.Nullable(t.Number({ minimum: 0 })),
+});
+export const NativeContentStructureNodeListResponse = t.Object({
+	structureId: t.Nullable(Uuid),
+	latestRevisionId: t.Nullable(Uuid),
+	items: t.Array(NativeContentNode, { maxItems: MaximumContentStructureNodes }),
+});
+export const NativeContentStructureDraftResponse = t.Object({
+	structureId: Uuid,
+	latestRevisionId: Uuid,
+	items: t.Array(NativeContentNode, { maxItems: MaximumContentStructureNodes }),
+	revisionCreated: t.Boolean(),
+});

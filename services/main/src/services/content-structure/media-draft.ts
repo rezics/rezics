@@ -1,18 +1,16 @@
+import type { UnitAuthorization } from "../authorization/unit/authorization";
+import { readContentStructureContentRows } from "./content-preview";
 import type { ContentLanguage } from "@rezics/i18n";
-import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
 import {
-	audio,
 	contentStructure,
 	contentStructureNode,
-	label,
-	unit,
 	unitLocalization,
 	unitOwnership,
-	video,
 } from "../database/schema";
-import { insertUnit } from "../units/create";
+import { insertPlatformUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import type { RevisionContributionInput } from "../units/revision-contribution";
 import { revisionedBatchChunks } from "../history/revisioned-batch";
@@ -51,9 +49,11 @@ export type MediaContentStructureDraftBase =
 	| { readonly kind: "revision"; readonly revisionId: string };
 
 export type SaveMediaContentStructureDraftInput = {
+	readonly authorization: UnitAuthorization<string>;
 	readonly ownerUnitId: string;
 	readonly base: MediaContentStructureDraftBase;
 	readonly actorProfileId: string;
+	readonly actorAuthUserId: string;
 	readonly contribution?: RevisionContributionInput;
 	readonly nodes: readonly (
 		| ExistingMediaDraftNode
@@ -69,7 +69,7 @@ function isMediaContentUnit(row: {
 	readonly audioId: string | null;
 }): boolean {
 	return (
-		row.unitKind === "media" ||
+		row.unitKind === "program" ||
 		(row.unitKind === "label" && row.labelId !== null) ||
 		(row.unitKind === "video" && row.videoId !== null) ||
 		(row.unitKind === "audio" && row.audioId !== null)
@@ -80,21 +80,22 @@ async function createMediaDraftContentUnit(
 	tx: DatabaseTransaction,
 	input: {
 		readonly actorProfileId: string;
+		readonly actorAuthUserId: string;
 		readonly contribution?: RevisionContributionInput;
 		readonly node: NewMediaDraftNode;
 	},
 ): Promise<string> {
 	const isLabel = input.node.contentKind === "label";
-	const created = await insertUnit(tx, {
-		kind: input.node.contentKind,
-		status: isLabel ? "published" : "draft",
-		visibility: "public",
-		publishedAt: isLabel ? new Date() : null,
+	const created = await insertPlatformUnit(tx, {
+		owner: input.node.contentKind,
+		values: {
+			createdByAuthUserId: input.actorAuthUserId,
+			status: isLabel ? "published" : "draft",
+			visibility: "public",
+			publishedAt: isLabel ? new Date() : null,
+		},
 		statusActor: { kind: "profile", profileId: input.actorProfileId },
 	});
-	if (input.node.contentKind === "video") await tx.insert(video).values({ id: created.id });
-	else if (input.node.contentKind === "audio") await tx.insert(audio).values({ id: created.id });
-	else await tx.insert(label).values({ id: created.id });
 	await tx.insert(unitLocalization).values({
 		unitId: created.id,
 		language: input.node.language,
@@ -162,37 +163,19 @@ export async function saveMediaContentStructureDraft(
 		if (before.structure.kind !== "media.contents")
 			throw new ContentStructureInvalid("Media draft targets a non-Media structure");
 
-		const currentRows = await tx
-			.select({
-				id: contentStructureNode.id,
-				contentUnitId: contentStructureNode.contentUnitId,
-				parentId: contentStructureNode.parentId,
-				position: contentStructureNode.position,
-				title: unitLocalization.title,
-				unitKind: unit.kind,
-				labelId: label.id,
-				videoId: video.id,
-				audioId: audio.id,
-			})
-			.from(contentStructureNode)
-			.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
-			.leftJoin(label, eq(label.id, contentStructureNode.contentUnitId))
-			.leftJoin(video, eq(video.id, contentStructureNode.contentUnitId))
-			.leftJoin(audio, eq(audio.id, contentStructureNode.contentUnitId))
-			.innerJoin(
-				unitLocalization,
-				and(
-					eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
-					isFirstUnitLocalization(unitLocalization.unitId),
-				),
-			)
-			.where(
-				and(
-					eq(contentStructureNode.structureId, targetStructure.id),
-					isNull(contentStructureNode.deletedAt),
-				),
-			)
-			.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
+		const currentIds = [...new Set(before.nodes.map((node) => node.contentUnitId))];
+		for (let start = 0; start < currentIds.length; start += 500)
+			await input.authorization.ensureCanReadMany(currentIds.slice(start, start + 500));
+		const currentContent = await readContentStructureContentRows(
+			tx,
+			before.nodes.map((node) => node.contentUnitId),
+		);
+		const currentContentById = new Map(currentContent.map((row) => [row.id, row]));
+		const currentRows = before.nodes.map((node) => {
+			const content = currentContentById.get(node.contentUnitId);
+			if (!content) throw new ContentStructureInvalid("Structure content is unavailable");
+			return { ...content, ...node };
+		});
 		if (currentRows.some((row) => row.title === null || !isMediaContentUnit(row)))
 			throw new ContentStructureInvalid("Media structure contains invalid content nodes");
 
@@ -201,31 +184,7 @@ export async function saveMediaContentStructureDraft(
 				input.nodes.flatMap((node) => (node.state === "attached" ? [node.contentUnitId] : [])),
 			),
 		];
-		const attachedContentRows = [];
-		for (const attachedIds of revisionedBatchChunks(attachedContentUnitIds))
-			attachedContentRows.push(
-				...(await tx
-					.select({
-						id: unit.id,
-						title: unitLocalization.title,
-						unitKind: unit.kind,
-						labelId: label.id,
-						videoId: video.id,
-						audioId: audio.id,
-					})
-					.from(unit)
-					.leftJoin(label, eq(label.id, unit.id))
-					.leftJoin(video, eq(video.id, unit.id))
-					.leftJoin(audio, eq(audio.id, unit.id))
-					.innerJoin(
-						unitLocalization,
-						and(
-							eq(unitLocalization.unitId, unit.id),
-							isFirstUnitLocalization(unitLocalization.unitId),
-						),
-					)
-					.where(and(inArray(unit.id, attachedIds), isNull(unit.deletedAt)))),
-			);
+		const attachedContentRows = await readContentStructureContentRows(tx, attachedContentUnitIds);
 		const attachedContentByUnitId = new Map(
 			attachedContentRows.map((row) => [row.id, row] as const),
 		);
@@ -305,6 +264,7 @@ export async function saveMediaContentStructureDraft(
 				node.state === "attached"
 					? node.contentUnitId
 					: await createMediaDraftContentUnit(tx, {
+							actorAuthUserId: input.actorAuthUserId,
 							actorProfileId: input.actorProfileId,
 							contribution: input.contribution,
 							node,
@@ -345,6 +305,14 @@ export async function saveMediaContentStructureDraft(
 			const contentUnitId = contentUnitIds.get(nodeId);
 			if (!node || !contentUnitId)
 				throw new ContentStructureInvalid("Renamed Media node is unavailable");
+			const previous = currentById.get(nodeId);
+			if (previous?.unitKind === "program")
+				throw new ContentStructureInvalid(
+					"Catalog names must be edited through native name commands",
+				);
+			await input.authorization.ensureInTransaction(tx, contentUnitId, "unit.update", [
+				"localizations",
+			]);
 			const updated = await tx
 				.update(unitLocalization)
 				.set({ title: node.title })

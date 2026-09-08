@@ -1,20 +1,17 @@
+import { readContentStructureContentRows } from "./content-preview";
 import type { ContentLanguage } from "@rezics/i18n";
-import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
 import {
 	contentStructure,
 	contentStructureNode,
-	label,
-	post,
 	realmUnit,
-	tag,
-	unit,
 	unitLocalization,
 	unitOwnership,
 } from "../database/schema";
 import type { RealmTagQueryStrategy } from "../database/schema/contract-values";
-import { insertUnit } from "../units/create";
+import { insertPlatformUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import type { RevisionContributionInput } from "../units/revision-contribution";
 import { revisionedBatchChunks } from "../history/revisioned-batch";
@@ -63,6 +60,7 @@ export type SaveRealmTaxonomyDraftInput = {
 	readonly ownerUnitId: string;
 	readonly baseRevisionId: string;
 	readonly actorProfileId: string;
+	readonly actorAuthUserId: string;
 	readonly contribution?: RevisionContributionInput;
 	readonly nodes: readonly RealmTaxonomyDraftNode[];
 };
@@ -83,6 +81,7 @@ async function createDraftLabel(
 	tx: DatabaseTransaction,
 	input: {
 		readonly actorProfileId: string;
+		readonly actorAuthUserId: string;
 		readonly contribution?: RevisionContributionInput;
 		readonly language: ContentLanguage;
 		readonly title: string;
@@ -90,14 +89,16 @@ async function createDraftLabel(
 ): Promise<string> {
 	const title = input.title.trim();
 	if (!title) throw new ContentStructureInvalid("Realm taxonomy Label title is blank");
-	const created = await insertUnit(tx, {
-		kind: "label",
-		status: "published",
-		visibility: "public",
-		publishedAt: new Date(),
+	const created = await insertPlatformUnit(tx, {
+		owner: "label",
+		values: {
+			createdByAuthUserId: input.actorAuthUserId,
+			status: "published",
+			visibility: "public",
+			publishedAt: new Date(),
+		},
 		statusActor: { kind: "profile", profileId: input.actorProfileId },
 	});
-	await tx.insert(label).values({ id: created.id });
 	await tx.insert(unitLocalization).values({
 		unitId: created.id,
 		language: input.language,
@@ -154,30 +155,21 @@ export async function saveRealmTaxonomyDraft(
 				throw new ContentStructureInvalid(
 					"Realm taxonomy draft targets another Content Structure kind",
 				);
-			const currentRows = await tx
-				.select({
-					id: contentStructureNode.id,
-					parentId: contentStructureNode.parentId,
-					position: contentStructureNode.position,
-					contentUnitId: contentStructureNode.contentUnitId,
-					queryStrategy: contentStructureNode.realmTagQueryStrategy,
-					unitKind: unit.kind,
-					postKind: post.kind,
-					tagId: tag.id,
-					labelId: label.id,
-				})
-				.from(contentStructureNode)
-				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
-				.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
-				.leftJoin(tag, eq(tag.id, contentStructureNode.contentUnitId))
-				.leftJoin(label, eq(label.id, contentStructureNode.contentUnitId))
-				.where(
-					and(
-						eq(contentStructureNode.structureId, structure.id),
-						isNull(contentStructureNode.deletedAt),
-					),
-				)
-				.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
+			const contentRows = await readContentStructureContentRows(
+				tx,
+				before.nodes.map((node) => node.contentUnitId),
+			);
+			const contentById = new Map(contentRows.map((row) => [row.id, row]));
+			const currentRows = before.nodes.map((node) => {
+				const content = contentById.get(node.contentUnitId);
+				if (!content) throw new ContentStructureInvalid("Taxonomy content is unavailable");
+				return {
+					...content,
+					...node,
+					queryStrategy: node.realmTagQueryStrategy,
+					tagId: content.unitKind === "tag" ? content.id : null,
+				};
+			});
 			const current: CurrentRealmTaxonomyDraftNode[] = currentRows.map((row) => ({
 				id: row.id,
 				parentId: row.parentId,
@@ -190,23 +182,10 @@ export async function saveRealmTaxonomyDraft(
 			const newUnitIds = input.nodes.flatMap((node) =>
 				node.state === "new" && node.content.kind === "unit" ? [node.content.unitId] : [],
 			);
-			const newUnitRows = [];
-			for (const newIds of revisionedBatchChunks(newUnitIds))
-				newUnitRows.push(
-					...(await tx
-						.select({
-							id: unit.id,
-							unitKind: unit.kind,
-							postKind: post.kind,
-							tagId: tag.id,
-							labelId: label.id,
-						})
-						.from(unit)
-						.leftJoin(post, eq(post.id, unit.id))
-						.leftJoin(tag, eq(tag.id, unit.id))
-						.leftJoin(label, eq(label.id, unit.id))
-						.where(and(inArray(unit.id, newIds), isNull(unit.deletedAt)))),
-				);
+			const newUnitRows = (await readContentStructureContentRows(tx, newUnitIds)).map((row) => ({
+				...row,
+				tagId: row.unitKind === "tag" ? row.id : null,
+			}));
 			const newUnitById = new Map(
 				newUnitRows.map((row) => [
 					row.id,
@@ -329,6 +308,7 @@ export async function saveRealmTaxonomyDraft(
 				const contentUnitId =
 					source.content.kind === "label"
 						? await createDraftLabel(tx, {
+								actorAuthUserId: input.actorAuthUserId,
 								actorProfileId: input.actorProfileId,
 								contribution: input.contribution,
 								language: source.content.language,

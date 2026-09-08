@@ -4,6 +4,7 @@ import {
 	ContentStructureContentModel,
 	ContentStructureCheckpointDepth,
 	ContentStructureKindPolicies,
+	MaximumContentStructureNodes,
 	ContentStructureLargeDeltaBytes,
 	ContentStructureReplayBytes,
 	ContentStructureSnapshotSchema,
@@ -166,29 +167,37 @@ describe("Content Structure History contract", () => {
 	});
 
 	it("allows same-domain Unit content without enabling Software contents", () => {
-		expect(ContentStructureKindPolicies["book.contents"].acceptsContent("book", null)).toBe(true);
-		expect(ContentStructureKindPolicies["media.contents"].acceptsContent("media")).toBe(true);
-		expect(ContentStructureKindPolicies["book.contents"].acceptsContent("media", null)).toBe(false);
+		expect(
+			ContentStructureKindPolicies["book.contents"].acceptsContent(
+				"publishing",
+				null,
+				"text_version",
+			),
+		).toBe(true);
+		expect(ContentStructureKindPolicies["media.contents"].acceptsContent("program")).toBe(true);
+		expect(ContentStructureKindPolicies["book.contents"].acceptsContent("program", null)).toBe(
+			false,
+		);
 		expect("software.contents" in ContentStructureKindPolicies).toBe(false);
 	});
 
 	it("keeps same-domain container occurrences progress-neutral", () => {
-		expect(ContentStructureKindPolicies["book.contents"].contributesProgress("book", null)).toBe(
-			false,
-		);
+		expect(
+			ContentStructureKindPolicies["book.contents"].contributesProgress("publishing", null),
+		).toBe(false);
 		expect(
 			ContentStructureKindPolicies["book.contents"].contributesProgress("post", "chapter"),
 		).toBe(true);
-		expect(ContentStructureKindPolicies["media.contents"].contributesProgress("media", null)).toBe(
-			false,
-		);
+		expect(
+			ContentStructureKindPolicies["media.contents"].contributesProgress("program", null),
+		).toBe(false);
 		expect(ContentStructureKindPolicies["media.contents"].contributesProgress("video", null)).toBe(
 			true,
 		);
 	});
 
 	it("validates a deep parent chain without recursive stack growth", () => {
-		const nodes = Array.from({ length: 10_000 }, (_, index) =>
+		const nodes = Array.from({ length: MaximumContentStructureNodes }, (_, index) =>
 			node({
 				id: `019b1234-1234-7000-8000-${String(index + 100).padStart(12, "0")}`,
 				contentUnitId: FirstContentId,
@@ -197,6 +206,16 @@ describe("Content Structure History contract", () => {
 				position: "a0",
 			}),
 		);
-		expect(snapshot(nodes).nodes).toHaveLength(10_000);
+		expect(snapshot(nodes).nodes).toHaveLength(MaximumContentStructureNodes);
+		expect(() =>
+			snapshot([
+				...nodes,
+				node({
+					id: "019b1234-1234-7000-8000-000000009999",
+					contentUnitId: FirstContentId,
+					position: "a1",
+				}),
+			]),
+		).toThrow();
 	});
 });

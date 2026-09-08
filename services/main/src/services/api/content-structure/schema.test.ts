@@ -1,3 +1,4 @@
+import { MaximumContentStructureNodes } from "../../content-structure/contracts";
 import { Value } from "typebox/value";
 import { createPortableTextDocument } from "@rezics/block";
 import { describe, expect, it } from "vitest";
@@ -157,11 +158,11 @@ describe("Content Structure API schemas", () => {
 		).toBe(false);
 	});
 
-	it("does not impose the batch-command limit on a complete aggregate", () => {
+	it("bounds a complete aggregate independently of batch command count", () => {
 		expect(
 			Value.Check(SaveBookContentStructureDraftBody, {
 				baseRevisionId: uuid(1),
-				nodes: Array.from({ length: 10_001 }, (_, index) => ({
+				nodes: Array.from({ length: MaximumContentStructureNodes }, (_, index) => ({
 					state: "existing",
 					id: uuid(index + 2),
 					parentId: null,
@@ -170,6 +171,18 @@ describe("Content Structure API schemas", () => {
 				})),
 			}),
 		).toBe(true);
+		expect(
+			Value.Check(SaveBookContentStructureDraftBody, {
+				baseRevisionId: uuid(1),
+				nodes: Array.from({ length: MaximumContentStructureNodes + 1 }, (_, index) => ({
+					state: "existing",
+					id: uuid(index + 2),
+					parentId: null,
+					order: index,
+					title: `Node ${index}`,
+				})),
+			}),
+		).toBe(false);
 	});
 
 	it("limits only the number of explicit batch commands", () => {

@@ -1,23 +1,16 @@
-import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import type { UnitAuthorization } from "../authorization/unit/authorization";
+import { readContentStructureContentRows } from "./content-preview";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
-import {
-	contentStructure,
-	contentStructureNode,
-	label,
-	post,
-	unit,
-	unitOwnership,
-	unitLocalization,
-} from "../database/schema";
+import { contentStructure, contentStructureNode, unitLocalization } from "../database/schema";
 import type { UnitOwnershipMode } from "../database/schema/contract-values";
 import {
 	createProfileOwnedUnitAccess,
 	createPublicEditableUnitAccess,
-	unitOwnershipModeFromOwnerProfileId,
 } from "../authorization/unit/ownership";
 import { isFirstUnitLocalization } from "../units/localization";
-import { insertUnit } from "../units/create";
+import { insertPlatformUnit } from "../units/create";
 import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
 import { shouldCreateProfilePublisherAttributionForPost } from "../posts/attribution-policy";
 import { applyNewPostTagMentionVotes } from "../posts/tag-mentions";
@@ -42,9 +35,11 @@ import { assertContentStructureDraftCommandLimit } from "./draft-batch";
 type AttachedBookDraftNodeInput = Omit<AttachedBookDraftNode, "title">;
 
 export type SaveBookContentStructureDraftInput = {
+	readonly authorization: UnitAuthorization<string>;
 	readonly ownerUnitId: string;
 	readonly baseRevisionId: string;
 	readonly actorProfileId: string;
+	readonly actorAuthUserId: string;
 	readonly contribution?: RevisionContributionInput;
 	readonly nodes: readonly (
 		| ExistingBookDraftNode
@@ -59,6 +54,7 @@ async function createBookDraftContentUnit(
 		readonly bookId: string;
 		readonly bookOwnershipMode: UnitOwnershipMode | undefined;
 		readonly actorProfileId: string;
+		readonly actorAuthUserId: string;
 		readonly contribution?: RevisionContributionInput;
 		readonly node: NewBookDraftNode;
 	},
@@ -72,26 +68,25 @@ async function createBookDraftContentUnit(
 	else
 		throw new ContentStructureInvalid("Chapter ownership has no Book default or explicit override");
 	const published = isChapter ? input.node.status === "published" : true;
-	const created = await insertUnit(tx, {
-		kind: isChapter ? "post" : "label",
-		status: published ? "published" : "draft",
-		visibility: "public",
+	const identityValues = {
+		createdByAuthUserId: input.actorAuthUserId,
+		status: published ? ("published" as const) : ("draft" as const),
+		visibility: "public" as const,
 		publishedAt: published ? new Date() : null,
-		statusActor: { kind: "profile", profileId: input.actorProfileId },
-	});
-	if (isChapter) {
+	};
+	const statusActor = { kind: "profile" as const, profileId: input.actorProfileId };
+	const created = isChapter
+		? await insertPlatformUnit(tx, {
+				owner: "post",
+				values: { ...identityValues, kind: "chapter", subjectUnitId: input.bookId },
+				statusActor,
+			})
+		: await insertPlatformUnit(tx, { owner: "label", values: identityValues, statusActor });
+	if (isChapter)
 		await ensureSubjectPostTargetingAllowed(tx, {
 			sourcePostId: created.id,
 			subjectUnitId: input.bookId,
 		});
-		await tx.insert(post).values({
-			id: created.id,
-			subjectUnitId: input.bookId,
-			kind: "chapter",
-		});
-	} else {
-		await tx.insert(label).values({ id: created.id });
-	}
 	await tx.insert(unitLocalization).values({
 		unitId: created.id,
 		language: input.node.language,
@@ -119,20 +114,6 @@ async function createBookDraftContentUnit(
 		event: "create",
 	});
 	return created.id;
-}
-
-async function readBookOwnershipMode(
-	tx: DatabaseTransaction,
-	bookId: string,
-): Promise<UnitOwnershipMode> {
-	const [owner] = await tx
-		.select({ profileId: unitOwnership.profileId })
-		.from(unitOwnership)
-		.where(and(eq(unitOwnership.unitId, bookId), isNull(unitOwnership.revokedAt)))
-		.limit(1)
-		.for("update");
-	if (!owner) throw new ContentStructureInvalid("Book has no active ownership");
-	return unitOwnershipModeFromOwnerProfileId(owner.profileId);
 }
 
 /**
@@ -175,41 +156,25 @@ export async function saveBookContentStructureDraft(
 			});
 			if (before.structure.kind !== "book.contents")
 				throw new ContentStructureInvalid("Book draft targets a non-Book structure");
-			const currentRows = await tx
-				.select({
-					id: contentStructureNode.id,
-					contentUnitId: contentStructureNode.contentUnitId,
-					parentId: contentStructureNode.parentId,
-					position: contentStructureNode.position,
-					title: unitLocalization.title,
-					unitKind: unit.kind,
-					postKind: post.kind,
-					labelId: label.id,
-				})
-				.from(contentStructureNode)
-				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
-				.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
-				.leftJoin(label, eq(label.id, contentStructureNode.contentUnitId))
-				.innerJoin(
-					unitLocalization,
-					and(
-						eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
-						isFirstUnitLocalization(unitLocalization.unitId),
-					),
-				)
-				.where(
-					and(
-						eq(contentStructureNode.structureId, structure.id),
-						isNull(contentStructureNode.deletedAt),
-					),
-				)
-				.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
+			const currentIds = [...new Set(before.nodes.map((node) => node.contentUnitId))];
+			for (let start = 0; start < currentIds.length; start += 500)
+				await input.authorization.ensureCanReadMany(currentIds.slice(start, start + 500));
+			const currentContent = await readContentStructureContentRows(
+				tx,
+				before.nodes.map((node) => node.contentUnitId),
+			);
+			const currentContentById = new Map(currentContent.map((row) => [row.id, row]));
+			const currentRows = before.nodes.map((node) => {
+				const content = currentContentById.get(node.contentUnitId);
+				if (!content) throw new ContentStructureInvalid("Structure content is unavailable");
+				return { ...content, ...node };
+			});
 			if (
 				currentRows.some(
 					(row) =>
 						row.title === null ||
 						!(
-							row.unitKind === "book" ||
+							(row.unitKind === "publishing" && row.shape === "text_version") ||
 							(row.unitKind === "post" && row.postKind === "chapter") ||
 							(row.unitKind === "label" && row.labelId !== null)
 						),
@@ -221,29 +186,7 @@ export async function saveBookContentStructureDraft(
 					input.nodes.flatMap((node) => (node.state === "attached" ? [node.contentUnitId] : [])),
 				),
 			];
-			const attachedContentRows = [];
-			for (const attachedIds of revisionedBatchChunks(attachedContentUnitIds))
-				attachedContentRows.push(
-					...(await tx
-						.select({
-							id: unit.id,
-							title: unitLocalization.title,
-							unitKind: unit.kind,
-							postKind: post.kind,
-							labelId: label.id,
-						})
-						.from(unit)
-						.leftJoin(post, eq(post.id, unit.id))
-						.leftJoin(label, eq(label.id, unit.id))
-						.innerJoin(
-							unitLocalization,
-							and(
-								eq(unitLocalization.unitId, unit.id),
-								isFirstUnitLocalization(unitLocalization.unitId),
-							),
-						)
-						.where(and(inArray(unit.id, attachedIds), isNull(unit.deletedAt)))),
-				);
+			const attachedContentRows = await readContentStructureContentRows(tx, attachedContentUnitIds);
 			const attachedContentByUnitId = new Map(
 				attachedContentRows.map((row) => [row.id, row] as const),
 			);
@@ -253,7 +196,7 @@ export async function saveBookContentStructureDraft(
 				if (
 					!content?.title ||
 					!(
-						content.unitKind === "book" ||
+						(content.unitKind === "publishing" && content.shape === "text_version") ||
 						(content.unitKind === "post" && content.postKind === "chapter") ||
 						(content.unitKind === "label" && content.labelId !== null)
 					)
@@ -271,15 +214,7 @@ export async function saveBookContentStructureDraft(
 			}));
 			const plan = planBookContentStructureDraft(current, draftNodes);
 			if (!plan.hasChanges) return { result: {} };
-			const needsBookOwnershipMode = plan.nodes.some(
-				(node) =>
-					node.state === "new" &&
-					node.contentKind === "chapter" &&
-					node.ownershipMode === undefined,
-			);
-			const bookOwnershipMode = needsBookOwnershipMode
-				? await readBookOwnershipMode(tx, input.ownerUnitId)
-				: undefined;
+			const bookOwnershipMode = "profile_owned" as const;
 
 			const currentById = new Map(currentRows.map((row) => [row.id, row]));
 			assertContentStructureDraftCommandLimit({
@@ -338,6 +273,7 @@ export async function saveBookContentStructureDraft(
 					node.state === "attached"
 						? node.contentUnitId
 						: await createBookDraftContentUnit(tx, {
+								actorAuthUserId: input.actorAuthUserId,
 								bookId: input.ownerUnitId,
 								bookOwnershipMode,
 								actorProfileId: input.actorProfileId,
@@ -380,6 +316,14 @@ export async function saveBookContentStructureDraft(
 				const contentUnitId = contentUnitIds.get(nodeId);
 				if (!node || !contentUnitId)
 					throw new ContentStructureInvalid("Renamed Book node is unavailable");
+				const previous = currentById.get(nodeId);
+				if (previous?.unitKind !== "post" && previous?.unitKind !== "label")
+					throw new ContentStructureInvalid(
+						"Catalog names must be edited through native name commands",
+					);
+				await input.authorization.ensureInTransaction(tx, contentUnitId, "unit.update", [
+					"localizations",
+				]);
 				const updated = await tx
 					.update(unitLocalization)
 					.set({ title: node.title })

@@ -1,3 +1,4 @@
+import { readUnitStateById } from "../units/query";
 import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
@@ -6,12 +7,12 @@ import {
 	contentStructureNode,
 	post,
 	realmUnit,
-	unit,
 	zonePage,
 	type ContentStructureKind,
 	type ContentStructureTargetKind,
 } from "../database/schema";
 import {
+	MaximumContentStructureNodes,
 	ContentStructureLogicalStateSchema,
 	ContentStructureKindPolicies,
 	ContentStructureSnapshotSchema,
@@ -68,16 +69,15 @@ export async function ensureContentStructureKindOwner(
 	ownerUnitId: string,
 	kind: ContentStructureKind,
 ): Promise<void> {
-	const [owner] = await tx
-		.select({ kind: unit.kind })
-		.from(unit)
-		.where(and(eq(unit.id, ownerUnitId), isNull(unit.deletedAt)))
-		.limit(1);
+	const owner = await readUnitStateById(tx, ownerUnitId);
 	if (
 		!owner ||
-		!(ContentStructureKindPolicies[kind].ownerKinds as readonly string[]).includes(owner.kind)
+		!(ContentStructureKindPolicies[kind].ownerKinds as readonly string[]).includes(
+			owner.reference.owner,
+		) ||
+		(kind === "book.contents" && owner.shape !== "text_version")
 	)
-		throw new ContentStructureInvalid(`${kind} is not valid for this Unit kind`);
+		throw new ContentStructureInvalid(`${kind} is not valid for this native owner and shape`);
 }
 
 export async function ensureContentStructureNodeAllowed(
@@ -96,24 +96,35 @@ export async function ensureContentStructureNodeAllowed(
 		throw new ContentStructureInvalid(
 			`${input.target.kind} targets are not valid for ${input.kind}`,
 		);
-	const [content] = await tx
-		.select({ kind: unit.kind, postKind: post.kind })
-		.from(unit)
-		.leftJoin(post, eq(post.id, unit.id))
-		.where(and(eq(unit.id, input.contentUnitId), isNull(unit.deletedAt)))
-		.limit(1);
-	if (!content || !policy.acceptsContent(content.kind, content.postKind))
+	const contentState = await readUnitStateById(tx, input.contentUnitId);
+	const [contentPost] =
+		contentState?.reference.owner === "post"
+			? await tx
+					.select({ kind: post.kind })
+					.from(post)
+					.where(eq(post.id, input.contentUnitId))
+					.limit(1)
+			: [];
+	const content = contentState
+		? {
+				kind: contentState.reference.owner,
+				postKind: contentPost?.kind ?? null,
+				shape: contentState.shape,
+			}
+		: null;
+	if (!content || !policy.acceptsContent(content.kind, content.postKind, content.shape))
 		throw new ContentStructureInvalid(`Content Unit is not valid for ${input.kind}`);
 	if (input.target.kind === "unit") {
-		const [target] = await tx
-			.select({ id: unit.id, kind: unit.kind, postKind: post.kind })
-			.from(unit)
-			.leftJoin(post, eq(post.id, unit.id))
-			.where(and(eq(unit.id, input.target.unitId), isNull(unit.deletedAt)))
-			.limit(1);
+		const target = await readUnitStateById(tx, input.target.unitId);
 		if (!target) throw new ContentStructureInvalid("Target Unit does not exist");
-		if (input.kind === "wiki.navigation" && !(target.kind === "post" && target.postKind === "wiki"))
-			throw new ContentStructureInvalid("Realm Wiki navigation targets must be Wiki Posts");
+		if (input.kind === "wiki.navigation") {
+			const [targetPost] =
+				target.reference.owner === "post"
+					? await tx.select({ kind: post.kind }).from(post).where(eq(post.id, target.id)).limit(1)
+					: [];
+			if (targetPost?.kind !== "wiki")
+				throw new ContentStructureInvalid("Realm Wiki navigation targets must be Wiki Posts");
+		}
 	}
 	if (input.kind === "wiki.navigation") {
 		const wikiUnitIds = [
@@ -200,7 +211,12 @@ export async function loadContentStructureSnapshot(
 				isNull(contentStructureNode.deletedAt),
 			),
 		)
-		.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
+		.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id))
+		.limit(MaximumContentStructureNodes + 1);
+	if (nodes.length > MaximumContentStructureNodes)
+		throw new ContentStructureInvalid(
+			`Content Structure exceeds ${MaximumContentStructureNodes} nodes`,
+		);
 	return ContentStructureSnapshotSchema.parse({ version: 1, structure, nodes });
 }
 

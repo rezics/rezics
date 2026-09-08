@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { UnitOwner } from "@rezics/reference";
 
 import {
 	ContentRatingValues,
@@ -8,11 +9,14 @@ import {
 	type ContentStructureKind,
 	type ContentStructureTargetKind,
 	type PostKind,
-	type UnitKind,
 } from "../database/schema/contract-values";
 import { FractionalPositionStorageMaximumBytes, isFractionalPosition } from "../ordering/position";
 
 export const ContentStructureContentModel = "rezics.content-structure.v1" as const;
+/** Complete editor/checkpoint materialization stays bounded independently of corpus size. */
+export const MaximumContentStructureNodes = 2048;
+/** Live reverse placements are enforced by the database; retained deleted history does not count. */
+export const MaximumContentStructurePlacements = 64;
 export const ContentStructureCheckpointDepth = 32;
 export const ContentStructureLargeDeltaBytes = 64 * 1024;
 export const ContentStructureReplayBytes = 256 * 1024;
@@ -127,7 +131,7 @@ export const ContentStructureSnapshotSchema = z
 	.object({
 		version: z.literal(1),
 		structure: ContentStructureStateSchema,
-		nodes: z.array(ContentStructureNodeStateSchema),
+		nodes: z.array(ContentStructureNodeStateSchema).max(MaximumContentStructureNodes),
 	})
 	.superRefine((snapshot, context) => {
 		const ids = new Set(snapshot.nodes.map((node) => node.id));
@@ -223,11 +227,11 @@ export const ContentStructureDeltaSchema = z.object({
 export type ContentStructureDelta = z.infer<typeof ContentStructureDeltaSchema>;
 
 type KindPolicy = {
-	readonly ownerKinds: readonly UnitKind[];
+	readonly ownerKinds: readonly UnitOwner[];
 	readonly targets: readonly ContentStructureTargetKind[];
 	readonly progress: "none" | "node_completion";
-	readonly acceptsContent: (kind: UnitKind, postKind: PostKind | null) => boolean;
-	readonly contributesProgress: (kind: UnitKind, postKind: PostKind | null) => boolean;
+	readonly acceptsContent: (kind: UnitOwner, postKind: PostKind | null, shape?: string) => boolean;
+	readonly contributesProgress: (kind: UnitOwner, postKind: PostKind | null) => boolean;
 };
 
 const anyContent = () => true;
@@ -242,32 +246,34 @@ const navigationTargets = ["unit", "external", "none"] as const;
  *
  * @remarks
  * Book progress is derived only from explicit Chapter occurrences in the
- * current `book.contents` structure. Book and Label occurrences are structural
+ * current `book.contents` structure. TextVersion and Label occurrences are structural
  * or navigational and never contribute progress themselves. A Chapter nested
  * beneath either one contributes because it is still an explicit occurrence
- * owned by this structure; the referenced Book's structure is never traversed
+ * owned by this structure; the referenced TextVersion's structure is never traversed
  * or inherited. Completion is scoped to the occurrence node ID, so one Chapter
  * Unit can participate independently in multiple Books.
  *
  * Media follows the same rule: only explicit Video and Audio occurrences
- * contribute. Media and Label occurrences do not, and referenced Media
+ * contribute. Program and Label occurrences do not, and referenced Program
  * structures are never traversed.
  */
 export const ContentStructureKindPolicies = {
 	"book.contents": {
-		ownerKinds: ["book"],
+		ownerKinds: ["publishing"],
 		targets: ["content"],
 		progress: "node_completion",
-		acceptsContent: (kind, postKind) =>
-			kind === "book" || kind === "label" || (kind === "post" && postKind === "chapter"),
+		acceptsContent: (kind, postKind, shape?: string) =>
+			(kind === "publishing" && shape === "text_version") ||
+			kind === "label" ||
+			(kind === "post" && postKind === "chapter"),
 		contributesProgress: (kind, postKind) => kind === "post" && postKind === "chapter",
 	},
 	"media.contents": {
-		ownerKinds: ["media"],
+		ownerKinds: ["program"],
 		targets: ["content"],
 		progress: "node_completion",
 		acceptsContent: (kind) =>
-			kind === "media" || kind === "label" || kind === "video" || kind === "audio",
+			kind === "program" || kind === "label" || kind === "video" || kind === "audio",
 		contributesProgress: timedMediaProgress,
 	},
 	"post.contents": {
@@ -309,7 +315,7 @@ export const ContentStructureKindPolicies = {
 		ownerKinds: ["zone"],
 		targets: ["content"],
 		progress: "none",
-		acceptsContent: (kind) => kind === "zone_page",
+		acceptsContent: (kind, postKind) => kind === "post" && postKind === "page",
 		contributesProgress: noProgress,
 	},
 } as const satisfies Record<ContentStructureKind, KindPolicy>;

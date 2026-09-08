@@ -1,14 +1,26 @@
+import { readUnitStateById } from "../../units/query";
+import { readContentStructureContentRows } from "../../content-structure/content-preview";
+import {
+	type ContentStructureNodeState,
+	type ContentStructureState,
+} from "../../content-structure/contracts";
+import { CatalogReferenceSchema } from "@rezics/reference";
+import { loadCatalogIdentity, CatalogAccessDenied } from "../../catalog/storage";
+import {
+	runWithParticipationAuthority,
+	ParticipationDenied,
+	type ParticipationAuthority,
+} from "../../participation/policy";
+import { AuthenticationRequired } from "../../auth/errors";
 import { DevelopmentPreviewCapability } from "@rezics/access";
 import type { ContentLanguage } from "@rezics/i18n";
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import Elysia from "elysia";
 import { StatusCodes } from "http-status-codes";
 
 import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
-import { canAccessContentStructureApi } from "../../authorization/content-structure/release";
 import { PlatformCapabilityRequired } from "../../authorization/errors";
-import { unitOwnershipModeFromOwnerProfileId } from "../../authorization/unit/ownership";
 import { getUnitLocalizationContentMetric } from "../../content-metrics/service";
 import { applyContentStructureBatch } from "../../content-structure/batch";
 import { saveBookContentStructureDraft } from "../../content-structure/book-draft";
@@ -34,28 +46,22 @@ import {
 import {
 	contentStructureTargetFromRow,
 	loadContentStructureSnapshot,
+	ensureContentStructureKindOwner,
 } from "../../content-structure/storage";
 import { database, type DatabaseTransaction } from "../../database";
 import {
-	audio,
-	book,
+	publishingTextVersion,
 	contentStructure,
 	contentStructureNode,
-	label,
-	media,
 	post,
-	unit,
 	unitLocalization,
-	unitLocalizationContentMetric,
 	unitOwnership,
-	video,
 } from "../../database/schema";
 import { runVoteTransaction } from "../../database/vote-admission";
 import { applyNewPostTagMentionVotes } from "../../posts/tag-mentions";
 import { findPostTargetingLock } from "../../posts/targeting";
-import { insertUnit } from "../../units/create";
+import { insertPlatformUnit } from "../../units/create";
 import { recordUnitRevision } from "../../units/history";
-import { resolvedUnitLocalizationLanguage } from "../../units/localization";
 import {
 	BookChapterNodeDetailResponse,
 	ContentStructureBatchMutationResponse,
@@ -63,12 +69,8 @@ import {
 	ContentStructureDetailResponse,
 	ContentStructureListResponse,
 	ContentStructureMutationResponse,
-	ContentStructureNodeListResponse,
 	ContentStructureNodeMutationResponse,
 	ContentStructureRevisionListResponse,
-	MediaContentStructureNodeListResponse,
-	SaveBookContentStructureDraftResponse,
-	SaveMediaContentStructureDraftResponse,
 	toApiErrorResponse,
 	toPortableTextResponse,
 	UpdateStateResponse,
@@ -76,6 +78,8 @@ import {
 } from "../schema/response";
 import { BookNotFound, ChapterLanguageNotFound, ChapterNotFound, MediaNotFound } from "./errors";
 import {
+	NativeContentStructureNodeListResponse,
+	NativeContentStructureDraftResponse,
 	BookChapterNodeParams,
 	BookContentStructureParams,
 	BookContentStructureQuery,
@@ -110,14 +114,15 @@ const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 function resolveBookContentKind(
 	unitKind: string,
 	postKind: string | null,
-): "book" | "chapter" | "label" | null {
-	if (unitKind === "book") return "book";
+	shape?: string,
+): "text_version" | "chapter" | "label" | null {
+	if (unitKind === "publishing" && shape === "text_version") return "text_version";
 	if (unitKind === "label") return "label";
 	if (unitKind === "post" && postKind === "chapter") return "chapter";
 	return null;
 }
 
-async function presentGenericContentStructureNode(node: typeof contentStructureNode.$inferSelect) {
+async function presentGenericContentStructureNode(node: ContentStructureNodeState) {
 	const storedTarget = contentStructureTargetFromRow(node);
 	return {
 		id: node.id,
@@ -136,7 +141,7 @@ async function presentGenericContentStructureNode(node: typeof contentStructureN
 }
 
 function presentContentStructure(
-	structure: typeof contentStructure.$inferSelect,
+	structure: ContentStructureState,
 	latestRevisionId: string | null,
 ) {
 	return {
@@ -165,6 +170,7 @@ async function ensureContentStructureOwner(
 
 async function ensureCanMutateContentStructure(
 	authorization: Authorization<string>,
+	participation: ParticipationAuthority,
 	input: {
 		readonly ownerUnitId: string;
 		readonly structureId?: string;
@@ -188,6 +194,13 @@ async function ensureCanMutateContentStructure(
 		await authorization.realm.ensureCapability(input.ownerUnitId, "realm.tags.manage");
 		return;
 	}
+	const owner = await readUnitStateById(database, input.ownerUnitId);
+	if (owner && CatalogReferenceSchema.safeParse(owner.reference).success) {
+		await database.transaction((tx) =>
+			ensureReleasedContentStructureApi(tx, input.ownerUnitId, authorization, participation),
+		);
+		return;
+	}
 	await authorization.unit.ensureCanUpdate(input.ownerUnitId, [
 		input.structureId ? ["content-structure", input.structureId] : ["content-structure"],
 	]);
@@ -197,221 +210,138 @@ async function ensureReleasedContentStructureApi(
 	tx: DatabaseTransaction,
 	unitId: string,
 	authorization: Authorization,
+	participation?: ParticipationAuthority,
 ): Promise<void> {
-	const [owner] = await tx
-		.select({ kind: unit.kind })
-		.from(unit)
-		.where(and(eq(unit.id, unitId), isNull(unit.deletedAt)))
-		.limit(1);
-	const previewRequired = owner?.kind === "software";
+	const owner = await readUnitStateById(tx, unitId);
+	if (owner && participation) {
+		const ref = CatalogReferenceSchema.safeParse(owner.reference);
+		if (ref.success) {
+			try {
+				await runWithParticipationAuthority(participation, () =>
+					loadCatalogIdentity(tx, ref.data, participation.principal.authUserId, true, "share"),
+				);
+			} catch (error) {
+				if (error instanceof CatalogAccessDenied) throw new ParticipationDenied();
+				throw error;
+			}
+		}
+	}
+	const previewRequired = owner?.reference.owner === "software";
 	const hasDevelopmentPreviewAccess =
 		previewRequired &&
 		(await authorization.platform.hasCapability(DevelopmentPreviewCapability, tx));
-	if (owner && !canAccessContentStructureApi(owner.kind, hasDevelopmentPreviewAccess))
-		throw new PlatformCapabilityRequired();
+	if (previewRequired && !hasDevelopmentPreviewAccess) throw new PlatformCapabilityRequired();
 }
 
-async function readBookContentStructure(
+function requireAuthUserId(authorization: Authorization<string>) {
+	if (!authorization.authUserId) throw new AuthenticationRequired();
+	return authorization.authUserId;
+}
+async function readNativeContentStructure(
 	tx: DatabaseTransaction,
-	bookId: string,
-	localizationLanguages: readonly ContentLanguage[] = [],
+	ownerId: string,
+	kind: "book.contents" | "media.contents",
+	authorization: Authorization,
+	languages: readonly ContentLanguage[] = [],
 ) {
-	const [owner] = await tx
-		.select({ profileId: unitOwnership.profileId })
-		.from(unitOwnership)
-		.where(and(eq(unitOwnership.unitId, bookId), isNull(unitOwnership.revokedAt)))
-		.limit(1);
-	const ownershipMode = unitOwnershipModeFromOwnerProfileId(owner?.profileId ?? null);
+	await ensureContentStructureKindOwner(tx, ownerId, kind);
 	const [structure] = await tx
 		.select({ id: contentStructure.id })
 		.from(contentStructure)
 		.where(
 			and(
-				eq(contentStructure.ownerUnitId, bookId),
-				eq(contentStructure.kind, "book.contents"),
+				eq(contentStructure.ownerUnitId, ownerId),
+				eq(contentStructure.kind, kind),
 				isNull(contentStructure.deletedAt),
 			),
 		)
 		.limit(1);
-	if (!structure) return { ownershipMode, structureId: null, latestRevisionId: null, items: [] };
-	const rows = await tx
-		.select({
-			id: contentStructureNode.id,
-			parentId: contentStructureNode.parentId,
-			contentUnitId: contentStructureNode.contentUnitId,
-			unitKind: unit.kind,
-			postKind: post.kind,
-			language: unitLocalization.language,
-			title: unitLocalization.title,
-			position: contentStructureNode.position,
-			wordCount: unitLocalizationContentMetric.wordCount,
-			characterCount: unitLocalizationContentMetric.characterCount,
-			bookWordCount: book.wordCount,
-		})
-		.from(contentStructureNode)
-		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
-		.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
-		.leftJoin(book, eq(book.id, contentStructureNode.contentUnitId))
-		.innerJoin(
-			unitLocalization,
-			and(
-				eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
-				eq(
-					unitLocalization.language,
-					resolvedUnitLocalizationLanguage(
-						contentStructureNode.contentUnitId,
-						localizationLanguages,
-					),
-				),
-			),
-		)
-		.leftJoin(
-			unitLocalizationContentMetric,
-			and(
-				eq(unitLocalizationContentMetric.unitId, contentStructureNode.contentUnitId),
-				eq(unitLocalizationContentMetric.language, unitLocalization.language),
-			),
-		)
-		.where(
-			and(
-				eq(contentStructureNode.structureId, structure.id),
-				isNull(contentStructureNode.deletedAt),
-				isNull(unit.deletedAt),
-				eq(unit.moderationStatus, "approved"),
-			),
-		)
-		.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
-	return {
-		ownershipMode,
+	if (!structure) return { structureId: null, latestRevisionId: null, items: [] };
+	const snapshot = await loadContentStructureSnapshot(tx, {
 		structureId: structure.id,
-		latestRevisionId: await getContentStructureRevision(tx, bookId, structure.id),
-		items: rows.map((row) => {
-			const contentKind = resolveBookContentKind(row.unitKind, row.postKind);
-			if (!contentKind)
-				throw new Error(`Invalid Book content node ${row.id} unit ${row.contentUnitId}`);
-			return {
-				id: row.id,
-				parentId: row.parentId,
-				contentUnitId: row.contentUnitId,
+		ownerUnitId: ownerId,
+	});
+	const visibleNodes = await visibleStructureNodes(authorization, snapshot.nodes);
+	const content = await readContentStructureContentRows(
+		tx,
+		visibleNodes.map((node) => node.contentUnitId),
+		languages,
+	);
+	const byId = new Map(content.map((row) => [row.id, row]));
+	const items = visibleNodes.flatMap((node) => {
+		const row = byId.get(node.contentUnitId);
+		if (!row) return [];
+		const contentKind =
+			kind === "book.contents"
+				? resolveBookContentKind(row.unitKind, row.postKind, row.shape)
+				: row.unitKind === "program"
+					? ("program" as const)
+					: row.unitKind === "audio" || row.unitKind === "video" || row.unitKind === "label"
+						? row.unitKind
+						: null;
+		if (!contentKind) throw new ContentStructureNotFound();
+		return [
+			{
+				id: node.id,
+				parentId: node.parentId,
+				contentUnitId: node.contentUnitId,
+				reference: { owner: row.unitKind, id: row.id, shape: row.shape },
 				contentKind,
 				language: row.language,
-				title: row.title ?? "",
-				position: row.position,
+				languageTag: row.languageTag,
+				title: row.title,
+				position: node.position,
 				contentMetrics:
-					contentKind === "book"
-						? { wordCount: row.bookWordCount ?? 0, characterCount: 0 }
-						: {
-								wordCount: row.wordCount ?? 0,
-								characterCount: row.characterCount ?? 0,
-							},
-			};
-		}),
-	};
-}
-
-async function readMediaContentStructure(
-	tx: DatabaseTransaction,
-	mediaId: string,
-	localizationLanguages: readonly ContentLanguage[] = [],
-) {
-	const [structure] = await tx
-		.select({ id: contentStructure.id })
-		.from(contentStructure)
-		.where(
-			and(
-				eq(contentStructure.ownerUnitId, mediaId),
-				eq(contentStructure.kind, "media.contents"),
-				isNull(contentStructure.deletedAt),
-			),
-		)
-		.limit(1);
-	if (!structure) return { state: "uninitialized" as const, items: [] as [] };
-	const rows = await tx
-		.select({
-			id: contentStructureNode.id,
-			parentId: contentStructureNode.parentId,
-			contentUnitId: contentStructureNode.contentUnitId,
-			unitKind: unit.kind,
-			language: unitLocalization.language,
-			title: unitLocalization.title,
-			position: contentStructureNode.position,
-			videoId: video.id,
-			videoDurationSeconds: video.durationSeconds,
-			audioId: audio.id,
-			audioDurationSeconds: audio.durationSeconds,
-			labelId: label.id,
-			mediaId: media.id,
-			mediaRuntimeMinutes: media.runtimeMinutes,
-		})
-		.from(contentStructureNode)
-		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
-		.leftJoin(video, eq(video.id, contentStructureNode.contentUnitId))
-		.leftJoin(audio, eq(audio.id, contentStructureNode.contentUnitId))
-		.leftJoin(label, eq(label.id, contentStructureNode.contentUnitId))
-		.leftJoin(media, eq(media.id, contentStructureNode.contentUnitId))
-		.innerJoin(
-			unitLocalization,
-			and(
-				eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
-				eq(
-					unitLocalization.language,
-					resolvedUnitLocalizationLanguage(
-						contentStructureNode.contentUnitId,
-						localizationLanguages,
-					),
-				),
-			),
-		)
-		.where(
-			and(
-				eq(contentStructureNode.structureId, structure.id),
-				isNull(contentStructureNode.deletedAt),
-				isNull(unit.deletedAt),
-				eq(unit.moderationStatus, "approved"),
-			),
-		)
-		.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
-	const latestRevisionId = await getContentStructureRevision(tx, mediaId, structure.id);
-	if (!latestRevisionId)
-		throw new Error("Initialized Media Content Structure has no head revision");
+					row.wordCount === null || row.characterCount === null
+						? null
+						: { wordCount: row.wordCount, characterCount: row.characterCount },
+				durationSeconds: row.durationSeconds,
+			},
+		];
+	});
 	return {
-		state: "initialized" as const,
 		structureId: structure.id,
-		latestRevisionId,
-		items: rows.map((row) => {
-			const contentKind =
-				row.unitKind === "video" && row.videoId
-					? ("video" as const)
-					: row.unitKind === "audio" && row.audioId
-						? ("audio" as const)
-						: row.unitKind === "label" && row.labelId
-							? ("label" as const)
-							: row.unitKind === "media" && row.mediaId
-								? ("media" as const)
-								: null;
-			if (!contentKind)
-				throw new Error(`Invalid Media content node ${row.id} unit ${row.contentUnitId}`);
-			return {
-				id: row.id,
-				parentId: row.parentId,
-				contentUnitId: row.contentUnitId,
-				contentKind,
-				language: row.language,
-				title: row.title ?? "",
-				position: row.position,
-				durationSeconds:
-					contentKind === "video"
-						? row.videoDurationSeconds
-						: contentKind === "audio"
-							? row.audioDurationSeconds
-							: contentKind === "media" && row.mediaRuntimeMinutes !== null
-								? row.mediaRuntimeMinutes * 60
-								: null,
-			};
-		}),
+		latestRevisionId: await getContentStructureRevision(tx, ownerId, structure.id),
+		items,
 	};
 }
-
+async function visibleStructureNodes(
+	authorization: Authorization,
+	nodes: readonly ContentStructureNodeState[],
+) {
+	const ids = [
+		...new Set(
+			nodes.flatMap((node) => [
+				node.contentUnitId,
+				...(node.targetUnitId ? [node.targetUnitId] : []),
+			]),
+		),
+	];
+	const readable = new Set<string>();
+	for (let start = 0; start < ids.length; start += 500)
+		for (const id of await authorization.unit.readableUnitIds(ids.slice(start, start + 500)))
+			readable.add(id);
+	const visible = nodes.filter(
+		(node) =>
+			readable.has(node.contentUnitId) && (!node.targetUnitId || readable.has(node.targetUnitId)),
+	);
+	const nodeIds = new Set(visible.map((node) => node.id));
+	return visible.map((node) => ({
+		...node,
+		parentId: node.parentId && nodeIds.has(node.parentId) ? node.parentId : null,
+	}));
+}
+async function ensureStructureReferencesReadable(
+	authorization: Authorization,
+	value: Awaited<ReturnType<typeof readNativeContentStructure>>,
+) {
+	const ids = [...new Set(value.items.map((item) => item.contentUnitId))];
+	const readable = new Set<string>();
+	for (let start = 0; start < ids.length; start += 500)
+		for (const id of await authorization.unit.readableUnitIds(ids.slice(start, start + 500)))
+			readable.add(id);
+	return { ...value, items: value.items.filter((item) => readable.has(item.contentUnitId)) };
+}
 export default new Elysia()
 	.use(session)
 	.get(
@@ -453,13 +383,13 @@ export default new Elysia()
 			},
 			detail: { summary: "Create Content Structure", tags: ["Content Structure"] },
 		},
-		async ({ params, body, entity, authorization }) => {
-			await ensureCanMutateContentStructure(authorization, {
+		async ({ params, body, entity, authorization, participation }) => {
+			await ensureCanMutateContentStructure(authorization, participation, {
 				ownerUnitId: params.unitId,
 				kind: body.kind === "realm.taxonomy" ? body.kind : undefined,
 			});
 			const result = await database.transaction(async (tx) => {
-				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
+				await ensureReleasedContentStructureApi(tx, params.unitId, authorization, participation);
 				return createContentStructure(tx, {
 					ownerUnitId: params.unitId,
 					kind: body.kind,
@@ -499,7 +429,11 @@ export default new Elysia()
 				);
 				return {
 					...presentContentStructure(snapshot.structure, latestRevisionId),
-					nodes: await Promise.all(snapshot.nodes.map(presentGenericContentStructureNode)),
+					nodes: await Promise.all(
+						(await visibleStructureNodes(authorization, snapshot.nodes)).map(
+							presentGenericContentStructureNode,
+						),
+					),
 				};
 			});
 		},
@@ -545,13 +479,13 @@ export default new Elysia()
 				tags: ["Content Structure"],
 			},
 		},
-		async ({ params, body, entity, authorization }) => {
-			await ensureCanMutateContentStructure(authorization, {
+		async ({ params, body, entity, authorization, participation }) => {
+			await ensureCanMutateContentStructure(authorization, participation, {
 				ownerUnitId: params.unitId,
 				structureId: params.structureId,
 			});
 			const result = await database.transaction(async (tx) => {
-				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
+				await ensureReleasedContentStructureApi(tx, params.unitId, authorization, participation);
 				await ensureContentStructureOwner(tx, params.unitId, params.structureId);
 				return restoreContentStructureRevision(tx, {
 					structureId: params.structureId,
@@ -587,8 +521,8 @@ export default new Elysia()
 				tags: ["Content Structure"],
 			},
 		},
-		async ({ params, body, entity, authorization }) => {
-			await ensureCanMutateContentStructure(authorization, {
+		async ({ params, body, entity, authorization, participation }) => {
+			await ensureCanMutateContentStructure(authorization, participation, {
 				ownerUnitId: params.unitId,
 				structureId: params.structureId,
 			});
@@ -605,7 +539,7 @@ export default new Elysia()
 			}
 			await authorization.unit.ensureCanReadMany([...referencedUnitIds]);
 			const result = await database.transaction(async (tx) => {
-				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
+				await ensureReleasedContentStructureApi(tx, params.unitId, authorization, participation);
 				return applyContentStructureBatch(tx, {
 					ownerUnitId: params.unitId,
 					structureId: params.structureId,
@@ -640,26 +574,28 @@ export default new Elysia()
 			},
 			detail: { summary: "Insert Content Structure node", tags: ["Content Structure"] },
 		},
-		async ({ params, body, entity, authorization }) => {
-			await ensureCanMutateContentStructure(authorization, {
+		async ({ params, body, entity, authorization, participation }) => {
+			await ensureCanMutateContentStructure(authorization, participation, {
 				ownerUnitId: params.unitId,
 				structureId: params.structureId,
 			});
 			if (body.content.kind === "unit") await authorization.unit.ensureCanRead(body.content.unitId);
 			if (body.target?.kind === "unit") await authorization.unit.ensureCanRead(body.target.unitId);
 			const result = await database.transaction(async (tx) => {
-				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
+				await ensureReleasedContentStructureApi(tx, params.unitId, authorization, participation);
 				let contentUnitId: string;
 				if (body.content.kind === "unit") contentUnitId = body.content.unitId;
 				else {
-					const created = await insertUnit(tx, {
-						kind: "label",
-						status: "published",
-						visibility: "public",
-						publishedAt: new Date(),
+					const created = await insertPlatformUnit(tx, {
+						owner: "label",
+						values: {
+							createdByAuthUserId: requireAuthUserId(authorization),
+							status: "published",
+							visibility: "public",
+							publishedAt: new Date(),
+						},
 						statusActor: { kind: "profile", profileId: entity.id },
 					});
-					await tx.insert(label).values({ id: created.id });
 					await tx.insert(unitLocalization).values({
 						unitId: created.id,
 						language: body.content.language,
@@ -714,15 +650,15 @@ export default new Elysia()
 			},
 			detail: { summary: "Update Content Structure node", tags: ["Content Structure"] },
 		},
-		async ({ params, body, entity, authorization }) => {
-			await ensureCanMutateContentStructure(authorization, {
+		async ({ params, body, entity, authorization, participation }) => {
+			await ensureCanMutateContentStructure(authorization, participation, {
 				ownerUnitId: params.unitId,
 				structureId: params.structureId,
 			});
 			if (body.contentUnitId) await authorization.unit.ensureCanRead(body.contentUnitId);
 			if (body.target?.kind === "unit") await authorization.unit.ensureCanRead(body.target.unitId);
 			const result = await database.transaction(async (tx) => {
-				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
+				await ensureReleasedContentStructureApi(tx, params.unitId, authorization, participation);
 				return updateContentStructureNode(tx, {
 					ownerUnitId: params.unitId,
 					structureId: params.structureId,
@@ -762,13 +698,13 @@ export default new Elysia()
 				tags: ["Content Structure"],
 			},
 		},
-		async ({ params, body, entity, authorization }) => {
-			await ensureCanMutateContentStructure(authorization, {
+		async ({ params, body, entity, authorization, participation }) => {
+			await ensureCanMutateContentStructure(authorization, participation, {
 				ownerUnitId: params.unitId,
 				structureId: params.structureId,
 			});
 			const result = await database.transaction(async (tx) => {
-				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
+				await ensureReleasedContentStructureApi(tx, params.unitId, authorization, participation);
 				return deleteContentStructureNode(tx, {
 					ownerUnitId: params.unitId,
 					structureId: params.structureId,
@@ -799,13 +735,13 @@ export default new Elysia()
 			},
 			detail: { summary: "Delete Content Structure", tags: ["Content Structure"] },
 		},
-		async ({ params, body, entity, authorization }) => {
-			await ensureCanMutateContentStructure(authorization, {
+		async ({ params, body, entity, authorization, participation }) => {
+			await ensureCanMutateContentStructure(authorization, participation, {
 				ownerUnitId: params.unitId,
 				structureId: params.structureId,
 			});
 			const result = await database.transaction(async (tx) => {
-				await ensureReleasedContentStructureApi(tx, params.unitId, authorization);
+				await ensureReleasedContentStructureApi(tx, params.unitId, authorization, participation);
 				return deleteContentStructure(tx, {
 					ownerUnitId: params.unitId,
 					structureId: params.structureId,
@@ -822,12 +758,12 @@ export default new Elysia()
 		},
 	)
 	.get(
-		"/units/book/:unitId/content-structure/nodes",
+		"/publishing/text-versions/:unitId/content-structure/nodes",
 		{
 			params: BookContentStructureParams,
 			query: BookContentStructureQuery,
 			response: {
-				[StatusCodes.OK]: ContentStructureNodeListResponse,
+				[StatusCodes.OK]: NativeContentStructureNodeListResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["BookNotFound"]),
 			},
 			detail: {
@@ -838,19 +774,28 @@ export default new Elysia()
 		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
 			if (!(await authorization.unit.canRead(params.unitId))) throw new BookNotFound();
-			return database.transaction((tx) =>
-				readBookContentStructure(tx, params.unitId, query.localizationLanguages),
+			return ensureStructureReferencesReadable(
+				authorization,
+				await database.transaction((tx) =>
+					readNativeContentStructure(
+						tx,
+						params.unitId,
+						"book.contents",
+						authorization,
+						query.localizationLanguages,
+					),
+				),
 			);
 		},
 	)
 	.put(
-		"/units/book/:unitId/content-structure",
+		"/publishing/text-versions/:unitId/content-structure",
 		{
 			access: "contribute:unit:update",
 			params: BookContentStructureParams,
 			body: SaveBookContentStructureDraftBody,
 			response: {
-				[StatusCodes.OK]: SaveBookContentStructureDraftResponse,
+				[StatusCodes.OK]: NativeContentStructureDraftResponse,
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"RevisionCreditEntityInvalid",
@@ -870,9 +815,12 @@ export default new Elysia()
 				tags: ["Content Structure"],
 			},
 		},
-		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
+		async ({ params, entity, authorization, body, participation }) => {
+			await ensureCanMutateContentStructure(authorization, participation, {
+				ownerUnitId: params.unitId,
+			});
 			return runVoteTransaction({ family: "unit_tag", authority: "global" }, async (tx) => {
+				await ensureReleasedContentStructureApi(tx, params.unitId, authorization, participation);
 				const attachedContentUnitIds = [
 					...new Set(
 						body.nodes.flatMap((node) => (node.state === "attached" ? [node.contentUnitId] : [])),
@@ -881,16 +829,22 @@ export default new Elysia()
 				for (const unitId of attachedContentUnitIds)
 					await authorization.unit.ensureInTransaction(tx, unitId, "unit.read");
 				const result = await saveBookContentStructureDraft(tx, {
+					authorization: authorization.unit,
+					actorAuthUserId: requireAuthUserId(authorization),
 					ownerUnitId: params.unitId,
 					baseRevisionId: body.baseRevisionId,
 					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					nodes: body.nodes,
 				});
-				const saved = await readBookContentStructure(tx, params.unitId);
+				const saved = await readNativeContentStructure(
+					tx,
+					params.unitId,
+					"book.contents",
+					authorization,
+				);
 				if (!saved.structureId || !saved.latestRevisionId) throw new BookNotFound();
 				return {
-					ownershipMode: saved.ownershipMode,
 					structureId: saved.structureId,
 					latestRevisionId: saved.latestRevisionId,
 					items: saved.items,
@@ -900,12 +854,12 @@ export default new Elysia()
 		},
 	)
 	.get(
-		"/units/media/:unitId/content-structure/nodes",
+		"/program/:unitId/content-structure/nodes",
 		{
 			params: MediaContentStructureParams,
 			query: MediaContentStructureQuery,
 			response: {
-				[StatusCodes.OK]: MediaContentStructureNodeListResponse,
+				[StatusCodes.OK]: NativeContentStructureNodeListResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["MediaNotFound"]),
 			},
 			detail: {
@@ -916,19 +870,28 @@ export default new Elysia()
 		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
 			if (!(await authorization.unit.canRead(params.unitId))) throw new MediaNotFound();
-			return database.transaction((tx) =>
-				readMediaContentStructure(tx, params.unitId, query.localizationLanguages),
+			return ensureStructureReferencesReadable(
+				authorization,
+				await database.transaction((tx) =>
+					readNativeContentStructure(
+						tx,
+						params.unitId,
+						"media.contents",
+						authorization,
+						query.localizationLanguages,
+					),
+				),
 			);
 		},
 	)
 	.put(
-		"/units/media/:unitId/content-structure",
+		"/program/:unitId/content-structure",
 		{
 			access: "contribute:unit:update",
 			params: MediaContentStructureParams,
 			body: SaveMediaContentStructureDraftBody,
 			response: {
-				[StatusCodes.OK]: SaveMediaContentStructureDraftResponse,
+				[StatusCodes.OK]: NativeContentStructureDraftResponse,
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"RevisionCreditEntityInvalid",
@@ -943,9 +906,12 @@ export default new Elysia()
 				tags: ["Content Structure"],
 			},
 		},
-		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
+		async ({ params, entity, authorization, body, participation }) => {
+			await ensureCanMutateContentStructure(authorization, participation, {
+				ownerUnitId: params.unitId,
+			});
 			return database.transaction(async (tx) => {
+				await ensureReleasedContentStructureApi(tx, params.unitId, authorization, participation);
 				const attachedContentUnitIds = [
 					...new Set(
 						body.nodes.flatMap((node) => (node.state === "attached" ? [node.contentUnitId] : [])),
@@ -954,24 +920,33 @@ export default new Elysia()
 				for (const unitId of attachedContentUnitIds)
 					await authorization.unit.ensureInTransaction(tx, unitId, "unit.read");
 				const result = await saveMediaContentStructureDraft(tx, {
+					authorization: authorization.unit,
+					actorAuthUserId: requireAuthUserId(authorization),
 					ownerUnitId: params.unitId,
 					base: body.base,
 					actorProfileId: entity.id,
 					contribution: body.revisionContext?.contribution,
 					nodes: body.nodes,
 				});
-				const saved = await readMediaContentStructure(tx, params.unitId);
-				if (saved.state !== "initialized")
+				const saved = await readNativeContentStructure(
+					tx,
+					params.unitId,
+					"media.contents",
+					authorization,
+				);
+				if (!saved.structureId || !saved.latestRevisionId)
 					throw new Error("Saved Media Content Structure is uninitialized");
 				return {
 					...saved,
+					structureId: saved.structureId,
+					latestRevisionId: saved.latestRevisionId,
 					revisionCreated: result.revisionCreated,
 				};
 			});
 		},
 	)
 	.get(
-		"/books/:bookId/content-nodes/:nodeId",
+		"/publishing/text-versions/:bookId/content-nodes/:nodeId",
 		{
 			params: BookChapterNodeParams,
 			query: ReadChapterQuery,
@@ -992,12 +967,13 @@ export default new Elysia()
 					bookId: contentStructureNode.ownerUnitId,
 					chapterId: contentStructureNode.contentUnitId,
 					position: contentStructureNode.position,
-					metadataOnly: book.metadataOnly,
 				})
 				.from(contentStructureNode)
 				.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
-				.innerJoin(book, eq(book.id, contentStructure.ownerUnitId))
-				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+				.innerJoin(
+					publishingTextVersion,
+					eq(publishingTextVersion.id, contentStructure.ownerUnitId),
+				)
 				.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 				.where(
 					and(
@@ -1007,17 +983,18 @@ export default new Elysia()
 						eq(post.kind, "chapter"),
 						isNull(contentStructure.deletedAt),
 						isNull(contentStructureNode.deletedAt),
-						isNull(unit.deletedAt),
-						eq(unit.moderationStatus, "approved"),
+						isNull(post.deletedAt),
+						eq(post.moderationStatus, "approved"),
 					),
 				)
 				.limit(1);
 			if (!node?.chapterId) throw new ChapterNotFound();
-			const bodyPresentation = node.metadataOnly
-				? ("omit" as const)
-				: (await authorization.unit.canUpdate(node.chapterId, ["localizations"]))
-					? ("preview" as const)
-					: ("published" as const);
+			await authorization.unit.ensureCanRead(node.chapterId, () => new ChapterNotFound());
+			const bodyPresentation = (await authorization.unit.canUpdate(node.chapterId, [
+				"localizations",
+			]))
+				? ("preview" as const)
+				: ("published" as const);
 			const localizationLanguages = query.localizationLanguages ?? [];
 			const [localizations, targetingLock] = await Promise.all([
 				database
@@ -1043,7 +1020,6 @@ export default new Elysia()
 			});
 			if (!selected) throw new ChapterLanguageNotFound();
 			const canPresentContent =
-				bodyPresentation !== "omit" &&
 				selected.content !== null &&
 				(bodyPresentation === "preview" || selected.contentStatus === "published");
 			const contentMetrics = canPresentContent
@@ -1053,33 +1029,36 @@ export default new Elysia()
 				throw new Error(
 					`Missing content metric for chapter ${node.chapterId} localization ${selected.language}`,
 				);
-			const siblingRows = await database
-				.select({
-					id: contentStructureNode.id,
-					parentId: contentStructureNode.parentId,
-					contentUnitId: contentStructureNode.contentUnitId,
-					position: contentStructureNode.position,
-					unitKind: unit.kind,
-					postKind: post.kind,
-				})
-				.from(contentStructureNode)
-				.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
-				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
-				.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
-				.where(
-					and(
-						eq(contentStructureNode.structureId, node.structureId),
-						eq(contentStructure.kind, "book.contents"),
-						isNull(contentStructure.deletedAt),
-						isNull(contentStructureNode.deletedAt),
-						isNull(unit.deletedAt),
-						eq(unit.moderationStatus, "approved"),
-					),
-				)
-				.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
+			const siblingSnapshot = await database.transaction((tx) =>
+				loadContentStructureSnapshot(tx, {
+					structureId: node.structureId,
+					ownerUnitId: params.bookId,
+				}),
+			);
+			const siblingContent = await database.transaction((tx) =>
+				readContentStructureContentRows(
+					tx,
+					siblingSnapshot.nodes.map((item) => item.contentUnitId),
+				),
+			);
+			const byId = new Map(siblingContent.map((item) => [item.id, item]));
+			const allowed = new Set<string>();
+			for (let start = 0; start < siblingContent.length; start += 500)
+				for (const id of await authorization.unit.readableUnitIds(
+					siblingContent.slice(start, start + 500).map((item) => item.id),
+				))
+					allowed.add(id);
+			const siblingRows = siblingSnapshot.nodes.flatMap((item) => {
+				const content = byId.get(item.contentUnitId);
+				return content && allowed.has(content.id) ? [{ ...content, ...item }] : [];
+			});
 			const chapterNodeIds = orderReaderChapterNodeIds(
 				siblingRows.flatMap((sibling) => {
-					const contentKind = resolveBookContentKind(sibling.unitKind, sibling.postKind);
+					const contentKind = resolveBookContentKind(
+						sibling.unitKind,
+						sibling.postKind,
+						sibling.shape,
+					);
 					return contentKind ? [{ ...sibling, contentKind }] : [];
 				}),
 			);

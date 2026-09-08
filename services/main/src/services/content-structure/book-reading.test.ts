@@ -141,7 +141,7 @@ describe("orderReaderChapterNodeIds", () => {
 					contentUnitId: "book",
 					parentId: "chapter-node",
 					position: "a1",
-					contentKind: "book",
+					contentKind: "text_version",
 				},
 				{
 					id: "chapter-node",
