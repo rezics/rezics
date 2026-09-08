@@ -10,6 +10,8 @@ import {
 } from "./vndb-supporting-plans";
 import { normalizeVndbSemanticDump } from "./vndb-semantics-dump";
 import { normalizeVndbEntityDump } from "./vndb-entity-dump";
+import { normalizeVndbCharacterDump } from "./vndb-character-dump";
+import type { VndbNativeNamePlan } from "./vndb-names-update";
 import type { VndbSemanticPlan } from "./vndb-semantics-contracts";
 import { remapVndbSemanticPlan } from "./vndb-semantics";
 import { vndbProducerShape } from "./vndb-entities";
@@ -69,14 +71,17 @@ function prepare(input: VndbPreparedSnapshot) {
 	let record: VndbSupportingRecord;
 	let path = (value: string) => value;
 	let extraSemantics: VndbSemanticPlan = { facts: [], relations: [] };
+	let dumpNames: VndbNativeNamePlan[] | undefined;
 	if (receipt.contractSha256 === VndbDumpContractSha256) {
-		if (family === "character")
-			throw new TypeError("VNDB entity dump requires its reviewed assembled projection");
-		if (family === "staff" || family === "producer") {
-			const normalized = normalizeVndbEntityDump(family, raw);
+		if (family === "staff" || family === "producer" || family === "character") {
+			const normalized =
+				family === "character"
+					? normalizeVndbCharacterDump(raw)
+					: normalizeVndbEntityDump(family, raw);
 			record = VndbSupportingRecordSchema.parse({ ...normalized.record, objectType: family });
 			path = normalized.sourcePath;
 			extraSemantics = normalized.extraSemantics;
+			if ("names" in normalized) dumpNames = normalized.names;
 		} else {
 			const normalized = normalizeVndbSemanticDump(family, raw);
 			record = normalized.record;
@@ -88,7 +93,10 @@ function prepare(input: VndbPreparedSnapshot) {
 	const semantic = remapVndbSemanticPlan(planVndbSupportingSemantics(record), path);
 	semantic.facts.push(...extraSemantics.facts);
 	semantic.relations.push(...extraSemantics.relations);
-	return { bytes, snapshotId, receipt, record, path, semantic };
+	const names =
+		dumpNames ??
+		planVndbSupportingNames(record).map((item) => ({ ...item, path: path(item.path) }));
+	return { bytes, snapshotId, receipt, record, path, semantic, names };
 }
 
 /** @alpha Reviewed supporting-object updates share the initial native plans and exact compensation journal. */
@@ -253,19 +261,11 @@ export function createVndbSupportingNativeWriter(input: {
 				revision,
 				context.mappingKey,
 				{
-					plan: before
-						? planVndbSupportingNames(before.record).map((item) => ({
-								...item,
-								path: before.path(item.path),
-							}))
-						: [],
+					plan: before?.names ?? [],
 					document: previousDocument,
 				},
 				{
-					plan: planVndbSupportingNames(after.record).map((item) => ({
-						...item,
-						path: after.path(item.path),
-					})),
+					plan: after.names,
 					document,
 				},
 			);

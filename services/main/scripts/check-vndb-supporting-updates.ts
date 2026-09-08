@@ -63,6 +63,7 @@ const archive: CatalogSourceArchive = {
 type Case = {
 	dump?: boolean;
 	relations?: { key: string; counts: [number, number] }[];
+	spoilerName?: { value: string; values: [number, number] };
 	kind: "staff" | "producer" | "character" | "tag" | "trait" | "quote" | "drm" | "engine";
 	before: Record<string, unknown> & { id: string | number };
 	after: Record<string, unknown> & { id: string | number };
@@ -73,7 +74,68 @@ type Case = {
 		values: [string | number | boolean, string | number | boolean];
 	};
 };
+function characterDump(updated: boolean) {
+	return {
+		id: "c985011",
+		character: {
+			id: "c985011",
+			image: "ch985011",
+			bloodt: "unknown",
+			cup_size: "",
+			sex: "m",
+			spoil_sex: null,
+			gender: null,
+			spoil_gender: null,
+			main: updated ? "c985001" : null,
+			main_spoil: 2,
+			s_bust: 0,
+			s_waist: 0,
+			s_hip: 0,
+			birthday: 229,
+			height: updated ? 171 : 170,
+			weight: 0,
+			age: null,
+			description: "Character dump",
+		},
+		names: [
+			{
+				id: "c985011",
+				lang: "ja",
+				name: updated ? "人物乙" : "人物甲",
+				latin: updated ? "Character B" : "Character A",
+			},
+		],
+		aliases: [{ id: "c985011", name: "Hidden alias", latin: null, spoil: updated ? 2 : 1 }],
+		traits: updated ? [{ id: "c985011", tid: "i985001", spoil: 1, lie: true }] : [],
+		vns: updated ? [{ id: "c985011", vid: "v985009", rid: "r985011", role: "main", spoil: 1 }] : [],
+		images: [
+			{
+				id: "ch985011",
+				width: updated ? 601 : 600,
+				height: 800,
+				c_votecount: 2,
+				c_sexual_avg: 100,
+				c_violence_avg: 0,
+			},
+		],
+	};
+}
 const cases: Case[] = [
+	{
+		kind: "character",
+		dump: true,
+		before: characterDump(false),
+		after: characterDump(true),
+		name: ["人物甲", "人物乙"],
+		property: { namespace: "catalog", key: "character.height", values: [170, 171] },
+		spoilerName: { value: "Hidden alias", values: [1, 2] },
+		relations: [
+			{ key: "instance-of-character", counts: [0, 1] },
+			{ key: "has-character-trait", counts: [0, 1] },
+			{ key: "character-appears-in", counts: [0, 1] },
+			{ key: "has-image", counts: [1, 1] },
+		],
+	},
 	{
 		kind: "staff",
 		dump: true,
@@ -337,6 +399,8 @@ try {
 						externalId: String(entry.before.id),
 					})),
 					{ source: "vndb", objectType: "vn", externalId: "v985009" },
+					{ source: "vndb", objectType: "release", externalId: "r985011" },
+					{ source: "vndb", objectType: "image", externalId: "ch985011" },
 				];
 				for (const routingBucket of new Set(
 					keys.map((key) => aggregateRoutingBucket("source_record", catalogSourceRecordId(key))),
@@ -413,6 +477,13 @@ try {
 						after: { snapshotId: observed.snapshot.id, receipt: afterReceipt, bytes: afterBytes },
 					});
 					const verify = async (index: 0 | 1) => {
+						if (entry.spoilerName) {
+							const alias = (await listCatalogNames(tx, reference, actor.id)).find(
+								(name) => name.state === "active" && name.value === entry.spoilerName?.value,
+							);
+							assert.equal(alias?.spoiler, entry.spoilerName.values[index]);
+							assertions++;
+						}
 						for (const relation of entry.relations ?? []) {
 							const [definition] = await tx
 								.select({ id: catalogDefinitionRevision.id })
@@ -430,7 +501,11 @@ try {
 								.limit(1);
 							assert.ok(definition);
 							assert.equal(
-								(await findCatalogRelations(tx, reference, actor.id, definition.id)).length,
+								(
+									await findCatalogRelations(tx, reference, actor.id, definition.id, {
+										maxSpoiler: 2,
+									})
+								).length,
 								relation.counts[index],
 							);
 							assertions++;

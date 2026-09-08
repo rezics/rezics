@@ -187,3 +187,28 @@ names and descriptions, unresolved staff identity, and preserved independent sta
 begin dates. Six scoped test files passed 32 tests and the backend TypeScript
 check passed. Character/VN/release remaining dump joins, API/dump observation-scope
 transitions and full provider coverage remain open.
+
+## Character dump joins
+
+The character initializer and update callback now consume `chars`, `chars_names`,
+`chars_alias`, `chars_traits`, `chars_vns` and its selected image row. All localized
+names retain their language; aliases retain spoiler levels and exact romanization
+derivation. The source's private cached language does not invent a primary name
+language. Unknown measurements and inherited apparent/actual sex/gender follow
+the pinned `lib/VNWeb/API.pm` projection, with pointers to the actual contributing
+dump columns. Instance relations and VN/release appearances retain their scope,
+role, spoiler and occurrence multiplicity.
+
+The packet caps names at 128, aliases at 1,024, traits and appearance rows at 4,096
+each, and image dependencies at one. Work and memory stay proportional to one
+admitted 8 MB packet; ordinary applications remain capped at 128 changes. The
+existing 500M/3B role/name/semantic occurrence planning budgets apply independently
+to each growing relation; this adds no whole-corpus join or scan. Additional image
+dispersion/weight statistics and VN/release assembly remain unqualified.
+
+DB59 `check-vndb-supporting-updates.ts` now passes 259 rollback assertions across
+eleven surface/family cases, three apply/withdraw/reapply cycles each. Character
+coverage reads back native original/romanized names, changed alias spoilers,
+measurement values, restored image relations and exact
+instance/trait/VN-release relation counts. Seven focused test files passed; these
+fixtures do not qualify cross-surface source transitions or bulk acquisition.

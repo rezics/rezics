@@ -10,6 +10,7 @@ import type { CatalogSourceReceipt } from "./source-observations";
 import type { CatalogReference } from "./contracts";
 import { VndbCatalogContractSha256, VndbDumpContractSha256 } from "./vndb";
 import { normalizeVndbEntityDump } from "./vndb-entity-dump";
+import { normalizeVndbCharacterDump } from "./vndb-character-dump";
 
 const integer = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const name = z.string().min(1).max(131_072);
@@ -327,9 +328,11 @@ async function adoptVndbEntity(
 	if (receipt.contractSha256 !== VndbCatalogContractSha256 && !isDump)
 		throw new TypeError("VNDB source contract has not been reviewed for this mapper");
 	const input: unknown = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
-	if (isDump && kind === "character")
-		throw new TypeError("Character dump assembly is not reviewed");
-	const normalized = isDump && kind !== "character" ? normalizeVndbEntityDump(kind, input) : null;
+	const normalized = isDump
+		? kind === "character"
+			? normalizeVndbCharacterDump(input)
+			: normalizeVndbEntityDump(kind, input)
+		: null;
 	const sourcePath = normalized?.sourcePath ?? ((path: string) => path);
 	const record: SourceEntity = normalized
 		? normalized.record
@@ -422,10 +425,12 @@ async function adoptVndbEntity(
 		reference,
 		actor,
 		revision,
-		planVndbSupportingNames(supportingRecord).map((item) => ({
-			...item,
-			path: sourcePath(item.path),
-		})),
+		normalized && "names" in normalized
+			? normalized.names
+			: planVndbSupportingNames(supportingRecord).map((item) => ({
+					...item,
+					path: sourcePath(item.path),
+				})),
 		document,
 		created ? { id: created.nameId, revision: 1 } : undefined,
 	);

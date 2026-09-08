@@ -32,6 +32,7 @@ type SourceFields = Pick<CatalogNameInput, "value"> &
 			| "languageTag"
 			| "origin"
 			| "primaryForLanguage"
+			| "spoiler"
 			| "derivationNameId"
 			| "derivationRevision"
 		>
@@ -380,6 +381,11 @@ export async function reconcileVndbNativeNames(
 						current.languageTag,
 					);
 					values.origin = mergeField(previous.fields.origin, item.fields.origin, current.origin);
+					values.spoiler = mergeField(
+						previous.fields.spoiler,
+						item.fields.spoiler,
+						current.spoiler,
+					);
 					values.primaryForLanguage = mergeField(
 						previous.fields.primaryForLanguage,
 						item.fields.primaryForLanguage,

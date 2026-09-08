@@ -306,6 +306,7 @@ function allowedRoles(relation: VndbSemanticRelation) {
 	)
 		return ["subject", "concept"];
 	if (relation.key === "character-appears-in") return ["subject", "content", "release"];
+	if (relation.key === "instance-of-character") return ["subject", "character"];
 	if (relation.key === "quotation-context") return ["subject", "content", "character"];
 	if (relation.key === "uses-access-mechanism") return ["subject", "mechanism"];
 	if (relation.key === "uses-software-engine") return ["subject", "engine"];
