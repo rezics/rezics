@@ -14,7 +14,7 @@ import { unitStateRelation } from "../units/state-relation";
 import { readUnitPresentationsInTransaction } from "../units/presentation-reader";
 import { z } from "zod";
 import { presentImageAsset } from "../api/image-assets/presentation";
-import { and, eq, exists, inArray, isNull, not, or, sql, type SQL } from "drizzle-orm";
+import { and, eq, exists, isNull, not, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { StudioRealmSubjectLimitExceeded } from "../api/users/errors";
@@ -510,7 +510,7 @@ async function selectWorkspaceCandidateBatch(input: {
 	const accepted = and(
 		sql`${resource.id} is not null`,
 		or(
-			inArray(resource.owner, CatalogOwnerValues),
+			sql`${resource.owner} = any(${sql.param([...CatalogOwnerValues])}::text[])`,
 			getUnitReadCondition(input.profileId, {}, resource),
 		),
 		studioResourceScopeCondition(
