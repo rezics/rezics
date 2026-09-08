@@ -1,4 +1,16 @@
 concept	definition	locale	status	slot	approved_form	forbidden_forms
+definitionNamespace	A stable identifier scope that distinguishes governed catalog definitions by namespace and key; unrelated to social Zones or Realms.	en	approved	label	Namespace	-
+definitionNamespace	A stable identifier scope that distinguishes governed catalog definitions by namespace and key; unrelated to social Zones or Realms.	en	approved	inline	namespace	-
+definitionNamespace	A stable identifier scope that distinguishes governed catalog definitions by namespace and key; unrelated to social Zones or Realms.	zh-Hant	approved	label	命名空間	-
+definitionNamespace	A stable identifier scope that distinguishes governed catalog definitions by namespace and key; unrelated to social Zones or Realms.	zh-Hant	approved	inline	命名空間	-
+definitionNamespace	A stable identifier scope that distinguishes governed catalog definitions by namespace and key; unrelated to social Zones or Realms.	zh-Hans	approved	label	命名空间	-
+definitionNamespace	A stable identifier scope that distinguishes governed catalog definitions by namespace and key; unrelated to social Zones or Realms.	zh-Hans	approved	inline	命名空间	-
+definitionNamespace	A stable identifier scope that distinguishes governed catalog definitions by namespace and key; unrelated to social Zones or Realms.	de	approved	label	Namensraum	-
+definitionNamespace	A stable identifier scope that distinguishes governed catalog definitions by namespace and key; unrelated to social Zones or Realms.	de	approved	inline	Namensraum	-
+definitionNamespace	A stable identifier scope that distinguishes governed catalog definitions by namespace and key; unrelated to social Zones or Realms.	ja	approved	label	名前空間	-
+definitionNamespace	A stable identifier scope that distinguishes governed catalog definitions by namespace and key; unrelated to social Zones or Realms.	ja	approved	inline	名前空間	-
+definitionNamespace	A stable identifier scope that distinguishes governed catalog definitions by namespace and key; unrelated to social Zones or Realms.	ko	approved	label	이름 공간	-
+definitionNamespace	A stable identifier scope that distinguishes governed catalog definitions by namespace and key; unrelated to social Zones or Realms.	ko	approved	inline	이름 공간	-
 publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	en	approved	label	Publisher	-
 publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	en	approved	pluralLabel	Publishers	-
 publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	en	approved	inline	publisher	-

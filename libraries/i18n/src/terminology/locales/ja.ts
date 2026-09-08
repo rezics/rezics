@@ -1,6 +1,11 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const jaTerminology = defineTerminology("ja", {
+	definitionNamespace: {
+		status: "approved",
+		forms: { label: "名前空間", inline: "名前空間" },
+		forbidden: [],
+	},
 	publisher: {
 		status: "approved",
 		forms: { label: "出版者", pluralLabel: "出版者", inline: "出版者", plural: "出版者" },

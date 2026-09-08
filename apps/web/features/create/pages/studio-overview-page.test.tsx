@@ -109,7 +109,10 @@ vi.mock("../components/studio-content-list", () => ({
 vi.mock("@/i18n/client", () => ({
 	useTranslation: () => ({
 		t: {
-			units: { nativeDefinitions: { title: "Catalog definitions" } },
+			units: {
+				nativeDefinitions: { title: "Catalog definitions" },
+				nativeSources: { intake: "Import from a source" },
+			},
 			create: {
 				overview: {
 					continueTitle: "Continue",

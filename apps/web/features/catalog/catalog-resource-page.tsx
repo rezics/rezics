@@ -37,6 +37,13 @@ export function CatalogResourcePage({ reference }: { reference: CatalogReference
 				) : null}
 			</div>
 			{session ? <PrivateFavoriteControl targetUnitId={reference.id} /> : null}
+			{resource.data.canEdit ? (
+				<Button asChild variant="outline">
+					<AppLink href={`/catalog/${reference.owner}/${reference.id}/sources`}>
+						{t.units.nativeSources.title}
+					</AppLink>
+				</Button>
+			) : null}
 			{(reference.owner === "publishing" && resource.data.shape === "text_version") ||
 			reference.owner === "program" ? (
 				<nav className="flex flex-wrap gap-2" aria-label={t.units.content.title}>

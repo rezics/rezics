@@ -37,6 +37,12 @@ const WebTerminologyLocales = AllTerminologyLocales;
  * consistent across product surfaces. Keys identify concepts, not source words.
  */
 export const terminologyConcepts = defineTerminologyConcepts({
+	definitionNamespace: {
+		definition:
+			"A stable identifier scope that distinguishes governed catalog definitions by namespace and key; unrelated to social Zones or Realms.",
+		slots: ["label", "inline"] as const,
+		locales: WebTerminologyLocales,
+	},
 	publisher: {
 		definition:
 			"A person or organization credited with issuing published content, including a bibliographic publication or a platform post.",

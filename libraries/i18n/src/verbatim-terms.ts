@@ -25,6 +25,26 @@ type VerbatimTermDefinition = {
  * allowlist for untranslated source-language prose.
  */
 export const verbatimTerms = {
+	vndb: {
+		value: "VNDB",
+		category: "brand",
+		rationale: "External visual novel database provider brand.",
+	},
+	musicbrainz: {
+		value: "MusicBrainz",
+		category: "brand",
+		rationale: "External music database provider brand.",
+	},
+	bangumi: {
+		value: "Bangumi",
+		category: "brand",
+		rationale: "External media database provider brand.",
+	},
+	openlibrary: {
+		value: "Open Library",
+		category: "brand",
+		rationale: "External publication database provider brand.",
+	},
 	rezics: {
 		value: "REZICS",
 		category: "brand",

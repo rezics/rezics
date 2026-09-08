@@ -1,6 +1,11 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const koTerminology = defineTerminology("ko", {
+	definitionNamespace: {
+		status: "approved",
+		forms: { label: "이름 공간", inline: "이름 공간" },
+		forbidden: [],
+	},
 	publisher: {
 		status: "approved",
 		forms: {

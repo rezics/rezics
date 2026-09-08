@@ -4,6 +4,25 @@
 
 This document is a generated view of the typed termbase in `libraries/i18n/src/terminology`. Product locale resources remain the owner of complete user-visible messages.
 
+## definitionNamespace
+
+A stable identifier scope that distinguishes governed catalog definitions by namespace and key; unrelated to social Zones or Realms.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Namespace |  |
+| en | approved | inline | namespace |  |
+| zh-Hant | approved | label | 命名空間 |  |
+| zh-Hant | approved | inline | 命名空間 |  |
+| zh-Hans | approved | label | 命名空间 |  |
+| zh-Hans | approved | inline | 命名空间 |  |
+| de | approved | label | Namensraum |  |
+| de | approved | inline | Namensraum |  |
+| ja | approved | label | 名前空間 |  |
+| ja | approved | inline | 名前空間 |  |
+| ko | approved | label | 이름 공간 |  |
+| ko | approved | inline | 이름 공간 |  |
+
 ## publisher
 
 A person or organization credited with issuing published content, including a bibliographic publication or a platform post.

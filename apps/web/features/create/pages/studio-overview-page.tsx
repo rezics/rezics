@@ -107,6 +107,9 @@ export function StudioOverviewPage() {
 			<Link className="w-fit underline underline-offset-4" href="/catalog/definitions">
 				{t.units.nativeDefinitions.title}
 			</Link>
+			<Link className="w-fit underline underline-offset-4" href="/catalog/sources/import">
+				{t.units.nativeSources.intake}
+			</Link>
 			<StudioOverviewList
 				emptyMessage={t.create.overview.empty.workspace}
 				mode="workspace"

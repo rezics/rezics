@@ -1,6 +1,11 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const enTerminology = defineTerminology("en", {
+	definitionNamespace: {
+		status: "approved",
+		forms: { label: "Namespace", inline: "namespace" },
+		forbidden: [],
+	},
 	publisher: {
 		status: "approved",
 		forms: {
