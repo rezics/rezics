@@ -154,7 +154,7 @@ export function BookFeedCard() {
 				/>
 				<div className="flex min-w-0 flex-1 flex-col gap-2">
 					<Badge className="w-fit" size="sm" variant="info">
-						{feed.content.kinds["unit:book"]}
+						{feed.content.kinds["publishing:text_version"]}
 					</Badge>
 					<FeedCardTitle id="book-feed-title">{fixture.collection.title}</FeedCardTitle>
 					<FeedCardBody>{fixture.collection.body}</FeedCardBody>
@@ -189,7 +189,7 @@ export function CollectionFeedCard() {
 			/>
 			<FeedCardContent>
 				<Badge className="w-fit" size="sm" variant="info">
-					{feed.content.kinds["unit:collection"]}
+					{feed.content.kinds["collection:collection"]}
 				</Badge>
 				<FeedCardTitle id="collection-feed-title">{fixture.collection.title}</FeedCardTitle>
 				<FeedCardBody>{fixture.collection.body}</FeedCardBody>

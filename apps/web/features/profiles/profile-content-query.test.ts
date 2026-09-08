@@ -23,7 +23,7 @@ describe("Profile content page requests", () => {
 	it("composes selected content kinds into the Feed filter", () => {
 		expect(
 			createProfileContentRequest({
-				contentKinds: ["unit:collection", "post:review"],
+				contentKinds: ["collection:collection", "post:review"],
 				profileId: ProfileId,
 			}),
 		).toEqual({
@@ -32,7 +32,10 @@ describe("Profile content page requests", () => {
 			state: {
 				filter: {
 					where: {
-						any: [{ kind: { in: ["collection"] } }, { post: { is: { kind: { in: ["review"] } } } }],
+						any: [
+							{ owner: { in: ["collection"] } },
+							{ post: { is: { kind: { in: ["review"] } } } },
+						],
 					},
 				},
 				pageSize: 20,
@@ -44,21 +47,32 @@ describe("Profile content page requests", () => {
 	it("keeps only content kinds supported by the Profile feed", () => {
 		expect(
 			normalizeProfileContentKinds([
-				"unit:book",
-				"unit:series",
+				"publishing:text_version",
+				"grouping:grouping",
 				"post:picture",
-				"unit:collection",
+				"collection:collection",
 				"post:picture",
 			]),
-		).toEqual(["unit:book", "unit:series", "unit:collection", "post:picture"]);
+		).toEqual([
+			"publishing:text_version",
+			"grouping:grouping",
+			"collection:collection",
+			"post:picture",
+		]);
 	});
 
 	it("parses only Profile feed content kinds from the URL", () => {
 		expect(profileContentParser.parseServerSide(undefined)).toEqual([]);
 		expect(
 			profileContentParser.parseServerSide(
-				"unit:entity,unit:book,unit:series,post:review,post:picture,unknown",
+				"entity:person,publishing:text_version,grouping:grouping,post:review,post:picture,unknown",
 			),
-		).toEqual(["unit:entity", "unit:book", "unit:series", "post:review", "post:picture"]);
+		).toEqual([
+			"entity:person",
+			"publishing:text_version",
+			"grouping:grouping",
+			"post:review",
+			"post:picture",
+		]);
 	});
 });

@@ -6,7 +6,7 @@ import { AppLink } from "@/features/application-shell/components/app-link";
 import { useTranslation } from "@/i18n/client";
 import {
 	createContentLanguageSupportDraft,
-	type ContentLanguageSupportUnitType,
+	type ContentLanguageSupportOwner,
 } from "../model/content-language-support";
 import {
 	formatContentLanguageName,
@@ -16,10 +16,10 @@ import { contentLanguageSearchHref } from "../routing/content-language-search-ro
 
 export function ContentLanguageSupportDisplay({
 	value,
-	searchUnitType,
+	searchOwner,
 }: {
 	readonly value: unknown;
-	readonly searchUnitType?: ContentLanguageSupportUnitType;
+	readonly searchOwner?: ContentLanguageSupportOwner;
 }) {
 	const { locale, t } = useTranslation(["units"]);
 	const entries = createContentLanguageSupportDraft(value);
@@ -49,11 +49,11 @@ export function ContentLanguageSupportDisplay({
 							);
 							return (
 								<li key={languageTag}>
-									{searchUnitType ? (
+									{searchOwner ? (
 										<AppLink
 											className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 											href={contentLanguageSearchHref({
-												unitType: searchUnitType,
+												owner: searchOwner,
 												languageTag,
 												...(group.channel ? { channel: group.channel } : {}),
 											})}

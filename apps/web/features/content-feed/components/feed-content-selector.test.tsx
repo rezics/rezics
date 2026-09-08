@@ -47,7 +47,10 @@ describe("FeedContentSelector", () => {
 		const onValueChange = vi.fn();
 		render(
 			<TranslationProvider initial={translation.snapshot}>
-				<FeedContentSelector onValueChange={onValueChange} value={["unit:book", "post:review"]} />
+				<FeedContentSelector
+					onValueChange={onValueChange}
+					value={["publishing:text_version", "post:review"]}
+				/>
 			</TranslationProvider>,
 		);
 
@@ -64,7 +67,7 @@ describe("FeedContentSelector", () => {
 			<TranslationProvider initial={translation.snapshot}>
 				<FeedContentSelector
 					onValueChange={vi.fn()}
-					options={["unit:book", "unit:collection", "post:review"]}
+					options={["publishing:text_version", "collection:collection", "post:review"]}
 					value={[]}
 				/>
 			</TranslationProvider>,

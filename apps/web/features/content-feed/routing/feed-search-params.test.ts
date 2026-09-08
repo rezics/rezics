@@ -20,11 +20,13 @@ describe("Feed URL state", () => {
 		expect(feedSortParser.parseServerSide("hot")).toBe("best");
 		expect(feedSortParser.parseServerSide("unknown")).toBe("best");
 		expect(feedContentParser.parseServerSide(undefined)).toEqual([]);
-		expect(feedContentParser.parseServerSide("unit:book,post:review")).toEqual([
-			"unit:book",
+		expect(feedContentParser.parseServerSide("publishing:text_version,post:review")).toEqual([
+			"publishing:text_version",
 			"post:review",
 		]);
-		expect(feedContentParser.parseServerSide("unit:book,unknown")).toEqual(["unit:book"]);
+		expect(feedContentParser.parseServerSide("publishing:text_version,unknown")).toEqual([
+			"publishing:text_version",
+		]);
 		expect(feedLanguagesParser.parseServerSide(undefined)).toEqual([]);
 		expect(feedLanguagesParser.parseServerSide("zh,en")).toEqual(["zh", "en"]);
 		expect(
@@ -55,8 +57,8 @@ describe("Feed URL state", () => {
 				tags: [],
 			}),
 		).toBe("");
-		expect(serialize({ content: ["unit:book", "post:review"] })).toBe(
-			"?content=unit:book,post:review",
+		expect(serialize({ content: ["publishing:text_version", "post:review"] })).toBe(
+			"?content=publishing:text_version,post:review",
 		);
 	});
 });

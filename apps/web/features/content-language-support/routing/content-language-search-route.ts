@@ -4,43 +4,18 @@ import {
 	type ContentLanguageChannel,
 	type ContentLanguageTag,
 } from "@rezics/content-language";
-import type { UnitPredicate } from "@rezics/filter";
+import { parseUnitPredicate, type UnitPredicate } from "@rezics/filter";
 import { createParser, createSerializer, parseAsStringLiteral } from "nuqs/server";
 
-import { type ContentLanguageSupportUnitType } from "../model/content-language-support";
+import {
+	ContentLanguageSupportOwnerValues,
+	type ContentLanguageSupportOwner,
+} from "../model/content-language-support";
 
-const ContentKindByUnitType = {
-	book: "unit:book",
-	software: "unit:software",
-	media: "unit:media",
-	video: "unit:video",
-	audio: "unit:audio",
-	release: "unit:release",
-} as const satisfies Record<
-	ContentLanguageSupportUnitType,
-	`unit:${ContentLanguageSupportUnitType}`
->;
-
-export const ContentLanguageSearchContentKindValues = [
-	"unit:book",
-	"unit:software",
-	"unit:media",
-	"unit:video",
-	"unit:audio",
-	"unit:release",
-] as const;
-
-const UnitTypeByContentKind = {
-	"unit:book": "book",
-	"unit:software": "software",
-	"unit:media": "media",
-	"unit:video": "video",
-	"unit:audio": "audio",
-	"unit:release": "release",
-} as const satisfies Record<
-	(typeof ContentLanguageSearchContentKindValues)[number],
-	ContentLanguageSupportUnitType
->;
+const shapeParser = createParser({
+	parse: (value) => (/^[a-z][a-z0-9_.-]{0,95}$/.test(value) ? value : null),
+	serialize: String,
+});
 
 const canonicalLanguageTagParser = createParser({
 	parse(value): ContentLanguageTag | null {
@@ -61,7 +36,8 @@ const routeOptions = {
 } as const;
 
 export const contentLanguageSearchRouteParsers = {
-	content: parseAsStringLiteral(ContentLanguageSearchContentKindValues).withOptions(routeOptions),
+	contentOwner: parseAsStringLiteral(ContentLanguageSupportOwnerValues).withOptions(routeOptions),
+	contentShape: shapeParser.withOptions(routeOptions),
 	consumptionLanguage: canonicalLanguageTagParser.withOptions(routeOptions),
 	consumptionChannel: parseAsStringLiteral(ContentLanguageChannelValues).withOptions(routeOptions),
 };
@@ -69,25 +45,32 @@ export const contentLanguageSearchRouteParsers = {
 const serializeContentLanguageSearchRoute = createSerializer(contentLanguageSearchRouteParsers);
 
 export function contentLanguageSearchHref(input: {
-	readonly unitType: ContentLanguageSupportUnitType;
+	readonly owner: ContentLanguageSupportOwner;
+	readonly shape?: string;
 	readonly languageTag: ContentLanguageTag;
 	readonly channel?: ContentLanguageChannel;
 }): string {
+	createContentLanguageSearchPredicate(input);
 	return `/search${serializeContentLanguageSearchRoute({
-		content: ContentKindByUnitType[input.unitType],
+		contentOwner: input.owner,
+		contentShape: input.shape ?? null,
 		consumptionLanguage: input.languageTag,
 		consumptionChannel: input.channel ?? null,
 	})}`;
 }
 
 export function createContentLanguageSearchPredicate(input: {
-	readonly content: (typeof ContentLanguageSearchContentKindValues)[number];
+	readonly owner: ContentLanguageSupportOwner;
+	readonly shape?: string;
 	readonly languageTag: ContentLanguageTag;
 	readonly channel?: ContentLanguageChannel;
 }): UnitPredicate {
-	return {
+	return parseUnitPredicate({
 		all: [
-			{ kind: { in: [UnitTypeByContentKind[input.content]] } },
+			{
+				owner: { in: [input.owner] },
+				...(input.shape === undefined ? {} : { shape: { in: [input.shape] } }),
+			},
 			{
 				contentLanguageSupport: {
 					some: {
@@ -97,5 +80,5 @@ export function createContentLanguageSearchPredicate(input: {
 				},
 			},
 		],
-	};
+	});
 }

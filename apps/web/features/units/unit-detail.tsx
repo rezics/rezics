@@ -18,7 +18,7 @@ import { FavoriteButton } from "@/features/collections/components/favorite-butto
 import { LocalizedText } from "@/features/content-language-display/chinese-content-display-context";
 import { LocalizedPortableTextContent } from "@/features/content-language-display/localized-portable-text-content";
 import { ContentLanguageSupportDisplay } from "@/features/content-language-support/components/content-language-support-display";
-import { isContentLanguageSupportUnitType } from "@/features/content-language-support/model/content-language-support";
+import { isContentLanguageSupportOwner } from "@/features/content-language-support/model/content-language-support";
 import { UnitDockRenderer, useDockManagementAccess } from "@/features/docks";
 import { UnitShelf } from "@/features/explore/unit-shelf";
 import { useTranslation } from "@/i18n/client";
@@ -341,7 +341,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 							<Card>
 								<CardContent className="p-5">
 									<ContentLanguageSupportDisplay
-										{...(isContentLanguageSupportUnitType(type) ? { searchUnitType: type } : {})}
+										{...(isContentLanguageSupportOwner(type) ? { searchOwner: type } : {})}
 										value={item.contentLanguageSupport}
 									/>
 								</CardContent>

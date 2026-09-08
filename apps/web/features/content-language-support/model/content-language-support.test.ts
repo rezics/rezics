@@ -7,14 +7,15 @@ import {
 	contentLanguageSupportChanged,
 	ContentLanguageEditorTagValues,
 	createContentLanguageSupportDraft,
-	isContentLanguageSupportUnitType,
+	isContentLanguageSupportOwner,
 	removeContentLanguage,
 	toggleContentLanguageChannel,
 } from "./content-language-support";
 
 describe("content language support editor model", () => {
 	it("uses the same persisted field for Release Units", () => {
-		expect(isContentLanguageSupportUnitType("release")).toBe(true);
+		expect(isContentLanguageSupportOwner("publishing")).toBe(true);
+		expect(isContentLanguageSupportOwner("release")).toBe(false);
 	});
 
 	it("offers canonical first-party choices without widening the persistence contract", () => {

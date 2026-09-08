@@ -57,7 +57,7 @@ import {
 	adoptContentLanguageEvidence,
 	contentLanguageSupportChanged,
 	createContentLanguageSupportDraft,
-	isContentLanguageSupportUnitType,
+	isContentLanguageSupportOwner,
 } from "@/features/content-language-support/model/content-language-support";
 import { AdaptedAudioField } from "./components/adapted-audio-field";
 import { adaptedAudioUnitIdsChanged } from "./model/adapted-audio";
@@ -112,7 +112,7 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 	const [adaptedAudioUnitIds, setAdaptedAudioUnitIds] = useState<readonly string[]>(() =>
 		unit.details.type === "video" ? (unit.details.adaptedAudioUnitIds ?? []) : [],
 	);
-	const supportsContentLanguage = isContentLanguageSupportUnitType(type);
+	const supportsContentLanguage = isContentLanguageSupportOwner(type);
 	const update = usePatchApiUnitsByTypeByUnitId({
 		mutation: {
 			onSuccess: async () => invalidateUnitDetail(queryClient, type, unit.id, true),

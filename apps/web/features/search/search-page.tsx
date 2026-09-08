@@ -280,9 +280,10 @@ function RouteSearchPage() {
 	});
 	const labels = new Map(route.tag.map((tagId, index) => [tagId, route.tagLabel[index]] as const));
 	const contentLanguagePredicate =
-		route.content && route.consumptionLanguage
+		route.contentOwner && route.consumptionLanguage
 			? createContentLanguageSearchPredicate({
-					content: route.content,
+					owner: route.contentOwner,
+					...(route.contentShape ? { shape: route.contentShape } : {}),
 					languageTag: route.consumptionLanguage,
 					...(route.consumptionChannel ? { channel: route.consumptionChannel } : {}),
 				})
@@ -305,7 +306,7 @@ function RouteSearchPage() {
 			initialQuery={route.q}
 			initialState={initialFilter ? { filter: initialFilter } : undefined}
 			injections={injections}
-			key={`${route.q}:${route.tag.join(",")}:${route.content ?? ""}:${route.consumptionLanguage ?? ""}:${route.consumptionChannel ?? ""}`}
+			key={`${route.q}:${route.tag.join(",")}:${route.contentOwner ?? ""}:${route.contentShape ?? ""}:${route.consumptionLanguage ?? ""}:${route.consumptionChannel ?? ""}`}
 			onInjectionsChange={(next) => {
 				const tag = injectedTagIds(next);
 				void setRoute({
@@ -319,9 +320,10 @@ function RouteSearchPage() {
 			}
 			source={{ kind: "filter", filterDocument: {} }}
 			toolbarFilters={
-				route.content && route.consumptionLanguage ? (
+				route.contentOwner && route.consumptionLanguage ? (
 					<ContentLanguageSearchScope
-						content={route.content}
+						owner={route.contentOwner}
+						{...(route.contentShape ? { shape: route.contentShape } : {})}
 						languageTag={route.consumptionLanguage}
 						{...(route.consumptionChannel ? { channel: route.consumptionChannel } : {})}
 					/>

@@ -50,7 +50,6 @@ const EntityFieldIndex: Partial<Record<SearchField, string>> = {
 	root: "all",
 	parent: "all",
 	owner: "users",
-	"software-platform": "entity",
 };
 
 function selectedScalars(condition: DraftSearchCondition): readonly SearchScalar[] {

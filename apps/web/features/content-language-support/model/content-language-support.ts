@@ -21,21 +21,19 @@ export const ContentLanguageEditorTagValues: readonly ContentLanguageTag[] = Obj
 	),
 );
 
-export const ContentLanguageSupportUnitTypes = [
-	"book",
+export const ContentLanguageSupportOwnerValues = [
+	"publishing",
+	"music",
+	"program",
 	"software",
-	"media",
 	"video",
 	"audio",
-	"release",
 ] as const;
 
-export type ContentLanguageSupportUnitType = (typeof ContentLanguageSupportUnitTypes)[number];
+export type ContentLanguageSupportOwner = (typeof ContentLanguageSupportOwnerValues)[number];
 
-export function isContentLanguageSupportUnitType(
-	value: string,
-): value is ContentLanguageSupportUnitType {
-	return ContentLanguageSupportUnitTypes.some((candidate) => candidate === value);
+export function isContentLanguageSupportOwner(value: string): value is ContentLanguageSupportOwner {
+	return ContentLanguageSupportOwnerValues.some((candidate) => candidate === value);
 }
 
 function replaceEntry(

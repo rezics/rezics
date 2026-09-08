@@ -10,7 +10,7 @@ import { useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
-import type { ContentLanguageSupportUnitType } from "../model/content-language-support";
+import type { ContentLanguageSupportOwner } from "../model/content-language-support";
 import { ContentLanguageSupportDisplay } from "./content-language-support-display";
 
 type EvidenceItem =
@@ -40,7 +40,7 @@ const EvidencePageSize = 20;
 
 export type ContentLanguageSupportEvidenceProps = {
 	readonly onAdopt: (value: EvidenceItem["contentLanguageSupport"]) => void;
-	readonly type: ContentLanguageSupportUnitType;
+	readonly type: ContentLanguageSupportOwner;
 	readonly unitId: string;
 };
 

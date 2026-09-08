@@ -23,7 +23,7 @@ function FullFeedListFixture() {
 	return (
 		<div className="grid gap-3 sm:gap-4">
 			<FeedListControls
-				contentKinds={["unit:book", "post:review"]}
+				contentKinds={["publishing:text_version", "post:review"]}
 				languages={languages}
 				onContentKindsChange={() => undefined}
 				onLanguagesChange={setLanguages}

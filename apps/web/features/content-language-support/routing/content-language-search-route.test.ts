@@ -10,18 +10,26 @@ import {
 describe("content-language Search Feed route", () => {
 	it("writes the canonical language tag and the matching Unit/channel scope", () => {
 		const languageTag = canonicalizeContentLanguageTag("zh-hant");
-		expect(contentLanguageSearchHref({ unitType: "book", languageTag, channel: "text" })).toBe(
-			"/search?content=unit:book&consumptionLanguage=zh-Hant&consumptionChannel=text",
+		expect(
+			contentLanguageSearchHref({
+				owner: "publishing",
+				shape: "text_version",
+				languageTag,
+				channel: "text",
+			}),
+		).toBe(
+			"/search?contentOwner=publishing&contentShape=text_version&consumptionLanguage=zh-Hant&consumptionChannel=text",
 		);
 		expect(
 			createContentLanguageSearchPredicate({
-				content: "unit:book",
+				owner: "publishing",
+				shape: "text_version",
 				languageTag,
 				channel: "text",
 			}),
 		).toEqual({
 			all: [
-				{ kind: { in: ["book"] } },
+				{ owner: { in: ["publishing"] }, shape: { in: ["text_version"] } },
 				{
 					contentLanguageSupport: {
 						some: { languageTag: "zh-Hant", channel: "text" },
