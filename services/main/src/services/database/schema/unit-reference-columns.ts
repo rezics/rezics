@@ -19,7 +19,7 @@ import { tag } from "./tag";
 import { tagPath } from "./tag-path";
 import { label } from "./label";
 
-const suffixes = {
+function suffixes() { return {
 	publishing: "Publishing",
 	music: "Music",
 	program: "Program",
@@ -40,8 +40,8 @@ const suffixes = {
 	tag: "Tag",
 	tag_path: "TagPath",
 	label: "Label",
-} as const satisfies Record<UnitOwner, string>;
-type Key<Prefix extends string, Owner extends UnitOwner> = `${Prefix}${(typeof suffixes)[Owner]}Id`;
+} as const satisfies Record<UnitOwner, string>; }
+type Key<Prefix extends string, Owner extends UnitOwner> = `${Prefix}${ReturnType<typeof suffixes>[Owner]}Id`;
 type Builders<Prefix extends string> = {
 	[Owner in UnitOwner as Key<Prefix, Owner>]: ReturnType<typeof uuid>;
 };
@@ -49,7 +49,7 @@ type Values<Prefix extends string> = { [Owner in UnitOwner as Key<Prefix, Owner>
 type Columns<Prefix extends string> = Record<Key<Prefix, UnitOwner>, AnyPgColumn>;
 
 function key<Prefix extends string, Owner extends UnitOwner>(prefix: Prefix, owner: Owner) {
-	return `${prefix}${suffixes[owner]}Id` as const;
+	return `${prefix}${suffixes()[owner]}Id` as const;
 }
 function physical(prefix: string, owner: UnitOwner) {
 	if (!/^[a-z][A-Za-z]*$/u.test(prefix))
