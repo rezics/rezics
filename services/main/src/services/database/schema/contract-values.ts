@@ -257,64 +257,6 @@ export const RevisionAttributionAssuranceValues = [
 ] as const;
 export type RevisionAttributionAssurance = (typeof RevisionAttributionAssuranceValues)[number];
 
-export const CreditAttributionUnitKindValues = [
-	"book",
-	"software",
-	"media",
-	"series",
-	"entity",
-	"collection",
-	"release",
-	"video",
-	"audio",
-] as const satisfies readonly UnitKind[];
-export type CreditAttributionUnitKind = (typeof CreditAttributionUnitKindValues)[number];
-
-/** Roles shared by aggregate Media and its concrete timed-media Units. */
-export const MediaCreditAttributionRoleValues = [
-	"director",
-	"producer",
-	"writer",
-	"publisher",
-	"composer",
-	"actor",
-	"narrator",
-	"studio",
-	"distributor",
-] as const satisfies readonly CreditAttributionRole[];
-
-export const CreditAttributionRolesByUnitKind = {
-	book: [
-		"author",
-		"co-author",
-		"translator",
-		"illustrator",
-		"editor",
-		"publisher",
-		"letterer",
-		"colorist",
-	],
-	software: [
-		"developer",
-		"publisher",
-		"composer",
-		"designer",
-		"director",
-		"producer",
-		"writer",
-		"translator",
-		"illustrator",
-		"editor",
-	],
-	media: MediaCreditAttributionRoleValues,
-	series: ["author", "editor", "publisher"],
-	entity: ["publisher", "actor"],
-	collection: ["publisher"],
-	release: ["developer", "publisher", "distributor", "translator", "editor", "producer", "studio"],
-	video: MediaCreditAttributionRoleValues,
-	audio: MediaCreditAttributionRoleValues,
-} as const satisfies Record<CreditAttributionUnitKind, readonly CreditAttributionRole[]>;
-
 export const SubjectAssociationRoleValues = [
 	"primary_character",
 	"featured_character",
@@ -334,18 +276,6 @@ export function isEntityKind(value: string): value is EntityKind {
 
 export function isCreditAttributionRole(value: string): value is CreditAttributionRole {
 	return (CreditAttributionRoleValues as readonly string[]).includes(value);
-}
-
-export function isCreditAttributionUnitKind(kind: UnitKind): kind is CreditAttributionUnitKind {
-	return CreditAttributionUnitKindValues.some((value) => value === kind);
-}
-
-export function isCreditAttributionRoleForUnitKind(
-	kind: CreditAttributionUnitKind,
-	role: CreditAttributionRole,
-): boolean {
-	const roles: readonly CreditAttributionRole[] = CreditAttributionRolesByUnitKind[kind];
-	return roles.includes(role);
 }
 
 export function isSubjectAssociationRole(value: string): value is SubjectAssociationRole {
