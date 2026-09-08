@@ -9,7 +9,8 @@ import {
 	catalogSourceMappingClaim,
 	catalogSourceSnapshot,
 } from "../database/schema/catalog-source";
-import { programWork } from "../database/schema/catalog-program";
+import { updateProgramStructure } from "./program";
+import { initializeBangumiNativeOccurrences } from "./bangumi-native";
 import { softwareContent } from "../database/schema/catalog-software";
 import { type CatalogOwner } from "./contracts";
 import { BangumiSubjectContractSha256, planBangumiSubject } from "./bangumi";
@@ -211,16 +212,12 @@ export async function adoptBangumiSubject(
 						declaredTotalEpisodeCount: plan.subject.total_episodes,
 					}
 				: {};
-		await tx
-			.insert(programWork)
-			.values({
-				id: identity.id,
-				...counts,
+		identity.revision = (
+			await updateProgramStructure(tx, identity, actor, identity.revision, {
+				shape: "program",
+				fields: counts,
 			})
-			.onConflictDoUpdate({
-				target: programWork.id,
-				set: { id: identity.id, ...counts },
-			});
+		).revision;
 	}
 	if (plan.owner === "software")
 		await tx.insert(softwareContent).values({ id: identity.id }).onConflictDoNothing();
@@ -279,6 +276,14 @@ export async function adoptBangumiSubject(
 		const table = CatalogIdentityTables[plan.owner];
 		await tx.update(table).set({ contentRating: "r18" }).where(eq(table.id, identity.id));
 	}
+	revision = (
+		await initializeBangumiNativeOccurrences(tx, identity, actor, revision, {
+			sourceRecordId: observation.record.id,
+			snapshotId: observation.snapshot.id,
+			receipt,
+			bytes,
+		})
+	).revision;
 	const binding = {
 		mappingVersion: "bangumi.subject.1",
 		sourceRecordId: observation.record.id,

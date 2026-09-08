@@ -1,3 +1,6 @@
+import { BangumiApiContractSha256, BangumiArchiveContractSha256 } from "./bangumi-contracts";
+export { BangumiApiContractSha256, BangumiArchiveContractSha256 } from "./bangumi-contracts";
+import { initializeBangumiNativeOccurrences } from "./bangumi-native";
 import { catalogSourceSupportColumns } from "./source-support";
 import { createHash } from "node:crypto";
 import { and, eq } from "drizzle-orm";
@@ -20,14 +23,11 @@ import {
 	validateBangumiRevisionContext,
 } from "./bangumi-records";
 import { bangumiDate, BangumiSubjectContractSha256, BangumiWikiEntrySchema } from "./bangumi";
-import { createEntity, initializeEntityProfile } from "./entities";
-import {
-	createProgramStructure,
-	updateProgramStructure,
-	type ProgramStructureSchema,
-} from "./program";
+import { initializeEntityProfile } from "./entities";
+import { updateProgramStructure, type ProgramStructureSchema } from "./program";
 import {
 	addCatalogName,
+	createCatalogIdentity,
 	appendCatalogFactNodes,
 	beginCatalogFact,
 	loadCatalogIdentity,
@@ -42,12 +42,6 @@ import {
 } from "./source-child-correspondence";
 import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
 import { catalogValueNodes } from "./value-nodes";
-
-/** Exact pinned contracts; live wire corrections are covered by bangumi-records tests. @internal */
-export const BangumiApiContractSha256 =
-	"e415ffb14fefb7df2833c7afe789107297217ed624668f1c63fbfb0a361df807";
-export const BangumiArchiveContractSha256 =
-	"f2a0867917012cda97ec1f80cb5cae6ef7752e2e716d9dbce1ce57c2f9b33884";
 
 function decode(receipt: CatalogSourceReceipt, bytes: Uint8Array, contract: string) {
 	if (
@@ -88,6 +82,7 @@ async function finish(
 	actor: string,
 	receipt: CatalogSourceReceipt,
 	observation: Awaited<ReturnType<typeof recordCatalogSourceDocument>>,
+	bytes: Uint8Array,
 	identity: CatalogReference & { revision: number },
 	names: readonly { value: string; languageTag: string | null; path: string }[],
 	baselineRevision?: number,
@@ -130,6 +125,14 @@ async function finish(
 		snapshotId: observation.snapshot.id,
 		sourcePath: "/id",
 	});
+	revision = (
+		await initializeBangumiNativeOccurrences(tx, identity, actor, revision, {
+			sourceRecordId: observation.record.id,
+			snapshotId: observation.snapshot.id,
+			receipt,
+			bytes,
+		})
+	).revision;
 	const binding = {
 		mappingVersion:
 			receipt.key.objectType === "episode" ? "bangumi.program-episode.1" : "bangumi.entity.1",
@@ -242,15 +245,26 @@ export async function adoptBangumiEntity(
 			actor,
 			receipt,
 			observation,
+			bytes,
 			{ ...existing.reference, revision },
 			[],
 			existing.revision,
 		);
 	}
-	const identity = await createEntity(tx, actor, {
-		shape,
-		name: { languageTag: null, value: record.name },
+	const createdIdentity = await createCatalogIdentity(tx, { owner: "entity", shape }, actor);
+	const initialized = await initializeEntityProfile(
+		tx,
+		createdIdentity,
+		actor,
+		createdIdentity.revision,
+		{},
+	);
+	const named = await addCatalogName(tx, createdIdentity, actor, initialized.revision, {
+		languageTag: null,
+		value: record.name,
+		kind: "source-primary",
 	});
+	const identity = { ...createdIdentity, revision: named.revision, nameId: named.id };
 	await prepareCatalogSourceChildCorrespondence(tx, actor, {
 		sourceRecordId: observation.record.id,
 		snapshotId: observation.snapshot.id,
@@ -278,7 +292,7 @@ export async function adoptBangumiEntity(
 		snapshotId: observation.snapshot.id,
 		sourcePath: "/name",
 	});
-	return finish(tx, actor, receipt, observation, identity, []);
+	return finish(tx, actor, receipt, observation, bytes, identity, []);
 }
 
 /** Program episodes retain decimal sort, display duration, precise parsed duration and partial dates. @internal */
@@ -325,8 +339,11 @@ export async function adoptBangumiProgramEpisode(
 			dateText: record.airdate,
 		},
 	};
-	const title = { languageTag: null, value: record.name || record.name_cn || String(record.sort) };
-	let identity;
+	const title = {
+		languageTag: !record.name && record.name_cn ? "zh" : null,
+		value: record.name || record.name_cn || String(record.sort),
+	};
+	let identity: CatalogReference & { revision: number; nameId: string };
 	if (existing) {
 		const updated = await updateProgramStructure(
 			tx,
@@ -340,7 +357,15 @@ export async function adoptBangumiProgramEpisode(
 			kind: "source-primary",
 		});
 		identity = { ...existing.reference, revision: named.revision, nameId: named.id };
-	} else identity = await createProgramStructure(tx, actor, structure, title);
+	} else {
+		const created = await createCatalogIdentity(tx, { owner: "program", shape: "episode" }, actor);
+		const updated = await updateProgramStructure(tx, created, actor, created.revision, structure);
+		const named = await addCatalogName(tx, created, actor, updated.revision, {
+			...title,
+			kind: "source-primary",
+		});
+		identity = { ...created, revision: named.revision, nameId: named.id };
+	}
 	await prepareCatalogSourceChildCorrespondence(tx, actor, {
 		sourceRecordId: observation.record.id,
 		snapshotId: observation.snapshot.id,
@@ -360,6 +385,7 @@ export async function adoptBangumiProgramEpisode(
 		actor,
 		receipt,
 		observation,
+		bytes,
 		identity,
 		record.name && record.name_cn
 			? [{ value: record.name_cn, languageTag: "zh", path: "/name_cn" }]
