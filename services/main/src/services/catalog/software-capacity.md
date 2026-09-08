@@ -243,3 +243,20 @@ Four affected test files passed 15 tests; backend and script TypeScript checks p
 Release remaining media/link joins, anime metadata and source tag-vote aggregation,
 source status/redirect interpretation and cross-surface combined projections remain
 open. Complete public dump streaming acquisition is not implied by packet adoption.
+
+Release packets now require their public image/link collections, including empty
+arrays when observed empty. Each artwork joins exactly one public image row and
+retains type, optional VN, and null/all-language versus explicit language scopes.
+The private `releases_images.photo` column is ignored even if a caller includes it;
+the public dump cannot establish photograph status. Packet image joins are capped
+at 4,096 rows, links at 512, and language scopes at 128 per image. The combined
+semantic/transaction admission cap still prevents multiplicative fan-out beyond
+the ordinary 128-change writer; larger owners require staged application.
+
+DB59 release dump mode passed 71 rollback assertions over three cycles, reading
+back image type/width, language scope and URLs after application and compensation,
+alongside retained human catalog number and language channel. API mode separately
+passed 23 assertions. Three scoped test files passed 11 tests, and backend/script
+TypeScript checks passed. Remaining provider gaps include anime metadata, Wikidata
+enrichment, tag-vote aggregation, additional image moderation statistics, source
+status/redirect policy and combined observation-surface transitions.

@@ -12,8 +12,17 @@ import {
 } from "../src/services/database/schema/catalog-software";
 import { catalogSourceMappingClaim } from "../src/services/database/schema/catalog-source";
 import { CatalogNameTables } from "../src/services/database/schema/catalog-names";
+import {
+	catalogDefinition,
+	catalogDefinitionRevision,
+} from "../src/services/database/schema/catalog-identity";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
-import { VndbCatalogContractSha256, vndbSourceKey } from "../src/services/catalog/vndb";
+import {
+	VndbCatalogContractSha256,
+	VndbDumpContractSha256,
+	vndbSourceKey,
+} from "../src/services/catalog/vndb";
+import { adoptVndbDumpRelease } from "../src/services/catalog/vndb-dump";
 import {
 	storeCatalogSourcePayload,
 	recordCatalogSourceObservation,
@@ -34,7 +43,13 @@ import {
 	decodeSoftwareReleaseSnapshot,
 } from "../src/services/catalog/software";
 import { putSoftwareComponent } from "../src/services/catalog/software-components";
-import { ensureCatalogDefinition, loadCatalogIdentity } from "../src/services/catalog/storage";
+import {
+	ensureCatalogDefinition,
+	loadCatalogIdentity,
+	findCatalogRelations,
+	readCatalogRelationQualifiers,
+	readCatalogFactNodes,
+} from "../src/services/catalog/storage";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
@@ -94,19 +109,80 @@ const updated = {
 	],
 	extlinks: [{ ...original.extlinks[0], label: "Updated homepage" }],
 };
-const firstBytes = Buffer.from(JSON.stringify(original)),
-	secondBytes = Buffer.from(JSON.stringify(updated));
+const useDump = process.env.REZICS_VNDB_DUMP_FIXTURE === "1";
+function dumpRelease(record: typeof original | typeof updated, changed: boolean) {
+	return {
+		release: {
+			id: record.id,
+			olang: "ja",
+			gtin: "0",
+			released: 0,
+			voiced: 0,
+			reso_x: 0,
+			reso_y: 0,
+			minage: null,
+			patch: record.patch,
+			freeware: false,
+			uncensored: null,
+			official: record.official,
+			has_ero: false,
+			catalog: "",
+			notes: record.notes,
+			engine: null,
+		},
+		titles: record.languages.map((language) => ({
+			id: record.id,
+			lang: language.lang,
+			title: language.title,
+			latin: language.main ? record.title : null,
+			mtl: language.mtl,
+		})),
+		platforms: record.platforms.map((platform) => ({ id: record.id, platform })),
+		media: record.media.map((medium) => ({ id: record.id, ...medium })),
+		vns: record.vns.map((vn) => ({ id: record.id, vid: vn.id, rtype: vn.rtype })),
+		producers: record.producers.map((producer) => ({
+			id: record.id,
+			pid: producer.id,
+			developer: producer.developer,
+			publisher: producer.publisher,
+		})),
+		release_images: [
+			{
+				id: record.id,
+				img: "cv970001",
+				vid: "v970001",
+				itype: changed ? "pkgback" : "pkgfront",
+				lang: changed ? ["ja", "en"] : null,
+				photo: true,
+			},
+		],
+		images: [
+			{
+				id: "cv970001",
+				width: changed ? 640 : 600,
+				height: 400,
+				c_votecount: 2,
+				c_sexual_avg: 100,
+				c_violence_avg: 0,
+			},
+		],
+		links: [{ id: record.id, link: 1 }],
+		extlinks: [{ id: 1, site: "website", value: `https://example.invalid/${changed ? "b" : "a"}` }],
+	};
+}
+const firstBytes = Buffer.from(JSON.stringify(useDump ? dumpRelease(original, false) : original)),
+	secondBytes = Buffer.from(JSON.stringify(useDump ? dumpRelease(updated, true) : updated));
 const firstReceipt = await storeCatalogSourcePayload(
 	vndbSourceKey(original.id),
 	firstBytes,
-	VndbCatalogContractSha256,
+	useDump ? VndbDumpContractSha256 : VndbCatalogContractSha256,
 	null,
 	archive,
 );
 const secondReceipt = await storeCatalogSourcePayload(
 	vndbSourceKey(original.id),
 	secondBytes,
-	VndbCatalogContractSha256,
+	useDump ? VndbDumpContractSha256 : VndbCatalogContractSha256,
 	null,
 	archive,
 );
@@ -127,8 +203,15 @@ try {
 			assert.ok(actor);
 			await runWithNativeFixtureActor(tx, actor.id, async () => {
 				for (const routingBucket of new Set(
-					[original.id, "v970001", "p970001", "p970002"].map((id) =>
-						aggregateRoutingBucket("source_record", catalogSourceRecordId(vndbSourceKey(id))),
+					[original.id, "v970001", "p970001", "p970002", "cv970001"].map((id) =>
+						aggregateRoutingBucket(
+							"source_record",
+							catalogSourceRecordId(
+								id.startsWith("cv")
+									? { source: "vndb", objectType: "image", externalId: id }
+									: vndbSourceKey(id),
+							),
+						),
 					),
 				))
 					await tx
@@ -142,7 +225,12 @@ try {
 							})),
 						)
 						.onConflictDoNothing();
-				const initial = await adoptVndbRelease(tx, actor.id, firstReceipt, firstBytes);
+				const initial = await (useDump ? adoptVndbDumpRelease : adoptVndbRelease)(
+					tx,
+					actor.id,
+					firstReceipt,
+					firstBytes,
+				);
 				assert.equal(initial.status, "created");
 				if (initial.status !== "created") throw new Error("Fixture source was already bound");
 				const reference = initial.reference;
@@ -215,6 +303,74 @@ try {
 					before: { snapshotId: initial.snapshotId, receipt: firstReceipt, bytes: firstBytes },
 					after: { snapshotId: second.snapshot.id, receipt: secondReceipt, bytes: secondBytes },
 				});
+				const verifyDumpGraph = async (changed: boolean) => {
+					if (!useDump) return;
+					const languages = new Set<string>();
+					for (const [key, count] of [
+						["has-image", changed ? 2 : 1],
+						["external-link", 1],
+					] as const) {
+						const [definition] = await tx
+							.select({ id: catalogDefinitionRevision.id })
+							.from(catalogDefinition)
+							.innerJoin(
+								catalogDefinitionRevision,
+								eq(catalogDefinition.id, catalogDefinitionRevision.definitionId),
+							)
+							.where(
+								and(
+									eq(catalogDefinition.namespace, "catalog.semantic-relation"),
+									eq(catalogDefinition.key, key),
+								),
+							)
+							.limit(1);
+						assert.ok(definition);
+						const relations = await findCatalogRelations(tx, reference, actor.id, definition.id);
+						assert.equal(relations.length, count);
+						assertions++;
+						for (const relation of relations)
+							for (const qualifier of await readCatalogRelationQualifiers(
+								tx,
+								reference,
+								actor.id,
+								relation.id,
+							)) {
+								const [property] = await tx
+									.select({ key: catalogDefinition.key })
+									.from(catalogDefinitionRevision)
+									.innerJoin(
+										catalogDefinition,
+										eq(catalogDefinition.id, catalogDefinitionRevision.definitionId),
+									)
+									.where(eq(catalogDefinitionRevision.id, qualifier.definitionRevisionId))
+									.limit(1);
+								assert.notEqual(property?.key, "is-photograph");
+								if (
+									!["image-type", "image-source-language", "image-dims-width", "url"].includes(
+										property?.key ?? "",
+									)
+								)
+									continue;
+								const [value] = await readCatalogFactNodes(
+									tx,
+									reference,
+									actor.id,
+									qualifier.valueFactId,
+								);
+								if (property?.key === "image-type")
+									assert.equal(value?.textValue, changed ? "pkgback" : "pkgfront");
+								if (property?.key === "image-dims-width")
+									assert.equal(Number(value?.numberValue), changed ? 640 : 600);
+								if (property?.key === "url")
+									assert.equal(value?.textValue, `https://example.invalid/${changed ? "b" : "a"}`);
+								if (property?.key === "image-source-language" && value?.textValue)
+									languages.add(value.textValue);
+								assertions++;
+							}
+					}
+					assert.deepEqual([...languages].sort(), changed ? ["en", "ja"] : []);
+					assertions++;
+				};
 				for (let cycle = 0; cycle < 3; cycle++) {
 					const proposal = await proposeCatalogSourceAdoption(tx, actor.id, {
 						sourceRecordId,
@@ -237,6 +393,7 @@ try {
 						writer,
 					);
 					assert.equal(applied.status, "applied");
+					await verifyDumpGraph(true);
 					assertions++;
 					const details = await readSoftwareDetails(tx, reference, actor.id);
 					assert.equal(details.kind, "release");
@@ -261,6 +418,7 @@ try {
 						writer,
 					);
 					assert.equal(withdrawn.status, "withdrawn");
+					await verifyDumpGraph(false);
 					assertions++;
 					const restored = await readSoftwareDetails(tx, reference, actor.id);
 					if (restored.kind !== "release") throw new Error("Expected release");
@@ -304,7 +462,13 @@ try {
 		if (error !== rollback) throw error;
 	}
 	console.log(
-		JSON.stringify({ check: "vndb-native-updates", assertions, cycles: 3, rolledBack: true }),
+		JSON.stringify({
+			check: "vndb-native-updates",
+			surface: useDump ? "dump" : "api",
+			assertions,
+			cycles: 3,
+			rolledBack: true,
+		}),
 	);
 } finally {
 	await pool.end();

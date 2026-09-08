@@ -94,6 +94,10 @@ describe("VNDB native source deltas", () => {
 	});
 	it("represents dump supersession, producer roles, DRM notes and animation separately", () => {
 		const dump = {
+			release_images: [],
+			images: [],
+			links: [],
+			extlinks: [],
 			release: {
 				id: "r1",
 				olang: "en",

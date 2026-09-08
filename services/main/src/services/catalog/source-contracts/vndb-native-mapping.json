@@ -24,7 +24,8 @@
     "correspondence": "DB57: check-source-child-correspondence.ts passed 21 rollback assertions. The same archived snapshot maps through distinct name/context/scalar epochs after A-to-B-to-A rebind and mapper protocol change; policy revisions retain their epoch. Shared baseline and fact-support epoch integration was applied and checked in DB58.",
     "protocolRefresh": "DB59: check-vndb-protocol-refresh.ts passed 49 rollback assertions for v2-to-v3-to-v4 apply/withdraw/reapply. Old source graph/title claims restore, human name/description survive, typed pure source values remain source-authored, conflicting scalar edits reject, and a same-target API-to-dump protocol refresh rejects before native mutations because unobserved fields lack a combined projection.",
     "softwareReadScope": "DB58: check-software-read-scope.ts passed 18 rollback assertions. Selected grants do not inherit same-Auth creator rights through software discovery, linked components, credit actors/characters, or historical JSON references; filters precede keyset pagination.",
-    "vnDumpUpdates": "DB59: REZICS_VNDB_DUMP_FIXTURE=1 check-vndb-vn-updates.ts passed 74 rollback assertions over three apply/withdraw/reapply cycles. Actual source alias joins, contexts, staff/voice, name derivation/authority, playtime, primary/screenshot image widths, release-scoped screenshots, external link URLs and sequel relations restore exactly. API mode separately passed 38 assertions."
+    "vnDumpUpdates": "DB59: REZICS_VNDB_DUMP_FIXTURE=1 check-vndb-vn-updates.ts passed 74 rollback assertions over three apply/withdraw/reapply cycles. Actual source alias joins, contexts, staff/voice, name derivation/authority, playtime, primary/screenshot image widths, release-scoped screenshots, external link URLs and sequel relations restore exactly. API mode separately passed 38 assertions.",
+    "releaseDumpUpdates": "DB59: REZICS_VNDB_DUMP_FIXTURE=1 check-vndb-native-updates.ts passed 71 rollback assertions across three apply/withdraw/reapply cycles. Native image type/width, all-language versus ja/en image scopes and exact URLs restore; unexported photograph metadata is not fabricated; independent catalog number and language channel remain. API mode separately passed 23 assertions."
   },
   "apiLeaves": [
     {
@@ -1483,9 +1484,9 @@
         "site",
         "value"
       ],
-      "status": "native-partial",
-      "nativeMeaning": "Pinned formatting for all 82 public sites with exact parent/link evidence is wired to staff/producer/VN dump writers. Release packet assembly remains open.",
-      "implementation": "vndb-dump-media.ts / source-contracts/vndb-dump-link-formats.json / vndb-entity-dump.ts"
+      "status": "native-update-sql",
+      "nativeMeaning": "Pinned formatting for all 82 public sites and bounded exact parent/link joins are wired to staff/producer/VN/release dump native writers. Selected website updates have actual native SQL evidence; formatter variants have deterministic tests.",
+      "implementation": "vndb-dump-media.ts / source-contracts/vndb-dump-link-formats.json / vndb-entity-dump.ts / vndb-vn-dump.ts / vndb-dump.ts"
     },
     {
       "table": "images",
@@ -1501,8 +1502,8 @@
         "c_weight"
       ],
       "status": "native-partial",
-      "nativeMeaning": "Character and VN dump joins map image identity, dimensions, canonical URL and average moderation ratings into native relations. Complete release joins and additional vote-count/dispersion/weight statistics remain open.",
-      "implementation": "vndb-dump-media.ts / vndb-character-dump.ts / vndb-vn-dump.ts"
+      "nativeMeaning": "Character, VN and release joins map image identity, dimensions, canonical URL and average moderation ratings into native scoped relations. Additional vote-count/dispersion statistics remain open; c_weight is provider image-moderation UI scheduling data, not canonical image semantics.",
+      "implementation": "vndb-dump-media.ts / vndb-character-dump.ts / vndb-vn-dump.ts / vndb-dump.ts"
     },
     {
       "table": "image_votes",
@@ -1617,9 +1618,9 @@
         "id",
         "link"
       ],
-      "status": "gap",
-      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
-      "implementation": null
+      "status": "native-update-sql",
+      "nativeMeaning": "Bounded parent/link joins use pinned formatting and exact source evidence; URL changes and exact compensation are SQL-qualified.",
+      "implementation": "vndb-dump.ts / vndb-dump-media.ts / vndb-release-update.ts / check-vndb-native-updates.ts"
     },
     {
       "table": "releases_images",
@@ -1630,9 +1631,9 @@
         "itype",
         "lang"
       ],
-      "status": "gap",
-      "nativeMeaning": "Complete assembled public-dump native mapping and operational updates remain open.",
-      "implementation": null
+      "status": "native-update-sql",
+      "nativeMeaning": "Joined artwork retains public image type, optional VN scope, explicit language array versus all-release-languages null, source dimensions and moderation averages. The non-public photo flag is not invented from dump absence.",
+      "implementation": "vndb-dump.ts / vndb-release-update.ts / check-vndb-native-updates.ts"
     },
     {
       "table": "releases_media",
@@ -2058,7 +2059,7 @@
   "remainingGates": [
     "Generalize and qualify native protocol replacement beyond the bounded VN implementation; source-context separation and VN multi-upgrade replacement are qualified, but no global all-mapper refresh claim is made.",
     "Qualify complete dump surface/association mapping alongside the eight supporting native callbacks; existing SQL fixtures cover selected native graph behavior, not every public dump field.",
-    "Remaining dump assembly, release image/link joins, VN anime metadata and tag-vote aggregation and table-specific bulk mapping must close individually.",
+    "Remaining dump assembly, VN anime metadata, Wikidata enrichment and tag-vote aggregation and table-specific bulk mapping must close individually.",
     "API-to-dump and dump-to-API source-surface transitions need a reviewed combined projection; current release callbacks reject such switches rather than erase unobserved fields.",
     "Applications above 128 native changes require the central staged protocol.",
     "No all-corpus, all-field native source qualification or production capacity claim follows from selected fixtures."

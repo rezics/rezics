@@ -7,6 +7,15 @@ import { planVndbRelease, writeVndbReleaseProjection } from "./vndb-release";
 import { recordCatalogSourceDocument, type CatalogSourceReceipt } from "./source-observations";
 import { appendVndbSemanticPlan } from "./vndb-semantics";
 import type { VndbSemanticFact, VndbSemanticPlan } from "./vndb-semantics-contracts";
+import { planVndbSemantics } from "./vndb-semantics-contracts";
+import { remapVndbSemanticPlan } from "./vndb-semantics";
+import {
+	VndbDumpImageSchema,
+	VndbDumpExternalBindingSchema,
+	VndbDumpExternalLinkSchema,
+	vndbDumpImage,
+	planVndbDumpExternalLinks,
+} from "./vndb-dump-media";
 import { softwareComponentSourceOccurrence } from "../database/schema/catalog-software-source";
 import { setSoftwareAnimation, vndbAnimation } from "./software-animation";
 
@@ -95,6 +104,22 @@ export const VndbDumpReleaseSchema = z
 			.array(ownerRow.extend({ drm: count, notes: z.string() }))
 			.max(128)
 			.default([]),
+		release_images: z
+			.array(
+				ownerRow.extend({
+					img: z.string().regex(/^cv[1-9][0-9]*$/u),
+					vid: z
+						.string()
+						.regex(/^v[1-9][0-9]*$/u)
+						.nullable(),
+					itype: z.enum(["pkgfront", "pkgback", "pkgcontent", "pkgside", "pkgmed", "dig"]),
+					lang: z.array(z.string()).max(128).nullable(),
+				}),
+			)
+			.max(4096),
+		images: z.array(VndbDumpImageSchema).max(4096),
+		links: z.array(VndbDumpExternalBindingSchema).max(512),
+		extlinks: z.array(VndbDumpExternalLinkSchema).max(512),
 	})
 	.passthrough()
 	.superRefine((value, ctx) => {
@@ -106,6 +131,8 @@ export const VndbDumpReleaseSchema = z
 			"supersedes",
 			"drm",
 			"producers",
+			"release_images",
+			"links",
 		] as const)
 			for (const [index, row] of value[family].entries())
 				if (row.id !== value.release.id)
@@ -388,6 +415,55 @@ export function planVndbDumpReleaseSemantics(input: unknown): VndbSemanticPlan {
 						},
 					],
 				});
+	const images = new Map(document.images.map((row, index) => [row.id, { row, index }]));
+	if (
+		images.size !== document.images.length ||
+		new Set(document.release_images.map((row) => row.img)).size !== document.release_images.length
+	)
+		throw new TypeError("Duplicate release image join key");
+	const used = new Set<string>();
+	const record = {
+		id: document.release.id,
+		images: document.release_images.map((row) => {
+			const image = images.get(row.img);
+			if (!image) throw new TypeError("Release image dependency is missing");
+			used.add(row.img);
+			return { ...vndbDumpImage(image.row), type: row.itype, vn: row.vid, languages: row.lang };
+		}),
+	};
+	if (used.size !== images.size)
+		throw new TypeError("Release packet contains unrelated image rows");
+	const media = remapVndbSemanticPlan(planVndbSemantics(record), (path) => {
+		const match = /^\/images\/(\d+)(?:\/(.*))?$/u.exec(path);
+		if (!match) throw new TypeError("Unreviewed release image projection path");
+		const index = Number(match[1]),
+			binding = document.release_images[index],
+			tail = match[2];
+		if (!binding) throw new TypeError("Release image binding row is missing");
+		const prefix = `/release_images/${index}`;
+		if (!tail) return prefix;
+		if (tail === "type") return `${prefix}/itype`;
+		if (tail === "vn") return `${prefix}/vid`;
+		if (tail.startsWith("languages")) return `${prefix}/${tail.replace(/^languages/u, "lang")}`;
+		const columns: Record<string, string> = {
+			id: "id",
+			url: "id",
+			"dims/0": "width",
+			"dims/1": "height",
+			sexual: "c_sexual_avg",
+			violence: "c_violence_avg",
+			votecount: "c_votecount",
+		};
+		const image = images.get(binding.img),
+			column = columns[tail];
+		if (!image || !column) throw new TypeError("Release image evidence row or column is missing");
+		return `/images/${image.index}/${column}`;
+	});
+	result.relations.push(
+		...media.relations,
+		...planVndbDumpExternalLinks(document.release.id, document.links, document.extlinks, "/links")
+			.relations,
+	);
 	return result;
 }
 
