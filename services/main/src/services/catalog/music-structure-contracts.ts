@@ -1,3 +1,4 @@
+import { MUSIC_SOURCE_COMPONENT_LIMIT } from "../database/schema/catalog-source-limits";
 import { z } from "zod";
 import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 
@@ -212,10 +213,10 @@ export const MusicComponentMutationSchema = z.discriminatedUnion("action", [
 	z.strictObject({ ...locator, action: z.literal("remove") }),
 	z.strictObject({ ...locator, action: z.literal("restore"), historyId: z.uuid() }),
 ]);
-export const MusicComponentBatchSchema = z
+const musicComponentBatchSchema = (limit: number) => z
 	.array(MusicComponentMutationSchema)
 	.min(1)
-	.max(128)
+	.max(limit)
 	.superRefine((operations, ctx) => {
 		const keys = new Set<string>();
 		for (const operation of operations) {
@@ -233,6 +234,9 @@ export const MusicComponentBatchSchema = z
 				ctx.addIssue({ code: "custom", message: "Invalid component key" });
 		}
 	});
+export const MusicComponentBatchSchema = musicComponentBatchSchema(128);
+/** @internal One fenced background publication; never accepted by the manual command API. */
+export const MusicSourceComponentBatchSchema = musicComponentBatchSchema(MUSIC_SOURCE_COMPONENT_LIMIT);
 export type MusicComponentMutation = z.input<typeof MusicComponentMutationSchema>;
 
 /** @alpha Exact immutable heads needed to reverse a native application without overwriting corrections. */

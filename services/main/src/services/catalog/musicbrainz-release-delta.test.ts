@@ -51,12 +51,16 @@ describe("MusicBrainz archived structural delta admission", () => {
 		});
 		expect(() => preflightMusicBrainzReleaseDelta(release, duplicate)).toThrow("Duplicate");
 	});
-	test("large sources require staged activation before an atomic writer starts", () => {
+	test("unchanged source rows do not consume the native mutation budget", () => {
 		const large = MusicBrainzReleaseSchema.parse({
 			...release,
 			media: Array.from({ length: 129 }, (_, i) => ({ position: i + 1 })),
 		});
-		expect(() => preflightMusicBrainzReleaseDelta(release, large)).toThrow("staged application");
+		expect(() => preflightMusicBrainzReleaseDelta(large, { ...large, barcode: "1234" })).not.toThrow();
+	});
+	test("source occurrence read capacity is independent and explicit", () => {
+		const tooLarge = MusicBrainzReleaseSchema.parse({ ...release, media: Array.from({ length: 4096 }, (_, i) => ({ position: i + 1 })) });
+		expect(() => preflightMusicBrainzReleaseDelta(tooLarge, tooLarge)).toThrow("source support");
 	});
 	test("admits identifier and relation fields covered by native semantic writers", () => {
 		expect(

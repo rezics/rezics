@@ -1,3 +1,4 @@
+import { MUSIC_SOURCE_COMPONENT_LIMIT, MUSIC_SOURCE_APPLICATION_LIMIT, SOURCE_ANCILLARY_CHANGE_LIMIT } from "../database/schema/catalog-source-limits";
 import { CatalogChildSourceChangeSchema } from "./child-source-contracts";
 import { CatalogChildSourceTables } from "../database/schema/catalog-child-source";
 import { advanceChildSourceBaselines } from "./child-source-baselines";
@@ -121,8 +122,12 @@ export type CatalogSourceNativeChange = z.infer<typeof nativeChangeSchema>;
 /** Request bound; larger owners use separately reviewed source mapping scopes and bounded native commands. @internal */
 export const CatalogSourceNativeChangesSchema = z
 	.array(nativeChangeSchema)
-	.max(128)
+	.max(MUSIC_SOURCE_APPLICATION_LIMIT)
 	.superRefine((changes, ctx) => {
+		const music = changes.filter((change) => change.kind === "music-component");
+		if (music.length > MUSIC_SOURCE_COMPONENT_LIMIT || changes.length - music.length > SOURCE_ANCILLARY_CHANGE_LIMIT ||
+			(music.length > 128 && (new Set(changes.map((change) => change.ownerId)).size !== 1 || changes.some((change) => change.kind !== "music-component" && (!("owner" in change) || change.owner !== "music" || !["catalog-name", "catalog-name-authority", "catalog-identifier", "catalog-semantic"].includes(change.kind))))))
+			ctx.addIssue({ code: "custom", message: "Source application exceeds its owner-local publication budget" });
 		const seen = new Set<string>();
 		for (const [index, change] of changes.entries()) {
 			const key = JSON.stringify([
@@ -169,6 +174,13 @@ export async function recordCatalogSourceApplication(
 ) {
 	const changes = CatalogSourceNativeChangesSchema.parse(inputChanges);
 	await tx.insert(catalogSourceApplication).values({ ...input, changeCount: changes.length });
+	const musicRows = changes.flatMap((change, position) => change.kind === "music-component" ? [{
+		sourceRecordId: input.sourceRecordId, proposalId: input.proposalId, action: input.action, position,
+		ownerId: change.ownerId, component: change.component, componentKey: change.componentKey,
+		beforeRevisionId: change.beforeRevisionId, afterRevisionId: change.afterRevisionId,
+	}] : []);
+	for (let offset = 0; offset < musicRows.length; offset += 128)
+		await tx.insert(musicSourceApplicationChange).values(musicRows.slice(offset, offset + 128));
 	for (const [position, change] of changes.entries()) {
 		const common = {
 			sourceRecordId: input.sourceRecordId,
@@ -242,13 +254,6 @@ export async function recordCatalogSourceApplication(
 				break;
 			}
 			case "music-component":
-				await tx.insert(musicSourceApplicationChange).values({
-					...common,
-					component: change.component,
-					componentKey: change.componentKey,
-					beforeRevisionId: change.beforeRevisionId,
-					afterRevisionId: change.afterRevisionId,
-				});
 				break;
 			case "software-component":
 				await tx.insert(softwareSourceComponentApplicationChange).values({
@@ -421,7 +426,7 @@ export async function readCatalogSourceApplication(
 				),
 			)
 			.orderBy(table.position)
-			.limit(128);
+			.limit(kind === "music-component" ? MUSIC_SOURCE_COMPONENT_LIMIT + 1 : 128);
 		for (const row of rows) {
 			const {
 				sourceRecordId: _source,
@@ -508,5 +513,5 @@ export async function readCatalogSourceApplication(
 		changes.some((change, index) => change.position !== index)
 	)
 		throw new Error("Source application native history is incomplete");
-	return { application, changes: changes.map(({ position: _position, ...change }) => change) };
+	return { application, changes: CatalogSourceNativeChangesSchema.parse(changes.map(({ position: _position, ...change }) => change)) };
 }

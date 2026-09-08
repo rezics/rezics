@@ -17,6 +17,7 @@ import {
 import { CatalogRevisionConflict, loadCatalogIdentity, recordCatalogChange } from "./storage";
 import {
 	MusicComponentBatchSchema,
+	MusicSourceComponentBatchSchema,
 	MusicComponentKeys,
 	MusicComponentSchemas,
 	musicComponentCompensation,
@@ -138,7 +139,21 @@ export async function mutateMusicComponents(
 	expectedRevision: number,
 	input: readonly MusicComponentMutation[],
 ) {
-	const operations = MusicComponentBatchSchema.parse(input);
+	return mutatePreparedMusicComponents(tx, reference, actor, expectedRevision, MusicComponentBatchSchema.parse(input));
+}
+
+/** @internal Background source publication validates all heads and relocates all moving rows before applying any final position. */
+export async function mutateMusicSourceComponents(
+	tx: DatabaseTransaction, reference: CatalogReference, actor: string, expectedRevision: number,
+	input: readonly MusicComponentMutation[],
+) {
+	return mutatePreparedMusicComponents(tx, reference, actor, expectedRevision, MusicSourceComponentBatchSchema.parse(input));
+}
+
+async function mutatePreparedMusicComponents(
+	tx: DatabaseTransaction, reference: CatalogReference, actor: string, expectedRevision: number,
+	operations: MusicComponentMutation[],
+) {
 	return runParticipationSavepoint(tx, async (inner) => {
 		const identity = await loadCatalogIdentity(inner, reference, actor, true);
 		if (reference.owner !== "music") throw new TypeError("Expected music storage owner");
@@ -189,14 +204,16 @@ export async function mutateMusicComponents(
 				throw new TypeError("Cannot remove an absent component");
 			prepared.push({ operation, head, row: body, remove });
 		}
-		const creditIds = prepared.flatMap((item) =>
+		for (let offset = 0; offset < prepared.length; offset += 128) {
+		const page = prepared.slice(offset, offset + 128);
+		const creditIds = page.flatMap((item) =>
 			!item.remove && typeof item.row.artist_credit_id === "string"
 				? [item.row.artist_credit_id]
 				: [],
 		);
 		const alternativeIds = [
 			...new Set(
-				prepared.flatMap((item) =>
+				page.flatMap((item) =>
 					!item.remove && typeof item.row.alternative_track_id === "string"
 						? [item.row.alternative_track_id]
 						: [],
@@ -217,11 +234,12 @@ export async function mutateMusicComponents(
 		await requireMusicCreditAccess(inner, actor, creditIds, {
 			reference,
 			write: true,
-			historyIds: prepared.flatMap((item) => [
+			historyIds: page.flatMap((item) => [
 				...(item.head ? [item.head.id] : []),
 				...(item.operation.action === "restore" ? [item.operation.historyId] : []),
 			]),
 		});
+		}
 		const revision = await recordCatalogChange(
 			inner,
 			reference,

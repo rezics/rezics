@@ -1,3 +1,4 @@
+import { MUSIC_SOURCE_OCCURRENCE_LIMIT } from "../database/schema/catalog-source-limits";
 import type { MusicBrainzRelease } from "./musicbrainz";
 
 type Medium = MusicBrainzRelease["media"][number];
@@ -63,26 +64,16 @@ export function preflightMusicBrainzReleaseDelta(
 	incoming: MusicBrainzRelease,
 ) {
 	if (previous.id !== incoming.id) throw new TypeError("Release delta crosses source identity");
-	const size = (release: MusicBrainzRelease) =>
-		2 +
-		(release.aliases?.length ?? 0) +
-		Number(Boolean(release.annotation)) +
-		Number(Boolean(release.disambiguation)) +
-		(release["label-info"]?.length ?? 0) +
-		(release["release-events"]?.length ?? (release.date ? 1 : 0)) +
-		release.media.reduce(
-			(total, medium, index) =>
-				total +
-				1 +
-				(medium.id ? 1 : 0) +
-				tracks(medium, index).length * 2 +
-				(medium.discs?.length ?? 0),
-			0,
-		);
-	if (size(previous) + size(incoming) > 128)
-		throw new RangeError(
-			"Music release delta requires staged application before native activation",
-		);
+	// Archive byte admission and source occurrence admission are read-work bounds. Actual
+	// mutations are counted only after fieldwise source/native reconciliation.
+	for (const release of [previous, incoming]) {
+		const occurrences = 1 + (release["label-info"]?.length ?? 0) +
+			(release["release-events"]?.length ?? (release.date ? 1 : 0)) +
+			release.media.reduce((total, medium, index) => total + 1 + Number(Boolean(medium.id)) +
+				tracks(medium, index).length * 2 + (medium.discs?.length ?? 0), 0);
+		if (occurrences > MUSIC_SOURCE_OCCURRENCE_LIMIT)
+			throw new RangeError("Music release source support exceeds the staged publication capacity");
+	}
 	for (const release of [previous, incoming]) {
 		const ids = release.media.flatMap((medium, index) =>
 			tracks(medium, index).map((entry) => entry.track.id),

@@ -1,3 +1,4 @@
+import { MUSIC_SOURCE_APPLICATION_LIMIT } from "./catalog-source-limits";
 import { sql } from "drizzle-orm";
 import {
 	bigint,
@@ -85,7 +86,7 @@ export const catalogSourceApplication = pgTable(
 		),
 		check(
 			"catalog_source_application_values",
-			sql`${t.action} in ('apply','withdraw') and ${t.beforeRevision} >= 1 and ${t.afterRevision} > ${t.beforeRevision} and ${t.afterRevision} <= 9007199254740991 and ${t.changeCount} between 0 and 128`,
+			sql`${t.action} in ('apply','withdraw') and ${t.beforeRevision} >= 1 and ${t.afterRevision} > ${t.beforeRevision} and ${t.afterRevision} <= 9007199254740991 and ${t.changeCount} between 0 and ${sql.raw(String(MUSIC_SOURCE_APPLICATION_LIMIT))}`,
 		),
 	],
 );
@@ -132,7 +133,7 @@ function profileApplicationTable(owner: keyof typeof CatalogProfileHistoryTables
 			}).onDelete("restrict"),
 			check(
 				`${owner}_profile_app_values`,
-				sql`${t.position} between 0 and 127 and (${t.beforeRevision} is null or ${t.beforeRevision} < ${t.afterRevision})`,
+				sql`${t.position} between 0 and ${sql.raw(String(MUSIC_SOURCE_APPLICATION_LIMIT - 1))} and (${t.beforeRevision} is null or ${t.beforeRevision} < ${t.afterRevision})`,
 			),
 		],
 	);
@@ -175,7 +176,7 @@ export const musicSourceApplicationChange = pgTable(
 		}).onDelete("restrict"),
 		check(
 			"music_source_application_values",
-			sql`${t.position} between 0 and 127 and octet_length(${t.component}) between 1 and 96 and octet_length(${t.componentKey}) between 1 and 1536 and (${t.beforeRevisionId} is null or ${t.beforeRevisionId} <> ${t.afterRevisionId})`,
+			sql`${t.position} between 0 and ${sql.raw(String(MUSIC_SOURCE_APPLICATION_LIMIT - 1))} and octet_length(${t.component}) between 1 and 96 and octet_length(${t.componentKey}) between 1 and 1536 and (${t.beforeRevisionId} is null or ${t.beforeRevisionId} <> ${t.afterRevisionId})`,
 		),
 	],
 );
@@ -219,7 +220,7 @@ export const softwareSourceComponentApplicationChange = pgTable(
 		}).onDelete("restrict"),
 		check(
 			"software_source_component_application_values",
-			sql`${t.position} between 0 and 127 and (${t.beforeRevision} is null or ${t.beforeRevision} < ${t.afterRevision})`,
+			sql`${t.position} between 0 and ${sql.raw(String(MUSIC_SOURCE_APPLICATION_LIMIT - 1))} and (${t.beforeRevision} is null or ${t.beforeRevision} < ${t.afterRevision})`,
 		),
 	],
 );
@@ -251,7 +252,7 @@ export const softwareSourceRecordApplicationChange = pgTable(
 		}).onDelete("restrict"),
 		check(
 			"software_source_record_application_values",
-			sql`${t.position} between 0 and 127 and (${t.beforeRevision} is null or ${t.beforeRevision} < ${t.afterRevision})`,
+			sql`${t.position} between 0 and ${sql.raw(String(MUSIC_SOURCE_APPLICATION_LIMIT - 1))} and (${t.beforeRevision} is null or ${t.beforeRevision} < ${t.afterRevision})`,
 		),
 	],
 );
@@ -295,7 +296,7 @@ function exactRevisionApplicationTable(
 			}).onDelete("restrict"),
 			check(
 				`${prefix}_values`,
-				sql`${t.position} between 0 and 127 and (${t.beforeRevision} is null or ${t.beforeRevision} < ${t.afterRevision})`,
+				sql`${t.position} between 0 and ${sql.raw(String(MUSIC_SOURCE_APPLICATION_LIMIT - 1))} and (${t.beforeRevision} is null or ${t.beforeRevision} < ${t.afterRevision})`,
 			),
 		],
 	);

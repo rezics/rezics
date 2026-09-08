@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
 	MusicComponentBatchSchema,
+	MusicSourceComponentBatchSchema,
 	MusicComponentSchemas,
 	musicComponentCompensation,
 	musicComponentKey,
@@ -10,6 +11,15 @@ import { musicBrainzAliasName } from "./musicbrainz-names";
 const id = "11111111-1111-4111-8111-111111111111";
 const history = "22222222-2222-4222-8222-222222222222";
 describe("native music exact structural contracts", () => {
+	test("source publication validates complete reorder sets without widening manual requests", () => {
+		const operations = Array.from({ length: 2048 }, () => ({ component: "music_track_occurrence" as const, componentKey: crypto.randomUUID(), action: "remove" as const, expectedRevisionId: history }));
+		expect(MusicComponentBatchSchema.safeParse(operations).success).toBe(false);
+		expect(MusicSourceComponentBatchSchema.safeParse(operations).success).toBe(true);
+		expect(MusicSourceComponentBatchSchema.safeParse([...operations, { ...operations[0]!, componentKey: crypto.randomUUID() }]).success).toBe(false);
+		const duplicateAcrossPages = [...operations];
+		duplicateAcrossPages[129] = operations[0]!;
+		expect(MusicSourceComponentBatchSchema.safeParse(duplicateAcrossPages).success).toBe(false);
+	});
 	test("identifier key tokens cannot alias through separator characters", () => {
 		const first = musicComponentKey("music_track_identifier", {
 			track_id: id,

@@ -6,7 +6,7 @@ import {
 import type { CatalogSourceNativeWriter } from "./source-proposals";
 import { compensateCatalogSourceOwnedChange } from "./source-owned-compensation";
 import { MusicComponentChangeSchema } from "./music-structure-contracts";
-import { compensateMusicComponents } from "./music-structure";
+import { mutateMusicSourceComponents } from "./music-structure";
 import { loadCatalogIdentity, recordCatalogChange } from "./storage";
 import { compensateCatalogProfileSourceChange } from "./profile-source";
 
@@ -56,12 +56,17 @@ export async function compensateMusicSourceApplication(
 		});
 	const current = await loadCatalogIdentity(tx, context.reference, context.actor, true);
 	const result = changes.length
-		? await compensateMusicComponents(
+		? await mutateMusicSourceComponents(
 				tx,
 				context.reference,
 				context.actor,
 				current.revision,
-				changes,
+				[...changes].reverse().map((change) => ({
+					component: change.component, componentKey: change.componentKey,
+					expectedRevisionId: change.afterRevisionId,
+					...(change.beforeRevisionId ? { action: "restore" as const, historyId: change.beforeRevisionId }
+						: { action: "remove" as const }),
+				})),
 			)
 		: {
 				revision: await recordCatalogChange(

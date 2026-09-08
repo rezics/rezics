@@ -1,3 +1,4 @@
+import { preflightMusicBrainzReleaseDelta } from "./musicbrainz-release-plan";
 import { createHash } from "node:crypto";
 import type { DatabaseTransaction } from "../database";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
@@ -61,6 +62,7 @@ export async function adoptMusicBrainzRelease(
 		receipt.key.externalId !== record.id
 	)
 		throw new TypeError("MusicBrainz release differs from its source key");
+	preflightMusicBrainzReleaseDelta(record, record);
 	const observation = await recordCatalogSourceDocument(tx, receipt, bytes);
 	const existing = await inspectExistingSourceBinding(
 		tx,
