@@ -64,7 +64,6 @@ function relationsDocument(videoAudioTracks?: readonly { readonly audioUnitId: s
 			subjectAssociations: [],
 			tags: [],
 			structureApplications: [],
-			variants: [],
 			...(videoAudioTracks ? { videoAudioTracks } : {}),
 		},
 	} as const;
@@ -274,12 +273,17 @@ describe("legacy Unit revision snapshots", () => {
 		).toEqual([]);
 	});
 
-	it("strips the retired single-license column instead of restoring it", () => {
+	it("keeps only public editable metadata in revision state", () => {
 		expect(
 			parsePersistedUnitRevisionState({
 				contentRating: "general",
 				aiDisclosure: "none",
 				license: "cc-by-4.0",
+				createdByAuthUserId: "018f998a-0000-7000-8000-000000000001",
+				revision: 7,
+				routingGeneration: 4,
+				status: "published",
+				visibility: "private",
 				postTargetingLocked: false,
 			}),
 		).toEqual({

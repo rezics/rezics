@@ -1,3 +1,7 @@
+import { PlatformOwnerValues } from "@rezics/reference";
+import { readUnitStateById } from "./query";
+import { unitOwnerTable } from "../database/schema/unit-reference-columns";
+import { nextUnitUpdatedAt } from "./update-values";
 import { AvatarTypeValues, FontAwesomeIconPrefixValues } from "@rezics/avatar";
 import {
 	assertBlockQueryBudget,
@@ -29,13 +33,15 @@ import { syncUnitLocalizationContentMetrics } from "../content-metrics/service";
 import type { DatabaseTransaction } from "../database";
 import {
 	audio,
-	book,
+	entityIdentity,
+	tag,
+	tagPath,
+	label,
+	customTheme,
 	collection,
 	creditAttribution,
 	CreditAttributionRoleValues,
-	entity,
 	MaximumAudioTracksPerVideo,
-	media,
 	poll,
 	pollOption,
 	PollOptionSourceKindValues,
@@ -45,17 +51,10 @@ import {
 	realmRule,
 	RealmRuleAcknowledgementModeValues,
 	realmRuleRevision,
-	release,
 	revisionContent,
-	series,
-	seriesRelease,
-	software,
-	softwareRequirement,
 	subjectAssociation,
 	SubjectAssociationRoleValues,
-	unit,
 	unitContentLanguageSupport,
-	UnitKindValues,
 	unitLocalization,
 	unitRevision,
 	unitRevisionCreditAttribution,
@@ -64,8 +63,6 @@ import {
 	UnitRevisionSlotRoleValues,
 	unitRevisionTag,
 	unitTag,
-	unitVariant,
-	VariantCapableUnitKindValues,
 	video,
 	videoAudioTrack,
 	zone,
@@ -91,7 +88,7 @@ import {
 	isContentLanguageSupportUnitKind,
 	replaceUnitContentLanguageSupport,
 } from "./content-language-support";
-import { insertUnit } from "./create";
+import { insertPlatformUnit } from "./create";
 import {
 	AssociationContextPostInvalid,
 	RevisionContributionActorRequired,
@@ -99,14 +96,14 @@ import {
 	UnitRevisionConflict,
 } from "./errors";
 import { isFirstUnitLocalization } from "./localization";
-import { ensureMetadataOnlyChangeAllowed } from "./metadata-only";
+
 import type {
 	RevisionContributionInput,
 	TrustedRevisionContribution,
 } from "./revision-contribution";
 import { defaultRevisionContribution } from "./revision-contribution";
 import { finalizeInitialUnitStatusRevision } from "./status";
-import { ensureUnitVariantLifecycle } from "./variant-policy";
+
 import { restoreVideoAudioTracks } from "./video-audio-tracks";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
@@ -114,7 +111,6 @@ export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
 type SnapshotRow = Record<string, unknown>;
 
 const SnapshotRowSchema = z.record(z.string(), z.unknown());
-const JsonObjectSchema = z.record(z.string(), z.unknown());
 function createDocumentSchema<TSchemaValue extends TSchema>(schema: TSchemaValue) {
 	return z.custom<StaticDecode<TSchemaValue>>((value): value is StaticDecode<TSchemaValue> =>
 		isDocument(schema, value),
@@ -182,14 +178,7 @@ const VideoAudioTracksSchema = z
 		(values) => new Set(values.map(({ audioUnitId }) => audioUnitId)).size === values.length,
 		"contains duplicate Audio Unit IDs",
 	);
-type UnitRevisionKind = Exclude<(typeof UnitKindValues)[number], "tag_path">;
-function deriveUnitRevisionKindValues(): [UnitRevisionKind, ...UnitRevisionKind[]] {
-	const values = UnitKindValues.filter((value): value is UnitRevisionKind => value !== "tag_path");
-	const [first, ...rest] = values;
-	if (!first) throw new Error("UnitKindValues must contain a revision-capable kind");
-	return [first, ...rest];
-}
-const UnitRevisionKindValues = deriveUnitRevisionKindValues();
+const UnitRevisionKindValues = PlatformOwnerValues;
 
 const UnitSnapshotSchema = z.object({
 	version: z.literal(UnitRevisionSchemaVersion),
@@ -203,11 +192,8 @@ const UnitSnapshotSchema = z.object({
 		credits: z.array(SnapshotRowSchema),
 		subjectAssociations: z.array(SnapshotRowSchema),
 		tags: z.array(SnapshotRowSchema),
-		variants: z.array(SnapshotRowSchema),
 		/** Released v1 relation documents without this key represent no external Audio tracks. */
 		videoAudioTracks: VideoAudioTracksSchema.default([]),
-		seriesReleases: z.array(SnapshotRowSchema),
-		softwareRequirements: z.array(SnapshotRowSchema),
 		pollOptions: z.array(SnapshotRowSchema),
 		realmPins: z.array(SnapshotRowSchema),
 		realmUnit: z.array(SnapshotRowSchema),
@@ -218,17 +204,28 @@ type RuleSnapshot = z.infer<typeof RuleSnapshotSchema>;
 type UnitSnapshot = z.infer<typeof UnitSnapshotSchema>;
 
 const schemaFactory = createSchemaFactory({ coerce: { date: true } });
-const unitStateSchema = schemaFactory.createSelectSchema(unit).omit({
+/** Only public editable metadata is versioned. Private creators, lifecycle, routing and revision counters are never copied into history. */
+const unitStateSchema = schemaFactory.createSelectSchema(audio).pick({
+	contentRating: true,
+	aiDisclosure: true,
+	postTargetingLocked: true,
+});
+const platformIdentityFields = {
 	id: true,
-	kind: true,
+	revision: true,
+	routingGeneration: true,
+	createdByAuthUserId: true,
 	status: true,
 	visibility: true,
+	contentRating: true,
+	aiDisclosure: true,
 	moderationStatus: true,
+	postTargetingLocked: true,
 	publishedAt: true,
 	deletedAt: true,
 	createdAt: true,
 	updatedAt: true,
-});
+} as const;
 
 /** Parses a persisted Unit revision row, stripping retired keys such as `license`. @internal */
 export function parsePersistedUnitRevisionState(value: unknown) {
@@ -244,55 +241,59 @@ const unitLocalizationStateSchema = schemaFactory
 		description: PortableTextDocumentSchema.nullable(),
 		content: UnitLocalizationContentSchema.nullable(),
 	})
-	.omit({ unitId: true, createdAt: true, updatedAt: true });
+	.pick({
+		language: true,
+		position: true,
+		avatarType: true,
+		avatarAssetId: true,
+		avatarEmoji: true,
+		avatarIconPrefix: true,
+		avatarIconName: true,
+		bannerAssetId: true,
+		coverAssetId: true,
+		title: true,
+		summary: true,
+		description: true,
+		content: true,
+		contentStatus: true,
+	});
 const UnitLocalizationRevisionDocumentSchema = z.object({
 	version: z.literal(UnitRevisionSlotSchemaVersions.localization),
 	localization: unitLocalizationStateSchema,
 });
 type UnitLocalizationState = z.infer<typeof unitLocalizationStateSchema>;
-const bookStateSchema = schemaFactory
-	.createSelectSchema(book, { metadataOnly: z.boolean().default(true) })
-	.omit({ id: true, createdAt: true, updatedAt: true });
-const softwareStateSchema = schemaFactory
-	.createSelectSchema(software, { metadataOnly: z.boolean().default(true) })
-	.omit({ id: true, createdAt: true, updatedAt: true });
-const mediaStateSchema = schemaFactory
-	.createSelectSchema(media, { metadataOnly: z.boolean().default(true) })
-	.omit({ id: true, createdAt: true, updatedAt: true });
-const videoStateSchema = schemaFactory
-	.createSelectSchema(video)
-	.omit({ id: true, createdAt: true, updatedAt: true });
-const audioStateSchema = schemaFactory
-	.createSelectSchema(audio)
-	.omit({ id: true, createdAt: true, updatedAt: true });
-const entityStateSchema = schemaFactory
-	.createSelectSchema(entity)
-	.omit({ id: true, createdAt: true, updatedAt: true });
-const seriesStateSchema = schemaFactory
-	.createSelectSchema(series)
-	.omit({ id: true, createdAt: true, updatedAt: true });
-const releaseStateSchema = schemaFactory
-	.createSelectSchema(release)
-	.omit({ id: true, createdAt: true, updatedAt: true });
+const videoStateSchema = schemaFactory.createSelectSchema(video).omit(platformIdentityFields);
+const audioStateSchema = schemaFactory.createSelectSchema(audio).omit(platformIdentityFields);
 const postStateSchema = schemaFactory
 	.createSelectSchema(post)
-	.omit({ id: true, createdAt: true, updatedAt: true });
-const realmStateSchema = schemaFactory
-	.createSelectSchema(realm)
-	.omit({ id: true, createdAt: true, updatedAt: true });
+	.pick({ kind: true, subjectUnitId: true });
+const realmStateSchema = schemaFactory.createSelectSchema(realm).omit(platformIdentityFields);
 const zoneStateSchema = schemaFactory
 	.createSelectSchema(zone, {
 		filterDocument: FilterDocumentSchema,
 		appearanceDocument: ZoneAppearanceDocumentSchema,
 	})
-	.omit({ id: true, createdAt: true, updatedAt: true });
+	.omit(platformIdentityFields);
 const collectionStateSchema = z.object({});
+const tagStateSchema = schemaFactory
+	.createSelectSchema(tag, { nodeKind: z.literal("concept") })
+	.omit(platformIdentityFields);
+const tagPathStateSchema = schemaFactory.createSelectSchema(tagPath).omit(platformIdentityFields);
+const realmRuleStateSchema = schemaFactory
+	.createSelectSchema(realmRule)
+	.omit(platformIdentityFields);
+const labelStateSchema = z.object({});
+const customThemeStateSchema = z.object({});
 
 class UnitSnapshotBlockDocumentInvalid extends TypeError {}
 
 function assertUnitSnapshotBlockWriteBudgets(snapshot: UnitSnapshot): void {
 	try {
-		if (snapshot.kind === "zone_page") {
+		if (
+			snapshot.kind === "post" &&
+			snapshot.extension &&
+			postStateSchema.parse(snapshot.extension).kind === "page"
+		) {
 			for (const localization of snapshot.localizations) {
 				if (localization.content === null) continue;
 				assertUnitReferencedBlockDocument(localization.content, ZonePageBlockHostPolicy);
@@ -317,31 +318,63 @@ function assertUnitSnapshotBlockWriteBudgets(snapshot: UnitSnapshot): void {
 }
 const pollStateSchema = schemaFactory
 	.createSelectSchema(poll)
-	.omit({ id: true, closedAt: true, createdAt: true, updatedAt: true });
-const creditAttributionRowSchema = schemaFactory.createSelectSchema(creditAttribution, {
-	position: FractionalPositionSchema,
-	role: z.enum(CreditAttributionRoleValues),
-});
-const subjectAssociationRowSchema = schemaFactory.createSelectSchema(subjectAssociation, {
-	position: FractionalPositionSchema,
-	role: z.enum(SubjectAssociationRoleValues),
-});
-const unitTagRowSchema = schemaFactory.createSelectSchema(unitTag, {
-	position: FractionalPositionSchema.nullable(),
-});
-const unitVariantRowSchema = schemaFactory.createSelectSchema(unitVariant, {
-	unitKind: z.enum(VariantCapableUnitKindValues),
-});
-const seriesReleaseRowSchema = schemaFactory.createSelectSchema(seriesRelease, {
-	position: FractionalPositionSchema,
-});
-const softwareRequirementRowSchema = schemaFactory.createSelectSchema(softwareRequirement, {
-	hardware: JsonObjectSchema,
-});
+	.omit({ ...platformIdentityFields, closedAt: true });
+const creditAttributionRowSchema = schemaFactory
+	.createSelectSchema(creditAttribution, {
+		position: FractionalPositionSchema,
+		role: z.enum(CreditAttributionRoleValues),
+	})
+	.pick({
+		id: true,
+		sourceUnitId: true,
+		creditedEntityId: true,
+		role: true,
+		position: true,
+		createdAt: true,
+		updatedAt: true,
+	});
+const subjectAssociationRowSchema = schemaFactory
+	.createSelectSchema(subjectAssociation, {
+		position: FractionalPositionSchema,
+		role: z.enum(SubjectAssociationRoleValues),
+	})
+	.pick({
+		id: true,
+		unitId: true,
+		entityId: true,
+		contextPostId: true,
+		role: true,
+		position: true,
+		createdAt: true,
+		updatedAt: true,
+	});
+const unitTagRowSchema = schemaFactory
+	.createSelectSchema(unitTag, {
+		position: FractionalPositionSchema.nullable(),
+	})
+	.pick({
+		unitId: true,
+		tagId: true,
+		createdByProfileId: true,
+		pinned: true,
+		position: true,
+		createdAt: true,
+		updatedAt: true,
+	});
 const pollOptionRowSchema = schemaFactory
 	.createSelectSchema(pollOption, {
 		sourceKind: z.enum(PollOptionSourceKindValues),
 		position: z.int().nonnegative(),
+	})
+	.pick({
+		id: true,
+		pollId: true,
+		sourceKind: true,
+		targetUnitId: true,
+		position: true,
+		deletedAt: true,
+		createdAt: true,
+		updatedAt: true,
 	})
 	.refine(
 		(row) =>
@@ -349,9 +382,19 @@ const pollOptionRowSchema = schemaFactory
 			(row.sourceKind === "unit" && row.targetUnitId !== null),
 		{ message: "Poll option source and target Unit do not match" },
 	);
-const realmPinRowSchema = schemaFactory.createSelectSchema(realmPin, {
-	position: FractionalPositionSchema,
-});
+const realmPinRowSchema = schemaFactory
+	.createSelectSchema(realmPin, {
+		position: FractionalPositionSchema,
+	})
+	.pick({
+		realmId: true,
+		unitId: true,
+		kind: true,
+		position: true,
+		createdByProfileId: true,
+		createdAt: true,
+		updatedAt: true,
+	});
 function parseSnapshotState(
 	schema: { parse(value: unknown): SnapshotRow },
 	row: SnapshotRow | undefined,
@@ -369,21 +412,6 @@ async function snapshotExtension(
 	kind: UnitSnapshot["kind"],
 ) {
 	switch (kind) {
-		case "book":
-			return parseSnapshotState(
-				bookStateSchema,
-				(await tx.select().from(book).where(eq(book.id, unitId)).limit(1))[0],
-			);
-		case "software":
-			return parseSnapshotState(
-				softwareStateSchema,
-				(await tx.select().from(software).where(eq(software.id, unitId)).limit(1))[0],
-			);
-		case "media":
-			return parseSnapshotState(
-				mediaStateSchema,
-				(await tx.select().from(media).where(eq(media.id, unitId)).limit(1))[0],
-			);
 		case "video":
 			return parseSnapshotState(
 				videoStateSchema,
@@ -394,53 +422,56 @@ async function snapshotExtension(
 				audioStateSchema,
 				(await tx.select().from(audio).where(eq(audio.id, unitId)).limit(1))[0],
 			);
-		case "entity":
-			return parseSnapshotState(
-				entityStateSchema,
-				(await tx.select().from(entity).where(eq(entity.id, unitId)).limit(1))[0],
-			);
-		case "series":
-			return parseSnapshotState(
-				seriesStateSchema,
-				(await tx.select().from(series).where(eq(series.id, unitId)).limit(1))[0],
-			);
-		case "release":
-			return parseSnapshotState(
-				releaseStateSchema,
-				(await tx.select().from(release).where(eq(release.id, unitId)).limit(1))[0],
-			);
 		case "post":
 			return parseSnapshotState(
 				postStateSchema,
 				(await tx.select().from(post).where(eq(post.id, unitId)).limit(1))[0],
-			);
-		case "realm":
-			return parseSnapshotState(
-				realmStateSchema,
-				(await tx.select().from(realm).where(eq(realm.id, unitId)).limit(1))[0],
-			);
-		case "zone":
-			return parseSnapshotState(
-				zoneStateSchema,
-				(await tx.select().from(zone).where(eq(zone.id, unitId)).limit(1))[0],
-			);
-		case "collection":
-			return parseSnapshotState(
-				collectionStateSchema,
-				(await tx.select().from(collection).where(eq(collection.id, unitId)).limit(1))[0],
 			);
 		case "poll":
 			return parseSnapshotState(
 				pollStateSchema,
 				(await tx.select().from(poll).where(eq(poll.id, unitId)).limit(1))[0],
 			);
-		case "tag":
-		case "label":
+		case "zone":
+			return parseSnapshotState(
+				zoneStateSchema,
+				(await tx.select().from(zone).where(eq(zone.id, unitId)).limit(1))[0],
+			);
+		case "realm":
+			return parseSnapshotState(
+				realmStateSchema,
+				(await tx.select().from(realm).where(eq(realm.id, unitId)).limit(1))[0],
+			);
 		case "realm_rule":
-		case "slug_namespace":
-		case "zone_page":
+			return parseSnapshotState(
+				realmRuleStateSchema,
+				(await tx.select().from(realmRule).where(eq(realmRule.id, unitId)).limit(1))[0],
+			);
 		case "custom_theme":
-			return null;
+			return parseSnapshotState(
+				customThemeStateSchema,
+				(await tx.select().from(customTheme).where(eq(customTheme.id, unitId)).limit(1))[0],
+			);
+		case "collection":
+			return parseSnapshotState(
+				collectionStateSchema,
+				(await tx.select().from(collection).where(eq(collection.id, unitId)).limit(1))[0],
+			);
+		case "tag":
+			return parseSnapshotState(
+				tagStateSchema,
+				(await tx.select().from(tag).where(eq(tag.id, unitId)).limit(1))[0],
+			);
+		case "tag_path":
+			return parseSnapshotState(
+				tagPathStateSchema,
+				(await tx.select().from(tagPath).where(eq(tagPath.id, unitId)).limit(1))[0],
+			);
+		case "label":
+			return parseSnapshotState(
+				labelStateSchema,
+				(await tx.select().from(label).where(eq(label.id, unitId)).limit(1))[0],
+			);
 	}
 }
 
@@ -478,10 +509,9 @@ async function snapshotRealmRules(tx: DatabaseTransaction, realmId: string) {
 }
 
 async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
-	const [record] = await tx.select().from(unit).where(eq(unit.id, unitId)).limit(1);
-	if (!record) throw new Error(`Cannot snapshot missing Unit ${unitId}`);
-	if (record.kind === "tag_path")
-		throw new Error("Tag Path Units use immutable definitions and do not support Unit revisions");
+	const record = await readUnitStateById(tx, unitId);
+	if (!record) throw new Error(`Cannot snapshot missing platform owner ${unitId}`);
+	const kind = z.enum(PlatformOwnerValues).parse(record.reference.owner);
 	const localizations = await tx
 		.select()
 		.from(unitLocalization)
@@ -507,11 +537,6 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		.from(unitTag)
 		.where(eq(unitTag.unitId, unitId))
 		.orderBy(unitTag.tagId);
-	const variants = await tx
-		.select()
-		.from(unitVariant)
-		.where(eq(unitVariant.variantUnitId, unitId))
-		.orderBy(unitVariant.variantUnitId);
 	const videoAudioTracks = await tx
 		.select({ audioUnitId: videoAudioTrack.audioUnitId })
 		.from(videoAudioTrack)
@@ -523,29 +548,12 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 
 	const empty: SnapshotRow[] = [];
 	const owned: UnitSnapshot["owned"] = {
-		credits,
-		subjectAssociations,
-		tags,
-		variants,
+		credits: credits.map((row) => creditAttributionRowSchema.parse(row)),
+		subjectAssociations: subjectAssociations.map((row) => subjectAssociationRowSchema.parse(row)),
+		tags: tags.map((row) => unitTagRowSchema.parse(row)),
 		videoAudioTracks,
-		seriesReleases:
-			record.kind === "series"
-				? await tx
-						.select()
-						.from(seriesRelease)
-						.where(eq(seriesRelease.seriesId, unitId))
-						.orderBy(seriesRelease.position, seriesRelease.releaseUnitId)
-				: empty,
-		softwareRequirements:
-			record.kind === "software"
-				? await tx
-						.select()
-						.from(softwareRequirement)
-						.where(eq(softwareRequirement.softwareId, unitId))
-						.orderBy(softwareRequirement.id)
-				: empty,
 		pollOptions:
-			record.kind === "poll"
+			kind === "poll"
 				? await tx
 						.select()
 						.from(pollOption)
@@ -553,7 +561,7 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 						.orderBy(pollOption.position, pollOption.id)
 				: empty,
 		realmPins:
-			record.kind === "realm"
+			kind === "realm"
 				? await tx
 						.select()
 						.from(realmPin)
@@ -561,11 +569,11 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 						.orderBy(realmPin.kind, realmPin.position, realmPin.unitId)
 				: empty,
 		realmUnit: empty,
-		realmRules: record.kind === "realm" ? await snapshotRealmRules(tx, unitId) : null,
+		realmRules: kind === "realm" ? await snapshotRealmRules(tx, unitId) : null,
 	};
 	return {
 		version: UnitRevisionSchemaVersion,
-		kind: record.kind,
+		kind: kind,
 		unit: unitStateSchema.parse(record),
 		localizations: localizations.map((localization) =>
 			unitLocalizationStateSchema.parse(localization),
@@ -573,9 +581,13 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		contentLanguageSupport: contentLanguageSupportRow
 			? ContentLanguageSupportSchema.parse(contentLanguageSupportRow.value)
 			: [],
-		extension: await snapshotExtension(tx, unitId, record.kind),
+		extension: await snapshotExtension(tx, unitId, kind),
 		preference: null,
-		owned,
+		owned: {
+			...owned,
+			pollOptions: owned.pollOptions.map((row) => pollOptionRowSchema.parse(row)),
+			realmPins: owned.realmPins.map((row) => realmPinRowSchema.parse(row)),
+		},
 	} satisfies UnitSnapshot;
 }
 
@@ -585,58 +597,58 @@ async function restoreExtension(
 	kind: UnitSnapshot["kind"],
 	value: SnapshotRow | null,
 ) {
-	if (
-		kind === "tag" ||
-		kind === "label" ||
-		kind === "realm_rule" ||
-		kind === "slug_namespace" ||
-		kind === "zone_page"
-	)
-		return;
-	if (!value) throw new Error(`Missing ${kind} extension in Unit snapshot`);
+	if (!value) throw new Error(`Missing ${kind} owner state in platform snapshot`);
 	switch (kind) {
-		case "book":
-			await tx.update(book).set(bookStateSchema.parse(value)).where(eq(book.id, unitId));
-			break;
-		case "software":
-			await tx
-				.update(software)
-				.set(softwareStateSchema.parse(value))
-				.where(eq(software.id, unitId));
-			break;
-		case "media":
-			await tx.update(media).set(mediaStateSchema.parse(value)).where(eq(media.id, unitId));
-			break;
 		case "video":
 			await tx.update(video).set(videoStateSchema.parse(value)).where(eq(video.id, unitId));
-			break;
+			return;
 		case "audio":
 			await tx.update(audio).set(audioStateSchema.parse(value)).where(eq(audio.id, unitId));
-			break;
-		case "entity":
-			await tx.update(entity).set(entityStateSchema.parse(value)).where(eq(entity.id, unitId));
-			break;
-		case "series":
-			await tx.update(series).set(seriesStateSchema.parse(value)).where(eq(series.id, unitId));
-			break;
-		case "release":
-			await tx.update(release).set(releaseStateSchema.parse(value)).where(eq(release.id, unitId));
-			break;
+			return;
 		case "post":
 			await tx.update(post).set(postStateSchema.parse(value)).where(eq(post.id, unitId));
-			break;
-		case "realm":
-			await tx.update(realm).set(realmStateSchema.parse(value)).where(eq(realm.id, unitId));
-			break;
-		case "zone":
-			await tx.update(zone).set(zoneStateSchema.parse(value)).where(eq(zone.id, unitId));
-			break;
-		case "collection":
-			collectionStateSchema.parse(value);
-			break;
+			return;
 		case "poll":
 			await tx.update(poll).set(pollStateSchema.parse(value)).where(eq(poll.id, unitId));
-			break;
+			return;
+		case "zone":
+			await tx.update(zone).set(zoneStateSchema.parse(value)).where(eq(zone.id, unitId));
+			return;
+		case "realm":
+			await tx.update(realm).set(realmStateSchema.parse(value)).where(eq(realm.id, unitId));
+			return;
+		case "realm_rule": {
+			const [current] = await tx.select().from(realmRule).where(eq(realmRule.id, unitId)).limit(1);
+			if (
+				!current ||
+				canonicalJson(realmRuleStateSchema.parse(current)) !==
+					canonicalJson(realmRuleStateSchema.parse(value))
+			)
+				throw new Error("Immutable realm_rule structure cannot be changed by revision restore");
+			return;
+		}
+		case "custom_theme":
+			customThemeStateSchema.parse(value);
+			return;
+		case "collection":
+			collectionStateSchema.parse(value);
+			return;
+		case "tag":
+			await tx.update(tag).set(tagStateSchema.parse(value)).where(eq(tag.id, unitId));
+			return;
+		case "tag_path": {
+			const [current] = await tx.select().from(tagPath).where(eq(tagPath.id, unitId)).limit(1);
+			if (
+				!current ||
+				canonicalJson(tagPathStateSchema.parse(current)) !==
+					canonicalJson(tagPathStateSchema.parse(value))
+			)
+				throw new Error("Immutable tag_path structure cannot be changed by revision restore");
+			return;
+		}
+		case "label":
+			labelStateSchema.parse(value);
+			return;
 	}
 }
 
@@ -657,6 +669,7 @@ async function restoreRealmRules(
 	realmId: string,
 	value: RuleSnapshot | null,
 	actorProfileId: string,
+	actorAuthUserId: string | null,
 ) {
 	const [latest] = await tx
 		.select({ value: max(realmRuleRevision.version) })
@@ -674,11 +687,16 @@ async function restoreRealmRules(
 		.returning({ id: realmRuleRevision.id });
 	if (!revision) throw new Error("Realm rule restore did not return a revision");
 	for (const rule of value?.rules ?? []) {
-		const ruleUnit = await insertUnit(tx, {
-			kind: "realm_rule",
-			status: "published",
-			visibility: "unlisted",
-			publishedAt: new Date(),
+		const ruleUnit = await insertPlatformUnit(tx, {
+			owner: "realm_rule",
+			values: {
+				createdByAuthUserId: actorAuthUserId,
+				revisionId: revision.id,
+				position: rule.position,
+				status: "published",
+				visibility: "unlisted",
+				publishedAt: new Date(),
+			},
 			statusActor: { kind: "profile", profileId: actorProfileId },
 		});
 		await tx.insert(unitLocalization).values({
@@ -687,11 +705,6 @@ async function restoreRealmRules(
 			title: rule.title,
 			content: rule.content,
 			contentStatus: "published",
-		});
-		await tx.insert(realmRule).values({
-			id: ruleUnit.id,
-			revisionId: revision.id,
-			position: rule.position,
 		});
 	}
 }
@@ -750,19 +763,25 @@ export async function restoreUnitSnapshot(
 	const subjectAssociations = snapshot.owned.subjectAssociations.map((row) =>
 		subjectAssociationRowSchema.parse(row),
 	);
+	await authorization.unit.ensureInTransaction(tx, unitId, "unit.update");
 	await lockUnitHistory(tx, unitId);
-	const [current] = await tx
-		.select({
-			kind: unit.kind,
-			subjectUnitId: post.subjectUnitId,
-			zoneAppearanceDocument: zone.appearanceDocument,
-		})
-		.from(unit)
-		.leftJoin(post, eq(post.id, unit.id))
-		.leftJoin(zone, eq(zone.id, unit.id))
-		.where(eq(unit.id, unitId))
-		.limit(1);
-	if (!current || current.kind !== snapshot.kind) throw new Error("Unit snapshot kind mismatch");
+	const currentState = await readUnitStateById(tx, unitId, { lock: "update" });
+	if (!currentState || currentState.reference.owner !== snapshot.kind)
+		throw new Error("Platform snapshot owner mismatch");
+	const table = unitOwnerTable(currentState.reference.owner);
+	const [currentPost] =
+		snapshot.kind === "post"
+			? await tx.select().from(post).where(eq(post.id, unitId)).limit(1)
+			: [];
+	const [currentZone] =
+		snapshot.kind === "zone"
+			? await tx.select().from(zone).where(eq(zone.id, unitId)).limit(1)
+			: [];
+	const current = {
+		subjectUnitId: currentPost?.subjectUnitId ?? null,
+		zoneAppearanceDocument: currentZone?.appearanceDocument,
+	};
+
 	if (snapshot.kind === "zone" && snapshot.extension) {
 		const currentTheme = ZoneAppearanceDocumentSchema.parse(current.zoneAppearanceDocument);
 		const restoredTheme = zoneStateSchema.parse(snapshot.extension).appearanceDocument;
@@ -779,30 +798,6 @@ export async function restoreUnitSnapshot(
 			await ensurePublicZoneThemeHeroAsset(tx, restoredTheme.heroAssetId);
 		}
 	}
-	if (snapshot.kind === "book" && snapshot.extension)
-		await ensureMetadataOnlyChangeAllowed(
-			tx,
-			authorization,
-			"book",
-			unitId,
-			bookStateSchema.parse(snapshot.extension).metadataOnly,
-		);
-	if (snapshot.kind === "software" && snapshot.extension)
-		await ensureMetadataOnlyChangeAllowed(
-			tx,
-			authorization,
-			"software",
-			unitId,
-			softwareStateSchema.parse(snapshot.extension).metadataOnly,
-		);
-	if (snapshot.kind === "media" && snapshot.extension)
-		await ensureMetadataOnlyChangeAllowed(
-			tx,
-			authorization,
-			"media",
-			unitId,
-			mediaStateSchema.parse(snapshot.extension).metadataOnly,
-		);
 	const currentCredits = await tx
 		.select({ creditedEntityId: creditAttribution.creditedEntityId })
 		.from(creditAttribution)
@@ -863,7 +858,14 @@ export async function restoreUnitSnapshot(
 				subjectUnitId: postState.subjectUnitId,
 			});
 	}
-	await tx.update(unit).set(unitStateSchema.parse(snapshot.unit)).where(eq(unit.id, unitId));
+	await tx
+		.update(table)
+		.set({
+			...unitStateSchema.parse(snapshot.unit),
+			revision: sql`${table.revision} + 1`,
+			updatedAt: nextUnitUpdatedAt(currentState.updatedAt),
+		})
+		.where(eq(table.id, unitId));
 	if (isContentLanguageSupportUnitKind(snapshot.kind))
 		await replaceUnitContentLanguageSupport(
 			tx,
@@ -882,18 +884,11 @@ export async function restoreUnitSnapshot(
 			})),
 		);
 	await restoreExtension(tx, unitId, snapshot.kind, snapshot.extension);
-	if (snapshot.kind === "software")
-		await tx.delete(softwareRequirement).where(eq(softwareRequirement.softwareId, unitId));
 	await tx.delete(creditAttribution).where(eq(creditAttribution.sourceUnitId, unitId));
 	await tx.delete(subjectAssociation).where(eq(subjectAssociation.unitId, unitId));
-	await tx.delete(unitVariant).where(eq(unitVariant.variantUnitId, unitId));
 	if (snapshot.owned.credits.length) await tx.insert(creditAttribution).values(credits);
 	if (subjectAssociations.length) await tx.insert(subjectAssociation).values(subjectAssociations);
 	await restoreUnitTags(tx, unitId, snapshot.owned.tags);
-	if (snapshot.owned.variants.length)
-		await tx
-			.insert(unitVariant)
-			.values(snapshot.owned.variants.map((row) => unitVariantRowSchema.parse(row)));
 	await restoreVideoAudioTracks(
 		tx,
 		unitId,
@@ -901,19 +896,6 @@ export async function restoreUnitSnapshot(
 		snapshot.owned.videoAudioTracks.map(({ audioUnitId }) => audioUnitId),
 	);
 
-	if (snapshot.kind === "series") {
-		await tx.delete(seriesRelease).where(eq(seriesRelease.seriesId, unitId));
-		if (snapshot.owned.seriesReleases.length)
-			await tx
-				.insert(seriesRelease)
-				.values(snapshot.owned.seriesReleases.map((row) => seriesReleaseRowSchema.parse(row)));
-	}
-	if (snapshot.kind === "software" && snapshot.owned.softwareRequirements.length)
-		await tx
-			.insert(softwareRequirement)
-			.values(
-				snapshot.owned.softwareRequirements.map((row) => softwareRequirementRowSchema.parse(row)),
-			);
 	// Dynamic Content Structure slots are restored by their content-model adapter.
 	if (snapshot.kind === "poll") await restoreSoftRows(tx, unitId, snapshot.owned.pollOptions);
 	if (snapshot.kind === "realm") {
@@ -922,9 +904,14 @@ export async function restoreUnitSnapshot(
 			await tx
 				.insert(realmPin)
 				.values(snapshot.owned.realmPins.map((row) => realmPinRowSchema.parse(row)));
-		await restoreRealmRules(tx, unitId, snapshot.owned.realmRules, authorization.profileId);
+		await restoreRealmRules(
+			tx,
+			unitId,
+			snapshot.owned.realmRules,
+			authorization.profileId,
+			authorization.authUserId ?? null,
+		);
 	}
-	await ensureUnitVariantLifecycle(tx, unitId);
 }
 
 export const UnitRevisionChangeTags = ["mw-undo", "mw-manual-revert"] as const;
@@ -992,7 +979,6 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 				credits: snapshot.owned.credits,
 				subjectAssociations: snapshot.owned.subjectAssociations,
 				tags: snapshot.owned.tags,
-				variants: snapshot.owned.variants,
 				videoAudioTracks: snapshot.owned.videoAudioTracks,
 			},
 		},
@@ -1000,8 +986,6 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 			model: SlotModels.structure,
 			payload: {
 				version: UnitRevisionSlotSchemaVersions.structure,
-				seriesReleases: snapshot.owned.seriesReleases,
-				softwareRequirements: snapshot.owned.softwareRequirements,
 				pollOptions: snapshot.owned.pollOptions,
 				realmPins: snapshot.owned.realmPins,
 			},
@@ -1127,10 +1111,7 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 			credits: relations.credits,
 			subjectAssociations: relations.subjectAssociations,
 			tags: relations.tags,
-			variants: relations.variants,
 			videoAudioTracks: parseVideoAudioTracksSlot(documents),
-			seriesReleases: structure.seriesReleases,
-			softwareRequirements: structure.softwareRequirements,
 			pollOptions: structure.pollOptions,
 			realmPins: structure.realmPins,
 			realmUnit: [],
@@ -1292,17 +1273,16 @@ async function resolveRevisionContribution(
 	if (contribution.primary === "human") return contribution;
 
 	const [eligibleEntity] = await tx
-		.select({ id: entity.id })
-		.from(entity)
-		.innerJoin(unit, eq(unit.id, entity.id))
+		.select({ id: entityIdentity.id })
+		.from(entityIdentity)
 		.where(
 			and(
-				eq(entity.id, contribution.creditedEntityId),
-				eq(entity.kind, "software_agent"),
-				eq(unit.status, "published"),
-				inArray(unit.visibility, ["public", "unlisted"]),
-				eq(unit.moderationStatus, "approved"),
-				isNull(unit.deletedAt),
+				eq(entityIdentity.id, contribution.creditedEntityId),
+				eq(entityIdentity.shape, "software_agent"),
+				eq(entityIdentity.status, "published"),
+				inArray(entityIdentity.visibility, ["public", "unlisted"]),
+				eq(entityIdentity.moderationStatus, "approved"),
+				isNull(entityIdentity.deletedAt),
 			),
 		)
 		.limit(1);
@@ -1564,8 +1544,6 @@ const StableArrayKeys = [
 	["tagId"],
 	["unitId", "role"],
 	["entityId", "role"],
-	["seriesId", "releaseUnitId"],
-	["softwareId", "kind"],
 	["zoneId", "unitId"],
 	["collectionId", "unitId"],
 	["position"],

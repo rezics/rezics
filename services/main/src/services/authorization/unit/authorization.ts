@@ -90,6 +90,11 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 			: work();
 	}
 
+	#nativeActor(): string | null {
+		const principal = currentParticipationAuthority()?.principal;
+		return principal && principal.authUserId === this.authUserId ? principal.authUserId : null;
+	}
+
 	async #authenticatedSelf(executor: DatabaseExecutor): Promise<boolean> {
 		if (!this.profileId || !this.authUserId) return false;
 		const [binding] = await executor
@@ -144,7 +149,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		const nativeReference = CatalogReferenceSchema.safeParse(record.reference);
 		if (nativeReference.success) {
 			if (permission !== "unit.read") return { allowed: false, reason: "ungranted" };
-			const actor = currentParticipationAuthority()?.principal.authUserId ?? null;
+			const actor = this.#nativeActor();
 			try {
 				await withCatalogViewerPolicy(executor, actor, () =>
 					loadCatalogIdentity(executor, nativeReference.data, actor, false),
@@ -361,7 +366,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		if (uniqueIds.length > 500) throw new RangeError("Unit read batches cannot exceed 500 targets");
 		const readableIds = await this.#withParticipation(() =>
 			database.transaction(async (tx) => {
-				const actor = currentParticipationAuthority()?.principal.authUserId ?? null;
+				const actor = this.#nativeActor();
 				return withCatalogViewerPolicy(tx, actor, async () => {
 					const viewerId = (await this.#authenticatedSelf(tx)) ? this.profileId : undefined;
 					const [control] = await tx
