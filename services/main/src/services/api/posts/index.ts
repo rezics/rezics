@@ -382,6 +382,7 @@ export default new Elysia()
 							and(
 								sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind)`,
 								eq(post.status, "published"),
+								eq(post.moderationStatus, "approved"),
 								eq(post.visibility, "public"),
 								isNull(post.deletedAt),
 								query.realmId

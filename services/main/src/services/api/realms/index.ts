@@ -299,7 +299,7 @@ async function ensureRealmVisible(realmId: string, request: Request) {
 	const [record] = await database
 		.select({ status: realm.status, visibility: realm.visibility })
 		.from(realm)
-		.where(eq(realm.id, realmId))
+		.where(and(eq(realm.id, realmId), isNull(realm.deletedAt)))
 		.limit(1);
 	if (!record) throw new RealmNotFound();
 	const identity = await resolveIdentity(request, "realm:read");
@@ -307,6 +307,7 @@ async function ensureRealmVisible(realmId: string, request: Request) {
 	const membership = entity ? await findRealmMembership(realmId, entity.id) : undefined;
 	if (!isRealmVisible(record.status, record.visibility, membership?.state))
 		throw new RealmNotFound();
+	await identity.authorization.unit.ensureCanRead(realmId, () => new RealmNotFound());
 	return identity;
 }
 
@@ -637,7 +638,14 @@ export default new Elysia({ prefix: "/realms" })
 						),
 					),
 				)
-				.where(and(eq(realm.status, "published"), eq(realm.visibility, "public")))
+				.where(
+					and(
+						eq(realm.status, "published"),
+						eq(realm.visibility, "public"),
+						eq(realm.moderationStatus, "approved"),
+						isNull(realm.deletedAt),
+					),
+				)
 				.orderBy(desc(realm.createdAt), desc(realm.id))
 				.limit(query.limit ?? 20);
 			const slugAddresses = await getPublicCanonicalUnitSlugAddresses(items.map((item) => item.id));
