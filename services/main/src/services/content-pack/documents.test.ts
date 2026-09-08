@@ -1,9 +1,9 @@
 import { createPortableTextDocument, createUnitReferencedBlockDocument } from "@rezics/block";
 import { describe, expect, it } from "vitest";
 
+import type { PackObject } from "./contracts";
 import { assertPackObjectDocuments } from "./documents";
 import { ContentPackInvalid } from "./errors";
-import type { PackObject } from "./contracts";
 
 const ZonePageFeed = createUnitReferencedBlockDocument(
 	[
@@ -20,8 +20,9 @@ const ZonePageFeed = createUnitReferencedBlockDocument(
 function zonePage(overrides: Partial<PackObject> = {}): PackObject {
 	return {
 		sourceKey: "pack:zone-page:home",
-		unit: {
-			kind: "zone_page",
+		identity: {
+			owner: "post",
+			shape: "page",
 			status: "published",
 			visibility: "public",
 			contentRating: "general",

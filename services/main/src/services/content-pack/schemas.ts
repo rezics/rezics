@@ -11,8 +11,12 @@ import {
 	normalizeContentLanguageSupport,
 } from "@rezics/content-language";
 import { isLicenseId } from "@rezics/license";
+import { CatalogOwnerValues, UnitOwnerValues } from "@rezics/reference";
 import { SlugLabelPattern } from "@rezics/slug";
 import { z } from "zod";
+import { CatalogDefinitionInputSchema } from "../catalog/contracts";
+import { CreateCatalogResourceSchema } from "../catalog/resource-contracts";
+import { nativePackReference } from "./native-contracts";
 
 import {
 	AiDisclosureValues,
@@ -22,7 +26,6 @@ import {
 	ContentStatusValues,
 	ContentStructureKindValues,
 	CreditAttributionRoleValues,
-	EntityKindValues,
 	ModerationStatusValues,
 	PostKindValues,
 	RealmJoinPolicyValues,
@@ -31,8 +34,6 @@ import {
 	SubjectAssociationRoleValues,
 	UnitOwnershipModeValues,
 	UnitStatusValues,
-	VariantCapableUnitKindValues,
-	WorkReleaseStatusValues,
 } from "../database/schema/contract-values";
 import {
 	TagExpressionArgumentRoleValues,
@@ -43,30 +44,13 @@ import {
 import { TagRelationKindValues } from "../database/schema/vocabulary";
 
 const MaximumPostgresInteger = 2_147_483_647;
-const PackUnitKindValues = [
-	"book",
+const ContentLanguageSupportOwnerValues = [
+	"publishing",
+	"music",
+	"program",
 	"software",
-	"media",
 	"video",
 	"audio",
-	"release",
-	"entity",
-	"label",
-	"tag",
-	"series",
-	"zone",
-	"zone_page",
-	"collection",
-	"post",
-	"realm",
-] as const;
-const ContentLanguageSupportUnitKindValues = [
-	"book",
-	"software",
-	"media",
-	"video",
-	"audio",
-	"release",
 ] as const;
 
 const NonEmptyString = z.string().refine((value) => value.trim().length > 0, {
@@ -348,45 +332,6 @@ const ContentLanguageSupportSchema = z
 		}
 	});
 
-const EntityMeasurementSchema = z
-	.object({
-		contextUnitSourceKey: NonEmptyString.nullable(),
-		heightMillimetres: PositivePostgresInteger.optional(),
-		weightGrams: PositivePostgresInteger.optional(),
-		bustMillimetres: PositivePostgresInteger.optional(),
-		waistMillimetres: PositivePostgresInteger.optional(),
-		hipsMillimetres: PositivePostgresInteger.optional(),
-		sourceUrl: Url,
-		sourceImportedAt: Timestamp,
-		sourceProvenance: JsonObject,
-	})
-	.strict()
-	.refine(
-		(value) =>
-			value.heightMillimetres !== undefined ||
-			value.weightGrams !== undefined ||
-			value.bustMillimetres !== undefined ||
-			value.waistMillimetres !== undefined ||
-			value.hipsMillimetres !== undefined,
-		{ message: "A measurement row must contain at least one point value" },
-	);
-
-const EntityMeasurementsSchema = z
-	.array(EntityMeasurementSchema)
-	.max(9)
-	.superRefine((measurements, context) => {
-		const contexts = new Set<string | null>();
-		for (const [index, measurement] of measurements.entries()) {
-			if (contexts.has(measurement.contextUnitSourceKey))
-				context.addIssue({
-					code: "custom",
-					path: [index, "contextUnitSourceKey"],
-					message: "An Entity measurement context may appear only once",
-				});
-			contexts.add(measurement.contextUnitSourceKey);
-		}
-	});
-
 const TagParentSourceKeysSchema = z
 	.array(NonEmptyString)
 	.max(16)
@@ -430,9 +375,10 @@ const RealmPagesSchema = z
 const PackObjectBaseSchema = z
 	.object({
 		sourceKey: NonEmptyString,
-		unit: z
+		identity: z
 			.object({
-				kind: z.enum(PackUnitKindValues),
+				owner: z.enum(UnitOwnerValues),
+				shape: z.string().regex(/^[a-z][a-z0-9_.-]{0,95}$/u),
 				status: z.enum(UnitStatusValues),
 				visibility: z.enum(ResourceVisibilityValues),
 				contentRating: z.enum(ContentRatingValues),
@@ -449,58 +395,12 @@ const PackObjectBaseSchema = z
 			})
 			.strict(),
 		contentLanguageSupport: ContentLanguageSupportSchema.optional(),
-		entity: z
-			.object({ kind: z.enum(EntityKindValues), verified: z.boolean() })
-			.strict()
-			.optional(),
+		native: CreateCatalogResourceSchema.optional(),
 		tag: TagSchema.optional(),
 		label: z.object({}).strict().optional(),
 		collection: z.object({}).strict().optional(),
-		entityMeasurements: EntityMeasurementsSchema.optional(),
-		book: z
-			.object({
-				releaseStatus: z.enum(WorkReleaseStatusValues),
-				isbn13: z
-					.string()
-					.regex(/^\d{13}$/)
-					.optional(),
-				publicationDate: CalendarDate.optional(),
-				pageCount: PositivePostgresInteger.optional(),
-				wordCount: NonNegativePostgresInteger.optional(),
-				format: NonEmptyString.optional(),
-			})
-			.strict()
-			.optional(),
-		media: z
-			.object({
-				kind: NonEmptyString,
-				releaseStatus: z.enum(WorkReleaseStatusValues),
-				releaseDate: CalendarDate.optional(),
-				episodeCount: PositivePostgresInteger.optional(),
-				seasonCount: PositivePostgresInteger.optional(),
-				runtimeMinutes: PositivePostgresInteger.optional(),
-			})
-			.strict()
-			.optional(),
-		software: z
-			.object({
-				metadataOnly: z.boolean(),
-				releaseDate: CalendarDate.optional(),
-				versionLabel: NonEmptyString.optional(),
-			})
-			.strict()
-			.optional(),
-		release: z
-			.object({
-				parentUnitSourceKey: NonEmptyString,
-				versionLabel: NonEmptyString,
-				releasedOn: CalendarDate.optional(),
-			})
-			.strict()
-			.optional(),
 		video: z.object({ durationSeconds: PositivePostgresInteger.optional() }).strict().optional(),
 		audio: z.object({ durationSeconds: PositivePostgresInteger.optional() }).strict().optional(),
-		series: z.object({ kind: NonEmptyString }).strict().optional(),
 		realm: z
 			.object({
 				slug: Slug,
@@ -514,7 +414,7 @@ const PackObjectBaseSchema = z
 			.object({
 				slug: Slug,
 				filterTagSourceKey: NonEmptyString.optional(),
-				filterUnitKind: z.enum(["book", "media"]).optional(),
+				filterOwner: z.enum(["publishing", "program", "software", "music"]).optional(),
 				themeAccent: NonEmptyString.optional(),
 				homePageSourceKey: NonEmptyString.optional(),
 				localRuleRealmSourceKey: NonEmptyString.optional(),
@@ -557,116 +457,86 @@ const PackObjectBaseSchema = z
 	})
 	.strict();
 
-const DetailFields = [
-	"entity",
+const PlatformDetailFields = [
 	"tag",
 	"label",
 	"collection",
-	"book",
-	"media",
-	"software",
-	"release",
 	"video",
 	"audio",
-	"series",
 	"realm",
 	"zone",
 	"compiledZone",
 	"zonePage",
 	"post",
 ] as const;
-
-const ExpectedDetailFields = {
-	book: ["book"],
-	software: ["software"],
-	media: ["media"],
-	video: ["video"],
-	audio: ["audio"],
-	release: ["release"],
-	entity: ["entity"],
-	label: ["label"],
-	tag: ["tag"],
-	series: ["series"],
-	zone: ["zone", "compiledZone"],
-	zone_page: ["zonePage", "post"],
-	collection: [],
-	post: ["post"],
-	realm: ["realm"],
-} as const satisfies Record<
-	(typeof PackUnitKindValues)[number],
-	readonly (typeof DetailFields)[number][]
->;
-
 export const PackObjectSchema = PackObjectBaseSchema.superRefine((object, context) => {
-	const localizationLanguages = object.localizations.map(({ language }) => language);
-	if (new Set(localizationLanguages).size !== localizationLanguages.length)
-		context.addIssue({
-			code: "custom",
-			path: ["localizations"],
-			message: "A content object may declare each localization language only once",
-		});
-	const expected = new Set<(typeof DetailFields)[number]>(ExpectedDetailFields[object.unit.kind]);
-	for (const field of DetailFields) {
-		if (object.unit.kind === "collection" && field === "collection") continue;
-		const present = object[field] !== undefined;
-		if (expected.has(field) && !present)
-			context.addIssue({
-				code: "custom",
-				path: [field],
-				message: `${object.unit.kind} objects require ${field}`,
-			});
-		if (!expected.has(field) && present)
-			context.addIssue({
-				code: "custom",
-				path: [field],
-				message: `${field} is not valid on ${object.unit.kind} objects`,
-			});
+	const issue = (path: (string | number)[], message: string) =>
+		context.addIssue({ code: "custom", path, message });
+	if (
+		new Set(object.localizations.map((entry) => entry.language)).size !==
+		object.localizations.length
+	)
+		issue(["localizations"], "Each language may occur only once");
+	const catalog = CatalogOwnerValues.some((owner) => owner === object.identity.owner);
+	if (catalog) {
+		if (!object.native)
+			issue(["native"], "A catalog identity requires a complete native creation declaration");
+		else {
+			const expected = nativePackReference(object.native);
+			if (expected.owner !== object.identity.owner || expected.shape !== object.identity.shape)
+				issue(["identity"], "Native owner and shape must match the creation declaration");
+		}
+		for (const field of PlatformDetailFields)
+			if (object[field] !== undefined)
+				issue([field], "Platform detail is not valid on a catalog resource");
+		if (object.identity.aiDisclosure !== "unknown" || object.identity.postTargetingLocked)
+			issue(["identity"], "Catalog resources do not declare platform-only lifecycle fields");
+	} else {
+		if (object.native) issue(["native"], "A platform identity cannot declare a catalog structure");
+		const expected =
+			object.identity.owner === "zone"
+				? ["zone", "compiledZone"]
+				: object.identity.owner === "post"
+					? ["post", ...(object.zonePage ? ["zonePage"] : [])]
+					: [object.identity.owner];
+		for (const field of PlatformDetailFields) {
+			const required = expected.includes(field);
+			if (required && object[field] === undefined && field !== "collection" && field !== "label")
+				issue([field], "Missing platform detail");
+			if (!required && object[field] !== undefined) issue([field], "Unexpected platform detail");
+		}
+		if (!PlatformDetailFields.some((field) => field === object.identity.owner))
+			issue(["identity", "owner"], "This pack format does not support that platform owner");
+		if (object.identity.shape !== (object.post?.kind ?? object.identity.owner))
+			issue(["identity", "shape"], "Platform shape must match its concrete type");
+		if (
+			object.zonePage &&
+			(object.identity.owner !== "post" ||
+				object.post?.kind !== "page" ||
+				object.post.subjectSourceKey !== object.zonePage.zoneSourceKey)
+		)
+			issue(["zonePage"], "A Zone Page is a page Post whose subject is its owning Zone");
 	}
-	if (object.entityMeasurements && object.unit.kind !== "entity")
-		context.addIssue({
-			code: "custom",
-			path: ["entityMeasurements"],
-			message: "Only Entity objects may declare measurements",
-		});
-	if (object.unit.kind !== "zone_page")
+	if (!object.zonePage)
 		for (const [index, localization] of object.localizations.entries())
 			if (localization.content !== undefined && !isPortableTextDocument(localization.content))
-				context.addIssue({
-					code: "custom",
-					path: ["localizations", index, "content"],
-					message: "Non-Zone content must be a Portable Text document",
-				});
+				issue(["localizations", index, "content"], "Content must be a Portable Text document");
 	if (
 		object.contentLanguageSupport &&
-		!ContentLanguageSupportUnitKindValues.some((kind) => kind === object.unit.kind)
+		!ContentLanguageSupportOwnerValues.some((owner) => owner === object.identity.owner)
 	)
-		context.addIssue({
-			code: "custom",
-			path: ["contentLanguageSupport"],
-			message: `${object.unit.kind} cannot declare content language support`,
-		});
-	const authoredBindingFields = [
-		object.labelSourceKey,
-		object.structureSourceKey,
-		object.creditRole,
-	];
-	const authoredBindingCount = authoredBindingFields.filter((value) => value !== undefined).length;
-	if (authoredBindingCount > 0 && object.unit.kind !== "book")
-		context.addIssue({
-			code: "custom",
-			message: "Only authored Book objects may declare label, structure, and credit bindings",
-		});
-	if (authoredBindingCount !== 0 && authoredBindingCount !== authoredBindingFields.length)
-		context.addIssue({
-			code: "custom",
-			message: "Authored Book label, structure, and credit bindings must be declared together",
-		});
+		issue(["contentLanguageSupport"], "This owner does not support consumption languages");
+	const bindings = [object.labelSourceKey, object.structureSourceKey, object.creditRole];
+	const count = bindings.filter((value) => value !== undefined).length;
+	if (
+		count &&
+		!(object.identity.owner === "publishing" && object.identity.shape === "text_version")
+	)
+		issue([], "Authored text bindings require a native TextVersion");
+	if (count !== 0 && count !== bindings.length)
+		issue([], "Authored text bindings must be declared together");
 	if (object.zone && object.compiledZone && object.zone.slug !== object.compiledZone.slug)
-		context.addIssue({
-			code: "custom",
-			path: ["compiledZone", "slug"],
-			message: "Authored and compiled Zone slugs must match",
-		});
+		issue(["compiledZone", "slug"], "Zone slugs must match");
 });
 
 const ProvenanceFields = {
@@ -736,16 +606,36 @@ const UnitTagRelationSchema = z
 
 export const PackRelationsSchema = z
 	.object({
-		unitVariants: z
+		catalogRelations: z
 			.array(
-				z
-					.object({
-						mainUnitSourceKey: NonEmptyString,
-						variantUnitSourceKey: NonEmptyString,
-						unitKind: z.enum(VariantCapableUnitKindValues),
-					})
-					.strict(),
+				z.strictObject({
+					sourceSourceKey: NonEmptyString,
+					targetSourceKey: NonEmptyString,
+					definition: CatalogDefinitionInputSchema,
+					roleDefinition: CatalogDefinitionInputSchema,
+					qualifiers: z
+						.array(
+							z.strictObject({
+								factSourceKey: NonEmptyString,
+								definition: CatalogDefinitionInputSchema,
+							}),
+						)
+						.max(64)
+						.default([]),
+				}),
 			)
+			.max(10000)
+			.optional(),
+		catalogFacts: z
+			.array(
+				z.strictObject({
+					sourceKey: NonEmptyString,
+					ownerSourceKey: NonEmptyString,
+					definition: CatalogDefinitionInputSchema,
+					value: JsonValue,
+				}),
+			)
+			.max(10000)
 			.optional(),
 		credits: z
 			.array(
@@ -761,18 +651,6 @@ export const PackRelationsSchema = z
 			)
 			.optional(),
 		subjects: z.array(SubjectRelationSchema).optional(),
-		seriesReleases: z
-			.array(
-				z
-					.object({
-						seriesSourceKey: NonEmptyString,
-						releaseUnitSourceKey: NonEmptyString,
-						position: NonEmptyString,
-						releasedOn: CalendarDate.nullable(),
-					})
-					.strict(),
-			)
-			.optional(),
 		collectionItems: z
 			.array(
 				z

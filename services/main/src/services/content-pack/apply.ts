@@ -1,17 +1,20 @@
+import { replaceCatalogContentLanguageSupport } from "../catalog/content-language-declaration";
+import { loadCatalogIdentity } from "../catalog/storage";
+import { replaceUnitContentLanguageSupport } from "../units/content-language-support";
 import { createHash } from "node:crypto";
 
 import { normalizeContentLanguageSupport } from "@rezics/content-language";
 import { assertFilterDocument } from "@rezics/filter";
 import { isContentLanguage } from "@rezics/i18n";
 import { isLicenseId } from "@rezics/license";
-import { TopLevelSlugNamespaceUnitIds, ZoneHomePageSlug } from "@rezics/slug";
+import { TopLevelSlugNamespaceIds, ZoneHomePageSlug } from "@rezics/slug";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import {
 	createProfileOwnedUnitAccess,
 	createPublicEditableUnitAccess,
 } from "../authorization/unit/ownership";
-import { OfficialProfileIds } from "../bootstrap/data";
+import { BootstrapPlatformAdministratorProfile, OfficialProfileIds } from "../bootstrap/data";
 import { createCollectionStructureHistory } from "../collection-structure/history";
 import { applyContentStructureBatch } from "../content-structure/batch";
 import type { ContentStructureBatchCommand } from "../content-structure/batch-plan";
@@ -19,57 +22,35 @@ import { createNavigationStructure } from "../content-structure/navigation";
 import { createContentStructure } from "../content-structure/service";
 import type { DatabaseTransaction } from "../database";
 import {
-	audio,
-	book,
-	collection,
 	collectionItem,
-	ContentLanguageSupportUnitKindValues,
 	contentStructure,
 	creditAttribution,
-	entity,
-	entityMeasurement,
 	guideNode,
 	guideNodeLocalization,
-	label,
-	media,
-	post,
-	realm,
 	realmUnit,
-	release,
-	series,
-	seriesRelease,
-	software,
 	subjectAssociation,
 	subjectAssociationJudgment,
 	tag,
 	tagRelation,
-	unit,
 	unitAlias,
-	unitContentLanguageSupport,
 	unitLocalization,
 	unitSlugAddress,
 	unitTag,
 	unitTagJudgment,
 	unitTagPathApplication,
 	unitTagPathApplicationJudgment,
-	unitVariant,
-	VariantCapableUnitKindValues,
-	video,
 	vocabularyNode,
-	zone,
 	zonePage,
-	type ContentLanguageSupportUnitKind,
 	type ContentStructureKind,
-	type VariantCapableUnitKind,
 } from "../database/schema";
-import { WorkPolicy } from "../performance/policy";
+import { withSeedAuthority } from "../seed/identity";
 import {
 	createTagExpressionInferenceRuleInTransaction,
 	createTagExpressionInTransaction,
 	ensureSimpleTagExpressionInTransaction,
 } from "../tag-expressions/service";
 import { createTagPathInTransaction, createTagPathSenseInTransaction } from "../tag-paths/service";
-import { insertUnit } from "../units/create";
+import { insertPlatformUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import { insertLicenseGrants } from "../units/license-grants";
 import { recordInitialRealmUnitPublicationEvents } from "../units/realm-publication";
@@ -83,32 +64,13 @@ import type {
 } from "./contracts";
 import { assertContentPackDocuments } from "./documents";
 import { ContentPackCollision, ContentPackConflict, ContentPackInvalid } from "./errors";
+import { orderPackObjects, readPackIdentities } from "./identity";
+import { insertNativePackObject } from "./native";
+import { importNativePackAssertions } from "./native-assertions";
 import { planContentPack } from "./plan";
 import { assertContentPackThemeAssets } from "./theme-assets";
 
 const ImportOwnerProfileId = OfficialProfileIds.editorial;
-const KindOrder: readonly string[] = [
-	"tag",
-	"entity",
-	"label",
-	"series",
-	"book",
-	"media",
-	"software",
-	"video",
-	"audio",
-	"release",
-	"collection",
-	"realm",
-	"zone",
-	"post",
-	"zone_page",
-];
-
-const ContentLanguageSupportUnitKindSet: ReadonlySet<string> = new Set(
-	ContentLanguageSupportUnitKindValues,
-);
-const VariantCapableUnitKindSet: ReadonlySet<string> = new Set(VariantCapableUnitKindValues);
 const ImportReadBatchSize = 500;
 type PackUnitTagRelation = NonNullable<PackRelations["unitTags"]>[number];
 type PackSubjectRelation = NonNullable<PackRelations["subjects"]>[number];
@@ -121,6 +83,16 @@ export async function applyContentPack(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
 	sourceRoot: string,
+): Promise<{ readonly status: "created" | "noop"; readonly created: number }> {
+	return withSeedAuthority(tx, BootstrapPlatformAdministratorProfile.profileId, (authority) =>
+		applyContentPackAsOperator(tx, pack, sourceRoot, authority.principal.authUserId),
+	);
+}
+async function applyContentPackAsOperator(
+	tx: DatabaseTransaction,
+	pack: LoadedPack,
+	sourceRoot: string,
+	actor: string,
 ): Promise<{ readonly status: "created" | "noop"; readonly created: number }> {
 	assertContentPackDocuments(pack);
 	await assertContentPackThemeAssets(tx, pack);
@@ -143,13 +115,10 @@ export async function applyContentPack(
 	const createKeys = new Set(
 		plan.objects.filter((item) => item.action === "create").map((item) => item.sourceKey),
 	);
-	const objects = [...pack.objects]
-		.filter((object) => createKeys.has(object.sourceKey))
-		.sort((left, right) => kindRank(left.unit.kind) - kindRank(right.unit.kind));
+	const objects = orderPackObjects(pack).filter((object) => createKeys.has(object.sourceKey));
+	for (const object of objects) await importUnit(tx, pack, object, actor);
+	await importNativePackAssertions(tx, pack, actor);
 
-	for (const object of objects) await importUnit(tx, pack, object);
-
-	await importEntityMeasurements(tx, pack);
 	await importVocabularyDefinitions(tx, pack);
 	await importRelations(tx, pack, createKeys);
 	await importStructures(tx, pack);
@@ -157,6 +126,7 @@ export async function applyContentPack(
 	await recordImportedCollectionStructureHistories(tx, pack, objects);
 
 	for (const object of objects) {
+		if (object.native) continue;
 		await recordUnitRevision(tx, {
 			unitId: requireId(pack.ids.units, object.sourceKey),
 			actorProfileId: ImportOwnerProfileId,
@@ -172,7 +142,7 @@ export async function recordImportedCollectionStructureHistories(
 	objects: readonly PackObject[],
 ): Promise<void> {
 	for (const object of objects) {
-		if (object.unit.kind !== "collection") continue;
+		if (object.identity.owner !== "collection") continue;
 		await createCollectionStructureHistory(tx, {
 			collectionId: requireId(pack.ids.units, object.sourceKey),
 			actorProfileId: ImportOwnerProfileId,
@@ -203,35 +173,20 @@ async function verifyExistingPackObjects(
 			.filter((object) => existingSourceKeys.includes(object.sourceKey))
 			.map((object) => [requireId(pack.ids.units, object.sourceKey), object] as const),
 	);
-	const records = [];
-	for (const ids of chunks([...expectedById.keys()], ImportReadBatchSize))
-		records.push(
-			...(await tx
-				.select({
-					id: unit.id,
-					kind: unit.kind,
-					status: unit.status,
-					visibility: unit.visibility,
-					contentRating: unit.contentRating,
-					aiDisclosure: unit.aiDisclosure,
-					moderationStatus: unit.moderationStatus,
-					postTargetingLocked: unit.postTargetingLocked,
-					deletedAt: unit.deletedAt,
-				})
-				.from(unit)
-				.where(inArray(unit.id, ids))),
-		);
+	const records = await readPackIdentities(tx, pack, existingSourceKeys);
+
 	for (const record of records) {
 		const expected = expectedById.get(record.id);
 		if (!expected) throw new ContentPackCollision(`Unexpected existing Unit ${record.id}`);
 		if (
-			record.kind !== expected.unit.kind ||
-			record.status !== expected.unit.status ||
-			record.visibility !== expected.unit.visibility ||
-			record.contentRating !== expected.unit.contentRating ||
-			record.aiDisclosure !== expected.unit.aiDisclosure ||
-			record.moderationStatus !== expected.unit.moderationStatus ||
-			record.postTargetingLocked !== expected.unit.postTargetingLocked ||
+			record.owner !== expected.identity.owner ||
+			record.shape !== expected.identity.shape ||
+			record.status !== expected.identity.status ||
+			record.visibility !== expected.identity.visibility ||
+			record.contentRating !== expected.identity.contentRating ||
+			(!expected.native && record.aiDisclosure !== expected.identity.aiDisclosure) ||
+			record.moderationStatus !== expected.identity.moderationStatus ||
+			(!expected.native && record.postTargetingLocked !== expected.identity.postTargetingLocked) ||
 			record.deletedAt !== null
 		)
 			throw new ContentPackCollision(
@@ -249,45 +204,32 @@ function chunks<T>(values: readonly T[], size: number): readonly T[][] {
 	return result;
 }
 
-function kindRank(kind: string): number {
-	const index = KindOrder.indexOf(kind);
-	return index === -1 ? KindOrder.length : index;
-}
-
 async function importUnit(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
 	object: PackObject,
+	actor: string,
 ): Promise<void> {
 	const unitId = requireId(pack.ids.units, object.sourceKey);
-	const license = object.unit.license;
+	const license = object.identity.license;
 	if (license !== null && !isLicenseId(license))
 		throw new ContentPackInvalid(`${object.sourceKey} has an unknown license identifier`);
-	await insertUnit(tx, {
-		id: unitId,
-		kind: object.unit.kind,
-		status: object.unit.status,
-		visibility: object.unit.visibility,
-		contentRating: object.unit.contentRating,
-		aiDisclosure: object.unit.aiDisclosure,
-		moderationStatus: object.unit.moderationStatus,
-		postTargetingLocked: object.unit.postTargetingLocked,
-		publishedAt: object.unit.status === "published" ? new Date() : null,
-		statusActor: { kind: "import" },
-	});
-	if (object.import.ownershipMode === "community_owned")
-		await createPublicEditableUnitAccess(tx, unitId, ["unit.update", "unit.status.update"]);
-	else await createProfileOwnedUnitAccess(tx, unitId, ImportOwnerProfileId);
+	if (object.native) await insertNativePackObject(tx, object, unitId, actor);
+	else {
+		await insertPlatformDetail(tx, pack, object, unitId, actor);
+		if (object.import.ownershipMode === "community_owned")
+			await createPublicEditableUnitAccess(tx, unitId, ["unit.update", "unit.status.update"]);
+		else await createProfileOwnedUnitAccess(tx, unitId, ImportOwnerProfileId);
+	}
 	if (license)
 		await insertLicenseGrants(tx, {
 			unitId,
 			grantedByProfileId: ImportOwnerProfileId,
 			licenseIds: [license],
-			unitKind: object.unit.kind,
+			unitKind: object.identity.owner,
 		});
 
-	await insertDetail(tx, pack, object, unitId, object.import.ownershipMode === "community_owned");
-	await insertContentLanguageSupport(tx, object, unitId);
+	await insertContentLanguageSupport(tx, object, unitId, actor);
 	await tx.insert(unitLocalization).values(
 		object.localizations.map((localization, index) => {
 			if (!isContentLanguage(localization.language))
@@ -322,204 +264,107 @@ async function importUnit(
 		);
 }
 
-async function insertDetail(
+async function insertPlatformDetail(
 	tx: DatabaseTransaction,
 	pack: LoadedPack,
 	object: PackObject,
-	unitId: string,
-	metadataOnly: boolean,
+	id: string,
+	actor: string,
 ): Promise<void> {
-	switch (object.unit.kind) {
-		case "entity":
-			if (!object.entity) throw new ContentPackInvalid(`${object.sourceKey} missing entity`);
-			await tx.insert(entity).values({
-				id: unitId,
-				kind: object.entity.kind,
-				verified: object.entity.verified,
-			});
-			return;
+	const { owner, shape, license, ...lifecycle } = object.identity;
+	const values = {
+		id,
+		...lifecycle,
+		publishedAt: lifecycle.status === "published" ? new Date() : null,
+		createdByAuthUserId: actor,
+	};
+	const statusActor = { kind: "import" } as const;
+	switch (owner) {
 		case "tag":
-			if (!object.tag) throw new ContentPackInvalid(`${object.sourceKey} missing tag`);
-			await tx.insert(vocabularyNode).values({
-				id: unitId,
-				kind: "concept",
-				createdByProfileId: ImportOwnerProfileId,
+			await tx
+				.insert(vocabularyNode)
+				.values({ id, kind: "concept", createdByProfileId: ImportOwnerProfileId });
+			await insertPlatformUnit(tx, {
+				owner,
+				values: {
+					...values,
+					...(object.tag && "directlyApplicable" in object.tag
+						? {
+								directlyApplicable: object.tag.directlyApplicable,
+								defaultSpoilerLevel: object.tag.defaultSpoilerLevel,
+							}
+						: {}),
+				},
+				statusActor,
 			});
-			await tx.insert(tag).values(
-				"directlyApplicable" in object.tag
-					? {
-							id: unitId,
-							directlyApplicable: object.tag.directlyApplicable,
-							defaultSpoilerLevel: object.tag.defaultSpoilerLevel,
-						}
-					: { id: unitId },
-			);
 			return;
 		case "label":
-			await tx.insert(label).values({ id: unitId });
+		case "collection":
+			await insertPlatformUnit(tx, { owner, values, statusActor });
 			return;
-		case "series":
-			if (!object.series) throw new ContentPackInvalid(`${object.sourceKey} missing series`);
-			await tx.insert(series).values({ id: unitId, kind: object.series.kind });
-			return;
-		case "book":
-			if (!object.book) throw new ContentPackInvalid(`${object.sourceKey} missing book`);
-			await tx.insert(book).values({
-				id: unitId,
-				metadataOnly,
-				releaseStatus: object.book.releaseStatus,
-				isbn13: object.book.isbn13 ?? null,
-				publicationDate: object.book.publicationDate ?? null,
-				pageCount: object.book.pageCount ?? null,
-			});
-			return;
-		case "media":
-			if (!object.media) throw new ContentPackInvalid(`${object.sourceKey} missing media`);
-			await tx.insert(media).values({
-				id: unitId,
-				metadataOnly,
-				kind: object.media.kind,
-				releaseStatus: object.media.releaseStatus,
-				releaseDate: object.media.releaseDate ?? null,
-				episodeCount: object.media.episodeCount ?? null,
-				seasonCount: object.media.seasonCount ?? null,
-				runtimeMinutes: object.media.runtimeMinutes ?? null,
-			});
-			return;
-		case "software":
-			if (!object.software) throw new ContentPackInvalid(object.sourceKey + " missing software");
-			await tx.insert(software).values({
-				id: unitId,
-				metadataOnly: object.software.metadataOnly,
-				releaseDate: object.software.releaseDate ?? null,
-				versionLabel: object.software.versionLabel ?? null,
-			});
-			return;
-		case "release":
-			if (!object.release) throw new ContentPackInvalid(object.sourceKey + " missing release");
-			await tx.insert(release).values({
-				id: unitId,
-				parentUnitId: requireId(pack.ids.units, object.release.parentUnitSourceKey),
-				versionLabel: object.release.versionLabel,
-				releasedOn: object.release.releasedOn ?? null,
+		case "audio":
+			await insertPlatformUnit(tx, {
+				owner,
+				values: { ...values, durationSeconds: object.audio?.durationSeconds ?? null },
+				statusActor,
 			});
 			return;
 		case "video":
-			if (!object.video) throw new ContentPackInvalid(object.sourceKey + " missing video");
-			await tx.insert(video).values({
-				id: unitId,
-				durationSeconds: object.video.durationSeconds ?? null,
+			await insertPlatformUnit(tx, {
+				owner,
+				values: { ...values, durationSeconds: object.video?.durationSeconds ?? null },
+				statusActor,
 			});
-			return;
-		case "audio":
-			if (!object.audio) throw new ContentPackInvalid(object.sourceKey + " missing audio");
-			await tx.insert(audio).values({
-				id: unitId,
-				durationSeconds: object.audio.durationSeconds ?? null,
-			});
-			return;
-		case "collection":
-			await tx.insert(collection).values({ id: unitId });
 			return;
 		case "realm":
-			if (!object.realm) throw new ContentPackInvalid(`${object.sourceKey} missing realm`);
-			await tx.insert(realm).values({
-				id: unitId,
-				joinPolicy: object.realm.joinPolicy,
-				realmTagVotingEnabled: object.realm.realmTagVotingEnabled,
-				enabledPages: [...object.realm.enabledPages],
+			if (!object.realm) throw new ContentPackInvalid("Missing Realm detail");
+			await insertPlatformUnit(tx, {
+				owner,
+				values: {
+					...values,
+					joinPolicy: object.realm.joinPolicy,
+					realmTagVotingEnabled: object.realm.realmTagVotingEnabled,
+					enabledPages: object.realm.enabledPages,
+				},
+				statusActor,
 			});
 			return;
 		case "zone": {
 			const compiled = object.compiledZone;
-			if (!compiled) throw new ContentPackInvalid(`${object.sourceKey} missing compiled zone`);
+			if (!compiled) throw new ContentPackInvalid("Missing compiled Zone");
 			assertFilterDocument(compiled.filterDocument);
-			await tx.insert(zone).values({
-				id: unitId,
-				filterDocument: compiled.filterDocument,
-				appearanceDocument: compiled.appearanceDocument,
-				localRuleRealmId: requireId(pack.ids.units, compiled.localRuleRealmSourceKey),
+			await insertPlatformUnit(tx, {
+				owner,
+				values: {
+					...values,
+					filterDocument: compiled.filterDocument,
+					appearanceDocument: compiled.appearanceDocument,
+					localRuleRealmId: requireId(pack.ids.units, compiled.localRuleRealmSourceKey),
+				},
+				statusActor,
 			});
 			return;
 		}
 		case "post":
-			if (!object.post) throw new ContentPackInvalid(`${object.sourceKey} missing post`);
-			await tx.insert(post).values({
-				id: unitId,
-				kind: object.post.kind,
-				subjectUnitId: object.post.subjectSourceKey
-					? requireId(pack.ids.units, object.post.subjectSourceKey)
-					: null,
+			if (!object.post) throw new ContentPackInvalid("Missing Post detail");
+			await insertPlatformUnit(tx, {
+				owner,
+				values: {
+					...values,
+					kind: object.post.kind,
+					subjectUnitId: object.post.subjectSourceKey
+						? requireId(pack.ids.units, object.post.subjectSourceKey)
+						: null,
+				},
+				statusActor,
 			});
+			if (object.zonePage)
+				await tx
+					.insert(zonePage)
+					.values({ id, zoneId: requireId(pack.ids.units, object.zonePage.zoneSourceKey) });
 			return;
-		case "zone_page": {
-			if (!object.zonePage || !object.post)
-				throw new ContentPackInvalid(`${object.sourceKey} missing zone page`);
-			const zoneId = requireId(pack.ids.units, object.zonePage.zoneSourceKey);
-			await tx.insert(post).values({
-				id: unitId,
-				kind: "page",
-				subjectUnitId: zoneId,
-			});
-			await tx.insert(zonePage).values({ id: unitId, zoneId });
-			return;
-		}
 		default:
-			throw new ContentPackInvalid(`Unsupported unit kind ${object.unit.kind}`);
-	}
-}
-
-async function importEntityMeasurements(tx: DatabaseTransaction, pack: LoadedPack): Promise<void> {
-	for (const object of pack.objects) {
-		if (object.unit.kind !== "entity" || !object.entityMeasurements) continue;
-		const entityId = requireId(pack.ids.units, object.sourceKey);
-		for (const measurement of object.entityMeasurements) {
-			const contextUnitId = measurement.contextUnitSourceKey
-				? requireId(pack.ids.units, measurement.contextUnitSourceKey)
-				: null;
-			await tx
-				.insert(entityMeasurement)
-				.values({
-					entityId,
-					contextUnitId,
-					heightMillimetres: measurement.heightMillimetres ?? null,
-					weightGrams: measurement.weightGrams ?? null,
-					bustMillimetres: measurement.bustMillimetres ?? null,
-					waistMillimetres: measurement.waistMillimetres ?? null,
-					hipsMillimetres: measurement.hipsMillimetres ?? null,
-				})
-				.onConflictDoNothing();
-			const [actual] = await tx
-				.select({
-					id: entityMeasurement.id,
-					heightMillimetres: entityMeasurement.heightMillimetres,
-					weightGrams: entityMeasurement.weightGrams,
-					bustMillimetres: entityMeasurement.bustMillimetres,
-					waistMillimetres: entityMeasurement.waistMillimetres,
-					hipsMillimetres: entityMeasurement.hipsMillimetres,
-				})
-				.from(entityMeasurement)
-				.where(
-					and(
-						eq(entityMeasurement.entityId, entityId),
-						contextUnitId === null
-							? isNull(entityMeasurement.contextUnitId)
-							: eq(entityMeasurement.contextUnitId, contextUnitId),
-					),
-				)
-				.limit(1);
-			if (
-				!actual ||
-				actual.heightMillimetres !== (measurement.heightMillimetres ?? null) ||
-				actual.weightGrams !== (measurement.weightGrams ?? null) ||
-				actual.bustMillimetres !== (measurement.bustMillimetres ?? null) ||
-				actual.waistMillimetres !== (measurement.waistMillimetres ?? null) ||
-				actual.hipsMillimetres !== (measurement.hipsMillimetres ?? null)
-			)
-				throw new ContentPackCollision(
-					`${object.sourceKey} measurement collides with different existing facts`,
-				);
-		}
+			throw new ContentPackInvalid(`Unsupported platform owner ${owner}`);
 	}
 }
 
@@ -527,36 +372,24 @@ async function insertContentLanguageSupport(
 	tx: DatabaseTransaction,
 	object: PackObject,
 	unitId: string,
+	actor: string,
 ): Promise<void> {
 	if (object.contentLanguageSupport === undefined) return;
-	if (!isContentLanguageSupportUnitKind(object.unit.kind))
-		throw new ContentPackInvalid(
-			object.sourceKey + " cannot declare content-consumption language support",
-		);
-	let value: ReturnType<typeof normalizeContentLanguageSupport>;
-	try {
-		value = normalizeContentLanguageSupport(object.contentLanguageSupport);
-	} catch (error) {
-		throw new ContentPackInvalid(
-			object.sourceKey +
-				" has invalid content language support: " +
-				(error instanceof Error ? error.message : "unknown validation failure"),
-		);
-	}
+	const value = normalizeContentLanguageSupport(object.contentLanguageSupport);
 	if (!value.length) return;
-	await tx.insert(unitContentLanguageSupport).values({
-		unitId,
-		unitKind: object.unit.kind,
-		value,
-	});
-}
-
-function isContentLanguageSupportUnitKind(kind: string): kind is ContentLanguageSupportUnitKind {
-	return ContentLanguageSupportUnitKindSet.has(kind);
-}
-
-function isVariantCapableUnitKind(kind: string): kind is VariantCapableUnitKind {
-	return VariantCapableUnitKindSet.has(kind);
+	const owner = object.identity.owner;
+	if (owner === "publishing" || owner === "music" || owner === "program" || owner === "software") {
+		const reference = { owner, id: unitId };
+		await replaceCatalogContentLanguageSupport(tx, reference, actor, {
+			expectedRevision: (await loadCatalogIdentity(tx, reference, actor, true)).revision,
+			expectedHeadVersion: 0,
+			value,
+		});
+		return;
+	}
+	if (owner !== "audio" && owner !== "video")
+		throw new ContentPackInvalid("This owner does not support consumption language declarations");
+	await replaceUnitContentLanguageSupport(tx, unitId, owner, value);
 }
 
 function touchesCreated(
@@ -572,37 +405,6 @@ async function importRelations(
 	createKeys: ReadonlySet<string>,
 ): Promise<void> {
 	const { relations, ids } = pack;
-	const objectBySourceKey = new Map(
-		pack.objects.map((object) => [object.sourceKey, object] as const),
-	);
-	const unitVariants = (relations.unitVariants ?? []).filter((item) =>
-		touchesCreated(createKeys, [item.mainUnitSourceKey, item.variantUnitSourceKey]),
-	);
-	if (unitVariants.length) {
-		const variantCountByMain = new Map<string, number>();
-		const rows = unitVariants.map((item) => {
-			if (!isVariantCapableUnitKind(item.unitKind))
-				throw new ContentPackInvalid("Unsupported variant kind " + item.unitKind);
-			const nextCount = (variantCountByMain.get(item.mainUnitSourceKey) ?? 0) + 1;
-			if (nextCount > WorkPolicy.variant.maxGroupSize)
-				throw new ContentPackInvalid("Unit Variant group exceeds the supported size");
-			variantCountByMain.set(item.mainUnitSourceKey, nextCount);
-			const variantObject = objectBySourceKey.get(item.variantUnitSourceKey);
-			const mainObject = objectBySourceKey.get(item.mainUnitSourceKey);
-			if (item.unitKind === "entity") {
-				const variantEntityKind = variantObject?.entity?.kind;
-				const mainEntityKind = mainObject?.entity?.kind;
-				if (!variantEntityKind || variantEntityKind !== mainEntityKind)
-					throw new ContentPackInvalid("Entity variant relations require matching Entity kinds");
-			}
-			return {
-				mainUnitId: requireId(ids.units, item.mainUnitSourceKey),
-				variantUnitId: requireId(ids.units, item.variantUnitSourceKey),
-				unitKind: item.unitKind,
-			};
-		});
-		await tx.insert(unitVariant).values(rows);
-	}
 	const credits = (relations.credits ?? []).filter((item) =>
 		touchesCreated(createKeys, [item.sourceUnitSourceKey, item.creditedEntitySourceKey]),
 	);
@@ -617,18 +419,6 @@ async function importRelations(
 			})),
 		);
 	await importSubjectRelations(tx, pack);
-	const seriesReleases = (relations.seriesReleases ?? []).filter((item) =>
-		touchesCreated(createKeys, [item.seriesSourceKey, item.releaseUnitSourceKey]),
-	);
-	if (seriesReleases.length)
-		await tx.insert(seriesRelease).values(
-			seriesReleases.map((item) => ({
-				seriesId: requireId(ids.units, item.seriesSourceKey),
-				releaseUnitId: requireId(ids.units, item.releaseUnitSourceKey),
-				position: item.position,
-				releasedOn: item.releasedOn,
-			})),
-		);
 	const collectionItems = (relations.collectionItems ?? []).filter((item) =>
 		touchesCreated(createKeys, [item.collectionSourceKey, item.unitSourceKey]),
 	);
@@ -869,7 +659,7 @@ async function importVocabularyDefinitions(
 	const actualRelationIds = await importTagRelations(tx, pack);
 	const actualExpressionIds = await importTagExpressions(tx, pack);
 	for (const object of pack.objects)
-		if (object.unit.kind === "tag")
+		if (object.identity.owner === "tag")
 			await ensureSimpleTagExpressionInTransaction(tx, {
 				tagId: requireId(pack.ids.units, object.sourceKey),
 				profileId: ImportOwnerProfileId,
@@ -1263,7 +1053,7 @@ async function importSlugs(
 	createKeys: ReadonlySet<string>,
 ): Promise<void> {
 	for (const object of pack.objects) {
-		if (object.unit.kind !== "zone_page" || !object.zonePage) continue;
+		if (!object.zonePage) continue;
 		if (!createKeys.has(object.sourceKey)) continue;
 		await replaceZonePageSlugAddress(tx, {
 			zoneId: requireId(pack.ids.units, object.zonePage.zoneSourceKey),
@@ -1273,11 +1063,11 @@ async function importSlugs(
 	}
 	for (const slug of pack.relations.slugs ?? []) {
 		if (!createKeys.has(slug.targetSourceKey)) continue;
-		const scopeUnitId = TopLevelSlugNamespaceUnitIds[slug.scope];
-		if (!scopeUnitId) throw new ContentPackInvalid(`Unknown slug scope ${slug.scope}`);
+		const scopeNamespaceId = TopLevelSlugNamespaceIds[slug.scope];
+		if (!scopeNamespaceId) throw new ContentPackInvalid(`Unknown slug scope ${slug.scope}`);
 		await tx.insert(unitSlugAddress).values({
 			kind: "canonical",
-			scopeUnitId,
+			scopeNamespaceId,
 			slug: slug.slug,
 			targetUnitId: requireId(pack.ids.units, slug.targetSourceKey),
 		});

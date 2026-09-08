@@ -1,27 +1,26 @@
-import { withImageAssetWrite } from "../image-assets/write";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { withImageAssetWrite } from "../image-assets/write";
 
 import {
 	parseDocument,
 	ZoneAppearanceDocument,
 	type ZoneAppearanceDocument as ZoneAppearance,
 } from "@rezics/block";
-import { TopLevelSlugNamespaceUnitIds } from "@rezics/slug";
+import { TopLevelSlugNamespaceIds } from "@rezics/slug";
 import { and, eq, isNull } from "drizzle-orm";
 
 import { completeImageAsset, createImageAsset } from "../api/image-assets/service";
 import { BootstrapPlatformAdministratorProfile, OfficialProfileIds } from "../bootstrap/data";
 import { env } from "../config";
-import { putCustomThemeInstallation } from "../custom-themes/presentation";
 import { validateSubmittedCustomThemePackage } from "../custom-themes/package";
+import { putCustomThemeInstallation } from "../custom-themes/presentation";
 import { createCustomTheme, submitCustomThemeRevision } from "../custom-themes/service";
 import { database } from "../database";
 import {
 	customThemeRevision,
 	customThemeRevisionReviewEvent,
-	unit,
 	unitCustomThemeInstallation,
 	unitSlugAddress,
 	zone,
@@ -61,14 +60,13 @@ async function findLightNovelZoneId(): Promise<string> {
 	const [row] = await database
 		.select({ id: unitSlugAddress.targetUnitId })
 		.from(unitSlugAddress)
-		.innerJoin(unit, eq(unit.id, unitSlugAddress.targetUnitId))
+		.innerJoin(zone, eq(zone.id, unitSlugAddress.targetUnitId))
 		.where(
 			and(
 				eq(unitSlugAddress.slug, LightNovelZoneSlug),
 				eq(unitSlugAddress.kind, "canonical"),
-				eq(unitSlugAddress.scopeUnitId, TopLevelSlugNamespaceUnitIds.zones),
-				eq(unit.kind, "zone"),
-				isNull(unit.deletedAt),
+				eq(unitSlugAddress.scopeNamespaceId, TopLevelSlugNamespaceIds.zones),
+				isNull(zone.deletedAt),
 			),
 		)
 		.limit(1);

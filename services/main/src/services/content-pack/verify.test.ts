@@ -11,8 +11,9 @@ const Checksum = "a".repeat(64);
 function collectionObject(): PackObject {
 	return {
 		sourceKey: "fixture:collection",
-		unit: {
-			kind: "collection",
+		identity: {
+			owner: "collection",
+			shape: "collection",
 			status: "published",
 			visibility: "public",
 			contentRating: "general",

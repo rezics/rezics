@@ -1,5 +1,5 @@
-import type { DatabaseTransaction } from "../database";
 import { findPublicZoneThemeHeroAssets } from "../api/image-assets/service";
+import type { DatabaseTransaction } from "../database";
 import type { LoadedPack } from "./contracts";
 import { ContentPackInvalid } from "./errors";
 
@@ -10,7 +10,9 @@ export async function assertContentPackThemeAssets(
 ): Promise<void> {
 	const references = pack.objects.flatMap((object) => {
 		const assetId = object.compiledZone?.appearanceDocument.heroAssetId;
-		return object.unit.kind === "zone" && assetId ? [{ sourceKey: object.sourceKey, assetId }] : [];
+		return object.identity.owner === "zone" && assetId
+			? [{ sourceKey: object.sourceKey, assetId }]
+			: [];
 	});
 	if (!references.length) return;
 	const resolved = await findPublicZoneThemeHeroAssets(

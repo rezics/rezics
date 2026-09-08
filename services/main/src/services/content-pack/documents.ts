@@ -1,8 +1,8 @@
 import {
 	UnitReferencedBlockDocument,
 	WikiPostBlockHostPolicy,
-	ZonePageBlockHostPolicy,
 	ZoneAppearanceDocument,
+	ZonePageBlockHostPolicy,
 	assertBlockQueryBudget,
 	assertUnitReferencedBlockDocument,
 	assertWikiPostPortableTextDocument,
@@ -10,22 +10,22 @@ import {
 	isDocument,
 } from "@rezics/block";
 
-import { ContentPackInvalid } from "./errors";
 import type { LoadedPack, PackObject } from "./contracts";
+import { ContentPackInvalid } from "./errors";
 
 export function assertContentPackDocuments(pack: LoadedPack): void {
 	for (const object of pack.objects) assertPackObjectDocuments(object);
 }
 
 export function assertPackObjectDocuments(object: PackObject): void {
-	if (object.unit.kind === "zone") {
+	if (object.identity.owner === "zone") {
 		const appearanceDocument = object.compiledZone?.appearanceDocument;
 		if (!isDocument(ZoneAppearanceDocument, appearanceDocument))
 			throw new ContentPackInvalid(
 				`${object.sourceKey} compiled Zone theme is not a ZoneAppearanceDocument`,
 			);
 	}
-	if (object.unit.kind === "zone_page") {
+	if (Boolean(object.zonePage)) {
 		for (const localization of object.localizations)
 			assertZonePageLocalization(object, localization);
 		return;

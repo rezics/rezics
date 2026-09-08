@@ -1,10 +1,8 @@
-import { inArray } from "drizzle-orm";
-
 import { BootstrapUnitIds } from "../bootstrap/data";
 import type { DatabaseTransaction } from "../database";
-import { unit } from "../database/schema";
-import { ContentPackCollision, ContentPackInvalid } from "./errors";
 import type { ContentPackPlan, LoadedPack, PlannedObject } from "./contracts";
+import { ContentPackCollision, ContentPackInvalid } from "./errors";
+import { readPackIdentities } from "./identity";
 
 const BootstrapIdSet = new Set<string>(BootstrapUnitIds);
 
@@ -13,7 +11,6 @@ export async function planContentPack(
 	pack: LoadedPack,
 	sourceRoot: string,
 ): Promise<ContentPackPlan> {
-	const unitIds = Object.values(pack.ids.units);
 	for (const [sourceKey, unitId] of Object.entries(pack.ids.units)) {
 		if (BootstrapIdSet.has(unitId))
 			throw new ContentPackCollision(`${sourceKey} uses Bootstrap ID ${unitId}`);
@@ -23,9 +20,8 @@ export async function planContentPack(
 			throw new ContentPackInvalid(`Missing unit id for ${object.sourceKey}`);
 	}
 
-	const existingUnits = unitIds.length
-		? await tx.select({ id: unit.id }).from(unit).where(inArray(unit.id, unitIds))
-		: [];
+	const existingUnits = await readPackIdentities(tx, pack);
+
 	const existingIds = new Set(existingUnits.map((row) => row.id));
 	const planned: PlannedObject[] = [];
 	for (const object of pack.objects) {

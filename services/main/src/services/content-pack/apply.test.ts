@@ -2,15 +2,14 @@ import type { SQL } from "drizzle-orm";
 import { PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it, vi } from "vitest";
 
-import type { DatabaseTransaction } from "../database";
 import { OfficialProfileIds } from "../bootstrap/data";
-import type { PackObject } from "./contracts";
+import type { DatabaseTransaction } from "../database";
 import {
 	applyContentPack,
 	assertShowcaseFixtureInstallState,
 	recordImportedCollectionStructureHistories,
 } from "./apply";
-import type { LoadedPack } from "./contracts";
+import type { LoadedPack, PackObject } from "./contracts";
 import { ContentPackConflict } from "./errors";
 
 const createCollectionStructureHistory = vi.hoisted(() => vi.fn());
@@ -23,8 +22,9 @@ const CollectionId = "019c0000-0000-7000-8000-000000000001";
 function collectionObject(): PackObject {
 	return {
 		sourceKey: "fixture:collection",
-		unit: {
-			kind: "collection",
+		identity: {
+			owner: "collection",
+			shape: "collection",
 			status: "published",
 			visibility: "public",
 			contentRating: "general",

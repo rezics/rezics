@@ -1,35 +1,19 @@
-# Local showcase fixture loader
+# Native local content packs
 
-This directory reads the content-pack file format used by the sibling
-`rezics-showcase-packs` repository. It is local development infrastructure,
-not a production ingestion service.
+This is local fixture infrastructure. It creates canonical resources in an explicit transaction and does not run as production ingestion or synchronization. A mixed existing/missing pack is rejected; that rule does not authorize resetting unrelated development data. Bounded edits to existing resources should use their owning API.
 
-REZICS canonical rows and their REZICS-owned revision, governance, and audit
-history are the sole source of truth. The loader does not persist a pack
-ledger or parallel evidence tables, does not synchronize later pack changes,
-and must never run against staging or production. Its service entry point
-enforces a local database URL.
+Every object declares `identity.owner`, `identity.shape`, lifecycle metadata, localizations, and an import policy. Catalog objects additionally declare `native`, using the same strict creation grammar as `CreateCatalogResourceSchema`. The declaration must agree with the owner and shape. The importer uses the fixed UUID from `ids.units`, creates its actual owner identity, and initializes all required subtype rows before the transaction can commit. There is no global Unit row, old Book/Media/Series/Release detail, generic variant relation, or measurement side table.
 
-Load fixtures only into a freshly reset local database. A mixture of existing
-and missing fixture Units is rejected; reset and reload instead of reconciling
-the fixture repository with canonical data through this loader. This is a
-loader invariant, not a general instruction to reset unrelated local state for
-every bounded content edit. When only one existing product-owned resource must
-be replaced, use its owning authenticated API, service operation, or a reviewed
-loopback-only maintenance command and verify the exact persisted value. Keep
-reset-and-reload for identity-graph, relation, slug, structure, or other
-interdependent pack changes, or when no safe targeted write path exists.
+Native documents are `publishing.json`, `music.json`, `program.json`, `software.json`, `entities.json`, `groupings.json`, `references.json`, and `distributions.json`. Platform documents retain Realm, Zone, Tag, Post, Label, Collection, Audio and Video owners. Zone Pages live in `posts.json` as a Post with shape/kind `page`, a real Zone subject, and `zonePage.zoneSourceKey` pointing to that same Zone. Chapter files may still be split under `chapters/`.
 
-The default bundle is a strictly bounded developer dataset (currently about
-2,000 Units and 7,000 relation records, roughly 17 MB). Production capacity
-planning at 500 million and 3 billion corpus rows therefore assigns this
-loader zero rows and zero request-path work: it is intentionally not a
-corpus-scale production data flow.
+A catalog object's required links use explicit native references with UUIDs from the pack ledger. Creation is topologically ordered; missing external targets are checked by the native commands, and cycles fail before writes. Identity creation uses the real Bootstrap operator Auth binding. Catalog creators receive the normal native permissions; import ownership metadata never invents organization representation or account bindings. Native named forms and revisions are canonical; shared localization rows retain authored rich content. Native consumption-language declarations use their semantic journal and update the projection in the same transaction.
 
-`light-novel-demo.ts` is the same class of local installer. After the
-light-novel pack is loaded, `task local:light-novel-demo` uploads an optional
-ignored banner through the Image Assets storage contract and installs one
-approved Custom Theme revision on that Zone. It authenticates as Bootstrap
-Profiles inside the process, never over HTTP, and is gated by
-`assertLocalDatabaseUrl`. It is not a substitute for the public Custom Theme
-review APIs outside a disposable local database.
+`catalogFacts` declares a source key, owner source key, governed property definition and JSON value. Values are streamed into bounded native value-node batches. `catalogRelations` declares an owner, target, predicate definition, role definition with explicit allowed targets, and optional qualifiers referring to facts on that same owner. The importer compiles the generated role/qualifier revision IDs into the predicate's constraints. The relation grammar is deliberately binary; more complex source relationships belong in the corresponding owning import command. Rights records and source locks remain explicit. A source assertion is not silently promoted to account authority.
+
+Old showcase packs need an offline conversion to this format. The original curated repository is not rewritten or loaded through an adapter. Conversion must preserve source provenance and authored documents while splitting bibliographic works, text versions and publications, and replacing software versions, groups and contextual facts with their actual native structures. Loading old documents fails explicitly.
+
+## Bounds and capacity
+
+The loader accepts at most 10,000 objects per pack, 10,000 native facts and 10,000 native relations. Each JSON document is capped at 8 MiB and the complete pack at 128 MiB before JSON materialization. Checksums are compared before and after parsing to detect a changing source. Identity existence checks group by declared concrete owner and read primary keys in batches of 500. There is no whole-corpus scan, offset pagination, or per-ID network query. Dependency ordering is O(objects + required links), with bounded in-memory state. Scalar fact payloads are capped below the native 512 KiB command limit, and value-node batches contain at most 128 nodes.
+
+At either 500,000,000 or 3,000,000,000 corpus rows, the loader still performs only these bounded owner-key lookups and creates its declared local fixture rows. Index height and cache misses can change latency; no production throughput claim is made. For 10,000 objects, identity reads require at most 20 owner groups plus 20 fully populated 500-row batches; skew can put all 10,000 writes on one owner and remains a single local transaction. Native fact/relationship history contributes its usual row and index write amplification. Large packs can hold transaction locks and generate substantial WAL, so this tool is restricted to disposable local targets and sequential pack admission. Production bulk adoption must use the native staged, resumable source pipelines instead of expanding these limits.

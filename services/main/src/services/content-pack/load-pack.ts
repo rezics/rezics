@@ -1,7 +1,8 @@
+import { createReadStream } from "node:fs";
 import { createHash } from "node:crypto";
-import { readdir, readFile } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
 import { join, relative } from "node:path";
-import { type ZodType, type output, z } from "zod";
+import { type output, z, type ZodType } from "zod";
 
 import type { IdLedger, LoadedPack, PackObject, PackRelations, RightsRecord } from "./contracts";
 import { assertContentPackDocuments } from "./documents";
@@ -21,15 +22,16 @@ import {
 const ObjectDocumentNames = [
 	"realm.json",
 	"zones.json",
-	"zone-pages.json",
-	"series.json",
-	"books.json",
-	"media.json",
+	"publishing.json",
+	"music.json",
+	"program.json",
 	"software.json",
-	"releases.json",
 	"video.json",
 	"audio.json",
 	"entities.json",
+	"groupings.json",
+	"references.json",
+	"distributions.json",
 	"tags.json",
 	"posts.json",
 	"labels.json",
@@ -48,10 +50,11 @@ const KnownRootDocumentNames: ReadonlySet<string> = new Set([
 	"bindings.json",
 ]);
 const EmptyRelations: PackRelations = {
-	unitVariants: [],
+	catalogRelations: [],
+	catalogFacts: [],
 	credits: [],
 	subjects: [],
-	seriesReleases: [],
+
 	collectionItems: [],
 	unitTags: [],
 	guideNodes: [],
@@ -80,6 +83,7 @@ export async function loadPack(packsRoot: string, packId: string): Promise<Loade
 	const safePackId = parsedPackId.data;
 	const packDir = join(packsRoot, "packs", safePackId);
 	await assertKnownRootDocuments(packDir);
+	const expectedChecksum = await hashPack(packDir);
 	const manifest = await readJson(join(packDir, "pack.json"), PackManifestSchema);
 	if (manifest.id !== safePackId)
 		throw new ContentPackInvalid(
@@ -107,6 +111,8 @@ export async function loadPack(packsRoot: string, packId: string): Promise<Loade
 		[],
 	);
 	const checksum = await hashPack(packDir);
+	if (checksum !== expectedChecksum)
+		throw new ContentPackInvalid("Pack changed while it was being loaded");
 	const pack: LoadedPack = {
 		packDir,
 		manifest,
@@ -199,17 +205,20 @@ function assertPackReferences(
 			throw new ContentPackInvalid(`Duplicate content object source key: ${object.sourceKey}`);
 		objectsBySourceKey.set(object.sourceKey, object);
 		requireLedgerId(ids.units, object.sourceKey, "Unit");
-		if (object.entityMeasurements)
-			for (const measurement of object.entityMeasurements)
-				if (measurement.contextUnitSourceKey)
-					requireLedgerId(ids.units, measurement.contextUnitSourceKey, "measurement context Unit");
-		if (object.unit.kind === "tag" && object.tag && "parentSourceKeys" in object.tag)
+		if (object.identity.owner === "tag" && object.tag && "parentSourceKeys" in object.tag)
 			for (const parentSourceKey of object.tag.parentSourceKeys) {
 				if (parentSourceKey === object.sourceKey)
 					throw new ContentPackInvalid(`${object.sourceKey} cannot be its own Tag parent`);
 				requireLedgerId(ids.units, parentSourceKey, "parent Tag");
 			}
 	}
+	for (const relation of relations.catalogRelations ?? []) {
+		requireLedgerId(ids.units, relation.sourceSourceKey, "native relation owner");
+		requireLedgerId(ids.units, relation.targetSourceKey, "native relation target");
+	}
+	for (const fact of relations.catalogFacts ?? [])
+		requireLedgerId(ids.units, fact.ownerSourceKey, "native fact owner");
+	if (objects.length > 10_000) throw new ContentPackInvalid("Pack object budget exceeds 10000");
 	const unitIdValues = Object.values(ids.units);
 	if (new Set(unitIdValues).size !== unitIdValues.length)
 		throw new ContentPackInvalid("Unit IDs must be unique within a content pack");
@@ -219,12 +228,12 @@ function assertPackReferences(
 		requireLedgerId(ids.units, relation.unitSourceKey, "Tag application Unit");
 		requireLedgerId(ids.units, relation.tagSourceKey, "applied Tag");
 		const tagObject = objectsBySourceKey.get(relation.tagSourceKey);
-		if (tagObject && tagObject.unit.kind !== "tag")
+		if (tagObject && tagObject.identity.owner !== "tag")
 			throw new ContentPackInvalid(
 				`${relation.tagSourceKey} is not a Tag and cannot appear in unitTags`,
 			);
 		if (
-			tagObject?.unit.kind === "tag" &&
+			tagObject?.identity.owner === "tag" &&
 			tagObject.tag &&
 			"directlyApplicable" in tagObject.tag &&
 			!tagObject.tag.directlyApplicable
@@ -240,7 +249,7 @@ function assertPackReferences(
 
 	const vocabularyNodeSourceKeys = new Set<string>();
 	for (const [sourceKey, object] of objectsBySourceKey)
-		if (object.unit.kind === "tag") vocabularyNodeSourceKeys.add(sourceKey);
+		if (object.identity.owner === "tag") vocabularyNodeSourceKeys.add(sourceKey);
 	for (const guide of relations.guideNodes ?? []) {
 		if (vocabularyNodeSourceKeys.has(guide.sourceKey))
 			throw new ContentPackInvalid(`Duplicate vocabulary-node source key: ${guide.sourceKey}`);
@@ -292,7 +301,7 @@ function assertPackReferences(
 			...(expression.groupKey ? [expression.groupKey.tagSourceKey] : []),
 		]) {
 			const object = objectsBySourceKey.get(tagSourceKey);
-			if (!object || object.unit.kind !== "tag")
+			if (!object || object.identity.owner !== "tag")
 				throw new ContentPackInvalid(
 					`${tagSourceKey} is not a Tag and cannot define a Tag Expression`,
 				);
@@ -313,7 +322,7 @@ function assertPackReferences(
 			);
 		if (rule.targetTagSourceKey) {
 			const target = objectsBySourceKey.get(rule.targetTagSourceKey);
-			if (!target || target.unit.kind !== "tag")
+			if (!target || target.identity.owner !== "tag")
 				throw new ContentPackInvalid(`Unknown inference target Tag: ${rule.targetTagSourceKey}`);
 		}
 	}
@@ -398,7 +407,7 @@ function assertPackReferences(
 		requireLedgerId(ids.units, subject.unitSourceKey, "subject Unit");
 		requireLedgerId(ids.units, subject.entitySourceKey, "subject Entity");
 		const entityObject = objectsBySourceKey.get(subject.entitySourceKey);
-		if (entityObject && entityObject.unit.kind !== "entity")
+		if (entityObject && entityObject.identity.owner !== "entity")
 			throw new ContentPackInvalid(
 				`${subject.entitySourceKey} is not an Entity and cannot be a subject association Entity`,
 			);
@@ -444,19 +453,26 @@ function hasJsonPointer(root: unknown, pointer: string): boolean {
 
 async function hashPack(packDir: string): Promise<string> {
 	const hash = createHash("sha256");
+	let bytes = 0;
+	async function append(filePath: string) {
+		const buffer = await readPackDocument(filePath);
+		bytes += buffer.length;
+		if (bytes > 128 * 1024 * 1024) throw new ContentPackInvalid("Pack exceeds 128 MiB byte budget");
+		hash.update(buffer);
+	}
 	const rootDocumentNames = (await readdir(packDir, { withFileTypes: true }))
 		.filter((entry) => entry.isFile() && KnownRootDocumentNames.has(entry.name))
 		.map((entry) => entry.name)
 		.sort((left, right) => left.localeCompare(right));
 	for (const name of rootDocumentNames) {
 		hash.update(name);
-		hash.update(await readFile(join(packDir, name)));
+		await append(join(packDir, name));
 	}
 	const contentDir = join(packDir, "content");
 	for (const filePath of await listFilesRecursively(contentDir)) {
 		const name = relative(packDir, filePath).replaceAll("\\", "/");
 		hash.update(name);
-		hash.update(await readFile(filePath));
+		await append(filePath);
 	}
 	return hash.digest("hex");
 }
@@ -475,7 +491,7 @@ async function readJson<Schema extends ZodType>(
 	filePath: string,
 	schema: Schema,
 ): Promise<output<Schema>> {
-	const source = await readFile(filePath, "utf8");
+	const source = (await readPackDocument(filePath)).toString("utf8");
 	let value: unknown;
 	try {
 		value = JSON.parse(source);
@@ -517,4 +533,18 @@ function describeIssues(error: z.ZodError): string {
 
 function isMissingFile(error: unknown): boolean {
 	return error instanceof Error && "code" in error && error.code === "ENOENT";
+}
+
+/** File reads are capped before materializing JSON, including during checksum verification. */
+async function readPackDocument(filePath: string): Promise<Buffer> {
+	const chunks: Buffer[] = [];
+	let size = 0;
+	for await (const chunk of createReadStream(filePath)) {
+		if (!Buffer.isBuffer(chunk)) throw new ContentPackInvalid("Unexpected pack stream encoding");
+		size += chunk.length;
+		if (size > 8 * 1024 * 1024)
+			throw new ContentPackInvalid("Pack document exceeds 8 MiB byte budget");
+		chunks.push(chunk);
+	}
+	return Buffer.concat(chunks, size);
 }

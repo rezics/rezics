@@ -1,12 +1,11 @@
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+
 import { join } from "node:path";
-import { UnitReferencedBlockDocument, isDocument } from "@rezics/block";
+
 import { describe, expect, it } from "vitest";
 
-import { ContentPackInvalid, ContentPackSourceNotFound } from "./errors";
+import { ContentPackInvalid } from "./errors";
 import { loadPack } from "./load-pack";
-import { resolveShowcasePacksDir } from "./resolve-source";
 
 const FixtureId = "checksum-fixture";
 const FixtureUnitIds = {
@@ -23,16 +22,6 @@ const FixtureFieldRights = {
 	sourceUrl: "https://example.com/entity",
 	attributionText: "The description has source-specific terms.",
 } as const;
-
-const ShowcasePacksRoot = (() => {
-	try {
-		return resolveShowcasePacksDir({});
-	} catch (error) {
-		if (error instanceof ContentPackSourceNotFound) return undefined;
-		throw error;
-	}
-})();
-const showcaseIt = ShowcasePacksRoot ? it : it.skip;
 
 describe("loadPack", () => {
 	it("validates and losslessly loads every pack document with a stable checksum", async () => {
@@ -323,103 +312,11 @@ describe("loadPack", () => {
 			await fixture.dispose();
 		}
 	});
-
-	showcaseIt(
-		"loads all generated showcase contracts without dropping their extensions",
-		async () => {
-			if (!ShowcasePacksRoot)
-				throw new Error("showcase test ran without its optional source checkout");
-			const [toaru, xuZhimo, vndb] = await Promise.all([
-				loadPack(ShowcasePacksRoot, "toaru-core"),
-				loadPack(ShowcasePacksRoot, "xu-zhimo"),
-				loadPack(ShowcasePacksRoot, "vndb-v11"),
-			]);
-			expect(toaru.manifest.id).toBe("toaru-core");
-			expect(toaru.manifest.languages).toEqual(["ja", "zh"]);
-			expect(
-				toaru.objects.some((object) => object.sourceKey === "toaru:entity:character:kamijou-touma"),
-			).toBe(true);
-			expect(toaru.ids.units["toaru:entity:character:kamijou-touma"]).toMatch(
-				/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
-			);
-
-			expect(xuZhimo.bindings).toHaveLength(389);
-			expect(xuZhimo.objects.some((object) => object.labelSourceKey !== undefined)).toBe(true);
-
-			expect(vndb.relations.guideNodes).toEqual([]);
-			expect(vndb.relations.tagRelations).toHaveLength(1_083);
-			expect(vndb.relations.tagExpressions).toHaveLength(1_305);
-			expect(vndb.relations.tagExpressionInferenceRules).toHaveLength(3_559);
-			expect(vndb.relations.tagPaths).toHaveLength(840);
-			expect(vndb.relations.tagPathSenses).toHaveLength(840);
-			expect(vndb.relations.tagPathApplications).toHaveLength(1_781);
-			expect(vndb.manifest.version).toBe("1.2.0");
-			expect(
-				vndb.objects.filter(
-					(object) =>
-						object.unit.kind === "tag" &&
-						object.localizations.some((localization) => localization.description !== undefined),
-				),
-			).toHaveLength(1_022);
-			expect(
-				vndb.objects
-					.find((object) => object.sourceKey === "vndb:v11:software:work")
-					?.localizations.some((localization) => localization.description !== undefined),
-			).toBe(true);
-			if (vndb.sourceLock.kind !== "snapshot-provenance")
-				throw new Error("vndb-v11 must use snapshot provenance");
-			expect(vndb.sourceLock.rightsExceptions).toEqual([
-				expect.objectContaining({
-					sourceField: "db/vn.description",
-					verificationStatus: "unverified",
-					sourceUrl: "https://vndb.org/d14",
-				}),
-				expect.objectContaining({
-					sourceField: "db/chars.description",
-					verificationStatus: "unverified",
-					sourceUrl: "https://vndb.org/d14",
-				}),
-			]);
-			expect(vndb.sourceLock.aggregation).toEqual({
-				name: "VNDB tag_vn_calc",
-				sourceUrl:
-					"https://code.blicky.net/yorhel/vndb/src/commit/514f2391cc12aa94ce420354863c52538641d9b1/sql/func.sql",
-			});
-			expect(vndb.objects.some((object) => (object.entityMeasurements?.length ?? 0) > 0)).toBe(
-				true,
-			);
-		},
-		20_000,
-	);
-
-	showcaseIt.each([
-		["hongloumeng", "hongloumeng:zone", "hongloumeng:zone-page:home"],
-		["light-novel", "light-novel:zone", "light-novel:zone-page:home"],
-		["vndb-v11", "vndb:v11:zone:catalog", "vndb:v11:zone-page:home"],
-	] as const)(
-		"loads %s with a fallback appearance and Unit-referenced home Page",
-		async (packId, zoneSourceKey, pageSourceKey) => {
-			if (!ShowcasePacksRoot)
-				throw new Error("showcase test ran without its optional source checkout");
-			const pack = await loadPack(ShowcasePacksRoot, packId);
-			const zone = pack.objects.find(({ sourceKey }) => sourceKey === zoneSourceKey);
-			const page = pack.objects.find(({ sourceKey }) => sourceKey === pageSourceKey);
-
-			expect(zone?.compiledZone?.appearanceDocument._type).toBe("zone-appearance");
-			expect(zone?.zone?.homePageSourceKey).toBe(pageSourceKey);
-			expect(page?.zonePage?.zoneSourceKey).toBe(zoneSourceKey);
-			expect(
-				page?.localizations.every(({ content }) =>
-					isDocument(UnitReferencedBlockDocument, content),
-				),
-			).toBe(true);
-			expect(pack.checksum).toMatch(/^[0-9a-f]{64}$/);
-		},
-	);
 });
 
 async function createFixture() {
-	const root = await mkdtemp(join(tmpdir(), "rezics-content-pack-"));
+	await mkdir(".temp", { recursive: true });
+	const root = await mkdtemp(join(".temp", "rezics-content-pack-"));
 	const packDir = join(root, "packs", FixtureId);
 	const contentDir = join(packDir, "content");
 	const entitiesPath = join(contentDir, "entities.json");
@@ -457,20 +354,21 @@ async function createFixture() {
 			},
 		]),
 		writeJson(join(contentDir, "software.json"), [
-			packObject("fixture:software", "software", {
-				software: { metadataOnly: true, versionLabel: "root" },
+			packObject("fixture:software", "software", "content", {
+				native: {
+					kind: "software_content",
+					name: { value: "Fixture software", languageTag: "en" },
+				},
 			}),
-		]),
-		writeJson(join(contentDir, "releases.json"), [
-			packObject("fixture:release", "release", {
-				release: { parentUnitSourceKey: "fixture:software", versionLabel: "1.0" },
+			packObject("fixture:release", "software", "release", {
+				native: { kind: "software_release", name: { value: "Fixture release", languageTag: "en" } },
 			}),
 		]),
 		writeJson(join(contentDir, "video.json"), [
-			packObject("fixture:video", "video", { video: { durationSeconds: 120 } }),
+			packObject("fixture:video", "video", "video", { video: { durationSeconds: 120 } }),
 		]),
 		writeJson(join(contentDir, "audio.json"), [
-			packObject("fixture:audio", "audio", { audio: { durationSeconds: 120 } }),
+			packObject("fixture:audio", "audio", "audio", { audio: { durationSeconds: 120 } }),
 		]),
 		writeJson(entitiesPath, [entityObject()]),
 		writeJson(relationsPath, { subjects: [] }),
@@ -487,15 +385,21 @@ async function createFixture() {
 	};
 }
 
-function packObject(sourceKey: string, kind: string, detail: Readonly<Record<string, unknown>>) {
+function packObject(
+	sourceKey: string,
+	owner: string,
+	shape: string,
+	detail: Readonly<Record<string, unknown>>,
+) {
 	return {
 		sourceKey,
-		unit: {
-			kind,
+		identity: {
+			owner,
+			shape,
 			status: "published",
 			visibility: "public",
 			contentRating: "general",
-			aiDisclosure: "none",
+			aiDisclosure: "unknown",
 			license: null,
 			moderationStatus: "approved",
 			postTargetingLocked: false,
@@ -508,8 +412,12 @@ function packObject(sourceKey: string, kind: string, detail: Readonly<Record<str
 
 function entityObject() {
 	return {
-		...packObject("fixture:entity", "entity", {
-			entity: { kind: "character", verified: false },
+		...packObject("fixture:entity", "entity", "character", {
+			native: {
+				kind: "entity",
+				shape: "character",
+				name: { value: "Fixture Entity", languageTag: "en" },
+			},
 		}),
 		localizations: [
 			{

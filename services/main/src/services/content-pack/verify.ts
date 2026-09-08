@@ -1,10 +1,11 @@
 import { inArray } from "drizzle-orm";
+import { readPackIdentities } from "./identity";
 
 import type { DatabaseTransaction } from "../database";
-import { collectionStructureRevisionHead, unit } from "../database/schema";
+import { collectionStructureRevisionHead } from "../database/schema";
+import type { LoadedPack } from "./contracts";
 import { assertContentPackDocuments } from "./documents";
 import { ContentPackInvalid } from "./errors";
-import type { LoadedPack } from "./contracts";
 import { assertContentPackThemeAssets } from "./theme-assets";
 
 export async function verifyContentPack(
@@ -14,13 +15,13 @@ export async function verifyContentPack(
 	assertContentPackDocuments(pack);
 	await assertContentPackThemeAssets(tx, pack);
 	const unitIds = pack.objects.map((object) => pack.ids.units[object.sourceKey]!);
-	const existing = await tx.select({ id: unit.id }).from(unit).where(inArray(unit.id, unitIds));
+	const existing = await readPackIdentities(tx, pack);
 	if (existing.length !== unitIds.length)
 		throw new ContentPackInvalid(
 			`${pack.manifest.id} is missing ${unitIds.length - existing.length} imported units`,
 		);
 	const collectionIds = pack.objects.flatMap((object) =>
-		object.unit.kind === "collection" ? [pack.ids.units[object.sourceKey]!] : [],
+		object.identity.owner === "collection" ? [pack.ids.units[object.sourceKey]!] : [],
 	);
 	const collectionStructureHeads = collectionIds.length
 		? await tx
