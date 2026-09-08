@@ -1,11 +1,12 @@
-import { and, count, eq, inArray, isNotNull, isNull, notInArray, sql } from "drizzle-orm";
+import { readSeedIdentityIds } from "./fixture-target";
+import { seedFixtureIdentityId } from "./identity";
+import { CatalogNameTables } from "../database/schema/catalog-names";
+import { assertLocalDatabaseUrl } from "./data";
+import { env } from "../config";
+import { and, count, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 
 import { assertPlatformCoreReady, inspectPlatformCore } from "../bootstrap/core";
-import {
-	BootstrapUnitIds,
-	CuratedCreationTagCollectionManifest,
-	OfficialZoneManifest,
-} from "../bootstrap/data";
+import { CuratedCreationTagCollectionManifest, OfficialZoneManifest } from "../bootstrap/data";
 import { database } from "../database";
 import {
 	apiTokenQuotaOverride,
@@ -21,12 +22,13 @@ import {
 	realmTagJudgment,
 	realmUnitTag,
 	recommendationSnapshot,
-	release,
+	softwareRelease,
+	entityCatalogProfile,
+	publishingTextWork,
+	publishingPublicationText,
 	sharedSearchQuery,
 	subjectAssociation,
 	tagPath,
-	unit,
-	unitAccessGrant,
 	unitAccessInvitation,
 	unitAccessRestriction,
 	unitAssociationProposal,
@@ -57,7 +59,9 @@ function requirePositive(value: number, message: string): void {
 export async function verifySeedDatabase(
 	options: Pick<SeedRunOptions, "profile" | "scenarios">,
 ): Promise<SeedVerificationResult> {
+	assertLocalDatabaseUrl(env.DATABASE_URL);
 	assertPlatformCoreReady(await inspectPlatformCore());
+	const identityIds = await readSeedIdentityIds(database);
 	const coverageContractQueries = [
 		{
 			name: "Shared Search query",
@@ -76,18 +80,16 @@ export async function verifySeedDatabase(
 			query: database.select({ value: count() }).from(unitAccessRestriction),
 		},
 		{
-			name: "Entity association access grant",
-			query: database
-				.select({ value: count() })
-				.from(unitAccessGrant)
-				.where(
-					inArray(unitAccessGrant.permission, [
-						"entity.association.credit.request",
-						"entity.association.credit.direct",
-						"entity.association.subject.request",
-						"entity.association.subject.direct",
-					]),
-				),
+			name: "Independent native Entity profiles",
+			query: database.select({ value: count() }).from(entityCatalogProfile),
+		},
+		{
+			name: "Text Version to Work coverage",
+			query: database.select({ value: count() }).from(publishingTextWork),
+		},
+		{
+			name: "Publication to Text Version coverage",
+			query: database.select({ value: count() }).from(publishingPublicationText),
 		},
 		{
 			name: "Unit association proposal",
@@ -131,7 +133,7 @@ export async function verifySeedDatabase(
 		},
 		{
 			name: "Release",
-			query: database.select({ value: count() }).from(release),
+			query: database.select({ value: count() }).from(softwareRelease),
 		},
 	] as const;
 	const [
@@ -146,10 +148,9 @@ export async function verifySeedDatabase(
 		contentReviewCasesResult,
 		demoPlatformGrantResult,
 	] = await Promise.all([
-		database
-			.select({ value: count() })
-			.from(unit)
-			.where(notInArray(unit.id, [...BootstrapUnitIds])),
+		Promise.resolve([
+			{ value: [...identityIds.values()].reduce((sum, ids) => sum + ids.length, 0) },
+		]),
 		database
 			.select({ id: users.id })
 			.from(users)
@@ -182,17 +183,30 @@ export async function verifySeedDatabase(
 					isNotNull(recommendationSnapshot.completedAt),
 				),
 			),
-		database
-			.select({ kind: unit.kind, title: unitLocalization.title })
-			.from(unitLocalization)
-			.innerJoin(unit, eq(unit.id, unitLocalization.unitId))
-			.where(
-				inArray(unitLocalization.title, [
-					SeedFixtureTitles.book.en,
-					SeedFixtureTitles.media.en,
-					SeedFixtureTitles.software.en,
-				]),
-			),
+		Promise.all(
+			(
+				[
+					{ kind: "publishing", key: "demo-book" },
+					{ kind: "program", key: "demo-media" },
+					{ kind: "software", key: "demo-software" },
+				] as const
+			).map(async (fixture) => {
+				const names = CatalogNameTables[fixture.kind].name;
+				const [name] = await database
+					.select({ title: names.value })
+					.from(names)
+					.where(
+						and(
+							eq(names.ownerId, seedFixtureIdentityId(fixture.kind, fixture.key)),
+							eq(names.languageTag, "en"),
+							eq(names.kind, "primary"),
+							eq(names.state, "active"),
+						),
+					)
+					.limit(1);
+				return { kind: fixture.kind, title: name?.title ?? null };
+			}),
+		),
 		database
 			.select({ collectionId: collectionItem.collectionId, value: count() })
 			.from(collectionItem)
@@ -227,8 +241,8 @@ export async function verifySeedDatabase(
 		"Seed demo identity must not receive platform capability grants",
 	);
 	for (const [kind, fixture] of [
-		["book", SeedFixtureTitles.book],
-		["media", SeedFixtureTitles.media],
+		["publishing", SeedFixtureTitles.book],
+		["program", SeedFixtureTitles.media],
 		["software", SeedFixtureTitles.software],
 	] as const)
 		if (!officialZoneFixtures.some((row) => row.kind === kind && row.title === fixture.en))

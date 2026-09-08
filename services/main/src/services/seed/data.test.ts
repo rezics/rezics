@@ -90,8 +90,8 @@ describe("seed data", () => {
 		const plan = createSeedEnforcementPlan({
 			actorEntityId: "actor-entity",
 			index: 12,
-			authUserId: "profile-a",
-			actorAuthUserId: "profile-b",
+			authUserId: "auth-a",
+			actorAuthUserId: "auth-b",
 			kind: "suspension",
 			startsAt,
 			expiresAt: null,
@@ -100,7 +100,8 @@ describe("seed data", () => {
 		expect(plan.action.kind).toBe("issue");
 		expect(plan.action.enforcementKind).toBe(plan.enforcement.kind);
 		expect(plan.action.requestId).toBe("seed-enforcement-request-00000012");
-		expect(plan.enforcement).toMatchObject({ profileId: "profile-a", startsAt });
+		expect(plan.enforcement).toMatchObject({ authUserId: "auth-a", startsAt });
+		expect(plan.enforcement).not.toHaveProperty("profileId");
 	});
 
 	it("accepts only loopback database URLs", () => {

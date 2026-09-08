@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { UnitOwnerValues } from "@rezics/reference";
 import type { DatabaseTransaction } from "../database";
 import { assertFixtureSeedTargetEmpty } from "./fixture-target";
 
@@ -9,6 +10,7 @@ function transactionWithExistingRows(input: {
 }) {
 	const limit = vi
 		.fn()
+		.mockResolvedValue([])
 		.mockResolvedValueOnce(input.userId ? [{ id: input.userId }] : [])
 		.mockResolvedValueOnce(input.unitId ? [{ id: input.unitId }] : []);
 	const where = vi.fn(() => ({ limit }));
@@ -22,7 +24,7 @@ describe("Fixture Seed target preflight", () => {
 		const { transaction, select } = transactionWithExistingRows({});
 
 		await expect(assertFixtureSeedTargetEmpty(transaction)).resolves.toBeUndefined();
-		expect(select).toHaveBeenCalledTimes(2);
+		expect(select).toHaveBeenCalledTimes(UnitOwnerValues.length + 1);
 	});
 
 	it("rejects an existing non-Bootstrap user", async () => {

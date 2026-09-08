@@ -1,3 +1,19 @@
+import { saveFavorite } from "../favorites/service";
+import { CatalogReferenceSchema, type UnitOwner } from "@rezics/reference";
+import type { SeedIdentityDescriptor } from "./identity";
+import {
+	prepareFixtureIdentities,
+	insertSeedPlatformRows,
+	assertPreparedFixtureIdentitiesStored,
+	withSeedAuthority,
+} from "./identity";
+import {
+	materializeCatalogFixtures,
+	writeSeedCatalogNames,
+	seedCatalogNameHistory,
+	seedNativeFixtureStructures,
+	seedNativeReleaseFixture,
+} from "./catalog";
 import { createHash } from "node:crypto";
 import { authEntity } from "../database/schema/participation";
 import { selfAuthUserIdForEntity } from "../participation/account-query";
@@ -38,7 +54,7 @@ import {
 	CuratedCreationTagCollectionManifest,
 	OfficialProfileIds,
 	OfficialRealmManifest,
-	TopLevelSlugNamespaceUnitIds,
+	TopLevelSlugNamespaceIds,
 } from "../bootstrap/data";
 import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
 import {
@@ -60,14 +76,13 @@ import {
 	accountEnforcementAction,
 	accountEntityBlock,
 	accountPreference,
+	accountFavoritesState,
 	accounts,
 	apikeys,
 	auditEvent,
 	AuditEventSchemaVersion,
-	book,
 	collection,
 	collectionItem,
-	CommunityOwnedUnitKindValues,
 	contentGovernanceAction,
 	contentReport,
 	contentReportReferral,
@@ -81,14 +96,10 @@ import {
 	conversationRead,
 	creditAttribution,
 	EnforcementKindValues,
-	entity,
-	label,
-	media,
 	message,
 	notification,
 	notificationPreference,
 	platformCapabilityGrant,
-	poll,
 	pollOption,
 	pollVote,
 	post,
@@ -109,16 +120,9 @@ import {
 	realmUnitTag,
 	recommendationEvent,
 	recommendationExclusion,
-	release,
 	score,
-	series,
-	seriesRelease,
-	software,
-	softwareRequirement,
 	subjectAssociation,
-	tag,
 	tagRelation,
-	unit,
 	unitAccessGrant,
 	unitAccessInvitation,
 	unitAccessRestriction,
@@ -138,13 +142,10 @@ import {
 	unitRevisionHead,
 	unitShare,
 	unitSlugAddress,
-	unitStatusEvent,
 	unitTag,
 	unitTagJudgment,
-	unitVariant,
 	users,
 	vocabularyNode,
-	WorkReleaseStatusValues,
 	zone,
 	zonePage,
 } from "../database/schema";
@@ -165,7 +166,6 @@ import {
 	collectUnique,
 	createSeedData,
 	createSeedEnforcementPlan,
-	dateOnly,
 	DemoCredentials,
 	latestDate,
 	position,
@@ -176,10 +176,10 @@ import {
 import { assertFixtureSeedTargetEmpty } from "./fixture-target";
 import { seedPlatformInfrastructure } from "./platform-infrastructure";
 
-type UnitKind = (typeof unit.$inferSelect)["kind"];
-type UnitStatus = (typeof unit.$inferSelect)["status"];
-type ResourceVisibility = (typeof unit.$inferSelect)["visibility"];
-type ModerationStatus = (typeof unit.$inferSelect)["moderationStatus"];
+type UnitKind = UnitOwner;
+type UnitStatus = SeedIdentityDescriptor["status"];
+type ResourceVisibility = SeedIdentityDescriptor["visibility"];
+type ModerationStatus = SeedIdentityDescriptor["moderationStatus"];
 
 type LocalizationKind = "description" | "post" | "reply" | "poll" | "title";
 
@@ -355,36 +355,11 @@ function createDescriptor(
 	};
 }
 
-async function insertUnits(
+async function prepareSeedIdentities(
 	tx: DatabaseTransaction,
 	descriptors: readonly UnitDescriptor[],
 ): Promise<CreatedUnit[]> {
-	const created: CreatedUnit[] = [];
-	for (const descriptor of descriptors) {
-		const [row] = await tx
-			.insert(unit)
-			.values({
-				kind: descriptor.kind,
-				status: descriptor.status,
-				visibility: descriptor.visibility,
-				moderationStatus: descriptor.moderationStatus,
-				publishedAt: descriptor.publishedAt,
-				createdAt: descriptor.createdAt,
-				updatedAt: descriptor.updatedAt,
-			})
-			.returning({ id: unit.id });
-		if (!row) throw new Error(`Seed Unit insertion did not return ${descriptor.seedKey}`);
-		await tx.insert(unitStatusEvent).values({
-			unitId: row.id,
-			fromStatus: null,
-			toStatus: descriptor.status,
-			actorKind: "system",
-			changedByProfileId: null,
-			createdAt: descriptor.createdAt,
-		});
-		created.push({ ...descriptor, id: row.id });
-	}
-	return created;
+	return prepareFixtureIdentities(tx, descriptors);
 }
 
 function localizationRows(data: SeedData, value: CreatedUnit) {
@@ -438,13 +413,24 @@ async function insertUnitDetails(
 	values: readonly CreatedUnit[],
 	communityOwnerProfileId: string = OfficialProfileIds.community,
 ): Promise<void> {
+	const localized = values.map((value) => ({ value, rows: localizationRows(data, value) }));
 	await writeBatches(
-		values.flatMap((value) => localizationRows(data, value)),
+		localized.flatMap((item) => item.rows),
 		(batch) => tx.insert(unitLocalization).values(batch),
 	);
+	for (const item of localized)
+		if (CatalogReferenceSchema.safeParse({ owner: item.value.kind, id: item.value.id }).success)
+			await writeSeedCatalogNames(
+				tx,
+				item.value,
+				item.rows.map((row) => ({
+					language: row.language,
+					title: "title" in row ? row.title : null,
+				})),
+			);
+
 	const ownershipRows: (typeof unitOwnership.$inferInsert)[] = [];
 	const grantRows: (typeof unitAccessGrant.$inferInsert)[] = [];
-	const communityOwnedKinds: ReadonlySet<string> = new Set(CommunityOwnedUnitKindValues);
 	const ownerBindings = values.length
 		? await tx
 				.select()
@@ -467,27 +453,8 @@ async function insertUnitDetails(
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		};
-		if (value.kind === "entity") {
-			ownershipRows.push({
-				...ownershipCommon,
-				profileId: value.ownerProfileId,
-				assignedByProfileId: value.ownerProfileId,
-			});
-			for (const permission of [
-				"entity.association.credit.request",
-				"entity.association.subject.request",
-				"entity.association.subject.direct",
-			] as const)
-				grantRows.push({
-					unitId: value.id,
-					subjectKind: "authenticated",
-					permission,
-					scope: [],
-					grantedByAuthUserId: authByEntity.get(value.ownerProfileId) ?? null,
-					createdAt: value.createdAt,
-					updatedAt: value.updatedAt,
-				});
-		} else if (communityOwnedKinds.has(value.kind)) {
+		if (CatalogReferenceSchema.safeParse({ owner: value.kind, id: value.id }).success) continue;
+		if (value.kind === "tag") {
 			ownershipRows.push({
 				...ownershipCommon,
 				profileId: communityOwnerProfileId,
@@ -596,7 +563,6 @@ async function seedProfiles(
 				collectionConfig: {
 					version: 1,
 					view: index % 2 === 0 ? "grid" : "list",
-					addMainWithVariantByDefault: index % 3 !== 0,
 				},
 				createdAt: value.createdAt,
 				updatedAt: value.createdAt,
@@ -614,6 +580,9 @@ async function seedProfiles(
 		})),
 		(batch) => tx.insert(realmMember).values(batch),
 	);
+	await tx
+		.insert(accountFavoritesState)
+		.values(profiles.map((profile) => ({ authUserId: profile.authUserId })));
 	const demo = itemAt(profiles, 0);
 	await tx.insert(accounts).values({
 		accountId: demo.authUserId,
@@ -687,6 +656,11 @@ async function seedOfficialZoneFixtures(
 	] as const;
 	for (const [kind, value] of fixtures) {
 		const titles = SeedFixtureTitles[kind];
+		await writeSeedCatalogNames(
+			tx,
+			value,
+			(["zh", "en"] as const).map((language) => ({ language, title: titles[language] })),
+		);
 		await tx
 			.insert(unitLocalization)
 			.values(
@@ -744,26 +718,35 @@ async function seedUnitFixtures(
 			});
 		});
 
-	const entities = await insertUnits(tx, descriptors("entity", SeedPlan.entities, "entity"));
-	const tags = await insertUnits(tx, descriptors("tag", SeedPlan.tags, "tag"));
-	const books = await insertUnits(tx, descriptors("book", SeedPlan.books, "book"));
-	const softwareUnits = await insertUnits(
+	const entities = await prepareSeedIdentities(
+		tx,
+		descriptors("entity", SeedPlan.entities, "entity"),
+	);
+	const tags = await prepareSeedIdentities(tx, descriptors("tag", SeedPlan.tags, "tag"));
+	const books = await prepareSeedIdentities(tx, descriptors("publishing", SeedPlan.books, "book"));
+	const softwareUnits = await prepareSeedIdentities(
 		tx,
 		descriptors("software", SeedPlan.software, "software"),
 	);
-	const mediaItems = await insertUnits(tx, descriptors("media", SeedPlan.media, "media"));
-	const seriesItems = await insertUnits(tx, descriptors("series", SeedPlan.series, "series"));
-	const realms = await insertUnits(tx, descriptors("realm", SeedPlan.realms, "realm"));
+	const mediaItems = await prepareSeedIdentities(
+		tx,
+		descriptors("program", SeedPlan.media, "media"),
+	);
+	const seriesItems = await prepareSeedIdentities(
+		tx,
+		descriptors("grouping", SeedPlan.series, "series"),
+	);
+	const realms = await prepareSeedIdentities(tx, descriptors("realm", SeedPlan.realms, "realm"));
 
 	const zoneDescriptors = descriptors("zone", SeedPlan.zones, "zone");
-	const zones = await insertUnits(tx, zoneDescriptors);
+	const zones = await prepareSeedIdentities(tx, zoneDescriptors);
 	const collectionDescriptors = Array.from({ length: SeedPlan.collections }, (_, index) => {
 		const owner = itemAt(profiles, index);
 		const createdAt = latestDate(data.pastDate(730), owner.createdAt);
 		if (index < SeedPlan.users) {
 			return {
 				kind: "collection" as const,
-				seedKey: `favorites-${position(index)}`,
+				seedKey: `private-collection-${position(index)}`,
 				ownerProfileId: owner.id,
 				localizationKind: "description" as const,
 				status: "published" as const,
@@ -784,9 +767,9 @@ async function seedUnitFixtures(
 			notBefore: [owner.createdAt],
 		});
 	});
-	const collections = await insertUnits(tx, collectionDescriptors);
+	const collections = await prepareSeedIdentities(tx, collectionDescriptors);
 	const pollDescriptors = descriptors("poll", SeedPlan.polls, "poll", 180, "poll");
-	const polls = await insertUnits(tx, pollDescriptors);
+	const polls = await prepareSeedIdentities(tx, pollDescriptors);
 	const allUnits = [
 		...entities,
 		...tags,
@@ -806,28 +789,10 @@ async function seedUnitFixtures(
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
-		(batch) => tx.insert(realm).values(batch),
+		(batch) => insertSeedPlatformRows(tx, { owner: "realm", rows: batch }),
 	);
-	await insertUnitDetails(tx, data, allUnits, OfficialProfileIds.community);
-	const [fixtureBook, fixtureMedia, fixtureSoftware] = [books[0], mediaItems[0], softwareUnits[0]];
-	if (!fixtureBook || !fixtureMedia || !fixtureSoftware)
-		throw new Error("Official Zone Unit scenarios require Book, Media, and Software Units");
-	await seedOfficialZoneFixtures(tx, data, {
-		book: fixtureBook,
-		media: fixtureMedia,
-		software: fixtureSoftware,
-	});
 
-	await writeBatches(
-		entities.map((value, index) => ({
-			id: value.id,
-			kind: index < 45 ? "person" : index < 65 ? "organization" : "character",
-			verified: false,
-			createdAt: value.createdAt,
-			updatedAt: value.updatedAt,
-		})),
-		(batch) => tx.insert(entity).values(batch),
-	);
+	await materializeCatalogFixtures(tx, entities);
 	await writeBatches(
 		tags.map((value) => ({
 			id: value.id,
@@ -843,7 +808,7 @@ async function seedUnitFixtures(
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
-		(batch) => tx.insert(tag).values(batch),
+		(batch) => insertSeedPlatformRows(tx, { owner: "tag", rows: batch }),
 	);
 	for (const value of tags)
 		await ensureSimpleTagExpressionInTransaction(tx, {
@@ -851,43 +816,9 @@ async function seedUnitFixtures(
 			profileId: value.ownerProfileId,
 			createdAt: value.createdAt,
 		});
-	await writeBatches(
-		books.map((value, index) => ({
-			id: value.id,
-			releaseStatus: itemAt(WorkReleaseStatusValues, index),
-			isbn13: data.fakerByLanguage.en.string.numeric(13),
-			publicationDate: dateOnly(data.pastDate(7_300)),
-			pageCount: 80 + ((index * 37) % 900),
-			format: itemAt(["paperback", "hardcover", "ebook"], index),
-			createdAt: value.createdAt,
-			updatedAt: value.updatedAt,
-		})),
-		(batch) => tx.insert(book).values(batch),
-	);
-	await writeBatches(
-		softwareUnits.map((value, index) => ({
-			id: value.id,
-			releaseDate: dateOnly(data.pastDate(5_000)),
-			versionLabel: `${1 + (index % 5)}.${index % 10}`,
-			createdAt: value.createdAt,
-			updatedAt: value.updatedAt,
-		})),
-		(batch) => tx.insert(software).values(batch),
-	);
-	await writeBatches(
-		mediaItems.map((value, index) => ({
-			id: value.id,
-			releaseStatus: itemAt(WorkReleaseStatusValues, index),
-			kind: itemAt(["movie", "series", "animation", "documentary"], index),
-			releaseDate: dateOnly(data.pastDate(7_300)),
-			runtimeMinutes: 20 + ((index * 17) % 180),
-			episodeCount: index % 3 === 0 ? 1 + (index % 48) : null,
-			seasonCount: index % 3 === 0 ? 1 + (index % 8) : null,
-			createdAt: value.createdAt,
-			updatedAt: value.updatedAt,
-		})),
-		(batch) => tx.insert(media).values(batch),
-	);
+	await materializeCatalogFixtures(tx, books);
+	await materializeCatalogFixtures(tx, softwareUnits);
+	await materializeCatalogFixtures(tx, mediaItems);
 	await writeBatches(
 		[
 			...books
@@ -926,15 +857,7 @@ async function seedUnitFixtures(
 		],
 		(batch) => tx.insert(unitLicenseGrant).values(batch),
 	);
-	await writeBatches(
-		seriesItems.map((value, index) => ({
-			id: value.id,
-			kind: itemAt(["franchise", "book_series", "software_series", "media_series"], index),
-			createdAt: value.createdAt,
-			updatedAt: value.updatedAt,
-		})),
-		(batch) => tx.insert(series).values(batch),
-	);
+	await materializeCatalogFixtures(tx, seriesItems);
 	await writeBatches(
 		realms.map((value) => ({
 			ownerUnitId: value.id,
@@ -956,7 +879,7 @@ async function seedUnitFixtures(
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
-		(batch) => tx.insert(zone).values(batch),
+		(batch) => insertSeedPlatformRows(tx, { owner: "zone", rows: batch }),
 	);
 	await writeBatches(
 		zones.map((value) => ({
@@ -970,7 +893,7 @@ async function seedUnitFixtures(
 	);
 	await writeBatches(
 		collections.map((value) => ({ id: value.id })),
-		(batch) => tx.insert(collection).values(batch),
+		(batch) => insertSeedPlatformRows(tx, { owner: "collection", rows: batch }),
 	);
 	await writeBatches(
 		collections.map((value) => ({
@@ -997,8 +920,18 @@ async function seedUnitFixtures(
 				updatedAt: value.updatedAt,
 			};
 		}),
-		(batch) => tx.insert(poll).values(batch),
+		(batch) => insertSeedPlatformRows(tx, { owner: "poll", rows: batch }),
 	);
+
+	await insertUnitDetails(tx, data, allUnits, OfficialProfileIds.community);
+	const [fixtureBook, fixtureMedia, fixtureSoftware] = [books[0], mediaItems[0], softwareUnits[0]];
+	if (!fixtureBook || !fixtureMedia || !fixtureSoftware)
+		throw new Error("Official Zone Unit scenarios require Book, Media, and Software Units");
+	await seedOfficialZoneFixtures(tx, data, {
+		book: fixtureBook,
+		media: fixtureMedia,
+		software: fixtureSoftware,
+	});
 
 	const works = [...books, ...softwareUnits, ...mediaItems];
 	const aliases = Array.from({ length: SeedPlan.aliases }, (_, index) => {
@@ -1105,49 +1038,12 @@ async function seedUnitFixtures(
 		await lockUnitTagJudgmentHotKeys(tx, batch);
 		await tx.insert(unitTagJudgment).values(batch);
 	});
-	await writeBatches(
-		Array.from({ length: SeedPlan.variants }, (_, index) => {
-			const groups = [
-				{ kind: "book" as const, units: books },
-				{ kind: "software" as const, units: softwareUnits },
-				{ kind: "media" as const, units: mediaItems },
-			];
-			const group = itemAt(groups, index);
-			const ordinal = Math.floor(index / groups.length);
-			return {
-				variantUnitId: itemAt(group.units, group.units.length - 1 - ordinal).id,
-				mainUnitId: itemAt(group.units, ordinal).id,
-				unitKind: group.kind,
-			};
-		}),
-		(batch) => tx.insert(unitVariant).values(batch),
-	);
-	await writeBatches(
-		Array.from({ length: SeedPlan.seriesReleases }, (_, index) => ({
-			seriesId: itemAt(seriesItems, Math.floor(index / 6)).id,
-			releaseUnitId: itemAt(works, index * 7).id,
-			position: fractionalPositionAt(index % 6),
-			releasedOn: dateOnly(data.pastDate(3_650)),
-		})),
-		(batch) => tx.insert(seriesRelease).values(batch),
-	);
-	const linkByUnitId = new Map(links.map((value) => [value.unitId, value]));
-	await writeBatches(
-		Array.from({ length: SeedPlan.softwareRequirements }, (_, index) => {
-			const softwareUnit = itemAt(softwareUnits, Math.floor(index / 2));
-			return {
-				softwareId: softwareUnit.id,
-				platformEntityId: itemAt(entities.slice(65), index).id,
-				tier: index % 2 === 0 ? "minimum" : "recommended",
-				sourceExternalLinkId: linkByUnitId.get(softwareUnit.id)?.id,
-				hardware: {
-					memoryGb: index % 2 === 0 ? 8 : 16,
-					storageGb: 40 + (index % 8) * 10,
-				},
-			};
-		}),
-		(batch) => tx.insert(softwareRequirement).values(batch),
-	);
+	await seedNativeFixtureStructures(tx, {
+		books,
+		software: softwareUnits,
+		programs: mediaItems,
+		groupings: seriesItems,
+	});
 	const createdPollOptions: { id: string; pollId: string; position: number }[] = [];
 	for (const batch of chunks(
 		Array.from({ length: SeedPlan.pollOptions }, (_, index) => {
@@ -1357,7 +1253,7 @@ async function seedExampleWiki(
 			});
 	await tx.insert(unitSlugAddress).values({
 		kind: "canonical",
-		scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
+		scopeNamespaceId: TopLevelSlugNamespaceIds.zones,
 		slug: "example-wiki",
 		targetUnitId: zoneUnit.id,
 		createdAt,
@@ -1372,7 +1268,7 @@ async function seedExampleWiki(
 		["維基建設", "Wiki projects"],
 		["作品觀看順序參考", "Viewing order"],
 	] as const;
-	const labelUnits = await insertUnits(
+	const labelUnits = await prepareSeedIdentities(
 		tx,
 		labelCopy.map((_, index) =>
 			createDescriptor(data, {
@@ -1386,13 +1282,14 @@ async function seedExampleWiki(
 			}),
 		),
 	);
-	await tx.insert(label).values(
-		labelUnits.map((label) => ({
+	await insertSeedPlatformRows(tx, {
+		owner: "label",
+		rows: labelUnits.map((label) => ({
 			id: label.id,
 			createdAt: label.createdAt,
 			updatedAt: label.updatedAt,
 		})),
-	);
+	});
 	await tx.insert(unitLocalization).values(
 		labelUnits.flatMap((label, index) =>
 			(["zh", "en"] as const).map((language, languageIndex) => ({
@@ -1415,7 +1312,7 @@ async function seedExampleWiki(
 		})),
 	);
 
-	const [wikiPost] = await insertUnits(tx, [
+	const [wikiPost] = await prepareSeedIdentities(tx, [
 		createDescriptor(data, {
 			kind: "post",
 			seedKey: "example-wiki-home",
@@ -1427,12 +1324,17 @@ async function seedExampleWiki(
 		}),
 	]);
 	if (!wikiPost) throw new Error("Example Wiki Post insertion failed");
-	await tx.insert(post).values({
-		id: wikiPost.id,
-		subjectUnitId: zoneUnit.id,
-		kind: "wiki",
-		createdAt: wikiPost.createdAt,
-		updatedAt: wikiPost.updatedAt,
+	await insertSeedPlatformRows(tx, {
+		owner: "post",
+		rows: [
+			{
+				id: wikiPost.id,
+				subjectUnitId: zoneUnit.id,
+				kind: "wiki",
+				createdAt: wikiPost.createdAt,
+				updatedAt: wikiPost.updatedAt,
+			},
+		],
 	});
 	await tx.insert(unitLocalization).values(
 		(["zh", "en"] as const).map((language, index) => ({
@@ -1484,9 +1386,9 @@ async function seedExampleWiki(
 		[{ _type: "post-full-view", _key: "a40000000002", postId: wikiPost.id }],
 		"a40000000001",
 	);
-	const [pageUnit] = await insertUnits(tx, [
+	const [pageUnit] = await prepareSeedIdentities(tx, [
 		createDescriptor(data, {
-			kind: "zone_page",
+			kind: "post",
 			seedKey: "example-wiki-zone-home-page",
 			ownerProfileId: owner.id,
 			localizationKind: "title",
@@ -1496,12 +1398,17 @@ async function seedExampleWiki(
 		}),
 	]);
 	if (!pageUnit) throw new Error("Example Wiki Zone Page Unit insertion failed");
-	await tx.insert(post).values({
-		id: pageUnit.id,
-		subjectUnitId: zoneUnit.id,
-		kind: "page",
-		createdAt: pageUnit.createdAt,
-		updatedAt: pageUnit.updatedAt,
+	await insertSeedPlatformRows(tx, {
+		owner: "post",
+		rows: [
+			{
+				id: pageUnit.id,
+				subjectUnitId: zoneUnit.id,
+				kind: "page",
+				createdAt: pageUnit.createdAt,
+				updatedAt: pageUnit.updatedAt,
+			},
+		],
 	});
 	await tx.insert(zonePage).values({
 		id: pageUnit.id,
@@ -1668,28 +1575,22 @@ async function seedContent(
 		},
 	);
 
-	const rootPosts = await insertUnits(tx, rootDescriptors);
-	const createdFirstLevelReplies = await insertUnits(tx, firstLevelReplyDescriptors);
-	const createdNestedReplies = await insertUnits(tx, nestedReplyDescriptors);
+	const rootPosts = await prepareSeedIdentities(tx, rootDescriptors);
+	const createdFirstLevelReplies = await prepareSeedIdentities(tx, firstLevelReplyDescriptors);
+	const createdNestedReplies = await prepareSeedIdentities(tx, nestedReplyDescriptors);
 	const replies = [...createdFirstLevelReplies, ...createdNestedReplies];
-	const reviews = await insertUnits(tx, descriptors(SeedPlan.reviews, "review", "post"));
-	const chapters = await insertUnits(tx, descriptors(SeedPlan.chapters, "chapter", "post"));
-	const chapterLabels = await insertUnits(
+	const reviews = await prepareSeedIdentities(tx, descriptors(SeedPlan.reviews, "review", "post"));
+	const chapters = await prepareSeedIdentities(
+		tx,
+		descriptors(SeedPlan.chapters, "chapter", "post"),
+	);
+	const chapterLabels = await prepareSeedIdentities(
 		tx,
 		descriptors(SeedPlan.contentStructureNodes - SeedPlan.chapters, "chapter-label", "title").map(
 			(value): UnitDescriptor => ({ ...value, kind: "label" }),
 		),
 	);
 	const allPosts = [...rootPosts, ...replies, ...reviews, ...chapters];
-	await insertUnitDetails(tx, data, [...allPosts, ...chapterLabels]);
-	await writeBatches(
-		allPosts.map((value) => ({
-			sourceUnitId: value.id,
-			creditedEntityId: value.ownerProfileId,
-			role: "publisher" as const,
-		})),
-		(batch) => tx.insert(creditAttribution).values(batch),
-	);
 
 	await writeBatches(
 		rootPosts.map((value, index) => ({
@@ -1699,7 +1600,7 @@ async function seedContent(
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
-		(batch) => tx.insert(post).values(batch),
+		(batch) => insertSeedPlatformRows(tx, { owner: "post", rows: batch }),
 	);
 	await writeBatches(
 		reviews.map((value, index) => ({
@@ -1709,7 +1610,7 @@ async function seedContent(
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
-		(batch) => tx.insert(post).values(batch),
+		(batch) => insertSeedPlatformRows(tx, { owner: "post", rows: batch }),
 	);
 	await writeBatches(
 		chapters.map((value, index) => ({
@@ -1719,7 +1620,7 @@ async function seedContent(
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
-		(batch) => tx.insert(post).values(batch),
+		(batch) => insertSeedPlatformRows(tx, { owner: "post", rows: batch }),
 	);
 	await writeBatches(
 		chapterLabels.map((value) => ({
@@ -1727,7 +1628,7 @@ async function seedContent(
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
-		(batch) => tx.insert(label).values(batch),
+		(batch) => insertSeedPlatformRows(tx, { owner: "label", rows: batch }),
 	);
 	await writeBatches(
 		replies.map((value) => ({
@@ -1737,7 +1638,17 @@ async function seedContent(
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
-		(batch) => tx.insert(post).values(batch),
+		(batch) => insertSeedPlatformRows(tx, { owner: "post", rows: batch }),
+	);
+
+	await insertUnitDetails(tx, data, [...allPosts, ...chapterLabels]);
+	await writeBatches(
+		allPosts.map((value) => ({
+			sourceUnitId: value.id,
+			creditedEntityId: value.ownerProfileId,
+			role: "publisher" as const,
+		})),
+		(batch) => tx.insert(creditAttribution).values(batch),
 	);
 
 	const firstLevelReplies = replies.slice(0, SeedPlan.rootPosts);
@@ -1925,7 +1836,7 @@ async function seedStructure(
 		);
 	}
 
-	const editableUnits = [...unitFixtures.works, ...unitFixtures.series, ...content.rootPosts];
+	const editableUnits = [...content.rootPosts, ...unitFixtures.collections];
 	await writeBatches(
 		Array.from({ length: 150 }, (_, index) => {
 			const target = itemAt(editableUnits, index);
@@ -2027,11 +1938,11 @@ async function seedStructure(
 			},
 		}));
 	});
-	const ruleUnits = await insertUnits(
+	const ruleUnits = await prepareSeedIdentities(
 		tx,
 		ruleDescriptors.map(({ descriptor }) => descriptor),
 	);
-	await insertUnitDetails(tx, data, ruleUnits);
+
 	await writeBatches(
 		ruleUnits.map((ruleUnit, index) => {
 			const input = itemAt(ruleDescriptors, index);
@@ -2042,8 +1953,9 @@ async function seedStructure(
 				createdAt: input.revision.publishedAt,
 			};
 		}),
-		(batch) => tx.insert(realmRule).values(batch),
+		(batch) => insertSeedPlatformRows(tx, { owner: "realm_rule", rows: batch }),
 	);
+	await insertUnitDetails(tx, data, ruleUnits);
 	await writeBatches(
 		revisions.flatMap((revision, revisionIndex) =>
 			Array.from({ length: SeedPlan.realmRuleAcceptances / revisions.length }, (_, index) => ({
@@ -2225,7 +2137,7 @@ async function seedInteractions(
 					firstSeenAt: createdAt,
 					lastSeenAt,
 					lastContentStructureNodeId:
-						target.kind === "book" ? (firstNodeByBook.get(target.id)?.id ?? null) : null,
+						target.kind === "publishing" ? (firstNodeByBook.get(target.id)?.id ?? null) : null,
 					createdAt,
 					updatedAt: lastSeenAt,
 				};
@@ -3032,11 +2944,11 @@ async function seedCoverageContracts(
 	});
 
 	await tx.insert(unitAccessInvitation).values({
-		unitId: target.id,
+		unitId: contextPost.id,
 		invitedAuthUserId: collaborator.authUserId,
 		permissions: ["unit.read", "unit.update"],
 		scope: ["localizations"],
-		invitedByAuthUserId: selfAuthUserIdForEntity(target.ownerProfileId),
+		invitedByAuthUserId: selfAuthUserIdForEntity(contextPost.ownerProfileId),
 		expiresAt,
 		createdAt,
 		updatedAt: createdAt,
@@ -3055,9 +2967,9 @@ async function seedCoverageContracts(
 	const accessDecision = await createGovernanceDecision(tx, {
 		action: "unit.access.restrict",
 		actorProfileId: actor.id,
-		authority: { kind: "unit", unitId: itemAt(unitFixtures.works, 2).id },
-		targetUnitId: itemAt(unitFixtures.works, 2).id,
-		subject: { kind: "unit_access_configuration", id: itemAt(unitFixtures.works, 2).id },
+		authority: { kind: "unit", unitId: itemAt(content.rootPosts, 2).id },
+		targetUnitId: itemAt(content.rootPosts, 2).id,
+		subject: { kind: "unit_access_configuration", id: itemAt(content.rootPosts, 2).id },
 		basis: {
 			kind: "rules",
 			rules: [
@@ -3070,7 +2982,7 @@ async function seedCoverageContracts(
 		},
 	});
 	await tx.insert(unitAccessRestriction).values({
-		unitId: itemAt(unitFixtures.works, 2).id,
+		unitId: itemAt(content.rootPosts, 2).id,
 		subjectKind: "auth",
 		authUserId: collaborator.authUserId,
 		permission: "unit.update",
@@ -3226,42 +3138,13 @@ async function seedCoverageContracts(
 		updatedAt: createdAt,
 	});
 
-	const [releaseUnit] = await insertUnits(tx, [
-		{
-			kind: "release",
-			seedKey: "demo-release",
-			ownerProfileId: actor.id,
-			localizationKind: "description",
-			status: "published",
-			visibility: "public",
-			moderationStatus: "approved",
-			publishedAt: createdAt,
-			createdAt,
-			updatedAt: createdAt,
-		},
-	]);
-	if (!releaseUnit) throw new Error("Coverage scenario failed to create a Release Unit");
-	await insertUnitDetails(tx, data, [releaseUnit]);
-	await tx.insert(release).values({
-		id: releaseUnit.id,
-		parentUnitId: itemAt(unitFixtures.softwareUnits, 0).id,
-		versionLabel: "1.0.0-seed",
-		releasedOn: dateOnly(createdAt),
-		createdAt,
-		updatedAt: createdAt,
-	});
-	await recordUnitRevision(tx, {
-		unitId: releaseUnit.id,
-		actorProfileId: actor.id,
-		event: "create",
-		message: "Seeded release coverage scenario",
-	});
+	await seedNativeReleaseFixture(tx, itemAt(unitFixtures.softwareUnits, 0));
 }
 
 async function seedHistory(
 	tx: DatabaseTransaction,
 	data: SeedData,
-	profiles: readonly CreatedProfile[],
+	_profiles: readonly CreatedProfile[],
 	unitFixtures: SeedUnitFixtures,
 	content: SeedContent,
 ): Promise<void> {
@@ -3290,7 +3173,6 @@ async function seedHistory(
 	}
 
 	const historyUnits = [
-		...profiles.map((value) => ({ id: value.id, actorProfileId: value.id })),
 		...[
 			...unitFixtures.entities,
 			...unitFixtures.tags,
@@ -3301,7 +3183,11 @@ async function seedHistory(
 			...unitFixtures.collections,
 			...unitFixtures.polls,
 			...content.allPosts,
-		].map((value) => ({ id: value.id, actorProfileId: value.ownerProfileId })),
+		]
+			.filter(
+				(value) => !CatalogReferenceSchema.safeParse({ owner: value.kind, id: value.id }).success,
+			)
+			.map((value) => ({ id: value.id, actorProfileId: value.ownerProfileId })),
 	];
 	const initialRevisionByUnit = new Map<string, string>();
 	for (const [index, value] of historyUnits.entries()) {
@@ -3317,46 +3203,48 @@ async function seedHistory(
 		}
 	}
 
-	const updatedRevisionByUnit = new Map<string, string>();
-	for (const [index, value] of unitFixtures.works.slice(0, SeedPlan.historyUpdates).entries()) {
+	for (const [index, value] of content.rootPosts.slice(0, SeedPlan.historyUpdates).entries()) {
+		const baseRevisionId = initialRevisionByUnit.get(value.id);
+		if (!baseRevisionId)
+			throw new Error("Platform fixture history is missing its initial revision");
 		await tx
 			.update(unitLocalization)
-			.set({
-				summary: data.summary(itemAt(data.languages(index), 0)),
-				updatedAt: data.referenceTime,
-			})
+			.set({ summary: data.summary("en") })
 			.where(
 				and(
 					eq(unitLocalization.unitId, value.id),
 					isFirstUnitLocalization(unitLocalization.unitId),
 				),
 			);
-		const baseRevisionId = initialRevisionByUnit.get(value.id);
-		if (!baseRevisionId) throw new Error(`Missing initial seed revision for Unit ${value.id}`);
-		const result = await recordUnitRevision(tx, {
+		const updated = await recordUnitRevision(tx, {
 			unitId: value.id,
 			actorProfileId: value.ownerProfileId,
 			event: "update",
-			message: "Seeded localization update",
 			baseRevisionId,
+			message: "Updated fixture summary",
 		});
-		updatedRevisionByUnit.set(value.id, result.revisionId);
+		if (index < SeedPlan.historyRestores)
+			await withSeedAuthority(tx, value.ownerProfileId, (authority) =>
+				restoreUnitRevision(tx, {
+					unitId: value.id,
+					sourceRevisionId: baseRevisionId,
+					baseRevisionId: updated.revisionId,
+					actorProfileId: value.ownerProfileId,
+					authorization: new Authorization(
+						authority.actingEntityId,
+						authority.principal.authUserId,
+						authority,
+					),
+					message: "Restored fixture summary",
+				}),
+			);
 	}
-	for (const value of unitFixtures.works.slice(0, SeedPlan.historyRestores)) {
-		const sourceRevisionId = initialRevisionByUnit.get(value.id);
-		const baseRevisionId = updatedRevisionByUnit.get(value.id);
-		if (!sourceRevisionId || !baseRevisionId) {
-			throw new Error(`Missing seed revision chain for Unit ${value.id}`);
-		}
-		await restoreUnitRevision(tx, {
-			unitId: value.id,
-			sourceRevisionId,
-			baseRevisionId,
-			actorProfileId: value.ownerProfileId,
-			message: "Seeded revision restore",
-			authorization: new Authorization(value.ownerProfileId),
-		});
-	}
+
+	await seedCatalogNameHistory(
+		tx,
+		unitFixtures.works.slice(0, SeedPlan.historyUpdates),
+		SeedPlan.historyRestores,
+	);
 }
 
 export interface SeedResult {
@@ -3407,6 +3295,10 @@ export class DatabaseSeedService {
 					);
 				console.info("Seeding Unit fixtures scenario");
 				const unitFixtures = await seedUnitFixtures(tx, data, profiles);
+				for (const profile of profiles)
+					await withSeedAuthority(tx, profile.id, (authority) =>
+						saveFavorite(tx, authority, unitFixtures.books[0]!.id, { expectedRevision: 0 }),
+					);
 				console.info("Seeding Example Wiki scenario");
 				await seedExampleWiki(tx, data, profiles, unitFixtures);
 				console.info("Seeding content scenario");
@@ -3433,6 +3325,7 @@ export class DatabaseSeedService {
 					console.info("Seeding history scenario");
 					await seedHistory(tx, data, profiles, unitFixtures, content);
 				}
+				await assertPreparedFixtureIdentitiesStored(tx);
 			},
 			{ isolationLevel: "serializable" },
 		);

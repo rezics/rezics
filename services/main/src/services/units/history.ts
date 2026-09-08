@@ -1278,7 +1278,7 @@ async function resolveRevisionContribution(
 		.where(
 			and(
 				eq(entityIdentity.id, contribution.creditedEntityId),
-				eq(entityIdentity.shape, "software_agent"),
+				eq(entityIdentity.shape, "service_actor"),
 				eq(entityIdentity.status, "published"),
 				inArray(entityIdentity.visibility, ["public", "unlisted"]),
 				eq(entityIdentity.moderationStatus, "approved"),
