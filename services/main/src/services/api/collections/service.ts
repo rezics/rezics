@@ -1,4 +1,4 @@
-import {presentImageAsset} from "../image-assets/presentation";
+import { presentImageAsset } from "../image-assets/presentation";
 import type { StaticDecode } from "typebox";
 import { and, asc, eq, gt, or } from "drizzle-orm";
 import { t, type UnwrapSchema } from "elysia";
@@ -101,7 +101,7 @@ export async function getCollection(
 		.where(eq(collectionTable.id, collectionId))
 		.limit(1);
 	if (!record) throw new CollectionNotFound();
-	const readDecision = await authorization.unit.decide(collectionId, "collectionTable.read");
+	const readDecision = await authorization.unit.decide(collectionId, "unit.read");
 	if (!readDecision.allowed) throw new CollectionNotFound();
 	const [localizations, attributionMap] = await Promise.all([
 		database
@@ -130,10 +130,10 @@ export async function getCollection(
 	if (!selectedLocalization) throw new CollectionNotFound();
 	const [updateDecision, accessDecision, restoreDecision, realmPublicationDecision] =
 		await Promise.all([
-			authorization.unit.decide(collectionId, "collectionTable.update"),
-			authorization.unit.decide(collectionId, "collectionTable.access.manage"),
-			authorization.unit.decide(collectionId, "collectionTable.history.restore"),
-			authorization.unit.decide(collectionId, "collectionTable.realm-publication.manage"),
+			authorization.unit.decide(collectionId, "unit.update"),
+			authorization.unit.decide(collectionId, "unit.access.manage"),
+			authorization.unit.decide(collectionId, "unit.history.restore"),
+			authorization.unit.decide(collectionId, "unit.realm-publication.manage"),
 		]);
 	const canUpdate = updateDecision.allowed;
 	const detail = record;

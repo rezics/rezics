@@ -1,11 +1,11 @@
 import type { PortableTextDocument } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
-import { sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
-import { realmRule, realmRuleRevision, unitLocalization, unitOwnership } from "../database/schema";
+import { authEntity, realmRuleRevision, unitLocalization, unitOwnership } from "../database/schema";
 import { fractionalPositionAt } from "../ordering/position";
-import { insertUnit } from "../units/create";
+import { insertPlatformUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import type { RevisionContributionInput } from "../units/revision-contribution";
 import { getCurrentRealmRules } from "./service";
@@ -72,6 +72,12 @@ export async function publishRealmRuleRevision(
 	if (input.baseRevisionId !== currentRevisionId)
 		return { status: "revision_changed", currentRevisionId };
 
+	const [actor] = await tx
+		.select({ authUserId: authEntity.authUserId })
+		.from(authEntity)
+		.where(and(eq(authEntity.entityId, input.actorProfileId), eq(authEntity.state, "active")))
+		.limit(1);
+	if (!actor) throw new Error("Realm Rule publication requires an active authenticated creator");
 	const publishedAt = input.publishedAt ?? new Date();
 	const [created] = await tx
 		.insert(realmRuleRevision)
@@ -88,13 +94,18 @@ export async function publishRealmRuleRevision(
 	if (!created) throw new Error("Realm Rule revision insertion did not return a row");
 
 	for (const [index, rule] of input.rules.entries()) {
-		const ruleUnit = await insertUnit(tx, {
-			kind: "realm_rule",
-			status: "published",
-			visibility: "unlisted",
-			publishedAt,
-			createdAt: publishedAt,
-			updatedAt: publishedAt,
+		const ruleUnit = await insertPlatformUnit(tx, {
+			owner: "realm_rule",
+			values: {
+				status: "published",
+				visibility: "unlisted",
+				publishedAt,
+				createdAt: publishedAt,
+				updatedAt: publishedAt,
+				revisionId: created.id,
+				position: index,
+				createdByAuthUserId: actor.authUserId,
+			},
 			statusActor: { kind: "profile", profileId: input.actorProfileId },
 		});
 		await tx.insert(unitLocalization).values(
@@ -113,12 +124,6 @@ export async function publishRealmRuleRevision(
 			assignedByProfileId: input.actorProfileId,
 			createdAt: publishedAt,
 			updatedAt: publishedAt,
-		});
-		await tx.insert(realmRule).values({
-			id: ruleUnit.id,
-			revisionId: created.id,
-			position: index,
-			createdAt: publishedAt,
 		});
 	}
 

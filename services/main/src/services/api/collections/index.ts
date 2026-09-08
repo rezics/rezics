@@ -1,4 +1,4 @@
-import {presentImageAsset} from "../image-assets/presentation";
+import { presentImageAsset } from "../image-assets/presentation";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
@@ -294,7 +294,10 @@ export default new Elysia({ prefix: "/collections" })
 				);
 				const created = await insertPlatformUnit(tx, {
 					owner: "collection",
-					values: {visibility: body.visibility ?? "private", createdByAuthUserId: principal.authUserId},
+					values: {
+						visibility: body.visibility ?? "private",
+						createdByAuthUserId: principal.authUserId,
+					},
 					statusActor: { kind: "profile", profileId: entity.id },
 				});
 				await tx.insert(unitLocalization).values({
@@ -385,9 +388,9 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Update collection", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "collection.update");
+			await authorization.unit.ensure(params.collectionId, "unit.update");
 			const statusUpdateDecision = body.status
-				? await authorization.unit.decide(params.collectionId, "collection.status.update", ["unit"])
+				? await authorization.unit.decide(params.collectionId, "unit.status.update", ["unit"])
 				: undefined;
 			await database.transaction(async (tx) => {
 				if (body.localization)
@@ -453,7 +456,7 @@ export default new Elysia({ prefix: "/collections" })
 			},
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "collection.update");
+			await authorization.unit.ensure(params.collectionId, "unit.update");
 			const result = await database.transaction((tx) =>
 				applyCollectionBatch(tx, {
 					collectionId: params.collectionId,
@@ -465,7 +468,7 @@ export default new Elysia({ prefix: "/collections" })
 						const decision = await authorization.unit.decideInTransaction(
 							tx,
 							targetId,
-							"collection.read",
+							"unit.read",
 						);
 						if (!decision.allowed) throw new UnitNotFound();
 					},
@@ -494,7 +497,7 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Add collection items atomically", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "collection.update");
+			await authorization.unit.ensure(params.collectionId, "unit.update");
 			if (new Set(body.items.map(({ targetId }) => targetId)).size !== body.items.length)
 				throw new ValidationError({ items: "targetId values must be unique" });
 			if (body.items.some(({ targetId }) => targetId === params.collectionId))
@@ -514,7 +517,7 @@ export default new Elysia({ prefix: "/collections" })
 						const decision = await authorization.unit.decideInTransaction(
 							tx,
 							targetId,
-							"collection.read",
+							"unit.read",
 						);
 						if (!decision.allowed) throw new UnitNotFound();
 					},
@@ -546,7 +549,7 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Move collection items atomically", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "collection.update");
+			await authorization.unit.ensure(params.collectionId, "unit.update");
 			const result = await database.transaction((tx) =>
 				applyCollectionBatch(tx, {
 					collectionId: params.collectionId,
@@ -583,7 +586,7 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Save collection item", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "collection.update");
+			await authorization.unit.ensure(params.collectionId, "unit.update");
 			if (params.targetId === params.collectionId)
 				throw new ValidationError({ targetId: "a Collection cannot contain itself" });
 			await authorization.unit.ensureCanRead(params.targetId);
@@ -598,7 +601,7 @@ export default new Elysia({ prefix: "/collections" })
 						const decision = await authorization.unit.decideInTransaction(
 							tx,
 							targetId,
-							"collection.read",
+							"unit.read",
 						);
 						if (!decision.allowed) throw new UnitNotFound();
 					},
@@ -621,7 +624,7 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Remove collection item", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "collection.update");
+			await authorization.unit.ensure(params.collectionId, "unit.update");
 			const result = await database.transaction((tx) =>
 				applyCollectionBatch(tx, {
 					collectionId: params.collectionId,
@@ -703,7 +706,7 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Restore a Collection item revision", tags: ["Collections"] },
 		},
 		async ({ params, body, entity, authorization }) => {
-			await authorization.unit.ensure(params.collectionId, "collection.history.restore");
+			await authorization.unit.ensure(params.collectionId, "unit.history.restore");
 			const result = await database.transaction(async (tx) => {
 				await ensureEditableCollection(tx, params.collectionId);
 				return restoreCollectionStructureRevision(tx, {

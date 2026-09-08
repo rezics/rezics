@@ -1,3 +1,4 @@
+import { authEntity } from "../database/schema/participation";
 import { createHash } from "node:crypto";
 
 import type { ContentLanguage } from "@rezics/i18n";
@@ -46,7 +47,6 @@ import {
 	tagPathVote,
 	tagPathVoteStat,
 	tagRelation,
-	unit,
 	unitAlias,
 	unitLocalization,
 	unitTagPathApplication,
@@ -75,7 +75,7 @@ import {
 	TagPathMergeNotFound,
 	TagPathNotFound,
 } from "../api/tags/errors";
-import { insertUnit } from "../units/create";
+import { insertPlatformUnit } from "../units/create";
 import { presentAvatar } from "../units/avatar";
 import {
 	resolvedUnitLocalizationAvatar,
@@ -89,10 +89,10 @@ export type BinaryVote = -1 | 1;
 export type OptionalBinaryVote = BinaryVote | null;
 export type SpoilerLevel = 0 | 1 | 2;
 
-const memberUnit = alias(unit, "tag_path_member_unit");
-const componentUnit = alias(unit, "tag_expression_component_unit");
-const inferenceTargetUnit = alias(unit, "tag_expression_inference_target_unit");
-const senseRealmUnit = alias(unit, "tag_path_sense_realm_unit");
+const memberUnit = alias(tag, "tag_path_member_unit");
+const componentUnit = alias(tag, "tag_expression_component_unit");
+const inferenceTargetUnit = alias(tag, "tag_expression_inference_target_unit");
+const senseRealmUnit = alias(realm, "tag_path_sense_realm_unit");
 const viewerDefinitionVote = alias(tagPathVote, "viewer_tag_path_vote");
 const viewerApplicationJudgment = alias(
 	unitTagPathApplicationJudgment,
@@ -319,17 +319,14 @@ export async function createTagPathInTransaction(
 	if (input.pathId) {
 		const [declared] = await tx
 			.select({
-				kind: unit.kind,
 				memberNodeIds: tagPath.memberNodeIds,
 				relationIds: tagPath.relationIds,
 			})
-			.from(unit)
-			.leftJoin(tagPath, eq(tagPath.id, unit.id))
-			.where(eq(unit.id, input.pathId))
+			.from(tagPath)
+			.where(eq(tagPath.id, input.pathId))
 			.limit(1);
 		if (declared) {
 			if (
-				declared.kind !== "tag_path" ||
 				!declared.memberNodeIds ||
 				!declared.relationIds ||
 				!sameOrderedIds(declared.memberNodeIds, input.memberNodeIds) ||
@@ -350,24 +347,29 @@ export async function createTagPathInTransaction(
 		return { pathId: existing.id, created: false };
 	}
 	const createdAt = input.createdAt ?? new Date();
-	const createdUnit = await insertUnit(tx, {
-		id: input.pathId,
-		kind: "tag_path",
-		status: "published",
-		visibility: "public",
-		publishedAt: createdAt,
-		createdAt,
-		updatedAt: createdAt,
+	const [actor] = await tx
+		.select({ authUserId: authEntity.authUserId })
+		.from(authEntity)
+		.where(and(eq(authEntity.entityId, input.profileId), eq(authEntity.state, "active")))
+		.limit(1);
+	if (!actor) throw new Error("Tag Path creation requires an active authenticated creator");
+	const createdUnit = await insertPlatformUnit(tx, {
+		owner: "tag_path",
+		values: {
+			id: input.pathId,
+			status: "published",
+			visibility: "public",
+			publishedAt: createdAt,
+			createdAt,
+			updatedAt: createdAt,
+			memberNodeIds: [...input.memberNodeIds],
+			relationIds: [...input.relationIds],
+			structuralIdentityHash: identityHash,
+			terminalNodeId: input.memberNodeIds.at(-1)!,
+			createdByProfileId: input.profileId,
+			createdByAuthUserId: actor.authUserId,
+		},
 		statusActor: { kind: "profile", profileId: input.profileId },
-	});
-	await tx.insert(tagPath).values({
-		id: createdUnit.id,
-		memberNodeIds: [...input.memberNodeIds],
-		relationIds: [...input.relationIds],
-		structuralIdentityHash: identityHash,
-		terminalNodeId: input.memberNodeIds.at(-1)!,
-		createdByProfileId: input.profileId,
-		createdAt,
 	});
 	await createCommunityOwnedUnitAccess(tx, createdUnit.id);
 	await upsertDefinitionVote(tx, createdUnit.id, input.profileId, 1, createdAt);
@@ -764,11 +766,10 @@ export async function getTagPath(input: {
 			usageCount: tagPathVoteStat.usageCount,
 			viewerVote: viewerDefinitionVote.value,
 			createdAt: tagPath.createdAt,
-			updatedAt: unit.updatedAt,
+			updatedAt: tagPath.updatedAt,
 			mergedIntoPathId: acceptedMerge.targetPathId,
 		})
 		.from(tagPath)
-		.innerJoin(unit, eq(unit.id, tagPath.id))
 		.leftJoin(tagPathVoteStat, eq(tagPathVoteStat.pathId, tagPath.id))
 		.leftJoin(
 			viewerDefinitionVote,
@@ -786,9 +787,9 @@ export async function getTagPath(input: {
 		.where(
 			and(
 				eq(tagPath.id, input.pathId),
-				eq(unit.status, "published"),
-				eq(unit.visibility, "public"),
-				isNull(unit.deletedAt),
+				eq(tagPath.status, "published"),
+				eq(tagPath.visibility, "public"),
+				isNull(tagPath.deletedAt),
 			),
 		)
 		.limit(1);

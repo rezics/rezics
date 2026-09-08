@@ -598,7 +598,7 @@ export default new Elysia()
 							.where(eq(unitLocalization.unitId, review.id))
 							.orderBy(unitLocalization.position, unitLocalization.language),
 						getAttributionSummariesByUnitIds([review.id], localizationLanguages),
-						selectPostScores(review.id, viewerProfileId, localizationLanguages).then((items) =>
+						selectPostScores(review.id, authorization, localizationLanguages).then((items) =>
 							items.map(({ scoreId, realmId, realmTitle, value }) => ({
 								scoreId,
 								realmId,
@@ -606,7 +606,7 @@ export default new Elysia()
 								value,
 							})),
 						),
-						selectPostProgressEntry(review.id, viewerProfileId),
+						selectPostProgressEntry(review.id, authorization),
 						subjectPromise,
 						authorization.unit.canUpdate(params.reviewId, ["localizations"]),
 						authorization.unit.canUpdate(params.reviewId, ["credit-attributions"]),
