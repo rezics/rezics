@@ -14,7 +14,6 @@ import { insertPlatformUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import type { RevisionContributionInput } from "../units/revision-contribution";
 import { revisionedBatchChunks } from "../history/revisioned-batch";
-import { isFirstUnitLocalization } from "../units/localization";
 import { planContentStructureDraft, type ContentStructureDraftNodeBase } from "./book-draft-plan";
 import { diffContentStructureSnapshots } from "./contracts";
 import { assertContentStructureDraftCommandLimit } from "./draft-batch";
@@ -332,6 +331,8 @@ export async function saveMediaContentStructureDraft(
 				throw new ContentStructureInvalid(
 					"Catalog names must be edited through native name commands",
 				);
+			if (!previous?.language || previous.title === null)
+				throw new ContentStructureInvalid("Renamed localization is unavailable");
 			await input.authorization.ensureInTransaction(tx, contentUnitId, "unit.update", [
 				"localizations",
 			]);
@@ -341,7 +342,8 @@ export async function saveMediaContentStructureDraft(
 				.where(
 					and(
 						eq(unitLocalization.unitId, contentUnitId),
-						isFirstUnitLocalization(unitLocalization.unitId),
+						eq(unitLocalization.language, previous.language),
+						eq(unitLocalization.title, previous.title),
 					),
 				)
 				.returning({ unitId: unitLocalization.unitId });

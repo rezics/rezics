@@ -9,7 +9,6 @@ import {
 	createProfileOwnedUnitAccess,
 	createPublicEditableUnitAccess,
 } from "../authorization/unit/ownership";
-import { isFirstUnitLocalization } from "../units/localization";
 import { insertPlatformUnit } from "../units/create";
 import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
 import { shouldCreateProfilePublisherAttributionForPost } from "../posts/attribution-policy";
@@ -339,6 +338,8 @@ export async function saveBookContentStructureDraft(
 					throw new ContentStructureInvalid(
 						"Catalog names must be edited through native name commands",
 					);
+				if (!previous?.language || previous.title === null)
+					throw new ContentStructureInvalid("Renamed localization is unavailable");
 				await input.authorization.ensureInTransaction(tx, contentUnitId, "unit.update", [
 					"localizations",
 				]);
@@ -348,7 +349,8 @@ export async function saveBookContentStructureDraft(
 					.where(
 						and(
 							eq(unitLocalization.unitId, contentUnitId),
-							isFirstUnitLocalization(unitLocalization.unitId),
+							eq(unitLocalization.language, previous.language),
+							eq(unitLocalization.title, previous.title),
 						),
 					)
 					.returning({ unitId: unitLocalization.unitId });
