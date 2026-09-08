@@ -1,4 +1,4 @@
-import {presentImageAsset} from "../image-assets/presentation";
+import { presentImageAsset } from "../image-assets/presentation";
 import { unitStateRelation } from "../../units/state-relation";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
 import { DevelopmentPreviewCapability, RealmUnitCreatePermissionValues } from "@rezics/access";
@@ -1068,7 +1068,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Save complete Realm taxonomy draft", tags: ["Realms"] },
 		},
-		async ({ params, body, entity, authorization }) => {
+		async ({ params, body, entity, authorization, principal }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.tags.manage");
 			const referencedUnitIds = body.nodes.flatMap((node) =>
 				node.state === "new" && node.content.kind === "unit" ? [node.content.unitId] : [],
@@ -1079,6 +1079,7 @@ export default new Elysia({ prefix: "/realms" })
 					sql`select pg_advisory_xact_lock(hashtextextended(${`${params.realmId}:realm-taxonomy-draft`}::text, 0))`,
 				);
 				const result = await saveRealmTaxonomyDraft(tx, {
+					actorAuthUserId: principal.authUserId,
 					ownerUnitId: params.realmId,
 					baseRevisionId: body.baseRevisionId,
 					actorProfileId: entity.id,
