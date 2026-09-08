@@ -475,26 +475,32 @@ The catalog family containing written works, text versions and publications.
 
 | Locale | Status | Slot | Approved form | Forbidden forms |
 | --- | --- | --- | --- | --- |
+| en | approved | entryLabel | Publishing entry |  |
 | en | approved | label | Publishing catalog |  |
 | en | approved | pluralLabel | Publishing catalog |  |
 | en | approved | inline | publishing catalog |  |
 | en | approved | plural | publishing catalog |  |
+| zh-Hant | approved | entryLabel | 出版條目 |  |
 | zh-Hant | approved | label | 出版目錄 |  |
 | zh-Hant | approved | pluralLabel | 出版目錄 |  |
 | zh-Hant | approved | inline | 出版目錄 |  |
 | zh-Hant | approved | plural | 出版目錄 |  |
+| zh-Hans | approved | entryLabel | 出版条目 |  |
 | zh-Hans | approved | label | 出版目录 |  |
 | zh-Hans | approved | pluralLabel | 出版目录 |  |
 | zh-Hans | approved | inline | 出版目录 |  |
 | zh-Hans | approved | plural | 出版目录 |  |
+| de | approved | entryLabel | Publikationseintrag |  |
 | de | approved | label | Publikationskatalog |  |
 | de | approved | pluralLabel | Publikationskatalog |  |
 | de | approved | inline | Publikationskatalog |  |
 | de | approved | plural | Publikationskatalog |  |
+| ja | approved | entryLabel | 出版項目 |  |
 | ja | approved | label | 出版カタログ |  |
 | ja | approved | pluralLabel | 出版カタログ |  |
 | ja | approved | inline | 出版カタログ |  |
 | ja | approved | plural | 出版カタログ |  |
+| ko | approved | entryLabel | 출판 항목 |  |
 | ko | approved | label | 출판 카탈로그 |  |
 | ko | approved | pluralLabel | 출판 카탈로그 |  |
 | ko | approved | inline | 출판 카탈로그 |  |
@@ -537,26 +543,32 @@ The catalog family of reference concepts, places, instruments and events.
 
 | Locale | Status | Slot | Approved form | Forbidden forms |
 | --- | --- | --- | --- | --- |
+| en | approved | entryLabel | Reference entry |  |
 | en | approved | label | Reference entries |  |
 | en | approved | pluralLabel | Reference entries |  |
 | en | approved | inline | reference entries |  |
 | en | approved | plural | reference entries |  |
+| zh-Hant | approved | entryLabel | 參照條目 |  |
 | zh-Hant | approved | label | 參照條目 |  |
 | zh-Hant | approved | pluralLabel | 參照條目 |  |
 | zh-Hant | approved | inline | 參照條目 |  |
 | zh-Hant | approved | plural | 參照條目 |  |
+| zh-Hans | approved | entryLabel | 参照条目 |  |
 | zh-Hans | approved | label | 参照条目 |  |
 | zh-Hans | approved | pluralLabel | 参照条目 |  |
 | zh-Hans | approved | inline | 参照条目 |  |
 | zh-Hans | approved | plural | 参照条目 |  |
+| de | approved | entryLabel | Referenzeintrag |  |
 | de | approved | label | Referenzeinträge |  |
 | de | approved | pluralLabel | Referenzeinträge |  |
 | de | approved | inline | Referenzeinträge |  |
 | de | approved | plural | Referenzeinträge |  |
+| ja | approved | entryLabel | 参照項目 |  |
 | ja | approved | label | 参照項目 |  |
 | ja | approved | pluralLabel | 参照項目 |  |
 | ja | approved | inline | 参照項目 |  |
 | ja | approved | plural | 参照項目 |  |
+| ko | approved | entryLabel | 참조 항목 |  |
 | ko | approved | label | 참조 항목 |  |
 | ko | approved | pluralLabel | 참조 항목 |  |
 | ko | approved | inline | 참조 항목 |  |

@@ -120,7 +120,7 @@ export const terminologyConcepts = defineTerminologyConcepts({
 	},
 	publishingCatalog: {
 		definition: "The catalog family containing written works, text versions and publications.",
-		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		slots: ["label", "pluralLabel", "inline", "plural", "entryLabel"] as const,
 		locales: WebTerminologyLocales,
 	},
 	software: {
@@ -130,7 +130,7 @@ export const terminologyConcepts = defineTerminologyConcepts({
 	},
 	referenceCatalog: {
 		definition: "The catalog family of reference concepts, places, instruments and events.",
-		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		slots: ["label", "pluralLabel", "inline", "plural", "entryLabel"] as const,
 		locales: WebTerminologyLocales,
 	},
 	music: {

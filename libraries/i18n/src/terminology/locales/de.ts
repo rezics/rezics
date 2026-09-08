@@ -144,6 +144,7 @@ export const deTerminology = defineTerminology("de", {
 	publishingCatalog: {
 		status: "approved",
 		forms: {
+			entryLabel: "Publikationseintrag",
 			label: "Publikationskatalog",
 			pluralLabel: "Publikationskatalog",
 			inline: "Publikationskatalog",
@@ -159,6 +160,7 @@ export const deTerminology = defineTerminology("de", {
 	referenceCatalog: {
 		status: "approved",
 		forms: {
+			entryLabel: "Referenzeintrag",
 			label: "Referenzeinträge",
 			pluralLabel: "Referenzeinträge",
 			inline: "Referenzeinträge",

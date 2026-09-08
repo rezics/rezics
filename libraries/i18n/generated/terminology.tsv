@@ -359,26 +359,32 @@ distributionPackage	One distributed package or manifest that can include indepen
 distributionPackage	One distributed package or manifest that can include independently identified resources.	ko	approved	pluralLabel	배포 패키지	-
 distributionPackage	One distributed package or manifest that can include independently identified resources.	ko	approved	inline	배포 패키지	-
 distributionPackage	One distributed package or manifest that can include independently identified resources.	ko	approved	plural	배포 패키지	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	en	approved	entryLabel	Publishing entry	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	en	approved	label	Publishing catalog	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	en	approved	pluralLabel	Publishing catalog	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	en	approved	inline	publishing catalog	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	en	approved	plural	publishing catalog	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hant	approved	entryLabel	出版條目	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hant	approved	label	出版目錄	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hant	approved	pluralLabel	出版目錄	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hant	approved	inline	出版目錄	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hant	approved	plural	出版目錄	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hans	approved	entryLabel	出版条目	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hans	approved	label	出版目录	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hans	approved	pluralLabel	出版目录	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hans	approved	inline	出版目录	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hans	approved	plural	出版目录	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	de	approved	entryLabel	Publikationseintrag	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	de	approved	label	Publikationskatalog	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	de	approved	pluralLabel	Publikationskatalog	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	de	approved	inline	Publikationskatalog	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	de	approved	plural	Publikationskatalog	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	ja	approved	entryLabel	出版項目	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	ja	approved	label	出版カタログ	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	ja	approved	pluralLabel	出版カタログ	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	ja	approved	inline	出版カタログ	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	ja	approved	plural	出版カタログ	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	ko	approved	entryLabel	출판 항목	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	ko	approved	label	출판 카탈로그	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	ko	approved	pluralLabel	출판 카탈로그	-
 publishingCatalog	The catalog family containing written works, text versions and publications.	ko	approved	inline	출판 카탈로그	-
@@ -407,26 +413,32 @@ software	The catalog family of software titles, versions and releases.	ko	approv
 software	The catalog family of software titles, versions and releases.	ko	approved	pluralLabel	소프트웨어	-
 software	The catalog family of software titles, versions and releases.	ko	approved	inline	소프트웨어	-
 software	The catalog family of software titles, versions and releases.	ko	approved	plural	소프트웨어	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	en	approved	entryLabel	Reference entry	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	en	approved	label	Reference entries	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	en	approved	pluralLabel	Reference entries	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	en	approved	inline	reference entries	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	en	approved	plural	reference entries	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hant	approved	entryLabel	參照條目	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hant	approved	label	參照條目	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hant	approved	pluralLabel	參照條目	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hant	approved	inline	參照條目	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hant	approved	plural	參照條目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hans	approved	entryLabel	参照条目	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hans	approved	label	参照条目	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hans	approved	pluralLabel	参照条目	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hans	approved	inline	参照条目	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hans	approved	plural	参照条目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	de	approved	entryLabel	Referenzeintrag	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	de	approved	label	Referenzeinträge	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	de	approved	pluralLabel	Referenzeinträge	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	de	approved	inline	Referenzeinträge	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	de	approved	plural	Referenzeinträge	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ja	approved	entryLabel	参照項目	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ja	approved	label	参照項目	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ja	approved	pluralLabel	参照項目	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ja	approved	inline	参照項目	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ja	approved	plural	参照項目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ko	approved	entryLabel	참조 항목	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ko	approved	label	참조 항목	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ko	approved	pluralLabel	참조 항목	-
 referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ko	approved	inline	참조 항목	-

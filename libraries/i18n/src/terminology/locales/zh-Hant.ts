@@ -88,7 +88,13 @@ export const zhHantTerminology = defineTerminology("zh-Hant", {
 	},
 	publishingCatalog: {
 		status: "approved",
-		forms: { label: "出版目錄", pluralLabel: "出版目錄", inline: "出版目錄", plural: "出版目錄" },
+		forms: {
+			entryLabel: "出版條目",
+			label: "出版目錄",
+			pluralLabel: "出版目錄",
+			inline: "出版目錄",
+			plural: "出版目錄",
+		},
 		forbidden: [],
 	},
 	software: {
@@ -98,7 +104,13 @@ export const zhHantTerminology = defineTerminology("zh-Hant", {
 	},
 	referenceCatalog: {
 		status: "approved",
-		forms: { label: "參照條目", pluralLabel: "參照條目", inline: "參照條目", plural: "參照條目" },
+		forms: {
+			entryLabel: "參照條目",
+			label: "參照條目",
+			pluralLabel: "參照條目",
+			inline: "參照條目",
+			plural: "參照條目",
+		},
 		forbidden: [],
 	},
 	music: {

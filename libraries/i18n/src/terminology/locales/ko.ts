@@ -134,6 +134,7 @@ export const koTerminology = defineTerminology("ko", {
 	publishingCatalog: {
 		status: "approved",
 		forms: {
+			entryLabel: "출판 항목",
 			label: "출판 카탈로그",
 			pluralLabel: "출판 카탈로그",
 			inline: "출판 카탈로그",
@@ -154,6 +155,7 @@ export const koTerminology = defineTerminology("ko", {
 	referenceCatalog: {
 		status: "approved",
 		forms: {
+			entryLabel: "참조 항목",
 			label: "참조 항목",
 			pluralLabel: "참조 항목",
 			inline: "참조 항목",

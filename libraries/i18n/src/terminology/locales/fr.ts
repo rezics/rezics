@@ -149,6 +149,7 @@ export const frTerminology = defineTerminology("fr", {
 	publishingCatalog: {
 		status: "approved",
 		forms: {
+			entryLabel: "Notice éditoriale",
 			label: "Catalogue éditorial",
 			pluralLabel: "Catalogue éditorial",
 			inline: "catalogue éditorial",
@@ -164,6 +165,7 @@ export const frTerminology = defineTerminology("fr", {
 	referenceCatalog: {
 		status: "approved",
 		forms: {
+			entryLabel: "Notice de référence",
 			label: "Notices de référence",
 			pluralLabel: "Notices de référence",
 			inline: "notices de référence",

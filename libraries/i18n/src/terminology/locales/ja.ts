@@ -114,6 +114,7 @@ export const jaTerminology = defineTerminology("ja", {
 	publishingCatalog: {
 		status: "approved",
 		forms: {
+			entryLabel: "出版項目",
 			label: "出版カタログ",
 			pluralLabel: "出版カタログ",
 			inline: "出版カタログ",
@@ -133,7 +134,13 @@ export const jaTerminology = defineTerminology("ja", {
 	},
 	referenceCatalog: {
 		status: "approved",
-		forms: { label: "参照項目", pluralLabel: "参照項目", inline: "参照項目", plural: "参照項目" },
+		forms: {
+			entryLabel: "参照項目",
+			label: "参照項目",
+			pluralLabel: "参照項目",
+			inline: "参照項目",
+			plural: "参照項目",
+		},
 		forbidden: [],
 	},
 	music: {

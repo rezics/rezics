@@ -88,7 +88,13 @@ export const zhHansTerminology = defineTerminology("zh-Hans", {
 	},
 	publishingCatalog: {
 		status: "approved",
-		forms: { label: "出版目录", pluralLabel: "出版目录", inline: "出版目录", plural: "出版目录" },
+		forms: {
+			entryLabel: "出版条目",
+			label: "出版目录",
+			pluralLabel: "出版目录",
+			inline: "出版目录",
+			plural: "出版目录",
+		},
 		forbidden: [],
 	},
 	software: {
@@ -98,7 +104,13 @@ export const zhHansTerminology = defineTerminology("zh-Hans", {
 	},
 	referenceCatalog: {
 		status: "approved",
-		forms: { label: "参照条目", pluralLabel: "参照条目", inline: "参照条目", plural: "参照条目" },
+		forms: {
+			entryLabel: "参照条目",
+			label: "参照条目",
+			pluralLabel: "参照条目",
+			inline: "参照条目",
+			plural: "参照条目",
+		},
 		forbidden: [],
 	},
 	music: {
