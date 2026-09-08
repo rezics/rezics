@@ -53,8 +53,16 @@ export async function readUnitPresentationsInTransaction(
 		.from(candidates)
 		.innerJoinLateral(state, sql`true`)
 		.limit(ids.length);
+	const nativeOwners = new Set<string>(CatalogOwnerValues);
 	const result = new Map<string, UnitPresentation>(
-		rows.map(({ avatar, ...row }) => [row.id, { ...row, avatar: presentAvatar(avatar) }]),
+		rows.map(({ avatar, ...row }) => [
+			row.id,
+			{
+				...row,
+				...(nativeOwners.has(row.owner) ? { title: null, language: null } : {}),
+				avatar: presentAvatar(avatar),
+			},
+		]),
 	);
 	for (const owner of CatalogOwnerValues) {
 		const owned = rows.filter((row) => row.owner === owner).map((row) => row.id);
@@ -62,43 +70,25 @@ export async function readUnitPresentationsInTransaction(
 		const names = CatalogNameTables[owner].name;
 		for (let offset = 0; offset < owned.length; offset += 100) {
 			const batch = owned.slice(offset, offset + 100);
-			// Read bounded ID/language candidates first; large name values are fetched only for the chosen display forms.
-			const candidates = await tx.execute(
-				sql`select requested.owner_id,candidate.id,candidate.language_tag,candidate.primary_for_language from unnest(${sql.param(batch)}::uuid[]) requested(owner_id) join lateral(select ${names.id} as id,${names.languageTag} as language_tag,${names.primaryForLanguage} as primary_for_language from ${names} where ${names.ownerId}=requested.owner_id and ${names.state}='active' and ${names.spoiler}=0 and ${names.scopeOwnerId} is null order by ${names.id} limit 32) candidate on true`,
-			);
-			const parsed = z
-				.array(
-					z.object({
-						owner_id: z.uuid(),
-						id: z.uuid(),
-						language_tag: z.string().nullable(),
-						primary_for_language: z.boolean().nullable(),
-					}),
-				)
-				.max(3200)
-				.parse(candidates.rows);
-			const byOwner = new Map<string, typeof parsed>();
-			for (const row of parsed) {
-				const group = byOwner.get(row.owner_id) ?? [];
-				group.push(row);
-				byOwner.set(row.owner_id, group);
-			}
-			const chosen: Array<{ ownerId: string; id: string }> = [];
-			for (const ownerId of batch) {
-				const options = byOwner.get(ownerId) ?? [];
-				let selected: (typeof options)[number] | undefined;
-				for (const language of languages) {
-					const matching = options.filter((row) => row.language_tag === language);
-					selected = matching.find((row) => row.primary_for_language === true) ?? matching[0];
-					if (selected) break;
-				}
-				selected ??= options.find((row) => row.primary_for_language === true) ?? options[0];
-				if (selected) chosen.push({ ownerId, id: selected.id });
-			}
-			if (!chosen.length) continue;
-			const labels = await tx.execute(
-				sql`select ${names.ownerId} as owner_id,${names.value} as value,${names.languageTag} as language_tag from unnest(${sql.param(chosen.map((row) => row.ownerId))}::uuid[],${sql.param(chosen.map((row) => row.id))}::uuid[]) selected(owner_id,id) join ${names} on ${names.ownerId}=selected.owner_id and ${names.id}=selected.id`,
-			);
+			// Each preferred language uses its partial index; only the chosen full value is read.
+			const labels = await tx.execute(sql`
+  select requested.owner_id,selected_name.value,selected_name.language_tag
+  from unnest(${sql.param(batch)}::uuid[]) requested(owner_id)
+  left join lateral (
+   select candidate.id from unnest(${sql.param([...new Set(languages)])}::text[]) with ordinality wanted(language_tag,priority)
+   cross join lateral (
+    select ${names.id} as id from ${names}
+    where ${names.ownerId}=requested.owner_id and ${names.languageTag}=wanted.language_tag and ${names.state}='active' and ${names.spoiler}=0 and ${names.scopeOwnerId} is null
+    order by coalesce(${names.primaryForLanguage},false) desc,${names.id} limit 1
+   ) candidate order by wanted.priority limit 1
+  ) preferred on true
+  left join lateral (
+   select ${names.id} as id from ${names}
+   where ${names.ownerId}=requested.owner_id and ${names.state}='active' and ${names.spoiler}=0 and ${names.scopeOwnerId} is null
+   order by ${names.id} limit 1
+  ) fallback on preferred.id is null
+  join ${names} selected_name on selected_name.owner_id=requested.owner_id and selected_name.id=coalesce(preferred.id,fallback.id)
+ `);
 			for (const row of z
 				.array(
 					z.object({ owner_id: z.uuid(), value: z.string(), language_tag: z.string().nullable() }),
