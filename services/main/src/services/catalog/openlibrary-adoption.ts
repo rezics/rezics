@@ -1,217 +1,445 @@
-import { createHash } from "node:crypto";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { runParticipationSavepoint } from "../participation/policy";
 import type { DatabaseTransaction } from "../database";
-import { catalogSourceRecord, catalogSourceMappingClaim } from "../database/schema/catalog-source";
+import type { CatalogReference } from "./contracts";
 import {
-	publishingPublication,
-	publishingPublicationWork,
-	publishingReleaseEvent,
-	publishingWork,
-} from "../database/schema/catalog-publishing";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { publishingIdentity } from "../database/schema/catalog-identity";
-import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
-import { inspectExistingSourceBinding } from "./source-adoption";
-import {
-	OpenLibraryEditionSchema,
-	OpenLibraryWorkSchema,
-	openLibraryDate,
-	openLibrarySourceKey,
+	OpenLibraryContractSha256,
+	OpenLibraryMappingVersion,
+	type OpenLibraryDocument,
 } from "./openlibrary";
-import { addCatalogName, createCatalogIdentity } from "./storage";
+import {
+	recordCatalogSourceDocument,
+	loadCatalogSourceDocument,
+	type CatalogSourceReceipt,
+} from "./source-observations";
+import { inspectExistingSourceBinding } from "./source-adoption";
 import {
 	prepareCatalogSourceChildCorrespondence,
 	sealCatalogSourceChildCorrespondence,
 } from "./source-child-correspondence";
+import { acceptCatalogSourceInitialization } from "./source-bindings";
+import {
+	createCatalogIdentity,
+	loadCatalogIdentity,
+	recordCatalogChange,
+	CatalogRevisionConflict,
+} from "./storage";
+import { initializeEntityProfile } from "./entities";
+import { PublishingStructureSchema, updatePublishingStructure } from "./publishing";
+import { writeCatalogStructureSource, compensateCatalogStructureSource } from "./structure-source";
+import {
+	readChildSourceOccurrences,
+	writeCatalogChildSource,
+	compensateCatalogChildSource,
+} from "./child-source";
+import { ChildSourceComponents } from "./child-source-contracts";
+import { applyCatalogSourceNameDelta } from "./source-name-delta";
+import { applyCatalogSourceIdentifierDelta } from "./source-identifier-delta";
+import { applyCatalogSourceFactDelta } from "./source-fact-delta";
+import {
+	applyCatalogSourceRelationDelta,
+	readCatalogSourceRelationDescriptor,
+	type CatalogSourceRelationDescriptor,
+} from "./source-relation-delta";
+import { compensateCatalogSourceOwnedChange } from "./source-owned-compensation";
+import {
+	CatalogSourceNativeChangesSchema,
+	readCatalogSourceApplication,
+	type CatalogSourceNativeChange,
+} from "./source-applications";
+import type { CatalogSourceNativeWriter } from "./source-proposals";
+import {
+	openLibraryNames,
+	openLibraryIdentifiers,
+	openLibraryContributors,
+} from "./openlibrary-plans";
+import {
+	prepareOpenLibraryArchive,
+	resolveOpenLibraryReferences,
+	openLibraryFactPlan,
+	openLibraryRelationPlan,
+	openLibraryChildPlan,
+	contributionPath,
+	type OpenLibraryArchive,
+	type OpenLibraryObservedDocument,
+} from "./openlibrary-runtime";
 
-/** Pinned Open Library type-contract commit; its field artifacts remain in the source inventory. */
-export const OpenLibraryContractSha256 =
-	"837ebff80ad04e255691c649c9058f86f23eb76bb139e87c05f01e09a53a17d7";
-export const OpenLibraryMappingVersion = "openlibrary.dc153f22c728ad4e2e414867363805a032c64a6b.1";
-
-async function sourceWorkReferences(
-	tx: DatabaseTransaction,
-	actor: string,
-	keys: readonly string[],
-) {
-	const ordered = [...new Set(keys)];
-	for (const key of ordered)
-		if (openLibrarySourceKey(key).objectType !== "work")
-			throw new TypeError("Edition Work reference has another object type");
-	const found = new Map<string, { owner: "publishing"; id: string }>();
-	const binding = CatalogFactTables.publishing.sourceBinding;
-	for (let offset = 0; offset < ordered.length; offset += 128) {
-		const batch = ordered.slice(offset, offset + 128);
-		const rows = await tx
-			.select({
-				externalId: catalogSourceRecord.externalId,
-				id: publishingIdentity.id,
-				shape: publishingIdentity.shape,
-				creator: publishingIdentity.createdByAuthUserId,
-				visibility: publishingIdentity.visibility,
-				status: publishingIdentity.status,
-				moderation: publishingIdentity.moderationStatus,
-			})
-			.from(catalogSourceRecord)
-			.innerJoin(
-				catalogSourceMappingClaim,
-				and(
-					eq(catalogSourceMappingClaim.sourceRecordId, catalogSourceRecord.id),
-					eq(catalogSourceMappingClaim.path, "/"),
-					eq(catalogSourceMappingClaim.owner, "publishing"),
-				),
-			)
-			.innerJoin(
-				binding,
-				and(
-					eq(binding.sourceRecordId, catalogSourceMappingClaim.sourceRecordId),
-					eq(binding.mappingKey, catalogSourceMappingClaim.mappingKey),
-				),
-			)
-			.innerJoin(publishingIdentity, eq(publishingIdentity.id, binding.ownerId))
-			.where(
-				and(
-					eq(catalogSourceRecord.source, "openlibrary"),
-					eq(catalogSourceRecord.objectType, "work"),
-					inArray(catalogSourceRecord.externalId, batch),
-					isNull(publishingIdentity.deletedAt),
-				),
-			)
-			.limit(batch.length);
-		for (const row of rows) {
-			if (
-				row.shape !== "work" ||
-				(row.creator !== actor &&
-					(row.visibility === "private" ||
-						row.status !== "published" ||
-						row.moderation !== "approved"))
-			)
-				throw new Error("Source Work dependency is not available to this actor");
-			found.set(row.externalId, { owner: "publishing", id: row.id });
-		}
-	}
-	return ordered.map((key) => {
-		const reference = found.get(key);
-		if (!reference) throw new Error(`Unresolved source Work dependency: ${key}`);
-		return reference;
-	});
+function expectedTarget(record: OpenLibraryDocument) {
+	return record.kind === "author"
+		? { owner: "entity" as const, shape: "unresolved" }
+		: { owner: "publishing" as const, shape: record.kind === "work" ? "work" : "publication" };
 }
-
-/** Dependency-aware Work/Edition projection; it does not invent authors or intermediate text versions. */
+async function applySnapshot(
+	tx: DatabaseTransaction,
+	reference: CatalogReference,
+	actor: string,
+	revision: number,
+	mappingKey: string,
+	previous: { record: OpenLibraryDocument; document: OpenLibraryObservedDocument } | null,
+	incoming: { record: OpenLibraryDocument; document: OpenLibraryObservedDocument },
+	mode: "intake" | "prepared",
+) {
+	const targets = await resolveOpenLibraryReferences(
+		tx,
+		actor,
+		incoming.document,
+		incoming.record,
+		mode,
+	);
+	const names = openLibraryNames(incoming.record),
+		identifiers = openLibraryIdentifiers(incoming.record),
+		facts = await openLibraryFactPlan(tx, incoming.record),
+		children = await openLibraryChildPlan(
+			tx,
+			incoming.document.record.id,
+			incoming.record,
+			targets,
+		),
+		contributors = openLibraryContributors(incoming.record);
+	if (
+		names.length + identifiers.length + facts.length + children.length + contributors.length >
+		120
+	)
+		throw new RangeError("OpenLibrary record requires staged native application");
+	const previousChildren =
+		previous && reference.owner === "publishing"
+			? await readChildSourceOccurrences(
+					tx,
+					reference,
+					actor,
+					previous.document.record.id,
+					previous.document.snapshot.id,
+				)
+			: [];
+	const previousFacts = previous ? await openLibraryFactPlan(tx, previous.record) : [];
+	const previousRelations: CatalogSourceRelationDescriptor[] = [];
+	if (previous)
+		for (const contributor of openLibraryContributors(previous.record)) {
+			const value = await readCatalogSourceRelationDescriptor(tx, reference, actor, {
+				sourceRecordId: previous.document.record.id,
+				snapshotId: previous.document.snapshot.id,
+				identity: contributor.identity,
+				path: contributionPath(contributor),
+			});
+			if (!value)
+				throw new TypeError("OpenLibrary contributor lacks its exact previous native occurrence");
+			previousRelations.push(value);
+		}
+	const changes: CatalogSourceNativeChange[] = [];
+	if (incoming.record.kind !== "author") {
+		const sourceValue = PublishingStructureSchema.parse(
+			incoming.record.kind === "work"
+				? { shape: "work", fields: {} }
+				: {
+						shape: "publication",
+						fields: {
+							pageCount: incoming.record.record.number_of_pages ?? null,
+							paginationText: incoming.record.record.pagination ?? null,
+						},
+					},
+		);
+		const written = await writeCatalogStructureSource(tx, reference, actor, revision, {
+			sourceRecordId: incoming.document.record.id,
+			previousSnapshotId: previous?.document.snapshot.id ?? null,
+			snapshotId: incoming.document.snapshot.id,
+			sourcePath: "/",
+			sourceValue,
+			observedFields: incoming.record.kind === "work" ? [] : ["pageCount", "paginationText"],
+		});
+		revision = written.revision;
+		changes.push(...written.changes);
+	}
+	const named = await applyCatalogSourceNameDelta(
+		tx,
+		reference,
+		actor,
+		revision,
+		{
+			sourceRecordId: incoming.document.record.id,
+			mappingKey,
+			previousSnapshotId: previous?.document.snapshot.id ?? null,
+			snapshotId: incoming.document.snapshot.id,
+		},
+		{ namespace: "openlibrary.names.2", names },
+	);
+	revision = named.revision;
+	changes.push(...named.changes);
+	const identified = await applyCatalogSourceIdentifierDelta(
+		tx,
+		reference,
+		actor,
+		revision,
+		{
+			sourceRecordId: incoming.document.record.id,
+			mappingKey,
+			previousSnapshotId: previous?.document.snapshot.id ?? incoming.document.snapshot.id,
+			snapshotId: incoming.document.snapshot.id,
+		},
+		previous ? openLibraryIdentifiers(previous.record) : [],
+		identifiers,
+	);
+	revision = identified.revision;
+	changes.push(...identified.changes);
+	const values = await applyCatalogSourceFactDelta(
+		tx,
+		reference,
+		actor,
+		revision,
+		incoming.document,
+		previous
+			? { snapshotId: previous.document.snapshot.id, mappingKey, descriptors: previousFacts }
+			: null,
+		facts,
+	);
+	revision = values.revision;
+	changes.push(...values.changes);
+	const relations = await openLibraryRelationPlan(
+		tx,
+		reference,
+		incoming.record,
+		targets,
+		values.facts,
+	);
+	const linked = await applyCatalogSourceRelationDelta(
+		tx,
+		reference,
+		actor,
+		revision,
+		incoming.document,
+		previous
+			? { snapshotId: previous.document.snapshot.id, mappingKey, descriptors: previousRelations }
+			: null,
+		relations,
+	);
+	revision = linked.revision;
+	changes.push(...linked.changes);
+	const incomingKeys = new Set(
+		children.map((child) => `${ChildSourceComponents[child.value.kind]}/${child.key}`),
+	);
+	for (const prior of previousChildren)
+		if (!incomingKeys.has(`${prior.component}/${prior.componentKey}`)) {
+			const removed = await writeCatalogChildSource(tx, reference, actor, revision, {
+				sourceRecordId: incoming.document.record.id,
+				previousSnapshotId: previous?.document.snapshot.id ?? null,
+				snapshotId: incoming.document.snapshot.id,
+				sourcePath: prior.sourcePath,
+				component: prior.component,
+				componentKey: prior.componentKey,
+				sourceValue: null,
+				observedFields: [],
+			});
+			revision = removed.revision;
+			changes.push(...removed.changes);
+		}
+	for (const child of children) {
+		const written = await writeCatalogChildSource(tx, reference, actor, revision, {
+			sourceRecordId: incoming.document.record.id,
+			previousSnapshotId: previous?.document.snapshot.id ?? null,
+			snapshotId: incoming.document.snapshot.id,
+			sourcePath: child.path,
+			component: ChildSourceComponents[child.value.kind],
+			componentKey: child.key,
+			sourceValue: child.value,
+			observedFields: child.observedFields,
+		});
+		revision = written.revision;
+		changes.push(...written.changes);
+	}
+	return { revision, changes: CatalogSourceNativeChangesSchema.parse(changes) };
+}
+/** @alpha @remarks Own snapshots initialize real native structures; foreign references have separate pristine baselines and never invent text versions. */
 export async function adoptOpenLibraryRecord(
 	tx: DatabaseTransaction,
 	actor: string,
 	receipt: CatalogSourceReceipt,
 	bytes: Uint8Array,
 ) {
-	if (
-		bytes.byteLength > 8_000_000 ||
-		createHash("sha256").update(bytes).digest("hex") !== receipt.contentSha256
-	)
-		throw new Error("Open Library projection bytes differ from the archived observation");
-	if (receipt.contractSha256 !== OpenLibraryContractSha256)
-		throw new Error("Open Library source contract has not been reviewed for this mapper");
-	const raw: unknown = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
-	const isWork = receipt.key.objectType === "work";
-	const record = isWork ? OpenLibraryWorkSchema.parse(raw) : OpenLibraryEditionSchema.parse(raw);
-	const source = openLibrarySourceKey(record.key);
-	if (
-		source.source !== receipt.key.source ||
-		source.objectType !== receipt.key.objectType ||
-		source.externalId !== receipt.key.externalId
-	)
-		throw new TypeError("Open Library payload identity differs from its source key");
-	const observation = await recordCatalogSourceDocument(tx, receipt, bytes);
-	const existing = await inspectExistingSourceBinding(
-		tx,
-		actor,
-		observation,
-		OpenLibraryMappingVersion,
-	);
-	if (existing) return existing;
-	const edition = isWork ? null : OpenLibraryEditionSchema.parse(raw);
-	const works = await sourceWorkReferences(
-		tx,
-		actor,
-		(edition?.works ?? []).map(({ key }) => key),
-	);
-	const identity = await createCatalogIdentity(
-		tx,
-		{ owner: "publishing", shape: isWork ? "work" : "publication" },
-		actor,
-	);
-	await prepareCatalogSourceChildCorrespondence(tx, actor, {
-		sourceRecordId: observation.record.id,
-		snapshotId: observation.snapshot.id,
-		reference: identity,
-		mappingVersion: OpenLibraryMappingVersion,
-	});
-	if (isWork) await tx.insert(publishingWork).values({ id: identity.id });
-	else
-		await tx.insert(publishingPublication).values({
-			id: identity.id,
-			pageCount: edition?.number_of_pages ?? null,
-			paginationText: edition?.pagination ?? null,
-		});
-	let revision = identity.revision;
-	if (record.title)
-		revision = (
-			await addCatalogName(tx, identity, actor, revision, {
-				kind: "source-primary",
-				languageTag: null,
-				value: record.title,
-			})
-		).revision;
-	for (let offset = 0; offset < works.length; offset += 128)
-		await tx.insert(publishingPublicationWork).values(
-			works.slice(offset, offset + 128).map((work, position) => ({
-				publicationId: identity.id,
-				workId: work.id,
-				position: offset + position,
-			})),
-		);
-	const date = openLibraryDate(edition?.publish_date);
-	if (edition && (edition.publish_date || edition.publishers?.length)) {
-		const publishers = edition.publishers?.length ? edition.publishers : [null];
-		for (let offset = 0; offset < publishers.length; offset += 128)
-			await tx.insert(publishingReleaseEvent).values(
-				publishers.slice(offset, offset + 128).map((publisherCredit) => ({
-					publicationId: identity.id,
-					publisherCredit,
-					dateYear: date?.year ?? null,
-					dateMonth: date?.month ?? null,
-					dateDay: date?.day ?? null,
-					dateText: edition.publish_date,
-				})),
+	const record = prepareOpenLibraryArchive({ receipt, bytes });
+	return runParticipationSavepoint(tx, async (write) => {
+		const document = await recordCatalogSourceDocument(write, receipt, bytes),
+			existing = await inspectExistingSourceBinding(
+				write,
+				actor,
+				document,
+				OpenLibraryMappingVersion,
 			);
-	}
-	const identifiers = [
-		{ namespace: `openlibrary.${source.objectType}`, value: source.externalId },
-		...(edition?.isbn_10 ?? []).map((value) => ({ namespace: "isbn10", value })),
-		...(edition?.isbn_13 ?? []).map((value) => ({ namespace: "isbn13", value })),
-		...Object.entries(edition?.identifiers ?? {}).flatMap(([namespace, values]) =>
-			values.map((value) => ({ namespace: `openlibrary.identifier.${namespace}`, value })),
-		),
-	];
-	for (let offset = 0; offset < identifiers.length; offset += 128)
-		await tx.insert(CatalogFactTables.publishing.identifier).values(
-			identifiers.slice(offset, offset + 128).map((identifier) => ({
-				ownerId: identity.id,
-				...identifier,
-				normalizedValue: identifier.value,
-			})),
-		);
-	await sealCatalogSourceChildCorrespondence(tx, actor, {
-		mappingVersion: OpenLibraryMappingVersion,
-		sourceRecordId: observation.record.id,
-		snapshotId: observation.snapshot.id,
-		path: "/",
-		reference: { owner: "publishing", id: identity.id },
+		if (existing && existing.status !== "initialize_reference") return existing;
+		const target = expectedTarget(record);
+		const created = existing
+			? existing.reference
+			: await createCatalogIdentity(write, target, actor);
+		const reference: CatalogReference = { owner: created.owner, id: created.id };
+		const identity = await loadCatalogIdentity(write, reference, actor, true);
+		if (
+			reference.owner !== target.owner ||
+			(target.owner === "publishing" && identity.shape !== target.shape)
+		)
+			throw new TypeError("OpenLibrary record requires a reviewed native grain");
+		let revision = identity.revision;
+		if (!existing)
+			revision = (
+				record.kind === "author"
+					? await initializeEntityProfile(write, reference, actor, revision, {})
+					: await updatePublishingStructure(
+							write,
+							reference,
+							actor,
+							revision,
+							record.kind === "work"
+								? { shape: "work", fields: {} }
+								: { shape: "publication", fields: {} },
+						)
+			).revision;
+		const scope = await prepareCatalogSourceChildCorrespondence(write, actor, {
+			sourceRecordId: document.record.id,
+			snapshotId: document.snapshot.id,
+			reference,
+			mappingVersion: OpenLibraryMappingVersion,
+		});
+		revision = (
+			await applySnapshot(
+				write,
+				reference,
+				actor,
+				revision,
+				scope.mappingKey,
+				null,
+				{ record, document },
+				"intake",
+			)
+		).revision;
+		if (existing)
+			await acceptCatalogSourceInitialization(write, actor, {
+				sourceRecordId: document.record.id,
+				path: "/",
+				snapshotId: document.snapshot.id,
+				mappingVersion: OpenLibraryMappingVersion,
+				reference,
+				expectedBaselineRevision: existing.revision,
+				finalRevision: revision,
+			});
+		else
+			await sealCatalogSourceChildCorrespondence(write, actor, {
+				sourceRecordId: document.record.id,
+				path: "/",
+				snapshotId: document.snapshot.id,
+				mappingVersion: OpenLibraryMappingVersion,
+				reference,
+			});
+		return { status: "created" as const, reference, revision, snapshotId: document.snapshot.id };
 	});
-	return {
-		status: "created" as const,
-		reference: { owner: "publishing" as const, id: identity.id },
-		revision,
-		snapshotId: observation.snapshot.id,
-	};
+}
+/** @alpha @remarks Reviewed refresh/withdrawal performs real exact native writes, with archived bytes, immutable source epochs and no foreign-target writes. */
+export function createOpenLibraryNativeWriter(input: {
+	before: OpenLibraryArchive | null;
+	after: OpenLibraryArchive;
+}): CatalogSourceNativeWriter {
+	const before = input.before
+			? { ...input.before, record: prepareOpenLibraryArchive(input.before) }
+			: null,
+		after = { ...input.after, record: prepareOpenLibraryArchive(input.after) };
+	if (
+		before &&
+		(before.record.kind !== after.record.kind ||
+			before.record.record.key !== after.record.record.key)
+	)
+		throw new TypeError("OpenLibrary update crosses source identities or bibliographic grain");
+	return async (outer, context) =>
+		runParticipationSavepoint(outer, async (tx) => {
+			const target = expectedTarget(after.record);
+			if (
+				context.mappingVersion !== OpenLibraryMappingVersion ||
+				context.reference.owner !== target.owner ||
+				after.receipt.contractSha256 !== OpenLibraryContractSha256
+			)
+				throw new TypeError("OpenLibrary callback differs from its reviewed source proposal");
+			const native = await loadCatalogIdentity(tx, context.reference, context.actor, true);
+			if (target.owner === "publishing" && native.shape !== target.shape)
+				throw new TypeError("OpenLibrary native subtype changed without reviewed reclassification");
+			const document = await loadCatalogSourceDocument(
+				tx,
+				context.sourceRecordId,
+				context.snapshotId,
+				after.receipt,
+				after.bytes,
+			);
+			let revision = context.expectedRevision;
+			const changes: CatalogSourceNativeChange[] = [];
+			if (context.action === "withdraw") {
+				const application = await readCatalogSourceApplication(tx, context.actor, {
+					sourceRecordId: context.sourceRecordId,
+					proposalId: context.proposalId,
+					action: "apply",
+				});
+				if (!application || Boolean(application.application.previousSnapshotId) !== Boolean(before))
+					throw new TypeError("OpenLibrary withdrawal lacks its original archive baseline");
+				if (before && application.application.previousSnapshotId)
+					await loadCatalogSourceDocument(
+						tx,
+						context.sourceRecordId,
+						application.application.previousSnapshotId,
+						before.receipt,
+						before.bytes,
+					);
+				for (const change of [...application.changes].reverse()) {
+					if (
+						!("owner" in change) ||
+						change.owner !== context.reference.owner ||
+						change.ownerId !== context.reference.id
+					)
+						throw new TypeError("OpenLibrary withdrawal cannot mutate a foreign native target");
+					if (change.kind === "catalog-structure")
+						changes.push(await compensateCatalogStructureSource(tx, context.actor, change));
+					else if (change.kind === "catalog-child")
+						changes.push(await compensateCatalogChildSource(tx, context.actor, change));
+					else if (
+						change.kind === "catalog-name" ||
+						change.kind === "catalog-name-authority" ||
+						change.kind === "catalog-identifier" ||
+						change.kind === "catalog-semantic"
+					)
+						changes.push(await compensateCatalogSourceOwnedChange(tx, context.actor, change));
+					else
+						throw new TypeError("OpenLibrary application contains another native component family");
+				}
+				revision = (await loadCatalogIdentity(tx, context.reference, context.actor, true)).revision;
+			} else {
+				if (Boolean(context.previousSnapshotId) !== Boolean(before))
+					throw new CatalogRevisionConflict(
+						"OpenLibrary source baseline changed after preparation",
+					);
+				const previous =
+					before && context.previousSnapshotId
+						? {
+								record: before.record,
+								document: await loadCatalogSourceDocument(
+									tx,
+									context.sourceRecordId,
+									context.previousSnapshotId,
+									before.receipt,
+									before.bytes,
+								),
+							}
+						: null;
+				const result = await applySnapshot(
+					tx,
+					context.reference,
+					context.actor,
+					revision,
+					context.mappingKey,
+					previous,
+					{ record: after.record, document },
+					"prepared",
+				);
+				revision = result.revision;
+				changes.push(...result.changes);
+			}
+			revision = await recordCatalogChange(
+				tx,
+				context.reference,
+				context.actor,
+				revision,
+				`source.openlibrary.${after.record.kind}.${context.action}`,
+			);
+			return { revision, changes: CatalogSourceNativeChangesSchema.parse(changes) };
+		});
 }

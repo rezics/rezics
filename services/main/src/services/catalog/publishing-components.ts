@@ -79,17 +79,34 @@ export async function putPublishingComponent(
 			{ owner: "publishing", shape: "publication" },
 			"facet",
 		);
-	} else
+	} else {
+		// Keeping an existing pointer does not read that foreign resource or create new access to it.
+		const [current] = await tx
+			.select({
+				publisherEntityId: publishingReleaseEvent.publisherEntityId,
+				areaId: publishingReleaseEvent.areaId,
+			})
+			.from(publishingReleaseEvent)
+			.where(
+				and(
+					eq(publishingReleaseEvent.publicationId, reference.id),
+					eq(publishingReleaseEvent.id, key),
+				),
+			)
+			.limit(1);
 		await assertReadableTargets(
 			tx,
 			[
-				...(value.publisherEntityId
+				...(value.publisherEntityId && value.publisherEntityId !== current?.publisherEntityId
 					? [{ owner: "entity" as const, id: value.publisherEntityId }]
 					: []),
-				...(value.areaId ? [{ owner: "reference" as const, id: value.areaId }] : []),
+				...(value.areaId && value.areaId !== current?.areaId
+					? [{ owner: "reference" as const, id: value.areaId }]
+					: []),
 			],
 			actor,
 		);
+	}
 	const revision = await recordCatalogChange(
 		tx,
 		reference,
