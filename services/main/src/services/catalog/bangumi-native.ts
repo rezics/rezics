@@ -37,36 +37,49 @@ import { applyCatalogSourceFactDelta } from "./source-fact-delta";
 type Snapshot = Readonly<{ snapshotId: string; receipt: CatalogSourceReceipt; bytes: Uint8Array }>;
 const namespace = "bangumi.name";
 
-/** One episode parent is admitted through immutable source evidence before scoped execution. @internal */
+/** Admit current and exact previous episode parents separately; old-only targets are withdrawal reads. @internal */
 export async function prepareBangumiProposalDependencies(
 	tx: DatabaseTransaction,
 	actor: string,
-	input: Snapshot & { sourceRecordId: string; proposalId: string },
+	input: Snapshot & { sourceRecordId: string; proposalId: string; before?: Snapshot | null },
 ) {
-	const record = prepareBangumiNativeRecord(input.receipt, input.bytes);
-	const document = await loadCatalogSourceDocument(
-		tx,
-		input.sourceRecordId,
-		input.snapshotId,
-		input.receipt,
-		input.bytes,
-	);
-	if (record.kind !== "episode") return [];
-	await resolveBangumiDependency(tx, actor, "subject", record.value.subject_id);
-	return [
-		await prepareCatalogSourceProposalDependency(tx, actor, {
-			sourceRecordId: input.sourceRecordId,
-			proposalId: input.proposalId,
-			position: 0,
-			dependencySourceRecordId: catalogSourceRecordId({
-				source: "bangumi",
-				objectType: "subject",
-				externalId: String(record.value.subject_id),
-			}),
-			evidence: document.referenceAt("/subject_id"),
-		}),
+	const incoming = prepareBangumiNativeRecord(input.receipt, input.bytes);
+	const snapshots: { snapshot: Snapshot; purpose: "incoming" | "previous-for-withdrawal" }[] = [
+		{ snapshot: input, purpose: "incoming" },
 	];
+	if (input.before) snapshots.push({ snapshot: input.before, purpose: "previous-for-withdrawal" });
+	const prepared = [];
+	for (const { snapshot, purpose } of snapshots) {
+		const record = prepareBangumiNativeRecord(snapshot.receipt, snapshot.bytes);
+		if (record.kind !== incoming.kind || record.value.id !== incoming.value.id)
+			throw new TypeError("Bangumi dependency archives cross source identity");
+		const document = await loadCatalogSourceDocument(
+			tx,
+			input.sourceRecordId,
+			snapshot.snapshotId,
+			snapshot.receipt,
+			snapshot.bytes,
+		);
+		if (record.kind !== "episode") continue;
+		await resolveBangumiDependency(tx, actor, "subject", record.value.subject_id);
+		prepared.push(
+			await prepareCatalogSourceProposalDependency(tx, actor, {
+				sourceRecordId: input.sourceRecordId,
+				proposalId: input.proposalId,
+				position: prepared.length,
+				purpose,
+				dependencySourceRecordId: catalogSourceRecordId({
+					source: "bangumi",
+					objectType: "subject",
+					externalId: String(record.value.subject_id),
+				}),
+				evidence: document.referenceAt("/subject_id"),
+			}),
+		);
+	}
+	return prepared;
 }
+
 function mapping(record: BangumiNativeRecord) {
 	return record.kind === "subject"
 		? "bangumi.subject.1"

@@ -1,3 +1,9 @@
+import {
+	currentParticipationAuthority,
+	runWithParticipationAuthority,
+} from "../src/services/participation/policy";
+import { issueParticipationGrant } from "../src/services/participation/commands";
+import type { CatalogSourceNativeWriter } from "../src/services/catalog/source-proposals";
 import { checkSourceRelationDelta } from "./source-relation-delta-fixture";
 import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
 import type { CatalogReference } from "../src/services/catalog/contracts";
@@ -23,6 +29,7 @@ import {
 	BangumiArchiveContractSha256,
 	adoptBangumiEntity,
 	adoptBangumiProgramEpisode,
+	resolveBangumiDependency,
 } from "../src/services/catalog/bangumi-adoption";
 import { adoptBangumiSubject } from "../src/services/catalog/source-adoption";
 import {
@@ -138,11 +145,18 @@ const cases = [
 		after: { ...character, summary: "Updated description", name: "After" },
 	},
 	{
+		kind: "subject",
+		contract: BangumiSubjectContractSha256,
+		before: { ...subject, id: 950005 },
+		after: { ...subject, id: 950005, name: "After", summary: "Updated description" },
+	},
+	{
 		kind: "episode",
 		contract: BangumiArchiveContractSha256,
 		before: episode,
 		after: {
 			...episode,
+			subject_id: 950005,
 			description: "Updated description",
 			name: "After",
 			sort: 2.5,
@@ -315,6 +329,7 @@ try {
 							throw new Error("Expected pending proposal");
 						await prepareBangumiProposalDependencies(tx, account.id, {
 							...after,
+							before,
 							sourceRecordId,
 							proposalId: proposed.proposal.id,
 						});
@@ -324,17 +339,44 @@ try {
 							mappingVersion,
 							reason: "Qualify exact Bangumi native update and compensation",
 						};
-						assert.equal(
-							(
-								await decideCatalogSourceProposal(
-									tx,
-									account.id,
-									{ ...decision, action: "apply" },
-									writer,
-								)
-							).status,
-							"applied",
-						);
+						const authority = currentParticipationAuthority();
+						assert.ok(authority);
+						const grant = await issueParticipationGrant(tx, authority, {
+							recipient: { kind: "auth", authUserId: account.id },
+							actingEntityId: authority.actingEntityId,
+							capability: "proposal.adopt",
+							target: reference,
+							proposal: { sourceRecordId, proposalId: proposed.proposal.id },
+						});
+						const selected = { ...authority, grant };
+						const decide = (
+							write: typeof tx,
+							action: "apply" | "withdraw",
+							callback: CatalogSourceNativeWriter = writer,
+						): ReturnType<typeof decideCatalogSourceProposal> =>
+							runWithParticipationAuthority(selected, () =>
+								decideCatalogSourceProposal(write, account.id, { ...decision, action }, callback),
+							);
+						if (scenario.kind === "episode") {
+							const previousParent = await resolveBangumiDependency(
+								tx,
+								account.id,
+								"subject",
+								subject.id,
+							);
+							await assert.rejects(
+								() =>
+									tx.transaction((nested) =>
+										decide(nested, "apply", async (write, context) => {
+											await loadCatalogIdentity(write, previousParent, context.actor, false);
+											return writer(write, context);
+										}),
+									),
+								/cannot access this identity/iu,
+							);
+							checks++;
+						}
+						assert.equal((await decide(tx, "apply")).status, "applied");
 						checks++;
 						await assertSourceFact(after.snapshotId);
 						const names = await listCatalogNames(tx, reference, account.id),
@@ -360,19 +402,13 @@ try {
 							assert.ok(read);
 							assert.equal(Number(read.episodeNumber), 77);
 							assert.equal(Number(read.sortNumber), 2.5);
-							checks += 2;
+							assert.equal(
+								read.programId,
+								(await resolveBangumiDependency(tx, account.id, "subject", 950005)).id,
+							);
+							checks += 3;
 						}
-						assert.equal(
-							(
-								await decideCatalogSourceProposal(
-									tx,
-									account.id,
-									{ ...decision, action: "withdraw" },
-									writer,
-								)
-							).status,
-							"withdrawn",
-						);
+						assert.equal((await decide(tx, "withdraw")).status, "withdrawn");
 						checks++;
 						await assertSourceFact(before.snapshotId);
 						assert.ok(
@@ -390,7 +426,11 @@ try {
 							assert.ok(read);
 							assert.equal(Number(read.episodeNumber), 77);
 							assert.equal(Number(read.sortNumber), 1.5);
-							checks += 2;
+							assert.equal(
+								read.programId,
+								(await resolveBangumiDependency(tx, account.id, "subject", subject.id)).id,
+							);
+							checks += 3;
 						}
 					}
 					if (scenario.kind === "subject")

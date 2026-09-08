@@ -19,8 +19,11 @@ Archive does not observe API-only episode numbering or parsed duration. Human
 values in unobserved fields survive updates and compensation. Changing from a
 broader API observation to a narrower archive observation remains an explicit
 hold in the shared structure interpreter; it does not erase missing fields.
-`prepareBangumiProposalDependencies` admits the episode parent from its exact
-archived `/subject_id` evidence before scoped proposal execution.
+`prepareBangumiProposalDependencies` admits incoming and exact previous episode
+parents from their respective archived `/subject_id` evidence. Previous-only
+parents are readable only during withdrawal; native update callbacks cannot
+use them during apply or mutate either foreign parent. Qualification uses
+selected proposal grants, including when the operator is also the creator.
 
 Withdrawal uses the persisted application journal in reverse order. It never
 recomputes an inverse from a live provider response. Names, identifier claims and
@@ -43,7 +46,7 @@ serialize under their existing binding/native-owner locks.
 Qualification: `check-bangumi-source-updates.ts` covers four families, two
 apply/withdraw cycles each, exact primary IDs, human alias preservation, native
 episode sort restoration and an independently authored episode number. The
-2026-09-08 run passed 94 SQL checks in a rolled-back transaction; the older DB62
+2026-09-08 run passed 188 SQL checks in a rolled-back transaction; the older DB62
 target needed only a transaction-local copy of the already corrected canonical
 structure occurrence guard. Five focused projection tests and eight existing
 record tests passed. Full backend TypeScript remains blocked by separately
@@ -54,6 +57,5 @@ exact source semantic IDs, updated fact heads and original fact restoration.
 
 Remaining work is explicit: entity profile interpretation, date/wiki
 native facts, relation/index/member update compensation, reviewed music and
-publishing grain refinement, source classification/NSFW updates, and the shared
-previous-phase dependency protocol. The complete nine-family archive parser
+publishing grain refinement, source classification/NSFW updates, and broader provider property interpretation. The complete nine-family archive parser
 qualification does not establish those native update capabilities.
