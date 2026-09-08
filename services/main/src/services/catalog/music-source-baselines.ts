@@ -1,5 +1,5 @@
 import { catalogSourceApplicationScopes } from "./source-application-scopes";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, or, sql } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import {
 	musicComponentRevision,
@@ -106,99 +106,53 @@ export async function advanceMusicSourceComponentBaselines(
 		{ ...scope, snapshotId: proposal.snapshotId },
 		input.action,
 	);
-	for (const change of native) {
-		const [head] = await tx
-			.select()
-			.from(musicComponentRevision)
-			.where(
-				and(
-					eq(musicComponentRevision.ownerId, change.ownerId),
-					eq(musicComponentRevision.id, change.afterRevisionId),
-				),
-			)
-			.limit(1);
-		if (!head) throw new Error("Music source current history is missing");
-		let matched = false;
+	const keyOf = (row: { ownerId: string; component: string; componentKey: string }) => `${row.ownerId}:${row.component}:${row.componentKey}`;
+	const matched = new Set<string>();
+	for (let offset = 0; offset < native.length; offset += 128) {
+		const page = native.slice(offset, offset + 128);
+		const heads = await tx.select({ ownerId: musicComponentRevision.ownerId, id: musicComponentRevision.id, operation: musicComponentRevision.operation })
+			.from(musicComponentRevision).where(or(...page.map((change) => and(eq(musicComponentRevision.ownerId, change.ownerId), eq(musicComponentRevision.id, change.afterRevisionId))))).limit(page.length);
+		const headById = new Map(heads.map((head) => [`${head.ownerId}:${head.id}`, head]));
 		for (const interpretation of scopes) {
-			const occurrence = musicComponentSourceOccurrence;
-			const find = async (snapshotId: string) => {
-				const rows = await tx
-					.select()
-					.from(occurrence)
-					.where(
-						and(
-							eq(occurrence.sourceRecordId, input.sourceRecordId),
-							eq(occurrence.mappingKey, interpretation.mappingKey),
-							eq(occurrence.correspondenceRevision, interpretation.correspondenceRevision),
-							eq(occurrence.snapshotId, snapshotId),
-							eq(occurrence.ownerId, change.ownerId),
-							eq(occurrence.component, change.component),
-							eq(occurrence.componentKey, change.componentKey),
-						),
-					)
-					.limit(2);
-				if (rows.length > 1) throw new Error("Ambiguous original music source component support");
-				return rows[0];
-			};
-			const observed = interpretation.desiredSnapshotId
-				? await find(interpretation.desiredSnapshotId)
-				: undefined;
-			let support: { snapshotId: string; sourcePath: string; historyId: string } | undefined =
-				observed;
-			for (const snapshotId of interpretation.snapshotIds) {
-				if (support) break;
-				support = await find(snapshotId);
+			const occurrence = musicComponentSourceOccurrence, table = musicComponentSourceBaseline;
+			const supports = await tx.select({ ownerId: occurrence.ownerId, component: occurrence.component, componentKey: occurrence.componentKey,
+				snapshotId: occurrence.snapshotId, sourcePath: occurrence.sourcePath, historyId: occurrence.historyId }).from(occurrence)
+				.where(and(eq(occurrence.sourceRecordId, input.sourceRecordId), eq(occurrence.mappingKey, interpretation.mappingKey), eq(occurrence.correspondenceRevision, interpretation.correspondenceRevision),
+					inArray(occurrence.snapshotId, interpretation.snapshotIds), or(...page.map((change) => and(eq(occurrence.ownerId, change.ownerId), eq(occurrence.component, change.component), eq(occurrence.componentKey, change.componentKey))))))
+				.limit(page.length * 2 + 1);
+			if (supports.length > page.length * 2) throw new Error("Ambiguous original music source component support");
+			const supportBySnapshot = new Map<string, (typeof supports)[number]>();
+			for (const row of supports) {
+				const key = `${keyOf(row)}:${row.snapshotId}`;
+				if (supportBySnapshot.has(key)) throw new Error("Ambiguous original music source component support");
+				supportBySnapshot.set(key, row);
 			}
-			const table = musicComponentSourceBaseline;
-			const key = and(
-				eq(table.sourceRecordId, input.sourceRecordId),
-				eq(table.mappingKey, interpretation.mappingKey),
-				eq(table.correspondenceRevision, interpretation.correspondenceRevision),
-				eq(table.ownerId, change.ownerId),
-				eq(table.component, change.component),
-				eq(table.componentKey, change.componentKey),
-			);
-			const [previous] = await tx.select().from(table).where(key).limit(1).for("update");
-			if (!support && previous)
-				support = {
-					snapshotId: previous.snapshotId,
-					sourcePath: previous.sourcePath,
-					historyId: previous.sourceHistoryId,
-				};
-			if (!support) continue;
-			matched = true;
-			const values = {
-				sourceRecordId: input.sourceRecordId,
-				mappingKey: interpretation.mappingKey,
-				correspondenceRevision: interpretation.correspondenceRevision,
-				mappingOwner: proposal.mappingOwner,
-				ownerId: change.ownerId,
-				component: change.component,
-				componentKey: change.componentKey,
-				snapshotId: support.snapshotId,
-				sourcePath: support.sourcePath,
-				sourceHistoryId: support.historyId,
-				currentHistoryId: head.id,
-				absent: !observed || head.operation === "DELETE",
-				proposalId: input.proposalId,
-				action: input.action,
-			};
-			await tx
-				.insert(table)
-				.values(values)
-				.onConflictDoUpdate({
-					target: [
-						table.sourceRecordId,
-						table.mappingKey,
-						table.correspondenceRevision,
-						table.ownerId,
-						table.component,
-						table.componentKey,
-					],
-					set: values,
-				});
+			const previous = await tx.select().from(table).where(and(eq(table.sourceRecordId, input.sourceRecordId), eq(table.mappingKey, interpretation.mappingKey), eq(table.correspondenceRevision, interpretation.correspondenceRevision),
+				or(...page.map((change) => and(eq(table.ownerId, change.ownerId), eq(table.component, change.component), eq(table.componentKey, change.componentKey))))))
+				.orderBy(table.ownerId, table.component, table.componentKey).limit(page.length).for("update");
+			const previousByKey = new Map(previous.map((row) => [keyOf(row), row]));
+			const values: (typeof table.$inferInsert)[] = [];
+			for (const change of page) {
+				const key = keyOf(change), head = headById.get(`${change.ownerId}:${change.afterRevisionId}`);
+				if (!head) throw new Error("Music source current history is missing");
+				const observed = interpretation.desiredSnapshotId ? supportBySnapshot.get(`${key}:${interpretation.desiredSnapshotId}`) : undefined;
+				let support: { snapshotId: string; sourcePath: string; historyId: string } | undefined = observed;
+				for (const snapshotId of interpretation.snapshotIds) { if (support) break; support = supportBySnapshot.get(`${key}:${snapshotId}`); }
+				const old = previousByKey.get(key);
+				if (!support && old) support = { snapshotId: old.snapshotId, sourcePath: old.sourcePath, historyId: old.sourceHistoryId };
+				if (!support) continue;
+				matched.add(key);
+				values.push({ sourceRecordId: input.sourceRecordId, mappingKey: interpretation.mappingKey, correspondenceRevision: interpretation.correspondenceRevision,
+					mappingOwner: proposal.mappingOwner, ownerId: change.ownerId, component: change.component, componentKey: change.componentKey,
+					snapshotId: support.snapshotId, sourcePath: support.sourcePath, sourceHistoryId: support.historyId, currentHistoryId: head.id,
+					absent: !observed || head.operation === "DELETE", proposalId: input.proposalId, action: input.action });
+			}
+			if (values.length) await tx.insert(table).values(values).onConflictDoUpdate({
+				target: [table.sourceRecordId, table.mappingKey, table.correspondenceRevision, table.ownerId, table.component, table.componentKey],
+				set: { mappingOwner: sql`excluded.mapping_owner`, snapshotId: sql`excluded.snapshot_id`, sourcePath: sql`excluded.source_path`, sourceHistoryId: sql`excluded.source_history_id`,
+					currentHistoryId: sql`excluded.current_history_id`, absent: sql`excluded.absent`, proposalId: sql`excluded.proposal_id`, action: sql`excluded.action` },
+			});
 		}
-		if (!matched)
-			throw new Error("Music change lacks exact support in either recorded interpretation");
 	}
+	if (native.some((change) => !matched.has(keyOf(change)))) throw new Error("Music change lacks exact support in either recorded interpretation");
 }

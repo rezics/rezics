@@ -17,7 +17,7 @@ import {
 	type MusicComponentName,
 	type MusicComponentMutation,
 } from "./music-structure-contracts";
-import { mutateMusicSourceComponents, readMusicComponentHead } from "./music-structure";
+import { mutateMusicSourceComponents, readMusicComponentHeads } from "./music-structure";
 import { CatalogRevisionConflict, recordCatalogChange } from "./storage";
 import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 
@@ -158,12 +158,18 @@ export async function prepareMusicSourceProjection(
 			throw new RangeError("Music source delta exceeds the atomic publication capacity");
 		const operations: MusicComponentMutation[] = [];
 		let nativeBytes = 0;
+		const actualByKey = new Map<string, Awaited<ReturnType<typeof readMusicComponentHeads>>[number]>();
+		const existing = desiredRows.filter((item) => item.old);
+		for (let offset = 0; offset < existing.length; offset += 128)
+			for (const head of await readMusicComponentHeads(tx, context.reference.id, existing.slice(offset, offset + 128))) {
+				nativeBytes += Buffer.byteLength(JSON.stringify(head.value));
+				if (nativeBytes > 32_000_000) throw new RangeError("Music publication native comparison exceeds its byte budget");
+				actualByKey.set(`${head.component}:${head.componentKey}`, head);
+			}
 		for (const desired of desiredRows) {
 			const old = desired.old;
-			const actual = old ? await readMusicComponentHead(tx, context.reference.id, desired.component, desired.componentKey) : null;
+			const actual = old ? actualByKey.get(`${desired.component}:${desired.componentKey}`) ?? null : null;
 			if (old && !actual) throw new Error("Music source component is missing its current native head");
-			if (actual) nativeBytes += Buffer.byteLength(JSON.stringify(actual.value));
-			if (nativeBytes > 32_000_000) throw new RangeError("Music publication native comparison exceeds its byte budget");
 			if (old && actual?.operation === "DELETE" && actual.id !== old.currentHistoryId)
 				throw new CatalogRevisionConflict("Music source component was independently removed");
 			operations.push({ action: "put", component: desired.component, componentKey: desired.componentKey,

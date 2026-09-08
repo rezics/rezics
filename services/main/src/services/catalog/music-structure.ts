@@ -1,4 +1,7 @@
-import { and, eq, inArray, getTableColumns, sql, type SQL } from "drizzle-orm";
+import { and, eq, inArray, isNull, or, getTableColumns, sql, type SQL } from "drizzle-orm";
+import { CatalogIdentityTables } from "../database/schema/catalog-identity";
+import { catalogAccessDecisions } from "../participation/policy";
+import { catalogRatingReadable } from "./read-policy";
 import { requireMusicCreditAccess } from "./music-credit-access";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -14,7 +17,7 @@ import {
 	assertMusicMediumFormatCompatibility,
 	assertMusicMediumAttributeValue,
 } from "./music-medium-attributes";
-import { CatalogRevisionConflict, loadCatalogIdentity, recordCatalogChange } from "./storage";
+import { CatalogRevisionConflict, CatalogAccessDenied, CatalogReferenceNotFound, loadCatalogIdentity, recordCatalogChange } from "./storage";
 import {
 	MusicComponentBatchSchema,
 	MusicSourceComponentBatchSchema,
@@ -52,12 +55,44 @@ export async function readMusicComponentHead(
 	return row ?? null;
 }
 
+/** @internal Exact owner-local current heads, in pages of at most 128; no history scan. */
+export async function readMusicComponentHeads(tx: DatabaseTransaction, ownerId: string,
+	input: readonly { component: MusicComponentName; componentKey: string }[]) {
+	if (input.length > 128) throw new RangeError("Music head lookup is limited to 128 keys");
+	if (!input.length) return [];
+	const table = musicComponentRevision, head = musicComponentHead;
+	return tx.select(getTableColumns(table)).from(head)
+		.innerJoin(table, and(eq(table.ownerId, head.ownerId), eq(table.id, head.historyId)))
+		.where(and(eq(head.ownerId, ownerId), or(...input.map((item) => and(eq(head.component, item.component), eq(head.componentKey, item.componentKey))))))
+		.limit(input.length);
+}
+
+type PreparedMusicMutation = { operation: MusicComponentMutation; head: Awaited<ReturnType<typeof readMusicComponentHead>>; row: Record<string, unknown>; remove: boolean };
+
+async function validateSourceReferences(tx: DatabaseTransaction, actor: string, prepared: readonly PreparedMusicMutation[]) {
+	for (const owner of ["music", "entity", "reference"] as const) {
+		const ids = [...new Set(prepared.flatMap((item) => item.remove ? [] : [
+			...["recording_id", "release_group_id"].filter(() => owner === "music"),
+			...(owner === "entity" ? ["label_id"] : []), ...(owner === "reference" ? ["area_id"] : []),
+		].flatMap((column) => typeof item.row[column] === "string" && (item.head?.operation === "DELETE" ? undefined : item.head?.value[column]) !== item.row[column] ? [z.uuid().parse(item.row[column])] : [])))];
+		const table = CatalogIdentityTables[owner];
+		for (let offset = 0; offset < ids.length; offset += 128) {
+			const page = ids.slice(offset, offset + 128);
+			const candidates = await tx.select().from(table).where(and(inArray(table.id, page), isNull(table.deletedAt))).limit(page.length).for("share");
+			if (candidates.length !== page.length || candidates.some((row) => !catalogRatingReadable(row.contentRating))) throw new CatalogReferenceNotFound();
+			const allowed = await catalogAccessDecisions(tx, candidates.map((row) => ({ reference: { owner, id: row.id }, createdByAuthUserId: row.createdByAuthUserId })), actor, false);
+			if (candidates.some((row, index) => !allowed[index] && (row.visibility === "private" || row.status !== "published" || row.moderationStatus !== "approved"))) throw new CatalogAccessDenied();
+		}
+	}
+}
+
 async function validateReferences(
 	tx: DatabaseTransaction,
 	actor: string,
 	component: MusicComponentName,
 	row: Record<string, unknown>,
 	current?: Record<string, unknown>,
+	foreignReferencesValidated = false,
 ) {
 	if (component === "music_medium_attribute") {
 		await assertMusicMediumAttributeValue(
@@ -86,7 +121,7 @@ async function validateReferences(
 	] as const) {
 		const id = row[column];
 		// Preserving an already validated edge does not read or grant access to its target.
-		if (typeof id === "string" && current?.[column] !== id)
+		if (!foreignReferencesValidated && typeof id === "string" && current?.[column] !== id)
 			await loadCatalogIdentity(tx, { owner, id }, actor, false);
 	}
 	for (const [column, value] of Object.entries(row)) {
@@ -159,12 +194,32 @@ async function mutatePreparedMusicComponents(
 		if (reference.owner !== "music") throw new TypeError("Expected music storage owner");
 		if (identity.revision !== expectedRevision)
 			throw new CatalogRevisionConflict("Music owner revision changed");
-		const prepared = [];
+		const prepared: PreparedMusicMutation[] = [];
+		const bulk = Number.isFinite(maximumHistoryBytes);
+		const heads = new Map<string, NonNullable<Awaited<ReturnType<typeof readMusicComponentHead>>>>();
+		const restoreRows = new Map<string, NonNullable<Awaited<ReturnType<typeof readMusicComponentHead>>>>();
 		let historyBytes = 0;
+		if (bulk) {
+			for (let offset = 0; offset < operations.length; offset += 128) {
+				const page = operations.slice(offset, offset + 128);
+				for (const head of await readMusicComponentHeads(inner, reference.id, page)) {
+					historyBytes += Buffer.byteLength(JSON.stringify(head.value));
+					if (historyBytes > maximumHistoryBytes) throw new RangeError("Music publication history exceeds its byte budget");
+					heads.set(`${head.component}:${head.componentKey}`, head);
+				}
+				const restoreIds = page.flatMap((operation) => operation.action === "restore" ? [operation.historyId] : []);
+				if (restoreIds.length) for (const history of await inner.select().from(musicComponentRevision)
+					.where(and(eq(musicComponentRevision.ownerId, reference.id), inArray(musicComponentRevision.id, restoreIds))).limit(restoreIds.length)) {
+					historyBytes += Buffer.byteLength(JSON.stringify(history.value));
+					if (historyBytes > maximumHistoryBytes) throw new RangeError("Music publication history exceeds its byte budget");
+					restoreRows.set(history.id, history);
+				}
+			}
+		}
 		for (const operation of operations) {
 			if (identity.shape !== musicComponentOwner(operation.component).shape)
 				throw new TypeError("Music component belongs to another native shape");
-			const head = await readMusicComponentHead(
+			const head = bulk ? heads.get(`${operation.component}:${operation.componentKey}`) ?? null : await readMusicComponentHead(
 				inner,
 				reference.id,
 				operation.component,
@@ -175,7 +230,7 @@ async function mutatePreparedMusicComponents(
 			let value: unknown = operation.action === "put" ? operation.value : head?.value;
 			let remove = operation.action === "remove";
 			if (operation.action === "restore") {
-				const [history] = await inner
+				const [history] = bulk ? [restoreRows.get(operation.historyId)] : await inner
 					.select()
 					.from(musicComponentRevision)
 					.where(
@@ -187,12 +242,12 @@ async function mutatePreparedMusicComponents(
 						),
 					)
 					.limit(1);
-				if (!history) throw new TypeError("History does not belong to the requested component");
+				if (!history || history.component !== operation.component || history.componentKey !== operation.componentKey) throw new TypeError("History does not belong to the requested component");
 				value = history.value;
 				remove = history.operation === "DELETE";
 			}
-			if (head) historyBytes += Buffer.byteLength(JSON.stringify(head.value));
-			if (operation.action === "restore") historyBytes += Buffer.byteLength(JSON.stringify(value));
+			if (!bulk && head) historyBytes += Buffer.byteLength(JSON.stringify(head.value));
+			if (!bulk && operation.action === "restore") historyBytes += Buffer.byteLength(JSON.stringify(value));
 			if (historyBytes > maximumHistoryBytes) throw new RangeError("Music publication history exceeds its byte budget");
 			const row = MusicComponentSchemas[operation.component].parse(value);
 			const body: Record<string, unknown> = row;
@@ -285,11 +340,29 @@ async function mutatePreparedMusicComponents(
 				);
 				if (!Number.isSafeInteger(maximum + members.length))
 					throw new RangeError("No safe temporary reorder positions remain");
-				for (const [index, item] of members.entries())
-					await inner.execute(
-						sql`update ${sql.identifier(component)} set position = ${maximum + index + 1} where ${rowPredicate(component, reference.id, item.row)}`,
-					);
+				for (let offset = 0; offset < members.length; offset += 128) {
+					const page = members.slice(offset, offset + 128);
+					if (bulk) await inner.execute(sql`update ${sql.identifier(component)} target set position=incoming.position
+						from (values ${sql.join(page.map((item, index) => sql`(${z.uuid().parse(item.row.id)}::uuid,${maximum + offset + index + 1}::bigint)`), sql`,`)}) incoming(id,position)
+						where target.release_id=${reference.id}::uuid and target.id=incoming.id`);
+					else for (const [index, item] of page.entries()) await inner.execute(sql`update ${sql.identifier(component)} set position=${maximum + offset + index + 1} where ${rowPredicate(component, reference.id, item.row)}`);
+				}
 			}
+		}
+		if (bulk) {
+			await validateSourceReferences(inner, actor, prepared);
+			for (const item of prepared) if (!item.remove) await validateReferences(inner, actor, item.operation.component, item.row,
+				item.head && item.head.operation !== "DELETE" ? MusicComponentSchemas[item.operation.component].parse(item.head.value) : undefined, true);
+			await applyMusicSourceRows(inner, reference.id, prepared);
+			const afterByKey = new Map<string, string>();
+			for (let offset = 0; offset < prepared.length; offset += 128)
+				for (const after of await readMusicComponentHeads(inner, reference.id, prepared.slice(offset, offset + 128).map((item) => item.operation)))
+					afterByKey.set(`${after.component}:${after.componentKey}`, after.id);
+			return { revision, changes: prepared.map((item) => {
+				const afterRevisionId = afterByKey.get(`${item.operation.component}:${item.operation.componentKey}`);
+				if (!afterRevisionId || afterRevisionId === item.head?.id) throw new Error("Native source mutation did not record an exact new head");
+				return { component: item.operation.component, componentKey: item.operation.componentKey, beforeRevisionId: item.head?.id ?? null, afterRevisionId };
+			}) };
 		}
 		const changes: MusicComponentChange[] = [];
 		for (const { operation, head, row, remove } of prepared) {
@@ -355,6 +428,45 @@ async function mutatePreparedMusicComponents(
 		}
 		return { revision, changes };
 	});
+}
+
+// SQL pages share the outer publication transaction. Dependency order applies across every page.
+async function applyMusicSourceRows(tx: DatabaseTransaction, ownerId: string, input: readonly PreparedMusicMutation[]) {
+	const rank = (component: MusicComponentName) => musicComponentOwner(component).column === "id" ? 0
+		: component === "music_medium" ? 1 : component === "music_release_presentation" || component === "music_track_occurrence" ? 2
+			: component === "music_medium_presentation" ? 3 : component === "music_track_presentation" ? 4 : 5;
+	const groups = new Map<string, PreparedMusicMutation[]>();
+	for (const item of input) {
+		const action = item.remove ? "remove" : item.head && item.head.operation !== "DELETE" ? "update" : "insert";
+		const key = `${action}:${item.operation.component}`;
+		const group = groups.get(key) ?? []; group.push(item); groups.set(key, group);
+	}
+	const ordered = [...groups.entries()].sort(([a, left], [b, right]) => {
+		const removeA = a.startsWith("remove:"), removeB = b.startsWith("remove:");
+		return removeA !== removeB ? removeA ? -1 : 1 : (rank(left[0]!.operation.component) - rank(right[0]!.operation.component)) * (removeA ? -1 : 1);
+	});
+	for (const [groupKey, items] of ordered) {
+		const component = items[0]!.operation.component, table = sql.identifier(component);
+		const columns = Object.keys(items[0]!.row), ownerColumn = musicComponentOwner(component).column;
+		const predicate = sql.join([sql`target.${sql.identifier(ownerColumn)}=${ownerId}::uuid`,
+			...MusicComponentKeys[component].map((key) => sql`target.${sql.identifier(key)}=incoming.${sql.identifier(key)}`)], sql` and `);
+		for (let offset = 0; offset < items.length;) {
+			const page: PreparedMusicMutation[] = []; let bytes = 0;
+			while (offset < items.length && page.length < 128) {
+				const item = items[offset]!; const size = Buffer.byteLength(JSON.stringify(item.row));
+				if (size > 2_000_000) throw new RangeError("Music source row exceeds its SQL page budget");
+				if (page.length && bytes + size > 2_000_000) break;
+				page.push(item); bytes += size; offset++;
+			}
+			const source = sql`jsonb_populate_recordset(null::${table},${JSON.stringify(page.map((item) => item.row))}::jsonb)`;
+			if (groupKey.startsWith("remove:")) await tx.execute(sql`delete from ${table} target using ${source} incoming where ${predicate}`);
+			else if (groupKey.startsWith("update:")) {
+				const mutable = columns.filter((column) => column !== ownerColumn && !MusicComponentKeys[component].includes(column));
+				const updated = mutable.length ? mutable : [MusicComponentKeys[component][0]!];
+				await tx.execute(sql`update ${table} target set ${sql.join(updated.map((column) => sql`${sql.identifier(column)}=incoming.${sql.identifier(column)}`), sql`,`)} from ${source} incoming where ${predicate}`);
+			} else await tx.execute(sql`insert into ${table} (${sql.join(columns.map((column) => sql.identifier(column)), sql`,`)}) select ${sql.join(columns.map((column) => sql.identifier(column)), sql`,`)} from ${source}`);
+		}
+	}
 }
 
 /** @alpha Compensates precisely the rows changed by an application; independent edits reject the entire batch. */
