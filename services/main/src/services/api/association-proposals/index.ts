@@ -60,19 +60,21 @@ export default new Elysia({ prefix: "/unit" })
 			query: ListAssociationProposalsQuery,
 			response: {
 				[StatusCodes.OK]: AssociationProposalListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
 				[StatusCodes.FORBIDDEN]: ProposalForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: ProposalNotFoundResponse,
 			},
 			detail: { summary: "List Unit association proposals", tags: ["Unit"] },
 		},
-		async ({ authorization, params, query }) => ({
-			items: await listAssociationProposals(authorization, {
+		async ({ authorization, params, query }) =>
+			listAssociationProposals(authorization, {
 				unitId: params.unitId,
 				side: query.side,
 				kind: query.kind,
 				includeResolved: query.includeResolved ?? false,
+				limit: query.limit,
+				cursor: query.cursor,
 			}),
-		}),
 	)
 	.post(
 		"/:unitId/association-proposals/requests",

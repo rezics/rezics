@@ -130,7 +130,8 @@ import {
 	WithdrawUnitReferenceQuery,
 } from "./schema";
 import { creditRoleAllowedForReference } from "../../units/credit-role-contract";
-import { checkUnitOwner, createTagResource, recordResourceRevision } from "./service";
+import { checkUnitOwner, createTagResource } from "./service";
+import { recordResourceRevision } from "../../units/resource-history";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitResourceMutationNotFoundResponse = toApiErrorResponse([

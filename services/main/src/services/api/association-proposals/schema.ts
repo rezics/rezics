@@ -15,7 +15,9 @@ export const ListAssociationProposalsQuery = t.Object(
 	{
 		side: t.Union([t.Literal("source"), t.Literal("target")]),
 		kind: AssociationKind,
-		includeResolved: t.Optional(t.Boolean()),
+		includeResolved: t.Optional(t.BooleanString()),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
+		cursor: t.Optional(t.String({ maxLength: 1024 })),
 	},
 	{ additionalProperties: false },
 );
@@ -89,5 +91,6 @@ export const ResolveAssociationProposalBody = t.Optional(
 	t.Object({ revisionContext: t.Optional(RevisionContext) }, { additionalProperties: false }),
 );
 export const AssociationProposalListResponse = t.Object({
-	items: t.Array(AssociationProposalResponse),
+	items: t.Array(AssociationProposalResponse, { maxItems: 100 }),
+	nextCursor: t.Nullable(t.String()),
 });

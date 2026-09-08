@@ -1,22 +1,23 @@
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 
+import { z } from "zod";
+import {
+	ParticipationAuthoritySchema,
+	ParticipationDenied,
+	type ParticipationAuthority,
+} from "../participation/policy";
+import { InvalidPaginationCursor } from "../pagination/errors";
+import { readUnitStateById } from "./query";
+import { creditRoleAllowedForReference } from "./credit-role-contract";
 import { recordAuditEvent } from "../audit";
 import { Authorization } from "../authorization";
 import { associationTargetScope } from "../authorization/unit/scope";
 import { database, type DatabaseTransaction } from "../database";
-import {
-	creditAttribution,
-	entity,
-	subjectAssociation,
-	unit,
-	unitAssociationProposal,
-} from "../database/schema";
+import { creditAttribution, subjectAssociation, unitAssociationProposal } from "../database/schema";
 import {
 	type AssociationKind,
 	type CreditAttributionRole,
 	isCreditAttributionRole,
-	isCreditAttributionRoleForUnitKind,
-	isCreditAttributionUnitKind,
 	isSubjectAssociationRole,
 	type SubjectAssociationRole,
 } from "../database/schema/contract-values";
@@ -35,7 +36,7 @@ import {
 	AssociationProposalRoleInvalid,
 	UnitNotFound,
 } from "./errors";
-import { recordUnitRevision } from "./history";
+import { recordResourceRevision } from "./resource-history";
 import type { RevisionContributionInput } from "./revision-contribution";
 
 export type AssociationProposalState =
@@ -75,26 +76,65 @@ export function associationProposalState(
 	return record.resolution ?? (record.expiresAt <= now ? "expired" : "pending");
 }
 
-export function presentAssociationProposal(record: ProposalRecord, now = new Date()) {
-	const state = associationProposalState(record, now);
+/** Public operational response intentionally excludes private principal/grant and concrete routing columns. */
+export function presentAssociationProposal(
+	record: Pick<
+		ProposalRecord,
+		| "id"
+		| "sourceUnitId"
+		| "targetUnitId"
+		| "direction"
+		| "createdByProfileId"
+		| "expiresAt"
+		| "resolution"
+		| "resolvedAt"
+		| "resolvedByProfileId"
+		| "createdAt"
+		| "updatedAt"
+		| "kind"
+		| "role"
+		| "contextPostId"
+	>,
+	now = new Date(),
+) {
+	const visible = {
+		id: record.id,
+		sourceUnitId: record.sourceUnitId,
+		targetUnitId: record.targetUnitId,
+		direction: record.direction,
+		createdByProfileId: record.createdByProfileId,
+		expiresAt: record.expiresAt,
+		resolution: record.resolution,
+		resolvedAt: record.resolvedAt,
+		resolvedByProfileId: record.resolvedByProfileId,
+		createdAt: record.createdAt,
+		updatedAt: record.updatedAt,
+		state: associationProposalState(record, now),
+	};
 	if (record.kind === "credit" && isCreditAttributionRole(record.role))
+		return { ...visible, kind: record.kind, role: record.role, contextPostId: null };
+	if (record.kind === "subject" && isSubjectAssociationRole(record.role))
 		return {
-			...record,
-			kind: record.kind,
-			role: record.role,
-			contextPostId: null,
-			state,
-		};
-	if (record.kind === "subject" && isSubjectAssociationRole(record.role)) {
-		return {
-			...record,
+			...visible,
 			kind: record.kind,
 			role: record.role,
 			contextPostId: record.contextPostId ?? null,
-			state,
 		};
-	}
 	throw new TypeError("Stored association proposal role does not match its kind");
+}
+function creatorAuthority(
+	authorization: Authorization<string>,
+	actorProfileId: string,
+): ParticipationAuthority {
+	if (
+		actorProfileId !== authorization.profileId ||
+		!authorization.authUserId ||
+		!authorization.participationAuthority
+	)
+		throw new ParticipationDenied();
+	const authority = ParticipationAuthoritySchema.parse(authorization.participationAuthority);
+	if (authority.principal.authUserId !== authorization.authUserId) throw new ParticipationDenied();
+	return authority;
 }
 
 async function lockAssociationWorkflow(
@@ -110,7 +150,7 @@ async function lockAssociationWorkflow(
 async function recordProposalAudit(
 	tx: DatabaseTransaction,
 	input: {
-		readonly actorProfileId: string;
+		readonly actorAuthUserId: string;
 		readonly action: string;
 		readonly authorityUnitId: string;
 		readonly proposalId: string;
@@ -120,7 +160,7 @@ async function recordProposalAudit(
 	await recordAuditEvent(tx, {
 		category: "admin_activity",
 		outcome: "succeeded",
-		actor: { kind: "profile", profileId: input.actorProfileId },
+		actor: { kind: "auth", authUserId: input.actorAuthUserId },
 		authority: { kind: "unit", id: input.authorityUnitId },
 		action: input.action,
 		target: { kind: "unit_association_proposal", id: input.proposalId },
@@ -129,31 +169,16 @@ async function recordProposalAudit(
 }
 
 async function ensureSourceUnitExists(tx: DatabaseTransaction, sourceUnitId: string) {
-	const [record] = await tx
-		.select({ id: unit.id })
-		.from(unit)
-		.where(and(eq(unit.id, sourceUnitId), isNull(unit.deletedAt)))
-		.limit(1);
-	if (!record) throw new UnitNotFound();
+	if (!(await readUnitStateById(tx, sourceUnitId))) throw new UnitNotFound();
 }
-
 async function ensureCreditSourceRoleAllowed(
 	tx: DatabaseTransaction,
 	sourceUnitId: string,
 	role: CreditAttributionRole,
 ) {
-	const [record] = await tx
-		.select({ kind: unit.kind })
-		.from(unit)
-		.where(and(eq(unit.id, sourceUnitId), isNull(unit.deletedAt)))
-		.limit(1);
-	if (!record) throw new UnitNotFound();
-	// Unit kinds with a domain role matrix must honor it. Other Unit kinds
-	// retain the generic credit vocabulary used by their existing proposal UI.
-	if (
-		isCreditAttributionUnitKind(record.kind) &&
-		!isCreditAttributionRoleForUnitKind(record.kind, role)
-	)
+	const current = await readUnitStateById(tx, sourceUnitId);
+	if (!current) throw new UnitNotFound();
+	if (!(await creditRoleAllowedForReference(tx, current.reference, role)))
 		throw new AssociationProposalRoleInvalid();
 }
 
@@ -208,6 +233,7 @@ async function insertProposal(
 	input: AssociationTargetInput & {
 		readonly direction: "request" | "invitation";
 		readonly createdByProfileId: string;
+		readonly creatorAuthority: ParticipationAuthority;
 		readonly expiresAt: Date;
 	},
 ) {
@@ -220,7 +246,7 @@ async function insertProposal(
 		.returning();
 	if (!created) throw new Error("Association proposal insertion returned no row");
 	await recordProposalAudit(tx, {
-		actorProfileId: input.createdByProfileId,
+		actorAuthUserId: input.creatorAuthority.principal.authUserId,
 		action: `unit.association_proposal.${input.direction}.create`,
 		authorityUnitId: input.sourceUnitId,
 		proposalId: created.id,
@@ -276,7 +302,8 @@ export async function createAssociationRequestInTransaction(
 	return insertProposal(tx, {
 		...input,
 		direction: "request",
-		createdByProfileId: actorProfileId,
+		createdByProfileId: authorization.profileId,
+		creatorAuthority: creatorAuthority(authorization, actorProfileId),
 	});
 }
 
@@ -311,11 +338,21 @@ export async function createAssociationInvitation(
 		return insertProposal(tx, {
 			...input,
 			direction: "invitation",
-			createdByProfileId: actorProfileId,
+			createdByProfileId: authorization.profileId,
+			creatorAuthority: creatorAuthority(authorization, actorProfileId),
 		});
 	});
 }
 
+const ProposalCursor = z.strictObject({
+	v: z.literal(1),
+	unitId: z.uuid(),
+	side: z.enum(["source", "target"]),
+	kind: z.enum(["credit", "subject"]),
+	includeResolved: z.boolean(),
+	createdAt: z.iso.datetime(),
+	id: z.uuid(),
+});
 export async function listAssociationProposals(
 	authorization: Authorization<string>,
 	input: {
@@ -323,46 +360,101 @@ export async function listAssociationProposals(
 		readonly side: "source" | "target";
 		readonly kind: AssociationKind;
 		readonly includeResolved: boolean;
+		readonly limit?: number;
+		readonly cursor?: string;
 	},
 ) {
-	if (input.side === "source")
-		await authorization.unit.ensure(
-			input.unitId,
-			"unit.update",
-			sourceAssociationScope(input.kind),
-		);
-	else {
-		if (input.kind === "subject") {
-			const [target] = await database
-				.select({ id: entity.id })
-				.from(entity)
-				.where(eq(entity.id, input.unitId))
-				.limit(1);
-			if (!target) throw new EntityEntryNotFound();
+	const limit = z
+		.number()
+		.int()
+		.min(1)
+		.max(100)
+		.parse(input.limit ?? 50);
+	let cursor: z.output<typeof ProposalCursor> | undefined;
+	if (input.cursor) {
+		try {
+			cursor = ProposalCursor.parse(
+				JSON.parse(Buffer.from(input.cursor, "base64url").toString("utf8")),
+			);
+			if (
+				cursor.unitId !== input.unitId ||
+				cursor.side !== input.side ||
+				cursor.kind !== input.kind ||
+				cursor.includeResolved !== input.includeResolved
+			)
+				throw new InvalidPaginationCursor();
+		} catch {
+			throw new InvalidPaginationCursor();
 		}
-		await authorization.unit.ensure(
-			input.unitId,
-			"unit.association.manage",
-			associationTargetScope(input.kind),
-		);
 	}
-	const sideCondition =
-		input.side === "source"
-			? eq(unitAssociationProposal.sourceUnitId, input.unitId)
-			: eq(unitAssociationProposal.targetUnitId, input.unitId);
-	const rows = await database
-		.select()
-		.from(unitAssociationProposal)
-		.where(
-			and(
-				sideCondition,
-				eq(unitAssociationProposal.kind, input.kind),
-				input.includeResolved ? undefined : isNull(unitAssociationProposal.resolution),
-			),
-		)
-		.orderBy(desc(unitAssociationProposal.createdAt), desc(unitAssociationProposal.id));
-	const now = new Date();
-	return rows.map((row) => presentAssociationProposal(row, now));
+	return database.transaction(
+		async (tx) => {
+			if (input.side === "source")
+				await authorization.unit.ensureInTransaction(
+					tx,
+					input.unitId,
+					"unit.update",
+					sourceAssociationScope(input.kind),
+				);
+			else {
+				if (input.kind === "subject") {
+					const target = await readUnitStateById(tx, input.unitId);
+					if (target?.reference.owner !== "entity") throw new EntityEntryNotFound();
+				}
+				await authorization.unit.ensureInTransaction(
+					tx,
+					input.unitId,
+					"unit.association.manage",
+					associationTargetScope(input.kind),
+				);
+			}
+			const source =
+				input.side === "source"
+					? unitAssociationProposal.sourceUnitId
+					: unitAssociationProposal.targetUnitId;
+			const rows = await tx
+				.select()
+				.from(unitAssociationProposal)
+				.where(
+					and(
+						eq(source, input.unitId),
+						input.includeResolved ? undefined : isNull(unitAssociationProposal.resolution),
+						cursor
+							? or(
+									lt(unitAssociationProposal.createdAt, new Date(cursor.createdAt)),
+									and(
+										eq(unitAssociationProposal.createdAt, new Date(cursor.createdAt)),
+										lt(unitAssociationProposal.id, cursor.id),
+									),
+								)
+							: undefined,
+					),
+				)
+				.orderBy(desc(unitAssociationProposal.createdAt), desc(unitAssociationProposal.id))
+				.limit(256);
+			const matching = rows.filter((row) => row.kind === input.kind),
+				page = matching.slice(0, limit),
+				last =
+					matching.length > limit ? page.at(-1) : rows.length === 256 ? rows.at(-1) : undefined;
+			return {
+				items: page.map((row) => presentAssociationProposal(row)),
+				nextCursor: last
+					? Buffer.from(
+							JSON.stringify({
+								v: 1,
+								unitId: input.unitId,
+								side: input.side,
+								kind: input.kind,
+								includeResolved: input.includeResolved,
+								createdAt: last.createdAt.toISOString(),
+								id: last.id,
+							}),
+						).toString("base64url")
+					: null,
+			};
+		},
+		{ isolationLevel: "repeatable read" },
+	);
 }
 
 async function loadUnresolvedProposal(
@@ -411,10 +503,15 @@ async function ensureResolutionAuthorized(
 async function materializeProposal(
 	tx: DatabaseTransaction,
 	proposal: ProposalRecord,
-	acceptingProfileId: string,
+	acceptingAuthorization: Authorization<string>,
 	contribution: RevisionContributionInput | undefined,
 ) {
-	const proposerAuthorization = new Authorization(proposal.createdByProfileId);
+	const admitted = ParticipationAuthoritySchema.parse(proposal.creatorAuthority);
+	const proposerAuthorization = new Authorization(
+		proposal.createdByProfileId,
+		admitted.principal.authUserId,
+		admitted,
+	);
 	if (proposal.direction === "request")
 		await proposerAuthorization.unit.ensureInTransaction(
 			tx,
@@ -477,13 +574,19 @@ async function materializeProposal(
 			position: fractionalPositionBetween(last?.position, null),
 		});
 	}
-	await recordUnitRevision(tx, {
-		unitId: proposal.sourceUnitId,
-		actorProfileId:
-			proposal.direction === "request" ? proposal.createdByProfileId : acceptingProfileId,
-		contribution,
-		event: "update",
-	});
+	await recordResourceRevision(
+		tx,
+		proposal.direction === "request" ? proposerAuthorization : acceptingAuthorization,
+		{
+			unitId: proposal.sourceUnitId,
+			actorProfileId:
+				proposal.direction === "request"
+					? proposal.createdByProfileId
+					: acceptingAuthorization.profileId,
+			contribution,
+			event: "update",
+		},
+	);
 }
 
 async function ensureNoRelationshipOrProposalForAcceptance(
@@ -535,6 +638,7 @@ export async function resolveAssociationProposal(
 		readonly contribution?: RevisionContributionInput;
 	},
 ) {
+	const admitted = creatorAuthority(authorization, actorProfileId);
 	return database.transaction(async (tx) => {
 		const proposalBeforeLock = await loadUnresolvedProposal(tx, input.proposalId);
 		await lockAssociationWorkflow(
@@ -550,7 +654,7 @@ export async function resolveAssociationProposal(
 				() => new AssociationContextPostInvalid(),
 			);
 		if (input.action === "accept")
-			await materializeProposal(tx, proposal, actorProfileId, input.contribution);
+			await materializeProposal(tx, proposal, authorization, input.contribution);
 		const resolution =
 			input.action === "accept"
 				? "accepted"
@@ -559,7 +663,12 @@ export async function resolveAssociationProposal(
 					: "cancelled";
 		const [resolved] = await tx
 			.update(unitAssociationProposal)
-			.set({ resolution, resolvedAt: new Date(), resolvedByProfileId: actorProfileId })
+			.set({
+				resolution,
+				resolvedAt: new Date(),
+				resolvedByProfileId: authorization.profileId,
+				resolvedByAuthUserId: admitted.principal.authUserId,
+			})
 			.where(
 				and(
 					eq(unitAssociationProposal.id, proposal.id),
@@ -569,7 +678,7 @@ export async function resolveAssociationProposal(
 			.returning();
 		if (!resolved) throw new AssociationProposalConflict();
 		await recordProposalAudit(tx, {
-			actorProfileId,
+			actorAuthUserId: admitted.principal.authUserId,
 			action: `unit.association_proposal.${input.action}`,
 			authorityUnitId: input.actingUnitId,
 			proposalId: proposal.id,

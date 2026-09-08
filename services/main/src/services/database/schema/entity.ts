@@ -3,6 +3,7 @@ import { inArray, sql } from "drizzle-orm";
 import {
 	check,
 	index,
+	jsonb,
 	pgEnum,
 	primaryKey,
 	smallint,
@@ -12,6 +13,9 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
+import { users } from "./auth";
+import { participationGrant, servicePrincipal } from "./participation";
+import type { ParticipationAuthority } from "../../participation/policy";
 import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
@@ -62,10 +66,23 @@ export const unitAssociationProposal = pgTable(
 		createdByProfileId: uuid()
 			.notNull()
 			.references(() => entityIdentity.id, { onDelete: "restrict" }),
+		/** Private admitted principal/grant; excluded from every public proposal response. */
+		creatorAuthority: jsonb().$type<ParticipationAuthority>().notNull(),
+		creatorAuthUserId: uuid()
+			.generatedAlwaysAs(sql`(creator_authority->'principal'->>'authUserId')::uuid`)
+			.notNull()
+			.references(() => users.id, { onDelete: "restrict" }),
+		creatorGrantId: uuid()
+			.generatedAlwaysAs(sql`(creator_authority->'grant'->>'id')::uuid`)
+			.references(() => participationGrant.id, { onDelete: "restrict" }),
+		creatorServicePrincipalId: uuid()
+			.generatedAlwaysAs(sql`(creator_authority->'principal'->>'servicePrincipalId')::uuid`)
+			.references(() => servicePrincipal.id, { onDelete: "restrict" }),
 		expiresAt: createTimestampMsColumn().notNull(),
 		resolution: associationProposalResolution(),
 		resolvedAt: createTimestampMsColumn(),
 		resolvedByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "restrict" }),
+		resolvedByAuthUserId: uuid().references(() => users.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 
@@ -97,7 +114,31 @@ export const unitAssociationProposal = pgTable(
 		index("unit_association_proposal_context_post_idx")
 			.on(table.contextPostId)
 			.where(sql`${table.contextPostId} is not null`),
+		index("unit_association_proposal_source_page_idx").on(
+			table.sourceUnitId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("unit_association_proposal_target_page_idx").on(
+			table.targetUnitId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("unit_association_proposal_creator_auth_idx").on(table.creatorAuthUserId, table.id),
+		index("unit_association_proposal_creator_grant_idx")
+			.on(table.creatorGrantId)
+			.where(sql`${table.creatorGrantId} is not null`),
+		index("unit_association_proposal_creator_service_idx")
+			.on(table.creatorServicePrincipalId)
+			.where(sql`${table.creatorServicePrincipalId} is not null`),
+		check(
+			"unit_association_proposal_authority_shape_check",
+			sql`jsonb_typeof(${table.creatorAuthority})='object' and octet_length(${table.creatorAuthority}::text)<=4096`,
+		),
 		index("unit_association_proposal_created_by_idx").on(table.createdByProfileId),
+		index("unit_association_proposal_resolved_auth_idx")
+			.on(table.resolvedByAuthUserId)
+			.where(sql`${table.resolvedByAuthUserId} is not null`),
 		index("unit_association_proposal_resolved_by_idx").on(table.resolvedByProfileId),
 		check("unit_association_proposal_role_not_blank", sql`btrim(${table.role}) <> ''`),
 		/**
@@ -127,9 +168,9 @@ export const unitAssociationProposal = pgTable(
 		check(
 			"unit_association_proposal_resolution_shape_check",
 			sql`(
-				${table.resolution} is null and ${table.resolvedAt} is null and ${table.resolvedByProfileId} is null
+				${table.resolution} is null and ${table.resolvedAt} is null and ${table.resolvedByProfileId} is null and ${table.resolvedByAuthUserId} is null
 			) or (
-				${table.resolution} is not null and ${table.resolvedAt} is not null and ${table.resolvedByProfileId} is not null
+				${table.resolution} is not null and ${table.resolvedAt} is not null and ${table.resolvedByProfileId} is not null and ${table.resolvedByAuthUserId} is not null
 			)`,
 		),
 	],
