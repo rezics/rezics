@@ -50,6 +50,14 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles = {
+	catalog_source_reinterpretation: [
+		"catalog-source-application.sql",
+		"catalog-source-correspondence.sql",
+		"catalog-source-owned-baseline.sql",
+		"catalog-profile-source.sql",
+		"music-source-lifecycle.sql",
+		"catalog-credit-integrity.sql",
+	],
 	catalog_source_support_epochs: [
 		"content-label-policy.sql",
 		"catalog-source-support.sql",
@@ -126,6 +134,8 @@ export const PostgreSqlSchemaMigrationBundles = {
 } as const satisfies Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>>;
 
 export const PostgreSqlSchemaFunctionNames = [
+	"catalog_source_application_includes_epoch",
+	"catalog_require_credit_creation_context",
 	"catalog_guard_source_support",
 	"catalog_source_guard_dependency",
 	"catalog_source_guard_binding_correspondence",
@@ -319,6 +329,7 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "music_artist_credit", name: "music_credit_creation_context" },
 	{ table: "catalog_source_proposal_dependency", name: "catalog_source_dependency_guard" },
 	{
 		table: "software_participation_credit_source_occurrence",

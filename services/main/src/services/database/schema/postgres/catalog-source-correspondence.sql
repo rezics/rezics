@@ -29,7 +29,7 @@ FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_binding_correspondence
 
 CREATE OR REPLACE FUNCTION public.catalog_source_guard_child_correspondence()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
-DECLARE anchor public.catalog_source_binding_revision%ROWTYPE; source_mapping uuid; source_epoch bigint;
+DECLARE anchor public.catalog_source_binding_revision%ROWTYPE; source_mapping uuid; source_epoch bigint; native_shape text;
 BEGIN
   IF TG_ARGV[0]='source-support' THEN
     source_mapping := NEW.source_mapping_key; source_epoch := NEW.source_correspondence_revision;
@@ -44,10 +44,14 @@ BEGIN
       RAISE EXCEPTION 'Source context correspondence must target its exact software content' USING ERRCODE='23514';
     END IF;
   END IF;
-  IF TG_ARGV[0]='software-owner' THEN
+  IF TG_ARGV[0] IN ('software-owner','software-record') THEN
     IF anchor.owner<>'software' OR anchor.software_id IS DISTINCT FROM NEW.owner_id THEN
       RAISE EXCEPTION 'Source scalar or component correspondence must target its exact software owner' USING ERRCODE='23514';
     END IF;
+  END IF;
+  IF TG_ARGV[0]='software-record' THEN
+    SELECT shape INTO STRICT native_shape FROM public.software_record_revision WHERE owner_id=NEW.owner_id AND revision=NEW.revision;
+    IF native_shape IS DISTINCT FROM NEW.source_shape THEN RAISE EXCEPTION 'Source scalar interpretation must match its exact native history shape' USING ERRCODE='23514'; END IF;
   END IF;
   RETURN NEW;
 END $$;
@@ -59,7 +63,7 @@ CREATE TRIGGER software_credit_correspondence_guard BEFORE INSERT ON public.soft
 FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence('software-context');
 DROP TRIGGER IF EXISTS software_record_correspondence_guard ON public.software_record_source_occurrence;
 CREATE TRIGGER software_record_correspondence_guard BEFORE INSERT ON public.software_record_source_occurrence
-FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence('software-owner');
+FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence('software-record');
 DROP TRIGGER IF EXISTS software_component_correspondence_guard ON public.software_component_source_occurrence;
 CREATE TRIGGER software_component_correspondence_guard BEFORE INSERT ON public.software_component_source_occurrence
 FOR EACH ROW EXECUTE FUNCTION public.catalog_source_guard_child_correspondence('software-owner');
