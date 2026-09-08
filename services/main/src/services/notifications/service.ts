@@ -8,6 +8,7 @@ import {
 	notificationPreference,
 	participationGrant,
 	users,
+	governanceNoticeRecipient,
 } from "../database/schema";
 import { enqueueNotificationEmail } from "../email/outbox";
 import { emailIntentDeliveryEnabled } from "../email/policy";
@@ -142,8 +143,8 @@ export function notificationTranslationKey(
 	return kind;
 }
 
-export async function createNotification(tx: DatabaseTransaction, input: NotificationInput) {
-	if (input.actorProfileId === input.recipientEntityId) return;
+/** @internal Resolve current personal inboxes, with the Entity controller bound enforced. */
+export async function resolveNotificationRecipients(tx: DatabaseTransaction, input: NotificationBase) {
 	const [self] = input.recipientEntityId
 		? await tx
 				.select({ authUserId: authEntity.authUserId })
@@ -180,14 +181,26 @@ export async function createNotification(tx: DatabaseTransaction, input: Notific
 	const candidateIds = candidates.flatMap((candidate) =>
 		candidate.authUserId ? [candidate.authUserId] : [],
 	);
-	if (!candidateIds.length) return;
+	if (!candidateIds.length) return [];
 	const recipients = await tx
 		.select({ id: users.id })
 		.from(users)
 		.where(and(inArray(users.id, candidateIds), isNull(users.erasedAt)))
 		.orderBy(users.id)
 		.for("share");
+	return recipients;
+}
+
+export async function createNotification(tx: DatabaseTransaction, input: NotificationInput) {
+	if (input.actorProfileId === input.recipientEntityId) return;
+	const recipients = await resolveNotificationRecipients(tx, input);
 	if (!recipients.length) return;
+	if (input.kind === "moderation" && input.payload.publicNoticePostId) {
+		const postId = input.payload.publicNoticePostId;
+		await tx.insert(governanceNoticeRecipient).values(recipients.map(recipient => ({
+			postId, authUserId: recipient.id,
+		}))).onConflictDoNothing();
+	}
 	const preferences = await tx
 		.select()
 		.from(notificationPreference)

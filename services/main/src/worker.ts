@@ -27,6 +27,7 @@ const [
 	customThemeReview,
 	customThemeMonitor,
 	workerHealth,
+	{ dispatchGovernanceReportDelivery, purgeCompletedGovernanceReportDeliveries },
 ] = await Promise.all([
 	import("srvx"),
 	import("./services/config"),
@@ -44,6 +45,7 @@ const [
 	import("./services/custom-themes/review"),
 	import("./services/custom-themes/monitor"),
 	import("./services/health/worker-health"),
+	import("./services/governance/report-delivery"),
 ]);
 const { aggregateRecommendationMetrics, purgeRecommendationData, refreshRecommendationSnapshot } =
 	recommendationWorker;
@@ -85,7 +87,10 @@ observability.metrics.workerHeartbeat();
 
 const pollInterval = env.EMAIL_DISPATCH_POLL_INTERVAL_MS;
 const lanes = {
-	delivery: [{ name: "email.dispatch", intervalMs: pollInterval, run: dispatchEmailBatch }],
+	delivery: [
+		{ name: "email.dispatch", intervalMs: pollInterval, run: dispatchEmailBatch },
+		{ name: "governance.report_delivery", intervalMs: 1000, run: async () => { await dispatchGovernanceReportDelivery(); } },
+	],
 	canonical: [
 		{
 			name: "unit_merge.dispatch",
@@ -126,6 +131,8 @@ const lanes = {
 		},
 	],
 	maintenance: [
+		{ name: "governance.delivery_cleanup", intervalMs: 10_000, run: async () => { await purgeCompletedGovernanceReportDeliveries(); } },
+		{ name: "recommendation.retention", intervalMs: 10_000, run: purgeRecommendationData },
 		{
 			name: "account_erasure.dispatch",
 			intervalMs: 1000,

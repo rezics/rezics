@@ -27,6 +27,7 @@ import {
 	unitAccessRestriction,
 	unitOwnership,
 	users,
+	governanceNoticeRecipient,
 } from "../../database/schema";
 import { UnitAccessRestricted, UnitNotFound, UnitPermissionForbidden } from "../../units/errors";
 import type { PlatformAuthorization } from "../platform/authorization";
@@ -42,7 +43,7 @@ import { profileMatchesRealmAccessSubject } from "./realm-subject";
 import { scopeCovers, scopeKey, type UnitScope } from "./scope";
 
 export type UnitAccessDecision =
-	| { readonly allowed: true; readonly source: "public" | "platform" | "owner" | "native" }
+	| { readonly allowed: true; readonly source: "public" | "platform" | "owner" | "native" | "governance_notice" }
 	| {
 			readonly allowed: true;
 			readonly source: "grant";
@@ -264,6 +265,14 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 			return { allowed: true, source: "public" };
 		if (!this.profileId) return { allowed: false, reason: "anonymous" };
 
+		if (permission === "unit.read" && record.reference.owner === "post" && this.authUserId) {
+			const [receipt] = await executor.select({ postId: governanceNoticeRecipient.postId })
+				.from(governanceNoticeRecipient).where(and(
+					eq(governanceNoticeRecipient.postId, unitId),
+					eq(governanceNoticeRecipient.authUserId, this.authUserId),
+				)).limit(1);
+			if (receipt) return { allowed: true, source: "governance_notice" };
+		}
 		const grants = await executor
 			.select({
 				id: unitAccessGrant.id,

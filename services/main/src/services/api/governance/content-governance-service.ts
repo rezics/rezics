@@ -12,8 +12,6 @@ import { recordAuditEvent } from "../../audit";
 import type { DatabaseTransaction } from "../../database";
 import {
 	contentGovernanceAction,
-	contentReport,
-	contentReportReferral,
 	contentReviewCase,
 	realmUnit,
 	realmUnitStatusEvent,
@@ -27,9 +25,9 @@ import {
 } from "../../governance/decision-service";
 import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
 import { createNotification } from "../../notifications/service";
+import { enqueueGovernanceReportDelivery } from "../../governance/report-delivery";
 import {
 	assertContentGovernanceActionCompatible,
-	isActiveContentReviewCaseState,
 	resolveLicenseRecognitionStatus,
 	resolvePostTargetingLockState,
 	resolveRealmUnitStatus,
@@ -691,18 +689,6 @@ export async function executeAuthorizedContentGovernanceAction(
 	const noteRoles = new Set(input.body.notes?.map((note) => note.role));
 	if (noteRoles.size !== (input.body.notes?.length ?? 0)) throw new ModerationNoteRoleDuplicate();
 	const target = await getModerationTargetContext(tx, input.caseRow);
-	const caseReports = await tx
-		.select({
-			referralId: contentReportReferral.id,
-			reportId: contentReport.id,
-			reporterProfileId: contentReport.reporterProfileId,
-		})
-		.from(contentReportReferral)
-		.innerJoin(contentReport, eq(contentReport.id, contentReportReferral.reportId))
-		.where(eq(contentReportReferral.caseId, input.caseRow.id));
-	const reportRecipientProfileIds = presentProfileIds(
-		caseReports.map(({ reporterProfileId }) => ({ profileId: reporterProfileId })),
-	);
 	const plan = await deriveActionPlan(tx, input.caseRow, input.body);
 	const previousState =
 		plan.type === "unit_state" || plan.type === "realm_unit_state" ? plan.previousState : null;
@@ -784,9 +770,7 @@ export async function executeAuthorizedContentGovernanceAction(
 				subjectUnitId: target.subjectUnitId,
 				realmId: input.caseRow.realmId,
 				revisionContribution: input.body.revisionContext?.contribution,
-				publicRecipientProfileIds: [
-					...new Set([...target.recipientEntityIds, ...reportRecipientProfileIds]),
-				],
+				publicRecipientProfileIds: target.recipientEntityIds,
 				note,
 			});
 			noteBindings.push({ ...binding, role: note.role });
@@ -823,23 +807,10 @@ export async function executeAuthorizedContentGovernanceAction(
 			},
 		});
 	}
-	if (!isActiveContentReviewCaseState(nextCaseState))
-		for (const caseReport of caseReports) {
-			await createNotification(tx, {
-				recipientEntityId: caseReport.reporterProfileId,
-				actorProfileId: actorProfileId,
-				kind: "moderation",
-				subjectUnitId: target.subjectUnitId,
-				payload: {
-					type: "report_resolution",
-					reportId: caseReport.reportId,
-					referralId: caseReport.referralId,
-					actionId: created.id,
-					actionKind: input.body.kind,
-					publicNoticePostId,
-				},
-			});
-		}
+	await enqueueGovernanceReportDelivery(tx, {
+		kind: "action", caseId: input.caseRow.id, actionId: created.id,
+		actorEntityId: actorProfileId, actorAuthUserId, publicNoticePostId,
+	});
 	await recordAuditEvent(tx, {
 		category: "admin_activity",
 		outcome: "succeeded",

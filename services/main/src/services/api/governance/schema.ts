@@ -585,6 +585,7 @@ const UnitAllowedDecisionResponse = t.Union([
 				t.Literal("platform"),
 				t.Literal("owner"),
 				t.Literal("native"),
+				t.Literal("governance_notice"),
 			]),
 		},
 		{ additionalProperties: false },

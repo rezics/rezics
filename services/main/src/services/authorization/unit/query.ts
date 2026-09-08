@@ -15,7 +15,7 @@ import { alias } from "drizzle-orm/pg-core";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
 
 import { database } from "../../database";
-import { unitAccessGrant, unitAccessRestriction, unitOwnership } from "../../database/schema";
+import { unitAccessGrant, unitAccessRestriction, unitOwnership, governanceNoticeRecipient } from "../../database/schema";
 import { getPlatformCapabilityCondition } from "../platform/query";
 import { profileMatchesRealmAccessSubject } from "./realm-subject";
 import type { UnitScope } from "./scope";
@@ -142,12 +142,17 @@ export function getUnitReadCondition(
 				),
 			),
 	);
+	const noticeRecipient = exists(database.select({ postId: governanceNoticeRecipient.postId })
+		.from(governanceNoticeRecipient).where(and(
+			eq(governanceNoticeRecipient.postId, target.id),
+			eq(governanceNoticeRecipient.authUserId, selfAuthUserIdForEntity(profileId)),
+		)));
 	return and(
 		isNull(target.deletedAt),
 		or(
 			platformSubject,
 			ownership,
-			and(not(profileRestriction), not(realmRestriction), or(visible, matchingGrant)),
+			and(not(profileRestriction), not(realmRestriction), or(visible, matchingGrant, noticeRecipient)),
 		),
 	);
 }

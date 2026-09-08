@@ -27,7 +27,6 @@ import { toSafeInteger } from "../../database/integer";
 import {
 	ActiveContentReviewCaseStateValues,
 	contentGovernanceAction,
-	contentReport,
 	contentReportReferral,
 	contentReviewCase,
 	contentReviewCaseReportCounter,
@@ -62,6 +61,7 @@ import {
 } from "../../database/schema/contract-values";
 import { runVoteTransaction } from "../../database/vote-admission";
 import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
+import { enqueueGovernanceReportDelivery } from "../../governance/report-delivery";
 import { createNotification } from "../../notifications/service";
 import { fractionalPositionBetween } from "../../ordering/position";
 import { decodeCursor, encodeCursor } from "../../pagination";
@@ -3188,15 +3188,6 @@ export default new Elysia({ prefix: "/realms" })
 						.returning();
 				}
 				if (!caseRow) throw new Error("Realm content review case insertion returned no row");
-				const reportRows = await tx
-					.select({
-						referralId: contentReportReferral.id,
-						reportId: contentReport.id,
-						reporterProfileId: contentReport.reporterProfileId,
-					})
-					.from(contentReportReferral)
-					.innerJoin(contentReport, eq(contentReport.id, contentReportReferral.reportId))
-					.where(eq(contentReportReferral.caseId, caseRow.id));
 				const annotation = body.annotation
 					? await createGovernanceNotePost(tx, {
 							actorProfileId: entity.id,
@@ -3204,9 +3195,6 @@ export default new Elysia({ prefix: "/realms" })
 							subjectId: caseRow.id,
 							subjectUnitId: params.unitId,
 							realmId: params.realmId,
-							publicRecipientProfileIds: [
-								...new Set(reportRows.map((report) => report.reporterProfileId)),
-							],
 							revisionContribution: body.revisionContext?.contribution,
 							note: body.annotation,
 						})
@@ -3217,21 +3205,14 @@ export default new Elysia({ prefix: "/realms" })
 						.update(contentReviewCase)
 						.set({ state: caseState })
 						.where(eq(contentReviewCase.id, caseRow.id));
-					for (const report of reportRows)
-						await createNotification(tx, {
-							recipientEntityId: report.reporterProfileId,
-							actorProfileId: entity.id,
-							kind: "moderation",
-							subjectUnitId: params.unitId,
-							payload: {
-								type: "report_resolution",
-								reportId: report.reportId,
-								referralId: report.referralId,
-								resolution: "dismissed",
-								publicNoticePostId:
-									body.annotation?.role === "public_notice" ? annotation?.postId : undefined,
-							},
-						});
+				}
+				if (body.command === "dismiss" || body.annotation?.role === "public_notice") {
+					if (!authorization.authUserId) throw new Error("Review delivery requires the operator account");
+					await enqueueGovernanceReportDelivery(tx, {
+						kind: body.command === "dismiss" ? "dismissal" : "notice", caseId: caseRow.id,
+						actorEntityId: entity.id, actorAuthUserId: authorization.authUserId,
+						publicNoticePostId: body.annotation?.role === "public_notice" ? annotation?.postId : undefined,
+					});
 				}
 				await appendAuditEvent(tx, {
 					category: "admin_activity",
