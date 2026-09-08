@@ -3,10 +3,12 @@ import { and, asc, eq, inArray, notInArray } from "drizzle-orm";
 import type { DatabaseTransaction } from "../database";
 import { authEntity, accountFollowPreference, unitFollow } from "../database/schema";
 import { fractionalPositionBetween } from "../ordering/position";
-import { OfficialZoneManifest } from "./data";
+import { OfficialZoneUnitIds } from "@rezics/slug";
+
+const officialZoneIds = Object.values(OfficialZoneUnitIds);
 
 function officialPositionsBefore(rightBoundary: string | null): string[] {
-	const positions = new Array<string>(OfficialZoneManifest.length);
+	const positions = new Array<string>(officialZoneIds.length);
 	let right = rightBoundary;
 	for (let index = positions.length - 1; index >= 0; index -= 1) {
 		const position = fractionalPositionBetween(null, right);
@@ -40,7 +42,6 @@ export async function ensureOfficialZoneFollows(
 		return id;
 	};
 	for (const entityId of targets) authFor(entityId);
-	const officialZoneIds = OfficialZoneManifest.map(({ id }) => id);
 	if (options.sequenceIsEmpty) {
 		const positions = officialPositionsBefore(null);
 		await tx
