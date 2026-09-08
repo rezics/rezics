@@ -56,7 +56,10 @@ export type SaveMediaContentStructureDraftInput = {
 	readonly actorAuthUserId: string;
 	readonly contribution?: RevisionContributionInput;
 	readonly nodes: readonly (
-		| ExistingMediaDraftNode
+		| (Omit<ExistingMediaDraftNode, "title"> & {
+				readonly title?: string;
+				readonly expectedTitle?: string | null;
+		  })
 		| NewMediaDraftNode
 		| Omit<AttachedMediaDraftNode, "title">
 	)[];
@@ -180,7 +183,11 @@ export async function saveMediaContentStructureDraft(
 			if (!content) throw new ContentStructureInvalid("Structure content is unavailable");
 			return { ...content, ...node };
 		});
-		if (currentRows.some((row) => row.title === null || !isMediaContentUnit(row)))
+		if (
+			currentRows.some(
+				(row) => (row.title === null && row.unitKind !== "program") || !isMediaContentUnit(row),
+			)
+		)
 			throw new ContentStructureInvalid("Media structure contains invalid content nodes");
 
 		const attachedContentUnitIds = [
@@ -192,14 +199,25 @@ export async function saveMediaContentStructureDraft(
 		const attachedContentByUnitId = new Map(
 			attachedContentRows.map((row) => [row.id, row] as const),
 		);
+		const previousTitles = new Map(currentRows.map((row) => [row.id, row.title]));
 		const draftNodes: MediaDraftNode[] = input.nodes.map((node) => {
+			if (node.state === "existing") {
+				const currentTitle = previousTitles.get(node.id);
+				if (
+					node.title !== undefined &&
+					node.title !== currentTitle &&
+					node.expectedTitle !== currentTitle
+				)
+					throw new ContentStructureInvalid("Content title changed; reload before renaming");
+				return { ...node, title: node.title ?? currentTitle ?? "" };
+			}
 			if (node.state !== "attached") return node;
 			const content = attachedContentByUnitId.get(node.contentUnitId);
-			if (!content?.title || !isMediaContentUnit(content))
+			if (!content || !isMediaContentUnit(content))
 				throw new ContentStructureInvalid(
 					"Attached Media content Unit must be a Media, Video, Audio, or Label",
 				);
-			return { ...node, title: content.title };
+			return { ...node, title: content.title ?? "" };
 		});
 		const current = currentRows.map((row) => ({
 			id: row.id,

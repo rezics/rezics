@@ -217,6 +217,8 @@ const ExistingBookContentStructureDraftNode = t.Object(
 	{
 		state: t.Literal("existing"),
 		...BookContentStructureDraftNodeBase,
+		title: t.Optional(t.String({ minLength: 1, maxLength: 500 })),
+		expectedTitle: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
 	},
 	{ additionalProperties: false },
 );
@@ -286,6 +288,8 @@ const ExistingMediaContentStructureDraftNode = t.Object(
 	{
 		state: t.Literal("existing"),
 		...BookContentStructureDraftNodeBase,
+		title: t.Optional(t.String({ minLength: 1, maxLength: 500 })),
+		expectedTitle: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
 	},
 	{ additionalProperties: false },
 );

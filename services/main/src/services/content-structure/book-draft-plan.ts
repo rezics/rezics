@@ -108,7 +108,7 @@ export function planContentStructureDraft<Node extends ContentStructureDraftNode
 		if (!Number.isSafeInteger(draft.order) || draft.order < 0 || draft.order >= draftNodes.length)
 			invalid(`Draft node ${draft.id} has an invalid sibling order`);
 		const title = draft.title.trim();
-		if (!title) invalid(`Draft node ${draft.id} has a blank title`);
+		if (!title && draft.state === "new") invalid(`Draft node ${draft.id} has a blank title`);
 		if (draft.state === "existing" && !currentById.has(draft.id))
 			invalid(`Existing draft node ${draft.id} does not belong to this structure`);
 		if (draft.state !== "existing" && currentById.has(draft.id))

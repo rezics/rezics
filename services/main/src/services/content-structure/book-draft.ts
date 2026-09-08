@@ -42,7 +42,10 @@ export type SaveBookContentStructureDraftInput = {
 	readonly actorAuthUserId: string;
 	readonly contribution?: RevisionContributionInput;
 	readonly nodes: readonly (
-		| ExistingBookDraftNode
+		| (Omit<ExistingBookDraftNode, "title"> & {
+				readonly title?: string;
+				readonly expectedTitle?: string | null;
+		  })
 		| NewBookDraftNode
 		| AttachedBookDraftNodeInput
 	)[];
@@ -176,7 +179,7 @@ export async function saveBookContentStructureDraft(
 			if (
 				currentRows.some(
 					(row) =>
-						row.title === null ||
+						(row.title === null && row.unitKind !== "publishing") ||
 						!(
 							(row.unitKind === "publishing" && row.shape === "text_version") ||
 							(row.unitKind === "post" && row.postKind === "chapter") ||
@@ -194,11 +197,22 @@ export async function saveBookContentStructureDraft(
 			const attachedContentByUnitId = new Map(
 				attachedContentRows.map((row) => [row.id, row] as const),
 			);
+			const previousTitles = new Map(currentRows.map((row) => [row.id, row.title]));
 			const draftNodes: BookDraftNode[] = input.nodes.map((node) => {
+				if (node.state === "existing") {
+					const currentTitle = previousTitles.get(node.id);
+					if (
+						node.title !== undefined &&
+						node.title !== currentTitle &&
+						node.expectedTitle !== currentTitle
+					)
+						throw new ContentStructureInvalid("Content title changed; reload before renaming");
+					return { ...node, title: node.title ?? currentTitle ?? "" };
+				}
 				if (node.state !== "attached") return node;
 				const content = attachedContentByUnitId.get(node.contentUnitId);
 				if (
-					!content?.title ||
+					!content ||
 					!(
 						(content.unitKind === "publishing" && content.shape === "text_version") ||
 						(content.unitKind === "post" && content.postKind === "chapter") ||
@@ -208,7 +222,7 @@ export async function saveBookContentStructureDraft(
 					throw new ContentStructureInvalid(
 						"Attached Book content Unit must be a Book, Chapter, or Label",
 					);
-				return { ...node, title: content.title };
+				return { ...node, title: content.title ?? "" };
 			});
 			const current = currentRows.map((row) => ({
 				id: row.id,
