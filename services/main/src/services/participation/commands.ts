@@ -28,6 +28,7 @@ import {
 import { createParticipantIdentity } from "./identity";
 import { catalogSourceAdoptionProposal } from "../database/schema/catalog-source";
 import { lockCatalogSourceBinding } from "../catalog/source-bindings";
+import { publicEntityName } from "./presentation";
 
 export const IssueGrantInputSchema = z
 	.strictObject({
@@ -260,6 +261,37 @@ export async function revokeParticipationGrant(
 }
 
 /** Lists only the actual account's invitations, without traversing organization membership. */
+/** Security managers inspect a bounded Entity grant page, including grants issued to other principals. */
+export async function listManagedEntityGrants(
+	tx: DatabaseTransaction,
+	authority: ParticipationAuthority,
+	entityId: string,
+	afterId?: string,
+) {
+	z.uuid().parse(entityId);
+	if (afterId) z.uuid().parse(afterId);
+	await requireParticipation(tx, authority, "entity.security", { owner: "entity", id: entityId });
+	return tx
+		.select({
+			grant: participationGrant,
+			accountEntityId: authEntity.entityId,
+			recipientName: publicEntityName(
+				sql`coalesce(${authEntity.entityId}, ${servicePrincipal.entityId})`,
+			),
+		})
+		.from(participationGrant)
+		.leftJoin(authEntity, eq(authEntity.authUserId, participationGrant.authUserId))
+		.leftJoin(servicePrincipal, eq(servicePrincipal.id, participationGrant.servicePrincipalId))
+		.where(
+			and(
+				eq(participationGrant.actingEntityId, entityId),
+				afterId ? gt(participationGrant.id, afterId) : undefined,
+			),
+		)
+		.orderBy(participationGrant.id)
+		.limit(101);
+}
+
 export async function listParticipationGrants(
 	tx: DatabaseTransaction,
 	authUserId: string,

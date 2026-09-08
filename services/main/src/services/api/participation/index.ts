@@ -8,6 +8,7 @@ import {
 	createServicePrincipal,
 	issueParticipationGrant,
 	listParticipationGrants,
+	listManagedEntityGrants,
 	listControlledServicePrincipals,
 	revokeParticipationGrant,
 	revokeServicePrincipal,
@@ -38,6 +39,7 @@ import {
 	ParticipationSelectionSchema,
 	ParticipationSelfSchema,
 	ParticipationGrantsSchema,
+	ManagedEntityGrantsSchema,
 	ManagedOrganizationsSchema,
 	CreatedOrganizationSchema,
 	PresentationMutationSchema,
@@ -177,6 +179,30 @@ export default new Elysia({ prefix: "/participation", name: "participation-api" 
 			runParticipationTransaction(async (tx) => {
 				const rows = await listParticipationGrants(tx, user.id, query.afterId);
 				const items = rows.slice(0, 100).map(presentParticipationGrant);
+				return { items, nextCursor: rows.length > 100 ? (items.at(-1)?.id ?? null) : null };
+			}),
+	)
+	.get(
+		"/entities/:id/grants",
+		{
+			detail: { operationId: "listManagedEntityGrants", tags: ["Participation"] },
+			access: "session-only",
+			params: z.strictObject({ id: z.uuid() }),
+			query: z.strictObject({ afterId: z.uuid().optional() }),
+			response: ManagedEntityGrantsSchema,
+		},
+		({ participation, params, query }) =>
+			runParticipationTransaction(async (tx) => {
+				const rows = await listManagedEntityGrants(tx, participation, params.id, query.afterId);
+				const items = rows.slice(0, 100).map((row) => ({
+					...presentParticipationGrant(row.grant),
+					recipientName: row.recipientName,
+					recipient: row.grant.servicePrincipalId
+						? { kind: "service" as const, servicePrincipalId: row.grant.servicePrincipalId }
+						: row.accountEntityId
+							? { kind: "account" as const, entityId: row.accountEntityId }
+							: null,
+				}));
 				return { items, nextCursor: rows.length > 100 ? (items.at(-1)?.id ?? null) : null };
 			}),
 	)

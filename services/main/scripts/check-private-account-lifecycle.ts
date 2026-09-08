@@ -37,6 +37,14 @@ import {
 	updateFollowingPresentation,
 } from "../src/services/following/service";
 import type { ImageErasureArchive } from "../src/services/image-assets/erasure";
+import {
+	createManagedOrganization,
+	listManagedOrganizations,
+} from "../src/services/participation/organizations";
+import {
+	issueParticipationGrant,
+	listManagedEntityGrants,
+} from "../src/services/participation/commands";
 
 const target = new URL(process.env.DATABASE_URL ?? "http://invalid");
 if (
@@ -75,6 +83,57 @@ try {
 		await database.transaction(async (tx) => {
 			const human = await actor(tx, "Private lifecycle owner");
 			const other = await actor(tx, "Unrelated private owner");
+			const organization = await runWithParticipationAuthority(human.authority, () =>
+				createManagedOrganization(tx, human.authority, {
+					name: "Lifecycle organization",
+					language: "en",
+				}),
+			);
+			check(
+				(await listManagedOrganizations(tx, human.account.id)).items[0]?.name,
+				"Lifecycle organization",
+				"managed identities project public names without per-row requests",
+			);
+			const security = organization.grants.find((grant) => grant.capability === "entity.security");
+			assert.ok(security);
+			const organizationAuthority: ParticipationAuthority = {
+				...human.authority,
+				actingEntityId: organization.entityId,
+				grant: { id: security.id, revision: security.revision },
+			};
+			await issueParticipationGrant(tx, organizationAuthority, {
+				recipient: { kind: "auth", authUserId: other.account.id },
+				actingEntityId: organization.entityId,
+				capability: "entity.publish",
+				target: { owner: "entity", id: organization.entityId },
+			});
+			const managedGrants = await listManagedEntityGrants(
+				tx,
+				organizationAuthority,
+				organization.entityId,
+			);
+			check(
+				managedGrants.length,
+				4,
+				"exact security authority reads grants issued to other principals",
+			);
+			check(
+				managedGrants.find((row) => row.accountEntityId === other.self.id)?.recipientName,
+				"Unrelated private owner",
+				"grant recipients use their public names",
+			);
+			await assert.rejects(
+				tx.transaction((nested) =>
+					listManagedEntityGrants(nested, other.authority, organization.entityId),
+				),
+			);
+			checks++;
+			await assert.rejects(
+				tx.transaction((nested) =>
+					listManagedEntityGrants(nested, organizationAuthority, other.self.id),
+				),
+			);
+			checks++;
 			const targets = await tx
 				.insert(unit)
 				.values(

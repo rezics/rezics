@@ -48,6 +48,20 @@ export const ParticipationGrantsSchema = z.strictObject({
 	items: z.array(ParticipationGrantSchema),
 	nextCursor: z.uuid().nullable(),
 });
+export const ManagedEntityGrantsSchema = z.strictObject({
+	items: z.array(
+		ParticipationGrantSchema.extend({
+			recipient: z
+				.discriminatedUnion("kind", [
+					z.strictObject({ kind: z.literal("account"), entityId: z.uuid() }),
+					z.strictObject({ kind: z.literal("service"), servicePrincipalId: z.uuid() }),
+				])
+				.nullable(),
+			recipientName: z.string().nullable(),
+		}),
+	),
+	nextCursor: z.uuid().nullable(),
+});
 export const ManagedOrganizationsSchema = z.strictObject({
 	items: z.array(
 		z.strictObject({
