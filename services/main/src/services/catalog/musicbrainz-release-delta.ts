@@ -32,6 +32,7 @@ import {
 import {
 	tracks,
 	correlateMusicBrainzMedia,
+	correlateMusicBrainzDiscs,
 	preflightMusicBrainzReleaseDelta,
 } from "./musicbrainz-release-plan";
 
@@ -275,20 +276,15 @@ export function musicBrainzReleaseNativeWriter(
 							: recoverAt("music_track_identifier", `${entry.path}/id`),
 					);
 				}
-				const claimedDiscs = new Set<number>();
+				const oldDiscIndices = correlateMusicBrainzDiscs(oldMedium?.discs ?? [], medium.discs ?? []);
 				for (const [discIndex, disc] of (medium.discs ?? []).entries()) {
-					const oldDiscIndex =
-						oldMedium?.discs?.findIndex(
-							(candidate, candidateIndex) =>
-								!claimedDiscs.has(candidateIndex) && isDeepStrictEqual(candidate, disc),
-						) ?? -1;
+					const oldDiscIndex = oldDiscIndices[discIndex] ?? -1;
 					let oldDisc: Baseline | undefined = recoverAt(
 						"music_medium_toc",
 						`/media/${index}/discs/${discIndex}`,
 					);
 					let tocId: string;
 					if (oldDiscIndex >= 0) {
-						claimedDiscs.add(oldDiscIndex);
 						oldDisc = oldAt("music_medium_toc", `/media/${oldIndex}/discs/${oldDiscIndex}`);
 						tocId = z.uuid().parse(oldDisc.value.toc_id);
 					} else if (oldDisc) {

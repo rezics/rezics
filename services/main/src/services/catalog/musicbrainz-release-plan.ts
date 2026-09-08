@@ -78,6 +78,16 @@ export function preflightMusicBrainzReleaseDelta(
 	if (musicBrainzReleaseAuxiliaryRows(previous, incoming) > MUSIC_SOURCE_AUXILIARY_ROW_LIMIT) throw new RangeError("Music release auxiliary writes exceed the publication capacity");
 }
 
+/** @internal Exact document equality with linear occurrence consumption, including duplicate TOC evidence. */
+export function correlateMusicBrainzDiscs(previous: NonNullable<Medium["discs"]>, incoming: NonNullable<Medium["discs"]>) {
+	const canonical = (value: unknown): string => value !== null && typeof value === "object"
+		? Array.isArray(value) ? `[${value.map(canonical).join(",")}]` : `{${Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([key, child]) => `${JSON.stringify(key)}:${canonical(child)}`).join(",")}}`
+		: JSON.stringify(value) ?? "undefined";
+	const rows = new Map<string, { indices: number[]; next: number }>();
+	for (const [index, disc] of previous.entries()) { const key = canonical(disc), row = rows.get(key) ?? { indices: [], next: 0 }; row.indices.push(index); rows.set(key, row); }
+	return incoming.map((disc) => { const row = rows.get(canonical(disc)); return row && row.next < row.indices.length ? row.indices[row.next++]! : null; });
+}
+
 /** @internal Count new credit-fragment rows and TOC offsets separately from structural mutations. */
 export function musicBrainzReleaseAuxiliaryRows(previous: MusicBrainzRelease | null, incoming: MusicBrainzRelease) {
 	let count = 0;
@@ -94,11 +104,8 @@ export function musicBrainzReleaseAuxiliaryRows(previous: MusicBrainzRelease | n
 		for (const entry of tracks(medium, index)) credit(oldTracks.get(entry.track.id)?.["artist-credit"], entry.track["artist-credit"]);
 		const oldIndex = correspondence[index];
 		const oldDiscs = oldIndex == null ? [] : previous?.media[oldIndex]?.discs ?? [];
-		const claimed = new Set<number>();
-		for (const disc of medium.discs ?? []) {
-			const match = oldDiscs.findIndex((candidate, candidateIndex) => !claimed.has(candidateIndex) && isDeepStrictEqual(candidate, disc));
-			if (match >= 0) claimed.add(match); else count += 1 + disc.offsets.length;
-		}
+		const discs = medium.discs ?? [], matched = correlateMusicBrainzDiscs(oldDiscs, discs);
+		for (const [discIndex, disc] of discs.entries()) if (matched[discIndex] === null) count += 1 + disc.offsets.length;
 	}
 	return count;
 }
