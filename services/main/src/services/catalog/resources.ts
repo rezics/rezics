@@ -3,7 +3,11 @@ import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { CatalogIdentityTables } from "../database/schema/catalog-identity";
 import { CatalogNameTables } from "../database/schema/catalog-names";
-import { readCatalogAuthorityScope, catalogIdentityReadPredicate } from "../participation/policy";
+import {
+	readCatalogAuthorityScope,
+	catalogIdentityReadPredicate,
+	canAccessCatalog,
+} from "../participation/policy";
 import { type CatalogReference } from "./contracts";
 import {
 	CreateCatalogResourceSchema,
@@ -131,6 +135,7 @@ export async function readCatalogResource(
 	const identity = await loadCatalogIdentity(tx, reference, actor, false);
 	return CatalogResourceSchema.parse({
 		reference,
+		canEdit: await canAccessCatalog(tx, reference, actor, identity.createdByAuthUserId, true),
 		shape: identity.shape,
 		revision: identity.revision,
 		status: identity.status,

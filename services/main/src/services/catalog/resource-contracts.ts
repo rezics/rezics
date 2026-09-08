@@ -102,6 +102,7 @@ export const CreateCatalogResourceSchema = z.discriminatedUnion("kind", [
 /** @alpha Public resource metadata excludes account provenance and internal routing state. */
 export const CatalogResourceSchema = z.strictObject({
 	reference: CatalogReferenceSchema,
+	canEdit: z.boolean(),
 	shape: z.string(),
 	revision: CatalogRevisionNumberSchema,
 	status: z.enum(UnitStatusValues),
