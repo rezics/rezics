@@ -340,6 +340,42 @@ export function patchMusicTrack(
 		MusicEditTrackSchema.parse(input),
 	);
 }
+/** @internal History authority does not grant access to private foreign identities. Omit hidden edges so a copied full-row put cannot silently erase them. */
+async function visibleComponentValues(
+	tx: DatabaseTransaction,
+	actor: string,
+	rows: readonly Record<string, unknown>[],
+) {
+	const output = rows.map((row) => ({ ...row }));
+	const scope = await readCatalogAuthorityScope(tx, actor);
+	for (const [field, owner] of [
+		["recording_id", "music"],
+		["release_group_id", "music"],
+		["label_id", "entity"],
+		["area_id", "reference"],
+	] as const) {
+		const ids = [
+			...new Set(
+				rows.map((row) => row[field]).filter((id): id is string => typeof id === "string"),
+			),
+		];
+		if (!ids.length) continue;
+		const table = CatalogIdentityTables[owner];
+		const visible = new Set(
+			(
+				await tx
+					.select({ id: table.id })
+					.from(table)
+					.where(and(inArray(table.id, ids), catalogIdentityReadPredicate(scope, owner, table)))
+					.limit(ids.length)
+			).map((row) => row.id),
+		);
+		for (const row of output)
+			if (typeof row[field] === "string" && !visible.has(row[field])) delete row[field];
+	}
+	return output;
+}
+
 /** @alpha Editor history remains paged and restores through exact native heads. */
 export async function pageMusicHistory(
 	tx: DatabaseTransaction,
@@ -356,6 +392,11 @@ export async function pageMusicHistory(
 		value.componentKey,
 		{ afterId: value.afterId, limit: value.limit + 1 },
 	);
+	const visible = await visibleComponentValues(
+		tx,
+		actor,
+		rows.map((row) => row.value),
+	);
 	return MusicHistoryPageSchema.parse(
 		catalogWirePage(
 			rows.map((row, index) => ({
@@ -367,7 +408,7 @@ export async function pageMusicHistory(
 					componentSequence: row.componentSequence,
 					ownerRevision: row.ownerRevision,
 					operation: row.operation,
-					value: row.value,
+					value: visible[index],
 					recordedAt: row.recordedAt.toISOString(),
 					restorable: rows[index + 1]?.ownerRevision !== row.ownerRevision,
 				},
@@ -467,12 +508,16 @@ export async function pageMusicStructure(
 		query.component,
 		rows.map((row) => musicComponentKey(query.component, row)),
 	);
+	const visible = await visibleComponentValues(tx, actor, rows);
 	const page = catalogWirePage(
-		rows.map((value) => {
+		rows.map((value, index) => {
 			const key = musicComponentKey(query.component, value),
 				headId = current.get(key);
 			if (!headId) throw new Error("Live music component has no native history head");
-			return { id: key, value: { component: query.component, componentKey: key, headId, value } };
+			return {
+				id: key,
+				value: { component: query.component, componentKey: key, headId, value: visible[index] },
+			};
 		}),
 		query.limit,
 	);

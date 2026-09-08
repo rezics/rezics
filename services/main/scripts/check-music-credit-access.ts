@@ -35,6 +35,7 @@ import { loadCatalogIdentity } from "../src/services/catalog/storage";
 import {
 	readMusicDetail,
 	pageMusicHistory,
+	pageMusicStructure,
 	patchMusicTrack,
 } from "../src/services/catalog/music-api";
 
@@ -187,11 +188,19 @@ try {
 						expectedHeadId: head.id,
 						value: { name: "Updated presentation" },
 					});
+					const structure = await pageMusicStructure(tx, root.id, account.id, {
+						component: "music_track_occurrence",
+					});
+					assert.ok(structure.items.every((item) => !("recording_id" in item.value)));
+					assert.ok(structure.items.some((item) => item.componentKey === track.id));
+					checks += 2;
 					const history = await pageMusicHistory(tx, root.id, account.id, {
 						component: "music_track_occurrence",
 						componentKey: track.id,
 					});
 					assert.equal(history.items.length, 2);
+					assert.ok(history.items.every((item) => !("recording_id" in item.value)));
+					checks++;
 					checks++;
 					const changedHead = await readMusicComponentHead(
 						tx,
