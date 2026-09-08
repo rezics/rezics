@@ -61,7 +61,7 @@ and software SQL fixtures remain separate evidence. User-reported playtime is a
 qualified estimate with sample count and estimator, not a fixed intrinsic duration.
 
 Unfinished scope remains explicit in `source-contracts/vndb-native-mapping.json`:
-Supporting-principal update orchestration, versioned child correspondence after root rebind, complete remaining public dump
+Complete remaining public dump
 assembly, API/dump source-surface transitions and centrally staged applications
 above the ordinary 128-change budget. A source-surface transition is rejected
 until a reviewed combined projection can retain unobserved fields safely. Native
@@ -154,3 +154,36 @@ Work is proportional to one admitted source record, independent of corpus size.
 The source task capacity/lease remains the concurrency and backpressure owner.
 Refresh qualification must include repeated protocol changes while retaining
 human overrides; graph separation alone does not prove replacement semantics.
+
+## Assembled staff and producer public dump packets
+
+The staff/producer initializer and native update callback now consume bounded
+assembled dump packets. Main and alternate staff aliases are checked against the
+same parent and main alias key; producer relations preserve direction. External
+link IDs join only packet-local rows and use the pinned `ExtLinks.pm` formatter
+contract in `source-contracts/vndb-dump-link-formats.json`. Names, semantic values,
+profile gender and links retain pointers into the original archived packet.
+
+The pinned public dump omits private `staff.stype`, whose upstream vocabulary
+includes groups, companies and repositories. Dump staff therefore starts as an
+unresolved Entity; an existing independently classified Entity keeps its shape.
+The separately reviewed Kana API describes staff identities as persons and
+retains that classification. `staff.prod` is a linked producer profile relation,
+without merging the two identities or inferring that they are the same entity.
+Source status/deletion/redirect reconciliation is still an acquisition obligation.
+
+Packets admit 1,024 staff aliases and 1,024 producer relations; external link joins
+are bounded to 512 rows. A hash join costs O(A + R + L) time and space for one
+admitted record, never an in-process whole-corpus map. The existing 8 MB byte and
+128 ordinary native-change limits still apply; larger outputs require central
+staging. Existing occurrence/history estimates above cover persisted growth at
+500M/3B rows. No higher ingestion throughput or larger transaction admission is
+implied by these record-local bounds.
+
+DB59 `check-vndb-supporting-updates.ts` passed 211 rollback assertions across ten
+source-surface/family cases, three apply/withdraw/reapply cycles each. This includes
+native staff/producer dump links, directed subsidiary relationships, restored
+names and descriptions, unresolved staff identity, and preserved independent staff
+begin dates. Six scoped test files passed 32 tests and the backend TypeScript
+check passed. Character/VN/release remaining dump joins, API/dump observation-scope
+transitions and full provider coverage remain open.

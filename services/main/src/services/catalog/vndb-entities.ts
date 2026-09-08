@@ -8,7 +8,8 @@ import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import type { CatalogSourceReceipt } from "./source-observations";
 import type { CatalogReference } from "./contracts";
-import { VndbCatalogContractSha256 } from "./vndb";
+import { VndbCatalogContractSha256, VndbDumpContractSha256 } from "./vndb";
+import { normalizeVndbEntityDump } from "./vndb-entity-dump";
 
 const integer = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const name = z.string().min(1).max(131_072);
@@ -322,11 +323,17 @@ async function adoptVndbEntity(
 		createHash("sha256").update(bytes).digest("hex") !== receipt.contentSha256
 	)
 		throw new TypeError("VNDB entity projection differs from its archived source bytes");
-	if (receipt.contractSha256 !== VndbCatalogContractSha256)
+	const isDump = receipt.contractSha256 === VndbDumpContractSha256;
+	if (receipt.contractSha256 !== VndbCatalogContractSha256 && !isDump)
 		throw new TypeError("VNDB source contract has not been reviewed for this mapper");
 	const input: unknown = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
-	const record: SourceEntity =
-		kind === "staff"
+	if (isDump && kind === "character")
+		throw new TypeError("Character dump assembly is not reviewed");
+	const normalized = isDump && kind !== "character" ? normalizeVndbEntityDump(kind, input) : null;
+	const sourcePath = normalized?.sourcePath ?? ((path: string) => path);
+	const record: SourceEntity = normalized
+		? normalized.record
+		: kind === "staff"
 			? VndbStaffSchema.parse(input)
 			: kind === "producer"
 				? VndbProducerSchema.parse(input)
@@ -345,14 +352,20 @@ async function adoptVndbEntity(
 	const { initializeVndbNativeNames } = await import("./vndb-names-update");
 	const { VndbSupportingRecordSchema, planVndbSupportingNames, planVndbSupportingSemantics } =
 		await import("./vndb-supporting-plans");
-	const { appendVndbSemanticPlan } = await import("./vndb-semantics");
+	const { appendVndbSemanticPlan, remapVndbSemanticPlan } = await import("./vndb-semantics");
 	const { CatalogFactTables } = await import("../database/schema/catalog-facts");
 	const document = await recordCatalogSourceDocument(tx, receipt, bytes);
 	const existing = await inspectExistingSourceBinding(tx, actor, document, `vndb.${kind}.2`);
 	if (existing && existing.status !== "initialize_reference") return existing;
 	const staff = kind === "staff" ? VndbStaffSchema.parse(record) : null;
 	const producer = kind === "producer" ? VndbProducerSchema.parse(record) : null;
-	const shape = staff ? "person" : producer ? vndbProducerShape(producer.type) : "character";
+	const shape = staff
+		? isDump
+			? "unresolved"
+			: "person"
+		: producer
+			? vndbProducerShape(producer.type)
+			: "character";
 	const nativeNames = staff ? planVndbStaffNames(staff) : [];
 	const mainAlias = nativeNames.find((value) => value.ismain) ?? nativeNames[0];
 	const languageTag = null;
@@ -386,9 +399,9 @@ async function adoptVndbEntity(
 	if (reference.owner !== "entity") throw new TypeError("VNDB entity resolved to another owner");
 	if (existing) {
 		const current = await loadCatalogIdentity(tx, reference, actor, true);
-		if (current.shape === "unresolved")
+		if (current.shape === "unresolved" && shape !== "unresolved")
 			revision = (await resolveEntityShape(tx, reference, actor, revision, shape)).revision;
-		else if (current.shape !== shape)
+		else if (shape !== "unresolved" && current.shape !== shape)
 			throw new TypeError("VNDB endpoint classification differs from the bound entity shape");
 		revision = (
 			await initializeEntityProfile(tx, reference, actor, revision, {
@@ -409,7 +422,10 @@ async function adoptVndbEntity(
 		reference,
 		actor,
 		revision,
-		planVndbSupportingNames(supportingRecord),
+		planVndbSupportingNames(supportingRecord).map((item) => ({
+			...item,
+			path: sourcePath(item.path),
+		})),
 		document,
 		created ? { id: created.nameId, revision: 1 } : undefined,
 	);
@@ -422,7 +438,7 @@ async function adoptVndbEntity(
 		await bindCatalogProfileSourceOccurrence(tx, reference, actor, {
 			sourceRecordId: document.record.id,
 			snapshotId: document.snapshot.id,
-			sourcePath: "/gender",
+			sourcePath: sourcePath("/gender"),
 			revision: profile.revision,
 		});
 	}
@@ -444,17 +460,15 @@ async function adoptVndbEntity(
 			identifierRevision: identifier.identifierRevision,
 			sourceRecordId: document.record.id,
 			snapshotId: document.snapshot.id,
-			sourcePath: "/id",
+			sourcePath: sourcePath("/id"),
 		});
 	}
-	revision = await appendVndbSemanticPlan(
-		tx,
-		reference,
-		actor,
-		revision,
-		planVndbSupportingSemantics(supportingRecord),
-		document,
-	);
+	const semantic = remapVndbSemanticPlan(planVndbSupportingSemantics(supportingRecord), sourcePath);
+	if (normalized) {
+		semantic.facts.push(...normalized.extraSemantics.facts);
+		semantic.relations.push(...normalized.extraSemantics.relations);
+	}
+	revision = await appendVndbSemanticPlan(tx, reference, actor, revision, semantic, document);
 	if (existing)
 		await acceptCatalogSourceInitialization(tx, actor, {
 			sourceRecordId: document.record.id,

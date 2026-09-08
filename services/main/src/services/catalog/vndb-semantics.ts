@@ -290,7 +290,11 @@ async function appendFact(
 
 function allowedRoles(relation: VndbSemanticRelation) {
 	if (relation.key === "supersedes-release") return ["subject", "release"];
-	if (relation.key === "developed-by" || relation.key === "published-by")
+	if (
+		relation.key === "developed-by" ||
+		relation.key === "published-by" ||
+		relation.key === "has-linked-producer-profile"
+	)
 		return ["subject", "producer"];
 	if (relation.key === "external-link" || relation.key === "reported-playtime-estimate")
 		return ["subject"];

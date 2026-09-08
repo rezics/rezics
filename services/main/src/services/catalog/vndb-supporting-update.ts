@@ -9,6 +9,8 @@ import {
 	type VndbSupportingRecord,
 } from "./vndb-supporting-plans";
 import { normalizeVndbSemanticDump } from "./vndb-semantics-dump";
+import { normalizeVndbEntityDump } from "./vndb-entity-dump";
+import type { VndbSemanticPlan } from "./vndb-semantics-contracts";
 import { remapVndbSemanticPlan } from "./vndb-semantics";
 import { vndbProducerShape } from "./vndb-entities";
 import type { VndbPreparedSnapshot } from "./vndb-release-update";
@@ -66,16 +68,27 @@ function prepare(input: VndbPreparedSnapshot) {
 		throw new TypeError("VNDB DRM and engine objects require reviewed public dump evidence");
 	let record: VndbSupportingRecord;
 	let path = (value: string) => value;
+	let extraSemantics: VndbSemanticPlan = { facts: [], relations: [] };
 	if (receipt.contractSha256 === VndbDumpContractSha256) {
-		if (family === "staff" || family === "producer" || family === "character")
+		if (family === "character")
 			throw new TypeError("VNDB entity dump requires its reviewed assembled projection");
-		const normalized = normalizeVndbSemanticDump(family, raw);
-		record = normalized.record;
-		path = normalized.sourcePath;
+		if (family === "staff" || family === "producer") {
+			const normalized = normalizeVndbEntityDump(family, raw);
+			record = VndbSupportingRecordSchema.parse({ ...normalized.record, objectType: family });
+			path = normalized.sourcePath;
+			extraSemantics = normalized.extraSemantics;
+		} else {
+			const normalized = normalizeVndbSemanticDump(family, raw);
+			record = normalized.record;
+			path = normalized.sourcePath;
+		}
 	} else record = VndbSupportingRecordSchema.parse({ ...raw, objectType: family });
 	if (String(record.id) !== receipt.key.externalId)
 		throw new TypeError("VNDB supporting archive identifies another source object");
-	return { bytes, snapshotId, receipt, record, path };
+	const semantic = remapVndbSemanticPlan(planVndbSupportingSemantics(record), path);
+	semantic.facts.push(...extraSemantics.facts);
+	semantic.relations.push(...extraSemantics.relations);
+	return { bytes, snapshotId, receipt, record, path, semantic };
 }
 
 /** @alpha Reviewed supporting-object updates share the initial native plans and exact compensation journal. */
@@ -119,7 +132,10 @@ export function createVndbSupportingNativeWriter(input: {
 		)
 			throw new TypeError("VNDB supporting writer differs from its prepared mapping");
 		const native = await loadCatalogIdentity(tx, context.reference, context.actor, true);
-		if (native.shape !== shape)
+		const unclassifiedStaffDump =
+			after.record.objectType === "staff" &&
+			after.receipt.contractSha256 === VndbDumpContractSha256;
+		if (!unclassifiedStaffDump && native.shape !== shape)
 			throw new TypeError(
 				"VNDB classification requires an explicitly reviewed native target rebind",
 			);
@@ -262,13 +278,11 @@ export function createVndbSupportingNativeWriter(input: {
 				revision,
 				context.mappingKey,
 				{
-					plan: before
-						? remapVndbSemanticPlan(planVndbSupportingSemantics(before.record), before.path)
-						: { facts: [], relations: [] },
+					plan: before ? before.semantic : { facts: [], relations: [] },
 					document: previousDocument,
 				},
 				{
-					plan: remapVndbSemanticPlan(planVndbSupportingSemantics(after.record), after.path),
+					plan: after.semantic,
 					document,
 				},
 			);

@@ -1,0 +1,418 @@
+{
+  "upstreamCommit": "514f2391cc12aa94ce420354863c52538641d9b1",
+  "upstreamPath": "lib/VNDB/ExtLinks.pm",
+  "upstreamSha256": "7b28593fc2294872353ae5dce8e3b6518150e96486489355cd2454572acd8076",
+  "semantics": "Non-affiliate extlink_printf defaults using public site/value only; private routing hints are not asserted.",
+  "sites": [
+    {
+      "site": "afdian",
+      "label": "Afdian",
+      "format": "https://afdian.com/a/%s"
+    },
+    {
+      "site": "anidb",
+      "label": "AniDB",
+      "format": "https://anidb.net/cr%d"
+    },
+    {
+      "site": "animateg",
+      "label": "Animate Games",
+      "format": "https://www.animategames.jp/home/detail/%d"
+    },
+    {
+      "site": "anison",
+      "label": "Anison",
+      "format": "http://anison.info/data/person/%d.html"
+    },
+    {
+      "site": "appstore",
+      "label": "App Store",
+      "format": null
+    },
+    {
+      "site": "bgmtv",
+      "label": "Bangumi",
+      "format": "https://bgm.tv/person/%d"
+    },
+    {
+      "site": "bilibili",
+      "label": "Bilibili",
+      "format": "https://space.bilibili.com/%d"
+    },
+    {
+      "site": "boosty",
+      "label": "Boosty",
+      "format": "https://boosty.to/%s"
+    },
+    {
+      "site": "booth",
+      "label": "BOOTH",
+      "format": "https://booth.pm/en/items/%d"
+    },
+    {
+      "site": "booth_pub",
+      "label": "BOOTH",
+      "format": "https://%s.booth.pm/"
+    },
+    {
+      "site": "bsky",
+      "label": "Bluesky",
+      "format": "https://bsky.app/profile/%s"
+    },
+    {
+      "site": "cien",
+      "label": "Ci-en",
+      "format": "https://ci-en.dlsite.com/creator/%d"
+    },
+    {
+      "site": "denpa",
+      "label": "Denpasoft",
+      "format": null
+    },
+    {
+      "site": "deviantar",
+      "label": "DeviantArt",
+      "format": "https://www.deviantart.com/%s"
+    },
+    {
+      "site": "digiket",
+      "label": "Digiket",
+      "format": "https://www.digiket.com/work/show/_data/ID=ITM%07d/"
+    },
+    {
+      "site": "discogs",
+      "label": "Discogs",
+      "format": "https://www.discogs.com/artist/%d"
+    },
+    {
+      "site": "dlsite",
+      "label": "DLsite",
+      "format": null
+    },
+    {
+      "site": "dlsiteen",
+      "label": "DLsite (eng)",
+      "format": "https://www.dlsite.com/eng/work/=/product_id/%s.html"
+    },
+    {
+      "site": "dmm",
+      "label": "DMM",
+      "format": "https://%s"
+    },
+    {
+      "site": "egs",
+      "label": "ErogameScape",
+      "format": "https://erogamescape.dyndns.org/~ap2/ero/toukei_kaiseki/game.php?game=%d"
+    },
+    {
+      "site": "egs_creator",
+      "label": "ErogameScape",
+      "format": "https://erogamescape.dyndns.org/~ap2/ero/toukei_kaiseki/creater.php?creater=%d"
+    },
+    {
+      "site": "encubed",
+      "label": "Novelnews",
+      "format": "http://novelnews.net/tag/%s/"
+    },
+    {
+      "site": "erotrail",
+      "label": "ErogeTrailers",
+      "format": "http://erogetrailers.com/soft/%d"
+    },
+    {
+      "site": "facebook",
+      "label": "Facebook",
+      "format": "https://www.facebook.com/%s"
+    },
+    {
+      "site": "fakku",
+      "label": "Fakku",
+      "format": "https://www.fakku.net/games/%s"
+    },
+    {
+      "site": "fanbox",
+      "label": "Fanbox",
+      "format": "https://%s.fanbox.cc/"
+    },
+    {
+      "site": "fantia",
+      "label": "Fantia",
+      "format": "https://fantia.jp/fanclubs/%d"
+    },
+    {
+      "site": "freegame",
+      "label": "Freegame Mugen",
+      "format": "https://freegame-mugen.jp/%s.html"
+    },
+    {
+      "site": "freem",
+      "label": "Freem!",
+      "format": "https://www.freem.ne.jp/win/game/%d"
+    },
+    {
+      "site": "gamefaqs_comp",
+      "label": "GameFAQs",
+      "format": "https://gamefaqs.gamespot.com/company/%d-"
+    },
+    {
+      "site": "gamejolt",
+      "label": "Game Jolt",
+      "format": "https://gamejolt.com/games/vn/%d"
+    },
+    {
+      "site": "getchu",
+      "label": "Getchu",
+      "format": "http://www.getchu.com/soft.phtml?id=%d"
+    },
+    {
+      "site": "getchudl",
+      "label": "DL.Getchu",
+      "format": "http://dl.getchu.com/i/item%d"
+    },
+    {
+      "site": "gog",
+      "label": "GOG",
+      "format": "https://www.gog.com/en/game/%s"
+    },
+    {
+      "site": "googplay",
+      "label": "Google Play",
+      "format": "https://play.google.com/store/apps/details?id=%s"
+    },
+    {
+      "site": "gyutto",
+      "label": "Gyutto",
+      "format": "https://gyutto.com/i/item%d"
+    },
+    {
+      "site": "imdb",
+      "label": "IMDb",
+      "format": "https://www.imdb.com/name/nm%07d"
+    },
+    {
+      "site": "instagram",
+      "label": "Instagram",
+      "format": "https://www.instagram.com/%s/"
+    },
+    {
+      "site": "itch",
+      "label": "Itch.io",
+      "format": null
+    },
+    {
+      "site": "itch_dev",
+      "label": "Itch.io",
+      "format": "https://%s.itch.io/"
+    },
+    {
+      "site": "jastusa",
+      "label": "JAST USA",
+      "format": null
+    },
+    {
+      "site": "jlist",
+      "label": "J-List",
+      "format": null
+    },
+    {
+      "site": "johren",
+      "label": "Johren",
+      "format": "https://www.johren.games/games/download/%s/"
+    },
+    {
+      "site": "kagura",
+      "label": "Kagura Games",
+      "format": null
+    },
+    {
+      "site": "kofi",
+      "label": "Ko-fi",
+      "format": "https://ko-fi.com/%s"
+    },
+    {
+      "site": "mbrainz",
+      "label": "MusicBrainz",
+      "format": "https://musicbrainz.org/artist/%s"
+    },
+    {
+      "site": "melon",
+      "label": "Melonbooks.com",
+      "format": "https://www.melonbooks.com/index.php?main_page=product_info&products_id=IT%010d"
+    },
+    {
+      "site": "melonjp",
+      "label": "Melonbooks.co.jp",
+      "format": "https://www.melonbooks.co.jp/detail/detail.php?product_id=%d"
+    },
+    {
+      "site": "mg",
+      "label": "MangaGamer",
+      "format": null
+    },
+    {
+      "site": "mobygames",
+      "label": "MobyGames",
+      "format": "https://www.mobygames.com/person/%d"
+    },
+    {
+      "site": "mobygames_comp",
+      "label": "MobyGames",
+      "format": "https://www.mobygames.com/company/%d"
+    },
+    {
+      "site": "nijie",
+      "label": "Nijie",
+      "format": "https://nijie.info/members.php?id=%d"
+    },
+    {
+      "site": "nintendo",
+      "label": "Nintendo",
+      "format": "https://www.nintendo.com/store/products/%s/"
+    },
+    {
+      "site": "nintendo_hk",
+      "label": "Nintendo (HK)",
+      "format": "https://store.nintendo.com.hk/%d"
+    },
+    {
+      "site": "nintendo_jp",
+      "label": "Nintendo (JP)",
+      "format": "https://store-jp.nintendo.com/item/software/D%d"
+    },
+    {
+      "site": "novelgam",
+      "label": "NovelGame",
+      "format": "https://novelgame.jp/games/show/%d"
+    },
+    {
+      "site": "nutaku",
+      "label": "Nutaku",
+      "format": "https://www.nutaku.net/games/%s/"
+    },
+    {
+      "site": "patreon",
+      "label": "Patreon",
+      "format": "https://www.patreon.com/%s"
+    },
+    {
+      "site": "patreonp",
+      "label": "Patreon post",
+      "format": "https://www.patreon.com/posts/%d"
+    },
+    {
+      "site": "pixiv",
+      "label": "Pixiv",
+      "format": "https://www.pixiv.net/member.php?id=%d"
+    },
+    {
+      "site": "playasia",
+      "label": "PlayAsia",
+      "format": null
+    },
+    {
+      "site": "playstation_eu",
+      "label": "PlayStation Store (EU)",
+      "format": "https://store.playstation.com/en-gb/product/%s"
+    },
+    {
+      "site": "playstation_hk",
+      "label": "PlayStation Store (HK)",
+      "format": "https://store.playstation.com/en-hk/product/%s"
+    },
+    {
+      "site": "playstation_jp",
+      "label": "PlayStation Store (JP)",
+      "format": "https://store.playstation.com/ja-jp/product/%s"
+    },
+    {
+      "site": "playstation_na",
+      "label": "PlayStation Store (NA)",
+      "format": "https://store.playstation.com/en-us/product/%s"
+    },
+    {
+      "site": "renai",
+      "label": "Renai.us",
+      "format": "https://renai.us/game/%s"
+    },
+    {
+      "site": "scloud",
+      "label": "SoundCloud",
+      "format": "https://soundcloud.com/%s"
+    },
+    {
+      "site": "steam",
+      "label": "Steam",
+      "format": "https://store.steampowered.com/app/%d/"
+    },
+    {
+      "site": "steam_curator",
+      "label": "Steam Curator",
+      "format": "https://store.steampowered.com/curator/%d"
+    },
+    {
+      "site": "substar",
+      "label": "SubscribeStar",
+      "format": "https://subscribestar.%s"
+    },
+    {
+      "site": "toranoana",
+      "label": "Toranoana",
+      "format": "https://ec.toranoana.shop/tora/ec/item/%012d/"
+    },
+    {
+      "site": "tumblr",
+      "label": "Tumblr",
+      "format": "https://%s.tumblr.com/"
+    },
+    {
+      "site": "twitter",
+      "label": "Xitter",
+      "format": "https://x.com/%s"
+    },
+    {
+      "site": "vgmdb",
+      "label": "VGMdb",
+      "format": "https://vgmdb.net/artist/%d"
+    },
+    {
+      "site": "vgmdb_org",
+      "label": "VGMdb org",
+      "format": "https://vgmdb.net/org/%d"
+    },
+    {
+      "site": "vk",
+      "label": "VK",
+      "format": "https://vk.com/%s"
+    },
+    {
+      "site": "vndb",
+      "label": "VNDB user",
+      "format": "https://vndb.org/%s"
+    },
+    {
+      "site": "website",
+      "label": "Official website",
+      "format": "%s"
+    },
+    {
+      "site": "weibo",
+      "label": "Weibo",
+      "format": "https://weibo.com/u/%d"
+    },
+    {
+      "site": "wikidata",
+      "label": "Wikidata",
+      "format": "https://www.wikidata.org/wiki/Q%d"
+    },
+    {
+      "site": "wp",
+      "label": "Wikipedia",
+      "format": "https://en.wikipedia.org/wiki/%s"
+    },
+    {
+      "site": "youtube",
+      "label": "Youtube",
+      "format": "https://www.youtube.com/@%s"
+    }
+  ]
+}

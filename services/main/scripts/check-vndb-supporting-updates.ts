@@ -34,6 +34,7 @@ import {
 	listCatalogNames,
 	loadCatalogIdentity,
 	readCatalogFactNodes,
+	findCatalogRelations,
 } from "../src/services/catalog/storage";
 import { EntityProfileSchema } from "../src/services/catalog/entity-contracts";
 import { initializeEntityProfile } from "../src/services/catalog/entities";
@@ -60,6 +61,8 @@ const archive: CatalogSourceArchive = {
 	},
 };
 type Case = {
+	dump?: boolean;
+	relations?: { key: string; counts: [number, number] }[];
 	kind: "staff" | "producer" | "character" | "tag" | "trait" | "quote" | "drm" | "engine";
 	before: Record<string, unknown> & { id: string | number };
 	after: Record<string, unknown> & { id: string | number };
@@ -71,6 +74,92 @@ type Case = {
 	};
 };
 const cases: Case[] = [
+	{
+		kind: "staff",
+		dump: true,
+		before: {
+			id: "s985011",
+			staff: {
+				id: "s985011",
+				gender: "m",
+				lang: "en",
+				main: 985011,
+				description: "Dump description A",
+				prod: null,
+			},
+			aliases: [{ id: "s985011", aid: 985011, name: "Dump staff A", latin: null }],
+			links: [{ id: "s985011", link: 1 }],
+			extlinks: [{ id: 1, site: "website", value: "https://example.invalid/a" }],
+		},
+		after: {
+			id: "s985011",
+			staff: {
+				id: "s985011",
+				gender: "f",
+				lang: "en",
+				main: 985011,
+				description: "Dump description B",
+				prod: "p985011",
+			},
+			aliases: [
+				{ id: "s985011", aid: 985011, name: "Dump staff B", latin: null },
+				{ id: "s985011", aid: 985012, name: "New dump alias", latin: null },
+			],
+			links: [{ id: "s985011", link: 2 }],
+			extlinks: [{ id: 2, site: "website", value: "https://example.invalid/b" }],
+		},
+		name: ["Dump staff A", "Dump staff B"],
+		relations: [
+			{ key: "has-linked-producer-profile", counts: [0, 1] },
+			{ key: "external-link", counts: [1, 1] },
+		],
+		property: {
+			namespace: "catalog.metadata",
+			key: "description.vndb-markup",
+			values: ["Dump description A", "Dump description B"],
+		},
+	},
+	{
+		kind: "producer",
+		dump: true,
+		before: {
+			id: "p985011",
+			producer: {
+				id: "p985011",
+				type: "co",
+				lang: "en",
+				name: "Dump producer A",
+				latin: null,
+				alias: "",
+				description: "Producer A",
+			},
+			relations: [],
+			links: [],
+			extlinks: [],
+		},
+		after: {
+			id: "p985011",
+			producer: {
+				id: "p985011",
+				type: "co",
+				lang: "en",
+				name: "Dump producer B",
+				latin: null,
+				alias: "New producer alias",
+				description: "Producer B",
+			},
+			relations: [{ id: "p985011", pid: "p985001", relation: "sub" }],
+			links: [],
+			extlinks: [],
+		},
+		name: ["Dump producer A", "Dump producer B"],
+		relations: [{ key: "has-subsidiary", counts: [0, 1] }],
+		property: {
+			namespace: "catalog.metadata",
+			key: "description.vndb-markup",
+			values: ["Producer A", "Producer B"],
+		},
+	},
 	{
 		kind: "staff",
 		before: {
@@ -271,7 +360,7 @@ try {
 						},
 						sourceRecordId = catalogSourceRecordId(key);
 					const contract =
-						entry.kind === "drm" || entry.kind === "engine"
+						entry.dump || entry.kind === "drm" || entry.kind === "engine"
 							? VndbDumpContractSha256
 							: VndbCatalogContractSha256;
 					const beforeBytes = Buffer.from(JSON.stringify(entry.before)),
@@ -300,6 +389,10 @@ try {
 									: await adoptVndbSemanticObject(tx, actor.id, beforeReceipt, beforeBytes);
 					if (adopted.status !== "created") throw new Error(`Expected initial ${entry.kind}`);
 					const reference = adopted.reference;
+					if (entry.dump && entry.kind === "staff") {
+						assert.equal((await loadCatalogIdentity(tx, reference, actor.id)).shape, "unresolved");
+						assertions++;
+					}
 					if (entry.kind === "staff") {
 						const head = await readCatalogProfileHead(tx, reference, actor.id);
 						assert.ok(head);
@@ -320,6 +413,28 @@ try {
 						after: { snapshotId: observed.snapshot.id, receipt: afterReceipt, bytes: afterBytes },
 					});
 					const verify = async (index: 0 | 1) => {
+						for (const relation of entry.relations ?? []) {
+							const [definition] = await tx
+								.select({ id: catalogDefinitionRevision.id })
+								.from(catalogDefinition)
+								.innerJoin(
+									catalogDefinitionRevision,
+									eq(catalogDefinitionRevision.definitionId, catalogDefinition.id),
+								)
+								.where(
+									and(
+										eq(catalogDefinition.namespace, "catalog.semantic-relation"),
+										eq(catalogDefinition.key, relation.key),
+									),
+								)
+								.limit(1);
+							assert.ok(definition);
+							assert.equal(
+								(await findCatalogRelations(tx, reference, actor.id, definition.id)).length,
+								relation.counts[index],
+							);
+							assertions++;
+						}
 						if (entry.name) {
 							assert.ok(
 								(await listCatalogNames(tx, reference, actor.id)).some(
