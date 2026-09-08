@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { TopLevelSlugNamespaceUnitIds } from "@rezics/slug";
+import { TopLevelSlugNamespaceIds } from "@rezics/slug";
 
 import { profileHref, ProfileSections } from "./profile-route";
 
@@ -23,7 +23,8 @@ describe("profile routes", () => {
 			id: "profile-id",
 			slugAddress: {
 				slug: "alice",
-				scopeUnitId: TopLevelSlugNamespaceUnitIds.users,
+				scopeUnitId: null,
+ scopeNamespaceId: TopLevelSlugNamespaceIds.users,
 				canonicalPath: ["users", "alice"],
 			},
 		};

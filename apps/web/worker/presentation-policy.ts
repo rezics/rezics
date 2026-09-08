@@ -1,4 +1,4 @@
-import { TopLevelSlugNamespaceUnitIds, isSlugLabel } from "@rezics/slug";
+import { TopLevelSlugNamespaceIds, isSlugLabel } from "@rezics/slug";
 
 const UuidPattern =
 	/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
@@ -199,10 +199,10 @@ async function resolveZoneHostId(
 	}
 	if (segments[0] !== "z" || !segments[1] || !isSlugLabel(segments[1])) return undefined;
 	const slugUrl = new URL(
-		`/api/v1/slug-addresses/scopes/${TopLevelSlugNamespaceUnitIds.zones}/${encodeURIComponent(segments[1])}`,
+		`/api/v1/slug-addresses/namespaces/${TopLevelSlugNamespaceIds.zones}/${encodeURIComponent(segments[1])}`,
 		backendOrigin(environment),
 	);
-	slugUrl.searchParams.set("kind", "zone");
+	slugUrl.searchParams.set("owner", "zone");
 	const value = await fetchPolicyJson(slugUrl, request, fetcher);
 	return isObject(value) && typeof value.id === "string" && UuidPattern.test(value.id)
 		? value.id

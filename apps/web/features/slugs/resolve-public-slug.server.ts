@@ -3,7 +3,7 @@ import {
 	isSlugLabel,
 	publicSlugHref,
 	SlugAddressMaximumDepth,
-	TopLevelSlugNamespaceUnitIds,
+	TopLevelSlugNamespaceIds,
 	type PublicSlugAddressValue,
 	type PublicSlugTargetKind,
 } from "@rezics/slug";
@@ -13,9 +13,9 @@ const UuidPattern =
 	/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
 
 const NamespaceByKind = {
-	profile: TopLevelSlugNamespaceUnitIds.users,
-	realm: TopLevelSlugNamespaceUnitIds.realms,
-	zone: TopLevelSlugNamespaceUnitIds.zones,
+	profile: TopLevelSlugNamespaceIds.users,
+	realm: TopLevelSlugNamespaceIds.realms,
+	zone: TopLevelSlugNamespaceIds.zones,
 } satisfies Record<PublicSlugTargetKind, string>;
 
 interface ResolvedPublicSlug {
@@ -42,19 +42,30 @@ function isObject(value: unknown): value is Record<string, unknown> {
 
 function parseAddress(value: unknown): PublicSlugAddressValue | undefined {
 	if (!isObject(value)) return undefined;
-	const { slug, scopeUnitId, canonicalPath } = value;
+	const { slug, scopeUnitId, scopeNamespaceId, canonicalPath } = value;
 	if (
 		typeof slug !== "string" ||
 		!isSlugLabel(slug) ||
-		typeof scopeUnitId !== "string" ||
-		!UuidPattern.test(scopeUnitId) ||
+		!(
+			(scopeUnitId === null &&
+				typeof scopeNamespaceId === "string" &&
+				UuidPattern.test(scopeNamespaceId)) ||
+			(scopeNamespaceId === null &&
+				typeof scopeUnitId === "string" &&
+				UuidPattern.test(scopeUnitId))
+		) ||
 		!Array.isArray(canonicalPath) ||
 		canonicalPath.length < 2 ||
 		canonicalPath.length > SlugAddressMaximumDepth ||
 		canonicalPath.some((segment) => typeof segment !== "string" || !isSlugLabel(segment))
 	)
 		return undefined;
-	return { slug, scopeUnitId, canonicalPath: canonicalPath as string[] };
+	return {
+		slug,
+		scopeUnitId: scopeUnitId as string | null,
+		scopeNamespaceId: scopeNamespaceId as string | null,
+		canonicalPath: canonicalPath as string[],
+	};
 }
 
 async function readJson(response: Response): Promise<unknown> {
@@ -70,12 +81,13 @@ async function resolvePublicSlugUncached(
 	slug: string,
 ): Promise<ResolvedPublicSlug | null> {
 	if (!isSlugLabel(slug)) return null;
-	const scopeUnitId = NamespaceByKind[kind];
+	const scopeNamespaceId = NamespaceByKind[kind];
+	const owner = kind === "profile" ? "entity" : kind;
 	const url = new URL(
-		`/api/v1/slug-addresses/scopes/${scopeUnitId}/${encodeURIComponent(slug)}`,
+		`/api/v1/slug-addresses/namespaces/${scopeNamespaceId}/${encodeURIComponent(slug)}`,
 		apiOrigin(),
 	);
-	url.searchParams.set("kind", kind);
+	url.searchParams.set("owner", owner);
 	const response = await fetch(url, { cache: "no-store" });
 	if (response.status === 404) return null;
 	if (!response.ok) throw new Error(`Slug address API failed with status ${response.status}`);
@@ -84,13 +96,14 @@ async function resolvePublicSlugUncached(
 		!isObject(value) ||
 		typeof value.id !== "string" ||
 		!UuidPattern.test(value.id) ||
-		value.kind !== kind ||
+		value.owner !== owner ||
 		typeof value.redirected !== "boolean"
 	)
 		throw new Error("Slug address API returned an invalid Unit identity");
 	const address = parseAddress({
 		slug: Array.isArray(value.canonicalPath) ? value.canonicalPath.at(-1) : undefined,
-		scopeUnitId,
+		scopeUnitId: null,
+		scopeNamespaceId,
 		canonicalPath: value.canonicalPath,
 	});
 	const canonicalHref = publicSlugHref(kind, address);

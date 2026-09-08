@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isAvailableZonePageSlug, TopLevelSlugNamespaceUnitIds } from "@rezics/slug";
+import { isAvailableZonePageSlug, TopLevelSlugNamespaceIds } from "@rezics/slug";
 
 import { postCreateHref, postDiscussionHref, postHref } from "./url";
 
@@ -31,7 +31,8 @@ describe("postHref", () => {
 					id: "zone-1",
 					slugAddress: {
 						slug: "fiction",
-						scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
+						scopeUnitId: null,
+ scopeNamespaceId: TopLevelSlugNamespaceIds.zones,
 						canonicalPath: ["zones", "fiction"],
 					},
 				},

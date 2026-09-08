@@ -2,7 +2,7 @@ import {
 	publicSlugHref,
 	publicUnitIdHref,
 	PublicSlugRouteManifest,
-	TopLevelSlugNamespaceUnitIds,
+	TopLevelSlugNamespaceIds,
 } from "@rezics/slug";
 import { describe, expect, it } from "vitest";
 
@@ -10,7 +10,7 @@ import { realmHref, zoneHref, zonePageHref } from "./unit-route";
 
 describe("public Unit slug routes", () => {
 	it("keeps every enabled namespace and prefix unique", () => {
-		for (const key of ["namespaceSlug", "namespaceUnitId", "idSegment", "slugSegment"] as const)
+		for (const key of ["namespaceSlug", "namespaceId", "idSegment", "slugSegment"] as const)
 			expect(new Set(PublicSlugRouteManifest.map((route) => route[key])).size).toBe(
 				PublicSlugRouteManifest.length,
 			);
@@ -38,7 +38,8 @@ describe("public Unit slug routes", () => {
 			id: "realm-id",
 			slugAddress: {
 				slug: "art",
-				scopeUnitId: TopLevelSlugNamespaceUnitIds.realms,
+				scopeUnitId: null,
+ scopeNamespaceId: TopLevelSlugNamespaceIds.realms,
 				canonicalPath: ["realms", "art"],
 			},
 		};
@@ -46,7 +47,8 @@ describe("public Unit slug routes", () => {
 			id: "zone-id",
 			slugAddress: {
 				slug: "summer",
-				scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
+				scopeUnitId: null,
+ scopeNamespaceId: TopLevelSlugNamespaceIds.zones,
 				canonicalPath: ["zones", "summer"],
 			},
 		};
@@ -59,7 +61,8 @@ describe("public Unit slug routes", () => {
 			id: "zone-id",
 			slugAddress: {
 				slug: "summer",
-				scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
+				scopeUnitId: null,
+ scopeNamespaceId: TopLevelSlugNamespaceIds.zones,
 				canonicalPath: ["zones", "summer"],
 			},
 		};
@@ -77,7 +80,8 @@ describe("public Unit slug routes", () => {
 			id: "zone-id",
 			slugAddress: {
 				slug: "summer",
-				scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
+				scopeUnitId: null,
+ scopeNamespaceId: TopLevelSlugNamespaceIds.zones,
 				canonicalPath: ["zones", "summer"],
 			},
 		};
@@ -96,7 +100,8 @@ describe("public Unit slug routes", () => {
 				id: "realm-id",
 				slugAddress: {
 					slug: "art",
-					scopeUnitId: TopLevelSlugNamespaceUnitIds.users,
+					scopeUnitId: null,
+ scopeNamespaceId: TopLevelSlugNamespaceIds.users,
 					canonicalPath: ["realms", "art"],
 				},
 			}),
@@ -108,6 +113,7 @@ describe("public Unit slug routes", () => {
 			publicSlugHref("profile", {
 				slug: "favorites",
 				scopeUnitId: "profile-id",
+ scopeNamespaceId:null,
 				canonicalPath: ["users", "alice", "favorites"],
 			}),
 		).toBeUndefined();

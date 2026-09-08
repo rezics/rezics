@@ -1,4 +1,4 @@
-import { TopLevelSlugNamespaceUnitIds } from "@rezics/slug";
+import { TopLevelSlugNamespaceIds } from "@rezics/slug";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -31,7 +31,8 @@ describe("Studio routes", () => {
 				id: "unit-id",
 				slugAddress: {
 					slug: "artists",
-					scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
+					scopeUnitId: null,
+ scopeNamespaceId: TopLevelSlugNamespaceIds.zones,
 					canonicalPath: ["zones", "artists"],
 				},
 			}),

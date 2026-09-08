@@ -1,4 +1,4 @@
-import { TopLevelSlugNamespaceUnitIds } from "@rezics/slug";
+import { TopLevelSlugNamespaceIds } from "@rezics/slug";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -27,7 +27,8 @@ describe("Realm content creation routes", () => {
 					id: "realm-id",
 					slugAddress: {
 						slug: "art",
-						scopeUnitId: TopLevelSlugNamespaceUnitIds.realms,
+						scopeUnitId: null,
+ scopeNamespaceId: TopLevelSlugNamespaceIds.realms,
 						canonicalPath: ["realms", "art"],
 					},
 				},
