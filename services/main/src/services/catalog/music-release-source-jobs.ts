@@ -1,4 +1,4 @@
-import { MUSIC_SOURCE_DEPENDENCY_LIMIT, MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT } from "../database/schema/catalog-source-limits";
+import { MUSIC_SOURCE_DEPENDENCY_LIMIT, MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT, SOURCE_ACQUISITION_IO_TIMEOUT_MS } from "../database/schema/catalog-source-limits";
 import { withPreparedMusicBrainzRecordings } from "./musicbrainz-reference-cache";
 import { tracks } from "./musicbrainz-release-plan";
 import { planMusicBrainzDependencies, prepareMusicBrainzProposalDependencies } from "./musicbrainz-dependencies";
@@ -177,7 +177,8 @@ export function createMusicReleaseSourceHandlers(database: DatabaseExecutor, rou
 					});
 				});
 				// Archive I/O and JSON parsing never hold the owner lock. Receipts enforce 8 MiB/document.
-				const bytes = loaded.evidence ? await Promise.all([readCatalogSourceNativeBytes(loaded.evidence.before), readCatalogSourceNativeBytes(loaded.evidence.after)]) : null;
+				const archiveSignal = AbortSignal.any([signal, AbortSignal.timeout(SOURCE_ACQUISITION_IO_TIMEOUT_MS)]);
+				const bytes = loaded.evidence ? await Promise.all([readCatalogSourceNativeBytes(loaded.evidence.before, archiveSignal), readCatalogSourceNativeBytes(loaded.evidence.after, archiveSignal)]) : null;
 				if (bytes) preflightMusicBrainzReleaseDelta(MusicBrainzReleaseSchema.parse(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes[0]!))), MusicBrainzReleaseSchema.parse(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes[1]!))));
 				if (signal.aborted) throw signal.reason;
 				const completed = await database.transaction(async (tx) => {

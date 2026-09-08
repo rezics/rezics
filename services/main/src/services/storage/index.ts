@@ -53,9 +53,9 @@ export const storage = {
 		);
 	},
 
-	get(input: StorageObjectInput) {
+	get(input: StorageObjectInput, options?: { signal?: AbortSignal }) {
 		return withDependencySpan({ dependency: "s3", operation: "get" }, () =>
-			storageClient.send(new GetObjectCommand({ ...input, Bucket: env.S3_BUCKET })),
+			storageClient.send(new GetObjectCommand({ ...input, Bucket: env.S3_BUCKET }), { abortSignal: options?.signal }),
 		);
 	},
 

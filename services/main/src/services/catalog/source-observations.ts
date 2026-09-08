@@ -1,11 +1,11 @@
-import { SOURCE_DOCUMENT_BYTE_LIMIT, SOURCE_MULTIPART_BYTE_LIMIT, SOURCE_MULTIPART_PART_LIMIT, SOURCE_MANIFEST_BYTE_LIMIT } from "../database/schema/catalog-source-limits";
+import { SOURCE_DOCUMENT_BYTE_LIMIT, SOURCE_MULTIPART_BYTE_LIMIT, SOURCE_MULTIPART_PART_LIMIT, SOURCE_MANIFEST_BYTE_LIMIT, SOURCE_ACQUISITION_IO_TIMEOUT_MS } from "../database/schema/catalog-source-limits";
 import { withSourceDocumentPaths } from "./source-document-scope";
 export { catalogSourcePath, catalogSourceLogicalPath } from "./source-document-scope";
 import { isDeepStrictEqual } from "node:util";
 import { catalogSourceSnapshotBundle, catalogSourceSnapshotPart } from "../database/schema/catalog-source-multipart";
 import { CatalogSourceManifestSchema, CatalogSourceMultipartReceiptSchema, type CatalogSourceMultipartReceipt } from "./source-multipart-contracts";
 import { createHash } from "node:crypto";
-import { Readable } from "node:stream";
+import { Readable, addAbortSignal } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -74,7 +74,7 @@ export type CatalogSourceArchive = {
 		},
 		options?: { signal?: AbortSignal },
 	): Promise<unknown>;
-	get(input: { Key: string }): Promise<{ Body?: unknown }>;
+	get(input: { Key: string }, options?: { signal?: AbortSignal }): Promise<{ Body?: unknown }>;
 };
 const receiptArchives = new WeakMap<object, CatalogSourceArchive>();
 const receiptSnapshots = new WeakMap<object, { sourceRecordId: string; snapshotId: string }>();
@@ -201,22 +201,23 @@ export function listCatalogSourceProfiles(receipt: CatalogSourceReceipt) {
 }
 
 /** @alpha Read one exact raw or derived profile, independently bounded to 8 MB. Stored URLs are never followed. */
-export async function readCatalogSourceProfileBytes(receipt: CatalogSourceReceipt, profileKey?: string): Promise<Uint8Array> {
+export async function readCatalogSourceProfileBytes(receipt: CatalogSourceReceipt, profileKey?: string, signal?: AbortSignal): Promise<Uint8Array> {
 	requireIssuedReceipt(receipt);
+	const ioSignal = boundedSourceReadSignal(signal);
 	if (!receipt.bundle) {
 		if (profileKey !== undefined && profileKey !== "document") throw new TypeError("Single-document source has no selected multipart profile");
-		return readCatalogSourceBytes(receipt);
+		return readCatalogSourceBytes(receipt, ioSignal);
 	}
-	const manifestBytes = await readCatalogSourceBytes(receipt);
+	const manifestBytes = await readCatalogSourceBytes(receipt, ioSignal);
 	const manifest = CatalogSourceManifestSchema.parse(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(manifestBytes)));
 	if (!isDeepStrictEqual(manifest, receipt.bundle.manifest)) throw new TypeError("Multipart source manifest differs from its persisted receipt");
 	const part = manifest.parts.find((part) => part.key === (profileKey ?? manifest.nativePart));
 	if (!part) throw new TypeError("Unknown source profile");
-	return readSourcePayload(receipt, part.payloadRef, part.contentSha256, part.byteLength);
+	return readSourcePayload(receipt, part.payloadRef, part.contentSha256, { expectedLength: part.byteLength, signal: ioSignal });
 }
 
 /** @internal Existing single-document providers retain the same read contract. */
-export function readCatalogSourceNativeBytes(receipt: CatalogSourceReceipt) { return readCatalogSourceProfileBytes(receipt); }
+export function readCatalogSourceNativeBytes(receipt: CatalogSourceReceipt, signal?: AbortSignal) { return readCatalogSourceProfileBytes(receipt, undefined, signal); }
 
 /** @internal Only issued archive metadata can select a native view's physical evidence path. */
 export function withCatalogSourceReceipts<T>(receipts: readonly CatalogSourceReceipt[], work: () => T): T {
@@ -231,32 +232,79 @@ export function withCatalogSourceReceipts<T>(receipts: readonly CatalogSourceRec
 }
 
 /** The immutable archive is verified on read; external URLs never become fetch instructions. */
-export async function readCatalogSourceBytes(receipt: CatalogSourceReceipt): Promise<Uint8Array> {
+export async function readCatalogSourceBytes(receipt: CatalogSourceReceipt, signal?: AbortSignal): Promise<Uint8Array> {
 	if (!issuedReceipts.has(receipt) || receipt[storedReceipt] !== true)
 		throw new TypeError("Source receipt was not produced by the archive writer");
-	return readSourcePayload(receipt, receipt.payloadRef, receipt.contentSha256, undefined, receipt.bundle ? SOURCE_MANIFEST_BYTE_LIMIT : SOURCE_DOCUMENT_BYTE_LIMIT);
+	return readSourcePayload(receipt, receipt.payloadRef, receipt.contentSha256, { maximumLength: receipt.bundle ? SOURCE_MANIFEST_BYTE_LIMIT : SOURCE_DOCUMENT_BYTE_LIMIT, signal: boundedSourceReadSignal(signal) });
 }
 
-async function readSourcePayload(receipt: CatalogSourceReceipt, payloadRef: string, contentSha256: string, expectedLength?: number, maximumLength = SOURCE_DOCUMENT_BYTE_LIMIT): Promise<Uint8Array> {
+function boundedSourceReadSignal(signal?: AbortSignal) {
+	const timeout = AbortSignal.timeout(SOURCE_ACQUISITION_IO_TIMEOUT_MS);
+	const result = signal ? AbortSignal.any([signal, timeout]) : timeout;
+	result.throwIfAborted();
+	return result;
+}
+
+function discardSourceBody(body: unknown) {
+	if (body instanceof Readable) body.destroy();
+	else if (body instanceof ReadableStream) void body.cancel().catch(() => {});
+}
+
+/** Archive adapters must cancel their I/O; the caller also releases its slot if a custom adapter ignores cancellation. */
+async function getSourceArchive(archive: CatalogSourceArchive, payloadRef: string, signal: AbortSignal): Promise<{ Body?: unknown }> {
+	signal.throwIfAborted();
+	return new Promise((resolve, reject) => {
+		const abort = () => reject(signal.reason);
+		signal.addEventListener("abort", abort, { once: true });
+		Promise.resolve().then(() => { signal.throwIfAborted(); return archive.get({ Key: payloadRef }, { signal }); }).then((result) => {
+			if (signal.aborted) { discardSourceBody(result.Body); reject(signal.reason); }
+			else resolve(result);
+		}, reject).finally(() => signal.removeEventListener("abort", abort));
+	});
+}
+
+async function readSourcePayload(receipt: CatalogSourceReceipt, payloadRef: string, contentSha256: string,
+	options: { expectedLength?: number; maximumLength?: number; signal: AbortSignal },
+): Promise<Uint8Array> {
 	const archive = receiptArchives.get(receipt);
 	if (!archive) throw new TypeError("Source receipt has no archive owner");
-	const result = await archive.get({ Key: payloadRef });
+	const { signal } = options;
+	const result = await getSourceArchive(archive, payloadRef, signal);
+	if (signal.aborted) { discardSourceBody(result.Body); signal.throwIfAborted(); }
 	if (!result.Body) throw new Error("Archived source payload is missing");
 	if (!(result.Body instanceof Readable) && !(result.Body instanceof ReadableStream))
 		throw new TypeError("Source archive returned an unsupported byte stream");
 	const chunks: Uint8Array[] = [];
 	let length = 0;
-	for await (const chunk of result.Body) {
+	const append = (chunk: unknown) => {
+		signal.throwIfAborted();
 		if (!(chunk instanceof Uint8Array))
 			throw new TypeError("Source archive stream did not contain bytes");
 		length += chunk.byteLength;
-		if (length > maximumLength) throw new RangeError("Archived source payload exceeds its read budget");
+		if (length > (options.maximumLength ?? SOURCE_DOCUMENT_BYTE_LIMIT)) throw new RangeError("Archived source payload exceeds its read budget");
 		chunks.push(chunk);
+	};
+	if (result.Body instanceof Readable) {
+		const stream = addAbortSignal(signal, result.Body);
+		for await (const chunk of stream) append(chunk);
+	} else {
+		const reader = result.Body.getReader();
+		const abort = () => { void reader.cancel(signal.reason).catch(() => {}); };
+		signal.addEventListener("abort", abort, { once: true });
+		try {
+			signal.throwIfAborted();
+			for (;;) { const item = await reader.read(); if (item.done) break; append(item.value); }
+		} finally {
+			signal.removeEventListener("abort", abort);
+			void reader.cancel().catch(() => {});
+			reader.releaseLock();
+		}
 	}
+	signal.throwIfAborted();
 	const bytes = Buffer.concat(chunks);
 	if (createHash("sha256").update(bytes).digest("hex") !== contentSha256)
 		throw new Error("Archived source checksum differs");
-	if (expectedLength !== undefined && bytes.byteLength !== expectedLength) throw new TypeError("Source part length differs from its receipt");
+	if (options.expectedLength !== undefined && bytes.byteLength !== options.expectedLength) throw new TypeError("Source part length differs from its receipt");
 	return bytes;
 }
 
