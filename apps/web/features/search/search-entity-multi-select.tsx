@@ -17,7 +17,7 @@ import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
-import { isCommunityUnitEntityKind } from "@/features/create/model/community-unit-search";
+import { isSimpleFeedContentKind } from "@rezics/filter";
 
 export interface SearchEntityOption extends EntityPickerHit {
 	readonly kind: string;
@@ -51,7 +51,7 @@ export function SearchEntityMultiSelect({
 	readonly emptyLabel: string;
 	readonly removeLabel: string;
 }) {
-	const { t } = useTranslation(["nav", "ui"]);
+	const { t } = useTranslation(["feed"]);
 	const searchEntities = useEntitySearch();
 	const { collection, set } = useListCollection<SearchEntityOption>({
 		initialItems: [...selected],
@@ -61,9 +61,12 @@ export function SearchEntityMultiSelect({
 	const [inputValue, setInputValue] = useState("");
 	const [isPending, setIsPending] = useState(false);
 	const [isError, setIsError] = useState(false);
-	const kindLabels: Readonly<Record<string, string>> = t.nav.following.types;
-	const kindLabel = (kind: string) =>
-		isCommunityUnitEntityKind(kind) ? t.ui[kind] : (kindLabels[kind] ?? kind);
+	const kindLabel = (kind: string) => kind;
+	const resourceLabel = (hit: EntityPickerHit): string => {
+		const token = hit.owner && hit.shape ? `${hit.owner}:${hit.shape}` : undefined;
+		if (token && isSimpleFeedContentKind(token)) return t.feed.content.kinds[token];
+		return hit.owner ? t.feed.content.owners[hit.owner] : "";
+	};
 
 	useEffect(() => {
 		set(uniqueOptions(selected, collection.items));
@@ -92,7 +95,7 @@ export function SearchEntityMultiSelect({
 						const normalized = hits.map(
 							(hit): SearchEntityOption => ({
 								...hit,
-								kind: hit.kind ?? index,
+								kind: resourceLabel(hit),
 							}),
 						);
 						set(uniqueOptions(selected, normalized));
@@ -112,7 +115,7 @@ export function SearchEntityMultiSelect({
 			window.clearTimeout(timer);
 			request.abort();
 		};
-	}, [index, inputValue, searchEntities, selected, set]);
+	}, [index, inputValue, searchEntities, selected, set, t.feed.content]);
 
 	return (
 		<Combobox

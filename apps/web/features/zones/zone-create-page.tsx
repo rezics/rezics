@@ -114,7 +114,7 @@ function ZoneCreateContent() {
 							<UnitPicker
 								ariaLabel={t.zones.ruleRealm.label}
 								index="realms"
-								kinds={["realm"]}
+								owners={["realm"]}
 								onValueChange={(value) => setLocalRuleRealmId(value ?? "")}
 								placeholder={t.ui.pickerPlaceholders.realm}
 								value={localRuleRealmId}

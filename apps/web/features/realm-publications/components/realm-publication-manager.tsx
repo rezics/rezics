@@ -93,7 +93,7 @@ export function RealmPublicationManager({ unitId }: { readonly unitId: string })
 						<UnitPicker
 							ariaLabel={copy.realmLabel}
 							index="realms"
-							kinds={["realm"]}
+							owners={["realm"]}
 							onValueChange={setRealmId}
 							placeholder={t.ui.pickerPlaceholders.realm}
 							value={realmId}

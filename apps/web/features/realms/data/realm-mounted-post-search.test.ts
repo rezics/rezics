@@ -28,7 +28,8 @@ describe("searchRealmMountedPosts", () => {
 					hits: [
 						{
 							id: "post-id",
-							kind: "wiki",
+							owner: "post",
+							shape: "wiki",
 							title: "評分準則",
 							name: null,
 							avatar: null,
@@ -43,7 +44,7 @@ describe("searchRealmMountedPosts", () => {
 				query: "準則",
 				signal,
 				localizationLanguages: ["zh", "en"],
-				kinds,
+				shapes: kinds,
 			});
 
 			expect(api.postApiSearchByIndex).toHaveBeenCalledWith({
@@ -51,7 +52,8 @@ describe("searchRealmMountedPosts", () => {
 				body: {
 					query: "準則",
 					realmId: "realm-id",
-					kinds: expectedKinds,
+					owners: ["post"],
+					shapes: expectedKinds,
 					limit: 10,
 					localizationLanguages: ["zh", "en"],
 				},
@@ -61,7 +63,8 @@ describe("searchRealmMountedPosts", () => {
 				{
 					id: "post-id",
 					label: "評分準則",
-					kind: "wiki",
+					owner: "post",
+					shape: "wiki",
 					avatar: null,
 				},
 			]);

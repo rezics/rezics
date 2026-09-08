@@ -71,7 +71,7 @@ function RealmScoreContextSettingsForm({
 				query,
 				signal,
 				localizationLanguages,
-				kinds: RealmScoreContextPostKinds,
+				shapes: RealmScoreContextPostKinds,
 			}),
 		[localizationLanguages, realmId],
 	);
@@ -121,7 +121,8 @@ function RealmScoreContextSettingsForm({
 						<UnitPicker
 							ariaLabel={copy.post}
 							index="posts"
-							kinds={RealmScoreContextPostKinds}
+							owners={["post"]}
+							shapes={RealmScoreContextPostKinds}
 							onValueChange={(value) => {
 								setContextPostId(value);
 								save.reset();

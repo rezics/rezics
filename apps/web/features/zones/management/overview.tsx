@@ -264,7 +264,7 @@ function ZoneManagementOverviewForLanguage() {
 									<UnitPicker
 										ariaLabel={t.zones.ruleRealm.label}
 										index="realms"
-										kinds={["realm"]}
+										owners={["realm"]}
 										onValueChange={(localRuleRealmId) =>
 											sharedDraft.setValue((current) => ({
 												...current,

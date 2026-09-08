@@ -84,7 +84,8 @@ export function UnitPicker({
 			<EntityPicker
 				ariaLabel={ariaLabel}
 				index={index}
-				owners={owners} shapes={shapes}
+				owners={owners}
+				shapes={shapes}
 				onChange={(next) => {
 					setSelected({ sourceId: next.id, value: next });
 					onValueChange(next.id);
@@ -171,7 +172,8 @@ export function UnitMultiPicker({
 					ariaLabel={ariaLabel}
 					index={index}
 					key={values.join("\u0000")}
-					owners={owners} shapes={shapes}
+					owners={owners}
+					shapes={shapes}
 					onChange={(next) => {
 						if (!values.includes(next.id)) onValuesChange([...values, next.id]);
 					}}

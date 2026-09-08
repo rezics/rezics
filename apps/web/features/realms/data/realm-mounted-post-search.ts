@@ -15,14 +15,15 @@ export async function searchRealmMountedPosts(input: {
 	readonly query: string;
 	readonly signal: AbortSignal;
 	readonly localizationLanguages: readonly ContentLanguage[];
-	readonly kinds: readonly RealmMountedPostKind[];
+	readonly shapes: readonly RealmMountedPostKind[];
 }): Promise<readonly EntityPickerHit[]> {
 	const { data } = await postApiSearchByIndex({
 		path: { index: "posts" },
 		body: {
 			query: input.query,
 			realmId: input.realmId,
-			kinds: [...input.kinds],
+			owners: ["post"],
+			shapes: [...input.shapes],
 			limit: 10,
 			localizationLanguages: [...input.localizationLanguages],
 		},
@@ -31,7 +32,8 @@ export async function searchRealmMountedPosts(input: {
 	return data.hits.map((hit) => ({
 		id: hit.id,
 		label: hit.title ?? hit.name ?? hit.id,
-		kind: hit.kind,
+		owner: hit.owner,
+		shape: hit.shape,
 		avatar: hit.avatar,
 	}));
 }

@@ -194,7 +194,7 @@ function RealmTagContextBindForm({ realmId }: { readonly realmId: string }) {
 				query,
 				signal,
 				localizationLanguages,
-				kinds: RealmTagContextPostKinds,
+				shapes: RealmTagContextPostKinds,
 			}),
 		[localizationLanguages, realmId],
 	);
@@ -239,7 +239,8 @@ function RealmTagContextBindForm({ realmId }: { readonly realmId: string }) {
 					<EntityPicker
 						ariaLabel={t.realms.tagContext.existingWiki}
 						index="posts"
-						kinds={RealmTagContextPostKinds}
+						owners={["post"]}
+						shapes={RealmTagContextPostKinds}
 						onChange={setWiki}
 						onClear={() => setWiki(undefined)}
 						placeholder={t.ui.pickerPlaceholders.post}

@@ -318,7 +318,7 @@ function BlockFields({
 					<UnitPicker
 						ariaLabel={labels.identifier}
 						index={block._type === "post-full-view" ? "posts" : "units"}
-						kinds={
+						owners={
 							block._type === "post-full-view" ? ["post"] : relatedKind ? [relatedKind] : undefined
 						}
 						onValueChange={(value) =>

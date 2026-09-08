@@ -790,7 +790,7 @@ function WikiNavigationTreeEditor({
 										<UnitPicker
 											ariaLabel={t.realms.wikiNavigationSettings.label}
 											index="units"
-											kinds={["label"]}
+											owners={["label"]}
 											onValueChange={(value) =>
 												changeDraft((nodes) =>
 													updateWikiNavigationDraftNode(nodes, selectedNode.id, {
@@ -813,7 +813,7 @@ function WikiNavigationTreeEditor({
 											<UnitPicker
 												ariaLabel={t.realms.wikiNavigationSettings.target}
 												index="posts"
-												kinds={["post"]}
+												owners={["post"]}
 												onValueChange={(value) =>
 													changeDraft((nodes) =>
 														updateWikiNavigationDraftNode(nodes, selectedNode.id, {

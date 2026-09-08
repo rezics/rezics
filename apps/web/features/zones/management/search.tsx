@@ -268,7 +268,7 @@ function FilterDocumentEditor({
 											<UnitMultiPicker
 												ariaLabel={t.zones.management.search.allowedTagIds}
 												index="tags"
-												kinds={["tag"]}
+												owners={["tag"]}
 												onValuesChange={(values) =>
 													updateControl(control, {
 														optionPolicy: values.length

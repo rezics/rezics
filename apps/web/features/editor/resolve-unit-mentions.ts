@@ -14,7 +14,7 @@ export function createUnitMentionResolver(
 			id: item.id,
 			label: item.title ?? item.id,
 			owner: item.owner,
-shape: item.shape,
+			shape: item.shape,
 			avatar: item.avatar,
 		}));
 	};

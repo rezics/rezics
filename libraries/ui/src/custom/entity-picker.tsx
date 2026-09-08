@@ -122,19 +122,24 @@ export function EntityPicker({
 			() => {
 				const request = new AbortController();
 				controller = request;
-				const requestedOwners = ownersKey ? UnitOwnerValues.filter((owner) => ownersKey.split("\u0000").includes(owner)) : undefined;
-const requestedShapes = shapesKey?.split("\u0000");
-				void searchEntities(index, query, request.signal, { owners: requestedOwners, shapes: requestedShapes }).then(
+				const requestedOwners = ownersKey
+					? UnitOwnerValues.filter((owner) => ownersKey.split("\u0000").includes(owner))
+					: undefined;
+				const requestedShapes = shapesKey?.split("\u0000");
+				void searchEntities(index, query, request.signal, {
+					owners: requestedOwners,
+					shapes: requestedShapes,
+				}).then(
 					(nextHits) => {
 						if (request.signal.aborted) return;
 						const allowedOwners = ownersKey ? new Set(ownersKey.split("\u0000")) : undefined;
-const allowedShapes = shapesKey ? new Set(shapesKey.split("\u0000")) : undefined;
+						const allowedShapes = shapesKey ? new Set(shapesKey.split("\u0000")) : undefined;
 						set(
 							nextHits.filter(
 								(hit) =>
 									!excludedIds?.has(hit.id) &&
 									(!allowedOwners || (hit.owner !== undefined && allowedOwners.has(hit.owner))) &&
-(!allowedShapes || (hit.shape !== undefined && allowedShapes.has(hit.shape))),
+									(!allowedShapes || (hit.shape !== undefined && allowedShapes.has(hit.shape))),
 							),
 						);
 						setSearchResolution({ status: "ready", query });
@@ -153,7 +158,17 @@ const allowedShapes = shapesKey ? new Set(shapesKey.split("\u0000")) : undefined
 			window.clearTimeout(timer);
 			controller?.abort();
 		};
-	}, [ownersKey, shapesKey, excludedIds, index, inputValue, open, searchEntities, searchOnOpen, set]);
+	}, [
+		ownersKey,
+		shapesKey,
+		excludedIds,
+		index,
+		inputValue,
+		open,
+		searchEntities,
+		searchOnOpen,
+		set,
+	]);
 
 	useEffect(() => {
 		setInputValue(value?.label ?? "");

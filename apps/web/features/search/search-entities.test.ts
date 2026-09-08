@@ -44,7 +44,8 @@ describe("searchEntities", () => {
 				items: [
 					{
 						id: unitId,
-						kind: "realm",
+						owner: "realm",
+						shape: "realm",
 						title: "群體智慧",
 						avatar: { type: "emoji", emoji: "🧠" },
 					},
@@ -57,7 +58,8 @@ describe("searchEntities", () => {
 		expect(result).toEqual([
 			{
 				id: unitId,
-				kind: "realm",
+				owner: "realm",
+				shape: "realm",
 				label: "群體智慧",
 				avatar: { type: "emoji", emoji: "🧠" },
 			},
@@ -75,7 +77,8 @@ describe("searchEntities", () => {
 				hits: [
 					{
 						id: unitId,
-						kind: "book",
+						owner: "publishing",
+						shape: "text_version",
 						title: "中文書名",
 						titles: ["한국어 제목", "中文書名"],
 						name: null,
@@ -99,7 +102,8 @@ describe("searchEntities", () => {
 			{
 				id: unitId,
 				label: "中文書名",
-				kind: "book",
+				owner: "publishing",
+				shape: "text_version",
 				avatar: null,
 			},
 		]);
@@ -153,12 +157,56 @@ describe("searchEntities", () => {
 				path: { index: "tags" },
 				body: {
 					query: "",
-					kinds: undefined,
+					owners: undefined,
+					shapes: undefined,
 					realmTagContextRealmId: realmId,
 					limit: 10,
 					localizationLanguages: ["zh", "en"],
 				},
 			}),
 		);
+	});
+	it("sends owner and shape constraints before applying result limits", async () => {
+		api.postApiSearchByIndex.mockResolvedValue({ data: { hits: [] } });
+		await searchEntities("units", "text", new AbortController().signal, {
+			owners: ["publishing"],
+			shapes: ["text_version"],
+		});
+		expect(api.postApiSearchByIndex).toHaveBeenCalledWith(
+			expect.objectContaining({
+				body: expect.objectContaining({ owners: ["publishing"], shapes: ["text_version"] }),
+			}),
+		);
+	});
+	it("rejects an exact resource with the wrong shape", async () => {
+		api.postApiUnitsPresentations.mockResolvedValue({
+			data: {
+				items: [
+					{ id: unitId, owner: "publishing", shape: "publication", title: "Edition", avatar: null },
+				],
+			},
+		});
+		api.postApiSearchByIndex.mockResolvedValue({ data: { hits: [] } });
+		expect(
+			await searchEntities("units", unitId, new AbortController().signal, {
+				owners: ["publishing"],
+				shapes: ["text_version"],
+			}),
+		).toEqual([]);
+	});
+	it("keeps only chapter shapes in a Post picker", async () => {
+		api.postApiSearchByIndex.mockResolvedValue({
+			data: {
+				hits: [
+					{ id: unitId, owner: "post", shape: "chapter", title: "Chapter", avatar: null },
+					{ id: "other", owner: "post", shape: "review", title: "Review", avatar: null },
+				],
+			},
+		});
+		const result = await searchEntities("posts", "text", new AbortController().signal, {
+			owners: ["post"],
+			shapes: ["chapter"],
+		});
+		expect(result.map((item) => item.id)).toEqual([unitId]);
 	});
 });

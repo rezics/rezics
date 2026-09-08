@@ -18,7 +18,7 @@ export function AdaptedAudioField({
 			<FieldLabel>{t.units.fields.adaptedAudio}</FieldLabel>
 			<UnitMultiPicker
 				ariaLabel={t.units.fields.adaptedAudio}
-				kinds={AdaptedAudioUnitKinds}
+				owners={AdaptedAudioUnitKinds}
 				maxValues={MaximumAudioTracksPerVideo}
 				onValuesChange={onChange}
 				placeholder={t.ui.pickerPlaceholders.unit}

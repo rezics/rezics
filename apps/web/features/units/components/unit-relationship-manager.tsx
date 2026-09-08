@@ -482,7 +482,8 @@ function AddSubjectDialog({
 							<EntityPicker
 								ariaLabel={t.units.editor.contextWikiPost}
 								index="posts"
-								kind="wiki"
+								owners={["post"]}
+								shapes={["wiki"]}
 								onChange={setContextPost}
 								onClear={() => setContextPost(undefined)}
 								placeholder={t.ui.pickerPlaceholders.post}
@@ -968,7 +969,7 @@ function MainUnitDialog({
 							<FieldLabel>{t.units.relationshipManagement.mainUnit}</FieldLabel>
 							<UnitPicker
 								ariaLabel={t.units.relationshipManagement.mainUnit}
-								kinds={[type]}
+								owners={[type]}
 								onValueChange={setMainUnitId}
 								placeholder={t.ui.pickerPlaceholders.unit}
 								value={mainUnitId}

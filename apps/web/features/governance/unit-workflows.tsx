@@ -539,9 +539,9 @@ function AssociationProposalManager({
 							<UnitPicker
 								ariaLabel={relatedUnitLabel}
 								index={entityPublisherOnly ? "users" : undefined}
-								kinds={
+								owners={
 									entityPublisherOnly
-										? ["profile"]
+										? ["entity"]
 										: kind === "subject" && side === "source"
 											? ["entity"]
 											: undefined
@@ -594,7 +594,8 @@ function AssociationProposalManager({
 									<EntityPicker
 										ariaLabel={t.governance.contextWikiPost}
 										index="posts"
-										kind="wiki"
+										owners={["post"]}
+										shapes={["wiki"]}
 										onChange={setContextPost}
 										placeholder={t.ui.pickerPlaceholders.post}
 										value={contextPost}
@@ -799,7 +800,7 @@ function EntityPublisherManager({ entity }: { entity: GetApiEntitiesByUnitIdStat
 							<UnitPicker
 								ariaLabel={t.governance.publisherProfile}
 								index="users"
-								kinds={["profile"]}
+								owners={["entity"]}
 								onValueChange={setPublisherProfileId}
 								placeholder={t.ui.pickerPlaceholders.user}
 								value={publisherProfileId}
