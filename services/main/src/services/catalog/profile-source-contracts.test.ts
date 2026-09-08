@@ -4,6 +4,24 @@ import { musicBrainzSupportingObservedProfileFields } from "./musicbrainz-suppor
 import { parseMusicBrainzSupportingEndpoint } from "./musicbrainz-entities";
 
 describe("pure source profile field scope", () => {
+	it("a new correspondence fills only absent native values and never assumes the target is empty", () => {
+		const gender = crypto.randomUUID();
+		const incoming = parseCatalogSourceProfile("entity", { genderRevisionId: gender }, [
+			"genderRevisionId",
+		]);
+		expect(mergeCatalogSourceProfile("entity", { ended: true }, null, incoming)).toMatchObject({
+			genderRevisionId: gender,
+			ended: true,
+		});
+		expect(() =>
+			mergeCatalogSourceProfile(
+				"entity",
+				{ genderRevisionId: crypto.randomUUID() },
+				null,
+				incoming,
+			),
+		).toThrow("independent native edit");
+	});
 	it("preserves human fields while applying changed observed source fields", () => {
 		const before = parseCatalogSourceProfile(
 			"entity",

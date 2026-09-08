@@ -118,6 +118,10 @@ export async function applyMusicBrainzFactDelta(
 		throw new RangeError("Music semantic delta requires staged application");
 	const f = CatalogFactTables[reference.owner];
 	const scope = await catalogSourceSupportColumns(tx, observation.record.id);
+	const baselineKey = {
+		sourceRecordId: observation.record.id,
+		mappingKey: previous?.mappingKey ?? scope.sourceMappingKey,
+	};
 	const changes: FactChange[] = [];
 	const consumed = new Set<number>();
 	const support = async (snapshotId: string, descriptor: Descriptor) => {
@@ -242,38 +246,35 @@ export async function applyMusicBrainzFactDelta(
 			continue;
 		}
 		const sourceRevision = proof.row ? proof.row.expectedHeadVersion + 1 : 0;
-		const currentRevision =
-			previous && proof.row
-				? await resolveCatalogSourceOwnedBaseline(
-						tx,
-						{ sourceRecordId: observation.record.id, mappingKey: previous.mappingKey },
-						{
-							owner: reference.owner,
-							ownerId: reference.id,
-							kind: "catalog-semantic",
-							componentKey: proof.row.semanticId,
-						},
-						sourceRevision,
-					)
-				: sourceRevision;
+		const currentRevision = proof.row
+			? await resolveCatalogSourceOwnedBaseline(
+					tx,
+					baselineKey,
+					{
+						owner: reference.owner,
+						ownerId: reference.id,
+						kind: "catalog-semantic",
+						componentKey: proof.row.semanticId,
+					},
+					sourceRevision,
+				)
+			: sourceRevision;
 		const target = await support(observation.snapshot.id, descriptor);
 		if (target.row) {
 			const expected =
 				proof.row && proof.row.semanticId === target.row.semanticId
 					? currentRevision
-					: previous
-						? await resolveCatalogSourceOwnedBaseline(
-								tx,
-								{ sourceRecordId: observation.record.id, mappingKey: previous.mappingKey },
-								{
-									owner: reference.owner,
-									ownerId: reference.id,
-									kind: "catalog-semantic",
-									componentKey: target.row.semanticId,
-								},
-								target.row.expectedHeadVersion + 1,
-							)
-						: target.row.expectedHeadVersion + 1;
+					: await resolveCatalogSourceOwnedBaseline(
+							tx,
+							baselineKey,
+							{
+								owner: reference.owner,
+								ownerId: reference.id,
+								kind: "catalog-semantic",
+								componentKey: target.row.semanticId,
+							},
+							target.row.expectedHeadVersion + 1,
+						);
 			const restored = await restoreCatalogSemanticRevision(
 				tx,
 				reference,

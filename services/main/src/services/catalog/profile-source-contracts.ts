@@ -33,24 +33,26 @@ export function parseCatalogSourceProfile(
 export function mergeCatalogSourceProfile(
 	owner: "entity" | "reference",
 	nativeInput: unknown,
-	previous: ReturnType<typeof parseCatalogSourceProfile>,
+	previous: ReturnType<typeof parseCatalogSourceProfile> | null,
 	incoming: ReturnType<typeof parseCatalogSourceProfile>,
 ) {
-	const before = parseCatalogSourceProfile(owner, previous.sourceProfile, previous.observedFields),
+	const before = previous
+			? parseCatalogSourceProfile(owner, previous.sourceProfile, previous.observedFields)
+			: null,
 		after = parseCatalogSourceProfile(owner, incoming.sourceProfile, incoming.observedFields);
-	if (before.observedFields.some((field) => !after.observedFields.includes(field)))
+	if (before?.observedFields.some((field) => !after.observedFields.includes(field)))
 		throw new TypeError("Supporting update omitted a previously observed profile field");
 	const native =
 		owner === "entity"
 			? EntityProfileSchema.parse(nativeInput)
 			: ReferenceProfileSchema.parse(nativeInput);
 	const desired: Record<string, unknown> = { ...native };
-	const oldValues = new Map(Object.entries(before.sourceProfile)),
+	const oldValues = new Map(Object.entries(before?.sourceProfile ?? {})),
 		newValues = new Map(Object.entries(after.sourceProfile));
 	for (const field of after.observedFields) {
-		const old = oldValues.get(field),
+		const old = before ? oldValues.get(field) : field === "shape" ? desired[field] : null,
 			value = newValues.get(field);
-		if (before.observedFields.includes(field) && isDeepStrictEqual(old, value)) continue;
+		if (before?.observedFields.includes(field) && isDeepStrictEqual(old, value)) continue;
 		if (!isDeepStrictEqual(desired[field], old) && !isDeepStrictEqual(desired[field], value))
 			throw new TypeError(`Supporting source ${field} conflicts with an independent native edit`);
 		desired[field] = value;

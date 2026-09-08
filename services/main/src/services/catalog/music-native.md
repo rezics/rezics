@@ -391,3 +391,19 @@ record independently compiled source values instead of inherited native fields.
 One additional live-head primary-key probe per admitted component supports the
 merge; the operation stays bounded by 128 components. This improves preservation
 of human fields but does not yet implement the null-before whole-mapper refresh.
+
+The supporting factory now accepts a null-before archive for a separately prepared
+new target. It checks the immutable prior binding, refuses to treat a same-target
+mapper replacement as an empty owner, and neither reads nor mutates the former
+target's native rows. New source profile fields fill only absent values or agree
+with current values; conflicting curated fields require review. Curated names
+remain separate, and source facts, identifiers and relations have exact repeatable
+initial-application compensation. Series classification and nonempty area-code
+initialization still require their native journals and fail explicitly.
+
+The actual DB61 supporting fixture now passes 284 tracked checks: the original ten
+supporting-object update cases, plus nine new-target rebind cases, each applied and
+withdrawn twice. It verifies unchanged former-target revisions and preservation
+of curated new-target names. Paused rebinding is explicitly reviewed and resumed
+before application. This qualifies new-target initialization for the exercised
+semantics; same-target mapper refresh remains open.

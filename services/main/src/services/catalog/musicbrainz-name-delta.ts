@@ -33,29 +33,33 @@ export async function applyMusicBrainzNameDelta(
 	revision: number,
 	sourceRecordId: string,
 	mappingKey: string,
-	previousSnapshotId: string,
+	previousSnapshotId: string | null,
 	snapshotId: string,
-	previous: Pick<MusicBrainzRelease, "title" | "aliases"> & { "sort-name"?: string | null },
+	previous:
+		| (Pick<MusicBrainzRelease, "title" | "aliases"> & { "sort-name"?: string | null })
+		| null,
 	incoming: Pick<MusicBrainzRelease, "title" | "aliases"> & { "sort-name"?: string | null },
 	primaryPath = "/title",
 ) {
 	const scope = await resolveCatalogSourceChildCorrespondence(tx, sourceRecordId);
 	const table = CatalogNameTables[reference.owner].sourceOccurrence;
-	const rows = await tx
-		.select()
-		.from(table)
-		.where(
-			and(
-				eq(table.ownerId, reference.id),
-				eq(table.sourceRecordId, sourceRecordId),
-				eq(table.mappingKey, scope.mappingKey),
-				eq(table.correspondenceRevision, scope.correspondenceRevision),
-				eq(table.ownerId, reference.id),
-				eq(table.snapshotId, previousSnapshotId),
-				eq(table.namespace, "musicbrainz.name"),
-			),
-		)
-		.limit(129);
+	const rows = previousSnapshotId
+		? await tx
+				.select()
+				.from(table)
+				.where(
+					and(
+						eq(table.ownerId, reference.id),
+						eq(table.sourceRecordId, sourceRecordId),
+						eq(table.mappingKey, scope.mappingKey),
+						eq(table.correspondenceRevision, scope.correspondenceRevision),
+						eq(table.ownerId, reference.id),
+						eq(table.snapshotId, previousSnapshotId),
+						eq(table.namespace, "musicbrainz.name"),
+					),
+				)
+				.limit(129)
+		: [];
 	if (rows.length > 128 || (incoming.aliases?.length ?? 0) > 128)
 		throw new RangeError("Music name delta requires staged application");
 	const byPath = new Map(rows.map((row) => [row.sourcePath, row]));
@@ -207,17 +211,17 @@ export async function applyMusicBrainzNameDelta(
 		await write(
 			primaryPath,
 			{ kind: "source-primary", value: incoming.title, languageTag: null },
-			previous.title ? primaryPath : undefined,
-			previous.title === incoming.title,
+			previous?.title ? primaryPath : undefined,
+			previous?.title === incoming.title,
 		);
 	if (incoming["sort-name"])
 		await write(
 			"/sort-name",
 			{ kind: "sort", value: incoming["sort-name"], languageTag: null },
-			previous["sort-name"] ? "/sort-name" : undefined,
-			previous["sort-name"] === incoming["sort-name"],
+			previous?.["sort-name"] ? "/sort-name" : undefined,
+			previous?.["sort-name"] === incoming["sort-name"],
 		);
-	const oldAliases = previous.aliases ?? [];
+	const oldAliases = previous?.aliases ?? [];
 	const aliasesUsed = new Set<number>();
 	for (const [index, alias] of (incoming.aliases ?? []).entries()) {
 		let oldIndex = oldAliases.findIndex(

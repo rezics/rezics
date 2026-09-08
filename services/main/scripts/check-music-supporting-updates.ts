@@ -3,6 +3,7 @@ import { Readable } from "node:stream";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { users } from "../src/services/database/schema/auth";
+import type { CatalogReference } from "../src/services/catalog/contracts";
 import { operationalCapacity } from "../src/services/database/schema/operational-durability";
 import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import { aggregateRoutingBucket } from "../src/services/events/envelope";
@@ -20,14 +21,22 @@ import {
 	proposeCatalogSourceAdoption,
 	decideCatalogSourceProposal,
 } from "../src/services/catalog/source-proposals";
-import { lockCatalogSourceBinding } from "../src/services/catalog/source-bindings";
+import {
+	lockCatalogSourceBinding,
+	reviseCatalogSourceBinding,
+} from "../src/services/catalog/source-bindings";
 import { resolveCatalogSourceChildCorrespondence } from "../src/services/catalog/source-child-correspondence";
 import {
 	readCatalogProfileHead,
 	readCatalogSourceProfile,
 } from "../src/services/catalog/profile-source";
-import { initializeEntityProfile } from "../src/services/catalog/entities";
-import { EntityProfileSchema } from "../src/services/catalog/entity-contracts";
+import { initializeEntityProfile, createEntity } from "../src/services/catalog/entities";
+import { createReference } from "../src/services/catalog/references";
+import {
+	EntityProfileSchema,
+	EntityShapeSchema,
+	ReferenceProfileSchema,
+} from "../src/services/catalog/entity-contracts";
 import {
 	listCatalogNames,
 	loadCatalogIdentity,
@@ -331,6 +340,121 @@ try {
 							),
 						);
 						checks++;
+					}
+					if (item.kind !== "series") {
+						const original = await loadCatalogIdentity(tx, reference, account.id, true);
+						const target: CatalogReference & { revision: number } =
+							reference.owner === "entity"
+								? await createEntity(tx, account.id, {
+										shape: EntityShapeSchema.parse(original.shape),
+										name: { languageTag: "en", value: "Curated target name" },
+										profile: { ended: true },
+									})
+								: await createReference(tx, account.id, {
+										name: { languageTag: "en", value: "Curated target name" },
+										profile: ReferenceProfileSchema.parse({
+											shape: original.shape,
+											...(item.kind === "url" ? { url: item.after.resource } : {}),
+										}),
+									});
+						const currentBinding = await lockCatalogSourceBinding(tx, {
+							sourceRecordId,
+							mappingKey: scope.mappingKey,
+						});
+						const rebound = await reviseCatalogSourceBinding(tx, account.id, {
+							sourceRecordId,
+							mappingKey: scope.mappingKey,
+							expectedRevision: currentBinding.claim.bindingRevision,
+							state: "active",
+							mode: "review",
+							target,
+							reason: "Prepare independently owned new native target",
+						});
+						await reviseCatalogSourceBinding(tx, account.id, {
+							sourceRecordId,
+							mappingKey: scope.mappingKey,
+							expectedRevision: rebound.revision,
+							state: "active",
+							mode: "review",
+							reason: "Activate reviewed new target correspondence",
+						});
+						const initialize = createMusicBrainzNativeWriter({
+							before: null,
+							after: {
+								snapshotId: observation.snapshot.id,
+								receipt: afterReceipt,
+								bytes: afterBytes,
+							},
+						});
+						for (let cycle = 0; cycle < 2; cycle++) {
+							const proposed = await proposeCatalogSourceAdoption(tx, account.id, {
+								sourceRecordId,
+								mappingKey: scope.mappingKey,
+								snapshotId: observation.snapshot.id,
+								mappingVersion: `musicbrainz.${item.kind}.1`,
+							});
+							assert.ok("proposal" in proposed);
+							assert.ok(proposed.proposal);
+							await prepareMusicBrainzProposalDependencies(tx, account.id, {
+								sourceRecordId,
+								snapshotId: observation.snapshot.id,
+								proposalId: proposed.proposal.id,
+								receipt: afterReceipt,
+								bytes: afterBytes,
+							});
+							const decision = {
+								sourceRecordId,
+								proposalId: proposed.proposal.id,
+								mappingVersion: `musicbrainz.${item.kind}.1`,
+								reason: "Apply own target without borrowing prior target authority",
+							};
+							assert.equal(
+								(
+									await decideCatalogSourceProposal(
+										tx,
+										account.id,
+										{ ...decision, action: "apply" },
+										initialize,
+									)
+								).status,
+								"applied",
+							);
+							checks++;
+							assert.ok(
+								(await listCatalogNames(tx, target, account.id)).some(
+									(name) => name.value === "Curated target name" && name.state === "active",
+								),
+							);
+							checks++;
+							assert.equal(
+								(await loadCatalogIdentity(tx, reference, account.id, false)).revision,
+								original.revision,
+							);
+							checks++;
+							assert.equal(
+								(
+									await decideCatalogSourceProposal(
+										tx,
+										account.id,
+										{ ...decision, action: "withdraw" },
+										initialize,
+									)
+								).status,
+								"withdrawn",
+							);
+							checks++;
+							assert.equal(
+								(await loadCatalogIdentity(tx, reference, account.id, false)).revision,
+								original.revision,
+							);
+							checks++;
+							assert.ok(
+								(await listCatalogNames(tx, target, account.id)).some(
+									(name) => name.value === "Curated target name" && name.state === "active",
+								),
+							);
+							checks++;
+						}
 					}
 				}
 			});

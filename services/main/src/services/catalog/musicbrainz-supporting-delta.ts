@@ -1,4 +1,9 @@
 import { isDeepStrictEqual } from "node:util";
+import { and, eq } from "drizzle-orm";
+import {
+	catalogSourceMappingClaim,
+	catalogSourceBindingRevision,
+} from "../database/schema/catalog-source";
 import { runParticipationSavepoint } from "../participation/policy";
 import { EntityProfileSchema, ReferenceProfileSchema } from "./entity-contracts";
 import { parseCatalogSourceProfile, mergeCatalogSourceProfile } from "./profile-source-contracts";
@@ -77,29 +82,92 @@ function facts(document: MusicBrainzSupportingDocument) {
 
 /** @internal Supporting endpoints apply fixed profiles, named forms, text assertions and identifier claims through native writers. */
 export function musicBrainzSupportingNativeWriter(
-	beforeArchive: Archive,
+	beforeArchive: Archive | null,
 	afterArchive: Archive,
 ): CatalogSourceNativeWriter {
 	return (outer, context) =>
 		runParticipationSavepoint(outer, async (tx) => {
 			if (context.action === "withdraw") return compensateMusicSourceApplication(tx, context);
-			if (!context.previousSnapshotId)
-				throw new TypeError("Supporting update requires a persisted previous interpretation");
-			const before = parseMusicBrainzSupportingDocument(beforeArchive.receipt, beforeArchive.bytes),
+			const before = beforeArchive
+					? parseMusicBrainzSupportingDocument(beforeArchive.receipt, beforeArchive.bytes)
+					: null,
 				after = parseMusicBrainzSupportingDocument(afterArchive.receipt, afterArchive.bytes);
 			if (
-				before.type !== after.type ||
-				before.record.id !== after.record.id ||
+				(before && (before.type !== after.type || before.record.id !== after.record.id)) ||
 				context.mappingVersion !== `musicbrainz.${after.type}.1`
 			)
 				throw new TypeError("Supporting source identity or mapping version changed");
-			await loadCatalogSourceDocument(
-				tx,
-				context.sourceRecordId,
-				context.previousSnapshotId,
-				beforeArchive.receipt,
-				beforeArchive.bytes,
-			);
+			if (beforeArchive) {
+				if (!context.previousSnapshotId)
+					throw new TypeError("Supporting previous snapshot is missing");
+				await loadCatalogSourceDocument(
+					tx,
+					context.sourceRecordId,
+					context.previousSnapshotId,
+					beforeArchive.receipt,
+					beforeArchive.bytes,
+				);
+			} else {
+				if (context.previousSnapshotId)
+					throw new TypeError("Supporting previous archive is missing");
+				if (after.type === "series")
+					throw new TypeError(
+						"New series correspondence requires its native classification journal",
+					);
+				if (
+					after.type === "area" &&
+					[
+						after.record["iso-3166-1-codes"],
+						after.record["iso-3166-2-codes"],
+						after.record["iso-3166-3-codes"],
+					].some((codes) => codes?.length)
+				)
+					throw new TypeError(
+						"New area-code correspondence requires its native occurrence journal",
+					);
+				const [claim] = await tx
+					.select()
+					.from(catalogSourceMappingClaim)
+					.where(
+						and(
+							eq(catalogSourceMappingClaim.sourceRecordId, context.sourceRecordId),
+							eq(catalogSourceMappingClaim.mappingKey, context.mappingKey),
+						),
+					)
+					.limit(1);
+				if (!claim || claim.correspondenceRevision !== context.correspondenceRevision)
+					throw new TypeError("Supporting correspondence fence changed");
+				if (claim.appliedCorrespondenceRevision !== null) {
+					const [previousBinding] = await tx
+						.select()
+						.from(catalogSourceBindingRevision)
+						.where(
+							and(
+								eq(catalogSourceBindingRevision.sourceRecordId, context.sourceRecordId),
+								eq(catalogSourceBindingRevision.mappingKey, context.mappingKey),
+								eq(catalogSourceBindingRevision.revision, claim.appliedCorrespondenceRevision),
+							),
+						)
+						.limit(1);
+					if (!previousBinding)
+						throw new TypeError("Previous supporting interpretation binding is missing");
+					const oldTarget = {
+						entity: previousBinding.entityId,
+						reference: previousBinding.referenceId,
+						grouping: previousBinding.groupingId,
+					};
+					if (
+						previousBinding.owner === context.reference.owner &&
+						(context.reference.owner === "entity" ||
+							context.reference.owner === "reference" ||
+							context.reference.owner === "grouping") &&
+						oldTarget[context.reference.owner] === context.reference.id
+					)
+						throw new TypeError(
+							"Same-target supporting mapper refresh requires prior native plans",
+						);
+				}
+			}
 			const observation = await loadCatalogSourceDocument(
 				tx,
 				context.sourceRecordId,
@@ -113,12 +181,12 @@ export function musicBrainzSupportingNativeWriter(
 				throw new TypeError(
 					"Supporting update requires separately reviewed native reclassification",
 				);
-			if (before.type === "area" && after.type === "area")
+			if (before?.type === "area" && after.type === "area")
 				for (const field of ["iso-3166-1-codes", "iso-3166-2-codes", "iso-3166-3-codes"] as const)
 					if (!isDeepStrictEqual(before.record[field] ?? [], after.record[field] ?? []))
 						throw new TypeError("Area code update requires its native occurrence journal");
 			if (
-				before.type === "series" &&
+				before?.type === "series" &&
 				after.type === "series" &&
 				(before.record.type !== after.record.type ||
 					before.record["type-id"] !== after.record["type-id"])
@@ -139,22 +207,27 @@ export function musicBrainzSupportingNativeWriter(
 					incoming.profile,
 					musicBrainzSupportingObservedProfileFields(after),
 				);
-				const previous = await readCatalogSourceProfile(tx, context.reference, context.actor, {
-					sourceRecordId: context.sourceRecordId,
-					snapshotId: context.previousSnapshotId,
-					mappingKey: context.mappingKey,
-					correspondenceRevision: context.correspondenceRevision,
-				});
-				if (!previous)
+				const previous = context.previousSnapshotId
+					? await readCatalogSourceProfile(tx, context.reference, context.actor, {
+							sourceRecordId: context.sourceRecordId,
+							snapshotId: context.previousSnapshotId,
+							mappingKey: context.mappingKey,
+							correspondenceRevision: context.correspondenceRevision,
+						})
+					: null;
+				if (before && !previous)
 					throw new TypeError("Supporting previous pure profile occurrence is missing");
 				const head = await readCatalogProfileHead(tx, context.reference, context.actor);
-				if (!head || head.removed)
+				if (head?.removed || (before && !head))
 					throw new CatalogRevisionConflict("Supporting native profile was independently removed");
-				const current =
-					incoming.owner === "entity"
+				const current = head
+					? incoming.owner === "entity"
 						? EntityProfileSchema.parse(head.snapshot)
-						: ReferenceProfileSchema.parse(head.snapshot);
-				const desired = mergeCatalogSourceProfile(incoming.owner, current, previous, source);
+						: ReferenceProfileSchema.parse(head.snapshot)
+					: null;
+				const desired = current
+					? mergeCatalogSourceProfile(incoming.owner, current, previous, source)
+					: source.sourceProfile;
 				const evidence = {
 					sourceRecordId: context.sourceRecordId,
 					snapshotId: context.snapshotId,
@@ -168,14 +241,14 @@ export function musicBrainzSupportingNativeWriter(
 						context.actor,
 						revision,
 						{
-							expectedProfileRevision: head.revision,
+							expectedProfileRevision: head?.revision ?? null,
 							profile: desired,
 							...evidence,
 						},
 					);
 					revision = saved.revision;
 					changes.push(saved.change);
-				} else
+				} else if (head)
 					await bindCatalogProfileSourceOccurrence(tx, context.reference, context.actor, {
 						...evidence,
 						revision: head.revision,
@@ -190,7 +263,7 @@ export function musicBrainzSupportingNativeWriter(
 				context.mappingKey,
 				context.previousSnapshotId,
 				context.snapshotId,
-				names(before),
+				before ? names(before) : null,
 				names(after),
 				after.type === "url" ? "/resource" : "/name",
 			);
@@ -202,11 +275,13 @@ export function musicBrainzSupportingNativeWriter(
 				context.actor,
 				revision,
 				observation,
-				{
-					snapshotId: context.previousSnapshotId,
-					mappingKey: context.mappingKey,
-					record: facts(before),
-				},
+				before && context.previousSnapshotId
+					? {
+							snapshotId: context.previousSnapshotId,
+							mappingKey: context.mappingKey,
+							record: facts(before),
+						}
+					: null,
 				facts(after),
 			);
 			changes.push(...assertions.changes);
@@ -216,8 +291,8 @@ export function musicBrainzSupportingNativeWriter(
 				context.reference,
 				context.actor,
 				revision,
-				{ ...context, previousSnapshotId: context.previousSnapshotId },
-				identifiers(before),
+				{ ...context, previousSnapshotId: context.previousSnapshotId ?? context.snapshotId },
+				before ? identifiers(before) : [],
 				identifiers(after),
 			);
 			changes.push(...claims.changes);
@@ -229,9 +304,9 @@ export function musicBrainzSupportingNativeWriter(
 				revision,
 				observation,
 				{
-					snapshotId: context.previousSnapshotId,
+					snapshotId: context.previousSnapshotId ?? context.snapshotId,
 					mappingKey: context.mappingKey,
-					relations: before.record.relations ?? [],
+					relations: before?.record.relations ?? [],
 				},
 				after.record.relations ?? [],
 			);

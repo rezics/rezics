@@ -59,18 +59,18 @@ export function createMusicBrainzNativeWriter(input: {
 		if (context.snapshotId !== after.snapshotId)
 			throw new TypeError("MusicBrainz callback snapshot differs from its proposal");
 		if (context.action === "withdraw") return compensateMusicSourceApplication(tx, context);
+		if (context.previousSnapshotId !== (before?.snapshotId ?? null))
+			throw new TypeError("MusicBrainz callback previous snapshot differs from its proposal");
+		if (!["release", "work", "recording", "release_group"].includes(kind))
+			return musicBrainzSupportingNativeWriter(before, after)(tx, context);
 		if (!before)
 			throw new TypeError(
-				"MusicBrainz correspondence refresh requires a persisted prior interpretation",
+				"MusicBrainz core correspondence refresh requires a persisted prior native plan",
 			);
-		if (context.previousSnapshotId !== before.snapshotId)
-			throw new TypeError("MusicBrainz callback previous snapshot differs from its proposal");
 		const writer =
 			kind === "release"
 				? musicBrainzReleaseNativeWriter(before, after)
-				: ["work", "recording", "release_group"].includes(kind)
-					? musicBrainzObjectNativeWriter(before, after)
-					: musicBrainzSupportingNativeWriter(before, after);
+				: musicBrainzObjectNativeWriter(before, after);
 		return writer(tx, context);
 	};
 }
