@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { classifyPublicUnitSeoIndexing, isPublicUnitSeoKind } from "./seo-contract";
+import { classifyPublicUnitSeoIndexing, isPublicUnitSeoOwner } from "./seo-contract";
 
 describe("public Unit SEO contract", () => {
 	it.each(["general", "r15"] as const)(
@@ -47,27 +47,27 @@ describe("public Unit SEO contract", () => {
 	});
 
 	it("covers every Unit kind with a public landing route and excludes internal-only kinds", () => {
-		for (const kind of [
-			"entity",
-			"book",
+		for (const owner of [
+			"publishing",
+			"music",
+			"program",
 			"software",
-			"release",
-			"media",
+			"entity",
+			"grouping",
+			"reference",
+			"distribution",
 			"video",
 			"audio",
-			"entity",
-			"tag",
-			"series",
-			"zone",
-			"zone_page",
-			"collection",
 			"post",
 			"poll",
+			"zone",
 			"realm",
-		] as const)
-			expect(isPublicUnitSeoKind(kind)).toBe(true);
+			"collection",
+			"tag",
+		])
+			expect(isPublicUnitSeoOwner(owner)).toBe(true);
 
 		for (const kind of ["slug_namespace", "label", "realm_rule", "tag_path"] as const)
-			expect(isPublicUnitSeoKind(kind)).toBe(false);
+			expect(isPublicUnitSeoOwner(kind)).toBe(false);
 	});
 });

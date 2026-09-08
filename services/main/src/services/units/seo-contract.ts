@@ -1,30 +1,28 @@
-import type { ContentRating, UnitKind } from "../database/schema/contract-values";
-
-export const PublicUnitSeoKinds = [
-	"book",
+import type { UnitOwner } from "@rezics/reference";
+import type { ContentRating } from "../database/schema/contract-values";
+export const PublicUnitSeoOwners = [
+	"publishing",
+	"music",
+	"program",
 	"software",
-	"release",
-	"media",
+	"entity",
+	"grouping",
+	"reference",
+	"distribution",
 	"video",
 	"audio",
-	"entity",
-	"tag",
-	"series",
-	"zone",
-	"zone_page",
-	"collection",
 	"post",
 	"poll",
+	"zone",
 	"realm",
-] as const satisfies readonly UnitKind[];
-
-export type PublicUnitSeoKind = (typeof PublicUnitSeoKinds)[number];
-
-const PublicUnitSeoKindSet = new Set<UnitKind>(PublicUnitSeoKinds);
+	"collection",
+	"tag",
+] as const satisfies readonly UnitOwner[];
+export type PublicUnitSeoOwner = (typeof PublicUnitSeoOwners)[number];
+const PublicUnitSeoOwnerSet = new Set<string>(PublicUnitSeoOwners);
 const SeoContentRatings = new Set<ContentRating>(["general", "r15"]);
-
-export function isPublicUnitSeoKind(kind: UnitKind): kind is PublicUnitSeoKind {
-	return PublicUnitSeoKindSet.has(kind);
+export function isPublicUnitSeoOwner(owner: string): owner is PublicUnitSeoOwner {
+	return PublicUnitSeoOwnerSet.has(owner);
 }
 
 export function isSeoContentRating(contentRating: ContentRating): boolean {

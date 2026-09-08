@@ -14,6 +14,7 @@ import {
 import {
 	DateTime,
 	ContentLanguage,
+	ContentLanguageTag,
 	ContentLanguageSupport,
 	ContentRating,
 	LifecycleInput,
@@ -23,7 +24,7 @@ import {
 	UnitLocalizationInput,
 	Uuid,
 } from "../schema";
-import { PublicUnitSeoKinds } from "../../units/seo-contract";
+import { PublicUnitSeoOwners } from "../../units/seo-contract";
 
 export const TimedMediaUnitType = t.Union([t.Literal("video"), t.Literal("audio")]);
 export type TimedMediaUnitType = StaticDecode<typeof TimedMediaUnitType>;
@@ -250,7 +251,7 @@ export const PublicUnitSeoParams = t.Object({ unitId: Uuid });
 export const PublicUnitSeoQuery = UnitDetailQuery;
 const PublicUnitSeoContextResponse = t.Union([
 	t.Object(
-		{ kind: t.Literal("entity"), entityKind: t.String({ minLength: 1 }) },
+		{ kind: t.Literal("entity"), shape: t.String({ minLength: 1 }) },
 		{ additionalProperties: false },
 	),
 	t.Object(
@@ -268,7 +269,7 @@ const PublicUnitSeoContextResponse = t.Union([
 ]);
 const PublicUnitSeoPresentationResponse = t.Object(
 	{
-		language: ContentLanguage,
+		language: t.Nullable(ContentLanguageTag),
 		title: t.String({ minLength: 1, maxLength: 500 }),
 		description: t.Nullable(t.String({ maxLength: 600 })),
 		image: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
@@ -278,7 +279,8 @@ const PublicUnitSeoPresentationResponse = t.Object(
 );
 const PublicUnitSeoIdentityResponse = {
 	id: Uuid,
-	kind: t.UnionEnum(PublicUnitSeoKinds),
+	owner: t.UnionEnum(PublicUnitSeoOwners),
+	shape: t.String({ minLength: 1 }),
 	contentRating: ContentRating,
 	publishedAt: t.Nullable(DateTime),
 	updatedAt: DateTime,
