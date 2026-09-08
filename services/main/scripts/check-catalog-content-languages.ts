@@ -3,6 +3,8 @@ import {
 	catalogDefinitionRevision,
 } from "../src/services/database/schema/catalog-identity";
 import { beginCatalogFact, CatalogRevisionConflict } from "../src/services/catalog/storage";
+import { resolveIdentity } from "../src/services/auth/session";
+import { runWithParticipationAuthority } from "../src/services/participation/policy";
 import {
 	contentLanguageDeclarationSemanticId,
 	ContentLanguageDeclarationReferenceSchema,
@@ -295,12 +297,18 @@ try {
 			.orderBy(catalogDefinitionRevision.version)
 			.limit(1);
 		assert.ok(meaning);
+		const identity = await resolveIdentity(
+			new Request("http://localhost:3001", { headers: { Cookie: owner } }),
+			"unit:update",
+		);
 		await assert.rejects(
-			database.transaction((tx) =>
-				beginCatalogFact(tx, nativeReference, actorId, current.revision, meaning.id, {
-					initialSemanticId: contentLanguageDeclarationSemanticId(nativeReference),
-					expectedHeadVersion: 0,
-				}),
+			runWithParticipationAuthority(identity.participation, () =>
+				database.transaction((tx) =>
+					beginCatalogFact(tx, nativeReference, actorId, current.revision, meaning.id, {
+						initialSemanticId: contentLanguageDeclarationSemanticId(nativeReference),
+						expectedHeadVersion: 0,
+					}),
+				),
 			),
 			CatalogRevisionConflict,
 		);
