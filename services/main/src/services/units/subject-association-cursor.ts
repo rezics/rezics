@@ -1,6 +1,6 @@
 import { t } from "elysia";
 
-import { ContentLanguage, Uuid } from "../api/schema";
+import { ContentLanguageTag, Uuid } from "../api/schema";
 import { MaximumSubjectAssociationsPageSize } from "../database/schema/contract-values";
 import { FractionalPositionStorageMaximumBytes, isFractionalPosition } from "../ordering/position";
 import { parseJsonCursor } from "../pagination";
@@ -10,7 +10,7 @@ const SubjectAssociationListCursor = t.Object(
 	{
 		v: t.Literal(1),
 		unitId: Uuid,
-		localizationLanguages: t.Array(ContentLanguage, { uniqueItems: true, maxItems: 50 }),
+		localizationLanguages: t.Array(ContentLanguageTag, { uniqueItems: true, maxItems: 32 }),
 		limit: t.Integer({ minimum: 1, maximum: MaximumSubjectAssociationsPageSize }),
 		position: t.String({ minLength: 1, maxLength: FractionalPositionStorageMaximumBytes }),
 		id: Uuid,

@@ -233,7 +233,9 @@ export type UnitDetailQuery = StaticDecode<typeof UnitDetailQuery>;
 
 export const UnitSubjectAssociationsQuery = t.Object(
 	{
-		...LocalizationLanguageQuery,
+		localizationLanguages: t.Optional(
+			t.Array(ContentLanguageTag, { maxItems: 32, uniqueItems: true }),
+		),
 		cursor: t.Optional(t.String({ minLength: 1, maxLength: 4096 })),
 		limit: t.Optional(
 			t.Integer({

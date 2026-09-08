@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Authorization } from "../authorization";
+import { decodeParticipationCursor } from "./participation-cursor";
 
 const execute = vi.hoisted(() => vi.fn());
 const getPublicCanonicalUnitSlugAddresses = vi.hoisted(() => vi.fn());
 const listPathMembers = vi.hoisted(() => vi.fn());
+const readUnitPresentationsInTransaction = vi.hoisted(() => vi.fn());
 
 vi.mock("../database", async () => {
 	const { sql } = await import("drizzle-orm");
@@ -10,16 +13,23 @@ vi.mock("../database", async () => {
 	return {
 		database: {
 			execute,
+			transaction: (work: (tx: { execute: typeof execute }) => Promise<unknown>) =>
+				work({ execute }),
 			select: () => ({ from: () => ({ where: () => query }) }),
 		},
 	};
 });
+vi.mock("../units/presentation-reader", () => ({ readUnitPresentationsInTransaction }));
 vi.mock("../units/slug-address", () => ({ getPublicCanonicalUnitSlugAddresses }));
 vi.mock("../tag-paths/service", () => ({ listPathMembers }));
 
 import { listCurrentProfileContributionResources } from "./contribution-resources";
 
 const ProfileId = "019b76da-a800-7300-8000-000000000001";
+const authorization = new Authorization(ProfileId, "019b76da-a800-7300-8000-000000000009");
+vi.spyOn(authorization.unit, "readableUnitIdsInTransaction").mockImplementation(
+	async (_tx, ids) => new Set(ids),
+);
 const ResourceUnitId = "019b76da-a800-7300-8000-000000000002";
 
 function contributionCandidate(overrides: Record<string, unknown> = {}) {
@@ -27,8 +37,8 @@ function contributionCandidate(overrides: Record<string, unknown> = {}) {
 		resourceUnitId: ResourceUnitId,
 		sortAt: "2026-07-27T08:00:00.000Z",
 		accepted: true,
-		resourceKind: "post",
-		postKind: "wiki",
+		resourceOwner: "post",
+		shape: "wiki",
 		language: "en",
 		title: "Public contribution",
 		coverAssetId: null,
@@ -52,22 +62,26 @@ describe("public contribution resources", () => {
 		getPublicCanonicalUnitSlugAddresses.mockResolvedValue(new Map());
 		listPathMembers.mockReset();
 		listPathMembers.mockResolvedValue(new Map());
+		readUnitPresentationsInTransaction.mockReset();
+		readUnitPresentationsInTransaction.mockResolvedValue(
+			new Map([[ResourceUnitId, { title: "Public contribution", language: null }]]),
+		);
 	});
 
 	it("presents a public resource independently from current editor access", async () => {
 		execute.mockResolvedValueOnce({ rows: [contributionCandidate()] });
 
 		const result = await listCurrentProfileContributionResources({
-			profileId: ProfileId,
+			authorization,
 			query: { section: "wiki", kind: "contributed", limit: 1 },
 			includeDevelopmentPreview: false,
 		});
 
 		expect(result.items[0]).toMatchObject({
 			id: ResourceUnitId,
-			resourceKind: "post",
+			resourceOwner: "post",
 			presentation: {
-				kind: "localized_unit",
+				kind: "resource",
 				title: "Public contribution",
 			},
 			contributionCount: 3,
@@ -80,7 +94,7 @@ describe("public contribution resources", () => {
 		execute.mockResolvedValueOnce({ rows: [contributionCandidate({ accepted: false })] });
 
 		const result = await listCurrentProfileContributionResources({
-			profileId: ProfileId,
+			authorization,
 			query: { section: "wiki", limit: 1 },
 			includeDevelopmentPreview: false,
 		});
@@ -102,8 +116,8 @@ describe("public contribution resources", () => {
 		execute.mockResolvedValueOnce({
 			rows: [
 				contributionCandidate({
-					resourceKind: "tag_path",
-					postKind: null,
+					resourceOwner: "tag_path",
+					shape: "tag_path",
 					language: null,
 					title: null,
 					coverAssetId: null,
@@ -113,7 +127,7 @@ describe("public contribution resources", () => {
 		listPathMembers.mockResolvedValueOnce(new Map([[ResourceUnitId, [member, member]]]));
 
 		const result = await listCurrentProfileContributionResources({
-			profileId: ProfileId,
+			authorization,
 			query: { section: "tag", kind: "created", limit: 30 },
 			includeDevelopmentPreview: false,
 		});
@@ -122,7 +136,7 @@ describe("public contribution resources", () => {
 		expect(result.items[0]).toMatchObject({
 			id: ResourceUnitId,
 			section: "tag",
-			resourceKind: "tag_path",
+			resourceOwner: "tag_path",
 			presentation: { kind: "tag_path", members: [member, member] },
 		});
 		expect(getPublicCanonicalUnitSlugAddresses).toHaveBeenCalledWith([]);
@@ -132,7 +146,7 @@ describe("public contribution resources", () => {
 		execute.mockResolvedValueOnce({ rows: [contributionCandidate()] });
 
 		const result = await listCurrentProfileContributionResources({
-			profileId: ProfileId,
+			authorization,
 			query: { kind: "contributed", limit: 1 },
 			includeDevelopmentPreview: false,
 		});
@@ -140,7 +154,29 @@ describe("public contribution resources", () => {
 		expect(result.items[0]).toMatchObject({
 			id: ResourceUnitId,
 			section: "wiki",
-			resourceKind: "post",
+			resourceOwner: "post",
 		});
+	});
+	it("advances sparse pages after the fixed physical scan budget", async () => {
+		const query = { kind: "all", limit: 1 } as const;
+		for (let batch = 0; batch < 4; batch++)
+			execute.mockResolvedValueOnce({
+				rows: Array.from({ length: 64 }, (_, index) =>
+					contributionCandidate({
+						accepted: false,
+						resourceUnitId: `019b76da-a800-7300-8000-${(256 - batch * 64 - index).toString(16).padStart(12, "0")}`,
+					}),
+				),
+			});
+		const result = await listCurrentProfileContributionResources({
+			authorization,
+			query,
+			includeDevelopmentPreview: false,
+		});
+		expect(result.items).toEqual([]);
+		expect(execute).toHaveBeenCalledTimes(4);
+		expect(decodeParticipationCursor(result.nextCursor ?? undefined, query)?.resourceUnitId).toBe(
+			"019b76da-a800-7300-8000-000000000001",
+		);
 	});
 });

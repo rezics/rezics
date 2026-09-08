@@ -621,9 +621,9 @@ export default new Elysia({ prefix: "/units" })
 		},
 	)
 	.get(
-		"/:type/:unitId/subject-associations",
+		"/by-id/:unitId/subject-associations",
 		{
-			params: UnitLookupParams,
+			params: UnitStatusEventParams,
 			query: UnitSubjectAssociationsQuery,
 			response: {
 				[StatusCodes.OK]: UnitSubjectAssociationListResponse,
@@ -635,7 +635,6 @@ export default new Elysia({ prefix: "/units" })
 		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
 			return listUnitSubjectAssociations({
-				kind: params.type,
 				unitId: params.unitId,
 				authorization,
 				localizationLanguages: query.localizationLanguages ?? [],

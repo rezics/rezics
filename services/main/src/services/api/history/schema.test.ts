@@ -44,17 +44,19 @@ describe("History API schemas", () => {
 		expect(Value.Check(ContributionResourceListQuery, {})).toBe(true);
 		expect(
 			Value.Check(ContributionResourceListQuery, {
-				section: "book",
+				section: "publishing",
 				kind: "contributed",
 				localizationLanguages: ["zh", "en"],
 				limit: 100,
 			}),
 		).toBe(true);
-		expect(Value.Check(ContributionResourceListQuery, { section: "book" })).toBe(true);
-		expect(Value.Check(ContributionResourceListQuery, { section: "book", kind: "assigned" })).toBe(
+		expect(Value.Check(ContributionResourceListQuery, { section: "publishing" })).toBe(true);
+		expect(
+			Value.Check(ContributionResourceListQuery, { section: "publishing", kind: "assigned" }),
+		).toBe(false);
+		expect(Value.Check(ContributionResourceListQuery, { section: "publishing", limit: 101 })).toBe(
 			false,
 		);
-		expect(Value.Check(ContributionResourceListQuery, { section: "book", limit: 101 })).toBe(false);
 	});
 
 	it("keeps localized Units and immutable Tag Paths discriminated", () => {
@@ -70,10 +72,11 @@ describe("History API schemas", () => {
 		};
 		const localized = {
 			...activity,
-			section: "book",
-			resourceKind: "book",
+			section: "publishing",
+			resourceOwner: "publishing",
+			shape: "work",
 			presentation: {
-				kind: "localized_unit",
+				kind: "resource",
 				slugAddress: null,
 				language: "en",
 				title: "A book",
@@ -85,7 +88,8 @@ describe("History API schemas", () => {
 		const path = {
 			...activity,
 			section: "tag",
-			resourceKind: "tag_path",
+			resourceOwner: "tag_path",
+			shape: "tag_path",
 			presentation: {
 				kind: "tag_path",
 				members: [

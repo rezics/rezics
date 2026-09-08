@@ -22,7 +22,7 @@ describe("participation cursor", () => {
 	});
 
 	it("cannot be reused for a different participation kind", () => {
-		const query = { section: "book", kind: "created" } as const;
+		const query = { section: "publishing", kind: "created" } as const;
 		const cursor = encodeParticipationCursor(query, {
 			sortAt: new Date("2026-07-27T08:00:00.000Z"),
 			resourceUnitId: ResourceUnitId,
@@ -40,8 +40,8 @@ describe("participation cursor", () => {
 		};
 		const cursor = encodeParticipationCursor(aggregateQuery, boundary);
 		expect(decodeParticipationCursor(cursor, aggregateQuery)).toEqual(boundary);
-		expect(() => decodeParticipationCursor(cursor, { ...aggregateQuery, section: "book" })).toThrow(
-			InvalidPaginationCursor,
-		);
+		expect(() =>
+			decodeParticipationCursor(cursor, { ...aggregateQuery, section: "publishing" }),
+		).toThrow(InvalidPaginationCursor);
 	});
 });
