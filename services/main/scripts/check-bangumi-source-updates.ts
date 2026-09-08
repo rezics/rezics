@@ -1,3 +1,4 @@
+import { checkSourceRelationDelta } from "./source-relation-delta-fixture";
 import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
 import type { CatalogReference } from "../src/services/catalog/contracts";
 import { programEpisode } from "../src/services/database/schema/catalog-program";
@@ -392,6 +393,14 @@ try {
 							checks += 2;
 						}
 					}
+					if (scenario.kind === "subject")
+						checks += await checkSourceRelationDelta(tx, account.id, reference, {
+							before,
+							after,
+							sourceRecordId,
+							mappingKey: scope.mappingKey,
+							mappingVersion,
+						});
 					const occurrences = CatalogNameTables[reference.owner].sourceOccurrence;
 					assert.ok(
 						(
