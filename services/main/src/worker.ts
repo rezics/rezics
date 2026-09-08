@@ -47,7 +47,7 @@ const [
 	import("./services/health/worker-health"),
 	import("./services/governance/report-delivery"),
 ]);
-const { aggregateRecommendationMetrics, purgeRecommendationData, refreshRecommendationSnapshot } =
+const { purgeRecommendationData, dispatchRecommendationRefresh } =
 	recommendationWorker;
 const { dispatchEmailBatch } = emailDispatcher;
 const { cleanupExpiredPendingImageAssets } = imageAssetCleanup;
@@ -114,19 +114,11 @@ const lanes = {
 		},
 		{
 			name: "recommendation.refresh",
-			intervalMs: env.RECOMMENDATION_REFRESH_INTERVAL_MS,
+			intervalMs: 1_000,
 			run: async () => {
-				const snapshotId = await refreshRecommendationSnapshot();
-				await aggregateRecommendationMetrics();
-				await purgeRecommendationData();
-				logger.info(
-					snapshotId ? "Recommendation refresh completed" : "Recommendation refresh skipped",
-					{
-						eventName: snapshotId
-							? "recommendation.refresh.completed"
-							: "recommendation.refresh.skipped",
-					},
-				);
+				const result = await dispatchRecommendationRefresh();
+				if (result.state === "ready" || result.state === "failed")
+					logger.info("Recommendation build finished", { eventName: `recommendation.refresh.${result.state}`, attributes: result });
 			},
 		},
 	],

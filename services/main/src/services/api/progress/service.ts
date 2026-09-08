@@ -1,18 +1,16 @@
+import { unitStateRelation } from "../../units/state-relation";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
 	audio,
-	bookChapterProgressStat,
-	bookChapterStat,
 	contentStructure,
 	contentStructureNode,
 	contentStructureNodeProgress,
 	contentStructureRevisionHead,
 	post,
 	postProgressEntry,
-	unit,
 	unitProgress,
 	unitProgressEntry,
 	video,
@@ -24,6 +22,7 @@ import {
 import { ContentStructureNodeNotFound } from "../content-structure/errors";
 import { ValidationError } from "../errors";
 import { ProgressEntryNotFound } from "./errors";
+import { readUnitStateById } from "../../units/query";
 
 export interface ProgressEntryContentInput {
 	readonly entryKind: ProgressEntryKind;
@@ -52,6 +51,8 @@ type ProgressSnapshot = {
 	readonly visibility: "public" | "unlisted" | "private";
 };
 
+const contentState=unitStateRelation(contentStructureNode.contentUnitId,"progress_content_state");
+
 const AutomaticProgressCheckpointIntervalMs = 24 * 60 * 60 * 1_000;
 const DefaultProgressVisibility = "private" as const;
 
@@ -60,6 +61,9 @@ export async function lockUnitProgress(
 	authUserId: string,
 	unitId: string,
 ): Promise<void> {
+	const target=await readUnitStateById(tx,unitId);
+	if(!target || !["publishing","program","music","software","video","audio"].includes(target.reference.owner))
+		throw new ValidationError({message:"Progress requires a supported content owner"});
 	await tx.execute(
 		sql`select pg_advisory_xact_lock(hashtextextended(${`unit-progress:${authUserId}:${unitId}`}::text, 0))`,
 	);
@@ -181,21 +185,22 @@ export async function recordMediaNodeCompletion(
 	await lockUnitProgress(tx, input.authUserId, input.unitId);
 	const readableUnitCondition = input.canReadUnpublished
 		? undefined
-		: and(eq(unit.status, "published"), inArray(unit.visibility, ["public", "unlisted"]));
+		: and(eq(contentState.status, "published"), inArray(contentState.visibility, ["public", "unlisted"]));
 	const [target] = await tx
 		.select({ id: contentStructureNode.id })
 		.from(contentStructureNode)
 		.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
-		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+		.innerJoinLateral(contentState,sql`true`)
 		.where(
 			and(
 				eq(contentStructureNode.id, input.nodeId),
 				eq(contentStructureNode.ownerUnitId, input.unitId),
 				eq(contentStructure.kind, "media.contents"),
-				inArray(unit.kind, ["video", "audio"]),
+				inArray(contentState.owner, ["video", "audio"]),
 				isNull(contentStructureNode.deletedAt),
 				isNull(contentStructure.deletedAt),
-				isNull(unit.deletedAt),
+				isNull(contentState.deletedAt),
+                eq(contentState.moderationStatus,"approved"),
 				readableUnitCondition,
 			),
 		)
@@ -220,15 +225,15 @@ export async function recordMediaNodeCompletion(
 	const items = await tx
 		.select({
 			durationSeconds: sql<number | null>`case
-				when ${unit.kind} = 'video' then ${video.durationSeconds}
-				when ${unit.kind} = 'audio' then ${audio.durationSeconds}
+				when ${contentState.owner} = 'video' then ${video.durationSeconds}
+				when ${contentState.owner} = 'audio' then ${audio.durationSeconds}
 				else null
 			end`,
 			completedAt: contentStructureNodeProgress.completedAt,
 		})
 		.from(contentStructureNode)
 		.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
-		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+		.innerJoinLateral(contentState,sql`true`)
 		.leftJoin(video, eq(video.id, contentStructureNode.contentUnitId))
 		.leftJoin(audio, eq(audio.id, contentStructureNode.contentUnitId))
 		.leftJoin(
@@ -242,10 +247,11 @@ export async function recordMediaNodeCompletion(
 			and(
 				eq(contentStructureNode.ownerUnitId, input.unitId),
 				eq(contentStructure.kind, "media.contents"),
-				inArray(unit.kind, ["video", "audio"]),
+				inArray(contentState.owner, ["video", "audio"]),
 				isNull(contentStructureNode.deletedAt),
 				isNull(contentStructure.deletedAt),
-				isNull(unit.deletedAt),
+				isNull(contentState.deletedAt),
+                eq(contentState.moderationStatus,"approved"),
 				readableUnitCondition,
 			),
 		);
@@ -550,23 +556,24 @@ export async function recordChapterReading(
 	await lockUnitProgress(tx, input.authUserId, input.unitId);
 	const readableUnitCondition = input.canReadUnpublished
 		? undefined
-		: and(eq(unit.status, "published"), inArray(unit.visibility, ["public", "unlisted"]));
+		: and(eq(contentState.status, "published"), inArray(contentState.visibility, ["public", "unlisted"]));
 	const [chapterNode] = await tx
 		.select({ id: contentStructureNode.id })
 		.from(contentStructureNode)
 		.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
-		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+		.innerJoinLateral(contentState,sql`true`)
 		.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 		.where(
 			and(
 				eq(contentStructureNode.id, input.nodeId),
 				eq(contentStructureNode.ownerUnitId, input.unitId),
 				eq(contentStructure.kind, "book.contents"),
-				eq(unit.kind, "post"),
+				eq(contentState.owner, "post"),
 				eq(post.kind, "chapter"),
 				isNull(contentStructureNode.deletedAt),
 				isNull(contentStructure.deletedAt),
-				isNull(unit.deletedAt),
+				isNull(contentState.deletedAt),
+                eq(contentState.moderationStatus,"approved"),
 				readableUnitCondition,
 			),
 		)
@@ -578,28 +585,16 @@ export async function recordChapterReading(
 		.values({ authUserId: input.authUserId, nodeId: input.nodeId, completedAt: input.now })
 		.onConflictDoNothing();
 
-	const [chapterCounts] = await tx
-		.select({
-			completed: input.canReadUnpublished
-				? bookChapterProgressStat.allCompletedCount
-				: bookChapterProgressStat.publicCompletedCount,
-			total: input.canReadUnpublished ? bookChapterStat.allCount : bookChapterStat.publicCount,
-		})
-		.from(bookChapterStat)
-		.leftJoin(
-			bookChapterProgressStat,
-			and(
-				eq(bookChapterProgressStat.authUserId, input.authUserId),
-				eq(bookChapterProgressStat.bookUnitId, bookChapterStat.bookUnitId),
-			),
-		)
-		.where(eq(bookChapterStat.bookUnitId, input.unitId));
-	if (!chapterCounts) throw new Error("Book chapter progress aggregation returned no row");
-	const completedChapterCount = toSafeInteger(
-		chapterCounts.completed ?? 0n,
-		"completed Book chapter count",
-	);
-	const totalChapterCount = toSafeInteger(chapterCounts.total, "Book chapter count");
+ const occurrences = await tx.select({completedAt:contentStructureNodeProgress.completedAt})
+  .from(contentStructureNode).innerJoin(contentStructure,eq(contentStructure.id,contentStructureNode.structureId))
+  .innerJoinLateral(contentState,sql`true`).innerJoin(post,eq(post.id,contentStructureNode.contentUnitId))
+  .leftJoin(contentStructureNodeProgress,and(eq(contentStructureNodeProgress.nodeId,contentStructureNode.id),eq(contentStructureNodeProgress.authUserId,input.authUserId)))
+  .where(and(eq(contentStructureNode.ownerUnitId,input.unitId),eq(contentStructure.kind,"book.contents"),eq(post.kind,"chapter"),
+   isNull(contentStructureNode.deletedAt),isNull(contentStructure.deletedAt),isNull(contentState.deletedAt),
+   eq(contentState.moderationStatus,"approved"),readableUnitCondition));
+ const completedChapterCount=occurrences.filter(row=>row.completedAt!==null).length;
+ const totalChapterCount=occurrences.length;
+
 	const reading = deriveChapterReadingProgress(completedChapterCount, totalChapterCount);
 
 	const [lastCheckpoint] = await tx

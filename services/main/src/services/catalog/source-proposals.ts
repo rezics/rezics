@@ -212,7 +212,7 @@ async function writeCatalogSourceProposal(
 ) {
 	if (current.claim.state !== "active") return { status: "paused" as const };
 	if (value.mappingVersion !== current.claim.mappingVersion)
-		throw new Error("Source mapping protocol requires an explicit binding revision");
+		throw new TypeError("Source mapping protocol requires an explicit binding revision");
 	if (current.source.headSnapshotId !== value.snapshotId)
 		throw new Error("Proposal observation is no longer current");
 	const [snapshot] = await tx

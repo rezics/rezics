@@ -15,7 +15,7 @@ import {
 	realmTagJudgmentStat,
 	realmUnit,
 	tag,
-	unit,
+	post,
 } from "../database/schema";
 import { listVisibleUnitTagExpressions } from "../tag-paths/service";
 import {
@@ -37,17 +37,17 @@ function presentTagVote(value: number | null): TagVoteValue {
 }
 
 const viewerRealmTagVote = alias(realmTagJudgment, "viewer_realm_tag_judgment");
-const realmSourceUnit = alias(unit, "realm_tag_source_unit");
-const voteContextRealmUnit = alias(unit, "realm_tag_judgment_context_unit");
-const votedTagUnit = alias(unit, "realm_voted_tag_unit");
-const contextPostUnit = alias(unit, "realm_tag_context_post_unit");
+const realmSourceUnit = alias(realm, "realm_tag_source_unit");
+const voteContextRealmUnit = alias(realm, "realm_tag_judgment_context_unit");
+const votedTagUnit = alias(tag, "realm_voted_tag_unit");
+const contextPostUnit = alias(post, "realm_tag_context_post_unit");
 const contextRealmUnit = alias(realmUnit, "realm_tag_context_realm_unit");
 const candidateRealmTagContext = alias(realmTagContext, "candidate_realm_tag_context");
-const candidateContextPostUnit = alias(unit, "candidate_realm_tag_context_post_unit");
+const candidateContextPostUnit = alias(post, "candidate_realm_tag_context_post_unit");
 const candidateContextRealmUnit = alias(realmUnit, "candidate_realm_tag_context_realm_unit");
 const rankedContextRealm = alias(realm, "ranked_realm_tag_context_realm");
-const rankedTagUnit = alias(unit, "ranked_realm_voted_tag_unit");
-const rankedContextPostUnit = alias(unit, "ranked_realm_tag_context_post_unit");
+const rankedTagUnit = alias(tag, "ranked_realm_voted_tag_unit");
+const rankedContextPostUnit = alias(post, "ranked_realm_tag_context_post_unit");
 const rankedContextRealmUnit = alias(realmUnit, "ranked_realm_tag_context_realm_unit");
 export async function listRealmTagSubscriptions(input: {
 	readonly profileId: string;

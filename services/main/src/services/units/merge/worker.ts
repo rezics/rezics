@@ -36,6 +36,8 @@ import { humanMergeAuthority } from "./service";
 import { UnitMergePolicy, nextUnitMergePhase, unitMergeRetryDelayMilliseconds } from "./policy";
 import { databaseSqlState } from "../../database/constraint";
 import { recordAuditEvent } from "../../audit";
+import { CatalogRevisionConflict } from "../../catalog/storage";
+import { ValidationError } from "../../api/errors";
 
 type Op = typeof unitMergeOperation.$inferSelect;
 type RequestRow = typeof unitMergeRequest.$inferSelect;
@@ -339,6 +341,7 @@ async function moveBinding(
 	request: RequestRow,
 	item: Item,
 	retain = false,
+	reviewedBindingRevision?: number,
 ) {
 	if (!item.sourceRecordId || !item.mappingKey || !item.sourceBindingRevision)
 		throw new ReconciliationRequired("missing_binding_reference");
@@ -346,12 +349,17 @@ async function moveBinding(
 		sourceRecordId: item.sourceRecordId,
 		mappingKey: item.mappingKey,
 	});
-	if (
-		current.reference.owner !== request.owner ||
-		current.reference.id !== request.sourceUnitId ||
-		current.claim.bindingRevision !== item.sourceBindingRevision
-	)
+	const expectedRevision = reviewedBindingRevision ?? item.sourceBindingRevision;
+	if (current.claim.bindingRevision !== expectedRevision)
 		throw new ReconciliationRequired("binding_changed");
+	if (current.reference.owner !== request.owner || current.reference.id !== request.sourceUnitId) {
+		if (retain && reviewedBindingRevision !== undefined) {
+			// The exact current binding revision retains its concrete target FKs. Do not move an independently rebound source.
+			await resolveItem(tx, op, item, "retain_independently_rebound_binding", { targetBindingRevision: expectedRevision });
+			return;
+		}
+		throw new ReconciliationRequired("binding_target_changed");
+	}
 	const [before] = await tx
 		.select()
 		.from(catalogSourceBindingRevision)
@@ -359,7 +367,7 @@ async function moveBinding(
 			and(
 				eq(catalogSourceBindingRevision.sourceRecordId, item.sourceRecordId),
 				eq(catalogSourceBindingRevision.mappingKey, item.mappingKey),
-				eq(catalogSourceBindingRevision.revision, item.sourceBindingRevision),
+				eq(catalogSourceBindingRevision.revision, expectedRevision),
 			),
 		)
 		.limit(1);
@@ -375,7 +383,7 @@ async function moveBinding(
 	const changed = await reviseCatalogSourceBinding(tx, op.executorAuthUserId, {
 		sourceRecordId: item.sourceRecordId,
 		mappingKey: item.mappingKey,
-		expectedRevision: item.sourceBindingRevision,
+		expectedRevision,
 		state: "paused",
 		mode: before.mode,
 		reason: `Reviewed native merge ${request.id}: ${rebind ? "rebind paused" : "retain paused source"}`,
@@ -660,7 +668,7 @@ export async function processClaimedUnitMergePage(claimed: Op) {
 		)
 			return { outcome: "lease_lost" as const };
 		await tx.execute(
-			sql`select set_config('lock_timeout','5000',true),set_config('statement_timeout','25000',true),set_config('rezics.merge_request_id',${request.id},true)`,
+			sql`select set_config('lock_timeout','5000',true),set_config('statement_timeout','25000',true),set_config('rezics.merge_request_id',${request.id},true),set_config('rezics.merge_lease_token',${op.leaseToken},true)`,
 		);
 		const result = await admitted(tx, op, (authorization) =>
 			processPage(tx, op, request, authorization),
@@ -763,7 +771,7 @@ export async function resolveMergeReconciliationItem(
 	authorization: Authorization<string>,
 	requestId: string,
 	itemId: string,
-	input: { action: "retry" | "retain_source"; expectedTargetRevision: number; reason: string },
+	input: { action: "retry" | "retain_source"; expectedTargetRevision: number; expectedBindingRevision?: number; reason: string },
 ) {
 	return database.transaction(async (tx) => {
 		await authorization.platform.ensureCapability("unit.merge", tx);
@@ -793,6 +801,8 @@ export async function resolveMergeReconciliationItem(
 				.for("update");
 		if (!request || !op || !item || op.state === "processing" || !pending(item))
 			throw new ReconciliationRequired("item_unavailable");
+		if (item.kind === "source_binding" && input.expectedBindingRevision === undefined)
+			throw new ValidationError({ message: "Review the current source binding revision before resolving this item" });
 		const target = await readUnitStateById(tx, request.targetUnitId, { lock: "update" });
 		if (!target || target.revision !== input.expectedTargetRevision)
 			throw new ReconciliationRequired("target_revision_changed");
@@ -805,12 +815,12 @@ export async function resolveMergeReconciliationItem(
 		await tx.execute(sql`select set_config('rezics.merge_request_id',${requestId},true)`);
 		await admitted(tx, operator, async () => {
 			if (input.action === "retain_source") {
-				if (item.kind === "source_binding") await moveBinding(tx, operator, request, item, true);
+				if (item.kind === "source_binding") await moveBinding(tx, operator, request, item, true, input.expectedBindingRevision);
 				else await resolveItem(tx, operator, item, "retain_reviewed_source");
 			} else if (item.kind === "name")
 				await copyName(tx, operator, request, item, 0, item.sourceKey.startsWith("anchor:"));
 			else if (item.kind === "identifier") await copyIdentifier(tx, operator, request, item);
-			else if (item.kind === "source_binding") await moveBinding(tx, operator, request, item);
+			else if (item.kind === "source_binding") await moveBinding(tx, operator, request, item, false, input.expectedBindingRevision);
 			else await resolveItem(tx, operator, item, "retain_reviewed_source");
 		});
 		await recordAuditEvent(tx, {
@@ -820,8 +830,11 @@ export async function resolveMergeReconciliationItem(
 			authority: { kind: "platform" },
 			action: "unit.merge.reconciliation.resolve",
 			target: { kind: "unit_merge_request", id: requestId },
-			details: { itemId, action: input.action, reason: input.reason },
+			details: { itemId, action: input.action, reason: input.reason, expectedBindingRevision: input.expectedBindingRevision ?? null },
 		});
 		return { resolved: true as const };
+	}).catch((cause: unknown) => {
+		if (cause instanceof ReconciliationRequired) throw new CatalogRevisionConflict(`Merge reconciliation changed: ${cause.code}`);
+		throw cause;
 	});
 }

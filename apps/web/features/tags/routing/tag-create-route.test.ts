@@ -55,13 +55,13 @@ describe("Tag creation routes", () => {
 				realmId: RealmId,
 				title: "science",
 				unitId: UnitId,
-				unitType: "media",
+				unitType: "program",
 			}),
 		).resolves.toMatchObject({
 			status: "ready",
 			intent: {
 				kind: "unit-tag-vote",
-				type: "media",
+				type: "program",
 				unitId: UnitId,
 				context: { kind: "realm", realmId: RealmId },
 			},
@@ -71,7 +71,7 @@ describe("Tag creation routes", () => {
 				context: "realm",
 				intent: "unit-tag-vote",
 				unitId: UnitId,
-				unitType: "media",
+				unitType: "program",
 			}),
 		).resolves.toEqual({ status: "invalid" });
 		await expect(
@@ -79,7 +79,7 @@ describe("Tag creation routes", () => {
 				context: "global",
 				intent: "unit-tag-vote",
 				unitId: "not-a-unit-id",
-				unitType: "media",
+				unitType: "program",
 			}),
 		).resolves.toEqual({ status: "invalid" });
 	});

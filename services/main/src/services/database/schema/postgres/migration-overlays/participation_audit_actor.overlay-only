@@ -1,1 +1,0 @@
-Commit the Auth audit actor label before the atomic Auth/Entity schema replacement uses it. No native tables or source data are changed by this preparation.

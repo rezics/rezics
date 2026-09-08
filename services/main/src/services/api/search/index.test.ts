@@ -14,7 +14,7 @@ describe("Zone Block Search source resolution", () => {
 	it("resolves search-backed UnitList through one trusted path", () => {
 		const feature: SearchFeatureSource = {
 			kind: "inline",
-			filterDocument: { categories: ["units"], where: { kind: { in: ["book"] } } },
+			filterDocument: { categories: ["units"], where: { owner: { in: ["publishing"] }, shape: {in:["work"]} } },
 		};
 		expect(
 			findSearchFeatureSource(

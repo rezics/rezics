@@ -46,7 +46,6 @@ import {
 import { fractionalPositionBetween } from "../../ordering/position";
 import { updateDirectUnitTagCuration } from "../../tags/curation";
 import { ensureWikiAssociationContextPost } from "../../units/association-context";
-import { getAttributionSummariesByUnitIds } from "../../units/attribution";
 import { ensureDirectCreditAttributionAllowed } from "../../units/attribution-authorization";
 import { presentAvatar } from "../../units/avatar";
 import { AssociationContextPostInvalid } from "../../units/errors";
@@ -130,14 +129,21 @@ import {
 } from "./schema";
 import { creditRoleAllowedForReference } from "../../units/credit-role-contract";
 import { checkUnitOwner, createTagResource } from "./service";
-import { recordResourceRevision } from "../../units/resource-history";
+import { recordResourceRevision, ensureResourceUpdateAllowed } from "../../units/resource-history";
+import { decodeDomainCursor, encodeDomainCursor } from "../../catalog/domain-api-pagination";
+import { z } from "zod";
+import { LocalizationLanguageQuery } from "../schema";
+import { getPublicEntitySummariesByIds } from "../../participation/presentation";
+import { ValidationError } from "../errors";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitResourceMutationNotFoundResponse = toApiErrorResponse([
 	"UnitNotFound",
+	"CatalogReferenceNotFound",
 	"ImageAssetNotFound",
 ]);
 const UnitMutationForbiddenResponse = toApiErrorResponse([
+	"ParticipationDenied",
 	"UnitPermissionForbidden",
 	"UnitAccessRestricted",
 ]);
@@ -158,7 +164,7 @@ async function ensureUnitMutationAuthorized(
 	unitId: string,
 	scope: readonly string[],
 ): Promise<void> {
-	await authorization.ensureCanUpdate(unitId, [scope]);
+	await database.transaction(tx=>ensureResourceUpdateAllowed(tx,authorization,unitId,scope));
 }
 
 async function ensureReadableSourceEntity(
@@ -864,6 +870,34 @@ export default new Elysia()
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 			)
+			.get(
+				"/credit-attributions",
+				{ params: UnitUnitParams, query: t.Object({ ...LocalizationLanguageQuery,
+					cursor:t.Optional(t.String({maxLength:2048})),limit:t.Integer({minimum:1,maximum:100,default:25}) }),
+					response:t.Object({items:t.Array(CreditAttributionResponse,{maxItems:100}),nextCursor:t.Nullable(t.String())}),
+					detail:{operationId:"listResourceCreditAttributions",summary:"Read accepted credit attributions",tags:["Units"]} },
+				async({params,query,request})=>{
+					await checkUnitOwner(params.unitId,params.owner);
+					const identity=await resolveIdentity(request,"unit:read");
+					const scope=`credits:${params.owner}:${params.unitId}`;
+					const after=(()=>{try{return decodeDomainCursor(scope,query.cursor,z.strictObject({position:z.string().max(1024),id:z.uuid()}));}
+						catch(cause){if(cause instanceof TypeError) throw new ValidationError({message:cause.message});throw cause;}})();
+					return database.transaction(async tx=>{
+						await identity.authorization.unit.ensureInTransaction(tx,params.unitId,"unit.read");
+						const rows=await tx.select({id:creditAttribution.id,role:creditAttribution.role,position:creditAttribution.position,creditedEntityId:creditAttribution.creditedEntityId})
+							.from(creditAttribution).where(and(eq(creditAttribution.sourceUnitId,params.unitId),after?sql`(${creditAttribution.position},${creditAttribution.id}) > (${after.position},${after.id}::uuid)`:undefined))
+							.orderBy(creditAttribution.position,creditAttribution.id).limit(query.limit);
+						const publicEntities=await getPublicEntitySummariesByIds(rows.map(row=>row.creditedEntityId),query.localizationLanguages??[],tx);
+						const readable=await identity.authorization.unit.readableUnitIdsInTransaction(tx,[...publicEntities.keys()]);
+						const items=rows.flatMap(({creditedEntityId,...row})=>{
+							const creditedEntity=publicEntities.get(creditedEntityId);
+							return creditedEntity && readable.has(creditedEntityId)?[{...row,creditedEntity}]:[];
+						});
+						const last=rows.at(-1);
+						return {items,nextCursor:last&&rows.length===query.limit?encodeDomainCursor(scope,{position:last.position,id:last.id}):null};
+					},{isolationLevel:"repeatable read"});
+				},
+			)
 			.post(
 				"/credit-attributions",
 				{
@@ -880,6 +914,7 @@ export default new Elysia()
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"UnitPermissionForbidden",
 							"EntityAssociationRestricted",
+							"ParticipationDenied",
 						]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "EntityEntryNotFound"]),
 					},
@@ -901,6 +936,8 @@ export default new Elysia()
 					]);
 					const credit = await database.transaction(async (tx) => {
 						await ensureDirectCreditAttributionAllowed(authorization, tx, body.creditedEntityId);
+						const creditedEntity=(await getPublicEntitySummariesByIds([body.creditedEntityId],[],tx)).get(body.creditedEntityId);
+						if(!creditedEntity || !(await authorization.unit.readableUnitIdsInTransaction(tx,[body.creditedEntityId])).has(body.creditedEntityId)) throw new EntityEntryNotFound();
 						await tx.execute(
 							sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
 						);
@@ -924,14 +961,10 @@ export default new Elysia()
 							contribution: revisionContext?.contribution,
 							event: "update",
 						});
-						return created;
+						if(!created) throw new Error("Credit insertion did not return a row");
+						return {id:created.id,position:created.position,role:created.role,creditedEntity};
 					});
-					if (!credit) throw new Error("Credit insertion did not return a row");
-					const attributions =
-						(await getAttributionSummariesByUnitIds([params.unitId])).get(params.unitId) ?? [];
-					const created = attributions.find(({ id }) => id === credit.id);
-					if (!created) throw new Error("Created credit attribution could not be resolved");
-					return created;
+					return credit;
 				},
 			)
 			.delete(

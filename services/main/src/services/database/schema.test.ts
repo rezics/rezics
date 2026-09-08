@@ -1,3 +1,6 @@
+import { CatalogIdentityTables } from "./schema/catalog-identity";
+import { CatalogNameTables } from "./schema/catalog-names";
+import { creditRolesForReference } from "../units/credit-role-contract";
 import {
 	PlatformCapabilityValues,
 	RealmAccessSubjectRelationValues,
@@ -14,8 +17,8 @@ import {
 	apiQuotaPolicy,
 	apiTokenQuotaBinding,
 	auditEvent,
-	book,
 	CanonicalPgroongaIndexes,
+	LargeCapacityPgroongaIndexes,
 	CommunityOwnedUnitKindValues,
 	contentGovernanceAction,
 	ContentGovernanceActionKindValues,
@@ -43,9 +46,6 @@ import {
 	ImageAssetPresentationFitValues,
 	ImageAssetPresentationRoleValues,
 	imageObject,
-	isCreditAttributionRoleForUnitKind,
-	isCreditAttributionUnitKind,
-	media,
 	NonRealmUnitKindValues,
 	notificationRecipientStat,
 	platformCapabilityGrant,
@@ -91,7 +91,6 @@ import {
 	tagPathVote,
 	tagPublicPositionStat,
 	tagRelation,
-	unit,
 	unitAccessGrant,
 	unitAccessInvitation,
 	unitAccessRestriction,
@@ -112,9 +111,6 @@ import {
 	unitLocalizationContentMetric,
 	unitMergeRequest,
 	unitOwnership,
-	unitOwnershipClaim,
-	unitOwnershipClaimResolution,
-	UnitOwnershipClaimResolutionValues,
 	unitProgress,
 	unitReactionStat,
 	unitReferenceCurationHead,
@@ -131,19 +127,37 @@ import {
 	unitTagPathApplication,
 	unitTagPathApplicationJudgment,
 	unitTagPathApplicationJudgmentStat,
-	unitVariant,
 	userAccountState,
-	VariantCapableUnitKindValues,
 	videoAudioTrack,
 	vocabularyNode,
-	WorkReleaseStatusValues,
 } from "./schema";
 
 const dialect = new PgDialect();
+const ReferenceTargetTables = [
+	"publishing_identity", "music_identity", "program_identity", "software_identity",
+	"entity_identity", "grouping_identity", "reference_identity", "distribution_identity",
+	"video", "audio", "post", "poll", "zone", "realm", "realm_rule", "custom_theme",
+	"collection", "tag", "tag_path", "label",
+];
+
+function expectConcreteReferences(
+	config: ReturnType<typeof getTableConfig>, prefix: string, onDelete?: string,
+) {
+	const references = config.foreignKeys.filter((key) =>
+		key.reference().columns.some((column) => column.name.startsWith(`${prefix}_`)),
+	);
+	expect(references.map((key) => getTableName(key.reference().foreignTable)).sort())
+		.toEqual([...ReferenceTargetTables].sort());
+	for (const key of references) {
+		expect(key.reference().foreignColumns.map((column) => column.name)).toEqual(["id"]);
+		if (onDelete) expect(key.onDelete).toBe(onDelete);
+	}
+}
 
 describe("database schema contracts", () => {
-	it("owns every canonical PGroonga index in the Drizzle Unit schema", () => {
-		const indexes = [unitLocalization, unitAlias, unitSearchDocument]
+	it("owns every canonical PGroonga index in the concrete resource schemas", () => {
+		const indexes = [unitLocalization, unitAlias, unitSearchDocument,
+			...Object.values(CatalogNameTables).map((tables) => tables.name)]
 			.flatMap((table) => getTableConfig(table).indexes)
 			.filter((index) => index.config.method === "pgroonga");
 
@@ -153,29 +167,16 @@ describe("database schema contracts", () => {
 			expect(expression && dialect.sqlToQuery(expression as SQL).sql).toContain(
 				"public.pgroonga_text_full_text_search_ops_v2",
 			);
+		}
+		for (const index of indexes.filter((index) =>
+			LargeCapacityPgroongaIndexes.some((name) => name === index.config.name))) {
 			expect(index.config.with).toEqual({
 				lexicon_flags_mapping: expect.stringMatching(/^'.*"LARGE".*'$/),
 				index_flags_mapping: expect.stringMatching(/^'.*"LARGE".*'$/),
 			});
 		}
 		expect(indexes[2]?.config.where).toBeUndefined();
-		expect(indexes[3]?.config.with).toEqual({
-			lexicon_flags_mapping: expect.stringMatching(/^'.*"LARGE".*'$/),
-			index_flags_mapping: expect.stringMatching(/^'.*"LARGE".*'$/),
-		});
-	});
-
-	it("keeps Book and Media release statuses required and database constrained", () => {
-		expect(WorkReleaseStatusValues).toEqual(["ongoing", "hiatus", "completed", "cancelled"]);
-		for (const [table, constraintName] of [
-			[book, "book_release_status_check"],
-			[media, "media_release_status_check"],
-		] as const) {
-			const config = getTableConfig(table);
-			const releaseStatus = config.columns.find((column) => column.name === "release_status");
-			expect(releaseStatus?.notNull).toBe(true);
-			expect(config.checks.map((constraint) => constraint.name)).toContain(constraintName);
-		}
+		for (const index of indexes.slice(4)) expect(index.config.where).toBeDefined();
 	});
 
 	it("enforces matching subject kinds for account and token quota assignments", () => {
@@ -203,7 +204,7 @@ describe("database schema contracts", () => {
 	});
 
 	it("uses PostgreSQL uuidv7 for generated identifiers", () => {
-		expect(dialect.sqlToQuery(unit.id.default as SQL).sql).toBe("uuidv7()");
+		expect(dialect.sqlToQuery(post.id.default as SQL).sql).toBe("uuidv7()");
 		expect(dialect.sqlToQuery(sharedSearchQuery.id.default as SQL).sql).toBe("uuidv7()");
 	});
 
@@ -238,9 +239,9 @@ describe("database schema contracts", () => {
 		expect(follow.foreignKeys.map((key) => key.getName())).toEqual(
 			expect.arrayContaining([
 				"unit_follow_follower_profile_id_entity_identity_id_fk",
-				"unit_follow_unit_id_unit_id_fk",
 			]),
 		);
+		expectConcreteReferences(follow, "unit");
 		expect(follow.checks.map((constraint) => constraint.name)).toContain(
 			"unit_follow_not_self_check",
 		);
@@ -275,7 +276,8 @@ describe("database schema contracts", () => {
 		expect(grant.columns.map((column) => column.name)).not.toContain("role");
 		expect(grant.columns.map((column) => column.name)).not.toContain("status");
 		expect(grant.columns.map((column) => column.name)).not.toContain("withdrawn_at");
-		expect(grant.indexes.map((index) => index.config.name)).toEqual([
+		expect(grant.indexes.filter((index) => !index.config.name?.endsWith("_ref_idx"))
+			.map((index) => index.config.name)).toEqual([
 			"unit_license_grant_open_unit_license_key",
 			"unit_license_grant_unit_granted_at_idx",
 			"unit_license_grant_effective_license_unit_idx",
@@ -287,12 +289,15 @@ describe("database schema contracts", () => {
 		).toBeDefined();
 		expect(unitLicenseGrant.recognitionStatus.enumValues).toEqual(["recognized", "invalidated"]);
 		expect(unitLicenseGrant.recognitionStatus.hasDefault).toBe(true);
-		expect(
-			grant.foreignKeys.find((key) => key.getName() === "unit_license_grant_unit_id_unit_id_fkey")
-				?.onDelete,
-		).toBe("restrict");
+		expectConcreteReferences(grant, "unit", "restrict");
+		const reverseIndexes = grant.indexes.filter((index) => index.config.name?.endsWith("_ref_idx"));
+		expect(reverseIndexes).toHaveLength(ReferenceTargetTables.length);
+		for (const index of reverseIndexes) expect(index.config.where).toBeDefined();
 		expect(grant.columns.map((column) => column.name)).not.toContain("revoked_at");
 		expect(grant.checks.map((constraint) => constraint.name)).toEqual([
+			"unit_license_grant_unit_target_check",
+			"unit_license_grant_unit_id_check",
+			"unit_license_grant_license_id_check",
 			"unit_license_grant_offering_end_check",
 		]);
 	});
@@ -335,26 +340,6 @@ describe("database schema contracts", () => {
 		);
 		expect(ownership.indexes.map((index) => index.config.name)).toContain(
 			"unit_ownership_active_unit_key",
-		);
-	});
-
-	it("keeps Unit ownership claims as an independent historical workflow", () => {
-		const claim = getTableConfig(unitOwnershipClaim);
-		expect(getTableName(unitOwnershipClaim)).toBe("unit_ownership_claim");
-		expect(unitOwnershipClaimResolution.enumValues).toEqual(UnitOwnershipClaimResolutionValues);
-		expect(claim.indexes.map((index) => index.config.name)).toEqual(
-			expect.arrayContaining([
-				"unit_ownership_claim_pending_profile_unit_key",
-				"unit_ownership_claim_resulting_ownership_key",
-				"unit_ownership_claim_pending_created_at_idx",
-			]),
-		);
-		expect(claim.checks.map((constraint) => constraint.name)).toEqual(
-			expect.arrayContaining([
-				"unit_ownership_claim_details_not_blank",
-				"unit_ownership_claim_resolution_shape_check",
-				"unit_ownership_claim_distinct_ownership_check",
-			]),
 		);
 	});
 
@@ -513,9 +498,7 @@ describe("database schema contracts", () => {
 		expect(getTableName(unitAssociationProposal)).toBe("unit_association_proposal");
 		expect(proposal.columns.map((column) => column.name)).toContain("target_unit_id");
 		expect(proposal.columns.map((column) => column.name)).not.toContain("target_entity_id");
-		expect(proposal.foreignKeys.map((key) => key.getName())).toContain(
-			"unit_association_proposal_target_unit_id_unit_id_fk",
-		);
+		expectConcreteReferences(proposal, "target_unit");
 		expect(proposal.checks.map((constraint) => constraint.name)).toEqual(
 			expect.arrayContaining([
 				"unit_association_proposal_not_self_check",
@@ -525,13 +508,12 @@ describe("database schema contracts", () => {
 		);
 		expect(CreditAttributionRoleValues).toContain("author");
 		expect(CreditAttributionRoleValues).toContain("translator");
-		expect(isCreditAttributionRoleForUnitKind("book", "author")).toBe(true);
-		expect(isCreditAttributionRoleForUnitKind("media", "author")).toBe(false);
-		expect(isCreditAttributionRoleForUnitKind("entity", "publisher")).toBe(true);
-		expect(isCreditAttributionRoleForUnitKind("entity", "actor")).toBe(true);
-		expect(isCreditAttributionRoleForUnitKind("software", "translator")).toBe(true);
-		expect(isCreditAttributionRoleForUnitKind("software", "illustrator")).toBe(true);
-		expect(isCreditAttributionRoleForUnitKind("software", "editor")).toBe(true);
+		expect(creditRolesForReference({ owner: "publishing", shape: "work" })).toContain("author");
+		expect(creditRolesForReference({ owner: "program", shape: "program" })).not.toContain("author");
+		expect(creditRolesForReference({ owner: "entity", shape: "character" })).toEqual(["publisher", "actor"]);
+		expect(creditRolesForReference({ owner: "software", shape: "content" })).toEqual(
+			expect.arrayContaining(["translator", "illustrator", "editor"]),
+		);
 		for (const role of [
 			"developer",
 			"publisher",
@@ -541,18 +523,12 @@ describe("database schema contracts", () => {
 			"producer",
 			"studio",
 		] as const)
-			expect(isCreditAttributionRoleForUnitKind("release", role)).toBe(true);
+			expect(creditRolesForReference({ owner: "software", shape: "release" })).toContain(role);
 		for (const kind of ["video", "audio"] as const) {
-			expect(isCreditAttributionRoleForUnitKind(kind, "director")).toBe(true);
-			expect(isCreditAttributionRoleForUnitKind(kind, "composer")).toBe(true);
-			expect(isCreditAttributionRoleForUnitKind(kind, "narrator")).toBe(true);
-			expect(isCreditAttributionRoleForUnitKind(kind, "studio")).toBe(true);
+			expect(creditRolesForReference({ owner: kind, shape: kind })).toEqual(
+				expect.arrayContaining(["director", "composer", "narrator", "studio"]),
+			);
 		}
-		expect(isCreditAttributionUnitKind("release")).toBe(true);
-		expect(isCreditAttributionUnitKind("video")).toBe(true);
-		expect(isCreditAttributionUnitKind("audio")).toBe(true);
-		expect(isCreditAttributionUnitKind("entity")).toBe(true);
-		expect(isCreditAttributionUnitKind("realm")).toBe(false);
 		expect(SubjectAssociationRoleValues).toContain("primary_character");
 		expect(SubjectAssociationRoleValues).toContain("source_work");
 		expect(getTableConfig(subjectAssociation).checks.map(({ name }) => name)).toContain(
@@ -576,10 +552,10 @@ describe("database schema contracts", () => {
 		);
 		expect(attribution.foreignKeys.map((key) => key.getName())).toEqual(
 			expect.arrayContaining([
-				"credit_attribution_source_unit_id_unit_id_fk",
 				"credit_attribution_credited_entity_id_entity_identity_id_fk",
 			]),
 		);
+		expectConcreteReferences(attribution, "source_unit");
 		expect(attribution.uniqueConstraints.map((constraint) => constraint.name)).toContain(
 			"credit_attribution_source_credited_role_key",
 		);
@@ -801,11 +777,13 @@ describe("database schema contracts", () => {
 			accountEnforcementAction,
 			contentGovernanceAction,
 			unitAccessRestriction,
-			unitMergeRequest,
 		]) {
 			const decisionId = getTableConfig(table).columns.find(({ name }) => name === "decision_id");
 			expect(decisionId?.notNull).toBe(false);
 		}
+		expect(
+			getTableConfig(unitMergeRequest).columns.find(({ name }) => name === "decision_id")?.notNull,
+		).toBe(true);
 		expect(getTableConfig(accountEnforcementAction).columns.map(({ name }) => name)).toEqual(
 			expect.arrayContaining(["target_auth_user_id", "kind", "enforcement_kind"]),
 		);
@@ -881,10 +859,10 @@ describe("database schema contracts", () => {
 	});
 
 	it("separates optional Unit slug addresses from ID-addressed Units", () => {
-		const coreUnit = getTableConfig(unit);
+		const concreteOwners = [post, ...Object.values(CatalogIdentityTables)];
 		const address = getTableConfig(unitSlugAddress);
-		expect(unit.kind.getSQLType()).toBe("text");
-		expect(coreUnit.columns.map((column) => column.name)).not.toEqual(
+		expect(CatalogIdentityTables.publishing.shape.getSQLType()).toBe("text");
+		for (const owner of concreteOwners) expect(getTableConfig(owner).columns.map((column) => column.name)).not.toEqual(
 			expect.arrayContaining(["slug", "slug_scope_id"]),
 		);
 		expect(address.uniqueConstraints.map((constraint) => constraint.name)).toContain(
@@ -905,38 +883,10 @@ describe("database schema contracts", () => {
 		);
 		expect(address.foreignKeys.map((key) => key.getName())).toEqual(
 			expect.arrayContaining([
-				"unit_slug_address_scope_unit_id_unit_id_fk",
-				"unit_slug_address_target_unit_id_unit_id_fk",
+				"unit_slug_address_scope_unit_publishing_id_publishing_identity_id_fk",
+				"unit_slug_address_target_unit_publishing_id_publishing_identity_id_fk",
 			]),
 		);
-	});
-
-	it("enforces same-kind star-shaped Main-Variant edges", () => {
-		const coreUnit = getTableConfig(unit);
-		const variant = getTableConfig(unitVariant);
-		expect(coreUnit.uniqueConstraints.map((constraint) => constraint.name)).toContain(
-			"unit_id_kind_key",
-		);
-		expect(variant.columns.map((column) => column.name)).toEqual([
-			"variant_unit_id",
-			"main_unit_id",
-			"unit_kind",
-			"created_at",
-			"updated_at",
-		]);
-		expect(variant.foreignKeys.map((key) => key.getName())).toEqual(
-			expect.arrayContaining(["unit_variant_variant_kind_fkey", "unit_variant_main_kind_fkey"]),
-		);
-		expect(variant.checks.map((constraint) => constraint.name)).toEqual(
-			expect.arrayContaining(["unit_variant_not_self_check"]),
-		);
-		expect(variant.checks.map((constraint) => constraint.name)).not.toContain(
-			"unit_variant_kind_check",
-		);
-		expect(variant.indexes.map((index) => index.config.name)).toContain(
-			"unit_variant_main_created_at_idx",
-		);
-		expect(VariantCapableUnitKindValues).toEqual(["book", "software", "media", "entity"]);
 	});
 
 	it("stores optional Video Audio tracks with subtype foreign keys and reverse lookup", () => {
@@ -995,9 +945,9 @@ describe("database schema contracts", () => {
 			]),
 		);
 		expect(PlatformCapabilityValues).not.toContain("unit.ownership.transfer");
-		expect(
-			getTableConfig(platformCapabilityGrant).checks.map((constraint) => constraint.name),
-		).toContain("platform_capability_grant_current_capability_check");
+		expect(platformCapabilityGrant.capability.enumValues).toEqual(PlatformCapabilityValues);
+		expect(getTableConfig(platformCapabilityGrant).checks.map((constraint) => constraint.name))
+			.toEqual(["platform_capability_grant_revocation_check", "platform_capability_grant_expiry_check"]);
 		expect(unitSlugAddress.kind.getSQLType()).toBe("text");
 	});
 
@@ -1047,9 +997,14 @@ describe("database schema contracts", () => {
 	it("keeps Dock kinds closed and gives each Dock a stable identity", () => {
 		expect(DockKindValues).toEqual(["main", "wiki"]);
 		expect(DockKindsByUnitKind).toEqual({
-			book: ["main"],
+			publishing: ["main"],
+			music: ["main"],
+			program: ["main"],
 			software: ["main"],
-			media: ["main"],
+			entity: ["main"],
+			grouping: ["main"],
+			reference: ["main"],
+			distribution: ["main"],
 			zone: ["main"],
 			realm: ["main", "wiki"],
 		});
@@ -1076,11 +1031,11 @@ describe("database schema contracts", () => {
 		expect(realmTag.foreignKeys.map((key) => key.getName())).toEqual(
 			expect.arrayContaining([
 				"realm_tag_judgment_stat_realm_fkey",
-				"realm_tag_judgment_stat_unit_fkey",
 				"realm_tag_judgment_stat_tag_fkey",
 				"realm_tag_judgment_stat_context_fkey",
 			]),
 		);
+		expectConcreteReferences(realmTag, "unit");
 		expect(getTableConfig(realmTagJudgment).foreignKeys.map((key) => key.getName())).toContain(
 			"realm_tag_judgment_context_fkey",
 		);

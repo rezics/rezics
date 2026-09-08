@@ -149,9 +149,7 @@ DROP TRIGGER IF EXISTS participation_private_account_guard ON public.account_uni
 CREATE TRIGGER participation_private_account_guard BEFORE INSERT OR UPDATE OF auth_user_id ON public.account_unit_tag
 FOR EACH ROW EXECUTE FUNCTION public.participation_require_unerased_account('auth_user_id');
 
-DROP TRIGGER IF EXISTS participation_private_account_guard ON public.book_chapter_progress_stat;
-CREATE TRIGGER participation_private_account_guard BEFORE INSERT OR UPDATE OF auth_user_id ON public.book_chapter_progress_stat
-FOR EACH ROW EXECUTE FUNCTION public.participation_require_unerased_account('auth_user_id');
+
 
 DROP TRIGGER IF EXISTS participation_private_account_guard ON public.conversation_participant_stat;
 CREATE TRIGGER participation_private_account_guard BEFORE INSERT OR UPDATE OF auth_user_id ON public.conversation_participant_stat

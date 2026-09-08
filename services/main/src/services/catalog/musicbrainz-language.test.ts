@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import mapping from "./source-contracts/musicbrainz-language-map.json";
 

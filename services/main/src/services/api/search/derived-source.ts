@@ -13,7 +13,7 @@ import { and, asc, eq } from "drizzle-orm";
 import type { Authorization } from "../../authorization";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
-import { collectionItem, unit, unitFollow } from "../../database/schema";
+import { collectionItem, tag, unitFollow } from "../../database/schema";
 import { getReadableUnitPresentationsByIds, type UnitPresentation } from "../../units/attribution";
 import { CollectionNotFound } from "../collections/errors";
 
@@ -39,14 +39,13 @@ async function collectionTagCandidates(
 ): Promise<readonly string[]> {
 	await authorization.unit.ensureCanRead(collectionId, () => new CollectionNotFound());
 	const rows = await database
-		.select({ id: unit.id })
+		.select({ id: tag.id })
 		.from(collectionItem)
-		.innerJoin(unit, eq(unit.id, collectionItem.unitId))
+		.innerJoin(tag, eq(tag.id, collectionItem.unitId))
 		.where(
 			and(
 				eq(collectionItem.collectionId, collectionId),
-				eq(unit.kind, "tag"),
-				getUnitReadCondition(authorization.profileId),
+				getUnitReadCondition(authorization.profileId, {}, tag),
 			),
 		)
 		.orderBy(asc(collectionItem.unitId))
@@ -59,14 +58,13 @@ async function followedTagCandidates(
 	authorization: Authorization,
 ): Promise<readonly string[]> {
 	const rows = await database
-		.select({ id: unit.id })
+		.select({ id: tag.id })
 		.from(unitFollow)
-		.innerJoin(unit, eq(unit.id, unitFollow.unitId))
+		.innerJoin(tag, eq(tag.id, unitFollow.unitId))
 		.where(
 			and(
 				eq(unitFollow.followerProfileId, profileId),
-				eq(unit.kind, "tag"),
-				getUnitReadCondition(authorization.profileId),
+				getUnitReadCondition(authorization.profileId, {}, tag),
 			),
 		)
 		.orderBy(asc(unitFollow.unitId))
@@ -172,7 +170,7 @@ export async function resolveDerivedSearchSource(input: {
 		await getReadableUnitPresentationsByIds({
 			unitIds: [selectedId],
 			localizationLanguages: input.localizationLanguages,
-			profileId: input.authorization.profileId,
+			authorization: input.authorization,
 		})
 	).get(selectedId);
 	if (!selected)

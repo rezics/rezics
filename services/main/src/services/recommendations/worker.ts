@@ -1,154 +1,44 @@
 import { and, desc, eq, lt, ne, sql } from "drizzle-orm";
-
-import { database, type DatabaseTransaction, withDatabaseSession } from "../database";
-import { recommendationSnapshot, unitBestScore } from "../database/schema";
+import { database } from "../database";
+import { env } from "../config";
+import { recommendationSnapshot } from "../database/schema";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
+import { dispatchRecommendationBuild, finalizeRecommendationSnapshot } from "./build-partitions";
 
-/**
- * Materializes the sparse, shared `best` sort key for one immutable snapshot.
- *
- * Only Units with positive recent signal are written. Zero-score Units stay out
- * of this table and are served directly from the public Unit updated-at index.
- * This makes refresh cost proportional to recent activity, not catalogue size.
- */
-async function buildUnitBestScores(
-	tx: DatabaseTransaction,
-	snapshotId: string,
-	sourceWatermark: Date,
-) {
-	const halfLifeSeconds = RecommendationPolicy.bestHalfLifeHours * 3_600;
-	await tx.execute(sql`
-		with positive_score as (
-			select coalesce(relationship.main_unit_id, signal.unit_id) as unit_id,
-				sum(
-					signal.weight * exp(
-						-ln(2) * extract(epoch from (
-							${sourceWatermark}::timestamptz - signal.bucket_start
-						)) / ${halfLifeSeconds}
-					)
-				)::double precision as score
-			from recommendation_unit_signal_hourly signal
-			left join unit_variant relationship
-				on relationship.variant_unit_id = signal.unit_id
-			where signal.bucket_start >= ${sourceWatermark}::timestamptz
-					- ${RecommendationPolicy.bestWindowDays} * interval '1 day'
-				and signal.bucket_start <= ${sourceWatermark}::timestamptz
-				and signal.weight > 0
-			group by coalesce(relationship.main_unit_id, signal.unit_id)
-			having sum(signal.weight) > 0
-		)
-		insert into ${unitBestScore} (
-			snapshot_id, unit_id, unit_kind, score, unit_updated_at
-		)
-		select ${snapshotId}::uuid, positive_score.unit_id, discovery.kind,
-			positive_score.score, discovery.updated_at
-		from positive_score
-		join unit discovery on discovery.id = positive_score.unit_id
-		where discovery.status = 'published'
-			and discovery.visibility = 'public'
-			and discovery.moderation_status = 'approved'
-			and discovery.deleted_at is null
-	`);
+/** One tick advances a bounded share of the durable build. */
+export function dispatchRecommendationRefresh() {
+ return dispatchRecommendationBuild(database, env.RECOMMENDATION_REFRESH_INTERVAL_MS);
 }
 
-export async function refreshRecommendationSnapshot(): Promise<string | null> {
-	return withDatabaseSession(async (session) => {
-		const lock = await session.execute<{ acquired: boolean }>(
-			sql`select pg_try_advisory_lock(hashtextextended('recommendation-refresh', 0)) AS acquired`,
-		);
-		if (!lock.rows[0]?.acquired) return null;
-		let snapshotId: string | null = null;
-		try {
-			const sourceWatermark = new Date();
-			const [snapshot] = await session
-				.insert(recommendationSnapshot)
-				.values({
-					policyVersion: RecommendationPolicyVersion,
-					sourceWatermark,
-				})
-				.returning({ id: recommendationSnapshot.id });
-			if (!snapshot) throw new Error("Recommendation snapshot insertion returned no row");
-			snapshotId = snapshot.id;
-			await session.transaction((tx) => buildUnitBestScores(tx, snapshot.id, sourceWatermark));
-
-			await session.transaction(async (tx) => {
-				const completedAt = new Date();
-				await tx
-					.update(recommendationSnapshot)
-					.set({ active: false })
-					.where(eq(recommendationSnapshot.active, true));
-				await tx
-					.update(recommendationSnapshot)
-					.set({ state: "ready", active: true, completedAt, error: null })
-					.where(eq(recommendationSnapshot.id, snapshot.id));
-			});
-			return snapshot.id;
-		} catch (error) {
-			if (snapshotId)
-				await session
-					.update(recommendationSnapshot)
-					.set({
-						state: "failed",
-						active: false,
-						completedAt: new Date(),
-						error: error instanceof Error ? error.message.slice(0, 2_000) : "Unknown refresh error",
-					})
-					.where(eq(recommendationSnapshot.id, snapshotId));
-			throw error;
-		} finally {
-			await session.execute(
-				sql`select pg_advisory_unlock(hashtextextended('recommendation-refresh', 0))`,
-			);
-		}
-	});
-}
-
-export async function aggregateRecommendationMetrics() {
-	await database.execute(sql`
-		insert into recommendation_metric_daily (
-			day, surface, policy_version, impressions, opens, dwell_30s, not_interested
-		)
-		select occurred_at::date, surface, policy_version,
-			count(*) filter (where type = 'impression'),
-			count(*) filter (where type = 'open'),
-			count(*) filter (where type = 'dwell_30s'),
-			count(*) filter (where type = 'not_interested')
-		from recommendation_event
-		where surface is not null and policy_version is not null
-			and occurred_at >= current_date - interval '2 days'
-		group by occurred_at::date, surface, policy_version
-		on conflict (day, surface, policy_version) do update set
-			impressions = excluded.impressions,
-			opens = excluded.opens,
-			dwell_30s = excluded.dwell_30s,
-			not_interested = excluded.not_interested
-	`);
-}
-
+/** Each maintenance run has a fixed deletion budget. Backlogs remain visible and drain over later runs. */
 export async function purgeRecommendationData(now = new Date()) {
-	const eventBoundary = new Date(
-		now.getTime() - RecommendationPolicy.eventRetentionDays * 86_400_000,
-	);
-	const snapshotBoundary = new Date(
-		now.getTime() - RecommendationPolicy.snapshotRetentionHours * 3_600_000,
-	);
-	const signalBoundary = new Date(
-		now.getTime() - RecommendationPolicy.signalRetentionDays * 86_400_000,
-	);
-	await database
-		.delete(recommendationSnapshot)
-		.where(
-			and(
-				ne(recommendationSnapshot.active, true),
-				lt(recommendationSnapshot.startedAt, snapshotBoundary),
-			),
-		);
-	await database.execute(
-		sql`delete from recommendation_event where occurred_at < ${eventBoundary}`,
-	);
-	await database.execute(
-		sql`delete from recommendation_unit_signal_hourly where bucket_start < ${signalBoundary}`,
-	);
+ const eventBoundary=new Date(now.getTime()-RecommendationPolicy.eventRetentionDays*86_400_000);
+ let signalBoundary=new Date(now.getTime()-RecommendationPolicy.signalRetentionDays*86_400_000);
+ const [building]=await database.select({id:recommendationSnapshot.id,startedAt:recommendationSnapshot.startedAt,watermark:recommendationSnapshot.sourceWatermark})
+  .from(recommendationSnapshot).where(eq(recommendationSnapshot.state,"building")).limit(1);
+ if(building) {
+  if(building.startedAt.getTime()<=now.getTime()-RecommendationPolicy.buildDeadlineMs)
+   await finalizeRecommendationSnapshot(database,building.id);
+  else if(building.watermark)
+   signalBoundary=new Date(Math.min(signalBoundary.getTime(),building.watermark.getTime()-RecommendationPolicy.bestWindowDays*86_400_000));
+ }
+ const snapshotBoundary=new Date(now.getTime()-RecommendationPolicy.snapshotRetentionHours*3_600_000);
+ const snapshots=await database.select({id:recommendationSnapshot.id}).from(recommendationSnapshot)
+  .where(and(eq(recommendationSnapshot.active,false),ne(recommendationSnapshot.state,"building"),lt(recommendationSnapshot.startedAt,snapshotBoundary)))
+  .orderBy(recommendationSnapshot.startedAt,recommendationSnapshot.id).limit(4);
+ for (const snapshot of snapshots) {
+  await database.execute(sql`delete from unit_best_score where (snapshot_id,unit_id) in (
+   select snapshot_id,unit_id from unit_best_score where snapshot_id=${snapshot.id}::uuid order by unit_id limit 10000 for update skip locked
+  )`);
+  await database.delete(recommendationSnapshot).where(and(eq(recommendationSnapshot.id,snapshot.id),
+   eq(recommendationSnapshot.active,false),sql`not exists(select 1 from unit_best_score where snapshot_id=${snapshot.id}::uuid)`));
+ }
+ await database.execute(sql`delete from recommendation_event where id in (
+  select id from recommendation_event where occurred_at < ${eventBoundary} order by occurred_at,id limit 10000 for update skip locked
+ )`);
+ await database.execute(sql`delete from recommendation_unit_signal_hourly where (unit_id,bucket_start,kind) in (
+  select unit_id,bucket_start,kind from recommendation_unit_signal_hourly where bucket_start < ${signalBoundary} order by bucket_start,unit_id,kind limit 10000 for update skip locked
+ )`);
 }
 
 export async function getRecommendationHealth(now = new Date()) {

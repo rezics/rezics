@@ -1,3 +1,4 @@
+import contentLanguages from "./content-languages";
 import Elysia from "elysia";
 import mergedSources from "./merged-sources";
 import { z } from "zod";
@@ -33,6 +34,18 @@ import {
 import { addCatalogName, reviseCatalogName } from "../../catalog/names";
 import { addCatalogIdentifier, reviseCatalogIdentifier } from "../../catalog/identifiers";
 import { catalogRead, catalogMutation } from "./transaction";
+import music from "./music";
+import software from "./software";
+import program from "./program";
+import publishing from "./publishing";
+import semantics from "./semantics";
+import sources, { resourceSourceBindings } from "./sources";
+import definitions from "./definitions";
+import entityMeasurements from "./entity-measurements";
+import grouping from "./grouping";
+import entityProfile from "./entity-profile";
+import editorial from "./editorial";
+import entityCandidates from "./entity-candidates";
 
 const reference = z.strictObject({ owner: z.enum(CatalogOwnerValues), id: z.uuid() });
 const nameReference = reference.extend({ nameId: z.uuid() });
@@ -45,6 +58,20 @@ const namesQuery = CatalogCursorQuerySchema.extend({
 export default new Elysia({ prefix: "/catalog", name: "catalog-api" })
 	.use(session)
 	.use(mergedSources)
+	.use(music)
+	.use(software)
+	.use(program)
+	.use(publishing)
+	.use(contentLanguages)
+	.use(semantics)
+	.use(sources)
+	.use(definitions)
+	.use(entityMeasurements)
+	.use(grouping)
+	.use(entityProfile)
+	.use(editorial)
+	.use(entityCandidates)
+	.use(resourceSourceBindings)
 	.post(
 		"/resources",
 		{

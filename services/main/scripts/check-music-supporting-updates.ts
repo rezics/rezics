@@ -45,15 +45,21 @@ import {
 } from "../src/services/catalog/storage";
 
 const connectionString = process.env.DATABASE_URL;
+const fixturePort = process.env.REZICS_CATALOG_FIXTURE_PORT;
+const fixtureDatabase = process.env.REZICS_CATALOG_FIXTURE_DATABASE;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
 	throw new Error("Explicit disposable music supporting fixture required");
+if (!fixturePort || !fixtureDatabase)
+	throw new Error("Explicit REZICS_CATALOG_FIXTURE_PORT and REZICS_CATALOG_FIXTURE_DATABASE required");
 const target = new URL(connectionString);
 if (
-	!["localhost", "127.0.0.1"].includes(target.hostname) ||
-	target.port !== "25434" ||
-	target.pathname !== "/rezics_atlas"
+	!["localhost", "127.0.0.1", "[::1]"].includes(target.hostname) ||
+	target.port !== fixturePort ||
+	target.port === "15432" ||
+	target.pathname !== `/${fixtureDatabase}` ||
+	!/^\/rezics_atlas(?:_[a-z0-9_]+)?$/u.test(target.pathname)
 )
-	throw new Error("Music supporting fixture requires isolated loopback target");
+	throw new Error("Music supporting fixture requires isolated loopback Atlas target");
 const pool = new Pool({ connectionString, max: 1, statement_timeout: 20000 });
 const db = drizzle({ client: pool });
 const objects = new Map<string, Uint8Array>();

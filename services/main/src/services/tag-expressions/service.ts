@@ -13,7 +13,6 @@ import {
 	tagExpressionInferenceRule,
 	tagExpressionLabelComponent,
 	tagExpressionPresentationRevision,
-	unit,
 	type TagExpressionArgumentRole,
 	type TagExpressionInferenceKind,
 	type TagExpressionKind,
@@ -25,7 +24,7 @@ import {
 	type LocalizationLanguageQuery,
 } from "../units/localization";
 
-const expressionComponentUnit = alias(unit, "tag_expression_read_component_unit");
+const expressionComponentUnit = alias(tag, "tag_expression_read_component_unit");
 
 export type TagExpressionComponent = {
 	readonly tagId: string;

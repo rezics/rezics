@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { Readable } from "node:stream";
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { users } from "../src/services/database/schema/auth";
@@ -47,14 +47,40 @@ async function readCapturedPart(key: "tracks" | "media" | "metadata") {
 	assert.ok((await stat(path)).size <= SOURCE_DOCUMENT_BYTE_LIMIT);
 	return new Uint8Array(await readFile(path));
 }
+const MusicReleaseCaptureProfileSchema = z.strictObject({
+	key: z.enum(["tracks", "media", "metadata"]),
+	profile: z.string(),
+	requestUrl: z.url(),
+	observedAt: z.iso.datetime({ offset: true }),
+});
+const MusicReleaseCaptureHashSchema = z.strictObject({
+	profile: z.enum(["tracks", "media", "metadata"]),
+	bytes: z.number().int().positive(),
+	sha256: z.string().regex(/^[a-f0-9]{64}$/u),
+});
+const MusicReleaseCaptureSchema = z.strictObject({
+	id: z.uuid(),
+	profiles: z.array(MusicReleaseCaptureProfileSchema).length(3),
+	hashes: z.array(MusicReleaseCaptureHashSchema).length(3),
+});
+type MusicReleaseCapture = z.infer<typeof MusicReleaseCaptureSchema>;
+type MusicReleaseCaptureProfile = z.infer<typeof MusicReleaseCaptureProfileSchema>;
+type MusicReleaseCaptureHash = z.infer<typeof MusicReleaseCaptureHashSchema>;
 const captured = captureDirectory ? { tracks: await readCapturedPart("tracks"), media: await readCapturedPart("media"), metadata: await readCapturedPart("metadata") } : null;
-const capture = captureDirectory ? z.strictObject({ id: z.uuid(), profiles: z.array(z.strictObject({ key: z.enum(["tracks", "media", "metadata"]), profile: z.string(), requestUrl: z.url(), observedAt: z.iso.datetime({ offset: true }) })).length(3), hashes: z.array(z.strictObject({ profile: z.enum(["tracks", "media", "metadata"]), bytes: z.number().int().positive(), sha256: z.string().regex(/^[a-f0-9]{64}$/u) })).length(3) }).parse(JSON.parse(await readFile(resolve(captureDirectory, "capture.json"), "utf8"))) : null;
+const capture: MusicReleaseCapture | null = captureDirectory
+	? MusicReleaseCaptureSchema.parse(JSON.parse(await readFile(resolve(captureDirectory, "capture.json"), "utf8")))
+	: null;
 if (captured && capture) for (const profile of musicBrainzReleaseAcquisitionProfiles(capture.id)) {
-	const receipt = capture.profiles.find((candidate) => candidate.key === profile.key), hash = capture.hashes.find((candidate) => candidate.profile === profile.key);
-	assert.ok(receipt && hash);
-	assert.equal(receipt.requestUrl, profile.url); assert.equal(receipt.profile, profile.profile);
-	assert.equal(captured[profile.key].byteLength, hash.bytes);
-	assert.equal(createHash("sha256").update(captured[profile.key]).digest("hex"), hash.sha256);
+	const matchedProfile: MusicReleaseCaptureProfile | undefined = capture.profiles.find(
+		(candidate) => candidate.key === profile.key,
+	);
+	const matchedHash: MusicReleaseCaptureHash | undefined = capture.hashes.find(
+		(candidate) => candidate.profile === profile.key,
+	);
+	assert.ok(matchedProfile && matchedHash);
+	assert.equal(matchedProfile.requestUrl, profile.url); assert.equal(matchedProfile.profile, profile.profile);
+	assert.equal(captured[profile.key].byteLength, matchedHash.bytes);
+	assert.equal(createHash("sha256").update(captured[profile.key]).digest("hex"), matchedHash.sha256);
 }
 const capturedMetadata: unknown = captured ? JSON.parse(new TextDecoder().decode(captured.metadata)) : null;
 const capturedId = capturedMetadata !== null && typeof capturedMetadata === "object" && "id" in capturedMetadata ? capturedMetadata.id : null;
@@ -83,7 +109,7 @@ async function message(jobId: string, generation: number, position: number, phas
 			sql`${operationalOutbox.payload}->'payload'->>'jobId'=${jobId}`,
 			sql`(${operationalOutbox.payload}->'payload'->>'generation')::bigint=${generation}`,
 			sql`(${operationalOutbox.payload}->'payload'->>'afterPosition')::integer=${position}`))
-		.orderBy(operationalOutbox.createdAt.desc()).limit(1);
+		.orderBy(desc(operationalOutbox.createdAt)).limit(1);
 	assert.ok(row);
 	return eventEnvelopeSchema.parse(row.payload);
 }

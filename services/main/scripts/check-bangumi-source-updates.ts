@@ -52,10 +52,13 @@ const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
 	throw new Error("Explicit disposable Bangumi fixture required");
 const target = new URL(connectionString);
+const fixturePort=process.env.REZICS_CATALOG_FIXTURE_PORT;
+const fixtureDatabase=process.env.REZICS_CATALOG_FIXTURE_DATABASE;
 if (
-	!["localhost", "127.0.0.1"].includes(target.hostname) ||
-	target.port !== "25434" ||
-	target.pathname !== "/rezics_atlas"
+	!["localhost", "127.0.0.1", "[::1]"].includes(target.hostname) ||
+	!fixturePort || !fixtureDatabase || target.port==="15432" ||
+	target.port !== fixturePort || target.pathname !== `/${fixtureDatabase}` ||
+	!/^rezics_atlas(?:_[a-z0-9_]+)?$/u.test(fixtureDatabase)
 )
 	throw new Error("Bangumi source fixture requires isolated loopback target");
 const pool = new Pool({ connectionString, max: 1, statement_timeout: 20000 }),

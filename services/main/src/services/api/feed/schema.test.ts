@@ -4,9 +4,9 @@ import { FilterSchemaModels } from "@rezics/filter";
 
 import {
 	FeedContentKindValues,
-	FeedRatedWorkUnitKindValues,
+	FeedRatedWorkOwnerValues,
 	FeedRequest,
-	FeedUnitKindValues,
+	FeedUnitOwnerValues,
 } from "./schema";
 
 const RealmId = "00000000-0000-4000-8000-000000000001";
@@ -14,12 +14,12 @@ const checkFeedRequest = (value: unknown) => Check(FilterSchemaModels, FeedReque
 
 describe("Feed API contract", () => {
 	it("does not expose dedicated Tag Path Units through mixed Feed", () => {
-		expect(FeedUnitKindValues).not.toContain("tag_path");
+		expect(FeedUnitOwnerValues).not.toContain("tag_path");
 		expect(FeedContentKindValues).not.toContain("unit:tag_path");
 	});
 
-	it("presents a Series through the rated-work feed contract", () => {
-		expect(FeedRatedWorkUnitKindValues).toContain("series");
+	it("presents a Grouping through the rated-work feed contract", () => {
+		expect(FeedRatedWorkOwnerValues).toContain("grouping");
 	});
 
 	it("accepts the canonical domain Filter tree", () => {
@@ -54,8 +54,8 @@ describe("Feed API contract", () => {
 	});
 
 	it("rejects malformed and duplicate Filter sets", () => {
-		expect(checkFeedRequest({ filter: { where: { kind: { in: [] } } } })).toBe(false);
-		expect(checkFeedRequest({ filter: { where: { kind: { in: ["book", "book"] } } } })).toBe(false);
+		expect(checkFeedRequest({ filter: { where: { owner: { in: [] } } } })).toBe(false);
+		expect(checkFeedRequest({ filter: { where: { owner: { in: ["publishing", "publishing"] } } } })).toBe(false);
 		expect(
 			checkFeedRequest({
 				filter: {

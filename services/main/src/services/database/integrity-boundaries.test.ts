@@ -15,13 +15,11 @@ import {
 	accountUnitTag,
 	realmPin,
 	realmUnitTag,
-	seriesRelease,
 	subjectAssociation,
 	unitAlias,
 	unitExternalLink,
 	accountFollowPreference,
 	unitLocalization,
-	unitOwnershipClaim,
 	unitTagPathApplication,
 	unitTag,
 } from "./schema";
@@ -48,14 +46,13 @@ describe("database integrity boundaries", () => {
 			[realmUnitTag, "realm_unit_tag_position_byte_length_check"],
 			[accountUnitTag, "account_unit_tag_position_byte_length_check"],
 			[postProgressEntry, "post_progress_entry_position_byte_length_check"],
-			[seriesRelease, "series_release_position_byte_length_check"],
 			[collectionItem, "collection_item_position_byte_length_check"],
 			[postScore, "post_score_position_byte_length_check"],
 			[creditAttribution, "credit_attribution_position_byte_length_check"],
 			[subjectAssociation, "subject_association_position_byte_length_check"],
 		] as const;
 
-		expect(constraints).toHaveLength(17);
+		expect(constraints).toHaveLength(16);
 		for (const [table, name] of constraints) {
 			const rendered = renderedCheck(table, name);
 			expect(rendered.sql).toMatch(/^octet_length\(.+\."position"\) <= \$1$/);
@@ -75,11 +72,6 @@ describe("database integrity boundaries", () => {
 			contentGovernanceAction,
 			"content_governance_action_license_grant_transition_check",
 			'"content_governance_action"."previous_recognition_status" is not null',
-		],
-		[
-			unitOwnershipClaim,
-			"unit_ownership_claim_resolution_shape_check",
-			'"unit_ownership_claim"."resolution" is not null',
 		],
 		[
 			unitLocalization,

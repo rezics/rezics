@@ -263,8 +263,10 @@ async function appendFact(
 	sourceKey: string,
 	scope: CatalogSourceChildCorrespondence,
 	replacement?: { semanticId: string; headVersion: number },
+	purpose: "assertion" | "qualifier" = "assertion",
 ) {
 	const fact = await beginCatalogFact(tx, reference, actor, revision, definitionId, {
+		purpose,
 		spoiler: item.spoiler ?? 0,
 		...(replacement
 			? {
@@ -354,7 +356,7 @@ export async function appendVndbSemanticPlan(
 	await loadCatalogIdentity(tx, reference, actor, true);
 	const { definitions, roles } = await semanticDefinitions(tx);
 	const keys = vndbSemanticKeys(plan);
-	const writeFact = async (item: VndbSemanticFact, key: string) => {
+	const writeFact = async (item: VndbSemanticFact, key: string, purpose: "assertion" | "qualifier" = "assertion") => {
 		const reused = options.reuse?.get(key);
 		if (reused) {
 			if (reused.kind !== "fact") throw new TypeError("Semantic reuse family changed");
@@ -373,6 +375,7 @@ export async function appendVndbSemanticPlan(
 			key,
 			scope,
 			replacement,
+			purpose,
 		);
 		revision = created.revision;
 		options.changes?.push({
@@ -403,7 +406,7 @@ export async function appendVndbSemanticPlan(
 		for (const [index, item] of relation.qualifiers.entries()) {
 			const key = keys.qualifiers[relationIndex]?.[index];
 			if (!key) throw new Error("Missing semantic qualifier key");
-			const id = await writeFact(item, key);
+			const id = await writeFact(item, key, "qualifier");
 			qualifiers.push({
 				definitionRevisionId: mustGet(definitions, `${item.namespace}:${item.key}`),
 				valueFactId: id,

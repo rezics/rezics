@@ -845,7 +845,7 @@ describe("Search execution primitives", () => {
 		expect(() =>
 			assertSearchExpression({
 				operator: "all",
-				clauses: [{ field: "kind", operator: "equals", value: "book" }],
+				clauses: [{ field: "unit-owner", operator: "equals", value: "publishing" }],
 			}),
 		).not.toThrow();
 		expect(() =>
@@ -863,7 +863,7 @@ describe("Search execution primitives", () => {
 				{ length: 45 },
 				(_, index) =>
 					({
-						field: "kind",
+						field: "unit-shape",
 						operator: "equals",
 						value: `kind-${index}`,
 					}) as const,

@@ -25,6 +25,7 @@ describe("Bangumi native relation interpretation", () => {
 				path: "/relation_type",
 				definitionRevisionId: definition,
 				kind: "number",
+				purpose: "qualifier",
 				value: 7,
 			},
 			{
@@ -32,6 +33,7 @@ describe("Bangumi native relation interpretation", () => {
 				path: "/ended",
 				definitionRevisionId: definition,
 				kind: "boolean",
+				purpose: "qualifier",
 				value: false,
 			},
 		]);

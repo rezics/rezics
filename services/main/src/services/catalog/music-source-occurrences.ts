@@ -13,6 +13,7 @@ import {
 } from "./music-structure-contracts";
 import type { recordCatalogSourceDocument } from "./source-observations";
 import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
+import { isCatalogReferenceInitialization } from "./reference-initialization";
 
 type PendingOccurrence = { sourceRecordId: string; snapshotId: string; ownerId: string; component: MusicComponentName; componentKey: string; sourcePath: string; sourceValue?: unknown };
 const pendingOccurrences = new AsyncLocalStorage<{ tx: DatabaseTransaction; rows: PendingOccurrence[] }>();
@@ -60,6 +61,8 @@ export async function recordMusicSourceComponent(
 		.parse(sourcePath);
 	MusicComponentNameSchema.parse(component);
 	sourcePath = catalogSourcePath(observation.record.id, observation.snapshot.id, sourcePath);
+	// Foreign-reference initial values belong to their own pristine baseline; the containing release may not withdraw them.
+	if(isCatalogReferenceInitialization(tx,observation.record.id,{owner:"music",id:ownerId})) return;
 	const pending = pendingOccurrences.getStore();
 	if (pending?.tx === tx) {
 		if (pending.rows.length >= MUSIC_SOURCE_OCCURRENCE_LIMIT) throw new RangeError("Initial music source support exceeds its publication capacity");

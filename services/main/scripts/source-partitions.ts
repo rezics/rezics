@@ -2,6 +2,9 @@ import { CatalogOwnerValues } from "@rezics/reference";
 
 /** @internal Physical source placement preserves each typed primary/unique key. */
 export const sourcePartitionKeys = {
+	...Object.fromEntries(CatalogOwnerValues.flatMap(owner => [
+		[`${owner}_editorial`, "owner_id"], [`${owner}_editorial_revision`, "owner_id"],
+	])),
 	...Object.fromEntries(
 		["program", "publishing"].flatMap((owner) =>
 			["occurrence", "application_change", "baseline"].map((kind) => [
@@ -10,7 +13,21 @@ export const sourcePartitionKeys = {
 			]),
 		),
 	),
+	...Object.fromEntries(
+		["program", "publishing"].flatMap((owner) =>
+			["occurrence", "application_change", "baseline"].map((kind) => [
+				`${owner}_component_source_${kind}`,
+				"source_record_id",
+			]),
+		),
+	),
 	catalog_definition_term_support: "source_record_id",
+	catalog_definition_label: "definition_revision_id",
+	catalog_definition_review: "definition_revision_id",
+	recommendation_unit_signal_hourly: "unit_id",
+	unit_best_score: "unit_id",
+	unit_merge_reconciliation_item: "request_id",
+	governance_notice_recipient: "post_id",
 	catalog_source_proposal_dependency: "source_record_id",
 	...Object.fromEntries(
 		["entity", "reference"].flatMap((owner) =>
@@ -43,8 +60,11 @@ export const sourcePartitionKeys = {
 	music_component_source_baseline: "source_record_id",
 	catalog_source_record: "id",
 	catalog_source_snapshot: "source_record_id",
+	catalog_source_snapshot_bundle: "source_record_id",
+	catalog_source_snapshot_part: "source_record_id",
 	catalog_source_application: "source_record_id",
 	music_source_application_change: "source_record_id",
+	music_release_source_job: "source_record_id",
 	software_source_component_application_change: "source_record_id",
 	software_source_record_application_change: "source_record_id",
 	catalog_source_mapping_claim: "source_record_id",

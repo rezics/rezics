@@ -17,8 +17,8 @@ describe("public scoped slug API contract", () => {
 	});
 
 	it("accepts only a known expected Unit kind", () => {
-		expect(Check(ResolveScopedSlugAddressQuery, { kind: "profile" })).toBe(true);
-		expect(Check(ResolveScopedSlugAddressQuery, { kind: "unknown" })).toBe(false);
+		expect(Check(ResolveScopedSlugAddressQuery, { owner: "entity" })).toBe(true);
+		expect(Check(ResolveScopedSlugAddressQuery, { owner: "unknown" })).toBe(false);
 	});
 
 	it("projects slug, scope, and canonical path atomically", () => {
@@ -26,6 +26,7 @@ describe("public scoped slug API contract", () => {
 			Check(PublicSlugAddressResponse, {
 				slug: "alice",
 				scopeUnitId: ScopeUnitId,
+				scopeNamespaceId: null,
 				canonicalPath: ["users", "alice"],
 			}),
 		).toBe(true);

@@ -5,12 +5,8 @@ import { entityIdentity } from "../../database/schema";
 import { EntityAssociationRestricted, EntityEntryNotFound } from "../../entities/errors";
 import type { PlatformAuthorization } from "../platform/authorization";
 import type { UnitAuthorization } from "../unit/authorization";
-import { associationTargetScope } from "../unit/scope";
-import {
-	entityAssociationPermission,
-	type AssociationKind,
-	type EntityAssociationCommand,
-} from "./policy";
+import { requireParticipation, ParticipationDenied } from "../../participation/policy";
+import type { AssociationKind, EntityAssociationCommand } from "./policy";
 
 export async function lockEntityAssociationState(
 	tx: DatabaseTransaction,
@@ -48,22 +44,12 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 		command: EntityAssociationCommand,
 	): Promise<void> {
 		if (await this.platform.hasCapability("entity.associations.override", tx)) return;
-
-		const managerDecision = await this.unitAuthorization.decideInTransaction(
-			tx,
-			entityId,
-			"unit.association.manage",
-			associationTargetScope(kind),
-		);
-		if (managerDecision.allowed) return;
-		if (command !== "invitation") {
-			const decision = await this.unitAuthorization.decideInTransaction(
-				tx,
-				entityId,
-				entityAssociationPermission(kind, command),
-				associationTargetScope(kind),
-			);
-			if (decision.allowed) return;
+		const authority=this.unitAuthorization.participationAuthority;
+		// Requesting consent has no accepted effect; a direct attribution or invitation represents the target.
+		if(authority && command==="request" && (await this.unitAuthorization.readableUnitIdsInTransaction(tx,[entityId])).has(entityId)) return;
+		if(authority && authority.actingEntityId===entityId) {
+			try { await requireParticipation(tx,authority,"entity.publish",{owner:"entity",id:entityId}); return; }
+			catch(cause) { if(!(cause instanceof ParticipationDenied)) throw cause; }
 		}
 		throw new EntityAssociationRestricted(kind, command);
 	}

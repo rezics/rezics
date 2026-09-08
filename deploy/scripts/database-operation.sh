@@ -43,19 +43,22 @@ atlas_check() {
 cd /workspace/services/main
 
 preflight() {
+	yarn exec tsx scripts/check-baseline-epoch.ts preflight
 	yarn exec atlas migrate status --env main --url "${DATABASE_ADMIN_URL}"
 }
 
 migrate() {
-	yarn exec tsx scripts/migrate-filter-documents.ts --yes
+	yarn exec tsx scripts/check-baseline-epoch.ts preflight
 	PGOPTIONS="-c lock_timeout=5s -c statement_timeout=30min -c idle_in_transaction_session_timeout=60s" \
 		yarn exec atlas migrate apply --env main --url "${DATABASE_ADMIN_URL}" \
 		--lock-timeout 5s
+	yarn exec tsx scripts/check-baseline-epoch.ts installed
 	yarn exec tsx scripts/ensure-database-privileges.ts
 	yarn exec tsx scripts/install-platform.ts --yes
 }
 
 verify() {
+	yarn exec tsx scripts/check-baseline-epoch.ts installed
 	yarn exec tsx scripts/verify-postgres-runtime.ts
 	yarn exec tsx scripts/verify-platform-core.ts
 }

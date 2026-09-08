@@ -11,7 +11,6 @@ import { readUnitStateById } from "./query";
 import { creditRoleAllowedForReference } from "./credit-role-contract";
 import { recordAuditEvent } from "../audit";
 import { Authorization } from "../authorization";
-import { associationTargetScope } from "../authorization/unit/scope";
 import { database, type DatabaseTransaction } from "../database";
 import { creditAttribution, subjectAssociation, unitAssociationProposal } from "../database/schema";
 import {
@@ -36,7 +35,7 @@ import {
 	AssociationProposalRoleInvalid,
 	UnitNotFound,
 } from "./errors";
-import { recordResourceRevision } from "./resource-history";
+import { recordResourceRevision, ensureResourceUpdateAllowed } from "./resource-history";
 import type { RevisionContributionInput } from "./revision-contribution";
 
 export type AssociationProposalState =
@@ -68,6 +67,11 @@ type CreateAssociationProposalInput = AssociationTargetInput & {
 
 export const sourceAssociationScope = (kind: AssociationKind) =>
 	[kind === "credit" ? "credit-attributions" : "subject-associations"] as const;
+
+async function ensureAssociationTargetController(tx:DatabaseTransaction,authorization:Authorization<string>,targetId:string,kind:AssociationKind) {
+	if(kind==="credit") return ensureCreditAttributionInvitationAllowed(authorization,tx,targetId);
+	return authorization.entity.ensureAssociationInvitationAllowed(tx,targetId,kind);
+}
 
 export function associationProposalState(
 	record: Pick<ProposalRecord, "resolution" | "expiresAt">,
@@ -279,12 +283,7 @@ export async function createAssociationRequestInTransaction(
 ) {
 	if (input.sourceUnitId === input.targetUnitId) throw new AssociationProposalConflict();
 	await lockAssociationWorkflow(tx, input.sourceUnitId, input.targetUnitId);
-	await authorization.unit.ensureInTransaction(
-		tx,
-		input.sourceUnitId,
-		"unit.update",
-		sourceAssociationScope(input.kind),
-	);
+	await ensureResourceUpdateAllowed(tx,authorization.unit,input.sourceUnitId,sourceAssociationScope(input.kind));
 	if (input.kind === "credit") {
 		await ensureCreditSourceRoleAllowed(tx, input.sourceUnitId, input.role);
 		await ensureCreditAttributionRequestAllowed(authorization, tx, input.targetUnitId);
@@ -390,23 +389,13 @@ export async function listAssociationProposals(
 	return database.transaction(
 		async (tx) => {
 			if (input.side === "source")
-				await authorization.unit.ensureInTransaction(
-					tx,
-					input.unitId,
-					"unit.update",
-					sourceAssociationScope(input.kind),
-				);
+				await ensureResourceUpdateAllowed(tx,authorization.unit,input.unitId,sourceAssociationScope(input.kind));
 			else {
 				if (input.kind === "subject") {
 					const target = await readUnitStateById(tx, input.unitId);
 					if (target?.reference.owner !== "entity") throw new EntityEntryNotFound();
 				}
-				await authorization.unit.ensureInTransaction(
-					tx,
-					input.unitId,
-					"unit.association.manage",
-					associationTargetScope(input.kind),
-				);
+				await ensureAssociationTargetController(tx,authorization,input.unitId,input.kind);
 			}
 			const source =
 				input.side === "source"
@@ -485,19 +474,9 @@ async function ensureResolutionAuthorized(
 	const expectedUnitId = actsForSource ? proposal.sourceUnitId : proposal.targetUnitId;
 	if (actingUnitId !== expectedUnitId) throw new AssociationProposalNotFound();
 	if (actsForSource)
-		await authorization.unit.ensureInTransaction(
-			tx,
-			proposal.sourceUnitId,
-			"unit.update",
-			sourceAssociationScope(proposal.kind),
-		);
+		await ensureResourceUpdateAllowed(tx,authorization.unit,proposal.sourceUnitId,sourceAssociationScope(proposal.kind));
 	else
-		await authorization.unit.ensureInTransaction(
-			tx,
-			proposal.targetUnitId,
-			"unit.association.manage",
-			associationTargetScope(proposal.kind),
-		);
+		await ensureAssociationTargetController(tx,authorization,proposal.targetUnitId,proposal.kind);
 }
 
 async function materializeProposal(
@@ -513,12 +492,7 @@ async function materializeProposal(
 		admitted,
 	);
 	if (proposal.direction === "request")
-		await proposerAuthorization.unit.ensureInTransaction(
-			tx,
-			proposal.sourceUnitId,
-			"unit.update",
-			sourceAssociationScope(proposal.kind),
-		);
+		await ensureResourceUpdateAllowed(tx,proposerAuthorization.unit,proposal.sourceUnitId,sourceAssociationScope(proposal.kind));
 	else if (proposal.kind === "credit")
 		await ensureCreditAttributionInvitationAllowed(
 			proposerAuthorization,

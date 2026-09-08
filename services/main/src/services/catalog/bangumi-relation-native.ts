@@ -83,10 +83,10 @@ export function planBangumiNativeRelationFacts(
 		const identity = qualifier.key,
 			path = `/${qualifier.key}`;
 		if (typeof qualifier.value === "number")
-			return { identity, path, definitionRevisionId, kind: "number", value: qualifier.value };
+			return { identity, path, definitionRevisionId, purpose: "qualifier", kind: "number", value: qualifier.value };
 		if (typeof qualifier.value === "boolean")
-			return { identity, path, definitionRevisionId, kind: "boolean", value: qualifier.value };
-		return { identity, path, definitionRevisionId, kind: "string", value: qualifier.value };
+			return { identity, path, definitionRevisionId, purpose: "qualifier", kind: "boolean", value: qualifier.value };
+		return { identity, path, definitionRevisionId, purpose: "qualifier", kind: "string", value: qualifier.value };
 	});
 }
 

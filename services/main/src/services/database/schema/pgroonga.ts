@@ -4,6 +4,14 @@ export const CanonicalPgroongaIndexes = [
 	"unit_localization_pgroonga_content_idx",
 	"unit_alias_term_search_idx",
 	"unit_search_document_pgroonga_idx",
+	"publishing_named_form_search_idx",
+	"music_named_form_search_idx",
+	"program_named_form_search_idx",
+	"software_named_form_search_idx",
+	"entity_named_form_search_idx",
+	"grouping_named_form_search_idx",
+	"reference_named_form_search_idx",
+	"distribution_named_form_search_idx",
 ] as const;
 
 export type CanonicalPgroongaIndex = (typeof CanonicalPgroongaIndexes)[number];
@@ -13,4 +21,5 @@ export const LargeCapacityPgroongaIndexes: readonly CanonicalPgroongaIndex[] = [
 	CanonicalPgroongaIndexes[0],
 	CanonicalPgroongaIndexes[1],
 	CanonicalPgroongaIndexes[3],
+	...CanonicalPgroongaIndexes.slice(4),
 ];

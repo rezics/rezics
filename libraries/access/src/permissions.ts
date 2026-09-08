@@ -158,6 +158,7 @@ export const PlatformCapabilityValues = [
 	"platform.session.read",
 	"platform.session.revoke",
 	"entity.associations.override",
+	"catalog.definition.manage",
 	"unit.edit",
 	DevelopmentPreviewCapability,
 	CustomThemeExternalLiveAccessCapability,
@@ -243,6 +244,11 @@ export const PlatformCapabilityDefinitions = {
 		resource: "entity.associations",
 		action: "override",
 		rationale: "Overrides association consent and validation workflows across the platform.",
+	},
+	"catalog.definition.manage": {
+		resource: "catalog.definition",
+		action: "manage",
+		rationale: "Publishing a property, relation or vocabulary meaning governs future catalog contributions and requires independent authority.",
 	},
 	"unit.edit": {
 		resource: "unit",

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
@@ -46,6 +47,7 @@ try {
 				})
 				.returning({ id: users.id });
 			assert.ok(actor);
+			return runWithNativeFixtureActor(tx,actor.id,async()=>{
 			const release = await createMusicRelease(tx, actor.id, {
 				name: { languageTag: "en", value: "Physical album" },
 			});
@@ -242,6 +244,7 @@ try {
 				"Human correction",
 			);
 			throw rollback;
+			});
 		});
 	} catch (error) {
 		if (error !== rollback) throw error;

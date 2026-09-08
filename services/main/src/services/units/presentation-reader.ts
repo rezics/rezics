@@ -3,9 +3,10 @@ import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import { isContentLanguage } from "@rezics/i18n";
 import { sql } from "drizzle-orm";
 import { CatalogOwnerValues, type UnitOwner } from "@rezics/reference";
-import type { PresentedAvatar } from "@rezics/avatar";
+import { AvatarTypeValues, FontAwesomeIconPrefixValues, type PresentedAvatar } from "@rezics/avatar";
 import { database, type DatabaseTransaction } from "../database";
 import { CatalogNameTables } from "../database/schema/catalog-names";
+import { CatalogEditorialTables } from "../database/schema/catalog-editorial";
 import { unitStateRelation } from "./state-relation";
 import { presentAvatar } from "./avatar";
 import {
@@ -13,6 +14,7 @@ import {
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
+	avatarReferenceFromColumns,
 } from "./localization";
 
 export type UnitPresentation = {
@@ -39,7 +41,7 @@ export async function readUnitPresentationsInTransaction(
 	if (languages.length > 32)
 		throw new RangeError("Presentation language preferences exceed the bounded grammar");
 	const canonicalLanguages = [...new Set(languages.map(canonicalizeContentLanguageTag))];
-	const platformLanguages = canonicalLanguages.filter(isContentLanguage);
+	const platformLanguages = canonicalLanguages.map(language => language.toString()).filter(isContentLanguage);
 	const candidates = database
 		.select({ id: sql<string>`requested.id`.as("id") })
 		.from(sql`unnest(${sql.param(ids)}::uuid[]) as requested(id)`)
@@ -55,8 +57,8 @@ export async function readUnitPresentationsInTransaction(
 			owner: state.owner,
 			shape: state.shape,
 			language: resolvedUnitLocalizationLanguage(state.id, platformLanguages),
-			title: resolvedUnitLocalizationTitle(state.id, platformLanguages),
-			summary: resolvedUnitLocalizationSummary(state.id, platformLanguages),
+			title:sql<string|null>`left(${resolvedUnitLocalizationTitle(state.id, platformLanguages)},500)`,
+			summary:sql<string|null>`left(${resolvedUnitLocalizationSummary(state.id, platformLanguages)},2000)`,
 			avatar: resolvedUnitLocalizationAvatar(state.id, platformLanguages),
 		})
 		.from(candidates)
@@ -77,11 +79,12 @@ export async function readUnitPresentationsInTransaction(
 		const owned = rows.filter((row) => row.owner === owner).map((row) => row.id);
 		if (!owned.length) continue;
 		const names = CatalogNameTables[owner].name;
+		const editorial = CatalogEditorialTables[owner].current;
 		for (let offset = 0; offset < owned.length; offset += 100) {
 			const batch = owned.slice(offset, offset + 100);
 			// Each preferred language uses its partial index; only the chosen full value is read.
 			const labels = await tx.execute(sql`
-  select requested.owner_id,selected_name.value,selected_name.language_tag
+  select requested.owner_id,left(selected_name.value,500) as value,selected_name.language_tag
   from unnest(${sql.param(batch)}::uuid[]) requested(owner_id)
   left join lateral (
    select candidate.id from unnest(${sql.param(canonicalLanguages)}::text[]) with ordinality wanted(language_tag,priority)
@@ -115,6 +118,23 @@ export async function readUnitPresentationsInTransaction(
 						title: row.value,
 						language: row.language_tag,
 					});
+			}
+			const presentationRows = await tx.execute(sql`
+ select requested.owner_id, chosen.language, chosen.summary,
+ chosen.avatar_type,chosen.avatar_asset_id,chosen.avatar_emoji,chosen.avatar_icon_prefix,chosen.avatar_icon_name
+ from unnest(${sql.param(batch)}::uuid[]) requested(owner_id)
+ join lateral (
+  select language,summary,avatar_type,avatar_asset_id,avatar_emoji,avatar_icon_prefix,avatar_icon_name from ${editorial}
+  where owner_id=requested.owner_id and state='active'
+  order by coalesce(array_position(${sql.param(canonicalLanguages)}::text[],language),2147483647),language limit 1
+ ) chosen on true`);
+			for(const row of z.array(z.object({owner_id:z.uuid(),language:z.string(),summary:z.string().nullable(),
+				avatar_type:z.enum(AvatarTypeValues).nullable(),avatar_asset_id:z.uuid().nullable(),avatar_emoji:z.string().nullable(),
+				avatar_icon_prefix:z.enum(FontAwesomeIconPrefixValues).nullable(),avatar_icon_name:z.string().nullable()})).max(100).parse(presentationRows.rows)) {
+				const previous=result.get(row.owner_id);
+				if(previous) result.set(row.owner_id,{...previous,summary:row.summary,
+					avatar:presentAvatar(avatarReferenceFromColumns({avatarType:row.avatar_type,avatarAssetId:row.avatar_asset_id,
+						avatarEmoji:row.avatar_emoji,avatarIconPrefix:row.avatar_icon_prefix,avatarIconName:row.avatar_icon_name}))});
 			}
 		}
 	}

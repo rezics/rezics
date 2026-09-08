@@ -1,6 +1,6 @@
 import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { inArray, sql } from "drizzle-orm";
-import { check, foreignKey, index, text, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { check, foreignKey, index, smallint, text, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import {
@@ -75,6 +75,8 @@ export const contentStructureNode = pgTable(
 	"content_structure_node",
 	{
 		id: createUuidv7PrimaryKey(),
+		liveStructureSlot: smallint().default(0).notNull(),
+		liveContentSlot: smallint().default(0).notNull(),
 		structureId: uuid().notNull(),
 		ownerUnitId: uuid().notNull(),
 		parentId: uuid(),
@@ -128,6 +130,10 @@ export const contentStructureNode = pgTable(
 		uniqueIndex("content_structure_node_document_key")
 			.on(table.structureId, table.documentKey)
 			.where(sql`${table.documentKey} is not null and ${table.deletedAt} is null`),
+        check("content_structure_live_structure_slot_check",sql`${table.liveStructureSlot} between 0 and 2047`),
+        check("content_structure_live_content_slot_check",sql`${table.liveContentSlot} between 0 and 63`),
+        uniqueIndex("content_structure_live_structure_slot_key").on(table.structureId,table.liveStructureSlot).where(sql`${table.deletedAt} is null`),
+        uniqueIndex("content_structure_live_content_slot_key").on(table.contentUnitId,table.liveContentSlot).where(sql`${table.deletedAt} is null`),
 		index("content_structure_node_structure_parent_position_idx")
 			.on(table.structureId, table.parentId, table.position, table.id)
 			.where(sql`${table.deletedAt} is null`),

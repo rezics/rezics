@@ -1,5 +1,6 @@
+import { unitStateRelation } from "../units/state-relation";
 import type { ContentLanguage } from "@rezics/i18n";
-import { and, desc, eq, inArray, ne } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 import {
 	getFeedEligibilityCondition,
@@ -10,8 +11,6 @@ import {
 } from "../api/feed";
 import type { RecommendationReason } from "../api/recommendations/schema";
 import { contentRatingPolicyFromAllowlist } from "../content-rating/policy";
-import { database } from "../database";
-import { creditAttribution, post, unit } from "../database/schema";
 import { searchGlobalIdentifiers } from "../search/service";
 import type { RecommendationSnapshotContext, RecommendationViewer } from "./context";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
@@ -36,56 +35,24 @@ export async function recommendRelatedPosts(input: {
 		localizationLanguages: input.localizationLanguages,
 	};
 	const eligible = getFeedEligibilityCondition(input.viewer, feedQuery, input.asOf, input.afterId);
-	const [subjectRows, creditRows, best] = await Promise.all([
-		input.seed.subjectId
-			? database
-					.select({ id: post.id })
-					.from(post)
-					.innerJoin(unit, eq(unit.id, post.id))
-					.where(
-						and(eq(post.subjectUnitId, input.seed.subjectId), ne(post.id, input.seed.id), eligible),
-					)
-					.orderBy(desc(post.createdAt), desc(post.id))
-					.limit(RecommendationPolicy.maxRelationCandidates)
-			: [],
-		input.seed.creditedEntityIds.length
-			? database
-					.selectDistinct({ id: creditAttribution.sourceUnitId })
-					.from(creditAttribution)
-					.innerJoin(post, eq(post.id, creditAttribution.sourceUnitId))
-					.innerJoin(unit, eq(unit.id, post.id))
-					.where(
-						and(
-							inArray(creditAttribution.creditedEntityId, [...input.seed.creditedEntityIds]),
-							ne(post.id, input.seed.id),
-							eligible,
-						),
-					)
-					.orderBy(creditAttribution.sourceUnitId)
-					.limit(RecommendationPolicy.maxRelationCandidates)
-			: [],
-		searchGlobalIdentifiers({
-			branches: [
-				{
-					category: "posts",
-					searchExpression: {
-						field: "kind",
-						operator: "any-of",
-						values: ["post", "reply"],
-					},
-					sourceUnitKinds: ["post"],
-				},
-			],
-			contentRatings: [...input.viewer.contentRatings],
-			contentRatingPolicy: contentRatingPolicyFromAllowlist(input.viewer.contentRatings),
-			...(input.viewer.profileId ? { profileId: input.viewer.profileId } : {}),
-			limit: RecommendationPolicy.maxCandidates,
-			sort: "best",
-		}),
-	]);
+ const target=unitStateRelation(sql`null::uuid`,"search_unit");
+ const base={branches:[{category:"posts" as const,sourceOwners:["post" as const],sourceShapes:["post","reply"]}],
+  contentRatings:[...input.viewer.contentRatings],contentRatingPolicy:contentRatingPolicyFromAllowlist(input.viewer.contentRatings),
+  ...(input.viewer.profileId ? {profileId:input.viewer.profileId} : {}),
+  additionalConditions:[eligible,sql`${target.id} <> ${input.seed.id}::uuid`],
+  bestSnapshotId:input.snapshot?.id??null,
+ };
+ const [subjectRows,creditRows,best]=await Promise.all([
+  input.seed.subjectId ? searchGlobalIdentifiers({...base,subjectId:input.seed.subjectId,limit:RecommendationPolicy.maxRelationCandidates,sort:"createdAt:desc"}) : {hits:[]},
+  input.seed.creditedEntityIds.length ? searchGlobalIdentifiers({...base,
+   branches:[{...base.branches[0]!,searchExpression:{field:"credited-profile",operator:"any-of",values:[...input.seed.creditedEntityIds]}}],
+   limit:RecommendationPolicy.maxRelationCandidates,sort:"createdAt:desc"}) : {hits:[]},
+  searchGlobalIdentifiers({...base,limit:RecommendationPolicy.maxCandidates,sort:"best"}),
+ ]);
+
 	const contextualIds = new Set([
-		...subjectRows.map(({ id }) => id),
-		...creditRows.map(({ id }) => id),
+		...subjectRows.hits.map(({ id }) => id),
+		...creditRows.hits.map(({ id }) => id),
 	]);
 	const reason = new Map<string, RecommendationReason>(
 		[...contextualIds].map((id) => [id, "related_subject"]),

@@ -7,20 +7,18 @@ import {
 } from "./search";
 
 describe("progress Search Feature execution boundary", () => {
-	it("publishes a query-only schema with four progress-specific sort options", () => {
+	it("publishes a query-only schema with two indexed progress-specific sort options", () => {
 		const definition = getProgressSearchDefinition();
 
 		expect(definition.controls).toEqual([]);
 		expect(definition.filterDocument).toEqual({
 			categories: ["units"],
-			where: { kind: { in: ["book", "media", "software"] } },
+			where: { owner: { in: ["publishing", "program", "music", "software", "video", "audio"] } },
 		});
 		expect(definition.query.enabled).toBe(true);
 		expect(definition.sort.search.options).toEqual([
 			"progressLastSeenAt:desc",
 			"progressLastSeenAt:asc",
-			"title:asc",
-			"title:desc",
 		]);
 	});
 
@@ -43,11 +41,11 @@ describe("progress Search Feature execution boundary", () => {
 	it("binds opaque cursors to the query, sort, and page size", () => {
 		const first = resolveProgressSearchRequest({
 			injections: [],
-			state: { sort: "title:asc", pageSize: 20 },
+			state: { sort: "progressLastSeenAt:asc", pageSize: 20 },
 		});
 		const cursor = createProgressSearchCursor(first, {
 			boundary: {
-				sortValue: "dune",
+				sortValue: "2026-09-08T00:00:00.000Z",
 				unitId: "0198e6bd-18ff-7760-b9cc-4f74f8bb29bf",
 			},
 			consumed: 20,
@@ -57,16 +55,16 @@ describe("progress Search Feature execution boundary", () => {
 		expect(
 			resolveProgressSearchRequest({
 				injections: [],
-				state: { sort: "title:asc", pageSize: 20, cursor },
+				state: { sort: "progressLastSeenAt:asc", pageSize: 20, cursor },
 			}).boundary,
 		).toEqual({
-			sortValue: "dune",
+			sortValue: "2026-09-08T00:00:00.000Z",
 			unitId: "0198e6bd-18ff-7760-b9cc-4f74f8bb29bf",
 		});
 		expect(() =>
 			resolveProgressSearchRequest({
 				injections: [],
-				state: { sort: "title:desc", pageSize: 20, cursor },
+				state: { sort: "progressLastSeenAt:desc", pageSize: 20, cursor },
 			}),
 		).toThrow("does not match");
 	});
@@ -77,7 +75,7 @@ describe("progress Search Feature execution boundary", () => {
 				injections: [],
 				state: {
 					filter: {
-						where: { kind: { in: ["book"] } },
+						where: { owner: { in: ["publishing"] } },
 					},
 				},
 			}),
@@ -90,7 +88,7 @@ describe("progress Search Feature execution boundary", () => {
 						removable: false,
 						value: {
 							controlKey: "kind",
-							filter: { field: "kind", operator: "equals", value: "book" },
+							filter: { field: "unit-owner", operator: "equals", value: "publishing" },
 						},
 					},
 				],

@@ -18,7 +18,9 @@ contracts in their status; use source code and qualification evidence for curren
 | [Content structures, relations, and query models, 2026-09-06](REZICS-内容结构关系与查询模型-20260906.md) | Fixed and dynamic fields, content identity and occurrences, traversal, Tag evolution, referenceable relations, and relational/full-text query execution. | Existing implementation observations plus proposed changes; not a completion record. |
 | [Catalog boundaries and implementation phases, 2026-09-06](REZICS-Catalog领域边界与实施分期-20260906.md) | Full catalog ownership map; classification versus extensions, object identities, table groups and sharding; products/GPU, compute services, software/packages, media, courses and future domains. | Owns the current-source status snapshot, deferred scope, activation conditions and delivery criteria. |
 
-For the current stage, start with the source-complete schema report and
+For the converged native delivery, start with the
+[convergence boundary and remaining gaps](REZICS-operational-refactor-convergence-gaps-20260908.md).
+For the broader target, read the source-complete schema report and
 [schema milestone](../plan/operational-refactor-20260906/00-source-complete-schema.md).
 The operational decision report and [broader program](../plan/operational-refactor-20260906/README.md)
 remain the long-term portfolio. The program adds

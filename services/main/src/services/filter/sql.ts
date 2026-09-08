@@ -1,6 +1,5 @@
 import { selfAuthUserIdForEntity } from "../participation/account-query";
 import type {
-	BookFilter,
 	CollectionFilter,
 	ContentLanguageSupportFilter,
 	IntegerFilter,
@@ -59,13 +58,28 @@ function logicConditions<T extends { all?: T[]; any?: T[]; not?: T }>(
 	];
 }
 
-function unitReferenceCondition(filter: UnitReferenceFilter, id: SqlName, kind?: SqlName): SQL {
+function unitReferenceCondition(
+	filter: UnitReferenceFilter,
+	id: SqlName,
+	owner?: SqlName,
+	shape?: SqlName,
+): SQL {
 	const conditions: SQL[] = [];
 	if (filter.id) conditions.push(valuesCondition(id, filter.id.in, true));
-	if (filter.kind) {
-		if (!kind) return sql`false`;
-		conditions.push(valuesCondition(kind, filter.kind.in));
-	}
+	if (filter.owner)
+		conditions.push(
+			valuesCondition(
+				owner ?? sql`(select owner from public.read_unit_state(${id}))`,
+				filter.owner.in,
+			),
+		);
+	if (filter.shape)
+		conditions.push(
+			valuesCondition(
+				shape ?? sql`(select shape from public.read_unit_state(${id}))`,
+				filter.shape.in,
+			),
+		);
 	return conjunction(conditions);
 }
 
@@ -83,13 +97,6 @@ function localizationCondition(filter: LocalizationFilter): SQL {
 	const conditions = logicConditions(filter, localizationCondition);
 	if (filter.language)
 		conditions.push(valuesCondition(sql`filter_localization.language`, filter.language.in));
-	return conjunction(conditions);
-}
-
-function bookCondition(filter: BookFilter): SQL {
-	const conditions = logicConditions(filter, bookCondition);
-	if (filter.releaseStatus)
-		conditions.push(valuesCondition(sql`filter_book.release_status`, filter.releaseStatus.in));
 	return conjunction(conditions);
 }
 
@@ -121,7 +128,7 @@ function realmPlacementCondition(filter: RealmPlacementFilter): SQL {
 	const conditions = logicConditions(filter, realmPlacementCondition);
 	if (filter.realm)
 		conditions.push(
-			unitReferenceCondition(filter.realm, sql`filter_realm_unit.realm_id`, sql`filter_realm.kind`),
+			unitReferenceCondition(filter.realm, sql`filter_realm_unit.realm_id`, sql`'realm'`),
 		);
 	if (filter.status)
 		conditions.push(valuesCondition(sql`filter_realm_unit.status`, filter.status.in));
@@ -158,9 +165,9 @@ function tagAssertionCondition(
 		conditions.push(sql`exists (
 			select 1
 			from ${unitEffectiveTag} filter_effective_tag
-			join unit filter_tag on filter_tag.id = filter_effective_tag.tag_id
+			join tag filter_tag on filter_tag.id = filter_effective_tag.tag_id
 			where filter_effective_tag.unit_id = ${unitId}
-				and ${tagReference(sql`filter_effective_tag.tag_id`, sql`filter_tag.kind`)}
+				and ${tagReference(sql`filter_effective_tag.tag_id`, sql`'tag'`)}
 		)`);
 		return conjunction(conditions);
 	}
@@ -169,7 +176,7 @@ function tagAssertionCondition(
 		conditions.push(sql`exists (
 			select 1
 			from ${unitEffectiveTag} filter_effective_tag
-			join unit filter_tag on filter_tag.id = filter_effective_tag.tag_id
+			join tag filter_tag on filter_tag.id = filter_effective_tag.tag_id
 			${
 				consensus
 					? sql`join ${unitTagJudgmentStat} filter_tag_stat
@@ -178,7 +185,7 @@ function tagAssertionCondition(
 					: sql``
 			}
 			where filter_effective_tag.unit_id = ${unitId}
-				and ${tagReference(sql`filter_effective_tag.tag_id`, sql`filter_tag.kind`)}
+				and ${tagReference(sql`filter_effective_tag.tag_id`, sql`'tag'`)}
 				${
 					consensus
 						? sql`and filter_tag_stat.vote_count > 0
@@ -194,23 +201,19 @@ function tagAssertionCondition(
 		conditions.push(sql`exists (
 			select 1
 			from unit_tag filter_unit_tag
-			join unit filter_tag on filter_tag.id = filter_unit_tag.tag_id
+			join tag filter_tag on filter_tag.id = filter_unit_tag.tag_id
 			where filter_unit_tag.unit_id = ${unitId}
-				and ${tagReference(sql`filter_unit_tag.tag_id`, sql`filter_tag.kind`)}
+				and ${tagReference(sql`filter_unit_tag.tag_id`, sql`'tag'`)}
 		)`);
 	} else if (authority.kind === "realm" && authority.view.kind === "policy") {
 		conditions.push(sql`exists (
 			select 1
 			from realm_unit_tag filter_realm_tag
-			join unit filter_tag on filter_tag.id = filter_realm_tag.tag_id
-			join unit filter_authority_realm on filter_authority_realm.id = filter_realm_tag.realm_id
+			join tag filter_tag on filter_tag.id = filter_realm_tag.tag_id
+			join realm filter_authority_realm on filter_authority_realm.id = filter_realm_tag.realm_id
 			where filter_realm_tag.unit_id = ${unitId}
-				and ${unitReferenceCondition(
-					authority.realm,
-					sql`filter_realm_tag.realm_id`,
-					sql`filter_authority_realm.kind`,
-				)}
-				and ${tagReference(sql`filter_realm_tag.tag_id`, sql`filter_tag.kind`)}
+				and ${unitReferenceCondition(authority.realm, sql`filter_realm_tag.realm_id`, sql`'realm'`)}
+				and ${tagReference(sql`filter_realm_tag.tag_id`, sql`'tag'`)}
 		)`);
 	} else if (authority.kind === "realm") {
 		const view = authority.view;
@@ -219,16 +222,16 @@ function tagAssertionCondition(
 		conditions.push(sql`exists (
 			select 1
 			from realm_tag_judgment_stat filter_realm_tag_stat
-			join unit filter_tag on filter_tag.id = filter_realm_tag_stat.tag_id
-			join unit filter_authority_realm
+			join tag filter_tag on filter_tag.id = filter_realm_tag_stat.tag_id
+			join realm filter_authority_realm
 				on filter_authority_realm.id = filter_realm_tag_stat.realm_id
 			where filter_realm_tag_stat.unit_id = ${unitId}
 				and ${unitReferenceCondition(
 					authority.realm,
 					sql`filter_realm_tag_stat.realm_id`,
-					sql`filter_authority_realm.kind`,
+					sql`'realm'`,
 				)}
-				and ${tagReference(sql`filter_realm_tag_stat.tag_id`, sql`filter_tag.kind`)}
+				and ${tagReference(sql`filter_realm_tag_stat.tag_id`, sql`'tag'`)}
 				and filter_realm_tag_stat.vote_count > 0
 				${
 					consensus
@@ -246,10 +249,10 @@ function tagAssertionCondition(
 				? sql`exists (
 					select 1
 					from account_unit_tag filter_profile_tag
-					join unit filter_tag on filter_tag.id = filter_profile_tag.tag_id
+					join tag filter_tag on filter_tag.id = filter_profile_tag.tag_id
 					where filter_profile_tag.unit_id = ${unitId}
 						and filter_profile_tag.auth_user_id = ${selfAuthUserIdForEntity(viewerProfileId)}
-						and ${tagReference(sql`filter_profile_tag.tag_id`, sql`filter_tag.kind`)}
+						and ${tagReference(sql`filter_profile_tag.tag_id`, sql`'tag'`)}
 				)`
 				: sql`false`,
 		);
@@ -288,11 +291,11 @@ function postCondition(filter: PostFilter, viewerProfileId?: string): SQL {
 	if (filter.subject)
 		conditions.push(
 			"is" in filter.subject
-				? filter.subject.is.kind
+				? filter.subject.is.owner || filter.subject.is.shape
 					? sql`exists (
-						select 1 from unit filter_subject
-						where filter_subject.id = filter_post.subject_unit_id
-							and ${unitReferenceCondition(filter.subject.is, sql`filter_subject.id`, sql`filter_subject.kind`)}
+						select 1 from public.read_unit_state(filter_post.subject_unit_id) filter_subject
+						where true
+							and ${unitReferenceCondition(filter.subject.is, sql`filter_subject.id`, sql`filter_subject.owner`, sql`filter_subject.shape`)}
 					)`
 					: unitReferenceCondition(filter.subject.is, sql`filter_post.subject_unit_id`)
 				: sql`filter_post.subject_unit_id is null`,
@@ -301,22 +304,22 @@ function postCondition(filter: PostFilter, viewerProfileId?: string): SQL {
 		conditions.push(sql`exists (
 			select 1
 			from realm_tag_context filter_realm_tag_context
-			join unit filter_context_realm
+			join realm filter_context_realm
 				on filter_context_realm.id = filter_realm_tag_context.realm_id
-			join unit filter_context_tag
+			join tag filter_context_tag
 				on filter_context_tag.id = filter_realm_tag_context.tag_id
 			where filter_realm_tag_context.context_post_id = filter_post.id
 				and ${unitReferenceCondition(
 					filter.explainsRealmTag.realm,
 					sql`filter_realm_tag_context.realm_id`,
-					sql`filter_context_realm.kind`,
+					sql`'realm'`,
 				)}
 				and ${
 					filter.explainsRealmTag.tag
 						? unitReferenceCondition(
 								filter.explainsRealmTag.tag,
 								sql`filter_realm_tag_context.tag_id`,
-								sql`filter_context_tag.kind`,
+								sql`'tag'`,
 							)
 						: sql`true`
 				}
@@ -328,15 +331,15 @@ function postCondition(filter: PostFilter, viewerProfileId?: string): SQL {
 			select 1
 			from post_score filter_post_score
 			join score filter_score on filter_score.id = filter_post_score.score_id
-			join profile_preference filter_score_preference
-				on filter_score_preference.profile_id = filter_score.profile_id
-			join unit filter_score_realm on filter_score_realm.id = filter_score.realm_id
-			join unit filter_score_target on filter_score_target.id = filter_score.unit_id
+			left join account_preference filter_score_preference
+ on filter_score_preference.auth_user_id = ${selfAuthUserIdForEntity(sql`filter_score.profile_id`)}
+			join realm filter_score_realm on filter_score_realm.id = filter_score.realm_id
+			join lateral public.read_unit_state(filter_score.unit_id) filter_score_target on true
 			where filter_post_score.post_id = filter_post.id
 				and (
 					${viewerProfileId ? sql`filter_score.profile_id = ${viewerProfileId}::uuid` : sql`false`}
 					or (
-						filter_score_preference.score_visibility <> 'private'
+						coalesce(filter_score_preference.score_visibility,'public') <> 'private'
 						and filter_score.visibility <> 'private'
 						and filter_score_realm.status = 'published'
 						and filter_score_realm.visibility in ('public', 'unlisted')
@@ -351,10 +354,10 @@ function postCondition(filter: PostFilter, viewerProfileId?: string): SQL {
 								? sql`not exists (
 										select 1 from account_entity_block filter_score_block
 										where (
-											filter_score_block.blocker_auth_user_id = ${viewerProfileId}::uuid
+											filter_score_block.blocker_auth_user_id = ${selfAuthUserIdForEntity(viewerProfileId)}
 											and filter_score_block.blocked_entity_id = filter_score.profile_id
 										) or (
-											filter_score_block.blocker_auth_user_id = filter_score.profile_id
+											filter_score_block.blocker_auth_user_id = ${selfAuthUserIdForEntity(sql`filter_score.profile_id`)}
 											and filter_score_block.blocked_entity_id = ${viewerProfileId}::uuid
 										)
 									)`
@@ -367,9 +370,9 @@ function postCondition(filter: PostFilter, viewerProfileId?: string): SQL {
 					{
 						value: sql`filter_score.value`,
 						realmId: sql`filter_score.realm_id`,
-						realmKind: sql`filter_score_realm.kind`,
+						realmKind: sql`'realm'`,
 						targetId: sql`filter_score.unit_id`,
-						targetKind: sql`filter_score_target.kind`,
+						targetKind: sql`filter_score_target.owner`,
 						authorId: sql`filter_score.profile_id`,
 					},
 					viewerProfileId,
@@ -388,13 +391,13 @@ function collectionCondition(filter: CollectionFilter): SQL {
 		const exists = sql`exists (
 			select 1
 			from collection_item filter_collection_item
-			join unit filter_collection_item_unit
-				on filter_collection_item_unit.id = filter_collection_item.unit_id
+			join lateral public.read_unit_state(filter_collection_item.unit_id) filter_collection_item_unit on true
 			where filter_collection_item.collection_id = filter_collection.id
 				and ${unitReferenceCondition(
 					itemFilter,
 					sql`filter_collection_item_unit.id`,
-					sql`filter_collection_item_unit.kind`,
+					sql`filter_collection_item_unit.owner`,
+					sql`filter_collection_item_unit.shape`,
 				)}
 		)`;
 		conditions.push("some" in relation ? exists : sql`not (${exists})`);
@@ -404,7 +407,8 @@ function collectionCondition(filter: CollectionFilter): SQL {
 
 export interface CompileUnitPredicateSqlInput {
 	readonly unitId: SQL<unknown>;
-	readonly unitKind: SQL<unknown>;
+	readonly unitOwner: SQL<unknown>;
+	readonly unitShape: SQL<unknown>;
 	readonly viewerProfileId?: string;
 }
 
@@ -447,7 +451,7 @@ function realmPlacementCandidateSet(filter: RealmPlacementFilter): SQL | undefin
 	if (filter.realm?.id)
 		conjunctiveSets.push(sql`select filter_realm_unit.unit_id
 			from realm_unit filter_realm_unit
-			join unit filter_realm on filter_realm.id = filter_realm_unit.realm_id
+			join realm filter_realm on filter_realm.id = filter_realm_unit.realm_id
 			where ${realmPlacementCondition(filter)}`);
 	return combineCandidateSets(conjunctiveSets, "intersect");
 }
@@ -545,18 +549,17 @@ function scoreCandidateSet(
 			: filter.author?.id !== undefined;
 	if (filter.realm?.id || filter.target?.id || authorAnchored) {
 		const source = sql`from score filter_candidate_score
-			join unit filter_candidate_score_realm
+			join realm filter_candidate_score_realm
 				on filter_candidate_score_realm.id = filter_candidate_score.realm_id
-			join unit filter_candidate_score_target
-				on filter_candidate_score_target.id = filter_candidate_score.unit_id`;
+			join lateral public.read_unit_state(filter_candidate_score.unit_id) filter_candidate_score_target on true`;
 		const condition = scoreCondition(
 			filter,
 			{
 				value: sql`filter_candidate_score.value`,
 				realmId: sql`filter_candidate_score.realm_id`,
-				realmKind: sql`filter_candidate_score_realm.kind`,
+				realmKind: sql`'realm'`,
 				targetId: sql`filter_candidate_score.unit_id`,
-				targetKind: sql`filter_candidate_score_target.kind`,
+				targetKind: sql`filter_candidate_score_target.owner`,
 				authorId: sql`filter_candidate_score.profile_id`,
 			},
 			viewerProfileId,
@@ -570,10 +573,9 @@ function scoreCandidateSet(
 					from post_score filter_candidate_post_score
 					join score filter_candidate_score
 						on filter_candidate_score.id = filter_candidate_post_score.score_id
-					join unit filter_candidate_score_realm
+					join realm filter_candidate_score_realm
 						on filter_candidate_score_realm.id = filter_candidate_score.realm_id
-					join unit filter_candidate_score_target
-						on filter_candidate_score_target.id = filter_candidate_score.unit_id
+					join lateral public.read_unit_state(filter_candidate_score.unit_id) filter_candidate_score_target on true
 					where ${condition}`,
 		);
 	}
@@ -688,9 +690,12 @@ export function compileUnitPredicateCandidateSet(
 		}
 	}
 	if (filter.id)
-		conjunctiveSets.push(sql`select candidate_unit.id as unit_id
-			from unit candidate_unit
-			where ${valuesCondition(sql`candidate_unit.id`, filter.id.in, true)}`);
+		conjunctiveSets.push(
+			sql`select candidate_id as unit_id from unnest(ARRAY[${sql.join(
+				filter.id.in.map((id) => sql`${id}::uuid`),
+				sql`,`,
+			)}]::uuid[]) candidate_id`,
+		);
 	if (filter.contentLanguageSupport && "some" in filter.contentLanguageSupport)
 		conjunctiveSets.push(sql`select filter_content_language.unit_id
 			from unit_content_language_search filter_content_language
@@ -706,12 +711,13 @@ export function compileUnitPredicateCandidateSet(
 	)
 		conjunctiveSets.push(sql`select filter_credit_attribution.source_unit_id as unit_id
 			from credit_attribution filter_credit_attribution
-			join unit filter_credited_unit
+			join entity_identity filter_credited_unit
 				on filter_credited_unit.id = filter_credit_attribution.credited_entity_id
 			where ${unitReferenceCondition(
 				filter.creditAttributions.some,
 				sql`filter_credited_unit.id`,
-				sql`filter_credited_unit.kind`,
+				sql`'entity'`,
+				sql`filter_credited_unit.shape`,
 			)}`);
 	if (
 		filter.subjectAssociations &&
@@ -720,12 +726,13 @@ export function compileUnitPredicateCandidateSet(
 	)
 		conjunctiveSets.push(sql`select filter_subject_association.unit_id
 			from subject_association filter_subject_association
-			join unit filter_subject_entity
+			join entity_identity filter_subject_entity
 				on filter_subject_entity.id = filter_subject_association.entity_id
 			where ${unitReferenceCondition(
 				filter.subjectAssociations.some,
 				sql`filter_subject_entity.id`,
-				sql`filter_subject_entity.kind`,
+				sql`'entity'`,
+				sql`filter_subject_entity.shape`,
 			)}`);
 	if (filter.publishers && "some" in filter.publishers)
 		conjunctiveSets.push(sql`select filter_publisher.source_unit_id as unit_id
@@ -752,10 +759,6 @@ export function compileUnitPredicateCandidateSet(
 		const collectionSet = collectionCandidateSet(filter.collection.is);
 		if (collectionSet) conjunctiveSets.push(collectionSet);
 	}
-	if (filter.book && "is" in filter.book)
-		conjunctiveSets.push(sql`select filter_book.id as unit_id
-			from book filter_book
-			where ${bookCondition(filter.book.is)}`);
 	return combineCandidateSets(conjunctiveSets, "intersect");
 }
 
@@ -766,7 +769,8 @@ export function compileUnitPredicateSql(
 ): SQL {
 	const conditions = logicConditions(filter, (child) => compileUnitPredicateSql(child, input));
 	if (filter.id) conditions.push(valuesCondition(input.unitId, filter.id.in, true));
-	if (filter.kind) conditions.push(valuesCondition(input.unitKind, filter.kind.in));
+	if (filter.owner) conditions.push(valuesCondition(input.unitOwner, filter.owner.in));
+	if (filter.shape) conditions.push(valuesCondition(input.unitShape, filter.shape.in));
 	if (filter.localizations) {
 		const relation = filter.localizations;
 		const exists = sql`exists (
@@ -790,7 +794,7 @@ export function compileUnitPredicateSql(
 		const exists = sql`exists (
 			select 1
 			from realm_unit filter_realm_unit
-			join unit filter_realm on filter_realm.id = filter_realm_unit.realm_id
+			join realm filter_realm on filter_realm.id = filter_realm_unit.realm_id
 			where filter_realm_unit.unit_id = ${input.unitId}
 				and ${realmPlacementCondition("some" in relation ? relation.some : relation.none)}
 		)`;
@@ -811,12 +815,13 @@ export function compileUnitPredicateSql(
 		const membership = sql`${input.unitId} in (
 			select filter_credit_attribution.source_unit_id
 			from credit_attribution filter_credit_attribution
-			join unit filter_credited_unit
+			join entity_identity filter_credited_unit
 				on filter_credited_unit.id = filter_credit_attribution.credited_entity_id
 			where ${unitReferenceCondition(
 				reference,
 				sql`filter_credited_unit.id`,
-				sql`filter_credited_unit.kind`,
+				sql`'entity'`,
+				sql`filter_credited_unit.shape`,
 			)}
 		)`;
 		conditions.push("some" in relation ? membership : sql`not (${membership})`);
@@ -827,12 +832,13 @@ export function compileUnitPredicateSql(
 		const membership = sql`${input.unitId} in (
 			select filter_subject_association.unit_id
 			from subject_association filter_subject_association
-			join unit filter_subject_entity
+			join entity_identity filter_subject_entity
 				on filter_subject_entity.id = filter_subject_association.entity_id
 			where ${unitReferenceCondition(
 				reference,
 				sql`filter_subject_entity.id`,
-				sql`filter_subject_entity.kind`,
+				sql`'entity'`,
+				sql`filter_subject_entity.shape`,
 			)}
 		)`;
 		conditions.push("some" in relation ? membership : sql`not (${membership})`);
@@ -858,12 +864,11 @@ export function compileUnitPredicateSql(
 		const exists = sql`exists (
 			select 1
 			from score filter_received_score
-			join profile_preference filter_received_score_preference
-				on filter_received_score_preference.profile_id = filter_received_score.profile_id
-			join unit filter_received_realm
+			left join account_preference filter_received_score_preference
+ on filter_received_score_preference.auth_user_id = ${selfAuthUserIdForEntity(sql`filter_received_score.profile_id`)}
+			join realm filter_received_realm
 				on filter_received_realm.id = filter_received_score.realm_id
-			join unit filter_received_target
-				on filter_received_target.id = filter_received_score.unit_id
+			join lateral public.read_unit_state(filter_received_score.unit_id) filter_received_target on true
 			where filter_received_score.unit_id = ${input.unitId}
 				and (
 					${
@@ -872,7 +877,7 @@ export function compileUnitPredicateSql(
 							: sql`false`
 					}
 					or (
-						filter_received_score_preference.score_visibility = 'public'
+						coalesce(filter_received_score_preference.score_visibility,'public') = 'public'
 						and filter_received_score.visibility = 'public'
 						and filter_received_realm.status = 'published'
 						and filter_received_realm.visibility = 'public'
@@ -887,10 +892,10 @@ export function compileUnitPredicateSql(
 								? sql`not exists (
 										select 1 from account_entity_block filter_received_score_block
 										where (
-											filter_received_score_block.blocker_auth_user_id = ${input.viewerProfileId}::uuid
+											filter_received_score_block.blocker_auth_user_id = ${selfAuthUserIdForEntity(input.viewerProfileId)}
 											and filter_received_score_block.blocked_entity_id = filter_received_score.profile_id
 										) or (
-											filter_received_score_block.blocker_auth_user_id = filter_received_score.profile_id
+											filter_received_score_block.blocker_auth_user_id = ${selfAuthUserIdForEntity(sql`filter_received_score.profile_id`)}
 											and filter_received_score_block.blocked_entity_id = ${input.viewerProfileId}::uuid
 										)
 									)`
@@ -903,9 +908,9 @@ export function compileUnitPredicateSql(
 					{
 						value: sql`filter_received_score.value`,
 						realmId: sql`filter_received_score.realm_id`,
-						realmKind: sql`filter_received_realm.kind`,
+						realmKind: sql`'realm'`,
 						targetId: sql`filter_received_score.unit_id`,
-						targetKind: sql`filter_received_target.kind`,
+						targetKind: sql`filter_received_target.owner`,
 						authorId: sql`filter_received_score.profile_id`,
 					},
 					input.viewerProfileId,
@@ -935,16 +940,6 @@ export function compileUnitPredicateSql(
 					select 1 from collection filter_collection
 					where filter_collection.id = ${input.unitId}
 				)`,
-		);
-	if (filter.book)
-		conditions.push(
-			"is" in filter.book
-				? sql`exists (
-					select 1 from book filter_book
-					where filter_book.id = ${input.unitId}
-						and ${bookCondition(filter.book.is)}
-				)`
-				: sql`not exists (select 1 from book filter_book where filter_book.id = ${input.unitId})`,
 		);
 	return conjunction(conditions);
 }

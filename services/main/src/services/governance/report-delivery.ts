@@ -1,9 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { and, desc, eq, gt, isNull, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, lte, sql } from "drizzle-orm";
 import { database, withDatabaseTransactionDeadline, type DatabaseTransaction } from "../database";
 import { contentGovernanceAction, contentReport, contentReportReferral, contentReviewCase,
 	governanceNoticeRecipient, governanceReportDelivery } from "../database/schema";
 import { createNotification, resolveNotificationRecipients } from "../notifications/service";
+import { databaseErrorMatches } from "../database/constraint";
+import { GovernanceDeliveryCapacityExceeded } from "../api/governance/errors";
 
 /** @internal Fixed work bounds; queue ownership is a PostgreSQL row lock held through each page. */
 export const GovernanceReportDeliveryPolicy = { shards: 64, pageSize: 32, concurrentPages: 4, transactionMs: 20_000 } as const;
@@ -18,10 +20,16 @@ export async function enqueueGovernanceReportDelivery(tx: DatabaseTransaction, i
 		.where(eq(contentReportReferral.caseId, input.caseId)).orderBy(desc(contentReportReferral.id)).limit(1);
 	if (!boundary) return;
 	const id = randomUUID();
-	await tx.insert(governanceReportDelivery).values({
-		...input, id, shard: Number.parseInt(id.slice(0, 2), 16) % GovernanceReportDeliveryPolicy.shards,
-		throughReferralId: boundary.id,
-	}).onConflictDoNothing();
+	try {
+		await tx.insert(governanceReportDelivery).values({
+			...input, id, shard: Number.parseInt(id.slice(0, 2), 16) % GovernanceReportDeliveryPolicy.shards,
+			throughReferralId: boundary.id,
+		}).onConflictDoNothing();
+	} catch (cause) {
+		if (databaseErrorMatches(cause, { code: "23514", constraint: "governance_report_delivery_capacity" }))
+			throw new GovernanceDeliveryCapacityExceeded();
+		throw cause;
+	}
 }
 
 /** @internal Exactly one bounded page; notification, read receipt and cursor advance share the transaction. */
@@ -112,7 +120,7 @@ export async function purgeCompletedGovernanceReportDeliveries(now = new Date())
 			.orderBy(governanceReportDelivery.completedAt, governanceReportDelivery.id)
 			.limit(128).for("update", { skipLocked: true });
 		if (rows.length) await tx.delete(governanceReportDelivery)
-			.where(sql`${governanceReportDelivery.id} = any(${rows.map(row => row.id)}::uuid[])`);
+			.where(inArray(governanceReportDelivery.id,rows.map(row => row.id)));
 		return rows.length;
 	});
 }

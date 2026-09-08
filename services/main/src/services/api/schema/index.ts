@@ -21,9 +21,9 @@ import {
 	ChineseContentDisplayValues,
 	ContentLanguageValues,
 	ContentRatingValues,
-	FollowableUnitKindValues,
+	FollowableUnitOwnerValues,
 	NonRealmUnitKindValues,
-	NonRealmFollowableUnitKindValues,
+	NonRealmFollowableUnitOwnerValues,
 	ResourceVisibilityValues,
 	RevisionAttributionAssuranceValues,
 	RevisionContributionRoleValues,
@@ -124,14 +124,14 @@ export const UnitKind = t.UnionEnum(UnitKindValues, { default: undefined });
 export type UnitKind = StaticDecode<typeof UnitKind>;
 
 /** A Unit discriminator admitted by generic Following surfaces. */
-export const FollowableUnitKind = t.UnionEnum(FollowableUnitKindValues, { default: undefined });
-export type FollowableUnitKind = StaticDecode<typeof FollowableUnitKind>;
+export const FollowableUnitOwner = t.UnionEnum(FollowableUnitOwnerValues, { default: undefined });
+export type FollowableUnitOwner = StaticDecode<typeof FollowableUnitOwner>;
 
 /** A followable Unit discriminator excluding Realm-only settings branches. */
-export const NonRealmFollowableUnitKind = t.UnionEnum(NonRealmFollowableUnitKindValues, {
+export const NonRealmFollowableUnitOwner = t.UnionEnum(NonRealmFollowableUnitOwnerValues, {
 	default: undefined,
 });
-export type NonRealmFollowableUnitKind = StaticDecode<typeof NonRealmFollowableUnitKind>;
+export type NonRealmFollowableUnitOwner = StaticDecode<typeof NonRealmFollowableUnitOwner>;
 
 /** The release lifecycle of a Book or Media work, independent of Unit publication. */
 export const WorkReleaseStatus = t.UnionEnum(WorkReleaseStatusValues, { default: undefined });

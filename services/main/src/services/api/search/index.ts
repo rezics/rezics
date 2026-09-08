@@ -390,7 +390,7 @@ async function presentSearchResultAsFeed(
 			tagIds: result.searchTagIds,
 			localizationLanguages,
 		}),
-		getTagPositionAvailability(items.flatMap((item) => (item.unitKind === "tag" ? [item.id] : []))),
+		getTagPositionAvailability(items.flatMap((item) => (item.owner === "tag" ? [item.id] : []))),
 	]);
 	const presentedItems = items.map((item) => {
 		const matches = tagMatches.get(item.id);

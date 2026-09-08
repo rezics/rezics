@@ -1,7 +1,8 @@
 import { MUSIC_SOURCE_DEPENDENCY_LIMIT, MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT, SOURCE_ACQUISITION_IO_TIMEOUT_MS } from "../database/schema/catalog-source-limits";
+import { peekActiveObservability } from "@rezics/observability";
 import { withPreparedMusicBrainzRecordings } from "./musicbrainz-reference-cache";
 import { tracks } from "./musicbrainz-release-plan";
-import { planMusicBrainzDependencies, prepareMusicBrainzProposalDependencies } from "./musicbrainz-dependencies";
+import { planMusicBrainzDependencies, prepareMusicBrainzProposalDependencies, MusicReleaseDependencyPageSize } from "./musicbrainz-dependencies";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseExecutor, DatabaseTransaction } from "../database";
@@ -204,9 +205,9 @@ export function createMusicReleaseSourceHandlers(database: DatabaseExecutor, rou
 										sourceRecordId: row.sourceRecordId, snapshotId: previous ? loaded.evidence.preparation.beforeSnapshotId : row.snapshotId,
 										receipt: previous ? loaded.evidence.before : loaded.evidence.after, bytes: bytes[documentIndex]!,
 										afterPosition: position, sourcePage: true, purpose: previous ? "previous-for-withdrawal" : "incoming" });
-									const processed = Math.min(128, Math.max(0, plan.length - position));
+									const processed = Math.min(MusicReleaseDependencyPageSize, Math.max(0, plan.length - position));
 									nextPosition += processed; preparedDependencyCount += processed;
-									if (position + 128 < plan.length) prepared = false;
+									if (position + MusicReleaseDependencyPageSize < plan.length) prepared = false;
 									else if (!previous && row.action === "apply") { nextPosition = MUSIC_SOURCE_DEPENDENCY_LIMIT; prepared = false; }
 								}
 								const [updated] = await tx.update(jobs).set({ preparation: loaded.evidence.preparation,
@@ -234,6 +235,10 @@ export function createMusicReleaseSourceHandlers(database: DatabaseExecutor, rou
 				});
 				return { status: "committed" as const, receiptId: completed.receiptId };
 			} catch (error) {
+				peekActiveObservability()?.logger.error("Music release source stage failed", {
+					eventName: "catalog.music_release.stage_failed", error,
+					attributes: { phase, sourceRecordId: value.sourceRecordId, jobId: value.jobId, generation: value.generation },
+				});
 				if (signal.aborted) throw error;
 				// Claim committed before work. Failed publication rolls back, then records a bounded retry or terminal proof.
 				return database.transaction(async (tx) => {

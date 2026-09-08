@@ -125,6 +125,11 @@ export function createCatalogNameTables(owner: CatalogOwner) {
 		index(`${owner}_named_form_active_idx`)
 			.on(table.ownerId, table.id)
 			.where(sql`${table.state} = 'active'`),
+		index(`${owner}_named_form_search_idx`).using("pgroonga", table.value)
+			.with({ index_flags_mapping: '\'{"value":["LARGE"]}\'', lexicon_flags_mapping: '\'{"value":["LARGE"]}\'' })
+			.where(sql`${table.state}='active' and ${table.spoiler}=0 and ${table.scopeOwnerId} is null`),
+		index(`${owner}_named_form_search_language_idx`).on(table.ownerId,sql`split_part(lower(${table.languageTag}),'-',1)`,table.id)
+			.where(sql`${table.state}='active' and ${table.spoiler}=0 and ${table.scopeOwnerId} is null`),
 		index(`${owner}_named_form_preview_idx`)
 			.on(table.ownerId, table.id)
 			.where(sql`${table.state}='active' and ${table.spoiler}=0 and ${table.scopeOwnerId} is null`),

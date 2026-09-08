@@ -10,6 +10,8 @@ import {
 	setValueUnknown,
 	valueDraftFromNodes,
 	valueRules,
+	type ReadValueNode,
+	type ValueNode,
 } from "./semantic-draft";
 const id = "019b1234-0000-7000-8000-000000000001";
 function meaning(valueKind: DefinitionRevision["valueKind"] = "number"): DefinitionRevision {
@@ -66,13 +68,69 @@ describe("semantic authoring boundary", () => {
 		expect(child).not.toBeNull();
 		if (!child) return;
 		const body = buildFactBody(definition, child, 2, 0);
-		expect(body?.nodes[2]).toMatchObject({
+		expect(body).not.toBeNull();
+		if (!body) return;
+		expect(body.nodes[2]).toMatchObject({
 			parentPosition: 1,
 			parentKind: "array",
 			memberKey: null,
 			kind: "string",
 		});
-		expect(body && valueDraftFromNodes(definition, body.nodes)).toEqual(child);
+		expect(body.nodes.every((node) => !Object.hasOwn(node, "rulePosition"))).toBe(true);
+		const readNodes: ReadValueNode[] = [
+			{ ...body.nodes[0]!, rulePosition: 0 },
+			{ ...body.nodes[1]!, rulePosition: 1 },
+			{ ...body.nodes[2]!, rulePosition: 2 },
+		];
+		expect(valueDraftFromNodes(definition, readNodes)).toEqual(child);
+	});
+	it("uses persisted rulePosition to disambiguate identical member keys", () => {
+		const definition = meaning("object");
+		definition.constraints.rules = [
+			{ position: 0, parent: null, memberKey: null, kind: "object", nullable: true, integer: false },
+			{ position: 1, parent: 0, memberKey: "left", kind: "object", nullable: false, integer: false },
+			{ position: 2, parent: 0, memberKey: "right", kind: "object", nullable: false, integer: false },
+			{ position: 3, parent: 1, memberKey: "name", kind: "string", nullable: false, integer: false },
+			{ position: 4, parent: 2, memberKey: "name", kind: "string", nullable: false, integer: false },
+		];
+		const rows = [
+			emptyValueNode(0, null),
+			emptyValueNode(1, 0),
+			emptyValueNode(2, 0),
+			{ ...emptyValueNode(3, 1), text: "L" },
+			{ ...emptyValueNode(4, 2), text: "R" },
+		];
+		const written = buildFactBody(definition, rows, 1, 0);
+		expect(written).not.toBeNull();
+		if (!written) return;
+		expect(written.nodes.map((node) => node.memberKey)).toEqual([null, "left", "right", "name", "name"]);
+		expect(written.nodes.every((node: ValueNode) => !Object.hasOwn(node, "rulePosition"))).toBe(true);
+		const readNodes: ReadValueNode[] = [
+			{ ...written.nodes[0]!, rulePosition: 0 },
+			{ ...written.nodes[1]!, rulePosition: 1 },
+			{ ...written.nodes[2]!, rulePosition: 2 },
+			{ ...written.nodes[3]!, rulePosition: 3 },
+			{ ...written.nodes[4]!, rulePosition: 4 },
+		];
+		expect(valueDraftFromNodes(definition, readNodes)).toEqual(rows);
+		expect(
+			valueDraftFromNodes(definition, [
+				readNodes[0]!,
+				readNodes[1]!,
+				readNodes[2]!,
+				{ ...readNodes[3]!, rulePosition: 4 },
+				{ ...readNodes[4]!, rulePosition: 3 },
+			]),
+		).toBeNull();
+		expect(
+			valueDraftFromNodes(definition, [
+				readNodes[0]!,
+				readNodes[1]!,
+				readNodes[2]!,
+				{ ...readNodes[3]!, parentPosition: 2 },
+				readNodes[4]!,
+			]),
+		).toBeNull();
 	});
 	it("removes a complete subtree and clears children for an unknown container", () => {
 		const rows = [

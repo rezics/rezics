@@ -63,8 +63,8 @@ async function assertDisposableDatabase(client: Client): Promise<void> {
 		"select current_database() as database",
 	);
 	assert(
-		result.rows[0]?.database === "rezics_atlas",
-		"Revision contribution fixtures may run only in the disposable rezics_atlas database",
+		/^rezics_atlas(?:_[a-z0-9_]+)?$/u.test(result.rows[0]?.database ?? ""),
+		"Revision contribution fixtures require a disposable Atlas database",
 	);
 }
 
@@ -123,22 +123,14 @@ async function seedFixtureOwners(client: Client): Promise<void> {
 			[AuthUserId, Timestamp],
 		);
 		await client.query(
-			`insert into public.unit (id, kind, created_at, updated_at)
-			values
-				($1, 'profile', $4, $4),
-				($2, 'software', $4, $4),
-				($3, 'book', $4, $4)`,
-			[ProfileId, CreditedEntityId, ContentUnitId, Timestamp],
+			`insert into public.entity_identity (id, shape, created_by_auth_user_id, created_at, updated_at)
+			values ($1, 'person', $3, $4, $4), ($2, 'software_agent', $3, $4, $4)`,
+			[ProfileId, CreditedEntityId, AuthUserId, Timestamp],
 		);
 		await client.query(
-			`insert into public.profile (id, auth_user_id, joined_at, created_at, updated_at)
-			values ($1, $2, $3, $3, $3)`,
-			[ProfileId, AuthUserId, Timestamp],
-		);
-		await client.query(
-			`insert into public.entity (id, kind, created_at, updated_at)
-			values ($1, 'software_agent', $2, $2)`,
-			[CreditedEntityId, Timestamp],
+			`insert into public.post (id, created_by_auth_user_id, created_at, updated_at)
+			values ($1, $2, $3, $3)`,
+			[ContentUnitId, AuthUserId, Timestamp],
 		);
 		await client.query("commit");
 	} catch (error) {
@@ -265,6 +257,9 @@ async function verifyBoundedJoinPlans(client: Client): Promise<void> {
 
 const connectionString = process.env.DATABASE_ADMIN_URL;
 assert(connectionString, "DATABASE_ADMIN_URL is required");
+const target = new URL(connectionString);
+assert(["localhost", "127.0.0.1", "[::1]"].includes(target.hostname) && target.port !== "15432",
+	"Revision fixtures require an isolated loopback database");
 const client = new Client({ connectionString });
 
 try {

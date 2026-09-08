@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { Readable } from "node:stream";
 import { createHash } from "node:crypto";
 import { storeCatalogSourceMultipartPayload, readCatalogSourceBytes, readCatalogSourceProfileBytes, readCatalogSourceNativeBytes, listCatalogSourceProfiles, type CatalogSourceArchive } from "./source-observations";
@@ -26,7 +26,7 @@ describe("immutable multipart source receipts", () => {
 		expect(reordered.contentSha256).toBe(first.contentSha256);
 		expect(createHash("sha256").update(await readCatalogSourceBytes(first)).digest("hex")).toBe(first.contentSha256);
 		expect(listCatalogSourceProfiles(first)[0]?.observedAt).not.toBe(listCatalogSourceProfiles(second)[0]?.observedAt);
-		expect(await readCatalogSourceProfileBytes(first, "raw")).toEqual(body);
+		expect(Uint8Array.from(await readCatalogSourceProfileBytes(first, "raw"))).toEqual(body);
 		expect(JSON.parse(new TextDecoder().decode(await readCatalogSourceNativeBytes(first)))).toEqual({ id: key.externalId });
 		expect(Reflect.set(first.bundle!.manifest.parts[0]!, "profile", "unreviewed")).toBe(false);
 	});

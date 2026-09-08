@@ -206,10 +206,11 @@ export const unitProgress = pgTable(
 		}).onDelete("set null"),
 		index("unit_progress_unit_status_idx").on(table.unitId, table.status),
 		index("unit_progress_auth_user_seen_idx")
-			.on(table.authUserId, table.lastSeenAt.desc(), table.unitId)
+			.on(table.authUserId, table.lastSeenAt.desc(), table.unitId.desc())
 			.where(sql`${table.deletedAt} is null`),
+		index("unit_progress_auth_status_seen_idx").on(table.authUserId,table.status,table.lastSeenAt.desc(),table.unitId.desc()).where(sql`${table.deletedAt} is null`),
 		index("unit_progress_public_auth_user_seen_idx")
-			.on(table.authUserId, table.lastSeenAt.desc(), table.unitId)
+			.on(table.authUserId, table.lastSeenAt.desc(), table.unitId.desc())
 			.where(sql`${table.deletedAt} is null and ${table.visibility} = 'public'`),
 		index("unit_progress_last_content_structure_node_idx").on(table.lastContentStructureNodeId),
 		index("unit_progress_current_entry_idx").on(table.currentEntryId),

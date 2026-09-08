@@ -68,12 +68,12 @@ BEGIN
 		RAISE EXCEPTION 'Content-spoiler labels apply only to post-kind Units'
 			USING ERRCODE = '23514', CONSTRAINT = 'content_spoiler_label_post_kind';
 	ELSIF NEW.tag_id = nsfw_id AND NOT EXISTS (
-		SELECT 1 FROM public.unit WHERE id = NEW.unit_id
-			AND status = 'published'::public.unit_status
-			AND visibility = 'public'::public.resource_visibility
-			AND moderation_status = 'approved'::public.moderation_status
+		SELECT 1 FROM public.read_unit_state(NEW.unit_id) WHERE id = NEW.unit_id
+			AND status = 'published'
+			AND visibility = 'public'
+			AND moderation_status = 'approved'
 			AND deleted_at IS NULL
-			AND kind NOT IN ('slug_namespace', 'profile', 'tag', 'tag_path', 'zone', 'realm', 'realm_rule')
+			AND owner NOT IN ('entity', 'tag', 'tag_path', 'zone', 'realm', 'realm_rule')
 	) THEN
 		RAISE EXCEPTION 'The NSFW display label applies only to active public content Units'
 			USING ERRCODE = '23514', CONSTRAINT = 'nsfw_label_public_content';

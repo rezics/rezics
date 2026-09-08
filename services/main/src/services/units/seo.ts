@@ -253,7 +253,7 @@ export async function getPublicUnitSeoProjection(
 				.orderBy(
 					localizationLanguageOrder(
 						unitLocalization.language,
-						canonicalLanguages.filter(isContentLanguage),
+						canonicalLanguages.map(language => language.toString()).filter(isContentLanguage),
 					),
 					asc(unitLocalization.position),
 					asc(unitLocalization.language),

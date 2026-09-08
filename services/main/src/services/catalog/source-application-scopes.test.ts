@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 import { catalogSourceApplicationScopes } from "./source-application-scopes";
 
 test("same-epoch updates keep both source snapshots and restore the original on withdrawal", () => {

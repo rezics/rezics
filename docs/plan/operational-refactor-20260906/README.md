@@ -3,6 +3,13 @@
 Date: 2026-09-06. Status: supporting implementation exists; **the current source-complete catalog schema milestone is not delivered**.
 Source baseline: `470aa6c0432fae1dacbd3be7d8ad62b566447ca9`.
 
+**Convergence decision, 2026-09-08:** retain the implemented native replacement
+and stop extending complex source scope for this delivery. The
+[convergence report](../../report/REZICS-operational-refactor-convergence-gaps-20260908.md)
+records current evidence and the remaining product/qualification gaps. It does
+not waive the full source-complete milestone below. Continue from
+[NEXT_SESSION.md](NEXT_SESSION.md), not historical temporary reboot files.
+
 **Current boundary, 2026-09-07:** the maintainer has authorized autonomous
 implementation, independent worktrees and research-led design decisions.
 Documents are revisable records, not a reason to stop implementation. Resolve

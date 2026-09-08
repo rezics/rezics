@@ -44,7 +44,7 @@ BEGIN
         nullif(concat_ws(E'\n', localization.metadata_es,
             localization.content_es, alias_document.aliases_neutral,
             alias_document.aliases_es), '')
-    FROM public.unit AS candidate
+    FROM public.read_unit_state(p_unit_id) AS candidate
     LEFT JOIN LATERAL (
         SELECT
             max(public.current_search_metadata_v1(title, summary, description))

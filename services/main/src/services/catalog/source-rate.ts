@@ -11,9 +11,9 @@ export class CatalogSourceRateLimited extends Error {
 	}
 }
 
-/** @internal A bounded three-row authority coordinates all worker replicas before external requests. */
+/** @internal Four provider rows coordinate every replica; the default admits less than one request per second. */
 export async function reserveCatalogSourceRequest(database: DatabaseExecutor, source: string) {
-	z.enum(["musicbrainz", "vndb", "bangumi"]).parse(source);
+	z.enum(["musicbrainz", "vndb", "bangumi", "openlibrary"]).parse(source);
 	const admitted = await database.transaction(async (tx) => {
 		await tx.insert(budgets).values({ source }).onConflictDoNothing();
 		const [row] = await tx

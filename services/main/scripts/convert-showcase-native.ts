@@ -19,3 +19,4 @@ if (args.length !== 4 || args[0] !== "--from" || args[2] !== "--to" || !args[1] 
 	);
 const { convertShowcase } = await import("./native-showcase/convert");
 console.log(JSON.stringify(await convertShowcase(args[1], args[3]), null, 2));
+export {};

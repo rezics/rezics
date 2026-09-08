@@ -38,7 +38,7 @@ describe("progress API contract", () => {
 				record: progress,
 				continuation: {
 					kind: "contents",
-					ownerUnit: { id: progress.unitId, type: "book" },
+					ownerUnit: { id: progress.unitId, owner: "publishing", shape: "text_version" },
 				},
 			}),
 		).toBe(true);

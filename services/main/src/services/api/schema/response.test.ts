@@ -81,7 +81,8 @@ describe("API response values", () => {
 		const postBase = {
 			...base,
 			itemType: "post" as const,
-			unitKind: "post" as const,
+			owner: "post" as const,
+            shape:"post",
 			summary: null,
 			cover: null,
 			subjectId: null,
@@ -98,7 +99,8 @@ describe("API response values", () => {
 			{
 				...base,
 				itemType: "unit" as const,
-				unitKind: "book" as const,
+				owner: "publishing" as const,
+                shape:"work",
 				postKind: null,
 				summary: null,
 				cover: null,
@@ -111,12 +113,12 @@ describe("API response values", () => {
 			} satisfies StaticDecode<typeof FeedNonReviewPostItemResponse>,
 			{
 				...postBase,
-				postKind: "review" as const,
+				postKind: "review" as const,shape:"review",
 				scores: [],
 			} satisfies StaticDecode<typeof FeedReviewItemResponse>,
 			{
 				...postBase,
-				postKind: "wiki" as const,
+				postKind: "wiki" as const,shape:"wiki",
 				realmTagContext: null,
 			} satisfies StaticDecode<typeof FeedWikiItemResponse>,
 		];
@@ -374,7 +376,8 @@ describe("API response values", () => {
 			position: "a0",
 			creditedEntity: {
 				id: "00000000-0000-7000-8000-000000000002",
-				kind: "profile",
+				owner: "entity",
+				shape: "person",
 				language: "en",
 				slugAddress: null,
 				title: "Author",
@@ -403,35 +406,18 @@ describe("API response values", () => {
 		).toBe(false);
 	});
 
-	it("does not include format in Unit detail responses", () => {
-		const bookDetails = {
-			type: "book" as const,
-			releaseStatus: "ongoing" as const,
-			metadataOnly: false,
-			isbn13: null,
-			publicationDate: null,
-			pageCount: null,
-			wordCount: null,
-			publishedContentMetrics: [],
-		};
-
-		expect(Check(UnitDetailResponse.properties.details, bookDetails)).toBe(true);
-		expect(
-			Check(UnitDetailResponse.properties.details, { ...bookDetails, format: "paperback" }),
-		).toBe(false);
+	it("does not mix publishing format metadata into timed-media details", () => {
+		const audioDetails = {type:"audio",durationSeconds:null};
+		expect(Check(UnitDetailResponse.properties.details,audioDetails)).toBe(true);
+		expect(Check(UnitDetailResponse.properties.details,{...audioDetails,format:"paperback"})).toBe(false);
 		expect(
 			UnitDetailResponse.properties.details.anyOf.some((schema) => "format" in schema.properties),
 		).toBe(false);
 	});
 
-	it("requires metadata-only state and its independent update capability", () => {
-		for (const type of ["book", "software", "media"] as const) {
-			const details = UnitDetailResponse.properties.details.anyOf.find(
-				(schema) => schema.properties.type.const === type,
-			);
-			expect(details?.required).toContain("metadataOnly");
-		}
-		expect(UnitDetailResponse.properties.capabilities.required).toContain("canUpdateMetadataOnly");
+	it("admits only the two timed-media detail kinds", () => {
+		expect(UnitDetailResponse.properties.details.anyOf.map(schema=>schema.properties.type.const)).toEqual(["video","audio"]);
+		for(const type of ["book","software","media","series","release"]) expect(Check(UnitDetailResponse.properties.details,{type})).toBe(false);
 	});
 
 	it("uses canonical nullable adapted Audio sets on Video details", () => {

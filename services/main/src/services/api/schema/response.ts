@@ -23,7 +23,6 @@ import {
 	ResourceVisibility,
 	StoredUiLocale,
 	Uuid,
-	WorkReleaseStatus,
 } from ".";
 import { CountResultSchema, SearchCountResultSchema } from "../../counts/contract";
 import {
@@ -42,7 +41,6 @@ import {
 	RealmTagQueryStrategyValues,
 	SubjectAssociationExpressionPreviewLimit,
 	SubjectAssociationRoleValues,
-	UnitKindValues,
 	UnitOwnershipModeValues,
 } from "../../database/schema/contract-values";
 import {
@@ -53,7 +51,7 @@ import {
 import { HealthCheckStateValues } from "../../health/model";
 import {
 	FeedNonReviewPostKindValues,
-	FeedUnitKindValues,
+	FeedUnitOwnerValues,
 	MaximumFeedAttributionsPerItem,
 	MaximumFeedPageSize,
 	MaximumFeedRealmContextsPerItem,
@@ -197,8 +195,9 @@ export const LocalizedContentMetricResponse = t.Object(
 
 const UnitSummaryFields = {
 	id: Uuid,
-	kind: t.UnionEnum(UnitKindValues),
-	language: ContentLanguage,
+	owner: t.UnionEnum(UnitOwnerValues),
+	shape: t.String(),
+	language: NullableText,
 	slugAddress: NullablePublicSlugAddressResponse,
 	title: NullableText,
 	summary: NullableText,
@@ -208,8 +207,9 @@ const UnitSummaryFields = {
 export const UnitSummaryResponse = t.Object(UnitSummaryFields);
 export const UnitPresentationResponse = t.Object({
 	id: Uuid,
-	kind: t.UnionEnum(UnitKindValues),
-	language: ContentLanguage,
+	owner: t.UnionEnum(UnitOwnerValues),
+	shape: t.String(),
+	language: NullableText,
 	title: NullableText,
 	summary: NullableText,
 	avatar: AvatarResponse,
@@ -226,8 +226,7 @@ const UnitAttributionSummaryFields = {
 
 const EntitySummaryFields = {
 	...UnitSummaryFields,
-	kind: t.Literal("entity"),
-	language: t.String(),
+	owner: t.Literal("entity"),
 };
 export const UnitAttributionSummaryResponse = t.Object({
 	...UnitAttributionSummaryFields,
@@ -299,15 +298,7 @@ export const UnitVariantContextResponse = t.Union([
 	),
 ]);
 
-const ManageableUnitTypeResponse = t.Union([
-	t.Literal("book"),
-	t.Literal("software"),
-	t.Literal("media"),
-	t.Literal("series"),
-	t.Literal("video"),
-	t.Literal("audio"),
-	t.Literal("release"),
-]);
+const ManageableUnitTypeResponse = t.UnionEnum(["video", "audio"]);
 
 const UnitLicenseGrantResponse = t.Object(
 	{
@@ -333,43 +324,6 @@ const UnitLicenseOfferingResponse = t.Object(
 const UnitDetailsResponse = t.Union([
 	t.Object(
 		{
-			type: t.Literal("book"),
-			releaseStatus: WorkReleaseStatus,
-			metadataOnly: t.Boolean(),
-			isbn13: NullableText,
-			publicationDate: t.Nullable(t.String({ format: "date" })),
-			pageCount: t.Nullable(t.Integer({ minimum: 1 })),
-			/** Editorial metadata; never derived from hosted chapters. */
-			wordCount: t.Nullable(t.Integer({ minimum: 0 })),
-			publishedContentMetrics: t.Array(LocalizedContentMetricResponse),
-		},
-		{ additionalProperties: false },
-	),
-	t.Object(
-		{
-			type: t.Literal("software"),
-			metadataOnly: t.Boolean(),
-			releaseDate: t.Nullable(t.String({ format: "date" })),
-			versionLabel: NullableText,
-		},
-		{ additionalProperties: false },
-	),
-	t.Object(
-		{
-			type: t.Literal("media"),
-			releaseStatus: WorkReleaseStatus,
-			metadataOnly: t.Boolean(),
-			releaseDate: t.Nullable(t.String({ format: "date" })),
-			kind: t.String(),
-			runtimeMinutes: t.Nullable(t.Integer({ minimum: 1 })),
-			episodeCount: t.Nullable(t.Integer({ minimum: 1 })),
-			seasonCount: t.Nullable(t.Integer({ minimum: 1 })),
-		},
-		{ additionalProperties: false },
-	),
-	t.Object({ type: t.Literal("series"), kind: t.String() }, { additionalProperties: false }),
-	t.Object(
-		{
 			type: t.Literal("video"),
 			durationSeconds: t.Nullable(t.Integer({ minimum: 1 })),
 			adaptedAudioUnitIds: t.Nullable(
@@ -385,15 +339,6 @@ const UnitDetailsResponse = t.Union([
 		{
 			type: t.Literal("audio"),
 			durationSeconds: t.Nullable(t.Integer({ minimum: 1 })),
-		},
-		{ additionalProperties: false },
-	),
-	t.Object(
-		{
-			type: t.Literal("release"),
-			parentUnitId: Uuid,
-			versionLabel: t.String({ minLength: 1 }),
-			releasedOn: t.Nullable(t.String({ format: "date" })),
 		},
 		{ additionalProperties: false },
 	),
@@ -431,16 +376,6 @@ export const AssociationContextPostResponse = t.Object({
 		}),
 	),
 });
-
-const PendingUnitOwnershipClaimSummaryResponse = t.Object(
-	{
-		id: Uuid,
-		state: t.Literal("pending"),
-		details: t.String(),
-		createdAt: DateTime,
-	},
-	{ additionalProperties: false },
-);
 
 const UnitExternalLinkIdentityResponseFields = {
 	id: Uuid,
@@ -550,7 +485,6 @@ export const UnitDetailResponse = t.Object({
 	),
 	variantContext: UnitVariantContextResponse,
 	ownershipMode: t.UnionEnum(["profile_owned", "community_owned"]),
-	ownershipClaim: t.Nullable(PendingUnitOwnershipClaimSummaryResponse),
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
 		canUpdateMetadataOnly: t.Boolean(),
@@ -573,10 +507,11 @@ export const UnitSubjectAssociationListResponse = t.Object(
 				{
 					id: Uuid,
 					entityEntryId: Uuid,
-					entityKind: t.UnionEnum(EntityKindValues),
+					entityOwner: t.Literal("entity"),
+					entityShape: t.String({ minLength: 1 }),
 					role: t.UnionEnum(SubjectAssociationRoleValues),
 					position: FractionalPosition,
-					language: t.Nullable(ContentLanguage),
+					language: t.Nullable(ContentLanguageTag),
 					title: NullableText,
 					summary: NullableText,
 					description: t.Nullable(PortableTextDocument),
@@ -590,11 +525,11 @@ export const UnitSubjectAssociationListResponse = t.Object(
 						t.Object(
 							{
 								contextUnitId: t.Nullable(Uuid),
-								heightMillimetres: t.Nullable(t.Integer({ minimum: 1 })),
-								weightGrams: t.Nullable(t.Integer({ minimum: 1 })),
-								bustMillimetres: t.Nullable(t.Integer({ minimum: 1 })),
-								waistMillimetres: t.Nullable(t.Integer({ minimum: 1 })),
-								hipsMillimetres: t.Nullable(t.Integer({ minimum: 1 })),
+								heightMillimetres: t.Nullable(t.Integer({ minimum: 0 })),
+								weightGrams: t.Nullable(t.Integer({ minimum: 0 })),
+								bustMillimetres: t.Nullable(t.Integer({ minimum: 0 })),
+								waistMillimetres: t.Nullable(t.Integer({ minimum: 0 })),
+								hipsMillimetres: t.Nullable(t.Integer({ minimum: 0 })),
 							},
 							{ additionalProperties: false },
 						),
@@ -617,38 +552,22 @@ export type UnitSubjectAssociationListResponse = StaticDecode<
 const TagHasOtherPositionsResponse = t.Boolean({
 	description: "Whether this Tag has another accepted public vocabulary position.",
 });
-const DeprecatedTagOtherPositionCountResponse = t.Integer({
-	minimum: 0,
-	deprecated: true,
-	description:
-		"Deprecated exact count of additional accepted public vocabulary positions. Use tagHasOtherPositions; this field is removed in the next breaking RomVer API release.",
-});
 
 export const SearchHit = t.Object({
 	id: Uuid,
 	slugAddress: NullablePublicSlugAddressResponse,
 	category: t.String(),
-	kind: t.String(),
-	language: ContentLanguage,
+	owner: t.UnionEnum(UnitOwnerValues),
+	shape: t.String(),
+	language: NullableText,
 	title: NullableText,
 	titles: t.Array(t.String()),
 	summaries: t.Array(t.String()),
 	avatar: t.Optional(AvatarResponse),
-	variantRole: t.Optional(t.UnionEnum(["standalone", "main", "variant"])),
-	variantMain: t.Optional(
-		t.Union([
-			t.Object({ state: t.Literal("unavailable") }),
-			t.Object({
-				state: t.Literal("available"),
-				unit: UnitVariantSummaryResponse,
-			}),
-		]),
-	),
 	name: t.Optional(NullableText),
 	summary: NullableText,
 	tagMatches: t.Optional(t.Array(SearchTagMatchReasonResponse, { maxItems: 8 })),
 	tagHasOtherPositions: t.Optional(TagHasOtherPositionsResponse),
-	tagOtherPositionCount: t.Optional(DeprecatedTagOtherPositionCountResponse),
 });
 export const PersistedSortUnavailableAdvisoryResponse = t.Object(
 	{
@@ -792,8 +711,9 @@ export const PostListResponse = t.Object({
 });
 const FeedItemBaseResponse = {
 	id: Uuid,
-	language: t.Nullable(ContentLanguage),
-	availableLanguages: t.Array(ContentLanguage, { uniqueItems: true }),
+	shape: t.String(),
+	language: t.Nullable(ContentLanguageTag),
+	availableLanguages: t.Array(ContentLanguageTag, { uniqueItems: true }),
 	attributions: t.Array(UnitAttributionSummaryResponse, {
 		maxItems: MaximumFeedAttributionsPerItem,
 	}),
@@ -801,7 +721,7 @@ const FeedItemBaseResponse = {
 	realms: t.Array(
 		t.Object({
 			id: Uuid,
-			language: ContentLanguage,
+			language: t.Nullable(ContentLanguageTag),
 			slugAddress: NullablePublicSlugAddressResponse,
 			title: NullableText,
 			summary: NullableText,
@@ -818,13 +738,12 @@ const FeedItemBaseResponse = {
 	tracking: t.Nullable(RecommendationTrackingSchema),
 	searchTagMatches: t.Optional(t.Array(SearchTagMatchReasonResponse, { maxItems: 8 })),
 	tagHasOtherPositions: t.Optional(TagHasOtherPositionsResponse),
-	tagOtherPositionCount: t.Optional(DeprecatedTagOtherPositionCountResponse),
 };
 
 const FeedUnitItemFields = {
 	...FeedItemBaseResponse,
 	itemType: t.Literal("unit"),
-	unitKind: t.UnionEnum(FeedUnitKindValues),
+	owner: t.UnionEnum(FeedUnitOwnerValues),
 	postKind: t.Null(),
 	summary: NullableText,
 	cover: ImageAssetResponse,
@@ -849,7 +768,8 @@ const FeedScoreCandidatesResponse = t.Object({
 
 const PostSubjectPresentationFields = {
 	id: Uuid,
-	type: t.String(),
+	owner: t.UnionEnum(UnitOwnerValues),
+	shape: t.String(),
 	language: t.Nullable(ContentLanguageTag),
 	title: NullableText,
 	summary: NullableText,
@@ -877,7 +797,7 @@ const FeedUnitPresentationResponse = t.Union([
 			t.Object({
 				realmId: Uuid,
 				contextPostId: Uuid,
-				language: t.Nullable(ContentLanguage),
+				language: t.Nullable(ContentLanguageTag),
 				summary: NullableText,
 			}),
 		),
@@ -895,7 +815,7 @@ export const FeedUnitItemResponse = t.Object({
 const FeedPostItemFields = {
 	...FeedItemBaseResponse,
 	itemType: t.Literal("post"),
-	unitKind: t.Literal("post"),
+	owner: t.Literal("post"),
 	summary: NullableText,
 	cover: ImageAssetResponse,
 	subjectId: t.Nullable(Uuid),
@@ -948,7 +868,7 @@ export const FeedWikiItemResponse = t.Object({
 			realmId: Uuid,
 			tag: t.Object({
 				id: Uuid,
-				language: ContentLanguage,
+				language: t.Nullable(ContentLanguageTag),
 				title: NullableText,
 				avatar: AvatarResponse,
 			}),
@@ -1054,8 +974,9 @@ export const EntityActivityResponse = t.Object({
 		t.Object({
 			scoreId: Uuid,
 			unitId: Uuid,
-			unitKind: t.UnionEnum(UnitKindValues),
-			unitLanguage: t.Nullable(ContentLanguage),
+			unitOwner:t.UnionEnum(UnitOwnerValues),
+            unitShape:t.String(),
+			unitLanguage:t.Nullable(ContentLanguageTag),
 			unitTitle: NullableText,
 			realmId: Uuid,
 			realmTitle: NullableText,
@@ -1067,8 +988,9 @@ export const EntityActivityResponse = t.Object({
 	progress: t.Array(
 		t.Object({
 			unitId: Uuid,
-			unitKind: t.UnionEnum(UnitKindValues),
-			unitLanguage: t.Nullable(ContentLanguage),
+			unitOwner:t.UnionEnum(UnitOwnerValues),
+            unitShape:t.String(),
+			unitLanguage:t.Nullable(ContentLanguageTag),
 			unitTitle: NullableText,
 			status: t.UnionEnum(ProgressStatusValues),
 			progress: t.Number({ minimum: 0, maximum: 1 }),
@@ -1082,6 +1004,7 @@ const ProgressStatusResponse = t.UnionEnum(ProgressStatusValues);
 const ProgressEntryKindResponse = t.UnionEnum(ProgressEntryKindValues);
 const ProgressDatePrecisionResponse = t.UnionEnum(ProgressDatePrecisionValues);
 export const ProgressListResponse = t.Object({
+ nextCursor:t.Nullable(t.String()),
 	items: t.Array(
 		t.Object({
 			unitId: Uuid,
@@ -1094,8 +1017,9 @@ export const ProgressListResponse = t.Object({
 			lastContentStructureNodeId: t.Nullable(Uuid),
 			lastReadAnchor: t.Nullable(t.Unknown()),
 			visibility: ResourceVisibility,
-			type: t.String(),
-			language: ContentLanguage,
+			owner: t.UnionEnum(UnitOwnerValues),
+            shape:t.String(),
+			language:t.Nullable(ContentLanguageTag),
 			title: NullableText,
 		}),
 	),
@@ -1113,8 +1037,9 @@ export const ProgressSearchResponse = t.Object({
 			lastContentStructureNodeId: t.Nullable(Uuid),
 			lastReadAnchor: t.Nullable(t.Unknown()),
 			visibility: ResourceVisibility,
-			type: t.UnionEnum(["book", "media", "software"]),
-			language: ContentLanguage,
+			owner: t.UnionEnum(UnitOwnerValues),
+            shape:t.String(),
+			language:t.Nullable(ContentLanguageTag),
 			title: NullableText,
 			summary: NullableText,
 			cover: ImageAssetResponse,
@@ -1226,7 +1151,6 @@ export const EntityDetailResponse = t.Object({
 	kind: t.UnionEnum(EntityKindValues, { default: undefined }),
 	verified: t.Boolean(),
 	ownershipMode: t.UnionEnum(["profile_owned", "community_owned"]),
-	ownershipClaim: t.Nullable(PendingUnitOwnershipClaimSummaryResponse),
 	language: t.Nullable(ContentLanguage),
 	avatar: AvatarResponse,
 	banner: ImageAssetResponse,
@@ -1746,3 +1670,4 @@ export const UnitExternalLinkCurationResponse = t.Object({
 	curationVersion: t.Integer({ minimum: 0 }),
 });
 export const VoteResponse = BinaryVoteSummaryResponse;
+import { UnitOwnerValues } from "@rezics/reference";

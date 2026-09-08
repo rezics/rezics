@@ -87,3 +87,34 @@ staging, immutable rows, current heads, historical values, restore, withdrawal,
 spoiler filtering and predicate constraints on an explicitly selected disposable
 loopback database, rolling back every fixture. Schema SQL remains a generated
 migration input; apply the integration migration before running that fixture.
+# Assertion and qualifier facts
+
+Each native fact has an immutable `purpose`: `assertion` or `qualifier`.
+Assertions describe their owner independently. Qualifier facts supply typed
+values for an exact relation and carry no standalone assertion about the owner.
+The default is `assertion`; true source relationship qualifiers explicitly use
+`qualifier`. Deliberately reusing an existing assertion as a qualifier does not
+change that assertion's purpose.
+
+Ordinary fact pages, global character measurements and fact history exclude
+qualifier-only values. Even the owner must supply an exact containing relation
+to read a qualifier's nodes. The read checks the relation/fact binding and every
+participant's current visibility and spoiler policy. Public readers additionally
+require the current relation; authorized owners may inspect a historical
+relation subject to the same participant checks. Orphaned qualifier drafts are
+not independently exposed. Relation history identifies exact historical values.
+
+The relation write API accepts either an existing `valueFactId` or inline `nodes`
+for each qualifier. Inline values are created with purpose `qualifier` and
+published with the relation in one transaction, limited to 64 qualifiers, 512
+total inline value nodes and 512,000 request bytes. A failed relation rolls back
+its new values. Purpose cannot change in place or across semantic revisions,
+replacement, transition or restoration, and the database enforces the boundary.
+
+The purpose field adds approximately 16 bytes per fact after typical alignment:
+8 GB at 500 million rows and 48 GB at 3 billion, excluding replication and WAL.
+Existing owner partitions and exact fact keys remain unchanged. Candidate-bounded
+fact pages filter purpose after the physical head page and preserve their cursor,
+so qualifier-heavy owners produce sparse pages without unbounded scans. Exact
+qualifier reads use the existing owner/fact and owner/relation-scope indexes;
+the containing relation has at most 128 participants and 64 qualifiers.

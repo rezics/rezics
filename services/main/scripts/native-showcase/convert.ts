@@ -529,7 +529,7 @@ export async function convertShowcasePack(sourceRoot: string, outputRoot: string
 			}
 			const detail = record(original.book);
 			if (detail.releaseStatus) addFact("declared_completion_state", key, detail.releaseStatus);
-		} else if (original.unit.kind === "media")
+		} else if (original.unit.kind === "media") {
 			for (const [keyName, value] of Object.entries(record(original.media)))
 				if (!["episodeCount"].includes(keyName))
 					addFact(
@@ -537,10 +537,10 @@ export async function convertShowcasePack(sourceRoot: string, outputRoot: string
 						key,
 						value,
 					);
-				else if (original.unit.kind === "software") {
-					const detail = record(original.software);
-					if (detail.releaseDate) addFact("first_release_date", key, detail.releaseDate);
-				}
+		} else if (original.unit.kind === "software") {
+			const detail = record(original.software);
+			if (detail.releaseDate) addFact("first_release_date", key, detail.releaseDate);
+		}
 		if (original.entityMeasurements)
 			for (const [index, item] of array(original.entityMeasurements).entries()) {
 				const measurement = record(item);

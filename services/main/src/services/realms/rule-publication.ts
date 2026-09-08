@@ -1,9 +1,10 @@
 import type { PortableTextDocument } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
-import { authEntity, realmRuleRevision, unitLocalization, unitOwnership } from "../database/schema";
+import { users, realmRuleRevision, unitLocalization, unitOwnership } from "../database/schema";
+import { AccountAuthorization } from "../authorization/account/authorization";
 import { fractionalPositionAt } from "../ordering/position";
 import { insertPlatformUnit } from "../units/create";
 import { recordUnitRevision } from "../units/history";
@@ -23,6 +24,7 @@ export interface RealmRulePublication {
 export interface PublishRealmRuleRevisionInput {
 	readonly realmId: string;
 	readonly actorProfileId: string;
+	readonly actorAuthUserId: string;
 	readonly baseRevisionId: string | null;
 	readonly acknowledgementMode: "explicit" | "implicit_on_follow";
 	readonly requireOnJoin: boolean;
@@ -73,11 +75,12 @@ export async function publishRealmRuleRevision(
 		return { status: "revision_changed", currentRevisionId };
 
 	const [actor] = await tx
-		.select({ authUserId: authEntity.authUserId })
-		.from(authEntity)
-		.where(and(eq(authEntity.entityId, input.actorProfileId), eq(authEntity.state, "active")))
+		.select({ authUserId: users.id })
+		.from(users)
+		.where(and(eq(users.id, input.actorAuthUserId), isNull(users.erasedAt)))
 		.limit(1);
 	if (!actor) throw new Error("Realm Rule publication requires an active authenticated creator");
+	await new AccountAuthorization(actor.authUserId).ensureCanWrite(tx);
 	const publishedAt = input.publishedAt ?? new Date();
 	const [created] = await tx
 		.insert(realmRuleRevision)

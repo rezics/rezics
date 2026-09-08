@@ -1,5 +1,6 @@
 import { PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
+import { realm } from "../database/schema";
 
 import {
 	contentRatingAllowlistFromStored,
@@ -38,8 +39,8 @@ describe("content-rating policy", () => {
 	});
 
 	it("compiles match-none as a false predicate and allowlists as an IN predicate", () => {
-		expect(dialect.sqlToQuery(getContentRatingCondition({ kind: "none" })).sql).toBe("false");
-		expect(dialect.sqlToQuery(getContentRatingCondition(DefaultContentRatingPolicy)).sql).toContain(
+		expect(dialect.sqlToQuery(getContentRatingCondition({ kind: "none" }, realm.contentRating)).sql).toBe("false");
+		expect(dialect.sqlToQuery(getContentRatingCondition(DefaultContentRatingPolicy, realm.contentRating)).sql).toContain(
 			" in (",
 		);
 	});

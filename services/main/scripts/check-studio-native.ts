@@ -204,7 +204,7 @@ try {
 		new Request("http://localhost", { headers: { Cookie: other } }),
 		"account:read",
 	);
-	if (!ownerIdentity.participation || !otherIdentity.participation)
+	if (!("participation" in ownerIdentity) || !("participation" in otherIdentity))
 		throw new Error("Fixture actors require participation");
 	const grant = await database.transaction((tx) =>
 		issueParticipationGrant(tx, ownerIdentity.participation, {

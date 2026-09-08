@@ -45,6 +45,7 @@ import {
 import { readMusicTracks } from "../src/services/catalog/domains";
 import { readCatalogSourceApplication } from "../src/services/catalog/source-applications";
 import {
+	CatalogReferenceNotFound,
 	listCatalogNames,
 	readCatalogFactNodes,
 	pageCatalogRelations,
@@ -453,7 +454,11 @@ try {
 							writer,
 						),
 					),
-					/requires separately authorized intake|cannot access/,
+					(error: unknown) => {
+						assert.ok(error instanceof CatalogReferenceNotFound);
+						assert.equal(error.message, "Prepared recording correspondence is unavailable");
+						return true;
+					},
 				);
 				await prepareMusicBrainzProposalDependencies(tx, actor.id, {
 					proposalId: proposal.proposal.id,

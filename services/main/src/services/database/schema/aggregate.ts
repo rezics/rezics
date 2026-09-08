@@ -580,58 +580,6 @@ export const notificationRecipientStat = pgTable(
 	],
 );
 
-/**
- * Exact explicit Chapter-occurrence totals used to derive Book reading progress.
- *
- * @remarks
- * Book and Label occurrences never enter this aggregate. A Chapter placed below
- * either one contributes by its own node ID; referenced Book structures are not
- * traversed. This keeps maintenance local to the changed occurrence.
- */
-export const bookChapterStat = pgTable(
-	"book_chapter_stat",
-	{
-		bookUnitId: uuid("book_unit_id")
-			.primaryKey()
-			.references(() => publishingTextVersion.id, { onDelete: "cascade" }),
-		allCount: aggregateCount(),
-		publicCount: aggregateCount(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		check(
-			"book_chapter_stat_count_check",
-			sql`${table.allCount} >= 0 and ${table.publicCount} >= 0 and ${table.publicCount} <= ${table.allCount}`,
-		),
-	],
-);
-
-/**
- * Exact per-Profile completion totals for the Chapter occurrences above.
- * Completion remains scoped to the occurrence node ID, not the Chapter Unit.
- */
-export const bookChapterProgressStat = pgTable(
-	"book_chapter_progress_stat",
-	{
-		authUserId: uuid()
-			.notNull()
-			.references(() => users.id, { onDelete: "cascade" }),
-		bookUnitId: uuid("book_unit_id")
-			.notNull()
-			.references(() => publishingTextVersion.id, { onDelete: "cascade" }),
-		allCompletedCount: aggregateCount(),
-		publicCompletedCount: aggregateCount(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.authUserId, table.bookUnitId] }),
-		check(
-			"book_chapter_progress_stat_count_check",
-			sql`${table.allCompletedCount} >= 0 and ${table.publicCompletedCount} >= 0 and ${table.publicCompletedCount} <= ${table.allCompletedCount}`,
-		),
-	],
-);
-
 /** Rebuildable exact public Chapter metrics, grouped by Book and content language. */
 export const bookLocalizedContentMetricStat = pgTable(
 	"book_localized_content_metric_stat",
@@ -777,8 +725,9 @@ export const recommendationUnitSignalHourly = pgTable(
 		),
 
 		primaryKey({ columns: [table.unitId, table.bucketStart, table.kind] }),
-		index("recommendation_unit_signal_hourly_bucket_idx").on(table.bucketStart, table.unitId),
+		index("recommendation_unit_signal_hourly_bucket_idx").on(table.bucketStart, table.unitId, table.kind),
+		index("recommendation_unit_signal_hourly_positive_idx").on(table.bucketStart, table.unitId, table.kind).where(sql`${table.weight} > 0`),
 		check("recommendation_unit_signal_hourly_count_check", sql`${table.signalCount} >= 0`),
-		check("recommendation_unit_signal_hourly_weight_check", sql`${table.weight} >= 0`),
+		check("recommendation_unit_signal_hourly_weight_check", sql`${table.weight} >= 0 and ${table.weight} < 'Infinity'::double precision`),
 	],
 );

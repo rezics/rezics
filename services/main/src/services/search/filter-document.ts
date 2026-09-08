@@ -62,8 +62,6 @@ const CommonSorts = [
 export const ProgressSearchSorts = [
 	"progressLastSeenAt:desc",
 	"progressLastSeenAt:asc",
-	"title:asc",
-	"title:desc",
 ] as const satisfies readonly SearchSort[];
 export type ProgressSearchSort = (typeof ProgressSearchSorts)[number];
 
@@ -73,14 +71,16 @@ export const SearchMaxResultWindow = WorkPolicy.search.maxResultWindow;
 /** The only Search capability ceiling. Filter documents can only narrow it. */
 const GlobalVisibleFields = new Set<SearchField>([
 	"category",
-	"kind",
+	"unit-owner",
+	"unit-shape",
 	"language",
 	"content-rating",
 	"tag",
 ]);
 const GlobalFacetFields = new Set<SearchField>([
 	"category",
-	"kind",
+	"unit-owner",
+	"unit-shape",
 	"language",
 	"content-rating",
 	"tag",
@@ -391,7 +391,7 @@ function scopeForContexts(contexts: readonly SearchFeatureContext[]) {
 													value: "units",
 												},
 												{
-													field: "kind",
+													field: "unit-owner",
 													operator: "equals",
 													value: "zone",
 												},

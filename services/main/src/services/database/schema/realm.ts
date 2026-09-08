@@ -1,4 +1,5 @@
-import { type PlatformCapability } from "@rezics/access";
+import { realmUnitStatus, realmUnitPublicationState } from "./realm-values";
+import { PlatformCapabilityValues } from "@rezics/access";
 import { inArray, sql } from "drizzle-orm";
 import {
 	type AnyPgColumn,
@@ -38,8 +39,6 @@ import {
 	RealmPinKindValues,
 	RealmRuleAcknowledgementModeValues,
 	RealmTagFallbackPolicyValues,
-	RealmUnitPublicationStateValues,
-	RealmUnitStatusValues,
 	toEnumValues,
 } from "./contract-values";
 
@@ -55,66 +54,7 @@ export const realmTagFallbackPolicy = pgEnum(
 	"realm_tag_fallback_policy",
 	toEnumValues(RealmTagFallbackPolicyValues),
 );
-export const realmUnitStatus = pgEnum("realm_unit_status", toEnumValues(RealmUnitStatusValues));
-export const realmUnitPublicationState = pgEnum(
-	"realm_unit_publication_state",
-	toEnumValues(RealmUnitPublicationStateValues),
-);
-/*
- * The storage enum retains the retired Unit ownership-transfer label; the
- * grant check proves the narrower application type.
- */
-const platformCapabilityStorageValues = toEnumValues([
-	"platform.access.read",
-	"platform.access.manage",
-	"platform.audit.read",
-	"platform.user.read",
-	"platform.user.status.update",
-	"platform.session.read",
-	"platform.session.revoke",
-	"entity.associations.override",
-	"unit.edit",
-	"platform.development_preview.access",
-	"platform.custom_theme.external_live.access",
-	"platform.custom_theme.external_live.access.manage",
-	"platform.custom_theme.review",
-	"platform.custom_theme.kill",
-	"unit.ownership.transfer",
-	"unit.delete",
-	"unit.restore",
-	"unit.governance.read",
-	"unit.merge.propose",
-	"unit.merge.review",
-	"unit.merge",
-	"unit.ownership.override",
-	"unit.license.manage",
-	"unit.slug.manage",
-	"unit.slug.namespace.manage",
-	"unit.slug.redirect.release",
-	"platform.api_quota_policy.read",
-	"platform.api_quota_policy.update",
-	"platform.user.api_quota.read",
-	"platform.user.api_quota.update",
-	"platform.user.api_token.api_quota.read",
-	"platform.user.api_token.api_quota.update",
-	"platform.moderate",
-	"platform.suppress",
-	"realm.contribute",
-	"realm.units.create",
-	"realm.post.replies.create",
-	"realm.settings.update",
-	"realm.members.read",
-	"realm.members.manage",
-	"realm.rules.update",
-	"realm.pins.manage",
-	"realm.tags.manage",
-	"realm.tag-voting.update",
-	"realm.tag-contexts.manage",
-	"realm.units.moderate",
-] as const satisfies readonly (PlatformCapability | "unit.ownership.transfer")[]) as [
-	PlatformCapability,
-	...PlatformCapability[],
-];
+const platformCapabilityStorageValues=toEnumValues(PlatformCapabilityValues);
 export const platformCapability = pgEnum("platform_capability", platformCapabilityStorageValues);
 
 export const realm = pgTable(
@@ -355,10 +295,7 @@ export const platformCapabilityGrant = pgTable(
 			.where(sql`${table.revokedAt} is null`),
 		index("platform_capability_grant_granted_by_idx").on(table.grantedByAuthUserId),
 		index("platform_capability_grant_revoked_by_idx").on(table.revokedByAuthUserId),
-		check(
-			"platform_capability_grant_current_capability_check",
-			sql`${table.capability} <> 'unit.ownership.transfer'::platform_capability`,
-		),
+
 		check(
 			"platform_capability_grant_revocation_check",
 			sql`(${table.revokedAt} is null) = (${table.revokedByAuthUserId} is null)`,

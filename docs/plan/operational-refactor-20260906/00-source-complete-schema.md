@@ -81,10 +81,13 @@ These are supplied operating assumptions, not a production inspection by the age
   still obey their own stable-identity, privacy and referential-integrity rules.
 - The approximately 400k legacy import is a bounded one-time task. It does not
   replace the 500M-row / 3B-row capacity-planning requirements for the new model.
-- Released SQL/checksum history remains an audit artifact under CONTRIBUTING;
-  retaining it does not require retaining its schema at runtime or converting
-  old rows inside new DDL. Generate the replacement schema through repository
-  tooling. Rehearsing legacy transfer is not a condition for destructive target DDL.
+- **2026-09-08 maintainer clarification:** delete the complete old SQL migration
+  chain and global `unit` table, and generate one fresh native target baseline.
+  Git retains the old history for recovery/audit. Do not spend implementation
+  time maintaining sequential migrations through obsolete intermediate schemas.
+  This explicit replacement supersedes the earlier released-history retention
+  rule for this cutover; normal immutability resumes after the new baseline is
+  released. Legacy transfer is not a condition for target DDL.
 
 This document correction does not execute a database reset, delete the legacy
 export, run the separate migration program or reopen the site. It removes those
@@ -297,10 +300,12 @@ fixture qualification. Production conversion/activation remains separately gated
   released SQL and restricted recovery archives are historical evidence only.
 - Native read/query/edit/export and revision/withdrawal behavior pass; fixed
   request/document limits do not impose hidden lifetime limits on imported owners.
-- Released migration checksums are intact. Generate with
-  `task services-main:db:generate -- <name>` and run full replay/schema checks.
-  Use the existing `rezics-dev` PostgreSQL and its container `psql` for local SQL
-  inspection/verification; use only the supported disposable shadow for generation.
+- The explicitly authorized native replacement is generated with
+  `task services-main:db:baseline` and qualified on a fresh disposable target.
+  Once that baseline is released, preserve its checksums and use
+  `task services-main:db:generate -- <name>` for forward migrations. Run replay
+  and schema checks against an explicitly selected disposable database; ordinary
+  development data is not a reset target by implication.
 - Record 500M/3B growth for every growing relation and child fan-out, representative
   query plans, million-item owner behavior, bounded memory/WAL/admission and an
   explicit partition/shard cutover path. P10 owns measured resource qualification.

@@ -27,7 +27,7 @@ import {
 	FavoriteRevisionSchema,
 	FavoriteStateSchema,
 } from "../src/services/favorites/contracts";
-import { unit } from "../src/services/database/schema/unit";
+import { catalogUnitLocator } from "../src/services/database/schema/catalog-identity";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
@@ -192,21 +192,19 @@ try {
 		assertions++;
 		favoriteRevision = favorite.revision;
 	}
-	assert.equal(
-		(
-			await database
-				.select({ id: unit.id })
-				.from(unit)
-				.where(
-					inArray(
-						unit.id,
-						[...created.values()].map((resource) => resource.reference.id),
-					),
-				)
-		).length,
-		0,
-	);
+	const createdIds = [...created.values()].map((resource) => resource.reference.id);
+	const locators = await database
+		.select({ id: catalogUnitLocator.id, owner: catalogUnitLocator.owner })
+		.from(catalogUnitLocator)
+		.where(inArray(catalogUnitLocator.id, createdIds));
+	assert.equal(locators.length, createdIds.length);
 	assertions++;
+	for (const resource of created.values()) {
+		const locator = locators.find((row) => row.id === resource.reference.id);
+		assert.ok(locator);
+		assert.equal(locator.owner, resource.reference.owner);
+		assertions += 2;
+	}
 	const privateFavorites = FavoriteListSchema.parse(
 		await request("GET", "/favorites", undefined, 200, delegate.cookie),
 	);

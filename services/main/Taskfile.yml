@@ -85,23 +85,11 @@ tasks:
         cmds:
             - yarn exec tsx scripts/benchmark-zone-composition-capacity.ts {{.CLI_ARGS}}
 
-    zone-theme-class-names:cutover-check:
-        desc: Read-only inventory for legacy styleRoles Block documents.
+    auth-identity:check:
+        desc: Verify current authentication identity constraints.
         cmds:
             - test -n "${DATABASE_ADMIN_URL:-}"
-            - yarn exec tsx scripts/check-zone-theme-class-name-cutover.ts {{.CLI_ARGS}}
-
-    auth-identity:cutover-check:
-        desc: Preflight or verify the Better Auth 1.7 account identity cutover.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - yarn exec tsx scripts/check-better-auth-identity-cutover.ts {{.CLI_ARGS}}
-
-    filter-documents:migrate:
-        desc: Rewrite preview Search/Zone documents to sparse FilterDocuments in bounded batches.
-        cmds:
-            - test -n "${DATABASE_ADMIN_URL:-}"
-            - yarn exec tsx scripts/migrate-filter-documents.ts {{.CLI_ARGS}}
+            - yarn exec tsx scripts/check-auth-identity.ts
 
     storage:prepare:
         desc: Idempotently prepare the loopback object-storage bucket used by local development.
@@ -288,6 +276,11 @@ tasks:
                 --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
             - yarn exec tsx scripts/generate-database-migration.ts {{.CLI_ARGS}}
 
+    db:baseline:
+        desc: Generate the explicitly authorized fresh native baseline before its first release.
+        cmds:
+            - yarn exec tsx scripts/generate-native-baseline.ts
+
     db:hash:
         desc: Recompute the Atlas migration directory checksum.
         cmds:
@@ -311,90 +304,23 @@ tasks:
             - yarn exec tsx scripts/check-postgres-schema.ts
 
     db:check:
-        desc: Replay migrations and verify that they match the Drizzle schema.
+        desc: Install the fresh native baseline and verify current schema and integrity contracts.
         cmds:
             - task: db:validate
             - defer: { task: db:replay:down }
             - task: db:replay:reset
             - >-
-                yarn exec atlas migrate apply --env main
-                --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                --to-version 20260809000003
-            - >-
-                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-studio-workspace-cutover.ts seed
-            - >-
-                yarn exec atlas migrate apply --env main
-                --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                --to-version 20260811000002
-            - >-
-                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
-                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-filter-document-cutover.ts seed
-            - >-
-                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/migrate-filter-documents.ts --yes --batch-size 2
-            - >-
-                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/migrate-filter-documents.ts --yes --batch-size 2
-            - >-
-                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
-                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-bootstrap-unit-merge-access-cutover.ts seed
-            - >-
-                yarn exec atlas migrate apply --env main
-                --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                --to-version 20260811190000
-            - >-
-                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/migrate-filter-documents.ts --yes --batch-size 2
-            - >-
-                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
-                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-studio-workspace-cutover.ts verify-and-clean
-            - >-
-                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
-                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-filter-document-cutover.ts verify-and-clean
-            - >-
-                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
-                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-bootstrap-unit-merge-access-cutover.ts verify-and-clean
-            - >-
-                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
-                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-governance-rule-cutover.ts seed
-            - >-
-                yarn exec atlas migrate apply --env main
-                --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                --to-version 20260829135159
-            - >-
-                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
-                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-better-auth-identity-cutover.ts seed
-            - >-
-                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-better-auth-identity-cutover.ts preflight
-            - >-
-                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
-                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-tag-public-position-projection-cutover.ts seed
+                yarn exec tsx scripts/check-baseline-epoch.ts preflight
             - >-
                 yarn exec atlas migrate apply --env main
                 --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
             - >-
-                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-tag-public-position-projection-cutover.ts verify-and-clean
+                yarn exec tsx scripts/check-baseline-epoch.ts installed
             - >-
-                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-better-auth-identity-cutover.ts verify-and-clean
-            - >-
-                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
-                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-governance-rule-cutover.ts verify-and-clean
+                yarn exec tsx scripts/check-auth-identity.ts
             - >-
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
@@ -402,12 +328,17 @@ tasks:
             - >-
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-entity-measurement-cardinality.ts
+                yarn exec tsx scripts/check-revision-primary-contribution.ts
             - >-
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
-                yarn exec tsx scripts/check-revision-primary-contribution.ts
-
+                DATABASE_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-realm-governance-projection.ts
+            - >-
+                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                DATABASE_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-content-structure-budgets.ts
             - >-
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/check-postgres-schema.ts
@@ -425,6 +356,7 @@ tasks:
         desc: Print pending Atlas migrations without applying them.
         cmds:
             - test -n "${DATABASE_ADMIN_URL:-}"
+            - yarn exec tsx scripts/check-baseline-epoch.ts preflight
             - yarn exec atlas migrate apply --env main --url "${DATABASE_ADMIN_URL}" --dry-run
 
     db:migrate:
@@ -432,19 +364,12 @@ tasks:
         cmds:
             - task: db:atlas:check
             - test -n "${DATABASE_ADMIN_URL:-}"
-            - task: auth-identity:cutover-check
-              vars:
-                  CLI_ARGS: preflight
-            - task: filter-documents:migrate
-              vars:
-                  CLI_ARGS: --yes
+            - yarn exec tsx scripts/check-baseline-epoch.ts preflight
             - >-
                 PGOPTIONS='-c search_path=public,pg_catalog -c lock_timeout=5s -c statement_timeout=0 -c idle_in_transaction_session_timeout=60s'
                 yarn exec atlas migrate apply --env main --url "${DATABASE_ADMIN_URL}"
                 --lock-timeout 5s
-            - task: auth-identity:cutover-check
-              vars:
-                  CLI_ARGS: verify
+            - yarn exec tsx scripts/check-baseline-epoch.ts installed
             - yarn exec tsx scripts/ensure-database-privileges.ts
 
     db:preflight:

@@ -9,7 +9,7 @@ import {
 	catalogSourceSubscription as subscriptions,
 } from "../database/schema/catalog-source";
 import { type CatalogReference, CatalogReferenceSchema } from "./contracts";
-import { loadCatalogIdentity, CatalogAccessDenied } from "./storage";
+import { loadCatalogIdentity, CatalogAccessDenied, CatalogRevisionConflict } from "./storage";
 import { hasCatalogMergeRedirect } from "./merge-read";
 import { canAccessCatalog } from "../participation/policy";
 import { appendOperationalOutbox } from "../events/durability";
@@ -359,7 +359,7 @@ export async function reviseCatalogSourceBinding(
 		}
 	} else await loadCatalogIdentity(tx, current.reference, actor, true);
 	if (current.claim.bindingRevision !== value.expectedRevision)
-		throw new Error("Source binding revision is stale");
+		throw new CatalogRevisionConflict("Source binding revision is stale");
 	const reference = value.target ?? current.reference;
 	if (reference.owner !== current.reference.owner)
 		throw new Error("Cross-owner rebind requires a new checked mapping");

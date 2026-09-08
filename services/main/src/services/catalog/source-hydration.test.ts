@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { catalogSourceHydration } from "./source-hydration";
 const reference = { observedSnapshotId: null, appliedCorrespondenceRevision: 1, correspondenceRevision: 1,
 	evidenceSourceRecordId: "source", evidenceSnapshotId: "snapshot", evidencePath: "/media/0/tracks/0/recording/id" };

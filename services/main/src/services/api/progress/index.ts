@@ -1,7 +1,7 @@
-import {presentImageAsset} from "../image-assets/presentation";
+import { unitStateRelation, unitStatesForIds } from "../../units/state-relation";
+import { readProgressPage } from "./listing";
 import { SearchFeatureDefinition } from "@rezics/filter";
-import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
+import { and, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import Elysia from "elysia";
 import { StatusCodes } from "http-status-codes";
 
@@ -15,15 +15,10 @@ import {
 	contentStructureNodeProgress,
 	post,
 	postProgressEntry,
-	unit,
-	unitLocalization,
 	unitProgress,
 	unitProgressEntry,
 } from "../../database/schema";
-import {
-	resolvedUnitLocalizationImageAssetId,
-	resolvedUnitLocalizationLanguage,
-} from "../../units/localization";
+
 
 import { ContentStructureNodeNotFound } from "../content-structure/errors";
 import { NoContentResponse } from "../schema/action-response";
@@ -74,13 +69,8 @@ import {
 	setCurrentProgressEntry,
 } from "./service";
 
-const continuationContentUnit = alias(unit, "progress_continuation_content_unit");
-
-function toProgressUnitType(value: string): "book" | "media" | "software" {
-	if (value === "book" || value === "media" || value === "software") return value;
-	throw new TypeError("Progress Search returned an unsupported Unit kind");
-}
-
+const contentState=unitStateRelation(contentStructureNode.contentUnitId,"progress_content_state");
+const ownerState=unitStateRelation(sql`null::uuid`,"progress_owner_state");
 async function findCompletableContentStructureNode(
 	unitId: string,
 	nodeId: string,
@@ -88,12 +78,12 @@ async function findCompletableContentStructureNode(
 	const [node] = await database
 		.select({
 			structureKind: contentStructure.kind,
-			unitKind: unit.kind,
+			unitOwner: contentState.owner,
 			postKind: post.kind,
 		})
 		.from(contentStructureNode)
 		.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
-		.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+		.innerJoinLateral(contentState,sql`true`)
 		.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 		.where(
 			and(
@@ -101,86 +91,43 @@ async function findCompletableContentStructureNode(
 				eq(contentStructureNode.ownerUnitId, unitId),
 				isNull(contentStructureNode.deletedAt),
 				isNull(contentStructure.deletedAt),
-				isNull(unit.deletedAt),
+				isNull(contentState.deletedAt),
 			),
 		)
 		.limit(1);
 	if (
 		node?.structureKind === "book.contents" &&
-		ContentStructureKindPolicies["book.contents"].contributesProgress(node.unitKind, node.postKind)
+		ContentStructureKindPolicies["book.contents"].contributesProgress(node.unitOwner, node.postKind)
 	)
 		return "book";
 	if (
 		node?.structureKind === "media.contents" &&
-		ContentStructureKindPolicies["media.contents"].contributesProgress(node.unitKind, node.postKind)
+		ContentStructureKindPolicies["media.contents"].contributesProgress(node.unitOwner, node.postKind)
 	)
 		return "media";
 	return null;
 }
 
-async function resolveProgressContinuation(
-	unitId: string,
-	nodeId: string | null,
-): Promise<ProgressContinuationResponse> {
-	const [candidate] = await database
-		.select({
-			ownerKind: unit.kind,
-			nodeId: contentStructureNode.id,
-			structureKind: contentStructure.kind,
-			contentUnitId: continuationContentUnit.id,
-			contentUnitKind: continuationContentUnit.kind,
-			postKind: post.kind,
-		})
-		.from(unit)
-		.leftJoin(
-			contentStructureNode,
-			and(
-				nodeId ? eq(contentStructureNode.id, nodeId) : sql`false`,
-				eq(contentStructureNode.ownerUnitId, unit.id),
-				isNull(contentStructureNode.deletedAt),
-			),
-		)
-		.leftJoin(
-			contentStructure,
-			and(
-				eq(contentStructure.id, contentStructureNode.structureId),
-				eq(contentStructure.ownerUnitId, unit.id),
-				isNull(contentStructure.deletedAt),
-			),
-		)
-		.leftJoin(
-			continuationContentUnit,
-			and(
-				eq(continuationContentUnit.id, contentStructureNode.contentUnitId),
-				isNull(continuationContentUnit.deletedAt),
-				eq(continuationContentUnit.moderationStatus, "approved"),
-			),
-		)
-		.leftJoin(post, eq(post.id, continuationContentUnit.id))
-		.where(and(eq(unit.id, unitId), isNull(unit.deletedAt)))
-		.limit(1);
-	if (!candidate || candidate.ownerKind === "software") return { kind: "none" };
-	if (
-		candidate.ownerKind === "book" &&
-		candidate.nodeId &&
-		candidate.structureKind === "book.contents" &&
-		candidate.contentUnitKind === "post" &&
-		candidate.postKind === "chapter"
-	)
-		return { kind: "book-node", bookId: unitId, nodeId: candidate.nodeId };
-	if (
-		candidate.ownerKind === "media" &&
-		candidate.structureKind === "media.contents" &&
-		candidate.contentUnitId &&
-		(candidate.contentUnitKind === "video" || candidate.contentUnitKind === "audio")
-	)
-		return {
-			kind: "unit",
-			contentUnit: { id: candidate.contentUnitId, type: candidate.contentUnitKind },
-		};
-	if (candidate.ownerKind === "book" || candidate.ownerKind === "media")
-		return { kind: "contents", ownerUnit: { id: unitId, type: candidate.ownerKind } };
-	return { kind: "none" };
+async function resolveProgressContinuation(unitId:string,nodeId:string|null):Promise<ProgressContinuationResponse> {
+ const [candidate]=await database.select({owner:ownerState.owner,shape:ownerState.shape,nodeId:contentStructureNode.id,
+  structureKind:contentStructure.kind,contentUnitId:contentState.id,contentOwner:contentState.owner,contentShape:contentState.shape,
+ }).from(unitStatesForIds([unitId],"progress_owner_state"))
+  .leftJoin(contentStructureNode,and(nodeId ? eq(contentStructureNode.id,nodeId) : sql`false`,eq(contentStructureNode.ownerUnitId,ownerState.id),isNull(contentStructureNode.deletedAt)))
+  .leftJoin(contentStructure,and(eq(contentStructure.id,contentStructureNode.structureId),eq(contentStructure.ownerUnitId,ownerState.id),isNull(contentStructure.deletedAt)))
+  .leftJoinLateral(contentState,and(eq(contentState.moderationStatus,"approved"),eq(contentState.status,"published"),inArray(contentState.visibility,["public","unlisted"])))
+  .limit(1);
+ if(!candidate) return {kind:"none"};
+ if(candidate.owner==="publishing" && candidate.shape==="text_version") {
+  return candidate.nodeId && candidate.structureKind==="book.contents" && candidate.contentOwner==="post" && candidate.contentShape==="chapter"
+   ? {kind:"text-version-node",textVersionId:unitId,nodeId:candidate.nodeId}
+   : {kind:"contents",ownerUnit:{id:unitId,owner:"publishing",shape:"text_version"}};
+ }
+ if(candidate.owner==="program") {
+  return candidate.structureKind==="media.contents" && candidate.contentUnitId && (candidate.contentOwner==="video"||candidate.contentOwner==="audio")
+   ? {kind:"unit",contentUnit:{id:candidate.contentUnitId,owner:candidate.contentOwner,shape:candidate.contentOwner}}
+   : {kind:"contents",ownerUnit:{id:unitId,owner:"program",shape:"program"}};
+ }
+ return {kind:"none"};
 }
 
 function toProgressResponse<
@@ -262,47 +209,11 @@ export default new Elysia({ prefix: "/progress" })
 			response: { [StatusCodes.OK]: ProgressListResponse },
 			detail: { summary: "List current profile progress", tags: ["Progress"] },
 		},
-		async ({ user, authorization, query }) => {
-			const items = await database
-				.select({
-					unitId: unitProgress.unitId,
-					status: unitProgress.status,
-					progress: unitProgress.progress,
-					completedCount: unitProgress.completedCount,
-					totalTimeMs: unitProgress.totalTimeMs,
-					firstSeenAt: unitProgress.firstSeenAt,
-					lastSeenAt: unitProgress.lastSeenAt,
-					lastContentStructureNodeId: unitProgress.lastContentStructureNodeId,
-					visibility: unitProgress.visibility,
-					deletedAt: unitProgress.deletedAt,
-					type: unit.kind,
-					language: unitLocalization.language,
-					title: unitLocalization.title,
-				})
-				.from(unitProgress)
-				.innerJoin(unit, eq(unit.id, unitProgress.unitId))
-				.innerJoin(
-					unitLocalization,
-					and(
-						eq(unitLocalization.unitId, unit.id),
-						eq(
-							unitLocalization.language,
-							resolvedUnitLocalizationLanguage(unit.id, query.localizationLanguages),
-						),
-					),
-				)
-				.where(
-					and(
-						eq(unitProgress.authUserId, user.id),
-						isNull(unitProgress.deletedAt),
-						getUnitReadCondition(authorization.profileId),
-						query.status ? eq(unitProgress.status, query.status) : undefined,
-					),
-				)
-				.orderBy(desc(unitProgress.lastSeenAt))
-				.limit(query.limit ?? 50);
-			return { items: items.map(toProgressResponse) };
-		},
+        async ({user,authorization,query}) => {
+         const request=resolveProgressSearchRequest({state:{sort:"progressLastSeenAt:desc",pageSize:query.limit??50,cursor:query.cursor}},JSON.stringify({surface:"list",status:query.status,languages:query.localizationLanguages}));
+         const page=await readProgressPage({authUserId:user.id,profileId:authorization.profileId,languages:query.localizationLanguages??[],request,...(query.status ? {status:query.status} : {})});
+         return {items:page.items,nextCursor:page.boundary ? createProgressSearchCursor(request,{boundary:page.boundary,consumed:page.consumed,total:page.total}) : null};
+        },
 	)
 	.get(
 		"/search/filter",
@@ -330,128 +241,11 @@ export default new Elysia({ prefix: "/progress" })
 				tags: ["Progress", "Search"],
 			},
 		},
-		async ({ user, authorization, body }) => {
-			const request = resolveProgressSearchRequest(body);
-			const textCondition = request.query
-				? (() => {
-						const escaped = request.query.replace(/[!%_]/g, "!$&");
-						const pattern = `%${escaped}%`;
-						return or(
-							sql`coalesce(${unitLocalization.title}, '') ilike ${pattern} escape '!'`,
-							sql`coalesce(${unitLocalization.summary}, '') ilike ${pattern} escape '!'`,
-						);
-					})()
-				: undefined;
-			const baseCondition = and(
-				eq(unitProgress.authUserId, user.id),
-				isNull(unitProgress.deletedAt),
-				getUnitReadCondition(authorization.profileId),
-				inArray(unit.kind, ["book", "media", "software"]),
-				textCondition,
-			);
-			const sortExpression = request.sort.startsWith("title:")
-				? sql`lower(${unitLocalization.title})`
-				: sql`${unitProgress.lastSeenAt}`;
-			const boundaryCondition = request.boundary
-				? (() => {
-						const value = request.sort.startsWith("title:")
-							? request.boundary.sortValue
-							: new Date(request.boundary.sortValue!);
-						if (value === null)
-							return sql`(${sortExpression} is null and ${unitProgress.unitId} > ${request.boundary.unitId}::uuid)`;
-						const comparison = request.sort.endsWith(":asc")
-							? sql`${sortExpression} > ${value}`
-							: sql`${sortExpression} < ${value}`;
-						return sql`(
-							(${sortExpression} is not null and (
-								${comparison}
-								or (${sortExpression} = ${value} and ${unitProgress.unitId} > ${request.boundary.unitId}::uuid)
-							))
-							or ${sortExpression} is null
-						)`;
-					})()
-				: undefined;
-			const condition = and(baseCondition, boundaryCondition);
-			const orderBy =
-				request.sort === "title:asc"
-					? [sql`lower(${unitLocalization.title}) asc nulls last`, asc(unitProgress.unitId)]
-					: request.sort === "title:desc"
-						? [sql`lower(${unitLocalization.title}) desc nulls last`, asc(unitProgress.unitId)]
-						: request.sort === "progressLastSeenAt:asc"
-							? [asc(unitProgress.lastSeenAt), asc(unitProgress.unitId)]
-							: [desc(unitProgress.lastSeenAt), asc(unitProgress.unitId)];
-			const baseQuery = database
-				.select({
-					unitId: unitProgress.unitId,
-					status: unitProgress.status,
-					progress: unitProgress.progress,
-					completedCount: unitProgress.completedCount,
-					totalTimeMs: unitProgress.totalTimeMs,
-					firstSeenAt: unitProgress.firstSeenAt,
-					lastSeenAt: unitProgress.lastSeenAt,
-					lastContentStructureNodeId: unitProgress.lastContentStructureNodeId,
-					visibility: unitProgress.visibility,
-					type: unit.kind,
-					language: unitLocalization.language,
-					title: unitLocalization.title,
-					sortTitle: sql<string | null>`lower(${unitLocalization.title})`,
-					summary: unitLocalization.summary,
-					coverAssetId: resolvedUnitLocalizationImageAssetId(
-						unit.id,
-						"cover",
-						body.localizationLanguages,
-					),
-				})
-				.from(unitProgress)
-				.innerJoin(unit, eq(unit.id, unitProgress.unitId))
-				.innerJoin(
-					unitLocalization,
-					and(
-						eq(unitLocalization.unitId, unit.id),
-						eq(
-							unitLocalization.language,
-							resolvedUnitLocalizationLanguage(unit.id, body.localizationLanguages),
-						),
-					),
-				)
-				.where(condition);
-			const rows = await baseQuery.orderBy(...orderBy).limit(request.pageSize + 1);
-			const pageRows = rows.slice(0, request.pageSize);
-			const consumed = request.consumed + pageRows.length;
-			const total =
-				rows.length <= request.pageSize
-					? ({ kind: "exact", value: consumed } as const)
-					: ({
-							kind: "lower-bound",
-							value: Math.max(request.total?.value ?? 0, consumed + 1),
-						} as const);
-			const items = pageRows.map(({ coverAssetId, sortTitle: _sortTitle, ...row }) => ({
-				...row,
-				type: toProgressUnitType(row.type),
-				totalTimeMs: Number(row.totalTimeMs),
-				lastReadAnchor: null,
-				cover: presentImageAsset(coverAssetId, "cover"),
-			}));
-			const lastRow = pageRows.at(-1);
-			return {
-				items,
-				total,
-				...(rows.length > request.pageSize && lastRow
-					? {
-							nextCursor: createProgressSearchCursor(request, {
-								boundary: {
-									sortValue: request.sort.startsWith("title:")
-										? lastRow.sortTitle
-										: lastRow.lastSeenAt.toISOString(),
-									unitId: lastRow.unitId,
-								},
-								consumed,
-								total,
-							}),
-						}
-					: {}),
-			};
-		},
+        async ({user,authorization,body}) => {
+         const request=resolveProgressSearchRequest(body,JSON.stringify({surface:"search",languages:body.localizationLanguages}));
+         const page=await readProgressPage({authUserId:user.id,profileId:authorization.profileId,languages:body.localizationLanguages??[],request});
+         return {items:page.items,total:page.total,...(page.boundary ? {nextCursor:createProgressSearchCursor(request,{boundary:page.boundary,consumed:page.consumed,total:page.total})} : {})};
+        },
 	)
 	.get(
 		"/:unitId",
@@ -698,7 +492,7 @@ export default new Elysia({ prefix: "/progress" })
 					eq(contentStructureNode.id, contentStructureNodeProgress.nodeId),
 				)
 				.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
-				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+				.innerJoinLateral(contentState,sql`true`)
 				.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 				.where(
 					and(
@@ -707,17 +501,18 @@ export default new Elysia({ prefix: "/progress" })
 						or(
 							and(
 								eq(contentStructure.kind, "book.contents"),
-								eq(unit.kind, "post"),
+								eq(contentState.owner, "post"),
 								eq(post.kind, "chapter"),
 							),
 							and(
 								eq(contentStructure.kind, "media.contents"),
-								inArray(unit.kind, ["video", "audio"]),
+								inArray(contentState.owner, ["video", "audio"]),
 							),
 						),
 						isNull(contentStructureNode.deletedAt),
 						isNull(contentStructure.deletedAt),
-						isNull(unit.deletedAt),
+						isNull(contentState.deletedAt),
+                        getUnitReadCondition(authorization.profileId,{},contentState),
 					),
 				)
 				.orderBy(desc(contentStructureNodeProgress.completedAt));

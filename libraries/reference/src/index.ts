@@ -33,6 +33,8 @@ export const UnitOwnerValues = [...CatalogOwnerValues, ...PlatformOwnerValues] a
 export type CatalogOwner = (typeof CatalogOwnerValues)[number];
 export type PlatformOwner = (typeof PlatformOwnerValues)[number];
 export type UnitOwner = (typeof UnitOwnerValues)[number];
+export const UnitOwnerSchema = z.enum(UnitOwnerValues);
+export const CatalogOwnerSchema = z.enum(CatalogOwnerValues);
 
 /** Owners eligible for public Following; Tag Path uses its dedicated curation contract. @alpha */
 export type FollowableUnitOwner = Exclude<UnitOwner, "tag_path">;
@@ -64,12 +66,12 @@ export const NonRealmFollowableUnitOwnerValues = nonRealmFollowableUnitOwners();
  * Parsing proves only owner and UUID shape. The owning service must check concrete
  * foreign keys, supported capability, current visibility and authorization.
  */
-export const UnitReferenceSchema = z.strictObject({ owner: z.enum(UnitOwnerValues), id: z.uuid() });
+export const UnitReferenceSchema = z.strictObject({ owner: UnitOwnerSchema, id: z.uuid() });
 export type UnitReference = z.infer<typeof UnitReferenceSchema>;
 
 /** Catalog-only references cannot silently accept platform or account identities. @alpha */
 export const CatalogReferenceSchema = z.strictObject({
-	owner: z.enum(CatalogOwnerValues),
+	owner: CatalogOwnerSchema,
 	id: z.uuid(),
 });
 export type CatalogReference = z.infer<typeof CatalogReferenceSchema>;

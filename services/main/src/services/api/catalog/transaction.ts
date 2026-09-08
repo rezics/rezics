@@ -47,7 +47,10 @@ export async function catalogRead<T>(
 	const authority = "participation" in identity ? identity.participation : undefined;
 	const actor = authority?.principal.authUserId ?? null;
 	const execute = () =>
-		runParticipationTransaction((tx) => withCatalogViewerPolicy(tx, actor, () => work(tx, actor)));
+		runParticipationTransaction(
+			(tx) => withCatalogViewerPolicy(tx, actor, () => work(tx, actor)),
+			{ isolationLevel: "repeatable read" },
+		);
 	try {
 		return authority ? await runWithParticipationAuthority(authority, execute) : await execute();
 	} catch (cause) {

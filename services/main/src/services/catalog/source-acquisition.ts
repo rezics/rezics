@@ -6,8 +6,9 @@ import { reserveCatalogSourceRequest } from "./source-rate";
 import { bangumiAcquisitionDescriptor } from "./bangumi-acquisition";
 import { musicBrainzAcquisitionDescriptor } from "./musicbrainz-acquisition";
 import { vndbAcquisitionRequest } from "./vndb-acquisition";
-import { storeCatalogSourcePayload, type CatalogSourceArchive } from "./source-observations";
-import type { CatalogSourceCheckLease, CatalogSourceCheckOutcome } from "./source-scheduling";
+import { openLibraryAcquisitionDescriptor } from "./openlibrary-acquisition";
+import { storeCatalogSourcePayload, type CatalogSourceArchive, type CatalogSourceAcquisition, type CatalogSourceKey } from "./source-observations";
+import type { CatalogSourceCheckOutcome } from "./source-scheduling";
 
 export type CatalogSourceFetch = (
 	input: string | URL | Request,
@@ -18,7 +19,7 @@ const userAgent = "REZICS-source-check/1.0 (+https://www.rezics.com)";
 const maximumBytes = SOURCE_DOCUMENT_BYTE_LIMIT;
 
 /** @internal Transport routes are code-owned; upstream identifiers never become arbitrary fetch URLs. */
-export function catalogSourceAcquisitionRequest(lease: CatalogSourceCheckLease) {
+export function catalogSourceAcquisitionRequest(lease: CatalogSourceKey) {
 	const headers = {
 		"User-Agent": userAgent,
 		Accept: "application/json",
@@ -38,11 +39,13 @@ export function catalogSourceAcquisitionRequest(lease: CatalogSourceCheckLease) 
 		};
 	if (lease.source === "bangumi")
 		return { ...bangumiAcquisitionDescriptor(lease.objectType, lease.externalId), headers };
+	if (lease.source === "openlibrary")
+		return { ...openLibraryAcquisitionDescriptor(lease.objectType, lease.externalId), headers };
 	throw new Error("No reviewed acquisition route is registered for this source object type");
 }
 /** @internal Network and archive I/O happen after acquisition admission and outside the applying transaction. */
 export async function acquireCatalogSourceCheck(
-	lease: CatalogSourceCheckLease,
+	lease: CatalogSourceAcquisition & CatalogSourceKey,
 	signal: AbortSignal,
 	dependencies: {
 		fetch?: CatalogSourceFetch;

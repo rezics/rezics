@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import {
+	MUSIC_SOURCE_COMPONENT_LIMIT,
+	SOURCE_ANCILLARY_CHANGE_LIMIT,
+} from "../database/schema/catalog-source-limits";
 import { CatalogSourceNativeChangesSchema } from "./source-applications";
 
 const ownerId = "01900000-0000-7000-8000-000000000001";
@@ -27,7 +31,22 @@ describe("native source application manifest", () => {
 		expect(CatalogSourceNativeChangesSchema.safeParse([music, music]).success).toBe(false);
 		expect(
 			CatalogSourceNativeChangesSchema.safeParse(
-				Array.from({ length: 129 }, (_, i) => ({ ...music, componentKey: String(i) })),
+				Array.from({ length: SOURCE_ANCILLARY_CHANGE_LIMIT + 1 }, (_, i) => ({
+					kind: "catalog-name" as const,
+					owner: "entity" as const,
+					ownerId,
+					componentKey: `01900000-0000-7000-8000-${String(i).padStart(12, "0")}`,
+					beforeRevision: 1,
+					afterRevision: 2,
+				})),
+			).success,
+		).toBe(false);
+		expect(
+			CatalogSourceNativeChangesSchema.safeParse(
+				Array.from({ length: MUSIC_SOURCE_COMPONENT_LIMIT + 1 }, (_, i) => ({
+					...music,
+					componentKey: String(i),
+				})),
 			).success,
 		).toBe(false);
 	});

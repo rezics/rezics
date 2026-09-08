@@ -301,6 +301,8 @@ try {
 			new Request("http://localhost:3001", { headers: { Cookie: owner } }),
 			"unit:update",
 		);
+		if (!("participation" in identity))
+			throw new Error("Fixture actor requires participation");
 		await assert.rejects(
 			runWithParticipationAuthority(identity.participation, () =>
 				database.transaction((tx) =>

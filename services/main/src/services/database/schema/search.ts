@@ -1,16 +1,17 @@
 import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import type { SharedSearchQueryDocument } from "@rezics/filter";
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { bigint, check, index, jsonb, text, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { entityIdentity } from "./catalog-identity";
 import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
-import type { UnitKind } from "./contract-values";
+import { UnitOwnerValues, type UnitOwner } from "@rezics/reference";
 import { CanonicalPgroongaIndexes } from "./pgroonga";
 
 const UnitSearchTextColumnNames = [
-	"unit_kind",
+	"unit_owner",
+	"unit_shape",
 	"text_all",
 	"text_zh",
 	"text_en",
@@ -36,7 +37,8 @@ export const unitSearchDocument = pgTable(
 	"unit_search_document",
 	{
 		unitId: uuid().primaryKey(),
-		unitKind: text().$type<UnitKind>().notNull(),
+		unitOwner: text().$type<UnitOwner>().notNull(),
+		unitShape: text().notNull(),
 		unitUpdatedAtMicros: bigint({ mode: "bigint" }).notNull(),
 		searchOrderKey: text().notNull(),
 		textAll: text(),
@@ -52,11 +54,13 @@ export const unitSearchDocument = pgTable(
 	},
 	(table) => [
 		...unitReferenceConstraints("unit_search_document", "unit", table, false, table.unitId),
+		check("unit_search_document_owner_check", inArray(table.unitOwner, UnitOwnerValues)),
 
 		index(CanonicalPgroongaIndexes[3])
 			.using(
 				"pgroonga",
-				table.unitKind.op("public.pgroonga_text_term_search_ops_v2"),
+				table.unitOwner.op("public.pgroonga_text_term_search_ops_v2"),
+				table.unitShape.op("public.pgroonga_text_term_search_ops_v2"),
 				table.textAll,
 				table.textZh,
 				table.textEn,

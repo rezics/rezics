@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull, or, getTableColumns, sql, type SQL } from "drizzle-orm";
+import { and, eq, inArray, isNull, getTableColumns, sql, type SQL } from "drizzle-orm";
 import { CatalogIdentityTables } from "../database/schema/catalog-identity";
 import { catalogAccessDecisions } from "../participation/policy";
 import { catalogRatingReadable } from "./read-policy";
@@ -61,10 +61,17 @@ export async function readMusicComponentHeads(tx: DatabaseTransaction, ownerId: 
 	if (input.length > 128) throw new RangeError("Music head lookup is limited to 128 keys");
 	if (!input.length) return [];
 	const table = musicComponentRevision, head = musicComponentHead;
-	return tx.select(getTableColumns(table)).from(head)
-		.innerJoin(table, and(eq(table.ownerId, head.ownerId), eq(table.id, head.historyId)))
-		.where(and(eq(head.ownerId, ownerId), or(...input.map((item) => and(eq(head.component, item.component), eq(head.componentKey, item.componentKey))))))
-		.limit(input.length);
+	const keys=[...new Map(input.map(item=>[JSON.stringify([item.component,item.componentKey]),item])).values()];
+	const requested=tx.select({component:sql<string>`requested.component`.as("component"),
+		componentKey:sql<string>`requested.component_key`.as("component_key")})
+		.from(sql`unnest(${sql.param(keys.map(item=>item.component))}::text[],${sql.param(keys.map(item=>item.componentKey))}::text[]) requested(component,component_key)`)
+		.as("requested_music_heads");
+	// A parameterized point lookup per key avoids repeatedly scanning a large owner's entire head set.
+	const selected=tx.select({ownerId:head.ownerId,historyId:head.historyId}).from(head)
+		.where(and(eq(head.ownerId,ownerId),eq(head.component,requested.component),eq(head.componentKey,requested.componentKey)))
+		.limit(1).as("selected_music_head");
+	return tx.select(getTableColumns(table)).from(requested).innerJoinLateral(selected,sql`true`)
+		.innerJoin(table,and(eq(table.ownerId,selected.ownerId),eq(table.id,selected.historyId))).limit(keys.length);
 }
 
 type PreparedMusicMutation = { operation: MusicComponentMutation; head: Awaited<ReturnType<typeof readMusicComponentHead>>; row: Record<string, unknown>; remove: boolean };

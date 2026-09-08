@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 import { MusicBrainzRelationSchema } from "./musicbrainz";
 import { correlateMusicBrainzRelations } from "./musicbrainz-relation-plan";
 

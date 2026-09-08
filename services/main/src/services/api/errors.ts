@@ -4,6 +4,10 @@ import { StatusCodes } from "http-status-codes";
 
 import { AuthErrors } from "../auth/errors";
 import { AuthorizationErrors } from "../authorization/errors";
+import {
+	CatalogSourceRequestLimited,
+	CatalogSourceUnavailable,
+} from "../catalog/source-api-errors";
 import { CatalogReferenceNotFound, CatalogRevisionConflict } from "../catalog/storage";
 import { DatabaseErrors } from "../database/errors";
 import { EntityErrors } from "../entities/errors";
@@ -77,6 +81,8 @@ export class RouteNotFound extends HTTPError.id("RouteNotFound", StatusCodes.NOT
 export const ApiErrors = [
 	CatalogReferenceNotFound,
 	CatalogRevisionConflict,
+	CatalogSourceRequestLimited,
+	CatalogSourceUnavailable,
 	ParticipationDenied,
 	FavoriteNotFound,
 	FavoriteRevisionConflict,

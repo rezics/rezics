@@ -1630,7 +1630,7 @@ export default new Elysia({ prefix: "/realms" })
 			},
 			detail: { summary: "Update Realm rules", tags: ["Realms"] },
 		},
-		async ({ params, entity, authorization, body }) => {
+		async ({ params, user, entity, authorization, body }) => {
 			await ensureRealmFieldsAuthorized(authorization, params.realmId, "realm.rules.update", [
 				"rules",
 			]);
@@ -1638,6 +1638,7 @@ export default new Elysia({ prefix: "/realms" })
 				const result = await publishRealmRuleRevision(tx, {
 					realmId: params.realmId,
 					actorProfileId: entity.id,
+					actorAuthUserId: user.id,
 					baseRevisionId: body.baseRevisionId,
 					acknowledgementMode: body.acknowledgementMode,
 					requireOnJoin: body.requireOnJoin,

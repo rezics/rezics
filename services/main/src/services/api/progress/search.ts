@@ -18,7 +18,7 @@ import { WorkPolicy } from "../../performance/policy";
 
 const ProgressFilterDocument = createFilterDocument({
 	categories: ["units"],
-	where: { kind: { in: ["book", "media", "software"] } },
+	where: { owner: { in: ["publishing", "program", "music", "software", "video", "audio"] } },
 });
 const ProgressEndpointPolicy = {
 	fields: [],
@@ -94,7 +94,7 @@ function decodeProgressSearchCursor(value: string): ProgressSearchCursor {
 		) ||
 		typeof cursor.consumed !== "number" ||
 		!Number.isSafeInteger(cursor.consumed) ||
-		cursor.consumed < 1 ||
+		cursor.consumed < 0 ||
 		typeof cursor.pageSize !== "number" ||
 		!Number.isSafeInteger(cursor.pageSize) ||
 		cursor.pageSize < 1 ||
@@ -141,7 +141,7 @@ export function createProgressSearchCursor(
 	return `s1_${Buffer.from(JSON.stringify(cursor)).toString("base64url")}`;
 }
 
-export function resolveProgressSearchRequest(value: unknown): ResolvedProgressSearchRequest {
+export function resolveProgressSearchRequest(value: unknown, scopeKey = ""): ResolvedProgressSearchRequest {
 	let input: ReturnType<typeof parseSearchFeatureInput>;
 	try {
 		const body =
@@ -171,14 +171,13 @@ export function resolveProgressSearchRequest(value: unknown): ResolvedProgressSe
 	if (pageSize > WorkPolicy.search.maxPageSize)
 		throw new InvalidSearch("Progress Search page size exceeds its configured maximum");
 	const requestHash = createHash("sha256")
-		.update(JSON.stringify({ query, sort, pageSize }))
+		.update(JSON.stringify({ query, sort, pageSize, scopeKey }))
 		.digest("hex");
 	const cursor = input.state.cursor ? decodeProgressSearchCursor(input.state.cursor) : undefined;
 	if (
 		cursor &&
 		(cursor.requestHash !== requestHash ||
 			cursor.pageSize !== pageSize ||
-			cursor.consumed + pageSize > WorkPolicy.search.maxResultWindow ||
 			(sort.startsWith("progressLastSeenAt:") &&
 				(cursor.boundary.sortValue === null ||
 					!Number.isFinite(Date.parse(cursor.boundary.sortValue)))))

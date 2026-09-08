@@ -98,6 +98,12 @@ export async function publishCatalogSemanticRevision(
 		const newId = value.factId ?? value.relationId;
 		const targetTable = value.factId ? fact : relation;
 		if (oldId && newId) {
+			if (value.factId) {
+				const purposes = await tx.select({ purpose: fact.purpose }).from(fact)
+					.where(and(eq(fact.ownerId, reference.id), inArray(fact.id, [oldId, newId]))).limit(2);
+				if (new Set(purposes.map(row => row.purpose)).size !== 1)
+					throw new TypeError("A semantic identity cannot change its fact purpose");
+			}
 			const rows = await tx
 				.select({ definitionRevisionId: targetTable.definitionRevisionId })
 				.from(targetTable)
@@ -163,10 +169,19 @@ export async function listCatalogSemanticHistory(
 	const identity = await loadCatalogIdentity(tx, reference, actor, false);
 	if (!(await canAccessCatalog(tx, reference, actor, identity.createdByAuthUserId, false)))
 		throw new CatalogReferenceNotFound("Semantic history requires owner authority");
-	const table = CatalogFactTables[reference.owner].semanticRevision;
+	const { semanticRevision: table, fact, relation } = CatalogFactTables[reference.owner];
+	const head = CatalogFactTables[reference.owner].semanticHead;
+	const [current] = await tx.select({ purpose: fact.purpose }).from(head)
+		.innerJoin(table, and(eq(table.ownerId, head.ownerId), eq(table.semanticId, head.semanticId), eq(table.version, head.version)))
+		.leftJoin(fact, and(eq(fact.ownerId, table.ownerId), eq(fact.id, table.factId)))
+		.where(and(eq(head.ownerId, reference.id), eq(head.semanticId, semanticId))).limit(1);
+	if (current?.purpose === "qualifier")
+		throw new CatalogReferenceNotFound("Qualifier history is read through its exact relation revisions");
 	return tx
-		.select()
+		.select({ ...getTableColumns(table), definitionRevisionId: sql<string>`coalesce(${fact.definitionRevisionId},${relation.definitionRevisionId})` })
 		.from(table)
+		.leftJoin(fact, and(eq(fact.ownerId, table.ownerId), eq(fact.id, table.factId)))
+		.leftJoin(relation, and(eq(relation.ownerId, table.ownerId), eq(relation.id, table.relationId)))
 		.where(
 			and(
 				eq(table.ownerId, reference.id),
@@ -268,7 +283,7 @@ export async function restoreCatalogSemanticRevision(
 }
 
 /** @alpha Selection predicate for current accepted rows, usable by bounded exports and queries. */
-export function currentCatalogSemantic(reference: CatalogReference, kind: "fact" | "relation") {
+export function currentCatalogSemantic(reference: CatalogReference, kind: "fact" | "relation", includeInactive = false) {
 	const {
 		semanticHead: head,
 		semanticRevision: revision,
@@ -277,7 +292,16 @@ export function currentCatalogSemantic(reference: CatalogReference, kind: "fact"
 	} = CatalogFactTables[reference.owner];
 	const target = kind === "fact" ? fact : relation;
 	const targetId = kind === "fact" ? revision.factId : revision.relationId;
-	return sql`exists (select 1 from ${revision} join ${head} on ${head.ownerId}=${revision.ownerId} and ${head.semanticId}=${revision.semanticId} and ${head.version}=${revision.version} where ${revision.ownerId}=${target.ownerId} and ${targetId}=${target.id} and ${revision.state} in ('active','disputed'))`;
+	return sql`exists (select 1 from ${revision} join ${head} on ${head.ownerId}=${revision.ownerId} and ${head.semanticId}=${revision.semanticId} and ${head.version}=${revision.version} where ${revision.ownerId}=${target.ownerId} and ${targetId}=${target.id} ${includeInactive ? sql`` : sql`and ${revision.state} in ('active','disputed')`})`;
+}
+
+/** Bounded head candidates make pagination independent of the number of obsolete value revisions. @internal */
+export async function pageCurrentCatalogSemanticTargets(tx: DatabaseTransaction, reference: CatalogReference, afterId: string | undefined, limit: number) {
+	const { semanticHead: head, semanticRevision: revision } = CatalogFactTables[reference.owner];
+	return tx.select({ semanticId: head.semanticId, factId: revision.factId, relationId: revision.relationId }).from(head)
+		.innerJoin(revision, and(eq(revision.ownerId, head.ownerId), eq(revision.semanticId, head.semanticId), eq(revision.version, head.version)))
+		.where(and(eq(head.ownerId, reference.id), afterId ? gt(head.semanticId, afterId) : undefined))
+		.orderBy(head.semanticId).limit(limit);
 }
 
 /** @alpha Withdraw or dispute the current semantic decision without changing historical data. */
@@ -312,6 +336,8 @@ export async function transitionCatalogSemanticState(
 		)
 		.limit(1);
 	if (!current) throw new CatalogRevisionConflict("Semantic head changed");
+	if (current.state === "withdrawn")
+		throw new TypeError("A withdrawn semantic decision requires a new reviewed value or relation");
 	const head = await publishCatalogSemanticRevision(tx, reference, actor, {
 		semanticId,
 		expectedHeadVersion,
@@ -351,6 +377,7 @@ export async function listCatalogFacts(
 		.where(
 			and(
 				eq(table.ownerId, reference.id),
+				eq(table.purpose, "assertion"),
 				currentCatalogSemantic(reference, "fact"),
 				sql`${table.spoiler} <= ${page.maxSpoiler}`,
 				page.afterId ? gt(table.id, page.afterId) : undefined,
@@ -373,6 +400,7 @@ export async function pageCatalogFacts(
 		limit?: number;
 		definitionRevisionId?: string;
 		maxSpoiler?: 0 | 1 | 2;
+		includeInactive?: boolean;
 	} = {},
 ) {
 	await loadCatalogIdentity(tx, reference, actor, false);
@@ -382,43 +410,33 @@ export async function pageCatalogFacts(
 			limit: z.number().int().min(1).max(100).default(50),
 			definitionRevisionId: z.uuid().optional(),
 			maxSpoiler: z.number().int().min(0).max(2).default(0),
+			includeInactive: z.boolean().default(false),
 		})
 		.parse(input);
+	if (page.includeInactive) await loadCatalogIdentity(tx, reference, actor, true);
 	const table = CatalogFactTables[reference.owner].fact;
-	const candidates = await tx
-		.select({ id: table.id })
-		.from(table)
-		.where(
-			and(
-				eq(table.ownerId, reference.id),
-				page.afterId ? gt(table.id, page.afterId) : undefined,
-				page.definitionRevisionId
-					? eq(table.definitionRevisionId, page.definitionRevisionId)
-					: undefined,
-			),
-		)
-		.orderBy(table.id)
-		.limit(page.limit);
-	if (!candidates.length) return { items: [], afterId: null };
+	const candidates = await pageCurrentCatalogSemanticTargets(tx, reference, page.afterId, page.limit);
+	const afterId = candidates.length === page.limit ? candidates.at(-1)?.semanticId ?? null : null;
+	const ids = candidates.flatMap(candidate => candidate.factId ? [candidate.factId] : []);
+	if (!ids.length) return { items: [], afterId };
 	const items = await tx
 		.select({ ...getTableColumns(table), state: currentCatalogSemanticState(reference, "fact") })
 		.from(table)
 		.where(
 			and(
 				eq(table.ownerId, reference.id),
-				inArray(
-					table.id,
-					candidates.map((c) => c.id),
-				),
-				currentCatalogSemantic(reference, "fact"),
+				inArray(table.id, ids),
+				eq(table.purpose, "assertion"),
+				page.definitionRevisionId ? eq(table.definitionRevisionId, page.definitionRevisionId) : undefined,
+				currentCatalogSemantic(reference, "fact", page.includeInactive),
 				sql`${table.spoiler} <= ${page.maxSpoiler}`,
 			),
 		)
-		.orderBy(table.id)
+		.orderBy(table.semanticId)
 		.limit(page.limit);
 	return {
 		items,
-		afterId: candidates.length === page.limit ? (candidates.at(-1)?.id ?? null) : null,
+		afterId,
 	};
 }
 

@@ -1,3 +1,5 @@
+import { UnitOwnerSchema, type UnitOwner } from "@rezics/reference";
+import { unitStateRelation, unitStatesForIds } from "../../units/state-relation";
 import {presentImageAsset} from "../image-assets/presentation";
 import type { PresentedAvatar } from "@rezics/avatar";
 import {
@@ -43,7 +45,8 @@ import {
 	realmUnit,
 	score,
 	scoreStat,
-	unit,
+	realm,
+	tag,
 	unitBestScore,
 	unitFollow,
 	unitLocalization,
@@ -64,7 +67,7 @@ import {
 import type { RecommendationCandidate } from "../../recommendations/ranking";
 import { createRecommendationTracking } from "../../recommendations/tracking";
 import { InvalidSearch, SearchUnavailable } from "../../search/errors";
-import type { SearchExpression, SearchKeysetPosition } from "../../search/query";
+import type { SearchKeysetPosition } from "../../search/query";
 import { SearchCategories } from "../../search/schema";
 import { searchGlobalIdentifiers, type GlobalSearchBranch } from "../../search/service";
 import {
@@ -93,27 +96,28 @@ import {
 	DefaultFeedContentKindValues,
 	FeedContentKindValues,
 	FeedPostKindValues,
-	FeedRatedWorkUnitKindValues,
+	FeedRatedWorkOwnerValues,
 	FeedRequest,
 	FeedSortSchema,
-	FeedUnitKindValues,
+	FeedUnitOwnerValues,
 	MaximumFeedAttributionsPerItem,
 	MaximumFeedRealmContextsPerItem,
 	type FeedContentKind,
 	type FeedPostKind,
 	type FeedRequest as FeedRequestType,
 	type FeedSort,
-	type FeedUnitKind,
+	type FeedUnitOwner,
 } from "./schema";
 
-const feedReviewScoreTargetUnit = alias(unit, "feed_review_score_target_unit");
-const feedReviewScoreRealm = alias(unit, "feed_review_score_realm");
-const feedRealmContextTagUnit = alias(unit, "feed_realm_context_tag_unit");
-const feedRealmContextPostUnit = alias(unit, "feed_realm_context_post_unit");
+const feedUnit = unitStateRelation(sql`null::uuid`, "search_unit");
+const feedReviewScoreTargetUnit = unitStateRelation(score.unitId, "feed_review_score_target");
+const feedReviewScoreRealm = alias(realm, "feed_review_score_realm");
+const feedRealmContextTagUnit = alias(tag, "feed_realm_context_tag_unit");
+const feedRealmContextPostUnit = alias(post, "feed_realm_context_post_unit");
 
 interface FeedRealmContextSummary {
 	readonly id: string;
-	readonly language: ContentLanguage;
+	readonly language: string | null;
 	readonly slugAddress: PublicCanonicalUnitSlugAddress | null;
 	readonly title: string | null;
 	readonly summary: string | null;
@@ -142,12 +146,11 @@ async function getFeedRealmContextsByUnitIds(
 			)}) as requested(unit_id, primary_realm_id)
 			cross join lateral (
 				select membership.realm_id
-				from ${realmUnit} as membership
-				inner join ${unit} as context_realm on context_realm.id = membership.realm_id
-				where membership.unit_id = requested.unit_id
-					and membership.status = 'visible'
-					and membership.publication_state = 'active'
-					and context_realm.status = 'published'
+                from (select realm_id,updated_at from ${realmUnit}
+                  where unit_id=requested.unit_id and status='visible' and publication_state='active'
+                  order by updated_at desc,realm_id desc limit 32) membership
+                inner join ${realm} as context_realm on context_realm.id=membership.realm_id
+                where context_realm.status='published' and context_realm.moderation_status='approved'
 					and context_realm.visibility = 'public'
 					and context_realm.deleted_at is null
 				order by
@@ -165,7 +168,7 @@ async function getFeedRealmContextsByUnitIds(
 	);
 	for (const row of membershipRows.rows) {
 		const realm = realmSummaries.get(row.realmId);
-		if (!realm || realm.kind !== "realm") continue;
+		if (!realm || realm.owner !== "realm") continue;
 		result.get(row.unitId)?.push({
 			id: realm.id,
 			language: realm.language,
@@ -189,50 +192,23 @@ export function prioritizeFeedRealmContexts<T extends { readonly id: string }>(
 		: [...realms];
 }
 
-type FeedContentDefinition =
-	| { readonly itemType: "unit"; readonly unitKind: FeedUnitKind }
-	| { readonly itemType: "post"; readonly postKind: FeedPostKind };
-
-const FeedContentDefinitions = {
-	"unit:book": { itemType: "unit", unitKind: "book" },
-	"unit:software": { itemType: "unit", unitKind: "software" },
-	"unit:media": { itemType: "unit", unitKind: "media" },
-	"unit:video": { itemType: "unit", unitKind: "video" },
-	"unit:audio": { itemType: "unit", unitKind: "audio" },
-	"unit:release": { itemType: "unit", unitKind: "release" },
-	"unit:entity": { itemType: "unit", unitKind: "entity" },
-	"unit:tag": { itemType: "unit", unitKind: "tag" },
-	"unit:series": { itemType: "unit", unitKind: "series" },
-	"unit:zone": { itemType: "unit", unitKind: "zone" },
-	"unit:collection": { itemType: "unit", unitKind: "collection" },
-	"unit:poll": { itemType: "unit", unitKind: "poll" },
-	"unit:realm": { itemType: "unit", unitKind: "realm" },
-	"post:post": { itemType: "post", postKind: "post" },
-	"post:reply": { itemType: "post", postKind: "reply" },
-	"post:excerpt": { itemType: "post", postKind: "excerpt" },
-	"post:review": { itemType: "post", postKind: "review" },
-	"post:chapter": { itemType: "post", postKind: "chapter" },
-	"post:wiki": { itemType: "post", postKind: "wiki" },
-	"post:picture": { itemType: "post", postKind: "picture" },
-} as const satisfies Record<FeedContentKind, FeedContentDefinition>;
-
-const FeedUnitKinds: ReadonlySet<string> = new Set(FeedUnitKindValues);
+type FeedContentDefinition = { readonly owner: FeedUnitOwner | "post"; readonly shape: string };
+const FeedContentDefinitions = Object.fromEntries(FeedContentKindValues.map(token => {
+ const [owner, shape] = token.split(":");
+ if (!shape) throw new Error("Invalid feed content shape");
+ return [token, {owner: UnitOwnerSchema.parse(owner), shape}];
+}));
+function feedDefinition(token: FeedContentKind): FeedContentDefinition {
+ const definition = FeedContentDefinitions[token];
+ if (!definition || !(definition.owner === "post" || isFeedUnitOwner(definition.owner))) throw new Error("Invalid feed content owner");
+ return {...definition, owner: definition.owner};
+}
+const FeedUnitOwners: ReadonlySet<string> = new Set(FeedUnitOwnerValues);
 const FeedPostKinds: ReadonlySet<string> = new Set(FeedPostKindValues);
-const FeedRatedWorkUnitKinds: ReadonlySet<string> = new Set(FeedRatedWorkUnitKindValues);
-
-function isFeedUnitKind(value: string): value is FeedUnitKind {
-	return FeedUnitKinds.has(value);
-}
-
-function isFeedPostKind(value: string | null): value is FeedPostKind {
-	return value !== null && FeedPostKinds.has(value);
-}
-
-function isFeedRatedWorkUnitKind(
-	value: FeedUnitKind,
-): value is (typeof FeedRatedWorkUnitKindValues)[number] {
-	return FeedRatedWorkUnitKinds.has(value);
-}
+const FeedRatedWorkOwners: ReadonlySet<string> = new Set(FeedRatedWorkOwnerValues);
+function isFeedUnitOwner(value: string): value is FeedUnitOwner {return FeedUnitOwners.has(value);}
+function isFeedPostKind(value: string | null): value is FeedPostKind {return value !== null && FeedPostKinds.has(value);}
+function isFeedRatedWorkOwner(value: string) {return FeedRatedWorkOwners.has(value);}
 
 interface FeedScoreAggregate {
 	readonly realmId: string;
@@ -269,47 +245,30 @@ export function createFeedScoreCandidates({
 }
 
 export function resolveFeedContentSelection(content?: readonly FeedContentKind[]) {
-	const requested = new Set(content ?? DefaultFeedContentKindValues);
-	const selected = FeedContentKindValues.filter((kind) => requested.has(kind));
-	const unitKinds: FeedUnitKind[] = [];
-	const postKinds: FeedPostKind[] = [];
-	for (const kind of selected) {
-		const definition = FeedContentDefinitions[kind];
-		if (definition.itemType === "unit") unitKinds.push(definition.unitKind);
-		else postKinds.push(definition.postKind);
-	}
-	return { selected: [...selected], unitKinds, postKinds } as const;
+ const requested = new Set(content ?? DefaultFeedContentKindValues);
+ const selected = FeedContentKindValues.filter(kind => requested.has(kind));
+ const definitions = selected.map(feedDefinition);
+ return {selected, definitions, owners: [...new Set(definitions.filter(d => d.owner !== "post").map(d => d.owner))], postKinds: definitions.flatMap(d => isFeedPostKind(d.shape) && d.owner === "post" ? [d.shape] : [])};
 }
-
-const FeedSearchCategoryByContentKind = {
-	"unit:book": "units",
-	"unit:software": "units",
-	"unit:media": "units",
-	"unit:video": "units",
-	"unit:audio": "units",
-	"unit:release": "units",
-	"unit:entity": "entities",
-	"unit:tag": "tags",
-	"unit:series": "units",
-	"unit:zone": "units",
-	"unit:collection": "collections",
-	"unit:poll": "polls",
-	"unit:realm": "realms",
-	"post:post": "posts",
-	"post:reply": "posts",
-	"post:excerpt": "posts",
-	"post:review": "reviews",
-	"post:chapter": "posts",
-	"post:wiki": "posts",
-	"post:picture": "posts",
-} as const satisfies Record<FeedContentKind, SearchCategory>;
+function feedSearchCategory(token: FeedContentKind): SearchCategory {
+ const d = feedDefinition(token);
+ switch(d.owner) {
+  case "entity": return "entities";
+  case "tag": return "tags";
+  case "collection": return "collections";
+  case "poll": return "polls";
+  case "realm": return "realms";
+  case "post": return d.shape === "review" ? "reviews" : "posts";
+  default: return "units";
+ }
+}
 
 export function resolveFeedSearchCategories(
 	content?: readonly FeedContentKind[],
 ): SearchCategory[] {
 	const requested = new Set(
 		resolveFeedContentSelection(content).selected.map(
-			(kind) => FeedSearchCategoryByContentKind[kind],
+			(kind) => feedSearchCategory(kind),
 		),
 	);
 	return SearchCategories.filter((category) => requested.has(category));
@@ -332,49 +291,23 @@ async function resolveFeedSearchSelection(input: {
 	readonly contentRatings: RecommendationViewer["contentRatings"];
 	readonly query: string;
 	readonly sort: FeedSort;
+ readonly snapshotId:string|null;
 	readonly limit: number;
 	readonly eligibilityCondition: SQL;
 	readonly position?: SearchKeysetPosition;
 }): Promise<FeedSearchSelection> {
-	const definitions = resolveFeedContentSelection(input.content).selected;
-	const grouped = new Map<
-		SearchCategory,
-		{ values: Set<string>; sourceUnitKinds: Set<(typeof unit.$inferSelect)["kind"]> }
-	>();
-	for (const contentKind of definitions) {
-		const category = FeedSearchCategoryByContentKind[contentKind];
-		const definition = FeedContentDefinitions[contentKind];
-		const group = grouped.get(category) ?? {
-			values: new Set<string>(),
-			sourceUnitKinds: new Set<(typeof unit.$inferSelect)["kind"]>(),
-		};
-		if (definition.itemType === "unit") {
-			group.values.add(definition.unitKind);
-			group.sourceUnitKinds.add(definition.unitKind);
-		} else {
-			group.values.add(definition.postKind);
-			group.sourceUnitKinds.add("post");
-		}
-		grouped.set(category, group);
-	}
-	const branches: GlobalSearchBranch[] = [...grouped].map(
-		([category, { values, sourceUnitKinds }]) => {
-			const selectedKinds = [...values];
-			const searchExpression: SearchExpression | undefined =
-				category === "units" || category === "posts"
-					? selectedKinds.length === 1
-						? { field: "kind", operator: "equals", value: selectedKinds[0]! }
-						: { field: "kind", operator: "any-of", values: selectedKinds }
-					: undefined;
-			return {
-				category,
-				...(searchExpression ? { searchExpression } : {}),
-				sourceUnitKinds: [...sourceUnitKinds],
-			};
-		},
-	);
+ const definitions = resolveFeedContentSelection(input.content).selected;
+ // Preserve native pairs in the common eligibility predicate; source restrictions run before limits.
+ const grouped = new Map<SearchCategory, {owners: Set<UnitOwner>; shapes: Set<string>}>();
+ for (const token of definitions) {
+  const d = feedDefinition(token), category = feedSearchCategory(token);
+  const group = grouped.get(category) ?? {owners: new Set<UnitOwner>(), shapes: new Set<string>()};
+  group.owners.add(d.owner); group.shapes.add(d.shape); grouped.set(category,group);
+ }
+ const branches: GlobalSearchBranch[] = [...grouped].map(([category, group]) => ({category, sourceOwners:[...group.owners], sourceShapes:[...group.shapes]}));
 	const page = await searchGlobalIdentifiers({
 		branches,
+        bestSnapshotId:input.snapshotId,
 		...(input.filter ? { domainFilter: input.filter } : {}),
 		...(input.profileId ? { profileId: input.profileId } : {}),
 		contentRatingPolicy: contentRatingPolicyFromAllowlist(input.contentRatings),
@@ -450,7 +383,7 @@ const FeedSearchPosition = t.Union([
 
 const FeedCursor = t.Object(
 	{
-		v: t.Literal(11),
+		v: t.Literal(1),
 		sort: FeedSortSchema,
 		filterHash: t.Nullable(t.String({ pattern: "^[0-9a-f]{64}$" })),
 		filterLanguages: t.Array(t.UnionEnum(ContentLanguageValues), { uniqueItems: true }),
@@ -541,57 +474,45 @@ export function getFeedEligibilityCondition(
 	asOf: Date,
 	anchorId?: string,
 ): SQL {
-	const { unitKinds, postKinds } = resolveFeedContentSelection(scope.content);
-	const contentCondition = or(
-		unitKinds.length ? inArray(unit.kind, unitKinds) : undefined,
-		postKinds.length
-			? and(
-					eq(unit.kind, "post"),
-					exists(
-						database
-							.select({ id: post.id })
-							.from(post)
-							.where(and(eq(post.id, unit.id), inArray(post.kind, postKinds))),
-					),
-				)
-			: undefined,
-	);
+ const { definitions } = resolveFeedContentSelection(scope.content);
+ const contentCondition = definitions.length ? or(...definitions.map(d => and(eq(feedUnit.owner, d.owner), eq(feedUnit.shape, d.shape)))) : sql`false`;
 	return and(
 		contentCondition,
-		eq(unit.status, "published"),
-		eq(unit.visibility, "public"),
-		eq(unit.moderationStatus, "approved"),
-		isNull(unit.deletedAt),
-		lte(unit.createdAt, asOf),
-		sql`(${unit.kind} <> 'post'
+		eq(feedUnit.status, "published"),
+		eq(feedUnit.visibility, "public"),
+		eq(feedUnit.moderationStatus, "approved"),
+		isNull(feedUnit.deletedAt),
+		lte(feedUnit.createdAt, asOf),
+        lte(feedUnit.updatedAt,asOf),
+		sql`(${feedUnit.owner} <> 'post'
 			or not exists (
 				select 1 from post candidate_post
-				where candidate_post.id = ${unit.id}
+				where candidate_post.id = ${feedUnit.id}
 					and candidate_post.kind = 'reply'::post_kind
 			)
 			or exists (
 				select 1 from post_reply readable_reply
-				join unit readable_root on readable_root.id = readable_reply.root_post_id
-				where readable_reply.post_id = ${unit.id}
+				join post readable_root on readable_root.id = readable_reply.root_post_id
+				where readable_reply.post_id = ${feedUnit.id}
 					and readable_root.status = 'published'
 					and readable_root.visibility = 'public'
 					and readable_root.moderation_status = 'approved'
 					and readable_root.deleted_at is null
 			))`,
 		scope.languages?.length
-			? sql`exists (
+			? sql`(public.catalog_name_has_languages(${feedUnit.id}, ${sql.param(scope.languages)}::text[], false) or exists (
 				select 1 from unit_localization scoped_localization
-				where scoped_localization.unit_id = ${unit.id}
+				where scoped_localization.unit_id = ${feedUnit.id}
 					and scoped_localization.language in (${sql.join(
 						scope.languages.map((language) => sql`${language}`),
 						sql`, `,
 					)})
-			)`
+			))`
 			: undefined,
 		scope.realmIds?.length
 			? sql`exists (
 				select 1 from realm_unit scoped_content
-				where scoped_content.unit_id = ${unit.id}
+				where scoped_content.unit_id = ${feedUnit.id}
 					and scoped_content.realm_id in (${sql.join(
 						scope.realmIds.map((realmId) => sql`${realmId}::uuid`),
 						sql`, `,
@@ -605,7 +526,7 @@ export function getFeedEligibilityCondition(
 					database
 						.select({ id: post.id })
 						.from(post)
-						.where(and(eq(post.id, unit.id), eq(post.subjectUnitId, scope.subjectId))),
+						.where(and(eq(post.id, feedUnit.id), eq(post.subjectUnitId, scope.subjectId))),
 				)
 			: undefined,
 		scope.reviewScore
@@ -618,11 +539,11 @@ export function getFeedEligibilityCondition(
 							accountPreference,
 							eq(accountPreference.authUserId, selfAuthUserIdForEntity(score.profileId)),
 						)
-						.innerJoin(feedReviewScoreTargetUnit, eq(feedReviewScoreTargetUnit.id, score.unitId))
+						.innerJoinLateral(feedReviewScoreTargetUnit, sql`true`)
 						.innerJoin(feedReviewScoreRealm, eq(feedReviewScoreRealm.id, score.realmId))
 						.where(
 							and(
-								eq(postScore.postId, unit.id),
+								eq(postScore.postId, feedUnit.id),
 								eq(score.realmId, scope.reviewScore.realmId),
 								inArray(score.value, scope.reviewScore.values),
 								getProfileActivityReadCondition({
@@ -640,25 +561,26 @@ export function getFeedEligibilityCondition(
 			: undefined,
 		scope.filter
 			? compileUnitPredicateSql(scope.filter, {
-					unitId: sql`${unit.id}`,
-					unitKind: sql`${unit.kind}`,
+					unitId: sql`${feedUnit.id}`,
+					unitOwner: sql`${feedUnit.owner}`,
+                    unitShape: sql`${feedUnit.shape}`,
 					...(viewer.profileId ? { viewerProfileId: viewer.profileId } : {}),
 				})
 			: undefined,
-		getContentRatingCondition(contentRatingPolicyFromAllowlist(viewer.contentRatings)),
+		getContentRatingCondition(contentRatingPolicyFromAllowlist(viewer.contentRatings), feedUnit.contentRating),
 		viewer.profileId
 			? sql`not exists (
 				select 1 from credit_attribution attribution
 				join account_entity_block blocked on
-					(blocked.blocker_auth_user_id = ${viewer.profileId}::uuid and blocked.blocked_entity_id = attribution.credited_entity_id)
-					or (blocked.blocker_auth_user_id = attribution.credited_entity_id and blocked.blocked_entity_id = ${viewer.profileId}::uuid)
-				where attribution.source_unit_id = ${unit.id}
+					(blocked.blocker_auth_user_id = ${selfAuthUserIdForEntity(viewer.profileId)} and blocked.blocked_entity_id = attribution.credited_entity_id)
+                    or (blocked.blocker_auth_user_id = ${selfAuthUserIdForEntity(sql`attribution.credited_entity_id`)} and blocked.blocked_entity_id = ${viewer.profileId}::uuid)
+				where attribution.source_unit_id = ${feedUnit.id}
 			)`
 			: undefined,
 		viewer.profileId
-			? sql`(${unit.id} = ${anchorId ?? null}::uuid or not exists (
+			? sql`(${feedUnit.id} = ${anchorId ?? null}::uuid or not exists (
 				select 1 from recommendation_exclusion excluded
-				where excluded.profile_id = ${viewer.profileId}::uuid and excluded.unit_id = ${unit.id}
+				where excluded.auth_user_id = ${selfAuthUserIdForEntity(viewer.profileId)} and excluded.unit_id = ${feedUnit.id}
 			))`
 			: undefined,
 	)!;
@@ -701,7 +623,8 @@ export function createFeedTotal(input: {
 }
 
 export interface FeedRankingCandidate extends RecommendationCandidate {
-	unitKind: FeedUnitKind | "post";
+	owner: FeedUnitOwner | "post";
+	shape: string;
 	postKind: FeedPostKind | null;
 	creditedEntityIds: readonly string[];
 	realmId: string | null;
@@ -723,8 +646,8 @@ export function getFeedCandidateRealmIdExpression(
 			) then 0 else 1 end,`
 			: sql``;
 	return sql<string | null>`(
-		select candidate_realm.realm_id from realm_unit candidate_realm
-		where candidate_realm.unit_id = ${unit.id}
+		select candidate_realm.realm_id from (select realm_id,updated_at from realm_unit candidate_realm
+		where candidate_realm.unit_id = ${feedUnit.id}
 			and candidate_realm.status = 'visible'
 			and candidate_realm.publication_state = 'active'
 			${
@@ -735,9 +658,11 @@ export function getFeedCandidateRealmIdExpression(
 						)})`
 					: sql``
 			}
+        order by candidate_realm.updated_at desc,candidate_realm.realm_id desc limit 32
+        ) candidate_realm
 		order by
 			${followedRealmOrder}
-			candidate_realm.created_at desc, candidate_realm.realm_id
+			candidate_realm.updated_at desc, candidate_realm.realm_id desc
 		limit 1
 	)`;
 }
@@ -754,43 +679,44 @@ export async function getFeedRankingCandidates(input: {
 	if (!input.ids.length) return [];
 	const selectedRealmId = getFeedCandidateRealmIdExpression(input.viewer, input.query.realmIds);
 	const snapshotJoin = input.snapshotId
-		? and(eq(unitBestScore.snapshotId, input.snapshotId), eq(unitBestScore.unitId, unit.id))
+		? and(eq(unitBestScore.snapshotId, input.snapshotId), eq(unitBestScore.unitId, feedUnit.id))
 		: sql`false`;
 	const rows = await database
 		.select({
-			id: unit.id,
-			unitKind: unit.kind,
+			id: feedUnit.id,
+			owner: feedUnit.owner,
+			shape: feedUnit.shape,
 			postKind: post.kind,
-			creditedEntityIds: sql<string[]>`array(
-				select distinct attribution.credited_entity_id::text
-				from credit_attribution attribution
-				where attribution.source_unit_id = ${unit.id}
-				order by attribution.credited_entity_id::text
-			)`,
+            creditedEntityIds:sql<string[]>`array(
+             select distinct credited_entity_id::text from (
+              select credited_entity_id from credit_attribution where source_unit_id=${feedUnit.id}
+              order by position,id limit 32
+             ) bounded order by credited_entity_id::text
+            )`,
 			realmId: selectedRealmId,
 			subjectId: post.subjectUnitId,
 			rootPostId: postReply.rootPostId,
 			parentPostId: postReply.parentPostId,
-			createdAt: unit.createdAt,
-			updatedAt: unit.updatedAt,
+			createdAt: feedUnit.createdAt,
+			updatedAt: feedUnit.updatedAt,
 			bestScore: sql<number>`coalesce(${unitBestScore.score}, 0)`,
 		})
-		.from(unit)
-		.leftJoin(post, eq(post.id, unit.id))
-		.leftJoin(postReply, eq(postReply.postId, unit.id))
+		.from(unitStatesForIds(input.ids, "search_unit"))
+		.leftJoin(post, eq(post.id, feedUnit.id))
+		.leftJoin(postReply, eq(postReply.postId, feedUnit.id))
 		.leftJoin(unitBestScore, snapshotJoin)
 		.where(
 			and(
-				inArray(unit.id, input.ids),
+				inArray(feedUnit.id, input.ids),
 				getFeedEligibilityCondition(input.viewer, input.query, input.asOf, input.anchorId),
 			),
 		);
 	return rows.flatMap((row): FeedRankingCandidate[] => {
 		const kind =
-			row.unitKind === "post" && isFeedPostKind(row.postKind)
-				? { unitKind: "post" as const, postKind: row.postKind }
-				: isFeedUnitKind(row.unitKind)
-					? { unitKind: row.unitKind, postKind: null }
+			row.owner === "post" && isFeedPostKind(row.postKind)
+				? { owner: "post" as const, postKind: row.postKind }
+				: isFeedUnitOwner(row.owner)
+					? { owner: row.owner, postKind: null }
 					: null;
 		if (!kind) return [];
 		if (row.bestScore > 0 && !input.sources.reason.has(row.id))
@@ -799,6 +725,7 @@ export async function getFeedRankingCandidates(input: {
 			{
 				id: row.id,
 				...kind,
+				shape: row.shape,
 				creditedEntityIds: row.creditedEntityIds,
 				realmId: row.realmId,
 				subjectId: row.subjectId,
@@ -841,31 +768,32 @@ export async function hydrateFeedItems(
 	const allowedLanguages = scope.languages ?? [];
 	const rows = await database
 		.select({
-			id: unit.id,
-			unitKind: unit.kind,
+			id: feedUnit.id,
+			owner: feedUnit.owner,
+			shape: feedUnit.shape,
 			postKind: post.kind,
 			subjectId: post.subjectUnitId,
 			rootPostId: postReply.rootPostId,
 			parentPostId: postReply.parentPostId,
-			language: resolvedUnitLocalizationLanguage(unit.id, displayLanguages, allowedLanguages),
+			language: resolvedUnitLocalizationLanguage(feedUnit.id, displayLanguages, allowedLanguages),
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
 			coverAssetId: resolvedUnitLocalizationImageAssetId(
-				unit.id,
+				feedUnit.id,
 				"cover",
 				displayLanguages,
 				allowedLanguages,
 			),
-			avatar: resolvedUnitLocalizationAvatar(unit.id, displayLanguages, allowedLanguages),
+			avatar: resolvedUnitLocalizationAvatar(feedUnit.id, displayLanguages, allowedLanguages),
 			bannerAssetId: resolvedUnitLocalizationImageAssetId(
-				unit.id,
+				feedUnit.id,
 				"banner",
 				displayLanguages,
 				allowedLanguages,
 			),
 			latestRevisionId: unitRevisionHead.revisionId,
-			createdAt: unit.createdAt,
-			updatedAt: unit.updatedAt,
+			createdAt: feedUnit.createdAt,
+			updatedAt: feedUnit.updatedAt,
 			contentSpoilerLevel: sql<number>`coalesce((
 				select manifest.spoiler_level
 				from (values
@@ -875,29 +803,29 @@ export async function hydrateFeedItems(
 				) manifest(tag_id, spoiler_level)
 				join ${unitTag} content_label
 					on content_label.tag_id = manifest.tag_id
-					and content_label.unit_id = ${unit.id}
+					and content_label.unit_id = ${feedUnit.id}
 			), 0)`,
 			contentNsfw: sql<boolean>`exists(
 				select 1 from ${unitTag} content_label
-				where content_label.unit_id = ${unit.id}
+				where content_label.unit_id = ${feedUnit.id}
 					and content_label.tag_id = '019b76da-a800-7370-8000-000000000004'::uuid
 			)`,
 		})
-		.from(unit)
-		.leftJoin(post, eq(post.id, unit.id))
-		.leftJoin(postReply, eq(postReply.postId, unit.id))
-		.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unit.id))
+		.from(unitStatesForIds(pageIds, "search_unit"))
+		.leftJoin(post, eq(post.id, feedUnit.id))
+		.leftJoin(postReply, eq(postReply.postId, feedUnit.id))
+		.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, feedUnit.id))
 		.leftJoin(
 			unitLocalization,
 			and(
-				eq(unitLocalization.unitId, unit.id),
+				eq(unitLocalization.unitId, feedUnit.id),
 				eq(
 					unitLocalization.language,
-					resolvedUnitLocalizationLanguage(unit.id, displayLanguages, allowedLanguages),
+					resolvedUnitLocalizationLanguage(feedUnit.id, displayLanguages, allowedLanguages),
 				),
 			),
 		)
-		.where(and(inArray(unit.id, pageIds), getFeedEligibilityCondition(viewer, scope, asOf)));
+		.where(and(inArray(feedUnit.id, pageIds), getFeedEligibilityCondition(viewer, scope, asOf)));
 	if (!rows.length) return [];
 	const [viewerDisplayPreference] = viewer.profileId
 		? await database
@@ -910,22 +838,23 @@ export async function hydrateFeedItems(
 				.limit(1)
 		: [];
 	const validIds = rows.map(({ id }) => id);
+	const presentations = await getPublicUnitSummariesByIds(validIds, displayLanguages);
 	const rootPostIds = rows
-		.filter(({ unitKind, postKind }) => unitKind === "post" && postKind !== "reply")
+		.filter(({ owner, postKind }) => owner === "post" && postKind !== "reply")
 		.map(({ id }) => id);
 	const replyIds = rows.filter(({ postKind }) => postKind === "reply").map(({ id }) => id);
 	const reviewIds = rows.filter(({ postKind }) => postKind === "review").map(({ id }) => id);
 	const wikiIds = rows.filter(({ postKind }) => postKind === "wiki").map(({ id }) => id);
-	const tagIds = rows.filter(({ unitKind }) => unitKind === "tag").map(({ id }) => id);
+	const tagIds = rows.filter(({ owner }) => owner === "tag").map(({ id }) => id);
 	const scopedRealmIds = [...new Set(page.flatMap(({ realmId }) => (realmId ? [realmId] : [])))];
 	const collectionIds = rows
-		.filter(({ unitKind }) => unitKind === "collection")
+		.filter(({ owner }) => owner === "collection")
 		.map(({ id }) => id);
-	const realmIds = rows.filter(({ unitKind }) => unitKind === "realm").map(({ id }) => id);
+	const realmIds = rows.filter(({ owner }) => owner === "realm").map(({ id }) => id);
 	const ratedWorkIds = rows
 		.filter(
-			(row): row is typeof row & { unitKind: FeedUnitKind } =>
-				isFeedUnitKind(row.unitKind) && isFeedRatedWorkUnitKind(row.unitKind),
+			(row): row is typeof row & { owner: FeedUnitOwner } =>
+				isFeedUnitOwner(row.owner) && isFeedRatedWorkOwner(row.owner),
 		)
 		.map(({ id }) => id);
 	const subjectIds = [...new Set(rows.flatMap(({ subjectId }) => (subjectId ? [subjectId] : [])))];
@@ -1002,37 +931,10 @@ export async function hydrateFeedItems(
 						),
 					)
 			: [],
-		subjectIds.length
-			? database
-					.select({
-						id: unit.id,
-						type: unit.kind,
-						language: resolvedUnitLocalizationLanguage(unit.id, displayLanguages),
-						title: unitLocalization.title,
-						summary: unitLocalization.summary,
-						coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", displayLanguages),
-					})
-					.from(unit)
-					.leftJoin(
-						unitLocalization,
-						and(
-							eq(unitLocalization.unitId, unit.id),
-							eq(
-								unitLocalization.language,
-								resolvedUnitLocalizationLanguage(unit.id, displayLanguages),
-							),
-						),
-					)
-					.where(
-						and(
-							inArray(unit.id, subjectIds),
-							eq(unit.status, "published"),
-							eq(unit.visibility, "public"),
-							eq(unit.moderationStatus, "approved"),
-							isNull(unit.deletedAt),
-						),
-					)
-			: [],
+        subjectIds.length ? database.select({id: feedUnit.id, owner: feedUnit.owner, shape: feedUnit.shape,
+         coverAssetId: resolvedUnitLocalizationImageAssetId(feedUnit.id, "cover", displayLanguages)})
+         .from(unitStatesForIds(subjectIds, "search_unit"))
+         .where(and(eq(feedUnit.status,"published"), eq(feedUnit.visibility,"public"), eq(feedUnit.moderationStatus,"approved"), isNull(feedUnit.deletedAt), getContentRatingCondition(contentRatingPolicyFromAllowlist(viewer.contentRatings),feedUnit.contentRating))) : [],
 		scoreTargetIds.length
 			? database
 					.select({
@@ -1051,11 +953,11 @@ export async function hydrateFeedItems(
 			: [],
 		database
 			.select({
-				id: unit.id,
-				title: resolvedUnitLocalizationTitle(unit.id, displayLanguages),
+				id: feedUnit.id,
+				title: resolvedUnitLocalizationTitle(feedUnit.id, displayLanguages),
 			})
-			.from(unit)
-			.where(inArray(unit.id, scoreRealmIds)),
+			.from(unitStatesForIds(scoreRealmIds, "search_unit"))
+			.where(inArray(feedUnit.id, scoreRealmIds)),
 		rootIds.length
 			? database
 					.select({
@@ -1064,7 +966,7 @@ export async function hydrateFeedItems(
 						subjectId: post.subjectUnitId,
 					})
 					.from(post)
-					.innerJoin(unit, eq(unit.id, post.id))
+					.innerJoinLateral(unitStateRelation(post.id,"search_unit"), sql`true`)
 					.leftJoin(
 						unitLocalization,
 						and(
@@ -1181,7 +1083,7 @@ export async function hydrateFeedItems(
 						accountPreference,
 						eq(accountPreference.authUserId, selfAuthUserIdForEntity(score.profileId)),
 					)
-					.innerJoin(feedReviewScoreTargetUnit, eq(feedReviewScoreTargetUnit.id, score.unitId))
+					.innerJoinLateral(feedReviewScoreTargetUnit, sql`true`)
 					.innerJoin(feedReviewScoreRealm, eq(feedReviewScoreRealm.id, score.realmId))
 					.where(
 						and(
@@ -1209,27 +1111,13 @@ export async function hydrateFeedItems(
 		}),
 		getFeedRealmContextsByUnitIds(page, displayLanguages),
 	]);
-	const subjects = new Map(
-		subjectRows.flatMap((subject) => {
-			const language = subject.language;
-			if (!language) return [];
-			return [
-				[
-					subject.id,
-					{
-						id: subject.id,
-						type: subject.type,
-						language,
-						title: subject.title,
-						summary: subject.summary,
-						cover: presentImageAsset(subject.coverAssetId, "cover"),
-					},
-				] as const,
-			];
-		}),
-	);
+ const subjectPresentations = await getPublicUnitSummariesByIds(subjectRows.map(row => row.id), displayLanguages);
+ const subjects = new Map(subjectRows.flatMap(subject => {
+  const presentation = subjectPresentations.get(subject.id);
+  return presentation ? [[subject.id, {...presentation, cover: presentImageAsset(subject.coverAssetId,"cover")} ] as const] : [];
+ }));
 	const rowMap = new Map(rows.map((row) => [row.id, row]));
-	const availableLanguagesByUnitId = new Map<string, ContentLanguage[]>();
+	const availableLanguagesByUnitId = new Map<string, string[]>();
 	for (const { unitId, language } of availableLanguageRows) {
 		const languages = availableLanguagesByUnitId.get(unitId) ?? [];
 		languages.push(language);
@@ -1336,6 +1224,8 @@ export async function hydrateFeedItems(
 		const row = rowMap.get(id);
 		const ranked = pageMap.get(id);
 		if (!row || !ranked) return [];
+        const presentation = presentations.get(row.id);
+        if (!presentation) return [];
 		const tracking =
 			origin.kind === "recommendation"
 				? createRecommendationTracking(row.id, {
@@ -1347,12 +1237,13 @@ export async function hydrateFeedItems(
 				: null;
 		const common = {
 			id: row.id,
-			language: row.language,
-			availableLanguages: availableLanguagesByUnitId.get(row.id) ?? [],
+			language: presentation.language,
+			availableLanguages: [...new Set([...(availableLanguagesByUnitId.get(row.id) ?? []), ...(presentation.language ? [presentation.language] : [])])],
+			shape: row.shape,
 			attributions: attributions.get(row.id) ?? [],
 			realmId: ranked.realmId,
 			realms: prioritizeFeedRealmContexts(realmContexts.get(row.id) ?? [], ranked.realmId),
-			title: row.title,
+			title: presentation.title,
 			createdAt: row.createdAt.toISOString(),
 			updatedAt: row.updatedAt.toISOString(),
 			reactions: {
@@ -1364,43 +1255,43 @@ export async function hydrateFeedItems(
 				origin.kind === "recommendation" ? (origin.reasons.get(row.id) ?? null) : null,
 			tracking,
 		};
-		if (isFeedUnitKind(row.unitKind)) {
+		if (isFeedUnitOwner(row.owner)) {
 			const unitItem = {
 				...common,
 				itemType: "unit" as const,
 				postKind: null,
-				summary: row.summary,
+				summary: presentation.summary,
 				cover: presentImageAsset(row.coverAssetId, "cover"),
 				collection:
-					row.unitKind === "collection"
+					row.owner === "collection"
 						? {
 								directItemCount: collectionDirectItemCount.get(row.id) ?? 0,
 							}
 						: null,
 			};
-			if (isFeedRatedWorkUnitKind(row.unitKind))
+			if (isFeedRatedWorkOwner(row.owner))
 				return [
 					{
 						...unitItem,
-						unitKind: row.unitKind,
+						owner: row.owner,
 						presentation: {
 							kind: "rated-work",
 							scores: scoresFor(row.id),
 						},
 					},
 				];
-			if (row.unitKind === "realm" || row.unitKind === "zone" || row.unitKind === "tag")
+			if (row.owner === "realm" || row.owner === "zone" || row.owner === "tag")
 				return [
 					{
 						...unitItem,
-						unitKind: row.unitKind,
+						owner: row.owner,
 						presentation: {
 							kind: "identity",
 							avatar: presentAvatar(row.avatar),
 							banner: presentImageAsset(row.bannerAssetId, "banner"),
-							memberCount: row.unitKind === "realm" ? (realmMemberCount.get(row.id) ?? 0) : null,
+							memberCount: row.owner === "realm" ? (realmMemberCount.get(row.id) ?? 0) : null,
 							realmTagContext:
-								row.unitKind === "tag" && ranked.realmId
+								row.owner === "tag" && ranked.realmId
 									? (realmTagContextByRealmTag.get(`${ranked.realmId}:${row.id}`) ?? null)
 									: null,
 						},
@@ -1409,24 +1300,24 @@ export async function hydrateFeedItems(
 			return [
 				{
 					...unitItem,
-					unitKind: row.unitKind,
+					owner: row.owner,
 					presentation: { kind: "general" },
 				},
 			];
 		}
-		if (row.unitKind !== "post" || !isFeedPostKind(row.postKind)) return [];
+		if (row.owner !== "post" || !isFeedPostKind(row.postKind)) return [];
 		const subject = row.subjectId ? subjects.get(row.subjectId) : undefined;
 		if (row.postKind === "excerpt" && !subject) return [];
 		const contentSpoilerLevel = requireContentSpoilerLevel(row.contentSpoilerLevel);
 		const postItem = {
 			...common,
 			itemType: "post" as const,
-			unitKind: "post" as const,
+			owner: "post" as const,
 			summary:
 				(row.contentSpoilerLevel > 0 && !viewerDisplayPreference?.alwaysShowSpoilers) ||
 				(row.contentNsfw && !viewerDisplayPreference?.alwaysShowNsfw)
 					? null
-					: row.summary,
+					: presentation.summary,
 			cover: presentImageAsset(row.coverAssetId, "cover"),
 			subjectId: row.subjectId,
 			rootPostId: row.rootPostId,
@@ -1441,7 +1332,7 @@ export async function hydrateFeedItems(
 			},
 			replyCount:
 				row.postKind === "reply" ? (childCount.get(row.id) ?? 0) : (rootCount.get(row.id) ?? 0),
-			title: row.title,
+			title: presentation.title,
 			latestRevisionId: row.latestRevisionId,
 			replyContext: row.rootPostId ? (rootContext.get(row.rootPostId) ?? null) : null,
 			subject: subject
@@ -1530,6 +1421,15 @@ export default new Elysia({ prefix: "/feed" }).post(
 		const limit = body.limit ?? 20;
 		const scope: FeedEligibilityScope = baseScope;
 		const asOf = cursor ? new Date(cursor.asOf) : new Date();
+		const snapshot = cursor?.snapshotId
+			? await resolveRecommendationSnapshot(cursor.snapshotId)
+			: cursor
+				? null
+				: await resolveRecommendationSnapshot();
+		if (cursor?.snapshotId && !snapshot) throw new InvalidFeedCursor();
+		const snapshotContext = snapshot ?? fallbackRecommendationSnapshot;
+		if (cursor && cursor.policyVersion !== snapshotContext.policyVersion)
+			throw new InvalidFeedCursor();
 		let searchSelection: FeedSearchSelection;
 		try {
 			searchSelection = await resolveFeedSearchSelection({
@@ -1541,21 +1441,13 @@ export default new Elysia({ prefix: "/feed" }).post(
 				sort,
 				limit,
 				eligibilityCondition: getFeedEligibilityCondition(viewer, scope, asOf),
+                snapshotId:snapshotContext.id,
 				...(cursor ? { position: cursor.searchPosition } : {}),
 			});
 		} catch (cause) {
 			if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable) throw cause;
 			throw new SearchUnavailable(cause);
 		}
-		const snapshot = cursor?.snapshotId
-			? await resolveRecommendationSnapshot(cursor.snapshotId)
-			: cursor
-				? null
-				: await resolveRecommendationSnapshot();
-		if (cursor?.snapshotId && !snapshot) throw new InvalidFeedCursor();
-		const snapshotContext = snapshot ?? fallbackRecommendationSnapshot;
-		if (cursor && cursor.policyVersion !== snapshotContext.policyVersion)
-			throw new InvalidFeedCursor();
 		const sources: CandidateSources = {
 			ids: [...searchSelection.ids],
 			reason: new Map(
@@ -1588,7 +1480,7 @@ export default new Elysia({ prefix: "/feed" }).post(
 		const encodedNextCursor = searchSelection.nextPosition
 			? Buffer.from(
 					JSON.stringify({
-						v: 11,
+						v: 1,
 						sort,
 						filterHash: body.filter
 							? createHash("sha256").update(canonicalUnitFilter(body.filter)).digest("hex")

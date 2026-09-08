@@ -356,6 +356,10 @@ try {
 									reference,
 									actor.id,
 									qualifier.valueFactId,
+									-1,
+									100,
+									0,
+									relation.id,
 								);
 								if (property?.key === "image-type")
 									assert.equal(value?.textValue, changed ? "pkgback" : "pkgfront");

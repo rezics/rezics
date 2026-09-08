@@ -2,10 +2,10 @@ import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { UnitReferenceSchema, CatalogReferenceSchema } from "@rezics/reference";
 import type { DatabaseTransaction } from "../database";
-import { catalogUnitLocator } from "../database/schema/catalog-identity";
+import { catalogUnitLocator, catalogRoutingControl } from "../database/schema/catalog-identity";
 import { unitOwnerTable } from "../database/schema/unit-reference-columns";
 import { CatalogNameTables } from "../database/schema/catalog-names";
-import { unit, unitLocalization } from "../database/schema/unit";
+import { unitLocalization } from "../database/schema/unit";
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { loadCatalogIdentity } from "../catalog/storage";
 import { catalogReadRatingPredicate } from "../catalog/read-policy";
@@ -15,6 +15,8 @@ export class UnitReferenceUnavailable extends Error {}
 /** Resolve one routing record and prove its concrete owner key; a missing locator never causes an owner scan. @internal */
 export async function resolveRegisteredUnitReference(tx: DatabaseTransaction, id: string) {
 	z.uuid().parse(id);
+	const [control] = await tx.select({ ready: catalogRoutingControl.ready }).from(catalogRoutingControl).where(eq(catalogRoutingControl.singleton, true)).limit(1).for("share");
+	if (!control?.ready) throw new UnitReferenceUnavailable("Unit routing is fenced for repair");
 	const [route] = await tx
 		.select()
 		.from(catalogUnitLocator)
@@ -67,20 +69,20 @@ export async function readRegisteredUnitPreview(
 			language: name?.language ?? null,
 		};
 	}
-	// The retained owner's lifecycle moves together with that owner's root writer during the parent cutover.
+	const table = unitOwnerTable(routed.reference.owner);
 	const [target] = await tx
-		.select({ id: unit.id })
-		.from(unit)
+		.select({ id: table.id, generation: table.routingGeneration })
+		.from(table)
 		.where(
 			and(
-				eq(unit.id, id),
-				getUnitReadCondition(actor.selfEntityId),
-				catalogReadRatingPredicate(unit.contentRating),
+				eq(table.id, id),
+				getUnitReadCondition(actor.selfEntityId, {}, table),
+				catalogReadRatingPredicate(table.contentRating),
 			),
 		)
 		.limit(1)
 		.for("share");
-	if (!target || routed.generation !== 1)
+	if (!target || routed.generation !== target.generation)
 		throw new UnitReferenceUnavailable("Unit target is unavailable");
 	const [text] = await tx
 		.select({

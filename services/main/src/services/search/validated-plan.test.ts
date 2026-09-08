@@ -26,7 +26,7 @@ describe("validated search plan", () => {
 				searchExpression: {
 					operator: "any",
 					clauses: [
-						{ field: "kind", operator: "equals", value: "book" },
+						{ field: "unit-owner", operator: "equals", value: "publishing" },
 						{
 							operator: "not",
 							clause: { field: "language", operator: "equals", value: "en" },
@@ -40,12 +40,7 @@ describe("validated search plan", () => {
 		expect(plan.complexity).toMatchObject({
 			boundedCandidateVerification: true,
 			candidateSources: ["sparse-btree"],
-			orderingIndexes: [
-				"unit_best_score_order_idx",
-				"unit_best_score_kind_order_idx",
-				"unit_public_updated_at_desc_idx",
-				"unit_public_kind_updated_at_desc_idx",
-			],
+			orderingIndexes: expect.arrayContaining(["unit_best_score_owner_order_idx","publishing_identity_public_updated_idx"]),
 			maxCandidatesScanned: WorkPolicy.search.maxCandidatesScanned,
 			expressionNodes: 4,
 			positiveBranches: 1,

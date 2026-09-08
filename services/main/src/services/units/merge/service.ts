@@ -12,6 +12,8 @@ import {
 	authEntity,
 	users,
 	governanceDecisionRule,
+	catalogSourceMappingClaim,
+	catalogSourceBindingRevision,
 } from "../../database/schema";
 import {
 	ParticipationAuthoritySchema,
@@ -460,7 +462,8 @@ export async function retryUnitMerge(authorization: Authorization<string>, reque
 		return oneView(tx, await requireRequest(tx, requestId));
 	});
 }
-export function presentMergeItem(row: typeof unitMergeReconciliationItem.$inferSelect) {
+export function presentMergeItem(row: typeof unitMergeReconciliationItem.$inferSelect,
+	currentBinding: z.infer<typeof MergeItemSchema>["currentBinding"] = null) {
 	return MergeItemSchema.parse({
 		id: row.id,
 		kind: row.kind,
@@ -483,6 +486,7 @@ export function presentMergeItem(row: typeof unitMergeReconciliationItem.$inferS
 		mappingKey: row.mappingKey,
 		sourceBindingRevision: row.sourceBindingRevision,
 		targetBindingRevision: row.targetBindingRevision,
+		currentBinding,
 		errorCode: row.errorCode,
 		resolvedAt: row.resolvedAt?.toISOString() ?? null,
 	});
@@ -496,10 +500,15 @@ export async function listMergeReconciliationItems(
 	return database.transaction(async (tx) => {
 		await authorization.platform.ensureCapability("unit.governance.read", tx);
 		await requireRequest(tx, requestId);
-		const t = unitMergeReconciliationItem,
+		const t = unitMergeReconciliationItem, claim = catalogSourceMappingClaim, binding = catalogSourceBindingRevision,
 			rows = await tx
-				.select()
+				.select({ item: t, currentBinding: {
+					revision: binding.revision, state: binding.state, owner: binding.owner,
+					id: sql<string>`coalesce(${binding.publishingId},${binding.musicId},${binding.programId},${binding.softwareId},${binding.entityId},${binding.groupingId},${binding.referenceId},${binding.distributionId})`,
+				} })
 				.from(t)
+				.leftJoin(claim, and(eq(claim.sourceRecordId, t.sourceRecordId), eq(claim.mappingKey, t.mappingKey)))
+				.leftJoin(binding, and(eq(binding.sourceRecordId, claim.sourceRecordId), eq(binding.mappingKey, claim.mappingKey), eq(binding.revision, claim.bindingRevision)))
 				.where(
 					and(
 						eq(t.requestId, requestId),
@@ -511,8 +520,11 @@ export async function listMergeReconciliationItems(
 				.limit(value.limit + 1);
 		const page = rows.slice(0, value.limit);
 		return {
-			items: page.map(presentMergeItem),
-			nextCursor: rows.length > value.limit ? (page.at(-1)?.id ?? null) : null,
+			items: page.map(({ item, currentBinding }) => presentMergeItem(item, currentBinding ? {
+				revision: currentBinding.revision, state: currentBinding.state,
+				reference: { owner: currentBinding.owner, id: currentBinding.id },
+			} : null)),
+			nextCursor: rows.length > value.limit ? (page.at(-1)?.item.id ?? null) : null,
 		};
 	});
 }

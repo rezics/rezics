@@ -14,8 +14,8 @@ import {
 } from "../src/services/database/schema/favorites";
 import { accountFollowPreference, unitFollow } from "../src/services/database/schema/follow";
 import { imageAsset, imageObject } from "../src/services/database/schema/image";
-import { unit } from "../src/services/database/schema/unit";
 import { post } from "../src/services/database/schema/post";
+import { Authorization } from "../src/services/authorization";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import {
 	runWithParticipationAuthority,
@@ -84,6 +84,16 @@ try {
 		await database.transaction(async (tx) => {
 			const human = await actor(tx, "Private lifecycle owner");
 			const other = await actor(tx, "Unrelated private owner");
+			const humanAuthorization = new Authorization(
+				human.self.id,
+				human.account.id,
+				human.authority,
+			);
+			const otherAuthorization = new Authorization(
+				other.self.id,
+				other.account.id,
+				other.authority,
+			);
 			const organization = await runWithParticipationAuthority(human.authority, () =>
 				createManagedOrganization(tx, human.authority, {
 					name: "Lifecycle organization",
@@ -136,7 +146,7 @@ try {
 			);
 			checks++;
 			const targets = await tx
-				.insert(unit)
+				.insert(post)
 				.values(
 					Array.from({ length: 515 }, (_, index) => ({
 						kind: "post" as const,
@@ -145,8 +155,7 @@ try {
 						visibility: index < 512 ? ("private" as const) : ("public" as const),
 					})),
 				)
-				.returning({ id: unit.id });
-			await tx.insert(post).values(targets.map(({ id }) => ({ id })));
+				.returning({ id: post.id });
 			const first = targets[512]!.id,
 				second = targets[513]!.id;
 			await tx
@@ -165,6 +174,7 @@ try {
 				authUserId: human.account.id,
 				followerProfileId: human.self.id,
 				limit: 30,
+				authorization: humanAuthorization.unit,
 			});
 			check(page.items.length, 0, "filtered scan returns no inaccessible targets");
 			assert.ok(page.nextCursor);
@@ -174,6 +184,7 @@ try {
 				followerProfileId: human.self.id,
 				limit: 30,
 				cursor: page.nextCursor,
+				authorization: humanAuthorization.unit,
 			});
 			check(
 				next.items.length,
@@ -209,7 +220,7 @@ try {
 				authUserId: other.account.id,
 				followerProfileId: other.self.id,
 				unitId: first,
-				authorization: { ensureCanRead: async () => undefined },
+				authorization: otherAuthorization.unit,
 			});
 			check(
 				(await readFavorite(tx, human.authority, first)).entry,

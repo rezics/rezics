@@ -1,5 +1,6 @@
+import { UnitOwnerValues, type UnitOwner } from "@rezics/reference";
 import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import {
 	bigint,
 	boolean,
@@ -9,6 +10,7 @@ import {
 	foreignKey,
 	index,
 	pgEnum,
+	smallint,
 	primaryKey,
 	text,
 	unique,
@@ -28,7 +30,6 @@ import {
 	RecommendationEventTypeValues,
 	RecommendationSnapshotStateValues,
 	RecommendationSurfaceValues,
-	type UnitKind,
 	toEnumValues,
 } from "./contract-values";
 
@@ -60,6 +61,9 @@ export const recommendationSnapshot = pgTable(
 	},
 	(table) => [
 		uniqueIndex("recommendation_snapshot_active_key").on(table.active).where(sql`${table.active}`),
+		uniqueIndex("recommendation_snapshot_building_key").on(table.state).where(sql`${table.state}='building'`),
+		unique("recommendation_snapshot_policy_watermark_key").on(table.policyVersion, table.sourceWatermark),
+		index("recommendation_snapshot_retention_idx").on(table.startedAt, table.id).where(sql`not ${table.active} and ${table.state}<>'building'`),
 		index("recommendation_snapshot_state_started_at_idx").on(table.state, table.startedAt.desc()),
 		check(
 			"recommendation_snapshot_policy_version_not_blank",
@@ -75,6 +79,25 @@ export const recommendationSnapshot = pgTable(
 		),
 	],
 );
+
+/** Exactly 64 durable cursors per admitted snapshot; score writes and cursor progress commit together. */
+export const recommendationSnapshotPartition = pgTable("recommendation_snapshot_partition", {
+	snapshotId: uuid().notNull().references(() => recommendationSnapshot.id, { onDelete: "cascade" }),
+	bucket: smallint().notNull(),
+	state: text().$type<"pending" | "working" | "done" | "failed">().default("pending").notNull(),
+	generation: bigint({ mode: "number" }).default(0).notNull(),
+	leaseToken: uuid(), leaseExpiresAt: createTimestampMsColumn(),
+	afterBucketStart: createTimestampMsColumn(), afterUnitId: uuid(), afterKind: text(),
+	scannedRows: bigint({ mode: "bigint" }).default(0n).notNull(),
+	failures: smallint().default(0).notNull(), nextAttemptAt: createTimestampMsColumn().defaultNow().notNull(),
+	error: text(),
+}, (table) => [
+	primaryKey({ columns: [table.snapshotId, table.bucket] }),
+	index("recommendation_snapshot_partition_claim_idx").on(table.snapshotId, table.state, table.nextAttemptAt, table.leaseExpiresAt, table.bucket),
+	check("recommendation_snapshot_partition_values", sql`${table.bucket} between 0 and 63 and ${table.state} in ('pending','working','done','failed') and ${table.generation} between 0 and 9007199254740991 and ${table.scannedRows}>=0 and ${table.failures} between 0 and 12 and (${table.error} is null or octet_length(${table.error})<=2048)`),
+	check("recommendation_snapshot_partition_lease", sql`(${table.state}='working') = (${table.leaseToken} is not null and ${table.leaseExpiresAt} is not null) and num_nonnulls(${table.leaseToken},${table.leaseExpiresAt}) in (0,2)`),
+	check("recommendation_snapshot_partition_cursor", sql`num_nonnulls(${table.afterBucketStart},${table.afterUnitId},${table.afterKind}) in (0,3)`),
+]);
 
 export const recommendationEvent = pgTable(
 	"recommendation_event",
@@ -155,7 +178,8 @@ export const unitBestScore = pgTable(
 	{
 		snapshotId: uuid().notNull(),
 		unitId: uuid().notNull(),
-		unitKind: text().$type<UnitKind>().notNull(),
+		unitOwner: text().$type<UnitOwner>().notNull(),
+		unitShape: text().notNull(),
 		score: doublePrecision().notNull(),
 		unitUpdatedAt: createTimestampMsColumn().notNull(),
 
@@ -163,6 +187,7 @@ export const unitBestScore = pgTable(
 	},
 	(table) => [
 		...unitReferenceConstraints("unit_best_score", "unit", table, false, table.unitId),
+		check("unit_best_score_owner_check", inArray(table.unitOwner, UnitOwnerValues)),
 
 		primaryKey({ columns: [table.snapshotId, table.unitId] }),
 		foreignKey({
@@ -177,15 +202,16 @@ export const unitBestScore = pgTable(
 			table.unitUpdatedAt.desc().nullsFirst(),
 			table.unitId.desc().nullsFirst(),
 		),
-		index("unit_best_score_kind_order_idx").on(
+		index("unit_best_score_owner_order_idx").on(
 			table.snapshotId,
-			table.unitKind,
+			table.unitOwner,
 			table.score.desc().nullsFirst(),
 			table.unitUpdatedAt.desc().nullsFirst(),
 			table.unitId.desc().nullsFirst(),
 		),
+		index("unit_best_score_owner_shape_order_idx").on(table.snapshotId, table.unitOwner, table.unitShape, table.score.desc(), table.unitUpdatedAt.desc(), table.unitId.desc()),
 		index("unit_best_score_unit_merge_idx").on(table.unitId, table.snapshotId),
-		check("unit_best_score_positive_check", sql`${table.score} > 0`),
+		check("unit_best_score_positive_check", sql`${table.score} > 0 and ${table.score} < 'Infinity'::double precision`),
 	],
 );
 
@@ -193,6 +219,7 @@ export const recommendationMetricDaily = pgTable(
 	"recommendation_metric_daily",
 	{
 		day: date().notNull(),
+		shard: smallint().notNull(),
 		surface: recommendationSurface().notNull(),
 		policyVersion: text().notNull(),
 		impressions: bigint({ mode: "bigint" }).default(0n).notNull(),
@@ -202,7 +229,8 @@ export const recommendationMetricDaily = pgTable(
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.day, table.surface, table.policyVersion] }),
+		primaryKey({ columns: [table.day, table.surface, table.policyVersion, table.shard] }),
+		check("recommendation_metric_daily_shard_check",sql`${table.shard} between 0 and 127`),
 		check(
 			"recommendation_metric_daily_policy_version_not_blank",
 			sql`btrim(${table.policyVersion}) <> ''`,

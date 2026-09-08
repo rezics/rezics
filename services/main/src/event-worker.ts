@@ -10,6 +10,7 @@ import {
 	scheduleSourceCheckTasks,
 } from "./services/events/source-check-runtime";
 import { createSourceHandlers } from "./services/catalog/source-runtime";
+import { createMusicReleaseSourceHandlers } from "./services/catalog/music-release-source-jobs";
 import { parseEventWorkerConfig } from "./services/events/config";
 import { disposeOperationalDelivery } from "./services/events/failure";
 import { relayOutboxBatch } from "./services/events/relay";
@@ -73,6 +74,9 @@ try {
 		);
 		if (route.class === "task")
 			handlers.push(createSourceCheckHandler(database, route, acquireCatalogSourceCheck));
+		handlers.push(...createMusicReleaseSourceHandlers(database, route, (failure, signal) =>
+			disposeOperationalDelivery(database, route, failure, signal),
+		));
 		for (const handler of handlers) {
 			const stream = await provisionTransport(manager, route, handler.durable, handler.kind);
 			const consumer = await client.consumers.get(stream, handler.durable);

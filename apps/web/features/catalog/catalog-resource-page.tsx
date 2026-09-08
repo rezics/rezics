@@ -7,12 +7,19 @@ import {
 	useReadCatalogResource,
 } from "@rezics/openapi-tanstack-query";
 import { Badge, Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { PrivateFavoriteControl } from "@/features/favorites/private-favorite-control";
+import { PublishingResourceDetails } from "./components/publishing-resource-details";
+import { GroupingResourceDetails } from "./components/grouping-resource-details";
+import { SoftwareResourceDetails } from "./components/software-resource-details";
+import { ProgramResourceDetails } from "./components/program-resource-details";
+import { CatalogEditorialSection } from "./components/catalog-editorial";
+import { CatalogResourceActions } from "./components/catalog-resource-actions";
+import { EntityResourceDetails } from "@/features/entities/components/entity-resource-details";
 
-export function CatalogResourcePage({ reference }: { reference: CatalogReference }) {
+export function CatalogResourcePage({ reference, children }: { reference: CatalogReference; children?: ReactNode }) {
 	const { t, locale } = useTranslation(["units", "ui", "actions"]);
 	const { data: session } = useHydratedSession();
 	const resource = useReadCatalogResource({ path: reference });
@@ -37,6 +44,8 @@ export function CatalogResourcePage({ reference }: { reference: CatalogReference
 				) : null}
 			</div>
 			{session ? <PrivateFavoriteControl targetUnitId={reference.id} /> : null}
+			<CatalogResourceActions reference={reference} shape={resource.data.shape} canEdit={resource.data.canEdit} />
+			<CatalogEditorialSection reference={reference} />
 			<Button asChild variant="outline">
 				<AppLink href={`/catalog/${reference.owner}/${reference.id}/facts`}>
 					{t.units.nativeSemantics.title}
@@ -72,6 +81,7 @@ export function CatalogResourcePage({ reference }: { reference: CatalogReference
 				</nav>
 			) : null}
 
+			{children ?? (reference.owner === "publishing" ? <PublishingResourceDetails id={reference.id} /> : reference.owner === "software" ? <SoftwareResourceDetails id={reference.id} /> : reference.owner === "program" ? <ProgramResourceDetails id={reference.id} /> : reference.owner === "grouping" ? <GroupingResourceDetails id={reference.id} /> : reference.owner === "entity" ? <EntityResourceDetails id={reference.id} /> : null)}
 			<section className="grid gap-3">
 				<h2 className="text-lg font-semibold">{t.units.nativeCatalog.names}</h2>
 				<NamePage key={reference.id} reference={reference} />

@@ -1,3 +1,5 @@
+import { CatalogOwnerValues } from "@rezics/reference";
+import { unitStatesForIds } from "../../units/state-relation";
 import { and, eq, inArray } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { StatusCodes } from "http-status-codes";
@@ -12,7 +14,6 @@ import {
 	post,
 	recommendationEvent,
 	recommendationExclusion,
-	unit,
 } from "../../database/schema";
 import { parseJsonCursor } from "../../pagination";
 import { InvalidPaginationCursor } from "../../pagination/errors";
@@ -26,7 +27,6 @@ import { verifyRecommendationTracking } from "../../recommendations/tracking";
 import { recommendUnits } from "../../recommendations/units";
 import { getAttributionSummariesByUnitIds } from "../../units/attribution";
 import { UnitNotFound } from "../../units/errors";
-import { resolveMainUnitId } from "../../units/variants";
 import { ValidationError } from "../errors";
 import { PostFeedResponse, toApiErrorResponse } from "../schema/response";
 import {
@@ -44,8 +44,9 @@ import {
 
 const UnitRecommendationCursor = t.Object(
 	{
-		v: t.Literal(2),
-		type: t.Nullable(t.Union([t.Literal("book"), t.Literal("software"), t.Literal("media")])),
+		v: t.Literal(1),
+		owner: t.Nullable(t.UnionEnum(CatalogOwnerValues)),
+		shape: t.Nullable(t.String()),
 		seedUnitId: t.Nullable(t.String({ format: "uuid" })),
 		contentRatings: t.Array(t.UnionEnum(ContentRatingValues), { uniqueItems: true }),
 		personalized: t.Boolean(),
@@ -61,7 +62,7 @@ type UnitRecommendationCursor = StaticDecode<typeof UnitRecommendationCursor>;
 
 const RelatedPostCursor = t.Object(
 	{
-		v: t.Literal(2),
+		v: t.Literal(1),
 		postId: t.String({ format: "uuid" }),
 		contentRatings: t.Array(t.UnionEnum(ContentRatingValues), { uniqueItems: true }),
 		personalized: t.Boolean(),
@@ -167,7 +168,7 @@ export default new Elysia({ prefix: "/recommendations" })
 			const cursor = decodeUnitCursor(query.cursor);
 			if (
 				cursor &&
-				(cursor.type !== (query.type ?? null) ||
+				(cursor.owner !== (query.owner ?? null) || cursor.shape !== (query.shape ?? null) ||
 					cursor.seedUnitId !== (query.seedUnitId ?? null) ||
 					!equalOrderedValues(cursor.contentRatings, viewer.contentRatings) ||
 					cursor.personalized !== viewer.personalized ||
@@ -175,30 +176,12 @@ export default new Elysia({ prefix: "/recommendations" })
 					Number.isNaN(Date.parse(cursor.asOf)))
 			)
 				throw new InvalidPaginationCursor();
-			let inheritedSeedUnitId: string | undefined;
-			if (query.seedUnitId) {
-				const [seed] = await database
-					.select({ id: unit.id })
-					.from(unit)
-					.where(
-						and(
-							eq(unit.id, query.seedUnitId),
-							getUnitReadCondition(identity.entity?.id),
-							eq(unit.moderationStatus, "approved"),
-						),
-					)
-					.limit(1);
-				if (!seed) throw new UnitNotFound();
-				const resolvedMainUnitId = await resolveMainUnitId(database, query.seedUnitId);
-				if (resolvedMainUnitId !== query.seedUnitId) {
-					const [readableMain] = await database
-						.select({ id: unit.id })
-						.from(unit)
-						.where(and(eq(unit.id, resolvedMainUnitId), getUnitReadCondition(identity.entity?.id)))
-						.limit(1);
-					if (readableMain) inheritedSeedUnitId = resolvedMainUnitId;
-				}
-			}
+            if (query.seedUnitId) {
+                const state=unitStatesForIds([query.seedUnitId],"recommendation_seed");
+                const [seed]=await database.select({id:state.id}).from(state)
+                 .where(and(getUnitReadCondition(identity.entity?.id,{},state),eq(state.moderationStatus,"approved"))).limit(1);
+                if (!seed) throw new UnitNotFound();
+            }
 			const snapshot = await resolvePageSnapshot(cursor);
 			const policyVersion = snapshot?.policyVersion ?? RecommendationPolicyVersion;
 			if (cursor?.policyVersion !== undefined && cursor.policyVersion !== policyVersion)
@@ -207,9 +190,9 @@ export default new Elysia({ prefix: "/recommendations" })
 			const result = await recommendUnits({
 				viewer,
 				snapshot,
-				...(query.type ? { type: query.type } : {}),
+				...(query.owner ? { owner: query.owner } : {}),
+                ...(query.shape ? {shape:query.shape} : {}),
 				...(query.seedUnitId ? { seedUnitId: query.seedUnitId } : {}),
-				...(inheritedSeedUnitId ? { inheritedSeedUnitId } : {}),
 				asOf,
 				pageSize: query.limit ?? 20,
 				localizationLanguages: query.localizationLanguages ?? [],
@@ -221,8 +204,9 @@ export default new Elysia({ prefix: "/recommendations" })
 				items: result.items,
 				nextCursor: result.nextId
 					? encodeCursor({
-							v: 2,
-							type: query.type ?? null,
+							v: 1,
+							owner: query.owner ?? null,
+                            shape:query.shape ?? null,
 							seedUnitId: query.seedUnitId ?? null,
 							contentRatings: [...viewer.contentRatings],
 							personalized: viewer.personalized,
@@ -267,17 +251,16 @@ export default new Elysia({ prefix: "/recommendations" })
 					subjectId: post.subjectUnitId,
 				})
 				.from(post)
-				.innerJoin(unit, eq(unit.id, post.id))
 				.where(
 					and(
 						eq(post.id, params.postId),
-						getUnitReadCondition(identity.entity?.id),
-						eq(unit.moderationStatus, "approved"),
+						getUnitReadCondition(identity.entity?.id, {}, post),
+						eq(post.moderationStatus, "approved"),
 					),
 				)
 				.limit(1);
 			if (!seedBase) throw new UnitNotFound();
-			const attributionMap = await getAttributionSummariesByUnitIds([seedBase.id]);
+			const attributionMap = await getAttributionSummariesByUnitIds([seedBase.id], [], {maximumPerSourceUnit:32});
 			const seed = {
 				...seedBase,
 				creditedEntityIds: (attributionMap.get(seedBase.id) ?? []).map(
@@ -304,7 +287,7 @@ export default new Elysia({ prefix: "/recommendations" })
 				items: result.items,
 				nextCursor: result.nextId
 					? encodeCursor({
-							v: 2,
+							v: 1,
 							postId: params.postId,
 							contentRatings: [...viewer.contentRatings],
 							personalized: viewer.personalized,
@@ -336,14 +319,15 @@ export default new Elysia({ prefix: "/recommendations" })
 			}
 			const { identity, authUserId } = await getEventAuthUserId(request);
 			const targetIds = [...new Set(body.events.map(({ targetUnitId }) => targetUnitId))];
-			const readable = await database
-				.select({ id: unit.id })
-				.from(unit)
+			const target = unitStatesForIds(targetIds,"recommendation_event_target");
+            const readable = await database
+				.select({ id: target.id })
+				.from(target)
 				.where(
 					and(
-						inArray(unit.id, targetIds),
-						getUnitReadCondition(identity.entity?.id),
-						eq(unit.moderationStatus, "approved"),
+						inArray(target.id, targetIds),
+						getUnitReadCondition(identity.entity?.id,{},target),
+						eq(target.moderationStatus, "approved"),
 					),
 				);
 			if (readable.length !== targetIds.length) throw new UnitNotFound();

@@ -1,5 +1,5 @@
 import { MUSIC_SOURCE_COMPONENT_LIMIT } from "../database/schema/catalog-source-limits";
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import {
 	MusicComponentBatchSchema,
 	MusicSourceComponentBatchSchema,

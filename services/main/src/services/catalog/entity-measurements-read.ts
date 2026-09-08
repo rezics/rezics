@@ -44,14 +44,14 @@ export async function readNativeEntityMeasurements(
   from unnest(${sql.param(ids)}::uuid[]) requested(id) cross join meanings
   left join lateral (
    select limited.*,count(*) over() as candidate_count from (
-    select f.id,f.semantic_id,f.state,f.sealed_at,f.spoiler from public.entity_fact f
+    select f.id,f.semantic_id,f.state,f.sealed_at,f.spoiler,f.purpose from public.entity_fact f
     where f.owner_id=requested.id and f.definition_revision_id=meanings.id order by f.id desc limit 65
    ) limited
   ) candidates on true
   left join public.entity_semantic_head head on head.owner_id=requested.id and head.semantic_id=candidates.semantic_id
   left join public.entity_semantic_revision revision on revision.owner_id=head.owner_id and revision.semantic_id=head.semantic_id and revision.version=head.version and revision.fact_id=candidates.id and revision.state='active'
   left join public.entity_fact_value_node current_value on current_value.owner_id=requested.id and current_value.fact_id=revision.fact_id and current_value.position=0
-   and candidates.state='active' and candidates.sealed_at is not null and candidates.spoiler=0
+   and candidates.state='active' and candidates.sealed_at is not null and candidates.spoiler=0 and candidates.purpose='assertion'
  `);
 	const rows = z
 		.array(

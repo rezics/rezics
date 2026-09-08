@@ -122,6 +122,12 @@ const qualifiersPage = catalogSemanticPage(CatalogQualifierSchema);
 const pathFor = (reference: CatalogReference) =>
 	`/catalog/resources/${reference.owner}/${reference.id}`;
 const nodesFor = (value: unknown) => [...catalogValueNodes(value)];
+const readNodesFor = (value: unknown) => nodesFor(value).map(node => {
+	const rulePosition = node.parentPosition === null ? 0
+		: node.memberKey === "label" ? 1 : node.memberKey === "count" ? 2 : node.memberKey === "enabled" ? 3 : undefined;
+	assert.notEqual(rulePosition, undefined, "Read expectation must identify the exact fixture grammar rule");
+	return { ...node, rulePosition };
+});
 async function current(reference: CatalogReference, cookie: string) {
 	return CatalogResourceSchema.parse(
 		await request("GET", pathFor(reference), undefined, 200, cookie),
@@ -363,7 +369,7 @@ try {
 		new Request("http://localhost", { headers: { Cookie: owner } }),
 		"account:read",
 	);
-	if (!identity.participation)
+	if (!("participation" in identity))
 		throw new Error("Fixture definitions require explicit participation");
 	const namespace = "fixture.semantics." + crypto.randomUUID();
 	const meanings = await runWithParticipationAuthority(identity.participation, () =>
@@ -483,7 +489,7 @@ try {
 		const first = await writeFact(reference, owner, meanings.property.revisionId, firstValue);
 		assert.equal(first.headVersion, 1);
 		assertions++;
-		assert.deepEqual(await allNodes(reference, owner, first.id), nodesFor(firstValue));
+		assert.deepEqual(await allNodes(reference, owner, first.id), readNodesFor(firstValue));
 		assertions++;
 		await request("GET", path + "/facts", undefined, 404, stranger);
 		await request("GET", `${path}/facts/${first.id}/nodes`, undefined, 404, stranger);
@@ -566,7 +572,7 @@ try {
 				owner,
 			),
 		);
-		assert.deepEqual(await allNodes(reference, owner, first.id), nodesFor(firstValue));
+		assert.deepEqual(await allNodes(reference, owner, first.id), readNodesFor(firstValue));
 		assertions++;
 		let head: SemanticHead = await changeState(reference, owner, second, "disputed");
 		const disputed = factsPage.parse(

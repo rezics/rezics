@@ -1,3 +1,4 @@
+import type { UnitOwner } from "@rezics/reference";
 import type { PresentedAvatar } from "@rezics/avatar";
 import type { UnitPredicate } from "@rezics/filter";
 import {
@@ -24,36 +25,18 @@ export interface SearchHit {
 	id: string;
 	slugAddress: PublicSlugAddressValue | null;
 	category: string;
-	kind: string;
-	language: ContentLanguage;
+	owner: UnitOwner;
+	shape: string;
+	language: string | null;
 	title: string | null;
 	summary: string | null;
 	titles: string[];
 	summaries: string[];
 	avatar?: PresentedAvatar | null;
-	variantRole?: "standalone" | "main" | "variant";
-	variantMain?:
-		| { readonly state: "unavailable" }
-		| {
-				readonly state: "available";
-				readonly unit: {
-					readonly id: string;
-					readonly type: "book" | "software" | "media";
-					readonly language: ContentLanguage;
-					readonly title: string | null;
-					readonly cover: { readonly id: string; readonly url: string } | null;
-				};
-		  };
 	/** Semantic evidence attached only when a positive Tag filter shaped this result. */
 	tagMatches?: SearchTagMatchReason[];
 	/** Whether a Tag-concept Search hit has another accepted public vocabulary position. */
 	tagHasOtherPositions?: boolean;
-	/**
-	 * Number of additional structural positions for a Tag-concept Search hit.
-	 * @deprecated Prefer `tagHasOtherPositions`; this compatibility field is
-	 * removed in the next breaking RomVer API release.
-	 */
-	tagOtherPositionCount?: number;
 }
 
 export interface DomainSearchRequest {
@@ -65,7 +48,8 @@ export interface DomainSearchRequest {
 	limit?: number;
 	localizationLanguages?: readonly ContentLanguage[];
 	Languages?: ContentLanguage[];
-	kinds?: string[];
+	owners?: UnitOwner[];
+	shapes?: string[];
 	contentRatings?: string[];
 	aiDisclosures?: string[];
 	licenses?: LicenseId[];
@@ -96,7 +80,8 @@ export interface DomainSearchRequest {
 
 export const SearchFieldByDomainRequestFilter = {
 	Languages: "language",
-	kind: "kind",
+	owner: "unit-owner",
+	shape: "unit-shape",
 	contentRating: "content-rating",
 	aiDisclosure: "ai-disclosure",
 	license: "license",

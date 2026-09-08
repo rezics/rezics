@@ -1,3 +1,6 @@
+import { CatalogOwnerValues, UnitOwnerValues, type UnitOwner } from "@rezics/reference";
+import { unitOwnerTable } from "../database/schema/unit-reference-columns";
+import { unitStateRelation } from "../units/state-relation";
 import { ContentLanguageRegistryPolicy } from "@rezics/content-language";
 import { createHash } from "node:crypto";
 
@@ -26,16 +29,14 @@ import {
 import type { SearchCountResult } from "../counts/contract";
 import { database } from "../database";
 import {
-	book,
 	collection,
 	collectionItem,
 	contentStructure,
 	contentStructureNode,
 	creditAttribution,
-	entity,
-	media,
 	poll,
 	post,
+	PostKindValues,
 	postReply,
 	postReplyStat,
 	realm,
@@ -43,30 +44,20 @@ import {
 	realmTagJudgmentStat,
 	realmUnit,
 	recommendationSnapshot,
-	software,
-	softwareRequirement,
 	tagPublicPositionStat,
-	unit,
 	unitBestScore,
 	unitEffectiveTag,
 	unitFollowStat,
-	UnitKindValues,
 	unitLicenseGrant,
 	unitLocalization,
 	unitOwnership,
 	unitSearchDocument,
-	unitVariant,
-	type UnitKind,
 } from "../database/schema";
 import { compileUnitPredicateCandidateSet, compileUnitPredicateSql } from "../filter/sql";
 import { WorkPolicy } from "../performance/policy";
-import {
-	resolvedUnitLocalizationLanguage,
-	resolvedUnitLocalizationSummary,
-	resolvedUnitLocalizationTitle,
-} from "../units/localization";
+import { readUnitPresentationsInTransaction } from "../units/presentation-reader";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
-import { CurrentSearchUnitKindsByCategory } from "./contracts";
+import { CurrentSearchOwnersByCategory } from "./contracts";
 import { InvalidSearch } from "./errors";
 import {
 	getCurrentSearchFieldDefinition,
@@ -96,17 +87,31 @@ import {
 } from "./schema";
 import { boundedSearchStatementTimeout } from "./statement-timeout";
 
-const subjectUnit = alias(unit, "subject_unit");
-const searchFilterCollectionUnit = alias(unit, "search_filter_collection_unit");
+// Columns are bound to one concrete owner scan or an explicit bounded ID lookup.
+const searchUnit = unitStateRelation(sql`null::uuid`, "search_unit");
+function searchState(id: SQL): SQL { return sql`lateral ${unitStateRelation(id, "search_unit")}`; }
+function ownerSearchRelation(owner: UnitOwner, shapes: readonly string[] = []): SQL {
+ const table = unitOwnerTable(owner);
+ const shape = owner === "post" ? sql`${post.kind}::text` : "shape" in table ? sql`${table.shape}` : sql`${owner}::text`;
+ const publishedAt = "publishedAt" in table ? sql`${table.publishedAt}` : sql`null::timestamptz`;
+ const requestedPostShapes = shapes.filter((value): value is (typeof PostKindValues)[number] => PostKindValues.some(kind=>kind===value));
+ const shapeCondition = !shapes.length ? sql`true` : owner === "post" ? requestedPostShapes.length ? inArray(post.kind, requestedPostShapes) : sql`false`
+ : "shape" in table ? inArray(table.shape, [...shapes]) : sql`${shapes.includes(owner)}`;
+ return sql`(select ${table.id} as id, ${owner}::text as owner, ${shape} as shape,
+ ${table.status} as status, ${table.visibility} as visibility,
+ ${table.moderationStatus} as moderation_status, ${table.deletedAt} as deleted_at,
+ ${table.createdAt} as created_at, ${table.updatedAt} as updated_at, ${publishedAt} as published_at
+ from ${table} where ${shapeCondition}) as search_unit`;
+}
+const searchFilterCollectionUnit = alias(collection, "search_filter_collection_unit");
 const boundedSearchDocument = alias(unitSearchDocument, "bounded_search_document");
-const facetLocalization = alias(unitLocalization, "facet_unit_localization");
 const facetUnitTag = alias(unitEffectiveTag, "facet_unit_tag");
 const facetRealmUnit = alias(realmUnit, "facet_realm_unit");
 const facetCreditAttribution = alias(creditAttribution, "facet_credit_attribution");
 const facetOwnership = alias(unitOwnership, "facet_ownership");
 const facetLicenseGrant = alias(unitLicenseGrant, "facet_license_grant");
 const scopedRealmTagContextRealm = alias(realm, "scoped_realm_tag_context_realm");
-const scopedRealmTagContextPostUnit = alias(unit, "scoped_realm_tag_context_post_unit");
+const scopedRealmTagContextPostUnit = alias(post, "scoped_realm_tag_context_post_unit");
 const scopedRealmTagContextRealmUnit = alias(realmUnit, "scoped_realm_tag_context_realm_unit");
 const { metrics } = getActiveObservability();
 type SearchHitWithoutSlugAddress = Omit<SearchHit, "slugAddress">;
@@ -137,7 +142,8 @@ function toUuidArray(values: readonly string[]): SQL {
 function validateRequest(category: SearchCategory, request: DomainSearchRequest): void {
 	const filters = [
 		["Languages", SearchFieldByDomainRequestFilter.Languages, Boolean(request.Languages?.length)],
-		["kinds", SearchFieldByDomainRequestFilter.kind, Boolean(request.kinds?.length)],
+		["owners", SearchFieldByDomainRequestFilter.owner, Boolean(request.owners?.length)],
+		["shapes", SearchFieldByDomainRequestFilter.shape, Boolean(request.shapes?.length)],
 		[
 			"contentRatings",
 			SearchFieldByDomainRequestFilter.contentRating,
@@ -212,7 +218,7 @@ function collectionMembershipCondition(
 						(collectionId) => sql`exists (
 							select 1
 							from ${collectionItem} search_collection_membership
-							where search_collection_membership.unit_id = ${unit.id}
+							where search_collection_membership.unit_id = ${searchUnit.id}
 								and search_collection_membership.collection_id = ${collectionId}::uuid
 						)`,
 					),
@@ -221,7 +227,7 @@ function collectionMembershipCondition(
 			: sql`exists (
 				select 1
 				from ${collectionItem} search_collection_membership
-				where search_collection_membership.unit_id = ${unit.id}
+				where search_collection_membership.unit_id = ${searchUnit.id}
 					and search_collection_membership.collection_id = any(${toUuidArray(collectionIds)})
 			)`;
 	return filter.operator === "not-equals" || filter.operator === "none-of"
@@ -251,59 +257,6 @@ function scalarColumnCondition(column: SQL, filter: SearchControlPredicate): SQL
 		: match;
 }
 
-function numericColumnCondition(column: SQL, filter: SearchControlPredicate): SQL {
-	if (filter.operator === "exists")
-		return filter.value ? sql`${column} is not null` : sql`${column} is null`;
-	if (filter.operator !== "range")
-		throw new InvalidSearch(`${filter.field} requires a numeric range`);
-	const bounds: SQL[] = [];
-	if (filter.lower !== undefined) {
-		if (typeof filter.lower !== "number")
-			throw new InvalidSearch(`${filter.field} requires numeric bounds`);
-		bounds.push(sql`${column} >= ${filter.lower}`);
-	}
-	if (filter.upper !== undefined) {
-		if (typeof filter.upper !== "number")
-			throw new InvalidSearch(`${filter.field} requires numeric bounds`);
-		bounds.push(sql`${column} <= ${filter.upper}`);
-	}
-	return sql`(${sql.join(bounds, sql` and `)})`;
-}
-
-function softwareRequirementCondition(filter: SearchControlPredicate, column: SQL): SQL {
-	const values = scalarStrings(searchFilterValues(filter), filter.field);
-	const candidates =
-		filter.field === "software-platform" ? toUuidArray(values) : toTextArray(values);
-	const oneMatches = sql`exists (
-		select 1 from ${softwareRequirement}
-		where ${softwareRequirement.softwareId} = ${unit.id}
-			and ${column} = any(${candidates})
-	)`;
-	if (filter.operator === "all-of")
-		return sql`not exists (
-			select 1 from unnest(${candidates}) as required(value)
-			where not exists (
-				select 1 from ${softwareRequirement}
-				where ${softwareRequirement.softwareId} = ${unit.id}
-					and ${column} = required.value
-			)
-		)`;
-	return filter.operator === "not-equals" || filter.operator === "none-of"
-		? sql`not (${oneMatches})`
-		: oneMatches;
-}
-
-function softwareRequirementRowCondition(filter: SearchControlPredicate, column: SQL): SQL {
-	const values = scalarStrings(searchFilterValues(filter), filter.field);
-	const candidates =
-		filter.field === "software-platform" ? toUuidArray(values) : toTextArray(values);
-	if (filter.operator === "all-of" && values.length > 1) return sql`false`;
-	const matches = sql`${column} = any(${candidates})`;
-	return filter.operator === "not-equals" || filter.operator === "none-of"
-		? sql`not (${matches})`
-		: matches;
-}
-
 function compileFilter(
 	category: SearchCategory,
 	filter: SearchControlPredicate,
@@ -321,9 +274,9 @@ function compileFilter(
 			inner join ${realmUnit} as ${scopedRealmTagContextRealmUnit}
 				on ${scopedRealmTagContextRealmUnit.realmId} = ${realmTagContext.realmId}
 				and ${scopedRealmTagContextRealmUnit.unitId} = ${realmTagContext.contextPostId}
-			inner join ${unit} as ${scopedRealmTagContextPostUnit}
+			inner join ${post} as ${scopedRealmTagContextPostUnit}
 				on ${scopedRealmTagContextPostUnit.id} = ${realmTagContext.contextPostId}
-			where ${realmTagContext.tagId} = ${unit.id}
+			where ${realmTagContext.tagId} = ${searchUnit.id}
 				and ${realmTagContext.realmId} = ${filter.value}::uuid
 				and ${scopedRealmTagContextRealm.realmTagVotingEnabled} = true
 				and ${scopedRealmTagContextRealmUnit.status} = 'visible'
@@ -333,7 +286,7 @@ function compileFilter(
 	}
 	if (filter.field === "realm-tag-vote") {
 		const conditions: SQL[] = [
-			sql`${realmTagJudgmentStat.unitId} = ${unit.id}`,
+			sql`${realmTagJudgmentStat.unitId} = ${searchUnit.id}`,
 			sql`${realmTagJudgmentStat.realmId} = ${filter.realmId}::uuid`,
 			sql`${realmTagJudgmentStat.tagId} = ${filter.tagId}::uuid`,
 			sql`${realmTagJudgmentStat.voteCount} > 0`,
@@ -366,7 +319,7 @@ function compileFilter(
 				.from(unitLicenseGrant)
 				.where(
 					and(
-						eq(unitLicenseGrant.unitId, unit.id),
+						eq(unitLicenseGrant.unitId, searchUnit.id),
 						isNull(unitLicenseGrant.offeringEndedAt),
 						eq(unitLicenseGrant.recognitionStatus, "recognized"),
 					),
@@ -381,7 +334,7 @@ function compileFilter(
 				.from(unitLicenseGrant)
 				.where(
 					and(
-						eq(unitLicenseGrant.unitId, unit.id),
+						eq(unitLicenseGrant.unitId, searchUnit.id),
 						isNull(unitLicenseGrant.offeringEndedAt),
 						eq(unitLicenseGrant.recognitionStatus, "recognized"),
 						values.length > 0 ? inArray(unitLicenseGrant.licenseId, values) : undefined,
@@ -392,141 +345,21 @@ function compileFilter(
 			return sql`not ${grantExists}`;
 		return grantExists;
 	}
-	const typeSpecificScalar: Partial<
-		Record<
-			SearchControlPredicate["field"],
-			{
-				readonly kind: string;
-				readonly relation: SQL;
-				readonly id: SQL;
-				readonly column: SQL;
-			}
-		>
-	> = {
-		"book-isbn13": {
-			kind: "book",
-			relation: sql`${book}`,
-			id: sql`${book.id}`,
-			column: sql`${book.isbn13}`,
-		},
-		"book-publication-date": {
-			kind: "book",
-			relation: sql`${book}`,
-			id: sql`${book.id}`,
-			column: sql`${book.publicationDate}`,
-		},
-		"book-format": {
-			kind: "book",
-			relation: sql`${book}`,
-			id: sql`${book.id}`,
-			column: sql`${book.format}`,
-		},
-		"media-kind": {
-			kind: "media",
-			relation: sql`${media}`,
-			id: sql`${media.id}`,
-			column: sql`${media.kind}`,
-		},
-		"media-release-date": {
-			kind: "media",
-			relation: sql`${media}`,
-			id: sql`${media.id}`,
-			column: sql`${media.releaseDate}`,
-		},
-		"software-release-date": {
-			kind: "software",
-			relation: sql`${software}`,
-			id: sql`${software.id}`,
-			column: sql`${software.releaseDate}`,
-		},
-		"software-version-label": {
-			kind: "software",
-			relation: sql`${software}`,
-			id: sql`${software.id}`,
-			column: sql`${software.versionLabel}`,
-		},
-	};
-	const scalarDefinition = typeSpecificScalar[filter.field];
-	if (scalarDefinition)
-		return sql`${unit.kind}::text = ${scalarDefinition.kind} and exists (
-			select 1 from ${scalarDefinition.relation}
-			where ${scalarDefinition.id} = ${unit.id}
-				and ${scalarColumnCondition(scalarDefinition.column, filter)}
-		)`;
-	const typeSpecificNumeric: Partial<
-		Record<
-			SearchControlPredicate["field"],
-			{
-				readonly kind: string;
-				readonly relation: SQL;
-				readonly id: SQL;
-				readonly column: SQL;
-			}
-		>
-	> = {
-		"book-page-count": {
-			kind: "book",
-			relation: sql`${book}`,
-			id: sql`${book.id}`,
-			column: sql`${book.pageCount}`,
-		},
-		"book-word-count": {
-			kind: "book",
-			relation: sql`${book}`,
-			id: sql`${book.id}`,
-			column: sql`${book.wordCount}`,
-		},
-		"media-runtime-minutes": {
-			kind: "media",
-			relation: sql`${media}`,
-			id: sql`${media.id}`,
-			column: sql`${media.runtimeMinutes}`,
-		},
-		"media-episode-count": {
-			kind: "media",
-			relation: sql`${media}`,
-			id: sql`${media.id}`,
-			column: sql`${media.episodeCount}`,
-		},
-		"media-season-count": {
-			kind: "media",
-			relation: sql`${media}`,
-			id: sql`${media.id}`,
-			column: sql`${media.seasonCount}`,
-		},
-	};
-	const numericDefinition = typeSpecificNumeric[filter.field];
-	if (numericDefinition)
-		return sql`${unit.kind}::text = ${numericDefinition.kind} and exists (
-			select 1 from ${numericDefinition.relation}
-			where ${numericDefinition.id} = ${unit.id}
-				and ${numericColumnCondition(numericDefinition.column, filter)}
-		)`;
-	if (filter.field === "software-platform")
-		return sql`${unit.kind} = 'software' and ${softwareRequirementCondition(
-			filter,
-			sql`${softwareRequirement.platformEntityId}`,
-		)}`;
-	if (filter.field === "software-requirement-tier")
-		return sql`${unit.kind} = 'software' and ${softwareRequirementCondition(
-			filter,
-			sql`${softwareRequirement.tier}`,
-		)}`;
-
 	if (filter.field === "language") {
 		const values = scalarStrings(searchFilterValues(filter), filter.field);
-		const match =
+		const localizedMatch =
 			filter.operator === "all-of"
 				? sql`array(
 					select ${unitLocalization.language}
 					from ${unitLocalization}
-					where ${unitLocalization.unitId} = ${unit.id}
+					where ${unitLocalization.unitId} = ${searchUnit.id}
 				) @> ${toTextArray(values)}`
 				: sql`exists (
 					select 1 from ${unitLocalization}
-					where ${unitLocalization.unitId} = ${unit.id}
+					where ${unitLocalization.unitId} = ${searchUnit.id}
 						and ${unitLocalization.language} = any(${toTextArray(values)})
 				)`;
+		const match = sql`(${localizedMatch} or public.catalog_name_has_languages(${searchUnit.id}, ${toTextArray(values)}, ${filter.operator === "all-of"}))`;
 		return filter.operator === "not-equals" || filter.operator === "none-of"
 			? sql`not (${match})`
 			: match;
@@ -535,7 +368,7 @@ function compileFilter(
 		const creditedEntitys = sql`array(
 			select distinct ${creditAttribution.creditedEntityId}
 			from ${creditAttribution}
-			where ${creditAttribution.sourceUnitId} = ${unit.id}
+			where ${creditAttribution.sourceUnitId} = ${searchUnit.id}
 		)`;
 		if (filter.operator === "exists")
 			return filter.value
@@ -551,42 +384,13 @@ function compileFilter(
 			: match;
 	}
 	if (filter.field === "credited-profile") {
-		const creditedProfiles = sql`array(
-			select resolved_credit.profile_id
-			from (
-				select direct_credit.credited_entity_id as profile_id
-				from public.credit_attribution as direct_credit
-				join public.unit as direct_profile
-					on direct_profile.id = direct_credit.credited_entity_id
-					and direct_profile.kind = 'profile'
-					and direct_profile.status = 'published'
-					and direct_profile.visibility <> 'private'
-					and direct_profile.moderation_status = 'approved'
-					and direct_profile.deleted_at is null
-				where direct_credit.source_unit_id = ${unit.id}
-				union
-				select entity_profile.credited_entity_id as profile_id
-				from public.credit_attribution as source_credit
-				join public.unit as credited_entity
-					on credited_entity.id = source_credit.credited_entity_id
-					and credited_entity.kind = 'entity'
-					and credited_entity.status = 'published'
-					and credited_entity.visibility <> 'private'
-					and credited_entity.moderation_status = 'approved'
-					and credited_entity.deleted_at is null
-				join public.credit_attribution as entity_profile
-					on entity_profile.source_unit_id = credited_entity.id
-					and entity_profile.role = 'publisher'
-				join public.unit as credited_profile
-					on credited_profile.id = entity_profile.credited_entity_id
-					and credited_profile.kind = 'profile'
-					and credited_profile.status = 'published'
-					and credited_profile.visibility <> 'private'
-					and credited_profile.moderation_status = 'approved'
-					and credited_profile.deleted_at is null
-				where source_credit.source_unit_id = ${unit.id}
-			) as resolved_credit
-		)`;
+		const creditedProfiles = sql`array(select direct_credit.credited_entity_id
+ from public.credit_attribution direct_credit
+ join public.account_self on account_self.entity_id=direct_credit.credited_entity_id
+ join public.entity_identity direct_profile on direct_profile.id=account_self.entity_id
+ where direct_credit.source_unit_id=${searchUnit.id}
+ and direct_profile.status='published' and direct_profile.visibility='public'
+ and direct_profile.moderation_status='approved' and direct_profile.deleted_at is null)`;
 		const values = scalarStrings(searchFilterValues(filter), filter.field);
 		const match =
 			filter.operator === "all-of"
@@ -602,7 +406,7 @@ function compileFilter(
 			from ${contentStructureNode}
 			join ${contentStructure}
 				on ${contentStructure.id} = ${contentStructureNode.structureId}
-			where ${contentStructureNode.contentUnitId} = ${unit.id}
+			where ${contentStructureNode.contentUnitId} = ${searchUnit.id}
 				and ${contentStructureNode.deletedAt} is null
 				and ${contentStructure.deletedAt} is null
 				and ${contentStructure.kind} in ('book.contents', 'post.contents')
@@ -620,7 +424,7 @@ function compileFilter(
 		const owners = sql`array(
 			select distinct ${unitOwnership.profileId}
 			from ${unitOwnership}
-			where ${unitOwnership.unitId} = ${unit.id}
+			where ${unitOwnership.unitId} = ${searchUnit.id}
 				and ${unitOwnership.revokedAt} is null
 		)`;
 		if (filter.operator === "exists")
@@ -640,11 +444,11 @@ function compileFilter(
 			filter.operator === "all-of"
 				? sql`array(
 					select ${unitEffectiveTag.tagId} from ${unitEffectiveTag}
-					where ${unitEffectiveTag.unitId} = ${unit.id}
+					where ${unitEffectiveTag.unitId} = ${searchUnit.id}
 				) @> ${toUuidArray(values)}`
 				: sql`exists (
 					select 1 from ${unitEffectiveTag}
-					where ${unitEffectiveTag.unitId} = ${unit.id}
+					where ${unitEffectiveTag.unitId} = ${searchUnit.id}
 						and ${unitEffectiveTag.tagId} = any(${toUuidArray(values)})
 				)`;
 		return filter.operator === "not-equals" || filter.operator === "none-of"
@@ -659,13 +463,13 @@ function compileFilter(
 				? sql`array(
 					select ${realmUnit.realmId}
 					from ${realmUnit}
-					where ${realmUnit.unitId} = ${unit.id}
+					where ${realmUnit.unitId} = ${searchUnit.id}
 						and ${realmUnit.status} = 'visible'
 						and ${realmUnit.publicationState} = 'active'
 				) @> ${toUuidArray(values)}`
 				: sql`exists (
 					select 1 from ${realmUnit}
-					where ${realmUnit.unitId} = ${unit.id}
+					where ${realmUnit.unitId} = ${searchUnit.id}
 						and ${realmUnit.realmId} = any(${toUuidArray(values)})
 						and ${realmUnit.status} = 'visible'
 						and ${realmUnit.publicationState} = 'active'
@@ -686,39 +490,19 @@ function compileFilter(
 		const condition = filter.operator === "not-equals" ? sql`not (${match})` : match;
 		return sql`exists (
 			select 1 from ${poll}
-			where ${poll.id} = ${unit.id} and ${condition}
+			where ${poll.id} = ${searchUnit.id} and ${condition}
 		)`;
 	}
 
-	if (filter.field === "kind") {
-		if (category === "entities")
-			return sql`exists (
-				select 1 from ${entity}
-				where ${entity.id} = ${unit.id}
-					and ${scalarColumnCondition(sql`${entity.kind}`, filter)}
-			)`;
-		if (category === "posts")
-			return sql`exists (
-				select 1 from ${post}
-				where ${post.id} = ${unit.id}
-					and ${scalarColumnCondition(sql`${post.kind}`, filter)}
-			)`;
-		if (category === "reviews")
-			return sql`exists (
-				select 1 from ${post}
-				inner join ${unit} as ${subjectUnit} on ${subjectUnit.id} = ${post.subjectUnitId}
-				where ${post.id} = ${unit.id}
-					and ${scalarColumnCondition(sql`${subjectUnit.kind}`, filter)}
-			)`;
-		return scalarColumnCondition(sql`${unit.kind}`, filter);
-	}
+	if (filter.field === "unit-owner") return scalarColumnCondition(sql`${searchUnit.owner}`, filter);
+	if (filter.field === "unit-shape") return scalarColumnCondition(sql`${searchUnit.shape}`, filter);
 
 	const directUnitColumnByField: Partial<Record<SearchControlPredicate["field"], SQL>> = {
-		"content-rating": sql`${unit.contentRating}`,
-		"ai-disclosure": sql`${unit.aiDisclosure}`,
-		"created-at": sql`${unit.createdAt}`,
-		"updated-at": sql`${unit.updatedAt}`,
-		"published-at": sql`${unit.publishedAt}`,
+		"content-rating": sql`${searchUnit.contentRating}`,
+		"ai-disclosure": sql`${searchUnit.aiDisclosure}`,
+		"created-at": sql`${searchUnit.createdAt}`,
+		"updated-at": sql`${searchUnit.updatedAt}`,
+		"published-at": sql`${searchUnit.publishedAt}`,
 	};
 	const directUnitColumn = directUnitColumnByField[filter.field];
 	if (directUnitColumn) return scalarColumnCondition(directUnitColumn, filter);
@@ -765,7 +549,7 @@ function compileFilter(
 	if (!oneToOneColumn) throw new InvalidSearch(`${filter.field} is not implemented`);
 	return sql`exists (
 		select 1 from ${oneToOneColumn.relation}
-		where ${oneToOneColumn.id} = ${unit.id}
+		where ${oneToOneColumn.id} = ${searchUnit.id}
 			and ${scalarColumnCondition(oneToOneColumn.column, filter)}
 	)`;
 }
@@ -784,35 +568,7 @@ export function compilePostgresSearchExpression(
 	if ("field" in expression) return compileFilter(category, expression, profileId);
 	if (expression.operator === "not")
 		return sql`not (${compilePostgresSearchExpression(category, expression.clause, profileId)})`;
-	if (expression.operator === "all") {
-		const requirementFilters = expression.clauses.filter(
-			(clause): clause is SearchControlPredicate =>
-				"field" in clause &&
-				(clause.field === "software-platform" || clause.field === "software-requirement-tier"),
-		);
-		if (
-			requirementFilters.some((filter) => filter.field === "software-platform") &&
-			requirementFilters.some((filter) => filter.field === "software-requirement-tier")
-		) {
-			const requirementClauses = new Set<SearchExpression>(requirementFilters);
-			const requirementConditions = requirementFilters.map((filter) =>
-				softwareRequirementRowCondition(
-					filter,
-					filter.field === "software-platform"
-						? sql`${softwareRequirement.platformEntityId}`
-						: sql`${softwareRequirement.tier}`,
-				),
-			);
-			const otherConditions = expression.clauses
-				.filter((clause) => !requirementClauses.has(clause))
-				.map((clause) => compilePostgresSearchExpression(category, clause, profileId));
-			return sql`(${unit.kind} = 'software' and exists (
-				select 1 from ${softwareRequirement}
-				where ${softwareRequirement.softwareId} = ${unit.id}
-					and ${sql.join(requirementConditions, sql` and `)}
-			)${otherConditions.length ? sql` and ${sql.join(otherConditions, sql` and `)}` : sql``})`;
-		}
-	}
+
 	const clauses = expression.clauses.map((clause) =>
 		compilePostgresSearchExpression(category, clause, profileId),
 	);
@@ -915,14 +671,14 @@ function searchCandidateSet(
 }
 
 function buildCommonSearchConditions(request: DomainSearchRequest): SQL[] {
-	const readCondition = getUnitReadCondition(request.profileId, { discoverableOnly: true });
+	const readCondition = getUnitReadCondition(request.profileId, { discoverableOnly: true }, searchUnit);
 	if (!readCondition) throw new Error("Unit read policy produced no SQL condition");
 	const conditions: SQL[] = [readCondition];
 	conditions.push(
-		getContentRatingCondition(request.contentRatingPolicy ?? DefaultContentRatingPolicy),
+		getContentRatingCondition(request.contentRatingPolicy ?? DefaultContentRatingPolicy, searchUnit.contentRating),
 	);
 	if (request.scopeUnitId) {
-		const direct = sql`${unit.id} = ${request.scopeUnitId}::uuid`;
+		const direct = sql`${searchUnit.id} = ${request.scopeUnitId}::uuid`;
 		conditions.push(
 			request.includeScopeDescendants
 				? sql`(${direct} or exists (
@@ -931,7 +687,7 @@ function buildCommonSearchConditions(request: DomainSearchRequest): SQL[] {
 					inner join ${contentStructure}
 						on ${contentStructure.id} = ${contentStructureNode.structureId}
 					where ${contentStructureNode.ownerUnitId} = ${request.scopeUnitId}::uuid
-						and ${contentStructureNode.contentUnitId} = ${unit.id}
+						and ${contentStructureNode.contentUnitId} = ${searchUnit.id}
 						and ${contentStructureNode.deletedAt} is null
 						and ${contentStructure.deletedAt} is null
 						and ${contentStructure.kind} in ('book.contents', 'post.contents')
@@ -942,8 +698,9 @@ function buildCommonSearchConditions(request: DomainSearchRequest): SQL[] {
 	if (request.domainFilter)
 		conditions.push(
 			compileUnitPredicateSql(request.domainFilter, {
-				unitId: sql`${unit.id}`,
-				unitKind: sql`${unit.kind}`,
+				unitId: sql`${searchUnit.id}`,
+				unitOwner: sql`${searchUnit.owner}`,
+				unitShape: sql`${searchUnit.shape}`,
 				viewerProfileId: request.profileId,
 			}),
 		);
@@ -959,24 +716,19 @@ function buildSearchConditions(
 	validateRequest(category, request);
 	const conditions = includeCommonConditions ? buildCommonSearchConditions(request) : [];
 	conditions.push(
-		sql`${unit.kind}::text = ANY(${toTextArray(CurrentSearchUnitKindsByCategory[category])})`,
+		sql`${searchUnit.owner}::text = ANY(${toTextArray(CurrentSearchOwnersByCategory[category])})`,
 	);
 	if (category === "posts")
 		conditions.push(sql`exists (
 			select 1 from ${post}
-			where ${post.id} = ${unit.id} and ${post.kind} <> 'review'::post_kind
+			where ${post.id} = ${searchUnit.id} and ${post.kind} <> 'review'::post_kind
 		)`);
 	if (category === "reviews")
 		conditions.push(sql`exists (
 			select 1 from ${post}
-			where ${post.id} = ${unit.id} and ${post.kind} = 'review'::post_kind
+			where ${post.id} = ${searchUnit.id} and ${post.kind} = 'review'::post_kind
 		)`);
-	const query = request.query?.trim() ?? "";
-	if (category === "units" && !query)
-		conditions.push(sql`not exists (
-			select 1 from ${unitVariant}
-			where ${unitVariant.variantUnitId} = ${unit.id}
-		)`);
+
 	if (expression)
 		conditions.push(compilePostgresSearchExpression(category, expression, request.profileId));
 	return conditions;
@@ -997,7 +749,8 @@ function buildEffectiveSearchExpression(
 		if (value !== undefined) filters.push({ field, operator: "equals", value });
 	};
 	addValues(SearchFieldByDomainRequestFilter.Languages, request.Languages);
-	addValues(SearchFieldByDomainRequestFilter.kind, request.kinds);
+	addValues(SearchFieldByDomainRequestFilter.owner, request.owners);
+	addValues(SearchFieldByDomainRequestFilter.shape, request.shapes);
 	addValues(SearchFieldByDomainRequestFilter.contentRating, request.contentRatings);
 	addValues(SearchFieldByDomainRequestFilter.aiDisclosure, request.aiDisclosures);
 	addValues(SearchFieldByDomainRequestFilter.license, request.licenses);
@@ -1174,7 +927,8 @@ function readSearchCandidatePage(rows: readonly SearchCandidateDatabaseRow[]): S
 interface PreparedSearchBranch {
 	readonly category: SearchCategory;
 	readonly conditions: readonly SQL[];
-	readonly sourceUnitKinds: readonly UnitKind[];
+	readonly sourceOwners: readonly UnitOwner[];
+	readonly sourceShapes: readonly string[];
 }
 
 interface OrderedCandidateSource {
@@ -1182,27 +936,31 @@ interface OrderedCandidateSource {
 	readonly direction: "asc" | "desc";
 }
 
-const publicDiscoverableCandidate = sql`${unit.status} = 'published'::unit_status
-	and ${unit.visibility} = 'public'::resource_visibility
-	and ${unit.moderationStatus} = 'approved'::moderation_status
-	and ${unit.deletedAt} is null`;
+const publicDiscoverableCandidate = sql`${searchUnit.status} = 'published'
+	and ${searchUnit.visibility} = 'public'
+	and ${searchUnit.moderationStatus} = 'approved'
+	and ${searchUnit.deletedAt} is null`;
 
-function resolveSourceUnitKinds(
+function resolveSourceOwners(
 	category: SearchCategory,
 	requestedKinds?: readonly string[],
-): readonly UnitKind[] {
-	const categoryKinds = CurrentSearchUnitKindsByCategory[category];
+): readonly UnitOwner[] {
+	const categoryKinds = CurrentSearchOwnersByCategory[category];
 	if (category !== "units" || !requestedKinds?.length) return categoryKinds;
 	const requested = new Set(
-		requestedKinds.filter((kind): kind is UnitKind =>
-			UnitKindValues.some((candidate) => candidate === kind),
+		requestedKinds.filter((kind): kind is UnitOwner =>
+			UnitOwnerValues.some((candidate) => candidate === kind),
 		),
 	);
 	return categoryKinds.filter((kind) => requested.has(kind));
 }
 
-function mergeSourceUnitKinds(branches: readonly PreparedSearchBranch[]): readonly UnitKind[] {
-	return [...new Set(branches.flatMap(({ sourceUnitKinds }) => sourceUnitKinds))];
+function mergeSourceShapes(branches: readonly PreparedSearchBranch[]): readonly string[] {
+ return branches.some(branch=>!branch.sourceShapes.length) ? [] : [...new Set(branches.flatMap(branch=>branch.sourceShapes))];
+}
+
+function mergeSourceOwners(branches: readonly PreparedSearchBranch[]): readonly UnitOwner[] {
+	return [...new Set(branches.flatMap(({ sourceOwners }) => sourceOwners))];
 }
 
 function requirePositionValues(position: SearchKeysetPosition): {
@@ -1330,11 +1088,13 @@ function bestCandidateSource(
 	position: SearchKeysetPosition | undefined,
 	limit: number,
 	seeded = false,
-	sourceUnitKinds?: readonly UnitKind[],
+	sourceOwners?: readonly UnitOwner[],
+	shapes: readonly string[] = [],
+ bestSnapshotId?: string | null,
 ): OrderedCandidateSource {
 	if (position && position.source !== "best-positive" && position.source !== "best-zero")
 		throw new InvalidSearch("This best cursor predates snapshot-pinned pagination");
-	if (sourceUnitKinds?.length === 0)
+	if (sourceOwners?.length === 0)
 		return {
 			direction: "desc",
 			statement: sql`select null::uuid as unit_id, 0::numeric as primary_order,
@@ -1344,12 +1104,13 @@ function bestCandidateSource(
 		};
 	const bestPosition =
 		position?.source === "best-positive" || position?.source === "best-zero" ? position : undefined;
-	const selectedSnapshot = bestPosition
-		? bestPosition.snapshotId === null
+	const selectedSnapshotId=bestPosition ? bestPosition.snapshotId : bestSnapshotId;
+	const selectedSnapshot = selectedSnapshotId !== undefined
+		? selectedSnapshotId === null
 			? sql`select ${recommendationSnapshot.id} from ${recommendationSnapshot} where false`
 			: sql`select ${recommendationSnapshot.id}
 				from ${recommendationSnapshot}
-				where ${recommendationSnapshot.id} = ${bestPosition.snapshotId}::uuid
+				where ${recommendationSnapshot.id} = ${selectedSnapshotId}::uuid
 					and ${recommendationSnapshot.state} = 'ready'::recommendation_snapshot_state`
 		: sql`select ${recommendationSnapshot.id}
 			from ${recommendationSnapshot}
@@ -1357,7 +1118,7 @@ function bestCandidateSource(
 			limit 1`;
 	const positivePosition = bestPosition?.source === "best-positive" ? bestPosition : undefined;
 	const zeroPosition = bestPosition?.source === "best-zero" ? bestPosition : undefined;
-	const includePositive = bestPosition?.source !== "best-zero" && bestPosition?.snapshotId !== null;
+	const includePositive = bestPosition?.source !== "best-zero" && selectedSnapshotId !== null;
 	const positiveKeyset = positivePosition
 		? (() => {
 				const { primary, secondary } = requirePositionValues(positivePosition);
@@ -1372,9 +1133,7 @@ function bestCandidateSource(
 				)`;
 			})()
 		: sql`true`;
-	const kindDimensions: readonly (UnitKind | undefined)[] = sourceUnitKinds?.length
-		? sourceUnitKinds
-		: [undefined];
+	const kindDimensions: readonly UnitOwner[] = sourceOwners ?? UnitOwnerValues;
 	const positiveByKind = kindDimensions.map(
 		(kind) => sql`
 			select ${unitBestScore.unitId} as unit_id,
@@ -1392,7 +1151,8 @@ function bestCandidateSource(
 			}
 			inner join selected_best_snapshot
 				on selected_best_snapshot.id = ${unitBestScore.snapshotId}
-			where ${kind ? sql`${unitBestScore.unitKind} = ${kind}` : sql`true`}
+			where ${kind ? sql`${unitBestScore.unitOwner} = ${kind}` : sql`true`}
+				and ${shapes.length ? sql`${unitBestScore.unitShape} = any(${toTextArray(shapes)})` : sql`true`}
 				and ${positiveKeyset}
 			order by ${unitBestScore.score} desc,
 				${unitBestScore.unitUpdatedAt} desc,
@@ -1409,32 +1169,32 @@ function bestCandidateSource(
 		limit ${limit}`;
 	const zeroByKind = kindDimensions.map(
 		(kind) => sql`
-			select ${unit.id} as unit_id,
+			select ${searchUnit.id} as unit_id,
 				0::numeric as primary_order,
-				extract(epoch from ${unit.updatedAt})::numeric as secondary_order,
+				extract(epoch from ${searchUnit.updatedAt})::numeric as secondary_order,
 				1::integer as source_phase,
 				'best-zero'::text as source_name,
 				(select id from selected_best_snapshot) as snapshot_id,
 				false as search_fallback
-			from ${unit}
-			${seeded ? sql`inner join filter_seed on filter_seed.unit_id = ${unit.id}` : sql``}
+			from ${ownerSearchRelation(kind, shapes)}
+			${seeded ? sql`inner join filter_seed on filter_seed.unit_id = ${searchUnit.id}` : sql``}
 			where ${publicDiscoverableCandidate}
-				and ${kind ? sql`${unit.kind} = ${kind}` : sql`true`}
+				and ${shapes.length ? sql`${searchUnit.shape} = any(${toTextArray(shapes)})` : sql`true`}
 				and not exists (
 					select 1
 					from ${unitBestScore}
 					inner join selected_best_snapshot
 						on selected_best_snapshot.id = ${unitBestScore.snapshotId}
-					where ${unitBestScore.unitId} = ${unit.id}
+					where ${unitBestScore.unitId} = ${searchUnit.id}
 				)
 				and ${timestampKeysetCondition(
-					sql`${unit.updatedAt}`,
-					sql`${unit.id}`,
+					sql`${searchUnit.updatedAt}`,
+					sql`${searchUnit.id}`,
 					"desc",
 					zeroPosition,
 					"secondary",
 				)}
-			order by ${unit.updatedAt} desc, ${unit.id} desc
+			order by ${searchUnit.updatedAt} desc, ${searchUnit.id} desc
 			limit ${limit}`,
 	);
 	const zero = sql`
@@ -1496,7 +1256,7 @@ function sparseFollowerCandidateSource(
 					? sql`inner join filter_seed on filter_seed.unit_id = ${unitFollowStat.unitId}`
 					: sql``
 			}
-			where ${unitFollowStat.followerCount} > 0
+			where ${unitFollowStat.followerCount} > 0 and ${unitFollowStat.unitRealmId} is not null
 				and ${bigintKeysetCondition(
 					sql`${unitFollowStat.followerCount}`,
 					sql`${unitFollowStat.unitId}`,
@@ -1511,23 +1271,23 @@ function sparseFollowerCandidateSource(
 		const zeroPosition =
 			cursorPhase === zeroPhase && position?.source === "count-zero" ? position : undefined;
 		branches.push(sql`
-			select ${unit.id} as unit_id,
+			select ${searchUnit.id} as unit_id,
 				0::numeric as primary_order,
 				0::numeric as secondary_order,
 				${zeroPhase}::integer as source_phase,
 				'count-zero'::text as source_name,
 				null::uuid as snapshot_id,
 				false as search_fallback
-			from ${unit}
-			${seeded ? sql`inner join filter_seed on filter_seed.unit_id = ${unit.id}` : sql``}
+			from ${ownerSearchRelation("realm")}
+			${seeded ? sql`inner join filter_seed on filter_seed.unit_id = ${searchUnit.id}` : sql``}
 			where ${publicDiscoverableCandidate}
 				and not exists (
 					select 1 from ${unitFollowStat}
-					where ${unitFollowStat.unitId} = ${unit.id}
+					where ${unitFollowStat.unitId} = ${searchUnit.id}
 						and ${unitFollowStat.followerCount} > 0
 				)
-				and ${idKeysetCondition(sql`${unit.id}`, direction, zeroPosition)}
-			order by ${unit.id} ${orderDirection}
+				and ${idKeysetCondition(sql`${searchUnit.id}`, direction, zeroPosition)}
+			order by ${searchUnit.id} ${orderDirection}
 			limit ${limit}`);
 	}
 	return {
@@ -1547,7 +1307,8 @@ function sparseFollowerCandidateSource(
 function textCandidateSource(
 	query: ExpandedSearchQuery,
 	languageBoundary: readonly ContentLanguage[],
-	sourceUnitKinds: readonly UnitKind[],
+	sourceOwners: readonly UnitOwner[],
+	shapes: readonly string[],
 	position: SearchKeysetPosition | undefined,
 	limit: number,
 ): OrderedCandidateSource {
@@ -1556,7 +1317,7 @@ function textCandidateSource(
 	const cursorMicros = cursorValues
 		? sql`round(${cursorValues.primary}::numeric * 1000000)::bigint`
 		: sql`null::bigint`;
-	if (!sourceUnitKinds.length)
+	if (!sourceOwners.length)
 		return {
 			direction: "desc",
 			statement: sql`select null::uuid as unit_id, 0::numeric as primary_order,
@@ -1564,7 +1325,7 @@ function textCandidateSource(
 				'ordered'::text as source_name, null::uuid as snapshot_id,
 				false as search_fallback, false as search_matched where false`,
 		};
-	const kindSources = sourceUnitKinds.map(
+	const kindSources = sourceOwners.map(
 		(kind) => sql`
 			select text_candidate.unit_id,
 				(text_candidate.unit_updated_at_micros::numeric / 1000000) as primary_order,
@@ -1574,15 +1335,9 @@ function textCandidateSource(
 				null::uuid as snapshot_id,
 				(not text_candidate.search_matched) as search_fallback,
 				text_candidate.search_matched
-			from public.search_text_candidates(
-				${toTextArray(query.variants)},
-				${toTextArray(languageBoundary)},
-				${kind},
-				${cursorMicros},
-				${orderedPosition?.unitId ?? null}::uuid,
-				${WorkPolicy.search.maxEstimatedPostings},
-				${limit}
-			) as text_candidate
+			from ${CatalogOwnerValues.some(owner=>owner===kind)
+ ? sql`public.search_catalog_name_candidates(${kind}, ${toTextArray(query.variants)}, ${toTextArray(languageBoundary)}, ${toTextArray(shapes)}, ${cursorMicros}, ${orderedPosition?.unitId ?? null}::uuid, ${WorkPolicy.search.maxEstimatedPostings}, ${limit})`
+ : sql`public.search_text_candidates(${toTextArray(query.variants)}, ${toTextArray(languageBoundary)}, ${kind}, ${toTextArray(shapes)}, ${cursorMicros}, ${orderedPosition?.unitId ?? null}::uuid, ${WorkPolicy.search.maxEstimatedPostings}, ${limit})`} as text_candidate
 			order by text_candidate.unit_updated_at_micros desc,
 				text_candidate.unit_id desc
 			limit ${limit}`,
@@ -1604,8 +1359,11 @@ function seededUnitCandidateSource(
 	sort: SearchSort,
 	position: SearchKeysetPosition | undefined,
 	limit: number,
+	sourceOwners: readonly UnitOwner[],
+	shapes: readonly string[],
+ bestSnapshotId?:string|null,
 ): OrderedCandidateSource | undefined {
-	if (sort === "best") return bestCandidateSource(position, limit, true);
+	if (sort === "best") return bestCandidateSource(position, limit, true, sourceOwners, shapes, bestSnapshotId);
 	if (sort === "followerCount:asc" || sort === "followerCount:desc")
 		return sparseFollowerCandidateSource(
 			position,
@@ -1649,69 +1407,55 @@ function seededUnitCandidateSource(
 			position: orderedPosition,
 			limit,
 		});
-	const resolvedSort = sort === "relevance" ? "updatedAt:desc" : sort;
-	if (
-		resolvedSort !== "createdAt:asc" &&
-		resolvedSort !== "createdAt:desc" &&
-		resolvedSort !== "updatedAt:asc" &&
-		resolvedSort !== "updatedAt:desc" &&
-		resolvedSort !== "publishedAt:asc" &&
-		resolvedSort !== "publishedAt:desc"
-	)
-		return undefined;
-	const timestamp = resolvedSort.startsWith("createdAt")
-		? sql`${unit.createdAt}`
-		: resolvedSort.startsWith("publishedAt")
-			? sql`${unit.publishedAt}`
-			: sql`${unit.updatedAt}`;
-	if (resolvedSort.startsWith("publishedAt"))
-		return nullableTimestampCandidateSource({
-			column: timestamp,
-			id: sql`${unit.id}`,
-			relation: sql`${unit} inner join filter_seed on filter_seed.unit_id = ${unit.id}`,
-			baseCondition: publicDiscoverableCandidate,
-			direction,
-			position: orderedPosition,
-			limit,
-		});
-	return {
-		direction,
-		statement: sql`
-			select ${unit.id} as unit_id,
-				extract(epoch from ${timestamp})::numeric as primary_order,
-				0::numeric as secondary_order,
-				0::integer as source_phase,
-				'ordered'::text as source_name,
-				null::uuid as snapshot_id,
-				false as search_fallback,
-				false as search_matched
-			from filter_seed
-			inner join ${unit} on ${unit.id} = filter_seed.unit_id
-			where ${publicDiscoverableCandidate}
-				and ${timestampKeysetCondition(timestamp, sql`${unit.id}`, direction, orderedPosition)}
-			order by ${timestamp} ${orderDirection}, ${unit.id} ${orderDirection}
-			limit ${limit}`,
-	};
+	return ownerOrderedCandidateSource(sort === "relevance" ? "updatedAt:desc" : sort, position, limit, sourceOwners, shapes, true);
+}
+
+function ownerOrderedCandidateSource(sort: SearchSort, position: SearchKeysetPosition | undefined,
+ limit: number, owners: readonly UnitOwner[], shapes: readonly string[], seeded = false): OrderedCandidateSource {
+ const direction = sort.endsWith(":asc") ? "asc" : "desc";
+ const orderDirection = direction === "asc" ? sql`asc` : sql`desc`;
+ const timestamp = sort.startsWith("createdAt:") ? sql`${searchUnit.createdAt}`
+ : sort.startsWith("publishedAt:") ? sql`${searchUnit.publishedAt}`
+ : sort.startsWith("updatedAt:") ? sql`${searchUnit.updatedAt}` : undefined;
+ if (!timestamp) throw new InvalidSearch(`${sort} has no native owner ordering`);
+ const orderedPosition = requireOrderedPosition(position);
+ const baseCondition = sql`${publicDiscoverableCandidate} and ${shapes.length ? sql`${searchUnit.shape}=any(${toTextArray(shapes)})` : sql`true`}`;
+ const branches = owners.map(owner => {
+  const relation = sql`${ownerSearchRelation(owner, shapes)} ${seeded ? sql`inner join filter_seed on filter_seed.unit_id = ${searchUnit.id}` : sql``}`;
+  if (sort.startsWith("publishedAt:")) return nullableTimestampCandidateSource({column:timestamp,id:sql`${searchUnit.id}`,relation,baseCondition,direction,position:orderedPosition,limit}).statement;
+  return sql`select ${searchUnit.id} as unit_id, extract(epoch from ${timestamp})::numeric as primary_order,
+   0::numeric as secondary_order, 0::integer as source_phase, 'ordered'::text as source_name,
+   null::uuid as snapshot_id, false as search_fallback
+   from ${relation} where ${baseCondition}
+   and ${timestampKeysetCondition(timestamp,sql`${searchUnit.id}`,direction,orderedPosition)}
+   order by ${timestamp} ${orderDirection}, ${searchUnit.id} ${orderDirection} limit ${limit}`;
+ });
+ return {direction, statement: branches.length ? sql`select native_source.* from (${sql.join(branches.map(branch=>sql`(${branch})`),sql` union all `)}) native_source
+ order by source_phase asc, primary_order ${orderDirection}, secondary_order ${orderDirection}, unit_id ${orderDirection} limit ${limit}`
+ : sql`select null::uuid as unit_id, 0::numeric as primary_order, 0::numeric as secondary_order, 0::integer as source_phase, 'ordered'::text as source_name, null::uuid as snapshot_id, false as search_fallback where false`};
 }
 
 function orderedCandidateSource(input: {
 	readonly query: ExpandedSearchQuery;
 	readonly sort: SearchSort;
 	readonly position?: SearchKeysetPosition;
+ readonly bestSnapshotId?:string|null;
 	readonly languageBoundary: readonly ContentLanguage[];
-	readonly sourceUnitKinds: readonly UnitKind[];
+	readonly sourceOwners: readonly UnitOwner[];
+	readonly sourceShapes: readonly string[];
 	readonly limit: number;
 }): OrderedCandidateSource {
 	if (input.sort === "relevance")
 		return textCandidateSource(
 			input.query,
 			input.languageBoundary,
-			input.sourceUnitKinds,
+			input.sourceOwners,
+			input.sourceShapes,
 			input.position,
 			input.limit,
 		);
 	if (input.sort === "best")
-		return bestCandidateSource(input.position, input.limit, false, input.sourceUnitKinds);
+		return bestCandidateSource(input.position, input.limit, false, input.sourceOwners, input.sourceShapes,input.bestSnapshotId);
 	const direction = input.sort.endsWith(":asc") ? "asc" : "desc";
 	if (input.sort === "followerCount:asc" || input.sort === "followerCount:desc")
 		return sparseFollowerCandidateSource(input.position, direction, input.limit);
@@ -1749,61 +1493,7 @@ function orderedCandidateSource(input: {
 			position,
 			limit: input.limit,
 		});
-	const timestamps: Partial<Record<SearchSort, SQL>> = {
-		"createdAt:asc": sql`${unit.createdAt}`,
-		"createdAt:desc": sql`${unit.createdAt}`,
-		"updatedAt:asc": sql`${unit.updatedAt}`,
-		"updatedAt:desc": sql`${unit.updatedAt}`,
-		"publishedAt:asc": sql`${unit.publishedAt}`,
-		"publishedAt:desc": sql`${unit.publishedAt}`,
-	};
-	const timestamp = timestamps[input.sort];
-	if (!timestamp) throw new InvalidSearch(`${input.sort} has no PostgreSQL search ordering`);
-	if (input.sort === "publishedAt:asc" || input.sort === "publishedAt:desc")
-		return nullableTimestampCandidateSource({
-			column: timestamp,
-			id: sql`${unit.id}`,
-			relation: sql`${unit}`,
-			baseCondition: publicDiscoverableCandidate,
-			direction,
-			position,
-			limit: input.limit,
-		});
-	if (!input.sourceUnitKinds.length)
-		return {
-			direction,
-			statement: sql`select null::uuid as unit_id, 0::numeric as primary_order,
-				0::numeric as secondary_order, 0::integer as source_phase,
-				'ordered'::text as source_name, null::uuid as snapshot_id,
-				false as search_fallback where false`,
-		};
-	const kindSources = input.sourceUnitKinds.map(
-		(kind) => sql`
-			select ${unit.id} as unit_id,
-				extract(epoch from ${timestamp})::numeric as primary_order,
-				0::numeric as secondary_order,
-				0::integer as source_phase,
-				'ordered'::text as source_name,
-				null::uuid as snapshot_id,
-				false as search_fallback
-			from ${unit}
-			where ${publicDiscoverableCandidate}
-				and ${unit.kind} = ${kind}
-				and ${timestampKeysetCondition(timestamp, sql`${unit.id}`, direction, position)}
-			order by ${timestamp} ${orderDirection}, ${unit.id} ${orderDirection}
-			limit ${input.limit}`,
-	);
-	return {
-		direction,
-		statement: sql`
-			select ordered_kind_source.*
-			from (${sql.join(
-				kindSources.map((branch) => sql`(${branch})`),
-				sql` union all `,
-			)}) as ordered_kind_source
-			order by primary_order ${orderDirection}, unit_id ${orderDirection}
-			limit ${input.limit}`,
-	};
+	return ownerOrderedCandidateSource(input.sort, input.position, input.limit, input.sourceOwners, input.sourceShapes);
 }
 
 function currentSearchDocumentCondition(
@@ -1845,12 +1535,12 @@ function currentSearchSources(
 	if (!query.query)
 		return sql`select bounded_search_candidate.unit_id
 			from ${candidateRelation} as bounded_search_candidate`;
-	const boundedMatch = sql`exists (
+	const boundedMatch = sql`(public.catalog_name_matches(bounded_search_candidate.unit_id, ${toTextArray(query.variants)}, ${toTextArray(languageBoundary)}) or exists (
 		select 1
 		from ${unitSearchDocument} as ${boundedSearchDocument}
 		where ${boundedSearchDocument.unitId} = bounded_search_candidate.unit_id
 			and ${currentSearchDocumentCondition(query, languageBoundary)}
-	)`;
+	))`;
 	if (!sourceMayPreMatch)
 		return sql`select bounded_search_candidate.unit_id
 			from ${candidateRelation} as bounded_search_candidate
@@ -1874,6 +1564,7 @@ async function searchCandidateBatch(input: {
 	readonly query: ExpandedSearchQuery;
 	readonly sort: SearchSort;
 	readonly position?: SearchKeysetPosition;
+ readonly bestSnapshotId?:string|null;
 	readonly limit: number;
 	readonly scanLimit: number;
 	readonly languageBoundary: readonly ContentLanguage[];
@@ -1882,14 +1573,16 @@ async function searchCandidateBatch(input: {
 		return { rows: [], hasMore: false, scannedCount: 0, boundedTextFallback: false };
 	const source =
 		(input.candidateSet
-			? seededUnitCandidateSource(input.sort, input.position, input.scanLimit + 1)
+			? seededUnitCandidateSource(input.sort, input.position, input.scanLimit + 1, mergeSourceOwners(input.branches), mergeSourceShapes(input.branches),input.bestSnapshotId)
 			: undefined) ??
 		orderedCandidateSource({
 			query: input.query,
 			sort: input.sort,
 			position: input.position,
+            bestSnapshotId:input.bestSnapshotId,
 			languageBoundary: input.languageBoundary,
-			sourceUnitKinds: mergeSourceUnitKinds(input.branches),
+			sourceOwners: mergeSourceOwners(input.branches),
+			sourceShapes: mergeSourceShapes(input.branches),
 			limit: input.scanLimit + 1,
 		});
 	const branchConditions = input.branches.map(
@@ -1906,14 +1599,15 @@ async function searchCandidateBatch(input: {
 		sql`scanned_candidates`,
 		input.sort === "relevance",
 	);
+	const checkedSnapshotId=input.position?.source === "best-positive" || input.position?.source === "best-zero" ? input.position.snapshotId : input.bestSnapshotId;
 	const snapshotAvailable =
 		input.sort === "best" &&
-		(input.position?.source === "best-positive" || input.position?.source === "best-zero")
-			? input.position.snapshotId === null
+		checkedSnapshotId !== undefined
+			? checkedSnapshotId === null
 				? sql`true`
 				: sql`exists (
 					select 1 from ${recommendationSnapshot}
-					where ${recommendationSnapshot.id} = ${input.position.snapshotId}::uuid
+					where ${recommendationSnapshot.id} = ${checkedSnapshotId}::uuid
 						and ${recommendationSnapshot.state} = 'ready'::recommendation_snapshot_state
 				)`
 			: sql`true`;
@@ -1941,7 +1635,7 @@ async function searchCandidateBatch(input: {
 				select distinct unit_id
 				from raw_search_sources
 			), eligible_matches as (
-				select ${unit.id} as unit_id,
+				select ${searchUnit.id} as unit_id,
 					scanned_candidates.primary_order,
 					scanned_candidates.secondary_order,
 					scanned_candidates.source_phase,
@@ -1949,7 +1643,7 @@ async function searchCandidateBatch(input: {
 					scanned_candidates.snapshot_id
 				from scanned_candidates
 				inner join search_sources on search_sources.unit_id = scanned_candidates.unit_id
-				inner join ${unit} on ${unit.id} = scanned_candidates.unit_id
+				inner join ${searchState(sql`scanned_candidates.unit_id`)} on true
 				where ${sql.join(eligibilityConditions, sql` and `)}
 			), accepted as materialized (
 				select unit_id, primary_order, secondary_order, source_phase,
@@ -2090,6 +1784,7 @@ async function searchCandidatePage(input: {
 	readonly query: ExpandedSearchQuery;
 	readonly sort: SearchSort;
 	readonly position?: SearchKeysetPosition;
+ readonly bestSnapshotId?:string|null;
 	readonly limit: number;
 	readonly languageBoundary: readonly ContentLanguage[];
 }): Promise<SearchCandidatePage> {
@@ -2161,65 +1856,21 @@ async function hydrateSearchHits(
 	presentationLanguages: readonly ContentLanguage[],
 ): Promise<SearchHitWithoutSlugAddress[]> {
 	if (!unitIds.length) return [];
-	const hitType = category === "posts" ? sql`${post.kind}::text` : sql`${unit.kind}::text`;
-	const tagPositionField =
-		category === "tags"
-			? sql`,
-			'tagHasOtherPositions', coalesce(${tagPublicPositionStat.publicPositionCount} > 1, false),
-			'tagOtherPositionCount', greatest(
-				coalesce(${tagPublicPositionStat.publicPositionCount}, 0) - 1,
-				0
-			)`
-			: sql``;
-	const tagPositionJoin =
-		category === "tags"
-			? sql`left join ${tagPublicPositionStat}
-				on ${tagPublicPositionStat.tagId} = ${unit.id}`
-			: sql``;
-	const result = await database.execute<{ hit: SearchHitWithoutSlugAddress }>(sql`
-		select jsonb_build_object(
-			'id', ${unit.id},
-			'category', ${category}::text,
-			'kind', ${hitType},
-			'language', ${resolvedUnitLocalizationLanguage(
-				unit.id,
-				request.localizationLanguages,
-				presentationLanguages,
-			)},
-			'title', ${resolvedUnitLocalizationTitle(
-				unit.id,
-				request.localizationLanguages,
-				presentationLanguages,
-			)},
-			'summary', ${resolvedUnitLocalizationSummary(
-				unit.id,
-				request.localizationLanguages,
-				presentationLanguages,
-			)},
-			'titles', coalesce((
-				select jsonb_agg(localization.title order by localization.position, localization.language)
-					filter (where localization.title is not null)
-				from ${unitLocalization} localization
-				where localization.unit_id = ${unit.id}
-			), '[]'::jsonb),
-			'summaries', coalesce((
-				select jsonb_agg(localization.summary order by localization.position, localization.language)
-					filter (where localization.summary is not null)
-				from ${unitLocalization} localization
-				where localization.unit_id = ${unit.id}
-			), '[]'::jsonb)
-			${tagPositionField}
-		) as hit
-		from ${unit}
-		left join ${post} on ${post.id} = ${unit.id}
-		${tagPositionJoin}
-		where ${unit.id} = any(${toUuidArray(unitIds)})
-	`);
-	const byId = new Map(result.rows.map(({ hit }) => [hit.id, hit]));
-	return unitIds.flatMap((id) => {
-		const hit = byId.get(id);
-		return hit ? [hit] : [];
-	});
+ return database.transaction(async tx => {
+  const allowed = await tx.execute<{id:string}>(sql`select ${searchUnit.id} as id
+   from unnest(${toUuidArray(unitIds)}) requested(id)
+   inner join ${searchState(sql`requested.id`)} on true
+   where ${getUnitReadCondition(request.profileId,{discoverableOnly:true},searchUnit)}
+   and ${getContentRatingCondition(request.contentRatingPolicy ?? DefaultContentRatingPolicy,searchUnit.contentRating)}`);
+  const ids = allowed.rows.map(row=>row.id);
+  const presentations = await readUnitPresentationsInTransaction(tx,ids,request.localizationLanguages?.length ? request.localizationLanguages : presentationLanguages);
+  const tagPositions = category === "tags" && ids.length
+   ? await tx.select({id:tagPublicPositionStat.tagId,count:tagPublicPositionStat.publicPositionCount}).from(tagPublicPositionStat).where(inArray(tagPublicPositionStat.tagId,ids)) : [];
+  const positions = new Map(tagPositions.map(row=>[row.id,row.count>1]));
+  return unitIds.flatMap(id=>{const item=presentations.get(id);return item ? [{...item,category,
+   titles:item.title ? [item.title]:[],summaries:item.summary ? [item.summary]:[],
+   ...(category === "tags" ? {tagHasOtherPositions:positions.get(id) ?? false}: {})}]:[];});
+ }, {isolationLevel:"repeatable read",accessMode:"read only"});
 }
 
 function searchDomainScan(
@@ -2315,7 +1966,8 @@ async function searchDomainScan(
 			{
 				category,
 				conditions,
-				sourceUnitKinds: resolveSourceUnitKinds(category, request.kinds),
+				sourceOwners: resolveSourceOwners(category, request.owners),
+				sourceShapes: request.shapes ?? [],
 			},
 		],
 		candidateSet: searchCandidateSet(searchExpression, request.domainFilter, request.profileId),
@@ -2438,7 +2090,8 @@ export interface GlobalSearchBranch {
 	readonly category: SearchCategory;
 	readonly searchExpression?: SearchExpression;
 	/** Exact Unit roots used by the ordered source before branch predicates run. */
-	readonly sourceUnitKinds?: readonly UnitKind[];
+	readonly sourceOwners?: readonly UnitOwner[];
+	readonly sourceShapes?: readonly string[];
 }
 
 export interface GlobalSearchIdentifiersRequest
@@ -2446,6 +2099,8 @@ export interface GlobalSearchIdentifiersRequest
 	readonly branches: readonly GlobalSearchBranch[];
 	readonly cursor?: never;
 	readonly position?: SearchKeysetPosition;
+ /** Server-resolved initial snapshot; null pins the empty sparse projection. */
+ readonly bestSnapshotId?:string|null;
 	/** Server-owned predicates evaluated inside the bounded Top-K scan. */
 	readonly additionalConditions?: readonly SQL[];
 }
@@ -2477,14 +2132,15 @@ async function prepareGlobalSearchRequest(
 			...(branch.searchExpression ? { searchExpression: branch.searchExpression } : {}),
 		} satisfies DomainSearchRequest;
 		const searchExpression = buildEffectiveSearchExpression(domainRequest);
-		const categoryKinds: readonly UnitKind[] = CurrentSearchUnitKindsByCategory[branch.category];
-		const sourceUnitKinds =
-			branch.sourceUnitKinds ?? resolveSourceUnitKinds(branch.category, commonRequest.kinds);
-		if (sourceUnitKinds.some((kind) => !categoryKinds.includes(kind)))
+		const categoryKinds: readonly UnitOwner[] = CurrentSearchOwnersByCategory[branch.category];
+		const sourceOwners =
+			branch.sourceOwners ?? resolveSourceOwners(branch.category, commonRequest.owners);
+		if (sourceOwners.some((kind) => !categoryKinds.includes(kind)))
 			throw new InvalidSearch("Global Search branch has a Unit kind outside its category");
 		return {
 			category: branch.category,
-			sourceUnitKinds,
+			sourceOwners,
+			sourceShapes: branch.sourceShapes ?? commonRequest.shapes ?? [],
 			conditions: buildSearchConditions(branch.category, domainRequest, searchExpression, false),
 			...(searchExpression ? { searchExpression } : {}),
 		};
@@ -2601,6 +2257,7 @@ export async function searchGlobalIdentifiers(
 		query: prepared.query,
 		sort: prepared.sort,
 		position: request.position,
+        bestSnapshotId:request.bestSnapshotId,
 		limit: prepared.limit,
 		languageBoundary: prepared.languageBoundary,
 	});
@@ -2633,74 +2290,58 @@ function facetSpec(
 	if (field === "category") return { value: sql`${category}::text`, join: none };
 	if (field === "language")
 		return {
-			value: sql`${facetLocalization.language}`,
-			join: sql`join ${unitLocalization} as ${facetLocalization}
-				on ${facetLocalization.unitId} = ${unit.id}`,
+			value: sql`facet_language.language`,
+			join: sql`join lateral (
+				select language from ${unitLocalization} where unit_id=${searchUnit.id}
+				union select language from unnest(array['zh','en','ja','ko','de','fr','es']::text[]) native_language(language)
+				where public.catalog_name_has_languages(${searchUnit.id},array[language],false)
+			) facet_language on true`,
 		};
 	if (field === "tag")
 		return {
 			value: sql`${facetUnitTag.tagId}`,
 			join: sql`join ${unitEffectiveTag} as ${facetUnitTag}
-				on ${facetUnitTag.unitId} = ${unit.id}`,
+				on ${facetUnitTag.unitId} = ${searchUnit.id}`,
 		};
 	if (field === "realm")
 		return {
 			value: sql`${facetRealmUnit.realmId}`,
 			join: sql`join ${realmUnit} as ${facetRealmUnit}
-				on ${facetRealmUnit.unitId} = ${unit.id} and ${facetRealmUnit.status} = 'visible'`,
+				on ${facetRealmUnit.unitId} = ${searchUnit.id} and ${facetRealmUnit.status} = 'visible'`,
 		};
 	if (field === "credit")
 		return {
 			value: sql`${facetCreditAttribution.creditedEntityId}`,
 			join: sql`join ${creditAttribution} as ${facetCreditAttribution}
-				on ${facetCreditAttribution.sourceUnitId} = ${unit.id}`,
+				on ${facetCreditAttribution.sourceUnitId} = ${searchUnit.id}`,
 		};
 	if (field === "owner")
 		return {
 			value: sql`${facetOwnership.profileId}`,
 			join: sql`join ${unitOwnership} as ${facetOwnership}
-				on ${facetOwnership.unitId} = ${unit.id}
+				on ${facetOwnership.unitId} = ${searchUnit.id}
 				and ${facetOwnership.revokedAt} is null`,
 		};
 	if (field === "license")
 		return {
 			value: sql`${facetLicenseGrant.licenseId}`,
 			join: sql`join ${unitLicenseGrant} as ${facetLicenseGrant}
-				on ${facetLicenseGrant.unitId} = ${unit.id}
+				on ${facetLicenseGrant.unitId} = ${searchUnit.id}
 				and ${facetLicenseGrant.offeringEndedAt} is null
 				and ${facetLicenseGrant.recognitionStatus} = 'recognized'`,
 		};
-	if (
-		field === "kind" &&
-		(category === "units" ||
-			category === "entities" ||
-			category === "posts" ||
-			category === "reviews")
-	)
-		return {
-			value:
-				category === "entities"
-					? sql`(select ${entity.kind} from ${entity} where ${entity.id} = ${unit.id})`
-					: category === "reviews"
-						? sql`(select ${subjectUnit.kind}
-							from ${post}
-							inner join ${unit} as ${subjectUnit}
-								on ${subjectUnit.id} = ${post.subjectUnitId}
-							where ${post.id} = ${unit.id})`
-						: category === "posts"
-							? sql`(select ${post.kind} from ${post} where ${post.id} = ${unit.id})`
-							: sql`${unit.kind}`,
-			join: none,
-		};
+	if (field === "unit-owner") return { value: sql`${searchUnit.owner}`, join: none };
+	if (field === "unit-shape") return { value: sql`${searchUnit.shape}`, join: none };
+
 	const scalar: Partial<Record<SearchField, SQL>> = {
-		"content-rating": sql`${unit.contentRating}`,
-		"ai-disclosure": sql`${unit.aiDisclosure}`,
-		"join-policy": sql`(select ${realm.joinPolicy} from ${realm} where ${realm.id} = ${unit.id})`,
-		multiple: sql`(select ${poll.mode} = 'multiple' from ${poll} where ${poll.id} = ${unit.id})`,
+		"content-rating": sql`${searchUnit.contentRating}`,
+		"ai-disclosure": sql`${searchUnit.aiDisclosure}`,
+		"join-policy": sql`(select ${realm.joinPolicy} from ${realm} where ${realm.id} = ${searchUnit.id})`,
+		multiple: sql`(select ${poll.mode} = 'multiple' from ${poll} where ${poll.id} = ${searchUnit.id})`,
 		"results-visibility": sql`(select ${poll.resultVisibility}
-			from ${poll} where ${poll.id} = ${unit.id})`,
+			from ${poll} where ${poll.id} = ${searchUnit.id})`,
 		closed: sql`(select ${poll.closedAt} is not null or ${poll.closesAt} <= now()
-			from ${poll} where ${poll.id} = ${unit.id})`,
+			from ${poll} where ${poll.id} = ${searchUnit.id})`,
 	};
 	const value = scalar[field];
 	return value ? { value, join: none } : undefined;
@@ -2720,13 +2361,13 @@ async function aggregateDomainFacets(
 	const queries = requestedFacets.map(
 		({ field, spec }) => sql`(
 			select ${field}::text as field, (${spec.value})::text as value,
-				count(distinct ${unit.id})::text as count
+				count(distinct ${searchUnit.id})::text as count
 			from search_candidate
-			inner join ${unit} on ${unit.id} = search_candidate.unit_id
+			inner join ${searchState(sql`search_candidate.unit_id`)} on true
 			${spec.join}
 			where (${spec.value}) is not null
 			group by (${spec.value})
-			order by count(distinct ${unit.id}) desc, (${spec.value})::text
+			order by count(distinct ${searchUnit.id}) desc, (${spec.value})::text
 			limit 100
 		)`,
 	);
@@ -2776,7 +2417,8 @@ export async function searchDomainFacets(
 			{
 				category,
 				conditions,
-				sourceUnitKinds: resolveSourceUnitKinds(category, request.kinds),
+				sourceOwners: resolveSourceOwners(category, request.owners),
+				sourceShapes: request.shapes ?? [],
 			},
 		],
 		candidateSet: searchCandidateSet(searchExpression, request.domainFilter, request.profileId),
@@ -2828,14 +2470,14 @@ async function aggregateGlobalFacets(
 		({ category, field, spec }) => sql`(
 			select ${category}::text as category, ${field}::text as field,
 				(${spec.value})::text as value,
-				count(distinct ${unit.id})::text as count
+				count(distinct ${searchUnit.id})::text as count
 			from eligible_category
-			inner join ${unit} on ${unit.id} = eligible_category.unit_id
+			inner join ${searchState(sql`eligible_category.unit_id`)} on true
 			${spec.join}
 			where eligible_category.category = ${category}::text
 				and (${spec.value}) is not null
 			group by (${spec.value})
-			order by count(distinct ${unit.id}) desc, (${spec.value})::text
+			order by count(distinct ${searchUnit.id}) desc, (${spec.value})::text
 			limit 100
 		)`,
 	);
@@ -2847,9 +2489,9 @@ async function aggregateGlobalFacets(
 	}>(sql`with search_candidate(unit_id) as (
 		select * from unnest(${toUuidArray(candidateIds)})
 	), eligible_category(unit_id, category) as materialized (
-		select ${unit.id}, eligibility.category
+		select ${searchUnit.id}, eligibility.category
 		from search_candidate
-		inner join ${unit} on ${unit.id} = search_candidate.unit_id
+		inner join ${searchState(sql`search_candidate.unit_id`)} on true
 		cross join lateral (values ${sql.join(eligibilityRows, sql`, `)})
 			as eligibility(category, matches)
 		where eligibility.matches
@@ -2889,7 +2531,8 @@ export async function searchGlobalFacets(
 			request,
 			fields,
 			searchExpression,
-			sourceUnitKinds: resolveSourceUnitKinds(category, request.kinds),
+			sourceOwners: resolveSourceOwners(category, request.owners),
+				sourceShapes: request.shapes ?? [],
 			conditions: buildSearchConditions(category, request, searchExpression),
 		};
 	});
@@ -3022,6 +2665,8 @@ export async function searchGrouped(request: {
 	indexes: SearchCategory[];
 	localizationLanguages: readonly ContentLanguage[];
 	Languages?: ContentLanguage[];
+	owners?: UnitOwner[];
+	shapes?: string[];
 	limitPerIndex?: number;
 	contentRatingPolicy?: DomainSearchRequest["contentRatingPolicy"];
 }) {
@@ -3032,6 +2677,8 @@ export async function searchGrouped(request: {
 				query: request.query,
 				localizationLanguages: request.localizationLanguages,
 				Languages: request.Languages,
+				owners: request.owners,
+				shapes: request.shapes,
 				limit: request.limitPerIndex ?? 5,
 				contentRatingPolicy: request.contentRatingPolicy,
 			});

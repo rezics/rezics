@@ -190,6 +190,7 @@ export async function adoptBangumiApiRelation(
 			actor,
 			revision,
 			qualifier.definitionRevisionId,
+			{ purpose: "qualifier" },
 		);
 		const appended = await appendCatalogFactNodes(
 			tx,

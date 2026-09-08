@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION public.catalog_publish_identity_route()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
-DECLARE affected integer; legacy_exists boolean; routing_ready boolean;
+DECLARE affected integer; routing_ready boolean;
 BEGIN
   SELECT ready INTO routing_ready FROM public.catalog_routing_control WHERE singleton FOR SHARE;
   IF routing_ready IS DISTINCT FROM true THEN
@@ -12,14 +12,6 @@ BEGIN
     RAISE EXCEPTION 'Catalog identity or routing generation cannot move backwards'
       USING ERRCODE = '23514', CONSTRAINT = 'catalog_identity_immutable_id';
   END IF;
-  -- Transitional collision fence. P11 removes it with the legacy INSERT guard.
-  IF TG_OP = 'INSERT' AND to_regclass('public.unit') IS NOT NULL THEN
-    EXECUTE 'SELECT EXISTS(SELECT 1 FROM public.unit WHERE id = $1)' INTO legacy_exists USING NEW.id;
-    IF legacy_exists THEN
-      RAISE EXCEPTION 'Catalog ID is still owned by the legacy identity store'
-        USING ERRCODE = '23505', CONSTRAINT = 'catalog_identity_owner_conflict';
-    END IF;
-  END IF;
   INSERT INTO public.catalog_unit_locator(id, owner, generation)
     VALUES (NEW.id, TG_ARGV[0], NEW.routing_generation)
     ON CONFLICT (id) DO UPDATE SET generation = EXCLUDED.generation
@@ -28,18 +20,6 @@ BEGIN
   GET DIAGNOSTICS affected = ROW_COUNT;
   IF affected <> 1 THEN
     RAISE EXCEPTION 'Catalog ID already belongs to another owner or routing generation'
-      USING ERRCODE = '23505', CONSTRAINT = 'catalog_identity_owner_conflict';
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-CREATE OR REPLACE FUNCTION public.catalog_guard_legacy_identity()
-RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
-BEGIN
-  PERFORM pg_advisory_xact_lock(hashtextextended('catalog-identity:' || NEW.id::text, 0));
-  IF EXISTS(SELECT 1 FROM public.catalog_unit_locator WHERE id = NEW.id) THEN
-    RAISE EXCEPTION 'Legacy insert conflicts with a native catalog identity'
       USING ERRCODE = '23505', CONSTRAINT = 'catalog_identity_owner_conflict';
   END IF;
   RETURN NEW;
@@ -119,10 +99,6 @@ CREATE TRIGGER grouping_class_definition_guard
 BEFORE INSERT OR UPDATE ON public.grouping_class_assignment
 FOR EACH ROW EXECUTE FUNCTION public.catalog_require_definition_kind('class_revision_id', 'class');
 
-DROP TRIGGER IF EXISTS catalog_legacy_identity_guard ON public.unit;
-CREATE TRIGGER catalog_legacy_identity_guard
-BEFORE INSERT ON public.unit
-FOR EACH ROW EXECUTE FUNCTION public.catalog_guard_legacy_identity();
 
 DROP TRIGGER IF EXISTS publishing_identity_route_publish ON public.publishing_identity;
 CREATE TRIGGER publishing_identity_route_publish

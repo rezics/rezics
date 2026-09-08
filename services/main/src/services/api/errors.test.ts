@@ -8,7 +8,7 @@ import { SearchUnavailable } from "../search/errors";
 import { UnitPermissionForbidden } from "../units/errors";
 import { ContentLabelApplicationInvalid } from "../database/errors";
 import { DockRevisionConflict } from "./docks/errors";
-import { UnitMergeMeasurementConflict } from "./governance/errors";
+import { UnitMergeMeasurementConflict, GovernanceDeliveryCapacityExceeded } from "./governance/errors";
 import { ApiQuotaPolicyInvalid } from "./quota-policies/errors";
 import { RealmRuleRevisionChanged } from "./realms/errors";
 import errorBoundary from "./error-boundary";
@@ -120,6 +120,7 @@ describe("API errors", () => {
 			}),
 			unprocessable: new ApiQuotaPolicyInvalid(),
 			busy: new VoteHotKeyBusy(new Error("private database diagnostic")),
+			deliveryBusy: new GovernanceDeliveryCapacityExceeded(),
 			internal: new Error("private unknown diagnostic"),
 			thirdParty: new ThirdPartyFailure(),
 		} as const;
@@ -141,6 +142,7 @@ describe("API errors", () => {
 			["conflict", StatusCodes.CONFLICT, "RealmRuleRevisionChanged"],
 			["unprocessable", StatusCodes.UNPROCESSABLE_ENTITY, "ApiQuotaPolicyInvalid"],
 			["busy", StatusCodes.TOO_MANY_REQUESTS, "VoteHotKeyBusy"],
+			["deliveryBusy", StatusCodes.SERVICE_UNAVAILABLE, "GovernanceDeliveryCapacityExceeded"],
 			["internal", StatusCodes.INTERNAL_SERVER_ERROR, "InternalError"],
 			["thirdParty", StatusCodes.INTERNAL_SERVER_ERROR, "InternalError"],
 		] as const;
@@ -158,6 +160,7 @@ describe("API errors", () => {
 			expect(body.error.code).toBe(expectedCode);
 			expect(JSON.stringify(body)).not.toContain("private");
 			if (path === "busy") expect(response.headers.get("Retry-After")).toBe("1");
+			else if (path === "deliveryBusy") expect(response.headers.get("Retry-After")).toBe("10");
 			else expect(response.headers.get("Retry-After")).toBeNull();
 		}
 	});
@@ -229,6 +232,9 @@ describe("API errors", () => {
 		expect(ApiErrorCodes.every(isApiErrorCode)).toBe(true);
 		expect(isApiErrorCode("NOT_REGISTERED")).toBe(false);
 		expect(isApiError({ type: "UnitChanged", status: StatusCodes.CONFLICT })).toBe(false);
+		expect(ApiErrorCodes).toContain("CatalogSourceRequestLimited");
+		expect(ApiErrorCodes).toContain("CatalogSourceUnavailable");
+		expect(ApiErrorCodes).toContain("CatalogRevisionConflict");
 	});
 
 	it("preserves payload fields that Effect previously populated through super", () => {

@@ -344,13 +344,13 @@ try {
 					await orderGroupingRelation(tx, universe, actor, universe.revision, entry)
 				).revision;
 			assert.deepEqual(
-				(await readGroupingOrder(tx, universe, null, releaseOrder.id)).map(
+				(await readGroupingOrder(tx, universe, null, releaseOrder.id)).items.map(
 					({ relationId }) => relationId,
 				),
 				[membership.id, commentaryRelation.id],
 			);
 			assert.deepEqual(
-				(await readGroupingOrder(tx, universe, null, chronology.id)).map(
+				(await readGroupingOrder(tx, universe, null, chronology.id)).items.map(
 					({ relationId }) => relationId,
 				),
 				[commentaryRelation.id, membership.id],

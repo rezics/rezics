@@ -10,16 +10,14 @@ DECLARE
 	member_count integer;
 	valid_relation_count integer;
 BEGIN
-	IF TG_OP <> 'INSERT' THEN
-		RAISE EXCEPTION 'Tag Path definitions are immutable'
-			USING ERRCODE = '23514', CONSTRAINT = 'tag_path_definition_immutable';
-	END IF;
-	IF NOT EXISTS (
-		SELECT 1 FROM public.unit WHERE id = NEW.id AND kind = 'tag_path'
-	) THEN
-		RAISE EXCEPTION 'Tag Path identity must reference a tag_path Unit'
-			USING ERRCODE = '23514', CONSTRAINT = 'tag_path_unit_kind';
-	END IF;
+ IF TG_OP='DELETE' THEN RAISE EXCEPTION 'Tag Path definitions are immutable' USING ERRCODE='23514'; END IF;
+ IF TG_OP='UPDATE' THEN
+  IF (NEW.id,NEW.member_node_ids,NEW.relation_ids,NEW.structural_identity_hash,NEW.terminal_node_id,NEW.created_by_profile_id,NEW.created_at)
+   IS DISTINCT FROM (OLD.id,OLD.member_node_ids,OLD.relation_ids,OLD.structural_identity_hash,OLD.terminal_node_id,OLD.created_by_profile_id,OLD.created_at) THEN
+   RAISE EXCEPTION 'Tag Path definitions are immutable' USING ERRCODE='23514';
+  END IF;
+  RETURN NEW;
+ END IF;
 	SELECT count(DISTINCT node.id)
 	INTO member_count
 	FROM unnest(NEW.member_node_ids) AS member(node_id)
@@ -249,7 +247,7 @@ DECLARE
 	) END;
 	accepted boolean;
 BEGIN
-	IF OLD.kind <> 'tag_path' OR old_public = new_public THEN
+	IF old_public = new_public THEN
 		RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NULL END;
 	END IF;
 	PERFORM public.lock_vote_hot_key('tag_path_vote:' || target_path_id::text, 0);
@@ -374,8 +372,8 @@ BEGIN
 			status, visibility, moderation_status, deleted_at
 		)
 		INTO path_public
-		FROM public.unit
-		WHERE id = key_id AND kind = 'tag_path';
+		FROM public.tag_path
+		WHERE id = key_id;
 		IF coalesce(path_public, false) THEN
 			PERFORM public.adjust_tag_public_position_stat(
 				key_id,
@@ -1087,14 +1085,14 @@ CREATE TRIGGER tag_public_position_stat_projection_guard
 BEFORE INSERT OR UPDATE OR DELETE ON public.tag_public_position_stat
 FOR EACH ROW EXECUTE FUNCTION public.guard_tag_public_position_stat_projection();
 
-DROP TRIGGER IF EXISTS tag_path_public_state_maintain ON public.unit;
+DROP TRIGGER IF EXISTS tag_path_public_state_maintain ON public.tag_path;
 CREATE TRIGGER tag_path_public_state_maintain
-AFTER UPDATE OF status, visibility, moderation_status, deleted_at ON public.unit
+AFTER UPDATE OF status, visibility, moderation_status, deleted_at ON public.tag_path
 FOR EACH ROW EXECUTE FUNCTION public.maintain_tag_path_public_state();
 
-DROP TRIGGER IF EXISTS tag_path_public_delete_maintain ON public.unit;
+DROP TRIGGER IF EXISTS tag_path_public_delete_maintain ON public.tag_path;
 CREATE TRIGGER tag_path_public_delete_maintain
-BEFORE DELETE ON public.unit
+BEFORE DELETE ON public.tag_path
 FOR EACH ROW EXECUTE FUNCTION public.maintain_tag_path_public_state();
 
 DROP TRIGGER IF EXISTS tag_expression_mutation_guard ON public.tag_expression;

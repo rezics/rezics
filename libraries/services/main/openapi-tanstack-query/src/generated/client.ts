@@ -11,8 +11,8 @@ import type {
 	AddCatalogIdentifierResponses,
 	AddCatalogNameOptions,
 	AddCatalogNameResponses,
-	CreateCatalogResourceOptions,
-	CreateCatalogResourceResponses,
+	AddMusicMediumOptions,
+	AddMusicMediumResponses,
 	DeleteApiApiQuotaPoliciesAccountsByUserIdOptions,
 	DeleteApiApiQuotaPoliciesAccountsByUserIdResponses,
 	DeleteApiApiTokensByTokenIdOptions,
@@ -59,10 +59,6 @@ import type {
 	GetApiNotificationsPreferencesResponses,
 	PutApiNotificationsPreferencesOptions,
 	PutApiNotificationsPreferencesResponses,
-	PostApiOwnershipClaimsOptions,
-	PostApiOwnershipClaimsResponses,
-	PostApiOwnershipClaimsByClaimIdWithdrawOptions,
-	PostApiOwnershipClaimsByClaimIdWithdrawResponses,
 	GetApiRecommendationsUnitsOptions,
 	GetApiRecommendationsUnitsResponses,
 	GetApiRecommendationsPostsByPostIdOptions,
@@ -163,28 +159,30 @@ import type {
 	PostApiGovernancePlatformUnitsByUnitIdDeleteResponses,
 	PostApiGovernancePlatformUnitsByUnitIdRestoreOptions,
 	PostApiGovernancePlatformUnitsByUnitIdRestoreResponses,
-	GetApiGovernancePlatformUnitMergesOptions,
-	GetApiGovernancePlatformUnitMergesResponses,
-	PostApiGovernancePlatformUnitMergesOptions,
-	PostApiGovernancePlatformUnitMergesResponses,
-	GetApiGovernancePlatformUnitMergesByRequestIdOptions,
-	GetApiGovernancePlatformUnitMergesByRequestIdResponses,
-	PostApiGovernancePlatformUnitMergesPreflightOptions,
-	PostApiGovernancePlatformUnitMergesPreflightResponses,
-	PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions,
-	PostApiGovernancePlatformUnitMergesByRequestIdReviewsResponses,
-	PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions,
-	PostApiGovernancePlatformUnitMergesByRequestIdRetryResponses,
-	GetApiGovernancePlatformOwnershipClaimsOptions,
-	GetApiGovernancePlatformOwnershipClaimsResponses,
-	PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionOptions,
-	PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionResponses,
+	ListNativeMergeRequestsOptions,
+	ListNativeMergeRequestsResponses,
+	ProposeNativeMergeOptions,
+	ProposeNativeMergeResponses,
+	ReadNativeMergeRequestOptions,
+	ReadNativeMergeRequestResponses,
+	PreflightNativeMergeOptions,
+	PreflightNativeMergeResponses,
+	ReviewNativeMergeOptions,
+	ReviewNativeMergeResponses,
+	RetryNativeMergeOptions,
+	RetryNativeMergeResponses,
+	ListNativeMergeReconciliationOptions,
+	ListNativeMergeReconciliationResponses,
+	ResolveNativeMergeReconciliationOptions,
+	ResolveNativeMergeReconciliationResponses,
 	GetApiGovernanceRuleSourcesOptions,
 	GetApiGovernanceRuleSourcesResponses,
 	GetApiGovernanceNotesByPostIdOptions,
 	GetApiGovernanceNotesByPostIdResponses,
 	PatchApiGovernanceNotesByPostIdOptions,
 	PatchApiGovernanceNotesByPostIdResponses,
+	ListContentReviewCaseNotesOptions,
+	ListContentReviewCaseNotesResponses,
 	GetApiGovernanceContentReviewCasesOptions,
 	GetApiGovernanceContentReviewCasesResponses,
 	GetApiGovernanceContentReviewCasesByCaseIdOptions,
@@ -199,10 +197,6 @@ import type {
 	PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeResponses,
 	GetApiAuditEventsOptions,
 	GetApiAuditEventsResponses,
-	PostApiSeriesOptions,
-	PostApiSeriesResponses,
-	GetApiSeriesBySeriesIdReleasesOptions,
-	GetApiSeriesBySeriesIdReleasesResponses,
 	ReplaceZoneSlugAddressOptions,
 	ReplaceZoneSlugAddressResponses,
 	GetApiZonesByZoneIdOptions,
@@ -237,20 +231,238 @@ import type {
 	PutApiZonesByZoneIdNavigationByNavigationIdResponses,
 	DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
 	DeleteApiZonesByZoneIdNavigationByNavigationIdResponses,
-	PutApiSeriesBySeriesIdReleasesByReleaseIdOptions,
-	PutApiSeriesBySeriesIdReleasesByReleaseIdResponses,
-	DeleteApiSeriesBySeriesIdReleasesByReleaseIdOptions,
-	DeleteApiSeriesBySeriesIdReleasesByReleaseIdResponses,
 	PostApiZonesOptions,
 	PostApiZonesResponses,
-	GetApiSoftwareBySoftwareIdSystemRequirementsOptions,
-	GetApiSoftwareBySoftwareIdSystemRequirementsResponses,
-	PostApiSoftwareBySoftwareIdSystemRequirementsOptions,
-	PostApiSoftwareBySoftwareIdSystemRequirementsResponses,
-	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
-	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
-	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
-	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
+	ListMergedCatalogSourcesOptions,
+	ListMergedCatalogSourcesResponses,
+	ReadMusicDetailOptions,
+	ReadMusicDetailResponses,
+	PatchMusicMetadataOptions,
+	PatchMusicMetadataResponses,
+	ListMusicMediaOptions,
+	ListMusicMediaResponses,
+	PatchMusicMediumOptions,
+	PatchMusicMediumResponses,
+	RemoveMusicMediumOptions,
+	RemoveMusicMediumResponses,
+	ListMusicTracksOptions,
+	ListMusicTracksResponses,
+	AddMusicTrackOptions,
+	AddMusicTrackResponses,
+	PatchMusicTrackOptions,
+	PatchMusicTrackResponses,
+	RemoveMusicTrackOptions,
+	RemoveMusicTrackResponses,
+	ReadMusicStructureOptions,
+	ReadMusicStructureResponses,
+	MutateMusicStructureOptions,
+	MutateMusicStructureResponses,
+	ListMusicHistoryOptions,
+	ListMusicHistoryResponses,
+	RestoreMusicComponentOptions,
+	RestoreMusicComponentResponses,
+	AttachMusicDiscTocOptions,
+	AttachMusicDiscTocResponses,
+	ListMusicDiscTocsOptions,
+	ListMusicDiscTocsResponses,
+	ReadMusicDiscTocOptions,
+	ReadMusicDiscTocResponses,
+	ReadSoftwareDetailsOptions,
+	ReadSoftwareDetailsResponses,
+	ReviseSoftwareDetailsOptions,
+	ReviseSoftwareDetailsResponses,
+	ListSoftwareDetailsHistoryOptions,
+	ListSoftwareDetailsHistoryResponses,
+	RestoreSoftwareDetailsOptions,
+	RestoreSoftwareDetailsResponses,
+	FindSoftwareReleasesOptions,
+	FindSoftwareReleasesResponses,
+	ListSoftwareComponentsOptions,
+	ListSoftwareComponentsResponses,
+	PutSoftwareComponentOptions,
+	PutSoftwareComponentResponses,
+	WithdrawSoftwareComponentOptions,
+	WithdrawSoftwareComponentResponses,
+	ListSoftwareComponentHistoryOptions,
+	ListSoftwareComponentHistoryResponses,
+	RestoreSoftwareComponentOptions,
+	RestoreSoftwareComponentResponses,
+	ListSoftwareParticipationContextsOptions,
+	ListSoftwareParticipationContextsResponses,
+	CreateSoftwareParticipationContextOptions,
+	CreateSoftwareParticipationContextResponses,
+	ReadSoftwareParticipationContextOptions,
+	ReadSoftwareParticipationContextResponses,
+	ReviseSoftwareParticipationContextOptions,
+	ReviseSoftwareParticipationContextResponses,
+	ListSoftwareParticipationContextHistoryOptions,
+	ListSoftwareParticipationContextHistoryResponses,
+	RestoreSoftwareParticipationContextOptions,
+	RestoreSoftwareParticipationContextResponses,
+	ListSoftwareCreditsOptions,
+	ListSoftwareCreditsResponses,
+	CreateSoftwareCreditOptions,
+	CreateSoftwareCreditResponses,
+	ReviseSoftwareCreditOptions,
+	ReviseSoftwareCreditResponses,
+	ListSoftwareCreditHistoryOptions,
+	ListSoftwareCreditHistoryResponses,
+	RestoreSoftwareCreditOptions,
+	RestoreSoftwareCreditResponses,
+	ReadProgramDetailsOptions,
+	ReadProgramDetailsResponses,
+	ReviseProgramDetailsOptions,
+	ReviseProgramDetailsResponses,
+	ListProgramOccurrencesOptions,
+	ListProgramOccurrencesResponses,
+	PutProgramOccurrenceOptions,
+	PutProgramOccurrenceResponses,
+	RemoveProgramOccurrenceOptions,
+	RemoveProgramOccurrenceResponses,
+	ListProgramComponentHistoryOptions,
+	ListProgramComponentHistoryResponses,
+	RestoreProgramComponentOptions,
+	RestoreProgramComponentResponses,
+	ReadPublishingDetailsOptions,
+	ReadPublishingDetailsResponses,
+	RevisePublishingDetailsOptions,
+	RevisePublishingDetailsResponses,
+	ListPublishingComponentsOptions,
+	ListPublishingComponentsResponses,
+	PutPublishingComponentOptions,
+	PutPublishingComponentResponses,
+	RemovePublishingComponentOptions,
+	RemovePublishingComponentResponses,
+	ListPublishingComponentHistoryOptions,
+	ListPublishingComponentHistoryResponses,
+	RestorePublishingComponentOptions,
+	RestorePublishingComponentResponses,
+	ListPublishingConnectionsOptions,
+	ListPublishingConnectionsResponses,
+	ReadCatalogContentLanguageSupportOptions,
+	ReadCatalogContentLanguageSupportResponses,
+	ReplaceCatalogContentLanguageSupportOptions,
+	ReplaceCatalogContentLanguageSupportResponses,
+	ListCatalogContentLanguageEvidenceOptions,
+	ListCatalogContentLanguageEvidenceResponses,
+	ListCatalogContentLanguageHistoryOptions,
+	ListCatalogContentLanguageHistoryResponses,
+	ReadCatalogContentLanguageHistoryOptions,
+	ReadCatalogContentLanguageHistoryResponses,
+	RestoreCatalogContentLanguageSupportOptions,
+	RestoreCatalogContentLanguageSupportResponses,
+	ListCatalogFactsOptions,
+	ListCatalogFactsResponses,
+	WriteCatalogFactOptions,
+	WriteCatalogFactResponses,
+	ListCatalogFactNodesOptions,
+	ListCatalogFactNodesResponses,
+	ListCatalogRelationsOptions,
+	ListCatalogRelationsResponses,
+	WriteCatalogRelationOptions,
+	WriteCatalogRelationResponses,
+	ListCatalogRelationParticipantsOptions,
+	ListCatalogRelationParticipantsResponses,
+	ListCatalogRelationQualifiersOptions,
+	ListCatalogRelationQualifiersResponses,
+	ListCatalogSemanticHistoryOptions,
+	ListCatalogSemanticHistoryResponses,
+	TransitionCatalogSemanticStateOptions,
+	TransitionCatalogSemanticStateResponses,
+	RestoreCatalogSemanticRevisionOptions,
+	RestoreCatalogSemanticRevisionResponses,
+	IntakeCatalogSourceOptions,
+	IntakeCatalogSourceResponses,
+	GetCatalogSourceJobOptions,
+	GetCatalogSourceJobResponses,
+	ControlCatalogSourceJobOptions,
+	ControlCatalogSourceJobResponses,
+	ListCatalogSourceProposalsOptions,
+	ListCatalogSourceProposalsResponses,
+	ProposeCatalogSourceAdoptionOptions,
+	ProposeCatalogSourceAdoptionResponses,
+	ReviseCatalogSourceBindingOptions,
+	ReviseCatalogSourceBindingResponses,
+	GetCatalogSourceProposalPreviewOptions,
+	GetCatalogSourceProposalPreviewResponses,
+	GetCatalogSourceProposalPreviewValueOptions,
+	GetCatalogSourceProposalPreviewValueResponses,
+	DecideCatalogSourceProposalOptions,
+	DecideCatalogSourceProposalResponses,
+	GetCatalogDefinitionPermissionsOptions,
+	GetCatalogDefinitionPermissionsResponses,
+	ListCatalogDefinitionRevisionLabelsOptions,
+	ListCatalogDefinitionRevisionLabelsResponses,
+	ListCatalogDefinitionsOptions,
+	ListCatalogDefinitionsResponses,
+	CreateCatalogDefinitionOptions,
+	CreateCatalogDefinitionResponses,
+	GetCatalogDefinitionRevisionOptions,
+	GetCatalogDefinitionRevisionResponses,
+	GetCatalogDefinitionOptions,
+	GetCatalogDefinitionResponses,
+	ListCatalogDefinitionRevisionsOptions,
+	ListCatalogDefinitionRevisionsResponses,
+	ReviseCatalogDefinitionOptions,
+	ReviseCatalogDefinitionResponses,
+	ReadEntityMeasurementContextOptions,
+	ReadEntityMeasurementContextResponses,
+	WriteEntityMeasurementContextOptions,
+	WriteEntityMeasurementContextResponses,
+	ListGroupingClassesOptions,
+	ListGroupingClassesResponses,
+	AssignGroupingClassOptions,
+	AssignGroupingClassResponses,
+	RemoveGroupingClassOptions,
+	RemoveGroupingClassResponses,
+	ListGroupingOrderProfilesOptions,
+	ListGroupingOrderProfilesResponses,
+	CreateGroupingOrderProfileOptions,
+	CreateGroupingOrderProfileResponses,
+	RenameGroupingOrderProfileOptions,
+	RenameGroupingOrderProfileResponses,
+	ListGroupingOrderEntriesOptions,
+	ListGroupingOrderEntriesResponses,
+	PutGroupingOrderEntryOptions,
+	PutGroupingOrderEntryResponses,
+	RemoveGroupingOrderEntryOptions,
+	RemoveGroupingOrderEntryResponses,
+	ListGroupingHistoryOptions,
+	ListGroupingHistoryResponses,
+	RestoreGroupingCommandOptions,
+	RestoreGroupingCommandResponses,
+	ReadCatalogEntityProfileOptions,
+	ReadCatalogEntityProfileResponses,
+	WriteCatalogEntityProfileOptions,
+	WriteCatalogEntityProfileResponses,
+	RemoveCatalogEntityProfileOptions,
+	RemoveCatalogEntityProfileResponses,
+	ResolveCatalogEntityShapeOptions,
+	ResolveCatalogEntityShapeResponses,
+	ListCatalogEntityProfileHistoryOptions,
+	ListCatalogEntityProfileHistoryResponses,
+	RestoreCatalogEntityProfileOptions,
+	RestoreCatalogEntityProfileResponses,
+	ListCatalogEditorialLanguagesOptions,
+	ListCatalogEditorialLanguagesResponses,
+	ReadCatalogEditorialOptions,
+	ReadCatalogEditorialResponses,
+	WriteCatalogEditorialOptions,
+	WriteCatalogEditorialResponses,
+	WithdrawCatalogEditorialOptions,
+	WithdrawCatalogEditorialResponses,
+	ListCatalogEditorialHistoryOptions,
+	ListCatalogEditorialHistoryResponses,
+	ReadCatalogEditorialRevisionOptions,
+	ReadCatalogEditorialRevisionResponses,
+	RestoreCatalogEditorialOptions,
+	RestoreCatalogEditorialResponses,
+	ListCatalogEntityCandidatesOptions,
+	ListCatalogEntityCandidatesResponses,
+	ListCatalogResourceSourceBindingsOptions,
+	ListCatalogResourceSourceBindingsResponses,
+	CreateCatalogResourceOptions,
+	CreateCatalogResourceResponses,
 	ReadCatalogResourceOptions,
 	ReadCatalogResourceResponses,
 	UpdateCatalogLifecycleOptions,
@@ -463,16 +675,16 @@ import type {
 	GetApiTagPathsMergesPendingResponses,
 	PutApiTagPathsMergesByMergeIdResolutionOptions,
 	PutApiTagPathsMergesByMergeIdResolutionResponses,
-	GetApiUnitsByTypeByUnitIdTagsOptions,
-	GetApiUnitsByTypeByUnitIdTagsResponses,
-	PostApiUnitsByTypeByUnitIdTagPathApplicationsOptions,
-	PostApiUnitsByTypeByUnitIdTagPathApplicationsResponses,
-	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdOptions,
-	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdResponses,
-	PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
-	PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
-	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
-	DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
+	GetApiResourcesByOwnerByUnitIdTagsOptions,
+	GetApiResourcesByOwnerByUnitIdTagsResponses,
+	PostApiResourcesByOwnerByUnitIdTagPathApplicationsOptions,
+	PostApiResourcesByOwnerByUnitIdTagPathApplicationsResponses,
+	DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdOptions,
+	DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdResponses,
+	PutApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+	PutApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
+	DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+	DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
 	GetApiRealmsByRealmIdTagPathsOptions,
 	GetApiRealmsByRealmIdTagPathsResponses,
 	PutApiRealmsByRealmIdTagPathsByPathIdOptions,
@@ -505,14 +717,16 @@ import type {
 	GetPublicUnitSlugAddressResponses,
 	ResolveScopedUnitSlugAddressOptions,
 	ResolveScopedUnitSlugAddressResponses,
+	ResolveNamespaceSlugAddressOptions,
+	ResolveNamespaceSlugAddressResponses,
 	GetUnitSlugAddressWithPlatformAccessOptions,
 	GetUnitSlugAddressWithPlatformAccessResponses,
 	ReplaceUnitSlugAddressWithPlatformAccessOptions,
 	ReplaceUnitSlugAddressWithPlatformAccessResponses,
-	CreateSlugNamespaceWithPlatformAccessOptions,
-	CreateSlugNamespaceWithPlatformAccessResponses,
 	ReleaseSlugRedirectWithPlatformAccessOptions,
 	ReleaseSlugRedirectWithPlatformAccessResponses,
+	GetUnitReferenceOptions,
+	GetUnitReferenceResponses,
 	GetPublicUnitSeoProjectionOptions,
 	GetPublicUnitSeoProjectionResponses,
 	PostApiUnitsPresentationsOptions,
@@ -525,8 +739,6 @@ import type {
 	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawResponses,
 	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishOptions,
 	PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishResponses,
-	GetApiUnitsByIdByUnitIdSeriesMembershipsOptions,
-	GetApiUnitsByIdByUnitIdSeriesMembershipsResponses,
 	GetApiUnitsByIdByUnitIdStatusEventsOptions,
 	GetApiUnitsByIdByUnitIdStatusEventsResponses,
 	GetApiUnitsByIdByUnitIdLocalizationOrderOptions,
@@ -539,24 +751,16 @@ import type {
 	GetApiUnitsByTypeResponses,
 	PostApiUnitsByTypeOptions,
 	PostApiUnitsByTypeResponses,
-	PostApiUnitsBookByBookIdChapterDraftJobsOptions,
-	PostApiUnitsBookByBookIdChapterDraftJobsResponses,
 	GetApiUnitsByTypeByUnitIdContentLanguageSupportEvidenceOptions,
 	GetApiUnitsByTypeByUnitIdContentLanguageSupportEvidenceResponses,
 	GetApiUnitsByTypeByUnitIdOptions,
 	GetApiUnitsByTypeByUnitIdResponses,
 	PatchApiUnitsByTypeByUnitIdOptions,
 	PatchApiUnitsByTypeByUnitIdResponses,
-	PatchApiUnitsByTypeByUnitIdVariantContextOptions,
-	PatchApiUnitsByTypeByUnitIdVariantContextResponses,
-	PostApiUnitsByTypeByUnitIdVariantContextPromoteOptions,
-	PostApiUnitsByTypeByUnitIdVariantContextPromoteResponses,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageOptions,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponses,
-	GetApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
-	GetApiUnitsByTypeByUnitIdSubjectAssociationsResponses,
-	PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
-	PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses,
+	GetApiUnitsByIdByUnitIdSubjectAssociationsOptions,
+	GetApiUnitsByIdByUnitIdSubjectAssociationsResponses,
 	ListCurrentUserContributionResourcesOptions,
 	ListCurrentUserContributionResourcesResponses,
 	GetApiHistoryUnitsByUnitIdRevisionsOptions,
@@ -577,20 +781,6 @@ import type {
 	GetApiHistoryContributionsByProfileIdResponses,
 	GetApiHistoryChangeTagsOptions,
 	GetApiHistoryChangeTagsResponses,
-	GetApiEntitiesOptions,
-	GetApiEntitiesResponses,
-	PostApiEntitiesOptions,
-	PostApiEntitiesResponses,
-	GetApiEntitiesByUnitIdOptions,
-	GetApiEntitiesByUnitIdResponses,
-	PutApiEntitiesByUnitIdMeasurementsOptions,
-	PutApiEntitiesByUnitIdMeasurementsResponses,
-	PatchApiEntitiesByUnitIdVariantContextOptions,
-	PatchApiEntitiesByUnitIdVariantContextResponses,
-	PostApiEntitiesByUnitIdVariantContextPromoteOptions,
-	PostApiEntitiesByUnitIdVariantContextPromoteResponses,
-	PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
-	PutApiEntitiesByUnitIdLocalizationsByLanguageResponses,
 	GetApiTagsOptions,
 	GetApiTagsResponses,
 	PostApiTagsOptions,
@@ -599,50 +789,54 @@ import type {
 	GetApiTagsByTagIdResponses,
 	PutApiTagsByTagIdLocalizationsByLanguageOptions,
 	PutApiTagsByTagIdLocalizationsByLanguageResponses,
-	GetApiUnitsByTypeByUnitIdAliasesOptions,
-	GetApiUnitsByTypeByUnitIdAliasesResponses,
-	PostApiUnitsByTypeByUnitIdAliasesOptions,
-	PostApiUnitsByTypeByUnitIdAliasesResponses,
-	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
-	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses,
-	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
-	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses,
-	PatchApiUnitsByTypeByUnitIdAliasesByAliasIdOptions,
-	PatchApiUnitsByTypeByUnitIdAliasesByAliasIdResponses,
-	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions,
-	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses,
-	PostApiUnitsByTypeByUnitIdCreditAttributionsOptions,
-	PostApiUnitsByTypeByUnitIdCreditAttributionsResponses,
-	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
-	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdResponses,
-	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
-	PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
-	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
-	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
-	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
-	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdResponses,
-	GetApiUnitsByTypeByUnitIdExternalLinksOptions,
-	GetApiUnitsByTypeByUnitIdExternalLinksResponses,
-	PostApiUnitsByTypeByUnitIdExternalLinksOptions,
-	PostApiUnitsByTypeByUnitIdExternalLinksResponses,
-	PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
-	PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses,
-	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
-	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses,
-	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions,
-	PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses,
-	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions,
-	DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses,
-	PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
-	PutApiUnitsByTypeByUnitIdTagsByTagIdResponses,
-	PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions,
-	PatchApiUnitsByTypeByUnitIdTagsByTagIdResponses,
-	DeleteApiUnitsByTypeByUnitIdTagsByTagIdOptions,
-	DeleteApiUnitsByTypeByUnitIdTagsByTagIdResponses,
-	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
-	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses,
-	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
-	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses,
+	GetApiResourcesByOwnerByUnitIdAliasesOptions,
+	GetApiResourcesByOwnerByUnitIdAliasesResponses,
+	PostApiResourcesByOwnerByUnitIdAliasesOptions,
+	PostApiResourcesByOwnerByUnitIdAliasesResponses,
+	PutApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteOptions,
+	PutApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteResponses,
+	DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteOptions,
+	DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteResponses,
+	PatchApiResourcesByOwnerByUnitIdAliasesByAliasIdOptions,
+	PatchApiResourcesByOwnerByUnitIdAliasesByAliasIdResponses,
+	DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdOptions,
+	DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdResponses,
+	ListResourceCreditAttributionsOptions,
+	ListResourceCreditAttributionsResponses,
+	PostApiResourcesByOwnerByUnitIdCreditAttributionsOptions,
+	PostApiResourcesByOwnerByUnitIdCreditAttributionsResponses,
+	DeleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociationIdOptions,
+	DeleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociationIdResponses,
+	PostApiResourcesByOwnerByUnitIdSubjectAssociationsOptions,
+	PostApiResourcesByOwnerByUnitIdSubjectAssociationsResponses,
+	PutApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+	PutApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
+	DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+	DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
+	DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdOptions,
+	DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdResponses,
+	GetApiResourcesByOwnerByUnitIdExternalLinksOptions,
+	GetApiResourcesByOwnerByUnitIdExternalLinksResponses,
+	PostApiResourcesByOwnerByUnitIdExternalLinksOptions,
+	PostApiResourcesByOwnerByUnitIdExternalLinksResponses,
+	PutApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+	PutApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteResponses,
+	DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+	DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteResponses,
+	PatchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdOptions,
+	PatchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdResponses,
+	DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdOptions,
+	DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdResponses,
+	PutApiResourcesByOwnerByUnitIdTagsByTagIdOptions,
+	PutApiResourcesByOwnerByUnitIdTagsByTagIdResponses,
+	PatchApiResourcesByOwnerByUnitIdTagsByTagIdOptions,
+	PatchApiResourcesByOwnerByUnitIdTagsByTagIdResponses,
+	DeleteApiResourcesByOwnerByUnitIdTagsByTagIdOptions,
+	DeleteApiResourcesByOwnerByUnitIdTagsByTagIdResponses,
+	PutApiResourcesByOwnerByUnitIdTagsByTagIdVoteOptions,
+	PutApiResourcesByOwnerByUnitIdTagsByTagIdVoteResponses,
+	DeleteApiResourcesByOwnerByUnitIdTagsByTagIdVoteOptions,
+	DeleteApiResourcesByOwnerByUnitIdTagsByTagIdVoteResponses,
 	GetApiUnitsByIdByUnitIdContentStructuresOptions,
 	GetApiUnitsByIdByUnitIdContentStructuresResponses,
 	PostApiUnitsByIdByUnitIdContentStructuresOptions,
@@ -663,16 +857,16 @@ import type {
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
-	GetApiUnitsBookByUnitIdContentStructureNodesOptions,
-	GetApiUnitsBookByUnitIdContentStructureNodesResponses,
-	PutApiUnitsBookByUnitIdContentStructureOptions,
-	PutApiUnitsBookByUnitIdContentStructureResponses,
-	GetApiUnitsMediaByUnitIdContentStructureNodesOptions,
-	GetApiUnitsMediaByUnitIdContentStructureNodesResponses,
-	PutApiUnitsMediaByUnitIdContentStructureOptions,
-	PutApiUnitsMediaByUnitIdContentStructureResponses,
-	GetApiBooksByBookIdContentNodesByNodeIdOptions,
-	GetApiBooksByBookIdContentNodesByNodeIdResponses,
+	ListTextVersionContentNodesOptions,
+	ListTextVersionContentNodesResponses,
+	SaveTextVersionContentDraftOptions,
+	SaveTextVersionContentDraftResponses,
+	ListProgramContentNodesOptions,
+	ListProgramContentNodesResponses,
+	SaveProgramContentDraftOptions,
+	SaveProgramContentDraftResponses,
+	ReadTextVersionChapterNodeOptions,
+	ReadTextVersionChapterNodeResponses,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentOptions,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses,
 	GetApiProgressOptions,
@@ -1292,40 +1486,6 @@ export function putApiNotificationsPreferences<ThrowOnError extends boolean = tr
 		],
 		...config,
 	}) as Promise<RequestResult<PutApiNotificationsPreferencesResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Claim ownership of a community-owned Unit
- * {@link /api/v1/ownership-claims}
- */
-export function postApiOwnershipClaims<ThrowOnError extends boolean = true>(
-	options: Options<PostApiOwnershipClaimsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiOwnershipClaimsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/ownership-claims",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiOwnershipClaimsResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Withdraw a pending Unit ownership claim
- * {@link /api/v1/ownership-claims/:claimId/withdraw}
- */
-export function postApiOwnershipClaimsByClaimIdWithdraw<ThrowOnError extends boolean = true>(
-	options: Options<PostApiOwnershipClaimsByClaimIdWithdrawOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiOwnershipClaimsByClaimIdWithdrawResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/ownership-claims/{claimId}/withdraw",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiOwnershipClaimsByClaimIdWithdrawResponses, ThrowOnError>>;
 }
 
 /**
@@ -2374,12 +2534,12 @@ export function postApiGovernancePlatformUnitsByUnitIdRestore<ThrowOnError exten
 }
 
 /**
- * @summary List Unit merge governance requests
+ * @summary List native identity merge requests
  * {@link /api/v1/governance/platform/unit-merges}
  */
-export function getApiGovernancePlatformUnitMerges<ThrowOnError extends boolean = true>(
-	options: Options<GetApiGovernancePlatformUnitMergesOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiGovernancePlatformUnitMergesResponses, ThrowOnError>> {
+export function listNativeMergeRequests<ThrowOnError extends boolean = true>(
+	options: Options<ListNativeMergeRequestsOptions, ThrowOnError> = {},
+): Promise<RequestResult<ListNativeMergeRequestsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
@@ -2387,16 +2547,16 @@ export function getApiGovernancePlatformUnitMerges<ThrowOnError extends boolean 
 		url: "/api/v1/governance/platform/unit-merges",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<GetApiGovernancePlatformUnitMergesResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<ListNativeMergeRequestsResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Propose a reviewed Unit identity merge
+ * @summary Propose a native merge for two independent reviews
  * {@link /api/v1/governance/platform/unit-merges}
  */
-export function postApiGovernancePlatformUnitMerges<ThrowOnError extends boolean = true>(
-	options: Options<PostApiGovernancePlatformUnitMergesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernancePlatformUnitMergesResponses, ThrowOnError>> {
+export function proposeNativeMerge<ThrowOnError extends boolean = true>(
+	options: Options<ProposeNativeMergeOptions, ThrowOnError>,
+): Promise<RequestResult<ProposeNativeMergeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
@@ -2404,16 +2564,16 @@ export function postApiGovernancePlatformUnitMerges<ThrowOnError extends boolean
 		url: "/api/v1/governance/platform/unit-merges",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<PostApiGovernancePlatformUnitMergesResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<ProposeNativeMergeResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Get a Unit merge governance request
+ * @summary Read a native identity merge request
  * {@link /api/v1/governance/platform/unit-merges/:requestId}
  */
-export function getApiGovernancePlatformUnitMergesByRequestId<ThrowOnError extends boolean = true>(
-	options: Options<GetApiGovernancePlatformUnitMergesByRequestIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernancePlatformUnitMergesByRequestIdResponses, ThrowOnError>> {
+export function readNativeMergeRequest<ThrowOnError extends boolean = true>(
+	options: Options<ReadNativeMergeRequestOptions, ThrowOnError>,
+): Promise<RequestResult<ReadNativeMergeRequestResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
@@ -2421,18 +2581,16 @@ export function getApiGovernancePlatformUnitMergesByRequestId<ThrowOnError exten
 		url: "/api/v1/governance/platform/unit-merges/{requestId}",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<
-		RequestResult<GetApiGovernancePlatformUnitMergesByRequestIdResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<ReadNativeMergeRequestResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Preflight a Unit identity merge
+ * @summary Inspect native merge compatibility and reconciliation policy
  * {@link /api/v1/governance/platform/unit-merges/preflight}
  */
-export function postApiGovernancePlatformUnitMergesPreflight<ThrowOnError extends boolean = true>(
-	options: Options<PostApiGovernancePlatformUnitMergesPreflightOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernancePlatformUnitMergesPreflightResponses, ThrowOnError>> {
+export function preflightNativeMerge<ThrowOnError extends boolean = true>(
+	options: Options<PreflightNativeMergeOptions, ThrowOnError>,
+): Promise<RequestResult<PreflightNativeMergeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
@@ -2440,20 +2598,16 @@ export function postApiGovernancePlatformUnitMergesPreflight<ThrowOnError extend
 		url: "/api/v1/governance/platform/unit-merges/preflight",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<PostApiGovernancePlatformUnitMergesPreflightResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PreflightNativeMergeResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Approve or reject a Unit merge request
+ * @summary Review a pinned native merge and data plan
  * {@link /api/v1/governance/platform/unit-merges/:requestId/reviews}
  */
-export function postApiGovernancePlatformUnitMergesByRequestIdReviews<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<PostApiGovernancePlatformUnitMergesByRequestIdReviewsOptions, ThrowOnError>,
-): Promise<
-	RequestResult<PostApiGovernancePlatformUnitMergesByRequestIdReviewsResponses, ThrowOnError>
-> {
+export function reviewNativeMerge<ThrowOnError extends boolean = true>(
+	options: Options<ReviewNativeMergeOptions, ThrowOnError>,
+): Promise<RequestResult<ReviewNativeMergeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
@@ -2461,22 +2615,16 @@ export function postApiGovernancePlatformUnitMergesByRequestIdReviews<
 		url: "/api/v1/governance/platform/unit-merges/{requestId}/reviews",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<
-		RequestResult<PostApiGovernancePlatformUnitMergesByRequestIdReviewsResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<ReviewNativeMergeResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Retry a failed Unit merge operation
+ * @summary Retry native merge work under current authority
  * {@link /api/v1/governance/platform/unit-merges/:requestId/retry}
  */
-export function postApiGovernancePlatformUnitMergesByRequestIdRetry<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<PostApiGovernancePlatformUnitMergesByRequestIdRetryOptions, ThrowOnError>,
-): Promise<
-	RequestResult<PostApiGovernancePlatformUnitMergesByRequestIdRetryResponses, ThrowOnError>
-> {
+export function retryNativeMerge<ThrowOnError extends boolean = true>(
+	options: Options<RetryNativeMergeOptions, ThrowOnError>,
+): Promise<RequestResult<RetryNativeMergeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
@@ -2484,49 +2632,41 @@ export function postApiGovernancePlatformUnitMergesByRequestIdRetry<
 		url: "/api/v1/governance/platform/unit-merges/{requestId}/retry",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<
-		RequestResult<PostApiGovernancePlatformUnitMergesByRequestIdRetryResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<RetryNativeMergeResponses, ThrowOnError>>;
 }
 
 /**
- * @summary List platform Unit ownership claims
- * {@link /api/v1/governance/platform/ownership-claims}
+ * @summary Inspect copied and retained native merge evidence
+ * {@link /api/v1/governance/platform/unit-merges/:requestId/items}
  */
-export function getApiGovernancePlatformOwnershipClaims<ThrowOnError extends boolean = true>(
-	options: Options<GetApiGovernancePlatformOwnershipClaimsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiGovernancePlatformOwnershipClaimsResponses, ThrowOnError>> {
+export function listNativeMergeReconciliation<ThrowOnError extends boolean = true>(
+	options: Options<ListNativeMergeReconciliationOptions, ThrowOnError>,
+): Promise<RequestResult<ListNativeMergeReconciliationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/governance/platform/ownership-claims",
+		url: "/api/v1/governance/platform/unit-merges/{requestId}/items",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<RequestResult<GetApiGovernancePlatformOwnershipClaimsResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<ListNativeMergeReconciliationResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Resolve a Unit ownership claim
- * {@link /api/v1/governance/platform/ownership-claims/:claimId/decision}
+ * @summary Resolve one native reconciliation decision
+ * {@link /api/v1/governance/platform/unit-merges/:requestId/items/:itemId/resolve}
  */
-export function postApiGovernancePlatformOwnershipClaimsByClaimIdDecision<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionOptions, ThrowOnError>,
-): Promise<
-	RequestResult<PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionResponses, ThrowOnError>
-> {
+export function resolveNativeMergeReconciliation<ThrowOnError extends boolean = true>(
+	options: Options<ResolveNativeMergeReconciliationOptions, ThrowOnError>,
+): Promise<RequestResult<ResolveNativeMergeReconciliationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/governance/platform/ownership-claims/{claimId}/decision",
+		url: "/api/v1/governance/platform/unit-merges/{requestId}/items/{itemId}/resolve",
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
-	}) as Promise<
-		RequestResult<PostApiGovernancePlatformOwnershipClaimsByClaimIdDecisionResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<ResolveNativeMergeReconciliationResponses, ThrowOnError>>;
 }
 
 /**
@@ -2581,6 +2721,23 @@ export function patchApiGovernanceNotesByPostId<ThrowOnError extends boolean = t
 		],
 		...config,
 	}) as Promise<RequestResult<PatchApiGovernanceNotesByPostIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List content review case notes
+ * {@link /api/v1/governance/content-review/cases/:caseId/notes}
+ */
+export function listContentReviewCaseNotes<ThrowOnError extends boolean = true>(
+	options: Options<ListContentReviewCaseNotesOptions, ThrowOnError>,
+): Promise<RequestResult<ListContentReviewCaseNotesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/governance/content-review/cases/{caseId}/notes",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<ListContentReviewCaseNotesResponses, ThrowOnError>>;
 }
 
 /**
@@ -2706,42 +2863,6 @@ export function getApiAuditEvents<ThrowOnError extends boolean = true>(
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiAuditEventsResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Create Series
- * {@link /api/v1/series}
- */
-export function postApiSeries<ThrowOnError extends boolean = true>(
-	options: Options<PostApiSeriesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSeriesResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/series",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiSeriesResponses, ThrowOnError>>;
-}
-
-/**
- * @summary List Series releases
- * {@link /api/v1/series/:seriesId/releases}
- */
-export function getApiSeriesBySeriesIdReleases<ThrowOnError extends boolean = true>(
-	options: Options<GetApiSeriesBySeriesIdReleasesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiSeriesBySeriesIdReleasesResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/v1/series/{seriesId}/releases",
-		...config,
-	}) as Promise<RequestResult<GetApiSeriesBySeriesIdReleasesResponses, ThrowOnError>>;
 }
 
 /**
@@ -3048,46 +3169,6 @@ export function deleteApiZonesByZoneIdNavigationByNavigationId<ThrowOnError exte
 }
 
 /**
- * @summary Add or update Series release
- * {@link /api/v1/series/:seriesId/releases/:releaseId}
- */
-export function putApiSeriesBySeriesIdReleasesByReleaseId<ThrowOnError extends boolean = true>(
-	options: Options<PutApiSeriesBySeriesIdReleasesByReleaseIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiSeriesBySeriesIdReleasesByReleaseIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/v1/series/{seriesId}/releases/{releaseId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiSeriesBySeriesIdReleasesByReleaseIdResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Remove Series release
- * {@link /api/v1/series/:seriesId/releases/:releaseId}
- */
-export function deleteApiSeriesBySeriesIdReleasesByReleaseId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiSeriesBySeriesIdReleasesByReleaseIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiSeriesBySeriesIdReleasesByReleaseIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/v1/series/{seriesId}/releases/{releaseId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiSeriesBySeriesIdReleasesByReleaseIdResponses, ThrowOnError>>;
-}
-
-/**
  * @summary Create Zone
  * {@link /api/v1/zones}
  */
@@ -3108,108 +3189,2063 @@ export function postApiZones<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary List Software system requirements
- * {@link /api/v1/software/:softwareId/system-requirements}
+ * @summary Find retained source records and their reconciliation policies
+ * {@link /api/v1/catalog/resources/:owner/:id/merged-sources}
  */
-export function getApiSoftwareBySoftwareIdSystemRequirements<ThrowOnError extends boolean = true>(
-	options: Options<GetApiSoftwareBySoftwareIdSystemRequirementsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiSoftwareBySoftwareIdSystemRequirementsResponses, ThrowOnError>> {
+export function listMergedCatalogSources<ThrowOnError extends boolean = true>(
+	options: Options<ListMergedCatalogSourcesOptions, ThrowOnError>,
+): Promise<RequestResult<ListMergedCatalogSourcesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/software/{softwareId}/system-requirements",
+		url: "/api/v1/catalog/resources/{owner}/{id}/merged-sources",
 		...config,
-	}) as Promise<RequestResult<GetApiSoftwareBySoftwareIdSystemRequirementsResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<ListMergedCatalogSourcesResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Create Software system requirement
- * {@link /api/v1/software/:softwareId/system-requirements}
+ * @summary Read a native music object
+ * {@link /api/v1/catalog/music/:id}
  */
-export function postApiSoftwareBySoftwareIdSystemRequirements<ThrowOnError extends boolean = true>(
-	options: Options<PostApiSoftwareBySoftwareIdSystemRequirementsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSoftwareBySoftwareIdSystemRequirementsResponses, ThrowOnError>> {
+export function readMusicDetail<ThrowOnError extends boolean = true>(
+	options: Options<ReadMusicDetailOptions, ThrowOnError>,
+): Promise<RequestResult<ReadMusicDetailResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/v1/catalog/music/{id}", ...config }) as Promise<
+		RequestResult<ReadMusicDetailResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Edit exact native music metadata
+ * {@link /api/v1/catalog/music/:id/metadata}
+ */
+export function patchMusicMetadata<ThrowOnError extends boolean = true>(
+	options: Options<PatchMusicMetadataOptions, ThrowOnError>,
+): Promise<RequestResult<PatchMusicMetadataResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/v1/catalog/music/{id}/metadata",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PatchMusicMetadataResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Page album media
+ * {@link /api/v1/catalog/music/:id/media}
+ */
+export function listMusicMedia<ThrowOnError extends boolean = true>(
+	options: Options<ListMusicMediaOptions, ThrowOnError>,
+): Promise<RequestResult<ListMusicMediaResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/v1/catalog/music/{id}/media", ...config }) as Promise<
+		RequestResult<ListMusicMediaResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Add an album medium
+ * {@link /api/v1/catalog/music/:id/media}
+ */
+export function addMusicMedium<ThrowOnError extends boolean = true>(
+	options: Options<AddMusicMediumOptions, ThrowOnError>,
+): Promise<RequestResult<AddMusicMediumResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/software/{softwareId}/system-requirements",
+		url: "/api/v1/catalog/music/{id}/media",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<
-		RequestResult<PostApiSoftwareBySoftwareIdSystemRequirementsResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<AddMusicMediumResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Replace Software system requirement
- * {@link /api/v1/software/:softwareId/system-requirements/:requirementId}
+ * @summary Edit an exact medium
+ * {@link /api/v1/catalog/music/:id/media/:mediumId}
  */
-export function putApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<
-		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
-		ThrowOnError
-	>,
-): Promise<
-	RequestResult<PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses, ThrowOnError>
-> {
+export function patchMusicMedium<ThrowOnError extends boolean = true>(
+	options: Options<PatchMusicMediumOptions, ThrowOnError>,
+): Promise<RequestResult<PatchMusicMediumResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
-		method: "PUT",
-		url: "/api/v1/software/{softwareId}/system-requirements/{requirementId}",
+		method: "PATCH",
+		url: "/api/v1/catalog/music/{id}/media/{mediumId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<
-		RequestResult<
-			PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
-			ThrowOnError
-		>
-	>;
+	}) as Promise<RequestResult<PatchMusicMediumResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Delete Software system requirement
- * {@link /api/v1/software/:softwareId/system-requirements/:requirementId}
+ * @summary Remove an empty album medium
+ * {@link /api/v1/catalog/music/:id/media/:mediumId}
  */
-export function deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<
-		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
-		ThrowOnError
-	>,
-): Promise<
-	RequestResult<
-		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
-		ThrowOnError
-	>
-> {
+export function removeMusicMedium<ThrowOnError extends boolean = true>(
+	options: Options<RemoveMusicMediumOptions, ThrowOnError>,
+): Promise<RequestResult<RemoveMusicMediumResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/software/{softwareId}/system-requirements/{requirementId}",
+		url: "/api/v1/catalog/music/{id}/media/{mediumId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
-			ThrowOnError
-		>
+	}) as Promise<RequestResult<RemoveMusicMediumResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Page a medium's track occurrences
+ * {@link /api/v1/catalog/music/:id/media/:mediumId/tracks}
+ */
+export function listMusicTracks<ThrowOnError extends boolean = true>(
+	options: Options<ListMusicTracksOptions, ThrowOnError>,
+): Promise<RequestResult<ListMusicTracksResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/music/{id}/media/{mediumId}/tracks",
+		...config,
+	}) as Promise<RequestResult<ListMusicTracksResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Add a printed track occurrence
+ * {@link /api/v1/catalog/music/:id/media/:mediumId/tracks}
+ */
+export function addMusicTrack<ThrowOnError extends boolean = true>(
+	options: Options<AddMusicTrackOptions, ThrowOnError>,
+): Promise<RequestResult<AddMusicTrackResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/music/{id}/media/{mediumId}/tracks",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<AddMusicTrackResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Edit an exact track occurrence
+ * {@link /api/v1/catalog/music/:id/tracks/:trackId}
+ */
+export function patchMusicTrack<ThrowOnError extends boolean = true>(
+	options: Options<PatchMusicTrackOptions, ThrowOnError>,
+): Promise<RequestResult<PatchMusicTrackResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/v1/catalog/music/{id}/tracks/{trackId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PatchMusicTrackResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Remove an exact track occurrence
+ * {@link /api/v1/catalog/music/:id/tracks/:trackId}
+ */
+export function removeMusicTrack<ThrowOnError extends boolean = true>(
+	options: Options<RemoveMusicTrackOptions, ThrowOnError>,
+): Promise<RequestResult<RemoveMusicTrackResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/catalog/music/{id}/tracks/{trackId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RemoveMusicTrackResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Page live native music component values
+ * {@link /api/v1/catalog/music/:id/structure}
+ */
+export function readMusicStructure<ThrowOnError extends boolean = true>(
+	options: Options<ReadMusicStructureOptions, ThrowOnError>,
+): Promise<RequestResult<ReadMusicStructureResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/music/{id}/structure",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ReadMusicStructureResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Apply a bounded exact music structure batch
+ * {@link /api/v1/catalog/music/:id/structure}
+ */
+export function mutateMusicStructure<ThrowOnError extends boolean = true>(
+	options: Options<MutateMusicStructureOptions, ThrowOnError>,
+): Promise<RequestResult<MutateMusicStructureResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/music/{id}/structure",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<MutateMusicStructureResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Page exact music component history
+ * {@link /api/v1/catalog/music/:id/history}
+ */
+export function listMusicHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListMusicHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<ListMusicHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/music/{id}/history",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ListMusicHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Restore one exact music component history value
+ * {@link /api/v1/catalog/music/:id/restore}
+ */
+export function restoreMusicComponent<ThrowOnError extends boolean = true>(
+	options: Options<RestoreMusicComponentOptions, ThrowOnError>,
+): Promise<RequestResult<RestoreMusicComponentResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/music/{id}/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RestoreMusicComponentResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Attach physical disc pressing evidence
+ * {@link /api/v1/catalog/music/:id/media/:mediumId/tocs}
+ */
+export function attachMusicDiscToc<ThrowOnError extends boolean = true>(
+	options: Options<AttachMusicDiscTocOptions, ThrowOnError>,
+): Promise<RequestResult<AttachMusicDiscTocResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/music/{id}/media/{mediumId}/tocs",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<AttachMusicDiscTocResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Page physical disc pressing evidence
+ * {@link /api/v1/catalog/music/:id/media/:mediumId/tocs}
+ */
+export function listMusicDiscTocs<ThrowOnError extends boolean = true>(
+	options: Options<ListMusicDiscTocsOptions, ThrowOnError>,
+): Promise<RequestResult<ListMusicDiscTocsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/music/{id}/media/{mediumId}/tocs",
+		...config,
+	}) as Promise<RequestResult<ListMusicDiscTocsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read a disc's exact physical offsets
+ * {@link /api/v1/catalog/music/:id/media/:mediumId/tocs/:tocId}
+ */
+export function readMusicDiscToc<ThrowOnError extends boolean = true>(
+	options: Options<ReadMusicDiscTocOptions, ThrowOnError>,
+): Promise<RequestResult<ReadMusicDiscTocResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/music/{id}/media/{mediumId}/tocs/{tocId}",
+		...config,
+	}) as Promise<RequestResult<ReadMusicDiscTocResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read software content, version or release details
+ * {@link /api/v1/catalog/software/:id/details}
+ */
+export function readSoftwareDetails<ThrowOnError extends boolean = true>(
+	options: Options<ReadSoftwareDetailsOptions, ThrowOnError>,
+): Promise<RequestResult<ReadSoftwareDetailsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/software/{id}/details",
+		...config,
+	}) as Promise<RequestResult<ReadSoftwareDetailsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Revise software details against the current owner revision
+ * {@link /api/v1/catalog/software/:id/details}
+ */
+export function reviseSoftwareDetails<ThrowOnError extends boolean = true>(
+	options: Options<ReviseSoftwareDetailsOptions, ThrowOnError>,
+): Promise<RequestResult<ReviseSoftwareDetailsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/software/{id}/details",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ReviseSoftwareDetailsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read authorized software detail history
+ * {@link /api/v1/catalog/software/:id/history}
+ */
+export function listSoftwareDetailsHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListSoftwareDetailsHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<ListSoftwareDetailsHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/software/{id}/history",
+		...config,
+	}) as Promise<RequestResult<ListSoftwareDetailsHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Restore historical software details as a new revision
+ * {@link /api/v1/catalog/software/:id/history/restore}
+ */
+export function restoreSoftwareDetails<ThrowOnError extends boolean = true>(
+	options: Options<RestoreSoftwareDetailsOptions, ThrowOnError>,
+): Promise<RequestResult<RestoreSoftwareDetailsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/software/{id}/history/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RestoreSoftwareDetailsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Find readable releases matching the same language, platform and medium
+ * {@link /api/v1/catalog/software/:id/releases}
+ */
+export function findSoftwareReleases<ThrowOnError extends boolean = true>(
+	options: Options<FindSoftwareReleasesOptions, ThrowOnError>,
+): Promise<RequestResult<FindSoftwareReleasesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/software/{id}/releases",
+		...config,
+	}) as Promise<RequestResult<FindSoftwareReleasesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List native release content, languages, carriers and animation
+ * {@link /api/v1/catalog/software/:id/components/:kind}
+ */
+export function listSoftwareComponents<ThrowOnError extends boolean = true>(
+	options: Options<ListSoftwareComponentsOptions, ThrowOnError>,
+): Promise<RequestResult<ListSoftwareComponentsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/software/{id}/components/{kind}",
+		...config,
+	}) as Promise<RequestResult<ListSoftwareComponentsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Add or revise an exact software release component
+ * {@link /api/v1/catalog/software/:id/components/:kind/:componentId}
+ */
+export function putSoftwareComponent<ThrowOnError extends boolean = true>(
+	options: Options<PutSoftwareComponentOptions, ThrowOnError>,
+): Promise<RequestResult<PutSoftwareComponentResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/software/{id}/components/{kind}/{componentId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutSoftwareComponentResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Withdraw one exact release component
+ * {@link /api/v1/catalog/software/:id/components/:kind/:componentId}
+ */
+export function withdrawSoftwareComponent<ThrowOnError extends boolean = true>(
+	options: Options<WithdrawSoftwareComponentOptions, ThrowOnError>,
+): Promise<RequestResult<WithdrawSoftwareComponentResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/catalog/software/{id}/components/{kind}/{componentId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<WithdrawSoftwareComponentResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read authorized release component revisions
+ * {@link /api/v1/catalog/software/:id/components/:kind/:componentId/history}
+ */
+export function listSoftwareComponentHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListSoftwareComponentHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<ListSoftwareComponentHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/software/{id}/components/{kind}/{componentId}/history",
+		...config,
+	}) as Promise<RequestResult<ListSoftwareComponentHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Restore a release component against its exact current revision
+ * {@link /api/v1/catalog/software/:id/components/:kind/:componentId/restore}
+ */
+export function restoreSoftwareComponent<ThrowOnError extends boolean = true>(
+	options: Options<RestoreSoftwareComponentOptions, ThrowOnError>,
+): Promise<RequestResult<RestoreSoftwareComponentResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/software/{id}/components/{kind}/{componentId}/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RestoreSoftwareComponentResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List software credit contexts
+ * {@link /api/v1/catalog/software/:id/contexts}
+ */
+export function listSoftwareParticipationContexts<ThrowOnError extends boolean = true>(
+	options: Options<ListSoftwareParticipationContextsOptions, ThrowOnError>,
+): Promise<RequestResult<ListSoftwareParticipationContextsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/software/{id}/contexts",
+		...config,
+	}) as Promise<RequestResult<ListSoftwareParticipationContextsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create a software credit context
+ * {@link /api/v1/catalog/software/:id/contexts}
+ */
+export function createSoftwareParticipationContext<ThrowOnError extends boolean = true>(
+	options: Options<CreateSoftwareParticipationContextOptions, ThrowOnError>,
+): Promise<RequestResult<CreateSoftwareParticipationContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/software/{id}/contexts",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<CreateSoftwareParticipationContextResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read a software credit context
+ * {@link /api/v1/catalog/software/:id/contexts/:contextId}
+ */
+export function readSoftwareParticipationContext<ThrowOnError extends boolean = true>(
+	options: Options<ReadSoftwareParticipationContextOptions, ThrowOnError>,
+): Promise<RequestResult<ReadSoftwareParticipationContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/software/{id}/contexts/{contextId}",
+		...config,
+	}) as Promise<RequestResult<ReadSoftwareParticipationContextResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Revise one exact credit context
+ * {@link /api/v1/catalog/software/:id/contexts/:contextId}
+ */
+export function reviseSoftwareParticipationContext<ThrowOnError extends boolean = true>(
+	options: Options<ReviseSoftwareParticipationContextOptions, ThrowOnError>,
+): Promise<RequestResult<ReviseSoftwareParticipationContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/software/{id}/contexts/{contextId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ReviseSoftwareParticipationContextResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read authorized credit context history
+ * {@link /api/v1/catalog/software/:id/contexts/:contextId/history}
+ */
+export function listSoftwareParticipationContextHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListSoftwareParticipationContextHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<ListSoftwareParticipationContextHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/software/{id}/contexts/{contextId}/history",
+		...config,
+	}) as Promise<RequestResult<ListSoftwareParticipationContextHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Restore a credit context as a new revision
+ * {@link /api/v1/catalog/software/:id/contexts/:contextId/restore}
+ */
+export function restoreSoftwareParticipationContext<ThrowOnError extends boolean = true>(
+	options: Options<RestoreSoftwareParticipationContextOptions, ThrowOnError>,
+): Promise<RequestResult<RestoreSoftwareParticipationContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/software/{id}/contexts/{contextId}/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RestoreSoftwareParticipationContextResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List readable staff and voice credits with exact name and context references
+ * {@link /api/v1/catalog/software/:id/credits}
+ */
+export function listSoftwareCredits<ThrowOnError extends boolean = true>(
+	options: Options<ListSoftwareCreditsOptions, ThrowOnError>,
+): Promise<RequestResult<ListSoftwareCreditsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/software/{id}/credits",
+		...config,
+	}) as Promise<RequestResult<ListSoftwareCreditsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create an exact staff or voice credit
+ * {@link /api/v1/catalog/software/:id/credits}
+ */
+export function createSoftwareCredit<ThrowOnError extends boolean = true>(
+	options: Options<CreateSoftwareCreditOptions, ThrowOnError>,
+): Promise<RequestResult<CreateSoftwareCreditResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/software/{id}/credits",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<CreateSoftwareCreditResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Revise a staff or voice credit against its exact revision
+ * {@link /api/v1/catalog/software/:id/credits/:creditId}
+ */
+export function reviseSoftwareCredit<ThrowOnError extends boolean = true>(
+	options: Options<ReviseSoftwareCreditOptions, ThrowOnError>,
+): Promise<RequestResult<ReviseSoftwareCreditResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/software/{id}/credits/{creditId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ReviseSoftwareCreditResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read authorized staff and voice credit history
+ * {@link /api/v1/catalog/software/:id/credits/:creditId/history}
+ */
+export function listSoftwareCreditHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListSoftwareCreditHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<ListSoftwareCreditHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/software/{id}/credits/{creditId}/history",
+		...config,
+	}) as Promise<RequestResult<ListSoftwareCreditHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Restore an exact historical staff or voice credit
+ * {@link /api/v1/catalog/software/:id/credits/:creditId/restore}
+ */
+export function restoreSoftwareCredit<ThrowOnError extends boolean = true>(
+	options: Options<RestoreSoftwareCreditOptions, ThrowOnError>,
+): Promise<RequestResult<RestoreSoftwareCreditResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/software/{id}/credits/{creditId}/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RestoreSoftwareCreditResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read a program, season, version or episode
+ * {@link /api/v1/catalog/program/:id/details}
+ */
+export function readProgramDetails<ThrowOnError extends boolean = true>(
+	options: Options<ReadProgramDetailsOptions, ThrowOnError>,
+): Promise<RequestResult<ReadProgramDetailsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/program/{id}/details",
+		...config,
+	}) as Promise<RequestResult<ReadProgramDetailsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Revise exact native Program fields
+ * {@link /api/v1/catalog/program/:id/details}
+ */
+export function reviseProgramDetails<ThrowOnError extends boolean = true>(
+	options: Options<ReviseProgramDetailsOptions, ThrowOnError>,
+): Promise<RequestResult<ReviseProgramDetailsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/program/{id}/details",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ReviseProgramDetailsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List ordered episode appearances
+ * {@link /api/v1/catalog/program/:id/occurrences}
+ */
+export function listProgramOccurrences<ThrowOnError extends boolean = true>(
+	options: Options<ListProgramOccurrencesOptions, ThrowOnError>,
+): Promise<RequestResult<ListProgramOccurrencesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/program/{id}/occurrences",
+		...config,
+	}) as Promise<RequestResult<ListProgramOccurrencesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Add or revise one episode appearance
+ * {@link /api/v1/catalog/program/:id/occurrences/:occurrenceId}
+ */
+export function putProgramOccurrence<ThrowOnError extends boolean = true>(
+	options: Options<PutProgramOccurrenceOptions, ThrowOnError>,
+): Promise<RequestResult<PutProgramOccurrenceResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/program/{id}/occurrences/{occurrenceId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutProgramOccurrenceResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Remove one episode appearance while retaining its history
+ * {@link /api/v1/catalog/program/:id/occurrences/:occurrenceId}
+ */
+export function removeProgramOccurrence<ThrowOnError extends boolean = true>(
+	options: Options<RemoveProgramOccurrenceOptions, ThrowOnError>,
+): Promise<RequestResult<RemoveProgramOccurrenceResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/catalog/program/{id}/occurrences/{occurrenceId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RemoveProgramOccurrenceResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read authorized immutable Program component history
+ * {@link /api/v1/catalog/program/:id/history/:component/:componentKey}
+ */
+export function listProgramComponentHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListProgramComponentHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<ListProgramComponentHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/program/{id}/history/{component}/{componentKey}",
+		...config,
+	}) as Promise<RequestResult<ListProgramComponentHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Restore a Program component against its exact current history
+ * {@link /api/v1/catalog/program/:id/history/:component/:componentKey/restore}
+ */
+export function restoreProgramComponent<ThrowOnError extends boolean = true>(
+	options: Options<RestoreProgramComponentOptions, ThrowOnError>,
+): Promise<RequestResult<RestoreProgramComponentResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/program/{id}/history/{component}/{componentKey}/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RestoreProgramComponentResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read a work, text version, publication or serialization
+ * {@link /api/v1/catalog/publishing/:id/details}
+ */
+export function readPublishingDetails<ThrowOnError extends boolean = true>(
+	options: Options<ReadPublishingDetailsOptions, ThrowOnError>,
+): Promise<RequestResult<ReadPublishingDetailsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/publishing/{id}/details",
+		...config,
+	}) as Promise<RequestResult<ReadPublishingDetailsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Revise exact native Publishing fields
+ * {@link /api/v1/catalog/publishing/:id/details}
+ */
+export function revisePublishingDetails<ThrowOnError extends boolean = true>(
+	options: Options<RevisePublishingDetailsOptions, ThrowOnError>,
+): Promise<RequestResult<RevisePublishingDetailsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/publishing/{id}/details",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RevisePublishingDetailsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read ordered coverage, publication events, facets or serial installments
+ * {@link /api/v1/catalog/publishing/:id/components/:kind}
+ */
+export function listPublishingComponents<ThrowOnError extends boolean = true>(
+	options: Options<ListPublishingComponentsOptions, ThrowOnError>,
+): Promise<RequestResult<ListPublishingComponentsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/publishing/{id}/components/{kind}",
+		...config,
+	}) as Promise<RequestResult<ListPublishingComponentsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Add or revise one exact Publishing child
+ * {@link /api/v1/catalog/publishing/:id/components/:kind/:componentId}
+ */
+export function putPublishingComponent<ThrowOnError extends boolean = true>(
+	options: Options<PutPublishingComponentOptions, ThrowOnError>,
+): Promise<RequestResult<PutPublishingComponentResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/publishing/{id}/components/{kind}/{componentId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutPublishingComponentResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Remove one Publishing child while retaining its history
+ * {@link /api/v1/catalog/publishing/:id/components/:kind/:componentId}
+ */
+export function removePublishingComponent<ThrowOnError extends boolean = true>(
+	options: Options<RemovePublishingComponentOptions, ThrowOnError>,
+): Promise<RequestResult<RemovePublishingComponentResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/catalog/publishing/{id}/components/{kind}/{componentId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RemovePublishingComponentResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read authorized exact Publishing revision history
+ * {@link /api/v1/catalog/publishing/:id/history/:component/:componentKey}
+ */
+export function listPublishingComponentHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListPublishingComponentHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<ListPublishingComponentHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/publishing/{id}/history/{component}/{componentKey}",
+		...config,
+	}) as Promise<RequestResult<ListPublishingComponentHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Restore Publishing state against its exact current child history
+ * {@link /api/v1/catalog/publishing/:id/history/:component/:componentKey/restore}
+ */
+export function restorePublishingComponent<ThrowOnError extends boolean = true>(
+	options: Options<RestorePublishingComponentOptions, ThrowOnError>,
+): Promise<RequestResult<RestorePublishingComponentResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/publishing/{id}/history/{component}/{componentKey}/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RestorePublishingComponentResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Browse readable works, text versions, publications and serializations
+ * {@link /api/v1/catalog/publishing/:id/connections}
+ */
+export function listPublishingConnections<ThrowOnError extends boolean = true>(
+	options: Options<ListPublishingConnectionsOptions, ThrowOnError>,
+): Promise<RequestResult<ListPublishingConnectionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/publishing/{id}/connections",
+		...config,
+	}) as Promise<RequestResult<ListPublishingConnectionsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read an explicit native consumption-language declaration
+ * {@link /api/v1/catalog/resources/:owner/:id/content-language-support}
+ */
+export function readCatalogContentLanguageSupport<ThrowOnError extends boolean = true>(
+	options: Options<ReadCatalogContentLanguageSupportOptions, ThrowOnError>,
+): Promise<RequestResult<ReadCatalogContentLanguageSupportResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support",
+		...config,
+	}) as Promise<RequestResult<ReadCatalogContentLanguageSupportResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Replace one native declaration with exact owner and field revisions
+ * {@link /api/v1/catalog/resources/:owner/:id/content-language-support}
+ */
+export function replaceCatalogContentLanguageSupport<ThrowOnError extends boolean = true>(
+	options: Options<ReplaceCatalogContentLanguageSupportOptions, ThrowOnError>,
+): Promise<RequestResult<ReplaceCatalogContentLanguageSupportResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ReplaceCatalogContentLanguageSupportResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read existing direct native-link language evidence without inheritance
+ * {@link /api/v1/catalog/resources/:owner/:id/content-language-support/evidence}
+ */
+export function listCatalogContentLanguageEvidence<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogContentLanguageEvidenceOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogContentLanguageEvidenceResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support/evidence",
+		...config,
+	}) as Promise<RequestResult<ListCatalogContentLanguageEvidenceResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List native declaration decisions by field revision
+ * {@link /api/v1/catalog/resources/:owner/:id/content-language-support/history}
+ */
+export function listCatalogContentLanguageHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogContentLanguageHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogContentLanguageHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support/history",
+		...config,
+	}) as Promise<RequestResult<ListCatalogContentLanguageHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read one exact historical native declaration
+ * {@link /api/v1/catalog/resources/:owner/:id/content-language-support/history/:version}
+ */
+export function readCatalogContentLanguageHistory<ThrowOnError extends boolean = true>(
+	options: Options<ReadCatalogContentLanguageHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<ReadCatalogContentLanguageHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support/history/{version}",
+		...config,
+	}) as Promise<RequestResult<ReadCatalogContentLanguageHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Restore a native language declaration as a new decision
+ * {@link /api/v1/catalog/resources/:owner/:id/content-language-support/restore}
+ */
+export function restoreCatalogContentLanguageSupport<ThrowOnError extends boolean = true>(
+	options: Options<RestoreCatalogContentLanguageSupportOptions, ThrowOnError>,
+): Promise<RequestResult<RestoreCatalogContentLanguageSupportResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RestoreCatalogContentLanguageSupportResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List current typed catalog attributes
+ * {@link /api/v1/catalog/resources/:owner/:id/facts}
+ */
+export function listCatalogFacts<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogFactsOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogFactsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/facts",
+		...config,
+	}) as Promise<RequestResult<ListCatalogFactsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Write or replace one typed catalog attribute
+ * {@link /api/v1/catalog/resources/:owner/:id/facts}
+ */
+export function writeCatalogFact<ThrowOnError extends boolean = true>(
+	options: Options<WriteCatalogFactOptions, ThrowOnError>,
+): Promise<RequestResult<WriteCatalogFactResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/resources/{owner}/{id}/facts",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<WriteCatalogFactResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read the exact typed value in bounded pages
+ * {@link /api/v1/catalog/resources/:owner/:id/facts/:factId/nodes}
+ */
+export function listCatalogFactNodes<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogFactNodesOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogFactNodesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/facts/{factId}/nodes",
+		...config,
+	}) as Promise<RequestResult<ListCatalogFactNodesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List current catalog relations
+ * {@link /api/v1/catalog/resources/:owner/:id/relations}
+ */
+export function listCatalogRelations<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogRelationsOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogRelationsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/relations",
+		...config,
+	}) as Promise<RequestResult<ListCatalogRelationsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Write or replace one catalog relation with its participants
+ * {@link /api/v1/catalog/resources/:owner/:id/relations}
+ */
+export function writeCatalogRelation<ThrowOnError extends boolean = true>(
+	options: Options<WriteCatalogRelationOptions, ThrowOnError>,
+): Promise<RequestResult<WriteCatalogRelationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/resources/{owner}/{id}/relations",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<WriteCatalogRelationResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read relation participants and their roles
+ * {@link /api/v1/catalog/resources/:owner/:id/relations/:relationId/participants}
+ */
+export function listCatalogRelationParticipants<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogRelationParticipantsOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogRelationParticipantsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/relations/{relationId}/participants",
+		...config,
+	}) as Promise<RequestResult<ListCatalogRelationParticipantsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read qualifiers of an exact relation
+ * {@link /api/v1/catalog/resources/:owner/:id/relations/:relationId/qualifiers}
+ */
+export function listCatalogRelationQualifiers<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogRelationQualifiersOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogRelationQualifiersResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/relations/{relationId}/qualifiers",
+		...config,
+	}) as Promise<RequestResult<ListCatalogRelationQualifiersResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read the immutable decisions for a catalog attribute or relation
+ * {@link /api/v1/catalog/resources/:owner/:id/semantics/:semanticId/history}
+ */
+export function listCatalogSemanticHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogSemanticHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogSemanticHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/semantics/{semanticId}/history",
+		...config,
+	}) as Promise<RequestResult<ListCatalogSemanticHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Dispute, withdraw or supersede a catalog decision
+ * {@link /api/v1/catalog/resources/:owner/:id/semantics/:semanticId/state}
+ */
+export function transitionCatalogSemanticState<ThrowOnError extends boolean = true>(
+	options: Options<TransitionCatalogSemanticStateOptions, ThrowOnError>,
+): Promise<RequestResult<TransitionCatalogSemanticStateResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/resources/{owner}/{id}/semantics/{semanticId}/state",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<TransitionCatalogSemanticStateResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Restore an eligible historical value as a new decision
+ * {@link /api/v1/catalog/resources/:owner/:id/semantics/:semanticId/restore}
+ */
+export function restoreCatalogSemanticRevision<ThrowOnError extends boolean = true>(
+	options: Options<RestoreCatalogSemanticRevisionOptions, ThrowOnError>,
+): Promise<RequestResult<RestoreCatalogSemanticRevisionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/resources/{owner}/{id}/semantics/{semanticId}/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RestoreCatalogSemanticRevisionResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Import a source record as a private native draft or propose its update
+ * {@link /api/v1/catalog/sources/intake}
+ */
+export function intakeCatalogSource<ThrowOnError extends boolean = true>(
+	options: Options<IntakeCatalogSourceOptions, ThrowOnError>,
+): Promise<RequestResult<IntakeCatalogSourceResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/sources/intake",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<IntakeCatalogSourceResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read a source import or update job
+ * {@link /api/v1/catalog/sources/:sourceRecordId/jobs/:jobId}
+ */
+export function getCatalogSourceJob<ThrowOnError extends boolean = true>(
+	options: Options<GetCatalogSourceJobOptions, ThrowOnError>,
+): Promise<RequestResult<GetCatalogSourceJobResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/sources/{sourceRecordId}/jobs/{jobId}",
+		...config,
+	}) as Promise<RequestResult<GetCatalogSourceJobResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Pause or resume a source import or update job
+ * {@link /api/v1/catalog/sources/:sourceRecordId/jobs/:jobId}
+ */
+export function controlCatalogSourceJob<ThrowOnError extends boolean = true>(
+	options: Options<ControlCatalogSourceJobOptions, ThrowOnError>,
+): Promise<RequestResult<ControlCatalogSourceJobResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/v1/catalog/sources/{sourceRecordId}/jobs/{jobId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ControlCatalogSourceJobResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Review updates for one exact source binding
+ * {@link /api/v1/catalog/sources/:sourceRecordId/bindings/:mappingKey/proposals}
+ */
+export function listCatalogSourceProposals<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogSourceProposalsOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogSourceProposalsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/sources/{sourceRecordId}/bindings/{mappingKey}/proposals",
+		...config,
+	}) as Promise<RequestResult<ListCatalogSourceProposalsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Propose the current observation for a bound native record
+ * {@link /api/v1/catalog/sources/:sourceRecordId/bindings/:mappingKey/proposals}
+ */
+export function proposeCatalogSourceAdoption<ThrowOnError extends boolean = true>(
+	options: Options<ProposeCatalogSourceAdoptionOptions, ThrowOnError>,
+): Promise<RequestResult<ProposeCatalogSourceAdoptionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/sources/{sourceRecordId}/bindings/{mappingKey}/proposals",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ProposeCatalogSourceAdoptionResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Pause, resume or explicitly rebind one source correspondence
+ * {@link /api/v1/catalog/sources/:sourceRecordId/bindings/:mappingKey}
+ */
+export function reviseCatalogSourceBinding<ThrowOnError extends boolean = true>(
+	options: Options<ReviseCatalogSourceBindingOptions, ThrowOnError>,
+): Promise<RequestResult<ReviseCatalogSourceBindingResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/v1/catalog/sources/{sourceRecordId}/bindings/{mappingKey}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ReviseCatalogSourceBindingResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Inspect exact source changes before a reviewed decision
+ * {@link /api/v1/catalog/sources/:sourceRecordId/proposals/:proposalId/preview}
+ */
+export function getCatalogSourceProposalPreview<ThrowOnError extends boolean = true>(
+	options: Options<GetCatalogSourceProposalPreviewOptions, ThrowOnError>,
+): Promise<RequestResult<GetCatalogSourceProposalPreviewResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/sources/{sourceRecordId}/proposals/{proposalId}/preview",
+		...config,
+	}) as Promise<RequestResult<GetCatalogSourceProposalPreviewResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Expand a source value while preserving its exact snapshot
+ * {@link /api/v1/catalog/sources/:sourceRecordId/proposals/:proposalId/preview/value}
+ */
+export function getCatalogSourceProposalPreviewValue<ThrowOnError extends boolean = true>(
+	options: Options<GetCatalogSourceProposalPreviewValueOptions, ThrowOnError>,
+): Promise<RequestResult<GetCatalogSourceProposalPreviewValueResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/sources/{sourceRecordId}/proposals/{proposalId}/preview/value",
+		...config,
+	}) as Promise<RequestResult<GetCatalogSourceProposalPreviewValueResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Apply, reject or withdraw an exact source proposal
+ * {@link /api/v1/catalog/sources/:sourceRecordId/proposals/:proposalId/decision}
+ */
+export function decideCatalogSourceProposal<ThrowOnError extends boolean = true>(
+	options: Options<DecideCatalogSourceProposalOptions, ThrowOnError>,
+): Promise<RequestResult<DecideCatalogSourceProposalResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/sources/{sourceRecordId}/proposals/{proposalId}/decision",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<DecideCatalogSourceProposalResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read current definition management access
+ * {@link /api/v1/catalog/definitions/permissions}
+ */
+export function getCatalogDefinitionPermissions<ThrowOnError extends boolean = true>(
+	options: Options<GetCatalogDefinitionPermissionsOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetCatalogDefinitionPermissionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/definitions/permissions",
+		...config,
+	}) as Promise<RequestResult<GetCatalogDefinitionPermissionsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read names for an exact page of immutable definition dependencies
+ * {@link /api/v1/catalog/definitions/revision-labels}
+ */
+export function listCatalogDefinitionRevisionLabels<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogDefinitionRevisionLabelsOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogDefinitionRevisionLabelsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/definitions/revision-labels",
+		...config,
+	}) as Promise<RequestResult<ListCatalogDefinitionRevisionLabelsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Choose governed property, relation and vocabulary meanings
+ * {@link /api/v1/catalog/definitions}
+ */
+export function listCatalogDefinitions<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogDefinitionsOptions, ThrowOnError> = {},
+): Promise<RequestResult<ListCatalogDefinitionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/v1/catalog/definitions", ...config }) as Promise<
+		RequestResult<ListCatalogDefinitionsResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @summary Create a governed meaning with its localized names
+ * {@link /api/v1/catalog/definitions}
+ */
+export function createCatalogDefinition<ThrowOnError extends boolean = true>(
+	options: Options<CreateCatalogDefinitionOptions, ThrowOnError>,
+): Promise<RequestResult<CreateCatalogDefinitionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/definitions",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<CreateCatalogDefinitionResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read an exact immutable definition revision
+ * {@link /api/v1/catalog/definitions/revisions/:id}
+ */
+export function getCatalogDefinitionRevision<ThrowOnError extends boolean = true>(
+	options: Options<GetCatalogDefinitionRevisionOptions, ThrowOnError>,
+): Promise<RequestResult<GetCatalogDefinitionRevisionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/definitions/revisions/{id}",
+		...config,
+	}) as Promise<RequestResult<GetCatalogDefinitionRevisionResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read a definition and its current reviewed meaning
+ * {@link /api/v1/catalog/definitions/:id}
+ */
+export function getCatalogDefinition<ThrowOnError extends boolean = true>(
+	options: Options<GetCatalogDefinitionOptions, ThrowOnError>,
+): Promise<RequestResult<GetCatalogDefinitionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/v1/catalog/definitions/{id}", ...config }) as Promise<
+		RequestResult<GetCatalogDefinitionResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Read a definition's immutable history
+ * {@link /api/v1/catalog/definitions/:id/revisions}
+ */
+export function listCatalogDefinitionRevisions<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogDefinitionRevisionsOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogDefinitionRevisionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/definitions/{id}/revisions",
+		...config,
+	}) as Promise<RequestResult<ListCatalogDefinitionRevisionsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Append a reviewed meaning without changing existing facts
+ * {@link /api/v1/catalog/definitions/:id/revisions}
+ */
+export function reviseCatalogDefinition<ThrowOnError extends boolean = true>(
+	options: Options<ReviseCatalogDefinitionOptions, ThrowOnError>,
+): Promise<RequestResult<ReviseCatalogDefinitionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/definitions/{id}/revisions",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<ReviseCatalogDefinitionResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read character measurements in an exact content context
+ * {@link /api/v1/catalog/entity/:id/measurements/context}
+ */
+export function readEntityMeasurementContext<ThrowOnError extends boolean = true>(
+	options: Options<ReadEntityMeasurementContextOptions, ThrowOnError>,
+): Promise<RequestResult<ReadEntityMeasurementContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/entity/{id}/measurements/context",
+		...config,
+	}) as Promise<RequestResult<ReadEntityMeasurementContextResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Record or replace character measurements in an exact content context
+ * {@link /api/v1/catalog/entity/:id/measurements/context}
+ */
+export function writeEntityMeasurementContext<ThrowOnError extends boolean = true>(
+	options: Options<WriteEntityMeasurementContextOptions, ThrowOnError>,
+): Promise<RequestResult<WriteEntityMeasurementContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/entity/{id}/measurements/context",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<WriteEntityMeasurementContextResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read grouping classifications
+ * {@link /api/v1/catalog/grouping/:id/classes}
+ */
+export function listGroupingClasses<ThrowOnError extends boolean = true>(
+	options: Options<ListGroupingClassesOptions, ThrowOnError>,
+): Promise<RequestResult<ListGroupingClassesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/grouping/{id}/classes",
+		...config,
+	}) as Promise<RequestResult<ListGroupingClassesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Assign a governed grouping classification
+ * {@link /api/v1/catalog/grouping/:id/classes/:classRevisionId}
+ */
+export function assignGroupingClass<ThrowOnError extends boolean = true>(
+	options: Options<AssignGroupingClassOptions, ThrowOnError>,
+): Promise<RequestResult<AssignGroupingClassResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/grouping/{id}/classes/{classRevisionId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<AssignGroupingClassResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Remove a classification without changing memberships
+ * {@link /api/v1/catalog/grouping/:id/classes/:classRevisionId}
+ */
+export function removeGroupingClass<ThrowOnError extends boolean = true>(
+	options: Options<RemoveGroupingClassOptions, ThrowOnError>,
+): Promise<RequestResult<RemoveGroupingClassResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/catalog/grouping/{id}/classes/{classRevisionId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RemoveGroupingClassResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read independently named membership orders
+ * {@link /api/v1/catalog/grouping/:id/orders}
+ */
+export function listGroupingOrderProfiles<ThrowOnError extends boolean = true>(
+	options: Options<ListGroupingOrderProfilesOptions, ThrowOnError>,
+): Promise<RequestResult<ListGroupingOrderProfilesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/grouping/{id}/orders",
+		...config,
+	}) as Promise<RequestResult<ListGroupingOrderProfilesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create an independent membership order
+ * {@link /api/v1/catalog/grouping/:id/orders}
+ */
+export function createGroupingOrderProfile<ThrowOnError extends boolean = true>(
+	options: Options<CreateGroupingOrderProfileOptions, ThrowOnError>,
+): Promise<RequestResult<CreateGroupingOrderProfileResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/grouping/{id}/orders",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<CreateGroupingOrderProfileResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Rename an existing membership order
+ * {@link /api/v1/catalog/grouping/:id/orders/:profileId}
+ */
+export function renameGroupingOrderProfile<ThrowOnError extends boolean = true>(
+	options: Options<RenameGroupingOrderProfileOptions, ThrowOnError>,
+): Promise<RequestResult<RenameGroupingOrderProfileResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/grouping/{id}/orders/{profileId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RenameGroupingOrderProfileResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Page current readable relations in one named order
+ * {@link /api/v1/catalog/grouping/:id/orders/:profileId/entries}
+ */
+export function listGroupingOrderEntries<ThrowOnError extends boolean = true>(
+	options: Options<ListGroupingOrderEntriesOptions, ThrowOnError>,
+): Promise<RequestResult<ListGroupingOrderEntriesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/grouping/{id}/orders/{profileId}/entries",
+		...config,
+	}) as Promise<RequestResult<ListGroupingOrderEntriesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Position one exact active relation in a membership order
+ * {@link /api/v1/catalog/grouping/:id/orders/:profileId/entries/:relationId}
+ */
+export function putGroupingOrderEntry<ThrowOnError extends boolean = true>(
+	options: Options<PutGroupingOrderEntryOptions, ThrowOnError>,
+): Promise<RequestResult<PutGroupingOrderEntryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/grouping/{id}/orders/{profileId}/entries/{relationId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutGroupingOrderEntryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Remove an order entry while retaining its underlying relation
+ * {@link /api/v1/catalog/grouping/:id/orders/:profileId/entries/:relationId}
+ */
+export function removeGroupingOrderEntry<ThrowOnError extends boolean = true>(
+	options: Options<RemoveGroupingOrderEntryOptions, ThrowOnError>,
+): Promise<RequestResult<RemoveGroupingOrderEntryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/catalog/grouping/{id}/orders/{profileId}/entries/{relationId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RemoveGroupingOrderEntryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read authorized classification and order command history
+ * {@link /api/v1/catalog/grouping/:id/history}
+ */
+export function listGroupingHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListGroupingHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<ListGroupingHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/grouping/{id}/history",
+		...config,
+	}) as Promise<RequestResult<ListGroupingHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Reapply one historical classification or order command
+ * {@link /api/v1/catalog/grouping/:id/history/restore}
+ */
+export function restoreGroupingCommand<ThrowOnError extends boolean = true>(
+	options: Options<RestoreGroupingCommandOptions, ThrowOnError>,
+): Promise<RequestResult<RestoreGroupingCommandResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/grouping/{id}/history/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RestoreGroupingCommandResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read fixed Entity catalog values
+ * {@link /api/v1/catalog/entity/:id/profile}
+ */
+export function readCatalogEntityProfile<ThrowOnError extends boolean = true>(
+	options: Options<ReadCatalogEntityProfileOptions, ThrowOnError>,
+): Promise<RequestResult<ReadCatalogEntityProfileResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/entity/{id}/profile",
+		...config,
+	}) as Promise<RequestResult<ReadCatalogEntityProfileResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Set fixed Entity catalog values
+ * {@link /api/v1/catalog/entity/:id/profile}
+ */
+export function writeCatalogEntityProfile<ThrowOnError extends boolean = true>(
+	options: Options<WriteCatalogEntityProfileOptions, ThrowOnError>,
+): Promise<RequestResult<WriteCatalogEntityProfileResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/entity/{id}/profile",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<WriteCatalogEntityProfileResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Remove fixed values while preserving Entity history
+ * {@link /api/v1/catalog/entity/:id/profile}
+ */
+export function removeCatalogEntityProfile<ThrowOnError extends boolean = true>(
+	options: Options<RemoveCatalogEntityProfileOptions, ThrowOnError>,
+): Promise<RequestResult<RemoveCatalogEntityProfileResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/catalog/entity/{id}/profile",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RemoveCatalogEntityProfileResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Resolve a previously unresolved Entity shape
+ * {@link /api/v1/catalog/entity/:id/shape/resolve}
+ */
+export function resolveCatalogEntityShape<ThrowOnError extends boolean = true>(
+	options: Options<ResolveCatalogEntityShapeOptions, ThrowOnError>,
+): Promise<RequestResult<ResolveCatalogEntityShapeResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/entity/{id}/shape/resolve",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ResolveCatalogEntityShapeResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read authorized fixed-profile history
+ * {@link /api/v1/catalog/entity/:id/profile/history}
+ */
+export function listCatalogEntityProfileHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogEntityProfileHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogEntityProfileHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/entity/{id}/profile/history",
+		...config,
+	}) as Promise<RequestResult<ListCatalogEntityProfileHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Restore fixed values under current authority
+ * {@link /api/v1/catalog/entity/:id/profile/history/restore}
+ */
+export function restoreCatalogEntityProfile<ThrowOnError extends boolean = true>(
+	options: Options<RestoreCatalogEntityProfileOptions, ThrowOnError>,
+): Promise<RequestResult<RestoreCatalogEntityProfileResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/entity/{id}/profile/history/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RestoreCatalogEntityProfileResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List authored editorial languages
+ * {@link /api/v1/catalog/resources/:owner/:id/editorial}
+ */
+export function listCatalogEditorialLanguages<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogEditorialLanguagesOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogEditorialLanguagesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/editorial",
+		...config,
+	}) as Promise<RequestResult<ListCatalogEditorialLanguagesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read one editorial language
+ * {@link /api/v1/catalog/resources/:owner/:id/editorial/:language}
+ */
+export function readCatalogEditorial<ThrowOnError extends boolean = true>(
+	options: Options<ReadCatalogEditorialOptions, ThrowOnError>,
+): Promise<RequestResult<ReadCatalogEditorialResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}",
+		...config,
+	}) as Promise<RequestResult<ReadCatalogEditorialResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Write one editorial language
+ * {@link /api/v1/catalog/resources/:owner/:id/editorial/:language}
+ */
+export function writeCatalogEditorial<ThrowOnError extends boolean = true>(
+	options: Options<WriteCatalogEditorialOptions, ThrowOnError>,
+): Promise<RequestResult<WriteCatalogEditorialResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<WriteCatalogEditorialResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Withdraw editorial content while preserving history
+ * {@link /api/v1/catalog/resources/:owner/:id/editorial/:language}
+ */
+export function withdrawCatalogEditorial<ThrowOnError extends boolean = true>(
+	options: Options<WithdrawCatalogEditorialOptions, ThrowOnError>,
+): Promise<RequestResult<WithdrawCatalogEditorialResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<WithdrawCatalogEditorialResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read authorized editorial revision metadata
+ * {@link /api/v1/catalog/resources/:owner/:id/editorial/:language/history}
+ */
+export function listCatalogEditorialHistory<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogEditorialHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogEditorialHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}/history",
+		...config,
+	}) as Promise<RequestResult<ListCatalogEditorialHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Read one authorized editorial revision
+ * {@link /api/v1/catalog/resources/:owner/:id/editorial/:language/history/:editorialRevision}
+ */
+export function readCatalogEditorialRevision<ThrowOnError extends boolean = true>(
+	options: Options<ReadCatalogEditorialRevisionOptions, ThrowOnError>,
+): Promise<RequestResult<ReadCatalogEditorialRevisionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}/history/{editorialRevision}",
+		...config,
+	}) as Promise<RequestResult<ReadCatalogEditorialRevisionResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Restore editorial content using current edit authority
+ * {@link /api/v1/catalog/resources/:owner/:id/editorial/:language/history/restore}
+ */
+export function restoreCatalogEditorial<ThrowOnError extends boolean = true>(
+	options: Options<RestoreCatalogEditorialOptions, ThrowOnError>,
+): Promise<RequestResult<RestoreCatalogEditorialResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}/history/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<RestoreCatalogEditorialResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Find public Entities eligible for the chosen attribution step
+ * {@link /api/v1/catalog/entity-candidates}
+ */
+export function listCatalogEntityCandidates<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogEntityCandidatesOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogEntityCandidatesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/v1/catalog/entity-candidates", ...config }) as Promise<
+		RequestResult<ListCatalogEntityCandidatesResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Read source correspondences for a native record
+ * {@link /api/v1/catalog/resources/:owner/:id/source-bindings}
+ */
+export function listCatalogResourceSourceBindings<ThrowOnError extends boolean = true>(
+	options: Options<ListCatalogResourceSourceBindingsOptions, ThrowOnError>,
+): Promise<RequestResult<ListCatalogResourceSourceBindingsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/catalog/resources/{owner}/{id}/source-bindings",
+		...config,
+	}) as Promise<RequestResult<ListCatalogResourceSourceBindingsResponses, ThrowOnError>>;
 }
 
 /**
@@ -5281,56 +7317,60 @@ export function putApiTagPathsMergesByMergeIdResolution<ThrowOnError extends boo
 
 /**
  * @summary Get visible Tag Expressions grouped by authority
- * {@link /api/v1/units/:type/:unitId/tags}
+ * {@link /api/v1/resources/:owner/:unitId/tags}
  */
-export function getApiUnitsByTypeByUnitIdTags<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUnitsByTypeByUnitIdTagsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByTypeByUnitIdTagsResponses, ThrowOnError>> {
+export function getApiResourcesByOwnerByUnitIdTags<ThrowOnError extends boolean = true>(
+	options: Options<GetApiResourcesByOwnerByUnitIdTagsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiResourcesByOwnerByUnitIdTagsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/units/{type}/{unitId}/tags",
+		url: "/api/v1/resources/{owner}/{unitId}/tags",
 		...config,
-	}) as Promise<RequestResult<GetApiUnitsByTypeByUnitIdTagsResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiResourcesByOwnerByUnitIdTagsResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Apply one explicit global Path Sense
- * {@link /api/v1/units/:type/:unitId/tag-path-applications}
+ * {@link /api/v1/resources/:owner/:unitId/tag-path-applications}
  */
-export function postApiUnitsByTypeByUnitIdTagPathApplications<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUnitsByTypeByUnitIdTagPathApplicationsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsByTypeByUnitIdTagPathApplicationsResponses, ThrowOnError>> {
+export function postApiResourcesByOwnerByUnitIdTagPathApplications<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiResourcesByOwnerByUnitIdTagPathApplicationsOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PostApiResourcesByOwnerByUnitIdTagPathApplicationsResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/units/{type}/{unitId}/tag-path-applications",
+		url: "/api/v1/resources/{owner}/{unitId}/tag-path-applications",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<PostApiUnitsByTypeByUnitIdTagPathApplicationsResponses, ThrowOnError>
+		RequestResult<PostApiResourcesByOwnerByUnitIdTagPathApplicationsResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Remove one global Path Application
- * {@link /api/v1/units/:type/:unitId/tag-path-applications/:applicationId}
+ * {@link /api/v1/resources/:owner/:unitId/tag-path-applications/:applicationId}
  */
-export function deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationId<
+export function deleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<
-		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdOptions,
+		DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdOptions,
 		ThrowOnError
 	>,
 ): Promise<
 	RequestResult<
-		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdResponses,
+		DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdResponses,
 		ThrowOnError
 	>
 > {
@@ -5338,7 +7378,7 @@ export function deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/tag-path-applications/{applicationId}",
+		url: "/api/v1/resources/{owner}/{unitId}/tag-path-applications/{applicationId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5346,7 +7386,7 @@ export function deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationId<
 		...config,
 	}) as Promise<
 		RequestResult<
-			DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdResponses,
+			DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdResponses,
 			ThrowOnError
 		>
 	>;
@@ -5354,18 +7394,18 @@ export function deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationId<
 
 /**
  * @summary Judge one global semantic Application
- * {@link /api/v1/units/:type/:unitId/tag-path-applications/:applicationId/judgment}
+ * {@link /api/v1/resources/:owner/:unitId/tag-path-applications/:applicationId/judgment}
  */
-export function putApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgment<
+export function putApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgment<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<
-		PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+		PutApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
 		ThrowOnError
 	>,
 ): Promise<
 	RequestResult<
-		PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
+		PutApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
 		ThrowOnError
 	>
 > {
@@ -5373,7 +7413,7 @@ export function putApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgm
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/units/{type}/{unitId}/tag-path-applications/{applicationId}/judgment",
+		url: "/api/v1/resources/{owner}/{unitId}/tag-path-applications/{applicationId}/judgment",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5381,7 +7421,7 @@ export function putApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgm
 		...config,
 	}) as Promise<
 		RequestResult<
-			PutApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
+			PutApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
 			ThrowOnError
 		>
 	>;
@@ -5389,18 +7429,18 @@ export function putApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgm
 
 /**
  * @summary Clear one global Application judgment
- * {@link /api/v1/units/:type/:unitId/tag-path-applications/:applicationId/judgment}
+ * {@link /api/v1/resources/:owner/:unitId/tag-path-applications/:applicationId/judgment}
  */
-export function deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgment<
+export function deleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgment<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<
-		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
+		DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
 		ThrowOnError
 	>,
 ): Promise<
 	RequestResult<
-		DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
+		DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
 		ThrowOnError
 	>
 > {
@@ -5408,7 +7448,7 @@ export function deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJu
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/tag-path-applications/{applicationId}/judgment",
+		url: "/api/v1/resources/{owner}/{unitId}/tag-path-applications/{applicationId}/judgment",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -5416,7 +7456,7 @@ export function deleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJu
 		...config,
 	}) as Promise<
 		RequestResult<
-			DeleteApiUnitsByTypeByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
+			DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
 			ThrowOnError
 		>
 	>;
@@ -5720,7 +7760,7 @@ export function deleteApiUsersMeTagRealmSubscriptionsByRealmId<ThrowOnError exte
 }
 
 /**
- * @description Resolves one to three slug labels to a public Unit ID and reports its canonical path. Browser routes use the resolved ID for subsequent resource reads and cache identity.
+ * @description Resolves two or three slug labels to a public Unit ID and reports its canonical path. Browser routes use the resolved ID for subsequent resource reads and cache identity.
  * @summary Resolve a complete public Unit slug path
  * {@link /api/v1/slug-addresses/resolve}
  */
@@ -5752,7 +7792,7 @@ export function getPublicUnitSlugAddress<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @description Resolves a direct scope Unit ID and slug label to a public Unit ID. An optional expected kind prevents cross-resource matches. The response includes the complete canonical path so callers can redirect former addresses.
+ * @description Resolves a direct scope Unit ID and slug label to a public Unit ID. An optional expected owner prevents cross-resource matches. The response includes the complete canonical path so callers can redirect former addresses.
  * @summary Resolve a Unit slug in its direct scope
  * {@link /api/v1/slug-addresses/scopes/:scopeUnitId/:slug}
  */
@@ -5766,6 +7806,22 @@ export function resolveScopedUnitSlugAddress<ThrowOnError extends boolean = true
 		url: "/api/v1/slug-addresses/scopes/{scopeUnitId}/{slug}",
 		...config,
 	}) as Promise<RequestResult<ResolveScopedUnitSlugAddressResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Resolve a resource in a permanent namespace
+ * {@link /api/v1/slug-addresses/namespaces/:scopeNamespaceId/:slug}
+ */
+export function resolveNamespaceSlugAddress<ThrowOnError extends boolean = true>(
+	options: Options<ResolveNamespaceSlugAddressOptions, ThrowOnError>,
+): Promise<RequestResult<ResolveNamespaceSlugAddressResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/slug-addresses/namespaces/{scopeNamespaceId}/{slug}",
+		...config,
+	}) as Promise<RequestResult<ResolveNamespaceSlugAddressResponses, ThrowOnError>>;
 }
 
 /**
@@ -5805,24 +7861,6 @@ export function replaceUnitSlugAddressWithPlatformAccess<ThrowOnError extends bo
 }
 
 /**
- * @description Development-preview control plane. Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.
- * @summary Create an explicitly addressed namespace with platform access
- * {@link /api/v1/slug-addresses/namespaces}
- */
-export function createSlugNamespaceWithPlatformAccess<ThrowOnError extends boolean = true>(
-	options: Options<CreateSlugNamespaceWithPlatformAccessOptions, ThrowOnError>,
-): Promise<RequestResult<CreateSlugNamespaceWithPlatformAccessResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/slug-addresses/namespaces",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<CreateSlugNamespaceWithPlatformAccessResponses, ThrowOnError>>;
-}
-
-/**
  * @description Development-preview control plane. Deletes one temporary Redirect record so its scoped label may be reused. This is an audited platform action; retention and quarantine policy determines when a redirect is eligible for release.
  * @summary Release a retained slug redirect with platform access
  * {@link /api/v1/slug-addresses/redirects/:redirectAddressId}
@@ -5838,6 +7876,22 @@ export function releaseSlugRedirectWithPlatformAccess<ThrowOnError extends boole
 		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<ReleaseSlugRedirectWithPlatformAccessResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Resolve a readable native owner reference
+ * {@link /api/v1/units/by-id/:unitId/reference}
+ */
+export function getUnitReference<ThrowOnError extends boolean = true>(
+	options: Options<GetUnitReferenceOptions, ThrowOnError>,
+): Promise<RequestResult<GetUnitReferenceResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/units/by-id/{unitId}/reference",
+		...config,
+	}) as Promise<RequestResult<GetUnitReferenceResponses, ThrowOnError>>;
 }
 
 /**
@@ -5974,22 +8028,6 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublish<
 }
 
 /**
- * @summary List Unit Series memberships
- * {@link /api/v1/units/by-id/:unitId/series-memberships}
- */
-export function getApiUnitsByIdByUnitIdSeriesMemberships<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUnitsByIdByUnitIdSeriesMembershipsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByIdByUnitIdSeriesMembershipsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/series-memberships",
-		...config,
-	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdSeriesMembershipsResponses, ThrowOnError>>;
-}
-
-/**
  * @summary List Unit status events
  * {@link /api/v1/units/by-id/:unitId/status-events}
  */
@@ -6102,26 +8140,6 @@ export function postApiUnitsByType<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Draft Chapters attached to a draft Book
- * {@link /api/v1/units/book/:bookId/chapter-draft-jobs}
- */
-export function postApiUnitsBookByBookIdChapterDraftJobs<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUnitsBookByBookIdChapterDraftJobsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsBookByBookIdChapterDraftJobsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/units/book/{bookId}/chapter-draft-jobs",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiUnitsBookByBookIdChapterDraftJobsResponses, ThrowOnError>>;
-}
-
-/**
  * @summary List bounded Unit content language evidence
  * {@link /api/v1/units/:type/:unitId/content-language-support/evidence}
  */
@@ -6182,50 +8200,6 @@ export function patchApiUnitsByTypeByUnitId<ThrowOnError extends boolean = true>
 }
 
 /**
- * @summary Update Unit Main relationship
- * {@link /api/v1/units/:type/:unitId/variant-context}
- */
-export function patchApiUnitsByTypeByUnitIdVariantContext<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiUnitsByTypeByUnitIdVariantContextOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiUnitsByTypeByUnitIdVariantContextResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PATCH",
-		url: "/api/v1/units/{type}/{unitId}/variant-context",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiUnitsByTypeByUnitIdVariantContextResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Promote Unit Variant to Main
- * {@link /api/v1/units/:type/:unitId/variant-context/promote}
- */
-export function postApiUnitsByTypeByUnitIdVariantContextPromote<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<PostApiUnitsByTypeByUnitIdVariantContextPromoteOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsByTypeByUnitIdVariantContextPromoteResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/units/{type}/{unitId}/variant-context/promote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiUnitsByTypeByUnitIdVariantContextPromoteResponses, ThrowOnError>
-	>;
-}
-
-/**
  * @summary Create or replace unit localization
  * {@link /api/v1/units/:type/:unitId/localizations/:language}
  */
@@ -6251,40 +8225,18 @@ export function putApiUnitsByTypeByUnitIdLocalizationsByLanguage<
 
 /**
  * @summary List bounded Unit subject association cards
- * {@link /api/v1/units/:type/:unitId/subject-associations}
+ * {@link /api/v1/units/by-id/:unitId/subject-associations}
  */
-export function getApiUnitsByTypeByUnitIdSubjectAssociations<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUnitsByTypeByUnitIdSubjectAssociationsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByTypeByUnitIdSubjectAssociationsResponses, ThrowOnError>> {
+export function getApiUnitsByIdByUnitIdSubjectAssociations<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByIdByUnitIdSubjectAssociationsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByIdByUnitIdSubjectAssociationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/units/{type}/{unitId}/subject-associations",
+		url: "/api/v1/units/by-id/{unitId}/subject-associations",
 		...config,
-	}) as Promise<RequestResult<GetApiUnitsByTypeByUnitIdSubjectAssociationsResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Add Unit subject association
- * {@link /api/v1/units/:type/:unitId/subject-associations}
- */
-export function postApiUnitsByTypeByUnitIdSubjectAssociations<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/units/{type}/{unitId}/subject-associations",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdSubjectAssociationsResponses, ThrowOnError>>;
 }
 
 /**
@@ -6434,7 +8386,7 @@ export function patchApiHistoryUnitRevisionsByRevisionIdVisibility<
 }
 
 /**
- * @summary List recent changes
+ * @summary List recent platform resource revisions
  * {@link /api/v1/history/recent-changes}
  */
 export function getApiHistoryRecentChanges<ThrowOnError extends boolean = true>(
@@ -6448,7 +8400,7 @@ export function getApiHistoryRecentChanges<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary List profile contributions
+ * @summary List platform resource revisions by contributor
  * {@link /api/v1/history/contributions/:profileId}
  */
 export function getApiHistoryContributionsByProfileId<ThrowOnError extends boolean = true>(
@@ -6474,142 +8426,6 @@ export function getApiHistoryChangeTags<ThrowOnError extends boolean = true>(
 
 	return request({ method: "GET", url: "/api/v1/history/change-tags", ...config }) as Promise<
 		RequestResult<GetApiHistoryChangeTagsResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary List entity entries
- * {@link /api/v1/entities}
- */
-export function getApiEntities<ThrowOnError extends boolean = true>(
-	options: Options<GetApiEntitiesOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiEntitiesResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/v1/entities",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiEntitiesResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Create entity entry
- * {@link /api/v1/entities}
- */
-export function postApiEntities<ThrowOnError extends boolean = true>(
-	options: Options<PostApiEntitiesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiEntitiesResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/entities",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiEntitiesResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Get entity entry
- * {@link /api/v1/entities/:unitId}
- */
-export function getApiEntitiesByUnitId<ThrowOnError extends boolean = true>(
-	options: Options<GetApiEntitiesByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiEntitiesByUnitIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({ method: "GET", url: "/api/v1/entities/{unitId}", ...config }) as Promise<
-		RequestResult<GetApiEntitiesByUnitIdResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Create or replace a canonical Entity measurement set
- * {@link /api/v1/entities/:unitId/measurements}
- */
-export function putApiEntitiesByUnitIdMeasurements<ThrowOnError extends boolean = true>(
-	options: Options<PutApiEntitiesByUnitIdMeasurementsOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiEntitiesByUnitIdMeasurementsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/v1/entities/{unitId}/measurements",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiEntitiesByUnitIdMeasurementsResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Update Entity Main relationship
- * {@link /api/v1/entities/:unitId/variant-context}
- */
-export function patchApiEntitiesByUnitIdVariantContext<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiEntitiesByUnitIdVariantContextOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiEntitiesByUnitIdVariantContextResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PATCH",
-		url: "/api/v1/entities/{unitId}/variant-context",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiEntitiesByUnitIdVariantContextResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Promote Entity Variant to Main
- * {@link /api/v1/entities/:unitId/variant-context/promote}
- */
-export function postApiEntitiesByUnitIdVariantContextPromote<ThrowOnError extends boolean = true>(
-	options: Options<PostApiEntitiesByUnitIdVariantContextPromoteOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiEntitiesByUnitIdVariantContextPromoteResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/v1/entities/{unitId}/variant-context/promote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiEntitiesByUnitIdVariantContextPromoteResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Create or replace entity localization
- * {@link /api/v1/entities/:unitId/localizations/:language}
- */
-export function putApiEntitiesByUnitIdLocalizationsByLanguage<ThrowOnError extends boolean = true>(
-	options: Options<PutApiEntitiesByUnitIdLocalizationsByLanguageOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiEntitiesByUnitIdLocalizationsByLanguageResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/v1/entities/{unitId}/localizations/{language}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiEntitiesByUnitIdLocalizationsByLanguageResponses, ThrowOnError>
 	>;
 }
 
@@ -6683,164 +8499,202 @@ export function putApiTagsByTagIdLocalizationsByLanguage<ThrowOnError extends bo
 
 /**
  * @summary List Unit alias references
- * {@link /api/v1/units/:type/:unitId/aliases}
+ * {@link /api/v1/resources/:owner/:unitId/aliases}
  */
-export function getApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUnitsByTypeByUnitIdAliasesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByTypeByUnitIdAliasesResponses, ThrowOnError>> {
+export function getApiResourcesByOwnerByUnitIdAliases<ThrowOnError extends boolean = true>(
+	options: Options<GetApiResourcesByOwnerByUnitIdAliasesOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiResourcesByOwnerByUnitIdAliasesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/units/{type}/{unitId}/aliases",
+		url: "/api/v1/resources/{owner}/{unitId}/aliases",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<GetApiUnitsByTypeByUnitIdAliasesResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiResourcesByOwnerByUnitIdAliasesResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Propose Unit alias
- * {@link /api/v1/units/:type/:unitId/aliases}
+ * {@link /api/v1/resources/:owner/:unitId/aliases}
  */
-export function postApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUnitsByTypeByUnitIdAliasesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsByTypeByUnitIdAliasesResponses, ThrowOnError>> {
+export function postApiResourcesByOwnerByUnitIdAliases<ThrowOnError extends boolean = true>(
+	options: Options<PostApiResourcesByOwnerByUnitIdAliasesOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiResourcesByOwnerByUnitIdAliasesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/units/{type}/{unitId}/aliases",
+		url: "/api/v1/resources/{owner}/{unitId}/aliases",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PostApiUnitsByTypeByUnitIdAliasesResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PostApiResourcesByOwnerByUnitIdAliasesResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Vote on Unit alias
- * {@link /api/v1/units/:type/:unitId/aliases/:aliasId/vote}
+ * {@link /api/v1/resources/:owner/:unitId/aliases/:aliasId/vote}
  */
-export function putApiUnitsByTypeByUnitIdAliasesByAliasIdVote<ThrowOnError extends boolean = true>(
-	options: Options<PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>> {
+export function putApiResourcesByOwnerByUnitIdAliasesByAliasIdVote<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PutApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PutApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/units/{type}/{unitId}/aliases/{aliasId}/vote",
+		url: "/api/v1/resources/{owner}/{unitId}/aliases/{aliasId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
+		RequestResult<PutApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Remove Unit alias vote
- * {@link /api/v1/units/:type/:unitId/aliases/:aliasId/vote}
+ * {@link /api/v1/resources/:owner/:unitId/aliases/:aliasId/vote}
  */
-export function deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<
+export function deleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVote<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>> {
+	options: Options<DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteOptions, ThrowOnError>,
+): Promise<
+	RequestResult<DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/aliases/{aliasId}/vote",
+		url: "/api/v1/resources/{owner}/{unitId}/aliases/{aliasId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
+		RequestResult<DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
 	>;
 }
 
 /**
  * @summary Update Unit Alias curation
- * {@link /api/v1/units/:type/:unitId/aliases/:aliasId}
+ * {@link /api/v1/resources/:owner/:unitId/aliases/:aliasId}
  */
-export function patchApiUnitsByTypeByUnitIdAliasesByAliasId<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiUnitsByTypeByUnitIdAliasesByAliasIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>> {
+export function patchApiResourcesByOwnerByUnitIdAliasesByAliasId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PatchApiResourcesByOwnerByUnitIdAliasesByAliasIdOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiResourcesByOwnerByUnitIdAliasesByAliasIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PATCH",
-		url: "/api/v1/units/{type}/{unitId}/aliases/{aliasId}",
+		url: "/api/v1/resources/{owner}/{unitId}/aliases/{aliasId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PatchApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<PatchApiResourcesByOwnerByUnitIdAliasesByAliasIdResponses, ThrowOnError>
+	>;
 }
 
 /**
  * @summary Withdraw Unit alias reference
- * {@link /api/v1/units/:type/:unitId/aliases/:aliasId}
+ * {@link /api/v1/resources/:owner/:unitId/aliases/:aliasId}
  */
-export function deleteApiUnitsByTypeByUnitIdAliasesByAliasId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>> {
+export function deleteApiResourcesByOwnerByUnitIdAliasesByAliasId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/aliases/{aliasId}",
+		url: "/api/v1/resources/{owner}/{unitId}/aliases/{aliasId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Read accepted credit attributions
+ * {@link /api/v1/resources/:owner/:unitId/credit-attributions}
+ */
+export function listResourceCreditAttributions<ThrowOnError extends boolean = true>(
+	options: Options<ListResourceCreditAttributionsOptions, ThrowOnError>,
+): Promise<RequestResult<ListResourceCreditAttributionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/v1/resources/{owner}/{unitId}/credit-attributions",
+		...config,
+	}) as Promise<RequestResult<ListResourceCreditAttributionsResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Add Unit credit attribution
- * {@link /api/v1/units/:type/:unitId/credit-attributions}
+ * {@link /api/v1/resources/:owner/:unitId/credit-attributions}
  */
-export function postApiUnitsByTypeByUnitIdCreditAttributions<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUnitsByTypeByUnitIdCreditAttributionsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsByTypeByUnitIdCreditAttributionsResponses, ThrowOnError>> {
+export function postApiResourcesByOwnerByUnitIdCreditAttributions<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiResourcesByOwnerByUnitIdCreditAttributionsOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PostApiResourcesByOwnerByUnitIdCreditAttributionsResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/units/{type}/{unitId}/credit-attributions",
+		url: "/api/v1/resources/{owner}/{unitId}/credit-attributions",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PostApiUnitsByTypeByUnitIdCreditAttributionsResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<PostApiResourcesByOwnerByUnitIdCreditAttributionsResponses, ThrowOnError>
+	>;
 }
 
 /**
  * @summary Remove Unit credit attribution
- * {@link /api/v1/units/:type/:unitId/credit-attributions/:associationId}
+ * {@link /api/v1/resources/:owner/:unitId/credit-attributions/:associationId}
  */
-export function deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId<
+export function deleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociationId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<
-		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
+		DeleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociationIdOptions,
 		ThrowOnError
 	>,
 ): Promise<
 	RequestResult<
-		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdResponses,
+		DeleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociationIdResponses,
 		ThrowOnError
 	>
 > {
@@ -6848,7 +8702,7 @@ export function deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/credit-attributions/{associationId}",
+		url: "/api/v1/resources/{owner}/{unitId}/credit-attributions/{associationId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6856,26 +8710,52 @@ export function deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId<
 		...config,
 	}) as Promise<
 		RequestResult<
-			DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdResponses,
+			DeleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociationIdResponses,
 			ThrowOnError
 		>
 	>;
 }
 
 /**
- * @summary Judge the spoiler level of a subject association
- * {@link /api/v1/units/:type/:unitId/subject-associations/:associationId/spoiler}
+ * @summary Add Unit subject association
+ * {@link /api/v1/resources/:owner/:unitId/subject-associations}
  */
-export function putApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoiler<
+export function postApiResourcesByOwnerByUnitIdSubjectAssociations<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiResourcesByOwnerByUnitIdSubjectAssociationsOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PostApiResourcesByOwnerByUnitIdSubjectAssociationsResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/v1/resources/{owner}/{unitId}/subject-associations",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<PostApiResourcesByOwnerByUnitIdSubjectAssociationsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Judge the spoiler level of a subject association
+ * {@link /api/v1/resources/:owner/:unitId/subject-associations/:associationId/spoiler}
+ */
+export function putApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoiler<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<
-		PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+		PutApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
 		ThrowOnError
 	>,
 ): Promise<
 	RequestResult<
-		PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
+		PutApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
 		ThrowOnError
 	>
 > {
@@ -6883,7 +8763,7 @@ export function putApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoil
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/units/{type}/{unitId}/subject-associations/{associationId}/spoiler",
+		url: "/api/v1/resources/{owner}/{unitId}/subject-associations/{associationId}/spoiler",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6891,7 +8771,7 @@ export function putApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoil
 		...config,
 	}) as Promise<
 		RequestResult<
-			PutApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
+			PutApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
 			ThrowOnError
 		>
 	>;
@@ -6899,18 +8779,18 @@ export function putApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoil
 
 /**
  * @summary Clear a subject-association spoiler judgment
- * {@link /api/v1/units/:type/:unitId/subject-associations/:associationId/spoiler}
+ * {@link /api/v1/resources/:owner/:unitId/subject-associations/:associationId/spoiler}
  */
-export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoiler<
+export function deleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoiler<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<
-		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
+		DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
 		ThrowOnError
 	>,
 ): Promise<
 	RequestResult<
-		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
+		DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
 		ThrowOnError
 	>
 > {
@@ -6918,7 +8798,7 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSp
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/subject-associations/{associationId}/spoiler",
+		url: "/api/v1/resources/{owner}/{unitId}/subject-associations/{associationId}/spoiler",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6926,7 +8806,7 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSp
 		...config,
 	}) as Promise<
 		RequestResult<
-			DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
+			DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
 			ThrowOnError
 		>
 	>;
@@ -6934,18 +8814,18 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdSp
 
 /**
  * @summary Remove Unit subject association
- * {@link /api/v1/units/:type/:unitId/subject-associations/:associationId}
+ * {@link /api/v1/resources/:owner/:unitId/subject-associations/:associationId}
  */
-export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId<
+export function deleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<
-		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
+		DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdOptions,
 		ThrowOnError
 	>,
 ): Promise<
 	RequestResult<
-		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdResponses,
+		DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdResponses,
 		ThrowOnError
 	>
 > {
@@ -6953,7 +8833,7 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId<
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/subject-associations/{associationId}",
+		url: "/api/v1/resources/{owner}/{unitId}/subject-associations/{associationId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -6961,7 +8841,7 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId<
 		...config,
 	}) as Promise<
 		RequestResult<
-			DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdResponses,
+			DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdResponses,
 			ThrowOnError
 		>
 	>;
@@ -6969,92 +8849,66 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId<
 
 /**
  * @summary List Unit external-link references
- * {@link /api/v1/units/:type/:unitId/external-links}
+ * {@link /api/v1/resources/:owner/:unitId/external-links}
  */
-export function getApiUnitsByTypeByUnitIdExternalLinks<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUnitsByTypeByUnitIdExternalLinksOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByTypeByUnitIdExternalLinksResponses, ThrowOnError>> {
+export function getApiResourcesByOwnerByUnitIdExternalLinks<ThrowOnError extends boolean = true>(
+	options: Options<GetApiResourcesByOwnerByUnitIdExternalLinksOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiResourcesByOwnerByUnitIdExternalLinksResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/units/{type}/{unitId}/external-links",
+		url: "/api/v1/resources/{owner}/{unitId}/external-links",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<GetApiUnitsByTypeByUnitIdExternalLinksResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiResourcesByOwnerByUnitIdExternalLinksResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Propose Unit external link
- * {@link /api/v1/units/:type/:unitId/external-links}
+ * {@link /api/v1/resources/:owner/:unitId/external-links}
  */
-export function postApiUnitsByTypeByUnitIdExternalLinks<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUnitsByTypeByUnitIdExternalLinksOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsByTypeByUnitIdExternalLinksResponses, ThrowOnError>> {
+export function postApiResourcesByOwnerByUnitIdExternalLinks<ThrowOnError extends boolean = true>(
+	options: Options<PostApiResourcesByOwnerByUnitIdExternalLinksOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiResourcesByOwnerByUnitIdExternalLinksResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/v1/units/{type}/{unitId}/external-links",
+		url: "/api/v1/resources/{owner}/{unitId}/external-links",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PostApiUnitsByTypeByUnitIdExternalLinksResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PostApiResourcesByOwnerByUnitIdExternalLinksResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Vote on Unit external link
- * {@link /api/v1/units/:type/:unitId/external-links/:externalLinkId/vote}
+ * {@link /api/v1/resources/:owner/:unitId/external-links/:externalLinkId/vote}
  */
-export function putApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions, ThrowOnError>,
-): Promise<
-	RequestResult<PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses, ThrowOnError>
-> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Remove Unit external link vote
- * {@link /api/v1/units/:type/:unitId/external-links/:externalLinkId/vote}
- */
-export function deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote<
+export function putApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<
-		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+		PutApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteOptions,
 		ThrowOnError
 	>,
 ): Promise<
 	RequestResult<
-		DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses,
+		PutApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteResponses,
 		ThrowOnError
 	>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
-		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}/vote",
+		method: "PUT",
+		url: "/api/v1/resources/{owner}/{unitId}/external-links/{externalLinkId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
@@ -7062,7 +8916,42 @@ export function deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote<
 		...config,
 	}) as Promise<
 		RequestResult<
-			DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVoteResponses,
+			PutApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Remove Unit external link vote
+ * {@link /api/v1/resources/:owner/:unitId/external-links/:externalLinkId/vote}
+ */
+export function deleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/v1/resources/{owner}/{unitId}/external-links/{externalLinkId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<
+			DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteResponses,
 			ThrowOnError
 		>
 	>;
@@ -7070,154 +8959,178 @@ export function deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdVote<
 
 /**
  * @summary Update Unit external link curation
- * {@link /api/v1/units/:type/:unitId/external-links/:externalLinkId}
+ * {@link /api/v1/resources/:owner/:unitId/external-links/:externalLinkId}
  */
-export function patchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId<
+export function patchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions, ThrowOnError>,
+	options: Options<
+		PatchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdOptions,
+		ThrowOnError
+	>,
 ): Promise<
-	RequestResult<PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses, ThrowOnError>
+	RequestResult<
+		PatchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdResponses,
+		ThrowOnError
+	>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PATCH",
-		url: "/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}",
+		url: "/api/v1/resources/{owner}/{unitId}/external-links/{externalLinkId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<PatchApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses, ThrowOnError>
+		RequestResult<
+			PatchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdResponses,
+			ThrowOnError
+		>
 	>;
 }
 
 /**
  * @summary Withdraw Unit external-link reference
- * {@link /api/v1/units/:type/:unitId/external-links/:externalLinkId}
+ * {@link /api/v1/resources/:owner/:unitId/external-links/:externalLinkId}
  */
-export function deleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkId<
+export function deleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdOptions, ThrowOnError>,
+	options: Options<
+		DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdOptions,
+		ThrowOnError
+	>,
 ): Promise<
-	RequestResult<DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses, ThrowOnError>
+	RequestResult<
+		DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdResponses,
+		ThrowOnError
+	>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/external-links/{externalLinkId}",
+		url: "/api/v1/resources/{owner}/{unitId}/external-links/{externalLinkId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
 	}) as Promise<
-		RequestResult<DeleteApiUnitsByTypeByUnitIdExternalLinksByExternalLinkIdResponses, ThrowOnError>
+		RequestResult<
+			DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdResponses,
+			ThrowOnError
+		>
 	>;
 }
 
 /**
  * @summary Tag unit
- * {@link /api/v1/units/:type/:unitId/tags/:tagId}
+ * {@link /api/v1/resources/:owner/:unitId/tags/:tagId}
  */
-export function putApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends boolean = true>(
-	options: Options<PutApiUnitsByTypeByUnitIdTagsByTagIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUnitsByTypeByUnitIdTagsByTagIdResponses, ThrowOnError>> {
+export function putApiResourcesByOwnerByUnitIdTagsByTagId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiResourcesByOwnerByUnitIdTagsByTagIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/units/{type}/{unitId}/tags/{tagId}",
+		url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PutApiUnitsByTypeByUnitIdTagsByTagIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PutApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Update Unit tag curation
- * {@link /api/v1/units/:type/:unitId/tags/:tagId}
+ * {@link /api/v1/resources/:owner/:unitId/tags/:tagId}
  */
-export function patchApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiUnitsByTypeByUnitIdTagsByTagIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiUnitsByTypeByUnitIdTagsByTagIdResponses, ThrowOnError>> {
+export function patchApiResourcesByOwnerByUnitIdTagsByTagId<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiResourcesByOwnerByUnitIdTagsByTagIdOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PATCH",
-		url: "/api/v1/units/{type}/{unitId}/tags/{tagId}",
+		url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PatchApiUnitsByTypeByUnitIdTagsByTagIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PatchApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Remove Unit tag
- * {@link /api/v1/units/:type/:unitId/tags/:tagId}
+ * {@link /api/v1/resources/:owner/:unitId/tags/:tagId}
  */
-export function deleteApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiUnitsByTypeByUnitIdTagsByTagIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdTagsByTagIdResponses, ThrowOnError>> {
+export function deleteApiResourcesByOwnerByUnitIdTagsByTagId<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/tags/{tagId}",
+		url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdTagsByTagIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Vote on Unit tag
- * {@link /api/v1/units/:type/:unitId/tags/:tagId/vote}
+ * {@link /api/v1/resources/:owner/:unitId/tags/:tagId/vote}
  */
-export function putApiUnitsByTypeByUnitIdTagsByTagIdVote<ThrowOnError extends boolean = true>(
-	options: Options<PutApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses, ThrowOnError>> {
+export function putApiResourcesByOwnerByUnitIdTagsByTagIdVote<ThrowOnError extends boolean = true>(
+	options: Options<PutApiResourcesByOwnerByUnitIdTagsByTagIdVoteOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiResourcesByOwnerByUnitIdTagsByTagIdVoteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/units/{type}/{unitId}/tags/{tagId}/vote",
+		url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<PutApiResourcesByOwnerByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
+	>;
 }
 
 /**
  * @summary Remove Unit tag vote
- * {@link /api/v1/units/:type/:unitId/tags/:tagId/vote}
+ * {@link /api/v1/resources/:owner/:unitId/tags/:tagId/vote}
  */
-export function deleteApiUnitsByTypeByUnitIdTagsByTagIdVote<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses, ThrowOnError>> {
+export function deleteApiResourcesByOwnerByUnitIdTagsByTagIdVote<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdVoteOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdVoteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/v1/units/{type}/{unitId}/tags/{tagId}/vote",
+		url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}/vote",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
+	>;
 }
 
 /**
@@ -7487,93 +9400,91 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByN
 }
 
 /**
- * @summary List book Content Structure nodes
- * {@link /api/v1/units/book/:unitId/content-structure/nodes}
+ * @summary List TextVersion content occurrences
+ * {@link /api/v1/publishing/text-versions/:unitId/content-structure/nodes}
  */
-export function getApiUnitsBookByUnitIdContentStructureNodes<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUnitsBookByUnitIdContentStructureNodesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsBookByUnitIdContentStructureNodesResponses, ThrowOnError>> {
+export function listTextVersionContentNodes<ThrowOnError extends boolean = true>(
+	options: Options<ListTextVersionContentNodesOptions, ThrowOnError>,
+): Promise<RequestResult<ListTextVersionContentNodesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/units/book/{unitId}/content-structure/nodes",
+		url: "/api/v1/publishing/text-versions/{unitId}/content-structure/nodes",
 		...config,
-	}) as Promise<RequestResult<GetApiUnitsBookByUnitIdContentStructureNodesResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<ListTextVersionContentNodesResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Save a complete Book Content Structure draft
- * {@link /api/v1/units/book/:unitId/content-structure}
+ * @summary Save a TextVersion content draft
+ * {@link /api/v1/publishing/text-versions/:unitId/content-structure}
  */
-export function putApiUnitsBookByUnitIdContentStructure<ThrowOnError extends boolean = true>(
-	options: Options<PutApiUnitsBookByUnitIdContentStructureOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUnitsBookByUnitIdContentStructureResponses, ThrowOnError>> {
+export function saveTextVersionContentDraft<ThrowOnError extends boolean = true>(
+	options: Options<SaveTextVersionContentDraftOptions, ThrowOnError>,
+): Promise<RequestResult<SaveTextVersionContentDraftResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/units/book/{unitId}/content-structure",
+		url: "/api/v1/publishing/text-versions/{unitId}/content-structure",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PutApiUnitsBookByUnitIdContentStructureResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<SaveTextVersionContentDraftResponses, ThrowOnError>>;
 }
 
 /**
- * @summary List Media Content Structure nodes
- * {@link /api/v1/units/media/:unitId/content-structure/nodes}
+ * @summary List Program content occurrences
+ * {@link /api/v1/program/:unitId/content-structure/nodes}
  */
-export function getApiUnitsMediaByUnitIdContentStructureNodes<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUnitsMediaByUnitIdContentStructureNodesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsMediaByUnitIdContentStructureNodesResponses, ThrowOnError>> {
+export function listProgramContentNodes<ThrowOnError extends boolean = true>(
+	options: Options<ListProgramContentNodesOptions, ThrowOnError>,
+): Promise<RequestResult<ListProgramContentNodesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/units/media/{unitId}/content-structure/nodes",
+		url: "/api/v1/program/{unitId}/content-structure/nodes",
 		...config,
-	}) as Promise<
-		RequestResult<GetApiUnitsMediaByUnitIdContentStructureNodesResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<ListProgramContentNodesResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Save a complete Media Content Structure draft
- * {@link /api/v1/units/media/:unitId/content-structure}
+ * @summary Save a Program content draft
+ * {@link /api/v1/program/:unitId/content-structure}
  */
-export function putApiUnitsMediaByUnitIdContentStructure<ThrowOnError extends boolean = true>(
-	options: Options<PutApiUnitsMediaByUnitIdContentStructureOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUnitsMediaByUnitIdContentStructureResponses, ThrowOnError>> {
+export function saveProgramContentDraft<ThrowOnError extends boolean = true>(
+	options: Options<SaveProgramContentDraftOptions, ThrowOnError>,
+): Promise<RequestResult<SaveProgramContentDraftResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/v1/units/media/{unitId}/content-structure",
+		url: "/api/v1/program/{unitId}/content-structure",
 		security: [
 			{ type: "http", scheme: "bearer" },
 			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
 		],
 		...config,
-	}) as Promise<RequestResult<PutApiUnitsMediaByUnitIdContentStructureResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<SaveProgramContentDraftResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Read a Chapter occurrence in a Book
- * {@link /api/v1/books/:bookId/content-nodes/:nodeId}
+ * @summary Read a Chapter occurrence in a TextVersion
+ * {@link /api/v1/publishing/text-versions/:bookId/content-nodes/:nodeId}
  */
-export function getApiBooksByBookIdContentNodesByNodeId<ThrowOnError extends boolean = true>(
-	options: Options<GetApiBooksByBookIdContentNodesByNodeIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiBooksByBookIdContentNodesByNodeIdResponses, ThrowOnError>> {
+export function readTextVersionChapterNode<ThrowOnError extends boolean = true>(
+	options: Options<ReadTextVersionChapterNodeOptions, ThrowOnError>,
+): Promise<RequestResult<ReadTextVersionChapterNodeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/v1/books/{bookId}/content-nodes/{nodeId}",
+		url: "/api/v1/publishing/text-versions/{bookId}/content-nodes/{nodeId}",
 		...config,
-	}) as Promise<RequestResult<GetApiBooksByBookIdContentNodesByNodeIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<ReadTextVersionChapterNodeResponses, ThrowOnError>>;
 }
 
 /**

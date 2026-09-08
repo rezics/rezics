@@ -1,3 +1,4 @@
+import { UnitOwnerValues } from "@rezics/reference";
 import {
 	BlockPath,
 	MaxDockQueryBlocks,
@@ -41,7 +42,8 @@ export const DomainSearchBody = t.Object(
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 		localizationLanguages: t.Optional(LocalizationLanguageHints),
 		Languages: t.Optional(SearchLanguageList),
-		kinds: t.Optional(SearchStringList),
+		owners: t.Optional(t.Array(t.UnionEnum(UnitOwnerValues), { maxItems: 20, uniqueItems: true })),
+		shapes: t.Optional(SearchStringList),
 		contentRatings: t.Optional(SearchContentRatingList),
 		aiDisclosures: t.Optional(SearchStringList),
 		licenses: t.Optional(SearchLicenseList),
@@ -69,6 +71,8 @@ export const GroupedSearchBody = t.Object(
 		indexes: t.Optional(t.Array(SearchCategory, { minItems: 1, maxItems: 10 })),
 		localizationLanguages: t.Optional(LocalizationLanguageHints),
 		Languages: t.Optional(SearchLanguageList),
+		owners: t.Optional(t.Array(t.UnionEnum(UnitOwnerValues), { maxItems: 20, uniqueItems: true })),
+		shapes: t.Optional(SearchStringList),
 		limitPerIndex: t.Optional(t.Integer({ minimum: 1, maximum: 20, default: 5 })),
 	},
 	{ additionalProperties: false },

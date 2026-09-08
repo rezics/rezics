@@ -420,6 +420,7 @@ export async function adoptBangumiIndexMember(
 				"A nonempty index member comment requires its governed native annotation definition",
 			);
 		const note = await writeCatalogSourceScalar(tx, reference, actor, revision, {
+			purpose: "qualifier",
 			definitionRevisionId: value.commentDefinitionRevisionId,
 			value: entry.comment,
 			sourceRecordId: observation.record.id,
@@ -436,6 +437,7 @@ export async function adoptBangumiIndexMember(
 		if (!value.addedAtDefinitionRevisionId)
 			throw new TypeError("Index member source time requires its governed native definition");
 		const added = await writeCatalogSourceScalar(tx, reference, actor, revision, {
+			purpose: "qualifier",
 			definitionRevisionId: value.addedAtDefinitionRevisionId,
 			value: entry.added_at,
 			sourceRecordId: observation.record.id,

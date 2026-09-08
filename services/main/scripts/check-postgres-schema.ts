@@ -116,8 +116,10 @@ async function main(): Promise<void> {
 		.map(({ name }) => name);
 	assertCanonicalPostgreSqlSchemaFiles(actualFileNames, PostgreSqlSchemaFileNames);
 	const schemaDefinitions = await Promise.all(
-		PostgreSqlSchemaFileNames.map((fileName) =>
-			readFile(new URL(fileName, schemaDirectory), "utf8"),
+		PostgreSqlSchemaFileNames.map(async (fileName) =>
+			// The owning migration generator writes LF on every host. PostgreSQL
+			// preserves function-body newlines, so replay the same canonical bytes.
+			(await readFile(new URL(fileName, schemaDirectory), "utf8")).replace(/\r\n?/gu, "\n"),
 		),
 	);
 	assertCanonicalPostgreSqlObjectManifest(

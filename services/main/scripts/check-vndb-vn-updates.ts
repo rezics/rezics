@@ -338,7 +338,16 @@ try {
 							.where(eq(catalogDefinitionRevision.id, field.definitionRevisionId))
 							.limit(1);
 						assert.ok(definition);
-						const [node] = await readCatalogFactNodes(tx, ref, actor.id, field.valueFactId);
+						const [node] = await readCatalogFactNodes(
+							tx,
+							ref,
+							actor.id,
+							field.valueFactId,
+							-1,
+							100,
+							0,
+							relation.id,
+						);
 						assert.ok(node);
 						result.set(definition.key, node.numberValue ?? node.textValue);
 					}
@@ -392,6 +401,10 @@ try {
 									ref,
 									actor.id,
 									qualifier.valueFactId,
+									-1,
+									100,
+									0,
+									relation.id,
 								);
 								if (property.key === "image-dims-width")
 									assert.equal(Number(value?.numberValue), updated ? 640 : 600);

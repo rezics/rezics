@@ -20,9 +20,9 @@ export async function resolveGovernanceLookup(
 		if (scopes) throw new UnitGovernanceLookupInvalid();
 		return { kind: "browse" };
 	}
-	const id = z.uuid().safeParse(query);
-	if (id.success) {
-		if (scopes) throw new UnitGovernanceLookupInvalid();
+	if (scopes === 0) {
+		const id = z.uuid().safeParse(query);
+		if (!id.success) throw new UnitGovernanceLookupInvalid();
 		return { kind: "exact", id: id.data };
 	}
 	if (!isSlugLabel(query) || scopes !== 1) throw new UnitGovernanceLookupInvalid();

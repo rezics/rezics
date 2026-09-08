@@ -1,5 +1,5 @@
 import {presentImageAsset} from "../api/image-assets/presentation";
-import { and, desc, eq, inArray, isNull, lt, sql, getTableName, is, type SQLWrapper } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, lt, sql, getColumnTable, getTableName, is, type SQLWrapper } from "drizzle-orm";
 import { PgColumn } from "drizzle-orm/pg-core";
 import { createSchemaFactory } from "drizzle-orm/zod";
 import { z } from "zod";
@@ -12,7 +12,7 @@ import {
 	type AvatarReference,
 	type PresentedAvatar,
 } from "@rezics/avatar";
-import { database, type DatabaseTransaction } from "../database";
+import { database, type DatabaseTransaction, type DatabaseExecutor } from "../database";
 import { entityIdentity } from "../database/schema/catalog-identity";
 import {
 	entityPresentation,
@@ -180,7 +180,7 @@ export async function restoreEntityPresentation(
 export function publicEntityName(entityId: string | SQLWrapper) {
 	// Drizzle unqualifies column objects in single-table SELECT projections, including nested SQL.
 	const target = is(entityId, PgColumn)
-		? sql`${sql.identifier(getTableName(entityId.table))}.${sql.identifier(entityId.name)}`
+		? sql`${sql.identifier(getTableName(getColumnTable(entityId)))}.${sql.identifier(entityId.name)}`
 		: entityId;
 	return sql<string | null>`coalesce((select named.value from public.entity_presentation presented
 		join public.entity_named_form_revision named on named.owner_id=presented.entity_id and named.id=presented.name_id and named.revision=presented.name_revision
@@ -192,8 +192,9 @@ export function publicEntityName(entityId: string | SQLWrapper) {
 
 export interface PublicEntitySummary {
 	id: string;
-	kind: "entity";
-	language: string;
+	owner: "entity";
+	shape: string;
+	language: string | null;
 	title: string | null;
 	summary: string | null;
 	avatar: PresentedAvatar | null;
@@ -204,6 +205,7 @@ export interface PublicEntitySummary {
 export async function getPublicEntitySummariesByIds(
 	entityIds: readonly string[],
 	languages: readonly string[] = [],
+	executor: DatabaseExecutor = database,
 ): Promise<Map<string, PublicEntitySummary>> {
 	const ids = [...new Set(entityIds)];
 	if (ids.length > 512 || languages.length > 32)
@@ -214,7 +216,7 @@ export async function getPublicEntitySummariesByIds(
 				languages.map((language) => sql`${parseContentLanguageTag(language).tag}`),
 				sql`, `,
 			)}]::text[], ${entityPresentation.language}), 2147483647)`
-		: sql`0`;
+		: sql`null::integer`;
 	const presentation = database
 		.select({
 			language: entityPresentation.language,
@@ -232,10 +234,11 @@ export async function getPublicEntitySummariesByIds(
 		.orderBy(order, entityPresentation.language)
 		.limit(1)
 		.as("chosen_entity_presentation");
-	const rows = await database
+	const rows = await executor
 		.select({
 			id: entityIdentity.id,
-			language: sql<string>`coalesce(${presentation.language}, 'und')`,
+			shape: entityIdentity.shape,
+			language: presentation.language,
 			title: sql<
 				string | null
 			>`coalesce(${nameVersions.value}, ${publicEntityName(entityIdentity.id)})`,
@@ -261,6 +264,7 @@ export async function getPublicEntitySummariesByIds(
 				inArray(entityIdentity.id, ids),
 				eq(entityIdentity.status, "published"),
 				eq(entityIdentity.visibility, "public"),
+				eq(entityIdentity.moderationStatus, "approved"),
 				isNull(entityIdentity.deletedAt),
 			),
 		);
@@ -269,7 +273,8 @@ export async function getPublicEntitySummariesByIds(
 			row.id,
 			{
 				id: row.id,
-				kind: "entity" as const,
+				owner: "entity" as const,
+				shape: row.shape,
 				language: row.language,
 				title: row.title,
 				summary: row.summary,
@@ -301,6 +306,7 @@ export async function readPublicEntityProfile(
 		.where(
 			and(
 				eq(entityIdentity.id, entityId),
+				eq(entityIdentity.moderationStatus, "approved"),
 				eq(entityIdentity.status, "published"),
 				eq(entityIdentity.visibility, "public"),
 				isNull(entityIdentity.deletedAt),
@@ -313,7 +319,7 @@ export async function readPublicEntityProfile(
 				languages.map((language) => sql`${language}`),
 				sql`, `,
 			)}]::text[], ${entityPresentation.language}), 2147483647)`
-		: sql`0`;
+		: sql`null::integer`;
 	const [presentation] = await database
 		.select()
 		.from(entityPresentation)

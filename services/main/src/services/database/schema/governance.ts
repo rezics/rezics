@@ -1,3 +1,4 @@
+import { realmUnitStatus, realmUnitPublicationState } from "./realm-values";
 import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { sql } from "drizzle-orm";
 import {
@@ -46,8 +47,6 @@ import {
 	realmRule,
 	realmRuleRevision,
 	realmUnit,
-	realmUnitPublicationState,
-	realmUnitStatus,
 } from "./realm";
 import { unitLicenseGrant, unitLicenseRecognitionStatus } from "./unit";
 import { zone } from "./zone";

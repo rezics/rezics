@@ -1,4 +1,4 @@
-import { and, eq, gt, or } from "drizzle-orm";
+import { and, eq, gt, inArray, or } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import {
@@ -27,7 +27,7 @@ const orderKeySchema = z
 	.string()
 	.min(1)
 	.refine((value) => Buffer.byteLength(value, "utf8") <= 160);
-const groupingSnapshotSchema = z.discriminatedUnion("operation", [
+export const GroupingCommandSnapshotSchema = z.discriminatedUnion("operation", [
 	z.strictObject({ operation: z.literal("class.assign"), classRevisionId: z.uuid() }),
 	z.strictObject({ operation: z.literal("class.remove"), classRevisionId: z.uuid() }),
 	z.strictObject({
@@ -204,6 +204,7 @@ export async function readGroupingOrder(
 	input: {
 		readonly limit?: number;
 		readonly after?: { readonly position: string; readonly relationId: string };
+		readonly maxSpoiler?: 0 | 1 | 2;
 	} = {},
 ) {
 	const ref = groupingReferenceSchema.parse({ owner: reference.owner, id: reference.id });
@@ -212,32 +213,26 @@ export async function readGroupingOrder(
 	const page = z
 		.strictObject({
 			limit: z.number().int().min(1).max(100).default(50),
+			maxSpoiler: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
 			after: z
 				.strictObject({ position: z.string().refine(isFractionalPosition), relationId: z.uuid() })
 				.optional(),
 		})
 		.parse(input);
 	const table = groupingOrderEntry;
-	return tx
+	// Page the ordered candidates before visibility checks so sparse private or
+	// withdrawn memberships cannot turn one request into a whole-group scan.
+	const candidates = await tx
 		.select({
 			relationId: table.relationId,
 			position: table.position,
 			sourcePosition: table.sourcePosition,
 		})
 		.from(table)
-		.innerJoin(
-			groupingCatalogRelation,
-			and(
-				eq(groupingCatalogRelation.ownerId, table.ownerId),
-				eq(groupingCatalogRelation.id, table.relationId),
-			),
-		)
 		.where(
 			and(
 				eq(table.ownerId, ref.id),
 				eq(table.profileId, profileId),
-				eq(currentCatalogSemanticState(ref, "relation"), "active"),
-				await readableRelation(tx, ref, actor),
 				page.after
 					? or(
 							gt(table.position, page.after.position),
@@ -251,6 +246,16 @@ export async function readGroupingOrder(
 		)
 		.orderBy(table.position, table.relationId)
 		.limit(page.limit);
+	const visible = candidates.length ? await tx.select({ id: groupingCatalogRelation.id })
+		.from(groupingCatalogRelation).where(and(eq(groupingCatalogRelation.ownerId, ref.id),
+			inArray(groupingCatalogRelation.id, candidates.map(row => row.relationId)),
+			eq(currentCatalogSemanticState(ref, "relation"), "active"),
+			await readableRelation(tx, ref, actor, page.maxSpoiler),
+		)).limit(candidates.length) : [];
+	const visibleIds = new Set(visible.map(row => row.id));
+	const last = candidates.at(-1);
+	return { items: candidates.filter(row => visibleIds.has(row.relationId)),
+		after: candidates.length === page.limit && last ? { position: last.position, relationId: last.relationId } : null };
 }
 
 /** @alpha @remarks Classification removal changes no memberships, reading progress or source assertions. */
@@ -431,7 +436,7 @@ export async function readGroupingHistory(
 		)
 		.orderBy(table.revision)
 		.limit(page.limit);
-	return rows.map((row) => ({ ...row, snapshot: groupingSnapshotSchema.parse(row.snapshot) }));
+	return rows.map((row) => ({ ...row, snapshot: GroupingCommandSnapshotSchema.parse(row.snapshot) }));
 }
 
 /** @alpha @remarks Reapply one historical command as a new authorized edit; retired relations cannot be revived. */
@@ -452,7 +457,7 @@ export async function restoreGroupingCommand(
 		.where(and(eq(table.ownerId, ref.id), eq(table.revision, revision)))
 		.limit(1);
 	if (!row) throw new CatalogReferenceNotFound("Grouping command revision is missing");
-	const snapshot = groupingSnapshotSchema.parse(row.snapshot);
+	const snapshot = GroupingCommandSnapshotSchema.parse(row.snapshot);
 	switch (snapshot.operation) {
 		case "class.assign":
 			return assignGroupingClass(tx, ref, actor, expectedVersion, snapshot.classRevisionId);

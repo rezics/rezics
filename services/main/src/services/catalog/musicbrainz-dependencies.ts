@@ -37,6 +37,9 @@ import { bindReferencedSourceIdentity } from "./source-references";
 import { prepareCatalogSourceProposalDependency } from "./source-dependencies";
 import { catalogSourceRecordId } from "./source-record-key";
 import { loadCatalogSourceDocument, type CatalogSourceReceipt } from "./source-observations";
+
+/** @internal Heavy reference initialization uses half the ordinary proposal bound to leave room within the 25-second transaction. */
+export const MusicReleaseDependencyPageSize = 64;
 type Area = NonNullable<NonNullable<MusicBrainzRelease["release-events"]>[number]["area"]>;
 type Label = NonNullable<NonNullable<MusicBrainzRelease["label-info"]>[number]["label"]>;
 type Dependency = { path: string } & (
@@ -275,7 +278,8 @@ export async function prepareMusicBrainzProposalDependencies(
 			if (observation.referenceAt(item.path).externalId !== sourceKey(item).externalId)
 				throw new TypeError("MusicBrainz dependency identity differs from archived evidence");
 		const prepared = [];
-		for (const [offset, item] of plan.slice(afterPosition, afterPosition + 128).entries()) {
+		const pageSize=input.sourcePage ? MusicReleaseDependencyPageSize : 128;
+		for (const [offset, item] of plan.slice(afterPosition, afterPosition + pageSize).entries()) {
 			const position = afterPosition + offset + (input.purpose === "previous-for-withdrawal" ? MUSIC_SOURCE_DEPENDENCY_LIMIT : 0);
 			const path = item.path.slice(0, -3);
 			switch (item.kind) {

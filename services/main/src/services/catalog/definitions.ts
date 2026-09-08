@@ -112,6 +112,42 @@ export function validateCatalogParticipants(
 }
 
 /** @alpha Append a reviewed meaning without reinterpreting any prior fact or evidence. */
+export async function validateCatalogDefinitionMeaning(
+	tx: DatabaseTransaction,
+	kind: typeof catalogDefinition.$inferSelect.kind,
+	input: { valueKind: import("./contracts").CatalogValueKind | null; constraints: z.input<typeof CatalogDefinitionConstraintsSchema> },
+) {
+	const constraints = CatalogDefinitionConstraintsSchema.parse(input.constraints);
+	if ((kind === "property") !== (input.valueKind !== null))
+		throw new TypeError("Definition kind and value type disagree");
+	if (kind === "predicate" && !constraints.roles?.length)
+		throw new TypeError("Predicate requires governed roles");
+	if (kind !== "predicate" && (constraints.roles || constraints.qualifierRevisionIds))
+		throw new TypeError("Only predicates declare participant roles and relation qualifiers");
+	if (kind === "property" && ["object", "array"].includes(input.valueKind ?? "") && !constraints.rules)
+		throw new TypeError("Structured property requires governed rules");
+	if (constraints.rules && (kind !== "property" || constraints.rules[0]?.kind !== input.valueKind))
+		throw new TypeError("Property grammar must start with its governed value kind");
+	const groups = [
+		{ ids: (constraints.roles ?? []).map(role => role.roleRevisionId), kinds: ["role"] },
+		{ ids: constraints.qualifierRevisionIds ?? [], kinds: ["property"] },
+		{ ids: constraints.memberRevisionIds ?? [], kinds: ["class", "vocabulary"] },
+		{ ids: [constraints.vocabularyRevisionId, ...(constraints.rules ?? []).map(rule => rule.vocabularyRevisionId)]
+			.filter((id): id is string => id !== undefined), kinds: ["vocabulary"] },
+	] satisfies { ids: string[]; kinds: (typeof catalogDefinition.$inferSelect.kind)[] }[];
+	for (const { ids, kinds } of groups) {
+		const unique = [...new Set(ids)];
+		if (!unique.length) continue;
+		const rows = await tx.select({ id: catalogDefinitionRevision.id }).from(catalogDefinitionRevision)
+			.innerJoin(catalogDefinition, eq(catalogDefinition.id, catalogDefinitionRevision.definitionId))
+			.where(and(inArray(catalogDefinitionRevision.id, unique), inArray(catalogDefinition.kind, kinds)))
+			.limit(unique.length);
+		if (rows.length !== unique.length) throw new TypeError("Definition dependency is missing or has another semantic kind");
+	}
+	return constraints;
+}
+
+/** @alpha Append a reviewed meaning without reinterpreting any prior fact or evidence. */
 export async function reviseCatalogDefinition(
 	tx: DatabaseTransaction,
 	definitionId: string,
@@ -141,30 +177,7 @@ export async function reviseCatalogDefinition(
 		.orderBy(desc(catalogDefinitionRevision.version))
 		.limit(1);
 	if (latest?.version !== expectedVersion) throw new TypeError("Definition head changed");
-	const constraints = CatalogDefinitionConstraintsSchema.parse(input.constraints);
-	if ((identity.kind === "property") !== (input.valueKind !== null))
-		throw new TypeError("Definition kind and value type disagree");
-	if (identity.kind === "predicate" && !constraints.roles?.length)
-		throw new TypeError("Predicate requires governed roles");
-	if (
-		identity.kind === "property" &&
-		["object", "array"].includes(input.valueKind ?? "") &&
-		!constraints.rules
-	)
-		throw new TypeError("Structured property requires governed rules");
-	for (const role of constraints.roles ?? [])
-		await assertCatalogDefinitionRevision(tx, role.roleRevisionId, "role");
-	for (const qualifier of constraints.qualifierRevisionIds ?? [])
-		await assertCatalogDefinitionRevision(tx, qualifier, "property");
-	for (const member of constraints.memberRevisionIds ?? [])
-		await assertCatalogDefinitionRevision(tx, member, ["class", "vocabulary"]);
-	for (const vocabulary of new Set(
-		[
-			constraints.vocabularyRevisionId,
-			...(constraints.rules ?? []).map((r) => r.vocabularyRevisionId),
-		].filter((id): id is string => id !== undefined),
-	))
-		await assertCatalogDefinitionRevision(tx, vocabulary, "vocabulary");
+	const constraints = await validateCatalogDefinitionMeaning(tx, identity.kind, input);
 	const [revision] = await tx
 		.insert(catalogDefinitionRevision)
 		.values({ definitionId, version: expectedVersion + 1, valueKind: input.valueKind, constraints })

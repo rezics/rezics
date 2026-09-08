@@ -280,6 +280,13 @@ CREATE OR REPLACE FUNCTION public.guard_merged_catalog_identity_write()
 BEGIN
  IF EXISTS(SELECT 1 FROM public.unit_merge_redirect WHERE source_unit_id=OLD.id) THEN
  RAISE EXCEPTION 'Merged source identity is retained read-only' USING ERRCODE='23514',CONSTRAINT='merged_catalog_identity_read_only'; END IF;
+ IF EXISTS(SELECT 1 FROM public.unit_merge_graph_lock l JOIN public.unit_merge_operation o ON o.id=l.operation_id
+   WHERE l.unit_id=OLD.id AND o.source_unit_id=OLD.id
+   AND NOT coalesce(o.request_id::text=current_setting('rezics.merge_request_id',true)
+    AND o.lease_token::text=current_setting('rezics.merge_lease_token',true)
+    AND o.state='processing' AND o.lease_expires_at>clock_timestamp(),false)) THEN
+ RAISE EXCEPTION 'Accepted merge source is frozen until its worker canonicalizes it'
+ USING ERRCODE='23514',CONSTRAINT='accepted_catalog_merge_source_read_only'; END IF;
  RETURN CASE WHEN TG_OP='DELETE' THEN OLD ELSE NEW END;
 END;$function$;
 

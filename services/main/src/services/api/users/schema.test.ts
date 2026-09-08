@@ -34,13 +34,13 @@ describe("following API contracts", () => {
 	it("accepts typed kind, language, and bounded pagination inputs", () => {
 		expect(
 			Check(FollowingListQuery, {
-				kind: "zone",
+				owner: "zone",
 				localizationLanguages: ["zh", "en"],
 				limit: 30,
 			}),
 		).toBe(true);
-		expect(Check(FollowingListQuery, { kind: "unknown" })).toBe(false);
-		expect(Check(FollowingListQuery, { kind: "tag_path" })).toBe(false);
+		expect(Check(FollowingListQuery, { owner: "unknown" })).toBe(false);
+		expect(Check(FollowingListQuery, { owner: "tag_path" })).toBe(false);
 		expect(Check(FollowingListQuery, { language: "zh" })).toBe(false);
 		expect(Check(FollowingListQuery, { localizationLanguages: ["zh-Hant"] })).toBe(false);
 		expect(Check(FollowingListQuery, { limit: 101 })).toBe(false);
@@ -50,7 +50,7 @@ describe("following API contracts", () => {
 		expect(
 			Check(FollowingStatusResponse, {
 				following: true,
-				kind: "realm",
+				owner: "realm",
 				favorite: false,
 				position: "a0V",
 				inAppNotificationsEnabled: true,
@@ -60,7 +60,7 @@ describe("following API contracts", () => {
 		expect(
 			Check(FollowingStatusResponse, {
 				following: false,
-				kind: "book",
+				owner: "publishing",
 				favorite: null,
 				position: null,
 				inAppNotificationsEnabled: null,
@@ -70,7 +70,7 @@ describe("following API contracts", () => {
 		expect(
 			Check(FollowingStatusResponse, {
 				following: false,
-				kind: "realm",
+				owner: "realm",
 				favorite: false,
 				position: "a0V",
 				inAppNotificationsEnabled: null,
@@ -80,7 +80,7 @@ describe("following API contracts", () => {
 		expect(
 			Check(FollowingStatusResponse, {
 				following: true,
-				kind: "book",
+				owner: "publishing",
 				favorite: false,
 				position: "a0V",
 				inAppNotificationsEnabled: true,
@@ -92,28 +92,28 @@ describe("following API contracts", () => {
 	it("requires Realm-only personalization settings only for Realm targets", () => {
 		expect(
 			Check(ReplaceFollowingSettingsBody, {
-				kind: "realm",
+				owner: "realm",
 				inAppNotificationsEnabled: false,
 				realmTagSourceSubscribed: true,
 			}),
 		).toBe(true);
 		expect(
 			Check(ReplaceFollowingSettingsBody, {
-				kind: "tag_path",
+				owner: "tag_path",
 				inAppNotificationsEnabled: true,
 				realmTagSourceSubscribed: null,
 			}),
 		).toBe(false);
 		expect(
 			Check(ReplaceFollowingSettingsBody, {
-				kind: "book",
+				owner: "publishing",
 				inAppNotificationsEnabled: true,
 				realmTagSourceSubscribed: null,
 			}),
 		).toBe(true);
 		expect(
 			Check(ReplaceFollowingSettingsBody, {
-				kind: "book",
+				owner: "publishing",
 				inAppNotificationsEnabled: true,
 				realmTagSourceSubscribed: false,
 			}),
@@ -160,16 +160,16 @@ describe("Profile privacy contracts", () => {
 describe("profile content language contract", () => {
 	it("requires one supported language for every localized profile update", () => {
 		const input = {
-			updatedAt: "2026-07-28T00:00:00.000Z",
+			expectedRevision: 0,
 			language: "zh",
 			name: "名稱",
 		};
 		expect(Check(UpdateEntityPresentationBody, input)).toBe(true);
 		expect(Check(UpdateEntityPresentationBody, { ...input, language: "ja" })).toBe(true);
-		expect(Check(UpdateEntityPresentationBody, { ...input, language: "zh-Hans" })).toBe(false);
+		expect(Check(UpdateEntityPresentationBody, { ...input, language: "zh-Hans" })).toBe(true);
 		expect(
 			Check(UpdateEntityPresentationBody, {
-				updatedAt: input.updatedAt,
+				expectedRevision: input.expectedRevision,
 				name: input.name,
 			}),
 		).toBe(false);

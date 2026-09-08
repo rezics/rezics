@@ -262,7 +262,7 @@ try {
 				sourcePosition: "1.5",
 			});
 			assert.equal(
-				(await readGroupingOrder(tx, grouping, actor, order.id))[0]?.sourcePosition,
+				(await readGroupingOrder(tx, grouping, actor, order.id)).items[0]?.sourcePosition,
 				"1.5",
 			);
 			checks++;
@@ -270,7 +270,7 @@ try {
 				profileId: order.id,
 				relationId: relation.id,
 			});
-			assert.equal((await readGroupingOrder(tx, grouping, actor, order.id)).length, 0);
+			assert.equal((await readGroupingOrder(tx, grouping, actor, order.id)).items.length, 0);
 			const restoredOrder = await restoreGroupingCommand(
 				tx,
 				grouping,
@@ -278,7 +278,7 @@ try {
 				removed.revision,
 				ordered.revision,
 			);
-			assert.equal((await readGroupingOrder(tx, grouping, actor, order.id)).length, 1);
+			assert.equal((await readGroupingOrder(tx, grouping, actor, order.id)).items.length, 1);
 			checks++;
 			const entries = await readGroupingHistory(tx, grouping, actor, { limit: 2 });
 			assert.equal(entries.length, 2);
@@ -292,7 +292,7 @@ try {
 				relation.headVersion,
 				"withdrawn",
 			);
-			assert.equal((await readGroupingOrder(tx, grouping, actor, order.id)).length, 0);
+			assert.equal((await readGroupingOrder(tx, grouping, actor, order.id)).items.length, 0);
 			checks++;
 			await assert.rejects(
 				tx.transaction((nested) =>

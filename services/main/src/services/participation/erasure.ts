@@ -30,7 +30,6 @@ import {
 import {
 	notificationRecipientStat,
 	conversationParticipantStat,
-	bookChapterProgressStat,
 } from "../database/schema/aggregate";
 import { accountEntityBlock } from "../database/schema/account-block";
 import {
@@ -382,13 +381,6 @@ export async function dispatchAccountErasureBatch(
 				break;
 			case "progress":
 				result = await deletePrivateBatch(tx, unitProgress, eq(unitProgress.authUserId, authId));
-				break;
-			case "progress_stats":
-				result = await deletePrivateBatch(
-					tx,
-					bookChapterProgressStat,
-					eq(bookChapterProgressStat.authUserId, authId),
-				);
 				break;
 			case "recommendation_events":
 				result = await deletePrivateBatch(

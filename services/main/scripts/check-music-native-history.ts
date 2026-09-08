@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { runWithNativeFixtureActor } from "./native-fixture-actor";
 import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
@@ -48,6 +49,7 @@ try {
 				.values({ name: "Music history fixture", email: `${crypto.randomUUID()}@example.invalid` })
 				.returning({ id: users.id });
 			assert.ok(actor);
+			return runWithNativeFixtureActor(tx,actor.id,async()=>{
 			const release = await createMusicRelease(tx, actor.id, {
 				name: { languageTag: "en", value: "Physical release" },
 			});
@@ -129,6 +131,7 @@ try {
 			);
 			assert.ok(plan.rows.length);
 			throw rollback;
+			});
 		});
 	} catch (error) {
 		if (error !== rollback) throw error;

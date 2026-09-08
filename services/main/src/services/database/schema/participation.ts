@@ -117,7 +117,6 @@ export const AccountErasureStageValues = [
 	"progress",
 	"progress_entries",
 	"progress_nodes",
-	"progress_stats",
 	"recommendation_events",
 	"recommendation_exclusions",
 	"studio_visits",

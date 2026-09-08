@@ -47,7 +47,7 @@ describe("sparse Filter documents", () => {
 	it("compiles only the explicit categories and domain predicate", () => {
 		const filterDocument = {
 			categories: ["units"],
-			where: { kind: { in: ["book"] } },
+			where: { owner: { in: ["publishing"] }, shape: {in:["work"]} },
 		} as const;
 		const compiled = compileSearchFeatureInput(input(filterDocument), {
 			sortProfile: "search",

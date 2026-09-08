@@ -3,11 +3,12 @@ import { t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import {
 	ContentLanguage,
+	ContentLanguageTag,
 	DateTime,
-	FollowableUnitKind,
+	FollowableUnitOwner,
 	FractionalPosition,
 	LocalizationLanguageField,
-	NonRealmFollowableUnitKind,
+	NonRealmFollowableUnitOwner,
 	OrdinalPosition,
 	ResourceVisibility,
 	Uuid,
@@ -78,7 +79,7 @@ export const FollowResponse = t.Object({ following: t.Boolean() });
 export const FollowingStatusResponse = t.Union([
 	t.Object({
 		following: t.Literal(true),
-		kind: t.Literal("realm"),
+		owner: t.Literal("realm"),
 		favorite: t.Boolean(),
 		position: FractionalPosition,
 		inAppNotificationsEnabled: t.Boolean(),
@@ -86,7 +87,7 @@ export const FollowingStatusResponse = t.Union([
 	}),
 	t.Object({
 		following: t.Literal(true),
-		kind: NonRealmFollowableUnitKind,
+		owner: NonRealmFollowableUnitOwner,
 		favorite: t.Boolean(),
 		position: FractionalPosition,
 		inAppNotificationsEnabled: t.Boolean(),
@@ -94,7 +95,7 @@ export const FollowingStatusResponse = t.Union([
 	}),
 	t.Object({
 		following: t.Literal(false),
-		kind: t.Literal("realm"),
+		owner: t.Literal("realm"),
 		favorite: t.Null(),
 		position: t.Null(),
 		inAppNotificationsEnabled: t.Null(),
@@ -102,7 +103,7 @@ export const FollowingStatusResponse = t.Union([
 	}),
 	t.Object({
 		following: t.Literal(false),
-		kind: NonRealmFollowableUnitKind,
+		owner: NonRealmFollowableUnitOwner,
 		favorite: t.Null(),
 		position: t.Null(),
 		inAppNotificationsEnabled: t.Null(),
@@ -114,8 +115,9 @@ export const FollowingListResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			slugAddress: NullablePublicSlugAddressResponse,
-			kind: FollowableUnitKind,
-			language: t.Nullable(ContentLanguage),
+			owner: FollowableUnitOwner,
+            shape:t.String(),
+			language: t.Nullable(ContentLanguageTag),
 			title: t.Nullable(t.String()),
 			avatar: AvatarResponse,
 			cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),

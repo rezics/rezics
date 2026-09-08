@@ -26,7 +26,17 @@ contract with a new forward migration whose filename sorts after the released
 history. Prefixed product tags such as `web/v*`, `about/v*`, and `api/v*` do not
 advance the database migration boundary.
 
+The maintainer's 2026-09-08 operational-refactor authorization explicitly replaces
+the entire old migration chain with a fresh native target baseline. Delete the
+old migrations and global `unit` model; their Git history is the recovery/audit
+record. Do not replay obsolete schemas before installing this target or generate
+successive compatibility cutovers. Once the new baseline is released, the
+ordinary append-only rule applies to that new history. Legacy import remains a
+separate offline program.
+
 Generate database migrations with `task services-main:db:generate -- <name>`.
+For the authorized replacement, generate the fresh baseline with
+`task services-main:db:baseline`, then qualify it with `task services-main:db:check`.
 The task replays the versioned directory with production-equivalent file
 transactions into the disposable shadow database, then runs `atlas schema diff`
 against the typed Drizzle exporter. Do not replace this workflow with

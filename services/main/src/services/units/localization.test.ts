@@ -2,7 +2,7 @@ import { PgDialect } from "drizzle-orm/pg-core";
 import { FontAwesomeProvider } from "@rezics/avatar";
 import { describe, expect, it } from "vitest";
 
-import { unit } from "../database/schema";
+import { post } from "../database/schema";
 import {
 	avatarReferenceToColumns,
 	resolveUnitLocalizationFromOrdered,
@@ -77,14 +77,14 @@ describe("resolveUnitLocalizationAvatarFromOrdered", () => {
 
 describe("resolvedUnitLocalizationAvatar", () => {
 	it("gives the bound provider value a concrete PostgreSQL type", () => {
-		const query = new PgDialect().sqlToQuery(resolvedUnitLocalizationAvatar(unit.id));
+		const query = new PgDialect().sqlToQuery(resolvedUnitLocalizationAvatar(post.id));
 
 		expect(query.sql).toContain("'provider', $1::text");
 		expect(query.params[0]).toBe(FontAwesomeProvider);
 	});
 
 	it("preserves the caller's language preference order for array filters", () => {
-		const query = new PgDialect().sqlToQuery(resolvedUnitLocalizationTitle(unit.id, ["zh", "en"]));
+		const query = new PgDialect().sqlToQuery(resolvedUnitLocalizationTitle(post.id, ["zh", "en"]));
 
 		expect(query.sql).toContain("array_position");
 		expect(query.sql).toContain("array[$1, $2]::text[]");

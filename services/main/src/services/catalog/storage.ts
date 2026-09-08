@@ -33,6 +33,7 @@ import {
 import {
 	currentCatalogSemantic,
 	currentCatalogSemanticState,
+	pageCurrentCatalogSemanticTargets,
 	publishCatalogSemanticRevision,
 } from "./semantic-history";
 import { CatalogValueNodeSchema } from "./value-nodes";
@@ -285,6 +286,7 @@ export async function beginCatalogFact(
 	definitionRevisionId: string,
 	options: {
 		spoiler?: 0 | 1 | 2;
+		purpose?: "assertion" | "qualifier";
 		semanticId?: string;
 		expectedHeadVersion?: number;
 		initialSemanticId?: string;
@@ -292,6 +294,7 @@ export async function beginCatalogFact(
 ) {
 	const staged = z
 		.strictObject({
+			purpose: z.enum(["assertion", "qualifier"]).default("assertion"),
 			spoiler: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
 			semanticId: z.uuid().optional(),
 			initialSemanticId: z.uuid().optional(),
@@ -330,6 +333,7 @@ export async function beginCatalogFact(
 			ownerId: reference.id,
 			definitionRevisionId,
 			spoiler: staged.spoiler,
+			purpose: staged.purpose,
 			semanticId: staged.initialSemanticId ?? staged.semanticId,
 			expectedHeadVersion: staged.expectedHeadVersion,
 		})
@@ -539,8 +543,9 @@ export async function readCatalogFactNodes(
 	z.number().int().min(0).max(2).parse(maxSpoiler);
 	if (!fact?.sealedAt || !["active", "disputed"].includes(fact.state) || fact.spoiler > maxSpoiler)
 		throw new CatalogReferenceNotFound("Catalog fact is missing, withdrawn or not sealed");
-	if (!(await canAccessCatalog(tx, reference, actor, identity.createdByAuthUserId, false))) {
-		const [current] = await tx
+	const ownerAccess = await canAccessCatalog(tx, reference, actor, identity.createdByAuthUserId, false);
+	if (fact.purpose === "qualifier" || !ownerAccess) {
+		const [current] = fact.purpose === "assertion" ? await tx
 			.select({ id: tables.fact.id })
 			.from(tables.fact)
 			.where(
@@ -550,11 +555,11 @@ export async function readCatalogFactNodes(
 					currentCatalogSemantic(reference, "fact"),
 				),
 			)
-			.limit(1);
+			.limit(1) : [];
 		if (!current) {
 			if (!relationId)
 				throw new CatalogReferenceNotFound(
-					"Historical fact requires owner authority or a current exact relation",
+					"Qualifier values require an exact visible relation; historical assertions require owner authority",
 				);
 			z.uuid().parse(relationId);
 			const [scoped] = await tx
@@ -572,7 +577,7 @@ export async function readCatalogFactNodes(
 						eq(tables.relationScope.ownerId, reference.id),
 						eq(tables.relationScope.relationId, relationId),
 						eq(tables.relationScope.valueFactId, factId),
-						currentCatalogSemantic(reference, "relation"),
+						ownerAccess ? undefined : currentCatalogSemantic(reference, "relation"),
 						await readableRelation(tx, reference, actor, maxSpoiler),
 					),
 				)
@@ -606,6 +611,7 @@ export async function createCatalogRelation(
 		readonly definitionRevisionId: string;
 		readonly spoiler?: 0 | 1 | 2;
 		readonly semanticId?: string;
+		readonly initialSemanticId?: string;
 		readonly expectedHeadVersion?: number;
 		readonly qualifiers?: readonly { definitionRevisionId: string; valueFactId: string }[];
 		readonly participants: readonly {
@@ -619,6 +625,7 @@ export async function createCatalogRelation(
 		.strictObject({
 			definitionRevisionId: z.uuid(),
 			semanticId: z.uuid().optional(),
+			initialSemanticId: z.uuid().optional(),
 			expectedHeadVersion: z
 				.number()
 				.int()
@@ -648,7 +655,8 @@ export async function createCatalogRelation(
 				target: { owner: participant.target.owner, id: participant.target.id },
 			})),
 		});
-	if (Boolean(value.semanticId) !== value.expectedHeadVersion > 0)
+	if (Boolean(value.semanticId) !== value.expectedHeadVersion > 0 ||
+		(value.initialSemanticId && (value.semanticId || value.expectedHeadVersion !== 0)))
 		throw new TypeError("Replacement requires an exact existing semantic head");
 	const revision = await recordCatalogChange(
 		tx,
@@ -701,7 +709,7 @@ export async function createCatalogRelation(
 			ownerId: reference.id,
 			definitionRevisionId: value.definitionRevisionId,
 			spoiler: value.spoiler,
-			semanticId: value.semanticId,
+			semanticId: value.initialSemanticId ?? value.semanticId,
 			expectedHeadVersion: value.expectedHeadVersion,
 		})
 		.returning({ id: tables.relation.id, semanticId: tables.relation.semanticId });
@@ -969,6 +977,7 @@ export async function readCatalogRelationQualifiers(
 			id: tables.relationScope.id,
 			definitionRevisionId: tables.relationScope.definitionRevisionId,
 			valueFactId: tables.relationScope.valueFactId,
+			valueFactPurpose: tables.fact.purpose,
 		})
 		.from(tables.relationScope)
 		.innerJoin(
@@ -1000,6 +1009,7 @@ export async function pageCatalogRelations(
 		limit?: number;
 		definitionRevisionId?: string;
 		maxSpoiler?: 0 | 1 | 2;
+		includeInactive?: boolean;
 	} = {},
 ) {
 	await loadCatalogIdentity(tx, reference, actor, false);
@@ -1009,24 +1019,15 @@ export async function pageCatalogRelations(
 			limit: z.number().int().min(1).max(100).default(50),
 			definitionRevisionId: z.uuid().optional(),
 			maxSpoiler: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
+			includeInactive: z.boolean().default(false),
 		})
 		.parse(input);
+	if (page.includeInactive) await loadCatalogIdentity(tx, reference, actor, true);
 	const table = CatalogFactTables[reference.owner].relation;
-	const candidates = await tx
-		.select({ id: table.id })
-		.from(table)
-		.where(
-			and(
-				eq(table.ownerId, reference.id),
-				page.afterId ? gt(table.id, page.afterId) : undefined,
-				page.definitionRevisionId
-					? eq(table.definitionRevisionId, page.definitionRevisionId)
-					: undefined,
-			),
-		)
-		.orderBy(table.id)
-		.limit(page.limit);
-	if (!candidates.length) return { items: [], afterId: null };
+	const candidates = await pageCurrentCatalogSemanticTargets(tx, reference, page.afterId, page.limit);
+	const afterId = candidates.length === page.limit ? candidates.at(-1)?.semanticId ?? null : null;
+	const ids = candidates.flatMap(candidate => candidate.relationId ? [candidate.relationId] : []);
+	if (!ids.length) return { items: [], afterId };
 	const items = await tx
 		.select({
 			...getTableColumns(table),
@@ -1036,18 +1037,16 @@ export async function pageCatalogRelations(
 		.where(
 			and(
 				eq(table.ownerId, reference.id),
-				inArray(
-					table.id,
-					candidates.map((c) => c.id),
-				),
-				currentCatalogSemantic(reference, "relation"),
+				inArray(table.id, ids),
+				page.definitionRevisionId ? eq(table.definitionRevisionId, page.definitionRevisionId) : undefined,
+				currentCatalogSemantic(reference, "relation", page.includeInactive),
 				await readableRelation(tx, reference, actor, page.maxSpoiler),
 			),
 		)
-		.orderBy(table.id)
+		.orderBy(table.semanticId)
 		.limit(page.limit);
 	return {
 		items,
-		afterId: candidates.length === page.limit ? (candidates.at(-1)?.id ?? null) : null,
+		afterId,
 	};
 }

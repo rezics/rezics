@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 import { MusicBrainzAlternativeReleaseDumpSchema } from "./musicbrainz-alternative-contracts";
 
 const gid = "11111111-1111-4111-8111-111111111111";

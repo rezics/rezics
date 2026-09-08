@@ -8,7 +8,7 @@ import {
 	FilterPostKindValues,
 	FilterRealmUnitPublicationStateValues,
 	FilterRealmUnitStatusValues,
-	FilterUnitKindValues,
+	UnitOwnerValues,
 	mergeUnitFilter,
 	parseUnitFilter,
 	readSimpleFeedFilter,
@@ -25,7 +25,6 @@ import {
 	PostKindValues,
 	RealmUnitPublicationStateValues,
 	RealmUnitStatusValues,
-	UnitKindValues,
 } from "../database/schema/contract-values";
 import { compileUnitPredicateCandidateSet, compileUnitPredicateSql } from "./sql";
 
@@ -34,8 +33,9 @@ const TagId = "00000000-0000-4000-8000-000000000002";
 const dialect = new PgDialect();
 
 describe("domain Filter contract", () => {
-	it("keeps non-searchable Tag Paths out of the otherwise canonical vocabularies", () => {
-		expect(FilterUnitKindValues).toEqual(UnitKindValues.filter((kind) => kind !== "tag_path"));
+	it("uses native owners and preserves the canonical typed vocabularies", () => {
+		expect(UnitOwnerValues).toContain("publishing");
+		expect(UnitOwnerValues).not.toContain("book");
 		expect(FilterPostKindValues).toEqual(PostKindValues);
 		expect(FilterContentLanguageValues).toEqual(ContentLanguageValues);
 		expect(FilterRealmUnitStatusValues).toEqual(RealmUnitStatusValues);
@@ -44,7 +44,7 @@ describe("domain Filter contract", () => {
 
 	it("round-trips the standard Feed selection without widening it", () => {
 		const filter = createSimpleFeedFilter({
-			contentKinds: ["unit:book", "post:review"],
+			contentKinds: ["publishing:work", "post:review"],
 			languages: ["zh", "en"],
 			realmIds: [RealmId],
 			tagIds: [TagId],
@@ -52,7 +52,7 @@ describe("domain Filter contract", () => {
 
 		expect(filter).toBeDefined();
 		expect(readSimpleFeedFilter(filter)).toEqual({
-			contentKinds: ["unit:book", "post:review"],
+			contentKinds: ["publishing:work", "post:review"],
 			languages: ["zh", "en"],
 			realmIds: [RealmId],
 			tagIds: [TagId],
@@ -78,7 +78,7 @@ describe("domain Filter contract", () => {
 		const query = dialect.sqlToQuery(
 			compileUnitPredicateSql(filter, {
 				unitId: sql`candidate.id`,
-				unitKind: sql`candidate.kind`,
+				unitOwner: sql`candidate.owner`, unitShape: sql`candidate.shape`,
 			}),
 		);
 
@@ -89,10 +89,10 @@ describe("domain Filter contract", () => {
 	it("builds the standard content selection as Unit-or-Post eligibility", () => {
 		expect(
 			createSimpleFeedFilter({
-				contentKinds: ["post:review", "unit:media", "unit:book", "unit:book"],
+				contentKinds: ["post:review", "program:program", "publishing:work", "publishing:work"],
 			}),
 		).toEqual({
-			any: [{ kind: { in: ["book", "media"] } }, { post: { is: { kind: { in: ["review"] } } } }],
+			any: [{owner:{in:["publishing"]},shape:{in:["work"]}}, {owner:{in:["program"]},shape:{in:["program"]}}, { post: { is: { kind: { in: ["review"] } } } }],
 		});
 	});
 
@@ -121,7 +121,7 @@ describe("domain Filter contract", () => {
 		const eligibility = dialect.sqlToQuery(
 			compileUnitPredicateSql(filter, {
 				unitId: sql`candidate.id`,
-				unitKind: sql`candidate.kind`,
+				unitOwner: sql`candidate.owner`, unitShape: sql`candidate.shape`,
 			}),
 		);
 		const candidates = compileUnitPredicateCandidateSet(filter);
@@ -138,13 +138,13 @@ describe("domain Filter contract", () => {
 	it("canonicalizes object key order for cursor identity", () => {
 		expect(
 			canonicalUnitPredicate({
-				kind: { in: ["book"] },
+				owner: { in: ["publishing"] },
 				id: { in: [RealmId] },
 			}),
 		).toBe(
 			canonicalUnitPredicate({
 				id: { in: [RealmId] },
-				kind: { in: ["book"] },
+				owner: { in: ["publishing"] },
 			}),
 		);
 	});
@@ -165,10 +165,10 @@ describe("domain Filter contract", () => {
 		expect(() =>
 			assertUnitPredicate({
 				any: [
-					{ post: { is: { subject: { is: { kind: { in: ["book"] } } } } } },
+					{ post: { is: { subject: { is: { owner: { in: ["publishing"] } } } } } },
 					{
 						collection: {
-							is: { items: { some: { kind: { in: ["book"] } } } },
+							is: { items: { some: { owner: { in: ["publishing"] } } } },
 						},
 					},
 				],
@@ -207,7 +207,7 @@ describe("domain Filter contract", () => {
 						{ subjectAssociations: { some: { id: { in: [RealmId] } } } },
 					],
 				},
-				{ unitId: sql`candidate.id`, unitKind: sql`candidate.kind` },
+				{ unitId: sql`candidate.id`, unitOwner: sql`candidate.owner`, unitShape: sql`candidate.shape` },
 			),
 		);
 
@@ -237,7 +237,7 @@ describe("domain Filter contract", () => {
 			compileUnitPredicateCandidateSet({
 				any: [
 					{ creditAttributions: { some: { id: { in: [RealmId] } } } },
-					{ kind: { in: ["book"] } },
+					{ owner: { in: ["publishing"] } },
 				],
 			}),
 		).toBeUndefined();
@@ -295,12 +295,12 @@ describe("domain Filter contract", () => {
 		).toBeUndefined();
 		expect(
 			compileUnitPredicateCandidateSet({
-				creditAttributions: { some: { kind: { in: ["entity"] } } },
+				creditAttributions: { some: { owner: { in: ["entity"] } } },
 			}),
 		).toBeUndefined();
 		expect(
 			compileUnitPredicateCandidateSet({
-				any: [{ tags: { some: { tag: { id: { in: [TagId] } } } } }, { kind: { in: ["book"] } }],
+				any: [{ tags: { some: { tag: { id: { in: [TagId] } } } } }, { owner: { in: ["publishing"] } }],
 			}),
 		).toBeUndefined();
 	});
@@ -348,7 +348,7 @@ describe("domain Filter contract", () => {
 			const query = dialect.sqlToQuery(
 				compileUnitPredicateSql(filter, {
 					unitId: sql`candidate.id`,
-					unitKind: sql`candidate.kind`,
+					unitOwner: sql`candidate.owner`, unitShape: sql`candidate.shape`,
 				}),
 			);
 
@@ -446,7 +446,7 @@ describe("domain Filter contract", () => {
 	it("does not reinterpret an advanced Filter as standard Feed UI state", () => {
 		expect(
 			readSimpleFeedFilter({
-				any: [{ kind: { in: ["book"] } }, { kind: { in: ["media"] } }],
+				any: [{ owner: { in: ["publishing"] } }, { owner: { in: ["program"] } }],
 			}),
 		).toBeUndefined();
 	});
@@ -454,7 +454,7 @@ describe("domain Filter contract", () => {
 	it("keeps service-backed Search positive and outside recursive predicates", () => {
 		const filter = parseUnitFilter({
 			search: { query: "distributed systems" },
-			where: { kind: { in: ["book"] } },
+			where: { owner: { in: ["publishing"] } },
 		});
 
 		expect(() => assertUnitFilter(filter)).not.toThrow();

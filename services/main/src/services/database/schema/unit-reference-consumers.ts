@@ -301,25 +301,19 @@ export const UnitReferenceConsumers = [
 		optional: false,
 	},
 	{
-		table: "unit_merge_graph_guard",
-		id: "unit_id",
-		prefix: "unit",
-		optional: false,
-	},
-	{
 		table: "unit_merge_graph_lock",
 		id: "unit_id",
 		prefix: "unit",
 		optional: false,
 	},
 	{
-		table: "unit_merge_operation",
+		table: "unit_merge_reconciliation_item",
 		id: "source_unit_id",
 		prefix: "source_unit",
 		optional: false,
 	},
 	{
-		table: "unit_merge_operation",
+		table: "unit_merge_reconciliation_item",
 		id: "target_unit_id",
 		prefix: "target_unit",
 		optional: false,
@@ -350,12 +344,6 @@ export const UnitReferenceConsumers = [
 	},
 	{
 		table: "unit_ownership",
-		id: "unit_id",
-		prefix: "unit",
-		optional: false,
-	},
-	{
-		table: "unit_ownership_claim",
 		id: "unit_id",
 		prefix: "unit",
 		optional: false,

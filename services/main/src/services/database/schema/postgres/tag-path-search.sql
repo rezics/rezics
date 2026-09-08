@@ -88,7 +88,7 @@ BEGIN
         RETURN;
     END IF;
 
-    filter_expression := filter_expression || ' && unit_kind == '
+    filter_expression := filter_expression || ' && unit_owner == '
         || public.pgroonga_escape('tag');
     command_result := public.pgroonga_command('select', ARRAY[
         'table', public.pgroonga_table_name('unit_search_document_pgroonga_idx'),
@@ -124,7 +124,8 @@ REVOKE ALL ON FUNCTION public.search_tag_suggestion_candidates(
 CREATE OR REPLACE FUNCTION public.search_text_candidates(
     p_queries text[],
     p_languages text[],
-    p_unit_kind text,
+    p_unit_owner text,
+    p_shapes text[],
     p_after_updated_at_micros bigint,
     p_after_unit_id uuid,
     p_estimated_postings_limit integer,
@@ -168,12 +169,9 @@ BEGIN
        OR NOT p_languages <@ ARRAY['zh', 'en', 'ja', 'ko', 'de', 'fr', 'es']::text[] THEN
         RAISE EXCEPTION 'invalid text language boundary' USING ERRCODE = '22023';
     END IF;
-    IF p_unit_kind IS NULL OR p_unit_kind NOT IN (
-        'slug_namespace', 'profile', 'book', 'software', 'media', 'video', 'audio',
-        'release', 'entity', 'label', 'tag', 'tag_path', 'series', 'zone',
-        'zone_page', 'collection', 'post', 'poll', 'realm', 'realm_rule'
-    ) THEN
-        RAISE EXCEPTION 'invalid Unit kind boundary' USING ERRCODE = '22023';
+    IF p_shapes IS NULL OR cardinality(p_shapes)>50 THEN RAISE EXCEPTION 'invalid shape boundary' USING ERRCODE='22023'; END IF;
+    IF p_unit_owner IS NULL OR p_unit_owner NOT IN ('publishing','music','program','software','entity','grouping','reference','distribution','post','video','audio','poll','zone','realm','realm_rule','custom_theme','collection','tag','tag_path','label') THEN
+      RAISE EXCEPTION 'invalid Unit owner boundary' USING ERRCODE='22023';
     END IF;
     IF p_limit IS NULL OR p_limit < 1 OR p_limit > 4097 THEN
         RAISE EXCEPTION 'invalid text result limit' USING ERRCODE = '22023';
@@ -235,27 +233,20 @@ BEGIN
     END LOOP;
 
     IF estimated_postings > p_estimated_postings_limit THEN
-        RETURN QUERY
-        SELECT candidate.id,
-            (extract(epoch FROM candidate.updated_at) * 1000000)::bigint,
-            false
-        FROM public.unit AS candidate
-        WHERE candidate.kind = p_unit_kind
-          AND candidate.status = 'published'::public.unit_status
-          AND candidate.visibility = 'public'::public.resource_visibility
-          AND candidate.moderation_status = 'approved'::public.moderation_status
-          AND candidate.deleted_at IS NULL
-          AND (p_after_unit_id IS NULL OR (candidate.updated_at, candidate.id) < (
-              to_timestamp(p_after_updated_at_micros::numeric / 1000000),
-              p_after_unit_id
-          ))
-        ORDER BY candidate.updated_at DESC, candidate.id DESC
-        LIMIT p_limit;
+        RETURN QUERY EXECUTE format('SELECT candidate.id,(extract(epoch FROM candidate.updated_at)*1000000)::bigint,false FROM public.%I candidate
+         WHERE candidate.status=''published'' AND candidate.visibility=''public'' AND candidate.moderation_status=''approved'' AND candidate.deleted_at IS NULL
+          AND (cardinality($4)=0 OR %s=ANY($4))
+          AND ($1 IS NULL OR (candidate.updated_at,candidate.id)<(to_timestamp($2::numeric/1000000),$1))
+         ORDER BY candidate.updated_at DESC,candidate.id DESC LIMIT $3',CASE WHEN p_unit_owner=ANY(ARRAY['publishing','music','program','software','entity','grouping','reference','distribution']) THEN p_unit_owner||'_identity' ELSE p_unit_owner END,CASE WHEN p_unit_owner=ANY(ARRAY['publishing','music','program','software','entity','grouping','reference','distribution']) THEN 'candidate.shape' WHEN p_unit_owner='post' THEN 'candidate.kind::text' ELSE quote_literal(p_unit_owner) END)
+         USING p_after_unit_id,p_after_updated_at_micros,p_limit,p_shapes;
         RETURN;
     END IF;
 
-    filter_expression := filter_expression || ' && unit_kind == '
-        || public.pgroonga_escape(p_unit_kind);
+    filter_expression := filter_expression || ' && unit_owner == '
+        || public.pgroonga_escape(p_unit_owner);
+    IF cardinality(p_shapes)>0 THEN
+     filter_expression := filter_expression||' && ('||(SELECT string_agg('unit_shape == '||public.pgroonga_escape(shape),' || ') FROM unnest(p_shapes) shape)||')';
+    END IF;
     IF p_after_unit_id IS NOT NULL THEN
         after_order_key := lpad(p_after_updated_at_micros::text, 20, '0')
             || ':' || p_after_unit_id::text;
@@ -290,10 +281,6 @@ BEGIN
 END;
 $$;
 
-DROP FUNCTION IF EXISTS public.search_text_candidates(
-    text, text[], text, bigint, uuid, integer, integer
-);
-
 REVOKE ALL ON FUNCTION public.search_text_candidates(
-    text[], text[], text, bigint, uuid, integer, integer
+    text[], text[], text, text[], bigint, uuid, integer, integer
 ) FROM PUBLIC;

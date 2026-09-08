@@ -1,5 +1,6 @@
 import { catalogSourcePath } from "./source-document-scope";
-import { catalogSourceSupportColumns } from "./source-support";
+import { catalogReferenceAwareSupportColumns } from "./source-support";
+import { isCatalogReferenceInitialization } from "./reference-initialization";
 import { z } from "zod";
 import { createHash } from "node:crypto";
 import type { DatabaseTransaction } from "../database";
@@ -43,7 +44,7 @@ export async function adoptMusicBrainzAliases(
 	for (const [index, alias] of aliases.entries()) {
 		const added = await addCatalogName(tx, reference, actor, revision, musicBrainzAliasName(alias));
 		revision = added.revision;
-		await bindCatalogNameSourceOccurrence(tx, reference, actor, {
+		if(!isCatalogReferenceInitialization(tx,observation.record.id,reference)) await bindCatalogNameSourceOccurrence(tx, reference, actor, {
 			sourceRecordId: observation.record.id,
 			snapshotId: observation.snapshot.id,
 			namespace: "musicbrainz.name",
@@ -57,7 +58,7 @@ export async function adoptMusicBrainzAliases(
 			sourcePath: catalogSourcePath(observation.record.id, observation.snapshot.id, `${path}/${index}`),
 		});
 		await tx.insert(CatalogFactTables[reference.owner].support).values({
-			...(await catalogSourceSupportColumns(tx, observation.record.id)),
+			...(await catalogReferenceAwareSupportColumns(tx, observation.record.id)),
 			ownerId: reference.id,
 			namedFormId: added.id,
 			sourceRecordId: observation.record.id,
@@ -82,7 +83,7 @@ export async function adoptMusicBrainzTitle(
 		value: title,
 		languageTag: null,
 	});
-	await bindCatalogNameSourceOccurrence(tx, reference, actor, {
+	if(!isCatalogReferenceInitialization(tx,observation.record.id,reference)) await bindCatalogNameSourceOccurrence(tx, reference, actor, {
 		sourceRecordId: observation.record.id,
 		snapshotId: observation.snapshot.id,
 		namespace: "musicbrainz.name",
@@ -92,7 +93,7 @@ export async function adoptMusicBrainzTitle(
 		sourcePath: catalogSourcePath(observation.record.id, observation.snapshot.id, "/title"),
 	});
 	await tx.insert(CatalogFactTables[reference.owner].support).values({
-		...(await catalogSourceSupportColumns(tx, observation.record.id)),
+		...(await catalogReferenceAwareSupportColumns(tx, observation.record.id)),
 		ownerId: reference.id,
 		namedFormId: added.id,
 		sourceRecordId: observation.record.id,

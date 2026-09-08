@@ -7,12 +7,15 @@ if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1"
 const url = new URL(connectionString);
 if (
 	!["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) ||
-	!["/rezics", "/rezics_atlas"].includes(url.pathname)
+	!/^\/rezics_atlas(?:_[a-z0-9_]+)?$/u.test(url.pathname) ||
+	url.port === "15432"
 )
-	throw new Error("Progress privacy checks require a loopback local REZICS database");
+	throw new Error("Progress privacy checks require an isolated loopback Atlas database");
 
 const { database } = await import("../src/services/database");
-const { unit, users, unitProgress } = await import("../src/services/database/schema");
+const { users, unitProgress } = await import("../src/services/database/schema");
+const { createCatalogIdentity } = await import("../src/services/catalog/storage");
+const { runWithNativeFixtureActor } = await import("./native-fixture-actor");
 const { createProgressEntry, lockUnitProgress } = await import(
 	"../src/services/api/progress/service"
 );
@@ -28,8 +31,9 @@ try {
 			.values({ name: "Privacy fixture", email: `${crypto.randomUUID()}@example.invalid` })
 			.returning();
 		assert.ok(account);
-		const [target] = await tx.insert(unit).values({ kind: "book" }).returning();
-		assert.ok(target);
+		const target = await runWithNativeFixtureActor(tx, account.id, () =>
+			createCatalogIdentity(tx, { owner: "publishing", shape: "work" }, account.id),
+		);
 		const key = and(eq(unitProgress.authUserId, account.id), eq(unitProgress.unitId, target.id));
 		const visibility = async () =>
 			(await tx.select({ visibility: unitProgress.visibility }).from(unitProgress).where(key))[0]

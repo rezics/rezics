@@ -173,7 +173,7 @@ describe("feed eligibility SQL", () => {
 	it("defaults to feedable Units and Post kinds without replies", () => {
 		const selection = resolveFeedContentSelection();
 
-		expect(selection.unitKinds).toContain("book");
+		expect(selection.owners).toContain("publishing");
 		expect(selection.postKinds).toContain("post");
 		expect(selection.postKinds).toContain("excerpt");
 		expect(selection.postKinds).not.toContain("reply");
@@ -183,14 +183,15 @@ describe("feed eligibility SQL", () => {
 	it("keeps supported replies available when explicitly selected", () => {
 		expect(resolveFeedContentSelection(["post:reply"])).toEqual({
 			selected: ["post:reply"],
-			unitKinds: [],
+            definitions:[{owner:"post",shape:"reply"}],
+			owners: [],
 			postKinds: ["reply"],
 		});
 	});
 
 	it("normalizes content selections into the contract order", () => {
-		expect(resolveFeedContentSelection(["post:reply", "unit:book"]).selected).toEqual([
-			"unit:book",
+		expect(resolveFeedContentSelection(["post:reply", "publishing:work"]).selected).toEqual([
+			"publishing:work",
 			"post:reply",
 		]);
 	});
@@ -208,7 +209,7 @@ describe("feed eligibility SQL", () => {
 			),
 		);
 
-		expect(query.sql).toMatch(/"unit"\."content_rating" in \(\$\d+, \$\d+\)/);
+		expect(query.sql).toMatch(/"search_unit"\."content_rating" in \(\$\d+, \$\d+\)/);
 		expect(query.sql).not.toContain("::text[]");
 		expect(query.params).toEqual(expect.arrayContaining(["general", "r15"]));
 	});
@@ -226,18 +227,19 @@ describe("feed eligibility SQL", () => {
 			),
 		);
 
-		expect(query.sql).toContain('"unit"."kind" =');
-		expect(query.sql).toContain('"post"."kind" in');
+		expect(query.sql).toContain('"search_unit"."owner" =');
+		expect(query.sql).toContain('"search_unit"."shape" =');
 		expect(query.params).toEqual(expect.arrayContaining(["post", "general"]));
 		expect(query.params).not.toContain("reply");
 	});
 
 	it("uses simple domain content filters to narrow the feed universe", () => {
-		const selection = resolveFeedContentSelection(["unit:book", "post:review"]);
+		const selection = resolveFeedContentSelection(["publishing:work", "post:review"]);
 
 		expect(selection).toEqual({
-			selected: ["unit:book", "post:review"],
-			unitKinds: ["book"],
+			selected: ["publishing:work", "post:review"],
+            definitions:[{owner:"publishing",shape:"work"},{owner:"post",shape:"review"}],
+			owners: ["publishing"],
 			postKinds: ["review"],
 		});
 	});
@@ -284,7 +286,7 @@ describe("feed eligibility SQL", () => {
 		expect(query.sql).toContain('"post_score"."post_id"');
 		expect(query.sql).toContain('"score"."realm_id"');
 		expect(query.sql).toContain('"score"."value" in');
-		expect(query.sql).toContain('"profile_preference"."score_visibility"');
+		expect(query.sql).toContain('"account_preference"."score_visibility"');
 		expect(query.sql).toContain('"score"."visibility"');
 		expect(query.params).toEqual(expect.arrayContaining(["review", realmId, 8, 9, 10, "general"]));
 	});
@@ -410,7 +412,7 @@ describe("feed candidate realm SQL", () => {
 
 		expect(query.sql).not.toContain('"unit_follow"');
 		expect(query.sql).not.toContain("case when exists");
-		expect(query.sql).toContain("candidate_realm.created_at desc, candidate_realm.realm_id");
+		expect(query.sql).toContain("candidate_realm.updated_at desc, candidate_realm.realm_id desc");
 		expect(query.params).toEqual([]);
 	});
 

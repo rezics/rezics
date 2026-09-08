@@ -60,6 +60,7 @@ export const MergeItemListSchema = z.strictObject({
 export const MergeResolveItemSchema = z.strictObject({
 	action: z.enum(["retry", "retain_source"]),
 	expectedTargetRevision: revision,
+	expectedBindingRevision: revision.optional(),
 	reason: z.string().min(1).max(2000),
 });
 const summary = z.strictObject({ id: z.uuid(), title: z.string().max(500).nullable() });
@@ -143,6 +144,10 @@ export const MergeItemSchema = z.strictObject({
 	mappingKey: z.uuid().nullable(),
 	sourceBindingRevision: revision.nullable(),
 	targetBindingRevision: revision.nullable(),
+	currentBinding: z.strictObject({
+		revision, state: z.enum(["active", "paused", "withdrawn"]),
+		reference: z.strictObject({ owner: z.enum(CatalogOwnerValues), id: z.uuid() }),
+	}).nullable(),
 	errorCode: z.string().nullable(),
 	resolvedAt: z.iso.datetime().nullable(),
 });

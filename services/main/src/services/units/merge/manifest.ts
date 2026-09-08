@@ -17,7 +17,8 @@ import {
 } from "../../api/governance/errors";
 import { readUnitStateById, type UnitState } from "../query";
 import { readUnitPresentationsInTransaction } from "../presentation-reader";
-import { loadCatalogIdentity } from "../../catalog/storage";
+import { loadCatalogIdentity, CatalogAccessDenied, CatalogReferenceNotFound } from "../../catalog/storage";
+import { ParticipationDenied } from "../../participation/policy";
 import { UnitNotFound } from "../errors";
 import { MergePlanSchema, MergeManifestSchema, type DefaultMergePlan } from "./contracts";
 import type { z } from "zod";
@@ -77,11 +78,14 @@ export async function buildUnitMergeManifest(
 	const sourceReference = CatalogReferenceSchema.safeParse(source.reference),
 		targetReference = CatalogReferenceSchema.safeParse(target.reference);
 	if (!sourceReference.success || !targetReference.success) throw new UnitMergeKindIneligible();
-	if (!compatibleMergeIdentities(source, target)) throw new UnitMergeKindMismatch();
 	for (const reference of [sourceReference.data, targetReference.data]) {
-		await loadCatalogIdentity(tx, reference, authorization.authUserId ?? null, false);
-		if (access === "write")
-			await loadCatalogIdentity(tx, reference, authorization.authUserId ?? null, true);
+		try { await loadCatalogIdentity(tx, reference, authorization.authUserId ?? null, false); }
+		catch(cause) { if(cause instanceof CatalogAccessDenied || cause instanceof CatalogReferenceNotFound) throw new UnitNotFound(); throw cause; }
+	}
+	if (!compatibleMergeIdentities(source, target)) throw new UnitMergeKindMismatch();
+	if(access==="write") for(const reference of [sourceReference.data,targetReference.data]) {
+		try { await loadCatalogIdentity(tx,reference,authorization.authUserId??null,true); }
+		catch(cause) { if(cause instanceof CatalogAccessDenied) throw new ParticipationDenied(); throw cause; }
 	}
 	const ids = [source.id, target.id];
 	const [controls, selves, redirects, locks] = await Promise.all([

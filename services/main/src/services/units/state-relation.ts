@@ -1,6 +1,7 @@
 import type { UnitOwner } from "@rezics/reference";
 import { sql, type SQLWrapper } from "drizzle-orm";
 import { database } from "../database";
+import { post } from "../database/schema/post";
 import type {
 	AiDisclosureValues,
 	ContentRating,
@@ -29,16 +30,33 @@ export function unitStateRelation(targetId: SQLWrapper, alias: string, includeDe
 			moderationStatus: sql<ModerationStatus>`moderation_status`.as("moderation_status"),
 			aiDisclosure: sql<AiDisclosure | null>`ai_disclosure`.as("ai_disclosure"),
 			postTargetingLocked: sql<boolean | null>`post_targeting_locked`.as("post_targeting_locked"),
-			publishedAt: sql<Date | null>`published_at`.as("published_at"),
+			publishedAt: sql<Date | null>`published_at`.mapWith(post.publishedAt).as("published_at"),
 			revision: sql<number>`revision`.mapWith(Number).as("revision"),
 			routingGeneration: sql<number>`routing_generation`.as("routing_generation"),
 			createdByAuthUserId: sql<string | null>`created_by_auth_user_id`.as(
 				"created_by_auth_user_id",
 			),
-			deletedAt: sql<Date | null>`deleted_at`.as("deleted_at"),
-			createdAt: sql<Date>`created_at`.as("created_at"),
-			updatedAt: sql<Date>`updated_at`.as("updated_at"),
+			deletedAt: sql<Date | null>`deleted_at`.mapWith(post.deletedAt).as("deleted_at"),
+			createdAt: sql<Date>`created_at`.mapWith(post.createdAt).as("created_at"),
+			updatedAt: sql<Date>`updated_at`.mapWith(post.updatedAt).as("updated_at"),
 		})
 		.from(sql`public.read_unit_state(${targetId}, ${includeDeleted})`)
 		.as(alias);
+}
+
+/** A finite caller-owned candidate set; never discovers IDs through routing metadata. */
+export function unitStatesForIds(ids: readonly string[], alias: string, includeDeleted = false) {
+	if (ids.length > 500) throw new RangeError("At most 500 explicit state targets are admitted");
+	const candidates = database.select({ id: sql<string>`requested.id`.as("id") })
+		.from(sql`unnest(${sql.param([...new Set(ids)])}::uuid[]) requested(id)`).as("state_candidates");
+	const state = unitStateRelation(candidates.id, "candidate_state", includeDeleted);
+	return database.select({
+		id: state.id, owner: state.owner, shape: state.shape, status: state.status,
+		visibility: state.visibility, moderationStatus: state.moderationStatus,
+		contentRating: state.contentRating, aiDisclosure: state.aiDisclosure,
+		postTargetingLocked: state.postTargetingLocked, publishedAt: state.publishedAt,
+		revision: state.revision, routingGeneration: state.routingGeneration,
+		createdByAuthUserId: state.createdByAuthUserId, deletedAt: state.deletedAt,
+		createdAt: state.createdAt, updatedAt: state.updatedAt,
+	}).from(candidates).innerJoinLateral(state, sql`true`).as(alias);
 }

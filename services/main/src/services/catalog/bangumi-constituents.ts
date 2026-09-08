@@ -159,6 +159,7 @@ export async function adoptBangumiConstituent(
 			actor,
 			parentRevision,
 			qualifier.definitionRevisionId,
+			{ purpose: "qualifier" },
 		);
 		const appended = await appendCatalogFactNodes(tx, parent, actor, fact.revision, fact.id, -1, [
 			...catalogValueNodes(qualifier.value),

@@ -2925,17 +2925,18 @@ async function seedCoverageContracts(
 		createdAt,
 		updatedAt: createdAt,
 	});
-	await tx.insert(unitAssociationProposal).values({
+	await withSeedAuthority(tx, actor.id, (authority) => tx.insert(unitAssociationProposal).values({
 		sourceUnitId: itemAt(unitFixtures.works, 1).id,
 		targetUnitId: targetEntity.id,
 		kind: "subject",
 		role: "related_subject",
 		direction: "request",
 		createdByProfileId: actor.id,
+		creatorAuthority: authority,
 		expiresAt,
 		createdAt,
 		updatedAt: createdAt,
-	});
+	}));
 
 	await tx.insert(unitAccessInvitation).values({
 		unitId: contextPost.id,

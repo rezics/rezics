@@ -155,24 +155,10 @@ export const MaximumSubjectAssociationExpressionsPerItem = 128;
 /** Maximum assertion identities inspected per associated Entity and request. */
 export const SubjectAssociationExpressionCandidateScanLimit = 512;
 export const UnitOwnershipModeValues = ["profile_owned", "community_owned"] as const;
-export const UnitOwnershipClaimableUnitKindValues = [
-	"entity",
-	"book",
-	"media",
-	"software",
-] as const;
-export const UnitOwnershipClaimResolutionValues = [
-	"approved",
-	"rejected",
-	"withdrawn",
-	"superseded",
-] as const;
 
 export type UnitKind = (typeof UnitKindValues)[number];
 export type EntityKind = (typeof EntityKindValues)[number];
 export type UnitOwnershipMode = (typeof UnitOwnershipModeValues)[number];
-export type UnitOwnershipClaimableUnitKind = (typeof UnitOwnershipClaimableUnitKindValues)[number];
-export type UnitOwnershipClaimResolution = (typeof UnitOwnershipClaimResolutionValues)[number];
 export type NonRealmUnitKind = Exclude<UnitKind, "realm">;
 export { FollowableUnitOwnerValues, NonRealmFollowableUnitOwnerValues } from "@rezics/reference";
 export type { FollowableUnitOwner, NonRealmFollowableUnitOwner } from "@rezics/reference";
@@ -535,9 +521,7 @@ export const ReactionKindValues = ["upvote", "downvote"] as const;
 export const FeedSortValues = ["best", "new"] as const;
 export const RecommendationSurfaceValues = [
 	"home_feed",
-	"home_book",
-	"home_software",
-	"home_media",
+	"home_catalog",
 	"unit_related",
 	"post_related",
 ] as const;

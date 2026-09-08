@@ -2,27 +2,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const recordUnitRevision = vi.hoisted(() => vi.fn());
 const transitionUnitStatus = vi.hoisted(() => vi.fn());
-const ensureUnitVariantLifecycle = vi.hoisted(() => vi.fn());
-const enqueueBookChapterDraftJobInTransaction = vi.hoisted(() => vi.fn());
 const replaceAdaptedAudioUnitTracks = vi.hoisted(() => vi.fn());
 
 vi.mock("./history", () => ({ recordUnitRevision }));
 vi.mock("./status", () => ({ transitionUnitStatus }));
-vi.mock("./variant-policy", () => ({
-	ensureUnitVariantLifecycle,
-	isDiscoverableVariantUnit: vi.fn(),
-}));
-vi.mock("./book-chapter-draft", async (importOriginal) => ({
-	...(await importOriginal<typeof import("./book-chapter-draft")>()),
-	enqueueBookChapterDraftJobInTransaction,
-}));
 vi.mock("./video-audio-tracks", async (importOriginal) => ({
 	...(await importOriginal<typeof import("./video-audio-tracks")>()),
 	replaceAdaptedAudioUnitTracks,
 }));
 
 import type { DatabaseTransaction } from "../database";
-import { book, bookChapterDraftJob, unit } from "../database/schema";
+import { video } from "../database/schema";
 import { updateUnitInTransaction } from "./service";
 
 const UnitId = "019b0000-0000-7000-8000-000000000001";
@@ -39,7 +29,7 @@ function transactionDouble(input?: {
 			updates.push({ table, values });
 			return {
 				where: vi.fn(() =>
-					table === unit
+					table === video
 						? {
 								returning: vi.fn(async () =>
 									Array.from(input?.unitUpdateResult ?? [{ id: UnitId, status: "draft" }]),
@@ -63,116 +53,33 @@ describe("Unit update transaction", () => {
 	beforeEach(() => {
 		recordUnitRevision.mockReset().mockResolvedValue({ revisionId: "revision-id" });
 		transitionUnitStatus.mockReset().mockResolvedValue(undefined);
-		ensureUnitVariantLifecycle.mockReset().mockResolvedValue(undefined);
-		enqueueBookChapterDraftJobInTransaction.mockReset().mockResolvedValue({
-			id: "job-id",
-			state: "pending",
-		});
 		replaceAdaptedAudioUnitTracks.mockReset().mockResolvedValue(undefined);
 	});
 
-	it("publishes with a status-only patch without issuing an empty Book update", async () => {
-		const { transaction, updates } = transactionDouble();
-
-		await updateUnitInTransaction(transaction, "book", UnitId, ActorProfileId, true, {
-			expectedUpdatedAt: ExpectedUpdatedAt,
-			status: "published",
-		});
-
-		expect(updates).toHaveLength(2);
-		expect(updates[0]?.table).toBe(unit);
-		expect(updates[0]?.values).toEqual(expect.objectContaining({ updatedAt: expect.any(Date) }));
-		expect(updates[1]).toEqual({
-			table: bookChapterDraftJob,
-			values: expect.objectContaining({ state: "cancelled" }),
-		});
-		expect(transitionUnitStatus).toHaveBeenCalledWith(
-			transaction,
-			expect.objectContaining({
-				unitId: UnitId,
-				toStatus: "published",
-				authorization: { kind: "interactive", statusUpdateAllowed: true },
-			}),
-		);
-	});
-
-	it("updates Book details without requiring a Unit lifecycle field", async () => {
-		const { transaction, updates } = transactionDouble();
-
-		await updateUnitInTransaction(transaction, "book", UnitId, ActorProfileId, false, {
-			expectedUpdatedAt: ExpectedUpdatedAt,
-			details: { releaseStatus: "ongoing", wordCount: 100_000 },
-		});
-
-		expect(updates.map(({ table }) => table)).toEqual([unit, book]);
-		expect(updates[1]?.values).toEqual(
-			expect.objectContaining({ releaseStatus: "ongoing", wordCount: 100_000 }),
-		);
-		expect(transitionUnitStatus).not.toHaveBeenCalled();
-	});
-
-	it("keeps an active Chapter draft job when the Book remains draft", async () => {
-		const { transaction, updates } = transactionDouble();
-
-		await updateUnitInTransaction(transaction, "book", UnitId, ActorProfileId, true, {
-			expectedUpdatedAt: ExpectedUpdatedAt,
-			status: "draft",
-		});
-
-		expect(updates.map(({ table }) => table)).toEqual([unit]);
-	});
-
-	it("atomically enqueues the Chapter command when a published Book becomes draft", async () => {
-		const { transaction, updates } = transactionDouble({
-			unitUpdateResult: [{ id: UnitId, status: "published" }],
-		});
-
-		await updateUnitInTransaction(transaction, "book", UnitId, ActorProfileId, true, {
-			expectedUpdatedAt: ExpectedUpdatedAt,
-			status: "draft",
-			bookChapterDraftScope: "manageable_published_chapters",
-		});
-
-		expect(updates[1]).toEqual({
-			table: bookChapterDraftJob,
-			values: expect.objectContaining({ state: "cancelled" }),
-		});
-		expect(enqueueBookChapterDraftJobInTransaction).toHaveBeenCalledWith(transaction, {
-			bookId: UnitId,
-			bookUpdatedAt: expect.any(Date),
-			requestedByProfileId: ActorProfileId,
-		});
-	});
-
-	it("keeps Chapters independent when the Book-only draft scope is selected", async () => {
-		const { transaction } = transactionDouble({
-			unitUpdateResult: [{ id: UnitId, status: "published" }],
-		});
-
-		await updateUnitInTransaction(transaction, "book", UnitId, ActorProfileId, true, {
-			expectedUpdatedAt: ExpectedUpdatedAt,
-			status: "draft",
-			bookChapterDraftScope: "book_only",
-		});
-
-		expect(transitionUnitStatus).toHaveBeenCalledWith(
-			transaction,
-			expect.objectContaining({ toStatus: "draft" }),
-		);
-		expect(enqueueBookChapterDraftJobInTransaction).not.toHaveBeenCalled();
-	});
-
+ it("publishes one concrete Video row and records the authorized status transition",async()=>{
+  const {transaction,updates}=transactionDouble();
+  await updateUnitInTransaction(transaction,"video",UnitId,ActorProfileId,true,{expectedUpdatedAt:ExpectedUpdatedAt,status:"published"});
+  expect(updates).toHaveLength(1);expect(updates[0]?.table).toBe(video);
+  expect(transitionUnitStatus).toHaveBeenCalledWith(transaction,expect.objectContaining({unitId:UnitId,toStatus:"published",authorization:{kind:"interactive",statusUpdateAllowed:true},revisionId:"revision-id"}));
+ });
+ it("updates Video details on the same owner row",async()=>{
+  const {transaction,updates}=transactionDouble();
+  await updateUnitInTransaction(transaction,"video",UnitId,ActorProfileId,false,{expectedUpdatedAt:ExpectedUpdatedAt,details:{durationSeconds:3600}});
+  expect(updates.map(update=>update.table)).toEqual([video]);
+  expect(updates[0]?.values).toEqual(expect.objectContaining({durationSeconds:3600}));
+  expect(transitionUnitStatus).not.toHaveBeenCalled();
+ });
 	it("updates visibility without issuing an empty subtype update", async () => {
 		const { transaction, updates } = transactionDouble();
 
-		await updateUnitInTransaction(transaction, "book", UnitId, ActorProfileId, false, {
+		await updateUnitInTransaction(transaction, "video", UnitId, ActorProfileId, false, {
 			expectedUpdatedAt: ExpectedUpdatedAt,
 			visibility: "unlisted",
 		});
 
 		expect(updates).toHaveLength(1);
 		expect(updates[0]).toEqual({
-			table: unit,
+			table: video,
 			values: expect.objectContaining({
 				visibility: "unlisted",
 				updatedAt: expect.any(Date),
@@ -188,7 +95,7 @@ describe("Unit update transaction", () => {
 		});
 
 		await expect(
-			updateUnitInTransaction(transaction, "book", UnitId, ActorProfileId, false, {
+			updateUnitInTransaction(transaction, "video", UnitId, ActorProfileId, false, {
 				expectedUpdatedAt: ExpectedUpdatedAt,
 				visibility: "unlisted",
 			}),

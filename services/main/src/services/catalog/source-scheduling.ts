@@ -51,6 +51,8 @@ export async function planSourceCheck(
 		.limit(1)
 		.for("update");
 	if (!record) throw new Error("Source check record is missing");
+	if (record.source === "openlibrary")
+		throw new TypeError("Open Library uses human-requested lookups or bulk dumps, not recurring polling");
 	const [existing] = await tx
 		.select()
 		.from(plans)

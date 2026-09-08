@@ -1,6 +1,6 @@
 import { catalogSourcePath } from "./source-document-scope";
 import { MusicBrainzRelationEndpointFamilies } from "./musicbrainz-relation-plan";
-import { catalogSourceSupportColumns } from "./source-support";
+import { catalogReferenceAwareSupportColumns } from "./source-support";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
@@ -281,7 +281,7 @@ export async function adoptMusicBrainzRelations(
 		revision = created.revision;
 		for (const qualifier of qualifiers)
 			await tx.insert(CatalogFactTables[reference.owner].support).values({
-				...(await catalogSourceSupportColumns(tx, observation.record.id)),
+				...(await catalogReferenceAwareSupportColumns(tx, observation.record.id)),
 				ownerId: reference.id,
 				factId: qualifier.valueFactId,
 				sourceRecordId: observation.record.id,
@@ -289,7 +289,7 @@ export async function adoptMusicBrainzRelations(
 				sourcePath: catalogSourcePath(observation.record.id, observation.snapshot.id, `${path}/${position}`),
 			});
 		await tx.insert(CatalogFactTables[reference.owner].support).values({
-			...(await catalogSourceSupportColumns(tx, observation.record.id)),
+			...(await catalogReferenceAwareSupportColumns(tx, observation.record.id)),
 			ownerId: reference.id,
 			relationId: created.id,
 			sourceRecordId: observation.record.id,

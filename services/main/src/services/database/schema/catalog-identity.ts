@@ -68,6 +68,7 @@ export const catalogDefinition = pgTable(
 	},
 	(table) => [
 		unique("catalog_definition_namespace_key").on(table.namespace, table.key),
+		index("catalog_definition_kind_namespace_key_idx").on(table.kind, table.namespace, table.key),
 		check(
 			"catalog_definition_namespace_check",
 			sql`${table.namespace} ~ '^[a-z][a-z0-9_.-]{0,95}$'`,
@@ -127,6 +128,7 @@ function createOwnerIdentity<const Owner extends CatalogOwner>(owner: Owner) {
 				.default("approved")
 				.notNull(),
 			createdByAuthUserId: uuid().references(() => users.id, { onDelete: "set null" }),
+			postTargetingLocked: boolean().default(false).notNull(),
 			revision: bigint({ mode: "number" }).default(1).notNull(),
 			routingGeneration: integer().default(1).notNull(),
 			deletedAt: createTimestampMsColumn(),
@@ -137,6 +139,14 @@ function createOwnerIdentity<const Owner extends CatalogOwner>(owner: Owner) {
 			unique(`${owner}_identity_shape_key`).on(table.id, table.shape),
 			index(`${owner}_identity_creator_idx`).on(table.createdByAuthUserId, table.id),
 			index(`${owner}_identity_shape_idx`).on(table.shape, table.id),
+			index(`${owner}_identity_public_created_idx`).on(table.createdAt.desc(),table.id.desc())
+				.where(sql`${table.status}='published' and ${table.visibility}='public' and ${table.moderationStatus}='approved' and ${table.deletedAt} is null`),
+			index(`${owner}_identity_public_updated_idx`).on(table.updatedAt.desc(),table.id.desc())
+				.where(sql`${table.status}='published' and ${table.visibility}='public' and ${table.moderationStatus}='approved' and ${table.deletedAt} is null`),
+			index(`${owner}_identity_public_shape_created_idx`).on(table.shape,table.createdAt.desc(),table.id.desc())
+				.where(sql`${table.status}='published' and ${table.visibility}='public' and ${table.moderationStatus}='approved' and ${table.deletedAt} is null`),
+			index(`${owner}_identity_public_shape_updated_idx`).on(table.shape,table.updatedAt.desc(),table.id.desc())
+				.where(sql`${table.status}='published' and ${table.visibility}='public' and ${table.moderationStatus}='approved' and ${table.deletedAt} is null`),
 			check(`${owner}_identity_shape_check`, sql`${table.shape} ~ '^[a-z][a-z0-9_.-]{0,95}$'`),
 			check(`${owner}_identity_status_check`, inArray(table.status, UnitStatusValues)),
 			check(

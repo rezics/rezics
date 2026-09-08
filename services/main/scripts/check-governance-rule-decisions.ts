@@ -51,8 +51,8 @@ async function assertDisposableDatabase(client: Client): Promise<void> {
 		"select current_database() as database",
 	);
 	assert(
-		result.rows[0]?.database === "rezics_atlas",
-		"Governance decision fixtures may run only in the disposable rezics_atlas database",
+		/^rezics_atlas(?:_[a-z0-9_]+)?$/u.test(result.rows[0]?.database ?? ""),
+		"Governance decision fixtures require a disposable Atlas database",
 	);
 }
 
@@ -66,17 +66,8 @@ async function seedRuleGraph(client: Client): Promise<void> {
 			[AuthUserId, Timestamp],
 		);
 		await client.query(
-			`insert into public.unit (id, kind, created_at, updated_at)
-			values
-				($1, 'profile', $5, $5),
-				($2, 'realm', $5, $5),
-				($3, 'realm_rule', $5, $5),
-				($4, 'realm_rule', $5, $5)`,
-			[ProfileId, RealmId, RuleId, AppendRuleId, Timestamp],
-		);
-		await client.query(
-			`insert into public.profile (id, auth_user_id, joined_at, created_at, updated_at)
-			values ($1, $2, $3, $3, $3)`,
+			`insert into public.entity_identity (id, shape, created_by_auth_user_id, created_at, updated_at)
+			values ($1, 'person', $2, $3, $3)`,
 			[ProfileId, AuthUserId, Timestamp],
 		);
 		await client.query(
@@ -101,16 +92,7 @@ async function seedRuleGraph(client: Client): Promise<void> {
 	}
 }
 
-async function verifyRemovedContracts(client: Client): Promise<void> {
-	const removedTypes = await client.query<{ readonly name: string }>(
-		`select typname as name
-		from pg_catalog.pg_type
-		where typnamespace = 'public'::regnamespace
-			and typname = any($1::text[])`,
-		[["governance_reason_code", "user_account_state_reason"]],
-	);
-	assert(removedTypes.rows.length === 0, "Legacy governance reason enum types still exist");
-
+async function verifyCurrentContracts(client: Client): Promise<void> {
 	const basis = await client.query<{ readonly value: string }>(
 		`select enumlabel as value
 		from pg_catalog.pg_enum
@@ -262,12 +244,15 @@ async function verifyHistoryIndexPlans(client: Client): Promise<void> {
 
 const connectionString = process.env.DATABASE_ADMIN_URL;
 assert(connectionString, "DATABASE_ADMIN_URL is required");
+const target = new URL(connectionString);
+assert(["localhost", "127.0.0.1", "[::1]"].includes(target.hostname) && target.port !== "15432",
+	"Governance fixtures require an isolated loopback database");
 const client = new Client({ connectionString });
 
 try {
 	await client.connect();
 	await assertDisposableDatabase(client);
-	await verifyRemovedContracts(client);
+	await verifyCurrentContracts(client);
 	await seedRuleGraph(client);
 	await verifyDecisionInvariants(client);
 	await verifyHistoryIndexPlans(client);

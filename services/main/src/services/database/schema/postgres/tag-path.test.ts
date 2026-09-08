@@ -11,7 +11,6 @@ import {
 let source = "";
 let aggregateSource = "";
 let realmSource = "";
-let projectionMigrationOverlay = "";
 
 function escapeRegExp(value: string): string {
 	return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
@@ -26,14 +25,10 @@ function functionSource(name: string): string {
 }
 
 beforeAll(async () => {
-	[source, aggregateSource, realmSource, projectionMigrationOverlay] = await Promise.all([
+	[source, aggregateSource, realmSource] = await Promise.all([
 		readFile(new URL("./tag-path.sql", import.meta.url), "utf8"),
 		readFile(new URL("./tag-judgment-aggregates.sql", import.meta.url), "utf8"),
 		readFile(new URL("./realm-tag-authority.sql", import.meta.url), "utf8"),
-		readFile(
-			new URL("./migration-overlays/tag_public_position_projection.post.sql", import.meta.url),
-			"utf8",
-		),
 	]);
 });
 
@@ -163,39 +158,4 @@ describe("Tag Path PostgreSQL semantic contract", () => {
 		expect(source).toMatch(/SELECT 1 FROM public\.tag_path_member WHERE node_id = OLD\.id LIMIT 1/);
 	});
 
-	it("initializes existing Tags atomically only while Tag Paths are empty", () => {
-		expect(source).not.toContain("backfill_tag_public_position_stats");
-		expect(source).not.toContain("read_tag_public_position_projection_drift");
-		expect(source).not.toContain("tag_public_position_projection_state");
-		expect(source).not.toContain("rezics.tag_public_position_projection_owner");
-		expect(projectionMigrationOverlay).toContain("SELECT 1 FROM public.tag_path_member LIMIT 1");
-		expect(projectionMigrationOverlay).toContain("SELECT 1 FROM public.tag LIMIT 100001");
-		expect(projectionMigrationOverlay).toContain("tag_public_position_atomic_tag_bound");
-		expect(projectionMigrationOverlay).toContain(
-			"LOCK TABLE public.tag, public.tag_path_member IN SHARE ROW EXCLUSIVE MODE",
-		);
-		for (const functionName of [
-			"tag_path_unit_is_public",
-			"lock_tag_public_position_keys",
-			"guard_tag_public_position_stat_projection",
-			"seed_tag_public_position_stat",
-			"guard_tag_path_concept_lifecycle",
-			"adjust_tag_public_position_stat",
-			"maintain_tag_path_public_state",
-			"maintain_tag_path_vote_stat",
-		])
-			expect(projectionMigrationOverlay).toContain(
-				`CREATE OR REPLACE FUNCTION public.${functionName}`,
-			);
-		expect(projectionMigrationOverlay).not.toContain("guard_tag_expression_mutation");
-		expect(projectionMigrationOverlay).toContain(
-			"DISABLE TRIGGER tag_public_position_stat_projection_guard",
-		);
-		expect(projectionMigrationOverlay).toContain(
-			"SELECT concept.id FROM public.tag AS concept ORDER BY concept.id",
-		);
-		expect(projectionMigrationOverlay).toContain(
-			"ENABLE TRIGGER tag_public_position_stat_projection_guard",
-		);
-	});
 });

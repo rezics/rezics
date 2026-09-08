@@ -7,7 +7,6 @@ import { selfAuthUserIdForEntity } from "../participation/account-query";
 import type { DatabaseTransaction } from "../database";
 import {
 	governancePostBinding,
-	post,
 	unitAccessGrant,
 	unitLocalization,
 	unitOwnership,
@@ -18,7 +17,8 @@ import {
 import { presentPortableTextDocument } from "../documents/portable-text-presentation";
 import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
 import { createProfilePublisherAttribution } from "../units/attribution";
-import { insertUnit } from "../units/create";
+import { insertPlatformUnit } from "../units/create";
+import { ParticipationDenied } from "../participation/policy";
 import { recordUnitRevision } from "../units/history";
 import { isFirstUnitLocalization } from "../units/localization";
 import type { RevisionContributionInput } from "../units/revision-contribution";
@@ -55,23 +55,27 @@ export async function createGovernanceNotePost(
 		note: GovernanceNote;
 	},
 ): Promise<{ postId: string }> {
-	const created = await insertUnit(tx, {
-		kind: "post",
-		status: "published",
-		visibility: "private",
-		postTargetingLocked: true,
-		publishedAt: new Date(),
+	const [actor] = await tx.select({ authUserId: authEntity.authUserId }).from(authEntity)
+		.where(and(eq(authEntity.entityId, input.actorProfileId), eq(authEntity.state, "active")))
+		.limit(1).for("share");
+	if (!actor) throw new ParticipationDenied("Governance notes require the current operator account");
+	const created = await insertPlatformUnit(tx, {
+		owner: "post",
+		values: {
+			kind: "governance_note",
+			subjectUnitId: input.subjectUnitId,
+			status: "published",
+			visibility: "private",
+			postTargetingLocked: true,
+			publishedAt: new Date(),
+			createdByAuthUserId: actor.authUserId,
+		},
 		statusActor: { kind: "profile", profileId: input.actorProfileId },
 	});
 	await ensureSubjectPostTargetingAllowed(tx, {
 		sourcePostId: created.id,
 		subjectUnitId: input.subjectUnitId,
 		...(input.realmId ? { realmIds: [input.realmId] } : {}),
-	});
-	await tx.insert(post).values({
-		id: created.id,
-		subjectUnitId: input.subjectUnitId,
-		kind: "governance_note",
 	});
 	await tx.insert(unitLocalization).values({
 		unitId: created.id,

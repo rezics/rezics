@@ -2,7 +2,7 @@ import { OfficialRealmUnitIds } from "@rezics/slug";
 
 import { recordAuditEvent } from "../../audit";
 import { assertPlatformCoreReady, inspectPlatformCore } from "../../bootstrap/core";
-import { OfficialProfileIds } from "../../bootstrap/data";
+import { OfficialProfileIds, BootstrapPlatformAdministratorProfile } from "../../bootstrap/data";
 import { env } from "../../config";
 import { database, type DatabaseTransaction } from "../../database";
 import { publishRealmRuleRevision } from "../../realms/rule-publication";
@@ -35,6 +35,7 @@ export async function seedOfficialRuleRealmInTransaction(
 	const result = await publishRealmRuleRevision(tx, {
 		realmId: OfficialRealmUnitIds.rule,
 		actorProfileId: OfficialProfileIds.community,
+		actorAuthUserId: BootstrapPlatformAdministratorProfile.authUserId,
 		baseRevisionId: null,
 		...OfficialRuleInitialRevision,
 	});
@@ -52,7 +53,7 @@ export async function seedOfficialRuleRealmInTransaction(
 	await recordAuditEvent(tx, {
 		category: "admin_activity",
 		outcome: "succeeded",
-		actor: { kind: "profile", profileId: OfficialProfileIds.community },
+		actor: { kind: "auth", authUserId: BootstrapPlatformAdministratorProfile.authUserId },
 		authority: { kind: "realm", id: OfficialRealmUnitIds.rule },
 		action: "realm.rules.initialize",
 		target: { kind: "unit", id: OfficialRealmUnitIds.rule },

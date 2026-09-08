@@ -1,0 +1,6 @@
+{
+  "epoch": "operational-native-20260908",
+  "migration": "20260908000000_operational_target_baseline.sql",
+  "replacedHistoryCommit": "338e950b814148d16649c7817ac04fc826c51f8c",
+  "installation": "fresh-database"
+}

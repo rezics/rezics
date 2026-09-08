@@ -14,6 +14,7 @@ import { OpenAPIV3 } from "openapi-types";
 import { Type } from "typebox";
 
 import { ResolvedUnitPresentationResponse, UnitPresentationResponse } from "./custom-themes/schema";
+import { CatalogSourceIntakeModels } from "../catalog/source-native-registry";
 
 const HttpMethods = [
 	OpenAPIV3.HttpMethods.GET,
@@ -41,6 +42,7 @@ const SearchFeatureDefinitionComponent = Type.Object(
 
 /** Stable public component boundaries retained from the Elysia 1 document. */
 const RezicsOpenApiModels = {
+	...CatalogSourceIntakeModels,
 	JsonValue: JsonValue.$defs.JsonValue,
 	...FilterSchemaModels,
 	DockDocument,

@@ -9,22 +9,9 @@ const transaction = vi.hoisted(() =>
 	),
 );
 
-vi.mock("../database", () => ({
-	database: {
-		execute,
-		transaction,
-		select: vi.fn(() => {
-			const rows = Promise.resolve([]);
-			const query = {
-				from: () => query,
-				innerJoin: () => query,
-				where: () => query,
-				then: rows.then.bind(rows),
-			};
-			return query;
-		}),
-	},
-}));
+vi.mock("../database", async()=>{const {drizzle}=await import("drizzle-orm/node-postgres");const query=drizzle.mock();return{database:{execute,transaction,select:query.select.bind(query)}};});
+vi.mock("../units/slug-address",()=>({getPublicCanonicalUnitSlugAddresses:async()=>new Map()}));
+vi.mock("../units/presentation-reader",()=>({readUnitPresentationsInTransaction:async(_tx:unknown,ids:readonly string[])=>new Map(ids.map(id=>[id,{id,owner:"publishing",shape:"work",language:"en",title:"Work",summary:null,avatar:null}]))}));
 
 import { parseSearchCursor } from "./query";
 import {
@@ -119,18 +106,7 @@ describe("direct PostgreSQL Search", () => {
 			})
 			.mockResolvedValueOnce({
 				rows: [
-					{
-						hit: {
-							id: first,
-							category: "units",
-							kind: "book",
-							language: "en",
-							title: "Book",
-							summary: null,
-							titles: ["Book"],
-							summaries: [],
-						},
-					},
+					{ id: first },
 				],
 			});
 
@@ -155,7 +131,7 @@ describe("direct PostgreSQL Search", () => {
 		expect(candidateSql).not.toContain('left join "profile"');
 		expect(candidateSql).not.toContain('left join "entity"');
 		expect(candidateSql).not.toContain("candidate_localizations as materialized");
-		expect(candidateSql).toContain('"unit"."status"');
+		expect(candidateSql).toContain('"search_unit"."status"');
 		expect(candidateSql).toContain("limit");
 		expect(result.total).toEqual({ kind: "lower-bound", value: 1 });
 		expect(result.hits[0]?.id).toBe(first);
@@ -205,10 +181,10 @@ describe("direct PostgreSQL Search", () => {
 		});
 
 		const result = await searchGlobalIdentifiers({
-			branches: [{ category: "reviews", sourceUnitKinds: ["post"] }],
+			branches: [{ category: "reviews", sourceOwners: ["post"] }],
 			additionalConditions: [
 				sql.raw(
-					"exists (select 1 from post bounded_review_gate where bounded_review_gate.id = unit.id)",
+					"exists (select 1 from post bounded_review_gate where bounded_review_gate.id = search_unit.id)",
 				),
 			],
 			limit: 20,
@@ -249,8 +225,8 @@ describe("direct PostgreSQL Search", () => {
 		});
 
 		const candidateSql = sqlText(execute.mock.calls[1]![0] as SQL);
-		expect(candidateSql).toContain('("unit"."updated_at", "unit"."id") < (to_timestamp(');
-		expect(candidateSql).toContain('order by "unit"."updated_at" desc, "unit"."id" desc');
+		expect(candidateSql).toContain('("search_unit"."updated_at", "search_unit"."id") < (to_timestamp(');
+		expect(candidateSql).toContain('order by "search_unit"."updated_at" desc, "search_unit"."id" desc');
 	});
 
 	it("treats query-language punctuation as escaped ordinary search text", async () => {
@@ -270,8 +246,8 @@ describe("direct PostgreSQL Search", () => {
 		const result = await searchDomain("units", { query: "(common OR hidden", limit: 20 });
 		const candidateQuery = dialect.sqlToQuery(execute.mock.calls[1]![0] as SQL);
 		expect(candidateQuery.sql).toContain("public.search_text_candidates");
-		expect(candidateQuery.params.filter((value) => value === "(common OR hidden")).toHaveLength(9);
-		expect(candidateQuery.params).toEqual(expect.arrayContaining(["book", "software", "media"]));
+		expect(candidateQuery.params.filter((value) => value === "(common OR hidden")).toHaveLength(12);
+		expect(candidateQuery.params).toEqual(expect.arrayContaining(["publishing", "software", "program"]));
 		expect(result.total).toEqual({ kind: "exact", value: 1 });
 		expect(result.nextCursor).toBeUndefined();
 	});
@@ -303,9 +279,10 @@ describe("direct PostgreSQL Search", () => {
 		const candidateSql = sqlText(execute.mock.calls[1]![0] as SQL);
 		expect(candidateSql).toContain('from "unit_best_score"');
 		expect(candidateSql).toContain('order by "unit_best_score"."score" desc');
-		expect(candidateSql).toContain('"unit_best_score"."unit_kind" =');
-		expect(candidateSql).toContain('"unit"."kind" =');
-		expect(candidateSql).toContain('order by "unit"."updated_at" desc, "unit"."id" desc');
+		expect(candidateSql).toContain('"unit_best_score"."unit_owner" =');
+		expect(candidateSql).toContain('from "publishing_identity"');
+		expect(candidateSql).not.toContain('from "unit"');
+		expect(candidateSql).toContain('order by "search_unit"."updated_at" desc, "search_unit"."id" desc');
 		expect(candidateSql).not.toContain("row_number()");
 		expect(candidateSql).toContain("scanned_candidates as materialized");
 		expect(candidateSql).not.toContain("recommendation_unit_stat");
@@ -356,25 +333,14 @@ describe("direct PostgreSQL Search", () => {
 			})
 			.mockResolvedValueOnce({
 				rows: [
-					{
-						hit: {
-							id: second,
-							category: "units",
-							kind: "book",
-							language: "en",
-							title: "Adaptive result",
-							summary: null,
-							titles: ["Adaptive result"],
-							summaries: [],
-						},
-					},
+					{ id: second },
 				],
 			});
 
 		const result = await searchDomain("units", { sort: "updatedAt:desc", limit: 20 });
-		expect(transaction).toHaveBeenCalledTimes(2);
+		expect(transaction).toHaveBeenCalledTimes(3);
 		expect(sqlText(execute.mock.calls[3]![0] as SQL)).toContain(
-			'("unit"."updated_at", "unit"."id") < (to_timestamp(',
+			'("search_unit"."updated_at", "search_unit"."id") < (to_timestamp(',
 		);
 		expect(result.hits.map(({ id }) => id)).toEqual([second]);
 		expect(result.total).toEqual({ kind: "exact", value: 1 });
@@ -480,7 +446,8 @@ describe("direct PostgreSQL Search", () => {
 		const candidateSql = sqlText(execute.mock.calls[3]![0] as SQL);
 
 		expect(candidateSql).toContain("filter_seed(unit_id) as materialized");
-		expect(candidateSql).toContain('inner join "unit" on "unit"."id" = filter_seed.unit_id');
+		expect(candidateSql).toContain('inner join filter_seed on filter_seed.unit_id = "search_unit"."id"');
+		expect(candidateSql).toContain('from "publishing_identity"');
 		expect(seedSql).toContain(" union all ");
 		expect(candidateSql.match(/candidate\.id in/g)).toBeNull();
 		expect(result.page.hits).toEqual([{ id: first }]);
@@ -523,7 +490,7 @@ describe("direct PostgreSQL Search", () => {
 		expect(candidateSql).toContain(
 			'inner join filter_seed on filter_seed.unit_id = "unit_best_score"."unit_id"',
 		);
-		expect(candidateSql).toContain('inner join filter_seed on filter_seed.unit_id = "unit"."id"');
+		expect(candidateSql).toContain('inner join filter_seed on filter_seed.unit_id = "search_unit"."id"');
 	});
 
 	it("switches a dense relational seed back to bounded ordered keyset scanning", async () => {
@@ -561,6 +528,6 @@ describe("direct PostgreSQL Search", () => {
 		expect(seedSql).toContain("limit");
 		expect(seedSql).toContain('from "unit_effective_tag" filter_effective_tag');
 		expect(candidateSql).not.toContain("filter_seed(unit_id) as materialized");
-		expect(candidateSql).toContain('order by "unit"."updated_at" desc, "unit"."id" desc');
+		expect(candidateSql).toContain('order by "search_unit"."updated_at" desc, "search_unit"."id" desc');
 	});
 });

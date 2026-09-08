@@ -1,4 +1,4 @@
-import { PlatformOwnerValues } from "@rezics/reference";
+import { UnitOwnerValues } from "@rezics/reference";
 import { z } from "zod";
 import { unitOwnerTable } from "../database/schema/unit-reference-columns";
 import { and, eq, inArray, sql } from "drizzle-orm";
@@ -18,7 +18,7 @@ import {
 	type PostTargetingLockDetails,
 } from "./errors";
 
-/** At most one bounded PK batch per concrete platform owner, with deterministic owner/ID lock ordering. */
+/** At most one bounded PK batch per concrete owner, with deterministic owner/ID lock ordering. */
 async function readTargetingStates(
 	executor: DatabaseExecutor,
 	ids: readonly string[],
@@ -38,7 +38,7 @@ async function readTargetingStates(
 		.where(inArray(catalogUnitLocator.id, [...ids]));
 	const result: { id: string; postTargetingLocked: boolean }[] = [];
 	for (const owner of [...new Set(routes.map((route) => route.owner))].sort()) {
-		const parsed = z.enum(PlatformOwnerValues).safeParse(owner);
+		const parsed = z.enum(UnitOwnerValues).safeParse(owner);
 		if (!parsed.success) continue;
 		const table = unitOwnerTable(parsed.data);
 		if (!("postTargetingLocked" in table)) throw new Error("Platform owner lacks targeting state");

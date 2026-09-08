@@ -1,3 +1,4 @@
+import { unitStateRelation } from "../../units/state-relation";
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { StatusCodes } from "http-status-codes";
@@ -19,7 +20,6 @@ import {
 	postScore,
 	score,
 	scoreStat,
-	unit,
 	unitLocalization,
 	unitOwnership,
 	unitProgressEntry,
@@ -47,7 +47,7 @@ import {
 	createProfilePublisherAttribution,
 	getAttributionSummariesByUnitIds,
 } from "../../units/attribution";
-import { insertUnit } from "../../units/create";
+import { insertPlatformUnit } from "../../units/create";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import {
@@ -125,7 +125,7 @@ const ReviewSearchPosition = t.Union([
 
 const ReviewListCursor = t.Object(
 	{
-		v: t.Literal(5),
+		v: t.Literal(1),
 		targetId: t.Nullable(Uuid),
 		languages: t.Array(ContentLanguage, { maxItems: 50, uniqueItems: true }),
 		localizationLanguages: t.Array(ContentLanguage, {
@@ -278,26 +278,27 @@ export default new Elysia()
 					const limit = query.limit ?? 20;
 					const asOf = cursor ? new Date(cursor.asOf) : new Date();
 					const searchPage = await searchGlobalIdentifiers({
-						branches: [{ category: "reviews", sourceUnitKinds: ["post"] }],
+						branches: [{ category: "reviews", sourceOwners: ["post"], sourceShapes:["review"] }],
 						...(viewer.profileId ? { profileId: viewer.profileId } : {}),
 						contentRatingPolicy: contentRatingPolicyFromAllowlist(viewer.contentRatings),
 						contentRatings: [...viewer.contentRatings],
 						additionalConditions: [getFeedEligibilityCondition(rankingViewer, scope, asOf)],
 						limit,
 						sort: sort === "new" ? "createdAt:desc" : "best",
+                        bestSnapshotId:snapshotContext.id,
 						...(cursor ? { position: cursor.searchPosition } : {}),
 					});
 					const candidateIds = searchPage.hits.map(({ id }) => id);
 					const candidateRows = candidateIds.length
 						? await database
 								.select({
-									id: unit.id,
+									id: post.id,
 									subjectId: post.subjectUnitId,
 									realmId: getFeedCandidateRealmIdExpression(rankingViewer, scope.realmIds),
 								})
-								.from(unit)
-								.innerJoin(post, eq(post.id, unit.id))
-								.where(inArray(unit.id, candidateIds))
+								.from(post)
+                                .innerJoinLateral(unitStateRelation(post.id,"search_unit"),sql`true`)
+								.where(inArray(post.id, candidateIds))
 						: [];
 					const candidateById = new Map(
 						candidateRows.map((candidate) => [candidate.id, candidate]),
@@ -333,7 +334,7 @@ export default new Elysia()
 						totalCount,
 						nextCursor: searchPage.nextPosition
 							? encodeReviewListCursor({
-									v: 5,
+									v: 1,
 									targetId: query.targetId ?? null,
 									languages: query.languages ?? [],
 									localizationLanguages: query.localizationLanguages ?? [],
@@ -386,7 +387,7 @@ export default new Elysia()
 					},
 					detail: { summary: "Create review", tags: ["Reviews"] },
 				},
-				async ({ entity, authorization, body }) => {
+				async ({ user, entity, authorization, body }) => {
 					const targetId = await resolveCanonicalUnitId(database, body.targetId);
 					await authorization.unit.ensureCanRead(targetId);
 					await authorization.realm.ensureUnitCreation(body.publishRealmIds, "realm.units.create");
@@ -424,22 +425,15 @@ export default new Elysia()
 									});
 							}
 							await authorization.entity.ensureSubjectAssociationAllowedIfEntity(tx, targetId);
-							const created = await insertUnit(tx, {
-								kind: "post",
-								status: "published",
-								visibility: "public",
-								publishedAt: new Date(),
-								statusActor: { kind: "profile", profileId: entity.id },
-							});
+							const created = await insertPlatformUnit(tx, {
+                                owner:"post",values:{kind:"review",subjectUnitId:targetId,
+                                 status:"published",visibility:"public",publishedAt:new Date(),createdByAuthUserId:user.id},
+                                statusActor:{kind:"profile",profileId:entity.id},
+                            });
 							await ensureSubjectPostTargetingAllowed(tx, {
 								sourcePostId: created.id,
 								subjectUnitId: targetId,
 								realmIds: body.publishRealmIds,
-							});
-							await tx.insert(post).values({
-								id: created.id,
-								subjectUnitId: targetId,
-								kind: "review",
 							});
 							await tx.insert(unitLocalization).values({
 								unitId: created.id,
@@ -527,8 +521,8 @@ export default new Elysia()
 							body: unitLocalization.content,
 							replyCount: sql<unknown>`coalesce(${postReplyStat.undeletedDescendantCount}, 0)`,
 							latestRevisionId: unitRevisionHead.revisionId,
-							createdAt: unit.createdAt,
-							updatedAt: unit.updatedAt,
+							createdAt: post.createdAt,
+							updatedAt: post.updatedAt,
 							contentSpoilerLevel: sql<number>`coalesce((
 								select manifest.spoiler_level
 								from (values
@@ -547,7 +541,6 @@ export default new Elysia()
 							)`,
 						})
 						.from(post)
-						.innerJoin(unit, eq(unit.id, post.id))
 						.leftJoin(postReplyStat, eq(postReplyStat.postId, post.id))
 						.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, post.id))
 						.innerJoin(

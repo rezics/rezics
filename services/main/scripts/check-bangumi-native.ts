@@ -192,7 +192,7 @@ try {
 					actor,
 					grouping.orderProfileId,
 				);
-				assert.equal(ordered.length, 1);
+				assert.equal(ordered.items.length, 1);
 				const supports = CatalogFactTables.grouping.support;
 				const sources = await tx
 					.select()

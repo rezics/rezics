@@ -17,6 +17,7 @@ const SafeDurationMs = t.Integer({ minimum: 0, maximum: Number.MAX_SAFE_INTEGER 
 
 export const ListProgressQuery = t.Object(
 	{
+		cursor: t.Optional(t.String({maxLength:1024})),
 		status: t.Optional(ProgressStatus),
 		...LocalizationLanguageQuery,
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
@@ -40,14 +41,14 @@ export type ProgressUnitParams = StaticDecode<typeof ProgressUnitParams>;
 
 export const ProgressContinuationResponse = t.Union([
 	t.Object(
-		{ kind: t.Literal("book-node"), bookId: Uuid, nodeId: Uuid },
+		{ kind: t.Literal("text-version-node"), textVersionId: Uuid, nodeId: Uuid },
 		{ additionalProperties: false },
 	),
 	t.Object(
 		{
 			kind: t.Literal("unit"),
 			contentUnit: t.Object(
-				{ id: Uuid, type: t.UnionEnum(["video", "audio"]) },
+				{ id: Uuid, owner: t.UnionEnum(["video", "audio"]), shape:t.UnionEnum(["video", "audio"]) },
 				{ additionalProperties: false },
 			),
 		},
@@ -57,7 +58,7 @@ export const ProgressContinuationResponse = t.Union([
 		{
 			kind: t.Literal("contents"),
 			ownerUnit: t.Object(
-				{ id: Uuid, type: t.UnionEnum(["book", "media"]) },
+				{ id: Uuid, owner: t.UnionEnum(["publishing", "program"]), shape:t.UnionEnum(["text_version", "program"]) },
 				{ additionalProperties: false },
 			),
 		},

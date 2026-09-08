@@ -1,6 +1,14 @@
 import { StatusCodes } from "http-status-codes";
 import { HTTPError } from "elysia";
 
+export class GovernanceDeliveryCapacityExceeded extends HTTPError.id(
+	"GovernanceDeliveryCapacityExceeded",
+	StatusCodes.SERVICE_UNAVAILABLE,
+) {
+	override readonly message = "Governance notification delivery is busy; retry the action shortly";
+	readonly retryAfterSeconds = 10;
+}
+
 export class GovernanceNoteNotFound extends HTTPError.id(
 	"GovernanceNoteNotFound",
 	StatusCodes.NOT_FOUND,
@@ -375,6 +383,7 @@ export class UnitGovernanceLookupInvalid extends HTTPError.id(
 }
 
 export const GovernanceErrors = [
+	GovernanceDeliveryCapacityExceeded,
 	UnitGovernanceLookupInvalid,
 	GovernanceNoteNotFound,
 	ContentGovernanceTargetNotFound,

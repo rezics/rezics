@@ -1,11 +1,11 @@
 import type { SearchCategory } from "@rezics/filter";
 import { isPortableTextValueBlock, normalizePortableText } from "@rezics/portable-text";
 
-import type { UnitKind } from "../database/schema/contract-values";
+import type { UnitOwner } from "@rezics/reference";
 
-/** Authoritative current Unit kinds addressable by each public Search category. */
-export const CurrentSearchUnitKindsByCategory = {
-	units: ["book", "software", "media", "series", "video", "audio", "release", "zone"],
+/** Authoritative native resource owners addressable by each public Search category. */
+export const CurrentSearchOwnersByCategory = {
+	units: ["publishing", "music", "program", "software", "grouping", "reference", "distribution", "video", "audio", "zone"],
 	entities: ["entity"],
 	tags: ["tag"],
 	posts: ["post"],
@@ -13,7 +13,7 @@ export const CurrentSearchUnitKindsByCategory = {
 	collections: ["collection"],
 	reviews: ["post"],
 	polls: ["poll"],
-} as const satisfies Record<SearchCategory, readonly UnitKind[]>;
+} as const satisfies Record<SearchCategory, readonly UnitOwner[]>;
 
 /**
  * Extracts only user-visible Portable Text spans for deterministic PGroonga fixtures.

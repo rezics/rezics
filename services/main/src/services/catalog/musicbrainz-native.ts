@@ -1,5 +1,6 @@
 import { catalogSourcePath } from "./source-document-scope";
-import { catalogSourceSupportColumns } from "./source-support";
+import { catalogReferenceAwareSupportColumns } from "./source-support";
+import { isCatalogReferenceInitialization } from "./reference-initialization";
 import { and, eq, desc } from "drizzle-orm";
 import { isDeepStrictEqual } from "node:util";
 import { catalogDefinition, catalogDefinitionRevision } from "../database/schema/catalog-identity";
@@ -154,7 +155,7 @@ export async function musicBrainzVocabulary(
 						value: name,
 					});
 					revision = named.revision;
-					await bindCatalogNameSourceOccurrence(tx, created, source.actor, {
+					if(!isCatalogReferenceInitialization(tx,source.observation.record.id,created)) await bindCatalogNameSourceOccurrence(tx, created, source.actor, {
 						sourceRecordId: source.observation.record.id,
 						snapshotId: source.observation.snapshot.id,
 						namespace: "musicbrainz.taxonomy.name",
@@ -164,7 +165,7 @@ export async function musicBrainzVocabulary(
 						sourcePath: catalogSourcePath(source.observation.record.id, source.observation.snapshot.id, source.namePath),
 					});
 					await tx.insert(CatalogFactTables.reference.support).values({
-						...(await catalogSourceSupportColumns(tx, source.observation.record.id)),
+						...(await catalogReferenceAwareSupportColumns(tx, source.observation.record.id)),
 						ownerId: created.id,
 						namedFormId: named.id,
 						sourceRecordId: source.observation.record.id,
@@ -378,7 +379,7 @@ export async function musicBrainzLabelReference(
 				});
 				revision = identifier.revision;
 				await tx.insert(CatalogFactTables.entity.support).values({
-					...(await catalogSourceSupportColumns(tx, observation.record.id)),
+					...(await catalogReferenceAwareSupportColumns(tx, observation.record.id)),
 					ownerId: created.id,
 					identifierId: identifier.id,
 					identifierRevision: identifier.identifierRevision,
@@ -607,7 +608,7 @@ export async function projectMusicBrainzIdentifiers(
 			});
 		if (!identifier) throw new Error("Music source identifier insertion returned no row");
 		await tx.insert(CatalogFactTables.music.support).values({
-			...(await catalogSourceSupportColumns(tx, observation.record.id)),
+			...(await catalogReferenceAwareSupportColumns(tx, observation.record.id)),
 			ownerId,
 			identifierId: identifier.id,
 			identifierRevision: identifier.revision,

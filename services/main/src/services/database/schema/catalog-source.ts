@@ -19,7 +19,7 @@ import { CatalogOwnerValues, type CatalogOwner } from "../../catalog/contracts";
 import { users } from "./auth";
 import { CatalogIdentityTables } from "./catalog-identity";
 
-/** Three configured provider budgets, independent of corpus cardinality and worker replicas. */
+/** Four configured provider budgets, independent of corpus cardinality and worker replicas. */
 export const catalogSourceProviderBudget = pgTable(
 	"catalog_source_provider_budget",
 	{
@@ -31,7 +31,7 @@ export const catalogSourceProviderBudget = pgTable(
 	(table) => [
 		check(
 			"catalog_source_provider_budget_check",
-			sql`${table.source} in ('musicbrainz','vndb','bangumi') and ${table.minimumIntervalMs} between 1000 and 86400000`,
+			sql`${table.source} in ('musicbrainz','vndb','bangumi','openlibrary') and ${table.minimumIntervalMs} between 1000 and 86400000`,
 		),
 	],
 );

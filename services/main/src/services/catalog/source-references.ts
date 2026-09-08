@@ -1,5 +1,6 @@
 import { cachedMusicBrainzRecording } from "./musicbrainz-reference-cache";
-import { catalogSourceSupportColumns } from "./source-support";
+import { catalogReferenceAwareSupportColumns } from "./source-support";
+import { withCatalogReferenceInitialization } from "./reference-initialization";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -101,6 +102,7 @@ export async function bindReferencedSourceIdentity(
 		{ owner: input.owner, shape: input.shape },
 		actor,
 	);
+	return withCatalogReferenceInitialization({tx,reference:identity,evidenceSourceRecordId:evidence.sourceRecordId},async()=>{
 	let revision = identity.revision;
 	if (input.name)
 		revision = (
@@ -135,7 +137,7 @@ export async function bindReferencedSourceIdentity(
 		.returning({ id: tables.identifier.id, identifierRevision: tables.identifier.revision });
 	if (!identifier) throw new Error("Referenced source identifier insertion returned no row");
 	await tx.insert(tables.support).values({
-		...(await catalogSourceSupportColumns(tx, evidence.sourceRecordId)),
+		...(await catalogReferenceAwareSupportColumns(tx, evidence.sourceRecordId)),
 		ownerId: identity.id,
 		identifierId: identifier.id,
 		identifierRevision: identifier.identifierRevision,
@@ -169,4 +171,5 @@ export async function bindReferencedSourceIdentity(
 		mappingKey: createdClaim.mappingKey,
 	});
 	return { owner: input.owner, id: identity.id, revision, created: true };
+	});
 }

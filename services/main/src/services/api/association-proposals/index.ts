@@ -36,11 +36,13 @@ function futureDate(value: string): Date {
 }
 
 const ProposalForbiddenResponse = toApiErrorResponse([
+	"ParticipationDenied",
 	"UnitPermissionForbidden",
 	"UnitAccessRestricted",
 	"EntityAssociationRestricted",
 ]);
 const ProposalNotFoundResponse = toApiErrorResponse([
+	"CatalogReferenceNotFound",
 	"UnitNotFound",
 	"EntityEntryNotFound",
 	"AssociationProposalNotFound",

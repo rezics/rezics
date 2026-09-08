@@ -143,11 +143,11 @@ describe("database bootstrap manifest", () => {
 				categories: ["units", "posts", "reviews", "collections"],
 				where: {
 					any: [
-						{ kind: { in: ["book"] } },
-						{ post: { is: { subject: { is: { kind: { in: ["book"] } } } } } },
+						{ owner: { in: ["publishing"] } },
+						{ post: { is: { subject: { is: { owner: { in: ["publishing"] } } } } } },
 						{
 							collection: {
-								is: { items: { some: { kind: { in: ["book"] } } } },
+								is: { items: { some: { owner: { in: ["publishing"] } } } },
 							},
 						},
 					],
@@ -156,13 +156,13 @@ describe("database bootstrap manifest", () => {
 			expect.objectContaining({
 				categories: ["units", "posts", "reviews", "collections"],
 				where: expect.objectContaining({
-					any: expect.arrayContaining([{ kind: { in: ["media"] } }]),
+					any: expect.arrayContaining([{ owner: { in: ["program"] } }]),
 				}),
 			}),
 			expect.objectContaining({
 				categories: ["units", "posts", "reviews", "collections"],
 				where: expect.objectContaining({
-					any: expect.arrayContaining([{ kind: { in: ["software"] } }]),
+					any: expect.arrayContaining([{ owner: { in: ["software"] } }]),
 				}),
 			}),
 			expect.objectContaining({
@@ -170,7 +170,7 @@ describe("database bootstrap manifest", () => {
 			}),
 			expect.objectContaining({
 				categories: ["units"],
-				where: { kind: { in: ["zone"] } },
+				where: { owner: { in: ["zone"] } },
 			}),
 		]);
 		for (const value of OfficialZoneManifest) {

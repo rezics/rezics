@@ -8,6 +8,10 @@ import { contentRatingAllowlistFromStored } from "../content-rating/policy";
 import { database } from "../database";
 import { readUnitStateById } from "./query";
 import { readNativeEntityMeasurements } from "../catalog/entity-measurements-read";
+import { readEntityContextMeasurements } from "../catalog/entity-context-measurements";
+import { EntityMeasurementContextSchema, type EntityContextMeasurement } from "../catalog/entity-measurement-contracts";
+import { withCatalogViewerPolicy } from "../catalog/read-policy";
+import { runWithParticipationAuthority } from "../participation/policy";
 import { readUnitPresentationsInTransaction } from "./presentation-reader";
 import {
 	accountPreference,
@@ -68,8 +72,8 @@ export async function listUnitSubjectAssociations(
 	)
 		throw new RangeError("Subject association page limit is outside its request-path bound");
 	const platformLanguages = input.localizationLanguages.filter(isContentLanguage);
-	return database.transaction(
-		async (tx) => {
+	const read = () => database.transaction(
+		async (tx) => withCatalogViewerPolicy(tx, input.authorization.authUserId ?? null, async () => {
 			const canonicalUnitId = await resolveCanonicalUnitId(tx, input.unitId);
 			const viewerPreference = input.authorization.authUserId
 				? (
@@ -161,7 +165,8 @@ export async function listUnitSubjectAssociations(
 			const allowedContentRatings = contentRatingAllowlistFromStored(
 				viewerPreference?.contentRatings,
 			);
-			const [contextPosts, expressionSets, attributions, measurements, presentations] =
+			const measurementContext = EntityMeasurementContextSchema.safeParse(base.reference);
+			const [contextPosts, expressionSets, attributions, measurements, presentations, contextualMeasurements] =
 				await Promise.all([
 					getAssociationContextPostsByAssociationIds(
 						associationIds,
@@ -178,6 +183,10 @@ export async function listUnitSubjectAssociations(
 					getAttributionSummariesByUnitIds(entityIds, platformLanguages),
 					readNativeEntityMeasurements(tx, entityIds),
 					readUnitPresentationsInTransaction(tx, entityIds, input.localizationLanguages),
+					measurementContext.success
+						? readEntityContextMeasurements(tx, entityIds, input.authorization.authUserId ?? null, measurementContext.data,
+							viewerPreference?.alwaysShowSpoilers ? 2 : 0)
+						: Promise.resolve(new Map<string, EntityContextMeasurement>()),
 				]);
 
 			const last =
@@ -198,6 +207,7 @@ export async function listUnitSubjectAssociations(
 						viewerSpoilerLevel,
 						...association
 					}) => {
+						const contextualMeasurement = contextualMeasurements.get(association.entityEntryId);
 						const expressionSet = expressionSets.get(association.entityEntryId) ?? {
 							expressions: [],
 							complete: true,
@@ -216,7 +226,9 @@ export async function listUnitSubjectAssociations(
 							expressions: [...expressionSet.expressions],
 							expressionsComplete: expressionSet.complete,
 							attributions: [...(attributions.get(association.entityEntryId) ?? [])],
-							measurement: measurements.get(association.entityEntryId) ?? null,
+							measurement: contextualMeasurement
+								? { ...contextualMeasurement.values, contextUnitId: base.id }
+								: measurements.get(association.entityEntryId) ?? null,
 							contextPost: contextPosts.get(association.id) ?? null,
 							spoiler: presentSubjectAssociationSpoiler(
 								{
@@ -235,7 +247,10 @@ export async function listUnitSubjectAssociations(
 					? encodeSubjectAssociationCursor({ position: last.position, id: last.id }, cursorContext)
 					: null,
 			};
-		},
+		}),
 		{ isolationLevel: "repeatable read" },
 	);
+	return input.authorization.participationAuthority
+		? runWithParticipationAuthority(input.authorization.participationAuthority, read)
+		: read();
 }
