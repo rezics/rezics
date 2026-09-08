@@ -58,10 +58,12 @@ describe("MusicBrainz archived structural delta admission", () => {
 		});
 		expect(() => preflightMusicBrainzReleaseDelta(release, large)).toThrow("staged application");
 	});
-	test("unsupported changed semantic fields cannot silently count as a successful projection", () => {
-		expect(preflightMusicBrainzReleaseDelta(release, { ...release, asin: "B000000001" })).toBeUndefined();
-		expect(() =>
+	test("admits identifier and relation fields covered by native semantic writers", () => {
+		expect(
+			preflightMusicBrainzReleaseDelta(release, { ...release, asin: "B000000001" }),
+		).toBeUndefined();
+		expect(
 			preflightMusicBrainzReleaseDelta(release, { ...release, relations: [] }),
-		).toThrow("native semantic writer");
+		).toBeUndefined();
 	});
 });

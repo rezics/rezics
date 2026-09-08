@@ -340,3 +340,38 @@ not catalog rows; measure this additional admission cost and cache/compile the
 bounded validation plan if it exceeds the ingest budget. The existing owner/source
 partition and retention plan applies. Runtime contract tests pass; SQL acceptance
 requires the centrally generated migration and rerun of rollback-only fixtures.
+
+### Supporting native updates and relation bundles (2026-09-08)
+
+The offline factory now dispatches artist, label, area, place, event, instrument,
+series, genre, mood and URL updates. Fixed profiles use explicit source field
+scopes and retain independent human values; names, text assertions, IPI/ISNI/label
+codes and governed relationships use their native revision owners. Relationship
+updates preserve direction and endpoint credit spellings, and apply/compensate
+their private qualifier facts as an exact bundle. Initial adoption now records
+qualifier source support as well as the relation's support. Reapplication resolves
+the relation's current baseline from its previous occurrence when the same
+semantic identity spans both source snapshots.
+
+`check-music-supporting-updates.ts` passed 176 tracked assertions across ten
+endpoint kinds and two apply/withdraw cycles, including changed relationship
+credits and dates, and an independently authored artist field retained in native
+history but absent from pure source ownership. `check-catalog-profile-source.ts`
+passed 30 checks across Entity/Reference and three cycles. The names-enabled
+release/object delta fixture also passed with changed relation qualifiers.
+These tests installed the reviewed interpretation columns/guards inside each
+fixture transaction and rolled back both DDL and rows. They qualify owner logic,
+not generated migration replay. Ordinary source admission and profile parser
+tests remain separate deterministic checks.
+
+The [MusicBrainz API](https://musicbrainz.org/doc/MusicBrainz_API) makes inclusion
+selection explicit, so an omitted profile field never silently clears an earlier
+observation. The [PostgreSQL JSON conversion rules](https://www.postgresql.org/docs/current/functions-json.html)
+ignore unknown keys and can coerce scalar types; the music SQL guard therefore
+checks the exact key set and normalized typed result separately.
+
+Changed area-code sets, series classification and native reclassification still
+fail explicitly pending their exact native journals. Null-before mapper refresh,
+taxonomy hierarchy installation, CAA/EAA artwork metadata, redirect persistence,
+SQL dump orchestration and full source counter dispositions remain unqualified.
+The machine-readable mapping inventory retains those gaps and `qualified: false`.

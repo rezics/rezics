@@ -147,8 +147,8 @@ export async function applyMusicBrainzRelationDelta(
 		record(value, expected, removed.headVersion);
 		return true;
 	};
-	const restore = async (value: Semantic) => {
-		const expected = await currentRevision(value);
+	const restore = async (value: Semantic, expectedCurrent?: number) => {
+		const expected = expectedCurrent ?? (await currentRevision(value));
 		const restored = await restoreCatalogSemanticRevision(
 			tx,
 			reference,
@@ -190,7 +190,10 @@ export async function applyMusicBrainzRelationDelta(
 			if (old && !preserveOld && old.semanticId !== target.semanticId)
 				throw new TypeError("Relationship correspondence changed its native semantic identity");
 			for (const fact of await qualifierFacts(target)) await restore(fact);
-			await restore(target);
+			await restore(
+				target,
+				old && old.semanticId === target.semanticId ? await currentRevision(old) : undefined,
+			);
 			continue;
 		}
 		const expected = old && !preserveOld ? await currentRevision(old) : null;
@@ -206,23 +209,14 @@ export async function applyMusicBrainzRelationDelta(
 			old && expected !== null
 				? { semanticId: old.semanticId, expectedHeadVersion: expected }
 				: undefined,
+			"prepared",
 		);
 		const added = await relationAt(observation.snapshot.id, index);
 		if (!added) throw new Error("Relationship adoption omitted its source occurrence");
 		const facts = await qualifierFacts(added);
 		if (facts.length > 64)
 			throw new RangeError("Relationship qualifier bundle exceeds its canonical bound");
-		for (const fact of facts) {
-			await tx.insert(table.support).values({
-				...(await catalogSourceSupportColumns(tx, observation.record.id)),
-				ownerId: reference.id,
-				factId: fact.id,
-				sourceRecordId: observation.record.id,
-				snapshotId: observation.snapshot.id,
-				sourcePath: `/relations/${index}`,
-			});
-			record(fact, null, sourceRevision(fact));
-		}
+		for (const fact of facts) record(fact, null, sourceRevision(fact));
 		record(added, expected, sourceRevision(added));
 	}
 	for (const [index] of prior.entries()) {

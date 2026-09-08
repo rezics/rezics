@@ -1,3 +1,4 @@
+import { MusicBrainzRelationEndpointFamilies } from "./musicbrainz-relation-plan";
 import { catalogSourceSupportColumns } from "./source-support";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -18,27 +19,6 @@ import { catalogValueNodes } from "./value-nodes";
 
 type Relation = z.infer<typeof MusicBrainzRelationSchema>;
 type Observation = Awaited<ReturnType<typeof recordCatalogSourceDocument>>;
-const endpointFamilies = {
-	artist: {
-		owner: "entity",
-		shape: "unresolved",
-		shapes: ["person", "collective", "character", "unresolved"],
-	},
-	label: { owner: "entity", shape: "label", shapes: ["label", "organization", "unresolved"] },
-	area: { owner: "reference", shape: "area", shapes: ["area"] },
-	place: { owner: "reference", shape: "place", shapes: ["place"] },
-	event: { owner: "reference", shape: "event", shapes: ["event"] },
-	instrument: { owner: "reference", shape: "instrument", shapes: ["instrument"] },
-	series: { owner: "grouping", shape: "grouping", shapes: ["grouping"] },
-	genre: { owner: "reference", shape: "concept", shapes: ["concept"] },
-	mood: { owner: "reference", shape: "concept", shapes: ["concept"] },
-	recording: { owner: "music", shape: "recording", shapes: ["recording"] },
-	release: { owner: "music", shape: "release", shapes: ["release"] },
-	"release-group": { owner: "music", shape: "release_group", shapes: ["release_group"] },
-	work: { owner: "music", shape: "work", shapes: ["work"] },
-	url: { owner: "reference", shape: "web_resource", shapes: ["web_resource"] },
-} as const;
-
 async function attributeDefinition(tx: DatabaseTransaction) {
 	return ensureCatalogDefinition(tx, {
 		namespace: "musicbrainz.relationship.qualifier",
@@ -83,6 +63,7 @@ export async function adoptMusicBrainzRelations(
 	path = "/relations",
 	sourceOffset = 0,
 	replacement?: { semanticId: string; expectedHeadVersion: number },
+	dependencyMode: "intake" | "prepared" = "intake",
 ) {
 	const relations = z.array(MusicBrainzRelationSchema).max(8192).parse(input);
 	z.number().int().min(0).max(8191).parse(sourceOffset);
@@ -109,8 +90,9 @@ export async function adoptMusicBrainzRelations(
 			relation["target-type"] === "release_group" ? "release-group" : relation["target-type"];
 		const target = relation[key];
 		if (!target) throw new TypeError("Relationship target missing");
-		const family = endpointFamilies[key];
+		const family = MusicBrainzRelationEndpointFamilies[key];
 		const endpoint = await bindReferencedSourceIdentity(tx, actor, {
+			mode: dependencyMode,
 			source: "musicbrainz",
 			objectType: key.replaceAll("-", "_"),
 			externalId: target.id,
@@ -227,6 +209,28 @@ export async function adoptMusicBrainzRelations(
 					? ["person", "collective", "character", "label", "organization", "unresolved"]
 					: [...family.shapes],
 		};
+		const qualifierRevisionIds = [(await attributeDefinition(tx)).revisionId];
+		for (const key of [
+			"begin.year",
+			"begin.month",
+			"begin.day",
+			"end.year",
+			"end.month",
+			"end.day",
+			"ended",
+			"ordering",
+		])
+			qualifierRevisionIds.push(
+				(
+					await ensureCatalogDefinition(tx, {
+						namespace: "musicbrainz.relationship.qualifier",
+						key,
+						kind: "property",
+						valueKind: key === "ended" ? "boolean" : "number",
+						constraints: { nullable: true, ...(key !== "ended" ? { integer: true } : {}) },
+					})
+				).revisionId,
+			);
 		const predicate = await ensureCatalogDefinition(tx, {
 			namespace: "musicbrainz.relationship",
 			key: `${relation["type-id"]}.${sourceEndpoint.owner}.${targetEndpoint.owner}`,
@@ -247,32 +251,7 @@ export async function adoptMusicBrainzRelations(
 						targets: [relation.direction === "forward" ? otherTarget : ownerTarget],
 					},
 				],
-				qualifierRevisionIds: [
-					(await attributeDefinition(tx)).revisionId,
-					...(await Promise.all(
-						[
-							"begin.year",
-							"begin.month",
-							"begin.day",
-							"end.year",
-							"end.month",
-							"end.day",
-							"ended",
-							"ordering",
-						].map(
-							async (key) =>
-								(
-									await ensureCatalogDefinition(tx, {
-										namespace: "musicbrainz.relationship.qualifier",
-										key,
-										kind: "property",
-										valueKind: key === "ended" ? "boolean" : "number",
-										constraints: { nullable: true, ...(key !== "ended" ? { integer: true } : {}) },
-									})
-								).revisionId,
-						),
-					)),
-				],
+				qualifierRevisionIds,
 			},
 		});
 		const created = await createCatalogRelation(tx, reference, actor, revision, {
@@ -299,6 +278,15 @@ export async function adoptMusicBrainzRelations(
 			qualifiers,
 		});
 		revision = created.revision;
+		for (const qualifier of qualifiers)
+			await tx.insert(CatalogFactTables[reference.owner].support).values({
+				...(await catalogSourceSupportColumns(tx, observation.record.id)),
+				ownerId: reference.id,
+				factId: qualifier.valueFactId,
+				sourceRecordId: observation.record.id,
+				snapshotId: observation.snapshot.id,
+				sourcePath: `${path}/${position}`,
+			});
 		await tx.insert(CatalogFactTables[reference.owner].support).values({
 			...(await catalogSourceSupportColumns(tx, observation.record.id)),
 			ownerId: reference.id,

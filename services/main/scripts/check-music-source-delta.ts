@@ -43,7 +43,12 @@ import {
 } from "../src/services/catalog/music-domain";
 import { readMusicTracks } from "../src/services/catalog/domains";
 import { readCatalogSourceApplication } from "../src/services/catalog/source-applications";
-import { listCatalogNames, readCatalogFactNodes } from "../src/services/catalog/storage";
+import {
+	listCatalogNames,
+	readCatalogFactNodes,
+	pageCatalogRelations,
+	readCatalogParticipants,
+} from "../src/services/catalog/storage";
 import { listCatalogFacts } from "../src/services/catalog/semantic-history";
 import { bindReferencedSourceIdentity } from "../src/services/catalog/source-references";
 import { runWithNativeFixtureActor } from "./native-fixture-actor";
@@ -115,6 +120,17 @@ try {
 					id: sourceKey.externalId,
 					title: "Album before",
 					barcode: "111",
+					relations: [
+						{
+							"type-id": crypto.randomUUID(),
+							type: "Associated artist",
+							direction: "forward",
+							"target-type": "artist",
+							artist: { id: artistId, name: "Fixture artist" },
+							begin: "2000",
+							"source-credit": "Original relation credit",
+						},
+					],
 					...(testNames ? { annotation: "First annotation" } : {}),
 					aliases: [{ name: "Alias before", locale: "en", primary: true }],
 					"artist-credit": [
@@ -298,6 +314,11 @@ try {
 				const incoming: MusicBrainzRelease = {
 					...previous,
 					asin: "B000000002",
+					relations: (previous.relations ?? []).map((relation) => ({
+						...relation,
+						begin: "2001",
+						"source-credit": "Updated relation credit",
+					})),
 					"artist-credit": [
 						{
 							name: "New credited artist",
@@ -419,6 +440,14 @@ try {
 					writer,
 				);
 				assert.equal(decision.status, "applied");
+				const related = await pageCatalogRelations(tx, reference, actor.id);
+				assert.equal(related.items.length, 1);
+				assert.ok(related.items[0]);
+				assert.ok(
+					(await readCatalogParticipants(tx, reference, related.items[0].id, actor.id)).some(
+						(participant) => participant.creditedAs === "Updated relation credit",
+					),
+				);
 				const updated = await readMusicTracks(tx, reference, actor.id, medium.id);
 				assert.deepEqual(
 					updated.map((row) => row.id),

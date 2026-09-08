@@ -1,6 +1,6 @@
 {
 	"source": "musicbrainz",
-	"reviewedAt": "2026-09-07",
+	"reviewedAt": "2026-09-08",
 	"qualified": false,
 	"denominator": "Required public catalog semantics across WS/2, public SQL dumps, Cover Art Archive and Event Art Archive; declaration counts alone are not the denominator.",
 	"sources": [
@@ -38,7 +38,9 @@
 			"write": [
 				"musicbrainz-adoption.ts",
 				"musicbrainz-release-delta.ts",
-				"musicbrainz-name-delta.ts"
+				"musicbrainz-name-delta.ts",
+				"musicbrainz-identifier-delta.ts",
+				"musicbrainz-writer.ts"
 			],
 			"queryExport": [
 				"music-domain.ts:readMusicReleaseMetadata",
@@ -50,7 +52,8 @@
 				"check-music-source-delta.ts"
 			],
 			"remaining": [
-				"Combined explicit-head/sequence migration and repeated SQL acceptance",
+				"Coordinated pure-interpretation migration replay",
+				"Null-before same-target mapper refresh",
 				"Staged activation for large source scopes"
 			]
 		},
@@ -191,7 +194,9 @@
 				"musicbrainz-object-adoption.ts",
 				"musicbrainz-native.ts",
 				"musicbrainz-object-delta.ts",
-				"musicbrainz-facts.ts"
+				"musicbrainz-facts.ts",
+				"musicbrainz-identifier-delta.ts",
+				"musicbrainz-writer.ts"
 			],
 			"queryExport": [
 				"music-domain.ts:readMusicWorkMetadata",
@@ -207,9 +212,9 @@
 				"check-music-source-delta.ts"
 			],
 			"remaining": [
-				"ISRC/ISWC and relationship update integration",
-				"Complete work-attribute taxonomy hierarchy installation",
-				"Staged activation for large scopes"
+				"Coordinated pure-interpretation migration replay",
+				"Null-before same-target mapper refresh",
+				"Staged activation for large source scopes"
 			]
 		},
 		{
@@ -237,7 +242,8 @@
 			"write": [
 				"musicbrainz-names.ts",
 				"musicbrainz-name-delta.ts",
-				"musicbrainz-entities-adoption.ts"
+				"musicbrainz-entities-adoption.ts",
+				"musicbrainz-supporting-delta.ts"
 			],
 			"queryExport": [
 				"names.ts:listCatalogNameRevisions",
@@ -245,11 +251,11 @@
 			],
 			"checks": [
 				"music-structure.test.ts",
-				"check-music-source-delta.ts"
+				"check-music-source-delta.ts",
+				"check-music-supporting-updates.ts"
 			],
 			"remaining": [
-				"Unknown alias-type native vocabulary rather than default alias kind",
-				"Supporting endpoint update callbacks"
+				"Unknown alias-type native vocabulary rather than default alias kind"
 			]
 		},
 		{
@@ -277,19 +283,23 @@
 				"music_semantic_revision"
 			],
 			"write": [
-				"musicbrainz-relations.ts"
+				"musicbrainz-relations.ts",
+				"musicbrainz-relation-delta.ts",
+				"musicbrainz-dependencies.ts"
 			],
 			"queryExport": [
 				"semantic-history.ts",
 				"storage.ts"
 			],
 			"checks": [
-				"musicbrainz.test.ts"
+				"musicbrainz.test.ts",
+				"check-music-source-delta.ts",
+				"check-music-supporting-updates.ts"
 			],
 			"remaining": [
-				"Changed/removed relation reconciliation",
 				"Full upstream relationship-type/attribute hierarchy installation",
-				"Cross-owner source update qualification"
+				"Large qualifier bundles require staged activation",
+				"Generated migration replay remains distinct from rollback-only owner logic qualification"
 			]
 		},
 		{
@@ -336,7 +346,10 @@
 			],
 			"write": [
 				"musicbrainz-entities-adoption.ts",
-				"musicbrainz-entities.ts"
+				"musicbrainz-entities.ts",
+				"musicbrainz-supporting-delta.ts",
+				"musicbrainz-dependencies.ts",
+				"profile-source.ts"
 			],
 			"queryExport": [
 				"entities.ts",
@@ -344,12 +357,16 @@
 				"grouping.ts"
 			],
 			"checks": [
-				"musicbrainz-entities.test.ts"
+				"musicbrainz-entities.test.ts",
+				"check-music-supporting-updates.ts",
+				"profile-source-contracts.test.ts"
 			],
 			"remaining": [
-				"Runtime acquisition registration and periodic checks",
-				"Native update/withdraw writers",
-				"Complete exact type/alias mapping"
+				"Area-code and series-classification update journals",
+				"Native reclassification when source object grain changes",
+				"Joined full SQL dump admission",
+				"Coordinated pure-interpretation migration replay",
+				"Null-before same-target mapper refresh"
 			]
 		},
 		{

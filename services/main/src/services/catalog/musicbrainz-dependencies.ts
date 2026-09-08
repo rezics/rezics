@@ -1,4 +1,7 @@
 import type { DatabaseTransaction } from "../database";
+import { z } from "zod";
+import type { CatalogOwner } from "./contracts";
+import { MusicBrainzRelationEndpointFamilies } from "./musicbrainz-relation-plan";
 import { musicRecording, musicReleaseGroup } from "../database/schema/catalog-music";
 import {
 	currentParticipationAuthority,
@@ -9,6 +12,7 @@ import {
 	MusicBrainzReleaseSchema,
 	MusicBrainzObjectDocumentSchema,
 	MusicBrainzCatalogContractSha256,
+	MusicBrainzRelationSchema,
 	type MusicBrainzCredit,
 	type MusicBrainzRelease,
 	type MusicBrainzRecording,
@@ -22,6 +26,7 @@ import {
 	musicBrainzCreditWriter,
 } from "./musicbrainz-native";
 import { tracks } from "./musicbrainz-release-plan";
+import { parseMusicBrainzSupportingEndpoint } from "./musicbrainz-entities";
 import { bindReferencedSourceIdentity } from "./source-references";
 import { prepareCatalogSourceProposalDependency } from "./source-dependencies";
 import { catalogSourceRecordId } from "./source-record-key";
@@ -35,6 +40,16 @@ type Dependency = { path: string } & (
 	| { kind: "recording"; value: MusicBrainzRecording }
 	| { kind: "release_group"; value: MusicBrainzReleaseGroup }
 	| {
+			kind: "relation";
+			binding: {
+				objectType: string;
+				externalId: string;
+				owner: CatalogOwner;
+				shape: string;
+				name?: string;
+			};
+	  }
+	| {
 			kind: "vocabulary";
 			family: string;
 			id: string | null | undefined;
@@ -44,6 +59,12 @@ type Dependency = { path: string } & (
 );
 
 function sourceKey(item: Dependency) {
+	if (item.kind === "relation")
+		return {
+			source: "musicbrainz",
+			objectType: item.binding.objectType,
+			externalId: item.binding.externalId,
+		};
 	return {
 		source: "musicbrainz",
 		objectType: item.kind === "vocabulary" ? item.family : item.kind,
@@ -112,7 +133,7 @@ export function planMusicBrainzDependencies(
 		for (const [index, label] of (release["label-info"] ?? []).entries())
 			if (label.label)
 				add({ kind: "label", value: label.label, path: `/label-info/${index}/label/id` });
-	} else {
+	} else if (["work", "recording", "release_group"].includes(objectType)) {
 		const document = MusicBrainzObjectDocumentSchema.parse({ kind: objectType, record: input });
 		if (document.kind === "work")
 			vocabulary(
@@ -144,6 +165,54 @@ export function planMusicBrainzDependencies(
 					);
 			}
 		}
+	} else {
+		const document = parseMusicBrainzSupportingEndpoint(objectType, input);
+		if (!["url", "series", "genre", "mood"].includes(document.type)) {
+			const record = document.record;
+			const id = typeof record["type-id"] === "string" ? record["type-id"] : null;
+			const name = typeof record.type === "string" ? record.type : null;
+			vocabulary(`${document.type}_type`, id, name, "/type-id", "/type");
+		}
+		if (document.type === "artist") {
+			vocabulary(
+				"gender",
+				document.record["gender-id"],
+				document.record.gender,
+				"/gender-id",
+				"/gender",
+			);
+			for (const field of ["area", "begin-area", "end-area"] as const)
+				if (document.record[field])
+					add({ kind: "area", value: document.record[field], path: `/${field}/id` });
+		} else if ((document.type === "label" || document.type === "place") && document.record.area)
+			add({ kind: "area", value: document.record.area, path: "/area/id" });
+	}
+	const sourceRelations = z
+		.object({ id: z.uuid(), relations: z.array(MusicBrainzRelationSchema).max(128).optional() })
+		.parse(input);
+	for (const [index, relation] of (sourceRelations.relations ?? []).entries()) {
+		const key =
+			relation["target-type"] === "release_group" ? "release-group" : relation["target-type"];
+		const target = relation[key];
+		if (!target) throw new TypeError("MusicBrainz relationship dependency is missing its target");
+		const family = MusicBrainzRelationEndpointFamilies[key];
+		if (key.replaceAll("-", "_") === objectType && target.id === sourceRelations.id) continue;
+		add({
+			kind: "relation",
+			path: `/relations/${index}/${key}/id`,
+			binding: {
+				objectType: key.replaceAll("-", "_"),
+				externalId: target.id,
+				owner: family.owner,
+				shape: family.shape,
+				name:
+					"name" in target && typeof target.name === "string"
+						? target.name
+						: "title" in target && typeof target.title === "string"
+							? target.title
+							: undefined,
+			},
+		});
 	}
 	return [...dependencies.values()];
 }
@@ -194,6 +263,13 @@ export async function prepareMusicBrainzProposalDependencies(
 		for (const [position, item] of plan.entries()) {
 			const path = item.path.slice(0, -3);
 			switch (item.kind) {
+				case "relation":
+					await bindReferencedSourceIdentity(tx, actor, {
+						source: "musicbrainz",
+						...item.binding,
+						evidence: observation.referenceAt(item.path),
+					});
+					break;
 				case "vocabulary":
 					await musicBrainzVocabulary(tx, item.family, item.id, item.name, {
 						actor,

@@ -65,6 +65,7 @@ describe("MusicBrainz pending proposal dependency plan", () => {
 				"artist-credit": Array.from({ length: 129 }, () => ({ name: "Artist", artist })),
 			}),
 		).toHaveLength(1);
-		expect(() => planMusicBrainzDependencies("artist", artist)).toThrow();
+		expect(planMusicBrainzDependencies("artist", artist)).toEqual([]);
+		expect(() => planMusicBrainzDependencies("unknown", artist)).toThrow();
 	});
 });

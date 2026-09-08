@@ -8,6 +8,7 @@ import { compensateCatalogSourceOwnedChange } from "./source-owned-compensation"
 import { MusicComponentChangeSchema } from "./music-structure-contracts";
 import { compensateMusicComponents } from "./music-structure";
 import { loadCatalogIdentity, recordCatalogChange } from "./storage";
+import { compensateCatalogProfileSourceChange } from "./profile-source";
 
 /** @internal Every music mapper uses the same exact source journal compensation protocol. */
 export async function compensateMusicSourceApplication(
@@ -23,14 +24,22 @@ export async function compensateMusicSourceApplication(
 	const inverse: CatalogSourceNativeChange[] = [];
 	for (const change of [...application.changes].reverse()) {
 		if (change.kind === "music-component") continue;
-		if (!("owner" in change) || change.owner !== "music" || change.ownerId !== context.reference.id)
+		if (
+			!("owner" in change) ||
+			change.owner !== context.reference.owner ||
+			change.ownerId !== context.reference.id
+		)
 			throw new TypeError("Music compensation targets another native owner");
-		inverse.push(await compensateCatalogSourceOwnedChange(tx, context.actor, change));
+		inverse.push(
+			change.kind === "catalog-profile"
+				? await compensateCatalogProfileSourceChange(tx, context.actor, change)
+				: await compensateCatalogSourceOwnedChange(tx, context.actor, change),
+		);
 	}
 	const changes = application.changes
 		.filter((change) => change.kind === "music-component")
 		.map((change) => {
-			if (change.ownerId !== context.reference.id)
+			if (context.reference.owner !== "music" || change.ownerId !== context.reference.id)
 				throw new TypeError("Music compensation journal targets another owner");
 			return MusicComponentChangeSchema.parse({
 				component: change.component,

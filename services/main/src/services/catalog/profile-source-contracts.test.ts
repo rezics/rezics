@@ -1,9 +1,38 @@
 import { describe, expect, it } from "vitest";
-import { parseCatalogSourceProfile } from "./profile-source-contracts";
+import { parseCatalogSourceProfile, mergeCatalogSourceProfile } from "./profile-source-contracts";
 import { musicBrainzSupportingObservedProfileFields } from "./musicbrainz-supporting-profile";
 import { parseMusicBrainzSupportingEndpoint } from "./musicbrainz-entities";
 
 describe("pure source profile field scope", () => {
+	it("preserves human fields while applying changed observed source fields", () => {
+		const before = parseCatalogSourceProfile(
+			"entity",
+			{ begin: { year: 1980, month: null, day: null } },
+			["begin"],
+		);
+		const after = parseCatalogSourceProfile(
+			"entity",
+			{ begin: { year: 1981, month: null, day: null } },
+			["begin"],
+		);
+		expect(
+			mergeCatalogSourceProfile("entity", { ...before.sourceProfile, ended: true }, before, after),
+		).toMatchObject({ ended: true, begin: { year: 1981 } });
+		expect(after.sourceProfile).toMatchObject({ ended: null });
+	});
+	it("preserves corrected fields under unchanged source and rejects conflicting source changes", () => {
+		const before = parseCatalogSourceProfile("entity", { ended: false }, ["ended"]);
+		expect(mergeCatalogSourceProfile("entity", { ended: true }, before, before)).toMatchObject({
+			ended: true,
+		});
+		const changed = parseCatalogSourceProfile("entity", { ended: null }, ["ended"]);
+		expect(() => mergeCatalogSourceProfile("entity", { ended: true }, before, changed)).toThrow(
+			"independent native edit",
+		);
+		expect(() =>
+			mergeCatalogSourceProfile("entity", {}, before, parseCatalogSourceProfile("entity", {}, [])),
+		).toThrow("omitted");
+	});
 	it("keeps defaulted native fields outside a partial observation's authority", () => {
 		const parsed = parseCatalogSourceProfile("entity", { genderRevisionId: null }, [
 			"genderRevisionId",

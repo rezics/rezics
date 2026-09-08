@@ -10,6 +10,7 @@ import { applyMusicBrainzFactDelta, musicBrainzFactDescriptors } from "./musicbr
 import { compensateMusicSourceApplication } from "./music-source-compensation";
 import { prepareMusicSourceProjection } from "./music-source-projection";
 import { applyMusicBrainzIdentifierDelta } from "./musicbrainz-identifier-delta";
+import { applyMusicBrainzRelationDelta } from "./musicbrainz-relation-delta";
 
 type Archived = { receipt: CatalogSourceReceipt; bytes: Uint8Array };
 
@@ -58,8 +59,6 @@ export function musicBrainzObjectNativeWriter(
 				context.mappingVersion !== `musicbrainz.${incoming.kind}.2`
 			)
 				throw new TypeError("Music object source identity or mapper changed");
-			if (!isDeepStrictEqual(previous.record.relations, incoming.record.relations))
-				throw new TypeError("Music object relationship delta requires its native semantic writer");
 			const factInput = (document: typeof incoming) =>
 				document.kind === "work"
 					? document.record
@@ -266,8 +265,21 @@ export function musicBrainzObjectNativeWriter(
 				identifierEntries(previous),
 				identifierEntries(incoming),
 			);
+			const relations = await applyMusicBrainzRelationDelta(
+				tx,
+				context.reference,
+				context.actor,
+				identifiers.revision,
+				observation,
+				{
+					snapshotId: context.previousSnapshotId,
+					mappingKey: context.mappingKey,
+					relations: previous.record.relations ?? [],
+				},
+				incoming.record.relations ?? [],
+			);
 			return {
-				revision: identifiers.revision,
+				revision: relations.revision,
 				changes: [
 					...structural.changes.map((change) => ({
 						kind: "music-component" as const,
@@ -277,6 +289,7 @@ export function musicBrainzObjectNativeWriter(
 					...names.changes,
 					...facts.changes,
 					...identifiers.changes,
+					...relations.changes,
 				],
 			};
 		});

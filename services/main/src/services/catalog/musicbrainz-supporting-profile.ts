@@ -76,6 +76,7 @@ export async function musicBrainzSupportingProfile(
 	actor: string,
 	observation: Observation,
 	document: MusicBrainzSupportingDocument,
+	mode: "intake" | "prepared" = "intake",
 ) {
 	const vocabulary = (
 		family: string,
@@ -84,6 +85,7 @@ export async function musicBrainzSupportingProfile(
 		field = "type",
 	) =>
 		musicBrainzVocabulary(tx, family, id, name, {
+			mode,
 			actor,
 			observation,
 			idPath: `/${field}-id`,
@@ -92,7 +94,8 @@ export async function musicBrainzSupportingProfile(
 	const area = async (
 		value: Parameters<typeof musicBrainzAreaReference>[3] | null | undefined,
 		path: string,
-	) => (value ? (await musicBrainzAreaReference(tx, actor, observation, value, path)).id : null);
+	) =>
+		value ? (await musicBrainzAreaReference(tx, actor, observation, value, path, mode)).id : null;
 	switch (document.type) {
 		case "artist": {
 			const record = document.record;

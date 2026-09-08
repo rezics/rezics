@@ -1,4 +1,3 @@
-import { isDeepStrictEqual } from "node:util";
 import type { MusicBrainzRelease } from "./musicbrainz";
 
 type Medium = MusicBrainzRelease["media"][number];
@@ -84,9 +83,6 @@ export function preflightMusicBrainzReleaseDelta(
 		throw new RangeError(
 			"Music release delta requires staged application before native activation",
 		);
-	for (const key of ["relations"] as const)
-		if (!isDeepStrictEqual(previous[key], incoming[key]))
-			throw new TypeError(`Music release ${key} change requires its native semantic writer`);
 	for (const release of [previous, incoming]) {
 		const ids = release.media.flatMap((medium, index) =>
 			tracks(medium, index).map((entry) => entry.track.id),

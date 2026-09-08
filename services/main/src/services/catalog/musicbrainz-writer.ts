@@ -3,6 +3,7 @@ import { MusicBrainzCatalogContractSha256 } from "./musicbrainz";
 import { musicBrainzObjectNativeWriter } from "./musicbrainz-object-delta";
 import { musicBrainzReleaseNativeWriter } from "./musicbrainz-release-delta";
 import { compensateMusicSourceApplication } from "./music-source-compensation";
+import { musicBrainzSupportingNativeWriter } from "./musicbrainz-supporting-delta";
 import type { CatalogSourceReceipt } from "./source-observations";
 import type { CatalogSourceNativeWriter } from "./source-proposals";
 
@@ -33,7 +34,24 @@ export function createMusicBrainzNativeWriter(input: {
 	)
 		throw new TypeError("MusicBrainz update archives cross source identity");
 	const kind = after.receipt.key.objectType;
-	if (!["release", "work", "recording", "release_group"].includes(kind))
+	if (
+		![
+			"release",
+			"work",
+			"recording",
+			"release_group",
+			"artist",
+			"label",
+			"area",
+			"place",
+			"event",
+			"instrument",
+			"series",
+			"genre",
+			"mood",
+			"url",
+		].includes(kind)
+	)
 		throw new TypeError(`MusicBrainz ${kind} has no qualified native update writer`);
 	// Missing previous evidence must never be interpreted as an empty native owner.
 	// A new correspondence needs its persisted interpretation before refresh can apply.
@@ -50,7 +68,9 @@ export function createMusicBrainzNativeWriter(input: {
 		const writer =
 			kind === "release"
 				? musicBrainzReleaseNativeWriter(before, after)
-				: musicBrainzObjectNativeWriter(before, after);
+				: ["work", "recording", "release_group"].includes(kind)
+					? musicBrainzObjectNativeWriter(before, after)
+					: musicBrainzSupportingNativeWriter(before, after);
 		return writer(tx, context);
 	};
 }
