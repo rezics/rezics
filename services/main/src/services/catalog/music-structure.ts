@@ -147,12 +147,12 @@ export async function mutateMusicSourceComponents(
 	tx: DatabaseTransaction, reference: CatalogReference, actor: string, expectedRevision: number,
 	input: readonly MusicComponentMutation[],
 ) {
-	return mutatePreparedMusicComponents(tx, reference, actor, expectedRevision, MusicSourceComponentBatchSchema.parse(input));
+	return mutatePreparedMusicComponents(tx, reference, actor, expectedRevision, MusicSourceComponentBatchSchema.parse(input), 32_000_000);
 }
 
 async function mutatePreparedMusicComponents(
 	tx: DatabaseTransaction, reference: CatalogReference, actor: string, expectedRevision: number,
-	operations: MusicComponentMutation[],
+	operations: MusicComponentMutation[], maximumHistoryBytes = Number.POSITIVE_INFINITY,
 ) {
 	return runParticipationSavepoint(tx, async (inner) => {
 		const identity = await loadCatalogIdentity(inner, reference, actor, true);
@@ -160,6 +160,7 @@ async function mutatePreparedMusicComponents(
 		if (identity.revision !== expectedRevision)
 			throw new CatalogRevisionConflict("Music owner revision changed");
 		const prepared = [];
+		let historyBytes = 0;
 		for (const operation of operations) {
 			if (identity.shape !== musicComponentOwner(operation.component).shape)
 				throw new TypeError("Music component belongs to another native shape");
@@ -190,6 +191,9 @@ async function mutatePreparedMusicComponents(
 				value = history.value;
 				remove = history.operation === "DELETE";
 			}
+			if (head) historyBytes += Buffer.byteLength(JSON.stringify(head.value));
+			if (operation.action === "restore") historyBytes += Buffer.byteLength(JSON.stringify(value));
+			if (historyBytes > maximumHistoryBytes) throw new RangeError("Music publication history exceeds its byte budget");
 			const row = MusicComponentSchemas[operation.component].parse(value);
 			const body: Record<string, unknown> = row;
 			const ownerId = body[musicComponentOwner(operation.component).column];

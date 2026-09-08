@@ -6,7 +6,6 @@ import { musicComponentSourceBaseline } from "../database/schema/catalog-music-s
 import type { DatabaseTransaction } from "../database";
 import {
 	musicComponentRevision,
-	musicComponentHead,
 	musicComponentSourceOccurrence,
 } from "../database/schema/catalog-music";
 import type { CatalogSourceNativeWriter } from "./source-proposals";
@@ -18,7 +17,7 @@ import {
 	type MusicComponentName,
 	type MusicComponentMutation,
 } from "./music-structure-contracts";
-import { mutateMusicSourceComponents } from "./music-structure";
+import { mutateMusicSourceComponents, readMusicComponentHead } from "./music-structure";
 import { CatalogRevisionConflict, recordCatalogChange } from "./storage";
 import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 
@@ -30,8 +29,6 @@ export type MusicSourceComponentBaseline = {
 	currentHistoryId: string;
 	absent: boolean;
 	value: Record<string, unknown>;
-	actualHistoryId: string;
-	actualValue: Record<string, unknown> | null;
 };
 
 /** @internal Reconcile native fields against pure source values without overwriting independent edits. */
@@ -70,21 +67,16 @@ export async function prepareMusicSourceProjection(
 	const load = async (snapshotId: string) => {
 		const baseline = musicComponentSourceBaseline;
 		const current = alias(history, "source_current");
-		const actual = alias(history, "native_current");
-		const head = musicComponentHead;
 		const currentId = sql<string>`case when ${baseline.sourceHistoryId} = ${occurrence.historyId} then ${baseline.currentHistoryId} else ${occurrence.historyId} end`;
 		const rows = await tx.select({
 			component: occurrence.component, componentKey: occurrence.componentKey,
 			sourcePath: occurrence.sourcePath, historyId: occurrence.historyId, value: occurrence.sourceValue,
 			currentHistoryId: current.id, currentOperation: current.operation,
-			actualHistoryId: actual.id, actualOperation: actual.operation, actualValue: actual.value,
 		}).from(occurrence)
 			.leftJoin(baseline, and(eq(baseline.sourceRecordId, occurrence.sourceRecordId),
 				eq(baseline.mappingKey, occurrence.mappingKey), eq(baseline.correspondenceRevision, occurrence.correspondenceRevision),
 				eq(baseline.ownerId, occurrence.ownerId), eq(baseline.component, occurrence.component), eq(baseline.componentKey, occurrence.componentKey)))
 			.leftJoin(current, and(eq(current.ownerId, occurrence.ownerId), eq(current.id, currentId)))
-			.leftJoin(head, and(eq(head.ownerId, occurrence.ownerId), eq(head.component, occurrence.component), eq(head.componentKey, occurrence.componentKey)))
-			.leftJoin(actual, and(eq(actual.ownerId, head.ownerId), eq(actual.id, head.historyId)))
 			.where(and(eq(occurrence.sourceRecordId, context.sourceRecordId), eq(occurrence.mappingKey, scope.mappingKey),
 				eq(occurrence.correspondenceRevision, scope.correspondenceRevision), eq(occurrence.snapshotId, snapshotId),
 				eq(occurrence.ownerId, context.reference.id)))
@@ -93,14 +85,13 @@ export async function prepareMusicSourceProjection(
 			throw new RangeError("Music source support exceeds the staged publication capacity");
 		const result = new Map<string, MusicSourceComponentBaseline>();
 		for (const row of rows) {
-			if (!row.currentHistoryId || !row.actualHistoryId || !row.currentOperation || !row.actualOperation)
+			if (!row.currentHistoryId || !row.currentOperation)
 				throw new Error("Music source component is missing its exact native history");
 			const component = MusicComponentNameSchema.parse(row.component);
 			result.set(`${component}:${row.sourcePath}`, {
 				component, componentKey: row.componentKey, sourcePath: row.sourcePath, historyId: row.historyId,
 				value: MusicComponentSchemas[component].parse(row.value), currentHistoryId: row.currentHistoryId,
-				absent: row.currentOperation === "DELETE", actualHistoryId: row.actualHistoryId,
-				actualValue: row.actualOperation === "DELETE" ? null : MusicComponentSchemas[component].parse(row.actualValue),
+				absent: row.currentOperation === "DELETE",
 			});
 		}
 		return result;
@@ -108,7 +99,7 @@ export async function prepareMusicSourceProjection(
 	const before = await load(context.previousSnapshotId);
 	const alreadyObserved = await load(context.snapshotId);
 	const used = new Set<string>();
-	const operations: MusicComponentMutation[] = [];
+	const desiredRows: { component: MusicComponentName; componentKey: string; value: Record<string, unknown>; old?: MusicSourceComponentBaseline }[] = [];
 	const pending: {
 		component: MusicComponentName;
 		componentKey: string;
@@ -137,18 +128,7 @@ export async function prepareMusicSourceProjection(
 		if (old && !old.absent && isDeepStrictEqual(old.value, row))
 			pending.push({ component, componentKey, path, historyId: old.historyId, sourceValue: row });
 		else {
-			if (old && old.actualValue === null && old.actualHistoryId !== old.currentHistoryId)
-				throw new CatalogRevisionConflict("Music source component was independently removed");
-			const desired = old?.actualValue
-				? mergeMusicSourceValue(component, old.value, row, old.actualValue)
-				: row;
-			operations.push({
-				action: "put",
-				component,
-				componentKey,
-				expectedRevisionId: old?.actualHistoryId ?? null,
-				value: desired,
-			});
+			desiredRows.push({ component, componentKey, value: row, old });
 			pending.push({ component, componentKey, path, sourceValue: row });
 		}
 	};
@@ -174,9 +154,23 @@ export async function prepareMusicSourceProjection(
 								? 5
 								: 0;
 		removals.sort((left, right) => rank(left.component) - rank(right.component));
-		const plan = [...removals, ...operations];
-		if (plan.length > MUSIC_SOURCE_COMPONENT_LIMIT)
+		if (removals.length + desiredRows.length > MUSIC_SOURCE_COMPONENT_LIMIT)
 			throw new RangeError("Music source delta exceeds the atomic publication capacity");
+		const operations: MusicComponentMutation[] = [];
+		let nativeBytes = 0;
+		for (const desired of desiredRows) {
+			const old = desired.old;
+			const actual = old ? await readMusicComponentHead(tx, context.reference.id, desired.component, desired.componentKey) : null;
+			if (old && !actual) throw new Error("Music source component is missing its current native head");
+			if (actual) nativeBytes += Buffer.byteLength(JSON.stringify(actual.value));
+			if (nativeBytes > 32_000_000) throw new RangeError("Music publication native comparison exceeds its byte budget");
+			if (old && actual?.operation === "DELETE" && actual.id !== old.currentHistoryId)
+				throw new CatalogRevisionConflict("Music source component was independently removed");
+			operations.push({ action: "put", component: desired.component, componentKey: desired.componentKey,
+				expectedRevisionId: actual?.id ?? null,
+				value: old && actual && actual.operation !== "DELETE" ? mergeMusicSourceValue(desired.component, old.value, desired.value, actual.value) : desired.value });
+		}
+		const plan = [...removals, ...operations];
 		const result = plan.length
 			? await mutateMusicSourceComponents(
 					tx,
