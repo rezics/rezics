@@ -1,3 +1,4 @@
+import { CatalogFactTables } from "../src/services/database/schema/catalog-facts";
 import type { CatalogReference } from "../src/services/catalog/contracts";
 import { programEpisode } from "../src/services/database/schema/catalog-program";
 import assert from "node:assert/strict";
@@ -64,7 +65,7 @@ const subject = {
 	type: 2,
 	name: "Before",
 	name_cn: "",
-	summary: "",
+	summary: "Original description",
 	series: false,
 	nsfw: false,
 	locked: false,
@@ -85,7 +86,7 @@ const person = {
 	type: 1,
 	career: [],
 	infobox: "{{Infobox person\n|别名={\n[Stable alias]\n}\n}}",
-	summary: "",
+	summary: "Original description",
 	comments: 0,
 	collects: 0,
 };
@@ -94,7 +95,7 @@ const character = {
 	name: "Before",
 	role: 1,
 	infobox: person.infobox,
-	summary: "",
+	summary: "Original description",
 	comments: 0,
 	collects: 0,
 };
@@ -107,7 +108,7 @@ const episode = {
 	sort: 1.5,
 	airdate: "2024-02",
 	duration: "24m",
-	description: "",
+	description: "Original description",
 	disc: 0,
 };
 const cases = [
@@ -115,25 +116,37 @@ const cases = [
 		kind: "subject",
 		contract: BangumiSubjectContractSha256,
 		before: subject,
-		after: { ...subject, name: "After", eps: 13, total_episodes: 13 },
+		after: {
+			...subject,
+			summary: "Updated description",
+			name: "After",
+			eps: 13,
+			total_episodes: 13,
+		},
 	},
 	{
 		kind: "person",
 		contract: BangumiArchiveContractSha256,
 		before: person,
-		after: { ...person, name: "After" },
+		after: { ...person, summary: "Updated description", name: "After" },
 	},
 	{
 		kind: "character",
 		contract: BangumiArchiveContractSha256,
 		before: character,
-		after: { ...character, name: "After" },
+		after: { ...character, summary: "Updated description", name: "After" },
 	},
 	{
 		kind: "episode",
 		contract: BangumiArchiveContractSha256,
 		before: episode,
-		after: { ...episode, name: "After", sort: 2.5, duration: "25m" },
+		after: {
+			...episode,
+			description: "Updated description",
+			name: "After",
+			sort: 2.5,
+			duration: "25m",
+		},
 	},
 ];
 let checks = 0;
@@ -198,6 +211,48 @@ try {
 					checks++;
 					const reference = initial.reference,
 						scope = await resolveCatalogSourceChildCorrespondence(tx, sourceRecordId);
+					const assertSourceFact = async (snapshotId: string) => {
+						const f = CatalogFactTables[reference.owner];
+						const [proof] = await tx
+							.select({ factId: f.fact.id, semanticId: f.fact.semanticId })
+							.from(f.support)
+							.innerJoin(
+								f.fact,
+								and(eq(f.fact.ownerId, f.support.ownerId), eq(f.fact.id, f.support.factId)),
+							)
+							.where(
+								and(
+									eq(f.support.ownerId, reference.id),
+									eq(f.support.sourceRecordId, sourceRecordId),
+									eq(f.support.snapshotId, snapshotId),
+								),
+							)
+							.limit(1);
+						assert.ok(proof);
+						const [head] = await tx
+							.select({ factId: f.semanticRevision.factId, state: f.semanticRevision.state })
+							.from(f.semanticHead)
+							.innerJoin(
+								f.semanticRevision,
+								and(
+									eq(f.semanticRevision.ownerId, f.semanticHead.ownerId),
+									eq(f.semanticRevision.semanticId, f.semanticHead.semanticId),
+									eq(f.semanticRevision.version, f.semanticHead.version),
+								),
+							)
+							.where(
+								and(
+									eq(f.semanticHead.ownerId, reference.id),
+									eq(f.semanticHead.semanticId, proof.semanticId),
+								),
+							)
+							.limit(1);
+						assert.equal(head?.factId, proof.factId);
+						assert.equal(head?.state, "active");
+						checks += 2;
+					};
+					await assertSourceFact(before.snapshotId);
+
 					const initialNames = await listCatalogNames(tx, reference, account.id);
 					const alias = initialNames.find((name) => name.value === "Stable alias");
 					if (scenario.kind !== "episode") {
@@ -280,6 +335,7 @@ try {
 							"applied",
 						);
 						checks++;
+						await assertSourceFact(after.snapshotId);
 						const names = await listCatalogNames(tx, reference, account.id),
 							primary = names.find((name) => name.value === "After" && name.state === "active");
 						assert.ok(primary);
@@ -317,6 +373,7 @@ try {
 							"withdrawn",
 						);
 						checks++;
+						await assertSourceFact(before.snapshotId);
 						assert.ok(
 							(await listCatalogNames(tx, reference, account.id)).some(
 								(name) =>

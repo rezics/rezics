@@ -6,6 +6,7 @@ import type { CatalogReference } from "./contracts";
 import {
 	prepareBangumiNativeRecord,
 	planBangumiNativeNames,
+	planBangumiNativeFacts,
 	planBangumiProgramProjection,
 	type BangumiNativeRecord,
 } from "./bangumi-native-plan";
@@ -31,6 +32,7 @@ import { loadCatalogSourceDocument, type CatalogSourceReceipt } from "./source-o
 import type { CatalogSourceNativeWriter } from "./source-proposals";
 import { prepareCatalogSourceProposalDependency } from "./source-dependencies";
 import { catalogSourceRecordId } from "./source-record-key";
+import { applyCatalogSourceFactDelta } from "./source-fact-delta";
 
 type Snapshot = Readonly<{ snapshotId: string; receipt: CatalogSourceReceipt; bytes: Uint8Array }>;
 const namespace = "bangumi.name";
@@ -155,7 +157,23 @@ export async function initializeBangumiNativeOccurrences(
 			observedFields: fixed.observedFields,
 		});
 	}
-	return { revision };
+	const document = await loadCatalogSourceDocument(
+		tx,
+		input.sourceRecordId,
+		input.snapshotId,
+		input.receipt,
+		input.bytes,
+	);
+	const facts = await applyCatalogSourceFactDelta(
+		tx,
+		reference,
+		actor,
+		revision,
+		document,
+		null,
+		planBangumiNativeFacts(record),
+	);
+	return { revision: facts.revision };
 }
 
 /** Applies archived evidence through native component journals; compensation never remaps live source data. @internal */
@@ -178,7 +196,7 @@ export function createBangumiNativeWriter(input: {
 	return async (tx, context) => {
 		if (context.mappingVersion !== mapping(after.record) || context.snapshotId !== after.snapshotId)
 			throw new TypeError("Bangumi callback differs from its exact proposal");
-		await loadCatalogSourceDocument(
+		const document = await loadCatalogSourceDocument(
 			tx,
 			context.sourceRecordId,
 			after.snapshotId,
@@ -308,6 +326,23 @@ export function createBangumiNativeWriter(input: {
 			);
 			revision = ids.revision;
 			changes.push(...ids.changes);
+			const facts = await applyCatalogSourceFactDelta(
+				tx,
+				context.reference,
+				context.actor,
+				revision,
+				document,
+				before
+					? {
+							snapshotId: before.snapshotId,
+							mappingKey: context.mappingKey,
+							descriptors: planBangumiNativeFacts(before.record),
+						}
+					: null,
+				planBangumiNativeFacts(after.record),
+			);
+			revision = facts.revision;
+			changes.push(...facts.changes);
 		}
 		revision = await recordCatalogChange(
 			tx,

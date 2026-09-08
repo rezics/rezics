@@ -43,13 +43,16 @@ serialize under their existing binding/native-owner locks.
 Qualification: `check-bangumi-source-updates.ts` covers four families, two
 apply/withdraw cycles each, exact primary IDs, human alias preservation, native
 episode sort restoration and an independently authored episode number. The
-2026-09-08 run passed 54 SQL checks in a rolled-back transaction; the older DB62
+2026-09-08 run passed 94 SQL checks in a rolled-back transaction; the older DB62
 target needed only a transaction-local copy of the already corrected canonical
 structure occurrence guard. Five focused projection tests and eight existing
 record tests passed. Full backend TypeScript remains blocked by separately
 owned global Unit-consumer removal; this packet has no TypeScript diagnostics.
 
-Remaining work is explicit: entity profile interpretation, summary/date/wiki
+Descriptions now use the provider-independent source fact journal, including
+exact source semantic IDs, updated fact heads and original fact restoration.
+
+Remaining work is explicit: entity profile interpretation, date/wiki
 native facts, relation/index/member update compensation, reviewed music and
 publishing grain refinement, source classification/NSFW updates, and the shared
 previous-phase dependency protocol. The complete nine-family archive parser

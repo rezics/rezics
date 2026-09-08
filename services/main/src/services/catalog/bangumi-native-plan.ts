@@ -20,6 +20,27 @@ import {
 import type { CatalogSourceReceipt } from "./source-observations";
 import type { CatalogSourceNamePlan } from "./source-name-delta";
 import { prepareStructureSourceProjection } from "./structure-source-contracts";
+import type { CatalogSourceFactDescriptor } from "./source-fact-delta";
+
+/** Descriptions are native assertions; provider ratings, popularity and moderation state remain observations. @internal */
+export function planBangumiNativeFacts(record: BangumiNativeRecord): CatalogSourceFactDescriptor[] {
+	const value = record.value;
+	const description =
+		"summary" in value ? value.summary : "description" in value ? value.description : value.desc;
+	const path = "summary" in value ? "/summary" : "description" in value ? "/description" : "/desc";
+	return description
+		? [
+				{
+					identity: "description",
+					path,
+					namespace: "catalog",
+					key: "description",
+					value: description,
+					kind: "string",
+				},
+			]
+		: [];
+}
 
 /** Offline inputs are checked against the exact reviewed contract and archived content digest. @internal */
 export function prepareBangumiNativeRecord(receipt: CatalogSourceReceipt, bytes: Uint8Array) {
