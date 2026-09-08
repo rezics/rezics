@@ -29,7 +29,7 @@ export const CatalogTranslationMethodValues = [
  * @alpha
  * @remarks Native catalog editing contract. Multiple names in the same language remain independent identities.
  */
-export const CatalogNameValuesSchema = z
+export const CatalogNameInputSchema = z
 	.strictObject({
 		value: boundedText(131_072),
 		kind: boundedText(96),
@@ -63,21 +63,22 @@ export const CatalogNameValuesSchema = z
 				path: ["privateUseNamespace"],
 				message: "Private-use namespace requires a language tag",
 			});
-	})
-	.transform((value) => {
-		const language =
-			value.languageTag === null
-				? null
-				: parseContentLanguageTag(value.languageTag, {
-						privateUseNamespace: value.privateUseNamespace ?? undefined,
-					});
-		return {
-			...value,
-			languageTag: language?.tag ?? null,
-			privateUseNamespace: language?.kind === "private-use" ? language.namespace : null,
-			languagePolicy: language?.policy ?? null,
-		};
 	});
+
+export const CatalogNameValuesSchema = CatalogNameInputSchema.transform((value) => {
+	const language =
+		value.languageTag === null
+			? null
+			: parseContentLanguageTag(value.languageTag, {
+					privateUseNamespace: value.privateUseNamespace ?? undefined,
+				});
+	return {
+		...value,
+		languageTag: language?.tag ?? null,
+		privateUseNamespace: language?.kind === "private-use" ? language.namespace : null,
+		languagePolicy: language?.policy ?? null,
+	};
+});
 export type CatalogNameInput = z.input<typeof CatalogNameValuesSchema>;
 
 export const CatalogNameEvidenceSchema = z.strictObject({

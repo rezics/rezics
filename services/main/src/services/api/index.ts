@@ -10,6 +10,7 @@ import agentGuide from "./agent-guide";
 import associationProposals from "./association-proposals";
 import audit from "./audit";
 import collections from "./collections";
+import catalog from "./catalog";
 import contentStructure from "./content-structure";
 import customThemes from "./custom-themes";
 import docks from "./docks";
@@ -95,6 +96,7 @@ export default new Elysia()
 				.use(governance)
 				.use(audit)
 				.use(domainExtensions)
+				.use(catalog)
 				.use(docks)
 				.use(users)
 				.use(participation)

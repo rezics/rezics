@@ -18,6 +18,7 @@ import { AccountAuthorization } from "../authorization/account/authorization";
 import { catalogSourceProposalDependency } from "../database/schema/catalog-source-dependency";
 import { catalogSourceMappingClaim } from "../database/schema/catalog-source";
 import { CatalogIdentityTables } from "../database/schema/catalog-identity";
+import { catalogReadRatingPredicate } from "../catalog/read-policy";
 
 /** @alpha Request and queued command identity, including the revision approved at admission. */
 export const ParticipationAuthoritySchema = z.strictObject({
@@ -284,6 +285,7 @@ export function catalogIdentityReadPredicate(
 		visibility: AnyPgColumn;
 		status: AnyPgColumn;
 		moderationStatus: AnyPgColumn;
+		contentRating: AnyPgColumn;
 		deletedAt: AnyPgColumn;
 	} = CatalogIdentityTables[owner],
 ) {
@@ -295,7 +297,7 @@ export function catalogIdentityReadPredicate(
 			? sql`false`
 			: eq(table.createdByAuthUserId, scope.creatorAuthUserId);
 	const granted = ids.length ? inArray(table.id, ids) : sql`false`;
-	return sql`${table.deletedAt} is null and ((${creator}) is true or (${granted}) is true or (${table.visibility} in ('public','unlisted') and ${table.status}='published' and ${table.moderationStatus}='approved'))`;
+	return sql`${table.deletedAt} is null and ${catalogReadRatingPredicate(table.contentRating)} and ((${creator}) is true or (${granted}) is true or (${table.visibility} in ('public','unlisted') and ${table.status}='published' and ${table.moderationStatus}='approved'))`;
 }
 
 async function resolveCatalogAuthorityScope(
@@ -404,6 +406,10 @@ async function resolveCatalogAuthorityScope(
 		owner: alternatives[0][0],
 		id: alternatives[0][1],
 	});
+	if (grant.capability !== "catalog.read" && grant.capability !== "catalog.edit") {
+		await requireParticipation(tx, authority, grant.capability, target);
+		return { creatorAuthUserId: null, references: [] };
+	}
 	await requireParticipation(tx, authority, write ? "catalog.edit" : "catalog.read", target);
 	return { creatorAuthUserId: null, references: [target] };
 }

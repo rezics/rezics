@@ -36,6 +36,7 @@ import {
 	publishCatalogSemanticRevision,
 } from "./semantic-history";
 import { CatalogValueNodeSchema } from "./value-nodes";
+import { catalogRatingReadable } from "./read-policy";
 
 export class CatalogAccessDenied extends Error {}
 export class CatalogRevisionConflict extends HTTPError.id("CatalogRevisionConflict", 409) {
@@ -71,6 +72,8 @@ export async function loadCatalogIdentity(
 		.limit(1);
 	const [row] = await (write ? query.for(writeLock) : query);
 	if (!row) throw new CatalogReferenceNotFound("Catalog identity is missing or retired");
+	if (!write && !catalogRatingReadable(row.contentRating))
+		throw new CatalogReferenceNotFound("Catalog identity is unavailable under the viewer policy");
 	const creator = await canAccessCatalog(tx, ref, actor, row.createdByAuthUserId, write);
 	if (
 		write
@@ -807,6 +810,10 @@ export async function assertReadableTargets(
 		for (const row of rows) shapes.set(`${owner}:${row.id}`, row.shape);
 		if (rows.length !== ids.length)
 			throw new CatalogReferenceNotFound("Catalog participant target is missing");
+		if (rows.some((row) => !catalogRatingReadable(row.contentRating)))
+			throw new CatalogAccessDenied(
+				"Catalog participant target is unavailable under the viewer policy",
+			);
 		const access = await catalogAccessDecisions(
 			tx,
 			rows.map((row) => ({
