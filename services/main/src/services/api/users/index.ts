@@ -620,8 +620,9 @@ export default new Elysia({ name: "account-entity-api" })
 					localizationLanguages,
 				);
 				return {
-					scores: scores.map((row) => ({
+					scores: scores.map(({ id, ...row }) => ({
 						...row,
+						scoreId: id,
 						unitLanguage: presentations.get(row.unitId)?.language ?? null,
 						unitTitle: presentations.get(row.unitId)?.title ?? null,
 						realmTitle: presentations.get(row.realmId)?.title ?? null,
