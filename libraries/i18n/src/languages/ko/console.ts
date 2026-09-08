@@ -2,9 +2,7 @@ import { insert } from "native-i18n";
 
 import { koTerminology } from "@rezics/i18n/terminology/ko";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import units from "./units";
 
-const { forms: entityTerms } = koTerminology.entity;
 const { forms: realmTerms } = koTerminology.realm;
 const { forms: zoneTerms } = koTerminology.zone;
 const { forms: postTerms } = koTerminology.post;
@@ -147,7 +145,6 @@ export default {
 		searchPlaceholder: `제목, 유닛 ${verbatimTerms.id.value} 또는 공개 주소로 검색`,
 		stateFilter: "수명 주기 상태",
 		states: {
-			action_required: "결정 필요",
 			active: "활성 유닛",
 			deleted: "소프트 삭제됨",
 			all: "모든 유닛",
@@ -213,6 +210,8 @@ export default {
 		stateFilter: "병합 상태",
 		allStates: "모든 상태",
 		states: {
+			action_required: "결정 필요",
+
 			pending_review: "검토 대기",
 			accepted: "대기열에 등록됨",
 			rejected: "거부됨",
@@ -230,6 +229,20 @@ export default {
 		target: "정식 대상",
 		openUnit: "유닛 열기",
 		kind: "유닛 종류",
+		approvalProgress: insert("승인 {{required}}건 중 {{count}}건", {
+			count: Number,
+			required: Number,
+		}),
+		operation: "참조 수렴",
+		operationStates: {
+			action_required: "결정 필요",
+
+			pending: "대기열에 등록됨",
+			processing: "처리 중",
+			retry_wait: "재시도 대기",
+			completed: "완료됨",
+			failed: "수동 재시도 필요",
+		},
 		processedRows: insert("참조 {{count}}건 처리됨", { count: Number }),
 		reviews: "검토 기록",
 		decisions: { approve: "승인", reject: "거부" },

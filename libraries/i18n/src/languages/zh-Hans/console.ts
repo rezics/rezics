@@ -2,9 +2,7 @@ import { insert } from "native-i18n";
 
 import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import units from "./units";
 
-const { forms: entityTerms } = zhHansTerminology.entity;
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: zoneTerms } = zhHansTerminology.zone;
 const { forms: postTerms } = zhHansTerminology.post;
@@ -141,7 +139,6 @@ export default {
 		searchPlaceholder: `按标题、条目 ${verbatimTerms.id.value} 或公开网址搜索`,
 		stateFilter: "生命周期状态",
 		states: {
-			action_required: "需要决定",
 			active: "有效条目",
 			deleted: "已软删除",
 			all: "全部条目",
@@ -207,6 +204,8 @@ export default {
 		stateFilter: "合并状态",
 		allStates: "所有状态",
 		states: {
+			action_required: "需要决定",
+
 			pending_review: "等待审核",
 			accepted: "已进入队列",
 			rejected: "已驳回",
@@ -224,6 +223,20 @@ export default {
 		target: "正式目标",
 		openUnit: "打开条目",
 		kind: "条目类型",
+		approvalProgress: insert("已获得 {{count}}／{{required}} 票同意", {
+			count: Number,
+			required: Number,
+		}),
+		operation: "引用收敛",
+		operationStates: {
+			action_required: "需要决定",
+
+			pending: "已进入队列",
+			processing: "处理中",
+			retry_wait: "等待重试",
+			completed: "已完成",
+			failed: "需要手动重试",
+		},
 		processedRows: insert("已处理 {{count}} 条引用", { count: Number }),
 		reviews: "审核记录",
 		decisions: { approve: "同意", reject: "驳回" },

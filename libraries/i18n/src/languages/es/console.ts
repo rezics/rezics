@@ -2,9 +2,7 @@ import { insert } from "native-i18n";
 
 import { esTerminology } from "@rezics/i18n/terminology/es";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import units from "./units";
 
-const { forms: entityTerms } = esTerminology.entity;
 const { forms: realmTerms } = esTerminology.realm;
 const { forms: zoneTerms } = esTerminology.zone;
 const { forms: postTerms } = esTerminology.post;
@@ -153,7 +151,6 @@ export default {
 		searchPlaceholder: `Buscar por título, ${verbatimTerms.id.value} de Unit o dirección pública`,
 		stateFilter: "Estado del ciclo de vida",
 		states: {
-			action_required: "Decisión necesaria",
 			active: "Units activas",
 			deleted: "Eliminadas provisionalmente",
 			all: "Todas las Units",
@@ -222,6 +219,8 @@ export default {
 		stateFilter: "Estado de la fusión",
 		allStates: "Todos los estados",
 		states: {
+			action_required: "Decisión necesaria",
+
 			pending_review: "Pendiente de revisión",
 			accepted: "En cola",
 			rejected: "Rechazada",
@@ -239,7 +238,6 @@ export default {
 		target: "Destino canónico",
 		openUnit: "Abrir Unit",
 		kind: "Tipo de Unit",
-		proposer: "Propuesta por",
 		approvalProgress: insert("{{count}} de {{required}} aprobaciones", {
 			count: Number,
 			required: Number,
@@ -247,6 +245,7 @@ export default {
 		operation: "Convergencia de referencias",
 		operationStates: {
 			action_required: "Decisión necesaria",
+
 			pending: "En cola",
 			processing: "Procesando",
 			retry_wait: "Esperando reintento",

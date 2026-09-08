@@ -2,9 +2,7 @@ import { insert } from "native-i18n";
 
 import { frTerminology } from "@rezics/i18n/terminology/fr";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import units from "./units";
 
-const { forms: entityTerms } = frTerminology.entity;
 const { forms: realmTerms } = frTerminology.realm;
 const { forms: zoneTerms } = frTerminology.zone;
 const { forms: postTerms } = frTerminology.post;
@@ -152,7 +150,6 @@ export default {
 		searchPlaceholder: "Rechercher par titre, identifiant de Unit ou adresse publique",
 		stateFilter: "État du cycle de vie",
 		states: {
-			action_required: "Décision requise",
 			active: "Units actives",
 			deleted: "Supprimées provisoirement",
 			all: "Toutes les Units",
@@ -222,6 +219,8 @@ export default {
 		stateFilter: "État de la fusion",
 		allStates: "Tous les états",
 		states: {
+			action_required: "Décision requise",
+
 			pending_review: "En attente d’examen",
 			accepted: "En file d’attente",
 			rejected: "Rejetée",
@@ -239,7 +238,6 @@ export default {
 		target: "Cible canonique",
 		openUnit: "Ouvrir la Unit",
 		kind: "Type d’Unit",
-		proposer: "Proposée par",
 		approvalProgress: insert("{{count}} approbations sur {{required}}", {
 			count: Number,
 			required: Number,
@@ -247,6 +245,7 @@ export default {
 		operation: "Convergence des références",
 		operationStates: {
 			action_required: "Décision requise",
+
 			pending: "En file d’attente",
 			processing: "Traitement en cours",
 			retry_wait: "En attente d’une nouvelle tentative",

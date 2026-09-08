@@ -2,9 +2,7 @@ import { insert } from "native-i18n";
 
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import units from "./units";
 
-const { forms: entityTerms } = zhHantTerminology.entity;
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: zoneTerms } = zhHantTerminology.zone;
 const { forms: postTerms } = zhHantTerminology.post;
@@ -141,7 +139,6 @@ export default {
 		searchPlaceholder: `依標題、條目 ${verbatimTerms.id.value} 或公開網址搜尋`,
 		stateFilter: "生命週期狀態",
 		states: {
-			action_required: "需要決定",
 			active: "有效條目",
 			deleted: "已軟刪除",
 			all: "全部條目",
@@ -207,6 +204,8 @@ export default {
 		stateFilter: "合併狀態",
 		allStates: "所有狀態",
 		states: {
+			action_required: "需要決定",
+
 			pending_review: "等待審核",
 			accepted: "已排入佇列",
 			rejected: "已駁回",
@@ -224,6 +223,20 @@ export default {
 		target: "正式目標",
 		openUnit: "開啟條目",
 		kind: "條目類型",
+		approvalProgress: insert("已取得 {{count}}／{{required}} 票同意", {
+			count: Number,
+			required: Number,
+		}),
+		operation: "參照收斂",
+		operationStates: {
+			action_required: "需要決定",
+
+			pending: "已排入佇列",
+			processing: "處理中",
+			retry_wait: "等待重試",
+			completed: "已完成",
+			failed: "需要手動重試",
+		},
 		processedRows: insert("已處理 {{count}} 筆參照", { count: Number }),
 		reviews: "審核紀錄",
 		decisions: { approve: "同意", reject: "駁回" },

@@ -2,9 +2,7 @@ import { insert } from "native-i18n";
 
 import { jaTerminology } from "@rezics/i18n/terminology/ja";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import units from "./units";
 
-const { forms: entityTerms } = jaTerminology.entity;
 const { forms: realmTerms } = jaTerminology.realm;
 const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: postTerms } = jaTerminology.post;
@@ -149,7 +147,6 @@ export default {
 		searchPlaceholder: `タイトル、ユニット ${verbatimTerms.id.value}、公開アドレスで検索`,
 		stateFilter: "ライフサイクル状態",
 		states: {
-			action_required: "判断が必要",
 			active: "有効なユニット",
 			deleted: "論理削除済み",
 			all: "すべてのユニット",
@@ -216,6 +213,8 @@ export default {
 		stateFilter: "統合の状態",
 		allStates: "すべての状態",
 		states: {
+			action_required: "判断が必要",
+
 			pending_review: "審査待ち",
 			accepted: "キュー登録済み",
 			rejected: "却下済み",
@@ -233,6 +232,20 @@ export default {
 		target: "正規の統合先",
 		openUnit: "ユニットを開く",
 		kind: "ユニット種別",
+		approvalProgress: insert("{{required}} 件中 {{count}} 件の承認", {
+			count: Number,
+			required: Number,
+		}),
+		operation: "参照の収束",
+		operationStates: {
+			action_required: "判断が必要",
+
+			pending: "キュー登録済み",
+			processing: "処理中",
+			retry_wait: "再試行待ち",
+			completed: "完了",
+			failed: "手動での再試行が必要",
+		},
 		processedRows: insert("{{count}} 件の参照を処理済み", { count: Number }),
 		reviews: "審査履歴",
 		decisions: { approve: "承認", reject: "却下" },

@@ -2,9 +2,7 @@ import { insert } from "native-i18n";
 
 import { deTerminology } from "@rezics/i18n/terminology/de";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
-import units from "./units";
 
-const { forms: entityTerms } = deTerminology.entity;
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: zoneTerms } = deTerminology.zone;
 const { forms: postTerms } = deTerminology.post;
@@ -151,7 +149,6 @@ export default {
 		searchPlaceholder: `Nach Titel, Unit-${verbatimTerms.id.value} oder öffentlicher Adresse suchen`,
 		stateFilter: "Lebenszyklusstatus",
 		states: {
-			action_required: "Entscheidung erforderlich",
 			active: "Aktive Units",
 			deleted: "Vorläufig gelöscht",
 			all: "Alle Units",
@@ -220,6 +217,8 @@ export default {
 		stateFilter: "Zusammenführungsstatus",
 		allStates: "Alle Status",
 		states: {
+			action_required: "Entscheidung erforderlich",
+
 			pending_review: "Prüfung ausstehend",
 			accepted: "Eingereiht",
 			rejected: "Abgelehnt",
@@ -237,7 +236,6 @@ export default {
 		target: "Kanonisches Ziel",
 		openUnit: "Unit öffnen",
 		kind: "Unit-Art",
-		proposer: "Vorgeschlagen von",
 		approvalProgress: insert("{{count}} von {{required}} Zustimmungen", {
 			count: Number,
 			required: Number,
@@ -245,6 +243,7 @@ export default {
 		operation: "Konvergenz der Referenzen",
 		operationStates: {
 			action_required: "Entscheidung erforderlich",
+
 			pending: "Eingereiht",
 			processing: "In Bearbeitung",
 			retry_wait: "Wartet auf Wiederholung",
