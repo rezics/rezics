@@ -10,6 +10,7 @@ const { forms: zoneTerms } = zhHansTerminology.zone;
 const { forms: postTerms } = zhHansTerminology.post;
 
 export default {
+	caseNotes: "案件备注",
 	nativeMerge: {
 		previous: "上一页",
 		refresh: "刷新",

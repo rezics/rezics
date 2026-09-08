@@ -10,6 +10,7 @@ const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: postTerms } = jaTerminology.post;
 
 export default {
+	caseNotes: "案件の注記",
 	nativeMerge: {
 		previous: "前へ",
 		refresh: "更新",

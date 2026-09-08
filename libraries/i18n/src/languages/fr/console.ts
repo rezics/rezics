@@ -10,6 +10,7 @@ const { forms: zoneTerms } = frTerminology.zone;
 const { forms: postTerms } = frTerminology.post;
 
 export default {
+	caseNotes: "Notes du dossier",
 	nativeMerge: {
 		previous: "Précédent",
 		refresh: "Actualiser",

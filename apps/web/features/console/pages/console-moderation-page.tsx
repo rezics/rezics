@@ -4,6 +4,7 @@ import { createBlockKey, createPortableTextDocument } from "@rezics/block";
 import {
 	GetApiReportsPlatformCasesState,
 	getApiGovernanceContentReviewCasesQueryKey,
+	listContentReviewCaseNotesQueryKey,
 	getApiReportsPlatformCases,
 	getApiReportsPlatformCasesQueryKey,
 	getApiReportsReviewCasesByCaseId,
@@ -61,6 +62,7 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useLocalizationLanguages } from "@/i18n/use-localization-languages";
 import { useConsoleWorkspace } from "../components/console-workspace";
+import { ContentReviewCaseNotes } from "../components/content-review-case-notes";
 
 type PlatformReportCase = GetApiReportsPlatformCasesStatus200["items"][number];
 type PlatformCommand =
@@ -254,6 +256,9 @@ export function ConsoleModerationPage() {
 
 	async function refreshCaseData(caseId: string) {
 		await Promise.all([
+			queryClient.invalidateQueries({
+				queryKey: listContentReviewCaseNotesQueryKey({ path: { caseId } }),
+			}),
 			queryClient.invalidateQueries({ queryKey: getApiReportsPlatformCasesQueryKey() }),
 			queryClient.invalidateQueries({
 				queryKey: getApiReportsReviewCasesByCaseIdQueryKey({
@@ -387,6 +392,7 @@ export function ConsoleModerationPage() {
 						</CardHeader>
 						<CardContent className="grid gap-6 pt-5">
 							<CaseSnapshot item={selected} />
+							<ContentReviewCaseNotes key={selected.caseId} caseId={selected.caseId} />
 							<div className="grid gap-3">
 								<h3 className="font-heading font-bold">{t.console.moderation.reports}</h3>
 								{reports.isPending ? <QueryPending /> : null}

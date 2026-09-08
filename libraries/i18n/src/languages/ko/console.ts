@@ -10,6 +10,7 @@ const { forms: zoneTerms } = koTerminology.zone;
 const { forms: postTerms } = koTerminology.post;
 
 export default {
+	caseNotes: "사건 메모",
 	nativeMerge: {
 		previous: "이전",
 		refresh: "새로 고침",

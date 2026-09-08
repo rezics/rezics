@@ -10,6 +10,7 @@ const { forms: zoneTerms } = deTerminology.zone;
 const { forms: postTerms } = deTerminology.post;
 
 export default {
+	caseNotes: "Fallnotizen",
 	nativeMerge: {
 		previous: "Zurück",
 		refresh: "Aktualisieren",

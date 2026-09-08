@@ -10,6 +10,7 @@ const { forms: zoneTerms } = esTerminology.zone;
 const { forms: postTerms } = esTerminology.post;
 
 export default {
+	caseNotes: "Notas del caso",
 	nativeMerge: {
 		previous: "Anterior",
 		refresh: "Actualizar",
