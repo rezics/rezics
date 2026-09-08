@@ -300,3 +300,14 @@ limits and can materialize their own evidenced artist references during direct
 intake. Very large nested documents need staged admission before operational
 activation. The existing source correspondence, owner partition and 500M/3B
 storage/routing estimates apply; representative skewed load remains unqualified.
+
+ISRC, ISWC and ASIN adoption now uses the shared identifier normalization policy
+and records the exact native claim revision at its archived source path. Their
+native update writer adds, withdraws and reapplies claims with exact journal
+compensation, preserving unrelated or independently supported claims. DB59 SQL
+qualification on 2026-09-08 covers changed ISRC/ISWC active values and restoration
+of the originals across two apply/withdraw cycles, plus ASIN addition across the
+release fixture's repeated cycles. Identifier lists admit at most 128 combined
+before/after occurrences; native identifiers remain many-valued and are never
+treated as automatic identity merge instructions. Identifier redirect adoption
+and larger staged applications remain separate coverage.

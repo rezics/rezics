@@ -154,7 +154,15 @@ export async function adoptMusicBrainzRelease(
 	});
 	await projectMusicBrainzReleaseMetadata(tx, actor, observation, identity.id, record);
 	await recordMusicSourceComponent(tx, observation, identity.id, "music_release", identity.id, "/");
-	if (record.asin) await projectMusicBrainzIdentifiers(tx, identity.id, "asin", [record.asin]);
+	if (record.asin)
+		await projectMusicBrainzIdentifiers(
+			tx,
+			identity.id,
+			"asin",
+			[record.asin],
+			observation,
+			"/asin",
+		);
 	let revision = identity.revision;
 	if (record.title)
 		revision = await adoptMusicBrainzTitle(
@@ -261,6 +269,8 @@ export async function adoptMusicBrainzRelease(
 					target.id,
 					"isrc",
 					sourceTrack.recording.isrcs ?? [],
+					observation,
+					`${path}/recording/isrcs`,
 				);
 				await adoptMusicBrainzRelations(
 					tx,

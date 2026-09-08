@@ -9,6 +9,7 @@ import { applyMusicBrainzNameDelta } from "./musicbrainz-name-delta";
 import { applyMusicBrainzFactDelta, musicBrainzFactDescriptors } from "./musicbrainz-facts";
 import { compensateMusicSourceApplication } from "./music-source-compensation";
 import { prepareMusicSourceProjection } from "./music-source-projection";
+import { applyMusicBrainzIdentifierDelta } from "./musicbrainz-identifier-delta";
 
 type Archived = { receipt: CatalogSourceReceipt; bytes: Uint8Array };
 
@@ -92,8 +93,6 @@ export function musicBrainzObjectNativeWriter(
 				"prepared",
 			);
 			if (incoming.kind === "work" && previous.kind === "work") {
-				if (!isDeepStrictEqual(previous.record.iswcs, incoming.record.iswcs))
-					throw new TypeError("Work identifier delta requires its native identifier writer");
 				const old = source.oldAt("music_work", "/");
 				source.put(
 					"music_work",
@@ -135,8 +134,6 @@ export function musicBrainzObjectNativeWriter(
 					);
 				}
 			} else if (incoming.kind === "recording" && previous.kind === "recording") {
-				if (!isDeepStrictEqual(previous.record.isrcs, incoming.record.isrcs))
-					throw new TypeError("Recording identifier delta requires its native identifier writer");
 				const old = source.oldAt("music_recording", "/");
 				source.put(
 					"music_recording",
@@ -240,8 +237,31 @@ export function musicBrainzObjectNativeWriter(
 				},
 				factInput(incoming),
 			);
+			const identifierEntries = (document: typeof incoming) =>
+				document.kind === "work"
+					? (document.record.iswcs ?? []).map((value, index) => ({
+							namespace: "iswc",
+							value,
+							path: `/iswcs/${index}`,
+						}))
+					: document.kind === "recording"
+						? (document.record.isrcs ?? []).map((value, index) => ({
+								namespace: "isrc",
+								value,
+								path: `/isrcs/${index}`,
+							}))
+						: [];
+			const identifiers = await applyMusicBrainzIdentifierDelta(
+				tx,
+				context.reference,
+				context.actor,
+				facts.revision,
+				{ ...context, previousSnapshotId: context.previousSnapshotId },
+				identifierEntries(previous),
+				identifierEntries(incoming),
+			);
 			return {
-				revision: facts.revision,
+				revision: identifiers.revision,
 				changes: [
 					...structural.changes.map((change) => ({
 						kind: "music-component" as const,
@@ -250,6 +270,7 @@ export function musicBrainzObjectNativeWriter(
 					})),
 					...names.changes,
 					...facts.changes,
+					...identifiers.changes,
 				],
 			};
 		});

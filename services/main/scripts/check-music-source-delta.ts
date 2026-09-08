@@ -297,6 +297,7 @@ try {
 				const originalTracks = await readMusicTracks(tx, reference, actor.id, medium.id);
 				const incoming: MusicBrainzRelease = {
 					...previous,
+					asin: "B000000002",
 					"artist-credit": [
 						{
 							name: "New credited artist",
@@ -657,12 +658,13 @@ try {
 						...(kind === "work"
 							? {
 									languages: ["en"],
+									iswcs: ["T-034.524.680-1"],
 									...(testNames
 										? { attributes: [{ type: "Catalogue number", value: "Op. 1" }] }
 										: {}),
 								}
 							: kind === "recording"
-								? { length: 120000, video: false }
+								? { length: 120000, video: false, isrcs: ["USAAA2000001"] }
 								: {
 										"primary-type": "Album",
 										"secondary-types": ["Compilation"],
@@ -675,13 +677,14 @@ try {
 						...(kind === "work"
 							? {
 									languages: ["ja"],
+									iswcs: ["T-034.524.681-2"],
 									type: "Song",
 									...(testNames
 										? { attributes: [{ type: "Catalogue number", value: "Op. 2" }] }
 										: {}),
 								}
 							: kind === "recording"
-								? { length: 125000, video: true }
+								? { length: 125000, video: true, isrcs: ["USAAA2000002"] }
 								: {
 										"primary-type": "EP",
 										"secondary-types": ["Soundtrack"],
@@ -756,6 +759,24 @@ try {
 							objectWriter,
 						);
 						assert.equal(applied.status, "applied");
+						if (kind === "recording" || kind === "work") {
+							const identifiers = CatalogFactTables.music.identifier;
+							assert.deepEqual(
+								(
+									await tx
+										.select({ value: identifiers.value })
+										.from(identifiers)
+										.where(
+											and(
+												eq(identifiers.ownerId, object.reference.id),
+												eq(identifiers.namespace, kind === "recording" ? "isrc" : "iswc"),
+												eq(identifiers.state, "active"),
+											),
+										)
+								).map((row) => row.value),
+								kind === "recording" ? ["USAAA2000002"] : ["T-034.524.681-2"],
+							);
+						}
 						if (kind === "work")
 							assert.deepEqual(
 								(await listMusicWorkLanguages(tx, object.reference, actor.id)).map(
@@ -781,6 +802,24 @@ try {
 							objectWriter,
 						);
 						assert.equal(removed.status, "withdrawn");
+						if (kind === "recording" || kind === "work") {
+							const identifiers = CatalogFactTables.music.identifier;
+							assert.deepEqual(
+								(
+									await tx
+										.select({ value: identifiers.value })
+										.from(identifiers)
+										.where(
+											and(
+												eq(identifiers.ownerId, object.reference.id),
+												eq(identifiers.namespace, kind === "recording" ? "isrc" : "iswc"),
+												eq(identifiers.state, "active"),
+											),
+										)
+								).map((row) => row.value),
+								kind === "recording" ? ["USAAA2000001"] : ["T-034.524.680-1"],
+							);
+						}
 						if (kind === "work")
 							assert.deepEqual(
 								(await listMusicWorkLanguages(tx, object.reference, actor.id)).map(

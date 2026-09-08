@@ -1,4 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
+import { applyMusicBrainzIdentifierDelta } from "./musicbrainz-identifier-delta";
 import { runParticipationSavepoint } from "../participation/policy";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
 import { z } from "zod";
@@ -401,8 +402,19 @@ export function musicBrainzReleaseNativeWriter(
 				},
 				{ annotation: incoming.annotation, disambiguation: incoming.disambiguation },
 			);
+			const identifierEntries = (record: typeof incoming) =>
+				record.asin ? [{ namespace: "asin", value: record.asin, path: "/asin" }] : [];
+			const identifiers = await applyMusicBrainzIdentifierDelta(
+				tx,
+				context.reference,
+				context.actor,
+				facts.revision,
+				{ ...context, previousSnapshotId: context.previousSnapshotId },
+				identifierEntries(previous),
+				identifierEntries(incoming),
+			);
 			return {
-				revision: facts.revision,
+				revision: identifiers.revision,
 				changes: [
 					...result.changes.map((change) => ({
 						kind: "music-component" as const,
@@ -411,6 +423,7 @@ export function musicBrainzReleaseNativeWriter(
 					})),
 					...names.changes,
 					...facts.changes,
+					...identifiers.changes,
 				],
 			};
 		});

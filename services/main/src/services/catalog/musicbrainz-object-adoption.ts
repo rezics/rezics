@@ -88,7 +88,14 @@ export async function adoptMusicBrainzObject(
 					},
 				});
 			await projectMusicBrainzWorkLanguages(tx, identity.id, document.record, observation);
-			await projectMusicBrainzIdentifiers(tx, identity.id, "iswc", document.record.iswcs ?? []);
+			await projectMusicBrainzIdentifiers(
+				tx,
+				identity.id,
+				"iswc",
+				document.record.iswcs ?? [],
+				observation,
+				"/iswcs",
+			);
 			break;
 		}
 		case "recording": {
@@ -116,7 +123,14 @@ export async function adoptMusicBrainzObject(
 							document.record.video !== undefined ? document.record.video : musicRecording.video,
 					},
 				});
-			await projectMusicBrainzIdentifiers(tx, identity.id, "isrc", document.record.isrcs ?? []);
+			await projectMusicBrainzIdentifiers(
+				tx,
+				identity.id,
+				"isrc",
+				document.record.isrcs ?? [],
+				observation,
+				"/isrcs",
+			);
 			break;
 		}
 		case "release_group": {

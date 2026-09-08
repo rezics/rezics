@@ -12,6 +12,7 @@ import { initializeReferenceProfile, appendAreaCodes } from "./references";
 import { adoptMusicBrainzAliases } from "./musicbrainz-names";
 import { musicBrainzArtistShape, musicBrainzLabelShape } from "./musicbrainz-entities";
 import { addCatalogIdentifier } from "./identifiers";
+import { normalizeCatalogIdentifier } from "./name-contracts";
 import {
 	musicDiscToc,
 	musicDiscTocOffset,
@@ -588,12 +589,30 @@ export async function projectMusicBrainzIdentifiers(
 	ownerId: string,
 	namespace: "isrc" | "iswc" | "asin",
 	values: readonly string[],
+	observation: Observation,
+	path: string,
 ) {
-	for (const value of new Set(values))
-		await tx.insert(CatalogFactTables.music.identifier).values({
+	const recorded = new Set<string>();
+	for (const [position, value] of values.entries()) {
+		const normalized = normalizeCatalogIdentifier({ namespace, value });
+		if (recorded.has(normalized.normalizedValue)) continue;
+		recorded.add(normalized.normalizedValue);
+		const [identifier] = await tx
+			.insert(CatalogFactTables.music.identifier)
+			.values({ ownerId, ...normalized })
+			.returning({
+				id: CatalogFactTables.music.identifier.id,
+				revision: CatalogFactTables.music.identifier.revision,
+			});
+		if (!identifier) throw new Error("Music source identifier insertion returned no row");
+		await tx.insert(CatalogFactTables.music.support).values({
+			...(await catalogSourceSupportColumns(tx, observation.record.id)),
 			ownerId,
-			namespace,
-			value,
-			normalizedValue: value.replaceAll("-", "").replaceAll(".", "").toUpperCase(),
+			identifierId: identifier.id,
+			identifierRevision: identifier.revision,
+			sourceRecordId: observation.record.id,
+			snapshotId: observation.snapshot.id,
+			sourcePath: namespace === "asin" ? path : `${path}/${position}`,
 		});
+	}
 }
