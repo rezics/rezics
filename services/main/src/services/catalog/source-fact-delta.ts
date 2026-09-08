@@ -22,6 +22,7 @@ import { resolveCatalogSourceOwnedBaseline } from "./source-owned-baselines";
 const identityFields = {
 	identity: z.string().min(1).max(1024),
 	path: z.string().startsWith("/").max(512),
+	purpose: z.enum(["assertion", "qualifier"]).optional(),
 };
 const namedFields = {
 	...identityFields,
@@ -64,6 +65,7 @@ export type CatalogSourceFactResult = {
 };
 const sameDefinition = (left: CatalogSourceFactDescriptor, right: CatalogSourceFactDescriptor) =>
 	left.kind === right.kind &&
+	(left.purpose ?? "assertion") === (right.purpose ?? "assertion") &&
 	("definitionRevisionId" in left
 		? "definitionRevisionId" in right && left.definitionRevisionId === right.definitionRevisionId
 		: !("definitionRevisionId" in right) &&
@@ -176,6 +178,7 @@ export async function applyCatalogSourceFactDelta(
 					eq(f.support.ownerId, reference.id),
 					eq(f.support.sourcePath, descriptor.path),
 					eq(f.fact.definitionRevisionId, definition.revisionId),
+					eq(f.fact.purpose, descriptor.purpose ?? "assertion"),
 				),
 			)
 			.orderBy(f.support.id)
@@ -306,9 +309,9 @@ export async function applyCatalogSourceFactDelta(
 			actor,
 			revision,
 			target.definition.revisionId,
-			replacement && proof.row
+			{ purpose: descriptor.purpose ?? "assertion", ...(replacement && proof.row
 				? { semanticId: proof.row.semanticId, expectedHeadVersion: currentRevision }
-				: {},
+				: {}) },
 		);
 		const nodes = [...catalogValueNodes(descriptor.value)];
 		const appended = await appendCatalogFactNodes(
