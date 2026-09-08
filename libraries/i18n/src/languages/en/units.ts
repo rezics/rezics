@@ -12,6 +12,26 @@ const { forms: metadataTerms } = enTerminology.metadata;
 const { forms: entityTerms } = enTerminology.entity;
 
 export default {
+	nativeGrouping: {
+		classes: "Classifications",
+		orders: "Named orders",
+		orderName: "Order name",
+		membership: "Membership",
+		sourcePosition: "Source position",
+		moveEarlier: "Move earlier",
+		removeOrderEntry: "Remove from this order",
+		addMembership: "Place in this order",
+		editMemberships: "Edit membership relations",
+		reapply: "Reapply this change",
+		operations: {
+			"class.assign": "Classification assigned",
+			"class.remove": "Classification removed",
+			"order.create": "Order created",
+			"order.rename": "Order renamed",
+			"order.set": "Membership positioned",
+			"order.remove": "Membership removed from order",
+		},
+	},
 	nativePublishing: {
 		work: enTerminology.publishingWork.forms.label,
 		text_version: enTerminology.textVersion.forms.label,

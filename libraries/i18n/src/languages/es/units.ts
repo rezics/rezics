@@ -12,6 +12,26 @@ const { forms: metadataTerms } = esTerminology.metadata;
 const { forms: entityTerms } = esTerminology.entity;
 
 export default {
+	nativeGrouping: {
+		classes: "Clasificaciones",
+		orders: "Órdenes con nombre",
+		orderName: "Nombre del orden",
+		membership: "Pertenencia",
+		sourcePosition: "Posición en la fuente",
+		moveEarlier: "Mover antes",
+		removeOrderEntry: "Quitar de este orden",
+		addMembership: "Colocar en este orden",
+		editMemberships: "Editar relaciones de pertenencia",
+		reapply: "Volver a aplicar este cambio",
+		operations: {
+			"class.assign": "Clasificación asignada",
+			"class.remove": "Clasificación retirada",
+			"order.create": "Orden creado",
+			"order.rename": "Orden renombrado",
+			"order.set": "Pertenencia posicionada",
+			"order.remove": "Pertenencia retirada del orden",
+		},
+	},
 	nativePublishing: {
 		work: esTerminology.publishingWork.forms.label,
 		text_version: esTerminology.textVersion.forms.label,

@@ -12,6 +12,26 @@ const { forms: metadataTerms } = koTerminology.metadata;
 const { forms: entityTerms } = koTerminology.entity;
 
 export default {
+	nativeGrouping: {
+		classes: "분류",
+		orders: "이름이 있는 순서",
+		orderName: "순서 이름",
+		membership: "구성 관계",
+		sourcePosition: "출처 순서",
+		moveEarlier: "앞으로 이동",
+		removeOrderEntry: "이 순서에서 제외",
+		addMembership: "이 순서에 배치",
+		editMemberships: "구성 관계 편집",
+		reapply: "이 변경 다시 적용",
+		operations: {
+			"class.assign": "분류 지정됨",
+			"class.remove": "분류 제거됨",
+			"order.create": "순서 생성됨",
+			"order.rename": "순서 이름 변경됨",
+			"order.set": "구성 관계 위치 변경됨",
+			"order.remove": "순서에서 구성 관계 제외됨",
+		},
+	},
 	nativePublishing: {
 		work: koTerminology.publishingWork.forms.label,
 		text_version: koTerminology.textVersion.forms.label,

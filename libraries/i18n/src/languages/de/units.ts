@@ -12,6 +12,26 @@ const { forms: metadataTerms } = deTerminology.metadata;
 const { forms: entityTerms } = deTerminology.entity;
 
 export default {
+	nativeGrouping: {
+		classes: "Klassifizierungen",
+		orders: "Benannte Reihenfolgen",
+		orderName: "Name der Reihenfolge",
+		membership: "Zugehörigkeit",
+		sourcePosition: "Quellposition",
+		moveEarlier: "Nach vorne verschieben",
+		removeOrderEntry: "Aus dieser Reihenfolge entfernen",
+		addMembership: "In dieser Reihenfolge platzieren",
+		editMemberships: "Zugehörigkeiten bearbeiten",
+		reapply: "Diese Änderung erneut anwenden",
+		operations: {
+			"class.assign": "Klassifizierung zugewiesen",
+			"class.remove": "Klassifizierung entfernt",
+			"order.create": "Reihenfolge erstellt",
+			"order.rename": "Reihenfolge umbenannt",
+			"order.set": "Zugehörigkeit positioniert",
+			"order.remove": "Zugehörigkeit aus Reihenfolge entfernt",
+		},
+	},
 	nativePublishing: {
 		work: deTerminology.publishingWork.forms.label,
 		text_version: deTerminology.textVersion.forms.label,

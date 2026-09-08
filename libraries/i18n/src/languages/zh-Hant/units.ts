@@ -12,6 +12,26 @@ const { forms: metadataTerms } = zhHantTerminology.metadata;
 const { forms: entityTerms } = zhHantTerminology.entity;
 
 export default {
+	nativeGrouping: {
+		classes: "分類",
+		orders: "具名順序",
+		orderName: "順序名稱",
+		membership: "成員關係",
+		sourcePosition: "來源序號",
+		moveEarlier: "向前移動",
+		removeOrderEntry: "從此順序移除",
+		addMembership: "放入此順序",
+		editMemberships: "編輯成員關係",
+		reapply: "重新套用此變更",
+		operations: {
+			"class.assign": "已指定分類",
+			"class.remove": "已移除分類",
+			"order.create": "已建立順序",
+			"order.rename": "已重新命名順序",
+			"order.set": "已調整成員位置",
+			"order.remove": "已從順序移除成員",
+		},
+	},
 	nativePublishing: {
 		work: zhHantTerminology.publishingWork.forms.label,
 		text_version: zhHantTerminology.textVersion.forms.label,

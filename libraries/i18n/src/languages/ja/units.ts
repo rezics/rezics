@@ -12,6 +12,26 @@ const { forms: metadataTerms } = jaTerminology.metadata;
 const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
+	nativeGrouping: {
+		classes: "分類",
+		orders: "名前付きの順序",
+		orderName: "順序の名前",
+		membership: "所属関係",
+		sourcePosition: "出典の順序",
+		moveEarlier: "前に移動",
+		removeOrderEntry: "この順序から除外",
+		addMembership: "この順序に配置",
+		editMemberships: "所属関係を編集",
+		reapply: "この変更を再適用",
+		operations: {
+			"class.assign": "分類を設定",
+			"class.remove": "分類を解除",
+			"order.create": "順序を作成",
+			"order.rename": "順序の名前を変更",
+			"order.set": "所属関係の位置を変更",
+			"order.remove": "順序から所属関係を除外",
+		},
+	},
 	nativePublishing: {
 		work: jaTerminology.publishingWork.forms.label,
 		text_version: jaTerminology.textVersion.forms.label,
