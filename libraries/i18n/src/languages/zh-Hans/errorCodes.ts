@@ -4,6 +4,7 @@ import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 const { forms: audioTerms } = zhHansTerminology.audio;
 const { forms: dockTerms } = zhHansTerminology.dock;
 const { forms: customThemeTerms } = zhHansTerminology.customTheme;
+const { forms: definitionNamespaceTerms } = zhHansTerminology.definitionNamespace;
 const { forms: followTerms } = zhHansTerminology.follow;
 const { forms: postTerms } = zhHansTerminology.post;
 const { forms: realmTerms } = zhHansTerminology.realm;
@@ -254,12 +255,12 @@ export default {
 	UnitLocalizationNotFound: "这个内容语言已不存在。",
 	UnitLastLocalizationRemovalForbidden: "作品必须保留至少一种内容语言。",
 	InvalidSlug: `${unitSlugTerms.label}必须是 1 至 63 个字符的小写 ${verbatimTerms.ascii.value} 短横线标签。`,
-	SlugTaken: `这个条目命名空间中的${unitSlugTerms.inline}已被使用。`,
+	SlugTaken: `这个条目${definitionNamespaceTerms.label}中的${unitSlugTerms.inline}已被使用。`,
 	SlugReserved: `这个${unitSlugTerms.inline}是平台保留名称，无法使用。`,
 	ProfileSlugChangeUnavailable: `个人资料的${unitSlugTerms.inline}设置后目前无法更改。`,
-	SlugScopeNotFound: `找不到${unitSlugTerms.inline}所属的条目命名空间。`,
-	SlugScopeUnavailable: `没有地址或已删除的条目，不能作为${unitSlugTerms.inline}的标准命名空间。`,
-	SlugScopeCycle: `这次移动会形成${unitSlugTerms.inline}命名空间循环。`,
+	SlugScopeNotFound: `找不到${unitSlugTerms.inline}所属的条目${definitionNamespaceTerms.label}。`,
+	SlugScopeUnavailable: `没有地址或已删除的条目，不能作为${unitSlugTerms.inline}的标准${definitionNamespaceTerms.label}。`,
+	SlugScopeCycle: `这次移动会形成${unitSlugTerms.inline}${definitionNamespaceTerms.label}循环。`,
 	SlugDepthExceeded: `由${unitSlugTerms.plural}组成的条目路径超过最大深度。`,
 	UnitAddressMutationForbidden: `无法对这个条目的${unitSlugTerms.inline}地址运行这项操作。`,
 	SlugRedirectNotFound: `找不到${unitSlugTerms.inline}重定向。`,

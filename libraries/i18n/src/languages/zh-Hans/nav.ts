@@ -9,6 +9,7 @@ const { forms: audioTerms } = zhHansTerminology.audio;
 const { forms: realmTerms } = zhHansTerminology.realm;
 const { forms: entityTerms } = zhHansTerminology.entity;
 const { forms: unitSlugTerms } = zhHansTerminology.unitSlug;
+const { forms: definitionNamespaceTerms } = zhHansTerminology.definitionNamespace;
 const { forms: zoneTerms } = zhHansTerminology.zone;
 const { forms: customThemeTerms } = zhHansTerminology.customTheme;
 
@@ -63,7 +64,7 @@ export default {
 		favorite: "置顶",
 		unfavorite: "取消置顶",
 		types: {
-			slug_namespace: `${unitSlugTerms.label}命名空间`,
+			slug_namespace: `${unitSlugTerms.label}${definitionNamespaceTerms.label}`,
 			profile: "用户",
 			book: "书籍",
 			software: `${zhHansTerminology.software.forms.label}`,

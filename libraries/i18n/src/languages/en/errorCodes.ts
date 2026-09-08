@@ -4,6 +4,7 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 const { forms: audioTerms } = enTerminology.audio;
 const { forms: dockTerms } = enTerminology.dock;
 const { forms: customThemeTerms } = enTerminology.customTheme;
+const { forms: definitionNamespaceTerms } = enTerminology.definitionNamespace;
 const { forms: followTerms } = enTerminology.follow;
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
@@ -283,12 +284,12 @@ export default {
 	UnitLocalizationNotFound: "That content language no longer exists.",
 	UnitLastLocalizationRemovalForbidden: "A Unit must keep at least one content language.",
 	InvalidSlug: `${unitSlugTerms.label} must be a 1-63 character lowercase ${verbatimTerms.ascii.value} hyphenated label.`,
-	SlugTaken: `That ${unitSlugTerms.inline} is already used in this Unit namespace.`,
+	SlugTaken: `That ${unitSlugTerms.inline} is already used in this Unit ${definitionNamespaceTerms.inline}.`,
 	SlugReserved: `That ${unitSlugTerms.inline} is reserved and cannot be assigned.`,
 	ProfileSlugChangeUnavailable: `Your Profile ${unitSlugTerms.inline} cannot currently be changed after it has been set.`,
-	SlugScopeNotFound: `The Unit namespace for this ${unitSlugTerms.inline} could not be found.`,
+	SlugScopeNotFound: `The Unit ${definitionNamespaceTerms.inline} for this ${unitSlugTerms.inline} could not be found.`,
 	SlugScopeUnavailable: `Unaddressed and deleted Units cannot be canonical ${unitSlugTerms.inline} namespaces.`,
-	SlugScopeCycle: `This move would create a ${unitSlugTerms.inline} namespace cycle.`,
+	SlugScopeCycle: `This move would create a ${unitSlugTerms.inline} ${definitionNamespaceTerms.inline} cycle.`,
 	SlugDepthExceeded: `The Unit ${unitSlugTerms.inline} path exceeds the maximum depth.`,
 	UnitAddressMutationForbidden: `This Unit ${unitSlugTerms.inline} address cannot perform that operation.`,
 	SlugRedirectNotFound: `The ${unitSlugTerms.inline} Redirect could not be found.`,

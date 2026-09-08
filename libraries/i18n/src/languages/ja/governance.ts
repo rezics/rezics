@@ -9,6 +9,7 @@ const { forms: entityTerms } = jaTerminology.entity;
 const { forms: postTerms } = jaTerminology.post;
 const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: customThemeTerms } = jaTerminology.customTheme;
+const { forms: definitionNamespaceTerms } = jaTerminology.definitionNamespace;
 
 export default {
 	title: "ユニットガバナンス",
@@ -86,7 +87,7 @@ export default {
 		"unit.delete": "任意のユニットを論理削除する",
 		"unit.restore": "論理削除されたユニットを復元する",
 		"unit.slug.manage": "ユニットの公開アドレスを管理する",
-		"unit.slug.namespace.manage": "アドレス名前空間を管理する",
+		"unit.slug.namespace.manage": `アドレス${definitionNamespaceTerms.label}を管理する`,
 		"unit.slug.redirect.release": "予約されたアドレスのリダイレクトを解除する",
 		"platform.api_quota_policy.read": `${verbatimTerms.api.value} クォータポリシーを表示する`,
 		"platform.api_quota_policy.update": `${verbatimTerms.api.value} クォータポリシーを更新する`,

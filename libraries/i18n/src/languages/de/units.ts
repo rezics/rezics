@@ -141,9 +141,9 @@ export default {
 		sourceDigest: "Prüfsumme der Quelle",
 		noChanges: "Beim Vergleich unterscheiden sich keine Quellwerte.",
 		withdrawProposalNotice:
-			"Die Rücknahme entfernt den übernommenen Beitrag gemäß den geltenden Zuordnungsregeln. Prüfe die Quellwerte und gib einen Grund an.",
+			"Die Rücknahme macht die übernommenen Quelländerungen gemäß den geltenden Zuordnungsregeln rückgängig. Prüfe die Quellwerte und gib einen Grund an.",
 		apply: "Aktualisierung übernehmen",
-		withdraw: "Beitrag zurücknehmen",
+		withdraw: "Übernahme zurücknehmen",
 		before: "Vorher",
 		after: "Nachher",
 		readValue: "Vollständigen Wert lesen",

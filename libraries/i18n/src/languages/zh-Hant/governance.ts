@@ -9,6 +9,7 @@ const { forms: entityTerms } = zhHantTerminology.entity;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: zoneTerms } = zhHantTerminology.zone;
 const { forms: customThemeTerms } = zhHantTerminology.customTheme;
+const { forms: definitionNamespaceTerms } = zhHantTerminology.definitionNamespace;
 
 export default {
 	title: "條目治理",
@@ -86,7 +87,7 @@ export default {
 		"unit.delete": "軟刪除任意條目",
 		"unit.restore": "還原已軟刪除的條目",
 		"unit.slug.manage": "管理條目公開網址",
-		"unit.slug.namespace.manage": "管理網址命名空間",
+		"unit.slug.namespace.manage": `管理網址${definitionNamespaceTerms.label}`,
 		"unit.slug.redirect.release": "釋出保留的網址重新導向",
 		"platform.api_quota_policy.read": `檢視 ${verbatimTerms.api.value} 配額政策`,
 		"platform.api_quota_policy.update": `更新 ${verbatimTerms.api.value} 配額政策`,

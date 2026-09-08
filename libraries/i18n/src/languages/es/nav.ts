@@ -9,6 +9,7 @@ const { forms: audioTerms } = esTerminology.audio;
 const { forms: realmTerms } = esTerminology.realm;
 const { forms: entityTerms } = esTerminology.entity;
 const { forms: unitSlugTerms } = esTerminology.unitSlug;
+const { forms: definitionNamespaceTerms } = esTerminology.definitionNamespace;
 const { forms: zoneTerms } = esTerminology.zone;
 const { forms: customThemeTerms } = esTerminology.customTheme;
 
@@ -63,7 +64,7 @@ export default {
 		favorite: "Fijar",
 		unfavorite: "Dejar de fijar",
 		types: {
-			slug_namespace: `Espacio de nombres de ${unitSlugTerms.inline}`,
+			slug_namespace: `${definitionNamespaceTerms.label} de ${unitSlugTerms.inline}`,
 			profile: "Perfil",
 			book: "Libro",
 			software: `${esTerminology.software.forms.label}`,

@@ -9,6 +9,7 @@ const { forms: audioTerms } = enTerminology.audio;
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: entityTerms } = enTerminology.entity;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
+const { forms: definitionNamespaceTerms } = enTerminology.definitionNamespace;
 const { forms: zoneTerms } = enTerminology.zone;
 const { forms: customThemeTerms } = enTerminology.customTheme;
 
@@ -63,7 +64,7 @@ export default {
 		favorite: "Pin",
 		unfavorite: "Unpin",
 		types: {
-			slug_namespace: `${unitSlugTerms.label} namespace`,
+			slug_namespace: `${unitSlugTerms.label} ${definitionNamespaceTerms.inline}`,
 			profile: "Profile",
 			book: "Book",
 			software: `${enTerminology.software.forms.label}`,

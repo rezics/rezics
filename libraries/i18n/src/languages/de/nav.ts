@@ -9,6 +9,7 @@ const { forms: audioTerms } = deTerminology.audio;
 const { forms: realmTerms } = deTerminology.realm;
 const { forms: entityTerms } = deTerminology.entity;
 const { forms: unitSlugTerms } = deTerminology.unitSlug;
+const { forms: definitionNamespaceTerms } = deTerminology.definitionNamespace;
 const { forms: zoneTerms } = deTerminology.zone;
 const { forms: customThemeTerms } = deTerminology.customTheme;
 
@@ -63,7 +64,7 @@ export default {
 		favorite: "Fixieren",
 		unfavorite: "Lösen",
 		types: {
-			slug_namespace: `${unitSlugTerms.label}-Namensraum`,
+			slug_namespace: `${unitSlugTerms.label}-${definitionNamespaceTerms.label}`,
 			profile: "Profil",
 			book: "Buch",
 			software: `${deTerminology.software.forms.label}`,

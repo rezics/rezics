@@ -4,6 +4,7 @@ import { esTerminology } from "@rezics/i18n/terminology/es";
 const { forms: audioTerms } = esTerminology.audio;
 const { forms: dockTerms } = esTerminology.dock;
 const { forms: customThemeTerms } = esTerminology.customTheme;
+const { forms: definitionNamespaceTerms } = esTerminology.definitionNamespace;
 const { forms: followTerms } = esTerminology.follow;
 const { forms: postTerms } = esTerminology.post;
 const { forms: realmTerms } = esTerminology.realm;
@@ -304,12 +305,12 @@ export default {
 	UnitLocalizationNotFound: "Ese idioma del contenido ya no existe.",
 	UnitLastLocalizationRemovalForbidden: "Una Unit debe conservar al menos un idioma de contenido.",
 	InvalidSlug: `El ${unitSlugTerms.inline} debe ser una etiqueta ${verbatimTerms.ascii.value} en minúsculas, de entre 1 y 63 caracteres y separada por guiones.`,
-	SlugTaken: `Ese ${unitSlugTerms.inline} ya se usa en este espacio de nombres de Unit.`,
+	SlugTaken: `Ese ${unitSlugTerms.inline} ya se usa en este ${definitionNamespaceTerms.inline} de Unit.`,
 	SlugReserved: `Ese ${unitSlugTerms.inline} está reservado y no se puede utilizar.`,
 	ProfileSlugChangeUnavailable: `El ${unitSlugTerms.inline} de tu perfil no se puede cambiar actualmente después de definirlo.`,
-	SlugScopeNotFound: `No se ha encontrado el espacio de nombres de Unit de este ${unitSlugTerms.inline}.`,
+	SlugScopeNotFound: `No se ha encontrado el ${definitionNamespaceTerms.inline} de Unit de este ${unitSlugTerms.inline}.`,
 	SlugScopeUnavailable: `Las Units sin dirección y las eliminadas no pueden ser espacios de nombres canónicos de ${unitSlugTerms.plural}.`,
-	SlugScopeCycle: `Este traslado crearía un ciclo en el espacio de nombres de ${unitSlugTerms.plural}.`,
+	SlugScopeCycle: `Este traslado crearía un ciclo en el ${definitionNamespaceTerms.inline} de ${unitSlugTerms.plural}.`,
 	SlugDepthExceeded: `La ruta del ${unitSlugTerms.inline} de la Unit supera la profundidad máxima.`,
 	UnitAddressMutationForbidden: `Esta dirección de ${unitSlugTerms.inline} de la Unit no permite realizar esa operación.`,
 	SlugRedirectNotFound: `No se ha encontrado la redirección del ${unitSlugTerms.inline}.`,

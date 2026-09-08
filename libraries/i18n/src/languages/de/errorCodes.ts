@@ -4,6 +4,7 @@ import { deTerminology } from "@rezics/i18n/terminology/de";
 const { forms: audioTerms } = deTerminology.audio;
 const { forms: dockTerms } = deTerminology.dock;
 const { forms: customThemeTerms } = deTerminology.customTheme;
+const { forms: definitionNamespaceTerms } = deTerminology.definitionNamespace;
 const { forms: followTerms } = deTerminology.follow;
 const { forms: postTerms } = deTerminology.post;
 const { forms: realmTerms } = deTerminology.realm;
@@ -313,12 +314,12 @@ export default {
 	UnitLocalizationNotFound: "Diese Inhaltssprache existiert nicht mehr.",
 	UnitLastLocalizationRemovalForbidden: "Eine Unit muss mindestens eine Inhaltssprache behalten.",
 	InvalidSlug: `${unitSlugTerms.label} muss eine 1 bis 63 Zeichen lange, kleingeschriebene und mit Bindestrichen getrennte ${verbatimTerms.ascii.value}-Bezeichnung sein.`,
-	SlugTaken: `Diese ${unitSlugTerms.inline} wird in diesem Unit-Namensraum bereits verwendet.`,
+	SlugTaken: `Diese ${unitSlugTerms.inline} wird in diesem Unit-${definitionNamespaceTerms.label} bereits verwendet.`,
 	SlugReserved: `Diese ${unitSlugTerms.inline} ist reserviert und kann nicht verwendet werden.`,
 	ProfileSlugChangeUnavailable: `Die ${unitSlugTerms.inline} deines Profils kann nach dem Festlegen derzeit nicht geändert werden.`,
-	SlugScopeNotFound: `Der Unit-Namensraum für diese ${unitSlugTerms.inline} wurde nicht gefunden.`,
+	SlugScopeNotFound: `Der Unit-${definitionNamespaceTerms.label} für diese ${unitSlugTerms.inline} wurde nicht gefunden.`,
 	SlugScopeUnavailable: `Nicht adressierte und gelöschte Units können keine kanonischen Namensräume für ${unitSlugTerms.plural} sein.`,
-	SlugScopeCycle: `Diese Verschiebung würde einen Zyklus im Namensraum der ${unitSlugTerms.inline}en erzeugen.`,
+	SlugScopeCycle: `Diese Verschiebung würde einen Zyklus im ${definitionNamespaceTerms.label} der ${unitSlugTerms.inline}en erzeugen.`,
 	SlugDepthExceeded: `Der Pfad der Unit-${unitSlugTerms.inline} überschreitet die maximale Tiefe.`,
 	UnitAddressMutationForbidden: `Diese Adresse der Unit-${unitSlugTerms.inline} kann diese Aktion nicht ausführen.`,
 	SlugRedirectNotFound: `Die Weiterleitung für die ${unitSlugTerms.inline} wurde nicht gefunden.`,

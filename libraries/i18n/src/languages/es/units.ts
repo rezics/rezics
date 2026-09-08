@@ -192,7 +192,7 @@ export default {
 			failed: "Fallida",
 		},
 		objectTypes: {
-			release: "Publicación",
+			release: "Lanzamiento",
 			staff: "Miembro del equipo",
 			producer: "Productor",
 			trait: "Característica",

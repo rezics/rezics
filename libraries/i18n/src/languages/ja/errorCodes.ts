@@ -4,6 +4,7 @@ import { jaTerminology } from "@rezics/i18n/terminology/ja";
 const { forms: audioTerms } = jaTerminology.audio;
 const { forms: dockTerms } = jaTerminology.dock;
 const { forms: customThemeTerms } = jaTerminology.customTheme;
+const { forms: definitionNamespaceTerms } = jaTerminology.definitionNamespace;
 const { forms: followTerms } = jaTerminology.follow;
 const { forms: postTerms } = jaTerminology.post;
 const { forms: realmTerms } = jaTerminology.realm;
@@ -283,12 +284,12 @@ export default {
 	UnitLastLocalizationRemovalForbidden:
 		"ユニットは少なくとも1つのコンテンツ言語を保持する必要があります。",
 	InvalidSlug: `${unitSlugTerms.label} は1～63文字の小文字の ${verbatimTerms.ascii.value} ハイフン付きラベルでなければなりません。`,
-	SlugTaken: `その ${unitSlugTerms.inline} はすでにこのユニットの名前空間で使用されています。`,
+	SlugTaken: `その ${unitSlugTerms.inline} はすでにこのユニットの${definitionNamespaceTerms.label}で使用されています。`,
 	SlugReserved: `その ${unitSlugTerms.inline} は予約されているため使用できません。`,
 	ProfileSlugChangeUnavailable: `プロフィールの ${unitSlugTerms.inline} は、設定後に現在変更できません。`,
-	SlugScopeNotFound: `この ${unitSlugTerms.inline} のユニット名前空間が見つかりませんでした。`,
-	SlugScopeUnavailable: `未対応および削除されたユニットは、標準的な ${unitSlugTerms.inline} 名前空間にすることはできません。`,
-	SlugScopeCycle: `この移動は ${unitSlugTerms.inline} 名前空間のサイクルを作成します。`,
+	SlugScopeNotFound: `この ${unitSlugTerms.inline} のユニット${definitionNamespaceTerms.label}が見つかりませんでした。`,
+	SlugScopeUnavailable: `未対応および削除されたユニットは、標準的な ${unitSlugTerms.inline} ${definitionNamespaceTerms.label}にすることはできません。`,
+	SlugScopeCycle: `この移動は ${unitSlugTerms.inline} ${definitionNamespaceTerms.label}のサイクルを作成します。`,
 	SlugDepthExceeded: `ユニット ${unitSlugTerms.inline} のパスが最大深度を超えています。`,
 	UnitAddressMutationForbidden: `このユニット ${unitSlugTerms.inline} のアドレスでは、その操作を実行できません。`,
 	SlugRedirectNotFound: `${unitSlugTerms.inline} リダイレクトが見つかりませんでした。`,

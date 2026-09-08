@@ -4,6 +4,7 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 const { forms: audioTerms } = zhHantTerminology.audio;
 const { forms: dockTerms } = zhHantTerminology.dock;
 const { forms: customThemeTerms } = zhHantTerminology.customTheme;
+const { forms: definitionNamespaceTerms } = zhHantTerminology.definitionNamespace;
 const { forms: followTerms } = zhHantTerminology.follow;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
@@ -254,12 +255,12 @@ export default {
 	UnitLocalizationNotFound: "這個內容語言已不存在。",
 	UnitLastLocalizationRemovalForbidden: "作品必須保留至少一種內容語言。",
 	InvalidSlug: `${unitSlugTerms.label}必須是 1 至 63 個字元的小寫 ${verbatimTerms.ascii.value} 短橫線標籤。`,
-	SlugTaken: `這個條目命名空間中的${unitSlugTerms.inline}已被使用。`,
+	SlugTaken: `這個條目${definitionNamespaceTerms.label}中的${unitSlugTerms.inline}已被使用。`,
 	SlugReserved: `這個${unitSlugTerms.inline}是平台保留名稱，無法使用。`,
 	ProfileSlugChangeUnavailable: `個人資料的${unitSlugTerms.inline}設定後目前無法變更。`,
-	SlugScopeNotFound: `找不到${unitSlugTerms.inline}所屬的條目命名空間。`,
-	SlugScopeUnavailable: `沒有位址或已刪除的條目，不能作為${unitSlugTerms.inline}的標準命名空間。`,
-	SlugScopeCycle: `這次移動會形成${unitSlugTerms.inline}命名空間循環。`,
+	SlugScopeNotFound: `找不到${unitSlugTerms.inline}所屬的條目${definitionNamespaceTerms.label}。`,
+	SlugScopeUnavailable: `沒有位址或已刪除的條目，不能作為${unitSlugTerms.inline}的標準${definitionNamespaceTerms.label}。`,
+	SlugScopeCycle: `這次移動會形成${unitSlugTerms.inline}${definitionNamespaceTerms.label}循環。`,
 	SlugDepthExceeded: `由${unitSlugTerms.plural}組成的條目路徑超過最大深度。`,
 	UnitAddressMutationForbidden: `無法對這個條目的${unitSlugTerms.inline}位址執行這項操作。`,
 	SlugRedirectNotFound: `找不到${unitSlugTerms.inline}重新導向。`,
