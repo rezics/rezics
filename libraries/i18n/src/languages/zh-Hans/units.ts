@@ -12,6 +12,7 @@ const { forms: metadataTerms } = zhHansTerminology.metadata;
 const { forms: entityTerms } = zhHansTerminology.entity;
 
 export default {
+	nativeCatalog: { names: "名称", identifiers: "标识符" },
 	types: {
 		book: "书籍",
 		software: "软件",

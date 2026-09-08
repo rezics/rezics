@@ -2,7 +2,7 @@
 
 import { AppLink } from "@/features/application-shell/components/app-link";
 import { RequireSession } from "@/features/auth/require-session";
-import { publicUnitHref } from "@/features/units/routing/public-unit-route";
+import { unitReferenceHref } from "@/features/units/routing/unit-reference-route";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import {
@@ -50,7 +50,7 @@ function FavoritesContent() {
 			{query.data.items.length ? (
 				query.data.items.map((entry) => (
 					<FavoriteEntry
-						key={`${entry.targetUnitId}:${entry.revision}`}
+						key={`${entry.target.id}:${entry.revision}`}
 						entry={entry}
 						revision={query.data.revision}
 						onChanged={() => setCursors([])}
@@ -104,12 +104,12 @@ function FavoriteEntry({
 		try {
 			if (operation === "remove")
 				await remove.mutateAsync({
-					path: { targetUnitId: entry.targetUnitId },
+					path: { targetUnitId: entry.target.id },
 					body: { expectedRevision: revision },
 				});
 			else
 				await save.mutateAsync({
-					path: { targetUnitId: entry.targetUnitId },
+					path: { targetUnitId: entry.target.id },
 					body: {
 						expectedRevision: revision,
 						note: note || null,
@@ -123,7 +123,7 @@ function FavoriteEntry({
 			await invalidateFavorites(client);
 		}
 	}
-	const href = publicUnitHref(entry.preview.kind, { id: entry.targetUnitId });
+	const href = unitReferenceHref(entry.target);
 	return (
 		<Card>
 			<CardContent className="grid gap-4 p-5">
@@ -173,7 +173,7 @@ function FavoriteEntry({
 				<RequestFailure error={save.error ?? remove.error} />
 				{history ? (
 					<FavoriteHistory
-						targetUnitId={entry.targetUnitId}
+						targetUnitId={entry.target.id}
 						revision={revision}
 						onChanged={onChanged}
 					/>

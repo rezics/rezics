@@ -12,6 +12,7 @@ const { forms: metadataTerms } = deTerminology.metadata;
 const { forms: entityTerms } = deTerminology.entity;
 
 export default {
+	nativeCatalog: { names: "Namen", identifiers: "Kennungen" },
 	types: {
 		book: "Buch",
 		software: "Software",

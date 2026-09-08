@@ -12,6 +12,7 @@ const { forms: metadataTerms } = esTerminology.metadata;
 const { forms: entityTerms } = esTerminology.entity;
 
 export default {
+	nativeCatalog: { names: "Nombres", identifiers: "Identificadores" },
 	types: {
 		book: "Libro",
 		software: "Software",

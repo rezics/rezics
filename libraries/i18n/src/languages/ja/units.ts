@@ -12,6 +12,7 @@ const { forms: metadataTerms } = jaTerminology.metadata;
 const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
+	nativeCatalog: { names: "名称", identifiers: "識別子" },
 	types: {
 		book: "書籍",
 		software: "ソフトウェア",

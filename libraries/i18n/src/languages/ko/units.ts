@@ -12,6 +12,7 @@ const { forms: metadataTerms } = koTerminology.metadata;
 const { forms: entityTerms } = koTerminology.entity;
 
 export default {
+	nativeCatalog: { names: "이름", identifiers: "식별자" },
 	types: {
 		book: "책",
 		software: "소프트웨어",
