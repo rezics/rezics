@@ -1,0 +1,21 @@
+# Native lifecycle administration
+
+Platform lifecycle commands resolve the locator and lock the concrete native owner row. Catalog identities append their owner change ledger; platform resources append their platform revision ledger. Deleting a catalog entry does not delete the Entity or private authentication account of its contributor. Bootstrap resources and identities admitted to participation require their dedicated lifecycle or recovery flow. Restore preserves the identity and restores a previously published resource as archived, never immediately published. Merge locks and redirects continue to block conflicting lifecycle operations.
+
+The public administration DTO uses owner and shape, and ownership identifies an Entity. The authenticated account is obtained from Authorization inside each transaction and recorded privately in the audit event. Ownership override targets must be active participating Entities with a current human controller; imported catalog subjects do not become access principals merely because they exist.
+
+## Query contract
+
+The list endpoint supports keyset browsing and exact lookup. query may be a UUID without a scope, or one valid slug together with exactly one scopeNamespaceId or scopeUnitId. Invalid combinations return UnitGovernanceLookupInvalid. A title fragment is not accepted as corpus search. Namespace and Unit scopes are different identities. The unique scope-and-slug index supplies one target, including redirect addresses. Deleted resources are available to appropriately authorized administration reads. General discovery Search deliberately remains a separate public surface.
+
+Browse windows contain at most 500 locator IDs for lifecycle or 250 participation IDs for ownership, before status or controller eligibility filters. A response can therefore be empty while nextCursor remains non-null. Consumers must preserve that cursor. Hydration occurs after candidate selection. Each lifecycle page contains at most 100 resources; ownership pages contain at most 50. No offset paging, whole-corpus name scan, or unrestricted slug scan is used. Controller checks use the existing active security-grant and self-binding indexes. Ownership commands recheck and lock participation before assigning authority.
+
+## Capacity assumptions
+
+The corpus baseline is 500 million locator rows and the planning estimate is 3 billion. At an assumed 96 bytes per locator heap row and 40 bytes per primary-index entry including page overhead, routing alone is approximately 68 GB and 408 GB respectively, excluding WAL, replicas, free-space allowance, owner rows, and additional indexes. These are estimates, not measured sizes. Routing and each concrete owner remain independently partitionable; the endpoint has no in-memory whole-corpus requirement.
+
+At an illustrative 20 administration requests per second, worst-case browsing examines 10,000 candidate IDs per second, with at most 2,000 returned resources. This is a capacity scenario, not a qualified throughput result. Exact lookup performs one unique-address or locator seek and one concrete-owner seek. Browse work is O(log N + C) for the index window plus at most C point reads, where C is capped independently of N. Name previews use the existing selective owner/name indexes. Long names can still hit the global response size limit; that transport guard is not a claim that every worst-case page fits.
+
+Administration should use bounded connection-pool concurrency and queue rejection rather than accumulating transactions. Monitor transaction duration, pool wait, rejected work, owner hot-key lock waits, and response-size failures. A sustained p95 above one second or pool wait above 250 ms is the planning signal to lower page size/concurrency or route windows to owner shards; these are operational thresholds requiring production calibration. Recurring index rebuilds and title-search maintenance are not introduced. A future moderation title-search feature requires its own incremental projection that includes deleted resources; it must not reuse public discovery visibility or hydrate the entire corpus.
+
+Code-integrity and actual database fixture results are recorded in the operational qualification ledger. This document alone does not qualify capacity or platform frontend acceptance.

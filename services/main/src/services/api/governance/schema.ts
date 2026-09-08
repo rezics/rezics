@@ -1,3 +1,4 @@
+import { UnitOwnerValues } from "@rezics/reference";
 import {
 	AuthenticatedGrantableUnitPermissionValues,
 	DelegableUnitPermissionValues,
@@ -145,7 +146,11 @@ export const GovernanceRuleSourcesResponse = t.Object({
 				revisionId: Uuid,
 				rules: t.Array(
 					t.Object(
-						{ id: Uuid, language: ContentLanguage, title: t.String() },
+						{
+							id: Uuid,
+							language: ContentLanguage,
+							title: t.String(),
+						},
 						{ additionalProperties: false },
 					),
 					{ minItems: 1, maxItems: 100 },
@@ -238,7 +243,10 @@ export const CreateGrantBody = t.Object(
 export const GrantParams = t.Object({ grantId: Uuid });
 
 export const UnitGovernanceParams = t.Object({ unitId: Uuid });
-export const UnitAccessInvitationParams = t.Object({ unitId: Uuid, invitationId: Uuid });
+export const UnitAccessInvitationParams = t.Object({
+	unitId: Uuid,
+	invitationId: Uuid,
+});
 export const ListUnitAccessInvitationsQuery = t.Object(
 	{ includeResolved: t.Optional(t.Boolean()) },
 	{ additionalProperties: false },
@@ -318,8 +326,8 @@ export const RelinquishUnitOwnershipBody = t.Object(
 );
 export const OverrideUnitOwnershipBody = t.Object(
 	{
-		expectedOwnerProfileId: NullableUuid,
-		targetProfileId: Uuid,
+		expectedOwnerEntityId: NullableUuid,
+		targetEntityId: Uuid,
 		confirmationUnitId: Uuid,
 		rules: GovernanceRuleReferences,
 		note: t.Optional(t.String({ minLength: 1, maxLength: 2_000 })),
@@ -328,13 +336,21 @@ export const OverrideUnitOwnershipBody = t.Object(
 );
 export const UnitOwnershipResponse = t.Object({
 	owner: t.Object({
-		profileId: Uuid,
+		entityId: Uuid,
 		label: t.Nullable(t.String()),
 	}),
 });
 export const ListUnitOwnershipCandidatesQuery = t.Object(
 	{
-		query: t.Optional(t.String({ maxLength: 200 })),
+		query: t.Optional(
+			t.String({
+				minLength: 1,
+				maxLength: 63,
+				description: "Exact UUID, or exact slug with one explicit scope",
+			}),
+		),
+		scopeNamespaceId: t.Optional(Uuid),
+		scopeUnitId: t.Optional(Uuid),
 		cursor: t.Optional(Uuid),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 50 })),
 	},
@@ -345,7 +361,15 @@ const UnitLifecycleState = t.Union([t.Literal("active"), t.Literal("deleted"), t
 export const ListPlatformUnitsQuery = t.Object(
 	{
 		state: t.Optional(UnitLifecycleState),
-		query: t.Optional(t.String({ maxLength: 200 })),
+		query: t.Optional(
+			t.String({
+				minLength: 1,
+				maxLength: 63,
+				description: "Exact UUID, or exact slug with one explicit scope",
+			}),
+		),
+		scopeNamespaceId: t.Optional(Uuid),
+		scopeUnitId: t.Optional(Uuid),
 		cursor: t.Optional(Uuid),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
 	},
@@ -372,12 +396,13 @@ export const RestoreUnitLifecycleCommandBody = t.Object(
 );
 const PlatformUnitLifecycleItem = t.Object({
 	id: Uuid,
-	kind: t.UnionEnum(UnitKindValues),
+	owner: t.UnionEnum(UnitOwnerValues),
+	shape: t.String(),
 	title: t.Nullable(t.String()),
 	status: t.UnionEnum(UnitStatusValues),
-	owner: t.Nullable(
+	ownership: t.Nullable(
 		t.Object({
-			profileId: Uuid,
+			entityId: Uuid,
 			label: t.Nullable(t.String()),
 		}),
 	),
@@ -589,7 +614,9 @@ export const ContentGovernanceActionResponse = t.Object({
 	resultingRecognitionStatus: t.Nullable(t.UnionEnum(["recognized", "invalidated"])),
 	resultingPostTargetingLocked: t.Nullable(t.Boolean()),
 	reversesActionId: t.Nullable(Uuid),
-	rules: t.Array(GovernanceRuleReference, { maxItems: GovernanceMaxRuleReferences }),
+	rules: t.Array(GovernanceRuleReference, {
+		maxItems: GovernanceMaxRuleReferences,
+	}),
 	notes: t.Array(GovernanceNoteBindingResponse),
 	createdAt: DateTime,
 });
@@ -679,7 +706,7 @@ export const UnitAccessCandidateListResponse = t.Object({
 export const UnitOwnershipCandidateListResponse = t.Object({
 	items: t.Array(
 		t.Object({
-			profileId: Uuid,
+			entityId: Uuid,
 			label: t.Nullable(t.String()),
 			slug: t.Nullable(t.String()),
 		}),

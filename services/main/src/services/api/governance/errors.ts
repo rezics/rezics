@@ -366,7 +366,16 @@ export class UnitMergeRetryUnavailable extends HTTPError.id(
 	override readonly message = "This Unit merge operation cannot be retried in its current state";
 }
 
+export class UnitGovernanceLookupInvalid extends HTTPError.id(
+	"UnitGovernanceLookupInvalid",
+	StatusCodes.BAD_REQUEST,
+) {
+	override readonly message =
+		"Enter an exact UUID without a scope, or a slug with exactly one namespace or Unit scope";
+}
+
 export const GovernanceErrors = [
+	UnitGovernanceLookupInvalid,
 	GovernanceNoteNotFound,
 	ContentGovernanceTargetNotFound,
 	ContentReviewRealmMissing,

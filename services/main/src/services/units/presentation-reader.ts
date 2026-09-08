@@ -28,6 +28,7 @@ export async function readUnitPresentationsInTransaction(
 	tx: DatabaseTransaction,
 	unitIds: readonly string[],
 	languages: LocalizationLanguageQuery = [],
+	options: { readonly includeDeleted?: boolean } = {},
 ): Promise<Map<string, UnitPresentation>> {
 	const ids = z
 		.array(z.uuid())
@@ -40,7 +41,11 @@ export async function readUnitPresentationsInTransaction(
 		.select({ id: sql<string>`requested.id`.as("id") })
 		.from(sql`unnest(${sql.param(ids)}::uuid[]) as requested(id)`)
 		.as("requested_presentation_ids");
-	const state = unitStateRelation(candidates.id, "presentation_state");
+	const state = unitStateRelation(
+		candidates.id,
+		"presentation_state",
+		options.includeDeleted ?? false,
+	);
 	const rows = await tx
 		.select({
 			id: state.id,
@@ -92,13 +97,21 @@ export async function readUnitPresentationsInTransaction(
  `);
 			for (const row of z
 				.array(
-					z.object({ owner_id: z.uuid(), value: z.string(), language_tag: z.string().nullable() }),
+					z.object({
+						owner_id: z.uuid(),
+						value: z.string(),
+						language_tag: z.string().nullable(),
+					}),
 				)
 				.max(100)
 				.parse(labels.rows)) {
 				const previous = result.get(row.owner_id);
 				if (previous)
-					result.set(row.owner_id, { ...previous, title: row.value, language: row.language_tag });
+					result.set(row.owner_id, {
+						...previous,
+						title: row.value,
+						language: row.language_tag,
+					});
 			}
 		}
 	}

@@ -905,7 +905,7 @@ export default new Elysia({ prefix: "/unit" })
 				});
 				const [owner] = await tx
 					.select({
-						profileId: entityIdentity.id,
+						entityId: entityIdentity.id,
 						label: publicEntityName(entityIdentity.id),
 					})
 					.from(entityIdentity)
@@ -969,7 +969,7 @@ export default new Elysia({ prefix: "/unit" })
 				});
 				const [owner] = await tx
 					.select({
-						profileId: entityIdentity.id,
+						entityId: entityIdentity.id,
 						label: publicEntityName(entityIdentity.id),
 					})
 					.from(entityIdentity)

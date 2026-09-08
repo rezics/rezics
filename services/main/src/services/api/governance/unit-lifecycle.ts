@@ -39,6 +39,7 @@ export default new Elysia({ prefix: "/platform/units" })
 			query: ListPlatformUnitsQuery,
 			response: {
 				[StatusCodes.OK]: PlatformUnitListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["UnitGovernanceLookupInvalid"]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 			},
 			detail: {
@@ -48,9 +49,11 @@ export default new Elysia({ prefix: "/platform/units" })
 		},
 		async ({ authorization, query }) => {
 			await authorization.platform.ensureCapability("unit.governance.read");
-			return listPlatformUnits({
+			return listPlatformUnits(authorization.platform, {
 				state: query.state ?? "active",
 				query: query.query,
+				scopeNamespaceId: query.scopeNamespaceId,
+				scopeUnitId: query.scopeUnitId,
 				cursor: query.cursor,
 				limit: query.limit ?? 50,
 			});
@@ -73,7 +76,7 @@ export default new Elysia({ prefix: "/platform/units" })
 		},
 		async ({ authorization, params }) => {
 			await authorization.platform.ensureCapability("unit.governance.read");
-			return getPlatformUnit(params.unitId);
+			return getPlatformUnit(authorization.platform, params.unitId);
 		},
 	)
 	.get(
@@ -84,6 +87,7 @@ export default new Elysia({ prefix: "/platform/units" })
 			query: ListUnitOwnershipCandidatesQuery,
 			response: {
 				[StatusCodes.OK]: UnitOwnershipCandidateListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["UnitGovernanceLookupInvalid"]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
@@ -94,9 +98,11 @@ export default new Elysia({ prefix: "/platform/units" })
 		},
 		async ({ authorization, params, query }) => {
 			await authorization.platform.ensureCapability("unit.ownership.override");
-			return listPlatformOwnershipCandidates({
+			return listPlatformOwnershipCandidates(authorization.platform, {
 				unitId: params.unitId,
 				query: query.query,
+				scopeNamespaceId: query.scopeNamespaceId,
+				scopeUnitId: query.scopeUnitId,
 				cursor: query.cursor,
 				limit: query.limit ?? 50,
 			});
@@ -130,14 +136,13 @@ export default new Elysia({ prefix: "/platform/units" })
 				tags: ["Governance"],
 			},
 		},
-		async ({ authorization, entity, params, body }) => {
+		async ({ authorization, params, body }) => {
 			if (body.confirmationUnitId !== params.unitId)
 				throw new UnitOwnershipOverrideConfirmationInvalid();
 			return overridePlatformUnitOwnership(authorization.platform, {
 				unitId: params.unitId,
-				actorProfileId: entity.id,
-				expectedOwnerProfileId: body.expectedOwnerProfileId,
-				targetProfileId: body.targetProfileId,
+				expectedOwnerEntityId: body.expectedOwnerEntityId,
+				targetEntityId: body.targetEntityId,
 				rules: body.rules,
 				note: body.note?.trim() || undefined,
 			});
@@ -176,12 +181,11 @@ export default new Elysia({ prefix: "/platform/units" })
 				tags: ["Governance"],
 			},
 		},
-		async ({ authorization, entity, params, body }) => {
+		async ({ authorization, params, body }) => {
 			await authorization.platform.ensureCapability("unit.delete");
 			if (body.confirmationUnitId !== params.unitId) throw new UnitLifecycleConfirmationInvalid();
-			return softDeletePlatformUnit({
+			return softDeletePlatformUnit(authorization, {
 				unitId: params.unitId,
-				actorProfileId: entity.id,
 				expectedUpdatedAt: new Date(body.expectedUpdatedAt),
 				rules: body.rules,
 				note: body.note?.trim() || undefined,
@@ -221,12 +225,11 @@ export default new Elysia({ prefix: "/platform/units" })
 				tags: ["Governance"],
 			},
 		},
-		async ({ authorization, entity, params, body }) => {
+		async ({ authorization, params, body }) => {
 			await authorization.platform.ensureCapability("unit.restore");
 			if (body.confirmationUnitId !== params.unitId) throw new UnitLifecycleConfirmationInvalid();
-			return restorePlatformUnit({
+			return restorePlatformUnit(authorization, {
 				unitId: params.unitId,
-				actorProfileId: entity.id,
 				expectedUpdatedAt: new Date(body.expectedUpdatedAt),
 				note: body.note?.trim() || undefined,
 				contribution: body.revisionContext?.contribution,

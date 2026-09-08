@@ -64,9 +64,9 @@ export async function lockUnitForLicenseMutation(
 	tx: DatabaseTransaction,
 	unitId: string,
 ): Promise<{ readonly id: string; readonly owner: UnitOwner; readonly shape: string }> {
- const row = await readUnitStateById(tx,unitId,{lock:"update"});
- if (!row) throw new UnitNotFound();
- return {id:row.id,owner:row.reference.owner,shape:row.shape};
+	const row = await readUnitStateById(tx, unitId, { lock: "update" });
+	if (!row) throw new UnitNotFound();
+	return { id: row.id, owner: row.reference.owner, shape: row.shape };
 }
 
 function assertGrantPreconditions(

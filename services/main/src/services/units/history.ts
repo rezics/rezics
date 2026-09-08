@@ -509,7 +509,7 @@ async function snapshotRealmRules(tx: DatabaseTransaction, realmId: string) {
 }
 
 async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
-	const record = await readUnitStateById(tx, unitId);
+	const record = await readUnitStateById(tx, unitId, { includeDeleted: true });
 	if (!record) throw new Error(`Cannot snapshot missing platform owner ${unitId}`);
 	const kind = z.enum(PlatformOwnerValues).parse(record.reference.owner);
 	const localizations = await tx
