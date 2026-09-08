@@ -33,6 +33,7 @@ export default {
 		events: `${koTerminology.publisher.forms.label} 및 날짜`,
 	},
 	nativeSemantics: {
+		includeInactive: "철회되거나 대체된 기록 표시",
 		title: "속성 및 관계",
 		facts: "속성",
 		relations: "관계",

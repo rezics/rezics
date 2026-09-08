@@ -33,6 +33,7 @@ export default {
 		events: `Dates and ${enTerminology.publisher.forms.plural}`,
 	},
 	nativeSemantics: {
+		includeInactive: "Show withdrawn and superseded decisions",
 		title: "Attributes and relations",
 		facts: "Attributes",
 		relations: "Relations",

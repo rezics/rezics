@@ -33,6 +33,7 @@ export default {
 		events: `${zhHansTerminology.publisher.forms.label}与日期`,
 	},
 	nativeSemantics: {
+		includeInactive: "显示已撤回和已被取代的记录",
 		title: "属性与关系",
 		facts: "属性",
 		relations: "关系",

@@ -33,6 +33,7 @@ export default {
 		events: `${jaTerminology.publisher.forms.label}と日付`,
 	},
 	nativeSemantics: {
+		includeInactive: "取り消し済み・置換済みの記録を表示",
 		title: "属性と関係",
 		facts: "属性",
 		relations: "関係",

@@ -33,6 +33,7 @@ export default {
 		events: `Fechas y ${esTerminology.publisher.forms.plural}`,
 	},
 	nativeSemantics: {
+		includeInactive: "Mostrar decisiones retiradas y sustituidas",
 		title: "Atributos y relaciones",
 		facts: "Atributos",
 		relations: "Relaciones",

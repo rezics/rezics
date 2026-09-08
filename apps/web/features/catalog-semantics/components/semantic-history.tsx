@@ -16,12 +16,14 @@ export function SemanticStateActions({
 	revision,
 	semanticId,
 	headVersion,
+	currentState,
 	onSaved,
 }: {
 	reference: CatalogReference;
 	revision: number;
 	semanticId: string;
 	headVersion: number;
+	currentState: "active" | "disputed" | "withdrawn" | "superseded";
 	onSaved: () => void;
 }) {
 	const { t } = useTranslation(["units"]),
@@ -35,7 +37,7 @@ export function SemanticStateActions({
 						type="button"
 						variant="outline"
 						key={state}
-						disabled={mutation.isPending}
+						disabled={mutation.isPending || currentState === "withdrawn" || currentState === state}
 						onClick={() => {
 							void mutation
 								.mutateAsync({
@@ -59,6 +61,7 @@ export function SemanticHistory({
 	revision,
 	semanticId,
 	headVersion,
+	currentState,
 	spoiler,
 	canEdit,
 	onSaved,
@@ -67,6 +70,7 @@ export function SemanticHistory({
 	revision: number;
 	semanticId: string;
 	headVersion: number;
+	currentState: "active" | "disputed" | "withdrawn" | "superseded";
 	spoiler: 0 | 1 | 2;
 	canEdit: boolean;
 	onSaved: () => void;
@@ -121,7 +125,10 @@ export function SemanticHistory({
 									spoiler={spoiler}
 								/>
 							) : null}
-							{canEdit && item.version !== headVersion ? (
+							{canEdit &&
+							currentState !== "withdrawn" &&
+							item.state === "active" &&
+							item.version !== headVersion ? (
 								<Button
 									type="button"
 									disabled={restore.isPending}

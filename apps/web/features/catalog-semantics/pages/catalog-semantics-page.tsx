@@ -12,7 +12,10 @@ import {
 import { Badge, Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
 import { AppLink } from "@/features/application-shell/components/app-link";
 import { useTranslation } from "@/i18n/client";
-import { DefinitionChoice } from "@/features/catalog-definitions/components/definition-fields";
+import {
+	DefinitionChoice,
+	DefinitionFlag,
+} from "@/features/catalog-definitions/components/definition-fields";
 import {
 	DefinitionLabelBatch,
 	ExactDefinitionName,
@@ -28,6 +31,7 @@ type PageContext = {
 	revision: number;
 	spoiler: 0 | 1 | 2;
 	canEdit: boolean;
+	includeInactive: boolean;
 	onChanged: () => void;
 };
 export function CatalogSemanticsPage({ reference }: { reference: CatalogReference }) {
@@ -35,7 +39,8 @@ export function CatalogSemanticsPage({ reference }: { reference: CatalogReferenc
 		copy = t.units.nativeSemantics;
 	const [spoiler, setSpoiler] = useState<0 | 1 | 2>(0),
 		[creating, setCreating] = useState<"fact" | "relation" | null>(null),
-		[epoch, setEpoch] = useState(0);
+		[epoch, setEpoch] = useState(0),
+		[includeInactive, setIncludeInactive] = useState(false);
 	const resource = useReadCatalogResource({ path: reference }),
 		cache = useQueryClient();
 	if (resource.isPending) return <QueryPending />;
@@ -56,6 +61,7 @@ export function CatalogSemanticsPage({ reference }: { reference: CatalogReferenc
 		revision: resource.data.revision,
 		spoiler,
 		canEdit: resource.data.canEdit,
+		includeInactive: resource.data.canEdit && includeInactive,
 		onChanged,
 	};
 	return (
@@ -93,6 +99,13 @@ export function CatalogSemanticsPage({ reference }: { reference: CatalogReferenc
 				}
 				onChange={(value) => setSpoiler(value === "0" ? 0 : value === "1" ? 1 : 2)}
 			/>
+			{context.canEdit ? (
+				<DefinitionFlag
+					label={copy.includeInactive}
+					value={includeInactive}
+					onChange={setIncludeInactive}
+				/>
+			) : null}
 			{creating === "fact" ? (
 				<FactEditor reference={reference} revision={resource.data.revision} onSaved={onChanged} />
 			) : creating === "relation" ? (
@@ -102,8 +115,8 @@ export function CatalogSemanticsPage({ reference }: { reference: CatalogReferenc
 					onSaved={onChanged}
 				/>
 			) : null}
-			<FactPage key={`facts:${epoch}:${spoiler}`} {...context} />
-			<RelationPage key={`relations:${epoch}:${spoiler}`} {...context} />
+			<FactPage key={`facts:${epoch}:${spoiler}:${context.includeInactive}`} {...context} />
+			<RelationPage key={`relations:${epoch}:${spoiler}:${context.includeInactive}`} {...context} />
 		</main>
 	);
 }
@@ -112,7 +125,12 @@ function FactPage(context: PageContext) {
 		[cursors, setCursors] = useState<string[]>([]),
 		query = useListCatalogFacts({
 			path: context.reference,
-			query: { limit: 25, maxSpoiler: context.spoiler, afterId: cursors.at(-1) },
+			query: {
+				limit: 25,
+				maxSpoiler: context.spoiler,
+				afterId: cursors.at(-1),
+				includeInactive: context.includeInactive ? "true" : "false",
+			},
 		});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -154,7 +172,12 @@ function RelationPage(context: PageContext) {
 		[cursors, setCursors] = useState<string[]>([]),
 		query = useListCatalogRelations({
 			path: context.reference,
-			query: { limit: 25, maxSpoiler: context.spoiler, afterId: cursors.at(-1) },
+			query: {
+				limit: 25,
+				maxSpoiler: context.spoiler,
+				afterId: cursors.at(-1),
+				includeInactive: context.includeInactive ? "true" : "false",
+			},
 		});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError) return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -222,13 +245,15 @@ function SemanticCard({
 				>
 					{copy.inspectValue}
 				</Button>
-				<Button
-					variant="outline"
-					aria-expanded={history}
-					onClick={() => setHistory((current) => !current)}
-				>
-					{copy.history}
-				</Button>
+				{context.canEdit ? (
+					<Button
+						variant="outline"
+						aria-expanded={history}
+						onClick={() => setHistory((current) => !current)}
+					>
+						{copy.history}
+					</Button>
+				) : null}
 				{context.canEdit ? (
 					<Button
 						variant="outline"
@@ -277,16 +302,18 @@ function SemanticCard({
 						revision={context.revision}
 						semanticId={value.semanticId}
 						headVersion={value.headVersion}
+						currentState={value.state}
 						onSaved={context.onChanged}
 					/>
 				</>
 			) : null}
-			{history ? (
+			{history && context.canEdit ? (
 				<SemanticHistory
 					reference={context.reference}
 					revision={context.revision}
 					semanticId={value.semanticId}
 					headVersion={value.headVersion}
+					currentState={value.state}
 					spoiler={context.spoiler}
 					canEdit={context.canEdit}
 					onSaved={context.onChanged}

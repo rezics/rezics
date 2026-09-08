@@ -33,6 +33,7 @@ export default {
 		events: `${zhHantTerminology.publisher.forms.label}與日期`,
 	},
 	nativeSemantics: {
+		includeInactive: "顯示已撤回和已被取代的記錄",
 		title: "屬性與關係",
 		facts: "屬性",
 		relations: "關係",

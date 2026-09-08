@@ -33,6 +33,7 @@ export default {
 		events: `Daten und ${deTerminology.publisher.forms.plural}`,
 	},
 	nativeSemantics: {
+		includeInactive: "Zurückgenommene und ersetzte Entscheidungen anzeigen",
 		title: "Attribute und Beziehungen",
 		facts: "Attribute",
 		relations: "Beziehungen",
