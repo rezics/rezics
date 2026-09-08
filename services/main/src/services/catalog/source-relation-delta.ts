@@ -4,7 +4,7 @@ import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
 import { CatalogReferenceSchema, type CatalogReference } from "./contracts";
-import { createCatalogRelation } from "./storage";
+import { createCatalogRelation, loadCatalogIdentity } from "./storage";
 import { catalogSourceSupportColumns } from "./source-support";
 import { resolveCatalogSourceOwnedBaseline } from "./source-owned-baselines";
 import { restoreCatalogSemanticRevision, transitionCatalogSemanticState } from "./semantic-history";
@@ -36,6 +36,90 @@ export const CatalogSourceRelationDescriptorSchema = z.strictObject({
 });
 export type CatalogSourceRelationDescriptor = z.input<typeof CatalogSourceRelationDescriptorSchema>;
 
+/** Read only the owning relation's immutable occurrence; previous private participants need no live remapping. @internal */
+export async function readCatalogSourceRelationDescriptor(
+	tx: DatabaseTransaction,
+	reference: CatalogReference,
+	actor: string,
+	input: { sourceRecordId: string; snapshotId: string; identity: string; path: string },
+): Promise<CatalogSourceRelationDescriptor | null> {
+	await loadCatalogIdentity(tx, reference, actor, true);
+	z.uuid().parse(input.sourceRecordId);
+	z.uuid().parse(input.snapshotId);
+	const f = CatalogFactTables[reference.owner],
+		scope = await catalogSourceSupportColumns(tx, input.sourceRecordId);
+	const rows = await tx
+		.select({
+			id: f.relation.id,
+			definitionRevisionId: f.relation.definitionRevisionId,
+			spoiler: f.relation.spoiler,
+		})
+		.from(f.support)
+		.innerJoin(
+			f.relation,
+			and(eq(f.relation.ownerId, f.support.ownerId), eq(f.relation.id, f.support.relationId)),
+		)
+		.where(
+			and(
+				eq(f.support.ownerId, reference.id),
+				eq(f.support.sourceRecordId, input.sourceRecordId),
+				eq(f.support.sourceMappingKey, scope.sourceMappingKey),
+				eq(f.support.sourceCorrespondenceRevision, scope.sourceCorrespondenceRevision),
+				eq(f.support.snapshotId, input.snapshotId),
+				eq(f.support.sourcePath, input.path),
+			),
+		)
+		.limit(2);
+	if (rows.length > 1) throw new TypeError("Source relation occurrence is ambiguous");
+	const row = rows[0];
+	if (!row) return null;
+	const participants = await tx
+		.select()
+		.from(f.participant)
+		.where(and(eq(f.participant.ownerId, reference.id), eq(f.participant.relationId, row.id)))
+		.orderBy(f.participant.position)
+		.limit(129);
+	const qualifiers = await tx
+		.select({
+			definitionRevisionId: f.relationScope.definitionRevisionId,
+			valueFactId: f.relationScope.valueFactId,
+		})
+		.from(f.relationScope)
+		.where(and(eq(f.relationScope.ownerId, reference.id), eq(f.relationScope.relationId, row.id)))
+		.orderBy(f.relationScope.definitionRevisionId, f.relationScope.valueFactId)
+		.limit(65);
+	return CatalogSourceRelationDescriptorSchema.parse({
+		identity: input.identity,
+		path: input.path,
+		value: {
+			definitionRevisionId: row.definitionRevisionId,
+			spoiler: row.spoiler,
+			qualifiers,
+			participants: participants.map((participant) => {
+				const targets = Object.entries({
+					publishing: participant.publishingId,
+					music: participant.musicId,
+					program: participant.programId,
+					software: participant.softwareId,
+					entity: participant.entityId,
+					grouping: participant.groupingId,
+					reference: participant.referenceId,
+					distribution: participant.distributionId,
+				}).filter(([, id]) => id !== null);
+				if (targets.length !== 1)
+					throw new TypeError("Recorded relation participant has another native target shape");
+				const [target] = targets;
+				if (!target) throw new TypeError("Recorded relation participant target is missing");
+				return {
+					roleRevisionId: participant.roleRevisionId,
+					target: CatalogReferenceSchema.parse({ owner: target[0], id: target[1] }),
+					...(participant.creditedAs === null ? {} : { creditedAs: participant.creditedAs }),
+				};
+			}),
+		},
+	});
+}
+
 /** @internal Stable source relation identities survive array reorder and repeated exact journal compensation. */
 export async function applyCatalogSourceRelationDelta(
 	tx: DatabaseTransaction,
@@ -57,7 +141,17 @@ export async function applyCatalogSourceRelationDelta(
 			new Set(result.map((item) => item.path)).size !== result.length
 		)
 			throw new TypeError("Source relation identity or occurrence path is ambiguous");
-		return result;
+		return result.map((item) => ({
+			...item,
+			value: {
+				...item.value,
+				qualifiers: [...item.value.qualifiers].sort(
+					(left, right) =>
+						left.definitionRevisionId.localeCompare(right.definitionRevisionId) ||
+						left.valueFactId.localeCompare(right.valueFactId),
+				),
+			},
+		}));
 	};
 	const before = parse(previous?.descriptors ?? []),
 		after = parse(incoming);
@@ -138,16 +232,14 @@ export async function applyCatalogSourceRelationDelta(
 		descriptor: z.output<typeof CatalogSourceRelationDescriptorSchema>,
 		row: Native,
 	) => {
-		await tx
-			.insert(f.support)
-			.values({
-				...scope,
-				ownerId: reference.id,
-				relationId: row.id,
-				sourceRecordId: document.record.id,
-				snapshotId: document.snapshot.id,
-				sourcePath: descriptor.path,
-			});
+		await tx.insert(f.support).values({
+			...scope,
+			ownerId: reference.id,
+			relationId: row.id,
+			sourceRecordId: document.record.id,
+			snapshotId: document.snapshot.id,
+			sourcePath: descriptor.path,
+		});
 	};
 	const record = (row: Native, beforeRevision: number | null, afterRevision: number) => {
 		changes.push({
