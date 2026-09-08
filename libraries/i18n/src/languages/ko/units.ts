@@ -12,6 +12,26 @@ const { forms: metadataTerms } = koTerminology.metadata;
 const { forms: entityTerms } = koTerminology.entity;
 
 export default {
+	nativePublishing: {
+		work: koTerminology.publishingWork.forms.label,
+		text_version: koTerminology.textVersion.forms.label,
+		publication: koTerminology.publication.forms.label,
+		serialization: koTerminology.serialization.forms.label,
+		works: koTerminology.publishingWork.forms.pluralLabel,
+		textVersions: koTerminology.textVersion.forms.pluralLabel,
+		publications: koTerminology.publication.forms.pluralLabel,
+		serializations: koTerminology.serialization.forms.pluralLabel,
+		coverage: koTerminology.publishingCoverage.forms.label,
+		installments: koTerminology.publishingInstallment.forms.pluralLabel,
+		publisher: koTerminology.publisher.forms.label,
+		pageCount: "페이지 수",
+		pagination: "쪽수 표기",
+		editTitle: "제목 수정",
+		removed: "삭제됨",
+		noSubparts: "하위 항목이 없습니다.",
+		dateText: "원문 날짜",
+		events: `${koTerminology.publisher.forms.label} 및 날짜`,
+	},
 	nativeMusic: {
 		music: koTerminology.music.forms.label,
 		recording: koTerminology.musicRecording.forms.label,

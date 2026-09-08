@@ -12,6 +12,26 @@ const { forms: metadataTerms } = deTerminology.metadata;
 const { forms: entityTerms } = deTerminology.entity;
 
 export default {
+	nativePublishing: {
+		work: deTerminology.publishingWork.forms.label,
+		text_version: deTerminology.textVersion.forms.label,
+		publication: deTerminology.publication.forms.label,
+		serialization: deTerminology.serialization.forms.label,
+		works: deTerminology.publishingWork.forms.pluralLabel,
+		textVersions: deTerminology.textVersion.forms.pluralLabel,
+		publications: deTerminology.publication.forms.pluralLabel,
+		serializations: deTerminology.serialization.forms.pluralLabel,
+		coverage: deTerminology.publishingCoverage.forms.label,
+		installments: deTerminology.publishingInstallment.forms.pluralLabel,
+		publisher: deTerminology.publisher.forms.label,
+		pageCount: "Seitenzahl",
+		pagination: "Seitenzählung",
+		editTitle: "Titel bearbeiten",
+		removed: "Entfernt",
+		noSubparts: "Keine untergeordneten Teile.",
+		dateText: "Datumsangabe",
+		events: `Daten und ${deTerminology.publisher.forms.plural}`,
+	},
 	nativeMusic: {
 		music: deTerminology.music.forms.label,
 		recording: deTerminology.musicRecording.forms.label,

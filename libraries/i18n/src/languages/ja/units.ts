@@ -12,6 +12,26 @@ const { forms: metadataTerms } = jaTerminology.metadata;
 const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
+	nativePublishing: {
+		work: jaTerminology.publishingWork.forms.label,
+		text_version: jaTerminology.textVersion.forms.label,
+		publication: jaTerminology.publication.forms.label,
+		serialization: jaTerminology.serialization.forms.label,
+		works: jaTerminology.publishingWork.forms.pluralLabel,
+		textVersions: jaTerminology.textVersion.forms.pluralLabel,
+		publications: jaTerminology.publication.forms.pluralLabel,
+		serializations: jaTerminology.serialization.forms.pluralLabel,
+		coverage: jaTerminology.publishingCoverage.forms.label,
+		installments: jaTerminology.publishingInstallment.forms.pluralLabel,
+		publisher: jaTerminology.publisher.forms.label,
+		pageCount: "ページ数",
+		pagination: "ページ表記",
+		editTitle: "タイトルを編集",
+		removed: "削除済み",
+		noSubparts: "下位の項目はありません。",
+		dateText: "記載された日付",
+		events: `${jaTerminology.publisher.forms.label}と日付`,
+	},
 	nativeMusic: {
 		music: jaTerminology.music.forms.label,
 		recording: jaTerminology.musicRecording.forms.label,

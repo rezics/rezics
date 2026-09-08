@@ -12,6 +12,26 @@ const { forms: metadataTerms } = zhHansTerminology.metadata;
 const { forms: entityTerms } = zhHansTerminology.entity;
 
 export default {
+	nativePublishing: {
+		work: zhHansTerminology.publishingWork.forms.label,
+		text_version: zhHansTerminology.textVersion.forms.label,
+		publication: zhHansTerminology.publication.forms.label,
+		serialization: zhHansTerminology.serialization.forms.label,
+		works: zhHansTerminology.publishingWork.forms.pluralLabel,
+		textVersions: zhHansTerminology.textVersion.forms.pluralLabel,
+		publications: zhHansTerminology.publication.forms.pluralLabel,
+		serializations: zhHansTerminology.serialization.forms.pluralLabel,
+		coverage: zhHansTerminology.publishingCoverage.forms.label,
+		installments: zhHansTerminology.publishingInstallment.forms.pluralLabel,
+		publisher: zhHansTerminology.publisher.forms.label,
+		pageCount: "页数",
+		pagination: "页码说明",
+		editTitle: "编辑标题",
+		removed: "已移除",
+		noSubparts: "没有下级篇章。",
+		dateText: "日期原文",
+		events: `${zhHansTerminology.publisher.forms.label}与日期`,
+	},
 	nativeMusic: {
 		music: zhHansTerminology.music.forms.label,
 		recording: zhHansTerminology.musicRecording.forms.label,

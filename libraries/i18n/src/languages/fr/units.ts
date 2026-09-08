@@ -12,6 +12,26 @@ const { forms: metadataTerms } = frTerminology.metadata;
 const { forms: entityTerms } = frTerminology.entity;
 
 export default {
+	nativePublishing: {
+		work: frTerminology.publishingWork.forms.label,
+		text_version: frTerminology.textVersion.forms.label,
+		publication: frTerminology.publication.forms.label,
+		serialization: frTerminology.serialization.forms.label,
+		works: frTerminology.publishingWork.forms.pluralLabel,
+		textVersions: frTerminology.textVersion.forms.pluralLabel,
+		publications: frTerminology.publication.forms.pluralLabel,
+		serializations: frTerminology.serialization.forms.pluralLabel,
+		coverage: frTerminology.publishingCoverage.forms.label,
+		installments: frTerminology.publishingInstallment.forms.pluralLabel,
+		publisher: frTerminology.publisher.forms.label,
+		pageCount: "Nombre de pages",
+		pagination: "Pagination indiquée",
+		editTitle: "Modifier le titre",
+		removed: "Supprimé",
+		noSubparts: "Aucune partie imbriquée.",
+		dateText: "Date telle qu’indiquée",
+		events: `Dates et ${frTerminology.publisher.forms.plural}`,
+	},
 	nativeMusic: {
 		music: frTerminology.music.forms.label,
 		recording: frTerminology.musicRecording.forms.label,
