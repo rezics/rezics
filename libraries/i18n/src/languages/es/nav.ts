@@ -66,7 +66,7 @@ export default {
 			slug_namespace: `Espacio de nombres de ${unitSlugTerms.inline}`,
 			profile: "Perfil",
 			book: "Libro",
-			software: "Software",
+			software: `${esTerminology.software.forms.label}`,
 			media: "Contenido multimedia",
 			video: videoTerms.label,
 			audio: audioTerms.label,

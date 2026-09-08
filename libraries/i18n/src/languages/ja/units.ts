@@ -76,7 +76,7 @@ export default {
 	},
 	types: {
 		book: "書籍",
-		software: "ソフトウェア",
+		software: `${jaTerminology.software.forms.label}`,
 		media: "メディア",
 		series: "シリーズ",
 		video: videoTerms.label,
@@ -100,8 +100,7 @@ export default {
 			"公共作品はコミュニティが所有し、共同で管理します。作成しても所有者としての地位や追加権限は付与されず、ログイン中の全員が共通の権限で編集できます。",
 		publicWorkHelpScope:
 			"単一のプロフィールではなくコミュニティが作品を管理する場合に選択します。所有形態は章本文の表示可否を決定しません。",
-		publicWorkHelpAlternative:
-			"著作権を保有している場合や、自分で管理しながら特定の相手との共同作業に開放したい場合は「所有作品」を選び、作成後に権限設定で適切な編集権限を付与してください。",
+		publicWorkHelpAlternative: `${jaTerminology.publishingWork.forms.label}権を保有している場合や、自分で管理しながら特定の相手との共同作業に開放したい場合は「所有作品」を選び、作成後に権限設定で適切な編集権限を付与してください。`,
 		entryOwnershipLabel: "項目の所有形態",
 		ownedEntry: "自分の項目",
 		ownedEntryDescription: "あなたのプロフィールがこの項目を所有し、管理します。",
@@ -140,7 +139,7 @@ export default {
 			"このユニットとの関係と、プラットフォームが確認できる方法を説明してください。",
 		detailsHint:
 			"代表関係または権利関係を確認できる公開情報を提示してください。機密性の高い個人情報は送信しないでください。",
-		effectNotice: `承認されると、この ${verbatimTerms.rezics.value} ユニットの管理上の所有権があなたのプロフィールに移ります。本人認証や、著作権その他の法的権利の判断ではありません。`,
+		effectNotice: `承認されると、この ${verbatimTerms.rezics.value} ユニットの管理上の所有権があなたのプロフィールに移ります。本人認証や、${jaTerminology.publishingWork.forms.label}権その他の法的権利の判断ではありません。`,
 		submit: "申請を送信",
 		cancel: "キャンセル",
 		submitted: "申請を送信しました",
@@ -278,8 +277,7 @@ export default {
 		metadataOnly: `${metadataTerms.label}のみ`,
 		metadataOnlyDescription: {
 			book: "作品情報、目次、進捗、ディスカッションは保持しますが、ホストされている章本文は表示しません。既存の本文は削除されません。",
-			software:
-				"ソフトウェア情報、バージョン、進捗、ディスカッションは保持しますが、ホストされているパッケージ、バイナリ、ソースアーカイブは提供しません。既存のファイルは削除されません。",
+			software: `${jaTerminology.software.forms.label}情報、バージョン、進捗、ディスカッションは保持しますが、ホストされているパッケージ、バイナリ、ソースアーカイブは提供しません。既存のファイルは削除されません。`,
 			media:
 				"メディア情報、目次、進捗、ディスカッションは保持しますが、ホストされているメディアコンテンツは表示しません。既存のコンテンツは削除されません。",
 		},
@@ -328,7 +326,7 @@ export default {
 				discussion: "ディスカッション",
 			},
 			software: {
-				overview: "ソフトウェア情報",
+				overview: `${jaTerminology.software.forms.label}情報`,
 				requirements: "システム要件",
 				tags: "タグ",
 				associations: "関連付け",
@@ -366,13 +364,13 @@ export default {
 				discussion: `この作品を主題として使用している${postTerms.pluralLabel}を閲覧する。`,
 			},
 			software: {
-				overview: "ソフトウェアの説明、バージョン情報、使用状況。",
+				overview: `${jaTerminology.software.forms.label}の説明、バージョン情報、使用状況。`,
 				requirements: "プラットフォームとティアごとのシステム要件を参照してください。",
 				tags: "選択した情報源からのグローバルタグと文脈上の評価を確認する。",
-				associations: "ソフトウェアの主題、シリーズ、メイン–バリアントの関係を確認してください。",
-				reviews: "ソフトウェアユーザーレビューを読むか書き込む。",
-				collections: "このソフトウェアを含む公開コレクションを閲覧する。",
-				discussion: `このソフトウェアを主題として使用している ${postTerms.pluralLabel} を閲覧する。`,
+				associations: `${jaTerminology.software.forms.label}の主題、シリーズ、メイン–バリアントの関係を確認してください。`,
+				reviews: `${jaTerminology.software.forms.label}ユーザーレビューを読むか書き込む。`,
+				collections: `この${jaTerminology.software.forms.label}を含む公開コレクションを閲覧する。`,
+				discussion: `この${jaTerminology.software.forms.label}を主題として使用している ${postTerms.pluralLabel} を閲覧する。`,
 			},
 			series: {
 				overview: "シリーズの説明、作品情報、総合評価。",
@@ -452,12 +450,11 @@ export default {
 		canonicalUnit: "主要ユニット",
 		saveSettings: "設定を保存",
 		bookDraftScope: "書籍の公開停止範囲",
-		bookDraftScopeDescription: `チャプターは独立した${postTerms.label}です。現在紐づいている公開済みチャプターも下書きに戻すか、明示的に選択してください。`,
+		bookDraftScopeDescription: `${jaTerminology.chapter.forms.label}は独立した${postTerms.label}です。現在紐づいている公開済み${jaTerminology.chapter.forms.label}も下書きに戻すか、明示的に選択してください。`,
 		bookDraftChoose: "公開停止範囲を選択",
 		bookDraftBookOnly: "書籍のみ下書きに戻す",
-		bookDraftBookAndChapters: "書籍と管理可能な公開済みチャプターを下書きに戻す",
-		bookChapterDraftQueued:
-			"チャプターの公開停止処理を予約しました。管理権限のあるチャプターを順次処理します。",
+		bookDraftBookAndChapters: `書籍と管理可能な公開済み${jaTerminology.chapter.forms.label}を下書きに戻す`,
+		bookChapterDraftQueued: `${jaTerminology.chapter.forms.label}の公開停止処理を予約しました。管理権限のある${jaTerminology.chapter.forms.label}を順次処理します。`,
 	},
 	relationshipManagement: {
 		credits: "クレジット",

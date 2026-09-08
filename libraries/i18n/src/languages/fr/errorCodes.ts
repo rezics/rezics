@@ -13,9 +13,11 @@ const { forms: zoneTerms } = frTerminology.zone;
 const { forms: entityTerms } = frTerminology.entity;
 
 export default {
-	OrganizationMembershipConflict: "Cette invitation ou adhésion a changé. Actualisez la page et réessayez.",
+	OrganizationMembershipConflict:
+		"Cette invitation ou adhésion a changé. Actualisez la page et réessayez.",
 	OrganizationMembershipNotFound: "Cette invitation ou adhésion est indisponible.",
-	OrganizationMembershipCapacityExceeded: "Il y a trop d’invitations en attente. Traitez-en quelques-unes avant d’en envoyer une autre.",
+	OrganizationMembershipCapacityExceeded:
+		"Il y a trop d’invitations en attente. Traitez-en quelques-unes avant d’en envoyer une autre.",
 	CatalogReferenceNotFound: "Cet enregistrement est introuvable.",
 	CatalogRevisionConflict: "Cet enregistrement a changé. Actualisez la page et réessayez.",
 	FavoriteNotFound: "Cet élément enregistré est introuvable.",
@@ -100,8 +102,7 @@ export default {
 	UserFollowBlocked: `${followTerms.stateLabel} n’est pas disponible entre des utilisateurs bloqués.`,
 	FollowingTargetKindMismatch: `Le type de la Unit ${followTerms.followed}e a changé. Rechargez ses réglages.`,
 	UserSelfBlockForbidden: "Vous ne pouvez pas vous bloquer vous-même.",
-	SoftwareSystemRequirementSourceInvalid:
-		"La source de la configuration requise doit appartenir à ce logiciel.",
+	SoftwareSystemRequirementSourceInvalid: `La source de la configuration requise doit appartenir à ce ${frTerminology.software.forms.inline}.`,
 	SeriesReleaseNotFound: "Cette version de la série est introuvable.",
 	ZonePageNotFound: `Cette page d’${zoneTerms.inline} est introuvable.`,
 	ZonePageInUse: `Cette page d’${zoneTerms.inline} est encore utilisée par un document de blocs ou de navigation.`,
@@ -110,7 +111,7 @@ export default {
 	ZoneDocumentInvalid: `Le document de blocs ou de navigation de l’${zoneTerms.inline} n’est pas valide.`,
 	ZoneTimeRangeInvalid: `L’heure de fin de l’${zoneTerms.inline} doit être postérieure à son heure de début.`,
 	ZoneRuleRealmInvalid: `Le ${realmTerms.inline} sélectionné n’a aucune révision de règles actuelle contenant au moins une règle.`,
-	SoftwareNotFound: "Ce logiciel est introuvable.",
+	SoftwareNotFound: `Ce ${frTerminology.software.forms.inline} est introuvable.`,
 	SystemRequirementNotFound: "Cette configuration requise est introuvable.",
 	PollOptionsDuplicated: "Les choix du sondage doivent être uniques.",
 	PollNotFound: "Ce sondage est introuvable.",
@@ -207,8 +208,8 @@ export default {
 	InvalidPaginationCursor: "Ce lien de page n’est pas valide ou a expiré.",
 	BookNotFound: "Ce livre est introuvable.",
 	MediaNotFound: "Cet élément multimédia est introuvable.",
-	ChapterNotFound: "Ce chapitre est introuvable.",
-	ChapterLanguageNotFound: "Cette langue de chapitre est introuvable.",
+	ChapterNotFound: `Ce ${frTerminology.chapter.forms.inline} est introuvable.`,
+	ChapterLanguageNotFound: `Cette langue de ${frTerminology.chapter.forms.inline} est introuvable.`,
 	ReportRealmMismatch: `L’unité signalée n’appartient pas à ce ${realmTerms.inline}.`,
 	PostNotFound: `Cette ${postTerms.inline} est introuvable.`,
 	PostLocalizationNotFound: `Cette version linguistique de la ${postTerms.inline} est introuvable.`,

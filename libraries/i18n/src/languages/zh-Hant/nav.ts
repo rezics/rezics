@@ -66,7 +66,7 @@ export default {
 			slug_namespace: `${unitSlugTerms.label}命名空間`,
 			profile: "使用者",
 			book: "書籍",
-			software: "軟體",
+			software: `${zhHantTerminology.software.forms.label}`,
 			media: "媒體",
 			video: videoTerms.label,
 			audio: audioTerms.label,

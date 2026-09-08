@@ -7,8 +7,8 @@ const { forms: zoneTerms } = esTerminology.zone;
 const { forms: entityTerms } = esTerminology.entity;
 
 export default {
-	loading: "Cargando el editor…",
-	loadFailed: "No se ha podido cargar el editor.",
+	loading: `Cargando el editor…`,
+	loadFailed: `No se ha podido cargar el editor.`,
 	paragraph: "Párrafo",
 	heading2: "Encabezado 2",
 	heading3: "Encabezado 3",

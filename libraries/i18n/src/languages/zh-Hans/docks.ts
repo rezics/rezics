@@ -69,7 +69,7 @@ export default {
 		},
 		orientations: { horizontal: "水平", vertical: "垂直" },
 		resultsLayouts: { list: "列表", grid: "网格", compact: "精简" },
-		styles: { line: "线条", space: "留白", section: "章节" },
+		styles: { line: "线条", space: "留白", section: `${zhHansTerminology.chapter.forms.label}` },
 		types: {
 			"post-full-view": `完整${postTerms.inline}`,
 			"unit-ref": "内容引用",

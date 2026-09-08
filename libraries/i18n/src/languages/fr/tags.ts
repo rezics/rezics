@@ -120,7 +120,7 @@ export default {
 			generic: "Type",
 			partitive: "Partie",
 			instance: "Instance",
-			organizational: "Organisation",
+			organizational: `${frTerminology.entity.forms.organizationLabel}`,
 			facet_value: "Valeur de facette",
 		},
 	},

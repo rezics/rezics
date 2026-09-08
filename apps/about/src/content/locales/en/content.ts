@@ -55,7 +55,7 @@ export const enContent = {
 	home: {
 		eyebrow: "inherit · create · spread",
 		title: "Meet the stories you love.",
-		lead: `Start with web novels scattered across platforms and languages. ${BRAND} reconnects an original work and its localized presentations, serial sources, chapters, and communities as one evolving work.`,
+		lead: `Start with web novels scattered across platforms and languages. ${BRAND} reconnects an original work and its localized presentations, serial sources, ${enTerminology.chapter.forms.plural}, and communities as one evolving work.`,
 		explore: "Explore web novels",
 		productsAction: "Explore products",
 		problem: {
@@ -65,7 +65,7 @@ export const enContent = {
 		},
 		promise: {
 			title: "Reconnect the same work first; then let reading and community grow naturally.",
-			body: `${BRAND} starts from a natively multilingual Unit. The same work can carry several content languages, serials can cross platforms, chapters can keep growing, and ${REALM}s can form different perspectives; originals, translations, and communities still share one understandable, traceable identity.`,
+			body: `${BRAND} starts from a natively multilingual Unit. The same work can carry several content languages, serials can cross platforms, ${enTerminology.chapter.forms.plural} can keep growing, and ${REALM}s can form different perspectives; originals, translations, and communities still share one understandable, traceable identity.`,
 		},
 		principles: [
 			{
@@ -78,7 +78,7 @@ export const enContent = {
 			},
 			{
 				title: "Continuous evolution",
-				body: "Serials, chapters, editions, progress, and discussion can all keep accumulating as a work updates.",
+				body: `Serials, ${enTerminology.chapter.forms.plural}, editions, progress, and discussion can all keep accumulating as a work updates.`,
 			},
 		],
 		model: {
@@ -95,7 +95,7 @@ export const enContent = {
 				},
 				{
 					title: `Reading and ${FOLLOW}`,
-					body: "Content Structure preserves chapter context, and progress lets readers resume from the real place.",
+					body: `Content Structure preserves ${enTerminology.chapter.forms.inline} context, and progress lets readers resume from the real place.`,
 				},
 				{
 					title: `${REALM}s and shared knowledge`,
@@ -199,7 +199,7 @@ export const enContent = {
 					},
 					{
 						title: "Content Structure",
-						body: "Chapters are reusable content; structure manages order, occurrence, and serial evolution.",
+						body: `${enTerminology.chapter.forms.pluralLabel} are reusable content; structure manages order, occurrence, and serial evolution.`,
 					},
 					{
 						title: `${BLOCK_SCHEMA} + ${PORTABLE_TEXT}`,
@@ -233,7 +233,7 @@ export const enContent = {
 			},
 			{
 				title: `${FOLLOW} serials and resume from where you left off`,
-				body: "See which chapter a source has updated to, whether the work is ongoing or complete, and save your own reading status and last position.",
+				body: `See which ${enTerminology.chapter.forms.inline} a source has updated to, whether the work is ongoing or complete, and save your own reading status and last position.`,
 				result: "The work updates; your reading context does not have to start over.",
 			},
 			{
@@ -248,7 +248,7 @@ export const enContent = {
 			},
 			{
 				title: "Publish your own articles and work content",
-				body: `Edit ${enTerminology.post.forms.label}s with ${PORTABLE_TEXT}, store evolvable documents with ${BLOCK_SCHEMA}, and use Content Structure to arrange chapters and publication history.`,
+				body: `Edit ${enTerminology.post.forms.label}s with ${PORTABLE_TEXT}, store evolvable documents with ${BLOCK_SCHEMA}, and use Content Structure to arrange ${enTerminology.chapter.forms.plural} and publishing history.`,
 				result:
 					"Content is not only readable; it can also be cited, reused, and revised continuously.",
 			},

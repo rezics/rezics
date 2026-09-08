@@ -31,11 +31,10 @@ export default {
 	directCollectionHint:
 		"A collection is added as one item; its contents are not imported recursively.",
 	publishers: {
-		label: "Publisher",
-		unknown: "No publisher credited",
-		current: "Current publishers",
-		currentDescription:
-			"These Profiles receive publisher credit on the collection page and in feeds.",
+		label: `${enTerminology.publisher.forms.label}`,
+		unknown: `No ${enTerminology.publisher.forms.inline} credited`,
+		current: `Current ${enTerminology.publisher.forms.plural}`,
+		currentDescription: `These Profiles receive ${enTerminology.publisher.forms.inline} credit on the collection page and in feeds.`,
 	},
 	save: {
 		action: "Save",
@@ -55,7 +54,7 @@ export default {
 	},
 	workspace: {
 		title: "Collection management",
-		description: `Manage content, ${metadataTerms.inline}, ordering, publishers, access, and history.`,
+		description: `Manage content, ${metadataTerms.inline}, ordering, ${enTerminology.publisher.forms.plural}, access, and history.`,
 		navigation: "Collection management navigation",
 		overview: "Collection management areas",
 		backToCollection: "Back to collection",
@@ -74,8 +73,8 @@ export default {
 				description: "Add, remove, multi-select, and order content.",
 			},
 			publishers: {
-				label: "Publishers",
-				description: "Manage the Profile publisher credits shown publicly.",
+				label: `${enTerminology.publisher.forms.pluralLabel}`,
+				description: `Manage the Profile ${enTerminology.publisher.forms.inline} credits shown publicly.`,
 			},
 			access: {
 				label: "Access",

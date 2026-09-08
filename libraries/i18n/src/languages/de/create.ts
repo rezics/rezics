@@ -26,7 +26,7 @@ export default {
 		groups: {
 			works: "Werke und Einträge",
 			publishing: "Veröffentlichen",
-			organization: "Bereiche und Organisation",
+			organization: `Bereiche und ${deTerminology.entity.forms.organizationLabel}`,
 			vocabulary: "Vokabular",
 		},
 		empty: {
@@ -61,7 +61,7 @@ export default {
 			description: "Zeige Bücher zu deiner Arbeit an und verwalte sie.",
 		},
 		software: {
-			label: "Software",
+			label: `${deTerminology.software.forms.label}`,
 			description: "Zeige Softwareeinträge zu deiner Arbeit an und verwalte sie.",
 		},
 		media: {

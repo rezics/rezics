@@ -66,7 +66,7 @@ export default {
 			slug_namespace: `${unitSlugTerms.label} 네임스페이스`,
 			profile: "프로필",
 			book: "책",
-			software: "소프트웨어",
+			software: `${koTerminology.software.forms.label}`,
 			media: "미디어",
 			video: videoTerms.label,
 			audio: audioTerms.label,

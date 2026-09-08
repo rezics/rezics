@@ -217,7 +217,7 @@ export default {
 			},
 			orientations: { horizontal: "水平", vertical: "垂直" },
 			resultsLayouts: { list: "清單", grid: "格狀", compact: "精簡" },
-			styles: { line: "線條", space: "留白", section: "章節" },
+			styles: { line: "線條", space: "留白", section: `${zhHantTerminology.chapter.forms.label}` },
 			types: {
 				"post-full-view": "完整文章",
 				"unit-ref": "內容引用",

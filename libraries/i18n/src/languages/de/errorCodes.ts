@@ -13,9 +13,11 @@ const { forms: zoneTerms } = deTerminology.zone;
 const { forms: entityTerms } = deTerminology.entity;
 
 export default {
-	OrganizationMembershipConflict: "Die Einladung oder Mitgliedschaft wurde geändert. Lade die Seite neu und versuche es erneut.",
+	OrganizationMembershipConflict:
+		"Die Einladung oder Mitgliedschaft wurde geändert. Lade die Seite neu und versuche es erneut.",
 	OrganizationMembershipNotFound: "Diese Einladung oder Mitgliedschaft ist nicht verfügbar.",
-	OrganizationMembershipCapacityExceeded: "Es gibt zu viele offene Einladungen. Bearbeite einige, bevor du eine weitere sendest.",
+	OrganizationMembershipCapacityExceeded:
+		"Es gibt zu viele offene Einladungen. Bearbeite einige, bevor du eine weitere sendest.",
 	CatalogReferenceNotFound: "Dieser Eintrag wurde nicht gefunden.",
 	CatalogRevisionConflict:
 		"Dieser Eintrag wurde geändert. Lade die Seite neu und versuche es erneut.",
@@ -101,8 +103,7 @@ export default {
 	UserFollowBlocked: `${followTerms.stateLabel} ist zwischen blockierten Benutzern nicht verfügbar.`,
 	FollowingTargetKindMismatch: `Der Typ der ${followTerms.followed}en Unit hat sich geändert. Lade ihre Einstellungen neu.`,
 	UserSelfBlockForbidden: "Du kannst dich nicht selbst blockieren.",
-	SoftwareSystemRequirementSourceInvalid:
-		"Die Quelle der Systemanforderung muss zu dieser Software gehören.",
+	SoftwareSystemRequirementSourceInvalid: `Die Quelle der Systemanforderung muss zu dieser ${deTerminology.software.forms.label} gehören.`,
 	SeriesReleaseNotFound: "Diese Veröffentlichung der Reihe wurde nicht gefunden.",
 	ZonePageNotFound: `Diese Seite des ${zoneTerms.inline}s wurde nicht gefunden.`,
 	ZonePageInUse: `Diese Seite des ${zoneTerms.inline}s wird noch von einem Block- oder Navigationsdokument verwendet.`,
@@ -111,7 +112,7 @@ export default {
 	ZoneDocumentInvalid: `Das Block- oder Navigationsdokument des ${zoneTerms.inline}s ist ungültig.`,
 	ZoneTimeRangeInvalid: `Die Endzeit des ${zoneTerms.inline}s muss nach seiner Startzeit liegen.`,
 	ZoneRuleRealmInvalid: `Der ausgewählte ${realmTerms.inline} hat keine aktuelle Regelversion mit mindestens einer Regel.`,
-	SoftwareNotFound: "Diese Software wurde nicht gefunden.",
+	SoftwareNotFound: `Diese ${deTerminology.software.forms.label} wurde nicht gefunden.`,
 	SystemRequirementNotFound: "Diese Systemanforderung wurde nicht gefunden.",
 	PollOptionsDuplicated: "Die Antwortmöglichkeiten der Umfrage müssen eindeutig sein.",
 	PollNotFound: "Diese Umfrage wurde nicht gefunden.",
@@ -213,7 +214,7 @@ export default {
 	InvalidPaginationCursor: "Dieser Seitenlink ist ungültig oder abgelaufen.",
 	BookNotFound: "Dieses Buch wurde nicht gefunden.",
 	MediaNotFound: "Dieses Medienelement wurde nicht gefunden.",
-	ChapterNotFound: "Dieses Kapitel wurde nicht gefunden.",
+	ChapterNotFound: `Dieses ${deTerminology.chapter.forms.label} wurde nicht gefunden.`,
 	ChapterLanguageNotFound: "Diese Kapitelsprache wurde nicht gefunden.",
 	ReportRealmMismatch: `Die gemeldete Unit gehört nicht zu diesem ${realmTerms.inline}.`,
 	PostNotFound: `Dieser ${postTerms.inline} wurde nicht gefunden.`,

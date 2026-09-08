@@ -61,8 +61,8 @@ export default {
 			description: "Consulta y gestiona los libros relacionados con tu trabajo.",
 		},
 		software: {
-			label: "Software",
-			description: "Consulta y gestiona las entradas de software relacionadas con tu trabajo.",
+			label: `${esTerminology.software.forms.label}`,
+			description: `Consulta y gestiona las entradas de ${esTerminology.software.forms.inline} relacionadas con tu trabajo.`,
 		},
 		media: {
 			label: "Contenido multimedia",
@@ -140,7 +140,7 @@ export default {
 		createAction: "Continuar con la creación",
 		subjects: {
 			book: "libros",
-			software: "entradas de software",
+			software: `entradas de ${esTerminology.software.forms.inline}`,
 			media: "entradas multimedia",
 			person: "personas",
 			organization: "organizaciones",

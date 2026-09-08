@@ -1,6 +1,166 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const koTerminology = defineTerminology("ko", {
+	publisher: {
+		status: "approved",
+		forms: {
+			label: "발행 주체",
+			pluralLabel: "발행 주체",
+			inline: "발행 주체",
+			plural: "발행 주체",
+		},
+		forbidden: [],
+	},
+	publishingWork: {
+		status: "approved",
+		forms: {
+			label: "문자 저작물",
+			pluralLabel: "문자 저작물",
+			inline: "문자 저작물",
+			plural: "문자 저작물",
+		},
+		forbidden: [],
+	},
+	textVersion: {
+		status: "approved",
+		forms: {
+			label: "텍스트 판본",
+			pluralLabel: "텍스트 판본",
+			inline: "텍스트 판본",
+			plural: "텍스트 판본",
+		},
+		forbidden: [],
+	},
+	publication: {
+		status: "approved",
+		forms: { label: "출판물", pluralLabel: "출판물", inline: "출판물", plural: "출판물" },
+		forbidden: [],
+	},
+	serialization: {
+		status: "approved",
+		forms: { label: "연재물", pluralLabel: "연재물", inline: "연재물", plural: "연재물" },
+		forbidden: [],
+	},
+	publishingCoverage: {
+		status: "approved",
+		forms: {
+			label: "내용 수록 범위",
+			pluralLabel: "내용 수록 범위",
+			inline: "내용 수록 범위",
+			plural: "내용 수록 범위",
+		},
+		forbidden: [],
+	},
+	publishingInstallment: {
+		status: "approved",
+		forms: { label: "연재분", pluralLabel: "연재분", inline: "연재분", plural: "연재분" },
+		forbidden: [],
+	},
+	chapter: {
+		status: "approved",
+		forms: { label: "챕터", pluralLabel: "챕터", inline: "챕터", plural: "챕터" },
+		forbidden: [],
+	},
+	program: {
+		status: "approved",
+		forms: {
+			label: "영상 작품",
+			pluralLabel: "영상 작품",
+			inline: "영상 작품",
+			plural: "영상 작품",
+		},
+		forbidden: [],
+	},
+	softwareContent: {
+		status: "approved",
+		forms: {
+			label: "소프트웨어 작품",
+			pluralLabel: "소프트웨어 작품",
+			inline: "소프트웨어 작품",
+			plural: "소프트웨어 작품",
+		},
+		forbidden: [],
+	},
+	softwareVersion: {
+		status: "approved",
+		forms: {
+			label: "소프트웨어 버전",
+			pluralLabel: "소프트웨어 버전",
+			inline: "소프트웨어 버전",
+			plural: "소프트웨어 버전",
+		},
+		forbidden: [],
+	},
+	softwareRelease: {
+		status: "approved",
+		forms: {
+			label: "소프트웨어 출시본",
+			pluralLabel: "소프트웨어 출시본",
+			inline: "소프트웨어 출시본",
+			plural: "소프트웨어 출시본",
+		},
+		forbidden: [],
+	},
+	grouping: {
+		status: "approved",
+		forms: {
+			label: "카탈로그 그룹",
+			pluralLabel: "카탈로그 그룹",
+			inline: "카탈로그 그룹",
+			plural: "카탈로그 그룹",
+		},
+		forbidden: [],
+	},
+	referenceConcept: {
+		status: "approved",
+		forms: {
+			label: "참조 개념",
+			pluralLabel: "참조 개념",
+			inline: "참조 개념",
+			plural: "참조 개념",
+		},
+		forbidden: [],
+	},
+	distributionPackage: {
+		status: "approved",
+		forms: {
+			label: "배포 패키지",
+			pluralLabel: "배포 패키지",
+			inline: "배포 패키지",
+			plural: "배포 패키지",
+		},
+		forbidden: [],
+	},
+	publishingCatalog: {
+		status: "approved",
+		forms: {
+			label: "출판 카탈로그",
+			pluralLabel: "출판 카탈로그",
+			inline: "출판 카탈로그",
+			plural: "출판 카탈로그",
+		},
+		forbidden: [],
+	},
+	software: {
+		status: "approved",
+		forms: {
+			label: "소프트웨어",
+			pluralLabel: "소프트웨어",
+			inline: "소프트웨어",
+			plural: "소프트웨어",
+		},
+		forbidden: [],
+	},
+	referenceCatalog: {
+		status: "approved",
+		forms: {
+			label: "참조 항목",
+			pluralLabel: "참조 항목",
+			inline: "참조 항목",
+			plural: "참조 항목",
+		},
+		forbidden: [],
+	},
 	music: {
 		status: "approved",
 		forms: { label: "음악", inline: "음악", plural: "음악" },
@@ -128,7 +288,15 @@ export const koTerminology = defineTerminology("ko", {
 	},
 	entity: {
 		status: "approved",
-		forms: { label: "엔터티", pluralLabel: "엔터티", inline: "엔터티", plural: "엔터티" },
+		forms: {
+			personLabel: "실존 인물",
+			organizationLabel: "단체·기관",
+			characterLabel: "가상 인물",
+			label: "엔터티",
+			pluralLabel: "엔터티",
+			inline: "엔터티",
+			plural: "엔터티",
+		},
 		forbidden: ["Catalog"],
 	},
 	metadata: {

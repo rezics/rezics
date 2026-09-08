@@ -66,7 +66,7 @@ export default {
 			slug_namespace: `${unitSlugTerms.label} ネームスペース`,
 			profile: "プロフィール",
 			book: "書籍",
-			software: "ソフトウェア",
+			software: `${jaTerminology.software.forms.label}`,
 			media: "メディア",
 			video: videoTerms.label,
 			audio: audioTerms.label,

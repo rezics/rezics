@@ -1,6 +1,106 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const zhHantTerminology = defineTerminology("zh-Hant", {
+	publisher: {
+		status: "approved",
+		forms: { label: "出版者", pluralLabel: "出版者", inline: "出版者", plural: "出版者" },
+		forbidden: [],
+	},
+	publishingWork: {
+		status: "approved",
+		forms: { label: "文字作品", pluralLabel: "文字作品", inline: "文字作品", plural: "文字作品" },
+		forbidden: [],
+	},
+	textVersion: {
+		status: "approved",
+		forms: { label: "文本版本", pluralLabel: "文本版本", inline: "文本版本", plural: "文本版本" },
+		forbidden: [],
+	},
+	publication: {
+		status: "approved",
+		forms: { label: "出版品", pluralLabel: "出版品", inline: "出版品", plural: "出版品" },
+		forbidden: [],
+	},
+	serialization: {
+		status: "approved",
+		forms: { label: "連載", pluralLabel: "連載", inline: "連載", plural: "連載" },
+		forbidden: [],
+	},
+	publishingCoverage: {
+		status: "approved",
+		forms: {
+			label: "內容涵蓋範圍",
+			pluralLabel: "內容涵蓋範圍",
+			inline: "內容涵蓋範圍",
+			plural: "內容涵蓋範圍",
+		},
+		forbidden: [],
+	},
+	publishingInstallment: {
+		status: "approved",
+		forms: { label: "連載篇章", pluralLabel: "連載篇章", inline: "連載篇章", plural: "連載篇章" },
+		forbidden: [],
+	},
+	chapter: {
+		status: "approved",
+		forms: { label: "章節", pluralLabel: "章節", inline: "章節", plural: "章節" },
+		forbidden: [],
+	},
+	program: {
+		status: "approved",
+		forms: { label: "影視作品", pluralLabel: "影視作品", inline: "影視作品", plural: "影視作品" },
+		forbidden: [],
+	},
+	softwareContent: {
+		status: "approved",
+		forms: { label: "軟體作品", pluralLabel: "軟體作品", inline: "軟體作品", plural: "軟體作品" },
+		forbidden: [],
+	},
+	softwareVersion: {
+		status: "approved",
+		forms: { label: "軟體版本", pluralLabel: "軟體版本", inline: "軟體版本", plural: "軟體版本" },
+		forbidden: [],
+	},
+	softwareRelease: {
+		status: "approved",
+		forms: {
+			label: "軟體發行版本",
+			pluralLabel: "軟體發行版本",
+			inline: "軟體發行版本",
+			plural: "軟體發行版本",
+		},
+		forbidden: [],
+	},
+	grouping: {
+		status: "approved",
+		forms: { label: "目錄分組", pluralLabel: "目錄分組", inline: "目錄分組", plural: "目錄分組" },
+		forbidden: [],
+	},
+	referenceConcept: {
+		status: "approved",
+		forms: { label: "參照概念", pluralLabel: "參照概念", inline: "參照概念", plural: "參照概念" },
+		forbidden: [],
+	},
+	distributionPackage: {
+		status: "approved",
+		forms: { label: "散布套件", pluralLabel: "散布套件", inline: "散布套件", plural: "散布套件" },
+		forbidden: [],
+	},
+	publishingCatalog: {
+		status: "approved",
+		forms: { label: "出版目錄", pluralLabel: "出版目錄", inline: "出版目錄", plural: "出版目錄" },
+		forbidden: [],
+	},
+	software: {
+		status: "approved",
+		forms: { label: "軟體", pluralLabel: "軟體", inline: "軟體", plural: "軟體" },
+		forbidden: [],
+	},
+	referenceCatalog: {
+		status: "approved",
+		forms: { label: "參照條目", pluralLabel: "參照條目", inline: "參照條目", plural: "參照條目" },
+		forbidden: [],
+	},
 	music: {
 		status: "approved",
 		forms: { label: "音樂", inline: "音樂", plural: "音樂" },
@@ -123,7 +223,15 @@ export const zhHantTerminology = defineTerminology("zh-Hant", {
 	},
 	entity: {
 		status: "approved",
-		forms: { label: "實體", pluralLabel: "實體", inline: "實體", plural: "實體" },
+		forms: {
+			personLabel: "現實人物",
+			organizationLabel: "組織機構",
+			characterLabel: "虛構角色",
+			label: "實體",
+			pluralLabel: "實體",
+			inline: "實體",
+			plural: "實體",
+		},
 		forbidden: ["Catalog", "Entity"],
 	},
 	metadata: {

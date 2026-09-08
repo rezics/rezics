@@ -166,7 +166,7 @@ export default {
 	scoreActionByType: {
 		book: "为这本书评分",
 		media: "为这部作品评分",
-		software: "为这套软件评分",
+		software: `为这套${zhHansTerminology.software.forms.label}评分`,
 		series: "为这个系列评分",
 	},
 	progressByType: {
@@ -182,9 +182,9 @@ export default {
 			status: "阅读状态",
 			progress: "阅读完成度",
 			completedCount: "已读次数",
-			lastChapter: "当前章节",
-			noChapter: "尚未选择章节",
-			estimatedFromContents: "已根据所选章节与目录内容量估算进度，你仍可自行调整。",
+			lastChapter: `当前${zhHansTerminology.chapter.forms.label}`,
+			noChapter: `尚未选择${zhHansTerminology.chapter.forms.label}`,
+			estimatedFromContents: `已根据所选${zhHansTerminology.chapter.forms.label}与目录内容量估算进度，你仍可自行调整。`,
 			history: {
 				completion: insert("于 {{date}} 读完了这本书。", { date: String }),
 				update: insert("于 {{date}} 读到 {{percent}}%。", {
@@ -280,7 +280,7 @@ export default {
 					percent: Number,
 				}),
 			},
-			scoreAction: "为这套软件评分",
+			scoreAction: `为这套${zhHansTerminology.software.forms.label}评分`,
 			recordAction: "记录使用",
 			startAction: "开始使用",
 			updateAction: "更新记录",

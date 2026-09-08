@@ -164,7 +164,7 @@ export default {
 	scoreActionByType: {
 		book: "この本を評価",
 		media: "この作品を評価",
-		software: "このソフトウェアを評価",
+		software: `この${jaTerminology.software.forms.label}を評価`,
 		series: "このシリーズを評価",
 	},
 	progressByType: {
@@ -282,7 +282,7 @@ export default {
 					percent: Number,
 				}),
 			},
-			scoreAction: "このソフトウェアを評価する",
+			scoreAction: `この${jaTerminology.software.forms.label}を評価する`,
 			recordAction: "使用状況を記録",
 			startAction: "使用開始",
 			updateAction: "記録を更新",

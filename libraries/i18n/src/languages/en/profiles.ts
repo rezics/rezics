@@ -34,7 +34,7 @@ export default {
 		dropped: "Dropped",
 	},
 	contentTitle: "Public content",
-	contentDescription: `Public content credited directly to this user or to an ${entityTerms.inline} that credits them as publisher, plus ${realmTerms.pluralLabel} and ${zoneTerms.pluralLabel} they own.`,
+	contentDescription: `Public content credited directly to this user or to an ${entityTerms.inline} that credits them as ${enTerminology.publisher.forms.inline}, plus ${realmTerms.pluralLabel} and ${zoneTerms.pluralLabel} they own.`,
 	contentEmptyTitle: "No public content yet",
 	contentEmptyDescription: `Public credited content and owned ${realmTerms.pluralLabel} or ${zoneTerms.pluralLabel} will appear here.`,
 } satisfies typeof import("../zh-Hant/profiles").default;

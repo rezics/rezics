@@ -120,7 +120,7 @@ export default {
 			generic: "Art",
 			partitive: "Teil",
 			instance: "Instanz",
-			organizational: "Organisation",
+			organizational: `${deTerminology.entity.forms.organizationLabel}`,
 			facet_value: "Facettenwert",
 		},
 	},

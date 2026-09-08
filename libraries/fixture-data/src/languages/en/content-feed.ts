@@ -1,3 +1,4 @@
+import { enTerminology } from "@rezics/i18n/terminology/en";
 import type { FeedFixtureLocalizedContent } from "../../content-feed/localized-content";
 
 export default {
@@ -42,7 +43,7 @@ export default {
 	},
 	collection: {
 		title: "Where science and story meet",
-		body: "A collection of chapters, reviews, and worldbuilding notes worth revisiting.",
+		body: `A collection of ${enTerminology.chapter.forms.plural}, reviews, and worldbuilding notes worth revisiting.`,
 		coverAlt: "An abstract blue and amber book cover",
 	},
 } satisfies FeedFixtureLocalizedContent;

@@ -57,8 +57,8 @@ export default {
 	sections: {
 		book: { label: "도서", description: "작업과 관련된 도서를 보고 관리하세요." },
 		software: {
-			label: "소프트웨어",
-			description: "귀하의 작업과 관련된 소프트웨어 항목 보기 및 관리",
+			label: `${koTerminology.software.forms.label}`,
+			description: `귀하의 작업과 관련된 ${koTerminology.software.forms.label} 항목 보기 및 관리`,
 		},
 		media: { label: "미디어", description: "귀하의 작업과 관련된 미디어 보기 및 관리" },
 		entity: {
@@ -122,7 +122,7 @@ export default {
 		createAction: "계속 만들기",
 		subjects: {
 			book: "도서",
-			software: "소프트웨어 항목",
+			software: `${koTerminology.software.forms.label} 항목`,
 			media: "미디어 항목",
 			person: "인물",
 			organization: "조직",

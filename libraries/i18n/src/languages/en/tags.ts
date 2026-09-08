@@ -119,7 +119,7 @@ export default {
 			generic: "Kind",
 			partitive: "Part",
 			instance: "Instance",
-			organizational: "Organization",
+			organizational: `${enTerminology.entity.forms.organizationLabel}`,
 			facet_value: "Facet value",
 		},
 	},

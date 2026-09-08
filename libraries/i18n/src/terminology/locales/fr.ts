@@ -1,6 +1,176 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const frTerminology = defineTerminology("fr", {
+	publisher: {
+		status: "approved",
+		forms: {
+			label: "Responsable de publication",
+			pluralLabel: "Responsables de publication",
+			inline: "responsable de publication",
+			plural: "responsables de publication",
+		},
+		forbidden: [],
+	},
+	publishingWork: {
+		status: "approved",
+		forms: {
+			label: "Œuvre écrite",
+			pluralLabel: "Œuvres écrites",
+			inline: "œuvre écrite",
+			plural: "œuvres écrites",
+		},
+		forbidden: [],
+	},
+	textVersion: {
+		status: "approved",
+		forms: {
+			label: "Version du texte",
+			pluralLabel: "Versions du texte",
+			inline: "version du texte",
+			plural: "versions du texte",
+		},
+		forbidden: [],
+	},
+	publication: {
+		status: "approved",
+		forms: {
+			label: "Édition bibliographique",
+			pluralLabel: "Éditions bibliographiques",
+			inline: "édition bibliographique",
+			plural: "éditions bibliographiques",
+		},
+		forbidden: [],
+	},
+	serialization: {
+		status: "approved",
+		forms: {
+			label: "Publication en feuilleton",
+			pluralLabel: "Publications en feuilleton",
+			inline: "publication en feuilleton",
+			plural: "publications en feuilleton",
+		},
+		forbidden: [],
+	},
+	publishingCoverage: {
+		status: "approved",
+		forms: {
+			label: "Contenu couvert",
+			pluralLabel: "Contenus couverts",
+			inline: "contenu couvert",
+			plural: "contenus couverts",
+		},
+		forbidden: [],
+	},
+	publishingInstallment: {
+		status: "approved",
+		forms: {
+			label: "Livraison du feuilleton",
+			pluralLabel: "Livraisons du feuilleton",
+			inline: "livraison du feuilleton",
+			plural: "livraisons du feuilleton",
+		},
+		forbidden: [],
+	},
+	chapter: {
+		status: "approved",
+		forms: { label: "Chapitre", pluralLabel: "Chapitres", inline: "chapitre", plural: "chapitres" },
+		forbidden: [],
+	},
+	program: {
+		status: "approved",
+		forms: {
+			label: "Œuvre audiovisuelle",
+			pluralLabel: "Œuvres audiovisuelles",
+			inline: "œuvre audiovisuelle",
+			plural: "œuvres audiovisuelles",
+		},
+		forbidden: [],
+	},
+	softwareContent: {
+		status: "approved",
+		forms: {
+			label: "Œuvre logicielle",
+			pluralLabel: "Œuvres logicielles",
+			inline: "œuvre logicielle",
+			plural: "œuvres logicielles",
+		},
+		forbidden: [],
+	},
+	softwareVersion: {
+		status: "approved",
+		forms: {
+			label: "Version logicielle",
+			pluralLabel: "Versions logicielles",
+			inline: "version logicielle",
+			plural: "versions logicielles",
+		},
+		forbidden: [],
+	},
+	softwareRelease: {
+		status: "approved",
+		forms: {
+			label: "Édition logicielle",
+			pluralLabel: "Éditions logicielles",
+			inline: "édition logicielle",
+			plural: "éditions logicielles",
+		},
+		forbidden: [],
+	},
+	grouping: {
+		status: "approved",
+		forms: {
+			label: "Groupement du catalogue",
+			pluralLabel: "Groupements du catalogue",
+			inline: "groupement du catalogue",
+			plural: "groupements du catalogue",
+		},
+		forbidden: [],
+	},
+	referenceConcept: {
+		status: "approved",
+		forms: {
+			label: "Concept de référence",
+			pluralLabel: "Concepts de référence",
+			inline: "concept de référence",
+			plural: "concepts de référence",
+		},
+		forbidden: [],
+	},
+	distributionPackage: {
+		status: "approved",
+		forms: {
+			label: "Paquet de distribution",
+			pluralLabel: "Paquets de distribution",
+			inline: "paquet de distribution",
+			plural: "paquets de distribution",
+		},
+		forbidden: [],
+	},
+	publishingCatalog: {
+		status: "approved",
+		forms: {
+			label: "Catalogue éditorial",
+			pluralLabel: "Catalogue éditorial",
+			inline: "catalogue éditorial",
+			plural: "catalogue éditorial",
+		},
+		forbidden: [],
+	},
+	software: {
+		status: "approved",
+		forms: { label: "Logiciel", pluralLabel: "Logiciels", inline: "logiciel", plural: "logiciels" },
+		forbidden: [],
+	},
+	referenceCatalog: {
+		status: "approved",
+		forms: {
+			label: "Notices de référence",
+			pluralLabel: "Notices de référence",
+			inline: "notices de référence",
+			plural: "notices de référence",
+		},
+		forbidden: [],
+	},
 	music: {
 		status: "approved",
 		forms: { label: "Musique", inline: "musique", plural: "musique" },
@@ -146,7 +316,15 @@ export const frTerminology = defineTerminology("fr", {
 	},
 	entity: {
 		status: "approved",
-		forms: { label: "Entité", pluralLabel: "Entités", inline: "entité", plural: "entités" },
+		forms: {
+			personLabel: "Personne réelle",
+			organizationLabel: "Organisation",
+			characterLabel: "Personnage fictif",
+			label: "Entité",
+			pluralLabel: "Entités",
+			inline: "entité",
+			plural: "entités",
+		},
 		forbidden: ["Catalog"],
 	},
 	metadata: {

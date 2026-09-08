@@ -12,9 +12,11 @@ const { forms: unitSlugTerms } = koTerminology.unitSlug;
 const { forms: zoneTerms } = koTerminology.zone;
 
 export default {
-	OrganizationMembershipConflict: "초대 또는 구성원 상태가 변경되었습니다. 새로 고친 후 다시 시도하세요.",
+	OrganizationMembershipConflict:
+		"초대 또는 구성원 상태가 변경되었습니다. 새로 고친 후 다시 시도하세요.",
 	OrganizationMembershipNotFound: "이 초대 또는 구성원 기록을 사용할 수 없습니다.",
-	OrganizationMembershipCapacityExceeded: "처리 대기 중인 초대가 너무 많습니다. 일부를 처리한 후 새 초대를 보내세요.",
+	OrganizationMembershipCapacityExceeded:
+		"처리 대기 중인 초대가 너무 많습니다. 일부를 처리한 후 새 초대를 보내세요.",
 	CatalogReferenceNotFound: "이 기록을 찾을 수 없습니다.",
 	CatalogRevisionConflict: "이 기록이 변경되었습니다. 새로 고친 후 다시 시도하세요.",
 	FavoriteNotFound: "저장한 항목을 찾을 수 없습니다.",
@@ -93,7 +95,7 @@ export default {
 	UserFollowBlocked: `차단된 사용자 간에는 ${followTerms.stateLabel}를 사용할 수 없습니다.`,
 	FollowingTargetKindMismatch: `${followTerms.actionLabel} 항목의 유형이 변경되었습니다. 설정을 다시 불러오세요.`,
 	UserSelfBlockForbidden: "자신을 차단할 수 없습니다.",
-	SoftwareSystemRequirementSourceInvalid: "시스템 요구 사항 소스는 이 소프트웨어에 속해야 합니다.",
+	SoftwareSystemRequirementSourceInvalid: `시스템 요구 사항 소스는 이 ${koTerminology.software.forms.label}에 속해야 합니다.`,
 	SeriesReleaseNotFound: "이 시리즈 릴리스를 찾을 수 없습니다.",
 	ZonePageNotFound: `이 ${zoneTerms.inline} 페이지를 찾을 수 없습니다.`,
 	ZonePageInUse: `이 ${zoneTerms.inline} 페이지는 여전히 블록 또는 탐색 문서에서 사용 중입니다.`,
@@ -102,7 +104,7 @@ export default {
 	ZoneDocumentInvalid: `${zoneTerms.inline} 블록 또는 내비게이션 문서가 유효하지 않습니다.`,
 	ZoneTimeRangeInvalid: `${zoneTerms.inline} 종료 시간은 시작 시간 이후여야 합니다.`,
 	ZoneRuleRealmInvalid: `선택한 ${realmTerms.label}에 규칙이 하나 이상 포함된 현재 규칙 개정본이 없습니다.`,
-	SoftwareNotFound: "이 소프트웨어를 찾을 수 없습니다.",
+	SoftwareNotFound: `이 ${koTerminology.software.forms.label}를 찾을 수 없습니다.`,
 	SystemRequirementNotFound: "이 시스템 요구 사항을 찾을 수 없습니다.",
 	PollOptionsDuplicated: "투표 옵션은 고유해야 합니다.",
 	PollNotFound: "이 투표를 찾을 수 없습니다.",

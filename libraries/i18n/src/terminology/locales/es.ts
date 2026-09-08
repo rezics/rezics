@@ -1,6 +1,171 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const esTerminology = defineTerminology("es", {
+	publisher: {
+		status: "approved",
+		forms: {
+			label: "Responsable de publicación",
+			pluralLabel: "Responsables de publicación",
+			inline: "responsable de publicación",
+			plural: "responsables de publicación",
+		},
+		forbidden: [],
+	},
+	publishingWork: {
+		status: "approved",
+		forms: {
+			label: "Obra escrita",
+			pluralLabel: "Obras escritas",
+			inline: "obra escrita",
+			plural: "obras escritas",
+		},
+		forbidden: [],
+	},
+	textVersion: {
+		status: "approved",
+		forms: {
+			label: "Versión del texto",
+			pluralLabel: "Versiones del texto",
+			inline: "versión del texto",
+			plural: "versiones del texto",
+		},
+		forbidden: [],
+	},
+	publication: {
+		status: "approved",
+		forms: {
+			label: "Edición bibliográfica",
+			pluralLabel: "Ediciones bibliográficas",
+			inline: "edición bibliográfica",
+			plural: "ediciones bibliográficas",
+		},
+		forbidden: [],
+	},
+	serialization: {
+		status: "approved",
+		forms: {
+			label: "Publicación por entregas",
+			pluralLabel: "Publicaciones por entregas",
+			inline: "publicación por entregas",
+			plural: "publicaciones por entregas",
+		},
+		forbidden: [],
+	},
+	publishingCoverage: {
+		status: "approved",
+		forms: {
+			label: "Contenido incluido",
+			pluralLabel: "Contenidos incluidos",
+			inline: "contenido incluido",
+			plural: "contenidos incluidos",
+		},
+		forbidden: [],
+	},
+	publishingInstallment: {
+		status: "approved",
+		forms: { label: "Entrega", pluralLabel: "Entregas", inline: "entrega", plural: "entregas" },
+		forbidden: [],
+	},
+	chapter: {
+		status: "approved",
+		forms: { label: "Capítulo", pluralLabel: "Capítulos", inline: "capítulo", plural: "capítulos" },
+		forbidden: [],
+	},
+	program: {
+		status: "approved",
+		forms: {
+			label: "Obra audiovisual",
+			pluralLabel: "Obras audiovisuales",
+			inline: "obra audiovisual",
+			plural: "obras audiovisuales",
+		},
+		forbidden: [],
+	},
+	softwareContent: {
+		status: "approved",
+		forms: {
+			label: "Obra de software",
+			pluralLabel: "Obras de software",
+			inline: "obra de software",
+			plural: "obras de software",
+		},
+		forbidden: [],
+	},
+	softwareVersion: {
+		status: "approved",
+		forms: {
+			label: "Versión de software",
+			pluralLabel: "Versiones de software",
+			inline: "versión de software",
+			plural: "versiones de software",
+		},
+		forbidden: [],
+	},
+	softwareRelease: {
+		status: "approved",
+		forms: {
+			label: "Edición de software",
+			pluralLabel: "Ediciones de software",
+			inline: "edición de software",
+			plural: "ediciones de software",
+		},
+		forbidden: [],
+	},
+	grouping: {
+		status: "approved",
+		forms: {
+			label: "Agrupación del catálogo",
+			pluralLabel: "Agrupaciones del catálogo",
+			inline: "agrupación del catálogo",
+			plural: "agrupaciones del catálogo",
+		},
+		forbidden: [],
+	},
+	referenceConcept: {
+		status: "approved",
+		forms: {
+			label: "Concepto de referencia",
+			pluralLabel: "Conceptos de referencia",
+			inline: "concepto de referencia",
+			plural: "conceptos de referencia",
+		},
+		forbidden: [],
+	},
+	distributionPackage: {
+		status: "approved",
+		forms: {
+			label: "Paquete de distribución",
+			pluralLabel: "Paquetes de distribución",
+			inline: "paquete de distribución",
+			plural: "paquetes de distribución",
+		},
+		forbidden: [],
+	},
+	publishingCatalog: {
+		status: "approved",
+		forms: {
+			label: "Catálogo editorial",
+			pluralLabel: "Catálogo editorial",
+			inline: "catálogo editorial",
+			plural: "catálogo editorial",
+		},
+		forbidden: [],
+	},
+	software: {
+		status: "approved",
+		forms: { label: "Software", pluralLabel: "Software", inline: "software", plural: "software" },
+		forbidden: [],
+	},
+	referenceCatalog: {
+		status: "approved",
+		forms: {
+			label: "Entradas de referencia",
+			pluralLabel: "Entradas de referencia",
+			inline: "entradas de referencia",
+			plural: "entradas de referencia",
+		},
+		forbidden: [],
+	},
 	music: {
 		status: "approved",
 		forms: { label: "Música", inline: "música", plural: "música" },
@@ -138,6 +303,9 @@ export const esTerminology = defineTerminology("es", {
 	entity: {
 		status: "approved",
 		forms: {
+			personLabel: "Persona real",
+			organizationLabel: "Organización",
+			characterLabel: "Personaje ficticio",
 			label: "Entidad",
 			pluralLabel: "Entidades",
 			inline: "entidad",

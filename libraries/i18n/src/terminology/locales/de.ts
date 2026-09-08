@@ -1,6 +1,171 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const deTerminology = defineTerminology("de", {
+	publisher: {
+		status: "approved",
+		forms: { label: "Verleger", pluralLabel: "Verleger", inline: "Verleger", plural: "Verleger" },
+		forbidden: [],
+	},
+	publishingWork: {
+		status: "approved",
+		forms: {
+			label: "Schriftwerk",
+			pluralLabel: "Schriftwerke",
+			inline: "Schriftwerk",
+			plural: "Schriftwerke",
+		},
+		forbidden: [],
+	},
+	textVersion: {
+		status: "approved",
+		forms: {
+			label: "Textfassung",
+			pluralLabel: "Textfassungen",
+			inline: "Textfassung",
+			plural: "Textfassungen",
+		},
+		forbidden: [],
+	},
+	publication: {
+		status: "approved",
+		forms: {
+			label: "Publikation",
+			pluralLabel: "Publikationen",
+			inline: "Publikation",
+			plural: "Publikationen",
+		},
+		forbidden: [],
+	},
+	serialization: {
+		status: "approved",
+		forms: {
+			label: "Fortsetzungsveröffentlichung",
+			pluralLabel: "Fortsetzungsveröffentlichungen",
+			inline: "Fortsetzungsveröffentlichung",
+			plural: "Fortsetzungsveröffentlichungen",
+		},
+		forbidden: [],
+	},
+	publishingCoverage: {
+		status: "approved",
+		forms: {
+			label: "Inhaltlicher Umfang",
+			pluralLabel: "Inhaltlicher Umfang",
+			inline: "inhaltlicher Umfang",
+			plural: "inhaltlicher Umfang",
+		},
+		forbidden: [],
+	},
+	publishingInstallment: {
+		status: "approved",
+		forms: {
+			label: "Fortsetzungsfolge",
+			pluralLabel: "Fortsetzungsfolgen",
+			inline: "Fortsetzungsfolge",
+			plural: "Fortsetzungsfolgen",
+		},
+		forbidden: [],
+	},
+	chapter: {
+		status: "approved",
+		forms: { label: "Kapitel", pluralLabel: "Kapitel", inline: "Kapitel", plural: "Kapitel" },
+		forbidden: [],
+	},
+	program: {
+		status: "approved",
+		forms: {
+			label: "Film- und Fernsehwerk",
+			pluralLabel: "Film- und Fernsehwerke",
+			inline: "Film- und Fernsehwerk",
+			plural: "Film- und Fernsehwerke",
+		},
+		forbidden: [],
+	},
+	softwareContent: {
+		status: "approved",
+		forms: {
+			label: "Softwaretitel",
+			pluralLabel: "Softwaretitel",
+			inline: "Softwaretitel",
+			plural: "Softwaretitel",
+		},
+		forbidden: [],
+	},
+	softwareVersion: {
+		status: "approved",
+		forms: {
+			label: "Softwareversion",
+			pluralLabel: "Softwareversionen",
+			inline: "Softwareversion",
+			plural: "Softwareversionen",
+		},
+		forbidden: [],
+	},
+	softwareRelease: {
+		status: "approved",
+		forms: {
+			label: "Softwareveröffentlichung",
+			pluralLabel: "Softwareveröffentlichungen",
+			inline: "Softwareveröffentlichung",
+			plural: "Softwareveröffentlichungen",
+		},
+		forbidden: [],
+	},
+	grouping: {
+		status: "approved",
+		forms: {
+			label: "Kataloggruppe",
+			pluralLabel: "Kataloggruppen",
+			inline: "Kataloggruppe",
+			plural: "Kataloggruppen",
+		},
+		forbidden: [],
+	},
+	referenceConcept: {
+		status: "approved",
+		forms: {
+			label: "Referenzbegriff",
+			pluralLabel: "Referenzbegriffe",
+			inline: "Referenzbegriff",
+			plural: "Referenzbegriffe",
+		},
+		forbidden: [],
+	},
+	distributionPackage: {
+		status: "approved",
+		forms: {
+			label: "Distributionspaket",
+			pluralLabel: "Distributionspakete",
+			inline: "Distributionspaket",
+			plural: "Distributionspakete",
+		},
+		forbidden: [],
+	},
+	publishingCatalog: {
+		status: "approved",
+		forms: {
+			label: "Publikationskatalog",
+			pluralLabel: "Publikationskatalog",
+			inline: "Publikationskatalog",
+			plural: "Publikationskatalog",
+		},
+		forbidden: [],
+	},
+	software: {
+		status: "approved",
+		forms: { label: "Software", pluralLabel: "Software", inline: "Software", plural: "Software" },
+		forbidden: [],
+	},
+	referenceCatalog: {
+		status: "approved",
+		forms: {
+			label: "Referenzeinträge",
+			pluralLabel: "Referenzeinträge",
+			inline: "Referenzeinträge",
+			plural: "Referenzeinträge",
+		},
+		forbidden: [],
+	},
 	music: {
 		status: "approved",
 		forms: { label: "Musik", inline: "Musik", plural: "Musik" },
@@ -147,6 +312,9 @@ export const deTerminology = defineTerminology("de", {
 	entity: {
 		status: "approved",
 		forms: {
+			personLabel: "Reale Person",
+			organizationLabel: "Organisation",
+			characterLabel: "Fiktive Figur",
 			label: "Entität",
 			pluralLabel: "Entitäten",
 			inline: "Entität",

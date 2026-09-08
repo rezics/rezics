@@ -37,11 +37,11 @@ export const zhHantContent = {
 	meta: {
 		home: {
 			title: `${BRAND} — 與所愛的故事相遇`,
-			description: `跨平台、跨語言找到網路小說，${FOLLOW}連載，並在${REALM}遇見同好。`,
+			description: `跨平台、跨語言找到網路小說，${FOLLOW}${zhHantTerminology.serialization.forms.label}，並在${REALM}遇見同好。`,
 		},
 		uses: {
 			title: `用途 — ${BRAND}`,
-			description: `探索讀者如何跨平台尋書、${FOLLOW}連載、保存進度並找到同好。`,
+			description: `探索讀者如何跨平台尋書、${FOLLOW}${zhHantTerminology.serialization.forms.label}、保存進度並找到同好。`,
 		},
 		products: {
 			title: `產品 — ${BRAND}`,
@@ -51,21 +51,24 @@ export const zhHantContent = {
 	home: {
 		eyebrow: "傳承 · 創作 · 傳播",
 		title: "與所愛的故事相遇。",
-		lead: `從散落在不同平台與語言中的網路小說開始。${BRAND} 將原作與各語呈現、連載來源、章節及社群重新連成同一部持續演進的作品。`,
+		lead: `從散落在不同平台與語言中的網路小說開始。${BRAND} 將原作與各語呈現、${zhHantTerminology.serialization.forms.label}來源、${zhHantTerminology.chapter.forms.label}及社群重新連成同一部持續演進的作品。`,
 		explore: "探索網路小說",
 		productsAction: "探索產品",
 		problem: {
-			title: "一本連載，不該因平台、語言與譯名而變成碎片。",
+			title: `一本${zhHantTerminology.serialization.forms.label}，不該因平台、語言與譯名而變成碎片。`,
 			body: "讀者想找的是同一個故事，今天卻必須在平台頁、譯名條目、進度工具與討論群之間反覆辨認。作品更新了，這些碎片也不一定一起前進。",
 		},
 		promise: {
 			title: "先把同一部作品接回來，再讓閱讀與社群自然生長。",
-			body: `${BRAND} 以原生多語言單元作為共同起點。同一部作品可以承載多種內容語言，連載可以跨平台，章節可以繼續增加，${REALM}可以形成不同觀點；原作、翻譯與社群仍共享同一個可理解、可追溯的身份。`,
+			body: `${BRAND} 以原生多語言單元作為共同起點。同一部作品可以承載多種內容語言，${zhHantTerminology.serialization.forms.label}可以跨平台，${zhHantTerminology.chapter.forms.label}可以繼續增加，${REALM}可以形成不同觀點；原作、翻譯與社群仍共享同一個可理解、可追溯的身份。`,
 		},
 		principles: [
 			{ title: "跨平台辨認", body: "平台網址是來源，不是作品唯一的身份。" },
 			{ title: "跨語言理解", body: "原名、譯名與別名共同幫助讀者找到同一部作品。" },
-			{ title: "持續演進", body: "連載、章節、版本、進度與討論都能在作品更新時繼續累積。" },
+			{
+				title: "持續演進",
+				body: `${zhHantTerminology.serialization.forms.label}、${zhHantTerminology.chapter.forms.label}、版本、進度與討論都能在作品更新時繼續累積。`,
+			},
 		],
 		model: {
 			title: "網路小說是入口，底層為所有持續演進的作品而設計。",
@@ -76,12 +79,12 @@ export const zhHantContent = {
 					body: "同一個作品身份原生承載各語呈現，名稱、內容與平台來源不必拆成互不相連的條目。",
 				},
 				{
-					title: "來源與連載",
-					body: "原始連載、翻譯來源、出版版本與更新狀態不再被壓成一個網址。",
+					title: `來源與${zhHantTerminology.serialization.forms.label}`,
+					body: `原始${zhHantTerminology.serialization.forms.label}、翻譯來源、出版版本與更新狀態不再被壓成一個網址。`,
 				},
 				{
 					title: `閱讀與${FOLLOW}`,
-					body: "內容結構保存章節脈絡，進度讓讀者從真正的位置繼續。",
+					body: `內容結構保存${zhHantTerminology.chapter.forms.label}脈絡，進度讓讀者從真正的位置繼續。`,
 				},
 				{
 					title: `${REALM}與共同知識`,
@@ -94,7 +97,10 @@ export const zhHantContent = {
 			body: `每一次找到、${FOLLOW}、加入社群與補充關係，都能降低下一位讀者的尋找成本。`,
 			cards: [
 				{ title: "找到", body: "從原名、譯名、別名或來源網址找到同一部網路小說。" },
-				{ title: "繼續", body: "跟進連載更新，保存閱讀狀態與最後位置。" },
+				{
+					title: "繼續",
+					body: `跟進${zhHantTerminology.serialization.forms.label}更新，保存閱讀狀態與最後位置。`,
+				},
 				{
 					title: "相遇",
 					body: `進入或建立${REALM}，找到願意長期討論同一部作品的人。`,
@@ -117,18 +123,21 @@ export const zhHantContent = {
 		},
 		v1: {
 			identity: {
-				title: "一本連載，不該因平台、語言與譯名而變成碎片。",
+				title: `一本${zhHantTerminology.serialization.forms.label}，不該因平台、語言與譯名而變成碎片。`,
 				body: `讀者想找的是同一個故事，今天卻必須在平台頁、譯名條目、進度工具與討論群之間反覆辨認。${BRAND} 先把它們接回同一個作品身份。`,
 				sourcesTitle: "跨平台來源",
 				sources: [
-					"原始連載平台",
+					`原始${zhHantTerminology.serialization.forms.label}平台`,
 					`翻譯與${zhHantTerminology.license.forms.label}來源`,
 					"出版及其他版本",
 				],
 				namesTitle: "原名與譯名",
 				originalName: "原名、羅馬字與別名",
 				translatedName: "各語言正式譯名與慣用名",
-				updates: { title: "連載更新", body: "來源持續更新，作品身份不必重建。" },
+				updates: {
+					title: `${zhHantTerminology.serialization.forms.label}更新`,
+					body: "來源持續更新，作品身份不必重建。",
+				},
 				progress: { title: "閱讀進度", body: "知道作品更新到哪裡，也知道自己讀到哪裡。" },
 				realm: { title: `${REALM}同好社群`, body: "從作品找到願意長期討論它的人。" },
 				workTitle: "同一部持續演進的作品",
@@ -139,7 +148,7 @@ export const zhHantContent = {
 				steps: [
 					{ title: "跨平台找到作品", body: "原名、譯名、別名與來源指向同一身份。" },
 					{
-						title: `${FOLLOW}連載與進度`,
+						title: `${FOLLOW}${zhHantTerminology.serialization.forms.label}與進度`,
 						body: "知道在哪裡讀、更新到哪裡、自己讀到哪裡。",
 					},
 					{ title: `加入或建立${REALM}`, body: "從作品找到真正長期討論它的人。" },
@@ -157,7 +166,7 @@ export const zhHantContent = {
 					},
 					{
 						title: "內容結構",
-						body: "章節是可重用內容；結構管理順序、出現位置與連載演進。",
+						body: `${zhHantTerminology.chapter.forms.label}是可重用內容；結構管理順序、出現位置與${zhHantTerminology.serialization.forms.label}演進。`,
 					},
 					{
 						title: `${BLOCK_SCHEMA} + ${PORTABLE_TEXT}`,
@@ -180,7 +189,7 @@ export const zhHantContent = {
 		journeys: [
 			{
 				title: "跨平台找到同一部網路小說",
-				body: "從平台網址、原始連載、翻譯來源或出版版本進入，回到同一個作品身份。",
+				body: `從平台網址、原始${zhHantTerminology.serialization.forms.label}、翻譯來源或出版版本進入，回到同一個作品身份。`,
 				result: "不再把每個平台條目當成不同的書。",
 			},
 			{
@@ -189,8 +198,8 @@ export const zhHantContent = {
 				result: "跨過語言，也不必離開原作與既有社群。",
 			},
 			{
-				title: `${FOLLOW}連載並從上次的位置繼續`,
-				body: "查看來源更新到哪一章、作品處於連載或完結狀態，並保存自己的閱讀狀態與最後位置。",
+				title: `${FOLLOW}${zhHantTerminology.serialization.forms.label}並從上次的位置繼續`,
+				body: `查看來源更新到哪一章、作品處於${zhHantTerminology.serialization.forms.label}或完結狀態，並保存自己的閱讀狀態與最後位置。`,
 				result: "作品在更新，閱讀脈絡不必重來。",
 			},
 			{
@@ -205,7 +214,7 @@ export const zhHantContent = {
 			},
 			{
 				title: "發布自己的文章與作品內容",
-				body: `以 ${PORTABLE_TEXT} 編輯${zhHantTerminology.post.forms.label}，用 ${BLOCK_SCHEMA} 保存可演進文件，並以內容結構安排章節與發布歷史。`,
+				body: `以 ${PORTABLE_TEXT} 編輯${zhHantTerminology.post.forms.label}，用 ${BLOCK_SCHEMA} 保存可演進文件，並以內容結構安排${zhHantTerminology.chapter.forms.label}與發布歷史。`,
 				result: "內容不只可閱讀，也能被引用、重用與持續修訂。",
 			},
 			{

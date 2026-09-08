@@ -67,7 +67,7 @@ export default {
 			slug_namespace: `Périmètre de nommage d’${unitSlugTerms.inline}`,
 			profile: "Profil",
 			book: "Livre",
-			software: "Logiciel",
+			software: `${frTerminology.software.forms.label}`,
 			media: "Média",
 			video: videoTerms.label,
 			audio: audioTerms.label,

@@ -1,6 +1,176 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const enTerminology = defineTerminology("en", {
+	publisher: {
+		status: "approved",
+		forms: {
+			label: "Publisher",
+			pluralLabel: "Publishers",
+			inline: "publisher",
+			plural: "publishers",
+		},
+		forbidden: [],
+	},
+	publishingWork: {
+		status: "approved",
+		forms: {
+			label: "Written work",
+			pluralLabel: "Written works",
+			inline: "written work",
+			plural: "written works",
+		},
+		forbidden: [],
+	},
+	textVersion: {
+		status: "approved",
+		forms: {
+			label: "Text version",
+			pluralLabel: "Text versions",
+			inline: "text version",
+			plural: "text versions",
+		},
+		forbidden: [],
+	},
+	publication: {
+		status: "approved",
+		forms: {
+			label: "Publication",
+			pluralLabel: "Publications",
+			inline: "publication",
+			plural: "publications",
+		},
+		forbidden: [],
+	},
+	serialization: {
+		status: "approved",
+		forms: {
+			label: "Serialization",
+			pluralLabel: "Serializations",
+			inline: "serialization",
+			plural: "serializations",
+		},
+		forbidden: [],
+	},
+	publishingCoverage: {
+		status: "approved",
+		forms: {
+			label: "Content coverage",
+			pluralLabel: "Content coverage",
+			inline: "content coverage",
+			plural: "content coverage",
+		},
+		forbidden: [],
+	},
+	publishingInstallment: {
+		status: "approved",
+		forms: {
+			label: "Installment",
+			pluralLabel: "Installments",
+			inline: "installment",
+			plural: "installments",
+		},
+		forbidden: [],
+	},
+	chapter: {
+		status: "approved",
+		forms: { label: "Chapter", pluralLabel: "Chapters", inline: "chapter", plural: "chapters" },
+		forbidden: [],
+	},
+	program: {
+		status: "approved",
+		forms: {
+			label: "Screen work",
+			pluralLabel: "Screen works",
+			inline: "screen work",
+			plural: "screen works",
+		},
+		forbidden: [],
+	},
+	softwareContent: {
+		status: "approved",
+		forms: {
+			label: "Software title",
+			pluralLabel: "Software titles",
+			inline: "software title",
+			plural: "software titles",
+		},
+		forbidden: [],
+	},
+	softwareVersion: {
+		status: "approved",
+		forms: {
+			label: "Software version",
+			pluralLabel: "Software versions",
+			inline: "software version",
+			plural: "software versions",
+		},
+		forbidden: [],
+	},
+	softwareRelease: {
+		status: "approved",
+		forms: {
+			label: "Software release",
+			pluralLabel: "Software releases",
+			inline: "software release",
+			plural: "software releases",
+		},
+		forbidden: [],
+	},
+	grouping: {
+		status: "approved",
+		forms: {
+			label: "Catalog group",
+			pluralLabel: "Catalog groups",
+			inline: "catalog group",
+			plural: "catalog groups",
+		},
+		forbidden: [],
+	},
+	referenceConcept: {
+		status: "approved",
+		forms: {
+			label: "Reference concept",
+			pluralLabel: "Reference concepts",
+			inline: "reference concept",
+			plural: "reference concepts",
+		},
+		forbidden: [],
+	},
+	distributionPackage: {
+		status: "approved",
+		forms: {
+			label: "Distribution package",
+			pluralLabel: "Distribution packages",
+			inline: "distribution package",
+			plural: "distribution packages",
+		},
+		forbidden: [],
+	},
+	publishingCatalog: {
+		status: "approved",
+		forms: {
+			label: "Publishing catalog",
+			pluralLabel: "Publishing catalog",
+			inline: "publishing catalog",
+			plural: "publishing catalog",
+		},
+		forbidden: [],
+	},
+	software: {
+		status: "approved",
+		forms: { label: "Software", pluralLabel: "Software", inline: "software", plural: "software" },
+		forbidden: [],
+	},
+	referenceCatalog: {
+		status: "approved",
+		forms: {
+			label: "Reference entries",
+			pluralLabel: "Reference entries",
+			inline: "reference entries",
+			plural: "reference entries",
+		},
+		forbidden: [],
+	},
 	music: {
 		status: "approved",
 		forms: { label: "Music", inline: "music", plural: "music" },
@@ -123,7 +293,15 @@ export const enTerminology = defineTerminology("en", {
 	},
 	entity: {
 		status: "approved",
-		forms: { label: "Entity", pluralLabel: "Entities", inline: "entity", plural: "entities" },
+		forms: {
+			personLabel: "Real person",
+			organizationLabel: "Organization",
+			characterLabel: "Fictional character",
+			label: "Entity",
+			pluralLabel: "Entities",
+			inline: "entity",
+			plural: "entities",
+		},
 		forbidden: ["Catalog", "catalog"],
 	},
 	metadata: {

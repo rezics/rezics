@@ -120,7 +120,7 @@ export default {
 			generic: "Tipo",
 			partitive: "Parte",
 			instance: "Instancia",
-			organizational: "Organización",
+			organizational: `${esTerminology.entity.forms.organizationLabel}`,
 			facet_value: "Valor de faceta",
 		},
 	},

@@ -15,7 +15,8 @@ const { forms: entityTerms } = enTerminology.entity;
 export default {
 	OrganizationMembershipConflict: "This invitation or membership changed. Refresh and try again.",
 	OrganizationMembershipNotFound: "This invitation or membership is unavailable.",
-	OrganizationMembershipCapacityExceeded: "There are too many pending invitations. Resolve some before sending another.",
+	OrganizationMembershipCapacityExceeded:
+		"There are too many pending invitations. Resolve some before sending another.",
 	CatalogReferenceNotFound: "This record could not be found.",
 	CatalogRevisionConflict: "This record changed. Refresh and try again.",
 	FavoriteNotFound: "This saved item could not be found.",
@@ -95,8 +96,7 @@ export default {
 	UserFollowBlocked: `${followTerms.stateLabel} is unavailable between blocked users.`,
 	FollowingTargetKindMismatch: `The ${followTerms.followed} Unit type changed. Reload its settings.`,
 	UserSelfBlockForbidden: "You cannot block yourself.",
-	SoftwareSystemRequirementSourceInvalid:
-		"The system-requirement source must belong to this software.",
+	SoftwareSystemRequirementSourceInvalid: `The system-requirement source must belong to this ${enTerminology.software.forms.inline}.`,
 	SeriesReleaseNotFound: "This series release could not be found.",
 	ZonePageNotFound: `This ${zoneTerms.inline} page could not be found.`,
 	ZonePageInUse: `This ${zoneTerms.inline} page is still used by a block or navigation document.`,
@@ -105,7 +105,7 @@ export default {
 	ZoneDocumentInvalid: `The ${zoneTerms.inline} block or navigation document is invalid.`,
 	ZoneTimeRangeInvalid: `The ${zoneTerms.inline} end time must be later than its start time.`,
 	ZoneRuleRealmInvalid: `The selected ${realmTerms.label} has no current Rule revision with at least one Rule.`,
-	SoftwareNotFound: "This software could not be found.",
+	SoftwareNotFound: `This ${enTerminology.software.forms.inline} could not be found.`,
 	SystemRequirementNotFound: "This system requirement could not be found.",
 	PollOptionsDuplicated: "Poll options must be unique.",
 	PollNotFound: "This poll could not be found.",
@@ -193,8 +193,8 @@ export default {
 	InvalidPaginationCursor: "This page link is invalid or expired.",
 	BookNotFound: "This book could not be found.",
 	MediaNotFound: "This media item could not be found.",
-	ChapterNotFound: "This chapter could not be found.",
-	ChapterLanguageNotFound: "This chapter language could not be found.",
+	ChapterNotFound: `This ${enTerminology.chapter.forms.inline} could not be found.`,
+	ChapterLanguageNotFound: `This ${enTerminology.chapter.forms.inline} language could not be found.`,
 	ReportRealmMismatch: `The reported Unit does not belong to this ${realmTerms.label}.`,
 	PostNotFound: `This ${postTerms.inline} could not be found.`,
 	PostLocalizationNotFound: `This ${postTerms.inline} localization could not be found.`,
@@ -317,10 +317,9 @@ export default {
 	AssociationContextPostInvalid: `The relationship context must be a wiki ${postTerms.label}.`,
 	ProgressEntryNotFound: "This progress event could not be found.",
 	PostTagMentionVoteConflict: `This Tag mention conflicts with your existing downvote on the ${postTerms.label}.`,
-	UnitRealmPublicationNotFound: `This content has no publication relationship with that ${realmTerms.label}.`,
-	UnitRealmPublicationAlreadyExists: `This content already has a publication relationship with that ${realmTerms.label}.`,
-	UnitRealmPublicationTransitionInvalid:
-		"The publication relationship is already in the requested state.",
+	UnitRealmPublicationNotFound: `This content has no link to that ${realmTerms.label}.`,
+	UnitRealmPublicationAlreadyExists: `This content is already linked to that ${realmTerms.label}.`,
+	UnitRealmPublicationTransitionInvalid: "The content already has the requested publishing state.",
 	CustomThemeExternalLiveAccessSelfMutationForbidden:
 		"You cannot grant, change, or revoke your own external-resource theme access.",
 	CustomThemeNotFound: `This ${customThemeTerms.inline} could not be found.`,

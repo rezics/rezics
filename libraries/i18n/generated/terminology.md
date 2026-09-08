@@ -4,6 +4,564 @@
 
 This document is a generated view of the typed termbase in `libraries/i18n/src/terminology`. Product locale resources remain the owner of complete user-visible messages.
 
+## publisher
+
+A person or organization credited with issuing published content, including a bibliographic publication or a platform post.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Publisher |  |
+| en | approved | pluralLabel | Publishers |  |
+| en | approved | inline | publisher |  |
+| en | approved | plural | publishers |  |
+| zh-Hant | approved | label | 出版者 |  |
+| zh-Hant | approved | pluralLabel | 出版者 |  |
+| zh-Hant | approved | inline | 出版者 |  |
+| zh-Hant | approved | plural | 出版者 |  |
+| zh-Hans | approved | label | 出版者 |  |
+| zh-Hans | approved | pluralLabel | 出版者 |  |
+| zh-Hans | approved | inline | 出版者 |  |
+| zh-Hans | approved | plural | 出版者 |  |
+| de | approved | label | Verleger |  |
+| de | approved | pluralLabel | Verleger |  |
+| de | approved | inline | Verleger |  |
+| de | approved | plural | Verleger |  |
+| ja | approved | label | 出版者 |  |
+| ja | approved | pluralLabel | 出版者 |  |
+| ja | approved | inline | 出版者 |  |
+| ja | approved | plural | 出版者 |  |
+| ko | approved | label | 발행 주체 |  |
+| ko | approved | pluralLabel | 발행 주체 |  |
+| ko | approved | inline | 발행 주체 |  |
+| ko | approved | plural | 발행 주체 |  |
+
+## publishingWork
+
+A written intellectual work, independent of its text versions and publications.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Written work |  |
+| en | approved | pluralLabel | Written works |  |
+| en | approved | inline | written work |  |
+| en | approved | plural | written works |  |
+| zh-Hant | approved | label | 文字作品 |  |
+| zh-Hant | approved | pluralLabel | 文字作品 |  |
+| zh-Hant | approved | inline | 文字作品 |  |
+| zh-Hant | approved | plural | 文字作品 |  |
+| zh-Hans | approved | label | 文字作品 |  |
+| zh-Hans | approved | pluralLabel | 文字作品 |  |
+| zh-Hans | approved | inline | 文字作品 |  |
+| zh-Hans | approved | plural | 文字作品 |  |
+| de | approved | label | Schriftwerk |  |
+| de | approved | pluralLabel | Schriftwerke |  |
+| de | approved | inline | Schriftwerk |  |
+| de | approved | plural | Schriftwerke |  |
+| ja | approved | label | 著作 |  |
+| ja | approved | pluralLabel | 著作 |  |
+| ja | approved | inline | 著作 |  |
+| ja | approved | plural | 著作 |  |
+| ko | approved | label | 문자 저작물 |  |
+| ko | approved | pluralLabel | 문자 저작물 |  |
+| ko | approved | inline | 문자 저작물 |  |
+| ko | approved | plural | 문자 저작물 |  |
+
+## textVersion
+
+One identifiable text, translation or revision that can be embodied by publications.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Text version |  |
+| en | approved | pluralLabel | Text versions |  |
+| en | approved | inline | text version |  |
+| en | approved | plural | text versions |  |
+| zh-Hant | approved | label | 文本版本 |  |
+| zh-Hant | approved | pluralLabel | 文本版本 |  |
+| zh-Hant | approved | inline | 文本版本 |  |
+| zh-Hant | approved | plural | 文本版本 |  |
+| zh-Hans | approved | label | 文本版本 |  |
+| zh-Hans | approved | pluralLabel | 文本版本 |  |
+| zh-Hans | approved | inline | 文本版本 |  |
+| zh-Hans | approved | plural | 文本版本 |  |
+| de | approved | label | Textfassung |  |
+| de | approved | pluralLabel | Textfassungen |  |
+| de | approved | inline | Textfassung |  |
+| de | approved | plural | Textfassungen |  |
+| ja | approved | label | テキスト版 |  |
+| ja | approved | pluralLabel | テキスト版 |  |
+| ja | approved | inline | テキスト版 |  |
+| ja | approved | plural | テキスト版 |  |
+| ko | approved | label | 텍스트 판본 |  |
+| ko | approved | pluralLabel | 텍스트 판본 |  |
+| ko | approved | inline | 텍스트 판본 |  |
+| ko | approved | plural | 텍스트 판본 |  |
+
+## publication
+
+One bibliographic publication or edition, independent of its covered texts or works.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Publication |  |
+| en | approved | pluralLabel | Publications |  |
+| en | approved | inline | publication |  |
+| en | approved | plural | publications |  |
+| zh-Hant | approved | label | 出版品 |  |
+| zh-Hant | approved | pluralLabel | 出版品 |  |
+| zh-Hant | approved | inline | 出版品 |  |
+| zh-Hant | approved | plural | 出版品 |  |
+| zh-Hans | approved | label | 出版物 |  |
+| zh-Hans | approved | pluralLabel | 出版物 |  |
+| zh-Hans | approved | inline | 出版物 |  |
+| zh-Hans | approved | plural | 出版物 |  |
+| de | approved | label | Publikation |  |
+| de | approved | pluralLabel | Publikationen |  |
+| de | approved | inline | Publikation |  |
+| de | approved | plural | Publikationen |  |
+| ja | approved | label | 出版物 |  |
+| ja | approved | pluralLabel | 出版物 |  |
+| ja | approved | inline | 出版物 |  |
+| ja | approved | plural | 出版物 |  |
+| ko | approved | label | 출판물 |  |
+| ko | approved | pluralLabel | 출판물 |  |
+| ko | approved | inline | 출판물 |  |
+| ko | approved | plural | 출판물 |  |
+
+## serialization
+
+An identifiable ongoing or completed serialized publication of content.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Serialization |  |
+| en | approved | pluralLabel | Serializations |  |
+| en | approved | inline | serialization |  |
+| en | approved | plural | serializations |  |
+| zh-Hant | approved | label | 連載 |  |
+| zh-Hant | approved | pluralLabel | 連載 |  |
+| zh-Hant | approved | inline | 連載 |  |
+| zh-Hant | approved | plural | 連載 |  |
+| zh-Hans | approved | label | 连载 |  |
+| zh-Hans | approved | pluralLabel | 连载 |  |
+| zh-Hans | approved | inline | 连载 |  |
+| zh-Hans | approved | plural | 连载 |  |
+| de | approved | label | Fortsetzungsveröffentlichung |  |
+| de | approved | pluralLabel | Fortsetzungsveröffentlichungen |  |
+| de | approved | inline | Fortsetzungsveröffentlichung |  |
+| de | approved | plural | Fortsetzungsveröffentlichungen |  |
+| ja | approved | label | 連載 |  |
+| ja | approved | pluralLabel | 連載 |  |
+| ja | approved | inline | 連載 |  |
+| ja | approved | plural | 連載 |  |
+| ko | approved | label | 연재물 |  |
+| ko | approved | pluralLabel | 연재물 |  |
+| ko | approved | inline | 연재물 |  |
+| ko | approved | plural | 연재물 |  |
+
+## publishingCoverage
+
+The known extent of a work or text included in another publishing resource.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Content coverage |  |
+| en | approved | pluralLabel | Content coverage |  |
+| en | approved | inline | content coverage |  |
+| en | approved | plural | content coverage |  |
+| zh-Hant | approved | label | 內容涵蓋範圍 |  |
+| zh-Hant | approved | pluralLabel | 內容涵蓋範圍 |  |
+| zh-Hant | approved | inline | 內容涵蓋範圍 |  |
+| zh-Hant | approved | plural | 內容涵蓋範圍 |  |
+| zh-Hans | approved | label | 内容涵盖范围 |  |
+| zh-Hans | approved | pluralLabel | 内容涵盖范围 |  |
+| zh-Hans | approved | inline | 内容涵盖范围 |  |
+| zh-Hans | approved | plural | 内容涵盖范围 |  |
+| de | approved | label | Inhaltlicher Umfang |  |
+| de | approved | pluralLabel | Inhaltlicher Umfang |  |
+| de | approved | inline | inhaltlicher Umfang |  |
+| de | approved | plural | inhaltlicher Umfang |  |
+| ja | approved | label | 収録範囲 |  |
+| ja | approved | pluralLabel | 収録範囲 |  |
+| ja | approved | inline | 収録範囲 |  |
+| ja | approved | plural | 収録範囲 |  |
+| ko | approved | label | 내용 수록 범위 |  |
+| ko | approved | pluralLabel | 내용 수록 범위 |  |
+| ko | approved | inline | 내용 수록 범위 |  |
+| ko | approved | plural | 내용 수록 범위 |  |
+
+## publishingInstallment
+
+One ordered installment of serialized content; not necessarily a chapter.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Installment |  |
+| en | approved | pluralLabel | Installments |  |
+| en | approved | inline | installment |  |
+| en | approved | plural | installments |  |
+| zh-Hant | approved | label | 連載篇章 |  |
+| zh-Hant | approved | pluralLabel | 連載篇章 |  |
+| zh-Hant | approved | inline | 連載篇章 |  |
+| zh-Hant | approved | plural | 連載篇章 |  |
+| zh-Hans | approved | label | 连载篇章 |  |
+| zh-Hans | approved | pluralLabel | 连载篇章 |  |
+| zh-Hans | approved | inline | 连载篇章 |  |
+| zh-Hans | approved | plural | 连载篇章 |  |
+| de | approved | label | Fortsetzungsfolge |  |
+| de | approved | pluralLabel | Fortsetzungsfolgen |  |
+| de | approved | inline | Fortsetzungsfolge |  |
+| de | approved | plural | Fortsetzungsfolgen |  |
+| ja | approved | label | 連載回 |  |
+| ja | approved | pluralLabel | 連載回 |  |
+| ja | approved | inline | 連載回 |  |
+| ja | approved | plural | 連載回 |  |
+| ko | approved | label | 연재분 |  |
+| ko | approved | pluralLabel | 연재분 |  |
+| ko | approved | inline | 연재분 |  |
+| ko | approved | plural | 연재분 |  |
+
+## chapter
+
+One authored chapter in a text reading structure.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Chapter |  |
+| en | approved | pluralLabel | Chapters |  |
+| en | approved | inline | chapter |  |
+| en | approved | plural | chapters |  |
+| zh-Hant | approved | label | 章節 |  |
+| zh-Hant | approved | pluralLabel | 章節 |  |
+| zh-Hant | approved | inline | 章節 |  |
+| zh-Hant | approved | plural | 章節 |  |
+| zh-Hans | approved | label | 章节 |  |
+| zh-Hans | approved | pluralLabel | 章节 |  |
+| zh-Hans | approved | inline | 章节 |  |
+| zh-Hans | approved | plural | 章节 |  |
+| de | approved | label | Kapitel |  |
+| de | approved | pluralLabel | Kapitel |  |
+| de | approved | inline | Kapitel |  |
+| de | approved | plural | Kapitel |  |
+| ja | approved | label | チャプター |  |
+| ja | approved | pluralLabel | チャプター |  |
+| ja | approved | inline | チャプター |  |
+| ja | approved | plural | チャプター |  |
+| ko | approved | label | 챕터 |  |
+| ko | approved | pluralLabel | 챕터 |  |
+| ko | approved | inline | 챕터 |  |
+| ko | approved | plural | 챕터 |  |
+
+## program
+
+An audiovisual screen work, including film, television and animation; separate from its versions and episodes.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Screen work |  |
+| en | approved | pluralLabel | Screen works |  |
+| en | approved | inline | screen work |  |
+| en | approved | plural | screen works |  |
+| zh-Hant | approved | label | 影視作品 |  |
+| zh-Hant | approved | pluralLabel | 影視作品 |  |
+| zh-Hant | approved | inline | 影視作品 |  |
+| zh-Hant | approved | plural | 影視作品 |  |
+| zh-Hans | approved | label | 影视作品 |  |
+| zh-Hans | approved | pluralLabel | 影视作品 |  |
+| zh-Hans | approved | inline | 影视作品 |  |
+| zh-Hans | approved | plural | 影视作品 |  |
+| de | approved | label | Film- und Fernsehwerk |  |
+| de | approved | pluralLabel | Film- und Fernsehwerke |  |
+| de | approved | inline | Film- und Fernsehwerk |  |
+| de | approved | plural | Film- und Fernsehwerke |  |
+| ja | approved | label | 映像作品 |  |
+| ja | approved | pluralLabel | 映像作品 |  |
+| ja | approved | inline | 映像作品 |  |
+| ja | approved | plural | 映像作品 |  |
+| ko | approved | label | 영상 작품 |  |
+| ko | approved | pluralLabel | 영상 작품 |  |
+| ko | approved | inline | 영상 작품 |  |
+| ko | approved | plural | 영상 작품 |  |
+
+## softwareContent
+
+A software intellectual work or title, independent of versions and releases.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Software title |  |
+| en | approved | pluralLabel | Software titles |  |
+| en | approved | inline | software title |  |
+| en | approved | plural | software titles |  |
+| zh-Hant | approved | label | 軟體作品 |  |
+| zh-Hant | approved | pluralLabel | 軟體作品 |  |
+| zh-Hant | approved | inline | 軟體作品 |  |
+| zh-Hant | approved | plural | 軟體作品 |  |
+| zh-Hans | approved | label | 软件作品 |  |
+| zh-Hans | approved | pluralLabel | 软件作品 |  |
+| zh-Hans | approved | inline | 软件作品 |  |
+| zh-Hans | approved | plural | 软件作品 |  |
+| de | approved | label | Softwaretitel |  |
+| de | approved | pluralLabel | Softwaretitel |  |
+| de | approved | inline | Softwaretitel |  |
+| de | approved | plural | Softwaretitel |  |
+| ja | approved | label | ソフトウェア作品 |  |
+| ja | approved | pluralLabel | ソフトウェア作品 |  |
+| ja | approved | inline | ソフトウェア作品 |  |
+| ja | approved | plural | ソフトウェア作品 |  |
+| ko | approved | label | 소프트웨어 작품 |  |
+| ko | approved | pluralLabel | 소프트웨어 작품 |  |
+| ko | approved | inline | 소프트웨어 작품 |  |
+| ko | approved | plural | 소프트웨어 작품 |  |
+
+## softwareVersion
+
+An evidenced version of a software title with a declared distinction.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Software version |  |
+| en | approved | pluralLabel | Software versions |  |
+| en | approved | inline | software version |  |
+| en | approved | plural | software versions |  |
+| zh-Hant | approved | label | 軟體版本 |  |
+| zh-Hant | approved | pluralLabel | 軟體版本 |  |
+| zh-Hant | approved | inline | 軟體版本 |  |
+| zh-Hant | approved | plural | 軟體版本 |  |
+| zh-Hans | approved | label | 软件版本 |  |
+| zh-Hans | approved | pluralLabel | 软件版本 |  |
+| zh-Hans | approved | inline | 软件版本 |  |
+| zh-Hans | approved | plural | 软件版本 |  |
+| de | approved | label | Softwareversion |  |
+| de | approved | pluralLabel | Softwareversionen |  |
+| de | approved | inline | Softwareversion |  |
+| de | approved | plural | Softwareversionen |  |
+| ja | approved | label | ソフトウェア版 |  |
+| ja | approved | pluralLabel | ソフトウェア版 |  |
+| ja | approved | inline | ソフトウェア版 |  |
+| ja | approved | plural | ソフトウェア版 |  |
+| ko | approved | label | 소프트웨어 버전 |  |
+| ko | approved | pluralLabel | 소프트웨어 버전 |  |
+| ko | approved | inline | 소프트웨어 버전 |  |
+| ko | approved | plural | 소프트웨어 버전 |  |
+
+## softwareRelease
+
+One concrete software release, separate from its included contents and versions.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Software release |  |
+| en | approved | pluralLabel | Software releases |  |
+| en | approved | inline | software release |  |
+| en | approved | plural | software releases |  |
+| zh-Hant | approved | label | 軟體發行版本 |  |
+| zh-Hant | approved | pluralLabel | 軟體發行版本 |  |
+| zh-Hant | approved | inline | 軟體發行版本 |  |
+| zh-Hant | approved | plural | 軟體發行版本 |  |
+| zh-Hans | approved | label | 软件发行版本 |  |
+| zh-Hans | approved | pluralLabel | 软件发行版本 |  |
+| zh-Hans | approved | inline | 软件发行版本 |  |
+| zh-Hans | approved | plural | 软件发行版本 |  |
+| de | approved | label | Softwareveröffentlichung |  |
+| de | approved | pluralLabel | Softwareveröffentlichungen |  |
+| de | approved | inline | Softwareveröffentlichung |  |
+| de | approved | plural | Softwareveröffentlichungen |  |
+| ja | approved | label | ソフトウェアリリース |  |
+| ja | approved | pluralLabel | ソフトウェアリリース |  |
+| ja | approved | inline | ソフトウェアリリース |  |
+| ja | approved | plural | ソフトウェアリリース |  |
+| ko | approved | label | 소프트웨어 출시본 |  |
+| ko | approved | pluralLabel | 소프트웨어 출시본 |  |
+| ko | approved | inline | 소프트웨어 출시본 |  |
+| ko | approved | plural | 소프트웨어 출시본 |  |
+
+## grouping
+
+A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Catalog group |  |
+| en | approved | pluralLabel | Catalog groups |  |
+| en | approved | inline | catalog group |  |
+| en | approved | plural | catalog groups |  |
+| zh-Hant | approved | label | 目錄分組 |  |
+| zh-Hant | approved | pluralLabel | 目錄分組 |  |
+| zh-Hant | approved | inline | 目錄分組 |  |
+| zh-Hant | approved | plural | 目錄分組 |  |
+| zh-Hans | approved | label | 目录分组 |  |
+| zh-Hans | approved | pluralLabel | 目录分组 |  |
+| zh-Hans | approved | inline | 目录分组 |  |
+| zh-Hans | approved | plural | 目录分组 |  |
+| de | approved | label | Kataloggruppe |  |
+| de | approved | pluralLabel | Kataloggruppen |  |
+| de | approved | inline | Kataloggruppe |  |
+| de | approved | plural | Kataloggruppen |  |
+| ja | approved | label | カタロググループ |  |
+| ja | approved | pluralLabel | カタロググループ |  |
+| ja | approved | inline | カタロググループ |  |
+| ja | approved | plural | カタロググループ |  |
+| ko | approved | label | 카탈로그 그룹 |  |
+| ko | approved | pluralLabel | 카탈로그 그룹 |  |
+| ko | approved | inline | 카탈로그 그룹 |  |
+| ko | approved | plural | 카탈로그 그룹 |  |
+
+## referenceConcept
+
+A catalog reference concept; distinct from an indexable Tag.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Reference concept |  |
+| en | approved | pluralLabel | Reference concepts |  |
+| en | approved | inline | reference concept |  |
+| en | approved | plural | reference concepts |  |
+| zh-Hant | approved | label | 參照概念 |  |
+| zh-Hant | approved | pluralLabel | 參照概念 |  |
+| zh-Hant | approved | inline | 參照概念 |  |
+| zh-Hant | approved | plural | 參照概念 |  |
+| zh-Hans | approved | label | 参照概念 |  |
+| zh-Hans | approved | pluralLabel | 参照概念 |  |
+| zh-Hans | approved | inline | 参照概念 |  |
+| zh-Hans | approved | plural | 参照概念 |  |
+| de | approved | label | Referenzbegriff |  |
+| de | approved | pluralLabel | Referenzbegriffe |  |
+| de | approved | inline | Referenzbegriff |  |
+| de | approved | plural | Referenzbegriffe |  |
+| ja | approved | label | 参照概念 |  |
+| ja | approved | pluralLabel | 参照概念 |  |
+| ja | approved | inline | 参照概念 |  |
+| ja | approved | plural | 参照概念 |  |
+| ko | approved | label | 참조 개념 |  |
+| ko | approved | pluralLabel | 참조 개념 |  |
+| ko | approved | inline | 참조 개념 |  |
+| ko | approved | plural | 참조 개념 |  |
+
+## distributionPackage
+
+One distributed package or manifest that can include independently identified resources.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Distribution package |  |
+| en | approved | pluralLabel | Distribution packages |  |
+| en | approved | inline | distribution package |  |
+| en | approved | plural | distribution packages |  |
+| zh-Hant | approved | label | 散布套件 |  |
+| zh-Hant | approved | pluralLabel | 散布套件 |  |
+| zh-Hant | approved | inline | 散布套件 |  |
+| zh-Hant | approved | plural | 散布套件 |  |
+| zh-Hans | approved | label | 分发包 |  |
+| zh-Hans | approved | pluralLabel | 分发包 |  |
+| zh-Hans | approved | inline | 分发包 |  |
+| zh-Hans | approved | plural | 分发包 |  |
+| de | approved | label | Distributionspaket |  |
+| de | approved | pluralLabel | Distributionspakete |  |
+| de | approved | inline | Distributionspaket |  |
+| de | approved | plural | Distributionspakete |  |
+| ja | approved | label | 配布パッケージ |  |
+| ja | approved | pluralLabel | 配布パッケージ |  |
+| ja | approved | inline | 配布パッケージ |  |
+| ja | approved | plural | 配布パッケージ |  |
+| ko | approved | label | 배포 패키지 |  |
+| ko | approved | pluralLabel | 배포 패키지 |  |
+| ko | approved | inline | 배포 패키지 |  |
+| ko | approved | plural | 배포 패키지 |  |
+
+## publishingCatalog
+
+The catalog family containing written works, text versions and publications.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Publishing catalog |  |
+| en | approved | pluralLabel | Publishing catalog |  |
+| en | approved | inline | publishing catalog |  |
+| en | approved | plural | publishing catalog |  |
+| zh-Hant | approved | label | 出版目錄 |  |
+| zh-Hant | approved | pluralLabel | 出版目錄 |  |
+| zh-Hant | approved | inline | 出版目錄 |  |
+| zh-Hant | approved | plural | 出版目錄 |  |
+| zh-Hans | approved | label | 出版目录 |  |
+| zh-Hans | approved | pluralLabel | 出版目录 |  |
+| zh-Hans | approved | inline | 出版目录 |  |
+| zh-Hans | approved | plural | 出版目录 |  |
+| de | approved | label | Publikationskatalog |  |
+| de | approved | pluralLabel | Publikationskatalog |  |
+| de | approved | inline | Publikationskatalog |  |
+| de | approved | plural | Publikationskatalog |  |
+| ja | approved | label | 出版カタログ |  |
+| ja | approved | pluralLabel | 出版カタログ |  |
+| ja | approved | inline | 出版カタログ |  |
+| ja | approved | plural | 出版カタログ |  |
+| ko | approved | label | 출판 카탈로그 |  |
+| ko | approved | pluralLabel | 출판 카탈로그 |  |
+| ko | approved | inline | 출판 카탈로그 |  |
+| ko | approved | plural | 출판 카탈로그 |  |
+
+## software
+
+The catalog family of software titles, versions and releases.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Software |  |
+| en | approved | pluralLabel | Software |  |
+| en | approved | inline | software |  |
+| en | approved | plural | software |  |
+| zh-Hant | approved | label | 軟體 |  |
+| zh-Hant | approved | pluralLabel | 軟體 |  |
+| zh-Hant | approved | inline | 軟體 |  |
+| zh-Hant | approved | plural | 軟體 |  |
+| zh-Hans | approved | label | 软件 |  |
+| zh-Hans | approved | pluralLabel | 软件 |  |
+| zh-Hans | approved | inline | 软件 |  |
+| zh-Hans | approved | plural | 软件 |  |
+| de | approved | label | Software |  |
+| de | approved | pluralLabel | Software |  |
+| de | approved | inline | Software |  |
+| de | approved | plural | Software |  |
+| ja | approved | label | ソフトウェア |  |
+| ja | approved | pluralLabel | ソフトウェア |  |
+| ja | approved | inline | ソフトウェア |  |
+| ja | approved | plural | ソフトウェア |  |
+| ko | approved | label | 소프트웨어 |  |
+| ko | approved | pluralLabel | 소프트웨어 |  |
+| ko | approved | inline | 소프트웨어 |  |
+| ko | approved | plural | 소프트웨어 |  |
+
+## referenceCatalog
+
+The catalog family of reference concepts, places, instruments and events.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Reference entries |  |
+| en | approved | pluralLabel | Reference entries |  |
+| en | approved | inline | reference entries |  |
+| en | approved | plural | reference entries |  |
+| zh-Hant | approved | label | 參照條目 |  |
+| zh-Hant | approved | pluralLabel | 參照條目 |  |
+| zh-Hant | approved | inline | 參照條目 |  |
+| zh-Hant | approved | plural | 參照條目 |  |
+| zh-Hans | approved | label | 参照条目 |  |
+| zh-Hans | approved | pluralLabel | 参照条目 |  |
+| zh-Hans | approved | inline | 参照条目 |  |
+| zh-Hans | approved | plural | 参照条目 |  |
+| de | approved | label | Referenzeinträge |  |
+| de | approved | pluralLabel | Referenzeinträge |  |
+| de | approved | inline | Referenzeinträge |  |
+| de | approved | plural | Referenzeinträge |  |
+| ja | approved | label | 参照項目 |  |
+| ja | approved | pluralLabel | 参照項目 |  |
+| ja | approved | inline | 参照項目 |  |
+| ja | approved | plural | 参照項目 |  |
+| ko | approved | label | 참조 항목 |  |
+| ko | approved | pluralLabel | 참조 항목 |  |
+| ko | approved | inline | 참조 항목 |  |
+| ko | approved | plural | 참조 항목 |  |
+
 ## music
 
 The native music domain.
@@ -550,26 +1108,44 @@ A Unit representing a person, organization, or character that can participate in
 
 | Locale | Status | Slot | Approved form | Forbidden forms |
 | --- | --- | --- | --- | --- |
+| en | approved | personLabel | Real person | Catalog, catalog |
+| en | approved | organizationLabel | Organization | Catalog, catalog |
+| en | approved | characterLabel | Fictional character | Catalog, catalog |
 | en | approved | label | Entity | Catalog, catalog |
 | en | approved | pluralLabel | Entities | Catalog, catalog |
 | en | approved | inline | entity | Catalog, catalog |
 | en | approved | plural | entities | Catalog, catalog |
+| zh-Hant | approved | personLabel | 現實人物 | Catalog, Entity |
+| zh-Hant | approved | organizationLabel | 組織機構 | Catalog, Entity |
+| zh-Hant | approved | characterLabel | 虛構角色 | Catalog, Entity |
 | zh-Hant | approved | label | 實體 | Catalog, Entity |
 | zh-Hant | approved | pluralLabel | 實體 | Catalog, Entity |
 | zh-Hant | approved | inline | 實體 | Catalog, Entity |
 | zh-Hant | approved | plural | 實體 | Catalog, Entity |
+| zh-Hans | approved | personLabel | 现实人物 | Catalog, Entity |
+| zh-Hans | approved | organizationLabel | 组织机构 | Catalog, Entity |
+| zh-Hans | approved | characterLabel | 虚构角色 | Catalog, Entity |
 | zh-Hans | approved | label | 实体 | Catalog, Entity |
 | zh-Hans | approved | pluralLabel | 实体 | Catalog, Entity |
 | zh-Hans | approved | inline | 实体 | Catalog, Entity |
 | zh-Hans | approved | plural | 实体 | Catalog, Entity |
+| de | approved | personLabel | Reale Person | Catalog |
+| de | approved | organizationLabel | Organisation | Catalog |
+| de | approved | characterLabel | Fiktive Figur | Catalog |
 | de | approved | label | Entität | Catalog |
 | de | approved | pluralLabel | Entitäten | Catalog |
 | de | approved | inline | Entität | Catalog |
 | de | approved | plural | Entitäten | Catalog |
+| ja | approved | personLabel | 実在の人物 | Catalog |
+| ja | approved | organizationLabel | 団体・組織 | Catalog |
+| ja | approved | characterLabel | 架空の登場人物 | Catalog |
 | ja | approved | label | エンティティ | Catalog |
 | ja | approved | pluralLabel | エンティティ | Catalog |
 | ja | approved | inline | エンティティ | Catalog |
 | ja | approved | plural | エンティティ | Catalog |
+| ko | approved | personLabel | 실존 인물 | Catalog |
+| ko | approved | organizationLabel | 단체·기관 | Catalog |
+| ko | approved | characterLabel | 가상 인물 | Catalog |
 | ko | approved | label | 엔터티 | Catalog |
 | ko | approved | pluralLabel | 엔터티 | Catalog |
 | ko | approved | inline | 엔터티 | Catalog |

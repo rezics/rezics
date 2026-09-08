@@ -26,7 +26,7 @@ export default {
 		groups: {
 			works: "Œuvres et entrées",
 			publishing: "Publier",
-			organization: "Organisation",
+			organization: `${frTerminology.entity.forms.organizationLabel}`,
 			vocabulary: "Vocabulaire",
 		},
 		empty: {
@@ -61,8 +61,8 @@ export default {
 			description: "Consultez et gérez les livres liés à votre travail.",
 		},
 		software: {
-			label: "Logiciels",
-			description: "Consultez et gérez les entrées de logiciels liées à votre travail.",
+			label: `${frTerminology.software.forms.pluralLabel}`,
+			description: `Consultez et gérez les entrées de ${frTerminology.software.forms.plural} liées à votre travail.`,
 		},
 		media: {
 			label: "Médias",
@@ -137,7 +137,7 @@ export default {
 		createAction: "Poursuivre la création",
 		subjects: {
 			book: "livres",
-			software: "logiciels",
+			software: `${frTerminology.software.forms.plural}`,
 			media: "médias",
 			person: "personnes",
 			organization: "organisations",

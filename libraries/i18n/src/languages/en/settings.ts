@@ -13,8 +13,9 @@ const { forms: zoneTerms } = enTerminology.zone;
 export default {
 	memberships: {
 		expiryHint: "Choose an expiration within the next thirty days.",
-		title: "Organization memberships",
-		description: "Review invitations, leave organizations, and manage member lists where you have permission.",
+		title: `${enTerminology.entity.forms.organizationLabel} memberships`,
+		description:
+			"Review invitations, leave organizations, and manage member lists where you have permission.",
 		invitations: "Invitations",
 		organizations: "My organizations",
 		managing: "Member lists I manage",
@@ -29,9 +30,12 @@ export default {
 		emptyMembers: "No members yet.",
 		emptyOrganizations: "You have not joined an organization.",
 		emptyManagement: "You do not currently manage any member lists.",
-		acceptPrompt: "Accepting adds your public identity to this organization’s member list, visible to its membership managers.",
-		removePrompt: "Removing membership leaves separately granted publishing, security and management permissions unchanged.",
-		leavePrompt: "Leaving removes your membership. Any separate permissions you hold remain unchanged.",
+		acceptPrompt:
+			"Accepting adds your public identity to this organization’s member list, visible to its membership managers.",
+		removePrompt:
+			"Removing membership leaves separately granted publishing, security and management permissions unchanged.",
+		leavePrompt:
+			"Leaving removes your membership. Any separate permissions you hold remain unchanged.",
 		recipientHint: "Use the public identity of an existing account.",
 		states: {
 			pending: "Pending",
@@ -49,7 +53,8 @@ export default {
 		history: "History",
 		restore: "Restore",
 		title: "Organizations and access",
-		description: "Create organizations, manage their public identities, and control delegated access.",
+		description:
+			"Create organizations, manage their public identities, and control delegated access.",
 		organizations: "Organizations",
 		createOrganization: "Create organization",
 		name: "Name",
@@ -67,12 +72,15 @@ export default {
 		createService: "Create automation identity",
 		credential: "Credential",
 		credentialDescription: "Copy this credential now. It will not be shown again.",
-		securityWarning: "Revoking the last human security controller suspends this identity until the platform verifies a recovery.",
-		revokeWarning: "This permission will stop working immediately. Completed actions remain recorded.",
+		securityWarning:
+			"Revoking the last human security controller suspends this identity until the platform verifies a recovery.",
+		revokeWarning:
+			"This permission will stop working immediately. Completed actions remain recorded.",
 		erasedRecipient: "Account erased",
 		currentAccount: "My identity",
 		eraseTitle: "Erase account",
-		eraseDescription: "Signing in will stop immediately. Private notes, favorites, progress, messages and uploads will be erased in batches. Public authorship and audit records remain. This cannot be undone.",
+		eraseDescription:
+			"Signing in will stop immediately. Private notes, favorites, progress, messages and uploads will be erased in batches. Public authorship and audit records remain. This cannot be undone.",
 		eraseConfirmation: "I understand that my account and private data cannot be recovered.",
 		erase: "Erase my account",
 		erased: "Account erasure has started.",

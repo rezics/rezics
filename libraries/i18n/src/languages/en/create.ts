@@ -57,8 +57,8 @@ export default {
 	sections: {
 		book: { label: "Books", description: "View and manage books related to your work." },
 		software: {
-			label: "Software",
-			description: "View and manage software entries related to your work.",
+			label: `${enTerminology.software.forms.label}`,
+			description: `View and manage ${enTerminology.software.forms.inline} entries related to your work.`,
 		},
 		media: { label: "Media", description: "View and manage media related to your work." },
 		entity: {
@@ -123,7 +123,7 @@ export default {
 		createAction: "Continue to create",
 		subjects: {
 			book: "books",
-			software: "software entries",
+			software: `${enTerminology.software.forms.inline} entries`,
 			media: "media entries",
 			person: "people",
 			organization: "organizations",

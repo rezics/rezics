@@ -1,3 +1,4 @@
+import { enTerminology } from "@rezics/i18n/terminology/en";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 import type { ContactCopy } from "../contract";
@@ -21,7 +22,7 @@ export const enContactCopy = {
 	topics: [
 		{
 			title: "Product and content collaboration",
-			body: `Discuss how publishers, creators, communities, or content tools can connect their works, structures, and histories with ${BRAND}.`,
+			body: `Discuss how ${enTerminology.publisher.forms.plural}, creators, communities, or content tools can connect their works, structures, and histories with ${BRAND}.`,
 		},
 		{
 			title: "Open-source participation",

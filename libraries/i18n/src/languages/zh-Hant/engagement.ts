@@ -166,7 +166,7 @@ export default {
 	scoreActionByType: {
 		book: "為這本書評分",
 		media: "為這部作品評分",
-		software: "為這套軟體評分",
+		software: `為這套${zhHantTerminology.software.forms.label}評分`,
 		series: "為這個系列評分",
 	},
 	progressByType: {
@@ -182,9 +182,9 @@ export default {
 			status: "閱讀狀態",
 			progress: "閱讀完成度",
 			completedCount: "已讀次數",
-			lastChapter: "目前章節",
-			noChapter: "尚未選擇章節",
-			estimatedFromContents: "已依所選章節與目錄內容量估算進度，你仍可自行調整。",
+			lastChapter: `目前${zhHantTerminology.chapter.forms.label}`,
+			noChapter: `尚未選擇${zhHantTerminology.chapter.forms.label}`,
+			estimatedFromContents: `已依所選${zhHantTerminology.chapter.forms.label}與目錄內容量估算進度，你仍可自行調整。`,
 			history: {
 				completion: insert("於 {{date}} 讀完了這本書。", { date: String }),
 				update: insert("於 {{date}} 讀到 {{percent}}%。", {
@@ -280,7 +280,7 @@ export default {
 					percent: Number,
 				}),
 			},
-			scoreAction: "為這套軟體評分",
+			scoreAction: `為這套${zhHantTerminology.software.forms.label}評分`,
 			recordAction: "記錄使用",
 			startAction: "開始使用",
 			updateAction: "更新紀錄",

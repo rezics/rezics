@@ -13,9 +13,11 @@ const { forms: zoneTerms } = esTerminology.zone;
 const { forms: entityTerms } = esTerminology.entity;
 
 export default {
-	OrganizationMembershipConflict: "La invitación o la membresía ha cambiado. Actualiza la página e inténtalo de nuevo.",
+	OrganizationMembershipConflict:
+		"La invitación o la membresía ha cambiado. Actualiza la página e inténtalo de nuevo.",
 	OrganizationMembershipNotFound: "Esta invitación o membresía no está disponible.",
-	OrganizationMembershipCapacityExceeded: "Hay demasiadas invitaciones pendientes. Resuelve algunas antes de enviar otra.",
+	OrganizationMembershipCapacityExceeded:
+		"Hay demasiadas invitaciones pendientes. Resuelve algunas antes de enviar otra.",
 	CatalogReferenceNotFound: "No se encontró este registro.",
 	CatalogRevisionConflict: "Este registro ha cambiado. Actualiza la página e inténtalo de nuevo.",
 	FavoriteNotFound: "No se encontró este elemento guardado.",
@@ -101,8 +103,7 @@ export default {
 	UserFollowBlocked: `${followTerms.stateLabel} no está disponible entre usuarios bloqueados.`,
 	FollowingTargetKindMismatch: `El tipo de la Unit ${followTerms.followed} ha cambiado. Vuelve a cargar sus ajustes.`,
 	UserSelfBlockForbidden: "No puedes bloquearte a ti mismo.",
-	SoftwareSystemRequirementSourceInvalid:
-		"El origen del requisito del sistema debe pertenecer a este software.",
+	SoftwareSystemRequirementSourceInvalid: `El origen del requisito del sistema debe pertenecer a este ${esTerminology.software.forms.inline}.`,
 	SeriesReleaseNotFound: "No se ha encontrado esta versión de la serie.",
 	ZonePageNotFound: `No se ha encontrado esta página de ${zoneTerms.inline}.`,
 	ZonePageInUse: `Esta página de ${zoneTerms.inline} todavía se usa en un documento de bloques o navegación.`,
@@ -111,7 +112,7 @@ export default {
 	ZoneDocumentInvalid: `El documento de bloques o navegación de la ${zoneTerms.inline} no es válido.`,
 	ZoneTimeRangeInvalid: `La hora de finalización de la ${zoneTerms.inline} debe ser posterior a la de inicio.`,
 	ZoneRuleRealmInvalid: `El ${realmTerms.inline} seleccionado no tiene una revisión de reglas vigente con al menos una regla.`,
-	SoftwareNotFound: "No se ha encontrado este software.",
+	SoftwareNotFound: `No se ha encontrado este ${esTerminology.software.forms.inline}.`,
 	SystemRequirementNotFound: "No se ha encontrado este requisito del sistema.",
 	PollOptionsDuplicated: "Las opciones de la encuesta deben ser únicas.",
 	PollNotFound: "No se ha encontrado esta encuesta.",
@@ -206,8 +207,8 @@ export default {
 	InvalidPaginationCursor: "Este enlace de página no es válido o ha vencido.",
 	BookNotFound: "No se ha encontrado este libro.",
 	MediaNotFound: "No se ha encontrado este elemento multimedia.",
-	ChapterNotFound: "No se ha encontrado este capítulo.",
-	ChapterLanguageNotFound: "No se ha encontrado este idioma del capítulo.",
+	ChapterNotFound: `No se ha encontrado este ${esTerminology.chapter.forms.inline}.`,
+	ChapterLanguageNotFound: `No se ha encontrado este idioma del ${esTerminology.chapter.forms.inline}.`,
 	ReportRealmMismatch: `La unidad denunciada no pertenece a este ${realmTerms.inline}.`,
 	PostNotFound: `No se ha encontrado esta ${postTerms.inline}.`,
 	PostLocalizationNotFound: `No se ha encontrado esta versión lingüística de la ${postTerms.inline}.`,

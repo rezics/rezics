@@ -164,7 +164,7 @@ export default {
 	scoreActionByType: {
 		book: "Rate this book",
 		media: "Rate this work",
-		software: "Rate this software",
+		software: `Rate this ${enTerminology.software.forms.inline}`,
 		series: "Rate this series",
 	},
 	progressByType: {
@@ -181,10 +181,9 @@ export default {
 			status: "Reading status",
 			progress: "Reading completion",
 			completedCount: "Completed reads",
-			lastChapter: "Current chapter",
-			noChapter: "No chapter selected",
-			estimatedFromContents:
-				"Estimated from the selected chapter and contents; you can still adjust it.",
+			lastChapter: `Current ${enTerminology.chapter.forms.inline}`,
+			noChapter: `No ${enTerminology.chapter.forms.inline} selected`,
+			estimatedFromContents: `Estimated from the selected ${enTerminology.chapter.forms.inline} and contents; you can still adjust it.`,
 			history: {
 				completion: insert("Finished this book on {{date}}.", { date: String }),
 				update: insert("Reached {{percent}}% on {{date}}.", {
@@ -283,7 +282,7 @@ export default {
 					percent: Number,
 				}),
 			},
-			scoreAction: "Rate this software",
+			scoreAction: `Rate this ${enTerminology.software.forms.inline}`,
 			recordAction: "Record usage",
 			startAction: "Start using",
 			updateAction: "Update record",

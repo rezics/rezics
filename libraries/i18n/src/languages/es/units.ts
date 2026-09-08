@@ -76,7 +76,7 @@ export default {
 	},
 	types: {
 		book: "Libro",
-		software: "Software",
+		software: `${esTerminology.software.forms.label}`,
 		media: "Contenido multimedia",
 		series: "Serie",
 		video: videoTerms.label,
@@ -98,8 +98,7 @@ export default {
 		publicWorkHelpTitle: "¿Qué es una obra comunitaria?",
 		publicWorkHelpOwnership:
 			"Las obras comunitarias pertenecen a la comunidad y se mantienen de forma colectiva. Crearlas no te concede la titularidad ni permisos adicionales; todas las personas con sesión iniciada las editan con los mismos permisos compartidos.",
-		publicWorkHelpScope:
-			"Elige esta opción cuando la comunidad, y no un único perfil, deba mantener la obra. La titularidad no determina si se muestra el cuerpo de los capítulos.",
+		publicWorkHelpScope: `Elige esta opción cuando la comunidad, y no un único perfil, deba mantener la obra. La titularidad no determina si se muestra el cuerpo de los ${esTerminology.chapter.forms.plural}.`,
 		publicWorkHelpAlternative:
 			"Si posees los derechos de autor o quieres administrar una obra y permitir que determinadas personas colaboren, elige «Obra propia» y concede los permisos de edición adecuados después de crearla.",
 		entryOwnershipLabel: "Titularidad de la entrada",
@@ -156,7 +155,7 @@ export default {
 		"co-author": "Coautor",
 		translator: "Traductor",
 		illustrator: "Ilustrador",
-		editor: "Editor",
+		editor: `Editor`,
 		publisher: "Editorial",
 		letterer: "Rotulista",
 		colorist: "Colorista",
@@ -212,8 +211,7 @@ export default {
 			},
 			contentStructure: {
 				label: "Estructura de contenido",
-				description:
-					"Gestiona capítulos del libro o elementos multimedia en un editor de árbol plegable y con sangría.",
+				description: `Gestiona ${esTerminology.chapter.forms.plural} del libro o elementos multimedia en un editor de árbol plegable y con sangría.`,
 				developmentBadge: "En desarrollo",
 			},
 			releases: {
@@ -278,9 +276,8 @@ export default {
 		isbn13: verbatimTerms.isbn13.value,
 		metadataOnly: `Solo ${metadataTerms.inline}`,
 		metadataOnlyDescription: {
-			book: "Conserva los datos de la obra, el contenido, el progreso y los debates, pero no presenta los capítulos alojados. El texto existente no se elimina.",
-			software:
-				"Conserva los datos del software, las versiones, el progreso y los debates, pero no ofrece paquetes, binarios ni archivos de código fuente alojados. Los archivos existentes no se eliminan.",
+			book: `Conserva los datos de la obra, el contenido, el progreso y los debates, pero no presenta los ${esTerminology.chapter.forms.plural} alojados. El texto existente no se elimina.`,
+			software: `Conserva los datos del ${esTerminology.software.forms.inline}, las versiones, el progreso y los debates, pero no ofrece paquetes, binarios ni archivos de código fuente alojados. Los archivos existentes no se eliminan.`,
 			media:
 				"Conserva los datos, el contenido, el progreso y los debates, pero no presenta contenido multimedia alojado. El contenido existente no se elimina.",
 		},
@@ -329,7 +326,7 @@ export default {
 				discussion: "Conversación",
 			},
 			software: {
-				overview: "Información del software",
+				overview: `Información del ${esTerminology.software.forms.inline}`,
 				requirements: "Requisitos del sistema",
 				tags: "Etiquetas",
 				associations: "Asociaciones",
@@ -350,7 +347,7 @@ export default {
 		sectionDescriptions: {
 			book: {
 				overview: "Descripción del libro, información editorial y estado de lectura.",
-				contents: "Explora la estructura de capítulos y sigue leyendo.",
+				contents: `Explora la estructura de ${esTerminology.chapter.forms.plural} y sigue leyendo.`,
 				tags: "Revisa las etiquetas globales y las valoraciones contextuales de las fuentes seleccionadas.",
 				associations:
 					"Revisa los temas del libro, su serie y sus relaciones entre elementos principales y variantes.",
@@ -370,14 +367,13 @@ export default {
 				discussion: `Explora las ${postTerms.plural} que usan esta obra como tema.`,
 			},
 			software: {
-				overview: "Descripción del software, información de versión y estado de uso.",
+				overview: `Descripción del ${esTerminology.software.forms.inline}, información de versión y estado de uso.`,
 				requirements: "Consulta los requisitos del sistema por plataforma y nivel.",
 				tags: "Revisa las etiquetas globales y las valoraciones contextuales de las fuentes seleccionadas.",
-				associations:
-					"Revisa los temas del software, su serie y sus relaciones entre elementos principales y variantes.",
-				reviews: "Lee o escribe reseñas de usuarios del software.",
-				collections: "Explora las colecciones públicas que incluyen este software.",
-				discussion: `Explora las ${postTerms.plural} que usan este software como tema.`,
+				associations: `Revisa los temas del ${esTerminology.software.forms.inline}, su serie y sus relaciones entre elementos principales y variantes.`,
+				reviews: `Lee o escribe reseñas de usuarios del ${esTerminology.software.forms.inline}.`,
+				collections: `Explora las colecciones públicas que incluyen este ${esTerminology.software.forms.inline}.`,
+				discussion: `Explora las ${postTerms.plural} que usan este ${esTerminology.software.forms.inline} como tema.`,
 			},
 			series: {
 				overview: "Descripción, información de las obras y valoraciones de la serie.",
@@ -458,12 +454,11 @@ export default {
 		canonicalUnit: "Unit principal",
 		saveSettings: "Guardar configuración",
 		bookDraftScope: "Alcance de la retirada",
-		bookDraftScopeDescription: `Los capítulos son ${postTerms.plural} independientes. Elige explícitamente si los capítulos publicados asociados también deben volver a borrador.`,
+		bookDraftScopeDescription: `Los ${esTerminology.chapter.forms.plural} son ${postTerms.plural} independientes. Elige explícitamente si los ${esTerminology.chapter.forms.plural} publicados asociados también deben volver a borrador.`,
 		bookDraftChoose: "Elegir el alcance",
 		bookDraftBookOnly: "Pasar solo el libro a borrador",
-		bookDraftBookAndChapters: "Pasar a borrador el libro y los capítulos publicados administrables",
-		bookChapterDraftQueued:
-			"La retirada de capítulos está en cola; los capítulos administrables se procesarán por lotes.",
+		bookDraftBookAndChapters: `Pasar a borrador el libro y los ${esTerminology.chapter.forms.plural} publicados administrables`,
+		bookChapterDraftQueued: `La retirada de ${esTerminology.chapter.forms.plural} está en cola; los ${esTerminology.chapter.forms.plural} administrables se procesarán por lotes.`,
 	},
 	relationshipManagement: {
 		credits: "Créditos",
@@ -659,15 +654,18 @@ export default {
 	content: {
 		title: "Contenido",
 		edit: "Editar contenido",
-		chapter: "Capítulo",
+		chapter: `${esTerminology.chapter.forms.label}`,
 		label: "Etiqueta",
 		structure: "Estructura",
 		root: "(Raíz)",
-		structureSummary: insert("{{books}} libros · {{chapters}} capítulos · {{labels}} etiquetas", {
-			books: Number,
-			chapters: Number,
-			labels: Number,
-		}),
+		structureSummary: insert(
+			`{{books}} libros · {{chapters}} ${esTerminology.chapter.forms.plural} · {{labels}} etiquetas`,
+			{
+				books: Number,
+				chapters: Number,
+				labels: Number,
+			},
+		),
 		mediaStructureSummary: insert(
 			`{{media}} contenidos multimedia · {{videos}} ${videoTerms.plural} · {{audios}} elementos de ${audioTerms.inline} · {{labels}} etiquetas`,
 			{ media: Number, videos: Number, audios: Number, labels: Number },
@@ -682,32 +680,29 @@ export default {
 		moveToFirst: "Mover al principio de este nivel",
 		moveToLast: "Mover al final de este nivel",
 		move: "Mover",
-		moveDescription:
-			"Elige una etiqueta para mover el elemento al final de sus elementos subordinados o un capítulo para moverlo justo debajo.",
+		moveDescription: `Elige una etiqueta para mover el elemento al final de sus elementos subordinados o un ${esTerminology.chapter.forms.inline} para moverlo justo debajo.`,
 		mediaMoveDescription:
 			"Elige una etiqueta para mover la selección al final de sus elementos subordinados o un elemento multimedia para moverla justo debajo.",
-		addChapter: "Añadir capítulo",
+		addChapter: `Añadir ${esTerminology.chapter.forms.inline}`,
 		addBook: "Añadir libro",
 		addMedia: "Añadir contenido multimedia",
 		addLabel: "Añadir etiqueta",
 		addVideo: `Añadir ${videoTerms.inline}`,
 		addAudio: `Añadir ${audioTerms.inline}`,
-		addChapterDescription:
-			"Crea un capítulo nuevo o busca un capítulo existente para añadirlo. Al terminar también se guardará la estructura de contenido.",
-		chapterOwnership: "Titularidad del capítulo",
+		addChapterDescription: `Crea un ${esTerminology.chapter.forms.inline} nuevo o busca un ${esTerminology.chapter.forms.inline} existente para añadirlo. Al terminar también se guardará la estructura de contenido.`,
+		chapterOwnership: `Titularidad del ${esTerminology.chapter.forms.inline}`,
 		addBookDescription:
 			"Busca un libro existente para añadirlo. Esta acción también guarda la estructura de contenido.",
 		addMediaDescription:
 			"Busca contenido multimedia existente para añadirlo. Esta acción también guarda la estructura de contenido.",
 		bookDefaultOwnership: "Usar la predeterminada del libro",
-		profileOwnedChapter: "Capítulo propio",
-		communityOwnedChapter: "Capítulo comunitario",
+		profileOwnedChapter: `${esTerminology.chapter.forms.label} propio`,
+		communityOwnedChapter: `${esTerminology.chapter.forms.label} comunitario`,
 		chapterOwnershipDefaultDescription: insert(
 			"Usa la titularidad actual del libro: {{ownership}}.",
 			{ ownership: String },
 		),
-		chapterOwnershipOverrideDescription:
-			"Sobrescribe la titularidad predeterminada del libro para este capítulo.",
+		chapterOwnershipOverrideDescription: `Sobrescribe la titularidad predeterminada del libro para este ${esTerminology.chapter.forms.inline}.`,
 		addLabelDescription:
 			"Crea una etiqueta nueva o busca una etiqueta existente para añadirla. Al terminar también se guardará la estructura de contenido.",
 		addVideoDescription: `Crea un ${videoTerms.inline} o busca uno existente para añadirlo. Esta acción también guarda la estructura de contenido.`,
@@ -715,22 +710,22 @@ export default {
 		addMode: "Modo de incorporación",
 		createMode: "Crear",
 		attachMode: "Añadir existente",
-		existingChapter: "Capítulo existente",
+		existingChapter: `${esTerminology.chapter.forms.label} existente`,
 		existingBook: "Libro existente",
 		existingMedia: "Contenido multimedia existente",
 		existingLabel: "Etiqueta existente",
 		existingMediaItem: "Elemento multimedia existente",
-		searchExistingChapter: "Buscar capítulos existentes",
+		searchExistingChapter: `Buscar ${esTerminology.chapter.forms.plural} existentes`,
 		searchExistingBook: "Buscar libros existentes",
 		searchExistingMedia: "Buscar contenido multimedia existente",
 		searchExistingLabel: "Buscar etiquetas existentes",
 		searchExistingMediaItem: "Buscar elementos multimedia existentes",
 		mediaKindFilter: "Tipo de contenido",
 		allMediaKinds: "Todos",
-		createChapterAndSave: "Crear capítulo y guardar",
+		createChapterAndSave: `Crear ${esTerminology.chapter.forms.inline} y guardar`,
 		createLabelAndSave: "Crear etiqueta y guardar",
 		createMediaItemAndSave: "Crear elemento multimedia y guardar",
-		attachChapterAndSave: "Añadir capítulo y guardar",
+		attachChapterAndSave: `Añadir ${esTerminology.chapter.forms.inline} y guardar`,
 		attachBookAndSave: "Añadir libro y guardar",
 		attachMediaAndSave: "Añadir contenido multimedia y guardar",
 		attachLabelAndSave: "Añadir etiqueta y guardar",
@@ -738,17 +733,16 @@ export default {
 		saveCurrentChangesNotice:
 			"Esta acción también guarda los cambios de la estructura de contenido que aún estén pendientes.",
 		choosePosition: "Elegir posición en la estructura",
-		choosePositionDescription:
-			"Elige una etiqueta para añadir el elemento al final de sus elementos subordinados o un capítulo para insertarlo justo debajo.",
+		choosePositionDescription: `Elige una etiqueta para añadir el elemento al final de sus elementos subordinados o un ${esTerminology.chapter.forms.inline} para insertarlo justo debajo.`,
 		mediaChoosePositionDescription:
 			"Elige una etiqueta para añadir el elemento al final de sus elementos subordinados o un elemento multimedia para insertarlo justo debajo.",
-		newChapter: "Nuevo capítulo",
+		newChapter: `Nuevo ${esTerminology.chapter.forms.inline}`,
 		newBook: "Añadir libro",
 		newLabel: "Nueva etiqueta",
 		newMediaItem: "Añadir elemento multimedia",
 		newVideo: `Nuevo ${videoTerms.inline}`,
 		newAudio: `Nuevo elemento de ${audioTerms.inline}`,
-		newChapterAfter: "Nuevo capítulo debajo",
+		newChapterAfter: `Nuevo ${esTerminology.chapter.forms.inline} debajo`,
 		newLabelAfter: "Nueva etiqueta debajo",
 		newVideoAfter: `Nuevo ${videoTerms.inline} debajo`,
 		newAudioAfter: `Nuevo elemento de ${audioTerms.inline} debajo`,
@@ -759,7 +753,7 @@ export default {
 		expandAll: "Expandir todo",
 		collapseAll: "Contraer todo",
 		dragHandle: "Arrastrar para mover",
-		noContent: "Todavía no hay capítulos.",
+		noContent: `Todavía no hay ${esTerminology.chapter.forms.plural}.`,
 		noMediaContent: `Todavía no hay ${videoTerms.plural} ni elementos de ${audioTerms.inline}.`,
 		durationUnknown: "Duración no indicada",
 		markMediaItemComplete: "Marcar como completado",
@@ -771,17 +765,16 @@ export default {
 		unsavedDraft: "Hay cambios sin guardar",
 		draftHint:
 			"Los cambios de nombre y los movimientos permanecen en el borrador hasta que se guardan. Crear o añadir contenido guarda todos los cambios actuales.",
-		development: "El editor de estructura de contenido está en desarrollo",
+		development: `El editor de estructura de contenido está en desarrollo`,
 		developmentDescription: `La estructura de contenido todavía no está disponible para este tipo de Unit. El acceso de vista previa mediante la ${verbatimTerms.api.value} requiere la capacidad de vista previa de desarrollo.`,
 	},
 	chapter: {
-		title: "Editar capítulo",
+		title: `Editar ${esTerminology.chapter.forms.inline}`,
 		backToStructure: "Volver a la estructura de contenido",
-		language: "Idioma del capítulo",
+		language: `Idioma del ${esTerminology.chapter.forms.inline}`,
 		useLanguage: "Cambiar idioma",
-		save: "Guardar capítulo",
-		communityUnitContentPolicyTitle:
-			"Las obras comunitarias no permiten editar aquí el cuerpo del capítulo",
+		save: `Guardar ${esTerminology.chapter.forms.inline}`,
+		communityUnitContentPolicyTitle: `Las obras comunitarias no permiten editar aquí el cuerpo del ${esTerminology.chapter.forms.inline}`,
 		communityUnitContentPolicyDescription: `Este libro está mantenido por la comunidad. Puedes organizar su estructura de contenido o adjuntar una ${postTerms.inline} existente, pero este editor no ofrece un editor para su cuerpo.`,
 		wordCount: insert("{{count}} palabras", { count: Number }),
 		characterCount: insert("{{count}} caracteres", { count: Number }),
@@ -790,10 +783,10 @@ export default {
 		backToContents: "Volver al contenido",
 		settings: "Configuración de lectura",
 		fontSize: "Tamaño de letra",
-		chapterLanguage: "Idioma del capítulo",
+		chapterLanguage: `Idioma del ${esTerminology.chapter.forms.inline}`,
 		automaticLanguage: "Automático",
-		markChapterComplete: "Marcar capítulo como completado",
-		markChapterIncomplete: "Marcar capítulo como incompleto",
+		markChapterComplete: `Marcar ${esTerminology.chapter.forms.inline} como completado`,
+		markChapterIncomplete: `Marcar ${esTerminology.chapter.forms.inline} como incompleto`,
 		read: "Leído",
 		unread: "Sin leer",
 	},

@@ -32,11 +32,10 @@ export default {
 	directCollectionHint:
 		"Une collection est ajoutée comme un seul élément ; son contenu n’est pas importé récursivement.",
 	publishers: {
-		label: "Éditeur",
-		unknown: "Aucun éditeur crédité",
-		current: "Éditeurs actuels",
-		currentDescription:
-			"Ces profils sont crédités comme éditeurs sur la collection et dans les flux.",
+		label: `${frTerminology.publisher.forms.label}`,
+		unknown: `Aucun ${frTerminology.publisher.forms.inline} crédité`,
+		current: `${frTerminology.publisher.forms.pluralLabel} actuels`,
+		currentDescription: `Ces profils sont crédités comme ${frTerminology.publisher.forms.plural} sur la collection et dans les flux.`,
 	},
 	save: {
 		action: "Enregistrer",
@@ -56,7 +55,7 @@ export default {
 	},
 	workspace: {
 		title: "Gestion de la collection",
-		description: `Gérez le contenu, les ${metadataTerms.inline}, l’ordre, les éditeurs, les accès et l’historique.`,
+		description: `Gérez le contenu, les ${metadataTerms.inline}, l’ordre, les ${frTerminology.publisher.forms.plural}, les accès et l’historique.`,
 		navigation: "Navigation de la gestion de la collection",
 		overview: "Sections de gestion de la collection",
 		backToCollection: "Retour à la collection",
@@ -75,8 +74,8 @@ export default {
 				description: "Ajoutez, supprimez, sélectionnez et ordonnez le contenu.",
 			},
 			publishers: {
-				label: "Éditeurs",
-				description: "Gérez les profils d’éditeur affichés publiquement.",
+				label: `${frTerminology.publisher.forms.pluralLabel}`,
+				description: `Gérez les profils d’${frTerminology.publisher.forms.inline} affichés publiquement.`,
 			},
 			access: {
 				label: "Accès",

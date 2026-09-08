@@ -1,6 +1,141 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const jaTerminology = defineTerminology("ja", {
+	publisher: {
+		status: "approved",
+		forms: { label: "出版者", pluralLabel: "出版者", inline: "出版者", plural: "出版者" },
+		forbidden: [],
+	},
+	publishingWork: {
+		status: "approved",
+		forms: { label: "著作", pluralLabel: "著作", inline: "著作", plural: "著作" },
+		forbidden: [],
+	},
+	textVersion: {
+		status: "approved",
+		forms: {
+			label: "テキスト版",
+			pluralLabel: "テキスト版",
+			inline: "テキスト版",
+			plural: "テキスト版",
+		},
+		forbidden: [],
+	},
+	publication: {
+		status: "approved",
+		forms: { label: "出版物", pluralLabel: "出版物", inline: "出版物", plural: "出版物" },
+		forbidden: [],
+	},
+	serialization: {
+		status: "approved",
+		forms: { label: "連載", pluralLabel: "連載", inline: "連載", plural: "連載" },
+		forbidden: [],
+	},
+	publishingCoverage: {
+		status: "approved",
+		forms: { label: "収録範囲", pluralLabel: "収録範囲", inline: "収録範囲", plural: "収録範囲" },
+		forbidden: [],
+	},
+	publishingInstallment: {
+		status: "approved",
+		forms: { label: "連載回", pluralLabel: "連載回", inline: "連載回", plural: "連載回" },
+		forbidden: [],
+	},
+	chapter: {
+		status: "approved",
+		forms: {
+			label: "チャプター",
+			pluralLabel: "チャプター",
+			inline: "チャプター",
+			plural: "チャプター",
+		},
+		forbidden: [],
+	},
+	program: {
+		status: "approved",
+		forms: { label: "映像作品", pluralLabel: "映像作品", inline: "映像作品", plural: "映像作品" },
+		forbidden: [],
+	},
+	softwareContent: {
+		status: "approved",
+		forms: {
+			label: "ソフトウェア作品",
+			pluralLabel: "ソフトウェア作品",
+			inline: "ソフトウェア作品",
+			plural: "ソフトウェア作品",
+		},
+		forbidden: [],
+	},
+	softwareVersion: {
+		status: "approved",
+		forms: {
+			label: "ソフトウェア版",
+			pluralLabel: "ソフトウェア版",
+			inline: "ソフトウェア版",
+			plural: "ソフトウェア版",
+		},
+		forbidden: [],
+	},
+	softwareRelease: {
+		status: "approved",
+		forms: {
+			label: "ソフトウェアリリース",
+			pluralLabel: "ソフトウェアリリース",
+			inline: "ソフトウェアリリース",
+			plural: "ソフトウェアリリース",
+		},
+		forbidden: [],
+	},
+	grouping: {
+		status: "approved",
+		forms: {
+			label: "カタロググループ",
+			pluralLabel: "カタロググループ",
+			inline: "カタロググループ",
+			plural: "カタロググループ",
+		},
+		forbidden: [],
+	},
+	referenceConcept: {
+		status: "approved",
+		forms: { label: "参照概念", pluralLabel: "参照概念", inline: "参照概念", plural: "参照概念" },
+		forbidden: [],
+	},
+	distributionPackage: {
+		status: "approved",
+		forms: {
+			label: "配布パッケージ",
+			pluralLabel: "配布パッケージ",
+			inline: "配布パッケージ",
+			plural: "配布パッケージ",
+		},
+		forbidden: [],
+	},
+	publishingCatalog: {
+		status: "approved",
+		forms: {
+			label: "出版カタログ",
+			pluralLabel: "出版カタログ",
+			inline: "出版カタログ",
+			plural: "出版カタログ",
+		},
+		forbidden: [],
+	},
+	software: {
+		status: "approved",
+		forms: {
+			label: "ソフトウェア",
+			pluralLabel: "ソフトウェア",
+			inline: "ソフトウェア",
+			plural: "ソフトウェア",
+		},
+		forbidden: [],
+	},
+	referenceCatalog: {
+		status: "approved",
+		forms: { label: "参照項目", pluralLabel: "参照項目", inline: "参照項目", plural: "参照項目" },
+		forbidden: [],
+	},
 	music: {
 		status: "approved",
 		forms: { label: "音楽", inline: "音楽", plural: "音楽" },
@@ -124,6 +259,9 @@ export const jaTerminology = defineTerminology("ja", {
 	entity: {
 		status: "approved",
 		forms: {
+			personLabel: "実在の人物",
+			organizationLabel: "団体・組織",
+			characterLabel: "架空の登場人物",
 			label: "エンティティ",
 			pluralLabel: "エンティティ",
 			inline: "エンティティ",

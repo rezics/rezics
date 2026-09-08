@@ -66,7 +66,7 @@ export default {
 			slug_namespace: `${unitSlugTerms.label}-Namensraum`,
 			profile: "Profil",
 			book: "Buch",
-			software: "Software",
+			software: `${deTerminology.software.forms.label}`,
 			media: "Medien",
 			video: videoTerms.label,
 			audio: audioTerms.label,

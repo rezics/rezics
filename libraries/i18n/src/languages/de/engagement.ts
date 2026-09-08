@@ -166,7 +166,7 @@ export default {
 	scoreActionByType: {
 		book: "Dieses Buch bewerten",
 		media: "Dieses Werk bewerten",
-		software: "Diese Software bewerten",
+		software: `Diese ${deTerminology.software.forms.label} bewerten`,
 		series: "Diese Reihe bewerten",
 	},
 	progressByType: {
@@ -183,10 +183,9 @@ export default {
 			status: "Lesestatus",
 			progress: "Lesefortschritt",
 			completedCount: "Abgeschlossene Lesedurchgänge",
-			lastChapter: "Aktuelles Kapitel",
-			noChapter: "Kein Kapitel ausgewählt",
-			estimatedFromContents:
-				"Aus dem gewählten Kapitel und dem Umfang des Inhalts geschätzt; du kannst den Wert anpassen.",
+			lastChapter: `Aktuelles ${deTerminology.chapter.forms.label}`,
+			noChapter: `Kein ${deTerminology.chapter.forms.label} ausgewählt`,
+			estimatedFromContents: `Aus dem gewählten ${deTerminology.chapter.forms.label} und dem Umfang des Inhalts geschätzt; du kannst den Wert anpassen.`,
 			history: {
 				completion: insert("Dieses Buch am {{date}} fertig gelesen.", { date: String }),
 				update: insert("Am {{date}} {{percent}} % erreicht.", {
@@ -287,7 +286,7 @@ export default {
 					percent: Number,
 				}),
 			},
-			scoreAction: "Diese Software bewerten",
+			scoreAction: `Diese ${deTerminology.software.forms.label} bewerten`,
 			recordAction: "Nutzung erfassen",
 			startAction: "Nutzung beginnen",
 			updateAction: "Eintrag aktualisieren",

@@ -37,11 +37,11 @@ export const zhHansContent = {
 	meta: {
 		home: {
 			title: `${BRAND} — 与所爱的故事相遇`,
-			description: `跨平台、跨语言找到网络小说，${FOLLOW}连载，并在${REALM}遇见同好。`,
+			description: `跨平台、跨语言找到网络小说，${FOLLOW}${zhHansTerminology.serialization.forms.label}，并在${REALM}遇见同好。`,
 		},
 		uses: {
 			title: `用途 — ${BRAND}`,
-			description: `探索读者如何跨平台寻书、${FOLLOW}连载、保存进度并找到同好。`,
+			description: `探索读者如何跨平台寻书、${FOLLOW}${zhHansTerminology.serialization.forms.label}、保存进度并找到同好。`,
 		},
 		products: {
 			title: `产品 — ${BRAND}`,
@@ -51,16 +51,16 @@ export const zhHansContent = {
 	home: {
 		eyebrow: "传承 · 创作 · 传播",
 		title: "与所爱的故事相遇。",
-		lead: `从散落在不同平台与语言中的网络小说开始。${BRAND} 将原作与各语言呈现、连载来源、章节及社区重新连成同一部持续演进的作品。`,
+		lead: `从散落在不同平台与语言中的网络小说开始。${BRAND} 将原作与各语言呈现、${zhHansTerminology.serialization.forms.label}来源、${zhHansTerminology.chapter.forms.label}及社区重新连成同一部持续演进的作品。`,
 		explore: "探索网络小说",
 		productsAction: "探索产品",
 		problem: {
-			title: "一本连载，不该因平台、语言与译名而变成碎片。",
+			title: `一本${zhHansTerminology.serialization.forms.label}，不该因平台、语言与译名而变成碎片。`,
 			body: "读者想找的是同一个故事，今天却必须在平台页、译名条目、进度工具与讨论群之间反复辨认。作品更新了，这些碎片也不一定一起前进。",
 		},
 		promise: {
 			title: "先把同一部作品接回来，再让阅读与社区自然生长。",
-			body: `${BRAND} 以原生多语言单元作为共同起点。同一部作品可以承载多种内容语言，连载可以跨平台，章节可以继续增加，${REALM}可以形成不同观点；原作、翻译与社区仍共享同一个可理解、可追溯的身份。`,
+			body: `${BRAND} 以原生多语言单元作为共同起点。同一部作品可以承载多种内容语言，${zhHansTerminology.serialization.forms.label}可以跨平台，${zhHansTerminology.chapter.forms.label}可以继续增加，${REALM}可以形成不同观点；原作、翻译与社区仍共享同一个可理解、可追溯的身份。`,
 		},
 		principles: [
 			{ title: "跨平台辨认", body: "平台网址是来源，不是作品唯一的身份。" },
@@ -70,7 +70,7 @@ export const zhHansContent = {
 			},
 			{
 				title: "持续演进",
-				body: "连载、章节、版本、进度与讨论都能在作品更新时继续累积。",
+				body: `${zhHansTerminology.serialization.forms.label}、${zhHansTerminology.chapter.forms.label}、版本、进度与讨论都能在作品更新时继续累积。`,
 			},
 		],
 		model: {
@@ -82,12 +82,12 @@ export const zhHansContent = {
 					body: "同一个作品身份原生承载各语言呈现，名称、内容与平台来源不必拆成互不相连的条目。",
 				},
 				{
-					title: "来源与连载",
-					body: "原始连载、翻译来源、出版版本与更新状态不再被压成一个网址。",
+					title: `来源与${zhHansTerminology.serialization.forms.label}`,
+					body: `原始${zhHansTerminology.serialization.forms.label}、翻译来源、出版版本与更新状态不再被压成一个网址。`,
 				},
 				{
 					title: `阅读与${FOLLOW}`,
-					body: "内容结构保留章节上下文，进度让读者从真正的位置继续。",
+					body: `内容结构保留${zhHansTerminology.chapter.forms.label}上下文，进度让读者从真正的位置继续。`,
 				},
 				{
 					title: `${REALM}与共同知识`,
@@ -103,7 +103,10 @@ export const zhHansContent = {
 					title: "找到",
 					body: "从原名、译名、别名或来源网址找到同一部网络小说。",
 				},
-				{ title: "继续", body: "跟进连载更新，保存阅读状态与最后位置。" },
+				{
+					title: "继续",
+					body: `跟进${zhHansTerminology.serialization.forms.label}更新，保存阅读状态与最后位置。`,
+				},
 				{
 					title: "相遇",
 					body: `进入或建立${REALM}，找到愿意长期讨论同一部作品的人。`,
@@ -126,15 +129,19 @@ export const zhHansContent = {
 		},
 		v1: {
 			identity: {
-				title: "一本连载，不该因平台、语言与译名而变成碎片。",
+				title: `一本${zhHansTerminology.serialization.forms.label}，不该因平台、语言与译名而变成碎片。`,
 				body: `读者想找的是同一个故事，今天却必须在平台页、译名条目、进度工具与讨论群之间反复辨认。${BRAND} 先把它们接回同一个作品身份。`,
 				sourcesTitle: "跨平台来源",
-				sources: ["原始连载平台", "翻译与授权来源", "出版及其他版本"],
+				sources: [
+					`原始${zhHansTerminology.serialization.forms.label}平台`,
+					"翻译与授权来源",
+					"出版及其他版本",
+				],
 				namesTitle: "原名与译名",
 				originalName: "原名、罗马字与别名",
 				translatedName: "各语言正式译名与常用名",
 				updates: {
-					title: "连载更新",
+					title: `${zhHansTerminology.serialization.forms.label}更新`,
 					body: "来源持续更新，作品身份不必重建。",
 				},
 				progress: {
@@ -156,7 +163,7 @@ export const zhHansContent = {
 						body: "原名、译名、别名与来源指向同一身份。",
 					},
 					{
-						title: `${FOLLOW}连载与进度`,
+						title: `${FOLLOW}${zhHansTerminology.serialization.forms.label}与进度`,
 						body: "知道在哪里读、更新到哪里、自己读到哪里。",
 					},
 					{
@@ -180,7 +187,7 @@ export const zhHansContent = {
 					},
 					{
 						title: "内容结构",
-						body: "章节是可重用内容；结构管理顺序、出现位置与连载演进。",
+						body: `${zhHansTerminology.chapter.forms.label}是可重用内容；结构管理顺序、出现位置与${zhHansTerminology.serialization.forms.label}演进。`,
 					},
 					{
 						title: `${BLOCK_SCHEMA} + ${PORTABLE_TEXT}`,
@@ -203,7 +210,7 @@ export const zhHansContent = {
 		journeys: [
 			{
 				title: "跨平台找到同一部网络小说",
-				body: "从平台网址、原始连载、翻译来源或出版版本进入，回到同一个作品身份。",
+				body: `从平台网址、原始${zhHansTerminology.serialization.forms.label}、翻译来源或出版版本进入，回到同一个作品身份。`,
 				result: "不再把每个平台条目当成不同的书。",
 			},
 			{
@@ -212,8 +219,8 @@ export const zhHansContent = {
 				result: "跨过语言，也不必离开原作与已有社区。",
 			},
 			{
-				title: `${FOLLOW}连载并从上次的位置继续`,
-				body: "查看来源更新到哪一章、作品处于连载或完结状态，并保存自己的阅读状态与最后位置。",
+				title: `${FOLLOW}${zhHansTerminology.serialization.forms.label}并从上次的位置继续`,
+				body: `查看来源更新到哪一章、作品处于${zhHansTerminology.serialization.forms.label}或完结状态，并保存自己的阅读状态与最后位置。`,
 				result: "作品在更新，阅读上下文不必重来。",
 			},
 			{
@@ -228,7 +235,7 @@ export const zhHansContent = {
 			},
 			{
 				title: "发布自己的文章与作品内容",
-				body: `以 ${PORTABLE_TEXT} 编辑${zhHansTerminology.post.forms.label}，用 ${BLOCK_SCHEMA} 保存可演进文档，并以内容结构安排章节与发布历史。`,
+				body: `以 ${PORTABLE_TEXT} 编辑${zhHansTerminology.post.forms.label}，用 ${BLOCK_SCHEMA} 保存可演进文档，并以内容结构安排${zhHansTerminology.chapter.forms.label}与发布历史。`,
 				result: "内容不只可阅读，也能被引用、重用与持续修订。",
 			},
 			{

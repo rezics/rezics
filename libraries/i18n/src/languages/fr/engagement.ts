@@ -164,7 +164,7 @@ export default {
 	scoreActionByType: {
 		book: "Noter ce livre",
 		media: "Noter cette œuvre",
-		software: "Noter ce logiciel",
+		software: `Noter ce ${frTerminology.software.forms.inline}`,
 		series: "Noter cette série",
 	},
 	progressByType: {
@@ -181,10 +181,9 @@ export default {
 			status: "État de lecture",
 			progress: "Progression de lecture",
 			completedCount: "Lectures achevées",
-			lastChapter: "Chapitre actuel",
-			noChapter: "Aucun chapitre sélectionné",
-			estimatedFromContents:
-				"Estimation fondée sur le chapitre choisi et le volume du sommaire ; vous pouvez l’ajuster.",
+			lastChapter: `${frTerminology.chapter.forms.label} actuel`,
+			noChapter: `Aucun ${frTerminology.chapter.forms.inline} sélectionné`,
+			estimatedFromContents: `Estimation fondée sur le ${frTerminology.chapter.forms.inline} choisi et le volume du sommaire ; vous pouvez l’ajuster.`,
 			history: {
 				completion: insert("Livre terminé le {{date}}.", { date: String }),
 				update: insert("Progression portée à {{percent}} % le {{date}}.", {
@@ -283,7 +282,7 @@ export default {
 					percent: Number,
 				}),
 			},
-			scoreAction: "Noter ce logiciel",
+			scoreAction: `Noter ce ${frTerminology.software.forms.inline}`,
 			recordAction: "Enregistrer l’utilisation",
 			startAction: "Commencer à utiliser",
 			updateAction: "Mettre à jour le journal",

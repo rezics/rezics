@@ -52,7 +52,7 @@ export const deContent = {
 	home: {
 		eyebrow: "Weitergeben · Schaffen · Verbreiten",
 		title: "Den Geschichten begegnen, die du liebst.",
-		lead: `Ausgangspunkt sind Webromane, die über verschiedene Plattformen und Sprachen verstreut sind. ${BRAND} verbindet das Originalwerk und seine Darstellungen in verschiedenen Sprachen, Fortsetzungsquellen, Kapitel und Communities wieder zu einem einzigen Werk, das sich fortlaufend entwickelt.`,
+		lead: `Ausgangspunkt sind Webromane, die über verschiedene Plattformen und Sprachen verstreut sind. ${BRAND} verbindet das Originalwerk und seine Darstellungen in verschiedenen Sprachen, Fortsetzungsquellen, ${deTerminology.chapter.forms.label} und Communities wieder zu einem einzigen Werk, das sich fortlaufend entwickelt.`,
 		explore: "Webromane entdecken",
 		productsAction: "Produkte entdecken",
 		problem: {
@@ -63,7 +63,7 @@ export const deContent = {
 		promise: {
 			title:
 				"Zuerst dasselbe Werk wieder zusammenführen; dann können Lesen und Community natürlich wachsen.",
-			body: `${BRAND} nimmt eine von Grund auf mehrsprachige Einheit als gemeinsamen Ausgangspunkt. Dasselbe Werk kann mehrere Inhaltssprachen tragen, Serien können sich über Plattformen erstrecken, Kapitel können weiter wachsen und ${deTerminology.realm.forms.pluralLabel} können unterschiedliche Sichtweisen bilden; Original, Übersetzungen und Communities teilen dennoch eine verständliche und nachvollziehbare Identität.`,
+			body: `${BRAND} nimmt eine von Grund auf mehrsprachige Einheit als gemeinsamen Ausgangspunkt. Dasselbe Werk kann mehrere Inhaltssprachen tragen, Serien können sich über Plattformen erstrecken, ${deTerminology.chapter.forms.label} können weiter wachsen und ${deTerminology.realm.forms.pluralLabel} können unterschiedliche Sichtweisen bilden; Original, Übersetzungen und Communities teilen dennoch eine verständliche und nachvollziehbare Identität.`,
 		},
 		principles: [
 			{
@@ -76,7 +76,7 @@ export const deContent = {
 			},
 			{
 				title: "Fortlaufend entwickeln",
-				body: "Serien, Kapitel, Ausgaben, Fortschritt und Diskussionen können sich bei Aktualisierungen des Werks weiter ansammeln.",
+				body: `Serien, ${deTerminology.chapter.forms.label}, Ausgaben, Fortschritt und Diskussionen können sich bei Aktualisierungen des Werks weiter ansammeln.`,
 			},
 		],
 		model: {
@@ -201,7 +201,7 @@ export const deContent = {
 					},
 					{
 						title: "Inhaltsstruktur",
-						body: "Kapitel sind wiederverwendbare Inhalte; die Struktur verwaltet Reihenfolge, Auftreten und die Entwicklung einer Serie.",
+						body: `${deTerminology.chapter.forms.label} sind wiederverwendbare Inhalte; die Struktur verwaltet Reihenfolge, Auftreten und die Entwicklung einer Serie.`,
 					},
 					{
 						title: `${BLOCK_SCHEMA} + ${PORTABLE_TEXT}`,
@@ -236,7 +236,7 @@ export const deContent = {
 			},
 			{
 				title: `Einer Serie ${deTerminology.follow.forms.action} und an der letzten Stelle weitermachen`,
-				body: "Sehen, bis zu welchem Kapitel eine Quelle aktualisiert ist, ob sich das Werk noch in Fortsetzung befindet oder abgeschlossen ist, und den eigenen Lesestatus sowie die letzte Position speichern.",
+				body: `Sehen, bis zu welchem ${deTerminology.chapter.forms.label} eine Quelle aktualisiert ist, ob sich das Werk noch in Fortsetzung befindet oder abgeschlossen ist, und den eigenen Lesestatus sowie die letzte Position speichern.`,
 				result:
 					"Das Werk wird aktualisiert, doch der Lesezusammenhang muss nicht von vorn beginnen.",
 			},
@@ -253,7 +253,7 @@ export const deContent = {
 			},
 			{
 				title: `Eigene ${deTerminology.post.forms.pluralLabel} und Werk-Inhalte veröffentlichen`,
-				body: `Mit ${PORTABLE_TEXT} einen ${deTerminology.post.forms.label} bearbeiten, mit ${BLOCK_SCHEMA} entwicklungsfähige Dokumente bewahren und Kapitel sowie Veröffentlichungsgeschichte mit der Inhaltsstruktur anordnen.`,
+				body: `Mit ${PORTABLE_TEXT} einen ${deTerminology.post.forms.label} bearbeiten, mit ${BLOCK_SCHEMA} entwicklungsfähige Dokumente bewahren und ${deTerminology.chapter.forms.label} sowie Veröffentlichungsgeschichte mit der Inhaltsstruktur anordnen.`,
 				result:
 					"Inhalt ist nicht nur lesbar, sondern kann auch zitiert, wiederverwendet und fortlaufend überarbeitet werden.",
 			},

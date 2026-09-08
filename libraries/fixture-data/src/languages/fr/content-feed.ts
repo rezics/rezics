@@ -1,3 +1,4 @@
+import { frTerminology } from "@rezics/i18n/terminology/fr";
 import type { FeedFixtureLocalizedContent } from "../../content-feed/localized-content";
 
 export default {
@@ -46,7 +47,7 @@ export default {
 	},
 	collection: {
 		title: "Là où la science rencontre la magie",
-		body: "Une collection de chapitres, de critiques et de notes sur l'univers qui méritent d'être relus.",
+		body: `Une collection de ${frTerminology.chapter.forms.plural}, de critiques et de notes sur l'univers qui méritent d'être relus.`,
 		coverAlt: "Une couverture abstraite aux tons bleus et ambrés",
 	},
 } satisfies FeedFixtureLocalizedContent;

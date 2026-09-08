@@ -1,3 +1,4 @@
+import { esTerminology } from "@rezics/i18n/terminology/es";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { insert } from "native-i18n";
 
@@ -67,7 +68,7 @@ export default {
 			crop: "Recortar a 3:4",
 			containDescription:
 				"La imagen completa permanece visible. El marco utiliza un fondo desenfocado cuando sus proporciones son distintas.",
-			cropDescription: "Solo se entrega y muestra el área 3:4 seleccionada.",
+			cropDescription: `Solo se ${esTerminology.publishingInstallment.forms.inline} y muestra el área 3:4 seleccionada.`,
 		},
 		cancel: "Cancelar",
 		save: "Guardar el área mostrada",

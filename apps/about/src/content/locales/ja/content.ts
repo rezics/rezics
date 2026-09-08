@@ -38,11 +38,11 @@ export const jaContent = {
 	meta: {
 		home: {
 			title: `${BRAND} — 好きな物語に出会う`,
-			description: `複数のプラットフォームと言語をまたいでウェブ小説を見つけ、連載を${FOLLOW}し、${REALM}で同じ作品を愛する仲間と出会えます。`,
+			description: `複数のプラットフォームと言語をまたいでウェブ小説を見つけ、${jaTerminology.serialization.forms.label}を${FOLLOW}し、${REALM}で同じ作品を愛する仲間と出会えます。`,
 		},
 		uses: {
 			title: `活用方法 — ${BRAND}`,
-			description: `読者が複数のプラットフォームをまたいで本を探し、連載を${FOLLOW}し、進捗を保存して仲間を見つける方法をご覧ください。`,
+			description: `読者が複数のプラットフォームをまたいで本を探し、${jaTerminology.serialization.forms.label}を${FOLLOW}し、進捗を保存して仲間を見つける方法をご覧ください。`,
 		},
 		products: {
 			title: `プロダクト — ${BRAND}`,
@@ -52,16 +52,16 @@ export const jaContent = {
 	home: {
 		eyebrow: "継承 · 創作 · 伝播",
 		title: "好きな物語に出会う。",
-		lead: `さまざまなプラットフォームと言語に散らばるウェブ小説から始めます。${BRAND} は、原作と各言語での表示、連載元、章、コミュニティを、進化し続ける一つの作品へと再び結びます。`,
+		lead: `さまざまなプラットフォームと言語に散らばるウェブ小説から始めます。${BRAND} は、原作と各言語での表示、${jaTerminology.serialization.forms.label}元、章、コミュニティを、進化し続ける一つの作品へと再び結びます。`,
 		explore: "ウェブ小説を探す",
 		productsAction: "プロダクトを見る",
 		problem: {
-			title: "一つの連載が、プラットフォーム、言語、翻訳題のために断片化されるべきではありません。",
+			title: `一つの${jaTerminology.serialization.forms.label}が、プラットフォーム、言語、翻訳題のために断片化されるべきではありません。`,
 			body: "読者が探しているのは同じ物語なのに、今はプラットフォームのページ、翻訳題の項目、進捗ツール、議論のグループの間で何度も見分けなければなりません。作品が更新されても、こうした断片が一緒に進むとは限りません。",
 		},
 		promise: {
 			title: "まず同じ作品をつなぎ直し、その後で読書とコミュニティを自然に育てる。",
-			body: `${BRAND} は、最初から多言語のユニットを共通の出発点とします。同じ作品が複数のコンテンツ言語を担い、連載はプラットフォームをまたぎ、章は増え続け、${REALM}は異なる見方を形作れます。それでも、原作、翻訳、コミュニティは、理解でき、たどることのできる一つのアイデンティティを共有します。`,
+			body: `${BRAND} は、最初から多言語のユニットを共通の出発点とします。同じ作品が複数のコンテンツ言語を担い、${jaTerminology.serialization.forms.label}はプラットフォームをまたぎ、章は増え続け、${REALM}は異なる見方を形作れます。それでも、原作、翻訳、コミュニティは、理解でき、たどることのできる一つのアイデンティティを共有します。`,
 		},
 		principles: [
 			{
@@ -74,7 +74,7 @@ export const jaContent = {
 			},
 			{
 				title: "継続的な進化",
-				body: "連載、章、版、進捗、議論は、作品が更新されても積み重ね続けられます。",
+				body: `${jaTerminology.serialization.forms.label}、章、版、進捗、議論は、作品が更新されても積み重ね続けられます。`,
 			},
 		],
 		model: {
@@ -86,8 +86,8 @@ export const jaContent = {
 					body: "一つの作品アイデンティティが各言語での表示を担い、名称、コンテンツ、プラットフォームの情報源を切り離された項目にしません。",
 				},
 				{
-					title: "情報源と連載",
-					body: `原連載、翻訳元、出版版、更新状態が一つの ${URL} に押し込められることはありません。`,
+					title: `情報源と${jaTerminology.serialization.forms.label}`,
+					body: `原${jaTerminology.serialization.forms.label}、翻訳元、出版版、更新状態が一つの ${URL} に押し込められることはありません。`,
 				},
 				{
 					title: `読書と${FOLLOW}`,
@@ -109,7 +109,7 @@ export const jaContent = {
 				},
 				{
 					title: "続ける",
-					body: "連載の更新を追い、読書状態と最後に読んだ位置を保存します。",
+					body: `${jaTerminology.serialization.forms.label}の更新を追い、読書状態と最後に読んだ位置を保存します。`,
 				},
 				{
 					title: "出会う",
@@ -133,12 +133,11 @@ export const jaContent = {
 		},
 		v1: {
 			identity: {
-				title:
-					"一つの連載が、プラットフォーム、言語、翻訳題のために断片化されるべきではありません。",
+				title: `一つの${jaTerminology.serialization.forms.label}が、プラットフォーム、言語、翻訳題のために断片化されるべきではありません。`,
 				body: `読者が探しているのは同じ物語なのに、今はプラットフォームのページ、翻訳題の項目、進捗ツール、議論のグループの間で何度も見分けなければなりません。${BRAND} はまず、それらを一つの作品アイデンティティへつなぎ直します。`,
 				sourcesTitle: "複数プラットフォームの情報源",
 				sources: [
-					"原連載プラットフォーム",
+					`原${jaTerminology.serialization.forms.label}プラットフォーム`,
 					`翻訳元と${jaTerminology.license.forms.label}提供元`,
 					"出版版とその他の版",
 				],
@@ -146,7 +145,7 @@ export const jaContent = {
 				originalName: "原題、ローマ字表記、別名",
 				translatedName: "各言語の正式な翻訳題と通称",
 				updates: {
-					title: "連載の更新",
+					title: `${jaTerminology.serialization.forms.label}の更新`,
 					body: "情報源は更新され続けても、作品アイデンティティを作り直す必要はありません。",
 				},
 				progress: {
@@ -168,7 +167,7 @@ export const jaContent = {
 						body: "原題、翻訳題、別名、情報源が同じアイデンティティを指します。",
 					},
 					{
-						title: `連載と進捗を${FOLLOW}`,
+						title: `${jaTerminology.serialization.forms.label}と進捗を${FOLLOW}`,
 						body: "どこで読めるか、どこまで更新されたか、自分がどこまで読んだかを知ることができます。",
 					},
 					{
@@ -195,7 +194,7 @@ export const jaContent = {
 					},
 					{
 						title: "コンテンツ構造",
-						body: "章は再利用可能なコンテンツであり、構造が順序、出現位置、連載の進化を管理します。",
+						body: `章は再利用可能なコンテンツであり、構造が順序、出現位置、${jaTerminology.serialization.forms.label}の進化を管理します。`,
 					},
 					{
 						title: `${BLOCK_SCHEMA} + ${PORTABLE_TEXT}`,
@@ -219,7 +218,7 @@ export const jaContent = {
 		journeys: [
 			{
 				title: "複数プラットフォームで同じウェブ小説を見つける",
-				body: `プラットフォームの ${URL}、原連載、翻訳元、出版版から入り、同じ作品アイデンティティへ戻ります。`,
+				body: `プラットフォームの ${URL}、原${jaTerminology.serialization.forms.label}、翻訳元、出版版から入り、同じ作品アイデンティティへ戻ります。`,
 				result: "各プラットフォームの項目を別の本だと見なさなくなります。",
 			},
 			{
@@ -228,8 +227,8 @@ export const jaContent = {
 				result: "言語をまたいでも、原作や既存のコミュニティから離れる必要はありません。",
 			},
 			{
-				title: `連載を${FOLLOW}し、前回の位置から続ける`,
-				body: "情報源がどの章まで更新されたか、作品が連載中か完結かを確認し、自分の読書状態と最後の位置を保存します。",
+				title: `${jaTerminology.serialization.forms.label}を${FOLLOW}し、前回の位置から続ける`,
+				body: `情報源がどの章まで更新されたか、作品が${jaTerminology.serialization.forms.label}中か完結かを確認し、自分の読書状態と最後の位置を保存します。`,
 				result: "作品が更新されても、読書の文脈をやり直す必要はありません。",
 			},
 			{

@@ -76,7 +76,7 @@ export default {
 	},
 	types: {
 		book: "Livre",
-		software: "Logiciel",
+		software: `${frTerminology.software.forms.label}`,
 		media: "Média",
 		series: "Série",
 		video: videoTerms.label,
@@ -98,8 +98,7 @@ export default {
 		publicWorkHelpTitle: "Qu’est-ce qu’une œuvre communautaire ?",
 		publicWorkHelpOwnership:
 			"Les œuvres communautaires appartiennent à la communauté et sont entretenues collectivement. Leur création ne vous confère ni propriété ni droits supplémentaires ; toutes les personnes connectées les modifient avec les mêmes autorisations partagées.",
-		publicWorkHelpScope:
-			"Choisissez cette option lorsque l’œuvre doit être gérée par la communauté plutôt que par un seul profil. Le mode de propriété ne détermine pas l’affichage du corps des chapitres.",
+		publicWorkHelpScope: `Choisissez cette option lorsque l’œuvre doit être gérée par la communauté plutôt que par un seul profil. Le mode de propriété ne détermine pas l’affichage du corps des ${frTerminology.chapter.forms.plural}.`,
 		publicWorkHelpAlternative:
 			"Si vous détenez les droits d’auteur ou souhaitez administrer une œuvre tout en l’ouvrant à certaines personnes, choisissez « Œuvre personnelle », puis accordez les droits de modification appropriés après sa création.",
 		entryOwnershipLabel: "Propriété de l’entrée",
@@ -157,7 +156,7 @@ export default {
 		"co-author": "Coauteur",
 		translator: "Traducteur",
 		illustrator: "Illustrateur",
-		editor: "Éditeur",
+		editor: `Éditeur`,
 		publisher: "Maison d’édition",
 		letterer: "Lettreur",
 		colorist: "Coloriste",
@@ -214,8 +213,7 @@ export default {
 			},
 			contentStructure: {
 				label: "Structure du contenu",
-				description:
-					"Gérez les chapitres du livre ou les éléments multimédias dans un éditeur arborescent, indenté et repliable.",
+				description: `Gérez les ${frTerminology.chapter.forms.plural} du livre ou les éléments multimédias dans un éditeur arborescent, indenté et repliable.`,
 				developmentBadge: "En cours de développement",
 			},
 			releases: {
@@ -280,9 +278,8 @@ export default {
 		isbn13: verbatimTerms.isbn13.value,
 		metadataOnly: `${metadataTerms.label} uniquement`,
 		metadataOnlyDescription: {
-			book: "Conserve les informations sur l’œuvre, le sommaire, la progression et les discussions, mais ne présente pas les chapitres hébergés. Les textes existants ne sont pas supprimés.",
-			software:
-				"Conserve les informations sur le logiciel, les versions, la progression et les discussions, mais ne fournit pas les paquets, binaires ou archives de code source hébergés. Les fichiers existants ne sont pas supprimés.",
+			book: `Conserve les informations sur l’œuvre, le sommaire, la progression et les discussions, mais ne présente pas les ${frTerminology.chapter.forms.plural} hébergés. Les textes existants ne sont pas supprimés.`,
+			software: `Conserve les informations sur le ${frTerminology.software.forms.inline}, les versions, la progression et les discussions, mais ne fournit pas les paquets, binaires ou archives de code source hébergés. Les fichiers existants ne sont pas supprimés.`,
 			media:
 				"Conserve les informations, le sommaire, la progression et les discussions, mais ne présente pas le contenu multimédia hébergé. Le contenu existant n’est pas supprimé.",
 		},
@@ -331,7 +328,7 @@ export default {
 				discussion: "Discussion",
 			},
 			software: {
-				overview: "Informations sur le logiciel",
+				overview: `Informations sur le ${frTerminology.software.forms.inline}`,
 				requirements: "Configuration requise",
 				tags: "Étiquettes",
 				associations: "Associations",
@@ -352,7 +349,7 @@ export default {
 		sectionDescriptions: {
 			book: {
 				overview: "Description du livre, informations éditoriales et état de lecture.",
-				contents: "Parcourez la structure des chapitres et poursuivez votre lecture.",
+				contents: `Parcourez la structure des ${frTerminology.chapter.forms.plural} et poursuivez votre lecture.`,
 				tags: "Consultez les étiquettes globales et les appréciations contextuelles des sources sélectionnées.",
 				associations:
 					"Consultez les sujets du livre, sa série et ses relations entre éléments principaux et variantes.",
@@ -371,14 +368,13 @@ export default {
 				discussion: `Parcourez les ${postTerms.plural} qui utilisent cette œuvre comme sujet.`,
 			},
 			software: {
-				overview: "Description du logiciel, informations de version et état d’utilisation.",
+				overview: `Description du ${frTerminology.software.forms.inline}, informations de version et état d’utilisation.`,
 				requirements: "Consultez la configuration requise par plateforme et par niveau.",
 				tags: "Consultez les étiquettes globales et les appréciations contextuelles des sources sélectionnées.",
-				associations:
-					"Consultez les sujets du logiciel, sa série et ses relations entre éléments principaux et variantes.",
-				reviews: "Lisez ou rédigez des avis d’utilisateurs du logiciel.",
-				collections: "Parcourez les collections publiques qui contiennent ce logiciel.",
-				discussion: `Parcourez les ${postTerms.plural} qui utilisent ce logiciel comme sujet.`,
+				associations: `Consultez les sujets du ${frTerminology.software.forms.inline}, sa série et ses relations entre éléments principaux et variantes.`,
+				reviews: `Lisez ou rédigez des avis d’utilisateurs du ${frTerminology.software.forms.inline}.`,
+				collections: `Parcourez les collections publiques qui contiennent ce ${frTerminology.software.forms.inline}.`,
+				discussion: `Parcourez les ${postTerms.plural} qui utilisent ce ${frTerminology.software.forms.inline} comme sujet.`,
 			},
 			series: {
 				overview: "Description, informations sur les œuvres et appréciations de la série.",
@@ -459,12 +455,11 @@ export default {
 		canonicalUnit: "Unit principale",
 		saveSettings: "Enregistrer les réglages",
 		bookDraftScope: "Portée du retour au brouillon",
-		bookDraftScopeDescription: `Les chapitres sont des ${postTerms.plural} indépendants. Choisissez explicitement si les chapitres publiés rattachés doivent aussi repasser en brouillon.`,
+		bookDraftScopeDescription: `Les ${frTerminology.chapter.forms.plural} sont des ${postTerms.plural} indépendants. Choisissez explicitement si les ${frTerminology.chapter.forms.plural} publiés rattachés doivent aussi repasser en brouillon.`,
 		bookDraftChoose: "Choisir la portée",
 		bookDraftBookOnly: "Repasser uniquement le livre en brouillon",
-		bookDraftBookAndChapters: "Repasser le livre et les chapitres publiés gérables en brouillon",
-		bookChapterDraftQueued:
-			"Le retour au brouillon des chapitres est en file d’attente ; les chapitres gérables seront traités par lots.",
+		bookDraftBookAndChapters: `Repasser le livre et les ${frTerminology.chapter.forms.plural} publiés gérables en brouillon`,
+		bookChapterDraftQueued: `Le retour au brouillon des ${frTerminology.chapter.forms.plural} est en file d’attente ; les ${frTerminology.chapter.forms.plural} gérables seront traités par lots.`,
 	},
 	relationshipManagement: {
 		credits: "Crédits",
@@ -661,15 +656,18 @@ export default {
 	content: {
 		title: "Contenu",
 		edit: "Modifier le contenu",
-		chapter: "Chapitre",
+		chapter: `${frTerminology.chapter.forms.label}`,
 		label: "Libellé",
 		structure: "Structure",
 		root: "(Racine)",
-		structureSummary: insert("{{books}} livres · {{chapters}} chapitres · {{labels}} libellés", {
-			books: Number,
-			chapters: Number,
-			labels: Number,
-		}),
+		structureSummary: insert(
+			`{{books}} livres · {{chapters}} ${frTerminology.chapter.forms.plural} · {{labels}} libellés`,
+			{
+				books: Number,
+				chapters: Number,
+				labels: Number,
+			},
+		),
 		mediaStructureSummary: insert(
 			`{{media}} médias · {{videos}} ${videoTerms.plural} · {{audios}} éléments ${audioTerms.inline} · {{labels}} libellés`,
 			{ media: Number, videos: Number, audios: Number, labels: Number },
@@ -684,32 +682,29 @@ export default {
 		moveToFirst: "Déplacer en première position à ce niveau",
 		moveToLast: "Déplacer en dernière position à ce niveau",
 		move: "Déplacer",
-		moveDescription:
-			"Choisissez un libellé pour déplacer l’élément après ses enfants, ou un chapitre pour le déplacer directement en dessous.",
+		moveDescription: `Choisissez un libellé pour déplacer l’élément après ses enfants, ou un ${frTerminology.chapter.forms.inline} pour le déplacer directement en dessous.`,
 		mediaMoveDescription:
 			"Choisissez un libellé pour déplacer la sélection après ses enfants, ou un élément multimédia pour la placer directement en dessous.",
-		addChapter: "Ajouter un chapitre",
+		addChapter: `Ajouter un ${frTerminology.chapter.forms.inline}`,
 		addBook: "Ajouter un livre",
 		addMedia: "Ajouter un média",
 		addLabel: "Ajouter un libellé",
 		addVideo: `Ajouter une ${videoTerms.inline}`,
 		addAudio: `Ajouter un élément ${audioTerms.inline}`,
-		addChapterDescription:
-			"Créez un chapitre ou recherchez un chapitre existant à ajouter. La structure du contenu sera également enregistrée.",
-		chapterOwnership: "Propriété du chapitre",
+		addChapterDescription: `Créez un ${frTerminology.chapter.forms.inline} ou recherchez un ${frTerminology.chapter.forms.inline} existant à ajouter. La structure du contenu sera également enregistrée.`,
+		chapterOwnership: `Propriété du ${frTerminology.chapter.forms.inline}`,
 		addBookDescription:
 			"Recherchez un livre existant à ajouter. La structure du contenu sera également enregistrée.",
 		addMediaDescription:
 			"Recherchez un média existant à ajouter. La structure du contenu sera également enregistrée.",
 		bookDefaultOwnership: "Utiliser la valeur par défaut du livre",
-		profileOwnedChapter: "Chapitre personnel",
-		communityOwnedChapter: "Chapitre communautaire",
+		profileOwnedChapter: `${frTerminology.chapter.forms.label} personnel`,
+		communityOwnedChapter: `${frTerminology.chapter.forms.label} communautaire`,
 		chapterOwnershipDefaultDescription: insert(
 			"Utilise la propriété actuelle du livre : {{ownership}}.",
 			{ ownership: String },
 		),
-		chapterOwnershipOverrideDescription:
-			"Remplace la propriété par défaut du livre pour ce chapitre.",
+		chapterOwnershipOverrideDescription: `Remplace la propriété par défaut du livre pour ce ${frTerminology.chapter.forms.inline}.`,
 		addLabelDescription:
 			"Créez un libellé ou recherchez un libellé existant à ajouter. La structure du contenu sera également enregistrée.",
 		addVideoDescription: `Créez une ${videoTerms.inline} ou recherchez-en une existante à ajouter. Cette action enregistre aussi la structure du contenu.`,
@@ -717,22 +712,22 @@ export default {
 		addMode: "Mode d’ajout",
 		createMode: "Créer",
 		attachMode: "Ajouter un élément existant",
-		existingChapter: "Chapitre existant",
+		existingChapter: `${frTerminology.chapter.forms.label} existant`,
 		existingBook: "Livre existant",
 		existingMedia: "Média existant",
 		existingLabel: "Libellé existant",
 		existingMediaItem: "Élément multimédia existant",
-		searchExistingChapter: "Rechercher des chapitres existants",
+		searchExistingChapter: `Rechercher des ${frTerminology.chapter.forms.plural} existants`,
 		searchExistingBook: "Rechercher des livres existants",
 		searchExistingMedia: "Rechercher des médias existants",
 		searchExistingLabel: "Rechercher des libellés existants",
 		searchExistingMediaItem: "Rechercher des éléments multimédias existants",
 		mediaKindFilter: "Type de média",
 		allMediaKinds: "Tous",
-		createChapterAndSave: "Créer le chapitre et enregistrer",
+		createChapterAndSave: `Créer le ${frTerminology.chapter.forms.inline} et enregistrer`,
 		createLabelAndSave: "Créer le libellé et enregistrer",
 		createMediaItemAndSave: "Créer l’élément multimédia et enregistrer",
-		attachChapterAndSave: "Ajouter le chapitre et enregistrer",
+		attachChapterAndSave: `Ajouter le ${frTerminology.chapter.forms.inline} et enregistrer`,
 		attachBookAndSave: "Ajouter le livre et enregistrer",
 		attachMediaAndSave: "Ajouter le média et enregistrer",
 		attachLabelAndSave: "Ajouter le libellé et enregistrer",
@@ -740,17 +735,16 @@ export default {
 		saveCurrentChangesNotice:
 			"Cette action enregistre également les modifications de la structure du contenu qui ne le sont pas encore.",
 		choosePosition: "Choisir la position dans la structure",
-		choosePositionDescription:
-			"Choisissez un libellé pour ajouter l’élément après ses enfants, ou un chapitre pour l’insérer directement en dessous.",
+		choosePositionDescription: `Choisissez un libellé pour ajouter l’élément après ses enfants, ou un ${frTerminology.chapter.forms.inline} pour l’insérer directement en dessous.`,
 		mediaChoosePositionDescription:
 			"Choisissez un libellé pour ajouter l’élément après ses enfants, ou un élément multimédia pour l’insérer directement en dessous.",
-		newChapter: "Nouveau chapitre",
+		newChapter: `Nouveau ${frTerminology.chapter.forms.inline}`,
 		newBook: "Ajouter un livre",
 		newLabel: "Nouveau libellé",
 		newMediaItem: "Ajouter un élément multimédia",
 		newVideo: `Nouvelle ${videoTerms.inline}`,
 		newAudio: `Nouvel élément ${audioTerms.inline}`,
-		newChapterAfter: "Nouveau chapitre en dessous",
+		newChapterAfter: `Nouveau ${frTerminology.chapter.forms.inline} en dessous`,
 		newLabelAfter: "Nouveau libellé en dessous",
 		newVideoAfter: `Nouvelle ${videoTerms.inline} en dessous`,
 		newAudioAfter: `Nouvel élément ${audioTerms.inline} en dessous`,
@@ -761,7 +755,7 @@ export default {
 		expandAll: "Tout déployer",
 		collapseAll: "Tout replier",
 		dragHandle: "Faire glisser pour déplacer",
-		noContent: "Il n’y a encore aucun chapitre.",
+		noContent: `Il n’y a encore aucun ${frTerminology.chapter.forms.inline}.`,
 		noMediaContent: `Il n’y a encore aucune ${videoTerms.inline} ni aucun élément ${audioTerms.inline}.`,
 		durationUnknown: "Durée non indiquée",
 		markMediaItemComplete: "Marquer comme terminé",
@@ -773,17 +767,16 @@ export default {
 		unsavedDraft: "Certaines modifications ne sont pas enregistrées",
 		draftHint:
 			"Les changements de nom et les déplacements restent dans le brouillon jusqu’à l’enregistrement. La création ou l’ajout de contenu enregistre toutes les modifications en cours.",
-		development: "L’éditeur de structure du contenu est en cours de développement",
+		development: `L’éditeur de structure du contenu est en cours de développement`,
 		developmentDescription: `La structure du contenu n’est pas encore disponible pour ce type de Unit. L’accès à l’aperçu via l’${verbatimTerms.api.value} exige la capacité d’aperçu de développement.`,
 	},
 	chapter: {
-		title: "Modifier le chapitre",
+		title: `Modifier le ${frTerminology.chapter.forms.inline}`,
 		backToStructure: "Retour à la structure du contenu",
-		language: "Langue du chapitre",
+		language: `Langue du ${frTerminology.chapter.forms.inline}`,
 		useLanguage: "Changer de langue",
-		save: "Enregistrer le chapitre",
-		communityUnitContentPolicyTitle:
-			"Les œuvres communautaires ne permettent pas de modifier ici le corps du chapitre",
+		save: `Enregistrer le ${frTerminology.chapter.forms.inline}`,
+		communityUnitContentPolicyTitle: `Les œuvres communautaires ne permettent pas de modifier ici le corps du ${frTerminology.chapter.forms.inline}`,
 		communityUnitContentPolicyDescription: `Ce livre est géré par la communauté. Vous pouvez organiser sa structure du contenu ou joindre un ${postTerms.inline} existant, mais cet éditeur ne propose pas d’éditeur pour son corps.`,
 		wordCount: insert("{{count}} mots", { count: Number }),
 		characterCount: insert("{{count}} caractères", { count: Number }),
@@ -792,10 +785,10 @@ export default {
 		backToContents: "Retour au contenu",
 		settings: "Réglages de lecture",
 		fontSize: "Taille de police",
-		chapterLanguage: "Langue du chapitre",
+		chapterLanguage: `Langue du ${frTerminology.chapter.forms.inline}`,
 		automaticLanguage: "Automatique",
-		markChapterComplete: "Marquer le chapitre comme terminé",
-		markChapterIncomplete: "Marquer le chapitre comme non terminé",
+		markChapterComplete: `Marquer le ${frTerminology.chapter.forms.inline} comme terminé`,
+		markChapterIncomplete: `Marquer le ${frTerminology.chapter.forms.inline} comme non terminé`,
 		read: "Lu",
 		unread: "Non lu",
 	},

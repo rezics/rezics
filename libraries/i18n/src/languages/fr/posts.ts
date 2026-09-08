@@ -25,7 +25,7 @@ export default {
 		subject: String,
 	}),
 	unknownAttribution: "Aucune attribution",
-	publisher: "Éditeur",
+	publisher: `${frTerminology.publisher.forms.label}`,
 	wikiCreateTitle: "Créer une entrée Wiki",
 	wikiAccessMode: "Droit de modification",
 	wikiCommunityUnit: "Entrée publique",

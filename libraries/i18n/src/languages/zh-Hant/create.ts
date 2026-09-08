@@ -56,7 +56,10 @@ export default {
 	},
 	sections: {
 		book: { label: "書籍", description: "查看及管理與您相關的書籍。" },
-		software: { label: "軟體", description: "查看及管理與您相關的軟體條目。" },
+		software: {
+			label: `${zhHantTerminology.software.forms.label}`,
+			description: `查看及管理與您相關的${zhHantTerminology.software.forms.label}條目。`,
+		},
 		media: { label: "媒體", description: "查看及管理與您相關的媒體內容。" },
 		entity: {
 			label: entityTerms.pluralLabel,
@@ -105,7 +108,7 @@ export default {
 		createAction: "繼續建立",
 		subjects: {
 			book: "書籍",
-			software: "軟體",
+			software: `${zhHantTerminology.software.forms.label}`,
 			media: "媒體",
 			person: "人物",
 			organization: "組織",

@@ -166,7 +166,7 @@ export default {
 	scoreActionByType: {
 		book: "이 책 평가하기",
 		media: "이 작품 평가하기",
-		software: "이 소프트웨어 평가하기",
+		software: `이 ${koTerminology.software.forms.label} 평가하기`,
 		series: "이 시리즈 평가하기",
 	},
 	progressByType: {
@@ -183,10 +183,9 @@ export default {
 			status: "읽기 상태",
 			progress: "읽기 완료",
 			completedCount: "완료된 읽기",
-			lastChapter: "현재 챕터",
-			noChapter: "선택된 챕터가 없습니다",
-			estimatedFromContents:
-				"선택한 챕터와 목차의 콘텐츠 분량을 기준으로 추정했습니다. 직접 조정할 수도 있습니다.",
+			lastChapter: `현재 ${koTerminology.chapter.forms.label}`,
+			noChapter: `선택된 ${koTerminology.chapter.forms.label}가 없습니다`,
+			estimatedFromContents: `선택한 ${koTerminology.chapter.forms.label}와 목차의 콘텐츠 분량을 기준으로 추정했습니다. 직접 조정할 수도 있습니다.`,
 			history: {
 				completion: insert("{{date}}에 이 책을 다 읽었습니다.", { date: String }),
 				update: insert("{{date}}에 {{percent}}%까지 읽었습니다.", {
@@ -285,7 +284,7 @@ export default {
 					percent: Number,
 				}),
 			},
-			scoreAction: "이 소프트웨어 평가하기",
+			scoreAction: `이 ${koTerminology.software.forms.label} 평가하기`,
 			recordAction: "사용 기록",
 			startAction: "사용 시작",
 			updateAction: "기록 업데이트",

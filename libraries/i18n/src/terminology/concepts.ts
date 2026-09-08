@@ -37,6 +37,102 @@ const WebTerminologyLocales = AllTerminologyLocales;
  * consistent across product surfaces. Keys identify concepts, not source words.
  */
 export const terminologyConcepts = defineTerminologyConcepts({
+	publisher: {
+		definition:
+			"A person or organization credited with issuing published content, including a bibliographic publication or a platform post.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	publishingWork: {
+		definition: "A written intellectual work, independent of its text versions and publications.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	textVersion: {
+		definition:
+			"One identifiable text, translation or revision that can be embodied by publications.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	publication: {
+		definition:
+			"One bibliographic publication or edition, independent of its covered texts or works.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	serialization: {
+		definition: "An identifiable ongoing or completed serialized publication of content.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	publishingCoverage: {
+		definition: "The known extent of a work or text included in another publishing resource.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	publishingInstallment: {
+		definition: "One ordered installment of serialized content; not necessarily a chapter.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	chapter: {
+		definition: "One authored chapter in a text reading structure.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	program: {
+		definition:
+			"An audiovisual screen work, including film, television and animation; separate from its versions and episodes.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	softwareContent: {
+		definition: "A software intellectual work or title, independent of versions and releases.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	softwareVersion: {
+		definition: "An evidenced version of a software title with a declared distinction.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	softwareRelease: {
+		definition: "One concrete software release, separate from its included contents and versions.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	grouping: {
+		definition:
+			"A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	referenceConcept: {
+		definition: "A catalog reference concept; distinct from an indexable Tag.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	distributionPackage: {
+		definition:
+			"One distributed package or manifest that can include independently identified resources.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	publishingCatalog: {
+		definition: "The catalog family containing written works, text versions and publications.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	software: {
+		definition: "The catalog family of software titles, versions and releases.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	referenceCatalog: {
+		definition: "The catalog family of reference concepts, places, instruments and events.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
 	music: {
 		definition: "The native music domain.",
 		slots: ["label", "inline", "plural"] as const,
@@ -148,7 +244,15 @@ export const terminologyConcepts = defineTerminologyConcepts({
 	entity: {
 		definition:
 			"A Unit representing a person, organization, or character that can participate in attributions and subject associations.",
-		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		slots: [
+			"label",
+			"pluralLabel",
+			"inline",
+			"plural",
+			"personLabel",
+			"organizationLabel",
+			"characterLabel",
+		] as const,
 		locales: WebTerminologyLocales,
 	},
 	metadata: {

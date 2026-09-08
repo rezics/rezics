@@ -1,3 +1,4 @@
+import { esTerminology } from "@rezics/i18n/terminology/es";
 import type { FeedFixtureLocalizedContent } from "../../content-feed/localized-content";
 
 export default {
@@ -45,7 +46,7 @@ export default {
 	},
 	collection: {
 		title: "Donde se encuentran la ciencia y la magia",
-		body: "Una colección de capítulos, reseñas y notas sobre el mundo ficticio que vale la pena releer.",
+		body: `Una colección de ${esTerminology.chapter.forms.plural}, reseñas y notas sobre el mundo ficticio que vale la pena releer.`,
 		coverAlt: "Una cubierta abstracta en tonos azules y ámbar",
 	},
 } satisfies FeedFixtureLocalizedContent;

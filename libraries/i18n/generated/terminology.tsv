@@ -1,4 +1,436 @@
 concept	definition	locale	status	slot	approved_form	forbidden_forms
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	en	approved	label	Publisher	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	en	approved	pluralLabel	Publishers	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	en	approved	inline	publisher	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	en	approved	plural	publishers	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	zh-Hant	approved	label	出版者	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	zh-Hant	approved	pluralLabel	出版者	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	zh-Hant	approved	inline	出版者	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	zh-Hant	approved	plural	出版者	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	zh-Hans	approved	label	出版者	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	zh-Hans	approved	pluralLabel	出版者	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	zh-Hans	approved	inline	出版者	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	zh-Hans	approved	plural	出版者	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	de	approved	label	Verleger	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	de	approved	pluralLabel	Verleger	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	de	approved	inline	Verleger	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	de	approved	plural	Verleger	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	ja	approved	label	出版者	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	ja	approved	pluralLabel	出版者	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	ja	approved	inline	出版者	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	ja	approved	plural	出版者	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	ko	approved	label	발행 주체	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	ko	approved	pluralLabel	발행 주체	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	ko	approved	inline	발행 주체	-
+publisher	A person or organization credited with issuing published content, including a bibliographic publication or a platform post.	ko	approved	plural	발행 주체	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	en	approved	label	Written work	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	en	approved	pluralLabel	Written works	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	en	approved	inline	written work	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	en	approved	plural	written works	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	zh-Hant	approved	label	文字作品	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	zh-Hant	approved	pluralLabel	文字作品	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	zh-Hant	approved	inline	文字作品	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	zh-Hant	approved	plural	文字作品	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	zh-Hans	approved	label	文字作品	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	zh-Hans	approved	pluralLabel	文字作品	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	zh-Hans	approved	inline	文字作品	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	zh-Hans	approved	plural	文字作品	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	de	approved	label	Schriftwerk	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	de	approved	pluralLabel	Schriftwerke	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	de	approved	inline	Schriftwerk	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	de	approved	plural	Schriftwerke	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	ja	approved	label	著作	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	ja	approved	pluralLabel	著作	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	ja	approved	inline	著作	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	ja	approved	plural	著作	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	ko	approved	label	문자 저작물	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	ko	approved	pluralLabel	문자 저작물	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	ko	approved	inline	문자 저작물	-
+publishingWork	A written intellectual work, independent of its text versions and publications.	ko	approved	plural	문자 저작물	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	en	approved	label	Text version	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	en	approved	pluralLabel	Text versions	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	en	approved	inline	text version	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	en	approved	plural	text versions	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	zh-Hant	approved	label	文本版本	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	zh-Hant	approved	pluralLabel	文本版本	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	zh-Hant	approved	inline	文本版本	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	zh-Hant	approved	plural	文本版本	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	zh-Hans	approved	label	文本版本	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	zh-Hans	approved	pluralLabel	文本版本	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	zh-Hans	approved	inline	文本版本	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	zh-Hans	approved	plural	文本版本	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	de	approved	label	Textfassung	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	de	approved	pluralLabel	Textfassungen	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	de	approved	inline	Textfassung	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	de	approved	plural	Textfassungen	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	ja	approved	label	テキスト版	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	ja	approved	pluralLabel	テキスト版	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	ja	approved	inline	テキスト版	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	ja	approved	plural	テキスト版	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	ko	approved	label	텍스트 판본	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	ko	approved	pluralLabel	텍스트 판본	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	ko	approved	inline	텍스트 판본	-
+textVersion	One identifiable text, translation or revision that can be embodied by publications.	ko	approved	plural	텍스트 판본	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	en	approved	label	Publication	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	en	approved	pluralLabel	Publications	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	en	approved	inline	publication	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	en	approved	plural	publications	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	zh-Hant	approved	label	出版品	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	zh-Hant	approved	pluralLabel	出版品	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	zh-Hant	approved	inline	出版品	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	zh-Hant	approved	plural	出版品	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	zh-Hans	approved	label	出版物	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	zh-Hans	approved	pluralLabel	出版物	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	zh-Hans	approved	inline	出版物	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	zh-Hans	approved	plural	出版物	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	de	approved	label	Publikation	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	de	approved	pluralLabel	Publikationen	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	de	approved	inline	Publikation	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	de	approved	plural	Publikationen	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	ja	approved	label	出版物	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	ja	approved	pluralLabel	出版物	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	ja	approved	inline	出版物	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	ja	approved	plural	出版物	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	ko	approved	label	출판물	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	ko	approved	pluralLabel	출판물	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	ko	approved	inline	출판물	-
+publication	One bibliographic publication or edition, independent of its covered texts or works.	ko	approved	plural	출판물	-
+serialization	An identifiable ongoing or completed serialized publication of content.	en	approved	label	Serialization	-
+serialization	An identifiable ongoing or completed serialized publication of content.	en	approved	pluralLabel	Serializations	-
+serialization	An identifiable ongoing or completed serialized publication of content.	en	approved	inline	serialization	-
+serialization	An identifiable ongoing or completed serialized publication of content.	en	approved	plural	serializations	-
+serialization	An identifiable ongoing or completed serialized publication of content.	zh-Hant	approved	label	連載	-
+serialization	An identifiable ongoing or completed serialized publication of content.	zh-Hant	approved	pluralLabel	連載	-
+serialization	An identifiable ongoing or completed serialized publication of content.	zh-Hant	approved	inline	連載	-
+serialization	An identifiable ongoing or completed serialized publication of content.	zh-Hant	approved	plural	連載	-
+serialization	An identifiable ongoing or completed serialized publication of content.	zh-Hans	approved	label	连载	-
+serialization	An identifiable ongoing or completed serialized publication of content.	zh-Hans	approved	pluralLabel	连载	-
+serialization	An identifiable ongoing or completed serialized publication of content.	zh-Hans	approved	inline	连载	-
+serialization	An identifiable ongoing or completed serialized publication of content.	zh-Hans	approved	plural	连载	-
+serialization	An identifiable ongoing or completed serialized publication of content.	de	approved	label	Fortsetzungsveröffentlichung	-
+serialization	An identifiable ongoing or completed serialized publication of content.	de	approved	pluralLabel	Fortsetzungsveröffentlichungen	-
+serialization	An identifiable ongoing or completed serialized publication of content.	de	approved	inline	Fortsetzungsveröffentlichung	-
+serialization	An identifiable ongoing or completed serialized publication of content.	de	approved	plural	Fortsetzungsveröffentlichungen	-
+serialization	An identifiable ongoing or completed serialized publication of content.	ja	approved	label	連載	-
+serialization	An identifiable ongoing or completed serialized publication of content.	ja	approved	pluralLabel	連載	-
+serialization	An identifiable ongoing or completed serialized publication of content.	ja	approved	inline	連載	-
+serialization	An identifiable ongoing or completed serialized publication of content.	ja	approved	plural	連載	-
+serialization	An identifiable ongoing or completed serialized publication of content.	ko	approved	label	연재물	-
+serialization	An identifiable ongoing or completed serialized publication of content.	ko	approved	pluralLabel	연재물	-
+serialization	An identifiable ongoing or completed serialized publication of content.	ko	approved	inline	연재물	-
+serialization	An identifiable ongoing or completed serialized publication of content.	ko	approved	plural	연재물	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	en	approved	label	Content coverage	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	en	approved	pluralLabel	Content coverage	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	en	approved	inline	content coverage	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	en	approved	plural	content coverage	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	zh-Hant	approved	label	內容涵蓋範圍	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	zh-Hant	approved	pluralLabel	內容涵蓋範圍	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	zh-Hant	approved	inline	內容涵蓋範圍	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	zh-Hant	approved	plural	內容涵蓋範圍	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	zh-Hans	approved	label	内容涵盖范围	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	zh-Hans	approved	pluralLabel	内容涵盖范围	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	zh-Hans	approved	inline	内容涵盖范围	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	zh-Hans	approved	plural	内容涵盖范围	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	de	approved	label	Inhaltlicher Umfang	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	de	approved	pluralLabel	Inhaltlicher Umfang	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	de	approved	inline	inhaltlicher Umfang	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	de	approved	plural	inhaltlicher Umfang	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	ja	approved	label	収録範囲	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	ja	approved	pluralLabel	収録範囲	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	ja	approved	inline	収録範囲	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	ja	approved	plural	収録範囲	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	ko	approved	label	내용 수록 범위	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	ko	approved	pluralLabel	내용 수록 범위	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	ko	approved	inline	내용 수록 범위	-
+publishingCoverage	The known extent of a work or text included in another publishing resource.	ko	approved	plural	내용 수록 범위	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	en	approved	label	Installment	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	en	approved	pluralLabel	Installments	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	en	approved	inline	installment	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	en	approved	plural	installments	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	zh-Hant	approved	label	連載篇章	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	zh-Hant	approved	pluralLabel	連載篇章	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	zh-Hant	approved	inline	連載篇章	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	zh-Hant	approved	plural	連載篇章	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	zh-Hans	approved	label	连载篇章	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	zh-Hans	approved	pluralLabel	连载篇章	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	zh-Hans	approved	inline	连载篇章	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	zh-Hans	approved	plural	连载篇章	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	de	approved	label	Fortsetzungsfolge	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	de	approved	pluralLabel	Fortsetzungsfolgen	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	de	approved	inline	Fortsetzungsfolge	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	de	approved	plural	Fortsetzungsfolgen	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	ja	approved	label	連載回	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	ja	approved	pluralLabel	連載回	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	ja	approved	inline	連載回	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	ja	approved	plural	連載回	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	ko	approved	label	연재분	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	ko	approved	pluralLabel	연재분	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	ko	approved	inline	연재분	-
+publishingInstallment	One ordered installment of serialized content; not necessarily a chapter.	ko	approved	plural	연재분	-
+chapter	One authored chapter in a text reading structure.	en	approved	label	Chapter	-
+chapter	One authored chapter in a text reading structure.	en	approved	pluralLabel	Chapters	-
+chapter	One authored chapter in a text reading structure.	en	approved	inline	chapter	-
+chapter	One authored chapter in a text reading structure.	en	approved	plural	chapters	-
+chapter	One authored chapter in a text reading structure.	zh-Hant	approved	label	章節	-
+chapter	One authored chapter in a text reading structure.	zh-Hant	approved	pluralLabel	章節	-
+chapter	One authored chapter in a text reading structure.	zh-Hant	approved	inline	章節	-
+chapter	One authored chapter in a text reading structure.	zh-Hant	approved	plural	章節	-
+chapter	One authored chapter in a text reading structure.	zh-Hans	approved	label	章节	-
+chapter	One authored chapter in a text reading structure.	zh-Hans	approved	pluralLabel	章节	-
+chapter	One authored chapter in a text reading structure.	zh-Hans	approved	inline	章节	-
+chapter	One authored chapter in a text reading structure.	zh-Hans	approved	plural	章节	-
+chapter	One authored chapter in a text reading structure.	de	approved	label	Kapitel	-
+chapter	One authored chapter in a text reading structure.	de	approved	pluralLabel	Kapitel	-
+chapter	One authored chapter in a text reading structure.	de	approved	inline	Kapitel	-
+chapter	One authored chapter in a text reading structure.	de	approved	plural	Kapitel	-
+chapter	One authored chapter in a text reading structure.	ja	approved	label	チャプター	-
+chapter	One authored chapter in a text reading structure.	ja	approved	pluralLabel	チャプター	-
+chapter	One authored chapter in a text reading structure.	ja	approved	inline	チャプター	-
+chapter	One authored chapter in a text reading structure.	ja	approved	plural	チャプター	-
+chapter	One authored chapter in a text reading structure.	ko	approved	label	챕터	-
+chapter	One authored chapter in a text reading structure.	ko	approved	pluralLabel	챕터	-
+chapter	One authored chapter in a text reading structure.	ko	approved	inline	챕터	-
+chapter	One authored chapter in a text reading structure.	ko	approved	plural	챕터	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	en	approved	label	Screen work	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	en	approved	pluralLabel	Screen works	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	en	approved	inline	screen work	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	en	approved	plural	screen works	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	zh-Hant	approved	label	影視作品	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	zh-Hant	approved	pluralLabel	影視作品	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	zh-Hant	approved	inline	影視作品	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	zh-Hant	approved	plural	影視作品	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	zh-Hans	approved	label	影视作品	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	zh-Hans	approved	pluralLabel	影视作品	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	zh-Hans	approved	inline	影视作品	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	zh-Hans	approved	plural	影视作品	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	de	approved	label	Film- und Fernsehwerk	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	de	approved	pluralLabel	Film- und Fernsehwerke	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	de	approved	inline	Film- und Fernsehwerk	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	de	approved	plural	Film- und Fernsehwerke	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	ja	approved	label	映像作品	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	ja	approved	pluralLabel	映像作品	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	ja	approved	inline	映像作品	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	ja	approved	plural	映像作品	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	ko	approved	label	영상 작품	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	ko	approved	pluralLabel	영상 작품	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	ko	approved	inline	영상 작품	-
+program	An audiovisual screen work, including film, television and animation; separate from its versions and episodes.	ko	approved	plural	영상 작품	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	en	approved	label	Software title	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	en	approved	pluralLabel	Software titles	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	en	approved	inline	software title	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	en	approved	plural	software titles	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	zh-Hant	approved	label	軟體作品	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	zh-Hant	approved	pluralLabel	軟體作品	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	zh-Hant	approved	inline	軟體作品	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	zh-Hant	approved	plural	軟體作品	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	zh-Hans	approved	label	软件作品	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	zh-Hans	approved	pluralLabel	软件作品	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	zh-Hans	approved	inline	软件作品	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	zh-Hans	approved	plural	软件作品	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	de	approved	label	Softwaretitel	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	de	approved	pluralLabel	Softwaretitel	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	de	approved	inline	Softwaretitel	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	de	approved	plural	Softwaretitel	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	ja	approved	label	ソフトウェア作品	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	ja	approved	pluralLabel	ソフトウェア作品	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	ja	approved	inline	ソフトウェア作品	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	ja	approved	plural	ソフトウェア作品	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	ko	approved	label	소프트웨어 작품	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	ko	approved	pluralLabel	소프트웨어 작품	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	ko	approved	inline	소프트웨어 작품	-
+softwareContent	A software intellectual work or title, independent of versions and releases.	ko	approved	plural	소프트웨어 작품	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	en	approved	label	Software version	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	en	approved	pluralLabel	Software versions	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	en	approved	inline	software version	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	en	approved	plural	software versions	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	zh-Hant	approved	label	軟體版本	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	zh-Hant	approved	pluralLabel	軟體版本	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	zh-Hant	approved	inline	軟體版本	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	zh-Hant	approved	plural	軟體版本	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	zh-Hans	approved	label	软件版本	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	zh-Hans	approved	pluralLabel	软件版本	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	zh-Hans	approved	inline	软件版本	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	zh-Hans	approved	plural	软件版本	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	de	approved	label	Softwareversion	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	de	approved	pluralLabel	Softwareversionen	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	de	approved	inline	Softwareversion	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	de	approved	plural	Softwareversionen	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	ja	approved	label	ソフトウェア版	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	ja	approved	pluralLabel	ソフトウェア版	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	ja	approved	inline	ソフトウェア版	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	ja	approved	plural	ソフトウェア版	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	ko	approved	label	소프트웨어 버전	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	ko	approved	pluralLabel	소프트웨어 버전	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	ko	approved	inline	소프트웨어 버전	-
+softwareVersion	An evidenced version of a software title with a declared distinction.	ko	approved	plural	소프트웨어 버전	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	en	approved	label	Software release	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	en	approved	pluralLabel	Software releases	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	en	approved	inline	software release	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	en	approved	plural	software releases	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	zh-Hant	approved	label	軟體發行版本	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	zh-Hant	approved	pluralLabel	軟體發行版本	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	zh-Hant	approved	inline	軟體發行版本	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	zh-Hant	approved	plural	軟體發行版本	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	zh-Hans	approved	label	软件发行版本	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	zh-Hans	approved	pluralLabel	软件发行版本	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	zh-Hans	approved	inline	软件发行版本	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	zh-Hans	approved	plural	软件发行版本	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	de	approved	label	Softwareveröffentlichung	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	de	approved	pluralLabel	Softwareveröffentlichungen	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	de	approved	inline	Softwareveröffentlichung	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	de	approved	plural	Softwareveröffentlichungen	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	ja	approved	label	ソフトウェアリリース	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	ja	approved	pluralLabel	ソフトウェアリリース	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	ja	approved	inline	ソフトウェアリリース	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	ja	approved	plural	ソフトウェアリリース	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	ko	approved	label	소프트웨어 출시본	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	ko	approved	pluralLabel	소프트웨어 출시본	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	ko	approved	inline	소프트웨어 출시본	-
+softwareRelease	One concrete software release, separate from its included contents and versions.	ko	approved	plural	소프트웨어 출시본	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	en	approved	label	Catalog group	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	en	approved	pluralLabel	Catalog groups	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	en	approved	inline	catalog group	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	en	approved	plural	catalog groups	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	zh-Hant	approved	label	目錄分組	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	zh-Hant	approved	pluralLabel	目錄分組	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	zh-Hant	approved	inline	目錄分組	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	zh-Hant	approved	plural	目錄分組	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	zh-Hans	approved	label	目录分组	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	zh-Hans	approved	pluralLabel	目录分组	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	zh-Hans	approved	inline	目录分组	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	zh-Hans	approved	plural	目录分组	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	de	approved	label	Kataloggruppe	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	de	approved	pluralLabel	Kataloggruppen	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	de	approved	inline	Kataloggruppe	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	de	approved	plural	Kataloggruppen	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	ja	approved	label	カタロググループ	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	ja	approved	pluralLabel	カタロググループ	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	ja	approved	inline	カタロググループ	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	ja	approved	plural	カタロググループ	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	ko	approved	label	카탈로그 그룹	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	ko	approved	pluralLabel	카탈로그 그룹	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	ko	approved	inline	카탈로그 그룹	-
+grouping	A catalog grouping such as a series, franchise or continuity; not a user Collection or membership organization.	ko	approved	plural	카탈로그 그룹	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	en	approved	label	Reference concept	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	en	approved	pluralLabel	Reference concepts	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	en	approved	inline	reference concept	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	en	approved	plural	reference concepts	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	zh-Hant	approved	label	參照概念	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	zh-Hant	approved	pluralLabel	參照概念	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	zh-Hant	approved	inline	參照概念	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	zh-Hant	approved	plural	參照概念	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	zh-Hans	approved	label	参照概念	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	zh-Hans	approved	pluralLabel	参照概念	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	zh-Hans	approved	inline	参照概念	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	zh-Hans	approved	plural	参照概念	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	de	approved	label	Referenzbegriff	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	de	approved	pluralLabel	Referenzbegriffe	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	de	approved	inline	Referenzbegriff	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	de	approved	plural	Referenzbegriffe	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	ja	approved	label	参照概念	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	ja	approved	pluralLabel	参照概念	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	ja	approved	inline	参照概念	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	ja	approved	plural	参照概念	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	ko	approved	label	참조 개념	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	ko	approved	pluralLabel	참조 개념	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	ko	approved	inline	참조 개념	-
+referenceConcept	A catalog reference concept; distinct from an indexable Tag.	ko	approved	plural	참조 개념	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	en	approved	label	Distribution package	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	en	approved	pluralLabel	Distribution packages	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	en	approved	inline	distribution package	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	en	approved	plural	distribution packages	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	zh-Hant	approved	label	散布套件	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	zh-Hant	approved	pluralLabel	散布套件	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	zh-Hant	approved	inline	散布套件	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	zh-Hant	approved	plural	散布套件	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	zh-Hans	approved	label	分发包	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	zh-Hans	approved	pluralLabel	分发包	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	zh-Hans	approved	inline	分发包	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	zh-Hans	approved	plural	分发包	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	de	approved	label	Distributionspaket	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	de	approved	pluralLabel	Distributionspakete	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	de	approved	inline	Distributionspaket	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	de	approved	plural	Distributionspakete	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	ja	approved	label	配布パッケージ	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	ja	approved	pluralLabel	配布パッケージ	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	ja	approved	inline	配布パッケージ	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	ja	approved	plural	配布パッケージ	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	ko	approved	label	배포 패키지	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	ko	approved	pluralLabel	배포 패키지	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	ko	approved	inline	배포 패키지	-
+distributionPackage	One distributed package or manifest that can include independently identified resources.	ko	approved	plural	배포 패키지	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	en	approved	label	Publishing catalog	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	en	approved	pluralLabel	Publishing catalog	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	en	approved	inline	publishing catalog	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	en	approved	plural	publishing catalog	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hant	approved	label	出版目錄	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hant	approved	pluralLabel	出版目錄	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hant	approved	inline	出版目錄	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hant	approved	plural	出版目錄	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hans	approved	label	出版目录	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hans	approved	pluralLabel	出版目录	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hans	approved	inline	出版目录	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	zh-Hans	approved	plural	出版目录	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	de	approved	label	Publikationskatalog	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	de	approved	pluralLabel	Publikationskatalog	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	de	approved	inline	Publikationskatalog	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	de	approved	plural	Publikationskatalog	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	ja	approved	label	出版カタログ	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	ja	approved	pluralLabel	出版カタログ	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	ja	approved	inline	出版カタログ	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	ja	approved	plural	出版カタログ	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	ko	approved	label	출판 카탈로그	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	ko	approved	pluralLabel	출판 카탈로그	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	ko	approved	inline	출판 카탈로그	-
+publishingCatalog	The catalog family containing written works, text versions and publications.	ko	approved	plural	출판 카탈로그	-
+software	The catalog family of software titles, versions and releases.	en	approved	label	Software	-
+software	The catalog family of software titles, versions and releases.	en	approved	pluralLabel	Software	-
+software	The catalog family of software titles, versions and releases.	en	approved	inline	software	-
+software	The catalog family of software titles, versions and releases.	en	approved	plural	software	-
+software	The catalog family of software titles, versions and releases.	zh-Hant	approved	label	軟體	-
+software	The catalog family of software titles, versions and releases.	zh-Hant	approved	pluralLabel	軟體	-
+software	The catalog family of software titles, versions and releases.	zh-Hant	approved	inline	軟體	-
+software	The catalog family of software titles, versions and releases.	zh-Hant	approved	plural	軟體	-
+software	The catalog family of software titles, versions and releases.	zh-Hans	approved	label	软件	-
+software	The catalog family of software titles, versions and releases.	zh-Hans	approved	pluralLabel	软件	-
+software	The catalog family of software titles, versions and releases.	zh-Hans	approved	inline	软件	-
+software	The catalog family of software titles, versions and releases.	zh-Hans	approved	plural	软件	-
+software	The catalog family of software titles, versions and releases.	de	approved	label	Software	-
+software	The catalog family of software titles, versions and releases.	de	approved	pluralLabel	Software	-
+software	The catalog family of software titles, versions and releases.	de	approved	inline	Software	-
+software	The catalog family of software titles, versions and releases.	de	approved	plural	Software	-
+software	The catalog family of software titles, versions and releases.	ja	approved	label	ソフトウェア	-
+software	The catalog family of software titles, versions and releases.	ja	approved	pluralLabel	ソフトウェア	-
+software	The catalog family of software titles, versions and releases.	ja	approved	inline	ソフトウェア	-
+software	The catalog family of software titles, versions and releases.	ja	approved	plural	ソフトウェア	-
+software	The catalog family of software titles, versions and releases.	ko	approved	label	소프트웨어	-
+software	The catalog family of software titles, versions and releases.	ko	approved	pluralLabel	소프트웨어	-
+software	The catalog family of software titles, versions and releases.	ko	approved	inline	소프트웨어	-
+software	The catalog family of software titles, versions and releases.	ko	approved	plural	소프트웨어	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	en	approved	label	Reference entries	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	en	approved	pluralLabel	Reference entries	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	en	approved	inline	reference entries	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	en	approved	plural	reference entries	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hant	approved	label	參照條目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hant	approved	pluralLabel	參照條目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hant	approved	inline	參照條目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hant	approved	plural	參照條目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hans	approved	label	参照条目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hans	approved	pluralLabel	参照条目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hans	approved	inline	参照条目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	zh-Hans	approved	plural	参照条目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	de	approved	label	Referenzeinträge	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	de	approved	pluralLabel	Referenzeinträge	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	de	approved	inline	Referenzeinträge	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	de	approved	plural	Referenzeinträge	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ja	approved	label	参照項目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ja	approved	pluralLabel	参照項目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ja	approved	inline	参照項目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ja	approved	plural	参照項目	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ko	approved	label	참조 항목	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ko	approved	pluralLabel	참조 항목	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ko	approved	inline	참조 항목	-
+referenceCatalog	The catalog family of reference concepts, places, instruments and events.	ko	approved	plural	참조 항목	-
 music	The native music domain.	en	approved	label	Music	-
 music	The native music domain.	en	approved	inline	music	-
 music	The native music domain.	en	approved	plural	music	-
@@ -413,26 +845,44 @@ license	A registered legal instrument or rights statement that a Unit grants ind
 license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	ja	approved	inline	ライセンス	Publication license
 license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	ko	approved	label	라이선스	Publication license
 license	A registered legal instrument or rights statement that a Unit grants independently of every other selected License.	ko	approved	inline	라이선스	Publication license
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	en	approved	personLabel	Real person	Catalog | catalog
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	en	approved	organizationLabel	Organization	Catalog | catalog
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	en	approved	characterLabel	Fictional character	Catalog | catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	en	approved	label	Entity	Catalog | catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	en	approved	pluralLabel	Entities	Catalog | catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	en	approved	inline	entity	Catalog | catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	en	approved	plural	entities	Catalog | catalog
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	zh-Hant	approved	personLabel	現實人物	Catalog | Entity
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	zh-Hant	approved	organizationLabel	組織機構	Catalog | Entity
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	zh-Hant	approved	characterLabel	虛構角色	Catalog | Entity
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	zh-Hant	approved	label	實體	Catalog | Entity
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	zh-Hant	approved	pluralLabel	實體	Catalog | Entity
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	zh-Hant	approved	inline	實體	Catalog | Entity
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	zh-Hant	approved	plural	實體	Catalog | Entity
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	zh-Hans	approved	personLabel	现实人物	Catalog | Entity
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	zh-Hans	approved	organizationLabel	组织机构	Catalog | Entity
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	zh-Hans	approved	characterLabel	虚构角色	Catalog | Entity
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	zh-Hans	approved	label	实体	Catalog | Entity
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	zh-Hans	approved	pluralLabel	实体	Catalog | Entity
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	zh-Hans	approved	inline	实体	Catalog | Entity
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	zh-Hans	approved	plural	实体	Catalog | Entity
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	de	approved	personLabel	Reale Person	Catalog
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	de	approved	organizationLabel	Organisation	Catalog
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	de	approved	characterLabel	Fiktive Figur	Catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	de	approved	label	Entität	Catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	de	approved	pluralLabel	Entitäten	Catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	de	approved	inline	Entität	Catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	de	approved	plural	Entitäten	Catalog
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	ja	approved	personLabel	実在の人物	Catalog
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	ja	approved	organizationLabel	団体・組織	Catalog
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	ja	approved	characterLabel	架空の登場人物	Catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	ja	approved	label	エンティティ	Catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	ja	approved	pluralLabel	エンティティ	Catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	ja	approved	inline	エンティティ	Catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	ja	approved	plural	エンティティ	Catalog
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	ko	approved	personLabel	실존 인물	Catalog
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	ko	approved	organizationLabel	단체·기관	Catalog
+entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	ko	approved	characterLabel	가상 인물	Catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	ko	approved	label	엔터티	Catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	ko	approved	pluralLabel	엔터티	Catalog
 entity	A Unit representing a person, organization, or character that can participate in attributions and subject associations.	ko	approved	inline	엔터티	Catalog

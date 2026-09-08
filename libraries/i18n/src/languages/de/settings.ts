@@ -12,7 +12,8 @@ export default {
 	memberships: {
 		expiryHint: "Wähle ein Ablaufdatum innerhalb der nächsten dreißig Tage.",
 		title: "Organisationsmitgliedschaften",
-		description: "Prüfe Einladungen, verlasse Organisationen und verwalte Mitgliederlisten mit entsprechender Berechtigung.",
+		description:
+			"Prüfe Einladungen, verlasse Organisationen und verwalte Mitgliederlisten mit entsprechender Berechtigung.",
 		invitations: "Einladungen",
 		organizations: "Meine Organisationen",
 		managing: "Von mir verwaltete Mitgliederlisten",
@@ -21,15 +22,18 @@ export default {
 		accept: "Annehmen",
 		decline: "Ablehnen",
 		cancelInvitation: "Einladung zurückziehen",
-		leave: "Organisation verlassen",
+		leave: `${deTerminology.entity.forms.organizationLabel} verlassen`,
 		remove: "Mitglied entfernen",
 		emptyInvitations: "Keine offenen Einladungen.",
 		emptyMembers: "Noch keine Mitglieder.",
-		emptyOrganizations: "Du bist keiner Organisation beigetreten.",
+		emptyOrganizations: `Du bist keiner ${deTerminology.entity.forms.organizationLabel} beigetreten.`,
 		emptyManagement: "Du verwaltest derzeit keine Mitgliederlisten.",
-		acceptPrompt: "Wenn du annimmst, wird deine öffentliche Identität in die für Mitgliedschaftsverantwortliche sichtbare Mitgliederliste aufgenommen.",
-		removePrompt: "Das Entfernen der Mitgliedschaft ändert keine gesondert vergebenen Veröffentlichungs-, Sicherheits- oder Verwaltungsrechte.",
-		leavePrompt: "Beim Verlassen endet deine Mitgliedschaft. Gesondert vergebene Berechtigungen bleiben unverändert.",
+		acceptPrompt:
+			"Wenn du annimmst, wird deine öffentliche Identität in die für Mitgliedschaftsverantwortliche sichtbare Mitgliederliste aufgenommen.",
+		removePrompt:
+			"Das Entfernen der Mitgliedschaft ändert keine gesondert vergebenen Veröffentlichungs-, Sicherheits- oder Verwaltungsrechte.",
+		leavePrompt:
+			"Beim Verlassen endet deine Mitgliedschaft. Gesondert vergebene Berechtigungen bleiben unverändert.",
 		recipientHint: "Verwende die öffentliche Identität eines bestehenden Kontos.",
 		states: {
 			pending: "Offen",
@@ -47,9 +51,10 @@ export default {
 		history: "Verlauf",
 		restore: "Wiederherstellen",
 		title: "Organisationen und Zugriff",
-		description: "Erstelle Organisationen und verwalte ihre öffentlichen Identitäten und delegierten Rechte.",
+		description:
+			"Erstelle Organisationen und verwalte ihre öffentlichen Identitäten und delegierten Rechte.",
 		organizations: "Organisationen",
-		createOrganization: "Organisation erstellen",
+		createOrganization: `${deTerminology.entity.forms.organizationLabel} erstellen`,
 		name: "Name",
 		manage: "Zugriff verwalten",
 		identity: "Handelnde Identität",
@@ -64,14 +69,19 @@ export default {
 		services: "Automatisierungsidentitäten",
 		createService: "Automatisierungsidentität erstellen",
 		credential: "Zugangsdaten",
-		credentialDescription: "Kopiere diese Zugangsdaten jetzt. Nach dem Schließen werden sie nicht erneut angezeigt.",
-		securityWarning: "Wenn du dem letzten menschlichen Sicherheitsverantwortlichen den Zugriff entziehst, wird diese Identität bis zur geprüften Wiederherstellung durch die Plattform gesperrt.",
-		revokeWarning: "Diese Berechtigung wird sofort unwirksam. Abgeschlossene Aktionen bleiben dokumentiert.",
+		credentialDescription:
+			"Kopiere diese Zugangsdaten jetzt. Nach dem Schließen werden sie nicht erneut angezeigt.",
+		securityWarning:
+			"Wenn du dem letzten menschlichen Sicherheitsverantwortlichen den Zugriff entziehst, wird diese Identität bis zur geprüften Wiederherstellung durch die Plattform gesperrt.",
+		revokeWarning:
+			"Diese Berechtigung wird sofort unwirksam. Abgeschlossene Aktionen bleiben dokumentiert.",
 		erasedRecipient: "Konto gelöscht",
 		currentAccount: "Meine Identität",
 		eraseTitle: "Konto löschen",
-		eraseDescription: "Die Anmeldung wird sofort gesperrt. Private Notizen, Favoriten, Fortschritte, Nachrichten und Uploads werden schrittweise gelöscht. Öffentliche Urheberangaben und Prüfprotokolle bleiben erhalten. Dies kann nicht rückgängig gemacht werden.",
-		eraseConfirmation: "Ich verstehe, dass mein Konto und meine privaten Daten nicht wiederhergestellt werden können.",
+		eraseDescription:
+			"Die Anmeldung wird sofort gesperrt. Private Notizen, Favoriten, Fortschritte, Nachrichten und Uploads werden schrittweise gelöscht. Öffentliche Urheberangaben und Prüfprotokolle bleiben erhalten. Dies kann nicht rückgängig gemacht werden.",
+		eraseConfirmation:
+			"Ich verstehe, dass mein Konto und meine privaten Daten nicht wiederhergestellt werden können.",
 		erase: "Mein Konto löschen",
 		erased: "Die Kontolöschung wurde gestartet.",
 		capabilities: {

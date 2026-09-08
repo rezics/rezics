@@ -7,8 +7,8 @@ const { forms: zoneTerms } = frTerminology.zone;
 const { forms: entityTerms } = frTerminology.entity;
 
 export default {
-	loading: "Chargement de l’éditeur…",
-	loadFailed: "Impossible de charger l’éditeur.",
+	loading: `Chargement de l’éditeur…`,
+	loadFailed: `Impossible de charger l’éditeur.`,
 	paragraph: "Paragraphe",
 	heading2: "Titre 2",
 	heading3: "Titre 3",

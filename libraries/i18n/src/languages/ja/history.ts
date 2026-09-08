@@ -1,3 +1,4 @@
+import { jaTerminology } from "@rezics/i18n/terminology/ja";
 export default {
 	title: "改訂履歴",
 	description: "内容の変更を確認、改訂の比較、または許可されている場合には内容を復元",
@@ -24,7 +25,7 @@ export default {
 		title: "改訂の表示範囲を管理",
 		description:
 			"改訂内容、編集要約、または編集者情報へのアクセスを制限します。すべての変更は監査記録に残ります。",
-		copyrightPreset: "著作権保護を適用",
+		copyrightPreset: `${jaTerminology.publishingWork.forms.label}権保護を適用`,
 		copyrightPresetDescription:
 			"内容と編集要約を非表示にし、抑制権限を持つ担当者だけが閲覧できるようにします。",
 		levelLabel: "保護レベル",

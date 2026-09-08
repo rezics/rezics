@@ -13,9 +13,11 @@ const { forms: zoneTerms } = jaTerminology.zone;
 const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
-	OrganizationMembershipConflict: "招待またはメンバーの状態が変更されました。再読み込みしてからお試しください。",
+	OrganizationMembershipConflict:
+		"招待またはメンバーの状態が変更されました。再読み込みしてからお試しください。",
 	OrganizationMembershipNotFound: "この招待またはメンバーの記録は利用できません。",
-	OrganizationMembershipCapacityExceeded: "未処理の招待が多すぎます。一部を処理してから新しい招待を送信してください。",
+	OrganizationMembershipCapacityExceeded:
+		"未処理の招待が多すぎます。一部を処理してから新しい招待を送信してください。",
 	CatalogReferenceNotFound: "この記録が見つかりません。",
 	CatalogRevisionConflict: "この記録は変更されました。再読み込みしてからお試しください。",
 	FavoriteNotFound: "保存した項目が見つかりません。",
@@ -95,8 +97,7 @@ export default {
 	UserFollowBlocked: `${followTerms.stateLabel}は、ブロックされたユーザー間では利用できません。`,
 	FollowingTargetKindMismatch: `${followTerms.actionLabel}項目の種類が変更されました。設定を再読み込みしてください。`,
 	UserSelfBlockForbidden: "自分自身をブロックすることはできません。",
-	SoftwareSystemRequirementSourceInvalid:
-		"システム要件のソースは、このソフトウェアに属している必要があります。",
+	SoftwareSystemRequirementSourceInvalid: `システム要件のソースは、この${jaTerminology.software.forms.label}に属している必要があります。`,
 	SeriesReleaseNotFound: "このシリーズリリースは見つかりませんでした。",
 	ZonePageNotFound: `この${zoneTerms.inline}ページは見つかりませんでした。`,
 	ZonePageInUse: `この${zoneTerms.inline}ページは、ブロックまたはナビゲーションドキュメントでまだ使用されています。`,
@@ -105,7 +106,7 @@ export default {
 	ZoneDocumentInvalid: `${zoneTerms.inline}ブロックまたはナビゲーションドキュメントが無効です。`,
 	ZoneTimeRangeInvalid: `${zoneTerms.inline}の終了時刻は開始時刻より後でなければなりません。`,
 	ZoneRuleRealmInvalid: `選択した${realmTerms.label}には、1件以上のルールを含む現在のルール改訂がありません。`,
-	SoftwareNotFound: "このソフトウェアが見つかりませんでした。",
+	SoftwareNotFound: `この${jaTerminology.software.forms.label}が見つかりませんでした。`,
 	SystemRequirementNotFound: "このシステム要件が見つかりませんでした。",
 	PollOptionsDuplicated: "投票オプションは一意である必要があります。",
 	PollNotFound: "この投票が見つかりませんでした。",

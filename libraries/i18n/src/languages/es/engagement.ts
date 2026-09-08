@@ -164,7 +164,7 @@ export default {
 	scoreActionByType: {
 		book: "Valorar este libro",
 		media: "Valorar esta obra",
-		software: "Valorar este software",
+		software: `Valorar este ${esTerminology.software.forms.inline}`,
 		series: "Valorar esta serie",
 	},
 	progressByType: {
@@ -181,10 +181,9 @@ export default {
 			status: "Estado de lectura",
 			progress: "Progreso de lectura",
 			completedCount: "Lecturas completadas",
-			lastChapter: "Capítulo actual",
-			noChapter: "No hay ningún capítulo seleccionado",
-			estimatedFromContents:
-				"Estimado a partir del capítulo elegido y el contenido del índice; puedes ajustarlo.",
+			lastChapter: `${esTerminology.chapter.forms.label} actual`,
+			noChapter: `No hay ningún ${esTerminology.chapter.forms.inline} seleccionado`,
+			estimatedFromContents: `Estimado a partir del ${esTerminology.chapter.forms.inline} elegido y el contenido del índice; puedes ajustarlo.`,
 			history: {
 				completion: insert("Terminaste este libro el {{date}}.", { date: String }),
 				update: insert("Llegaste al {{percent}} % el {{date}}.", {
@@ -283,7 +282,7 @@ export default {
 					percent: Number,
 				}),
 			},
-			scoreAction: "Valorar este software",
+			scoreAction: `Valorar este ${esTerminology.software.forms.inline}`,
 			recordAction: "Registrar uso",
 			startAction: "Empezar a usar",
 			updateAction: "Actualizar registro",

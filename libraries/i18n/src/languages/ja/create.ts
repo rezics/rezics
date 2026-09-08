@@ -57,8 +57,8 @@ export default {
 	sections: {
 		book: { label: "書籍", description: "あなたの作業に関連する書籍を表示および管理" },
 		software: {
-			label: "ソフトウェア",
-			description: "あなたの作業に関連するソフトウェアの項目を表示および管理します。",
+			label: `${jaTerminology.software.forms.label}`,
+			description: `あなたの作業に関連する${jaTerminology.software.forms.label}の項目を表示および管理します。`,
 		},
 		media: {
 			label: "メディア",
@@ -128,7 +128,7 @@ export default {
 		createAction: "作成に進む",
 		subjects: {
 			book: "書籍",
-			software: "ソフトウェア",
+			software: `${jaTerminology.software.forms.label}`,
 			media: "メディア",
 			person: "人物",
 			organization: "組織",

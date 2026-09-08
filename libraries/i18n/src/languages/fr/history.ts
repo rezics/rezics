@@ -1,3 +1,4 @@
+import { frTerminology } from "@rezics/i18n/terminology/fr";
 export default {
 	title: "Historique des révisions",
 	description:
@@ -9,13 +10,13 @@ export default {
 	undoRevision: "Annuler cette modification",
 	restoreRevision: "Restaurer cette révision",
 	compareWithParent: "Comparer à la précédente",
-	revisionBy: "Éditeur",
+	revisionBy: `Éditeur`,
 	noEditSummary: "Aucun résumé de modification",
 	compareTitle: "Différence entre les révisions",
 	before: "Avant",
 	after: "Après",
 	backToHistory: "Retour à l’historique des révisions",
-	backToEditor: "Retour à l’éditeur",
+	backToEditor: `Retour à l’éditeur`,
 	bytes: "octets",
 	visibility: {
 		hiddenBadge: "Masquée",
@@ -23,8 +24,7 @@ export default {
 		protectedSummary: "Résumé de modification protégé",
 		manage: "Gérer la visibilité",
 		title: "Gérer la visibilité de la révision",
-		description:
-			"Restreignez l’accès au contenu, au résumé de modification ou à l’identité de l’éditeur. Chaque changement est audité.",
+		description: `Restreignez l’accès au contenu, au résumé de modification ou à l’identité de l’éditeur. Chaque changement est audité.`,
 		copyrightPreset: "Appliquer la protection du droit d’auteur",
 		copyrightPresetDescription:
 			"Masquez le contenu et le résumé afin que seules les personnes autorisées à supprimer puissent les consulter.",
@@ -45,7 +45,7 @@ export default {
 		fields: {
 			content: "Contenu de la révision",
 			summary: "Résumé de modification",
-			actor: "Identité de l’éditeur",
+			actor: `Identité de l’éditeur`,
 		},
 		currentRevisionContent:
 			"Le contenu de la révision actuelle ne peut pas être masqué. Publiez d’abord une révision assainie, puis protégez l’ancienne.",

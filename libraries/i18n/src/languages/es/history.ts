@@ -1,3 +1,4 @@
+import { esTerminology } from "@rezics/i18n/terminology/es";
 export default {
 	title: "Historial de revisiones",
 	description:
@@ -9,13 +10,13 @@ export default {
 	undoRevision: "Deshacer esta edición",
 	restoreRevision: "Restaurar esta revisión",
 	compareWithParent: "Comparar con la anterior",
-	revisionBy: "Editor",
+	revisionBy: `Editor`,
 	noEditSummary: "Sin resumen de la edición",
 	compareTitle: "Diferencia entre revisiones",
 	before: "Antes",
 	after: "Después",
 	backToHistory: "Volver al historial de revisiones",
-	backToEditor: "Volver al editor",
+	backToEditor: `Volver al editor`,
 	bytes: "bytes",
 	visibility: {
 		hiddenBadge: "Oculta",
@@ -23,8 +24,7 @@ export default {
 		protectedSummary: "Resumen de la edición protegido",
 		manage: "Gestionar visibilidad",
 		title: "Gestionar la visibilidad de la revisión",
-		description:
-			"Restringe el acceso al contenido, al resumen de la edición o a la identidad del editor. Todos los cambios quedan auditados.",
+		description: `Restringe el acceso al contenido, al resumen de la edición o a la identidad del editor. Todos los cambios quedan auditados.`,
 		copyrightPreset: "Aplicar protección de derechos de autor",
 		copyrightPresetDescription:
 			"Oculta el contenido y el resumen para que solo puedan verlos quienes tengan acceso de supresión.",
@@ -44,7 +44,7 @@ export default {
 		fields: {
 			content: "Contenido de la revisión",
 			summary: "Resumen de la edición",
-			actor: "Identidad del editor",
+			actor: `Identidad del editor`,
 		},
 		currentRevisionContent:
 			"No se puede ocultar el contenido de la revisión actual. Publica primero una revisión limpia y protege después la anterior.",
