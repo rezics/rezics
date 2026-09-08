@@ -1,3 +1,4 @@
+import { catalogSourcePath } from "./source-document-scope";
 import { catalogSourceSupportColumns } from "./source-support";
 import { z } from "zod";
 import { createHash } from "node:crypto";
@@ -53,7 +54,7 @@ export async function adoptMusicBrainzAliases(
 				.digest("hex")}`,
 			nameId: added.id,
 			nameRevision: added.nameRevision,
-			sourcePath: `${path}/${index}`,
+			sourcePath: catalogSourcePath(observation.record.id, observation.snapshot.id, `${path}/${index}`),
 		});
 		await tx.insert(CatalogFactTables[reference.owner].support).values({
 			...(await catalogSourceSupportColumns(tx, observation.record.id)),
@@ -61,7 +62,7 @@ export async function adoptMusicBrainzAliases(
 			namedFormId: added.id,
 			sourceRecordId: observation.record.id,
 			snapshotId: observation.snapshot.id,
-			sourcePath: `${path}/${index}`,
+			sourcePath: catalogSourcePath(observation.record.id, observation.snapshot.id, `${path}/${index}`),
 		});
 	}
 	return revision;
@@ -88,7 +89,7 @@ export async function adoptMusicBrainzTitle(
 		localKey: "primary",
 		nameId: added.id,
 		nameRevision: added.nameRevision,
-		sourcePath: "/title",
+		sourcePath: catalogSourcePath(observation.record.id, observation.snapshot.id, "/title"),
 	});
 	await tx.insert(CatalogFactTables[reference.owner].support).values({
 		...(await catalogSourceSupportColumns(tx, observation.record.id)),
@@ -96,7 +97,7 @@ export async function adoptMusicBrainzTitle(
 		namedFormId: added.id,
 		sourceRecordId: observation.record.id,
 		snapshotId: observation.snapshot.id,
-		sourcePath: "/title",
+		sourcePath: catalogSourcePath(observation.record.id, observation.snapshot.id, "/title"),
 	});
 	return added.revision;
 }

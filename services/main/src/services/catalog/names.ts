@@ -1,3 +1,4 @@
+import { catalogSourcePath } from "./source-document-scope";
 import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
@@ -178,6 +179,7 @@ export async function bindCatalogNameSourceOccurrence(
 	input: z.input<typeof sourceOccurrenceSchema>,
 ) {
 	const value = sourceOccurrenceSchema.parse(input);
+	value.sourcePath = catalogSourcePath(value.sourceRecordId, value.snapshotId, value.sourcePath);
 	const scope = await resolveCatalogSourceChildCorrespondence(tx, value.sourceRecordId);
 	await loadCatalogIdentity(tx, reference, actor, true, "share");
 	await requireCatalogNameRevision(tx, reference, actor, value.nameId, value.nameRevision);

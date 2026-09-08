@@ -1,3 +1,9 @@
+import { SOURCE_DOCUMENT_BYTE_LIMIT, SOURCE_MULTIPART_BYTE_LIMIT, SOURCE_MULTIPART_PART_LIMIT, SOURCE_MANIFEST_BYTE_LIMIT } from "../database/schema/catalog-source-limits";
+import { withSourceDocumentPaths } from "./source-document-scope";
+export { catalogSourcePath, catalogSourceLogicalPath } from "./source-document-scope";
+import { isDeepStrictEqual } from "node:util";
+import { catalogSourceSnapshotBundle, catalogSourceSnapshotPart } from "../database/schema/catalog-source-multipart";
+import { CatalogSourceManifestSchema, CatalogSourceMultipartReceiptSchema, type CatalogSourceMultipartReceipt } from "./source-multipart-contracts";
 import { createHash } from "node:crypto";
 import { Readable } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
@@ -80,6 +86,7 @@ export type CatalogSourceReceipt = Readonly<{
 	payloadRef: string;
 	sourceRevision: string | null;
 	acquisition: CatalogSourceAcquisition | null;
+	bundle?: CatalogSourceMultipartReceipt;
 }>;
 
 /** Archive before opening a database transaction; only object keys are persisted. */
@@ -104,7 +111,7 @@ export async function storeCatalogSourcePayload(
 	z.string()
 		.regex(/^[a-f0-9]{64}$/u)
 		.parse(contractSha256);
-	if (bytes.byteLength > 8_000_000)
+	if (bytes.byteLength > SOURCE_DOCUMENT_BYTE_LIMIT)
 		throw new RangeError("Source record exceeds the admitted 8 MB archive budget");
 	// Upload and checksum must observe the same bytes even if the caller reuses its buffer.
 	const payload = new Uint8Array(bytes);
@@ -136,13 +143,104 @@ export async function storeCatalogSourcePayload(
 	return receipt;
 }
 
+function freezeBundle(bundle: CatalogSourceMultipartReceipt) {
+	Object.freeze(bundle.manifest.key);
+	for (const part of bundle.manifest.parts) Object.freeze(part);
+	Object.freeze(bundle.manifest.parts); Object.freeze(bundle.manifest);
+	for (const observation of bundle.observations) Object.freeze(observation);
+	Object.freeze(bundle.observations);
+	return Object.freeze(bundle);
+}
+
+/** @internal Stable raw part hashes and the derivation recipe determine content identity; observation times are separate receipt metadata. */
+export async function storeCatalogSourceMultipartPayload(input: CatalogSourceKey, profile: string, derivationContractSha256: string,
+	parts: readonly { key: string; profile: string; kind: "upstream_response" | "derived_view"; bytes: Uint8Array; requestUrl: string | null; observedAt: string }[],
+	contractSha256: string, archive: CatalogSourceArchive = storage, acquisition: CatalogSourceAcquisition | null = null, signal?: AbortSignal,
+): Promise<CatalogSourceReceipt> {
+	if (parts.length < 2 || parts.length > SOURCE_MULTIPART_PART_LIMIT || parts.reduce((sum, part) => sum + part.bytes.byteLength, 0) > SOURCE_MULTIPART_BYTE_LIMIT)
+		throw new RangeError("Multipart source exceeds its part or total byte budget");
+	const key = sourceKeySchema.parse(input);
+	const stored = [];
+	// Profile ordering is not observation content; normalize it before hashing the manifest.
+	const orderedParts = [...parts].sort((left, right) => left.key < right.key ? -1 : left.key > right.key ? 1 : 0);
+	for (const part of orderedParts) {
+		const receipt = await storeCatalogSourcePayload(key, part.bytes, contractSha256, null, archive, null, signal);
+		stored.push({ key: part.key, profile: part.profile, kind: part.kind, contentSha256: receipt.contentSha256,
+			payloadRef: receipt.payloadRef, byteLength: part.bytes.byteLength, requestUrl: part.requestUrl });
+	}
+	const bundle = CatalogSourceMultipartReceiptSchema.parse({ manifest: { format: "rezics.source.multipart-json.1", key, profile,
+		derivationContractSha256, consistency: "overlaps_validated", nativePart: "native_view", parts: stored },
+		observations: orderedParts.map((part) => ({ key: part.key, observedAt: part.observedAt })) });
+	const bytes = new TextEncoder().encode(JSON.stringify(bundle.manifest));
+	if (bytes.byteLength > SOURCE_MANIFEST_BYTE_LIMIT) throw new RangeError("Multipart manifest exceeds 64 KiB");
+	const raw = await storeCatalogSourcePayload(key, bytes, contractSha256, null, archive, acquisition, signal);
+	const receipt: CatalogSourceReceipt = Object.freeze({ ...raw, bundle: freezeBundle(bundle) });
+	issuedReceipts.add(receipt); receiptArchives.set(receipt, archive);
+	return receipt;
+}
+
+function requireIssuedReceipt(receipt: CatalogSourceReceipt) {
+	if (!issuedReceipts.has(receipt) || receipt[storedReceipt] !== true) throw new TypeError("Source receipt was not produced by the archive writer");
+}
+
+/** @internal A native input is a real archived derived part for multipart snapshots, or the original single JSON response. */
+export function catalogSourceDocumentSha256(receipt: CatalogSourceReceipt) {
+	requireIssuedReceipt(receipt);
+	const part = receipt.bundle?.manifest.parts.find((part) => part.key === "native_view");
+	if (receipt.bundle && !part) throw new TypeError("Multipart source has no derived native input");
+	return part?.contentSha256 ?? receipt.contentSha256;
+}
+
+/** @alpha Profile identities and capture times are inspectable without loading source bodies. */
+export function listCatalogSourceProfiles(receipt: CatalogSourceReceipt) {
+	requireIssuedReceipt(receipt);
+	return receipt.bundle ? receipt.bundle.manifest.parts.map((part) => ({ ...part,
+		observedAt: receipt.bundle!.observations.find((observation) => observation.key === part.key)!.observedAt,
+		derivedFrom: part.kind === "derived_view" ? receipt.bundle!.manifest.parts.filter((source) => source.kind === "upstream_response").map((source) => ({ key: source.key, contentSha256: source.contentSha256 })) : [],
+	})) : [];
+}
+
+/** @alpha Read one exact raw or derived profile, independently bounded to 8 MB. Stored URLs are never followed. */
+export async function readCatalogSourceProfileBytes(receipt: CatalogSourceReceipt, profileKey?: string): Promise<Uint8Array> {
+	requireIssuedReceipt(receipt);
+	if (!receipt.bundle) {
+		if (profileKey !== undefined && profileKey !== "document") throw new TypeError("Single-document source has no selected multipart profile");
+		return readCatalogSourceBytes(receipt);
+	}
+	const manifestBytes = await readCatalogSourceBytes(receipt);
+	const manifest = CatalogSourceManifestSchema.parse(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(manifestBytes)));
+	if (!isDeepStrictEqual(manifest, receipt.bundle.manifest)) throw new TypeError("Multipart source manifest differs from its persisted receipt");
+	const part = manifest.parts.find((part) => part.key === (profileKey ?? manifest.nativePart));
+	if (!part) throw new TypeError("Unknown source profile");
+	return readSourcePayload(receipt, part.payloadRef, part.contentSha256, part.byteLength);
+}
+
+/** @internal Existing single-document providers retain the same read contract. */
+export function readCatalogSourceNativeBytes(receipt: CatalogSourceReceipt) { return readCatalogSourceProfileBytes(receipt); }
+
+/** @internal Only issued archive metadata can select a native view's physical evidence path. */
+export function withCatalogSourceReceipts<T>(receipts: readonly CatalogSourceReceipt[], work: () => T): T {
+	if (receipts.length > 8) throw new RangeError("Source evidence scope exceeds eight receipts");
+	const paths = receipts.flatMap((receipt) => {
+		requireIssuedReceipt(receipt);
+		const snapshot = receiptSnapshots.get(receipt);
+		if (receipt.bundle && !snapshot) throw new TypeError("Multipart native input requires a committed receipt");
+		return snapshot ? [{ ...snapshot, prefix: receipt.bundle ? "/parts/native_view" as const : "" as const }] : [];
+	});
+	return withSourceDocumentPaths(paths, work);
+}
+
 /** The immutable archive is verified on read; external URLs never become fetch instructions. */
 export async function readCatalogSourceBytes(receipt: CatalogSourceReceipt): Promise<Uint8Array> {
 	if (!issuedReceipts.has(receipt) || receipt[storedReceipt] !== true)
 		throw new TypeError("Source receipt was not produced by the archive writer");
+	return readSourcePayload(receipt, receipt.payloadRef, receipt.contentSha256, undefined, receipt.bundle ? SOURCE_MANIFEST_BYTE_LIMIT : SOURCE_DOCUMENT_BYTE_LIMIT);
+}
+
+async function readSourcePayload(receipt: CatalogSourceReceipt, payloadRef: string, contentSha256: string, expectedLength?: number, maximumLength = SOURCE_DOCUMENT_BYTE_LIMIT): Promise<Uint8Array> {
 	const archive = receiptArchives.get(receipt);
 	if (!archive) throw new TypeError("Source receipt has no archive owner");
-	const result = await archive.get({ Key: receipt.payloadRef });
+	const result = await archive.get({ Key: payloadRef });
 	if (!result.Body) throw new Error("Archived source payload is missing");
 	if (!(result.Body instanceof Readable) && !(result.Body instanceof ReadableStream))
 		throw new TypeError("Source archive returned an unsupported byte stream");
@@ -152,12 +250,13 @@ export async function readCatalogSourceBytes(receipt: CatalogSourceReceipt): Pro
 		if (!(chunk instanceof Uint8Array))
 			throw new TypeError("Source archive stream did not contain bytes");
 		length += chunk.byteLength;
-		if (length > 8_000_000) throw new RangeError("Archived source payload exceeds its read budget");
+		if (length > maximumLength) throw new RangeError("Archived source payload exceeds its read budget");
 		chunks.push(chunk);
 	}
 	const bytes = Buffer.concat(chunks);
-	if (createHash("sha256").update(bytes).digest("hex") !== receipt.contentSha256)
+	if (createHash("sha256").update(bytes).digest("hex") !== contentSha256)
 		throw new Error("Archived source checksum differs");
+	if (expectedLength !== undefined && bytes.byteLength !== expectedLength) throw new TypeError("Source part length differs from its receipt");
 	return bytes;
 }
 
@@ -191,6 +290,17 @@ export async function loadCatalogSourceReceipt(
 		objectType: record.objectType,
 		externalId: record.externalId,
 	});
+	const [bundleRow] = await tx.select().from(catalogSourceSnapshotBundle).where(and(eq(catalogSourceSnapshotBundle.sourceRecordId, sourceRecordId), eq(catalogSourceSnapshotBundle.snapshotId, snapshotId))).limit(1);
+	let bundle: CatalogSourceMultipartReceipt | undefined;
+	if (bundleRow) {
+		const rows = await tx.select().from(catalogSourceSnapshotPart).where(and(eq(catalogSourceSnapshotPart.sourceRecordId, sourceRecordId), eq(catalogSourceSnapshotPart.snapshotId, snapshotId))).orderBy(catalogSourceSnapshotPart.position).limit(SOURCE_MULTIPART_PART_LIMIT + 1);
+		if (rows.length !== bundleRow.partCount || rows.some((row, index) => row.position !== index) || rows.reduce((sum, row) => sum + row.byteLength, 0) !== bundleRow.totalBytes)
+			throw new TypeError("Committed multipart source receipt is incomplete");
+		bundle = CatalogSourceMultipartReceiptSchema.parse({ manifest: { format: "rezics.source.multipart-json.1", key, profile: bundleRow.profile,
+			derivationContractSha256: bundleRow.derivationContractSha256, consistency: bundleRow.consistency, nativePart: "native_view",
+			parts: rows.map(({ key, profile, kind, contentSha256, payloadRef, byteLength, requestUrl }) => ({ key, profile, kind, contentSha256, payloadRef, byteLength, requestUrl })) },
+			observations: rows.map((row) => ({ key: row.key, observedAt: row.observedAt.toISOString() })) });
+	}
 	const receipt: CatalogSourceReceipt = Object.freeze({
 		[storedReceipt]: true as const,
 		key: Object.freeze(key),
@@ -199,6 +309,7 @@ export async function loadCatalogSourceReceipt(
 		payloadRef: snapshot.payloadRef,
 		sourceRevision: snapshot.sourceRevision,
 		acquisition: null,
+		...(bundle ? { bundle: freezeBundle(bundle) } : {}),
 	});
 	issuedReceipts.add(receipt);
 	receiptArchives.set(receipt, archive);
@@ -265,6 +376,14 @@ export async function recordCatalogSourceObservation(
 			})
 			.returning();
 		if (!snapshot) throw new Error("Source snapshot insertion returned no row");
+		if (receipt.bundle) {
+			const bundle = CatalogSourceMultipartReceiptSchema.parse(receipt.bundle), manifest = bundle.manifest;
+			await tx.insert(catalogSourceSnapshotBundle).values({ sourceRecordId: record.id, snapshotId: snapshot.id,
+				profile: manifest.profile, derivationContractSha256: manifest.derivationContractSha256, consistency: manifest.consistency,
+				partCount: manifest.parts.length, totalBytes: manifest.parts.reduce((sum, part) => sum + part.byteLength, 0) });
+			await tx.insert(catalogSourceSnapshotPart).values(manifest.parts.map((part, position) => ({ ...part, position,
+				sourceRecordId: record.id, snapshotId: snapshot.id, observedAt: new Date(bundle.observations.find((observation) => observation.key === part.key)!.observedAt) })));
+		}
 		await tx
 			.update(catalogSourceRecord)
 			.set({
@@ -315,6 +434,7 @@ export async function recordCatalogSourceDocument(
 	bytes: Uint8Array,
 ) {
 	const committed = receiptSnapshots.get(receipt);
+	if (receipt.bundle && !committed) throw new TypeError("Multipart native input requires reopening its committed receipt");
 	if (committed)
 		return loadCatalogSourceDocument(
 			tx,
@@ -331,8 +451,8 @@ export async function recordCatalogSourceDocument(
 function parseSourceDocument(receipt: CatalogSourceReceipt, bytes: Uint8Array): unknown {
 	if (
 		!issuedReceipts.has(receipt) ||
-		bytes.byteLength > 8_000_000 ||
-		createHash("sha256").update(bytes).digest("hex") !== receipt.contentSha256
+		bytes.byteLength > SOURCE_DOCUMENT_BYTE_LIMIT ||
+		createHash("sha256").update(bytes).digest("hex") !== catalogSourceDocumentSha256(receipt)
 	)
 		throw new TypeError("Source reference document differs from its archive receipt");
 	return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
@@ -346,12 +466,16 @@ function sourceDocumentEvidence(
 	return {
 		...observation,
 		referenceAt(path: string): CatalogSourceReferenceEvidence {
+			const prefix = receipt.bundle ? "/parts/native_view" : "";
+			const logicalPath = prefix && (path === prefix || path.startsWith(`${prefix}/`)) ? path.slice(prefix.length) || "/" : path;
+			const physicalPath = prefix ? `${prefix}${logicalPath === "/" ? "" : logicalPath}` : logicalPath;
+			if (Buffer.byteLength(physicalPath) > 512) throw new TypeError("Source part pointer exceeds its path budget");
 			const evidence = Object.freeze({
 				source: receipt.key.source,
 				sourceRecordId: observation.record.id,
 				snapshotId: observation.snapshot.id,
-				path,
-				externalId: sourceReferenceAt(document, path),
+				path: physicalPath,
+				externalId: sourceReferenceAt(document, logicalPath),
 			});
 			issuedReferenceEvidence.add(evidence);
 			return evidence;

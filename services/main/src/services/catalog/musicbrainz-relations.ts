@@ -1,3 +1,4 @@
+import { catalogSourcePath } from "./source-document-scope";
 import { MusicBrainzRelationEndpointFamilies } from "./musicbrainz-relation-plan";
 import { catalogSourceSupportColumns } from "./source-support";
 import { z } from "zod";
@@ -285,7 +286,7 @@ export async function adoptMusicBrainzRelations(
 				factId: qualifier.valueFactId,
 				sourceRecordId: observation.record.id,
 				snapshotId: observation.snapshot.id,
-				sourcePath: `${path}/${position}`,
+				sourcePath: catalogSourcePath(observation.record.id, observation.snapshot.id, `${path}/${position}`),
 			});
 		await tx.insert(CatalogFactTables[reference.owner].support).values({
 			...(await catalogSourceSupportColumns(tx, observation.record.id)),
@@ -293,7 +294,7 @@ export async function adoptMusicBrainzRelations(
 			relationId: created.id,
 			sourceRecordId: observation.record.id,
 			snapshotId: observation.snapshot.id,
-			sourcePath: `${path}/${position}`,
+			sourcePath: catalogSourcePath(observation.record.id, observation.snapshot.id, `${path}/${position}`),
 		});
 	}
 	return revision;

@@ -1,3 +1,5 @@
+import { assertMusicBrainzReleaseArchive } from "./musicbrainz-release-bundle";
+import { catalogSourceDocumentSha256, withCatalogSourceReceipts } from "./source-observations";
 import { MUSIC_SOURCE_AUXILIARY_ROW_LIMIT } from "../database/schema/catalog-source-limits";
 import { preflightMusicBrainzReleaseDelta, musicBrainzReleaseAuxiliaryRows } from "./musicbrainz-release-plan";
 import { createHash } from "node:crypto";
@@ -47,13 +49,14 @@ export async function adoptMusicBrainzRelease(
 	receipt: CatalogSourceReceipt,
 	bytes: Uint8Array,
 ) {
-	return withMusicSourceOccurrenceBatch(tx, () => adoptMusicBrainzReleaseInTransaction(tx, actor, receipt, bytes));
+	return withCatalogSourceReceipts([receipt], () => withMusicSourceOccurrenceBatch(tx, () => adoptMusicBrainzReleaseInTransaction(tx, actor, receipt, bytes)));
 }
 
 async function adoptMusicBrainzReleaseInTransaction(tx: DatabaseTransaction, actor: string, receipt: CatalogSourceReceipt, bytes: Uint8Array) {
+	assertMusicBrainzReleaseArchive(receipt);
 	if (
 		bytes.byteLength > 8_000_000 ||
-		createHash("sha256").update(bytes).digest("hex") !== receipt.contentSha256
+		createHash("sha256").update(bytes).digest("hex") !== catalogSourceDocumentSha256(receipt)
 	)
 		throw new Error("MusicBrainz projection bytes differ from the archived observation");
 	if (receipt.contractSha256 !== MusicBrainzCatalogContractSha256)

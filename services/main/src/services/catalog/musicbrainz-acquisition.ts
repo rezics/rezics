@@ -1,3 +1,4 @@
+import { musicBrainzReleaseAcquisitionProfiles } from "./musicbrainz-release-bundle";
 import { z } from "zod";
 import { MusicBrainzCatalogContractSha256, MusicBrainzRecordingSchema, MusicBrainzReleaseGroupSchema, MusicBrainzReleaseSchema, MusicBrainzWorkSchema } from "./musicbrainz";
 import { parseMusicBrainzSupportingEndpoint } from "./musicbrainz-entities";
@@ -18,12 +19,13 @@ export function musicBrainzAcquisitionDescriptor(objectType: string, externalId:
 	const id = z.uuid().parse(externalId);
 	const endpoint = type === "release_group" ? "release-group" : type;
 	const includes = type === "url" ? [...relationshipIncludes] : type === "genre" ? ["aliases", "annotation"] : ["aliases", "annotation", ...relationshipIncludes];
-	if (type === "release") includes.push("labels", "recordings", "release-groups", "artist-credits", "discids", "media", "isrcs", "recording-level-rels", "release-group-level-rels", "work-level-rels");
+	if (type === "release") { includes.length = 0; includes.push("recordings", "media", "artist-credits"); }
 	if (type === "recording") includes.push("artist-credits", "isrcs", "work-level-rels");
 	if (type === "release_group") includes.push("artist-credits");
 	return {
 		url: `https://musicbrainz.org/ws/2/${endpoint}/${id}?fmt=json&inc=${[...new Set(includes)].join("+")}`,
 		method: "GET" as const,
+		...(type === "release" ? { profiles: musicBrainzReleaseAcquisitionProfiles(id) } : {}),
 		contractSha256: MusicBrainzCatalogContractSha256,
 		parse(input: unknown) {
 			const record = type === "release" ? MusicBrainzReleaseSchema.parse(input) : type === "recording" ? MusicBrainzRecordingSchema.parse(input) : type === "work" ? MusicBrainzWorkSchema.parse(input) : type === "release_group" ? MusicBrainzReleaseGroupSchema.parse(input) : parseMusicBrainzSupportingEndpoint(type, input).record;

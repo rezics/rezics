@@ -1,3 +1,4 @@
+import { catalogSourcePath } from "./source-document-scope";
 import { catalogSourceSupportColumns } from "./source-support";
 import { isDeepStrictEqual } from "node:util";
 import { and, eq, ne, isNull, or } from "drizzle-orm";
@@ -81,7 +82,7 @@ export async function applyMusicBrainzRelationDelta(
 					eq(table.support.sourceCorrespondenceRevision, scope.sourceCorrespondenceRevision),
 					eq(table.support.sourceRecordId, observation.record.id),
 					eq(table.support.snapshotId, snapshotId),
-					eq(table.support.sourcePath, `/relations/${index}`),
+					eq(table.support.sourcePath, catalogSourcePath(observation.record.id, snapshotId, `/relations/${index}`)),
 				),
 			)
 			.limit(2);
@@ -179,7 +180,7 @@ export async function applyMusicBrainzRelationDelta(
 					relationId: old.id,
 					sourceRecordId: observation.record.id,
 					snapshotId: observation.snapshot.id,
-					sourcePath: `/relations/${index}`,
+					sourcePath: catalogSourcePath(observation.record.id, observation.snapshot.id, `/relations/${index}`),
 				});
 			continue;
 		}

@@ -1,3 +1,4 @@
+import { catalogSourcePath } from "./source-document-scope";
 import { catalogSourceSupportColumns } from "./source-support";
 import { and, eq, desc } from "drizzle-orm";
 import { isDeepStrictEqual } from "node:util";
@@ -160,7 +161,7 @@ export async function musicBrainzVocabulary(
 						localKey: "primary",
 						nameId: named.id,
 						nameRevision: named.nameRevision,
-						sourcePath: source.namePath,
+						sourcePath: catalogSourcePath(source.observation.record.id, source.observation.snapshot.id, source.namePath),
 					});
 					await tx.insert(CatalogFactTables.reference.support).values({
 						...(await catalogSourceSupportColumns(tx, source.observation.record.id)),
@@ -168,7 +169,7 @@ export async function musicBrainzVocabulary(
 						namedFormId: named.id,
 						sourceRecordId: source.observation.record.id,
 						snapshotId: source.observation.snapshot.id,
-						sourcePath: source.namePath,
+						sourcePath: catalogSourcePath(source.observation.record.id, source.observation.snapshot.id, source.namePath),
 					});
 				}
 				return { ...created, revision };
@@ -383,7 +384,7 @@ export async function musicBrainzLabelReference(
 					identifierRevision: identifier.identifierRevision,
 					sourceRecordId: observation.record.id,
 					snapshotId: observation.snapshot.id,
-					sourcePath: `${path}/label-code`,
+					sourcePath: catalogSourcePath(observation.record.id, observation.snapshot.id, `${path}/label-code`),
 				});
 			}
 			return { ...created, revision };
@@ -612,7 +613,7 @@ export async function projectMusicBrainzIdentifiers(
 			identifierRevision: identifier.revision,
 			sourceRecordId: observation.record.id,
 			snapshotId: observation.snapshot.id,
-			sourcePath: namespace === "asin" ? path : `${path}/${position}`,
+			sourcePath: catalogSourcePath(observation.record.id, observation.snapshot.id, namespace === "asin" ? path : `${path}/${position}`),
 		});
 	}
 }

@@ -3,7 +3,7 @@ import { BangumiSubjectSchema } from "./bangumi";
 import { OpenLibraryWorkSchema, OpenLibraryEditionSchema } from "./openlibrary";
 import { VndbVnSchema } from "./vndb";
 import { MusicBrainzReleaseSchema } from "./musicbrainz";
-import { readCatalogSourceBytes, type CatalogSourceReceipt } from "./source-observations";
+import { readCatalogSourceProfileBytes, type CatalogSourceReceipt } from "./source-observations";
 import type { CatalogValueNode } from "./value-nodes";
 
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
@@ -73,8 +73,9 @@ async function readSourceArchive(
 	receipt: CatalogSourceReceipt,
 	source: string,
 	objectType: string,
+	profileKey?: string,
 ) {
-	const bytes = await readCatalogSourceBytes(receipt);
+	const bytes = await readCatalogSourceProfileBytes(receipt, profileKey);
 	if (receipt.key.source !== source || receipt.key.objectType !== objectType)
 		throw new TypeError("Archive receipt has another source object contract");
 	const document: unknown = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
@@ -103,6 +104,8 @@ export async function exportVndbVn(receipt: CatalogSourceReceipt) {
 }
 
 /** Physical release and recording exports use native music readers; this exports source evidence. @internal */
-export async function exportMusicBrainzRelease(receipt: CatalogSourceReceipt) {
-	return MusicBrainzReleaseSchema.parse(await readSourceArchive(receipt, "musicbrainz", "release"));
+export async function exportMusicBrainzRelease(receipt: CatalogSourceReceipt, profileKey?: string) {
+	const document = await readSourceArchive(receipt, "musicbrainz", "release", profileKey);
+	// Metadata-only raw profiles deliberately omit media; returning a fabricated merged response would lose provenance.
+	return profileKey === "metadata" ? MusicBrainzReleaseSchema.omit({ media: true }).parse(document) : MusicBrainzReleaseSchema.parse(document);
 }

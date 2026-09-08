@@ -1,3 +1,4 @@
+import { catalogSourcePath } from "./source-document-scope";
 import { isDeepStrictEqual } from "node:util";
 import { and, eq, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -108,12 +109,12 @@ export async function prepareMusicSourceProjection(
 		sourceValue: Record<string, unknown>;
 	}[] = [];
 	const oldAt = (component: MusicComponentName, path: string) => {
-		const old = before.get(`${component}:${path}`);
+		const old = before.get(`${component}:${catalogSourcePath(context.sourceRecordId, context.previousSnapshotId, path)}`);
 		if (!old) throw new TypeError(`Missing exact native source occurrence: ${component} ${path}`);
 		return old;
 	};
 	const recoverAt = (component: MusicComponentName, path: string) =>
-		alreadyObserved.get(`${component}:${path}`);
+		alreadyObserved.get(`${component}:${catalogSourcePath(context.sourceRecordId, context.snapshotId, path)}`);
 	const oldByKey = (component: MusicComponentName, key: string) =>
 		[...before.values()].find((row) => row.component === component && row.componentKey === key);
 	const put = (
@@ -122,6 +123,7 @@ export async function prepareMusicSourceProjection(
 		value: unknown,
 		old?: MusicSourceComponentBaseline,
 	) => {
+		path = catalogSourcePath(context.sourceRecordId, context.snapshotId, path);
 		const row: Record<string, unknown> = MusicComponentSchemas[component].parse(value);
 		const componentKey = musicComponentKey(component, row);
 		if (old) used.add(`${component}:${old.componentKey}`);

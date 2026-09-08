@@ -1,3 +1,4 @@
+import { catalogSourcePath, catalogSourceLogicalPath } from "./source-document-scope";
 import { z } from "zod";
 import { resolveCatalogSourceChildCorrespondence } from "./source-child-correspondence";
 import { isDeepStrictEqual } from "node:util";
@@ -58,7 +59,7 @@ export async function applyCatalogSourceNameDelta(
 	const scope = await resolveCatalogSourceChildCorrespondence(tx, sourceRecordId);
 	const previousEpoch = source.previousCorrespondenceRevision ?? scope.correspondenceRevision;
 	const table = CatalogNameTables[reference.owner].sourceOccurrence;
-	const rows = previousSnapshotId
+	const storedRows = previousSnapshotId
 		? await tx
 				.select()
 				.from(table)
@@ -75,6 +76,7 @@ export async function applyCatalogSourceNameDelta(
 				)
 				.limit(129)
 		: [];
+	const rows = storedRows.map((row) => ({ ...row, sourcePath: catalogSourceLogicalPath(sourceRecordId, previousSnapshotId!, row.sourcePath) }));
 	if (rows.length > 128 || incoming.length > 128)
 		throw new RangeError("Name delta requires staged application");
 	const byPath = new Map(rows.map((row) => [row.sourcePath, row]));
@@ -108,6 +110,7 @@ export async function applyCatalogSourceNameDelta(
 	const used = new Set<string>();
 	const changes: NameChange[] = [];
 	const write = async (path: string, input: CatalogNameInput, previousPath?: string) => {
+		const sourcePath = catalogSourcePath(sourceRecordId, snapshotId, path);
 		const old = previousPath ? byPath.get(previousPath) : undefined;
 		if (previousPath && !old)
 			throw new TypeError(`Missing exact named-form occurrence: ${previousPath}`);
@@ -182,7 +185,7 @@ export async function applyCatalogSourceNameDelta(
 						eq(table.snapshotId, snapshotId),
 						eq(table.ownerId, reference.id),
 						eq(table.namespace, namespace),
-						eq(table.sourcePath, path),
+						eq(table.sourcePath, sourcePath),
 					),
 				)
 				.limit(2);
@@ -257,7 +260,7 @@ export async function applyCatalogSourceNameDelta(
 				),
 			)
 			.limit(1);
-		if (existing && (existing.nameId !== nameId || existing.sourcePath !== path))
+		if (existing && (existing.nameId !== nameId || existing.sourcePath !== sourcePath))
 			throw new Error("Reapplied source name targets another native identity");
 		await bindCatalogNameSourceOccurrence(tx, reference, actor, {
 			sourceRecordId,
@@ -266,7 +269,7 @@ export async function applyCatalogSourceNameDelta(
 			localKey,
 			nameId,
 			nameRevision: existing?.nameRevision ?? nameRevision,
-			sourcePath: path,
+			sourcePath,
 		});
 	};
 	const reserved = new Set(

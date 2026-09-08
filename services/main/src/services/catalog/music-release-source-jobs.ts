@@ -11,7 +11,7 @@ import { catalogSourceApplication as applications } from "../database/schema/cat
 import { currentParticipationAuthority, ParticipationAuthoritySchema, ParticipationDenied, requireParticipation, runWithParticipationAuthority } from "../participation/policy";
 import { loadCatalogIdentity, CatalogReferenceNotFound } from "./storage";
 import { lockCatalogSourceBinding } from "./source-bindings";
-import { loadCatalogSourceReceipt, readCatalogSourceBytes, type CatalogSourceArchive } from "./source-observations";
+import { loadCatalogSourceReceipt, readCatalogSourceNativeBytes, type CatalogSourceArchive } from "./source-observations";
 import { MusicBrainzCatalogContractSha256, MusicBrainzReleaseSchema } from "./musicbrainz";
 import { preflightMusicBrainzReleaseDelta } from "./musicbrainz-release-plan";
 import { AccountAuthorization } from "../authorization/account/authorization";
@@ -177,7 +177,7 @@ export function createMusicReleaseSourceHandlers(database: DatabaseExecutor, rou
 					});
 				});
 				// Archive I/O and JSON parsing never hold the owner lock. Receipts enforce 8 MiB/document.
-				const bytes = loaded.evidence ? await Promise.all([readCatalogSourceBytes(loaded.evidence.before), readCatalogSourceBytes(loaded.evidence.after)]) : null;
+				const bytes = loaded.evidence ? await Promise.all([readCatalogSourceNativeBytes(loaded.evidence.before), readCatalogSourceNativeBytes(loaded.evidence.after)]) : null;
 				if (bytes) preflightMusicBrainzReleaseDelta(MusicBrainzReleaseSchema.parse(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes[0]!))), MusicBrainzReleaseSchema.parse(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes[1]!))));
 				if (signal.aborted) throw signal.reason;
 				const completed = await database.transaction(async (tx) => {

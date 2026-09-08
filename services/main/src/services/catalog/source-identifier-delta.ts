@@ -1,3 +1,4 @@
+import { catalogSourcePath } from "./source-document-scope";
 import { and, eq, isNull, ne, or, getTableColumns } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -37,8 +38,8 @@ export async function applyCatalogSourceIdentifierDelta(
 	previousInput: readonly CatalogSourceIdentifierDescriptor[],
 	incomingInput: readonly CatalogSourceIdentifierDescriptor[],
 ) {
-	const previous = z.array(descriptorSchema).max(128).parse(previousInput),
-		incoming = z.array(descriptorSchema).max(128).parse(incomingInput);
+	const previous = z.array(descriptorSchema).max(128).parse(previousInput.map((entry) => ({ ...entry, path: catalogSourcePath(source.sourceRecordId, source.previousSnapshotId, entry.path) }))),
+		incoming = z.array(descriptorSchema).max(128).parse(incomingInput.map((entry) => ({ ...entry, path: catalogSourcePath(source.sourceRecordId, source.snapshotId, entry.path) })));
 	if (previous.length + incoming.length > 128)
 		throw new RangeError("Identifier delta requires staged source application");
 	const f = CatalogFactTables[reference.owner],

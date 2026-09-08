@@ -1,3 +1,4 @@
+import { catalogSourcePath } from "./source-document-scope";
 import { assertCatalogDefinitionRevision } from "./definitions";
 import { catalogSourceSupportColumns } from "./source-support";
 import { isDeepStrictEqual } from "node:util";
@@ -92,8 +93,8 @@ export async function applyCatalogSourceFactDelta(
 	} | null,
 	incoming: readonly CatalogSourceFactDescriptor[],
 ) {
-	const before = previous ? previous.descriptors.map((item) => descriptorSchema.parse(item)) : [];
-	const after = incoming.map((item) => descriptorSchema.parse(item));
+	const before = previous ? previous.descriptors.map((item) => descriptorSchema.parse({ ...item, path: catalogSourcePath(observation.record.id, previous.snapshotId, item.path) })) : [];
+	const after = incoming.map((item) => descriptorSchema.parse({ ...item, path: catalogSourcePath(observation.record.id, observation.snapshot.id, item.path) }));
 	if (before.length + after.length > 128)
 		throw new RangeError("Catalog semantic delta requires staged application");
 	const f = CatalogFactTables[reference.owner];

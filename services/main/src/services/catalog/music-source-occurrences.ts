@@ -1,3 +1,4 @@
+import { catalogSourcePath } from "./source-document-scope";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { MUSIC_SOURCE_OCCURRENCE_LIMIT } from "../database/schema/catalog-source-limits";
 import { and, eq, gt } from "drizzle-orm";
@@ -58,6 +59,7 @@ export async function recordMusicSourceComponent(
 		.refine((value) => Buffer.byteLength(value) <= 512)
 		.parse(sourcePath);
 	MusicComponentNameSchema.parse(component);
+	sourcePath = catalogSourcePath(observation.record.id, observation.snapshot.id, sourcePath);
 	const pending = pendingOccurrences.getStore();
 	if (pending?.tx === tx) {
 		if (pending.rows.length >= MUSIC_SOURCE_OCCURRENCE_LIMIT) throw new RangeError("Initial music source support exceeds its publication capacity");

@@ -1,3 +1,5 @@
+import { withCatalogSourceReceipts } from "./source-observations";
+import { assertMusicBrainzReleaseArchive } from "./musicbrainz-release-bundle";
 import { MUSIC_SOURCE_DEPENDENCY_LIMIT } from "../database/schema/catalog-source-limits";
 import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
 import type { DatabaseTransaction } from "../database";
@@ -250,7 +252,8 @@ export async function prepareMusicBrainzProposalDependencies(
 		throw new ParticipationDenied(
 			"MusicBrainz dependency preparation requires direct human intake authority",
 		);
-	return runParticipationSavepoint(outer, async (tx) => {
+	return withCatalogSourceReceipts([input.receipt], () => runParticipationSavepoint(outer, async (tx) => {
+		if (input.receipt.key.objectType === "release") assertMusicBrainzReleaseArchive(input.receipt);
 		const observation = await loadCatalogSourceDocument(
 			tx,
 			input.sourceRecordId,
@@ -340,5 +343,5 @@ export async function prepareMusicBrainzProposalDependencies(
 			);
 		}
 		return prepared;
-	});
+	}));
 }

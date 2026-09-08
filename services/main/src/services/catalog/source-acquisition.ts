@@ -1,3 +1,4 @@
+import { acquireMusicBrainzReleaseBundle } from "./musicbrainz-release-acquisition";
 import { z } from "zod";
 import { database } from "../database";
 import { reserveCatalogSourceRequest } from "./source-rate";
@@ -49,6 +50,10 @@ export async function acquireCatalogSourceCheck(
 	} = {},
 ): Promise<CatalogSourceCheckOutcome> {
 	const request = catalogSourceAcquisitionRequest(lease);
+	if (lease.source === "musicbrainz" && lease.objectType === "release") return acquireMusicBrainzReleaseBundle(lease, signal, {
+		fetch: dependencies.fetch ?? fetch, archive: dependencies.archive,
+		admit: dependencies.admit ?? (() => reserveCatalogSourceRequest(database, lease.source)),
+	});
 	await (dependencies.admit ?? (() => reserveCatalogSourceRequest(database, lease.source)))();
 	const ioSignal = AbortSignal.any([signal, AbortSignal.timeout(25_000)]);
 	const response = await (dependencies.fetch ?? fetch)(request.url, {

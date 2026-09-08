@@ -1,3 +1,5 @@
+import { assertMusicBrainzReleaseArchive } from "./musicbrainz-release-bundle";
+import { withCatalogSourceReceipts } from "./source-observations";
 import { withPreparedMusicBrainzRecordings } from "./musicbrainz-reference-cache";
 import { isDeepStrictEqual } from "node:util";
 import { applyMusicBrainzRelationDelta } from "./musicbrainz-relation-delta";
@@ -47,12 +49,15 @@ export function musicBrainzReleaseNativeWriter(
 	incomingArchive: Archived,
 ): CatalogSourceNativeWriter {
 	return async (outer, context) =>
-		runParticipationSavepoint(outer, async (tx) => {
+		withCatalogSourceReceipts([previousArchive.receipt, incomingArchive.receipt], () => runParticipationSavepoint(outer, async (tx) => {
+			assertMusicBrainzReleaseArchive(previousArchive.receipt);
+			assertMusicBrainzReleaseArchive(incomingArchive.receipt);
 			if (context.reference.owner !== "music" || context.mappingVersion !== "musicbrainz.release.1")
 				throw new TypeError("Music release writer received another mapping");
 			if (context.action === "withdraw") return compensateMusicSourceApplication(tx, context);
 			if (!context.previousSnapshotId)
 				throw new TypeError("An update requires a previous adopted snapshot");
+			const previousSnapshotId = context.previousSnapshotId;
 			for (const archive of [previousArchive, incomingArchive])
 				if (
 					archive.receipt.key.source !== "musicbrainz" ||
@@ -91,7 +96,7 @@ export function musicBrainzReleaseNativeWriter(
 			return withPreparedMusicBrainzRecordings(tx, context.actor, changedRecordings, async () => {
 			const { oldAt, recoverAt, put, finish } = await prepareMusicSourceProjection(tx, {
 				...context,
-				previousSnapshotId: context.previousSnapshotId,
+				previousSnapshotId,
 			});
 			const credit = musicBrainzCreditWriter(
 				tx,
@@ -392,7 +397,7 @@ export function musicBrainzReleaseNativeWriter(
 				{
 					sourceRecordId: context.sourceRecordId,
 					mappingKey: context.mappingKey,
-					previousSnapshotId: context.previousSnapshotId,
+					previousSnapshotId,
 					snapshotId: context.snapshotId,
 				},
 				incoming,
@@ -404,7 +409,7 @@ export function musicBrainzReleaseNativeWriter(
 				names.revision,
 				observation,
 				{
-					snapshotId: context.previousSnapshotId,
+					snapshotId: previousSnapshotId,
 					mappingKey: context.mappingKey,
 					record: { annotation: previous.annotation, disambiguation: previous.disambiguation },
 				},
@@ -417,7 +422,7 @@ export function musicBrainzReleaseNativeWriter(
 				context.reference,
 				context.actor,
 				facts.revision,
-				{ ...context, previousSnapshotId: context.previousSnapshotId },
+				{ ...context, previousSnapshotId },
 				identifierEntries(previous),
 				identifierEntries(incoming),
 			);
@@ -428,7 +433,7 @@ export function musicBrainzReleaseNativeWriter(
 				identifiers.revision,
 				observation,
 				{
-					snapshotId: context.previousSnapshotId,
+					snapshotId: previousSnapshotId,
 					mappingKey: context.mappingKey,
 					relations: previous.relations ?? [],
 				},
@@ -449,5 +454,5 @@ export function musicBrainzReleaseNativeWriter(
 				],
 			};
 			});
-		});
+		}));
 }
