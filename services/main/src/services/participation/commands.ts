@@ -143,6 +143,23 @@ export async function issueParticipationGrant(
 			value.actingEntityId !== authority.actingEntityId
 		)
 			throw new ParticipationDenied("Entity delegation requires its security controller");
+		if (value.capability === "entity.membership") {
+			const table = CatalogIdentityTables.entity;
+			const [organization] = await tx
+				.select({ id: table.id })
+				.from(table)
+				.where(
+					and(
+						eq(table.id, value.actingEntityId),
+						eq(table.shape, "organization"),
+						isNull(table.deletedAt),
+					),
+				)
+				.limit(1)
+				.for("share");
+			if (!organization)
+				throw new ParticipationDenied("Membership management belongs only to organizations");
+		}
 	} else {
 		const table = CatalogIdentityTables[value.target.owner];
 		const [target] = await tx
