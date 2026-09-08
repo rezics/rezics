@@ -265,7 +265,7 @@ async function readNativeContentStructure(
 		structureId: structure.id,
 		ownerUnitId: ownerId,
 	});
-	const visibleNodes = await visibleStructureNodes(authorization, snapshot.nodes);
+	const visibleNodes = await visibleStructureNodes(tx, authorization, snapshot.nodes);
 	const content = await readContentStructureContentRows(
 		tx,
 		visibleNodes.map((node) => node.contentUnitId),
@@ -310,6 +310,7 @@ async function readNativeContentStructure(
 	};
 }
 async function visibleStructureNodes(
+	tx: DatabaseTransaction,
 	authorization: Authorization,
 	nodes: readonly ContentStructureNodeState[],
 ) {
@@ -323,7 +324,10 @@ async function visibleStructureNodes(
 	];
 	const readable = new Set<string>();
 	for (let start = 0; start < ids.length; start += 500)
-		for (const id of await authorization.unit.readableUnitIds(ids.slice(start, start + 500)))
+		for (const id of await authorization.unit.readableUnitIdsInTransaction(
+			tx,
+			ids.slice(start, start + 500),
+		))
 			readable.add(id);
 	const visible = nodes.filter(
 		(node) =>
@@ -434,7 +438,7 @@ export default new Elysia()
 				return {
 					...presentContentStructure(snapshot.structure, latestRevisionId),
 					nodes: await Promise.all(
-						(await visibleStructureNodes(authorization, snapshot.nodes)).map(
+						(await visibleStructureNodes(tx, authorization, snapshot.nodes)).map(
 							presentGenericContentStructureNode,
 						),
 					),

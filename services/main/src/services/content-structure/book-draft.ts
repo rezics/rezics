@@ -157,8 +157,12 @@ export async function saveBookContentStructureDraft(
 			if (before.structure.kind !== "book.contents")
 				throw new ContentStructureInvalid("Book draft targets a non-Book structure");
 			const currentIds = [...new Set(before.nodes.map((node) => node.contentUnitId))];
-			for (let start = 0; start < currentIds.length; start += 500)
-				await input.authorization.ensureCanReadMany(currentIds.slice(start, start + 500));
+			for (let start = 0; start < currentIds.length; start += 500) {
+				const batch = currentIds.slice(start, start + 500);
+				const readable = await input.authorization.readableUnitIdsInTransaction(tx, batch);
+				if (readable.size !== batch.length)
+					throw new ContentStructureInvalid("Complete drafts require readable existing content");
+			}
 			const currentContent = await readContentStructureContentRows(
 				tx,
 				before.nodes.map((node) => node.contentUnitId),
