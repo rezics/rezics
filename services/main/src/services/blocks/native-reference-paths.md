@@ -31,8 +31,19 @@ This is a request-work analysis, not a latency or throughput benchmark. Actual
 read/write rates, hot-owner contention, index residency and storage throughput
 require representative integrated measurements at the deployment target.
 
-The existing report license-evidence hydration can still fan out over all active
-licenses and invalidation history for each selected target. That path is not
-capacity-qualified by the native owner migration; a separate paginated evidence
-surface or an explicitly enforced domain bound is required before claiming
-whole-report-path scalability. Evidence is not silently truncated here.
+Report license evidence has a separate proven control bound. The typed LicenseIds
+registry contains nine entries. The database CHECK uses that same registry, and
+its existing partial UNIQUE (unit_id, license_id) for open offerings permits at
+most nine active grants per resource. Thus 100 cases hydrate at most 900 grants,
+regardless of total corpus size or repeated ended offerings. The existing partial
+unique index avoids scanning ended offerings. Expanding the license registry
+changes this bound and requires updating this workload analysis.
+
+For each invalidated grant, the existing (license_grant_id, created_at DESC,
+id DESC) index supplies exactly one latest action. Its kind and resulting
+recognition are checked after LIMIT 1; inconsistent current evidence fails
+closed. A resource with a billion historical recognition changes still contributes
+one index seek per invalidated grant, rather than all its action rows. The list
+therefore performs at most 900 bounded action lookups, with no extra table or
+index write amplification. Its initial tiny-data fixtures do not establish
+production latency or index-cache residency at either capacity baseline.

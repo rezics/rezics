@@ -641,6 +641,17 @@ export default new Elysia().use(session).group("", (app) =>
 						licenseId: unitLicenseGrant.licenseId,
 						recognitionStatus: unitLicenseGrant.recognitionStatus,
 						grantedAt: unitLicenseGrant.grantedAt,
+						invalidationActionId: sql<
+							string | null
+						>`case when ${unitLicenseGrant.recognitionStatus} = 'invalidated' then (
+							select last_action.id from (
+								select ${contentGovernanceAction.id} as id, ${contentGovernanceAction.kind} as kind,
+									${contentGovernanceAction.resultingRecognitionStatus} as recognition_status
+								from ${contentGovernanceAction}
+								where ${contentGovernanceAction.licenseGrantId} = ${unitLicenseGrant.id}
+								order by ${contentGovernanceAction.createdAt} desc, ${contentGovernanceAction.id} desc limit 1
+							) last_action where last_action.kind = 'invalidate_license' and last_action.recognition_status = 'invalidated'
+						) else null end`,
 					})
 					.from(unitLicenseGrant)
 					.where(
@@ -663,33 +674,6 @@ export default new Elysia().use(session).group("", (app) =>
 					if (existing) existing.push(grant);
 					else grantsByUnit.set(grant.unitId, [grant]);
 				}
-				const invalidatedGrants = licenseGrantRows.filter(
-					(grant) => grant.recognitionStatus === "invalidated",
-				);
-				const invalidationActions = invalidatedGrants.length
-					? await database
-							.select({
-								id: contentGovernanceAction.id,
-								licenseGrantId: contentGovernanceAction.licenseGrantId,
-								createdAt: contentGovernanceAction.createdAt,
-							})
-							.from(contentGovernanceAction)
-							.where(
-								and(
-									inArray(
-										contentGovernanceAction.licenseGrantId,
-										invalidatedGrants.map((grant) => grant.id),
-									),
-									eq(contentGovernanceAction.kind, "invalidate_license"),
-									eq(contentGovernanceAction.resultingRecognitionStatus, "invalidated"),
-								),
-							)
-							.orderBy(desc(contentGovernanceAction.createdAt), desc(contentGovernanceAction.id))
-					: [];
-				const invalidationActionByGrant = new Map<string, string>();
-				for (const action of invalidationActions)
-					if (action.licenseGrantId && !invalidationActionByGrant.has(action.licenseGrantId))
-						invalidationActionByGrant.set(action.licenseGrantId, action.id);
 				const last = page.at(-1);
 				return {
 					items: page.map((row) => {
@@ -702,7 +686,7 @@ export default new Elysia().use(session).group("", (app) =>
 										recognitionStatus: "invalidated" as const,
 										offeringEnded: false as const,
 										invalidationActionId:
-											invalidationActionByGrant.get(grant.id) ??
+											grant.invalidationActionId ??
 											(() => {
 												throw new Error(`Invalidated license grant ${grant.id} has no action`);
 											})(),

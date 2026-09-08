@@ -9,6 +9,7 @@ import {
 import {
 	type LicenseId,
 	type LicenseRecognitionStatus,
+	LicenseIds,
 	LicenseRecognitionStatusValues,
 } from "@rezics/license";
 import { inArray, sql } from "drizzle-orm";
@@ -301,6 +302,7 @@ export const unitLicenseGrant = pgTable(
 		uniqueIndex("unit_license_grant_open_unit_license_key")
 			.on(table.unitId, table.licenseId)
 			.where(sql`${table.offeringEndedAt} is null`),
+		check("unit_license_grant_license_id_check", inArray(table.licenseId, LicenseIds)),
 		index("unit_license_grant_unit_granted_at_idx").on(table.unitId, table.grantedAt.desc()),
 		index("unit_license_grant_effective_license_unit_idx")
 			.on(table.licenseId, table.unitId)
