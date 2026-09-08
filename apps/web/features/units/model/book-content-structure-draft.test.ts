@@ -5,6 +5,8 @@ import {
 	getBookDraftMoveTargetIds,
 	getBookDraftSelectionRoots,
 	moveBookDraftSelection,
+	renameBookDraftNode,
+	createBookContentStructureDraft,
 	toBookContentStructureSaveNodes,
 	type BookDraftNode,
 } from "./book-content-structure-draft";
@@ -46,6 +48,33 @@ const nodes: BookDraftNode[] = [
 ];
 
 describe("Book Content Structure draft", () => {
+	it("omits unchanged titles and includes the original value only for intentional child renames", () => {
+		expect(toBookContentStructureSaveNodes(nodes).every((node) => !("title" in node))).toBe(true);
+		const renamed = renameBookDraftNode(nodes, "b", "Changed chapter");
+		expect(toBookContentStructureSaveNodes(renamed).find((node) => node.id === "b")).toMatchObject({
+			title: "Changed chapter",
+			expectedTitle: "B",
+		});
+	});
+	it("keeps an unnamed native Text Version unnamed while moving it", () => {
+		const draft = createBookContentStructureDraft([
+			{
+				id: "native",
+				parentId: null,
+				contentUnitId: "native-id",
+				contentKind: "text_version",
+				language: null,
+				languageTag: null,
+				title: null,
+				position: "a0",
+			},
+		]);
+		expect(renameBookDraftNode(draft, "native", "Invented name")).toEqual(draft);
+		expect(toBookContentStructureSaveNodes(draft)).toEqual([
+			{ state: "existing", id: "native", parentId: null, order: 0 },
+		]);
+	});
+
 	it("normalizes a selection to roots and blocks their descendants", () => {
 		const selection = new Set(["a", "b"]);
 		expect(getBookDraftSelectionRoots(nodes, selection).map(({ id }) => id)).toEqual(["a"]);

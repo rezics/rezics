@@ -8,6 +8,7 @@ import {
 	getMediaDraftMoveTargetIds,
 	indexMediaDraftSelectionCoverage,
 	moveMediaDraftSelection,
+	renameMediaDraftNode,
 	moveMediaDraftNode,
 	normalizeMediaDraftSelectionIds,
 	toMediaContentStructureSaveNodes,
@@ -47,6 +48,33 @@ const remote = [
 ] as const;
 
 describe("Media Content Structure draft", () => {
+	it("preserves source titles unless an existing timed-media child was intentionally renamed", () => {
+		const draft = createMediaContentStructureDraft(remote);
+		expect(toMediaContentStructureSaveNodes(draft).every((node) => !("title" in node))).toBe(true);
+		const renamed = renameMediaDraftNode(draft, "video-node", "Changed opening");
+		expect(
+			toMediaContentStructureSaveNodes(renamed).find((node) => node.id === "video-node"),
+		).toMatchObject({ title: "Changed opening", expectedTitle: "Opening" });
+	});
+	it("does not rename or invent a title for a native Program occurrence", () => {
+		const draft = createMediaContentStructureDraft([
+			{
+				id: "native",
+				parentId: null,
+				contentUnitId: "native-id",
+				contentKind: "program",
+				language: null,
+				title: null,
+				position: "a0",
+				durationSeconds: null,
+			},
+		]);
+		expect(renameMediaDraftNode(draft, "native", "Invented name")).toEqual(draft);
+		expect(toMediaContentStructureSaveNodes(draft)).toEqual([
+			{ state: "existing", id: "native", parentId: null, order: 0 },
+		]);
+	});
+
 	it("preserves timed-media kinds, duration, and hierarchy from the server", () => {
 		const draft = createMediaContentStructureDraft(remote);
 		const tree = buildMediaDraftTree(draft);

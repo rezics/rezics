@@ -234,7 +234,11 @@ export function renameMediaDraftNode(
 ): MediaDraftNode[] {
 	const normalizedTitle = title.trim();
 	if (!normalizedTitle) return [...nodes];
-	return nodes.map((node) => (node.id === nodeId ? { ...node, title: normalizedTitle } : node));
+	return nodes.map((node) =>
+		node.id === nodeId && node.contentKind !== "program" && node.state !== "attached"
+			? { ...node, title: normalizedTitle }
+			: node,
+	);
 }
 
 function descendantIds(
