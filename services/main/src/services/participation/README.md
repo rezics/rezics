@@ -166,6 +166,17 @@ above still requiring production qualification. The referencing indexes also
 bound follow deletion to its single preference, consistent with PostgreSQL's
 [foreign-key indexing guidance](https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-FK).
 
+`scripts/check-private-account-lifecycle.ts` passed 27 assertions on the generated
+60-migration disposable target. It uses the real service commands and PostgreSQL:
+515 public follows with 512 invisible candidates, cursor continuation, wrong
+Auth/self and missing-follow FK denial, exact Favorites lookup, stale revision
+denial, save/delete/restore/history, immutable private history before erasure,
+all durable cleanup stages and unrelated-account survival. Every fixture row
+rolls back. Its 502-object versioned archive is an in-memory test double: it
+proves orchestration and retained-empty-fence behavior, not live S3/R2 races or
+retention qualification. The independently tested missing/nonempty/truncated
+fence and oversized-page failures leave erasure incomplete.
+
 Favorites now has its own `/favorites` API and three Auth-owned relations:
 `account_favorite`, `account_favorite_revision`, and `account_favorites_state`.
 It is not a public Collection. Public Collection routes and bootstrap no longer
