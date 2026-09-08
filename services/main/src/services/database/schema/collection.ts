@@ -1,5 +1,7 @@
 import { sql } from "drizzle-orm";
 import { check, index, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
+import { createPlatformIdentityColumns, platformIdentityConstraints } from "./platform-identity";
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 
 import { pgTable } from "./base";
 import { entityIdentity } from "./catalog-identity";
@@ -9,7 +11,6 @@ import {
 	createUpdatedAtColumn,
 	fractionalIndexPosition,
 } from "./columns";
-import { unit } from "./unit";
 
 /**
  * Marks a Unit as a stored, explicitly ordered Collection.
@@ -29,11 +30,13 @@ import { unit } from "./unit";
  * Collections are introduced, they must use a separate model whose membership
  * and ordering semantics cannot be confused with stored Collection items.
  */
-export const collection = pgTable("collection", {
-	id: uuid()
-		.primaryKey()
-		.references(() => unit.id, { onDelete: "cascade" }),
-});
+export const collection = pgTable(
+	"collection",
+	{
+		...createPlatformIdentityColumns(),
+	},
+	(table) => platformIdentityConstraints("collection", table),
+);
 
 export const collectionItem = pgTable(
 	"collection_item",
@@ -41,9 +44,8 @@ export const collectionItem = pgTable(
 		collectionId: uuid()
 			.notNull()
 			.references(() => collection.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+		unitId: uuid().notNull(),
+		...unitReferenceColumns("unit", "restrict"),
 		position: fractionalIndexPosition().default(sql`'a0'::text`).notNull(),
 		addedByProfileId: uuid().references(() => entityIdentity.id, {
 			onDelete: "set null",
@@ -52,6 +54,7 @@ export const collectionItem = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints("collection_item", "unit", table, false, table.unitId),
 		primaryKey({ columns: [table.collectionId, table.unitId] }),
 		index("collection_item_collection_position_idx").on(
 			table.collectionId,

@@ -11,9 +11,11 @@ import {
 	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
+import { createPlatformIdentityColumns, platformIdentityConstraints } from "./platform-identity";
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 
-import { pgTable } from "./base";
 import { users } from "./auth";
+import { pgTable } from "./base";
 import { entityIdentity } from "./catalog-identity";
 import {
 	createCreatedAtColumn,
@@ -24,23 +26,19 @@ import {
 } from "./columns";
 import { post } from "./post";
 import { realm, realmUnit } from "./realm";
-import { unit } from "./unit";
 import { vocabularyNode } from "./vocabulary";
 
 /** Marker table proving that a Unit is a Tag. */
 export const tag = pgTable(
 	"tag",
 	{
-		id: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		...createPlatformIdentityColumns(),
 		nodeKind: text().$type<"concept">().default("concept").notNull(),
 		directlyApplicable: boolean().default(true).notNull(),
 		defaultSpoilerLevel: smallint(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...platformIdentityConstraints("tag", table),
 		foreignKey({
 			columns: [table.id, table.nodeKind],
 			foreignColumns: [vocabularyNode.id, vocabularyNode.kind],
@@ -58,9 +56,8 @@ export const tag = pgTable(
 export const unitTag = pgTable(
 	"unit_tag",
 	{
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
+		...unitReferenceColumns("unit", "cascade"),
 		tagId: uuid()
 			.notNull()
 			.references(() => tag.id, { onDelete: "cascade" }),
@@ -73,6 +70,7 @@ export const unitTag = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_tag", "unit", table, false, table.unitId),
 		primaryKey({ columns: [table.unitId, table.tagId] }),
 		index("unit_tag_tag_idx").on(table.tagId, table.unitId),
 		index("unit_tag_created_by_idx").on(table.createdByProfileId),
@@ -133,9 +131,8 @@ export const accountRealmTagSubscription = pgTable(
 export const unitTagJudgment = pgTable(
 	"unit_tag_judgment",
 	{
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+		unitId: uuid().notNull(),
+		...unitReferenceColumns("unit", "restrict"),
 		tagId: uuid()
 			.notNull()
 			.references(() => tag.id, { onDelete: "restrict" }),
@@ -150,6 +147,7 @@ export const unitTagJudgment = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_tag_judgment", "unit", table, false, table.unitId),
 		primaryKey({ columns: [table.unitId, table.tagId, table.profileId] }),
 		foreignKey({
 			columns: [table.unitId, table.tagId],
@@ -219,6 +217,7 @@ export const realmTagJudgment = pgTable(
 	{
 		realmId: uuid().notNull(),
 		unitId: uuid().notNull(),
+		...unitReferenceColumns("unit", "restrict"),
 		tagId: uuid().notNull(),
 		profileId: uuid()
 			.notNull()
@@ -231,6 +230,7 @@ export const realmTagJudgment = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints("realm_tag_judgment", "unit", table, false, table.unitId),
 		primaryKey({
 			columns: [table.realmId, table.unitId, table.tagId, table.profileId],
 		}),
@@ -238,11 +238,6 @@ export const realmTagJudgment = pgTable(
 			columns: [table.realmId],
 			foreignColumns: [realm.id],
 			name: "realm_tag_judgment_realm_fkey",
-		}).onDelete("restrict"),
-		foreignKey({
-			columns: [table.unitId],
-			foreignColumns: [unit.id],
-			name: "realm_tag_judgment_unit_fkey",
 		}).onDelete("restrict"),
 		foreignKey({
 			columns: [table.tagId],
@@ -338,9 +333,8 @@ export const accountUnitTag = pgTable(
 		authUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
+		...unitReferenceColumns("unit", "cascade"),
 		tagId: uuid()
 			.notNull()
 			.references(() => tag.id, { onDelete: "cascade" }),
@@ -349,6 +343,7 @@ export const accountUnitTag = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints("account_unit_tag", "unit", table, false, table.unitId),
 		primaryKey({ columns: [table.authUserId, table.unitId, table.tagId] }),
 		index("account_unit_tag_unit_idx").on(table.unitId, table.authUserId),
 		index("account_unit_tag_tag_idx").on(table.tagId),

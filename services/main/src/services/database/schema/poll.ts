@@ -9,6 +9,8 @@ import {
 	unique,
 	uuid,
 } from "drizzle-orm/pg-core";
+import { createPlatformIdentityColumns, platformIdentityConstraints } from "./platform-identity";
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 
 import { pgTable } from "./base";
 import { entityIdentity } from "./catalog-identity";
@@ -26,7 +28,6 @@ import {
 	toEnumValues,
 } from "./contract-values";
 import { realm } from "./realm";
-import { unit } from "./unit";
 
 export const pollMode = pgEnum("poll_mode", toEnumValues(PollModeValues));
 export const pollOptionSourceKind = pgEnum(
@@ -41,18 +42,15 @@ export const pollResultVisibility = pgEnum(
 export const poll = pgTable(
 	"poll",
 	{
-		id: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		...createPlatformIdentityColumns(),
 		mode: pollMode().default("single").notNull(),
 		resultVisibility: pollResultVisibility().default("live").notNull(),
 		anonymous: boolean().default(false).notNull(),
 		closesAt: createTimestampMsColumn(),
 		closedAt: createTimestampMsColumn(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...platformIdentityConstraints("poll", table),
 		index("poll_closes_at_asc_idx").on(table.closesAt.asc().nullsLast(), table.id.asc()),
 		index("poll_closes_at_desc_idx").on(
 			table.closesAt.desc().nullsLast(),
@@ -77,13 +75,15 @@ export const pollOption = pgTable(
 			.notNull()
 			.references(() => poll.id, { onDelete: "cascade" }),
 		sourceKind: pollOptionSourceKind().default("literal").notNull(),
-		targetUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
+		targetUnitId: uuid(),
+		...unitReferenceColumns("targetUnit", "restrict"),
 		position: ordinalPosition().notNull(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints("poll_option", "targetUnit", table, true, table.targetUnitId),
 		unique("poll_option_poll_id_key").on(table.pollId, table.id),
 		index("poll_option_poll_position_idx")
 			.on(table.pollId, table.position, table.id)

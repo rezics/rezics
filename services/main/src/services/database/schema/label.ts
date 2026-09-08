@@ -1,8 +1,6 @@
-import { uuid } from "drizzle-orm/pg-core";
+import { createPlatformIdentityColumns, platformIdentityConstraints } from "./platform-identity";
 
 import { pgTable } from "./base";
-import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
-import { unit } from "./unit";
 
 /**
  * A lightweight localized-title Unit for headings and display labels.
@@ -10,10 +8,10 @@ import { unit } from "./unit";
  * Label content lives in Unit localizations; this marker deliberately has no
  * domain fields of its own.
  */
-export const label = pgTable("label", {
-	id: uuid()
-		.primaryKey()
-		.references(() => unit.id, { onDelete: "cascade" }),
-	createdAt: createCreatedAtColumn(),
-	updatedAt: createUpdatedAtColumn(),
-});
+export const label = pgTable(
+	"label",
+	{
+		...createPlatformIdentityColumns(),
+	},
+	(table) => platformIdentityConstraints("label", table),
+);

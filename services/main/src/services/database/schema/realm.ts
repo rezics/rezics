@@ -13,6 +13,8 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 import { users } from "./auth";
+import { createPlatformIdentityColumns, platformIdentityConstraints } from "./platform-identity";
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 
 import { pgTable } from "./base";
 import { entityIdentity } from "./catalog-identity";
@@ -38,7 +40,6 @@ import {
 	RealmUnitStatusValues,
 	toEnumValues,
 } from "./contract-values";
-import { unit } from "./unit";
 
 export const realmJoinPolicy = pgEnum("realm_join_policy", toEnumValues(RealmJoinPolicyValues));
 export const realmMemberState = pgEnum("realm_member_state", toEnumValues(RealmMemberStateValues));
@@ -117,9 +118,7 @@ export const platformCapability = pgEnum("platform_capability", platformCapabili
 export const realm = pgTable(
 	"realm",
 	{
-		id: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		...createPlatformIdentityColumns(),
 		joinPolicy: realmJoinPolicy().default("open").notNull(),
 		realmTagVotingEnabled: boolean("realm_tag_voting_enabled").default(false).notNull(),
 		tagFitFallbackPolicy: realmTagFallbackPolicy("tag_fit_fallback_policy")
@@ -132,10 +131,9 @@ export const realm = pgTable(
 			.array()
 			.default(sql`array['main']::realm_page_kind[]`)
 			.notNull(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...platformIdentityConstraints("realm", table),
 		check(
 			"realm_enabled_pages_cardinality_check",
 			sql`cardinality(${table.enabledPages}) between 1 and ${RealmPageKindValues.length}`,
@@ -205,16 +203,14 @@ export const realmRuleRevision = pgTable(
 export const realmRule = pgTable(
 	"realm_rule",
 	{
-		id: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		...createPlatformIdentityColumns(),
 		revisionId: uuid()
 			.notNull()
 			.references(() => realmRuleRevision.id, { onDelete: "cascade" }),
 		position: ordinalPosition().notNull(),
-		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
+		...platformIdentityConstraints("realm_rule", table),
 		unique("realm_rule_id_revision_key").on(table.id, table.revisionId),
 		index("realm_rule_revision_position_idx").on(table.revisionId, table.position, table.id),
 	],
@@ -248,9 +244,8 @@ export const realmPin = pgTable(
 		realmId: uuid()
 			.notNull()
 			.references(() => realm.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
+		...unitReferenceColumns("unit", "cascade"),
 		kind: realmPinKind().default("pinned").notNull(),
 		position: fractionalIndexPosition().default(sql`'a0'::text`).notNull(),
 		createdByProfileId: uuid().references(() => entityIdentity.id, { onDelete: "set null" }),
@@ -258,6 +253,7 @@ export const realmPin = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints("realm_pin", "unit", table, false, table.unitId),
 		primaryKey({ columns: [table.realmId, table.unitId] }),
 		index("realm_pin_realm_kind_position_idx").on(
 			table.realmId,
@@ -281,9 +277,8 @@ export const realmUnit = pgTable(
 		realmId: uuid()
 			.notNull()
 			.references(() => realm.id, { onDelete: "cascade" }),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
+		...unitReferenceColumns("unit", "cascade"),
 		/** Rejects new Post relations targeting this Unit in this Realm. */
 		postTargetingLocked: boolean().default(false).notNull(),
 		status: realmUnitStatus().default("visible").notNull(),
@@ -292,6 +287,7 @@ export const realmUnit = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints("realm_unit", "unit", table, false, table.unitId),
 		primaryKey({ columns: [table.realmId, table.unitId] }),
 		index("realm_unit_realm_status_created_idx").on(
 			table.realmId,

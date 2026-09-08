@@ -23,6 +23,8 @@ import {
 	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
+import { createPlatformIdentityColumns, platformIdentityConstraints } from "./platform-identity";
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 
 import { pgTable } from "./base";
 import { entityIdentity } from "./catalog-identity";
@@ -36,16 +38,15 @@ import {
 	createUuidv7PrimaryKey,
 } from "./columns";
 import { revisionContent } from "./history";
-import { unit } from "./unit";
 
 /** Unit subtype carrying reusable Custom Theme identity and localization. */
-export const customTheme = pgTable("custom_theme", {
-	id: uuid()
-		.primaryKey()
-		.references(() => unit.id, { onDelete: "cascade" }),
-	createdAt: createCreatedAtColumn(),
-	updatedAt: createUpdatedAtColumn(),
-});
+export const customTheme = pgTable(
+	"custom_theme",
+	{
+		...createPlatformIdentityColumns(),
+	},
+	(table) => platformIdentityConstraints("custom_theme", table),
+);
 
 /**
  * Immutable package identity plus mutable review and emergency-control state.
@@ -67,7 +68,8 @@ export const customThemeRevision = pgTable(
 		sourceArchiveSha256: text().notNull(),
 		reviewState: text().$type<CustomThemeRevisionState>().default("pending_automated").notNull(),
 		approvalScope: text().$type<"host_unit">().default("host_unit").notNull(),
-		approvedHostUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
+		approvedHostUnitId: uuid(),
+		...unitReferenceColumns("approvedHostUnit", "restrict"),
 		reviewEvidence: createJsonObjectColumn(),
 		reviewEvidenceSha256: text(),
 		automatedReviewLeaseUntil: createTimestampMsColumn(),
@@ -85,6 +87,13 @@ export const customThemeRevision = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"custom_theme_revision",
+			"approvedHostUnit",
+			table,
+			true,
+			table.approvedHostUnitId,
+		),
 		unique("custom_theme_revision_id_target_key").on(table.id, table.targetContract),
 		index("custom_theme_revision_theme_id_idx").on(table.customThemeUnitId, table.id),
 		index("custom_theme_revision_host_approval_idx")
@@ -350,9 +359,8 @@ export const customThemeRevisionExternalResource = pgTable(
 export const unitCustomThemeInstallation = pgTable(
 	"unit_custom_theme_installation",
 	{
-		hostUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		hostUnitId: uuid().notNull(),
+		...unitReferenceColumns("hostUnit", "cascade"),
 		targetContract: text().$type<typeof UnitPresentationTargetContractV0>().notNull(),
 		revisionId: uuid().notNull(),
 		installedByProfileId: uuid()
@@ -362,6 +370,13 @@ export const unitCustomThemeInstallation = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"unit_custom_theme_installation",
+			"hostUnit",
+			table,
+			false,
+			table.hostUnitId,
+		),
 		primaryKey({ columns: [table.hostUnitId, table.targetContract] }),
 		foreignKey({
 			columns: [table.revisionId, table.targetContract],
@@ -381,9 +396,8 @@ export const unitCustomThemeInstallation = pgTable(
 export const unitPresentationDocument = pgTable(
 	"unit_presentation_document",
 	{
-		hostUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		hostUnitId: uuid().notNull(),
+		...unitReferenceColumns("hostUnit", "cascade"),
 		targetContract: text().$type<typeof UnitPresentationTargetContractV0>().notNull(),
 		/** @UNIT_LOCALIZATION_EXEMPT Display copy is referenced through localized Units. */
 		document: createJsonDocumentColumn().notNull(),
@@ -391,6 +405,13 @@ export const unitPresentationDocument = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints(
+			"unit_presentation_document",
+			"hostUnit",
+			table,
+			false,
+			table.hostUnitId,
+		),
 		primaryKey({ columns: [table.hostUnitId, table.targetContract] }),
 		check(
 			"unit_presentation_document_target_check",

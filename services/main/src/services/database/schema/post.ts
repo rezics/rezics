@@ -1,30 +1,30 @@
 import { sql } from "drizzle-orm";
 import { check, foreignKey, index, integer, pgEnum, unique, uuid } from "drizzle-orm/pg-core";
+import { createPlatformIdentityColumns, platformIdentityConstraints } from "./platform-identity";
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 
 import { pgTable } from "./base";
+import { createCreatedAtColumn } from "./columns";
 import { PostKindValues, toEnumValues } from "./contract-values";
-import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
-import { unit } from "./unit";
 
 export const postKind = pgEnum("post_kind", toEnumValues(PostKindValues));
 
 export const post = pgTable(
 	"post",
 	{
-		id: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		...createPlatformIdentityColumns(),
 		/**
 		 * Generic typed target. Public posts and reviews that target an Entity pass the
 		 * Entity subject-association policy; structural and governance posts use this
 		 * column for containment or administrative context instead.
 		 */
-		subjectUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
+		subjectUnitId: uuid(),
+		...unitReferenceColumns("subjectUnit", "restrict"),
 		kind: postKind().default("post").notNull(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints("post", "subjectUnit", table, true, table.subjectUnitId),
+		...platformIdentityConstraints("post", table),
 		index("post_subject_created_at_idx").on(
 			table.subjectUnitId,
 			table.createdAt.desc(),

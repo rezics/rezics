@@ -12,6 +12,8 @@ import {
 	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
+import { createPlatformIdentityColumns, platformIdentityConstraints } from "./platform-identity";
+import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 
 import { pgTable } from "./base";
 import { entityIdentity } from "./catalog-identity";
@@ -31,7 +33,6 @@ import {
 	TagExpressionArgumentRoleValues,
 	type TagExpressionArgumentRole,
 } from "./tag-expression";
-import { unit } from "./unit";
 import { tagRelation, vocabularyNode } from "./vocabulary";
 
 export const TagPathMinimumMembers = 2 as const;
@@ -60,9 +61,7 @@ export type TagPathSenseProvenance = Readonly<Record<string, unknown>>;
 export const tagPath = pgTable(
 	"tag_path",
 	{
-		id: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		...createPlatformIdentityColumns(),
 		memberNodeIds: uuid().array().notNull(),
 		relationIds: uuid().array().notNull(),
 		structuralIdentityHash: text().notNull(),
@@ -72,9 +71,9 @@ export const tagPath = pgTable(
 		createdByProfileId: uuid()
 			.notNull()
 			.references(() => entityIdentity.id, { onDelete: "restrict" }),
-		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
+		...platformIdentityConstraints("tag_path", table),
 		unique("tag_path_structure_key").on(table.memberNodeIds, table.relationIds),
 		unique("tag_path_structural_identity_hash_key").on(table.structuralIdentityHash),
 		index("tag_path_terminal_usage_idx").on(table.terminalNodeId, table.id),
@@ -242,9 +241,8 @@ export const unitTagPathApplication = pgTable(
 	"unit_tag_path_application",
 	{
 		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		unitId: uuid().notNull(),
+		...unitReferenceColumns("unit", "cascade"),
 		senseId: uuid()
 			.notNull()
 			.references(() => tagPathSense.id, { onDelete: "restrict" }),
@@ -255,6 +253,7 @@ export const unitTagPathApplication = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...unitReferenceConstraints("unit_tag_path_application", "unit", table, false, table.unitId),
 		unique("unit_tag_path_application_unit_sense_key").on(table.unitId, table.senseId),
 		index("unit_tag_path_application_sense_idx").on(table.senseId, table.unitId, table.id),
 		index("unit_tag_path_application_unit_position_idx").on(

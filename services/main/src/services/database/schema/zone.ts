@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { check, index, uuid } from "drizzle-orm/pg-core";
+import { createPlatformIdentityColumns, platformIdentityConstraints } from "./platform-identity";
 
 import { pgTable } from "./base";
 import {
@@ -8,15 +9,13 @@ import {
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 } from "./columns";
+import { post } from "./post";
 import { realm } from "./realm";
-import { unit } from "./unit";
 
 export const zone = pgTable(
 	"zone",
 	{
-		id: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
+		...createPlatformIdentityColumns(),
 		/** @UNIT_LOCALIZATION_EXEMPT Sparse Filter contract; `{}` adds no Zone conditions. */
 		filterDocument: createJsonDocumentColumn().notNull(),
 		/** @UNIT_LOCALIZATION_EXEMPT Structured fallback appearance contains no display copy. */
@@ -25,10 +24,9 @@ export const zone = pgTable(
 		endsAt: createTimestampMsColumn(),
 		/** Optional Zone-local policy source; the official Rule Realm is always also available. */
 		localRuleRealmId: uuid().references(() => realm.id, { onDelete: "restrict" }),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
+		...platformIdentityConstraints("zone", table),
 		check(
 			"zone_time_range_check",
 			sql`${table.endsAt} is null or ${table.startsAt} is null or ${table.endsAt} > ${table.startsAt}`,
@@ -49,7 +47,7 @@ export const zonePage = pgTable(
 	{
 		id: uuid()
 			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
+			.references(() => post.id, { onDelete: "cascade" }),
 		zoneId: uuid()
 			.notNull()
 			.references(() => zone.id, { onDelete: "restrict" }),
