@@ -37,7 +37,8 @@ export async function readUnitPresentationsInTransaction(
 	if (languages.length > 32)
 		throw new RangeError("Presentation language preferences exceed the bounded grammar");
 	const candidates = database
-		.select({ id: sql<string>`unnest(${sql.param(ids)}::uuid[])`.as("id") })
+		.select({ id: sql<string>`requested.id`.as("id") })
+		.from(sql`unnest(${sql.param(ids)}::uuid[]) as requested(id)`)
 		.as("requested_presentation_ids");
 	const state = unitStateRelation(candidates.id, "presentation_state");
 	const rows = await tx

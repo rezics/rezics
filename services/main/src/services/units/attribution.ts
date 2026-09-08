@@ -67,7 +67,8 @@ export async function getPublicUnitSummariesByIds(
 	const presentations = await database.transaction(
 		async (tx) => {
 			const candidates = database
-				.select({ id: sql<string>`unnest(${sql.param(ids)}::uuid[])`.as("id") })
+				.select({ id: sql<string>`requested.id`.as("id") })
+				.from(sql`unnest(${sql.param(ids)}::uuid[]) as requested(id)`)
 				.as("public_summary_candidates");
 			const state = unitStateRelation(candidates.id, "public_summary_state");
 			const visible = await tx
