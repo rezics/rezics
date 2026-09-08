@@ -1,3 +1,6 @@
+import { MUSIC_SOURCE_DEPENDENCY_LIMIT, MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT } from "../database/schema/catalog-source-limits";
+import { withPreparedMusicBrainzRecordings } from "./musicbrainz-reference-cache";
+import { tracks } from "./musicbrainz-release-plan";
 import { planMusicBrainzDependencies, prepareMusicBrainzProposalDependencies } from "./musicbrainz-dependencies";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -22,10 +25,10 @@ import type { EventHandler } from "../events/consumer";
 
 const locatorSchema = z.strictObject({ sourceRecordId: z.uuid(), jobId: z.uuid() });
 const inputSchema = z.strictObject({ sourceRecordId: z.uuid(), proposalId: z.uuid(), action: z.enum(["apply", "withdraw"]), reason: z.string().min(1).max(2048) });
-const taskSchema = z.strictObject({ afterPosition: z.number().int().min(0).max(8192), sourceRecordId: z.uuid(), jobId: z.uuid(), generation: z.number().int().positive().max(Number.MAX_SAFE_INTEGER), operationId: z.uuid(), consumerKey: z.enum(["music-release-prepare-v1", "music-release-publish-v1"]), maximumAttempts: z.literal(10), deadline: z.iso.datetime({ offset: true }) });
+const taskSchema = z.strictObject({ afterPosition: z.number().int().min(0).max(MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT), sourceRecordId: z.uuid(), jobId: z.uuid(), generation: z.number().int().positive().max(Number.MAX_SAFE_INTEGER), operationId: z.uuid(), consumerKey: z.enum(["music-release-prepare-v1", "music-release-publish-v1"]), maximumAttempts: z.literal(10), deadline: z.iso.datetime({ offset: true }) });
 const preparationSchema = z.strictObject({ beforeSnapshotId: z.uuid(), afterSnapshotId: z.uuid(), beforeSha256: z.string().regex(/^[0-9a-f]{64}$/), afterSha256: z.string().regex(/^[0-9a-f]{64}$/) });
-export const MusicReleaseSourceJobSchema = z.strictObject({ id: z.uuid(), sourceRecordId: z.uuid(), proposalId: z.uuid().nullable(), action: z.enum(["initialize", "apply", "withdraw"]), reference: z.strictObject({ owner: z.literal("music"), id: z.uuid() }).nullable(), generation: z.number().int().positive(), state: z.enum(["queued", "prepared", "paused", "succeeded", "superseded", "blocked", "failed"]), prepared: z.boolean(), preparedDependencies: z.number().int().min(0).max(8192), outcomeCode: z.string().nullable() });
-function present(row: typeof jobs.$inferSelect) { return MusicReleaseSourceJobSchema.parse({ id: row.id, sourceRecordId: row.sourceRecordId, proposalId: row.proposalId, action: row.action, reference: row.musicId ? { owner: "music", id: row.musicId } : null, generation: row.generation, state: row.state, prepared: row.preparationComplete, preparedDependencies: row.nextDependencyPosition, outcomeCode: row.outcomeCode }); }
+export const MusicReleaseSourceJobSchema = z.strictObject({ id: z.uuid(), sourceRecordId: z.uuid(), proposalId: z.uuid().nullable(), action: z.enum(["initialize", "apply", "withdraw"]), reference: z.strictObject({ owner: z.literal("music"), id: z.uuid() }).nullable(), generation: z.number().int().positive(), state: z.enum(["queued", "prepared", "paused", "succeeded", "superseded", "blocked", "failed"]), prepared: z.boolean(), preparedDependencies: z.number().int().min(0).max(MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT), outcomeCode: z.string().nullable() });
+function present(row: typeof jobs.$inferSelect) { return MusicReleaseSourceJobSchema.parse({ id: row.id, sourceRecordId: row.sourceRecordId, proposalId: row.proposalId, action: row.action, reference: row.musicId ? { owner: "music", id: row.musicId } : null, generation: row.generation, state: row.state, prepared: row.preparationComplete, preparedDependencies: row.preparedDependencyCount, outcomeCode: row.outcomeCode }); }
 function key(input: { sourceRecordId: string; jobId: string }) { return and(eq(jobs.sourceRecordId, input.sourceRecordId), eq(jobs.id, input.jobId)); }
 
 async function authorize(tx: DatabaseTransaction, actor: string, input: { sourceRecordId: string; proposalId: string | null; authority?: z.infer<typeof ParticipationAuthoritySchema> }) {
@@ -187,24 +190,26 @@ export function createMusicReleaseSourceHandlers(database: DatabaseExecutor, rou
 							if (!loaded.evidence || !bytes) throw new Error("Release job lost its prepared evidence");
 							if (phase === "prepare") {
 								const direct = row.authority.principal.kind === "auth" && !row.authority.grant;
-								const previous = row.nextDependencyPosition >= 4096;
+								const previous = row.nextDependencyPosition >= MUSIC_SOURCE_DEPENDENCY_LIMIT;
 								const documentIndex = previous ? 0 : 1;
 								const parsedDocument = MusicBrainzReleaseSchema.parse(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes[documentIndex]!)));
-								const plan = planMusicBrainzDependencies("release", parsedDocument, 4096);
-								const position = row.nextDependencyPosition % 4096;
+								const plan = planMusicBrainzDependencies("release", parsedDocument, MUSIC_SOURCE_DEPENDENCY_LIMIT);
+								const position = row.nextDependencyPosition % MUSIC_SOURCE_DEPENDENCY_LIMIT;
 								let nextPosition = row.nextDependencyPosition;
+								let preparedDependencyCount = row.preparedDependencyCount;
 								let prepared = true;
 								if (direct && row.action !== "withdraw") {
 									await prepareMusicBrainzProposalDependencies(tx, row.authority.principal.authUserId, { proposalId: row.proposalId,
 										sourceRecordId: row.sourceRecordId, snapshotId: previous ? loaded.evidence.preparation.beforeSnapshotId : row.snapshotId,
 										receipt: previous ? loaded.evidence.before : loaded.evidence.after, bytes: bytes[documentIndex]!,
 										afterPosition: position, sourcePage: true, purpose: previous ? "previous-for-withdrawal" : "incoming" });
-									nextPosition += Math.min(128, Math.max(0, plan.length - position));
+									const processed = Math.min(128, Math.max(0, plan.length - position));
+									nextPosition += processed; preparedDependencyCount += processed;
 									if (position + 128 < plan.length) prepared = false;
-									else if (!previous && row.action === "apply") { nextPosition = 4096; prepared = false; }
+									else if (!previous && row.action === "apply") { nextPosition = MUSIC_SOURCE_DEPENDENCY_LIMIT; prepared = false; }
 								}
 								const [updated] = await tx.update(jobs).set({ preparation: loaded.evidence.preparation,
-									preparationComplete: prepared, nextDependencyPosition: nextPosition, state: prepared ? "prepared" : "queued" }).where(key(value)).returning();
+									preparationComplete: prepared, preparedDependencyCount, nextDependencyPosition: nextPosition, state: prepared ? "prepared" : "queued" }).where(key(value)).returning();
 								if (!updated) throw new Error("Release preparation disappeared");
 								await admitStage(tx, updated, prepared ? "publish" : "prepare");
 							} else if (row.action === "initialize") {
@@ -213,7 +218,9 @@ export function createMusicReleaseSourceHandlers(database: DatabaseExecutor, rou
 									await tx.update(jobs).set({ state: "superseded", outcomeCode: "source_snapshot_changed" }).where(key(value));
 									return;
 								}
-								const result = await adoptMusicBrainzRelease(tx, row.authority.principal.authUserId, loaded.evidence.after, bytes[1]!);
+								const initialDocument = MusicBrainzReleaseSchema.parse(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes[1]!)));
+								const result = await withPreparedMusicBrainzRecordings(tx, row.authority.principal.authUserId, initialDocument.media.flatMap((medium, index) => tracks(medium, index).map((entry) => entry.track.recording.id)),
+									() => adoptMusicBrainzRelease(tx, row.authority.principal.authUserId, loaded.evidence.after, bytes[1]!));
 								if (result.reference.owner !== "music") throw new TypeError("Release intake resolved another owner");
 								await tx.update(jobs).set({ state: "succeeded", musicId: result.reference.id, outcomeCode: result.status }).where(key(value));
 							} else {

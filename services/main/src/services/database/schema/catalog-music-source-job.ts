@@ -1,3 +1,4 @@
+import { MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT } from "./catalog-source-limits";
 import { sql } from "drizzle-orm";
 import { bigint, boolean, check, foreignKey, index, integer, jsonb, primaryKey, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { users } from "./auth";
@@ -17,6 +18,7 @@ export const musicReleaseSourceJob = pgTable("music_release_source_job", {
 	authorityActingEntityId: uuid().generatedAlwaysAs(sql`(authority->>'actingEntityId')::uuid`).notNull().references(() => CatalogIdentityTables.entity.id, { onDelete: "restrict" }),
 	authorityGrantId: uuid().generatedAlwaysAs(sql`(authority->'grant'->>'id')::uuid`).references(() => participationGrant.id, { onDelete: "restrict" }),
 	authorityServicePrincipalId: uuid().generatedAlwaysAs(sql`(authority->'principal'->>'servicePrincipalId')::uuid`).references(() => servicePrincipal.id, { onDelete: "restrict" }),
+	preparedDependencyCount: integer().notNull().default(0),
 	preparationComplete: boolean().notNull().default(false),
 	nextDependencyPosition: integer().notNull().default(0),
 	generation: bigint({ mode: "number" }).notNull().default(1),
@@ -34,5 +36,5 @@ export const musicReleaseSourceJob = pgTable("music_release_source_job", {
 	uniqueIndex("music_release_source_job_initial_idx").on(t.sourceRecordId, t.snapshotId).where(sql`${t.action}='initialize'`),
 	foreignKey({ columns: [t.sourceRecordId, t.snapshotId], foreignColumns: [catalogSourceSnapshot.sourceRecordId, catalogSourceSnapshot.id] }).onDelete("restrict"),
 	foreignKey({ columns: [t.sourceRecordId, t.proposalId], foreignColumns: [catalogSourceAdoptionProposal.sourceRecordId, catalogSourceAdoptionProposal.id] }).onDelete("restrict"),
-	check("music_release_source_job_values", sql`${t.action} in ('initialize','apply','withdraw') and ((${t.action}='initialize') = (${t.proposalId} is null)) and ${t.state} in ('queued','prepared','paused','succeeded','superseded','blocked','failed') and ${t.nextDependencyPosition} between 0 and 8192 and ${t.generation} between 1 and 9007199254740991 and octet_length(${t.reason}) between 1 and 8192 and octet_length(${t.authority}::text) <= 2048 and (${t.preparation} is null or octet_length(${t.preparation}::text) <= 1024) and (${t.outcomeCode} is null or octet_length(${t.outcomeCode}) <= 128)`),
+	check("music_release_source_job_values", sql`${t.action} in ('initialize','apply','withdraw') and ((${t.action}='initialize') = (${t.proposalId} is null)) and ${t.state} in ('queued','prepared','paused','succeeded','superseded','blocked','failed') and ${t.nextDependencyPosition} between 0 and ${sql.raw(String(MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT))} and ${t.preparedDependencyCount} between 0 and ${sql.raw(String(MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT))} and ${t.generation} between 1 and 9007199254740991 and octet_length(${t.reason}) between 1 and 8192 and octet_length(${t.authority}::text) <= 2048 and (${t.preparation} is null or octet_length(${t.preparation}::text) <= 1024) and (${t.outcomeCode} is null or octet_length(${t.outcomeCode}) <= 128)`),
 ]);

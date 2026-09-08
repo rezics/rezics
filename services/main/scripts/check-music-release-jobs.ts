@@ -63,7 +63,7 @@ try {
 	const status = (jobId: string) => asActor(() => db.transaction((tx) => readMusicReleaseSourceJob(tx, admission.actor, { sourceRecordId, jobId })));
 	const control = (jobId: string, action: "pause" | "resume") => asActor(() => db.transaction((tx) => controlMusicReleaseSourceJob(tx, admission.actor, { sourceRecordId, jobId, action })));
 	async function advance(jobId: string, stopPrepared = false) {
-		for (let count = 0; count < 140; count++) {
+		for (let count = 0; count < 300; count++) {
 			const job = await status(jobId);
 			if (["succeeded", "failed", "blocked", "superseded", "paused"].includes(job.state) || (stopPrepared && job.prepared)) return job;
 			const [raw] = await db.select().from(musicReleaseSourceJob).where(and(eq(musicReleaseSourceJob.sourceRecordId, sourceRecordId), eq(musicReleaseSourceJob.id, jobId))).limit(1);
@@ -73,9 +73,16 @@ try {
 		}
 		throw new Error("Fixture exceeded its bounded job steps");
 	}
-	const count = 260;
+	const count = Number(process.env.REZICS_MUSIC_RELEASE_JOB_TRACKS ?? 260);
+	const mediumCount = Number(process.env.REZICS_MUSIC_RELEASE_JOB_MEDIA ?? 1);
+	assert.ok(Number.isSafeInteger(count) && count >= 260 && count <= 8000);
+	assert.ok(Number.isSafeInteger(mediumCount) && mediumCount >= 1 && mediumCount <= Math.min(count, 1000));
 	const original: MusicBrainzRelease = { id: sourceKey.externalId, title: "Large staged fixture", barcode: "before",
-		media: [{ id: crypto.randomUUID(), position: 1, tracks: Array.from({ length: count }, (_, index) => ({ id: crypto.randomUUID(), title: `Original ${index}`, number: String(index + 1), position: index + 1, recording: { id: crypto.randomUUID(), title: `Recording ${index}` } })) }] };
+		media: Array.from({ length: mediumCount }, (_, mediumIndex) => {
+			const start = Math.floor(mediumIndex * count / mediumCount), end = Math.floor((mediumIndex + 1) * count / mediumCount);
+			return { id: crypto.randomUUID(), position: mediumIndex + 1, tracks: Array.from({ length: end - start }, (_, index) => ({ id: crypto.randomUUID(), title: `Original ${start + index}`, number: String(index + 1), position: index + 1, recording: { id: crypto.randomUUID(), title: `Recording ${start + index}` } })) };
+		}) };
+
 	async function observe(document: MusicBrainzRelease) {
 		const bytes = new TextEncoder().encode(JSON.stringify(document));
 		const receipt = await storeCatalogSourcePayload(sourceKey, bytes, MusicBrainzCatalogContractSha256, null, archive);
@@ -99,11 +106,16 @@ try {
 	assert.equal(initialDone.state, "succeeded");
 	assert.ok(initialDone.reference);
 	const reference = initialDone.reference;
-	const nativeTracks = () => db.select({ id: musicTrackOccurrence.id, name: musicTrackOccurrence.name, position: musicTrackOccurrence.position }).from(musicTrackOccurrence).where(eq(musicTrackOccurrence.releaseId, reference.id)).orderBy(musicTrackOccurrence.position).limit(count + 1);
+	const nativeTracks = () => db.select({ id: musicTrackOccurrence.id, name: musicTrackOccurrence.name, position: musicTrackOccurrence.position, mediumId: musicTrackOccurrence.mediumId }).from(musicTrackOccurrence).where(eq(musicTrackOccurrence.releaseId, reference.id)).orderBy(musicTrackOccurrence.mediumId, musicTrackOccurrence.position).limit(count + 1);
 	const before = await nativeTracks();
 	assert.equal(before.length, count);
 	const oldIds = new Set(before.map((track) => track.id));
-	const incoming: MusicBrainzRelease = { ...original, media: [{ ...original.media[0]!, tracks: [...original.media[0]!.tracks!].reverse().map((track, index) => ({ ...track, position: index + 1, number: String(index + 1), title: index === 190 ? "Reject publication fixture" : `Updated ${index}` })) }] };
+	let updateIndex = 0;
+	const incoming: MusicBrainzRelease = { ...original, media: original.media.map((medium) => ({ ...medium, tracks: [...medium.tracks!].reverse().map((track, index) => {
+		const ordinal = updateIndex++;
+		return { ...track, position: index + 1, number: String(index + 1), title: ordinal === 190 ? "Reject publication fixture" : `Updated ${ordinal}` };
+	}) })) };
+
 	const second = await observe(incoming);
 	const [binding] = await db.select().from(catalogSourceMappingClaim).where(and(eq(catalogSourceMappingClaim.sourceRecordId, sourceRecordId), eq(catalogSourceMappingClaim.path, "/"))).limit(1);
 	assert.ok(binding);
@@ -122,7 +134,9 @@ try {
 	await db.execute(sql`create trigger music_release_job_fixture_failure before update on public.music_track_occurrence for each row execute function public.music_release_job_fixture_failure(${sql.raw(`'${reference.id}'`)})`);
 	try {
 		const prepared = await status(appliedJob.id);
-		const failedDelivery = await message(appliedJob.id, prepared.generation, prepared.preparedDependencies, "publish");
+		const [publishState] = await db.select().from(musicReleaseSourceJob).where(and(eq(musicReleaseSourceJob.sourceRecordId, sourceRecordId), eq(musicReleaseSourceJob.id, appliedJob.id))).limit(1);
+		assert.ok(publishState);
+		const failedDelivery = await message(appliedJob.id, prepared.generation, publishState.nextDependencyPosition, "publish");
 		assert.equal((await deliver(failedDelivery)).status, "retry");
 		assert.deepEqual(await nativeTracks(), before, "Failure after earlier native writes rolls back the entire reorder");
 		assert.equal(await historyCount(), historyBefore, "Partial histories do not escape the failed publication");
@@ -137,7 +151,7 @@ try {
 	const changed = await nativeTracks();
 	assert.equal(changed.length, count);
 	assert.ok(changed.every((track) => oldIds.has(track.id)));
-	assert.equal(changed[0]!.id, before.at(-1)!.id);
+	assert.equal(changed[0]!.id, before.filter((track) => track.mediumId === changed[0]!.mediumId).at(-1)!.id);
 	const journal = await asActor(() => db.transaction((tx) => readCatalogSourceApplication(tx, admission.actor, { sourceRecordId, proposalId, action: "apply" })));
 	assert.ok(journal);
 	assert.equal(journal.changes.filter((change) => change.kind === "music-component").length, count);
@@ -163,7 +177,7 @@ try {
 	assert.equal((await advance(tinyJob.id)).state, "succeeded");
 	const tinyJournal = await asActor(() => db.transaction((tx) => readCatalogSourceApplication(tx, admission.actor, { sourceRecordId, proposalId: tinyProposalId, action: "apply" })));
 	assert.equal(tinyJournal?.changes.filter((change) => change.kind === "music-component").length, 1);
-	console.info(JSON.stringify({ status: "passed", tracks: count, dependencyRows: dependencies.length, initialJobId: initial.id, applyJobId: appliedJob.id,
+	console.info(JSON.stringify({ status: "passed", tracks: count, media: mediumCount, dependencyRows: dependencies.length, initialJobId: initial.id, applyJobId: appliedJob.id,
 		checks: ["initial background adoption", "pause before preparation", "260 dependency references paged", "no partial root visibility", "reorder across 128 boundaries", "mid-publication rollback", "resume prepared publication", "complete exact journal", "withdrawal", "revoked authority", "one-change large snapshot"] }));
 } finally {
 	await pool.end();

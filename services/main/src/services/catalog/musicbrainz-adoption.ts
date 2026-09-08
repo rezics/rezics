@@ -1,4 +1,5 @@
-import { preflightMusicBrainzReleaseDelta } from "./musicbrainz-release-plan";
+import { MUSIC_SOURCE_AUXILIARY_ROW_LIMIT } from "../database/schema/catalog-source-limits";
+import { preflightMusicBrainzReleaseDelta, musicBrainzReleaseAuxiliaryRows } from "./musicbrainz-release-plan";
 import { createHash } from "node:crypto";
 import type { DatabaseTransaction } from "../database";
 import { musicBrainzLanguageTag } from "./musicbrainz-language";
@@ -28,7 +29,7 @@ import {
 } from "./musicbrainz-native";
 import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
 import { adoptMusicBrainzAliases, adoptMusicBrainzTitle } from "./musicbrainz-names";
-import { recordMusicSourceComponent } from "./music-source-occurrences";
+import { recordMusicSourceComponent, withMusicSourceOccurrenceBatch } from "./music-source-occurrences";
 import { applyMusicBrainzFactDelta } from "./musicbrainz-facts";
 import { inspectExistingSourceBinding } from "./source-adoption";
 import { bindReferencedSourceIdentity } from "./source-references";
@@ -46,6 +47,10 @@ export async function adoptMusicBrainzRelease(
 	receipt: CatalogSourceReceipt,
 	bytes: Uint8Array,
 ) {
+	return withMusicSourceOccurrenceBatch(tx, () => adoptMusicBrainzReleaseInTransaction(tx, actor, receipt, bytes));
+}
+
+async function adoptMusicBrainzReleaseInTransaction(tx: DatabaseTransaction, actor: string, receipt: CatalogSourceReceipt, bytes: Uint8Array) {
 	if (
 		bytes.byteLength > 8_000_000 ||
 		createHash("sha256").update(bytes).digest("hex") !== receipt.contentSha256
@@ -63,6 +68,7 @@ export async function adoptMusicBrainzRelease(
 	)
 		throw new TypeError("MusicBrainz release differs from its source key");
 	preflightMusicBrainzReleaseDelta(record, record);
+	if (musicBrainzReleaseAuxiliaryRows(null, record) > MUSIC_SOURCE_AUXILIARY_ROW_LIMIT) throw new RangeError("Initial release auxiliary writes exceed the publication capacity");
 	const observation = await recordCatalogSourceDocument(tx, receipt, bytes);
 	const existing = await inspectExistingSourceBinding(
 		tx,
@@ -182,6 +188,8 @@ export async function adoptMusicBrainzRelease(
 			value: record.id,
 			normalizedValue: record.id,
 		});
+	const trackRows: (typeof musicTrackOccurrence.$inferInsert)[] = [];
+	const trackIdentifierRows: (typeof musicTrackIdentifier.$inferInsert)[] = [];
 	for (const [mediumPosition, sourceMedium] of record.media.entries()) {
 		const [medium] = await tx
 			.insert(musicMedium)
@@ -284,9 +292,9 @@ export async function adoptMusicBrainzRelease(
 					`${path}/recording/relations`,
 				);
 			}
-			const [track] = await tx
-				.insert(musicTrackOccurrence)
-				.values({
+			const track = { id: crypto.randomUUID() };
+			trackRows.push({
+					id: track.id,
 					releaseId: identity.id,
 					mediumId: medium.id,
 					recordingId: target.id,
@@ -296,9 +304,7 @@ export async function adoptMusicBrainzRelease(
 					name: sourceTrack.title,
 					lengthMilliseconds: sourceTrack.length ?? null,
 					artistCreditId: await creditId(sourceTrack["artist-credit"], `${path}/artist-credit`),
-				})
-				.returning({ id: musicTrackOccurrence.id });
-			if (!track) throw new Error("MusicBrainz track insertion returned no row");
+				});
 			await recordMusicSourceComponent(
 				tx,
 				observation,
@@ -307,7 +313,7 @@ export async function adoptMusicBrainzRelease(
 				track.id,
 				path,
 			);
-			await tx.insert(musicTrackIdentifier).values({
+			trackIdentifierRows.push({
 				releaseId: identity.id,
 				trackId: track.id,
 				namespace: "musicbrainz.track",
@@ -323,6 +329,8 @@ export async function adoptMusicBrainzRelease(
 			);
 		}
 	}
+	for (let offset = 0; offset < trackRows.length; offset += 128) await tx.insert(musicTrackOccurrence).values(trackRows.slice(offset, offset + 128));
+	for (let offset = 0; offset < trackIdentifierRows.length; offset += 128) await tx.insert(musicTrackIdentifier).values(trackIdentifierRows.slice(offset, offset + 128));
 	revision = await adoptMusicBrainzAliases(
 		tx,
 		actor,

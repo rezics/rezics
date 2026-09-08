@@ -1,3 +1,4 @@
+import { MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT } from "../database/schema/catalog-source-limits";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -22,7 +23,7 @@ import {
 const keySchema = z.strictObject({
 	sourceRecordId: z.uuid(),
 	proposalId: z.uuid(),
-	position: z.number().int().min(0).max(8191),
+	position: z.number().int().min(0).max(MUSIC_SOURCE_DEPENDENCY_POSITION_LIMIT - 1),
 });
 
 /** Separately authorized intake may share its own draft dependencies with one exact proposal. @internal */

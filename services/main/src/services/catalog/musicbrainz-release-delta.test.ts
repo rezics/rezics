@@ -59,7 +59,7 @@ describe("MusicBrainz archived structural delta admission", () => {
 		expect(() => preflightMusicBrainzReleaseDelta(large, { ...large, barcode: "1234" })).not.toThrow();
 	});
 	test("source occurrence read capacity is independent and explicit", () => {
-		const tooLarge = MusicBrainzReleaseSchema.parse({ ...release, media: Array.from({ length: 4096 }, (_, i) => ({ position: i + 1 })) });
+		const tooLarge = MusicBrainzReleaseSchema.parse({ ...release, media: Array.from({ length: 4096 }, (_, i) => ({ position: i + 1, tracks: [track(crypto.randomUUID()), { ...track(crypto.randomUUID()), position: 2 }] })) });
 		expect(() => preflightMusicBrainzReleaseDelta(tooLarge, tooLarge)).toThrow("source support");
 	});
 	test("admits identifier and relation fields covered by native semantic writers", () => {

@@ -1,3 +1,4 @@
+import { MUSIC_SOURCE_DEPENDENCY_LIMIT } from "../database/schema/catalog-source-limits";
 import { adoptMusicBrainzRelations } from "./musicbrainz-relations";
 import type { DatabaseTransaction } from "../database";
 import { z } from "zod";
@@ -81,7 +82,7 @@ export function planMusicBrainzDependencies(
 	input: unknown,
 	maximum = 128,
 ): readonly Dependency[] {
-	if (maximum !== 128 && maximum !== 4096) throw new TypeError("Unreviewed dependency plan capacity");
+	if (maximum !== 128 && maximum !== MUSIC_SOURCE_DEPENDENCY_LIMIT) throw new TypeError("Unreviewed dependency plan capacity");
 	const dependencies = new Map<string, Dependency>();
 	const add = (item: Dependency) => {
 		const key = sourceKey(item);
@@ -237,7 +238,7 @@ export async function prepareMusicBrainzProposalDependencies(
 		bytes: Uint8Array;
 	},
 ) {
-	const afterPosition = z.number().int().min(0).max(4096).parse(input.afterPosition ?? 0);
+	const afterPosition = z.number().int().min(0).max(MUSIC_SOURCE_DEPENDENCY_LIMIT).parse(input.afterPosition ?? 0);
 	if (input.proposalId === null && !input.sourcePage) throw new TypeError("Unscoped dependency preparation requires an admitted source page");
 	const authority = currentParticipationAuthority();
 	if (
@@ -265,14 +266,14 @@ export async function prepareMusicBrainzProposalDependencies(
 		const plan = planMusicBrainzDependencies(
 			observation.record.objectType,
 			JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(input.bytes)),
-			input.sourcePage ? 4096 : 128,
+			input.sourcePage ? MUSIC_SOURCE_DEPENDENCY_LIMIT : 128,
 		);
 		for (const item of plan)
 			if (observation.referenceAt(item.path).externalId !== sourceKey(item).externalId)
 				throw new TypeError("MusicBrainz dependency identity differs from archived evidence");
 		const prepared = [];
 		for (const [offset, item] of plan.slice(afterPosition, afterPosition + 128).entries()) {
-			const position = afterPosition + offset + (input.purpose === "previous-for-withdrawal" ? 4096 : 0);
+			const position = afterPosition + offset + (input.purpose === "previous-for-withdrawal" ? MUSIC_SOURCE_DEPENDENCY_LIMIT : 0);
 			const path = item.path.slice(0, -3);
 			switch (item.kind) {
 				case "relation":

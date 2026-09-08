@@ -1,3 +1,4 @@
+import { withPreparedMusicBrainzRecordings } from "./musicbrainz-reference-cache";
 import { isDeepStrictEqual } from "node:util";
 import { applyMusicBrainzRelationDelta } from "./musicbrainz-relation-delta";
 import { applyCatalogSourceIdentifierDelta } from "./source-identifier-delta";
@@ -84,6 +85,9 @@ export function musicBrainzReleaseNativeWriter(
 			)
 				throw new TypeError("Release document differs from its archived source key");
 			preflightMusicBrainzReleaseDelta(previous, incoming);
+			const priorRecording = new Map(previous.media.flatMap((medium, index) => tracks(medium, index).map((entry) => [entry.track.id, entry.track.recording.id] as const)));
+			const changedRecordings = incoming.media.flatMap((medium, index) => tracks(medium, index).flatMap((entry) => priorRecording.get(entry.track.id) !== entry.track.recording.id ? [entry.track.recording.id] : []));
+			return withPreparedMusicBrainzRecordings(tx, context.actor, changedRecordings, async () => {
 			const { oldAt, recoverAt, put, finish } = await prepareMusicSourceProjection(tx, {
 				...context,
 				previousSnapshotId: context.previousSnapshotId,
@@ -448,5 +452,6 @@ export function musicBrainzReleaseNativeWriter(
 					...relations.changes,
 				],
 			};
+			});
 		});
 }

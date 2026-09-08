@@ -1,3 +1,4 @@
+import { cachedMusicBrainzRecording } from "./musicbrainz-reference-cache";
 import { catalogSourceSupportColumns } from "./source-support";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
@@ -37,6 +38,8 @@ export async function bindReferencedSourceIdentity(
 	const evidence = requireCatalogSourceReferenceEvidence(input.evidence);
 	if (evidence.source !== input.source || evidence.externalId !== input.externalId)
 		throw new TypeError("Source reference identity differs from its recorded evidence");
+	const cached = cachedMusicBrainzRecording(tx, actor, input);
+	if (cached) return cached;
 	const key = {
 		source: input.source,
 		objectType: input.objectType,

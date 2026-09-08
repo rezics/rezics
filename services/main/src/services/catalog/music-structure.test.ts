@@ -1,3 +1,4 @@
+import { MUSIC_SOURCE_COMPONENT_LIMIT } from "../database/schema/catalog-source-limits";
 import { describe, expect, test } from "bun:test";
 import {
 	MusicComponentBatchSchema,
@@ -12,7 +13,7 @@ const id = "11111111-1111-4111-8111-111111111111";
 const history = "22222222-2222-4222-8222-222222222222";
 describe("native music exact structural contracts", () => {
 	test("source publication validates complete reorder sets without widening manual requests", () => {
-		const operations = Array.from({ length: 2048 }, () => ({ component: "music_track_occurrence" as const, componentKey: crypto.randomUUID(), action: "remove" as const, expectedRevisionId: history }));
+		const operations = Array.from({ length: MUSIC_SOURCE_COMPONENT_LIMIT }, () => ({ component: "music_track_occurrence" as const, componentKey: crypto.randomUUID(), action: "remove" as const, expectedRevisionId: history }));
 		expect(MusicComponentBatchSchema.safeParse(operations).success).toBe(false);
 		expect(MusicSourceComponentBatchSchema.safeParse(operations).success).toBe(true);
 		expect(MusicSourceComponentBatchSchema.safeParse([...operations, { ...operations[0]!, componentKey: crypto.randomUUID() }]).success).toBe(false);

@@ -126,7 +126,7 @@ export const CatalogSourceNativeChangesSchema = z
 	.superRefine((changes, ctx) => {
 		const music = changes.filter((change) => change.kind === "music-component");
 		if (music.length > MUSIC_SOURCE_COMPONENT_LIMIT || changes.length - music.length > SOURCE_ANCILLARY_CHANGE_LIMIT ||
-			(music.length > 128 && (new Set(changes.map((change) => change.ownerId)).size !== 1 || changes.some((change) => change.kind !== "music-component" && (!("owner" in change) || change.owner !== "music" || !["catalog-name", "catalog-name-authority", "catalog-identifier", "catalog-semantic"].includes(change.kind))))))
+			(changes.length > 128 && (new Set(changes.map((change) => change.ownerId)).size !== 1 || changes.some((change) => change.kind !== "music-component" && (!("owner" in change) || change.owner !== "music" || !["catalog-name", "catalog-name-authority", "catalog-identifier", "catalog-semantic"].includes(change.kind))))))
 			ctx.addIssue({ code: "custom", message: "Source application exceeds its owner-local publication budget" });
 		const seen = new Set<string>();
 		for (const [index, change] of changes.entries()) {

@@ -1,4 +1,5 @@
-import { MUSIC_SOURCE_OCCURRENCE_LIMIT } from "../database/schema/catalog-source-limits";
+import { isDeepStrictEqual } from "node:util";
+import { MUSIC_SOURCE_OCCURRENCE_LIMIT, MUSIC_SOURCE_AUXILIARY_ROW_LIMIT } from "../database/schema/catalog-source-limits";
 import type { MusicBrainzRelease } from "./musicbrainz";
 
 type Medium = MusicBrainzRelease["media"][number];
@@ -26,29 +27,22 @@ export function correlateMusicBrainzMedia(
 	incoming: MusicBrainzRelease,
 ) {
 	const used = new Set<number>();
+	const byId = new Map<string, number[]>(), byTrack = new Map<string, Set<number>>(), byOccurrence = new Map<string, number[]>();
+	const occurrenceKey = (medium: Medium) => JSON.stringify({ position: medium.position, title: medium.title, formatId: medium["format-id"], format: medium.format });
+	for (const [index, medium] of previous.media.entries()) {
+		if (medium.id) { const matches = byId.get(medium.id) ?? []; matches.push(index); byId.set(medium.id, matches); }
+		else { const key = occurrenceKey(medium), matches = byOccurrence.get(key) ?? []; matches.push(index); byOccurrence.set(key, matches); }
+		for (const entry of tracks(medium, index)) { const matches = byTrack.get(entry.track.id) ?? new Set<number>(); matches.add(index); byTrack.set(entry.track.id, matches); }
+	}
 	return incoming.media.map((medium, index) => {
-		const ids = new Set(tracks(medium, index).map((entry) => entry.track.id));
-		const candidates = previous.media.flatMap((old, oldIndex) =>
-			(medium.id && old.id === medium.id) ||
-			tracks(old, oldIndex).some((entry) => ids.has(entry.track.id))
-				? [oldIndex]
-				: [],
-		);
+		const matched = new Set(medium.id ? byId.get(medium.id) ?? [] : []);
+		for (const entry of tracks(medium, index)) for (const oldIndex of byTrack.get(entry.track.id) ?? []) matched.add(oldIndex);
+		const candidates = [...matched];
 		if (candidates.length > 1)
 			throw new TypeError("Medium merge requires an explicit reviewed structural mapping");
 		let match = candidates[0];
 		if (match === undefined) {
-			const sameOccurrence = previous.media.flatMap((old, oldIndex) =>
-				!used.has(oldIndex) &&
-				!medium.id &&
-				!old.id &&
-				old.position === medium.position &&
-				old.title === medium.title &&
-				old["format-id"] === medium["format-id"] &&
-				old.format === medium.format
-					? [oldIndex]
-					: [],
-			);
+			const sameOccurrence = medium.id ? [] : (byOccurrence.get(occurrenceKey(medium)) ?? []).filter((oldIndex) => !used.has(oldIndex));
 			match = sameOccurrence.length === 1 ? sameOccurrence[0] : undefined;
 		}
 		if (match !== undefined && used.has(match))
@@ -81,4 +75,30 @@ export function preflightMusicBrainzReleaseDelta(
 		if (new Set(ids).size !== ids.length)
 			throw new TypeError("Duplicate MusicBrainz track identity in one release");
 	}
+	if (musicBrainzReleaseAuxiliaryRows(previous, incoming) > MUSIC_SOURCE_AUXILIARY_ROW_LIMIT) throw new RangeError("Music release auxiliary writes exceed the publication capacity");
+}
+
+/** @internal Count new credit-fragment rows and TOC offsets separately from structural mutations. */
+export function musicBrainzReleaseAuxiliaryRows(previous: MusicBrainzRelease | null, incoming: MusicBrainzRelease) {
+	let count = 0;
+	const creditSignatures = new Set<string>();
+	const credit = (before: MusicBrainzRelease["artist-credit"], after: MusicBrainzRelease["artist-credit"]) => {
+		if (!after?.length || isDeepStrictEqual(before, after)) return;
+		const signature = JSON.stringify(after.map((member) => [member.artist.id, member.name, member.joinphrase ?? ""]));
+		if (!creditSignatures.has(signature)) { creditSignatures.add(signature); count += 2 + after.length; }
+	};
+	credit(previous?.["artist-credit"], incoming["artist-credit"]);
+	const oldTracks = new Map(previous?.media.flatMap((medium, index) => tracks(medium, index).map((entry) => [entry.track.id, entry.track] as const)) ?? []);
+	const correspondence = previous ? correlateMusicBrainzMedia(previous, incoming) : incoming.media.map(() => null);
+	for (const [index, medium] of incoming.media.entries()) {
+		for (const entry of tracks(medium, index)) credit(oldTracks.get(entry.track.id)?.["artist-credit"], entry.track["artist-credit"]);
+		const oldIndex = correspondence[index];
+		const oldDiscs = oldIndex == null ? [] : previous?.media[oldIndex]?.discs ?? [];
+		const claimed = new Set<number>();
+		for (const disc of medium.discs ?? []) {
+			const match = oldDiscs.findIndex((candidate, candidateIndex) => !claimed.has(candidateIndex) && isDeepStrictEqual(candidate, disc));
+			if (match >= 0) claimed.add(match); else count += 1 + disc.offsets.length;
+		}
+	}
+	return count;
 }
