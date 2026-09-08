@@ -1,5 +1,6 @@
 "use client";
 
+import { UnitOwnerValues, type UnitOwner } from "@rezics/reference";
 import { useFilter, useListCollection } from "@ark-ui/react";
 import { useEffect, useState, type ReactNode } from "react";
 
@@ -22,7 +23,8 @@ import {
 export interface EntityPickerValue {
 	readonly id: string;
 	readonly label: string;
-	readonly kind?: string;
+	readonly owner?: UnitOwner;
+	readonly shape?: string;
 	readonly avatar?: import("@rezics/avatar").PresentedAvatar | null;
 }
 
@@ -36,8 +38,8 @@ export function EntityPicker({
 	ariaLabel,
 	excludedIds,
 	index,
-	kind,
-	kinds,
+	owners,
+	shapes,
 	invalid,
 	maxLength,
 	placeholder,
@@ -58,8 +60,8 @@ export function EntityPicker({
 	 */
 	excludedIds?: ReadonlySet<string>;
 	index: string;
-	kind?: string;
-	kinds?: readonly string[];
+	owners?: readonly UnitOwner[];
+	shapes?: readonly string[];
 	invalid?: boolean;
 	maxLength?: number;
 	placeholder: string;
@@ -101,8 +103,8 @@ export function EntityPicker({
 		status: "idle",
 	});
 	const [open, setOpen] = useState(false);
-	const allowedKinds = kinds ?? (kind ? [kind] : undefined);
-	const allowedKindsKey = allowedKinds?.join("\u0000");
+	const ownersKey = owners?.join("\u0000");
+	const shapesKey = shapes?.join("\u0000");
 
 	useEffect(() => {
 		const query = inputValue.trim();
@@ -120,16 +122,19 @@ export function EntityPicker({
 			() => {
 				const request = new AbortController();
 				controller = request;
-				const requestedKinds = allowedKindsKey?.split("\u0000");
-				void searchEntities(index, query, request.signal, { kinds: requestedKinds }).then(
+				const requestedOwners = ownersKey ? UnitOwnerValues.filter((owner) => ownersKey.split("\u0000").includes(owner)) : undefined;
+const requestedShapes = shapesKey?.split("\u0000");
+				void searchEntities(index, query, request.signal, { owners: requestedOwners, shapes: requestedShapes }).then(
 					(nextHits) => {
 						if (request.signal.aborted) return;
-						const allowed = allowedKindsKey ? new Set(allowedKindsKey.split("\u0000")) : undefined;
+						const allowedOwners = ownersKey ? new Set(ownersKey.split("\u0000")) : undefined;
+const allowedShapes = shapesKey ? new Set(shapesKey.split("\u0000")) : undefined;
 						set(
 							nextHits.filter(
 								(hit) =>
 									!excludedIds?.has(hit.id) &&
-									(!allowed || (hit.kind !== undefined && allowed.has(hit.kind))),
+									(!allowedOwners || (hit.owner !== undefined && allowedOwners.has(hit.owner))) &&
+(!allowedShapes || (hit.shape !== undefined && allowedShapes.has(hit.shape))),
 							),
 						);
 						setSearchResolution({ status: "ready", query });
@@ -148,7 +153,7 @@ export function EntityPicker({
 			window.clearTimeout(timer);
 			controller?.abort();
 		};
-	}, [allowedKindsKey, excludedIds, index, inputValue, open, searchEntities, searchOnOpen, set]);
+	}, [ownersKey, shapesKey, excludedIds, index, inputValue, open, searchEntities, searchOnOpen, set]);
 
 	useEffect(() => {
 		setInputValue(value?.label ?? "");

@@ -13,7 +13,8 @@ export function createUnitMentionResolver(
 		return data.items.map((item) => ({
 			id: item.id,
 			label: item.title ?? item.id,
-			kind: item.kind,
+			owner: item.owner,
+shape: item.shape,
 			avatar: item.avatar,
 		}));
 	};

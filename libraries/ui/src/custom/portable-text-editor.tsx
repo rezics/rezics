@@ -505,7 +505,7 @@ function SlashCommandEditable({
 					(items) => {
 						if (controller.signal.aborted) return;
 						setHits(
-							activeSlash.prefix === "z" ? items.filter((item) => item.kind === "zone") : items,
+							activeSlash.prefix === "z" ? items.filter((item) => item.owner === "zone") : items,
 						);
 					},
 					() => {

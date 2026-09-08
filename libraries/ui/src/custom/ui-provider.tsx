@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, type ReactNode } from "react";
+import type { UnitOwner } from "@rezics/reference";
 import type { PresentedAvatar } from "@rezics/avatar";
 
 export interface UiMessages {
@@ -65,16 +66,19 @@ export type UiMessagesInput = Omit<Partial<UiMessages>, "editor"> & {
 export interface EntityPickerHit {
 	id: string;
 	label: string;
-	kind?: string;
+	owner?: UnitOwner;
+	shape?: string;
 	avatar?: PresentedAvatar | null;
 }
 
 export interface UnitMentionPresentation extends EntityPickerHit {
-	kind: string;
+	owner: UnitOwner;
+	shape: string;
 }
 
 export interface EntitySearchOptions {
-	readonly kinds?: readonly string[];
+	readonly owners?: readonly UnitOwner[];
+	readonly shapes?: readonly string[];
 	readonly creditAttributionSearch?: "direct" | "public";
 	/** Restrict Tag results to Tags explicitly explained by this Realm. */
 	readonly realmTagContextRealmId?: string;

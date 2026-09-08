@@ -1,5 +1,6 @@
 "use client";
 
+import type { UnitOwner } from "@rezics/reference";
 import { XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -47,12 +48,13 @@ function useResolvedUnitValues(unitIds: readonly string[]): readonly EntityPicke
  * @alpha
  * @remarks
  * The picker resolves persisted IDs back to presentations and may restrict results to specific
- * Unit kinds. Exact UUID lookup is supplied by the application's entity-search provider.
+ * resource owners and shapes. Exact UUID lookup is supplied by the application's entity-search provider.
  */
 export function UnitPicker({
 	ariaLabel,
 	index = "units",
-	kinds,
+	owners,
+	shapes,
 	name,
 	onValueChange,
 	placeholder,
@@ -61,7 +63,8 @@ export function UnitPicker({
 }: {
 	readonly ariaLabel: string;
 	readonly index?: string;
-	readonly kinds?: readonly string[];
+	readonly owners?: readonly UnitOwner[];
+	readonly shapes?: readonly string[];
 	readonly name?: string;
 	readonly onValueChange: (value: string | undefined) => void;
 	readonly placeholder: string;
@@ -81,7 +84,7 @@ export function UnitPicker({
 			<EntityPicker
 				ariaLabel={ariaLabel}
 				index={index}
-				kinds={kinds}
+				owners={owners} shapes={shapes}
 				onChange={(next) => {
 					setSelected({ sourceId: next.id, value: next });
 					onValueChange(next.id);
@@ -108,7 +111,8 @@ export function UnitPicker({
 export function UnitMultiPicker({
 	ariaLabel,
 	index = "units",
-	kinds,
+	owners,
+	shapes,
 	maxValues,
 	name,
 	onValuesChange,
@@ -118,7 +122,8 @@ export function UnitMultiPicker({
 }: {
 	readonly ariaLabel: string;
 	readonly index?: string;
-	readonly kinds?: readonly string[];
+	readonly owners?: readonly UnitOwner[];
+	readonly shapes?: readonly string[];
 	readonly maxValues?: number;
 	readonly name?: string;
 	readonly onValuesChange: (values: readonly string[]) => void;
@@ -166,7 +171,7 @@ export function UnitMultiPicker({
 					ariaLabel={ariaLabel}
 					index={index}
 					key={values.join("\u0000")}
-					kinds={kinds}
+					owners={owners} shapes={shapes}
 					onChange={(next) => {
 						if (!values.includes(next.id)) onValuesChange([...values, next.id]);
 					}}
