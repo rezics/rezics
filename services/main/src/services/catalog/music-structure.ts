@@ -236,7 +236,10 @@ export async function mutateMusicComponents(
 					item.operation.component === component &&
 					item.head &&
 					item.head.operation !== "DELETE" &&
-					!item.remove,
+					!item.remove &&
+					(item.head.value.position !== item.row.position ||
+						(component === "music_track_occurrence" &&
+							item.head.value.medium_id !== item.row.medium_id)),
 			);
 			if (!moving.length) continue;
 			const groups = new Map<string, typeof moving>();

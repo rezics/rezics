@@ -2,6 +2,8 @@ import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import type { DatabaseTransaction } from "../database";
+import { musicIdentity } from "../database/schema/catalog-identity";
+import { readCatalogAuthorityScope, catalogIdentityReadPredicate } from "../participation/policy";
 import { musicCreditReferenceHeads, requireMusicCreditAccess } from "./music-credit-access";
 import { assertMusicMediumFormatCompatibility } from "./music-medium-attributes";
 import { assertCatalogDefinitionTarget } from "./definitions";
@@ -176,8 +178,20 @@ export async function readMusicReleaseMetadata(
 		.where(eq(musicRelease.id, release.id))
 		.limit(1);
 	if (!row) throw new CatalogReferenceNotFound("Music release is missing");
-	if (row.releaseGroupId)
-		await assertReadableTargets(tx, [{ owner: "music", id: row.releaseGroupId }], actor);
+	if (row.releaseGroupId) {
+		const scope = await readCatalogAuthorityScope(tx, actor);
+		const [visible] = await tx
+			.select({ id: musicIdentity.id })
+			.from(musicIdentity)
+			.where(
+				and(
+					eq(musicIdentity.id, row.releaseGroupId),
+					catalogIdentityReadPredicate(scope, "music", musicIdentity),
+				),
+			)
+			.limit(1);
+		if (!visible) row.releaseGroupId = null;
+	}
 	await requirePresentationCredits(tx, actor, [row.artistCreditId], {
 		reference: release,
 		component: "music_release",

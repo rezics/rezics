@@ -14,6 +14,7 @@ import { issueParticipationGrant } from "../src/services/participation/commands"
 import {
 	createMusicRelease,
 	createRecording,
+	createReleaseGroup,
 	beginMusicCredit,
 	appendMusicCreditMembers,
 	sealMusicCredit,
@@ -31,6 +32,11 @@ import {
 	mutateMusicComponents,
 } from "../src/services/catalog/music-structure";
 import { loadCatalogIdentity } from "../src/services/catalog/storage";
+import {
+	readMusicDetail,
+	pageMusicHistory,
+	patchMusicTrack,
+} from "../src/services/catalog/music-api";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString || process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
@@ -70,6 +76,10 @@ try {
 				const otherRecording = await createRecording(tx, account.id, {
 					name: { value: "Another private recording", languageTag: "en" },
 				});
+				const privateGroup = await createReleaseGroup(tx, account.id, {
+					value: "Private release family",
+					languageTag: "en",
+				});
 				const root = { owner: album.owner, id: album.id },
 					foreign = { owner: recording.owner, id: recording.id };
 				const ownCredit = await beginMusicCredit(tx, account.id, "Visible credit", root);
@@ -85,7 +95,7 @@ try {
 				await sealMusicCredit(tx, account.id, privateCredit, 1);
 				await tx
 					.update(musicRelease)
-					.set({ artistCreditId: ownCredit })
+					.set({ artistCreditId: ownCredit, releaseGroupId: privateGroup.id })
 					.where(eq(musicRelease.id, root.id));
 				const medium = await addMusicMedium(tx, root, account.id, album.revision, { position: 1 });
 				await addMusicTrack(tx, root, account.id, medium.revision, {
@@ -152,6 +162,12 @@ try {
 					);
 					checks++;
 					const tracks = await readMusicTracks(tx, root, account.id, medium.id);
+					const detail = await readMusicDetail(tx, root.id, account.id);
+					assert.equal(detail.kind, "release");
+					assert.equal(detail.canEdit, true);
+					assert.ok(detail.kind === "release");
+					assert.equal(detail.metadata.releaseGroupId, null);
+					checks += 3;
 					assert.equal(tracks[0]?.recordingId, null);
 					checks++;
 					assert.equal(tracks[0]?.artistCreditId, ownCredit);
@@ -166,15 +182,17 @@ try {
 					);
 					assert.ok(head);
 					const current = await loadCatalogIdentity(tx, root, account.id, true);
-					const changed = await mutateMusicComponents(tx, root, account.id, current.revision, [
-						{
-							action: "put",
-							component: "music_track_occurrence",
-							componentKey: track.id,
-							expectedRevisionId: head.id,
-							value: { ...head.value, name: "Updated presentation" },
-						},
-					]);
+					const changed = await patchMusicTrack(tx, root.id, track.id, account.id, {
+						expectedRevision: current.revision,
+						expectedHeadId: head.id,
+						value: { name: "Updated presentation" },
+					});
+					const history = await pageMusicHistory(tx, root.id, account.id, {
+						component: "music_track_occurrence",
+						componentKey: track.id,
+					});
+					assert.equal(history.items.length, 2);
+					checks++;
 					const changedHead = await readMusicComponentHead(
 						tx,
 						root.id,
@@ -192,7 +210,7 @@ try {
 								{
 									action: "put",
 									component: "music_track_occurrence",
-								componentKey: track.id,
+									componentKey: track.id,
 									expectedRevisionId: changedHead.id,
 									value: { ...changedHead.value, recording_id: otherRecording.id },
 								},
@@ -240,6 +258,9 @@ try {
 					.set({ status: "published", visibility: "public" })
 					.where(eq(musicIdentity.id, root.id));
 				assert.equal((await readMusicReleaseMetadata(tx, root, null)).artistCreditId, ownCredit);
+				checks++;
+				const publicDetail = await readMusicDetail(tx, root.id, null);
+				assert.equal(publicDetail.canEdit, false);
 				checks++;
 				const [unchanged] = await tx
 					.select({ count: musicArtistCredit.memberCount })
