@@ -445,8 +445,17 @@ export const ContentReviewCaseResponse = t.Object({
 	assignedProfileId: t.Nullable(Uuid),
 	duplicateOfCaseId: t.Nullable(Uuid),
 	notes: t.Array(GovernanceNoteResponse),
+	notesNextCursor: t.Nullable(Uuid),
 	createdAt: DateTime,
 	updatedAt: DateTime,
+});
+export const GovernanceCaseNotesQuery = t.Object({
+	cursor: t.Optional(Uuid),
+	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+}, { additionalProperties: false });
+export const GovernanceCaseNotesResponse = t.Object({
+	items: t.Array(GovernanceNoteResponse, { maxItems: 50 }),
+	nextCursor: t.Nullable(Uuid),
 });
 export const ContentReviewCaseListResponse = t.Object({
 	items: t.Array(ContentReviewCaseResponse),

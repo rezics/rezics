@@ -739,7 +739,10 @@ export const governancePostBinding = pgTable(
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
-		index("governance_post_binding_subject_idx").on(table.subjectKind, table.subjectId),
+		index("governance_post_binding_subject_idx").on(table.subjectKind, table.subjectId, table.postId.desc()),
+		uniqueIndex("governance_post_binding_action_role_key")
+			.on(table.subjectKind, table.subjectId, table.role)
+			.where(sql`${table.subjectKind} <> 'content_review_case'`),
 		index("governance_post_binding_subject_role_idx").on(
 			table.subjectKind,
 			table.subjectId,

@@ -27,7 +27,8 @@ import {
 import {
 	createGovernanceNotePost,
 	getGovernanceNote,
-	listGovernanceNotes,
+	pageGovernanceCaseNotes,
+	previewGovernanceCaseNotes,
 } from "../../governance/note-service";
 import { createNotification } from "../../notifications/service";
 import { recordUnitRevision } from "../../units/history";
@@ -59,6 +60,8 @@ import {
 	ContentReviewCaseListResponse,
 	ContentReviewCaseParams,
 	ContentReviewCaseResponse,
+	GovernanceCaseNotesQuery,
+	GovernanceCaseNotesResponse,
 	CreateAccountEnforcementBody,
 	CreateContentGovernanceActionBody,
 	EnforcementResponse,
@@ -173,17 +176,12 @@ async function presentContentReviewCases<T extends PresentableCase>(
 	tx: DatabaseTransaction,
 	rows: readonly T[],
 ) {
-	const caseNotes = await listGovernanceNotes(tx, {
-		subjectKind: "content_review_case",
-		subjectIds: rows.map((row) => row.id),
-		roles: ["internal_note"],
-	});
+	const caseNotes = await previewGovernanceCaseNotes(tx, rows.map(row => row.id));
 	return rows.map((row) => ({
 		...row,
-		notes: caseNotes
-			.filter((note) => note.subjectId === row.id && note.role === "internal_note")
-			.sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime())
+		notes: (caseNotes.get(row.id)?.items ?? [])
 			.map(({ subjectId: _subjectId, ...note }) => note),
+		notesNextCursor: caseNotes.get(row.id)?.nextCursor ?? null,
 	}));
 }
 
@@ -309,6 +307,28 @@ export default new Elysia({ prefix: "/governance" })
 			const { subjectId: _subjectId, ...response } = note;
 			return response;
 		},
+	)
+	.get(
+		"/content-review/cases/:caseId/notes",
+		{
+			access: "session-only",
+			params: ContentReviewCaseParams,
+			query: GovernanceCaseNotesQuery,
+			response: {
+				[StatusCodes.OK]: GovernanceCaseNotesResponse,
+				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ContentReviewCaseNotFound"]),
+			},
+			detail: { operationId: "listContentReviewCaseNotes", summary: "List content review case notes", tags: ["Governance"] },
+		},
+		async ({ authorization, params, query }) => database.transaction(async tx => {
+			const [row] = await tx.select(caseSelection).from(contentReviewCase)
+				.where(eq(contentReviewCase.id, params.caseId)).limit(1);
+			if (!row) throw new ModerationCaseNotFound();
+			await ensureCaseAccess(authorization, row);
+			const page = await pageGovernanceCaseNotes(tx, { caseId: row.id, ...query });
+			return { ...page, items: page.items.map(({ subjectId: _subjectId, ...note }) => note) };
+		}),
 	)
 	.patch(
 		"/notes/:postId",
