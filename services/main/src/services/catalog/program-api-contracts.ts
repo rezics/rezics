@@ -11,6 +11,7 @@ export const ProgramComponentSchema = z.enum([
 	"program_episode_occurrence",
 ]);
 export const ProgramDetailsSchema = z.strictObject({
+	canEdit: z.boolean(),
 	id: z.uuid(),
 	revision,
 	historyId: z.uuid(),

@@ -1,6 +1,7 @@
 import { and, eq, gt, lt, desc, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
+import { canAccessCatalog } from "../participation/policy";
 import {
 	softwareComponentRevision,
 	softwareParticipationContext,
@@ -88,6 +89,7 @@ export async function readSoftwareApiDetails(
 	const result = await readSoftwareDetails(tx, ref(id), actor);
 	if (!result.value) throw new CatalogReferenceNotFound("Software details are not initialized");
 	return SoftwareDetailSchema.parse({
+		canEdit: await canAccessCatalog(tx, ref(id), actor, result.identity.createdByAuthUserId, true),
 		id,
 		revision: result.identity.revision,
 		contentId: result.kind === "version" ? result.value.contentId : null,

@@ -15,6 +15,7 @@ export const SoftwareDetailValueSchema = z.discriminatedUnion("kind", [
 	z.strictObject({ kind: z.literal("release"), value: SoftwareReleaseDetailsSchema }),
 ]);
 export const SoftwareDetailSchema = z.strictObject({
+	canEdit: z.boolean(),
 	id: z.uuid(),
 	revision: NativeRevisionSchema,
 	contentId: z.uuid().nullable(),
