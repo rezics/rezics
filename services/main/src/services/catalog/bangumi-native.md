@@ -1,7 +1,8 @@
 # Bangumi native update packet
 
 `createBangumiNativeWriter` accepts immutable before/after archived documents for
-subject, person, character and episode records. Both receipt contract and bytes
+subject, person, character and episode records, plus all five Archive relation
+families when their reviewed native relation mapping is supplied. Both receipt contract and bytes
 are checked, and the callback verifies the exact proposal snapshot, previous
 snapshot, mapping version, owner and shape. It runs offline. A classification
 change requires reviewed correspondence rather than changing the native shape.
@@ -46,16 +47,29 @@ serialize under their existing binding/native-owner locks.
 Qualification: `check-bangumi-source-updates.ts` covers four families, two
 apply/withdraw cycles each, exact primary IDs, human alias preservation, native
 episode sort restoration and an independently authored episode number. The
-2026-09-08 run passed 188 SQL checks in a rolled-back transaction; the older DB62
+2026-09-08 run passed 313 SQL checks in a rolled-back transaction; the older DB62
 target needed only a transaction-local copy of the already corrected canonical
-structure occurrence guard. Five focused projection tests and eight existing
-record tests passed. Full backend TypeScript remains blocked by separately
+structure occurrence guard. Twenty-one focused projection, relation and shared fact-contract tests passed. Full backend TypeScript remains blocked by separately
 owned global Unit-consumer removal; this packet has no TypeScript diagnostics.
 
 Descriptions now use the provider-independent source fact journal, including
 exact source semantic IDs, updated fact heads and original fact restoration.
 
 Remaining work is explicit: entity profile interpretation, date/wiki
-native facts, relation/index/member update compensation, reviewed music and
-publishing grain refinement, source classification/NSFW updates, and broader provider property interpretation. The complete nine-family archive parser
-qualification does not establish those native update capabilities.
+native facts, API-only relationship/index/member update compensation, reviewed music and
+publishing grain refinement, source classification/NSFW updates, and broader
+provider property interpretation. The complete nine-family archive parser
+qualification does not establish those remaining semantic capabilities.
+
+The archive relation initializer now prepares/seals its native root correspondence.
+A reviewed mapping supplies the native predicate, participant roles and qualifier
+property revisions; missing mappings are rejected. Numeric/string/boolean context
+qualifiers remain typed native facts. Refresh reads the prior relation descriptor
+from immutable native history rather than resolving private old endpoints. Fact
+changes precede relation changes; withdrawal reverses that exact journal. This
+preserves relationship/qualifier semantic IDs across repeated update and
+compensation, including source cast order, staff episode text and contextual
+person/character credits. The five archive relationship families add 125 SQL
+assertions with two apply/withdraw cycles each to the prior 188-check fixture.
+This covers native execution for all nine archive families under selected source
+proposal grants, with human-maintained semantic mappings as an explicit input.

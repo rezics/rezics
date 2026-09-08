@@ -1,3 +1,9 @@
+import {
+	createBangumiRelationNativeWriter,
+	prepareBangumiRelationProposalDependencies,
+	BangumiNativeRelationFamilies,
+} from "./bangumi-relation-native";
+import { BangumiRelationMappingSchema } from "./bangumi-relations";
 import { and, eq, isNotNull } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
@@ -43,6 +49,13 @@ export async function prepareBangumiProposalDependencies(
 	actor: string,
 	input: Snapshot & { sourceRecordId: string; proposalId: string; before?: Snapshot | null },
 ) {
+	if (BangumiNativeRelationFamilies.some((kind) => kind === input.receipt.key.objectType))
+		return prepareBangumiRelationProposalDependencies(tx, actor, {
+			sourceRecordId: input.sourceRecordId,
+			proposalId: input.proposalId,
+			after: input,
+			before: input.before ?? null,
+		});
 	const incoming = prepareBangumiNativeRecord(input.receipt, input.bytes);
 	const snapshots: { snapshot: Snapshot; purpose: "incoming" | "previous-for-withdrawal" }[] = [
 		{ snapshot: input, purpose: "incoming" },
@@ -193,7 +206,19 @@ export async function initializeBangumiNativeOccurrences(
 export function createBangumiNativeWriter(input: {
 	before: Snapshot | null;
 	after: Snapshot;
+	relationMapping?: z.input<typeof BangumiRelationMappingSchema>;
 }): CatalogSourceNativeWriter {
+	if (BangumiNativeRelationFamilies.some((kind) => kind === input.after.receipt.key.objectType)) {
+		if (!input.relationMapping)
+			throw new TypeError(
+				"Bangumi relations require reviewed native predicate, role and qualifier definitions",
+			);
+		return createBangumiRelationNativeWriter({
+			after: input.after,
+			before: input.before,
+			mapping: input.relationMapping,
+		});
+	}
 	const prepare = (snapshot: Snapshot) => {
 		z.uuid().parse(snapshot.snapshotId);
 		const bytes = new Uint8Array(snapshot.bytes);

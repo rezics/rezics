@@ -1,3 +1,5 @@
+import { BangumiNativeRelationFamilies } from "../src/services/catalog/bangumi-relation-native";
+import { checkBangumiNativeRelations } from "./bangumi-relation-native-fixture";
 import {
 	currentParticipationAuthority,
 	runWithParticipationAuthority,
@@ -457,6 +459,7 @@ try {
 					);
 					checks++;
 				}
+				checks += await checkBangumiNativeRelations(tx, account.id);
 			});
 			throw rollback;
 		});
@@ -464,7 +467,12 @@ try {
 		if (error !== rollback) throw error;
 	}
 	console.log(
-		JSON.stringify({ checks, families: cases.map((item) => item.kind), cycles: 2, rollback: true }),
+		JSON.stringify({
+			checks,
+			families: [...new Set(cases.map((item) => item.kind)), ...BangumiNativeRelationFamilies],
+			cycles: 2,
+			rollback: true,
+		}),
 	);
 } finally {
 	await pool.end();

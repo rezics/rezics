@@ -1,19 +1,8 @@
-import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { CatalogFactTables } from "../database/schema/catalog-facts";
-import { type CatalogReference } from "./contracts";
+import type { CatalogReference } from "./contracts";
 import { BangumiArchiveRelationSchema, bangumiRelationKey } from "./bangumi-records";
-import { BangumiArchiveContractSha256, resolveBangumiDependency } from "./bangumi-adoption";
-import {
-	createCatalogRelation,
-	appendCatalogFactNodes,
-	beginCatalogFact,
-	loadCatalogIdentity,
-	sealCatalogFact,
-} from "./storage";
-import { type CatalogSourceReceipt, recordCatalogSourceDocument } from "./source-observations";
-import { catalogValueNodes } from "./value-nodes";
+import type { CatalogSourceReceipt } from "./source-observations";
 
 /** A reviewed mapping references native semantic definitions rather than creating a provider ontology. @internal */
 export const BangumiRelationMappingSchema = z.strictObject({
@@ -123,84 +112,14 @@ export async function adoptBangumiArchiveRelation(
 	bytes: Uint8Array,
 	mappingInput: z.input<typeof BangumiRelationMappingSchema>,
 ) {
-	if (
-		bytes.byteLength > 512_000 ||
-		createHash("sha256").update(bytes).digest("hex") !== receipt.contentSha256 ||
-		receipt.contractSha256 !== BangumiArchiveContractSha256 ||
-		receipt.key.source !== "bangumi"
-	)
-		throw new TypeError("Archive relationship differs from its reviewed receipt or byte budget");
-	const raw: unknown = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
-	const record = z.record(z.string(), z.unknown()).parse(raw);
-	const plan = planBangumiArchiveRelation(
-		BangumiArchiveRelationSchema.parse({ ...record, kind: receipt.key.objectType }),
+	const { initializeBangumiNativeRelation } = await import("./bangumi-relation-native");
+	return initializeBangumiNativeRelation(
+		tx,
+		reference,
+		actor,
+		expectedRevision,
+		receipt,
+		bytes,
+		mappingInput,
 	);
-	if (receipt.key.externalId !== bangumiRelationKey(plan.row))
-		throw new TypeError("Archive relationship tuple differs from its source key");
-	const mapping = BangumiRelationMappingSchema.parse(mappingInput);
-	const observation = await recordCatalogSourceDocument(tx, receipt, bytes);
-	const participants = [];
-	for (const participant of plan.participants) {
-		const roleRevisionId = mapping.roles[participant.role];
-		if (!roleRevisionId) throw new TypeError(`Missing reviewed role: ${participant.role}`);
-		participants.push({
-			roleRevisionId,
-			target: await resolveBangumiDependency(tx, actor, participant.objectType, participant.id),
-		});
-	}
-	const primary = participants[0]?.target;
-	if (!primary || primary.owner !== reference.owner || primary.id !== reference.id)
-		throw new TypeError("Relation owner differs from its source subject");
-	const identity = await loadCatalogIdentity(tx, reference, actor, true);
-	if (identity.revision !== expectedRevision) throw new Error("Catalog revision changed");
-	let revision = expectedRevision;
-	const qualifiers: { definitionRevisionId: string; valueFactId: string }[] = [];
-	for (const qualifier of plan.qualifiers) {
-		const definitionRevisionId = mapping.qualifiers[qualifier.key];
-		if (!definitionRevisionId) throw new TypeError(`Missing reviewed qualifier: ${qualifier.key}`);
-		const fact = await beginCatalogFact(tx, reference, actor, revision, definitionRevisionId);
-		const nodes = [...catalogValueNodes(qualifier.value)];
-		const appended = await appendCatalogFactNodes(
-			tx,
-			reference,
-			actor,
-			fact.revision,
-			fact.id,
-			-1,
-			nodes,
-		);
-		revision = (
-			await sealCatalogFact(
-				tx,
-				reference,
-				actor,
-				appended.revision,
-				fact.id,
-				appended.lastNodePosition,
-			)
-		).revision;
-		qualifiers.push({ definitionRevisionId, valueFactId: fact.id });
-		await tx.insert(CatalogFactTables[reference.owner].support).values({
-			ownerId: reference.id,
-			factId: fact.id,
-			sourceRecordId: observation.record.id,
-			snapshotId: observation.snapshot.id,
-			sourcePath: `/${qualifier.key}`,
-		});
-	}
-	const input = {
-		definitionRevisionId: mapping.predicateRevisionId,
-		participants,
-		qualifiers,
-		spoiler: plan.spoiler,
-	};
-	const relation = await createCatalogRelation(tx, reference, actor, revision, input);
-	await tx.insert(CatalogFactTables[reference.owner].support).values({
-		ownerId: reference.id,
-		relationId: relation.id,
-		sourceRecordId: observation.record.id,
-		snapshotId: observation.snapshot.id,
-		sourcePath: "/",
-	});
-	return relation;
 }
