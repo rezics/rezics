@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useApplicationRouter } from "@/features/application-shell/hooks/use-application-router";
 import type { CatalogReference } from "@rezics/reference";
 import {
@@ -8,6 +9,7 @@ import {
 	useReviseCatalogSourceBinding,
 	useIntakeCatalogSource,
 	useProposeCatalogSourceAdoption,
+	listCatalogSourceProposalsQueryKey,
 	type ListCatalogResourceSourceBindingsStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { Badge, Button, PageHeading, QueryFailure, QueryPending } from "@rezics/ui";
@@ -89,7 +91,8 @@ function SourceBinding({
 		[mode, setMode] = useState(binding.mode),
 		[reason, setReason] = useState(""),
 		[job, setJob] = useState<{ sourceRecordId: string; id: string } | null>(null);
-	const router = useApplicationRouter();
+	const router = useApplicationRouter(),
+		cache = useQueryClient();
 	const revise = useReviseCatalogSourceBinding(),
 		refresh = useIntakeCatalogSource(),
 		propose = useProposeCatalogSourceAdoption();
@@ -97,6 +100,9 @@ function SourceBinding({
 		type = sourceObjectType(binding.objectType),
 		body = provider ? sourceIntakeBody(provider, binding.objectType, binding.externalId) : null;
 	const path = { sourceRecordId: binding.sourceRecordId, mappingKey: binding.mappingKey };
+	function refreshHistory() {
+		void cache.invalidateQueries({ queryKey: listCatalogSourceProposalsQueryKey({ path }) });
+	}
 	const busy = revise.isPending || refresh.isPending || propose.isPending;
 	return (
 		<section className="grid gap-4 rounded-xl border p-5">
@@ -141,6 +147,7 @@ function SourceBinding({
 												);
 											}
 											onChanged();
+											refreshHistory();
 										})
 										.catch(() => undefined);
 								}}
@@ -163,6 +170,7 @@ function SourceBinding({
 										})
 										.then(() => {
 											setHistory(true);
+											refreshHistory();
 											onChanged();
 										})
 										.catch(() => undefined);

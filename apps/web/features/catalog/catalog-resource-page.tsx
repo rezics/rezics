@@ -37,6 +37,11 @@ export function CatalogResourcePage({ reference }: { reference: CatalogReference
 				) : null}
 			</div>
 			{session ? <PrivateFavoriteControl targetUnitId={reference.id} /> : null}
+			<Button asChild variant="outline">
+				<AppLink href={`/catalog/${reference.owner}/${reference.id}/facts`}>
+					{t.units.nativeSemantics.title}
+				</AppLink>
+			</Button>
 			{resource.data.canEdit ? (
 				<Button asChild variant="outline">
 					<AppLink href={`/catalog/${reference.owner}/${reference.id}/sources`}>
