@@ -23,6 +23,7 @@ import {
 } from "../database/schema/catalog-source";
 import { catalogSourceApplication } from "../database/schema/catalog-source-application";
 import { CatalogIdentityTables } from "../database/schema/catalog-identity";
+import { mergedCatalogReadPredicate } from "../catalog/merge-read";
 import { catalogReadRatingPredicate } from "../catalog/read-policy";
 
 /** @alpha Request and queued command identity, including the revision approved at admission. */
@@ -303,7 +304,7 @@ export function catalogIdentityReadPredicate(
 			? sql`false`
 			: eq(table.createdByAuthUserId, scope.creatorAuthUserId);
 	const granted = ids.length ? inArray(table.id, ids) : sql`false`;
-	return sql`${table.deletedAt} is null and ${catalogReadRatingPredicate(table.contentRating)} and ((${creator}) is true or (${granted}) is true or (${table.visibility} in ('public','unlisted') and ${table.status}='published' and ${table.moderationStatus}='approved'))`;
+	return sql`${table.deletedAt} is null and ${catalogReadRatingPredicate(table.contentRating)} and ((${creator}) is true or (${granted}) is true or (${table.visibility} in ('public','unlisted') and ${table.status}='published' and ${table.moderationStatus}='approved') or ${mergedCatalogReadPredicate(owner, table, scope)})`;
 }
 
 async function resolveCatalogAuthorityScope(

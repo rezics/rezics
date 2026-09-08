@@ -1,433 +1,827 @@
-import { and, asc, eq, inArray, lte, or, sql } from "drizzle-orm";
-
-import { recordAuditEvent } from "../../audit";
+import { and, eq, gt, inArray, lte, or, sql } from "drizzle-orm";
+import { z } from "zod";
+import { Authorization } from "../../authorization";
 import { database, type DatabaseTransaction } from "../../database";
-import { runVoteTransaction } from "../../database/vote-admission";
 import {
-	unit,
-	unitMergeGraphLock,
-	unitMergeOperation,
 	unitMergeRequest,
-	type UnitMergeGraphPlanV1,
-	type UnitMergeOperationPhase,
-} from "../../database/schema";
-import { isEntityMeasurementMergePhase } from "./entity-measurements";
-import { processUnitMergePhase } from "./phase-handlers";
-import { nextUnitMergePhase, UnitMergePolicy, unitMergeRetryDelayMilliseconds } from "./policy";
+	unitMergeOperation,
+	unitMergeGraphLock,
+	unitMergeRedirect,
+	unitMergeReconciliationItem,
+} from "../../database/schema/unit-merge";
+import { CatalogIdentityTables } from "../../database/schema/catalog-identity";
+import { CatalogNameTables } from "../../database/schema/catalog-names";
+import { CatalogFactTables } from "../../database/schema/catalog-facts";
+import {
+	catalogSourceMappingClaim,
+	catalogSourceBindingRevision,
+} from "../../database/schema/catalog-source";
+import {
+	ParticipationAuthoritySchema,
+	runWithParticipationAuthority,
+} from "../../participation/policy";
+import { withCatalogViewerPolicy } from "../../catalog/read-policy";
+import { addCatalogName } from "../../catalog/names";
+import { addCatalogIdentifier } from "../../catalog/identifiers";
+import { CatalogNameInputSchema } from "../../catalog/name-contracts";
+import {
+	reviseCatalogSourceBinding,
+	lockCatalogSourceBinding,
+} from "../../catalog/source-bindings";
+import { readUnitStateById } from "../query";
+import { nextUnitUpdatedAt } from "../update-values";
+import { buildUnitMergeManifest, assertMergeManifestFingerprint } from "./manifest";
+import { MergePlanSchema } from "./contracts";
+import { humanMergeAuthority } from "./service";
+import { UnitMergePolicy, nextUnitMergePhase, unitMergeRetryDelayMilliseconds } from "./policy";
+import { databaseSqlState } from "../../database/constraint";
+import { recordAuditEvent } from "../../audit";
 
-const MaximumStepsPerDispatch = 32;
-
-type ClaimedUnitMergeOperation = {
-	readonly id: string;
-	readonly requestId: string;
-	readonly sourceUnitId: string;
-	readonly targetUnitId: string;
-	readonly phase: UnitMergeOperationPhase;
-	readonly attemptCount: number;
-	readonly leaseToken: string;
-	readonly graphPlan: UnitMergeGraphPlanV1;
-};
-
+type Op = typeof unitMergeOperation.$inferSelect;
+type RequestRow = typeof unitMergeRequest.$inferSelect;
+type Item = typeof unitMergeReconciliationItem.$inferSelect;
+type ItemInsert = typeof unitMergeReconciliationItem.$inferInsert;
+class ReconciliationRequired extends Error {
+	constructor(readonly code: string) {
+		super(code);
+	}
+}
 export async function claimUnitMergeOperations(
 	now: Date,
-	limit = UnitMergePolicy.workerClaimBatchSize,
-): Promise<ClaimedUnitMergeOperation[]> {
+	limit = 4,
+	shards: readonly number[] = Array.from({ length: 64 }, (_, i) => i),
+) {
+	const count = z.number().int().min(1).max(4).parse(limit),
+		buckets = z
+			.array(z.number().int().min(0).max(63))
+			.min(1)
+			.max(64)
+			.parse([...new Set(shards)]);
 	return database.transaction(async (tx) => {
-		const candidates = await tx
+		const expired = await tx
 			.select({ id: unitMergeOperation.id })
 			.from(unitMergeOperation)
 			.where(
-				or(
-					and(
-						inArray(unitMergeOperation.state, ["pending", "retry_wait"]),
-						lte(unitMergeOperation.availableAt, now),
-					),
-					and(
-						eq(unitMergeOperation.state, "processing"),
-						lte(unitMergeOperation.leaseExpiresAt, now),
-					),
+				and(
+					inArray(unitMergeOperation.shard, buckets),
+					eq(unitMergeOperation.state, "processing"),
+					lte(unitMergeOperation.leaseExpiresAt, now),
 				),
 			)
-			.orderBy(asc(unitMergeOperation.availableAt), asc(unitMergeOperation.createdAt))
-			.limit(limit)
+			.orderBy(unitMergeOperation.leaseExpiresAt, unitMergeOperation.id)
+			.limit(count)
 			.for("update", { skipLocked: true });
-		const ids = candidates.map(({ id }) => id);
+		const pending =
+			expired.length < count
+				? await tx
+						.select({ id: unitMergeOperation.id })
+						.from(unitMergeOperation)
+						.where(
+							and(
+								inArray(unitMergeOperation.shard, buckets),
+								inArray(unitMergeOperation.state, ["pending", "retry_wait"]),
+								lte(unitMergeOperation.availableAt, now),
+							),
+						)
+						.orderBy(unitMergeOperation.availableAt, unitMergeOperation.id)
+						.limit(count - expired.length)
+						.for("update", { skipLocked: true })
+				: [];
+		const ids = [...expired, ...pending].map((row) => row.id);
 		if (!ids.length) return [];
-		const leaseExpiresAt = new Date(now.getTime() + UnitMergePolicy.workerLeaseDurationMs);
-		const claimed = await tx
+		return tx
 			.update(unitMergeOperation)
 			.set({
 				state: "processing",
 				leaseToken: sql`uuidv7()`,
-				leaseExpiresAt,
-				startedAt: sql`coalesce(${unitMergeOperation.startedAt}, ${now})`,
-				updatedAt: now,
+				leaseExpiresAt: new Date(now.getTime() + UnitMergePolicy.workerLeaseDurationMs),
+				startedAt: sql`coalesce(${unitMergeOperation.startedAt},${now})`,
 			})
 			.where(inArray(unitMergeOperation.id, ids))
-			.returning({
-				id: unitMergeOperation.id,
-				requestId: unitMergeOperation.requestId,
-				sourceUnitId: unitMergeOperation.sourceUnitId,
-				targetUnitId: unitMergeOperation.targetUnitId,
-				phase: unitMergeOperation.phase,
-				attemptCount: unitMergeOperation.attemptCount,
-				leaseToken: unitMergeOperation.leaseToken,
-			});
-		await tx
-			.update(unitMergeRequest)
-			.set({ state: "executing", updatedAt: now })
-			.where(
-				inArray(
-					unitMergeRequest.id,
-					claimed.map(({ requestId }) => requestId),
-				),
-			);
-		const requests = await tx
-			.select({ id: unitMergeRequest.id, graphPlan: unitMergeRequest.graphPlan })
-			.from(unitMergeRequest)
-			.where(
-				inArray(
-					unitMergeRequest.id,
-					claimed.map(({ requestId }) => requestId),
-				),
-			);
-		const graphPlanByRequest = new Map(requests.map((request) => [request.id, request.graphPlan]));
-		return claimed.map((operation) => {
-			const graphPlan = graphPlanByRequest.get(operation.requestId);
-			if (!operation.leaseToken || !graphPlan)
-				throw new Error(`Claimed Unit merge ${operation.id} has an incomplete manifest`);
-			return { ...operation, leaseToken: operation.leaseToken, graphPlan };
-		});
+			.returning();
 	});
 }
-
-type StepResult =
-	| { readonly outcome: "continue"; readonly phase: UnitMergeOperationPhase }
-	| { readonly outcome: "completed" }
-	| { readonly outcome: "lease_lost" };
-
-function voteAuthorityForPhase(phase: UnitMergeOperationPhase): "global" | "realm" | undefined {
-	if (phase === "realm_tag_judgments") return "realm";
-	if (phase === "unit_tags" || phase === "tag_path_applications" || phase === "finalize")
-		return "global";
-	return undefined;
-}
-
-async function recordSystemMergeAudit(
+async function admitted<T>(
 	tx: DatabaseTransaction,
-	input: {
-		readonly action: string;
-		readonly outcome?: "succeeded" | "failed";
-		readonly requestId: string;
-		readonly sourceUnitId: string;
-		readonly targetUnitId: string;
-		readonly details?: Record<string, unknown>;
-	},
-): Promise<void> {
-	await recordAuditEvent(tx, {
-		category: "system_event",
-		outcome: input.outcome ?? "succeeded",
-		actor: { kind: "system" },
-		authority: { kind: "platform" },
-		action: input.action,
-		target: { kind: "unit_merge_request", id: input.requestId },
-		details: {
-			sourceUnitId: input.sourceUnitId,
-			targetUnitId: input.targetUnitId,
-			...input.details,
-		},
-	});
+	op: Op,
+	work: (authorization: Authorization<string>) => Promise<T>,
+): Promise<T> {
+	const authority = ParticipationAuthoritySchema.parse(op.executorAuthority),
+		authorization = new Authorization(op.executorProfileId, op.executorAuthUserId, authority);
+	if (!(await authorization.platform.hasCapability("unit.merge", tx)))
+		await authorization.platform.ensureCapability("unit.merge.propose", tx);
+	await humanMergeAuthority(tx, authorization);
+	return runWithParticipationAuthority(authority, () =>
+		withCatalogViewerPolicy(tx, op.executorAuthUserId, () => work(authorization)),
+	);
 }
-
-async function processClaimedStep(
-	claimed: ClaimedUnitMergeOperation,
-	phase: UnitMergeOperationPhase,
-): Promise<StepResult> {
-	const work = async (tx: DatabaseTransaction): Promise<StepResult> => {
-		const [operation] = await tx
-			.select({
-				id: unitMergeOperation.id,
-				state: unitMergeOperation.state,
-				phase: unitMergeOperation.phase,
-				leaseToken: unitMergeOperation.leaseToken,
-			})
-			.from(unitMergeOperation)
-			.where(eq(unitMergeOperation.id, claimed.id))
-			.limit(1)
-			.for("update");
-		if (
-			!operation ||
-			operation.state !== "processing" ||
-			operation.leaseToken !== claimed.leaseToken ||
-			operation.phase !== phase
-		)
-			return { outcome: "lease_lost" };
-		await tx.execute(sql`select
-			set_config('rezics.unit_merge_operation_id', ${claimed.id}, true),
-			set_config('rezics.unit_merge_lease_token', ${claimed.leaseToken}, true)
-		`);
-
-		const result = await processUnitMergePhase(tx, phase, {
-			operationId: claimed.id,
-			sourceUnitId: claimed.sourceUnitId,
-			targetUnitId: claimed.targetUnitId,
-			graphPlan: claimed.graphPlan,
-			batchSize: UnitMergePolicy.workerBatchSize,
-		});
-		const now = new Date();
-		if (phase === "finalize" && result.done) {
-			await tx.delete(unitMergeGraphLock).where(eq(unitMergeGraphLock.operationId, claimed.id));
-			await tx.update(unit).set({ updatedAt: now }).where(eq(unit.id, claimed.targetUnitId));
-			await tx.execute(
-				sql`select public.refresh_unit_search_document(${claimed.targetUnitId}::uuid)`,
-			);
-			await tx
-				.update(unitMergeOperation)
-				.set({
-					state: "completed",
-					processedRows: sql`${unitMergeOperation.processedRows} + ${result.processedRows}`,
-					attemptCount: 0,
-					leaseToken: null,
-					leaseExpiresAt: null,
-					lastErrorCode: null,
-					lastErrorMessage: null,
-					completedAt: now,
-					updatedAt: now,
-				})
-				.where(eq(unitMergeOperation.id, claimed.id));
-			await tx
-				.update(unitMergeRequest)
-				.set({ state: "completed", completedAt: now, failedAt: null, updatedAt: now })
-				.where(eq(unitMergeRequest.id, claimed.requestId));
-			await recordSystemMergeAudit(tx, {
-				action: "unit.merge.execution.complete",
-				requestId: claimed.requestId,
-				sourceUnitId: claimed.sourceUnitId,
-				targetUnitId: claimed.targetUnitId,
-				details: { operationId: claimed.id },
-			});
-			return { outcome: "completed" };
-		}
-
-		const nextPhase = result.done ? nextUnitMergePhase(phase) : phase;
-		if (!nextPhase) throw new Error(`Unit merge phase ${phase} has no successor`);
+async function ensureItem(
+	tx: DatabaseTransaction,
+	op: Op,
+	request: RequestRow,
+	details: Pick<ItemInsert, "kind" | "sourceKey"> & Partial<ItemInsert>,
+): Promise<Item> {
+	const values = {
+		...details,
+		requestId: request.id,
+		owner: request.owner,
+		sourceUnitId: request.sourceUnitId,
+		targetUnitId: request.targetUnitId,
+		sourceOwnerRevision: request.sourceRevision,
+	};
+	const [created] = await tx
+		.insert(unitMergeReconciliationItem)
+		.values(values)
+		.onConflictDoNothing()
+		.returning();
+	if (created) {
 		await tx
 			.update(unitMergeOperation)
-			.set({
-				phase: nextPhase,
-				processedRows: sql`${unitMergeOperation.processedRows} + ${result.processedRows}`,
-				attemptCount: 0,
-				lastErrorCode: null,
-				lastErrorMessage: null,
-				leaseExpiresAt: new Date(now.getTime() + UnitMergePolicy.workerLeaseDurationMs),
-				updatedAt: now,
-			})
-			.where(
-				and(
-					eq(unitMergeOperation.id, claimed.id),
-					eq(unitMergeOperation.leaseToken, claimed.leaseToken),
-				),
-			);
-		return { outcome: "continue", phase: nextPhase };
-	};
-	const authority = voteAuthorityForPhase(phase);
-	return authority
-		? runVoteTransaction({ family: "unit_merge", authority }, work)
-		: database.transaction(work);
-}
-
-function failureDetails(error: unknown): { code: string; message: string } {
-	const type = error && typeof error === "object" ? Reflect.get(error, "type") : undefined;
-	const constraint =
-		error && typeof error === "object" ? Reflect.get(error, "constraint") : undefined;
-	const rawMessage = error instanceof Error ? error.message : String(error);
-	return {
-		code:
-			typeof type === "string"
-				? type
-				: typeof constraint === "string"
-					? `database:${constraint}`
-					: "UnitMergeExecutionError",
-		message: (rawMessage.trim() || "Unknown Unit merge execution failure").slice(0, 2_000),
-	};
-}
-
-/** A lossless merge conflict cannot become safe through automatic retries. */
-export function isTerminalUnitMergeExecutionFailure(error: unknown): boolean {
-	const type = error && typeof error === "object" ? Reflect.get(error, "type") : undefined;
-	return type === "UnitMergeMeasurementConflict";
-}
-
-type UnitMergeLeaseTransition = {
-	readonly state: "failed" | "pending" | "processing" | "retry_wait";
-	readonly availableAt: Date;
-	readonly leaseToken: string | null;
-	readonly leaseExpiresAt: Date | null;
-	readonly phase?: "entity_measurement_preflight";
-	readonly measurementPreflightCursorEntityId?: null;
-};
-
-export function unitMergeFailureTransition(input: {
-	readonly phase: UnitMergeOperationPhase;
-	readonly terminal: boolean;
-	readonly now: Date;
-	readonly retryAt: Date;
-	readonly leaseToken: string;
-}): UnitMergeLeaseTransition {
-	const measurementPhase = isEntityMeasurementMergePhase(input.phase);
-	if (input.terminal)
-		return {
-			state: "failed",
-			availableAt: input.now,
-			leaseToken: null,
-			leaseExpiresAt: null,
-			...(measurementPhase
-				? {
-						phase: "entity_measurement_preflight" as const,
-						measurementPreflightCursorEntityId: null,
-					}
-				: {}),
-		};
-	if (measurementPhase)
-		return {
-			state: "processing",
-			availableAt: input.retryAt,
-			leaseToken: input.leaseToken,
-			leaseExpiresAt: input.retryAt,
-		};
-	return {
-		state: "retry_wait",
-		availableAt: input.retryAt,
-		leaseToken: null,
-		leaseExpiresAt: null,
-	};
-}
-
-export function unitMergeYieldTransition(input: {
-	readonly phase: UnitMergeOperationPhase;
-	readonly now: Date;
-	readonly leaseToken: string;
-}): UnitMergeLeaseTransition {
-	const preserveMeasurementFreeze = isEntityMeasurementMergePhase(input.phase);
-	return {
-		state: preserveMeasurementFreeze ? "processing" : "pending",
-		availableAt: input.now,
-		leaseToken: preserveMeasurementFreeze ? input.leaseToken : null,
-		leaseExpiresAt: preserveMeasurementFreeze ? input.now : null,
-	};
-}
-
-async function markClaimedFailure(
-	claimed: ClaimedUnitMergeOperation,
-	error: unknown,
-	now = new Date(),
-): Promise<void> {
-	const failure = failureDetails(error);
-	await database.transaction(async (tx) => {
-		const [operation] = await tx
-			.select({
-				state: unitMergeOperation.state,
-				leaseToken: unitMergeOperation.leaseToken,
-				attemptCount: unitMergeOperation.attemptCount,
-			})
-			.from(unitMergeOperation)
-			.where(eq(unitMergeOperation.id, claimed.id))
-			.limit(1)
-			.for("update");
-		if (
-			!operation ||
-			operation.state !== "processing" ||
-			operation.leaseToken !== claimed.leaseToken
+			.set({ totalItems: sql`${unitMergeOperation.totalItems}+1` })
+			.where(eq(unitMergeOperation.id, op.id));
+		return created;
+	}
+	const [existing] = await tx
+		.select()
+		.from(unitMergeReconciliationItem)
+		.where(
+			and(
+				eq(unitMergeReconciliationItem.requestId, request.id),
+				eq(unitMergeReconciliationItem.kind, details.kind),
+				eq(unitMergeReconciliationItem.sourceKey, details.sourceKey),
+			),
 		)
-			return;
-		const attemptCount = operation.attemptCount + 1;
-		const terminal =
-			isTerminalUnitMergeExecutionFailure(error) ||
-			attemptCount >= UnitMergePolicy.workerMaximumAutomaticAttempts;
-		const retryAt = new Date(
-			now.getTime() + unitMergeRetryDelayMilliseconds(attemptCount, Math.random()),
-		);
-		const transition = unitMergeFailureTransition({
-			phase: claimed.phase,
-			terminal,
-			now,
-			retryAt,
-			leaseToken: operation.leaseToken,
-		});
-		await tx
-			.update(unitMergeOperation)
-			.set({
-				...transition,
-				attemptCount,
-				lastErrorCode: failure.code,
-				lastErrorMessage: failure.message,
-				updatedAt: now,
-			})
-			.where(eq(unitMergeOperation.id, claimed.id));
-		if (!terminal) return;
-		await tx
-			.update(unitMergeRequest)
-			.set({ state: "failed", failedAt: now, updatedAt: now })
-			.where(eq(unitMergeRequest.id, claimed.requestId));
-		await recordSystemMergeAudit(tx, {
-			action: "unit.merge.execution.failed",
-			outcome: "failed",
-			requestId: claimed.requestId,
-			sourceUnitId: claimed.sourceUnitId,
-			targetUnitId: claimed.targetUnitId,
-			details: {
-				operationId: claimed.id,
-				phase: claimed.phase,
-				attemptCount,
-				errorCode: failure.code,
-			},
-		});
-	});
+		.limit(1);
+	if (!existing) throw new Error("Merge item collision did not resolve");
+	return existing;
 }
-
-async function yieldClaimedOperation(
-	claimed: ClaimedUnitMergeOperation,
-	phase: UnitMergeOperationPhase,
-): Promise<void> {
-	const now = new Date();
-	const transition = unitMergeYieldTransition({
-		phase,
-		now,
-		leaseToken: claimed.leaseToken,
-	});
-	await database
-		.update(unitMergeOperation)
+async function resolveItem(
+	tx: DatabaseTransaction,
+	op: Op,
+	item: Item,
+	decision: string,
+	patch: Partial<ItemInsert> = {},
+) {
+	const [resolved] = await tx
+		.update(unitMergeReconciliationItem)
 		.set({
-			...transition,
-			updatedAt: now,
+			...patch,
+			state: decision.startsWith("retain") ? "retained" : "applied",
+			decision,
+			errorCode: null,
+			resolvedAt: new Date(),
+			resolvedByAuthUserId: op.executorAuthUserId,
 		})
 		.where(
 			and(
-				eq(unitMergeOperation.id, claimed.id),
-				eq(unitMergeOperation.state, "processing"),
-				eq(unitMergeOperation.phase, phase),
-				eq(unitMergeOperation.leaseToken, claimed.leaseToken),
+				eq(unitMergeReconciliationItem.requestId, item.requestId),
+				eq(unitMergeReconciliationItem.id, item.id),
+				inArray(unitMergeReconciliationItem.state, ["pending", "action_required"]),
+			),
+		)
+		.returning({ id: unitMergeReconciliationItem.id });
+	if (resolved)
+		await tx
+			.update(unitMergeOperation)
+			.set({ resolvedItems: sql`${unitMergeOperation.resolvedItems}+1` })
+			.where(eq(unitMergeOperation.id, op.id));
+}
+async function actionRequired(tx: DatabaseTransaction, item: Item, code: string) {
+	await tx
+		.update(unitMergeReconciliationItem)
+		.set({ state: "action_required", errorCode: code.slice(0, 128) })
+		.where(
+			and(
+				eq(unitMergeReconciliationItem.requestId, item.requestId),
+				eq(unitMergeReconciliationItem.id, item.id),
+				inArray(unitMergeReconciliationItem.state, ["pending", "action_required"]),
 			),
 		);
 }
-
-async function drainClaimedOperation(claimed: ClaimedUnitMergeOperation): Promise<void> {
-	let phase = claimed.phase;
+function pending(item: Item) {
+	return item.state === "pending" || item.state === "action_required";
+}
+async function sourceAndTarget(tx: DatabaseTransaction, request: RequestRow) {
+	const source = await readUnitStateById(tx, request.sourceUnitId, { lock: "share" }),
+		target = await readUnitStateById(tx, request.targetUnitId, { lock: "update" });
+	if (
+		!source ||
+		!target ||
+		source.visibility !== request.visibilityAtRequest ||
+		target.visibility !== request.visibilityAtRequest ||
+		source.reference.owner !== request.owner ||
+		target.reference.owner !== request.owner ||
+		source.shape !== request.shape ||
+		target.shape !== request.shape ||
+		source.moderationStatus !== "approved" ||
+		target.moderationStatus !== "approved" ||
+		source.contentRating !== target.contentRating
+	)
+		throw new ReconciliationRequired("source_or_target_policy_changed");
+	return { source, target };
+}
+async function copyName(
+	tx: DatabaseTransaction,
+	op: Op,
+	request: RequestRow,
+	item: Item,
+	depth = 0,
+	anchor = false,
+): Promise<{ id: string; revision: number }> {
+	if (!item.sourceNameId || !item.sourceNameRevision)
+		throw new ReconciliationRequired("missing_name_reference");
+	if (!pending(item)) {
+		if (item.targetNameId && item.targetNameRevision)
+			return { id: item.targetNameId, revision: item.targetNameRevision };
+		throw new ReconciliationRequired("retained_derivation_dependency");
+	}
+	if (depth > 8) throw new ReconciliationRequired("name_derivation_depth");
+	const t = CatalogNameTables[request.owner].nameRevision;
+	const [source] = await tx
+		.select()
+		.from(t)
+		.where(
+			and(
+				eq(t.ownerId, request.sourceUnitId),
+				eq(t.id, item.sourceNameId),
+				eq(t.revision, item.sourceNameRevision),
+			),
+		)
+		.limit(1);
+	if (!source) throw new ReconciliationRequired("name_history_missing");
+	let derivationNameId: string | null = null,
+		derivationRevision: number | null = null;
+	if (source.derivationNameId && source.derivationRevision) {
+		const dependency = await ensureItem(tx, op, request, {
+			kind: "name",
+			sourceKey: `anchor:${source.derivationNameId}:${source.derivationRevision}`,
+			sourceNameId: source.derivationNameId,
+			sourceNameRevision: source.derivationRevision,
+		});
+		const copied = await copyName(tx, op, request, dependency, depth + 1, true);
+		derivationNameId = copied.id;
+		derivationRevision = copied.revision;
+	}
+	const { target } = await sourceAndTarget(tx, request);
+	const value = CatalogNameInputSchema.parse({
+		value: source.value,
+		kind: source.kind,
+		sortName: source.sortName,
+		languageTag: source.languageTag,
+		privateUseNamespace: source.privateUseNamespace,
+		origin: source.origin,
+		translationMethod: source.translationMethod,
+		primaryForLanguage: false,
+		scopeOwnerId:
+			source.scopeOwnerId === request.sourceUnitId ? request.targetUnitId : source.scopeOwnerId,
+		territory: source.territory,
+		context: source.context,
+		derivationNameId,
+		derivationRevision,
+		begin: source.begin,
+		end: source.end,
+		ended: source.ended,
+		spoiler: source.spoiler,
+		state: anchor ? "withdrawn" : source.state,
+	});
+	const copied = await addCatalogName(
+		tx,
+		{ owner: request.owner, id: request.targetUnitId },
+		op.executorAuthUserId,
+		target.revision,
+		value,
+	);
+	await resolveItem(tx, op, item, anchor ? "copy_derivation_anchor" : "copy_alternate_name", {
+		targetNameId: copied.id,
+		targetNameRevision: copied.nameRevision,
+		targetOwnerRevision: copied.revision,
+	});
+	return { id: copied.id, revision: copied.nameRevision };
+}
+async function copyIdentifier(tx: DatabaseTransaction, op: Op, request: RequestRow, item: Item) {
+	if (!item.sourceIdentifierId || !item.sourceIdentifierRevision)
+		throw new ReconciliationRequired("missing_identifier_reference");
+	const t = CatalogNameTables[request.owner].identifierRevision;
+	const [source] = await tx
+		.select()
+		.from(t)
+		.where(
+			and(
+				eq(t.ownerId, request.sourceUnitId),
+				eq(t.id, item.sourceIdentifierId),
+				eq(t.revision, item.sourceIdentifierRevision),
+			),
+		)
+		.limit(1);
+	if (!source) throw new ReconciliationRequired("identifier_history_missing");
+	const { target } = await sourceAndTarget(tx, request);
+	const copied = await addCatalogIdentifier(
+		tx,
+		{ owner: request.owner, id: request.targetUnitId },
+		op.executorAuthUserId,
+		target.revision,
+		{
+			namespace: source.namespace,
+			value: source.value,
+			issuerEntityId: source.issuerEntityId,
+			state: source.state,
+		},
+	);
+	await resolveItem(tx, op, item, "copy_identifier_claim", {
+		targetIdentifierId: copied.id,
+		targetIdentifierRevision: copied.identifierRevision,
+		targetOwnerRevision: copied.revision,
+	});
+}
+async function moveBinding(
+	tx: DatabaseTransaction,
+	op: Op,
+	request: RequestRow,
+	item: Item,
+	retain = false,
+) {
+	if (!item.sourceRecordId || !item.mappingKey || !item.sourceBindingRevision)
+		throw new ReconciliationRequired("missing_binding_reference");
+	const current = await lockCatalogSourceBinding(tx, {
+		sourceRecordId: item.sourceRecordId,
+		mappingKey: item.mappingKey,
+	});
+	if (
+		current.reference.owner !== request.owner ||
+		current.reference.id !== request.sourceUnitId ||
+		current.claim.bindingRevision !== item.sourceBindingRevision
+	)
+		throw new ReconciliationRequired("binding_changed");
+	const [before] = await tx
+		.select()
+		.from(catalogSourceBindingRevision)
+		.where(
+			and(
+				eq(catalogSourceBindingRevision.sourceRecordId, item.sourceRecordId),
+				eq(catalogSourceBindingRevision.mappingKey, item.mappingKey),
+				eq(catalogSourceBindingRevision.revision, item.sourceBindingRevision),
+			),
+		)
+		.limit(1);
+	if (!before) throw new ReconciliationRequired("binding_history_missing");
+	if (before.state === "withdrawn") {
+		await resolveItem(tx, op, item, "retain_withdrawn_binding", {
+			targetBindingRevision: before.revision,
+		});
+		return;
+	}
+	const plan = MergePlanSchema.parse(request.plan),
+		rebind = !retain && plan.bindings === "rebind_paused";
+	const changed = await reviseCatalogSourceBinding(tx, op.executorAuthUserId, {
+		sourceRecordId: item.sourceRecordId,
+		mappingKey: item.mappingKey,
+		expectedRevision: item.sourceBindingRevision,
+		state: "paused",
+		mode: before.mode,
+		reason: `Reviewed native merge ${request.id}: ${rebind ? "rebind paused" : "retain paused source"}`,
+		...(rebind ? { target: { owner: request.owner, id: request.targetUnitId } } : {}),
+	});
+	await resolveItem(tx, op, item, rebind ? "rebind_paused" : "retain_paused_binding", {
+		targetBindingRevision: changed.revision,
+	});
+}
+async function safelyResolve(
+	tx: DatabaseTransaction,
+	_op: Op,
+	item: Item,
+	work: (nested: DatabaseTransaction) => Promise<unknown>,
+) {
+	if (!pending(item)) return;
 	try {
-		for (let step = 0; step < MaximumStepsPerDispatch; step += 1) {
-			const result = await processClaimedStep(claimed, phase);
-			if (result.outcome !== "continue") return;
-			phase = result.phase;
-		}
-		await yieldClaimedOperation(claimed, phase);
+		await tx.transaction(async (nested) => {
+			await work(nested);
+		});
 	} catch (error) {
-		await markClaimedFailure({ ...claimed, phase }, error);
+		const state = databaseSqlState(error);
+		if (state && !["23514", "23503", "23505"].includes(state)) throw error;
+		await actionRequired(
+			tx,
+			item,
+			error instanceof ReconciliationRequired ? error.code : "native_reconciliation_validation",
+		);
 	}
 }
-
-/** Claims independent operations and advances each through bounded transactions. */
-export async function dispatchUnitMergeBatch(now = new Date()): Promise<number> {
-	const claimed = await claimUnitMergeOperations(now);
-	await Promise.all(claimed.map((operation) => drainClaimedOperation(operation)));
+async function processPage(
+	tx: DatabaseTransaction,
+	op: Op,
+	request: RequestRow,
+	authorization: Authorization<string>,
+) {
+	const plan = MergePlanSchema.parse(request.plan);
+	if (op.phase === "canonicalize") {
+		const manifest = await buildUnitMergeManifest(tx, authorization, {
+			sourceUnitId: request.sourceUnitId,
+			targetUnitId: request.targetUnitId,
+			plan,
+			operationId: op.id,
+		});
+		assertMergeManifestFingerprint(manifest, request.requestFingerprint);
+		const table = CatalogIdentityTables[request.owner];
+		const [source] = await tx
+			.update(table)
+			.set({
+				status: "archived",
+				revision: sql`${table.revision}+1`,
+				updatedAt: nextUnitUpdatedAt(request.sourceUpdatedAt),
+			})
+			.where(and(eq(table.id, request.sourceUnitId), eq(table.revision, request.sourceRevision)))
+			.returning({ revision: table.revision });
+		if (!source) throw new ReconciliationRequired("source_revision_changed");
+		await tx.insert(CatalogFactTables[request.owner].change).values({
+			ownerId: request.sourceUnitId,
+			version: source.revision,
+			actorAuthUserId: op.executorAuthUserId,
+			operation: "identity.merge.archive",
+		});
+		await tx.insert(unitMergeRedirect).values({
+			sourceUnitId: request.sourceUnitId,
+			targetUnitId: request.targetUnitId,
+			owner: request.owner,
+			requestId: request.id,
+			sourceWasPublic:
+				request.statusAtRequest === "published" && request.visibilityAtRequest !== "private",
+		});
+		await tx
+			.update(unitMergeRequest)
+			.set({ state: "executing", canonicalizedAt: new Date() })
+			.where(eq(unitMergeRequest.id, request.id));
+		return { done: true, processed: 1 };
+	}
+	if (op.phase === "names") {
+		const t = CatalogNameTables[request.owner].name;
+		const rows = await tx
+			.select()
+			.from(t)
+			.where(
+				and(
+					eq(t.ownerId, request.sourceUnitId),
+					eq(t.state, "active"),
+					op.cursorId ? gt(t.id, op.cursorId) : undefined,
+				),
+			)
+			.orderBy(t.id)
+			.limit(UnitMergePolicy.workerBatchSize);
+		for (const row of rows) {
+			const item = await ensureItem(tx, op, request, {
+				kind: "name",
+				sourceKey: `current:${row.id}:${row.revision}`,
+				sourceNameId: row.id,
+				sourceNameRevision: row.revision,
+			});
+			await safelyResolve(tx, op, item, (nested) =>
+				plan.names === "retain_source"
+					? resolveItem(nested, op, item, "retain_name")
+					: copyName(nested, op, request, item),
+			);
+		}
+		return {
+			done: rows.length < UnitMergePolicy.workerBatchSize,
+			processed: rows.length,
+			cursorId: rows.at(-1)?.id,
+		};
+	}
+	if (op.phase === "identifiers") {
+		const t = CatalogNameTables[request.owner].identifier;
+		const rows = await tx
+			.select()
+			.from(t)
+			.where(
+				and(
+					eq(t.ownerId, request.sourceUnitId),
+					eq(t.state, "active"),
+					op.cursorId ? gt(t.id, op.cursorId) : undefined,
+				),
+			)
+			.orderBy(t.id)
+			.limit(UnitMergePolicy.workerBatchSize);
+		for (const row of rows) {
+			const item = await ensureItem(tx, op, request, {
+				kind: "identifier",
+				sourceKey: `${row.id}:${row.revision}`,
+				sourceIdentifierId: row.id,
+				sourceIdentifierRevision: row.revision,
+			});
+			await safelyResolve(tx, op, item, (nested) =>
+				plan.identifiers === "retain_source"
+					? resolveItem(nested, op, item, "retain_identifier")
+					: copyIdentifier(nested, op, request, item),
+			);
+		}
+		return {
+			done: rows.length < UnitMergePolicy.workerBatchSize,
+			processed: rows.length,
+			cursorId: rows.at(-1)?.id,
+		};
+	}
+	if (op.phase === "semantics") {
+		const { semanticHead: h, semanticRevision: r } = CatalogFactTables[request.owner];
+		const rows = await tx
+			.select({ id: h.semanticId, version: h.version, state: r.state })
+			.from(h)
+			.innerJoin(
+				r,
+				and(eq(r.ownerId, h.ownerId), eq(r.semanticId, h.semanticId), eq(r.version, h.version)),
+			)
+			.where(
+				and(
+					eq(h.ownerId, request.sourceUnitId),
+					op.cursorId ? gt(h.semanticId, op.cursorId) : undefined,
+				),
+			)
+			.orderBy(h.semanticId)
+			.limit(UnitMergePolicy.inventoryBatchSize);
+		for (const row of rows) {
+			if (row.state !== "active") continue;
+			const item = await ensureItem(tx, op, request, {
+				kind: "semantic",
+				sourceKey: `${row.id}:${row.version}`,
+				sourceSemanticId: row.id,
+				sourceSemanticVersion: row.version,
+			});
+			if (pending(item)) await resolveItem(tx, op, item, "retain_semantic_snapshot");
+		}
+		return {
+			done: rows.length < UnitMergePolicy.inventoryBatchSize,
+			processed: rows.length,
+			cursorId: rows.at(-1)?.id,
+		};
+	}
+	if (op.phase === "bindings") {
+		const t = CatalogFactTables[request.owner].sourceBinding,
+			c = catalogSourceMappingClaim;
+		const rows = await tx
+			.select({ id: t.mappingKey, sourceRecordId: t.sourceRecordId, revision: c.bindingRevision })
+			.from(t)
+			.innerJoin(c, and(eq(c.sourceRecordId, t.sourceRecordId), eq(c.mappingKey, t.mappingKey)))
+			.where(
+				and(
+					eq(t.ownerId, request.sourceUnitId),
+					op.cursorId
+						? or(
+								gt(t.mappingKey, op.cursorId),
+								and(
+									eq(t.mappingKey, op.cursorId),
+									gt(
+										t.sourceRecordId,
+										op.cursorSecondaryId ?? "00000000-0000-0000-0000-000000000000",
+									),
+								),
+							)
+						: undefined,
+				),
+			)
+			.orderBy(t.mappingKey, t.sourceRecordId)
+			.limit(UnitMergePolicy.workerBatchSize);
+		for (const row of rows) {
+			const item = await ensureItem(tx, op, request, {
+				kind: "source_binding",
+				sourceKey: `${row.sourceRecordId}:${row.id}:${row.revision}`,
+				sourceRecordId: row.sourceRecordId,
+				mappingKey: row.id,
+				sourceBindingRevision: row.revision,
+			});
+			await safelyResolve(tx, op, item, (nested) => moveBinding(nested, op, request, item));
+		}
+		return {
+			done: rows.length < UnitMergePolicy.workerBatchSize,
+			processed: rows.length,
+			cursorId: rows.at(-1)?.id,
+			cursorSecondaryId: rows.at(-1)?.sourceRecordId,
+		};
+	}
+	if (op.phase === "structure") {
+		const item = await ensureItem(tx, op, request, {
+			kind: "structure",
+			sourceKey: `root:${request.sourceUnitId}:${request.sourceRevision}`,
+		});
+		if (pending(item)) await resolveItem(tx, op, item, "retain_native_structure");
+		return { done: true, processed: 1 };
+	}
+	if (op.phase === "settle") {
+		const [remaining] = await tx
+			.select({ id: unitMergeReconciliationItem.id })
+			.from(unitMergeReconciliationItem)
+			.where(
+				and(
+					eq(unitMergeReconciliationItem.requestId, request.id),
+					inArray(unitMergeReconciliationItem.state, ["pending", "action_required"]),
+				),
+			)
+			.limit(1);
+		if (remaining) throw new ReconciliationRequired("items_need_review");
+		return { done: true, processed: 0 };
+	}
+	await tx
+		.update(unitMergeOperation)
+		.set({ state: "completed", completedAt: new Date(), leaseToken: null, leaseExpiresAt: null })
+		.where(eq(unitMergeOperation.id, op.id));
+	await tx
+		.update(unitMergeRequest)
+		.set({ state: "completed", completedAt: new Date() })
+		.where(eq(unitMergeRequest.id, request.id));
+	await tx.delete(unitMergeGraphLock).where(eq(unitMergeGraphLock.operationId, op.id));
+	await recordAuditEvent(tx, {
+		category: "admin_activity",
+		outcome: "succeeded",
+		actor: { kind: "auth", authUserId: op.executorAuthUserId },
+		authority: { kind: "platform" },
+		action: "unit.merge.reconciled",
+		target: { kind: "unit_merge_request", id: request.id },
+		details: { sourceUnitId: request.sourceUnitId, targetUnitId: request.targetUnitId, plan },
+	});
+	return { done: true, processed: 0, completed: true };
+}
+export async function processClaimedUnitMergePage(claimed: Op) {
+	return database.transaction(async (tx) => {
+		const [request] = await tx
+			.select()
+			.from(unitMergeRequest)
+			.where(eq(unitMergeRequest.id, claimed.requestId))
+			.limit(1)
+			.for("update");
+		const [op] = await tx
+			.select()
+			.from(unitMergeOperation)
+			.where(eq(unitMergeOperation.id, claimed.id))
+			.limit(1)
+			.for("update");
+		if (
+			!request ||
+			!op ||
+			op.state !== "processing" ||
+			op.leaseToken !== claimed.leaseToken ||
+			!op.leaseExpiresAt ||
+			op.leaseExpiresAt <= new Date()
+		)
+			return { outcome: "lease_lost" as const };
+		await tx.execute(
+			sql`select set_config('lock_timeout','5000',true),set_config('statement_timeout','25000',true),set_config('rezics.merge_request_id',${request.id},true)`,
+		);
+		const result = await admitted(tx, op, (authorization) =>
+			processPage(tx, op, request, authorization),
+		);
+		if (!result.completed) {
+			const phase = result.done ? nextUnitMergePhase(op.phase) : op.phase;
+			if (!phase) throw new Error("Merge phase ended without finalization");
+			await tx
+				.update(unitMergeOperation)
+				.set({
+					phase,
+					cursorId: result.done ? null : (result.cursorId ?? op.cursorId),
+					cursorSecondaryId: result.done
+						? null
+						: (result.cursorSecondaryId ?? op.cursorSecondaryId),
+					processedRows: sql`${unitMergeOperation.processedRows}+${result.processed}`,
+					state: "pending",
+					leaseToken: null,
+					leaseExpiresAt: null,
+					availableAt: new Date(),
+					lastErrorCode: null,
+					lastErrorMessage: null,
+				})
+				.where(eq(unitMergeOperation.id, op.id));
+		}
+		return { outcome: result.completed ? ("completed" as const) : ("continued" as const) };
+	});
+}
+async function failClaim(claimed: Op, error: unknown) {
+	return database.transaction(async (tx) => {
+		const [request] = await tx
+			.select()
+			.from(unitMergeRequest)
+			.where(eq(unitMergeRequest.id, claimed.requestId))
+			.limit(1)
+			.for("update");
+		const [op] = await tx
+			.select()
+			.from(unitMergeOperation)
+			.where(eq(unitMergeOperation.id, claimed.id))
+			.limit(1)
+			.for("update");
+		if (!request || !op || op.state !== "processing" || op.leaseToken !== claimed.leaseToken)
+			return;
+		const stale = error instanceof Error && error.constructor.name === "UnitMergeManifestStale",
+			manual =
+				error instanceof ReconciliationRequired ||
+				(error instanceof Error &&
+					[
+						"ParticipationDenied",
+						"PlatformCapabilityRequired",
+						"CatalogAccessDenied",
+						"UnitPermissionForbidden",
+					].includes(error.constructor.name));
+		const attempts = op.attemptCount + 1,
+			state = stale || attempts >= 12 ? "failed" : manual ? "action_required" : "retry_wait";
+		await tx
+			.update(unitMergeOperation)
+			.set({
+				state,
+				attemptCount: attempts,
+				leaseToken: null,
+				leaseExpiresAt: null,
+				lastErrorCode: stale
+					? "manifest_changed"
+					: manual
+						? "reconciliation_required"
+						: "merge_retry",
+				lastErrorMessage:
+					error instanceof ReconciliationRequired
+						? error.code
+						: "The merge needs operator attention or a retry.",
+				availableAt: new Date(
+					Date.now() + unitMergeRetryDelayMilliseconds(attempts, Math.random()),
+				),
+			})
+			.where(eq(unitMergeOperation.id, op.id));
+		await tx
+			.update(unitMergeRequest)
+			.set({ state: stale ? "superseded" : state === "retry_wait" ? "executing" : state })
+			.where(eq(unitMergeRequest.id, request.id));
+		if (stale && !request.canonicalizedAt)
+			await tx.delete(unitMergeGraphLock).where(eq(unitMergeGraphLock.operationId, op.id));
+	});
+}
+export async function dispatchUnitMergeBatch() {
+	const claimed = await claimUnitMergeOperations(new Date());
+	await Promise.all(
+		claimed.map(async (op) => {
+			try {
+				await processClaimedUnitMergePage(op);
+			} catch (error) {
+				await failClaim(op, error);
+			}
+		}),
+	);
 	return claimed.length;
+}
+export async function resolveMergeReconciliationItem(
+	authorization: Authorization<string>,
+	requestId: string,
+	itemId: string,
+	input: { action: "retry" | "retain_source"; expectedTargetRevision: number; reason: string },
+) {
+	return database.transaction(async (tx) => {
+		await authorization.platform.ensureCapability("unit.merge", tx);
+		const authority = await humanMergeAuthority(tx, authorization);
+		const [request] = await tx
+				.select()
+				.from(unitMergeRequest)
+				.where(eq(unitMergeRequest.id, requestId))
+				.limit(1)
+				.for("update"),
+			[op] = await tx
+				.select()
+				.from(unitMergeOperation)
+				.where(eq(unitMergeOperation.requestId, requestId))
+				.limit(1)
+				.for("update"),
+			[item] = await tx
+				.select()
+				.from(unitMergeReconciliationItem)
+				.where(
+					and(
+						eq(unitMergeReconciliationItem.requestId, requestId),
+						eq(unitMergeReconciliationItem.id, itemId),
+					),
+				)
+				.limit(1)
+				.for("update");
+		if (!request || !op || !item || op.state === "processing" || !pending(item))
+			throw new ReconciliationRequired("item_unavailable");
+		const target = await readUnitStateById(tx, request.targetUnitId, { lock: "update" });
+		if (!target || target.revision !== input.expectedTargetRevision)
+			throw new ReconciliationRequired("target_revision_changed");
+		const operator = {
+			...op,
+			executorAuthUserId: authority.principal.authUserId,
+			executorProfileId: authorization.profileId,
+			executorAuthority: authority,
+		};
+		await tx.execute(sql`select set_config('rezics.merge_request_id',${requestId},true)`);
+		await admitted(tx, operator, async () => {
+			if (input.action === "retain_source") {
+				if (item.kind === "source_binding") await moveBinding(tx, operator, request, item, true);
+				else await resolveItem(tx, operator, item, "retain_reviewed_source");
+			} else if (item.kind === "name")
+				await copyName(tx, operator, request, item, 0, item.sourceKey.startsWith("anchor:"));
+			else if (item.kind === "identifier") await copyIdentifier(tx, operator, request, item);
+			else if (item.kind === "source_binding") await moveBinding(tx, operator, request, item);
+			else await resolveItem(tx, operator, item, "retain_reviewed_source");
+		});
+		await recordAuditEvent(tx, {
+			category: "admin_activity",
+			outcome: "succeeded",
+			actor: { kind: "auth", authUserId: authority.principal.authUserId },
+			authority: { kind: "platform" },
+			action: "unit.merge.reconciliation.resolve",
+			target: { kind: "unit_merge_request", id: requestId },
+			details: { itemId, action: input.action, reason: input.reason },
+		});
+		return { resolved: true as const };
+	});
 }

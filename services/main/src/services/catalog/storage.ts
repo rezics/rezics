@@ -36,6 +36,11 @@ import {
 	publishCatalogSemanticRevision,
 } from "./semantic-history";
 import { CatalogValueNodeSchema } from "./value-nodes";
+import {
+	hasCatalogMergeRedirect,
+	mergedCatalogReadPredicate,
+	unmergedCatalogWritePredicate,
+} from "./merge-read";
 import { catalogRatingReadable } from "./read-policy";
 
 export class CatalogAccessDenied extends Error {}
@@ -68,17 +73,38 @@ export async function loadCatalogIdentity(
 	const query = tx
 		.select()
 		.from(table)
-		.where(and(eq(table.id, ref.id), isNull(table.deletedAt)))
+		.where(
+			and(
+				eq(table.id, ref.id),
+				isNull(table.deletedAt),
+				write ? unmergedCatalogWritePredicate(table.id) : undefined,
+			),
+		)
 		.limit(1);
 	const [row] = await (write ? query.for(writeLock) : query);
+	if (!row && write && (await hasCatalogMergeRedirect(tx, ref)))
+		throw new CatalogAccessDenied("Merged source data is read-only");
 	if (!row) throw new CatalogReferenceNotFound("Catalog identity is missing or retired");
 	if (!write && !catalogRatingReadable(row.contentRating))
 		throw new CatalogReferenceNotFound("Catalog identity is unavailable under the viewer policy");
 	const creator = await canAccessCatalog(tx, ref, actor, row.createdByAuthUserId, write);
+	if (write && row.status === "archived" && (await hasCatalogMergeRedirect(tx, ref)))
+		throw new CatalogAccessDenied("Merged source data is read-only");
+	let mergedReadable = false;
+	if (!write && !creator && row.status === "archived") {
+		const scope = await readCatalogAuthorityScope(tx, actor);
+		const [allowed] = await tx
+			.select({ id: table.id })
+			.from(table)
+			.where(and(eq(table.id, ref.id), mergedCatalogReadPredicate(ref.owner, table, scope)))
+			.limit(1);
+		mergedReadable = Boolean(allowed);
+	}
 	if (
 		write
 			? !creator
 			: !creator &&
+				!mergedReadable &&
 				(row.visibility === "private" ||
 					row.status !== "published" ||
 					row.moderationStatus !== "approved")

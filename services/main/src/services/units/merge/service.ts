@@ -1,870 +1,537 @@
+import { createHash, randomUUID } from "node:crypto";
 import { and, desc, eq, inArray, lt, lte, sql } from "drizzle-orm";
-
+import type { z } from "zod";
+import type { Authorization } from "../../authorization";
+import { database, type DatabaseTransaction } from "../../database";
 import {
+	unitMergeRequest,
+	unitMergeReview,
+	unitMergeOperation,
+	unitMergeGraphLock,
+	unitMergeReconciliationItem,
+	authEntity,
+	users,
+	governanceDecisionRule,
+} from "../../database/schema";
+import {
+	ParticipationAuthoritySchema,
+	ParticipationDenied,
+	type ParticipationAuthority,
+} from "../../participation/policy";
+import { createGovernanceDecision } from "../../governance/decision-service";
+import { recordAuditEvent } from "../../audit";
+import {
+	UnitMergeConfirmationInvalid,
 	UnitMergeIdempotencyConflict,
 	UnitMergeManifestStale,
 	UnitMergeNotFound,
-	UnitMergeRequestConflict,
-	UnitMergeRequestExpired,
 	UnitMergeRequestNotPending,
-	UnitMergeRetryUnavailable,
+	UnitMergeRequestExpired,
+	UnitMergeReviewSelfForbidden,
 	UnitMergeReviewDuplicate,
 	UnitMergeReviewFingerprintMismatch,
-	UnitMergeReviewSelfForbidden,
+	UnitMergeRetryUnavailable,
 } from "../../api/governance/errors";
-import { recordAuditEvent } from "../../audit";
-import { database, type DatabaseExecutor, type DatabaseTransaction } from "../../database";
-import { databaseConstraintName } from "../../database/constraint";
-import { runVoteTransaction } from "../../database/vote-admission";
+import { buildUnitMergeManifest, assertMergeManifestFingerprint } from "./manifest";
 import {
-	unit,
-	governanceDecisionRule,
-	unitMergeGraphLock,
-	unitMergeOperation,
-	unitMergeRedirect,
-	unitMergeRequest,
-	unitMergeReview,
-	type UnitMergeEligibleKind,
-	type UnitMergeGraphPlanV1,
-	type UnitMergeOperationPhase,
-	type UnitMergeOperationState,
-	type UnitMergeRequestMode,
-	type UnitMergeRequestState,
-	type UnitMergeReviewDecision,
-} from "../../database/schema";
-import {
-	createGovernanceDecision,
-	listGovernanceDecisionRules,
-	validateGovernanceRuleReferences,
-	type GovernanceRuleReference,
-} from "../../governance/decision-service";
-import { firstUnitLocalizationTitle } from "../localization";
-import { UnitNotFound } from "../errors";
-import { isEntityMeasurementMergePhase } from "./entity-measurements";
-import {
-	buildUnitMergeManifest,
-	isUnitMergeManifestStaleness,
-	requireCurrentUnitMergeManifest,
-	type UnitMergeManifestV1,
-} from "./manifest";
-import { UnitMergePolicy, unitMergeRequestExpiry } from "./policy";
+	MergeCreateSchema,
+	MergePreflightSchema,
+	MergeReviewSchema,
+	MergeListSchema,
+	MergeItemListSchema,
+	MergeRequestSchema,
+	MergeItemSchema,
+	MergeManifestSchema,
+	MergePlanSchema,
+} from "./contracts";
+import { unitMergeRequestExpiry } from "./policy";
 
-export type UnitMergeReviewView = {
-	readonly reviewerProfileId: string;
-	readonly reviewerLabel: string | null;
-	readonly decision: UnitMergeReviewDecision;
-	readonly note: string | null;
-	readonly createdAt: Date;
-};
-
-export type UnitMergeRequestView = {
-	readonly id: string;
-	readonly sourceUnit: { readonly id: string; readonly title: string | null };
-	readonly targetUnit: { readonly id: string; readonly title: string | null };
-	readonly unitKind: UnitMergeEligibleKind;
-	readonly mode: UnitMergeRequestMode;
-	readonly state: UnitMergeRequestState;
-	readonly proposer: { readonly profileId: string; readonly label: string | null };
-	readonly overrideOfRequestId: string | null;
-	readonly rules: GovernanceRuleReference[];
-	readonly note: string | null;
-	readonly policy: {
-		readonly version: number;
-		readonly requiredApprovals: number;
-		readonly vetoEnabled: boolean;
-		readonly selfReviewForbidden: boolean;
-	};
-	readonly manifest: {
-		readonly version: 1;
-		readonly sourceUpdatedAt: Date;
-		readonly targetUpdatedAt: Date;
-		readonly sourceGraphRevision: number;
-		readonly targetGraphRevision: number;
-		readonly graphPlan: UnitMergeGraphPlanV1;
-		readonly fingerprint: string;
-	};
-	readonly approvals: number;
-	readonly rejections: number;
-	readonly reviews: UnitMergeReviewView[];
-	readonly operation: null | {
-		readonly id: string;
-		readonly state: UnitMergeOperationState;
-		readonly phase: UnitMergeOperationPhase;
-		readonly attemptCount: number;
-		readonly processedRows: number;
-		readonly availableAt: Date;
-		readonly lastErrorCode: string | null;
-		readonly lastErrorMessage: string | null;
-		readonly startedAt: Date | null;
-		readonly completedAt: Date | null;
-	};
-	readonly expiresAt: Date;
-	readonly acceptedAt: Date | null;
-	readonly rejectedAt: Date | null;
-	readonly supersededAt: Date | null;
-	readonly completedAt: Date | null;
-	readonly failedAt: Date | null;
-	readonly createdAt: Date;
-	readonly updatedAt: Date;
-};
-
-const requestSelection = {
-	id: unitMergeRequest.id,
-	sourceUnitId: unitMergeRequest.sourceUnitId,
-	sourceTitle: firstUnitLocalizationTitle(unitMergeRequest.sourceUnitId),
-	targetUnitId: unitMergeRequest.targetUnitId,
-	targetTitle: firstUnitLocalizationTitle(unitMergeRequest.targetUnitId),
-	unitKind: unitMergeRequest.unitKind,
-	mode: unitMergeRequest.mode,
-	state: unitMergeRequest.state,
-	proposerProfileId: unitMergeRequest.proposerProfileId,
-	proposerLabel: firstUnitLocalizationTitle(unitMergeRequest.proposerProfileId),
-	overrideOfRequestId: unitMergeRequest.overrideOfRequestId,
-	decisionId: unitMergeRequest.decisionId,
-	note: unitMergeRequest.note,
-	policyVersion: unitMergeRequest.policyVersion,
-	requiredApprovals: unitMergeRequest.requiredApprovals,
-	vetoEnabled: unitMergeRequest.vetoEnabled,
-	selfReviewForbidden: unitMergeRequest.selfReviewForbidden,
-	manifestVersion: unitMergeRequest.manifestVersion,
-	sourceUpdatedAt: unitMergeRequest.sourceUpdatedAt,
-	targetUpdatedAt: unitMergeRequest.targetUpdatedAt,
-	sourceGraphRevision: unitMergeRequest.sourceGraphRevision,
-	targetGraphRevision: unitMergeRequest.targetGraphRevision,
-	graphPlan: unitMergeRequest.graphPlan,
-	requestFingerprint: unitMergeRequest.requestFingerprint,
-	expiresAt: unitMergeRequest.expiresAt,
-	acceptedAt: unitMergeRequest.acceptedAt,
-	rejectedAt: unitMergeRequest.rejectedAt,
-	supersededAt: unitMergeRequest.supersededAt,
-	completedAt: unitMergeRequest.completedAt,
-	failedAt: unitMergeRequest.failedAt,
-	createdAt: unitMergeRequest.createdAt,
-	updatedAt: unitMergeRequest.updatedAt,
-	operationId: unitMergeOperation.id,
-	operationState: unitMergeOperation.state,
-	operationPhase: unitMergeOperation.phase,
-	operationAttemptCount: unitMergeOperation.attemptCount,
-	operationProcessedRows: unitMergeOperation.processedRows,
-	operationAvailableAt: unitMergeOperation.availableAt,
-	operationLastErrorCode: unitMergeOperation.lastErrorCode,
-	operationLastErrorMessage: unitMergeOperation.lastErrorMessage,
-	operationStartedAt: unitMergeOperation.startedAt,
-	operationCompletedAt: unitMergeOperation.completedAt,
-};
-
-type SelectedRequest = Awaited<ReturnType<typeof selectRequests>>[number];
-
-function requireUnitMergeManifestVersion(value: number): 1 {
-	if (value !== UnitMergePolicy.manifestVersion)
-		throw new Error(`Unsupported Unit merge manifest version ${value}`);
-	return value;
-}
-
-async function selectRequests(
-	executor: DatabaseExecutor,
-	where: ReturnType<typeof eq> | undefined,
-	limit: number,
-) {
-	return executor
-		.select(requestSelection)
-		.from(unitMergeRequest)
-		.leftJoin(unitMergeOperation, eq(unitMergeOperation.requestId, unitMergeRequest.id))
-		.where(where)
-		.orderBy(desc(unitMergeRequest.id))
-		.limit(limit);
-}
-
-async function presentRequests(
-	executor: DatabaseExecutor,
-	rows: readonly SelectedRequest[],
-): Promise<UnitMergeRequestView[]> {
-	const ids = rows.map((row) => row.id);
-	const reviews = ids.length
-		? await executor
-				.select({
-					requestId: unitMergeReview.requestId,
-					reviewerProfileId: unitMergeReview.reviewerProfileId,
-					reviewerLabel: firstUnitLocalizationTitle(unitMergeReview.reviewerProfileId),
-					decision: unitMergeReview.decision,
-					note: unitMergeReview.note,
-					createdAt: unitMergeReview.createdAt,
-				})
-				.from(unitMergeReview)
-				.where(inArray(unitMergeReview.requestId, ids))
-				.orderBy(unitMergeReview.createdAt, unitMergeReview.reviewerProfileId)
-		: [];
-	const byRequest = new Map<string, UnitMergeReviewView[]>();
-	for (const review of reviews) {
-		const items = byRequest.get(review.requestId) ?? [];
-		items.push({
-			reviewerProfileId: review.reviewerProfileId,
-			reviewerLabel: review.reviewerLabel,
-			decision: review.decision,
-			note: review.note,
-			createdAt: review.createdAt,
-		});
-		byRequest.set(review.requestId, items);
-	}
-	const decisionIds = [...new Set(rows.flatMap((row) => (row.decisionId ? [row.decisionId] : [])))];
-	const ruleRows = decisionIds.length
-		? await executor
-				.select({
-					decisionId: governanceDecisionRule.decisionId,
-					sourceRealmId: governanceDecisionRule.ruleSourceRealmId,
-					revisionId: governanceDecisionRule.ruleRevisionId,
-					ruleId: governanceDecisionRule.ruleId,
-				})
-				.from(governanceDecisionRule)
-				.where(inArray(governanceDecisionRule.decisionId, decisionIds))
-				.orderBy(
-					governanceDecisionRule.decisionId,
-					governanceDecisionRule.ruleSourceRealmId,
-					governanceDecisionRule.ruleId,
-				)
-		: [];
-	const rulesByDecision = new Map<string, GovernanceRuleReference[]>();
-	for (const rule of ruleRows) {
-		const items = rulesByDecision.get(rule.decisionId) ?? [];
-		items.push({
-			sourceRealmId: rule.sourceRealmId,
-			revisionId: rule.revisionId,
-			ruleId: rule.ruleId,
-		});
-		rulesByDecision.set(rule.decisionId, items);
-	}
-	return rows.map((row) => {
-		const requestReviews = byRequest.get(row.id) ?? [];
-		return {
-			id: row.id,
-			sourceUnit: { id: row.sourceUnitId, title: row.sourceTitle },
-			targetUnit: { id: row.targetUnitId, title: row.targetTitle },
-			unitKind: row.unitKind,
-			mode: row.mode,
-			state: row.state,
-			proposer: { profileId: row.proposerProfileId, label: row.proposerLabel },
-			overrideOfRequestId: row.overrideOfRequestId,
-			rules: row.decisionId ? (rulesByDecision.get(row.decisionId) ?? []) : [],
-			note: row.note,
-			policy: {
-				version: row.policyVersion,
-				requiredApprovals: row.requiredApprovals,
-				vetoEnabled: row.vetoEnabled,
-				selfReviewForbidden: row.selfReviewForbidden,
-			},
-			manifest: {
-				version: requireUnitMergeManifestVersion(row.manifestVersion),
-				sourceUpdatedAt: row.sourceUpdatedAt,
-				targetUpdatedAt: row.targetUpdatedAt,
-				sourceGraphRevision: row.sourceGraphRevision,
-				targetGraphRevision: row.targetGraphRevision,
-				graphPlan: row.graphPlan,
-				fingerprint: row.requestFingerprint,
-			},
-			approvals: requestReviews.filter(({ decision }) => decision === "approve").length,
-			rejections: requestReviews.filter(({ decision }) => decision === "reject").length,
-			reviews: requestReviews,
-			operation:
-				row.operationId &&
-				row.operationState &&
-				row.operationPhase &&
-				row.operationAttemptCount !== null &&
-				row.operationProcessedRows !== null &&
-				row.operationAvailableAt
-					? {
-							id: row.operationId,
-							state: row.operationState,
-							phase: row.operationPhase,
-							attemptCount: row.operationAttemptCount,
-							processedRows: row.operationProcessedRows,
-							availableAt: row.operationAvailableAt,
-							lastErrorCode: row.operationLastErrorCode,
-							lastErrorMessage: row.operationLastErrorMessage,
-							startedAt: row.operationStartedAt,
-							completedAt: row.operationCompletedAt,
-						}
-					: null,
-			expiresAt: row.expiresAt,
-			acceptedAt: row.acceptedAt,
-			rejectedAt: row.rejectedAt,
-			supersededAt: row.supersededAt,
-			completedAt: row.completedAt,
-			failedAt: row.failedAt,
-			createdAt: row.createdAt,
-			updatedAt: row.updatedAt,
-		};
-	});
-}
-
-export async function getUnitMergeRequest(requestId: string): Promise<UnitMergeRequestView> {
-	const rows = await selectRequests(database, eq(unitMergeRequest.id, requestId), 1);
-	const [request] = await presentRequests(database, rows);
-	if (!request) throw new UnitMergeNotFound();
-	return request;
-}
-
-export async function listUnitMergeRequests(input: {
-	readonly state?: UnitMergeRequestState;
-	readonly cursor?: string;
-	readonly limit: number;
-}) {
-	const rows = await selectRequests(
-		database,
-		and(
-			input.state ? eq(unitMergeRequest.state, input.state) : undefined,
-			input.cursor ? lt(unitMergeRequest.id, input.cursor) : undefined,
-		),
-		input.limit + 1,
-	);
-	const page = rows.slice(0, input.limit);
-	return {
-		items: await presentRequests(database, page),
-		nextCursor: rows.length > input.limit ? (page.at(-1)?.id ?? null) : null,
-	};
-}
-
-export async function preflightUnitMerge(input: {
-	readonly sourceUnitId: string;
-	readonly targetUnitId: string;
-}) {
-	const manifest = await runVoteTransaction({ family: "unit_merge", authority: "global" }, (tx) =>
-		buildUnitMergeManifest(tx, input),
-	);
-	const rows = await database
-		.select({ id: unit.id, title: firstUnitLocalizationTitle(unit.id) })
-		.from(unit)
-		.where(inArray(unit.id, [manifest.sourceUnitId, manifest.targetUnitId]));
-	const titleById = new Map(rows.map((row) => [row.id, row.title]));
-	return {
-		sourceUnit: {
-			id: manifest.sourceUnitId,
-			title: titleById.get(manifest.sourceUnitId) ?? null,
-		},
-		targetUnit: {
-			id: manifest.targetUnitId,
-			title: titleById.get(manifest.targetUnitId) ?? null,
-		},
-		unitKind: manifest.unitKind,
-		policy: {
-			version: UnitMergePolicy.version,
-			requiredApprovals: UnitMergePolicy.requiredApprovals,
-			vetoEnabled: UnitMergePolicy.vetoEnabled,
-			selfReviewForbidden: UnitMergePolicy.selfReviewForbidden,
-		},
-		manifest: {
-			version: manifest.version,
-			sourceUpdatedAt: manifest.sourceUpdatedAt,
-			targetUpdatedAt: manifest.targetUpdatedAt,
-			sourceGraphRevision: manifest.sourceGraphRevision,
-			targetGraphRevision: manifest.targetGraphRevision,
-			graphPlan: manifest.graphPlan,
-			fingerprint: manifest.requestFingerprint,
-		},
-	};
-}
-
-type CreateMergeInput = {
-	readonly sourceUnitId: string;
-	readonly targetUnitId: string;
-	readonly expectedSourceUpdatedAt: Date;
-	readonly expectedTargetUpdatedAt: Date;
-	readonly proposerProfileId: string;
-	readonly idempotencyKey: string;
-	readonly rules: readonly GovernanceRuleReference[];
-	readonly note?: string;
-};
-
-function requestInsertValues(
-	manifest: UnitMergeManifestV1,
-	input: CreateMergeInput,
-	requestId: string,
-	decisionId: string,
-	mode: UnitMergeRequestMode,
-	state: UnitMergeRequestState,
-	now: Date,
-) {
-	return {
-		id: requestId,
-		decisionId,
-		sourceUnitId: manifest.sourceUnitId,
-		targetUnitId: manifest.targetUnitId,
-		unitKind: manifest.unitKind,
-		mode,
-		state,
-		proposerProfileId: input.proposerProfileId,
-		idempotencyKey: input.idempotencyKey,
-		note: input.note,
-		policyVersion: UnitMergePolicy.version,
-		requiredApprovals: UnitMergePolicy.requiredApprovals,
-		vetoEnabled: UnitMergePolicy.vetoEnabled,
-		selfReviewForbidden: UnitMergePolicy.selfReviewForbidden,
-		manifestVersion: UnitMergePolicy.manifestVersion,
-		sourceUpdatedAt: manifest.sourceUpdatedAt,
-		targetUpdatedAt: manifest.targetUpdatedAt,
-		sourceGraphRevision: manifest.sourceGraphRevision,
-		targetGraphRevision: manifest.targetGraphRevision,
-		graphPlan: manifest.graphPlan,
-		requestFingerprint: manifest.requestFingerprint,
-		expiresAt: unitMergeRequestExpiry(now),
-		createdAt: now,
-		updatedAt: now,
-	};
-}
-
-function canonicalRuleKeys(rules: readonly GovernanceRuleReference[]): string[] {
-	return rules.map((rule) => `${rule.sourceRealmId}:${rule.revisionId}:${rule.ruleId}`).sort();
-}
-
-async function existingCommandMatches(
-	executor: DatabaseExecutor,
-	row: typeof unitMergeRequest.$inferSelect,
-	input: CreateMergeInput & { readonly overrideOfRequestId?: string },
-	mode: UnitMergeRequestMode,
-): Promise<boolean> {
-	if (!row.decisionId) return false;
-	const existingRules = await listGovernanceDecisionRules(executor, row.decisionId);
-	return (
-		row.mode === mode &&
-		row.sourceUnitId === input.sourceUnitId &&
-		row.targetUnitId === input.targetUnitId &&
-		row.sourceUpdatedAt.getTime() === input.expectedSourceUpdatedAt.getTime() &&
-		row.targetUpdatedAt.getTime() === input.expectedTargetUpdatedAt.getTime() &&
-		JSON.stringify(canonicalRuleKeys(existingRules)) ===
-			JSON.stringify(canonicalRuleKeys(input.rules)) &&
-		row.note === (input.note ?? null) &&
-		row.overrideOfRequestId === (input.overrideOfRequestId ?? null)
-	);
-}
-
-async function existingIdempotentRequest(
-	executor: DatabaseExecutor,
-	input: CreateMergeInput & { readonly overrideOfRequestId?: string },
-	mode: UnitMergeRequestMode,
-): Promise<string | null> {
-	const [existing] = await executor
-		.select()
-		.from(unitMergeRequest)
+type RequestRow = typeof unitMergeRequest.$inferSelect;
+export async function humanMergeAuthority(
+	tx: DatabaseTransaction,
+	authorization: Authorization<string>,
+): Promise<ParticipationAuthority & { principal: { kind: "auth"; authUserId: string } }> {
+	const actor = authorization.authUserId;
+	if (!actor) throw new ParticipationDenied();
+	const [self] = await tx
+		.select({ id: authEntity.entityId, revision: authEntity.revision })
+		.from(authEntity)
+		.innerJoin(users, eq(users.id, authEntity.authUserId))
 		.where(
 			and(
-				eq(unitMergeRequest.proposerProfileId, input.proposerProfileId),
-				eq(unitMergeRequest.idempotencyKey, input.idempotencyKey),
+				eq(authEntity.authUserId, actor),
+				eq(authEntity.entityId, authorization.profileId),
+				eq(authEntity.state, "active"),
+				eq(users.principalKind, "human"),
+				sql`${users.erasedAt} is null`,
 			),
 		)
-		.limit(1);
-	if (!existing) return null;
-	if (!(await existingCommandMatches(executor, existing, input, mode)))
-		throw new UnitMergeIdempotencyConflict();
-	return existing.id;
-}
-
-async function expirePendingMergeForSource(
-	tx: DatabaseTransaction,
-	sourceUnitId: string,
-	now: Date,
-): Promise<void> {
-	await tx
-		.update(unitMergeRequest)
-		.set({ state: "expired", updatedAt: now })
-		.where(
-			and(
-				eq(unitMergeRequest.sourceUnitId, sourceUnitId),
-				eq(unitMergeRequest.state, "pending_review"),
-				lte(unitMergeRequest.expiresAt, now),
-			),
-		);
-}
-
-async function auditMerge(
-	tx: DatabaseTransaction,
-	input: {
-		readonly action: string;
-		readonly actorProfileId: string;
-		readonly requestId: string;
-		readonly sourceUnitId: string;
-		readonly targetUnitId: string;
-		readonly governanceDecisionId?: string;
-		readonly details?: Record<string, unknown>;
-	},
-): Promise<void> {
-	await recordAuditEvent(tx, {
-		category: "admin_activity",
-		outcome: "succeeded",
-		actor: { kind: "profile", profileId: input.actorProfileId },
-		authority: { kind: "platform" },
-		action: input.action,
-		governanceDecisionId: input.governanceDecisionId,
-		target: { kind: "unit_merge_request", id: input.requestId },
-		details: {
-			sourceUnitId: input.sourceUnitId,
-			targetUnitId: input.targetUnitId,
-			...input.details,
+		.limit(1)
+		.for("share");
+	if (!self) throw new ParticipationDenied("Merge requires a current human account");
+	const admitted = ParticipationAuthoritySchema.parse(
+		authorization.participationAuthority ?? {
+			principal: { kind: "auth", authUserId: actor },
+			actingEntityId: self.id,
+			authorizationRevision: self.revision,
 		},
-	});
-}
-
-function graphLockUnitIds(
-	sourceUnitId: string,
-	targetUnitId: string,
-	plan: UnitMergeGraphPlanV1,
-): string[] {
-	return [
-		...new Set(
-			[
-				sourceUnitId,
-				targetUnitId,
-				plan.sourceMainUnitId,
-				plan.targetMainUnitId,
-				plan.destinationMainUnitId,
-			].filter((unitId): unitId is string => Boolean(unitId)),
-		),
-	].sort();
-}
-
-async function acceptUnitMerge(
-	tx: DatabaseTransaction,
-	input: {
-		readonly requestId: string;
-		readonly sourceUnitId: string;
-		readonly targetUnitId: string;
-		readonly graphPlan: UnitMergeGraphPlanV1;
-		readonly actorProfileId: string;
-		readonly governanceDecisionId: string;
-		readonly mode: UnitMergeRequestMode;
-		readonly now: Date;
-	},
-): Promise<string> {
-	const rules = await listGovernanceDecisionRules(tx, input.governanceDecisionId);
-	await validateGovernanceRuleReferences(tx, {
-		authority: { kind: "platform" },
-		rules,
-	});
-	const [operation] = await tx
-		.insert(unitMergeOperation)
-		.values({
-			requestId: input.requestId,
-			sourceUnitId: input.sourceUnitId,
-			targetUnitId: input.targetUnitId,
-			availableAt: input.now,
-			createdAt: input.now,
-			updatedAt: input.now,
-		})
-		.returning({ id: unitMergeOperation.id });
-	if (!operation) throw new Error("Accepted Unit merge did not create an operation");
-	const lockUnitIds = graphLockUnitIds(input.sourceUnitId, input.targetUnitId, input.graphPlan);
-	for (const unitId of lockUnitIds)
-		await tx.execute(
-			sql`select pg_advisory_xact_lock(hashtextextended('unit-merge:' || ${unitId}::text, 0))`,
-		);
-	await tx.insert(unitMergeGraphLock).values(
-		lockUnitIds.map((unitId) => ({
-			unitId,
-			operationId: operation.id,
-			createdAt: input.now,
-		})),
 	);
-	await tx.insert(unitMergeRedirect).values({
-		sourceUnitId: input.sourceUnitId,
-		targetUnitId: input.targetUnitId,
-		requestId: input.requestId,
-		createdAt: input.now,
+	if (admitted.principal.kind !== "auth" || admitted.principal.authUserId !== actor)
+		throw new ParticipationDenied("Merge review cannot use a service principal");
+	return { ...admitted, principal: admitted.principal };
+}
+function manifestFromRow(row: RequestRow) {
+	return MergeManifestSchema.parse({
+		owner: row.owner,
+		shape: row.shape,
+		sourceUnit: { id: row.sourceUnitId, title: row.sourceTitle },
+		targetUnit: { id: row.targetUnitId, title: row.targetTitle },
+		sourceRevision: row.sourceRevision,
+		targetRevision: row.targetRevision,
+		sourceUpdatedAt: row.sourceUpdatedAt.toISOString(),
+		targetUpdatedAt: row.targetUpdatedAt.toISOString(),
+		status: row.statusAtRequest,
+		visibility: row.visibilityAtRequest,
+		plan: MergePlanSchema.parse(row.plan),
+		fingerprint: row.requestFingerprint,
 	});
-	const [tombstoned] = await tx
-		.update(unit)
-		.set({ deletedAt: input.now, postTargetingLocked: true, updatedAt: input.now })
-		.where(and(eq(unit.id, input.sourceUnitId), sql`${unit.deletedAt} is null`))
-		.returning({ id: unit.id });
-	if (!tombstoned) throw new UnitNotFound();
-	await tx
-		.update(unitMergeRequest)
-		.set({
-			state: "accepted",
-			acceptedAt: input.now,
-			updatedAt: input.now,
-		})
-		.where(eq(unitMergeRequest.id, input.requestId));
-	await auditMerge(tx, {
-		action:
-			input.mode === "privileged_direct" ? "unit.merge.direct.accept" : "unit.merge.review.accept",
-		actorProfileId: input.actorProfileId,
-		requestId: input.requestId,
-		sourceUnitId: input.sourceUnitId,
-		targetUnitId: input.targetUnitId,
-		governanceDecisionId: input.governanceDecisionId,
-		details: { operationId: operation.id, graphPlan: input.graphPlan },
-	});
-	return operation.id;
 }
-
-async function generateUuidv7(tx: DatabaseTransaction): Promise<string> {
-	type GeneratedUuidRow = { readonly id: string };
-	const generated = await tx.execute<GeneratedUuidRow>(sql`select uuidv7() as id`);
-	const id = generated.rows[0]?.id;
-	if (!id) throw new Error("UUIDv7 generation returned no id");
-	return id;
-}
-
-function mapCreateConstraint(error: unknown): never {
-	const constraint = databaseConstraintName(error);
-	if (constraint === "unit_merge_request_proposer_idempotency_key")
-		throw new UnitMergeIdempotencyConflict();
-	if (
-		constraint === "unit_merge_request_active_source_key" ||
-		constraint === "unit_merge_request_override_of_key" ||
-		constraint === "unit_merge_redirect_pkey" ||
-		constraint === "unit_merge_graph_lock_pkey" ||
-		constraint === "unit_merge_operation_source_key"
-	)
-		throw new UnitMergeRequestConflict();
-	throw error;
-}
-
-export async function createReviewedUnitMerge(input: CreateMergeInput) {
-	let requestId: string;
-	try {
-		requestId = await runVoteTransaction(
-			{ family: "unit_merge", authority: "global" },
-			async (tx) => {
-				await expirePendingMergeForSource(tx, input.sourceUnitId, new Date());
-				const existing = await existingIdempotentRequest(tx, input, "reviewed");
-				if (existing) return existing;
-				const manifest = await buildUnitMergeManifest(tx, input);
-				const now = new Date();
-				const newRequestId = await generateUuidv7(tx);
-				const decision = await createGovernanceDecision(tx, {
-					action: "unit.merge.propose",
-					actorProfileId: input.proposerProfileId,
-					authority: { kind: "platform" },
-					targetUnitId: manifest.sourceUnitId,
-					subject: { kind: "unit_merge_request", id: newRequestId },
-					basis: { kind: "rules", rules: input.rules },
-				});
-				const [created] = await tx
-					.insert(unitMergeRequest)
-					.values(
-						requestInsertValues(
-							manifest,
-							input,
-							newRequestId,
-							decision.id,
-							"reviewed",
-							"pending_review",
-							now,
-						),
-					)
-					.returning({ id: unitMergeRequest.id });
-				if (!created) throw new Error("Unit merge proposal insertion returned no row");
-				await auditMerge(tx, {
-					action: "unit.merge.propose",
-					actorProfileId: input.proposerProfileId,
-					requestId: created.id,
-					sourceUnitId: manifest.sourceUnitId,
-					targetUnitId: manifest.targetUnitId,
-					governanceDecisionId: decision.id,
-					details: {
-						policyVersion: UnitMergePolicy.version,
-						requiredApprovals: UnitMergePolicy.requiredApprovals,
-						requestFingerprint: manifest.requestFingerprint,
-					},
-				});
-				return created.id;
-			},
-		);
-	} catch (error) {
-		if (databaseConstraintName(error) === "unit_merge_request_proposer_idempotency_key") {
-			const existing = await existingIdempotentRequest(database, input, "reviewed");
-			if (existing) return getUnitMergeRequest(existing);
-		}
-		mapCreateConstraint(error);
-	}
-	return getUnitMergeRequest(requestId);
-}
-
-type ReviewTransactionResult =
-	| { readonly outcome: "ok"; readonly requestId: string }
-	| { readonly outcome: "expired" }
-	| { readonly outcome: "stale" };
-
-export async function reviewUnitMerge(input: {
-	readonly requestId: string;
-	readonly reviewerProfileId: string;
-	readonly decision: UnitMergeReviewDecision;
-	readonly requestFingerprint: string;
-	readonly note?: string;
-}) {
-	let result: ReviewTransactionResult;
-	try {
-		result = await runVoteTransaction(
-			{ family: "unit_merge", authority: "global" },
-			async (tx): Promise<ReviewTransactionResult> => {
-				const [request] = await tx
-					.select()
-					.from(unitMergeRequest)
-					.where(eq(unitMergeRequest.id, input.requestId))
-					.limit(1)
-					.for("update");
-				if (!request) throw new UnitMergeNotFound();
-				if (request.state !== "pending_review" || request.mode !== "reviewed")
-					throw new UnitMergeRequestNotPending();
-				const now = new Date();
-				if (request.expiresAt.getTime() <= now.getTime()) {
-					await tx
-						.update(unitMergeRequest)
-						.set({ state: "expired", updatedAt: now })
-						.where(eq(unitMergeRequest.id, request.id));
-					return { outcome: "expired" };
-				}
-				if (!request.decisionId) {
-					await tx
-						.update(unitMergeRequest)
-						.set({ state: "superseded", supersededAt: now, updatedAt: now })
-						.where(eq(unitMergeRequest.id, request.id));
-					return { outcome: "stale" };
-				}
-				if (request.requestFingerprint !== input.requestFingerprint)
-					throw new UnitMergeReviewFingerprintMismatch();
-				if (request.selfReviewForbidden && request.proposerProfileId === input.reviewerProfileId)
-					throw new UnitMergeReviewSelfForbidden();
-
-				let manifest: UnitMergeManifestV1;
-				try {
-					manifest = await requireCurrentUnitMergeManifest(tx, {
-						sourceUnitId: request.sourceUnitId,
-						targetUnitId: request.targetUnitId,
-						requestFingerprint: request.requestFingerprint,
-					});
-				} catch (error) {
-					if (!isUnitMergeManifestStaleness(error)) throw error;
-					await tx
-						.update(unitMergeRequest)
-						.set({ state: "superseded", supersededAt: now, updatedAt: now })
-						.where(eq(unitMergeRequest.id, request.id));
-					return { outcome: "stale" };
-				}
-
-				await tx.insert(unitMergeReview).values({
-					requestId: request.id,
-					reviewerProfileId: input.reviewerProfileId,
-					decision: input.decision,
-					note: input.note,
-					requestFingerprint: input.requestFingerprint,
-					createdAt: now,
-				});
-				await auditMerge(tx, {
-					action: `unit.merge.review.${input.decision}`,
-					actorProfileId: input.reviewerProfileId,
-					requestId: request.id,
-					sourceUnitId: request.sourceUnitId,
-					targetUnitId: request.targetUnitId,
-					governanceDecisionId: request.decisionId,
-					details: { requestFingerprint: input.requestFingerprint, note: input.note },
-				});
-				if (input.decision === "reject" && request.vetoEnabled) {
-					await tx
-						.update(unitMergeRequest)
-						.set({ state: "rejected", rejectedAt: now, updatedAt: now })
-						.where(eq(unitMergeRequest.id, request.id));
-					return { outcome: "ok", requestId: request.id };
-				}
-				const approvals = await tx
-					.select({ reviewerProfileId: unitMergeReview.reviewerProfileId })
-					.from(unitMergeReview)
-					.where(
-						and(eq(unitMergeReview.requestId, request.id), eq(unitMergeReview.decision, "approve")),
-					)
-					.limit(request.requiredApprovals);
-				if (approvals.length >= request.requiredApprovals)
-					await acceptUnitMerge(tx, {
-						requestId: request.id,
-						sourceUnitId: request.sourceUnitId,
-						targetUnitId: request.targetUnitId,
-						graphPlan: manifest.graphPlan,
-						actorProfileId: input.reviewerProfileId,
-						governanceDecisionId: request.decisionId,
-						mode: "reviewed",
-						now,
-					});
-				return { outcome: "ok", requestId: request.id };
-			},
-		);
-	} catch (error) {
-		const constraint = databaseConstraintName(error);
-		if (constraint === "unit_merge_review_pkey") throw new UnitMergeReviewDuplicate();
-		if (constraint === "unit_merge_review_self_forbidden") throw new UnitMergeReviewSelfForbidden();
-		if (constraint === "unit_merge_review_fingerprint_stale")
-			throw new UnitMergeReviewFingerprintMismatch();
-		mapCreateConstraint(error);
-	}
-	if (result.outcome === "expired") throw new UnitMergeRequestExpired();
-	if (result.outcome === "stale") throw new UnitMergeManifestStale();
-	return getUnitMergeRequest(result.requestId);
-}
-
-export async function retryUnitMerge(input: {
-	readonly requestId: string;
-	readonly actorProfileId: string;
-}) {
-	await database.transaction(async (tx) => {
-		const [operation] = await tx
+async function views(tx: DatabaseTransaction, rows: readonly RequestRow[]) {
+	if (!rows.length) return [];
+	const ids = rows.map((row) => row.id);
+	const [reviews, operations, rules] = await Promise.all([
+		tx
+			.select()
+			.from(unitMergeReview)
+			.where(inArray(unitMergeReview.requestId, ids))
+			.limit(ids.length * 2),
+		tx
 			.select()
 			.from(unitMergeOperation)
-			.where(eq(unitMergeOperation.requestId, input.requestId))
+			.where(inArray(unitMergeOperation.requestId, ids))
+			.limit(ids.length),
+		tx
+			.select()
+			.from(governanceDecisionRule)
+			.where(
+				inArray(
+					governanceDecisionRule.decisionId,
+					rows.map((row) => row.decisionId),
+				),
+			)
+			.limit(rows.length * 32),
+	]);
+	return rows.map((row) => {
+		const votes = reviews.filter((vote) => vote.requestId === row.id),
+			op = operations.find((op) => op.requestId === row.id);
+		return MergeRequestSchema.parse({
+			id: row.id,
+			state: row.state,
+			manifest: manifestFromRow(row),
+			proposer: { entityId: row.proposerProfileId },
+			note: row.note,
+			requiredApprovals: 2,
+			rules: rules
+				.filter((rule) => rule.decisionId === row.decisionId)
+				.map((rule) => ({
+					sourceRealmId: rule.ruleSourceRealmId,
+					revisionId: rule.ruleRevisionId,
+					ruleId: rule.ruleId,
+				})),
+			approvals: votes.filter((v) => v.decision === "approve").length,
+			rejections: votes.filter((v) => v.decision === "reject").length,
+			reviews: votes.map((v) => ({
+				entityId: v.reviewerProfileId,
+				decision: v.decision,
+				note: v.note,
+				createdAt: v.createdAt.toISOString(),
+			})),
+			operation: op
+				? {
+						id: op.id,
+						state: op.state,
+						phase: op.phase,
+						processedRows: op.processedRows,
+						totalItems: op.totalItems,
+						resolvedItems: op.resolvedItems,
+						attemptCount: op.attemptCount,
+						availableAt: op.availableAt.toISOString(),
+						lastErrorCode: op.lastErrorCode,
+						lastErrorMessage: op.lastErrorMessage,
+						startedAt: op.startedAt?.toISOString() ?? null,
+						completedAt: op.completedAt?.toISOString() ?? null,
+					}
+				: null,
+			expiresAt: row.expiresAt.toISOString(),
+			acceptedAt: row.acceptedAt?.toISOString() ?? null,
+			canonicalizedAt: row.canonicalizedAt?.toISOString() ?? null,
+			completedAt: row.completedAt?.toISOString() ?? null,
+			createdAt: row.createdAt.toISOString(),
+		});
+	});
+}
+async function requireRequest(tx: DatabaseTransaction, id: string, lock = false) {
+	const query = tx.select().from(unitMergeRequest).where(eq(unitMergeRequest.id, id)).limit(1);
+	const [row] = await (lock ? query.for("update") : query);
+	if (!row) throw new UnitMergeNotFound();
+	return row;
+}
+async function oneView(tx: DatabaseTransaction, row: RequestRow) {
+	const [view] = await views(tx, [row]);
+	if (!view) throw new UnitMergeNotFound();
+	return view;
+}
+export async function preflightUnitMerge(
+	authorization: Authorization<string>,
+	input: z.input<typeof MergePreflightSchema>,
+) {
+	const value = MergePreflightSchema.parse(input);
+	return database.transaction(async (tx) => {
+		await authorization.platform.ensureCapability("unit.merge.propose", tx);
+		await humanMergeAuthority(tx, authorization);
+		return buildUnitMergeManifest(tx, authorization, value);
+	});
+}
+export async function createReviewedUnitMerge(
+	authorization: Authorization<string>,
+	input: z.input<typeof MergeCreateSchema>,
+) {
+	const value = MergeCreateSchema.parse(input);
+	if (
+		value.sourceUnitId !== value.confirmationSourceUnitId ||
+		value.targetUnitId !== value.confirmationTargetUnitId
+	)
+		throw new UnitMergeConfirmationInvalid();
+	return database.transaction(async (tx) => {
+		await authorization.platform.ensureCapability("unit.merge.propose", tx);
+		const authority = await humanMergeAuthority(tx, authorization);
+		const [existing] = await tx
+			.select()
+			.from(unitMergeRequest)
+			.where(
+				and(
+					eq(unitMergeRequest.proposerAuthUserId, authority.principal.authUserId),
+					eq(unitMergeRequest.idempotencyKey, value.idempotencyKey),
+				),
+			)
+			.limit(1);
+		if (existing) {
+			if (existing.requestFingerprint !== value.requestFingerprint)
+				throw new UnitMergeIdempotencyConflict();
+			return oneView(tx, existing);
+		}
+		const manifest = await buildUnitMergeManifest(tx, authorization, value);
+		assertMergeManifestFingerprint(manifest, value.requestFingerprint);
+		if (
+			manifest.sourceRevision !== value.expectedSourceRevision ||
+			manifest.targetRevision !== value.expectedTargetRevision
+		)
+			throw new UnitMergeManifestStale();
+		const id = randomUUID(),
+			decision = await createGovernanceDecision(tx, {
+				action: "unit.merge.propose",
+				actorProfileId: authorization.profileId,
+				authority: { kind: "platform" },
+				targetUnitId: value.sourceUnitId,
+				subject: { kind: "unit_merge_request", id },
+				basis: { kind: "rules", rules: value.rules },
+			});
+		const [row] = await tx
+			.insert(unitMergeRequest)
+			.values({
+				id,
+				sourceUnitId: value.sourceUnitId,
+				targetUnitId: value.targetUnitId,
+				owner: manifest.owner,
+				shape: manifest.shape,
+				sourceRevision: manifest.sourceRevision,
+				targetRevision: manifest.targetRevision,
+				sourceUpdatedAt: new Date(manifest.sourceUpdatedAt),
+				targetUpdatedAt: new Date(manifest.targetUpdatedAt),
+				statusAtRequest: manifest.status,
+				visibilityAtRequest: manifest.visibility,
+				sourceTitle: manifest.sourceUnit.title,
+				targetTitle: manifest.targetUnit.title,
+				proposerProfileId: authorization.profileId,
+				proposerAuthUserId: authority.principal.authUserId,
+				proposerAuthority: authority,
+				idempotencyKey: value.idempotencyKey,
+				decisionId: decision.id,
+				requestFingerprint: manifest.fingerprint,
+				plan: manifest.plan,
+				note: value.note,
+				expiresAt: unitMergeRequestExpiry(new Date()),
+			})
+			.returning();
+		if (!row) throw new Error("Merge request insertion did not return a row");
+		await recordAuditEvent(tx, {
+			category: "admin_activity",
+			outcome: "succeeded",
+			actor: { kind: "auth", authUserId: authority.principal.authUserId },
+			authority: { kind: "platform" },
+			action: "unit.merge.propose",
+			governanceDecisionId: decision.id,
+			target: { kind: "unit_merge_request", id },
+			details: {
+				owner: row.owner,
+				shape: row.shape,
+				sourceUnitId: row.sourceUnitId,
+				targetUnitId: row.targetUnitId,
+				plan: row.plan,
+			},
+		});
+		return oneView(tx, row);
+	});
+}
+export async function getUnitMergeRequest(authorization: Authorization<string>, id: string) {
+	return database.transaction(
+		async (tx) => {
+			await authorization.platform.ensureCapability("unit.governance.read", tx);
+			return oneView(tx, await requireRequest(tx, id));
+		},
+		{ isolationLevel: "repeatable read" },
+	);
+}
+export async function listUnitMergeRequests(
+	authorization: Authorization<string>,
+	input: z.input<typeof MergeListSchema>,
+) {
+	const value = MergeListSchema.parse(input);
+	return database.transaction(
+		async (tx) => {
+			await authorization.platform.ensureCapability("unit.governance.read", tx);
+			const rows = await tx
+				.select()
+				.from(unitMergeRequest)
+				.where(
+					and(
+						value.state ? eq(unitMergeRequest.state, value.state) : undefined,
+						value.cursor ? lt(unitMergeRequest.id, value.cursor) : undefined,
+					),
+				)
+				.orderBy(desc(unitMergeRequest.id))
+				.limit(value.limit + 1);
+			const page = rows.slice(0, value.limit);
+			return {
+				items: await views(tx, page),
+				nextCursor: rows.length > value.limit ? (page.at(-1)?.id ?? null) : null,
+			};
+		},
+		{ isolationLevel: "repeatable read" },
+	);
+}
+export async function reviewUnitMerge(
+	authorization: Authorization<string>,
+	requestId: string,
+	input: z.input<typeof MergeReviewSchema>,
+) {
+	const value = MergeReviewSchema.parse(input);
+	return database.transaction(async (tx) => {
+		await authorization.platform.ensureCapability("unit.merge.review", tx);
+		const authority = await humanMergeAuthority(tx, authorization),
+			row = await requireRequest(tx, requestId, true);
+		if (row.state !== "pending_review") throw new UnitMergeRequestNotPending();
+		if (row.expiresAt <= new Date()) throw new UnitMergeRequestExpired();
+		if (row.proposerAuthUserId === authority.principal.authUserId)
+			throw new UnitMergeReviewSelfForbidden();
+		if (row.requestFingerprint !== value.requestFingerprint)
+			throw new UnitMergeReviewFingerprintMismatch();
+		const [existing] = await tx
+			.select({ id: unitMergeReview.requestId })
+			.from(unitMergeReview)
+			.where(
+				and(
+					eq(unitMergeReview.requestId, requestId),
+					eq(unitMergeReview.reviewerAuthUserId, authority.principal.authUserId),
+				),
+			)
+			.limit(1);
+		if (existing) throw new UnitMergeReviewDuplicate();
+		const current = await buildUnitMergeManifest(tx, authorization, {
+			sourceUnitId: row.sourceUnitId,
+			targetUnitId: row.targetUnitId,
+			plan: MergePlanSchema.parse(row.plan),
+		});
+		assertMergeManifestFingerprint(current, row.requestFingerprint);
+		await tx.insert(unitMergeReview).values({
+			requestId,
+			reviewerAuthUserId: authority.principal.authUserId,
+			reviewerProfileId: authorization.profileId,
+			decision: value.decision,
+			requestFingerprint: value.requestFingerprint,
+			note: value.note,
+		});
+		if (value.decision === "reject")
+			await tx
+				.update(unitMergeRequest)
+				.set({ state: "rejected" })
+				.where(eq(unitMergeRequest.id, requestId));
+		else {
+			const votes = await tx
+				.select({ decision: unitMergeReview.decision })
+				.from(unitMergeReview)
+				.where(eq(unitMergeReview.requestId, requestId))
+				.limit(2);
+			if (votes.length === 2 && votes.every((vote) => vote.decision === "approve")) {
+				await tx
+					.update(unitMergeRequest)
+					.set({ state: "accepted", acceptedAt: new Date() })
+					.where(eq(unitMergeRequest.id, requestId));
+				const [operation] = await tx
+					.insert(unitMergeOperation)
+					.values({
+						requestId,
+						sourceUnitId: row.sourceUnitId,
+						targetUnitId: row.targetUnitId,
+						owner: row.owner,
+						shard: createHash("sha256").update(requestId).digest().readUInt16BE(0) % 64,
+						executorAuthUserId: row.proposerAuthUserId,
+						executorProfileId: row.proposerProfileId,
+						executorAuthority: ParticipationAuthoritySchema.parse(row.proposerAuthority),
+					})
+					.returning({ id: unitMergeOperation.id });
+				if (!operation) throw new Error("Merge operation insertion did not return a row");
+				await tx
+					.insert(unitMergeGraphLock)
+					.values(
+						[row.sourceUnitId, row.targetUnitId]
+							.sort()
+							.map((unitId) => ({ unitId, operationId: operation.id })),
+					);
+			}
+		}
+		await recordAuditEvent(tx, {
+			category: "admin_activity",
+			outcome: "succeeded",
+			actor: { kind: "auth", authUserId: authority.principal.authUserId },
+			authority: { kind: "platform" },
+			action: `unit.merge.review.${value.decision}`,
+			target: { kind: "unit_merge_request", id: requestId },
+			details: { requestFingerprint: row.requestFingerprint },
+		});
+		return oneView(tx, await requireRequest(tx, requestId));
+	});
+}
+export async function retryUnitMerge(authorization: Authorization<string>, requestId: string) {
+	return database.transaction(async (tx) => {
+		await authorization.platform.ensureCapability("unit.merge", tx);
+		const authority = await humanMergeAuthority(tx, authorization),
+			row = await requireRequest(tx, requestId, true);
+		const [op] = await tx
+			.select()
+			.from(unitMergeOperation)
+			.where(eq(unitMergeOperation.requestId, requestId))
 			.limit(1)
 			.for("update");
-		if (!operation) throw new UnitMergeNotFound();
-		if (operation.state !== "failed") throw new UnitMergeRetryUnavailable();
-		const now = new Date();
+		if (!op || !["failed", "action_required", "retry_wait"].includes(op.state))
+			throw new UnitMergeRetryUnavailable();
 		await tx
 			.update(unitMergeOperation)
 			.set({
 				state: "pending",
-				...(isEntityMeasurementMergePhase(operation.phase)
-					? {
-							phase: "entity_measurement_preflight" as const,
-							measurementPreflightCursorEntityId: null,
-						}
-					: {}),
-				availableAt: now,
+				availableAt: new Date(),
 				leaseToken: null,
 				leaseExpiresAt: null,
+				executorAuthUserId: authority.principal.authUserId,
+				executorProfileId: authorization.profileId,
+				executorAuthority: authority,
 				lastErrorCode: null,
 				lastErrorMessage: null,
-				attemptCount: 0,
-				updatedAt: now,
 			})
-			.where(eq(unitMergeOperation.id, operation.id));
+			.where(eq(unitMergeOperation.id, op.id));
 		await tx
 			.update(unitMergeRequest)
-			.set({ state: "accepted", failedAt: null, updatedAt: now })
-			.where(eq(unitMergeRequest.id, operation.requestId));
-		await auditMerge(tx, {
-			action: "unit.merge.execution.retry",
-			actorProfileId: input.actorProfileId,
-			requestId: operation.requestId,
-			sourceUnitId: operation.sourceUnitId,
-			targetUnitId: operation.targetUnitId,
-			details: { operationId: operation.id, attemptCount: operation.attemptCount },
+			.set({ state: "executing" })
+			.where(eq(unitMergeRequest.id, row.id));
+		await recordAuditEvent(tx, {
+			category: "admin_activity",
+			outcome: "succeeded",
+			actor: { kind: "auth", authUserId: authority.principal.authUserId },
+			authority: { kind: "platform" },
+			action: "unit.merge.retry",
+			target: { kind: "unit_merge_request", id: requestId },
+			details: { phase: op.phase },
 		});
+		return oneView(tx, await requireRequest(tx, requestId));
 	});
-	return getUnitMergeRequest(input.requestId);
 }
-
-/** Lazily expires a bounded page; the worker invokes this independently of execution. */
-export async function expireUnitMergeRequests(now = new Date(), limit = 100): Promise<number> {
-	const result = await database.execute<{ id: string }>(sql`
-		with candidates as (
-			select id
-			from ${unitMergeRequest}
-			where ${unitMergeRequest.state} = 'pending_review'
-				and ${unitMergeRequest.expiresAt} <= ${now}
-			order by ${unitMergeRequest.expiresAt}, ${unitMergeRequest.id}
-			limit ${limit}
-			for update skip locked
-		)
-		update ${unitMergeRequest} as request
-		set state = 'expired', updated_at = ${now}
-		from candidates
-		where request.id = candidates.id
-		returning request.id
-	`);
-	return result.rows.length;
+export function presentMergeItem(row: typeof unitMergeReconciliationItem.$inferSelect) {
+	return MergeItemSchema.parse({
+		id: row.id,
+		kind: row.kind,
+		state: row.state,
+		sourceKey: row.sourceKey,
+		decision: row.decision,
+		sourceReference: { owner: row.owner, id: row.sourceUnitId },
+		targetReference: { owner: row.owner, id: row.targetUnitId },
+		sourceNameId: row.sourceNameId,
+		sourceNameRevision: row.sourceNameRevision,
+		targetNameId: row.targetNameId,
+		targetNameRevision: row.targetNameRevision,
+		sourceIdentifierId: row.sourceIdentifierId,
+		sourceIdentifierRevision: row.sourceIdentifierRevision,
+		targetIdentifierId: row.targetIdentifierId,
+		targetIdentifierRevision: row.targetIdentifierRevision,
+		sourceSemanticId: row.sourceSemanticId,
+		sourceSemanticVersion: row.sourceSemanticVersion,
+		sourceRecordId: row.sourceRecordId,
+		mappingKey: row.mappingKey,
+		sourceBindingRevision: row.sourceBindingRevision,
+		targetBindingRevision: row.targetBindingRevision,
+		errorCode: row.errorCode,
+		resolvedAt: row.resolvedAt?.toISOString() ?? null,
+	});
+}
+export async function listMergeReconciliationItems(
+	authorization: Authorization<string>,
+	requestId: string,
+	input: z.input<typeof MergeItemListSchema>,
+) {
+	const value = MergeItemListSchema.parse(input);
+	return database.transaction(async (tx) => {
+		await authorization.platform.ensureCapability("unit.governance.read", tx);
+		await requireRequest(tx, requestId);
+		const t = unitMergeReconciliationItem,
+			rows = await tx
+				.select()
+				.from(t)
+				.where(
+					and(
+						eq(t.requestId, requestId),
+						value.state ? eq(t.state, value.state) : undefined,
+						value.cursor ? lt(t.id, value.cursor) : undefined,
+					),
+				)
+				.orderBy(desc(t.id))
+				.limit(value.limit + 1);
+		const page = rows.slice(0, value.limit);
+		return {
+			items: page.map(presentMergeItem),
+			nextCursor: rows.length > value.limit ? (page.at(-1)?.id ?? null) : null,
+		};
+	});
+}
+export async function expireUnitMergeRequests(now = new Date(), limit = 100) {
+	return database.transaction(async (tx) => {
+		const rows = await tx
+			.select({ id: unitMergeRequest.id })
+			.from(unitMergeRequest)
+			.where(
+				and(eq(unitMergeRequest.state, "pending_review"), lte(unitMergeRequest.expiresAt, now)),
+			)
+			.orderBy(unitMergeRequest.expiresAt, unitMergeRequest.id)
+			.limit(Math.min(100, limit))
+			.for("update", { skipLocked: true });
+		if (rows.length)
+			await tx
+				.update(unitMergeRequest)
+				.set({ state: "expired" })
+				.where(
+					inArray(
+						unitMergeRequest.id,
+						rows.map((row) => row.id),
+					),
+				);
+		return rows.length;
+	});
 }

@@ -135,6 +135,7 @@ export interface UnitMergeReconciliationPlan {
 	readonly semantics: "retain_source";
 	readonly structure: "retain_source";
 	readonly bindings: "rebind_paused" | "pause_at_source";
+	readonly retainedAccess: "target_readers";
 }
 export const TimedMediaUnitKindValues = ["video", "audio"] as const;
 /** Request-path bound for replacing or reading external Audio tracks on one Video. */

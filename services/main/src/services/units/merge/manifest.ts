@@ -1,263 +1,127 @@
 import { createHash } from "node:crypto";
-
-import { eq, inArray, sql } from "drizzle-orm";
-
+import { inArray, sql } from "drizzle-orm";
+import { CatalogReferenceSchema } from "@rezics/reference";
+import type { Authorization } from "../../authorization";
+import type { DatabaseTransaction } from "../../database";
+import {
+	authEntity,
+	entityParticipation,
+	unitMergeGraphLock,
+	unitMergeRedirect,
+} from "../../database/schema";
 import {
 	UnitMergeKindIneligible,
 	UnitMergeKindMismatch,
 	UnitMergeManifestStale,
 	UnitMergeRequestConflict,
 } from "../../api/governance/errors";
-import { ContentLabelRegistryIds } from "../../bootstrap/data/content-labels";
-import type { DatabaseTransaction } from "../../database";
-import { ContentLabelUnitMergeForbidden } from "../../database/errors";
-import {
-	type UnitMergeEligibleKind,
-	UnitMergeEligibleKindValues,
-	unit,
-	unitMergeGraphGuard,
-	unitMergeRedirect,
-	unitVariant,
-	type UnitMergeGraphPlanV1,
-} from "../../database/schema";
+import { readUnitStateById, type UnitState } from "../query";
+import { readUnitPresentationsInTransaction } from "../presentation-reader";
 import { UnitNotFound } from "../errors";
-import { requireEntityMeasurementsMergeable } from "./entity-measurements";
-import { UnitMergePolicy } from "./policy";
-
-const EligibleKinds: ReadonlySet<string> = new Set(UnitMergeEligibleKindValues);
-const ProtectedRegistryUnitIds: ReadonlySet<string> = new Set(ContentLabelRegistryIds);
-const ManifestStalenessTypes: ReadonlySet<string> = new Set([
-	"UnitMergeManifestStale",
-	"UnitMergeRequestConflict",
-	"UnitNotFound",
-	"UnitMergeKindMismatch",
-	"UnitMergeKindIneligible",
-]);
-
-export function isUnitMergeManifestStaleness(error: unknown): boolean {
-	const type = error && typeof error === "object" ? Reflect.get(error, "type") : undefined;
-	return typeof type === "string" && ManifestStalenessTypes.has(type);
+import { MergePlanSchema, MergeManifestSchema, type DefaultMergePlan } from "./contracts";
+import type { z } from "zod";
+export type UnitMergeManifest = z.output<typeof MergeManifestSchema>;
+export function mergeFingerprint(value: Omit<UnitMergeManifest, "fingerprint">) {
+	return createHash("sha256").update(JSON.stringify(value)).digest("hex");
 }
-
-function isUnitMergeEligibleKind(value: string): value is UnitMergeEligibleKind {
-	return EligibleKinds.has(value);
+export function compatibleMergeIdentities(
+	source: Pick<
+		UnitState,
+		"shape" | "reference" | "status" | "visibility" | "contentRating" | "moderationStatus"
+	>,
+	target: Pick<
+		UnitState,
+		"shape" | "reference" | "status" | "visibility" | "contentRating" | "moderationStatus"
+	>,
+) {
+	return (
+		source.reference.owner === target.reference.owner &&
+		source.shape === target.shape &&
+		source.status === target.status &&
+		source.status !== "archived" &&
+		source.visibility === target.visibility &&
+		source.contentRating === target.contentRating &&
+		source.moderationStatus === "approved" &&
+		target.moderationStatus === "approved"
+	);
 }
-
-export function requireUnitMergeRegistryEligibility(input: {
-	readonly sourceUnitId: string;
-	readonly targetUnitId: string;
-}): void {
-	if (
-		ProtectedRegistryUnitIds.has(input.sourceUnitId) ||
-		ProtectedRegistryUnitIds.has(input.targetUnitId)
-	)
-		throw new ContentLabelUnitMergeForbidden();
-}
-
-type LockedMergeUnit = {
-	readonly id: string;
-	readonly kind: string;
-	readonly deletedAt: Date | null;
-	readonly updatedAt: Date;
-};
-
-export type UnitMergeManifestV1 = {
-	readonly version: 1;
-	readonly sourceUnitId: string;
-	readonly targetUnitId: string;
-	readonly unitKind: UnitMergeEligibleKind;
-	readonly sourceUpdatedAt: Date;
-	readonly targetUpdatedAt: Date;
-	readonly sourceGraphRevision: number;
-	readonly targetGraphRevision: number;
-	readonly graphPlan: UnitMergeGraphPlanV1;
-	readonly requestFingerprint: string;
-};
-
-async function lockMergeUnits(
-	tx: DatabaseTransaction,
-	sourceUnitId: string,
-	targetUnitId: string,
-): Promise<readonly [LockedMergeUnit, LockedMergeUnit]> {
-	if (sourceUnitId === targetUnitId) throw new UnitMergeRequestConflict();
-	const ids = [sourceUnitId, targetUnitId].sort();
-	for (const unitId of ids)
+export async function lockMergePair(tx: DatabaseTransaction, ids: readonly string[]) {
+	for (const id of [...new Set(ids)].sort())
 		await tx.execute(
-			sql`select pg_advisory_xact_lock(hashtextextended('unit-merge:' || ${unitId}::text, 0))`,
+			sql`select pg_advisory_xact_lock(hashtextextended('unit-merge:'||${id}::text,0))`,
 		);
-	const rows = await tx
-		.select({
-			id: unit.id,
-			kind: unit.kind,
-			deletedAt: unit.deletedAt,
-			updatedAt: unit.updatedAt,
-		})
-		.from(unit)
-		.where(inArray(unit.id, ids))
-		.orderBy(unit.id)
-		.for("update");
-	const source = rows.find((row) => row.id === sourceUnitId);
-	const target = rows.find((row) => row.id === targetUnitId);
-	if (!source || !target || source.deletedAt || target.deletedAt) throw new UnitNotFound();
-	return [source, target];
 }
-
-async function requireUnmergedPair(
-	tx: DatabaseTransaction,
-	sourceUnitId: string,
-	targetUnitId: string,
-): Promise<void> {
-	const redirects = await tx
-		.select({ sourceUnitId: unitMergeRedirect.sourceUnitId })
-		.from(unitMergeRedirect)
-		.where(inArray(unitMergeRedirect.sourceUnitId, [sourceUnitId, targetUnitId]))
-		.limit(2);
-	if (redirects.length) throw new UnitMergeRequestConflict();
-}
-
-async function graphRevision(tx: DatabaseTransaction, unitId: string): Promise<number> {
-	await tx.insert(unitMergeGraphGuard).values({ unitId }).onConflictDoNothing();
-	const [guard] = await tx
-		.select({ revision: unitMergeGraphGuard.revision })
-		.from(unitMergeGraphGuard)
-		.where(eq(unitMergeGraphGuard.unitId, unitId))
-		.limit(1);
-	return guard?.revision ?? 0;
-}
-
-type GraphObservation = {
-	readonly role: "standalone" | "variant" | "main";
-	readonly mainUnitId: string | null;
-};
-
-async function observeGraph(tx: DatabaseTransaction, unitId: string): Promise<GraphObservation> {
-	const [outbound] = await tx
-		.select({ mainUnitId: unitVariant.mainUnitId })
-		.from(unitVariant)
-		.where(eq(unitVariant.variantUnitId, unitId))
-		.limit(1);
-	if (outbound) return { role: "variant", mainUnitId: outbound.mainUnitId };
-	const [inbound] = await tx
-		.select({ variantUnitId: unitVariant.variantUnitId })
-		.from(unitVariant)
-		.where(eq(unitVariant.mainUnitId, unitId))
-		.limit(1);
-	return inbound ? { role: "main", mainUnitId: null } : { role: "standalone", mainUnitId: null };
-}
-
-export function planUnitMergeGraph(input: {
-	readonly sourceUnitId: string;
-	readonly targetUnitId: string;
-	readonly source: GraphObservation;
-	readonly target: GraphObservation;
-}): UnitMergeGraphPlanV1 {
-	let action: UnitMergeGraphPlanV1["action"] = "none";
-	let destinationMainUnitId: string | null = null;
-	if (input.source.role === "main") {
-		if (input.target.role === "variant" && input.target.mainUnitId === input.sourceUnitId) {
-			action = "promote_target_from_source";
-			destinationMainUnitId = input.targetUnitId;
-		} else if (input.target.role === "variant" && input.target.mainUnitId) {
-			action = "reparent_source_variants_to_target_main";
-			destinationMainUnitId = input.target.mainUnitId;
-		} else {
-			action = "reparent_source_variants_to_target";
-			destinationMainUnitId = input.targetUnitId;
-		}
-	} else if (input.source.role === "variant") action = "detach_source";
-	return {
-		version: 1,
-		sourceRole: input.source.role,
-		targetRole: input.target.role,
-		sourceMainUnitId: input.source.mainUnitId,
-		targetMainUnitId: input.target.mainUnitId,
-		destinationMainUnitId,
-		action,
-	};
-}
-
-function fingerprintManifest(manifest: Omit<UnitMergeManifestV1, "requestFingerprint">): string {
-	return createHash("sha256")
-		.update(
-			JSON.stringify({
-				version: manifest.version,
-				policyVersion: UnitMergePolicy.version,
-				sourceUnitId: manifest.sourceUnitId,
-				targetUnitId: manifest.targetUnitId,
-				unitKind: manifest.unitKind,
-				sourceUpdatedAt: manifest.sourceUpdatedAt.toISOString(),
-				targetUpdatedAt: manifest.targetUpdatedAt.toISOString(),
-				sourceGraphRevision: manifest.sourceGraphRevision,
-				targetGraphRevision: manifest.targetGraphRevision,
-				graphPlan: manifest.graphPlan,
-			}),
-		)
-		.digest("hex");
-}
-
 export async function buildUnitMergeManifest(
 	tx: DatabaseTransaction,
+	authorization: Authorization<string>,
 	input: {
-		readonly sourceUnitId: string;
-		readonly targetUnitId: string;
-		readonly expectedSourceUpdatedAt?: Date;
-		readonly expectedTargetUpdatedAt?: Date;
+		sourceUnitId: string;
+		targetUnitId: string;
+		plan: typeof DefaultMergePlan;
+		operationId?: string;
 	},
-): Promise<UnitMergeManifestV1> {
-	requireUnitMergeRegistryEligibility(input);
-	const [source, target] = await lockMergeUnits(tx, input.sourceUnitId, input.targetUnitId);
-	await requireUnmergedPair(tx, source.id, target.id);
-	if (!isUnitMergeEligibleKind(source.kind)) throw new UnitMergeKindIneligible();
-	if (!isUnitMergeEligibleKind(target.kind)) throw new UnitMergeKindIneligible();
-	if (source.kind !== target.kind) throw new UnitMergeKindMismatch();
-	await requireEntityMeasurementsMergeable(tx, {
-		sourceUnitId: source.id,
-		targetUnitId: target.id,
-		sourceIsEntity: source.kind === "entity",
-	});
-	if (
-		(input.expectedSourceUpdatedAt &&
-			source.updatedAt.getTime() !== input.expectedSourceUpdatedAt.getTime()) ||
-		(input.expectedTargetUpdatedAt &&
-			target.updatedAt.getTime() !== input.expectedTargetUpdatedAt.getTime())
-	)
-		throw new UnitMergeManifestStale();
-
-	// A transaction owns one PostgreSQL client, so these independent reads remain sequential.
-	const sourceGraphRevision = await graphRevision(tx, source.id);
-	const targetGraphRevision = await graphRevision(tx, target.id);
-	const sourceGraph = await observeGraph(tx, source.id);
-	const targetGraph = await observeGraph(tx, target.id);
-	const manifestWithoutFingerprint = {
-		version: 1 as const,
-		sourceUnitId: source.id,
-		targetUnitId: target.id,
-		unitKind: source.kind,
-		sourceUpdatedAt: source.updatedAt,
-		targetUpdatedAt: target.updatedAt,
-		sourceGraphRevision,
-		targetGraphRevision,
-		graphPlan: planUnitMergeGraph({
-			sourceUnitId: source.id,
-			targetUnitId: target.id,
-			source: sourceGraph,
-			target: targetGraph,
-		}),
+): Promise<UnitMergeManifest> {
+	if (input.sourceUnitId === input.targetUnitId) throw new UnitMergeRequestConflict();
+	await lockMergePair(tx, [input.sourceUnitId, input.targetUnitId]);
+	const rows: UnitState[] = [];
+	for (const id of [input.sourceUnitId, input.targetUnitId].sort()) {
+		const row = await readUnitStateById(tx, id, { lock: "update" });
+		if (!row) throw new UnitNotFound();
+		rows.push(row);
+	}
+	const source = rows.find((row) => row.id === input.sourceUnitId),
+		target = rows.find((row) => row.id === input.targetUnitId);
+	if (!source || !target) throw new UnitNotFound();
+	const sourceReference = CatalogReferenceSchema.safeParse(source.reference),
+		targetReference = CatalogReferenceSchema.safeParse(target.reference);
+	if (!sourceReference.success || !targetReference.success) throw new UnitMergeKindIneligible();
+	if (!compatibleMergeIdentities(source, target)) throw new UnitMergeKindMismatch();
+	for (const id of [source.id, target.id]) {
+		await authorization.unit.ensureInTransaction(tx, id, "unit.read");
+		await authorization.unit.ensureInTransaction(tx, id, "unit.update");
+	}
+	const ids = [source.id, target.id];
+	const [controls, selves, redirects, locks] = await Promise.all([
+		tx
+			.select({ id: entityParticipation.entityId })
+			.from(entityParticipation)
+			.where(inArray(entityParticipation.entityId, ids))
+			.limit(2),
+		tx
+			.select({ id: authEntity.entityId })
+			.from(authEntity)
+			.where(inArray(authEntity.entityId, ids))
+			.limit(2),
+		tx
+			.select({ id: unitMergeRedirect.sourceUnitId })
+			.from(unitMergeRedirect)
+			.where(inArray(unitMergeRedirect.sourceUnitId, ids))
+			.limit(2),
+		tx
+			.select({ id: unitMergeGraphLock.unitId, operationId: unitMergeGraphLock.operationId })
+			.from(unitMergeGraphLock)
+			.where(inArray(unitMergeGraphLock.unitId, ids))
+			.limit(2),
+	]);
+	if (controls.length || selves.length) throw new UnitMergeKindIneligible();
+	if (redirects.length || locks.some((lock) => lock.operationId !== input.operationId))
+		throw new UnitMergeRequestConflict();
+	const labels = await readUnitPresentationsInTransaction(tx, ids);
+	const partial = {
+		owner: sourceReference.data.owner,
+		shape: source.shape,
+		sourceUnit: { id: source.id, title: labels.get(source.id)?.title ?? null },
+		targetUnit: { id: target.id, title: labels.get(target.id)?.title ?? null },
+		sourceRevision: source.revision,
+		targetRevision: target.revision,
+		sourceUpdatedAt: source.updatedAt.toISOString(),
+		targetUpdatedAt: target.updatedAt.toISOString(),
+		status: source.status,
+		visibility: source.visibility,
+		plan: MergePlanSchema.parse(input.plan),
 	};
-	return {
-		...manifestWithoutFingerprint,
-		requestFingerprint: fingerprintManifest(manifestWithoutFingerprint),
-	};
+	return MergeManifestSchema.parse({ ...partial, fingerprint: mergeFingerprint(partial) });
 }
-
-export async function requireCurrentUnitMergeManifest(
-	tx: DatabaseTransaction,
-	stored: Pick<UnitMergeManifestV1, "sourceUnitId" | "targetUnitId" | "requestFingerprint">,
-): Promise<UnitMergeManifestV1> {
-	const current = await buildUnitMergeManifest(tx, {
-		sourceUnitId: stored.sourceUnitId,
-		targetUnitId: stored.targetUnitId,
-	});
-	if (current.requestFingerprint !== stored.requestFingerprint) throw new UnitMergeManifestStale();
-	return current;
+export function assertMergeManifestFingerprint(actual: UnitMergeManifest, expected: string) {
+	if (actual.fingerprint !== expected) throw new UnitMergeManifestStale();
 }

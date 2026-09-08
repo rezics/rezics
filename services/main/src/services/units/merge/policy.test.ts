@@ -11,11 +11,10 @@ import {
 describe("centralized Unit merge policy", () => {
 	it("requires two independent approvals with one-vote veto and no self-review", () => {
 		expect(UnitMergePolicy).toMatchObject({
-			version: 2,
+			version: 1,
 			requiredApprovals: 2,
 			vetoEnabled: true,
 			selfReviewForbidden: true,
-			manifestVersion: 1,
 		});
 	});
 
@@ -26,9 +25,9 @@ describe("centralized Unit merge policy", () => {
 
 	it("walks every durable phase exactly once", () => {
 		expect(UnitMergeOperationPhaseValues.slice(0, 3)).toEqual([
-			"entity_measurement_preflight",
-			"entity_measurement_entities",
-			"entity_measurement_contexts",
+			"canonicalize",
+			"names",
+			"identifiers",
 		]);
 		for (const [index, phase] of UnitMergeOperationPhaseValues.entries())
 			expect(nextUnitMergePhase(phase)).toBe(UnitMergeOperationPhaseValues[index + 1] ?? null);

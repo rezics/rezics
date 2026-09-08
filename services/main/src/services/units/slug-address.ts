@@ -1,3 +1,4 @@
+import { resolveCanonicalUnitId } from "./merge/canonical";
 import {
 	isAvailableZonePageSlug,
 	ZoneHomePageSlug,
@@ -456,9 +457,24 @@ async function loadPublicScopedTarget(
 		.where(and(scopeMatches(scope), eq(unitSlugAddress.slug, slug)))
 		.limit(1);
 	if (!address) throw new UnitNotFound();
-	const state = await readUnitStateById(database, address.targetId);
+	const original = await readUnitStateById(database, address.targetId);
+	const canonicalId = await resolveCanonicalUnitId(database, address.targetId);
+	if (
+		canonicalId !== address.targetId &&
+		(!original ||
+			original.visibility !== "public" ||
+			original.moderationStatus !== "approved" ||
+			original.deletedAt)
+	)
+		throw new UnitNotFound();
+	const state =
+		canonicalId === address.targetId ? original : await readUnitStateById(database, canonicalId);
 	if (!state || !isPublicAddressNode(state)) throw new UnitNotFound();
-	return { ...address, state };
+	return {
+		...address,
+		addressKind: canonicalId === address.targetId ? address.addressKind : ("redirect" as const),
+		state,
+	};
 }
 function resolvedAddress(
 	state: UnitState,
@@ -495,7 +511,7 @@ export async function resolveUnitPath(segments: readonly string[]): Promise<Reso
 		const target = await loadPublicScopedTarget(scope, slug);
 		state = target.state;
 		redirected ||= target.addressKind === "redirect";
-		scope = { scopeUnitId: state.reference.id, scopeNamespaceId: null };
+		scope = { scopeUnitId: target.targetId, scopeNamespaceId: null };
 	}
 	if (!state) throw new UnitNotFound();
 	return resolvedAddress(

@@ -1,4 +1,5 @@
 import Elysia from "elysia";
+import mergedSources from "./merged-sources";
 import { z } from "zod";
 import session from "../../auth/session";
 import { CatalogOwnerValues } from "../../catalog/contracts";
@@ -43,6 +44,7 @@ const namesQuery = CatalogCursorQuerySchema.extend({
 /** @alpha Native owner resources and independently versioned forms; source acquisition has a separate review boundary. */
 export default new Elysia({ prefix: "/catalog", name: "catalog-api" })
 	.use(session)
+	.use(mergedSources)
 	.post(
 		"/resources",
 		{

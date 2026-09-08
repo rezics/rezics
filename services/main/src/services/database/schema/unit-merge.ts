@@ -101,24 +101,8 @@ export const unitMergeRequest = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 		...unitReferenceColumns("sourceUnit", "restrict"),
 		...unitReferenceColumns("targetUnit", "restrict"),
-		...unitReferenceColumns("sourceUnit", "restrict"),
-		...unitReferenceColumns("targetUnit", "restrict"),
 	},
 	(table) => [
-		...unitReferenceConstraints(
-			"unit_merge_operation",
-			"sourceUnit",
-			table,
-			false,
-			table.sourceUnitId,
-		),
-		...unitReferenceConstraints(
-			"unit_merge_operation",
-			"targetUnit",
-			table,
-			false,
-			table.targetUnitId,
-		),
 		...unitReferenceConstraints(
 			"unit_merge_request",
 			"sourceUnit",
@@ -182,7 +166,7 @@ export const unitMergeRequest = pgTable(
 		),
 		check(
 			"unit_merge_request_plan_check",
-			sql`jsonb_typeof(${table.plan})='object' and octet_length(${table.plan}::text)<=1024 and ${table.plan}->>'names' in ('copy_alternates','retain_source') and ${table.plan}->>'identifiers' in ('copy_claims','retain_source') and ${table.plan}->>'semantics'='retain_source' and ${table.plan}->>'structure'='retain_source' and ${table.plan}->>'bindings' in ('rebind_paused','pause_at_source')`,
+			sql`jsonb_typeof(${table.plan})='object' and octet_length(${table.plan}::text)<=1024 and ${table.plan}->>'names' in ('copy_alternates','retain_source') and ${table.plan}->>'identifiers' in ('copy_claims','retain_source') and ${table.plan}->>'semantics'='retain_source' and ${table.plan}->>'structure'='retain_source' and ${table.plan}->>'bindings' in ('rebind_paused','pause_at_source') and ${table.plan}->>'retainedAccess'='target_readers'`,
 		),
 	],
 );

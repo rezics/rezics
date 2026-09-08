@@ -1,4 +1,5 @@
 import { createPortableTextDocument } from "@rezics/block";
+import { MergeCreateSchema, MergeReviewSchema } from "../../units/merge/contracts";
 import { Check } from "typebox/value";
 import { describe, expect, it } from "vitest";
 
@@ -6,10 +7,8 @@ import {
 	CreateAccountEnforcementBody,
 	CreateContentGovernanceActionBody,
 	CreateUnitAccessInvitationBody,
-	CreateReviewedUnitMergeBody,
 	OverrideUnitOwnershipBody,
 	ReplaceUnitSubjectAccessBody,
-	ReviewUnitMergeBody,
 	RevokeAccountEnforcementBody,
 	TransferUnitOwnershipBody,
 	UpdateContentReviewCaseBody,
@@ -26,32 +25,28 @@ const rule = {
 };
 
 describe("adjacent governance API contracts", () => {
-	it("requires immutable merge revisions, exact confirmations, and a fingerprinted review", () => {
+	it("pins merge revisions and fingerprint with exact confirmation identities", () => {
 		const command = {
 			sourceUnitId: profileId,
 			targetUnitId: secondProfileId,
 			confirmationSourceUnitId: profileId,
 			confirmationTargetUnitId: secondProfileId,
-			expectedSourceUpdatedAt: "2026-08-11T00:00:00.000Z",
-			expectedTargetUpdatedAt: "2026-08-11T00:00:00.000Z",
-			idempotencyKey: "merge-command-1",
+			expectedSourceRevision: 1,
+			expectedTargetRevision: 2,
+			requestFingerprint: "a".repeat(64),
+			idempotencyKey: "merge-1",
 			rules: [rule],
 		};
-		expect(Check(CreateReviewedUnitMergeBody, command)).toBe(true);
+		expect(MergeCreateSchema.safeParse(command).success).toBe(true);
 		expect(
-			Check(CreateReviewedUnitMergeBody, { ...command, expectedSourceUpdatedAt: undefined }),
+			MergeCreateSchema.safeParse({ ...command, expectedSourceRevision: undefined }).success,
 		).toBe(false);
 		expect(
-			Check(ReviewUnitMergeBody, {
-				decision: "approve",
-				requestFingerprint: "a".repeat(64),
-			}),
+			MergeReviewSchema.safeParse({ decision: "approve", requestFingerprint: "a".repeat(64) })
+				.success,
 		).toBe(true);
 		expect(
-			Check(ReviewUnitMergeBody, {
-				decision: "approve",
-				requestFingerprint: "stale",
-			}),
+			MergeReviewSchema.safeParse({ decision: "approve", requestFingerprint: "stale" }).success,
 		).toBe(false);
 	});
 

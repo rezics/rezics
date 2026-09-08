@@ -1,7 +1,5 @@
 import Elysia from "elysia";
-import { StatusCodes } from "http-status-codes";
-import type { StaticDecode } from "typebox";
-
+import { z } from "zod";
 import session from "../../auth/session";
 import {
 	createReviewedUnitMerge,
@@ -10,229 +8,140 @@ import {
 	preflightUnitMerge,
 	retryUnitMerge,
 	reviewUnitMerge,
+	listMergeReconciliationItems,
 } from "../../units/merge/service";
-import { toApiErrorResponse } from "../schema/response";
-import { UnitMergeConfirmationInvalid } from "./errors";
+import { resolveMergeReconciliationItem } from "../../units/merge/worker";
 import {
-	CreateReviewedUnitMergeBody,
-	ListUnitMergeRequestsQuery,
-	ReviewUnitMergeBody,
-	UnitMergePreflightBody,
-	UnitMergePreflightResponse,
-	UnitMergeRequestListResponse,
-	UnitMergeRequestParams,
-	UnitMergeRequestResponse,
-} from "./schema";
-
-const MergeNotFoundResponse = toApiErrorResponse(["UnitMergeNotFound", "UnitNotFound"]);
-const MergeConflictResponse = toApiErrorResponse([
-	"UnitMergeKindMismatch",
-	"UnitMergeRequestConflict",
-	"UnitMergeMeasurementConflict",
-	"UnitMergeIdempotencyConflict",
-	"UnitMergeManifestStale",
-]);
-const MergeRuleConflictResponse = toApiErrorResponse([
-	"UnitMergeKindMismatch",
-	"UnitMergeRequestConflict",
-	"UnitMergeMeasurementConflict",
-	"UnitMergeIdempotencyConflict",
-	"UnitMergeManifestStale",
-	"GovernanceRuleChanged",
-]);
-const VoteBackpressureResponse = toApiErrorResponse(["VoteHotKeyBusy"]);
-const MergeEligibilityResponse = toApiErrorResponse([
-	"UnitMergeKindIneligible",
-	"ContentLabelUnitMergeForbidden",
-]);
-
-function presentMergeRequest(
-	request: Awaited<ReturnType<typeof getUnitMergeRequest>>,
-): StaticDecode<typeof UnitMergeRequestResponse> {
-	return request;
-}
-
-function requireMatchingConfirmations(body: {
-	readonly sourceUnitId: string;
-	readonly targetUnitId: string;
-	readonly confirmationSourceUnitId: string;
-	readonly confirmationTargetUnitId: string;
-}): void {
-	if (
-		body.sourceUnitId !== body.confirmationSourceUnitId ||
-		body.targetUnitId !== body.confirmationTargetUnitId
-	)
-		throw new UnitMergeConfirmationInvalid();
-}
-
+	MergePreflightSchema,
+	MergeCreateSchema,
+	MergeReviewSchema,
+	MergeListSchema,
+	MergeItemListSchema,
+	MergeResolveItemSchema,
+	MergeManifestSchema,
+	MergeRequestSchema,
+	MergeItemSchema,
+	mergePage,
+} from "../../units/merge/contracts";
+const requestParams = z.strictObject({ requestId: z.uuid() }),
+	itemParams = requestParams.extend({ itemId: z.uuid() });
+/** Native identity review and explicit data reconciliation; no direct or Variant merge path. */
 export default new Elysia({ prefix: "/platform/unit-merges" })
 	.use(session)
 	.get(
 		"",
 		{
 			access: "session-only",
-			query: ListUnitMergeRequestsQuery,
-			response: {
-				[StatusCodes.OK]: UnitMergeRequestListResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+			query: MergeListSchema,
+			response: mergePage(MergeRequestSchema),
+			detail: {
+				operationId: "listNativeMergeRequests",
+				summary: "List native identity merge requests",
+				tags: ["Governance"],
 			},
-			detail: { summary: "List Unit merge governance requests", tags: ["Governance"] },
 		},
-		async ({ authorization, query }) => {
-			await authorization.platform.ensureCapability("unit.governance.read");
-			const result = await listUnitMergeRequests({
-				state: query.state,
-				cursor: query.cursor,
-				limit: query.limit ?? 50,
-			});
-			return { ...result, items: result.items.map(presentMergeRequest) };
-		},
+		({ authorization, query }) => listUnitMergeRequests(authorization, query),
 	)
 	.get(
 		"/:requestId",
 		{
 			access: "session-only",
-			params: UnitMergeRequestParams,
-			response: {
-				[StatusCodes.OK]: UnitMergeRequestResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitMergeNotFound"]),
+			params: requestParams,
+			response: MergeRequestSchema,
+			detail: {
+				operationId: "readNativeMergeRequest",
+				summary: "Read a native identity merge request",
+				tags: ["Governance"],
 			},
-			detail: { summary: "Get a Unit merge governance request", tags: ["Governance"] },
 		},
-		async ({ authorization, params }) => {
-			await authorization.platform.ensureCapability("unit.governance.read");
-			return presentMergeRequest(await getUnitMergeRequest(params.requestId));
-		},
+		({ authorization, params }) => getUnitMergeRequest(authorization, params.requestId),
 	)
 	.post(
 		"/preflight",
 		{
 			access: "session-only",
-			body: UnitMergePreflightBody,
-			response: {
-				[StatusCodes.OK]: UnitMergePreflightResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
-				[StatusCodes.NOT_FOUND]: MergeNotFoundResponse,
-				[StatusCodes.CONFLICT]: MergeConflictResponse,
-				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: MergeEligibilityResponse,
+			body: MergePreflightSchema,
+			response: MergeManifestSchema,
+			detail: {
+				operationId: "preflightNativeMerge",
+				summary: "Inspect native merge compatibility and reconciliation policy",
+				tags: ["Governance"],
 			},
-			detail: { summary: "Preflight a Unit identity merge", tags: ["Governance"] },
 		},
-		async ({ authorization, body }) => {
-			await authorization.platform.ensureCapability("unit.merge.propose");
-			return preflightUnitMerge(body);
-		},
+		({ authorization, body }) => preflightUnitMerge(authorization, body),
 	)
 	.post(
 		"",
 		{
 			access: "fresh-session-only",
-			body: CreateReviewedUnitMergeBody,
-			response: {
-				[StatusCodes.OK]: UnitMergeRequestResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"UnitMergeConfirmationInvalid",
-					"GovernanceRuleSourceForbidden",
-				]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"PlatformCapabilityRequired",
-					"FreshSessionRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: MergeNotFoundResponse,
-				[StatusCodes.CONFLICT]: MergeRuleConflictResponse,
-				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: MergeEligibilityResponse,
+			body: MergeCreateSchema,
+			response: MergeRequestSchema,
+			detail: {
+				operationId: "proposeNativeMerge",
+				summary: "Propose a native merge for two independent reviews",
+				tags: ["Governance"],
 			},
-			detail: { summary: "Propose a reviewed Unit identity merge", tags: ["Governance"] },
 		},
-		async ({ authorization, entity, body }) => {
-			await authorization.platform.ensureCapability("unit.merge.propose");
-			requireMatchingConfirmations(body);
-			return presentMergeRequest(
-				await createReviewedUnitMerge({
-					sourceUnitId: body.sourceUnitId,
-					targetUnitId: body.targetUnitId,
-					expectedSourceUpdatedAt: new Date(body.expectedSourceUpdatedAt),
-					expectedTargetUpdatedAt: new Date(body.expectedTargetUpdatedAt),
-					proposerProfileId: entity.id,
-					idempotencyKey: body.idempotencyKey,
-					rules: body.rules,
-					note: body.note?.trim() || undefined,
-				}),
-			);
-		},
+		({ authorization, body }) => createReviewedUnitMerge(authorization, body),
 	)
 	.post(
 		"/:requestId/reviews",
 		{
 			access: "fresh-session-only",
-			params: UnitMergeRequestParams,
-			body: ReviewUnitMergeBody,
-			response: {
-				[StatusCodes.OK]: UnitMergeRequestResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"PlatformCapabilityRequired",
-					"FreshSessionRequired",
-					"UnitMergeReviewSelfForbidden",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitMergeNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"UnitMergeManifestStale",
-					"UnitMergeRequestConflict",
-					"UnitMergeMeasurementConflict",
-					"UnitMergeReviewDuplicate",
-					"UnitMergeReviewFingerprintMismatch",
-					"UnitMergeRequestNotPending",
-					"UnitMergeRequestExpired",
-					"GovernanceRuleChanged",
-				]),
-				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentLabelUnitMergeForbidden"]),
+			params: requestParams,
+			body: MergeReviewSchema,
+			response: MergeRequestSchema,
+			detail: {
+				operationId: "reviewNativeMerge",
+				summary: "Review a pinned native merge and data plan",
+				tags: ["Governance"],
 			},
-			detail: { summary: "Approve or reject a Unit merge request", tags: ["Governance"] },
 		},
-		async ({ authorization, entity, params, body }) => {
-			await authorization.platform.ensureCapability("unit.merge.review");
-			return presentMergeRequest(
-				await reviewUnitMerge({
-					requestId: params.requestId,
-					reviewerProfileId: entity.id,
-					decision: body.decision,
-					requestFingerprint: body.requestFingerprint,
-					note: body.note?.trim() || undefined,
-				}),
-			);
-		},
+		({ authorization, params, body }) => reviewUnitMerge(authorization, params.requestId, body),
 	)
 	.post(
 		"/:requestId/retry",
 		{
 			access: "fresh-session-only",
-			params: UnitMergeRequestParams,
-			response: {
-				[StatusCodes.OK]: UnitMergeRequestResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"PlatformCapabilityRequired",
-					"FreshSessionRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitMergeNotFound"]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"UnitMergeRetryUnavailable",
-					"GovernanceRuleChanged",
-				]),
-				[StatusCodes.TOO_MANY_REQUESTS]: VoteBackpressureResponse,
+			params: requestParams,
+			response: MergeRequestSchema,
+			detail: {
+				operationId: "retryNativeMerge",
+				summary: "Retry native merge work under current authority",
+				tags: ["Governance"],
 			},
-			detail: { summary: "Retry a failed Unit merge operation", tags: ["Governance"] },
 		},
-		async ({ authorization, entity, params }) => {
-			await authorization.platform.ensureCapability("unit.merge");
-			return presentMergeRequest(
-				await retryUnitMerge({
-					requestId: params.requestId,
-					actorProfileId: entity.id,
-				}),
-			);
+		({ authorization, params }) => retryUnitMerge(authorization, params.requestId),
+	)
+	.get(
+		"/:requestId/items",
+		{
+			access: "session-only",
+			params: requestParams,
+			query: MergeItemListSchema,
+			response: mergePage(MergeItemSchema),
+			detail: {
+				operationId: "listNativeMergeReconciliation",
+				summary: "Inspect copied and retained native merge evidence",
+				tags: ["Governance"],
+			},
 		},
+		({ authorization, params, query }) =>
+			listMergeReconciliationItems(authorization, params.requestId, query),
+	)
+	.post(
+		"/:requestId/items/:itemId/resolve",
+		{
+			access: "fresh-session-only",
+			params: itemParams,
+			body: MergeResolveItemSchema,
+			response: z.strictObject({ resolved: z.literal(true) }),
+			detail: {
+				operationId: "resolveNativeMergeReconciliation",
+				summary: "Resolve one native reconciliation decision",
+				tags: ["Governance"],
+			},
+		},
+		({ authorization, params, body }) =>
+			resolveMergeReconciliationItem(authorization, params.requestId, params.itemId, body),
 	);

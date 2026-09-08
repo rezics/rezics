@@ -1,4 +1,4 @@
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
 import { CatalogFactTables } from "../database/schema/catalog-facts";
@@ -9,7 +9,9 @@ import {
 	catalogSourceSubscription as subscriptions,
 } from "../database/schema/catalog-source";
 import { type CatalogReference, CatalogReferenceSchema } from "./contracts";
-import { loadCatalogIdentity } from "./storage";
+import { loadCatalogIdentity, CatalogAccessDenied } from "./storage";
+import { hasCatalogMergeRedirect } from "./merge-read";
+import { canAccessCatalog } from "../participation/policy";
 import { appendOperationalOutbox } from "../events/durability";
 import { aggregateRoutingBucket, eventEnvelopeSchema } from "../events/envelope";
 
@@ -328,13 +330,40 @@ export async function reviseCatalogSourceBinding(
 		sourceRecordId: value.sourceRecordId,
 		mappingKey: value.mappingKey,
 	});
-	await loadCatalogIdentity(tx, current.reference, actor, true);
+	const mergedSource = await hasCatalogMergeRedirect(tx, current.reference);
+	if (mergedSource) {
+		const original = await loadCatalogIdentity(tx, current.reference, actor, false);
+		const [canonical] = (
+			await tx.execute<{ id: string }>(
+				sql`select public.resolve_canonical_unit_id(${current.reference.id}::uuid) as id`,
+			)
+		).rows;
+		if (!canonical || (value.target ? value.target.id !== canonical.id : value.state === "active"))
+			throw new CatalogAccessDenied(
+				"A merged source binding may only be paused or moved to its canonical target",
+			);
+		const allowedOriginal = await canAccessCatalog(
+			tx,
+			current.reference,
+			actor,
+			original.createdByAuthUserId,
+			true,
+		);
+		if (!allowedOriginal) {
+			await loadCatalogIdentity(
+				tx,
+				{ owner: current.reference.owner, id: canonical.id },
+				actor,
+				true,
+			);
+		}
+	} else await loadCatalogIdentity(tx, current.reference, actor, true);
 	if (current.claim.bindingRevision !== value.expectedRevision)
 		throw new Error("Source binding revision is stale");
 	const reference = value.target ?? current.reference;
 	if (reference.owner !== current.reference.owner)
 		throw new Error("Cross-owner rebind requires a new checked mapping");
-	await loadCatalogIdentity(tx, reference, actor, true);
+	if (!mergedSource || value.target) await loadCatalogIdentity(tx, reference, actor, true);
 	const revision = current.claim.bindingRevision + 1;
 	const policyRevision = current.claim.policyRevision + 1;
 	const mappingVersion = value.mappingVersion ?? current.claim.mappingVersion;
