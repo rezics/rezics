@@ -1,20 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { HTTPError } from "elysia";
 
-export class SoftwareSystemRequirementSourceInvalid extends HTTPError.id(
-	"SoftwareSystemRequirementSourceInvalid",
-	StatusCodes.BAD_REQUEST,
-) {
-	override readonly message = "System requirement external link must belong to this Software";
-}
-
-export class SeriesReleaseNotFound extends HTTPError.id(
-	"SeriesReleaseNotFound",
-	StatusCodes.NOT_FOUND,
-) {
-	override readonly message = "Series release not found";
-}
-
 export class ZonePageNotFound extends HTTPError.id("ZonePageNotFound", StatusCodes.NOT_FOUND) {
 	override readonly message = "Zone page not found";
 }
@@ -57,20 +43,7 @@ export class ZoneRuleRealmInvalid extends HTTPError.id(
 		"Zone local Rule Realm must have a current revision with at least one Rule";
 }
 
-export class SoftwareNotFound extends HTTPError.id("SoftwareNotFound", StatusCodes.NOT_FOUND) {
-	override readonly message = "Software not found";
-}
-
-export class SystemRequirementNotFound extends HTTPError.id(
-	"SystemRequirementNotFound",
-	StatusCodes.NOT_FOUND,
-) {
-	override readonly message = "System requirement not found";
-}
-
 export const DomainExtensionErrors = [
-	SoftwareSystemRequirementSourceInvalid,
-	SeriesReleaseNotFound,
 	ZonePageNotFound,
 	ZonePageInUse,
 	ZoneNavigationNotFound,
@@ -78,6 +51,4 @@ export const DomainExtensionErrors = [
 	ZoneDocumentInvalid,
 	ZoneTimeRangeInvalid,
 	ZoneRuleRealmInvalid,
-	SoftwareNotFound,
-	SystemRequirementNotFound,
 ] as const;

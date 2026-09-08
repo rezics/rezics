@@ -1,10 +1,8 @@
+import { UnitOwnerValues } from "@rezics/reference";
 import type { StaticDecode } from "typebox";
 import { t } from "elysia";
 import { ContentLanguageValues } from "@rezics/i18n";
 import {
-	CreditAttributionRoleValues,
-	ContentLanguageEvidenceSourceValues,
-	UnitOwnershipModeValues,
 	ContentGovernanceActionKindValues,
 	MaximumAudioTracksPerVideo,
 	MaximumContentLanguageEvidencePageSize,
@@ -15,7 +13,6 @@ import {
 
 import {
 	DateTime,
-	FractionalPosition,
 	ContentLanguage,
 	ContentLanguageSupport,
 	ContentRating,
@@ -25,41 +22,18 @@ import {
 	UnitLocalizationContentFields,
 	UnitLocalizationInput,
 	Uuid,
-	WorkReleaseStatus,
 } from "../schema";
-import { InitialTagApplicationLimit } from "../../tags/initial-applications";
 import { PublicUnitSeoKinds } from "../../units/seo-contract";
 
-export const VariantUnitType = t.Union([
-	t.Literal("book"),
-	t.Literal("software"),
-	t.Literal("media"),
-]);
-export type VariantUnitType = StaticDecode<typeof VariantUnitType>;
-
-export const WorkUnitType = t.Union([VariantUnitType, t.Literal("series")]);
-export type WorkUnitType = StaticDecode<typeof WorkUnitType>;
 export const TimedMediaUnitType = t.Union([t.Literal("video"), t.Literal("audio")]);
 export type TimedMediaUnitType = StaticDecode<typeof TimedMediaUnitType>;
-export const ReleaseUnitType = t.Literal("release");
-export type ReleaseUnitType = StaticDecode<typeof ReleaseUnitType>;
-export const ManageableUnitType = t.Union([WorkUnitType, TimedMediaUnitType, ReleaseUnitType]);
+export const ManageableUnitType = TimedMediaUnitType;
 export type ManageableUnitType = StaticDecode<typeof ManageableUnitType>;
-export const ContentLanguageSupportUnitType = t.Union([
-	VariantUnitType,
-	TimedMediaUnitType,
-	ReleaseUnitType,
-]);
+export const ContentLanguageSupportUnitType = TimedMediaUnitType;
 export type ContentLanguageSupportUnitType = StaticDecode<typeof ContentLanguageSupportUnitType>;
-export const ContentLanguageEvidenceUnitType = t.Union([
-	VariantUnitType,
-	TimedMediaUnitType,
-	ReleaseUnitType,
-]);
-
-export const VariantUnitTypeParams = t.Object({ type: VariantUnitType });
-export const WorkUnitTypeParams = t.Object({ type: WorkUnitType });
-export const ManageableUnitTypeParams = t.Object({ type: ManageableUnitType });
+export const ContentLanguageEvidenceUnitType = TimedMediaUnitType;
+export const TimedMediaUnitTypeParams = t.Object({ type: TimedMediaUnitType });
+export const ManageableUnitTypeParams = TimedMediaUnitTypeParams;
 export const ContentLanguageSupportUnitParams = t.Object({
 	type: ContentLanguageSupportUnitType,
 	unitId: Uuid,
@@ -86,11 +60,11 @@ export const ContentLanguageEvidenceResponse = t.Object(
 		items: t.Array(
 			t.Object(
 				{
-					source: t.UnionEnum(ContentLanguageEvidenceSourceValues),
+					source: t.Literal("adapted_audio"),
 					unit: t.Object(
 						{
 							id: Uuid,
-							kind: t.UnionEnum(["book", "software", "media", "video", "audio", "release"]),
+							kind: t.Literal("audio"),
 							language: t.Nullable(ContentLanguage),
 							title: t.Nullable(t.String()),
 						},
@@ -108,26 +82,6 @@ export const ContentLanguageEvidenceResponse = t.Object(
 	},
 	{ additionalProperties: false },
 );
-
-export const UnitOwnershipMode = t.Union(UnitOwnershipModeValues.map((value) => t.Literal(value)));
-export type UnitOwnershipMode = StaticDecode<typeof UnitOwnershipMode>;
-
-export const CreateUnitCreditAttributionInput = t.Object(
-	{
-		entityId: Uuid,
-		role: t.Union(CreditAttributionRoleValues.map((role) => t.Literal(role))),
-	},
-	{ additionalProperties: false },
-);
-export type CreateUnitCreditAttributionInput = StaticDecode<
-	typeof CreateUnitCreditAttributionInput
->;
-
-export const UnitVersionInput = t.Union([
-	t.Object({ kind: t.Literal("main") }, { additionalProperties: false }),
-	t.Object({ kind: t.Literal("variant"), mainUnitId: Uuid }, { additionalProperties: false }),
-]);
-export type UnitVersionInput = StaticDecode<typeof UnitVersionInput>;
 
 export const UnitStatusEventParams = t.Object({ unitId: Uuid });
 export const UnitRealmPublicationParams = t.Object({
@@ -176,9 +130,6 @@ export const UnitRealmPublicationListResponse = t.Object({
 	),
 	nextCursor: t.Nullable(t.String()),
 });
-export const UnitSeriesMembershipQuery = t.Object(LocalizationLanguageQuery, {
-	additionalProperties: false,
-});
 export const ResolveUnitPresentationsBody = t.Object(
 	{
 		ids: t.Array(Uuid, { minItems: 1, maxItems: 100, uniqueItems: true }),
@@ -211,107 +162,37 @@ export const UnitStatusEventListResponse = t.Object({
 	nextCursor: t.Nullable(t.String()),
 });
 
-export const UnitSeriesMembershipListResponse = t.Object({
-	items: t.Array(
-		t.Object({
-			series: t.Object({
-				id: Uuid,
-				language: ContentLanguage,
-				title: t.Nullable(t.String()),
-				cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
-			}),
-			releaseUnitId: Uuid,
-			position: FractionalPosition,
-			releasedOn: t.Nullable(t.String({ format: "date" })),
-			source: t.UnionEnum(["direct", "main"]),
-		}),
-	),
-});
-
-const CreateUnitFields = {
-	initialTagIds: t.Optional(
-		t.Array(Uuid, { maxItems: InitialTagApplicationLimit, uniqueItems: true, default: [] }),
-	),
-	creditAttributionRequestConsent: t.Union([t.Literal("direct_only"), t.Literal("allow_requests")]),
-	version: UnitVersionInput,
+const CreateTimedMediaFields = {
 	localization: UnitLocalizationInput,
-	contentLanguageSupport: t.Optional(ContentLanguageSupport),
 	visibility: LifecycleInput.visibility,
 	contentRating: LifecycleInput.contentRating,
 	aiDisclosure: LifecycleInput.aiDisclosure,
-	licenses: LifecycleInput.licenses,
-	details: t.Union([
-		t.Object(
-			{
-				type: t.Literal("book"),
-				releaseStatus: WorkReleaseStatus,
-				metadataOnly: t.Optional(t.Boolean()),
-			},
-			{ additionalProperties: false },
-		),
-		t.Object(
-			{ type: t.Literal("software"), metadataOnly: t.Optional(t.Boolean()) },
-			{ additionalProperties: false },
-		),
-		t.Object(
-			{
-				type: t.Literal("media"),
-				releaseStatus: WorkReleaseStatus,
-				metadataOnly: t.Optional(t.Boolean()),
-			},
-			{ additionalProperties: false },
-		),
-	]),
-} as const;
-
-export const CreateUnitBody = t.Union([
+	durationSeconds: t.Optional(t.Nullable(t.Integer({ minimum: 1, maximum: 2147483647 }))),
+	revisionContext: t.Optional(RevisionContext),
+};
+export const CreateTimedMediaBody = t.Union([
 	t.Object(
-		{
-			ownershipMode: t.Literal("profile_owned"),
-			creditAttributions: t.Array(CreateUnitCreditAttributionInput, {
-				uniqueItems: true,
-			}),
-			...CreateUnitFields,
-			revisionContext: t.Optional(RevisionContext),
-		},
+		{ ...CreateTimedMediaFields, owner: t.Literal("audio") },
 		{ additionalProperties: false },
 	),
 	t.Object(
 		{
-			ownershipMode: t.Literal("community_owned"),
-			creditAttributions: t.Array(CreateUnitCreditAttributionInput, {
-				uniqueItems: true,
-			}),
-			...CreateUnitFields,
-			revisionContext: t.Optional(RevisionContext),
+			...CreateTimedMediaFields,
+			owner: t.Literal("video"),
+			adaptedAudioUnitIds: t.Optional(
+				t.Array(Uuid, { maxItems: MaximumAudioTracksPerVideo, uniqueItems: true }),
+			),
 		},
 		{ additionalProperties: false },
 	),
 ]);
-export type CreateUnitBody = StaticDecode<typeof CreateUnitBody>;
-
+export type CreateTimedMediaBody = StaticDecode<typeof CreateTimedMediaBody>;
 const UnitDetailsInput = t.Object(
 	{
-		isbn13: t.Optional(t.Nullable(t.String({ pattern: "^[0-9]{13}$" }))),
-		publicationDate: t.Optional(t.Nullable(t.String({ format: "date" }))),
-		pageCount: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
-		wordCount: t.Optional(t.Nullable(t.Integer({ minimum: 0 }))),
-		metadataOnly: t.Optional(t.Boolean()),
-		versionLabel: t.Optional(t.Nullable(t.String())),
-		kind: t.Optional(t.String({ minLength: 1 })),
-		runtimeMinutes: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
-		episodeCount: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
-		seasonCount: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
-		durationSeconds: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
+		durationSeconds: t.Optional(t.Nullable(t.Integer({ minimum: 1, maximum: 2147483647 }))),
 		adaptedAudioUnitIds: t.Optional(
-			t.Nullable(
-				t.Array(Uuid, {
-					maxItems: MaximumAudioTracksPerVideo,
-					uniqueItems: true,
-				}),
-			),
+			t.Nullable(t.Array(Uuid, { maxItems: MaximumAudioTracksPerVideo, uniqueItems: true })),
 		),
-		releaseStatus: t.Optional(WorkReleaseStatus),
 	},
 	{ additionalProperties: false },
 );
@@ -319,19 +200,8 @@ const UnitDetailsInput = t.Object(
 export const UpdateUnitBody = t.Object(
 	{
 		updatedAt: t.String({ format: "date-time" }),
-		bookChapterDraftScope: t.Optional(
-			t.Union([t.Literal("book_only"), t.Literal("manageable_published_chapters")]),
-		),
 		...LifecycleInput,
 		contentLanguageSupport: t.Optional(ContentLanguageSupport),
-		unit: t.Optional(
-			t.Object(
-				{
-					releasedOn: t.Optional(t.Nullable(t.String({ format: "date" }))),
-				},
-				{ additionalProperties: false },
-			),
-		),
 		details: t.Optional(UnitDetailsInput),
 		revisionContext: t.Optional(RevisionContext),
 	},
@@ -355,18 +225,6 @@ export const UnitLookupParams = t.Object({
 });
 export type UnitLookupParams = StaticDecode<typeof UnitLookupParams>;
 
-export const BookChapterDraftJobParams = t.Object({ bookId: Uuid });
-export const CreateBookChapterDraftJobBody = t.Object(
-	{ bookUpdatedAt: DateTime },
-	{ additionalProperties: false },
-);
-export const BookChapterDraftJobResponse = t.Object(
-	{
-		id: Uuid,
-		state: t.Union([t.Literal("pending"), t.Literal("completed")]),
-	},
-	{ additionalProperties: false },
-);
 export const UnitDetailQuery = t.Object(LocalizationLanguageQuery, {
 	additionalProperties: false,
 });
@@ -463,24 +321,6 @@ export const PublicUnitSeoResponse = t.Union([
 
 export const UnitUnitIdParams = t.Object({ type: ManageableUnitType, unitId: Uuid });
 export type UnitUnitIdParams = StaticDecode<typeof UnitUnitIdParams>;
-export const VariantUnitUnitIdParams = t.Object({ type: VariantUnitType, unitId: Uuid });
-
-export const UpdateUnitVariantContextBody = t.Object(
-	{
-		mainUnitId: t.Nullable(Uuid),
-		expectedMainUnitId: t.Nullable(Uuid),
-		revisionContext: t.Optional(RevisionContext),
-	},
-	{ additionalProperties: false },
-);
-export type UpdateUnitVariantContextBody = StaticDecode<typeof UpdateUnitVariantContextBody>;
-
-export const PromoteUnitVariantBody = t.Object(
-	{ expectedMainUnitId: Uuid, revisionContext: t.Optional(RevisionContext) },
-	{ additionalProperties: false },
-);
-export type PromoteUnitVariantBody = StaticDecode<typeof PromoteUnitVariantBody>;
-
 export const UnitLocalizationParams = t.Object({
 	type: ManageableUnitType,
 	unitId: t.String({ format: "uuid" }),
@@ -522,3 +362,8 @@ export type UnitLocalizationDeleteBody = StaticDecode<typeof UnitLocalizationDel
 export const UnitLocalizationOrderResponse = t.Object({
 	languages: ContentLanguageOrder,
 });
+
+export const UnitReferenceResponse = t.Object(
+	{ owner: t.UnionEnum(UnitOwnerValues), id: Uuid, shape: t.String() },
+	{ additionalProperties: false },
+);

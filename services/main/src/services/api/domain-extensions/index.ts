@@ -1,10 +1,12 @@
-import {presentImageAsset} from "../image-assets/presentation";
+import { catalogUnitLocator } from "../../database/schema/catalog-identity";
+import { unitStateRelation } from "../../units/state-relation";
+import { AuthenticationRequired } from "../../auth/errors";
+import { presentImageAsset } from "../image-assets/presentation";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
 import {
 	CustomThemeExternalLiveAccessCapability,
 	DevelopmentPreviewCapability,
 } from "@rezics/access";
-import type { AvatarReference } from "@rezics/avatar";
 import {
 	assertNavigationDocument,
 	assertResolvedBlockReferences,
@@ -15,7 +17,6 @@ import {
 	DockDocument,
 	NavigationDocument,
 	parseDocument,
-	PortableTextDocument,
 	UnitReferencedBlockDocument,
 	UnresolvedBlockReferenceError,
 	walkBlockTree,
@@ -32,16 +33,11 @@ import {
 	parseFilterDocument,
 } from "@rezics/filter";
 import type { ContentLanguage } from "@rezics/i18n";
-import {
-	JsonValue as JsonValueSchema,
-	type JsonValue as JsonValueType,
-} from "@rezics/portable-text";
 import { ZoneHomePageSlug } from "@rezics/slug";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import type { StaticDecode } from "typebox";
-import { Check } from "typebox/value";
 
 import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
@@ -63,15 +59,10 @@ import { database } from "../../database";
 import {
 	imageAsset,
 	post,
+	realm,
 	realmRule,
 	realmRuleRevision,
-	series,
-	seriesRelease,
-	software,
-	softwareRequirement,
-	unit,
 	unitDock,
-	unitExternalLink,
 	unitLocalization,
 	unitOwnership,
 	zone,
@@ -81,14 +72,11 @@ import { currentRealmRuleRevisionReadLock } from "../../realms/rule-revision-loc
 import { assertExecutableBlockFilterDocuments } from "../../search/block-filter-documents";
 import { resolveFilterDocument } from "../../search/filter-document";
 import { presentAvatar } from "../../units/avatar";
-import { insertUnit } from "../../units/create";
+import { insertPlatformUnit } from "../../units/create";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
-import { insertLicenseGrants } from "../../units/license-grants";
 import {
 	avatarReferenceFromColumns,
-	resolvedUnitLocalizationImageAssetId,
-	resolvedUnitLocalizationLanguage,
 	resolveUnitLocalizationAvatarFromOrdered,
 	resolveUnitLocalizationFromOrdered,
 	resolveUnitLocalizationImageAssetIdFromOrdered,
@@ -119,7 +107,6 @@ import {
 	ensurePublicZoneThemeHeroAsset,
 	findPublicZoneThemeHeroAsset,
 } from "../image-assets/service";
-import { RevisionContextBody } from "../schema";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import {
@@ -127,10 +114,6 @@ import {
 	SlugAddressMutationResponse,
 } from "../slug-addresses/schema";
 import {
-	SeriesReleaseNotFound,
-	SoftwareNotFound,
-	SoftwareSystemRequirementSourceInvalid,
-	SystemRequirementNotFound,
 	ZoneDocumentInvalid,
 	ZoneNavigationInUse,
 	ZoneNavigationNotFound,
@@ -140,20 +123,8 @@ import {
 	ZoneTimeRangeInvalid,
 } from "./errors";
 import {
-	CreateSeriesBody,
 	CreateZoneBody,
-	SeriesParams,
-	SeriesReleaseListQuery,
-	SeriesReleaseListResponse,
-	SeriesReleaseParams,
-	SeriesReleaseResponse,
-	SoftwareParams,
-	SoftwareRequirementParams,
-	SystemRequirementBody,
-	SystemRequirementListResponse,
-	SystemRequirementResponse,
 	UpdateZoneBody,
-	UpsertSeriesReleaseBody,
 	ZoneDetailQuery,
 	ZoneNavigationBody,
 	ZoneNavigationListResponse,
@@ -182,20 +153,12 @@ const ZonePreviewMutationForbiddenResponse = toApiErrorResponse([
 ]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 
-function presentSystemRequirement<Requirement extends { hardware: Record<string, unknown> }>(
-	requirement: Requirement,
-): Omit<Requirement, "hardware"> & {
-	hardware: Record<string, JsonValueType>;
-} {
-	if (!Object.values(requirement.hardware).every((value) => Check(JsonValueSchema, value)))
-		throw new Error("Stored Software system requirement hardware is not valid JSON");
-	return {
-		...requirement,
-		hardware: requirement.hardware as Record<string, JsonValueType>,
-	};
-}
-const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
 const UnitMutationNotFoundResponse = toApiErrorResponse(["UnitNotFound", "ImageAssetNotFound"]);
+
+function requireAuthUserId(authorization: Authorization<string>): string {
+	if (!authorization.authUserId) throw new AuthenticationRequired();
+	return authorization.authUserId;
+}
 
 async function ensureUnitMutationAuthorized(
 	authorization: UnitAuthorization<string>,
@@ -203,61 +166,6 @@ async function ensureUnitMutationAuthorized(
 	scope: readonly string[],
 ): Promise<void> {
 	await authorization.ensureCanUpdate(unitId, [scope]);
-}
-
-async function createBaseUnit(
-	tx: DatabaseTransaction,
-	input: {
-		kind: "series" | "zone";
-		localization: {
-			language: ContentLanguage;
-			title: string;
-			summary?: string;
-			description?: PortableTextDocument;
-			avatar?: AvatarReference | null;
-			bannerAssetId?: string | null;
-			coverAssetId?: string | null;
-		};
-		ownerId: string;
-	},
-) {
-	await ensureImageAssetsAttachable(
-		tx,
-		selfAuthUserIdForEntity(input.ownerId),
-		unitLocalizationImageAssetReferences(input.localization),
-	);
-	const created = await insertUnit(tx, {
-		kind: input.kind,
-		status: "published",
-		visibility: "public",
-		publishedAt: new Date(),
-		statusActor: { kind: "profile", profileId: input.ownerId },
-	});
-	await tx
-		.insert(unitLocalization)
-		.values({ unitId: created.id, ...toUnitLocalizationStorage(input.localization) });
-	await tx.insert(unitOwnership).values({
-		unitId: created.id,
-		profileId: input.ownerId,
-		assignedByProfileId: input.ownerId,
-	});
-	return created.id;
-}
-
-async function ensureRequirementSource(softwareId: string, sourceExternalLinkId?: string | null) {
-	if (!sourceExternalLinkId) return;
-	const [source] = await database
-		.select({ id: unitExternalLink.id })
-		.from(unitExternalLink)
-		.where(
-			and(
-				eq(unitExternalLink.id, sourceExternalLinkId),
-				eq(unitExternalLink.unitId, softwareId),
-				isNull(unitExternalLink.withdrawnAt),
-			),
-		)
-		.limit(1);
-	if (!source) throw new SoftwareSystemRequirementSourceInvalid();
 }
 
 async function getZone(zoneId: string) {
@@ -271,10 +179,7 @@ async function ensureZoneRuleRealm(tx: DatabaseTransaction, realmId: string): Pr
 	const [revision] = await tx
 		.select({ id: realmRuleRevision.id })
 		.from(realmRuleRevision)
-		.innerJoin(
-			unit,
-			and(eq(unit.id, realmRuleRevision.realmId), eq(unit.kind, "realm"), isNull(unit.deletedAt)),
-		)
+		.innerJoin(realm, and(eq(realm.id, realmRuleRevision.realmId), isNull(realm.deletedAt)))
 		.where(eq(realmRuleRevision.realmId, realmId))
 		.orderBy(desc(realmRuleRevision.version))
 		.limit(1)
@@ -430,10 +335,12 @@ function rethrowZoneNavigationNotFound(cause: unknown): never {
 
 async function getReadableRenderLocalizationRows(ids: readonly string[], profileId?: string) {
 	if (!ids.length) return [];
+	if (ids.length > 512) throw new RangeError("Zone render reference limit exceeded");
+	const state = unitStateRelation(unitLocalization.unitId, "render_unit_state");
 	return database
 		.select({
-			id: unit.id,
-			kind: unit.kind,
+			id: state.id,
+			kind: state.owner,
 			language: unitLocalization.language,
 			position: unitLocalization.position,
 			title: unitLocalization.title,
@@ -447,10 +354,12 @@ async function getReadableRenderLocalizationRows(ids: readonly string[], profile
 			bannerAssetId: unitLocalization.bannerAssetId,
 			coverAssetId: unitLocalization.coverAssetId,
 		})
-		.from(unit)
-		.innerJoin(unitLocalization, eq(unitLocalization.unitId, unit.id))
-		.where(and(inArray(unit.id, [...ids]), getUnitReadCondition(profileId)))
-		.orderBy(unit.id, unitLocalization.position, unitLocalization.language);
+		.from(unitLocalization)
+		.innerJoinLateral(state, sql`true`)
+		.where(
+			and(inArray(unitLocalization.unitId, [...ids]), getUnitReadCondition(profileId, {}, state)),
+		)
+		.orderBy(unitLocalization.unitId, unitLocalization.position, unitLocalization.language);
 }
 
 function presentRenderUnit(
@@ -521,16 +430,19 @@ async function ensureZoneFilterReferences(
 	const predicateIds = document.where ? collectUnitPredicateReferenceIds(document.where) : [];
 	const ids = [...new Set([...labelIds, ...tagIds, ...predicateIds])];
 	if (!ids.length) return;
+	if (ids.length > 512) throw new ZoneDocumentInvalid();
+	const state = unitStateRelation(catalogUnitLocator.id, "zone_filter_state");
 	const records = await tx
 		.select({
-			id: unit.id,
-			kind: unit.kind,
-			status: unit.status,
-			visibility: unit.visibility,
-			moderationStatus: unit.moderationStatus,
+			id: state.id,
+			kind: state.owner,
+			status: state.status,
+			visibility: state.visibility,
+			moderationStatus: state.moderationStatus,
 		})
-		.from(unit)
-		.where(and(inArray(unit.id, ids), isNull(unit.deletedAt)));
+		.from(catalogUnitLocator)
+		.innerJoinLateral(state, sql`true`)
+		.where(inArray(catalogUnitLocator.id, ids));
 	const recordById = new Map(records.map((record) => [record.id, record]));
 	const isPublicKind = (id: string, kind: "label" | "tag") => {
 		const record = recordById.get(id);
@@ -608,122 +520,6 @@ async function ensureZoneNavigationReferences(
 
 export default new Elysia()
 	.use(session)
-	.group("/series", (app) =>
-		app
-			.post(
-				"",
-				{
-					access: "contribute:unit:create",
-					body: CreateSeriesBody,
-					response: {
-						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
-					},
-					detail: { summary: "Create Series", tags: ["Series"] },
-				},
-				async ({ entity, body }) => {
-					const id = await database.transaction(async (tx) => {
-						const unitId = await createBaseUnit(tx, {
-							kind: "series",
-							localization: body.localization,
-							ownerId: entity.id,
-						});
-						await tx.insert(series).values({ id: unitId, kind: body.kind });
-						await insertLicenseGrants(tx, {
-							unitId,
-							grantedByProfileId: entity.id,
-							licenseIds: body.licenses,
-							unitKind: "series",
-						});
-						await recordUnitRevision(tx, {
-							unitId,
-							actorProfileId: entity.id,
-							contribution: body.revisionContext?.contribution,
-							event: "create",
-						});
-						return unitId;
-					});
-					return { id };
-				},
-			)
-			.get(
-				"/:seriesId/releases",
-				{
-					params: SeriesParams,
-					query: SeriesReleaseListQuery,
-					response: {
-						[StatusCodes.OK]: SeriesReleaseListResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-					},
-					detail: { summary: "List Series releases", tags: ["Series"] },
-				},
-				async ({ params, query, request }) => {
-					const localizationLanguages = query.localizationLanguages ?? [];
-					const identity = await resolveIdentity(request, "unit:read");
-					const { authorization } = identity;
-					await authorization.unit.ensureCanRead(params.seriesId, () => new UnitNotFound("Series"));
-					const rows = await database
-						.select({
-							seriesId: seriesRelease.seriesId,
-							releaseUnitId: seriesRelease.releaseUnitId,
-							position: seriesRelease.position,
-							releasedOn: seriesRelease.releasedOn,
-							createdAt: seriesRelease.createdAt,
-							updatedAt: seriesRelease.updatedAt,
-							type: unit.kind,
-							language: unitLocalization.language,
-							title: unitLocalization.title,
-							coverAssetId: resolvedUnitLocalizationImageAssetId(
-								unit.id,
-								"cover",
-								localizationLanguages,
-							),
-						})
-						.from(seriesRelease)
-						.innerJoin(unit, eq(unit.id, seriesRelease.releaseUnitId))
-						.innerJoin(
-							unitLocalization,
-							and(
-								eq(unitLocalization.unitId, unit.id),
-								eq(
-									unitLocalization.language,
-									resolvedUnitLocalizationLanguage(unit.id, localizationLanguages),
-								),
-							),
-						)
-						.where(
-							and(
-								eq(seriesRelease.seriesId, params.seriesId),
-								inArray(unit.kind, ["book", "software", "media"]),
-								getUnitReadCondition(identity.entity?.id),
-							),
-						)
-						.orderBy(seriesRelease.position, seriesRelease.releaseUnitId);
-					return {
-						items: rows.flatMap(({ type, language, title, coverAssetId, ...row }) =>
-							type === "book" || type === "software" || type === "media"
-								? [
-										{
-											...row,
-											release: {
-												id: row.releaseUnitId,
-												type,
-												language,
-												title,
-												cover: presentImageAsset(coverAssetId, "cover"),
-											},
-										},
-									]
-								: [],
-						),
-					};
-				},
-			),
-	)
 	.group("/zones", (app) =>
 		app
 			.put(
@@ -1195,6 +991,7 @@ export default new Elysia()
 					ensureZoneBlockDocument(body.localization.document);
 					try {
 						return await upsertZonePageUnit({
+							actorAuthUserId: requireAuthUserId(authorization),
 							zoneId: params.zoneId,
 							slug: body.slug,
 							actorProfileId: entity.id,
@@ -1261,6 +1058,7 @@ export default new Elysia()
 					ensureZoneBlockDocument(body.localization.document);
 					try {
 						return await upsertZonePageUnit({
+							actorAuthUserId: requireAuthUserId(authorization),
 							zoneId: params.zoneId,
 							pageId: params.pageId,
 							slug: body.slug,
@@ -1568,110 +1366,6 @@ export default new Elysia()
 				},
 			),
 	)
-	.group("/series", (app) =>
-		app
-			.put(
-				"/:seriesId/releases/:releaseId",
-				{
-					access: "contribute:unit:update",
-					params: SeriesReleaseParams,
-					body: UpsertSeriesReleaseBody,
-					response: {
-						[StatusCodes.OK]: SeriesReleaseResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-					},
-					detail: { summary: "Add or update Series release", tags: ["Series"] },
-				},
-				async ({ params, entity, authorization, body }) => {
-					const { revisionContext, ...release } = body;
-					await ensureUnitMutationAuthorized(authorization.unit, params.seriesId, ["releases"]);
-					await authorization.unit.ensureCanRead(
-						params.releaseId,
-						() => new UnitNotFound("Release Unit"),
-					);
-					const [releaseUnit] = await database
-						.select({ id: unit.id })
-						.from(unit)
-						.where(
-							and(
-								eq(unit.id, params.releaseId),
-								inArray(unit.kind, ["book", "software", "media"]),
-								isNull(unit.deletedAt),
-							),
-						)
-						.limit(1);
-					if (!releaseUnit) throw new UnitNotFound("Release Unit");
-					const [created] = await database.transaction(async (tx) => {
-						const rows = await tx
-							.insert(seriesRelease)
-							.values({
-								seriesId: params.seriesId,
-								releaseUnitId: params.releaseId,
-								...release,
-							})
-							.onConflictDoUpdate({
-								target: [seriesRelease.seriesId, seriesRelease.releaseUnitId],
-								set: release,
-							})
-							.returning();
-						await recordUnitRevision(tx, {
-							unitId: params.seriesId,
-							actorProfileId: entity.id,
-							contribution: revisionContext?.contribution,
-							event: "update",
-						});
-						return rows;
-					});
-					if (!created) throw new Error("Series release upsert did not return a row");
-					return created;
-				},
-			)
-			.delete(
-				"/:seriesId/releases/:releaseId",
-				{
-					access: "contribute:unit:update",
-					params: SeriesReleaseParams,
-					body: t.Optional(RevisionContextBody),
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "SeriesReleaseNotFound"]),
-					},
-					detail: {
-						summary: "Remove Series release",
-						tags: ["Series"],
-						responses: NoContentResponse,
-					},
-				},
-				async ({ params, entity, authorization, body }) => {
-					await ensureUnitMutationAuthorized(authorization.unit, params.seriesId, ["releases"]);
-					await database.transaction(async (tx) => {
-						const deleted = await tx
-							.delete(seriesRelease)
-							.where(
-								and(
-									eq(seriesRelease.seriesId, params.seriesId),
-									eq(seriesRelease.releaseUnitId, params.releaseId),
-								),
-							)
-							.returning({ id: seriesRelease.releaseUnitId });
-						if (!deleted.length) throw new SeriesReleaseNotFound();
-						await recordUnitRevision(tx, {
-							unitId: params.seriesId,
-							actorProfileId: entity.id,
-							contribution: body?.revisionContext?.contribution,
-							event: "update",
-						});
-					});
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
-			),
-	)
 	.group("/zones", (app) =>
 		app.post(
 			"",
@@ -1705,20 +1399,34 @@ export default new Elysia()
 				const id = await database.transaction(async (tx) => {
 					if (body.localRuleRealmId) await ensureZoneRuleRealm(tx, body.localRuleRealmId);
 					await ensurePublicZoneThemeHeroAsset(tx, body.appearanceDocument.heroAssetId);
-					const unitId = await createBaseUnit(tx, {
-						kind: "zone",
-						localization: body.localization,
-						ownerId: entity.id,
-					});
+					await ensureImageAssetsAttachable(
+						tx,
+						requireAuthUserId(authorization),
+						unitLocalizationImageAssetReferences(body.localization),
+					);
 					await ensureZoneFilterReferences(tx, body.filterDocument);
-					await tx.insert(zone).values({
-						id: unitId,
-						filterDocument: body.filterDocument,
-						appearanceDocument: body.appearanceDocument,
-						startsAt,
-						endsAt,
-						localRuleRealmId: body.localRuleRealmId ?? null,
+					const created = await insertPlatformUnit(tx, {
+						owner: "zone",
+						values: {
+							createdByAuthUserId: requireAuthUserId(authorization),
+							status: "published",
+							visibility: "public",
+							publishedAt: new Date(),
+							filterDocument: body.filterDocument,
+							appearanceDocument: body.appearanceDocument,
+							startsAt,
+							endsAt,
+							localRuleRealmId: body.localRuleRealmId ?? null,
+						},
+						statusActor: { kind: "profile", profileId: entity.id },
 					});
+					const unitId = created.id;
+					await tx
+						.insert(unitLocalization)
+						.values({ unitId, ...toUnitLocalizationStorage(body.localization) });
+					await tx
+						.insert(unitOwnership)
+						.values({ unitId, profileId: entity.id, assignedByProfileId: entity.id });
 					await recordUnitRevision(tx, {
 						unitId,
 						actorProfileId: entity.id,
@@ -1726,6 +1434,7 @@ export default new Elysia()
 						event: "create",
 					});
 					await provisionZoneDefaultExperienceInTransaction(tx, {
+						actorAuthUserId: requireAuthUserId(authorization),
 						zoneId: unitId,
 						actorProfileId: entity.id,
 						language: body.localization.language,
@@ -1736,188 +1445,4 @@ export default new Elysia()
 				return { id };
 			},
 		),
-	)
-	.group("/software", (app) =>
-		app
-			.get(
-				"/:softwareId/system-requirements",
-				{
-					params: SoftwareParams,
-					response: {
-						[StatusCodes.OK]: SystemRequirementListResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-					},
-					detail: { summary: "List Software system requirements", tags: ["Software"] },
-				},
-				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request, "unit:read")).authorization;
-					await authorization.unit.ensureCanRead(
-						params.softwareId,
-						() => new UnitNotFound("Software"),
-					);
-					const items = await database
-						.select()
-						.from(softwareRequirement)
-						.where(eq(softwareRequirement.softwareId, params.softwareId))
-						.orderBy(
-							softwareRequirement.platformEntityId,
-							softwareRequirement.tier,
-							softwareRequirement.id,
-						);
-					return {
-						items: items.map(presentSystemRequirement),
-					};
-				},
-			)
-			.post(
-				"/:softwareId/system-requirements",
-				{
-					access: "contribute:unit:update",
-					params: SoftwareParams,
-					body: SystemRequirementBody,
-					response: {
-						[StatusCodes.OK]: SystemRequirementResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"SoftwareSystemRequirementSourceInvalid",
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "SoftwareNotFound"]),
-					},
-					detail: { summary: "Create Software system requirement", tags: ["Software"] },
-				},
-				async ({ params, entity, authorization, body }) => {
-					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
-						"system-requirements",
-					]);
-					await ensureRequirementSource(params.softwareId, body.sourceExternalLinkId);
-					const [softwareRecord] = await database
-						.select({ id: software.id })
-						.from(software)
-						.where(eq(software.id, params.softwareId))
-						.limit(1);
-					if (!softwareRecord) throw new SoftwareNotFound();
-					const [created] = await database.transaction(async (tx) => {
-						const rows = await tx
-							.insert(softwareRequirement)
-							.values({
-								softwareId: params.softwareId,
-								platformEntityId: body.platformEntityId,
-								tier: body.tier,
-								sourceExternalLinkId: body.sourceExternalLinkId,
-								hardware: body.hardware,
-							})
-							.returning();
-						await recordUnitRevision(tx, {
-							unitId: params.softwareId,
-							actorProfileId: entity.id,
-							contribution: body.revisionContext?.contribution,
-							event: "update",
-						});
-						return rows;
-					});
-					if (!created) throw new Error("System requirement insertion did not return a row");
-					return presentSystemRequirement(created);
-				},
-			)
-			.put(
-				"/:softwareId/system-requirements/:requirementId",
-				{
-					access: "contribute:unit:update",
-					params: SoftwareRequirementParams,
-					body: SystemRequirementBody,
-					response: {
-						[StatusCodes.OK]: SystemRequirementResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"SoftwareSystemRequirementSourceInvalid",
-							"RevisionCreditEntityInvalid",
-							"RevisionContributionActorRequired",
-						]),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"SystemRequirementNotFound",
-						]),
-					},
-					detail: { summary: "Replace Software system requirement", tags: ["Software"] },
-				},
-				async ({ params, entity, authorization, body }) => {
-					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
-						"system-requirements",
-					]);
-					await ensureRequirementSource(params.softwareId, body.sourceExternalLinkId);
-					return database.transaction(async (tx) => {
-						const rows = await tx
-							.update(softwareRequirement)
-							.set({
-								platformEntityId: body.platformEntityId,
-								tier: body.tier,
-								sourceExternalLinkId: body.sourceExternalLinkId,
-								hardware: body.hardware,
-							})
-							.where(
-								and(
-									eq(softwareRequirement.id, params.requirementId),
-									eq(softwareRequirement.softwareId, params.softwareId),
-								),
-							)
-							.returning();
-						const [updated] = rows;
-						if (!updated) throw new SystemRequirementNotFound();
-						await recordUnitRevision(tx, {
-							unitId: params.softwareId,
-							actorProfileId: entity.id,
-							contribution: body.revisionContext?.contribution,
-							event: "update",
-						});
-						return presentSystemRequirement(updated);
-					});
-				},
-			)
-			.delete(
-				"/:softwareId/system-requirements/:requirementId",
-				{
-					access: "contribute:unit:update",
-					params: SoftwareRequirementParams,
-					body: t.Optional(RevisionContextBody),
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"SystemRequirementNotFound",
-						]),
-					},
-					detail: {
-						summary: "Delete Software system requirement",
-						tags: ["Software"],
-						responses: NoContentResponse,
-					},
-				},
-				async ({ params, entity, authorization, body }) => {
-					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
-						"system-requirements",
-					]);
-					await database.transaction(async (tx) => {
-						const deleted = await tx
-							.delete(softwareRequirement)
-							.where(
-								and(
-									eq(softwareRequirement.id, params.requirementId),
-									eq(softwareRequirement.softwareId, params.softwareId),
-								),
-							)
-							.returning({ id: softwareRequirement.id });
-						if (!deleted.length) throw new SystemRequirementNotFound();
-						await recordUnitRevision(tx, {
-							unitId: params.softwareId,
-							actorProfileId: entity.id,
-							contribution: body?.revisionContext?.contribution,
-							event: "update",
-						});
-					});
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
-			),
 	);

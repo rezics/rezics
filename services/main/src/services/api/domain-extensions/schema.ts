@@ -1,4 +1,3 @@
-import { JsonValue, type JsonValue as JsonValueType } from "@rezics/portable-text";
 import {
 	DockDocument,
 	NavigationDocument,
@@ -7,7 +6,6 @@ import {
 	ZoneAppearanceDocument,
 } from "@rezics/block";
 import { FilterDocument } from "@rezics/filter";
-import { LicenseIds } from "@rezics/license";
 import { type StaticDecode, Type } from "typebox";
 import { t } from "elysia";
 
@@ -17,7 +15,6 @@ import {
 	FractionalPositionInput,
 	ContentLanguage,
 	LocalizationLanguageQuery,
-	License,
 	RevisionContext,
 	UnitLocalizationInput,
 	Uuid,
@@ -46,49 +43,6 @@ const UnitReferencedBlockInputDocument = Type.Unsafe<
 >(UnitReferencedBlockDocument);
 const NavigationInputDocument =
 	Type.Unsafe<StaticDecode<typeof NavigationDocument>>(NavigationDocument);
-
-export const CreateSeriesBody = t.Object(
-	{
-		kind: t.String({ minLength: 1, maxLength: 64 }),
-		licenses: t.Array(License, { uniqueItems: true, maxItems: LicenseIds.length }),
-		localization: UnitLocalizationInput,
-		revisionContext: t.Optional(RevisionContext),
-	},
-	{ additionalProperties: false },
-);
-export const SeriesParams = t.Object({ seriesId: Uuid });
-export const SeriesReleaseListQuery = t.Object(LocalizationLanguageQuery, {
-	additionalProperties: false,
-});
-export const SeriesReleaseParams = t.Object({ seriesId: Uuid, releaseId: Uuid });
-export const UpsertSeriesReleaseBody = t.Object(
-	{
-		position: FractionalPositionInput,
-		releasedOn: t.Optional(t.Nullable(t.String({ format: "date" }))),
-		revisionContext: t.Optional(RevisionContext),
-	},
-	{ additionalProperties: false },
-);
-
-export const SoftwareParams = t.Object({ softwareId: Uuid });
-export const SoftwareRequirementParams = t.Object({
-	softwareId: Uuid,
-	requirementId: Uuid,
-});
-export const SystemRequirementBody = t.Object(
-	{
-		platformEntityId: t.Optional(t.Nullable(Uuid)),
-		tier: t.String({ minLength: 1, maxLength: 32 }),
-		sourceExternalLinkId: t.Optional(t.Nullable(Uuid)),
-		hardware: t.Record(t.String(), JsonValue),
-		revisionContext: t.Optional(RevisionContext),
-	},
-	{ additionalProperties: false },
-);
-
-const SystemRequirementHardwareResponse = Type.Unsafe<Record<string, JsonValueType>>(
-	t.Record(t.String(), JsonValue),
-);
 
 export const CreateZoneBody = t.Object(
 	{
@@ -198,45 +152,6 @@ export const ZoneNavigationRevisionBody = t.Object(
 	{ baseRevisionId: Uuid },
 	{ additionalProperties: false },
 );
-
-export const SeriesReleaseResponse = t.Object({
-	seriesId: Uuid,
-	releaseUnitId: Uuid,
-	position: FractionalPosition,
-	releasedOn: t.Nullable(t.String()),
-	createdAt: DateTime,
-	updatedAt: DateTime,
-});
-export const SeriesReleaseListResponse = t.Object({
-	items: t.Array(
-		t.Intersect([
-			SeriesReleaseResponse,
-			t.Object({
-				release: t.Object({
-					id: Uuid,
-					type: t.Union([t.Literal("book"), t.Literal("software"), t.Literal("media")]),
-					language: ContentLanguage,
-					title: t.Nullable(t.String()),
-					cover: ImageAssetResponse,
-				}),
-			}),
-		]),
-	),
-});
-
-export const SystemRequirementResponse = t.Object({
-	id: Uuid,
-	softwareId: Uuid,
-	platformEntityId: t.Nullable(Uuid),
-	tier: t.String(),
-	sourceExternalLinkId: t.Nullable(Uuid),
-	hardware: SystemRequirementHardwareResponse,
-	createdAt: DateTime,
-	updatedAt: DateTime,
-});
-export const SystemRequirementListResponse = t.Object({
-	items: t.Array(SystemRequirementResponse),
-});
 
 export const ZoneResponse = t.Object({
 	id: Uuid,

@@ -1,3 +1,6 @@
+import { readUnitStateById } from "../../units/query";
+import { UnitNotFound } from "../../units/errors";
+import { database } from "../../database";
 import Elysia, { t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import type { StaticDecode } from "typebox";
@@ -8,7 +11,6 @@ import { MaximumSubjectAssociationsPageSize } from "../../database/schema/contra
 import { decodeCursor, encodeCursor } from "../../pagination";
 import { resolveRecommendationViewer } from "../../recommendations/context";
 import { getReadableUnitPresentationsByIds } from "../../units/attribution";
-import { enqueueBookChapterDraftJob } from "../../units/book-chapter-draft";
 import { listContentLanguageEvidence } from "../../units/content-language-evidence";
 import {
 	createUnitRealmPublication,
@@ -18,7 +20,7 @@ import {
 } from "../../units/realm-publication";
 import { getPublicUnitSeoProjection } from "../../units/seo";
 import {
-	createUnit,
+	createTimedMediaUnit,
 	deleteUnitContentLanguage,
 	getUnit,
 	getUnitLocalizationOrder,
@@ -29,11 +31,6 @@ import {
 } from "../../units/service";
 import { listUnitStatusEvents } from "../../units/status";
 import { listUnitSubjectAssociations } from "../../units/subject-associations";
-import {
-	getUnitSeriesMemberships,
-	promoteUnitVariantToMain,
-	updateUnitVariantContext,
-} from "../../units/variants";
 import { ValidationError } from "../errors";
 import { NoContentResponse } from "../schema/action-response";
 import {
@@ -45,16 +42,13 @@ import {
 	VoteBackpressureResponse,
 } from "../schema/response";
 import {
-	BookChapterDraftJobParams,
-	BookChapterDraftJobResponse,
+	UnitReferenceResponse,
 	ContentLanguageEvidenceQuery,
 	ContentLanguageEvidenceResponse,
 	ContentLanguageEvidenceUnitParams,
-	CreateBookChapterDraftJobBody,
-	CreateUnitBody,
+	CreateTimedMediaBody,
 	ListUnitRealmPublicationsQuery,
 	ListUnitsQuery,
-	PromoteUnitVariantBody,
 	PublicUnitSeoParams,
 	PublicUnitSeoQuery,
 	PublicUnitSeoResponse,
@@ -70,18 +64,13 @@ import {
 	UnitLookupParams,
 	UnitRealmPublicationListResponse,
 	UnitRealmPublicationParams,
-	UnitSeriesMembershipListResponse,
-	UnitSeriesMembershipQuery,
 	UnitStatusEventListQuery,
 	UnitStatusEventListResponse,
 	UnitStatusEventParams,
 	UnitSubjectAssociationsQuery,
 	UnitUnitIdParams,
 	UpdateUnitBody,
-	UpdateUnitVariantContextBody,
-	VariantUnitTypeParams,
-	VariantUnitUnitIdParams,
-	WorkUnitTypeParams,
+	TimedMediaUnitTypeParams,
 } from "./schema";
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
@@ -112,12 +101,6 @@ const UnitCreateBadRequestResponse = toApiErrorResponse([
 ]);
 const UnitCreateConflictResponse = toApiErrorResponse([
 	"CreditAttributionRequestConfirmationRequired",
-	"UnitVariantKindMismatch",
-	"UnitVariantTargetIsVariant",
-	"UnitVariantSourceHasVariants",
-	"UnitVariantGroupLimitReached",
-	"UnitVariantChanged",
-	"UnitVariantMainUnavailable",
 	"UnitLicenseGrantConflict",
 	"UnitLicenseOfferingEndForbidden",
 ]);
@@ -162,7 +145,6 @@ const UnitAuthorizationForbiddenResponse = toApiErrorResponse([
 	"AccountRestricted",
 	"UnitPermissionForbidden",
 ]);
-const UnitChangedResponse = toApiErrorResponse(["UnitChanged"]);
 const UnitUpdateConflictResponse = toApiErrorResponse([
 	"UnitChanged",
 	"UnitLicenseGrantConflict",
@@ -185,16 +167,37 @@ const UnitRealmPublicationConflictResponse = toApiErrorResponse([
 	"UnitRealmPublicationTransitionInvalid",
 	"RealmRulesAcceptanceRequired",
 ]);
-const UnitVariantConflictResponse = toApiErrorResponse([
-	"UnitVariantKindMismatch",
-	"UnitVariantTargetIsVariant",
-	"UnitVariantSourceHasVariants",
-	"UnitVariantGroupLimitReached",
-	"UnitVariantChanged",
-	"UnitVariantMainUnavailable",
-]);
 export default new Elysia({ prefix: "/units" })
 	.use(session)
+	.get(
+		"/by-id/:unitId/reference",
+		{
+			params: UnitStatusEventParams,
+			response: {
+				[StatusCodes.OK]: UnitReferenceResponse,
+				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+			},
+			detail: {
+				operationId: "getUnitReference",
+				summary: "Resolve a readable native owner reference",
+				tags: ["Units"],
+			},
+		},
+		async ({ params, request }) => {
+			const { authorization } = await resolveIdentity(request, "unit:read");
+			return database.transaction(async (tx) => {
+				const decision = await authorization.unit.decideInTransaction(
+					tx,
+					params.unitId,
+					"unit.read",
+				);
+				if (!decision.allowed) throw new UnitNotFound();
+				const target = await readUnitStateById(tx, params.unitId, { lock: "share" });
+				if (!target) throw new UnitNotFound();
+				return { ...target.reference, shape: target.shape };
+			});
+		},
+	)
 	.get(
 		"/by-id/:unitId/seo",
 		{
@@ -357,29 +360,6 @@ export default new Elysia({ prefix: "/units" })
 		},
 	)
 	.get(
-		"/by-id/:unitId/series-memberships",
-		{
-			params: UnitStatusEventParams,
-			query: UnitSeriesMembershipQuery,
-			response: {
-				[StatusCodes.OK]: UnitSeriesMembershipListResponse,
-				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
-			},
-			detail: { summary: "List Unit Series memberships", tags: ["Units", "Series"] },
-		},
-		async ({ params, query, request }) => {
-			const authorization = (await resolveIdentity(request, "unit:read")).authorization;
-			await authorization.unit.ensureCanRead(params.unitId);
-			return {
-				items: await getUnitSeriesMemberships(
-					params.unitId,
-					authorization.profileId,
-					query.localizationLanguages ?? [],
-				),
-			};
-		},
-	)
-	.get(
 		"/by-id/:unitId/status-events",
 		{
 			params: UnitStatusEventParams,
@@ -480,7 +460,7 @@ export default new Elysia({ prefix: "/units" })
 	.get(
 		"/:type",
 		{
-			params: WorkUnitTypeParams,
+			params: TimedMediaUnitTypeParams,
 			query: ListUnitsQuery,
 			response: {
 				[StatusCodes.OK]: UnitListResponse,
@@ -513,8 +493,8 @@ export default new Elysia({ prefix: "/units" })
 		"/:type",
 		{
 			access: "contribute:unit:create",
-			params: VariantUnitTypeParams,
-			body: CreateUnitBody,
+			params: TimedMediaUnitTypeParams,
+			body: CreateTimedMediaBody,
 			response: {
 				[StatusCodes.OK]: UnitDetailResponse,
 				[StatusCodes.BAD_REQUEST]: UnitCreateBadRequestResponse,
@@ -531,39 +511,12 @@ export default new Elysia({ prefix: "/units" })
 			detail: { summary: "Create unit", tags: ["Units"] },
 		},
 		async ({ params, authorization, body }) => {
-			if (params.type !== body.details.type)
-				throw new ValidationError({
-					details: "must match the requested Unit type",
-				});
+			if (params.type !== body.owner)
+				throw new ValidationError({ details: "must match the requested owner" });
 			const { revisionContext, ...createBody } = body;
-			return createUnit(authorization, {
+			return createTimedMediaUnit(authorization, {
 				...createBody,
 				revisionContribution: revisionContext?.contribution,
-				initialTagIds: body.initialTagIds ?? [],
-			});
-		},
-	)
-	.post(
-		"/book/:bookId/chapter-draft-jobs",
-		{
-			access: "contribute:unit:update",
-			params: BookChapterDraftJobParams,
-			body: CreateBookChapterDraftJobBody,
-			response: {
-				[StatusCodes.OK]: BookChapterDraftJobResponse,
-				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
-				[StatusCodes.FORBIDDEN]: UnitAuthorizationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
-				[StatusCodes.CONFLICT]: UnitChangedResponse,
-			},
-			detail: { summary: "Draft Chapters attached to a draft Book", tags: ["Units"] },
-		},
-		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.bookId, "unit.status.update", ["unit"]);
-			return enqueueBookChapterDraftJob({
-				bookId: params.bookId,
-				bookUpdatedAt: new Date(body.bookUpdatedAt),
-				requestedByProfileId: entity.id,
 			});
 		},
 	)
@@ -637,76 +590,12 @@ export default new Elysia({ prefix: "/units" })
 			detail: { summary: "Update unit", tags: ["Units"] },
 		},
 		async ({ params, authorization, body }) => {
-			if (
-				body.bookChapterDraftScope !== undefined &&
-				(params.type !== "book" || body.status !== "draft")
-			)
-				throw new ValidationError({
-					bookChapterDraftScope: "is only valid while setting a Book to draft",
-				});
 			const { updatedAt, revisionContext, ...update } = body;
 			return updateUnit(params.type, params.unitId, authorization, {
 				...update,
 				revisionContribution: revisionContext?.contribution,
 				expectedUpdatedAt: new Date(updatedAt),
 			});
-		},
-	)
-	.patch(
-		"/:type/:unitId/variant-context",
-		{
-			access: "contribute:unit:update",
-			params: VariantUnitUnitIdParams,
-			body: UpdateUnitVariantContextBody,
-			response: {
-				[StatusCodes.OK]: UnitDetailResponse,
-				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
-				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-				[StatusCodes.BAD_REQUEST]: UnitRevisionContributionBadRequestResponse,
-				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
-				[StatusCodes.CONFLICT]: UnitVariantConflictResponse,
-			},
-			detail: { summary: "Update Unit Main relationship", tags: ["Units"] },
-		},
-		async ({ params, authorization, body }) => {
-			await updateUnitVariantContext({
-				kind: params.type,
-				variantUnitId: params.unitId,
-				mainUnitId: body.mainUnitId,
-				expectedMainUnitId: body.expectedMainUnitId,
-				actorProfileId: authorization.profileId,
-				contribution: body.revisionContext?.contribution,
-				authorization: authorization.unit,
-			});
-			return getUnit(params.type, params.unitId, authorization);
-		},
-	)
-	.post(
-		"/:type/:unitId/variant-context/promote",
-		{
-			access: "contribute:unit:update",
-			params: VariantUnitUnitIdParams,
-			body: PromoteUnitVariantBody,
-			response: {
-				[StatusCodes.OK]: UnitDetailResponse,
-				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
-				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-				[StatusCodes.BAD_REQUEST]: UnitRevisionContributionBadRequestResponse,
-				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
-				[StatusCodes.CONFLICT]: UnitVariantConflictResponse,
-			},
-			detail: { summary: "Promote Unit Variant to Main", tags: ["Units"] },
-		},
-		async ({ params, authorization, body }) => {
-			await promoteUnitVariantToMain({
-				kind: params.type,
-				variantUnitId: params.unitId,
-				expectedMainUnitId: body.expectedMainUnitId,
-				actorProfileId: authorization.profileId,
-				contribution: body.revisionContext?.contribution,
-				authorization: authorization.unit,
-			});
-			return getUnit(params.type, params.unitId, authorization);
 		},
 	)
 	.put(
