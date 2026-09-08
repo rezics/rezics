@@ -12,6 +12,33 @@ const { forms: metadataTerms } = enTerminology.metadata;
 const { forms: entityTerms } = enTerminology.entity;
 
 export default {
+	nativeMusic: {
+		music: enTerminology.music.forms.label,
+		recording: enTerminology.musicRecording.forms.label,
+		track: enTerminology.musicTrack.forms.label,
+		medium: enTerminology.musicMedium.forms.label,
+		release: enTerminology.musicRelease.forms.label,
+		release_group: enTerminology.musicReleaseGroup.forms.label,
+		work: "Composition",
+		release_candidate: `Unmatched ${enTerminology.musicRelease.forms.inline}`,
+		number: "Number",
+		position: "Position",
+		duration: "Duration (milliseconds)",
+		barcode: "Barcode",
+		language: "Language",
+		script: "Script",
+		history: "History",
+		restore: "Restore this version",
+		remove: "Remove",
+		addMedium: `Add ${enTerminology.musicMedium.forms.inline}`,
+		addTrack: `Add ${enTerminology.musicTrack.forms.inline}`,
+		emptyMedia: `No ${enTerminology.musicMedium.forms.plural} yet`,
+		emptyTracks: `No ${enTerminology.musicTrack.forms.plural} yet`,
+		deleted: "Deleted",
+		current: "Current",
+		video: `${enTerminology.video.forms.label}`,
+		addName: "Add name",
+	},
 	nativeCatalog: { names: "Names", identifiers: "Identifiers" },
 	types: {
 		book: "Book",

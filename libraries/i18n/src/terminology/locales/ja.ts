@@ -1,6 +1,36 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const jaTerminology = defineTerminology("ja", {
+	music: {
+		status: "approved",
+		forms: { label: "音楽", inline: "音楽", plural: "音楽" },
+		forbidden: [],
+	},
+	musicRecording: {
+		status: "approved",
+		forms: { label: "音楽録音", inline: "音楽録音", plural: "音楽録音" },
+		forbidden: [],
+	},
+	musicTrack: {
+		status: "approved",
+		forms: { label: "音楽トラック", inline: "音楽トラック", plural: "音楽トラック" },
+		forbidden: [],
+	},
+	musicMedium: {
+		status: "approved",
+		forms: { label: "音楽メディア", inline: "音楽メディア", plural: "音楽メディア" },
+		forbidden: [],
+	},
+	musicRelease: {
+		status: "approved",
+		forms: { label: "音楽リリース", inline: "音楽リリース", plural: "音楽リリース" },
+		forbidden: [],
+	},
+	musicReleaseGroup: {
+		status: "approved",
+		forms: { label: "リリースグループ", inline: "リリースグループ", plural: "リリースグループ" },
+		forbidden: [],
+	},
 	follow: {
 		status: "approved",
 		forms: {

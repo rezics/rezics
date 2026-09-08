@@ -12,6 +12,33 @@ const { forms: metadataTerms } = jaTerminology.metadata;
 const { forms: entityTerms } = jaTerminology.entity;
 
 export default {
+	nativeMusic: {
+		music: jaTerminology.music.forms.label,
+		recording: jaTerminology.musicRecording.forms.label,
+		track: jaTerminology.musicTrack.forms.label,
+		medium: jaTerminology.musicMedium.forms.label,
+		release: jaTerminology.musicRelease.forms.label,
+		release_group: jaTerminology.musicReleaseGroup.forms.label,
+		work: "楽曲",
+		release_candidate: `未照合の${jaTerminology.musicRelease.forms.inline}`,
+		number: "番号",
+		position: "順序",
+		duration: "長さ（ミリ秒）",
+		barcode: "バーコード",
+		language: "言語",
+		script: "文字体系",
+		history: "変更履歴",
+		restore: "この版を復元",
+		remove: "削除",
+		addMedium: `${jaTerminology.musicMedium.forms.inline}を追加`,
+		addTrack: `${jaTerminology.musicTrack.forms.inline}を追加`,
+		emptyMedia: `${jaTerminology.musicMedium.forms.inline}はまだありません`,
+		emptyTracks: `${jaTerminology.musicTrack.forms.inline}はまだありません`,
+		deleted: "削除済み",
+		current: "現在",
+		video: "映像",
+		addName: "名前を追加",
+	},
 	nativeCatalog: { names: "名称", identifiers: "識別子" },
 	types: {
 		book: "書籍",

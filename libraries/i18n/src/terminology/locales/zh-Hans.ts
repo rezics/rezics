@@ -1,6 +1,36 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const zhHansTerminology = defineTerminology("zh-Hans", {
+	music: {
+		status: "approved",
+		forms: { label: "音乐", inline: "音乐", plural: "音乐" },
+		forbidden: [],
+	},
+	musicRecording: {
+		status: "approved",
+		forms: { label: "录音", inline: "录音", plural: "录音" },
+		forbidden: [],
+	},
+	musicTrack: {
+		status: "approved",
+		forms: { label: "曲目", inline: "曲目", plural: "曲目" },
+		forbidden: [],
+	},
+	musicMedium: {
+		status: "approved",
+		forms: { label: "载体", inline: "载体", plural: "载体" },
+		forbidden: [],
+	},
+	musicRelease: {
+		status: "approved",
+		forms: { label: "发行版本", inline: "发行版本", plural: "发行版本" },
+		forbidden: [],
+	},
+	musicReleaseGroup: {
+		status: "approved",
+		forms: { label: "发行组", inline: "发行组", plural: "发行组" },
+		forbidden: [],
+	},
 	follow: {
 		status: "approved",
 		forms: {

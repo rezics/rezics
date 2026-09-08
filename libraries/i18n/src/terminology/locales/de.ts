@@ -1,6 +1,44 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const deTerminology = defineTerminology("de", {
+	music: {
+		status: "approved",
+		forms: { label: "Musik", inline: "Musik", plural: "Musik" },
+		forbidden: [],
+	},
+	musicRecording: {
+		status: "approved",
+		forms: { label: "Musikaufnahme", inline: "Musikaufnahme", plural: "Musikaufnahme" },
+		forbidden: [],
+	},
+	musicTrack: {
+		status: "approved",
+		forms: { label: "Musiktitel", inline: "Musiktitel", plural: "Musiktitel" },
+		forbidden: [],
+	},
+	musicMedium: {
+		status: "approved",
+		forms: { label: "Tonträger", inline: "Tonträger", plural: "Tonträger" },
+		forbidden: [],
+	},
+	musicRelease: {
+		status: "approved",
+		forms: {
+			label: "Musikveröffentlichung",
+			inline: "Musikveröffentlichung",
+			plural: "Musikveröffentlichung",
+		},
+		forbidden: [],
+	},
+	musicReleaseGroup: {
+		status: "approved",
+		forms: {
+			label: "Veröffentlichungsgruppe",
+			inline: "Veröffentlichungsgruppe",
+			plural: "Veröffentlichungsgruppe",
+		},
+		forbidden: [],
+	},
 	follow: {
 		status: "approved",
 		forms: {

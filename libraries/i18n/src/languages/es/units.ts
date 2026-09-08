@@ -12,6 +12,33 @@ const { forms: metadataTerms } = esTerminology.metadata;
 const { forms: entityTerms } = esTerminology.entity;
 
 export default {
+	nativeMusic: {
+		music: esTerminology.music.forms.label,
+		recording: esTerminology.musicRecording.forms.label,
+		track: esTerminology.musicTrack.forms.label,
+		medium: esTerminology.musicMedium.forms.label,
+		release: esTerminology.musicRelease.forms.label,
+		release_group: esTerminology.musicReleaseGroup.forms.label,
+		work: "Composición",
+		release_candidate: `${esTerminology.musicRelease.forms.label} sin vincular`,
+		number: "Número",
+		position: "Posición",
+		duration: "Duración (milisegundos)",
+		barcode: "Código de barras",
+		language: "Idioma",
+		script: "Escritura",
+		history: "Historial",
+		restore: "Restaurar esta versión",
+		remove: "Eliminar",
+		addMedium: `Añadir ${esTerminology.musicMedium.forms.inline}`,
+		addTrack: `Añadir ${esTerminology.musicTrack.forms.inline}`,
+		emptyMedia: `Todavía no hay ${esTerminology.musicMedium.forms.plural}`,
+		emptyTracks: `Todavía no hay ${esTerminology.musicTrack.forms.plural}`,
+		deleted: "Eliminado",
+		current: "Actual",
+		video: `${esTerminology.video.forms.label}`,
+		addName: "Añadir nombre",
+	},
 	nativeCatalog: { names: "Nombres", identifiers: "Identificadores" },
 	types: {
 		book: "Libro",

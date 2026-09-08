@@ -1,6 +1,36 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const enTerminology = defineTerminology("en", {
+	music: {
+		status: "approved",
+		forms: { label: "Music", inline: "music", plural: "music" },
+		forbidden: [],
+	},
+	musicRecording: {
+		status: "approved",
+		forms: { label: "Music recording", inline: "music recording", plural: "music recording" },
+		forbidden: [],
+	},
+	musicTrack: {
+		status: "approved",
+		forms: { label: "Music track", inline: "music track", plural: "music tracks" },
+		forbidden: [],
+	},
+	musicMedium: {
+		status: "approved",
+		forms: { label: "Release medium", inline: "release medium", plural: "release media" },
+		forbidden: [],
+	},
+	musicRelease: {
+		status: "approved",
+		forms: { label: "Music release", inline: "music release", plural: "music release" },
+		forbidden: [],
+	},
+	musicReleaseGroup: {
+		status: "approved",
+		forms: { label: "Release group", inline: "release group", plural: "release group" },
+		forbidden: [],
+	},
 	follow: {
 		status: "approved",
 		forms: {

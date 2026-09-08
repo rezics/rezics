@@ -1,6 +1,36 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const zhHantTerminology = defineTerminology("zh-Hant", {
+	music: {
+		status: "approved",
+		forms: { label: "音樂", inline: "音樂", plural: "音樂" },
+		forbidden: [],
+	},
+	musicRecording: {
+		status: "approved",
+		forms: { label: "錄音", inline: "錄音", plural: "錄音" },
+		forbidden: [],
+	},
+	musicTrack: {
+		status: "approved",
+		forms: { label: "曲目", inline: "曲目", plural: "曲目" },
+		forbidden: [],
+	},
+	musicMedium: {
+		status: "approved",
+		forms: { label: "載體", inline: "載體", plural: "載體" },
+		forbidden: [],
+	},
+	musicRelease: {
+		status: "approved",
+		forms: { label: "發行版本", inline: "發行版本", plural: "發行版本" },
+		forbidden: [],
+	},
+	musicReleaseGroup: {
+		status: "approved",
+		forms: { label: "發行組", inline: "發行組", plural: "發行組" },
+		forbidden: [],
+	},
 	follow: {
 		status: "approved",
 		forms: {

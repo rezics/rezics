@@ -1,6 +1,36 @@
 import { defineTerminology } from "@rezics/i18n/terminology/concepts";
 
 export const koTerminology = defineTerminology("ko", {
+	music: {
+		status: "approved",
+		forms: { label: "음악", inline: "음악", plural: "음악" },
+		forbidden: [],
+	},
+	musicRecording: {
+		status: "approved",
+		forms: { label: "음악 녹음", inline: "음악 녹음", plural: "음악 녹음" },
+		forbidden: [],
+	},
+	musicTrack: {
+		status: "approved",
+		forms: { label: "음악 트랙", inline: "음악 트랙", plural: "음악 트랙" },
+		forbidden: [],
+	},
+	musicMedium: {
+		status: "approved",
+		forms: { label: "음반 매체", inline: "음반 매체", plural: "음반 매체" },
+		forbidden: [],
+	},
+	musicRelease: {
+		status: "approved",
+		forms: { label: "음악 발매본", inline: "음악 발매본", plural: "음악 발매본" },
+		forbidden: [],
+	},
+	musicReleaseGroup: {
+		status: "approved",
+		forms: { label: "발매 그룹", inline: "발매 그룹", plural: "발매 그룹" },
+		forbidden: [],
+	},
 	follow: {
 		status: "approved",
 		forms: {

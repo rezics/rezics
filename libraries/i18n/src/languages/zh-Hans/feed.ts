@@ -61,7 +61,7 @@ export default {
 			"unit:media": "媒体",
 			"unit:video": videoTerms.label,
 			"unit:audio": audioTerms.label,
-			"unit:release": "发行版本",
+			"unit:release": zhHansTerminology.musicRelease.forms.label,
 			"unit:entity": entityTerms.pluralLabel,
 			"unit:tag": "标签",
 			"unit:structure": tagPathTerms.pluralLabel,

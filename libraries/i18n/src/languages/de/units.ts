@@ -12,6 +12,33 @@ const { forms: metadataTerms } = deTerminology.metadata;
 const { forms: entityTerms } = deTerminology.entity;
 
 export default {
+	nativeMusic: {
+		music: deTerminology.music.forms.label,
+		recording: deTerminology.musicRecording.forms.label,
+		track: deTerminology.musicTrack.forms.label,
+		medium: deTerminology.musicMedium.forms.label,
+		release: deTerminology.musicRelease.forms.label,
+		release_group: deTerminology.musicReleaseGroup.forms.label,
+		work: "Komposition",
+		release_candidate: `Nicht zugeordnete ${deTerminology.musicRelease.forms.inline}`,
+		number: "Nummer",
+		position: "Position",
+		duration: "Dauer (Millisekunden)",
+		barcode: "Strichcode",
+		language: "Sprache",
+		script: "Schrift",
+		history: "Verlauf",
+		restore: "Diese Version wiederherstellen",
+		remove: "Entfernen",
+		addMedium: `${deTerminology.musicMedium.forms.inline} hinzufügen`,
+		addTrack: `${deTerminology.musicTrack.forms.inline} hinzufügen`,
+		emptyMedia: `Noch keine ${deTerminology.musicMedium.forms.plural}`,
+		emptyTracks: `Noch keine ${deTerminology.musicTrack.forms.plural}`,
+		deleted: "Gelöscht",
+		current: "Aktuell",
+		video: `${deTerminology.video.forms.label}`,
+		addName: "Namen hinzufügen",
+	},
 	nativeCatalog: { names: "Namen", identifiers: "Kennungen" },
 	types: {
 		book: "Buch",

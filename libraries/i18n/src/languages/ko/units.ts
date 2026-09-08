@@ -12,6 +12,33 @@ const { forms: metadataTerms } = koTerminology.metadata;
 const { forms: entityTerms } = koTerminology.entity;
 
 export default {
+	nativeMusic: {
+		music: koTerminology.music.forms.label,
+		recording: koTerminology.musicRecording.forms.label,
+		track: koTerminology.musicTrack.forms.label,
+		medium: koTerminology.musicMedium.forms.label,
+		release: koTerminology.musicRelease.forms.label,
+		release_group: koTerminology.musicReleaseGroup.forms.label,
+		work: `${koTerminology.music.forms.label} 작품`,
+		release_candidate: `미연결 ${koTerminology.musicRelease.forms.inline}`,
+		number: "번호",
+		position: "순서",
+		duration: "길이(밀리초)",
+		barcode: "바코드",
+		language: "언어",
+		script: "문자 체계",
+		history: "변경 이력",
+		restore: "이 버전 복원",
+		remove: "삭제",
+		addMedium: `${koTerminology.musicMedium.forms.inline} 추가`,
+		addTrack: `${koTerminology.musicTrack.forms.inline} 추가`,
+		emptyMedia: `아직 ${koTerminology.musicMedium.forms.inline}가 없습니다`,
+		emptyTracks: `아직 ${koTerminology.musicTrack.forms.inline}이 없습니다`,
+		deleted: "삭제됨",
+		current: "현재",
+		video: "영상",
+		addName: "이름 추가",
+	},
 	nativeCatalog: { names: "이름", identifiers: "식별자" },
 	types: {
 		book: "책",

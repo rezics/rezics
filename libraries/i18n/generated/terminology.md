@@ -4,6 +4,156 @@
 
 This document is a generated view of the typed termbase in `libraries/i18n/src/terminology`. Product locale resources remain the owner of complete user-visible messages.
 
+## music
+
+The native music domain.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Music |  |
+| en | approved | inline | music |  |
+| en | approved | plural | music |  |
+| zh-Hant | approved | label | 音樂 |  |
+| zh-Hant | approved | inline | 音樂 |  |
+| zh-Hant | approved | plural | 音樂 |  |
+| zh-Hans | approved | label | 音乐 |  |
+| zh-Hans | approved | inline | 音乐 |  |
+| zh-Hans | approved | plural | 音乐 |  |
+| de | approved | label | Musik |  |
+| de | approved | inline | Musik |  |
+| de | approved | plural | Musik |  |
+| ja | approved | label | 音楽 |  |
+| ja | approved | inline | 音楽 |  |
+| ja | approved | plural | 音楽 |  |
+| ko | approved | label | 음악 |  |
+| ko | approved | inline | 음악 |  |
+| ko | approved | plural | 음악 |  |
+
+## musicRecording
+
+One recorded performance, distinct from a printed track occurrence.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Music recording |  |
+| en | approved | inline | music recording |  |
+| en | approved | plural | music recording |  |
+| zh-Hant | approved | label | 錄音 |  |
+| zh-Hant | approved | inline | 錄音 |  |
+| zh-Hant | approved | plural | 錄音 |  |
+| zh-Hans | approved | label | 录音 |  |
+| zh-Hans | approved | inline | 录音 |  |
+| zh-Hans | approved | plural | 录音 |  |
+| de | approved | label | Musikaufnahme |  |
+| de | approved | inline | Musikaufnahme |  |
+| de | approved | plural | Musikaufnahme |  |
+| ja | approved | label | 音楽録音 |  |
+| ja | approved | inline | 音楽録音 |  |
+| ja | approved | plural | 音楽録音 |  |
+| ko | approved | label | 음악 녹음 |  |
+| ko | approved | inline | 음악 녹음 |  |
+| ko | approved | plural | 음악 녹음 |  |
+
+## musicTrack
+
+One printed track occurrence on one release medium.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Music track |  |
+| en | approved | inline | music track |  |
+| en | approved | plural | music tracks |  |
+| zh-Hant | approved | label | 曲目 |  |
+| zh-Hant | approved | inline | 曲目 |  |
+| zh-Hant | approved | plural | 曲目 |  |
+| zh-Hans | approved | label | 曲目 |  |
+| zh-Hans | approved | inline | 曲目 |  |
+| zh-Hans | approved | plural | 曲目 |  |
+| de | approved | label | Musiktitel |  |
+| de | approved | inline | Musiktitel |  |
+| de | approved | plural | Musiktitel |  |
+| ja | approved | label | 音楽トラック |  |
+| ja | approved | inline | 音楽トラック |  |
+| ja | approved | plural | 音楽トラック |  |
+| ko | approved | label | 음악 트랙 |  |
+| ko | approved | inline | 음악 트랙 |  |
+| ko | approved | plural | 음악 트랙 |  |
+
+## musicMedium
+
+One ordered physical or digital carrier in a music release.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Release medium |  |
+| en | approved | inline | release medium |  |
+| en | approved | plural | release media |  |
+| zh-Hant | approved | label | 載體 |  |
+| zh-Hant | approved | inline | 載體 |  |
+| zh-Hant | approved | plural | 載體 |  |
+| zh-Hans | approved | label | 载体 |  |
+| zh-Hans | approved | inline | 载体 |  |
+| zh-Hans | approved | plural | 载体 |  |
+| de | approved | label | Tonträger |  |
+| de | approved | inline | Tonträger |  |
+| de | approved | plural | Tonträger |  |
+| ja | approved | label | 音楽メディア |  |
+| ja | approved | inline | 音楽メディア |  |
+| ja | approved | plural | 音楽メディア |  |
+| ko | approved | label | 음반 매체 |  |
+| ko | approved | inline | 음반 매체 |  |
+| ko | approved | plural | 음반 매체 |  |
+
+## musicRelease
+
+One concrete music release with its own carrier and track structure.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Music release |  |
+| en | approved | inline | music release |  |
+| en | approved | plural | music release |  |
+| zh-Hant | approved | label | 發行版本 |  |
+| zh-Hant | approved | inline | 發行版本 |  |
+| zh-Hant | approved | plural | 發行版本 |  |
+| zh-Hans | approved | label | 发行版本 |  |
+| zh-Hans | approved | inline | 发行版本 |  |
+| zh-Hans | approved | plural | 发行版本 |  |
+| de | approved | label | Musikveröffentlichung |  |
+| de | approved | inline | Musikveröffentlichung |  |
+| de | approved | plural | Musikveröffentlichung |  |
+| ja | approved | label | 音楽リリース |  |
+| ja | approved | inline | 音楽リリース |  |
+| ja | approved | plural | 音楽リリース |  |
+| ko | approved | label | 음악 발매본 |  |
+| ko | approved | inline | 음악 발매본 |  |
+| ko | approved | plural | 음악 발매본 |  |
+
+## musicReleaseGroup
+
+A family of related music releases.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Release group |  |
+| en | approved | inline | release group |  |
+| en | approved | plural | release group |  |
+| zh-Hant | approved | label | 發行組 |  |
+| zh-Hant | approved | inline | 發行組 |  |
+| zh-Hant | approved | plural | 發行組 |  |
+| zh-Hans | approved | label | 发行组 |  |
+| zh-Hans | approved | inline | 发行组 |  |
+| zh-Hans | approved | plural | 发行组 |  |
+| de | approved | label | Veröffentlichungsgruppe |  |
+| de | approved | inline | Veröffentlichungsgruppe |  |
+| de | approved | plural | Veröffentlichungsgruppe |  |
+| ja | approved | label | リリースグループ |  |
+| ja | approved | inline | リリースグループ |  |
+| ja | approved | plural | リリースグループ |  |
+| ko | approved | label | 발매 그룹 |  |
+| ko | approved | inline | 발매 그룹 |  |
+| ko | approved | plural | 발매 그룹 |  |
+
 ## follow
 
 A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.

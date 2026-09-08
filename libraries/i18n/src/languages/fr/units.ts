@@ -12,6 +12,33 @@ const { forms: metadataTerms } = frTerminology.metadata;
 const { forms: entityTerms } = frTerminology.entity;
 
 export default {
+	nativeMusic: {
+		music: frTerminology.music.forms.label,
+		recording: frTerminology.musicRecording.forms.label,
+		track: frTerminology.musicTrack.forms.label,
+		medium: frTerminology.musicMedium.forms.label,
+		release: frTerminology.musicRelease.forms.label,
+		release_group: frTerminology.musicReleaseGroup.forms.label,
+		work: "Composition",
+		release_candidate: `${frTerminology.musicRelease.forms.label} non rapprochée`,
+		number: "Numéro",
+		position: "Position",
+		duration: "Durée (millisecondes)",
+		barcode: "Code-barres",
+		language: "Langue",
+		script: "Écriture",
+		history: "Historique",
+		restore: "Restaurer cette version",
+		remove: "Supprimer",
+		addMedium: `Ajouter un ${frTerminology.musicMedium.forms.inline}`,
+		addTrack: `Ajouter une ${frTerminology.musicTrack.forms.inline}`,
+		emptyMedia: `Aucun ${frTerminology.musicMedium.forms.inline} pour le moment`,
+		emptyTracks: `Aucune ${frTerminology.musicTrack.forms.inline} pour le moment`,
+		deleted: "Supprimé",
+		current: "Actuel",
+		video: `${frTerminology.video.forms.label}`,
+		addName: "Ajouter un nom",
+	},
 	nativeCatalog: { names: "Noms", identifiers: "Identifiants" },
 	types: {
 		book: "Livre",

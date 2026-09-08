@@ -37,6 +37,36 @@ const WebTerminologyLocales = AllTerminologyLocales;
  * consistent across product surfaces. Keys identify concepts, not source words.
  */
 export const terminologyConcepts = defineTerminologyConcepts({
+	music: {
+		definition: "The native music domain.",
+		slots: ["label", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	musicRecording: {
+		definition: "One recorded performance, distinct from a printed track occurrence.",
+		slots: ["label", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	musicTrack: {
+		definition: "One printed track occurrence on one release medium.",
+		slots: ["label", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	musicMedium: {
+		definition: "One ordered physical or digital carrier in a music release.",
+		slots: ["label", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	musicRelease: {
+		definition: "One concrete music release with its own carrier and track structure.",
+		slots: ["label", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
+	musicReleaseGroup: {
+		definition: "A family of related music releases.",
+		slots: ["label", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
 	follow: {
 		definition:
 			"A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.",
