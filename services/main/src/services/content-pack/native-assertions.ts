@@ -1,3 +1,6 @@
+import { putPublishingComponent } from "../catalog/publishing-components";
+import { appendSoftwareReleaseComponents } from "../catalog/software";
+import { createGroupingOrderProfile, orderGroupingRelation } from "../catalog/grouping";
 import { CatalogReferenceSchema, type CatalogReference } from "@rezics/reference";
 import type { DatabaseTransaction } from "../database";
 import {
@@ -24,6 +27,7 @@ export async function importNativePackAssertions(
 		if (!object) throw new ContentPackInvalid(`Missing native assertion owner ${key}`);
 		return CatalogReferenceSchema.parse({ owner: object.identity.owner, id: pack.ids.units[key] });
 	}
+	const orderProfiles = new Map<string, string>();
 	const facts = new Map<string, { id: string; owner: CatalogReference }>();
 	for (const fact of pack.relations.catalogFacts ?? []) {
 		if (facts.has(fact.sourceKey)) throw new ContentPackInvalid("Duplicate native fact key");
@@ -94,15 +98,23 @@ export async function importNativePackAssertions(
 			throw new ContentPackInvalid(
 				"Pack relations require explicit role targets; predicate role IDs are compiled from that declaration",
 			);
+		const qualifierRevisionIds = new Set(
+			qualifiers.map((qualifier) => qualifier.definitionRevisionId),
+		);
+		for (const qualifier of relation.qualifierDefinitions) {
+			if (qualifier.kind !== "property")
+				throw new ContentPackInvalid("Qualifier definitions must be properties");
+			qualifierRevisionIds.add((await ensureCatalogDefinition(tx, qualifier)).revisionId);
+		}
 		const definition = await ensureCatalogDefinition(tx, {
 			...relation.definition,
 			constraints: {
 				...relation.definition.constraints,
 				roles: [{ roleRevisionId: role.revisionId, min: 1, max: 1, targets }],
-				qualifierRevisionIds: qualifiers.map((qualifier) => qualifier.definitionRevisionId),
+				qualifierRevisionIds: [...qualifierRevisionIds].sort(),
 			},
 		});
-		await createCatalogRelation(
+		const created = await createCatalogRelation(
 			tx,
 			owner,
 			actor,
@@ -112,6 +124,52 @@ export async function importNativePackAssertions(
 				participants: [{ roleRevisionId: role.revisionId, target }],
 				qualifiers,
 			},
+		);
+		if (relation.order) {
+			if (owner.owner !== "grouping")
+				throw new ContentPackInvalid("Only Grouping relationships have grouping order");
+			const key = `${owner.id}:${relation.order.profileKey}`;
+			let profileId = orderProfiles.get(key),
+				revision = created.revision;
+			if (!profileId) {
+				const profile = await createGroupingOrderProfile(
+					tx,
+					owner,
+					actor,
+					revision,
+					relation.order.profileKey,
+				);
+				profileId = profile.id;
+				revision = profile.revision;
+				orderProfiles.set(key, profileId);
+			}
+			await orderGroupingRelation(tx, owner, actor, revision, {
+				profileId,
+				relationId: created.id,
+				position: relation.order.position,
+				sourcePosition: relation.order.sourcePosition,
+			});
+		}
+	}
+	for (const component of pack.relations.publishingComponents ?? []) {
+		const owner = reference(component.ownerSourceKey);
+		await putPublishingComponent(
+			tx,
+			owner,
+			actor,
+			(await loadCatalogIdentity(tx, owner, actor, true)).revision,
+			component.key,
+			component.value,
+		);
+	}
+	for (const component of pack.relations.softwareComponents ?? []) {
+		const owner = reference(component.ownerSourceKey);
+		await appendSoftwareReleaseComponents(
+			tx,
+			owner,
+			actor,
+			(await loadCatalogIdentity(tx, owner, actor, true)).revision,
+			component.values,
 		);
 	}
 }

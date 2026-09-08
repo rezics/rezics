@@ -1,3 +1,6 @@
+import { CatalogIdentifierValuesSchema } from "../catalog/name-contracts";
+import { PublishingComponentValuesSchema } from "../catalog/publishing-components";
+import { SoftwareReleaseComponentSchema } from "../catalog/software";
 import {
 	ZoneAppearanceDocument,
 	isDocument,
@@ -396,6 +399,8 @@ const PackObjectBaseSchema = z
 			.strict(),
 		contentLanguageSupport: ContentLanguageSupportSchema.optional(),
 		native: CreateCatalogResourceSchema.optional(),
+		nativeIdentifiers: z.array(CatalogIdentifierValuesSchema).max(128).optional(),
+		groupingClasses: z.array(CatalogDefinitionInputSchema).max(128).optional(),
 		tag: TagSchema.optional(),
 		label: z.object({}).strict().optional(),
 		collection: z.object({}).strict().optional(),
@@ -478,6 +483,8 @@ export const PackObjectSchema = PackObjectBaseSchema.superRefine((object, contex
 	)
 		issue(["localizations"], "Each language may occur only once");
 	const catalog = CatalogOwnerValues.some((owner) => owner === object.identity.owner);
+	if (object.groupingClasses && object.identity.owner !== "grouping")
+		issue(["groupingClasses"], "Only a Grouping declares grouping classes");
 	if (catalog) {
 		if (!object.native)
 			issue(["native"], "A catalog identity requires a complete native creation declaration");
@@ -493,6 +500,8 @@ export const PackObjectSchema = PackObjectBaseSchema.superRefine((object, contex
 			issue(["identity"], "Catalog resources do not declare platform-only lifecycle fields");
 	} else {
 		if (object.native) issue(["native"], "A platform identity cannot declare a catalog structure");
+		if (object.nativeIdentifiers || object.groupingClasses)
+			issue([], "Catalog metadata is not valid on a platform resource");
 		const expected =
 			object.identity.owner === "zone"
 				? ["zone", "compiledZone"]
@@ -606,6 +615,25 @@ const UnitTagRelationSchema = z
 
 export const PackRelationsSchema = z
 	.object({
+		publishingComponents: z
+			.array(
+				z.strictObject({
+					ownerSourceKey: NonEmptyString,
+					key: Uuid,
+					value: PublishingComponentValuesSchema,
+				}),
+			)
+			.max(10000)
+			.optional(),
+		softwareComponents: z
+			.array(
+				z.strictObject({
+					ownerSourceKey: NonEmptyString,
+					values: z.array(SoftwareReleaseComponentSchema).min(1).max(128),
+				}),
+			)
+			.max(10000)
+			.optional(),
 		catalogRelations: z
 			.array(
 				z.strictObject({
@@ -613,6 +641,14 @@ export const PackRelationsSchema = z
 					targetSourceKey: NonEmptyString,
 					definition: CatalogDefinitionInputSchema,
 					roleDefinition: CatalogDefinitionInputSchema,
+					qualifierDefinitions: z.array(CatalogDefinitionInputSchema).max(64).default([]),
+					order: z
+						.strictObject({
+							profileKey: NonEmptyString,
+							position: NonEmptyString,
+							sourcePosition: NonEmptyString.optional(),
+						})
+						.optional(),
 					qualifiers: z
 						.array(
 							z.strictObject({
@@ -633,6 +669,7 @@ export const PackRelationsSchema = z
 					ownerSourceKey: NonEmptyString,
 					definition: CatalogDefinitionInputSchema,
 					value: JsonValue,
+					sourceEvidence: JsonObject.optional(),
 				}),
 			)
 			.max(10000)

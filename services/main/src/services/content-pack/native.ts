@@ -1,3 +1,5 @@
+import { addCatalogIdentifier } from "../catalog/identifiers";
+import { ensureCatalogDefinition } from "../catalog/storage";
 import { canonicalizeContentLanguageTag } from "@rezics/content-language";
 import type { DatabaseTransaction } from "../database";
 import type { PackObject } from "./contracts";
@@ -177,4 +179,12 @@ export async function insertNativePackObject(
 				kind: alias.kind,
 			})
 		).revision;
+	for (const identifier of object.nativeIdentifiers ?? [])
+		revision = (await addCatalogIdentifier(tx, reference, actor, revision, identifier)).revision;
+	for (const definition of object.groupingClasses ?? []) {
+		if (reference.owner !== "grouping" || definition.kind !== "class")
+			throw new ContentPackInvalid("A Grouping requires class definitions");
+		const row = await ensureCatalogDefinition(tx, definition);
+		revision = (await assignGroupingClass(tx, reference, actor, revision, row.revisionId)).revision;
+	}
 }
