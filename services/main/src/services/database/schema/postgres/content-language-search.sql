@@ -43,3 +43,21 @@ ON public.unit_content_language_support;
 CREATE TRIGGER unit_content_language_search_maintain
 AFTER INSERT OR UPDATE OR DELETE ON public.unit_content_language_support
 FOR EACH ROW EXECUTE FUNCTION public.maintain_unit_content_language_search();
+
+-- Declarations and their reverse projection use the concrete native owner, never retired kinds.
+CREATE OR REPLACE FUNCTION public.guard_content_language_owner() RETURNS trigger
+LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
+DECLARE target record;
+BEGIN
+  SELECT * INTO target FROM public.read_unit_state(NEW.unit_id, true);
+  IF NOT FOUND OR target.owner <> NEW.unit_kind OR target.owner NOT IN ('publishing','music','program','software','audio','video') THEN
+    RAISE EXCEPTION 'Content language declaration does not match its concrete owner' USING ERRCODE='23514';
+  END IF;
+  RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS content_language_owner_guard ON public.unit_content_language_support;
+CREATE TRIGGER content_language_owner_guard BEFORE INSERT OR UPDATE ON public.unit_content_language_support
+FOR EACH ROW EXECUTE FUNCTION public.guard_content_language_owner();
+DROP TRIGGER IF EXISTS content_language_owner_guard ON public.unit_content_language_search;
+CREATE TRIGGER content_language_owner_guard BEFORE INSERT OR UPDATE ON public.unit_content_language_search
+FOR EACH ROW EXECUTE FUNCTION public.guard_content_language_owner();

@@ -54,12 +54,12 @@ export const CommunityOwnedUnitKindValues = [
 export const VariantCapableUnitKindValues = ["book", "software", "media", "entity"] as const;
 /** Unit kinds that can make an authoritative content-consumption language declaration. */
 export const ContentLanguageSupportUnitKindValues = [
-	"book",
+	"publishing",
+	"music",
+	"program",
 	"software",
-	"media",
 	"video",
 	"audio",
-	"release",
 ] as const;
 export type ContentLanguageSupportUnitKind = (typeof ContentLanguageSupportUnitKindValues)[number];
 /** Direct, non-recursive evidence lanes exposed to content-language editors. */

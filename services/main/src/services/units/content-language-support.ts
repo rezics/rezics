@@ -5,16 +5,15 @@ import {
 } from "@rezics/content-language";
 import { eq, inArray, sql } from "drizzle-orm";
 
-import { type DatabaseTransaction, database } from "../database";
+import { type DatabaseTransaction, type DatabaseExecutor, database } from "../database";
 import {
 	type ContentLanguageSupportUnitKind,
 	ContentLanguageSupportUnitKindValues,
-	type UnitKind,
 	unitContentLanguageSupport,
 } from "../database/schema";
 import { UnitContentLanguageSupportInvalid } from "./errors";
 
-const ContentLanguageSupportUnitKindSet: ReadonlySet<UnitKind> = new Set(
+const ContentLanguageSupportUnitKindSet: ReadonlySet<string> = new Set(
 	ContentLanguageSupportUnitKindValues,
 );
 const EmptyContentLanguageSupport: ContentLanguageSupport = Object.freeze([]);
@@ -35,7 +34,7 @@ export function presentContentLanguageSupport(value: ContentLanguageSupport) {
 }
 
 export function isContentLanguageSupportUnitKind(
-	kind: UnitKind,
+	kind: string,
 ): kind is ContentLanguageSupportUnitKind {
 	return ContentLanguageSupportUnitKindSet.has(kind);
 }
@@ -63,8 +62,9 @@ function parseStoredContentLanguageSupport(value: unknown): ContentLanguageSuppo
 
 export async function getUnitContentLanguageSupport(
 	unitId: string,
+	executor: DatabaseExecutor = database,
 ): Promise<ContentLanguageSupport> {
-	const [row] = await database
+	const [row] = await executor
 		.select({ value: unitContentLanguageSupport.value })
 		.from(unitContentLanguageSupport)
 		.where(eq(unitContentLanguageSupport.unitId, unitId))
@@ -74,13 +74,14 @@ export async function getUnitContentLanguageSupport(
 
 export async function getUnitContentLanguageSupportByUnitIds(
 	unitIds: readonly string[],
+	executor: DatabaseExecutor = database,
 ): Promise<ReadonlyMap<string, ContentLanguageSupport>> {
 	if (unitIds.length === 0) return new Map();
 	if (unitIds.length > MaximumBatchUnitCount)
 		throw new RangeError(
 			`Content language support batch cannot exceed ${MaximumBatchUnitCount} Units`,
 		);
-	const rows = await database
+	const rows = await executor
 		.select({ unitId: unitContentLanguageSupport.unitId, value: unitContentLanguageSupport.value })
 		.from(unitContentLanguageSupport)
 		.where(inArray(unitContentLanguageSupport.unitId, unitIds));
@@ -93,7 +94,7 @@ export async function getUnitContentLanguageSupportByUnitIds(
 export async function replaceUnitContentLanguageSupport(
 	tx: DatabaseTransaction,
 	unitId: string,
-	unitKind: UnitKind,
+	unitKind: string,
 	value: unknown,
 ): Promise<ContentLanguageSupport> {
 	if (!isContentLanguageSupportUnitKind(unitKind))

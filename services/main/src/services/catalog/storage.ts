@@ -150,7 +150,8 @@ export async function resolveCatalogIdentity(
 	if (!locator)
 		throw new CatalogReferenceNotFound("Catalog routing is missing; owner repair is required");
 	const parsed = CatalogReferenceSchema.safeParse({ owner: locator.owner, id });
-	if (!parsed.success) throw new CatalogReferenceNotFound("This identity has another registered owner");
+	if (!parsed.success)
+		throw new CatalogReferenceNotFound("This identity has another registered owner");
 	const reference = parsed.data;
 	const row = await loadCatalogIdentity(tx, reference, actor, false);
 	if (row.routingGeneration !== locator.generation)
@@ -256,12 +257,18 @@ export async function beginCatalogFact(
 	actor: string,
 	expectedVersion: number,
 	definitionRevisionId: string,
-	options: { spoiler?: 0 | 1 | 2; semanticId?: string; expectedHeadVersion?: number } = {},
+	options: {
+		spoiler?: 0 | 1 | 2;
+		semanticId?: string;
+		expectedHeadVersion?: number;
+		initialSemanticId?: string;
+	} = {},
 ) {
 	const staged = z
 		.strictObject({
 			spoiler: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
 			semanticId: z.uuid().optional(),
+			initialSemanticId: z.uuid().optional(),
 			expectedHeadVersion: z
 				.number()
 				.int()
@@ -270,10 +277,26 @@ export async function beginCatalogFact(
 				.default(0),
 		})
 		.parse(options);
-	if (Boolean(staged.semanticId) !== staged.expectedHeadVersion > 0)
-		throw new TypeError("Replacement requires an exact existing semantic head");
+	if (
+		Boolean(staged.semanticId) !== staged.expectedHeadVersion > 0 ||
+		(staged.initialSemanticId && (staged.semanticId || staged.expectedHeadVersion !== 0))
+	)
+		throw new TypeError(
+			"Replacement requires an exact existing semantic head; explicit initialization is separate",
+		);
 	await assertCatalogDefinitionRevision(tx, definitionRevisionId, "property");
 	const revision = await recordCatalogChange(tx, reference, actor, expectedVersion, "fact.begin");
+	if (staged.initialSemanticId) {
+		const head = CatalogFactTables[reference.owner].semanticHead;
+		const [existing] = await tx
+			.select({ version: head.version })
+			.from(head)
+			.where(and(eq(head.ownerId, reference.id), eq(head.semanticId, staged.initialSemanticId)))
+			.limit(1);
+		if (existing)
+			throw new CatalogRevisionConflict("An existing semantic head cannot be initialized again");
+	}
+
 	const table = CatalogFactTables[reference.owner].fact;
 	const [created] = await tx
 		.insert(table)
@@ -281,7 +304,7 @@ export async function beginCatalogFact(
 			ownerId: reference.id,
 			definitionRevisionId,
 			spoiler: staged.spoiler,
-			semanticId: staged.semanticId,
+			semanticId: staged.initialSemanticId ?? staged.semanticId,
 			expectedHeadVersion: staged.expectedHeadVersion,
 		})
 		.returning({ id: table.id });

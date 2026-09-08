@@ -43,7 +43,7 @@ describe("Unit content language support boundary", () => {
 	});
 
 	it("keeps field ownership separate from presentation-only Unit kinds", () => {
-		for (const kind of ["book", "software", "media", "video", "audio", "release"] as const)
+		for (const kind of ["publishing", "music", "program", "software", "video", "audio"] as const)
 			expect(isContentLanguageSupportUnitKind(kind)).toBe(true);
 		for (const kind of ["series", "entity", "post"] as const)
 			expect(isContentLanguageSupportUnitKind(kind)).toBe(false);
