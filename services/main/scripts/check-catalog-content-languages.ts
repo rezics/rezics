@@ -3,7 +3,6 @@ import {
 	catalogDefinitionRevision,
 } from "../src/services/database/schema/catalog-identity";
 import { beginCatalogFact, CatalogRevisionConflict } from "../src/services/catalog/storage";
-import { resolveIdentity } from "../src/services/auth/session";
 import { runWithParticipationAuthority } from "../src/services/participation/policy";
 import {
 	contentLanguageDeclarationSemanticId,
@@ -45,6 +44,7 @@ const observability = initializeObservability({
 });
 const { database } = await import("../src/services/database");
 const { auth } = await import("../src/services/auth");
+const { resolveIdentity } = await import("../src/services/auth/session");
 const { default: catalog } = await import("../src/services/api/catalog");
 const { default: languages } = await import("../src/services/api/catalog/content-languages");
 const { default: errors } = await import("../src/services/api/error-boundary");
