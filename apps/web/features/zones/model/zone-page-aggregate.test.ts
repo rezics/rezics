@@ -14,8 +14,9 @@ function searchOutcome() {
 		items: [
 			{
 				id: UnitId,
-				category: "unit",
-				kind: "book",
+				category: "units",
+				owner: "publishing",
+				shape: "work",
 				title: "Book",
 				name: null,
 				summary: null,

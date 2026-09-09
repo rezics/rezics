@@ -10,7 +10,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { TranslationProvider } from "@/i18n/client";
 import { UnitMetadataEditor, type EditableUnit } from "./unit-edit";
 
-const api = vi.hoisted(() => ({ mutateAsync: vi.fn() }));
+const api = vi.hoisted(() => ({ mutateAsync: vi.fn().mockResolvedValue(undefined) }));
 const AudioUnitId = "00000000-0000-4000-8000-000000000010";
 const ParentUnitId = "00000000-0000-4000-8000-000000000020";
 

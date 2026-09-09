@@ -134,6 +134,7 @@ vi.mock("@rezics/openapi-tanstack-query", async (importOriginal) => {
 			refetch: vi.fn(),
 		}),
 		useGetApiUnitsByTypeByUnitId: () => ({ data: undefined }),
+		useGetApiGovernanceUnitByUnitIdAccessEffective: () => ({ data: undefined }),
 		useGetApiResourcesByOwnerByUnitIdTags: () => ({
 			data: tagData,
 			error: null,
@@ -159,6 +160,10 @@ vi.mock("@rezics/ui", () => ({
 
 vi.mock("@tanstack/react-query", () => ({
 	useQueryClient: () => ({ invalidateQueries: vi.fn(async () => undefined) }),
+}));
+
+vi.mock("@/features/units/hooks/use-unit-summary", () => ({
+	useUnitSummary: () => ({ data: undefined }),
 }));
 
 vi.mock("@/features/application-shell/components/app-link", () => ({

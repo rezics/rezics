@@ -109,7 +109,7 @@ describe("Unit association cards", () => {
 		const entityLinks = await screen.findAllByRole("link", { name: subjectAssociation.title });
 		expect(entityLinks).toHaveLength(2);
 		for (const link of entityLinks)
-			expect(link.getAttribute("href")).toBe(`/entities/${subjectAssociation.entityEntryId}`);
+			expect(link.getAttribute("href")).toBe(`/catalog/entity/${subjectAssociation.entityEntryId}`);
 		const entityBody = screen.getByRole("heading", {
 			name: subjectAssociation.title,
 		}).parentElement;

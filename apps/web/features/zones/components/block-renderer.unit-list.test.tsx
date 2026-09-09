@@ -483,7 +483,7 @@ describe("Zone unit-list presentation", () => {
 			source: { kind: "units", unitIds: [ItemId] },
 		} satisfies Block;
 		renderZone(block, [
-			unit(ItemId, "book", "Shelf item", { id: CoverId, url: "/cover.jpg" }),
+			unit(ItemId, "publishing", "Shelf item", { id: CoverId, url: "/cover.jpg" }),
 			unit(HeadingId, "label", "Featured books"),
 			unit(ViewAllId, "collection", "All books"),
 		]);
@@ -497,7 +497,7 @@ describe("Zone unit-list presentation", () => {
 		);
 		const card = screen.getByTestId("unit-card");
 		expect(card.getAttribute("data-cover")).toBe("/cover.jpg");
-		expect(card.getAttribute("href")).toBe(`/units/book/${ItemId}`);
+		expect(card.getAttribute("href")).toBe(`/catalog/publishing/${ItemId}`);
 	});
 
 	it("marks the rendered scope as a Zone appearance surface", () => {
@@ -569,7 +569,9 @@ describe("Zone unit-list presentation", () => {
 
 		await waitFor(() => expect(screen.getByTestId("shelf")).toBeTruthy());
 		expect(screen.getByTestId("shelf").getAttribute("data-item-size")).toBe("lg");
-		expect(screen.getByTestId("unit-card").getAttribute("href")).toBe(`/units/book/${ItemId}`);
+		expect(screen.getByTestId("unit-card").getAttribute("href")).toBe(
+			`/catalog/publishing/${ItemId}`,
+		);
 		expect(screen.getByTestId("unit-card").textContent).toContain("Search item");
 		expectPresetShelf();
 	});
@@ -583,7 +585,7 @@ describe("Zone unit-list presentation", () => {
 			presentation: { itemSize: "lg" },
 			source: { kind: "units", unitIds: [ItemId] },
 		} satisfies Block;
-		renderZone(block, [unit(ItemId, "book", "Grid item")]);
+		renderZone(block, [unit(ItemId, "publishing", "Grid item")]);
 
 		expect(screen.queryByTestId("shelf")).toBeNull();
 		expect(screen.getByRole("list").className).toContain("sm:grid-cols-2");

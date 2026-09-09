@@ -120,8 +120,8 @@ function checkResourceRegistry(path: string, source: string): string[] {
 				errors.push(`${location(path, node)} keep the translation resource registry client-safe`);
 		}
 
-		if (node.type === "CallExpression" && isAstNode(node.callee) && node.callee.type === "Import") {
-			const sourceValue = stringLiteralValue(nodeArray(node.arguments)[0]);
+		if (node.type === "ImportExpression") {
+			const sourceValue = stringLiteralValue(node.source);
 			if (!sourceValue?.startsWith("./languages/"))
 				errors.push(
 					`${location(path, node)} use a statically analyzable translation-module import`,

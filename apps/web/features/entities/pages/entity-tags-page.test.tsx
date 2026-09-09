@@ -6,11 +6,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const EntityId = "00000000-0000-7000-8000-000000000001";
 
-vi.mock("@rezics/openapi-tanstack-query", () => ({
-	useGetApiEntitiesByUnitId: () => ({
+vi.mock("@/features/units/hooks/use-unit-summary", () => ({
+	useUnitSummary: () => ({
 		data: {
 			id: EntityId,
 			language: "en",
+			title: "Saber",
 			localizations: [{ language: "en", title: "Saber" }],
 		},
 		error: null,
@@ -121,7 +122,7 @@ describe("EntityTagsPage", () => {
 		expect(screen.getByRole("heading", { name: "Tags" })).toBeTruthy();
 		expect(screen.getByText("Saber")).toBeTruthy();
 		expect(screen.getByRole("link", { name: /Back to overview/ }).getAttribute("href")).toBe(
-			`/entities/${EntityId}`,
+			`/catalog/entity/${EntityId}`,
 		);
 		expect(screen.getByTestId("tag-explorer").textContent).toBe(
 			`entity:${EntityId}:00000000-0000-7000-8000-000000000002`,

@@ -62,7 +62,7 @@ describe("FeedVoteControl", () => {
 		);
 		const selectedUpvote = screen.getByRole("button", { name: "贊成" });
 		expect(selectedUpvote.classList.contains("text-primary")).toBe(true);
-		expect(screen.getByText("228").classList.contains("text-primary")).toBe(true);
+		expect(screen.getByText("228").classList.contains("text-brand-text")).toBe(true);
 		fireEvent.click(selectedUpvote);
 		expect(onReactionChange).toHaveBeenLastCalledWith(null);
 

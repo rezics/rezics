@@ -125,7 +125,7 @@ vi.mock("@/lib/use-hydrated-session", () => ({
 	}),
 }));
 
-const translation = await create(resources).getTranslation(["engagement"], ["zh-Hant"]);
+const translation = await create(resources).getTranslation(["engagement", "ui"], ["zh-Hant"]);
 const domain = {
 	type: "publishing",
 	unitId: "019f9000-0000-7000-8000-000000000001",

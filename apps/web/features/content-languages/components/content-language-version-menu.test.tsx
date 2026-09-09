@@ -40,6 +40,7 @@ vi.mock("../hooks/use-content-language-navigation", () => ({
 
 vi.mock("@/i18n/client", () => ({
 	useTranslation: () => ({
+		locale: { current: "zh-Hant" },
 		t: {
 			locale: {
 				contentLanguages: { zh: "中文", ko: "韓文" },

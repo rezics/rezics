@@ -46,6 +46,7 @@ import { LocalizationMediaFallbackNotice } from "@/features/media/components/loc
 import { FeedCard } from "@/features/content-feed/components/feed-card";
 import { UnitLicensesField } from "./components/unit-licenses-field";
 import { readSubmittedLicenses } from "./model/unit-licenses";
+import { adaptedAudioUnitIdsChanged } from "./model/adapted-audio";
 import { FeedUnitContent } from "@/features/content-feed/components/feed-unit-content";
 import type { UnitType } from "./unit-types";
 
@@ -154,7 +155,11 @@ export function UnitMetadataEditor({ type, unit }: { type: UnitType; unit: Unit 
 						: {}),
 					details: {
 						durationSeconds: duration,
-						...(type === "video" ? { adaptedAudioUnitIds: [...tracks] } : {}),
+						...(type === "video" &&
+						unit.details.type === "video" &&
+						adaptedAudioUnitIdsChanged(unit.details.adaptedAudioUnitIds ?? [], tracks)
+							? { adaptedAudioUnitIds: tracks.length ? [...tracks] : null }
+							: {}),
 					},
 				},
 			})

@@ -1,5 +1,7 @@
 "use client";
 
+import { publicUnitHref } from "@/features/units/routing/public-unit-route";
+
 import {
 	Block as BlockContract,
 	appendBlockPath,
@@ -169,15 +171,7 @@ function unitHref(unit: RenderUnit, context?: ZoneBlockContextValue): string | n
 }
 
 function unitIdHref(kind: string, id: string): string | null {
-	if (["book", "software", "media"].includes(kind)) return `/units/${kind}/${id}`;
-	if (kind === "profile") return `/user/${id}`;
-	if (kind === "realm") return `/realm/${id}`;
-	if (kind === "zone") return `/zone/${id}`;
-	if (kind === "post") return `/posts/${id}`;
-	if (kind === "collection") return `/collections/${id}`;
-	if (kind === "poll") return `/polls/${id}`;
-	if (kind === "entity") return `/entities/${id}`;
-	return null;
+	return publicUnitHref(kind, { id }) ?? null;
 }
 
 function navigationHref(target: NavigationTarget, context: ZoneBlockContextValue): string | null {

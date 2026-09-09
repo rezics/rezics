@@ -89,6 +89,21 @@ vi.mock("@/features/units/model/unit-detail-unit", () => ({
 	isUnitDetailUnitFor: () => true,
 }));
 
+vi.mock("@/features/units/hooks/use-unit-summary", () => ({
+	useUnitSummary: () => ({
+		data: {
+			id: UnitId,
+			owner: "publishing",
+			shape: "text_version",
+			language: "zh",
+			title: "測試作品",
+		},
+		isPending: false,
+		isError: false,
+		refetch: vi.fn(),
+	}),
+}));
+
 vi.mock("@/i18n/client", async () => {
 	const { create: createReactI18n } = await import("native-i18n/react/client");
 	return createReactI18n(resources);

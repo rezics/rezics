@@ -8,7 +8,8 @@ const api = vi.hoisted(() => ({
 	mutateAsync: vi.fn(),
 }));
 
-vi.mock("@rezics/openapi-tanstack-query", () => ({
+vi.mock("@rezics/openapi-tanstack-query", async (importOriginal) => ({
+	...(await importOriginal<typeof import("@rezics/openapi-tanstack-query")>()),
 	usePostApiSearchByIndex: () => ({
 		isPending: false,
 		mutateAsync: api.mutateAsync,

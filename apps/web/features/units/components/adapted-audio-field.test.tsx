@@ -57,7 +57,7 @@ describe("AdaptedAudioField", () => {
 		render(<AdaptedAudioField onChange={onChange} value={["existing-audio"]} />);
 
 		expect(picker.props).toMatchObject({
-			kinds: ["audio"],
+			owners: ["audio"],
 			maxValues: MaximumAudioTracksPerVideo,
 			values: ["existing-audio"],
 		});

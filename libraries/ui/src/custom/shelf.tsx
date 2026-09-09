@@ -3,6 +3,7 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import {
 	Children,
+	type ComponentProps,
 	type CSSProperties,
 	type PointerEvent as ReactPointerEvent,
 	type ReactNode,
@@ -171,20 +172,25 @@ export function Shelf({ children, className, itemClassName, itemSize = "md", lab
 					onPointerUpCapture={handlePointerUp}
 				>
 					{items.map((item, index) => (
-						<CarouselItem
+						<ShelfItem
 							aria-label={labels.item({ item: index + 1, itemCount: items.length })}
 							className={cn("snap-start", itemClassName)}
 							index={index}
 							key={isValidElement(item) && item.key !== null ? item.key : index}
 						>
 							{item}
-						</CarouselItem>
+						</ShelfItem>
 					))}
 				</CarouselContent>
 				{layout.enhanced ? <ShelfControls labels={labels} /> : null}
 			</Carousel>
 		</div>
 	);
+}
+
+function ShelfItem(props: ComponentProps<typeof CarouselItem>) {
+	const carousel = useCarousel();
+	return <CarouselItem {...props} inert={!carousel.isInView(props.index)} />;
 }
 
 function ShelfControls({ labels }: { readonly labels: ShelfLabels }) {

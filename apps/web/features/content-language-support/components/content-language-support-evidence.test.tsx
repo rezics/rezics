@@ -120,7 +120,7 @@ describe("ContentLanguageSupportEvidence", () => {
 		expect(screen.getAllByText("English dub")).toHaveLength(1);
 	});
 
-	it("shows the parent source when a Release explicitly loads evidence", async () => {
+	it("shows adapted-Audio evidence on a Video", async () => {
 		evidenceApi.loadPage.mockResolvedValueOnce({
 			currentContentLanguageSupport: [],
 			items: [parentEvidence],
@@ -141,7 +141,7 @@ describe("ContentLanguageSupportEvidence", () => {
 		);
 
 		fireEvent.click(screen.getByRole("button", { name: "View related entries" }));
-		expect(await screen.findByText("Parent Unit")).toBeTruthy();
+		expect(await screen.findByText("Adapted audio")).toBeTruthy();
 		expect(screen.getByText("Parent software")).toBeTruthy();
 	});
 });

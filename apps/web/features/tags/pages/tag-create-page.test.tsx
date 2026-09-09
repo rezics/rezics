@@ -260,7 +260,7 @@ describe("TagCreatePage", () => {
 			}),
 		);
 		expect(state.applyGlobal).toHaveBeenCalledWith({
-			path: { type: "publishing", unitId: UnitId, tagId: TagId },
+			path: { owner: "publishing", unitId: UnitId, tagId: TagId },
 			body: {},
 		});
 		await waitFor(() => expect(state.push).toHaveBeenCalledOnce());

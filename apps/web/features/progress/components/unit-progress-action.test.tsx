@@ -127,7 +127,7 @@ describe("UnitProgressAction", () => {
 		fireEvent.click(screen.getByRole("button", { name: "繼續" }));
 
 		expect(push).toHaveBeenCalledWith(
-			"/units/book/019f0000-0000-7000-8000-000000000001/read/019f0000-0000-7000-8000-000000000002",
+			"/catalog/publishing/019f0000-0000-7000-8000-000000000001/read/019f0000-0000-7000-8000-000000000002",
 		);
 		expect(actions.openEditor).not.toHaveBeenCalled();
 	});

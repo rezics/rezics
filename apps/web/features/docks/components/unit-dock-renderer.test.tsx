@@ -128,10 +128,6 @@ vi.mock("@/features/content-feed/components/feed-item-identity-badge", () => ({
 	FeedItemIdentityBadge: () => <a data-testid="collection-identity-badge">Theme</a>,
 }));
 
-vi.mock("@/features/units/routing/public-unit-route", () => ({
-	publicUnitHref: (kind: string, unit: { readonly id: string }) => `/units/${kind}/${unit.id}`,
-}));
-
 vi.mock("@/i18n/client", () => ({
 	useTranslation: () => ({
 		t: {
@@ -179,7 +175,8 @@ function presentation(id: string, title: string) {
 	return {
 		avatar: null,
 		id,
-		kind: "book",
+		owner: "publishing",
+		shape: "work",
 		language: "en",
 		summary: null,
 		title,
@@ -237,10 +234,10 @@ describe("UnitDockRenderer unit-list presentation", () => {
 		expect(shelf.getAttribute("data-label")).toBe("Featured books");
 		expect(screen.getByRole("heading", { name: "Featured books" })).toBeTruthy();
 		expect(screen.getByRole("link", { name: "View all" }).getAttribute("href")).toBe(
-			`/units/book/${ViewAllId}`,
+			`/catalog/publishing/${ViewAllId}`,
 		);
 		const card = screen.getByTestId("unit-card");
-		expect(card.getAttribute("href")).toBe(`/units/book/${ItemId}`);
+		expect(card.getAttribute("href")).toBe(`/catalog/publishing/${ItemId}`);
 		expect(card.getAttribute("data-cover")).toBeNull();
 		expect(card.getAttribute("data-heading-as")).toBe("h3");
 		expect(screen.getByTestId("identity-avatar")).toBeTruthy();
