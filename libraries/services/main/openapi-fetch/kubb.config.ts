@@ -17,6 +17,20 @@ export default defineConfig({
 		pluginTs({
 			output: { path: "models.ts", mode: "file", barrel: false },
 			enum: { type: "asConst", constCasing: "pascalCase", typeSuffix: "" },
+			override: [
+				{
+					type: "schemaName",
+					pattern: /^(UnitReferencedBlock|SearchControlExpression|SearchControlPredicate)$/,
+					options: {
+						enum: {
+							type: "inlineLiteral",
+							constCasing: "pascalCase",
+							typeSuffix: "",
+							keyCasing: "none",
+						},
+					},
+				},
+			],
 		}),
 		pluginFetch({ output: { path: "client.ts", mode: "file", barrel: false } }),
 	],

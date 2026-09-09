@@ -2,7 +2,7 @@ name: ${COMPOSE_PROJECT_NAME:-rezics-dev}
 
 services:
     postgres:
-        image: rezics-postgres:18.4-pgroonga-4.0.8
+        image: rezics-postgres:18.6-pgroonga-4.0.8
         build:
             context: .
             target: postgres
@@ -25,9 +25,9 @@ services:
             - -c
             - max_worker_processes=12
             - -c
-            # One official showcase pack is one atomic transaction and retains
-            # its transaction advisory locks until commit. See Tag Path capacity.
-            - max_locks_per_transaction=256
+            # The native baseline and atomic fixture graphs retain DDL/advisory
+            # locks until commit; smaller lock tables cannot replay the baseline.
+            - max_locks_per_transaction=1024
             - -c
             - track_io_timing=on
             - -c
@@ -82,7 +82,7 @@ services:
             start_period: 10s
     postgres-migration-test:
         profiles: ["migration-test"]
-        image: rezics-postgres:18.4-pgroonga-4.0.8
+        image: rezics-postgres:18.6-pgroonga-4.0.8
         build:
             context: .
             target: postgres
@@ -113,7 +113,7 @@ services:
                 "max_worker_processes=12",
                 "-c",
                 # Keep migration-replay PostgreSQL aligned with local development.
-                "max_locks_per_transaction=256",
+                "max_locks_per_transaction=1024",
                 "-c",
                 "track_io_timing=on",
                 "-c",

@@ -1,5 +1,5 @@
 import { withImageAssetWrite } from "../../image-assets/write";
-import sharp from "sharp";
+import sharp, { type Sharp } from "sharp";
 
 import { isStorageNotFound, storage } from "../../storage";
 import { imageAssetPresentationOutputSize } from "./presentation";
@@ -84,7 +84,7 @@ async function derivedExists(storageKey: string): Promise<boolean> {
 	}
 }
 
-function applyOutputFormat(pipeline: sharp.Sharp, format: DerivedFormat): sharp.Sharp {
+function applyOutputFormat(pipeline: Sharp, format: DerivedFormat): Sharp {
 	switch (format) {
 		case "avif":
 			return pipeline.avif({ effort: 4, quality: 72 });

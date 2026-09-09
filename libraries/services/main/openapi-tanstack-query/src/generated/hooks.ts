@@ -4123,13 +4123,12 @@ export function getImageAssetsByIdPresentationsByRoleContentQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getImageAssetsByIdPresentationsByRoleContent({
+			return getImageAssetsByIdPresentationsByRoleContent({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -4219,13 +4218,12 @@ export function getImageAssetsByIdContentQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getImageAssetsByIdContent({
+			return getImageAssetsByIdContent({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -4321,14 +4319,13 @@ export function getApiUnitByUnitIdAssociationProposalsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitByUnitIdAssociationProposals({
+			return getApiUnitByUnitIdAssociationProposals({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -4426,13 +4423,12 @@ export function postApiUnitByUnitIdAssociationProposalsRequestsMutationOptions<T
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitByUnitIdAssociationProposalsRequests({
+			return postApiUnitByUnitIdAssociationProposalsRequests({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -4536,13 +4532,12 @@ export function postApiUnitByUnitIdAssociationProposalsInvitationsMutationOption
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitByUnitIdAssociationProposalsInvitations({
+			return postApiUnitByUnitIdAssociationProposalsInvitations({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -4646,13 +4641,12 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdAcceptMutatio
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitByUnitIdAssociationProposalsByProposalIdAccept({
+			return postApiUnitByUnitIdAssociationProposalsByProposalIdAccept({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -4757,13 +4751,12 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdDeclineMutati
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitByUnitIdAssociationProposalsByProposalIdDecline({
+			return postApiUnitByUnitIdAssociationProposalsByProposalIdDecline({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -4867,12 +4860,11 @@ export function deleteApiUnitByUnitIdAssociationProposalsByProposalIdMutationOpt
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiUnitByUnitIdAssociationProposalsByProposalId({
+			return deleteApiUnitByUnitIdAssociationProposalsByProposalId({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -4967,12 +4959,11 @@ export function getApiStartupQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiStartup({
+			return getApiStartup({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -5033,12 +5024,11 @@ export function getApiHealthQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiHealth({
+			return getApiHealth({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -5099,12 +5089,11 @@ export function headApiHealthQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await headApiHealth({
+			return headApiHealth({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -5170,12 +5159,11 @@ export function getApiReadyQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiReady({
+			return getApiReady({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -5247,13 +5235,12 @@ export function getApiNotificationsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiNotifications({
+			return getApiNotifications({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -5338,12 +5325,11 @@ export function getApiNotificationsUnreadCountQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiNotificationsUnreadCount({
+			return getApiNotificationsUnreadCount({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -5422,13 +5408,12 @@ export function getApiNotificationsByNotificationIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiNotificationsByNotificationId({
+			return getApiNotificationsByNotificationId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -5515,8 +5500,7 @@ export function putApiNotificationsReadAllMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await putApiNotificationsReadAll({ ...config, body, throwOnError: true });
-			return data;
+			return putApiNotificationsReadAll({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -5607,12 +5591,11 @@ export function putApiNotificationsByNotificationIdReadMutationOptions<TContext 
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await putApiNotificationsByNotificationIdRead({
+			return putApiNotificationsByNotificationIdRead({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -5707,12 +5690,11 @@ export function getApiNotificationsPreferencesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiNotificationsPreferences({
+			return getApiNotificationsPreferences({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -5784,12 +5766,7 @@ export function putApiNotificationsPreferencesMutationOptions<TContext = unknown
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await putApiNotificationsPreferences({
-				...config,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return putApiNotificationsPreferences({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -5885,13 +5862,12 @@ export function getApiRecommendationsUnitsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRecommendationsUnits({
+			return getApiRecommendationsUnits({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -5988,14 +5964,13 @@ export function getApiRecommendationsPostsByPostIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRecommendationsPostsByPostId({
+			return getApiRecommendationsPostsByPostId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -6089,8 +6064,7 @@ export function postApiRecommendationsEventsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiRecommendationsEvents({ ...config, body, throwOnError: true });
-			return data;
+			return postApiRecommendationsEvents({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -6184,13 +6158,12 @@ export function putApiRecommendationsExclusionsByUnitIdMutationOptions<TContext 
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRecommendationsExclusionsByUnitId({
+			return putApiRecommendationsExclusionsByUnitId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -6297,12 +6270,11 @@ export function deleteApiRecommendationsExclusionsByUnitIdMutationOptions<TConte
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiRecommendationsExclusionsByUnitId({
+			return deleteApiRecommendationsExclusionsByUnitId({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -6405,13 +6377,12 @@ export function getApiMessagesConversationsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiMessagesConversations({
+			return getApiMessagesConversations({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -6500,8 +6471,7 @@ export function postApiMessagesConversationsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiMessagesConversations({ ...config, body, throwOnError: true });
-			return data;
+			return postApiMessagesConversations({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -6611,13 +6581,12 @@ export function getApiMessagesConversationsByConversationIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiMessagesConversationsByConversationId({
+			return getApiMessagesConversationsByConversationId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -6717,14 +6686,13 @@ export function getApiMessagesConversationsByConversationIdMessagesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiMessagesConversationsByConversationIdMessages({
+			return getApiMessagesConversationsByConversationIdMessages({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -6823,13 +6791,12 @@ export function postApiMessagesConversationsByConversationIdMessagesMutationOpti
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiMessagesConversationsByConversationIdMessages({
+			return postApiMessagesConversationsByConversationIdMessages({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -6933,13 +6900,12 @@ export function putApiMessagesConversationsByConversationIdReadMutationOptions<T
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiMessagesConversationsByConversationIdRead({
+			return putApiMessagesConversationsByConversationIdRead({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -7037,8 +7003,7 @@ export function deleteApiMessagesByMessageIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiMessagesByMessageId({ ...config, path, throwOnError: true });
-			return data;
+			return deleteApiMessagesByMessageId({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -7125,12 +7090,11 @@ export function getApiApiTokensQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiApiTokens({
+			return getApiApiTokens({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -7199,8 +7163,7 @@ export function postApiApiTokensMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiApiTokens({ ...config, body, throwOnError: true });
-			return data;
+			return postApiApiTokens({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -7302,13 +7265,7 @@ export function patchApiApiTokensByTokenIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiApiTokensByTokenId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return patchApiApiTokensByTokenId({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -7412,8 +7369,7 @@ export function deleteApiApiTokensByTokenIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiApiTokensByTokenId({ ...config, path, throwOnError: true });
-			return data;
+			return deleteApiApiTokensByTokenId({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -7511,13 +7467,12 @@ export function putApiApiTokensByTokenIdQuotaOverrideMutationOptions<TContext = 
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiApiTokensByTokenIdQuotaOverride({
+			return putApiApiTokensByTokenIdQuotaOverride({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -7626,13 +7581,12 @@ export function deleteApiApiTokensByTokenIdQuotaOverrideMutationOptions<TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiApiTokensByTokenIdQuotaOverride({
+			return deleteApiApiTokensByTokenIdQuotaOverride({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -7736,12 +7690,11 @@ export function getCurrentApiTokenQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getCurrentApiToken({
+			return getCurrentApiToken({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -7814,12 +7767,11 @@ export function getApiApiQuotaPoliciesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiApiQuotaPolicies({
+			return getApiApiQuotaPolicies({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -7897,8 +7849,7 @@ export function postApiApiQuotaPoliciesMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiApiQuotaPolicies({ ...config, body, throwOnError: true });
-			return data;
+			return postApiApiQuotaPolicies({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -8000,13 +7951,12 @@ export function putApiApiQuotaPoliciesByPolicyKeyMutationOptions<TContext = unkn
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiApiQuotaPoliciesByPolicyKey({
+			return putApiApiQuotaPoliciesByPolicyKey({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -8119,13 +8069,12 @@ export function getApiApiQuotaPoliciesAccountsByUserIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiApiQuotaPoliciesAccountsByUserId({
+			return getApiApiQuotaPoliciesAccountsByUserId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -8217,13 +8166,12 @@ export function putApiApiQuotaPoliciesAccountsByUserIdMutationOptions<TContext =
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiApiQuotaPoliciesAccountsByUserId({
+			return putApiApiQuotaPoliciesAccountsByUserId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -8332,13 +8280,12 @@ export function deleteApiApiQuotaPoliciesAccountsByUserIdMutationOptions<TContex
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiApiQuotaPoliciesAccountsByUserId({
+			return deleteApiApiQuotaPoliciesAccountsByUserId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -8452,13 +8399,12 @@ export function getApiApiQuotaPoliciesAccountsByUserIdTokensQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiApiQuotaPoliciesAccountsByUserIdTokens({
+			return getApiApiQuotaPoliciesAccountsByUserIdTokens({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -8551,13 +8497,12 @@ export function putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutationOpt
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId({
+			return putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -8667,13 +8612,12 @@ export function deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdMutation
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId({
+			return deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -8779,8 +8723,7 @@ export function postApiFeedQueryMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiFeedQuery({ ...config, body, throwOnError: true });
-			return data;
+			return postApiFeedQuery({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -8874,13 +8817,12 @@ export function getApiReportsMeQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiReportsMe({
+			return getApiReportsMe({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -8974,14 +8916,13 @@ export function getApiReportsUnitsByUnitIdDestinationsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiReportsUnitsByUnitIdDestinations({
+			return getApiReportsUnitsByUnitIdDestinations({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -9083,14 +9024,13 @@ export function getApiRealmsByRealmIdReportsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdReports({
+			return getApiRealmsByRealmIdReports({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -9195,14 +9135,13 @@ export function getApiReportsReviewCasesByCaseIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiReportsReviewCasesByCaseId({
+			return getApiReportsReviewCasesByCaseId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -9301,13 +9240,12 @@ export function getApiReportsPlatformCasesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiReportsPlatformCases({
+			return getApiReportsPlatformCases({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -9395,14 +9333,13 @@ export function postApiReportsUnitsByUnitIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, query, body }) => {
-			const { data } = await postApiReportsUnitsByUnitId({
+			return postApiReportsUnitsByUnitId({
 				...config,
 				path,
 				query,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -9512,14 +9449,13 @@ export function getApiGovernanceUnitByUnitIdAccessQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGovernanceUnitByUnitIdAccess({
+			return getApiGovernanceUnitByUnitIdAccess({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -9615,13 +9551,12 @@ export function putApiGovernanceUnitByUnitIdAccessMutationOptions<TContext = unk
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiGovernanceUnitByUnitIdAccess({
+			return putApiGovernanceUnitByUnitIdAccess({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -9733,14 +9668,13 @@ export function getApiGovernanceUnitByUnitIdAccessCandidatesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGovernanceUnitByUnitIdAccessCandidates({
+			return getApiGovernanceUnitByUnitIdAccessCandidates({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -9842,14 +9776,13 @@ export function getApiGovernanceUnitByUnitIdAccessEffectiveQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGovernanceUnitByUnitIdAccessEffective({
+			return getApiGovernanceUnitByUnitIdAccessEffective({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -9951,14 +9884,13 @@ export function getApiGovernanceUnitByUnitIdOwnershipCandidatesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGovernanceUnitByUnitIdOwnershipCandidates({
+			return getApiGovernanceUnitByUnitIdOwnershipCandidates({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -10055,13 +9987,12 @@ export function putApiGovernanceUnitByUnitIdOwnershipMutationOptions<TContext = 
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiGovernanceUnitByUnitIdOwnership({
+			return putApiGovernanceUnitByUnitIdOwnership({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -10165,13 +10096,12 @@ export function postApiGovernanceUnitByUnitIdOwnershipRelinquishmentMutationOpti
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiGovernanceUnitByUnitIdOwnershipRelinquishment({
+			return postApiGovernanceUnitByUnitIdOwnershipRelinquishment({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -10279,13 +10209,12 @@ export function getApiGovernanceUnitAccessInvitationsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGovernanceUnitAccessInvitations({
+			return getApiGovernanceUnitAccessInvitations({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -10379,14 +10308,13 @@ export function getApiGovernanceUnitByUnitIdAccessInvitationsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGovernanceUnitByUnitIdAccessInvitations({
+			return getApiGovernanceUnitByUnitIdAccessInvitations({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -10483,13 +10411,12 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsMutationOptions<TC
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiGovernanceUnitByUnitIdAccessInvitations({
+			return postApiGovernanceUnitByUnitIdAccessInvitations({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -10593,13 +10520,12 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcce
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAccept({
+			return postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAccept({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -10701,13 +10627,12 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecl
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline({
+			return postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -10808,12 +10733,11 @@ export function deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdMu
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId({
+			return deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -10919,13 +10843,12 @@ export function getApiGovernancePlatformUnitsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGovernancePlatformUnits({
+			return getApiGovernancePlatformUnits({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -11019,13 +10942,12 @@ export function getApiGovernancePlatformUnitsByUnitIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGovernancePlatformUnitsByUnitId({
+			return getApiGovernancePlatformUnitsByUnitId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -11127,14 +11049,13 @@ export function getApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesQueryOpt
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGovernancePlatformUnitsByUnitIdOwnershipCandidates({
+			return getApiGovernancePlatformUnitsByUnitIdOwnershipCandidates({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -11236,13 +11157,12 @@ export function postApiGovernancePlatformUnitsByUnitIdOwnershipOverrideMutationO
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiGovernancePlatformUnitsByUnitIdOwnershipOverride({
+			return postApiGovernancePlatformUnitsByUnitIdOwnershipOverride({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -11347,13 +11267,12 @@ export function postApiGovernancePlatformUnitsByUnitIdDeleteMutationOptions<TCon
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiGovernancePlatformUnitsByUnitIdDelete({
+			return postApiGovernancePlatformUnitsByUnitIdDelete({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -11457,13 +11376,12 @@ export function postApiGovernancePlatformUnitsByUnitIdRestoreMutationOptions<TCo
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiGovernancePlatformUnitsByUnitIdRestore({
+			return postApiGovernancePlatformUnitsByUnitIdRestore({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -11565,13 +11483,12 @@ export function listNativeMergeRequestsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listNativeMergeRequests({
+			return listNativeMergeRequests({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -11644,8 +11561,7 @@ export function proposeNativeMergeMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await proposeNativeMerge({ ...config, body, throwOnError: true });
-			return data;
+			return proposeNativeMerge({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -11724,13 +11640,12 @@ export function readNativeMergeRequestQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readNativeMergeRequest({
+			return readNativeMergeRequest({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -11801,8 +11716,7 @@ export function preflightNativeMergeMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await preflightNativeMerge({ ...config, body, throwOnError: true });
-			return data;
+			return preflightNativeMerge({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -11880,8 +11794,7 @@ export function reviewNativeMergeMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await reviewNativeMerge({ ...config, path, body, throwOnError: true });
-			return data;
+			return reviewNativeMerge({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -11955,8 +11868,7 @@ export function retryNativeMergeMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await retryNativeMerge({ ...config, path, throwOnError: true });
-			return data;
+			return retryNativeMerge({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -12035,14 +11947,13 @@ export function listNativeMergeReconciliationQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listNativeMergeReconciliation({
+			return listNativeMergeReconciliation({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -12129,13 +12040,12 @@ export function resolveNativeMergeReconciliationMutationOptions<TContext = unkno
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await resolveNativeMergeReconciliation({
+			return resolveNativeMergeReconciliation({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -12227,13 +12137,12 @@ export function getApiGovernanceRuleSourcesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGovernanceRuleSources({
+			return getApiGovernanceRuleSources({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -12325,13 +12234,12 @@ export function getApiGovernanceNotesByPostIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGovernanceNotesByPostId({
+			return getApiGovernanceNotesByPostId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -12419,13 +12327,12 @@ export function patchApiGovernanceNotesByPostIdMutationOptions<TContext = unknow
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiGovernanceNotesByPostId({
+			return patchApiGovernanceNotesByPostId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -12537,14 +12444,13 @@ export function listContentReviewCaseNotesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listContentReviewCaseNotes({
+			return listContentReviewCaseNotes({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -12643,13 +12549,12 @@ export function getApiGovernanceContentReviewCasesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGovernanceContentReviewCases({
+			return getApiGovernanceContentReviewCases({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -12742,13 +12647,12 @@ export function getApiGovernanceContentReviewCasesByCaseIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGovernanceContentReviewCasesByCaseId({
+			return getApiGovernanceContentReviewCasesByCaseId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -12838,13 +12742,12 @@ export function patchApiGovernanceContentReviewCasesByCaseIdMutationOptions<TCon
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiGovernanceContentReviewCasesByCaseId({
+			return patchApiGovernanceContentReviewCasesByCaseId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -12944,12 +12847,11 @@ export function postApiGovernanceContentGovernanceActionsMutationOptions<TContex
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiGovernanceContentGovernanceActions({
+			return postApiGovernanceContentGovernanceActions({
 				...config,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -13053,12 +12955,7 @@ export function postApiGovernanceAccountEnforcementsMutationOptions<TContext = u
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiGovernanceAccountEnforcements({
-				...config,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return postApiGovernanceAccountEnforcements({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -13162,13 +13059,12 @@ export function postApiGovernanceAccountEnforcementsByEnforcementIdRevokeMutatio
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiGovernanceAccountEnforcementsByEnforcementIdRevoke({
+			return postApiGovernanceAccountEnforcementsByEnforcementIdRevoke({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -13276,13 +13172,12 @@ export function getApiAuditEventsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiAuditEvents({
+			return getApiAuditEvents({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -13367,8 +13262,7 @@ export function replaceZoneSlugAddressMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await replaceZoneSlugAddress({ ...config, path, body, throwOnError: true });
-			return data;
+			return replaceZoneSlugAddress({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -13475,14 +13369,13 @@ export function getApiZonesByZoneIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiZonesByZoneId({
+			return getApiZonesByZoneId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -13566,8 +13459,7 @@ export function patchApiZonesByZoneIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiZonesByZoneId({ ...config, path, body, throwOnError: true });
-			return data;
+			return patchApiZonesByZoneId({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -13671,14 +13563,13 @@ export function getZoneRenderProjectionQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getZoneRenderProjection({
+			return getZoneRenderProjection({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -13771,13 +13662,12 @@ export function getZonePageAddressByIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getZonePageAddressById({
+			return getZonePageAddressById({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -13863,13 +13753,12 @@ export function resolveZonePageAddressBySlugQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await resolveZonePageAddressBySlug({
+			return resolveZonePageAddressBySlug({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -13958,13 +13847,12 @@ export function getApiZonesByZoneIdPagesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiZonesByZoneIdPages({
+			return getApiZonesByZoneIdPages({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -14049,13 +13937,7 @@ export function postApiZonesByZoneIdPagesMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiZonesByZoneIdPages({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return postApiZonesByZoneIdPages({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -14164,13 +14046,12 @@ export function getApiZonesByZoneIdPagesByPageIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiZonesByZoneIdPagesByPageId({
+			return getApiZonesByZoneIdPagesByPageId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -14258,13 +14139,12 @@ export function putApiZonesByZoneIdPagesByPageIdMutationOptions<TContext = unkno
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiZonesByZoneIdPagesByPageId({
+			return putApiZonesByZoneIdPagesByPageId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -14370,13 +14250,12 @@ export function putApiZonesByZoneIdPagesByPageIdPlacementMutationOptions<TContex
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiZonesByZoneIdPagesByPageIdPlacement({
+			return putApiZonesByZoneIdPagesByPageIdPlacement({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -14485,13 +14364,12 @@ export function deleteApiZonesByZoneIdPagesByPageIdPlacementMutationOptions<TCon
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiZonesByZoneIdPagesByPageIdPlacement({
+			return deleteApiZonesByZoneIdPagesByPageIdPlacement({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -14603,13 +14481,12 @@ export function getApiZonesByZoneIdNavigationQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiZonesByZoneIdNavigation({
+			return getApiZonesByZoneIdNavigation({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -14696,13 +14573,7 @@ export function postApiZonesByZoneIdNavigationMutationOptions<TContext = unknown
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiZonesByZoneIdNavigation({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return postApiZonesByZoneIdNavigation({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -14807,13 +14678,12 @@ export function getApiZonesByZoneIdNavigationByNavigationIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiZonesByZoneIdNavigationByNavigationId({
+			return getApiZonesByZoneIdNavigationByNavigationId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -14902,13 +14772,12 @@ export function putApiZonesByZoneIdNavigationByNavigationIdMutationOptions<TCont
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiZonesByZoneIdNavigationByNavigationId({
+			return putApiZonesByZoneIdNavigationByNavigationId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -15017,13 +14886,12 @@ export function deleteApiZonesByZoneIdNavigationByNavigationIdMutationOptions<TC
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiZonesByZoneIdNavigationByNavigationId({
+			return deleteApiZonesByZoneIdNavigationByNavigationId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -15130,8 +14998,7 @@ export function postApiZonesMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiZones({ ...config, body, throwOnError: true });
-			return data;
+			return postApiZones({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -15234,14 +15101,13 @@ export function listMergedCatalogSourcesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listMergedCatalogSources({
+			return listMergedCatalogSources({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -15320,13 +15186,12 @@ export function readMusicDetailQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readMusicDetail({
+			return readMusicDetail({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -15396,8 +15261,7 @@ export function patchMusicMetadataMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchMusicMetadata({ ...config, path, body, throwOnError: true });
-			return data;
+			return patchMusicMetadata({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -15486,14 +15350,13 @@ export function listMusicMediaQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listMusicMedia({
+			return listMusicMedia({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -15572,8 +15435,7 @@ export function addMusicMediumMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await addMusicMedium({ ...config, path, body, throwOnError: true });
-			return data;
+			return addMusicMedium({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -15664,8 +15526,7 @@ export function patchMusicMediumMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchMusicMedium({ ...config, path, body, throwOnError: true });
-			return data;
+			return patchMusicMedium({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -15756,8 +15617,7 @@ export function removeMusicMediumMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await removeMusicMedium({ ...config, path, body, throwOnError: true });
-			return data;
+			return removeMusicMedium({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -15849,14 +15709,13 @@ export function listMusicTracksQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listMusicTracks({
+			return listMusicTracks({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -15935,8 +15794,7 @@ export function addMusicTrackMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await addMusicTrack({ ...config, path, body, throwOnError: true });
-			return data;
+			return addMusicTrack({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -16027,8 +15885,7 @@ export function patchMusicTrackMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchMusicTrack({ ...config, path, body, throwOnError: true });
-			return data;
+			return patchMusicTrack({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -16119,8 +15976,7 @@ export function removeMusicTrackMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await removeMusicTrack({ ...config, path, body, throwOnError: true });
-			return data;
+			return removeMusicTrack({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -16217,14 +16073,13 @@ export function readMusicStructureQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readMusicStructure({
+			return readMusicStructure({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -16307,8 +16162,7 @@ export function mutateMusicStructureMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await mutateMusicStructure({ ...config, path, body, throwOnError: true });
-			return data;
+			return mutateMusicStructure({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -16402,14 +16256,13 @@ export function listMusicHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listMusicHistory({
+			return listMusicHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -16492,8 +16345,7 @@ export function restoreMusicComponentMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await restoreMusicComponent({ ...config, path, body, throwOnError: true });
-			return data;
+			return restoreMusicComponent({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -16584,8 +16436,7 @@ export function attachMusicDiscTocMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await attachMusicDiscToc({ ...config, path, body, throwOnError: true });
-			return data;
+			return attachMusicDiscToc({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -16680,14 +16531,13 @@ export function listMusicDiscTocsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listMusicDiscTocs({
+			return listMusicDiscTocs({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -16764,13 +16614,12 @@ export function readMusicDiscTocQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readMusicDiscToc({
+			return readMusicDiscToc({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -16840,13 +16689,12 @@ export function readSoftwareDetailsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readSoftwareDetails({
+			return readSoftwareDetails({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -16918,8 +16766,7 @@ export function reviseSoftwareDetailsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await reviseSoftwareDetails({ ...config, path, body, throwOnError: true });
-			return data;
+			return reviseSoftwareDetails({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -17014,14 +16861,13 @@ export function listSoftwareDetailsHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listSoftwareDetailsHistory({
+			return listSoftwareDetailsHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -17106,8 +16952,7 @@ export function restoreSoftwareDetailsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await restoreSoftwareDetails({ ...config, path, body, throwOnError: true });
-			return data;
+			return restoreSoftwareDetails({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -17202,14 +17047,13 @@ export function findSoftwareReleasesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await findSoftwareReleases({
+			return findSoftwareReleases({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -17292,14 +17136,13 @@ export function listSoftwareComponentsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listSoftwareComponents({
+			return listSoftwareComponents({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -17378,8 +17221,7 @@ export function putSoftwareComponentMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putSoftwareComponent({ ...config, path, body, throwOnError: true });
-			return data;
+			return putSoftwareComponent({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -17470,13 +17312,7 @@ export function withdrawSoftwareComponentMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await withdrawSoftwareComponent({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return withdrawSoftwareComponent({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -17573,14 +17409,13 @@ export function listSoftwareComponentHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listSoftwareComponentHistory({
+			return listSoftwareComponentHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -17668,13 +17503,7 @@ export function restoreSoftwareComponentMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await restoreSoftwareComponent({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return restoreSoftwareComponent({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -17773,14 +17602,13 @@ export function listSoftwareParticipationContextsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listSoftwareParticipationContexts({
+			return listSoftwareParticipationContexts({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -17868,13 +17696,12 @@ export function createSoftwareParticipationContextMutationOptions<TContext = unk
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await createSoftwareParticipationContext({
+			return createSoftwareParticipationContext({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -17972,13 +17799,12 @@ export function readSoftwareParticipationContextQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readSoftwareParticipationContext({
+			return readSoftwareParticipationContext({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -18059,13 +17885,12 @@ export function reviseSoftwareParticipationContextMutationOptions<TContext = unk
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await reviseSoftwareParticipationContext({
+			return reviseSoftwareParticipationContext({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -18168,14 +17993,13 @@ export function listSoftwareParticipationContextHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listSoftwareParticipationContextHistory({
+			return listSoftwareParticipationContextHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -18265,13 +18089,12 @@ export function restoreSoftwareParticipationContextMutationOptions<TContext = un
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await restoreSoftwareParticipationContext({
+			return restoreSoftwareParticipationContext({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -18369,14 +18192,13 @@ export function listSoftwareCreditsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listSoftwareCredits({
+			return listSoftwareCredits({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -18455,8 +18277,7 @@ export function createSoftwareCreditMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await createSoftwareCredit({ ...config, path, body, throwOnError: true });
-			return data;
+			return createSoftwareCredit({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -18547,8 +18368,7 @@ export function reviseSoftwareCreditMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await reviseSoftwareCredit({ ...config, path, body, throwOnError: true });
-			return data;
+			return reviseSoftwareCredit({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -18643,14 +18463,13 @@ export function listSoftwareCreditHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listSoftwareCreditHistory({
+			return listSoftwareCreditHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -18735,8 +18554,7 @@ export function restoreSoftwareCreditMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await restoreSoftwareCredit({ ...config, path, body, throwOnError: true });
-			return data;
+			return restoreSoftwareCredit({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -18825,13 +18643,12 @@ export function readProgramDetailsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readProgramDetails({
+			return readProgramDetails({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -18901,8 +18718,7 @@ export function reviseProgramDetailsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await reviseProgramDetails({ ...config, path, body, throwOnError: true });
-			return data;
+			return reviseProgramDetails({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -18997,14 +18813,13 @@ export function listProgramOccurrencesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listProgramOccurrences({
+			return listProgramOccurrences({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -19083,8 +18898,7 @@ export function putProgramOccurrenceMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putProgramOccurrence({ ...config, path, body, throwOnError: true });
-			return data;
+			return putProgramOccurrence({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -19175,8 +18989,7 @@ export function removeProgramOccurrenceMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await removeProgramOccurrence({ ...config, path, body, throwOnError: true });
-			return data;
+			return removeProgramOccurrence({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -19273,14 +19086,13 @@ export function listProgramComponentHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listProgramComponentHistory({
+			return listProgramComponentHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -19365,8 +19177,7 @@ export function restoreProgramComponentMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await restoreProgramComponent({ ...config, path, body, throwOnError: true });
-			return data;
+			return restoreProgramComponent({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -19457,13 +19268,12 @@ export function readPublishingDetailsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readPublishingDetails({
+			return readPublishingDetails({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -19535,8 +19345,7 @@ export function revisePublishingDetailsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await revisePublishingDetails({ ...config, path, body, throwOnError: true });
-			return data;
+			return revisePublishingDetails({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -19631,14 +19440,13 @@ export function listPublishingComponentsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listPublishingComponents({
+			return listPublishingComponents({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -19719,8 +19527,7 @@ export function putPublishingComponentMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putPublishingComponent({ ...config, path, body, throwOnError: true });
-			return data;
+			return putPublishingComponent({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -19811,13 +19618,7 @@ export function removePublishingComponentMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await removePublishingComponent({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return removePublishingComponent({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -19916,14 +19717,13 @@ export function listPublishingComponentHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listPublishingComponentHistory({
+			return listPublishingComponentHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -20011,13 +19811,7 @@ export function restorePublishingComponentMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await restorePublishingComponent({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return restorePublishingComponent({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -20112,14 +19906,13 @@ export function listPublishingConnectionsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listPublishingConnections({
+			return listPublishingConnections({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -20208,13 +20001,12 @@ export function readCatalogContentLanguageSupportQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readCatalogContentLanguageSupport({
+			return readCatalogContentLanguageSupport({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -20295,13 +20087,12 @@ export function replaceCatalogContentLanguageSupportMutationOptions<TContext = u
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await replaceCatalogContentLanguageSupport({
+			return replaceCatalogContentLanguageSupport({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -20401,13 +20192,12 @@ export function listCatalogContentLanguageEvidenceQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogContentLanguageEvidence({
+			return listCatalogContentLanguageEvidence({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -20496,14 +20286,13 @@ export function listCatalogContentLanguageHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogContentLanguageHistory({
+			return listCatalogContentLanguageHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -20600,13 +20389,12 @@ export function readCatalogContentLanguageHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readCatalogContentLanguageHistory({
+			return readCatalogContentLanguageHistory({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -20687,13 +20475,12 @@ export function restoreCatalogContentLanguageSupportMutationOptions<TContext = u
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await restoreCatalogContentLanguageSupport({
+			return restoreCatalogContentLanguageSupport({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -20791,14 +20578,13 @@ export function listCatalogFactsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogFacts({
+			return listCatalogFacts({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -20877,8 +20663,7 @@ export function writeCatalogFactMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await writeCatalogFact({ ...config, path, body, throwOnError: true });
-			return data;
+			return writeCatalogFact({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -20973,14 +20758,13 @@ export function listCatalogFactNodesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogFactNodes({
+			return listCatalogFactNodes({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -21063,14 +20847,13 @@ export function listCatalogRelationsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogRelations({
+			return listCatalogRelations({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -21149,8 +20932,7 @@ export function writeCatalogRelationMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await writeCatalogRelation({ ...config, path, body, throwOnError: true });
-			return data;
+			return writeCatalogRelation({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -21252,14 +21034,13 @@ export function listCatalogRelationParticipantsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogRelationParticipants({
+			return listCatalogRelationParticipants({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -21355,14 +21136,13 @@ export function listCatalogRelationQualifiersQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogRelationQualifiers({
+			return listCatalogRelationQualifiers({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -21454,14 +21234,13 @@ export function listCatalogSemanticHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogSemanticHistory({
+			return listCatalogSemanticHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -21546,13 +21325,7 @@ export function transitionCatalogSemanticStateMutationOptions<TContext = unknown
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await transitionCatalogSemanticState({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return transitionCatalogSemanticState({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -21643,13 +21416,7 @@ export function restoreCatalogSemanticRevisionMutationOptions<TContext = unknown
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await restoreCatalogSemanticRevision({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return restoreCatalogSemanticRevision({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -21740,8 +21507,7 @@ export function intakeCatalogSourceMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ query, body }) => {
-			const { data } = await intakeCatalogSource({ ...config, query, body, throwOnError: true });
-			return data;
+			return intakeCatalogSource({ ...config, query, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -21832,13 +21598,12 @@ export function getCatalogSourceJobQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getCatalogSourceJob({
+			return getCatalogSourceJob({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -21910,8 +21675,7 @@ export function controlCatalogSourceJobMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await controlCatalogSourceJob({ ...config, path, body, throwOnError: true });
-			return data;
+			return controlCatalogSourceJob({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -22006,14 +21770,13 @@ export function listCatalogSourceProposalsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogSourceProposals({
+			return listCatalogSourceProposals({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -22098,13 +21861,7 @@ export function proposeCatalogSourceAdoptionMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await proposeCatalogSourceAdoption({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return proposeCatalogSourceAdoption({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -22195,13 +21952,7 @@ export function reviseCatalogSourceBindingMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await reviseCatalogSourceBinding({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return reviseCatalogSourceBinding({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -22300,14 +22051,13 @@ export function getCatalogSourceProposalPreviewQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getCatalogSourceProposalPreview({
+			return getCatalogSourceProposalPreview({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -22406,14 +22156,13 @@ export function getCatalogSourceProposalPreviewValueQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getCatalogSourceProposalPreviewValue({
+			return getCatalogSourceProposalPreviewValue({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -22502,13 +22251,7 @@ export function decideCatalogSourceProposalMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await decideCatalogSourceProposal({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return decideCatalogSourceProposal({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -22598,12 +22341,11 @@ export function getCatalogDefinitionPermissionsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getCatalogDefinitionPermissions({
+			return getCatalogDefinitionPermissions({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -22674,13 +22416,12 @@ export function listCatalogDefinitionRevisionLabelsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogDefinitionRevisionLabels({
+			return listCatalogDefinitionRevisionLabels({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -22762,13 +22503,12 @@ export function listCatalogDefinitionsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogDefinitions({
+			return listCatalogDefinitions({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -22841,8 +22581,7 @@ export function createCatalogDefinitionMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await createCatalogDefinition({ ...config, body, throwOnError: true });
-			return data;
+			return createCatalogDefinition({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -22931,13 +22670,12 @@ export function getCatalogDefinitionRevisionQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getCatalogDefinitionRevision({
+			return getCatalogDefinitionRevision({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -23018,13 +22756,12 @@ export function getCatalogDefinitionQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getCatalogDefinition({
+			return getCatalogDefinition({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -23104,14 +22841,13 @@ export function listCatalogDefinitionRevisionsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogDefinitionRevisions({
+			return listCatalogDefinitionRevisions({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -23198,8 +22934,7 @@ export function reviseCatalogDefinitionMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await reviseCatalogDefinition({ ...config, path, body, throwOnError: true });
-			return data;
+			return reviseCatalogDefinition({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -23292,14 +23027,13 @@ export function readEntityMeasurementContextQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readEntityMeasurementContext({
+			return readEntityMeasurementContext({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -23387,13 +23121,7 @@ export function writeEntityMeasurementContextMutationOptions<TContext = unknown>
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await writeEntityMeasurementContext({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return writeEntityMeasurementContext({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -23488,14 +23216,13 @@ export function listGroupingClassesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listGroupingClasses({
+			return listGroupingClasses({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -23574,8 +23301,7 @@ export function assignGroupingClassMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await assignGroupingClass({ ...config, path, body, throwOnError: true });
-			return data;
+			return assignGroupingClass({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -23666,8 +23392,7 @@ export function removeGroupingClassMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await removeGroupingClass({ ...config, path, body, throwOnError: true });
-			return data;
+			return removeGroupingClass({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -23762,14 +23487,13 @@ export function listGroupingOrderProfilesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listGroupingOrderProfiles({
+			return listGroupingOrderProfiles({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -23854,13 +23578,7 @@ export function createGroupingOrderProfileMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await createGroupingOrderProfile({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return createGroupingOrderProfile({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -23951,13 +23669,7 @@ export function renameGroupingOrderProfileMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await renameGroupingOrderProfile({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return renameGroupingOrderProfile({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -24052,14 +23764,13 @@ export function listGroupingOrderEntriesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listGroupingOrderEntries({
+			return listGroupingOrderEntries({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -24140,8 +23851,7 @@ export function putGroupingOrderEntryMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putGroupingOrderEntry({ ...config, path, body, throwOnError: true });
-			return data;
+			return putGroupingOrderEntry({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -24232,13 +23942,7 @@ export function removeGroupingOrderEntryMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await removeGroupingOrderEntry({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return removeGroupingOrderEntry({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -24333,14 +24037,13 @@ export function listGroupingHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listGroupingHistory({
+			return listGroupingHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -24419,8 +24122,7 @@ export function restoreGroupingCommandMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await restoreGroupingCommand({ ...config, path, body, throwOnError: true });
-			return data;
+			return restoreGroupingCommand({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -24511,13 +24213,12 @@ export function readCatalogEntityProfileQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readCatalogEntityProfile({
+			return readCatalogEntityProfile({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -24591,13 +24292,7 @@ export function writeCatalogEntityProfileMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await writeCatalogEntityProfile({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return writeCatalogEntityProfile({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -24688,13 +24383,7 @@ export function removeCatalogEntityProfileMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await removeCatalogEntityProfile({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return removeCatalogEntityProfile({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -24785,13 +24474,7 @@ export function resolveCatalogEntityShapeMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await resolveCatalogEntityShape({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return resolveCatalogEntityShape({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -24890,14 +24573,13 @@ export function listCatalogEntityProfileHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogEntityProfileHistory({
+			return listCatalogEntityProfileHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -24985,13 +24667,7 @@ export function restoreCatalogEntityProfileMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await restoreCatalogEntityProfile({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return restoreCatalogEntityProfile({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -25086,13 +24762,12 @@ export function listCatalogEditorialLanguagesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogEditorialLanguages({
+			return listCatalogEditorialLanguages({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -25173,13 +24848,12 @@ export function readCatalogEditorialQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readCatalogEditorial({
+			return readCatalogEditorial({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -25251,8 +24925,7 @@ export function writeCatalogEditorialMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await writeCatalogEditorial({ ...config, path, body, throwOnError: true });
-			return data;
+			return writeCatalogEditorial({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -25343,13 +25016,7 @@ export function withdrawCatalogEditorialMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await withdrawCatalogEditorial({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return withdrawCatalogEditorial({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -25446,14 +25113,13 @@ export function listCatalogEditorialHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogEditorialHistory({
+			return listCatalogEditorialHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -25545,13 +25211,12 @@ export function readCatalogEditorialRevisionQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readCatalogEditorialRevision({
+			return readCatalogEditorialRevision({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -25632,8 +25297,7 @@ export function restoreCatalogEditorialMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await restoreCatalogEditorial({ ...config, path, body, throwOnError: true });
-			return data;
+			return restoreCatalogEditorial({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -25726,13 +25390,12 @@ export function listCatalogEntityCandidatesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogEntityCandidates({
+			return listCatalogEntityCandidates({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -25818,14 +25481,13 @@ export function listCatalogResourceSourceBindingsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogResourceSourceBindings({
+			return listCatalogResourceSourceBindings({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -25913,8 +25575,7 @@ export function createCatalogResourceMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await createCatalogResource({ ...config, body, throwOnError: true });
-			return data;
+			return createCatalogResource({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -26005,13 +25666,12 @@ export function readCatalogResourceQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readCatalogResource({
+			return readCatalogResource({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -26083,8 +25743,7 @@ export function updateCatalogLifecycleMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await updateCatalogLifecycle({ ...config, path, body, throwOnError: true });
-			return data;
+			return updateCatalogLifecycle({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -26179,14 +25838,13 @@ export function listCatalogNamesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogNames({
+			return listCatalogNames({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -26265,8 +25923,7 @@ export function addCatalogNameMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await addCatalogName({ ...config, path, body, throwOnError: true });
-			return data;
+			return addCatalogName({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -26357,8 +26014,7 @@ export function reviseCatalogNameMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await reviseCatalogName({ ...config, path, body, throwOnError: true });
-			return data;
+			return reviseCatalogName({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -26453,14 +26109,13 @@ export function listCatalogIdentifiersQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCatalogIdentifiers({
+			return listCatalogIdentifiers({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -26539,8 +26194,7 @@ export function addCatalogIdentifierMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await addCatalogIdentifier({ ...config, path, body, throwOnError: true });
-			return data;
+			return addCatalogIdentifier({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -26631,8 +26285,7 @@ export function reviseCatalogIdentifierMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await reviseCatalogIdentifier({ ...config, path, body, throwOnError: true });
-			return data;
+			return reviseCatalogIdentifier({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -26728,13 +26381,12 @@ export function getApiUnitsByIdByUnitIdDocksQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByIdByUnitIdDocks({
+			return getApiUnitsByIdByUnitIdDocks({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -26828,13 +26480,12 @@ export function getApiUnitsByIdByUnitIdDocksByKindQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByIdByUnitIdDocksByKind({
+			return getApiUnitsByIdByUnitIdDocksByKind({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -26924,13 +26575,12 @@ export function putApiUnitsByIdByUnitIdDocksByKindMutationOptions<TContext = unk
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiUnitsByIdByUnitIdDocksByKind({
+			return putApiUnitsByIdByUnitIdDocksByKind({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -27039,13 +26689,12 @@ export function deleteApiUnitsByIdByUnitIdDocksByKindMutationOptions<TContext = 
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiUnitsByIdByUnitIdDocksByKind({
+			return deleteApiUnitsByIdByUnitIdDocksByKind({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -27162,14 +26811,13 @@ export function getApiUnitsByIdByUnitIdDocksByKindRevisionsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByIdByUnitIdDocksByKindRevisions({
+			return getApiUnitsByIdByUnitIdDocksByKindRevisions({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -27267,13 +26915,12 @@ export function postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreM
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore({
+			return postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -27384,13 +27031,12 @@ export function getApiAccountMeQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiAccountMe({
+			return getApiAccountMe({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -27474,8 +27120,7 @@ export function patchApiAccountMeMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await patchApiAccountMe({ ...config, body, throwOnError: true });
-			return data;
+			return patchApiAccountMe({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -27584,13 +27229,12 @@ export function listCurrentUserStudioContentQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCurrentUserStudioContent({
+			return listCurrentUserStudioContent({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -27679,8 +27323,7 @@ export function recordCurrentUserStudioVisitMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await recordCurrentUserStudioVisit({ ...config, path, throwOnError: true });
-			return data;
+			return recordCurrentUserStudioVisit({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -27772,12 +27415,11 @@ export function getApiAccountMePreferencesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiAccountMePreferences({
+			return getApiAccountMePreferences({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -27854,8 +27496,7 @@ export function patchApiAccountMePreferencesMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await patchApiAccountMePreferences({ ...config, body, throwOnError: true });
-			return data;
+			return patchApiAccountMePreferences({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -27952,8 +27593,7 @@ export function putApiAccountMePreferencesMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await putApiAccountMePreferences({ ...config, body, throwOnError: true });
-			return data;
+			return putApiAccountMePreferences({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -28053,8 +27693,7 @@ export function updateCurrentUserPrivacyMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await updateCurrentUserPrivacy({ ...config, body, throwOnError: true });
-			return data;
+			return updateCurrentUserPrivacy({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -28154,13 +27793,12 @@ export function getApiAccountMeFollowingQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiAccountMeFollowing({
+			return getApiAccountMeFollowing({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -28253,13 +27891,12 @@ export function getApiAccountMeFollowingByUnitIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiAccountMeFollowingByUnitId({
+			return getApiAccountMeFollowingByUnitId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -28347,12 +27984,7 @@ export function putApiAccountMeFollowingByUnitIdMutationOptions<TContext = unkno
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await putApiAccountMeFollowingByUnitId({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
+			return putApiAccountMeFollowingByUnitId({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -28446,12 +28078,7 @@ export function deleteApiAccountMeFollowingByUnitIdMutationOptions<TContext = un
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiAccountMeFollowingByUnitId({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
+			return deleteApiAccountMeFollowingByUnitId({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -28542,13 +28169,12 @@ export function patchApiAccountMeFollowingByUnitIdMutationOptions<TContext = unk
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiAccountMeFollowingByUnitId({
+			return patchApiAccountMeFollowingByUnitId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -28648,13 +28274,12 @@ export function putApiAccountMeFollowingByUnitIdSettingsMutationOptions<TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiAccountMeFollowingByUnitIdSettings({
+			return putApiAccountMeFollowingByUnitIdSettings({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -28761,14 +28386,13 @@ export function getUserProfileActivityQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getUserProfileActivity({
+			return getUserProfileActivity({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -28860,14 +28484,13 @@ export function getApiEntitiesByIdProfileQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiEntitiesByIdProfile({
+			return getApiEntitiesByIdProfile({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -28954,12 +28577,11 @@ export function getApiAccountMeBlocksQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiAccountMeBlocks({
+			return getApiAccountMeBlocks({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -29028,8 +28650,7 @@ export function putApiAccountBlocksByIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await putApiAccountBlocksById({ ...config, path, throwOnError: true });
-			return data;
+			return putApiAccountBlocksById({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -29123,8 +28744,7 @@ export function deleteApiAccountBlocksByIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiAccountBlocksById({ ...config, path, throwOnError: true });
-			return data;
+			return deleteApiAccountBlocksById({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -29226,14 +28846,13 @@ export function listManagedOrganizationMembersQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listManagedOrganizationMembers({
+			return listManagedOrganizationMembers({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -29343,14 +28962,13 @@ export function listManagedOrganizationInvitationsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listManagedOrganizationInvitations({
+			return listManagedOrganizationInvitations({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -29449,13 +29067,7 @@ export function inviteOrganizationMemberMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await inviteOrganizationMember({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return inviteOrganizationMember({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -29559,13 +29171,12 @@ export function cancelOrganizationMembershipInvitationMutationOptions<TContext =
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await cancelOrganizationMembershipInvitation({
+			return cancelOrganizationMembershipInvitation({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -29672,13 +29283,7 @@ export function removeOrganizationMemberMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await removeOrganizationMember({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return removeOrganizationMember({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -29784,13 +29389,12 @@ export function listOwnOrganizationMembershipInvitationsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listOwnOrganizationMembershipInvitations({
+			return listOwnOrganizationMembershipInvitations({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -29889,13 +29493,12 @@ export function listOwnOrganizationMembershipsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listOwnOrganizationMemberships({
+			return listOwnOrganizationMemberships({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -29985,13 +29588,12 @@ export function acceptOrganizationMembershipInvitationMutationOptions<TContext =
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await acceptOrganizationMembershipInvitation({
+			return acceptOrganizationMembershipInvitation({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -30094,13 +29696,12 @@ export function declineOrganizationMembershipInvitationMutationOptions<TContext 
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await declineOrganizationMembershipInvitation({
+			return declineOrganizationMembershipInvitation({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -30205,13 +29806,7 @@ export function leaveOrganizationMembershipMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await leaveOrganizationMembership({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return leaveOrganizationMembership({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -30309,13 +29904,12 @@ export function listManagedOrganizationsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listManagedOrganizations({
+			return listManagedOrganizations({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -30389,8 +29983,7 @@ export function createManagedOrganizationMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await createManagedOrganization({ ...config, body, throwOnError: true });
-			return data;
+			return createManagedOrganization({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -30475,12 +30068,7 @@ export function updateActingEntityPresentationMutationOptions<TContext = unknown
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await updateActingEntityPresentation({
-				...config,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return updateActingEntityPresentation({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -30574,14 +30162,13 @@ export function listActingEntityPresentationHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listActingEntityPresentationHistory({
+			return listActingEntityPresentationHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -30675,13 +30262,12 @@ export function getActingEntityPresentationRevisionQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getActingEntityPresentationRevision({
+			return getActingEntityPresentationRevision({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -30761,13 +30347,12 @@ export function restoreActingEntityPresentationMutationOptions<TContext = unknow
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await restoreActingEntityPresentation({
+			return restoreActingEntityPresentation({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -30850,12 +30435,11 @@ export function getCurrentParticipationQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getCurrentParticipation({
+			return getCurrentParticipation({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -30921,13 +30505,12 @@ export function listParticipationGrantsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listParticipationGrants({
+			return listParticipationGrants({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -31001,8 +30584,7 @@ export function issueParticipationGrantMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await issueParticipationGrant({ ...config, body, throwOnError: true });
-			return data;
+			return issueParticipationGrant({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -31092,14 +30674,13 @@ export function listManagedEntityGrantsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listManagedEntityGrants({
+			return listManagedEntityGrants({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -31176,8 +30757,7 @@ export function selectParticipationMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await selectParticipation({ ...config, body, throwOnError: true });
-			return data;
+			return selectParticipation({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -31254,13 +30834,7 @@ export function revokeParticipationGrantMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await revokeParticipationGrant({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return revokeParticipationGrant({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -31350,13 +30924,12 @@ export function listControlledServicePrincipalsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listControlledServicePrincipals({
+			return listControlledServicePrincipals({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -31435,8 +31008,7 @@ export function createServicePrincipalMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await createServicePrincipal({ ...config, body, throwOnError: true });
-			return data;
+			return createServicePrincipal({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -31521,8 +31093,7 @@ export function revokeServicePrincipalMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await revokeServicePrincipal({ ...config, path, body, throwOnError: true });
-			return data;
+			return revokeServicePrincipal({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -31603,8 +31174,7 @@ export function eraseOwnAccountMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async (_) => {
-			const { data } = await eraseOwnAccount({ ...config, throwOnError: true });
-			return data;
+			return eraseOwnAccount({ ...config, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -31673,8 +31243,7 @@ export function recoverEntityControllerMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await recoverEntityController({ ...config, path, body, throwOnError: true });
-			return data;
+			return recoverEntityController({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -31761,12 +31330,11 @@ export function getApiCustomThemesExecutionControlQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiCustomThemesExecutionControl({
+			return getApiCustomThemesExecutionControl({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -31838,12 +31406,7 @@ export function putApiCustomThemesExecutionControlMutationOptions<TContext = unk
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await putApiCustomThemesExecutionControl({
-				...config,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return putApiCustomThemesExecutionControl({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -31938,8 +31501,7 @@ export function postApiCustomThemesMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiCustomThemes({ ...config, body, throwOnError: true });
-			return data;
+			return postApiCustomThemes({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -32040,13 +31602,12 @@ export function putApiCustomThemesByThemeUnitIdLocalizationsByLanguageMutationOp
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiCustomThemesByThemeUnitIdLocalizationsByLanguage({
+			return putApiCustomThemesByThemeUnitIdLocalizationsByLanguage({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -32155,13 +31716,12 @@ export function getApiCustomThemesReviewQueueQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiCustomThemesReviewQueue({
+			return getApiCustomThemesReviewQueue({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -32258,14 +31818,13 @@ export function getApiCustomThemesByThemeUnitIdRevisionsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiCustomThemesByThemeUnitIdRevisions({
+			return getApiCustomThemesByThemeUnitIdRevisions({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -32364,13 +31923,12 @@ export function postApiCustomThemesByThemeUnitIdRevisionsMutationOptions<TContex
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiCustomThemesByThemeUnitIdRevisions({
+			return postApiCustomThemesByThemeUnitIdRevisions({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -32478,13 +32036,12 @@ export function postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionMut
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecision({
+			return postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecision({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -32589,13 +32146,12 @@ export function postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillMutatio
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKill({
+			return postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKill({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -32720,11 +32276,9 @@ export function getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRen
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } =
-				await getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetId(
-					{ ...config, path, signal: config.signal ?? signal, throwOnError: true },
-				);
-			return data;
+			return getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetId(
+				{ ...config, path, signal: config.signal ?? signal, throwOnError: true },
+			).unwrap();
 		},
 	});
 }
@@ -32831,14 +32385,13 @@ export function getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileQueryOpt
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFile({
+			return getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFile({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -32945,14 +32498,13 @@ export function getApiUnitsByIdByUnitIdPresentationQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByIdByUnitIdPresentation({
+			return getApiUnitsByIdByUnitIdPresentation({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -33049,13 +32601,12 @@ export function putApiUnitsByIdByUnitIdPresentationMutationOptions<TContext = un
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiUnitsByIdByUnitIdPresentation({
+			return putApiUnitsByIdByUnitIdPresentation({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -33172,14 +32723,13 @@ export function getApiUnitsByIdByUnitIdPresentationPolicyQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByIdByUnitIdPresentationPolicy({
+			return getApiUnitsByIdByUnitIdPresentationPolicy({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -33281,13 +32831,12 @@ export function getApiUnitsByIdByUnitIdPresentationDocumentQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByIdByUnitIdPresentationDocument({
+			return getApiUnitsByIdByUnitIdPresentationDocument({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -33379,13 +32928,12 @@ export function putApiUnitsByIdByUnitIdCustomThemeInstallationMutationOptions<TC
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiUnitsByIdByUnitIdCustomThemeInstallation({
+			return putApiUnitsByIdByUnitIdCustomThemeInstallation({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -33488,12 +33036,11 @@ export function deleteApiUnitsByIdByUnitIdCustomThemeInstallationMutationOptions
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiUnitsByIdByUnitIdCustomThemeInstallation({
+			return deleteApiUnitsByIdByUnitIdCustomThemeInstallation({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -33600,13 +33147,12 @@ export function getApiPlatformAccessCustomThemeExternalLiveAccountsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPlatformAccessCustomThemeExternalLiveAccounts({
+			return getApiPlatformAccessCustomThemeExternalLiveAccounts({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -33706,13 +33252,12 @@ export function getApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveA
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccess({
+			return getApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccess({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -33810,13 +33355,12 @@ export function putApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveA
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccess({
+			return putApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccess({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -33917,12 +33461,11 @@ export function getApiPlatformAccessPolicyQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPlatformAccessPolicy({
+			return getApiPlatformAccessPolicy({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -33996,13 +33539,12 @@ export function getApiPlatformAccessAccountsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPlatformAccessAccounts({
+			return getApiPlatformAccessAccounts({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -34094,13 +33636,12 @@ export function getApiPlatformAccessAccountsByAuthUserIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPlatformAccessAccountsByAuthUserId({
+			return getApiPlatformAccessAccountsByAuthUserId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -34189,13 +33730,12 @@ export function putApiPlatformAccessAccountsByAuthUserIdMutationOptions<TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiPlatformAccessAccountsByAuthUserId({
+			return putApiPlatformAccessAccountsByAuthUserId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -34303,13 +33843,12 @@ export function getApiPlatformUsersQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPlatformUsers({
+			return getApiPlatformUsers({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -34401,13 +33940,12 @@ export function getApiPlatformUsersByUserIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPlatformUsersByUserId({
+			return getApiPlatformUsersByUserId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -34498,13 +34036,12 @@ export function putApiPlatformUsersByUserIdAccountStateMutationOptions<TContext 
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiPlatformUsersByUserIdAccountState({
+			return putApiPlatformUsersByUserIdAccountState({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -34618,13 +34155,12 @@ export function getApiPlatformUsersByUserIdSessionsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPlatformUsersByUserIdSessions({
+			return getApiPlatformUsersByUserIdSessions({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -34714,12 +34250,11 @@ export function deleteApiPlatformUsersByUserIdSessionsMutationOptions<TContext =
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiPlatformUsersByUserIdSessions({
+			return deleteApiPlatformUsersByUserIdSessions({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -34818,12 +34353,11 @@ export function deleteApiPlatformUsersByUserIdSessionsBySessionIdMutationOptions
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiPlatformUsersByUserIdSessionsBySessionId({
+			return deleteApiPlatformUsersByUserIdSessionsBySessionId({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -34921,13 +34455,12 @@ export function getApiTagsSuggestionsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiTagsSuggestions({
+			return getApiTagsSuggestions({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -35004,14 +34537,13 @@ export function getApiTagsByTagIdExpressionsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiTagsByTagIdExpressions({
+			return getApiTagsByTagIdExpressions({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -35104,14 +34636,13 @@ export function getApiTagsByTagIdHierarchyQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiTagsByTagIdHierarchy({
+			return getApiTagsByTagIdHierarchy({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -35203,14 +34734,13 @@ export function getApiTagsByTagIdPathsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiTagsByTagIdPaths({
+			return getApiTagsByTagIdPaths({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -35288,8 +34818,7 @@ export function postApiTagExpressionsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiTagExpressions({ ...config, body, throwOnError: true });
-			return data;
+			return postApiTagExpressions({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -35380,13 +34909,12 @@ export function postApiTagExpressionsByExpressionIdInferenceRulesMutationOptions
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiTagExpressionsByExpressionIdInferenceRules({
+			return postApiTagExpressionsByExpressionIdInferenceRules({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -35479,12 +35007,11 @@ export function deleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdMutat
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiTagExpressionsByExpressionIdInferenceRulesByRuleId({
+			return deleteApiTagExpressionsByExpressionIdInferenceRulesByRuleId({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -35575,8 +35102,7 @@ export function postApiTagRelationsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiTagRelations({ ...config, body, throwOnError: true });
-			return data;
+			return postApiTagRelations({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -35671,12 +35197,7 @@ export function postApiTagPathsDefinitionWarningsMutationOptions<TContext = unkn
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiTagPathsDefinitionWarnings({
-				...config,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return postApiTagPathsDefinitionWarnings({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -35769,12 +35290,11 @@ export function deleteApiTagPathsByPathIdSensesBySenseIdMutationOptions<TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiTagPathsByPathIdSensesBySenseId({
+			return deleteApiTagPathsByPathIdSensesBySenseId({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -35868,13 +35388,12 @@ export function getApiTagPathsSearchQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiTagPathsSearch({
+			return getApiTagPathsSearch({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -35946,8 +35465,7 @@ export function postApiTagPathsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiTagPaths({ ...config, body, throwOnError: true });
-			return data;
+			return postApiTagPaths({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -36047,14 +35565,13 @@ export function getApiTagPathsByPathIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiTagPathsByPathId({
+			return getApiTagPathsByPathId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -36142,13 +35659,7 @@ export function postApiTagPathsByPathIdSensesMutationOptions<TContext = unknown>
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiTagPathsByPathIdSenses({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return postApiTagPathsByPathIdSenses({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -36244,13 +35755,7 @@ export function putApiTagPathsByPathIdVoteMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiTagPathsByPathIdVote({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return putApiTagPathsByPathIdVote({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -36344,8 +35849,7 @@ export function deleteApiTagPathsByPathIdVoteMutationOptions<TContext = unknown>
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiTagPathsByPathIdVote({ ...config, path, throwOnError: true });
-			return data;
+			return deleteApiTagPathsByPathIdVote({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -36433,8 +35937,7 @@ export function postApiTagPathsMergesMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiTagPathsMerges({ ...config, body, throwOnError: true });
-			return data;
+			return postApiTagPathsMerges({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -36533,13 +36036,12 @@ export function getApiTagPathsMergesPendingQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiTagPathsMergesPending({
+			return getApiTagPathsMergesPending({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -36624,13 +36126,12 @@ export function putApiTagPathsMergesByMergeIdResolutionMutationOptions<TContext 
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiTagPathsMergesByMergeIdResolution({
+			return putApiTagPathsMergesByMergeIdResolution({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -36738,14 +36239,13 @@ export function getApiResourcesByOwnerByUnitIdTagsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiResourcesByOwnerByUnitIdTags({
+			return getApiResourcesByOwnerByUnitIdTags({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -36838,13 +36338,12 @@ export function postApiResourcesByOwnerByUnitIdTagPathApplicationsMutationOption
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiResourcesByOwnerByUnitIdTagPathApplications({
+			return postApiResourcesByOwnerByUnitIdTagPathApplications({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -36943,12 +36442,11 @@ export function deleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicatio
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationId({
+			return deleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationId({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -37049,14 +36547,12 @@ export function putApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationId
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } =
-				await putApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgment({
-					...config,
-					path,
-					body,
-					throwOnError: true,
-				});
-			return data;
+			return putApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgment({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			}).unwrap();
 		},
 	});
 }
@@ -37162,13 +36658,11 @@ export function deleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicatio
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } =
-				await deleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgment({
-					...config,
-					path,
-					throwOnError: true,
-				});
-			return data;
+			return deleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgment({
+				...config,
+				path,
+				throwOnError: true,
+			}).unwrap();
 		},
 	});
 }
@@ -37273,14 +36767,13 @@ export function getApiRealmsByRealmIdTagPathsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdTagPaths({
+			return getApiRealmsByRealmIdTagPaths({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -37372,12 +36865,11 @@ export function putApiRealmsByRealmIdTagPathsByPathIdMutationOptions<TContext = 
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await putApiRealmsByRealmIdTagPathsByPathId({
+			return putApiRealmsByRealmIdTagPathsByPathId({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -37471,12 +36963,11 @@ export function putApiRealmsByRealmIdTagPathSensesBySenseIdMutationOptions<TCont
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await putApiRealmsByRealmIdTagPathSensesBySenseId({
+			return putApiRealmsByRealmIdTagPathSensesBySenseId({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -37570,13 +37061,12 @@ export function putApiRealmsByRealmIdTagPathsByPathIdVoteMutationOptions<TContex
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdTagPathsByPathIdVote({
+			return putApiRealmsByRealmIdTagPathsByPathIdVote({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -37669,12 +37159,11 @@ export function deleteApiRealmsByRealmIdTagPathsByPathIdVoteMutationOptions<TCon
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiRealmsByRealmIdTagPathsByPathIdVote({
+			return deleteApiRealmsByRealmIdTagPathsByPathIdVote({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -37764,13 +37253,12 @@ export function postApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsMutationOp
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiRealmsByRealmIdUnitsByUnitIdTagPathApplications({
+			return postApiRealmsByRealmIdUnitsByUnitIdTagPathApplications({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -37868,13 +37356,11 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplic
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } =
-				await deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationId({
-					...config,
-					path,
-					throwOnError: true,
-				});
-			return data;
+			return deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationId({
+				...config,
+				path,
+				throwOnError: true,
+			}).unwrap();
 		},
 	});
 }
@@ -37975,14 +37461,12 @@ export function putApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicati
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } =
-				await putApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgment({
-					...config,
-					path,
-					body,
-					throwOnError: true,
-				});
-			return data;
+			return putApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgment({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			}).unwrap();
 		},
 	});
 }
@@ -38090,13 +37574,11 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplic
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } =
-				await deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgment({
-					...config,
-					path,
-					throwOnError: true,
-				});
-			return data;
+			return deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgment({
+				...config,
+				path,
+				throwOnError: true,
+			}).unwrap();
 		},
 	});
 }
@@ -38195,13 +37677,12 @@ export function putApiRealmsByRealmIdTagPathPolicyMutationOptions<TContext = unk
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdTagPathPolicy({
+			return putApiRealmsByRealmIdTagPathPolicy({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -38305,13 +37786,12 @@ export function getApiUsersMeTagRealmSubscriptionsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUsersMeTagRealmSubscriptions({
+			return getApiUsersMeTagRealmSubscriptions({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -38397,14 +37877,13 @@ export function putApiUsersMeTagRealmSubscriptionsByRealmIdMutationOptions<TCont
 	>({
 		mutationKey,
 		mutationFn: async ({ path, query, body }) => {
-			const { data } = await putApiUsersMeTagRealmSubscriptionsByRealmId({
+			return putApiUsersMeTagRealmSubscriptionsByRealmId({
 				...config,
 				path,
 				query,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -38501,12 +37980,11 @@ export function deleteApiUsersMeTagRealmSubscriptionsByRealmIdMutationOptions<TC
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiUsersMeTagRealmSubscriptionsByRealmId({
+			return deleteApiUsersMeTagRealmSubscriptionsByRealmId({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -38597,8 +38075,7 @@ export function resolveUnitSlugAddressMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await resolveUnitSlugAddress({ ...config, body, throwOnError: true });
-			return data;
+			return resolveUnitSlugAddress({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -38698,13 +38175,12 @@ export function getPublicUnitSlugAddressQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getPublicUnitSlugAddress({
+			return getPublicUnitSlugAddress({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -38796,14 +38272,13 @@ export function resolveScopedUnitSlugAddressQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await resolveScopedUnitSlugAddress({
+			return resolveScopedUnitSlugAddress({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -38907,14 +38382,13 @@ export function resolveNamespaceSlugAddressQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await resolveNamespaceSlugAddress({
+			return resolveNamespaceSlugAddress({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -39015,13 +38489,12 @@ export function getUnitSlugAddressWithPlatformAccessQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getUnitSlugAddressWithPlatformAccess({
+			return getUnitSlugAddressWithPlatformAccess({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -39114,13 +38587,12 @@ export function replaceUnitSlugAddressWithPlatformAccessMutationOptions<TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await replaceUnitSlugAddressWithPlatformAccess({
+			return replaceUnitSlugAddressWithPlatformAccess({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -39230,13 +38702,12 @@ export function releaseSlugRedirectWithPlatformAccessMutationOptions<TContext = 
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await releaseSlugRedirectWithPlatformAccess({
+			return releaseSlugRedirectWithPlatformAccess({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -39343,13 +38814,12 @@ export function getUnitReferenceQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getUnitReference({
+			return getUnitReference({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -39428,14 +38898,13 @@ export function getPublicUnitSeoProjectionQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getPublicUnitSeoProjection({
+			return getPublicUnitSeoProjection({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -39526,8 +38995,7 @@ export function postApiUnitsPresentationsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiUnitsPresentations({ ...config, body, throwOnError: true });
-			return data;
+			return postApiUnitsPresentations({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -39627,14 +39095,13 @@ export function getApiUnitsByIdByUnitIdRealmPublicationsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByIdByUnitIdRealmPublications({
+			return getApiUnitsByIdByUnitIdRealmPublications({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -39734,12 +39201,11 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdMutationOption
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await postApiUnitsByIdByUnitIdRealmPublicationsByRealmId({
+			return postApiUnitsByIdByUnitIdRealmPublicationsByRealmId({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -39843,12 +39309,11 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawMutati
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdraw({
+			return postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdraw({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -39953,12 +39418,11 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishMutat
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublish({
+			return postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublish({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -40072,14 +39536,13 @@ export function getApiUnitsByIdByUnitIdStatusEventsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByIdByUnitIdStatusEvents({
+			return getApiUnitsByIdByUnitIdStatusEvents({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -40179,13 +39642,12 @@ export function getApiUnitsByIdByUnitIdLocalizationOrderQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByIdByUnitIdLocalizationOrder({
+			return getApiUnitsByIdByUnitIdLocalizationOrder({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -40273,13 +39735,12 @@ export function putApiUnitsByIdByUnitIdLocalizationOrderMutationOptions<TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiUnitsByIdByUnitIdLocalizationOrder({
+			return putApiUnitsByIdByUnitIdLocalizationOrder({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -40389,13 +39850,12 @@ export function deleteApiUnitsByIdByUnitIdLocalizationsByLanguageMutationOptions
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiUnitsByIdByUnitIdLocalizationsByLanguage({
+			return deleteApiUnitsByIdByUnitIdLocalizationsByLanguage({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -40508,14 +39968,13 @@ export function getApiUnitsByTypeQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByType({
+			return getApiUnitsByType({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -40601,8 +40060,7 @@ export function postApiUnitsByTypeMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitsByType({ ...config, path, body, throwOnError: true });
-			return data;
+			return postApiUnitsByType({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -40723,14 +40181,13 @@ export function getApiUnitsByTypeByUnitIdContentLanguageSupportEvidenceQueryOpti
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByTypeByUnitIdContentLanguageSupportEvidence({
+			return getApiUnitsByTypeByUnitIdContentLanguageSupportEvidence({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -40839,14 +40296,13 @@ export function getApiUnitsByTypeByUnitIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByTypeByUnitId({
+			return getApiUnitsByTypeByUnitId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -40941,13 +40397,7 @@ export function patchApiUnitsByTypeByUnitIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiUnitsByTypeByUnitId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return patchApiUnitsByTypeByUnitId({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -41057,13 +40507,12 @@ export function putApiUnitsByTypeByUnitIdLocalizationsByLanguageMutationOptions<
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiUnitsByTypeByUnitIdLocalizationsByLanguage({
+			return putApiUnitsByTypeByUnitIdLocalizationsByLanguage({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -41180,14 +40629,13 @@ export function getApiUnitsByIdByUnitIdSubjectAssociationsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByIdByUnitIdSubjectAssociations({
+			return getApiUnitsByIdByUnitIdSubjectAssociations({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -41289,13 +40737,12 @@ export function listCurrentUserContributionResourcesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listCurrentUserContributionResources({
+			return listCurrentUserContributionResources({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -41395,14 +40842,13 @@ export function getApiHistoryUnitsByUnitIdRevisionsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiHistoryUnitsByUnitIdRevisions({
+			return getApiHistoryUnitsByUnitIdRevisions({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -41502,13 +40948,12 @@ export function getApiHistoryUnitRevisionsByRevisionIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiHistoryUnitRevisionsByRevisionId({
+			return getApiHistoryUnitRevisionsByRevisionId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -41603,14 +41048,13 @@ export function getApiHistoryUnitsByUnitIdCompareQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiHistoryUnitsByUnitIdCompare({
+			return getApiHistoryUnitsByUnitIdCompare({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -41705,13 +41149,12 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreMutationO
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore({
+			return postApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -41821,13 +41264,12 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoMutationOpti
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo({
+			return postApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -41937,13 +41379,12 @@ export function patchApiHistoryUnitRevisionsByRevisionIdVisibilityMutationOption
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiHistoryUnitRevisionsByRevisionIdVisibility({
+			return patchApiHistoryUnitRevisionsByRevisionIdVisibility({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -42053,13 +41494,12 @@ export function getApiHistoryRecentChangesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiHistoryRecentChanges({
+			return getApiHistoryRecentChanges({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -42153,14 +41593,13 @@ export function getApiHistoryContributionsByProfileIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiHistoryContributionsByProfileId({
+			return getApiHistoryContributionsByProfileId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -42249,12 +41688,11 @@ export function getApiHistoryChangeTagsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiHistoryChangeTags({
+			return getApiHistoryChangeTags({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -42319,13 +41757,12 @@ export function getApiTagsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiTags({
+			return getApiTags({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -42390,8 +41827,7 @@ export function postApiTagsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiTags({ ...config, body, throwOnError: true });
-			return data;
+			return postApiTags({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -42473,14 +41909,13 @@ export function getApiTagsByTagIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiTagsByTagId({
+			return getApiTagsByTagId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -42565,13 +42000,12 @@ export function putApiTagsByTagIdLocalizationsByLanguageMutationOptions<TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiTagsByTagIdLocalizationsByLanguage({
+			return putApiTagsByTagIdLocalizationsByLanguage({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -42684,14 +42118,13 @@ export function getApiResourcesByOwnerByUnitIdAliasesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiResourcesByOwnerByUnitIdAliases({
+			return getApiResourcesByOwnerByUnitIdAliases({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -42788,13 +42221,12 @@ export function postApiResourcesByOwnerByUnitIdAliasesMutationOptions<TContext =
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiResourcesByOwnerByUnitIdAliases({
+			return postApiResourcesByOwnerByUnitIdAliases({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -42902,13 +42334,12 @@ export function putApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteMutationOption
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiResourcesByOwnerByUnitIdAliasesByAliasIdVote({
+			return putApiResourcesByOwnerByUnitIdAliasesByAliasIdVote({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -43011,12 +42442,11 @@ export function deleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteMutationOpt
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVote({
+			return deleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVote({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -43118,13 +42548,12 @@ export function patchApiResourcesByOwnerByUnitIdAliasesByAliasIdMutationOptions<
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiResourcesByOwnerByUnitIdAliasesByAliasId({
+			return patchApiResourcesByOwnerByUnitIdAliasesByAliasId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -43232,13 +42661,12 @@ export function deleteApiResourcesByOwnerByUnitIdAliasesByAliasIdMutationOptions
 	>({
 		mutationKey,
 		mutationFn: async ({ path, query }) => {
-			const { data } = await deleteApiResourcesByOwnerByUnitIdAliasesByAliasId({
+			return deleteApiResourcesByOwnerByUnitIdAliasesByAliasId({
 				...config,
 				path,
 				query,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -43348,14 +42776,13 @@ export function listResourceCreditAttributionsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listResourceCreditAttributions({
+			return listResourceCreditAttributions({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -43445,13 +42872,12 @@ export function postApiResourcesByOwnerByUnitIdCreditAttributionsMutationOptions
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiResourcesByOwnerByUnitIdCreditAttributions({
+			return postApiResourcesByOwnerByUnitIdCreditAttributions({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -43556,13 +42982,12 @@ export function deleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociation
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociationId({
+			return deleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociationId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -43668,13 +43093,12 @@ export function postApiResourcesByOwnerByUnitIdSubjectAssociationsMutationOption
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiResourcesByOwnerByUnitIdSubjectAssociations({
+			return postApiResourcesByOwnerByUnitIdSubjectAssociations({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -43782,14 +43206,12 @@ export function putApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationId
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } =
-				await putApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoiler({
-					...config,
-					path,
-					body,
-					throwOnError: true,
-				});
-			return data;
+			return putApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoiler({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			}).unwrap();
 		},
 	});
 }
@@ -43900,13 +43322,11 @@ export function deleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociatio
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } =
-				await deleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoiler({
-					...config,
-					path,
-					throwOnError: true,
-				});
-			return data;
+			return deleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoiler({
+				...config,
+				path,
+				throwOnError: true,
+			}).unwrap();
 		},
 	});
 }
@@ -44011,13 +43431,12 @@ export function deleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociatio
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationId({
+			return deleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -44133,14 +43552,13 @@ export function getApiResourcesByOwnerByUnitIdExternalLinksQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiResourcesByOwnerByUnitIdExternalLinks({
+			return getApiResourcesByOwnerByUnitIdExternalLinks({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -44240,13 +43658,12 @@ export function postApiResourcesByOwnerByUnitIdExternalLinksMutationOptions<TCon
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiResourcesByOwnerByUnitIdExternalLinks({
+			return postApiResourcesByOwnerByUnitIdExternalLinks({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -44354,13 +43771,12 @@ export function putApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteM
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote({
+			return putApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -44466,12 +43882,11 @@ export function deleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVo
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote({
+			return deleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -44574,13 +43989,12 @@ export function patchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdMut
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId({
+			return patchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -44689,13 +44103,12 @@ export function deleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdMu
 	>({
 		mutationKey,
 		mutationFn: async ({ path, query }) => {
-			const { data } = await deleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId({
+			return deleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId({
 				...config,
 				path,
 				query,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -44800,13 +44213,12 @@ export function putApiResourcesByOwnerByUnitIdTagsByTagIdMutationOptions<TContex
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiResourcesByOwnerByUnitIdTagsByTagId({
+			return putApiResourcesByOwnerByUnitIdTagsByTagId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -44911,13 +44323,12 @@ export function patchApiResourcesByOwnerByUnitIdTagsByTagIdMutationOptions<TCont
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiResourcesByOwnerByUnitIdTagsByTagId({
+			return patchApiResourcesByOwnerByUnitIdTagsByTagId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -45026,13 +44437,12 @@ export function deleteApiResourcesByOwnerByUnitIdTagsByTagIdMutationOptions<TCon
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiResourcesByOwnerByUnitIdTagsByTagId({
+			return deleteApiResourcesByOwnerByUnitIdTagsByTagId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -45140,13 +44550,12 @@ export function putApiResourcesByOwnerByUnitIdTagsByTagIdVoteMutationOptions<TCo
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiResourcesByOwnerByUnitIdTagsByTagIdVote({
+			return putApiResourcesByOwnerByUnitIdTagsByTagIdVote({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -45249,12 +44658,11 @@ export function deleteApiResourcesByOwnerByUnitIdTagsByTagIdVoteMutationOptions<
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiResourcesByOwnerByUnitIdTagsByTagIdVote({
+			return deleteApiResourcesByOwnerByUnitIdTagsByTagIdVote({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -45359,13 +44767,12 @@ export function getApiUnitsByIdByUnitIdContentStructuresQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByIdByUnitIdContentStructures({
+			return getApiUnitsByIdByUnitIdContentStructures({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -45453,13 +44860,12 @@ export function postApiUnitsByIdByUnitIdContentStructuresMutationOptions<TContex
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitsByIdByUnitIdContentStructures({
+			return postApiUnitsByIdByUnitIdContentStructures({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -45564,13 +44970,12 @@ export function getApiUnitsByIdByUnitIdContentStructuresByStructureIdQueryOption
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByIdByUnitIdContentStructuresByStructureId({
+			return getApiUnitsByIdByUnitIdContentStructuresByStructureId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -45660,13 +45065,12 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdMutation
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiUnitsByIdByUnitIdContentStructuresByStructureId({
+			return deleteApiUnitsByIdByUnitIdContentStructuresByStructureId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -45783,14 +45187,13 @@ export function getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsQu
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisions({
+			return getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisions({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -45897,14 +45300,12 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsB
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } =
-				await postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestore({
-					...config,
-					path,
-					body,
-					throwOnError: true,
-				});
-			return data;
+			return postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestore({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			}).unwrap();
 		},
 	});
 }
@@ -46012,13 +45413,12 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatch
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatch({
+			return postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatch({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -46124,13 +45524,12 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesMutat
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes({
+			return postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -46236,13 +45635,12 @@ export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNo
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId({
+			return patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -46350,13 +45748,12 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByN
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId({
+			return deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -46468,14 +45865,13 @@ export function listTextVersionContentNodesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listTextVersionContentNodes({
+			return listTextVersionContentNodes({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -46569,13 +45965,7 @@ export function saveTextVersionContentDraftMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await saveTextVersionContentDraft({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return saveTextVersionContentDraft({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -46686,14 +46076,13 @@ export function listProgramContentNodesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await listProgramContentNodes({
+			return listProgramContentNodes({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -46785,8 +46174,7 @@ export function saveProgramContentDraftMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await saveProgramContentDraft({ ...config, path, body, throwOnError: true });
-			return data;
+			return saveProgramContentDraft({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -46897,14 +46285,13 @@ export function readTextVersionChapterNodeQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await readTextVersionChapterNode({
+			return readTextVersionChapterNode({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -46998,13 +46385,12 @@ export function putApiChaptersByChapterIdLocalizationsByLanguageContentMutationO
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiChaptersByChapterIdLocalizationsByLanguageContent({
+			return putApiChaptersByChapterIdLocalizationsByLanguageContent({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -47111,13 +46497,12 @@ export function getApiProgressQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiProgress({
+			return getApiProgress({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -47188,12 +46573,11 @@ export function getApiProgressSearchFilterQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiProgressSearchFilter({
+			return getApiProgressSearchFilter({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -47262,8 +46646,7 @@ export function postApiProgressSearchMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiProgressSearch({ ...config, body, throwOnError: true });
-			return data;
+			return postApiProgressSearch({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -47359,13 +46742,12 @@ export function getApiProgressByUnitIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiProgressByUnitId({
+			return getApiProgressByUnitId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -47450,8 +46832,7 @@ export function putApiProgressByUnitIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiProgressByUnitId({ ...config, path, body, throwOnError: true });
-			return data;
+			return putApiProgressByUnitId({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -47545,8 +46926,7 @@ export function deleteApiProgressByUnitIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiProgressByUnitId({ ...config, path, throwOnError: true });
-			return data;
+			return deleteApiProgressByUnitId({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -47642,14 +47022,13 @@ export function getApiProgressByUnitIdEntriesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiProgressByUnitIdEntries({
+			return getApiProgressByUnitIdEntries({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -47746,13 +47125,7 @@ export function postApiProgressByUnitIdEntriesMutationOptions<TContext = unknown
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiProgressByUnitIdEntries({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return postApiProgressByUnitIdEntries({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -47848,13 +47221,12 @@ export function putApiProgressByUnitIdEntriesByEntryIdMutationOptions<TContext =
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiProgressByUnitIdEntriesByEntryId({
+			return putApiProgressByUnitIdEntriesByEntryId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -47952,12 +47324,11 @@ export function deleteApiProgressByUnitIdEntriesByEntryIdMutationOptions<TContex
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiProgressByUnitIdEntriesByEntryId({
+			return deleteApiProgressByUnitIdEntriesByEntryId({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -48051,12 +47422,11 @@ export function putApiProgressByUnitIdEntriesByEntryIdCurrentMutationOptions<TCo
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await putApiProgressByUnitIdEntriesByEntryIdCurrent({
+			return putApiProgressByUnitIdEntriesByEntryIdCurrent({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -48155,13 +47525,12 @@ export function getApiProgressByUnitIdNodesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiProgressByUnitIdNodes({
+			return getApiProgressByUnitIdNodes({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -48247,12 +47616,11 @@ export function postApiProgressByUnitIdNodesByNodeIdReadMutationOptions<TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await postApiProgressByUnitIdNodesByNodeIdRead({
+			return postApiProgressByUnitIdNodesByNodeIdRead({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -48347,13 +47715,12 @@ export function postApiProgressByUnitIdCompleteMutationOptions<TContext = unknow
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiProgressByUnitIdComplete({
+			return postApiProgressByUnitIdComplete({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -48448,12 +47815,7 @@ export function putApiProgressByUnitIdNodesByNodeIdMutationOptions<TContext = un
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await putApiProgressByUnitIdNodesByNodeId({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
+			return putApiProgressByUnitIdNodesByNodeId({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -48547,12 +47909,11 @@ export function deleteApiProgressByUnitIdNodesByNodeIdMutationOptions<TContext =
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiProgressByUnitIdNodesByNodeId({
+			return deleteApiProgressByUnitIdNodesByNodeId({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -48648,13 +48009,12 @@ export function getApiCollectionsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiCollections({
+			return getApiCollections({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -48730,8 +48090,7 @@ export function postApiCollectionsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiCollections({ ...config, body, throwOnError: true });
-			return data;
+			return postApiCollections({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -48837,14 +48196,13 @@ export function getApiCollectionsByCollectionIdItemsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiCollectionsByCollectionIdItems({
+			return getApiCollectionsByCollectionIdItems({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -48945,14 +48303,13 @@ export function getApiCollectionsByCollectionIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiCollectionsByCollectionId({
+			return getApiCollectionsByCollectionId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -49047,13 +48404,12 @@ export function patchApiCollectionsByCollectionIdMutationOptions<TContext = unkn
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiCollectionsByCollectionId({
+			return patchApiCollectionsByCollectionId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -49161,13 +48517,12 @@ export function postApiCollectionsByCollectionIdItemsBatchUpdateMutationOptions<
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiCollectionsByCollectionIdItemsBatchUpdate({
+			return postApiCollectionsByCollectionIdItemsBatchUpdate({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -49276,13 +48631,12 @@ export function postApiCollectionsByCollectionIdItemsBatchMutationOptions<TConte
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiCollectionsByCollectionIdItemsBatch({
+			return postApiCollectionsByCollectionIdItemsBatch({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -49391,13 +48745,12 @@ export function postApiCollectionsByCollectionIdItemsMoveMutationOptions<TContex
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiCollectionsByCollectionIdItemsMove({
+			return postApiCollectionsByCollectionIdItemsMove({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -49506,13 +48859,12 @@ export function putApiCollectionsByCollectionIdItemsByTargetIdMutationOptions<TC
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiCollectionsByCollectionIdItemsByTargetId({
+			return putApiCollectionsByCollectionIdItemsByTargetId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -49620,13 +48972,12 @@ export function deleteApiCollectionsByCollectionIdItemsByTargetIdMutationOptions
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiCollectionsByCollectionIdItemsByTargetId({
+			return deleteApiCollectionsByCollectionIdItemsByTargetId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -49738,14 +49089,13 @@ export function getApiCollectionsByCollectionIdItemRevisionsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiCollectionsByCollectionIdItemRevisions({
+			return getApiCollectionsByCollectionIdItemRevisions({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -49849,14 +49199,13 @@ export function getApiCollectionsByCollectionIdItemRevisionsCompareQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiCollectionsByCollectionIdItemRevisionsCompare({
+			return getApiCollectionsByCollectionIdItemRevisionsCompare({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -49953,13 +49302,12 @@ export function postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore({
+			return postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -50063,13 +49411,12 @@ export function getApiFavoritesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiFavorites({
+			return getApiFavorites({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -50150,13 +49497,12 @@ export function getApiFavoritesByTargetUnitIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiFavoritesByTargetUnitId({
+			return getApiFavoritesByTargetUnitId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -50240,13 +49586,7 @@ export function putApiFavoritesByTargetUnitIdMutationOptions<TContext = unknown>
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiFavoritesByTargetUnitId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return putApiFavoritesByTargetUnitId({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -50336,13 +49676,12 @@ export function deleteApiFavoritesByTargetUnitIdMutationOptions<TContext = unkno
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiFavoritesByTargetUnitId({
+			return deleteApiFavoritesByTargetUnitId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -50442,14 +49781,13 @@ export function getApiFavoritesByTargetUnitIdHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiFavoritesByTargetUnitIdHistory({
+			return getApiFavoritesByTargetUnitIdHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -50546,13 +49884,12 @@ export function getApiFavoritesByTargetUnitIdHistoryByRevisionQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiFavoritesByTargetUnitIdHistoryByRevision({
+			return getApiFavoritesByTargetUnitIdHistoryByRevision({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -50637,13 +49974,12 @@ export function postApiFavoritesByTargetUnitIdRestoreMutationOptions<TContext = 
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiFavoritesByTargetUnitIdRestore({
+			return postApiFavoritesByTargetUnitIdRestore({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -50734,13 +50070,12 @@ export function getApiReviewsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiReviews({
+			return getApiReviews({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -50814,8 +50149,7 @@ export function postApiReviewsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiReviews({ ...config, body, throwOnError: true });
-			return data;
+			return postApiReviews({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -50923,14 +50257,13 @@ export function getApiReviewsByReviewIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiReviewsByReviewId({
+			return getApiReviewsByReviewId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -51022,13 +50355,7 @@ export function patchApiReviewsByReviewIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiReviewsByReviewId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return patchApiReviewsByReviewId({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -51133,8 +50460,7 @@ export function putApiScoresByTargetIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiScoresByTargetId({ ...config, path, body, throwOnError: true });
-			return data;
+			return putApiScoresByTargetId({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -51238,14 +50564,13 @@ export function getApiScoresByTargetIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiScoresByTargetId({
+			return getApiScoresByTargetId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -51338,14 +50663,13 @@ export function getApiScoresByTargetIdViewerQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiScoresByTargetIdViewer({
+			return getApiScoresByTargetIdViewer({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -51444,14 +50768,13 @@ export function getApiReactionsUnitsByUnitIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiReactionsUnitsByUnitId({
+			return getApiReactionsUnitsByUnitId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -51544,13 +50867,7 @@ export function putApiReactionsUnitsByUnitIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiReactionsUnitsByUnitId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return putApiReactionsUnitsByUnitId({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -51645,13 +50962,12 @@ export function deleteApiReactionsUnitsByUnitIdMutationOptions<TContext = unknow
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiReactionsUnitsByUnitId({
+			return deleteApiReactionsUnitsByUnitId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -51742,8 +51058,7 @@ export function putApiReactionsSharesByUnitIdMutationOptions<TContext = unknown>
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await putApiReactionsSharesByUnitId({ ...config, path, throwOnError: true });
-			return data;
+			return putApiReactionsSharesByUnitId({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -51833,12 +51148,7 @@ export function deleteApiReactionsSharesByUnitIdMutationOptions<TContext = unkno
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiReactionsSharesByUnitId({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
+			return deleteApiReactionsSharesByUnitId({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -51925,8 +51235,7 @@ export function postApiPollsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiPolls({ ...config, body, throwOnError: true });
-			return data;
+			return postApiPolls({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -52024,14 +51333,13 @@ export function getApiPollsByPollIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPollsByPollId({
+			return getApiPollsByPollId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -52116,8 +51424,7 @@ export function putApiPollsByPollIdVoteMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiPollsByPollIdVote({ ...config, path, body, throwOnError: true });
-			return data;
+			return putApiPollsByPollIdVote({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -52217,8 +51524,7 @@ export function deleteApiPollsByPollIdVoteMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiPollsByPollIdVote({ ...config, path, throwOnError: true });
-			return data;
+			return deleteApiPollsByPollIdVote({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -52316,13 +51622,7 @@ export function postApiPollsByPollIdCloseMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiPollsByPollIdClose({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return postApiPollsByPollIdClose({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -52429,13 +51729,12 @@ export function getApiPostsByPostIdScoresQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPostsByPostIdScores({
+			return getApiPostsByPostIdScores({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -52521,13 +51820,7 @@ export function putApiPostsByPostIdScoresMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiPostsByPostIdScores({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return putApiPostsByPostIdScores({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -52624,13 +51917,12 @@ export function getApiPostsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPosts({
+			return getApiPosts({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -52701,8 +51993,7 @@ export function postApiPostsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiPosts({ ...config, body, throwOnError: true });
-			return data;
+			return postApiPosts({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -52807,8 +52098,7 @@ export function postApiPostsWikiMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiPostsWiki({ ...config, body, throwOnError: true });
-			return data;
+			return postApiPostsWiki({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -52914,14 +52204,13 @@ export function getApiPostsByPostIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPostsByPostId({
+			return getApiPostsByPostId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -53006,8 +52295,7 @@ export function patchApiPostsByPostIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiPostsByPostId({ ...config, path, body, throwOnError: true });
-			return data;
+			return patchApiPostsByPostId({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -53116,14 +52404,13 @@ export function getApiPostsByPostIdRepliesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiPostsByPostIdReplies({
+			return getApiPostsByPostIdReplies({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -53219,13 +52506,7 @@ export function postApiPostsByPostIdRepliesMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiPostsByPostIdReplies({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return postApiPostsByPostIdReplies({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -53331,13 +52612,12 @@ export function patchApiPostsByPostIdRepliesByReplyPostIdMutationOptions<TContex
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiPostsByPostIdRepliesByReplyPostId({
+			return patchApiPostsByPostIdRepliesByReplyPostId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -53441,13 +52721,12 @@ export function getApiRealmsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealms({
+			return getApiRealms({
 				...config,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -53516,8 +52795,7 @@ export function postApiRealmsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiRealms({ ...config, body, throwOnError: true });
-			return data;
+			return postApiRealms({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -53615,8 +52893,7 @@ export function replaceRealmSlugAddressMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await replaceRealmSlugAddress({ ...config, path, body, throwOnError: true });
-			return data;
+			return replaceRealmSlugAddress({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -53725,14 +53002,13 @@ export function getApiRealmsByRealmIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmId({
+			return getApiRealmsByRealmId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -53821,8 +53097,7 @@ export function patchApiRealmsByRealmIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiRealmsByRealmId({ ...config, path, body, throwOnError: true });
-			return data;
+			return patchApiRealmsByRealmId({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -53923,13 +53198,7 @@ export function putApiRealmsByRealmIdPagesMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdPages({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return putApiRealmsByRealmIdPages({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -54035,14 +53304,13 @@ export function getApiRealmsByRealmIdTaxonomyQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdTaxonomy({
+			return getApiRealmsByRealmIdTaxonomy({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -54146,14 +53414,13 @@ export function getApiRealmsByRealmIdTaxonomyDraftQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdTaxonomyDraft({
+			return getApiRealmsByRealmIdTaxonomyDraft({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -54252,13 +53519,12 @@ export function putApiRealmsByRealmIdTaxonomyDraftMutationOptions<TContext = unk
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdTaxonomyDraft({
+			return putApiRealmsByRealmIdTaxonomyDraft({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -54370,13 +53636,12 @@ export function getApiRealmsByRealmIdScoreContextQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdScoreContext({
+			return getApiRealmsByRealmIdScoreContext({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -54462,13 +53727,12 @@ export function putApiRealmsByRealmIdScoreContextMutationOptions<TContext = unkn
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdScoreContext({
+			return putApiRealmsByRealmIdScoreContext({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -54564,12 +53828,7 @@ export function deleteApiRealmsByRealmIdScoreContextMutationOptions<TContext = u
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiRealmsByRealmIdScoreContext({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
+			return deleteApiRealmsByRealmIdScoreContext({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -54661,13 +53920,7 @@ export function putApiRealmsByRealmIdTagVotingMutationOptions<TContext = unknown
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdTagVoting({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return putApiRealmsByRealmIdTagVoting({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -54767,12 +54020,7 @@ export function putApiRealmsByRealmIdMembershipMutationOptions<TContext = unknow
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await putApiRealmsByRealmIdMembership({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
+			return putApiRealmsByRealmIdMembership({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -54868,12 +54116,7 @@ export function deleteApiRealmsByRealmIdMembershipMutationOptions<TContext = unk
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiRealmsByRealmIdMembership({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
+			return deleteApiRealmsByRealmIdMembership({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -54977,14 +54220,13 @@ export function getApiRealmsByRealmIdMembersQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdMembers({
+			return getApiRealmsByRealmIdMembers({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -55081,13 +54323,12 @@ export function patchApiRealmsByRealmIdMembersByProfileIdMutationOptions<TContex
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiRealmsByRealmIdMembersByProfileId({
+			return patchApiRealmsByRealmIdMembersByProfileId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -55195,13 +54436,7 @@ export function putApiRealmsByRealmIdRulesMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdRules({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return putApiRealmsByRealmIdRules({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -55305,14 +54540,13 @@ export function getApiRealmsByRealmIdRulesQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdRules({
+			return getApiRealmsByRealmIdRules({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -55410,13 +54644,12 @@ export function getApiRealmsByRealmIdRulesAuthoringQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdRulesAuthoring({
+			return getApiRealmsByRealmIdRulesAuthoring({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -55505,13 +54738,12 @@ export function putApiRealmsByRealmIdRulesByRevisionIdAcknowledgementMutationOpt
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement({
+			return putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -55619,14 +54851,13 @@ export function getApiRealmsByRealmIdPinsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdPins({
+			return getApiRealmsByRealmIdPins({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -55718,13 +54949,7 @@ export function postApiRealmsByRealmIdPinsMoveMutationOptions<TContext = unknown
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiRealmsByRealmIdPinsMove({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return postApiRealmsByRealmIdPinsMove({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -55821,13 +55046,12 @@ export function putApiRealmsByRealmIdPinsByUnitIdMutationOptions<TContext = unkn
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdPinsByUnitId({
+			return putApiRealmsByRealmIdPinsByUnitId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -55929,14 +55153,13 @@ export function deleteApiRealmsByRealmIdPinsByUnitIdMutationOptions<TContext = u
 	>({
 		mutationKey,
 		mutationFn: async ({ path, query, body }) => {
-			const { data } = await deleteApiRealmsByRealmIdPinsByUnitId({
+			return deleteApiRealmsByRealmIdPinsByUnitId({
 				...config,
 				path,
 				query,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -56037,13 +55260,7 @@ export function postApiRealmsByRealmIdWikisMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiRealmsByRealmIdWikis({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return postApiRealmsByRealmIdWikis({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -56156,14 +55373,13 @@ export function getApiRealmsByRealmIdTagContextsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdTagContexts({
+			return getApiRealmsByRealmIdTagContexts({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -56258,13 +55474,12 @@ export function postApiRealmsByRealmIdTagContextsMutationOptions<TContext = unkn
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiRealmsByRealmIdTagContexts({
+			return postApiRealmsByRealmIdTagContexts({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -56375,13 +55590,12 @@ export function getApiRealmsByRealmIdTagsByTagIdContextQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdTagsByTagIdContext({
+			return getApiRealmsByRealmIdTagsByTagIdContext({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -56469,13 +55683,12 @@ export function putApiRealmsByRealmIdTagsByTagIdContextMutationOptions<TContext 
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdTagsByTagIdContext({
+			return putApiRealmsByRealmIdTagsByTagIdContext({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -56583,12 +55796,11 @@ export function deleteApiRealmsByRealmIdTagsByTagIdContextMutationOptions<TConte
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiRealmsByRealmIdTagsByTagIdContext({
+			return deleteApiRealmsByRealmIdTagsByTagIdContext({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -56691,13 +55903,12 @@ export function putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationOptio
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId({
+			return putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -56794,12 +56005,11 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdMutationOp
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId({
+			return deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -56902,14 +56112,13 @@ export function getApiRealmsByRealmIdUnitsByUnitIdTagsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdUnitsByUnitIdTags({
+			return getApiRealmsByRealmIdUnitsByUnitIdTags({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -57008,13 +56217,12 @@ export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteMutationOptions
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote({
+			return putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -57121,12 +56329,11 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteMutationOpti
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote({
+			return deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote({
 				...config,
 				path,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -57231,14 +56438,13 @@ export function getApiRealmsByRealmIdUnitsQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdUnits({
+			return getApiRealmsByRealmIdUnits({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -57342,14 +56548,13 @@ export function getApiRealmsByRealmIdUnitsByUnitIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdUnitsByUnitId({
+			return getApiRealmsByRealmIdUnitsByUnitId({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -57446,13 +56651,12 @@ export function patchApiRealmsByRealmIdUnitsByUnitIdMutationOptions<TContext = u
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiRealmsByRealmIdUnitsByUnitId({
+			return patchApiRealmsByRealmIdUnitsByUnitId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -57569,14 +56773,13 @@ export function getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdUnitsByUnitIdHistory({
+			return getApiRealmsByRealmIdUnitsByUnitIdHistory({
 				...config,
 				path,
 				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -57673,13 +56876,12 @@ export function postApiRealmsByRealmIdUnitsByUnitIdReviewMutationOptions<TContex
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiRealmsByRealmIdUnitsByUnitIdReview({
+			return postApiRealmsByRealmIdUnitsByUnitIdReview({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -57794,13 +56996,12 @@ export function getApiRealmsByRealmIdWikiNavigationQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdWikiNavigation({
+			return getApiRealmsByRealmIdWikiNavigation({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -57894,13 +57095,12 @@ export function postApiRealmsByRealmIdWikiNavigationMutationOptions<TContext = u
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiRealmsByRealmIdWikiNavigation({
+			return postApiRealmsByRealmIdWikiNavigation({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -58012,13 +57212,12 @@ export function getApiRealmsByRealmIdWikiNavigationByNavigationIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdWikiNavigationByNavigationId({
+			return getApiRealmsByRealmIdWikiNavigationByNavigationId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -58114,13 +57313,12 @@ export function putApiRealmsByRealmIdWikiNavigationByNavigationIdMutationOptions
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdWikiNavigationByNavigationId({
+			return putApiRealmsByRealmIdWikiNavigationByNavigationId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -58230,13 +57428,12 @@ export function deleteApiRealmsByRealmIdWikiNavigationByNavigationIdMutationOpti
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await deleteApiRealmsByRealmIdWikiNavigationByNavigationId({
+			return deleteApiRealmsByRealmIdWikiNavigationByNavigationId({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -58340,12 +57537,11 @@ export function getApiSearchFilterQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiSearchFilter({
+			return getApiSearchFilter({
 				...config,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -58411,8 +57607,7 @@ export function postApiSearchFilterDefinitionMutationOptions<TContext = unknown>
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiSearchFilterDefinition({ ...config, body, throwOnError: true });
-			return data;
+			return postApiSearchFilterDefinition({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -58499,8 +57694,7 @@ export function postApiSearchFilterExecuteMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiSearchFilterExecute({ ...config, body, throwOnError: true });
-			return data;
+			return postApiSearchFilterExecute({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -58591,8 +57785,7 @@ export function postApiSearchFilterFeedMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiSearchFilterFeed({ ...config, body, throwOnError: true });
-			return data;
+			return postApiSearchFilterFeed({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -58689,13 +57882,12 @@ export function getApiSearchZonesByZoneIdFilterQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiSearchZonesByZoneIdFilter({
+			return getApiSearchZonesByZoneIdFilter({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -58781,13 +57973,12 @@ export function postApiSearchZonesByZoneIdFilterExecuteMutationOptions<TContext 
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiSearchZonesByZoneIdFilterExecute({
+			return postApiSearchZonesByZoneIdFilterExecute({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -58886,13 +58077,12 @@ export function postApiSearchZonesByZoneIdFilterFeedMutationOptions<TContext = u
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiSearchZonesByZoneIdFilterFeed({
+			return postApiSearchZonesByZoneIdFilterFeed({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -58992,13 +58182,12 @@ export function postApiSearchZonesByZoneIdDockBlockExecutionsMutationOptions<TCo
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiSearchZonesByZoneIdDockBlockExecutions({
+			return postApiSearchZonesByZoneIdDockBlockExecutions({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -59102,13 +58291,12 @@ export function postApiSearchZonesByZoneIdPagesByPageIdExecuteMutationOptions<TC
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiSearchZonesByZoneIdPagesByPageIdExecute({
+			return postApiSearchZonesByZoneIdPagesByPageIdExecute({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -59212,13 +58400,12 @@ export function postApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsMutationOp
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiSearchZonesByZoneIdPagesByPageIdBlockExecutions({
+			return postApiSearchZonesByZoneIdPagesByPageIdBlockExecutions({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -59323,13 +58510,12 @@ export function postApiSearchZonesByZoneIdDockFeedBlockExecutionsMutationOptions
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiSearchZonesByZoneIdDockFeedBlockExecutions({
+			return postApiSearchZonesByZoneIdDockFeedBlockExecutions({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -59433,13 +58619,12 @@ export function postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsMutati
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutions({
+			return postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutions({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -59542,8 +58727,7 @@ export function postApiSearchMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiSearch({ ...config, body, throwOnError: true });
-			return data;
+			return postApiSearch({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -59639,8 +58823,7 @@ export function postApiSearchSharedQueriesMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiSearchSharedQueries({ ...config, body, throwOnError: true });
-			return data;
+			return postApiSearchSharedQueries({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -59741,13 +58924,12 @@ export function getApiSearchSharedQueriesByIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiSearchSharedQueriesById({
+			return getApiSearchSharedQueriesById({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -59832,8 +59014,7 @@ export function postApiSearchByIndexMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiSearchByIndex({ ...config, path, body, throwOnError: true });
-			return data;
+			return postApiSearchByIndex({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -59929,8 +59110,7 @@ export function postApiImageAssetsMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiImageAssets({ ...config, body, throwOnError: true });
-			return data;
+			return postApiImageAssets({ ...config, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -60032,13 +59212,7 @@ export function postApiImageAssetsByIdCompleteMutationOptions<TContext = unknown
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiImageAssetsByIdComplete({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
+			return postApiImageAssetsByIdComplete({ ...config, path, body, throwOnError: true }).unwrap();
 		},
 	});
 }
@@ -60144,13 +59318,12 @@ export function putApiImageAssetsByIdPresentationsByRoleMutationOptions<TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiImageAssetsByIdPresentationsByRole({
+			return putApiImageAssetsByIdPresentationsByRole({
 				...config,
 				path,
 				body,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -60262,13 +59435,12 @@ export function getApiImageAssetsByIdQueryOptions(
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiImageAssetsById({
+			return getApiImageAssetsById({
 				...config,
 				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
-			});
-			return data;
+			}).unwrap();
 		},
 	});
 }
@@ -60354,8 +59526,7 @@ export function deleteApiImageAssetsByIdMutationOptions<TContext = unknown>(
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiImageAssetsById({ ...config, path, throwOnError: true });
-			return data;
+			return deleteApiImageAssetsById({ ...config, path, throwOnError: true }).unwrap();
 		},
 	});
 }

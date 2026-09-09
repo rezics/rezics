@@ -101,10 +101,18 @@ describe("initial presentation preferences", () => {
 
 		await expect(getInitialPresentationPreferences(headers)).resolves.toEqual({
 			status: "resolved",
-			data: payload,
+			data: {
+				interfaceLocale: payload.interfaceLocale,
+				chineseContentDisplay: payload.chineseContentDisplay,
+				filterFeedByPreferredLanguages: payload.filterFeedByPreferredLanguages,
+				alwaysShowSpoilers: payload.alwaysShowSpoilers,
+				alwaysShowNsfw: payload.alwaysShowNsfw,
+				customThemesEnabled: payload.customThemesEnabled,
+				preferredLanguages: payload.preferredLanguages,
+			},
 		});
 		expect(request).toEqual({
-			url: "https://api.internal.example/api/v1/users/me/preferences",
+			url: "https://api.internal.example/api/v1/account/me/preferences",
 			cookie: "better-auth.session_token=opaque",
 			acceptLanguage: "zh-CN, zh;q=0.9",
 			authorization: null,

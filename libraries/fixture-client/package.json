@@ -15,8 +15,8 @@
 		"react": "19.2"
 	},
 	"devDependencies": {
-		"@types/react": "19",
-		"react": "19.2",
-		"typescript": "7"
+		"@types/react": "19.2.18",
+		"react": "19.2.8",
+		"typescript": "7.0.2"
 	}
 }

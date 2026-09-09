@@ -25,7 +25,7 @@ The components have deliberately narrow ownership:
 | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Databasus `v3.51.0`                  | Backup creation, zstd compression, AES-256-GCM encryption, R2 upload/download, GFS retention, catalog, audit UI, notification, and verification scheduling |
 | Databasus verification agent         | Download the selected archive and perform a real restore in a throwaway PostgreSQL container                                                               |
-| REZICS `postgres-verification` image | Supply PostgreSQL 18.4, PGroonga 4.0.8, `approx_count` 1.0, and post-restore search acceptance                                                             |
+| REZICS `postgres-verification` image | Supply PostgreSQL 18.6, PGroonga 4.0.8, `approx_count` 1.0, and post-restore search acceptance                                                             |
 | Cloudflare R2 Terraform              | Dedicated private bucket, disabled public domain, seven-day Bucket Lock floor, Infrequent Access transition, and incomplete multipart cleanup              |
 | Nomad Variables                      | Keep the Databasus master key, source read-only database credential, and bucket-scoped R2 credential outside images and jobspec source                     |
 

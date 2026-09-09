@@ -4,7 +4,7 @@
 	"private": true,
 	"type": "module",
 	"license": "AGPL-3.0-only",
-	"packageManager": "yarn@4.17.1",
+	"packageManager": "yarn@4.18.0",
 	"workspaces": [
 		"aspire-apphost",
 		"apps/*",
@@ -20,14 +20,14 @@
 		"aspire:stop": "aspire stop --non-interactive"
 	},
 	"resolutions": {
-		"@kubb/adapter-oas": "5.0.0-beta.95",
-		"@kubb/plugin-fetch": "5.0.0-beta.95",
-		"@kubb/plugin-react-query": "5.0.0-beta.95",
-		"@kubb/plugin-ts": "5.0.0-beta.95",
-		"@kubb/plugin-zod": "5.0.0-beta.95",
-		"@kubb/parser-ts": "5.0.0-beta.96",
-		"kubb": "5.0.0-beta.96",
-		"vite": "8.1.3",
+		"@kubb/adapter-oas": "5.1.0",
+		"@kubb/plugin-fetch": "5.3.0",
+		"@kubb/plugin-react-query": "5.1.0",
+		"@kubb/plugin-ts": "5.0.1",
+		"@kubb/plugin-zod": "5.1.4",
+		"@kubb/parser-ts": "5.1.0",
+		"kubb": "5.1.0",
+		"vite": "8.2.2",
 		"@storybook/react@npm:11.0.0-alpha.0": "patch:@storybook/react@npm%3A11.0.0-alpha.0#~/.yarn/patches/@storybook-react-npm-11.0.0-alpha.0-cd515a62b8.patch",
 		"vite-plugin-storybook-nextjs@npm:11.0.0-alpha.0": "patch:vite-plugin-storybook-nextjs@npm%3A11.0.0-alpha.0#~/.yarn/patches/vite-plugin-storybook-nextjs-npm-11.0.0-alpha.0-61abe2ce95.patch"
 	},
@@ -37,11 +37,11 @@
 		}
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.11",
+		"@biomejs/biome": "2.5.12",
 		"@microsoft/aspire-cli": "13.5.3",
-		"@types/node": "26",
+		"@types/node": "26.5.0",
 		"@vitest/coverage-v8": "4.1.10",
-		"typescript": "7",
+		"typescript": "7.0.2",
 		"vitest": "4.1.10"
 	}
 }

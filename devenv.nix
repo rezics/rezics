@@ -1,24 +1,24 @@
 { pkgs, ... }:
 
 let
-  # devenv-nixpkgs still packages Bun 1.3.x; pin 1.4.0 to match production.
-  bunVersion = "1.4.0";
+  # Pin Bun to the same release and verified artifacts as production.
+  bunVersion = "1.4.2";
   bunSources = {
     "aarch64-darwin" = pkgs.fetchurl {
       url = "https://github.com/oven-sh/bun/releases/download/bun-v${bunVersion}/bun-darwin-aarch64.zip";
-      hash = "sha256-xmnpf2Fk4cluBwF0jbmN+ndJKQjL2DlMdVcTSnNd44E=";
+      hash = "sha256-kJh6OhbX21VtiGrD1VHnttPt8KHPQ6yu1iLoZ2vh0S8=";
     };
     "aarch64-linux" = pkgs.fetchurl {
       url = "https://github.com/oven-sh/bun/releases/download/bun-v${bunVersion}/bun-linux-aarch64.zip";
-      hash = "sha256-SxozLuhhmD65O8/m93D/+U4+MbLDiL2uo8jtNeWO7Q4=";
+      hash = "sha256-VDKLvC2cjgyfiSxUTWbFeoO4QTnjSQnl7oF1jxrI/ac=";
     };
     "x86_64-darwin" = pkgs.fetchurl {
       url = "https://github.com/oven-sh/bun/releases/download/bun-v${bunVersion}/bun-darwin-x64-baseline.zip";
-      hash = "sha256-2pufG0unZsbymXEfON+qmGI+HtnECJaqU9uAPFLsH6A=";
+      hash = "sha256-utW71s8U0JgNEV9ZVMn/kE32GdXplNLaH/zNPzFjALA=";
     };
     "x86_64-linux" = pkgs.fetchurl {
       url = "https://github.com/oven-sh/bun/releases/download/bun-v${bunVersion}/bun-linux-x64.zip";
-      hash = "sha256-LQP7X7g6yLVnrKCigbLOGhoZ1Ij1bClo2Iw/Jekv5FI=";
+      hash = "sha256-NjaPrvdSeHXV/6UuU81IAhdB8qg+tiCKjdZAaNQiqRM=";
     };
   };
   bunSystem = pkgs.stdenv.hostPlatform.system;
@@ -38,7 +38,7 @@ in
     pkgs.fontconfig
     bun
     (pkgs.corepack.override { nodejs-slim = pkgs.nodejs-slim_26; })
-  ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+  ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     pkgs.pkg-config
     pkgs.webkitgtk_4_1
   ];

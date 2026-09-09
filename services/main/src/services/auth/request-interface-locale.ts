@@ -1,4 +1,4 @@
-import { parse as parseCookie } from "cookie";
+import { parseCookie } from "cookie";
 import { parseAcceptLanguage } from "native-i18n";
 import { DefaultStoredUiLocale, isUiLocale, matchUiLocaleTag, type UiLocale } from "@rezics/i18n";
 

@@ -8,7 +8,7 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"tsx": "4"
+		"tsx": "4.23.13"
 	},
 	"files": [
 		"dist"

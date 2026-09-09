@@ -18,11 +18,13 @@ async function readErrorBody(response: Response) {
 }
 
 describe("API root", () => {
+	it("eagerly compiles every route used by the srvx production entrypoint", () => {
+		expect(() => api.compile()).not.toThrow();
+	}, 30_000);
 	it("preserves the credentialed CORS contract for actual and preflight requests", async () => {
 		const trustedOrigin = "http://localhost:3000";
 		const allowedMethods = "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS";
-		const allowedHeaders =
-			"Content-Type, Authorization, Accept-Language, X-Rezics-Participation";
+		const allowedHeaders = "Content-Type, Authorization, Accept-Language, X-Rezics-Participation";
 		const exposedHeaders = "X-Request-Id, Retry-After";
 		const actual = await api.handle(
 			new Request("http://localhost/api/v1/health", {
@@ -592,7 +594,9 @@ describe("API root", () => {
 	it("documents JSON only for routes that declare a request body", () => {
 		const document = toOpenAPISchema(api);
 
-		expect(document.paths["/api/v1/account/me/following/{unitId}"]?.put?.requestBody).toBeUndefined();
+		expect(
+			document.paths["/api/v1/account/me/following/{unitId}"]?.put?.requestBody,
+		).toBeUndefined();
 		const preferencesBody = document.paths["/api/v1/account/me/preferences"]?.put?.requestBody;
 		if (!preferencesBody || "$ref" in preferencesBody)
 			throw new Error("Expected an inline preferences request body");

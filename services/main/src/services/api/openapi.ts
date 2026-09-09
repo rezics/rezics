@@ -2,12 +2,20 @@ import { toOpenAPISchema } from "@elysia/openapi/openapi";
 import {
 	DockDocument,
 	NavigationDocument,
+	NavigationItem,
 	PortableTextDocument,
 	UnitPresentationDocumentV0,
 	UnitReferencedBlockDocument,
+	UnitReferencedBlock,
 	ZoneAppearanceDocument,
 } from "@rezics/block";
-import { FilterDocument, FilterSchemaModels, SearchFeatureDefinition } from "@rezics/filter";
+import {
+	FilterDocument,
+	FilterSchemaModels,
+	SearchFeatureDefinition,
+	SearchControlExpression,
+	SearchControlPredicate,
+} from "@rezics/filter";
 import { JsonValue } from "@rezics/portable-text";
 import type { AnyElysia } from "elysia";
 import { OpenAPIV3 } from "openapi-types";
@@ -47,8 +55,12 @@ const RezicsOpenApiModels = {
 	...FilterSchemaModels,
 	DockDocument,
 	NavigationDocument,
+	NavigationItem: NavigationItem.$defs.NavigationItem,
 	PortableTextDocument,
 	UnitReferencedBlockDocument,
+	UnitReferencedBlock: UnitReferencedBlock.$defs.UnitReferencedBlock,
+	SearchControlExpression: SearchControlExpression.$defs.SearchControlExpression,
+	SearchControlPredicate,
 	FilterDocument: FilterDocumentComponent,
 	ZoneAppearanceDocument,
 	ResolvedUnitPresentationResponse,
@@ -110,8 +122,15 @@ function normalizeOpenApiValue(
 		);
 
 	const name = componentName(value, componentNames);
-	if (replaceComponents && name && name !== preserveComponent)
-		return { $ref: `#/components/schemas/${name}` };
+	if (replaceComponents && name && name !== preserveComponent) {
+		const reference = { $ref: `#/components/schemas/${name}` };
+		const nullable =
+			value.nullable === true ||
+			(Array.isArray(value.type) && value.type.includes("null")) ||
+			(Array.isArray(value.anyOf) &&
+				value.anyOf.some((member) => isJsonRecord(member) && member.type === "null"));
+		return nullable ? { anyOf: [reference, { type: "null" }] } : reference;
+	}
 	const cached = seen.get(value);
 	if (cached) return cached;
 	const normalized: JsonRecord = {};

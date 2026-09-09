@@ -10,7 +10,7 @@ import { Button, Field, FieldLabel, Input, QueryFailure, QueryPending } from "@r
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 import { MusicHistory } from "./music-history";
 
 type Track = ListMusicTracksStatus200["items"][number];

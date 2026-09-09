@@ -8,7 +8,7 @@ import { apiSchedulerHealthContract } from "../../services/main/src/health-contr
 
 const repositoryRoot = fileURLToPath(new URL("../..", import.meta.url));
 const appHostPath = fileURLToPath(new URL("../apphost.mts", import.meta.url));
-const yarnPath = fileURLToPath(new URL("../../.yarn/releases/yarn-4.17.1.cjs", import.meta.url));
+const yarnPath = fileURLToPath(new URL("../../.yarn/releases/yarn-4.18.0.cjs", import.meta.url));
 const appHostArgument = "aspire-apphost/apphost.mts";
 const startupTimeoutMs = 5 * 60 * 1000;
 const requestTimeoutMs = 2 * 60 * 1000;

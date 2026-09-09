@@ -7,7 +7,7 @@ import { Button, Field, FieldLabel, Input } from "@rezics/ui";
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import Link from "next/link";
+import { AppLink as Link } from "@/features/application-shell/components/app-link";
 
 export function MusicMetadata({
 	detail,

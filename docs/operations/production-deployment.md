@@ -255,7 +255,7 @@ For the v1.0.0 cutover, activate the sibling NixOS revision first and wait for
 the `rezics-database-reconcile` service, PostgreSQL, PgBouncer, and pinned
 Databasus readiness, then use
 `bootstrap-production.sh --confirm-empty-database`.
-The bootstrap installs the database, verifies PostgreSQL 18.4, PGroonga 4.0.8,
+The bootstrap installs the database, verifies PostgreSQL 18.6, PGroonga 4.0.8,
 `approx_count` 1.0, the required preload settings and canonical indexes, and only then starts API
 and worker traffic. No v1 workload owns a logical CDC slot. Databasus owns the backup schedule,
 R2 transfer, GFS retention, catalog, notification, and weekly isolated restore; its separately

@@ -18,6 +18,22 @@ export default defineConfig({
 		pluginTs({
 			output: { path: "models.ts", mode: "file", barrel: false },
 			enum: { type: "asConst", constCasing: "pascalCase", typeSuffix: "" },
+			// Recursive unions reuse property names with different enum domains.
+			// Keep those branch-local literals inline instead of merging their names.
+			override: [
+				{
+					type: "schemaName",
+					pattern: /^(UnitReferencedBlock|SearchControlExpression|SearchControlPredicate)$/,
+					options: {
+						enum: {
+							type: "inlineLiteral",
+							constCasing: "pascalCase",
+							typeSuffix: "",
+							keyCasing: "none",
+						},
+					},
+				},
+			],
 		}),
 		pluginFetch({ output: { path: "client.ts", mode: "file", barrel: false } }),
 		pluginReactQuery({

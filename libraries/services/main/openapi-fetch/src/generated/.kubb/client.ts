@@ -10,10 +10,11 @@ import type {
 	HeadersInit,
 	PathParamStyle,
 	PathSerializer,
+	RequestBody,
 	Serializers,
 	Styles,
 } from "./serializers";
-import { type StandardSchemaValidator, validateStandardSchema } from "./standardSchema.ts";
+import { type StandardSchemaValidator, validateStandardSchema } from "./standardSchema";
 
 /**
  * HTTP status codes treated as a success, everything else is an error.
@@ -147,6 +148,63 @@ export type RequestResult<
 		: ResultUnion<TResponses, TRequest, TResponse>;
 
 /**
+ * A `RequestResult` promise with an extra `unwrap()` method that resolves to the success body.
+ */
+export type Unwrappable<T extends { data: unknown; error: unknown }> = Promise<T> & {
+	unwrap: () => Promise<Extract<T, { error: undefined }>["data"]>;
+};
+
+/**
+ * Attaches `unwrap()` to a result promise, which rejects with `error` when the result carried one.
+ *
+ * @example Full result
+ * `const { data, error } = await getPetById({ path: { petId: 1 } })`
+ *
+ * @example Success body only
+ * `const pet = await getPetById({ path: { petId: 1 } }).unwrap()`
+ */
+export function withUnwrap<T extends { data: unknown; error: unknown }>(
+	promise: Promise<T>,
+): Unwrappable<T> {
+	const unwrappable = promise as Unwrappable<T>;
+	unwrappable.unwrap = () =>
+		promise.then((result) => {
+			if (result.error !== undefined) throw result.error;
+			return result.data as Extract<T, { error: undefined }>["data"];
+		});
+	return unwrappable;
+}
+
+/**
+ * The shape a generated operation returns when `returnType: 'data'` is set: the bare success body
+ * once `throwOnError` (on by default) narrows away the error branch, falling back to the full
+ * `RequestResult` when a call sets `throwOnError: false` and still needs `error` to discriminate a
+ * failed response.
+ */
+export type UnwrappedResult<
+	TResponses,
+	ThrowOnError extends boolean = true,
+	TRequest = Request,
+	TResponse = Response,
+> = ThrowOnError extends true
+	? RequestResult<TResponses, true, TRequest, TResponse>["data"]
+	: RequestResult<TResponses, ThrowOnError, TRequest, TResponse>;
+
+/**
+ * Narrows a resolved call down to its success body once `throwOnError` (on by default) rules out
+ * the error branch, the same default the runtime itself applies. Falls back to the full result for
+ * a call that sets `throwOnError: false`, since that path still needs `error` to discriminate a
+ * failed response. Backs `returnType: 'data'`, mirroring how `toEventStream` centralizes the
+ * post-processing for `text/event-stream` operations.
+ */
+export function unwrapResult<T extends { data: unknown; error: unknown }>(
+	promise: Promise<T>,
+	throwOnError: boolean | undefined,
+): Promise<T | T["data"]> {
+	return promise.then((result) => ((throwOnError ?? true) ? result.data : result));
+}
+
+/**
  * The data-shaped keys of the grouped options object, which `Options` re-adds typed per operation.
  */
 export type DataShape = {
@@ -168,7 +226,10 @@ export type Deserializer<T = unknown> = (raw: unknown, contentType: string) => T
 /**
  * Serializes a request body for a single media type, registered per content type as a codec's `serialize` to encode formats the default serializer does not handle.
  */
-export type ContentBodySerializer = (body: unknown, contentType?: string) => BodyInit | undefined;
+export type ContentBodySerializer = (
+	body: unknown,
+	contentType?: string,
+) => RequestBody | undefined;
 
 /**
  * A per-content-type codec registered on `codecs`, keyed by content type. `serialize` encodes the
@@ -284,7 +345,7 @@ export type ResolvedRequest = {
 	url: string;
 	method: string;
 	headers: Record<string, string>;
-	body?: BodyInit;
+	body?: RequestBody;
 	signal?: AbortSignal;
 	credentials?: RequestCredentials;
 	options?: FetchOptions;
@@ -501,12 +562,12 @@ export async function resolveAuth(params: {
 			if (scheme.in === "query") {
 				if (query[name] === undefined) query[name] = token;
 			} else if (scheme.in === "cookie") {
-				headers.Cookie = [headers.Cookie, `${name}=${token}`].filter(Boolean).join("; ");
+				headers["Cookie"] = [headers["Cookie"], `${name}=${token}`].filter(Boolean).join("; ");
 			} else if (!hasHeader(headers, name)) {
 				headers[name] = token;
 			}
 		} else if (!hasHeader(headers, "Authorization")) {
-			headers.Authorization =
+			headers["Authorization"] =
 				scheme.scheme === "basic" ? `Basic ${btoa(token)}` : `Bearer ${token}`;
 		}
 		return;
@@ -615,7 +676,7 @@ async function resolveRequest<TBody, TRequest, TResponse>({
 
 	if (requestConfig.cookies) {
 		const cookie = serializeCookies(requestConfig.cookies, requestConfig.styles?.cookie);
-		if (cookie) headers.Cookie = [headers.Cookie, cookie].filter(Boolean).join("; ");
+		if (cookie) headers["Cookie"] = [headers["Cookie"], cookie].filter(Boolean).join("; ");
 	}
 
 	const validatedBody = await runValidator(requestConfig.validator?.request, requestConfig.body);

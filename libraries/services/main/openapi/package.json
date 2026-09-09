@@ -9,6 +9,6 @@
 		"./openapi.json": "./openapi.json"
 	},
 	"devDependencies": {
-		"typescript": "7"
+		"typescript": "7.0.2"
 	}
 }

@@ -20,7 +20,7 @@ function requireString(record: Record<string, unknown>, key: string): string {
 }
 
 describe("Aspire OpenTelemetry integration", () => {
-	it("makes the dashboard HTTP endpoint the sole source of the resource OTLP protocol", async () => {
+	it("uses Aspire HTTP exporters without fixing dashboard ports in the launch profile", async () => {
 		const [configurationSource, appHostSource] = await Promise.all([
 			readFile(new URL("../../../aspire.config.json", import.meta.url), "utf8"),
 			readFile(new URL("../../../aspire-apphost/apphost.mts", import.meta.url), "utf8"),
@@ -31,15 +31,14 @@ describe("Aspire OpenTelemetry integration", () => {
 		const httpsProfile = requireRecord(profiles, "https");
 		const environmentVariables = requireRecord(httpsProfile, "environmentVariables");
 
-		expect(requireString(httpsProfile, "applicationUrl")).toMatch(/^https:\/\/localhost:\d+$/);
-		expect(requireString(environmentVariables, "ASPIRE_DASHBOARD_OTLP_HTTP_ENDPOINT_URL")).toMatch(
-			/^http:\/\/localhost:\d+$/,
-		);
-		expect(requireString(environmentVariables, "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL")).toMatch(
-			/^https:\/\/localhost:\d+$/,
-		);
+		expect(httpsProfile).not.toHaveProperty("applicationUrl");
+		expect(environmentVariables).not.toHaveProperty("ASPIRE_DASHBOARD_OTLP_HTTP_ENDPOINT_URL");
+		expect(environmentVariables).not.toHaveProperty("ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL");
 		expect(requireString(environmentVariables, "ASPIRE_ALLOW_UNSECURED_TRANSPORT")).toBe("true");
 		expect(environmentVariables).not.toHaveProperty("ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL");
 		expect(appHostSource).not.toContain('.withEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL"');
+		expect(
+			appHostSource.match(/\.withOtlpExporter\(\{ protocol: OtlpProtocol.HttpProtobuf \}\)/g),
+		).toHaveLength(2);
 	});
 });

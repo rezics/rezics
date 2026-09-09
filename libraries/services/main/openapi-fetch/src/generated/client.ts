@@ -3,7 +3,7 @@
  * Do not edit manually.
  */
 
-import type { Options, RequestResult } from "./.kubb/client";
+import type { Options, Unwrappable, RequestResult } from "./.kubb/client";
 import type {
 	AcceptOrganizationMembershipInvitationOptions,
 	AcceptOrganizationMembershipInvitationResponses,
@@ -1130,7 +1130,7 @@ import type {
 	DeleteApiImageAssetsByIdOptions,
 	DeleteApiImageAssetsByIdResponses,
 } from "./models";
-import { client } from "./.kubb/client";
+import { client, withUnwrap } from "./.kubb/client";
 
 /**
  * @summary Resolve rendered image asset presentation
@@ -1138,14 +1138,18 @@ import { client } from "./.kubb/client";
  */
 export function getImageAssetsByIdPresentationsByRoleContent<ThrowOnError extends boolean = true>(
 	options: Options<GetImageAssetsByIdPresentationsByRoleContentOptions, ThrowOnError>,
-): Promise<RequestResult<GetImageAssetsByIdPresentationsByRoleContentResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetImageAssetsByIdPresentationsByRoleContentResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/image-assets/{id}/presentations/{role}/content",
-		...config,
-	}) as Promise<RequestResult<GetImageAssetsByIdPresentationsByRoleContentResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/image-assets/{id}/presentations/{role}/content",
+			...config,
+		}) as Promise<
+			RequestResult<GetImageAssetsByIdPresentationsByRoleContentResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1154,12 +1158,14 @@ export function getImageAssetsByIdPresentationsByRoleContent<ThrowOnError extend
  */
 export function getImageAssetsByIdContent<ThrowOnError extends boolean = true>(
 	options: Options<GetImageAssetsByIdContentOptions, ThrowOnError>,
-): Promise<RequestResult<GetImageAssetsByIdContentResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetImageAssetsByIdContentResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/image-assets/{id}/content", ...config }) as Promise<
-		RequestResult<GetImageAssetsByIdContentResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/image-assets/{id}/content", ...config }) as Promise<
+			RequestResult<GetImageAssetsByIdContentResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1168,15 +1174,17 @@ export function getImageAssetsByIdContent<ThrowOnError extends boolean = true>(
  */
 export function getApiUnitByUnitIdAssociationProposals<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitByUnitIdAssociationProposalsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitByUnitIdAssociationProposalsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUnitByUnitIdAssociationProposalsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/unit/{unitId}/association-proposals",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiUnitByUnitIdAssociationProposalsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/unit/{unitId}/association-proposals",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiUnitByUnitIdAssociationProposalsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1187,17 +1195,21 @@ export function postApiUnitByUnitIdAssociationProposalsRequests<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiUnitByUnitIdAssociationProposalsRequestsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitByUnitIdAssociationProposalsRequestsResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<PostApiUnitByUnitIdAssociationProposalsRequestsResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/unit/{unitId}/association-proposals/requests",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiUnitByUnitIdAssociationProposalsRequestsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/unit/{unitId}/association-proposals/requests",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiUnitByUnitIdAssociationProposalsRequestsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1208,19 +1220,21 @@ export function postApiUnitByUnitIdAssociationProposalsInvitations<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiUnitByUnitIdAssociationProposalsInvitationsOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiUnitByUnitIdAssociationProposalsInvitationsResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/unit/{unitId}/association-proposals/invitations",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiUnitByUnitIdAssociationProposalsInvitationsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/unit/{unitId}/association-proposals/invitations",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiUnitByUnitIdAssociationProposalsInvitationsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1231,19 +1245,24 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdAccept<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/unit/{unitId}/association-proposals/{proposalId}/accept",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/unit/{unitId}/association-proposals/{proposalId}/accept",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -1254,19 +1273,24 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdDecline<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/unit/{unitId}/association-proposals/{proposalId}/decline",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/unit/{unitId}/association-proposals/{proposalId}/decline",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -1277,19 +1301,21 @@ export function deleteApiUnitByUnitIdAssociationProposalsByProposalId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<DeleteApiUnitByUnitIdAssociationProposalsByProposalIdOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<DeleteApiUnitByUnitIdAssociationProposalsByProposalIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/unit/{unitId}/association-proposals/{proposalId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiUnitByUnitIdAssociationProposalsByProposalIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/unit/{unitId}/association-proposals/{proposalId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiUnitByUnitIdAssociationProposalsByProposalIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1298,12 +1324,14 @@ export function deleteApiUnitByUnitIdAssociationProposalsByProposalId<
  */
 export function getApiStartup<ThrowOnError extends boolean = true>(
 	options: Options<GetApiStartupOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiStartupResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiStartupResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/startup", ...config }) as Promise<
-		RequestResult<GetApiStartupResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/startup", ...config }) as Promise<
+			RequestResult<GetApiStartupResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1312,12 +1340,14 @@ export function getApiStartup<ThrowOnError extends boolean = true>(
  */
 export function getApiHealth<ThrowOnError extends boolean = true>(
 	options: Options<GetApiHealthOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiHealthResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiHealthResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/health", ...config }) as Promise<
-		RequestResult<GetApiHealthResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/health", ...config }) as Promise<
+			RequestResult<GetApiHealthResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1326,12 +1356,14 @@ export function getApiHealth<ThrowOnError extends boolean = true>(
  */
 export function headApiHealth<ThrowOnError extends boolean = true>(
 	options: Options<HeadApiHealthOptions, ThrowOnError> = {},
-): Promise<RequestResult<HeadApiHealthResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<HeadApiHealthResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "HEAD", url: "/api/v1/health", ...config }) as Promise<
-		RequestResult<HeadApiHealthResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "HEAD", url: "/api/v1/health", ...config }) as Promise<
+			RequestResult<HeadApiHealthResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1340,12 +1372,14 @@ export function headApiHealth<ThrowOnError extends boolean = true>(
  */
 export function getApiReady<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReadyOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiReadyResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiReadyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/ready", ...config }) as Promise<
-		RequestResult<GetApiReadyResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/ready", ...config }) as Promise<
+			RequestResult<GetApiReadyResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1354,18 +1388,20 @@ export function getApiReady<ThrowOnError extends boolean = true>(
  */
 export function getApiNotifications<ThrowOnError extends boolean = true>(
 	options: Options<GetApiNotificationsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiNotificationsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiNotificationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/notifications",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiNotificationsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/notifications",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiNotificationsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1374,18 +1410,20 @@ export function getApiNotifications<ThrowOnError extends boolean = true>(
  */
 export function getApiNotificationsUnreadCount<ThrowOnError extends boolean = true>(
 	options: Options<GetApiNotificationsUnreadCountOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiNotificationsUnreadCountResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiNotificationsUnreadCountResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/notifications/unread-count",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiNotificationsUnreadCountResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/notifications/unread-count",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiNotificationsUnreadCountResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1394,18 +1432,20 @@ export function getApiNotificationsUnreadCount<ThrowOnError extends boolean = tr
  */
 export function getApiNotificationsByNotificationId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiNotificationsByNotificationIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiNotificationsByNotificationIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiNotificationsByNotificationIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/notifications/{notificationId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiNotificationsByNotificationIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/notifications/{notificationId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiNotificationsByNotificationIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1414,18 +1454,20 @@ export function getApiNotificationsByNotificationId<ThrowOnError extends boolean
  */
 export function putApiNotificationsReadAll<ThrowOnError extends boolean = true>(
 	options: Options<PutApiNotificationsReadAllOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiNotificationsReadAllResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiNotificationsReadAllResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/notifications/read-all",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiNotificationsReadAllResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/notifications/read-all",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiNotificationsReadAllResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1434,18 +1476,20 @@ export function putApiNotificationsReadAll<ThrowOnError extends boolean = true>(
  */
 export function putApiNotificationsByNotificationIdRead<ThrowOnError extends boolean = true>(
 	options: Options<PutApiNotificationsByNotificationIdReadOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiNotificationsByNotificationIdReadResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiNotificationsByNotificationIdReadResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/notifications/{notificationId}/read",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiNotificationsByNotificationIdReadResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/notifications/{notificationId}/read",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiNotificationsByNotificationIdReadResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1454,18 +1498,20 @@ export function putApiNotificationsByNotificationIdRead<ThrowOnError extends boo
  */
 export function getApiNotificationsPreferences<ThrowOnError extends boolean = true>(
 	options: Options<GetApiNotificationsPreferencesOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiNotificationsPreferencesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiNotificationsPreferencesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/notifications/preferences",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiNotificationsPreferencesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/notifications/preferences",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiNotificationsPreferencesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1474,18 +1520,20 @@ export function getApiNotificationsPreferences<ThrowOnError extends boolean = tr
  */
 export function putApiNotificationsPreferences<ThrowOnError extends boolean = true>(
 	options: Options<PutApiNotificationsPreferencesOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiNotificationsPreferencesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiNotificationsPreferencesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/notifications/preferences",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiNotificationsPreferencesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/notifications/preferences",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiNotificationsPreferencesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1494,12 +1542,14 @@ export function putApiNotificationsPreferences<ThrowOnError extends boolean = tr
  */
 export function getApiRecommendationsUnits<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRecommendationsUnitsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiRecommendationsUnitsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRecommendationsUnitsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/recommendations/units", ...config }) as Promise<
-		RequestResult<GetApiRecommendationsUnitsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/recommendations/units", ...config }) as Promise<
+			RequestResult<GetApiRecommendationsUnitsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1508,14 +1558,14 @@ export function getApiRecommendationsUnits<ThrowOnError extends boolean = true>(
  */
 export function getApiRecommendationsPostsByPostId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRecommendationsPostsByPostIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRecommendationsPostsByPostIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRecommendationsPostsByPostIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/recommendations/posts/{postId}",
-		...config,
-	}) as Promise<RequestResult<GetApiRecommendationsPostsByPostIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/recommendations/posts/{postId}", ...config }) as Promise<
+			RequestResult<GetApiRecommendationsPostsByPostIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1524,12 +1574,14 @@ export function getApiRecommendationsPostsByPostId<ThrowOnError extends boolean 
  */
 export function postApiRecommendationsEvents<ThrowOnError extends boolean = true>(
 	options: Options<PostApiRecommendationsEventsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiRecommendationsEventsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiRecommendationsEventsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/v1/recommendations/events", ...config }) as Promise<
-		RequestResult<PostApiRecommendationsEventsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "POST", url: "/api/v1/recommendations/events", ...config }) as Promise<
+			RequestResult<PostApiRecommendationsEventsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1538,18 +1590,20 @@ export function postApiRecommendationsEvents<ThrowOnError extends boolean = true
  */
 export function putApiRecommendationsExclusionsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRecommendationsExclusionsByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRecommendationsExclusionsByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiRecommendationsExclusionsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/recommendations/exclusions/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiRecommendationsExclusionsByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/recommendations/exclusions/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiRecommendationsExclusionsByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1558,18 +1612,20 @@ export function putApiRecommendationsExclusionsByUnitId<ThrowOnError extends boo
  */
 export function deleteApiRecommendationsExclusionsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiRecommendationsExclusionsByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiRecommendationsExclusionsByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiRecommendationsExclusionsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/recommendations/exclusions/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiRecommendationsExclusionsByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/recommendations/exclusions/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiRecommendationsExclusionsByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1578,18 +1634,20 @@ export function deleteApiRecommendationsExclusionsByUnitId<ThrowOnError extends 
  */
 export function getApiMessagesConversations<ThrowOnError extends boolean = true>(
 	options: Options<GetApiMessagesConversationsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiMessagesConversationsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiMessagesConversationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/messages/conversations",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiMessagesConversationsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/messages/conversations",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiMessagesConversationsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1598,18 +1656,20 @@ export function getApiMessagesConversations<ThrowOnError extends boolean = true>
  */
 export function postApiMessagesConversations<ThrowOnError extends boolean = true>(
 	options: Options<PostApiMessagesConversationsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiMessagesConversationsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiMessagesConversationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/messages/conversations",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiMessagesConversationsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/messages/conversations",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiMessagesConversationsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1618,18 +1678,22 @@ export function postApiMessagesConversations<ThrowOnError extends boolean = true
  */
 export function getApiMessagesConversationsByConversationId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiMessagesConversationsByConversationIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiMessagesConversationsByConversationIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiMessagesConversationsByConversationIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/messages/conversations/{conversationId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiMessagesConversationsByConversationIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/messages/conversations/{conversationId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiMessagesConversationsByConversationIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1640,22 +1704,24 @@ export function getApiMessagesConversationsByConversationIdMessages<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<GetApiMessagesConversationsByConversationIdMessagesOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<GetApiMessagesConversationsByConversationIdMessagesResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/messages/conversations/{conversationId}/messages",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<GetApiMessagesConversationsByConversationIdMessagesResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/messages/conversations/{conversationId}/messages",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiMessagesConversationsByConversationIdMessagesResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1666,22 +1732,24 @@ export function postApiMessagesConversationsByConversationIdMessages<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiMessagesConversationsByConversationIdMessagesOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiMessagesConversationsByConversationIdMessagesResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/messages/conversations/{conversationId}/messages",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiMessagesConversationsByConversationIdMessagesResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/messages/conversations/{conversationId}/messages",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiMessagesConversationsByConversationIdMessagesResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1692,20 +1760,24 @@ export function putApiMessagesConversationsByConversationIdRead<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PutApiMessagesConversationsByConversationIdReadOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiMessagesConversationsByConversationIdReadResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<PutApiMessagesConversationsByConversationIdReadResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/messages/conversations/{conversationId}/read",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiMessagesConversationsByConversationIdReadResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/messages/conversations/{conversationId}/read",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiMessagesConversationsByConversationIdReadResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1714,18 +1786,20 @@ export function putApiMessagesConversationsByConversationIdRead<
  */
 export function deleteApiMessagesByMessageId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiMessagesByMessageIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiMessagesByMessageIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiMessagesByMessageIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/messages/{messageId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiMessagesByMessageIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/messages/{messageId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiMessagesByMessageIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1734,15 +1808,17 @@ export function deleteApiMessagesByMessageId<ThrowOnError extends boolean = true
  */
 export function getApiApiTokens<ThrowOnError extends boolean = true>(
 	options: Options<GetApiApiTokensOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiApiTokensResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiApiTokensResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/api-tokens",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiApiTokensResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/api-tokens",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiApiTokensResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1751,15 +1827,17 @@ export function getApiApiTokens<ThrowOnError extends boolean = true>(
  */
 export function postApiApiTokens<ThrowOnError extends boolean = true>(
 	options: Options<PostApiApiTokensOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiApiTokensResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiApiTokensResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/api-tokens",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiApiTokensResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/api-tokens",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PostApiApiTokensResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1768,15 +1846,17 @@ export function postApiApiTokens<ThrowOnError extends boolean = true>(
  */
 export function patchApiApiTokensByTokenId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiApiTokensByTokenIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiApiTokensByTokenIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiApiTokensByTokenIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/api-tokens/{tokenId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PatchApiApiTokensByTokenIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/api-tokens/{tokenId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PatchApiApiTokensByTokenIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1785,15 +1865,17 @@ export function patchApiApiTokensByTokenId<ThrowOnError extends boolean = true>(
  */
 export function deleteApiApiTokensByTokenId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiApiTokensByTokenIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiApiTokensByTokenIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiApiTokensByTokenIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/api-tokens/{tokenId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<DeleteApiApiTokensByTokenIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/api-tokens/{tokenId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<DeleteApiApiTokensByTokenIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1802,15 +1884,17 @@ export function deleteApiApiTokensByTokenId<ThrowOnError extends boolean = true>
  */
 export function putApiApiTokensByTokenIdQuotaOverride<ThrowOnError extends boolean = true>(
 	options: Options<PutApiApiTokensByTokenIdQuotaOverrideOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiApiTokensByTokenIdQuotaOverrideResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiApiTokensByTokenIdQuotaOverrideResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/api-tokens/{tokenId}/quota-override",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiApiTokensByTokenIdQuotaOverrideResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/api-tokens/{tokenId}/quota-override",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PutApiApiTokensByTokenIdQuotaOverrideResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1819,15 +1903,17 @@ export function putApiApiTokensByTokenIdQuotaOverride<ThrowOnError extends boole
  */
 export function deleteApiApiTokensByTokenIdQuotaOverride<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiApiTokensByTokenIdQuotaOverrideOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiApiTokensByTokenIdQuotaOverrideResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiApiTokensByTokenIdQuotaOverrideResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/api-tokens/{tokenId}/quota-override",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<DeleteApiApiTokensByTokenIdQuotaOverrideResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/api-tokens/{tokenId}/quota-override",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<DeleteApiApiTokensByTokenIdQuotaOverrideResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1836,15 +1922,17 @@ export function deleteApiApiTokensByTokenIdQuotaOverride<ThrowOnError extends bo
  */
 export function getCurrentApiToken<ThrowOnError extends boolean = true>(
 	options: Options<GetCurrentApiTokenOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetCurrentApiTokenResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetCurrentApiTokenResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/token",
-		security: [{ type: "http", scheme: "bearer" }],
-		...config,
-	}) as Promise<RequestResult<GetCurrentApiTokenResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/token",
+			security: [{ type: "http", scheme: "bearer" }],
+			...config,
+		}) as Promise<RequestResult<GetCurrentApiTokenResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1853,15 +1941,17 @@ export function getCurrentApiToken<ThrowOnError extends boolean = true>(
  */
 export function getApiApiQuotaPolicies<ThrowOnError extends boolean = true>(
 	options: Options<GetApiApiQuotaPoliciesOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiApiQuotaPoliciesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiApiQuotaPoliciesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/api-quota-policies",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiApiQuotaPoliciesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/api-quota-policies",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiApiQuotaPoliciesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1870,15 +1960,17 @@ export function getApiApiQuotaPolicies<ThrowOnError extends boolean = true>(
  */
 export function postApiApiQuotaPolicies<ThrowOnError extends boolean = true>(
 	options: Options<PostApiApiQuotaPoliciesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiApiQuotaPoliciesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiApiQuotaPoliciesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/api-quota-policies",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiApiQuotaPoliciesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/api-quota-policies",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PostApiApiQuotaPoliciesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1887,15 +1979,17 @@ export function postApiApiQuotaPolicies<ThrowOnError extends boolean = true>(
  */
 export function putApiApiQuotaPoliciesByPolicyKey<ThrowOnError extends boolean = true>(
 	options: Options<PutApiApiQuotaPoliciesByPolicyKeyOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiApiQuotaPoliciesByPolicyKeyResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiApiQuotaPoliciesByPolicyKeyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/api-quota-policies/{policyKey}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiApiQuotaPoliciesByPolicyKeyResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/api-quota-policies/{policyKey}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PutApiApiQuotaPoliciesByPolicyKeyResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1904,15 +1998,17 @@ export function putApiApiQuotaPoliciesByPolicyKey<ThrowOnError extends boolean =
  */
 export function getApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiApiQuotaPoliciesAccountsByUserIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/api-quota-policies/accounts/{userId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/api-quota-policies/accounts/{userId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1921,15 +2017,17 @@ export function getApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends bool
  */
 export function putApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiApiQuotaPoliciesAccountsByUserIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/api-quota-policies/accounts/{userId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/api-quota-policies/accounts/{userId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PutApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1938,15 +2036,17 @@ export function putApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends bool
  */
 export function deleteApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiApiQuotaPoliciesAccountsByUserIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/api-quota-policies/accounts/{userId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<DeleteApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/api-quota-policies/accounts/{userId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<DeleteApiApiQuotaPoliciesAccountsByUserIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -1955,15 +2055,19 @@ export function deleteApiApiQuotaPoliciesAccountsByUserId<ThrowOnError extends b
  */
 export function getApiApiQuotaPoliciesAccountsByUserIdTokens<ThrowOnError extends boolean = true>(
 	options: Options<GetApiApiQuotaPoliciesAccountsByUserIdTokensOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdTokensResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdTokensResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/api-quota-policies/accounts/{userId}/tokens",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdTokensResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/api-quota-policies/accounts/{userId}/tokens",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiApiQuotaPoliciesAccountsByUserIdTokensResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1974,19 +2078,21 @@ export function putApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/api-quota-policies/accounts/{userId}/tokens/{tokenId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/api-quota-policies/accounts/{userId}/tokens/{tokenId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -1997,19 +2103,21 @@ export function deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/api-quota-policies/accounts/{userId}/tokens/{tokenId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/api-quota-policies/accounts/{userId}/tokens/{tokenId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2018,12 +2126,14 @@ export function deleteApiApiQuotaPoliciesAccountsByUserIdTokensByTokenId<
  */
 export function postApiFeedQuery<ThrowOnError extends boolean = true>(
 	options: Options<PostApiFeedQueryOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiFeedQueryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiFeedQueryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/v1/feed/query", ...config }) as Promise<
-		RequestResult<PostApiFeedQueryResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "POST", url: "/api/v1/feed/query", ...config }) as Promise<
+			RequestResult<PostApiFeedQueryResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2032,18 +2142,20 @@ export function postApiFeedQuery<ThrowOnError extends boolean = true>(
  */
 export function getApiReportsMe<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReportsMeOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiReportsMeResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiReportsMeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/reports/me",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiReportsMeResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/reports/me",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiReportsMeResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2052,18 +2164,20 @@ export function getApiReportsMe<ThrowOnError extends boolean = true>(
  */
 export function getApiReportsUnitsByUnitIdDestinations<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReportsUnitsByUnitIdDestinationsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiReportsUnitsByUnitIdDestinationsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiReportsUnitsByUnitIdDestinationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/reports/units/{unitId}/destinations",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiReportsUnitsByUnitIdDestinationsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/reports/units/{unitId}/destinations",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiReportsUnitsByUnitIdDestinationsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2072,15 +2186,17 @@ export function getApiReportsUnitsByUnitIdDestinations<ThrowOnError extends bool
  */
 export function getApiRealmsByRealmIdReports<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdReportsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdReportsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdReportsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/reports",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdReportsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/reports",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiRealmsByRealmIdReportsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2089,15 +2205,17 @@ export function getApiRealmsByRealmIdReports<ThrowOnError extends boolean = true
  */
 export function getApiReportsReviewCasesByCaseId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReportsReviewCasesByCaseIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiReportsReviewCasesByCaseIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiReportsReviewCasesByCaseIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/reports/review-cases/{caseId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiReportsReviewCasesByCaseIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/reports/review-cases/{caseId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiReportsReviewCasesByCaseIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2106,15 +2224,17 @@ export function getApiReportsReviewCasesByCaseId<ThrowOnError extends boolean = 
  */
 export function getApiReportsPlatformCases<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReportsPlatformCasesOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiReportsPlatformCasesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiReportsPlatformCasesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/reports/platform/cases",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiReportsPlatformCasesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/reports/platform/cases",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiReportsPlatformCasesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2123,18 +2243,20 @@ export function getApiReportsPlatformCases<ThrowOnError extends boolean = true>(
  */
 export function postApiReportsUnitsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PostApiReportsUnitsByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiReportsUnitsByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiReportsUnitsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/reports/units/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiReportsUnitsByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/reports/units/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiReportsUnitsByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2143,15 +2265,17 @@ export function postApiReportsUnitsByUnitId<ThrowOnError extends boolean = true>
  */
 export function getApiGovernanceUnitByUnitIdAccess<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceUnitByUnitIdAccessOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiGovernanceUnitByUnitIdAccessResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/unit/{unitId}/access",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/unit/{unitId}/access",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2160,15 +2284,17 @@ export function getApiGovernanceUnitByUnitIdAccess<ThrowOnError extends boolean 
  */
 export function putApiGovernanceUnitByUnitIdAccess<ThrowOnError extends boolean = true>(
 	options: Options<PutApiGovernanceUnitByUnitIdAccessOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiGovernanceUnitByUnitIdAccessResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiGovernanceUnitByUnitIdAccessResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/governance/unit/{unitId}/access",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiGovernanceUnitByUnitIdAccessResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/governance/unit/{unitId}/access",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PutApiGovernanceUnitByUnitIdAccessResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2177,15 +2303,19 @@ export function putApiGovernanceUnitByUnitIdAccess<ThrowOnError extends boolean 
  */
 export function getApiGovernanceUnitByUnitIdAccessCandidates<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceUnitByUnitIdAccessCandidatesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessCandidatesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiGovernanceUnitByUnitIdAccessCandidatesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/unit/{unitId}/access-candidates",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessCandidatesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/unit/{unitId}/access-candidates",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiGovernanceUnitByUnitIdAccessCandidatesResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2194,15 +2324,19 @@ export function getApiGovernanceUnitByUnitIdAccessCandidates<ThrowOnError extend
  */
 export function getApiGovernanceUnitByUnitIdAccessEffective<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceUnitByUnitIdAccessEffectiveOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessEffectiveResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiGovernanceUnitByUnitIdAccessEffectiveResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/unit/{unitId}/access/effective",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessEffectiveResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/unit/{unitId}/access/effective",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiGovernanceUnitByUnitIdAccessEffectiveResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2213,17 +2347,21 @@ export function getApiGovernanceUnitByUnitIdOwnershipCandidates<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<GetApiGovernanceUnitByUnitIdOwnershipCandidatesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernanceUnitByUnitIdOwnershipCandidatesResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<GetApiGovernanceUnitByUnitIdOwnershipCandidatesResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/unit/{unitId}/ownership/candidates",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<GetApiGovernanceUnitByUnitIdOwnershipCandidatesResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/unit/{unitId}/ownership/candidates",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiGovernanceUnitByUnitIdOwnershipCandidatesResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2232,15 +2370,17 @@ export function getApiGovernanceUnitByUnitIdOwnershipCandidates<
  */
 export function putApiGovernanceUnitByUnitIdOwnership<ThrowOnError extends boolean = true>(
 	options: Options<PutApiGovernanceUnitByUnitIdOwnershipOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiGovernanceUnitByUnitIdOwnershipResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiGovernanceUnitByUnitIdOwnershipResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/governance/unit/{unitId}/ownership",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiGovernanceUnitByUnitIdOwnershipResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/governance/unit/{unitId}/ownership",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PutApiGovernanceUnitByUnitIdOwnershipResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2251,19 +2391,21 @@ export function postApiGovernanceUnitByUnitIdOwnershipRelinquishment<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/unit/{unitId}/ownership/relinquishment",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/unit/{unitId}/ownership/relinquishment",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiGovernanceUnitByUnitIdOwnershipRelinquishmentResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2272,15 +2414,17 @@ export function postApiGovernanceUnitByUnitIdOwnershipRelinquishment<
  */
 export function getApiGovernanceUnitAccessInvitations<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceUnitAccessInvitationsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiGovernanceUnitAccessInvitationsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiGovernanceUnitAccessInvitationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/unit/access-invitations",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiGovernanceUnitAccessInvitationsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/unit/access-invitations",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiGovernanceUnitAccessInvitationsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2289,17 +2433,21 @@ export function getApiGovernanceUnitAccessInvitations<ThrowOnError extends boole
  */
 export function getApiGovernanceUnitByUnitIdAccessInvitations<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceUnitByUnitIdAccessInvitationsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessInvitationsResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<GetApiGovernanceUnitByUnitIdAccessInvitationsResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/unit/{unitId}/access-invitations",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<GetApiGovernanceUnitByUnitIdAccessInvitationsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/unit/{unitId}/access-invitations",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiGovernanceUnitByUnitIdAccessInvitationsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2308,17 +2456,21 @@ export function getApiGovernanceUnitByUnitIdAccessInvitations<ThrowOnError exten
  */
 export function postApiGovernanceUnitByUnitIdAccessInvitations<ThrowOnError extends boolean = true>(
 	options: Options<PostApiGovernanceUnitByUnitIdAccessInvitationsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernanceUnitByUnitIdAccessInvitationsResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<PostApiGovernanceUnitByUnitIdAccessInvitationsResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/unit/{unitId}/access-invitations",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiGovernanceUnitByUnitIdAccessInvitationsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/unit/{unitId}/access-invitations",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiGovernanceUnitByUnitIdAccessInvitationsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2332,7 +2484,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcce
 		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptResponses,
 		ThrowOnError
@@ -2340,17 +2492,19 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcce
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/unit/{unitId}/access-invitations/{invitationId}/accept",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/unit/{unitId}/access-invitations/{invitationId}/accept",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -2364,7 +2518,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecl
 		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineResponses,
 		ThrowOnError
@@ -2372,17 +2526,19 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecl
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/unit/{unitId}/access-invitations/{invitationId}/decline",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/unit/{unitId}/access-invitations/{invitationId}/decline",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -2396,7 +2552,7 @@ export function deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId<
 		DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdResponses,
 		ThrowOnError
@@ -2404,17 +2560,19 @@ export function deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId<
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/governance/unit/{unitId}/access-invitations/{invitationId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/governance/unit/{unitId}/access-invitations/{invitationId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -2423,15 +2581,17 @@ export function deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId<
  */
 export function getApiGovernancePlatformUnits<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernancePlatformUnitsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiGovernancePlatformUnitsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiGovernancePlatformUnitsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/platform/units",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiGovernancePlatformUnitsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/platform/units",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiGovernancePlatformUnitsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2440,15 +2600,17 @@ export function getApiGovernancePlatformUnits<ThrowOnError extends boolean = tru
  */
 export function getApiGovernancePlatformUnitsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernancePlatformUnitsByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernancePlatformUnitsByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiGovernancePlatformUnitsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/platform/units/{unitId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiGovernancePlatformUnitsByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/platform/units/{unitId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiGovernancePlatformUnitsByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2459,19 +2621,21 @@ export function getApiGovernancePlatformUnitsByUnitIdOwnershipCandidates<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/platform/units/{unitId}/ownership-candidates",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/platform/units/{unitId}/ownership-candidates",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiGovernancePlatformUnitsByUnitIdOwnershipCandidatesResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2482,19 +2646,21 @@ export function postApiGovernancePlatformUnitsByUnitIdOwnershipOverride<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/platform/units/{unitId}/ownership-override",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/platform/units/{unitId}/ownership-override",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiGovernancePlatformUnitsByUnitIdOwnershipOverrideResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2503,15 +2669,19 @@ export function postApiGovernancePlatformUnitsByUnitIdOwnershipOverride<
  */
 export function postApiGovernancePlatformUnitsByUnitIdDelete<ThrowOnError extends boolean = true>(
 	options: Options<PostApiGovernancePlatformUnitsByUnitIdDeleteOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernancePlatformUnitsByUnitIdDeleteResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiGovernancePlatformUnitsByUnitIdDeleteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/platform/units/{unitId}/delete",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiGovernancePlatformUnitsByUnitIdDeleteResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/platform/units/{unitId}/delete",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiGovernancePlatformUnitsByUnitIdDeleteResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2520,17 +2690,21 @@ export function postApiGovernancePlatformUnitsByUnitIdDelete<ThrowOnError extend
  */
 export function postApiGovernancePlatformUnitsByUnitIdRestore<ThrowOnError extends boolean = true>(
 	options: Options<PostApiGovernancePlatformUnitsByUnitIdRestoreOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernancePlatformUnitsByUnitIdRestoreResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<PostApiGovernancePlatformUnitsByUnitIdRestoreResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/platform/units/{unitId}/restore",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiGovernancePlatformUnitsByUnitIdRestoreResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/platform/units/{unitId}/restore",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiGovernancePlatformUnitsByUnitIdRestoreResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2539,15 +2713,17 @@ export function postApiGovernancePlatformUnitsByUnitIdRestore<ThrowOnError exten
  */
 export function listNativeMergeRequests<ThrowOnError extends boolean = true>(
 	options: Options<ListNativeMergeRequestsOptions, ThrowOnError> = {},
-): Promise<RequestResult<ListNativeMergeRequestsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListNativeMergeRequestsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/platform/unit-merges",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ListNativeMergeRequestsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/platform/unit-merges",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ListNativeMergeRequestsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2556,15 +2732,17 @@ export function listNativeMergeRequests<ThrowOnError extends boolean = true>(
  */
 export function proposeNativeMerge<ThrowOnError extends boolean = true>(
 	options: Options<ProposeNativeMergeOptions, ThrowOnError>,
-): Promise<RequestResult<ProposeNativeMergeResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ProposeNativeMergeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/platform/unit-merges",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ProposeNativeMergeResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/platform/unit-merges",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ProposeNativeMergeResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2573,15 +2751,17 @@ export function proposeNativeMerge<ThrowOnError extends boolean = true>(
  */
 export function readNativeMergeRequest<ThrowOnError extends boolean = true>(
 	options: Options<ReadNativeMergeRequestOptions, ThrowOnError>,
-): Promise<RequestResult<ReadNativeMergeRequestResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadNativeMergeRequestResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/platform/unit-merges/{requestId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ReadNativeMergeRequestResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/platform/unit-merges/{requestId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ReadNativeMergeRequestResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2590,15 +2770,17 @@ export function readNativeMergeRequest<ThrowOnError extends boolean = true>(
  */
 export function preflightNativeMerge<ThrowOnError extends boolean = true>(
 	options: Options<PreflightNativeMergeOptions, ThrowOnError>,
-): Promise<RequestResult<PreflightNativeMergeResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PreflightNativeMergeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/platform/unit-merges/preflight",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PreflightNativeMergeResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/platform/unit-merges/preflight",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PreflightNativeMergeResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2607,15 +2789,17 @@ export function preflightNativeMerge<ThrowOnError extends boolean = true>(
  */
 export function reviewNativeMerge<ThrowOnError extends boolean = true>(
 	options: Options<ReviewNativeMergeOptions, ThrowOnError>,
-): Promise<RequestResult<ReviewNativeMergeResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReviewNativeMergeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/platform/unit-merges/{requestId}/reviews",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ReviewNativeMergeResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/platform/unit-merges/{requestId}/reviews",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ReviewNativeMergeResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2624,15 +2808,17 @@ export function reviewNativeMerge<ThrowOnError extends boolean = true>(
  */
 export function retryNativeMerge<ThrowOnError extends boolean = true>(
 	options: Options<RetryNativeMergeOptions, ThrowOnError>,
-): Promise<RequestResult<RetryNativeMergeResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RetryNativeMergeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/platform/unit-merges/{requestId}/retry",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<RetryNativeMergeResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/platform/unit-merges/{requestId}/retry",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RetryNativeMergeResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2641,15 +2827,17 @@ export function retryNativeMerge<ThrowOnError extends boolean = true>(
  */
 export function listNativeMergeReconciliation<ThrowOnError extends boolean = true>(
 	options: Options<ListNativeMergeReconciliationOptions, ThrowOnError>,
-): Promise<RequestResult<ListNativeMergeReconciliationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListNativeMergeReconciliationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/platform/unit-merges/{requestId}/items",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ListNativeMergeReconciliationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/platform/unit-merges/{requestId}/items",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ListNativeMergeReconciliationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2658,15 +2846,17 @@ export function listNativeMergeReconciliation<ThrowOnError extends boolean = tru
  */
 export function resolveNativeMergeReconciliation<ThrowOnError extends boolean = true>(
 	options: Options<ResolveNativeMergeReconciliationOptions, ThrowOnError>,
-): Promise<RequestResult<ResolveNativeMergeReconciliationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ResolveNativeMergeReconciliationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/platform/unit-merges/{requestId}/items/{itemId}/resolve",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ResolveNativeMergeReconciliationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/platform/unit-merges/{requestId}/items/{itemId}/resolve",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ResolveNativeMergeReconciliationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2675,15 +2865,17 @@ export function resolveNativeMergeReconciliation<ThrowOnError extends boolean = 
  */
 export function getApiGovernanceRuleSources<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceRuleSourcesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernanceRuleSourcesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiGovernanceRuleSourcesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/rule-sources",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiGovernanceRuleSourcesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/rule-sources",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiGovernanceRuleSourcesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2692,15 +2884,17 @@ export function getApiGovernanceRuleSources<ThrowOnError extends boolean = true>
  */
 export function getApiGovernanceNotesByPostId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceNotesByPostIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernanceNotesByPostIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiGovernanceNotesByPostIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/notes/{postId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiGovernanceNotesByPostIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/notes/{postId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiGovernanceNotesByPostIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2709,18 +2903,20 @@ export function getApiGovernanceNotesByPostId<ThrowOnError extends boolean = tru
  */
 export function patchApiGovernanceNotesByPostId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiGovernanceNotesByPostIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiGovernanceNotesByPostIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiGovernanceNotesByPostIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/governance/notes/{postId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiGovernanceNotesByPostIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/governance/notes/{postId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchApiGovernanceNotesByPostIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2729,15 +2925,17 @@ export function patchApiGovernanceNotesByPostId<ThrowOnError extends boolean = t
  */
 export function listContentReviewCaseNotes<ThrowOnError extends boolean = true>(
 	options: Options<ListContentReviewCaseNotesOptions, ThrowOnError>,
-): Promise<RequestResult<ListContentReviewCaseNotesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListContentReviewCaseNotesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/content-review/cases/{caseId}/notes",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ListContentReviewCaseNotesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/content-review/cases/{caseId}/notes",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ListContentReviewCaseNotesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2746,15 +2944,17 @@ export function listContentReviewCaseNotes<ThrowOnError extends boolean = true>(
  */
 export function getApiGovernanceContentReviewCases<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceContentReviewCasesOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiGovernanceContentReviewCasesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiGovernanceContentReviewCasesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/content-review/cases",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiGovernanceContentReviewCasesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/content-review/cases",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiGovernanceContentReviewCasesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2763,15 +2963,17 @@ export function getApiGovernanceContentReviewCases<ThrowOnError extends boolean 
  */
 export function getApiGovernanceContentReviewCasesByCaseId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiGovernanceContentReviewCasesByCaseIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernanceContentReviewCasesByCaseIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiGovernanceContentReviewCasesByCaseIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/governance/content-review/cases/{caseId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiGovernanceContentReviewCasesByCaseIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/governance/content-review/cases/{caseId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiGovernanceContentReviewCasesByCaseIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2780,15 +2982,19 @@ export function getApiGovernanceContentReviewCasesByCaseId<ThrowOnError extends 
  */
 export function patchApiGovernanceContentReviewCasesByCaseId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiGovernanceContentReviewCasesByCaseIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiGovernanceContentReviewCasesByCaseIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiGovernanceContentReviewCasesByCaseIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/governance/content-review/cases/{caseId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PatchApiGovernanceContentReviewCasesByCaseIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/governance/content-review/cases/{caseId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<PatchApiGovernanceContentReviewCasesByCaseIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2797,15 +3003,17 @@ export function patchApiGovernanceContentReviewCasesByCaseId<ThrowOnError extend
  */
 export function postApiGovernanceContentGovernanceActions<ThrowOnError extends boolean = true>(
 	options: Options<PostApiGovernanceContentGovernanceActionsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernanceContentGovernanceActionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiGovernanceContentGovernanceActionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/content-governance/actions",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiGovernanceContentGovernanceActionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/content-governance/actions",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PostApiGovernanceContentGovernanceActionsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2814,15 +3022,17 @@ export function postApiGovernanceContentGovernanceActions<ThrowOnError extends b
  */
 export function postApiGovernanceAccountEnforcements<ThrowOnError extends boolean = true>(
 	options: Options<PostApiGovernanceAccountEnforcementsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernanceAccountEnforcementsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiGovernanceAccountEnforcementsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/account-enforcements",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiGovernanceAccountEnforcementsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/account-enforcements",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PostApiGovernanceAccountEnforcementsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2833,19 +3043,24 @@ export function postApiGovernanceAccountEnforcementsByEnforcementIdRevoke<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/governance/account-enforcements/{enforcementId}/revoke",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/governance/account-enforcements/{enforcementId}/revoke",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiGovernanceAccountEnforcementsByEnforcementIdRevokeResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -2854,15 +3069,17 @@ export function postApiGovernanceAccountEnforcementsByEnforcementIdRevoke<
  */
 export function getApiAuditEvents<ThrowOnError extends boolean = true>(
 	options: Options<GetApiAuditEventsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiAuditEventsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiAuditEventsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/audit/events",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiAuditEventsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/audit/events",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiAuditEventsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2872,18 +3089,20 @@ export function getApiAuditEvents<ThrowOnError extends boolean = true>(
  */
 export function replaceZoneSlugAddress<ThrowOnError extends boolean = true>(
 	options: Options<ReplaceZoneSlugAddressOptions, ThrowOnError>,
-): Promise<RequestResult<ReplaceZoneSlugAddressResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReplaceZoneSlugAddressResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/zones/{zoneId}/slug-address",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ReplaceZoneSlugAddressResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/zones/{zoneId}/slug-address",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ReplaceZoneSlugAddressResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2892,12 +3111,14 @@ export function replaceZoneSlugAddress<ThrowOnError extends boolean = true>(
  */
 export function getApiZonesByZoneId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiZonesByZoneIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiZonesByZoneIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiZonesByZoneIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/zones/{zoneId}", ...config }) as Promise<
-		RequestResult<GetApiZonesByZoneIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/zones/{zoneId}", ...config }) as Promise<
+			RequestResult<GetApiZonesByZoneIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2906,18 +3127,20 @@ export function getApiZonesByZoneId<ThrowOnError extends boolean = true>(
  */
 export function patchApiZonesByZoneId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiZonesByZoneIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiZonesByZoneIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiZonesByZoneIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/zones/{zoneId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiZonesByZoneIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/zones/{zoneId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchApiZonesByZoneIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2926,12 +3149,14 @@ export function patchApiZonesByZoneId<ThrowOnError extends boolean = true>(
  */
 export function getZoneRenderProjection<ThrowOnError extends boolean = true>(
 	options: Options<GetZoneRenderProjectionOptions, ThrowOnError>,
-): Promise<RequestResult<GetZoneRenderProjectionResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetZoneRenderProjectionResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/zones/{zoneId}/render", ...config }) as Promise<
-		RequestResult<GetZoneRenderProjectionResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/zones/{zoneId}/render", ...config }) as Promise<
+			RequestResult<GetZoneRenderProjectionResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2940,14 +3165,16 @@ export function getZoneRenderProjection<ThrowOnError extends boolean = true>(
  */
 export function getZonePageAddressById<ThrowOnError extends boolean = true>(
 	options: Options<GetZonePageAddressByIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetZonePageAddressByIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetZonePageAddressByIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/zones/{zoneId}/page-addresses/by-id/{pageId}",
-		...config,
-	}) as Promise<RequestResult<GetZonePageAddressByIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/zones/{zoneId}/page-addresses/by-id/{pageId}",
+			...config,
+		}) as Promise<RequestResult<GetZonePageAddressByIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2956,14 +3183,16 @@ export function getZonePageAddressById<ThrowOnError extends boolean = true>(
  */
 export function resolveZonePageAddressBySlug<ThrowOnError extends boolean = true>(
 	options: Options<ResolveZonePageAddressBySlugOptions, ThrowOnError>,
-): Promise<RequestResult<ResolveZonePageAddressBySlugResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ResolveZonePageAddressBySlugResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/zones/{zoneId}/page-addresses/by-slug/{slug}",
-		...config,
-	}) as Promise<RequestResult<ResolveZonePageAddressBySlugResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/zones/{zoneId}/page-addresses/by-slug/{slug}",
+			...config,
+		}) as Promise<RequestResult<ResolveZonePageAddressBySlugResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -2972,12 +3201,14 @@ export function resolveZonePageAddressBySlug<ThrowOnError extends boolean = true
  */
 export function getApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
 	options: Options<GetApiZonesByZoneIdPagesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiZonesByZoneIdPagesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiZonesByZoneIdPagesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/zones/{zoneId}/pages", ...config }) as Promise<
-		RequestResult<GetApiZonesByZoneIdPagesResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/zones/{zoneId}/pages", ...config }) as Promise<
+			RequestResult<GetApiZonesByZoneIdPagesResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -2986,18 +3217,20 @@ export function getApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
  */
 export function postApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
 	options: Options<PostApiZonesByZoneIdPagesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiZonesByZoneIdPagesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiZonesByZoneIdPagesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/zones/{zoneId}/pages",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiZonesByZoneIdPagesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/zones/{zoneId}/pages",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiZonesByZoneIdPagesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3006,14 +3239,14 @@ export function postApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
  */
 export function getApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiZonesByZoneIdPagesByPageIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/zones/{zoneId}/pages/{pageId}",
-		...config,
-	}) as Promise<RequestResult<GetApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/zones/{zoneId}/pages/{pageId}", ...config }) as Promise<
+			RequestResult<GetApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -3022,18 +3255,20 @@ export function getApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = 
  */
 export function putApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiZonesByZoneIdPagesByPageIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/zones/{zoneId}/pages/{pageId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/zones/{zoneId}/pages/{pageId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3042,18 +3277,20 @@ export function putApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = 
  */
 export function putApiZonesByZoneIdPagesByPageIdPlacement<ThrowOnError extends boolean = true>(
 	options: Options<PutApiZonesByZoneIdPagesByPageIdPlacementOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiZonesByZoneIdPagesByPageIdPlacementResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiZonesByZoneIdPagesByPageIdPlacementResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/zones/{zoneId}/pages/{pageId}/placement",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiZonesByZoneIdPagesByPageIdPlacementResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/zones/{zoneId}/pages/{pageId}/placement",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiZonesByZoneIdPagesByPageIdPlacementResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3062,18 +3299,22 @@ export function putApiZonesByZoneIdPagesByPageIdPlacement<ThrowOnError extends b
  */
 export function deleteApiZonesByZoneIdPagesByPageIdPlacement<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiZonesByZoneIdPagesByPageIdPlacementOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiZonesByZoneIdPagesByPageIdPlacementResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiZonesByZoneIdPagesByPageIdPlacementResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/zones/{zoneId}/pages/{pageId}/placement",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiZonesByZoneIdPagesByPageIdPlacementResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/zones/{zoneId}/pages/{pageId}/placement",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiZonesByZoneIdPagesByPageIdPlacementResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -3082,12 +3323,14 @@ export function deleteApiZonesByZoneIdPagesByPageIdPlacement<ThrowOnError extend
  */
 export function getApiZonesByZoneIdNavigation<ThrowOnError extends boolean = true>(
 	options: Options<GetApiZonesByZoneIdNavigationOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiZonesByZoneIdNavigationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiZonesByZoneIdNavigationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/zones/{zoneId}/navigation", ...config }) as Promise<
-		RequestResult<GetApiZonesByZoneIdNavigationResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/zones/{zoneId}/navigation", ...config }) as Promise<
+			RequestResult<GetApiZonesByZoneIdNavigationResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -3096,18 +3339,20 @@ export function getApiZonesByZoneIdNavigation<ThrowOnError extends boolean = tru
  */
 export function postApiZonesByZoneIdNavigation<ThrowOnError extends boolean = true>(
 	options: Options<PostApiZonesByZoneIdNavigationOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiZonesByZoneIdNavigationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiZonesByZoneIdNavigationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/zones/{zoneId}/navigation",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiZonesByZoneIdNavigationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/zones/{zoneId}/navigation",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiZonesByZoneIdNavigationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3116,14 +3361,18 @@ export function postApiZonesByZoneIdNavigation<ThrowOnError extends boolean = tr
  */
 export function getApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiZonesByZoneIdNavigationByNavigationIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/zones/{zoneId}/navigation/{navigationId}",
-		...config,
-	}) as Promise<RequestResult<GetApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/zones/{zoneId}/navigation/{navigationId}",
+			...config,
+		}) as Promise<
+			RequestResult<GetApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -3132,18 +3381,22 @@ export function getApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends
  */
 export function putApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiZonesByZoneIdNavigationByNavigationIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/zones/{zoneId}/navigation/{navigationId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/zones/{zoneId}/navigation/{navigationId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -3152,20 +3405,24 @@ export function putApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends
  */
 export function deleteApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiZonesByZoneIdNavigationByNavigationIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<DeleteApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/zones/{zoneId}/navigation/{navigationId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/zones/{zoneId}/navigation/{navigationId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -3174,18 +3431,20 @@ export function deleteApiZonesByZoneIdNavigationByNavigationId<ThrowOnError exte
  */
 export function postApiZones<ThrowOnError extends boolean = true>(
 	options: Options<PostApiZonesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiZonesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiZonesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/zones",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiZonesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/zones",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiZonesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3194,14 +3453,16 @@ export function postApiZones<ThrowOnError extends boolean = true>(
  */
 export function listMergedCatalogSources<ThrowOnError extends boolean = true>(
 	options: Options<ListMergedCatalogSourcesOptions, ThrowOnError>,
-): Promise<RequestResult<ListMergedCatalogSourcesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListMergedCatalogSourcesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/merged-sources",
-		...config,
-	}) as Promise<RequestResult<ListMergedCatalogSourcesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/merged-sources",
+			...config,
+		}) as Promise<RequestResult<ListMergedCatalogSourcesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3210,12 +3471,14 @@ export function listMergedCatalogSources<ThrowOnError extends boolean = true>(
  */
 export function readMusicDetail<ThrowOnError extends boolean = true>(
 	options: Options<ReadMusicDetailOptions, ThrowOnError>,
-): Promise<RequestResult<ReadMusicDetailResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadMusicDetailResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/catalog/music/{id}", ...config }) as Promise<
-		RequestResult<ReadMusicDetailResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/music/{id}", ...config }) as Promise<
+			RequestResult<ReadMusicDetailResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -3224,18 +3487,20 @@ export function readMusicDetail<ThrowOnError extends boolean = true>(
  */
 export function patchMusicMetadata<ThrowOnError extends boolean = true>(
 	options: Options<PatchMusicMetadataOptions, ThrowOnError>,
-): Promise<RequestResult<PatchMusicMetadataResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchMusicMetadataResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/catalog/music/{id}/metadata",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchMusicMetadataResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/catalog/music/{id}/metadata",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchMusicMetadataResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3244,12 +3509,14 @@ export function patchMusicMetadata<ThrowOnError extends boolean = true>(
  */
 export function listMusicMedia<ThrowOnError extends boolean = true>(
 	options: Options<ListMusicMediaOptions, ThrowOnError>,
-): Promise<RequestResult<ListMusicMediaResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListMusicMediaResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/catalog/music/{id}/media", ...config }) as Promise<
-		RequestResult<ListMusicMediaResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/music/{id}/media", ...config }) as Promise<
+			RequestResult<ListMusicMediaResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -3258,18 +3525,20 @@ export function listMusicMedia<ThrowOnError extends boolean = true>(
  */
 export function addMusicMedium<ThrowOnError extends boolean = true>(
 	options: Options<AddMusicMediumOptions, ThrowOnError>,
-): Promise<RequestResult<AddMusicMediumResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<AddMusicMediumResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/music/{id}/media",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<AddMusicMediumResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/music/{id}/media",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<AddMusicMediumResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3278,18 +3547,20 @@ export function addMusicMedium<ThrowOnError extends boolean = true>(
  */
 export function patchMusicMedium<ThrowOnError extends boolean = true>(
 	options: Options<PatchMusicMediumOptions, ThrowOnError>,
-): Promise<RequestResult<PatchMusicMediumResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchMusicMediumResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/catalog/music/{id}/media/{mediumId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchMusicMediumResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/catalog/music/{id}/media/{mediumId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchMusicMediumResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3298,18 +3569,20 @@ export function patchMusicMedium<ThrowOnError extends boolean = true>(
  */
 export function removeMusicMedium<ThrowOnError extends boolean = true>(
 	options: Options<RemoveMusicMediumOptions, ThrowOnError>,
-): Promise<RequestResult<RemoveMusicMediumResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RemoveMusicMediumResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/catalog/music/{id}/media/{mediumId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RemoveMusicMediumResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/catalog/music/{id}/media/{mediumId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RemoveMusicMediumResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3318,14 +3591,16 @@ export function removeMusicMedium<ThrowOnError extends boolean = true>(
  */
 export function listMusicTracks<ThrowOnError extends boolean = true>(
 	options: Options<ListMusicTracksOptions, ThrowOnError>,
-): Promise<RequestResult<ListMusicTracksResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListMusicTracksResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/music/{id}/media/{mediumId}/tracks",
-		...config,
-	}) as Promise<RequestResult<ListMusicTracksResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/music/{id}/media/{mediumId}/tracks",
+			...config,
+		}) as Promise<RequestResult<ListMusicTracksResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3334,18 +3609,20 @@ export function listMusicTracks<ThrowOnError extends boolean = true>(
  */
 export function addMusicTrack<ThrowOnError extends boolean = true>(
 	options: Options<AddMusicTrackOptions, ThrowOnError>,
-): Promise<RequestResult<AddMusicTrackResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<AddMusicTrackResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/music/{id}/media/{mediumId}/tracks",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<AddMusicTrackResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/music/{id}/media/{mediumId}/tracks",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<AddMusicTrackResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3354,18 +3631,20 @@ export function addMusicTrack<ThrowOnError extends boolean = true>(
  */
 export function patchMusicTrack<ThrowOnError extends boolean = true>(
 	options: Options<PatchMusicTrackOptions, ThrowOnError>,
-): Promise<RequestResult<PatchMusicTrackResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchMusicTrackResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/catalog/music/{id}/tracks/{trackId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchMusicTrackResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/catalog/music/{id}/tracks/{trackId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchMusicTrackResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3374,18 +3653,20 @@ export function patchMusicTrack<ThrowOnError extends boolean = true>(
  */
 export function removeMusicTrack<ThrowOnError extends boolean = true>(
 	options: Options<RemoveMusicTrackOptions, ThrowOnError>,
-): Promise<RequestResult<RemoveMusicTrackResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RemoveMusicTrackResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/catalog/music/{id}/tracks/{trackId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RemoveMusicTrackResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/catalog/music/{id}/tracks/{trackId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RemoveMusicTrackResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3394,18 +3675,20 @@ export function removeMusicTrack<ThrowOnError extends boolean = true>(
  */
 export function readMusicStructure<ThrowOnError extends boolean = true>(
 	options: Options<ReadMusicStructureOptions, ThrowOnError>,
-): Promise<RequestResult<ReadMusicStructureResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadMusicStructureResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/music/{id}/structure",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ReadMusicStructureResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/music/{id}/structure",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ReadMusicStructureResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3414,18 +3697,20 @@ export function readMusicStructure<ThrowOnError extends boolean = true>(
  */
 export function mutateMusicStructure<ThrowOnError extends boolean = true>(
 	options: Options<MutateMusicStructureOptions, ThrowOnError>,
-): Promise<RequestResult<MutateMusicStructureResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<MutateMusicStructureResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/music/{id}/structure",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<MutateMusicStructureResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/music/{id}/structure",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<MutateMusicStructureResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3434,18 +3719,20 @@ export function mutateMusicStructure<ThrowOnError extends boolean = true>(
  */
 export function listMusicHistory<ThrowOnError extends boolean = true>(
 	options: Options<ListMusicHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<ListMusicHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListMusicHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/music/{id}/history",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ListMusicHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/music/{id}/history",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListMusicHistoryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3454,18 +3741,20 @@ export function listMusicHistory<ThrowOnError extends boolean = true>(
  */
 export function restoreMusicComponent<ThrowOnError extends boolean = true>(
 	options: Options<RestoreMusicComponentOptions, ThrowOnError>,
-): Promise<RequestResult<RestoreMusicComponentResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RestoreMusicComponentResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/music/{id}/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RestoreMusicComponentResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/music/{id}/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RestoreMusicComponentResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3474,18 +3763,20 @@ export function restoreMusicComponent<ThrowOnError extends boolean = true>(
  */
 export function attachMusicDiscToc<ThrowOnError extends boolean = true>(
 	options: Options<AttachMusicDiscTocOptions, ThrowOnError>,
-): Promise<RequestResult<AttachMusicDiscTocResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<AttachMusicDiscTocResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/music/{id}/media/{mediumId}/tocs",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<AttachMusicDiscTocResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/music/{id}/media/{mediumId}/tocs",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<AttachMusicDiscTocResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3494,14 +3785,16 @@ export function attachMusicDiscToc<ThrowOnError extends boolean = true>(
  */
 export function listMusicDiscTocs<ThrowOnError extends boolean = true>(
 	options: Options<ListMusicDiscTocsOptions, ThrowOnError>,
-): Promise<RequestResult<ListMusicDiscTocsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListMusicDiscTocsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/music/{id}/media/{mediumId}/tocs",
-		...config,
-	}) as Promise<RequestResult<ListMusicDiscTocsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/music/{id}/media/{mediumId}/tocs",
+			...config,
+		}) as Promise<RequestResult<ListMusicDiscTocsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3510,14 +3803,16 @@ export function listMusicDiscTocs<ThrowOnError extends boolean = true>(
  */
 export function readMusicDiscToc<ThrowOnError extends boolean = true>(
 	options: Options<ReadMusicDiscTocOptions, ThrowOnError>,
-): Promise<RequestResult<ReadMusicDiscTocResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadMusicDiscTocResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/music/{id}/media/{mediumId}/tocs/{tocId}",
-		...config,
-	}) as Promise<RequestResult<ReadMusicDiscTocResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/music/{id}/media/{mediumId}/tocs/{tocId}",
+			...config,
+		}) as Promise<RequestResult<ReadMusicDiscTocResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3526,14 +3821,14 @@ export function readMusicDiscToc<ThrowOnError extends boolean = true>(
  */
 export function readSoftwareDetails<ThrowOnError extends boolean = true>(
 	options: Options<ReadSoftwareDetailsOptions, ThrowOnError>,
-): Promise<RequestResult<ReadSoftwareDetailsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadSoftwareDetailsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/software/{id}/details",
-		...config,
-	}) as Promise<RequestResult<ReadSoftwareDetailsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/software/{id}/details", ...config }) as Promise<
+			RequestResult<ReadSoftwareDetailsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -3542,18 +3837,20 @@ export function readSoftwareDetails<ThrowOnError extends boolean = true>(
  */
 export function reviseSoftwareDetails<ThrowOnError extends boolean = true>(
 	options: Options<ReviseSoftwareDetailsOptions, ThrowOnError>,
-): Promise<RequestResult<ReviseSoftwareDetailsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReviseSoftwareDetailsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/software/{id}/details",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ReviseSoftwareDetailsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/software/{id}/details",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ReviseSoftwareDetailsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3562,14 +3859,14 @@ export function reviseSoftwareDetails<ThrowOnError extends boolean = true>(
  */
 export function listSoftwareDetailsHistory<ThrowOnError extends boolean = true>(
 	options: Options<ListSoftwareDetailsHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<ListSoftwareDetailsHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListSoftwareDetailsHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/software/{id}/history",
-		...config,
-	}) as Promise<RequestResult<ListSoftwareDetailsHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/software/{id}/history", ...config }) as Promise<
+			RequestResult<ListSoftwareDetailsHistoryResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -3578,18 +3875,20 @@ export function listSoftwareDetailsHistory<ThrowOnError extends boolean = true>(
  */
 export function restoreSoftwareDetails<ThrowOnError extends boolean = true>(
 	options: Options<RestoreSoftwareDetailsOptions, ThrowOnError>,
-): Promise<RequestResult<RestoreSoftwareDetailsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RestoreSoftwareDetailsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/software/{id}/history/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RestoreSoftwareDetailsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/software/{id}/history/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RestoreSoftwareDetailsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3598,14 +3897,14 @@ export function restoreSoftwareDetails<ThrowOnError extends boolean = true>(
  */
 export function findSoftwareReleases<ThrowOnError extends boolean = true>(
 	options: Options<FindSoftwareReleasesOptions, ThrowOnError>,
-): Promise<RequestResult<FindSoftwareReleasesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<FindSoftwareReleasesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/software/{id}/releases",
-		...config,
-	}) as Promise<RequestResult<FindSoftwareReleasesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/software/{id}/releases", ...config }) as Promise<
+			RequestResult<FindSoftwareReleasesResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -3614,14 +3913,16 @@ export function findSoftwareReleases<ThrowOnError extends boolean = true>(
  */
 export function listSoftwareComponents<ThrowOnError extends boolean = true>(
 	options: Options<ListSoftwareComponentsOptions, ThrowOnError>,
-): Promise<RequestResult<ListSoftwareComponentsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListSoftwareComponentsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/software/{id}/components/{kind}",
-		...config,
-	}) as Promise<RequestResult<ListSoftwareComponentsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/software/{id}/components/{kind}",
+			...config,
+		}) as Promise<RequestResult<ListSoftwareComponentsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3630,18 +3931,20 @@ export function listSoftwareComponents<ThrowOnError extends boolean = true>(
  */
 export function putSoftwareComponent<ThrowOnError extends boolean = true>(
 	options: Options<PutSoftwareComponentOptions, ThrowOnError>,
-): Promise<RequestResult<PutSoftwareComponentResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutSoftwareComponentResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/software/{id}/components/{kind}/{componentId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutSoftwareComponentResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/software/{id}/components/{kind}/{componentId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutSoftwareComponentResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3650,18 +3953,20 @@ export function putSoftwareComponent<ThrowOnError extends boolean = true>(
  */
 export function withdrawSoftwareComponent<ThrowOnError extends boolean = true>(
 	options: Options<WithdrawSoftwareComponentOptions, ThrowOnError>,
-): Promise<RequestResult<WithdrawSoftwareComponentResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<WithdrawSoftwareComponentResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/catalog/software/{id}/components/{kind}/{componentId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<WithdrawSoftwareComponentResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/catalog/software/{id}/components/{kind}/{componentId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<WithdrawSoftwareComponentResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3670,14 +3975,16 @@ export function withdrawSoftwareComponent<ThrowOnError extends boolean = true>(
  */
 export function listSoftwareComponentHistory<ThrowOnError extends boolean = true>(
 	options: Options<ListSoftwareComponentHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<ListSoftwareComponentHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListSoftwareComponentHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/software/{id}/components/{kind}/{componentId}/history",
-		...config,
-	}) as Promise<RequestResult<ListSoftwareComponentHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/software/{id}/components/{kind}/{componentId}/history",
+			...config,
+		}) as Promise<RequestResult<ListSoftwareComponentHistoryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3686,18 +3993,20 @@ export function listSoftwareComponentHistory<ThrowOnError extends boolean = true
  */
 export function restoreSoftwareComponent<ThrowOnError extends boolean = true>(
 	options: Options<RestoreSoftwareComponentOptions, ThrowOnError>,
-): Promise<RequestResult<RestoreSoftwareComponentResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RestoreSoftwareComponentResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/software/{id}/components/{kind}/{componentId}/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RestoreSoftwareComponentResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/software/{id}/components/{kind}/{componentId}/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RestoreSoftwareComponentResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3706,14 +4015,14 @@ export function restoreSoftwareComponent<ThrowOnError extends boolean = true>(
  */
 export function listSoftwareParticipationContexts<ThrowOnError extends boolean = true>(
 	options: Options<ListSoftwareParticipationContextsOptions, ThrowOnError>,
-): Promise<RequestResult<ListSoftwareParticipationContextsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListSoftwareParticipationContextsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/software/{id}/contexts",
-		...config,
-	}) as Promise<RequestResult<ListSoftwareParticipationContextsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/software/{id}/contexts", ...config }) as Promise<
+			RequestResult<ListSoftwareParticipationContextsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -3722,18 +4031,20 @@ export function listSoftwareParticipationContexts<ThrowOnError extends boolean =
  */
 export function createSoftwareParticipationContext<ThrowOnError extends boolean = true>(
 	options: Options<CreateSoftwareParticipationContextOptions, ThrowOnError>,
-): Promise<RequestResult<CreateSoftwareParticipationContextResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<CreateSoftwareParticipationContextResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/software/{id}/contexts",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<CreateSoftwareParticipationContextResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/software/{id}/contexts",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<CreateSoftwareParticipationContextResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3742,14 +4053,16 @@ export function createSoftwareParticipationContext<ThrowOnError extends boolean 
  */
 export function readSoftwareParticipationContext<ThrowOnError extends boolean = true>(
 	options: Options<ReadSoftwareParticipationContextOptions, ThrowOnError>,
-): Promise<RequestResult<ReadSoftwareParticipationContextResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadSoftwareParticipationContextResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/software/{id}/contexts/{contextId}",
-		...config,
-	}) as Promise<RequestResult<ReadSoftwareParticipationContextResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/software/{id}/contexts/{contextId}",
+			...config,
+		}) as Promise<RequestResult<ReadSoftwareParticipationContextResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3758,18 +4071,20 @@ export function readSoftwareParticipationContext<ThrowOnError extends boolean = 
  */
 export function reviseSoftwareParticipationContext<ThrowOnError extends boolean = true>(
 	options: Options<ReviseSoftwareParticipationContextOptions, ThrowOnError>,
-): Promise<RequestResult<ReviseSoftwareParticipationContextResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReviseSoftwareParticipationContextResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/software/{id}/contexts/{contextId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ReviseSoftwareParticipationContextResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/software/{id}/contexts/{contextId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ReviseSoftwareParticipationContextResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3778,14 +4093,16 @@ export function reviseSoftwareParticipationContext<ThrowOnError extends boolean 
  */
 export function listSoftwareParticipationContextHistory<ThrowOnError extends boolean = true>(
 	options: Options<ListSoftwareParticipationContextHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<ListSoftwareParticipationContextHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListSoftwareParticipationContextHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/software/{id}/contexts/{contextId}/history",
-		...config,
-	}) as Promise<RequestResult<ListSoftwareParticipationContextHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/software/{id}/contexts/{contextId}/history",
+			...config,
+		}) as Promise<RequestResult<ListSoftwareParticipationContextHistoryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3794,18 +4111,20 @@ export function listSoftwareParticipationContextHistory<ThrowOnError extends boo
  */
 export function restoreSoftwareParticipationContext<ThrowOnError extends boolean = true>(
 	options: Options<RestoreSoftwareParticipationContextOptions, ThrowOnError>,
-): Promise<RequestResult<RestoreSoftwareParticipationContextResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RestoreSoftwareParticipationContextResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/software/{id}/contexts/{contextId}/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RestoreSoftwareParticipationContextResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/software/{id}/contexts/{contextId}/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RestoreSoftwareParticipationContextResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3814,14 +4133,14 @@ export function restoreSoftwareParticipationContext<ThrowOnError extends boolean
  */
 export function listSoftwareCredits<ThrowOnError extends boolean = true>(
 	options: Options<ListSoftwareCreditsOptions, ThrowOnError>,
-): Promise<RequestResult<ListSoftwareCreditsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListSoftwareCreditsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/software/{id}/credits",
-		...config,
-	}) as Promise<RequestResult<ListSoftwareCreditsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/software/{id}/credits", ...config }) as Promise<
+			RequestResult<ListSoftwareCreditsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -3830,18 +4149,20 @@ export function listSoftwareCredits<ThrowOnError extends boolean = true>(
  */
 export function createSoftwareCredit<ThrowOnError extends boolean = true>(
 	options: Options<CreateSoftwareCreditOptions, ThrowOnError>,
-): Promise<RequestResult<CreateSoftwareCreditResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<CreateSoftwareCreditResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/software/{id}/credits",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<CreateSoftwareCreditResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/software/{id}/credits",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<CreateSoftwareCreditResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3850,18 +4171,20 @@ export function createSoftwareCredit<ThrowOnError extends boolean = true>(
  */
 export function reviseSoftwareCredit<ThrowOnError extends boolean = true>(
 	options: Options<ReviseSoftwareCreditOptions, ThrowOnError>,
-): Promise<RequestResult<ReviseSoftwareCreditResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReviseSoftwareCreditResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/software/{id}/credits/{creditId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ReviseSoftwareCreditResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/software/{id}/credits/{creditId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ReviseSoftwareCreditResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3870,14 +4193,16 @@ export function reviseSoftwareCredit<ThrowOnError extends boolean = true>(
  */
 export function listSoftwareCreditHistory<ThrowOnError extends boolean = true>(
 	options: Options<ListSoftwareCreditHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<ListSoftwareCreditHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListSoftwareCreditHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/software/{id}/credits/{creditId}/history",
-		...config,
-	}) as Promise<RequestResult<ListSoftwareCreditHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/software/{id}/credits/{creditId}/history",
+			...config,
+		}) as Promise<RequestResult<ListSoftwareCreditHistoryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3886,18 +4211,20 @@ export function listSoftwareCreditHistory<ThrowOnError extends boolean = true>(
  */
 export function restoreSoftwareCredit<ThrowOnError extends boolean = true>(
 	options: Options<RestoreSoftwareCreditOptions, ThrowOnError>,
-): Promise<RequestResult<RestoreSoftwareCreditResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RestoreSoftwareCreditResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/software/{id}/credits/{creditId}/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RestoreSoftwareCreditResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/software/{id}/credits/{creditId}/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RestoreSoftwareCreditResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3906,14 +4233,14 @@ export function restoreSoftwareCredit<ThrowOnError extends boolean = true>(
  */
 export function readProgramDetails<ThrowOnError extends boolean = true>(
 	options: Options<ReadProgramDetailsOptions, ThrowOnError>,
-): Promise<RequestResult<ReadProgramDetailsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadProgramDetailsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/program/{id}/details",
-		...config,
-	}) as Promise<RequestResult<ReadProgramDetailsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/program/{id}/details", ...config }) as Promise<
+			RequestResult<ReadProgramDetailsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -3922,18 +4249,20 @@ export function readProgramDetails<ThrowOnError extends boolean = true>(
  */
 export function reviseProgramDetails<ThrowOnError extends boolean = true>(
 	options: Options<ReviseProgramDetailsOptions, ThrowOnError>,
-): Promise<RequestResult<ReviseProgramDetailsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReviseProgramDetailsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/program/{id}/details",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ReviseProgramDetailsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/program/{id}/details",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ReviseProgramDetailsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3942,14 +4271,16 @@ export function reviseProgramDetails<ThrowOnError extends boolean = true>(
  */
 export function listProgramOccurrences<ThrowOnError extends boolean = true>(
 	options: Options<ListProgramOccurrencesOptions, ThrowOnError>,
-): Promise<RequestResult<ListProgramOccurrencesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListProgramOccurrencesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/program/{id}/occurrences",
-		...config,
-	}) as Promise<RequestResult<ListProgramOccurrencesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/program/{id}/occurrences",
+			...config,
+		}) as Promise<RequestResult<ListProgramOccurrencesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3958,18 +4289,20 @@ export function listProgramOccurrences<ThrowOnError extends boolean = true>(
  */
 export function putProgramOccurrence<ThrowOnError extends boolean = true>(
 	options: Options<PutProgramOccurrenceOptions, ThrowOnError>,
-): Promise<RequestResult<PutProgramOccurrenceResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutProgramOccurrenceResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/program/{id}/occurrences/{occurrenceId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutProgramOccurrenceResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/program/{id}/occurrences/{occurrenceId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutProgramOccurrenceResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3978,18 +4311,20 @@ export function putProgramOccurrence<ThrowOnError extends boolean = true>(
  */
 export function removeProgramOccurrence<ThrowOnError extends boolean = true>(
 	options: Options<RemoveProgramOccurrenceOptions, ThrowOnError>,
-): Promise<RequestResult<RemoveProgramOccurrenceResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RemoveProgramOccurrenceResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/catalog/program/{id}/occurrences/{occurrenceId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RemoveProgramOccurrenceResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/catalog/program/{id}/occurrences/{occurrenceId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RemoveProgramOccurrenceResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -3998,14 +4333,16 @@ export function removeProgramOccurrence<ThrowOnError extends boolean = true>(
  */
 export function listProgramComponentHistory<ThrowOnError extends boolean = true>(
 	options: Options<ListProgramComponentHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<ListProgramComponentHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListProgramComponentHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/program/{id}/history/{component}/{componentKey}",
-		...config,
-	}) as Promise<RequestResult<ListProgramComponentHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/program/{id}/history/{component}/{componentKey}",
+			...config,
+		}) as Promise<RequestResult<ListProgramComponentHistoryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4014,18 +4351,20 @@ export function listProgramComponentHistory<ThrowOnError extends boolean = true>
  */
 export function restoreProgramComponent<ThrowOnError extends boolean = true>(
 	options: Options<RestoreProgramComponentOptions, ThrowOnError>,
-): Promise<RequestResult<RestoreProgramComponentResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RestoreProgramComponentResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/program/{id}/history/{component}/{componentKey}/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RestoreProgramComponentResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/program/{id}/history/{component}/{componentKey}/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RestoreProgramComponentResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4034,14 +4373,16 @@ export function restoreProgramComponent<ThrowOnError extends boolean = true>(
  */
 export function readPublishingDetails<ThrowOnError extends boolean = true>(
 	options: Options<ReadPublishingDetailsOptions, ThrowOnError>,
-): Promise<RequestResult<ReadPublishingDetailsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadPublishingDetailsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/publishing/{id}/details",
-		...config,
-	}) as Promise<RequestResult<ReadPublishingDetailsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/publishing/{id}/details",
+			...config,
+		}) as Promise<RequestResult<ReadPublishingDetailsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4050,18 +4391,20 @@ export function readPublishingDetails<ThrowOnError extends boolean = true>(
  */
 export function revisePublishingDetails<ThrowOnError extends boolean = true>(
 	options: Options<RevisePublishingDetailsOptions, ThrowOnError>,
-): Promise<RequestResult<RevisePublishingDetailsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RevisePublishingDetailsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/publishing/{id}/details",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RevisePublishingDetailsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/publishing/{id}/details",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RevisePublishingDetailsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4070,14 +4413,16 @@ export function revisePublishingDetails<ThrowOnError extends boolean = true>(
  */
 export function listPublishingComponents<ThrowOnError extends boolean = true>(
 	options: Options<ListPublishingComponentsOptions, ThrowOnError>,
-): Promise<RequestResult<ListPublishingComponentsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListPublishingComponentsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/publishing/{id}/components/{kind}",
-		...config,
-	}) as Promise<RequestResult<ListPublishingComponentsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/publishing/{id}/components/{kind}",
+			...config,
+		}) as Promise<RequestResult<ListPublishingComponentsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4086,18 +4431,20 @@ export function listPublishingComponents<ThrowOnError extends boolean = true>(
  */
 export function putPublishingComponent<ThrowOnError extends boolean = true>(
 	options: Options<PutPublishingComponentOptions, ThrowOnError>,
-): Promise<RequestResult<PutPublishingComponentResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutPublishingComponentResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/publishing/{id}/components/{kind}/{componentId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutPublishingComponentResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/publishing/{id}/components/{kind}/{componentId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutPublishingComponentResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4106,18 +4453,20 @@ export function putPublishingComponent<ThrowOnError extends boolean = true>(
  */
 export function removePublishingComponent<ThrowOnError extends boolean = true>(
 	options: Options<RemovePublishingComponentOptions, ThrowOnError>,
-): Promise<RequestResult<RemovePublishingComponentResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RemovePublishingComponentResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/catalog/publishing/{id}/components/{kind}/{componentId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RemovePublishingComponentResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/catalog/publishing/{id}/components/{kind}/{componentId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RemovePublishingComponentResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4126,14 +4475,16 @@ export function removePublishingComponent<ThrowOnError extends boolean = true>(
  */
 export function listPublishingComponentHistory<ThrowOnError extends boolean = true>(
 	options: Options<ListPublishingComponentHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<ListPublishingComponentHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListPublishingComponentHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/publishing/{id}/history/{component}/{componentKey}",
-		...config,
-	}) as Promise<RequestResult<ListPublishingComponentHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/publishing/{id}/history/{component}/{componentKey}",
+			...config,
+		}) as Promise<RequestResult<ListPublishingComponentHistoryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4142,18 +4493,20 @@ export function listPublishingComponentHistory<ThrowOnError extends boolean = tr
  */
 export function restorePublishingComponent<ThrowOnError extends boolean = true>(
 	options: Options<RestorePublishingComponentOptions, ThrowOnError>,
-): Promise<RequestResult<RestorePublishingComponentResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RestorePublishingComponentResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/publishing/{id}/history/{component}/{componentKey}/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RestorePublishingComponentResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/publishing/{id}/history/{component}/{componentKey}/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RestorePublishingComponentResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4162,14 +4515,16 @@ export function restorePublishingComponent<ThrowOnError extends boolean = true>(
  */
 export function listPublishingConnections<ThrowOnError extends boolean = true>(
 	options: Options<ListPublishingConnectionsOptions, ThrowOnError>,
-): Promise<RequestResult<ListPublishingConnectionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListPublishingConnectionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/publishing/{id}/connections",
-		...config,
-	}) as Promise<RequestResult<ListPublishingConnectionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/publishing/{id}/connections",
+			...config,
+		}) as Promise<RequestResult<ListPublishingConnectionsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4178,14 +4533,16 @@ export function listPublishingConnections<ThrowOnError extends boolean = true>(
  */
 export function readCatalogContentLanguageSupport<ThrowOnError extends boolean = true>(
 	options: Options<ReadCatalogContentLanguageSupportOptions, ThrowOnError>,
-): Promise<RequestResult<ReadCatalogContentLanguageSupportResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadCatalogContentLanguageSupportResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support",
-		...config,
-	}) as Promise<RequestResult<ReadCatalogContentLanguageSupportResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support",
+			...config,
+		}) as Promise<RequestResult<ReadCatalogContentLanguageSupportResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4194,18 +4551,20 @@ export function readCatalogContentLanguageSupport<ThrowOnError extends boolean =
  */
 export function replaceCatalogContentLanguageSupport<ThrowOnError extends boolean = true>(
 	options: Options<ReplaceCatalogContentLanguageSupportOptions, ThrowOnError>,
-): Promise<RequestResult<ReplaceCatalogContentLanguageSupportResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReplaceCatalogContentLanguageSupportResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ReplaceCatalogContentLanguageSupportResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ReplaceCatalogContentLanguageSupportResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4214,14 +4573,16 @@ export function replaceCatalogContentLanguageSupport<ThrowOnError extends boolea
  */
 export function listCatalogContentLanguageEvidence<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogContentLanguageEvidenceOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogContentLanguageEvidenceResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogContentLanguageEvidenceResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support/evidence",
-		...config,
-	}) as Promise<RequestResult<ListCatalogContentLanguageEvidenceResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support/evidence",
+			...config,
+		}) as Promise<RequestResult<ListCatalogContentLanguageEvidenceResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4230,14 +4591,16 @@ export function listCatalogContentLanguageEvidence<ThrowOnError extends boolean 
  */
 export function listCatalogContentLanguageHistory<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogContentLanguageHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogContentLanguageHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogContentLanguageHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support/history",
-		...config,
-	}) as Promise<RequestResult<ListCatalogContentLanguageHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support/history",
+			...config,
+		}) as Promise<RequestResult<ListCatalogContentLanguageHistoryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4246,14 +4609,16 @@ export function listCatalogContentLanguageHistory<ThrowOnError extends boolean =
  */
 export function readCatalogContentLanguageHistory<ThrowOnError extends boolean = true>(
 	options: Options<ReadCatalogContentLanguageHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<ReadCatalogContentLanguageHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadCatalogContentLanguageHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support/history/{version}",
-		...config,
-	}) as Promise<RequestResult<ReadCatalogContentLanguageHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support/history/{version}",
+			...config,
+		}) as Promise<RequestResult<ReadCatalogContentLanguageHistoryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4262,18 +4627,20 @@ export function readCatalogContentLanguageHistory<ThrowOnError extends boolean =
  */
 export function restoreCatalogContentLanguageSupport<ThrowOnError extends boolean = true>(
 	options: Options<RestoreCatalogContentLanguageSupportOptions, ThrowOnError>,
-): Promise<RequestResult<RestoreCatalogContentLanguageSupportResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RestoreCatalogContentLanguageSupportResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RestoreCatalogContentLanguageSupportResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/resources/{owner}/{id}/content-language-support/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RestoreCatalogContentLanguageSupportResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4282,14 +4649,16 @@ export function restoreCatalogContentLanguageSupport<ThrowOnError extends boolea
  */
 export function listCatalogFacts<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogFactsOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogFactsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogFactsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/facts",
-		...config,
-	}) as Promise<RequestResult<ListCatalogFactsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/facts",
+			...config,
+		}) as Promise<RequestResult<ListCatalogFactsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4298,18 +4667,20 @@ export function listCatalogFacts<ThrowOnError extends boolean = true>(
  */
 export function writeCatalogFact<ThrowOnError extends boolean = true>(
 	options: Options<WriteCatalogFactOptions, ThrowOnError>,
-): Promise<RequestResult<WriteCatalogFactResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<WriteCatalogFactResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/resources/{owner}/{id}/facts",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<WriteCatalogFactResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/resources/{owner}/{id}/facts",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<WriteCatalogFactResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4318,14 +4689,16 @@ export function writeCatalogFact<ThrowOnError extends boolean = true>(
  */
 export function listCatalogFactNodes<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogFactNodesOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogFactNodesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogFactNodesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/facts/{factId}/nodes",
-		...config,
-	}) as Promise<RequestResult<ListCatalogFactNodesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/facts/{factId}/nodes",
+			...config,
+		}) as Promise<RequestResult<ListCatalogFactNodesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4334,14 +4707,16 @@ export function listCatalogFactNodes<ThrowOnError extends boolean = true>(
  */
 export function listCatalogRelations<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogRelationsOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogRelationsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogRelationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/relations",
-		...config,
-	}) as Promise<RequestResult<ListCatalogRelationsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/relations",
+			...config,
+		}) as Promise<RequestResult<ListCatalogRelationsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4350,18 +4725,20 @@ export function listCatalogRelations<ThrowOnError extends boolean = true>(
  */
 export function writeCatalogRelation<ThrowOnError extends boolean = true>(
 	options: Options<WriteCatalogRelationOptions, ThrowOnError>,
-): Promise<RequestResult<WriteCatalogRelationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<WriteCatalogRelationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/resources/{owner}/{id}/relations",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<WriteCatalogRelationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/resources/{owner}/{id}/relations",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<WriteCatalogRelationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4370,14 +4747,16 @@ export function writeCatalogRelation<ThrowOnError extends boolean = true>(
  */
 export function listCatalogRelationParticipants<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogRelationParticipantsOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogRelationParticipantsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogRelationParticipantsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/relations/{relationId}/participants",
-		...config,
-	}) as Promise<RequestResult<ListCatalogRelationParticipantsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/relations/{relationId}/participants",
+			...config,
+		}) as Promise<RequestResult<ListCatalogRelationParticipantsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4386,14 +4765,16 @@ export function listCatalogRelationParticipants<ThrowOnError extends boolean = t
  */
 export function listCatalogRelationQualifiers<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogRelationQualifiersOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogRelationQualifiersResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogRelationQualifiersResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/relations/{relationId}/qualifiers",
-		...config,
-	}) as Promise<RequestResult<ListCatalogRelationQualifiersResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/relations/{relationId}/qualifiers",
+			...config,
+		}) as Promise<RequestResult<ListCatalogRelationQualifiersResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4402,14 +4783,16 @@ export function listCatalogRelationQualifiers<ThrowOnError extends boolean = tru
  */
 export function listCatalogSemanticHistory<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogSemanticHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogSemanticHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogSemanticHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/semantics/{semanticId}/history",
-		...config,
-	}) as Promise<RequestResult<ListCatalogSemanticHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/semantics/{semanticId}/history",
+			...config,
+		}) as Promise<RequestResult<ListCatalogSemanticHistoryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4418,18 +4801,20 @@ export function listCatalogSemanticHistory<ThrowOnError extends boolean = true>(
  */
 export function transitionCatalogSemanticState<ThrowOnError extends boolean = true>(
 	options: Options<TransitionCatalogSemanticStateOptions, ThrowOnError>,
-): Promise<RequestResult<TransitionCatalogSemanticStateResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<TransitionCatalogSemanticStateResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/resources/{owner}/{id}/semantics/{semanticId}/state",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<TransitionCatalogSemanticStateResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/resources/{owner}/{id}/semantics/{semanticId}/state",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<TransitionCatalogSemanticStateResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4438,18 +4823,20 @@ export function transitionCatalogSemanticState<ThrowOnError extends boolean = tr
  */
 export function restoreCatalogSemanticRevision<ThrowOnError extends boolean = true>(
 	options: Options<RestoreCatalogSemanticRevisionOptions, ThrowOnError>,
-): Promise<RequestResult<RestoreCatalogSemanticRevisionResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RestoreCatalogSemanticRevisionResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/resources/{owner}/{id}/semantics/{semanticId}/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RestoreCatalogSemanticRevisionResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/resources/{owner}/{id}/semantics/{semanticId}/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RestoreCatalogSemanticRevisionResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4458,18 +4845,20 @@ export function restoreCatalogSemanticRevision<ThrowOnError extends boolean = tr
  */
 export function intakeCatalogSource<ThrowOnError extends boolean = true>(
 	options: Options<IntakeCatalogSourceOptions, ThrowOnError>,
-): Promise<RequestResult<IntakeCatalogSourceResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<IntakeCatalogSourceResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/sources/intake",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<IntakeCatalogSourceResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/sources/intake",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<IntakeCatalogSourceResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4478,14 +4867,16 @@ export function intakeCatalogSource<ThrowOnError extends boolean = true>(
  */
 export function getCatalogSourceJob<ThrowOnError extends boolean = true>(
 	options: Options<GetCatalogSourceJobOptions, ThrowOnError>,
-): Promise<RequestResult<GetCatalogSourceJobResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetCatalogSourceJobResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/sources/{sourceRecordId}/jobs/{jobId}",
-		...config,
-	}) as Promise<RequestResult<GetCatalogSourceJobResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/sources/{sourceRecordId}/jobs/{jobId}",
+			...config,
+		}) as Promise<RequestResult<GetCatalogSourceJobResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4494,18 +4885,20 @@ export function getCatalogSourceJob<ThrowOnError extends boolean = true>(
  */
 export function controlCatalogSourceJob<ThrowOnError extends boolean = true>(
 	options: Options<ControlCatalogSourceJobOptions, ThrowOnError>,
-): Promise<RequestResult<ControlCatalogSourceJobResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ControlCatalogSourceJobResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/catalog/sources/{sourceRecordId}/jobs/{jobId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ControlCatalogSourceJobResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/catalog/sources/{sourceRecordId}/jobs/{jobId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ControlCatalogSourceJobResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4514,14 +4907,16 @@ export function controlCatalogSourceJob<ThrowOnError extends boolean = true>(
  */
 export function listCatalogSourceProposals<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogSourceProposalsOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogSourceProposalsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogSourceProposalsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/sources/{sourceRecordId}/bindings/{mappingKey}/proposals",
-		...config,
-	}) as Promise<RequestResult<ListCatalogSourceProposalsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/sources/{sourceRecordId}/bindings/{mappingKey}/proposals",
+			...config,
+		}) as Promise<RequestResult<ListCatalogSourceProposalsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4530,18 +4925,20 @@ export function listCatalogSourceProposals<ThrowOnError extends boolean = true>(
  */
 export function proposeCatalogSourceAdoption<ThrowOnError extends boolean = true>(
 	options: Options<ProposeCatalogSourceAdoptionOptions, ThrowOnError>,
-): Promise<RequestResult<ProposeCatalogSourceAdoptionResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ProposeCatalogSourceAdoptionResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/sources/{sourceRecordId}/bindings/{mappingKey}/proposals",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ProposeCatalogSourceAdoptionResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/sources/{sourceRecordId}/bindings/{mappingKey}/proposals",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ProposeCatalogSourceAdoptionResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4550,18 +4947,20 @@ export function proposeCatalogSourceAdoption<ThrowOnError extends boolean = true
  */
 export function reviseCatalogSourceBinding<ThrowOnError extends boolean = true>(
 	options: Options<ReviseCatalogSourceBindingOptions, ThrowOnError>,
-): Promise<RequestResult<ReviseCatalogSourceBindingResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReviseCatalogSourceBindingResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/catalog/sources/{sourceRecordId}/bindings/{mappingKey}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ReviseCatalogSourceBindingResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/catalog/sources/{sourceRecordId}/bindings/{mappingKey}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ReviseCatalogSourceBindingResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4570,14 +4969,16 @@ export function reviseCatalogSourceBinding<ThrowOnError extends boolean = true>(
  */
 export function getCatalogSourceProposalPreview<ThrowOnError extends boolean = true>(
 	options: Options<GetCatalogSourceProposalPreviewOptions, ThrowOnError>,
-): Promise<RequestResult<GetCatalogSourceProposalPreviewResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetCatalogSourceProposalPreviewResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/sources/{sourceRecordId}/proposals/{proposalId}/preview",
-		...config,
-	}) as Promise<RequestResult<GetCatalogSourceProposalPreviewResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/sources/{sourceRecordId}/proposals/{proposalId}/preview",
+			...config,
+		}) as Promise<RequestResult<GetCatalogSourceProposalPreviewResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4586,14 +4987,16 @@ export function getCatalogSourceProposalPreview<ThrowOnError extends boolean = t
  */
 export function getCatalogSourceProposalPreviewValue<ThrowOnError extends boolean = true>(
 	options: Options<GetCatalogSourceProposalPreviewValueOptions, ThrowOnError>,
-): Promise<RequestResult<GetCatalogSourceProposalPreviewValueResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetCatalogSourceProposalPreviewValueResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/sources/{sourceRecordId}/proposals/{proposalId}/preview/value",
-		...config,
-	}) as Promise<RequestResult<GetCatalogSourceProposalPreviewValueResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/sources/{sourceRecordId}/proposals/{proposalId}/preview/value",
+			...config,
+		}) as Promise<RequestResult<GetCatalogSourceProposalPreviewValueResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4602,18 +5005,20 @@ export function getCatalogSourceProposalPreviewValue<ThrowOnError extends boolea
  */
 export function decideCatalogSourceProposal<ThrowOnError extends boolean = true>(
 	options: Options<DecideCatalogSourceProposalOptions, ThrowOnError>,
-): Promise<RequestResult<DecideCatalogSourceProposalResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DecideCatalogSourceProposalResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/sources/{sourceRecordId}/proposals/{proposalId}/decision",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DecideCatalogSourceProposalResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/sources/{sourceRecordId}/proposals/{proposalId}/decision",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DecideCatalogSourceProposalResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4622,14 +5027,16 @@ export function decideCatalogSourceProposal<ThrowOnError extends boolean = true>
  */
 export function getCatalogDefinitionPermissions<ThrowOnError extends boolean = true>(
 	options: Options<GetCatalogDefinitionPermissionsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetCatalogDefinitionPermissionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetCatalogDefinitionPermissionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/definitions/permissions",
-		...config,
-	}) as Promise<RequestResult<GetCatalogDefinitionPermissionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/definitions/permissions",
+			...config,
+		}) as Promise<RequestResult<GetCatalogDefinitionPermissionsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4638,14 +5045,16 @@ export function getCatalogDefinitionPermissions<ThrowOnError extends boolean = t
  */
 export function listCatalogDefinitionRevisionLabels<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogDefinitionRevisionLabelsOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogDefinitionRevisionLabelsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogDefinitionRevisionLabelsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/definitions/revision-labels",
-		...config,
-	}) as Promise<RequestResult<ListCatalogDefinitionRevisionLabelsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/definitions/revision-labels",
+			...config,
+		}) as Promise<RequestResult<ListCatalogDefinitionRevisionLabelsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4654,12 +5063,14 @@ export function listCatalogDefinitionRevisionLabels<ThrowOnError extends boolean
  */
 export function listCatalogDefinitions<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogDefinitionsOptions, ThrowOnError> = {},
-): Promise<RequestResult<ListCatalogDefinitionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogDefinitionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/catalog/definitions", ...config }) as Promise<
-		RequestResult<ListCatalogDefinitionsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/definitions", ...config }) as Promise<
+			RequestResult<ListCatalogDefinitionsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -4668,15 +5079,17 @@ export function listCatalogDefinitions<ThrowOnError extends boolean = true>(
  */
 export function createCatalogDefinition<ThrowOnError extends boolean = true>(
 	options: Options<CreateCatalogDefinitionOptions, ThrowOnError>,
-): Promise<RequestResult<CreateCatalogDefinitionResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<CreateCatalogDefinitionResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/definitions",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<CreateCatalogDefinitionResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/definitions",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<CreateCatalogDefinitionResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4685,14 +5098,16 @@ export function createCatalogDefinition<ThrowOnError extends boolean = true>(
  */
 export function getCatalogDefinitionRevision<ThrowOnError extends boolean = true>(
 	options: Options<GetCatalogDefinitionRevisionOptions, ThrowOnError>,
-): Promise<RequestResult<GetCatalogDefinitionRevisionResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetCatalogDefinitionRevisionResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/definitions/revisions/{id}",
-		...config,
-	}) as Promise<RequestResult<GetCatalogDefinitionRevisionResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/definitions/revisions/{id}",
+			...config,
+		}) as Promise<RequestResult<GetCatalogDefinitionRevisionResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4701,12 +5116,14 @@ export function getCatalogDefinitionRevision<ThrowOnError extends boolean = true
  */
 export function getCatalogDefinition<ThrowOnError extends boolean = true>(
 	options: Options<GetCatalogDefinitionOptions, ThrowOnError>,
-): Promise<RequestResult<GetCatalogDefinitionResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetCatalogDefinitionResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/catalog/definitions/{id}", ...config }) as Promise<
-		RequestResult<GetCatalogDefinitionResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/definitions/{id}", ...config }) as Promise<
+			RequestResult<GetCatalogDefinitionResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -4715,14 +5132,16 @@ export function getCatalogDefinition<ThrowOnError extends boolean = true>(
  */
 export function listCatalogDefinitionRevisions<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogDefinitionRevisionsOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogDefinitionRevisionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogDefinitionRevisionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/definitions/{id}/revisions",
-		...config,
-	}) as Promise<RequestResult<ListCatalogDefinitionRevisionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/definitions/{id}/revisions",
+			...config,
+		}) as Promise<RequestResult<ListCatalogDefinitionRevisionsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4731,15 +5150,17 @@ export function listCatalogDefinitionRevisions<ThrowOnError extends boolean = tr
  */
 export function reviseCatalogDefinition<ThrowOnError extends boolean = true>(
 	options: Options<ReviseCatalogDefinitionOptions, ThrowOnError>,
-): Promise<RequestResult<ReviseCatalogDefinitionResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReviseCatalogDefinitionResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/definitions/{id}/revisions",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ReviseCatalogDefinitionResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/definitions/{id}/revisions",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ReviseCatalogDefinitionResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4748,14 +5169,16 @@ export function reviseCatalogDefinition<ThrowOnError extends boolean = true>(
  */
 export function readEntityMeasurementContext<ThrowOnError extends boolean = true>(
 	options: Options<ReadEntityMeasurementContextOptions, ThrowOnError>,
-): Promise<RequestResult<ReadEntityMeasurementContextResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadEntityMeasurementContextResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/entity/{id}/measurements/context",
-		...config,
-	}) as Promise<RequestResult<ReadEntityMeasurementContextResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/entity/{id}/measurements/context",
+			...config,
+		}) as Promise<RequestResult<ReadEntityMeasurementContextResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4764,18 +5187,20 @@ export function readEntityMeasurementContext<ThrowOnError extends boolean = true
  */
 export function writeEntityMeasurementContext<ThrowOnError extends boolean = true>(
 	options: Options<WriteEntityMeasurementContextOptions, ThrowOnError>,
-): Promise<RequestResult<WriteEntityMeasurementContextResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<WriteEntityMeasurementContextResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/entity/{id}/measurements/context",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<WriteEntityMeasurementContextResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/entity/{id}/measurements/context",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<WriteEntityMeasurementContextResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4784,14 +5209,14 @@ export function writeEntityMeasurementContext<ThrowOnError extends boolean = tru
  */
 export function listGroupingClasses<ThrowOnError extends boolean = true>(
 	options: Options<ListGroupingClassesOptions, ThrowOnError>,
-): Promise<RequestResult<ListGroupingClassesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListGroupingClassesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/grouping/{id}/classes",
-		...config,
-	}) as Promise<RequestResult<ListGroupingClassesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/grouping/{id}/classes", ...config }) as Promise<
+			RequestResult<ListGroupingClassesResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -4800,18 +5225,20 @@ export function listGroupingClasses<ThrowOnError extends boolean = true>(
  */
 export function assignGroupingClass<ThrowOnError extends boolean = true>(
 	options: Options<AssignGroupingClassOptions, ThrowOnError>,
-): Promise<RequestResult<AssignGroupingClassResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<AssignGroupingClassResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/grouping/{id}/classes/{classRevisionId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<AssignGroupingClassResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/grouping/{id}/classes/{classRevisionId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<AssignGroupingClassResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4820,18 +5247,20 @@ export function assignGroupingClass<ThrowOnError extends boolean = true>(
  */
 export function removeGroupingClass<ThrowOnError extends boolean = true>(
 	options: Options<RemoveGroupingClassOptions, ThrowOnError>,
-): Promise<RequestResult<RemoveGroupingClassResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RemoveGroupingClassResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/catalog/grouping/{id}/classes/{classRevisionId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RemoveGroupingClassResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/catalog/grouping/{id}/classes/{classRevisionId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RemoveGroupingClassResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4840,14 +5269,14 @@ export function removeGroupingClass<ThrowOnError extends boolean = true>(
  */
 export function listGroupingOrderProfiles<ThrowOnError extends boolean = true>(
 	options: Options<ListGroupingOrderProfilesOptions, ThrowOnError>,
-): Promise<RequestResult<ListGroupingOrderProfilesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListGroupingOrderProfilesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/grouping/{id}/orders",
-		...config,
-	}) as Promise<RequestResult<ListGroupingOrderProfilesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/grouping/{id}/orders", ...config }) as Promise<
+			RequestResult<ListGroupingOrderProfilesResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -4856,18 +5285,20 @@ export function listGroupingOrderProfiles<ThrowOnError extends boolean = true>(
  */
 export function createGroupingOrderProfile<ThrowOnError extends boolean = true>(
 	options: Options<CreateGroupingOrderProfileOptions, ThrowOnError>,
-): Promise<RequestResult<CreateGroupingOrderProfileResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<CreateGroupingOrderProfileResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/grouping/{id}/orders",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<CreateGroupingOrderProfileResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/grouping/{id}/orders",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<CreateGroupingOrderProfileResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4876,18 +5307,20 @@ export function createGroupingOrderProfile<ThrowOnError extends boolean = true>(
  */
 export function renameGroupingOrderProfile<ThrowOnError extends boolean = true>(
 	options: Options<RenameGroupingOrderProfileOptions, ThrowOnError>,
-): Promise<RequestResult<RenameGroupingOrderProfileResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RenameGroupingOrderProfileResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/grouping/{id}/orders/{profileId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RenameGroupingOrderProfileResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/grouping/{id}/orders/{profileId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RenameGroupingOrderProfileResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4896,14 +5329,16 @@ export function renameGroupingOrderProfile<ThrowOnError extends boolean = true>(
  */
 export function listGroupingOrderEntries<ThrowOnError extends boolean = true>(
 	options: Options<ListGroupingOrderEntriesOptions, ThrowOnError>,
-): Promise<RequestResult<ListGroupingOrderEntriesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListGroupingOrderEntriesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/grouping/{id}/orders/{profileId}/entries",
-		...config,
-	}) as Promise<RequestResult<ListGroupingOrderEntriesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/grouping/{id}/orders/{profileId}/entries",
+			...config,
+		}) as Promise<RequestResult<ListGroupingOrderEntriesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4912,18 +5347,20 @@ export function listGroupingOrderEntries<ThrowOnError extends boolean = true>(
  */
 export function putGroupingOrderEntry<ThrowOnError extends boolean = true>(
 	options: Options<PutGroupingOrderEntryOptions, ThrowOnError>,
-): Promise<RequestResult<PutGroupingOrderEntryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutGroupingOrderEntryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/grouping/{id}/orders/{profileId}/entries/{relationId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutGroupingOrderEntryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/grouping/{id}/orders/{profileId}/entries/{relationId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutGroupingOrderEntryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4932,18 +5369,20 @@ export function putGroupingOrderEntry<ThrowOnError extends boolean = true>(
  */
 export function removeGroupingOrderEntry<ThrowOnError extends boolean = true>(
 	options: Options<RemoveGroupingOrderEntryOptions, ThrowOnError>,
-): Promise<RequestResult<RemoveGroupingOrderEntryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RemoveGroupingOrderEntryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/catalog/grouping/{id}/orders/{profileId}/entries/{relationId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RemoveGroupingOrderEntryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/catalog/grouping/{id}/orders/{profileId}/entries/{relationId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RemoveGroupingOrderEntryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4952,14 +5391,14 @@ export function removeGroupingOrderEntry<ThrowOnError extends boolean = true>(
  */
 export function listGroupingHistory<ThrowOnError extends boolean = true>(
 	options: Options<ListGroupingHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<ListGroupingHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListGroupingHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/grouping/{id}/history",
-		...config,
-	}) as Promise<RequestResult<ListGroupingHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/grouping/{id}/history", ...config }) as Promise<
+			RequestResult<ListGroupingHistoryResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -4968,18 +5407,20 @@ export function listGroupingHistory<ThrowOnError extends boolean = true>(
  */
 export function restoreGroupingCommand<ThrowOnError extends boolean = true>(
 	options: Options<RestoreGroupingCommandOptions, ThrowOnError>,
-): Promise<RequestResult<RestoreGroupingCommandResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RestoreGroupingCommandResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/grouping/{id}/history/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RestoreGroupingCommandResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/grouping/{id}/history/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RestoreGroupingCommandResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -4988,14 +5429,14 @@ export function restoreGroupingCommand<ThrowOnError extends boolean = true>(
  */
 export function readCatalogEntityProfile<ThrowOnError extends boolean = true>(
 	options: Options<ReadCatalogEntityProfileOptions, ThrowOnError>,
-): Promise<RequestResult<ReadCatalogEntityProfileResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadCatalogEntityProfileResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/entity/{id}/profile",
-		...config,
-	}) as Promise<RequestResult<ReadCatalogEntityProfileResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/entity/{id}/profile", ...config }) as Promise<
+			RequestResult<ReadCatalogEntityProfileResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -5004,18 +5445,20 @@ export function readCatalogEntityProfile<ThrowOnError extends boolean = true>(
  */
 export function writeCatalogEntityProfile<ThrowOnError extends boolean = true>(
 	options: Options<WriteCatalogEntityProfileOptions, ThrowOnError>,
-): Promise<RequestResult<WriteCatalogEntityProfileResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<WriteCatalogEntityProfileResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/entity/{id}/profile",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<WriteCatalogEntityProfileResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/entity/{id}/profile",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<WriteCatalogEntityProfileResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5024,18 +5467,20 @@ export function writeCatalogEntityProfile<ThrowOnError extends boolean = true>(
  */
 export function removeCatalogEntityProfile<ThrowOnError extends boolean = true>(
 	options: Options<RemoveCatalogEntityProfileOptions, ThrowOnError>,
-): Promise<RequestResult<RemoveCatalogEntityProfileResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RemoveCatalogEntityProfileResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/catalog/entity/{id}/profile",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RemoveCatalogEntityProfileResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/catalog/entity/{id}/profile",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RemoveCatalogEntityProfileResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5044,18 +5489,20 @@ export function removeCatalogEntityProfile<ThrowOnError extends boolean = true>(
  */
 export function resolveCatalogEntityShape<ThrowOnError extends boolean = true>(
 	options: Options<ResolveCatalogEntityShapeOptions, ThrowOnError>,
-): Promise<RequestResult<ResolveCatalogEntityShapeResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ResolveCatalogEntityShapeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/entity/{id}/shape/resolve",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ResolveCatalogEntityShapeResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/entity/{id}/shape/resolve",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ResolveCatalogEntityShapeResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5064,14 +5511,16 @@ export function resolveCatalogEntityShape<ThrowOnError extends boolean = true>(
  */
 export function listCatalogEntityProfileHistory<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogEntityProfileHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogEntityProfileHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogEntityProfileHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/entity/{id}/profile/history",
-		...config,
-	}) as Promise<RequestResult<ListCatalogEntityProfileHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/entity/{id}/profile/history",
+			...config,
+		}) as Promise<RequestResult<ListCatalogEntityProfileHistoryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5080,18 +5529,20 @@ export function listCatalogEntityProfileHistory<ThrowOnError extends boolean = t
  */
 export function restoreCatalogEntityProfile<ThrowOnError extends boolean = true>(
 	options: Options<RestoreCatalogEntityProfileOptions, ThrowOnError>,
-): Promise<RequestResult<RestoreCatalogEntityProfileResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RestoreCatalogEntityProfileResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/entity/{id}/profile/history/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RestoreCatalogEntityProfileResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/entity/{id}/profile/history/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RestoreCatalogEntityProfileResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5100,14 +5551,16 @@ export function restoreCatalogEntityProfile<ThrowOnError extends boolean = true>
  */
 export function listCatalogEditorialLanguages<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogEditorialLanguagesOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogEditorialLanguagesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogEditorialLanguagesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/editorial",
-		...config,
-	}) as Promise<RequestResult<ListCatalogEditorialLanguagesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/editorial",
+			...config,
+		}) as Promise<RequestResult<ListCatalogEditorialLanguagesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5116,14 +5569,16 @@ export function listCatalogEditorialLanguages<ThrowOnError extends boolean = tru
  */
 export function readCatalogEditorial<ThrowOnError extends boolean = true>(
 	options: Options<ReadCatalogEditorialOptions, ThrowOnError>,
-): Promise<RequestResult<ReadCatalogEditorialResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadCatalogEditorialResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}",
-		...config,
-	}) as Promise<RequestResult<ReadCatalogEditorialResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}",
+			...config,
+		}) as Promise<RequestResult<ReadCatalogEditorialResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5132,18 +5587,20 @@ export function readCatalogEditorial<ThrowOnError extends boolean = true>(
  */
 export function writeCatalogEditorial<ThrowOnError extends boolean = true>(
 	options: Options<WriteCatalogEditorialOptions, ThrowOnError>,
-): Promise<RequestResult<WriteCatalogEditorialResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<WriteCatalogEditorialResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<WriteCatalogEditorialResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<WriteCatalogEditorialResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5152,18 +5609,20 @@ export function writeCatalogEditorial<ThrowOnError extends boolean = true>(
  */
 export function withdrawCatalogEditorial<ThrowOnError extends boolean = true>(
 	options: Options<WithdrawCatalogEditorialOptions, ThrowOnError>,
-): Promise<RequestResult<WithdrawCatalogEditorialResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<WithdrawCatalogEditorialResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<WithdrawCatalogEditorialResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<WithdrawCatalogEditorialResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5172,14 +5631,16 @@ export function withdrawCatalogEditorial<ThrowOnError extends boolean = true>(
  */
 export function listCatalogEditorialHistory<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogEditorialHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogEditorialHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogEditorialHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}/history",
-		...config,
-	}) as Promise<RequestResult<ListCatalogEditorialHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}/history",
+			...config,
+		}) as Promise<RequestResult<ListCatalogEditorialHistoryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5188,14 +5649,16 @@ export function listCatalogEditorialHistory<ThrowOnError extends boolean = true>
  */
 export function readCatalogEditorialRevision<ThrowOnError extends boolean = true>(
 	options: Options<ReadCatalogEditorialRevisionOptions, ThrowOnError>,
-): Promise<RequestResult<ReadCatalogEditorialRevisionResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadCatalogEditorialRevisionResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}/history/{editorialRevision}",
-		...config,
-	}) as Promise<RequestResult<ReadCatalogEditorialRevisionResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}/history/{editorialRevision}",
+			...config,
+		}) as Promise<RequestResult<ReadCatalogEditorialRevisionResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5204,18 +5667,20 @@ export function readCatalogEditorialRevision<ThrowOnError extends boolean = true
  */
 export function restoreCatalogEditorial<ThrowOnError extends boolean = true>(
 	options: Options<RestoreCatalogEditorialOptions, ThrowOnError>,
-): Promise<RequestResult<RestoreCatalogEditorialResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RestoreCatalogEditorialResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}/history/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RestoreCatalogEditorialResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/resources/{owner}/{id}/editorial/{language}/history/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RestoreCatalogEditorialResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5224,12 +5689,14 @@ export function restoreCatalogEditorial<ThrowOnError extends boolean = true>(
  */
 export function listCatalogEntityCandidates<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogEntityCandidatesOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogEntityCandidatesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogEntityCandidatesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/catalog/entity-candidates", ...config }) as Promise<
-		RequestResult<ListCatalogEntityCandidatesResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/entity-candidates", ...config }) as Promise<
+			RequestResult<ListCatalogEntityCandidatesResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -5238,14 +5705,16 @@ export function listCatalogEntityCandidates<ThrowOnError extends boolean = true>
  */
 export function listCatalogResourceSourceBindings<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogResourceSourceBindingsOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogResourceSourceBindingsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogResourceSourceBindingsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/source-bindings",
-		...config,
-	}) as Promise<RequestResult<ListCatalogResourceSourceBindingsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/source-bindings",
+			...config,
+		}) as Promise<RequestResult<ListCatalogResourceSourceBindingsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5254,18 +5723,20 @@ export function listCatalogResourceSourceBindings<ThrowOnError extends boolean =
  */
 export function createCatalogResource<ThrowOnError extends boolean = true>(
 	options: Options<CreateCatalogResourceOptions, ThrowOnError>,
-): Promise<RequestResult<CreateCatalogResourceResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<CreateCatalogResourceResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/resources",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<CreateCatalogResourceResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/resources",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<CreateCatalogResourceResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5274,14 +5745,14 @@ export function createCatalogResource<ThrowOnError extends boolean = true>(
  */
 export function readCatalogResource<ThrowOnError extends boolean = true>(
 	options: Options<ReadCatalogResourceOptions, ThrowOnError>,
-): Promise<RequestResult<ReadCatalogResourceResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadCatalogResourceResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}",
-		...config,
-	}) as Promise<RequestResult<ReadCatalogResourceResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/catalog/resources/{owner}/{id}", ...config }) as Promise<
+			RequestResult<ReadCatalogResourceResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -5290,18 +5761,20 @@ export function readCatalogResource<ThrowOnError extends boolean = true>(
  */
 export function updateCatalogLifecycle<ThrowOnError extends boolean = true>(
 	options: Options<UpdateCatalogLifecycleOptions, ThrowOnError>,
-): Promise<RequestResult<UpdateCatalogLifecycleResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<UpdateCatalogLifecycleResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/catalog/resources/{owner}/{id}/lifecycle",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<UpdateCatalogLifecycleResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/catalog/resources/{owner}/{id}/lifecycle",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<UpdateCatalogLifecycleResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5310,14 +5783,16 @@ export function updateCatalogLifecycle<ThrowOnError extends boolean = true>(
  */
 export function listCatalogNames<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogNamesOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogNamesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogNamesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/names",
-		...config,
-	}) as Promise<RequestResult<ListCatalogNamesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/names",
+			...config,
+		}) as Promise<RequestResult<ListCatalogNamesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5326,18 +5801,20 @@ export function listCatalogNames<ThrowOnError extends boolean = true>(
  */
 export function addCatalogName<ThrowOnError extends boolean = true>(
 	options: Options<AddCatalogNameOptions, ThrowOnError>,
-): Promise<RequestResult<AddCatalogNameResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<AddCatalogNameResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/resources/{owner}/{id}/names",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<AddCatalogNameResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/resources/{owner}/{id}/names",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<AddCatalogNameResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5346,18 +5823,20 @@ export function addCatalogName<ThrowOnError extends boolean = true>(
  */
 export function reviseCatalogName<ThrowOnError extends boolean = true>(
 	options: Options<ReviseCatalogNameOptions, ThrowOnError>,
-): Promise<RequestResult<ReviseCatalogNameResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReviseCatalogNameResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/resources/{owner}/{id}/names/{nameId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ReviseCatalogNameResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/resources/{owner}/{id}/names/{nameId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ReviseCatalogNameResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5366,14 +5845,16 @@ export function reviseCatalogName<ThrowOnError extends boolean = true>(
  */
 export function listCatalogIdentifiers<ThrowOnError extends boolean = true>(
 	options: Options<ListCatalogIdentifiersOptions, ThrowOnError>,
-): Promise<RequestResult<ListCatalogIdentifiersResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCatalogIdentifiersResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/catalog/resources/{owner}/{id}/identifiers",
-		...config,
-	}) as Promise<RequestResult<ListCatalogIdentifiersResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/catalog/resources/{owner}/{id}/identifiers",
+			...config,
+		}) as Promise<RequestResult<ListCatalogIdentifiersResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5382,18 +5863,20 @@ export function listCatalogIdentifiers<ThrowOnError extends boolean = true>(
  */
 export function addCatalogIdentifier<ThrowOnError extends boolean = true>(
 	options: Options<AddCatalogIdentifierOptions, ThrowOnError>,
-): Promise<RequestResult<AddCatalogIdentifierResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<AddCatalogIdentifierResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/catalog/resources/{owner}/{id}/identifiers",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<AddCatalogIdentifierResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/catalog/resources/{owner}/{id}/identifiers",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<AddCatalogIdentifierResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5402,18 +5885,20 @@ export function addCatalogIdentifier<ThrowOnError extends boolean = true>(
  */
 export function reviseCatalogIdentifier<ThrowOnError extends boolean = true>(
 	options: Options<ReviseCatalogIdentifierOptions, ThrowOnError>,
-): Promise<RequestResult<ReviseCatalogIdentifierResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReviseCatalogIdentifierResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/catalog/resources/{owner}/{id}/identifiers/{identifierId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ReviseCatalogIdentifierResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/catalog/resources/{owner}/{id}/identifiers/{identifierId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ReviseCatalogIdentifierResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5422,14 +5907,14 @@ export function reviseCatalogIdentifier<ThrowOnError extends boolean = true>(
  */
 export function getApiUnitsByIdByUnitIdDocks<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdDocksOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUnitsByIdByUnitIdDocksResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/docks",
-		...config,
-	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/units/by-id/{unitId}/docks", ...config }) as Promise<
+			RequestResult<GetApiUnitsByIdByUnitIdDocksResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -5438,14 +5923,16 @@ export function getApiUnitsByIdByUnitIdDocks<ThrowOnError extends boolean = true
  */
 export function getApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdDocksByKindOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/docks/{kind}",
-		...config,
-	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/units/by-id/{unitId}/docks/{kind}",
+			...config,
+		}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5454,18 +5941,20 @@ export function getApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean 
  */
 export function putApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUnitsByIdByUnitIdDocksByKindOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/units/by-id/{unitId}/docks/{kind}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/units/by-id/{unitId}/docks/{kind}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5474,18 +5963,20 @@ export function putApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean 
  */
 export function deleteApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiUnitsByIdByUnitIdDocksByKindOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/units/by-id/{unitId}/docks/{kind}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/units/by-id/{unitId}/docks/{kind}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5494,14 +5985,18 @@ export function deleteApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boole
  */
 export function getApiUnitsByIdByUnitIdDocksByKindRevisions<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdDocksByKindRevisionsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksByKindRevisionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUnitsByIdByUnitIdDocksByKindRevisionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/docks/{kind}/revisions",
-		...config,
-	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksByKindRevisionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/units/by-id/{unitId}/docks/{kind}/revisions",
+			...config,
+		}) as Promise<
+			RequestResult<GetApiUnitsByIdByUnitIdDocksByKindRevisionsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -5515,7 +6010,7 @@ export function postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore<
 		PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreResponses,
 		ThrowOnError
@@ -5523,20 +6018,22 @@ export function postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore<
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/units/by-id/{unitId}/docks/{kind}/revisions/{revisionId}/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/units/by-id/{unitId}/docks/{kind}/revisions/{revisionId}/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -5545,18 +6042,20 @@ export function postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore<
  */
 export function getApiAccountMe<ThrowOnError extends boolean = true>(
 	options: Options<GetApiAccountMeOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiAccountMeResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiAccountMeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/account/me",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiAccountMeResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/account/me",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiAccountMeResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5565,18 +6064,20 @@ export function getApiAccountMe<ThrowOnError extends boolean = true>(
  */
 export function patchApiAccountMe<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiAccountMeOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiAccountMeResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiAccountMeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/account/me",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiAccountMeResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/account/me",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchApiAccountMeResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5585,18 +6086,20 @@ export function patchApiAccountMe<ThrowOnError extends boolean = true>(
  */
 export function listCurrentUserStudioContent<ThrowOnError extends boolean = true>(
 	options: Options<ListCurrentUserStudioContentOptions, ThrowOnError> = {},
-): Promise<RequestResult<ListCurrentUserStudioContentResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCurrentUserStudioContentResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/account/me/studio",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ListCurrentUserStudioContentResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/account/me/studio",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListCurrentUserStudioContentResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5605,18 +6108,20 @@ export function listCurrentUserStudioContent<ThrowOnError extends boolean = true
  */
 export function recordCurrentUserStudioVisit<ThrowOnError extends boolean = true>(
 	options: Options<RecordCurrentUserStudioVisitOptions, ThrowOnError>,
-): Promise<RequestResult<RecordCurrentUserStudioVisitResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RecordCurrentUserStudioVisitResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/account/me/studio/{unitId}/visit",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<RecordCurrentUserStudioVisitResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/account/me/studio/{unitId}/visit",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<RecordCurrentUserStudioVisitResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5625,18 +6130,20 @@ export function recordCurrentUserStudioVisit<ThrowOnError extends boolean = true
  */
 export function getApiAccountMePreferences<ThrowOnError extends boolean = true>(
 	options: Options<GetApiAccountMePreferencesOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiAccountMePreferencesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiAccountMePreferencesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/account/me/preferences",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiAccountMePreferencesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/account/me/preferences",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiAccountMePreferencesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5645,18 +6152,20 @@ export function getApiAccountMePreferences<ThrowOnError extends boolean = true>(
  */
 export function patchApiAccountMePreferences<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiAccountMePreferencesOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiAccountMePreferencesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiAccountMePreferencesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/account/me/preferences",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiAccountMePreferencesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/account/me/preferences",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchApiAccountMePreferencesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5665,18 +6174,20 @@ export function patchApiAccountMePreferences<ThrowOnError extends boolean = true
  */
 export function putApiAccountMePreferences<ThrowOnError extends boolean = true>(
 	options: Options<PutApiAccountMePreferencesOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiAccountMePreferencesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiAccountMePreferencesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/account/me/preferences",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiAccountMePreferencesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/account/me/preferences",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiAccountMePreferencesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5685,15 +6196,17 @@ export function putApiAccountMePreferences<ThrowOnError extends boolean = true>(
  */
 export function updateCurrentUserPrivacy<ThrowOnError extends boolean = true>(
 	options: Options<UpdateCurrentUserPrivacyOptions, ThrowOnError>,
-): Promise<RequestResult<UpdateCurrentUserPrivacyResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<UpdateCurrentUserPrivacyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/account/me/privacy",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<UpdateCurrentUserPrivacyResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/account/me/privacy",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<UpdateCurrentUserPrivacyResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5702,18 +6215,20 @@ export function updateCurrentUserPrivacy<ThrowOnError extends boolean = true>(
  */
 export function getApiAccountMeFollowing<ThrowOnError extends boolean = true>(
 	options: Options<GetApiAccountMeFollowingOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiAccountMeFollowingResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiAccountMeFollowingResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/account/me/following",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiAccountMeFollowingResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/account/me/following",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiAccountMeFollowingResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5722,18 +6237,20 @@ export function getApiAccountMeFollowing<ThrowOnError extends boolean = true>(
  */
 export function getApiAccountMeFollowingByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiAccountMeFollowingByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiAccountMeFollowingByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiAccountMeFollowingByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/account/me/following/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiAccountMeFollowingByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/account/me/following/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiAccountMeFollowingByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5742,18 +6259,20 @@ export function getApiAccountMeFollowingByUnitId<ThrowOnError extends boolean = 
  */
 export function putApiAccountMeFollowingByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiAccountMeFollowingByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiAccountMeFollowingByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiAccountMeFollowingByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/account/me/following/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiAccountMeFollowingByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/account/me/following/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiAccountMeFollowingByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5762,18 +6281,20 @@ export function putApiAccountMeFollowingByUnitId<ThrowOnError extends boolean = 
  */
 export function deleteApiAccountMeFollowingByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiAccountMeFollowingByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiAccountMeFollowingByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiAccountMeFollowingByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/account/me/following/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiAccountMeFollowingByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/account/me/following/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiAccountMeFollowingByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5782,18 +6303,20 @@ export function deleteApiAccountMeFollowingByUnitId<ThrowOnError extends boolean
  */
 export function patchApiAccountMeFollowingByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiAccountMeFollowingByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiAccountMeFollowingByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiAccountMeFollowingByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/account/me/following/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiAccountMeFollowingByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/account/me/following/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchApiAccountMeFollowingByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5802,18 +6325,20 @@ export function patchApiAccountMeFollowingByUnitId<ThrowOnError extends boolean 
  */
 export function putApiAccountMeFollowingByUnitIdSettings<ThrowOnError extends boolean = true>(
 	options: Options<PutApiAccountMeFollowingByUnitIdSettingsOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiAccountMeFollowingByUnitIdSettingsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiAccountMeFollowingByUnitIdSettingsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/account/me/following/{unitId}/settings",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiAccountMeFollowingByUnitIdSettingsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/account/me/following/{unitId}/settings",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiAccountMeFollowingByUnitIdSettingsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5822,12 +6347,14 @@ export function putApiAccountMeFollowingByUnitIdSettings<ThrowOnError extends bo
  */
 export function getUserProfileActivity<ThrowOnError extends boolean = true>(
 	options: Options<GetUserProfileActivityOptions, ThrowOnError>,
-): Promise<RequestResult<GetUserProfileActivityResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetUserProfileActivityResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/entities/{id}/activity", ...config }) as Promise<
-		RequestResult<GetUserProfileActivityResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/entities/{id}/activity", ...config }) as Promise<
+			RequestResult<GetUserProfileActivityResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -5836,12 +6363,14 @@ export function getUserProfileActivity<ThrowOnError extends boolean = true>(
  */
 export function getApiEntitiesByIdProfile<ThrowOnError extends boolean = true>(
 	options: Options<GetApiEntitiesByIdProfileOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiEntitiesByIdProfileResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiEntitiesByIdProfileResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/entities/{id}/profile", ...config }) as Promise<
-		RequestResult<GetApiEntitiesByIdProfileResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/entities/{id}/profile", ...config }) as Promise<
+			RequestResult<GetApiEntitiesByIdProfileResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -5850,18 +6379,20 @@ export function getApiEntitiesByIdProfile<ThrowOnError extends boolean = true>(
  */
 export function getApiAccountMeBlocks<ThrowOnError extends boolean = true>(
 	options: Options<GetApiAccountMeBlocksOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiAccountMeBlocksResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiAccountMeBlocksResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/account/me/blocks",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiAccountMeBlocksResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/account/me/blocks",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiAccountMeBlocksResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5870,18 +6401,20 @@ export function getApiAccountMeBlocks<ThrowOnError extends boolean = true>(
  */
 export function putApiAccountBlocksById<ThrowOnError extends boolean = true>(
 	options: Options<PutApiAccountBlocksByIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiAccountBlocksByIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiAccountBlocksByIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/account/blocks/{id}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiAccountBlocksByIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/account/blocks/{id}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiAccountBlocksByIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5890,18 +6423,20 @@ export function putApiAccountBlocksById<ThrowOnError extends boolean = true>(
  */
 export function deleteApiAccountBlocksById<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiAccountBlocksByIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiAccountBlocksByIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiAccountBlocksByIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/account/blocks/{id}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiAccountBlocksByIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/account/blocks/{id}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiAccountBlocksByIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5909,15 +6444,17 @@ export function deleteApiAccountBlocksById<ThrowOnError extends boolean = true>(
  */
 export function listManagedOrganizationMembers<ThrowOnError extends boolean = true>(
 	options: Options<ListManagedOrganizationMembersOptions, ThrowOnError>,
-): Promise<RequestResult<ListManagedOrganizationMembersResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListManagedOrganizationMembersResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/participation/membership/organizations/{organizationEntityId}/members",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ListManagedOrganizationMembersResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/members",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ListManagedOrganizationMembersResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5925,15 +6462,17 @@ export function listManagedOrganizationMembers<ThrowOnError extends boolean = tr
  */
 export function listManagedOrganizationInvitations<ThrowOnError extends boolean = true>(
 	options: Options<ListManagedOrganizationInvitationsOptions, ThrowOnError>,
-): Promise<RequestResult<ListManagedOrganizationInvitationsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListManagedOrganizationInvitationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/participation/membership/organizations/{organizationEntityId}/invitations",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ListManagedOrganizationInvitationsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/invitations",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ListManagedOrganizationInvitationsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5941,15 +6480,17 @@ export function listManagedOrganizationInvitations<ThrowOnError extends boolean 
  */
 export function inviteOrganizationMember<ThrowOnError extends boolean = true>(
 	options: Options<InviteOrganizationMemberOptions, ThrowOnError>,
-): Promise<RequestResult<InviteOrganizationMemberResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<InviteOrganizationMemberResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/membership/organizations/{organizationEntityId}/invitations",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<InviteOrganizationMemberResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/invitations",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<InviteOrganizationMemberResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5957,15 +6498,17 @@ export function inviteOrganizationMember<ThrowOnError extends boolean = true>(
  */
 export function cancelOrganizationMembershipInvitation<ThrowOnError extends boolean = true>(
 	options: Options<CancelOrganizationMembershipInvitationOptions, ThrowOnError>,
-): Promise<RequestResult<CancelOrganizationMembershipInvitationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<CancelOrganizationMembershipInvitationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/membership/organizations/{organizationEntityId}/invitations/{invitationId}/cancel",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<CancelOrganizationMembershipInvitationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/invitations/{invitationId}/cancel",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<CancelOrganizationMembershipInvitationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5973,15 +6516,17 @@ export function cancelOrganizationMembershipInvitation<ThrowOnError extends bool
  */
 export function removeOrganizationMember<ThrowOnError extends boolean = true>(
 	options: Options<RemoveOrganizationMemberOptions, ThrowOnError>,
-): Promise<RequestResult<RemoveOrganizationMemberResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RemoveOrganizationMemberResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/membership/organizations/{organizationEntityId}/members/{memberEntityId}/remove",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<RemoveOrganizationMemberResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/membership/organizations/{organizationEntityId}/members/{memberEntityId}/remove",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RemoveOrganizationMemberResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -5989,15 +6534,17 @@ export function removeOrganizationMember<ThrowOnError extends boolean = true>(
  */
 export function listOwnOrganizationMembershipInvitations<ThrowOnError extends boolean = true>(
 	options: Options<ListOwnOrganizationMembershipInvitationsOptions, ThrowOnError> = {},
-): Promise<RequestResult<ListOwnOrganizationMembershipInvitationsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListOwnOrganizationMembershipInvitationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/participation/membership/me/invitations",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ListOwnOrganizationMembershipInvitationsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/participation/membership/me/invitations",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ListOwnOrganizationMembershipInvitationsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6005,15 +6552,17 @@ export function listOwnOrganizationMembershipInvitations<ThrowOnError extends bo
  */
 export function listOwnOrganizationMemberships<ThrowOnError extends boolean = true>(
 	options: Options<ListOwnOrganizationMembershipsOptions, ThrowOnError> = {},
-): Promise<RequestResult<ListOwnOrganizationMembershipsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListOwnOrganizationMembershipsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/participation/membership/me/organizations",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ListOwnOrganizationMembershipsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/participation/membership/me/organizations",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ListOwnOrganizationMembershipsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6021,15 +6570,17 @@ export function listOwnOrganizationMemberships<ThrowOnError extends boolean = tr
  */
 export function acceptOrganizationMembershipInvitation<ThrowOnError extends boolean = true>(
 	options: Options<AcceptOrganizationMembershipInvitationOptions, ThrowOnError>,
-): Promise<RequestResult<AcceptOrganizationMembershipInvitationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<AcceptOrganizationMembershipInvitationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/membership/invitations/{invitationId}/accept",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<AcceptOrganizationMembershipInvitationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/membership/invitations/{invitationId}/accept",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<AcceptOrganizationMembershipInvitationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6037,15 +6588,17 @@ export function acceptOrganizationMembershipInvitation<ThrowOnError extends bool
  */
 export function declineOrganizationMembershipInvitation<ThrowOnError extends boolean = true>(
 	options: Options<DeclineOrganizationMembershipInvitationOptions, ThrowOnError>,
-): Promise<RequestResult<DeclineOrganizationMembershipInvitationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeclineOrganizationMembershipInvitationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/membership/invitations/{invitationId}/decline",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<DeclineOrganizationMembershipInvitationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/membership/invitations/{invitationId}/decline",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<DeclineOrganizationMembershipInvitationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6053,15 +6606,17 @@ export function declineOrganizationMembershipInvitation<ThrowOnError extends boo
  */
 export function leaveOrganizationMembership<ThrowOnError extends boolean = true>(
 	options: Options<LeaveOrganizationMembershipOptions, ThrowOnError>,
-): Promise<RequestResult<LeaveOrganizationMembershipResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<LeaveOrganizationMembershipResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/membership/me/organizations/{organizationEntityId}/leave",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<LeaveOrganizationMembershipResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/membership/me/organizations/{organizationEntityId}/leave",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<LeaveOrganizationMembershipResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6069,15 +6624,17 @@ export function leaveOrganizationMembership<ThrowOnError extends boolean = true>
  */
 export function listManagedOrganizations<ThrowOnError extends boolean = true>(
 	options: Options<ListManagedOrganizationsOptions, ThrowOnError> = {},
-): Promise<RequestResult<ListManagedOrganizationsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListManagedOrganizationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/participation/organizations",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ListManagedOrganizationsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/participation/organizations",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ListManagedOrganizationsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6085,15 +6642,17 @@ export function listManagedOrganizations<ThrowOnError extends boolean = true>(
  */
 export function createManagedOrganization<ThrowOnError extends boolean = true>(
 	options: Options<CreateManagedOrganizationOptions, ThrowOnError>,
-): Promise<RequestResult<CreateManagedOrganizationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<CreateManagedOrganizationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/organizations",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<CreateManagedOrganizationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/organizations",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<CreateManagedOrganizationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6101,15 +6660,17 @@ export function createManagedOrganization<ThrowOnError extends boolean = true>(
  */
 export function updateActingEntityPresentation<ThrowOnError extends boolean = true>(
 	options: Options<UpdateActingEntityPresentationOptions, ThrowOnError>,
-): Promise<RequestResult<UpdateActingEntityPresentationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<UpdateActingEntityPresentationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/participation/presentation",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<UpdateActingEntityPresentationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/participation/presentation",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<UpdateActingEntityPresentationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6117,15 +6678,17 @@ export function updateActingEntityPresentation<ThrowOnError extends boolean = tr
  */
 export function listActingEntityPresentationHistory<ThrowOnError extends boolean = true>(
 	options: Options<ListActingEntityPresentationHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<ListActingEntityPresentationHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListActingEntityPresentationHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/participation/presentation/{language}/history",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ListActingEntityPresentationHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/participation/presentation/{language}/history",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ListActingEntityPresentationHistoryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6133,15 +6696,17 @@ export function listActingEntityPresentationHistory<ThrowOnError extends boolean
  */
 export function getActingEntityPresentationRevision<ThrowOnError extends boolean = true>(
 	options: Options<GetActingEntityPresentationRevisionOptions, ThrowOnError>,
-): Promise<RequestResult<GetActingEntityPresentationRevisionResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetActingEntityPresentationRevisionResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/participation/presentation/{language}/history/{revision}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetActingEntityPresentationRevisionResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/participation/presentation/{language}/history/{revision}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetActingEntityPresentationRevisionResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6149,15 +6714,17 @@ export function getActingEntityPresentationRevision<ThrowOnError extends boolean
  */
 export function restoreActingEntityPresentation<ThrowOnError extends boolean = true>(
 	options: Options<RestoreActingEntityPresentationOptions, ThrowOnError>,
-): Promise<RequestResult<RestoreActingEntityPresentationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RestoreActingEntityPresentationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/presentation/{language}/restore",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<RestoreActingEntityPresentationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/presentation/{language}/restore",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RestoreActingEntityPresentationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6165,15 +6732,17 @@ export function restoreActingEntityPresentation<ThrowOnError extends boolean = t
  */
 export function getCurrentParticipation<ThrowOnError extends boolean = true>(
 	options: Options<GetCurrentParticipationOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetCurrentParticipationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetCurrentParticipationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/participation/self",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetCurrentParticipationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/participation/self",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetCurrentParticipationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6181,15 +6750,17 @@ export function getCurrentParticipation<ThrowOnError extends boolean = true>(
  */
 export function listParticipationGrants<ThrowOnError extends boolean = true>(
 	options: Options<ListParticipationGrantsOptions, ThrowOnError> = {},
-): Promise<RequestResult<ListParticipationGrantsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListParticipationGrantsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/participation/grants",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ListParticipationGrantsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/participation/grants",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ListParticipationGrantsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6197,15 +6768,17 @@ export function listParticipationGrants<ThrowOnError extends boolean = true>(
  */
 export function issueParticipationGrant<ThrowOnError extends boolean = true>(
 	options: Options<IssueParticipationGrantOptions, ThrowOnError>,
-): Promise<RequestResult<IssueParticipationGrantResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<IssueParticipationGrantResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/grants",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<IssueParticipationGrantResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/grants",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<IssueParticipationGrantResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6213,15 +6786,17 @@ export function issueParticipationGrant<ThrowOnError extends boolean = true>(
  */
 export function listManagedEntityGrants<ThrowOnError extends boolean = true>(
 	options: Options<ListManagedEntityGrantsOptions, ThrowOnError>,
-): Promise<RequestResult<ListManagedEntityGrantsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListManagedEntityGrantsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/participation/entities/{id}/grants",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ListManagedEntityGrantsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/participation/entities/{id}/grants",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ListManagedEntityGrantsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6229,15 +6804,17 @@ export function listManagedEntityGrants<ThrowOnError extends boolean = true>(
  */
 export function selectParticipation<ThrowOnError extends boolean = true>(
 	options: Options<SelectParticipationOptions, ThrowOnError>,
-): Promise<RequestResult<SelectParticipationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<SelectParticipationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/acting",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<SelectParticipationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/acting",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<SelectParticipationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6245,15 +6822,17 @@ export function selectParticipation<ThrowOnError extends boolean = true>(
  */
 export function revokeParticipationGrant<ThrowOnError extends boolean = true>(
 	options: Options<RevokeParticipationGrantOptions, ThrowOnError>,
-): Promise<RequestResult<RevokeParticipationGrantResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RevokeParticipationGrantResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/grants/{id}/revoke",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<RevokeParticipationGrantResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/grants/{id}/revoke",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RevokeParticipationGrantResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6261,15 +6840,17 @@ export function revokeParticipationGrant<ThrowOnError extends boolean = true>(
  */
 export function listControlledServicePrincipals<ThrowOnError extends boolean = true>(
 	options: Options<ListControlledServicePrincipalsOptions, ThrowOnError> = {},
-): Promise<RequestResult<ListControlledServicePrincipalsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListControlledServicePrincipalsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/participation/service-principals",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ListControlledServicePrincipalsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/participation/service-principals",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ListControlledServicePrincipalsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6277,15 +6858,17 @@ export function listControlledServicePrincipals<ThrowOnError extends boolean = t
  */
 export function createServicePrincipal<ThrowOnError extends boolean = true>(
 	options: Options<CreateServicePrincipalOptions, ThrowOnError>,
-): Promise<RequestResult<CreateServicePrincipalResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<CreateServicePrincipalResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/service-principals",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<CreateServicePrincipalResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/service-principals",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<CreateServicePrincipalResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6293,15 +6876,17 @@ export function createServicePrincipal<ThrowOnError extends boolean = true>(
  */
 export function revokeServicePrincipal<ThrowOnError extends boolean = true>(
 	options: Options<RevokeServicePrincipalOptions, ThrowOnError>,
-): Promise<RequestResult<RevokeServicePrincipalResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RevokeServicePrincipalResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/service-principals/{id}/revoke",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<RevokeServicePrincipalResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/service-principals/{id}/revoke",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RevokeServicePrincipalResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6309,15 +6894,17 @@ export function revokeServicePrincipal<ThrowOnError extends boolean = true>(
  */
 export function eraseOwnAccount<ThrowOnError extends boolean = true>(
 	options: Options<EraseOwnAccountOptions, ThrowOnError> = {},
-): Promise<RequestResult<EraseOwnAccountResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<EraseOwnAccountResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/account/erase",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<EraseOwnAccountResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/account/erase",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<EraseOwnAccountResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6325,15 +6912,17 @@ export function eraseOwnAccount<ThrowOnError extends boolean = true>(
  */
 export function recoverEntityController<ThrowOnError extends boolean = true>(
 	options: Options<RecoverEntityControllerOptions, ThrowOnError>,
-): Promise<RequestResult<RecoverEntityControllerResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<RecoverEntityControllerResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/participation/entities/{id}/recover",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<RecoverEntityControllerResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/participation/entities/{id}/recover",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<RecoverEntityControllerResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6342,15 +6931,17 @@ export function recoverEntityController<ThrowOnError extends boolean = true>(
  */
 export function getApiCustomThemesExecutionControl<ThrowOnError extends boolean = true>(
 	options: Options<GetApiCustomThemesExecutionControlOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiCustomThemesExecutionControlResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiCustomThemesExecutionControlResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/custom-themes/execution-control",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiCustomThemesExecutionControlResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/custom-themes/execution-control",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiCustomThemesExecutionControlResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6359,15 +6950,17 @@ export function getApiCustomThemesExecutionControl<ThrowOnError extends boolean 
  */
 export function putApiCustomThemesExecutionControl<ThrowOnError extends boolean = true>(
 	options: Options<PutApiCustomThemesExecutionControlOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiCustomThemesExecutionControlResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiCustomThemesExecutionControlResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/custom-themes/execution-control",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiCustomThemesExecutionControlResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/custom-themes/execution-control",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PutApiCustomThemesExecutionControlResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6376,18 +6969,20 @@ export function putApiCustomThemesExecutionControl<ThrowOnError extends boolean 
  */
 export function postApiCustomThemes<ThrowOnError extends boolean = true>(
 	options: Options<PostApiCustomThemesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiCustomThemesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiCustomThemesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/custom-themes/",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiCustomThemesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/custom-themes/",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiCustomThemesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6398,22 +6993,24 @@ export function putApiCustomThemesByThemeUnitIdLocalizationsByLanguage<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/custom-themes/{themeUnitId}/localizations/{language}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/custom-themes/{themeUnitId}/localizations/{language}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiCustomThemesByThemeUnitIdLocalizationsByLanguageResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -6422,15 +7019,17 @@ export function putApiCustomThemesByThemeUnitIdLocalizationsByLanguage<
  */
 export function getApiCustomThemesReviewQueue<ThrowOnError extends boolean = true>(
 	options: Options<GetApiCustomThemesReviewQueueOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiCustomThemesReviewQueueResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiCustomThemesReviewQueueResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/custom-themes/review-queue",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiCustomThemesReviewQueueResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/custom-themes/review-queue",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiCustomThemesReviewQueueResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6439,18 +7038,20 @@ export function getApiCustomThemesReviewQueue<ThrowOnError extends boolean = tru
  */
 export function getApiCustomThemesByThemeUnitIdRevisions<ThrowOnError extends boolean = true>(
 	options: Options<GetApiCustomThemesByThemeUnitIdRevisionsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiCustomThemesByThemeUnitIdRevisionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiCustomThemesByThemeUnitIdRevisionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/custom-themes/{themeUnitId}/revisions",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiCustomThemesByThemeUnitIdRevisionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/custom-themes/{themeUnitId}/revisions",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiCustomThemesByThemeUnitIdRevisionsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6459,18 +7060,20 @@ export function getApiCustomThemesByThemeUnitIdRevisions<ThrowOnError extends bo
  */
 export function postApiCustomThemesByThemeUnitIdRevisions<ThrowOnError extends boolean = true>(
 	options: Options<PostApiCustomThemesByThemeUnitIdRevisionsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiCustomThemesByThemeUnitIdRevisionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiCustomThemesByThemeUnitIdRevisionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/custom-themes/{themeUnitId}/revisions",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiCustomThemesByThemeUnitIdRevisionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/custom-themes/{themeUnitId}/revisions",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiCustomThemesByThemeUnitIdRevisionsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6484,7 +7087,7 @@ export function postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecision<
 		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionResponses,
 		ThrowOnError
@@ -6492,17 +7095,19 @@ export function postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecision<
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/custom-themes/{themeUnitId}/revisions/{revisionId}/decision",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/custom-themes/{themeUnitId}/revisions/{revisionId}/decision",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdDecisionResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -6513,19 +7118,24 @@ export function postApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKill<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/custom-themes/{themeUnitId}/revisions/{revisionId}/kill",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/custom-themes/{themeUnitId}/revisions/{revisionId}/kill",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiCustomThemesByThemeUnitIdRevisionsByRevisionIdKillResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -6539,7 +7149,7 @@ export function getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRen
 		GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdResponses,
 		ThrowOnError
@@ -6547,17 +7157,19 @@ export function getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRen
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/custom-themes/{themeUnitId}/revisions/{revisionId}/reference-render-artifacts/{screenshotAssetId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/custom-themes/{themeUnitId}/revisions/{revisionId}/reference-render-artifacts/{screenshotAssetId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdReferenceRenderArtifactsByScreenshotAssetIdResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -6568,19 +7180,21 @@ export function getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFile<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/custom-themes/{themeUnitId}/revisions/{revisionId}/file",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/custom-themes/{themeUnitId}/revisions/{revisionId}/file",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -6589,18 +7203,20 @@ export function getApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFile<
  */
 export function getApiUnitsByIdByUnitIdPresentation<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdPresentationOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByIdByUnitIdPresentationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUnitsByIdByUnitIdPresentationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/presentation",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdPresentationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/units/by-id/{unitId}/presentation",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdPresentationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6609,18 +7225,20 @@ export function getApiUnitsByIdByUnitIdPresentation<ThrowOnError extends boolean
  */
 export function putApiUnitsByIdByUnitIdPresentation<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUnitsByIdByUnitIdPresentationOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUnitsByIdByUnitIdPresentationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiUnitsByIdByUnitIdPresentationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/units/by-id/{unitId}/presentation",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiUnitsByIdByUnitIdPresentationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/units/by-id/{unitId}/presentation",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiUnitsByIdByUnitIdPresentationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6629,18 +7247,20 @@ export function putApiUnitsByIdByUnitIdPresentation<ThrowOnError extends boolean
  */
 export function getApiUnitsByIdByUnitIdPresentationPolicy<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdPresentationPolicyOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByIdByUnitIdPresentationPolicyResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUnitsByIdByUnitIdPresentationPolicyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/presentation-policy",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdPresentationPolicyResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/units/by-id/{unitId}/presentation-policy",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdPresentationPolicyResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6649,18 +7269,22 @@ export function getApiUnitsByIdByUnitIdPresentationPolicy<ThrowOnError extends b
  */
 export function getApiUnitsByIdByUnitIdPresentationDocument<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdPresentationDocumentOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByIdByUnitIdPresentationDocumentResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUnitsByIdByUnitIdPresentationDocumentResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/presentation-document",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdPresentationDocumentResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/units/by-id/{unitId}/presentation-document",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiUnitsByIdByUnitIdPresentationDocumentResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -6669,20 +7293,24 @@ export function getApiUnitsByIdByUnitIdPresentationDocument<ThrowOnError extends
  */
 export function putApiUnitsByIdByUnitIdCustomThemeInstallation<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUnitsByIdByUnitIdCustomThemeInstallationOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUnitsByIdByUnitIdCustomThemeInstallationResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<PutApiUnitsByIdByUnitIdCustomThemeInstallationResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/units/by-id/{unitId}/custom-theme-installation",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiUnitsByIdByUnitIdCustomThemeInstallationResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/units/by-id/{unitId}/custom-theme-installation",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiUnitsByIdByUnitIdCustomThemeInstallationResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -6693,22 +7321,24 @@ export function deleteApiUnitsByIdByUnitIdCustomThemeInstallation<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<DeleteApiUnitsByIdByUnitIdCustomThemeInstallationOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<DeleteApiUnitsByIdByUnitIdCustomThemeInstallationResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/units/by-id/{unitId}/custom-theme-installation",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiUnitsByIdByUnitIdCustomThemeInstallationResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/units/by-id/{unitId}/custom-theme-installation",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiUnitsByIdByUnitIdCustomThemeInstallationResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -6719,19 +7349,21 @@ export function getApiPlatformAccessCustomThemeExternalLiveAccounts<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<GetApiPlatformAccessCustomThemeExternalLiveAccountsOptions, ThrowOnError> = {},
-): Promise<
+): Unwrappable<
 	RequestResult<GetApiPlatformAccessCustomThemeExternalLiveAccountsResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/platform-access/custom-theme-external-live/accounts",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<GetApiPlatformAccessCustomThemeExternalLiveAccountsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/platform-access/custom-theme-external-live/accounts",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiPlatformAccessCustomThemeExternalLiveAccountsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -6745,7 +7377,7 @@ export function getApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveA
 		GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessResponses,
 		ThrowOnError
@@ -6753,17 +7385,19 @@ export function getApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveA
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/platform-access/accounts/{authUserId}/custom-theme-external-live-access",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/platform-access/accounts/{authUserId}/custom-theme-external-live-access",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				GetApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -6777,7 +7411,7 @@ export function putApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveA
 		PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessResponses,
 		ThrowOnError
@@ -6785,17 +7419,19 @@ export function putApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveA
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/platform-access/accounts/{authUserId}/custom-theme-external-live-access",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/platform-access/accounts/{authUserId}/custom-theme-external-live-access",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PutApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveAccessResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -6804,15 +7440,17 @@ export function putApiPlatformAccessAccountsByAuthUserIdCustomThemeExternalLiveA
  */
 export function getApiPlatformAccessPolicy<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPlatformAccessPolicyOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiPlatformAccessPolicyResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiPlatformAccessPolicyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/platform-access/policy",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiPlatformAccessPolicyResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/platform-access/policy",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiPlatformAccessPolicyResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6821,15 +7459,17 @@ export function getApiPlatformAccessPolicy<ThrowOnError extends boolean = true>(
  */
 export function getApiPlatformAccessAccounts<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPlatformAccessAccountsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiPlatformAccessAccountsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiPlatformAccessAccountsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/platform-access/accounts",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiPlatformAccessAccountsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/platform-access/accounts",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiPlatformAccessAccountsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6838,15 +7478,17 @@ export function getApiPlatformAccessAccounts<ThrowOnError extends boolean = true
  */
 export function getApiPlatformAccessAccountsByAuthUserId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPlatformAccessAccountsByAuthUserIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiPlatformAccessAccountsByAuthUserIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiPlatformAccessAccountsByAuthUserIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/platform-access/accounts/{authUserId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiPlatformAccessAccountsByAuthUserIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/platform-access/accounts/{authUserId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiPlatformAccessAccountsByAuthUserIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6855,15 +7497,17 @@ export function getApiPlatformAccessAccountsByAuthUserId<ThrowOnError extends bo
  */
 export function putApiPlatformAccessAccountsByAuthUserId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiPlatformAccessAccountsByAuthUserIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiPlatformAccessAccountsByAuthUserIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiPlatformAccessAccountsByAuthUserIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/platform-access/accounts/{authUserId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiPlatformAccessAccountsByAuthUserIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/platform-access/accounts/{authUserId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PutApiPlatformAccessAccountsByAuthUserIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6872,15 +7516,17 @@ export function putApiPlatformAccessAccountsByAuthUserId<ThrowOnError extends bo
  */
 export function getApiPlatformUsers<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPlatformUsersOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiPlatformUsersResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiPlatformUsersResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/platform-users",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiPlatformUsersResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/platform-users",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiPlatformUsersResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6889,15 +7535,17 @@ export function getApiPlatformUsers<ThrowOnError extends boolean = true>(
  */
 export function getApiPlatformUsersByUserId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPlatformUsersByUserIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiPlatformUsersByUserIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiPlatformUsersByUserIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/platform-users/{userId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiPlatformUsersByUserIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/platform-users/{userId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiPlatformUsersByUserIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6906,15 +7554,17 @@ export function getApiPlatformUsersByUserId<ThrowOnError extends boolean = true>
  */
 export function putApiPlatformUsersByUserIdAccountState<ThrowOnError extends boolean = true>(
 	options: Options<PutApiPlatformUsersByUserIdAccountStateOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiPlatformUsersByUserIdAccountStateResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiPlatformUsersByUserIdAccountStateResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/platform-users/{userId}/account-state",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiPlatformUsersByUserIdAccountStateResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/platform-users/{userId}/account-state",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PutApiPlatformUsersByUserIdAccountStateResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6923,15 +7573,17 @@ export function putApiPlatformUsersByUserIdAccountState<ThrowOnError extends boo
  */
 export function getApiPlatformUsersByUserIdSessions<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPlatformUsersByUserIdSessionsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiPlatformUsersByUserIdSessionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiPlatformUsersByUserIdSessionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/platform-users/{userId}/sessions",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiPlatformUsersByUserIdSessionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/platform-users/{userId}/sessions",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiPlatformUsersByUserIdSessionsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6940,15 +7592,17 @@ export function getApiPlatformUsersByUserIdSessions<ThrowOnError extends boolean
  */
 export function deleteApiPlatformUsersByUserIdSessions<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiPlatformUsersByUserIdSessionsOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiPlatformUsersByUserIdSessionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiPlatformUsersByUserIdSessionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/platform-users/{userId}/sessions",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<DeleteApiPlatformUsersByUserIdSessionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/platform-users/{userId}/sessions",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<DeleteApiPlatformUsersByUserIdSessionsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -6959,19 +7613,21 @@ export function deleteApiPlatformUsersByUserIdSessionsBySessionId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<DeleteApiPlatformUsersByUserIdSessionsBySessionIdOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<DeleteApiPlatformUsersByUserIdSessionsBySessionIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/platform-users/{userId}/sessions/{sessionId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiPlatformUsersByUserIdSessionsBySessionIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/platform-users/{userId}/sessions/{sessionId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiPlatformUsersByUserIdSessionsBySessionIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -6980,12 +7636,14 @@ export function deleteApiPlatformUsersByUserIdSessionsBySessionId<
  */
 export function getApiTagsSuggestions<ThrowOnError extends boolean = true>(
 	options: Options<GetApiTagsSuggestionsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiTagsSuggestionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiTagsSuggestionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/tags/suggestions", ...config }) as Promise<
-		RequestResult<GetApiTagsSuggestionsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/tags/suggestions", ...config }) as Promise<
+			RequestResult<GetApiTagsSuggestionsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -6994,12 +7652,14 @@ export function getApiTagsSuggestions<ThrowOnError extends boolean = true>(
  */
 export function getApiTagsByTagIdExpressions<ThrowOnError extends boolean = true>(
 	options: Options<GetApiTagsByTagIdExpressionsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiTagsByTagIdExpressionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiTagsByTagIdExpressionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/tags/{tagId}/expressions", ...config }) as Promise<
-		RequestResult<GetApiTagsByTagIdExpressionsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/tags/{tagId}/expressions", ...config }) as Promise<
+			RequestResult<GetApiTagsByTagIdExpressionsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7008,12 +7668,14 @@ export function getApiTagsByTagIdExpressions<ThrowOnError extends boolean = true
  */
 export function getApiTagsByTagIdHierarchy<ThrowOnError extends boolean = true>(
 	options: Options<GetApiTagsByTagIdHierarchyOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiTagsByTagIdHierarchyResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiTagsByTagIdHierarchyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/tags/{tagId}/hierarchy", ...config }) as Promise<
-		RequestResult<GetApiTagsByTagIdHierarchyResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/tags/{tagId}/hierarchy", ...config }) as Promise<
+			RequestResult<GetApiTagsByTagIdHierarchyResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7022,12 +7684,14 @@ export function getApiTagsByTagIdHierarchy<ThrowOnError extends boolean = true>(
  */
 export function getApiTagsByTagIdPaths<ThrowOnError extends boolean = true>(
 	options: Options<GetApiTagsByTagIdPathsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiTagsByTagIdPathsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiTagsByTagIdPathsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/tags/{tagId}/paths", ...config }) as Promise<
-		RequestResult<GetApiTagsByTagIdPathsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/tags/{tagId}/paths", ...config }) as Promise<
+			RequestResult<GetApiTagsByTagIdPathsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7036,15 +7700,17 @@ export function getApiTagsByTagIdPaths<ThrowOnError extends boolean = true>(
  */
 export function postApiTagExpressions<ThrowOnError extends boolean = true>(
 	options: Options<PostApiTagExpressionsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiTagExpressionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiTagExpressionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/tag-expressions",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiTagExpressionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/tag-expressions",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PostApiTagExpressionsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7055,19 +7721,21 @@ export function postApiTagExpressionsByExpressionIdInferenceRules<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiTagExpressionsByExpressionIdInferenceRulesOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiTagExpressionsByExpressionIdInferenceRulesResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/tag-expressions/{expressionId}/inference-rules",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiTagExpressionsByExpressionIdInferenceRulesResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/tag-expressions/{expressionId}/inference-rules",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiTagExpressionsByExpressionIdInferenceRulesResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7081,22 +7749,24 @@ export function deleteApiTagExpressionsByExpressionIdInferenceRulesByRuleId<
 		DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/tag-expressions/{expressionId}/inference-rules/{ruleId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/tag-expressions/{expressionId}/inference-rules/{ruleId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				DeleteApiTagExpressionsByExpressionIdInferenceRulesByRuleIdResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -7105,18 +7775,20 @@ export function deleteApiTagExpressionsByExpressionIdInferenceRulesByRuleId<
  */
 export function postApiTagRelations<ThrowOnError extends boolean = true>(
 	options: Options<PostApiTagRelationsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiTagRelationsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiTagRelationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/tag-relations",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiTagRelationsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/tag-relations",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiTagRelationsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7125,18 +7797,20 @@ export function postApiTagRelations<ThrowOnError extends boolean = true>(
  */
 export function postApiTagPathsDefinitionWarnings<ThrowOnError extends boolean = true>(
 	options: Options<PostApiTagPathsDefinitionWarningsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiTagPathsDefinitionWarningsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiTagPathsDefinitionWarningsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/tag-paths/definition-warnings",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiTagPathsDefinitionWarningsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/tag-paths/definition-warnings",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiTagPathsDefinitionWarningsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7145,15 +7819,17 @@ export function postApiTagPathsDefinitionWarnings<ThrowOnError extends boolean =
  */
 export function deleteApiTagPathsByPathIdSensesBySenseId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiTagPathsByPathIdSensesBySenseIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiTagPathsByPathIdSensesBySenseIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiTagPathsByPathIdSensesBySenseIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/tag-paths/{pathId}/senses/{senseId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<DeleteApiTagPathsByPathIdSensesBySenseIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/tag-paths/{pathId}/senses/{senseId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<DeleteApiTagPathsByPathIdSensesBySenseIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7162,15 +7838,17 @@ export function deleteApiTagPathsByPathIdSensesBySenseId<ThrowOnError extends bo
  */
 export function getApiTagPathsSearch<ThrowOnError extends boolean = true>(
 	options: Options<GetApiTagPathsSearchOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiTagPathsSearchResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiTagPathsSearchResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/tag-paths/search",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiTagPathsSearchResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/tag-paths/search",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiTagPathsSearchResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7179,18 +7857,20 @@ export function getApiTagPathsSearch<ThrowOnError extends boolean = true>(
  */
 export function postApiTagPaths<ThrowOnError extends boolean = true>(
 	options: Options<PostApiTagPathsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiTagPathsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiTagPathsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/tag-paths",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiTagPathsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/tag-paths",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiTagPathsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7199,12 +7879,14 @@ export function postApiTagPaths<ThrowOnError extends boolean = true>(
  */
 export function getApiTagPathsByPathId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiTagPathsByPathIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiTagPathsByPathIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiTagPathsByPathIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/tag-paths/{pathId}", ...config }) as Promise<
-		RequestResult<GetApiTagPathsByPathIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/tag-paths/{pathId}", ...config }) as Promise<
+			RequestResult<GetApiTagPathsByPathIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7213,15 +7895,17 @@ export function getApiTagPathsByPathId<ThrowOnError extends boolean = true>(
  */
 export function postApiTagPathsByPathIdSenses<ThrowOnError extends boolean = true>(
 	options: Options<PostApiTagPathsByPathIdSensesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiTagPathsByPathIdSensesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiTagPathsByPathIdSensesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/tag-paths/{pathId}/senses",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiTagPathsByPathIdSensesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/tag-paths/{pathId}/senses",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PostApiTagPathsByPathIdSensesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7230,18 +7914,20 @@ export function postApiTagPathsByPathIdSenses<ThrowOnError extends boolean = tru
  */
 export function putApiTagPathsByPathIdVote<ThrowOnError extends boolean = true>(
 	options: Options<PutApiTagPathsByPathIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiTagPathsByPathIdVoteResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiTagPathsByPathIdVoteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/tag-paths/{pathId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiTagPathsByPathIdVoteResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/tag-paths/{pathId}/vote",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiTagPathsByPathIdVoteResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7250,18 +7936,20 @@ export function putApiTagPathsByPathIdVote<ThrowOnError extends boolean = true>(
  */
 export function deleteApiTagPathsByPathIdVote<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiTagPathsByPathIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiTagPathsByPathIdVoteResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiTagPathsByPathIdVoteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/tag-paths/{pathId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiTagPathsByPathIdVoteResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/tag-paths/{pathId}/vote",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiTagPathsByPathIdVoteResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7270,15 +7958,17 @@ export function deleteApiTagPathsByPathIdVote<ThrowOnError extends boolean = tru
  */
 export function postApiTagPathsMerges<ThrowOnError extends boolean = true>(
 	options: Options<PostApiTagPathsMergesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiTagPathsMergesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiTagPathsMergesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/tag-paths/merges",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiTagPathsMergesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/tag-paths/merges",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PostApiTagPathsMergesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7287,15 +7977,17 @@ export function postApiTagPathsMerges<ThrowOnError extends boolean = true>(
  */
 export function getApiTagPathsMergesPending<ThrowOnError extends boolean = true>(
 	options: Options<GetApiTagPathsMergesPendingOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiTagPathsMergesPendingResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiTagPathsMergesPendingResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/tag-paths/merges/pending",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiTagPathsMergesPendingResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/tag-paths/merges/pending",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiTagPathsMergesPendingResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7304,15 +7996,17 @@ export function getApiTagPathsMergesPending<ThrowOnError extends boolean = true>
  */
 export function putApiTagPathsMergesByMergeIdResolution<ThrowOnError extends boolean = true>(
 	options: Options<PutApiTagPathsMergesByMergeIdResolutionOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiTagPathsMergesByMergeIdResolutionResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiTagPathsMergesByMergeIdResolutionResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/tag-paths/merges/{mergeId}/resolution",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiTagPathsMergesByMergeIdResolutionResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/tag-paths/merges/{mergeId}/resolution",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PutApiTagPathsMergesByMergeIdResolutionResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7321,14 +8015,16 @@ export function putApiTagPathsMergesByMergeIdResolution<ThrowOnError extends boo
  */
 export function getApiResourcesByOwnerByUnitIdTags<ThrowOnError extends boolean = true>(
 	options: Options<GetApiResourcesByOwnerByUnitIdTagsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiResourcesByOwnerByUnitIdTagsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiResourcesByOwnerByUnitIdTagsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/resources/{owner}/{unitId}/tags",
-		...config,
-	}) as Promise<RequestResult<GetApiResourcesByOwnerByUnitIdTagsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/resources/{owner}/{unitId}/tags",
+			...config,
+		}) as Promise<RequestResult<GetApiResourcesByOwnerByUnitIdTagsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7339,22 +8035,24 @@ export function postApiResourcesByOwnerByUnitIdTagPathApplications<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiResourcesByOwnerByUnitIdTagPathApplicationsOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiResourcesByOwnerByUnitIdTagPathApplicationsResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/resources/{owner}/{unitId}/tag-path-applications",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiResourcesByOwnerByUnitIdTagPathApplicationsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/resources/{owner}/{unitId}/tag-path-applications",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiResourcesByOwnerByUnitIdTagPathApplicationsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7368,7 +8066,7 @@ export function deleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicatio
 		DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdResponses,
 		ThrowOnError
@@ -7376,20 +8074,22 @@ export function deleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicatio
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/resources/{owner}/{unitId}/tag-path-applications/{applicationId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/resources/{owner}/{unitId}/tag-path-applications/{applicationId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -7403,7 +8103,7 @@ export function putApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationId
 		PutApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		PutApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
 		ThrowOnError
@@ -7411,20 +8111,22 @@ export function putApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationId
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/resources/{owner}/{unitId}/tag-path-applications/{applicationId}/judgment",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PutApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/resources/{owner}/{unitId}/tag-path-applications/{applicationId}/judgment",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PutApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -7438,7 +8140,7 @@ export function deleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicatio
 		DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
 		ThrowOnError
@@ -7446,20 +8148,22 @@ export function deleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicatio
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/resources/{owner}/{unitId}/tag-path-applications/{applicationId}/judgment",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/resources/{owner}/{unitId}/tag-path-applications/{applicationId}/judgment",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				DeleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -7468,14 +8172,14 @@ export function deleteApiResourcesByOwnerByUnitIdTagPathApplicationsByApplicatio
  */
 export function getApiRealmsByRealmIdTagPaths<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdTagPathsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdTagPathsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdTagPathsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/tag-paths",
-		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdTagPathsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/realms/{realmId}/tag-paths", ...config }) as Promise<
+			RequestResult<GetApiRealmsByRealmIdTagPathsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7484,15 +8188,17 @@ export function getApiRealmsByRealmIdTagPaths<ThrowOnError extends boolean = tru
  */
 export function putApiRealmsByRealmIdTagPathsByPathId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdTagPathsByPathIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdTagPathsByPathIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiRealmsByRealmIdTagPathsByPathIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/tag-paths/{pathId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiRealmsByRealmIdTagPathsByPathIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/tag-paths/{pathId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PutApiRealmsByRealmIdTagPathsByPathIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7501,15 +8207,19 @@ export function putApiRealmsByRealmIdTagPathsByPathId<ThrowOnError extends boole
  */
 export function putApiRealmsByRealmIdTagPathSensesBySenseId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdTagPathSensesBySenseIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdTagPathSensesBySenseIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiRealmsByRealmIdTagPathSensesBySenseIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/tag-path-senses/{senseId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiRealmsByRealmIdTagPathSensesBySenseIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/tag-path-senses/{senseId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiRealmsByRealmIdTagPathSensesBySenseIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7518,18 +8228,20 @@ export function putApiRealmsByRealmIdTagPathSensesBySenseId<ThrowOnError extends
  */
 export function putApiRealmsByRealmIdTagPathsByPathIdVote<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdTagPathsByPathIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdTagPathsByPathIdVoteResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiRealmsByRealmIdTagPathsByPathIdVoteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/tag-paths/{pathId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiRealmsByRealmIdTagPathsByPathIdVoteResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/tag-paths/{pathId}/vote",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiRealmsByRealmIdTagPathsByPathIdVoteResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7538,18 +8250,22 @@ export function putApiRealmsByRealmIdTagPathsByPathIdVote<ThrowOnError extends b
  */
 export function deleteApiRealmsByRealmIdTagPathsByPathIdVote<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiRealmsByRealmIdTagPathsByPathIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiRealmsByRealmIdTagPathsByPathIdVoteResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiRealmsByRealmIdTagPathsByPathIdVoteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/realms/{realmId}/tag-paths/{pathId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdTagPathsByPathIdVoteResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/realms/{realmId}/tag-paths/{pathId}/vote",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiRealmsByRealmIdTagPathsByPathIdVoteResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7560,19 +8276,21 @@ export function postApiRealmsByRealmIdUnitsByUnitIdTagPathApplications<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/realms/{realmId}/units/{unitId}/tag-path-applications",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/realms/{realmId}/units/{unitId}/tag-path-applications",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7586,7 +8304,7 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplic
 		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdResponses,
 		ThrowOnError
@@ -7594,17 +8312,19 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplic
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/realms/{realmId}/units/{unitId}/tag-path-applications/{applicationId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/realms/{realmId}/units/{unitId}/tag-path-applications/{applicationId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -7618,7 +8338,7 @@ export function putApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicati
 		PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
 		ThrowOnError
@@ -7626,20 +8346,22 @@ export function putApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicati
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/units/{unitId}/tag-path-applications/{applicationId}/judgment",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/units/{unitId}/tag-path-applications/{applicationId}/judgment",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PutApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -7653,7 +8375,7 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplic
 		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
 		ThrowOnError
@@ -7661,20 +8383,22 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplic
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/realms/{realmId}/units/{unitId}/tag-path-applications/{applicationId}/judgment",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/realms/{realmId}/units/{unitId}/tag-path-applications/{applicationId}/judgment",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				DeleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplicationIdJudgmentResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -7683,18 +8407,20 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdTagPathApplicationsByApplic
  */
 export function putApiRealmsByRealmIdTagPathPolicy<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdTagPathPolicyOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdTagPathPolicyResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiRealmsByRealmIdTagPathPolicyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/tag-path-policy",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiRealmsByRealmIdTagPathPolicyResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/tag-path-policy",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiRealmsByRealmIdTagPathPolicyResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7703,18 +8429,20 @@ export function putApiRealmsByRealmIdTagPathPolicy<ThrowOnError extends boolean 
  */
 export function getApiUsersMeTagRealmSubscriptions<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUsersMeTagRealmSubscriptionsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiUsersMeTagRealmSubscriptionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUsersMeTagRealmSubscriptionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/users/me/tag-realm-subscriptions",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiUsersMeTagRealmSubscriptionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/users/me/tag-realm-subscriptions",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiUsersMeTagRealmSubscriptionsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7723,18 +8451,22 @@ export function getApiUsersMeTagRealmSubscriptions<ThrowOnError extends boolean 
  */
 export function putApiUsersMeTagRealmSubscriptionsByRealmId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUsersMeTagRealmSubscriptionsByRealmIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUsersMeTagRealmSubscriptionsByRealmIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiUsersMeTagRealmSubscriptionsByRealmIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/users/me/tag-realm-subscriptions/{realmId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiUsersMeTagRealmSubscriptionsByRealmIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/users/me/tag-realm-subscriptions/{realmId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiUsersMeTagRealmSubscriptionsByRealmIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7743,20 +8475,24 @@ export function putApiUsersMeTagRealmSubscriptionsByRealmId<ThrowOnError extends
  */
 export function deleteApiUsersMeTagRealmSubscriptionsByRealmId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiUsersMeTagRealmSubscriptionsByRealmIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUsersMeTagRealmSubscriptionsByRealmIdResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<DeleteApiUsersMeTagRealmSubscriptionsByRealmIdResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/users/me/tag-realm-subscriptions/{realmId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiUsersMeTagRealmSubscriptionsByRealmIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/users/me/tag-realm-subscriptions/{realmId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiUsersMeTagRealmSubscriptionsByRealmIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7766,12 +8502,14 @@ export function deleteApiUsersMeTagRealmSubscriptionsByRealmId<ThrowOnError exte
  */
 export function resolveUnitSlugAddress<ThrowOnError extends boolean = true>(
 	options: Options<ResolveUnitSlugAddressOptions, ThrowOnError>,
-): Promise<RequestResult<ResolveUnitSlugAddressResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ResolveUnitSlugAddressResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/v1/slug-addresses/resolve", ...config }) as Promise<
-		RequestResult<ResolveUnitSlugAddressResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "POST", url: "/api/v1/slug-addresses/resolve", ...config }) as Promise<
+			RequestResult<ResolveUnitSlugAddressResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7781,14 +8519,16 @@ export function resolveUnitSlugAddress<ThrowOnError extends boolean = true>(
  */
 export function getPublicUnitSlugAddress<ThrowOnError extends boolean = true>(
 	options: Options<GetPublicUnitSlugAddressOptions, ThrowOnError>,
-): Promise<RequestResult<GetPublicUnitSlugAddressResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetPublicUnitSlugAddressResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/slug-addresses/public-units/{unitId}",
-		...config,
-	}) as Promise<RequestResult<GetPublicUnitSlugAddressResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/slug-addresses/public-units/{unitId}",
+			...config,
+		}) as Promise<RequestResult<GetPublicUnitSlugAddressResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7798,14 +8538,16 @@ export function getPublicUnitSlugAddress<ThrowOnError extends boolean = true>(
  */
 export function resolveScopedUnitSlugAddress<ThrowOnError extends boolean = true>(
 	options: Options<ResolveScopedUnitSlugAddressOptions, ThrowOnError>,
-): Promise<RequestResult<ResolveScopedUnitSlugAddressResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ResolveScopedUnitSlugAddressResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/slug-addresses/scopes/{scopeUnitId}/{slug}",
-		...config,
-	}) as Promise<RequestResult<ResolveScopedUnitSlugAddressResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/slug-addresses/scopes/{scopeUnitId}/{slug}",
+			...config,
+		}) as Promise<RequestResult<ResolveScopedUnitSlugAddressResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7814,14 +8556,16 @@ export function resolveScopedUnitSlugAddress<ThrowOnError extends boolean = true
  */
 export function resolveNamespaceSlugAddress<ThrowOnError extends boolean = true>(
 	options: Options<ResolveNamespaceSlugAddressOptions, ThrowOnError>,
-): Promise<RequestResult<ResolveNamespaceSlugAddressResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ResolveNamespaceSlugAddressResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/slug-addresses/namespaces/{scopeNamespaceId}/{slug}",
-		...config,
-	}) as Promise<RequestResult<ResolveNamespaceSlugAddressResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/slug-addresses/namespaces/{scopeNamespaceId}/{slug}",
+			...config,
+		}) as Promise<RequestResult<ResolveNamespaceSlugAddressResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7831,15 +8575,17 @@ export function resolveNamespaceSlugAddress<ThrowOnError extends boolean = true>
  */
 export function getUnitSlugAddressWithPlatformAccess<ThrowOnError extends boolean = true>(
 	options: Options<GetUnitSlugAddressWithPlatformAccessOptions, ThrowOnError>,
-): Promise<RequestResult<GetUnitSlugAddressWithPlatformAccessResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetUnitSlugAddressWithPlatformAccessResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/slug-addresses/units/{unitId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetUnitSlugAddressWithPlatformAccessResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/slug-addresses/units/{unitId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetUnitSlugAddressWithPlatformAccessResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7849,15 +8595,17 @@ export function getUnitSlugAddressWithPlatformAccess<ThrowOnError extends boolea
  */
 export function replaceUnitSlugAddressWithPlatformAccess<ThrowOnError extends boolean = true>(
 	options: Options<ReplaceUnitSlugAddressWithPlatformAccessOptions, ThrowOnError>,
-): Promise<RequestResult<ReplaceUnitSlugAddressWithPlatformAccessResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReplaceUnitSlugAddressWithPlatformAccessResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/slug-addresses/units/{unitId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ReplaceUnitSlugAddressWithPlatformAccessResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/slug-addresses/units/{unitId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ReplaceUnitSlugAddressWithPlatformAccessResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7867,15 +8615,17 @@ export function replaceUnitSlugAddressWithPlatformAccess<ThrowOnError extends bo
  */
 export function releaseSlugRedirectWithPlatformAccess<ThrowOnError extends boolean = true>(
 	options: Options<ReleaseSlugRedirectWithPlatformAccessOptions, ThrowOnError>,
-): Promise<RequestResult<ReleaseSlugRedirectWithPlatformAccessResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReleaseSlugRedirectWithPlatformAccessResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/slug-addresses/redirects/{redirectAddressId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<ReleaseSlugRedirectWithPlatformAccessResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/slug-addresses/redirects/{redirectAddressId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<ReleaseSlugRedirectWithPlatformAccessResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7884,14 +8634,14 @@ export function releaseSlugRedirectWithPlatformAccess<ThrowOnError extends boole
  */
 export function getUnitReference<ThrowOnError extends boolean = true>(
 	options: Options<GetUnitReferenceOptions, ThrowOnError>,
-): Promise<RequestResult<GetUnitReferenceResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetUnitReferenceResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/reference",
-		...config,
-	}) as Promise<RequestResult<GetUnitReferenceResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/units/by-id/{unitId}/reference", ...config }) as Promise<
+			RequestResult<GetUnitReferenceResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7901,12 +8651,14 @@ export function getUnitReference<ThrowOnError extends boolean = true>(
  */
 export function getPublicUnitSeoProjection<ThrowOnError extends boolean = true>(
 	options: Options<GetPublicUnitSeoProjectionOptions, ThrowOnError>,
-): Promise<RequestResult<GetPublicUnitSeoProjectionResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetPublicUnitSeoProjectionResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/units/by-id/{unitId}/seo", ...config }) as Promise<
-		RequestResult<GetPublicUnitSeoProjectionResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/units/by-id/{unitId}/seo", ...config }) as Promise<
+			RequestResult<GetPublicUnitSeoProjectionResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7915,12 +8667,14 @@ export function getPublicUnitSeoProjection<ThrowOnError extends boolean = true>(
  */
 export function postApiUnitsPresentations<ThrowOnError extends boolean = true>(
 	options: Options<PostApiUnitsPresentationsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsPresentationsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiUnitsPresentationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/v1/units/presentations", ...config }) as Promise<
-		RequestResult<PostApiUnitsPresentationsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "POST", url: "/api/v1/units/presentations", ...config }) as Promise<
+			RequestResult<PostApiUnitsPresentationsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7929,18 +8683,20 @@ export function postApiUnitsPresentations<ThrowOnError extends boolean = true>(
  */
 export function getApiUnitsByIdByUnitIdRealmPublications<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdRealmPublicationsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByIdByUnitIdRealmPublicationsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUnitsByIdByUnitIdRealmPublicationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/realm-publications",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdRealmPublicationsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/units/by-id/{unitId}/realm-publications",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdRealmPublicationsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -7951,22 +8707,24 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/units/by-id/{unitId}/realm-publications/{realmId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/units/by-id/{unitId}/realm-publications/{realmId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -7977,22 +8735,27 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdraw<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/units/by-id/{unitId}/realm-publications/{realmId}/withdraw",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/units/by-id/{unitId}/realm-publications/{realmId}/withdraw",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdWithdrawResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -8006,25 +8769,27 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublish<
 		PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/units/by-id/{unitId}/realm-publications/{realmId}/republish",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/units/by-id/{unitId}/realm-publications/{realmId}/republish",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublishResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -8033,14 +8798,16 @@ export function postApiUnitsByIdByUnitIdRealmPublicationsByRealmIdRepublish<
  */
 export function getApiUnitsByIdByUnitIdStatusEvents<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdStatusEventsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByIdByUnitIdStatusEventsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUnitsByIdByUnitIdStatusEventsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/status-events",
-		...config,
-	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdStatusEventsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/units/by-id/{unitId}/status-events",
+			...config,
+		}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdStatusEventsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8049,14 +8816,16 @@ export function getApiUnitsByIdByUnitIdStatusEvents<ThrowOnError extends boolean
  */
 export function getApiUnitsByIdByUnitIdLocalizationOrder<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdLocalizationOrderOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByIdByUnitIdLocalizationOrderResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUnitsByIdByUnitIdLocalizationOrderResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/localization-order",
-		...config,
-	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdLocalizationOrderResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/units/by-id/{unitId}/localization-order",
+			...config,
+		}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdLocalizationOrderResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8065,18 +8834,20 @@ export function getApiUnitsByIdByUnitIdLocalizationOrder<ThrowOnError extends bo
  */
 export function putApiUnitsByIdByUnitIdLocalizationOrder<ThrowOnError extends boolean = true>(
 	options: Options<PutApiUnitsByIdByUnitIdLocalizationOrderOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUnitsByIdByUnitIdLocalizationOrderResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiUnitsByIdByUnitIdLocalizationOrderResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/units/by-id/{unitId}/localization-order",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiUnitsByIdByUnitIdLocalizationOrderResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/units/by-id/{unitId}/localization-order",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiUnitsByIdByUnitIdLocalizationOrderResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8087,22 +8858,24 @@ export function deleteApiUnitsByIdByUnitIdLocalizationsByLanguage<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/units/by-id/{unitId}/localizations/{language}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/units/by-id/{unitId}/localizations/{language}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiUnitsByIdByUnitIdLocalizationsByLanguageResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8111,12 +8884,14 @@ export function deleteApiUnitsByIdByUnitIdLocalizationsByLanguage<
  */
 export function getApiUnitsByType<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByTypeOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByTypeResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUnitsByTypeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/units/{type}", ...config }) as Promise<
-		RequestResult<GetApiUnitsByTypeResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/units/{type}", ...config }) as Promise<
+			RequestResult<GetApiUnitsByTypeResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8125,18 +8900,20 @@ export function getApiUnitsByType<ThrowOnError extends boolean = true>(
  */
 export function postApiUnitsByType<ThrowOnError extends boolean = true>(
 	options: Options<PostApiUnitsByTypeOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsByTypeResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiUnitsByTypeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/units/{type}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiUnitsByTypeResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/units/{type}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiUnitsByTypeResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8147,22 +8924,24 @@ export function getApiUnitsByTypeByUnitIdContentLanguageSupportEvidence<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<GetApiUnitsByTypeByUnitIdContentLanguageSupportEvidenceOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<GetApiUnitsByTypeByUnitIdContentLanguageSupportEvidenceResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/{type}/{unitId}/content-language-support/evidence",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<GetApiUnitsByTypeByUnitIdContentLanguageSupportEvidenceResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/units/{type}/{unitId}/content-language-support/evidence",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiUnitsByTypeByUnitIdContentLanguageSupportEvidenceResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8171,12 +8950,14 @@ export function getApiUnitsByTypeByUnitIdContentLanguageSupportEvidence<
  */
 export function getApiUnitsByTypeByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByTypeByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByTypeByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUnitsByTypeByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/units/{type}/{unitId}", ...config }) as Promise<
-		RequestResult<GetApiUnitsByTypeByUnitIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/units/{type}/{unitId}", ...config }) as Promise<
+			RequestResult<GetApiUnitsByTypeByUnitIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8185,18 +8966,20 @@ export function getApiUnitsByTypeByUnitId<ThrowOnError extends boolean = true>(
  */
 export function patchApiUnitsByTypeByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiUnitsByTypeByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiUnitsByTypeByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiUnitsByTypeByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/units/{type}/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiUnitsByTypeByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/units/{type}/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchApiUnitsByTypeByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8207,20 +8990,24 @@ export function putApiUnitsByTypeByUnitIdLocalizationsByLanguage<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PutApiUnitsByTypeByUnitIdLocalizationsByLanguageOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/units/{type}/{unitId}/localizations/{language}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/units/{type}/{unitId}/localizations/{language}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8229,14 +9016,16 @@ export function putApiUnitsByTypeByUnitIdLocalizationsByLanguage<
  */
 export function getApiUnitsByIdByUnitIdSubjectAssociations<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdSubjectAssociationsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByIdByUnitIdSubjectAssociationsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUnitsByIdByUnitIdSubjectAssociationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/subject-associations",
-		...config,
-	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdSubjectAssociationsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/units/by-id/{unitId}/subject-associations",
+			...config,
+		}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdSubjectAssociationsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8245,18 +9034,20 @@ export function getApiUnitsByIdByUnitIdSubjectAssociations<ThrowOnError extends 
  */
 export function listCurrentUserContributionResources<ThrowOnError extends boolean = true>(
 	options: Options<ListCurrentUserContributionResourcesOptions, ThrowOnError> = {},
-): Promise<RequestResult<ListCurrentUserContributionResourcesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListCurrentUserContributionResourcesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/history/contribution-resources/me",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ListCurrentUserContributionResourcesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/history/contribution-resources/me",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ListCurrentUserContributionResourcesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8265,14 +9056,16 @@ export function listCurrentUserContributionResources<ThrowOnError extends boolea
  */
 export function getApiHistoryUnitsByUnitIdRevisions<ThrowOnError extends boolean = true>(
 	options: Options<GetApiHistoryUnitsByUnitIdRevisionsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiHistoryUnitsByUnitIdRevisionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiHistoryUnitsByUnitIdRevisionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/history/units/{unitId}/revisions",
-		...config,
-	}) as Promise<RequestResult<GetApiHistoryUnitsByUnitIdRevisionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/history/units/{unitId}/revisions",
+			...config,
+		}) as Promise<RequestResult<GetApiHistoryUnitsByUnitIdRevisionsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8281,14 +9074,16 @@ export function getApiHistoryUnitsByUnitIdRevisions<ThrowOnError extends boolean
  */
 export function getApiHistoryUnitRevisionsByRevisionId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiHistoryUnitRevisionsByRevisionIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiHistoryUnitRevisionsByRevisionIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiHistoryUnitRevisionsByRevisionIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/history/unit-revisions/{revisionId}",
-		...config,
-	}) as Promise<RequestResult<GetApiHistoryUnitRevisionsByRevisionIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/history/unit-revisions/{revisionId}",
+			...config,
+		}) as Promise<RequestResult<GetApiHistoryUnitRevisionsByRevisionIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8297,14 +9092,14 @@ export function getApiHistoryUnitRevisionsByRevisionId<ThrowOnError extends bool
  */
 export function getApiHistoryUnitsByUnitIdCompare<ThrowOnError extends boolean = true>(
 	options: Options<GetApiHistoryUnitsByUnitIdCompareOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiHistoryUnitsByUnitIdCompareResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiHistoryUnitsByUnitIdCompareResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/history/units/{unitId}/compare",
-		...config,
-	}) as Promise<RequestResult<GetApiHistoryUnitsByUnitIdCompareResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/history/units/{unitId}/compare", ...config }) as Promise<
+			RequestResult<GetApiHistoryUnitsByUnitIdCompareResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8315,22 +9110,24 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/history/units/{unitId}/revisions/{revisionId}/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/history/units/{unitId}/revisions/{revisionId}/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8341,22 +9138,24 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/history/units/{unitId}/revisions/{revisionId}/undo",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/history/units/{unitId}/revisions/{revisionId}/undo",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8367,22 +9166,24 @@ export function patchApiHistoryUnitRevisionsByRevisionIdVisibility<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PatchApiHistoryUnitRevisionsByRevisionIdVisibilityOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PatchApiHistoryUnitRevisionsByRevisionIdVisibilityResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/history/unit-revisions/{revisionId}/visibility",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PatchApiHistoryUnitRevisionsByRevisionIdVisibilityResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/history/unit-revisions/{revisionId}/visibility",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PatchApiHistoryUnitRevisionsByRevisionIdVisibilityResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8391,12 +9192,14 @@ export function patchApiHistoryUnitRevisionsByRevisionIdVisibility<
  */
 export function getApiHistoryRecentChanges<ThrowOnError extends boolean = true>(
 	options: Options<GetApiHistoryRecentChangesOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiHistoryRecentChangesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiHistoryRecentChangesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/history/recent-changes", ...config }) as Promise<
-		RequestResult<GetApiHistoryRecentChangesResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/history/recent-changes", ...config }) as Promise<
+			RequestResult<GetApiHistoryRecentChangesResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8405,14 +9208,16 @@ export function getApiHistoryRecentChanges<ThrowOnError extends boolean = true>(
  */
 export function getApiHistoryContributionsByProfileId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiHistoryContributionsByProfileIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiHistoryContributionsByProfileIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiHistoryContributionsByProfileIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/history/contributions/{profileId}",
-		...config,
-	}) as Promise<RequestResult<GetApiHistoryContributionsByProfileIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/history/contributions/{profileId}",
+			...config,
+		}) as Promise<RequestResult<GetApiHistoryContributionsByProfileIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8421,12 +9226,14 @@ export function getApiHistoryContributionsByProfileId<ThrowOnError extends boole
  */
 export function getApiHistoryChangeTags<ThrowOnError extends boolean = true>(
 	options: Options<GetApiHistoryChangeTagsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiHistoryChangeTagsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiHistoryChangeTagsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/history/change-tags", ...config }) as Promise<
-		RequestResult<GetApiHistoryChangeTagsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/history/change-tags", ...config }) as Promise<
+			RequestResult<GetApiHistoryChangeTagsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8435,12 +9242,14 @@ export function getApiHistoryChangeTags<ThrowOnError extends boolean = true>(
  */
 export function getApiTags<ThrowOnError extends boolean = true>(
 	options: Options<GetApiTagsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiTagsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiTagsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/tags", ...config }) as Promise<
-		RequestResult<GetApiTagsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/tags", ...config }) as Promise<
+			RequestResult<GetApiTagsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8449,18 +9258,20 @@ export function getApiTags<ThrowOnError extends boolean = true>(
  */
 export function postApiTags<ThrowOnError extends boolean = true>(
 	options: Options<PostApiTagsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiTagsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiTagsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/tags",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiTagsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/tags",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiTagsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8469,12 +9280,14 @@ export function postApiTags<ThrowOnError extends boolean = true>(
  */
 export function getApiTagsByTagId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiTagsByTagIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/tags/{tagId}", ...config }) as Promise<
-		RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/tags/{tagId}", ...config }) as Promise<
+			RequestResult<GetApiTagsByTagIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8483,18 +9296,20 @@ export function getApiTagsByTagId<ThrowOnError extends boolean = true>(
  */
 export function putApiTagsByTagIdLocalizationsByLanguage<ThrowOnError extends boolean = true>(
 	options: Options<PutApiTagsByTagIdLocalizationsByLanguageOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiTagsByTagIdLocalizationsByLanguageResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiTagsByTagIdLocalizationsByLanguageResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/tags/{tagId}/localizations/{language}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiTagsByTagIdLocalizationsByLanguageResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/tags/{tagId}/localizations/{language}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiTagsByTagIdLocalizationsByLanguageResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8503,18 +9318,20 @@ export function putApiTagsByTagIdLocalizationsByLanguage<ThrowOnError extends bo
  */
 export function getApiResourcesByOwnerByUnitIdAliases<ThrowOnError extends boolean = true>(
 	options: Options<GetApiResourcesByOwnerByUnitIdAliasesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiResourcesByOwnerByUnitIdAliasesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiResourcesByOwnerByUnitIdAliasesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/resources/{owner}/{unitId}/aliases",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiResourcesByOwnerByUnitIdAliasesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/resources/{owner}/{unitId}/aliases",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiResourcesByOwnerByUnitIdAliasesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8523,18 +9340,20 @@ export function getApiResourcesByOwnerByUnitIdAliases<ThrowOnError extends boole
  */
 export function postApiResourcesByOwnerByUnitIdAliases<ThrowOnError extends boolean = true>(
 	options: Options<PostApiResourcesByOwnerByUnitIdAliasesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiResourcesByOwnerByUnitIdAliasesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiResourcesByOwnerByUnitIdAliasesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/resources/{owner}/{unitId}/aliases",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiResourcesByOwnerByUnitIdAliasesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/resources/{owner}/{unitId}/aliases",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiResourcesByOwnerByUnitIdAliasesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8545,22 +9364,24 @@ export function putApiResourcesByOwnerByUnitIdAliasesByAliasIdVote<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PutApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PutApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/resources/{owner}/{unitId}/aliases/{aliasId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/resources/{owner}/{unitId}/aliases/{aliasId}/vote",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8571,22 +9392,24 @@ export function deleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVote<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/resources/{owner}/{unitId}/aliases/{aliasId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/resources/{owner}/{unitId}/aliases/{aliasId}/vote",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8597,20 +9420,24 @@ export function patchApiResourcesByOwnerByUnitIdAliasesByAliasId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PatchApiResourcesByOwnerByUnitIdAliasesByAliasIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiResourcesByOwnerByUnitIdAliasesByAliasIdResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<PatchApiResourcesByOwnerByUnitIdAliasesByAliasIdResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/resources/{owner}/{unitId}/aliases/{aliasId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PatchApiResourcesByOwnerByUnitIdAliasesByAliasIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/resources/{owner}/{unitId}/aliases/{aliasId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PatchApiResourcesByOwnerByUnitIdAliasesByAliasIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8621,22 +9448,24 @@ export function deleteApiResourcesByOwnerByUnitIdAliasesByAliasId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/resources/{owner}/{unitId}/aliases/{aliasId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/resources/{owner}/{unitId}/aliases/{aliasId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiResourcesByOwnerByUnitIdAliasesByAliasIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8645,14 +9474,16 @@ export function deleteApiResourcesByOwnerByUnitIdAliasesByAliasId<
  */
 export function listResourceCreditAttributions<ThrowOnError extends boolean = true>(
 	options: Options<ListResourceCreditAttributionsOptions, ThrowOnError>,
-): Promise<RequestResult<ListResourceCreditAttributionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListResourceCreditAttributionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/resources/{owner}/{unitId}/credit-attributions",
-		...config,
-	}) as Promise<RequestResult<ListResourceCreditAttributionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/resources/{owner}/{unitId}/credit-attributions",
+			...config,
+		}) as Promise<RequestResult<ListResourceCreditAttributionsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -8663,22 +9494,24 @@ export function postApiResourcesByOwnerByUnitIdCreditAttributions<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiResourcesByOwnerByUnitIdCreditAttributionsOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiResourcesByOwnerByUnitIdCreditAttributionsResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/resources/{owner}/{unitId}/credit-attributions",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiResourcesByOwnerByUnitIdCreditAttributionsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/resources/{owner}/{unitId}/credit-attributions",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiResourcesByOwnerByUnitIdCreditAttributionsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8692,7 +9525,7 @@ export function deleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociation
 		DeleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociationIdOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		DeleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociationIdResponses,
 		ThrowOnError
@@ -8700,20 +9533,22 @@ export function deleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociation
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/resources/{owner}/{unitId}/credit-attributions/{associationId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociationIdResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/resources/{owner}/{unitId}/credit-attributions/{associationId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				DeleteApiResourcesByOwnerByUnitIdCreditAttributionsByAssociationIdResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -8724,22 +9559,24 @@ export function postApiResourcesByOwnerByUnitIdSubjectAssociations<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiResourcesByOwnerByUnitIdSubjectAssociationsOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiResourcesByOwnerByUnitIdSubjectAssociationsResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/resources/{owner}/{unitId}/subject-associations",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiResourcesByOwnerByUnitIdSubjectAssociationsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/resources/{owner}/{unitId}/subject-associations",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiResourcesByOwnerByUnitIdSubjectAssociationsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8753,7 +9590,7 @@ export function putApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationId
 		PutApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		PutApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
 		ThrowOnError
@@ -8761,20 +9598,22 @@ export function putApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationId
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/resources/{owner}/{unitId}/subject-associations/{associationId}/spoiler",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PutApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/resources/{owner}/{unitId}/subject-associations/{associationId}/spoiler",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PutApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -8788,7 +9627,7 @@ export function deleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociatio
 		DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
 		ThrowOnError
@@ -8796,20 +9635,22 @@ export function deleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociatio
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/resources/{owner}/{unitId}/subject-associations/{associationId}/spoiler",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/resources/{owner}/{unitId}/subject-associations/{associationId}/spoiler",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdSpoilerResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -8823,7 +9664,7 @@ export function deleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociatio
 		DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdResponses,
 		ThrowOnError
@@ -8831,20 +9672,22 @@ export function deleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociatio
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/resources/{owner}/{unitId}/subject-associations/{associationId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/resources/{owner}/{unitId}/subject-associations/{associationId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				DeleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociationIdResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -8853,18 +9696,22 @@ export function deleteApiResourcesByOwnerByUnitIdSubjectAssociationsByAssociatio
  */
 export function getApiResourcesByOwnerByUnitIdExternalLinks<ThrowOnError extends boolean = true>(
 	options: Options<GetApiResourcesByOwnerByUnitIdExternalLinksOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiResourcesByOwnerByUnitIdExternalLinksResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiResourcesByOwnerByUnitIdExternalLinksResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/resources/{owner}/{unitId}/external-links",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiResourcesByOwnerByUnitIdExternalLinksResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/resources/{owner}/{unitId}/external-links",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiResourcesByOwnerByUnitIdExternalLinksResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8873,18 +9720,22 @@ export function getApiResourcesByOwnerByUnitIdExternalLinks<ThrowOnError extends
  */
 export function postApiResourcesByOwnerByUnitIdExternalLinks<ThrowOnError extends boolean = true>(
 	options: Options<PostApiResourcesByOwnerByUnitIdExternalLinksOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiResourcesByOwnerByUnitIdExternalLinksResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiResourcesByOwnerByUnitIdExternalLinksResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/resources/{owner}/{unitId}/external-links",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiResourcesByOwnerByUnitIdExternalLinksResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/resources/{owner}/{unitId}/external-links",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiResourcesByOwnerByUnitIdExternalLinksResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -8898,7 +9749,7 @@ export function putApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote<
 		PutApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		PutApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteResponses,
 		ThrowOnError
@@ -8906,20 +9757,22 @@ export function putApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVote<
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/resources/{owner}/{unitId}/external-links/{externalLinkId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PutApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/resources/{owner}/{unitId}/external-links/{externalLinkId}/vote",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PutApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -8933,7 +9786,7 @@ export function deleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVo
 		DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteResponses,
 		ThrowOnError
@@ -8941,20 +9794,22 @@ export function deleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVo
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/resources/{owner}/{unitId}/external-links/{externalLinkId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/resources/{owner}/{unitId}/external-links/{externalLinkId}/vote",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdVoteResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -8968,7 +9823,7 @@ export function patchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId<
 		PatchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		PatchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdResponses,
 		ThrowOnError
@@ -8976,20 +9831,22 @@ export function patchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId<
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/resources/{owner}/{unitId}/external-links/{externalLinkId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PatchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/resources/{owner}/{unitId}/external-links/{externalLinkId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PatchApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -9003,7 +9860,7 @@ export function deleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId<
 		DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdResponses,
 		ThrowOnError
@@ -9011,20 +9868,22 @@ export function deleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId<
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/resources/{owner}/{unitId}/external-links/{externalLinkId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/resources/{owner}/{unitId}/external-links/{externalLinkId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				DeleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkIdResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -9033,18 +9892,20 @@ export function deleteApiResourcesByOwnerByUnitIdExternalLinksByExternalLinkId<
  */
 export function putApiResourcesByOwnerByUnitIdTagsByTagId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiResourcesByOwnerByUnitIdTagsByTagIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9053,18 +9914,22 @@ export function putApiResourcesByOwnerByUnitIdTagsByTagId<ThrowOnError extends b
  */
 export function patchApiResourcesByOwnerByUnitIdTagsByTagId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiResourcesByOwnerByUnitIdTagsByTagIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PatchApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -9073,18 +9938,22 @@ export function patchApiResourcesByOwnerByUnitIdTagsByTagId<ThrowOnError extends
  */
 export function deleteApiResourcesByOwnerByUnitIdTagsByTagId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -9093,20 +9962,24 @@ export function deleteApiResourcesByOwnerByUnitIdTagsByTagId<ThrowOnError extend
  */
 export function putApiResourcesByOwnerByUnitIdTagsByTagIdVote<ThrowOnError extends boolean = true>(
 	options: Options<PutApiResourcesByOwnerByUnitIdTagsByTagIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiResourcesByOwnerByUnitIdTagsByTagIdVoteResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<PutApiResourcesByOwnerByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiResourcesByOwnerByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}/vote",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiResourcesByOwnerByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -9117,20 +9990,24 @@ export function deleteApiResourcesByOwnerByUnitIdTagsByTagIdVote<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdVoteResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/resources/{owner}/{unitId}/tags/{tagId}/vote",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiResourcesByOwnerByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -9139,14 +10016,16 @@ export function deleteApiResourcesByOwnerByUnitIdTagsByTagIdVote<
  */
 export function getApiUnitsByIdByUnitIdContentStructures<ThrowOnError extends boolean = true>(
 	options: Options<GetApiUnitsByIdByUnitIdContentStructuresOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/content-structures",
-		...config,
-	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/units/by-id/{unitId}/content-structures",
+			...config,
+		}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9155,15 +10034,17 @@ export function getApiUnitsByIdByUnitIdContentStructures<ThrowOnError extends bo
  */
 export function postApiUnitsByIdByUnitIdContentStructures<ThrowOnError extends boolean = true>(
 	options: Options<PostApiUnitsByIdByUnitIdContentStructuresOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/units/by-id/{unitId}/content-structures",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PostApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/units/by-id/{unitId}/content-structures",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PostApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9174,18 +10055,20 @@ export function getApiUnitsByIdByUnitIdContentStructuresByStructureId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<GetApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<GetApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}",
-		...config,
-	}) as Promise<
-		RequestResult<GetApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}",
+			...config,
+		}) as Promise<
+			RequestResult<GetApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -9196,19 +10079,21 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -9222,7 +10107,7 @@ export function getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisions<
 		GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsResponses,
 		ThrowOnError
@@ -9230,16 +10115,18 @@ export function getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisions<
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/revisions",
-		...config,
-	}) as Promise<
-		RequestResult<
-			GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/revisions",
+			...config,
+		}) as Promise<
+			RequestResult<
+				GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -9253,7 +10140,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsB
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreResponses,
 		ThrowOnError
@@ -9261,17 +10148,19 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsB
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/revisions/{revisionId}/restore",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/revisions/{revisionId}/restore",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -9285,7 +10174,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatch
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchResponses,
 		ThrowOnError
@@ -9293,17 +10182,19 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatch
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes/batch",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes/batch",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesBatchResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -9317,22 +10208,24 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -9346,7 +10239,7 @@ export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNo
 		PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
 		ThrowOnError
@@ -9354,17 +10247,19 @@ export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNo
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -9378,7 +10273,7 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByN
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
 		ThrowOnError
@@ -9386,17 +10281,19 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByN
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -9405,14 +10302,16 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByN
  */
 export function listTextVersionContentNodes<ThrowOnError extends boolean = true>(
 	options: Options<ListTextVersionContentNodesOptions, ThrowOnError>,
-): Promise<RequestResult<ListTextVersionContentNodesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListTextVersionContentNodesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/publishing/text-versions/{unitId}/content-structure/nodes",
-		...config,
-	}) as Promise<RequestResult<ListTextVersionContentNodesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/publishing/text-versions/{unitId}/content-structure/nodes",
+			...config,
+		}) as Promise<RequestResult<ListTextVersionContentNodesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9421,18 +10320,20 @@ export function listTextVersionContentNodes<ThrowOnError extends boolean = true>
  */
 export function saveTextVersionContentDraft<ThrowOnError extends boolean = true>(
 	options: Options<SaveTextVersionContentDraftOptions, ThrowOnError>,
-): Promise<RequestResult<SaveTextVersionContentDraftResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<SaveTextVersionContentDraftResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/publishing/text-versions/{unitId}/content-structure",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<SaveTextVersionContentDraftResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/publishing/text-versions/{unitId}/content-structure",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<SaveTextVersionContentDraftResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9441,14 +10342,16 @@ export function saveTextVersionContentDraft<ThrowOnError extends boolean = true>
  */
 export function listProgramContentNodes<ThrowOnError extends boolean = true>(
 	options: Options<ListProgramContentNodesOptions, ThrowOnError>,
-): Promise<RequestResult<ListProgramContentNodesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ListProgramContentNodesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/program/{unitId}/content-structure/nodes",
-		...config,
-	}) as Promise<RequestResult<ListProgramContentNodesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/program/{unitId}/content-structure/nodes",
+			...config,
+		}) as Promise<RequestResult<ListProgramContentNodesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9457,18 +10360,20 @@ export function listProgramContentNodes<ThrowOnError extends boolean = true>(
  */
 export function saveProgramContentDraft<ThrowOnError extends boolean = true>(
 	options: Options<SaveProgramContentDraftOptions, ThrowOnError>,
-): Promise<RequestResult<SaveProgramContentDraftResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<SaveProgramContentDraftResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/program/{unitId}/content-structure",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<SaveProgramContentDraftResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/program/{unitId}/content-structure",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<SaveProgramContentDraftResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9477,14 +10382,16 @@ export function saveProgramContentDraft<ThrowOnError extends boolean = true>(
  */
 export function readTextVersionChapterNode<ThrowOnError extends boolean = true>(
 	options: Options<ReadTextVersionChapterNodeOptions, ThrowOnError>,
-): Promise<RequestResult<ReadTextVersionChapterNodeResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReadTextVersionChapterNodeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/publishing/text-versions/{bookId}/content-nodes/{nodeId}",
-		...config,
-	}) as Promise<RequestResult<ReadTextVersionChapterNodeResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/publishing/text-versions/{bookId}/content-nodes/{nodeId}",
+			...config,
+		}) as Promise<RequestResult<ReadTextVersionChapterNodeResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9495,22 +10402,24 @@ export function putApiChaptersByChapterIdLocalizationsByLanguageContent<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PutApiChaptersByChapterIdLocalizationsByLanguageContentOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/chapters/{chapterId}/localizations/{language}/content",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/chapters/{chapterId}/localizations/{language}/content",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -9519,18 +10428,20 @@ export function putApiChaptersByChapterIdLocalizationsByLanguageContent<
  */
 export function getApiProgress<ThrowOnError extends boolean = true>(
 	options: Options<GetApiProgressOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiProgressResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiProgressResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/progress",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiProgressResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/progress",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiProgressResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9539,18 +10450,20 @@ export function getApiProgress<ThrowOnError extends boolean = true>(
  */
 export function getApiProgressSearchFilter<ThrowOnError extends boolean = true>(
 	options: Options<GetApiProgressSearchFilterOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiProgressSearchFilterResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiProgressSearchFilterResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/progress/search/filter",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiProgressSearchFilterResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/progress/search/filter",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiProgressSearchFilterResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9559,18 +10472,20 @@ export function getApiProgressSearchFilter<ThrowOnError extends boolean = true>(
  */
 export function postApiProgressSearch<ThrowOnError extends boolean = true>(
 	options: Options<PostApiProgressSearchOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiProgressSearchResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiProgressSearchResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/progress/search",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiProgressSearchResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/progress/search",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiProgressSearchResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9579,18 +10494,20 @@ export function postApiProgressSearch<ThrowOnError extends boolean = true>(
  */
 export function getApiProgressByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiProgressByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiProgressByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiProgressByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/progress/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiProgressByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/progress/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiProgressByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9599,18 +10516,20 @@ export function getApiProgressByUnitId<ThrowOnError extends boolean = true>(
  */
 export function putApiProgressByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiProgressByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiProgressByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiProgressByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/progress/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiProgressByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/progress/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiProgressByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9619,18 +10538,20 @@ export function putApiProgressByUnitId<ThrowOnError extends boolean = true>(
  */
 export function deleteApiProgressByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiProgressByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiProgressByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiProgressByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/progress/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiProgressByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/progress/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiProgressByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9639,18 +10560,20 @@ export function deleteApiProgressByUnitId<ThrowOnError extends boolean = true>(
  */
 export function getApiProgressByUnitIdEntries<ThrowOnError extends boolean = true>(
 	options: Options<GetApiProgressByUnitIdEntriesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiProgressByUnitIdEntriesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiProgressByUnitIdEntriesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/progress/{unitId}/entries",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiProgressByUnitIdEntriesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/progress/{unitId}/entries",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiProgressByUnitIdEntriesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9659,18 +10582,20 @@ export function getApiProgressByUnitIdEntries<ThrowOnError extends boolean = tru
  */
 export function postApiProgressByUnitIdEntries<ThrowOnError extends boolean = true>(
 	options: Options<PostApiProgressByUnitIdEntriesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiProgressByUnitIdEntriesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiProgressByUnitIdEntriesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/progress/{unitId}/entries",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiProgressByUnitIdEntriesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/progress/{unitId}/entries",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiProgressByUnitIdEntriesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9679,18 +10604,20 @@ export function postApiProgressByUnitIdEntries<ThrowOnError extends boolean = tr
  */
 export function putApiProgressByUnitIdEntriesByEntryId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiProgressByUnitIdEntriesByEntryIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiProgressByUnitIdEntriesByEntryIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiProgressByUnitIdEntriesByEntryIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/progress/{unitId}/entries/{entryId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiProgressByUnitIdEntriesByEntryIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/progress/{unitId}/entries/{entryId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiProgressByUnitIdEntriesByEntryIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9699,18 +10626,20 @@ export function putApiProgressByUnitIdEntriesByEntryId<ThrowOnError extends bool
  */
 export function deleteApiProgressByUnitIdEntriesByEntryId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiProgressByUnitIdEntriesByEntryIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiProgressByUnitIdEntriesByEntryIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiProgressByUnitIdEntriesByEntryIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/progress/{unitId}/entries/{entryId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiProgressByUnitIdEntriesByEntryIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/progress/{unitId}/entries/{entryId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiProgressByUnitIdEntriesByEntryIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9719,20 +10648,24 @@ export function deleteApiProgressByUnitIdEntriesByEntryId<ThrowOnError extends b
  */
 export function putApiProgressByUnitIdEntriesByEntryIdCurrent<ThrowOnError extends boolean = true>(
 	options: Options<PutApiProgressByUnitIdEntriesByEntryIdCurrentOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiProgressByUnitIdEntriesByEntryIdCurrentResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<PutApiProgressByUnitIdEntriesByEntryIdCurrentResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/progress/{unitId}/entries/{entryId}/current",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiProgressByUnitIdEntriesByEntryIdCurrentResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/progress/{unitId}/entries/{entryId}/current",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiProgressByUnitIdEntriesByEntryIdCurrentResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -9741,18 +10674,20 @@ export function putApiProgressByUnitIdEntriesByEntryIdCurrent<ThrowOnError exten
  */
 export function getApiProgressByUnitIdNodes<ThrowOnError extends boolean = true>(
 	options: Options<GetApiProgressByUnitIdNodesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiProgressByUnitIdNodesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiProgressByUnitIdNodesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/progress/{unitId}/nodes",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiProgressByUnitIdNodesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/progress/{unitId}/nodes",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiProgressByUnitIdNodesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9761,18 +10696,20 @@ export function getApiProgressByUnitIdNodes<ThrowOnError extends boolean = true>
  */
 export function postApiProgressByUnitIdNodesByNodeIdRead<ThrowOnError extends boolean = true>(
 	options: Options<PostApiProgressByUnitIdNodesByNodeIdReadOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiProgressByUnitIdNodesByNodeIdReadResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiProgressByUnitIdNodesByNodeIdReadResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/progress/{unitId}/nodes/{nodeId}/read",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiProgressByUnitIdNodesByNodeIdReadResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/progress/{unitId}/nodes/{nodeId}/read",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiProgressByUnitIdNodesByNodeIdReadResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9781,18 +10718,20 @@ export function postApiProgressByUnitIdNodesByNodeIdRead<ThrowOnError extends bo
  */
 export function postApiProgressByUnitIdComplete<ThrowOnError extends boolean = true>(
 	options: Options<PostApiProgressByUnitIdCompleteOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiProgressByUnitIdCompleteResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiProgressByUnitIdCompleteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/progress/{unitId}/complete",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiProgressByUnitIdCompleteResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/progress/{unitId}/complete",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiProgressByUnitIdCompleteResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9801,18 +10740,20 @@ export function postApiProgressByUnitIdComplete<ThrowOnError extends boolean = t
  */
 export function putApiProgressByUnitIdNodesByNodeId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiProgressByUnitIdNodesByNodeIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiProgressByUnitIdNodesByNodeIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiProgressByUnitIdNodesByNodeIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/progress/{unitId}/nodes/{nodeId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiProgressByUnitIdNodesByNodeIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/progress/{unitId}/nodes/{nodeId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiProgressByUnitIdNodesByNodeIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9821,18 +10762,20 @@ export function putApiProgressByUnitIdNodesByNodeId<ThrowOnError extends boolean
  */
 export function deleteApiProgressByUnitIdNodesByNodeId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiProgressByUnitIdNodesByNodeIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiProgressByUnitIdNodesByNodeIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiProgressByUnitIdNodesByNodeIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/progress/{unitId}/nodes/{nodeId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiProgressByUnitIdNodesByNodeIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/progress/{unitId}/nodes/{nodeId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiProgressByUnitIdNodesByNodeIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9841,12 +10784,14 @@ export function deleteApiProgressByUnitIdNodesByNodeId<ThrowOnError extends bool
  */
 export function getApiCollections<ThrowOnError extends boolean = true>(
 	options: Options<GetApiCollectionsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiCollectionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiCollectionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/collections", ...config }) as Promise<
-		RequestResult<GetApiCollectionsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/collections", ...config }) as Promise<
+			RequestResult<GetApiCollectionsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -9855,18 +10800,20 @@ export function getApiCollections<ThrowOnError extends boolean = true>(
  */
 export function postApiCollections<ThrowOnError extends boolean = true>(
 	options: Options<PostApiCollectionsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiCollectionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiCollectionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/collections",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiCollectionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/collections",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiCollectionsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9875,14 +10822,16 @@ export function postApiCollections<ThrowOnError extends boolean = true>(
  */
 export function getApiCollectionsByCollectionIdItems<ThrowOnError extends boolean = true>(
 	options: Options<GetApiCollectionsByCollectionIdItemsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiCollectionsByCollectionIdItemsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiCollectionsByCollectionIdItemsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/collections/{collectionId}/items",
-		...config,
-	}) as Promise<RequestResult<GetApiCollectionsByCollectionIdItemsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/collections/{collectionId}/items",
+			...config,
+		}) as Promise<RequestResult<GetApiCollectionsByCollectionIdItemsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9891,14 +10840,14 @@ export function getApiCollectionsByCollectionIdItems<ThrowOnError extends boolea
  */
 export function getApiCollectionsByCollectionId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiCollectionsByCollectionIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiCollectionsByCollectionIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiCollectionsByCollectionIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/collections/{collectionId}",
-		...config,
-	}) as Promise<RequestResult<GetApiCollectionsByCollectionIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/collections/{collectionId}", ...config }) as Promise<
+			RequestResult<GetApiCollectionsByCollectionIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -9907,18 +10856,20 @@ export function getApiCollectionsByCollectionId<ThrowOnError extends boolean = t
  */
 export function patchApiCollectionsByCollectionId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiCollectionsByCollectionIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiCollectionsByCollectionIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiCollectionsByCollectionIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/collections/{collectionId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiCollectionsByCollectionIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/collections/{collectionId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchApiCollectionsByCollectionIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9929,20 +10880,24 @@ export function postApiCollectionsByCollectionIdItemsBatchUpdate<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiCollectionsByCollectionIdItemsBatchUpdateOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiCollectionsByCollectionIdItemsBatchUpdateResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<PostApiCollectionsByCollectionIdItemsBatchUpdateResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/collections/{collectionId}/items/batch-update",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiCollectionsByCollectionIdItemsBatchUpdateResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/collections/{collectionId}/items/batch-update",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiCollectionsByCollectionIdItemsBatchUpdateResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -9951,18 +10906,20 @@ export function postApiCollectionsByCollectionIdItemsBatchUpdate<
  */
 export function postApiCollectionsByCollectionIdItemsBatch<ThrowOnError extends boolean = true>(
 	options: Options<PostApiCollectionsByCollectionIdItemsBatchOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiCollectionsByCollectionIdItemsBatchResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiCollectionsByCollectionIdItemsBatchResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/collections/{collectionId}/items/batch",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiCollectionsByCollectionIdItemsBatchResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/collections/{collectionId}/items/batch",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiCollectionsByCollectionIdItemsBatchResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9971,18 +10928,20 @@ export function postApiCollectionsByCollectionIdItemsBatch<ThrowOnError extends 
  */
 export function postApiCollectionsByCollectionIdItemsMove<ThrowOnError extends boolean = true>(
 	options: Options<PostApiCollectionsByCollectionIdItemsMoveOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiCollectionsByCollectionIdItemsMoveResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiCollectionsByCollectionIdItemsMoveResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/collections/{collectionId}/items/move",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiCollectionsByCollectionIdItemsMoveResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/collections/{collectionId}/items/move",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiCollectionsByCollectionIdItemsMoveResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -9991,20 +10950,24 @@ export function postApiCollectionsByCollectionIdItemsMove<ThrowOnError extends b
  */
 export function putApiCollectionsByCollectionIdItemsByTargetId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiCollectionsByCollectionIdItemsByTargetIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiCollectionsByCollectionIdItemsByTargetIdResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<PutApiCollectionsByCollectionIdItemsByTargetIdResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/collections/{collectionId}/items/{targetId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiCollectionsByCollectionIdItemsByTargetIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/collections/{collectionId}/items/{targetId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiCollectionsByCollectionIdItemsByTargetIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10015,22 +10978,24 @@ export function deleteApiCollectionsByCollectionIdItemsByTargetId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<DeleteApiCollectionsByCollectionIdItemsByTargetIdOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<DeleteApiCollectionsByCollectionIdItemsByTargetIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/collections/{collectionId}/items/{targetId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiCollectionsByCollectionIdItemsByTargetIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/collections/{collectionId}/items/{targetId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiCollectionsByCollectionIdItemsByTargetIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10039,14 +11004,18 @@ export function deleteApiCollectionsByCollectionIdItemsByTargetId<
  */
 export function getApiCollectionsByCollectionIdItemRevisions<ThrowOnError extends boolean = true>(
 	options: Options<GetApiCollectionsByCollectionIdItemRevisionsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiCollectionsByCollectionIdItemRevisionsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiCollectionsByCollectionIdItemRevisionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/collections/{collectionId}/item-revisions",
-		...config,
-	}) as Promise<RequestResult<GetApiCollectionsByCollectionIdItemRevisionsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/collections/{collectionId}/item-revisions",
+			...config,
+		}) as Promise<
+			RequestResult<GetApiCollectionsByCollectionIdItemRevisionsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10057,18 +11026,20 @@ export function getApiCollectionsByCollectionIdItemRevisionsCompare<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<GetApiCollectionsByCollectionIdItemRevisionsCompareOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<GetApiCollectionsByCollectionIdItemRevisionsCompareResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/collections/{collectionId}/item-revisions/compare",
-		...config,
-	}) as Promise<
-		RequestResult<GetApiCollectionsByCollectionIdItemRevisionsCompareResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/collections/{collectionId}/item-revisions/compare",
+			...config,
+		}) as Promise<
+			RequestResult<GetApiCollectionsByCollectionIdItemRevisionsCompareResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10082,7 +11053,7 @@ export function postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore
 		PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreOptions,
 		ThrowOnError
 	>,
-): Promise<
+): Unwrappable<
 	RequestResult<
 		PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreResponses,
 		ThrowOnError
@@ -10090,17 +11061,19 @@ export function postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/collections/{collectionId}/item-revisions/{revisionId}/restore",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<
-			PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreResponses,
-			ThrowOnError
-		>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/collections/{collectionId}/item-revisions/{revisionId}/restore",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -10108,18 +11081,20 @@ export function postApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestore
  */
 export function getApiFavorites<ThrowOnError extends boolean = true>(
 	options: Options<GetApiFavoritesOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiFavoritesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiFavoritesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/favorites",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiFavoritesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/favorites",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiFavoritesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10127,18 +11102,20 @@ export function getApiFavorites<ThrowOnError extends boolean = true>(
  */
 export function getApiFavoritesByTargetUnitId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiFavoritesByTargetUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiFavoritesByTargetUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiFavoritesByTargetUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/favorites/{targetUnitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiFavoritesByTargetUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/favorites/{targetUnitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiFavoritesByTargetUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10146,18 +11123,20 @@ export function getApiFavoritesByTargetUnitId<ThrowOnError extends boolean = tru
  */
 export function putApiFavoritesByTargetUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiFavoritesByTargetUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiFavoritesByTargetUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiFavoritesByTargetUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/favorites/{targetUnitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiFavoritesByTargetUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/favorites/{targetUnitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiFavoritesByTargetUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10165,18 +11144,20 @@ export function putApiFavoritesByTargetUnitId<ThrowOnError extends boolean = tru
  */
 export function deleteApiFavoritesByTargetUnitId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiFavoritesByTargetUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiFavoritesByTargetUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiFavoritesByTargetUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/favorites/{targetUnitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiFavoritesByTargetUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/favorites/{targetUnitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiFavoritesByTargetUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10184,18 +11165,20 @@ export function deleteApiFavoritesByTargetUnitId<ThrowOnError extends boolean = 
  */
 export function getApiFavoritesByTargetUnitIdHistory<ThrowOnError extends boolean = true>(
 	options: Options<GetApiFavoritesByTargetUnitIdHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiFavoritesByTargetUnitIdHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiFavoritesByTargetUnitIdHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/favorites/{targetUnitId}/history",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiFavoritesByTargetUnitIdHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/favorites/{targetUnitId}/history",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiFavoritesByTargetUnitIdHistoryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10203,20 +11186,24 @@ export function getApiFavoritesByTargetUnitIdHistory<ThrowOnError extends boolea
  */
 export function getApiFavoritesByTargetUnitIdHistoryByRevision<ThrowOnError extends boolean = true>(
 	options: Options<GetApiFavoritesByTargetUnitIdHistoryByRevisionOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiFavoritesByTargetUnitIdHistoryByRevisionResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<GetApiFavoritesByTargetUnitIdHistoryByRevisionResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/favorites/{targetUnitId}/history/{revision}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<GetApiFavoritesByTargetUnitIdHistoryByRevisionResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/favorites/{targetUnitId}/history/{revision}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiFavoritesByTargetUnitIdHistoryByRevisionResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10224,18 +11211,20 @@ export function getApiFavoritesByTargetUnitIdHistoryByRevision<ThrowOnError exte
  */
 export function postApiFavoritesByTargetUnitIdRestore<ThrowOnError extends boolean = true>(
 	options: Options<PostApiFavoritesByTargetUnitIdRestoreOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiFavoritesByTargetUnitIdRestoreResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiFavoritesByTargetUnitIdRestoreResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/favorites/{targetUnitId}/restore",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiFavoritesByTargetUnitIdRestoreResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/favorites/{targetUnitId}/restore",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiFavoritesByTargetUnitIdRestoreResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10244,12 +11233,14 @@ export function postApiFavoritesByTargetUnitIdRestore<ThrowOnError extends boole
  */
 export function getApiReviews<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReviewsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiReviewsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiReviewsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/reviews", ...config }) as Promise<
-		RequestResult<GetApiReviewsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/reviews", ...config }) as Promise<
+			RequestResult<GetApiReviewsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10258,18 +11249,20 @@ export function getApiReviews<ThrowOnError extends boolean = true>(
  */
 export function postApiReviews<ThrowOnError extends boolean = true>(
 	options: Options<PostApiReviewsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiReviewsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiReviewsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/reviews",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiReviewsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/reviews",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiReviewsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10278,12 +11271,14 @@ export function postApiReviews<ThrowOnError extends boolean = true>(
  */
 export function getApiReviewsByReviewId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReviewsByReviewIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiReviewsByReviewIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiReviewsByReviewIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/reviews/{reviewId}", ...config }) as Promise<
-		RequestResult<GetApiReviewsByReviewIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/reviews/{reviewId}", ...config }) as Promise<
+			RequestResult<GetApiReviewsByReviewIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10292,18 +11287,20 @@ export function getApiReviewsByReviewId<ThrowOnError extends boolean = true>(
  */
 export function patchApiReviewsByReviewId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiReviewsByReviewIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiReviewsByReviewIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiReviewsByReviewIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/reviews/{reviewId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiReviewsByReviewIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/reviews/{reviewId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchApiReviewsByReviewIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10312,18 +11309,20 @@ export function patchApiReviewsByReviewId<ThrowOnError extends boolean = true>(
  */
 export function putApiScoresByTargetId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiScoresByTargetIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiScoresByTargetIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiScoresByTargetIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/scores/{targetId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiScoresByTargetIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/scores/{targetId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiScoresByTargetIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10332,12 +11331,14 @@ export function putApiScoresByTargetId<ThrowOnError extends boolean = true>(
  */
 export function getApiScoresByTargetId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiScoresByTargetIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiScoresByTargetIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiScoresByTargetIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/scores/{targetId}", ...config }) as Promise<
-		RequestResult<GetApiScoresByTargetIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/scores/{targetId}", ...config }) as Promise<
+			RequestResult<GetApiScoresByTargetIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10346,18 +11347,20 @@ export function getApiScoresByTargetId<ThrowOnError extends boolean = true>(
  */
 export function getApiScoresByTargetIdViewer<ThrowOnError extends boolean = true>(
 	options: Options<GetApiScoresByTargetIdViewerOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiScoresByTargetIdViewerResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiScoresByTargetIdViewerResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/scores/{targetId}/viewer",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiScoresByTargetIdViewerResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/scores/{targetId}/viewer",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiScoresByTargetIdViewerResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10366,12 +11369,14 @@ export function getApiScoresByTargetIdViewer<ThrowOnError extends boolean = true
  */
 export function getApiReactionsUnitsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiReactionsUnitsByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiReactionsUnitsByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiReactionsUnitsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/reactions/units/{unitId}", ...config }) as Promise<
-		RequestResult<GetApiReactionsUnitsByUnitIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/reactions/units/{unitId}", ...config }) as Promise<
+			RequestResult<GetApiReactionsUnitsByUnitIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10380,18 +11385,20 @@ export function getApiReactionsUnitsByUnitId<ThrowOnError extends boolean = true
  */
 export function putApiReactionsUnitsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiReactionsUnitsByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiReactionsUnitsByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiReactionsUnitsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/reactions/units/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiReactionsUnitsByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/reactions/units/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiReactionsUnitsByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10400,18 +11407,20 @@ export function putApiReactionsUnitsByUnitId<ThrowOnError extends boolean = true
  */
 export function deleteApiReactionsUnitsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiReactionsUnitsByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiReactionsUnitsByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiReactionsUnitsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/reactions/units/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiReactionsUnitsByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/reactions/units/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiReactionsUnitsByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10420,18 +11429,20 @@ export function deleteApiReactionsUnitsByUnitId<ThrowOnError extends boolean = t
  */
 export function putApiReactionsSharesByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiReactionsSharesByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiReactionsSharesByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiReactionsSharesByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/reactions/shares/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiReactionsSharesByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/reactions/shares/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiReactionsSharesByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10440,18 +11451,20 @@ export function putApiReactionsSharesByUnitId<ThrowOnError extends boolean = tru
  */
 export function deleteApiReactionsSharesByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiReactionsSharesByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiReactionsSharesByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiReactionsSharesByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/reactions/shares/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiReactionsSharesByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/reactions/shares/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiReactionsSharesByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10460,18 +11473,20 @@ export function deleteApiReactionsSharesByUnitId<ThrowOnError extends boolean = 
  */
 export function postApiPolls<ThrowOnError extends boolean = true>(
 	options: Options<PostApiPollsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiPollsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiPollsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/polls",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiPollsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/polls",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiPollsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10480,12 +11495,14 @@ export function postApiPolls<ThrowOnError extends boolean = true>(
  */
 export function getApiPollsByPollId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPollsByPollIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiPollsByPollIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiPollsByPollIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/polls/{pollId}", ...config }) as Promise<
-		RequestResult<GetApiPollsByPollIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/polls/{pollId}", ...config }) as Promise<
+			RequestResult<GetApiPollsByPollIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10494,18 +11511,20 @@ export function getApiPollsByPollId<ThrowOnError extends boolean = true>(
  */
 export function putApiPollsByPollIdVote<ThrowOnError extends boolean = true>(
 	options: Options<PutApiPollsByPollIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiPollsByPollIdVoteResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiPollsByPollIdVoteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/polls/{pollId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiPollsByPollIdVoteResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/polls/{pollId}/vote",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiPollsByPollIdVoteResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10514,18 +11533,20 @@ export function putApiPollsByPollIdVote<ThrowOnError extends boolean = true>(
  */
 export function deleteApiPollsByPollIdVote<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiPollsByPollIdVoteOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiPollsByPollIdVoteResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiPollsByPollIdVoteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/polls/{pollId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiPollsByPollIdVoteResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/polls/{pollId}/vote",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiPollsByPollIdVoteResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10534,18 +11555,20 @@ export function deleteApiPollsByPollIdVote<ThrowOnError extends boolean = true>(
  */
 export function postApiPollsByPollIdClose<ThrowOnError extends boolean = true>(
 	options: Options<PostApiPollsByPollIdCloseOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiPollsByPollIdCloseResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiPollsByPollIdCloseResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/polls/{pollId}/close",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiPollsByPollIdCloseResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/polls/{pollId}/close",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiPollsByPollIdCloseResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10554,12 +11577,14 @@ export function postApiPollsByPollIdClose<ThrowOnError extends boolean = true>(
  */
 export function getApiPostsByPostIdScores<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPostsByPostIdScoresOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiPostsByPostIdScoresResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiPostsByPostIdScoresResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/posts/{postId}/scores", ...config }) as Promise<
-		RequestResult<GetApiPostsByPostIdScoresResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/posts/{postId}/scores", ...config }) as Promise<
+			RequestResult<GetApiPostsByPostIdScoresResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10568,18 +11593,20 @@ export function getApiPostsByPostIdScores<ThrowOnError extends boolean = true>(
  */
 export function putApiPostsByPostIdScores<ThrowOnError extends boolean = true>(
 	options: Options<PutApiPostsByPostIdScoresOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiPostsByPostIdScoresResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiPostsByPostIdScoresResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/posts/{postId}/scores",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiPostsByPostIdScoresResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/posts/{postId}/scores",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiPostsByPostIdScoresResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10588,12 +11615,14 @@ export function putApiPostsByPostIdScores<ThrowOnError extends boolean = true>(
  */
 export function getApiPosts<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPostsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiPostsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiPostsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/posts", ...config }) as Promise<
-		RequestResult<GetApiPostsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/posts", ...config }) as Promise<
+			RequestResult<GetApiPostsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10602,18 +11631,20 @@ export function getApiPosts<ThrowOnError extends boolean = true>(
  */
 export function postApiPosts<ThrowOnError extends boolean = true>(
 	options: Options<PostApiPostsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiPostsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiPostsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/posts",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiPostsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/posts",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiPostsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10622,18 +11653,20 @@ export function postApiPosts<ThrowOnError extends boolean = true>(
  */
 export function postApiPostsWiki<ThrowOnError extends boolean = true>(
 	options: Options<PostApiPostsWikiOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiPostsWikiResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiPostsWikiResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/posts/wiki",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiPostsWikiResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/posts/wiki",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiPostsWikiResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10642,12 +11675,14 @@ export function postApiPostsWiki<ThrowOnError extends boolean = true>(
  */
 export function getApiPostsByPostId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPostsByPostIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiPostsByPostIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiPostsByPostIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/posts/{postId}", ...config }) as Promise<
-		RequestResult<GetApiPostsByPostIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/posts/{postId}", ...config }) as Promise<
+			RequestResult<GetApiPostsByPostIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10656,18 +11691,20 @@ export function getApiPostsByPostId<ThrowOnError extends boolean = true>(
  */
 export function patchApiPostsByPostId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiPostsByPostIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiPostsByPostIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiPostsByPostIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/posts/{postId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiPostsByPostIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/posts/{postId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchApiPostsByPostIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10676,12 +11713,14 @@ export function patchApiPostsByPostId<ThrowOnError extends boolean = true>(
  */
 export function getApiPostsByPostIdReplies<ThrowOnError extends boolean = true>(
 	options: Options<GetApiPostsByPostIdRepliesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiPostsByPostIdRepliesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiPostsByPostIdRepliesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/posts/{postId}/replies", ...config }) as Promise<
-		RequestResult<GetApiPostsByPostIdRepliesResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/posts/{postId}/replies", ...config }) as Promise<
+			RequestResult<GetApiPostsByPostIdRepliesResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10690,18 +11729,20 @@ export function getApiPostsByPostIdReplies<ThrowOnError extends boolean = true>(
  */
 export function postApiPostsByPostIdReplies<ThrowOnError extends boolean = true>(
 	options: Options<PostApiPostsByPostIdRepliesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiPostsByPostIdRepliesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiPostsByPostIdRepliesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/posts/{postId}/replies",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiPostsByPostIdRepliesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/posts/{postId}/replies",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiPostsByPostIdRepliesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10710,18 +11751,20 @@ export function postApiPostsByPostIdReplies<ThrowOnError extends boolean = true>
  */
 export function patchApiPostsByPostIdRepliesByReplyPostId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiPostsByPostIdRepliesByReplyPostIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiPostsByPostIdRepliesByReplyPostIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiPostsByPostIdRepliesByReplyPostIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/posts/{postId}/replies/{replyPostId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiPostsByPostIdRepliesByReplyPostIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/posts/{postId}/replies/{replyPostId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchApiPostsByPostIdRepliesByReplyPostIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10730,12 +11773,14 @@ export function patchApiPostsByPostIdRepliesByReplyPostId<ThrowOnError extends b
  */
 export function getApiRealms<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiRealmsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/realms", ...config }) as Promise<
-		RequestResult<GetApiRealmsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/realms", ...config }) as Promise<
+			RequestResult<GetApiRealmsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10744,18 +11789,20 @@ export function getApiRealms<ThrowOnError extends boolean = true>(
  */
 export function postApiRealms<ThrowOnError extends boolean = true>(
 	options: Options<PostApiRealmsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiRealmsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiRealmsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/realms",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiRealmsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/realms",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiRealmsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10765,18 +11812,20 @@ export function postApiRealms<ThrowOnError extends boolean = true>(
  */
 export function replaceRealmSlugAddress<ThrowOnError extends boolean = true>(
 	options: Options<ReplaceRealmSlugAddressOptions, ThrowOnError>,
-): Promise<RequestResult<ReplaceRealmSlugAddressResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<ReplaceRealmSlugAddressResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/slug-address",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<ReplaceRealmSlugAddressResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/slug-address",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<ReplaceRealmSlugAddressResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10785,12 +11834,14 @@ export function replaceRealmSlugAddress<ThrowOnError extends boolean = true>(
  */
 export function getApiRealmsByRealmId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/realms/{realmId}", ...config }) as Promise<
-		RequestResult<GetApiRealmsByRealmIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/realms/{realmId}", ...config }) as Promise<
+			RequestResult<GetApiRealmsByRealmIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10799,18 +11850,20 @@ export function getApiRealmsByRealmId<ThrowOnError extends boolean = true>(
  */
 export function patchApiRealmsByRealmId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiRealmsByRealmIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiRealmsByRealmIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiRealmsByRealmIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/realms/{realmId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiRealmsByRealmIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/realms/{realmId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchApiRealmsByRealmIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10819,15 +11872,17 @@ export function patchApiRealmsByRealmId<ThrowOnError extends boolean = true>(
  */
 export function putApiRealmsByRealmIdPages<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdPagesOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdPagesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiRealmsByRealmIdPagesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/pages",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiRealmsByRealmIdPagesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/pages",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PutApiRealmsByRealmIdPagesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10836,12 +11891,14 @@ export function putApiRealmsByRealmIdPages<ThrowOnError extends boolean = true>(
  */
 export function getApiRealmsByRealmIdTaxonomy<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdTaxonomyOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdTaxonomyResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdTaxonomyResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/realms/{realmId}/taxonomy", ...config }) as Promise<
-		RequestResult<GetApiRealmsByRealmIdTaxonomyResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/realms/{realmId}/taxonomy", ...config }) as Promise<
+			RequestResult<GetApiRealmsByRealmIdTaxonomyResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10850,18 +11907,20 @@ export function getApiRealmsByRealmIdTaxonomy<ThrowOnError extends boolean = tru
  */
 export function getApiRealmsByRealmIdTaxonomyDraft<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdTaxonomyDraftOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdTaxonomyDraftResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdTaxonomyDraftResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/taxonomy/draft",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdTaxonomyDraftResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/taxonomy/draft",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiRealmsByRealmIdTaxonomyDraftResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10870,18 +11929,20 @@ export function getApiRealmsByRealmIdTaxonomyDraft<ThrowOnError extends boolean 
  */
 export function putApiRealmsByRealmIdTaxonomyDraft<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdTaxonomyDraftOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdTaxonomyDraftResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiRealmsByRealmIdTaxonomyDraftResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/taxonomy/draft",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiRealmsByRealmIdTaxonomyDraftResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/taxonomy/draft",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiRealmsByRealmIdTaxonomyDraftResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10890,14 +11951,14 @@ export function putApiRealmsByRealmIdTaxonomyDraft<ThrowOnError extends boolean 
  */
 export function getApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdScoreContextOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdScoreContextResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdScoreContextResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/score-context",
-		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdScoreContextResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/realms/{realmId}/score-context", ...config }) as Promise<
+			RequestResult<GetApiRealmsByRealmIdScoreContextResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -10906,15 +11967,17 @@ export function getApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean =
  */
 export function putApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdScoreContextOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdScoreContextResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiRealmsByRealmIdScoreContextResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/score-context",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiRealmsByRealmIdScoreContextResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/score-context",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PutApiRealmsByRealmIdScoreContextResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10923,15 +11986,17 @@ export function putApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean =
  */
 export function deleteApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiRealmsByRealmIdScoreContextOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiRealmsByRealmIdScoreContextResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiRealmsByRealmIdScoreContextResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/realms/{realmId}/score-context",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdScoreContextResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/realms/{realmId}/score-context",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<DeleteApiRealmsByRealmIdScoreContextResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10940,18 +12005,20 @@ export function deleteApiRealmsByRealmIdScoreContext<ThrowOnError extends boolea
  */
 export function putApiRealmsByRealmIdTagVoting<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdTagVotingOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdTagVotingResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiRealmsByRealmIdTagVotingResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/tag-voting",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiRealmsByRealmIdTagVotingResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/tag-voting",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiRealmsByRealmIdTagVotingResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10960,18 +12027,20 @@ export function putApiRealmsByRealmIdTagVoting<ThrowOnError extends boolean = tr
  */
 export function putApiRealmsByRealmIdMembership<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdMembershipOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdMembershipResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiRealmsByRealmIdMembershipResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/membership",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiRealmsByRealmIdMembershipResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/membership",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiRealmsByRealmIdMembershipResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -10980,18 +12049,20 @@ export function putApiRealmsByRealmIdMembership<ThrowOnError extends boolean = t
  */
 export function deleteApiRealmsByRealmIdMembership<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiRealmsByRealmIdMembershipOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiRealmsByRealmIdMembershipResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiRealmsByRealmIdMembershipResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/realms/{realmId}/membership",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdMembershipResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/realms/{realmId}/membership",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiRealmsByRealmIdMembershipResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11000,18 +12071,20 @@ export function deleteApiRealmsByRealmIdMembership<ThrowOnError extends boolean 
  */
 export function getApiRealmsByRealmIdMembers<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdMembersOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdMembersResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdMembersResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/members",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdMembersResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/members",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiRealmsByRealmIdMembersResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11020,18 +12093,20 @@ export function getApiRealmsByRealmIdMembers<ThrowOnError extends boolean = true
  */
 export function patchApiRealmsByRealmIdMembersByProfileId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiRealmsByRealmIdMembersByProfileIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiRealmsByRealmIdMembersByProfileIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiRealmsByRealmIdMembersByProfileIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/realms/{realmId}/members/{profileId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiRealmsByRealmIdMembersByProfileIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/realms/{realmId}/members/{profileId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchApiRealmsByRealmIdMembersByProfileIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11040,18 +12115,20 @@ export function patchApiRealmsByRealmIdMembersByProfileId<ThrowOnError extends b
  */
 export function putApiRealmsByRealmIdRules<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdRulesOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdRulesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiRealmsByRealmIdRulesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/rules",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiRealmsByRealmIdRulesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/rules",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiRealmsByRealmIdRulesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11060,12 +12137,14 @@ export function putApiRealmsByRealmIdRules<ThrowOnError extends boolean = true>(
  */
 export function getApiRealmsByRealmIdRules<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdRulesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdRulesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdRulesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/realms/{realmId}/rules", ...config }) as Promise<
-		RequestResult<GetApiRealmsByRealmIdRulesResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/realms/{realmId}/rules", ...config }) as Promise<
+			RequestResult<GetApiRealmsByRealmIdRulesResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11074,18 +12153,20 @@ export function getApiRealmsByRealmIdRules<ThrowOnError extends boolean = true>(
  */
 export function getApiRealmsByRealmIdRulesAuthoring<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdRulesAuthoringOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdRulesAuthoringResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdRulesAuthoringResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/rules/authoring",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdRulesAuthoringResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/rules/authoring",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiRealmsByRealmIdRulesAuthoringResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11096,22 +12177,24 @@ export function putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/rules/{revisionId}/acknowledgement",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/rules/{revisionId}/acknowledgement",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiRealmsByRealmIdRulesByRevisionIdAcknowledgementResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11120,12 +12203,14 @@ export function putApiRealmsByRealmIdRulesByRevisionIdAcknowledgement<
  */
 export function getApiRealmsByRealmIdPins<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdPinsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdPinsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdPinsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/realms/{realmId}/pins", ...config }) as Promise<
-		RequestResult<GetApiRealmsByRealmIdPinsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/realms/{realmId}/pins", ...config }) as Promise<
+			RequestResult<GetApiRealmsByRealmIdPinsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11134,18 +12219,20 @@ export function getApiRealmsByRealmIdPins<ThrowOnError extends boolean = true>(
  */
 export function postApiRealmsByRealmIdPinsMove<ThrowOnError extends boolean = true>(
 	options: Options<PostApiRealmsByRealmIdPinsMoveOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiRealmsByRealmIdPinsMoveResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiRealmsByRealmIdPinsMoveResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/realms/{realmId}/pins/move",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiRealmsByRealmIdPinsMoveResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/realms/{realmId}/pins/move",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiRealmsByRealmIdPinsMoveResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11154,18 +12241,20 @@ export function postApiRealmsByRealmIdPinsMove<ThrowOnError extends boolean = tr
  */
 export function putApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdPinsByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdPinsByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiRealmsByRealmIdPinsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/pins/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiRealmsByRealmIdPinsByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/pins/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiRealmsByRealmIdPinsByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11174,18 +12263,20 @@ export function putApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolean =
  */
 export function deleteApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiRealmsByRealmIdPinsByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiRealmsByRealmIdPinsByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiRealmsByRealmIdPinsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/realms/{realmId}/pins/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdPinsByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/realms/{realmId}/pins/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiRealmsByRealmIdPinsByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11194,18 +12285,20 @@ export function deleteApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolea
  */
 export function postApiRealmsByRealmIdWikis<ThrowOnError extends boolean = true>(
 	options: Options<PostApiRealmsByRealmIdWikisOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiRealmsByRealmIdWikisResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiRealmsByRealmIdWikisResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/realms/{realmId}/wikis",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiRealmsByRealmIdWikisResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/realms/{realmId}/wikis",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiRealmsByRealmIdWikisResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11214,15 +12307,17 @@ export function postApiRealmsByRealmIdWikis<ThrowOnError extends boolean = true>
  */
 export function getApiRealmsByRealmIdTagContexts<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdTagContextsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdTagContextsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdTagContextsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/tag-contexts",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdTagContextsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/tag-contexts",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiRealmsByRealmIdTagContextsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11231,18 +12326,20 @@ export function getApiRealmsByRealmIdTagContexts<ThrowOnError extends boolean = 
  */
 export function postApiRealmsByRealmIdTagContexts<ThrowOnError extends boolean = true>(
 	options: Options<PostApiRealmsByRealmIdTagContextsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiRealmsByRealmIdTagContextsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiRealmsByRealmIdTagContextsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/realms/{realmId}/tag-contexts",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiRealmsByRealmIdTagContextsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/realms/{realmId}/tag-contexts",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiRealmsByRealmIdTagContextsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11251,14 +12348,16 @@ export function postApiRealmsByRealmIdTagContexts<ThrowOnError extends boolean =
  */
 export function getApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdTagsByTagIdContextOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/tags/{tagId}/context",
-		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/tags/{tagId}/context",
+			...config,
+		}) as Promise<RequestResult<GetApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11267,15 +12366,17 @@ export function getApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends boo
  */
 export function putApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends boolean = true>(
 	options: Options<PutApiRealmsByRealmIdTagsByTagIdContextOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/tags/{tagId}/context",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<PutApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/tags/{tagId}/context",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<PutApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11284,18 +12385,20 @@ export function putApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends boo
  */
 export function deleteApiRealmsByRealmIdTagsByTagIdContext<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiRealmsByRealmIdTagsByTagIdContextOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/realms/{realmId}/tags/{tagId}/context",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/realms/{realmId}/tags/{tagId}/context",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiRealmsByRealmIdTagsByTagIdContextResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11306,19 +12409,21 @@ export function putApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/units/{unitId}/policy-tags/{tagId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/units/{unitId}/policy-tags/{tagId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11329,19 +12434,21 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/realms/{realmId}/units/{unitId}/policy-tags/{tagId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/realms/{realmId}/units/{unitId}/policy-tags/{tagId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11350,18 +12457,20 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdPolicyTagsByTagId<
  */
 export function getApiRealmsByRealmIdUnitsByUnitIdTags<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdUnitsByUnitIdTagsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdTagsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdTagsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/units/{unitId}/tags",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdTagsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/units/{unitId}/tags",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdTagsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11372,22 +12481,24 @@ export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/units/{unitId}/tags/{tagId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/units/{unitId}/tags/{tagId}/vote",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11398,22 +12509,24 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/realms/{realmId}/units/{unitId}/tags/{tagId}/vote",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/realms/{realmId}/units/{unitId}/tags/{tagId}/vote",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11422,15 +12535,17 @@ export function deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<
  */
 export function getApiRealmsByRealmIdUnits<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdUnitsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdUnitsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdUnitsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/units",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/units",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11439,15 +12554,17 @@ export function getApiRealmsByRealmIdUnits<ThrowOnError extends boolean = true>(
  */
 export function getApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdUnitsByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/units/{unitId}",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/units/{unitId}",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11456,18 +12573,20 @@ export function getApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolean 
  */
 export function patchApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolean = true>(
 	options: Options<PatchApiRealmsByRealmIdUnitsByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PatchApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PATCH",
-		url: "/api/v1/realms/{realmId}/units/{unitId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PatchApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PATCH",
+			url: "/api/v1/realms/{realmId}/units/{unitId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PatchApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11476,15 +12595,17 @@ export function patchApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolea
  */
 export function getApiRealmsByRealmIdUnitsByUnitIdHistory<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/units/{unitId}/history",
-		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
-		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/units/{unitId}/history",
+			security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+			...config,
+		}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11493,18 +12614,20 @@ export function getApiRealmsByRealmIdUnitsByUnitIdHistory<ThrowOnError extends b
  */
 export function postApiRealmsByRealmIdUnitsByUnitIdReview<ThrowOnError extends boolean = true>(
 	options: Options<PostApiRealmsByRealmIdUnitsByUnitIdReviewOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiRealmsByRealmIdUnitsByUnitIdReviewResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiRealmsByRealmIdUnitsByUnitIdReviewResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/realms/{realmId}/units/{unitId}/review",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiRealmsByRealmIdUnitsByUnitIdReviewResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/realms/{realmId}/units/{unitId}/review",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiRealmsByRealmIdUnitsByUnitIdReviewResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11514,18 +12637,20 @@ export function postApiRealmsByRealmIdUnitsByUnitIdReview<ThrowOnError extends b
  */
 export function getApiRealmsByRealmIdWikiNavigation<ThrowOnError extends boolean = true>(
 	options: Options<GetApiRealmsByRealmIdWikiNavigationOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdWikiNavigationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiRealmsByRealmIdWikiNavigationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/wiki/navigation",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiRealmsByRealmIdWikiNavigationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/wiki/navigation",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiRealmsByRealmIdWikiNavigationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11535,18 +12660,20 @@ export function getApiRealmsByRealmIdWikiNavigation<ThrowOnError extends boolean
  */
 export function postApiRealmsByRealmIdWikiNavigation<ThrowOnError extends boolean = true>(
 	options: Options<PostApiRealmsByRealmIdWikiNavigationOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiRealmsByRealmIdWikiNavigationResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiRealmsByRealmIdWikiNavigationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/realms/{realmId}/wiki/navigation",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiRealmsByRealmIdWikiNavigationResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/realms/{realmId}/wiki/navigation",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiRealmsByRealmIdWikiNavigationResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11558,22 +12685,24 @@ export function getApiRealmsByRealmIdWikiNavigationByNavigationId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<GetApiRealmsByRealmIdWikiNavigationByNavigationIdOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<GetApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/realms/{realmId}/wiki/navigation/{navigationId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<GetApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/realms/{realmId}/wiki/navigation/{navigationId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<GetApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11585,22 +12714,24 @@ export function putApiRealmsByRealmIdWikiNavigationByNavigationId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PutApiRealmsByRealmIdWikiNavigationByNavigationIdOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PutApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/realms/{realmId}/wiki/navigation/{navigationId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PutApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/realms/{realmId}/wiki/navigation/{navigationId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PutApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11612,22 +12743,24 @@ export function deleteApiRealmsByRealmIdWikiNavigationByNavigationId<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/realms/{realmId}/wiki/navigation/{navigationId}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/realms/{realmId}/wiki/navigation/{navigationId}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<DeleteApiRealmsByRealmIdWikiNavigationByNavigationIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11636,12 +12769,14 @@ export function deleteApiRealmsByRealmIdWikiNavigationByNavigationId<
  */
 export function getApiSearchFilter<ThrowOnError extends boolean = true>(
 	options: Options<GetApiSearchFilterOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiSearchFilterResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiSearchFilterResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/v1/search/filter", ...config }) as Promise<
-		RequestResult<GetApiSearchFilterResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/search/filter", ...config }) as Promise<
+			RequestResult<GetApiSearchFilterResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11650,12 +12785,14 @@ export function getApiSearchFilter<ThrowOnError extends boolean = true>(
  */
 export function postApiSearchFilterDefinition<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchFilterDefinitionOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchFilterDefinitionResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiSearchFilterDefinitionResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/v1/search/filter/definition", ...config }) as Promise<
-		RequestResult<PostApiSearchFilterDefinitionResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "POST", url: "/api/v1/search/filter/definition", ...config }) as Promise<
+			RequestResult<PostApiSearchFilterDefinitionResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11664,12 +12801,14 @@ export function postApiSearchFilterDefinition<ThrowOnError extends boolean = tru
  */
 export function postApiSearchFilterExecute<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchFilterExecuteOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchFilterExecuteResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiSearchFilterExecuteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/v1/search/filter/execute", ...config }) as Promise<
-		RequestResult<PostApiSearchFilterExecuteResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "POST", url: "/api/v1/search/filter/execute", ...config }) as Promise<
+			RequestResult<PostApiSearchFilterExecuteResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11678,12 +12817,14 @@ export function postApiSearchFilterExecute<ThrowOnError extends boolean = true>(
  */
 export function postApiSearchFilterFeed<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchFilterFeedOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchFilterFeedResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiSearchFilterFeedResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/v1/search/filter/feed", ...config }) as Promise<
-		RequestResult<PostApiSearchFilterFeedResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({ method: "POST", url: "/api/v1/search/filter/feed", ...config }) as Promise<
+			RequestResult<PostApiSearchFilterFeedResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11692,14 +12833,14 @@ export function postApiSearchFilterFeed<ThrowOnError extends boolean = true>(
  */
 export function getApiSearchZonesByZoneIdFilter<ThrowOnError extends boolean = true>(
 	options: Options<GetApiSearchZonesByZoneIdFilterOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiSearchZonesByZoneIdFilterResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiSearchZonesByZoneIdFilterResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/search/zones/{zoneId}/filter",
-		...config,
-	}) as Promise<RequestResult<GetApiSearchZonesByZoneIdFilterResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/search/zones/{zoneId}/filter", ...config }) as Promise<
+			RequestResult<GetApiSearchZonesByZoneIdFilterResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11708,14 +12849,16 @@ export function getApiSearchZonesByZoneIdFilter<ThrowOnError extends boolean = t
  */
 export function postApiSearchZonesByZoneIdFilterExecute<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchZonesByZoneIdFilterExecuteOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchZonesByZoneIdFilterExecuteResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiSearchZonesByZoneIdFilterExecuteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/search/zones/{zoneId}/filter/execute",
-		...config,
-	}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFilterExecuteResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/search/zones/{zoneId}/filter/execute",
+			...config,
+		}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFilterExecuteResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11724,14 +12867,16 @@ export function postApiSearchZonesByZoneIdFilterExecute<ThrowOnError extends boo
  */
 export function postApiSearchZonesByZoneIdFilterFeed<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchZonesByZoneIdFilterFeedOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchZonesByZoneIdFilterFeedResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiSearchZonesByZoneIdFilterFeedResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/search/zones/{zoneId}/filter/feed",
-		...config,
-	}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFilterFeedResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/search/zones/{zoneId}/filter/feed",
+			...config,
+		}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFilterFeedResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11740,20 +12885,24 @@ export function postApiSearchZonesByZoneIdFilterFeed<ThrowOnError extends boolea
  */
 export function postApiSearchZonesByZoneIdDockBlockExecutions<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchZonesByZoneIdDockBlockExecutionsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchZonesByZoneIdDockBlockExecutionsResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<PostApiSearchZonesByZoneIdDockBlockExecutionsResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/search/zones/{zoneId}/dock/block-executions",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiSearchZonesByZoneIdDockBlockExecutionsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/search/zones/{zoneId}/dock/block-executions",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiSearchZonesByZoneIdDockBlockExecutionsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11762,20 +12911,24 @@ export function postApiSearchZonesByZoneIdDockBlockExecutions<ThrowOnError exten
  */
 export function postApiSearchZonesByZoneIdPagesByPageIdExecute<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchZonesByZoneIdPagesByPageIdExecuteOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdExecuteResponses, ThrowOnError>> {
+): Unwrappable<
+	RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdExecuteResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/search/zones/{zoneId}/pages/{pageId}/execute",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdExecuteResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/search/zones/{zoneId}/pages/{pageId}/execute",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdExecuteResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11786,22 +12939,24 @@ export function postApiSearchZonesByZoneIdPagesByPageIdBlockExecutions<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/search/zones/{zoneId}/pages/{pageId}/block-executions",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/search/zones/{zoneId}/pages/{pageId}/block-executions",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdBlockExecutionsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11812,22 +12967,24 @@ export function postApiSearchZonesByZoneIdDockFeedBlockExecutions<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiSearchZonesByZoneIdDockFeedBlockExecutionsOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiSearchZonesByZoneIdDockFeedBlockExecutionsResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/search/zones/{zoneId}/dock/feed-block-executions",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiSearchZonesByZoneIdDockFeedBlockExecutionsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/search/zones/{zoneId}/dock/feed-block-executions",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<PostApiSearchZonesByZoneIdDockFeedBlockExecutionsResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11838,22 +12995,27 @@ export function postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutions<
 	ThrowOnError extends boolean = true,
 >(
 	options: Options<PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsOptions, ThrowOnError>,
-): Promise<
+): Unwrappable<
 	RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsResponses, ThrowOnError>
 > {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/search/zones/{zoneId}/pages/{pageId}/feed-block-executions",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<
-		RequestResult<PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsResponses, ThrowOnError>
-	>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/search/zones/{zoneId}/pages/{pageId}/feed-block-executions",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<
+			RequestResult<
+				PostApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutionsResponses,
+				ThrowOnError
+			>
+		>,
+	);
 }
 
 /**
@@ -11862,18 +13024,20 @@ export function postApiSearchZonesByZoneIdPagesByPageIdFeedBlockExecutions<
  */
 export function postApiSearch<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiSearchResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/search",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiSearchResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/search",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiSearchResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11882,18 +13046,20 @@ export function postApiSearch<ThrowOnError extends boolean = true>(
  */
 export function postApiSearchSharedQueries<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchSharedQueriesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchSharedQueriesResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiSearchSharedQueriesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/search/shared-queries",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiSearchSharedQueriesResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/search/shared-queries",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiSearchSharedQueriesResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11902,14 +13068,14 @@ export function postApiSearchSharedQueries<ThrowOnError extends boolean = true>(
  */
 export function getApiSearchSharedQueriesById<ThrowOnError extends boolean = true>(
 	options: Options<GetApiSearchSharedQueriesByIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiSearchSharedQueriesByIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiSearchSharedQueriesByIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/search/shared-queries/{id}",
-		...config,
-	}) as Promise<RequestResult<GetApiSearchSharedQueriesByIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({ method: "GET", url: "/api/v1/search/shared-queries/{id}", ...config }) as Promise<
+			RequestResult<GetApiSearchSharedQueriesByIdResponses, ThrowOnError>
+		>,
+	);
 }
 
 /**
@@ -11918,18 +13084,20 @@ export function getApiSearchSharedQueriesById<ThrowOnError extends boolean = tru
  */
 export function postApiSearchByIndex<ThrowOnError extends boolean = true>(
 	options: Options<PostApiSearchByIndexOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchByIndexResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiSearchByIndexResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/search/{index}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiSearchByIndexResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/search/{index}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiSearchByIndexResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11938,18 +13106,20 @@ export function postApiSearchByIndex<ThrowOnError extends boolean = true>(
  */
 export function postApiImageAssets<ThrowOnError extends boolean = true>(
 	options: Options<PostApiImageAssetsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiImageAssetsResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiImageAssetsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/image-assets",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiImageAssetsResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/image-assets",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiImageAssetsResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11958,18 +13128,20 @@ export function postApiImageAssets<ThrowOnError extends boolean = true>(
  */
 export function postApiImageAssetsByIdComplete<ThrowOnError extends boolean = true>(
 	options: Options<PostApiImageAssetsByIdCompleteOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiImageAssetsByIdCompleteResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PostApiImageAssetsByIdCompleteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "POST",
-		url: "/api/v1/image-assets/{id}/complete",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PostApiImageAssetsByIdCompleteResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "POST",
+			url: "/api/v1/image-assets/{id}/complete",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PostApiImageAssetsByIdCompleteResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11978,18 +13150,20 @@ export function postApiImageAssetsByIdComplete<ThrowOnError extends boolean = tr
  */
 export function putApiImageAssetsByIdPresentationsByRole<ThrowOnError extends boolean = true>(
 	options: Options<PutApiImageAssetsByIdPresentationsByRoleOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiImageAssetsByIdPresentationsByRoleResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<PutApiImageAssetsByIdPresentationsByRoleResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "PUT",
-		url: "/api/v1/image-assets/{id}/presentations/{role}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<PutApiImageAssetsByIdPresentationsByRoleResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "PUT",
+			url: "/api/v1/image-assets/{id}/presentations/{role}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<PutApiImageAssetsByIdPresentationsByRoleResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -11998,18 +13172,20 @@ export function putApiImageAssetsByIdPresentationsByRole<ThrowOnError extends bo
  */
 export function getApiImageAssetsById<ThrowOnError extends boolean = true>(
 	options: Options<GetApiImageAssetsByIdOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiImageAssetsByIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<GetApiImageAssetsByIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "GET",
-		url: "/api/v1/image-assets/{id}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<GetApiImageAssetsByIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "GET",
+			url: "/api/v1/image-assets/{id}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<GetApiImageAssetsByIdResponses, ThrowOnError>>,
+	);
 }
 
 /**
@@ -12018,16 +13194,18 @@ export function getApiImageAssetsById<ThrowOnError extends boolean = true>(
  */
 export function deleteApiImageAssetsById<ThrowOnError extends boolean = true>(
 	options: Options<DeleteApiImageAssetsByIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiImageAssetsByIdResponses, ThrowOnError>> {
+): Unwrappable<RequestResult<DeleteApiImageAssetsByIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({
-		method: "DELETE",
-		url: "/api/v1/image-assets/{id}",
-		security: [
-			{ type: "http", scheme: "bearer" },
-			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
-		],
-		...config,
-	}) as Promise<RequestResult<DeleteApiImageAssetsByIdResponses, ThrowOnError>>;
+	return withUnwrap(
+		request({
+			method: "DELETE",
+			url: "/api/v1/image-assets/{id}",
+			security: [
+				{ type: "http", scheme: "bearer" },
+				{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+			],
+			...config,
+		}) as Promise<RequestResult<DeleteApiImageAssetsByIdResponses, ThrowOnError>>,
+	);
 }

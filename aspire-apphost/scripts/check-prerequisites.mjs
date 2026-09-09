@@ -2,8 +2,8 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const expectedAspireVersion = "13.5.3";
-const minimumBunVersion = "1.4.0";
-const expectedYarnVersion = "4.17.1";
+const minimumBunVersion = "1.4.2";
+const expectedYarnVersion = "4.18.0";
 const yarnPath = fileURLToPath(
 	new URL(`../../.yarn/releases/yarn-${expectedYarnVersion}.cjs`, import.meta.url),
 );

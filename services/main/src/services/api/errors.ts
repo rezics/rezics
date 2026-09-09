@@ -129,7 +129,10 @@ export type ApiTypedError = InstanceType<(typeof ApiErrors)[number]>;
 export type ApiErrorCode = ApiTypedError["type"];
 
 type ApiErrorClass = (typeof ApiErrors)[number];
-const getErrorType = (ErrorClass: ApiErrorClass): ApiErrorCode => ErrorClass.prototype.type;
+// HTTPError.id stores the stable tag in prototype.name; `type` now reads the
+// instance's code and may be expanded into an RFC 9457 URI by Elysia.
+const getErrorType = (ErrorClass: ApiErrorClass): ApiErrorCode =>
+	ErrorClass.prototype.name as ApiErrorCode;
 
 export const ApiErrorRegistry: ReadonlyMap<ApiErrorCode, ApiErrorClass> = new Map(
 	ApiErrors.map((ErrorClass) => [getErrorType(ErrorClass), ErrorClass] as const),

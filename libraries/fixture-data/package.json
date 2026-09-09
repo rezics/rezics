@@ -12,7 +12,7 @@
 		"@rezics/i18n": "workspace:*"
 	},
 	"devDependencies": {
-		"typescript": "7",
+		"typescript": "7.0.2",
 		"vitest": "4.1.10"
 	}
 }

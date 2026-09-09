@@ -1,8 +1,8 @@
 import type { Translation } from "@rezics/i18n";
-import type { PostApiFeedQueryStatus200ItemsRecommendationReason } from "@rezics/openapi-tanstack-query";
+import type { PostApiFeedQueryStatus200ItemsRecommendationReasonEnum } from "@rezics/openapi-tanstack-query";
 
 export function recommendationReasonLabel(
-	reason: PostApiFeedQueryStatus200ItemsRecommendationReason | null | undefined,
+	reason: PostApiFeedQueryStatus200ItemsRecommendationReasonEnum | null | undefined,
 	feed: Translation["feed"],
 ) {
 	if (reason === "followed_unit") return feed.reason.followedUnit;

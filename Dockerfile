@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1.7
 
-ARG NODE_IMAGE=node:26-bookworm-slim@sha256:9e6f9357d371591e32ab6f2d8a26d63bdd0d17c29eee3f4f3e7e454d9634bf73
-ARG BUN_IMAGE=oven/bun:1.4.0-slim@sha256:4c3ac64f41e0a47e28403789a63ecdca7987f322fa811bf5b3cb0f25f18443cc
-ARG POSTGRES_IMAGE=postgres:18.4-trixie@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
-ARG COREPACK_VERSION=0.35.0
-ARG BUN_VERSION=1.4.0
+ARG NODE_IMAGE=node:26-bookworm-slim@sha256:367679cf9792759492a486e4aa4b421764d71a9546a6dae8aab81a99eb797b3e
+ARG BUN_IMAGE=oven/bun:1.4.2-slim@sha256:cb3bbbb08e13a4a2ff400f24c7a2a1d5efa83f6ef8544d52d95a519631e2fc61
+ARG POSTGRES_IMAGE=postgres:18.6-trixie@sha256:4ef4dbc939d61acea57712655ddb4b4ab27419c913f94cca0cd57cb3ea3c2280
+ARG COREPACK_VERSION=0.36.0
+ARG BUN_VERSION=1.4.2
 ARG PGROONGA_VERSION=4.0.8-1
 ARG APPROX_COUNT_COMMIT=341dfa19f73e60d22a8869ccb03bd252d888cec7
 
@@ -23,7 +23,7 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 WORKDIR /workspace
 
 COPY LICENSE THIRD_PARTY_NOTICES.md package.json yarn.lock .yarnrc.yml ./
-COPY .yarn/releases/yarn-4.17.1.cjs .yarn/releases/yarn-4.17.1.cjs
+COPY .yarn/releases/yarn-4.18.0.cjs .yarn/releases/yarn-4.18.0.cjs
 COPY libraries/access/package.json libraries/access/package.json
 COPY libraries/avatar/package.json libraries/avatar/package.json
 COPY libraries/block/package.json libraries/block/package.json
@@ -43,7 +43,7 @@ FROM ${BUN_IMAGE} AS bun-compiler
 ARG BUN_VERSION
 USER root
 
-ADD --checksum=sha256:2d03fb5fb83ac8b567aca0a281b2ce1a1a19d488f56c2968d88c3f25e92fe452 \
+ADD --checksum=sha256:36368faef7527875d5ffa52e53cd48021741f2a83eb6208a8dd64068d422a913 \
     https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64.zip \
     /tmp/bun-linux-x64.zip
 

@@ -15,26 +15,26 @@
 	},
 	"dependencies": {
 		"@opentelemetry/api": "1.9.1",
-		"@opentelemetry/context-async-hooks": "2.9.0",
-		"@opentelemetry/core": "2.9.0",
-		"@opentelemetry/exporter-metrics-otlp-proto": "0.220.0",
-		"@opentelemetry/exporter-trace-otlp-proto": "0.220.0",
-		"@opentelemetry/resources": "2.9.0",
-		"@opentelemetry/sdk-metrics": "2.9.0",
-		"@opentelemetry/sdk-trace-base": "2.9.0",
-		"@opentelemetry/sdk-trace-node": "2.9.0"
+		"@opentelemetry/context-async-hooks": "2.11.0",
+		"@opentelemetry/core": "2.11.0",
+		"@opentelemetry/exporter-metrics-otlp-proto": "0.222.0",
+		"@opentelemetry/exporter-trace-otlp-proto": "0.222.0",
+		"@opentelemetry/resources": "2.11.0",
+		"@opentelemetry/sdk-metrics": "2.11.0",
+		"@opentelemetry/sdk-trace-base": "2.11.0",
+		"@opentelemetry/sdk-trace-node": "2.11.0"
 	},
 	"peerDependencies": {
-		"elysia": ">=2.0.0-beta.10 <3.0.0"
+		"elysia": ">=2.0.0-beta.14 <3.0.0"
 	},
 	"devDependencies": {
-		"@types/node": "26",
-		"elysia": "2.0.0-beta.10",
-		"exact-mirror": "1.2.4",
-		"file-type": "^21.0.0",
+		"@types/node": "26.5.0",
+		"elysia": "2.0.0-beta.14",
+		"exact-mirror": "1.2.6",
+		"file-type": "^22.0.2",
 		"openapi-types": "^12.1.3",
-		"typebox": "1.3.20",
-		"typescript": "7",
+		"typebox": "1.3.23",
+		"typescript": "7.0.2",
 		"vitest": "4.1.10"
 	}
 }

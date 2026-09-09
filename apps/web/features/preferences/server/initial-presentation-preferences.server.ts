@@ -49,7 +49,7 @@ const loadInitialPresentationPreferences = cache(
 		if (acceptLanguage) headers.set("accept-language", acceptLanguage);
 
 		try {
-			const response = await fetch(new URL("/api/v1/users/me/preferences", getBackendOrigin()), {
+			const response = await fetch(new URL("/api/v1/account/me/preferences", getBackendOrigin()), {
 				cache: "no-store",
 				headers,
 				signal: AbortSignal.timeout(PresentationPreferencesBootstrapTimeoutMs),

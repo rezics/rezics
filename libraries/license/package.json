@@ -9,7 +9,7 @@
 		".": "./src/index.ts"
 	},
 	"devDependencies": {
-		"typescript": "7",
+		"typescript": "7.0.2",
 		"vitest": "4.1.10"
 	}
 }

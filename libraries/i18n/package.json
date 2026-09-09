@@ -28,9 +28,9 @@
 		"native-i18n": "0.2.0"
 	},
 	"devDependencies": {
-		"@babel/parser": "^7.29.7",
+		"@babel/parser": "^8.0.4",
 		"@mdx-js/mdx": "^3.1.1",
-		"typescript": "7",
+		"typescript": "7.0.2",
 		"vitest": "4.1.10"
 	}
 }
