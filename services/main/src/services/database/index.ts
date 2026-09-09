@@ -16,6 +16,15 @@ const pool = new Pool({
 	maxLifetimeSeconds: env.DATABASE_POOL_MAX_LIFETIME_SECONDS,
 	statement_timeout: env.DATABASE_STATEMENT_TIMEOUT_MS,
 });
+// pg removes the failed idle client itself; an unhandled pool error would also
+// terminate the API/worker instead of letting later requests reconnect.
+pool.on("error", (error) => {
+	peekActiveObservability()?.logger.error("Idle PostgreSQL connection failed", {
+		eventName: "database.pool.connection_failed",
+		errorCode: "DatabaseConnectionFailed",
+		error,
+	});
+});
 const databasePoolWaitTracker = new DatabasePoolWaitTracker();
 const untrackedPoolConnect = pool.connect.bind(pool);
 
