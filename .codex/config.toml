@@ -1,12 +1,2 @@
-sandbox_mode = "workspace-write"
-approval_policy = "on-request"
-approvals_reviewer = "auto_review"
-
-[sandbox_workspace_write]
-network_access = true
-
-[windows]
-sandbox = "elevated"
-
 # Connect to the Storybook MCP URL discovered through `task aspire:describe`.
 # Use the owning official CLI with --port and --attach if the session cannot reconnect MCP.
