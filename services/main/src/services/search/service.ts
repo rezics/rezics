@@ -89,15 +89,31 @@ import { boundedSearchStatementTimeout } from "./statement-timeout";
 
 // Columns are bound to one concrete owner scan or an explicit bounded ID lookup.
 const searchUnit = unitStateRelation(sql`null::uuid`, "search_unit");
-function searchState(id: SQL): SQL { return sql`lateral ${unitStateRelation(id, "search_unit")}`; }
+function searchState(id: SQL): SQL {
+	return sql`lateral ${unitStateRelation(id, "search_unit")}`;
+}
 function ownerSearchRelation(owner: UnitOwner, shapes: readonly string[] = []): SQL {
- const table = unitOwnerTable(owner);
- const shape = owner === "post" ? sql`${post.kind}::text` : "shape" in table ? sql`${table.shape}` : sql`${owner}::text`;
- const publishedAt = "publishedAt" in table ? sql`${table.publishedAt}` : sql`null::timestamptz`;
- const requestedPostShapes = shapes.filter((value): value is (typeof PostKindValues)[number] => PostKindValues.some(kind=>kind===value));
- const shapeCondition = !shapes.length ? sql`true` : owner === "post" ? requestedPostShapes.length ? inArray(post.kind, requestedPostShapes) : sql`false`
- : "shape" in table ? inArray(table.shape, [...shapes]) : sql`${shapes.includes(owner)}`;
- return sql`(select ${table.id} as id, ${owner}::text as owner, ${shape} as shape,
+	const table = unitOwnerTable(owner);
+	const shape =
+		owner === "post"
+			? sql`${post.kind}::text`
+			: "shape" in table
+				? sql`${table.shape}`
+				: sql`${owner}::text`;
+	const publishedAt = "publishedAt" in table ? sql`${table.publishedAt}` : sql`null::timestamptz`;
+	const requestedPostShapes = shapes.filter((value): value is (typeof PostKindValues)[number] =>
+		PostKindValues.some((kind) => kind === value),
+	);
+	const shapeCondition = !shapes.length
+		? sql`true`
+		: owner === "post"
+			? requestedPostShapes.length
+				? inArray(post.kind, requestedPostShapes)
+				: sql`false`
+			: "shape" in table
+				? inArray(table.shape, [...shapes])
+				: sql`${shapes.includes(owner)}`;
+	return sql`(select ${table.id} as id, ${owner}::text as owner, ${shape} as shape,
  ${table.status} as status, ${table.visibility} as visibility,
  ${table.moderationStatus} as moderation_status, ${table.deletedAt} as deleted_at,
  ${table.createdAt} as created_at, ${table.updatedAt} as updated_at, ${publishedAt} as published_at
@@ -671,11 +687,18 @@ function searchCandidateSet(
 }
 
 function buildCommonSearchConditions(request: DomainSearchRequest): SQL[] {
-	const readCondition = getUnitReadCondition(request.profileId, { discoverableOnly: true }, searchUnit);
+	const readCondition = getUnitReadCondition(
+		request.profileId,
+		{ discoverableOnly: true },
+		searchUnit,
+	);
 	if (!readCondition) throw new Error("Unit read policy produced no SQL condition");
 	const conditions: SQL[] = [readCondition];
 	conditions.push(
-		getContentRatingCondition(request.contentRatingPolicy ?? DefaultContentRatingPolicy, searchUnit.contentRating),
+		getContentRatingCondition(
+			request.contentRatingPolicy ?? DefaultContentRatingPolicy,
+			searchUnit.contentRating,
+		),
 	);
 	if (request.scopeUnitId) {
 		const direct = sql`${searchUnit.id} = ${request.scopeUnitId}::uuid`;
@@ -956,7 +979,9 @@ function resolveSourceOwners(
 }
 
 function mergeSourceShapes(branches: readonly PreparedSearchBranch[]): readonly string[] {
- return branches.some(branch=>!branch.sourceShapes.length) ? [] : [...new Set(branches.flatMap(branch=>branch.sourceShapes))];
+	return branches.some((branch) => !branch.sourceShapes.length)
+		? []
+		: [...new Set(branches.flatMap((branch) => branch.sourceShapes))];
 }
 
 function mergeSourceOwners(branches: readonly PreparedSearchBranch[]): readonly UnitOwner[] {
@@ -1090,7 +1115,7 @@ function bestCandidateSource(
 	seeded = false,
 	sourceOwners?: readonly UnitOwner[],
 	shapes: readonly string[] = [],
- bestSnapshotId?: string | null,
+	bestSnapshotId?: string | null,
 ): OrderedCandidateSource {
 	if (position && position.source !== "best-positive" && position.source !== "best-zero")
 		throw new InvalidSearch("This best cursor predates snapshot-pinned pagination");
@@ -1104,15 +1129,16 @@ function bestCandidateSource(
 		};
 	const bestPosition =
 		position?.source === "best-positive" || position?.source === "best-zero" ? position : undefined;
-	const selectedSnapshotId=bestPosition ? bestPosition.snapshotId : bestSnapshotId;
-	const selectedSnapshot = selectedSnapshotId !== undefined
-		? selectedSnapshotId === null
-			? sql`select ${recommendationSnapshot.id} from ${recommendationSnapshot} where false`
-			: sql`select ${recommendationSnapshot.id}
+	const selectedSnapshotId = bestPosition ? bestPosition.snapshotId : bestSnapshotId;
+	const selectedSnapshot =
+		selectedSnapshotId !== undefined
+			? selectedSnapshotId === null
+				? sql`select ${recommendationSnapshot.id} from ${recommendationSnapshot} where false`
+				: sql`select ${recommendationSnapshot.id}
 				from ${recommendationSnapshot}
 				where ${recommendationSnapshot.id} = ${selectedSnapshotId}::uuid
 					and ${recommendationSnapshot.state} = 'ready'::recommendation_snapshot_state`
-		: sql`select ${recommendationSnapshot.id}
+			: sql`select ${recommendationSnapshot.id}
 			from ${recommendationSnapshot}
 			where ${recommendationSnapshot.active} = true
 			limit 1`;
@@ -1335,9 +1361,11 @@ function textCandidateSource(
 				null::uuid as snapshot_id,
 				(not text_candidate.search_matched) as search_fallback,
 				text_candidate.search_matched
-			from ${CatalogOwnerValues.some(owner=>owner===kind)
- ? sql`public.search_catalog_name_candidates(${kind}, ${toTextArray(query.variants)}, ${toTextArray(languageBoundary)}, ${toTextArray(shapes)}, ${cursorMicros}, ${orderedPosition?.unitId ?? null}::uuid, ${WorkPolicy.search.maxEstimatedPostings}, ${limit})`
- : sql`public.search_text_candidates(${toTextArray(query.variants)}, ${toTextArray(languageBoundary)}, ${kind}, ${toTextArray(shapes)}, ${cursorMicros}, ${orderedPosition?.unitId ?? null}::uuid, ${WorkPolicy.search.maxEstimatedPostings}, ${limit})`} as text_candidate
+			from ${
+				CatalogOwnerValues.some((owner) => owner === kind)
+					? sql`public.search_catalog_name_candidates(${kind}, ${toTextArray(query.variants)}, ${toTextArray(languageBoundary)}, ${toTextArray(shapes)}, ${cursorMicros}, ${orderedPosition?.unitId ?? null}::uuid, ${WorkPolicy.search.maxEstimatedPostings}, ${limit})`
+					: sql`public.search_text_candidates(${toTextArray(query.variants)}, ${toTextArray(languageBoundary)}, ${kind}, ${toTextArray(shapes)}, ${cursorMicros}, ${orderedPosition?.unitId ?? null}::uuid, ${WorkPolicy.search.maxEstimatedPostings}, ${limit})`
+			} as text_candidate
 			order by text_candidate.unit_updated_at_micros desc,
 				text_candidate.unit_id desc
 			limit ${limit}`,
@@ -1361,9 +1389,10 @@ function seededUnitCandidateSource(
 	limit: number,
 	sourceOwners: readonly UnitOwner[],
 	shapes: readonly string[],
- bestSnapshotId?:string|null,
+	bestSnapshotId?: string | null,
 ): OrderedCandidateSource | undefined {
-	if (sort === "best") return bestCandidateSource(position, limit, true, sourceOwners, shapes, bestSnapshotId);
+	if (sort === "best")
+		return bestCandidateSource(position, limit, true, sourceOwners, shapes, bestSnapshotId);
 	if (sort === "followerCount:asc" || sort === "followerCount:desc")
 		return sparseFollowerCandidateSource(
 			position,
@@ -1407,39 +1436,72 @@ function seededUnitCandidateSource(
 			position: orderedPosition,
 			limit,
 		});
-	return ownerOrderedCandidateSource(sort === "relevance" ? "updatedAt:desc" : sort, position, limit, sourceOwners, shapes, true);
+	return ownerOrderedCandidateSource(
+		sort === "relevance" ? "updatedAt:desc" : sort,
+		position,
+		limit,
+		sourceOwners,
+		shapes,
+		true,
+	);
 }
 
-function ownerOrderedCandidateSource(sort: SearchSort, position: SearchKeysetPosition | undefined,
- limit: number, owners: readonly UnitOwner[], shapes: readonly string[], seeded = false): OrderedCandidateSource {
- const direction = sort.endsWith(":asc") ? "asc" : "desc";
- const orderDirection = direction === "asc" ? sql`asc` : sql`desc`;
- const timestamp = sort.startsWith("createdAt:") ? sql`${searchUnit.createdAt}`
- : sort.startsWith("publishedAt:") ? sql`${searchUnit.publishedAt}`
- : sort.startsWith("updatedAt:") ? sql`${searchUnit.updatedAt}` : undefined;
- if (!timestamp) throw new InvalidSearch(`${sort} has no native owner ordering`);
- const orderedPosition = requireOrderedPosition(position);
- const baseCondition = sql`${publicDiscoverableCandidate} and ${shapes.length ? sql`${searchUnit.shape}=any(${toTextArray(shapes)})` : sql`true`}`;
- const branches = owners.map(owner => {
-  const relation = sql`${ownerSearchRelation(owner, shapes)} ${seeded ? sql`inner join filter_seed on filter_seed.unit_id = ${searchUnit.id}` : sql``}`;
-  if (sort.startsWith("publishedAt:")) return nullableTimestampCandidateSource({column:timestamp,id:sql`${searchUnit.id}`,relation,baseCondition,direction,position:orderedPosition,limit}).statement;
-  return sql`select ${searchUnit.id} as unit_id, extract(epoch from ${timestamp})::numeric as primary_order,
+function ownerOrderedCandidateSource(
+	sort: SearchSort,
+	position: SearchKeysetPosition | undefined,
+	limit: number,
+	owners: readonly UnitOwner[],
+	shapes: readonly string[],
+	seeded = false,
+): OrderedCandidateSource {
+	const direction = sort.endsWith(":asc") ? "asc" : "desc";
+	const orderDirection = direction === "asc" ? sql`asc` : sql`desc`;
+	const timestamp = sort.startsWith("createdAt:")
+		? sql`${searchUnit.createdAt}`
+		: sort.startsWith("publishedAt:")
+			? sql`${searchUnit.publishedAt}`
+			: sort.startsWith("updatedAt:")
+				? sql`${searchUnit.updatedAt}`
+				: undefined;
+	if (!timestamp) throw new InvalidSearch(`${sort} has no native owner ordering`);
+	const orderedPosition = requireOrderedPosition(position);
+	const baseCondition = sql`${publicDiscoverableCandidate} and ${shapes.length ? sql`${searchUnit.shape}=any(${toTextArray(shapes)})` : sql`true`}`;
+	const branches = owners.map((owner) => {
+		const relation = sql`${ownerSearchRelation(owner, shapes)} ${seeded ? sql`inner join filter_seed on filter_seed.unit_id = ${searchUnit.id}` : sql``}`;
+		if (sort.startsWith("publishedAt:"))
+			return nullableTimestampCandidateSource({
+				column: timestamp,
+				id: sql`${searchUnit.id}`,
+				relation,
+				baseCondition,
+				direction,
+				position: orderedPosition,
+				limit,
+			}).statement;
+		return sql`select ${searchUnit.id} as unit_id, extract(epoch from ${timestamp})::numeric as primary_order,
    0::numeric as secondary_order, 0::integer as source_phase, 'ordered'::text as source_name,
    null::uuid as snapshot_id, false as search_fallback
    from ${relation} where ${baseCondition}
-   and ${timestampKeysetCondition(timestamp,sql`${searchUnit.id}`,direction,orderedPosition)}
+   and ${timestampKeysetCondition(timestamp, sql`${searchUnit.id}`, direction, orderedPosition)}
    order by ${timestamp} ${orderDirection}, ${searchUnit.id} ${orderDirection} limit ${limit}`;
- });
- return {direction, statement: branches.length ? sql`select native_source.* from (${sql.join(branches.map(branch=>sql`(${branch})`),sql` union all `)}) native_source
+	});
+	return {
+		direction,
+		statement: branches.length
+			? sql`select native_source.* from (${sql.join(
+					branches.map((branch) => sql`(${branch})`),
+					sql` union all `,
+				)}) native_source
  order by source_phase asc, primary_order ${orderDirection}, secondary_order ${orderDirection}, unit_id ${orderDirection} limit ${limit}`
- : sql`select null::uuid as unit_id, 0::numeric as primary_order, 0::numeric as secondary_order, 0::integer as source_phase, 'ordered'::text as source_name, null::uuid as snapshot_id, false as search_fallback where false`};
+			: sql`select null::uuid as unit_id, 0::numeric as primary_order, 0::numeric as secondary_order, 0::integer as source_phase, 'ordered'::text as source_name, null::uuid as snapshot_id, false as search_fallback where false`,
+	};
 }
 
 function orderedCandidateSource(input: {
 	readonly query: ExpandedSearchQuery;
 	readonly sort: SearchSort;
 	readonly position?: SearchKeysetPosition;
- readonly bestSnapshotId?:string|null;
+	readonly bestSnapshotId?: string | null;
 	readonly languageBoundary: readonly ContentLanguage[];
 	readonly sourceOwners: readonly UnitOwner[];
 	readonly sourceShapes: readonly string[];
@@ -1455,7 +1517,14 @@ function orderedCandidateSource(input: {
 			input.limit,
 		);
 	if (input.sort === "best")
-		return bestCandidateSource(input.position, input.limit, false, input.sourceOwners, input.sourceShapes,input.bestSnapshotId);
+		return bestCandidateSource(
+			input.position,
+			input.limit,
+			false,
+			input.sourceOwners,
+			input.sourceShapes,
+			input.bestSnapshotId,
+		);
 	const direction = input.sort.endsWith(":asc") ? "asc" : "desc";
 	if (input.sort === "followerCount:asc" || input.sort === "followerCount:desc")
 		return sparseFollowerCandidateSource(input.position, direction, input.limit);
@@ -1493,7 +1562,13 @@ function orderedCandidateSource(input: {
 			position,
 			limit: input.limit,
 		});
-	return ownerOrderedCandidateSource(input.sort, input.position, input.limit, input.sourceOwners, input.sourceShapes);
+	return ownerOrderedCandidateSource(
+		input.sort,
+		input.position,
+		input.limit,
+		input.sourceOwners,
+		input.sourceShapes,
+	);
 }
 
 function currentSearchDocumentCondition(
@@ -1564,7 +1639,7 @@ async function searchCandidateBatch(input: {
 	readonly query: ExpandedSearchQuery;
 	readonly sort: SearchSort;
 	readonly position?: SearchKeysetPosition;
- readonly bestSnapshotId?:string|null;
+	readonly bestSnapshotId?: string | null;
 	readonly limit: number;
 	readonly scanLimit: number;
 	readonly languageBoundary: readonly ContentLanguage[];
@@ -1573,13 +1648,20 @@ async function searchCandidateBatch(input: {
 		return { rows: [], hasMore: false, scannedCount: 0, boundedTextFallback: false };
 	const source =
 		(input.candidateSet
-			? seededUnitCandidateSource(input.sort, input.position, input.scanLimit + 1, mergeSourceOwners(input.branches), mergeSourceShapes(input.branches),input.bestSnapshotId)
+			? seededUnitCandidateSource(
+					input.sort,
+					input.position,
+					input.scanLimit + 1,
+					mergeSourceOwners(input.branches),
+					mergeSourceShapes(input.branches),
+					input.bestSnapshotId,
+				)
 			: undefined) ??
 		orderedCandidateSource({
 			query: input.query,
 			sort: input.sort,
 			position: input.position,
-            bestSnapshotId:input.bestSnapshotId,
+			bestSnapshotId: input.bestSnapshotId,
 			languageBoundary: input.languageBoundary,
 			sourceOwners: mergeSourceOwners(input.branches),
 			sourceShapes: mergeSourceShapes(input.branches),
@@ -1599,10 +1681,12 @@ async function searchCandidateBatch(input: {
 		sql`scanned_candidates`,
 		input.sort === "relevance",
 	);
-	const checkedSnapshotId=input.position?.source === "best-positive" || input.position?.source === "best-zero" ? input.position.snapshotId : input.bestSnapshotId;
+	const checkedSnapshotId =
+		input.position?.source === "best-positive" || input.position?.source === "best-zero"
+			? input.position.snapshotId
+			: input.bestSnapshotId;
 	const snapshotAvailable =
-		input.sort === "best" &&
-		checkedSnapshotId !== undefined
+		input.sort === "best" && checkedSnapshotId !== undefined
 			? checkedSnapshotId === null
 				? sql`true`
 				: sql`exists (
@@ -1784,7 +1868,7 @@ async function searchCandidatePage(input: {
 	readonly query: ExpandedSearchQuery;
 	readonly sort: SearchSort;
 	readonly position?: SearchKeysetPosition;
- readonly bestSnapshotId?:string|null;
+	readonly bestSnapshotId?: string | null;
 	readonly limit: number;
 	readonly languageBoundary: readonly ContentLanguage[];
 }): Promise<SearchCandidatePage> {
@@ -1856,21 +1940,51 @@ async function hydrateSearchHits(
 	presentationLanguages: readonly ContentLanguage[],
 ): Promise<SearchHitWithoutSlugAddress[]> {
 	if (!unitIds.length) return [];
- return database.transaction(async tx => {
-  const allowed = await tx.execute<{id:string}>(sql`select ${searchUnit.id} as id
+	return database.transaction(
+		async (tx) => {
+			const allowed = await tx.execute<{ id: string }>(sql`select ${searchUnit.id} as id
    from unnest(${toUuidArray(unitIds)}) requested(id)
    inner join ${searchState(sql`requested.id`)} on true
-   where ${getUnitReadCondition(request.profileId,{discoverableOnly:true},searchUnit)}
-   and ${getContentRatingCondition(request.contentRatingPolicy ?? DefaultContentRatingPolicy,searchUnit.contentRating)}`);
-  const ids = allowed.rows.map(row=>row.id);
-  const presentations = await readUnitPresentationsInTransaction(tx,ids,request.localizationLanguages?.length ? request.localizationLanguages : presentationLanguages);
-  const tagPositions = category === "tags" && ids.length
-   ? await tx.select({id:tagPublicPositionStat.tagId,count:tagPublicPositionStat.publicPositionCount}).from(tagPublicPositionStat).where(inArray(tagPublicPositionStat.tagId,ids)) : [];
-  const positions = new Map(tagPositions.map(row=>[row.id,row.count>1]));
-  return unitIds.flatMap(id=>{const item=presentations.get(id);return item ? [{...item,category,
-   titles:item.title ? [item.title]:[],summaries:item.summary ? [item.summary]:[],
-   ...(category === "tags" ? {tagHasOtherPositions:positions.get(id) ?? false}: {})}]:[];});
- }, {isolationLevel:"repeatable read",accessMode:"read only"});
+   where ${getUnitReadCondition(request.profileId, { discoverableOnly: true }, searchUnit)}
+   and ${getContentRatingCondition(request.contentRatingPolicy ?? DefaultContentRatingPolicy, searchUnit.contentRating)}`);
+			const ids = allowed.rows.map((row) => row.id);
+			const presentations = await readUnitPresentationsInTransaction(
+				tx,
+				ids,
+				request.localizationLanguages?.length
+					? request.localizationLanguages
+					: presentationLanguages,
+			);
+			const tagPositions =
+				category === "tags" && ids.length
+					? await tx
+							.select({
+								id: tagPublicPositionStat.tagId,
+								count: tagPublicPositionStat.publicPositionCount,
+							})
+							.from(tagPublicPositionStat)
+							.where(inArray(tagPublicPositionStat.tagId, ids))
+					: [];
+			const positions = new Map(tagPositions.map((row) => [row.id, row.count > 1]));
+			return unitIds.flatMap((id) => {
+				const item = presentations.get(id);
+				return item
+					? [
+							{
+								...item,
+								category,
+								titles: item.title ? [item.title] : [],
+								summaries: item.summary ? [item.summary] : [],
+								...(category === "tags"
+									? { tagHasOtherPositions: positions.get(id) ?? false }
+									: {}),
+							},
+						]
+					: [];
+			});
+		},
+		{ isolationLevel: "repeatable read", accessMode: "read only" },
+	);
 }
 
 function searchDomainScan(
@@ -1897,7 +2011,7 @@ async function searchDomainScan(
 	category: SearchCategory,
 	request: DomainSearchRequest,
 	presentation: "hits" | "identifiers",
-	facetFields: readonly string[] = [],
+	facetFields?: readonly string[],
 ): Promise<
 	| SearchDomainScanResult<SearchHitWithoutSlugAddress>
 	| SearchDomainScanResult<SearchIdentifier>
@@ -1960,7 +2074,7 @@ async function searchDomainScan(
 		cursorSeen = categoryState?.seen ?? 0;
 		cursorPosition = categoryState?.position;
 	}
-	const hasFacets = facetFields.some((field) => facetSpec(category, field));
+	const hasFacets = facetFields?.some((field) => facetSpec(category, field)) ?? false;
 	const candidates = await searchCandidatePage({
 		branches: [
 			{
@@ -1992,7 +2106,7 @@ async function searchDomainScan(
 		hasFacets
 			? aggregateDomainFacets(
 					category,
-					facetFields,
+					facetFields ?? [],
 					candidates.rows.map(({ id }) => id),
 					!candidates.hasMore,
 				)
@@ -2030,7 +2144,7 @@ async function searchDomainScan(
 		processingTimeMs: Math.round((performance.now() - startedAt) * 1000) / 1000,
 	};
 	return presentation === "hits"
-		? { ...common, hits, ...(hasFacets ? { facets } : {}) }
+		? { ...common, hits, ...(facetFields !== undefined ? { facets } : {}) }
 		: { ...common, hits: identifiers };
 }
 
@@ -2099,8 +2213,8 @@ export interface GlobalSearchIdentifiersRequest
 	readonly branches: readonly GlobalSearchBranch[];
 	readonly cursor?: never;
 	readonly position?: SearchKeysetPosition;
- /** Server-resolved initial snapshot; null pins the empty sparse projection. */
- readonly bestSnapshotId?:string|null;
+	/** Server-resolved initial snapshot; null pins the empty sparse projection. */
+	readonly bestSnapshotId?: string | null;
 	/** Server-owned predicates evaluated inside the bounded Top-K scan. */
 	readonly additionalConditions?: readonly SQL[];
 }
@@ -2257,7 +2371,7 @@ export async function searchGlobalIdentifiers(
 		query: prepared.query,
 		sort: prepared.sort,
 		position: request.position,
-        bestSnapshotId:request.bestSnapshotId,
+		bestSnapshotId: request.bestSnapshotId,
 		limit: prepared.limit,
 		languageBoundary: prepared.languageBoundary,
 	});
@@ -2532,7 +2646,7 @@ export async function searchGlobalFacets(
 			fields,
 			searchExpression,
 			sourceOwners: resolveSourceOwners(category, request.owners),
-				sourceShapes: request.shapes ?? [],
+			sourceShapes: request.shapes ?? [],
 			conditions: buildSearchConditions(category, request, searchExpression),
 		};
 	});
