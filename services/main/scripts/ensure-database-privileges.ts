@@ -97,7 +97,7 @@ try {
 			);
 			await transaction.execute(
 				sql.raw(
-					`grant execute on function public.search_text_candidates(text[],text[],text,bigint,uuid,integer,integer) to ${role}`,
+					`grant execute on function public.search_text_candidates(text[],text[],text,text[],bigint,uuid,integer,integer) to ${role}`,
 				),
 			);
 			await transaction.execute(
@@ -117,7 +117,7 @@ try {
 			);
 			const privilegeProof = await transaction.execute<
 				Record<string, unknown> & {
-					readonly canMaintainUnit: boolean;
+					readonly canMaintainUsers: boolean;
 					readonly canReadApproximateMetrics: boolean;
 					readonly canReadEstimate: boolean;
 					readonly canRunApproximateWriter: boolean;
@@ -129,8 +129,8 @@ try {
 				}
 			>(sql`
 				select
-					has_table_privilege(${applicationRole}, 'public.unit', 'MAINTAIN')
-						as "canMaintainUnit",
+					has_table_privilege(${applicationRole}, 'public.users', 'MAINTAIN')
+						as "canMaintainUsers",
 					has_table_privilege(${applicationRole}, 'approx_count.metrics', 'SELECT')
 						as "canReadApproximateMetrics",
 					has_function_privilege(
@@ -153,7 +153,7 @@ try {
 					) as "canRunPgroongaCommand",
 					has_function_privilege(
 						${applicationRole},
-						'public.search_text_candidates(text[],text[],text,bigint,uuid,integer,integer)',
+						'public.search_text_candidates(text[],text[],text,text[],bigint,uuid,integer,integer)',
 						'EXECUTE'
 					) as "canRunSearchText",
 					has_function_privilege(
@@ -179,7 +179,7 @@ try {
 				!proof.canRunSearchText ||
 				!proof.canRunTagSuggestions ||
 				!proof.canRebuildTagExpression ||
-				proof.canMaintainUnit ||
+				proof.canMaintainUsers ||
 				proof.canRunApproximateWriter ||
 				proof.canRunPgroongaCommand ||
 				proof.canWriteApproximateMetrics
@@ -223,22 +223,22 @@ try {
 			);
 			const privilegeProof = await transaction.execute<
 				Record<string, unknown> & {
-					readonly canReadUnit: boolean;
-					readonly canWriteUnit: boolean;
+					readonly canReadUsers: boolean;
+					readonly canWriteUsers: boolean;
 				}
 			>(sql`
 				select
-					has_table_privilege(${backupRole}, 'public.unit', 'SELECT')
-						as "canReadUnit",
+					has_table_privilege(${backupRole}, 'public.users', 'SELECT')
+						as "canReadUsers",
 					(
-						has_table_privilege(${backupRole}, 'public.unit', 'INSERT')
-						or has_table_privilege(${backupRole}, 'public.unit', 'UPDATE')
-						or has_table_privilege(${backupRole}, 'public.unit', 'DELETE')
-						or has_table_privilege(${backupRole}, 'public.unit', 'TRUNCATE')
-					) as "canWriteUnit"
+						has_table_privilege(${backupRole}, 'public.users', 'INSERT')
+						or has_table_privilege(${backupRole}, 'public.users', 'UPDATE')
+						or has_table_privilege(${backupRole}, 'public.users', 'DELETE')
+						or has_table_privilege(${backupRole}, 'public.users', 'TRUNCATE')
+					) as "canWriteUsers"
 			`);
 			const proof = privilegeProof.rows[0];
-			if (!proof?.canReadUnit || proof.canWriteUnit)
+			if (!proof?.canReadUsers || proof.canWriteUsers)
 				throw new Error("Databasus read-only database privilege proof failed");
 		});
 	}
