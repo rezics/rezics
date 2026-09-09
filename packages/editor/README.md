@@ -2,6 +2,12 @@
 
 Reusable, loss-aware editor capabilities for REZICS products.
 
+Browser stories live in `stories/` and run in Web's shared Storybook instance via
+`task aspire:storybook`. They cover CodeMirror and the Portable Text capability
+without loading Web providers. `task packages-editor:typecheck` also checks the
+separate story project; published declarations still exclude story dependencies.
+See the [Storybook workflow](../../docs/architecture/storybook-workflow.md).
+
 The package deliberately separates its entry points so consumers can load only the capability they need:
 
 ```ts

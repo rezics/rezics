@@ -87,6 +87,13 @@ local-first `apps/rezics-text` desktop/Web editor remain independent from the
 AppHost; run the latter explicitly with `task apps-rezics-text:dev` or
 `task apps-rezics-text:dev:web`.
 
+Use `task aspire:storybook` for an independent Aspire mode hosting Web/shared UI,
+REZICS Text and About Storybooks without a database or application services.
+`task aspire:describe` exposes their HTTP/MCP/Review URLs. Set
+`REZICS_ASPIRE_STORYBOOK=true` to include them with normal development. Follow
+the [Storybook workflow](docs/architecture/storybook-workflow.md) for affected-state
+AI inspection. Generated test images are temporary and not committed.
+
 The API exposes startup at `GET /api/v1/startup`, dependency-free liveness at
 `GET/HEAD /api/v1/health`, and traffic readiness at `GET /api/v1/ready`. PostgreSQL is
 readiness-required; storage and recommendation freshness are reported as

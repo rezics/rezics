@@ -1,11 +1,12 @@
 import { refExpr } from "./.aspire/modules/base.mjs";
 import { createBuilder, OtlpProtocol, ProbeType } from "./.aspire/modules/aspire.mjs";
+import { addStorybooks } from "./storybook.mjs";
 import {
 	apiSchedulerHealthContract,
 	workerSchedulerHealthContract,
 } from "../services/main/src/health-contract.ts";
 
-type AppHostMode = "development" | "smoke";
+type AppHostMode = "development" | "smoke" | "storybook";
 type EmailMode = "cloudflare" | "log";
 
 function resolveAppHostMode(value: string | undefined): AppHostMode {
@@ -14,9 +15,12 @@ function resolveAppHostMode(value: string | undefined): AppHostMode {
 		case "development":
 			return "development";
 		case "smoke":
+		case "storybook":
 			return value;
 		default:
-			throw new Error(`REZICS_ASPIRE_MODE must be development or smoke; received ${value}`);
+			throw new Error(
+				`REZICS_ASPIRE_MODE must be development, smoke or storybook; received ${value}`,
+			);
 	}
 }
 
@@ -76,215 +80,222 @@ const isolatedSmoke = appHostMode === "smoke";
 
 const builder = await createBuilder();
 
-const smokeProbeToken = isolatedSmoke
-	? await builder.addParameter("smoke-probe-token", {
-			value: requireEnvironmentVariable("REZICS_SMOKE_PROBE_TOKEN"),
-			secret: true,
-		})
-	: undefined;
+if (appHostMode === "storybook") {
+	await addStorybooks(builder);
+} else {
+	const smokeProbeToken = isolatedSmoke
+		? await builder.addParameter("smoke-probe-token", {
+				value: requireEnvironmentVariable("REZICS_SMOKE_PROBE_TOKEN"),
+				secret: true,
+			})
+		: undefined;
 
-const databaseUrlParameter = await builder.addParameter("database-url", {
-	value: requireDatabaseUrl("DATABASE_URL"),
-	secret: true,
-});
-const database = await builder.addConnectionString("rezics-database", {
-	environmentVariableNameOrExpression: refExpr`${databaseUrlParameter}`,
-});
-
-const s3EndpointParameter = await builder.addParameter("rustfs-endpoint", {
-	value: requireHttpOrigin("S3_ENDPOINT"),
-});
-const rustfs = await builder.addExternalService("rustfs", s3EndpointParameter);
-const s3AccessKey = await builder.addParameter("rustfs-access-key", {
-	value: requireEnvironmentVariable("S3_ACCESS_KEY_ID"),
-	secret: true,
-});
-const s3SecretKey = await builder.addParameter("rustfs-secret-key", {
-	value: requireEnvironmentVariable("S3_SECRET_ACCESS_KEY"),
-	secret: true,
-});
-const s3Bucket = await builder.addParameter("rustfs-bucket", {
-	value: requireEnvironmentVariable("S3_BUCKET"),
-});
-const betterAuthSecret = await builder.addParameter("better-auth-secret", {
-	value: requireEnvironmentVariable("BETTER_AUTH_SECRET"),
-	secret: true,
-});
-const turnstileSiteKey = requireEnvironmentVariable("TURNSTILE_SITE_KEY");
-const turnstileSecretKey = await builder.addParameter("turnstile-secret-key", {
-	value: requireEnvironmentVariable("TURNSTILE_SECRET_KEY"),
-	secret: true,
-});
-const turnstileAllowedHostnames = requireEnvironmentVariable("TURNSTILE_ALLOWED_HOSTNAMES");
-const emailMode = resolveEmailMode(requireEnvironmentVariable("EMAIL_MODE"));
-const emailFrom = requireEnvironmentVariable("EMAIL_FROM");
-const emailFromName = process.env.EMAIL_FROM_NAME?.trim() || "Rezics";
-let cloudflareAccountId: Awaited<ReturnType<typeof builder.addParameter>> | undefined;
-let cloudflareEmailApiToken: Awaited<ReturnType<typeof builder.addParameter>> | undefined;
-
-if (emailMode === "cloudflare") {
-	cloudflareAccountId = await builder.addParameter("cloudflare-account-id", {
-		value: requireEnvironmentVariable("CLOUDFLARE_ACCOUNT_ID"),
-	});
-	cloudflareEmailApiToken = await builder.addParameter("cloudflare-email-api-token", {
-		value: requireEnvironmentVariable("CLOUDFLARE_EMAIL_API_TOKEN"),
+	const databaseUrlParameter = await builder.addParameter("database-url", {
+		value: requireDatabaseUrl("DATABASE_URL"),
 		secret: true,
 	});
+	const database = await builder.addConnectionString("rezics-database", {
+		environmentVariableNameOrExpression: refExpr`${databaseUrlParameter}`,
+	});
+
+	const s3EndpointParameter = await builder.addParameter("rustfs-endpoint", {
+		value: requireHttpOrigin("S3_ENDPOINT"),
+	});
+	const rustfs = await builder.addExternalService("rustfs", s3EndpointParameter);
+	const s3AccessKey = await builder.addParameter("rustfs-access-key", {
+		value: requireEnvironmentVariable("S3_ACCESS_KEY_ID"),
+		secret: true,
+	});
+	const s3SecretKey = await builder.addParameter("rustfs-secret-key", {
+		value: requireEnvironmentVariable("S3_SECRET_ACCESS_KEY"),
+		secret: true,
+	});
+	const s3Bucket = await builder.addParameter("rustfs-bucket", {
+		value: requireEnvironmentVariable("S3_BUCKET"),
+	});
+	const betterAuthSecret = await builder.addParameter("better-auth-secret", {
+		value: requireEnvironmentVariable("BETTER_AUTH_SECRET"),
+		secret: true,
+	});
+	const turnstileSiteKey = requireEnvironmentVariable("TURNSTILE_SITE_KEY");
+	const turnstileSecretKey = await builder.addParameter("turnstile-secret-key", {
+		value: requireEnvironmentVariable("TURNSTILE_SECRET_KEY"),
+		secret: true,
+	});
+	const turnstileAllowedHostnames = requireEnvironmentVariable("TURNSTILE_ALLOWED_HOSTNAMES");
+	const emailMode = resolveEmailMode(requireEnvironmentVariable("EMAIL_MODE"));
+	const emailFrom = requireEnvironmentVariable("EMAIL_FROM");
+	const emailFromName = process.env.EMAIL_FROM_NAME?.trim() || "Rezics";
+	let cloudflareAccountId: Awaited<ReturnType<typeof builder.addParameter>> | undefined;
+	let cloudflareEmailApiToken: Awaited<ReturnType<typeof builder.addParameter>> | undefined;
+
+	if (emailMode === "cloudflare") {
+		cloudflareAccountId = await builder.addParameter("cloudflare-account-id", {
+			value: requireEnvironmentVariable("CLOUDFLARE_ACCOUNT_ID"),
+		});
+		cloudflareEmailApiToken = await builder.addParameter("cloudflare-email-api-token", {
+			value: requireEnvironmentVariable("CLOUDFLARE_EMAIL_API_TOKEN"),
+			secret: true,
+		});
+	}
+
+	let api = builder
+		.addBunApp("main-api", "../services/main", "src/index.ts")
+		.withBun({ install: false })
+		.withRunScript("dev:api")
+		.withOtlpExporter({ protocol: OtlpProtocol.HttpProtobuf })
+		.withHttpEndpoint(
+			isolatedSmoke
+				? { env: "PORT", name: "http" }
+				: { env: "PORT", name: "http", port: requirePort("PORT") },
+		)
+		.withHttpProbe(ProbeType.Startup, {
+			endpointName: "http",
+			path: apiSchedulerHealthContract.startup.path,
+			initialDelaySeconds: seconds(apiSchedulerHealthContract.startup.initialGraceMs),
+			periodSeconds: seconds(apiSchedulerHealthContract.startup.intervalMs),
+			timeoutSeconds: seconds(apiSchedulerHealthContract.startup.timeoutMs),
+			failureThreshold: apiSchedulerHealthContract.startup.failureThreshold,
+			successThreshold: 1,
+		})
+		.withHttpProbe(ProbeType.Liveness, {
+			endpointName: "http",
+			path: apiSchedulerHealthContract.liveness.path,
+			initialDelaySeconds: seconds(apiSchedulerHealthContract.liveness.initialGraceMs),
+			periodSeconds: seconds(apiSchedulerHealthContract.liveness.intervalMs),
+			timeoutSeconds: seconds(apiSchedulerHealthContract.liveness.timeoutMs),
+			failureThreshold: apiSchedulerHealthContract.liveness.failureThreshold,
+			successThreshold: 1,
+		})
+		.withHttpProbe(ProbeType.Readiness, {
+			endpointName: "http",
+			path: apiSchedulerHealthContract.readiness.path,
+			initialDelaySeconds: seconds(apiSchedulerHealthContract.readiness.initialGraceMs),
+			periodSeconds: seconds(apiSchedulerHealthContract.readiness.intervalMs),
+			timeoutSeconds: seconds(apiSchedulerHealthContract.readiness.timeoutMs),
+			failureThreshold: apiSchedulerHealthContract.readiness.failureThreshold,
+			successThreshold: 1,
+		})
+		.withEnvironment("HOST", "0.0.0.0")
+		.withEnvironment("DATABASE_URL", database)
+		.withEnvironment("BETTER_AUTH_SECRET", betterAuthSecret)
+		.withEnvironment("TURNSTILE_SECRET_KEY", turnstileSecretKey)
+		.withEnvironment("TURNSTILE_ALLOWED_HOSTNAMES", turnstileAllowedHostnames)
+		.withEnvironment("EMAIL_MODE", emailMode)
+		.withEnvironment("EMAIL_FROM", emailFrom)
+		.withEnvironment("EMAIL_FROM_NAME", emailFromName)
+		.withEnvironment("S3_ENDPOINT", rustfs)
+		.withEnvironment("S3_REGION", requireEnvironmentVariable("S3_REGION"))
+		.withEnvironment("S3_ACCESS_KEY_ID", s3AccessKey)
+		.withEnvironment("S3_SECRET_ACCESS_KEY", s3SecretKey)
+		.withEnvironment("S3_BUCKET", s3Bucket)
+		.withEnvironment("S3_FORCE_PATH_STYLE", requireEnvironmentVariable("S3_FORCE_PATH_STYLE"))
+		.withEnvironment("S3_PRESIGN_EXPIRES_IN", requireEnvironmentVariable("S3_PRESIGN_EXPIRES_IN"))
+		.withReference(database)
+		.withReference(rustfs);
+
+	if (cloudflareAccountId && cloudflareEmailApiToken)
+		api = api
+			.withEnvironment("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
+			.withEnvironment("CLOUDFLARE_EMAIL_API_TOKEN", cloudflareEmailApiToken);
+	if (smokeProbeToken) api = api.withEnvironment("REZICS_SMOKE_PROBE_TOKEN", smokeProbeToken);
+
+	const apiEndpoint = await api.getEndpoint("http");
+
+	let worker = builder
+		.addBunApp("recommendation-worker", "../services/main", "src/worker.ts")
+		.withBun({ install: false })
+		.withRunScript("dev:worker")
+		.withOtlpExporter({ protocol: OtlpProtocol.HttpProtobuf })
+		.withHttpEndpoint({ env: "WORKER_HEALTH_PORT", name: "health" })
+		.withHttpProbe(ProbeType.Startup, {
+			endpointName: "health",
+			path: workerSchedulerHealthContract.startup.path,
+			initialDelaySeconds: seconds(workerSchedulerHealthContract.startup.initialGraceMs),
+			periodSeconds: seconds(workerSchedulerHealthContract.startup.intervalMs),
+			timeoutSeconds: seconds(workerSchedulerHealthContract.startup.timeoutMs),
+			failureThreshold: workerSchedulerHealthContract.startup.failureThreshold,
+			successThreshold: 1,
+		})
+		.withHttpProbe(ProbeType.Liveness, {
+			endpointName: "health",
+			path: workerSchedulerHealthContract.liveness.path,
+			initialDelaySeconds: seconds(workerSchedulerHealthContract.liveness.initialGraceMs),
+			periodSeconds: seconds(workerSchedulerHealthContract.liveness.intervalMs),
+			timeoutSeconds: seconds(workerSchedulerHealthContract.liveness.timeoutMs),
+			failureThreshold: workerSchedulerHealthContract.liveness.failureThreshold,
+			successThreshold: 1,
+		})
+		.withHttpProbe(ProbeType.Readiness, {
+			endpointName: "health",
+			path: workerSchedulerHealthContract.readiness.path,
+			initialDelaySeconds: seconds(workerSchedulerHealthContract.readiness.initialGraceMs),
+			periodSeconds: seconds(workerSchedulerHealthContract.readiness.intervalMs),
+			timeoutSeconds: seconds(workerSchedulerHealthContract.readiness.timeoutMs),
+			failureThreshold: workerSchedulerHealthContract.readiness.failureThreshold,
+			successThreshold: 1,
+		})
+		.withEnvironment("WORKER_HEALTH_HOST", "0.0.0.0")
+		.withEnvironment("DATABASE_URL", database)
+		.withEnvironment("BETTER_AUTH_SECRET", betterAuthSecret)
+		.withEnvironment("BETTER_AUTH_URL", apiEndpoint)
+		.withEnvironment("BETTER_AUTH_TRUSTED_ORIGINS", apiEndpoint)
+		.withEnvironment("EMAIL_MODE", emailMode)
+		.withEnvironment("EMAIL_FROM", emailFrom)
+		.withEnvironment("EMAIL_FROM_NAME", emailFromName)
+		.withEnvironment("S3_ENDPOINT", rustfs)
+		.withEnvironment("S3_REGION", requireEnvironmentVariable("S3_REGION"))
+		.withEnvironment("S3_ACCESS_KEY_ID", s3AccessKey)
+		.withEnvironment("S3_SECRET_ACCESS_KEY", s3SecretKey)
+		.withEnvironment("S3_BUCKET", s3Bucket)
+		.withEnvironment("S3_FORCE_PATH_STYLE", requireEnvironmentVariable("S3_FORCE_PATH_STYLE"))
+		.withEnvironment("S3_PRESIGN_EXPIRES_IN", requireEnvironmentVariable("S3_PRESIGN_EXPIRES_IN"))
+		.withEnvironment(
+			"RECOMMENDATION_REFRESH_INTERVAL_MS",
+			requireEnvironmentVariable("RECOMMENDATION_REFRESH_INTERVAL_MS"),
+		)
+		.withReference(database)
+		.withReference(rustfs);
+
+	if (cloudflareAccountId && cloudflareEmailApiToken)
+		worker = worker
+			.withEnvironment("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
+			.withEnvironment("CLOUDFLARE_EMAIL_API_TOKEN", cloudflareEmailApiToken);
+
+	await worker;
+
+	const web = await builder
+		.addViteApp("web", "../apps/web", { runScriptName: "dev" })
+		.withYarn({ install: false })
+		.withHttpEndpoint(
+			isolatedSmoke
+				? { env: "PORT", name: "http" }
+				: { env: "PORT", name: "http", port: requirePort("FRONTEND_PORT") },
+		)
+		.withEnvironment("BROWSER", "none")
+		.withEnvironment(
+			"CUSTOM_THEME_REFERENCE_RENDER_TOKEN",
+			process.env.CUSTOM_THEME_REFERENCE_RENDER_TOKEN?.trim() ||
+				"development-only-reference-render-token",
+		)
+		.withEnvironment("FONT_AWESOME_KIT_CSS_URL", process.env.FONT_AWESOME_KIT_CSS_URL?.trim() ?? "")
+		.withEnvironment(
+			"FONT_AWESOME_KIT_LICENSE",
+			process.env.FONT_AWESOME_KIT_LICENSE?.trim() || "free",
+		)
+		.withEnvironment("TURNSTILE_SITE_KEY", turnstileSiteKey)
+		.withEnvironment("TURNSTILE_ALLOWED_HOSTNAMES", turnstileAllowedHostnames)
+		.withEnvironment("REZICS_API_ORIGIN", apiEndpoint)
+		.withReference(api)
+		.waitFor(api);
+	const webEndpoint = await web.getEndpoint("http");
+
+	await api
+		.withEnvironment("BETTER_AUTH_URL", webEndpoint)
+		.withEnvironment("BETTER_AUTH_TRUSTED_ORIGINS", webEndpoint);
+
+	if (!isolatedSmoke && process.env.REZICS_ASPIRE_STORYBOOK === "true")
+		await addStorybooks(builder);
 }
-
-let api = builder
-	.addBunApp("main-api", "../services/main", "src/index.ts")
-	.withBun({ install: false })
-	.withRunScript("dev:api")
-	.withOtlpExporter({ protocol: OtlpProtocol.HttpProtobuf })
-	.withHttpEndpoint(
-		isolatedSmoke
-			? { env: "PORT", name: "http" }
-			: { env: "PORT", name: "http", port: requirePort("PORT") },
-	)
-	.withHttpProbe(ProbeType.Startup, {
-		endpointName: "http",
-		path: apiSchedulerHealthContract.startup.path,
-		initialDelaySeconds: seconds(apiSchedulerHealthContract.startup.initialGraceMs),
-		periodSeconds: seconds(apiSchedulerHealthContract.startup.intervalMs),
-		timeoutSeconds: seconds(apiSchedulerHealthContract.startup.timeoutMs),
-		failureThreshold: apiSchedulerHealthContract.startup.failureThreshold,
-		successThreshold: 1,
-	})
-	.withHttpProbe(ProbeType.Liveness, {
-		endpointName: "http",
-		path: apiSchedulerHealthContract.liveness.path,
-		initialDelaySeconds: seconds(apiSchedulerHealthContract.liveness.initialGraceMs),
-		periodSeconds: seconds(apiSchedulerHealthContract.liveness.intervalMs),
-		timeoutSeconds: seconds(apiSchedulerHealthContract.liveness.timeoutMs),
-		failureThreshold: apiSchedulerHealthContract.liveness.failureThreshold,
-		successThreshold: 1,
-	})
-	.withHttpProbe(ProbeType.Readiness, {
-		endpointName: "http",
-		path: apiSchedulerHealthContract.readiness.path,
-		initialDelaySeconds: seconds(apiSchedulerHealthContract.readiness.initialGraceMs),
-		periodSeconds: seconds(apiSchedulerHealthContract.readiness.intervalMs),
-		timeoutSeconds: seconds(apiSchedulerHealthContract.readiness.timeoutMs),
-		failureThreshold: apiSchedulerHealthContract.readiness.failureThreshold,
-		successThreshold: 1,
-	})
-	.withEnvironment("HOST", "0.0.0.0")
-	.withEnvironment("DATABASE_URL", database)
-	.withEnvironment("BETTER_AUTH_SECRET", betterAuthSecret)
-	.withEnvironment("TURNSTILE_SECRET_KEY", turnstileSecretKey)
-	.withEnvironment("TURNSTILE_ALLOWED_HOSTNAMES", turnstileAllowedHostnames)
-	.withEnvironment("EMAIL_MODE", emailMode)
-	.withEnvironment("EMAIL_FROM", emailFrom)
-	.withEnvironment("EMAIL_FROM_NAME", emailFromName)
-	.withEnvironment("S3_ENDPOINT", rustfs)
-	.withEnvironment("S3_REGION", requireEnvironmentVariable("S3_REGION"))
-	.withEnvironment("S3_ACCESS_KEY_ID", s3AccessKey)
-	.withEnvironment("S3_SECRET_ACCESS_KEY", s3SecretKey)
-	.withEnvironment("S3_BUCKET", s3Bucket)
-	.withEnvironment("S3_FORCE_PATH_STYLE", requireEnvironmentVariable("S3_FORCE_PATH_STYLE"))
-	.withEnvironment("S3_PRESIGN_EXPIRES_IN", requireEnvironmentVariable("S3_PRESIGN_EXPIRES_IN"))
-	.withReference(database)
-	.withReference(rustfs);
-
-if (cloudflareAccountId && cloudflareEmailApiToken)
-	api = api
-		.withEnvironment("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
-		.withEnvironment("CLOUDFLARE_EMAIL_API_TOKEN", cloudflareEmailApiToken);
-if (smokeProbeToken) api = api.withEnvironment("REZICS_SMOKE_PROBE_TOKEN", smokeProbeToken);
-
-const apiEndpoint = await api.getEndpoint("http");
-
-let worker = builder
-	.addBunApp("recommendation-worker", "../services/main", "src/worker.ts")
-	.withBun({ install: false })
-	.withRunScript("dev:worker")
-	.withOtlpExporter({ protocol: OtlpProtocol.HttpProtobuf })
-	.withHttpEndpoint({ env: "WORKER_HEALTH_PORT", name: "health" })
-	.withHttpProbe(ProbeType.Startup, {
-		endpointName: "health",
-		path: workerSchedulerHealthContract.startup.path,
-		initialDelaySeconds: seconds(workerSchedulerHealthContract.startup.initialGraceMs),
-		periodSeconds: seconds(workerSchedulerHealthContract.startup.intervalMs),
-		timeoutSeconds: seconds(workerSchedulerHealthContract.startup.timeoutMs),
-		failureThreshold: workerSchedulerHealthContract.startup.failureThreshold,
-		successThreshold: 1,
-	})
-	.withHttpProbe(ProbeType.Liveness, {
-		endpointName: "health",
-		path: workerSchedulerHealthContract.liveness.path,
-		initialDelaySeconds: seconds(workerSchedulerHealthContract.liveness.initialGraceMs),
-		periodSeconds: seconds(workerSchedulerHealthContract.liveness.intervalMs),
-		timeoutSeconds: seconds(workerSchedulerHealthContract.liveness.timeoutMs),
-		failureThreshold: workerSchedulerHealthContract.liveness.failureThreshold,
-		successThreshold: 1,
-	})
-	.withHttpProbe(ProbeType.Readiness, {
-		endpointName: "health",
-		path: workerSchedulerHealthContract.readiness.path,
-		initialDelaySeconds: seconds(workerSchedulerHealthContract.readiness.initialGraceMs),
-		periodSeconds: seconds(workerSchedulerHealthContract.readiness.intervalMs),
-		timeoutSeconds: seconds(workerSchedulerHealthContract.readiness.timeoutMs),
-		failureThreshold: workerSchedulerHealthContract.readiness.failureThreshold,
-		successThreshold: 1,
-	})
-	.withEnvironment("WORKER_HEALTH_HOST", "0.0.0.0")
-	.withEnvironment("DATABASE_URL", database)
-	.withEnvironment("BETTER_AUTH_SECRET", betterAuthSecret)
-	.withEnvironment("BETTER_AUTH_URL", apiEndpoint)
-	.withEnvironment("BETTER_AUTH_TRUSTED_ORIGINS", apiEndpoint)
-	.withEnvironment("EMAIL_MODE", emailMode)
-	.withEnvironment("EMAIL_FROM", emailFrom)
-	.withEnvironment("EMAIL_FROM_NAME", emailFromName)
-	.withEnvironment("S3_ENDPOINT", rustfs)
-	.withEnvironment("S3_REGION", requireEnvironmentVariable("S3_REGION"))
-	.withEnvironment("S3_ACCESS_KEY_ID", s3AccessKey)
-	.withEnvironment("S3_SECRET_ACCESS_KEY", s3SecretKey)
-	.withEnvironment("S3_BUCKET", s3Bucket)
-	.withEnvironment("S3_FORCE_PATH_STYLE", requireEnvironmentVariable("S3_FORCE_PATH_STYLE"))
-	.withEnvironment("S3_PRESIGN_EXPIRES_IN", requireEnvironmentVariable("S3_PRESIGN_EXPIRES_IN"))
-	.withEnvironment(
-		"RECOMMENDATION_REFRESH_INTERVAL_MS",
-		requireEnvironmentVariable("RECOMMENDATION_REFRESH_INTERVAL_MS"),
-	)
-	.withReference(database)
-	.withReference(rustfs);
-
-if (cloudflareAccountId && cloudflareEmailApiToken)
-	worker = worker
-		.withEnvironment("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
-		.withEnvironment("CLOUDFLARE_EMAIL_API_TOKEN", cloudflareEmailApiToken);
-
-await worker;
-
-const web = await builder
-	.addViteApp("web", "../apps/web", { runScriptName: "dev" })
-	.withYarn({ install: false })
-	.withHttpEndpoint(
-		isolatedSmoke
-			? { env: "PORT", name: "http" }
-			: { env: "PORT", name: "http", port: requirePort("FRONTEND_PORT") },
-	)
-	.withEnvironment("BROWSER", "none")
-	.withEnvironment(
-		"CUSTOM_THEME_REFERENCE_RENDER_TOKEN",
-		process.env.CUSTOM_THEME_REFERENCE_RENDER_TOKEN?.trim() ||
-			"development-only-reference-render-token",
-	)
-	.withEnvironment("FONT_AWESOME_KIT_CSS_URL", process.env.FONT_AWESOME_KIT_CSS_URL?.trim() ?? "")
-	.withEnvironment(
-		"FONT_AWESOME_KIT_LICENSE",
-		process.env.FONT_AWESOME_KIT_LICENSE?.trim() || "free",
-	)
-	.withEnvironment("TURNSTILE_SITE_KEY", turnstileSiteKey)
-	.withEnvironment("TURNSTILE_ALLOWED_HOSTNAMES", turnstileAllowedHostnames)
-	.withEnvironment("REZICS_API_ORIGIN", apiEndpoint)
-	.withReference(api)
-	.waitFor(api);
-const webEndpoint = await web.getEndpoint("http");
-
-await api
-	.withEnvironment("BETTER_AUTH_URL", webEndpoint)
-	.withEnvironment("BETTER_AUTH_TRUSTED_ORIGINS", webEndpoint);
 
 await builder.build().run();

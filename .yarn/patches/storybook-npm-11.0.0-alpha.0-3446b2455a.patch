@@ -1,0 +1,26 @@
+diff --git a/dist/_browser-chunks/chunk-M6YZR3ZW.js b/dist/_browser-chunks/chunk-M6YZR3ZW.js
+index 9cc8051ce3da4a375b0b4fce80179987b6cf14d8..b538569d0afab826e9e22ec32adfdd72cb6cc7cb 100644
+--- a/dist/_browser-chunks/chunk-M6YZR3ZW.js
++++ b/dist/_browser-chunks/chunk-M6YZR3ZW.js
+@@ -2526,7 +2526,7 @@ var FREEZE_STYLE_ID = "storybook-freeze-after-finished", PRE_FREEZE_STYLE_ID = "
+       let runFreeze = () => {
+         notifiedFrozen || (freezer.freeze(), notifiedFrozen = !0, options.onFrozen?.());
+       };
+-      typeof windowRef.queueMicrotask == "function" ? windowRef.queueMicrotask(runFreeze) : windowRef.setTimeout(runFreeze, 0);
++      windowRef.requestAnimationFrame(() => windowRef.requestAnimationFrame(runFreeze));
+     }
+   }), channel.on(STORY_HOT_UPDATED2, () => {
+     windowRef.location.reload();
+diff --git a/dist/preview/runtime.js b/dist/preview/runtime.js
+index 3cad9618aae48405ca285689e59b33ae9838cb58..f26b7f92e905dff86875aa3f768f2aa6929333b4 100644
+--- a/dist/preview/runtime.js
++++ b/dist/preview/runtime.js
+@@ -36582,7 +36582,7 @@ var FREEZE_STYLE_ID = "storybook-freeze-after-finished", PRE_FREEZE_STYLE_ID = "
+       let runFreeze = () => {
+         notifiedFrozen || (freezer.freeze(), notifiedFrozen = !0, options.onFrozen?.());
+       };
+-      typeof windowRef.queueMicrotask == "function" ? windowRef.queueMicrotask(runFreeze) : windowRef.setTimeout(runFreeze, 0);
++      windowRef.requestAnimationFrame(() => windowRef.requestAnimationFrame(runFreeze));
+     }
+   }), channel2.on(STORY_HOT_UPDATED, () => {
+     windowRef.location.reload();

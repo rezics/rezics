@@ -1,4 +1,4 @@
-import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from "@rezics/ui/ui/menu";
+import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from "@rezics/ui";
 import type { ReactElement, ReactNode } from "react";
 import type { RezicsTextApplicationCommand } from "../domain/application-menu";
 import {
@@ -23,7 +23,6 @@ export function ApplicationMenuBar({
 		<nav
 			aria-label={messages.labels.menuBar}
 			className="flex h-7 shrink-0 items-center gap-0.5 border-border border-b bg-muted/70 px-1"
-			role="menubar"
 		>
 			<MenuGroup label={messages.menus.file}>
 				<CommandItem

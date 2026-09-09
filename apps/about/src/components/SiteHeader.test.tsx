@@ -42,7 +42,7 @@ describe("SiteHeader", () => {
 		expect(screen.getByRole("link", { name: copy.a11y.home })).toHaveAttribute("href", "/en/");
 		const appEntry = screen.getByRole("link", { name: copy.nav.enter });
 		expect(appEntry).toHaveAttribute("href", "https://www.rezics.com/");
-		expect(appEntry).toHaveClass("text-white!");
+		expect(appEntry).toHaveClass("text-brand-foreground!");
 		expect(screen.getByRole("link", { name: copy.nav.home })).toHaveAttribute(
 			"aria-current",
 			"page",

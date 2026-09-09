@@ -16,14 +16,16 @@ export default definePreview({
 	loaders: [
 		async ({ globals }) => {
 			const locale = UiLocaleValues.find((value) => value === globals.locale) ?? "zh-Hant";
-			const { t } = await i18n.getTranslation(["actions", "state", "ui"], [locale]);
+			const { t } = await i18n.getTranslation(["actions", "state", "ui", "editor"], [locale]);
 			return {
+				labels: t,
 				uiMessages: {
 					loading: t.state.loading,
 					error: t.state.error,
 					empty: t.state.empty,
 					unnamed: t.ui.unnamed,
 					retry: t.actions.retry,
+					editor: t.editor,
 				},
 			};
 		},

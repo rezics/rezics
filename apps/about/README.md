@@ -3,6 +3,11 @@
 The static brand and product site for `about.rezics.com`, built with Astro,
 React islands, SharkUI, and Tailwind CSS.
 
+Use `task aspire:storybook` for the React islands with the site's own CSS and
+locale content. The [Storybook workflow](../../docs/architecture/storybook-workflow.md)
+covers navigation, theme and stage-label checks; Astro pages and MDX remain in
+the existing Astro build and dist verification workflow.
+
 ## Publication scope
 
 The site publishes six locale-prefixed editions:

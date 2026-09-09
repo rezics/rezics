@@ -92,7 +92,7 @@ export function SiteHeader({ locale, active, copy, links, alternatePaths, appUrl
 						))}
 					</nav>
 
-					<div className="header-actions" aria-label={copy.a11y.utilityNavigation}>
+					<div className="header-actions" role="group" aria-label={copy.a11y.utilityNavigation}>
 						<div className="desktop-tools">
 							<ChoiceSelect
 								ariaLabel={copy.nav.language}

@@ -12,9 +12,9 @@ tasks:
             - yarn run storybook:build
 
     storybook:test:
-        desc: Run stories and accessibility checks through the official agent tools.
+        desc: Run component and accessibility checks with the official Vitest integration.
         cmds:
-            - yarn exec storybook tools test run {{.CLI_ARGS}}
+            - yarn exec vitest run --project storybook {{.CLI_ARGS}}
 
     storybook:tools:
         desc: Invoke official Storybook discovery, docs, test, preview, and review tools.
@@ -36,10 +36,13 @@ tasks:
         cmds:
             - yarn exec vitest run --project storybook --coverage {{.CLI_ARGS}}
 
-    storybook:visual:
-        desc: Compare selected stories with reviewed native Vitest screenshot baselines.
+    storybook:capture:
+        desc: Capture selected stories with the native browser API for AI inspection.
+        preconditions:
+            - sh: '{{if contains ".stories." .CLI_ARGS}}true{{else}}false{{end}}'
+              msg: Pass story file filters; screenshot capture requires an explicit selection.
         env:
-            STORYBOOK_VISUAL_REGRESSION: "true"
+            STORYBOOK_CAPTURE: "true"
         cmds:
             - yarn exec vitest run --project storybook {{.CLI_ARGS}}
 

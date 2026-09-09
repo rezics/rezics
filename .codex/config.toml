@@ -8,6 +8,5 @@ network_access = true
 [windows]
 sandbox = "elevated"
 
-[mcp_servers.rezics-storybook]
-url = "http://127.0.0.1:6006/mcp"
-tool_timeout_sec = 180
+# Connect to the Storybook MCP URL discovered through `task aspire:describe`.
+# Use the owning official CLI with --port and --attach if the session cannot reconnect MCP.

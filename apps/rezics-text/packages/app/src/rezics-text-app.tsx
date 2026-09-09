@@ -1,4 +1,4 @@
-import { Resizable, ResizablePanel, ResizableResizeTrigger } from "@rezics/ui/ui/resizable";
+import { Resizable, ResizablePanel, ResizableResizeTrigger } from "@rezics/ui";
 import XIcon from "lucide-react/dist/esm/icons/x.mjs";
 import {
 	lazy,
@@ -250,7 +250,7 @@ export function RezicsTextApp({
 		<div
 			aria-label={messages.labels.application}
 			className="flex h-dvh min-h-[32rem] min-w-0 flex-col overflow-hidden bg-background text-foreground"
-			role="application"
+			role="group"
 		>
 			{nativeMenu ? null : <ApplicationMenuBar messages={messages} onCommand={runCommand} />}
 			<Resizable

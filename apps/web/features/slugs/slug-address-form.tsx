@@ -27,6 +27,7 @@ export function SlugAddressForm({
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
+		if (isPending || assignmentComplete) return;
 		setSaved(false);
 		setReserved(false);
 		const slug = String(new FormData(event.currentTarget).get("slug") ?? "").trim();
@@ -74,7 +75,13 @@ export function SlugAddressForm({
 				<RequestFailure error={error} />
 				{saved ? <p className="text-success-foreground text-sm">{t.ui.saved}</p> : null}
 				{assignmentComplete ? null : (
-					<Button variant="solid" className="w-fit" isLoading={isPending} type="submit">
+					<Button
+						variant="solid"
+						className="w-fit"
+						disabled={isPending}
+						isLoading={isPending}
+						type="submit"
+					>
 						{t.ui.save}
 					</Button>
 				)}

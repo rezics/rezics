@@ -66,7 +66,7 @@ yarn dlx shadcn@latest add @shark/<component> --diff --cwd libraries/ui
 Shared CSF Next stories live in `stories/`, outside the upstream mirror. They use
 the UI preview and the shared theme/locale environment; Web's Storybook includes
 them without making the UI workspace depend on Web providers. Start with
-`task apps-web:storybook` and follow the
+`task aspire:storybook` and follow the
 [Storybook workflow](../../docs/architecture/storybook-workflow.md).
 
 ## SharkUI audit

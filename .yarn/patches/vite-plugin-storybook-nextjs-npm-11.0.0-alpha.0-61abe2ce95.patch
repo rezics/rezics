@@ -1,0 +1,23 @@
+diff --git a/dist/index.js b/dist/index.js
+index c8849cc4ff538a69f44af630d9db8e229c431d06..384a3848144dc3a08f78ee27ec4e8d0689526067 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -829,6 +829,10 @@ function VitePlugin({ dir = process.cwd(), image } = {}) {
+           ...isVite8orNewer ? { tsconfigPaths: !0 } : {},
+           ...!isVitestEnv && {
+             alias: [
++              {
++                find: /^react\/compiler-runtime$/,
++                replacement: require4.resolve("next/dist/compiled/react/compiler-runtime")
++              },
+               {
+                 find: /^react$/,
+                 replacement: require4.resolve("next/dist/compiled/react")
+@@ -910,6 +914,7 @@ function VitePlugin({ dir = process.cwd(), image } = {}) {
+             alias: {
+               "next/dist/compiled/react": compiledReactDir,
+               "next/dist/compiled/react-dom": compiledReactDomDir,
++              "react/compiler-runtime": require4.resolve("next/dist/compiled/react/compiler-runtime.js"),
+               "react/jsx-dev-runtime": require4.resolve("next/dist/compiled/react/jsx-dev-runtime.js"),
+               "react/jsx-runtime": require4.resolve("next/dist/compiled/react/jsx-runtime.js"),
+               react: require4.resolve("next/dist/compiled/react"),

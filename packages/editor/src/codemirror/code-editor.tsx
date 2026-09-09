@@ -89,7 +89,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
 						EditorView.editable.of(!readOnly),
 					]),
 					accessibilityCompartmentRef.current.of(
-						EditorView.contentAttributes.of({ "aria-label": ariaLabel }),
+						EditorView.contentAttributes.of({ "aria-label": ariaLabel, tabindex: "0" }),
 					),
 					placeholderCompartmentRef.current.of(placeholder ? editorPlaceholder(placeholder) : []),
 					EditorView.updateListener.of((update) => {
@@ -139,7 +139,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
 		if (!view) return;
 		view.dispatch({
 			effects: accessibilityCompartmentRef.current.reconfigure(
-				EditorView.contentAttributes.of({ "aria-label": ariaLabel }),
+				EditorView.contentAttributes.of({ "aria-label": ariaLabel, tabindex: "0" }),
 			),
 		});
 	}, [ariaLabel]);

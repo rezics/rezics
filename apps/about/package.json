@@ -8,7 +8,13 @@
 		"@astrojs/check": "^0.9.9",
 		"@astrojs/mdx": "^7.0.4",
 		"@astrojs/react": "^6.0.2",
-		"@tailwindcss/vite": "^4.3.0",
+		"@rezics/storybook": "workspace:*",
+		"@storybook/addon-a11y": "^11.0.0-alpha.0",
+		"@storybook/addon-docs": "^11.0.0-alpha.0",
+		"@storybook/addon-mcp": "^11.0.0-alpha.0",
+		"@storybook/addon-vitest": "^11.0.0-alpha.0",
+		"@storybook/react-vite": "^11.0.0-alpha.0",
+		"@tailwindcss/vite": "^4.3.2",
 		"@testing-library/dom": "^10.4.1",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/react": "^16.3.1",
@@ -17,6 +23,7 @@
 		"@types/react-dom": "19",
 		"astro": "^7.1.4",
 		"jsdom": "^30.0.1",
+		"storybook": "patch:storybook@npm%3A11.0.0-alpha.0#~/.yarn/patches/storybook-npm-11.0.0-alpha.0-3446b2455a.patch",
 		"tailwindcss": "^4.3.0",
 		"tsx": "^4.23.0",
 		"typescript": "^6.0.3",
@@ -29,5 +36,11 @@
 		"lucide-react": "^1.24.0",
 		"react": "19.2",
 		"react-dom": "19.2"
+	},
+	"scripts": {
+		"storybook": "storybook dev -p 6009 --host 127.0.0.1 --no-open --exact-port",
+		"storybook:build": "storybook build --output-dir ../../.temp/storybook/about/static",
+		"storybook:aspire": "storybook dev --port \"$STORYBOOK_PORT\" --host 127.0.0.1 --no-open --exact-port",
+		"storybook:test": "vitest run --project storybook"
 	}
 }

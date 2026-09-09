@@ -9,7 +9,6 @@ import { IdentityAvatar } from "./identity-avatar";
 import {
 	Combobox,
 	ComboboxContent,
-	ComboboxEmpty,
 	ComboboxInput,
 	ComboboxItem,
 	ComboboxList,
@@ -103,6 +102,7 @@ export function EntityPicker({
 		status: "idle",
 	});
 	const [open, setOpen] = useState(false);
+	const [highlightedValue, setHighlightedValue] = useState<string | null>(null);
 	const ownersKey = owners?.join("\u0000");
 	const shapesKey = shapes?.join("\u0000");
 
@@ -181,6 +181,7 @@ export function EntityPicker({
 			: ({ status: "idle" } as const);
 	const shouldSearch = Boolean(searchEntities) && (query.length > 0 || (searchOnOpen && open));
 	const isPending = shouldSearch && currentResolution.status === "idle";
+	const hasResults = currentResolution.status === "ready" && collection.items.length > 0;
 	const showNoResultsAction =
 		query.length > 0 &&
 		currentResolution.status === "ready" &&
@@ -192,8 +193,12 @@ export function EntityPicker({
 			<Combobox
 				collection={collection}
 				inputValue={inputValue}
+				open={open && hasResults}
+				highlightedValue={open && hasResults ? highlightedValue : null}
+				onHighlightChange={({ highlightedValue: next }) => setHighlightedValue(next)}
 				onInputValueChange={({ inputValue: nextInputValue }) => {
 					setInputValue(nextInputValue);
+					setHighlightedValue(null);
 					filter(nextInputValue);
 				}}
 				onOpenChange={({ open: nextOpen }) => setOpen(nextOpen)}
@@ -205,6 +210,8 @@ export function EntityPicker({
 					}
 					onChange(selected);
 					setInputValue(selected.label);
+					setOpen(false);
+					setHighlightedValue(null);
 				}}
 				value={value ? [value.id] : []}
 			>
@@ -218,34 +225,35 @@ export function EntityPicker({
 					placeholder={placeholder}
 					type="search"
 				/>
-				<ComboboxContent>
-					{isPending || currentResolution.status === "pending" ? (
-						<p className="px-2 py-1.5 text-muted-foreground text-sm">{messages.loading}</p>
-					) : currentResolution.status === "error" ? (
-						<p className="px-2 py-1.5 text-destructive text-sm" role="alert">
-							{messages.error}
-						</p>
-					) : (
-						<>
-							<ComboboxList>
-								{collection.items.map((item) => (
-									<ComboboxItem item={item} key={item.id}>
-										<IdentityAvatar
-											avatar={item.avatar}
-											className="size-7"
-											fallback={item.label.slice(0, 1) || "?"}
-										/>
-										<span className="min-w-0 flex-1 truncate">
-											{item.label || messages.unnamed}
-										</span>
-									</ComboboxItem>
-								))}
-							</ComboboxList>
-							{(query || (searchOnOpen && open)) && <ComboboxEmpty>{messages.empty}</ComboboxEmpty>}
-						</>
-					)}
+				<ComboboxContent aria-label={ariaLabel}>
+					<ComboboxList>
+						{collection.items.map((item) => (
+							<ComboboxItem item={item} key={item.id}>
+								<IdentityAvatar
+									aria-hidden
+									avatar={item.avatar}
+									className="size-7"
+									fallback={item.label.slice(0, 1) || "?"}
+								/>
+								<span className="min-w-0 flex-1 truncate">{item.label || messages.unnamed}</span>
+							</ComboboxItem>
+						))}
+					</ComboboxList>
 				</ComboboxContent>
 			</Combobox>
+			{isPending || currentResolution.status === "pending" ? (
+				<p className="text-muted-foreground text-sm" role="status">
+					{messages.loading}
+				</p>
+			) : currentResolution.status === "error" ? (
+				<p className="text-destructive text-sm" role="alert">
+					{messages.error}
+				</p>
+			) : shouldSearch && currentResolution.status === "ready" && !hasResults ? (
+				<p className="text-muted-foreground text-sm" role="status">
+					{messages.empty}
+				</p>
+			) : null}
 			{showNoResultsAction ? <div aria-live="polite">{renderNoResultsAction(query)}</div> : null}
 		</div>
 	);

@@ -2,6 +2,10 @@
 
 Status: Implemented and verified on 2026-09-09.
 
+Historical acceptance record. The screenshot/baseline operating policy below is
+superseded by [AI UI review](storybook-ai-review-20260909.md); it does not prescribe
+future tasks. The six historical image references are removed from current Git tracking.
+
 Owner: Web, with shared component stories owned by UI.
 
 ## Objective and authorization

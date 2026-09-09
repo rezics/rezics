@@ -38,7 +38,9 @@ categories and record format only where they help explain decisions.
 
 Verify the changed text in its source context and follow the owner's
 [localization policy](../../../libraries/i18n/README.md) and deterministic
-checks. Browser or rendered QA requires the user's explicit request under
-[AGENTS.md](../../../AGENTS.md#data-and-verification-boundaries).
+checks. Follow the [AGENTS.md verification boundary](../../../AGENTS.md#data-and-verification-boundaries):
+scoped Storybook checks for covered UI are already authorized; full-application
+rendered QA requires the user's explicit request. For visible copy changes, use
+the [Storybook UI review skill](../storybook-ui-review/SKILL.md).
 Finish when the affected text serves its audience and required checks pass;
 report unresolved factual or terminology decisions without expanding the audit.

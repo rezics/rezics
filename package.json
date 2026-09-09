@@ -28,7 +28,8 @@
 		"@kubb/parser-ts": "5.0.0-beta.96",
 		"kubb": "5.0.0-beta.96",
 		"vite": "8.1.3",
-		"@storybook/react@npm:11.0.0-alpha.0": "patch:@storybook/react@npm%3A11.0.0-alpha.0#~/.yarn/patches/@storybook-react-npm-11.0.0-alpha.0-cd515a62b8.patch"
+		"@storybook/react@npm:11.0.0-alpha.0": "patch:@storybook/react@npm%3A11.0.0-alpha.0#~/.yarn/patches/@storybook-react-npm-11.0.0-alpha.0-cd515a62b8.patch",
+		"vite-plugin-storybook-nextjs@npm:11.0.0-alpha.0": "patch:vite-plugin-storybook-nextjs@npm%3A11.0.0-alpha.0#~/.yarn/patches/vite-plugin-storybook-nextjs-npm-11.0.0-alpha.0-61abe2ce95.patch"
 	},
 	"dependenciesMeta": {
 		"@ariga/atlas": {

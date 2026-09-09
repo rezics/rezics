@@ -1,6 +1,22 @@
 version: "3"
 
 tasks:
+    storybook:
+        desc: Run the component runtimes in Aspire without application infrastructure.
+        dir: ..
+        env:
+            REZICS_ASPIRE_MODE: storybook
+        cmds:
+            - task: restore
+            - yarn exec aspire run --no-build --apphost aspire-apphost/apphost.mts {{.CLI_ARGS}}
+
+    storybook:smoke:
+        desc: Verify isolated Storybook resources, MCP and clean shutdown without a database.
+        dir: ..
+        cmds:
+            - task: restore
+            - yarn workspace @rezics/aspire-apphost exec tsx scripts/manage-apphost.mts storybook-smoke
+
     restore:
         desc: Restore the pinned Aspire SDK and regenerate the TypeScript modules.
         dir: ..

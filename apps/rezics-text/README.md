@@ -10,6 +10,12 @@ The independent local Markdown editor product. It consumes `@rezics/editor` but 
 
 ## Development
 
+Component stories use the isolated React runtime managed by `task aspire:storybook`.
+They exercise the real workspace with in-memory file storage. Follow the
+[Storybook workflow](../../docs/architecture/storybook-workflow.md) for component,
+accessibility and on-demand AI screenshot review. Tauri filesystem and window behavior
+retain their own acceptance.
+
 ```sh
 task apps-rezics-text:dev:web
 task apps-rezics-text:dev

@@ -14,6 +14,7 @@ const startupTimeoutMs = 5 * 60 * 1000;
 const requestTimeoutMs = 2 * 60 * 1000;
 const smokeFontAwesomeCssUrl = "https://example.invalid/font-awesome-smoke.css";
 const smokeResourceNames = ["main-api", "recommendation-worker", "web"] as const;
+const storybookResourceNames = ["storybook-web", "storybook-text", "storybook-about"] as const;
 const forbiddenRuntimeDiagnostics = [
 	"TelemetryExporterUnhealthy",
 	"OTLPExporterError",
@@ -162,8 +163,8 @@ function summarize(resources: ResourceDescription[]) {
 		}));
 }
 
-function printResourceLogs() {
-	for (const resourceName of smokeResourceNames) {
+function printResourceLogs(resourceNames: readonly string[]) {
+	for (const resourceName of resourceNames) {
 		const result = runAspire([
 			"logs",
 			resourceName,
@@ -184,7 +185,7 @@ function printResourceLogs() {
 	}
 }
 
-async function waitForReady(child: ManagedChildProcess) {
+async function waitForReady(child: ManagedChildProcess, resourceNames: readonly string[]) {
 	const deadline = Date.now() + startupTimeoutMs;
 	let lastResources: ResourceDescription[] = [];
 	while (Date.now() < deadline) {
@@ -197,7 +198,7 @@ async function waitForReady(child: ManagedChildProcess) {
 			continue;
 		}
 		lastResources = describeResources();
-		const missing = smokeResourceNames.filter(
+		const missing = resourceNames.filter(
 			(name) => !lastResources.some((resource) => resource.displayName === name),
 		);
 		if (missing.length > 0) {
@@ -205,11 +206,7 @@ async function waitForReady(child: ManagedChildProcess) {
 			continue;
 		}
 		failOnTerminalResourceError(lastResources);
-		if (
-			requireRunningHealthy(lastResources, "main-api") &&
-			requireRunningHealthy(lastResources, "recommendation-worker") &&
-			requireRunningHealthy(lastResources, "web")
-		)
+		if (resourceNames.every((name) => requireRunningHealthy(lastResources, name)))
 			return lastResources;
 		await delay(2_000);
 	}
@@ -446,9 +443,79 @@ async function waitForStopped() {
 	throw new Error("Aspire AppHost did not stop cleanly");
 }
 
+async function verifyStorybooks(resources: ResourceDescription[]) {
+	if (
+		resources.some((resource) => smokeResourceNames.some((name) => name === resource.displayName))
+	)
+		throw new Error("The Storybook-only topology started an application resource");
+	for (const name of storybookResourceNames) {
+		const resource = findResource(resources, name);
+		const endpoint = resource.urls.find((entry) => entry.name === "http");
+		if (!endpoint) throw new Error(`${name} has no discovered HTTP endpoint`);
+		const index = await requireJson(
+			await requestOk(`${name} index`, new URL("/index.json", endpoint.url)),
+			name,
+		);
+		if (!isRecord(index) || !isRecord(index.entries) || Object.keys(index.entries).length === 0)
+			throw new Error(`${name} has no indexed stories`);
+		const mcp = new URL("/mcp", endpoint.url);
+		let session: string | null = null;
+		async function call(body: object) {
+			const response = await fetch(mcp, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Accept: "application/json, text/event-stream",
+					...(session ? { "Mcp-Session-Id": session } : {}),
+				},
+				body: JSON.stringify(body),
+				signal: AbortSignal.timeout(30_000),
+			});
+			if (!response.ok) throw new Error(`${name} MCP returned ${response.status}`);
+			session = response.headers.get("mcp-session-id") ?? session;
+			const text = await response.text();
+			if (!text) return undefined;
+			const json = response.headers.get("content-type")?.includes("text/event-stream")
+				? text
+						.split(/\r?\n/)
+						.filter((line) => line.startsWith("data:"))
+						.map((line) => line.slice(5).trim())
+						.join("\n")
+				: text;
+			return JSON.parse(json) as unknown;
+		}
+		const initialized = await call({
+			jsonrpc: "2.0",
+			id: 1,
+			method: "initialize",
+			params: {
+				protocolVersion: "2025-03-26",
+				capabilities: {},
+				clientInfo: { name: "rezics-storybook-smoke", version: "1.0.0" },
+			},
+		});
+		if (!isRecord(initialized) || !isRecord(initialized.result))
+			throw new Error(`${name} MCP initialization failed`);
+		await call({ jsonrpc: "2.0", method: "notifications/initialized" });
+		const listed = await call({ jsonrpc: "2.0", id: 2, method: "tools/list" });
+		if (!isRecord(listed) || !isRecord(listed.result) || !Array.isArray(listed.result.tools))
+			throw new Error(`${name} MCP tool listing failed`);
+		const tools = listed.result.tools;
+		for (const required of ["docs-list", "stories-preview", "test-run"])
+			if (!tools.some((tool) => isRecord(tool) && tool.name === required))
+				throw new Error(`${name} MCP lacks ${required}`);
+		console.info(
+			`${name}: ${Object.keys(index.entries).length} index entries; ${tools.length} MCP tools; ${endpoint.url}`,
+		);
+	}
+}
+
 async function main() {
 	const mode = process.argv[2];
-	if (mode !== "smoke") throw new Error("Usage: manage-apphost.mts smoke");
+	if (mode !== "smoke" && mode !== "storybook-smoke")
+		throw new Error("Usage: manage-apphost.mts smoke|storybook-smoke");
+	const storybookOnly = mode === "storybook-smoke";
+	const resourceNames = storybookOnly ? storybookResourceNames : smokeResourceNames;
 	const smokeProbeToken = randomUUID();
 	const existing = listMatchingAppHosts();
 	if (existing.length > 0)
@@ -477,7 +544,10 @@ async function main() {
 				FONT_AWESOME_KIT_CSS_URL: smokeFontAwesomeCssUrl,
 				FONT_AWESOME_KIT_LICENSE: "free",
 				NO_COLOR: "1",
-				REZICS_ASPIRE_MODE: mode,
+				REZICS_ASPIRE_MODE: storybookOnly ? "storybook" : "smoke",
+				...(storybookOnly
+					? { DATABASE_URL: undefined, BETTER_AUTH_SECRET: undefined, S3_ENDPOINT: undefined }
+					: {}),
 				REZICS_SMOKE_PROBE_TOKEN: smokeProbeToken,
 			},
 			stdio: ["ignore", "pipe", "pipe"],
@@ -486,15 +556,16 @@ async function main() {
 	);
 	const getOutput = captureOutput(child);
 	try {
-		const resources = await waitForReady(child);
-		await verifySmoke(resources, smokeProbeToken);
+		const resources = await waitForReady(child, resourceNames);
+		if (storybookOnly) await verifyStorybooks(resources);
+		else await verifySmoke(resources, smokeProbeToken);
 		await verifyRuntimeDiagnostics(getOutput);
 		console.table(summarize(resources));
 	} catch (error) {
 		const output = getOutput();
 		if (output) console.error(`Aspire output:\n${output}`);
 		try {
-			if (listMatchingAppHosts().length > 0) printResourceLogs();
+			if (listMatchingAppHosts().length > 0) printResourceLogs(resourceNames);
 		} catch (diagnosticError) {
 			console.error("Could not collect Aspire resource logs", diagnosticError);
 		}

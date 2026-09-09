@@ -28,6 +28,7 @@ tasks:
         cmds:
             - yarn workspace @rezics/text-app exec tsc --noEmit
             - yarn workspace @rezics/text-web exec tsc --noEmit
+            - yarn exec tsc --noEmit -p tsconfig.storybook.json
 
     test:
         desc: Run REZICS Text application behavior tests.
@@ -76,3 +77,38 @@ tasks:
         cmds:
             - task: generate:icons
             - node scripts/build-desktop.mjs
+
+    storybook:
+        desc: Start the isolated rezics-text component runtime.
+        cmds:
+            - yarn run storybook {{.CLI_ARGS}}
+
+    storybook:build:
+        desc: Build this owner's component documentation.
+        cmds:
+            - yarn run storybook:build
+
+    storybook:tools:
+        desc: Invoke official discovery, docs, testing and review tools.
+        cmds:
+            - yarn exec storybook tools {{.CLI_ARGS}}
+
+    storybook:test:
+        desc: Run component and accessibility checks with the official Vitest integration.
+        cmds:
+            - yarn exec vitest run --project storybook {{.CLI_ARGS}}
+
+    storybook:capture:
+        desc: Capture selected stories with the native browser API for AI inspection.
+        preconditions:
+            - sh: '{{if contains ".stories." .CLI_ARGS}}true{{else}}false{{end}}'
+              msg: Pass story file filters; screenshot capture requires an explicit selection.
+        env:
+            STORYBOOK_CAPTURE: "true"
+        cmds:
+            - yarn exec vitest run --config vitest.config.ts {{.CLI_ARGS}}
+
+    storybook:coverage:
+        desc: Report native browser coverage for this owner.
+        cmds:
+            - yarn exec vitest run --config vitest.config.ts --coverage {{.CLI_ARGS}}

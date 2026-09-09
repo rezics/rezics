@@ -16,7 +16,7 @@ export default defineConfig({
 			"./libraries/filter/vitest.config.ts",
 			"./services/main/vitest.config.ts",
 			"./apps/web/vitest.unit.config.ts",
-			"./apps/about/vitest.config.ts",
+			"./apps/about/vitest.unit.config.ts",
 		],
 		coverage: {
 			provider: "v8",

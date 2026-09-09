@@ -5,6 +5,7 @@ tasks:
         desc: Type-check the public editor capability package.
         cmds:
             - yarn run typecheck
+            - yarn exec tsc --noEmit -p tsconfig.stories.json
 
     test:
         desc: Run editor capability behavior tests.

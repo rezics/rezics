@@ -1,134 +1,129 @@
 # Storybook workflow
 
-Status: Accepted
+Status: Accepted. The [AI review skill](../../.agents/skills/storybook-ui-review/SKILL.md)
+owns evidence and completion policy. Screenshots support inspection of new and
+changed UI; persistent pixel baselines are not part of the default workflow.
 
-Owner: Web runtime; UI owns shared component stories.
+## Runtime owners
 
-## Runtime and version policy
+| Host | Stories and providers |
+| --- | --- |
+| Web | `apps/web/features`, `libraries/ui/stories`, `packages/editor/stories`. Next-compatible Vite, typed translations, isolated queries and explicit MSW handlers. Library previews do not inherit Web providers. |
+| REZICS Text | `apps/rezics-text/packages/app/src`. Real application CSS and in-memory document storage; no Tauri filesystem calls. |
+| About | `apps/about/src/components`. React islands with About CSS and locale content; Astro pages retain their owning checks. |
 
-Use the Storybook `next` channel and keep official packages at the same resolved
-version. The initial integration uses `11.0.0-alpha.0`. Keep the lockfile and any
-package patches under version control. Re-evaluate patches when updating `next`;
-do not disable experimental features solely because they are experimental.
+Keep stories beside their owner and outside the upstream SharkUI mirror. Preserve
+production/fixture isolation, real theme tokens, typed locales and independent Vite
+configurations. Do not load Vinext, Cloudflare or PWA plugins into Storybook.
+The [repository inventory](../plan/storybook-repository-coverage-20260909.md) records
+coverage and boundaries; historical screenshot counts are not future gates.
 
-`apps/web/.storybook/main.ts` owns the single development instance. Its independent
-Vite configuration excludes Vinext, Cloudflare and the application's PWA. The
-browser test project explicitly imports that same Vite configuration: addon-vitest
-applies `viteFinal`, but does not load the builder's `viteConfigPath` automatically.
-The `@storybook/nextjs-vite` adapter supplies Next-compatible navigation/module mocks.
+## Aspire lifecycle
 
-The following capabilities are enabled: CSF Next, experimental story tests,
-component manifests, server-side docgen, change detection, Agentic Review, Docs,
-Vitest Browser, accessibility, MSW, and MCP. Use official skills/tools for agent
-orchestration. Hosted visual approval is available through Chromatic when an
-account and project are configured; it is not needed for local screenshots.
-
-## Ownership
-
-- Feature stories are colocated `*.stories.tsx` files and import Web's preview.
-- Shared component stories live in `libraries/ui/stories` and import its preview.
-  They must not import Web providers. CSF Next binds each story to its own preview;
-  a separate preview does not automatically inherit the application preview.
-- The UI-owned `storyEnvironment` is a native preview addon shared by both previews.
-  It supplies the theme, locale/content-language controls, fixture provider, and
-  viewport definitions. Application-only translations, auth and query state stay
-  in the Web preview. Each story receives an isolated query client.
-- Import shared controls through `@rezics/ui`. Never edit the upstream `src/ui`
-  mirror to add stories, documentation, or test-only behavior.
-- Reuse typed locale resources and fixture data. Keep mock content out of production
-  locale resources and keep fixture/story dependencies out of production modules.
-
-## Commands
-
-Run from the repository root:
+From the repository root:
 
 ```sh
-task apps-web:storybook
-task apps-web:storybook:browsers
-task apps-web:storybook:skills -- stories
-task apps-web:storybook:skills -- write-story
-task apps-web:storybook:tools -- docs list --withStoryIds true
-task apps-web:storybook:tools -- stories changed
-task apps-web:storybook:tools -- stories find-by-component --help
-task apps-web:storybook:test
-task apps-web:storybook:tools -- review create --help
-task apps-web:storybook:build
-task apps-web:storybook:coverage
-task apps-web:storybook:visual -- ../../libraries/ui/stories/button.stories.tsx
+task aspire:storybook
+task aspire:describe
+task aspire-apphost:stop
 ```
 
-Use `--stories` with the official test tool to focus a run, following its help.
-Read `--help` for each command before constructing arguments. Reuse the correct
-running instance and take IDs from discovery tools. Return a review for visual
-work, including all newly introduced stories. Changes to global CSS, themes,
-providers or shared locale resources warrant broader tests than a single component.
+The rooted TypeScript AppHost supports `REZICS_ASPIRE_MODE=storybook`, which starts
+only `storybook-text`, `storybook-about` and `storybook-web`. It does not require
+application credentials, start infrastructure or prepare a database. To include
+these resources with normal development, set `REZICS_ASPIRE_STORYBOOK=true` before
+`task dev`. The existing application smoke mode excludes them.
 
-The project-scoped Codex MCP configuration points to `http://127.0.0.1:6006/mcp`.
-Start Storybook before connecting. In a separate worktree, use a distinct port and
-the official CLI from that worktree; do not accidentally inspect the original
-checkout's server. Adjust the task's MCP connection to the matching instance when
-using MCP there. The CLI and MCP expose the same upstream capabilities.
+Aspire allocates HTTP ports and injects `STORYBOOK_PORT`. Each owner's
+`storybook:aspire` script uses Yarn's portable shell to pass it to the official CLI.
+Endpoint references supply `STORYBOOK_URL` and Composition URLs. Web waits for
+Text and About readiness because reference discovery happens at startup. Dashboard
+resources expose HTTP, MCP and Review links. Storybooks are excluded from publish
+manifests.
 
-`apps/web/vitest.config.ts` exposes the Storybook browser project to the official
-test runner. `vitest.unit.config.ts` preserves the Web node tests in the root test
-suite, so ordinary deterministic checks do not silently start a browser.
+Use `task aspire:storybook -- --isolated` for isolated development. Discover actual
+URLs from `task aspire:describe`; never guess ports or inspect another checkout.
+`task aspire-apphost:storybook:smoke` verifies startup, indexes, MCP tool discovery
+and clean shutdown in an isolated topology without database settings. It refuses
+to replace an already-running AppHost for this checkout.
 
-## Screenshots and visual assertions
+Standalone tasks (`apps-web:storybook`, `apps-rezics-text:storybook`,
+`apps-about:storybook`) remain available for troubleshooting, with defaults 6006,
+6008 and 6009. Reuse the correct running instance rather than creating a duplicate
+outside Aspire.
 
-Screenshots use Vitest Browser's native API from the test lifecycle, with a fixed
-browser environment. Successful runs produce images too. Names identify the story,
-test, locale, theme and actual viewport; story IDs are URI-encoded for Windows-safe
-filenames, including CSF Next's colon-separated child test IDs.
+## Agent tools and on-demand images
 
-Default viewport: 1280 by 900; toolbar alternatives: 390 by 844 and 768 by 1024.
-Headless tests disable Vitest's separate canvas UI and size the Playwright context
-to fit the largest toolbar viewport (1280 by 1024), avoiding fit-to-panel scaling.
-Storybook's own UI and test panel
-remain available. Capture the test document body through the native locator API
-so portals are included and parallel test frames are not mixed into an image.
-Use per-story globals to make an important theme/viewport combination reproducible.
-Fix date-dependent scenarios and supply local assets. Unexpected API/external
-requests fail through MSW instead of falling through to live development data.
+Connect the task's MCP client to the discovered resource's `/mcp` URL. The repo
+has no fixed Codex MCP URL because isolated ports vary. If a client cannot attach
+dynamically, use the equivalent official CLI from the owning package with
+`--port <discovered-port> --attach`.
 
-Generated screenshots, failure artifacts, traces, coverage and static builds live
-under `.temp/storybook/`. Inspect screenshots before making visual claims. Use
-Vitest's `toMatchScreenshot()` for visual regression; review the initial or updated
-baseline instead of treating baseline creation as correctness. Pixel comparison,
-interaction assertions, accessibility checks and AI visual judgment provide
-different evidence. No custom image diff engine or screenshot scheduler is used.
+Read `storybook skills` and tool help for the installed version. Use official
+docs, `stories changed` and `stories find-by-component` to select relevant stories.
+An empty changed selection is not evidence of no impact. Expand consumer coverage
+for shared styles/providers. The alpha watcher may need a host restart when new
+external-workspace files appear; compare discovery with the selected test results.
 
-The opt-in `storybook:visual` task enables native comparison in the same lifecycle.
-Pass story file filters to limit the run. Reviewed references live in
-`apps/web/.storybook/baselines/`, with browser and OS in their native filenames;
-diffs stay under `.temp/storybook/diffs/`. Use Vitest's `--update` deliberately when
-creating or changing references, inspect the images, then rerun without it.
+`stories preview` returns preview URLs, not PNG files. Use available browser tools
+to capture selected states. Review thumbnails show initial renders; open the detail
+and perform interactions when a later state matters. The AI must view the images.
 
-## Compatibility corrections
+The opt-in native capture fallback is available when browser tooling is insufficient:
 
-TypeScript 7 removed the JavaScript compiler API consumed by Storybook's React
-docgen worker. The `@storybook/react` Yarn patch imports a separate
-`typescript-docgen` alias at version 6.0.3, supplied by `.yarnrc.yml`. Merely adding
-a dependency named `typescript` does not override the renderer's TypeScript peer.
-Application and library typechecks continue to use TypeScript 7. Remove this patch
-when upstream supports that compiler API boundary or scopes its own parser runtime.
+```sh
+task apps-web:storybook:capture -- features/editor/portable-text-editor.stories.tsx
+task apps-rezics-text:storybook:capture -- packages/app/src/rezics-text-app.stories.tsx
+task apps-about:storybook:capture -- src/components/SiteHeader.stories.tsx
+```
 
-The Web TypeScript `lib` target includes ES2023 because existing application code
-uses `toSorted`, `with`, and `findLast`. Storybook integration must not depend on
-an incidental dependency to supply those ambient declarations.
+Capture requires an explicit file selection and uses Vitest Browser's native API.
+Artifacts live under `.temp/storybook/`; body locators include portals and filenames
+identify story, locale, theme and viewport. Use a fixed environment and reach the
+intended state. Generated reference images, screenshots and diffs are never
+committed. Product image assets are unaffected.
 
-When the official test tool starts Vitest, it selects a project named
-`storybook:<absolute-config-directory>`. Declare that name when
-`VITEST_STORYBOOK=true`, before the addon plugin runs: Vitest can filter inline
-projects before the plugin overrides their names. Otherwise the CLI can wait until
-its 30-second startup timeout while direct `vitest --project storybook` works.
+## Tests and CI
 
-## Acceptance boundary
+Normal `storybook:test` tasks use the official Vitest addon without a running server
+and without capturing successful tests. MCP and `storybook:tools` can test an
+already-running instance. Native failure screenshots and traces remain available. Run
+affected typechecks and deterministic checks. `task storybook:check` deliberately
+runs all three suites when broad verification is warranted; small edits do not
+require it.
 
-For story-covered UI changes, update stories, run affected TypeScript/deterministic
-checks, run official Storybook tests, inspect relevant screenshots and create an
-official review. This scoped component/browser workflow is maintainer-approved.
-Full application browser flows retain their separate task authorization boundary.
+Node projects remain separate from browser projects. `storybook:coverage` and
+`storybook:build` remain available when needed. The advisory GitHub workflow runs
+owner types, component/a11y tests and static builds, retaining structured results
+and failure diagnostics. It does not compare pixels or update baselines.
 
-Passing these checks establishes integrity and the covered component behavior. It
-does not establish full-repository coverage, Vinext SSR/authentication behavior,
-production deployment, capacity, or hosted Chromatic acceptance.
+## Version and compatibility
+
+Follow `storybook@next`, retaining applicable official capabilities and reproducible
+patches. CSF Next/child tests, manifests/docgen, change detection, Docs, Vitest,
+a11y, Review and MCP remain enabled. Availability does not require invoking every
+capability in every task. Do not build replacement dependency graphs, screenshot
+schedulers, diff engines or review applications.
+
+Current scoped integration corrections:
+
+- React docgen uses a separate TypeScript 6 JavaScript API alias; application
+  typechecking remains TypeScript 7.
+- The Next Vite adapter maps `react/compiler-runtime` for compiled editor imports.
+- The embed freezer permits layout frames before freezing; native loaders preload
+  lazy editors. Upstream initial-state thumbnail semantics are retained.
+- Web prebundles native-i18n entry points together to preserve symbol identity.
+- Preserve the early `storybook:<configDir>` Vitest project name, independent Vite
+  config, typed capture injection and unscaled browser viewport. Attached and direct
+test runners have separate optimizer caches.
+- CodeMirror extension objects stay in renderers rather than serializable args.
+  Editor stories use official user-event typing cadence for manager replay.
+
+Re-evaluate patches on upgrades. Keep alpha diagnostics visible. Composition
+navigation does not prove cross-host MCP manifests work; use each host's direct
+tools. Full application E2E, real authentication, Tauri/native behavior, deployment
+and capacity remain outside component acceptance.
+
+The alpha offline `storybook tools test run --no-attach` bridge can fail to create
+its status-store leader. Independent tasks and CI use the documented native
+Vitest addon entry instead; server-connected MCP/CLI tools remain enabled.

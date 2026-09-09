@@ -33,6 +33,8 @@ target/
 !**/src-tauri/icons/.gitkeep
 coverage/
 storybook-static/
+# Generated visual evidence is local, including previously versioned references.
+apps/*/.storybook/baselines/
 *.tsbuildinfo
 .vite/
 .tanstack/

@@ -32,8 +32,19 @@ includes:
     packages-editor:
         taskfile: ./packages/editor/Taskfile.yml
         dir: ./packages/editor
+    packages-storybook:
+        taskfile: ./packages/storybook/Taskfile.yml
+        dir: ./packages/storybook
 
 tasks:
+    storybook:check:
+        desc: Run all owners' component and accessibility suites through the official Vitest addon.
+        cmds:
+            - task: packages-storybook:typecheck
+            - task: apps-web:storybook:test
+            - task: apps-rezics-text:storybook:test
+            - task: apps-about:storybook:test
+
     format:
         desc: Format source files with their owning formatters.
         cmds:
@@ -266,3 +277,9 @@ tasks:
         desc: Describe the running Aspire resource graph as JSON.
         cmds:
             - task: aspire-apphost:describe
+
+    aspire:storybook:
+        desc: Run the isolated Storybook development topology.
+        cmds:
+            - task: aspire-apphost:storybook
+              vars: { CLI_ARGS: "{{.CLI_ARGS}}" }

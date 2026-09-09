@@ -51,6 +51,7 @@ export * from "./ui/listbox";
 export * from "./ui/locale";
 export * from "./ui/marquee";
 export * from "./ui/native-select";
+export { NativeSelect } from "./custom/native-select";
 export * from "./ui/number-input";
 export * from "./ui/pagination";
 export * from "./ui/password-input";

@@ -13,16 +13,17 @@ language, fixture content language, light or dark theme, and viewport.
 From the repository root:
 
 ```sh
-task apps-web:storybook
+task aspire:storybook
+task aspire:describe
 task apps-web:storybook:skills -- stories
 task apps-web:storybook:tools -- docs list --withStoryIds true
 task apps-web:storybook:tools -- stories changed
 task apps-web:storybook:test
 ```
 
-Read each tool's `--help` before using its arguments. Use discovered story IDs for
-focused tests and the official review tool. The local MCP endpoint is
-`http://127.0.0.1:6006/mcp`.
+Read each tool's `--help` before using its arguments. Use discovered story IDs and
+the actual Aspire resource port for focused tests, previews and Review. Each
+resource exposes its own MCP URL; never assume another checkout's fixed port.
 
 ## Authoring
 
@@ -37,11 +38,12 @@ fixture data. API-backed scenarios use MSW with explicit endpoint handlers.
 
 ## Screenshots and acceptance
 
-The browser test lifecycle captures successful stories as well as failures through
-Vitest's native screenshot API. Filenames identify the story, test, locale, theme,
-and viewport. Generated files are under `.temp/storybook/` at the repository root.
-Use native `toMatchScreenshot()` assertions for reviewed visual baselines, and
-inspect actual images when judging layout or styling.
+The AI inspects screenshots of the new and changed states to find UI problems.
+Passing tests and publishing links do not replace viewing the actual images.
+Use browser capture tools on the selected previews, or the explicit
+`storybook:capture` task with story file filters. Generated images remain under
+`.temp/storybook/` and are never committed. Normal passing tests produce no images;
+failure diagnostics remain available. There is no default pixel-baseline workflow.
 
 The CSS check verifies that Tailwind utilities reach the browser. Component,
 accessibility, and screenshot results cover the selected stories. Vinext server

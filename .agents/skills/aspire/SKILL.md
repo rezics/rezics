@@ -7,6 +7,12 @@ metadata:
 
 # Aspire
 
+For Storybook lifecycle, use `task aspire:storybook` and discover the three
+resources through `task aspire:describe`. The Storybook-only mode and its bounded
+`aspire-apphost:storybook:smoke` task do not prepare infrastructure or databases.
+Use the [UI review skill](../storybook-ui-review/SKILL.md) for visual evidence;
+starting these resources does not authorize or trigger a bulk screenshot run.
+
 Use the repository's rooted `aspire.config.json` and
 [AppHost tasks](../../../aspire-apphost/Taskfile.yml) to select the authored
 AppHost, pinned tools and lifecycle wrappers. Discover resource names and

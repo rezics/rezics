@@ -1,0 +1,7 @@
+version: "3"
+
+tasks:
+    typecheck:
+        desc: Type-check the shared Storybook and Vitest configuration.
+        cmds:
+            - yarn exec tsc --noEmit

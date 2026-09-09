@@ -43,6 +43,7 @@
 		"@rezics/fixture-client": "workspace:*",
 		"@rezics/fixture-data": "workspace:*",
 		"@rezics/i18n": "workspace:*",
+		"@rezics/storybook": "workspace:*",
 		"@storybook/addon-a11y": "^11.0.0-alpha.0",
 		"@storybook/react-vite": "^11.0.0-alpha.0",
 		"@types/react": "19",
@@ -50,7 +51,7 @@
 		"native-i18n": "0.2.0",
 		"react": "19.2",
 		"react-dom": "19.2",
-		"storybook": "^11.0.0-alpha.0",
+		"storybook": "patch:storybook@npm%3A11.0.0-alpha.0#~/.yarn/patches/storybook-npm-11.0.0-alpha.0-3446b2455a.patch",
 		"typescript": "7",
 		"vite": "^8.1.3"
 	}

@@ -1,14 +1,10 @@
-import { defineConfig } from "vitest/config";
+import { createStorybookVitestConfig } from "@rezics/storybook/vitest";
+import viteConfig from "./.storybook/vite.config";
 
-export default defineConfig({
-	resolve: {
-		dedupe: ["react", "react-dom"],
-	},
-	test: {
-		environment: "jsdom",
-		execArgv: ["--no-experimental-webstorage"],
-		globals: true,
-		include: ["src/**/*.test.{ts,tsx}"],
-		setupFiles: ["./src/test/setup.ts"],
-	},
+export default createStorybookVitestConfig({
+	projectUrl: new URL("./", import.meta.url),
+	artifactDirectory: new URL("../../.temp/storybook/about/", import.meta.url),
+	viteConfig,
+	script: "yarn storybook --ci",
+	defaultPort: 6009,
 });

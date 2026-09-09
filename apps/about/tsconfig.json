@@ -3,7 +3,7 @@
 		"target": "ES2022",
 		"module": "ESNext",
 		"moduleResolution": "Bundler",
-		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		"lib": ["ES2023", "DOM", "DOM.Iterable"],
 		"types": ["astro/client", "node"],
 		"strict": true,
 		"noEmit": true,
@@ -23,6 +23,14 @@
 		"noUnusedLocals": true,
 		"noUnusedParameters": true
 	},
-	"include": ["src", "functions", "scripts", "astro.config.ts", "vitest.config.ts"],
+	"include": [
+		"src",
+		"functions",
+		"scripts",
+		"astro.config.ts",
+		"vitest.config.ts",
+		".storybook",
+		"vitest.storybook.config.ts"
+	],
 	"exclude": ["dist", ".astro", "node_modules"]
 }
