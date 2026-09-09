@@ -1,0 +1,72 @@
+name: Relationship query performance
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Experiment mode
+        type: choice
+        options: [smoke, load]
+        default: smoke
+      rows:
+        description: Generated publishing resources
+        default: '1000'
+      case:
+        description: Optional case ID substring
+        default: ''
+      jit:
+        description: PostgreSQL JIT experiment setting
+        type: choice
+        options: ['on', 'off']
+        default: 'on'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: performance-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '26'
+      - uses: go-task/setup-task@a00fbb05ce67b35648be3c78cbc9fd85354c757e # v2.2.0
+      - name: Install dependencies
+        run: |
+          npm install --global corepack@0.36.0
+          corepack enable
+          yarn install --immutable
+      - name: Extract the production Bun binary
+        run: |
+          mkdir -p .temp/performance-tools
+          container=$(docker create oven/bun:1.4.2-slim@sha256:cb3bbbb08e13a4a2ff400f24c7a2a1d5efa83f6ef8544d52d95a519631e2fc61)
+          docker cp "$container:/usr/local/bin/bun" .temp/performance-tools/bun
+          docker rm "$container"
+          chmod +x .temp/performance-tools/bun
+          echo "REZICS_BUN_BINARY=$PWD/.temp/performance-tools/bun" >> "$GITHUB_ENV"
+      - run: task services-main:performance:check
+      - run: task services-main:performance:tools
+      - name: Run the selected experiment
+        env:
+          PERF_MODE: ${{ inputs.mode }}
+          PERF_ROWS: ${{ inputs.rows }}
+          PERF_CASE: ${{ inputs.case }}
+          PERF_JIT: ${{ inputs.jit }}
+        run: |
+          args=(--mode "$PERF_MODE" --rows "$PERF_ROWS" --jit "$PERF_JIT")
+          if [ -n "$PERF_CASE" ]; then args+=(--case "$PERF_CASE"); fi
+          yarn workspace @rezics/backend exec tsx scripts/performance/run.ts "${args[@]}"
+      - name: Retain diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: performance-${{ github.run_id }}
+          path: .temp/performance/
+          include-hidden-files: true
+          retention-days: 7

@@ -47,11 +47,11 @@ must not depend on private libraries, applications, or services.
 ## Development
 
 The root workspace uses Node.js 26, Yarn 4, Bun, Go Task 3, Docker Compose, and
-Aspire 13.5.3. Compose owns persistent PostgreSQL 18.4 with PGroonga and RustFS.
+Aspire 13.5.3. Compose owns persistent PostgreSQL 18.6 with PGroonga and RustFS.
 Aspire owns the API, recommendation worker,
 web development server, and Dashboard. Use the repository's pinned
-devenv/direnv environment or provide Aspire 13.5.3, Yarn 4.17.1, Go Task 3, and
-Bun 1.4.0 or newer locally.
+devenv/direnv environment or provide Aspire 13.5.3, Yarn 4.18.0, Go Task 3, and
+Bun 1.4.2 or newer locally.
 
 ```sh
 yarn install --immutable
@@ -145,6 +145,10 @@ Metadata-contract work does not imply source regeneration. Update generators for
 intentional rebuild, but migrate deterministic committed artifacts directly when that is sufficient.
 An unavailable source, anti-bot response, or checksum mismatch must not cause a challenge page or
 unverified download to replace a committed fixture.
+
+For generated large-data search/list experiments, use the separate
+[relationship query performance workflow](services/main/performance/README.md).
+Its disposable datasets are independent of showcase packs and ordinary behavior tests.
 
 The main checks are:
 

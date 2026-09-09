@@ -117,6 +117,25 @@ tasks:
         cmds:
             - yarn exec vitest run --project main
 
+    performance:tools:
+        desc: Build the pinned gMark relationship generator; does not start application infrastructure.
+        dir: ../..
+        cmds:
+            - docker compose build postgres
+            - docker build --file services/main/performance/gmark.Dockerfile --tag rezics-gmark:77be5b6 .
+
+    performance:run:
+        desc: Generate relationship workloads and measure the real API on a new disposable PostgreSQL container.
+        cmds:
+            - yarn exec tsx scripts/performance/run.ts {{.CLI_ARGS}}
+
+    performance:check:
+        desc: Check performance harness integrity without creating data or starting servers.
+        dir: ../..
+        cmds:
+            - task: typecheck
+            - yarn exec vitest run --project main services/main/scripts/performance
+
     openapi:generate:
         desc: Generate the OpenAPI document from backend route schemas.
         cmds:
