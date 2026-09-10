@@ -3,6 +3,7 @@ import { z } from "zod";
 import { UnitReferenceSchema, type UnitReference } from "@rezics/reference";
 import type { DatabaseTransaction } from "../database";
 import { referenceValue } from "../database/schema/reference-value";
+import { allocateImmutableReference } from "./immutable-reference";
 import {
 	unitReferenceTargetColumn,
 	unitReferenceValues,
@@ -26,27 +27,24 @@ export async function allocateReferenceValue(
 ): Promise<string> {
 	const target = UnitReferenceSchema.parse(input);
 	const column = unitReferenceTargetColumn("target", target.owner, referenceValue);
-	const [existing] = await tx
-		.select({ id: referenceValue.id })
-		.from(referenceValue)
-		.where(eq(column, target.id))
-		.limit(1);
-	if (existing) return existing.id;
-	const [inserted] = await tx
-		.insert(referenceValue)
-		.values(unitReferenceValues("target", target))
-		.onConflictDoNothing({ target: column, where: sql`${column} is not null` })
-		.returning({ id: referenceValue.id });
-	if (inserted) return inserted.id;
-	// DO NOTHING can lose to a row invisible to its statement snapshot. A
-	// separate statement observes the committed winner without a no-op UPDATE.
-	const [winner] = await tx
-		.select({ id: referenceValue.id })
-		.from(referenceValue)
-		.where(eq(column, target.id))
-		.limit(1);
-	if (!winner) throw new Error("Reference allocation requires a fresh transaction snapshot");
-	return winner.id;
+	return allocateImmutableReference(
+		async () => {
+			const [existing] = await tx
+				.select({ id: referenceValue.id })
+				.from(referenceValue)
+				.where(eq(column, target.id))
+				.limit(1);
+			return existing?.id;
+		},
+		async () => {
+			const [inserted] = await tx
+				.insert(referenceValue)
+				.values(unitReferenceValues("target", target))
+				.onConflictDoNothing({ target: column, where: sql`${column} is not null` })
+				.returning({ id: referenceValue.id });
+			return inserted?.id;
+		},
+	);
 }
 
 /**

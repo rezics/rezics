@@ -1,14 +1,20 @@
 {
-  "baseCommit": "1ac6cbece019d8381b66a586347c8504c8ee706d",
+  "baseCommit": "662f41ace511cf4d92fed4e54aa04694bf0b18d7",
   "sourceDigests": {
-    "services/main/Taskfile.yml": "887ab2dc5299f37d3b4c35611bef19da7bc4d210df5726336175507f0d2eb0c7",
-    "services/main/scripts/check-reference-values.ts": "752ee23ac36c5d337025acc3f9424dc14381d1c50813ba1b5e83740f0b3ddc81",
+    "services/main/Taskfile.yml": "0992fb82abee916ee313620132129908b9d9bf9701615cc02189f7e8fd539e9d",
+    "services/main/scripts/check-reference-values.ts": "24db4be05b019c4fc2369af3f838bbbf5e6924edf7e41f97197a1d9c84a6a045",
+    "services/main/scripts/check-revision-references.ts": "f253950a8df8b45898665e75a7d77d534ecb0bd20067ab903faf613f40856f33",
     "services/main/scripts/validate-integrity-constraints.ts": "4f9bd84c35f51811787470a497333a3934e253a42a09d85c37087ec74167a895",
-    "services/main/src/services/units/reference-value.ts": "d1db692ecee57d756fccf34a1b6303699a3795f394c24832c027c33f1b8a112c",
+    "services/main/src/services/units/reference-value.ts": "b641e4cceb18b2b5a459095e5fb0db35d55e97da7ebfd3c0e091946ad1cfefdc",
+    "services/main/src/services/units/immutable-reference.ts": "81e871a52b3b0aa8cdc931c84f86869523590a152bc3f798cc94bec730bc6d78",
+    "services/main/src/services/units/revision-reference.ts": "bdad6d0ff9b9cee34e8f81548bf6bd9b546861ebf566d8360749e2c8d48b7b07",
+    "services/main/src/services/units/revision-reference-contract.ts": "12c88a1339daededd326ab208ac962a33c133f5519130894a46ed8b2fb1fbdce",
     "services/main/src/services/database/schema/reference-value.ts": "fbe7803514830a3061f043c2e0fc49de42889221355b08d89ffe3dbb12cda2a4",
+    "services/main/src/services/database/schema/revision-reference.ts": "382370d765d4428aed7bbbbb7e2c2a6cbf721aa396e3fb8be9c5ca11af9479a1",
     "services/main/src/services/database/schema/unit-reference-columns.ts": "233034aaf884b5b4108f234a8b1defa2a01c2f7fb5e60901242964f1c633de89",
     "services/main/src/services/database/schema/postgres/reference-value.sql": "188e30b55c9ba2ec3edb39e226595cecf64a45c64b558b06f8577483bd1d8531",
-    "services/main/src/services/database/migrations/atlas.sum": "ffacd0e65c99c4678cf8c88e5c2a076fdb22547ce69d1304b185c8e5830a28a1",
+    "services/main/src/services/database/schema/postgres/revision-reference.sql": "ad74bf4d91e48acd3bce56b0aa849b5ed6b72a451b35e5d814633a9568ae5df7",
+    "services/main/src/services/database/migrations/atlas.sum": "ff6c41c4f7f8e040c8e4cb07c75268fd1d42d598671e473ec6f855a3f13f811c",
     "libraries/reference/src/index.ts": "c4087e44f731b609802dbdf62de2dfcc3f474215642617706848989d90f7416e"
   },
   "node": "v24.14.1",
@@ -25,7 +31,114 @@
     "rows": 10012,
     "tuple_bytes": "64.00",
     "heap_bytes": "712704",
-    "index_bytes": "1081344"
+    "index_bytes": "1089536"
+  },
+  "revisionReferences": {
+    "sample": {
+      "rows": 10022,
+      "tuple_bytes": "88.00",
+      "heap_bytes": "966656",
+      "index_bytes": "1351680"
+    },
+    "targetPlan": [
+      {
+        "QUERY PLAN": [
+          {
+            "Plan": {
+              "Node Type": "Limit",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 0.29,
+              "Total Cost": 3.09,
+              "Plan Rows": 1,
+              "Plan Width": 16,
+              "Actual Startup Time": 0.005,
+              "Actual Total Time": 0.005,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "Disabled": false,
+              "Shared Hit Blocks": 3,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Shared I/O Read Time": 0,
+              "Shared I/O Write Time": 0,
+              "Local I/O Read Time": 0,
+              "Local I/O Write Time": 0,
+              "Temp I/O Read Time": 0,
+              "Temp I/O Write Time": 0,
+              "Plans": [
+                {
+                  "Node Type": "Index Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Scan Direction": "Forward",
+                  "Index Name": "revision_reference_reference_named_form_key",
+                  "Relation Name": "revision_reference",
+                  "Alias": "revision_reference",
+                  "Startup Cost": 0.29,
+                  "Total Cost": 17.11,
+                  "Plan Rows": 6,
+                  "Plan Width": 16,
+                  "Actual Startup Time": 0.005,
+                  "Actual Total Time": 0.005,
+                  "Actual Rows": 1,
+                  "Actual Loops": 1,
+                  "Disabled": false,
+                  "Index Cond": "((reference_named_form_owner_id = 'e89d9c79-e89b-4dcd-ba68-0c88b3a44fde'::uuid) AND (reference_named_form_item_id = '299c9101-1a01-49de-97be-efe328eee200'::uuid) AND (reference_named_form_revision = 1))",
+                  "Rows Removed by Index Recheck": 0,
+                  "Index Searches": 1,
+                  "Shared Hit Blocks": 3,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0,
+                  "Shared I/O Read Time": 0,
+                  "Shared I/O Write Time": 0,
+                  "Local I/O Read Time": 0,
+                  "Local I/O Write Time": 0,
+                  "Temp I/O Read Time": 0,
+                  "Temp I/O Write Time": 0
+                }
+              ]
+            },
+            "Planning": {
+              "Shared Hit Blocks": 155,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Shared I/O Read Time": 0,
+              "Shared I/O Write Time": 0,
+              "Local I/O Read Time": 0,
+              "Local I/O Write Time": 0,
+              "Temp I/O Read Time": 0,
+              "Temp I/O Write Time": 0
+            },
+            "Planning Time": 0.294,
+            "Triggers": [],
+            "Execution Time": 0.014
+          }
+        ]
+      }
+    ]
   },
   "targetPlan": [
     {
@@ -39,8 +152,8 @@
             "Total Cost": 8.3,
             "Plan Rows": 1,
             "Plan Width": 16,
-            "Actual Startup Time": 0.009,
-            "Actual Total Time": 0.01,
+            "Actual Startup Time": 0.004,
+            "Actual Total Time": 0.004,
             "Actual Rows": 1,
             "Actual Loops": 1,
             "Disabled": false,
@@ -74,12 +187,12 @@
                 "Total Cost": 8.3,
                 "Plan Rows": 1,
                 "Plan Width": 16,
-                "Actual Startup Time": 0.009,
-                "Actual Total Time": 0.009,
+                "Actual Startup Time": 0.003,
+                "Actual Total Time": 0.003,
                 "Actual Rows": 1,
                 "Actual Loops": 1,
                 "Disabled": false,
-                "Index Cond": "(target_reference_id = 'e8958749-9f2e-4e9d-b12c-ba279bbea446'::uuid)",
+                "Index Cond": "(target_reference_id = '36fbe094-fe04-43a5-adaa-97c88eb4c7fd'::uuid)",
                 "Rows Removed by Index Recheck": 0,
                 "Index Searches": 1,
                 "Shared Hit Blocks": 3,
@@ -119,9 +232,9 @@
             "Temp I/O Read Time": 0,
             "Temp I/O Write Time": 0
           },
-          "Planning Time": 0.354,
+          "Planning Time": 0.281,
           "Triggers": [],
-          "Execution Time": 0.022
+          "Execution Time": 0.011
         }
       ]
     }
@@ -138,8 +251,8 @@
             "Total Cost": 8.3,
             "Plan Rows": 1,
             "Plan Width": 16,
-            "Actual Startup Time": 0.007,
-            "Actual Total Time": 0.008,
+            "Actual Startup Time": 0.006,
+            "Actual Total Time": 0.006,
             "Actual Rows": 1,
             "Actual Loops": 1,
             "Disabled": false,
@@ -173,12 +286,12 @@
                 "Total Cost": 8.3,
                 "Plan Rows": 1,
                 "Plan Width": 16,
-                "Actual Startup Time": 0.007,
-                "Actual Total Time": 0.007,
+                "Actual Startup Time": 0.006,
+                "Actual Total Time": 0.006,
                 "Actual Rows": 1,
                 "Actual Loops": 1,
                 "Disabled": false,
-                "Index Cond": "(id = '01a08c49-54e2-7c85-99e9-f3024803a2ae'::uuid)",
+                "Index Cond": "(id = '01a08c70-35a9-73ba-84ad-e74fe623c470'::uuid)",
                 "Rows Removed by Index Recheck": 0,
                 "Index Searches": 1,
                 "Shared Hit Blocks": 3,
@@ -218,14 +331,14 @@
             "Temp I/O Read Time": 0,
             "Temp I/O Write Time": 0
           },
-          "Planning Time": 0.041,
+          "Planning Time": 0.042,
           "Triggers": [],
-          "Execution Time": 0.014
+          "Execution Time": 0.013
         }
       ]
     }
   ],
   "command": "task services-main:db:check",
   "databaseCheckExitCode": 0,
-  "qualificationScope": "Canonical identity reference values, native FK/immutability constraints, two-connection races, bounded lookup plans and fresh schema replay; not complete M01 or corpus-scale acceptance."
+  "qualificationScope": "Identity and exact catalog name/identifier revision reference values, concrete keys, immutability, two-connection races, bounded lookup plans and fresh schema replay; not complete M01 or corpus-scale acceptance."
 }

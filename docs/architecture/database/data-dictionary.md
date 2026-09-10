@@ -29,6 +29,8 @@ Reference allocation uses a target-index lookup, `INSERT ... ON CONFLICT DO NOTH
 
 The initial identity bridge registry covers existing native owners; add the Document identity alternative when that owner is implemented. Exact revisions and occurrences use their separate bridges and complete composite keys as their owners become available, before dependent generic consumers are switched. Bridge existence never substitutes for those keys.
 
+The initial exact-revision registry covers named-form and identifier-claim histories in the eight catalog owners. Each target includes `(owner_id, id, revision)`; item UUIDs may repeat under different owners. These history families contain complete immutable snapshots of validated heads and have no staging state. Every bridge alternative is either entirely null or a complete bounded key, and exactly one alternative is selected. A partial composite key cannot exploit PostgreSQL's nullable-FK behavior. Other revision families require their own completeness/seal guard before registration; a current-head pointer is never an exact target.
+
 ## D02. Accounts, participation and access
 
 | Relation family | Keys and fields | Contract | Index / lifecycle |

@@ -26,7 +26,7 @@ API = ROOT / "services/main/src/services/api"
 SOURCE_BASELINE_COMMIT = "74079abd73d5fc43ac87ac7cae8a2074ca72d13d"
 
 GROUPS = {
-    "D01": "base columns contract-values index platform-identity slug unit-reference-columns unit-reference-consumers unit-merge catalog-identity reference-value",
+    "D01": "base columns contract-values index platform-identity slug unit-reference-columns unit-reference-consumers unit-merge catalog-identity reference-value revision-reference",
     "D02": "access auth participation organization-membership account-control",
     "D03": "catalog-facts catalog-definition-governance catalog-definition-terms entity",
     "D04": "catalog-names content-language unit",
@@ -45,7 +45,7 @@ GROUPS = {
 FILE_GROUP = {name: group for group, names in GROUPS.items() for name in names.split()}
 
 SQL_GROUPS = {
-    "D01": "merge-integrity native-bootstrap unit-reference-integrity reference-value",
+    "D01": "merge-integrity native-bootstrap unit-reference-integrity reference-value revision-reference",
     "D02": "organization-membership participation-integrity participation-private-state unit-license-grant",
     "D03": "association-proposal-authority catalog-definition-governance catalog-definition-terms catalog-semantics-integrity realm-tag-authority",
     "D04": "catalog-name-integrity catalog-name-search catalog-editorial content-language-search",

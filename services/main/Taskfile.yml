@@ -323,7 +323,7 @@ tasks:
             - yarn exec tsx scripts/check-postgres-schema.ts
 
     db:references:check:
-        desc: Verify canonical reference values and two-connection races on an installed disposable Atlas database.
+        desc: Verify identity and exact catalog revision values and races on an installed disposable Atlas database.
         cmds:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 yarn exec tsx scripts/check-reference-values.ts

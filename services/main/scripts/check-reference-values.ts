@@ -8,6 +8,7 @@ import { Client } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
 import { CatalogOwnerValues, UnitOwnerValues } from "@rezics/reference";
+import { checkRevisionReferences } from "./check-revision-references";
 
 const connectionString = process.env.DATABASE_ADMIN_URL;
 assert(connectionString, "DATABASE_ADMIN_URL is required");
@@ -283,23 +284,38 @@ try {
 		await first.query("commit");
 	}
 	await collision;
+	const revisionReferences = await checkRevisionReferences(first, second, () =>
+		waitForBlock(first, secondPid, firstPid),
+	);
 
 	// Deterministic, bounded sample exercises actual planner choices without
 	// forcing index scans. It is a query/footprint check, not corpus-scale load.
 	for (let start = 1; start <= 10000; start += 500) {
 		await first.query(
 			`insert into public.reference_identity (id, shape)
-			select md5('reference-value-20260911:' || i)::uuid, 'unknown'
+			select overlay(overlay(md5('reference-value-20260911:' || i) placing '8' from 13 for 1) placing '8' from 17 for 1)::uuid, 'unknown'
 			from generate_series($1::integer, $2::integer) i on conflict do nothing`,
 			[start, start + 499],
 		);
 		await first.query(
 			`insert into public.reference_value (target_reference_id)
-			select md5('reference-value-20260911:' || i)::uuid
+			select overlay(overlay(md5('reference-value-20260911:' || i) placing '8' from 13 for 1) placing '8' from 17 for 1)::uuid
 			from generate_series($1::integer, $2::integer) i on conflict do nothing`,
 			[start, start + 499],
 		);
 	}
+	const [sampleReference] = (
+		await first.query<{
+			id: string;
+			targetId: string;
+		}>(`select id, target_reference_id as "targetId" from public.reference_value
+		where target_reference_id = overlay(overlay(md5('reference-value-20260911:' || 1) placing '8' from 13 for 1) placing '8' from 17 for 1)::uuid`)
+	).rows;
+	assert(sampleReference);
+	assert.deepEqual(
+		await firstDb.transaction((tx) => resolveReferenceValue(tx, sampleReference.id)),
+		{ owner: "reference", id: sampleReference.targetId },
+	);
 	await first.query("analyze public.reference_value");
 	const targetPlan = await first.query(
 		`explain (analyze, buffers, format json)
@@ -327,11 +343,17 @@ try {
 	const sourcePaths = [
 		"services/main/Taskfile.yml",
 		"services/main/scripts/check-reference-values.ts",
+		"services/main/scripts/check-revision-references.ts",
 		"services/main/scripts/validate-integrity-constraints.ts",
 		"services/main/src/services/units/reference-value.ts",
+		"services/main/src/services/units/immutable-reference.ts",
+		"services/main/src/services/units/revision-reference.ts",
+		"services/main/src/services/units/revision-reference-contract.ts",
 		"services/main/src/services/database/schema/reference-value.ts",
+		"services/main/src/services/database/schema/revision-reference.ts",
 		"services/main/src/services/database/schema/unit-reference-columns.ts",
 		"services/main/src/services/database/schema/postgres/reference-value.sql",
+		"services/main/src/services/database/schema/postgres/revision-reference.sql",
 		"services/main/src/services/database/migrations/atlas.sum",
 		"libraries/reference/src/index.ts",
 	];
@@ -353,12 +375,13 @@ try {
 			platform: `${process.platform}/${process.arch}`,
 			runtime: runtime.rows[0],
 			sample: footprint.rows[0],
+			revisionReferences,
 			targetPlan: targetPlan.rows,
 			valuePlan: valuePlan.rows,
 		}),
 	);
 	console.info(
-		"Reference value PostgreSQL constraints, independent identities, immutability, routing independence, indexed lookups and two-connection commit/rollback/deletion/identity-collision races passed.",
+		"Identity and exact catalog revision reference constraints, immutable allocation, indexed lookups and two-connection races passed.",
 	);
 } finally {
 	await first.end();
