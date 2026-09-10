@@ -248,7 +248,39 @@ try {
 		self: firstSelf,
 		authority: authority(raceAccount.id, firstSelf),
 	};
+	await assert.rejects(
+		database.transaction((tx) =>
+			createCatalogIdentity(tx, { owner: "reference", shape: "unscoped-intake" }, owner.account.id),
+		),
+		ParticipationDenied,
+	);
+	await assert.rejects(
+		database.transaction((tx) =>
+			runWithParticipationAuthority(
+				{ ...owner.authority, authorizationRevision: owner.authority.authorizationRevision + 1 },
+				() =>
+					createCatalogIdentity(
+						tx,
+						{ owner: "reference", shape: "stale-intake" },
+						owner.account.id,
+					),
+			),
+		),
+		ParticipationDenied,
+	);
 	const delegate = await database.transaction((tx) => newActor(tx, "Participation SQL delegate"));
+	await assert.rejects(
+		database.transaction((tx) =>
+			runWithParticipationAuthority(owner.authority, () =>
+				createCatalogIdentity(
+					tx,
+					{ owner: "reference", shape: "misattributed-intake" },
+					delegate.account.id,
+				),
+			),
+		),
+		ParticipationDenied,
+	);
 	const live = await database.transaction((tx) =>
 		runWithParticipationAuthority(owner.authority, async () => {
 			const createdNative = await createCatalogIdentity(
@@ -267,6 +299,18 @@ try {
 		}),
 	);
 	const delegated = { ...delegate.authority, grant: live.grant };
+	await assert.rejects(
+		database.transaction((tx) =>
+			runWithParticipationAuthority(delegated, () =>
+				createCatalogIdentity(
+					tx,
+					{ owner: "reference", shape: "unrelated-intake" },
+					delegate.account.id,
+				),
+			),
+		),
+		ParticipationDenied,
+	);
 	const effectAdmitted = deferred<void>();
 	const releaseEffect = deferred<void>();
 	const revokerReady = deferred<number>();
@@ -373,6 +417,16 @@ try {
 				"Session self identity must use the selected immutable name revision",
 			);
 			await eraseOwnAccount(tx, human.authority);
+			await assert.rejects(
+				runWithParticipationAuthority(human.authority, () =>
+					createCatalogIdentity(
+						tx,
+						{ owner: "reference", shape: "erased-intake" },
+						human.account.id,
+					),
+				),
+				ParticipationDenied,
+			);
 			assert.equal(
 				(await tx.select().from(authEntity).where(eq(authEntity.authUserId, human.account.id)))
 					.length,
@@ -451,6 +505,17 @@ try {
 				const selection = machine
 					? await resolveServicePrincipal(tx, machine.secret, grant)
 					: { ...delegate.authority, grant };
+				if (machine)
+					await assert.rejects(
+						runWithParticipationAuthority({ ...selection, grant: undefined }, () =>
+							createCatalogIdentity(
+								tx,
+								{ owner: "reference", shape: "service-intake" },
+								selection.principal.authUserId,
+							),
+						),
+						ParticipationDenied,
+					);
 				let callbacks = 0;
 				const outcome = await runWithParticipationAuthority(selection, () =>
 					decideCatalogSourceProposal(
@@ -459,6 +524,36 @@ try {
 						proposal.decision,
 						async (applying, context) => {
 							callbacks++;
+							await assert.rejects(
+								runWithParticipationAuthority(owner.authority, () =>
+									createCatalogIdentity(
+										applying,
+										{ owner: "reference", shape: "scope-reset-intake" },
+										owner.account.id,
+									),
+								),
+								ParticipationDenied,
+							);
+							await assert.rejects(
+								runParticipationSavepoint(applying, (nested) =>
+									createCatalogIdentity(
+										nested,
+										{ owner: "reference", shape: "proposal-intake" },
+										selection.principal.authUserId,
+									),
+								),
+								ParticipationDenied,
+							);
+							await assert.rejects(
+								database.transaction((unrelated) =>
+									createCatalogIdentity(
+										unrelated,
+										{ owner: "reference", shape: "cross-transaction-intake" },
+										selection.principal.authUserId,
+									),
+								),
+								ParticipationDenied,
+							);
 							assert.equal(
 								await canAccessCatalog(
 									applying,
@@ -519,6 +614,9 @@ try {
 		"services/main/Taskfile.yml",
 		"services/main/scripts/check-participation-authority.ts",
 		"services/main/src/services/participation/policy.ts",
+		"services/main/src/services/participation/identity.ts",
+		"services/main/src/services/catalog/storage.ts",
+		"services/main/src/services/catalog/identity-storage.ts",
 		"services/main/src/services/participation/commands.ts",
 		"services/main/src/services/participation/lifecycle.ts",
 		"services/main/src/services/participation/presentation.ts",
@@ -545,7 +643,7 @@ try {
 			platform: `${process.platform}/${process.arch}`,
 			runtime: runtime.rows[0],
 			qualificationScope:
-			"Concurrent self admission, delegated effect/revocation serialization, presentation restore, initial account closure and last-controller recovery, exact human/service source grants and transaction-bound denial. Identity intake, full resource ownership/disclosure, erasure workers and APIs are not qualified by this fixture.",
+				"Concurrent self admission, human catalog intake and rejected unscoped/misattributed/stale/delegated/service/proposal intake, delegated effect/revocation serialization, presentation restore, initial account closure and last-controller recovery, exact human/service source grants and transaction-bound denial. Full resource ownership/disclosure, erasure workers and APIs are not qualified by this fixture.",
 		}),
 	);
 } finally {

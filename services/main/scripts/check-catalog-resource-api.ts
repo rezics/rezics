@@ -382,6 +382,14 @@ try {
 	const selection = { actingEntityId: delegate.self.id, grant };
 	await request(
 		"POST",
+		"/catalog/resources",
+		{ kind: "publishing_work", name: name("Scoped grant cannot admit another identity") },
+		403,
+		delegate.cookie,
+		selection,
+	);
+	await request(
+		"POST",
 		`${path}/names`,
 		{
 			expectedRevision: revision,

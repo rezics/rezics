@@ -50,6 +50,8 @@ The initial exact-revision registry covers named-form and identifier-claim histo
 
 Authorization resources are logical aggregates, not automatically every revision row. Where a revision itself is independently grantable, its access contract is explicit. All access FKs and reverse erasure paths are concrete or validated REF; no polymorphic id string can target an arbitrary auth table.
 
+Independent catalog intake and participant construction have separate [admission protocols](../../../services/main/src/services/participation/README.md). Catalog intake requires current self contribution authority; an actor UUID or grant on an existing resource/proposal does not authorize unrelated identity creation. Account/persona bootstrap proves its own control authority before storage, so describing a person never creates a login binding.
+
 ## D03. Definitions, claims, evidence and acceptance
 
 | Relation | Key / fields | Invariant | Query / partition owner |

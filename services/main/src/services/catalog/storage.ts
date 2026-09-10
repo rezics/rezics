@@ -15,10 +15,11 @@ import {
 	catalogAccessDecisions,
 	readCatalogAuthorityScope,
 	catalogIdentityReadPredicate,
+	requireCatalogIdentityAdmission,
 } from "../participation/policy";
+import { insertCatalogIdentity } from "./identity-storage";
 import {
 	CatalogDefinitionInputSchema,
-	CatalogIdentityInputSchema,
 	CatalogOwnerValues,
 	CatalogPageSchema,
 	CatalogReferenceSchema,
@@ -140,27 +141,14 @@ export async function recordCatalogChange(
 	return updated.revision;
 }
 
-/** Authenticated callers must supply the actual private Auth actor; catalog authors are separate. */
+/** Admit an identity with current self contribution authority; actor UUIDs and scoped grants are insufficient. @internal */
 export async function createCatalogIdentity(
 	tx: DatabaseTransaction,
 	input: CatalogIdentityInput,
 	actor: string,
 ) {
-	const { owner, ...values } = CatalogIdentityInputSchema.parse(input);
-	z.uuid().parse(actor);
-	const table = CatalogIdentityTables[owner];
-	const [created] = await tx
-		.insert(table)
-		.values({ ...values, createdByAuthUserId: actor })
-		.returning({ id: table.id, revision: table.revision });
-	if (!created) throw new Error("Catalog identity insertion returned no row");
-	await tx.insert(CatalogFactTables[owner].change).values({
-		ownerId: created.id,
-		version: 1,
-		actorAuthUserId: actor,
-		operation: "identity.create",
-	});
-	return { owner, id: created.id, revision: created.revision };
+	await requireCatalogIdentityAdmission(tx, actor);
+	return insertCatalogIdentity(tx, input, actor);
 }
 
 export async function resolveCatalogIdentity(

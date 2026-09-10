@@ -109,6 +109,33 @@ export function currentParticipationAuthority() {
 	return authorities.getStore();
 }
 
+/**
+ * Admit independent catalog identities using current human self authority.
+ * @remarks Existing resource/proposal grants do not authorize unrelated identity
+ * intake. Participant bootstrap uses its own account/controller checks before
+ * writing storage; a UUID supplied as creator is never authority by itself.
+ * @internal
+ */
+export async function requireCatalogIdentityAdmission(
+	tx: DatabaseTransaction,
+	actorAuthUserId: string,
+): Promise<void> {
+	const authority = currentParticipationAuthority();
+	if (
+		!authority ||
+		authority.principal.kind !== "auth" ||
+		authority.grant ||
+		authority.principal.authUserId !== actorAuthUserId ||
+		approvedSourceApplications.getStore()?.tx === tx
+	)
+		throw new ParticipationDenied();
+	await requireParticipation(tx, authority, "entity.security", {
+		owner: "entity",
+		id: authority.actingEntityId,
+	});
+	await new AccountAuthorization(actorAuthUserId).ensureCanContribute(tx);
+}
+
 export function validateGrant(
 	grant: typeof participationGrant.$inferSelect,
 	authority: ParticipationAuthority,

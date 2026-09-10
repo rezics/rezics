@@ -10,6 +10,7 @@ Dependencies: M01-M04 native contracts. Owners: [source conformance](../../testi
 - Close Bangumi fixed/infobox/API semantics, VNDB dump joins/aggregates, MusicBrainz secondary/candidate/alternative structures and artwork mappings.
 - Build reproducible acquisition manifests and small committed fixtures; stream large data with checksums, bounded joins and resumable stages.
 - Run cross-source/human update/withdraw/reapply through the same native commands used for source-free authoring.
+- Prepare newly required native identities under the separate intake protocol before entering exact proposal-adoption scope. A proposal grant cannot mint unrelated identities; broader service intake needs an explicit authority contract rather than a creator-ID fallback.
 
 ## Acceptance
 

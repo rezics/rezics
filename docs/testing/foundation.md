@@ -62,10 +62,11 @@ The pinned run's 10,022 exact values averaged 88 tuple bytes, with 966,656 heap 
 | Protocol | Executable evidence |
 | --- | --- |
 | Self admission | Competing connections produce one self identity/binding; a provider display name equal to a private email stays unpublished. |
+| Catalog identity intake | Current self contribution authority admits identities; missing/stale context, actor mismatch, erased accounts, resource/proposal grants and service principals are denied. Approved source scope cannot escape through a new transaction to create a different identity. |
 | Delegation and revocation | A protected name edit demonstrably blocks conflicting revocation; after revocation the exact old grant is denied. |
 | Attribution and control | Cataloging a person creates no private account binding; absent ambient authority produces the expected catalog denial. |
 | Presentation history | Restore selects the exact earlier name revision and summary, including the session's selected presentation. |
 | Initial closure and recovery | Account closure removes its binding/PII and suspends an organization losing its final controller; recovery requires current platform authority and does not restore the erased account binding. |
 | Exact source approval | Human/service grants bind the approved proposal and native target; allowed native savepoints preserve scope, unrelated targets/transactions are denied, and revocation remains effective. |
 
-The [pinned participation run](database/participation-evidence.json) records source and migration digests, runtime settings and the exact command. This qualifies the listed protocols only. Identity intake, remaining membership/ownership transitions, generic resource ACL and disclosure fences, full private-data/asset erasure workers, restoration frontiers and HTTP API flows remain separate work.
+The [pinned participation run](database/participation-evidence.json) records source and migration digests, runtime settings and the exact command. This qualifies the listed protocols only. Remaining membership/ownership transitions, generic resource ACL and disclosure fences, full private-data/asset erasure workers and restoration frontiers remain separate work. The catalog resource API fixture separately checks eager route compilation and stateful ordinary/scoped resource behavior; it does not qualify all M01 APIs.

@@ -66,7 +66,8 @@
     "services/main/scripts/check-reference-values.ts",
     "services/main/scripts/check-revision-references.ts",
     "services/main/src/services/catalog/source-contracts/artifacts.json",
-    "services/main/src/services/catalog/source-contracts/fields.jsonl"
+    "services/main/src/services/catalog/source-contracts/fields.jsonl",
+    "services/main/src/services/participation/README.md"
   ],
   "schema_inputs": [
     "services/main/src/services/database/schema/access.ts",

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { DatabaseTransaction } from "../database";
-import { createCatalogIdentity } from "../catalog/storage";
+import { insertCatalogIdentity } from "../catalog/identity-storage";
 import { CatalogNameValuesSchema } from "../catalog/name-contracts";
 import { CatalogNameTables } from "../database/schema/catalog-names";
 import {
@@ -41,7 +41,7 @@ export async function createParticipantIdentity(
 	);
 	if (new Set(values.map((value) => value.languageTag)).size !== values.length)
 		throw new Error("Duplicate presentation language");
-	const identity = await createCatalogIdentity(
+	const identity = await insertCatalogIdentity(
 		tx,
 		{
 			owner: "entity",

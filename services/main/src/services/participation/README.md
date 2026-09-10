@@ -1,9 +1,8 @@
-# Participation ownership and cutover
+# Participation and authority
 
-This is the P02 source checkpoint for the replacement target. It is not a claim
-that the whole operational program, generated migration, or Web cutover is done.
-The stopped legacy database is an offline conversion input; these modules neither
-read the old Profile table nor provide compatibility routes.
+This owner defines private account control, public acting identities and scoped
+delegation. The [current plan](../../../../../docs/plan/README.md) owns remaining
+qualification; no legacy database or compatibility route is a dependency.
 
 `users` is private authentication identity. `auth_entity` binds one human account
 to one newly created public person Entity. Cataloging a person or organization
@@ -44,6 +43,21 @@ and exact native reference. Additional native dependencies need their own
 authorized intake stage. `catalogAccessDecisions` accepts at most 128 targets and
 checks the selected authority once for the batch; selected grants never fall
 back to creator rights.
+
+Independent catalog identity intake requires current human self authority, a
+matching private operator and account contribution eligibility. Missing/stale
+authority, a mismatched actor UUID, an erased account, a selected resource or
+proposal grant, and a service principal cannot authorize this intake path.
+Source proposal approval mutates its exact admitted target; prepare additional
+native identities in a separately authorized intake stage before entering that
+scope. A future service-intake capability requires its own explicit contract.
+
+Account/signup and managed-persona constructors prove their account/controller
+authority before calling the internal identity storage primitive. That primitive
+only writes the identity and initial provenance; it does not create a binding or
+grant. Keeping this path separate avoids requiring an existing self binding in
+the transaction that first creates it. Ordinary catalog commands cannot select
+this constructor through a client-supplied flag or classification.
 
 The bootstrap administrator is the initial human login. Community, editorial and
 moderation are native organizations with explicit grants to that operator,
@@ -103,6 +117,12 @@ real target measurements and P10 production throughput qualification remain gate
 | Presentation history | A 2 KiB mean snapshot is a workload assumption; the 1 MiB limit is an input bound, not a mean | About 1 TB / 6 TB before indexes, compression and replication; large-value skew must be monitored |
 | Control admission | At most 1,000 outstanding grants per principal, 100 active service principals per creator, 32 security controllers per Entity | Bounded account erasure/control scans, independent of corpus size |
 | Private erasure | 500 source rows per transaction, one locked job per worker poll, explicit stage progress and fair rescheduling | No account-sized transaction or in-memory corpus; add workers/partitions as queue age grows |
+
+Catalog intake adds a fixed number of account/binding/participation primary-key
+reads and the existing account-enforcement lookup before writing the new owner
+row and its change record. Shared authority locks remain held through commit;
+there is no owner-corpus scan or rewrite. The estimates above remain planning
+assumptions, not new load measurements from the intake-denial fixture.
 
 Grant mutation writes its current row and one immutable event, plus the relevant
 indexes. Name/presentation changes also append their exact revision records.

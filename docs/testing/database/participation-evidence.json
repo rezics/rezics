@@ -1,10 +1,13 @@
 {
   "check": "participation-authority",
-  "baseCommit": "966b88c175fa434bb6f80807c59cc45efa03f258",
+  "baseCommit": "e7e42c84050a7189b8633019f2a17a3273f0fdfa",
   "sourceDigests": {
     "services/main/Taskfile.yml": "71362683281cc5d31714564f2bc88b9dd93b8efe1a1f3325884847c4f2ce84d3",
-    "services/main/scripts/check-participation-authority.ts": "4ab4c5bdacea0bf4a81f9ba71c7af7bfd3df268fc61b3bc7c1fd804466f580d0",
-    "services/main/src/services/participation/policy.ts": "9afcf0bc59d64bcdbcbaa8ca0e822423a6a0052be4d5de058f45144e2c2d41dd",
+    "services/main/scripts/check-participation-authority.ts": "cd8441080c23bb441771864305c1445266c6cc9edd5cdaa74494d0e53a01aa18",
+    "services/main/src/services/participation/policy.ts": "72fca3598c299c53628403ec66ac540a48081369f7d94340a16f474bc775ad2a",
+    "services/main/src/services/participation/identity.ts": "235e4dc020fd1fb32c996ff2d43079c12c288021f095446b161a5c928fefa6f0",
+    "services/main/src/services/catalog/storage.ts": "d1f57f200d6366260cee43924edf75c4d960b8ff2e3eb7a10e02342dc1f3b8e9",
+    "services/main/src/services/catalog/identity-storage.ts": "d3d68540a0683f52b536a0ad9eeb24bf79c2d298e0ab744d872699a3a4158c4b",
     "services/main/src/services/participation/commands.ts": "f4075fd4277bc256461d5b6542d866d1c3890dbfd84323c1b7247ef30cfebd36",
     "services/main/src/services/participation/lifecycle.ts": "51759bd85fc183f16f0d7d2bfd55b79bbaacc4a6b61c6abca22b515eddff5e6a",
     "services/main/src/services/participation/presentation.ts": "1a61f819a4cc82cd9ce05a9e7891789992b268f984de7ea6644d970cae4f1eef",
@@ -21,8 +24,24 @@
     "max_connections": "100",
     "statement_timeout": "20s"
   },
-  "qualificationScope": "Concurrent self admission, delegated effect/revocation serialization, presentation restore, initial account closure and last-controller recovery, exact human/service source grants and transaction-bound denial. Identity intake, full resource ownership/disclosure, erasure workers and APIs are not qualified by this fixture.",
+  "qualificationScope": "Concurrent self admission, human catalog intake and rejected unscoped/misattributed/stale/delegated/service/proposal intake, delegated effect/revocation serialization, presentation restore, initial account closure and last-controller recovery, exact human/service source grants and transaction-bound denial. Full resource ownership/disclosure, erasure workers and APIs are not qualified by this fixture.",
   "command": "DATABASE_ADMIN_URL=<isolated Atlas target> task services-main:db:participation:check",
   "prepareCommand": "task services-main:db:fixture:prepare",
-  "exitCode": 0
+  "exitCode": 0,
+  "catalogApiRegression": {
+    "check": "catalog-resource-api",
+    "assertions": 172,
+    "createdResources": 16,
+    "committedToDisposableTarget": true,
+    "command": "From services/main: REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 DATABASE_URL=<isolated Atlas target> EMAIL_MODE=log yarn exec tsx --env-file=../../.env.example scripts/check-catalog-resource-api.ts",
+    "fixtureSha256": "5718134261c5ce4b2adf79b868adeb8d6cf2469f95926f85a41219b992cb30a5"
+  },
+  "validation": {
+    "mainTypecheck": "passed",
+    "mainTests": {
+      "files": 330,
+      "tests": 1785
+    },
+    "openapiCheck": "passed"
+  }
 }
