@@ -1,0 +1,40 @@
+{
+  "source_baseline_commit": "74079abd73d5fc43ac87ac7cae8a2074ca72d13d",
+  "schema_modules_and_sql_files_mapped": 150,
+  "api_owner_directories_mapped": 39,
+  "specified_cross_domain_scenarios": 100,
+  "invariant_families": 14,
+  "capacity_row_roles": 47,
+  "capacity_scales": [
+    500000000,
+    3000000000
+  ],
+  "checks": [
+    "all current non-test schema TS/SQL files have explicit reviewed mapping",
+    "all top-level API owner directories have explicit mapping",
+    "dictionary groups and local artifact links resolve within the repository, outside temporary directories",
+    "scenario identifiers unique and every invariant family covered",
+    "3B capacity arithmetic equals six times 500M under same assumptions"
+  ],
+  "not_executed": [
+    "target DDL or migrations",
+    "SQL behavioral/concurrency tests",
+    "composed formal model checking",
+    "full upstream field conformance",
+    "load/stability tests",
+    "backup/restore drill"
+  ],
+  "sha256": {
+    "current-schema-map.tsv": "cf02249e51ce36e9937cedac583d85e15356d033fbbe3999848bdf4fd1b3e631",
+    "api-coverage.tsv": "58c2695b7e36c5ba5cd30c04728e1326c567cd19a2e51ae7b0f32c04ada7d999",
+    "scenarios.tsv": "5a9bab85f9ebf78171042a5360a7c84fa86d33ee75d4b393d42613efd6b25b39",
+    "capacity.json": "a375fc0497ed2881aaea74514ceb25f1e0af1234cb5de4e04bd5a1d9b51a8130",
+    "capacity.md": "29b565643ffb846f45846abf9feb75a1c0b1eac0eba459b16715bcb89a546d30",
+    "dependency-manifest.json": "80027c61b6c07804884a7360cdefa8ab29685f58a800a71d3c5e840a508c0d91"
+  },
+  "authored_document_sha256": {
+    "README.md": "8624d1e3376c7ea54d3ca8cb9da709ce655d9fbb50cd5f4fd33b5e12b5c98354",
+    "data-dictionary.md": "b7984820091f4028fe51d59400b4b067f555258af4f8619b185db3b7fac11e4f",
+    "check_design.py": "7e1e9c708ff4de2ddb9a9173b4b889d914bb4ca29d6a7cfcf4ff92fe0ff486c5"
+  }
+}

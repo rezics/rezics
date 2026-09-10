@@ -1,5 +1,10 @@
 # Implementation plans
 
+The [whole-database target design, 2026-09-10](database-schema-design-20260910/README.md)
+is a proposed cross-domain schema design with a relational dictionary, current-owner
+coverage, scenario specifications and reproducible capacity estimates. It is not an
+applied migration or a replacement for the delivered-state ledgers below.
+
 The operational-refactor program is [REZICS operational refactor, 2026-09-06](operational-refactor-20260906/README.md).
 Start with its [current handoff](operational-refactor-20260906/NEXT_SESSION.md) when the
 user requests continuation. Historical approvals and implementation orders apply
