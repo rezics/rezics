@@ -10,6 +10,15 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing files.
 - If a repository rule or skill blocks completion, identify the exact file and instruction, explain the concrete conflict, and report the remaining work.
 - Put task-created temporary files in `.temp/`. Remove only those files before finishing unless retention was requested. Durable requested deliverables belong in their owning location; preserve pre-existing and user-provided files.
 
+## Git commits
+
+- Make each commit one coherent, buildable logical change. Include its
+  required tests and consumers; split unrelated work.
+- Review the staged diff. Commit only intended changes, and ensure the
+  commit does not depend on uncommitted work.
+- Follow `type(scope): summary`, with scope when useful. Describe the
+  resulting change; explain non-obvious motivation in the body.
+
 ## Data and verification boundaries
 
 - A fixture loader requiring a fresh database does not authorize resetting development data. Prefer an owning API or service for bounded content changes; follow the [fixture workflow](README.md#data-authority-and-showcase-fixtures) for interdependent changes. Before any reset, establish the exact target, authorization, scope and recovery consequence. Ask before deleting unrelated data when authorization is missing.
