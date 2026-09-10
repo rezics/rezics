@@ -23,6 +23,7 @@
     "docs/architecture/governance-rule-decisions.md",
     "docs/architecture/native-identity-merge.md",
     "docs/architecture/notification-delivery-and-read-state.md",
+    "docs/architecture/realm-collection-zone.md",
     "docs/architecture/storybook-workflow.md",
     "docs/architecture/tag-paths.md",
     "docs/architecture/unit-license-grants.md",

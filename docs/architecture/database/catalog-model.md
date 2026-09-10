@@ -13,10 +13,13 @@ Identify referents by the objects and operations the product supports. A new pro
 | Recording and track | A recording is reusable; a track is an occurrence with local number/title/credit in a medium. |
 | Version and distribution | Software functional variants/builds differ from releases, registry coordinates, files and installations. |
 | Structure and membership | Containment/ordered occurrences differ from series/franchise/world membership and governance selection. |
+| Grouping and subsite | Catalog Grouping, Realm community grouping and Collection curation retain distinct identities; Zone composes page/subsite infrastructure over one or more Collections. |
 | Individual and account | Person/character/organization/software-agent referents do not imply login or control. |
 | Asset and representation | Media identity, rendition, location, native use and default display are separate. |
 
 Known concrete objects can exist without fabricated unknown Work, Edition or Release parents. Multiple capabilities may describe one referent, but independently governed identities are not merged merely because one UI shows them together.
+
+[Realm, Collection and Zone composition](../realm-collection-zone.md) defines wiki corpora, contextual "published in" relationships and the separately modeled, optional Dynamic Collection direction. A wiki ecosystem may contain many Collections; neither a topic name nor a Zone requires one universal grouping owner.
 
 ## Edition and composition
 

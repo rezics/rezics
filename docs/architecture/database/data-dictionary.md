@@ -208,12 +208,12 @@ Editing a comment into an article keeps document/publication identities. Selecti
 
 | Relation family | Keys / fields | Contract / access |
 | --- | --- | --- |
-| realm, realm_member, realm_unit, realm_pin | Realm identity; membership and local publication/curation; stable placement | Membership, accepted content and pinned display are separate; uniqueness scoped to role |
+| realm, realm_member, realm_unit, realm_pin | Community grouping identity; participant membership and local publication/curation; stable placement | Realm grouping, Collection membership, accepted content and pinned display are separate; uniqueness scoped to role |
 | realm_rule_revision, realm_rule, rule_acceptance | Realm/exact rule revision/rule; account acknowledgement of exact version | New rules do not rewrite past decisions or imply retroactive acceptance |
-| zone, zone_page, unit_dock | Zone identity; page placements, chosen rule Realm, dock composition/contract | Displays existing content under current access; page position is not content identity |
+| zone, zone_page, unit_dock | Zone identity; page/subsite infrastructure, Collection presentations, chosen rule Realm, dock composition/contract | One Zone can compose several Collections; one Collection can appear in several Zones; display does not transfer identity or authority |
 | content_structure, structure_manifest, node/occurrence | Owner/structure/head; immutable manifest; parent, target, rank, coverage | Manifest-qualified targets, declared tree/DAG/cycle policy; large edits staged |
 | structure_revision/head, dock_revision/head, collection_structure_revision/head | Exact owner/subaggregate revision, generation, operation | Unrelated root edits do not copy all children; restore selects sealed generation |
-| collection, collection_item | Collection identity; item occurrence,target,rank,local note/credit | Curated public/private collection is not account favorite; repeated target policy explicit |
+| collection, collection_item | Curated grouping identity; explicit stored item occurrence,target,rank,local note/credit | Can organize a wiki corpus; public/private access and repeated-target policy explicit; distinct from private favorites and computed Dynamic Collection results |
 | vocabulary_node, guide_node/localization, label | Vocabulary/guide identity; typed definitions, selected localized copy | Control vocabulary and authored guides retain ownership/history; guides can reference Documents |
 | custom_theme, revision, review_event, file, external_resource | Theme identity, immutable submitted package, exact host/target contract, observed external evidence | Existing full-trust external-live preview retained; observed dependencies do not imply complete sealing |
 | unit_custom_theme_installation, execution_control | Host/target contract UQ; exact approved theme revision; kill epoch | Every activation checks current eligibility/approval/emergency state; no follow-latest |

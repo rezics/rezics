@@ -6,10 +6,12 @@ Dependency: [G4](backend-acceptance.md). Define shared Block and API contracts e
 
 - Book/general creation: authoring, chapters/series, history, reading/progress, export, comments and private/public states.
 - AO3-derived authoring: original/source works, fandoms, characters, contextual relationships, warnings, co-creators and collections through native contracts.
-- Wiki/Catalog: names/authority, evidence/conflicts, native structures, multi-cover galleries and representative selection.
+- Wiki/Catalog: names/authority, evidence/conflicts, native structures, multi-cover galleries and representative selection; wiki corpora organized as one or more Collections, including separate mod/project Collections.
 - Relationship Graph Block: configuration, subgraph, accessible list/table fallback, relation/evidence details, truncation and expansion.
 - Skill/Prompt/MCP Hub: catalog/version/package/parameter/capability views; execution only after its separate decisions and backend gate.
-- Community: Realm/Zone curation, navigation, memberships, governance, notifications and theme controls.
+- Community: Realm grouping/membership/governance, Collection curation and Zone page/subsite infrastructure; compose Zones with one or more Collections for wiki subsites, preserving publication relationships, native content identity, notifications and theme controls.
+
+Follow [Realm, Collection and Zone composition](../architecture/realm-collection-zone.md). Dynamic Collection interfaces are optional and require their separately qualified backend; the current frontend gate requires ordinary Collection-based composition only.
 
 Use existing feature ownership, @rezics/ui and typed locales. Follow [Storybook workflow](../architecture/storybook-workflow.md) and affected TypeScript/deterministic checks. Inspect affected screenshots where authorized. Full-application QA remains a distinct activity under AGENTS.md, not a hidden requirement of documentation work.
 

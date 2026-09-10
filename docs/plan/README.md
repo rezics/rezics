@@ -47,7 +47,7 @@ Existing code provides foundations. The revised target has not passed G2-G4 mere
 | M03 | [Content and media](modules/content-and-media.md) | M01, M02 contracts | Defined | Pending |
 | M04 | [Catalog](modules/catalog.md) | M01, M02, M03 contracts | Defined; source-free grain cases required | Pending |
 | M05 | [Creation and reading](modules/creation-and-reading.md) | M02-M04 | Book/AO3 and original-creation requirements specified | Pending |
-| M06 | [Community and governance](modules/community-and-governance.md) | M01-M03 | Defined | Pending |
+| M06 | [Community and governance](modules/community-and-governance.md) | M01-M03 | Defined; Realm/Collection/Zone wiki composition specified; Dynamic Collections optional | Pending |
 | M07 | [Sources and converters](modules/sources-and-converters.md) | M01-M04 native commands | Defined; full field conformance pending | Pending |
 | M08 | [Skill, Prompt and MCP Hub](modules/ai-hub.md) | M01-M04 | Catalog scope defined; execution/hosting questions open | Pending |
 | M09 | [Search and operations](modules/search-and-operations.md) | M01 and participating module events | Defined; known runtime failures open | Pending |

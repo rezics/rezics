@@ -4,11 +4,16 @@ Current contract for declarative Zone composition. The [implementation plan](../
 
 ## 1. Scope and positioning
 
-A Zone is REZICS's declarative sub-site surface: configuration-driven
-composition over the shared corpus, lighter than an embedded application
-platform and more capable than a wiki skin. Communities that need people,
-rules, and publication relations pair a Zone with a Realm; the Zone
-itself never grows membership or governance tables.
+A Zone provides REZICS's page and subsite infrastructure: routing, navigation,
+docks and declarative presentation over the shared corpus. A Zone combined with
+one or more Collections forms a user-facing subsite. A wiki's article corpus can
+span several Collections, including separately maintained projects in a modding
+ecosystem. A Realm supplies community grouping, rules and publication context
+where needed; those responsibilities do not move into Zone tables.
+
+[Realm, Collection and Zone composition](realm-collection-zone.md) owns these
+relationships. Dynamic Collections are a separate optional query-based model;
+ordinary Collections retain explicit stored membership and ordering.
 
 Composition combines list presentation, bounded query sources, page aggregate execution and explicit theme/presentation contracts. Source and rendering choices remain independent.
 

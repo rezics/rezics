@@ -9,6 +9,7 @@ This specification closes [G4](../plan/backend-acceptance.md). Run cases increme
 | Cross-source catalog | Several providers and a human describe one native object; conflicting updates, same-value confirmation, withdrawal/reapply and export preserve every authority. |
 | Book and media | Author/edit/publish/read/collect/comment on original and derivative works; source-specific covers, translation and structure changes preserve selection and progress. |
 | Graph and Wiki | Native character relations plus story-specific alternatives feed a bounded Graph API and serialized Block query; context/privacy/provenance remain intact. |
+| Wiki subsite composition | Azur Lane/Minecraft wiki articles are organized into one or several Collections; separate mod/project Collections can share a Zone portal or have their own Zones. Realm membership/publication context, Collection curation and Zone page infrastructure retain separate authority and identities. |
 | Hub catalog | Package/Prompt/MCP metadata links native software, documents and assets; version and source updates do not execute content or expose credentials. |
 | Revocation | Revoke ownership/delegation/disclosure during import, edit, graph traversal, export or rendition creation; successful commits obey the authority fence. |
 | Erasure | Erase an account, image or sensitive literal across revisions, adopted content, messages, notifications, search and caches; replay/restore cannot resurrect it. |
@@ -17,6 +18,8 @@ This specification closes [G4](../plan/backend-acceptance.md). Run cases increme
 | Projection recovery | Fail second recommendation/search generation; continue serving last valid generation while repairing and reconciling current authority. |
 
 ## Verification methods
+
+For [wiki composition](../architecture/realm-collection-zone.md), test one Collection in multiple Zones, multiple Collections in one Zone, Realm wiki-page grouping, explicit "published in" relationships, different adopted revisions, private members in public presentations and removing a Collection placement without deleting content or withdrawing publication elsewhere. Dynamic Collection runtime is optional; if activated, its query changes, computed membership, captures, stale cursors, revocation and cache/job recovery use the separate guide's cases. Stored Collection tests must pass without it.
 
 - Use real PostgreSQL for rejected persisted states and independent concurrent connections. API stateful flows carry IDs from producer responses.
 - Exercise current auth roles, blocked operations, source epochs, quotas and admission; never disable them to make a fixture green.
