@@ -1,4 +1,8 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import { setTimeout } from "node:timers/promises";
 import { Readable } from "node:stream";
 import { and, eq, sql } from "drizzle-orm";
@@ -41,6 +45,7 @@ import {
 	createCatalogIdentity,
 	addCatalogName,
 	loadCatalogIdentity,
+	CatalogAccessDenied,
 } from "../src/services/catalog/storage";
 import {
 	recordCatalogSourceObservation,
@@ -314,7 +319,10 @@ try {
 
 	try {
 		await database.transaction(async (tx) => {
-			await assert.rejects(loadCatalogIdentity(tx, live.native, owner.account.id, true));
+			await assert.rejects(
+				loadCatalogIdentity(tx, live.native, owner.account.id, true),
+				CatalogAccessDenied,
+			);
 			const human = await newActor(tx, "Participation erasure fixture");
 			const organization = await runWithParticipationAuthority(human.authority, () =>
 				createManagedOrganization(tx, human.authority, {
@@ -504,6 +512,41 @@ try {
 	}
 	console.log(
 		"Participation SQL: presentation restore, last-controller recovery, exact human/service source grants, native savepoints and cross-transaction denial passed.",
+	);
+	const repository = new URL("../../../", import.meta.url);
+	const sourceDigests: Record<string, string> = {};
+	for (const path of [
+		"services/main/Taskfile.yml",
+		"services/main/scripts/check-participation-authority.ts",
+		"services/main/src/services/participation/policy.ts",
+		"services/main/src/services/participation/commands.ts",
+		"services/main/src/services/participation/lifecycle.ts",
+		"services/main/src/services/participation/presentation.ts",
+		"services/main/src/services/participation/erasure.ts",
+		"services/main/src/services/auth/entity.ts",
+		"services/main/src/services/database/migrations/atlas.sum",
+	])
+		sourceDigests[path] = createHash("sha256")
+			.update(await readFile(new URL(path, repository)))
+			.digest("hex");
+	const runtime = await pool.query(`select version() as postgres, current_database() as database,
+		current_setting('default_transaction_isolation') as default_isolation,
+		current_setting('max_connections') as max_connections,
+		current_setting('statement_timeout') as statement_timeout`);
+	console.info(
+		JSON.stringify({
+			check: "participation-authority",
+			baseCommit: execFileSync("git", ["rev-parse", "HEAD"], {
+				cwd: fileURLToPath(repository),
+				encoding: "utf8",
+			}).trim(),
+			sourceDigests,
+			node: process.version,
+			platform: `${process.platform}/${process.arch}`,
+			runtime: runtime.rows[0],
+			qualificationScope:
+			"Concurrent self admission, delegated effect/revocation serialization, presentation restore, initial account closure and last-controller recovery, exact human/service source grants and transaction-bound denial. Identity intake, full resource ownership/disclosure, erasure workers and APIs are not qualified by this fixture.",
+		}),
 	);
 } finally {
 	await pool.end();

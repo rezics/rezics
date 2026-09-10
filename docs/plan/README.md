@@ -42,7 +42,7 @@ Existing code provides foundations. The revised target has not passed G2-G4 mere
 
 | ID | Module | Dependencies | Design | Target persistence/API/integration |
 | --- | --- | --- | --- | --- |
-| M01 | [Foundation](modules/foundation.md) | None | Defined; reference allocation protocol specified | G2 in progress: [identity and exact catalog metadata references qualified](../testing/foundation.md); consumer cutover, other revision/occurrence families, authority and remaining contracts pending |
+| M01 | [Foundation](modules/foundation.md) | None | Defined; reference allocation protocol specified | G2 in progress: [reference persistence and selected participation protocols qualified](../testing/foundation.md); consumer cutover, other revision/occurrence families, ownership/disclosure and remaining contracts pending |
 | M02 | [Knowledge and graph](modules/knowledge-and-graph.md) | M01 | Defined; graph query contract specified | Pending |
 | M03 | [Content and media](modules/content-and-media.md) | M01, M02 contracts | Defined | Pending |
 | M04 | [Catalog](modules/catalog.md) | M01, M02, M03 contracts | Defined; source-free grain cases required | Pending |

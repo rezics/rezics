@@ -278,6 +278,26 @@ tasks:
             - task: db:replay:down
             - task: db:replay:up
 
+    db:fixture:prepare:
+        desc: Reset only the disposable Atlas service and leave a fresh native database running for domain fixtures.
+        cmds:
+            - task: db:validate
+            - task: db:replay:reset
+            - >-
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-baseline-epoch.ts preflight
+            - >-
+                yarn exec atlas migrate apply --env main
+                --url "postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+            - >-
+                DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-baseline-epoch.ts installed
+
+    db:fixture:stop:
+        desc: Remove the disposable Atlas fixture service; preserve the application development database.
+        cmds:
+            - task: db:replay:down
+
     db:atlas:check:
         desc: Verify an Atlas CLI version compatible with REZICS.
         cmds:
@@ -327,6 +347,12 @@ tasks:
         cmds:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 yarn exec tsx scripts/check-reference-values.ts
+
+    db:participation:check:
+        desc: Verify principal admission, delegation, revocation, presentation and recovery on an installed disposable Atlas database.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-participation-authority.ts
 
     db:check:
         desc: Install the fresh native baseline and verify current schema and integrity contracts.
