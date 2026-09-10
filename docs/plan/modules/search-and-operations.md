@@ -1,0 +1,16 @@
+# M09: search, derived state and operations
+
+Dependencies: M01 and module event contracts. Owners: database architecture sections 13-16, [integration tests](../../testing/backend-integration.md), [known failures](../../testing/known-failures.md).
+
+## Remaining work
+
+- Qualify policy-aware candidates, multilingual names/filters, relation constraints, facets and bounded pagination with explicit incomplete results.
+- Qualify recommendation generations, counters/metrics and source statistics without giving projections canonical authority.
+- Complete outbox/relay/consumer flows, receipts, permission/source/lease fences, bounded fan-out, quotas and reconciliation.
+- Reproduce and resolve native facet-search crashes; a successful small or JIT-off run is not stability evidence.
+- Complete merge/recommendation recovery, checkpointed export, backup/WAL/object reconciliation and erasure-frontier replay.
+- Measure skew, hot keys, graph budgets, row/index/WAL amplification, queue age, storage, plans and recovery at the 500M/3B planning scales.
+
+## Acceptance
+
+Stale projections cannot leak private content or counts. Failed builds preserve the previous generation. Stale workers cannot duplicate effects or reactivate revoked state. Failures and measured limits remain visible until closed. Fresh rebuild qualification replaces online migration work in this program.

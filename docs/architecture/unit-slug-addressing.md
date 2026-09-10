@@ -4,12 +4,10 @@ Status: Accepted
 
 Owners: Main Service and Web
 
-For the operational catalog refactor, the maintainer-approved
-[breaking replacement baseline](../plan/operational-refactor-20260906/00-source-complete-schema.md#breaking-replacement-baseline)
-removes any obligation to keep old URLs, API contracts or stored address rows
-compatible. Retained address functionality must follow the new identity/slug
-semantics; legacy URL/ID mapping is separate offline conversion work. The route
-examples below do not require compatibility adapters in the replacement system.
+The [current program](../plan/README.md) has no compatibility requirements for
+old URLs, APIs, IDs or stored address rows. Implement this identity/address
+contract for the intended model and rebuild development/test state as needed.
+Legacy address conversion is not a prerequisite or deliverable of this program.
 
 ## Decision
 

@@ -11,12 +11,10 @@ authored schema and canonical SQL, then use
 `task services-main:db:check` for subsequent changes. Preserve released migration
 history and use the explicitly disposable shadow target for qualification.
 
-The former `catalog_native_source_event_batch` bundle and its destructive source
-parent replacement are historical implementation steps. Do not regenerate that
-retired bundle or repeat its drops to maintain the current schema. The original
-cutover decision is retained in the
-[historical baseline record](../../../../../../../docs/plan/operational-refactor-20260906/00-source-complete-schema.md#breaking-replacement-baseline).
-This history does not authorize resetting ordinary development data.
+The [current plan](../../../../../../../docs/plan/README.md) authorizes full
+development/test environment control and fresh rebuilds. No old-schema, API or
+data compatibility constrains the target. Use current authored schema and owning
+generators; do not replay retired bundles as prerequisites for the new model.
 
 The placement calculations below are workload assumptions to revalidate against
 the typed exporter and current SQL when changing the affected families. They do

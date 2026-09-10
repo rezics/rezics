@@ -6,11 +6,9 @@ Accepted: 2026-08-29
 
 Owners: Domain, Security, Operations
 
-This decision supersedes the CSS-containment and “scripts never run” parts of
-[Zone composition, aggregation, and theming decisions](./zone-composition-and-theming-decisions.md).
-The old styling contract remains inactive groundwork for reviewer linting and a
-possible future `bounded_style` mode; it is not the security boundary for the
-implemented Custom Theme runtime.
+This document owns executable-theme trust and authority. Declarative page
+composition and safe appearance follow [Zone composition](./zone-composition-and-theming-decisions.md).
+CSS containment is not the security boundary of the selected runtime.
 
 ## Decision
 
@@ -309,7 +307,7 @@ so it is replaced rather than adapted. There are no `/zone-themes` aliases,
 `zone_theme` Unit kinds, compatibility views, or approval inheritance. Preview
 CSS revisions must be discarded or explicitly resubmitted as a new
 host-full-trust package. Development databases that applied the old migration
-follow the [development cutover note](../operations/custom-theme-development-cutover.md).
+follow the [development cutover note](../operations/custom-theme-review-and-incident-response.md).
 
 ## Deferred decisions
 

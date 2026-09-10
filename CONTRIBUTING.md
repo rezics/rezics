@@ -15,15 +15,18 @@
 
 ## Versioning
 
-The first supported compatibility baseline is v1.0.0. Do not restore pre-v1
-routes, formats or compatibility layers. Remove obsolete code only within the
-requested scope.
+The current implementation program has no compatibility requirements for old
+schemas, APIs, SDKs, data, IDs/URLs, formats or implementation behavior. Design for
+the intended model, remove obsolete compatibility layers within scope and update
+retained consumers together. The current plan authorizes autonomous research,
+full development/test environment operation and local commits after checks.
 
 REZICS uses Romantic Versioning: `PROJECT.MAJOR.MINOR`. PROJECT changes for a
 separate product generation; MAJOR for significant or breaking product, public
 API or persisted-contract changes; MINOR for smaller additions and fixes.
-Packages have independent release lines. Breaking releases require an explicit
-migration or cutover plan, not a PROJECT bump.
+Packages have independent release lines. Document breaking target contracts and
+their reproducible installation/rebuild procedure; compatibility migration is not
+a deliverable of the current program. A breaking change is not a PROJECT bump.
 
 Root `vPROJECT.MAJOR.MINOR` tags define the server/database release boundary;
 prefixed product tags do not. Released SQL is append-only: add forward
@@ -35,8 +38,8 @@ migrations after the released history rather than editing, deleting or renaming 
 - The current [installation baseline](services/main/src/services/database/baseline.json) records the completed native replacement. Preserve that epoch and its recovery record; historical replacement authorization is not an instruction to regenerate it. Released-history checks enforce immutability.
 - Generate changes with `task services-main:db:generate -- <name>` and qualify them with `task services-main:db:check` on the disposable shadow target. Use the repository replay workflow rather than raw `atlas migrate diff`; see [migration operations](README.md#database-migrations).
 - Unit is a logical identity/reference/capability contract. Domain owners hold physical identity and lifecycle; do not restore a global `unit` parent or substitute a universal entity table. Preserve concrete foreign keys and validated reference alternatives.
-- Follow the [provider-independent catalog model](docs/report/REZICS-Catalog领域边界与实施分期-20260906.md#23-provider-independent-native-model). Source schemas test conformance; they do not dictate native ownership or a universal Edition layer.
-- The completed [native cutover](docs/plan/operational-refactor-20260906/00-source-complete-schema.md#breaking-replacement-baseline) replaced old contracts, including v1+ contracts. Offline legacy import is separate from the runtime. New changes follow the current target and normal release rules.
+- Follow the [provider-independent catalog model](docs/architecture/database/catalog-model.md#provider-independent-model). Source schemas test conformance; they do not dictate native ownership or a universal Edition layer.
+- Follow the [database target](docs/architecture/database/README.md) and [current plan](docs/plan/README.md). Fresh development/test rebuilds and source-native conversion tests qualify the new model; no legacy transfer is required.
 
 ## Exported TypeScript APIs
 

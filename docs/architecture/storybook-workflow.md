@@ -15,8 +15,8 @@ changed UI; persistent pixel baselines are not part of the default workflow.
 Keep stories beside their owner and outside the upstream SharkUI mirror. Preserve
 production/fixture isolation, real theme tokens, typed locales and independent Vite
 configurations. Do not load Vinext, Cloudflare or PWA plugins into Storybook.
-The [repository inventory](../plan/storybook-repository-coverage-20260909.md) records
-coverage and boundaries; historical screenshot counts are not future gates.
+The [frontend plan](../plan/frontend.md) owns remaining experience coverage;
+screenshots are scoped inspection evidence rather than completion counters.
 
 ## Aspire lifecycle
 

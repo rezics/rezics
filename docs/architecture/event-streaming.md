@@ -1,18 +1,15 @@
 # Event streaming and asynchronous execution
 
-Date: 2026-09-07. Status: **transport, database durability and observation outbox
-implemented and locally checked; full relay/business flow and production remain unqualified**.
+Status: selected transport architecture; business-flow and recovery qualification
+follow the current implementation plan.
 Owners: Main Service, source ingestion, worker runtime and host operations.
 
-The maintainer accepted NATS JetStream as the dedicated event and task transport,
-with Debezium Server as the preferred outbox relay to qualify and Bun workers as
-business consumers. This document owns that infrastructure decision. The
-[source protocol](../report/REZICS-source-integration-and-review-20260906.md#44-generic-source-bindings-and-subscriptions)
-owns binding, subscription and adoption semantics; [P10](../plan/operational-refactor-20260906/10-capacity-and-operations.md)
-owns workload and recovery qualification. This decision does not close the broader
-[catalog design-review gate](../plan/operational-refactor-20260906/00-source-complete-schema.md#design-review-gate)
-or qualify deployment or legacy conversion. The later maintainer instruction
-authorizes autonomous implementation and research-led revision of these documents.
+Use NATS JetStream for durable event/task transport, qualify Debezium Server as the
+committed-outbox relay and keep Bun workers as business consumers. The
+[source lifecycle](catalog-source-lifecycle.md) owns binding/subscription/adoption;
+[backend acceptance](../plan/backend-acceptance.md) owns workload and recovery.
+The [current plan](../plan/README.md) authorizes autonomous research and full
+development/test environment control with no compatibility requirements.
 
 ## Decision and alternatives
 
@@ -230,7 +227,7 @@ copy or 1.536 TB/9.216 TB for three, before the exclusions above. Domain corpus
 size is not the same as hot broker log size. Each growing outbox, subscription,
 job-history and receipt relation still needs its own 500M/3B row/index model.
 
-P10 must add actual average/p99 widths, consumer delivery/network amplification,
+Backend qualification must add actual average/p99 widths, consumer delivery/network amplification,
 replication bandwidth, fsync latency/IOPS, concurrency and outstanding-ACK memory,
 hot-source/target skew, backlog catch-up, compaction/cleanup, rebuild time and
 space. Admission and retention are bounded; source/consumer counts do not live
@@ -296,7 +293,7 @@ normal development PostgreSQL configuration was not changed to enable CDC.
 5. Measure 1k, 5k and 10k message/s profiles and bounded bursts with equal message
    sizes, R3, sync policy and independent consumers. Record publication p95/p99,
    delivery lag, steady-state and catch-up throughput, resources and impact on
-   P10 foreground/operation SLOs. These rates are test inputs, not promised limits.
+   the selected foreground/operation SLOs. These rates are test inputs, not promised limits.
 6. Pin qualified versions/configuration and actual deployment resources; record
    upgrade/restore and replay procedures before activation. Existing email and
    maintenance jobs are integrated only with their owners' correctness checks.

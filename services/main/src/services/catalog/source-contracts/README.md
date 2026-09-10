@@ -60,8 +60,10 @@ incomplete until every declaration has a valid disposition. Structural expansion
 and source-only/excluded metadata do not inflate native coverage. Even a complete
 declaration review does not cover facts absent from the pinned schemas, such as
 undeclared infobox values or the required novel translation/serialization cases
-not established by Open Library types. The owning source-complete plan retains
-those independent conformance requirements.
+not established by Open Library types. The [source conformance specification](../../../../../../docs/testing/source-conformance.md)
+and [Book/creation suite](../../../../../../docs/testing/book-and-creation.md) own
+those independent requirements. This inventory is evidence, not an old-contract
+compatibility obligation.
 
 ## Bounds
 
