@@ -109,7 +109,7 @@ async function proveReferenceMoveLimits(client: Client): Promise<void> {
 	await client.query("begin");
 	try {
 		await client.query(
-			`insert into public.unit (id, kind)
+			`insert into public.publishing_identity (id, shape)
 			 values ($1, 'book'), ($2, 'book'), ($3, 'book'), ($4, 'book')`,
 			[sourceActiveUnitId, fullActiveUnitId, sourcePinnedUnitId, fullPinnedUnitId],
 		);
