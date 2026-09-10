@@ -61,6 +61,7 @@ export * from "./poll";
 export * from "./post";
 export * from "./progress";
 export * from "./reaction";
+export * from "./reference-value";
 export * from "./realm";
 export * from "./recommendation";
 export * from "./score";

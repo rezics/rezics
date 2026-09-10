@@ -1,6 +1,6 @@
 {
   "source_baseline_commit": "74079abd73d5fc43ac87ac7cae8a2074ca72d13d",
-  "schema_modules_and_sql_files_mapped": 150,
+  "schema_modules_and_sql_files_mapped": 152,
   "api_owner_directories_mapped": 39,
   "specified_cross_domain_scenarios": 124,
   "invariant_families": 14,
@@ -25,12 +25,12 @@
     "backup/restore drill"
   ],
   "sha256": {
-    "current-schema-map.tsv": "c21a29ccf0ef82814f946d755d92617ef555345be7c521f0b8ec71fe3af94fc6",
+    "current-schema-map.tsv": "f89bce0b520b12d6805873846c8385226c2befc987ea1c14681be5c604dd98ff",
     "api-coverage.tsv": "58c2695b7e36c5ba5cd30c04728e1326c567cd19a2e51ae7b0f32c04ada7d999",
     "scenarios.tsv": "07738e2923baef54d4e4baebedc79b5b5dc25e2196685b51cd170c40f34c7cda",
     "capacity.json": "fd6446ce16165b24928d9245336e74d80c65e31682c2167c343e40e56760954d",
     "capacity.md": "38e2d5f1494f1775836389f6400766ba080cb50e8c8586de0cbb7cdf2d713176",
-    "dependency-manifest.json": "fc50c9290388fa85fb729dc3ccac57defedd3f0f3c4dac512d2330aa3bfcbfab"
+    "dependency-manifest.json": "14c095ed4c90fa45dba0e0d4ea83deed516756ab86a1c79d436a88b965b7b921"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -45,9 +45,9 @@
     "docs/architecture/database/ai-hub.md": "ccecae0e8f66d94644c6c5a56136628484375ff0eda43e4e914e3ed24d2e3050",
     "docs/architecture/database/catalog-model.md": "36d6ba3d85f211d5d560f6559bd624d1e8bbd8995e450d8a08ecd4ee3fe79524",
     "docs/architecture/database/creation.md": "7cd97242eb39b099a445934a6d345edfc4b45206f72a8f4bd626453e1af24cbd",
-    "docs/architecture/database/data-dictionary.md": "334e41bb470a147655b739edd66f5eb3681593d1277069e170808ee1226b17fb",
+    "docs/architecture/database/data-dictionary.md": "eb0f2a9e70c359c561f9d4d4aaf385b1bd56adecc990ccfbc54d0b6b285a8112",
     "docs/architecture/database/relationship-graph.md": "f849ff42ecba6c161cb25c392cfc8ef65c51d5be1eacc718ee6b3aa06d3245ef",
-    "docs/plan/README.md": "7d38e1ad5d48798f8b72a3cd30961b32d6a72d5a9c0cd59fe9d946de58b80d4f",
+    "docs/plan/README.md": "c5d95d8590bd185ed32481ba6f74ca17ada0057bf54b14b00da997e5b64fefeb",
     "docs/plan/backend-acceptance.md": "13b3b8e23f05cf3d433dd1383a8f1f59f2a5d5586c2ea5413c0caa8ee7059199",
     "docs/plan/frontend.md": "75b9281201ffad91a52dcc246a1c4bb6b5e7f0153d7edc30afa751d8790538b9",
     "docs/plan/modules/ai-hub.md": "b95b2996692fcef54d168477b80278214157257762b4fb7839b5918435aa677b",
@@ -55,19 +55,20 @@
     "docs/plan/modules/community-and-governance.md": "d60b12d59ab3164f95df37baaa9964a40d77934247191eb2c0c1f3e66602a5bb",
     "docs/plan/modules/content-and-media.md": "db3190e114de0419cc729215c63bea020927b3831a9d704b20a63e313be7dc64",
     "docs/plan/modules/creation-and-reading.md": "d7e836a92c106c22b4e76cd6684fa4afe1bea04b6b044cfaaf7228dba690f04b",
-    "docs/plan/modules/foundation.md": "1f566c6c20601bb5e1aaacfbb46413be28146f6675e4d04bb01452e7824d37f7",
+    "docs/plan/modules/foundation.md": "d6375f14a253507904128811b10cde7de3fa14f7613cff64ee973146363878d9",
     "docs/plan/modules/knowledge-and-graph.md": "16bafba22a5de999644c5e21997c75678da90c3c261a49dc81d288624d0d6f63",
     "docs/plan/modules/search-and-operations.md": "bebfb8cbf5af84ae5998f8f2a0b6058e29efa7933a9e75cd502f90ebc8d23cb2",
     "docs/plan/modules/sources-and-converters.md": "3a301265d30a7a106d16a4425548f3c6229194d70a8f4889ce4cfe4901532881",
     "docs/research/README.md": "991ca40ef4aba9186ce3ff8255b4bf410a05f8d82a225f5aed7c92facf8bacc1",
     "docs/research/ai-hub-execution.md": "6ea6b14e84b98a34a697370b14f0b6c50234a16d5214f67c451311ec16ceb081",
-    "docs/testing/README.md": "618b3f4cb2c8fa8fa8ed89c8328805fbd3ede76ffccc014cc5dd2614f4cc0086",
+    "docs/testing/README.md": "7569d6fd8b927c02f06cbf8ca70e42f10919385a137afc2c1d054228c54703dd",
     "docs/testing/ai-hub.md": "e26dbe58f28fe78b51a81bd54bfe47a7d267d97f6e18a15f46239bbb58f0c971",
     "docs/testing/backend-integration.md": "f401e233487583621d2e9db9489646bedfa12aaec0e574ea676838cefcde4fc6",
     "docs/testing/book-and-creation.md": "91af6b8352c20c1e933fe68e8ff0d828464d94ab43e64b2d32491598d1cb5cef",
+    "docs/testing/foundation.md": "9b2b031c45bcddd96d94261b35b622287f0affa6219e00d0ce39cafa8fd8481c",
     "docs/testing/known-failures.md": "421a07e97004928b72e0911c04c91584c4cf3e0b4d56dd7c7aecfa5820efec28",
     "docs/testing/relationship-graph.md": "7f3aaa37d76e80a9d2a5e54c9e2fa52102ba5830594121275ebefb278a5e2b91",
     "docs/testing/source-conformance.md": "36473ecd59994220f4bf3273631c84e5042e4a5abe81ba3666a047624b82beda",
-    "docs/testing/database/check_design.py": "84bcce15b968df135582d1973e50daaa11e9b03ecd4086b15ae2e4cc197c8547"
+    "docs/testing/database/check_design.py": "c9a13904ee578160ba242f5a3f422925bbf089425823733e48c1b32e1c8abfa3"
   }
 }

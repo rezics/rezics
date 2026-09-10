@@ -8,6 +8,7 @@ export const PostgreSqlSchemaFileNames = [
 	"governance-integrity.sql",
 	"governance-delivery.sql",
 	"history-integrity.sql",
+	"reference-value.sql",
 	"association-proposal-authority.sql",
 	"music-release-source-job.sql",
 	"catalog-definition-governance.sql",
@@ -363,6 +364,7 @@ export const PostgreSqlSchemaFunctionNames = [
 ] as const;
 
 export const PostgreSqlSchemaTriggers = [
+	{ table: "reference_value", name: "reference_value_immutable" },
 	{ table: "unit_association_proposal", name: "association_proposal_authority_guard" },
 	{ table: "music_release_source_job", name: "music_release_source_job_guard_trigger" },
 	{ table: "catalog_source_snapshot_bundle", name: "catalog_source_bundle_parts_check" },

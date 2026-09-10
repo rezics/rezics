@@ -48,6 +48,15 @@ type Builders<Prefix extends string> = {
 type Values<Prefix extends string> = { [Owner in UnitOwner as Key<Prefix, Owner>]: string | null };
 type Columns<Prefix extends string> = Record<Key<Prefix, UnitOwner>, AnyPgColumn>;
 
+/** Select a concrete reference column using the closed physical-owner registry. @internal */
+export function unitReferenceTargetColumn<Prefix extends string>(
+	prefix: Prefix,
+	owner: UnitOwner,
+	columns: Columns<Prefix>,
+): AnyPgColumn {
+	return columns[key(prefix, owner)];
+}
+
 function key<Prefix extends string, Owner extends UnitOwner>(prefix: Prefix, owner: Owner) {
 	return `${prefix}${suffixes()[owner]}Id` as const;
 }
