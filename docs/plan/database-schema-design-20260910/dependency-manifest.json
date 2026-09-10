@@ -222,8 +222,10 @@
     "services/main/src/services/api/wiki-navigation"
   ],
   "supporting_public_https_sources": [
+    "https://api.vndb.org/kana#release-fields",
     "https://api.vndb.org/kana#vn-fields",
     "https://github.com/bangumi/Archive/blob/master/README.md",
+    "https://musicbrainz.org/doc/Cover_Art_Archive/API",
     "https://musicbrainz.org/doc/MusicBrainz_Database/Schema",
     "https://openlibrary.org/developers/api",
     "https://www.postgresql.org/docs/18/continuous-archiving.html",

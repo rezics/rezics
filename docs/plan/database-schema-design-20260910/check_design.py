@@ -70,7 +70,7 @@ DISPOSITIONS = {
     "D05": "Retain specialized catalog grain and fields; apply common sealed-manifest and provenance protocol.",
     "D06": "Retain specialized music structures; complete exact revision/correspondence and source lifecycle contracts.",
     "D07": "Retain native owner and specialized capabilities; make classification and source contexts explicit.",
-    "D08": "Reshape authored body/history into Document revisions; retain media identity and separate payload availability.",
+    "D08": "Reshape body/history into Document revisions; retain media identity with contextual uses, representations, locations and scoped selection.",
     "D09": "Replace overloaded post kind/root assumptions with publication, slots, origin and placement; retain poll invariants.",
     "D10": "Retain realm/zone/structure/curation/theme ownership; bind exact revisions, scopes and generations.",
     "D11": "Retain dedicated participation facts; explicit scope/actor uniqueness, provenance and versioned progress.",
@@ -198,6 +198,30 @@ S097|thread,concurrency,projection|A new reply commits while a bulk layout gener
 S098|rights,history|End one license offering while another remains recognized|Independent offerings/history retained; recognition cannot reopen an ended row|I02,I05,I14
 S099|facts,source,native|Human updates a typed native field also maintained by source mapping|One owning command updates decision and effective column atomically; no second writer|I03,I06,I08
 S100|adoption,access,restore|Restore historical adoption after its disclosure or role eligibility is revoked|New selection revalidates and fails safely; history does not grant current use|I03,I04,I05
+S101|media,catalog,language|Attach front back booklet and screenshots to two language-specific releases|Separate contextual uses; Work gallery retains each release origin|I07,I13,I14
+S102|media,representation|Store original and three resized or re-encoded files|One asset revision with several representations; no extra covers|I02,I14
+S103|media,identity|Import similar scans or photos with different provenance|No automatic asset identity merge based on perceptual similarity|I02,I14
+S104|media,roles|One image has front and spine roles or is reused by several subjects|Versioned compatible role sets and independent contextual uses|I07,I14
+S105|media,source,selection|CAA labels an image Front but does not select it as main front|Preserve role and source primary flag separately from native selection|I03,I13,I14
+S106|media,grouping,catalog|Choose release art as a release-group or Work representative|Selection records eligible relationship and original release use|I01,I07,I14
+S107|media,software,source|VNDB bundle image applies to one VN and all release languages|Preserve VN subset and explicit all_release_languages interpretation|I01,I13,I14
+S108|media,source,coverage|Image array is absent in a narrow or failed observation|Do not withdraw unobserved gallery associations|I06,I13
+S109|media,source,human|Source removes image also independently accepted by a maintainer|Retract source support; separately evaluate retained authorized use|I05,I06
+S110|media,selection,access|Currently selected cover becomes unavailable|Retain selection history; return unavailable or perform authorized eligible fallback|I03,I04,I05
+S111|media,presentation|Two Realms crop the same image differently|Adoption-specific presentation; shared asset and other selection unchanged|I02,I07
+S112|media,selection,concurrency|Two editors set different default covers for the same canonical slot|One CAS-protected head; gallery remains multi-image|I03,I08
+S113|media,storage,rights|Identical bytes appear in incompatible retention domains|No rights/existence leak or cross-domain lifetime extension through dedupe|I05,I11,I14
+S114|media,external,history|External URL serves different bytes after observation|New observation/revision or stale state; never silently mutate a pinned byte-exact representation|I02,I13
+S115|media,privacy,erasure|Suppress original while thumbnail or poster cache remains|Current disclosure and erasure invalidate every affected delivery path|I04,I05,I11
+S116|media,video,audio|Attach subtitles audio tracks poster and a timed excerpt|Exact source revisions and typed channel/timebase selectors retained|I01,I13,I14
+S117|media,publishing|Store booklet as PDF plus selected page previews|Document/page and image representations remain distinguishable|I01,I14
+S118|media,scale|List gallery containing millions of historical uses|Subject/scope keyset access and bounded hydration; no eager full count|I12
+S119|media,ingestion,capacity|Index external asset metadata without downloading bytes|Explicit locator/provider assurance and cache policy; no fabricated digest|I02,I12,I13
+S120|media,moderation,source|Import image risk votes and source approval|Source statistics/evidence stay separate from native rating and moderation|I05,I09,I13
+S121|media,language,source|Release gains a language after an all-language image observation|Reevaluate relative applicability with pinned context before changing current selection|I02,I03,I13
+S122|media,version,adoption|Replace image content or revise use after it is adopted|Old adoption pins old use and asset revisions until explicit advance|I02,I03
+S123|media,erasure,fanout|Erase asset referenced by many uses and default selections|Immediate delivery invalidation and bounded reconciliation of affected uses|I05,I11,I12
+S124|media,jobs,concurrency|Old transform worker completes after input erasure or replacement|Lease and erasure/input fences reject stale rendition activation|I05,I10,I11
 """
 
 # scenario, row role, multiplier per scenario root, heap bytes, index bytes,
@@ -250,6 +274,19 @@ FAMILIES = [
     ("messages", "recipient_state", "0.2", 112, 112, 0),
     ("messages", "message_delivery", "1", 176, 160, 0),
     ("messages", "message_operation_receipt", "1.1", 176, 112, 0),
+    ("media", "media_asset", "3.2", 160, 112, 0),
+    ("media", "media_asset_revision", "3.36", 208, 144, 0),
+    ("media", "original_representation", "3.36", 192, 160, 2_000_000),
+    ("media", "preview_representation", "6.72", 192, 160, 150_000),
+    ("media", "asset_location", "12.6", 240, 144, 0),
+    ("media", "asset_use", "4", 160, 144, 0),
+    ("media", "asset_use_revision", "4.4", 224, 160, 0),
+    ("media", "asset_use_role", "5.5", 80, 96, 0),
+    ("media", "asset_use_applicability", "8.8", 128, 144, 0),
+    ("media", "media_source_support", "6.6", 160, 144, 0),
+    ("media", "media_gallery_occurrence", "4", 144, 176, 0),
+    ("media", "media_selection_history", "2.6", 176, 144, 0),
+    ("media", "media_current_selection", "2", 112, 112, 0),
 ]
 
 
@@ -336,7 +373,7 @@ def capacity():
         assert all(high[k] == 6 * low[k] for k in low)
     lines = ["# Capacity model: assumptions and reproducible arithmetic", "",
              "Generated by check_design.py. All widths, densities, throughputs and retention windows below are planning assumptions. No PostgreSQL size, benchmark or restore time was measured.", "",
-             "The catalog scenario counts native catalog roots; social counts publications; messages counts messages. These are separate synthetic mixes, not the same number of all REZICS records. Do not add scenario totals without deciding the actual mix and deduplicating shared reference/audit rows.", "",
+             "The catalog scenario counts native catalog roots; social counts publications; messages counts messages; media counts media-bearing subjects as a supplementary image-heavy envelope. These are separate synthetic mixes, not the same number of all REZICS records. Do not add scenario totals without deciding the actual mix and deduplicating shared reference/audit/selection rows.", "",
              "A modeled row role groups comparable rows across owner tables. Composite roles are equivalent-row estimates, not an assertion that several physical rows fit into one row. Inspect the dictionary and split composite roles using measured widths before implementation sizing. Every role also has an independent 500M/3B-row calculation in capacity.json. Control/configuration tables require an explicit bounded deployment inventory instead of automatically allocating 500M rows.", "",
              "## Scenario totals", "",
              "| Scenario | Roots | Modeled rows | Native heap + indexes TB | External payload TB | Native provision at 2x TB | Native + one replica at 2x each TB | 250 MB/s native restore lower bound hours |",
@@ -351,6 +388,17 @@ def capacity():
     for scenario, name, factor, heap, indexes, payload in FAMILIES:
         width = heap + indexes
         lines.append(f"| {scenario} | {name} | {factor} | {heap} | {indexes} | {payload} | {float(Decimal(factor) * 500_000_000 * width) / 1e12:.3f} | {float(Decimal(factor) * 3_000_000_000 * width) / 1e12:.3f} | {500_000_000 * width / 1e9:.1f} | {3_000_000_000 * width / 1e12:.3f} |")
+    lines += ["", "## Media density and optional hosting", "",
+              "Per media-bearing subject, assume 4 contextual asset uses, 3.2 distinct assets after authorized sharing, 1.05 content revisions per asset, and 1 original plus 2 previews per revision. Locations average 1.25 per representation. Use histories average 1.1 revisions, with 1.25 roles, 2 applicability entries and 1.5 source-support rows per use revision. Two display slots with 1.3 historical selections are modeled separately from gallery membership. These are adjustable density assumptions, not source/API limits.", "",
+              "The binary envelope assumes every original is hosted at 2 MB average and every preview at 150 KB average; media External payload TB above therefore represents 100% hosting. Metadata-only indexing does not require this binary allocation. Use independent original and preview admission fractions; cached thumbnails can be common even when originals remain external. No global cross-rights-domain dedupe saving is assumed.", "",
+              "| Media-bearing subjects | All originals + previews TB | 1% originals + 1% previews TB | 1% originals + 10% previews TB |",
+              "| --- | ---: | ---: | ---: |"]
+    for roots in (500_000_000, 3_000_000_000):
+        originals = sum(r["external_payload_bytes"] for r in rows if r["scenario"] == "media" and r["scenario_roots"] == roots and r["row_role"] == "original_representation")
+        previews = sum(r["external_payload_bytes"] for r in rows if r["scenario"] == "media" and r["scenario_roots"] == roots and r["row_role"] == "preview_representation")
+        assert originals + previews == totals[("media", roots)]["payload"]
+        lines.append(f"| {roots:,} | {(originals + previews) / 1e12:.3f} | {(originals + previews) * 0.01 / 1e12:.3f} | {(originals * 0.01 + previews * 0.10) / 1e12:.3f} |")
+    lines += ["", "Binary estimates exclude object replicas, version retention, traffic, abandoned uploads, transform working space, audio/video durations/bitrates and PDF size distributions. Size those media separately; image averages cannot qualify full multimedia hosting. Gallery reads use subject/scope/rank keysets; reverse erasure traverses asset/use indexes in bounded pages. Bound fetch bytes, transform concurrency and queued storage; receipt/lease/erasure fences prevent late workers resurrecting files. Compare metadata-only, original-cache and preview-cache workloads in qualification."]
     lines += ["", "## Sensitivity and operational budgets", "",
               "Catalog assumptions are dense: 16 assertions, 24 support rows, 13.5 relation-participant revisions and 16 source journal/correspondence rows per root. Keep these separately adjustable. Doubling evidence retention does not double every domain table, but it doubles the affected row role and associated retained payloads. A social root has 0.9 Documents, 1.3 revisions per Document, 1.4 publication revisions and 3 notifications; not every publication creates a Document or Thread.", "",
               "At 100,000 source objects/day, refreshing 500M objects once takes 5,000 days and 3B takes 30,000 days. At 1,000,000/day the lower bounds are 500/3,000 days. Continuous update therefore needs source deltas, popularity/freshness policy and elected coverage, not periodic whole-corpus crawling. The 50 objects/s initial test profile is 4.32M/day if sustained; this is not a provider permission or attainable feed rate.", "",
