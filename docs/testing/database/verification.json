@@ -30,7 +30,7 @@
     "scenarios.tsv": "07738e2923baef54d4e4baebedc79b5b5dc25e2196685b51cd170c40f34c7cda",
     "capacity.json": "00565a116367dbdaee7cbddd4e1e0c8ace7be142546c0b46b436f1a32c8b23d4",
     "capacity.md": "7117a8893f40bcfd09a116d974ad2ef3d06b2e6f7d47d725a80c2f1e54e13f84",
-    "dependency-manifest.json": "d4b15d36ce01639a6424502591f3c4fbfab389dc52ad89174c2214e6adb85dc0"
+    "dependency-manifest.json": "8929624aba4018b5ab9faa4d68dc89ad5f77fc2d41ab9c362a35e1aac980e14c"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -47,12 +47,12 @@
     "docs/architecture/database/creation.md": "7cd97242eb39b099a445934a6d345edfc4b45206f72a8f4bd626453e1af24cbd",
     "docs/architecture/database/data-dictionary.md": "48312794d054b8cc38d6d9ddd36b5ee9c908bea8e0da84c633b752e7f57d0169",
     "docs/architecture/database/relationship-graph.md": "f849ff42ecba6c161cb25c392cfc8ef65c51d5be1eacc718ee6b3aa06d3245ef",
-    "docs/plan/README.md": "a1d95056a5325e9887fca84a5f8fad1fc2281d1465352e56188ca637cbe17d7d",
+    "docs/plan/README.md": "4218fe53f30212e171b2c31f01861d00dd41f649df211b672ab4ecbfc942bc2e",
     "docs/plan/backend-acceptance.md": "13b3b8e23f05cf3d433dd1383a8f1f59f2a5d5586c2ea5413c0caa8ee7059199",
     "docs/plan/frontend.md": "60a94396354064d4de457964276c721e817bc9b7190ccae2678cb3f83284fabc",
     "docs/plan/modules/ai-hub.md": "b95b2996692fcef54d168477b80278214157257762b4fb7839b5918435aa677b",
     "docs/plan/modules/catalog.md": "bcbd52b1c0368c0874c6c753f392810a7d89c0b611a1fde76a49c203484653c3",
-    "docs/plan/modules/community-and-governance.md": "faa7526c0032b30bfff650f45589f2d4fc3707e74af21816f8c832910f56c353",
+    "docs/plan/modules/community-and-governance.md": "11f647ed66b95125459796129faeb682dcbce0c75e8ce393456ebd7d0e602229",
     "docs/plan/modules/content-and-media.md": "db3190e114de0419cc729215c63bea020927b3831a9d704b20a63e313be7dc64",
     "docs/plan/modules/creation-and-reading.md": "d7e836a92c106c22b4e76cd6684fa4afe1bea04b6b044cfaaf7228dba690f04b",
     "docs/plan/modules/foundation.md": "7bf56ed9a5853629097b6ddeff347a0f178790edff7975f964752c001e140c2a",
@@ -65,8 +65,8 @@
     "docs/testing/ai-hub.md": "e26dbe58f28fe78b51a81bd54bfe47a7d267d97f6e18a15f46239bbb58f0c971",
     "docs/testing/backend-integration.md": "2e55da1a8997b9044e751a3df2106a69bcda952d49ba7f58962baa87716495bb",
     "docs/testing/book-and-creation.md": "91af6b8352c20c1e933fe68e8ff0d828464d94ab43e64b2d32491598d1cb5cef",
-    "docs/testing/foundation.md": "9aa42a268fdce7b360a1f8da5b3f6cebc1366a65b7b52fa1bde6a3c36280c826",
-    "docs/testing/known-failures.md": "a13e17abd3be4a6634ce6ea330613f5509b072819960e9849fd59c5cbdd87277",
+    "docs/testing/foundation.md": "376129f5a4a8cac7dfbfb5b61ec62b5595a5ea073513b8125d79916918b04a92",
+    "docs/testing/known-failures.md": "1bf2f1c73f7af96035accd356c708767544232fba3dff657bae38ae66b3a1f4b",
     "docs/testing/relationship-graph.md": "7f3aaa37d76e80a9d2a5e54c9e2fa52102ba5830594121275ebefb278a5e2b91",
     "docs/testing/source-conformance.md": "36473ecd59994220f4bf3273631c84e5042e4a5abe81ba3666a047624b82beda",
     "docs/testing/database/check_design.py": "b67c19e215ee361d580f35448242de5aa31e88837f9a8fc024272b905fd8e466"

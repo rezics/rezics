@@ -100,8 +100,8 @@ operator retry with current authority. Account restrictions are not automaticall
 retried as transient database failures.
 
 `task services-main:db:merge-recovery:check` verifies an actual fixture-owned
-worker process killed after its structure-page writes but before transaction
-commit. Uncommitted items, counters and cursors roll back. Reclaiming the expired
+worker process killed after its structure-page writes but before its own transaction
+COMMIT. Uncommitted items, counters and cursors roll back. Reclaiming the expired
 lease issues a new token; the old worker cannot advance it. Replaying a page whose
 commit acknowledgement was lost adds no duplicate receipt, and finalization
 releases its graph locks once. Suspension, closure and stale Self revisions are
@@ -112,7 +112,8 @@ These checks use the existing one-account/one-Self indexed fences and four-opera
 claim bound; they add no persisted rows or indexes beyond existing audit/state
 transitions. The 500M/3B queue and receipt workload still requires corpus-scale
 qualification. This fixture proves the structure-page crash and finalization
-boundaries, not every phase, canonicalization failure point or disaster-recovery restore.
+boundaries; disaster-recovery restore and failures outside the tested boundaries
+remain separate qualification.
 
 ## Reviewer authority at canonicalization
 
@@ -159,3 +160,23 @@ The [application fixture](../../../../../../docs/testing/foundation.md#reviewer-
 qualifies this reviewer boundary, including simultaneous expiry and inherited
 versus explicitly replaced base grants. The generated migration is installed by
 the fresh native replay workflow; unreceipted historical reviews are not converted.
+
+## Canonicalization and catalog-effect crash recovery
+
+`task services-main:db:merge-phase-recovery:check` kills fixture-owned workers at
+their actual transaction COMMIT, after canonicalization, name copying and source
+rebinding. The fixture intercepts the PostgreSQL client only on the connection
+identified by the merge request/lease settings. It does not wrap the worker in an
+ambient transaction; accidental independent/global writes would remain visible
+and fail the rollback snapshot comparison. Child output must confirm this barrier
+before SIGKILL, and the parent waits for closed output streams.
+
+The [pinned phase evidence](../../../../../../docs/testing/database/merge-phase-recovery-evidence.json)
+compares native identities/revisions, catalog change history, names, redirects,
+request/operation state and items before and after each crash. Binding snapshots
+also cover original/current correspondence, subscriptions, outbox messages and
+reserved storage credits. Reclaiming the lease applies once; stale-token replay
+changes no state, and each operation completes and releases its graph locks.
+A separate crash followed by reviewer revocation leaves the source published and
+supersedes the request when it is reclaimed. This is process/transaction recovery,
+not a backup/restore or sustained-load qualification at 500M/3B.

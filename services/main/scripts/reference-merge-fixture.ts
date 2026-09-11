@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { and, desc, eq, ne } from "drizzle-orm";
+import type { CatalogReference } from "@rezics/reference";
 import { OfficialRealmUnitIds } from "@rezics/slug";
 import { database, type DatabaseTransaction } from "../src/services/database";
 import { replacePlatformUserAccountState } from "../src/services/platform-users/service";
@@ -39,6 +40,11 @@ import { DefaultMergePlan } from "../src/services/units/merge/contracts";
 type FixtureMergeOptions = {
 	visibility?: "public" | "private";
 	firstSourceReadLifetimeMs?: number;
+	prepareSource?: (
+		tx: DatabaseTransaction,
+		source: CatalogReference,
+		actor: string,
+	) => Promise<void>;
 };
 
 /** Prepare actual human accounts, a native pair, rule-backed intent and optional private read grants. @internal */
@@ -123,6 +129,12 @@ export async function prepareFixtureMerge(
 			proposer.account.id,
 		),
 	);
+	if (options.prepareSource) {
+		const prepare = options.prepareSource;
+		await runWithParticipationAuthority(proposer.authority, () =>
+			prepare(tx, { owner: source.owner, id: source.id }, proposer.account.id),
+		);
+	}
 	const manifest = await preflightUnitMerge(proposer.authorization, {
 		sourceUnitId: source.id,
 		targetUnitId: target.id,
@@ -163,7 +175,16 @@ export async function prepareFixtureMerge(
 	}
 	const firstReadGrants = await readGrants(first),
 		secondReadGrants = await readGrants(second);
-	return { proposer, first, second, source, target, request, firstReadGrants, secondReadGrants };
+	return {
+		proposer,
+		first,
+		second,
+		source: { ...source, revision: manifest.sourceRevision },
+		target,
+		request,
+		firstReadGrants,
+		secondReadGrants,
+	};
 }
 
 /** Queue an independently reviewed native pair in the caller's deadline transaction. @internal */

@@ -1,8 +1,8 @@
 {
-  "baseCommit": "2521b50793d6af375f6d74958d8a7daf59011bfc",
+  "baseCommit": "71b258ca4ff534f14dac61f200e8104eed30d407",
   "sourceDigests": {
-    "services/main/scripts/check-merge-recovery.ts": "370d62c5cdf500450258711d005c3d904f1798ba67f4ad7c1ab5ad7cd635cbac",
-    "services/main/scripts/reference-merge-fixture.ts": "25b1131328d5f462d1198c76adcbec2234feff2c9431e43a0ea3a8ed5ffe134e",
+    "services/main/scripts/check-merge-recovery.ts": "d93b0bc5a3f331bf244245e0802affb47e4fa3bd4076e421a019e5a7fa3d5987",
+    "services/main/scripts/reference-merge-fixture.ts": "9aa362e8550198f980a99a36f553659d49c05e17b2dacac3d8ee1229245db77e",
     "services/main/src/services/units/merge/service.ts": "8657edd660b50baca77c9f81f2d453c16401332a94d6ba7ab324685653fb0b50",
     "services/main/src/services/units/merge/worker.ts": "b9910002a3c6e3463c7b6351cb55db1c30d6a0281321b551613a33286efaf388",
     "services/main/src/services/authorization/platform/authorization.ts": "5e1785967f49d29e9777c2250e534ddda3f2f8767cad194b712e6b9eb4c43ef9",
@@ -26,6 +26,7 @@
     "nativeMergeRegressionAssertions": 136,
     "mainTestFiles": 333,
     "mainTests": 1790,
-    "mainTypeScript": "passed"
+    "mainTypeScript": "passed",
+    "crashBoundary": "Native worker COMMIT; no ambient transaction wrapper"
   }
 }

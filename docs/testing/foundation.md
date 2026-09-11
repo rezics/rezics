@@ -464,13 +464,14 @@ and M06; they do not establish G4 or complete M01/M06.
 [check-merge-recovery.ts](../../services/main/scripts/check-merge-recovery.ts).
 The [pinned run](database/merge-recovery-evidence.json) passes 109 assertions.
 A fixture-owned Node worker writes a real structure reconciliation page and emits
-its barrier before being killed with SIGKILL, before the outer COMMIT. The parent
+its barrier before being killed with SIGKILL, before the worker transaction COMMIT. The parent
 observes unchanged items/counters/cursors, expires that exact fixture lease and
 claims a different token. The stale token cannot apply; the new token applies
 one receipt. Replaying the committed token changes neither operation nor counters,
 and repeated finalization cannot repeat its graph-lock cleanup.
 
-The fixture also revokes a queued executor's capability, suspends/closes its
+The crash barrier intercepts only the actual worker connection's COMMIT, preserving
+the behavior of any independent database calls. The fixture also revokes a queued executor's capability, suspends/closes its
 account through rule-backed commands and advances its Self revision. Three exact
 worker/blocker PID races commit account or binding changes while finalization
 waits. Each denied execution retains its graph locks and remains actionable;
@@ -523,3 +524,28 @@ passed on another fresh installation. Native merge (136), private review (20)
 and worker recovery (109) regressions passed; backend tests passed 333 files/1,790
 tests and backend TypeScript passed. This qualifies the reviewer boundary, not G4
 or complete merge/split/disaster recovery.
+
+## Native merge phase recovery
+
+`task services-main:db:merge-phase-recovery:check` runs
+[check-merge-phase-recovery.ts](../../services/main/scripts/check-merge-phase-recovery.ts).
+The [pinned run](database/merge-phase-recovery-evidence.json) passes 58 assertions.
+The child is killed immediately before its actual worker COMMIT; the harness
+preserves independent transaction behavior instead of routing all calls through
+an ambient rollback wrapper.
+
+For canonicalization, name copying and source rebinding, whole-effect snapshots
+remain identical after the crash. These include identities, revisions, immutable
+change history, names, redirects, request/operation state and reconciliation items.
+Binding snapshots additionally include correspondence history, current projection,
+subscriptions, transport outbox and reserved storage credits. Reclaim applies one
+archive/name/binding transition; old-token replay changes nothing. Each operation
+finishes and releases its graph locks. A crash followed by reviewer revocation
+cannot archive the source when the lease is reclaimed.
+
+This closes the named process-crash cases. Backup/restore, whole-system event
+recovery and 500M/3B workload qualification remain separate requirements.
+
+The 109-assertion structure/authority regression also passes with the native COMMIT
+barrier, and backend TypeScript passes. No production schema or runtime change is
+part of this phase-recovery qualification.

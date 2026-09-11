@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { Client } from "pg";
+import { writeSync } from "node:fs";
 import { setTimeout } from "node:timers/promises";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
@@ -49,17 +51,40 @@ if (process.argv[2] === "--crash-page") {
 	const id = process.argv[3];
 	assert.ok(id);
 	const claimed = await operation(id);
-	await withDatabaseTransactionDeadline(30000, async () => {
-		assert.equal((await processClaimedUnitMergePage(claimed)).outcome, "continued");
-		// Terminate only this fixture-owned child, after page writes and before the outer COMMIT.
-		await new Promise<void>((resolve) =>
-			process.stdout.write("merge-page-written-before-commit\n", () => resolve()),
-		);
-		process.kill(process.pid, "SIGKILL");
-		throw new Error("The fixture crash did not stop its worker");
-	});
-	throw new Error("The fixture child unexpectedly survived");
+	// Intercept only this worker connection's COMMIT. Extra transactions or global writes retain their real behavior.
+	const originalQuery = Client.prototype.query;
+	let workerClient: Client | undefined;
+	Client.prototype.query = function (this: Client, ...args: unknown[]) {
+		const command = args[0];
+		const query =
+			typeof command === "string"
+				? command
+				: command &&
+						typeof command === "object" &&
+						"text" in command &&
+						typeof command.text === "string"
+					? command.text
+					: "";
+		if (
+			query.includes("set_config('rezics.merge_request_id'") &&
+			query.includes("set_config('rezics.merge_lease_token'")
+		)
+			workerClient = this;
+		if (this === workerClient && query.trim().replace(/;$/u, "").toLowerCase() === "commit") {
+			writeSync(1, "merge-page-written-before-commit\n");
+			process.kill(process.pid, "SIGKILL");
+			throw new Error("The fixture did not stop its worker before COMMIT");
+		}
+		return Reflect.apply(originalQuery, this, args);
+	} as typeof Client.prototype.query;
+	try {
+		await processClaimedUnitMergePage(claimed);
+		throw new Error("The worker returned without crossing its native COMMIT crash barrier");
+	} finally {
+		Client.prototype.query = originalQuery;
+	}
 }
+
 let checks = 0;
 function same(actual: unknown, expected: unknown) {
 	assert.deepEqual(actual, expected);
@@ -141,7 +166,7 @@ child.stderr.on("data", (chunk) => {
 const childExit = await new Promise<{ code: number | null; signal: NodeJS.Signals | null }>(
 	(resolve, reject) => {
 		child.once("error", reject);
-		child.once("exit", (code, signal) => resolve({ code, signal }));
+		child.once("close", (code, signal) => resolve({ code, signal }));
 	},
 );
 assert.equal(childExit.signal, "SIGKILL", childOutput);

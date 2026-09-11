@@ -1,0 +1,49 @@
+{
+  "baseCommit": "71b258ca4ff534f14dac61f200e8104eed30d407",
+  "sourceDigests": {
+    "services/main/scripts/check-merge-phase-recovery.ts": "ffe91b4806d49c18e20d3a14e5a9b9cf1bd00fdd3c5135215551635cfda1a680",
+    "services/main/scripts/check-merge-recovery.ts": "d93b0bc5a3f331bf244245e0802affb47e4fa3bd4076e421a019e5a7fa3d5987",
+    "services/main/scripts/reference-merge-fixture.ts": "9aa362e8550198f980a99a36f553659d49c05e17b2dacac3d8ee1229245db77e",
+    "services/main/src/services/units/merge/worker.ts": "b9910002a3c6e3463c7b6351cb55db1c30d6a0281321b551613a33286efaf388",
+    "services/main/src/services/units/merge/review-application.ts": "025567e77d6ce9dce75da20e8929e7dfea863207b28324567488490340b27c5b",
+    "services/main/src/services/catalog/source-bindings.ts": "f616a5c955aadbbe14b203138c1c2689f3167b4aebc447ec087af15281bba02f",
+    "services/main/src/services/database/migrations/atlas.sum": "919d501a2477edcdad92c2442716288636b323554fcc8a9b7a226b982e397c0e"
+  },
+  "node": "v26.8.2",
+  "platform": "linux/x64",
+  "runtime": {
+    "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "default_isolation": "read committed"
+  },
+  "checks": 58,
+  "phaseEvidence": [
+    {
+      "phase": "canonicalize",
+      "transactionFootprintRolledBack": true,
+      "staleLeaseRejected": true,
+      "replayDoesNotDuplicate": true,
+      "completed": true
+    },
+    {
+      "phase": "names",
+      "transactionFootprintRolledBack": true,
+      "staleLeaseRejected": true,
+      "replayDoesNotDuplicate": true,
+      "completed": true
+    },
+    {
+      "phase": "bindings",
+      "transactionFootprintRolledBack": true,
+      "staleLeaseRejected": true,
+      "replayDoesNotDuplicate": true,
+      "completed": true
+    }
+  ],
+  "reviewerRevocationAfterCrashRejected": true,
+  "fixtureHistoryRetained": true,
+  "verification": {
+    "structureAndAuthorityRegressionAssertions": 109,
+    "mainTypeScript": "passed",
+    "crashBoundary": "Native worker COMMIT; no ambient transaction wrapper"
+  }
+}
