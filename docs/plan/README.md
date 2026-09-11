@@ -50,7 +50,7 @@ Existing code provides foundations. The revised target has not passed G2-G4 mere
 | M06 | [Community and governance](modules/community-and-governance.md) | M01-M03 | Defined; Realm/Collection/Zone wiki composition specified; Dynamic Collections optional | Pending |
 | M07 | [Sources and converters](modules/sources-and-converters.md) | M01-M04 native commands | Defined; full field conformance pending | Pending |
 | M08 | [Skill, Prompt and MCP Hub](modules/ai-hub.md) | M01-M04 | Catalog scope defined; execution/hosting questions open | Pending |
-| M09 | [Search and operations](modules/search-and-operations.md) | M01 and participating module events | Defined; known runtime failures open | Pending |
+| M09 | [Search and operations](modules/search-and-operations.md) | M01 and participating module events | Defined; known runtime failures open | G2 in progress: [bounded snapshot generations, failure/reclaim and activation qualified](../testing/recommendations.md); online disclosure, retention, event/runtime, capacity and restoration work pending |
 
 G1 begins by reconciling the dictionary with Book/AO3, Graph API and Hub catalog requirements. Foundational harness work can proceed while independent Hub execution questions remain open. Do not declare an execution-enabled Hub complete without deciding and testing that scope.
 

@@ -1,8 +1,15 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { setTimeout } from "node:timers/promises";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { z } from "zod";
+import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
+import { runWithParticipationAuthority } from "../src/services/participation/policy";
 import { createCatalogIdentity } from "../src/services/catalog/storage";
 import { users } from "../src/services/database/schema/auth";
 import { post } from "../src/services/database/schema/post";
@@ -16,6 +23,7 @@ import {
 	advanceRecommendationPartition,
 	claimRecommendationPartition,
 	finalizeRecommendationSnapshot,
+	failRecommendationPartition,
 	RecommendationPartitionLeaseSchema,
 } from "../src/services/recommendations/build-partitions";
 import {
@@ -26,8 +34,7 @@ import {
 const connectionString = process.env.DATABASE_URL;
 if (process.env.REZICS_DISPOSABLE_MIGRATION_FIXTURE !== "1")
 	throw new Error("Explicit disposable recommendation-build fixture required");
-if (connectionString === undefined)
-	throw new Error("DATABASE_URL is required");
+if (connectionString === undefined) throw new Error("DATABASE_URL is required");
 const target = new URL(connectionString);
 if (
 	!["localhost", "127.0.0.1", "[::1]"].includes(target.hostname) ||
@@ -53,7 +60,10 @@ const SignalKinds = [
 	"progress_completed",
 	"progress_dropped",
 ] as const;
-const LargeHours = 92;
+const LargeHours = 91;
+const MaximumFixturePages = 128;
+const BackgroundUnits = 24;
+const BackgroundHours = 96;
 const SiblingHours = 4;
 const FixtureTrigger = "recommendation_build_fixture_fail";
 const FixtureFunction = "recommendation_build_fixture_fail";
@@ -158,12 +168,19 @@ function explainTree(rows: unknown) {
 	return { nodes, indexes, relations, executionTime, text: JSON.stringify(rows) };
 }
 async function explainIndexPlan(query: string, params: Array<string | Date | number>) {
-	await pool.query("begin");
+	const client = await pool.connect();
 	try {
-		await pool.query("set local enable_seqscan = off");
-		return explainTree((await pool.query(`explain (analyze, buffers, format json) ${query}`, params)).rows);
+		await client.query("begin");
+		await client.query("set local enable_seqscan = off");
+		return explainTree(
+			(await client.query(`explain (analyze, buffers, format json) ${query}`, params)).rows,
+		);
 	} finally {
-		await pool.query("rollback");
+		try {
+			await client.query("rollback");
+		} finally {
+			client.release();
+		}
 	}
 }
 
@@ -178,7 +195,11 @@ async function assertHash64(table: string) {
 		 order by c.relname`,
 		[table],
 	);
-	equal(children.rows.length, RecommendationPolicy.buildPartitions, `${table} must have 64 children`);
+	equal(
+		children.rows.length,
+		RecommendationPolicy.buildPartitions,
+		`${table} must have 64 children`,
+	);
 	for (let bucket = 0; bucket < RecommendationPolicy.buildPartitions; bucket++) {
 		assert.deepEqual(
 			ChildRow.parse(children.rows[bucket]),
@@ -250,7 +271,9 @@ async function scoresOf(snapshotId: string) {
 		.select({ unitId: unitBestScore.unitId, score: unitBestScore.score })
 		.from(unitBestScore)
 		.where(eq(unitBestScore.snapshotId, snapshotId));
-	return rows.map((row) => ScoreRow.parse(row)).sort((left, right) => left.unitId.localeCompare(right.unitId));
+	return rows
+		.map((row) => ScoreRow.parse(row))
+		.sort((left, right) => left.unitId.localeCompare(right.unitId));
 }
 
 async function expectedScores(child: string, watermark: Date, limit: number | null) {
@@ -271,7 +294,11 @@ async function expectedScores(child: string, watermark: Date, limit: number | nu
 		group by unit_id
 		order by unit_id`,
 		limit === null
-			? [watermark, RecommendationPolicy.bestWindowDays, RecommendationPolicy.bestHalfLifeHours * 3600]
+			? [
+					watermark,
+					RecommendationPolicy.bestWindowDays,
+					RecommendationPolicy.bestHalfLifeHours * 3600,
+				]
 			: [
 					watermark,
 					RecommendationPolicy.bestWindowDays,
@@ -282,8 +309,15 @@ async function expectedScores(child: string, watermark: Date, limit: number | nu
 	return result.rows.map((row) => ScoreRow.parse(row));
 }
 
-function scoresMatch(actual: { unitId: string; score: number }[], expected: { unitId: string; score: number }[]) {
-	equal(actual.length, expected.length, "score cardinality drifted from the scanned positive batch");
+function scoresMatch(
+	actual: { unitId: string; score: number }[],
+	expected: { unitId: string; score: number }[],
+) {
+	equal(
+		actual.length,
+		expected.length,
+		"score cardinality drifted from the scanned positive batch",
+	);
 	for (const [index, row] of expected.entries()) {
 		const got = actual[index];
 		checked(got, "missing score row");
@@ -293,6 +327,21 @@ function scoresMatch(actual: { unitId: string; score: number }[], expected: { un
 			`score ${got.unitId} ${got.score} != ${row.score}`,
 		);
 	}
+}
+
+async function installFixtureTrigger() {
+	await pool.query(
+		`create function public.${FixtureFunction}()
+		 returns trigger language plpgsql set search_path = pg_catalog, public as $fail$
+		 begin
+			raise exception 'injected recommendation score write failure' using errcode = '40001';
+		 end
+		 $fail$;
+		 create trigger ${FixtureTrigger}
+		 before insert or update on public.unit_best_score
+		 for each row execute function public.${FixtureFunction}();`,
+	);
+	triggerInstalled.value = true;
 }
 
 async function dropFixtureTrigger() {
@@ -317,6 +366,81 @@ async function dropFixtureTrigger() {
 	triggerInstalled.value = false;
 }
 
+async function drainSnapshot(id: string) {
+	let pages = 0,
+		emptyPages = 0;
+	for (; pages < MaximumFixturePages; pages++) {
+		const lease = await claimRecommendationPartition(database, id);
+		if (!lease) return { pages, emptyPages };
+		const advanced = await advanceRecommendationPartition(database, lease);
+		checked(advanced.status === "done" || advanced.status === "advanced");
+		if (advanced.scannedRows === 0) emptyPages++;
+	}
+	throw new Error("The fixed recommendation fixture exceeded its 128-page budget");
+}
+
+async function advanceSameLeaseConcurrently(
+	lease: z.infer<typeof RecommendationPartitionLeaseSchema>,
+) {
+	const firstPool = new Pool({
+		connectionString,
+		max: 1,
+		application_name: "recommendation-race-first",
+	});
+	const secondPool = new Pool({
+		connectionString,
+		max: 1,
+		application_name: "recommendation-race-second",
+	});
+	const holder = await pool.connect();
+	try {
+		const firstPid = (await firstPool.query("select pg_backend_pid() as pid")).rows[0].pid;
+		const secondPid = (await secondPool.query("select pg_backend_pid() as pid")).rows[0].pid;
+		await holder.query("begin");
+		await holder.query(
+			"select 1 from recommendation_snapshot_partition where snapshot_id=$1 and bucket=$2 for update",
+			[lease.snapshotId, lease.bucket],
+		);
+		const blocker = (await holder.query("select pg_backend_pid() as pid")).rows[0].pid;
+		const working = Promise.all([
+			advanceRecommendationPartition(drizzle({ client: firstPool }), lease),
+			advanceRecommendationPartition(drizzle({ client: secondPool }), lease),
+		]);
+		void working.catch(() => {});
+		try {
+			let blocked = false;
+			for (let attempt = 0; attempt < 200; attempt++) {
+				blocked =
+					(
+						await pool.query(
+							`select
+					($3::integer=any(pg_blocking_pids($1)) or
+					 exists(select 1 from unnest(pg_blocking_pids($1)) waiter where waiter=$2 and $3::integer=any(pg_blocking_pids(waiter))))
+					and ($3::integer=any(pg_blocking_pids($2)) or
+					 exists(select 1 from unnest(pg_blocking_pids($2)) waiter where waiter=$1 and $3::integer=any(pg_blocking_pids(waiter)))) as blocked`,
+							[firstPid, secondPid, blocker],
+						)
+					).rows[0]?.blocked === true;
+				if (blocked) break;
+				await setTimeout(10);
+			}
+			checked(blocked, "Both same-lease workers must wait on the exact partition holder");
+		} finally {
+			await holder.query("commit");
+		}
+		const results = await working;
+		assert.deepEqual(results.map((result) => result.status).sort(), ["advanced", "stale"]);
+		assertions++;
+		equal(
+			results.reduce((sum, result) => sum + result.scannedRows, 0),
+			RecommendationPolicy.buildBatchSize,
+		);
+	} finally {
+		holder.release();
+		await Promise.all([firstPool.end(), secondPool.end()]);
+	}
+}
+
 try {
 	equal(RecommendationPolicy.buildPartitions, 64);
 	equal(RecommendationPolicy.buildBatchSize, 4096);
@@ -335,15 +459,32 @@ try {
 		   and pg_get_expr(ix.indpred, ix.indrelid) like '%weight%0%'`,
 		[childName("recommendation_unit_signal_hourly", 0)],
 	);
-	checked(positiveIndex.rows.length > 0, "positive partial index is missing on the signal relation");
-
-	const leftover = await pool.query(
-		"select id from public.recommendation_snapshot where state = 'building' limit 1",
+	checked(
+		positiveIndex.rows.length > 0,
+		"positive partial index is missing on the signal relation",
 	);
-	checked(leftover.rows.length === 0, "Fixture requires no in-flight recommendation snapshot");
+
+	checked(
+		(await pool.query("select 1 from public.recommendation_snapshot limit 1")).rows.length === 0,
+		"Fixture requires a fresh recommendation snapshot lane",
+	);
+	checked(
+		(await pool.query("select 1 from public.recommendation_unit_signal_hourly limit 1")).rows
+			.length === 0,
+		"Fixture must not mix another signal corpus into its scoring assertions",
+	);
+	checked(
+		(
+			await pool.query(
+				"select to_regprocedure('public.recommendation_build_fixture_fail()') as name",
+			)
+		).rows[0]?.name === null,
+		"Fixture must not replace an existing function",
+	);
 
 	const largeIds = await idsForRemainder(0, 3);
 	const siblingIds = await idsForRemainder(1, 1);
+	const backgroundIds = await idsForRemainder(0, BackgroundUnits);
 	const postA = largeIds[0];
 	const postB = largeIds[1];
 	const workId = largeIds[2];
@@ -359,8 +500,14 @@ try {
 				email: `${crypto.randomUUID()}@example.invalid`,
 				emailVerified: true,
 			})
-			.returning({ id: users.id });
+			.returning();
 		checked(account);
+		const self = await ensureSelfEntityInTransaction(tx, account);
+		const authority = {
+			principal: { kind: "auth" as const, authUserId: account.id },
+			actingEntityId: self.id,
+			authorizationRevision: self.authorizationRevision,
+		};
 		await tx.insert(post).values({
 			id: postA,
 			kind: "post",
@@ -388,28 +535,41 @@ try {
 			publishedAt: sql`clock_timestamp()`,
 			createdByAuthUserId: account.id,
 		});
-		await createCatalogIdentity(
-			tx,
-			{
-				id: workId,
-				owner: "publishing",
-				shape: "work",
-				status: "published",
-				visibility: "public",
-			},
-			account.id,
+		await tx.insert(post).values(
+			backgroundIds.map((id) => ({
+				id,
+				kind: "post" as const,
+				status: "published" as const,
+				visibility: "public" as const,
+				moderationStatus: "approved" as const,
+				publishedAt: sql`clock_timestamp()`,
+				createdByAuthUserId: account.id,
+			})),
 		);
-		await createCatalogIdentity(
-			tx,
-			{
-				id: siblingId,
-				owner: "entity",
-				shape: "person",
-				status: "published",
-				visibility: "public",
-			},
-			account.id,
-		);
+		await runWithParticipationAuthority(authority, async () => {
+			await createCatalogIdentity(
+				tx,
+				{
+					id: workId,
+					owner: "publishing",
+					shape: "work",
+					status: "published",
+					visibility: "public",
+				},
+				account.id,
+			);
+			await createCatalogIdentity(
+				tx,
+				{
+					id: siblingId,
+					owner: "entity",
+					shape: "person",
+					status: "published",
+					visibility: "public",
+				},
+				account.id,
+			);
+		});
 		return account.id;
 	});
 	checked(z.string().uuid().safeParse(actorId).success);
@@ -450,8 +610,35 @@ try {
 		"NaN weights must be rejected",
 	);
 
-	const snapshotId = await admitRecommendationSnapshot(database);
-	checked(snapshotId, "admission must create a building snapshot on a quiet target");
+	const rollbackAdmission = new Error("rollback recommendation admission probe");
+	try {
+		await database.transaction(async (tx) => {
+			checked(
+				await admitRecommendationSnapshot(tx),
+				"admission must create a building snapshot on a quiet target",
+			);
+			throw rollbackAdmission;
+		});
+	} catch (error) {
+		if (error !== rollbackAdmission) throw error;
+	}
+	const snapshotId = await database.transaction(async (tx) => {
+		const [created] = await tx
+			.insert(recommendationSnapshot)
+			.values({
+				policyVersion: RecommendationPolicyVersion,
+				sourceWatermark: sql`date_trunc('hour',clock_timestamp(),'UTC')-interval '1 hour'`,
+			})
+			.returning({ id: recommendationSnapshot.id });
+		checked(created);
+		await tx.insert(recommendationSnapshotPartition).values(
+			Array.from({ length: RecommendationPolicy.buildPartitions }, (_, bucket) => ({
+				snapshotId: created.id,
+				bucket,
+			})),
+		);
+		return created.id;
+	});
 	const snapshot = await pool.query(
 		`select source_watermark from public.recommendation_snapshot where id = $1::uuid`,
 		[snapshotId],
@@ -478,6 +665,13 @@ try {
 		 cross join unnest($4::text[]) as kind`,
 		[watermark, [postA, postB, workId], LargeHours, [...SignalKinds]],
 	);
+	await pool.query(
+		`insert into public.recommendation_unit_signal_hourly (unit_id,bucket_start,kind,signal_count,weight)
+		select unit_id,$1::timestamptz-interval '7 days',kind::recommendation_signal_kind,1,1
+		from unnest($2::uuid[]) unit_id cross join unnest($3::text[]) kind`,
+		[watermark, [postA, postB, workId], [...SignalKinds]],
+	);
+
 	await pool.query(
 		`insert into public.${largeChild} (unit_id, bucket_start, kind, signal_count, weight, unit_post_id)
 		 values ($1::uuid, $2::timestamptz - interval '93 hours', 'upvote', 1, 2, $1::uuid)`,
@@ -519,6 +713,12 @@ try {
 	);
 	const positiveTotal = CountRow.parse(positiveLarge.rows[0]).n;
 
+	await pool.query(
+		`insert into public.recommendation_unit_signal_hourly (unit_id,bucket_start,kind,signal_count,weight)
+		select unit_id,$1::timestamptz-hour_offset*interval '1 hour',kind::recommendation_signal_kind,1,0
+		from unnest($2::uuid[]) unit_id cross join generate_series(1,$3::integer) hour_offset cross join unnest($4::text[]) kind`,
+		[watermark, backgroundIds, BackgroundHours, [...SignalKinds]],
+	);
 	await pool.query(`analyze public.${largeChild}`);
 	const workerSql = `select unit_id, bucket_start, kind, weight from public.${largeChild}
 		where bucket_start >= $1::timestamptz - interval '7 days'
@@ -533,9 +733,16 @@ try {
 		forcedPositive.relations.every((name) => name === largeChild || name.startsWith(largeChild)),
 		`positive query escaped child ${largeChild}: ${forcedPositive.relations.join(",")}`,
 	);
-	checked(!forcedPositive.nodes.includes("Append"), "child query must not append sibling partitions");
+	checked(
+		!forcedPositive.nodes.includes("Append"),
+		"child query must not append sibling partitions",
+	);
 	const naturalPositive = explainTree(
 		(await pool.query(`explain (analyze, buffers, format json) ${workerSql}`, [watermark])).rows,
+	);
+	checked(
+		naturalPositive.indexes.length > 0,
+		"Sparse positive workload must have a natural indexed scan",
 	);
 	const positiveMs = naturalPositive.executionTime;
 	checked(positiveMs !== undefined, "positive query EXPLAIN lacked Execution Time");
@@ -597,19 +804,7 @@ try {
 	equal((await partitionOf(snapshotId, 0)).generation, reclaimed.generation);
 	equal((await partitionOf(snapshotId, 0)).scannedRows, 0n);
 
-	await pool.query(
-		`create or replace function public.${FixtureFunction}()
-		 returns trigger language plpgsql set search_path = pg_catalog, public as $fail$
-		 begin
-			raise exception 'injected recommendation score write failure' using errcode = '40001';
-		 end
-		 $fail$;
-		 drop trigger if exists ${FixtureTrigger} on public.unit_best_score;
-		 create trigger ${FixtureTrigger}
-		 before insert or update on public.unit_best_score
-		 for each row execute function public.${FixtureFunction}();`,
-	);
-	triggerInstalled.value = true;
+	await installFixtureTrigger();
 	await rejectsCode(
 		() => advanceRecommendationPartition(database, lease1),
 		"40001",
@@ -621,11 +816,18 @@ try {
 	equal(rolled.leaseToken, lease1.token);
 	equal(rolled.scannedRows, 0n);
 	equal(rolled.afterUnitId, null);
-	equal((await scoresOf(snapshotId)).length, 0, "failed score write must not leave a checkpointed score");
+	equal(
+		(await scoresOf(snapshotId)).length,
+		0,
+		"failed score write must not leave a checkpointed score",
+	);
 	await dropFixtureTrigger();
 	const recovered = await advanceRecommendationPartition(database, lease1);
 	equal(recovered.status, "done");
-	checked(recovered.scannedRows > 0, "sibling partition must write positive scores after the trigger is removed");
+	checked(
+		recovered.scannedRows > 0,
+		"sibling partition must write positive scores after the trigger is removed",
+	);
 	equal((await partitionOf(snapshotId, 1)).state, "done");
 	const siblingScores = await scoresOf(snapshotId);
 	checked(siblingScores.some((row) => row.unitId === siblingId));
@@ -686,12 +888,7 @@ try {
 	);
 
 	const drainStarted = performance.now();
-	for (;;) {
-		const lease = await claimRecommendationPartition(database, snapshotId);
-		if (!lease) break;
-		const advanced = await advanceRecommendationPartition(database, lease);
-		checked(advanced.status === "done" || advanced.status === "advanced");
-	}
+	const firstDrain = await drainSnapshot(snapshotId);
 	timings.drainMs = performance.now() - drainStarted;
 	const remaining = await pool.query(
 		`select state, count(*)::int as n from public.recommendation_snapshot_partition
@@ -724,35 +921,33 @@ try {
 	);
 	await rejectsCode(
 		() =>
-			pool.query(`update public.unit_best_score set score = score + 1 where snapshot_id = $1::uuid`, [
-				snapshotId,
-			]),
+			pool.query(
+				`update public.unit_best_score set score = score + 1 where snapshot_id = $1::uuid`,
+				[snapshotId],
+			),
 		"23514",
 		"ready score updates are forbidden",
 	);
-	scoresMatch(withoutSibling(await scoresOf(snapshotId)), await expectedScores(largeChild, watermark, null));
+	scoresMatch(
+		withoutSibling(await scoresOf(snapshotId)),
+		await expectedScores(largeChild, watermark, null),
+	);
 
 	const priorActive = await pool.query(
 		`select id from public.recommendation_snapshot where active is true`,
 	);
 	equal(IdRow.parse(priorActive.rows[0]).id, snapshotId);
-	const buildingId = await database.transaction(async (tx) => {
-		const [created] = await tx
-			.insert(recommendationSnapshot)
-			.values({
-				policyVersion: RecommendationPolicyVersion,
-				sourceWatermark: sql`date_trunc('hour', clock_timestamp(), 'UTC') - interval '1 hour'`,
-			})
-			.returning({ id: recommendationSnapshot.id });
-		checked(created);
-		await tx.insert(recommendationSnapshotPartition).values(
-			Array.from({ length: RecommendationPolicy.buildPartitions }, (_, bucket) => ({
-				snapshotId: created.id,
-				bucket,
-			})),
-		);
-		return created.id;
-	});
+	const buildingId = await admitRecommendationSnapshot(database);
+	checked(buildingId, "A newer current-hour generation must be admitted");
+	const [building] = await database
+		.select()
+		.from(recommendationSnapshot)
+		.where(eq(recommendationSnapshot.id, buildingId));
+	checked(
+		building?.sourceWatermark && building.sourceWatermark > watermark,
+		"The replacement must use a newer cut",
+	);
+
 	const stillActive = await pool.query(
 		`select id, state from public.recommendation_snapshot where id = $1::uuid`,
 		[snapshotId],
@@ -768,12 +963,55 @@ try {
 		"prior ready snapshot must remain active while the next snapshot is building",
 	);
 	equal(await finalizeRecommendationSnapshot(database, buildingId), "building");
-	for (;;) {
-		const lease = await claimRecommendationPartition(database, buildingId);
-		if (!lease) break;
-		const advanced=await advanceRecommendationPartition(database,lease);
-		checked(advanced.status==="advanced"||advanced.status==="done","the next snapshot also requires bounded repeated partition batches");
-	}
+	const secondLease = await claimRecommendationPartition(database, buildingId);
+	checked(secondLease);
+	equal(secondLease.bucket, 0);
+	const priorScores = await scoresOf(snapshotId);
+	await installFixtureTrigger();
+	await rejectsCode(() => advanceRecommendationPartition(database, secondLease), "40001");
+	await failRecommendationPartition(
+		database,
+		secondLease,
+		new Error("Injected second-generation failure"),
+	);
+	equal((await partitionOf(buildingId, 0)).scannedRows, 0n);
+	equal((await partitionOf(buildingId, 0)).state, "pending");
+	equal((await scoresOf(buildingId)).length, 0);
+	assert.deepEqual(await scoresOf(snapshotId), priorScores);
+	assertions++;
+	equal(
+		(
+			await pool.query("select active from public.recommendation_snapshot where id=$1", [
+				snapshotId,
+			])
+		).rows[0]?.active,
+		true,
+	);
+	equal(await finalizeRecommendationSnapshot(database, buildingId), "building");
+	await dropFixtureTrigger();
+	await pool.query(
+		`select pg_sleep(greatest(0,extract(epoch from (next_attempt_at-clock_timestamp())))+0.025)
+		from recommendation_snapshot_partition where snapshot_id=$1::uuid and bucket=0`,
+		[buildingId],
+	);
+	const retryLease = await claimRecommendationPartition(database, buildingId);
+	checked(retryLease);
+	equal(retryLease.bucket, 0);
+	await advanceSameLeaseConcurrently(retryLease);
+	scoresMatch(
+		(await scoresOf(buildingId)).filter((row) => row.unitId !== siblingId),
+		await expectedScores(largeChild, building.sourceWatermark, RecommendationPolicy.buildBatchSize),
+	);
+	equal(await finalizeRecommendationSnapshot(database, buildingId), "building");
+	const secondDrain = await drainSnapshot(buildingId);
+	const secondPartition = await partitionOf(buildingId, 0);
+	equal(secondPartition.scannedRows, BigInt(RecommendationPolicy.buildBatchSize));
+	equal(
+		secondPartition.generation,
+		3,
+		"One failed claim, one full batch and an empty terminal page must each have their own lease",
+	);
+
 	equal(await finalizeRecommendationSnapshot(database, buildingId), "ready");
 	equal(
 		(
@@ -785,9 +1023,10 @@ try {
 	);
 	equal(
 		(
-			await pool.query(`select active, state from public.recommendation_snapshot where id = $1::uuid`, [
-				buildingId,
-			])
+			await pool.query(
+				`select active, state from public.recommendation_snapshot where id = $1::uuid`,
+				[buildingId],
+			)
 		).rows[0]?.active,
 		true,
 	);
@@ -800,17 +1039,52 @@ try {
 		"ready",
 	);
 
+	const repository = new URL("../../../", import.meta.url),
+		sourceDigests: Record<string, string> = {};
+	for (const path of [
+		"services/main/scripts/check-recommendation-build.ts",
+		"services/main/src/services/recommendations/build-partitions.ts",
+		"services/main/src/services/recommendations/policy.ts",
+		"services/main/src/services/database/schema/recommendation.ts",
+		"services/main/src/services/database/schema/postgres/recommendation-build.sql",
+		"services/main/src/services/database/migrations/atlas.sum",
+	])
+		sourceDigests[path] = createHash("sha256")
+			.update(await readFile(new URL(path, repository)))
+			.digest("hex");
+
 	console.info(
 		JSON.stringify({
+			baseCommit: execFileSync("git", ["rev-parse", "HEAD"], {
+				cwd: fileURLToPath(repository),
+				encoding: "utf8",
+			}).trim(),
+			sourceDigests,
+			node: process.version,
+			platform: `${process.platform}/${process.arch}`,
+			runtime: (
+				await pool.query(
+					"select version() as postgres,current_setting('default_transaction_isolation') as default_isolation",
+				)
+			).rows[0],
 			assertions,
+			firstDrain,
+			secondDrain,
+			secondGenerationAfterFailure: true,
+			exactBatchEndsWithEmptyPage: true,
+			sameLeaseConcurrentAdvanceFenced: true,
 			timings,
 			positiveTotal,
+			zeroWeightBackgroundRows: BackgroundUnits * BackgroundHours * SignalKinds.length,
+			naturalPositivePlan: JSON.parse(naturalPositive.text),
+			forcedPlansAreDiagnosticsOnly: true,
 			page1: page1.scannedRows,
 			page2: page2.scannedRows,
 			naturalPositiveNodes: naturalPositive.nodes,
 			pointControlIndexes: pointControl.indexes,
 			pointScoreIndexes: pointScore.indexes,
-			scope: "disposable SQL qualification for recommendations/build-partitions.ts; not executed against live DDL in this packet",
+			scope:
+				"native PostgreSQL qualification for snapshot partitions and activation; fixture history retained",
 			untestedRuntime: [
 				"dispatchRecommendationRefresh / worker tick / RECOMMENDATION_REFRESH_INTERVAL_MS",
 				"purgeRecommendationData retention deletes",
@@ -820,7 +1094,6 @@ try {
 				"failRecommendationPartition retry/backoff to 12 failures",
 				"buildDeadlineMs snapshot expiry",
 				"admitRecommendationSnapshot 17-snapshot retention backpressure",
-				"same-bucket concurrent advance",
 				"500_000_000-row and 3_000_000_000-row corpus cost",
 			],
 		}),

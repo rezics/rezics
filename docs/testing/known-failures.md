@@ -25,10 +25,3 @@ Compare JIT on/off and the same image/workload on a separate Linux host; retain 
 ## Fresh schema replay abort
 
 The September 8 convergence qualification recorded a PostgreSQL SIGILL during Atlas bookkeeping after schema statements. The underlying cause was not established. The current target must pass a fresh replay with exact generated inputs and engine diagnostics; a different successful replay does not close this observation.
-
-## Integration recovery gaps
-
-- Native merge application/recovery: [private review/reconciliation](foundation.md#native-merge-review-and-reconciliation) and [structure-page worker crash/reclaim/replay with current executor finalization](foundation.md#merge-worker-rollback-replay-and-current-executor) pass. [Reviewer authority at canonicalization is now qualified](foundation.md#reviewer-receipts-and-canonicalization-authority). [Canonicalization/name/binding crash recovery also passes](foundation.md#native-merge-phase-recovery). Complete backup/restore and whole-system recovery; the selected process/transaction cases do not qualify those boundaries.
-- Recommendation generation: the prior fixture exercised partition writes/fencing but did not finish its second snapshot. Require repeated bounded batches, preserved old active snapshot, complete activation and crash recovery.
-
-These are acceptance obligations in M06/M09. Re-evaluate against current code before claiming the old failure still reproduces, and remove each entry only after its lasting regression/qualification evidence is in the owning suite.

@@ -10,6 +10,7 @@ Testing follows [the implementation plan](../plan/README.md): shared schema desi
 | [Book and creation](book-and-creation.md) | Complete Book, original and AO3-derived native workflows. |
 | [Relationship Graph](relationship-graph.md) | Subgraph semantics, permissions, budgets and Block descriptor contracts. |
 | [Skill/Prompt/MCP Hub](ai-hub.md) | Catalog/package/template and controlled protocol conformance. |
+| [Recommendation generations](recommendations.md) | Bounded partition scoring, repeated snapshots, failure/replay and atomic activation. |
 | [Backend integration](backend-integration.md) | Cross-module security, concurrent state, jobs, recovery and load. |
 | [Known failures](known-failures.md) | Open regressions with reproducible diagnostics; remove after lasting test coverage closes them. |
 
