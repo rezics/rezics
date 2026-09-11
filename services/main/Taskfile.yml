@@ -403,7 +403,7 @@ tasks:
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-platform-user-authority.ts
 
     db:account-participation:check:
-        desc: Verify account enforcement on membership writes and catalog intake, including both transaction orders and signed-session APIs.
+        desc: Verify account state/enforcement on Favorites, membership and catalog intake, including both transaction orders and signed-session APIs.
         cmds:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-account-participation.ts

@@ -1,5 +1,7 @@
 import { and, desc, eq, gt, isNull, lt, ne } from "drizzle-orm";
 import { z } from "zod";
+import { Authorization } from "../authorization";
+import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
 import type { DatabaseTransaction } from "../database";
 import { users } from "../database/schema/auth";
 import { authEntity } from "../database/schema/participation";
@@ -33,7 +35,11 @@ import {
 
 import { FavoriteNotFound, FavoriteRevisionConflict } from "./errors";
 
-async function admitFavorites(tx: DatabaseTransaction, authority: ParticipationAuthority) {
+async function admitFavorites(
+	tx: DatabaseTransaction,
+	authority: ParticipationAuthority,
+	action: "read" | "write" = "read",
+) {
 	if (authority.principal.kind !== "auth")
 		throw new ParticipationDenied("Favorites require a human account");
 	const authUserId = authority.principal.authUserId;
@@ -53,6 +59,11 @@ async function admitFavorites(tx: DatabaseTransaction, authority: ParticipationA
 		.limit(1)
 		.for("share");
 	if (!account) throw new ParticipationDenied("Account is unavailable");
+	await ensureAccountAuthenticationAllowed(authUserId, tx);
+	if (action === "write")
+		await new Authorization(authority.actingEntityId, authUserId, authority).account.ensureCanWrite(
+			tx,
+		);
 	// A selected organization never changes ownership of personal Favorites.
 	return { authUserId, selfEntityId: account.selfEntityId };
 }
@@ -268,7 +279,7 @@ export async function saveFavorite(
 	input: z.input<typeof SaveFavoriteSchema>,
 	restoreRevision?: number,
 ) {
-	const { authUserId, selfEntityId } = await admitFavorites(tx, authority);
+	const { authUserId, selfEntityId } = await admitFavorites(tx, authority, "write");
 	const value = SaveFavoriteSchema.parse(input);
 	z.uuid().parse(targetUnitId);
 	const revision = await lockFavorites(tx, authUserId, value.expectedRevision);
@@ -369,7 +380,7 @@ export async function deleteFavorite(
 	targetUnitId: string,
 	expectedRevision: number,
 ) {
-	const { authUserId } = await admitFavorites(tx, authority);
+	const { authUserId } = await admitFavorites(tx, authority, "write");
 	const revision = await lockFavorites(
 		tx,
 		authUserId,

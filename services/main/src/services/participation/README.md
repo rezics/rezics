@@ -186,13 +186,13 @@ above still requiring production qualification. The referencing indexes also
 bound follow deletion to its single preference, consistent with PostgreSQL's
 [foreign-key indexing guidance](https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-FK).
 
-`scripts/check-private-account-lifecycle.ts` passed 32 assertions on the generated
-60-migration disposable target. It uses the real service commands and PostgreSQL:
+The [native private lifecycle fixture](../../../../../docs/testing/foundation.md#favorites-reference-consumer-and-private-lifecycle)
+uses real service commands and PostgreSQL:
 515 public follows with 512 invisible candidates, cursor continuation, wrong
 Auth/self and missing-follow FK denial, exact Favorites lookup, stale revision
 denial, save/delete/restore/history, immutable private history before erasure,
-all durable cleanup stages and unrelated-account survival. Every fixture row
-rolls back. Its 502-object versioned archive is an in-memory test double: it
+all durable cleanup stages and unrelated-account survival. The main scenario rolls back; race actors remain only in the disposable database.
+Its 502-object versioned archive is an in-memory test double: it
 proves orchestration and retained-empty-fence behavior, not live S3/R2 races or
 retention qualification. The independently tested missing/nonempty/truncated
 fence and oversized-page failures leave erasure incomplete.
@@ -297,11 +297,26 @@ These requirements follow the documented [AWS presigned URL reuse semantics](htt
 [bounded multi-object deletion](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html)
 and [R2's conditional-write and listing support](https://developers.cloudflare.com/r2/api/s3/api/).
 
+Favorites reads revalidate current sign-in state after locking the Auth account
+and self binding. Account suspension or closure blocks current entries, lists
+and private history even for a request admitted earlier. Save/delete/restore
+also recheck the shared account write policy inside that transaction. A ban or
+enforcement suspension blocks these writes while retaining private read access;
+silence permits private Favorites edits. Restoring account eligibility does not
+reset the Favorites revision or erase captured content.
+
 ### Private workload estimates and remaining qualification
 
 Assume 500 Favorites mutations/second, 5,000 ordered reads/second and 1,000 active
 erasure jobs spread across accounts; hot-account operations serialize on that
 account's state row. These are capacity scenarios, not measured production rates.
+Current account-state admission adds two primary-key reads per Favorites entry
+point. A write adds the account authorizer's row-lock read and one indexed
+enforcement query. At the stated rates, budget 10,000 additional point reads/s
+for list admission and 2,000 additional statements/s for writes; restore invokes
+history admission as well and adds two more point reads. No storage or index
+change accompanies these checks. Sustained latency, enforcement-history tails
+and account-lock wait still require workload qualification.
 With a 1.6 KiB mean entry including indexes, 500M current Favorites require about
 819.2 GB and 3B require about 4.9152 TB. At a 1.7 KiB mean history row including indexes,
 500M revisions require about 870.4 GB and 3B about 5.2224 TB (decimal storage units). A mutation writes a current

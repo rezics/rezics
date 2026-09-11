@@ -15,6 +15,8 @@ import {
 } from "../src/services/database";
 import {
 	users,
+	post,
+	accountFavorite,
 	platformCapabilityGrant,
 	realm,
 	realmRule,
@@ -26,6 +28,17 @@ import {
 } from "../src/services/database/schema";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { createGovernanceDecision } from "../src/services/governance/decision-service";
+import { Authorization } from "../src/services/authorization";
+import { AccountSuspended, AccountClosed } from "../src/services/auth/errors";
+import { replacePlatformUserAccountState } from "../src/services/platform-users/service";
+import {
+	saveFavorite,
+	deleteFavorite,
+	readFavorite,
+	listFavorites,
+	listFavoriteHistory,
+	readFavoriteRevision,
+} from "../src/services/favorites/service";
 import { AccountRestricted } from "../src/services/authorization/errors";
 import { createManagedOrganization } from "../src/services/participation/organizations";
 import {
@@ -63,6 +76,14 @@ async function rejected(
 ) {
 	await assert.rejects(tx.transaction(work), AccountRestricted);
 	checks++;
+}
+async function favoriteTarget(tx: DatabaseTransaction) {
+	const [target] = await tx
+		.insert(post)
+		.values({ visibility: "public", status: "published", publishedAt: new Date() })
+		.returning({ id: post.id });
+	assert.ok(target);
+	return target.id;
 }
 async function actor(tx: DatabaseTransaction, name: string) {
 	const [account] = await tx
@@ -296,6 +317,109 @@ try {
 			await enforce(tx, operator, other, "ban", { startsAt: new Date(now + 60000) });
 			assert.ok(await contribute(tx, other));
 			checks++;
+			const favoriteOwner = await actor(tx, "Favorite enforced owner"),
+				favoriteId = await favoriteTarget(tx);
+			await saveFavorite(tx, favoriteOwner.authority, favoriteId, {
+				expectedRevision: 0,
+				note: "Retained private note",
+			});
+			const favoriteBan = await enforce(tx, operator, favoriteOwner, "ban");
+			await rejected(tx, (nested) =>
+				saveFavorite(nested, favoriteOwner.authority, favoriteId, {
+					expectedRevision: 1,
+					note: "Denied edit",
+				}),
+			);
+			await rejected(tx, (nested) =>
+				deleteFavorite(nested, favoriteOwner.authority, favoriteId, 1),
+			);
+			await rejected(tx, (nested) =>
+				saveFavorite(nested, favoriteOwner.authority, favoriteId, { expectedRevision: 1 }, 1),
+			);
+			check(
+				(await readFavorite(tx, favoriteOwner.authority, favoriteId)).entry?.note,
+				"Retained private note",
+				"ban preserves private saved content and read access",
+			);
+			check(
+				(await listFavoriteHistory(tx, favoriteOwner.authority, favoriteId)).items.length,
+				1,
+				"denied favorite mutations append no history",
+			);
+			await revoke(tx, operator, favoriteBan);
+			await enforce(tx, operator, favoriteOwner, "silence");
+			check(
+				(await saveFavorite(tx, favoriteOwner.authority, favoriteId, { expectedRevision: 1 }))
+					.revision,
+				2,
+				"silence permits private Favorite writes",
+			);
+			await tx.insert(platformCapabilityGrant).values({
+				authUserId: operator.account.id,
+				capability: "platform.user.status.update",
+				grantedByAuthUserId: operator.account.id,
+			});
+			const authorization = new Authorization(
+				operator.self.id,
+				operator.account.id,
+				operator.authority,
+			);
+			const invitation = await inviteOrganizationMember(tx, org.authority, org.entityId, {
+				recipientEntityId: favoriteOwner.self.id,
+			});
+			await replacePlatformUserAccountState({
+				authorization,
+				targetUserId: favoriteOwner.account.id,
+				command: { state: "suspended", expectedRevision: 0, rules: [rule] },
+			});
+			const favoriteReads = [
+				(nested: DatabaseTransaction) => listFavorites(nested, favoriteOwner.authority, {}),
+				(nested: DatabaseTransaction) => readFavorite(nested, favoriteOwner.authority, favoriteId),
+				(nested: DatabaseTransaction) =>
+					listFavoriteHistory(nested, favoriteOwner.authority, favoriteId),
+				(nested: DatabaseTransaction) =>
+					readFavoriteRevision(nested, favoriteOwner.authority, favoriteId, 1),
+			];
+			for (const work of [
+				...favoriteReads,
+				(nested: DatabaseTransaction) =>
+					saveFavorite(nested, favoriteOwner.authority, favoriteId, { expectedRevision: 2 }),
+				(nested: DatabaseTransaction) =>
+					acceptMembershipInvitation(nested, favoriteOwner.authority, invitation.id, 1),
+			]) {
+				await assert.rejects(tx.transaction<unknown>(work), AccountSuspended);
+				checks++;
+			}
+			await replacePlatformUserAccountState({
+				authorization,
+				targetUserId: favoriteOwner.account.id,
+				command: { state: "active", expectedRevision: 1, rules: [rule] },
+			});
+			check(
+				(await saveFavorite(tx, favoriteOwner.authority, favoriteId, { expectedRevision: 2 }, 1))
+					.revision,
+				3,
+				"account restoration re-enables a permitted Favorite restore",
+			);
+			check(
+				(await acceptMembershipInvitation(tx, favoriteOwner.authority, invitation.id, 1)).state,
+				"accepted",
+				"restored sign-in status re-enables membership consent",
+			);
+			await replacePlatformUserAccountState({
+				authorization,
+				targetUserId: favoriteOwner.account.id,
+				command: { state: "closed", expectedRevision: 2, rules: [rule] },
+			});
+			for (const work of [
+				...favoriteReads,
+				(nested: DatabaseTransaction) =>
+					deleteFavorite(nested, favoriteOwner.authority, favoriteId, 3),
+			]) {
+				await assert.rejects(tx.transaction<unknown>(work), AccountClosed);
+				checks++;
+			}
+
 			throw rollback;
 		}),
 	);
@@ -317,7 +441,7 @@ async function blocked(pid: number, blocker: number) {
 	throw new Error("Expected the exact account-fence blocker");
 }
 try {
-	for (const operation of ["membership", "contribution"] as const) {
+	for (const operation of ["membership", "contribution", "favorite"] as const) {
 		const setup = await raceDb.transaction(async (tx) => {
 			const operator = await actor(tx, "Concurrent enforcement operator"),
 				owner = await actor(tx, "Concurrent inviter"),
@@ -326,7 +450,7 @@ try {
 			const invitation = await inviteOrganizationMember(tx, org.authority, org.entityId, {
 				recipientEntityId: guest.self.id,
 			});
-			return { operator, guest, org, invitation };
+			return { operator, guest, org, invitation, favoriteId: await favoriteTarget(tx) };
 		});
 		const held = Promise.withResolvers<number>(),
 			release = Promise.withResolvers<void>(),
@@ -346,7 +470,9 @@ try {
 			);
 			return operation === "membership"
 				? acceptMembershipInvitation(tx, setup.guest.authority, setup.invitation.id, 1)
-				: contribute(tx, setup.guest);
+				: operation === "favorite"
+					? saveFavorite(tx, setup.guest.authority, setup.favoriteId, { expectedRevision: 0 })
+					: contribute(tx, setup.guest);
 		});
 		void mutation.catch(waiting.reject);
 		const denied = assert.rejects(mutation, AccountRestricted);
@@ -385,9 +511,20 @@ try {
 			"pending",
 			"denied admission does not consume the invitation",
 		);
+		if (operation === "favorite")
+			check(
+				(
+					await raceDb
+						.select()
+						.from(accountFavorite)
+						.where(eq(accountFavorite.authUserId, setup.guest.account.id))
+				).length,
+				0,
+				"enforcement-first favorite writes no saved entry",
+			);
 	}
 
-	for (const operation of ["membership", "contribution"] as const) {
+	for (const operation of ["membership", "contribution", "favorite"] as const) {
 		const setup = await raceDb.transaction(async (tx) => {
 			const operator = await actor(tx, "Admission-first enforcer"),
 				owner = await actor(tx, "Admission-first inviter"),
@@ -396,7 +533,7 @@ try {
 			const invitation = await inviteOrganizationMember(tx, org.authority, org.entityId, {
 				recipientEntityId: guest.self.id,
 			});
-			return { operator, guest, org, invitation };
+			return { operator, guest, org, invitation, favoriteId: await favoriteTarget(tx) };
 		});
 		const held = Promise.withResolvers<number>(),
 			release = Promise.withResolvers<void>(),
@@ -405,7 +542,11 @@ try {
 			const result =
 				operation === "membership"
 					? await acceptMembershipInvitation(tx, setup.guest.authority, setup.invitation.id, 1)
-					: await contribute(tx, setup.guest);
+					: operation === "favorite"
+						? await saveFavorite(tx, setup.guest.authority, setup.favoriteId, {
+								expectedRevision: 0,
+							})
+						: await contribute(tx, setup.guest);
 			assert.ok(result);
 			checks++;
 			held.resolve(
@@ -445,6 +586,17 @@ try {
 			AccountRestricted,
 		);
 		checks++;
+		if (operation === "favorite")
+			check(
+				(
+					await raceDb
+						.select()
+						.from(accountFavorite)
+						.where(eq(accountFavorite.authUserId, setup.guest.account.id))
+				).length,
+				1,
+				"later enforcement retains the committed favorite",
+			);
 	}
 } finally {
 	await pool.end();
@@ -558,6 +710,8 @@ const repository = new URL("../../../", import.meta.url),
 	sourceDigests: Record<string, string> = {};
 for (const path of [
 	"services/main/scripts/check-account-participation.ts",
+	"services/main/src/services/favorites/service.ts",
+	"services/main/src/services/platform-users/service.ts",
 	"services/main/src/services/participation/membership.ts",
 	"services/main/src/services/api/participation/membership.ts",
 	"services/main/src/services/participation/policy.ts",
@@ -584,6 +738,7 @@ console.info(
 		).rows[0],
 		checks,
 		httpChecks,
+		favoritesAccountAdmissionQualified: true,
 		membershipEnforcementQualified: true,
 		contributionEnforcementQualified: true,
 	}),

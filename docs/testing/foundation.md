@@ -278,7 +278,7 @@ enforcement, Realm authority, restoration or 500M/3B throughput.
 
 `task services-main:db:account-participation:check` runs
 [check-account-participation.ts](../../services/main/scripts/check-account-participation.ts).
-The [pinned run](database/account-participation-evidence.json) passes 39 assertions,
+The [pinned run](database/account-participation-evidence.json) passes 68 assertions,
 including five signed-session API requests. Its first pre-fix case admitted a
 banned recipient to an organization. Membership changes now apply the shared
 account write policy to each operator and, at acceptance, the captured inviter.
@@ -298,7 +298,16 @@ OpenAPI and all three SDKs carry the membership error union. Scenario transactio
 roll back; race/API actors and first-party rule setup remain only in the
 explicitly disposable database. No external invitation or message is delivered.
 
-This is account-enforcement qualification for these paths, separate from binding
-suspension/recovery, Realm membership, other account-state transitions and whole
-restoration-frontier coverage. The membership owner records added query demand
+The same fixture covers current Favorites reads, lists and history after account
+suspension/closure; denied save/delete/restore during a ban; private read access
+under enforcement; silence permitting saved-content edits; and restoration
+preserving Favorites revisions. The pre-fix service accepted an update during
+an active ban. Favorites now checks current account state after its account and
+binding locks and applies the account write policy to mutations. Independent
+connections exercise enforcement-first and Favorite-first commit orders without
+losing a previously committed entry. Account-state restoration also re-enables
+membership acceptance when the original invitation's other authority remains valid.
+
+This qualifies the tested account-state and enforcement paths, separate from
+binding recovery, Realm membership and whole restoration-frontier coverage. The membership owner records added query demand
 under the unchanged 500M/3B workload envelope; this run is not load acceptance.

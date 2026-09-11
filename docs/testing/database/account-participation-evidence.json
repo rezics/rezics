@@ -1,7 +1,9 @@
 {
-  "baseCommit": "433299ffedf788abd65399c5786f80d37514edf7",
+  "baseCommit": "db4d0b43382cf46ac4de7b544809e9508ca0586e",
   "sourceDigests": {
-    "services/main/scripts/check-account-participation.ts": "1260e0e1492d616dee042cbed36c0cc4c5ccbcf0f3779cf9aa9d37cec89760df",
+    "services/main/scripts/check-account-participation.ts": "db04bd0ff3e630e5fea0f5909704753a0dd29a446d07851b3799aa36c45615ad",
+    "services/main/src/services/favorites/service.ts": "79297a75a151d71475fc89b5746beabcb0e41f732a0cb3836872c04b2088f40d",
+    "services/main/src/services/platform-users/service.ts": "cc86edbba2488532e883d1dee1592d36fb18e2844740f6c4b18ee9ec27ec3d48",
     "services/main/src/services/participation/membership.ts": "411f4683a409337eb9631b19310750b2e95f5e1b7d01d10b68374a8aec2d4801",
     "services/main/src/services/api/participation/membership.ts": "6cc88d29eb3788234cd2010edab49565b44512986ad42f0ff6222463dfd8b653",
     "services/main/src/services/participation/policy.ts": "72fca3598c299c53628403ec66ac540a48081369f7d94340a16f474bc775ad2a",
@@ -15,25 +17,23 @@
     "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
     "default_isolation": "read committed"
   },
-  "checks": 39,
+  "checks": 68,
   "httpChecks": 5,
+  "favoritesAccountAdmissionQualified": true,
   "membershipEnforcementQualified": true,
   "contributionEnforcementQualified": true,
   "verification": {
     "command": "DATABASE_ADMIN_URL=<disposable target> task services-main:db:account-participation:check",
     "passed": true,
     "typechecksPassed": [
-      "main",
-      "openapi-fetch",
-      "openapi-tanstack-query",
-      "public-sdk",
-      "web"
+      "main"
     ],
-    "openapiGenerated": true,
     "testFilesPassed": 332,
     "testsPassed": 1788,
-    "schemaChanges": false,
-    "membershipLifecycleAssertions": 76,
-    "membershipLifecyclePassed": true
+    "privateLifecycleAssertions": 49,
+    "privateLifecycleRaces": 4,
+    "privateLifecyclePassed": true,
+    "publicContractChanged": false,
+    "schemaChanges": false
   }
 }
