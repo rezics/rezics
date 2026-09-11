@@ -37,12 +37,12 @@
       "rows_per_root": "1.2",
       "modeled_rows": 600000000,
       "heap_bytes_per_row": 112,
-      "index_bytes_per_row": 144,
+      "index_bytes_per_row": 216,
       "external_payload_bytes_per_row": 0,
-      "native_bytes": 153600000000,
+      "native_bytes": 196800000000,
       "external_payload_bytes": 0,
-      "standalone_500m_rows_native_bytes": 128000000000,
-      "standalone_3b_rows_native_bytes": 768000000000
+      "standalone_500m_rows_native_bytes": 164000000000,
+      "standalone_3b_rows_native_bytes": 984000000000
     },
     {
       "scenario": "catalog",
@@ -51,12 +51,12 @@
       "rows_per_root": "1.2",
       "modeled_rows": 3600000000,
       "heap_bytes_per_row": 112,
-      "index_bytes_per_row": 144,
+      "index_bytes_per_row": 216,
       "external_payload_bytes_per_row": 0,
-      "native_bytes": 921600000000,
+      "native_bytes": 1180800000000,
       "external_payload_bytes": 0,
-      "standalone_500m_rows_native_bytes": 128000000000,
-      "standalone_3b_rows_native_bytes": 768000000000
+      "standalone_500m_rows_native_bytes": 164000000000,
+      "standalone_3b_rows_native_bytes": 984000000000
     },
     {
       "scenario": "catalog",
@@ -821,12 +821,12 @@
       "rows_per_root": "1.2",
       "modeled_rows": 600000000,
       "heap_bytes_per_row": 112,
-      "index_bytes_per_row": 144,
+      "index_bytes_per_row": 216,
       "external_payload_bytes_per_row": 0,
-      "native_bytes": 153600000000,
+      "native_bytes": 196800000000,
       "external_payload_bytes": 0,
-      "standalone_500m_rows_native_bytes": 128000000000,
-      "standalone_3b_rows_native_bytes": 768000000000
+      "standalone_500m_rows_native_bytes": 164000000000,
+      "standalone_3b_rows_native_bytes": 984000000000
     },
     {
       "scenario": "social",
@@ -835,12 +835,12 @@
       "rows_per_root": "1.2",
       "modeled_rows": 3600000000,
       "heap_bytes_per_row": 112,
-      "index_bytes_per_row": 144,
+      "index_bytes_per_row": 216,
       "external_payload_bytes_per_row": 0,
-      "native_bytes": 921600000000,
+      "native_bytes": 1180800000000,
       "external_payload_bytes": 0,
-      "standalone_500m_rows_native_bytes": 128000000000,
-      "standalone_3b_rows_native_bytes": 768000000000
+      "standalone_500m_rows_native_bytes": 164000000000,
+      "standalone_3b_rows_native_bytes": 984000000000
     },
     {
       "scenario": "social",
@@ -1687,14 +1687,14 @@
     {
       "scenario": "catalog",
       "roots": 500000000,
-      "native": 27468800000000,
+      "native": 27512000000000,
       "payload": 6144000000000,
       "rows": 83175000000
     },
     {
       "scenario": "catalog",
       "roots": 3000000000,
-      "native": 164812800000000,
+      "native": 165072000000000,
       "payload": 36864000000000,
       "rows": 499050000000
     },
@@ -1729,14 +1729,14 @@
     {
       "scenario": "social",
       "roots": 500000000,
-      "native": 4852480000000,
+      "native": 4895680000000,
       "payload": 599040000000,
       "rows": 13900000000
     },
     {
       "scenario": "social",
       "roots": 3000000000,
-      "native": 29114880000000,
+      "native": 29374080000000,
       "payload": 3594240000000,
       "rows": 83400000000
     }

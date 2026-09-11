@@ -353,10 +353,10 @@ try {
 	await first.query("analyze public.reference_value");
 	const nativeIdPlan = await first.query(
 		`explain (analyze, buffers, format json) select * from public.reference_value
-		where ${UnitOwnerValues.map((owner) => `target_${owner}_id = $1`).join(" or ")} limit 2`,
+		where coalesce(${UnitOwnerValues.map((owner) => `target_${owner}_id`).join(", ")}) = $1 limit 2`,
 		[sampleReference.targetId],
 	);
-	assert.match(JSON.stringify(nativeIdPlan.rows), /BitmapOr/u);
+	assert.match(JSON.stringify(nativeIdPlan.rows), /reference_value_native_id_idx/u);
 	assert.doesNotMatch(JSON.stringify(nativeIdPlan.rows), /Seq Scan/u);
 	const targetPlan = await first.query(
 		`explain (analyze, buffers, format json)

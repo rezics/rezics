@@ -1,6 +1,6 @@
-import { eq, or, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { UnitOwnerValues, UnitReferenceSchema, type UnitReference } from "@rezics/reference";
+import { UnitReferenceSchema, type UnitReference } from "@rezics/reference";
 import type { DatabaseTransaction } from "../database";
 import { referenceValue } from "../database/schema/reference-value";
 import { allocateImmutableReference } from "./immutable-reference";
@@ -75,7 +75,7 @@ export const referenceValueTarget = {
 
 /**
  * Find an existing value for a native UUID without allocating or relying on routing projections.
- * @remarks The closed registry makes at most twenty selective target-index probes. Native UUID
+ * @remarks The derived native-ID expression index supports one selective probe. Native UUID
  * admission is globally unique; detecting conflicting physical owners fails closed. This internal
  * lookup grants no disclosure authority and must not be exposed as an existence endpoint.
  * @internal
@@ -85,13 +85,7 @@ export async function findReferenceValueByNativeId(tx: DatabaseTransaction, nati
 	const rows = await tx
 		.select({ valueId: referenceValue.id, target: referenceValueTarget })
 		.from(referenceValue)
-		.where(
-			or(
-				...UnitOwnerValues.map((owner) =>
-					eq(unitReferenceTargetColumn("target", owner, referenceValue), nativeId),
-				),
-			),
-		)
+		.where(eq(referenceValueTarget.id, nativeId))
 		.limit(2);
 	if (rows.length > 1) throw new Error("Native UUID has conflicting reference owners");
 	const row = rows[0];

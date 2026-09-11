@@ -14,6 +14,7 @@ import {
 import { createPlatformIdentityColumns, platformIdentityConstraints } from "./platform-identity";
 import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 
+import { referenceValue } from "./reference-value";
 import { users } from "./auth";
 import { pgTable } from "./base";
 import { entityIdentity } from "./catalog-identity";
@@ -326,15 +327,16 @@ export const realmUnitTag = pgTable(
 	],
 );
 
-/** A Profile's private, direct Tag relationship. */
+/** An account-private, direct Tag relationship to a canonical target value. */
 export const accountUnitTag = pgTable(
 	"account_unit_tag",
 	{
 		authUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "cascade" }),
-		unitId: uuid().notNull(),
-		...unitReferenceColumns("unit", "cascade"),
+		targetReferenceId: uuid()
+			.notNull()
+			.references(() => referenceValue.id, { onDelete: "restrict" }),
 		tagId: uuid()
 			.notNull()
 			.references(() => tag.id, { onDelete: "cascade" }),
@@ -343,12 +345,10 @@ export const accountUnitTag = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		...unitReferenceConstraints("account_unit_tag", "unit", table, false, table.unitId),
-		primaryKey({ columns: [table.authUserId, table.unitId, table.tagId] }),
-		index("account_unit_tag_unit_idx").on(table.unitId, table.authUserId),
+		primaryKey({ columns: [table.authUserId, table.targetReferenceId, table.tagId] }),
+		index("account_unit_tag_unit_idx").on(table.targetReferenceId, table.authUserId),
 		index("account_unit_tag_tag_idx").on(table.tagId),
-		index("account_unit_tag_auth_tag_idx").on(table.authUserId, table.tagId, table.unitId),
-		check("account_unit_tag_not_self_check", sql`${table.unitId} <> ${table.tagId}`),
+		index("account_unit_tag_auth_tag_idx").on(table.authUserId, table.tagId, table.targetReferenceId),
 		createFractionalIndexPositionByteLengthConstraint(
 			"account_unit_tag_position_byte_length_check",
 			table.position,

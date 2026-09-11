@@ -244,7 +244,7 @@ the account's private rows and retains the shared reference.
 
 Entry lookup and order seek use `(auth_user_id, target_reference_id)` and
 `(auth_user_id, position)`. Native-ID requests find an existing reference through
-the registry's twenty target indexes, independently of the routing projection;
+the derived native-ID expression index, independently of the routing projection;
 this internal lookup never allocates or exposes existence. A new save or preview
 refresh must pass current target disclosure before allocation. A captured preview
 remains the account's private saved content after target visibility changes;
@@ -313,17 +313,16 @@ allocation was about 1.56 KB/entry, supporting the revised 1.6 KiB current-entry
 estimate for that payload distribution. History width remains a separate estimate.
 These averages do not bound large-note/preview tails. Each consumer row writes three indexes instead
 of four populated indexes; first use of a native target additionally allocates
-one shared reference (112 heap + 144 index bytes in the foundation model), and
+one shared reference (112 heap + 216 index bytes in the foundation model), and
 subsequent saves/history reuse it. For 500M/3B distinct targets retained by current entries or history, that adds
-128 GB/768 GB before sharing with other reference consumers. Count the lifetime
+164 GB/984 GB before sharing with other reference consumers. Count the lifetime
 union of referenced targets, including removed entries retained in history;
 additional revisions of the same target add no bridge rows. New allocation takes at most three indexed statements;
-reuse adds no reference writes. Native-ID lookup combines twenty selective target
-indexes with a fixed maximum of two returned rows to detect impossible duplicate
+reuse adds no reference writes. Native-ID lookup uses one selective expression-index
+probe with a fixed maximum of two returned rows to detect impossible duplicate
 owners. Ordered list hydration adds at most 101 reference-PK probes per page.
-Inspect unforced EXPLAIN/BUFFERS plans for this OR lookup and bounded list join;
-[PostgreSQL can combine indexes through bitmap scans](https://www.postgresql.org/docs/18/indexes-bitmap-scans.html), but the planner choice needs
-fixture evidence. Track those buffer reads and p95 latency alongside account-lock
+Inspect unforced EXPLAIN/BUFFERS plans for this native-ID lookup and bounded list join;
+the planner choice needs fixture evidence. Track those buffer reads and p95 latency alongside account-lock
 waits, WAL bytes, history/TOAST growth and erasure age. A hot target only contends
 on first allocation, while subsequent private writes serialize per account.
 Per-account hash partitions/shards are the growth path; reference FKs and shared

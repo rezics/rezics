@@ -1,3 +1,18 @@
+SET search_path TO public;
+
+-- Create index "reference_value_native_id_idx" to table: "reference_value"
+CREATE INDEX "reference_value_native_id_idx" ON "reference_value" ((COALESCE(target_publishing_id, target_music_id, target_program_id, target_software_id, target_entity_id, target_grouping_id, target_reference_id, target_distribution_id, target_video_id, target_audio_id, target_post_id, target_poll_id, target_zone_id, target_realm_id, target_realm_rule_id, target_custom_theme_id, target_collection_id, target_tag_id, target_tag_path_id, target_label_id)));
+-- Drop index "account_unit_tag_auth_tag_idx" from table: "account_unit_tag"
+DROP INDEX "account_unit_tag_auth_tag_idx";
+-- Drop index "account_unit_tag_unit_idx" from table: "account_unit_tag"
+DROP INDEX "account_unit_tag_unit_idx";
+-- Modify "account_unit_tag" table
+ALTER TABLE "account_unit_tag" DROP CONSTRAINT "account_unit_tag_not_self_check", DROP CONSTRAINT "account_unit_tag_unit_id_check", DROP CONSTRAINT "account_unit_tag_unit_target_check", DROP CONSTRAINT "account_unit_tag_pkey", DROP COLUMN "unit_id", DROP COLUMN "unit_publishing_id", DROP COLUMN "unit_music_id", DROP COLUMN "unit_program_id", DROP COLUMN "unit_software_id", DROP COLUMN "unit_entity_id", DROP COLUMN "unit_grouping_id", DROP COLUMN "unit_reference_id", DROP COLUMN "unit_distribution_id", DROP COLUMN "unit_video_id", DROP COLUMN "unit_audio_id", DROP COLUMN "unit_post_id", DROP COLUMN "unit_poll_id", DROP COLUMN "unit_zone_id", DROP COLUMN "unit_realm_id", DROP COLUMN "unit_realm_rule_id", DROP COLUMN "unit_custom_theme_id", DROP COLUMN "unit_collection_id", DROP COLUMN "unit_tag_id", DROP COLUMN "unit_tag_path_id", DROP COLUMN "unit_label_id", ADD COLUMN "target_reference_id" uuid NOT NULL, ADD PRIMARY KEY ("auth_user_id", "target_reference_id", "tag_id"), ADD CONSTRAINT "account_unit_tag_target_reference_id_reference_value_id_fkey" FOREIGN KEY ("target_reference_id") REFERENCES "reference_value" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT;
+-- Create index "account_unit_tag_auth_tag_idx" to table: "account_unit_tag"
+CREATE INDEX "account_unit_tag_auth_tag_idx" ON "account_unit_tag" ("auth_user_id", "tag_id", "target_reference_id");
+-- Create index "account_unit_tag_unit_idx" to table: "account_unit_tag"
+CREATE INDEX "account_unit_tag_unit_idx" ON "account_unit_tag" ("target_reference_id", "auth_user_id");
+
 CREATE OR REPLACE FUNCTION public.unit_publish_platform_route()
 RETURNS trigger LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$
 DECLARE ready boolean; affected integer;
@@ -165,3 +180,19 @@ BEGIN
   EXECUTE format('CREATE TRIGGER %I BEFORE INSERT OR UPDATE ON public.%I FOR EACH ROW EXECUTE FUNCTION public.unit_populate_reference(%L,%L,%L)',trigger_name,entry[1],entry[2],entry[3],entry[4]);
  END LOOP;
 END $$;
+
+
+CREATE OR REPLACE FUNCTION public.guard_account_tag_reference()
+RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
+BEGIN
+  IF public.reference_value_native_id(NEW.target_reference_id) = NEW.tag_id THEN
+    RAISE EXCEPTION 'A Tag cannot label itself'
+      USING ERRCODE = '23514', CONSTRAINT = 'account_unit_tag_not_self_check';
+  END IF;
+  RETURN NEW;
+END $$;
+
+DROP TRIGGER IF EXISTS account_tag_reference_guard ON public.account_unit_tag;
+CREATE TRIGGER account_tag_reference_guard
+BEFORE INSERT OR UPDATE OF target_reference_id, tag_id ON public.account_unit_tag
+FOR EACH ROW EXECUTE FUNCTION public.guard_account_tag_reference();

@@ -9,6 +9,7 @@ export const PostgreSqlSchemaFileNames = [
 	"governance-delivery.sql",
 	"history-integrity.sql",
 	"reference-value.sql",
+	"account-tag-reference.sql",
 	"revision-reference.sql",
 	"association-proposal-authority.sql",
 	"music-release-source-job.sql",
@@ -75,10 +76,12 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  */
 export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>> = {
 	favorite_reference_values: ["reference-value.sql", "unit-reference-integrity.sql", "participation-private-state.sql"],
+	account_tag_reference_values: ["unit-reference-integrity.sql", "account-tag-reference.sql"],
 };
 
 export const PostgreSqlSchemaFunctionNames = [
 	"reference_value_native_id",
+	"guard_account_tag_reference",
 	"catalog_editorial_guard",
 	"catalog_editorial_capture",
 	"catalog_editorial_history_guard",
@@ -578,6 +581,7 @@ export const PostgreSqlSchemaTriggers = [
 	{ table: "music_source_application_change", name: "music_source_application_exact_component" },
 	{ table: "account_follow_preference", name: "participation_follow_preference_guard" },
 	{ table: "recommendation_event", name: "recommendation_event_signals_maintain" },
+	{ table: "account_unit_tag", name: "account_tag_reference_guard" },
 	{ table: "account_favorite", name: "participation_favorite_identity_guard" },
 	{ table: "image_asset", name: "participation_image_owner_guard" },
 	{ table: "image_object", name: "participation_image_child_guard" },

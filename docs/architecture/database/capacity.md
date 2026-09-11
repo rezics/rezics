@@ -10,14 +10,14 @@ A modeled row role groups comparable rows across owner tables. Composite roles a
 
 | Scenario | Roots | Modeled rows | Native heap + indexes TB | External payload TB | Native provision at 2x TB | Native + one replica at 2x each TB | 250 MB/s native restore lower bound hours |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| catalog | 500,000,000 | 83,175,000,000 | 27.469 | 6.144 | 54.938 | 109.875 | 30.52 |
-| catalog | 3,000,000,000 | 499,050,000,000 | 164.813 | 36.864 | 329.626 | 659.251 | 183.13 |
+| catalog | 500,000,000 | 83,175,000,000 | 27.512 | 6.144 | 55.024 | 110.048 | 30.57 |
+| catalog | 3,000,000,000 | 499,050,000,000 | 165.072 | 36.864 | 330.144 | 660.288 | 183.41 |
 | media | 500,000,000 | 33,570,000,000 | 10.637 | 3864.000 | 21.273 | 42.547 | 11.82 |
 | media | 3,000,000,000 | 201,420,000,000 | 63.820 | 23184.000 | 127.640 | 255.279 | 70.91 |
 | messages | 500,000,000 | 2,250,000,000 | 0.733 | 0.563 | 1.466 | 2.931 | 0.81 |
 | messages | 3,000,000,000 | 13,500,000,000 | 4.397 | 3.379 | 8.794 | 17.587 | 4.89 |
-| social | 500,000,000 | 13,900,000,000 | 4.852 | 0.599 | 9.705 | 19.410 | 5.39 |
-| social | 3,000,000,000 | 83,400,000,000 | 29.115 | 3.594 | 58.230 | 116.460 | 32.35 |
+| social | 500,000,000 | 13,900,000,000 | 4.896 | 0.599 | 9.791 | 19.583 | 5.44 |
+| social | 3,000,000,000 | 83,400,000,000 | 29.374 | 3.594 | 58.748 | 117.496 | 32.64 |
 
 Native provision uses a 2x free-space/bloat/rebuild allowance, separately for each copy. It is not a predicted bloat ratio. Backups, retained WAL, object-store replicas, object inventory, search-engine external files and dual-generation migration space are additional. The restore bound assumes transferring heap AND indexes at constant effective 250 MB/s; rebuilding indexes from a smaller backup instead trades transfer for compute and I/O. Both bounds exclude WAL replay and validation.
 
@@ -26,7 +26,7 @@ Native provision uses a 2x free-space/bloat/rebuild allowance, separately for ea
 | Scenario | Row role | Rows/root | Heap B | Index B | External B | 500M roots native TB | 3B roots native TB | Independent 500M rows GB | Independent 3B rows TB |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | catalog | owner_identity | 1 | 224 | 160 | 0 | 0.192 | 1.152 | 192.0 | 1.152 |
-| catalog | reference_value | 1.2 | 112 | 144 | 0 | 0.154 | 0.922 | 128.0 | 0.768 |
+| catalog | reference_value | 1.2 | 112 | 216 | 0 | 0.197 | 1.181 | 164.0 | 0.984 |
 | catalog | license_offering_history | 2.4 | 160 | 176 | 0 | 0.403 | 2.419 | 168.0 | 1.008 |
 | catalog | access_and_ownership | 0.25 | 144 | 176 | 0 | 0.040 | 0.240 | 160.0 | 0.960 |
 | catalog | name_and_identifier_current | 6 | 208 | 176 | 0 | 1.152 | 6.912 | 192.0 | 1.152 |
@@ -54,7 +54,7 @@ Native provision uses a 2x free-space/bloat/rebuild allowance, separately for ea
 | social | publication_identity_and_head | 1 | 256 | 208 | 0 | 0.232 | 1.392 | 232.0 | 1.392 |
 | social | publication_revision | 1.4 | 144 | 112 | 0 | 0.179 | 1.075 | 128.0 | 0.768 |
 | social | publication_item | 1.54 | 128 | 144 | 0 | 0.209 | 1.257 | 136.0 | 0.816 |
-| social | reference_value | 1.2 | 112 | 144 | 0 | 0.154 | 0.922 | 128.0 | 0.768 |
+| social | reference_value | 1.2 | 112 | 216 | 0 | 0.197 | 1.181 | 164.0 | 0.984 |
 | social | exact_reference_and_disclosure | 1.5 | 176 | 144 | 0 | 0.240 | 1.440 | 160.0 | 0.960 |
 | social | thread_and_topic | 0.15 | 208 | 144 | 0 | 0.026 | 0.158 | 176.0 | 1.056 |
 | social | thread_placement | 1.05 | 176 | 224 | 0 | 0.210 | 1.260 | 200.0 | 1.200 |
@@ -109,7 +109,7 @@ At an assumed 20,000 native WAL bytes per small operation, 20 writes/s produces 
 
 A hypothetical 50,000 deliveries/s retained for 30 days creates 129.6B rows, not 500M. Such a rate requires a separately qualified delivery fleet, retention policy and recipient routing. At 2,000 events/s and 72-hour retention the hot outbox/transport envelope is 518.4M events; at 512 bytes/event this is 265.4 GB logical before indexes, replication or broker overhead. Small configuration counts cannot justify corpus-sized notification or outbox costs.
 
-A three-billion-row relation with a 96-byte index key entry represents 288 GB of index entries before tree/page overhead beyond the estimate. Do not assume all indexes fit RAM. A 100-byte average width error costs 50 GB at 500M rows and 300 GB at 3B rows, multiplied by relation density. The reference bridge includes one selected reverse index per row; it does not insert one entry into every nullable alternative index.
+A three-billion-row relation with a 96-byte index key entry represents 288 GB of index entries before tree/page overhead beyond the estimate. Do not assume all indexes fit RAM. A 100-byte average width error costs 50 GB at 500M rows and 300 GB at 3B rows, multiplied by relation density. The identity reference bridge includes its primary key, one selected reverse index and one derived-native-ID expression index per row; it does not insert one entry into every nullable alternative index. Exact revision references retain their separate two-index estimate.
 
 The target is single PostgreSQL initially, but the dense catalog upper scenario cannot be certified on unspecified hardware. If restore lower bound exceeds the proposed four-hour RTO, select a warm recovery replica/snapshot strategy or revise the accepted RTO before activation. Partitioning cannot shorten transfer below available bandwidth or provide cross-node FKs.
 

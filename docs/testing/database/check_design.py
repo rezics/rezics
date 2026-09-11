@@ -55,7 +55,7 @@ SQL_GROUPS = {
     "D08": "history-integrity content-label-policy",
     "D09": "post-integrity",
     "D10": "content-structure-budgets custom-theme-integrity realm-publication-governance",
-    "D11": "participation-follow participation-progress tag-judgment-aggregates tag-path unit-state-read platform-aggregates",
+    "D11": "account-tag-reference participation-follow participation-progress tag-judgment-aggregates tag-path unit-state-read platform-aggregates",
     "D12": "governance-delivery participation-messages participation-notifications",
     "D13": "governance-integrity",
     "D14": "catalog-child-source catalog-credit-integrity catalog-profile-source catalog-source-application catalog-source-correspondence catalog-source-dependency catalog-source-integrity catalog-source-multipart catalog-source-owned-baseline catalog-source-support catalog-structure-source music-release-source-job music-source-lifecycle operational-durability operational-runtime",
@@ -229,7 +229,7 @@ S124|media,jobs,concurrency|Old transform worker completes after input erasure o
 # externally stored payload bytes. Widths and multiplicities are assumptions.
 FAMILIES = [
     ("catalog", "owner_identity", "1", 224, 160, 0),
-    ("catalog", "reference_value", "1.2", 112, 144, 0),
+    ("catalog", "reference_value", "1.2", 112, 216, 0),
     ("catalog", "license_offering_history", "2.4", 160, 176, 0),
     ("catalog", "access_and_ownership", "0.25", 144, 176, 0),
     ("catalog", "name_and_identifier_current", "6", 208, 176, 0),
@@ -257,7 +257,7 @@ FAMILIES = [
     ("social", "publication_identity_and_head", "1", 256, 208, 0),
     ("social", "publication_revision", "1.4", 144, 112, 0),
     ("social", "publication_item", "1.54", 128, 144, 0),
-    ("social", "reference_value", "1.2", 112, 144, 0),
+    ("social", "reference_value", "1.2", 112, 216, 0),
     ("social", "exact_reference_and_disclosure", "1.5", 176, 144, 0),
     ("social", "thread_and_topic", "0.15", 208, 144, 0),
     ("social", "thread_placement", "1.05", 176, 224, 0),
@@ -405,7 +405,7 @@ def capacity():
               "At 100,000 source objects/day, refreshing 500M objects once takes 5,000 days and 3B takes 30,000 days. At 1,000,000/day the lower bounds are 500/3,000 days. Continuous update therefore needs source deltas, popularity/freshness policy and elected coverage, not periodic whole-corpus crawling. The 50 objects/s initial test profile is 4.32M/day if sustained; this is not a provider permission or attainable feed rate.", "",
               "At an assumed 20,000 native WAL bytes per small operation, 20 writes/s produces 0.4 MB/s or 34.56 GB/day; 100 writes/s produces 2 MB/s or 172.8 GB/day. A source application with hundreds of children can be orders of magnitude larger. Measure pg_stat_wal deltas under representative insert/update/checkpoint patterns; payload size is not WAL size.", "",
               "A hypothetical 50,000 deliveries/s retained for 30 days creates 129.6B rows, not 500M. Such a rate requires a separately qualified delivery fleet, retention policy and recipient routing. At 2,000 events/s and 72-hour retention the hot outbox/transport envelope is 518.4M events; at 512 bytes/event this is 265.4 GB logical before indexes, replication or broker overhead. Small configuration counts cannot justify corpus-sized notification or outbox costs.", "",
-              "A three-billion-row relation with a 96-byte index key entry represents 288 GB of index entries before tree/page overhead beyond the estimate. Do not assume all indexes fit RAM. A 100-byte average width error costs 50 GB at 500M rows and 300 GB at 3B rows, multiplied by relation density. The reference bridge includes one selected reverse index per row; it does not insert one entry into every nullable alternative index.", "",
+              "A three-billion-row relation with a 96-byte index key entry represents 288 GB of index entries before tree/page overhead beyond the estimate. Do not assume all indexes fit RAM. A 100-byte average width error costs 50 GB at 500M rows and 300 GB at 3B rows, multiplied by relation density. The identity reference bridge includes its primary key, one selected reverse index and one derived-native-ID expression index per row; it does not insert one entry into every nullable alternative index. Exact revision references retain their separate two-index estimate.", "",
               "The target is single PostgreSQL initially, but the dense catalog upper scenario cannot be certified on unspecified hardware. If restore lower bound exceeds the proposed four-hour RTO, select a warm recovery replica/snapshot strategy or revise the accepted RTO before activation. Partitioning cannot shorten transfer below available bandwidth or provide cross-node FKs.", "",
               "Qualification must measure root/child distributions, hot-key skew, serialized edits per aggregate, query candidate budgets, index/TOAST bytes, vacuum/freeze lag, logical/physical WAL, replica lag, connection and memory ceilings, queue age, erasure cost, index rebuild and restore. Primary alert thresholds and cutover actions are in README section 15."]
     return {"assumptions_only": True, "decimal_units": True, "families": rows,

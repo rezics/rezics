@@ -1,6 +1,6 @@
 {
   "source_baseline_commit": "74079abd73d5fc43ac87ac7cae8a2074ca72d13d",
-  "schema_modules_and_sql_files_mapped": 154,
+  "schema_modules_and_sql_files_mapped": 155,
   "api_owner_directories_mapped": 39,
   "specified_cross_domain_scenarios": 124,
   "invariant_families": 14,
@@ -25,12 +25,12 @@
     "backup/restore drill"
   ],
   "sha256": {
-    "current-schema-map.tsv": "5294aead1746ba4c3fc2d0038e71612bc6e57670a4c172163ecf46c75a463428",
+    "current-schema-map.tsv": "bdf3083a0847dd18747efe6cda827584d8dfa66ab2e54212645130abb4aded15",
     "api-coverage.tsv": "58c2695b7e36c5ba5cd30c04728e1326c567cd19a2e51ae7b0f32c04ada7d999",
     "scenarios.tsv": "07738e2923baef54d4e4baebedc79b5b5dc25e2196685b51cd170c40f34c7cda",
-    "capacity.json": "fd6446ce16165b24928d9245336e74d80c65e31682c2167c343e40e56760954d",
-    "capacity.md": "38e2d5f1494f1775836389f6400766ba080cb50e8c8586de0cbb7cdf2d713176",
-    "dependency-manifest.json": "5a2b8909e3bdb3e091e61ba622942b1cb8e60abca4e83ee7350487b32b010e45"
+    "capacity.json": "00565a116367dbdaee7cbddd4e1e0c8ace7be142546c0b46b436f1a32c8b23d4",
+    "capacity.md": "7117a8893f40bcfd09a116d974ad2ef3d06b2e6f7d47d725a80c2f1e54e13f84",
+    "dependency-manifest.json": "eb1193f06407acb6c5d191ea2650482fa2a6e2daeea4688fe4c1d07ce676c51a"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -41,13 +41,13 @@
     "dependency-manifest.json": "docs/testing/database/dependency-manifest.json"
   },
   "authored_document_sha256": {
-    "docs/architecture/database/README.md": "5b31f2a676f19db862dbbf0a22bda1eaeef509ad4b7d4c33e516a28a0b97113d",
+    "docs/architecture/database/README.md": "5c6f50521a24a6265aae0395626d1b98e6abc1fbf13184d761657c24db745b77",
     "docs/architecture/database/ai-hub.md": "ccecae0e8f66d94644c6c5a56136628484375ff0eda43e4e914e3ed24d2e3050",
     "docs/architecture/database/catalog-model.md": "a74b2f049531d62f8c149310b48ef5c0d1053cb1fcfede064efbb759f0ab4992",
     "docs/architecture/database/creation.md": "7cd97242eb39b099a445934a6d345edfc4b45206f72a8f4bd626453e1af24cbd",
-    "docs/architecture/database/data-dictionary.md": "2f3e99ea52db2a5caf85de636ca3e81fd73ef8f2c5e7d694f71545e5d5b381bd",
+    "docs/architecture/database/data-dictionary.md": "f8f347675574d4423444d28861071aec2e1dfb34821ba99e43de298b36944728",
     "docs/architecture/database/relationship-graph.md": "f849ff42ecba6c161cb25c392cfc8ef65c51d5be1eacc718ee6b3aa06d3245ef",
-    "docs/plan/README.md": "fceb0bff39b7d553bdf1b075599c7b5948aff67a32ff5d622c4d401b3e69d058",
+    "docs/plan/README.md": "89374e2eee1d0c1ea77ac6fab12d676ff11e3d69d48f93ab6e82ff2d1e74e95e",
     "docs/plan/backend-acceptance.md": "13b3b8e23f05cf3d433dd1383a8f1f59f2a5d5586c2ea5413c0caa8ee7059199",
     "docs/plan/frontend.md": "f5eb500f2d17facbf03f6d2c92548fb8772d6ddfaf800ea9febd25aab72de062",
     "docs/plan/modules/ai-hub.md": "b95b2996692fcef54d168477b80278214157257762b4fb7839b5918435aa677b",
@@ -65,10 +65,10 @@
     "docs/testing/ai-hub.md": "e26dbe58f28fe78b51a81bd54bfe47a7d267d97f6e18a15f46239bbb58f0c971",
     "docs/testing/backend-integration.md": "2e55da1a8997b9044e751a3df2106a69bcda952d49ba7f58962baa87716495bb",
     "docs/testing/book-and-creation.md": "91af6b8352c20c1e933fe68e8ff0d828464d94ab43e64b2d32491598d1cb5cef",
-    "docs/testing/foundation.md": "6eca4c0fb3c9b9ea6cf589e0bdbf1166fdaa597e6e56a547cbb2d687c7e2122e",
+    "docs/testing/foundation.md": "f238d64357082fdeceb690114ee35e5d193834439eae02517e2c829081c77ac1",
     "docs/testing/known-failures.md": "421a07e97004928b72e0911c04c91584c4cf3e0b4d56dd7c7aecfa5820efec28",
     "docs/testing/relationship-graph.md": "7f3aaa37d76e80a9d2a5e54c9e2fa52102ba5830594121275ebefb278a5e2b91",
     "docs/testing/source-conformance.md": "36473ecd59994220f4bf3273631c84e5042e4a5abe81ba3666a047624b82beda",
-    "docs/testing/database/check_design.py": "515d7fa669bf3c5b68edad6ee79a07fa5be5c3f29efa808664c36d6e476e92f8"
+    "docs/testing/database/check_design.py": "8ae699fc8367b76c8ea9e4e2cbe59883c53e4b494fcb15bb3cce6c2af07fb50d"
   }
 }

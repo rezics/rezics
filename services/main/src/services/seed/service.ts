@@ -1,3 +1,5 @@
+import { allocateReferenceValue } from "../units/reference-value";
+import { resolveRegisteredUnitReference } from "../units/reference";
 import { RecommendationSurfaceValues } from "../database/schema/contract-values";
 import { saveFavorite } from "../favorites/service";
 import { CatalogReferenceSchema, type UnitOwner } from "@rezics/reference";
@@ -2998,7 +3000,10 @@ async function seedCoverageContracts(
 	});
 	await tx.insert(accountUnitTag).values({
 		authUserId: selfAuthUserIdForEntity(actor.id),
-		unitId: target.id,
+		targetReferenceId: await allocateReferenceValue(
+			tx,
+			(await resolveRegisteredUnitReference(tx, target.id)).reference,
+		),
 		tagId: targetTag.id,
 		position: fractionalPositionAt(0),
 		createdAt,

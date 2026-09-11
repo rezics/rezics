@@ -11,7 +11,7 @@ describe("canonical reference values", () => {
 		expect(config.columns).toHaveLength(1 + UnitOwnerValues.length);
 		expect(config.checks).toHaveLength(1);
 		expect(config.foreignKeys).toHaveLength(UnitOwnerValues.length);
-		expect(config.indexes).toHaveLength(UnitOwnerValues.length);
+		expect(config.indexes).toHaveLength(UnitOwnerValues.length + 1);
 		for (const owner of UnitOwnerValues) {
 			const keys = config.foreignKeys.filter(
 				(key) => key.reference().foreignColumns[0] === unitOwnerIdColumn(owner),
@@ -19,7 +19,14 @@ describe("canonical reference values", () => {
 			expect(keys).toHaveLength(1);
 			expect(keys[0]?.onDelete).toBe("restrict");
 		}
-		expect(config.indexes.every((index) => index.config.unique && index.config.where)).toBe(true);
+		expect(
+			config.indexes.filter((index) => index.config.unique && index.config.where),
+		).toHaveLength(UnitOwnerValues.length);
+		const nativeIndex = config.indexes.find(
+			(index) => index.config.name === "reference_value_native_id_idx",
+		);
+		expect(nativeIndex).toBeDefined();
+		expect(nativeIndex?.config.unique).toBe(false);
 		expect(
 			config.foreignKeys.map((key) => getTableName(key.reference().foreignTable)),
 		).not.toContain("catalog_unit_locator");

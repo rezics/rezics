@@ -1,12 +1,6 @@
 /** Bounded schema registry for logical-ID input triggers; concrete nullable FKs remain the authority. */
 export const UnitReferenceConsumers = [
 	{
-		table: "account_unit_tag",
-		id: "unit_id",
-		prefix: "unit",
-		optional: false,
-	},
-	{
 		table: "collection_item",
 		id: "unit_id",
 		prefix: "unit",

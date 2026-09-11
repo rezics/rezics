@@ -1,9 +1,13 @@
 import { sql } from "drizzle-orm";
-import { check, uniqueIndex } from "drizzle-orm/pg-core";
+import { check, index, uniqueIndex } from "drizzle-orm/pg-core";
 import { UnitOwnerValues } from "@rezics/reference";
 import { pgTable } from "./base";
 import { createUuidv7PrimaryKey } from "./columns";
-import { unitReferenceColumns, unitReferenceTargetColumn } from "./unit-reference-columns";
+import {
+	unitReferenceColumns,
+	unitReferenceTargetColumn,
+	unitReferenceIdExpression,
+} from "./unit-reference-columns";
 
 /**
  * Immutable reference values for generic consumers; native owners exist independently.
@@ -16,6 +20,7 @@ export const referenceValue = pgTable(
 		...unitReferenceColumns("target"),
 	},
 	(table) => [
+		index("reference_value_native_id_idx").on(unitReferenceIdExpression("target")),
 		check(
 			"reference_value_target_check",
 			sql`num_nonnulls(${sql.join(
