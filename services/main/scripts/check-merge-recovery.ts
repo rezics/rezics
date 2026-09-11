@@ -8,15 +8,11 @@ import { and, eq, sql } from "drizzle-orm";
 import { database, withDatabaseTransactionDeadline } from "../src/services/database";
 import {
 	unitMergeOperation,
-	unitMergeRequest,
-	unitMergeReview,
-	governanceDecisionRule,
 	unitMergeRedirect,
 	unitMergeGraphLock,
 	unitMergeReconciliationItem,
 	platformCapabilityGrant,
 	authEntity,
-	userAccountState,
 	users,
 } from "../src/services/database/schema";
 import {
@@ -25,10 +21,12 @@ import {
 	dispatchUnitMergeBatch,
 } from "../src/services/units/merge/worker";
 import { retryUnitMerge } from "../src/services/units/merge/service";
-import { replacePlatformUserAccountState } from "../src/services/platform-users/service";
 import { Authorization } from "../src/services/authorization";
 import { ParticipationAuthoritySchema } from "../src/services/participation/policy";
-import { createMergedFixtureReference } from "./reference-merge-fixture";
+import {
+	createMergedFixtureReference,
+	setMergeFixtureAccountState,
+} from "./reference-merge-fixture";
 
 const target = new URL(process.env.DATABASE_URL ?? "http://invalid");
 assert.ok(
@@ -104,52 +102,6 @@ async function expire(op: Operation) {
 		.where(
 			and(eq(unitMergeOperation.id, op.id), eq(unitMergeOperation.leaseToken, op.leaseToken!)),
 		);
-}
-async function accountState(op: Operation, state: "active" | "suspended" | "closed") {
-	const [reviewer] = await database
-		.select({
-			authUserId: unitMergeReview.reviewerAuthUserId,
-			profileId: unitMergeReview.reviewerProfileId,
-			revision: authEntity.revision,
-		})
-		.from(unitMergeReview)
-		.innerJoin(authEntity, eq(authEntity.authUserId, unitMergeReview.reviewerAuthUserId))
-		.where(eq(unitMergeReview.requestId, op.requestId))
-		.limit(1);
-	assert.ok(reviewer);
-	await database
-		.insert(platformCapabilityGrant)
-		.values({
-			authUserId: reviewer.authUserId,
-			capability: "platform.user.status.update",
-			grantedByAuthUserId: reviewer.authUserId,
-		})
-		.onConflictDoNothing();
-	const rules = await database
-		.select({
-			sourceRealmId: governanceDecisionRule.ruleSourceRealmId,
-			revisionId: governanceDecisionRule.ruleRevisionId,
-			ruleId: governanceDecisionRule.ruleId,
-		})
-		.from(unitMergeRequest)
-		.innerJoin(
-			governanceDecisionRule,
-			eq(governanceDecisionRule.decisionId, unitMergeRequest.decisionId),
-		)
-		.where(eq(unitMergeRequest.id, op.requestId));
-	const [before] = await database
-		.select()
-		.from(userAccountState)
-		.where(eq(userAccountState.userId, op.executorAuthUserId));
-	await replacePlatformUserAccountState({
-		authorization: new Authorization(reviewer.profileId, reviewer.authUserId, {
-			principal: { kind: "auth", authUserId: reviewer.authUserId },
-			actingEntityId: reviewer.profileId,
-			authorizationRevision: reviewer.revision,
-		}),
-		targetUserId: op.executorAuthUserId,
-		command: { state, expectedRevision: before?.revision ?? 0, rules },
-	});
 }
 
 async function itemCount(op: Operation) {
@@ -271,7 +223,12 @@ for (const waitForRestriction of [false, true])
 					.update(authEntity)
 					.set({ revision: sql`${authEntity.revision}+1` })
 					.where(eq(authEntity.authUserId, op.executorAuthUserId));
-			} else await accountState(op, restriction);
+			} else
+				await setMergeFixtureAccountState({
+					requestId: op.requestId,
+					targetAuthUserId: op.executorAuthUserId,
+					state: restriction,
+				});
 		};
 		if (!waitForRestriction) {
 			await applyRestriction();
@@ -343,7 +300,12 @@ for (const waitForRestriction of [false, true])
 			).length,
 			2,
 		);
-		if (restriction !== "stale_self") await accountState(op, "active");
+		if (restriction !== "stale_self")
+			await setMergeFixtureAccountState({
+				requestId: op.requestId,
+				targetAuthUserId: op.executorAuthUserId,
+				state: "active",
+			});
 		const [self] = await database
 			.select()
 			.from(authEntity)

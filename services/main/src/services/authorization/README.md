@@ -59,7 +59,11 @@ not found. Ownership, grants, and restrictions use append-only revocation record
 enforces one active owner per Unit.
 
 Request-local cached decisions are presentation or preliminary admission results.
-Mutations use transaction-bound checks rather than cached decisions.
+Mutations use transaction-bound checks rather than cached decisions. A transaction's
+platform `ensureCapability` also returns the exact locked grant ID and expiry.
+Commands that perform later waits may recheck that grant's deadline in their final
+authorization statement. They must not substitute an unlocked replacement grant or
+reuse the receipt as authority in a later transaction.
 
 ## Resource access fences
 

@@ -39,6 +39,7 @@ import {
 	type UnitMergeReconciliationPlan,
 	toEnumValues,
 } from "./contract-values";
+import { participationGrant } from "./participation";
 import type { ParticipationAuthority } from "../../participation/policy";
 export const unitMergeRequestState = pgEnum(
 	"unit_merge_request_state",
@@ -182,6 +183,11 @@ export const unitMergeReview = pgTable(
 		reviewerProfileId: uuid()
 			.notNull()
 			.references(() => entityIdentity.id, { onDelete: "restrict" }),
+		reviewerAuthority: jsonb().$type<ParticipationAuthority>().notNull(),
+		sourceReadGrantId: uuid().references(() => participationGrant.id, { onDelete: "restrict" }),
+		sourceReadGrantRevision: bigint({ mode: "number" }),
+		targetReadGrantId: uuid().references(() => participationGrant.id, { onDelete: "restrict" }),
+		targetReadGrantRevision: bigint({ mode: "number" }),
 		decision: unitMergeReviewDecision().notNull(),
 		requestFingerprint: text().notNull(),
 		note: text(),
@@ -190,6 +196,28 @@ export const unitMergeReview = pgTable(
 	(table) => [
 		primaryKey({ columns: [table.requestId, table.reviewerAuthUserId] }),
 		index("unit_merge_review_entity_idx").on(table.reviewerProfileId, table.requestId),
+		index("unit_merge_review_source_read_grant_idx")
+			.on(table.sourceReadGrantId)
+			.where(sql`${table.sourceReadGrantId} is not null`),
+		index("unit_merge_review_target_read_grant_idx")
+			.on(table.targetReadGrantId)
+			.where(sql`${table.targetReadGrantId} is not null`),
+		check(
+			"unit_merge_review_authority_check",
+			sql`coalesce(jsonb_typeof(${table.reviewerAuthority})='object'
+			and octet_length(${table.reviewerAuthority}::text)<=4096
+			and ${table.reviewerAuthority}->'principal'->>'kind'='auth'
+			and (${table.reviewerAuthority}->'principal'->>'authUserId')::uuid=${table.reviewerAuthUserId}
+			and (${table.reviewerAuthority}->>'authorizationRevision')::bigint between 1 and 9007199254740991,false)`,
+		),
+		check(
+			"unit_merge_review_source_read_grant_check",
+			sql`(${table.sourceReadGrantId} is null and ${table.sourceReadGrantRevision} is null) or (${table.sourceReadGrantId} is not null and coalesce(${table.sourceReadGrantRevision} between 1 and 9007199254740991,false))`,
+		),
+		check(
+			"unit_merge_review_target_read_grant_check",
+			sql`(${table.targetReadGrantId} is null and ${table.targetReadGrantRevision} is null) or (${table.targetReadGrantId} is not null and coalesce(${table.targetReadGrantRevision} between 1 and 9007199254740991,false))`,
+		),
 		check(
 			"unit_merge_review_note_check",
 			sql`${table.note} is null or octet_length(${table.note})<=8000`,

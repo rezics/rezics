@@ -8,6 +8,16 @@ A merge is a reviewed identity-resolution decision, not a rewrite of every incom
 
 Pin source/target heads, visibility/capability state and the reconciliation policy. Independent reviewers must have actual read/review authority over the exact material. Revalidate the proposer, reviewers, roots and epochs at application. A rejection cannot be ignored by replaying an older approval.
 
+Each immutable review records its admitted human authority and exact optional
+private read-grant selections. Both reviewers must still qualify when the worker
+canonicalizes the pair; selected grant deadlines are checked together after all
+waits. A reviewer failure before that graph change supersedes the request and
+releases its locks, requiring a new proposal and fresh reviews. A proposer-only
+failure remains actionable for an authorized executor retry. Once canonicalization
+commits, the resolution has consumed its approvals; later pages retain current
+executor checks, while a later loss of reviewer access does not silently undo the
+committed resolution. Reversal or split requires its own reviewed decision.
+
 ## Resolution and reconciliation
 
 Retain immutable resolution events and a controlled current resolution head. Reject self/cyclic resolutions under sorted root locks with epoch rechecks after waiting. Bound lookup work; excessive chains use explicit reconciliation rather than request-time whole-corpus traversal. Source writes follow the reviewed current state and cannot silently redirect ownership or history.
@@ -20,4 +30,4 @@ Split or undo appends a correction decision and assigns affected facts/occurrenc
 
 Jobs use stable cursors, bounded pages, lease tokens, authority/source/head fences and atomic receipts. Cancellation/restart preserves the previous valid view or an explicit transition state. A changed target/human revision prevents stale compensation. No operation scans or rewrites all incoming FKs in one transaction.
 
-Test independent reviewer access, source preservation, every assignment disposition, repeated replay, source rebind, private reads, revocation and crash recovery. The unresolved full-fixture issue is tracked in [known failures](../testing/known-failures.md). Capacity uses 500M/3B reconciliation rows, skewed owners, indexed request/item keysets and measured history/receipt/WAL cost; bounded toy runs are not capacity acceptance.
+Test independent reviewer access, source preservation, every assignment disposition, repeated replay, source rebind, private reads, revocation and crash recovery. Remaining recovery obligations are tracked in [known failures](../testing/known-failures.md). Capacity uses 500M/3B reconciliation rows, skewed owners, indexed request/item keysets and measured history/receipt/WAL cost; bounded toy runs are not capacity acceptance.

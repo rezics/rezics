@@ -363,6 +363,11 @@ export async function reviewUnitMerge(
 			requestId,
 			reviewerAuthUserId: authority.principal.authUserId,
 			reviewerProfileId: authorization.profileId,
+			reviewerAuthority: authority,
+			sourceReadGrantId: value.readGrants?.source?.id ?? null,
+			sourceReadGrantRevision: value.readGrants?.source?.revision ?? null,
+			targetReadGrantId: value.readGrants?.target?.id ?? null,
+			targetReadGrantRevision: value.readGrants?.target?.revision ?? null,
 			decision: value.decision,
 			requestFingerprint: value.requestFingerprint,
 			note: value.note,
@@ -429,7 +434,7 @@ export async function retryUnitMerge(authorization: Authorization<string>, reque
 			.where(eq(unitMergeOperation.requestId, requestId))
 			.limit(1)
 			.for("update");
-		if (!op || !["failed", "action_required", "retry_wait"].includes(op.state))
+		if (!op || row.state === "superseded" || !["failed", "action_required", "retry_wait"].includes(op.state))
 			throw new UnitMergeRetryUnavailable();
 		await tx
 			.update(unitMergeOperation)

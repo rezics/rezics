@@ -1,5 +1,7 @@
 import { and, eq, gt, inArray, lte, or, sql } from "drizzle-orm";
 import { z } from "zod";
+import type { GrantedPlatformAccess } from "../../authorization/platform/authorization";
+import { revalidateMergeReviewers, UnitMergeReviewAuthorityChanged } from "./review-application";
 import { Authorization } from "../../authorization";
 import { database, type DatabaseTransaction } from "../../database";
 import {
@@ -106,14 +108,14 @@ export async function claimUnitMergeOperations(
 async function admitted<T>(
 	tx: DatabaseTransaction,
 	op: Op,
-	work: (authorization: Authorization<string>) => Promise<T>,
+	work: (authorization: Authorization<string>, grant: GrantedPlatformAccess) => Promise<T>,
 ): Promise<T> {
 	const authority = ParticipationAuthoritySchema.parse(op.executorAuthority),
 		authorization = new Authorization(op.executorProfileId, op.executorAuthUserId, authority);
-	await authorization.platform.ensureCapability("unit.merge.propose", tx);
+	const grant = await authorization.platform.ensureCapability("unit.merge.propose", tx);
 	await humanMergeAuthority(tx, authorization);
 	return runWithParticipationAuthority(authority, () =>
-		withCatalogViewerPolicy(tx, op.executorAuthUserId, () => work(authorization)),
+		withCatalogViewerPolicy(tx, op.executorAuthUserId, () => work(authorization, grant)),
 	);
 }
 async function ensureItem(
@@ -418,6 +420,7 @@ async function processPage(
 	op: Op,
 	request: RequestRow,
 	authorization: Authorization<string>,
+	proposerGrant: GrantedPlatformAccess,
 ) {
 	const plan = MergePlanSchema.parse(request.plan);
 	if (op.phase === "canonicalize") {
@@ -428,6 +431,7 @@ async function processPage(
 			operationId: op.id,
 		});
 		assertMergeManifestFingerprint(manifest, request.requestFingerprint);
+		await revalidateMergeReviewers(tx, request, op.id, proposerGrant, op.executorAuthority);
 		const table = CatalogIdentityTables[request.owner];
 		const [source] = await tx
 			.update(table)
@@ -669,8 +673,8 @@ export async function processClaimedUnitMergePage(claimed: Op) {
 		await tx.execute(
 			sql`select set_config('lock_timeout','5000',true),set_config('statement_timeout','25000',true),set_config('rezics.merge_request_id',${request.id},true),set_config('rezics.merge_lease_token',${op.leaseToken},true)`,
 		);
-		const result = await admitted(tx, op, (authorization) =>
-			processPage(tx, op, request, authorization),
+		const result = await admitted(tx, op, (authorization, grant) =>
+			processPage(tx, op, request, authorization, grant),
 		);
 		if (!result.completed) {
 			const phase = result.done ? nextUnitMergePhase(op.phase) : op.phase;
@@ -712,7 +716,9 @@ async function failClaim(claimed: Op, error: unknown) {
 			.for("update");
 		if (!request || !op || op.state !== "processing" || op.leaseToken !== claimed.leaseToken)
 			return;
-		const stale = error instanceof Error && error.constructor.name === "UnitMergeManifestStale",
+		const reviewChanged = error instanceof UnitMergeReviewAuthorityChanged,
+			stale = error instanceof Error && error.constructor.name === "UnitMergeManifestStale",
+			superseded = stale || reviewChanged,
 			manual =
 				error instanceof ReconciliationRequired ||
 				(error instanceof Error &&
@@ -725,7 +731,7 @@ async function failClaim(claimed: Op, error: unknown) {
 						"UnitPermissionForbidden",
 					].includes(error.constructor.name));
 		const attempts = op.attemptCount + 1,
-			state = stale || attempts >= 12 ? "failed" : manual ? "action_required" : "retry_wait";
+			state = superseded || attempts >= 12 ? "failed" : manual ? "action_required" : "retry_wait";
 		await tx
 			.update(unitMergeOperation)
 			.set({
@@ -733,8 +739,10 @@ async function failClaim(claimed: Op, error: unknown) {
 				attemptCount: attempts,
 				leaseToken: null,
 				leaseExpiresAt: null,
-				lastErrorCode: stale
-					? "manifest_changed"
+				lastErrorCode: reviewChanged
+					? "review_authority_changed"
+					: stale
+						? "manifest_changed"
 					: manual
 						? "reconciliation_required"
 						: "merge_retry",
@@ -749,9 +757,9 @@ async function failClaim(claimed: Op, error: unknown) {
 			.where(eq(unitMergeOperation.id, op.id));
 		await tx
 			.update(unitMergeRequest)
-			.set({ state: stale ? "superseded" : state === "retry_wait" ? "executing" : state })
+			.set({ state: superseded ? "superseded" : state === "retry_wait" ? "executing" : state })
 			.where(eq(unitMergeRequest.id, request.id));
-		if (stale && !request.canonicalizedAt)
+		if (superseded && !request.canonicalizedAt)
 			await tx.delete(unitMergeGraphLock).where(eq(unitMergeGraphLock.operationId, op.id));
 	});
 }

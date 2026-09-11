@@ -19,6 +19,8 @@ export type PlatformAccessDecision =
 	  }
 	| { readonly allowed: false; readonly reason: "anonymous" | "ungranted" };
 
+export type GrantedPlatformAccess = Extract<PlatformAccessDecision, { readonly allowed: true }>;
+
 async function decideActivePlatformGrant(
 	executor: DatabaseExecutor,
 	profileId: string,
@@ -136,10 +138,11 @@ export class PlatformAuthorization<ProfileId extends string | undefined> {
 		);
 	}
 
+	/** Return the selected grant so a transaction can recheck its deadline after later waits. */
 	async ensureCapability(
 		capability: PlatformCapability,
 		executor: DatabaseExecutor = database,
-	): Promise<void> {
+	): Promise<GrantedPlatformAccess> {
 		if (!this.authUserId) throw new PlatformCapabilityRequired();
 		const [account] = await executor
 			.select({ id: users.id })
@@ -150,7 +153,7 @@ export class PlatformAuthorization<ProfileId extends string | undefined> {
 		if (!account) throw new PlatformCapabilityRequired();
 		await ensureAccountAuthenticationAllowed(this.authUserId, executor);
 		const decision = await this.#decideCapability(executor, capability);
-		if (decision.allowed) return;
+		if (decision.allowed) return decision;
 		await recordAuditEvent(database, {
 			category: "policy_denied",
 			outcome: "denied",

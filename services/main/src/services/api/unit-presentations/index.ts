@@ -49,7 +49,7 @@ async function viewerEligibility(identity: {
 async function ensureInstallerEligibility(
 	authorization: {
 		readonly platform: {
-			readonly ensureCapability: (capability: PlatformCapability) => Promise<void>;
+			readonly ensureCapability: (capability: PlatformCapability) => Promise<unknown>;
 		};
 		readonly zone: {
 			readonly ensureThemeMutation: (zoneId: string, level: "development_preview") => Promise<void>;

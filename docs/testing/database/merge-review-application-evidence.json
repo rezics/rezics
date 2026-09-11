@@ -1,0 +1,94 @@
+{
+  "baseCommit": "2521b50793d6af375f6d74958d8a7daf59011bfc",
+  "sourceDigests": {
+    "services/main/scripts/check-merge-review-application.ts": "db9561809d69c62ce2a129592cae3287d9a2db76425904a32faa4491ad270009",
+    "services/main/scripts/reference-merge-fixture.ts": "25b1131328d5f462d1198c76adcbec2234feff2c9431e43a0ea3a8ed5ffe134e",
+    "services/main/src/services/units/merge/review-application.ts": "025567e77d6ce9dce75da20e8929e7dfea863207b28324567488490340b27c5b",
+    "services/main/src/services/units/merge/service.ts": "8657edd660b50baca77c9f81f2d453c16401332a94d6ba7ab324685653fb0b50",
+    "services/main/src/services/units/merge/worker.ts": "b9910002a3c6e3463c7b6351cb55db1c30d6a0281321b551613a33286efaf388",
+    "services/main/src/services/authorization/platform/authorization.ts": "5e1785967f49d29e9777c2250e534ddda3f2f8767cad194b712e6b9eb4c43ef9",
+    "services/main/src/services/database/schema/unit-merge.ts": "e678fd45443111d8a402cca940e1754caec003194bb958bcc1cf379a4bfbf481",
+    "services/main/src/services/database/schema/postgres/merge-integrity.sql": "fa96563629b44f9933073927bf093953a28b08aabc8cd2c8edf260555e4f1592",
+    "services/main/src/services/database/migrations/atlas.sum": "919d501a2477edcdad92c2442716288636b323554fcc8a9b7a226b982e397c0e"
+  },
+  "node": "v26.8.2",
+  "platform": "linux/x64",
+  "runtime": {
+    "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "default_isolation": "read committed"
+  },
+  "checks": 137,
+  "rowSamples": [
+    {
+      "visibility": "private",
+      "context": "explicit_with_base",
+      "row_bytes": 496,
+      "authority_bytes": 288
+    },
+    {
+      "visibility": "public",
+      "row_bytes": "356.0000000000000000",
+      "authority_bytes": "196.0000000000000000"
+    },
+    {
+      "visibility": "public",
+      "row_bytes": "356.0000000000000000",
+      "authority_bytes": "196.0000000000000000"
+    },
+    {
+      "visibility": "public",
+      "row_bytes": "356.0000000000000000",
+      "authority_bytes": "196.0000000000000000"
+    },
+    {
+      "visibility": "public",
+      "row_bytes": "356.0000000000000000",
+      "authority_bytes": "196.0000000000000000"
+    },
+    {
+      "visibility": "public",
+      "row_bytes": "356.0000000000000000",
+      "authority_bytes": "196.0000000000000000"
+    },
+    {
+      "visibility": "public",
+      "row_bytes": "356.0000000000000000",
+      "authority_bytes": "196.0000000000000000"
+    },
+    {
+      "visibility": "private",
+      "row_bytes": "408.0000000000000000",
+      "authority_bytes": "196.0000000000000000"
+    },
+    {
+      "visibility": "private",
+      "row_bytes": "408.0000000000000000",
+      "authority_bytes": "196.0000000000000000"
+    }
+  ],
+  "authorityShapeSizing": {
+    "observedAuthorityBytes": 288,
+    "maximumNumericAuthorityBytes": 302
+  },
+  "invalidReviewerAuthorityRejectsCanonicalization": true,
+  "freshRequestAfterSupersession": true,
+  "reviewConsumedAtCanonicalization": true,
+  "rollbackScenarios": true,
+  "committedDeadlineRaces": 5,
+  "unusedBaseGrantDoesNotOverrideExplicitReads": true,
+  "canonicalizationBeforeRevocation": true,
+  "fixtureHistoryRetained": true,
+  "verification": {
+    "installedMigrations": 8,
+    "installedStatements": 15848,
+    "fullDatabaseCheck": "passed: canonical SQL, integrity, index health and no schema drift",
+    "fullReplayApplicationAssertions": 124,
+    "finalTargetedApplicationAssertions": 137,
+    "nativeMergeRegressionAssertions": 136,
+    "privateReviewRegressionAssertions": 20,
+    "workerRecoveryRegressionAssertions": 109,
+    "mainTestFiles": 333,
+    "mainTests": 1790,
+    "mainTypeScript": "passed"
+  }
+}

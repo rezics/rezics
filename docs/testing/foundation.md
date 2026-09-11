@@ -389,7 +389,7 @@ manifest and request snapshots. These queries now await their shared client
 sequentially. The [pinned run](database/reference-merge-evidence.json) succeeds
 with zero concurrent-client warnings. This public slice supplies valid merged
 anchors for reference-consumer tests; it does not close the separate private
-manifest, full reconciliation or recovery obligations.
+manifest, full reconciliation or recovery scopes qualified in the following sections.
 
 ## Private recommendation exclusion references
 
@@ -454,7 +454,7 @@ tests; backend, all three generated SDKs and web TypeScript checks pass.
 No schema migration or rendered UI change is part of this repair.
 
 These checks qualify the named admission/disclosure/reconciliation paths.
-Application-time reviewer authority, crash/restart and production/corpus-scale
+Further phase crash/restart and production/corpus-scale
 capacity remain separate obligations in the [merge owner](../../services/main/src/services/units/merge/README.md)
 and M06; they do not establish G4 or complete M01/M06.
 
@@ -478,9 +478,48 @@ restoring authority and explicitly retrying completes it. The pre-fix suspended
 executor incorrectly reached `completed` through the broad-capability shortcut.
 
 This qualification covers structure-page process loss, lease reclaim, replay and
-finalization authority. Reviewer authority at canonicalization, other phase crash
-points and backup/restore remain open. The fixture keeps only its generated data
+finalization authority. Other phase crash points and backup/restore remain open. The fixture keeps only its generated data
 on the disposable target and refuses other runnable work at entry.
 
 The 136-assertion native merge fixture passes again with these executor checks;
 backend tests pass 333 files/1,790 tests and backend TypeScript passes.
+
+## Reviewer receipts and canonicalization authority
+
+`task services-main:db:merge-review-application:check` runs
+[check-merge-review-application.ts](../../services/main/scripts/check-merge-review-application.ts).
+The [pinned run](database/merge-review-application-evidence.json) passes 137 assertions
+on eight installed migrations and 15,848 statements. It checks restrictive private
+grant FKs, complete positive revision pairs, correct human authority, immutable
+receipts, and rejection of revoked/expired capabilities, inactive/stale Self
+bindings, suspended/closed accounts and revoked/expired private read grants.
+
+The pre-fix worker archived a source even after a reviewer lost permission.
+Canonicalization now rechecks the stored reviewer context and exact material
+access, then checks all selected grant deadlines in one statement after waits.
+Five exact-PID deadline races cover an earlier review capability, explicit/private
+base read grants, proposer-only expiry and simultaneous proposer/reviewer expiry
+while the last private grant blocks. Unused base grants cannot invalidate explicit
+pair selections; used base grants remain fenced. Another race
+proves a reviewer-capability revocation waits for an already admitted canonicalization.
+A superseded request cannot be retried; a new proposal with new reviews succeeds.
+Proposer-only expiry remains actionable, and consumed reviews do not undo a
+committed resolution when reviewer access later changes.
+
+Transaction scenarios roll back. The separate deadline/revocation races retain
+only fixture accounts and terminal request history on the disposable target.
+Native samples measure 196-byte Self-authority values, 288-byte contexts with a
+base grant, 356-byte public review rows, 408-byte private rows and 496-byte private
+rows with a base grant. The maximum numeric form of the current human authority
+shape measures 302 bytes. The [merge owner](../../services/main/src/services/units/merge/README.md#reviewer-authority-at-canonicalization)
+records the 500M/3B allowances, private-review sensitivity and remaining capacity
+qualification. The schema is a fresh-install target; old review records without
+these receipts are not converted by this program.
+
+The full database check passed canonical SQL, integrity validation, healthy indexes
+and schema-drift comparison on eight migrations/15,848 statements, including the
+initial 124-assertion application suite. The expanded 137-assertion suite then
+passed on another fresh installation. Native merge (136), private review (20)
+and worker recovery (109) regressions passed; backend tests passed 333 files/1,790
+tests and backend TypeScript passed. This qualifies the reviewer boundary, not G4
+or complete merge/split/disaster recovery.

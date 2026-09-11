@@ -1,14 +1,14 @@
 {
-  "baseCommit": "94763fdc2cf545f402216bc9a876b0ab8cad1068",
+  "baseCommit": "2521b50793d6af375f6d74958d8a7daf59011bfc",
   "sourceDigests": {
     "services/main/scripts/check-private-merge-review.ts": "02dc2687aaac23657f6f71b822cf8eb83236ccc4e700b2992b6c8ce1b2814a02",
     "services/main/src/services/units/merge/contracts.ts": "ead21a52711aa785bfafaa80e779e8ef1eaab4a51364ac4ffe054214546d542f",
     "services/main/src/services/units/merge/manifest.ts": "5e4813a31145936616c2cea1bc5862560162b65a4344e2c296dffa024872f502",
-    "services/main/src/services/units/merge/service.ts": "59864052793797ecb7734409ed461b0d4d9a1a202dad09e6a11dca0b4c6907c5",
+    "services/main/src/services/units/merge/service.ts": "8657edd660b50baca77c9f81f2d453c16401332a94d6ba7ab324685653fb0b50",
     "services/main/src/services/participation/policy.ts": "4a1e59309337d20aaf361f2b4529ebf37a4223d340c9608e752a35415e5c01a7",
     "services/main/src/services/catalog/storage.ts": "1d04120de14dc16ea71644a0ad90af4c6e464a59260c16d58a4764149c0cc49f",
     "services/main/src/services/catalog/merge-read.ts": "be743bca7132df148d2ede3747ed42c731dc177f35f73c1ca3b415c18d7191c3",
-    "services/main/src/services/database/migrations/atlas.sum": "b9c3c39f38498df118decef4c400ed34b616375694964aa3dbbeb801e49d2455"
+    "services/main/src/services/database/migrations/atlas.sum": "919d501a2477edcdad92c2442716288636b323554fcc8a9b7a226b982e397c0e"
   },
   "node": "v26.8.2",
   "platform": "linux/x64",

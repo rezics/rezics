@@ -54,7 +54,7 @@ const RevisionConflictResponse = toApiErrorResponse(["CustomThemeRevisionStateCo
 
 async function ensureExternalLiveEligibility(authorization: {
 	readonly platform: {
-		readonly ensureCapability: (capability: PlatformCapability) => Promise<void>;
+		readonly ensureCapability: (capability: PlatformCapability) => Promise<unknown>;
 	};
 }) {
 	await Promise.all([

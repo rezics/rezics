@@ -1,17 +1,17 @@
 {
-  "baseCommit": "fcc974a708c8255399b967119e50e0fa53201d0b",
+  "baseCommit": "2521b50793d6af375f6d74958d8a7daf59011bfc",
   "sourceDigests": {
-    "services/main/scripts/check-unit-merge-review-policy.ts": "18cc7506557ded96bf1e208792dbeb63b892fbcad1bf28eeb6a0b264fddd661b",
+    "services/main/scripts/check-unit-merge-review-policy.ts": "91b93cb57560d7317b456a5121827c90abd209723db81a29d11d92dcbe8bb20a",
     "services/main/src/services/units/merge/contracts.ts": "ead21a52711aa785bfafaa80e779e8ef1eaab4a51364ac4ffe054214546d542f",
     "services/main/src/services/units/merge/manifest.ts": "5e4813a31145936616c2cea1bc5862560162b65a4344e2c296dffa024872f502",
-    "services/main/src/services/units/merge/service.ts": "826c9aa0011b7240054f81b257143098030f84c66b8986fe4e90683e9d7cdde7",
-    "services/main/src/services/units/merge/worker.ts": "8dd80b470dd36618d9d6ee3ae55b3b95f7aa28d4119480fdd14af575170873a8",
+    "services/main/src/services/units/merge/service.ts": "8657edd660b50baca77c9f81f2d453c16401332a94d6ba7ab324685653fb0b50",
+    "services/main/src/services/units/merge/worker.ts": "b9910002a3c6e3463c7b6351cb55db1c30d6a0281321b551613a33286efaf388",
     "services/main/src/services/catalog/source-bindings.ts": "f616a5c955aadbbe14b203138c1c2689f3167b4aebc447ec087af15281bba02f",
     "services/main/src/services/catalog/storage.ts": "1d04120de14dc16ea71644a0ad90af4c6e464a59260c16d58a4764149c0cc49f",
     "services/main/src/services/catalog/merge-read.ts": "be743bca7132df148d2ede3747ed42c731dc177f35f73c1ca3b415c18d7191c3",
     "services/main/src/services/participation/policy.ts": "4a1e59309337d20aaf361f2b4529ebf37a4223d340c9608e752a35415e5c01a7",
     "services/main/src/services/database/constraint.ts": "59033f22d463b888d40a25996ccca97b79fbbc9144e09221a5c69ae0254196e6",
-    "services/main/src/services/database/migrations/atlas.sum": "b9c3c39f38498df118decef4c400ed34b616375694964aa3dbbeb801e49d2455"
+    "services/main/src/services/database/migrations/atlas.sum": "919d501a2477edcdad92c2442716288636b323554fcc8a9b7a226b982e397c0e"
   },
   "node": "v26.8.2",
   "platform": "linux/x64",
@@ -45,13 +45,13 @@
   "fixtureHistoryRetained": true,
   "allAdmittedOperationsCompleted": true,
   "verification": {
-    "installedMigrations": 7,
-    "installedStatements": 15738,
+    "installedMigrations": 8,
+    "installedStatements": 15848,
     "mainTestFiles": 333,
     "mainTests": 1790,
     "mainTypeScript": "passed",
     "generatedSdkTypeScript": "3 passed",
     "webTypeScript": "passed",
-    "fixtureLane": "No unfinished jobs at entry; completed history retained; new identities for each run"
+    "fixtureLane": "No unfinished jobs at entry; completed/superseded history retained; new identities for each run"
   }
 }

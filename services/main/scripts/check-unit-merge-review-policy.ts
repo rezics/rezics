@@ -54,7 +54,7 @@ const {
 	catalogSourceMappingClaim,
 	catalogSourceBindingRevision,
 } = await import("../src/services/database/schema/catalog-source");
-const { unitMergeOperation, unitMergeGraphLock, unitMergeRedirect } = await import(
+const { unitMergeOperation, unitMergeRequest, unitMergeGraphLock, unitMergeRedirect } = await import(
 	"../src/services/database/schema/unit-merge"
 );
 const { ensureSelfEntityInTransaction } = await import("../src/services/auth/entity");
@@ -457,7 +457,8 @@ async function processBlockedBindingPage(requestId: string, blockerPid: number, 
 
 try {
 	const [priorOperation] = await database.select({ id: unitMergeOperation.id }).from(unitMergeOperation)
-		.where(sql`${unitMergeOperation.state} <> 'completed'`).limit(1);
+		.where(sql`${unitMergeOperation.state} <> 'completed' and not (${unitMergeOperation.state} = 'failed' and exists(
+			select 1 from ${unitMergeRequest} where ${unitMergeRequest.id} = ${unitMergeOperation.requestId} and ${unitMergeRequest.state} = 'superseded'))`).limit(1);
 	assert.equal(priorOperation, undefined, "Prepare a lane with no unfinished operations; never drain another fixture's jobs");
 	const rule = await officialRule();
 	const proposer = await human("Native merge proposer");
@@ -1418,7 +1419,7 @@ try {
 	counted(independent.id !== paging.id);
 	counted(independent.id !== hidden.id);
 	const [unfinished] = await database.select({ id: unitMergeOperation.id }).from(unitMergeOperation)
-		.where(sql`${unitMergeOperation.state} <> 'completed'`).limit(1);
+		.where(and(inArray(unitMergeOperation.executorAuthUserId, accounts), sql`${unitMergeOperation.state} <> 'completed'`)).limit(1);
 	counted(unfinished === undefined);
 	const repository = new URL("../../../", import.meta.url);
 	const sourceDigests: Record<string, string> = {};

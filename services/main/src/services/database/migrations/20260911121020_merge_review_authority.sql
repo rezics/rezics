@@ -1,3 +1,12 @@
+SET search_path TO public;
+
+-- Modify "unit_merge_review" table
+ALTER TABLE "unit_merge_review" ADD CONSTRAINT "unit_merge_review_authority_check" CHECK (COALESCE(((jsonb_typeof(reviewer_authority) = 'object'::text) AND (octet_length((reviewer_authority)::text) <= 4096) AND (((reviewer_authority -> 'principal'::text) ->> 'kind'::text) = 'auth'::text) AND ((((reviewer_authority -> 'principal'::text) ->> 'authUserId'::text))::uuid = reviewer_auth_user_id) AND ((((reviewer_authority ->> 'authorizationRevision'::text))::bigint >= 1) AND (((reviewer_authority ->> 'authorizationRevision'::text))::bigint <= '9007199254740991'::bigint))), false)), ADD CONSTRAINT "unit_merge_review_source_read_grant_check" CHECK (((source_read_grant_id IS NULL) AND (source_read_grant_revision IS NULL)) OR ((source_read_grant_id IS NOT NULL) AND COALESCE(((source_read_grant_revision >= 1) AND (source_read_grant_revision <= '9007199254740991'::bigint)), false))), ADD CONSTRAINT "unit_merge_review_target_read_grant_check" CHECK (((target_read_grant_id IS NULL) AND (target_read_grant_revision IS NULL)) OR ((target_read_grant_id IS NOT NULL) AND COALESCE(((target_read_grant_revision >= 1) AND (target_read_grant_revision <= '9007199254740991'::bigint)), false))), ADD COLUMN "reviewer_authority" jsonb NOT NULL, ADD COLUMN "source_read_grant_id" uuid NULL, ADD COLUMN "source_read_grant_revision" bigint NULL, ADD COLUMN "target_read_grant_id" uuid NULL, ADD COLUMN "target_read_grant_revision" bigint NULL, ADD CONSTRAINT "unit_merge_review_AIJ20TJyGXP1_fkey" FOREIGN KEY ("target_read_grant_id") REFERENCES "participation_grant" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT, ADD CONSTRAINT "unit_merge_review_NpWKffh8rcuZ_fkey" FOREIGN KEY ("source_read_grant_id") REFERENCES "participation_grant" ("id") ON UPDATE NO ACTION ON DELETE RESTRICT;
+-- Create index "unit_merge_review_source_read_grant_idx" to table: "unit_merge_review"
+CREATE INDEX "unit_merge_review_source_read_grant_idx" ON "unit_merge_review" ("source_read_grant_id") WHERE (source_read_grant_id IS NOT NULL);
+-- Create index "unit_merge_review_target_read_grant_idx" to table: "unit_merge_review"
+CREATE INDEX "unit_merge_review_target_read_grant_idx" ON "unit_merge_review" ("target_read_grant_id") WHERE (target_read_grant_id IS NOT NULL);
+
 -- Native owner integrity and derived state. This file is the canonical forward-maintained source.
 CREATE OR REPLACE FUNCTION public.reject_merged_unit_reference()
  RETURNS trigger

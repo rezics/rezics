@@ -20,8 +20,8 @@ All of this runs in a rollback fixture and must emit no concurrent-client warnin
 
 The public fixture qualifies that canonicalization slice. The
 [native merge fixture](../../../../../../docs/testing/foundation.md#native-merge-review-and-reconciliation)
-separately qualifies private review admission and reconciliation. Application-time
-reviewer fences, restart/recovery and large-scale workloads remain in the broader
+separately qualifies private review admission and reconciliation. Further phase
+crash/recovery and large-scale workloads remain in the broader
 program; creating a redirect does not prove those later phases.
 
 ## Private pair review
@@ -76,7 +76,7 @@ items are resolved, the explicit operation retry resumes settlement/finalization
 ## Qualification commands
 
 Run `task services-main:db:merge:check` on a prepared disposable database with no
-unfinished merge jobs. Completed history is allowed; the fixture creates new
+unfinished merge jobs. Completed and superseded history is allowed; the fixture creates new
 identities, refuses to drain unrelated jobs and requires all admitted operations
 to finish. It covers default copy/rebind choices, the alternate retain/pause plan,
 more than 128 items, source binding drift after inventory, independent rebinding
@@ -112,5 +112,50 @@ These checks use the existing one-account/one-Self indexed fences and four-opera
 claim bound; they add no persisted rows or indexes beyond existing audit/state
 transitions. The 500M/3B queue and receipt workload still requires corpus-scale
 qualification. This fixture proves the structure-page crash and finalization
-boundaries, not every phase, canonicalization failure point, reviewer application
-fence or disaster-recovery restore.
+boundaries, not every phase, canonicalization failure point or disaster-recovery restore.
+
+## Reviewer authority at canonicalization
+
+A review pins its current human principal/Self revision and base request context, plus the exact
+optional source/target read-grant IDs and revisions. The read grants have restrictive
+foreign keys and paired positive revisions; the immutable review keeps its evidence
+when a grant is revoked. The admitted Self revision must match on insert.
+
+Before changing the resolution graph, the worker must revalidate both reviewers'
+current account, Self revision, platform review permission and native pair reads.
+Explicit read selections replace the base grant for their side. An unused base grant
+does not participate in authority or deadline checks; a base grant used by either
+side is validated and locked. All used authority rows remain locked through canonicalization. One final
+current-statement check covers the exact platform and participation grant deadlines
+after every wait. A reviewer failure supersedes the uncanonicalized request, fails its
+operation and releases its graph locks, so a new request can gather new reviews.
+An explicit retry cannot revive that superseded approval. Proposer-only expiry remains
+actionable for a current executor retry. Once canonicalization
+commits, later pages consume the reviewed resolution and continue to require the
+current executor; they do not undo it because a past reviewer later loses access.
+
+The review count remains exactly two. Serialized authority text is limited to
+4 KiB; physical JSONB size can differ. The common human Self receipt is estimated
+at 320 bytes, plus a 64-byte allowance
+for two private grant selections and alignment. At 500,000,000 reviews (250M two-review requests)
+this adds about 160 GB of authority payload, or 960 GB at 3,000,000,000
+reviews. The serialized-text limit is a validation bound rather than a physical
+storage allowance; an authority-shape expansion requires a new size estimate.
+At 1% private reviews, two 32-byte partial-index
+entries add an estimated 0.32 GB/1.92 GB, plus a 0.32 GB/1.92 GB grant-row allowance.
+Together the additions estimate 160.64 GB/963.84 GB at 1% private reviews; an
+all-private workload raises them to 224 GB/1.344 TB. These additions exclude existing
+review rows, WAL, replicas and maintenance headroom. Native samples measure
+196-byte Self authority values, 288-byte contexts with a base grant, 356-byte public
+review tuples, 408-byte private tuples and 496-byte private tuples with a base grant.
+The current human authority shape with maximum safe integer revisions measures
+302 bytes. The 320/64-byte allowances cover these samples; index/maintenance costs
+and an expanded authority format still require workload qualification.
+Canonicalization reads two bounded receipts (at most 8 KiB of authority JSON),
+indexed account/grant/native rows and one final deadline query; it never scans
+review history. Skew remains serialized on the existing request/pair locks.
+
+The [application fixture](../../../../../../docs/testing/foundation.md#reviewer-receipts-and-canonicalization-authority)
+qualifies this reviewer boundary, including simultaneous expiry and inherited
+versus explicitly replaced base grants. The generated migration is installed by
+the fresh native replay workflow; unreceipted historical reviews are not converted.

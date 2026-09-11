@@ -75,6 +75,7 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>> = {
+	merge_review_authority: ["merge-integrity.sql"],
 	realm_member_count_decrement: ["platform-aggregates.sql"],
 	recommendation_exclusion_reference_values: ["unit-reference-integrity.sql", "merge-integrity.sql"],
 	favorite_reference_values: ["reference-value.sql", "unit-reference-integrity.sql", "participation-private-state.sql"],
