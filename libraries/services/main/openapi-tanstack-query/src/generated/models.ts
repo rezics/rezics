@@ -60795,13 +60795,23 @@ export type ListManagedOrganizationMembersStatus200 = {
 	nextCursor: string | null;
 };
 
+export const ListManagedOrganizationMembersStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ListManagedOrganizationMembersStatus403ErrorCodeEnum =
+	(typeof ListManagedOrganizationMembersStatus403ErrorCodeEnum)[keyof typeof ListManagedOrganizationMembersStatus403ErrorCodeEnum];
+
 export type ListManagedOrganizationMembersStatus403 = {
 	error: {
 		/**
 		 * @default 'ParticipationDenied'
 		 * @type string
 		 */
-		code: "ParticipationDenied";
+		code: ListManagedOrganizationMembersStatus403ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -60958,13 +60968,23 @@ export type ListManagedOrganizationInvitationsStatus200 = {
 	nextCursor: string | null;
 };
 
+export const ListManagedOrganizationInvitationsStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ListManagedOrganizationInvitationsStatus403ErrorCodeEnum =
+	(typeof ListManagedOrganizationInvitationsStatus403ErrorCodeEnum)[keyof typeof ListManagedOrganizationInvitationsStatus403ErrorCodeEnum];
+
 export type ListManagedOrganizationInvitationsStatus403 = {
 	error: {
 		/**
 		 * @default 'ParticipationDenied'
 		 * @type string
 		 */
-		code: "ParticipationDenied";
+		code: ListManagedOrganizationInvitationsStatus403ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -61106,13 +61126,23 @@ export type InviteOrganizationMemberStatus200 = {
 
 export type InviteOrganizationMemberStatus400 = MalformedRequestBody;
 
+export const InviteOrganizationMemberStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type InviteOrganizationMemberStatus403ErrorCodeEnum =
+	(typeof InviteOrganizationMemberStatus403ErrorCodeEnum)[keyof typeof InviteOrganizationMemberStatus403ErrorCodeEnum];
+
 export type InviteOrganizationMemberStatus403 = {
 	error: {
 		/**
 		 * @default 'ParticipationDenied'
 		 * @type string
 		 */
-		code: "ParticipationDenied";
+		code: InviteOrganizationMemberStatus403ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -61277,13 +61307,23 @@ export type CancelOrganizationMembershipInvitationStatus200 = {
 
 export type CancelOrganizationMembershipInvitationStatus400 = MalformedRequestBody;
 
+export const CancelOrganizationMembershipInvitationStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type CancelOrganizationMembershipInvitationStatus403ErrorCodeEnum =
+	(typeof CancelOrganizationMembershipInvitationStatus403ErrorCodeEnum)[keyof typeof CancelOrganizationMembershipInvitationStatus403ErrorCodeEnum];
+
 export type CancelOrganizationMembershipInvitationStatus403 = {
 	error: {
 		/**
 		 * @default 'ParticipationDenied'
 		 * @type string
 		 */
-		code: "ParticipationDenied";
+		code: CancelOrganizationMembershipInvitationStatus403ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -61416,13 +61456,23 @@ export type RemoveOrganizationMemberStatus200 = {
 
 export type RemoveOrganizationMemberStatus400 = MalformedRequestBody;
 
+export const RemoveOrganizationMemberStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type RemoveOrganizationMemberStatus403ErrorCodeEnum =
+	(typeof RemoveOrganizationMemberStatus403ErrorCodeEnum)[keyof typeof RemoveOrganizationMemberStatus403ErrorCodeEnum];
+
 export type RemoveOrganizationMemberStatus403 = {
 	error: {
 		/**
 		 * @default 'ParticipationDenied'
 		 * @type string
 		 */
-		code: "ParticipationDenied";
+		code: RemoveOrganizationMemberStatus403ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -61580,13 +61630,23 @@ export type ListOwnOrganizationMembershipInvitationsStatus200 = {
 	nextCursor: string | null;
 };
 
+export const ListOwnOrganizationMembershipInvitationsStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ListOwnOrganizationMembershipInvitationsStatus403ErrorCodeEnum =
+	(typeof ListOwnOrganizationMembershipInvitationsStatus403ErrorCodeEnum)[keyof typeof ListOwnOrganizationMembershipInvitationsStatus403ErrorCodeEnum];
+
 export type ListOwnOrganizationMembershipInvitationsStatus403 = {
 	error: {
 		/**
 		 * @default 'ParticipationDenied'
 		 * @type string
 		 */
-		code: "ParticipationDenied";
+		code: ListOwnOrganizationMembershipInvitationsStatus403ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -61709,13 +61769,23 @@ export type ListOwnOrganizationMembershipsStatus200 = {
 	nextCursor: string | null;
 };
 
+export const ListOwnOrganizationMembershipsStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type ListOwnOrganizationMembershipsStatus403ErrorCodeEnum =
+	(typeof ListOwnOrganizationMembershipsStatus403ErrorCodeEnum)[keyof typeof ListOwnOrganizationMembershipsStatus403ErrorCodeEnum];
+
 export type ListOwnOrganizationMembershipsStatus403 = {
 	error: {
 		/**
 		 * @default 'ParticipationDenied'
 		 * @type string
 		 */
-		code: "ParticipationDenied";
+		code: ListOwnOrganizationMembershipsStatus403ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -61857,13 +61927,23 @@ export type AcceptOrganizationMembershipInvitationStatus200 = {
 
 export type AcceptOrganizationMembershipInvitationStatus400 = MalformedRequestBody;
 
+export const AcceptOrganizationMembershipInvitationStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type AcceptOrganizationMembershipInvitationStatus403ErrorCodeEnum =
+	(typeof AcceptOrganizationMembershipInvitationStatus403ErrorCodeEnum)[keyof typeof AcceptOrganizationMembershipInvitationStatus403ErrorCodeEnum];
+
 export type AcceptOrganizationMembershipInvitationStatus403 = {
 	error: {
 		/**
 		 * @default 'ParticipationDenied'
 		 * @type string
 		 */
-		code: "ParticipationDenied";
+		code: AcceptOrganizationMembershipInvitationStatus403ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -62015,13 +62095,23 @@ export type DeclineOrganizationMembershipInvitationStatus200 = {
 
 export type DeclineOrganizationMembershipInvitationStatus400 = MalformedRequestBody;
 
+export const DeclineOrganizationMembershipInvitationStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type DeclineOrganizationMembershipInvitationStatus403ErrorCodeEnum =
+	(typeof DeclineOrganizationMembershipInvitationStatus403ErrorCodeEnum)[keyof typeof DeclineOrganizationMembershipInvitationStatus403ErrorCodeEnum];
+
 export type DeclineOrganizationMembershipInvitationStatus403 = {
 	error: {
 		/**
 		 * @default 'ParticipationDenied'
 		 * @type string
 		 */
-		code: "ParticipationDenied";
+		code: DeclineOrganizationMembershipInvitationStatus403ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -62148,13 +62238,23 @@ export type LeaveOrganizationMembershipStatus200 = {
 
 export type LeaveOrganizationMembershipStatus400 = MalformedRequestBody;
 
+export const LeaveOrganizationMembershipStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type LeaveOrganizationMembershipStatus403ErrorCodeEnum =
+	(typeof LeaveOrganizationMembershipStatus403ErrorCodeEnum)[keyof typeof LeaveOrganizationMembershipStatus403ErrorCodeEnum];
+
 export type LeaveOrganizationMembershipStatus403 = {
 	error: {
 		/**
 		 * @default 'ParticipationDenied'
 		 * @type string
 		 */
-		code: "ParticipationDenied";
+		code: LeaveOrganizationMembershipStatus403ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};

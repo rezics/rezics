@@ -26,6 +26,16 @@ are separate effects. This follows the separation between membership and
 provider-defined authorization in [SCIM RFC 7643](https://www.rfc-editor.org/rfc/rfc7643.html#section-4.2),
 and the per-request validation rule in the [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html#validate-the-permissions-on-every-request).
 
+Membership mutations also apply the current account write policy to the human
+performing the change. Acceptance revalidates the inviter's write eligibility.
+Active bans and enforcement suspensions block invitation creation, cancellation,
+acceptance/decline, removal and departure. Silence blocks contributions rather
+than these membership writes. Enforcement expiry and explicit reversal restore
+eligibility; enforcement alone does not delete an already accepted membership.
+Private inbox and authorized roster reads retain their read policy. These
+account-enforcement effects are separate from sign-in suspension/closure and
+from the Auth-to-Self binding state.
+
 Pending invitations become accepted, declined, cancelled, expired or invalidated;
 terminal invitations never reopen. Rejoining requires a new accepted invitation
 and advances the existing membership revision. An immutable account-owned event
@@ -94,3 +104,12 @@ The pending-admission fixture in the linked foundation workflow verifies both
 1,000-row limits through domain commands and direct SQL, slot reclamation, and
 competing last-slot admissions on independent connections. It does not replace
 sustained workload or migration/sharding qualification.
+
+The account-policy integration adds one indexed account-enforcement probe per
+acting account on a membership write, plus the account authorizer's existing row-lock
+probe. Acceptance checks both recipient and inviter; other membership changes
+check one operator. Read queries and storage do not change. At the 2,000-change/s
+peak assumption, acceptance adds up to 4,000 enforcement probes/s and 4,000
+account-key lock probes/s in the uncached admission path. This is a workload estimate,
+not a measured capacity result. Long enforcement histories and lock contention
+remain part of the 500M/3B load qualification.

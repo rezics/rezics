@@ -12,6 +12,7 @@ import {
 	organizationMembership,
 	organizationMembershipInvitation,
 } from "../database/schema/organization-membership";
+import { Authorization } from "../authorization";
 import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
 import { requireParticipation, ParticipationDenied, type ParticipationAuthority } from "./policy";
 import { publicEntityName } from "./presentation";
@@ -27,7 +28,11 @@ import {
 const MaxPendingInvitations = 1000;
 const OneDay = 86_400_000;
 
-async function admitAccount(tx: DatabaseTransaction, authority: ParticipationAuthority) {
+async function admitAccount(
+	tx: DatabaseTransaction,
+	authority: ParticipationAuthority,
+	action: "read" | "write" = "read",
+) {
 	if (authority.principal.kind !== "auth")
 		throw new ParticipationDenied("Organization membership requires a human account");
 	const authUserId = authority.principal.authUserId;
@@ -39,6 +44,10 @@ async function admitAccount(tx: DatabaseTransaction, authority: ParticipationAut
 		.for("share");
 	if (!account) throw new ParticipationDenied("Account is unavailable");
 	await ensureAccountAuthenticationAllowed(authUserId, tx);
+	if (action === "write")
+		await new Authorization(authority.actingEntityId, authUserId, authority).account.ensureCanWrite(
+			tx,
+		);
 	const [binding] = await tx
 		.select()
 		.from(authEntity)
@@ -59,6 +68,7 @@ async function requireManager(
 	tx: DatabaseTransaction,
 	authority: ParticipationAuthority,
 	organizationEntityId: string,
+	action: "read" | "write" = "read",
 ) {
 	z.uuid().parse(organizationEntityId);
 	if (authority.principal.kind !== "auth" || !authority.grant)
@@ -69,6 +79,12 @@ async function requireManager(
 		owner: "entity",
 		id: organizationEntityId,
 	});
+	if (action === "write")
+		await new Authorization(
+			authority.actingEntityId,
+			authority.principal.authUserId,
+			authority,
+		).account.ensureCanWrite(tx);
 	const [organization] = await tx
 		.select({ revision: entityParticipation.revision })
 		.from(entityParticipation)
@@ -204,7 +220,7 @@ export async function inviteOrganizationMember(
 	organizationEntityId: string,
 	input: z.input<typeof CreateMembershipInvitationSchema>,
 ) {
-	const manager = await requireManager(tx, authority, organizationEntityId);
+	const manager = await requireManager(tx, authority, organizationEntityId, "write");
 	const value = CreateMembershipInvitationSchema.parse(input);
 	const [recipient] = await tx
 		.select({ authUserId: authEntity.authUserId })
@@ -339,7 +355,7 @@ export async function acceptMembershipInvitation(
 	id: string,
 	expectedRevision: number,
 ) {
-	const account = await admitAccount(tx, authority);
+	const account = await admitAccount(tx, authority, "write");
 	z.uuid().parse(id);
 	const [invitation] = await tx
 		.select()
@@ -362,7 +378,12 @@ export async function acceptMembershipInvitation(
 		authorizationRevision: invitation.inviterAuthorizationRevision,
 		grant: { id: invitation.authorizationGrantId, revision: invitation.authorizationGrantRevision },
 	};
-	const manager = await requireManager(tx, issuerAuthority, invitation.organizationEntityId);
+	const manager = await requireManager(
+		tx,
+		issuerAuthority,
+		invitation.organizationEntityId,
+		"write",
+	);
 	if (manager.organizationRevision !== invitation.organizationRevision)
 		throw new OrganizationMembershipConflict("Organization participation generation changed");
 	await tx.execute(
@@ -427,7 +448,7 @@ export async function declineMembershipInvitation(
 	id: string,
 	expectedRevision: number,
 ) {
-	const account = await admitAccount(tx, authority);
+	const account = await admitAccount(tx, authority, "write");
 	const invitation = await lockRecipientInvitation(tx, account.authUserId, id, expectedRevision);
 	const now = new Date();
 	await tx
@@ -450,7 +471,7 @@ export async function cancelMembershipInvitation(
 	id: string,
 	expectedRevision: number,
 ) {
-	const manager = await requireManager(tx, authority, organizationEntityId);
+	const manager = await requireManager(tx, authority, organizationEntityId, "write");
 	z.uuid().parse(id);
 	MembershipExpectedRevisionSchema.parse({ expectedRevision });
 	const [invitation] = await tx
@@ -614,7 +635,7 @@ export async function removeOrganizationMember(
 	memberEntityId: string,
 	expectedRevision: number,
 ) {
-	const manager = await requireManager(tx, authority, organizationEntityId);
+	const manager = await requireManager(tx, authority, organizationEntityId, "write");
 	return removeMember(
 		tx,
 		organizationEntityId,
@@ -629,7 +650,7 @@ export async function leaveOrganization(
 	organizationEntityId: string,
 	expectedRevision: number,
 ) {
-	const account = await admitAccount(tx, authority);
+	const account = await admitAccount(tx, authority, "write");
 	z.uuid().parse(organizationEntityId);
 	return removeMember(
 		tx,

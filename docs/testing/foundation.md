@@ -273,3 +273,32 @@ its own denied command. Both authorized and denied paths run on real PostgreSQL.
 Dummy accounts and rule-backed records remain only in the disposable target.
 This qualifies these administrative protocols, not all membership/contribution
 enforcement, Realm authority, restoration or 500M/3B throughput.
+
+## Account enforcement on participation writes
+
+`task services-main:db:account-participation:check` runs
+[check-account-participation.ts](../../services/main/scripts/check-account-participation.ts).
+The [pinned run](database/account-participation-evidence.json) passes 39 assertions,
+including five signed-session API requests. Its first pre-fix case admitted a
+banned recipient to an organization. Membership changes now apply the shared
+account write policy to each operator and, at acceptance, the captured inviter.
+
+Cases cover ban/suspension denial for invite, accept, decline, cancel, remove and
+leave; read-only inbox/roster access; silence allowing membership while blocking
+catalog intake; explicit enforcement reversal; expired and future enforcement.
+Both membership and catalog intake run in each transaction order: enforcement
+first blocks admission without consuming the invitation, while admission first
+holds its account fence until commit and survives later enforcement. Every race
+identifies the exact expected blocker; later contributions are denied.
+
+The HTTP sequence issues an enforcement through governance, checks the declared
+`AccountRestricted` response and permitted private inbox read, reverses the
+produced enforcement ID, and accepts the original pending invitation. Generated
+OpenAPI and all three SDKs carry the membership error union. Scenario transactions
+roll back; race/API actors and first-party rule setup remain only in the
+explicitly disposable database. No external invitation or message is delivered.
+
+This is account-enforcement qualification for these paths, separate from binding
+suspension/recovery, Realm membership, other account-state transitions and whole
+restoration-frontier coverage. The membership owner records added query demand
+under the unchanged 500M/3B workload envelope; this run is not load acceptance.

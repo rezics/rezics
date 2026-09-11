@@ -28,7 +28,12 @@ import { toApiErrorResponse } from "../schema/response";
 const organizationParams = z.strictObject({ organizationEntityId: z.uuid() });
 const invitationParams = z.strictObject({ invitationId: z.uuid() });
 const failures = {
-	403: toApiErrorResponse(["ParticipationDenied"]),
+	403: toApiErrorResponse([
+		"ParticipationDenied",
+		"AccountRestricted",
+		"AccountSuspended",
+		"AccountClosed",
+	]),
 	404: toApiErrorResponse(["OrganizationMembershipNotFound"]),
 	409: toApiErrorResponse([
 		"OrganizationMembershipConflict",
