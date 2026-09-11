@@ -205,7 +205,28 @@ state. No invitation email or message is delivered.
 
 The fixture erases its four dummy accounts' private state at completion and retains
 only permitted public/operator records in the disposable database. This qualifies
-the tested lifecycle protocols; organization-generation recovery/suspension,
-invitation-capacity saturation and 500M/3B load remain separate acceptance cases.
+the tested lifecycle protocols; invitation-capacity saturation and 500M/3B load remain separate acceptance cases;
+the generation and suspended-binding cases are covered by the fixture below.
 The [membership owner](../../services/main/src/services/participation/organization-membership.md)
 retains the 1,000-pending limits, storage estimates and workload assumptions.
+
+## Membership generation, suspension and recovery expiry
+
+`task services-main:db:membership-recovery:check` runs
+[check-membership-recovery.ts](../../services/main/scripts/check-membership-recovery.ts).
+It covers suspended/restored recipient and inviter bindings, stale Auth revisions,
+last-controller loss, platform-authorized recovery, old invitation rejection
+across organization generations and successful acceptance of a fresh invitation.
+
+Three pre-fix checks failed inside an open transaction: an expired controller
+still counted, an expired membership-manager grant left an invitation pending,
+and an expired platform grant still authorized recovery. These predicates now
+use current-statement time. Recovery also rechecks its locked platform grant's
+deadline after acquiring the control row. A two-connection case holds that row
+past expiry, proves the exact blocker and verifies that no recovery generation
+was appended; removing the recheck makes this regression fail.
+
+The [pinned run](database/membership-recovery-evidence.json) passes 20 assertions using native PostgreSQL commands. Transaction-local scenarios
+roll back; the control-wait case leaves only dummy fixture actors/control records
+in the explicitly disposable target. This does not qualify account-enforcement
+suspension, invitation-capacity saturation, restoration frontiers or load.

@@ -384,6 +384,12 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-organization-membership.ts
 
+    db:membership-recovery:check:
+        desc: Verify membership suspension/generation fencing and current recovery authority across expiry and lock waits.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-membership-recovery.ts
+
     db:check:
         desc: Install the fresh native baseline and verify current schema and integrity contracts.
         cmds:

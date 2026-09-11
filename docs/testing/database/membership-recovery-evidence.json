@@ -1,0 +1,35 @@
+{
+  "baseCommit": "bdc843f2ae8a0de3c9728affd66b70acb1063abf",
+  "sourceDigests": {
+    "services/main/scripts/check-membership-recovery.ts": "289a1b0da32c2354a41571e757cb1e5ba82bffcf28cdb9e525d4d0844b411262",
+    "services/main/src/services/participation/lifecycle.ts": "6932933657910ecfe24bc1ecfec43fbe463ffba301d33fbc57d2ea0b38aa827b",
+    "services/main/src/services/participation/membership.ts": "ae824c293825710a8096c97d0be4c3985b71ae12a87a6797489cd053d6ffcbf7",
+    "services/main/src/services/participation/commands.ts": "f4075fd4277bc256461d5b6542d866d1c3890dbfd84323c1b7247ef30cfebd36",
+    "services/main/src/services/participation/policy.ts": "72fca3598c299c53628403ec66ac540a48081369f7d94340a16f474bc775ad2a",
+    "services/main/src/services/database/schema/participation.ts": "e52a36e07c8b6217ac8d44505c682ac24441493c959fe9c14d247c35db7c3c79",
+    "services/main/src/services/database/schema/postgres/organization-membership.sql": "b70991055610f48ce5efee495e9dcdaf8b49265598cd8383add61ac7ab6b89ef",
+    "services/main/src/services/database/migrations/atlas.sum": "5fb195c51729b80d46bc5465d58560f13de318049030c756b24a3ca1cd3ea33e"
+  },
+  "node": "v26.8.2",
+  "platform": "linux/x64",
+  "runtime": {
+    "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "default_isolation": "read committed"
+  },
+  "checks": 20,
+  "recoveryGenerationQualified": true,
+  "suspendedBindingsQualified": true,
+  "expiredControlQualified": true,
+  "recoveryLockWaitQualified": true,
+  "verification": {
+    "command": "DATABASE_ADMIN_URL=<disposable target> task services-main:db:membership-recovery:check",
+    "passed": true,
+    "typecheckPassed": true,
+    "testFilesPassed": 332,
+    "testsPassed": 1788,
+    "membershipApiAssertions": 76,
+    "membershipApiPassed": true,
+    "participationAuthorityPassed": true,
+    "schemaChanges": false
+  }
+}

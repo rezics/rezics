@@ -102,7 +102,7 @@ function invalidInvitationAuthority(table: typeof organizationMembershipInvitati
 		where g.id = ${table.authorizationGrantId} and g.revision = ${table.authorizationGrantRevision}
 		and g.auth_user_id = ${table.invitedByAuthUserId} and g.capability = 'entity.membership'
 		and g.acting_entity_id = ${table.organizationEntityId} and g.entity_id = ${table.organizationEntityId}
-		and g.revoked_at is null and (g.expires_at is null or g.expires_at > now())
+		and g.revoked_at is null and (g.expires_at is null or g.expires_at > statement_timestamp())
 		and u.erased_at is null and b.state = 'active' and b.revision = ${table.inviterAuthorizationRevision}
 		and p.state = 'active' and p.revision = ${table.organizationRevision}
 		and e.shape = 'organization' and e.deleted_at is null

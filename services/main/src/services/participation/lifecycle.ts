@@ -90,7 +90,10 @@ export async function hasEntityController(tx: DatabaseTransaction, entityId: str
 				eq(participationGrant.entityId, entityId),
 				eq(participationGrant.capability, "entity.security"),
 				isNull(participationGrant.revokedAt),
-				or(isNull(participationGrant.expiresAt), sql`${participationGrant.expiresAt} > now()`),
+				or(
+					isNull(participationGrant.expiresAt),
+					sql`${participationGrant.expiresAt} > statement_timestamp()`,
+				),
 				isNull(users.erasedAt),
 				eq(authEntity.state, "active"),
 			),
@@ -140,7 +143,7 @@ export async function recoverEntityController(
 		id: authority.actingEntityId,
 	});
 	const [platformGrant] = await tx
-		.select({ id: platformCapabilityGrant.id })
+		.select({ id: platformCapabilityGrant.id, expiresAt: platformCapabilityGrant.expiresAt })
 		.from(platformCapabilityGrant)
 		.where(
 			and(
@@ -149,7 +152,7 @@ export async function recoverEntityController(
 				isNull(platformCapabilityGrant.revokedAt),
 				or(
 					isNull(platformCapabilityGrant.expiresAt),
-					sql`${platformCapabilityGrant.expiresAt} > now()`,
+					sql`${platformCapabilityGrant.expiresAt} > statement_timestamp()`,
 				),
 			),
 		)
@@ -163,6 +166,13 @@ export async function recoverEntityController(
 		(await hasEntityController(tx, input.entityId))
 	)
 		throw new ParticipationDenied("Entity control changed or still has a controller");
+	if (platformGrant.expiresAt) {
+		// Grant/control lock waits can outlive the candidate statement's deadline check.
+		const current = await tx.execute<{ active: boolean }>(sql`select
+			${platformGrant.expiresAt.toISOString()}::timestamptz > statement_timestamp() as active`);
+		if (!current.rows[0]?.active)
+			throw new ParticipationDenied("Platform security management authority expired");
+	}
 	const obsolete = await tx
 		.select()
 		.from(participationGrant)
@@ -181,14 +191,12 @@ export async function recoverEntityController(
 			.update(participationGrant)
 			.set({ revokedAt: new Date(), revision: grant.revision + 1 })
 			.where(eq(participationGrant.id, grant.id));
-		await tx
-			.insert(participationGrantEvent)
-			.values({
-				grantId: grant.id,
-				revision: grant.revision + 1,
-				operation: "revoke",
-				operatorAuthUserId: authority.principal.authUserId,
-			});
+		await tx.insert(participationGrantEvent).values({
+			grantId: grant.id,
+			revision: grant.revision + 1,
+			operation: "revoke",
+			operatorAuthUserId: authority.principal.authUserId,
+		});
 	}
 	const [recipient] = await tx
 		.select({ id: users.id })
@@ -216,27 +224,23 @@ export async function recoverEntityController(
 		})
 		.returning({ id: participationGrant.id });
 	if (!grant) throw new Error("Recovery grant insertion failed");
-	await tx
-		.insert(participationGrantEvent)
-		.values({
-			grantId: grant.id,
-			revision: 1,
-			operation: "grant",
-			operatorAuthUserId: authority.principal.authUserId,
-		});
+	await tx.insert(participationGrantEvent).values({
+		grantId: grant.id,
+		revision: 1,
+		operation: "grant",
+		operatorAuthUserId: authority.principal.authUserId,
+	});
 	const revision = control.revision + 1;
 	await tx
 		.update(entityParticipation)
 		.set({ state: "active", revision })
 		.where(eq(entityParticipation.entityId, input.entityId));
-	await tx
-		.insert(entityRecoveryEvent)
-		.values({
-			entityId: input.entityId,
-			revision,
-			operatorAuthUserId: authority.principal.authUserId,
-			recipientAuthUserId: recipient.id,
-			evidence,
-		});
+	await tx.insert(entityRecoveryEvent).values({
+		entityId: input.entityId,
+		revision,
+		operatorAuthUserId: authority.principal.authUserId,
+		recipientAuthUserId: recipient.id,
+		evidence,
+	});
 	return { entityId: input.entityId, revision, grant: { id: grant.id, revision: 1 } };
 }

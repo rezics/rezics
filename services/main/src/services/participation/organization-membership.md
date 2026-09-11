@@ -17,7 +17,10 @@ An invitation captures the issuer's Auth revision, exact immutable grant event,
 and the organization's participation revision. Acceptance locks and revalidates
 all three in the same transaction as the membership write. Revoked/expired
 authority, erased/suspended accounts and a recovered organization generation
-cannot revive a pending invitation. Already accepted membership survives an
+cannot revive a pending invitation. Current-controller and invitation-source
+expiry predicates use current-statement time. Recovery rechecks a locked
+platform grant after obtaining the organization control row, before changing
+control history; waiting past its deadline does not admit a stale recovery. Already accepted membership survives an
 issuer's later grant revocation; removal and the member's own account erasure
 are separate effects. This follows the separation between membership and
 provider-defined authorization in [SCIM RFC 7643](https://www.rfc-editor.org/rfc/rfc7643.html#section-4.2),
@@ -77,8 +80,10 @@ oldest erasure job, dead tuples/WAL, and p95/p99 page/admission latency. A susta
 Organization-hash roster shards and Auth-routed inbox/erasure ownership are the
 growth direction. Cross-owner routing, concrete FK preservation and a committed
 membership/inbox cutover must be qualified before sharding; no unchecked
-polymorphic relation replaces these constraints. No 500M/3B throughput claim is
-made from the local SQL fixture.
+polymorphic relation replaces these constraints. The expiry correction adds no rows or indexes at either scale. A recovery
+using an expiring platform grant adds one scalar SQL deadline check after its
+locks; current-controller probes retain their existing selective keys and
+32-controller bound. No 500M/3B throughput claim is made from local fixtures.
 
 The [foundation fixture workflow](../../../../../docs/testing/foundation.md#controlled-organization-membership)
 records executable lifecycle/API/race evidence and its qualification boundaries.
