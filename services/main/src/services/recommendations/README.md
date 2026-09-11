@@ -150,3 +150,31 @@ compilation on authenticated reads. Both recommendation and feed consumers use
 this shape; the normal statement deadline and database JIT configuration remain
 unchanged. [HTTP/query evidence](../../../../../docs/testing/recommendations.md#catalog-recommendation-http-reads)
 records the rejected cases, bounded query diagnostic and remaining workload scope.
+
+## Event intake
+
+Read telemetry uses one transaction for current account/Self state, attribution
+preference, target eligibility and insertion. It preserves the endpoint's read
+semantics: anonymous public observations are allowed, and authenticated reads do
+not acquire contribution authority merely by recording an event. A disabled or
+stale account cannot retain authenticated attribution. Preference rows are locked
+before choosing whether to store the Auth account or an anonymous event.
+
+The command locks resource fences and concrete owner rows in ID order, then uses
+the root authorizer for each target. Moderation eligibility and used grant
+deadlines are checked before insertion. Event freshness is evaluated against a
+current database statement after waits; tracking signatures, replay uniqueness
+and the one-day/five-minute time window remain enforced. A denied batch leaves no
+partial event insertion. The endpoint accepts at most 100 events/targets under a
+10-second total transaction deadline and returns current authority errors in its
+generated API contract. Target normalization remains separate reference-consumer
+work until event storage uses the canonical bridge.
+
+[Event intake evidence](../../../../../docs/testing/recommendations.md#event-intake-authority)
+covers rollback cases, resource/Self/preference lock waits, both visibility commit
+orders, late event expiry, anonymous/opt-out attribution and a maximum-size HTTP
+batch. The measured 100-distinct-target batch took about 906 ms locally. This is
+not 500M/3B throughput evidence: bound work includes up to 100 routing/native owner
+and authority probes, row locks, event writes and derived metric/signal writes.
+The total deadline bounds stalled batches; corpus storage, hot-key concurrency
+and integration with erasure/retention still require their own workload evidence.

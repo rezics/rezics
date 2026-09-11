@@ -10092,6 +10092,29 @@ export type PostApiRecommendationsEventsStatus200 = {
 
 export type PostApiRecommendationsEventsStatus400 = MalformedRequestBody;
 
+export const PostApiRecommendationsEventsStatus403ErrorCodeEnum = {
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	ParticipationDenied: "ParticipationDenied",
+} as const;
+
+export type PostApiRecommendationsEventsStatus403ErrorCodeEnum =
+	(typeof PostApiRecommendationsEventsStatus403ErrorCodeEnum)[keyof typeof PostApiRecommendationsEventsStatus403ErrorCodeEnum];
+
+export type PostApiRecommendationsEventsStatus403 = {
+	error: {
+		/**
+		 * @default 'ApiTokenPermissionRequired'
+		 * @type string
+		 */
+		code: PostApiRecommendationsEventsStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type PostApiRecommendationsEventsStatus404 = {
 	error: {
 		/**
@@ -10197,6 +10220,7 @@ export type PostApiRecommendationsEventsOptions = {
 export type PostApiRecommendationsEventsResponses = {
 	"200": PostApiRecommendationsEventsStatus200;
 	"400": PostApiRecommendationsEventsStatus400;
+	"403": PostApiRecommendationsEventsStatus403;
 	"404": PostApiRecommendationsEventsStatus404;
 	"422": PostApiRecommendationsEventsStatus422;
 	"500": PostApiRecommendationsEventsStatus500;
@@ -10208,6 +10232,7 @@ export type PostApiRecommendationsEventsResponses = {
 export type PostApiRecommendationsEventsResponse =
 	| PostApiRecommendationsEventsStatus200
 	| PostApiRecommendationsEventsStatus400
+	| PostApiRecommendationsEventsStatus403
 	| PostApiRecommendationsEventsStatus404
 	| PostApiRecommendationsEventsStatus422
 	| PostApiRecommendationsEventsStatus500;

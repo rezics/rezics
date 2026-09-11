@@ -2740,6 +2740,7 @@ import type {
 	PostApiRecommendationsEventsOptions,
 	PostApiRecommendationsEventsStatus200,
 	PostApiRecommendationsEventsStatus400,
+	PostApiRecommendationsEventsStatus403,
 	PostApiRecommendationsEventsStatus404,
 	PostApiRecommendationsEventsStatus422,
 	PostApiRecommendationsEventsStatus500,
@@ -6057,6 +6058,7 @@ export function postApiRecommendationsEventsMutationOptions<TContext = unknown>(
 		PostApiRecommendationsEventsStatus200,
 		ResponseErrorConfig<
 			| PostApiRecommendationsEventsStatus400
+			| PostApiRecommendationsEventsStatus403
 			| PostApiRecommendationsEventsStatus404
 			| PostApiRecommendationsEventsStatus422
 			| PostApiRecommendationsEventsStatus500
@@ -6081,6 +6083,7 @@ export function usePostApiRecommendationsEvents<TContext>(
 			PostApiRecommendationsEventsStatus200,
 			ResponseErrorConfig<
 				| PostApiRecommendationsEventsStatus400
+				| PostApiRecommendationsEventsStatus403
 				| PostApiRecommendationsEventsStatus404
 				| PostApiRecommendationsEventsStatus422
 				| PostApiRecommendationsEventsStatus500
@@ -6099,6 +6102,7 @@ export function usePostApiRecommendationsEvents<TContext>(
 		PostApiRecommendationsEventsStatus200,
 		ResponseErrorConfig<
 			| PostApiRecommendationsEventsStatus400
+			| PostApiRecommendationsEventsStatus403
 			| PostApiRecommendationsEventsStatus404
 			| PostApiRecommendationsEventsStatus422
 			| PostApiRecommendationsEventsStatus500
@@ -6111,6 +6115,7 @@ export function usePostApiRecommendationsEvents<TContext>(
 		PostApiRecommendationsEventsStatus200,
 		ResponseErrorConfig<
 			| PostApiRecommendationsEventsStatus400
+			| PostApiRecommendationsEventsStatus403
 			| PostApiRecommendationsEventsStatus404
 			| PostApiRecommendationsEventsStatus422
 			| PostApiRecommendationsEventsStatus500
@@ -6128,6 +6133,7 @@ export function usePostApiRecommendationsEvents<TContext>(
 		PostApiRecommendationsEventsStatus200,
 		ResponseErrorConfig<
 			| PostApiRecommendationsEventsStatus400
+			| PostApiRecommendationsEventsStatus403
 			| PostApiRecommendationsEventsStatus404
 			| PostApiRecommendationsEventsStatus422
 			| PostApiRecommendationsEventsStatus500

@@ -480,6 +480,12 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-recommendation-reads.ts
 
+    db:recommendation-events:check:
+        desc: Verify current event intake authority, target/preference races, replay and maximum HTTP batches.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-recommendation-event-intake.ts
+
     db:check:
         desc: Install the fresh native baseline and verify current schema and integrity contracts.
         cmds:

@@ -1,19 +1,18 @@
 import { saveRecommendationExclusion, removeRecommendationExclusion } from "../../recommendations/exclusions";
 import { CatalogOwnerValues } from "@rezics/reference";
 import { unitStatesForIds } from "../../units/state-relation";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import type { StaticDecode } from "typebox";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { getUnitReadCondition } from "../../authorization/unit/query";
-import { database } from "../../database";
+import { database, withDatabaseTransactionDeadline } from "../../database";
+import { recordRecommendationEvents } from "../../recommendations/events";
 import {
-	accountPreference,
 	ContentRatingValues,
 	post,
-	recommendationEvent,
 } from "../../database/schema";
 import { parseJsonCursor } from "../../pagination";
 import { InvalidPaginationCursor } from "../../pagination/errors";
@@ -21,7 +20,7 @@ import {
 	resolveRecommendationSnapshot,
 	resolveRecommendationViewer,
 } from "../../recommendations/context";
-import { RecommendationPolicyVersion } from "../../recommendations/policy";
+import { RecommendationPolicy, RecommendationPolicyVersion } from "../../recommendations/policy";
 import { recommendRelatedPosts } from "../../recommendations/related-posts";
 import { verifyRecommendationTracking } from "../../recommendations/tracking";
 import { recommendUnits } from "../../recommendations/units";
@@ -140,17 +139,6 @@ const RecommendationWriteForbiddenResponse = toApiErrorResponse([
 	"ParticipationDenied",
 ]);
 
-async function getEventAuthUserId(request: Request) {
-	const identity = await resolveIdentity(request, "recommendation:read");
-	const authUserId = "principal" in identity ? identity.principal.authUserId : undefined;
-	if (!authUserId) return { identity, authUserId: undefined };
-	const [preference] = await database
-		.select({ personalized: accountPreference.personalizedFeed })
-		.from(accountPreference)
-		.where(eq(accountPreference.authUserId, authUserId))
-		.limit(1);
-	return { identity, authUserId: (preference?.personalized ?? true) ? authUserId : undefined };
-}
 
 export default new Elysia({ prefix: "/recommendations" })
 	.use(session)
@@ -310,50 +298,18 @@ export default new Elysia({ prefix: "/recommendations" })
 			body: RecommendationEventBatchBody,
 			response: {
 				[StatusCodes.OK]: RecommendationEventBatchResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["ApiTokenPermissionRequired", "AccountSuspended", "AccountClosed", "ParticipationDenied"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
 			detail: { summary: "Record recommendation events", tags: ["Recommendations"] },
 		},
 		async ({ body, request }) => {
-			const now = new Date();
-			for (const event of body.events) {
-				ensureEventTime(event.occurredAt, now);
-				ensureRecommendationTracking(event.targetUnitId, event);
-			}
-			const { identity, authUserId } = await getEventAuthUserId(request);
-			const targetIds = [...new Set(body.events.map(({ targetUnitId }) => targetUnitId))];
-			const target = unitStatesForIds(targetIds,"recommendation_event_target");
-            const readable = await database
-				.select({ id: target.id })
-				.from(target)
-				.where(
-					and(
-						inArray(target.id, targetIds),
-						getUnitReadCondition(identity.entity?.id,{},target),
-						eq(target.moderationStatus, "approved"),
-					),
-				);
-			if (readable.length !== targetIds.length) throw new UnitNotFound();
-			const inserted = await database
-				.insert(recommendationEvent)
-				.values(
-					body.events.map((event) => ({
-						id: event.id,
-						authUserId,
-						requestId: event.requestId,
-						surface: event.surface,
-						type: event.type,
-						targetUnitId: event.targetUnitId,
-						position: event.position,
-						policyVersion: event.policyVersion,
-						occurredAt: event.occurredAt,
-					})),
-				)
-				.onConflictDoNothing()
-				.returning({ id: recommendationEvent.id });
-			return { accepted: inserted.length };
+			const identity = await resolveIdentity(request, "recommendation:read");
+			return withDatabaseTransactionDeadline(RecommendationPolicy.eventTransactionMs, () =>
+				database.transaction(tx => recordRecommendationEvents(tx, identity.authorization, body.events)));
 		},
 	)
+
 	.put(
 		"/exclusions/:unitId",
 		{

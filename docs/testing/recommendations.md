@@ -101,3 +101,22 @@ or image-byte rendering change is part of this repair.
 
 The shared feed/exclusion regression also passes 46 assertions and seven signed
 HTTP requests after the anti-join change.
+
+## Event intake authority
+
+`task services-main:db:recommendation-events:check` runs
+[check-recommendation-event-intake.ts](../../services/main/scripts/check-recommendation-event-intake.ts).
+The [pinned run](database/recommendation-event-intake-evidence.json) passes 30
+assertions and nine HTTP requests. Transaction cases cover valid/replayed events,
+invalid signatures/time, all-or-nothing denied batches, anonymous and opted-out
+attribution, and stale/suspended Self bindings. Five exact-PID lock-wait cases
+exercise visibility before intake, intake before visibility, Self revision,
+personalization preference and event time expiring while the target is locked.
+
+The HTTP fixture checks actual request validation, the 101-item rejection and a
+100-distinct-target batch under the ten-second transaction deadline. It also
+verifies replay, anonymity, preference handling and private-target denial. Fixture
+transaction cases roll back; API/race records remain on the disposable target.
+Backend tests pass 333 files/1,790 tests; backend, all three SDKs and web TypeScript
+pass after generated error-contract updates. Event reference normalization and
+full delivery/erasure/scale acceptance remain separate work.

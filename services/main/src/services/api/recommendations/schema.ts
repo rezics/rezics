@@ -7,6 +7,7 @@ import {
 	RecommendationSurfaceValues,
 } from "../../database/schema/contract-values";
 import { DateTime, DisplayPosition, LocalizationLanguageHints, Uuid } from "../schema";
+import { RecommendationPolicy } from "../../recommendations/policy";
 import { CatalogOwnerValues } from "@rezics/reference";
 
 export const RecommendationSurfaceSchema = t.UnionEnum(RecommendationSurfaceValues);
@@ -50,7 +51,7 @@ export const RecommendationEventBatchBody = t.Object(
 				},
 				{ additionalProperties: false },
 			),
-			{ minItems: 1, maxItems: 100 },
+			{ minItems: 1, maxItems: RecommendationPolicy.eventMaxBatchSize },
 		),
 	},
 	{ additionalProperties: false },

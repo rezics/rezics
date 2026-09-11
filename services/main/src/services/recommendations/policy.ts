@@ -14,6 +14,8 @@ export const RecommendationPolicy = {
 	snapshotRetentionHours: 4,
 	snapshotStaleHours: 3,
 	eventRetentionDays: 90,
+	eventMaxBatchSize: 100,
+	eventTransactionMs: 10_000,
 	buildPartitions: 64,
 	buildBatchSize: 4096,
 	buildConcurrency: 4,
