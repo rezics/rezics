@@ -65,3 +65,39 @@ large retention batches, process/backup restore or corpus-scale throughput.
 
 The lifecycle repair passes backend tests (333 files/1,790 tests) and backend
 TypeScript. No schema migration is required.
+
+## Catalog recommendation HTTP reads
+
+`task services-main:db:recommendation-reads:check` runs
+[check-recommendation-reads.ts](../../services/main/scripts/check-recommendation-reads.ts).
+The [pinned run](database/recommendation-read-evidence.json) passes 39 assertions
+across 20 actual HTTP requests. Native editorial covers, requested-language
+summaries and independent cover fallback are checked, including withdrawal.
+The image fixture qualifies metadata selection; it does not assert delivery of
+stored image bytes. The pre-fix endpoint returned no native cover because it
+looked only in legacy localizations.
+
+An active score remains stored while its native target becomes private; new
+anonymous and authenticated discovery reads exclude it. Draft, unlisted,
+moderation-removed and disallowed-rating entries remain absent. Archived and
+soft-deleted targets also disappear. Cursor query mismatch and a newly unavailable
+anchor are rejected. Tracking signatures verify, authenticated exclusions do not
+affect anonymous readers, and explicit exclusions remain effective with
+personalization disabled. An excluded anchor can still locate its continuation
+without being returned again; removal restores the recommendation.
+
+Authenticated reads exposed a repeatable statement timeout. The old anchor OR
+around the exclusion predicate yielded an estimated cost of 1,155,334 and spent
+2,362 ms compiling 787 JIT functions in a diagnostic run. An anti-join-preserving
+NULLIF anchor probe reduced the prototype cost to 2,656 and execution to 6.8 ms
+under the unchanged 1,500 ms limit, with default JIT enabled. Disabling JIT was a
+diagnostic comparison, not the repair. The same predicate shape is used by feed
+eligibility. These measurements do not close the independent native facet-search
+abort or 500M/3B load acceptance.
+
+Backend tests passed 333 files/1,790 tests; backend TypeScript and unchanged
+OpenAPI/generated-contract checks passed. No frontend component, schema migration
+or image-byte rendering change is part of this repair.
+
+The shared feed/exclusion regression also passes 46 assertions and seven signed
+HTTP requests after the anti-join change.

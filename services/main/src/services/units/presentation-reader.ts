@@ -9,8 +9,10 @@ import { CatalogNameTables } from "../database/schema/catalog-names";
 import { CatalogEditorialTables } from "../database/schema/catalog-editorial";
 import { unitStateRelation } from "./state-relation";
 import { presentAvatar } from "./avatar";
+import { presentImageAsset } from "../api/image-assets/presentation";
 import {
 	resolvedUnitLocalizationAvatar,
+	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationSummary,
 	resolvedUnitLocalizationTitle,
@@ -25,13 +27,14 @@ export type UnitPresentation = {
 	readonly title: string | null;
 	readonly summary: string | null;
 	readonly avatar: PresentedAvatar | null;
+	readonly cover?: ReturnType<typeof presentImageAsset>;
 };
 /** Hydrates only already-authorized IDs in the caller's consistent transaction; private routing fields never leave this projection. @internal */
 export async function readUnitPresentationsInTransaction(
 	tx: DatabaseTransaction,
 	unitIds: readonly string[],
 	languages: readonly string[] = [],
-	options: { readonly includeDeleted?: boolean } = {},
+	options: { readonly includeDeleted?: boolean; readonly includeCover?: boolean } = {},
 ): Promise<Map<string, UnitPresentation>> {
 	const ids = z
 		.array(z.uuid())
@@ -60,18 +63,21 @@ export async function readUnitPresentationsInTransaction(
 			title:sql<string|null>`left(${resolvedUnitLocalizationTitle(state.id, platformLanguages)},500)`,
 			summary:sql<string|null>`left(${resolvedUnitLocalizationSummary(state.id, platformLanguages)},2000)`,
 			avatar: resolvedUnitLocalizationAvatar(state.id, platformLanguages),
+			coverAssetId: options.includeCover ? sql<string|null>`case when ${state.owner}=any(${sql.param(CatalogOwnerValues)}::text[])
+				then null::uuid else ${resolvedUnitLocalizationImageAssetId(state.id,"cover",platformLanguages)} end` : sql<string|null>`null::uuid`,
 		})
 		.from(candidates)
 		.innerJoinLateral(state, sql`true`)
 		.limit(ids.length);
 	const nativeOwners = new Set<string>(CatalogOwnerValues);
 	const result = new Map<string, UnitPresentation>(
-		rows.map(({ avatar, ...row }) => [
+		rows.map(({ avatar, coverAssetId, ...row }) => [
 			row.id,
 			{
 				...row,
 				...(nativeOwners.has(row.owner) ? { title: null, language: null } : {}),
 				avatar: presentAvatar(avatar),
+				...(options.includeCover ? { cover: nativeOwners.has(row.owner) ? null : presentImageAsset(coverAssetId,"cover") } : {}),
 			},
 		]),
 	);
@@ -122,19 +128,26 @@ export async function readUnitPresentationsInTransaction(
 			const presentationRows = await tx.execute(sql`
  select requested.owner_id, chosen.language, chosen.summary,
  chosen.avatar_type,chosen.avatar_asset_id,chosen.avatar_emoji,chosen.avatar_icon_prefix,chosen.avatar_icon_name
+ ${options.includeCover ? sql`,cover.asset_id as cover_asset_id` : sql``}
  from unnest(${sql.param(batch)}::uuid[]) requested(owner_id)
  join lateral (
   select language,summary,avatar_type,avatar_asset_id,avatar_emoji,avatar_icon_prefix,avatar_icon_name from ${editorial}
   where owner_id=requested.owner_id and state='active'
   order by coalesce(array_position(${sql.param(canonicalLanguages)}::text[],language),2147483647),language limit 1
- ) chosen on true`);
+ ) chosen on true
+ ${options.includeCover ? sql`left join lateral (
+  select cover_asset_id as asset_id from ${editorial}
+  where owner_id=requested.owner_id and state='active' and cover_asset_id is not null
+  order by coalesce(array_position(${sql.param(canonicalLanguages)}::text[],language),2147483647),language limit 1
+ ) cover on true` : sql``}`);
 			for(const row of z.array(z.object({owner_id:z.uuid(),language:z.string(),summary:z.string().nullable(),
 				avatar_type:z.enum(AvatarTypeValues).nullable(),avatar_asset_id:z.uuid().nullable(),avatar_emoji:z.string().nullable(),
-				avatar_icon_prefix:z.enum(FontAwesomeIconPrefixValues).nullable(),avatar_icon_name:z.string().nullable()})).max(100).parse(presentationRows.rows)) {
+				avatar_icon_prefix:z.enum(FontAwesomeIconPrefixValues).nullable(),avatar_icon_name:z.string().nullable(),cover_asset_id:z.uuid().nullable().optional()})).max(100).parse(presentationRows.rows)) {
 				const previous=result.get(row.owner_id);
 				if(previous) result.set(row.owner_id,{...previous,summary:row.summary,
 					avatar:presentAvatar(avatarReferenceFromColumns({avatarType:row.avatar_type,avatarAssetId:row.avatar_asset_id,
-						avatarEmoji:row.avatar_emoji,avatarIconPrefix:row.avatar_icon_prefix,avatarIconName:row.avatar_icon_name}))});
+						avatarEmoji:row.avatar_emoji,avatarIconPrefix:row.avatar_icon_prefix,avatarIconName:row.avatar_icon_name})),
+					...(options.includeCover ? { cover:presentImageAsset(row.cover_asset_id ?? null,"cover") } : {})});
 			}
 		}
 	}

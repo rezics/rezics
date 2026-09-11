@@ -578,8 +578,9 @@ export function getFeedEligibilityCondition(
 				where attribution.source_unit_id = ${feedUnit.id}
 			)`
 			: undefined,
+		// A nullable probe exempts the cursor anchor without defeating the exclusion anti-join.
 		viewer.profileId
-			? sql`(${feedUnit.id} = ${anchorId ?? null}::uuid or not ${recommendationExclusionCondition(feedUnit.id, selfAuthUserIdForEntity(viewer.profileId))})`
+			? sql`not ${recommendationExclusionCondition(anchorId ? sql`nullif(${feedUnit.id},${anchorId}::uuid)` : feedUnit.id, selfAuthUserIdForEntity(viewer.profileId))}`
 			: undefined,
 	)!;
 }

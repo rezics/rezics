@@ -1,0 +1,53 @@
+{
+  "baseCommit": "98941dfe56c8bbaa9bd8b8049886f7441e51fefe",
+  "sourceDigests": {
+    "services/main/scripts/check-recommendation-reads.ts": "58d6d512f0323b51b58354f6a4a63c80eedf33cdbf3723461ca7c8a8e8f264a1",
+    "services/main/src/services/recommendations/units.ts": "514a7cacb2879f9a502f8a7f200d2ab6c92d75230984e9478aa26407189dc7bf",
+    "services/main/src/services/units/presentation-reader.ts": "e76a4c41f7df647f3d053b7eb1468676f0d13d18bdd34cd99615a746b1b9bca5",
+    "services/main/src/services/recommendations/exclusion-query.ts": "60579c643bc503cd3b5eee06fa918282bfa1da511bde7414ce494cfd07b12c5a",
+    "services/main/src/services/api/recommendations/index.ts": "8f50479578cca69c316993a212ec380d4c1042d188eb77ce6968a649046e362a",
+    "services/main/src/services/database/migrations/atlas.sum": "919d501a2477edcdad92c2442716288636b323554fcc8a9b7a226b982e397c0e",
+    "services/main/src/services/api/feed/index.ts": "905bf1aa1bac2c5def1b1ccf2efd6c640a31a8036433d363a360c74ef6274758"
+  },
+  "node": "v26.8.2",
+  "platform": "linux/x64",
+  "runtime": {
+    "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "default_isolation": "read committed"
+  },
+  "checks": 39,
+  "httpChecks": 20,
+  "currentPublicVisibilityChecked": true,
+  "nativeCoverFallback": true,
+  "cursorsAndTracking": true,
+  "privateExclusionIsolation": true,
+  "metadataOnlyImageFixture": true,
+  "verification": {
+    "mainTestFiles": 333,
+    "mainTests": 1790,
+    "mainTypeScript": "passed",
+    "openApiAndGeneratedContracts": "unchanged and passed",
+    "sharedFeedReferenceAssertions": 46,
+    "sharedFeedReferenceHttpRequests": 7
+  },
+  "queryDiagnostic": {
+    "context": "Authenticated candidate query, default JIT enabled; original OR form exceeded the normal 1500 ms statement budget. A separate longer diagnostic run measured JIT; production limits and JIT settings remain unchanged.",
+    "original": {
+      "cost": 1155334.2,
+      "planningMs": 108.868,
+      "executionMs": 2391.18,
+      "jitMs": 2361.637
+    },
+    "jitOffDiagnosticOnly": {
+      "planningMs": 33.444,
+      "executionMs": 4.228
+    },
+    "antiJoinPrototype": {
+      "cost": 2655.71,
+      "planningMs": 99.195,
+      "executionMs": 6.845,
+      "sharedHitBlocks": 570
+    },
+    "scope": "Small fixture data and query-shape evidence, not the unresolved facet abort or corpus-scale qualification"
+  }
+}

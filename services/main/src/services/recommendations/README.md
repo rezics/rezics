@@ -121,3 +121,32 @@ rows and the same fraction of their heap/index footprint: about 2.98M rows at th
 writes. Active builds may already require a longer window under their declared
 lifetime. Range predicates and deletion limits remain unchanged. Skew, storage/WAL
 and actual deadline capacity still require the M09 workload gate.
+
+## Catalog recommendation reads
+
+The candidate search and final hydration both require a currently published,
+public, approved, undeleted native identity within the viewer's rating policy.
+An old ready score is ordering data and cannot grant disclosure. Authenticated
+readers apply their own canonical-reference exclusions; disabling personalization
+does not remove explicit exclusion choices. An excluded cursor anchor can locate
+the continuation boundary but is not returned again. An unavailable anchor or
+changed query scope rejects the cursor.
+
+Catalog covers come from native editorial data through the existing bounded
+presentation reader. Cover lookup is opt-in, so other summary callers retain their
+existing response shape. The preferred active editorial language supplies summary
+text; the cover independently selects the first available active cover in language
+preference/fallback order. Withdrawn editorial rows do not supply covers. Native
+identities do not probe legacy cover rows, and other presentation types retain
+their existing localization resolver. Candidate and returned-page limits remain
+256 and 50, and each native owner has at most 32 editorial languages to examine.
+This adds one bounded lateral lookup inside the existing per-owner batch, without
+new rows/indexes or an application query per item at the 500M/3B planning scales.
+
+
+The exclusion check stays an anti-join. A NULLIF probe exempts an existing cursor
+anchor, replacing the outer OR that inflated planner cost and triggered long JIT
+compilation on authenticated reads. Both recommendation and feed consumers use
+this shape; the normal statement deadline and database JIT configuration remain
+unchanged. [HTTP/query evidence](../../../../../docs/testing/recommendations.md#catalog-recommendation-http-reads)
+records the rejected cases, bounded query diagnostic and remaining workload scope.
