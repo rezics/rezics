@@ -19,7 +19,7 @@ export function getPlatformCapabilityCondition(profileId: string, capability: Pl
 					isNull(platformCapabilityGrant.revokedAt),
 					or(
 						isNull(platformCapabilityGrant.expiresAt),
-						sql`${platformCapabilityGrant.expiresAt} > now()`,
+						sql`${platformCapabilityGrant.expiresAt} > statement_timestamp()`,
 					),
 				),
 			),

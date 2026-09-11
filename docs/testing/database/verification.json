@@ -25,12 +25,12 @@
     "backup/restore drill"
   ],
   "sha256": {
-    "current-schema-map.tsv": "4fc2dda51a02687fca4afc929d26f39d2c5b36011f7c1156e0c15279bebc0a0e",
+    "current-schema-map.tsv": "5294aead1746ba4c3fc2d0038e71612bc6e57670a4c172163ecf46c75a463428",
     "api-coverage.tsv": "58c2695b7e36c5ba5cd30c04728e1326c567cd19a2e51ae7b0f32c04ada7d999",
     "scenarios.tsv": "07738e2923baef54d4e4baebedc79b5b5dc25e2196685b51cd170c40f34c7cda",
     "capacity.json": "fd6446ce16165b24928d9245336e74d80c65e31682c2167c343e40e56760954d",
     "capacity.md": "38e2d5f1494f1775836389f6400766ba080cb50e8c8586de0cbb7cdf2d713176",
-    "dependency-manifest.json": "89e2c0ba272920df5cd0bb15c36d2cb3a2d4f40d96b2ff8bf6a331f72706e303"
+    "dependency-manifest.json": "5a2b8909e3bdb3e091e61ba622942b1cb8e60abca4e83ee7350487b32b010e45"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -45,9 +45,9 @@
     "docs/architecture/database/ai-hub.md": "ccecae0e8f66d94644c6c5a56136628484375ff0eda43e4e914e3ed24d2e3050",
     "docs/architecture/database/catalog-model.md": "a74b2f049531d62f8c149310b48ef5c0d1053cb1fcfede064efbb759f0ab4992",
     "docs/architecture/database/creation.md": "7cd97242eb39b099a445934a6d345edfc4b45206f72a8f4bd626453e1af24cbd",
-    "docs/architecture/database/data-dictionary.md": "7c1d097fd0400569130b934217c5aa246846bb6344b8018b37599f9c4f30d2d7",
+    "docs/architecture/database/data-dictionary.md": "2f3e99ea52db2a5caf85de636ca3e81fd73ef8f2c5e7d694f71545e5d5b381bd",
     "docs/architecture/database/relationship-graph.md": "f849ff42ecba6c161cb25c392cfc8ef65c51d5be1eacc718ee6b3aa06d3245ef",
-    "docs/plan/README.md": "7cfe88504ca28ba59c0557dc523e3f52cd5028556f7e7d073ab8b32a28fdf00c",
+    "docs/plan/README.md": "fceb0bff39b7d553bdf1b075599c7b5948aff67a32ff5d622c4d401b3e69d058",
     "docs/plan/backend-acceptance.md": "13b3b8e23f05cf3d433dd1383a8f1f59f2a5d5586c2ea5413c0caa8ee7059199",
     "docs/plan/frontend.md": "f5eb500f2d17facbf03f6d2c92548fb8772d6ddfaf800ea9febd25aab72de062",
     "docs/plan/modules/ai-hub.md": "b95b2996692fcef54d168477b80278214157257762b4fb7839b5918435aa677b",
@@ -55,7 +55,7 @@
     "docs/plan/modules/community-and-governance.md": "466c61759817b82c825cf547f69f299226796aebbe05c0d6d80996578f4e557a",
     "docs/plan/modules/content-and-media.md": "db3190e114de0419cc729215c63bea020927b3831a9d704b20a63e313be7dc64",
     "docs/plan/modules/creation-and-reading.md": "d7e836a92c106c22b4e76cd6684fa4afe1bea04b6b044cfaaf7228dba690f04b",
-    "docs/plan/modules/foundation.md": "25eef390d9587f122c5dd3f1522211e9a7837f15d5c01cd0e8effae9c6e6855c",
+    "docs/plan/modules/foundation.md": "be986efee963cf7963967e29dc9f6350c4944657e88d6d537c95d8e7451b2341",
     "docs/plan/modules/knowledge-and-graph.md": "16bafba22a5de999644c5e21997c75678da90c3c261a49dc81d288624d0d6f63",
     "docs/plan/modules/search-and-operations.md": "bebfb8cbf5af84ae5998f8f2a0b6058e29efa7933a9e75cd502f90ebc8d23cb2",
     "docs/plan/modules/sources-and-converters.md": "fea3bcce10c2bad7aca242568da22b0e6f47e96eae02ddf304d1d25bd29446cf",
@@ -65,7 +65,7 @@
     "docs/testing/ai-hub.md": "e26dbe58f28fe78b51a81bd54bfe47a7d267d97f6e18a15f46239bbb58f0c971",
     "docs/testing/backend-integration.md": "2e55da1a8997b9044e751a3df2106a69bcda952d49ba7f58962baa87716495bb",
     "docs/testing/book-and-creation.md": "91af6b8352c20c1e933fe68e8ff0d828464d94ab43e64b2d32491598d1cb5cef",
-    "docs/testing/foundation.md": "6e1bb4178355d5851328bcec69cd3e200d1fe203a45c47d6a3cbe86f780c78ad",
+    "docs/testing/foundation.md": "6eca4c0fb3c9b9ea6cf589e0bdbf1166fdaa597e6e56a547cbb2d687c7e2122e",
     "docs/testing/known-failures.md": "421a07e97004928b72e0911c04c91584c4cf3e0b4d56dd7c7aecfa5820efec28",
     "docs/testing/relationship-graph.md": "7f3aaa37d76e80a9d2a5e54c9e2fa52102ba5830594121275ebefb278a5e2b91",
     "docs/testing/source-conformance.md": "36473ecd59994220f4bf3273631c84e5042e4a5abe81ba3666a047624b82beda",

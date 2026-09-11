@@ -4,7 +4,7 @@ Dependencies: none. Contract owner: [database architecture](../../architecture/d
 
 ## Remaining work
 
-- Move generic consumers onto qualified identity and catalog metadata revision values. Extend the bridges for other revision owners and add occurrence references using complete concrete FK keys and sealed targets; qualify scoped addresses without a universal Unit parent or unchecked polymorphic ID.
+- Move remaining generic consumers onto qualified identity and catalog metadata revision values. Extend the bridges for other revision owners and add occurrence references using complete concrete FK keys and sealed targets; qualify scoped addresses without a universal Unit parent or unchecked polymorphic ID.
 - Implement canonical definitions, operation receipts, narrow heads and immutable revisions. Preserve unknown/absent/conflict and sensitive-value availability states.
 - Integrate qualified participation controls with remaining membership/ownership transitions, resource grants/restrictions and exact disclosure fences; prove ordered locks and current-snapshot rechecks across those paths.
 - Extend the fresh native fixture workflow for remaining lifecycle contracts and finish account-erasure workers and restoration-frontier cases without online migration steps.

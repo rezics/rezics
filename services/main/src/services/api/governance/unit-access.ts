@@ -12,7 +12,7 @@ import { publicEntityName } from "../../participation/presentation";
 
 import { recordAuditEvent } from "../../audit";
 import session from "../../auth/session";
-import { lockUnitAccessState } from "../../authorization/unit/invitations";
+import { lockUnitAccessState } from "../../authorization/unit/access-lock";
 import { replaceUnitOwnership } from "../../authorization/unit/ownership";
 import {
 	expandDelegableUnitPermissions,

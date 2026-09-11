@@ -12,8 +12,8 @@ FOR EACH ROW EXECUTE FUNCTION public.participation_guard_private_history();
 CREATE OR REPLACE FUNCTION public.participation_guard_favorite_identity()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 BEGIN
-  IF (to_jsonb(NEW)-ARRAY['position','note','snapshot','revision','updated_at','target_owner']) IS DISTINCT FROM
-    (to_jsonb(OLD)-ARRAY['position','note','snapshot','revision','updated_at','target_owner']) OR NEW.revision <= OLD.revision THEN
+  IF (to_jsonb(NEW)-ARRAY['position','note','snapshot','revision','updated_at']) IS DISTINCT FROM
+    (to_jsonb(OLD)-ARRAY['position','note','snapshot','revision','updated_at']) OR NEW.revision <= OLD.revision THEN
     RAISE EXCEPTION 'Favorite ownership and target are immutable; revisions must advance' USING ERRCODE = '23514';
   END IF;
   RETURN NEW;
@@ -101,12 +101,13 @@ DROP TRIGGER IF EXISTS favorite_item_stats_maintain ON public.collection_item;
 DROP FUNCTION IF EXISTS public.maintain_favorite_item_stats();
 CREATE OR REPLACE FUNCTION public.maintain_account_favorite_stats()
 RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
-DECLARE row_data public.account_favorite%ROWTYPE; direction bigint;
+DECLARE row_data public.account_favorite%ROWTYPE; direction bigint; target_id uuid;
 BEGIN
   IF TG_OP = 'INSERT' THEN row_data := NEW; direction := 1;
   ELSE row_data := OLD; direction := -1; END IF;
-  PERFORM public.apply_unit_engagement_stat(row_data.target_unit_id, p_favorites => direction);
-  PERFORM public.apply_recommendation_unit_signal(row_data.target_unit_id, row_data.created_at, 'favorite', direction, direction * 5);
+  target_id := public.reference_value_native_id(row_data.target_reference_id);
+  PERFORM public.apply_unit_engagement_stat(target_id, p_favorites => direction);
+  PERFORM public.apply_recommendation_unit_signal(target_id, row_data.created_at, 'favorite', direction, direction * 5);
   RETURN NULL;
 END $$;
 DROP TRIGGER IF EXISTS account_favorite_stats_maintain ON public.account_favorite;

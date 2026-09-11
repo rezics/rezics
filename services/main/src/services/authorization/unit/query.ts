@@ -31,14 +31,14 @@ type UnitReadTarget = {
 function activeGrant() {
 	return and(
 		isNull(unitAccessGrant.revokedAt),
-		or(isNull(unitAccessGrant.expiresAt), sql`${unitAccessGrant.expiresAt} > now()`),
+		or(isNull(unitAccessGrant.expiresAt), sql`${unitAccessGrant.expiresAt} > statement_timestamp()`),
 	);
 }
 
 function activeRestriction() {
 	return and(
 		isNull(unitAccessRestriction.revokedAt),
-		or(isNull(unitAccessRestriction.expiresAt), sql`${unitAccessRestriction.expiresAt} > now()`),
+		or(isNull(unitAccessRestriction.expiresAt), sql`${unitAccessRestriction.expiresAt} > statement_timestamp()`),
 	);
 }
 
@@ -83,7 +83,7 @@ export function getUnitReadCondition(
 					isNull(unitAccessRestriction.revokedAt),
 					or(
 						isNull(unitAccessRestriction.expiresAt),
-						sql`${unitAccessRestriction.expiresAt} > now()`,
+						sql`${unitAccessRestriction.expiresAt} > statement_timestamp()`,
 					),
 				),
 			),
@@ -101,7 +101,7 @@ export function getUnitReadCondition(
 					isNull(unitAccessRestriction.revokedAt),
 					or(
 						isNull(unitAccessRestriction.expiresAt),
-						sql`${unitAccessRestriction.expiresAt} > now()`,
+						sql`${unitAccessRestriction.expiresAt} > statement_timestamp()`,
 					),
 					profileMatchesRealmAccessSubject(
 						database,
@@ -228,7 +228,7 @@ export function getExplicitUnitAnyScopePermissionCondition(
 					isNull(candidateRestriction.revokedAt),
 					or(
 						isNull(candidateRestriction.expiresAt),
-						sql`${candidateRestriction.expiresAt} > now()`,
+						sql`${candidateRestriction.expiresAt} > statement_timestamp()`,
 					),
 					or(
 						and(
@@ -260,7 +260,7 @@ export function getExplicitUnitAnyScopePermissionCondition(
 					eq(candidateGrant.permission, permission),
 					grantSubject,
 					isNull(candidateGrant.revokedAt),
-					or(isNull(candidateGrant.expiresAt), sql`${candidateGrant.expiresAt} > now()`),
+					or(isNull(candidateGrant.expiresAt), sql`${candidateGrant.expiresAt} > statement_timestamp()`),
 					not(applicableRestriction),
 				),
 			),

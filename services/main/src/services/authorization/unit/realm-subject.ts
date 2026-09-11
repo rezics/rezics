@@ -85,7 +85,7 @@ export function profileCanManageRealmAccess(
 					eq(managerRestriction.subjectKind, "auth"),
 					eq(managerRestriction.authUserId, selfAuthUserIdForEntity(profileId)),
 					isNull(managerRestriction.revokedAt),
-					or(isNull(managerRestriction.expiresAt), sql`${managerRestriction.expiresAt} > now()`),
+					or(isNull(managerRestriction.expiresAt), sql`${managerRestriction.expiresAt} > statement_timestamp()`),
 				),
 			),
 	);
@@ -101,7 +101,7 @@ export function profileCanManageRealmAccess(
 					eq(managerRestriction.subjectKind, "realm"),
 					eq(managerRestriction.realmRelation, "member"),
 					isNull(managerRestriction.revokedAt),
-					or(isNull(managerRestriction.expiresAt), sql`${managerRestriction.expiresAt} > now()`),
+					or(isNull(managerRestriction.expiresAt), sql`${managerRestriction.expiresAt} > statement_timestamp()`),
 					exists(
 						executor
 							.select({ id: managerRestrictionMember.profileId })
@@ -127,7 +127,7 @@ export function profileCanManageRealmAccess(
 					eq(managerGrant.permission, "unit.access.manage"),
 					sql`cardinality(${managerGrant.scope}) = 0`,
 					isNull(managerGrant.revokedAt),
-					or(isNull(managerGrant.expiresAt), sql`${managerGrant.expiresAt} > now()`),
+					or(isNull(managerGrant.expiresAt), sql`${managerGrant.expiresAt} > statement_timestamp()`),
 					or(
 						and(
 							eq(managerGrant.subjectKind, "auth"),

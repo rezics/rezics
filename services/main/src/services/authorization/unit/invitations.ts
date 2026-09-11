@@ -1,3 +1,4 @@
+import { lockUnitAccessState } from "./access-lock";
 import type { DelegableUnitPermission } from "@rezics/access";
 import { and, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 
@@ -35,16 +36,6 @@ export function unitAccessInvitationState(
 
 export function presentUnitAccessInvitation(record: InvitationRecord, now = new Date()) {
 	return { ...record, state: unitAccessInvitationState(record, now) };
-}
-
-export async function lockUnitAccessState(
-	tx: DatabaseTransaction,
-	unitIds: readonly string[],
-): Promise<void> {
-	for (const unitId of [...new Set(unitIds)].sort())
-		await tx.execute(
-			sql`select pg_advisory_xact_lock(hashtextextended(${`unit-access:${unitId}`}::text, 0))`,
-		);
 }
 
 async function recordInvitationAudit(
@@ -110,7 +101,7 @@ export async function createUnitAccessInvitation(
 					eq(unitAccessInvitation.invitedAuthUserId, input.invitedAuthUserId),
 					eq(unitAccessInvitation.scope, [...input.scope]),
 					isNull(unitAccessInvitation.resolution),
-					sql`${unitAccessInvitation.expiresAt} > now()`,
+					sql`${unitAccessInvitation.expiresAt} > statement_timestamp()`,
 				),
 			)
 			.limit(1);
@@ -382,7 +373,7 @@ export async function cancelPendingUnitAccessInvitations(
 			and(
 				eq(unitAccessInvitation.unitId, unitId),
 				isNull(unitAccessInvitation.resolution),
-				sql`${unitAccessInvitation.expiresAt} > now()`,
+				sql`${unitAccessInvitation.expiresAt} > statement_timestamp()`,
 			),
 		)
 		.returning({ id: unitAccessInvitation.id });

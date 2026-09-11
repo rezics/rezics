@@ -9,7 +9,12 @@ import {
 	accountFavoritesState,
 } from "../database/schema/favorites";
 import { UnitReferenceSchema } from "@rezics/reference";
-import { unitReferenceValues } from "../database/schema/unit-reference-columns";
+import { referenceValue } from "../database/schema/reference-value";
+import {
+	allocateReferenceValue,
+	findReferenceValueByNativeId,
+	referenceValueTarget,
+} from "../units/reference-value";
 import { readRegisteredUnitPreview, UnitReferenceUnavailable } from "../units/reference";
 import { withCatalogViewerPolicy } from "../catalog/read-policy";
 import { CatalogAccessDenied, CatalogReferenceNotFound } from "../catalog/storage";
@@ -52,9 +57,9 @@ async function admitFavorites(tx: DatabaseTransaction, authority: ParticipationA
 	return { authUserId, selfEntityId: account.selfEntityId };
 }
 
-function presentFavorite(row: typeof accountFavorite.$inferSelect) {
+function presentFavorite(row: typeof accountFavorite.$inferSelect, target: unknown) {
 	return {
-		target: UnitReferenceSchema.parse({ owner: row.targetOwner, id: row.targetUnitId }),
+		target: UnitReferenceSchema.parse(target),
 		position: row.position,
 		note: row.note,
 		preview: FavoritePreviewSchema.parse(row.snapshot),
@@ -83,14 +88,14 @@ async function lockFavorites(
 async function favoritePosition(
 	tx: DatabaseTransaction,
 	authUserId: string,
-	targetUnitId: string,
-	afterTargetId: string | null | undefined,
+	targetReferenceId: string,
+	afterReferenceId: string | null | undefined,
 	current: typeof accountFavorite.$inferSelect | undefined,
 ) {
-	if (afterTargetId === targetUnitId) throw new FavoriteRevisionConflict();
-	if (afterTargetId === undefined && current) return current.position;
+	if (afterReferenceId === targetReferenceId) throw new FavoriteRevisionConflict();
+	if (afterReferenceId === undefined && current) return current.position;
 	let lower: string | null = null;
-	if (afterTargetId === undefined) {
+	if (afterReferenceId === undefined) {
 		const [last] = await tx
 			.select({ position: accountFavorite.position })
 			.from(accountFavorite)
@@ -99,14 +104,14 @@ async function favoritePosition(
 			.limit(1);
 		return fractionalPositionBetween(last?.position ?? null, null);
 	}
-	if (afterTargetId !== null) {
+	if (afterReferenceId !== null) {
 		const [anchor] = await tx
 			.select({ position: accountFavorite.position })
 			.from(accountFavorite)
 			.where(
 				and(
 					eq(accountFavorite.authUserId, authUserId),
-					eq(accountFavorite.targetUnitId, afterTargetId),
+					eq(accountFavorite.targetReferenceId, afterReferenceId),
 				),
 			)
 			.limit(1);
@@ -119,7 +124,7 @@ async function favoritePosition(
 		.where(
 			and(
 				eq(accountFavorite.authUserId, authUserId),
-				ne(accountFavorite.targetUnitId, targetUnitId),
+				ne(accountFavorite.targetReferenceId, targetReferenceId),
 				lower === null ? undefined : gt(accountFavorite.position, lower),
 			),
 		)
@@ -201,8 +206,9 @@ export async function listFavorites(
 		.limit(1)
 		.for("share");
 	const rows = await tx
-		.select()
+		.select({ entry: accountFavorite, target: referenceValueTarget })
 		.from(accountFavorite)
+		.innerJoin(referenceValue, eq(referenceValue.id, accountFavorite.targetReferenceId))
 		.where(
 			and(
 				eq(accountFavorite.authUserId, authUserId),
@@ -211,7 +217,9 @@ export async function listFavorites(
 		)
 		.orderBy(accountFavorite.position)
 		.limit(value.limit + 1);
-	const items = rows.slice(0, value.limit).map(presentFavorite);
+	const items = rows
+		.slice(0, value.limit)
+		.map(({ entry, target }) => presentFavorite(entry, target));
 	return {
 		revision: state?.revision ?? 0,
 		items,
@@ -234,17 +242,23 @@ export async function readFavorite(
 		.where(eq(accountFavoritesState.authUserId, authUserId))
 		.limit(1)
 		.for("share");
-	const [entry] = await tx
-		.select()
-		.from(accountFavorite)
-		.where(
-			and(
-				eq(accountFavorite.authUserId, authUserId),
-				eq(accountFavorite.targetUnitId, targetUnitId),
-			),
-		)
-		.limit(1);
-	return { revision: state?.revision ?? 0, entry: entry ? presentFavorite(entry) : null };
+	const reference = await findReferenceValueByNativeId(tx, targetUnitId);
+	const [entry] = reference
+		? await tx
+				.select()
+				.from(accountFavorite)
+				.where(
+					and(
+						eq(accountFavorite.authUserId, authUserId),
+						eq(accountFavorite.targetReferenceId, reference.valueId),
+					),
+				)
+				.limit(1)
+		: [];
+	return {
+		revision: state?.revision ?? 0,
+		entry: entry ? presentFavorite(entry, reference?.target) : null,
+	};
 }
 
 export async function saveFavorite(
@@ -258,16 +272,19 @@ export async function saveFavorite(
 	const value = SaveFavoriteSchema.parse(input);
 	z.uuid().parse(targetUnitId);
 	const revision = await lockFavorites(tx, authUserId, value.expectedRevision);
-	const [current] = await tx
-		.select()
-		.from(accountFavorite)
-		.where(
-			and(
-				eq(accountFavorite.authUserId, authUserId),
-				eq(accountFavorite.targetUnitId, targetUnitId),
-			),
-		)
-		.limit(1);
+	const reference = await findReferenceValueByNativeId(tx, targetUnitId);
+	const [current] = reference
+		? await tx
+				.select()
+				.from(accountFavorite)
+				.where(
+					and(
+						eq(accountFavorite.authUserId, authUserId),
+						eq(accountFavorite.targetReferenceId, reference.valueId),
+					),
+				)
+				.limit(1)
+		: [];
 	const restored =
 		restoreRevision === undefined
 			? undefined
@@ -277,10 +294,7 @@ export async function saveFavorite(
 		? { target: restored.snapshot.target, preview: restored.snapshot.preview }
 		: current && !value.refreshPreview
 			? {
-					target: UnitReferenceSchema.parse({
-						owner: current.targetOwner,
-						id: current.targetUnitId,
-					}),
+					target: UnitReferenceSchema.parse(reference?.target),
 					preview: FavoritePreviewSchema.parse(current.snapshot),
 				}
 			: await capturePreview(tx, authority, selfEntityId, targetUnitId);
@@ -291,31 +305,37 @@ export async function saveFavorite(
 		: value.note === undefined
 			? (current?.note ?? null)
 			: value.note;
+	const targetReferenceId = reference?.valueId ?? (await allocateReferenceValue(tx, target));
+	let afterReferenceId: string | null | undefined = value.afterTargetId;
+	if (typeof value.afterTargetId === "string") {
+		const anchor = await findReferenceValueByNativeId(tx, value.afterTargetId);
+		if (!anchor) throw new FavoriteNotFound();
+		afterReferenceId = anchor.valueId;
+	}
 	let position: string;
 	if (restored?.snapshot && value.afterTargetId === undefined) {
 		const [collision] = await tx
-			.select({ id: accountFavorite.targetUnitId })
+			.select({ id: accountFavorite.targetReferenceId })
 			.from(accountFavorite)
 			.where(
 				and(
 					eq(accountFavorite.authUserId, authUserId),
 					eq(accountFavorite.position, restored.snapshot.position),
-					ne(accountFavorite.targetUnitId, targetUnitId),
+					ne(accountFavorite.targetReferenceId, targetReferenceId),
 				),
 			)
 			.limit(1);
 		position = collision
-			? await favoritePosition(tx, authUserId, targetUnitId, collision.id, current)
+			? await favoritePosition(tx, authUserId, targetReferenceId, collision.id, current)
 			: restored.snapshot.position;
 	} else
-		position = await favoritePosition(tx, authUserId, targetUnitId, value.afterTargetId, current);
+		position = await favoritePosition(tx, authUserId, targetReferenceId, afterReferenceId, current);
 	const now = new Date();
 	const [row] = await tx
 		.insert(accountFavorite)
 		.values({
 			authUserId,
-			targetUnitId,
-			...unitReferenceValues("targetUnit", target),
+			targetReferenceId,
 			position,
 			note,
 			snapshot: preview,
@@ -324,7 +344,7 @@ export async function saveFavorite(
 			updatedAt: now,
 		})
 		.onConflictDoUpdate({
-			target: [accountFavorite.authUserId, accountFavorite.targetUnitId],
+			target: [accountFavorite.authUserId, accountFavorite.targetReferenceId],
 			set: { position, note, snapshot: preview, revision, updatedAt: now },
 		})
 		.returning();
@@ -332,16 +352,15 @@ export async function saveFavorite(
 	await tx.insert(accountFavoriteRevision).values({
 		authUserId,
 		revision,
-		targetUnitId,
-		...unitReferenceValues("targetUnit", target),
+		targetReferenceId,
 		operation: restored ? "restore" : current ? "update" : "save",
-		snapshot: { target, position, note, preview },
+		snapshot: { position, note, preview },
 	});
 	await tx
 		.update(accountFavoritesState)
 		.set({ revision })
 		.where(eq(accountFavoritesState.authUserId, authUserId));
-	return { revision, entry: presentFavorite(row) };
+	return { revision, entry: presentFavorite(row, target) };
 }
 
 export async function deleteFavorite(
@@ -361,26 +380,25 @@ export async function deleteFavorite(
 			.max(Number.MAX_SAFE_INTEGER - 1)
 			.parse(expectedRevision),
 	);
+	const reference = await findReferenceValueByNativeId(tx, targetUnitId);
+	if (!reference) throw new FavoriteNotFound();
 	const [removed] = await tx
 		.delete(accountFavorite)
 		.where(
 			and(
 				eq(accountFavorite.authUserId, authUserId),
-				eq(accountFavorite.targetUnitId, z.uuid().parse(targetUnitId)),
+				eq(accountFavorite.targetReferenceId, reference.valueId),
 			),
 		)
-		.returning({ id: accountFavorite.targetUnitId, owner: accountFavorite.targetOwner });
+		.returning({ targetReferenceId: accountFavorite.targetReferenceId });
 	if (!removed) throw new FavoriteNotFound();
-	await tx
-		.insert(accountFavoriteRevision)
-		.values({
-			authUserId,
-			revision,
-			targetUnitId,
-			...unitReferenceValues("targetUnit", { owner: removed.owner, id: targetUnitId }),
-			operation: "delete",
-			snapshot: null,
-		});
+	await tx.insert(accountFavoriteRevision).values({
+		authUserId,
+		revision,
+		targetReferenceId: removed.targetReferenceId,
+		operation: "delete",
+		snapshot: null,
+	});
 	await tx
 		.update(accountFavoritesState)
 		.set({ revision })
@@ -395,24 +413,27 @@ export async function listFavoriteHistory(
 	beforeRevision?: number,
 ) {
 	const { authUserId } = await admitFavorites(tx, authority);
-	const rows = await tx
-		.select({
-			revision: accountFavoriteRevision.revision,
-			operation: accountFavoriteRevision.operation,
-			createdAt: accountFavoriteRevision.createdAt,
-		})
-		.from(accountFavoriteRevision)
-		.where(
-			and(
-				eq(accountFavoriteRevision.authUserId, authUserId),
-				eq(accountFavoriteRevision.targetUnitId, z.uuid().parse(targetUnitId)),
-				beforeRevision === undefined
-					? undefined
-					: lt(accountFavoriteRevision.revision, beforeRevision),
-			),
-		)
-		.orderBy(desc(accountFavoriteRevision.revision))
-		.limit(101);
+	const reference = await findReferenceValueByNativeId(tx, targetUnitId);
+	const rows = reference
+		? await tx
+				.select({
+					revision: accountFavoriteRevision.revision,
+					operation: accountFavoriteRevision.operation,
+					createdAt: accountFavoriteRevision.createdAt,
+				})
+				.from(accountFavoriteRevision)
+				.where(
+					and(
+						eq(accountFavoriteRevision.authUserId, authUserId),
+						eq(accountFavoriteRevision.targetReferenceId, reference.valueId),
+						beforeRevision === undefined
+							? undefined
+							: lt(accountFavoriteRevision.revision, beforeRevision),
+					),
+				)
+				.orderBy(desc(accountFavoriteRevision.revision))
+				.limit(101)
+		: [];
 	const items = rows
 		.slice(0, 100)
 		.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() }));
@@ -426,24 +447,27 @@ export async function readFavoriteRevision(
 	revision: number,
 ) {
 	const { authUserId } = await admitFavorites(tx, authority);
+	const reference = await findReferenceValueByNativeId(tx, targetUnitId);
+	if (!reference) throw new FavoriteNotFound();
 	const [row] = await tx
 		.select()
 		.from(accountFavoriteRevision)
 		.where(
 			and(
 				eq(accountFavoriteRevision.authUserId, authUserId),
-				eq(accountFavoriteRevision.targetUnitId, z.uuid().parse(targetUnitId)),
+				eq(accountFavoriteRevision.targetReferenceId, reference.valueId),
 				eq(accountFavoriteRevision.revision, z.number().int().positive().safe().parse(revision)),
 			),
 		)
 		.limit(1);
 	if (!row) throw new FavoriteNotFound();
-	const snapshot = row.snapshot === null ? null : FavoriteSnapshotSchema.parse(row.snapshot);
-	if (
-		snapshot &&
-		(snapshot.target.id !== targetUnitId || snapshot.target.owner !== row.targetOwner)
-	)
-		throw new Error("Favorite snapshot target disagrees with its history key");
+	const snapshot =
+		row.snapshot === null
+			? null
+			: FavoriteSnapshotSchema.parse({
+					...z.record(z.string(), z.unknown()).parse(row.snapshot),
+					target: reference.target,
+				});
 	return {
 		revision: row.revision,
 		operation: row.operation,

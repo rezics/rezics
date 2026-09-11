@@ -2,12 +2,7 @@ import { sql } from "drizzle-orm";
 import { bigint, check, index, jsonb, primaryKey, text, unique, uuid } from "drizzle-orm/pg-core";
 import { pgTable } from "./base";
 import { users } from "./auth";
-import type { UnitOwner } from "@rezics/reference";
-import {
-	unitReferenceColumns,
-	unitReferenceConstraints,
-	unitReferenceOwnerExpression,
-} from "./unit-reference-columns";
+import { referenceValue } from "./reference-value";
 import {
 	createCreatedAtColumn,
 	createUpdatedAtColumn,
@@ -39,12 +34,9 @@ export const accountFavorite = pgTable(
 		authUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "restrict" }),
-		targetUnitId: uuid().notNull(),
-		...unitReferenceColumns("targetUnit"),
-		targetOwner: text()
-			.$type<UnitOwner>()
+		targetReferenceId: uuid()
 			.notNull()
-			.generatedAlwaysAs(unitReferenceOwnerExpression("targetUnit")),
+			.references(() => referenceValue.id, { onDelete: "restrict" }),
 		position: fractionalIndexPosition().notNull(),
 		note: text(),
 		snapshot: jsonb().$type<unknown>().notNull(),
@@ -53,10 +45,9 @@ export const accountFavorite = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		...unitReferenceConstraints("account_favorite", "targetUnit", table, false, table.targetUnitId),
-		primaryKey({ columns: [table.authUserId, table.targetUnitId] }),
+		primaryKey({ columns: [table.authUserId, table.targetReferenceId] }),
 		unique("account_favorite_position_key").on(table.authUserId, table.position),
-		index("account_favorite_target_idx").on(table.targetUnitId, table.authUserId),
+		index("account_favorite_target_idx").on(table.targetReferenceId, table.authUserId),
 		check(
 			"account_favorite_note_check",
 			sql`${table.note} is null or octet_length(${table.note}) <= 65536`,
@@ -81,31 +72,24 @@ export const accountFavoriteRevision = pgTable(
 			.notNull()
 			.references(() => users.id, { onDelete: "restrict" }),
 		revision: bigint({ mode: "number" }).notNull(),
-		targetUnitId: uuid().notNull(),
-		...unitReferenceColumns("targetUnit"),
-		targetOwner: text()
-			.$type<UnitOwner>()
+		targetReferenceId: uuid()
 			.notNull()
-			.generatedAlwaysAs(unitReferenceOwnerExpression("targetUnit")),
+			.references(() => referenceValue.id, { onDelete: "restrict" }),
 		operation: text().$type<"save" | "update" | "delete" | "restore">().notNull(),
 		snapshot: jsonb().$type<unknown>(),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
-		...unitReferenceConstraints(
-			"account_favorite_revision",
-			"targetUnit",
-			table,
-			false,
-			table.targetUnitId,
-		),
 		primaryKey({ columns: [table.authUserId, table.revision] }),
 		index("account_favorite_revision_target_idx").on(
 			table.authUserId,
-			table.targetUnitId,
+			table.targetReferenceId,
 			table.revision.desc(),
 		),
-		index("account_favorite_revision_target_merge_idx").on(table.targetUnitId, table.authUserId),
+		index("account_favorite_revision_target_merge_idx").on(
+			table.targetReferenceId,
+			table.authUserId,
+		),
 		check(
 			"account_favorite_revision_number_check",
 			sql`${table.revision} between 1 and 9007199254740991`,
@@ -115,12 +99,8 @@ export const accountFavoriteRevision = pgTable(
 			sql`${table.operation} in ('save','update','delete','restore')`,
 		),
 		check(
-			"account_favorite_revision_target_snapshot_check",
-			sql`${table.snapshot} is null or ((${table.snapshot}#>>'{target,id}'=${table.targetUnitId}::text and ${table.snapshot}#>>'{target,owner}'=${table.targetOwner}) is true)`,
-		),
-		check(
 			"account_favorite_revision_snapshot_check",
-			sql`(${table.operation} = 'delete' and ${table.snapshot} is null) or (${table.operation} <> 'delete' and jsonb_typeof(${table.snapshot}) = 'object' and octet_length(${table.snapshot}::text) <= 98304)`,
+			sql`(${table.operation} = 'delete' and ${table.snapshot} is null) or (${table.operation} <> 'delete' and ${table.snapshot} is not null and jsonb_typeof(${table.snapshot}) = 'object' and not (${table.snapshot} ? 'target') and octet_length(${table.snapshot}::text) <= 98304)`,
 		),
 	],
 );

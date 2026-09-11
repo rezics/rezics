@@ -53,9 +53,8 @@ try {
 	const database = await first.query<{ name: string }>("select current_database() as name");
 	assert.match(database.rows[0]?.name ?? "", /^rezics_atlas(?:_[a-z0-9_]+)?$/u);
 	await first.query("select id from public.reference_value limit 0");
-	const { allocateReferenceValue, resolveReferenceValue } = await import(
-		"../src/services/units/reference-value"
-	);
+	const { allocateReferenceValue, resolveReferenceValue, findReferenceValueByNativeId } =
+		await import("../src/services/units/reference-value");
 	const firstDb = drizzle({ client: first });
 	const secondDb = drizzle({ client: second });
 	const firstPid = (await first.query<{ pid: number }>("select pg_backend_pid() as pid")).rows[0]!
@@ -316,7 +315,49 @@ try {
 		await firstDb.transaction((tx) => resolveReferenceValue(tx, sampleReference.id)),
 		{ owner: "reference", id: sampleReference.targetId },
 	);
+	assert.deepEqual(
+		await firstDb.transaction((tx) => findReferenceValueByNativeId(tx, sampleReference.targetId)),
+		{
+			valueId: sampleReference.id,
+			target: { owner: "reference", id: sampleReference.targetId },
+		},
+	);
+	assert.equal(
+		await firstDb.transaction((tx) => findReferenceValueByNativeId(tx, randomUUID())),
+		undefined,
+	);
+	assert.equal(
+		(
+			await first.query<{ id: string }>("select public.reference_value_native_id($1) as id", [
+				sampleReference.id,
+			])
+		).rows[0]?.id,
+		sampleReference.targetId,
+	);
+	const sameStatementTarget = randomUUID();
+	await first.query("insert into public.reference_identity(id, shape) values ($1, 'unknown')", [
+		sameStatementTarget,
+	]);
+	assert.equal(
+		(
+			await first.query<{ id: string }>(
+				`with admitted as (
+		insert into public.reference_value(target_reference_id) values ($1) returning id
+	) select public.reference_value_native_id(id) as id from admitted`,
+				[sameStatementTarget],
+			)
+		).rows[0]?.id,
+		sameStatementTarget,
+		"SQL projection sees a value allocated in its calling statement",
+	);
 	await first.query("analyze public.reference_value");
+	const nativeIdPlan = await first.query(
+		`explain (analyze, buffers, format json) select * from public.reference_value
+		where ${UnitOwnerValues.map((owner) => `target_${owner}_id = $1`).join(" or ")} limit 2`,
+		[sampleReference.targetId],
+	);
+	assert.match(JSON.stringify(nativeIdPlan.rows), /BitmapOr/u);
+	assert.doesNotMatch(JSON.stringify(nativeIdPlan.rows), /Seq Scan/u);
 	const targetPlan = await first.query(
 		`explain (analyze, buffers, format json)
 		select id from public.reference_value where target_reference_id = $1 limit 1`,
@@ -376,6 +417,7 @@ try {
 			runtime: runtime.rows[0],
 			sample: footprint.rows[0],
 			revisionReferences,
+			nativeIdPlan: nativeIdPlan.rows,
 			targetPlan: targetPlan.rows,
 			valuePlan: valuePlan.rows,
 		}),

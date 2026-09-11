@@ -77,12 +77,14 @@ BEGIN
   END LOOP;
 END $$;
 
+-- Favorites now store canonical reference values, not logical-ID input alternatives.
+DROP TRIGGER IF EXISTS unit_reference_target_unit ON public.account_favorite;
+DROP TRIGGER IF EXISTS unit_reference_target_unit ON public.account_favorite_revision;
+
 -- Registered logical reference inputs.
 DO $$ DECLARE specification text; entry text[]; trigger_name text;
 BEGIN
  FOREACH specification IN ARRAY ARRAY[
-  'account_favorite|target_unit_id|target_unit|required',
-  'account_favorite_revision|target_unit_id|target_unit|required',
   'account_unit_tag|unit_id|unit|required',
   'collection_item|unit_id|unit|required',
   'content_report|target_unit_id|target_unit|required',

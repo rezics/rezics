@@ -1,3 +1,4 @@
+import { lockUnitAccessState } from "../authorization/unit/access-lock";
 import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { UnitReferenceSchema, CatalogReferenceSchema } from "@rezics/reference";
@@ -42,6 +43,9 @@ export async function readRegisteredUnitPreview(
 	id: string,
 	actor: { authUserId: string; selfEntityId: string },
 ) {
+	// Capture holds the same resource fence as grant/restriction/ownership changes.
+	// Acquire it before routing/native locks, then read policy in a fresh statement.
+	await lockUnitAccessState(tx, [id], "shared");
 	const routed = await resolveRegisteredUnitReference(tx, id);
 	const catalog = CatalogReferenceSchema.safeParse(routed.reference);
 	if (catalog.success) {

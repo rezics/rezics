@@ -39,13 +39,20 @@ async function decideActivePlatformGrant(
 				isNull(platformCapabilityGrant.revokedAt),
 				or(
 					isNull(platformCapabilityGrant.expiresAt),
-					sql`${platformCapabilityGrant.expiresAt} > now()`,
+					sql`${platformCapabilityGrant.expiresAt} > statement_timestamp()`,
 				),
 			),
 		)
 		.orderBy(sql`${platformCapabilityGrant.capability} = ${capability} desc`)
 		.limit(1)
 		.for("share");
+	if (grant?.expiresAt) {
+		// The row-lock wait can outlive the candidate SELECT's statement timestamp.
+		// Check expiry again after admission; the locked grant cannot be revoked meanwhile.
+		const current = await executor.execute<{ active: boolean }>(sql`select
+			${grant.expiresAt.toISOString()}::timestamptz > statement_timestamp() as active`);
+		if (!current.rows[0]?.active) return { allowed: false, reason: "ungranted" };
+	}
 	return grant
 		? {
 				allowed: true,
@@ -111,7 +118,7 @@ export class PlatformAuthorization<ProfileId extends string | undefined> {
 					isNull(platformCapabilityGrant.revokedAt),
 					or(
 						isNull(platformCapabilityGrant.expiresAt),
-						sql`${platformCapabilityGrant.expiresAt} > now()`,
+						sql`${platformCapabilityGrant.expiresAt} > statement_timestamp()`,
 					),
 				),
 			);

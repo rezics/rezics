@@ -27,6 +27,8 @@ For revision_reference, do not store an independently writable parent REF alongs
 
 Reference allocation uses a target-index lookup, `INSERT ... ON CONFLICT DO NOTHING`, then a separate lookup if another transaction won. A same-statement CTE cannot guarantee visibility of that winner under [PostgreSQL read committed](https://www.postgresql.org/docs/18/transaction-iso.html). Stronger isolation retries the whole transaction on serialization failure. Existing mappings are never updated or deleted; a rollback removes only that transaction's uncommitted allocation. The owning command supplies authorization and transaction deadlines. Internal allocation/resolution proves referential integrity, not current read or write permission, and is not a public lookup API.
 
+Favorites current entries and account-private history are generic identity consumers: each stores a restrictive REF, derives the native owner/id for responses and retains no independent target in its history payload. Saved previews remain private to their account; capturing a new preview requires current disclosure authority. Account erasure removes private content without deleting shared reference values.
+
 The initial identity bridge registry covers existing native owners; add the Document identity alternative when that owner is implemented. Exact revisions and occurrences use their separate bridges and complete composite keys as their owners become available, before dependent generic consumers are switched. Bridge existence never substitutes for those keys.
 
 The initial exact-revision registry covers named-form and identifier-claim histories in the eight catalog owners. Each target includes `(owner_id, id, revision)`; item UUIDs may repeat under different owners. These history families contain complete immutable snapshots of validated heads and have no staging state. Every bridge alternative is either entirely null or a complete bounded key, and exactly one alternative is selected. A partial composite key cannot exploit PostgreSQL's nullable-FK behavior. Other revision families require their own completeness/seal guard before registration; a current-head pointer is never an exact target.
@@ -49,6 +51,8 @@ The initial exact-revision registry covers named-form and identifier-claim histo
 | platform_capability_grant, account_enforcement | Account/principal, capability/action, validity, decision | Preview/administration eligibility remains distinct from ordinary object access | Principal/current; expiry |
 
 Authorization resources are logical aggregates, not automatically every revision row. Where a revision itself is independently grantable, its access contract is explicit. All access FKs and reverse erasure paths are concrete or validated REF; no polymorphic id string can target an arbitrary auth table.
+
+Grant/restriction expiry is evaluated at each current authorization statement, with a post-lock deadline recheck where platform grant selection can wait. The [authorization engine](../../../services/main/src/services/authorization/README.md) owns that protocol and its transaction-bound use.
 
 Independent catalog intake and participant construction have separate [admission protocols](../../../services/main/src/services/participation/README.md). Catalog intake requires current self contribution authority; an actor UUID or grant on an existing resource/proposal does not authorize unrelated identity creation. Account/persona bootstrap proves its own control authority before storage, so describing a person never creates a login binding.
 

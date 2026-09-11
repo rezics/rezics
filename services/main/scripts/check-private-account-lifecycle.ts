@@ -1,4 +1,10 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { checkFavoriteQueryPlans } from "./check-favorite-query-plans";
+import { checkFavoriteConcurrency } from "./check-favorite-concurrency";
 import { and, eq, sql } from "drizzle-orm";
 import {
 	database,
@@ -12,6 +18,10 @@ import {
 	accountFavoriteRevision,
 	accountFavoritesState,
 } from "../src/services/database/schema/favorites";
+import { FavoriteNotFound } from "../src/services/favorites/errors";
+import { referenceValue } from "../src/services/database/schema/reference-value";
+import { findReferenceValueByNativeId } from "../src/services/units/reference-value";
+import { catalogUnitLocator } from "../src/services/database/schema/catalog-identity";
 import { accountFollowPreference, unitFollow } from "../src/services/database/schema/follow";
 import { imageAsset, imageObject } from "../src/services/database/schema/image";
 import { post } from "../src/services/database/schema/post";
@@ -31,6 +41,7 @@ import {
 	deleteFavorite,
 	listFavorites,
 	listFavoriteHistory,
+	readFavoriteRevision,
 } from "../src/services/favorites/service";
 import {
 	followUnit,
@@ -78,6 +89,8 @@ function check(actual: unknown, expected: unknown, message: string) {
 	assert.deepEqual(actual, expected, message);
 	checks++;
 }
+let queryPlans: Awaited<ReturnType<typeof checkFavoriteQueryPlans>> | undefined;
+const concurrency = await checkFavoriteConcurrency(target.toString());
 const rollback = new Error("rollback private lifecycle fixture");
 try {
 	await withDatabaseTransactionDeadline(120_000, async () => {
@@ -227,6 +240,21 @@ try {
 				null,
 				"exact read represents absent favorite without scanning the account",
 			);
+			for (const deniedTarget of [targets[0]!.id, crypto.randomUUID()]) {
+				await assert.rejects(
+					tx.transaction((nested) =>
+						saveFavorite(nested, human.authority, deniedTarget, {
+							expectedRevision: 0,
+						}),
+					),
+					FavoriteNotFound,
+				);
+				check(
+					await findReferenceValueByNativeId(tx, deniedTarget),
+					undefined,
+					"denied saves do not allocate canonical references or reveal target existence",
+				);
+			}
 			const saved = await saveFavorite(tx, human.authority, first, {
 				expectedRevision: 0,
 				note: "Private note survives restore",
@@ -238,6 +266,108 @@ try {
 				),
 			);
 			checks++;
+			const savedReference = await findReferenceValueByNativeId(tx, first);
+			assert.ok(savedReference);
+			check(
+				savedReference.target,
+				{ owner: "post", id: first },
+				"canonical target is independently resolvable",
+			);
+			const [storedHistory] = await tx
+				.select()
+				.from(accountFavoriteRevision)
+				.where(eq(accountFavoriteRevision.authUserId, human.account.id));
+			check(
+				Object.hasOwn(storedHistory?.snapshot ?? {}, "target"),
+				false,
+				"private history has no independently writable target inside its payload",
+			);
+			await assert.rejects(
+				tx.transaction((nested) =>
+					nested.insert(accountFavoriteRevision).values({
+						authUserId: human.account.id,
+						revision: 999,
+						targetReferenceId: crypto.randomUUID(),
+						operation: "delete",
+						snapshot: null,
+					}),
+				),
+				(cause: unknown) => {
+					while (cause instanceof Error && cause.cause) cause = cause.cause;
+					return (
+						typeof cause === "object" && cause !== null && "code" in cause && cause.code === "23503"
+					);
+				},
+			);
+			checks++;
+			for (const invalid of [
+				{ operation: "save" as const, snapshot: null },
+				{ operation: "delete" as const, snapshot: {} },
+				{ operation: "save" as const, snapshot: { target: { owner: "post", id: first } } },
+			]) {
+				await assert.rejects(
+					tx.transaction((nested) =>
+						nested.insert(accountFavoriteRevision).values({
+							authUserId: human.account.id,
+							revision: 999,
+							targetReferenceId: savedReference.valueId,
+							...invalid,
+						}),
+					),
+					(cause: unknown) => {
+						while (cause instanceof Error && cause.cause) cause = cause.cause;
+						return (
+							typeof cause === "object" &&
+							cause !== null &&
+							"code" in cause &&
+							cause.code === "23514"
+						);
+					},
+				);
+				checks++;
+			}
+			const observationRollback = new Error("rollback temporary visibility and routing changes");
+			await assert.rejects(
+				tx.transaction(async (nested) => {
+					await nested.update(post).set({ visibility: "private" }).where(eq(post.id, first));
+					check(
+						(await readFavorite(nested, human.authority, first)).entry?.preview,
+						saved.entry.preview,
+						"captured private preview remains available to its account after visibility changes",
+					);
+					await assert.rejects(
+						nested.transaction((attempt) =>
+							saveFavorite(attempt, human.authority, first, {
+								expectedRevision: 1,
+								refreshPreview: true,
+							}),
+						),
+						FavoriteNotFound,
+					);
+					await assert.rejects(
+						nested.transaction((attempt) =>
+							saveFavorite(attempt, other.authority, first, {
+								expectedRevision: 0,
+							}),
+						),
+						FavoriteNotFound,
+					);
+					checks += 2;
+					await nested.delete(catalogUnitLocator).where(eq(catalogUnitLocator.id, first));
+					check(
+						(await readFavoriteRevision(nested, human.authority, first, 1)).snapshot?.target,
+						{ owner: "post", id: first },
+						"history derives exact native identity without the routing projection",
+					);
+					check(
+						(await listFavorites(nested, human.authority, {})).items[0]?.target,
+						{ owner: "post", id: first },
+						"bounded joined reads survive routing projection absence",
+					);
+					throw observationRollback;
+				}),
+				(error) => error === observationRollback,
+			);
 			await saveFavorite(tx, human.authority, second, { expectedRevision: 1 });
 			await deleteFavorite(tx, human.authority, first, 2);
 			await saveFavorite(tx, human.authority, first, { expectedRevision: 3 }, 1);
@@ -281,6 +411,24 @@ try {
 				expectedRevision: 0,
 				note: "Unrelated account note",
 			});
+			const sharedReferences = await tx
+				.select({ referenceId: accountFavorite.targetReferenceId })
+				.from(accountFavorite)
+				.where(eq(accountFavorite.targetReferenceId, savedReference.valueId));
+			check(
+				sharedReferences.length,
+				2,
+				"independent accounts reuse one canonical target without sharing private state",
+			);
+			await assert.rejects(
+				tx.transaction((nested) =>
+					nested
+						.update(accountFavorite)
+						.set({ targetReferenceId: crypto.randomUUID(), revision: revision + 1 })
+						.where(eq(accountFavorite.authUserId, human.account.id)),
+				),
+			);
+			checks++;
 			const [asset] = await tx
 				.insert(imageAsset)
 				.values({
@@ -383,6 +531,16 @@ try {
 				"another account remains intact",
 			);
 			check(
+				(
+					await tx
+						.select({ id: referenceValue.id })
+						.from(referenceValue)
+						.where(eq(referenceValue.id, savedReference.valueId))
+				).length,
+				1,
+				"account erasure removes private rows while shared immutable reference values survive",
+			);
+			check(
 				objects,
 				[{ key: original, versionId: "fence", size: 0 }],
 				"mock archive drains versions and retains only its empty upload fence",
@@ -393,6 +551,18 @@ try {
 				.where(and(eq(imageAsset.id, asset.id), eq(imageAsset.ownerAuthUserId, human.account.id)));
 			assert.ok(erasedAsset?.contentErasedAt);
 			checks++;
+			check(
+				(
+					await tx.execute<{
+						favorites: number;
+					}>(sql`select favorites::integer from public.unit_engagement_stat
+				where unit_id = ${first}::uuid`)
+				).rows[0]?.favorites,
+				1,
+				"reference-backed aggregate accounting retains only the unrelated account's favorite",
+			);
+			const sampleAccount = await actor(tx, "Favorite query sample");
+			queryPlans = await checkFavoriteQueryPlans(tx, sampleAccount.account.id);
 			throw rollback;
 		});
 	});
@@ -404,7 +574,50 @@ try {
 		process.exit(1);
 	}
 }
+const repository = new URL("../../../", import.meta.url);
+const sourceDigests: Record<string, string> = {};
+for (const path of [
+	"services/main/Taskfile.yml",
+	"services/main/scripts/check-private-account-lifecycle.ts",
+	"services/main/scripts/check-favorite-concurrency.ts",
+	"services/main/scripts/unit-access-fixture.ts",
+	"services/main/scripts/check-favorite-query-plans.ts",
+	"services/main/src/services/favorites/service.ts",
+	"services/main/src/services/favorites/contracts.ts",
+	"services/main/src/services/units/reference-value.ts",
+	"services/main/src/services/units/reference.ts",
+	"services/main/src/services/authorization/unit/access-lock.ts",
+	"services/main/src/services/authorization/unit/authorization.ts",
+	"services/main/src/services/participation/erasure.ts",
+	"services/main/src/services/image-assets/erasure.ts",
+	"services/main/src/services/database/schema/favorites.ts",
+	"services/main/src/services/database/schema/reference-value.ts",
+	"services/main/src/services/database/schema/postgres/participation-private-state.sql",
+	"services/main/src/services/database/schema/postgres/reference-value.sql",
+	"services/main/src/services/database/migrations/atlas.sum",
+])
+	sourceDigests[path] = createHash("sha256")
+		.update(await readFile(new URL(path, repository)))
+		.digest("hex");
+const runtime = await database.execute(sql`select version() as postgres,
+	current_setting('default_transaction_isolation') as default_isolation,
+	current_setting('shared_buffers') as shared_buffers`);
 console.info(
-	`Verified ${checks} private account lifecycle assertions on real PostgreSQL; image archive is an in-memory test double; all SQL fixture rows rolled back.`,
+	JSON.stringify({
+		baseCommit: execFileSync("git", ["rev-parse", "HEAD"], {
+			cwd: fileURLToPath(repository),
+			encoding: "utf8",
+		}).trim(),
+		sourceDigests,
+		node: process.version,
+		platform: `${process.platform}/${process.arch}`,
+		runtime: runtime.rows[0],
+		checks,
+		concurrency,
+		queryPlans,
+	}),
+);
+console.info(
+	`Verified ${checks} private account lifecycle assertions on real PostgreSQL; image archive is an in-memory test double; private lifecycle rows rolled back; concurrency actors remain only in this disposable target.`,
 );
 process.exit(0);

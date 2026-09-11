@@ -218,8 +218,8 @@ dialog, where the exact stored snapshot is shown before restoration.
 
 Web and localization TypeScript, localization policy and 42 non-rendering Web
 checks passed for this checkpoint. These are code-integrity results, not browser
-or visual acceptance. Native Catalog/Entity follow and Favorites targets still
-depend on the coordinated global Unit interaction cutover. Organization roster
+or visual acceptance. The foundation fixtures separately qualify native Favorites targets and selected
+participation protocols; broader authority/disclosure acceptance remains open. Organization roster
 membership is a separate lifecycle; no publication/security privilege is inferred
 from that future relation or from a sourced catalog membership.
 
@@ -231,12 +231,30 @@ shared immutable `revision_content`. A save keeps an ordered target, an optional
 private note and a typed captured preview. Restore restores the stored note,
 preview and position; an occupied historical position inserts immediately after
 that occupant. The optional explicit ordering anchor takes precedence. The fresh
-target accepts this breaking replacement; old Favorites extraction belongs to
-offline conversion, not to a runtime adapter.
+target is installed from the native baseline and forward migrations; old Favorites
+data and formats are outside the compatibility contract.
 
 One account-local state row serializes mutations and supplies optimistic
-concurrency. Entry lookup and order seek use `(auth_user_id, target_unit_id)` and
-`(auth_user_id, position)`. List pages contain at most 100 entries; history pages
+concurrency. Current entries and history store one restrictive `target_reference_id` FK to
+`reference_value`; neither stores an independent native target key or repeats
+its twenty owner alternatives. History payloads contain position, note and preview,
+while responses derive the target from the immutable reference. Accounts sharing
+a target reuse its value without sharing notes, history or control. Erasure deletes
+the account's private rows and retains the shared reference.
+
+Entry lookup and order seek use `(auth_user_id, target_reference_id)` and
+`(auth_user_id, position)`. Native-ID requests find an existing reference through
+the registry's twenty target indexes, independently of the routing projection;
+this internal lookup never allocates or exposes existence. A new save or preview
+refresh must pass current target disclosure before allocation. A captured preview
+remains the account's private saved content after target visibility changes;
+refresh still requires current access. Capture takes the shared resource-access
+fence before routing/native locks, then evaluates current read policy under
+READ COMMITTED. Direct grant revocation and restriction/ownership changes use
+the exclusive side of that same fence. This target-resource protocol does not
+qualify every transitive Realm/platform authority dependency or historical
+revision-disclosure contract. List hydration uses one bounded join to
+reference values, without per-entry service calls. List pages contain at most 100 entries; history pages
 contain metadata only and retrieve one full snapshot by exact revision. Notes are
 bounded at 64 KiB, previews at 8 KiB and complete historical snapshots at 96 KiB.
 History deletion is permitted only after the owning account is erased. Source,
@@ -284,13 +302,33 @@ and [R2's conditional-write and listing support](https://developers.cloudflare.c
 Assume 500 Favorites mutations/second, 5,000 ordered reads/second and 1,000 active
 erasure jobs spread across accounts; hot-account operations serialize on that
 account's state row. These are capacity scenarios, not measured production rates.
-With a 1.3 KiB mean entry including indexes, 500M current Favorites require about
-650 GB and 3B require about 3.9 TB. At a 1.7 KiB mean history row including indexes,
-500M revisions require about 850 GB and 3B about 5.1 TB. A mutation writes a current
+With a 1.6 KiB mean entry including indexes, 500M current Favorites require about
+819.2 GB and 3B require about 4.9152 TB. At a 1.7 KiB mean history row including indexes,
+500M revisions require about 870.4 GB and 3B about 5.2224 TB (decimal storage units). A mutation writes a current
 row, a history row and one small state row; budget heap/index/WAL/replica traffic
-for all three, with approximately 1.5 MB/s logical input at the assumed rate
-before WAL overhead and high-note tails. Per-account hash partitions/shards are
-the growth path; target ownership FKs need an explicit coordinated shard cutover.
+for all three, with approximately 1.7 MB/s of modeled row/index writes at the assumed rate
+before WAL overhead and high-note tails. The 2,000-entry fixture with 1,000 bytes
+of title/summary/note text averaged 1,200 tuple bytes; fresh heap and index page
+allocation was about 1.56 KB/entry, supporting the revised 1.6 KiB current-entry
+estimate for that payload distribution. History width remains a separate estimate.
+These averages do not bound large-note/preview tails. Each consumer row writes three indexes instead
+of four populated indexes; first use of a native target additionally allocates
+one shared reference (112 heap + 144 index bytes in the foundation model), and
+subsequent saves/history reuse it. For 500M/3B distinct targets retained by current entries or history, that adds
+128 GB/768 GB before sharing with other reference consumers. Count the lifetime
+union of referenced targets, including removed entries retained in history;
+additional revisions of the same target add no bridge rows. New allocation takes at most three indexed statements;
+reuse adds no reference writes. Native-ID lookup combines twenty selective target
+indexes with a fixed maximum of two returned rows to detect impossible duplicate
+owners. Ordered list hydration adds at most 101 reference-PK probes per page.
+Inspect unforced EXPLAIN/BUFFERS plans for this OR lookup and bounded list join;
+[PostgreSQL can combine indexes through bitmap scans](https://www.postgresql.org/docs/18/indexes-bitmap-scans.html), but the planner choice needs
+fixture evidence. Track those buffer reads and p95 latency alongside account-lock
+waits, WAL bytes, history/TOAST growth and erasure age. A hot target only contends
+on first allocation, while subsequent private writes serialize per account.
+Per-account hash partitions/shards are the growth path; reference FKs and shared
+target lookup need an explicit coordinated shard cutover. Neither row estimates
+nor the local fixture qualify sustained throughput, backup or restore at scale.
 
 Ordinary deletion batches contain at most 500 rows. Favorites history uses 32
 rows (at most 3 MiB of bounded snapshot bodies), current Favorites 48 rows (about

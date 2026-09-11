@@ -73,9 +73,12 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * Release migrations may install one atomic domain cutover while the canonical
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
-export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>> = {};
+export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>> = {
+	favorite_reference_values: ["reference-value.sql", "unit-reference-integrity.sql", "participation-private-state.sql"],
+};
 
 export const PostgreSqlSchemaFunctionNames = [
+	"reference_value_native_id",
 	"catalog_editorial_guard",
 	"catalog_editorial_capture",
 	"catalog_editorial_history_guard",

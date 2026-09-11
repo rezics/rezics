@@ -3,7 +3,7 @@ import { z } from "zod";
 import { UnitOwnershipChanged, UnitOwnershipTargetIneligible } from "../api/governance/errors";
 import { recordAuditEvent } from "../audit";
 import type { PlatformAuthorization } from "../authorization/platform/authorization";
-import { lockUnitAccessState } from "../authorization/unit/invitations";
+import { lockUnitAccessState } from "../authorization/unit/access-lock";
 import { replaceUnitOwnership } from "../authorization/unit/ownership";
 import { database, type DatabaseTransaction } from "../database";
 import {

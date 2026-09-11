@@ -31,6 +31,8 @@ The executable owner is [check-reference-values.ts](../../services/main/scripts/
 | Native identity collision | Two owners cannot concurrently admit the same native UUID. |
 | Selective queries | Unforced EXPLAIN ANALYZE chooses target uniqueness and value primary-key indexes. |
 
+The SQL projection also resolves a value inserted by its calling data-modifying CTE. Native-ID lookup independently combines the target indexes with BitmapOr in the pinned sample.
+
 Schema tests separately require one restrictive concrete FK and one partial unique index for every registered owner. No bridge FK targets the routing projection. Internal allocation/resolution is not an authorization API: consumer disclosure, revocation, exact revisions and occurrences require their own executable qualification.
 
 Rejected parent deletion asserts `23001` (`restrict_violation`); insertion against a missing target asserts `23503` (`foreign_key_violation`). These are distinct [PostgreSQL error identities](https://www.postgresql.org/docs/18/errcodes-appendix.html), not interchangeable expected results.
@@ -39,7 +41,7 @@ Rejected parent deletion asserts `23001` (`restrict_violation`); insertion again
 
 The fixture adds 10,000 reference-owner identities derived from MD5 of `reference-value-20260911:` plus integers 1 through 10,000, with UUIDv8 version/variant bits set, and their canonical values. It emits the base Git commit, SHA-256 digests of the actual fixture/allocator/schema/registry/migration-checksum inputs, Node/platform/PostgreSQL settings, EXPLAIN ANALYZE/BUFFERS JSON and measured tuple, heap and index bytes. Source digests identify pre-commit changes rather than implying the base commit includes them. Retain this command output when using the run as acceptance evidence.
 
-The [pinned qualification run](database/reference-values-evidence.json) passed the full fresh database check on PostgreSQL 18.6/Linux, including canonical SQL and schema drift. Its 10,012 identity values averaged 64 tuple bytes, with 712,704 heap bytes and 1,089,536 index bytes in the fresh sample. Both identity point lookups used their expected indexes and three shared buffer hits. These observations do not replace the planning envelope below or establish sustained-load acceptance.
+The [pinned qualification run](database/reference-values-evidence.json) passed the full fresh database check on PostgreSQL 18.6/Linux, including canonical SQL and schema drift. Its 10,013 identity values averaged 64 tuple bytes, with 712,704 heap bytes and 1,081,344 index bytes in the fresh sample. Both identity point lookups used their expected indexes and three shared buffer hits. These observations do not replace the planning envelope below or establish sustained-load acceptance.
 
 The bridge stores a UUID and 20 nullable concrete target alternatives, exactly one populated. Each row enters its primary-key index and one partial target index. Allocation performs at most three selective statements; reuse performs one lookup and zero updates. Lookup complexity is logarithmic in the selected index, with fixed owner-alternative decoding and no graph traversal. Unrelated targets do not share a write lock. Admission of a hot target serializes only competing insertions; bounded caller transaction/statement deadlines handle contention.
 
@@ -53,7 +55,7 @@ Cases cover all six incomplete subsets of a composite key, scattered alternative
 
 The bounded sample adds 10,000 named-form histories under one owner with UUIDv8 keys derived from `revision-reference-20260911:` and sequence numbers, then their exact values. This tests a hot parent with many child keys. The target lookup must choose the complete tuple's partial unique index without forcing planner settings. The existing 112-byte heap/144-byte index planning assumption covers one selected tuple, primary key and null bitmap for the 16 alternatives; retain the independent 500M/3B envelope and the modeled three exact references per catalog root. Record measured widths, index bytes and plans before accepting that estimate for a wider registry. Reads decode one fixed-width reference row, never its potentially large name/identifier payload; consumer batches and disclosure remain separate qualification.
 
-The pinned run's 10,022 exact values averaged 88 tuple bytes, with 966,656 heap bytes and 1,351,680 index bytes. The complete tuple lookup used `revision_reference_reference_named_form_key`. This is evidence for the registered metadata families and sample distribution, not a qualification of all future revision families or retained-corpus workload.
+The pinned run's 10,022 exact values averaged 88 tuple bytes, with 966,656 heap bytes and 1,286,144 index bytes. The complete tuple lookup used `revision_reference_reference_named_form_key`. This is evidence for the registered metadata families and sample distribution, not a qualification of all future revision families or retained-corpus workload.
 
 ## Selected participation control protocols
 
@@ -70,3 +72,56 @@ The pinned run's 10,022 exact values averaged 88 tuple bytes, with 966,656 heap 
 | Exact source approval | Human/service grants bind the approved proposal and native target; allowed native savepoints preserve scope, unrelated targets/transactions are denied, and revocation remains effective. |
 
 The [pinned participation run](database/participation-evidence.json) records source and migration digests, runtime settings and the exact command. This qualifies the listed protocols only. Remaining membership/ownership transitions, generic resource ACL and disclosure fences, full private-data/asset erasure workers and restoration frontiers remain separate work. The catalog resource API fixture separately checks eager route compilation and stateful ordinary/scoped resource behavior; it does not qualify all M01 APIs.
+
+## Favorites reference consumer and private lifecycle
+
+`task services-main:db:private-lifecycle:check` runs
+[check-private-account-lifecycle.ts](../../services/main/scripts/check-private-account-lifecycle.ts)
+against an explicitly supplied disposable `DATABASE_ADMIN_URL`. The full `db:check`
+also runs it after reference qualification. Current entries and private history
+reference one immutable value; API targets remain native owner/ID pairs.
+
+| Case | Assertion |
+| --- | --- |
+| Consumer integrity | Both tables have exactly one target REF FK, no independent native columns, and no duplicate target in history JSON. Missing values, invalid null/delete snapshots, retargeting and premature history deletion fail. |
+| Private disclosure | New saves for inaccessible/missing objects share the not-found result and allocate nothing. Saved content stays private to its account; later visibility changes deny refresh and another account's save. |
+| Canonical reuse | Two accounts share the same target REF while retaining independent notes and history. Read/list/history do not depend on the locator projection. |
+| Concurrent commands | The stale save demonstrably blocks on the winning transaction and then fails CAS; direct grant revocation waits for preview capture; a capture waiting behind a restriction rechecks and is denied. Account closure waits for an admitted save, and closed accounts cannot append another revision. |
+| Restoration and erasure | Stored note, preview and order survive restore. Bounded erasure drains multiple history and archive pages, preserves another account and public follows, and retains the shared REF. |
+| Bounded reads | Native-ID resolution uses target-index OR probes. A 2,000-entry hot-account fixture requires the ordered page query to use the account-position and reference primary-key indexes, without sequential scans. |
+
+The concurrency fixture commits dummy accounts/posts only in the disposable target.
+The private lifecycle and query samples roll back. The image archive is an in-memory
+implementation with 502 versions/keys; it proves bounded application behavior, not
+object-provider or recovery-frontier acceptance. The command emits source/migration
+digests, runtime settings, assertion totals, race outcomes and query plans/footprint.
+The query sample derives UUIDv8 targets from its generated account ID and integers
+1–2,000; each entry contains 200 title, 700 summary and 100 note bytes before JSON
+and row overhead. Whole-table heap/index bytes can include other fixture entries.
+The [pinned run](database/favorites-evidence.json) records 49 lifecycle assertions and four observed races. Its 2,000-entry sample averaged 1,200 tuple bytes; whole-table heap/index allocation was 2,777,088/344,064 bytes. The 31-row page used 101 shared buffer hits and the two required indexes.
+
+Retain the [private workload estimates](../../services/main/src/services/participation/README.md#private-workload-estimates-and-remaining-qualification)
+at both 500M and 3B rows; these samples do not qualify sustained load or restoration.
+
+## Current authorization expiry
+
+`task services-main:db:access-expiry:check` runs
+[check-access-expiry.ts](../../services/main/scripts/check-access-expiry.ts); `db:check`
+also includes it. Direct resource grants, resource restrictions and platform
+capabilities are checked before and after their stored expiry inside the same
+open transaction. The fixture waits for the database clock and checks both the
+transaction-bound authorization decision and the actual preview reader. Expired
+grants deny access; expired restrictions stop denying an otherwise public object.
+
+A separate two-connection case holds a platform grant row without changing it,
+observes the authorization query blocked on that exact transaction, waits past
+expiry, and releases it. The authorization must reject the expired candidate.
+The regressions were observed both with transaction-start expiry and with the
+post-lock platform recheck omitted; the corrected paths pass 11 assertions in the [pinned run](database/access-expiry-evidence.json).
+
+Transaction cases roll back; the row-lock case commits only dummy fixture
+identities/grants in the disposable target. Output records runtime settings and
+source/migration digests. These cases qualify time evaluation for the named
+paths, not every ancestor-authority fence, API, erasure frontier or restored
+snapshot. The [authorization owner](../../services/main/src/services/authorization/README.md)
+describes the current-check protocol and bounded additional query cost.

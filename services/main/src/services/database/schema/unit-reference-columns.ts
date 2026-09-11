@@ -145,17 +145,17 @@ export function unitReferenceValues<Prefix extends string>(
 	) as Values<Prefix>;
 }
 
-export function unitReferenceIdExpression(prefix: string) {
+export function unitReferenceIdExpression<Prefix extends string>(prefix: Prefix, columns?: Columns<Prefix>) {
 	return sql`coalesce(${sql.join(
-		UnitOwnerValues.map((owner) => sql.identifier(physical(prefix, owner))),
+		UnitOwnerValues.map((owner) => columns ? columns[key(prefix, owner)] : sql.identifier(physical(prefix, owner))),
 		sql`, `,
 	)})`;
 }
-export function unitReferenceOwnerExpression(prefix: string) {
+export function unitReferenceOwnerExpression<Prefix extends string>(prefix: Prefix, columns?: Columns<Prefix>) {
 	return sql`case ${sql.join(
 		UnitOwnerValues.map(
 			(owner) =>
-				sql`when ${sql.identifier(physical(prefix, owner))} is not null then ${sql.raw(`'${owner}'`)}`,
+				sql`when ${columns ? columns[key(prefix, owner)] : sql.identifier(physical(prefix, owner))} is not null then ${sql.raw(`'${owner}'`)}`,
 		),
 		sql` `,
 	)} else null end`;

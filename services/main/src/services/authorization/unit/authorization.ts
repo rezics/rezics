@@ -1,3 +1,4 @@
+import { lockUnitAccessState } from "./access-lock";
 import { CatalogReferenceSchema } from "@rezics/reference";
 import { readUnitStateById } from "../../units/query";
 import { unitOwnerTable } from "../../database/schema/unit-reference-columns";
@@ -62,13 +63,13 @@ export type UnitAccessDecision =
 	  };
 
 function active(expiresAt: typeof unitAccessGrant.expiresAt) {
-	return and(isNull(unitAccessGrant.revokedAt), or(isNull(expiresAt), sql`${expiresAt} > now()`));
+	return and(isNull(unitAccessGrant.revokedAt), or(isNull(expiresAt), sql`${expiresAt} > statement_timestamp()`));
 }
 
 function activeRestriction() {
 	return and(
 		isNull(unitAccessRestriction.revokedAt),
-		or(isNull(unitAccessRestriction.expiresAt), sql`${unitAccessRestriction.expiresAt} > now()`),
+		or(isNull(unitAccessRestriction.expiresAt), sql`${unitAccessRestriction.expiresAt} > statement_timestamp()`),
 	);
 }
 
@@ -140,9 +141,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		permission: UnitPermission,
 		scope: UnitScope,
 	): Promise<UnitAccessDecision> {
-		await executor.execute(
-			sql`select pg_advisory_xact_lock_shared(hashtextextended(${`unit-access:${unitId}`}::text, 0))`,
-		);
+		await lockUnitAccessState(executor, [unitId], "shared");
 		const record = await readUnitStateById(executor, unitId);
 		if (!record || record.deletedAt) return { allowed: false, reason: "missing" };
 		if (!isUnitPermissionApplicable(record.reference.owner, permission))

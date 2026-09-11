@@ -54,7 +54,7 @@ export function getRealmContributionCondition(
 					isNull(platformCapabilityGrant.revokedAt),
 					or(
 						isNull(platformCapabilityGrant.expiresAt),
-						sql`${platformCapabilityGrant.expiresAt} > now()`,
+						sql`${platformCapabilityGrant.expiresAt} > statement_timestamp()`,
 					),
 				),
 			),
