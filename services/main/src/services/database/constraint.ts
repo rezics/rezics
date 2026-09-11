@@ -16,10 +16,11 @@ function* databaseErrorCauseChain(error: unknown): Generator<object> {
 	}
 }
 
+/** Return a five-character SQLSTATE, skipping domain error codes in the cause chain. @internal */
 export function databaseSqlState(error: unknown): string | undefined {
 	for (const candidate of databaseErrorCauseChain(error)) {
 		const code = property(candidate, "code");
-		if (typeof code === "string") return code;
+		if (typeof code === "string" && /^[0-9A-Z]{5}$/u.test(code)) return code;
 	}
 	return undefined;
 }

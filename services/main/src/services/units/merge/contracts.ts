@@ -42,7 +42,15 @@ export const MergeCreateSchema = MergePreflightSchema.extend({
 		.max(32),
 	note: z.string().max(2000).optional(),
 });
+const MergeReadGrantSchema = z.strictObject({ id: z.uuid(), revision });
+/** Exact per-target read selections for one human merge review. @internal */
+export const MergeReadGrantsSchema = z.strictObject({
+	source: MergeReadGrantSchema.optional(),
+	target: MergeReadGrantSchema.optional(),
+});
+
 export const MergeReviewSchema = z.strictObject({
+	readGrants: MergeReadGrantsSchema.optional(),
 	decision: z.enum(["approve", "reject"]),
 	requestFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
 	note: z.string().max(2000).optional(),
@@ -144,10 +152,13 @@ export const MergeItemSchema = z.strictObject({
 	mappingKey: z.uuid().nullable(),
 	sourceBindingRevision: revision.nullable(),
 	targetBindingRevision: revision.nullable(),
-	currentBinding: z.strictObject({
-		revision, state: z.enum(["active", "paused", "withdrawn"]),
-		reference: z.strictObject({ owner: z.enum(CatalogOwnerValues), id: z.uuid() }),
-	}).nullable(),
+	currentBinding: z
+		.strictObject({
+			revision,
+			state: z.enum(["active", "paused", "withdrawn"]),
+			reference: z.strictObject({ owner: z.enum(CatalogOwnerValues), id: z.uuid() }),
+		})
+		.nullable(),
 	errorCode: z.string().nullable(),
 	resolvedAt: z.iso.datetime().nullable(),
 });

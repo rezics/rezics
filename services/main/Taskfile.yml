@@ -432,6 +432,18 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-recommendation-references.ts
 
+    db:private-merge-review:check:
+        desc: Verify explicit private-pair read grants and canonical target audience for retained sources.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-private-merge-review.ts
+
+    db:merge:check:
+        desc: Qualify native merge policy, private HTTP reviews and reconciliation in an isolated merge lane without unfinished jobs.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-unit-merge-review-policy.ts
+
     db:check:
         desc: Install the fresh native baseline and verify current schema and integrity contracts.
         cmds:

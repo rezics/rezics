@@ -89,24 +89,23 @@ export async function loadCatalogIdentity(
 	if (!row) throw new CatalogReferenceNotFound("Catalog identity is missing or retired");
 	if (!write && !catalogRatingReadable(row.contentRating))
 		throw new CatalogReferenceNotFound("Catalog identity is unavailable under the viewer policy");
-	const creator = await canAccessCatalog(tx, ref, actor, row.createdByAuthUserId, write);
+	const permitted = await canAccessCatalog(tx, ref, actor, row.createdByAuthUserId, write);
 	if (write && row.status === "archived" && (await hasCatalogMergeRedirect(tx, ref)))
 		throw new CatalogAccessDenied("Merged source data is read-only");
-	let mergedReadable = false;
-	if (!write && !creator && row.status === "archived") {
+	if (!write && row.status === "archived" && (await hasCatalogMergeRedirect(tx, ref))) {
 		const scope = await readCatalogAuthorityScope(tx, actor);
 		const [allowed] = await tx
 			.select({ id: table.id })
 			.from(table)
 			.where(and(eq(table.id, ref.id), mergedCatalogReadPredicate(ref.owner, table, scope)))
 			.limit(1);
-		mergedReadable = Boolean(allowed);
+		if (!allowed) throw new CatalogAccessDenied("Merged source requires current target read authority");
+		return row;
 	}
 	if (
 		write
-			? !creator
-			: !creator &&
-				!mergedReadable &&
+			? !permitted
+			: !permitted &&
 				(row.visibility === "private" ||
 					row.status !== "published" ||
 					row.moderationStatus !== "approved")

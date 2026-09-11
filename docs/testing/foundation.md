@@ -416,3 +416,44 @@ roll back; API/race actors remain only in the disposable target. The
 records the account, reference, lookup and storage contracts. Tracking-event
 normalization, complete recommendation generation and 500M/3B load acceptance
 remain separate work.
+
+## Native merge review and reconciliation
+
+`task services-main:db:merge:check` runs
+[check-unit-merge-review-policy.ts](../../services/main/scripts/check-unit-merge-review-policy.ts).
+The [pinned native run](database/native-merge-evidence.json) passes 136 assertions,
+including three signed-session private review requests. The disposable schema
+was freshly installed from seven migrations and 15,738 statements. Each attempt
+uses new identities and requires no unfinished jobs at entry; completed history
+is retained, and every admitted operation finishes by the end of the run.
+
+Cases cover independent human reviews, service/self/duplicate rejection, exact
+fingerprints and revisions, native owner/shape/status/visibility/rating guards,
+source preservation, more than 128 reconciliation items, default copy/rebind and
+alternate retain/pause plans, and retained-source disclosure. Exact two-connection
+barriers prove that binding drift becomes an actionable item. Human retention
+and retry require the current binding revision. A manual correction committed
+before inventory remains untouched; one committed after inventory can be retained
+but cannot be moved back by retry. Explicit operation retry completes settlement.
+
+`task services-main:db:private-merge-review:check` runs
+[check-private-merge-review.ts](../../services/main/scripts/check-private-merge-review.ts).
+The [pinned private run](database/private-merge-review-evidence.json) passes 20 assertions covering explicit
+per-side read grants, denied missing/incomplete/wrong-target/wrong-principal/stale/
+revoked selections, two accepted independent reviews, retained-source point and
+SQL-predicate agreement, and expiry while waiting on the other side's grant.
+A review capability alone never grants private catalog access. Fixture transaction
+cases roll back; the expiry-wait accounts remain only in the disposable database.
+
+Pre-fix failures exposed private-pair admission without a way to select both read
+grants, source-only authority bypassing the canonical target audience, and domain
+reconciliation codes being mistaken for SQLSTATEs. The same change qualifies
+explicit manual correction to a third native target while automatic rebinding
+remains constrained to the canonical target. Backend tests pass 333 files/1,790
+tests; backend, all three generated SDKs and web TypeScript checks pass.
+No schema migration or rendered UI change is part of this repair.
+
+These checks qualify the named admission/disclosure/reconciliation paths.
+Application-time reviewer authority, crash/restart and production/corpus-scale
+capacity remain separate obligations in the [merge owner](../../services/main/src/services/units/merge/README.md)
+and M06; they do not establish G4 or complete M01/M06.

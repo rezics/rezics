@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { inArray, sql } from "drizzle-orm";
+import { and, inArray, sql } from "drizzle-orm";
 import { CatalogReferenceSchema } from "@rezics/reference";
 import type { Authorization } from "../../authorization";
 import type { DatabaseTransaction } from "../../database";
@@ -8,6 +8,7 @@ import {
 	entityParticipation,
 	unitMergeGraphLock,
 	unitMergeRedirect,
+	participationGrant,
 } from "../../database/schema";
 import {
 	UnitMergeKindIneligible,
@@ -17,10 +18,24 @@ import {
 } from "../../api/governance/errors";
 import { readUnitStateById, type UnitState } from "../query";
 import { readUnitPresentationsInTransaction } from "../presentation-reader";
-import { loadCatalogIdentity, CatalogAccessDenied, CatalogReferenceNotFound } from "../../catalog/storage";
-import { ParticipationDenied } from "../../participation/policy";
+import {
+	loadCatalogIdentity,
+	CatalogAccessDenied,
+	CatalogReferenceNotFound,
+} from "../../catalog/storage";
+import {
+	ParticipationDenied,
+	currentParticipationAuthority,
+	runWithParticipationAuthority,
+	requireParticipation,
+} from "../../participation/policy";
 import { UnitNotFound } from "../errors";
-import { MergePlanSchema, MergeManifestSchema, type DefaultMergePlan } from "./contracts";
+import {
+	MergePlanSchema,
+	MergeManifestSchema,
+	type MergeReadGrantsSchema,
+	type DefaultMergePlan,
+} from "./contracts";
 import type { z } from "zod";
 export type UnitMergeManifest = z.output<typeof MergeManifestSchema>;
 export function mergeFingerprint(value: Omit<UnitMergeManifest, "fingerprint">) {
@@ -63,6 +78,7 @@ export async function buildUnitMergeManifest(
 		operationId?: string;
 	},
 	access: "write" | "read" = "write",
+	readGrants?: z.output<typeof MergeReadGrantsSchema>,
 ): Promise<UnitMergeManifest> {
 	if (input.sourceUnitId === input.targetUnitId) throw new UnitMergeRequestConflict();
 	await lockMergePair(tx, [input.sourceUnitId, input.targetUnitId]);
@@ -78,15 +94,44 @@ export async function buildUnitMergeManifest(
 	const sourceReference = CatalogReferenceSchema.safeParse(source.reference),
 		targetReference = CatalogReferenceSchema.safeParse(target.reference);
 	if (!sourceReference.success || !targetReference.success) throw new UnitMergeKindIneligible();
-	for (const reference of [sourceReference.data, targetReference.data]) {
-		try { await loadCatalogIdentity(tx, reference, authorization.authUserId ?? null, false); }
-		catch(cause) { if(cause instanceof CatalogAccessDenied || cause instanceof CatalogReferenceNotFound) throw new UnitNotFound(); throw cause; }
+	if (access !== "read" && readGrants)
+		throw new ParticipationDenied("Read selections cannot authorize merge writes");
+	const authority = currentParticipationAuthority();
+	for (const [side, reference] of [
+		["source", sourceReference.data],
+		["target", targetReference.data],
+	] as const) {
+		try {
+			const grant = readGrants?.[side];
+			if (grant) {
+				if (
+					!authority ||
+					authority.principal.kind !== "auth" ||
+					authority.principal.authUserId !== authorization.authUserId
+				)
+					throw new ParticipationDenied("Merge read selections require the current human account");
+				const selectedAuthority = { ...authority, actingEntityId: authorization.profileId, grant };
+				await runWithParticipationAuthority(selectedAuthority, async () => {
+					await requireParticipation(tx, selectedAuthority, "catalog.read", reference);
+					return loadCatalogIdentity(tx, reference, authority.principal.authUserId, false);
+				});
+			} else await loadCatalogIdentity(tx, reference, authorization.authUserId ?? null, false);
+		} catch (cause) {
+			if (cause instanceof CatalogAccessDenied || cause instanceof CatalogReferenceNotFound)
+				throw new UnitNotFound();
+			throw cause;
+		}
 	}
 	if (!compatibleMergeIdentities(source, target)) throw new UnitMergeKindMismatch();
-	if(access==="write") for(const reference of [sourceReference.data,targetReference.data]) {
-		try { await loadCatalogIdentity(tx,reference,authorization.authUserId??null,true); }
-		catch(cause) { if(cause instanceof CatalogAccessDenied) throw new ParticipationDenied(); throw cause; }
-	}
+	if (access === "write")
+		for (const reference of [sourceReference.data, targetReference.data]) {
+			try {
+				await loadCatalogIdentity(tx, reference, authorization.authUserId ?? null, true);
+			} catch (cause) {
+				if (cause instanceof CatalogAccessDenied) throw new ParticipationDenied();
+				throw cause;
+			}
+		}
 	const ids = [source.id, target.id];
 	const controls = await tx
 		.select({ id: entityParticipation.entityId })
@@ -112,6 +157,27 @@ export async function buildUnitMergeManifest(
 	if (redirects.length || locks.some((lock) => lock.operationId !== input.operationId))
 		throw new UnitMergeRequestConflict();
 	const labels = await readUnitPresentationsInTransaction(tx, ids);
+	const selectedReadGrantIds = [
+		...new Set(
+			[readGrants?.source?.id, readGrants?.target?.id].filter(
+				(id): id is string => id !== undefined,
+			),
+		),
+	];
+	if (selectedReadGrantIds.length) {
+		// Row locks prevent revocation, but a wait on the other side can outlive a deadline.
+		const [expired] = await tx
+			.select({ id: participationGrant.id })
+			.from(participationGrant)
+			.where(
+				and(
+					inArray(participationGrant.id, selectedReadGrantIds),
+					sql`${participationGrant.expiresAt} <= statement_timestamp()`,
+				),
+			)
+			.limit(1);
+		if (expired) throw new ParticipationDenied("Private merge read selection expired");
+	}
 	const partial = {
 		owner: sourceReference.data.owner,
 		shape: source.shape,

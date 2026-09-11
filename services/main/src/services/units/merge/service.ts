@@ -346,12 +346,15 @@ export async function reviewUnitMerge(
 			)
 			.limit(1);
 		if (existing) throw new UnitMergeReviewDuplicate();
-		const current = await runWithParticipationAuthority(authority, () => withCatalogViewerPolicy(tx, authority.principal.authUserId,
-			() => buildUnitMergeManifest(tx, authorization, {
-			sourceUnitId: row.sourceUnitId,
-			targetUnitId: row.targetUnitId,
-			plan: MergePlanSchema.parse(row.plan),
-		}, "read")));
+		const current = await runWithParticipationAuthority(authority, () =>
+			withCatalogViewerPolicy(tx, authority.principal.authUserId, () =>
+				buildUnitMergeManifest(tx, authorization, {
+					sourceUnitId: row.sourceUnitId,
+					targetUnitId: row.targetUnitId,
+					plan: MergePlanSchema.parse(row.plan),
+				}, "read", value.readGrants),
+			),
+		);
 		assertMergeManifestFingerprint(current, row.requestFingerprint);
 		await tx.insert(unitMergeReview).values({
 			requestId,
@@ -407,7 +410,7 @@ export async function reviewUnitMerge(
 			authority: { kind: "platform" },
 			action: `unit.merge.review.${value.decision}`,
 			target: { kind: "unit_merge_request", id: requestId },
-			details: { requestFingerprint: row.requestFingerprint },
+			details: { requestFingerprint: row.requestFingerprint, readGrants: value.readGrants ?? null },
 		});
 		return oneView(tx, await requireRequest(tx, requestId));
 	});

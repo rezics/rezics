@@ -338,9 +338,15 @@ export async function reviseCatalogSourceBinding(
 				sql`select public.resolve_canonical_unit_id(${current.reference.id}::uuid) as id`,
 			)
 		).rows;
-		if (!canonical || (value.target ? value.target.id !== canonical.id : value.state === "active"))
+		const explicitManualRebind = value.target !== undefined && value.mode === "manual";
+		if (
+			!canonical ||
+			(value.target
+				? value.target.id !== canonical.id && !explicitManualRebind
+				: value.state === "active")
+		)
 			throw new CatalogAccessDenied(
-				"A merged source binding may only be paused or moved to its canonical target",
+				"A merged source binding requires its canonical target or an explicit manual rebind",
 			);
 		const allowedOriginal = await canAccessCatalog(
 			tx,

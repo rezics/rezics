@@ -31,6 +31,12 @@ export function mergedCatalogReadPredicate(
  and ((${creator}) is true or (${granted}) is true or (${target.visibility} in ('public','unlisted') and ${target.status}='published' and ${target.moderationStatus}='approved'))
  ))`;
 }
+/** Source identity membership in the accepted merge graph; no authority is granted. @internal */
+export function catalogMergeSourcePredicate(owner: CatalogOwner, sourceId: SQLWrapper) {
+	return sql`exists(select 1 from ${unitMergeRedirect}
+		where ${unitMergeRedirect.sourceUnitId} = ${sourceId} and ${unitMergeRedirect.owner} = ${owner})`;
+}
+
 export async function hasCatalogMergeRedirect(
 	tx: DatabaseTransaction,
 	reference: CatalogReference,

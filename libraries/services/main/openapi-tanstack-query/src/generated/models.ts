@@ -28776,6 +28776,34 @@ export type ReviewNativeMergeRequestDecisionEnum =
 	(typeof ReviewNativeMergeRequestDecisionEnum)[keyof typeof ReviewNativeMergeRequestDecisionEnum];
 
 export type ReviewNativeMergeBody = {
+	readGrants?: {
+		source?: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			revision: number;
+		};
+		target?: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @maxLength 9007199254740991
+			 * @type integer
+			 */
+			revision: number;
+		};
+	};
 	decision: ReviewNativeMergeRequestDecisionEnum;
 	/**
 	 * @pattern ^[a-f0-9]{64}$

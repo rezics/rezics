@@ -3,6 +3,15 @@ import { describe, expect, it } from "vitest";
 import { databaseConstraintName, databaseErrorMatches, databaseSqlState } from "./constraint";
 
 describe("database error identity", () => {
+	it("ignores domain codes and keeps looking for a SQLSTATE cause", () => {
+		expect(databaseSqlState({ code: "binding_changed" })).toBeUndefined();
+		expect(databaseSqlState({ code: "CatalogRevisionConflict", cause: { code: "40001" } })).toBe(
+			"40001",
+		);
+		expect(databaseSqlState({ code: "23514suffix" })).toBeUndefined();
+		expect(databaseSqlState({ code: "55p03" })).toBeUndefined();
+	});
+
 	it("reads PostgreSQL identity through a cause chain", () => {
 		const postgresError = {
 			code: "55P03",

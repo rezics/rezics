@@ -1,4 +1,8 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import { setTimeout } from "node:timers/promises";
 import { Readable } from "node:stream";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
@@ -36,11 +40,11 @@ const observability = initializeObservability({
 	},
 });
 
-const { database } = await import("../src/services/database");
+const { database, withDatabaseTransactionDeadline } = await import("../src/services/database");
 type MergeFixtureTransaction = Parameters<Parameters<typeof database.transaction>[0]>[0];
 const { auth } = await import("../src/services/auth");
 const { users, sessions } = await import("../src/services/database/schema/auth");
-const { platformCapabilityGrant, realmRule, realmRuleRevision } = await import(
+const { platformCapabilityGrant, realm, realmRule, realmRuleRevision } = await import(
 	"../src/services/database/schema/realm"
 );
 const { CatalogIdentityTables } = await import("../src/services/database/schema/catalog-identity");
@@ -59,7 +63,7 @@ const { runWithParticipationAuthority, ParticipationDenied } = await import(
 	"../src/services/participation/policy"
 );
 const { withCatalogViewerPolicy } = await import("../src/services/catalog/read-policy");
-const { createServicePrincipal } = await import("../src/services/participation/commands");
+const { createServicePrincipal, issueParticipationGrant } = await import("../src/services/participation/commands");
 const {
 	createCatalogIdentity,
 	loadCatalogIdentity,
@@ -84,6 +88,7 @@ const {
 	preflightUnitMerge,
 	createReviewedUnitMerge,
 	reviewUnitMerge,
+	retryUnitMerge,
 	getUnitMergeRequest,
 	listMergeReconciliationItems,
 } = await import("../src/services/units/merge/service");
@@ -94,7 +99,7 @@ const {
 	resolveMergeReconciliationItem,
 } = await import("../src/services/units/merge/worker");
 const { listMergedCatalogSources } = await import("../src/services/units/merge/public-sources");
-const { DefaultMergePlan } = await import("../src/services/units/merge/contracts");
+const { DefaultMergePlan, MergeRequestSchema } = await import("../src/services/units/merge/contracts");
 const {
 	UnitMergeReviewSelfForbidden,
 	UnitMergeReviewDuplicate,
@@ -218,19 +223,22 @@ function nameValue(value: string, kind = "primary") {
 }
 
 async function officialRule() {
-	const [rule] = await database
-		.select({
-			sourceRealmId: realmRuleRevision.realmId,
-			revisionId: realmRuleRevision.id,
-			ruleId: realmRule.id,
-		})
-		.from(realmRuleRevision)
-		.innerJoin(realmRule, eq(realmRule.revisionId, realmRuleRevision.id))
-		.where(eq(realmRuleRevision.realmId, OfficialRealmUnitIds.rule))
-		.orderBy(desc(realmRuleRevision.version), realmRule.id)
-		.limit(1);
-	assert.ok(rule, "Install the official Rule Realm before this fixture");
-	return rule;
+	const issuer = await human("Native merge Rule fixture issuer");
+	return database.transaction(async (tx) => {
+		await tx.insert(realm).values({ id: OfficialRealmUnitIds.rule }).onConflictDoNothing();
+		let [revision] = await tx.select().from(realmRuleRevision)
+			.where(eq(realmRuleRevision.realmId, OfficialRealmUnitIds.rule))
+			.orderBy(desc(realmRuleRevision.version)).limit(1);
+		if (!revision) [revision] = await tx.insert(realmRuleRevision).values({
+			realmId: OfficialRealmUnitIds.rule, version: 1, createdByProfileId: issuer.self.id,
+		}).returning();
+		assert.ok(revision);
+		let [rule] = await tx.select({ id: realmRule.id }).from(realmRule)
+			.where(eq(realmRule.revisionId, revision.id)).limit(1);
+		if (!rule) [rule] = await tx.insert(realmRule).values({ revisionId: revision.id, position: 0 }).returning({ id: realmRule.id });
+		assert.ok(rule);
+		return { sourceRealmId: OfficialRealmUnitIds.rule, revisionId: revision.id, ruleId: rule.id };
+	});
 }
 
 async function publishingWork(
@@ -356,16 +364,17 @@ async function propose(
 	target: CatalogReference,
 	rules: Awaited<ReturnType<typeof officialRule>>[],
 	idempotencyKey = crypto.randomUUID(),
+	plan = DefaultMergePlan,
 ) {
 	const manifest = await preflightUnitMerge(person.authorization, {
 		sourceUnitId: source.id,
 		targetUnitId: target.id,
-		plan: DefaultMergePlan,
+		plan,
 	});
 	return createReviewedUnitMerge(person.authorization, {
 		sourceUnitId: source.id,
 		targetUnitId: target.id,
-		plan: DefaultMergePlan,
+		plan,
 		confirmationSourceUnitId: source.id,
 		confirmationTargetUnitId: target.id,
 		expectedSourceRevision: manifest.sourceRevision,
@@ -410,28 +419,47 @@ async function drainUntilBindings(requestId: string) {
 }
 
 function deferred<T>() {
-	let resolve!: (value: T) => void;
-	const promise = new Promise<T>((complete) => {
-		resolve = complete;
-	});
-	return { promise, resolve };
+	return Promise.withResolvers<T>();
 }
 
-async function waiter(blockerPid: number) {
+async function waiter(workerPid: number, blockerPid: number) {
 	for (let attempt = 0; attempt < 200; attempt++) {
-		const result = await database.execute<{ pid: number }>(
-			sql`select pid from pg_stat_activity where ${blockerPid} = any(pg_blocking_pids(pid))`,
+		const result = await database.execute<{ blocked: boolean }>(
+			sql`select ${blockerPid} = any(pg_blocking_pids(${workerPid})) as blocked`,
 		);
-		if (result.rows[0]) return;
+		if (result.rows[0]?.blocked) return;
 		await setTimeout(10);
 	}
 	throw new Error("Expected the merge worker to wait on the source binding lock");
 }
 
+async function processBlockedBindingPage(requestId: string, blockerPid: number, release: () => void) {
+	let running: Promise<void> | undefined;
+	try {
+		const [page] = await claimUnitMergeOperations(new Date(), 1);
+		assert.ok(page);
+		assert.equal(page.phase, "bindings");
+		assert.equal(page.requestId, requestId);
+		const workerPid = deferred<number>();
+		running = withDatabaseTransactionDeadline(30000, async () => {
+			workerPid.resolve(
+				(await database.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`)).rows[0]!.pid,
+			);
+			await processClaimedUnitMergePage(page);
+		});
+		void running.catch(workerPid.reject);
+		await waiter(await workerPid.promise, blockerPid);
+	} finally {
+		release();
+		await running;
+	}
+}
+
 try {
+	const [priorOperation] = await database.select({ id: unitMergeOperation.id }).from(unitMergeOperation)
+		.where(sql`${unitMergeOperation.state} <> 'completed'`).limit(1);
+	assert.equal(priorOperation, undefined, "Prepare a lane with no unfinished operations; never drain another fixture's jobs");
 	const rule = await officialRule();
-	// Prior interrupted fixture runs may leave admitted jobs; finish due work through the real worker before asserting queue order.
-	await reconcile();
 	const proposer = await human("Native merge proposer");
 	const firstReviewer = await human("Native merge first reviewer");
 	const secondReviewer = await human("Native merge second reviewer");
@@ -969,14 +997,34 @@ try {
 		visibility: "private",
 	});
 	const hidden = await propose(proposer, hiddenSource.reference, hiddenTarget.reference, [rule]);
-	await reviewUnitMerge(firstReviewer.authorization, hidden.id, {
-		decision: "approve",
-		requestFingerprint: hidden.manifest.fingerprint,
-	});
-	await reviewUnitMerge(secondReviewer.authorization, hidden.id, {
-		decision: "approve",
-		requestFingerprint: hidden.manifest.fingerprint,
-	});
+	await rejects(() => reviewUnitMerge(firstReviewer.authorization, hidden.id, {
+		decision: "approve", requestFingerprint: hidden.manifest.fingerprint,
+	}), UnitNotFound);
+	const { default: api } = await import("../src/services/api");
+	api.compile();
+	async function privateReviewRequest(reviewer: Person, readGrants: unknown, expectedStatus: number) {
+		const session = await context.internalAdapter.createSession(reviewer.account.id);
+		const [cookie] = (await serializeSignedCookie(context.authCookies.sessionToken.name, session.token, context.secret, { path: "/" })).split(";");
+		assert.ok(cookie);
+		const response = await api.fetch(new Request(`http://localhost:3001/api/v1/governance/platform/unit-merges/${hidden.id}/reviews`, {
+			method: "POST", headers: { Cookie: cookie, "Content-Type": "application/json" },
+			body: JSON.stringify({ decision: "approve", requestFingerprint: hidden.manifest.fingerprint, ...(readGrants ? { readGrants } : {}) }),
+		}));
+		const body = await response.json();
+		assert.equal(response.status, expectedStatus, JSON.stringify(body)); assertions++;
+		return expectedStatus === 200 ? MergeRequestSchema.parse(body) : undefined;
+	}
+	await privateReviewRequest(firstReviewer, undefined, 404);
+	for (const reviewer of [firstReviewer, secondReviewer]) {
+		const readGrants = await asActor(proposer, async (tx) => ({
+			source: await issueParticipationGrant(tx, proposer.authority, { recipient: { kind: "auth", authUserId: reviewer.account.id }, actingEntityId: reviewer.self.id, capability: "catalog.read", target: hiddenSource.reference }),
+			target: await issueParticipationGrant(tx, proposer.authority, { recipient: { kind: "auth", authUserId: reviewer.account.id }, actingEntityId: reviewer.self.id, capability: "catalog.read", target: hiddenTarget.reference }),
+		}));
+		const reviewed = await privateReviewRequest(reviewer, readGrants, 200);
+		assert.ok(reviewed);
+		counted(reviewed.manifest.sourceUnit.id === hiddenSource.reference.id);
+		counted(reviewed.manifest.targetUnit.id === hiddenTarget.reference.id);
+	}
 	await reconcile();
 	const hiddenCompleted = await getUnitMergeRequest(proposer.authorization, hidden.id);
 	counted(hiddenCompleted.state === "completed");
@@ -998,6 +1046,33 @@ try {
 			),
 		CatalogAccessDenied,
 	);
+
+	const retainedSource = await publishingWork(proposer, "Native merge retained source");
+	const retainedTarget = await publishingWork(proposer, "Native merge retained target");
+	await attachIdentifier(proposer, retainedSource.reference, "retained-source-id");
+	const retainedBinding = await attachBinding(proposer, retainedSource.reference);
+	const retainedRequest = await propose(proposer, retainedSource.reference, retainedTarget.reference, [rule], crypto.randomUUID(), {
+		...DefaultMergePlan, names: "retain_source", identifiers: "retain_source", bindings: "pause_at_source",
+	});
+	for (const reviewer of [firstReviewer, secondReviewer])
+		await reviewUnitMerge(reviewer.authorization, retainedRequest.id, {
+			decision: "approve", requestFingerprint: retainedRequest.manifest.fingerprint,
+		});
+	await reconcile();
+	counted((await getUnitMergeRequest(proposer.authorization, retainedRequest.id)).state === "completed");
+	const retainedItems = await listMergeReconciliationItems(proposer.authorization, retainedRequest.id, { limit: 100 });
+	for (const decision of ["retain_name", "retain_identifier", "retain_paused_binding", "retain_native_structure"])
+		counted(retainedItems.items.some(item => item.decision === decision && item.state === "retained"));
+	const pausedOriginal = await database.transaction(tx => lockCatalogSourceBinding(tx, { sourceRecordId: retainedBinding.sourceRecordId, mappingKey: retainedBinding.mappingKey }));
+	counted(pausedOriginal.reference.id === retainedSource.reference.id);
+	counted(pausedOriginal.claim.state === "paused");
+	counted(pausedOriginal.claim.bindingRevision === retainedBinding.bindingRevision + 1);
+	const retainedTargetNames = await database.select().from(CatalogNameTables.publishing.name)
+		.where(eq(CatalogNameTables.publishing.name.ownerId, retainedTarget.reference.id));
+	counted(retainedTargetNames.length === 1 && retainedTargetNames[0]?.id === retainedTarget.nameId);
+	const retainedTargetIdentifiers = await database.select().from(CatalogNameTables.publishing.identifier)
+		.where(eq(CatalogNameTables.publishing.identifier.ownerId, retainedTarget.reference.id));
+	counted(retainedTargetIdentifiers.length === 0);
 
 	const pageSource = await publishingWork(proposer, "Native merge paging source");
 	const pageTarget = await publishingWork(proposer, "Native merge paging target");
@@ -1047,6 +1122,7 @@ try {
 	const conflictSource = await publishingWork(proposer, "Native merge conflict source");
 	const conflictTarget = await publishingWork(proposer, "Native merge conflict target");
 	const conflictBinding = await attachBinding(proposer, conflictSource.reference);
+	const retryBinding = await attachBinding(proposer, conflictSource.reference);
 	const conflict = await propose(proposer, conflictSource.reference, conflictTarget.reference, [
 		rule,
 	]);
@@ -1063,50 +1139,45 @@ try {
 	const release = deferred<void>();
 	const stale = database.transaction((tx) =>
 		runWithParticipationAuthority(proposer.authority, async () => {
-			await lockCatalogSourceBinding(tx, {
-				sourceRecordId: conflictBinding.sourceRecordId,
-				mappingKey: conflictBinding.mappingKey,
-			});
+			const bindings = [conflictBinding, retryBinding].sort((left, right) => left.sourceRecordId.localeCompare(right.sourceRecordId));
+			for (const binding of bindings)
+				await lockCatalogSourceBinding(tx, { sourceRecordId: binding.sourceRecordId, mappingKey: binding.mappingKey });
 			const pid = await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`);
 			const backend = pid.rows[0];
 			assert.ok(backend);
 			ready.resolve(backend.pid);
 			await release.promise;
-			await reviseCatalogSourceBinding(tx, proposer.account.id, {
-				sourceRecordId: conflictBinding.sourceRecordId,
-				mappingKey: conflictBinding.mappingKey,
-				expectedRevision: 1,
-				state: "paused",
-				mode: "review",
-				reason: "Concurrent native merge fixture pause",
-			});
+			for (const binding of bindings)
+				await reviseCatalogSourceBinding(tx, proposer.account.id, {
+					sourceRecordId: binding.sourceRecordId, mappingKey: binding.mappingKey,
+					expectedRevision: 1, state: "paused", mode: "review",
+					reason: "Concurrent native merge fixture pause",
+				});
 		}),
 	);
+	void stale.catch(ready.reject);
 	const blocker = await ready.promise;
-	const worker = (async () => {
-		const claimedBindings = await claimUnitMergeOperations(new Date(), 1);
-		const bindingPage = claimedBindings[0];
-		assert.ok(bindingPage);
-		assert.equal(bindingPage.phase, "bindings");
-		const running = processClaimedUnitMergePage(bindingPage);
-		await waiter(blocker);
-		release.resolve();
-		return running;
-	})();
-	await Promise.all([stale, worker]);
+	await Promise.all([
+		stale,
+		processBlockedBindingPage(conflict.id, blocker, () => release.resolve()),
+	]);
 	await reconcile();
 	const conflicted = await getUnitMergeRequest(proposer.authorization, conflict.id);
 	counted(
 		conflicted.state === "action_required" ||
-			conflicted.operation?.state === "action_required" ||
-			conflicted.state === "completed",
+			conflicted.operation?.state === "action_required",
 	);
 	const conflictItems = await listMergeReconciliationItems(proposer.authorization, conflict.id, {
 		state: "action_required",
 		limit: 100,
 	});
-	const bindingItem = conflictItems.items.find((item) => item.kind === "source_binding");
-	if (bindingItem) {
+	const bindingItem = conflictItems.items.find((item) => item.kind === "source_binding" && item.sourceRecordId === conflictBinding.sourceRecordId);
+	const retryItem = conflictItems.items.find((item) => item.kind === "source_binding" && item.sourceRecordId === retryBinding.sourceRecordId);
+	assert.ok(retryItem?.currentBinding, "A second drifted binding must be independently reviewable");
+	assertions++;
+	assert.ok(bindingItem, "Concurrent binding drift must produce a reviewable reconciliation item");
+	assertions++;
+	{
 		counted(bindingItem.errorCode === "binding_changed");
 		const listedBinding = bindingItem.currentBinding;
 		assert.ok(listedBinding);
@@ -1147,7 +1218,18 @@ try {
 					(item.state === "retained" || item.state === "applied"),
 			),
 		);
+		const retryTarget = await identityRow(conflictTarget.reference.id);
+		await resolveMergeReconciliationItem(proposer.authorization, conflict.id, retryItem.id, {
+			action: "retry", expectedTargetRevision: retryTarget.revision,
+			expectedBindingRevision: retryItem.currentBinding.revision,
+			reason: "Retry the exact paused binding while it still targets the merge source",
+		});
+		const resolved = await listMergeReconciliationItems(proposer.authorization, conflict.id, { limit: 100 });
+		counted(resolved.items.some(item => item.id === bindingItem.id && item.currentBinding?.reference.id === conflictSource.reference.id && item.currentBinding.state === "paused"));
+		counted(resolved.items.some(item => item.id === retryItem.id && item.currentBinding?.reference.id === conflictTarget.reference.id && item.currentBinding.state === "paused"));
+		await retryUnitMerge(proposer.authorization, conflict.id);
 		await reconcile();
+		counted((await getUnitMergeRequest(proposer.authorization, conflict.id)).state === "completed");
 	}
 
 	const reboundSource = await publishingWork(proposer, "Native merge rebound source");
@@ -1157,6 +1239,7 @@ try {
 		"Native merge independent binding target",
 	);
 	const reboundBinding = await attachBinding(proposer, reboundSource.reference);
+	const beforeInventoryBinding = await attachBinding(proposer, reboundSource.reference);
 	const reboundMerge = await propose(
 		proposer,
 		reboundSource.reference,
@@ -1172,17 +1255,49 @@ try {
 		requestFingerprint: reboundMerge.manifest.fingerprint,
 	});
 	await drainUntilBindings(reboundMerge.id);
-	await asActor(proposer, (tx) =>
+	await rejects(() => asActor(proposer, (tx) =>
 		reviseCatalogSourceBinding(tx, proposer.account.id, {
 			sourceRecordId: reboundBinding.sourceRecordId,
 			mappingKey: reboundBinding.mappingKey,
 			expectedRevision: reboundBinding.bindingRevision,
-			state: "active",
-			mode: "manual",
-			reason: "Independent rebind before merge binding page",
+			state: "active", mode: "review",
+			reason: "Automatic rebinding must retain the canonical merge target",
+			target: independentBindingTarget.reference,
+		}),
+	), CatalogAccessDenied);
+	await asActor(proposer, (tx) =>
+		reviseCatalogSourceBinding(tx, proposer.account.id, {
+			sourceRecordId: beforeInventoryBinding.sourceRecordId,
+			mappingKey: beforeInventoryBinding.mappingKey,
+			expectedRevision: beforeInventoryBinding.bindingRevision,
+			state: "active", mode: "manual",
+			reason: "Independent correction committed before merge inventory",
 			target: independentBindingTarget.reference,
 		}),
 	);
+	const reboundReady = deferred<number>();
+	const reboundRelease = deferred<void>();
+	const rebinding = asActor(proposer, async (tx) => {
+		await lockCatalogSourceBinding(tx, { sourceRecordId: reboundBinding.sourceRecordId, mappingKey: reboundBinding.mappingKey });
+		const { rows: [backend] } = await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`);
+		assert.ok(backend);
+		reboundReady.resolve(backend.pid);
+		await reboundRelease.promise;
+		await reviseCatalogSourceBinding(tx, proposer.account.id, {
+			sourceRecordId: reboundBinding.sourceRecordId,
+			mappingKey: reboundBinding.mappingKey,
+			expectedRevision: reboundBinding.bindingRevision,
+			state: "active", mode: "manual",
+			reason: "Independent correction committed after merge inventory",
+			target: independentBindingTarget.reference,
+		});
+	});
+	void rebinding.catch(reboundReady.reject);
+	const reboundBlocker = await reboundReady.promise;
+	await Promise.all([
+		rebinding,
+		processBlockedBindingPage(reboundMerge.id, reboundBlocker, () => reboundRelease.resolve()),
+	]);
 	await reconcile();
 	const reboundStatus = await getUnitMergeRequest(proposer.authorization, reboundMerge.id);
 	counted(
@@ -1193,7 +1308,8 @@ try {
 		state: "action_required",
 		limit: 100,
 	});
-	const reboundItem = reboundItems.items.find((item) => item.kind === "source_binding");
+	counted(!reboundItems.items.some(item => item.sourceRecordId === beforeInventoryBinding.sourceRecordId));
+	const reboundItem = reboundItems.items.find((item) => item.kind === "source_binding" && item.sourceRecordId === reboundBinding.sourceRecordId);
 	assert.ok(reboundItem);
 	const reboundCurrent = reboundItem.currentBinding;
 	assert.ok(reboundCurrent);
@@ -1249,6 +1365,14 @@ try {
 		);
 	counted(reboundClaim?.publishingId === independentBindingTarget.reference.id);
 
+	const beforeInventoryCurrent = await database.transaction(tx => lockCatalogSourceBinding(tx, { sourceRecordId: beforeInventoryBinding.sourceRecordId, mappingKey: beforeInventoryBinding.mappingKey }));
+	counted(beforeInventoryCurrent.reference.id === independentBindingTarget.reference.id);
+	counted(beforeInventoryCurrent.claim.bindingRevision === beforeInventoryBinding.bindingRevision + 1);
+	counted(beforeInventoryCurrent.claim.state === "paused");
+	await retryUnitMerge(proposer.authorization, reboundMerge.id);
+	await reconcile();
+	counted((await getUnitMergeRequest(proposer.authorization, reboundMerge.id)).state === "completed");
+
 	const revokedProposer = await human("Native merge revoked proposer");
 	await grant(revokedProposer, "unit.merge");
 	const revokedSource = await publishingWork(revokedProposer, "Native merge revoked source");
@@ -1293,13 +1417,36 @@ try {
 	counted(independent.state === "completed");
 	counted(independent.id !== paging.id);
 	counted(independent.id !== hidden.id);
+	const [unfinished] = await database.select({ id: unitMergeOperation.id }).from(unitMergeOperation)
+		.where(sql`${unitMergeOperation.state} <> 'completed'`).limit(1);
+	counted(unfinished === undefined);
+	const repository = new URL("../../../", import.meta.url);
+	const sourceDigests: Record<string, string> = {};
+	for (const path of [
+		"services/main/scripts/check-unit-merge-review-policy.ts",
+		"services/main/src/services/units/merge/contracts.ts",
+		"services/main/src/services/units/merge/manifest.ts",
+		"services/main/src/services/units/merge/service.ts",
+		"services/main/src/services/units/merge/worker.ts",
+		"services/main/src/services/catalog/source-bindings.ts",
+		"services/main/src/services/catalog/storage.ts",
+		"services/main/src/services/catalog/merge-read.ts",
+		"services/main/src/services/participation/policy.ts",
+		"services/main/src/services/database/constraint.ts",
+		"services/main/src/services/database/migrations/atlas.sum",
+	]) sourceDigests[path] = createHash("sha256").update(await readFile(new URL(path, repository))).digest("hex");
 	console.info(
 		JSON.stringify({
+			baseCommit: execFileSync("git", ["rev-parse", "HEAD"], { cwd: fileURLToPath(repository), encoding: "utf8" }).trim(),
+			sourceDigests, node: process.version, platform: `${process.platform}/${process.arch}`,
+			runtime: (await database.execute(sql`select version() as postgres,current_setting('default_transaction_isolation') as default_isolation`)).rows[0],
+			privateReviewHttpRequests: 3,
 			selfReviewerForbidden: true,
 			duplicateAuthReviewDenied: true,
 			servicePrincipalDenied: true,
 			twoHumanApprovalsQueuedAndReconciled: true,
 			originalNamesFactsAndSourceEpochsPreserved: true,
+			alternateRetainPlanPreservesSourceMetadataAndPausesBindings: true,
 			staleRevisionAndFingerprintRejected: true,
 			sourceTargetAccessEnforced: true,
 			sourceOrdinaryWritesFrozen: true,
@@ -1308,6 +1455,7 @@ try {
 			staleBindingHumanRetainRetry: Boolean(bindingItem),
 			concurrentBindingDriftRejectsStaleRevision: Boolean(bindingItem),
 			independentRebindRetainDoesNotOverwrite: true,
+			beforeInventoryRebindPreservedWithoutReconciliation: true,
 			retryMovesBindingOnlyWhileOnSource: true,
 			revokedProposerDenied: true,
 			currentNativeNonReaderDenied: true,
@@ -1316,6 +1464,7 @@ try {
 			participatingOrControlledEntityBlocked: true,
 			assertions,
 			fixtureHistoryRetained: true,
+			allAdmittedOperationsCompleted: true,
 		}),
 	);
 } finally {
