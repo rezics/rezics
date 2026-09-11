@@ -373,3 +373,20 @@ OpenAPI and all SDKs include nullable native presentation language,
 `afterProfileId` and `nextCursor`. Consuming this traversal in the frontend is
 part of G5. The [Realm owner](../../services/main/src/services/realms/README.md#roster-reads)
 records pagination and disclosure semantics, workload estimates and skew limits.
+
+## Public reviewed merge reference fixture
+
+`task services-main:db:reference-merge:check` runs
+[check-reference-merge.ts](../../services/main/scripts/check-reference-merge.ts),
+using [the shared reference fixture](../../services/main/scripts/reference-merge-fixture.ts).
+It creates a real public native pair, a rule-backed request and two independent
+reviewers, then claims its operation and executes canonicalization. The redirect
+is validated through the normal request/review/archive constraints; no constraints
+or triggers are disabled. All fixture rows and the admitted operation roll back.
+
+The pre-fix path emitted a PostgreSQL client warning from concurrent queries in
+manifest and request snapshots. These queries now await their shared client
+sequentially. The [pinned run](database/reference-merge-evidence.json) succeeds
+with zero concurrent-client warnings. This public slice supplies valid merged
+anchors for reference-consumer tests; it does not close the separate private
+manifest, full reconciliation or recovery obligations.

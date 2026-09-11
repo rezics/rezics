@@ -88,28 +88,26 @@ export async function buildUnitMergeManifest(
 		catch(cause) { if(cause instanceof CatalogAccessDenied) throw new ParticipationDenied(); throw cause; }
 	}
 	const ids = [source.id, target.id];
-	const [controls, selves, redirects, locks] = await Promise.all([
-		tx
-			.select({ id: entityParticipation.entityId })
-			.from(entityParticipation)
-			.where(inArray(entityParticipation.entityId, ids))
-			.limit(2),
-		tx
-			.select({ id: authEntity.entityId })
-			.from(authEntity)
-			.where(inArray(authEntity.entityId, ids))
-			.limit(2),
-		tx
-			.select({ id: unitMergeRedirect.sourceUnitId })
-			.from(unitMergeRedirect)
-			.where(inArray(unitMergeRedirect.sourceUnitId, ids))
-			.limit(2),
-		tx
-			.select({ id: unitMergeGraphLock.unitId, operationId: unitMergeGraphLock.operationId })
-			.from(unitMergeGraphLock)
-			.where(inArray(unitMergeGraphLock.unitId, ids))
-			.limit(2),
-	]);
+	const controls = await tx
+		.select({ id: entityParticipation.entityId })
+		.from(entityParticipation)
+		.where(inArray(entityParticipation.entityId, ids))
+		.limit(2);
+	const selves = await tx
+		.select({ id: authEntity.entityId })
+		.from(authEntity)
+		.where(inArray(authEntity.entityId, ids))
+		.limit(2);
+	const redirects = await tx
+		.select({ id: unitMergeRedirect.sourceUnitId })
+		.from(unitMergeRedirect)
+		.where(inArray(unitMergeRedirect.sourceUnitId, ids))
+		.limit(2);
+	const locks = await tx
+		.select({ id: unitMergeGraphLock.unitId, operationId: unitMergeGraphLock.operationId })
+		.from(unitMergeGraphLock)
+		.where(inArray(unitMergeGraphLock.unitId, ids))
+		.limit(2);
 	if (controls.length || selves.length) throw new UnitMergeKindIneligible();
 	if (redirects.length || locks.some((lock) => lock.operationId !== input.operationId))
 		throw new UnitMergeRequestConflict();

@@ -103,28 +103,21 @@ function manifestFromRow(row: RequestRow) {
 async function views(tx: DatabaseTransaction, rows: readonly RequestRow[]) {
 	if (!rows.length) return [];
 	const ids = rows.map((row) => row.id);
-	const [reviews, operations, rules] = await Promise.all([
-		tx
-			.select()
-			.from(unitMergeReview)
-			.where(inArray(unitMergeReview.requestId, ids))
-			.limit(ids.length * 2),
-		tx
-			.select()
-			.from(unitMergeOperation)
-			.where(inArray(unitMergeOperation.requestId, ids))
-			.limit(ids.length),
-		tx
-			.select()
-			.from(governanceDecisionRule)
-			.where(
-				inArray(
-					governanceDecisionRule.decisionId,
-					rows.map((row) => row.decisionId),
-				),
-			)
-			.limit(rows.length * 32),
-	]);
+	const reviews = await tx
+		.select()
+		.from(unitMergeReview)
+		.where(inArray(unitMergeReview.requestId, ids))
+		.limit(ids.length * 2);
+	const operations = await tx
+		.select()
+		.from(unitMergeOperation)
+		.where(inArray(unitMergeOperation.requestId, ids))
+		.limit(ids.length);
+	const rules = await tx
+		.select()
+		.from(governanceDecisionRule)
+		.where(inArray(governanceDecisionRule.decisionId, rows.map((row) => row.decisionId)))
+		.limit(rows.length * 32);
 	return rows.map((row) => {
 		const votes = reviews.filter((vote) => vote.requestId === row.id),
 			op = operations.find((op) => op.requestId === row.id);
