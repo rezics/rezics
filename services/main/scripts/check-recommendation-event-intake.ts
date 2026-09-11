@@ -16,6 +16,7 @@ import {
 	authEntity,
 	accountPreference,
 	recommendationEvent,
+	accountErasure,
 } from "../src/services/database/schema";
 import { ensureSelfEntityInTransaction } from "../src/services/auth/entity";
 import { Authorization } from "../src/services/authorization";
@@ -27,6 +28,13 @@ import {
 } from "../src/services/participation/policy";
 import { createRecommendationTracking } from "../src/services/recommendations/tracking";
 import { recordRecommendationEvents } from "../src/services/recommendations/events";
+import {
+	eraseOwnAccount,
+	dispatchAccountErasureBatch,
+} from "../src/services/participation/erasure";
+import { saveRecommendationExclusion } from "../src/services/recommendations/exclusions";
+import { findReferenceValueByNativeId } from "../src/services/units/reference-value";
+import { createMergedFixtureReference } from "./reference-merge-fixture";
 import { UnitNotFound } from "../src/services/units/errors";
 import { ValidationError } from "../src/services/api/errors";
 const target = new URL(process.env.DATABASE_URL ?? "http://invalid");
@@ -76,6 +84,7 @@ try {
 					owner.account.id,
 				),
 			);
+			const eventPolicy = `event-fixture:${crypto.randomUUID()}`;
 			function event(id = publicTarget.id) {
 				return {
 					id: crypto.randomUUID(),
@@ -86,7 +95,7 @@ try {
 						requestId: crypto.randomUUID(),
 						surface: "home_catalog",
 						position: 0,
-						policyVersion: "native_best_v1",
+						policyVersion: eventPolicy,
 					}),
 				};
 			}
@@ -106,6 +115,12 @@ try {
 				.from(recommendationEvent)
 				.where(eq(recommendationEvent.id, first.id));
 			assert.equal(stored?.authUserId, owner.account.id);
+			checks++;
+			assert.ok(stored);
+			const referenceReceipt = await tx.execute<{ target: string }>(sql`
+				select value.target_publishing_id as target from recommendation_event event
+				join reference_value value on value.id=event.target_reference_id where event.id=${first.id}::uuid`);
+			assert.equal(referenceReceipt.rows[0]?.target, publicTarget.id);
 			checks++;
 			await assert.rejects(
 				tx.transaction((nested) =>
@@ -171,6 +186,208 @@ try {
 					await tx.select().from(recommendationEvent).where(eq(recommendationEvent.id, optedOut.id))
 				)[0]?.authUserId,
 				null,
+			);
+			checks++;
+			const signals = async (id = publicTarget.id) =>
+				(
+					await tx.execute(sql`
+				select kind, signal_count::integer as count, weight from recommendation_unit_signal_hourly
+				where unit_id=${id}::uuid order by kind::text,bucket_start`)
+				).rows;
+			const metrics = async () =>
+				(
+					await tx.execute(sql`
+				select coalesce(sum(opens),0)::integer as opens,
+				coalesce(sum(not_interested),0)::integer as exclusions from recommendation_metric_daily
+				where policy_version=${eventPolicy}`)
+				).rows;
+			assert.deepEqual(await signals(), [{ kind: "open", count: 1, weight: 1 }]);
+			checks++;
+			assert.deepEqual(await metrics(), [{ opens: 3, exclusions: 0 }]);
+			checks++;
+			// Transport replay also deduplicates a new event UUID with the same observation key.
+			assert.equal(
+				(
+					await recordRecommendationEvents(tx, owner.authorization, [
+						{ ...first, id: crypto.randomUUID() },
+					])
+				).accepted,
+				0,
+			);
+			checks++;
+			assert.deepEqual(await metrics(), [{ opens: 3, exclusions: 0 }]);
+			checks++;
+			const shared = event();
+			await recordRecommendationEvents(tx, stranger.authorization, [shared]);
+			assert.equal(
+				(
+					await tx.select().from(recommendationEvent).where(eq(recommendationEvent.id, shared.id))
+				)[0]?.targetReferenceId,
+				stored.targetReferenceId,
+			);
+			checks++;
+			const exclusion = event();
+			await saveRecommendationExclusion(tx, stranger.authorization, publicTarget.id, {
+				eventId: exclusion.id,
+				requestId: exclusion.requestId,
+				surface: exclusion.surface,
+				position: 0,
+				policyVersion: eventPolicy,
+				occurredAt: exclusion.occurredAt,
+			});
+			const choice =
+				await tx.execute(sql`select target_reference_id as reference from recommendation_exclusion
+				where auth_user_id=${stranger.account.id}::uuid`);
+			assert.deepEqual(choice.rows, [{ reference: stored.targetReferenceId }]);
+			checks++;
+			assert.equal(
+				(
+					await tx
+						.select()
+						.from(recommendationEvent)
+						.where(eq(recommendationEvent.id, exclusion.id))
+				)[0]?.targetReferenceId,
+				stored.targetReferenceId,
+			);
+			checks++;
+			assert.deepEqual(
+				await signals(),
+				[
+					{ kind: "open", count: 2, weight: 2 },
+					{ kind: "not_interested", count: 1, weight: 0 },
+				].sort((a, b) => a.kind.localeCompare(b.kind)),
+			);
+			checks++;
+			assert.deepEqual(await metrics(), [{ opens: 4, exclusions: 1 }]);
+			checks++;
+			function sqlState(error: unknown): string | undefined {
+				if (!error || typeof error !== "object") return;
+				if ("code" in error && typeof error.code === "string") return error.code;
+				return "cause" in error ? sqlState(error.cause) : undefined;
+			}
+			await assert.rejects(
+				tx.transaction((nested) =>
+					nested.insert(recommendationEvent).values({
+						...stored,
+						id: crypto.randomUUID(),
+						requestId: crypto.randomUUID(),
+						targetReferenceId: crypto.randomUUID(),
+					}),
+				),
+				(error) => sqlState(error) === "23503",
+			);
+			checks++;
+			// A newly allocated CTE reference must be visible to the AFTER INSERT signal trigger.
+			const cteTarget = await runWithParticipationAuthority(owner.authority, () =>
+				createCatalogIdentity(
+					tx,
+					{ owner: "publishing", shape: "work", status: "published", visibility: "public" },
+					owner.account.id,
+				),
+			);
+			assert.equal(await findReferenceValueByNativeId(tx, cteTarget.id), undefined);
+			checks++;
+			await tx.execute(sql`with allocated as (
+				insert into reference_value(target_publishing_id) values(${cteTarget.id}::uuid) returning id
+			) insert into recommendation_event(auth_user_id,request_id,surface,type,target_reference_id,position,policy_version,occurred_at)
+			select ${stranger.account.id}::uuid,gen_random_uuid(),'home_catalog','dwell_30s',id,0,${eventPolicy},statement_timestamp() from allocated`);
+			assert.deepEqual(await signals(cteTarget.id), [{ kind: "dwell_30s", count: 1, weight: 2 }]);
+			checks++;
+			// Failed time validation rolls back an allocation made after successful target authorization.
+			const invalidTarget = await runWithParticipationAuthority(owner.authority, () =>
+				createCatalogIdentity(
+					tx,
+					{ owner: "publishing", shape: "work", status: "published", visibility: "public" },
+					owner.account.id,
+				),
+			);
+			await assert.rejects(
+				tx.transaction((nested) =>
+					recordRecommendationEvents(nested, owner.authorization, [
+						{ ...event(invalidTarget.id), occurredAt: new Date(Date.now() - 86401000) },
+					]),
+				),
+				ValidationError,
+			);
+			checks++;
+			assert.equal(await findReferenceValueByNativeId(tx, invalidTarget.id), undefined);
+			checks++;
+			const beforeErasure = {
+				signals: await signals(),
+				cte: await signals(cteTarget.id),
+				metrics: await metrics(),
+			};
+			await runWithParticipationAuthority(stranger.authority, () =>
+				eraseOwnAccount(tx, stranger.authority),
+			);
+			let complete = false;
+			for (let page = 0; page < 100; page++) {
+				await tx
+					.update(accountErasure)
+					.set({ availableAt: new Date(0) })
+					.where(eq(accountErasure.authUserId, stranger.account.id));
+				await dispatchAccountErasureBatch({ authUserId: stranger.account.id });
+				if (
+					(
+						await tx
+							.select()
+							.from(accountErasure)
+							.where(eq(accountErasure.authUserId, stranger.account.id))
+					)[0]?.stage === "complete"
+				) {
+					complete = true;
+					break;
+				}
+			}
+			assert.ok(complete, "Account erasure must complete through its actual worker");
+			checks++;
+			assert.equal(
+				(
+					await tx
+						.select()
+						.from(recommendationEvent)
+						.where(eq(recommendationEvent.authUserId, stranger.account.id))
+				).length,
+				0,
+			);
+			checks++;
+			assert.equal(
+				(await findReferenceValueByNativeId(tx, publicTarget.id))?.valueId,
+				stored.targetReferenceId,
+			);
+			checks++;
+			assert.equal(
+				(await tx.select().from(recommendationEvent).where(eq(recommendationEvent.id, first.id)))
+					.length,
+				1,
+			);
+			checks++;
+			assert.deepEqual(
+				{ signals: await signals(), cte: await signals(cteTarget.id), metrics: await metrics() },
+				beforeErasure,
+			);
+			checks++;
+			await tx.delete(recommendationEvent).where(eq(recommendationEvent.id, first.id));
+			assert.deepEqual(
+				{ signals: await signals(), cte: await signals(cteTarget.id), metrics: await metrics() },
+				beforeErasure,
+			);
+			checks++;
+			const merged = await createMergedFixtureReference(tx);
+			const lateObservation = event(merged.sourceId);
+			assert.equal(
+				(await recordRecommendationEvents(tx, new Authorization(undefined), [lateObservation]))
+					.accepted,
+				1,
+			);
+			checks++;
+			const originalTarget = await tx.execute(sql`select value.target_publishing_id as target
+				from recommendation_event event join reference_value value on value.id=event.target_reference_id
+				where event.id=${lateObservation.id}::uuid`);
+			assert.deepEqual(
+				originalTarget.rows,
+				[{ target: merged.sourceId }],
+				"A readable late observation retains its original merged identity",
 			);
 			checks++;
 			const stale = new Authorization(owner.self.id, owner.account.id, {
@@ -496,6 +713,24 @@ const startedBatch = performance.now();
 assert.equal((await send(batchTargets.map(eventFor), 200)).accepted, 100);
 checks++;
 const fullBatchMilliseconds = performance.now() - startedBatch;
+const storage = (
+	await database.execute(sql`select count(*)::integer as rows,
+	min(pg_column_size(event)) as min_tuple_bytes,max(pg_column_size(event)) as max_tuple_bytes,
+	avg(pg_column_size(event))::float8 as mean_tuple_bytes
+	from recommendation_event event join reference_value value on value.id=event.target_reference_id
+	where ${inArray(sql`value.target_publishing_id`, batchTargets)}`)
+).rows[0];
+assert.equal(storage?.rows, 100);
+checks++;
+const shape = (
+	await database.execute(sql`select
+	(select count(*)::integer from pg_index where indrelid='recommendation_event'::regclass) as indexes,
+	(select count(*)::integer from information_schema.columns where table_schema='public'
+	and table_name='recommendation_event' and column_name like 'target_unit%') as old_columns`)
+).rows[0];
+assert.deepEqual(shape, { indexes: 5, old_columns: 0 });
+checks++;
+
 const anon = eventFor(apiFixture.target.id);
 assert.equal((await send([anon], 200, false)).accepted, 1);
 checks++;
@@ -528,7 +763,12 @@ const repository = new URL("../../../", import.meta.url),
 	sourceDigests: Record<string, string> = {};
 for (const path of [
 	"services/main/scripts/check-recommendation-event-intake.ts",
+	"services/main/scripts/reference-merge-fixture.ts",
 	"services/main/src/services/recommendations/events.ts",
+	"services/main/src/services/recommendations/exclusions.ts",
+	"services/main/src/services/units/reference-value.ts",
+	"services/main/src/services/database/schema/recommendation.ts",
+	"services/main/src/services/database/schema/postgres/participation-private-state.sql",
 	"services/main/src/services/api/recommendations/index.ts",
 	"services/main/src/services/recommendations/policy.ts",
 	"services/main/src/services/database/migrations/atlas.sum",
@@ -553,8 +793,12 @@ console.info(
 		checks,
 		httpChecks,
 		fullBatchMilliseconds,
+		storage,
+		shape,
 		maxDistinctTargets: 100,
 		currentEventIntakeQualified: true,
+		canonicalEventReferencesQualified: true,
+		erasurePreservesAggregates: true,
 		rollbackScenarios: true,
 		orderedRaces: 5,
 		eventTimeRecheckedAfterWait: true,

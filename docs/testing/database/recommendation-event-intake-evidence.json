@@ -1,11 +1,16 @@
 {
-  "baseCommit": "1374b4daca6eda4240a1405b0e6755133f12dc42",
+  "baseCommit": "a5c8121c03ccc325c9137ef4d96afd8e159b5279",
   "sourceDigests": {
-    "services/main/scripts/check-recommendation-event-intake.ts": "fc646a49810aae5ad9a8cc5e7ef2369e35706ec876857e7a518aebd34f4e8efd",
-    "services/main/src/services/recommendations/events.ts": "44df78da6a835cc20a145606faeb038290e6b7641d171ca82931fb319e3f981e",
+    "services/main/scripts/check-recommendation-event-intake.ts": "d4c05d54a03d3fa72b892e672d5d4e1f2092ead4efd08bef0e9f4a84bbe2593c",
+    "services/main/scripts/reference-merge-fixture.ts": "9aa362e8550198f980a99a36f553659d49c05e17b2dacac3d8ee1229245db77e",
+    "services/main/src/services/recommendations/events.ts": "5e17a31f920637c7ae103debc648b91ef4fd10a63692cd761a542f6297c3044d",
+    "services/main/src/services/recommendations/exclusions.ts": "9c9c8ff19ca53742983bc0adabe87a5fef7e1c2f62dbee8f501c11e9a840dce9",
+    "services/main/src/services/units/reference-value.ts": "5338039b67802c0595cbf9f0fdf0bdaf5703d9276ba5a8df87f5460ade76890e",
+    "services/main/src/services/database/schema/recommendation.ts": "58f3ace540bda8881602a7843ce45eedc2b0f5040404b78d1e39796f343c218f",
+    "services/main/src/services/database/schema/postgres/participation-private-state.sql": "b838f4a5939bff46ec0bb443a851a592794b0c8d72be50e4f25c28c9de7f71ac",
     "services/main/src/services/api/recommendations/index.ts": "b6719ef6a52bf8bd2afdad14bb887168e569df74c1ad60a659b40db056899314",
     "services/main/src/services/recommendations/policy.ts": "15ed8415df06576fb8afee9ca034334f478062b7bd92c34096a42111a14bc0a6",
-    "services/main/src/services/database/migrations/atlas.sum": "919d501a2477edcdad92c2442716288636b323554fcc8a9b7a226b982e397c0e"
+    "services/main/src/services/database/migrations/atlas.sum": "ff1faf45b9d4da4d896b2de14fd2e25a12646a1fa8d82d000c9931bd35051967"
   },
   "node": "v26.8.2",
   "platform": "linux/x64",
@@ -13,21 +18,39 @@
     "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
     "default_isolation": "read committed"
   },
-  "checks": 30,
+  "checks": 55,
   "httpChecks": 9,
-  "fullBatchMilliseconds": 906.0372130000032,
+  "fullBatchMilliseconds": 1413.706269000002,
+  "storage": {
+    "rows": 100,
+    "min_tuple_bytes": 144,
+    "max_tuple_bytes": 144,
+    "mean_tuple_bytes": 144
+  },
+  "shape": {
+    "indexes": 5,
+    "old_columns": 0
+  },
   "maxDistinctTargets": 100,
   "currentEventIntakeQualified": true,
+  "canonicalEventReferencesQualified": true,
+  "erasurePreservesAggregates": true,
   "rollbackScenarios": true,
   "orderedRaces": 5,
   "eventTimeRecheckedAfterWait": true,
   "fixtureHistoryRetained": true,
   "verification": {
-    "mainTestFiles": 333,
-    "mainTests": 1790,
+    "mainTestFiles": 332,
+    "mainTests": 1787,
     "backendTypeScript": "passed",
-    "sdkTypeScript": "3 passed",
-    "webTypeScript": "passed",
-    "openApiGeneration": "passed"
+    "apiContract": "unchanged",
+    "freshInstall": {
+      "task": "services-main:db:check",
+      "migrations": 9,
+      "sqlStatements": 15924,
+      "result": "passed",
+      "schemaDrift": "none",
+      "canonicalIndexes": "healthy"
+    }
   }
 }

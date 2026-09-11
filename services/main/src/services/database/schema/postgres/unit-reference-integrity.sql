@@ -83,6 +83,7 @@ DROP TRIGGER IF EXISTS unit_reference_target_unit ON public.account_favorite_rev
 
 DROP TRIGGER IF EXISTS unit_reference_unit ON public.account_unit_tag;
 DROP TRIGGER IF EXISTS unit_reference_unit ON public.recommendation_exclusion;
+DROP TRIGGER IF EXISTS unit_reference_target_unit ON public.recommendation_event;
 
 -- Registered logical reference inputs.
 DO $$ DECLARE specification text; entry text[]; trigger_name text;
@@ -107,7 +108,6 @@ BEGIN
   'realm_tag_judgment_stat|unit_id|unit|required',
   'realm_unit|unit_id|unit|required',
   'realm_unit_status_event|unit_id|unit|required',
-  'recommendation_event|target_unit_id|target_unit|required',
   'recommendation_unit_signal_hourly|unit_id|unit|required',
   'score|unit_id|unit|required',
   'score_stat|unit_id|unit|required',

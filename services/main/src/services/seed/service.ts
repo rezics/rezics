@@ -2805,6 +2805,11 @@ async function seedRecommendations(
 		...content.rootPosts,
 		...content.reviews,
 	];
+	const references = new Map<string, string>();
+	for (const id of new Set(targets.map((target) => target.id))) {
+		const { reference } = await resolveRegisteredUnitReference(tx, id);
+		references.set(id, await allocateReferenceValue(tx, reference));
+	}
 	const surfaces = RecommendationSurfaceValues;
 	const eventTypes = ["impression", "open", "dwell_30s", "not_interested"] as const;
 	await writeBatches(
@@ -2816,12 +2821,14 @@ async function seedRecommendations(
 				target.createdAt,
 				...(seedProfile ? [seedProfile.createdAt] : []),
 			);
+			const referenceId = references.get(target.id);
+			if (!referenceId) throw new Error("Seed event target reference is missing");
 			return {
 				authUserId: seedProfile ? selfAuthUserIdForEntity(seedProfile.id) : null,
 				requestId: data.fakerByLanguage.en.string.uuid(),
 				surface: itemAt(surfaces, index),
 				type: itemAt(eventTypes, index * 3),
-				targetUnitId: target.id,
+				targetReferenceId: referenceId,
 				position: index % 100,
 				policyVersion: RecommendationPolicyVersion,
 				occurredAt,
@@ -2840,11 +2847,7 @@ async function seedRecommendations(
 			};
 		}),
 	);
-	const references = new Map<string, string>();
-	for (const id of new Set(exclusions.map((row) => row.unitId))) {
-		const { reference } = await resolveRegisteredUnitReference(tx, id);
-		references.set(id, await allocateReferenceValue(tx, reference));
-	}
+
 	await writeBatches(
 		exclusions.map(({ unitId, ...row }) => {
 			const targetReferenceId = references.get(unitId);

@@ -72,7 +72,7 @@ export async function saveRecommendationExclusion(
 			requestId: event.requestId,
 			surface: event.surface,
 			type: "not_interested",
-			targetUnitId,
+			targetReferenceId,
 			position: event.position,
 			policyVersion: event.policyVersion,
 			occurredAt: event.occurredAt,

@@ -31,7 +31,7 @@ Reference allocation uses a target-index lookup, `INSERT ... ON CONFLICT DO NOTH
 
 Favorites current entries and account-private history are generic identity consumers: each stores a restrictive REF, derives the native owner/id for responses and retains no independent target in its history payload. Saved previews remain private to their account; capturing a new preview requires current disclosure authority. Account erasure removes private content without deleting shared reference values.
 
-Private recommendation exclusions also store a restrictive REF, keyed with their Auth account. Their native-ID API and feed/recommendation predicates derive the target through the reference value; merge guards decode the same reference before rejecting a merged source. Event telemetry has its own reference-consumer contract and never writes exclusion membership.
+Private recommendation exclusions also store a restrictive REF, keyed with their Auth account. Their native-ID API and feed/recommendation predicates derive the target through the reference value; merge guards decode the same reference before rejecting a merged source. Event telemetry also stores a restrictive REF; its replay key is request/REF/type. It preserves the originally observed identity, including a readable merged source, and never writes exclusion membership. Signal triggers decode the native target; account erasure removes private events while aggregate retention remains independent.
 
 The initial identity bridge registry covers existing native owners; add the Document identity alternative when that owner is implemented. Exact revisions and occurrences use their separate bridges and complete composite keys as their owners become available, before dependent generic consumers are switched. Bridge existence never substitutes for those keys.
 
@@ -310,7 +310,7 @@ Account-private Tag current rows use a canonical target REF. The account/target/
 | unit_search_document / candidate / language index | Target REF, scope, language, current content/semantic REV, generation, searchable fields | Rebuildable; policy filter at disclosure; selected inverted and typed indexes only |
 | named-form / identifier / effective-fact search | Native keys + source REV/generation and normalized predicate | One semantic source; projection never edited as a fact |
 | recommendation_snapshot / partition | Snapshot/partition, input cut, algorithm version, cursor, completeness | Atomic active generation switch only after all partitions validate |
-| recommendation_event/exclusion/metric | Account/target/time event; private exclusions; aggregate inputs | Private activity retention separated; event dedupe; source scores kept identifiable |
+| recommendation_event/exclusion/metric | Account/REF/time event; private exclusions; aggregate inputs | Request/REF/type event dedupe; private event erasure preserves references and aggregate inputs; source scores kept identifiable |
 | unit_best_score / ranking | Target/scope/algorithm generation; deterministic tie breaker | Display ranking does not change native score history |
 | score/tag/reaction/reply/collection/Realm/notification/poll/conversation stats | Scope/target/metric generation and value | Recomputable, striped when hot; observed/approximate/exact meanings explicit |
 | content metrics / engagement hourly | Exact content REV and algorithm; time bucket/target | Not authored data; content changes invalidate incrementally |

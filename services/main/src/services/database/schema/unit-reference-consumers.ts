@@ -115,12 +115,6 @@ export const UnitReferenceConsumers = [
 		optional: false,
 	},
 	{
-		table: "recommendation_event",
-		id: "target_unit_id",
-		prefix: "target_unit",
-		optional: false,
-	},
-	{
 		table: "recommendation_unit_signal_hourly",
 		id: "unit_id",
 		prefix: "unit",

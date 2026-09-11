@@ -108,26 +108,18 @@ export const recommendationEvent = pgTable(
 		requestId: uuid().notNull(),
 		surface: recommendationSurface().notNull(),
 		type: recommendationEventType().notNull(),
-		targetUnitId: uuid().notNull(),
+		targetReferenceId: uuid()
+			.notNull()
+			.references(() => referenceValue.id, { onDelete: "restrict" }),
 		position: displayPosition().notNull(),
 		policyVersion: text().notNull(),
 		occurredAt: createTimestampMsColumn().notNull(),
 		createdAt: createCreatedAtColumn(),
-
-		...unitReferenceColumns("targetUnit", "cascade"),
 	},
 	(table) => [
-		...unitReferenceConstraints(
-			"recommendation_event",
-			"targetUnit",
-			table,
-			false,
-			table.targetUnitId,
-		),
-
 		unique("recommendation_event_request_target_type_key").on(
 			table.requestId,
-			table.targetUnitId,
+			table.targetReferenceId,
 			table.type,
 		),
 		index("recommendation_event_occurred_at_idx").on(table.occurredAt, table.id),
@@ -137,7 +129,7 @@ export const recommendationEvent = pgTable(
 			table.id.desc(),
 		),
 		index("recommendation_event_target_occurred_at_idx").on(
-			table.targetUnitId,
+			table.targetReferenceId,
 			table.occurredAt.desc(),
 		),
 		check("recommendation_event_position_check", sql`${table.position} between 0 and 999`),

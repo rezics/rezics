@@ -413,9 +413,10 @@ tuples. This supports the owner's 80-byte heap/144-byte index planning allowance
 for the measured distribution, without establishing production throughput. Scenario rows and merge jobs
 roll back; API/race actors remain only in the disposable target. The
 [recommendation owner](../../services/main/src/services/recommendations/README.md)
-records the account, reference, lookup and storage contracts. Tracking-event
-normalization, complete recommendation generation and 500M/3B load acceptance
-remain separate work.
+records the account, reference, lookup and storage contracts. See
+[recommendation verification](recommendations.md) for canonical event storage and
+generation/lifecycle cases. Cross-module delivery/recovery and 500M/3B load
+acceptance remain integration gates.
 
 ## Native merge review and reconciliation
 

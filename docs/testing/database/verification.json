@@ -25,7 +25,7 @@
     "backup/restore drill"
   ],
   "sha256": {
-    "current-schema-map.tsv": "4ce93f8b29b56895decab821f12068a37305774103c61e556d69792acee24c56",
+    "current-schema-map.tsv": "ffcb72f75d469744cc154eaabb9b9bf9671690ced5474af0c9a8ad104c4d73a1",
     "api-coverage.tsv": "58c2695b7e36c5ba5cd30c04728e1326c567cd19a2e51ae7b0f32c04ada7d999",
     "scenarios.tsv": "07738e2923baef54d4e4baebedc79b5b5dc25e2196685b51cd170c40f34c7cda",
     "capacity.json": "00565a116367dbdaee7cbddd4e1e0c8ace7be142546c0b46b436f1a32c8b23d4",
@@ -45,9 +45,9 @@
     "docs/architecture/database/ai-hub.md": "ccecae0e8f66d94644c6c5a56136628484375ff0eda43e4e914e3ed24d2e3050",
     "docs/architecture/database/catalog-model.md": "a74b2f049531d62f8c149310b48ef5c0d1053cb1fcfede064efbb759f0ab4992",
     "docs/architecture/database/creation.md": "7cd97242eb39b099a445934a6d345edfc4b45206f72a8f4bd626453e1af24cbd",
-    "docs/architecture/database/data-dictionary.md": "48312794d054b8cc38d6d9ddd36b5ee9c908bea8e0da84c633b752e7f57d0169",
+    "docs/architecture/database/data-dictionary.md": "e6b9a0ba787128cad5a6b1927ac784bfe58936843520d27d9070d20aca994a2e",
     "docs/architecture/database/relationship-graph.md": "f849ff42ecba6c161cb25c392cfc8ef65c51d5be1eacc718ee6b3aa06d3245ef",
-    "docs/plan/README.md": "9baaff9c1a9fd04b81e922bb657ca242997af363834190cb11f5e235500cbcd2",
+    "docs/plan/README.md": "70fd62cc589db97f61ef75e6cb06f11aa6ceba97cd455bfbe02904a7d880f492",
     "docs/plan/backend-acceptance.md": "13b3b8e23f05cf3d433dd1383a8f1f59f2a5d5586c2ea5413c0caa8ee7059199",
     "docs/plan/frontend.md": "60a94396354064d4de457964276c721e817bc9b7190ccae2678cb3f83284fabc",
     "docs/plan/modules/ai-hub.md": "b95b2996692fcef54d168477b80278214157257762b4fb7839b5918435aa677b",
@@ -65,9 +65,9 @@
     "docs/testing/ai-hub.md": "e26dbe58f28fe78b51a81bd54bfe47a7d267d97f6e18a15f46239bbb58f0c971",
     "docs/testing/backend-integration.md": "2e55da1a8997b9044e751a3df2106a69bcda952d49ba7f58962baa87716495bb",
     "docs/testing/book-and-creation.md": "91af6b8352c20c1e933fe68e8ff0d828464d94ab43e64b2d32491598d1cb5cef",
-    "docs/testing/foundation.md": "376129f5a4a8cac7dfbfb5b61ec62b5595a5ea073513b8125d79916918b04a92",
+    "docs/testing/foundation.md": "8a8236cfcac67f02c7669dc9a5323bdd9d008e820db1f14d7b0e1bc650a03d9b",
     "docs/testing/known-failures.md": "c3fede052cdfe910553fbaeabc549f330a81d5b24650f6a5b26b1a035a977f97",
-    "docs/testing/recommendations.md": "5bade811e3e4b7896252a437a89c7ca7c2c3cdc107601be4c6710fa482a33a0d",
+    "docs/testing/recommendations.md": "abf65f1e162038769a06a8167c43be231afb91f7af8a470c408add8f886a11aa",
     "docs/testing/relationship-graph.md": "7f3aaa37d76e80a9d2a5e54c9e2fa52102ba5830594121275ebefb278a5e2b91",
     "docs/testing/source-conformance.md": "36473ecd59994220f4bf3273631c84e5042e4a5abe81ba3666a047624b82beda",
     "docs/testing/database/check_design.py": "b67c19e215ee361d580f35448242de5aa31e88837f9a8fc024272b905fd8e466"

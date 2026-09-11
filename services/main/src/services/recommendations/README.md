@@ -24,8 +24,8 @@ arbitrary account whose exclusions should be read.
 Merged native targets remain forbidden for new live exclusions. The merge guard
 decodes a canonical reference before consulting the reviewed redirect, including
 references created in the same data-modifying statement. Its native-ID projection
-is not a permission check. Tracking events retain their separate native-ID
-storage until their own reference-consumer qualification.
+is not a permission check. Tracking events share the same canonical reference
+bridge while retaining their independent event identity and replay key.
 
 ## Workload and scale
 
@@ -167,14 +167,66 @@ current database statement after waits; tracking signatures, replay uniqueness
 and the one-day/five-minute time window remain enforced. A denied batch leaves no
 partial event insertion. The endpoint accepts at most 100 events/targets under a
 10-second total transaction deadline and returns current authority errors in its
-generated API contract. Target normalization remains separate reference-consumer
-work until event storage uses the canonical bridge.
+generated API contract. Every distinct authorized target allocates or reuses its
+immutable reference before the final deadline check, so allocation waits cannot
+bypass authority or event-freshness validation.
 
 [Event intake evidence](../../../../../docs/testing/recommendations.md#event-intake-authority)
 covers rollback cases, resource/Self/preference lock waits, both visibility commit
 orders, late event expiry, anonymous/opt-out attribution and a maximum-size HTTP
-batch. The measured 100-distinct-target batch took about 906 ms locally. This is
+batch. The measured 100-distinct-target batch took about 1,414 ms locally. This is
 not 500M/3B throughput evidence: bound work includes up to 100 routing/native owner
 and authority probes, row locks, event writes and derived metric/signal writes.
 The total deadline bounds stalled batches; corpus storage, hot-key concurrency
-and integration with erasure/retention still require their own workload evidence.
+and large erasure/retention backlogs still require their own workload evidence.
+
+## Event reference storage and cost
+
+An event stores one restrictive `target_reference_id`; it has no independent
+native target UUID or per-owner alternative columns. The API retains the observed
+native ID and signed tracking contract. Replay uniqueness is request/reference/type,
+while the event UUID independently deduplicates transport retries. Exclusion
+commands and the main seed service reuse the same bridge. A readable late event
+for a merged source preserves that original identity; it does not create a live
+exclusion or rewrite the source to its canonical destination.
+
+The signal trigger decodes the concrete native target from the reference. A new
+reference written in the same statement is visible to that trigger. Authenticated
+attribution supplies hourly signals; anonymous and opted-out events supply only
+daily metrics. Duplicate inserts add neither. Account erasure and event-log
+retention remove private records while preserving shared reference values and
+already accumulated aggregate signals/metrics. Aggregate retention is independent
+of the 90-day event log; the retained log alone is not a complete rebuild source.
+
+There are five event indexes: primary UUID, replay uniqueness, retention time/UUID,
+account/time/UUID, and reference/time. A write maintains these five entries, then
+updates one of 128 daily metric stripes and at most one hourly signal key. First
+use of a native target adds one shared reference allocation; repeat events perform
+a target-index lookup. The account/time and reference/time paths retain selective
+leading keys for erasure and reverse reads. The API's 100-event bound also bounds
+reference lookups/allocations and decoded signal probes. Event batches lock targets
+in sorted order; hot target/hour and metric-stripe contention still needs measured
+concurrent ingestion evidence under the ten-second transaction deadline.
+
+For the 500,000,000-row baseline and 3,000,000,000-row estimate, assume UUID accounts,
+a 16-byte policy label and the current fixed enums/position/timestamps. The
+100-row native API sample measured 144 bytes per tuple. Reserve
+192 heap bytes and 272 bytes for the five indexes per event, including ordinary
+page headroom: 232 GB/1.392 TB before WAL, replicas, bloat, temporary maintenance
+space and backups. Hourly signals and daily metrics are additional relations: budget
+their distinct target/hour/kind and day/surface/policy/shard populations separately.
+Longer policy labels add heap bytes and enlarge the separate metric keys. Shared references cost the foundation's 328 bytes per distinct
+lifetime target; a 10% new-reference fraction adds 16.4 GB/98.4 GB, giving
+248.4 GB/1.4904 TB for this standalone scenario. Account for the lifetime target
+union once across consumers, including references that outlive the event window.
+
+A steady 90-day population of 500M/3B events implies about 64.3/385.8 inserts and
+expirations per second. The maintenance schedule admits at most 10,000 event
+deletions per ten-second tick, an ideal ceiling of 1,000/s before its other work,
+locks and scheduling delay. This arithmetic does not prove sustainable ingestion,
+erasure or retention. Qualify peak/skew distributions and observe oldest expired
+event age, erasure backlog, allocation rate, WAL volume and commit latency. If
+cleanup cannot keep pace, first measure concurrent SKIP LOCKED drains and storage
+capacity; a later time-partitioned design must preserve global UUID/replay uniqueness
+and account erasure across retained partitions before cutover. The current local
+fixture does not qualify that deployment or the full M09 capacity gate.

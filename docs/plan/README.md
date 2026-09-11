@@ -42,7 +42,7 @@ Existing code provides foundations. The revised target has not passed G2-G4 mere
 
 | ID | Module | Dependencies | Design | Target persistence/API/integration |
 | --- | --- | --- | --- | --- |
-| M01 | [Foundation](modules/foundation.md) | None | Defined; reference allocation protocol specified | G2 in progress: [canonical reference storage, selected private consumers and authority protocols qualified](../testing/foundation.md); native private review/disclosure, reconciliation and selected worker recovery/current-executor fences qualified; reviewer authority and canonicalization/catalog-effect process recovery qualified; remaining recovery, consumers, revision/occurrence families, ownership/disclosure and other contracts pending |
+| M01 | [Foundation](modules/foundation.md) | None | Defined; reference allocation protocol specified | G2 in progress: [canonical reference storage, selected private/event consumers and authority protocols qualified](../testing/foundation.md); native private review/disclosure, reconciliation and selected worker recovery/current-executor fences qualified; reviewer authority and canonicalization/catalog-effect process recovery qualified; remaining recovery, consumers, revision/occurrence families, ownership/disclosure and other contracts pending |
 | M02 | [Knowledge and graph](modules/knowledge-and-graph.md) | M01 | Defined; graph query contract specified | Pending |
 | M03 | [Content and media](modules/content-and-media.md) | M01, M02 contracts | Defined | Pending |
 | M04 | [Catalog](modules/catalog.md) | M01, M02, M03 contracts | Defined; source-free grain cases required | Pending |
@@ -50,7 +50,7 @@ Existing code provides foundations. The revised target has not passed G2-G4 mere
 | M06 | [Community and governance](modules/community-and-governance.md) | M01-M03 | Defined; Realm/Collection/Zone wiki composition specified; Dynamic Collections optional | Pending |
 | M07 | [Sources and converters](modules/sources-and-converters.md) | M01-M04 native commands | Defined; full field conformance pending | Pending |
 | M08 | [Skill, Prompt and MCP Hub](modules/ai-hub.md) | M01-M04 | Catalog scope defined; execution/hosting questions open | Pending |
-| M09 | [Search and operations](modules/search-and-operations.md) | M01 and participating module events | Defined; known runtime failures open | G2 in progress: [snapshot generations, lifecycle, catalog reads and event-intake authority qualified](../testing/recommendations.md); [native crash capture verified](../../services/main/performance/README.md#native-failure-artifacts); remaining online disclosure, event delivery, capacity and restoration work pending |
+| M09 | [Search and operations](modules/search-and-operations.md) | M01 and participating module events | Defined; known runtime failures open | G2 in progress: [snapshot generations, lifecycle, catalog reads and canonical event intake qualified](../testing/recommendations.md); [native crash capture verified](../../services/main/performance/README.md#native-failure-artifacts); remaining online disclosure, event delivery, capacity and restoration work pending |
 
 G1 begins by reconciling the dictionary with Book/AO3, Graph API and Hub catalog requirements. Foundational harness work can proceed while independent Hub execution questions remain open. Do not declare an execution-enabled Hub complete without deciding and testing that scope.
 

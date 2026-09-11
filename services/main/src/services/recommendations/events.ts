@@ -14,6 +14,8 @@ import {
 	platformCapabilityGrant,
 } from "../database/schema";
 import { ParticipationDenied } from "../participation/policy";
+import { allocateReferenceValue } from "../units/reference-value";
+import { resolveRegisteredUnitReference } from "../units/reference";
 import { UnitNotFound } from "../units/errors";
 import { readUnitStateById } from "../units/query";
 import { ValidationError } from "../api/errors";
@@ -96,6 +98,11 @@ export async function recordRecommendationEvents(
 		if (decision.source === "platform")
 			platformGrants.push((await authorization.platform.ensureCapability("unit.edit", tx)).grantId);
 	}
+	const references = new Map<string, string>();
+	for (const id of targets) {
+		const { reference } = await resolveRegisteredUnitReference(tx, id);
+		references.set(id, await allocateReferenceValue(tx, reference));
+	}
 	const {
 		rows: [clock],
 	} = await tx.execute<{ now: Date; expired: boolean }>(sql`select statement_timestamp() as now,
@@ -113,17 +120,21 @@ export async function recordRecommendationEvents(
 	const inserted = await tx
 		.insert(recommendationEvent)
 		.values(
-			events.map((event) => ({
-				id: event.id,
-				authUserId: attribution,
-				requestId: event.requestId,
-				surface: event.surface,
-				type: event.type,
-				targetUnitId: event.targetUnitId,
-				position: event.position,
-				policyVersion: event.policyVersion,
-				occurredAt: event.occurredAt,
-			})),
+			events.map((event) => {
+				const targetReferenceId = references.get(event.targetUnitId);
+				if (!targetReferenceId) throw new Error("Authorized event reference is missing");
+				return {
+					id: event.id,
+					authUserId: attribution,
+					requestId: event.requestId,
+					surface: event.surface,
+					type: event.type,
+					targetReferenceId,
+					position: event.position,
+					policyVersion: event.policyVersion,
+					occurredAt: event.occurredAt,
+				};
+			}),
 		)
 		.onConflictDoNothing()
 		.returning({ id: recommendationEvent.id });

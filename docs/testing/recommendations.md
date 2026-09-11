@@ -106,17 +106,34 @@ HTTP requests after the anti-join change.
 
 `task services-main:db:recommendation-events:check` runs
 [check-recommendation-event-intake.ts](../../services/main/scripts/check-recommendation-event-intake.ts).
-The [pinned run](database/recommendation-event-intake-evidence.json) passes 30
+The [pinned run](database/recommendation-event-intake-evidence.json) passes 55
 assertions and nine HTTP requests. Transaction cases cover valid/replayed events,
 invalid signatures/time, all-or-nothing denied batches, anonymous and opted-out
 attribution, and stale/suspended Self bindings. Five exact-PID lock-wait cases
 exercise visibility before intake, intake before visibility, Self revision,
 personalization preference and event time expiring while the target is locked.
 
+Events, repeat observations and exclusions share the same canonical target
+reference. A missing reference is rejected by its FK, and failed late validation
+rolls back an allocated reference. A newly inserted CTE reference is visible to
+the event signal trigger. Replay through either event UUID or observation key
+cannot double-count signals or metrics. Anonymous/opted-out observations update
+metrics without attributed hourly signals. Actual account erasure completes,
+removes that account's events, and preserves other accounts, shared references
+and aggregates. Event deletion also leaves aggregate retention independent.
+A readable late observation after a real reviewed merge retains the source ID.
+
 The HTTP fixture checks actual request validation, the 101-item rejection and a
-100-distinct-target batch under the ten-second transaction deadline. It also
-verifies replay, anonymity, preference handling and private-target denial. Fixture
-transaction cases roll back; API/race records remain on the disposable target.
-Backend tests pass 333 files/1,790 tests; backend, all three SDKs and web TypeScript
-pass after generated error-contract updates. Event reference normalization and
-full delivery/erasure/scale acceptance remain separate work.
+100-distinct-target batch under the ten-second transaction deadline. That batch
+took 1,414 ms in the pinned run and stored 144-byte tuples. Event storage has five
+indexes and no old target-UUID/owner-alternative columns. These local measurements
+do not qualify peak ingestion or the 500M/3B storage estimates in the owner README.
+
+Fixture transaction cases roll back; API/race records remain on the disposable
+target. The fixture is included in the full fresh-install check, alongside the
+46-assertion/seven-request exclusion regression. Backend tests pass 332 files and
+1,787 tests; backend TypeScript passes. The event persistence refactor leaves the
+API contract unchanged. The full check installs nine migrations and 15,924 SQL
+statements, validates canonical SQL/integrity/index health, and finds no schema
+drift. Full delivery, large erasure/retention backlogs, restoration
+and corpus-scale acceptance remain in M09.

@@ -481,7 +481,7 @@ tasks:
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-recommendation-reads.ts
 
     db:recommendation-events:check:
-        desc: Verify current event intake authority, target/preference races, replay and maximum HTTP batches.
+        desc: Verify canonical event references, current authority, races, aggregate retention and maximum HTTP batches.
         cmds:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-recommendation-event-intake.ts
@@ -529,6 +529,10 @@ tasks:
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log
                 DATABASE_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/check-recommendation-references.ts
+            - >-
+                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log
+                DATABASE_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-recommendation-event-intake.ts
             - >-
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1
                 DATABASE_ADMIN_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
