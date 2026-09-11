@@ -96,3 +96,28 @@ meet the two-hour deadline, the old snapshot remains active and the build fails.
 Qualify more workers/read-write capacity first; a new physical partition layout
 requires corresponding schema, routing and policy qualification. Storage/WAL,
 retention, online privacy and recovery at 500M/3B remain explicit acceptance work.
+
+## Retention and runtime lifecycle
+
+Signal cleanup uses the same UTC-hour floor as snapshot admission. Between builds
+it retains the entire oldest bucket needed by the next admitted seven-day window;
+using a minute/second cutoff would erase part of that input. A building snapshot
+keeps its older watermark window until database finalization confirms a terminal
+state. A maintenance caller's later clock does not prove the database build has
+ended. Ready active scores remain protected during cleanup.
+
+[Lifecycle qualification](../../../../../docs/testing/recommendations.md#retention-and-runtime-lifecycle)
+checks those boundaries, expired/incomplete builds, 12-failure exhaustion and
+stale failure acknowledgements, the 16/17 retired-snapshot admission boundary,
+four-snapshot cleanup, actual refresh dispatch and the three-hour health cutoff.
+The fixture accelerates next-attempt scheduling only after checking the real
+computed backoff between two server timestamps; it does not rewrite failure
+counts, generations or receipts.
+
+Aligning the default retention boundary can retain less than one additional hour.
+For a uniform 168-hour population, reserve up to 1/168 (0.596%) additional signal
+rows and the same fraction of their heap/index footprint: about 2.98M rows at the
+500M baseline or 17.86M at 3B. This delays deletion and does not add ingestion
+writes. Active builds may already require a longer window under their declared
+lifetime. Range predicates and deletion limits remain unchanged. Skew, storage/WAL
+and actual deadline capacity still require the M09 workload gate.

@@ -5,7 +5,7 @@ Dependencies: M01 and module event contracts. Owners: database architecture sect
 ## Remaining work
 
 - Qualify policy-aware candidates, multilingual names/filters, relation constraints, facets and bounded pagination with explicit incomplete results.
-- Qualify recommendation generations, counters/metrics and source statistics without giving projections canonical authority.
+- Qualify recommendation online disclosure, counters/metrics and source statistics without giving projections canonical authority; extend retention evidence to large backlogs and process/restore boundaries.
 - Complete outbox/relay/consumer flows, receipts, permission/source/lease fences, bounded fan-out, quotas and reconciliation.
 - Reproduce and resolve native facet-search crashes; a successful small or JIT-off run is not stability evidence.
 - Complete merge/recommendation recovery, checkpointed export, backup/WAL/object reconciliation and erasure-frontier replay.

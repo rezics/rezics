@@ -34,6 +34,34 @@ The fixture observes both hard blockers and the known waiter chain, following
 [PostgreSQL's blocking-PID semantics](https://www.postgresql.org/docs/18/functions-info.html).
 Backend TypeScript passes. No production schema/runtime change is part of this
 qualification. The earlier unfinished second-snapshot observation is closed by
-these executable cases; worker scheduling, online disclosure, retention, failure
-exhaustion, admission backpressure, process/restore drills and 500M/3B workloads
-remain in M09.
+these executable cases. The lifecycle section below qualifies dispatcher, retention
+control, failure exhaustion and admission pressure. Host scheduling, online
+disclosure, large backlogs, process/restore drills and 500M/3B workloads remain in M09.
+
+## Retention and runtime lifecycle
+
+`task services-main:db:recommendation-lifecycle:check` runs
+[check-recommendation-lifecycle.ts](../../services/main/scripts/check-recommendation-lifecycle.ts).
+The [pinned run](database/recommendation-lifecycle-evidence.json) passes 175 assertions
+on native PostgreSQL. It retains the oldest UTC-hour bucket for upcoming builds,
+protects a building snapshot's older window, and confirms that a later maintenance
+clock cannot release that window while database finalization still returns building.
+Both pre-fix cases deleted required signal rows.
+
+Expired or incomplete builds preserve the previous active scores. Twelve actual
+failure commands exhaust a partition; duplicate and stale acknowledgements do
+not add failures or disturb a newer lease. Each computed exponential/clamped
+backoff is checked between server timestamps, then only scheduling is accelerated
+for the next attempt. Sixteen retired snapshots permit admission, seventeen block
+it, and one purge removes four before admission resumes.
+
+The real refresh wrapper advances four empty/small jobs per tick and completes
+64 partitions in sixteen ticks, preserving the prior active snapshot until
+activation. Cooldown returns idle afterward. Health is ready at exactly three
+hours and stale after that boundary. Maintenance preserves active scores even
+when other data is old enough to remove. The fixture retains only generated data
+on a disposable target. It does not qualify broker delivery, online disclosure,
+large retention batches, process/backup restore or corpus-scale throughput.
+
+The lifecycle repair passes backend tests (333 files/1,790 tests) and backend
+TypeScript. No schema migration is required.

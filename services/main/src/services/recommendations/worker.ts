@@ -13,13 +13,15 @@ export function dispatchRecommendationRefresh() {
 /** Each maintenance run has a fixed deletion budget. Backlogs remain visible and drain over later runs. */
 export async function purgeRecommendationData(now = new Date()) {
  const eventBoundary=new Date(now.getTime()-RecommendationPolicy.eventRetentionDays*86_400_000);
- let signalBoundary=new Date(now.getTime()-RecommendationPolicy.signalRetentionDays*86_400_000);
+ // Upcoming snapshots use a UTC-hour cut, so keep its entire oldest bucket even between builds.
+ const hourBoundary=Math.floor(now.getTime()/3_600_000)*3_600_000;
+ let signalBoundary=new Date(hourBoundary-RecommendationPolicy.signalRetentionDays*86_400_000);
  const [building]=await database.select({id:recommendationSnapshot.id,startedAt:recommendationSnapshot.startedAt,watermark:recommendationSnapshot.sourceWatermark})
   .from(recommendationSnapshot).where(eq(recommendationSnapshot.state,"building")).limit(1);
  if(building) {
-  if(building.startedAt.getTime()<=now.getTime()-RecommendationPolicy.buildDeadlineMs)
-   await finalizeRecommendationSnapshot(database,building.id);
-  else if(building.watermark)
+  const stillBuilding=building.startedAt.getTime()<=now.getTime()-RecommendationPolicy.buildDeadlineMs
+   ? await finalizeRecommendationSnapshot(database,building.id)==="building" : true;
+  if(stillBuilding && building.watermark)
    signalBoundary=new Date(Math.min(signalBoundary.getTime(),building.watermark.getTime()-RecommendationPolicy.bestWindowDays*86_400_000));
  }
  const snapshotBoundary=new Date(now.getTime()-RecommendationPolicy.snapshotRetentionHours*3_600_000);
