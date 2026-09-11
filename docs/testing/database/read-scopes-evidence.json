@@ -1,0 +1,37 @@
+{
+  "baseCommit": "1297ef2230af348e887ddb413f8d4e0f762828c3",
+  "sourceDigests": {
+    "services/main/scripts/check-unit-read-scopes.ts": "0e11b7ffc411ced173d5c7e7008732408aaaba12f3b3738588351d0887d5853a",
+    "services/main/scripts/unit-access-fixture.ts": "ef5a1ae902501a5232de2ebd1c19bc95a5c2fcb0631bed914188afe0fa79a5de",
+    "services/main/src/services/authorization/unit/authorization.ts": "c48d78603040709609468db7510f3cf46219e1aca1e40d91a05f5904fd5d1a6c",
+    "services/main/src/services/authorization/unit/query.ts": "b177053545b56d5f176d7279093a7f320dc40f4836045bf68c63e75033d9ad73",
+    "libraries/access/src/scope.ts": "d813777bc9cf86c66448ecd1541865a377619ce84fabc1fca0eb752132a55193",
+    "services/main/src/services/database/schema/access.ts": "fa0d5ba6d8a96efed8b61d03ddd8a12d113ea5e633c6fbab9a4f3c8e00077b72",
+    "services/main/src/services/database/migrations/atlas.sum": "5fb195c51729b80d46bc5465d58560f13de318049030c756b24a3ca1cd3ea33e"
+  },
+  "node": "v26.8.2",
+  "platform": "linux/x64",
+  "checks": 16,
+  "runtime": {
+    "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+  },
+  "allRowsRolledBack": true,
+  "verification": {
+    "command": "DATABASE_ADMIN_URL=<disposable target> task services-main:db:read-scopes:check",
+    "passed": true,
+    "schemaChanges": false,
+    "typecheckPassed": true,
+    "testFilesPassed": 332,
+    "testsPassed": 1788,
+    "privateLifecycleAssertions": 49,
+    "privateLifecycleRaces": 4,
+    "api": {
+      "script": "services/main/scripts/check-catalog-resource-api.ts",
+      "sourceSha256": "7bf36bb981e5c7c211ce37dbd7c14fb2bc18c11a8e0265a216b37ca0a37302b9",
+      "assertions": 181,
+      "createdCatalogResources": 16,
+      "createdPrivateCollection": true,
+      "passed": true
+    }
+  }
+}

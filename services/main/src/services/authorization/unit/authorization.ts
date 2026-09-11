@@ -304,7 +304,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 				),
 			);
 		const matched = grants
-			.filter((grant) => permission === "unit.read" || scopeCovers(grant.scope, scope))
+			.filter((grant) => scopeCovers(grant.scope, scope))
 			.sort(
 				(left, right) => right.scope.length - left.scope.length || left.id.localeCompare(right.id),
 			)[0];

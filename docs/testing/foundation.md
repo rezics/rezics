@@ -157,3 +157,21 @@ seven shared buffers. Without the projection index, the same query used 302 and
 scanned the private Tag and reference tables; the earlier reference fixture adds
 to the reference-table sample in this full run. These are small warm-cache query
 observations, not throughput claims at either capacity baseline.
+
+## Scoped resource reads
+
+`task services-main:db:read-scopes:check` runs
+[check-unit-read-scopes.ts](../../services/main/scripts/check-unit-read-scopes.ts).
+The regression originally admitted a root read from a descendant-only grant,
+while the root list predicate denied it. The fixture now covers 16 decisions:
+root/ancestor/sibling denial, matching descendants, narrower restrictions,
+authenticated audiences, anonymous denial, and explicit root/ownership authority.
+The [pinned run](database/read-scopes-evidence.json) uses real PostgreSQL and rolls back its rows. Schema/migration changes are not
+required for this policy correction.
+
+[The resource API fixture](../../services/main/scripts/check-catalog-resource-api.ts)
+creates a private Collection, grants a descendant scope through the governance
+API, verifies the recipient receives 404 for full Collection detail and a denied
+root access decision, then grants root read access and verifies both endpoints
+allow it. All requests use the ID produced by Collection creation. The expanded
+fixture passes 181 assertions alongside its 16 native catalog resources.

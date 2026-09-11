@@ -122,6 +122,72 @@ async function create(
 try {
 	const owner = await actor("Private catalog fixture account"),
 		delegate = await actor("Private delegated fixture account");
+	const privateCollection = z.object({ id: z.uuid() }).parse(
+		await request(
+			"POST",
+			"/collections",
+			{
+				visibility: "private",
+				localization: { language: "en", title: "Private scoped Collection" },
+			},
+			200,
+			owner.cookie,
+		),
+	);
+	const collectionPath = `/collections/${privateCollection.id}`;
+	const collectionAccessPath = `/governance/unit/${privateCollection.id}/access`;
+	const readDecision = (value: unknown) =>
+		z
+			.object({
+				decisions: z.array(
+					z.object({
+						permission: z.string(),
+						decision: z.object({ allowed: z.boolean() }).passthrough(),
+					}),
+				),
+			})
+			.parse(value)
+			.decisions.find((row) => row.permission === "unit.read")?.decision.allowed;
+	await request(
+		"PUT",
+		collectionAccessPath,
+		{
+			subject: { kind: "auth", authUserId: delegate.account.id },
+			grants: ["unit.read"],
+			restrictions: [],
+			scope: ["section", "one"],
+		},
+		200,
+		owner.cookie,
+	);
+	await request("GET", collectionPath, undefined, 404, delegate.cookie);
+	assert.equal(
+		readDecision(
+			await request("GET", `${collectionAccessPath}/effective`, undefined, 200, delegate.cookie),
+		),
+		false,
+	);
+	assertions++;
+	await request(
+		"PUT",
+		collectionAccessPath,
+		{
+			subject: { kind: "auth", authUserId: delegate.account.id },
+			grants: ["unit.read"],
+			restrictions: [],
+			scope: [],
+		},
+		200,
+		owner.cookie,
+	);
+	await request("GET", collectionPath, undefined, 200, delegate.cookie);
+	assert.equal(
+		readDecision(
+			await request("GET", `${collectionAccessPath}/effective`, undefined, 200, delegate.cookie),
+		),
+		true,
+	);
+	assertions++;
 	await request(
 		"POST",
 		"/catalog/resources",

@@ -93,3 +93,17 @@ unique key bounds unrevoked candidates to one per account/capability; an expirin
 grant adds one constant-time SQL statement and one round trip, with no additional table
 scan. Monitor authorization latency and lock wait; the focused fixture is not sustained-load
 or whole-authority-graph acceptance.
+
+## Read scopes
+
+`unit.read` uses the same ancestor-prefix rule as other scoped permissions. A
+read grant for `section/one` permits that scope and its descendants, not the
+resource root, `section` or sibling paths. Full resource detail/list reads require
+root read authority; a descendant grant is not a whole-resource disclosure.
+Ownership and platform recovery precedence remain unchanged, and matching
+restrictions still override ordinary grants.
+
+The decision reuses the bounded-depth scope comparison (at most eight segments).
+It adds no SQL, storage or indexes and filters candidates before the existing
+specificity sort. This change does not qualify unbounded authority-graph fan-out
+or alter the existing 500M/3B workload assumptions.
