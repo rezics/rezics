@@ -1,4 +1,8 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import { setTimeout } from "node:timers/promises";
 import { serializeSignedCookie } from "better-call";
 import { and, eq, inArray, sql } from "drizzle-orm";
@@ -157,11 +161,11 @@ function deferred<T>() {
 	});
 	return { promise, resolve };
 }
-async function waitForBlocked(pid: number) {
+async function waitForBlocked(pid: number, blockerPid: number) {
 	for (let index = 0; index < 100; index++) {
 		const result = await racePool.query<{ blocked: boolean }>(
-			"select cardinality(pg_blocking_pids($1)) > 0 as blocked",
-			[pid],
+			"select $2::integer = any(pg_blocking_pids($1)) as blocked",
+			[pid, blockerPid],
 		);
 		if (result.rows[0]?.blocked) {
 			assertions++;
@@ -349,15 +353,13 @@ try {
 	);
 	await rejected(
 		database.transaction((tx) =>
-			tx
-				.insert(organizationMembership)
-				.values({
-					organizationEntityId: organization.entityId,
-					memberAuthUserId: alice.account.id,
-					memberEntityId: alice.self.id,
-					acceptedInvitationId: invitation.id,
-					joinedAt: new Date(),
-				}),
+			tx.insert(organizationMembership).values({
+				organizationEntityId: organization.entityId,
+				memberAuthUserId: alice.account.id,
+				memberEntityId: alice.self.id,
+				acceptedInvitationId: invitation.id,
+				joinedAt: new Date(),
+			}),
 		),
 	);
 	const beforeGrants = await database
@@ -566,12 +568,14 @@ try {
 	);
 
 	// Acceptance completes before revocation: the revoker must wait for the committed effect.
-	const acceptedBeforeRevoke = deferred<void>(),
+	const acceptedBeforeRevoke = deferred<number>(),
 		releaseAcceptance = deferred<void>(),
 		revokerPid = deferred<number>();
 	const accepting = raceDatabase.transaction(async (tx) => {
 		await acceptMembershipInvitation(tx, bob.authority, afterExpiry.id, 1);
-		acceptedBeforeRevoke.resolve();
+		acceptedBeforeRevoke.resolve(
+			(await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`)).rows[0]!.pid,
+		);
 		await releaseAcceptance.promise;
 	});
 	await Promise.race([acceptedBeforeRevoke.promise, accepting]);
@@ -586,7 +590,7 @@ try {
 		);
 	});
 	try {
-		await waitForBlocked(await revokerPid.promise);
+		await waitForBlocked(await revokerPid.promise, await acceptedBeforeRevoke.promise);
 	} finally {
 		releaseAcceptance.resolve();
 	}
@@ -617,7 +621,7 @@ try {
 	);
 	const replacement = { actingEntityId: organization.entityId, grant: replacementGrant };
 	const deniedInvitation = await invite(owner, replacement, carol);
-	const revokedBeforeAcceptance = deferred<void>(),
+	const revokedBeforeAcceptance = deferred<number>(),
 		releaseRevocation = deferred<void>(),
 		accepterPid = deferred<number>();
 	const revokeFirst = raceDatabase.transaction(async (tx) => {
@@ -627,7 +631,9 @@ try {
 			replacementGrant.id,
 			replacementGrant.revision,
 		);
-		revokedBeforeAcceptance.resolve();
+		revokedBeforeAcceptance.resolve(
+			(await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`)).rows[0]!.pid,
+		);
 		await releaseRevocation.promise;
 	});
 	await Promise.race([revokedBeforeAcceptance.promise, revokeFirst]);
@@ -638,7 +644,7 @@ try {
 	});
 	const deniedAccept = assert.rejects(acceptAfter);
 	try {
-		await waitForBlocked(await accepterPid.promise);
+		await waitForBlocked(await accepterPid.promise, await revokedBeforeAcceptance.promise);
 	} finally {
 		releaseRevocation.resolve();
 	}
@@ -730,9 +736,40 @@ try {
 		0,
 		"Own erasure removes received invitations after dependent history",
 	);
+	const repository = new URL("../../../", import.meta.url);
+	const sourceDigests: Record<string, string> = {};
+	for (const path of [
+		"services/main/Taskfile.yml",
+		"services/main/scripts/check-organization-membership.ts",
+		"services/main/src/services/participation/membership.ts",
+		"services/main/src/services/participation/membership-contracts.ts",
+		"services/main/src/services/participation/commands.ts",
+		"services/main/src/services/participation/policy.ts",
+		"services/main/src/services/participation/organizations.ts",
+		"services/main/src/services/participation/erasure.ts",
+		"services/main/src/services/api/participation/membership.ts",
+		"services/main/src/services/auth/entity.ts",
+		"services/main/src/services/database/schema/organization-membership.ts",
+		"services/main/src/services/database/schema/postgres/organization-membership.sql",
+		"services/main/src/services/database/migrations/atlas.sum",
+	])
+		sourceDigests[path] = createHash("sha256")
+			.update(await readFile(new URL(path, repository)))
+			.digest("hex");
+	const runtime = await database.execute(
+		sql`select version() as postgres, current_setting('default_transaction_isolation') as default_isolation`,
+	);
 	console.info(
 		JSON.stringify({
 			check: "organization-membership",
+			baseCommit: execFileSync("git", ["rev-parse", "HEAD"], {
+				cwd: fileURLToPath(repository),
+				encoding: "utf8",
+			}).trim(),
+			sourceDigests,
+			node: process.version,
+			platform: `${process.platform}/${process.arch}`,
+			runtime: runtime.rows[0],
 			assertions,
 			signedSessionHttp: true,
 			crossConnectionRevocationRaces: true,

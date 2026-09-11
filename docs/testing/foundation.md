@@ -185,3 +185,27 @@ the private Auth value. The fixture also rejects concurrent-query warnings from
 a single PostgreSQL client; snapshot reads now await their shared-client queries.
 The [pinned API run](database/access-snapshot-evidence.json) passes 184 assertions. These checks cover the access
 snapshot's label and transaction behavior, not all private-data disclosure paths.
+
+## Controlled organization membership
+
+`task services-main:db:membership:check` runs
+[check-organization-membership.ts](../../services/main/scripts/check-organization-membership.ts)
+on the retained disposable native target. It uses signed sessions, actual HTTP
+responses and PostgreSQL writes, with two connections for each revocation order.
+The blocking probe identifies the exact expected transaction. The [pinned run](database/membership-evidence.json) passes 76 assertions and completes private fixture cleanup.
+
+Cases cover exact membership-manager authority, separation from publishing,
+security and catalog editing, no automatic controller enrollment, private inboxes,
+public recipient identities, repeated pending invitations, recipient-only consent,
+stale revisions, removal/rejoin/leave history, decline/cancel/expiry terminal
+states, and both accept-before-revoke and revoke-before-accept outcomes. Accepted
+membership adds no control grants. Sender erasure preserves another account's
+accepted membership; member erasure removes its private membership/event/invitation
+state. No invitation email or message is delivered.
+
+The fixture erases its four dummy accounts' private state at completion and retains
+only permitted public/operator records in the disposable database. This qualifies
+the tested lifecycle protocols; organization-generation recovery/suspension,
+invitation-capacity saturation and 500M/3B load remain separate acceptance cases.
+The [membership owner](../../services/main/src/services/participation/organization-membership.md)
+retains the 1,000-pending limits, storage estimates and workload assumptions.

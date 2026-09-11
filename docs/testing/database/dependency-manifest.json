@@ -56,6 +56,7 @@
     "docs/testing/database/current-schema-map.tsv",
     "docs/testing/database/dependency-manifest.json",
     "docs/testing/database/favorites-evidence.json",
+    "docs/testing/database/membership-evidence.json",
     "docs/testing/database/participation-evidence.json",
     "docs/testing/database/read-scopes-evidence.json",
     "docs/testing/database/reference-values-evidence.json",
@@ -70,6 +71,7 @@
     "services/main/scripts/check-access-expiry.ts",
     "services/main/scripts/check-account-tag-references.ts",
     "services/main/scripts/check-catalog-resource-api.ts",
+    "services/main/scripts/check-organization-membership.ts",
     "services/main/scripts/check-participation-authority.ts",
     "services/main/scripts/check-private-account-lifecycle.ts",
     "services/main/scripts/check-reference-values.ts",
@@ -79,7 +81,8 @@
     "services/main/src/services/catalog/source-contracts/artifacts.json",
     "services/main/src/services/catalog/source-contracts/fields.jsonl",
     "services/main/src/services/filter/README.md",
-    "services/main/src/services/participation/README.md"
+    "services/main/src/services/participation/README.md",
+    "services/main/src/services/participation/organization-membership.md"
   ],
   "schema_inputs": [
     "services/main/src/services/database/schema/access.ts",

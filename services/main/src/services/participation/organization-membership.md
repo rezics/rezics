@@ -80,5 +80,7 @@ membership/inbox cutover must be qualified before sharding; no unchecked
 polymorphic relation replaces these constraints. No 500M/3B throughput claim is
 made from the local SQL fixture.
 
-Implementation and SQL/race verification are in progress. Central migration and
-SDK generation own activation of the new source schema.
+The [foundation fixture workflow](../../../../../docs/testing/foundation.md#controlled-organization-membership)
+records executable lifecycle/API/race evidence and its qualification boundaries.
+Use the installed native baseline and forward migrations; generated contracts
+remain owned by their existing OpenAPI/SDK tasks.

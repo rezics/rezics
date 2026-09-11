@@ -1,0 +1,38 @@
+{
+  "check": "organization-membership",
+  "baseCommit": "afb38538d885308b2e29e2be610f27cf5a3814d8",
+  "sourceDigests": {
+    "services/main/Taskfile.yml": "75a71c524a07e37128e1a7fde99fd36b7f9cf369077884025fcfd28dea297b34",
+    "services/main/scripts/check-organization-membership.ts": "ad117d0ca2641f85311a02daf97d9603a1b422e881586c8f777952ce940ab09b",
+    "services/main/src/services/participation/membership.ts": "6d3b4df9120905d9c302f660769109b84ac83bb77296cc4e2992901ce1f55a30",
+    "services/main/src/services/participation/membership-contracts.ts": "3562b08ef9c211ba1be8de15237c705d9582d4247752a5f2ab27431546d536c0",
+    "services/main/src/services/participation/commands.ts": "f4075fd4277bc256461d5b6542d866d1c3890dbfd84323c1b7247ef30cfebd36",
+    "services/main/src/services/participation/policy.ts": "72fca3598c299c53628403ec66ac540a48081369f7d94340a16f474bc775ad2a",
+    "services/main/src/services/participation/organizations.ts": "4bb41839c96194bb0824c36200a70f551d4cfac61572c6d3218eaee06b4a0bd1",
+    "services/main/src/services/participation/erasure.ts": "3505702946023a598f27b5e0975fe6ea3078e666093c287d6c4c859b1e1a2135",
+    "services/main/src/services/api/participation/membership.ts": "db11303b3295d286716687d419e5e0dd88cbd321e3e0d0114a286a01c83ec565",
+    "services/main/src/services/auth/entity.ts": "94e43fc866b18c05fd314df5f1ffc5d535d2b2a29aa567546eee641cdc532eb6",
+    "services/main/src/services/database/schema/organization-membership.ts": "572fb135e83efc73095aaba1538df32f23710d4d61ec2c5f9b99907816aedc9f",
+    "services/main/src/services/database/schema/postgres/organization-membership.sql": "b70991055610f48ce5efee495e9dcdaf8b49265598cd8383add61ac7ab6b89ef",
+    "services/main/src/services/database/migrations/atlas.sum": "5fb195c51729b80d46bc5465d58560f13de318049030c756b24a3ca1cd3ea33e"
+  },
+  "node": "v26.8.2",
+  "platform": "linux/x64",
+  "runtime": {
+    "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "default_isolation": "read committed"
+  },
+  "assertions": 76,
+  "signedSessionHttp": true,
+  "crossConnectionRevocationRaces": true,
+  "noEmailOrMessageDelivery": true,
+  "disposablePublicAuditFixtures": 4,
+  "verification": {
+    "command": "DATABASE_ADMIN_URL=<disposable target> task services-main:db:membership:check",
+    "passed": true,
+    "exactBlockingTransactionsObserved": true,
+    "privateCleanupPassed": true,
+    "typecheckPassed": true,
+    "schemaChanges": false
+  }
+}

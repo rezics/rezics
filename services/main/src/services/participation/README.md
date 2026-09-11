@@ -220,8 +220,8 @@ Web and localization TypeScript, localization policy and 42 non-rendering Web
 checks passed for this checkpoint. These are code-integrity results, not browser
 or visual acceptance. The foundation fixtures separately qualify native Favorites targets and selected
 participation protocols; broader authority/disclosure acceptance remains open. Organization roster
-membership is a separate lifecycle; no publication/security privilege is inferred
-from that future relation or from a sourced catalog membership.
+[membership](organization-membership.md) is a separate consent lifecycle; no
+publication/security privilege is inferred from it or from a sourced catalog membership.
 
 Favorites now has its own `/favorites` API and three Auth-owned relations:
 `account_favorite`, `account_favorite_revision`, and `account_favorites_state`.
