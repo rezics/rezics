@@ -141,3 +141,21 @@ Reserve space for a backend's dumped address space plus the copied artifact when
 running crash experiments. Copying has a 60-second deadline and reports failure
 explicitly; retain the owned container with `--keep` when further native inspection
 is needed. Core size follows process memory and workload, not just catalog rows.
+
+
+## SQL replay integrity
+
+Each SQL replay copies the current generated scripts into the container directory,
+including when a dataset is reused. Docker's [directory-content copy syntax](https://docs.docker.com/reference/cli/docker/container/cp/)
+avoids nesting the new directory beneath old scripts. Only filenames selected for
+the current workload are passed to pgbench. Native stdout/stderr is written to
+`pgbench.log` even when pgbench exits with an error; errors remain failed runs.
+
+`task services-main:performance:sql-replay:check` runs a separate scratch PostgreSQL
+container and replays a valid query, a changed division-by-zero query, and another
+valid query through the actual helper. The [pinned run](../../../docs/testing/database/performance-sql-replay-evidence.json)
+passes four assertions: the changed query fails, its native error log survives,
+and a subsequent valid script succeeds. Before the repair, the changed invalid
+query falsely passed because the container still executed the first script.
+No application schema is installed in this fixture. This qualifies replay input
+and failure capture, not application query latency or corpus capacity.

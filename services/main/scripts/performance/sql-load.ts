@@ -51,26 +51,41 @@ export async function runSqlLoad(
 		);
 		files.push(`/tmp/rezics-pgbench/${filename}`);
 	}
-	await exec("docker", ["cp", directory, `${container}:/tmp/rezics-pgbench`], {
+	await exec("docker", ["exec", container, "mkdir", "-p", "/tmp/rezics-pgbench"], {
 		windowsHide: true,
 	});
-	const result = await exec(
-		"docker",
-		[
-			"exec",
-			container,
-			"pgbench",
-			"--no-vacuum",
-			"--client=4",
-			"--jobs=2",
-			"--time=10",
-			"--username=rezics_perf_reader",
-			"--dbname=rezics_performance",
-			...files.flatMap((file) => ["--file", file]),
-		],
-		{ windowsHide: true, timeout: 120_000, maxBuffer: 4 * 1024 * 1024 },
-	);
-	const log = result.stdout + result.stderr;
+	await exec("docker", ["cp", `${directory}/.`, `${container}:/tmp/rezics-pgbench/`], {
+		windowsHide: true,
+	});
+	let log: string;
+	try {
+		const result = await exec(
+			"docker",
+			[
+				"exec",
+				container,
+				"pgbench",
+				"--no-vacuum",
+				"--client=4",
+				"--jobs=2",
+				"--time=10",
+				"--username=rezics_perf_reader",
+				"--dbname=rezics_performance",
+				...files.flatMap((file) => ["--file", file]),
+			],
+			{ windowsHide: true, timeout: 120_000, maxBuffer: 4 * 1024 * 1024 },
+		);
+		log = result.stdout + result.stderr;
+	} catch (error) {
+		const nativeLog =
+			error && typeof error === "object"
+				? [Reflect.get(error, "stdout"), Reflect.get(error, "stderr")]
+						.filter((value) => typeof value === "string")
+						.join("")
+				: String(error);
+		await writeFile(resolve(output, "pgbench.log"), nativeLog);
+		throw error;
+	}
 	await writeFile(resolve(output, "pgbench.log"), log);
 	const failed = /number of failed transactions:\s*(\d+)/i.exec(log)?.[1];
 	if (failed === undefined || Number(failed) !== 0 || /\bERROR:/i.test(log))

@@ -1,0 +1,19 @@
+{
+  "runId": "2405d6ed74ce67e2",
+  "checks": 4,
+  "reusedContainerUsesCurrentSql": true,
+  "failedNativeLogRetained": true,
+  "changedSqlRejected": true,
+  "laterValidSqlRecovers": true,
+  "applicationSchemaInstalled": false,
+  "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+  "baseCommit": "e6cbddf770f08c1bda2d0a184cc8b28217830d90",
+  "sourceDigests": {
+    "services/main/scripts/performance/sql-load.ts": "fd2e5ddb81999769d1b6e1605467a1557dcb927051bfee6999dc82a753414bb2",
+    "services/main/scripts/check-performance-sql-replay.ts": "4154da20bf43ac47d19b5bad8c699cd6edd0a0d995e0623eca6730a9116a2a69"
+  },
+  "verification": {
+    "performanceFrameworkTests": 7,
+    "backendTypeScript": "passed"
+  }
+}

@@ -124,6 +124,11 @@ tasks:
         cmds:
             - yarn exec tsx scripts/check-performance-diagnostics.ts
 
+    performance:sql-replay:check:
+        desc: Verify changed SQL and failed native logs when reusing a scratch performance container.
+        cmds:
+            - yarn exec tsx scripts/check-performance-sql-replay.ts
+
     performance:check:
         desc: Check performance harness integrity without creating data or starting servers.
         dir: ../..
