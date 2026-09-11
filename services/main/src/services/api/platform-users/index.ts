@@ -107,11 +107,10 @@ export default new Elysia({ prefix: "/platform-users" })
 			},
 			detail: { summary: "Replace a platform user account state", tags: ["Platform Users"] },
 		},
-		async ({ authorization, entity, user, params, body }) => {
+		async ({ authorization, params, body }) => {
 			await authorization.platform.ensureCapability("platform.user.status.update");
 			return replacePlatformUserAccountState({
-				actorProfileId: entity.id,
-				actorUserId: user.id,
+				authorization,
 				targetUserId: params.userId,
 				command: body,
 			});
@@ -151,10 +150,10 @@ export default new Elysia({ prefix: "/platform-users" })
 			},
 			detail: { summary: "Revoke a platform user session", tags: ["Platform Users"] },
 		},
-		async ({ authorization, entity, params }) => {
+		async ({ authorization, params }) => {
 			await authorization.platform.ensureCapability("platform.session.revoke");
 			return revokePlatformUserSession({
-				actorProfileId: entity.id,
+				authorization,
 				targetUserId: params.userId,
 				sessionId: params.sessionId,
 			});
@@ -173,10 +172,10 @@ export default new Elysia({ prefix: "/platform-users" })
 			},
 			detail: { summary: "Revoke all platform user sessions", tags: ["Platform Users"] },
 		},
-		async ({ authorization, entity, params }) => {
+		async ({ authorization, params }) => {
 			await authorization.platform.ensureCapability("platform.session.revoke");
 			return revokeAllPlatformUserSessions({
-				actorProfileId: entity.id,
+				authorization,
 				targetUserId: params.userId,
 			});
 		},

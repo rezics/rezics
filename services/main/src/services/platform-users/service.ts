@@ -11,7 +11,13 @@ import {
 } from "../api/users/errors";
 import { recordAuditEvent } from "../audit";
 import { effectiveAccountState, type AccountStateRecord } from "../auth/account-state";
-import { grantingPlatformCapabilities } from "../authorization/platform/policy";
+import type { Authorization } from "../authorization";
+import { PlatformCapabilityRequired } from "../authorization/errors";
+import {
+	grantingPlatformCapabilities,
+	type PlatformCapability,
+} from "../authorization/platform/policy";
+import { lockPlatformAccess } from "../platform-access";
 import { exactCount, lowerBoundCount } from "../counts/contract";
 import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
 import {
@@ -62,7 +68,7 @@ const accountIsActive = or(
 	eq(userAccountState.state, "active"),
 	and(
 		eq(userAccountState.state, "suspended"),
-		sql`${userAccountState.expiresAt} is not null and ${userAccountState.expiresAt} <= now()`,
+		sql`${userAccountState.expiresAt} is not null and ${userAccountState.expiresAt} <= statement_timestamp()`,
 	),
 );
 
@@ -71,7 +77,10 @@ function statePredicate(state: UserAccountState): SQL {
 	if (state === "closed") return eq(userAccountState.state, "closed");
 	return and(
 		eq(userAccountState.state, "suspended"),
-		or(isNull(userAccountState.expiresAt), sql`${userAccountState.expiresAt} > now()`),
+		or(
+			isNull(userAccountState.expiresAt),
+			sql`${userAccountState.expiresAt} > statement_timestamp()`,
+		),
 	)!;
 }
 
@@ -93,7 +102,7 @@ const userSelection = {
 		from (
 			select 1 from ${sessions}
 			where ${sessions.userId} = ${users.id}
-				and ${sessions.expiresAt} > now()
+				and ${sessions.expiresAt} > statement_timestamp()
 			limit ${WorkPolicy.account.maxActiveSessionCountScan}
 		) bounded_active_session
 	)`,
@@ -222,7 +231,7 @@ async function ensureManagerContinuity(
 				isNull(platformCapabilityGrant.revokedAt),
 				or(
 					isNull(platformCapabilityGrant.expiresAt),
-					sql`${platformCapabilityGrant.expiresAt} > now()`,
+					sql`${platformCapabilityGrant.expiresAt} > statement_timestamp()`,
 				),
 			),
 		)
@@ -239,7 +248,7 @@ async function ensureManagerContinuity(
 				isNull(platformCapabilityGrant.revokedAt),
 				or(
 					isNull(platformCapabilityGrant.expiresAt),
-					sql`${platformCapabilityGrant.expiresAt} > now()`,
+					sql`${platformCapabilityGrant.expiresAt} > statement_timestamp()`,
 				),
 				accountIsActive,
 			),
@@ -248,13 +257,38 @@ async function ensureManagerContinuity(
 	if (!otherManager) throw new PlatformUserManagerRequired();
 }
 
+/** Serialize platform configuration before taking account locks in identity order. */
+async function admitPlatformUserMutation(
+	tx: DatabaseTransaction,
+	authorization: Authorization<string>,
+	targetUserId: string,
+	capability: PlatformCapability,
+) {
+	if (!authorization.authUserId) throw new PlatformCapabilityRequired();
+	await lockPlatformAccess(tx);
+	await tx
+		.select({ id: users.id })
+		.from(users)
+		.where(inArray(users.id, [...new Set([authorization.authUserId, targetUserId])].sort()))
+		.orderBy(users.id)
+		.for("no key update");
+	// Check after all account waits, with grant locks retained until commit.
+	await authorization.platform.ensureCapability(capability, tx);
+	return { actorProfileId: authorization.profileId, actorUserId: authorization.authUserId };
+}
+
 export async function replacePlatformUserAccountState(input: {
-	readonly actorProfileId: string;
-	readonly actorUserId: string;
+	readonly authorization: Authorization<string>;
 	readonly targetUserId: string;
 	readonly command: ReplaceAccountStateInput;
 }) {
 	return database.transaction(async (tx) => {
+		const { actorProfileId, actorUserId } = await admitPlatformUserMutation(
+			tx,
+			input.authorization,
+			input.targetUserId,
+			"platform.user.status.update",
+		);
 		const [target] = await tx
 			.select({ userId: users.id, entityId: authEntity.entityId })
 			.from(users)
@@ -281,7 +315,7 @@ export async function replacePlatformUserAccountState(input: {
 		if (before.revision !== input.command.expectedRevision)
 			throw new UserAccountStateRevisionConflict();
 		if (before.state === "active" && input.command.state === "active") return before;
-		if (input.actorUserId === input.targetUserId && input.command.state !== "active")
+		if (actorUserId === input.targetUserId && input.command.state !== "active")
 			throw new UserSelfStatusChangeForbidden();
 		if (
 			input.command.state === "suspended" &&
@@ -298,7 +332,7 @@ export async function replacePlatformUserAccountState(input: {
 		const revision = before.revision + 1;
 		const decision = await createGovernanceDecision(tx, {
 			action: `platform_user.account_state.${input.command.state}`,
-			actorProfileId: input.actorProfileId,
+			actorProfileId,
 			authority: { kind: "platform" },
 			targetUserId: input.targetUserId,
 			subject: { kind: "platform_user", id: input.targetUserId },
@@ -312,7 +346,7 @@ export async function replacePlatformUserAccountState(input: {
 				decisionId: decision.id,
 				note,
 				expiresAt,
-				updatedByAuthUserId: input.actorUserId,
+				updatedByAuthUserId: actorUserId,
 				revision,
 				updatedAt: now,
 			})
@@ -323,7 +357,7 @@ export async function replacePlatformUserAccountState(input: {
 					decisionId: decision.id,
 					note,
 					expiresAt,
-					updatedByAuthUserId: input.actorUserId,
+					updatedByAuthUserId: actorUserId,
 					revision,
 					updatedAt: now,
 				},
@@ -333,7 +367,7 @@ export async function replacePlatformUserAccountState(input: {
 		await recordAuditEvent(tx, {
 			category: "admin_activity",
 			outcome: "succeeded",
-			actor: { kind: "profile", profileId: input.actorProfileId },
+			actor: { kind: "profile", profileId: actorProfileId },
 			authority: { kind: "platform" },
 			action: "platform_user.account_state.replace",
 			governanceDecisionId: decision.id,
@@ -355,7 +389,7 @@ export async function replacePlatformUserAccountState(input: {
 			expiresAt,
 			revision,
 			updatedAt: now,
-			updatedByAuthUserId: input.actorUserId,
+			updatedByAuthUserId: actorUserId,
 		};
 	});
 }
@@ -372,17 +406,23 @@ export async function listPlatformUserSessions(userId: string, currentSessionId:
 			userAgent: sessions.userAgent,
 		})
 		.from(sessions)
-		.where(and(eq(sessions.userId, userId), sql`${sessions.expiresAt} > now()`))
+		.where(and(eq(sessions.userId, userId), sql`${sessions.expiresAt} > statement_timestamp()`))
 		.orderBy(desc(sessions.updatedAt), desc(sessions.id));
 	return rows.map((row) => ({ ...row, current: row.id === currentSessionId }));
 }
 
 export async function revokePlatformUserSession(input: {
-	readonly actorProfileId: string;
+	readonly authorization: Authorization<string>;
 	readonly targetUserId: string;
 	readonly sessionId: string;
 }) {
 	return database.transaction(async (tx) => {
+		const { actorProfileId } = await admitPlatformUserMutation(
+			tx,
+			input.authorization,
+			input.targetUserId,
+			"platform.session.revoke",
+		);
 		const [revoked] = await tx
 			.delete(sessions)
 			.where(and(eq(sessions.id, input.sessionId), eq(sessions.userId, input.targetUserId)))
@@ -391,7 +431,7 @@ export async function revokePlatformUserSession(input: {
 		await recordAuditEvent(tx, {
 			category: "admin_activity",
 			outcome: "succeeded",
-			actor: { kind: "profile", profileId: input.actorProfileId },
+			actor: { kind: "profile", profileId: actorProfileId },
 			authority: { kind: "platform" },
 			action: "platform_user.session.revoke",
 			target: { kind: "platform_user", id: input.targetUserId },
@@ -402,10 +442,16 @@ export async function revokePlatformUserSession(input: {
 }
 
 export async function revokeAllPlatformUserSessions(input: {
-	readonly actorProfileId: string;
+	readonly authorization: Authorization<string>;
 	readonly targetUserId: string;
 }) {
 	return database.transaction(async (tx) => {
+		const { actorProfileId } = await admitPlatformUserMutation(
+			tx,
+			input.authorization,
+			input.targetUserId,
+			"platform.session.revoke",
+		);
 		const revoked = await tx
 			.delete(sessions)
 			.where(eq(sessions.userId, input.targetUserId))
@@ -414,7 +460,7 @@ export async function revokeAllPlatformUserSessions(input: {
 		await recordAuditEvent(tx, {
 			category: "admin_activity",
 			outcome: "succeeded",
-			actor: { kind: "profile", profileId: input.actorProfileId },
+			actor: { kind: "profile", profileId: actorProfileId },
 			authority: { kind: "platform" },
 			action: "platform_user.sessions.revoke_all",
 			target: { kind: "platform_user", id: input.targetUserId },

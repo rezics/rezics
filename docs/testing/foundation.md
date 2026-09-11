@@ -248,3 +248,28 @@ its separate grant limit. Dummy setup rows commit only to the disposable databas
 so the race clients can see them; reset that target to remove them. This proves
 admission bounds and reclamation semantics, not 500M/3B throughput or sustained
 flood handling. The existing membership storage, keyset and erasure budgets remain.
+
+## Current platform account and session authority
+
+`task services-main:db:platform-user-authority:check` runs
+[check-platform-user-authority.ts](../../services/main/scripts/check-platform-user-authority.ts).
+The [pinned run](database/platform-user-authority-evidence.json) passes 51 assertions,
+including 10 signed-session API requests. The pre-fix service accepted an
+account-state command without current operator authority; checking only in the
+route left the write transaction unprotected.
+
+The fixture verifies missing/revoked authority, cached prechecks, suspended and
+closed operators, revision conflicts, self-disable denial, rule-backed state
+changes, restoration and atomic session removal. All three commands lose to a
+concurrent grant revocation after waiting for that exact transaction. A target
+account lock held past the operator grant's expiry causes denial without a state
+write. Reciprocal suspension commands serialize: the first commits and the
+waiting operator then observes its suspension. API requests exercise account
+state replacement and single/all-session revocation using generated identities.
+
+The account admission lock permits denial-audit foreign-key references; using
+`FOR UPDATE` for the operator instead caused the audit write to time out behind
+its own denied command. Both authorized and denied paths run on real PostgreSQL.
+Dummy accounts and rule-backed records remain only in the disposable target.
+This qualifies these administrative protocols, not all membership/contribution
+enforcement, Realm authority, restoration or 500M/3B throughput.

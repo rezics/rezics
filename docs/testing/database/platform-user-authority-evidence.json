@@ -1,0 +1,30 @@
+{
+  "baseCommit": "8861b972832624457eeb511025280a92419f2b4c",
+  "sourceDigests": {
+    "services/main/scripts/check-platform-user-authority.ts": "3ec023e6748b2ff5712e5ff4ae539ffd9cd89c20953d9cb5c3c1dee4f56aea21",
+    "services/main/src/services/platform-users/service.ts": "cc86edbba2488532e883d1dee1592d36fb18e2844740f6c4b18ee9ec27ec3d48",
+    "services/main/src/services/api/platform-users/index.ts": "dad864927db539fc9152ba62bee3a7d3a1348c8e90f9e5a286297fc701325783",
+    "services/main/src/services/platform-access/service.ts": "77ecbc77e18d1d4460b2e080d1120f6966e85b9e966164775e1dfbe2159489cf",
+    "services/main/src/services/authorization/platform/authorization.ts": "8de70359410e60f78065bc9244f52be625bd9b4ddf3ba331ec448085748664ff",
+    "services/main/src/services/database/migrations/atlas.sum": "5fb195c51729b80d46bc5465d58560f13de318049030c756b24a3ca1cd3ea33e"
+  },
+  "node": "v26.8.2",
+  "platform": "linux/x64",
+  "runtime": {
+    "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "default_isolation": "read committed"
+  },
+  "checks": 51,
+  "httpChecks": 10,
+  "revokedOperatorQualified": true,
+  "accountStateQualified": true,
+  "targetWaitExpiryQualified": true,
+  "verification": {
+    "command": "DATABASE_ADMIN_URL=<disposable target> task services-main:db:platform-user-authority:check",
+    "passed": true,
+    "typecheckPassed": true,
+    "testFilesPassed": 332,
+    "testsPassed": 1788,
+    "schemaChanges": false
+  }
+}

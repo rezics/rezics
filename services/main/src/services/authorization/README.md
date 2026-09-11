@@ -121,3 +121,26 @@ hydration stays in a single account-binding query with indexed Entity-name probe
 there is no per-recipient application query. No new rows or indexes are added at
 either the 500M or 3B planning scale. Broad access-roster cardinality remains part
 of the remaining workload qualification.
+
+## Platform account and session mutations
+
+Account-state replacement and administrative session revocation take the request's
+root Authorization into their transaction. Actor IDs come from that context;
+preliminary route checks and cached decisions do not authorize the write.
+The command first takes the existing platform-configuration advisory lock, then
+locks the actor and target Auth rows in ID order with `FOR NO KEY UPDATE`.
+This is the same exclusive advisory lock used by platform-grant replacement.
+The account lock blocks state changes while permitting foreign-key references
+from denial audit records. Current account status and capability are checked
+only after these waits; the admitted grant remains locked through commit.
+
+Account-state changes retain revision comparison, rule-backed decisions,
+self-disable denial and atomic session removal. A waiting operator observes its
+own suspension before it can change another account. Continuity and status
+queries use current-statement expiry, including inside an older transaction.
+
+These low-volume administrative commands serialize with platform configuration.
+The new account probe touches at most two primary-key rows and adds no storage
+or indexes at the 500M baseline or 3B estimate. Configuration-lock wait/hold time
+needs operational monitoring; the scoped fixture does not establish throughput
+or qualify every account-enforcement and participation path.
