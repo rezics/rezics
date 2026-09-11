@@ -20,7 +20,7 @@ task services-main:performance:run -- --rows 10000 --jit off
 task services-main:performance:run -- --mode load --rows 1000 --case and-correlated.hot --rate 2 --duration 30 --vus 8 --jit off
 ~~~
 
-Compare JIT on/off and the same image/workload on a separate Linux host; retain native core/backtrace, reduced SQL/binds and run metadata. Closure requires repeated successful reproduction workloads plus an explained repair or qualified runtime change. Temporary original run files are not required: the recipe and generator remain committed. The retained failure is not replaced by historical suite totals.
+Compare JIT on/off and the same image/workload on a separate Linux host; retain native core/backtrace, reduced SQL/binds and run metadata. New performance containers enable core dumps, and `task services-main:performance:diagnostics:check` verifies capture after an isolated backend abort; reused older containers retain their original limits. Inspect `coreDumpSettings` and per-artifact capture outcomes in the report. Closure requires repeated successful reproduction workloads plus an explained repair or qualified runtime change. Temporary original run files are not required: the recipe and generator remain committed. The retained failure is not replaced by historical suite totals.
 
 ## Fresh schema replay abort
 

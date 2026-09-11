@@ -129,6 +129,11 @@ tasks:
         cmds:
             - yarn exec tsx scripts/performance/run.ts {{.CLI_ARGS}}
 
+    performance:diagnostics:check:
+        desc: Verify native core capture after aborting only a backend in a new run-owned scratch container.
+        cmds:
+            - yarn exec tsx scripts/check-performance-diagnostics.ts
+
     performance:check:
         desc: Check performance harness integrity without creating data or starting servers.
         dir: ../..

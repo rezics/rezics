@@ -22,6 +22,7 @@ import { loadDataset } from "./dataset";
 import { coverageReport, summarizePlan } from "./report";
 import { ensureK6, exec, prepareDefinitions } from "./tools";
 import { queryCases } from "./workload";
+import { collectFailureDiagnostics } from "./diagnostics";
 import { runSqlLoad } from "./sql-load";
 
 const config = parseOptions(process.argv.slice(2));
@@ -188,6 +189,8 @@ try {
 				`com.docker.compose.project=${container}`,
 				"--publish",
 				"127.0.0.1::5432",
+				"--ulimit",
+				"core=-1",
 				"--env",
 				"POSTGRES_DB=rezics_performance",
 				"--env",
@@ -241,6 +244,18 @@ try {
 		}
 	}
 	if (!admin) throw new Error("The disposable database did not become ready");
+	const coreSettings = await exec(
+		"docker",
+		[
+			"exec",
+			container,
+			"sh",
+			"-c",
+			"cat /proc/sys/kernel/core_pattern; cat /proc/sys/kernel/core_uses_pid; ulimit -c",
+		],
+		{ windowsHide: true, timeout: 10_000 },
+	);
+	report.coreDumpSettings = coreSettings.stdout.trim().split("\n");
 	report.databaseImageId = (
 		await exec("docker", ["inspect", "--format", "{{.Image}}", container], { windowsHide: true })
 	).stdout.trim();
@@ -617,23 +632,10 @@ try {
 	report.status = "failed";
 	report.error = error instanceof Error ? error.message : String(error);
 	try {
-		const logs = await exec("docker", ["logs", "--tail", "120", container], {
-			windowsHide: true,
-			timeout: 10_000,
-			maxBuffer: 4 * 1024 * 1024,
-		});
-		await writeFile(resolve(output, "postgres.log"), logs.stdout + logs.stderr);
-		await exec(
-			"docker",
-			[
-				"cp",
-				`${container}:/var/lib/postgresql/18/docker/pgroonga.log`,
-				resolve(output, "pgroonga.log"),
-			],
-			{ windowsHide: true, timeout: 10_000 },
-		);
-	} catch {
-		/* Preserve the original failure if the container never started. */
+		report.failureDiagnostics = await collectFailureDiagnostics(container, datasetRunId, output);
+	} catch (diagnosticError) {
+		report.failureDiagnosticsError =
+			diagnosticError instanceof Error ? diagnosticError.message : String(diagnosticError);
 	}
 	await persist();
 	console.error(report.error);

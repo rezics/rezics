@@ -40,7 +40,8 @@ Use `--keep` to retain a dataset for repeated experiments, then `--reuse <runId>
 with the same rows and seed. Reuse checks the container's ownership label, tool
 versions and migration receipts. A reused container is not removed automatically.
 Cleanup of new containers checks both their exact generated name and ownership
-label. Interrupted runs may leave containers; identify them from their report
+label. New containers enable core dumps; reused containers retain their original
+limits, which the report records with the engine core pattern and PID suffix setting. Interrupted runs may leave containers; identify them from their report
 before removing them. Database installation can require several GB of temporary
 WAL even for the smoke dataset because the native baseline has many partitions.
 
@@ -70,7 +71,7 @@ Reports live in `.temp/performance/<runId>/`:
 | `sql.jsonl` | SQL and bind values captured from the real API, labelled by native case |
 | `plans.json` | `EXPLAIN (ANALYZE, BUFFERS, SETTINGS)` summaries: operator rows/loops, estimation error, sort methods, inclusive root I/O |
 | `workload.json`, `k6-summary.json` | Reproducible HTTP workload and latency/error/underfilled-page/cursor-cycle metrics |
-| `api-*.log`, `k6.log`, failure `postgres.log`/`pgroonga.log` | Process diagnostics; capture is disabled during k6 measurement |
+| `api-*.log`, `k6.log`, failure `postgres.log`/`pgroonga.log`/`postgres.core` | Process diagnostics; SQL capture is disabled during k6 measurement; each native artifact records captured/unavailable separately |
 | `pgbench.log` (load mode) | A separate SQL-only mixed workload replaying captured parameters, including statement preparation |
 
 SQL diagnostics execute as the reader in read-only transactions with a 10-second
@@ -107,3 +108,30 @@ Tool references: [gMark](https://github.com/gbagan/gmark),
 [k6 arrival-rate executors](https://grafana.com/docs/k6/latest/using-k6/scenarios/executors/constant-arrival-rate/),
 [PostgreSQL EXPLAIN](https://www.postgresql.org/docs/current/sql-explain.html),
 [pgbench](https://www.postgresql.org/docs/current/pgbench.html).
+
+
+## Native failure artifacts
+
+The [diagnostic collector](../scripts/performance/diagnostics.ts) checks the exact
+container name and run ownership label before copying artifacts. PostgreSQL logs,
+PGroonga logs and a native core are captured independently, so an absent extension
+log cannot suppress a valid core. The original experiment failure remains the
+reported failure. The collector waits up to 30 seconds for Linux [CoreDumping](https://www.man7.org/linux/man-pages/man5/proc_pid_status.5.html) to clear before copying a core, avoiding an in-progress dump. Core copying supports the pinned image's PGDATA directory with
+engine pattern `core` and PID suffix disabled; other engine patterns remain visible
+in `coreDumpSettings` and require their matching collection path. Kernel settings
+are not changed globally. Existing reused containers may still have a zero core limit.
+
+Run `task services-main:performance:diagnostics:check` to start a separate scratch
+container, deliberately abort one sleeping PostgreSQL backend, wait for recovery,
+and verify a nonempty ELF core and server log through the same collector. The
+[pinned capture](../../../docs/testing/database/performance-diagnostics-evidence.json)
+passes eight assertions and copied a 178,716,672-byte core. No application schema
+or user dataset is installed in that drill. Artifacts stay under `.temp`; cores are
+not committed. The test rejects a mismatched ownership label and tears down only
+its generated container. This proves capture, not the cause or repair of the
+open facet-search/Atlas crashes.
+
+Reserve space for a backend's dumped address space plus the copied artifact when
+running crash experiments. Copying has a 60-second deadline and reports failure
+explicitly; retain the owned container with `--keep` when further native inspection
+is needed. Core size follows process memory and workload, not just catalog rows.
