@@ -2830,17 +2830,27 @@ async function seedRecommendations(
 		}),
 		(batch) => tx.insert(recommendationEvent).values(batch),
 	);
+	const exclusions = profiles.flatMap((seedProfile, profileIndex) =>
+		Array.from({ length: SeedPlan.recommendationExclusions / profiles.length }, (_, index) => {
+			const target = itemAt(targets, profileIndex * 17 + index);
+			return {
+				authUserId: selfAuthUserIdForEntity(seedProfile.id),
+				unitId: target.id,
+				createdAt: latestDate(data.pastDate(180), seedProfile.createdAt, target.createdAt),
+			};
+		}),
+	);
+	const references = new Map<string, string>();
+	for (const id of new Set(exclusions.map((row) => row.unitId))) {
+		const { reference } = await resolveRegisteredUnitReference(tx, id);
+		references.set(id, await allocateReferenceValue(tx, reference));
+	}
 	await writeBatches(
-		profiles.flatMap((seedProfile, profileIndex) =>
-			Array.from({ length: SeedPlan.recommendationExclusions / profiles.length }, (_, index) => {
-				const target = itemAt(targets, profileIndex * 17 + index);
-				return {
-					authUserId: selfAuthUserIdForEntity(seedProfile.id),
-					unitId: target.id,
-					createdAt: latestDate(data.pastDate(180), seedProfile.createdAt, target.createdAt),
-				};
-			}),
-		),
+		exclusions.map(({ unitId, ...row }) => {
+			const targetReferenceId = references.get(unitId);
+			if (!targetReferenceId) throw new Error("Seed exclusion reference is unavailable");
+			return { ...row, targetReferenceId };
+		}),
 		(batch) => tx.insert(recommendationExclusion).values(batch),
 	);
 }

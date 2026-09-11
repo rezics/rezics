@@ -390,3 +390,29 @@ sequentially. The [pinned run](database/reference-merge-evidence.json) succeeds
 with zero concurrent-client warnings. This public slice supplies valid merged
 anchors for reference-consumer tests; it does not close the separate private
 manifest, full reconciliation or recovery obligations.
+
+## Private recommendation exclusion references
+
+`task services-main:db:recommendation-references:check` runs
+[check-recommendation-references.ts](../../services/main/scripts/check-recommendation-references.ts)
+and passes in the full fresh database check: seven migrations, 15,738 SQL
+statements, canonical SQL/constraint checks, healthy indexes and no schema drift. The [pinned run](database/recommendation-exclusions-evidence.json)
+passes 46 assertions, including seven signed-session requests and actual feed
+eligibility before exclusion, after exclusion and after removal. Its cases cover eight catalog
+owners, duplicate/missing references, native-anchor retention, shared references,
+account isolation, idempotent events, denied-target allocation, removal and account
+erasure. A real reviewed public merge supplies the redirect used to test both
+ordinary and same-statement reference rejection for a merged target.
+
+The fixture also exercises signed-session exclusion/removal, invalid tracking,
+native-ID addressing, the actual feed eligibility predicate, and a direct-grant
+revocation race. A 10,000-target private set records tuple/index sizes and explains
+the native-reference and account/reference probes. The measured point query uses
+seven shared buffers; the fixture relation contains 10,010 rows with 72-byte mean
+tuples. This supports the owner's 80-byte heap/144-byte index planning allowance
+for the measured distribution, without establishing production throughput. Scenario rows and merge jobs
+roll back; API/race actors remain only in the disposable target. The
+[recommendation owner](../../services/main/src/services/recommendations/README.md)
+records the account, reference, lookup and storage contracts. Tracking-event
+normalization, complete recommendation generation and 500M/3B load acceptance
+remain separate work.

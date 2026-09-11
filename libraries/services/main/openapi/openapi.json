@@ -14498,7 +14498,10 @@
 													"enum": [
 														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
-														"AccountRestricted"
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"ParticipationDenied"
 													],
 													"type": "string"
 												},
@@ -14658,7 +14661,10 @@
 													"enum": [
 														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
-														"AccountRestricted"
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"ParticipationDenied"
 													],
 													"type": "string"
 												},

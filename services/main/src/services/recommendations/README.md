@@ -1,0 +1,58 @@
+# Recommendation exclusions
+
+A private exclusion is keyed by Auth account and immutable `reference_value`.
+It stores no duplicate native UUID or per-owner target columns. The restrictive
+reference FK preserves the native anchor; reference values are shared with other
+consumers and remain after an account removes its choice.
+
+The API accepts native target IDs and validates tracking signatures and event
+time. The command rechecks account write eligibility, sign-in state and the
+captured Self binding in its transaction. Personal reads use the actual Self
+rather than a selected organization grant. Current resource read authority is
+checked before allocating a reference or storing an exclusion/event. Removing
+an exclusion requires current account authority but no current target visibility;
+an absent choice does not create a reference value.
+
+Feed and recommendation predicates use the same account/reference join and the
+indexed native-ID expression. An inactive or erased Self binding stops private
+filter traversal before asynchronous erasure drains the rows. Cleanup remains
+Auth-indexed and bounded by the existing erasure worker. No public API accepts an
+arbitrary account whose exclusions should be read.
+
+Merged native targets remain forbidden for new live exclusions. The merge guard
+decodes a canonical reference before consulting the reviewed redirect, including
+references created in the same data-modifying statement. Its native-ID projection
+is not a permission check. Tracking events retain their separate native-ID
+storage until their own reference-consumer qualification.
+
+## Workload and scale
+
+Use the 500,000,000-row baseline and 3,000,000,000-row estimate. Plan 100 exclusion
+writes/s, 10,000 predicate evaluations/s normally and 500,000/s at peak across
+caller candidate sets. These are workload assumptions. Point-lookup and mutation
+targets are 5 ms and 200 ms p95 respectively, excluding transport. Caller candidate
+budgets and sparse-filter scan behavior still require their Search/feed workload
+qualification; a returned-page limit does not bound all predicate evaluations.
+
+The 10,010-row fixture measured a 72-byte mean tuple, 794,624 heap bytes
+and 1,032,192 index bytes across its two composite indexes. Budget 80 heap plus
+144 index bytes including ordinary page headroom: 112 GB at 500M or 672 GB at 3B,
+before WAL, replicas, bloat and maintenance copies. A first target use additionally
+allocates one shared reference, budgeted at 112 heap plus 216 index bytes in the
+foundation model. If 10% of choices introduce distinct references, the combined
+standalone envelope is 128.4 GB/770.4 GB; do not charge those shared references
+again to every consumer. Use the full lifetime target union when retention or
+sharing differs from that scenario.
+
+An existing choice needs indexed reference and account-key probes. New allocation
+uses the qualified lookup/unique-conflict/relookup protocol. The private filter
+adds indexed reference and binding joins, not application-level per-item requests.
+Monitor buffers, predicate latency, reference allocation rate, erasure backlog and
+hot-account contention. Random I/O and relation/index maintenance at these scales
+may require account-routed partitions plus a qualified shared-reference lookup
+service; preserve concrete target integrity and cursor/recovery behavior before
+such a cutover. The local fixture measures a 10,000-row hot set and index plans,
+not production throughput or complete recommendation-generation acceptance.
+
+[Foundation verification](../../../../../docs/testing/foundation.md#private-recommendation-exclusion-references)
+records executable SQL/API, merge-guard, revocation, erasure and query-plan evidence.

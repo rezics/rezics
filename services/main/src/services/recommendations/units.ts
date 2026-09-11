@@ -1,3 +1,4 @@
+import { recommendationExclusionCondition } from "./exclusion-query";
 import { and, eq, inArray, isNull, lte, sql } from "drizzle-orm";
 import { CatalogOwnerValues, CatalogOwnerSchema, type CatalogOwner } from "@rezics/reference";
 import type { ContentLanguage } from "@rezics/i18n";
@@ -26,9 +27,7 @@ export async function recommendUnits(input: {
   eq(target.moderationStatus,"approved"),isNull(target.deletedAt),lte(target.createdAt,input.asOf),lte(target.updatedAt,input.asOf),
   inArray(target.contentRating,[...input.viewer.contentRatings]),
   input.seedUnitId ? sql`${target.id} <> ${input.seedUnitId}::uuid` : undefined,
-  input.viewer.authUserId ? sql`(${target.id} = ${input.afterId ?? null}::uuid or not exists (
-   select 1 from recommendation_exclusion e where e.auth_user_id=${input.viewer.authUserId}::uuid and e.unit_id=${target.id}
-  ))` : undefined)!;
+  input.viewer.authUserId ? sql`(${target.id} = ${input.afterId ?? null}::uuid or not ${recommendationExclusionCondition(target.id, input.viewer.authUserId)})` : undefined)!;
  const selected = await searchGlobalIdentifiers({
   branches: [
    ...(owners.includes("entity") ? [{category:"entities" as const,sourceOwners:["entity" as const],sourceShapes:input.shape ? [input.shape] : []}] : []),

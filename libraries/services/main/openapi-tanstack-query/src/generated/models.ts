@@ -10244,6 +10244,9 @@ export const PutApiRecommendationsExclusionsByUnitIdStatus403ErrorCodeEnum = {
 	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	ParticipationDenied: "ParticipationDenied",
 } as const;
 
 export type PutApiRecommendationsExclusionsByUnitIdStatus403ErrorCodeEnum =
@@ -10413,6 +10416,9 @@ export const DeleteApiRecommendationsExclusionsByUnitIdStatus403ErrorCodeEnum = 
 	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	ParticipationDenied: "ParticipationDenied",
 } as const;
 
 export type DeleteApiRecommendationsExclusionsByUnitIdStatus403ErrorCodeEnum =

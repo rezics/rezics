@@ -62,6 +62,8 @@ SQL_GROUPS = {
     "D15": "content-metrics participation-studio recommendation-build search-document-support unit-search-document tag-path-search",
 }
 SQL_GROUP = {name: group for group, names in SQL_GROUPS.items() for name in names.split()}
+OVERLAY_GROUP = {"recommendation_exclusion_reference_values.pre": "D15"}
+
 
 DISPOSITIONS = {
     "D01": "Preserve owner identity; introduce normalized validated reference values; explicit correction/address history.",
@@ -306,6 +308,8 @@ def inventory():
             continue
         if p.parent.name == "postgres":
             group = "D01" if p.stem == "manifest" else SQL_GROUP.get(p.stem)
+        elif p.parent.name == "migration-overlays":
+            group = OVERLAY_GROUP.get(p.stem)
         else:
             group = FILE_GROUP.get(p.stem)
         if group is None:

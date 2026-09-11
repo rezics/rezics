@@ -1,3 +1,4 @@
+import { recommendationExclusionCondition } from "../../recommendations/exclusion-query";
 import { UnitOwnerSchema, type UnitOwner } from "@rezics/reference";
 import { unitStateRelation, unitStatesForIds } from "../../units/state-relation";
 import {presentImageAsset} from "../image-assets/presentation";
@@ -578,10 +579,7 @@ export function getFeedEligibilityCondition(
 			)`
 			: undefined,
 		viewer.profileId
-			? sql`(${feedUnit.id} = ${anchorId ?? null}::uuid or not exists (
-				select 1 from recommendation_exclusion excluded
-				where excluded.auth_user_id = ${selfAuthUserIdForEntity(viewer.profileId)} and excluded.unit_id = ${feedUnit.id}
-			))`
+			? sql`(${feedUnit.id} = ${anchorId ?? null}::uuid or not ${recommendationExclusionCondition(feedUnit.id, selfAuthUserIdForEntity(viewer.profileId))})`
 			: undefined,
 	)!;
 }

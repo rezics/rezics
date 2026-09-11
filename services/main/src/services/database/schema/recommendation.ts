@@ -1,3 +1,4 @@
+import { referenceValue } from "./reference-value";
 import { UnitOwnerValues, type UnitOwner } from "@rezics/reference";
 import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
 import { inArray, sql } from "drizzle-orm";
@@ -153,16 +154,14 @@ export const recommendationExclusion = pgTable(
 		authUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "cascade" }),
-		unitId: uuid().notNull(),
+		targetReferenceId: uuid()
+			.notNull()
+			.references(() => referenceValue.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
-
-		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
-		...unitReferenceConstraints("recommendation_exclusion", "unit", table, false, table.unitId),
-
-		primaryKey({ columns: [table.authUserId, table.unitId] }),
-		index("recommendation_exclusion_unit_idx").on(table.unitId, table.authUserId),
+		primaryKey({ columns: [table.authUserId, table.targetReferenceId] }),
+		index("recommendation_exclusion_target_idx").on(table.targetReferenceId, table.authUserId),
 	],
 );
 

@@ -1,3 +1,4 @@
+import { saveRecommendationExclusion, removeRecommendationExclusion } from "../../recommendations/exclusions";
 import { CatalogOwnerValues } from "@rezics/reference";
 import { unitStatesForIds } from "../../units/state-relation";
 import { and, eq, inArray } from "drizzle-orm";
@@ -13,7 +14,6 @@ import {
 	ContentRatingValues,
 	post,
 	recommendationEvent,
-	recommendationExclusion,
 } from "../../database/schema";
 import { parseJsonCursor } from "../../pagination";
 import { InvalidPaginationCursor } from "../../pagination/errors";
@@ -135,6 +135,9 @@ const RecommendationWriteForbiddenResponse = toApiErrorResponse([
 	"ApiTokenPermissionRequired",
 	"EmailVerificationRequired",
 	"AccountRestricted",
+	"AccountSuspended",
+	"AccountClosed",
+	"ParticipationDenied",
 ]);
 
 async function getEventAuthUserId(request: Request) {
@@ -365,31 +368,12 @@ export default new Elysia({ prefix: "/recommendations" })
 			},
 			detail: { summary: "Exclude a recommendation", tags: ["Recommendations"] },
 		},
-		async ({ body, params, user, authorization }) => {
+		async ({ body, params, authorization }) => {
 			ensureEventTime(body.occurredAt, new Date());
 			ensureRecommendationTracking(params.unitId, body);
-			await authorization.unit.ensureCanRead(params.unitId);
-			await database.transaction(async (tx) => {
-				await tx
-					.insert(recommendationExclusion)
-					.values({ authUserId: user.id, unitId: params.unitId })
-					.onConflictDoNothing();
-				await tx
-					.insert(recommendationEvent)
-					.values({
-						id: body.eventId,
-						authUserId: user.id,
-						requestId: body.requestId,
-						surface: body.surface,
-						type: "not_interested",
-						targetUnitId: params.unitId,
-						position: body.position,
-						policyVersion: body.policyVersion,
-						occurredAt: body.occurredAt,
-					})
-					.onConflictDoNothing();
-			});
-			return { excluded: true };
+			return database.transaction((tx) =>
+				saveRecommendationExclusion(tx, authorization, params.unitId, body),
+			);
 		},
 	)
 	.delete(
@@ -404,15 +388,6 @@ export default new Elysia({ prefix: "/recommendations" })
 			},
 			detail: { summary: "Restore an excluded recommendation", tags: ["Recommendations"] },
 		},
-		async ({ params, user }) => {
-			await database
-				.delete(recommendationExclusion)
-				.where(
-					and(
-						eq(recommendationExclusion.authUserId, user.id),
-						eq(recommendationExclusion.unitId, params.unitId),
-					),
-				);
-			return { excluded: false };
-		},
+		({ params, authorization }) =>
+			database.transaction((tx) => removeRecommendationExclusion(tx, authorization, params.unitId)),
 	);

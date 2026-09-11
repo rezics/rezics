@@ -65,6 +65,7 @@
     "docs/testing/database/read-scopes-evidence.json",
     "docs/testing/database/realm-membership-evidence.json",
     "docs/testing/database/realm-roster-evidence.json",
+    "docs/testing/database/recommendation-exclusions-evidence.json",
     "docs/testing/database/reference-merge-evidence.json",
     "docs/testing/database/reference-values-evidence.json",
     "docs/testing/database/scenarios.tsv",
@@ -88,6 +89,7 @@
     "services/main/scripts/check-realm-governance-projection.ts",
     "services/main/scripts/check-realm-membership.ts",
     "services/main/scripts/check-realm-roster.ts",
+    "services/main/scripts/check-recommendation-references.ts",
     "services/main/scripts/check-reference-merge.ts",
     "services/main/scripts/check-reference-values.ts",
     "services/main/scripts/check-revision-references.ts",
@@ -99,7 +101,8 @@
     "services/main/src/services/filter/README.md",
     "services/main/src/services/participation/README.md",
     "services/main/src/services/participation/organization-membership.md",
-    "services/main/src/services/realms/README.md"
+    "services/main/src/services/realms/README.md",
+    "services/main/src/services/recommendations/README.md"
   ],
   "schema_inputs": [
     "services/main/src/services/database/schema/access.ts",
@@ -209,6 +212,7 @@
     "services/main/src/services/database/schema/postgres/history-integrity.sql",
     "services/main/src/services/database/schema/postgres/manifest.ts",
     "services/main/src/services/database/schema/postgres/merge-integrity.sql",
+    "services/main/src/services/database/schema/postgres/migration-overlays/recommendation_exclusion_reference_values.pre.sql",
     "services/main/src/services/database/schema/postgres/music-release-source-job.sql",
     "services/main/src/services/database/schema/postgres/music-source-lifecycle.sql",
     "services/main/src/services/database/schema/postgres/native-bootstrap.sql",

@@ -76,6 +76,7 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  */
 export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>> = {
 	realm_member_count_decrement: ["platform-aggregates.sql"],
+	recommendation_exclusion_reference_values: ["unit-reference-integrity.sql", "merge-integrity.sql"],
 	favorite_reference_values: ["reference-value.sql", "unit-reference-integrity.sql", "participation-private-state.sql"],
 	account_tag_reference_values: ["unit-reference-integrity.sql", "account-tag-reference.sql"],
 };
@@ -461,7 +462,7 @@ export const PostgreSqlSchemaTriggers = [
 	{ table: "realm_unit_tag", name: "reject_merged_unit_realm_unit_tag_unit_id" },
 	{
 		table: "recommendation_exclusion",
-		name: "reject_merged_unit_recommendation_exclusion_unit_id",
+		name: "reject_merged_unit_recommendation_exclusion_target_reference_id",
 	},
 	{ table: "revision_content", name: "revision_content_immutable" },
 	{ table: "score", name: "reject_merged_unit_score_unit_id" },
