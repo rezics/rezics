@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { serializeSignedCookie } from "better-call";
 import { z } from "zod";
 import { initializeObservability } from "@rezics/observability";
@@ -48,6 +48,16 @@ const { default: api } = await import("../src/services/api");
 api.compile();
 const context = await auth.$context;
 const accounts: string[] = [];
+let concurrentClientWarnings = 0;
+const recordWarning = (warning: Error) => {
+	if (
+		warning.message.startsWith(
+			"Calling client.query() when the client is already executing a query",
+		)
+	)
+		concurrentClientWarnings++;
+};
+process.on("warning", recordWarning);
 let assertions = 0;
 
 async function actor(label: string) {
@@ -134,6 +144,10 @@ try {
 			owner.cookie,
 		),
 	);
+	await database
+		.update(users)
+		.set({ name: "Private Auth-only label" })
+		.where(eq(users.id, delegate.account.id));
 	const collectionPath = `/collections/${privateCollection.id}`;
 	const collectionAccessPath = `/governance/unit/${privateCollection.id}/access`;
 	const readDecision = (value: unknown) =>
@@ -148,7 +162,7 @@ try {
 			})
 			.parse(value)
 			.decisions.find((row) => row.permission === "unit.read")?.decision.allowed;
-	await request(
+	const scopedAccessSnapshot = await request(
 		"PUT",
 		collectionAccessPath,
 		{
@@ -160,6 +174,24 @@ try {
 		200,
 		owner.cookie,
 	);
+	const listedRecipient = z
+		.object({
+			subjects: z.array(
+				z.object({
+					subject: z.object({ kind: z.string(), authUserId: z.string().optional() }).passthrough(),
+					label: z.string().nullable(),
+				}),
+			),
+		})
+		.parse(scopedAccessSnapshot)
+		.subjects.find((row) => row.subject.authUserId === delegate.account.id);
+	assert.equal(
+		listedRecipient?.label,
+		delegate.self.name,
+		"access management uses the recipient's public Entity name",
+	);
+	assert.equal(JSON.stringify(scopedAccessSnapshot).includes("Private Auth-only label"), false);
+	assertions += 2;
 	await request("GET", collectionPath, undefined, 404, delegate.cookie);
 	assert.equal(
 		readDecision(
@@ -564,6 +596,13 @@ try {
 		}),
 	);
 	await request("GET", path, undefined, 404, delegate.cookie);
+	await new Promise<void>((resolve) => setImmediate(resolve));
+	assert.equal(
+		concurrentClientWarnings,
+		0,
+		"API flows await queries sharing a PostgreSQL transaction client",
+	);
+	assertions++;
 	console.log(
 		JSON.stringify({
 			check: "catalog-resource-api",
@@ -573,6 +612,7 @@ try {
 		}),
 	);
 } finally {
+	process.off("warning", recordWarning);
 	if (accounts.length) await database.delete(sessions).where(inArray(sessions.userId, accounts));
 	await database.$client.end();
 	await observability.shutdown();

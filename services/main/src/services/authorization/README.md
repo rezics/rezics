@@ -107,3 +107,17 @@ The decision reuses the bounded-depth scope comparison (at most eight segments).
 It adds no SQL, storage or indexes and filters candidates before the existing
 specificity sort. This change does not qualify unbounded authority-graph fan-out
 or alter the existing 500M/3B workload assumptions.
+
+## Access-configuration snapshots
+
+The access-management snapshot resolves Auth recipients through active self-Entity
+bindings and their public Entity names. A private Auth account name is not a
+recipient label; an absent or inactive self binding yields no label. The owner label
+continues to use its public Entity presentation.
+
+Snapshot queries sharing a transaction client run sequentially. This preserves
+one database snapshot without relying on PostgreSQL client query queuing. Label
+hydration stays in a single account-binding query with indexed Entity-name probes;
+there is no per-recipient application query. No new rows or indexes are added at
+either the 500M or 3B planning scale. Broad access-roster cardinality remains part
+of the remaining workload qualification.

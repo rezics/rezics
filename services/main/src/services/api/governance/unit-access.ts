@@ -25,6 +25,7 @@ import { OfficialProfileIds } from "../../bootstrap/data";
 import { database, type DatabaseTransaction } from "../../database";
 import {
 	entityIdentity,
+	authEntity,
 	realm,
 	unitAccessGrant,
 	unitAccessInvitation,
@@ -227,42 +228,40 @@ async function getAccessSnapshot(
 			const presentations = await readUnitPresentationsInTransaction(tx, [unitId]);
 			const viewerProfileId = authorization.profileId;
 
-			const [ownership, grants, restrictions] = await Promise.all([
-				tx
-					.select({
-						profileId: unitOwnership.profileId,
-						authUserId: selfAuthUserIdForEntity(unitOwnership.profileId),
-						label: publicEntityName(unitOwnership.profileId),
-					})
-					.from(unitOwnership)
-					.where(and(eq(unitOwnership.unitId, unitId), isNull(unitOwnership.revokedAt)))
-					.limit(1),
-				tx
-					.select()
-					.from(unitAccessGrant)
-					.where(
-						and(
-							eq(unitAccessGrant.unitId, unitId),
-							eq(unitAccessGrant.scope, [...scope]),
-							isNull(unitAccessGrant.revokedAt),
-							or(isNull(unitAccessGrant.expiresAt), sql`${unitAccessGrant.expiresAt} > now()`),
+			const ownership = await tx
+				.select({
+					profileId: unitOwnership.profileId,
+					authUserId: selfAuthUserIdForEntity(unitOwnership.profileId),
+					label: publicEntityName(unitOwnership.profileId),
+				})
+				.from(unitOwnership)
+				.where(and(eq(unitOwnership.unitId, unitId), isNull(unitOwnership.revokedAt)))
+				.limit(1);
+			const grants = await tx
+				.select()
+				.from(unitAccessGrant)
+				.where(
+					and(
+						eq(unitAccessGrant.unitId, unitId),
+						eq(unitAccessGrant.scope, [...scope]),
+						isNull(unitAccessGrant.revokedAt),
+						or(isNull(unitAccessGrant.expiresAt), sql`${unitAccessGrant.expiresAt} > now()`),
+					),
+				);
+			const restrictions = await tx
+				.select()
+				.from(unitAccessRestriction)
+				.where(
+					and(
+						eq(unitAccessRestriction.unitId, unitId),
+						eq(unitAccessRestriction.scope, [...scope]),
+						isNull(unitAccessRestriction.revokedAt),
+						or(
+							isNull(unitAccessRestriction.expiresAt),
+							sql`${unitAccessRestriction.expiresAt} > now()`,
 						),
 					),
-				tx
-					.select()
-					.from(unitAccessRestriction)
-					.where(
-						and(
-							eq(unitAccessRestriction.unitId, unitId),
-							eq(unitAccessRestriction.scope, [...scope]),
-							isNull(unitAccessRestriction.revokedAt),
-							or(
-								isNull(unitAccessRestriction.expiresAt),
-								sql`${unitAccessRestriction.expiresAt} > now()`,
-							),
-						),
-					),
-			]);
+				);
 
 			const subjects = new Map<
 				string,
@@ -308,20 +307,18 @@ async function getAccessSnapshot(
 			const realmIds = [...subjects.values()].flatMap(({ subject }) =>
 				subject.kind === "realm" ? [subject.realmId] : [],
 			);
-			const [accounts, realms] = await Promise.all([
-				authIds.length
-					? tx
-							.select({ id: users.id, label: users.name })
-							.from(users)
-							.where(inArray(users.id, authIds))
-					: [],
-				realmIds.length
-					? tx
-							.select({ id: realm.id, label: firstUnitLocalizationTitle(realm.id) })
-							.from(realm)
-							.where(inArray(realm.id, realmIds))
-					: [],
-			]);
+			const accounts = authIds.length
+				? await tx
+						.select({ id: authEntity.authUserId, label: publicEntityName(authEntity.entityId) })
+						.from(authEntity)
+						.where(and(inArray(authEntity.authUserId, authIds), eq(authEntity.state, "active")))
+				: [];
+			const realms = realmIds.length
+				? await tx
+						.select({ id: realm.id, label: firstUnitLocalizationTitle(realm.id) })
+						.from(realm)
+						.where(inArray(realm.id, realmIds))
+				: [];
 			const labelByKey = new Map([
 				...accounts.map((row) => [`auth:${row.id}`, row.label] as const),
 				...realms.map((row) => [`realm:${row.id}`, row.label] as const),

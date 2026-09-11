@@ -1,0 +1,22 @@
+{
+  "sourceDigests": {
+    "services/main/scripts/check-catalog-resource-api.ts": "a83118682e7c475de8eeed280e54eb8c6e3cded67a8124210375198abf04cc92",
+    "services/main/src/services/api/governance/unit-access.ts": "cf7e54261ccf0d6512704c4cb3db0932d1fb25c2707c4add96f15593dcb07a36",
+    "services/main/src/services/participation/presentation.ts": "1a61f819a4cc82cd9ce05a9e7891789992b268f984de7ea6644d970cae4f1eef",
+    "services/main/src/services/authorization/unit/authorization.ts": "c48d78603040709609468db7510f3cf46219e1aca1e40d91a05f5904fd5d1a6c",
+    "services/main/src/services/database/migrations/atlas.sum": "5fb195c51729b80d46bc5465d58560f13de318049030c756b24a3ca1cd3ea33e"
+  },
+  "verification": {
+    "script": "services/main/scripts/check-catalog-resource-api.ts",
+    "target": "disposable loopback rezics_atlas",
+    "apiAssertions": 184,
+    "apiPassed": true,
+    "privateAuthLabelExcluded": true,
+    "publicEntityLabelSelected": true,
+    "concurrentClientWarnings": 0,
+    "typecheckPassed": true,
+    "testFilesPassed": 332,
+    "testsPassed": 1788,
+    "schemaChanges": false
+  }
+}

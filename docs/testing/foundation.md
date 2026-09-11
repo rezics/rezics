@@ -175,3 +175,13 @@ API, verifies the recipient receives 404 for full Collection detail and a denied
 root access decision, then grants root read access and verifies both endpoints
 allow it. All requests use the ID produced by Collection creation. The expanded
 fixture passes 181 assertions alongside its 16 native catalog resources.
+
+## Private account names in access configuration
+
+The resource API fixture changes a grant recipient's private Auth name while
+keeping its public Entity name. The access-management response must use the
+public name and must not contain the private label. The pre-fix response exposed
+the private Auth value. The fixture also rejects concurrent-query warnings from
+a single PostgreSQL client; snapshot reads now await their shared-client queries.
+The [pinned API run](database/access-snapshot-evidence.json) passes 184 assertions. These checks cover the access
+snapshot's label and transaction behavior, not all private-data disclosure paths.
