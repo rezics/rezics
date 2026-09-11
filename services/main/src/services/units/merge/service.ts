@@ -51,6 +51,7 @@ import { unitMergeRequestExpiry } from "./policy";
 import { withCatalogViewerPolicy } from "../../catalog/read-policy";
 
 type RequestRow = typeof unitMergeRequest.$inferSelect;
+/** Retain the current human Self binding and reject a stale admitted revision. @internal */
 export async function humanMergeAuthority(
 	tx: DatabaseTransaction,
 	authorization: Authorization<string>,
@@ -82,6 +83,8 @@ export async function humanMergeAuthority(
 	);
 	if (admitted.principal.kind !== "auth" || admitted.principal.authUserId !== actor)
 		throw new ParticipationDenied("Merge review cannot use a service principal");
+	if (admitted.authorizationRevision !== self.revision)
+		throw new ParticipationDenied("Merge account self identity changed");
 	return { ...admitted, principal: admitted.principal };
 }
 function manifestFromRow(row: RequestRow) {

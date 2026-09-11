@@ -457,3 +457,30 @@ These checks qualify the named admission/disclosure/reconciliation paths.
 Application-time reviewer authority, crash/restart and production/corpus-scale
 capacity remain separate obligations in the [merge owner](../../services/main/src/services/units/merge/README.md)
 and M06; they do not establish G4 or complete M01/M06.
+
+## Merge worker rollback, replay and current executor
+
+`task services-main:db:merge-recovery:check` runs
+[check-merge-recovery.ts](../../services/main/scripts/check-merge-recovery.ts).
+The [pinned run](database/merge-recovery-evidence.json) passes 109 assertions.
+A fixture-owned Node worker writes a real structure reconciliation page and emits
+its barrier before being killed with SIGKILL, before the outer COMMIT. The parent
+observes unchanged items/counters/cursors, expires that exact fixture lease and
+claims a different token. The stale token cannot apply; the new token applies
+one receipt. Replaying the committed token changes neither operation nor counters,
+and repeated finalization cannot repeat its graph-lock cleanup.
+
+The fixture also revokes a queued executor's capability, suspends/closes its
+account through rule-backed commands and advances its Self revision. Three exact
+worker/blocker PID races commit account or binding changes while finalization
+waits. Each denied execution retains its graph locks and remains actionable;
+restoring authority and explicitly retrying completes it. The pre-fix suspended
+executor incorrectly reached `completed` through the broad-capability shortcut.
+
+This qualification covers structure-page process loss, lease reclaim, replay and
+finalization authority. Reviewer authority at canonicalization, other phase crash
+points and backup/restore remain open. The fixture keeps only its generated data
+on the disposable target and refuses other runnable work at entry.
+
+The 136-assertion native merge fixture passes again with these executor checks;
+backend tests pass 333 files/1,790 tests and backend TypeScript passes.

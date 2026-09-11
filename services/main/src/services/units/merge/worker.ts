@@ -110,8 +110,7 @@ async function admitted<T>(
 ): Promise<T> {
 	const authority = ParticipationAuthoritySchema.parse(op.executorAuthority),
 		authorization = new Authorization(op.executorProfileId, op.executorAuthUserId, authority);
-	if (!(await authorization.platform.hasCapability("unit.merge", tx)))
-		await authorization.platform.ensureCapability("unit.merge.propose", tx);
+	await authorization.platform.ensureCapability("unit.merge.propose", tx);
 	await humanMergeAuthority(tx, authorization);
 	return runWithParticipationAuthority(authority, () =>
 		withCatalogViewerPolicy(tx, op.executorAuthUserId, () => work(authorization)),
@@ -719,6 +718,8 @@ async function failClaim(claimed: Op, error: unknown) {
 				(error instanceof Error &&
 					[
 						"ParticipationDenied",
+						"AccountSuspended",
+						"AccountClosed",
 						"PlatformCapabilityRequired",
 						"CatalogAccessDenied",
 						"UnitPermissionForbidden",

@@ -28,7 +28,7 @@ The September 8 convergence qualification recorded a PostgreSQL SIGILL during At
 
 ## Integration recovery gaps
 
-- Native merge recovery: [private review admission and native reconciliation now pass](foundation.md#native-merge-review-and-reconciliation). Qualify current proposer/reviewer authority at application, lease reclaim, stale worker rejection, crash/rollback, restart and exact-once receipts after lost acknowledgements. The passing reconciliation run does not close those recovery obligations.
+- Native merge application/recovery: [private review/reconciliation](foundation.md#native-merge-review-and-reconciliation) and [structure-page worker crash/reclaim/replay with current executor finalization](foundation.md#merge-worker-rollback-replay-and-current-executor) pass. Qualify current reviewer authority at canonicalization and extend crash/restart evidence to canonicalization and source-binding effects; the selected phase tests do not close backup/restore or all-phase recovery.
 - Recommendation generation: the prior fixture exercised partition writes/fencing but did not finish its second snapshot. Require repeated bounded batches, preserved old active snapshot, complete activation and crash recovery.
 
 These are acceptance obligations in M06/M09. Re-evaluate against current code before claiming the old failure still reproduces, and remove each entry only after its lasting regression/qualification evidence is in the owning suite.

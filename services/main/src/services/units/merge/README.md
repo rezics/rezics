@@ -87,3 +87,30 @@ incomplete, stale, revoked and expired read-grant cases, including expiry while
 waiting on the other grant. It also compares point reads with SQL disclosure
 predicates for retained sources. Its ordinary cases roll back; the separate
 expiry-wait actors remain only in the disposable target.
+
+## Worker recovery and executor authority
+
+Every page calls the current platform admission check, including the account's
+sign-in state, then locks and verifies its admitted human Self-binding revision.
+The broader `unit.merge` capability implies proposal permission through the shared
+vocabulary; it does not skip account admission. Suspension, closure, lost platform
+permission and a changed Self binding stop the operation in `action_required`.
+The graph locks and reconciliation receipts remain available for an explicit
+operator retry with current authority. Account restrictions are not automatically
+retried as transient database failures.
+
+`task services-main:db:merge-recovery:check` verifies an actual fixture-owned
+worker process killed after its structure-page writes but before transaction
+commit. Uncommitted items, counters and cursors roll back. Reclaiming the expired
+lease issues a new token; the old worker cannot advance it. Replaying a page whose
+commit acknowledgement was lost adds no duplicate receipt, and finalization
+releases its graph locks once. Suspension, closure and stale Self revisions are
+also tested while the worker waits on the exact account/binding lock, followed by
+restoration and explicit retry. See the [pinned recovery evidence](../../../../../../docs/testing/database/merge-recovery-evidence.json).
+
+These checks use the existing one-account/one-Self indexed fences and four-operation
+claim bound; they add no persisted rows or indexes beyond existing audit/state
+transitions. The 500M/3B queue and receipt workload still requires corpus-scale
+qualification. This fixture proves the structure-page crash and finalization
+boundaries, not every phase, canonicalization failure point, reviewer application
+fence or disaster-recovery restore.

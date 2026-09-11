@@ -1,11 +1,11 @@
 {
-  "baseCommit": "94763fdc2cf545f402216bc9a876b0ab8cad1068",
+  "baseCommit": "fcc974a708c8255399b967119e50e0fa53201d0b",
   "sourceDigests": {
     "services/main/scripts/check-unit-merge-review-policy.ts": "18cc7506557ded96bf1e208792dbeb63b892fbcad1bf28eeb6a0b264fddd661b",
     "services/main/src/services/units/merge/contracts.ts": "ead21a52711aa785bfafaa80e779e8ef1eaab4a51364ac4ffe054214546d542f",
     "services/main/src/services/units/merge/manifest.ts": "5e4813a31145936616c2cea1bc5862560162b65a4344e2c296dffa024872f502",
-    "services/main/src/services/units/merge/service.ts": "59864052793797ecb7734409ed461b0d4d9a1a202dad09e6a11dca0b4c6907c5",
-    "services/main/src/services/units/merge/worker.ts": "4d3088d6f8a05b166d87152dc0e156c6c2dd1f512d176f9e7e1e6871ea20e52e",
+    "services/main/src/services/units/merge/service.ts": "826c9aa0011b7240054f81b257143098030f84c66b8986fe4e90683e9d7cdde7",
+    "services/main/src/services/units/merge/worker.ts": "8dd80b470dd36618d9d6ee3ae55b3b95f7aa28d4119480fdd14af575170873a8",
     "services/main/src/services/catalog/source-bindings.ts": "f616a5c955aadbbe14b203138c1c2689f3167b4aebc447ec087af15281bba02f",
     "services/main/src/services/catalog/storage.ts": "1d04120de14dc16ea71644a0ad90af4c6e464a59260c16d58a4764149c0cc49f",
     "services/main/src/services/catalog/merge-read.ts": "be743bca7132df148d2ede3747ed42c731dc177f35f73c1ca3b415c18d7191c3",
