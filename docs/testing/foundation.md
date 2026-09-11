@@ -344,3 +344,32 @@ The [Realm owner](../../services/main/src/services/realms/README.md) records the
 lock protocol, moderation retention and workload estimates. Native roster
 presentation/paging, target member revisions, rule-backed moderation history,
 bounded acknowledgement cleanup and transitive disclosure remain separate work.
+
+## Native Realm rosters and bounded paging
+
+`task services-main:db:realm-roster:check` runs
+[check-realm-roster.ts](../../services/main/scripts/check-realm-roster.ts).
+The [pinned run](database/realm-roster-evidence.json) passes 46 assertions,
+including 27 signed-session requests. The pre-fix endpoint returned HTTP 500
+because native Self identities had no retired Unit localization.
+
+The fixture checks native public names/avatars, private Auth-name exclusion,
+absent presentation, regional BCP 47 tags, withheld private Entity metadata,
+owner identity, ordinary denied reads and grant revocation at the exact resource
+fence. Presentation and canonical addresses use the read transaction. The
+shared Realm account checkpoint also retains current Self-revision validation.
+
+A 10,001-member roster contains 10,000 nonmatching candidates before the single
+active member. Traversal advances through 19 empty filtered pages and returns
+the matching member once on page 20. Dense pages respect the requested limit
+and do not repeat their boundary. The fixture captures the actual service SQL
+through its database logger, then explains it before and after adding 100,000
+background memberships. The final selective plan uses `realm_member_pkey`,
+returns 513 candidate/lookahead rows, uses 12 shared buffers and has no Sort.
+No planner flags force an index. The sample and its prior attempts remain only
+in the disposable target; these timings are not 500M/3B load acceptance.
+
+OpenAPI and all SDKs include nullable native presentation language,
+`afterProfileId` and `nextCursor`. Consuming this traversal in the frontend is
+part of G5. The [Realm owner](../../services/main/src/services/realms/README.md#roster-reads)
+records pagination and disclosure semantics, workload estimates and skew limits.

@@ -50,6 +50,24 @@ a plausible count; parent-Realm deletion may remove the aggregate through its FK
 The native projection fixture checks activation, muting, deletion, relocation,
 missing/underflow rejection and parent deletion.
 
+## Roster reads
+
+Roster reads recheck the account, captured Self revision and `realm.members.read`
+in their transaction. They hydrate public native Entity names and avatars in a
+bounded batch. A private Auth name is never a roster label. Missing or non-public
+Entity presentation yields null name, language, avatar and address; the authorized
+Realm membership reference remains visible. Presentation languages retain native
+BCP 47 tags instead of being forced into the authoring-language enum. Canonical
+address projection uses the caller's transaction.
+
+The live cursor is the last consumed `profileId`, supplied as `afterProfileId` on
+the next request. Members are ordered by immutable profile UUID. Output is capped
+at 100. Without a state filter, candidate work is the requested limit plus one;
+with a state filter, at most 512 candidates plus one lookahead are read before
+filtering. An empty filtered page can therefore carry `nextCursor`; only null
+means exhaustion. This is live keyset traversal, not a frozen historical roster.
+Only returned members are hydrated. No whole-roster sort or count is needed.
+
 ## Workload and qualification
 
 Retain the 500,000,000-row baseline and 3,000,000,000-row estimate for potentially
@@ -81,5 +99,18 @@ storage can route by Realm while account-facing lookup needs its own maintained
 projection. Qualify their FK, cutover and reconciliation behavior before use.
 Measure fence hold/wait time and hot-Realm write latency under sustained load; local two-connection checks do not establish 500M/3B throughput.
 [Foundation verification](../../../../../docs/testing/foundation.md#realm-membership-admission)
-records the executable API and race cases. Native roster presentation/paging, broader ownership transitions, transitive
-Realm access subjects and exact disclosure fences require remaining qualification.
+records the executable API and race cases. Broader ownership transitions,
+transitive Realm access subjects and exact disclosure fences require remaining qualification.
+
+Roster candidate extraction is O(log N + K) on the Realm/member primary key, with
+K at most 513; PostgreSQL may choose the narrower profile index when a Realm
+dominates the relation. Monitor actual buffers and filtered rows under skew. At
+5,000 roster pages/s, budget up to 505,000 candidates/s without state filtering
+or 2,565,000/s for sparse filters, plus at most 500,000 public Entity summaries/s.
+These are upper-bound planning rates, not measured throughput. Random heap access
+can touch one page per candidate; low-latency reads at that extreme require
+Realm-local storage/cache locality or a qualified covering projection. The
+100 ms p95 read target remains a load gate. No new indexes or stored rows are
+required by this change at the 500M/3B scales. Bounded candidate metadata and
+at most 100 names/avatars keep application memory independent of roster size;
+long authority histories and address ancestry retain their separate owner budgets.

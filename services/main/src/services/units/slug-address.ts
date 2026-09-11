@@ -8,7 +8,7 @@ import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { recordAuditEvent } from "../audit";
 import type { Authorization } from "../authorization";
-import { database, type DatabaseTransaction } from "../database";
+import { database, type DatabaseExecutor, type DatabaseTransaction } from "../database";
 import { unitSlugAddress, zonePage } from "../database/schema";
 import type { UnitOwner } from "@rezics/reference";
 import { readUnitStateById, type UnitState } from "./query";
@@ -295,6 +295,7 @@ function isPublicAddressNode(value: {
 /** Bounded ID input; each depth uses one index seek and one concrete owner lookup per candidate. */
 export async function getPublicCanonicalUnitSlugAddresses(
 	unitIds: readonly string[],
+	executor: DatabaseExecutor = database,
 ): Promise<ReadonlyMap<string, PublicCanonicalUnitSlugAddress>> {
 	if (unitIds.length > 512)
 		throw new RangeError("At most 512 canonical addresses can be projected at once");
@@ -311,7 +312,7 @@ export async function getPublicCanonicalUnitSlugAddresses(
 		const ids = [...new Set(states.filter((s) => !s.done).map((s) => s.currentId))];
 		if (!ids.length) break;
 		const state = unitStateRelation(unitSlugAddress.targetUnitId, "slug_target_state");
-		const rows = await database
+		const rows = await executor
 			.select({
 				targetId: unitSlugAddress.targetUnitId,
 				scopeUnitId: unitSlugAddress.scopeUnitId,

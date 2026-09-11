@@ -1,3 +1,4 @@
+import { RealmRosterPageLimit } from "../../realms/roster-contracts";
 import type { StaticDecode } from "typebox";
 import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
@@ -190,9 +191,10 @@ export const RealmPagesResponse = t.Object({
 export const ListRealmMembersQuery = t.Object(
 	{
 		profileId: t.Optional(Uuid),
+		afterProfileId: t.Optional(Uuid),
 		state: t.Optional(RealmMemberState),
 		...LocalizationLanguageQuery,
-		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: RealmRosterPageLimit, default: 50 })),
 	},
 	{ additionalProperties: false },
 );

@@ -151,7 +151,7 @@ export const RealmMemberListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			profileId: Uuid,
-			language: ContentLanguage,
+			language: t.Nullable(ContentLanguageTag),
 			name: t.Nullable(t.String()),
 			slugAddress: NullablePublicSlugAddressResponse,
 			avatar: AvatarResponse,
@@ -160,6 +160,7 @@ export const RealmMemberListResponse = t.Object({
 			joinedAt: DateTime,
 		}),
 	),
+	nextCursor: NullableUuid,
 });
 export const RealmMemberResponse = t.Object({
 	realmId: Uuid,

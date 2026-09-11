@@ -11,6 +11,7 @@ import { recordAuditEvent as appendAuditEvent } from "../../audit";
 import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
 import { joinRealm, leaveRealm, updateRealmMember } from "../../realms/membership";
+import { listRealmMembers } from "../../realms/roster";
 import {
 	isRealmVisible,
 	type RealmCapability,
@@ -1405,57 +1406,18 @@ export default new Elysia({ prefix: "/realms" })
 			query: ListRealmMembersQuery,
 			response: {
 				[StatusCodes.OK]: RealmMemberListResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"RealmCapabilityRequired",
+					"ParticipationDenied",
+					"AccountRestricted",
+					"AccountSuspended",
+					"AccountClosed",
+				]),
 			},
 			detail: { summary: "List Realm members", tags: ["Realms"] },
 		},
-		async ({ params, authorization, query }) => {
-			await authorization.realm.ensureCapability(params.realmId, "realm.members.read");
-			const [ownership] = await database
-				.select({ profileId: unitOwnership.profileId })
-				.from(unitOwnership)
-				.where(and(eq(unitOwnership.unitId, params.realmId), isNull(unitOwnership.revokedAt)))
-				.limit(1);
-			const members = await database
-				.select({
-					profileId: realmMember.profileId,
-					language: resolvedUnitLocalizationLanguage(
-						entityIdentity.id,
-						query.localizationLanguages,
-					),
-					name: resolvedUnitLocalizationTitle(entityIdentity.id, query.localizationLanguages),
-					avatar: resolvedUnitLocalizationAvatar(entityIdentity.id, query.localizationLanguages),
-					state: realmMember.state,
-					joinedAt: realmMember.joinedAt,
-				})
-				.from(realmMember)
-				.innerJoin(entityIdentity, eq(entityIdentity.id, realmMember.profileId))
-				.where(
-					and(
-						eq(realmMember.realmId, params.realmId),
-						query.profileId ? eq(realmMember.profileId, query.profileId) : undefined,
-						query.state ? eq(realmMember.state, query.state) : undefined,
-					),
-				)
-				.orderBy(desc(realmMember.joinedAt), desc(realmMember.profileId))
-				.limit(query.limit ?? 50);
-			const slugAddresses = await getPublicCanonicalUnitSlugAddresses(
-				members.map((member) => member.profileId),
-			);
-			return {
-				items: members.map(({ avatar, ...member }) => {
-					if (!member.language)
-						throw new Error(`Realm member ${member.profileId} has no localization`);
-					return {
-						...member,
-						isOwner: ownership?.profileId === member.profileId,
-						language: member.language,
-						slugAddress: slugAddresses.get(member.profileId) ?? null,
-						avatar: presentAvatar(avatar),
-					};
-				}),
-			};
-		},
+		({ params, authorization, query }) =>
+			database.transaction((tx) => listRealmMembers(tx, authorization, params.realmId, query)),
 	)
 	.patch(
 		"/:realmId/members/:profileId",

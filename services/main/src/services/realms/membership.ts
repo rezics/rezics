@@ -3,7 +3,6 @@ import { z } from "zod";
 import type { Authorization } from "../authorization";
 import { RealmRulesAcceptanceRequired } from "../authorization/errors";
 import { isRealmJoinable } from "../authorization/realm/policy";
-import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
 import {
 	RealmNotFound,
 	RealmMemberNotFound,
@@ -12,7 +11,6 @@ import {
 } from "../api/realms/errors";
 import type { DatabaseTransaction } from "../database";
 import {
-	authEntity,
 	realm,
 	realmMember,
 	realmRuleAcceptance,
@@ -24,37 +22,8 @@ import {
 import { recordAuditEvent } from "../audit";
 import { createNotification } from "../notifications/service";
 import { lockUnitAccessState } from "../authorization/unit/access-lock";
-import { ParticipationDenied } from "../participation/policy";
+import { admitRealmAccount } from "./account";
 import { currentRealmRuleRevisionReadLock } from "./rule-revision-lock";
-
-async function admitRealmAccount(
-	tx: DatabaseTransaction,
-	authorization: Authorization<string>,
-	action: "write" | "contribute",
-) {
-	const context = authorization.participationAuthority,
-		authUserId = authorization.authUserId;
-	if (!authUserId || !context || context.principal.authUserId !== authUserId)
-		throw new ParticipationDenied();
-	if (action === "contribute") await authorization.account.ensureCanContribute(tx);
-	else await authorization.account.ensureCanWrite(tx);
-	await ensureAccountAuthenticationAllowed(authUserId, tx);
-	const [binding] = await tx
-		.select({ entityId: authEntity.entityId })
-		.from(authEntity)
-		.where(
-			and(
-				eq(authEntity.authUserId, authUserId),
-				eq(authEntity.entityId, authorization.profileId),
-				eq(authEntity.state, "active"),
-				eq(authEntity.revision, context.authorizationRevision),
-			),
-		)
-		.limit(1)
-		.for("share");
-	if (!binding) throw new ParticipationDenied("Account self identity changed");
-	return binding;
-}
 
 /** Join as the authenticated self under current Realm policy and rule consent. @internal */
 export async function joinRealm(

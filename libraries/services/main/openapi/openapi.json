@@ -143323,6 +143323,12 @@
 						"schema": { "type": "string", "format": "uuid" }
 					},
 					{
+						"name": "afterProfileId",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "format": "uuid" }
+					},
+					{
 						"name": "state",
 						"in": "query",
 						"required": false,
@@ -143364,8 +143370,11 @@
 												"properties": {
 													"profileId": { "type": "string", "format": "uuid" },
 													"language": {
-														"enum": ["zh", "en", "ja", "ko", "de", "fr", "es"],
-														"type": "string"
+														"nullable": true,
+														"minLength": 1,
+														"maxLength": 255,
+														"pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$",
+														"type": ["string", "null"]
 													},
 													"name": { "nullable": true, "type": ["string", "null"] },
 													"slugAddress": {
@@ -143479,9 +143488,10 @@
 													"joinedAt"
 												]
 											}
-										}
+										},
+										"nextCursor": { "nullable": true, "type": ["string", "null"], "format": "uuid" }
 									},
-									"required": ["items"]
+									"required": ["items", "nextCursor"]
 								}
 							}
 						}
@@ -143498,7 +143508,13 @@
 											"properties": {
 												"code": {
 													"default": "RealmCapabilityRequired",
-													"enum": ["RealmCapabilityRequired"],
+													"enum": [
+														"RealmCapabilityRequired",
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed"
+													],
 													"type": "string"
 												},
 												"message": { "type": "string" },

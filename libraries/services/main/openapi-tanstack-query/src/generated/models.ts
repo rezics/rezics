@@ -119574,6 +119574,12 @@ export type GetApiRealmsByRealmIdMembersQuery = {
 	 * @type string | undefined
 	 */
 	profileId?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	afterProfileId?: string;
 	state?: GetApiRealmsByRealmIdMembersState;
 	localizationLanguages?: GetApiRealmsByRealmIdMembersLocalizationLanguagesEnum[];
 	/**
@@ -119584,19 +119590,6 @@ export type GetApiRealmsByRealmIdMembersQuery = {
 	 */
 	limit?: number;
 };
-
-export const GetApiRealmsByRealmIdMembersStatus200ItemsLanguageEnum = {
-	zh: "zh",
-	en: "en",
-	ja: "ja",
-	ko: "ko",
-	de: "de",
-	fr: "fr",
-	es: "es",
-} as const;
-
-export type GetApiRealmsByRealmIdMembersStatus200ItemsLanguageEnum =
-	(typeof GetApiRealmsByRealmIdMembersStatus200ItemsLanguageEnum)[keyof typeof GetApiRealmsByRealmIdMembersStatus200ItemsLanguageEnum];
 
 export const GetApiRealmsByRealmIdMembersStatus200ItemsAvatarIconPrefixEnum = {
 	fas: "fas",
@@ -119625,7 +119618,13 @@ export type GetApiRealmsByRealmIdMembersStatus200 = {
 		 * @type string
 		 */
 		profileId: string;
-		language: GetApiRealmsByRealmIdMembersStatus200ItemsLanguageEnum;
+		/**
+		 * @minLength 1
+		 * @maxLength 255
+		 * @pattern ^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$
+		 * @type string
+		 */
+		language: string | null;
 		name: string | null;
 		slugAddress: {
 			/**
@@ -119702,7 +119701,24 @@ export type GetApiRealmsByRealmIdMembersStatus200 = {
 		 */
 		joinedAt: string;
 	}[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	nextCursor: string | null;
 };
+
+export const GetApiRealmsByRealmIdMembersStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type GetApiRealmsByRealmIdMembersStatus403ErrorCodeEnum =
+	(typeof GetApiRealmsByRealmIdMembersStatus403ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdMembersStatus403ErrorCodeEnum];
 
 export type GetApiRealmsByRealmIdMembersStatus403 = {
 	error: {
@@ -119710,7 +119726,7 @@ export type GetApiRealmsByRealmIdMembersStatus403 = {
 		 * @default 'RealmCapabilityRequired'
 		 * @type string
 		 */
-		code: "RealmCapabilityRequired";
+		code: GetApiRealmsByRealmIdMembersStatus403ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
