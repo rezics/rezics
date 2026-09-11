@@ -43,6 +43,79 @@ try {
 	const realm = await id("insert into realm default values returning id"),
 		otherRealm = await id("insert into realm default values returning id"),
 		resource = await id("insert into realm default values returning id");
+	const secondMember = await id(
+		"insert into entity_identity(shape) values ('unresolved') returning id",
+	);
+	const count = async (realmId: string) =>
+		Number(
+			(
+				await db.query<{ active_member_count: string }>(
+					"select active_member_count from realm_stat where realm_id=$1",
+					[realmId],
+				)
+			).rows[0]?.active_member_count,
+		);
+	equal(await count(realm), 0);
+	await db.query(
+		"insert into realm_member(realm_id,profile_id,state) values ($1,$2,'active'),($1,$3,'pending')",
+		[realm, actor, secondMember],
+	);
+	equal(await count(realm), 1);
+	await db.query("update realm_member set state='muted' where realm_id=$1 and profile_id=$2", [
+		realm,
+		actor,
+	]);
+	equal(await count(realm), 0);
+	await db.query("update realm_member set state='active' where realm_id=$1 and profile_id=$2", [
+		realm,
+		actor,
+	]);
+	equal(await count(realm), 1);
+	await db.query("update realm_member set state='active' where realm_id=$1 and profile_id=$2", [
+		realm,
+		actor,
+	]);
+	equal(await count(realm), 1);
+	await db.query("update realm_member set state='active' where realm_id=$1 and profile_id=$2", [
+		realm,
+		secondMember,
+	]);
+	equal(await count(realm), 2);
+	await db.query("delete from realm_member where realm_id=$1 and profile_id=$2", [realm, actor]);
+	equal(await count(realm), 1);
+	await db.query("update realm_member set realm_id=$1 where realm_id=$2 and profile_id=$3", [
+		otherRealm,
+		realm,
+		secondMember,
+	]);
+	equal(await count(realm), 0);
+	equal(await count(otherRealm), 1);
+	await db.query("delete from realm_member where realm_id=$1 and profile_id=$2", [
+		otherRealm,
+		secondMember,
+	]);
+	equal(await count(otherRealm), 0);
+	await db.query("insert into realm_member(realm_id,profile_id) values ($1,$2)", [realm, actor]);
+	await db.query("savepoint counter_corruption");
+	await db.query("delete from realm_stat where realm_id=$1", [realm]);
+	await rejects("delete from realm_member where realm_id=$1 and profile_id=$2", [realm, actor]);
+	await db.query("rollback to savepoint counter_corruption");
+	await db.query("savepoint counter_underflow");
+	await db.query("update realm_stat set active_member_count=0 where realm_id=$1", [realm]);
+	await rejects("delete from realm_member where realm_id=$1 and profile_id=$2", [realm, actor]);
+	await db.query("rollback to savepoint counter_underflow");
+	equal(await count(realm), 1);
+	const deletedRealm = await id("insert into realm default values returning id");
+	await db.query("insert into realm_member(realm_id,profile_id) values ($1,$2)", [
+		deletedRealm,
+		actor,
+	]);
+	await db.query("delete from realm where id=$1", [deletedRealm]);
+	equal(
+		(await db.query("select 1 from realm_stat where realm_id=$1", [deletedRealm])).rows.length,
+		0,
+	);
+
 	await db.query("insert into realm_unit(realm_id,unit_id) values ($1,$3),($2,$3)", [
 		realm,
 		otherRealm,
@@ -157,7 +230,7 @@ try {
 			assertions,
 			rollback: true,
 			scope:
-				"latest Realm state-action ordering, exact scope, immutable evidence; single-session deterministic order, not concurrent throughput",
+				"Realm membership counters and latest governance projection, exact scope, immutable evidence; single-session deterministic order, not concurrent throughput",
 		}),
 	);
 } finally {

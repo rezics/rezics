@@ -10,9 +10,8 @@ import { StatusCodes } from "http-status-codes";
 import { recordAuditEvent as appendAuditEvent } from "../../audit";
 import session, { resolveIdentity } from "../../auth/session";
 import type { Authorization } from "../../authorization";
-import { RealmRulesAcceptanceRequired } from "../../authorization/errors";
+import { joinRealm, leaveRealm, updateRealmMember } from "../../realms/membership";
 import {
-	isRealmJoinable,
 	isRealmVisible,
 	type RealmCapability,
 } from "../../authorization/realm/policy";
@@ -62,7 +61,6 @@ import {
 import { runVoteTransaction } from "../../database/vote-admission";
 import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
 import { enqueueGovernanceReportDelivery } from "../../governance/report-delivery";
-import { createNotification } from "../../notifications/service";
 import { fractionalPositionBetween } from "../../ordering/position";
 import { decodeCursor, encodeCursor } from "../../pagination";
 import { assertWikiPostWriteDocument, createWikiPost } from "../../posts/wiki";
@@ -140,10 +138,7 @@ import {
 } from "../slug-addresses/schema";
 import { RealmUnitTagVoteListQuery, RealmUnitTagVoteListResponse } from "../tags/schema";
 import {
-	RealmMemberNotFound,
-	RealmMembershipNotFound,
 	RealmNotFound,
-	RealmOwnerLeaveForbidden,
 	RealmRuleRevisionChanged,
 	RealmScoreContextPostKindInvalid,
 	RealmScoreContextPostNotMounted,
@@ -1361,77 +1356,19 @@ export default new Elysia({ prefix: "/realms" })
 			params: RealmParams,
 			response: {
 				[StatusCodes.OK]: MembershipResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"ParticipationDenied",
+					"AccountRestricted",
+					"AccountSuspended",
+					"AccountClosed",
+				]),
 				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRulesAcceptanceRequired"]),
 			},
 			detail: { summary: "Join Realm", tags: ["Realms"] },
 		},
-		async ({ params, entity }) => {
-			const [record] = await database
-				.select({
-					status: realm.status,
-					visibility: realm.visibility,
-					joinPolicy: realm.joinPolicy,
-				})
-				.from(realm)
-				.where(eq(realm.id, params.realmId))
-				.limit(1);
-			if (!record) throw new RealmNotFound();
-			const current = await findRealmMembership(params.realmId, entity.id);
-			if (!isRealmJoinable(record.status, record.visibility, current?.state))
-				throw new RealmNotFound();
-			const state = record.joinPolicy === "approval" ? "pending" : "active";
-			await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${params.realmId}::text, 0))`,
-				);
-				const [rules] = await tx
-					.select({
-						id: realmRuleRevision.id,
-						acknowledgementMode: realmRuleRevision.acknowledgementMode,
-						requireOnJoin: realmRuleRevision.requireOnJoin,
-					})
-					.from(realmRuleRevision)
-					.where(eq(realmRuleRevision.realmId, params.realmId))
-					.orderBy(desc(realmRuleRevision.version))
-					.limit(1);
-				const acceptsOnFollow = rules?.acknowledgementMode === "implicit_on_follow";
-				if (rules?.requireOnJoin && !acceptsOnFollow) {
-					const [existingAcceptance] = await tx
-						.select({ revisionId: realmRuleAcceptance.revisionId })
-						.from(realmRuleAcceptance)
-						.where(
-							and(
-								eq(realmRuleAcceptance.revisionId, rules.id),
-								eq(realmRuleAcceptance.profileId, entity.id),
-							),
-						)
-						.limit(1);
-					if (!existingAcceptance) throw new RealmRulesAcceptanceRequired({ revisionId: rules.id });
-				}
-				await tx
-					.insert(realmMember)
-					.values({ realmId: params.realmId, profileId: entity.id, state })
-					.onConflictDoUpdate({
-						target: [realmMember.realmId, realmMember.profileId],
-						set: { state },
-					});
-				await tx
-					.insert(unitFollow)
-					.values({ followerProfileId: entity.id, unitId: params.realmId })
-					.onConflictDoNothing();
-				if (rules && acceptsOnFollow)
-					await tx
-						.insert(realmRuleAcceptance)
-						.values({
-							revisionId: rules.id,
-							profileId: entity.id,
-							language: null,
-						})
-						.onConflictDoNothing();
-			});
-			return { state };
-		},
+		({ params, authorization }) =>
+			database.transaction((tx) => joinRealm(tx, authorization, params.realmId)),
 	)
 	.delete(
 		"/:realmId/membership",
@@ -1440,6 +1377,12 @@ export default new Elysia({ prefix: "/realms" })
 			params: RealmParams,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"ParticipationDenied",
+					"AccountRestricted",
+					"AccountSuspended",
+					"AccountClosed",
+				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMembershipNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmOwnerLeaveForbidden"]),
 			},
@@ -1449,49 +1392,8 @@ export default new Elysia({ prefix: "/realms" })
 				responses: NoContentResponse,
 			},
 		},
-		async ({ params, entity }) => {
-			await database.transaction(async (tx) => {
-				const [membership] = await tx
-					.select({ profileId: realmMember.profileId })
-					.from(realmMember)
-					.where(and(eq(realmMember.realmId, params.realmId), eq(realmMember.profileId, entity.id)))
-					.limit(1);
-				if (!membership) throw new RealmMembershipNotFound();
-				const [ownership] = await tx
-					.select({ id: unitOwnership.id })
-					.from(unitOwnership)
-					.where(
-						and(
-							eq(unitOwnership.unitId, params.realmId),
-							eq(unitOwnership.profileId, entity.id),
-							isNull(unitOwnership.revokedAt),
-						),
-					)
-					.limit(1);
-				if (ownership) throw new RealmOwnerLeaveForbidden();
-				await tx
-					.delete(realmMember)
-					.where(
-						and(eq(realmMember.realmId, params.realmId), eq(realmMember.profileId, entity.id)),
-					);
-				await tx
-					.delete(unitFollow)
-					.where(
-						and(eq(unitFollow.followerProfileId, entity.id), eq(unitFollow.unitId, params.realmId)),
-					);
-				const revisions = tx
-					.select({ id: realmRuleRevision.id })
-					.from(realmRuleRevision)
-					.where(eq(realmRuleRevision.realmId, params.realmId));
-				await tx
-					.delete(realmRuleAcceptance)
-					.where(
-						and(
-							eq(realmRuleAcceptance.profileId, entity.id),
-							inArray(realmRuleAcceptance.revisionId, revisions),
-						),
-					);
-			});
+		async ({ params, authorization }) => {
+			await database.transaction((tx) => leaveRealm(tx, authorization, params.realmId));
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 	)
@@ -1563,54 +1465,22 @@ export default new Elysia({ prefix: "/realms" })
 			body: UpdateRealmMemberBody,
 			response: {
 				[StatusCodes.OK]: RealmMemberResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"RealmCapabilityRequired",
+					"ParticipationDenied",
+					"AccountRestricted",
+					"AccountSuspended",
+					"AccountClosed",
+				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmMemberNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmOwnerLeaveForbidden"]),
 			},
 			detail: { summary: "Update Realm member", tags: ["Realms"] },
 		},
-		async ({ params, entity, authorization, body }) => {
-			await authorization.realm.ensureCapability(params.realmId, "realm.members.manage");
-			const target = await findRealmMembership(params.realmId, params.profileId);
-			if (!target) throw new RealmMemberNotFound();
-			const result = await database.transaction(async (tx) => {
-				const [targetOwnership] = await tx
-					.select({ id: unitOwnership.id })
-					.from(unitOwnership)
-					.where(
-						and(
-							eq(unitOwnership.unitId, params.realmId),
-							eq(unitOwnership.profileId, params.profileId),
-							isNull(unitOwnership.revokedAt),
-						),
-					)
-					.limit(1);
-				if (targetOwnership && body.state !== "active") throw new RealmOwnerLeaveForbidden();
-				const [row] = await tx
-					.update(realmMember)
-					.set({ state: body.state })
-					.where(
-						and(
-							eq(realmMember.realmId, params.realmId),
-							eq(realmMember.profileId, params.profileId),
-						),
-					)
-					.returning();
-				if (!row) throw new RealmMemberNotFound();
-				await createNotification(tx, {
-					recipientEntityId: params.profileId,
-					actorProfileId: entity.id,
-					kind: "realm",
-					subjectUnitId: params.realmId,
-					payload: { type: "realm_event", event: "membership_updated" },
-				});
-				await recordAuditEvent(tx, entity.id, "realm.members.update", params.realmId, {
-					profileId: params.profileId,
-				});
-				return { ...row, isOwner: Boolean(targetOwnership) };
-			});
-			return result;
-		},
+		({ params, authorization, body }) =>
+			database.transaction((tx) =>
+				updateRealmMember(tx, authorization, params.realmId, params.profileId, body.state),
+			),
 	)
 	.put(
 		"/:realmId/rules",

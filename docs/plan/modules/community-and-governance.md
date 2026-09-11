@@ -4,7 +4,7 @@ Dependencies: M01-M03. Owners: dictionary D09-D13 and existing access, rule and 
 
 ## Remaining work
 
-- Qualify Realm community grouping/membership/rules, local selections and explicit publication relationships independently from Collection membership and Zone placement.
+- Qualify Realm community grouping/membership/rules, local selections and explicit publication relationships independently from Collection membership and Zone placement. Add member-revision preconditions and rule-backed moderation history; make departure acknowledgement cleanup bounded before scale acceptance.
 - Implement and qualify [Collection-based wiki composition](../../architecture/realm-collection-zone.md): Realm wiki pages in one or more Collections, Zone page/dock infrastructure presenting multiple Collections, and reuse of a Collection across Zones without copying content or granting access.
 - Implement Thread topics/origins/response targets, closed states, staged topology and concurrent-leaf catch-up.
 - Qualify reviews/scales, polls, tags/judgments, follow, collections, private favorites and progress with feature-specific actor uniqueness.

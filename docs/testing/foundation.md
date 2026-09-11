@@ -311,3 +311,36 @@ membership acceptance when the original invitation's other authority remains val
 This qualifies the tested account-state and enforcement paths, separate from
 binding recovery, Realm membership and whole restoration-frontier coverage. The membership owner records added query demand
 under the unchanged 500M/3B workload envelope; this run is not load acceptance.
+
+## Realm membership admission
+
+`task services-main:db:realm-membership:check` runs
+[check-realm-membership.ts](../../services/main/scripts/check-realm-membership.ts).
+The [pinned fresh run](database/realm-membership-evidence.json) passes 65 assertions,
+including 28 signed-session requests. The fixture exercises join, departure and moderator requests,
+current rule acknowledgements and independent-connection authority races. Its
+first pre-fix HTTP result changed a muted member back to active on a repeated
+join. Departure must also retain muted/banned/removed moderation rows so a
+leave/rejoin sequence cannot remove a restriction.
+
+Cases include open/approval admission, preserving an already active member,
+private/draft/deleted/moderation-removed rejection, explicit and implicit rule
+consent, ordinary departure, owner-departure denial and authorized moderation.
+Race cases cover a changed join policy, an existing or newly inserted ban,
+new required rules, admission before moderation, manager-grant revocation and
+ownership assignment before departure. Probes identify the exact blocker;
+stale Self-binding revisions must fail. Fixture records remain only in the
+explicitly disposable database, with external email delivery disabled by log mode.
+
+The [Realm projection fixture](../../services/main/scripts/check-realm-governance-projection.ts)
+passes 55 assertions covering governance and counters. It checks active-member counter transitions, relocation, deletion, missing
+counter/underflow failures and parent-Realm deletion. The pre-fix decrement tried
+to insert a negative value and failed its CHECK before conflict handling. The
+forward migration installs an UPDATE-based decrement while preserving fail-closed
+counter integrity. Both fixtures pass in the full fresh database check: six migrations and 15,618 SQL
+statements, canonical SQL and constraint verification, healthy indexes and no schema drift.
+
+The [Realm owner](../../services/main/src/services/realms/README.md) records the
+lock protocol, moderation retention and workload estimates. Native roster
+presentation/paging, target member revisions, rule-backed moderation history,
+bounded acknowledgement cleanup and transitive disclosure remain separate work.

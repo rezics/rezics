@@ -119325,6 +119325,29 @@ export type PutApiRealmsByRealmIdMembershipStatus200 = {
 	state: string;
 };
 
+export const PutApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type PutApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum];
+
+export type PutApiRealmsByRealmIdMembershipStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: PutApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type PutApiRealmsByRealmIdMembershipStatus404 = {
 	error: {
 		/**
@@ -119381,6 +119404,7 @@ export type PutApiRealmsByRealmIdMembershipOptions = {
 
 export type PutApiRealmsByRealmIdMembershipResponses = {
 	"200": PutApiRealmsByRealmIdMembershipStatus200;
+	"403": PutApiRealmsByRealmIdMembershipStatus403;
 	"404": PutApiRealmsByRealmIdMembershipStatus404;
 	"409": PutApiRealmsByRealmIdMembershipStatus409;
 	"422": PutApiRealmsByRealmIdMembershipStatus422;
@@ -119393,6 +119417,7 @@ export type PutApiRealmsByRealmIdMembershipResponses = {
  */
 export type PutApiRealmsByRealmIdMembershipResponse =
 	| PutApiRealmsByRealmIdMembershipStatus200
+	| PutApiRealmsByRealmIdMembershipStatus403
 	| PutApiRealmsByRealmIdMembershipStatus404
 	| PutApiRealmsByRealmIdMembershipStatus409
 	| PutApiRealmsByRealmIdMembershipStatus422
@@ -119409,6 +119434,29 @@ export type DeleteApiRealmsByRealmIdMembershipPath = {
 };
 
 export type DeleteApiRealmsByRealmIdMembershipStatus204 = void;
+
+export const DeleteApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type DeleteApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum];
+
+export type DeleteApiRealmsByRealmIdMembershipStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: DeleteApiRealmsByRealmIdMembershipStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
 
 export type DeleteApiRealmsByRealmIdMembershipStatus404 = {
 	error: {
@@ -119466,6 +119514,7 @@ export type DeleteApiRealmsByRealmIdMembershipOptions = {
 
 export type DeleteApiRealmsByRealmIdMembershipResponses = {
 	"204": DeleteApiRealmsByRealmIdMembershipStatus204;
+	"403": DeleteApiRealmsByRealmIdMembershipStatus403;
 	"404": DeleteApiRealmsByRealmIdMembershipStatus404;
 	"409": DeleteApiRealmsByRealmIdMembershipStatus409;
 	"422": DeleteApiRealmsByRealmIdMembershipStatus422;
@@ -119478,6 +119527,7 @@ export type DeleteApiRealmsByRealmIdMembershipResponses = {
  */
 export type DeleteApiRealmsByRealmIdMembershipResponse =
 	| DeleteApiRealmsByRealmIdMembershipStatus204
+	| DeleteApiRealmsByRealmIdMembershipStatus403
 	| DeleteApiRealmsByRealmIdMembershipStatus404
 	| DeleteApiRealmsByRealmIdMembershipStatus409
 	| DeleteApiRealmsByRealmIdMembershipStatus422
@@ -119774,13 +119824,24 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdStatus200 = {
 
 export type PatchApiRealmsByRealmIdMembersByProfileIdStatus400 = MalformedRequestBody;
 
+export const PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+} as const;
+
+export type PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum =
+	(typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum)[keyof typeof PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum];
+
 export type PatchApiRealmsByRealmIdMembersByProfileIdStatus403 = {
 	error: {
 		/**
 		 * @default 'RealmCapabilityRequired'
 		 * @type string
 		 */
-		code: "RealmCapabilityRequired";
+		code: PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};

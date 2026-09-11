@@ -1,0 +1,47 @@
+{
+  "baseCommit": "c8673d8de9930c52fdc397d0e1b521daa854cfd8",
+  "sourceDigests": {
+    "services/main/scripts/check-realm-membership.ts": "9b18187b76f017c3b634651e08ca28cfaf1faac8e4cd827648f945bf9e8ceaa1",
+    "services/main/src/services/realms/membership.ts": "5f28b2f527109240b9ac5e857b97c4eaf77e7c2c2fe42e8a75eecbf796756ce9",
+    "services/main/src/services/api/realms/index.ts": "51a6ee90f9de02bfb5741552eb16e83cd4b80ead65b109e23db96bb155b420c4",
+    "services/main/src/services/authorization/realm/policy.ts": "69791c164ddb35228cdc30a29704b25fa05b8e087860af3e7f4d20b40f45aa1c",
+    "services/main/src/services/realms/rule-revision-lock.ts": "5da775b55d742883ea9a255b5d73f6356036759c61274e94983b0d6e8bb3aee4",
+    "services/main/scripts/check-realm-governance-projection.ts": "276049473b809821fa31b76740400453e2bea72a0a23e4ff218d6cd7aeb5b866",
+    "services/main/src/services/database/schema/postgres/platform-aggregates.sql": "e7a918862930b91083d70fca6b4e7f999186c89fafdc64ee26666303ec0ed2ac",
+    "services/main/src/services/database/schema/postgres/manifest.ts": "fa46758f710c5c95e64c6097eab60ae30f627a780f6151dad9ccba25ed23d9b9",
+    "services/main/src/services/database/migrations/atlas.sum": "0193a8aa1b9186599d0e8a95cc42b2ffbb52c3ae3140c07843a938fe8d5c2938"
+  },
+  "node": "v26.8.2",
+  "platform": "linux/x64",
+  "runtime": {
+    "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "default_isolation": "read committed"
+  },
+  "checks": 65,
+  "httpChecks": 28,
+  "realmAdmissionQualified": true,
+  "departureModerationRetentionQualified": true,
+  "directModeratorRevocationQualified": true,
+  "ownerDepartureFenceQualified": true,
+  "verification": {
+    "command": "task services-main:db:check",
+    "freshMigrations": 6,
+    "freshSqlStatements": 15618,
+    "counterAndProjectionAssertions": 55,
+    "typechecksPassed": [
+      "main",
+      "openapi-fetch",
+      "openapi-tanstack-query",
+      "public-sdk",
+      "web"
+    ],
+    "testFilesPassed": 332,
+    "testsPassed": 1788,
+    "openapiGenerated": true,
+    "passed": true,
+    "canonicalSqlPassed": true,
+    "constraintsPassed": true,
+    "indexesHealthy": true,
+    "schemaDrift": false
+  }
+}

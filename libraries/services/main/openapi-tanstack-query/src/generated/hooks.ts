@@ -819,6 +819,7 @@ import type {
 	DeleteApiReactionsUnitsByUnitIdStatus500,
 	DeleteApiRealmsByRealmIdMembershipOptions,
 	DeleteApiRealmsByRealmIdMembershipStatus204,
+	DeleteApiRealmsByRealmIdMembershipStatus403,
 	DeleteApiRealmsByRealmIdMembershipStatus404,
 	DeleteApiRealmsByRealmIdMembershipStatus409,
 	DeleteApiRealmsByRealmIdMembershipStatus422,
@@ -3332,6 +3333,7 @@ import type {
 	PutApiReactionsUnitsByUnitIdStatus500,
 	PutApiRealmsByRealmIdMembershipOptions,
 	PutApiRealmsByRealmIdMembershipStatus200,
+	PutApiRealmsByRealmIdMembershipStatus403,
 	PutApiRealmsByRealmIdMembershipStatus404,
 	PutApiRealmsByRealmIdMembershipStatus409,
 	PutApiRealmsByRealmIdMembershipStatus422,
@@ -54009,6 +54011,7 @@ export function putApiRealmsByRealmIdMembershipMutationOptions<TContext = unknow
 	return mutationOptions<
 		PutApiRealmsByRealmIdMembershipStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdMembershipStatus403
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
 			| PutApiRealmsByRealmIdMembershipStatus422
@@ -54034,6 +54037,7 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiRealmsByRealmIdMembershipStatus200,
 			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdMembershipStatus403
 				| PutApiRealmsByRealmIdMembershipStatus404
 				| PutApiRealmsByRealmIdMembershipStatus409
 				| PutApiRealmsByRealmIdMembershipStatus422
@@ -54053,6 +54057,7 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 	const baseOptions = putApiRealmsByRealmIdMembershipMutationOptions(config) as UseMutationOptions<
 		PutApiRealmsByRealmIdMembershipStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdMembershipStatus403
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
 			| PutApiRealmsByRealmIdMembershipStatus422
@@ -54066,6 +54071,7 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 	return useMutation<
 		PutApiRealmsByRealmIdMembershipStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdMembershipStatus403
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
 			| PutApiRealmsByRealmIdMembershipStatus422
@@ -54084,6 +54090,7 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 	) as UseMutationResult<
 		PutApiRealmsByRealmIdMembershipStatus200,
 		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdMembershipStatus403
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
 			| PutApiRealmsByRealmIdMembershipStatus422
@@ -54105,6 +54112,7 @@ export function deleteApiRealmsByRealmIdMembershipMutationOptions<TContext = unk
 	return mutationOptions<
 		DeleteApiRealmsByRealmIdMembershipStatus204,
 		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdMembershipStatus403
 			| DeleteApiRealmsByRealmIdMembershipStatus404
 			| DeleteApiRealmsByRealmIdMembershipStatus409
 			| DeleteApiRealmsByRealmIdMembershipStatus422
@@ -54130,6 +54138,7 @@ export function useDeleteApiRealmsByRealmIdMembership<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiRealmsByRealmIdMembershipStatus204,
 			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdMembershipStatus403
 				| DeleteApiRealmsByRealmIdMembershipStatus404
 				| DeleteApiRealmsByRealmIdMembershipStatus409
 				| DeleteApiRealmsByRealmIdMembershipStatus422
@@ -54152,6 +54161,7 @@ export function useDeleteApiRealmsByRealmIdMembership<TContext>(
 	) as UseMutationOptions<
 		DeleteApiRealmsByRealmIdMembershipStatus204,
 		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdMembershipStatus403
 			| DeleteApiRealmsByRealmIdMembershipStatus404
 			| DeleteApiRealmsByRealmIdMembershipStatus409
 			| DeleteApiRealmsByRealmIdMembershipStatus422
@@ -54165,6 +54175,7 @@ export function useDeleteApiRealmsByRealmIdMembership<TContext>(
 	return useMutation<
 		DeleteApiRealmsByRealmIdMembershipStatus204,
 		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdMembershipStatus403
 			| DeleteApiRealmsByRealmIdMembershipStatus404
 			| DeleteApiRealmsByRealmIdMembershipStatus409
 			| DeleteApiRealmsByRealmIdMembershipStatus422
@@ -54183,6 +54194,7 @@ export function useDeleteApiRealmsByRealmIdMembership<TContext>(
 	) as UseMutationResult<
 		DeleteApiRealmsByRealmIdMembershipStatus204,
 		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdMembershipStatus403
 			| DeleteApiRealmsByRealmIdMembershipStatus404
 			| DeleteApiRealmsByRealmIdMembershipStatus409
 			| DeleteApiRealmsByRealmIdMembershipStatus422

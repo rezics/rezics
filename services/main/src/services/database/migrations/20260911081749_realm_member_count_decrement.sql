@@ -1,3 +1,5 @@
+SET search_path TO public;
+
 -- Native owner integrity and derived state. This file is the canonical forward-maintained source.
 CREATE OR REPLACE FUNCTION public.apply_reaction_change(p_profile_id uuid, p_unit_id uuid, p_realm_id uuid, p_reaction text, p_occurred_at timestamp with time zone, p_direction bigint)
  RETURNS void
