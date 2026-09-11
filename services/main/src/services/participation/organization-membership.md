@@ -89,3 +89,8 @@ The [foundation fixture workflow](../../../../../docs/testing/foundation.md#cont
 records executable lifecycle/API/race evidence and its qualification boundaries.
 Use the installed native baseline and forward migrations; generated contracts
 remain owned by their existing OpenAPI/SDK tasks.
+
+The pending-admission fixture in the linked foundation workflow verifies both
+1,000-row limits through domain commands and direct SQL, slot reclamation, and
+competing last-slot admissions on independent connections. It does not replace
+sustained workload or migration/sharding qualification.

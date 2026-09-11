@@ -205,7 +205,7 @@ state. No invitation email or message is delivered.
 
 The fixture erases its four dummy accounts' private state at completion and retains
 only permitted public/operator records in the disposable database. This qualifies
-the tested lifecycle protocols; invitation-capacity saturation and 500M/3B load remain separate acceptance cases;
+the tested lifecycle protocols; 500M/3B load remains a separate acceptance case;
 the generation and suspended-binding cases are covered by the fixture below.
 The [membership owner](../../services/main/src/services/participation/organization-membership.md)
 retains the 1,000-pending limits, storage estimates and workload assumptions.
@@ -229,4 +229,22 @@ was appended; removing the recheck makes this regression fail.
 The [pinned run](database/membership-recovery-evidence.json) passes 20 assertions using native PostgreSQL commands. Transaction-local scenarios
 roll back; the control-wait case leaves only dummy fixture actors/control records
 in the explicitly disposable target. This does not qualify account-enforcement
-suspension, invitation-capacity saturation, restoration frontiers or load.
+suspension, restoration frontiers or load. Pending-admission saturation is covered below.
+
+## Pending membership admission limits
+
+`task services-main:db:membership-capacity:check` runs
+[check-membership-capacity.ts](../../services/main/scripts/check-membership-capacity.ts).
+The [pinned run](database/membership-capacity-evidence.json) passes 15 assertions:
+organization and recipient pending counts stop at 1,000 in both domain commands
+and direct SQL; repeats reuse an existing pending invitation at capacity;
+cancellation and expiry reclaim slots without reopening terminal identities.
+Two independent connections compete for the last organization slot and then the
+last recipient slot across different organizations. Each loser demonstrably
+waits for the exact winner, rechecks the bound and fails without exceeding 1,000.
+
+Setup uses native account/organization commands and keeps each controller below
+its separate grant limit. Dummy setup rows commit only to the disposable database
+so the race clients can see them; reset that target to remove them. This proves
+admission bounds and reclamation semantics, not 500M/3B throughput or sustained
+flood handling. The existing membership storage, keyset and erasure budgets remain.

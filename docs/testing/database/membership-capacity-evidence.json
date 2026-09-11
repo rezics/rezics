@@ -1,0 +1,30 @@
+{
+  "baseCommit": "f62a4658c5b140e83a7101a6e53a4ed3885a9306",
+  "sourceDigests": {
+    "services/main/scripts/check-membership-capacity.ts": "1bf65e4b794ee1ef768653b326e8cab3cc4b429794a4d938471db717471dfcf2",
+    "services/main/src/services/participation/membership.ts": "ae824c293825710a8096c97d0be4c3985b71ae12a87a6797489cd053d6ffcbf7",
+    "services/main/src/services/participation/organizations.ts": "4bb41839c96194bb0824c36200a70f551d4cfac61572c6d3218eaee06b4a0bd1",
+    "services/main/src/services/participation/lifecycle.ts": "6932933657910ecfe24bc1ecfec43fbe463ffba301d33fbc57d2ea0b38aa827b",
+    "services/main/src/services/database/schema/organization-membership.ts": "572fb135e83efc73095aaba1538df32f23710d4d61ec2c5f9b99907816aedc9f",
+    "services/main/src/services/database/schema/postgres/organization-membership.sql": "b70991055610f48ce5efee495e9dcdaf8b49265598cd8383add61ac7ab6b89ef",
+    "services/main/src/services/database/migrations/atlas.sum": "5fb195c51729b80d46bc5465d58560f13de318049030c756b24a3ca1cd3ea33e"
+  },
+  "node": "v26.8.2",
+  "platform": "linux/x64",
+  "runtime": {
+    "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "default_isolation": "read committed"
+  },
+  "checks": 15,
+  "organizationPendingLimit": 1000,
+  "recipientPendingLimit": 1000,
+  "exactLastSlotRaces": 2,
+  "dummyRowsCommittedToDisposableTarget": true,
+  "verification": {
+    "command": "DATABASE_ADMIN_URL=<disposable target> task services-main:db:membership-capacity:check",
+    "passed": true,
+    "typecheckPassed": true,
+    "schemaChanges": false,
+    "loadQualification": false
+  }
+}
