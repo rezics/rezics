@@ -6,6 +6,12 @@ packs belong to design validation and are not inputs to this suite.
 
 ## Run
 
+This harness owns reproducible native relationship-load datasets. Use its bounded
+`--rows`, `--seed` and isolated-container lifecycle for scale experiments; ordinary
+development content belongs to the main seed service. Dataset support follows the
+native workload matrix below, with each additional owner requiring its own fixture
+contracts and measured distribution.
+
 Use Docker, Node/Yarn, Task and Bun 1.4.2 or newer. The first command builds the
 repository's PostgreSQL/PGroonga image and the pinned gMark generator. k6 is
 downloaded into `.temp/performance-tools` with a pinned SHA-256 checksum.
