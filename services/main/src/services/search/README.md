@@ -78,6 +78,12 @@ filter cannot fill the requested page inside that budget, Search returns fewer r
 cursor positioned after the last scanned candidate. It never scans the rest of the corpus to
 fill one request.
 
+The `credit` predicate names credited Entity identities, including organizations.
+The separate `credited-profile` predicate restricts those credits to publicly
+visible Entities with active `auth_entity` bindings. A catalog Entity without a
+Self binding is not an account profile. Both predicates retain parameterized UUIDs
+and the owning content's current disclosure checks.
+
 Positive Unit ID, Realm-placement, credit-attribution, subject-association, publisher, Tag,
 Score, Post-subject/context, and Collection-item predicates expose an indexed candidate-set
 proof. Language and kind alone deliberately do not: their sets can scale with the corpus. When

@@ -230,3 +230,35 @@ cleanup cannot keep pace, first measure concurrent SKIP LOCKED drains and storag
 capacity; a later time-partitioned design must preserve global UUID/replay uniqueness
 and account erasure across retained partitions before cutover. The current local
 fixture does not qualify that deployment or the full M09 capacity gate.
+
+## Related-post reads
+
+Shared subjects and publicly presented Entity credits supply context before the
+general recommendation fallback. Organization credits participate without an Auth
+Self binding. The separate Search `credited-profile` filter intentionally requires
+an active Auth–Entity binding and a publicly visible Entity; it uses `auth_entity`
+and does not equate every credited Entity with an account profile.
+
+Candidate generation, ranking and final feed hydration enforce public lifecycle,
+moderation and viewer rating eligibility. A reply also requires a public, approved,
+undeleted root within that rating policy. Direct recommendation seeds must pass
+current read and rating checks; a reply seed additionally requires its root to
+pass both. Enabling a rating in account preferences permits otherwise eligible
+content; ownership or an old recommendation score does not widen that preference.
+Explicit exclusions stay effective when personalization is off, and an excluded
+cursor anchor can locate continuation without being returned again.
+
+There are at most 32 presented seed credits and three source searches (subject,
+credit and general fallback). Each search retains its existing 4,096-candidate
+scan budget and returns at most 256 candidates. The union is capped at 256 before
+ranking and at 50 for a returned page. These limits bound per-request work, not
+exhaustive coverage of every related post. Positive credit predicates use the
+existing reverse-attribution candidate path. The root rating is a scalar condition
+inside the existing reply/root lookup; a direct reply seed adds one reply PK and
+one root PK lookup. No rows or indexes are added at the 500M/3B planning scales.
+Hot credits, sparse filters and the combined Search/feed workload still need their
+capacity gate; small HTTP fixtures do not establish production throughput.
+
+[Related-post qualification](../../../../../docs/testing/recommendations.md#related-post-http-reads)
+records native Entity credits, current disclosure, rating preferences and signed
+exclusion/cursor flows on the empty-snapshot fallback.

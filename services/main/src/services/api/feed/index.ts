@@ -499,6 +499,7 @@ export function getFeedEligibilityCondition(
 					and readable_root.visibility = 'public'
 					and readable_root.moderation_status = 'approved'
 					and readable_root.deleted_at is null
+					and ${getContentRatingCondition(contentRatingPolicyFromAllowlist(viewer.contentRatings), sql`readable_root.content_rating`)}
 			))`,
 		scope.languages?.length
 			? sql`(public.catalog_name_has_languages(${feedUnit.id}, ${sql.param(scope.languages)}::text[], false) or exists (

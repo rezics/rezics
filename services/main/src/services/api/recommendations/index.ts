@@ -1,7 +1,9 @@
 import { saveRecommendationExclusion, removeRecommendationExclusion } from "../../recommendations/exclusions";
 import { CatalogOwnerValues } from "@rezics/reference";
 import { unitStatesForIds } from "../../units/state-relation";
-import { and, eq } from "drizzle-orm";
+import { and, eq, exists, ne, or } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
+import { contentRatingPolicyFromAllowlist, getContentRatingCondition } from "../../content-rating/policy";
 import Elysia, { t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import type { StaticDecode } from "typebox";
@@ -13,6 +15,7 @@ import { recordRecommendationEvents } from "../../recommendations/events";
 import {
 	ContentRatingValues,
 	post,
+	postReply,
 } from "../../database/schema";
 import { parseJsonCursor } from "../../pagination";
 import { InvalidPaginationCursor } from "../../pagination/errors";
@@ -40,6 +43,9 @@ import {
 	UnitRecommendationQuery,
 	UnitRecommendationResponse,
 } from "./schema";
+
+const recommendationSeedRoot = alias(post, "recommendation_seed_root");
+const recommendationSeedReply = alias(postReply, "recommendation_seed_reply");
 
 const UnitRecommendationCursor = t.Object(
 	{
@@ -167,12 +173,16 @@ export default new Elysia({ prefix: "/recommendations" })
 					Number.isNaN(Date.parse(cursor.asOf)))
 			)
 				throw new InvalidPaginationCursor();
-            if (query.seedUnitId) {
-                const state=unitStatesForIds([query.seedUnitId],"recommendation_seed");
-                const [seed]=await database.select({id:state.id}).from(state)
-                 .where(and(getUnitReadCondition(identity.entity?.id,{},state),eq(state.moderationStatus,"approved"))).limit(1);
-                if (!seed) throw new UnitNotFound();
-            }
+			if (query.seedUnitId) {
+				const state = unitStatesForIds([query.seedUnitId], "recommendation_seed");
+				const [seed] = await database.select({ id: state.id }).from(state)
+					.where(and(
+						getUnitReadCondition(identity.entity?.id, {}, state),
+						eq(state.moderationStatus, "approved"),
+						getContentRatingCondition(contentRatingPolicyFromAllowlist(viewer.contentRatings), state.contentRating),
+					)).limit(1);
+				if (!seed) throw new UnitNotFound();
+			}
 			const snapshot = await resolvePageSnapshot(cursor);
 			const policyVersion = snapshot?.policyVersion ?? RecommendationPolicyVersion;
 			if (cursor?.policyVersion !== undefined && cursor.policyVersion !== policyVersion)
@@ -247,6 +257,19 @@ export default new Elysia({ prefix: "/recommendations" })
 						eq(post.id, params.postId),
 						getUnitReadCondition(identity.entity?.id, {}, post),
 						eq(post.moderationStatus, "approved"),
+						getContentRatingCondition(contentRatingPolicyFromAllowlist(viewer.contentRatings), post.contentRating),
+						or(
+							ne(post.kind, "reply"),
+							exists(database.select({ id: recommendationSeedReply.postId })
+								.from(recommendationSeedReply)
+								.innerJoin(recommendationSeedRoot, eq(recommendationSeedRoot.id, recommendationSeedReply.rootPostId))
+								.where(and(
+									eq(recommendationSeedReply.postId, post.id),
+									getUnitReadCondition(identity.entity?.id, {}, recommendationSeedRoot),
+									eq(recommendationSeedRoot.moderationStatus, "approved"),
+									getContentRatingCondition(contentRatingPolicyFromAllowlist(viewer.contentRatings), recommendationSeedRoot.contentRating),
+								))),
+						),
 					),
 				)
 				.limit(1);

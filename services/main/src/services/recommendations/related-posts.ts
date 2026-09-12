@@ -35,20 +35,49 @@ export async function recommendRelatedPosts(input: {
 		localizationLanguages: input.localizationLanguages,
 	};
 	const eligible = getFeedEligibilityCondition(input.viewer, feedQuery, input.asOf, input.afterId);
- const target=unitStateRelation(sql`null::uuid`,"search_unit");
- const base={branches:[{category:"posts" as const,sourceOwners:["post" as const],sourceShapes:["post","reply"]}],
-  contentRatings:[...input.viewer.contentRatings],contentRatingPolicy:contentRatingPolicyFromAllowlist(input.viewer.contentRatings),
-  ...(input.viewer.profileId ? {profileId:input.viewer.profileId} : {}),
-  additionalConditions:[eligible,sql`${target.id} <> ${input.seed.id}::uuid`],
-  bestSnapshotId:input.snapshot?.id??null,
- };
- const [subjectRows,creditRows,best]=await Promise.all([
-  input.seed.subjectId ? searchGlobalIdentifiers({...base,subjectId:input.seed.subjectId,limit:RecommendationPolicy.maxRelationCandidates,sort:"createdAt:desc"}) : {hits:[]},
-  input.seed.creditedEntityIds.length ? searchGlobalIdentifiers({...base,
-   branches:[{...base.branches[0]!,searchExpression:{field:"credited-profile",operator:"any-of",values:[...input.seed.creditedEntityIds]}}],
-   limit:RecommendationPolicy.maxRelationCandidates,sort:"createdAt:desc"}) : {hits:[]},
-  searchGlobalIdentifiers({...base,limit:RecommendationPolicy.maxCandidates,sort:"best"}),
- ]);
+	const target = unitStateRelation(sql`null::uuid`, "search_unit");
+	const base = {
+		branches: [
+			{
+				category: "posts" as const,
+				sourceOwners: ["post" as const],
+				sourceShapes: ["post", "reply"],
+			},
+		],
+		contentRatings: [...input.viewer.contentRatings],
+		contentRatingPolicy: contentRatingPolicyFromAllowlist(input.viewer.contentRatings),
+		...(input.viewer.profileId ? { profileId: input.viewer.profileId } : {}),
+		additionalConditions: [eligible, sql`${target.id} <> ${input.seed.id}::uuid`],
+		bestSnapshotId: input.snapshot?.id ?? null,
+	};
+	const [subjectRows, creditRows, best] = await Promise.all([
+		input.seed.subjectId
+			? searchGlobalIdentifiers({
+					...base,
+					subjectId: input.seed.subjectId,
+					limit: RecommendationPolicy.maxRelationCandidates,
+					sort: "createdAt:desc",
+				})
+			: { hits: [] },
+		input.seed.creditedEntityIds.length
+			? searchGlobalIdentifiers({
+					...base,
+					branches: [
+						{
+							...base.branches[0]!,
+							searchExpression: {
+								field: "credit",
+								operator: "any-of",
+								values: [...input.seed.creditedEntityIds],
+							},
+						},
+					],
+					limit: RecommendationPolicy.maxRelationCandidates,
+					sort: "createdAt:desc",
+				})
+			: { hits: [] },
+		searchGlobalIdentifiers({ ...base, limit: RecommendationPolicy.maxCandidates, sort: "best" }),
+	]);
 
 	const contextualIds = new Set([
 		...subjectRows.hits.map(({ id }) => id),

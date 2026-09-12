@@ -137,3 +137,34 @@ API contract unchanged. The full check installs nine migrations and 15,924 SQL
 statements, validates canonical SQL/integrity/index health, and finds no schema
 drift. Full delivery, large erasure/retention backlogs, restoration
 and corpus-scale acceptance remain in M09.
+
+## Related-post HTTP reads
+
+`task services-main:db:related-posts:check` runs
+[check-related-post-recommendations.ts](../../services/main/scripts/check-related-post-recommendations.ts)
+on an installed disposable Atlas target with no recommendation snapshots.
+The [pinned run](database/related-post-recommendations-evidence.json) passes 55
+assertions and 23 HTTP requests. Posts, replies, account Self identities and a managed organization exercise shared
+subject/credit priority, the general fallback and actual HTTP response validation.
+The organization supplies credit context without becoming an account profile.
+Direct Search checks distinguish active Self credits from organization credits.
+
+Cases reject private/unlisted/draft/moderation-removed/rating-disallowed candidates
+and replies beneath unavailable roots. Current root visibility/rating changes also
+remove existing replies. Direct post/catalog seeds respect the viewer's ratings,
+and reply seeds require readable roots. The allowed-rating preference case proves
+that eligible R18 content works for a viewer who enabled it. Signed tracking,
+anonymous/account isolation, exclusions with personalization off, cursor scope
+mismatch and continuation after excluding the anchor are checked.
+
+The pre-fix endpoint failed on a join to the removed `account_self` table. After
+fixing the credit path, a general-rated reply still appeared beneath an R18 root.
+The shared feed predicate now checks that root's rating; recommendation seed
+queries check both current access and ratings. API contracts and persisted schema
+are unchanged. Fixture data remains on the disposable target. This scope does not
+qualify full feed concurrency, every post kind, snapshot scoring, large fan-out or
+500M/3B throughput.
+
+The first related-post HTTP read took 251 ms in the local fixture. Backend tests
+pass 332 files/1,787 tests; backend TypeScript and unchanged OpenAPI/generated
+contracts pass. No schema migration or frontend visual change is part of this fix.

@@ -402,8 +402,8 @@ function compileFilter(
 	if (filter.field === "credited-profile") {
 		const creditedProfiles = sql`array(select direct_credit.credited_entity_id
  from public.credit_attribution direct_credit
- join public.account_self on account_self.entity_id=direct_credit.credited_entity_id
- join public.entity_identity direct_profile on direct_profile.id=account_self.entity_id
+ join public.auth_entity direct_self on direct_self.entity_id=direct_credit.credited_entity_id and direct_self.state='active'
+ join public.entity_identity direct_profile on direct_profile.id=direct_self.entity_id
  where direct_credit.source_unit_id=${searchUnit.id}
  and direct_profile.status='published' and direct_profile.visibility='public'
  and direct_profile.moderation_status='approved' and direct_profile.deleted_at is null)`;

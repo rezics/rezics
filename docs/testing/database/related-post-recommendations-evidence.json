@@ -1,0 +1,29 @@
+{
+  "baseCommit": "961234a48666732045f1658d368d8dab2f4397ac",
+  "sourceDigests": {
+    "services/main/scripts/check-related-post-recommendations.ts": "eb0fb0e84a2ce035b9fe4bd3d98ad0f80000feeed9c023b91c9d838ac6ad8db0",
+    "services/main/src/services/recommendations/related-posts.ts": "075fe9a92e3dee5f954d610abdca10cb354a2d2b8eb28a2fc2043bac590d06fe",
+    "services/main/src/services/search/service.ts": "d4adb783c92e2ff85dbb321659c94b5e43ff3d9bb1268ecd12c045d86406449f",
+    "services/main/src/services/api/recommendations/index.ts": "9dd78df885efcdf2f48b49a1cffd25b2768ae540b69384cccf6694e4d76ef888",
+    "services/main/src/services/api/feed/index.ts": "dcb7da8bd01d9064e5279ee01c4d758a79e38b1cf1cc9f26da4b9276da2d32a4",
+    "services/main/src/services/database/migrations/atlas.sum": "ff1faf45b9d4da4d896b2de14fd2e25a12646a1fa8d82d000c9931bd35051967"
+  },
+  "checks": 55,
+  "httpChecks": 23,
+  "firstReadMilliseconds": 251.11669599999732,
+  "runtime": {
+    "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "isolation": "read committed"
+  },
+  "viewerRatingPreferenceQualified": true,
+  "emptySnapshotFallback": true,
+  "currentRootDisclosure": true,
+  "fixtureDataRetained": true,
+  "verification": {
+    "mainTestFiles": 332,
+    "mainTests": 1787,
+    "backendTypeScript": "passed",
+    "openApiGeneratedContracts": "unchanged and passed",
+    "schemaChange": false
+  }
+}
