@@ -314,7 +314,8 @@ Account-private Tag current rows use a canonical target REF. The account/target/
 | unit_best_score / ranking | Target/scope/algorithm generation; deterministic tie breaker | Display ranking does not change native score history |
 | score/tag/reaction/reply/collection/Realm/notification/poll/conversation stats | Scope/target/metric generation and value | Recomputable, striped when hot; observed/approximate/exact meanings explicit |
 | content metrics / engagement hourly | Exact content REV and algorithm; time bucket/target | Not authored data; content changes invalidate incrementally |
-| studio candidates/visits | Actor/account,target,eligibility generation or visit time | Private projection; current access required; indexed erasure |
+| studio candidates | Actor/account, concrete target, eligibility generation | Rebuildable private projection; current access required; indexed erasure |
+| studio_resource_visit | PK Auth,target REF; last visited time | Private account fact; restrictive REF, monotonic completion time, current Self/account/read authority; no editor eligibility or source-order effect; indexed erasure |
 | shared_search_query | Owner, query contract/AST revision, presentation | Saved query is authored data; results and counts are projections |
 | export_job / export_manifest / export_part | Request, audience/authority epoch, snapshot cut, chunk hashes and cursor | Resumable bounded export; revoked authority prevents further private parts |
 

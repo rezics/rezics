@@ -650,3 +650,38 @@ listing disclosure paths or corpus-scale throughput.
 Backend tests pass 332 files/1,788 tests. After the selected-organization correction,
 20 focused tests and backend TypeScript pass. OpenAPI generation, all three SDK
 TypeScript checks and web TypeScript pass. No schema change is required.
+
+## Canonical Studio visits
+
+`task services-main:db:studio-visit-references:check` runs
+[check-studio-visit-references.ts](../../services/main/scripts/check-studio-visit-references.ts).
+The [fresh installed-layout evidence](database/studio-visit-reference-evidence.json)
+passes 80 assertions across all eight catalog identity owners. Cases cover
+allocation after disclosure, missing references/accounts, duplicate pairs, shared
+REFs with separate private times, unchanged editor eligibility and source cursors,
+bounded listing with native IDs, reviewed merge retention/rejection and actual
+account erasure across two nonempty 500-row deletion pages. Erased accounts cannot
+recreate private visits. All fixture data rolls back.
+
+A 10,000-pair sample measures approximately 72 bytes per visit tuple and three
+indexes. Exact account/REF and native-ID lookups use compound and canonical
+expression indexes; recent pagination uses the Auth/recent index without a Sort.
+Recorded relation sizes include other runs' rows and rollback pages, so they are
+not production per-row estimates. The owner documents separate 500M/3B pair and
+shared-reference budgets.
+
+The first layout run exposed 5–6 second creator listings. A query comparison found
+1,449 JIT functions in generic permission branches that cannot admit a native
+creator candidate. Specializing the `created` source preserved the same nine
+candidate identities, order and acceptance values while removing those branches;
+current native read/edit decisions remain mandatory. The final fresh fixture's
+nine listing calls measured approximately 49–333 ms. These are local samples,
+not throughput or all-source capacity acceptance. Other Studio source filters,
+mixed-source skew and integrated disclosure remain explicit M09 work.
+
+The full fresh database check installs eleven migrations and 16,241 SQL
+statements, passes canonical SQL/integrity checks, reports healthy indexes and
+finds no schema drift. The final creator-path fixture was rerun on that installed
+layout. The authority regression passes 39 assertions/11 requests/five races.
+Backend tests pass 332 files/1,789 tests, with 23 focused tests after creator-path
+specialization; backend TypeScript and unchanged OpenAPI/generated contracts pass.

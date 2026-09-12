@@ -1,0 +1,397 @@
+{
+  "checks": 80,
+  "storage": {
+    "visit_tuple_bytes": 71.9997,
+    "index_count": 3,
+    "heap_bytes": "770048",
+    "index_bytes": "4308992"
+  },
+  "plans": {
+    "lookup": [
+      {
+        "QUERY PLAN": [
+          {
+            "Plan": {
+              "Node Type": "Index Scan",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Scan Direction": "Forward",
+              "Index Name": "studio_resource_visit_resource_merge_idx",
+              "Relation Name": "studio_resource_visit",
+              "Alias": "studio_resource_visit",
+              "Startup Cost": 8.59,
+              "Total Cost": 16.61,
+              "Plan Rows": 1,
+              "Plan Width": 8,
+              "Actual Startup Time": 0.011,
+              "Actual Total Time": 0.012,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "Disabled": false,
+              "Index Cond": "((target_reference_id = (InitPlan 1).col1) AND (auth_user_id = '01a093c5-25fd-77e4-8b1c-282764a6516e'::uuid))",
+              "Rows Removed by Index Recheck": 0,
+              "Index Searches": 1,
+              "Shared Hit Blocks": 6,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Shared I/O Read Time": 0,
+              "Shared I/O Write Time": 0,
+              "Local I/O Read Time": 0,
+              "Local I/O Write Time": 0,
+              "Temp I/O Read Time": 0,
+              "Temp I/O Write Time": 0,
+              "Plans": [
+                {
+                  "Node Type": "Index Scan",
+                  "Parent Relationship": "InitPlan",
+                  "Subplan Name": "InitPlan 1",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Scan Direction": "Forward",
+                  "Index Name": "reference_value_native_id_idx",
+                  "Relation Name": "reference_value",
+                  "Alias": "reference_lookup",
+                  "Startup Cost": 0.29,
+                  "Total Cost": 8.3,
+                  "Plan Rows": 1,
+                  "Plan Width": 16,
+                  "Actual Startup Time": 0.006,
+                  "Actual Total Time": 0.007,
+                  "Actual Rows": 1,
+                  "Actual Loops": 1,
+                  "Disabled": false,
+                  "Index Cond": "(COALESCE(target_publishing_id, target_music_id, target_program_id, target_software_id, target_entity_id, target_grouping_id, target_reference_id, target_distribution_id, target_video_id, target_audio_id, target_post_id, target_poll_id, target_zone_id, target_realm_id, target_realm_rule_id, target_custom_theme_id, target_collection_id, target_tag_id, target_tag_path_id, target_label_id) = '01a093c5-543c-7f8f-a335-7e49604cbaf9'::uuid)",
+                  "Rows Removed by Index Recheck": 0,
+                  "Index Searches": 1,
+                  "Shared Hit Blocks": 3,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0,
+                  "Shared I/O Read Time": 0,
+                  "Shared I/O Write Time": 0,
+                  "Local I/O Read Time": 0,
+                  "Local I/O Write Time": 0,
+                  "Temp I/O Read Time": 0,
+                  "Temp I/O Write Time": 0
+                }
+              ]
+            },
+            "Planning": {
+              "Shared Hit Blocks": 96,
+              "Shared Read Blocks": 15,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 4,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Shared I/O Read Time": 0.233,
+              "Shared I/O Write Time": 0.025,
+              "Local I/O Read Time": 0,
+              "Local I/O Write Time": 0,
+              "Temp I/O Read Time": 0,
+              "Temp I/O Write Time": 0
+            },
+            "Planning Time": 0.561,
+            "Triggers": [],
+            "Execution Time": 0.022
+          }
+        ]
+      }
+    ],
+    "reverse": [
+      {
+        "QUERY PLAN": [
+          {
+            "Plan": {
+              "Node Type": "Limit",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 0.29,
+              "Total Cost": 10.07,
+              "Plan Rows": 2,
+              "Plan Width": 16,
+              "Actual Startup Time": 0.014,
+              "Actual Total Time": 0.015,
+              "Actual Rows": 2,
+              "Actual Loops": 1,
+              "Disabled": false,
+              "Shared Hit Blocks": 3,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Shared I/O Read Time": 0,
+              "Shared I/O Write Time": 0,
+              "Local I/O Read Time": 0,
+              "Local I/O Write Time": 0,
+              "Temp I/O Read Time": 0,
+              "Temp I/O Write Time": 0,
+              "Plans": [
+                {
+                  "Node Type": "Index Only Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Scan Direction": "Forward",
+                  "Index Name": "studio_resource_visit_resource_merge_idx",
+                  "Relation Name": "studio_resource_visit",
+                  "Alias": "studio_resource_visit",
+                  "Startup Cost": 0.29,
+                  "Total Cost": 10.07,
+                  "Plan Rows": 2,
+                  "Plan Width": 16,
+                  "Actual Startup Time": 0.013,
+                  "Actual Total Time": 0.014,
+                  "Actual Rows": 2,
+                  "Actual Loops": 1,
+                  "Disabled": false,
+                  "Index Cond": "(target_reference_id = '01a093c5-2124-71db-93b2-39b61d920ff2'::uuid)",
+                  "Rows Removed by Index Recheck": 0,
+                  "Heap Fetches": 4,
+                  "Index Searches": 1,
+                  "Shared Hit Blocks": 3,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0,
+                  "Shared I/O Read Time": 0,
+                  "Shared I/O Write Time": 0,
+                  "Local I/O Read Time": 0,
+                  "Local I/O Write Time": 0,
+                  "Temp I/O Read Time": 0,
+                  "Temp I/O Write Time": 0
+                }
+              ]
+            },
+            "Planning": {
+              "Shared Hit Blocks": 0,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Shared I/O Read Time": 0,
+              "Shared I/O Write Time": 0,
+              "Local I/O Read Time": 0,
+              "Local I/O Write Time": 0,
+              "Temp I/O Read Time": 0,
+              "Temp I/O Write Time": 0
+            },
+            "Planning Time": 0.041,
+            "Triggers": [],
+            "Execution Time": 0.022
+          }
+        ]
+      }
+    ],
+    "recent": [
+      {
+        "QUERY PLAN": [
+          {
+            "Plan": {
+              "Node Type": "Limit",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 0.29,
+              "Total Cost": 8.3,
+              "Plan Rows": 1,
+              "Plan Width": 24,
+              "Actual Startup Time": 0.01,
+              "Actual Total Time": 0.023,
+              "Actual Rows": 31,
+              "Actual Loops": 1,
+              "Disabled": false,
+              "Shared Hit Blocks": 5,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Shared I/O Read Time": 0,
+              "Shared I/O Write Time": 0,
+              "Local I/O Read Time": 0,
+              "Local I/O Write Time": 0,
+              "Temp I/O Read Time": 0,
+              "Temp I/O Write Time": 0,
+              "Plans": [
+                {
+                  "Node Type": "Index Only Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Scan Direction": "Forward",
+                  "Index Name": "studio_resource_visit_auth_recent_idx",
+                  "Relation Name": "studio_resource_visit",
+                  "Alias": "studio_resource_visit",
+                  "Startup Cost": 0.29,
+                  "Total Cost": 8.3,
+                  "Plan Rows": 1,
+                  "Plan Width": 24,
+                  "Actual Startup Time": 0.01,
+                  "Actual Total Time": 0.02,
+                  "Actual Rows": 31,
+                  "Actual Loops": 1,
+                  "Disabled": false,
+                  "Index Cond": "((auth_user_id = '01a093c5-25fd-77e4-8b1c-282764a6516e'::uuid) AND (ROW(last_visited_at, target_reference_id) < ROW('2026-01-01 00:00:00+00'::timestamp with time zone, '01a093c5-59ca-78e4-ac8a-ef73f0a6b932'::uuid)))",
+                  "Rows Removed by Index Recheck": 0,
+                  "Heap Fetches": 31,
+                  "Index Searches": 1,
+                  "Shared Hit Blocks": 5,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0,
+                  "Shared I/O Read Time": 0,
+                  "Shared I/O Write Time": 0,
+                  "Local I/O Read Time": 0,
+                  "Local I/O Write Time": 0,
+                  "Temp I/O Read Time": 0,
+                  "Temp I/O Write Time": 0
+                }
+              ]
+            },
+            "Planning": {
+              "Shared Hit Blocks": 0,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Shared I/O Read Time": 0,
+              "Shared I/O Write Time": 0,
+              "Local I/O Read Time": 0,
+              "Local I/O Write Time": 0,
+              "Temp I/O Read Time": 0,
+              "Temp I/O Write Time": 0
+            },
+            "Planning Time": 0.046,
+            "Triggers": [],
+            "Execution Time": 0.033
+          }
+        ]
+      }
+    ]
+  },
+  "loadRows": 10000,
+  "listingTimingsMs": [
+    333.477445,
+    59.31096099999968,
+    115.34087599999975,
+    48.85041099999944,
+    112.00460600000042,
+    101.29725299999973,
+    87.19193099999939,
+    68.34430500000053,
+    48.862685000000056
+  ],
+  "sourceDigests": {
+    "services/main/scripts/check-studio-visit-references.ts": "4421a6f63816b920e453433c97e940480fd5aec5de87ffe8832c48283a3e468a",
+    "services/main/src/services/database/schema/studio.ts": "208164c4e7162b3f1ffa1ecafe33f38336301590d56dcef42d294bfd8f223b0f",
+    "services/main/src/services/studio/service.ts": "359295a5420448de48ab06d02aec80aec0f3dbbeedbfc76527152ce664c77134",
+    "services/main/src/services/database/schema/postgres/merge-integrity.sql": "eed094c5bf10af8b0e117852fd5802fe263c1b113271c5c4fd34ab2827f2cdf5",
+    "services/main/src/services/database/migrations/atlas.sum": "cdbfad41cb05a6890c2e2cf0fe9993b55afcf0aa32d2281f90a1e8a624ec8de6"
+  },
+  "rollback": true,
+  "baseCommit": "ea56d91b39632a1be86c9d7ce4512485dcc6884c",
+  "creatorQueryDiagnostic": {
+    "sameCandidateIdentityOrderAndAcceptance": true,
+    "before": {
+      "Planning Time": 23.173,
+      "Execution Time": 521.541,
+      "JIT": {
+        "Functions": 1449,
+        "Options": {
+          "Inlining": false,
+          "Optimization": false,
+          "Expressions": true,
+          "Deforming": true
+        },
+        "Timing": {
+          "Generation": {
+            "Deform": 17.09,
+            "Total": 45.368
+          },
+          "Inlining": 0,
+          "Optimization": 38.083,
+          "Emission": 434.25,
+          "Total": 517.7
+        }
+      },
+      "returnedCandidateRows": 9
+    },
+    "after": {
+      "Planning Time": 0.967,
+      "Execution Time": 1.399,
+      "returnedCandidateRows": 9
+    },
+    "scope": "one account Self plus eight native catalog owners; diagnostic comparison, not sustained load"
+  },
+  "verification": {
+    "freshDatabaseCheck": {
+      "migrations": 11,
+      "sqlStatements": 16241,
+      "canonicalPostgres": "passed",
+      "integrityConstraints": "passed",
+      "pgroonga": "healthy",
+      "schemaDrift": "none"
+    },
+    "authorityRegression": {
+      "checks": 39,
+      "httpRequests": 11,
+      "orderedRaces": 5
+    },
+    "backendTests": {
+      "files": 332,
+      "tests": 1789
+    },
+    "focusedTestsAfterCreatorSpecialization": {
+      "files": 5,
+      "tests": 23
+    },
+    "backendTypeScript": "passed",
+    "unchangedOpenApiAndGeneratedContracts": "passed"
+  }
+}

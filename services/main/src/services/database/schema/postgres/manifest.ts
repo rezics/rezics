@@ -75,6 +75,7 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>> = {
+	studio_visit_reference_values: ["unit-reference-integrity.sql", "merge-integrity.sql"],
 	following_reference_values: ["unit-reference-integrity.sql", "participation-follow.sql", "platform-aggregates.sql", "merge-integrity.sql"],
 	recommendation_event_reference_values: ["unit-reference-integrity.sql", "participation-private-state.sql"],
 	merge_review_authority: ["merge-integrity.sql"],
@@ -477,7 +478,7 @@ export const PostgreSqlSchemaTriggers = [
 	},
 	{
 		table: "studio_resource_visit",
-		name: "reject_merged_unit_studio_resource_visit_resource_unit_id",
+		name: "reject_merged_unit_studio_resource_visit_target_reference_id",
 	},
 	{ table: "subject_association", name: "reject_merged_unit_subject_association_entity_id" },
 	{ table: "subject_association", name: "reject_merged_unit_subject_association_unit_id" },

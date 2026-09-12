@@ -7,6 +7,7 @@ import { pgTable } from "./base";
 import { users } from "./auth";
 import { createTimestampMsColumn, createUpdatedAtColumn } from "./columns";
 import { realm } from "./realm";
+import { referenceValue } from "./reference-value";
 
 /**
  * Rebuildable access-owned candidate index for a Profile's explicit editor assignments.
@@ -136,33 +137,25 @@ export const studioRealmEditorCandidate = pgTable(
 	],
 );
 
-/** The latest explicit visit to a resource through a Studio management surface. */
+/** The latest account-private Studio visit, addressed through an immutable native reference. */
 export const studioResourceVisit = pgTable(
 	"studio_resource_visit",
 	{
 		authUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "cascade" }),
-		resourceUnitId: uuid().notNull(),
+		targetReferenceId: uuid()
+			.notNull()
+			.references(() => referenceValue.id, { onDelete: "restrict" }),
 		lastVisitedAt: createTimestampMsColumn().defaultNow().notNull(),
-
-		...unitReferenceColumns("resourceUnit", "cascade"),
 	},
 	(table) => [
-		...unitReferenceConstraints(
-			"studio_resource_visit",
-			"resourceUnit",
-			table,
-			false,
-			table.resourceUnitId,
-		),
-
-		primaryKey({ columns: [table.authUserId, table.resourceUnitId] }),
+		primaryKey({ columns: [table.authUserId, table.targetReferenceId] }),
 		index("studio_resource_visit_auth_recent_idx").on(
 			table.authUserId,
 			table.lastVisitedAt.desc(),
-			table.resourceUnitId.desc(),
+			table.targetReferenceId.desc(),
 		),
-		index("studio_resource_visit_resource_merge_idx").on(table.resourceUnitId, table.authUserId),
+		index("studio_resource_visit_resource_merge_idx").on(table.targetReferenceId, table.authUserId),
 	],
 );

@@ -85,3 +85,53 @@ key; it creates no history row or per-reader fan-out. Repeated writes contend on
 that exact private key. Auth and target shared locks also serialize the command
 with authority changes; this point-operation qualification does not establish
 hot-account throughput or the integrated capacity gates above.
+
+## Canonical visit storage and workload
+
+Visits store `(auth_user_id, target_reference_id, last_visited_at)`. The target is
+one restrictive `reference_value` FK, allocated only after current authority is
+established. The command returns the native ID it validated. Listing finds the
+existing REF with the canonical native-ID expression index and seeks the
+compound account/REF index; missing visits remain null and never allocate references.
+The source cursor and editor-candidate projections keep their existing ownership.
+Merge canonicalization retains the original private REF; new visits to a merged
+source are rejected. Erasure removes account visits through the Auth-leading key
+without deleting shared references or another account's metadata.
+
+Budget the account/target relation independently of catalog cardinality. A visit
+is one latest-state row per distinct pair; frequent revisits rewrite that row.
+Reserve 96 bytes of heap and 160 bytes across the PK, Auth/recent and reverse-REF
+indexes (48 + 64 + 48): 128 GB at 500,000,000 visit pairs and 768 GB at
+3,000,000,000, before WAL, replicas, backups, bloat and page slack. If 10% of pairs
+introduce previously unreferenced native targets, the shared 328-byte REF allowance
+adds 16.4 GB/98.4 GB, producing a standalone 144.4 GB/866.4 GB attribution. References
+already allocated by Following, Favorites or other consumers must not be counted
+again. The independent shared-REF planning envelope remains 164 GB/984 GB for
+500M/3B mappings; the 10% attribution is an explicit workload assumption.
+
+One new visit writes one heap tuple and three visit index entries, plus allocation
+when required. A timestamp update changes an indexed field, so HOT updates cannot
+be assumed; reserve new entries in all three indexes and vacuum the old versions.
+Repeated visits from different accounts share read locks and the immutable REF;
+only the same account/target pair contends on the visit write. Hot accounts also
+concentrate Auth/recent index pages. Client concurrency and request quotas provide
+admission control; statement timeouts bound individual lock waits. Do not retry
+denied writes as throughput backpressure. Qualify p95/p99 write/lookup latency,
+wait time, WAL rate, dead tuples, index growth and vacuum lag under representative
+revisit skew before claiming capacity acceptance.
+
+The executable fixture uses 10,000 visit pairs for natural point, reverse and
+recent-keyset EXPLAIN plans, with fixed-width responses and no corpus-sized
+request memory. It is not a sustained-load result. At deployment growth thresholds,
+Auth-key hash partitioning/sharding can colocate private visits and erasure; the
+reference-leading reverse maintenance path then needs bounded partition fan-out
+or its own routing index. Preserve cross-shard REF existence enforcement and
+account/target uniqueness in that design. A deployment-specific threshold and
+partition qualification remain part of M09's integrated capacity work.
+
+The `created` query specializes candidate eligibility to native catalog creation.
+It omits generic ownership/direct/Realm permission expressions, which cannot
+admit a creator candidate; bounded current native read/edit decisions still run
+before presentation. This avoids compiling unused generic permission branches
+for every creator page. Other source filters and mixed-source workloads retain
+their separate capacity qualification.

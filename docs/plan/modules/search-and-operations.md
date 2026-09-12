@@ -10,6 +10,7 @@ Dependencies: M01 and module event contracts. Owners: database architecture sect
 - Reproduce and resolve native facet-search crashes; a successful small or JIT-off run is not stability evidence.
 - Complete merge/recommendation recovery, checkpointed export, backup/WAL/object reconciliation and erasure-frontier replay.
 - Add native Zone selector/composition capacity scenarios using current identities and private follow preferences.
+- Qualify Studio all/owned/direct/delegated and mixed-source query plans, disclosure, hot-account writes and source-candidate skew.
 - Measure skew, hot keys, graph budgets, row/index/WAL amplification, queue age, storage, plans and recovery at the 500M/3B planning scales.
 
 ## Acceptance

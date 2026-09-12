@@ -1,3 +1,4 @@
+import { allocateReferenceValue, referenceValueIdForNativeId } from "../units/reference-value";
 import type { Authorization } from "../authorization";
 import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
 import { lockUnitAccessState } from "../authorization/unit/access-lock";
@@ -499,8 +500,12 @@ async function selectWorkspaceCandidateBatch(input: {
 		source === "all" ? not(or(ownerAccess, directAccess) as SQL) : sql`true`,
 		not(earlierRealmSource),
 	) as SQL;
-	const acceptedSource = sql`case
-		when page.source_kind = 'profile' and page.catalog_creator_since is not null then ${source === "all" || source === "created"}
+	// Creator candidates use native catalog authority below; generic grant branches cannot admit them.
+	const acceptedSource =
+		source === "created"
+			? sql`page.source_kind = 'profile' and page.catalog_creator_since is not null`
+			: sql`case
+		when page.source_kind = 'profile' and page.catalog_creator_since is not null then ${source === "all"}
 		when page.source_kind = 'catalog_grant' then true
 		when page.source_kind = 'profile' then ${profileEffectiveCondition(
 			source,
@@ -517,10 +522,12 @@ async function selectWorkspaceCandidateBatch(input: {
 	const localizationLanguages = input.query.localizationLanguages ?? [];
 	const accepted = and(
 		sql`${resource.id} is not null`,
-		or(
-			sql`${resource.owner} = any(${sql.param([...CatalogOwnerValues])}::text[])`,
-			getUnitReadCondition(input.profileId, {}, resource),
-		),
+		source === "created"
+			? sql`${resource.owner} = any(${sql.param([...CatalogOwnerValues])}::text[])`
+			: or(
+					sql`${resource.owner} = any(${sql.param([...CatalogOwnerValues])}::text[])`,
+					getUnitReadCondition(input.profileId, {}, resource),
+				),
 		studioResourceScopeCondition(
 			input.query.section,
 			{
@@ -581,9 +588,9 @@ async function selectWorkspaceCandidateBatch(input: {
 			page.realm_grant_since as "realmGrantSince",
 			visit.last_visited_at as "lastVisitedAt",
 			${accepted} as accepted,
-			${ownerAccess} as "hasOwnerAccess",
-			${directAccess} as "hasDirectAccess",
-			case when page.source_kind = 'realm' then ${realmAccess} else false end as "hasRealmAccess",
+			${source === "created" ? sql`false` : ownerAccess} as "hasOwnerAccess",
+			${source === "created" ? sql`false` : directAccess} as "hasDirectAccess",
+			${source === "created" ? sql`false` : sql`case when page.source_kind = 'realm' then ${realmAccess} else false end`} as "hasRealmAccess",
 			${resource.owner} as "resourceOwner",
 			${resource.shape} as "resourceShape",
 			${resource.createdByAuthUserId} as "creatorAuthUserId",
@@ -598,7 +605,7 @@ async function selectWorkspaceCandidateBatch(input: {
 		left join lateral public.read_unit_state(page.unit_id) studio_workspace_resource on true
 		left join ${studioResourceVisit} visit
 			on visit.auth_user_id = ${selfAuthUserIdForEntity(input.profileId)}
-			and visit.resource_unit_id = page.unit_id
+			and visit.target_reference_id = ${referenceValueIdForNativeId(sql`page.unit_id`)}
 		order by
 			page.relevant_at desc nulls last,
 			page.unit_id desc nulls last,
@@ -857,28 +864,28 @@ export async function recordStudioVisit(input: {
 			.where(eq(unitMergeRedirect.sourceUnitId, unitId))
 			.limit(1);
 		if (merged) throw new UnitNotFound("Studio resource");
+		const targetReferenceId = await allocateReferenceValue(tx, target.reference);
 		const [visit] = await tx
 			.insert(studioResourceVisit)
 			.values({
 				authUserId,
-				resourceUnitId: unitId,
+				targetReferenceId,
 				lastVisitedAt: sql`clock_timestamp()`,
 			})
 			.onConflictDoUpdate({
-				target: [studioResourceVisit.authUserId, studioResourceVisit.resourceUnitId],
+				target: [studioResourceVisit.authUserId, studioResourceVisit.targetReferenceId],
 				set: {
 					lastVisitedAt: sql`greatest(${studioResourceVisit.lastVisitedAt}, clock_timestamp())`,
 				},
 			})
 			.returning({
-				unitId: studioResourceVisit.resourceUnitId,
 				lastVisitedAt: studioResourceVisit.lastVisitedAt,
 			});
 		if (!visit) throw new Error("Studio visit upsert returned no row");
 		if (!(await authorization.unit.decideInTransaction(tx, unitId, "unit.read")).allowed)
 			throw new UnitNotFound();
 		await authorization.account.ensureCanWrite(tx);
-		return visit;
+		return { unitId, ...visit };
 	});
 }
 

@@ -85,6 +85,7 @@ DROP TRIGGER IF EXISTS unit_reference_unit ON public.account_unit_tag;
 DROP TRIGGER IF EXISTS unit_reference_unit ON public.recommendation_exclusion;
 DROP TRIGGER IF EXISTS unit_reference_target_unit ON public.recommendation_event;
 DROP TRIGGER IF EXISTS unit_reference_unit ON public.unit_follow;
+DROP TRIGGER IF EXISTS unit_reference_resource_unit ON public.studio_resource_visit;
 
 -- Registered logical reference inputs.
 DO $$ DECLARE specification text; entry text[]; trigger_name text;
@@ -114,7 +115,6 @@ BEGIN
   'score_stat|unit_id|unit|required',
   'studio_auth_editor_candidate|unit_id|unit|required',
   'studio_realm_editor_candidate|unit_id|unit|required',
-  'studio_resource_visit|resource_unit_id|resource_unit|required',
   'subject_association|unit_id|unit|required',
   'unit_access_grant|unit_id|unit|required',
   'unit_access_invitation|unit_id|unit|required',

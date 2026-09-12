@@ -145,12 +145,6 @@ export const UnitReferenceConsumers = [
 		optional: false,
 	},
 	{
-		table: "studio_resource_visit",
-		id: "resource_unit_id",
-		prefix: "resource_unit",
-		optional: false,
-	},
-	{
 		table: "subject_association",
 		id: "unit_id",
 		prefix: "unit",

@@ -6,6 +6,8 @@ import {
 	profileResourceParticipation,
 	studioAuthEditorCandidate,
 	studioRealmEditorCandidate,
+	studioResourceVisit,
+	referenceValue,
 } from "./index";
 
 describe("Studio workspace and contribution projections", () => {
@@ -23,6 +25,24 @@ describe("Studio workspace and contribution projections", () => {
 				"profile_resource_participation_profile_contributed_idx",
 			]),
 		);
+	});
+
+	it("stores private visits with one restrictive canonical reference", () => {
+		const config = getTableConfig(studioResourceVisit);
+		expect(config.columns.map((column) => column.name).sort()).toEqual([
+			"auth_user_id",
+			"last_visited_at",
+			"target_reference_id",
+		]);
+		expect(config.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"auth_user_id",
+			"target_reference_id",
+		]);
+		expect(config.foreignKeys).toHaveLength(2);
+		expect(
+			config.foreignKeys.find((key) => key.reference().foreignTable === referenceValue)?.onDelete,
+		).toBe("restrict");
+		expect(config.indexes).toHaveLength(2);
 	});
 
 	it("indexes only current explicit editor candidates under Studio", () => {

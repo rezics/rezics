@@ -65,6 +65,7 @@ SQL_GROUP = {name: group for group, names in SQL_GROUPS.items() for name in name
 OVERLAY_GROUP = {
     "recommendation_exclusion_reference_values.pre": "D15",
     "following_reference_values.pre": "D11",
+    "studio_visit_reference_values.pre": "D15",
 }
 
 
@@ -83,7 +84,7 @@ DISPOSITIONS = {
     "D12": "Retain private conversation and recipient-delivery domains; versioned content, audience and watermark contracts.",
     "D13": "Retain rule-backed governance and reversals; complete split/erasure/correction contracts.",
     "D14": "Unify source journal/staging/fencing/receipts; retain quotas, transport intent and specialized data adapters.",
-    "D15": "Retain as rebuildable projections with input/security generation; capacity/stability qualification required.",
+    "D15": "Separate authoritative private/event facts from rebuildable projections; enforce input/security generations and qualify capacity/stability.",
 }
 
 API_GROUPS = {
