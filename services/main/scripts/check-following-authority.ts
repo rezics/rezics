@@ -1,3 +1,4 @@
+import { allocateReferenceValue, referenceValueIdForNativeId } from "../src/services/units/reference-value";
 import assert from "node:assert/strict";
 import { initializeObservability } from "@rezics/observability";
 import { desc, eq, sql } from "drizzle-orm";
@@ -344,7 +345,7 @@ for (const change of ["self", "target"] as const) {
 		await Promise.all([changing, denied]);
 	}
 	assert.equal(
-		(await database.select().from(unitFollow).where(eq(unitFollow.unitId, resource.id))).length,
+		(await database.select().from(unitFollow).where(eq(unitFollow.targetReferenceId, referenceValueIdForNativeId(resource.id)))).length,
 		0,
 	);
 	checks++;
@@ -366,13 +367,12 @@ const grant = await database.transaction(async (tx) => {
 		})
 		.returning();
 	assert.ok(row);
-	await tx
-		.insert(unitFollow)
-		.values({ followerProfileId: expiry.person.self.id, unitId: expiry.resource.id });
+	const targetReferenceId=await allocateReferenceValue(tx,{owner:"post",id:expiry.resource.id});
+	await tx.insert(unitFollow).values({followerProfileId:expiry.person.self.id,targetReferenceId});
 	await tx.insert(accountFollowPreference).values({
 		authUserId: expiry.person.account.id,
 		followerEntityId: expiry.person.self.id,
-		unitId: expiry.resource.id,
+		targetReferenceId,
 	});
 	return row;
 });

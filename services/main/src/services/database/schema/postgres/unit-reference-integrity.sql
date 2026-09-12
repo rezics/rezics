@@ -84,6 +84,7 @@ DROP TRIGGER IF EXISTS unit_reference_target_unit ON public.account_favorite_rev
 DROP TRIGGER IF EXISTS unit_reference_unit ON public.account_unit_tag;
 DROP TRIGGER IF EXISTS unit_reference_unit ON public.recommendation_exclusion;
 DROP TRIGGER IF EXISTS unit_reference_target_unit ON public.recommendation_event;
+DROP TRIGGER IF EXISTS unit_reference_unit ON public.unit_follow;
 
 -- Registered logical reference inputs.
 DO $$ DECLARE specification text; entry text[]; trigger_name text;
@@ -130,7 +131,6 @@ BEGIN
   'unit_engagement_stat|unit_id|unit|required',
   'unit_expression_assertion|unit_id|unit|required',
   'unit_external_link|unit_id|unit|required',
-  'unit_follow|unit_id|unit|required',
   'unit_follow_stat|unit_id|unit|required',
   'unit_license_grant|unit_id|unit|required',
   'unit_localization|unit_id|unit|required',

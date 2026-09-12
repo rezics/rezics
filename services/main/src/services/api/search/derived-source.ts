@@ -1,3 +1,4 @@
+import { referenceValue } from "../../database/schema/reference-value";
 import { createHash, randomBytes } from "node:crypto";
 
 import {
@@ -60,14 +61,15 @@ async function followedTagCandidates(
 	const rows = await database
 		.select({ id: tag.id })
 		.from(unitFollow)
-		.innerJoin(tag, eq(tag.id, unitFollow.unitId))
+		.innerJoin(referenceValue, eq(referenceValue.id, unitFollow.targetReferenceId))
+		.innerJoin(tag, eq(tag.id, referenceValue.targetTagId))
 		.where(
 			and(
 				eq(unitFollow.followerProfileId, profileId),
 				getUnitReadCondition(authorization.profileId, {}, tag),
 			),
 		)
-		.orderBy(asc(unitFollow.unitId))
+		.orderBy(asc(unitFollow.targetReferenceId))
 		.limit(DerivedSelectorCandidateLimit);
 	return rows.map(({ id }) => id);
 }

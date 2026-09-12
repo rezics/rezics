@@ -1,3 +1,4 @@
+import { referenceValue } from "./schema/reference-value";
 import { CatalogIdentityTables } from "./schema/catalog-identity";
 import { CatalogNameTables } from "./schema/catalog-names";
 import { creditRolesForReference } from "../units/credit-role-contract";
@@ -229,22 +230,19 @@ describe("database schema contracts", () => {
 		);
 	});
 
-	it("keeps Follow generic across Units while preventing self-follow", () => {
+	it("keeps Follow generic through a restrictive canonical reference", () => {
 		const follow = getTableConfig(unitFollow);
 
 		expect(follow.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
 			"follower_profile_id",
-			"unit_id",
+			"target_reference_id",
 		]);
 		expect(follow.foreignKeys.map((key) => key.getName())).toEqual(
 			expect.arrayContaining([
 				"unit_follow_follower_profile_id_entity_identity_id_fk",
 			]),
 		);
-		expectConcreteReferences(follow, "unit");
-		expect(follow.checks.map((constraint) => constraint.name)).toContain(
-			"unit_follow_not_self_check",
-		);
+		expect(follow.foreignKeys.some(key => key.reference().foreignTable === referenceValue)).toBe(true);
 	});
 
 	it("stores immutable shared Search queries behind a UUIDv7 primary key", () => {
@@ -1142,7 +1140,7 @@ describe("database schema contracts", () => {
 		const preference = getTableConfig(accountFollowPreference);
 		expect(preference.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
 			"auth_user_id",
-			"unit_id",
+			"target_reference_id",
 		]);
 		expect(preference.foreignKeys.map((key) => key.getName())).toContain(
 			"account_follow_preference_follow_fk",

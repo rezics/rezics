@@ -244,7 +244,7 @@ Editing a comment into an article keeps document/publication identities. Selecti
 | score, realm_score_context, post_score | Rater, subject REF, context, rating scale/version, current/history | UQ per intended voter/target/context; imported scores are source_statistic; scale explicit |
 | unit_reaction, share | Actor, target REF, reaction contract; share/publication link | Likes attach to declared target identity; transferring presentation does not duplicate votes |
 | alias/external-link/tag judgments | Exact reference/application, actor, scope, value, revision | Validity and spoiler judgments retain their own policies rather than generic vote columns |
-| unit_follow, follow_preference, tag subscription | Actor/account, target/scope, delivery policy | Follow is not membership, friendship or automatic access grant |
+| unit_follow, follow_preference, tag subscription | Public Entity/REF pair; Auth preference FK to the exact pair; target/scope, delivery policy | Native self-follow check decodes REF; private erasure is separate from public interest; Follow is not membership, friendship or automatic access grant |
 | account_favorite, favorite_revision/state | Account,target,private note/order/history | Account-private by default; no public Collection side effect |
 | unit_progress, progress_entry, node_progress, post_progress | Account,target plus exact content/structure version, position/status and observation | Explicit versus derived completion; edition changes require mapped/unknown state |
 | account_preference, account_entity_block | Account/preferences or blocker/target key, revision/state | Private; blocking and content access have distinct semantics |

@@ -246,12 +246,7 @@ export const UnitReferenceConsumers = [
 		prefix: "unit",
 		optional: false,
 	},
-	{
-		table: "unit_follow",
-		id: "unit_id",
-		prefix: "unit",
-		optional: false,
-	},
+
 	{
 		table: "unit_follow_stat",
 		id: "unit_id",

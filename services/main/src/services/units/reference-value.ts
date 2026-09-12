@@ -1,4 +1,5 @@
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, type SQLWrapper } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { UnitReferenceSchema, type UnitReference } from "@rezics/reference";
 import type { DatabaseTransaction } from "../database";
@@ -90,4 +91,17 @@ export async function findReferenceValueByNativeId(tx: DatabaseTransaction, nati
 	if (rows.length > 1) throw new Error("Native UUID has conflicting reference owners");
 	const row = rows[0];
 	return row ? { valueId: row.valueId, target: UnitReferenceSchema.parse(row.target) } : undefined;
+}
+
+const referenceLookup = alias(referenceValue, "reference_lookup");
+
+/**
+ * Indexed scalar reference lookup for a native-ID predicate, without allocation or disclosure.
+ * @remarks A missing mapping is NULL. Conflicting native owners raise a scalar-subquery error
+ * rather than choosing an arbitrary reference. The caller owns target read authorization.
+ * @internal
+ */
+export function referenceValueIdForNativeId(nativeId: string | SQLWrapper) {
+	return sql<string | null>`(select ${referenceLookup.id} from ${referenceValue} reference_lookup
+  where ${unitReferenceIdExpression("target", referenceLookup)}=${nativeId}::uuid)`;
 }

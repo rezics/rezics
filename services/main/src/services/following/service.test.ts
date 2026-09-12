@@ -30,10 +30,23 @@ vi.mock("../units/query", () => ({
 		return row ? { ...row, reference: { id: row.id, owner: row.kind } } : null;
 	},
 }));
+vi.mock("../units/reference", () => ({
+	resolveRegisteredUnitReference: async (_tx: unknown, id: string) => ({
+		reference: { id, owner: (await targetLimit())[0]?.kind ?? "post" },
+	}),
+}));
+vi.mock("../units/reference-value", async (original) => ({
+	...(await original<typeof import("../units/reference-value")>()),
+	allocateReferenceValue: vi.fn(async () => TargetReferenceId),
+	findReferenceValueByNativeId: vi.fn(async () => ({
+		valueId: TargetReferenceId,
+		target: { owner: "post" as const, id: TargetUnitId },
+	})),
+}));
 vi.mock("../realms/service", () => ({ acknowledgeCurrentRealmRulesOnFollow }));
 vi.mock("../notifications/service", () => ({ createNotification }));
 
-import { users, authEntity } from "../database/schema";
+import { users, authEntity, unitMergeRedirect } from "../database/schema";
 import { FollowableUnitOwnerValues } from "../database/schema/contract-values";
 import { UnitNotFound } from "../units/errors";
 import { UserFollowBlocked, UserSelfFollowForbidden } from "./errors";
@@ -42,6 +55,7 @@ import { followUnit } from "./service";
 const FollowerAuthUserId = "019f94d1-c8ca-7110-b984-b0614ba4db99";
 const FollowerProfileId = "019f94d1-c8ca-7110-b984-b0614ba4db9c";
 const TargetUnitId = "019f94d1-c8ca-7110-b984-b0614ba4db9d";
+const TargetReferenceId = "019f94d1-c8ca-7110-b984-b0614ba4db9e";
 
 describe("followUnit", () => {
 	const ensureCanRead = vi.fn(async () => ({ allowed: true as const, source: "public" as const }));
@@ -78,7 +92,7 @@ describe("followUnit", () => {
 		onConflictDoNothing.mockReset();
 		onConflictDoNothing.mockReturnValue({ returning: insertReturning });
 		insertReturning.mockReset();
-		insertReturning.mockResolvedValue([{ unitId: TargetUnitId }]);
+		insertReturning.mockResolvedValue([{ targetReferenceId: TargetReferenceId }]);
 		insertValues.mockReset();
 		insertValues.mockImplementation(() => ({ onConflictDoNothing }));
 		transactionInsert.mockReset();
@@ -86,11 +100,15 @@ describe("followUnit", () => {
 		transactionSelect.mockReset();
 		transactionSelect.mockImplementation(() => ({
 			from: vi.fn((table: unknown) =>
-				table === users || table === authEntity
-					? { where: () => ({ limit: () => ({ for: async () => [{ id: FollowerAuthUserId }] }) }) }
-					: {
-							where: vi.fn(() => ({ limit: blockedLimit })),
-						},
+				table === unitMergeRedirect
+					? { where: () => ({ limit: async () => [] }) }
+					: table === users || table === authEntity
+						? {
+								where: () => ({ limit: () => ({ for: async () => [{ id: FollowerAuthUserId }] }) }),
+							}
+						: {
+								where: vi.fn(() => ({ limit: blockedLimit })),
+							},
 			),
 		}));
 		transaction.mockReset();
@@ -128,11 +146,11 @@ describe("followUnit", () => {
 		expect(ensureCanRead).toHaveBeenCalledWith(expect.anything(), TargetUnitId, "unit.read");
 		expect(insertValues).toHaveBeenCalledWith({
 			followerProfileId: FollowerProfileId,
-			unitId: TargetUnitId,
+			targetReferenceId: TargetReferenceId,
 		});
 		expect(onConflictDoNothing).toHaveBeenCalledTimes(2);
-		if (kind === "entity") expect(transactionSelect).toHaveBeenCalledTimes(3);
-		else expect(transactionSelect).toHaveBeenCalledTimes(2);
+		if (kind === "entity") expect(transactionSelect).toHaveBeenCalledTimes(4);
+		else expect(transactionSelect).toHaveBeenCalledTimes(3);
 		if (kind === "realm")
 			expect(acknowledgeCurrentRealmRulesOnFollow).toHaveBeenCalledWith(
 				expect.anything(),
@@ -210,7 +228,7 @@ describe("followUnit", () => {
 			}),
 		).rejects.toBeInstanceOf(UserFollowBlocked);
 
-		expect(transactionSelect).toHaveBeenCalledTimes(3);
+		expect(transactionSelect).toHaveBeenCalledTimes(4);
 		expect(transactionInsert).not.toHaveBeenCalled();
 	});
 

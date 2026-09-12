@@ -1,3 +1,4 @@
+import { referenceValue } from "../database/schema/reference-value";
 import { readBootstrapPlatformIdentityIds } from "./core";
 import { and, asc, count, eq, inArray, isNull, notInArray, sql } from "drizzle-orm";
 
@@ -338,16 +339,17 @@ export async function inspectInitialInstallationBundle() {
 		database
 			.select({
 				profileId: accountFollowPreference.followerEntityId,
-				unitId: accountFollowPreference.unitId,
+				unitId: referenceValue.targetZoneId,
 				position: accountFollowPreference.position,
 				favorite: accountFollowPreference.favorite,
 			})
 			.from(accountFollowPreference)
+			.innerJoin(referenceValue, eq(referenceValue.id, accountFollowPreference.targetReferenceId))
 			.where(
 				and(
 					inArray(accountFollowPreference.followerEntityId, BootstrapProfileIdValues),
 					inArray(
-						accountFollowPreference.unitId,
+						referenceValue.targetZoneId,
 						OfficialZoneManifest.map(({ id }) => id),
 					),
 				),
@@ -362,12 +364,13 @@ export async function inspectInitialInstallationBundle() {
 							eq(accountFollowPreference.followerEntityId, profileId),
 							eq(accountFollowPreference.favorite, false),
 							notInArray(
-								accountFollowPreference.unitId,
-								OfficialZoneManifest.map(({ id }) => id),
+								accountFollowPreference.targetReferenceId,
+								database.select({ id: referenceValue.id }).from(referenceValue)
+									.where(inArray(referenceValue.targetZoneId, OfficialZoneManifest.map(({ id }) => id))),
 							),
 						),
 					)
-					.orderBy(asc(accountFollowPreference.position), asc(accountFollowPreference.unitId))
+					.orderBy(asc(accountFollowPreference.position), asc(accountFollowPreference.targetReferenceId))
 					.limit(1);
 				return { profileId, position: follow?.position ?? null };
 			}),

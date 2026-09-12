@@ -210,7 +210,8 @@ DROP TRIGGER IF EXISTS reject_merged_unit_unit_external_link_unit_id ON public.u
 CREATE TRIGGER reject_merged_unit_unit_external_link_unit_id BEFORE INSERT OR UPDATE OF unit_id ON public.unit_external_link FOR EACH ROW EXECUTE FUNCTION public.reject_merged_unit_reference('unit_id');
 
 DROP TRIGGER IF EXISTS reject_merged_unit_unit_follow_unit_id ON public.unit_follow;
-CREATE TRIGGER reject_merged_unit_unit_follow_unit_id BEFORE INSERT OR UPDATE OF unit_id ON public.unit_follow FOR EACH ROW EXECUTE FUNCTION public.reject_merged_unit_reference('unit_id');
+DROP TRIGGER IF EXISTS reject_merged_unit_unit_follow_target_reference_id ON public.unit_follow;
+CREATE TRIGGER reject_merged_unit_unit_follow_target_reference_id BEFORE INSERT OR UPDATE OF target_reference_id ON public.unit_follow FOR EACH ROW EXECUTE FUNCTION public.reject_merged_unit_reference('target_reference_id', 'reference_value');
 
 DROP TRIGGER IF EXISTS unit_merge_redirect_immutable ON public.unit_merge_redirect;
 CREATE TRIGGER unit_merge_redirect_immutable BEFORE DELETE OR UPDATE ON public.unit_merge_redirect FOR EACH ROW EXECUTE FUNCTION public.reject_unit_merge_immutable_mutation();

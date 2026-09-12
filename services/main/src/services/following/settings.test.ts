@@ -52,6 +52,13 @@ vi.mock("../units/query", () => ({
 		shape: state.targetOwner,
 	}),
 }));
+vi.mock("../units/reference-value", async (original) => ({
+	...(await original<typeof import("../units/reference-value")>()),
+	findReferenceValueByNativeId: vi.fn(async () => ({
+		valueId: targetReferenceId,
+		target: { owner: "post" as const, id: unitId },
+	})),
+}));
 vi.mock("../realms/service", () => ({ acknowledgeCurrentRealmRulesOnFollow: vi.fn() }));
 
 import {
@@ -66,6 +73,7 @@ import { getFollowingStatus, replaceFollowingSettings } from "./service";
 const authUserId = "019f94d1-c8ca-7110-b984-b0614ba4db99";
 const followerProfileId = "019f94d1-c8ca-7110-b984-b0614ba4db9c";
 const unitId = "019f94d1-c8ca-7110-b984-b0614ba4db9d";
+const targetReferenceId = "019f94d1-c8ca-7110-b984-b0614ba4db9e";
 const ensureCanRead = vi.fn(async () => ({ allowed: true as const, source: "public" as const }));
 const authorization = {
 	profileId: followerProfileId,
@@ -124,7 +132,12 @@ describe("private Following settings", () => {
 		expect(state.writes).toEqual([
 			{
 				table: accountFollowPreference,
-				values: { authUserId, followerEntityId: followerProfileId, unitId, inApp: false },
+				values: {
+					authUserId,
+					followerEntityId: followerProfileId,
+					targetReferenceId,
+					inApp: false,
+				},
 			},
 			{ table: accountRealmTagSubscription, values: { authUserId, realmId: unitId } },
 		]);
@@ -141,7 +154,7 @@ describe("private Following settings", () => {
 		expect(state.deleted).toEqual([accountRealmTagSubscription]);
 		expect(state.writes[0]).toEqual({
 			table: accountFollowPreference,
-			values: { authUserId, followerEntityId: followerProfileId, unitId, inApp: true },
+			values: { authUserId, followerEntityId: followerProfileId, targetReferenceId, inApp: true },
 		});
 	});
 	it("rejects a target-kind mismatch before writing settings", async () => {

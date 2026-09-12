@@ -75,6 +75,7 @@ export type PostgreSqlSchemaFileName = (typeof PostgreSqlSchemaFileNames)[number
  * PostgreSQL definitions remain split by responsibility for review and drift checks.
  */
 export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly PostgreSqlSchemaFileName[]>> = {
+	following_reference_values: ["unit-reference-integrity.sql", "participation-follow.sql", "platform-aggregates.sql", "merge-integrity.sql"],
 	recommendation_event_reference_values: ["unit-reference-integrity.sql", "participation-private-state.sql"],
 	merge_review_authority: ["merge-integrity.sql"],
 	realm_member_count_decrement: ["platform-aggregates.sql"],
@@ -85,6 +86,7 @@ export const PostgreSqlSchemaMigrationBundles: Readonly<Record<string, readonly 
 
 export const PostgreSqlSchemaFunctionNames = [
 	"reference_value_native_id",
+	"guard_follow_reference",
 	"guard_account_tag_reference",
 	"catalog_editorial_guard",
 	"catalog_editorial_capture",
@@ -502,7 +504,8 @@ export const PostgreSqlSchemaTriggers = [
 	{ table: "unit_external_link", name: "reject_merged_unit_unit_external_link_unit_id" },
 	{ table: "unit_external_link", name: "unit_external_link_reference_limits" },
 	{ table: "unit_external_link_vote", name: "unit_external_link_vote_stat_maintain" },
-	{ table: "unit_follow", name: "reject_merged_unit_unit_follow_unit_id" },
+	{ table: "unit_follow", name: "reject_merged_unit_unit_follow_target_reference_id" },
+	{ table: "unit_follow", name: "unit_follow_reference_guard" },
 	{ table: "unit_follow", name: "unit_follow_stat_maintain" },
 	{ table: "unit_localization", name: "book_localized_metric_localization_refresh" },
 	{ table: "unit_localization", name: "unit_search_document_from_localization" },

@@ -582,3 +582,43 @@ Backend tests pass 332 files/1,787 tests; the 31 Following tests pass after the
 final rechecks. Backend, all three SDKs and web TypeScript pass after OpenAPI
 generation. The private-lifecycle regression passes 49 assertions and four races.
 No schema migration is required.
+
+## Canonical Following references
+
+`task services-main:db:following-references:check` runs
+[check-following-references.ts](../../services/main/scripts/check-following-references.ts)
+on the disposable native schema. The [fresh-layout run](database/following-reference-evidence.json)
+passes 61 assertions. It covers all eight catalog identity owners,
+shared public/private references, replay counters, missing targets, duplicate
+relations, wrong-account preferences, immutable preference ownership and native
+self-follow rejection. A reference UUID equal to the follower Entity UUID can
+still name a different native target. A same-statement allocation must be visible
+to the counter trigger.
+
+The fixture checks tied private cursor positions, exact cursor fields, idempotent
+Zone defaults, private followed-Tag selection, retained original references after
+a real reviewed merge, forbidden new merged-source follows, removal and actual
+account erasure. A 10,000-pair sample records tuple/index sizes and natural plans
+for private keyset and native reverse lookups. Insertion and removal while routing
+is fenced prove that counters derive from canonical references rather than silently
+skipping effects. All fixture data rolls back.
+
+The migration overlay removes the dependent preference FK before replacing the
+public Follow key; PostgreSQL rejects the generator's unqualified parent-first
+order. The removed Zone capacity command targeted the retired global Unit/Profile
+schema and could not qualify this native layout. Native Zone composition capacity
+scenarios remain explicit work in M09. Reference integrity and these point/keyset
+checks do not establish complete delivery, restore or corpus-scale acceptance.
+
+The installed layout measured approximately 80 bytes per public Follow tuple and
+112 bytes per short-position preference tuple. Relation/index sizes in the evidence
+include the run's other fixture rows and rollback pages; they are not per-row
+production storage estimates. Natural keyset and reverse lookup plans use their
+indexes, and the keyset query requires no Sort after matching the index's explicit
+null ordering. The authority regression passes 61 assertions/13 HTTP requests and
+the private-lifecycle regression passes 50 assertions on canonical targets.
+
+The full fresh database check installs ten migrations and 16,113 SQL statements,
+passes canonical SQL/constraint checks, reports healthy indexes and finds no schema
+drift. Backend tests pass 332 files/1,788 tests; the affected 95 deterministic tests,
+backend TypeScript and unchanged OpenAPI/generated-contract checks also pass.

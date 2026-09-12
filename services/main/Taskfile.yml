@@ -70,10 +70,6 @@ tasks:
         desc: Qualify bounded Tag Path plans and hot-key writes only on disposable rezics_atlas.
         cmds:
             - yarn exec tsx scripts/benchmark-tag-path-capacity.ts {{.CLI_ARGS}}
-    zone-composition:capacity:
-        desc: Benchmark bounded Zone selectors and generic Custom Theme control paths only on disposable rezics_atlas.
-        cmds:
-            - yarn exec tsx scripts/benchmark-zone-composition-capacity.ts {{.CLI_ARGS}}
 
     auth-identity:check:
         desc: Verify current authentication identity constraints.
@@ -359,6 +355,12 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-participation-authority.ts
 
+    db:following-references:check:
+        desc: Verify canonical Follow references, private preferences, counters, defaults and indexed readers.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-following-references.ts
+
     db:following-authority:check:
         desc: Verify current Following Self/account authority, target/expiry races and private setting boundaries.
         cmds:
@@ -529,6 +531,10 @@ tasks:
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log
                 DATABASE_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
                 yarn exec tsx scripts/check-private-account-lifecycle.ts
+            - >-
+                REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log
+                DATABASE_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"
+                yarn exec tsx scripts/check-following-references.ts
             - >-
                 REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log
                 DATABASE_URL="postgres://postgres:postgres@localhost:${POSTGRES_MIGRATION_LOCAL_PORT:-5433}/rezics_atlas?sslmode=disable"

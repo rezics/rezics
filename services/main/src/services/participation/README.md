@@ -170,20 +170,18 @@ prove those old bodies still execute.
 ## Private Favorites, uploads and complete deletion ownership
 
 Personal Following stores ordering, favorite and delivery settings in
-`account_follow_preference`, keyed by Auth and target. A concrete composite FK
+`account_follow_preference`, keyed by Auth and canonical target reference. A concrete composite FK
 keeps its public Entity follow present, with at most one private row per follow.
 The database requires an active account and active self binding; organization
 selection never transfers those preferences. Erasure drains preference rows in
 500-row batches while retaining the public relation. Follow listings scan at most
 512 indexed private candidates, then apply visibility and return at most 100;
 the continuation cursor advances over filtered candidates even for empty pages.
-The default workload assumes 128-192 bytes of heap plus roughly 160-240 bytes
-across four indexes per preference: approximately 144-216 GB at 500M rows and
-864 GB-1.30 TB at 3B, before WAL, replication and bloat. One follow writes two
-rows; preference changes affect only the private row and relevant indexes.
-These are storage estimates, with the existing latency and shard-cutover gates
-above still requiring production qualification. The referencing indexes also
-bound follow deletion to its single preference, consistent with PostgreSQL's
+The [Following owner](../following/README.md) specifies the canonical reference,
+current authority and 500M/3B storage/workload envelopes. One personal follow writes
+a public relation and private preference; preference changes affect only the
+private row and its indexes. The referencing key bounds parent deletion to its
+single preference, consistent with PostgreSQL's
 [foreign-key indexing guidance](https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-FK).
 
 The [native private lifecycle fixture](../../../../../docs/testing/foundation.md#favorites-reference-consumer-and-private-lifecycle)

@@ -1,3 +1,4 @@
+import { allocateReferenceValue, referenceValueIdForNativeId } from "../../units/reference-value";
 import { presentImageAsset } from "../image-assets/presentation";
 import { unitStateRelation } from "../../units/state-relation";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
@@ -728,7 +729,7 @@ export default new Elysia({ prefix: "/realms" })
 					);
 					await tx.insert(unitFollow).values({
 						followerProfileId: entity.id,
-						unitId: created.id,
+						targetReferenceId: await allocateReferenceValue(tx, { owner: "realm", id: created.id }),
 					});
 					await applyInitialTags(tx, {
 						unitId: created.id,
@@ -851,12 +852,12 @@ export default new Elysia({ prefix: "/realms" })
 				? await Promise.all([
 						findRealmMembership(params.realmId, viewer.id),
 						database
-							.select({ realmId: unitFollow.unitId })
+							.select({ realmId: sql<string>`public.reference_value_native_id(${unitFollow.targetReferenceId})` })
 							.from(unitFollow)
 							.where(
 								and(
 									eq(unitFollow.followerProfileId, viewer.id),
-									eq(unitFollow.unitId, params.realmId),
+									eq(unitFollow.targetReferenceId, referenceValueIdForNativeId(params.realmId)),
 								),
 							),
 					])

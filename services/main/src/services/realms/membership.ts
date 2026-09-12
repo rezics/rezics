@@ -1,3 +1,4 @@
+import { allocateReferenceValue, referenceValueIdForNativeId } from "../units/reference-value";
 import { and, desc, eq, inArray, isNull, notInArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { Authorization } from "../authorization";
@@ -106,7 +107,7 @@ export async function joinRealm(
 	}
 	await tx
 		.insert(unitFollow)
-		.values({ followerProfileId: binding.entityId, unitId: realmId })
+		.values({ followerProfileId: binding.entityId, targetReferenceId: await allocateReferenceValue(tx, { owner: "realm", id: realmId }) })
 		.onConflictDoNothing();
 	if (rules && acceptsOnFollow)
 		await tx
@@ -151,7 +152,7 @@ export async function leaveRealm(
 			.where(and(eq(realmMember.realmId, realmId), eq(realmMember.profileId, binding.entityId)));
 	await tx
 		.delete(unitFollow)
-		.where(and(eq(unitFollow.unitId, realmId), eq(unitFollow.followerProfileId, binding.entityId)));
+		.where(and(eq(unitFollow.targetReferenceId, referenceValueIdForNativeId(realmId)), eq(unitFollow.followerProfileId, binding.entityId)));
 	const revisions = tx
 		.select({ id: realmRuleRevision.id })
 		.from(realmRuleRevision)

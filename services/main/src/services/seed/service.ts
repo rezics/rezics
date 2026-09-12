@@ -1894,17 +1894,7 @@ async function seedStructure(
 				}),
 			),
 		),
-		async (batch) => {
-			await tx.insert(unitFollow).values(batch);
-			await tx.insert(accountFollowPreference).values(
-				batch.map((follow) => ({
-					authUserId: selfAuthUserIdForEntity(follow.followerProfileId),
-					followerEntityId: follow.followerProfileId,
-					unitId: follow.unitId,
-					createdAt: follow.createdAt,
-				})),
-			);
-		},
+		(batch) => seedFollowsWithPreferences(tx, batch),
 	);
 
 	const revisions: (typeof realmRuleRevision.$inferSelect)[] = [];
@@ -2053,20 +2043,33 @@ async function seedStructure(
 				createdAt: zoneUnit.createdAt,
 			})),
 		),
-		async (batch) => {
-			await tx.insert(unitFollow).values(batch);
-			await tx.insert(accountFollowPreference).values(
-				batch.map((follow) => ({
-					authUserId: selfAuthUserIdForEntity(follow.followerProfileId),
-					followerEntityId: follow.followerProfileId,
-					unitId: follow.unitId,
-					createdAt: follow.createdAt,
-				})),
-			);
-		},
+		(batch) => seedFollowsWithPreferences(tx, batch),
 	);
 
 	return { realmMembers: memberRows, realmUnits: realmUnitRows };
+}
+
+async function seedFollowsWithPreferences(
+	tx: DatabaseTransaction,
+	rows: readonly { followerProfileId: string; unitId: string; createdAt: Date }[],
+) {
+	const references = new Map<string, string>();
+	for (const id of new Set(rows.map((row) => row.unitId))) {
+		const { reference } = await resolveRegisteredUnitReference(tx, id);
+		references.set(id, await allocateReferenceValue(tx, reference));
+	}
+	const follows = rows.map(({ unitId, ...row }) => {
+		const targetReferenceId = references.get(unitId);
+		if (!targetReferenceId) throw new Error("Seed Follow reference is unavailable");
+		return { ...row, targetReferenceId };
+	});
+	await tx.insert(unitFollow).values(follows);
+	await tx.insert(accountFollowPreference).values(follows.map((follow) => ({
+		authUserId: selfAuthUserIdForEntity(follow.followerProfileId),
+		followerEntityId: follow.followerProfileId,
+		targetReferenceId: follow.targetReferenceId,
+		createdAt: follow.createdAt,
+	})));
 }
 
 async function seedInteractions(
@@ -2088,17 +2091,7 @@ async function seedInteractions(
 				};
 			});
 		}),
-		async (batch) => {
-			await tx.insert(unitFollow).values(batch);
-			await tx.insert(accountFollowPreference).values(
-				batch.map((follow) => ({
-					authUserId: selfAuthUserIdForEntity(follow.followerProfileId),
-					followerEntityId: follow.followerProfileId,
-					unitId: follow.unitId,
-					createdAt: follow.createdAt,
-				})),
-			);
-		},
+		(batch) => seedFollowsWithPreferences(tx, batch),
 	);
 	await writeBatches(
 		profiles.map((blocker, index) => {

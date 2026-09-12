@@ -390,7 +390,8 @@ describe("feed candidate realm SQL", () => {
 
 		expect(query.sql).toContain('select 1 from "unit_follow"');
 		expect(query.sql).toContain('"unit_follow"."follower_profile_id"');
-		expect(query.sql).toContain('"unit_follow"."unit_id" = candidate_realm.realm_id');
+		expect(query.sql).toContain('"unit_follow"."target_reference_id" = (select "reference_lookup"."id"');
+		expect(query.sql).toContain("=candidate_realm.realm_id::uuid");
 		expect(query.sql).not.toContain('"preferred_realm_follow"');
 		expect(query.params).toEqual([profileId]);
 	});

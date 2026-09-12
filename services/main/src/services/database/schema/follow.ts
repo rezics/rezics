@@ -1,6 +1,6 @@
-import { unitReferenceColumns, unitReferenceConstraints } from "./unit-reference-columns";
+import { referenceValue } from "./reference-value";
 import { sql } from "drizzle-orm";
-import { boolean, check, foreignKey, index, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
+import { boolean, foreignKey, index, primaryKey, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { entityIdentity } from "./catalog-identity";
@@ -26,22 +26,19 @@ export const unitFollow = pgTable(
 		followerProfileId: uuid()
 			.notNull()
 			.references(() => entityIdentity.id, { onDelete: "cascade" }),
-		unitId: uuid().notNull(),
+		targetReferenceId: uuid()
+			.notNull()
+			.references(() => referenceValue.id, { onDelete: "restrict" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
-
-		...unitReferenceColumns("unit", "cascade"),
 	},
 	(table) => [
-		...unitReferenceConstraints("unit_follow", "unit", table, false, table.unitId),
-
-		primaryKey({ columns: [table.followerProfileId, table.unitId] }),
+		primaryKey({ columns: [table.followerProfileId, table.targetReferenceId] }),
 		index("unit_follow_unit_created_at_idx").on(
-			table.unitId,
+			table.targetReferenceId,
 			table.createdAt.desc(),
 			table.followerProfileId,
 		),
-		check("unit_follow_not_self_check", sql`${table.followerProfileId} <> ${table.unitId}`),
 	],
 );
 
@@ -53,7 +50,7 @@ export const accountFollowPreference = pgTable(
 			.notNull()
 			.references(() => users.id, { onDelete: "restrict" }),
 		followerEntityId: uuid().notNull(),
-		unitId: uuid().notNull(),
+		targetReferenceId: uuid().notNull(),
 		position: fractionalIndexPosition()
 			.default(sql`'a0' || replace(uuidv7()::text, '-', '') || 'V'`)
 			.notNull(),
@@ -63,21 +60,24 @@ export const accountFollowPreference = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.authUserId, table.unitId] }),
-		unique("account_follow_preference_follow_key").on(table.followerEntityId, table.unitId),
+		primaryKey({ columns: [table.authUserId, table.targetReferenceId] }),
+		unique("account_follow_preference_follow_key").on(
+			table.followerEntityId,
+			table.targetReferenceId,
+		),
 		foreignKey({
 			name: "account_follow_preference_follow_fk",
-			columns: [table.followerEntityId, table.unitId],
-			foreignColumns: [unitFollow.followerProfileId, unitFollow.unitId],
+			columns: [table.followerEntityId, table.targetReferenceId],
+			foreignColumns: [unitFollow.followerProfileId, unitFollow.targetReferenceId],
 		}).onDelete("cascade"),
 		index("account_follow_preference_auth_order_idx").on(
 			table.authUserId,
 			table.favorite.desc(),
 			table.position,
-			table.unitId,
+			table.targetReferenceId,
 		),
 		index("account_follow_preference_enabled_unit_idx")
-			.on(table.unitId, table.authUserId)
+			.on(table.targetReferenceId, table.authUserId)
 			.where(sql`${table.inApp}`),
 		createFractionalIndexPositionByteLengthConstraint(
 			"account_follow_preference_position_check",

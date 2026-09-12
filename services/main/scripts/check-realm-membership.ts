@@ -1,3 +1,4 @@
+import { referenceValueIdForNativeId } from "../src/services/units/reference-value";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -145,7 +146,7 @@ try {
 				.select()
 				.from(unitFollow)
 				.where(
-					and(eq(unitFollow.unitId, muted.id), eq(unitFollow.followerProfileId, member.self.id)),
+					and(eq(unitFollow.targetReferenceId, referenceValueIdForNativeId(muted.id)), eq(unitFollow.followerProfileId, member.self.id)),
 				)
 		).length,
 		0,
@@ -183,7 +184,7 @@ try {
 				.select()
 				.from(unitFollow)
 				.where(
-					and(eq(unitFollow.unitId, open.id), eq(unitFollow.followerProfileId, member.self.id)),
+					and(eq(unitFollow.targetReferenceId, referenceValueIdForNativeId(open.id)), eq(unitFollow.followerProfileId, member.self.id)),
 				)
 		).length,
 		1,
@@ -436,7 +437,7 @@ try {
 							.from(unitFollow)
 							.where(
 								and(
-									eq(unitFollow.unitId, subject.id),
+									eq(unitFollow.targetReferenceId, referenceValueIdForNativeId(subject.id)),
 									eq(unitFollow.followerProfileId, guest.self.id),
 								),
 							)

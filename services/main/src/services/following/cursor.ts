@@ -13,7 +13,7 @@ import { isStorageSafeFractionalPosition } from "../ordering/position";
 
 const FollowingCursor = t.Object(
 	{
-		v: t.Literal(3),
+		v: t.Literal(4),
 		owner: t.Nullable(t.UnionEnum(FollowableUnitOwnerValues)),
 		localizationLanguages: t.Array(t.UnionEnum(ContentLanguageValues), {
 			uniqueItems: true,
@@ -21,7 +21,7 @@ const FollowingCursor = t.Object(
 		contentRatings: t.Array(t.UnionEnum(ContentRatingValues), { uniqueItems: true }),
 		favorite: t.Boolean(),
 		position: t.String({ minLength: 2, maxLength: 512 }),
-		unitId: t.String({ format: "uuid" }),
+		targetReferenceId: t.String({ format: "uuid" }),
 	},
 	{ additionalProperties: false },
 );
@@ -29,7 +29,7 @@ const FollowingCursor = t.Object(
 export type FollowingCursorBoundary = {
 	readonly favorite: boolean;
 	readonly position: string;
-	readonly unitId: string;
+	readonly targetReferenceId: string;
 };
 
 export function encodeFollowingCursor(
@@ -40,11 +40,13 @@ export function encodeFollowingCursor(
 ): string {
 	return Buffer.from(
 		JSON.stringify({
-			v: 3,
+			v: 4,
 			owner: owner ?? null,
 			localizationLanguages,
 			contentRatings,
-			...boundary,
+			favorite: boundary.favorite,
+			position: boundary.position,
+			targetReferenceId: boundary.targetReferenceId,
 		}),
 	).toString("base64url");
 }
@@ -72,7 +74,7 @@ export function decodeFollowingCursor(
 		return {
 			favorite: cursor.favorite,
 			position: cursor.position,
-			unitId: cursor.unitId,
+			targetReferenceId: cursor.targetReferenceId,
 		};
 	} catch {
 		throw new InvalidPaginationCursor();

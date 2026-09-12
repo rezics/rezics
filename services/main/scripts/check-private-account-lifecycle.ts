@@ -20,7 +20,7 @@ import {
 } from "../src/services/database/schema/favorites";
 import { FavoriteNotFound } from "../src/services/favorites/errors";
 import { referenceValue } from "../src/services/database/schema/reference-value";
-import { findReferenceValueByNativeId } from "../src/services/units/reference-value";
+import { allocateReferenceValue, findReferenceValueByNativeId } from "../src/services/units/reference-value";
 import { catalogUnitLocator } from "../src/services/database/schema/catalog-identity";
 import { accountFollowPreference, unitFollow } from "../src/services/database/schema/follow";
 import { imageAsset, imageObject } from "../src/services/database/schema/image";
@@ -171,15 +171,18 @@ try {
 				.returning({ id: post.id });
 			const first = targets[512]!.id,
 				second = targets[513]!.id;
+   const references = new Map<string,string>();
+   for (const {id} of targets) references.set(id,await allocateReferenceValue(tx,{owner:"post",id}));
+   const referenceFor = (id:string) => {const reference=references.get(id);if(!reference)throw new Error("Following fixture reference missing");return reference;};
 			await tx
 				.insert(unitFollow)
-				.values(targets.map(({ id }) => ({ followerProfileId: human.self.id, unitId: id })));
+				.values(targets.map(({ id }) => ({ followerProfileId: human.self.id, targetReferenceId: referenceFor(id) })));
 			// Stable lexical ordering deliberately puts 512 filtered candidates before readable targets.
 			await tx.insert(accountFollowPreference).values(
 				targets.map(({ id }, index) => ({
 					authUserId: human.account.id,
 					followerEntityId: human.self.id,
-					unitId: id,
+					targetReferenceId: referenceFor(id),
 					position: `a0${String(index).padStart(5, "0")}V`,
 				})),
 			);
@@ -214,7 +217,7 @@ try {
 					nested.insert(accountFollowPreference).values({
 						authUserId: other.account.id,
 						followerEntityId: human.self.id,
-						unitId: first,
+						targetReferenceId: referenceFor(first),
 					}),
 				),
 			);
@@ -224,7 +227,7 @@ try {
 					nested.insert(accountFollowPreference).values({
 						authUserId: other.account.id,
 						followerEntityId: other.self.id,
-						unitId: first,
+						targetReferenceId: referenceFor(first),
 					}),
 				),
 			);
@@ -240,7 +243,12 @@ try {
 				null,
 				"exact read represents absent favorite without scanning the account",
 			);
-			for (const deniedTarget of [targets[0]!.id, crypto.randomUUID()]) {
+			const [unfollowedPrivate] = await tx.insert(post)
+				.values({ status: "published", visibility: "private", publishedAt: new Date() })
+				.returning({ id: post.id });
+			assert.ok(unfollowedPrivate);
+			for (const deniedTarget of [targets[0]!.id, unfollowedPrivate.id, crypto.randomUUID()]) {
+				const beforeDeniedReference = await findReferenceValueByNativeId(tx, deniedTarget);
 				await assert.rejects(
 					tx.transaction((nested) =>
 						saveFavorite(nested, human.authority, deniedTarget, {
@@ -251,8 +259,8 @@ try {
 				);
 				check(
 					await findReferenceValueByNativeId(tx, deniedTarget),
-					undefined,
-					"denied saves do not allocate canonical references or reveal target existence",
+					beforeDeniedReference,
+					"denied saves preserve existing references and do not allocate absent ones",
 				);
 			}
 			const saved = await saveFavorite(tx, human.authority, first, {
@@ -481,7 +489,7 @@ try {
 					nested.insert(accountFollowPreference).values({
 						authUserId: human.account.id,
 						followerEntityId: human.self.id,
-						unitId: first,
+						targetReferenceId: referenceFor(first),
 					}),
 				),
 			);

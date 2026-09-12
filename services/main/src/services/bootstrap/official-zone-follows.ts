@@ -1,3 +1,4 @@
+import { allocateReferenceValue } from "../units/reference-value";
 import { and, asc, eq, inArray, notInArray } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
@@ -42,13 +43,25 @@ export async function ensureOfficialZoneFollows(
 		return id;
 	};
 	for (const entityId of targets) authFor(entityId);
+	const references = new Map<string, string>();
+	for (const id of officialZoneIds)
+		references.set(id, await allocateReferenceValue(tx, { owner: "zone", id }));
+	const referenceFor = (id: string) => {
+		const value = references.get(id);
+		if (!value) throw new Error("Official Zone reference is unavailable");
+		return value;
+	};
+	const officialReferenceIds = [...references.values()];
 	if (options.sequenceIsEmpty) {
 		const positions = officialPositionsBefore(null);
 		await tx
 			.insert(unitFollow)
 			.values(
 				targets.flatMap((profileId) =>
-					officialZoneIds.map((unitId) => ({ followerProfileId: profileId, unitId })),
+					officialZoneIds.map((unitId) => ({
+						followerProfileId: profileId,
+						targetReferenceId: referenceFor(unitId),
+					})),
 				),
 			)
 			.onConflictDoNothing();
@@ -59,7 +72,7 @@ export async function ensureOfficialZoneFollows(
 					officialZoneIds.map((unitId, index) => ({
 						authUserId: authFor(profileId),
 						followerEntityId: profileId,
-						unitId,
+						targetReferenceId: referenceFor(unitId),
 						position: positions[index]!,
 					})),
 				),
@@ -76,10 +89,13 @@ export async function ensureOfficialZoneFollows(
 				and(
 					eq(accountFollowPreference.authUserId, authFor(profileId)),
 					eq(accountFollowPreference.favorite, false),
-					notInArray(accountFollowPreference.unitId, officialZoneIds),
+					notInArray(accountFollowPreference.targetReferenceId, officialReferenceIds),
 				),
 			)
-			.orderBy(asc(accountFollowPreference.position), asc(accountFollowPreference.unitId))
+			.orderBy(
+				asc(accountFollowPreference.position),
+				asc(accountFollowPreference.targetReferenceId),
+			)
 			.limit(1);
 		const positions = officialPositionsBefore(firstOrdinaryFollow?.position ?? null);
 		for (const [index, zoneId] of officialZoneIds.entries()) {
@@ -87,14 +103,14 @@ export async function ensureOfficialZoneFollows(
 			if (!position) throw new Error("Missing official Zone follow position");
 			await tx
 				.insert(unitFollow)
-				.values({ followerProfileId: profileId, unitId: zoneId })
+				.values({ followerProfileId: profileId, targetReferenceId: referenceFor(zoneId) })
 				.onConflictDoNothing();
 			await tx
 				.insert(accountFollowPreference)
 				.values({
 					authUserId: authFor(profileId),
 					followerEntityId: profileId,
-					unitId: zoneId,
+					targetReferenceId: referenceFor(zoneId),
 					position,
 				})
 				.onConflictDoNothing();

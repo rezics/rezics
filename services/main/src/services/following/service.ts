@@ -1,9 +1,16 @@
 import { presentImageAsset } from "../api/image-assets/presentation";
 import type { ContentLanguage } from "@rezics/i18n";
-import { and, desc, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { selfAuthUserIdForEntity } from "../participation/account-query";
 
 import { lockUnitAccessState } from "../authorization/unit/access-lock";
+import { referenceValue } from "../database/schema/reference-value";
+import {
+	allocateReferenceValue,
+	findReferenceValueByNativeId,
+	referenceValueTarget,
+} from "../units/reference-value";
+import { resolveRegisteredUnitReference } from "../units/reference";
 import type { Authorization } from "../authorization";
 import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
 import type { UnitAuthorization } from "../authorization/unit/authorization";
@@ -21,6 +28,7 @@ import {
 	accountEntityBlock,
 	accountRealmTagSubscription,
 	unitFollow,
+	unitMergeRedirect,
 	accountFollowPreference,
 } from "../database/schema";
 import type {
@@ -137,7 +145,7 @@ function followingCursorCondition(cursor: FollowingCursorBoundary | undefined) {
 			gt(accountFollowPreference.position, cursor.position),
 			and(
 				eq(accountFollowPreference.position, cursor.position),
-				gt(accountFollowPreference.unitId, cursor.unitId),
+				gt(accountFollowPreference.targetReferenceId, cursor.targetReferenceId),
 			),
 		),
 	);
@@ -168,11 +176,13 @@ export async function listFollowing(input: ListFollowingInput) {
 			throw new RangeError("Following page limit must be between 1 and 100");
 		const candidates = await tx
 			.select({
-				unitId: accountFollowPreference.unitId,
+				unitId: sql<string>`${referenceValueTarget.id}`,
+				targetReferenceId: accountFollowPreference.targetReferenceId,
 				favorite: accountFollowPreference.favorite,
 				position: accountFollowPreference.position,
 			})
 			.from(accountFollowPreference)
+			.innerJoin(referenceValue, eq(referenceValue.id, accountFollowPreference.targetReferenceId))
 			.where(
 				and(
 					eq(accountFollowPreference.authUserId, input.authUserId),
@@ -180,9 +190,9 @@ export async function listFollowing(input: ListFollowingInput) {
 				),
 			)
 			.orderBy(
-				desc(accountFollowPreference.favorite),
+				sql`${accountFollowPreference.favorite} desc nulls last`,
 				accountFollowPreference.position,
-				accountFollowPreference.unitId,
+				accountFollowPreference.targetReferenceId,
 			)
 			.limit(512);
 		if (!candidates.length) return { rows: [], lastScanned: undefined, exhausted: true };
@@ -195,10 +205,11 @@ export async function listFollowing(input: ListFollowingInput) {
 			);
 			for (const id of ids) readable.add(id);
 		}
-		const state = unitStateRelation(accountFollowPreference.unitId, "following_target_state");
+		const state = unitStateRelation(referenceValueTarget.id, "following_target_state");
 		const rows = await tx
 			.select({
 				id: state.id,
+				targetReferenceId: accountFollowPreference.targetReferenceId,
 				owner: state.owner,
 				shape: state.shape,
 				coverAssetId: resolvedUnitLocalizationImageAssetId(
@@ -212,6 +223,7 @@ export async function listFollowing(input: ListFollowingInput) {
 				updatedAt: accountFollowPreference.updatedAt,
 			})
 			.from(accountFollowPreference)
+			.innerJoin(referenceValue, eq(referenceValue.id, accountFollowPreference.targetReferenceId))
 			.innerJoinLateral(state, sql`true`)
 			.where(
 				and(
@@ -221,15 +233,15 @@ export async function listFollowing(input: ListFollowingInput) {
 					inArray(state.id, [...readable]),
 					getContentRatingCondition(contentRatingPolicy, state.contentRating),
 					inArray(
-						accountFollowPreference.unitId,
-						candidates.map((item) => item.unitId),
+						accountFollowPreference.targetReferenceId,
+						candidates.map((item) => item.targetReferenceId),
 					),
 				),
 			)
 			.orderBy(
-				desc(accountFollowPreference.favorite),
+				sql`${accountFollowPreference.favorite} desc nulls last`,
 				accountFollowPreference.position,
-				accountFollowPreference.unitId,
+				accountFollowPreference.targetReferenceId,
 			)
 			.limit(input.limit + 1);
 
@@ -254,20 +266,26 @@ export async function listFollowing(input: ListFollowingInput) {
 	const last = items.at(-1);
 	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(items.map((item) => item.id));
 	return {
-		items: items.map(({ presentedAvatar, coverAssetId, ...record }) => ({
-			...record,
-			owner: requireFollowableUnitOwner(record.owner),
-			slugAddress: slugAddresses.get(record.id) ?? null,
-			avatar: presentedAvatar,
-			cover: presentImageAsset(coverAssetId, "cover"),
-		})),
+		items: items.map(
+			({ presentedAvatar, coverAssetId, targetReferenceId: _referenceId, ...record }) => ({
+				...record,
+				owner: requireFollowableUnitOwner(record.owner),
+				slugAddress: slugAddresses.get(record.id) ?? null,
+				avatar: presentedAvatar,
+				cover: presentImageAsset(coverAssetId, "cover"),
+			}),
+		),
 		nextCursor:
 			rows.length > input.limit && last
 				? encodeFollowingCursor(
 						input.owner,
 						localizationLanguages,
 						contentRatingPolicy.kind === "allow" ? contentRatingPolicy.ratings : [],
-						{ favorite: last.favorite, position: last.position, unitId: last.id },
+						{
+							favorite: last.favorite,
+							position: last.position,
+							targetReferenceId: last.targetReferenceId,
+						},
 					)
 				: !scan.exhausted && scan.lastScanned
 					? encodeFollowingCursor(
@@ -310,6 +328,14 @@ export async function followUnit(input: {
 		);
 		const target = await resolveFollowTarget(tx, input.unitId, input.authorization);
 		if (target.id === input.followerProfileId) throw new UserSelfFollowForbidden();
+		const [merged] = await tx
+			.select({ id: unitMergeRedirect.sourceUnitId })
+			.from(unitMergeRedirect)
+			.where(eq(unitMergeRedirect.sourceUnitId, target.id))
+			.limit(1);
+		if (merged) throw new UnitNotFound("Follow target");
+		const { reference } = await resolveRegisteredUnitReference(tx, target.id);
+		const targetReferenceId = await allocateReferenceValue(tx, reference);
 		if (target.owner === "entity") {
 			const [blocked] = await tx
 				.select({ id: accountEntityBlock.blockedEntityId })
@@ -335,15 +361,15 @@ export async function followUnit(input: {
 
 		const [created] = await tx
 			.insert(unitFollow)
-			.values({ followerProfileId: input.followerProfileId, unitId: target.id })
+			.values({ followerProfileId: input.followerProfileId, targetReferenceId })
 			.onConflictDoNothing()
-			.returning({ unitId: unitFollow.unitId });
+			.returning({ targetReferenceId: unitFollow.targetReferenceId });
 		await tx
 			.insert(accountFollowPreference)
 			.values({
 				authUserId: input.authUserId,
 				followerEntityId: input.followerProfileId,
-				unitId: target.id,
+				targetReferenceId,
 			})
 			.onConflictDoNothing();
 		if (created && target.owner === "entity")
@@ -370,11 +396,16 @@ export async function unfollowUnit(
 ) {
 	await database.transaction(async (tx) => {
 		await lockFollowingAccount(tx, authUserId, followerProfileId, authorization, "write");
-		await tx
-			.delete(unitFollow)
-			.where(
-				and(eq(unitFollow.followerProfileId, followerProfileId), eq(unitFollow.unitId, unitId)),
-			);
+		const reference = await findReferenceValueByNativeId(tx, unitId);
+		if (reference)
+			await tx
+				.delete(unitFollow)
+				.where(
+					and(
+						eq(unitFollow.followerProfileId, followerProfileId),
+						eq(unitFollow.targetReferenceId, reference.valueId),
+					),
+				);
 		await authorization.account.ensureCanWrite(tx);
 	});
 	return { following: false as const };
@@ -396,6 +427,7 @@ export async function getFollowingStatus(input: {
 			"read",
 		);
 		const target = await resolveFollowTarget(tx, input.unitId, input.authorization);
+		const reference = await findReferenceValueByNativeId(tx, target.id);
 		const [record] = await tx
 			.select({
 				favorite: accountFollowPreference.favorite,
@@ -406,7 +438,7 @@ export async function getFollowingStatus(input: {
 			.where(
 				and(
 					eq(accountFollowPreference.authUserId, input.authUserId),
-					eq(accountFollowPreference.unitId, target.id),
+					eq(accountFollowPreference.targetReferenceId, reference?.valueId ?? sql`null::uuid`),
 				),
 			)
 			.limit(1);
@@ -481,6 +513,9 @@ export async function replaceFollowingSettings(input: {
 		);
 		const target = await resolveFollowTarget(tx, input.unitId, input.authorization);
 		if (target.owner !== input.settings.owner) throw new FollowingTargetKindMismatch();
+		const reference = await findReferenceValueByNativeId(tx, target.id);
+		if (!reference) throw new UnitNotFound("Follow");
+		const targetReferenceId = reference.valueId;
 		const [record] = await tx
 			.select({
 				favorite: accountFollowPreference.favorite,
@@ -490,7 +525,7 @@ export async function replaceFollowingSettings(input: {
 			.where(
 				and(
 					eq(accountFollowPreference.authUserId, input.authUserId),
-					eq(accountFollowPreference.unitId, target.id),
+					eq(accountFollowPreference.targetReferenceId, targetReferenceId),
 				),
 			)
 			.limit(1);
@@ -501,11 +536,11 @@ export async function replaceFollowingSettings(input: {
 			.values({
 				authUserId: input.authUserId,
 				followerEntityId: input.followerProfileId,
-				unitId: target.id,
+				targetReferenceId,
 				inApp: input.settings.inAppNotificationsEnabled,
 			})
 			.onConflictDoUpdate({
-				target: [accountFollowPreference.authUserId, accountFollowPreference.unitId],
+				target: [accountFollowPreference.authUserId, accountFollowPreference.targetReferenceId],
 				set: {
 					inApp: input.settings.inAppNotificationsEnabled,
 					updatedAt: new Date(),
@@ -565,6 +600,8 @@ export async function updateFollowingPresentation(
 ) {
 	return database.transaction(async (tx) => {
 		await lockFollowingAccount(tx, authUserId, followerProfileId, authorization, "write");
+		const reference = await findReferenceValueByNativeId(tx, unitId);
+		if (!reference) throw new UnitNotFound("Follow");
 		const [updated] = await tx
 			.update(accountFollowPreference)
 			.set({
@@ -575,11 +612,11 @@ export async function updateFollowingPresentation(
 			.where(
 				and(
 					eq(accountFollowPreference.authUserId, authUserId),
-					eq(accountFollowPreference.unitId, unitId),
+					eq(accountFollowPreference.targetReferenceId, reference.valueId),
 				),
 			)
 			.returning({
-				unitId: accountFollowPreference.unitId,
+				unitId: sql<string>`public.reference_value_native_id(${accountFollowPreference.targetReferenceId})`,
 				position: accountFollowPreference.position,
 				favorite: accountFollowPreference.favorite,
 				updatedAt: accountFollowPreference.updatedAt,

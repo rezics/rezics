@@ -1,3 +1,4 @@
+import { referenceValueIdForNativeId } from "../../units/reference-value";
 import { unitStateRelation } from "../../units/state-relation";
 import { readUnitPresentationsInTransaction } from "../../units/presentation-reader";
 import { DevelopmentPreviewCapability, PlatformCapabilityValues } from "@rezics/access";
@@ -705,8 +706,8 @@ export default new Elysia({ name: "account-entity-api" })
 					.delete(unitFollow)
 					.where(
 						or(
-							and(eq(unitFollow.followerProfileId, entity.id), eq(unitFollow.unitId, params.id)),
-							and(eq(unitFollow.followerProfileId, params.id), eq(unitFollow.unitId, entity.id)),
+							and(eq(unitFollow.followerProfileId, entity.id), eq(unitFollow.targetReferenceId, referenceValueIdForNativeId(params.id))),
+							and(eq(unitFollow.followerProfileId, params.id), eq(unitFollow.targetReferenceId, referenceValueIdForNativeId(entity.id))),
 						),
 					);
 			});

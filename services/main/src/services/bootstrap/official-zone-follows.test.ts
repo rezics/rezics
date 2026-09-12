@@ -6,6 +6,15 @@ import { ensureOfficialZoneFollows } from "./official-zone-follows";
 const entityId = "019b76da-a800-7200-8000-000000000001";
 const authUserId = "019b76da-a800-7100-8000-000000000001";
 
+const referenceFor = (id: string) =>
+	`00000000-0000-4000-8000-${String(OfficialZoneManifest.findIndex((zone) => zone.id === id) + 1).padStart(12, "0")}`;
+vi.mock("../units/reference-value", async (original) => ({
+	...(await original<typeof import("../units/reference-value")>()),
+	allocateReferenceValue: vi.fn(async (_tx: unknown, target: { id: string }) =>
+		referenceFor(target.id),
+	),
+}));
+
 describe("official Zone defaults", () => {
 	it("separates public follows from Auth-owned order without rewriting existing choices", async () => {
 		const writes: { table: unknown; value: unknown }[] = [];
@@ -34,7 +43,7 @@ describe("official Zone defaults", () => {
 		expect(writes.filter((write) => write.table === unitFollow)).toEqual(
 			OfficialZoneManifest.map((zone) => ({
 				table: unitFollow,
-				value: { followerProfileId: entityId, unitId: zone.id },
+				value: { followerProfileId: entityId, targetReferenceId: referenceFor(zone.id) },
 			})),
 		);
 		expect(

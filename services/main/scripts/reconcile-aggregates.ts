@@ -67,7 +67,7 @@ const checks: readonly { name: string; query: SQL }[] = [
 	{
 		name: "unit_follow_stat",
 		query: sql`
-			with expected as (select unit_id, count(*) as follower_count from unit_follow group by unit_id)
+			with expected as (select public.reference_value_native_id(target_reference_id) as unit_id, count(*) as follower_count from unit_follow group by target_reference_id)
 			select count(*)::text as drift_count from expected
 			full join unit_follow_stat using (unit_id)
 			where expected.unit_id is null or unit_follow_stat.unit_id is null

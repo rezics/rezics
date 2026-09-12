@@ -9,6 +9,7 @@ Dependencies: M01 and module event contracts. Owners: database architecture sect
 - Complete outbox/relay/consumer flows, receipts, permission/source/lease fences, bounded fan-out, quotas and reconciliation.
 - Reproduce and resolve native facet-search crashes; a successful small or JIT-off run is not stability evidence.
 - Complete merge/recommendation recovery, checkpointed export, backup/WAL/object reconciliation and erasure-frontier replay.
+- Add native Zone selector/composition capacity scenarios using current identities and private follow preferences.
 - Measure skew, hot keys, graph budgets, row/index/WAL amplification, queue age, storage, plans and recovery at the 500M/3B planning scales.
 
 ## Acceptance

@@ -62,7 +62,10 @@ SQL_GROUPS = {
     "D15": "content-metrics participation-studio recommendation-build search-document-support unit-search-document tag-path-search",
 }
 SQL_GROUP = {name: group for group, names in SQL_GROUPS.items() for name in names.split()}
-OVERLAY_GROUP = {"recommendation_exclusion_reference_values.pre": "D15"}
+OVERLAY_GROUP = {
+    "recommendation_exclusion_reference_values.pre": "D15",
+    "following_reference_values.pre": "D11",
+}
 
 
 DISPOSITIONS = {

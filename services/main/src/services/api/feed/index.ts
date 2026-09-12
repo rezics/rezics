@@ -1,3 +1,4 @@
+import { referenceValueIdForNativeId } from "../../units/reference-value";
 import { recommendationExclusionCondition } from "../../recommendations/exclusion-query";
 import { UnitOwnerSchema, type UnitOwner } from "@rezics/reference";
 import { unitStateRelation, unitStatesForIds } from "../../units/state-relation";
@@ -642,7 +643,7 @@ export function getFeedCandidateRealmIdExpression(
 			? sql`case when exists (
 				select 1 from ${unitFollow}
 				where ${unitFollow.followerProfileId} = ${viewer.profileId}::uuid
-					and ${unitFollow.unitId} = candidate_realm.realm_id
+					and ${unitFollow.targetReferenceId} = ${referenceValueIdForNativeId(sql`candidate_realm.realm_id`)}
 			) then 0 else 1 end,`
 			: sql``;
 	return sql<string | null>`(

@@ -585,30 +585,30 @@ CREATE OR REPLACE FUNCTION public.maintain_unit_follow_stat()
  LANGUAGE plpgsql
  SET search_path TO pg_catalog, public
 AS $function$
-DECLARE row_data unit_follow%ROWTYPE; direction bigint; change record;
+DECLARE row_data unit_follow%ROWTYPE; direction bigint; change record; target_id uuid;
 BEGIN
   FOR change IN
     SELECT OLD AS row_data, -1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'DELETE')
     UNION ALL SELECT NEW AS row_data, 1::bigint AS direction WHERE TG_OP IN ('UPDATE', 'INSERT')
   LOOP
     row_data := change.row_data; direction := change.direction;
-    IF EXISTS (SELECT 1 FROM public.read_unit_state(row_data.unit_id,true)) THEN
+    target_id := public.reference_value_native_id(row_data.target_reference_id);
       IF direction < 0 THEN
         UPDATE unit_follow_stat SET follower_count = follower_count + direction,
-          updated_at = now() WHERE unit_id = row_data.unit_id;
+          updated_at = now() WHERE unit_id = target_id;
         IF NOT FOUND THEN
           RAISE EXCEPTION 'missing unit_follow_stat row for decrement: %',
-            row_data.unit_id USING ERRCODE = '23514';
+            target_id USING ERRCODE = '23514';
         END IF;
       ELSE
-        INSERT INTO unit_follow_stat (unit_id, follower_count)
-        VALUES (row_data.unit_id, direction)
+        INSERT INTO unit_follow_stat (unit_id, unit_publishing_id, unit_music_id, unit_program_id, unit_software_id, unit_entity_id, unit_grouping_id, unit_reference_id, unit_distribution_id, unit_video_id, unit_audio_id, unit_post_id, unit_poll_id, unit_zone_id, unit_realm_id, unit_realm_rule_id, unit_custom_theme_id, unit_collection_id, unit_tag_id, unit_tag_path_id, unit_label_id, follower_count)
+        SELECT target_id, value.target_publishing_id, value.target_music_id, value.target_program_id, value.target_software_id, value.target_entity_id, value.target_grouping_id, value.target_reference_id, value.target_distribution_id, value.target_video_id, value.target_audio_id, value.target_post_id, value.target_poll_id, value.target_zone_id, value.target_realm_id, value.target_realm_rule_id, value.target_custom_theme_id, value.target_collection_id, value.target_tag_id, value.target_tag_path_id, value.target_label_id, direction
+        FROM public.reference_value value WHERE value.id=row_data.target_reference_id
         ON CONFLICT (unit_id) DO UPDATE SET
           follower_count = unit_follow_stat.follower_count + excluded.follower_count,
           updated_at = now();
       END IF;
-      DELETE FROM unit_follow_stat WHERE unit_id = row_data.unit_id AND follower_count = 0;
-    END IF;
+      DELETE FROM unit_follow_stat WHERE unit_id = target_id AND follower_count = 0;
   END LOOP;
   RETURN NULL;
 END;
