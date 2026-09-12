@@ -39,6 +39,7 @@ Follow only the owners relevant to the requested change:
 | Change | Owner and constraints |
 | --- | --- |
 | Web routes, screens or feature organization | [Web feature organization](docs/architecture/web-feature-organization.md). `apps/web/app` contains framework boundary adapters; implementation belongs to features or existing infrastructure owners. |
+| UI information organization, interactions or API-to-UI capability changes | [API and UI design](.agents/skills/api-ui-design/SKILL.md). Preserve API capabilities and semantics while designing information and actions around the user's task. |
 | Shared UI or controls | [UI conventions](libraries/ui/README.md). Use `@rezics/ui` and SharkUI; do not introduce another UI library. Preserve `src/ui` as the upstream mirror; project components belong in `src/custom`. |
 | Visible text or localization | [Localization](libraries/i18n/README.md). Every frontend string belongs to its owner's typed locale resources. For external content, use [external-content-value](.agents/skills/external-content-value/SKILL.md); optional copy must serve an audience need. |
 | Identity, resource responses, URLs or redirects | [Slug addressing](docs/architecture/unit-slug-addressing.md). IDs are immutable identities; scoped slugs are optional addresses. |
