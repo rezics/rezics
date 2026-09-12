@@ -22,6 +22,18 @@ task services-main:performance:run -- --mode load --rows 1000 --case and-correla
 
 Compare JIT on/off and the same image/workload on a separate Linux host; retain native core/backtrace, reduced SQL/binds and run metadata. New performance containers enable core dumps, and `task services-main:performance:diagnostics:check` verifies capture after an isolated backend abort; reused older containers retain their original limits. Inspect `coreDumpSettings` and per-artifact capture outcomes in the report. Closure requires repeated successful reproduction workloads plus an explained repair or qualified runtime change. Temporary original run files are not required: the recipe and generator remain committed. The retained failure is not replaced by historical suite totals.
 
+The [Linux comparison](database/native-facet-linux-evidence.json) on September 12
+uses an AMD Threadripper 3970X host and the same pinned PostgreSQL/PGroonga image.
+The 10,000-resource graph matches the original checksum and 37,641 edges. Full
+JIT-off and JIT-on smoke runs each pass 86 cases and 866 distinct EXPLAIN checks;
+focused 1,000-resource JIT-on and 10,000-resource JIT-off load also passes. HTTP
+budgets remain unchanged. Replay-only timeout failures were traced to the harness
+combining captured local settings across different API transactions; isolated
+SQL diagnostics pass. A host-interrupted run is excluded from acceptance.
+These comparisons do not reproduce or explain the original SIGABRT. Native core
+analysis on a reproducing runtime, or a separately qualified runtime change,
+remains required before closing it. The 500M/3B workload gate is also open.
+
 ## Fresh schema replay abort
 
 The September 8 convergence qualification recorded a PostgreSQL SIGILL during Atlas bookkeeping after schema statements. The underlying cause was not established. The current target must pass a fresh replay with exact generated inputs and engine diagnostics; a different successful replay does not close this observation.

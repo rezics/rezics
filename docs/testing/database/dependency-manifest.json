@@ -63,6 +63,7 @@
     "docs/testing/database/merge-phase-recovery-evidence.json",
     "docs/testing/database/merge-recovery-evidence.json",
     "docs/testing/database/merge-review-application-evidence.json",
+    "docs/testing/database/native-facet-linux-evidence.json",
     "docs/testing/database/native-merge-evidence.json",
     "docs/testing/database/participation-evidence.json",
     "docs/testing/database/platform-user-authority-evidence.json",

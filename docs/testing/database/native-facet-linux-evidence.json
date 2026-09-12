@@ -1,0 +1,734 @@
+{
+  "baseCommit": "3eb2da039b35a2d6777c12dfc453bb4b0c2d7d6a",
+  "date": "2026-09-12",
+  "scope": "Native facet reproduction comparison on Linux, not native-crash closure or corpus capacity",
+  "planningRows": [
+    500000000,
+    3000000000
+  ],
+  "runs": [
+    {
+      "runId": "e98c5639bb57a4bc",
+      "datasetRunId": "e98c5639bb57a4bc",
+      "revision": "b3e9888c9fc112ee552293d0cf8cbcb576b43e9f",
+      "dirty": true,
+      "config": {
+        "mode": "smoke",
+        "rows": 10000,
+        "seed": 20260909,
+        "rate": 10,
+        "durationSeconds": 180,
+        "vus": 32,
+        "journeyP95Ms": 2000,
+        "journeyP99Ms": 5000,
+        "keep": true,
+        "casePattern": "",
+        "cache": "warm",
+        "jit": "off"
+      },
+      "platform": "linux-x64",
+      "host": {
+        "cpu": "AMD Ryzen Threadripper 3970X 32-Core Processor",
+        "parallelism": 64,
+        "memoryBytes": 67258376192
+      },
+      "nodeVersion": "v26.8.2",
+      "bunVersion": "1.4.2",
+      "databaseImageId": "sha256:b30c21d0f15bcc1633c8408145a53eb3c5df5c8d549993bf92d6342d97a1c3cc",
+      "postgresVersion": {
+        "version": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+      },
+      "gmarkRevision": "77be5b620375f2fabf1b14204d1d1f899d8f8425",
+      "graphSha256": "b4089e971c11fea83c1c95afa188d2027a6ffabaf57215cb13d654c3598413a6",
+      "coreDumpSettings": [
+        "core",
+        "0",
+        "unlimited"
+      ],
+      "coverage": {
+        "planned": 86,
+        "executed": 86,
+        "missing": [],
+        "unexpected": []
+      },
+      "planCoverage": {
+        "captured": 1027,
+        "distinct": 866,
+        "explained": 866,
+        "failed": 0
+      },
+      "k6": {
+        "status": "passed"
+      },
+      "pgbench": null,
+      "databaseSettings": [
+        {
+          "name": "effective_cache_size",
+          "setting": "524288",
+          "unit": "8kB"
+        },
+        {
+          "name": "jit",
+          "setting": "on",
+          "unit": null
+        },
+        {
+          "name": "jit_above_cost",
+          "setting": "100000",
+          "unit": null
+        },
+        {
+          "name": "jit_inline_above_cost",
+          "setting": "500000",
+          "unit": null
+        },
+        {
+          "name": "jit_optimize_above_cost",
+          "setting": "500000",
+          "unit": null
+        },
+        {
+          "name": "maintenance_work_mem",
+          "setting": "65536",
+          "unit": "kB"
+        },
+        {
+          "name": "max_connections",
+          "setting": "100",
+          "unit": null
+        },
+        {
+          "name": "max_locks_per_transaction",
+          "setting": "1024",
+          "unit": null
+        },
+        {
+          "name": "max_parallel_workers_per_gather",
+          "setting": "2",
+          "unit": null
+        },
+        {
+          "name": "max_worker_processes",
+          "setting": "12",
+          "unit": null
+        },
+        {
+          "name": "random_page_cost",
+          "setting": "4",
+          "unit": null
+        },
+        {
+          "name": "shared_buffers",
+          "setting": "16384",
+          "unit": "8kB"
+        },
+        {
+          "name": "work_mem",
+          "setting": "4096",
+          "unit": "kB"
+        }
+      ],
+      "graphEdges": 37641,
+      "status": "passed",
+      "loadMetrics": {
+        "dropped_iterations": {
+          "type": "counter",
+          "contains": "default",
+          "values": {
+            "count": 0,
+            "rate": 0
+          },
+          "thresholds": {
+            "count==0": {
+              "ok": true
+            }
+          }
+        },
+        "iterations": {
+          "type": "counter",
+          "contains": "default",
+          "values": {
+            "count": 86,
+            "rate": 0.8750387036524817
+          }
+        },
+        "http_req_duration": {
+          "type": "trend",
+          "contains": "time",
+          "values": {
+            "min": 14.819631,
+            "med": 493.22365,
+            "p(95)": 1968.4816449,
+            "p(99)": 2665.673883979999,
+            "max": 2704.403906
+          }
+        },
+        "http_req_failed": {
+          "type": "rate",
+          "contains": "default",
+          "values": {
+            "rate": 0,
+            "passes": 0,
+            "fails": 107
+          }
+        }
+      },
+      "artifactDigests": {
+        "report.json": "033be76552c23ae92722424701bb7ce5b802cc60f69712d5c4082baa297e1e2d",
+        "sql.jsonl": "7b0ba08c0a4ce363f7ff5d7ebed24e6d25dc4593388face0ace361a91ff34994",
+        "plans.json": "6e172cc96add178ad3e9c5b9efc91789cc5c4146b9d4a8d74da5e37b2279e9c1",
+        "k6-summary.json": "9ac30f5d10718a3f3ea091fff32fdce60c8c59cb32b5a42812f17fb6df0e49b4"
+      }
+    },
+    {
+      "runId": "8e6f55dc977473e0",
+      "datasetRunId": "e98c5639bb57a4bc",
+      "revision": "ab53f94aece1403933a6e0dff8be573438af3831",
+      "dirty": true,
+      "config": {
+        "mode": "smoke",
+        "rows": 10000,
+        "seed": 20260909,
+        "rate": 10,
+        "durationSeconds": 180,
+        "vus": 32,
+        "journeyP95Ms": 2000,
+        "journeyP99Ms": 5000,
+        "keep": false,
+        "casePattern": "",
+        "cache": "warm",
+        "jit": "on",
+        "reuse": "e98c5639bb57a4bc"
+      },
+      "platform": "linux-x64",
+      "host": {
+        "cpu": "AMD Ryzen Threadripper 3970X 32-Core Processor",
+        "parallelism": 64,
+        "memoryBytes": 67258363904
+      },
+      "nodeVersion": "v26.8.2",
+      "bunVersion": "1.4.2",
+      "databaseImageId": "sha256:b30c21d0f15bcc1633c8408145a53eb3c5df5c8d549993bf92d6342d97a1c3cc",
+      "postgresVersion": {
+        "version": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+      },
+      "gmarkRevision": "77be5b620375f2fabf1b14204d1d1f899d8f8425",
+      "graphSha256": "b4089e971c11fea83c1c95afa188d2027a6ffabaf57215cb13d654c3598413a6",
+      "coreDumpSettings": [
+        "core",
+        "0",
+        "unlimited"
+      ],
+      "coverage": {
+        "planned": 86,
+        "executed": 86,
+        "missing": [],
+        "unexpected": []
+      },
+      "planCoverage": {
+        "captured": 1027,
+        "distinct": 866,
+        "explained": 866,
+        "failed": 0
+      },
+      "k6": {
+        "status": "passed"
+      },
+      "pgbench": null,
+      "databaseSettings": [
+        {
+          "name": "effective_cache_size",
+          "setting": "524288",
+          "unit": "8kB"
+        },
+        {
+          "name": "jit",
+          "setting": "on",
+          "unit": null
+        },
+        {
+          "name": "jit_above_cost",
+          "setting": "100000",
+          "unit": null
+        },
+        {
+          "name": "jit_inline_above_cost",
+          "setting": "500000",
+          "unit": null
+        },
+        {
+          "name": "jit_optimize_above_cost",
+          "setting": "500000",
+          "unit": null
+        },
+        {
+          "name": "maintenance_work_mem",
+          "setting": "65536",
+          "unit": "kB"
+        },
+        {
+          "name": "max_connections",
+          "setting": "100",
+          "unit": null
+        },
+        {
+          "name": "max_locks_per_transaction",
+          "setting": "1024",
+          "unit": null
+        },
+        {
+          "name": "max_parallel_workers_per_gather",
+          "setting": "2",
+          "unit": null
+        },
+        {
+          "name": "max_worker_processes",
+          "setting": "12",
+          "unit": null
+        },
+        {
+          "name": "random_page_cost",
+          "setting": "4",
+          "unit": null
+        },
+        {
+          "name": "shared_buffers",
+          "setting": "16384",
+          "unit": "8kB"
+        },
+        {
+          "name": "work_mem",
+          "setting": "4096",
+          "unit": "kB"
+        }
+      ],
+      "graphEdges": 37641,
+      "status": "passed",
+      "loadMetrics": {
+        "iterations": {
+          "values": {
+            "count": 86,
+            "rate": 0.719607390487586
+          },
+          "type": "counter",
+          "contains": "default"
+        },
+        "http_req_failed": {
+          "type": "rate",
+          "contains": "default",
+          "values": {
+            "passes": 0,
+            "fails": 107,
+            "rate": 0
+          }
+        },
+        "dropped_iterations": {
+          "thresholds": {
+            "count==0": {
+              "ok": true
+            }
+          },
+          "type": "counter",
+          "contains": "default",
+          "values": {
+            "count": 0,
+            "rate": 0
+          }
+        },
+        "http_req_duration": {
+          "type": "trend",
+          "contains": "time",
+          "values": {
+            "med": 812.984491,
+            "p(95)": 2416.1615758,
+            "p(99)": 3018.399476919999,
+            "max": 3079.520863,
+            "min": 13.529636
+          }
+        }
+      },
+      "artifactDigests": {
+        "report.json": "5b0db8bba5c15aa8d22142171bc914fa081eac7363b4c0d0ec5dccd9dfd71b93",
+        "sql.jsonl": "7b0ba08c0a4ce363f7ff5d7ebed24e6d25dc4593388face0ace361a91ff34994",
+        "plans.json": "0397b539da5b62ba4f6d85204e4570c0a459e4a97474914e9c3ec172a93a0322",
+        "k6-summary.json": "ab105dfc5c78381e55053fe247847e92f3027901652268a8fe351315d67d30d6"
+      }
+    },
+    {
+      "runId": "e8d6a449287e3d2a",
+      "datasetRunId": "21f7f9a59a035ccd",
+      "revision": "fc81af67894b61b8b77d3f1c1686bff6e0b8cc03",
+      "dirty": true,
+      "config": {
+        "mode": "load",
+        "rows": 1000,
+        "seed": 20260909,
+        "rate": 2,
+        "durationSeconds": 30,
+        "vus": 8,
+        "journeyP95Ms": 2000,
+        "journeyP99Ms": 5000,
+        "keep": false,
+        "casePattern": "and-correlated.hot",
+        "cache": "warm",
+        "jit": "on",
+        "reuse": "21f7f9a59a035ccd"
+      },
+      "platform": "linux-x64",
+      "host": {
+        "cpu": "AMD Ryzen Threadripper 3970X 32-Core Processor",
+        "parallelism": 64,
+        "memoryBytes": 67258376192
+      },
+      "nodeVersion": "v26.8.2",
+      "bunVersion": "1.4.2",
+      "databaseImageId": "sha256:b30c21d0f15bcc1633c8408145a53eb3c5df5c8d549993bf92d6342d97a1c3cc",
+      "postgresVersion": {
+        "version": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+      },
+      "gmarkRevision": "77be5b620375f2fabf1b14204d1d1f899d8f8425",
+      "graphSha256": "1639e546a28f72defa1bf3375c744c165d3e8cccaae8c46c8f20295c0eb323e6",
+      "coreDumpSettings": [
+        "core",
+        "0",
+        "0"
+      ],
+      "coverage": {
+        "planned": 2,
+        "executed": 2,
+        "missing": [],
+        "unexpected": []
+      },
+      "planCoverage": {
+        "captured": 20,
+        "distinct": 18,
+        "explained": 18,
+        "failed": 0
+      },
+      "k6": {
+        "status": "passed"
+      },
+      "pgbench": {
+        "caseFiles": 2,
+        "durationSeconds": 10,
+        "clients": 4,
+        "failedTransactions": 0,
+        "scope": "SQL-only mixed workload, includes preparation and per-query transactions, after API load",
+        "statementTimeoutMs": 10000,
+        "transactionScope": "one-per-query"
+      },
+      "databaseSettings": [
+        {
+          "name": "effective_cache_size",
+          "setting": "524288",
+          "unit": "8kB"
+        },
+        {
+          "name": "jit",
+          "setting": "on",
+          "unit": null
+        },
+        {
+          "name": "jit_above_cost",
+          "setting": "100000",
+          "unit": null
+        },
+        {
+          "name": "jit_inline_above_cost",
+          "setting": "500000",
+          "unit": null
+        },
+        {
+          "name": "jit_optimize_above_cost",
+          "setting": "500000",
+          "unit": null
+        },
+        {
+          "name": "maintenance_work_mem",
+          "setting": "65536",
+          "unit": "kB"
+        },
+        {
+          "name": "max_connections",
+          "setting": "100",
+          "unit": null
+        },
+        {
+          "name": "max_locks_per_transaction",
+          "setting": "1024",
+          "unit": null
+        },
+        {
+          "name": "max_parallel_workers_per_gather",
+          "setting": "2",
+          "unit": null
+        },
+        {
+          "name": "max_worker_processes",
+          "setting": "12",
+          "unit": null
+        },
+        {
+          "name": "random_page_cost",
+          "setting": "4",
+          "unit": null
+        },
+        {
+          "name": "shared_buffers",
+          "setting": "16384",
+          "unit": "8kB"
+        },
+        {
+          "name": "work_mem",
+          "setting": "4096",
+          "unit": "kB"
+        }
+      ],
+      "graphEdges": 3370,
+      "status": "passed",
+      "loadMetrics": {
+        "dropped_iterations": {
+          "values": {
+            "count": 0,
+            "rate": 0
+          },
+          "thresholds": {
+            "count==0": {
+              "ok": true
+            }
+          },
+          "type": "counter",
+          "contains": "default"
+        },
+        "http_req_duration": {
+          "type": "trend",
+          "contains": "time",
+          "values": {
+            "min": 1659.607554,
+            "med": 1696.203342,
+            "p(95)": 1763.841431,
+            "p(99)": 1822.7739448,
+            "max": 1882.036882
+          }
+        },
+        "http_req_failed": {
+          "type": "rate",
+          "contains": "default",
+          "values": {
+            "rate": 0,
+            "passes": 0,
+            "fails": 61
+          }
+        },
+        "iterations": {
+          "type": "counter",
+          "contains": "default",
+          "values": {
+            "count": 61,
+            "rate": 1.9234243936957252
+          }
+        }
+      },
+      "artifactDigests": {
+        "report.json": "1274710f3eedcd57a863c51c1dd7048142d42e4d7288ab340582b703852fd434",
+        "sql.jsonl": "cdfb1cb7530d460a5bc105c8a2b9f3e9f8920471e1fe3cc4b03a9a902276eb6b",
+        "plans.json": "a1bd371c041f89f2cfc2e802cee5297307178826e10716437ab27fb7eefdfa71",
+        "k6-summary.json": "e5855c67e0cb4578d21558e0742ba0dc3a0603210351dd2f840fcca7b9ef831a"
+      }
+    },
+    {
+      "runId": "33068f193c1b946a",
+      "datasetRunId": "e98c5639bb57a4bc",
+      "revision": "fc81af67894b61b8b77d3f1c1686bff6e0b8cc03",
+      "dirty": true,
+      "config": {
+        "mode": "load",
+        "rows": 10000,
+        "seed": 20260909,
+        "rate": 2,
+        "durationSeconds": 30,
+        "vus": 8,
+        "journeyP95Ms": 2000,
+        "journeyP99Ms": 5000,
+        "keep": false,
+        "casePattern": "and-correlated.hot",
+        "cache": "warm",
+        "jit": "off",
+        "reuse": "e98c5639bb57a4bc"
+      },
+      "platform": "linux-x64",
+      "host": {
+        "cpu": "AMD Ryzen Threadripper 3970X 32-Core Processor",
+        "parallelism": 64,
+        "memoryBytes": 67258376192
+      },
+      "nodeVersion": "v26.8.2",
+      "bunVersion": "1.4.2",
+      "databaseImageId": "sha256:b30c21d0f15bcc1633c8408145a53eb3c5df5c8d549993bf92d6342d97a1c3cc",
+      "postgresVersion": {
+        "version": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+      },
+      "gmarkRevision": "77be5b620375f2fabf1b14204d1d1f899d8f8425",
+      "graphSha256": "b4089e971c11fea83c1c95afa188d2027a6ffabaf57215cb13d654c3598413a6",
+      "coreDumpSettings": [
+        "core",
+        "0",
+        "unlimited"
+      ],
+      "coverage": {
+        "planned": 2,
+        "executed": 2,
+        "missing": [],
+        "unexpected": []
+      },
+      "planCoverage": {
+        "captured": 24,
+        "distinct": 20,
+        "explained": 20,
+        "failed": 0
+      },
+      "k6": {
+        "status": "passed"
+      },
+      "pgbench": {
+        "caseFiles": 2,
+        "durationSeconds": 10,
+        "clients": 4,
+        "failedTransactions": 0,
+        "scope": "SQL-only mixed workload, includes preparation and per-query transactions, after API load",
+        "statementTimeoutMs": 10000,
+        "transactionScope": "one-per-query"
+      },
+      "databaseSettings": [
+        {
+          "name": "effective_cache_size",
+          "setting": "524288",
+          "unit": "8kB"
+        },
+        {
+          "name": "jit",
+          "setting": "on",
+          "unit": null
+        },
+        {
+          "name": "jit_above_cost",
+          "setting": "100000",
+          "unit": null
+        },
+        {
+          "name": "jit_inline_above_cost",
+          "setting": "500000",
+          "unit": null
+        },
+        {
+          "name": "jit_optimize_above_cost",
+          "setting": "500000",
+          "unit": null
+        },
+        {
+          "name": "maintenance_work_mem",
+          "setting": "65536",
+          "unit": "kB"
+        },
+        {
+          "name": "max_connections",
+          "setting": "100",
+          "unit": null
+        },
+        {
+          "name": "max_locks_per_transaction",
+          "setting": "1024",
+          "unit": null
+        },
+        {
+          "name": "max_parallel_workers_per_gather",
+          "setting": "2",
+          "unit": null
+        },
+        {
+          "name": "max_worker_processes",
+          "setting": "12",
+          "unit": null
+        },
+        {
+          "name": "random_page_cost",
+          "setting": "4",
+          "unit": null
+        },
+        {
+          "name": "shared_buffers",
+          "setting": "16384",
+          "unit": "8kB"
+        },
+        {
+          "name": "work_mem",
+          "setting": "4096",
+          "unit": "kB"
+        }
+      ],
+      "graphEdges": 37641,
+      "status": "passed",
+      "loadMetrics": {
+        "http_req_failed": {
+          "type": "rate",
+          "contains": "default",
+          "values": {
+            "passes": 0,
+            "fails": 61,
+            "rate": 0
+          }
+        },
+        "iterations": {
+          "type": "counter",
+          "contains": "default",
+          "values": {
+            "count": 61,
+            "rate": 1.9268985235449947
+          }
+        },
+        "http_req_duration": {
+          "type": "trend",
+          "contains": "time",
+          "values": {
+            "min": 1638.52801,
+            "med": 1665.49897,
+            "p(95)": 1724.573741,
+            "p(99)": 1744.9610598,
+            "max": 1770.39699
+          }
+        },
+        "dropped_iterations": {
+          "type": "counter",
+          "contains": "default",
+          "values": {
+            "count": 0,
+            "rate": 0
+          },
+          "thresholds": {
+            "count==0": {
+              "ok": true
+            }
+          }
+        }
+      },
+      "artifactDigests": {
+        "report.json": "0ee0ad6ec26dd993cf70c14e7cc61ab83cef926bd21672ad7177b114daf85f9e",
+        "sql.jsonl": "9d70ed1eb7b0d6112a6e91dd382f7f98e0b6b417b6a585c06c0185a17887b2f0",
+        "plans.json": "7cb4be0f36d7ebf2ea73f8f0eab8c780c0a5fd26e40a4e9a5415f286eb266d86",
+        "k6-summary.json": "e8c30f26396d8f0fb6544beb130868ee54d1ac94cbde5883414fc1eb37c7dfed"
+      }
+    }
+  ],
+  "nativeCrashReproduced": false,
+  "nativeCrashCauseEstablished": false,
+  "productionCapacityQualified": false,
+  "replayCorrections": [
+    "current script contents replace stale scripts on reused containers",
+    "per-query read-only diagnostic transactions prevent leaked API-local timeouts"
+  ],
+  "interruption": {
+    "runId": "b784bf50a73feb18",
+    "outcome": "incomplete",
+    "observed": "Database connection terminated unexpectedly; process exited on an unhandled idle Client error. Docker Desktop was stopped when the task resumed after host reboot. This run provides no acceptance evidence."
+  }
+}

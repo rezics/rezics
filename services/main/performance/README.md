@@ -188,3 +188,10 @@ passes six assertions, verifies a failed report and captured server log, and
 preserves the dataset. This is an intentional connection-loss test, not a native
 engine-crash repair. A host shutdown can still prevent the process from writing
 its final report; interrupted reports must not be counted as acceptance evidence.
+
+
+The [pinned Linux comparison](../../../docs/testing/database/native-facet-linux-evidence.json)
+records the original 10,000-resource graph under both JIT settings and focused
+HTTP/SQL load results. It keeps host/image, exact graph, plans, budgets and
+artifact checksums together. The [native crash](../../../docs/testing/known-failures.md#native-facet-search-abort)
+remains open because it has not reproduced on this host.
