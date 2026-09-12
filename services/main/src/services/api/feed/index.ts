@@ -863,255 +863,243 @@ export async function hydrateFeedItems(
 	const globalScoreRealmId = OfficialRealmUnitIds.score;
 	const scoreRealmIds = [...new Set([viewer.defaultScoreRealmId, globalScoreRealmId])];
 	const rootIds = [...new Set(rows.flatMap(({ rootPostId }) => (rootPostId ? [rootPostId] : [])))];
-	const [
-		availableLanguageRows,
-		rootReplyCounts,
-		childReplyCounts,
-		reactions,
-		viewerReactions,
-		subjectRows,
-		scoreRows,
-		scoreRealmRows,
-		rootRows,
-		collectionCounts,
-		realmMemberCounts,
-		realmTagContextRows,
-		realmTagUnitContextRows,
-		reviewScores,
-	] = await Promise.all([
-		database
-			.select({
-				unitId: unitLocalization.unitId,
-				language: unitLocalization.language,
-			})
-			.from(unitLocalization)
-			.where(inArray(unitLocalization.unitId, validIds))
-			.orderBy(
-				asc(unitLocalization.unitId),
-				asc(unitLocalization.position),
-				asc(unitLocalization.language),
-			),
-		rootPostIds.length
-			? database
-					.select({
-						id: postReplyStat.postId,
-						count: postReplyStat.visibleDescendantCount,
-					})
-					.from(postReplyStat)
-					.where(inArray(postReplyStat.postId, rootPostIds))
-			: [],
-		replyIds.length
-			? database
-					.select({
-						id: postReplyStat.postId,
-						count: postReplyStat.visibleDirectCount,
-					})
-					.from(postReplyStat)
-					.where(inArray(postReplyStat.postId, replyIds))
-			: [],
-		database
-			.select({
-				unitId: unitReactionGlobalStat.unitId,
-				reaction: unitReactionGlobalStat.reaction,
-				count: unitReactionGlobalStat.reactionCount,
-			})
-			.from(unitReactionGlobalStat)
-			.where(inArray(unitReactionGlobalStat.unitId, validIds)),
-		viewer.profileId
-			? database
-					.select({
-						unitId: unitReaction.unitId,
-						realmId: unitReaction.realmId,
-						reaction: unitReaction.reaction,
-					})
-					.from(unitReaction)
-					.where(
-						and(
-							eq(unitReaction.profileId, viewer.profileId),
-							inArray(unitReaction.unitId, validIds),
+	// Zone aggregates bind these lookups to one PostgreSQL transaction client.
+	const availableLanguageRows = await database
+		.select({
+			unitId: unitLocalization.unitId,
+			language: unitLocalization.language,
+		})
+		.from(unitLocalization)
+		.where(inArray(unitLocalization.unitId, validIds))
+		.orderBy(
+			asc(unitLocalization.unitId),
+			asc(unitLocalization.position),
+			asc(unitLocalization.language),
+		);
+	const rootReplyCounts = await (rootPostIds.length
+		? database
+				.select({
+					id: postReplyStat.postId,
+					count: postReplyStat.visibleDescendantCount,
+				})
+				.from(postReplyStat)
+				.where(inArray(postReplyStat.postId, rootPostIds))
+		: []);
+	const childReplyCounts = await (replyIds.length
+		? database
+				.select({
+					id: postReplyStat.postId,
+					count: postReplyStat.visibleDirectCount,
+				})
+				.from(postReplyStat)
+				.where(inArray(postReplyStat.postId, replyIds))
+		: []);
+	const reactions = await database
+		.select({
+			unitId: unitReactionGlobalStat.unitId,
+			reaction: unitReactionGlobalStat.reaction,
+			count: unitReactionGlobalStat.reactionCount,
+		})
+		.from(unitReactionGlobalStat)
+		.where(inArray(unitReactionGlobalStat.unitId, validIds));
+	const viewerReactions = await (viewer.profileId
+		? database
+				.select({
+					unitId: unitReaction.unitId,
+					realmId: unitReaction.realmId,
+					reaction: unitReaction.reaction,
+				})
+				.from(unitReaction)
+				.where(
+					and(eq(unitReaction.profileId, viewer.profileId), inArray(unitReaction.unitId, validIds)),
+				)
+		: []);
+	const subjectRows = await (subjectIds.length
+		? database
+				.select({
+					id: feedUnit.id,
+					owner: feedUnit.owner,
+					shape: feedUnit.shape,
+					coverAssetId: resolvedUnitLocalizationImageAssetId(feedUnit.id, "cover", displayLanguages),
+				})
+				.from(unitStatesForIds(subjectIds, "search_unit"))
+				.where(
+					and(
+						eq(feedUnit.status, "published"),
+						eq(feedUnit.visibility, "public"),
+						eq(feedUnit.moderationStatus, "approved"),
+						isNull(feedUnit.deletedAt),
+						getContentRatingCondition(
+							contentRatingPolicyFromAllowlist(viewer.contentRatings),
+							feedUnit.contentRating,
 						),
-					)
-			: [],
-        subjectIds.length ? database.select({id: feedUnit.id, owner: feedUnit.owner, shape: feedUnit.shape,
-         coverAssetId: resolvedUnitLocalizationImageAssetId(feedUnit.id, "cover", displayLanguages)})
-         .from(unitStatesForIds(subjectIds, "search_unit"))
-         .where(and(eq(feedUnit.status,"published"), eq(feedUnit.visibility,"public"), eq(feedUnit.moderationStatus,"approved"), isNull(feedUnit.deletedAt), getContentRatingCondition(contentRatingPolicyFromAllowlist(viewer.contentRatings),feedUnit.contentRating))) : [],
-		scoreTargetIds.length
-			? database
-					.select({
-						unitId: scoreStat.unitId,
-						realmId: scoreStat.realmId,
-						totalScore: scoreStat.totalScore,
-						totalCount: scoreStat.totalCount,
-					})
-					.from(scoreStat)
-					.where(
-						and(
-							inArray(scoreStat.unitId, scoreTargetIds),
-							inArray(scoreStat.realmId, scoreRealmIds),
+					),
+				)
+		: []);
+	const scoreRows = await (scoreTargetIds.length
+		? database
+				.select({
+					unitId: scoreStat.unitId,
+					realmId: scoreStat.realmId,
+					totalScore: scoreStat.totalScore,
+					totalCount: scoreStat.totalCount,
+				})
+				.from(scoreStat)
+				.where(
+					and(inArray(scoreStat.unitId, scoreTargetIds), inArray(scoreStat.realmId, scoreRealmIds)),
+				)
+		: []);
+	const scoreRealmRows = await database
+		.select({
+			id: feedUnit.id,
+			title: resolvedUnitLocalizationTitle(feedUnit.id, displayLanguages),
+		})
+		.from(unitStatesForIds(scoreRealmIds, "search_unit"))
+		.where(inArray(feedUnit.id, scoreRealmIds));
+	const rootRows = await (rootIds.length
+		? database
+				.select({
+					rootPostId: post.id,
+					title: unitLocalization.title,
+					subjectId: post.subjectUnitId,
+				})
+				.from(post)
+				.innerJoinLateral(unitStateRelation(post.id, "search_unit"), sql`true`)
+				.leftJoin(
+					unitLocalization,
+					and(
+						eq(unitLocalization.unitId, post.id),
+						eq(
+							unitLocalization.language,
+							resolvedUnitLocalizationLanguage(post.id, displayLanguages),
 						),
-					)
-			: [],
-		database
-			.select({
-				id: feedUnit.id,
-				title: resolvedUnitLocalizationTitle(feedUnit.id, displayLanguages),
-			})
-			.from(unitStatesForIds(scoreRealmIds, "search_unit"))
-			.where(inArray(feedUnit.id, scoreRealmIds)),
-		rootIds.length
-			? database
-					.select({
-						rootPostId: post.id,
-						title: unitLocalization.title,
-						subjectId: post.subjectUnitId,
-					})
-					.from(post)
-					.innerJoinLateral(unitStateRelation(post.id,"search_unit"), sql`true`)
-					.leftJoin(
-						unitLocalization,
-						and(
-							eq(unitLocalization.unitId, post.id),
-							eq(
-								unitLocalization.language,
-								resolvedUnitLocalizationLanguage(post.id, displayLanguages),
-							),
-						),
-					)
-					.where(
-						and(
-							inArray(post.id, rootIds),
-							getFeedEligibilityCondition(viewer, { content: ["post:post"] }, asOf),
-						),
-					)
-			: [],
-		collectionIds.length
-			? database
-					.select({
-						collectionId: collectionStat.collectionId,
-						count: collectionStat.itemCount,
-					})
-					.from(collectionStat)
-					.where(inArray(collectionStat.collectionId, collectionIds))
-			: [],
-		realmIds.length
-			? database
-					.select({
-						realmId: realmStat.realmId,
-						count: realmStat.activeMemberCount,
-					})
-					.from(realmStat)
-					.where(inArray(realmStat.realmId, realmIds))
-			: [],
-		wikiIds.length
-			? database
-					.select({
-						contextPostId: realmTagContext.contextPostId,
-						realmId: realmTagContext.realmId,
-						tagId: realmTagContext.tagId,
-						language: resolvedUnitLocalizationLanguage(
-							feedRealmContextTagUnit.id,
-							displayLanguages,
-						),
-						title: resolvedUnitLocalizationTitle(feedRealmContextTagUnit.id, displayLanguages),
-						avatar: resolvedUnitLocalizationAvatar(feedRealmContextTagUnit.id, displayLanguages),
-					})
-					.from(realmTagContext)
-					.innerJoin(
-						realmUnit,
-						and(
-							eq(realmUnit.realmId, realmTagContext.realmId),
-							eq(realmUnit.unitId, realmTagContext.contextPostId),
-							eq(realmUnit.status, "visible"),
-							eq(realmUnit.publicationState, "active"),
-						),
-					)
-					.innerJoin(feedRealmContextTagUnit, eq(feedRealmContextTagUnit.id, realmTagContext.tagId))
-					.where(
-						and(
-							inArray(realmTagContext.contextPostId, wikiIds),
-							getUnitReadCondition(viewer.profileId, {}, feedRealmContextTagUnit),
-						),
-					)
-			: [],
-		tagIds.length && scopedRealmIds.length
-			? database
-					.select({
-						realmId: realmTagContext.realmId,
-						tagId: realmTagContext.tagId,
-						contextPostId: realmTagContext.contextPostId,
-						language: resolvedUnitLocalizationLanguage(
-							feedRealmContextPostUnit.id,
-							displayLanguages,
-						),
-						summary: resolvedUnitLocalizationSummary(feedRealmContextPostUnit.id, displayLanguages),
-					})
-					.from(realmTagContext)
-					.innerJoin(
-						realmUnit,
-						and(
-							eq(realmUnit.realmId, realmTagContext.realmId),
-							eq(realmUnit.unitId, realmTagContext.contextPostId),
-							eq(realmUnit.status, "visible"),
-							eq(realmUnit.publicationState, "active"),
-						),
-					)
-					.innerJoin(
-						feedRealmContextPostUnit,
-						eq(feedRealmContextPostUnit.id, realmTagContext.contextPostId),
-					)
-					.where(
-						and(
-							inArray(realmTagContext.realmId, scopedRealmIds),
-							inArray(realmTagContext.tagId, tagIds),
-							getUnitReadCondition(viewer.profileId, {}, feedRealmContextPostUnit),
-						),
-					)
-			: [],
-		reviewIds.length
-			? database
-					.select({
-						postId: postScore.postId,
-						scoreId: score.id,
-						realmId: score.realmId,
-						realmTitle: resolvedUnitLocalizationTitle(feedReviewScoreRealm.id, displayLanguages),
-						value: score.value,
-						position: postScore.position,
-					})
-					.from(postScore)
-					.innerJoin(score, eq(score.id, postScore.scoreId))
-					.innerJoin(
-						accountPreference,
-						eq(accountPreference.authUserId, selfAuthUserIdForEntity(score.profileId)),
-					)
-					.innerJoinLateral(feedReviewScoreTargetUnit, sql`true`)
-					.innerJoin(feedReviewScoreRealm, eq(feedReviewScoreRealm.id, score.realmId))
-					.where(
-						and(
-							inArray(postScore.postId, reviewIds),
-							getProfileActivityReadCondition({
-								ownerProfileId: score.profileId,
-								categoryVisibility: accountPreference.scoreVisibility,
-								itemVisibility: score.visibility,
-								viewerProfileId: viewer.profileId,
-								surface: "linked",
-							}),
-							getUnitReadCondition(viewer.profileId, {}, feedReviewScoreTargetUnit),
-							getUnitReadCondition(viewer.profileId, {}, feedReviewScoreRealm),
-						),
-					)
-					.orderBy(asc(postScore.postId), asc(postScore.position), asc(score.id))
-			: [],
-	]);
-	const [attributions, rootAttributions, realmContexts] = await Promise.all([
-		getAttributionSummariesByUnitIds(validIds, displayLanguages, {
-			maximumPerSourceUnit: MaximumFeedAttributionsPerItem,
-		}),
-		getAttributionSummariesByUnitIds(rootIds, displayLanguages, {
-			maximumPerSourceUnit: MaximumFeedAttributionsPerItem,
-		}),
-		getFeedRealmContextsByUnitIds(page, displayLanguages),
-	]);
+					),
+				)
+				.where(
+					and(
+						inArray(post.id, rootIds),
+						getFeedEligibilityCondition(viewer, { content: ["post:post"] }, asOf),
+					),
+				)
+		: []);
+	const collectionCounts = await (collectionIds.length
+		? database
+				.select({
+					collectionId: collectionStat.collectionId,
+					count: collectionStat.itemCount,
+				})
+				.from(collectionStat)
+				.where(inArray(collectionStat.collectionId, collectionIds))
+		: []);
+	const realmMemberCounts = await (realmIds.length
+		? database
+				.select({
+					realmId: realmStat.realmId,
+					count: realmStat.activeMemberCount,
+				})
+				.from(realmStat)
+				.where(inArray(realmStat.realmId, realmIds))
+		: []);
+	const realmTagContextRows = await (wikiIds.length
+		? database
+				.select({
+					contextPostId: realmTagContext.contextPostId,
+					realmId: realmTagContext.realmId,
+					tagId: realmTagContext.tagId,
+					language: resolvedUnitLocalizationLanguage(feedRealmContextTagUnit.id, displayLanguages),
+					title: resolvedUnitLocalizationTitle(feedRealmContextTagUnit.id, displayLanguages),
+					avatar: resolvedUnitLocalizationAvatar(feedRealmContextTagUnit.id, displayLanguages),
+				})
+				.from(realmTagContext)
+				.innerJoin(
+					realmUnit,
+					and(
+						eq(realmUnit.realmId, realmTagContext.realmId),
+						eq(realmUnit.unitId, realmTagContext.contextPostId),
+						eq(realmUnit.status, "visible"),
+						eq(realmUnit.publicationState, "active"),
+					),
+				)
+				.innerJoin(feedRealmContextTagUnit, eq(feedRealmContextTagUnit.id, realmTagContext.tagId))
+				.where(
+					and(
+						inArray(realmTagContext.contextPostId, wikiIds),
+						getUnitReadCondition(viewer.profileId, {}, feedRealmContextTagUnit),
+					),
+				)
+		: []);
+	const realmTagUnitContextRows = await (tagIds.length && scopedRealmIds.length
+		? database
+				.select({
+					realmId: realmTagContext.realmId,
+					tagId: realmTagContext.tagId,
+					contextPostId: realmTagContext.contextPostId,
+					language: resolvedUnitLocalizationLanguage(feedRealmContextPostUnit.id, displayLanguages),
+					summary: resolvedUnitLocalizationSummary(feedRealmContextPostUnit.id, displayLanguages),
+				})
+				.from(realmTagContext)
+				.innerJoin(
+					realmUnit,
+					and(
+						eq(realmUnit.realmId, realmTagContext.realmId),
+						eq(realmUnit.unitId, realmTagContext.contextPostId),
+						eq(realmUnit.status, "visible"),
+						eq(realmUnit.publicationState, "active"),
+					),
+				)
+				.innerJoin(
+					feedRealmContextPostUnit,
+					eq(feedRealmContextPostUnit.id, realmTagContext.contextPostId),
+				)
+				.where(
+					and(
+						inArray(realmTagContext.realmId, scopedRealmIds),
+						inArray(realmTagContext.tagId, tagIds),
+						getUnitReadCondition(viewer.profileId, {}, feedRealmContextPostUnit),
+					),
+				)
+		: []);
+	const reviewScores = await (reviewIds.length
+		? database
+				.select({
+					postId: postScore.postId,
+					scoreId: score.id,
+					realmId: score.realmId,
+					realmTitle: resolvedUnitLocalizationTitle(feedReviewScoreRealm.id, displayLanguages),
+					value: score.value,
+					position: postScore.position,
+				})
+				.from(postScore)
+				.innerJoin(score, eq(score.id, postScore.scoreId))
+				.innerJoin(
+					accountPreference,
+					eq(accountPreference.authUserId, selfAuthUserIdForEntity(score.profileId)),
+				)
+				.innerJoinLateral(feedReviewScoreTargetUnit, sql`true`)
+				.innerJoin(feedReviewScoreRealm, eq(feedReviewScoreRealm.id, score.realmId))
+				.where(
+					and(
+						inArray(postScore.postId, reviewIds),
+						getProfileActivityReadCondition({
+							ownerProfileId: score.profileId,
+							categoryVisibility: accountPreference.scoreVisibility,
+							itemVisibility: score.visibility,
+							viewerProfileId: viewer.profileId,
+							surface: "linked",
+						}),
+						getUnitReadCondition(viewer.profileId, {}, feedReviewScoreTargetUnit),
+						getUnitReadCondition(viewer.profileId, {}, feedReviewScoreRealm),
+					),
+				)
+				.orderBy(asc(postScore.postId), asc(postScore.position), asc(score.id))
+		: []);
+	const attributions = await getAttributionSummariesByUnitIds(validIds, displayLanguages, {
+		maximumPerSourceUnit: MaximumFeedAttributionsPerItem,
+	});
+	const rootAttributions = await getAttributionSummariesByUnitIds(rootIds, displayLanguages, {
+		maximumPerSourceUnit: MaximumFeedAttributionsPerItem,
+	});
+	const realmContexts = await getFeedRealmContextsByUnitIds(page, displayLanguages);
  const subjectPresentations = await getPublicUnitSummariesByIds(subjectRows.map(row => row.id), displayLanguages);
  const subjects = new Map(subjectRows.flatMap(subject => {
   const presentation = subjectPresentations.get(subject.id);

@@ -361,6 +361,17 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-following-references.ts
 
+    db:wiki-composition:check:
+        desc: Verify independent Wiki Collections, Realm publication, Zone presentation and private membership disclosure.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-wiki-collection-composition.ts
+
+    collections:cursor-runtime:check:
+        desc: Verify confidential Collection continuations across Node and Bun and measure bounded codec work.
+        cmds:
+            - yarn exec tsx scripts/check-collection-cursor-runtime.ts
+
     db:progress-authority:check:
         desc: Verify current Progress account/Self and parent-read authority, lock races and stateful HTTP journal commands.
         cmds:

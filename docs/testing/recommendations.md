@@ -142,7 +142,9 @@ and corpus-scale acceptance remain in M09.
 
 `task services-main:db:related-posts:check` runs
 [check-related-post-recommendations.ts](../../services/main/scripts/check-related-post-recommendations.ts)
-on an installed disposable Atlas target with no recommendation snapshots.
+on an installed disposable Atlas target with no recommendation snapshots or prior
+published/public Post/reply candidates. Its fixed two-page comparison assumes the
+four eligible Posts it creates; unrelated fixture Posts require a separate lane.
 The [pinned run](database/related-post-recommendations-evidence.json) passes 55
 assertions and 23 HTTP requests. Posts, replies, account Self identities and a managed organization exercise shared
 subject/credit priority, the general fallback and actual HTTP response validation.

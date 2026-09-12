@@ -1,0 +1,72 @@
+{
+  "checks": 35,
+  "httpChecks": 12,
+  "sourceDigests": {
+    "services/main/scripts/check-wiki-collection-composition.ts": "ba5bc87767eaf0fb3f934e20098de6ef2c6e9c2311a1eb64585ca2c52e7fbb8d",
+    "services/main/src/services/api/collections/items-cursor.ts": "21624a5d79139c8b7b8025200a8c08b89d9ce2f9b129afc0d22ca5a6c1b26d88",
+    "services/main/src/services/api/collections/service.ts": "b48c326b29a765388e90ccc3d568910bb007ed500408e506b862e082e74b9867",
+    "services/main/src/services/api/collections/index.ts": "30ba809ed6eeb4529be44a24f264eaebc34ab45be37220c0e95a9491f722c22b",
+    "services/main/src/services/api/feed/index.ts": "c97bd184ad6aa0e8013128f767d38b25921004761e8144ada73c45cf1683f135",
+    "services/main/src/services/database/migrations/atlas.sum": "cdbfad41cb05a6890c2e2cf0fe9993b55afcf0aa32d2281f90a1e8a624ec8de6"
+  },
+  "orderedTargetRaces": 2,
+  "fixturesRetained": true,
+  "fixture": {
+    "realmId": "01a0943e-bc92-78cb-be87-5baa608ac954",
+    "collectionIds": [
+      "01a0943e-bd97-74ec-91bd-5d14134896da",
+      "01a0943e-bdfa-716f-b275-cbba8c9b1857"
+    ],
+    "zoneIds": [
+      "01a0943e-be3d-7fbe-ae74-50c8a2ca775c",
+      "01a0943e-bf38-7645-a9c8-c0d1ef91a8f8"
+    ]
+  },
+  "baseCommit": "4d966f7fc351a5f55e8d36be42495bf88597de7e",
+  "cursorRuntime": {
+    "node": "v26.8.2",
+    "bun": "1.4.2",
+    "crossRuntimeChecks": 2,
+    "roundTrips": 10000,
+    "elapsedMs": 1475.4541480000003,
+    "tokenBytes": 152,
+    "sourceDigests": {
+      "services/main/scripts/check-collection-cursor-runtime.ts": "5c1e40fb1bf1f7f8af182061c47c914c12087c6f1bee826525f7424d268ce6b6",
+      "services/main/src/services/api/collections/items-cursor.ts": "21624a5d79139c8b7b8025200a8c08b89d9ce2f9b129afc0d22ca5a6c1b26d88"
+    }
+  },
+  "relatedPostRegression": {
+    "checks": 55,
+    "httpChecks": 23,
+    "firstReadMilliseconds": 228.41695899999468,
+    "runtime": {
+      "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+      "isolation": "read committed"
+    },
+    "sourceDigests": {
+      "services/main/scripts/check-related-post-recommendations.ts": "eb0fb0e84a2ce035b9fe4bd3d98ad0f80000feeed9c023b91c9d838ac6ad8db0",
+      "services/main/src/services/recommendations/related-posts.ts": "075fe9a92e3dee5f954d610abdca10cb354a2d2b8eb28a2fc2043bac590d06fe",
+      "services/main/src/services/search/service.ts": "d4adb783c92e2ff85dbb321659c94b5e43ff3d9bb1268ecd12c045d86406449f",
+      "services/main/src/services/api/recommendations/index.ts": "9dd78df885efcdf2f48b49a1cffd25b2768ae540b69384cccf6694e4d76ef888",
+      "services/main/src/services/api/feed/index.ts": "c97bd184ad6aa0e8013128f767d38b25921004761e8144ada73c45cf1683f135",
+      "services/main/src/services/database/migrations/atlas.sum": "cdbfad41cb05a6890c2e2cf0fe9993b55afcf0aa32d2281f90a1e8a624ec8de6"
+    },
+    "isolation": "Owned FILE_COPY clone with prior Post visibility made private; source preserved; clone removed after verification."
+  },
+  "verification": {
+    "backendTests": {
+      "files": 333,
+      "tests": 1796
+    },
+    "focusedTests": {
+      "files": 9,
+      "tests": 70
+    },
+    "cursorTests": 7,
+    "backendTypeScript": "passed",
+    "sdkTypeScript": "3 passed",
+    "webTypeScript": "passed",
+    "openApiGeneration": "passed",
+    "schemaChange": false
+  }
+}

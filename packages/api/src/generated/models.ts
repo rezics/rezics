@@ -103653,6 +103653,29 @@ export type GetApiCollectionsStatus400 = {
 	requestId: string;
 };
 
+export const GetApiCollectionsStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type GetApiCollectionsStatus403ErrorCodeEnum =
+	(typeof GetApiCollectionsStatus403ErrorCodeEnum)[keyof typeof GetApiCollectionsStatus403ErrorCodeEnum];
+
+export type GetApiCollectionsStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: GetApiCollectionsStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type GetApiCollectionsStatus422 = ValidationError;
 
 export type GetApiCollectionsStatus500 = InternalError;
@@ -103667,6 +103690,7 @@ export type GetApiCollectionsOptions = {
 export type GetApiCollectionsResponses = {
 	"200": GetApiCollectionsStatus200;
 	"400": GetApiCollectionsStatus400;
+	"403": GetApiCollectionsStatus403;
 	"422": GetApiCollectionsStatus422;
 	"500": GetApiCollectionsStatus500;
 };
@@ -103677,6 +103701,7 @@ export type GetApiCollectionsResponses = {
 export type GetApiCollectionsResponse =
 	| GetApiCollectionsStatus200
 	| GetApiCollectionsStatus400
+	| GetApiCollectionsStatus403
 	| GetApiCollectionsStatus422
 	| GetApiCollectionsStatus500;
 
@@ -106784,6 +106809,29 @@ export type GetApiCollectionsByCollectionIdItemsStatus400 = {
 	requestId: string;
 };
 
+export const GetApiCollectionsByCollectionIdItemsStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemsStatus403ErrorCodeEnum =
+	(typeof GetApiCollectionsByCollectionIdItemsStatus403ErrorCodeEnum)[keyof typeof GetApiCollectionsByCollectionIdItemsStatus403ErrorCodeEnum];
+
+export type GetApiCollectionsByCollectionIdItemsStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: GetApiCollectionsByCollectionIdItemsStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type GetApiCollectionsByCollectionIdItemsStatus404 = {
 	error: {
 		/**
@@ -106811,6 +106859,7 @@ export type GetApiCollectionsByCollectionIdItemsOptions = {
 export type GetApiCollectionsByCollectionIdItemsResponses = {
 	"200": GetApiCollectionsByCollectionIdItemsStatus200;
 	"400": GetApiCollectionsByCollectionIdItemsStatus400;
+	"403": GetApiCollectionsByCollectionIdItemsStatus403;
 	"404": GetApiCollectionsByCollectionIdItemsStatus404;
 	"422": GetApiCollectionsByCollectionIdItemsStatus422;
 	"500": GetApiCollectionsByCollectionIdItemsStatus500;
@@ -106822,6 +106871,7 @@ export type GetApiCollectionsByCollectionIdItemsResponses = {
 export type GetApiCollectionsByCollectionIdItemsResponse =
 	| GetApiCollectionsByCollectionIdItemsStatus200
 	| GetApiCollectionsByCollectionIdItemsStatus400
+	| GetApiCollectionsByCollectionIdItemsStatus403
 	| GetApiCollectionsByCollectionIdItemsStatus404
 	| GetApiCollectionsByCollectionIdItemsStatus422
 	| GetApiCollectionsByCollectionIdItemsStatus500;
@@ -107134,6 +107184,29 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 	};
 };
 
+export const GetApiCollectionsByCollectionIdStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type GetApiCollectionsByCollectionIdStatus403ErrorCodeEnum =
+	(typeof GetApiCollectionsByCollectionIdStatus403ErrorCodeEnum)[keyof typeof GetApiCollectionsByCollectionIdStatus403ErrorCodeEnum];
+
+export type GetApiCollectionsByCollectionIdStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: GetApiCollectionsByCollectionIdStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type GetApiCollectionsByCollectionIdStatus404 = {
 	error: {
 		/**
@@ -107160,6 +107233,7 @@ export type GetApiCollectionsByCollectionIdOptions = {
 
 export type GetApiCollectionsByCollectionIdResponses = {
 	"200": GetApiCollectionsByCollectionIdStatus200;
+	"403": GetApiCollectionsByCollectionIdStatus403;
 	"404": GetApiCollectionsByCollectionIdStatus404;
 	"422": GetApiCollectionsByCollectionIdStatus422;
 	"500": GetApiCollectionsByCollectionIdStatus500;
@@ -107170,6 +107244,7 @@ export type GetApiCollectionsByCollectionIdResponses = {
  */
 export type GetApiCollectionsByCollectionIdResponse =
 	| GetApiCollectionsByCollectionIdStatus200
+	| GetApiCollectionsByCollectionIdStatus403
 	| GetApiCollectionsByCollectionIdStatus404
 	| GetApiCollectionsByCollectionIdStatus422
 	| GetApiCollectionsByCollectionIdStatus500;

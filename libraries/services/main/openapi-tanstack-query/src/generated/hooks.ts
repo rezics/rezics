@@ -1141,17 +1141,20 @@ import type {
 	GetApiCollectionsByCollectionIdItemsOptions,
 	GetApiCollectionsByCollectionIdItemsStatus200,
 	GetApiCollectionsByCollectionIdItemsStatus400,
+	GetApiCollectionsByCollectionIdItemsStatus403,
 	GetApiCollectionsByCollectionIdItemsStatus404,
 	GetApiCollectionsByCollectionIdItemsStatus422,
 	GetApiCollectionsByCollectionIdItemsStatus500,
 	GetApiCollectionsByCollectionIdOptions,
 	GetApiCollectionsByCollectionIdStatus200,
+	GetApiCollectionsByCollectionIdStatus403,
 	GetApiCollectionsByCollectionIdStatus404,
 	GetApiCollectionsByCollectionIdStatus422,
 	GetApiCollectionsByCollectionIdStatus500,
 	GetApiCollectionsOptions,
 	GetApiCollectionsStatus200,
 	GetApiCollectionsStatus400,
+	GetApiCollectionsStatus403,
 	GetApiCollectionsStatus422,
 	GetApiCollectionsStatus500,
 	GetApiCustomThemesByThemeUnitIdRevisionsByRevisionIdFileOptions,
@@ -48114,7 +48117,10 @@ export function getApiCollectionsQueryOptions(
 	return queryOptions<
 		GetApiCollectionsStatus200,
 		ResponseErrorConfig<
-			GetApiCollectionsStatus400 | GetApiCollectionsStatus422 | GetApiCollectionsStatus500
+			| GetApiCollectionsStatus400
+			| GetApiCollectionsStatus403
+			| GetApiCollectionsStatus422
+			| GetApiCollectionsStatus500
 		>,
 		GetApiCollectionsStatus200,
 		typeof queryKey
@@ -48148,7 +48154,10 @@ export function useGetApiCollections<
 			QueryObserverOptions<
 				GetApiCollectionsStatus200,
 				ResponseErrorConfig<
-					GetApiCollectionsStatus400 | GetApiCollectionsStatus422 | GetApiCollectionsStatus500
+					| GetApiCollectionsStatus400
+					| GetApiCollectionsStatus403
+					| GetApiCollectionsStatus422
+					| GetApiCollectionsStatus500
 				>,
 				TData,
 				TQueryData,
@@ -48173,7 +48182,10 @@ export function useGetApiCollections<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			GetApiCollectionsStatus400 | GetApiCollectionsStatus422 | GetApiCollectionsStatus500
+			| GetApiCollectionsStatus400
+			| GetApiCollectionsStatus403
+			| GetApiCollectionsStatus422
+			| GetApiCollectionsStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -48299,6 +48311,7 @@ export function getApiCollectionsByCollectionIdItemsQueryOptions(
 		GetApiCollectionsByCollectionIdItemsStatus200,
 		ResponseErrorConfig<
 			| GetApiCollectionsByCollectionIdItemsStatus400
+			| GetApiCollectionsByCollectionIdItemsStatus403
 			| GetApiCollectionsByCollectionIdItemsStatus404
 			| GetApiCollectionsByCollectionIdItemsStatus422
 			| GetApiCollectionsByCollectionIdItemsStatus500
@@ -48345,6 +48358,7 @@ export function useGetApiCollectionsByCollectionIdItems<
 				GetApiCollectionsByCollectionIdItemsStatus200,
 				ResponseErrorConfig<
 					| GetApiCollectionsByCollectionIdItemsStatus400
+					| GetApiCollectionsByCollectionIdItemsStatus403
 					| GetApiCollectionsByCollectionIdItemsStatus404
 					| GetApiCollectionsByCollectionIdItemsStatus422
 					| GetApiCollectionsByCollectionIdItemsStatus500
@@ -48377,6 +48391,7 @@ export function useGetApiCollectionsByCollectionIdItems<
 		TData,
 		ResponseErrorConfig<
 			| GetApiCollectionsByCollectionIdItemsStatus400
+			| GetApiCollectionsByCollectionIdItemsStatus403
 			| GetApiCollectionsByCollectionIdItemsStatus404
 			| GetApiCollectionsByCollectionIdItemsStatus422
 			| GetApiCollectionsByCollectionIdItemsStatus500
@@ -48406,6 +48421,7 @@ export function getApiCollectionsByCollectionIdQueryOptions(
 	return queryOptions<
 		GetApiCollectionsByCollectionIdStatus200,
 		ResponseErrorConfig<
+			| GetApiCollectionsByCollectionIdStatus403
 			| GetApiCollectionsByCollectionIdStatus404
 			| GetApiCollectionsByCollectionIdStatus422
 			| GetApiCollectionsByCollectionIdStatus500
@@ -48451,6 +48467,7 @@ export function useGetApiCollectionsByCollectionId<
 			QueryObserverOptions<
 				GetApiCollectionsByCollectionIdStatus200,
 				ResponseErrorConfig<
+					| GetApiCollectionsByCollectionIdStatus403
 					| GetApiCollectionsByCollectionIdStatus404
 					| GetApiCollectionsByCollectionIdStatus422
 					| GetApiCollectionsByCollectionIdStatus500
@@ -48482,6 +48499,7 @@ export function useGetApiCollectionsByCollectionId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiCollectionsByCollectionIdStatus403
 			| GetApiCollectionsByCollectionIdStatus404
 			| GetApiCollectionsByCollectionIdStatus422
 			| GetApiCollectionsByCollectionIdStatus500

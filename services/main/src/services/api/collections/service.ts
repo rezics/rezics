@@ -1,7 +1,7 @@
+import { decodeCollectionItemsCursor, encodeCollectionItemsCursor } from "./items-cursor";
 import { presentImageAsset } from "../image-assets/presentation";
-import type { StaticDecode } from "typebox";
 import { and, asc, eq, gt, or } from "drizzle-orm";
-import { t, type UnwrapSchema } from "elysia";
+import type { UnwrapSchema } from "elysia";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import type { Authorization } from "../../authorization";
@@ -22,26 +22,12 @@ import {
 } from "../../database/schema";
 import { CollectionNotFound } from "./errors";
 import { CollectionContentResponse, CollectionDetailResponse } from "../schema/response";
-import { FractionalPosition, Uuid } from "../schema";
 
 import { presentAvatar } from "../../units/avatar";
-import { parseJsonCursor } from "../../pagination";
-import { InvalidPaginationCursor } from "../../pagination/errors";
 import { resolveRecommendationViewer } from "../../recommendations/context";
 import { hydrateFeedItems } from "../feed";
 import { FeedContentKindValues } from "../feed/schema";
 import { getAttributionSummariesByUnitIds } from "../../units/attribution";
-
-const CollectionItemsCursor = t.Object(
-	{
-		v: t.Literal(1),
-		collectionId: Uuid,
-		revisionId: Uuid,
-		position: FractionalPosition,
-		targetId: Uuid,
-	},
-	{ additionalProperties: false },
-);
 
 type CollectionContentMembership = UnwrapSchema<
 	typeof CollectionContentResponse
@@ -53,26 +39,6 @@ export function presentCollectionMembership(value: {
 	readonly createdAt: Date;
 }): CollectionContentMembership {
 	return { ...value, createdAt: value.createdAt.toISOString() };
-}
-
-function encodeCollectionItemsCursor(value: StaticDecode<typeof CollectionItemsCursor>) {
-	return Buffer.from(JSON.stringify(value)).toString("base64url");
-}
-
-function decodeCollectionItemsCursor(
-	value: string | undefined,
-	collectionId: string,
-	revisionId: string,
-) {
-	if (!value) return null;
-	try {
-		const cursor = parseJsonCursor(value, CollectionItemsCursor);
-		if (cursor.collectionId !== collectionId || cursor.revisionId !== revisionId)
-			throw new InvalidPaginationCursor();
-		return cursor;
-	} catch {
-		throw new InvalidPaginationCursor();
-	}
 }
 
 export async function getCollection(
@@ -103,38 +69,39 @@ export async function getCollection(
 	if (!record) throw new CollectionNotFound();
 	const readDecision = await authorization.unit.decide(collectionId, "unit.read");
 	if (!readDecision.allowed) throw new CollectionNotFound();
-	const [localizations, attributionMap] = await Promise.all([
-		database
-			.select({
-				language: unitLocalization.language,
-				position: unitLocalization.position,
-				title: unitLocalization.title,
-				summary: unitLocalization.summary,
-				avatarType: unitLocalization.avatarType,
-				avatarAssetId: unitLocalization.avatarAssetId,
-				avatarEmoji: unitLocalization.avatarEmoji,
-				avatarIconPrefix: unitLocalization.avatarIconPrefix,
-				avatarIconName: unitLocalization.avatarIconName,
-				bannerAssetId: unitLocalization.bannerAssetId,
-				coverAssetId: unitLocalization.coverAssetId,
-			})
-			.from(unitLocalization)
-			.where(eq(unitLocalization.unitId, collectionId))
-			.orderBy(unitLocalization.position, unitLocalization.language),
-		getAttributionSummariesByUnitIds([collectionId], localizationLanguages),
-	]);
+	const localizations = await database
+		.select({
+			language: unitLocalization.language,
+			position: unitLocalization.position,
+			title: unitLocalization.title,
+			summary: unitLocalization.summary,
+			avatarType: unitLocalization.avatarType,
+			avatarAssetId: unitLocalization.avatarAssetId,
+			avatarEmoji: unitLocalization.avatarEmoji,
+			avatarIconPrefix: unitLocalization.avatarIconPrefix,
+			avatarIconName: unitLocalization.avatarIconName,
+			bannerAssetId: unitLocalization.bannerAssetId,
+			coverAssetId: unitLocalization.coverAssetId,
+		})
+		.from(unitLocalization)
+		.where(eq(unitLocalization.unitId, collectionId))
+		.orderBy(unitLocalization.position, unitLocalization.language);
+	const attributionMap = await getAttributionSummariesByUnitIds(
+		[collectionId],
+		localizationLanguages,
+	);
 	const selectedLocalization = resolveUnitLocalizationFromOrdered(
 		localizations,
 		localizationLanguages,
 	);
 	if (!selectedLocalization) throw new CollectionNotFound();
-	const [updateDecision, accessDecision, restoreDecision, realmPublicationDecision] =
-		await Promise.all([
-			authorization.unit.decide(collectionId, "unit.update"),
-			authorization.unit.decide(collectionId, "unit.access.manage"),
-			authorization.unit.decide(collectionId, "unit.history.restore"),
-			authorization.unit.decide(collectionId, "unit.realm-publication.manage"),
-		]);
+	const updateDecision = await authorization.unit.decide(collectionId, "unit.update");
+	const accessDecision = await authorization.unit.decide(collectionId, "unit.access.manage");
+	const restoreDecision = await authorization.unit.decide(collectionId, "unit.history.restore");
+	const realmPublicationDecision = await authorization.unit.decide(
+		collectionId,
+		"unit.realm-publication.manage",
+	);
 	const canUpdate = updateDecision.allowed;
 	const detail = record;
 	return {
@@ -196,11 +163,13 @@ export async function getCollectionContent(
 ): Promise<UnwrapSchema<typeof CollectionContentResponse>> {
 	const localizationLanguages = input.localizationLanguages ?? [];
 	const collection = await getCollection(collectionId, authorization, localizationLanguages);
-	const cursor = decodeCollectionItemsCursor(
-		input.cursor,
+	const cursorScope = {
 		collectionId,
-		collection.latestItemsRevisionId,
-	);
+		revisionId: collection.latestItemsRevisionId,
+		authorization,
+		localizationLanguages,
+	};
+	const cursor = decodeCollectionItemsCursor(input.cursor, cursorScope);
 	const limit = input.limit ?? 20;
 	const memberships = (
 		await database
@@ -247,13 +216,10 @@ export async function getCollectionContent(
 		}),
 		nextCursor:
 			memberships.length > limit
-				? encodeCollectionItemsCursor({
-						v: 1,
-						collectionId,
-						revisionId: collection.latestItemsRevisionId,
-						position: page.at(-1)!.position,
-						targetId: page.at(-1)!.targetId,
-					})
+				? encodeCollectionItemsCursor(
+						{ position: page.at(-1)!.position, targetId: page.at(-1)!.targetId },
+						cursorScope,
+					)
 				: null,
 	};
 }

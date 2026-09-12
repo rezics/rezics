@@ -1,3 +1,5 @@
+import { lockUnitAccessState } from "../../authorization/unit/access-lock";
+import { readUnitStateById } from "../../units/query";
 import { presentImageAsset } from "../image-assets/presentation";
 import { selfAuthUserIdForEntity } from "../../participation/account-query";
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
@@ -76,6 +78,12 @@ import {
 } from "./schema";
 import { getCollection, getCollectionContent } from "./service";
 
+const CollectionReadForbiddenResponse = toApiErrorResponse([
+	"ParticipationDenied",
+	"AccountSuspended",
+	"AccountClosed",
+	"ApiTokenPermissionRequired",
+]);
 const CollectionNotFoundResponse = toApiErrorResponse(["CollectionNotFound"]);
 const CollectionMutationNotFoundResponse = toApiErrorResponse([
 	"CollectionNotFound",
@@ -157,13 +165,22 @@ export default new Elysia({ prefix: "/collections" })
 			query: ListCollectionsQuery,
 			response: {
 				[StatusCodes.OK]: CollectionListResponse,
+				[StatusCodes.FORBIDDEN]: CollectionReadForbiddenResponse,
 				[StatusCodes.BAD_REQUEST]: InvalidPaginationCursorResponse,
 			},
 			detail: { summary: "List collections", tags: ["Collections"] },
 		},
 		async ({ query, request }) => {
 			const localizationLanguages = query.localizationLanguages ?? [];
-			const identity = query.editableOnly ? await resolveIdentity(request, "unit:read") : undefined;
+			const targetIds = [
+				...new Set(
+					[query.targetId, query.containsTargetId].filter((id): id is string => id !== undefined),
+				),
+			].sort();
+			const identity =
+				query.editableOnly || targetIds.length
+					? await resolveIdentity(request, "unit:read")
+					: undefined;
 			const viewerId = identity?.entity?.id;
 			if (query.editableOnly && !viewerId) return { items: [], nextCursor: null };
 			const cursorContext = { query };
@@ -179,70 +196,89 @@ export default new Elysia({ prefix: "/collections" })
 						and(eq(collection.updatedAt, cursor.updatedAt), lt(collection.id, cursor.id)),
 					)
 				: undefined;
-			const candidates = await database
-				.select({
-					id: collection.id,
-					language: unitLocalization.language,
-					itemCount: collectionStat.itemCount,
-					containsTarget: query.targetId
-						? sql<boolean>`exists(select 1 from ${collectionItem} selected_item where selected_item.collection_id = ${collection.id} and selected_item.unit_id = ${query.targetId})`
-						: sql<boolean>`false`,
-					latestRevisionId: unitRevisionHead.revisionId,
-					latestItemsRevisionId: collectionStructureRevisionHead.revisionId,
-					title: unitLocalization.title,
-					summary: unitLocalization.summary,
-					coverAssetId: resolvedUnitLocalizationImageAssetId(
-						collection.id,
-						"cover",
-						localizationLanguages,
-					),
-					updatedAt: collection.updatedAt,
-				})
-				.from(collection)
-				.innerJoin(collectionStat, eq(collectionStat.collectionId, collection.id))
-				.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, collection.id))
-				.innerJoin(
-					collectionStructureRevisionHead,
-					eq(collectionStructureRevisionHead.collectionId, collection.id),
-				)
-				.innerJoin(
-					unitLocalization,
-					and(
-						eq(unitLocalization.unitId, collection.id),
-						eq(
-							unitLocalization.language,
-							resolvedUnitLocalizationLanguage(collection.id, localizationLanguages),
+			const candidates = await database.transaction(async (tx) => {
+				await lockUnitAccessState(tx, targetIds, "shared");
+				for (const targetId of targetIds) {
+					const target = await readUnitStateById(tx, targetId, { lock: "share" });
+					if (
+						!target ||
+						!(await identity?.authorization.unit.decideInTransaction(tx, targetId, "unit.read"))
+							?.allowed
+					)
+						return [];
+				}
+				const rows = await tx
+					.select({
+						id: collection.id,
+						language: unitLocalization.language,
+						itemCount: collectionStat.itemCount,
+						containsTarget: query.targetId
+							? sql<boolean>`exists(select 1 from ${collectionItem} selected_item where selected_item.collection_id = ${collection.id} and selected_item.unit_id = ${query.targetId})`
+							: sql<boolean>`false`,
+						latestRevisionId: unitRevisionHead.revisionId,
+						latestItemsRevisionId: collectionStructureRevisionHead.revisionId,
+						title: unitLocalization.title,
+						summary: unitLocalization.summary,
+						coverAssetId: resolvedUnitLocalizationImageAssetId(
+							collection.id,
+							"cover",
+							localizationLanguages,
 						),
-					),
-				)
-				.where(
-					and(
-						query.editableOnly
-							? getUnitUpdateCondition(viewerId!, collection)
-							: and(
-									eq(collection.status, "published"),
-									eq(collection.visibility, "public"),
-									eq(collection.moderationStatus, "approved"),
-									isNull(collection.deletedAt),
-								),
-						query.publisherProfileId
-							? sql`exists(
+						updatedAt: collection.updatedAt,
+					})
+					.from(collection)
+					.innerJoin(collectionStat, eq(collectionStat.collectionId, collection.id))
+					.innerJoin(unitRevisionHead, eq(unitRevisionHead.unitId, collection.id))
+					.innerJoin(
+						collectionStructureRevisionHead,
+						eq(collectionStructureRevisionHead.collectionId, collection.id),
+					)
+					.innerJoin(
+						unitLocalization,
+						and(
+							eq(unitLocalization.unitId, collection.id),
+							eq(
+								unitLocalization.language,
+								resolvedUnitLocalizationLanguage(collection.id, localizationLanguages),
+							),
+						),
+					)
+					.where(
+						and(
+							query.editableOnly
+								? getUnitUpdateCondition(viewerId!, collection)
+								: and(
+										eq(collection.status, "published"),
+										eq(collection.visibility, "public"),
+										eq(collection.moderationStatus, "approved"),
+										isNull(collection.deletedAt),
+									),
+							query.publisherProfileId
+								? sql`exists(
 								select 1 from ${creditAttribution} publisher_credit
 								where publisher_credit.source_unit_id = ${collection.id}
 									and publisher_credit.credited_entity_id = ${query.publisherProfileId}
 									and publisher_credit.role = 'publisher'
 							)`
-							: undefined,
-						query.containsTargetId
-							? sql`exists(select 1 from ${collectionItem} containing_item where containing_item.collection_id = ${collection.id} and containing_item.unit_id = ${query.containsTargetId})`
-							: undefined,
-						query.acceptsItemsOnly && !query.editableOnly ? sql`false` : undefined,
-						titleMatchesSearch,
-						cursorCondition,
-					),
-				)
-				.orderBy(desc(collection.updatedAt), desc(collection.id))
-				.limit(limit + 1);
+								: undefined,
+							query.containsTargetId
+								? sql`exists(select 1 from ${collectionItem} containing_item where containing_item.collection_id = ${collection.id} and containing_item.unit_id = ${query.containsTargetId})`
+								: undefined,
+							query.acceptsItemsOnly && !query.editableOnly ? sql`false` : undefined,
+							titleMatchesSearch,
+							cursorCondition,
+						),
+					)
+					.orderBy(desc(collection.updatedAt), desc(collection.id))
+					.limit(limit + 1);
+				for (const targetId of targetIds)
+					if (
+						!(await identity?.authorization.unit.decideInTransaction(tx, targetId, "unit.read"))
+							?.allowed
+					)
+						return [];
+				return rows;
+			});
 			const items = candidates.slice(0, limit);
 			const last = items.at(-1);
 			const attributionMap = await getAttributionSummariesByUnitIds(
@@ -335,6 +371,7 @@ export default new Elysia({ prefix: "/collections" })
 			query: CollectionItemsQuery,
 			response: {
 				[StatusCodes.OK]: CollectionContentResponse,
+				[StatusCodes.FORBIDDEN]: CollectionReadForbiddenResponse,
 				[StatusCodes.BAD_REQUEST]: InvalidPaginationCursorResponse,
 				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
 			},
@@ -356,6 +393,7 @@ export default new Elysia({ prefix: "/collections" })
 			query: CollectionDetailQuery,
 			response: {
 				[StatusCodes.OK]: CollectionDetailResponse,
+				[StatusCodes.FORBIDDEN]: CollectionReadForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
 			},
 			detail: { summary: "Get collection", tags: ["Collections"] },
