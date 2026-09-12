@@ -359,6 +359,12 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-participation-authority.ts
 
+    db:following-authority:check:
+        desc: Verify current Following Self/account authority, target/expiry races and private setting boundaries.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-following-authority.ts
+
     db:private-lifecycle:check:
         desc: Verify private Favorites references, concurrent commands and bounded account erasure on a disposable Atlas database.
         cmds:

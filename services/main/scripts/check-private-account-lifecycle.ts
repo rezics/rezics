@@ -187,7 +187,7 @@ try {
 				authUserId: human.account.id,
 				followerProfileId: human.self.id,
 				limit: 30,
-				authorization: humanAuthorization.unit,
+				authorization: humanAuthorization,
 			});
 			check(page.items.length, 0, "filtered scan returns no inaccessible targets");
 			assert.ok(page.nextCursor);
@@ -197,16 +197,16 @@ try {
 				followerProfileId: human.self.id,
 				limit: 30,
 				cursor: page.nextCursor,
-				authorization: humanAuthorization.unit,
+				authorization: humanAuthorization,
 			});
 			check(
 				next.items.length,
 				3,
 				"cursor advances past filtered candidates using only the preference table",
 			);
-			await updateFollowingPresentation(human.account.id, human.self.id, first, { favorite: true });
+			await updateFollowingPresentation(human.account.id, human.self.id, first, { favorite: true }, humanAuthorization);
 			await assert.rejects(() =>
-				updateFollowingPresentation(other.account.id, human.self.id, first, { favorite: false }),
+				updateFollowingPresentation(other.account.id, human.self.id, first, { favorite: false }, otherAuthorization),
 			);
 			checks++;
 			await assert.rejects(
@@ -233,7 +233,7 @@ try {
 				authUserId: other.account.id,
 				followerProfileId: other.self.id,
 				unitId: first,
-				authorization: otherAuthorization.unit,
+				authorization: otherAuthorization,
 			});
 			check(
 				(await readFavorite(tx, human.authority, first)).entry,

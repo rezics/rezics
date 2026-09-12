@@ -6,6 +6,12 @@ const state = vi.hoisted(() => ({
 	writes: [] as { table: unknown; values: unknown }[],
 	deleted: [] as unknown[],
 }));
+vi.mock("../auth/account-state", () => ({
+	ensureAccountAuthenticationAllowed: vi.fn(async () => undefined),
+}));
+vi.mock("../authorization/unit/access-lock", () => ({
+	lockUnitAccessState: vi.fn(async () => undefined),
+}));
 vi.mock("../database", () => {
 	const select = () => ({
 		from: (table: unknown) => {
@@ -60,8 +66,26 @@ import { getFollowingStatus, replaceFollowingSettings } from "./service";
 const authUserId = "019f94d1-c8ca-7110-b984-b0614ba4db99";
 const followerProfileId = "019f94d1-c8ca-7110-b984-b0614ba4db9c";
 const unitId = "019f94d1-c8ca-7110-b984-b0614ba4db9d";
-const ensureCanRead = vi.fn(async () => undefined);
-const input = { authUserId, followerProfileId, unitId, authorization: { ensureCanRead } };
+const ensureCanRead = vi.fn(async () => ({ allowed: true as const, source: "public" as const }));
+const authorization = {
+	profileId: followerProfileId,
+	authUserId,
+	participationAuthority: {
+		principal: { kind: "auth" as const, authUserId },
+		actingEntityId: followerProfileId,
+		authorizationRevision: 1,
+	},
+	account: {
+		authUserId,
+		ensureCanWrite: vi.fn(async () => undefined),
+		ensureCanContribute: vi.fn(async () => undefined),
+	},
+	unit: {
+		decideInTransaction: ensureCanRead,
+		readableUnitIdsInTransaction: vi.fn(async () => new Set<string>()),
+	},
+};
+const input = { authUserId, followerProfileId, unitId, authorization };
 
 beforeEach(() => {
 	state.rows.clear();

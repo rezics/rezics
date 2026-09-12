@@ -1,0 +1,36 @@
+{
+  "baseCommit": "ab14df656351580e7385c9d6f1bdbff2b810bae0",
+  "sourceDigests": {
+    "services/main/scripts/check-following-authority.ts": "53b35573fb738d31a0b37d760c98e3821effc7738a6ee4273c4db265db701ea1",
+    "services/main/src/services/following/service.ts": "6d33842d0db9cd2c4bc08f16e46186b59f929c09a19826a817f8d6c1ceba717a",
+    "services/main/src/services/api/users/index.ts": "52f211b31e8ccec4c8f9f2ce0c8ab7e13ac32f78aa8596aa8c85e63231ce8642",
+    "services/main/src/services/database/migrations/atlas.sum": "ff1faf45b9d4da4d896b2de14fd2e25a12646a1fa8d82d000c9931bd35051967"
+  },
+  "checks": 61,
+  "httpChecks": 13,
+  "currentSelfRequired": true,
+  "accountStatesQualified": true,
+  "contributionVsPrivateWriteQualified": true,
+  "orderedRaces": 4,
+  "scheduledRestrictionRecheckedAfterWait": true,
+  "expiryRecheckedAfterWait": true,
+  "transactionCasesRolledBack": true,
+  "raceFixturesRetained": true,
+  "verification": {
+    "backendTests": {
+      "files": 332,
+      "tests": 1787
+    },
+    "followingTestsAfterFinalRechecks": 31,
+    "backendTypeScript": "passed",
+    "sdkTypeScript": "3 passed",
+    "webTypeScript": "passed",
+    "openApiGeneration": "passed",
+    "privateLifecycleRegression": {
+      "assertions": 49,
+      "concurrencyRaces": 4
+    },
+    "schemaChange": false,
+    "postRunApiAdapterChange": "Whitespace-only formatting; non-whitespace source unchanged."
+  }
+}

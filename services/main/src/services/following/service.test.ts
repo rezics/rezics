@@ -12,6 +12,12 @@ const insertReturning = vi.hoisted(() => vi.fn());
 const acknowledgeCurrentRealmRulesOnFollow = vi.hoisted(() => vi.fn());
 const createNotification = vi.hoisted(() => vi.fn());
 
+vi.mock("../auth/account-state", () => ({
+	ensureAccountAuthenticationAllowed: vi.fn(async () => undefined),
+}));
+vi.mock("../authorization/unit/access-lock", () => ({
+	lockUnitAccessState: vi.fn(async () => undefined),
+}));
 vi.mock("../database", () => ({
 	database: {
 		select: databaseSelect,
@@ -38,10 +44,29 @@ const FollowerProfileId = "019f94d1-c8ca-7110-b984-b0614ba4db9c";
 const TargetUnitId = "019f94d1-c8ca-7110-b984-b0614ba4db9d";
 
 describe("followUnit", () => {
-	const ensureCanRead = vi.fn(async () => undefined);
+	const ensureCanRead = vi.fn(async () => ({ allowed: true as const, source: "public" as const }));
+	const authorization = {
+		profileId: FollowerProfileId,
+		authUserId: FollowerAuthUserId,
+		participationAuthority: {
+			principal: { kind: "auth" as const, authUserId: FollowerAuthUserId },
+			actingEntityId: FollowerProfileId,
+			authorizationRevision: 1,
+		},
+		account: {
+			authUserId: FollowerAuthUserId,
+			ensureCanWrite: vi.fn(async () => undefined),
+			ensureCanContribute: vi.fn(async () => undefined),
+		},
+		unit: {
+			decideInTransaction: ensureCanRead,
+			readableUnitIdsInTransaction: vi.fn(async () => new Set<string>()),
+		},
+	};
 
 	beforeEach(() => {
 		targetLimit.mockReset();
+		targetLimit.mockResolvedValue([]);
 		blockedLimit.mockReset();
 		blockedLimit.mockResolvedValue([]);
 		databaseSelect.mockReset();
@@ -96,11 +121,11 @@ describe("followUnit", () => {
 				authUserId: FollowerAuthUserId,
 				followerProfileId: FollowerProfileId,
 				unitId: TargetUnitId,
-				authorization: { ensureCanRead },
+				authorization,
 			}),
 		).resolves.toEqual({ following: true });
 
-		expect(ensureCanRead).toHaveBeenCalledWith(TargetUnitId, expect.any(Function));
+		expect(ensureCanRead).toHaveBeenCalledWith(expect.anything(), TargetUnitId, "unit.read");
 		expect(insertValues).toHaveBeenCalledWith({
 			followerProfileId: FollowerProfileId,
 			unitId: TargetUnitId,
@@ -133,10 +158,10 @@ describe("followUnit", () => {
 				authUserId: FollowerAuthUserId,
 				followerProfileId: FollowerProfileId,
 				unitId: TargetUnitId,
-				authorization: { ensureCanRead },
+				authorization,
 			}),
 		).rejects.toBeInstanceOf(UnitNotFound);
-		expect(transaction).not.toHaveBeenCalled();
+		expect(transactionInsert).not.toHaveBeenCalled();
 	});
 
 	it("does not notify again when the follow already exists", async () => {
@@ -148,7 +173,7 @@ describe("followUnit", () => {
 				authUserId: FollowerAuthUserId,
 				followerProfileId: FollowerProfileId,
 				unitId: TargetUnitId,
-				authorization: { ensureCanRead },
+				authorization,
 			}),
 		).resolves.toEqual({ following: true });
 
@@ -163,12 +188,12 @@ describe("followUnit", () => {
 				authUserId: FollowerAuthUserId,
 				followerProfileId: FollowerProfileId,
 				unitId: FollowerProfileId,
-				authorization: { ensureCanRead },
+				authorization,
 			}),
 		).rejects.toBeInstanceOf(UserSelfFollowForbidden);
 
-		expect(ensureCanRead).toHaveBeenCalledWith(FollowerProfileId, expect.any(Function));
-		expect(transaction).not.toHaveBeenCalled();
+		expect(ensureCanRead).toHaveBeenCalledWith(expect.anything(), FollowerProfileId, "unit.read");
+		expect(transactionInsert).not.toHaveBeenCalled();
 		expect(transactionInsert).not.toHaveBeenCalled();
 	});
 
@@ -181,7 +206,7 @@ describe("followUnit", () => {
 				authUserId: FollowerAuthUserId,
 				followerProfileId: FollowerProfileId,
 				unitId: TargetUnitId,
-				authorization: { ensureCanRead },
+				authorization,
 			}),
 		).rejects.toBeInstanceOf(UserFollowBlocked);
 
@@ -189,7 +214,7 @@ describe("followUnit", () => {
 		expect(transactionInsert).not.toHaveBeenCalled();
 	});
 
-	it("requires read access before resolving or writing a follow target", async () => {
+	it("requires current read access before writing a follow target", async () => {
 		const denied = new Error("denied");
 		const ensureCanReadDenied = vi.fn(async () => {
 			throw denied;
@@ -200,11 +225,14 @@ describe("followUnit", () => {
 				authUserId: FollowerAuthUserId,
 				followerProfileId: FollowerProfileId,
 				unitId: TargetUnitId,
-				authorization: { ensureCanRead: ensureCanReadDenied },
+				authorization: {
+					...authorization,
+					unit: { ...authorization.unit, decideInTransaction: ensureCanReadDenied },
+				},
 			}),
 		).rejects.toBe(denied);
 
 		expect(databaseSelect).not.toHaveBeenCalled();
-		expect(transaction).not.toHaveBeenCalled();
+		expect(transactionInsert).not.toHaveBeenCalled();
 	});
 });

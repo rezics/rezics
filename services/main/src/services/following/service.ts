@@ -3,6 +3,9 @@ import type { ContentLanguage } from "@rezics/i18n";
 import { and, desc, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { selfAuthUserIdForEntity } from "../participation/account-query";
 
+import { lockUnitAccessState } from "../authorization/unit/access-lock";
+import type { Authorization } from "../authorization";
+import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
 import type { UnitAuthorization } from "../authorization/unit/authorization";
 import { unitStateRelation } from "../units/state-relation";
 import { readUnitStateById } from "../units/query";
@@ -45,7 +48,15 @@ type FollowTarget = {
 	readonly owner: FollowableUnitOwner;
 };
 
-type FollowAuthorization = Pick<UnitAuthorization<string>, "ensureCanRead">;
+type FollowAuthorization = Pick<
+	Authorization<string>,
+	"profileId" | "authUserId" | "participationAuthority" | "account"
+> & {
+	readonly unit: Pick<
+		UnitAuthorization<string>,
+		"decideInTransaction" | "readableUnitIdsInTransaction"
+	>;
+};
 
 function requireFollowableUnitOwner(owner: UnitOwner): FollowableUnitOwner {
 	if (owner === "tag_path") throw new Error("Tag Path Units cannot enter generic Following");
@@ -67,7 +78,7 @@ type ReplaceFollowingSettings =
 type ListFollowingInput = {
 	readonly authUserId: string;
 	readonly followerProfileId: string;
-	readonly authorization: UnitAuthorization<string>;
+	readonly authorization: FollowAuthorization;
 	readonly owner?: FollowableUnitOwner;
 	readonly localizationLanguages?: readonly ContentLanguage[];
 	readonly cursor?: string;
@@ -75,14 +86,32 @@ type ListFollowingInput = {
 	readonly contentRatingPolicy?: ContentRatingPolicy;
 };
 
-async function lockFollowingAccount(tx: DatabaseTransaction, authUserId: string, entityId: string) {
+async function lockFollowingAccount(
+	tx: DatabaseTransaction,
+	authUserId: string,
+	entityId: string,
+	authorization: FollowAuthorization,
+	action: "read" | "write" | "contribute",
+) {
+	const authority = authorization.participationAuthority;
+	if (
+		authorization.authUserId !== authUserId ||
+		authorization.profileId !== entityId ||
+		!authority ||
+		authority.principal.kind !== "auth" ||
+		authority.principal.authUserId !== authUserId
+	)
+		throw new ParticipationDenied("Following requires the current account's self authority");
 	const [account] = await tx
 		.select({ id: users.id })
 		.from(users)
-		.where(and(eq(users.id, authUserId), isNull(users.erasedAt)))
+		.where(and(eq(users.id, authUserId), eq(users.principalKind, "human"), isNull(users.erasedAt)))
 		.limit(1)
 		.for("share");
 	if (!account) throw new ParticipationDenied("Account is unavailable");
+	await ensureAccountAuthenticationAllowed(authUserId, tx);
+	if (action === "write") await authorization.account.ensureCanWrite(tx);
+	if (action === "contribute") await authorization.account.ensureCanContribute(tx);
 	const [binding] = await tx
 		.select({ id: authEntity.entityId })
 		.from(authEntity)
@@ -91,6 +120,7 @@ async function lockFollowingAccount(tx: DatabaseTransaction, authUserId: string,
 				eq(authEntity.authUserId, authUserId),
 				eq(authEntity.entityId, entityId),
 				eq(authEntity.state, "active"),
+				eq(authEntity.revision, authority.authorizationRevision),
 			),
 		)
 		.limit(1)
@@ -116,6 +146,7 @@ function followingCursorCondition(cursor: FollowingCursorBoundary | undefined) {
 		: sameFavoriteAfterCursor;
 }
 
+/** Read a bounded page of the current account's choices with current target disclosure. @internal */
 export async function listFollowing(input: ListFollowingInput) {
 	const localizationLanguages = input.localizationLanguages ?? [];
 	const contentRatingPolicy = input.contentRatingPolicy ?? DefaultContentRatingPolicy;
@@ -126,7 +157,13 @@ export async function listFollowing(input: ListFollowingInput) {
 		contentRatingPolicy.kind === "allow" ? contentRatingPolicy.ratings : [],
 	);
 	const scan = await database.transaction(async (tx) => {
-		await lockFollowingAccount(tx, input.authUserId, input.followerProfileId);
+		await lockFollowingAccount(
+			tx,
+			input.authUserId,
+			input.followerProfileId,
+			input.authorization,
+			"read",
+		);
 		if (!Number.isSafeInteger(input.limit) || input.limit < 1 || input.limit > 100)
 			throw new RangeError("Following page limit must be between 1 and 100");
 		const candidates = await tx
@@ -152,7 +189,7 @@ export async function listFollowing(input: ListFollowingInput) {
 
 		const readable = new Set<string>();
 		for (let offset = 0; offset < candidates.length; offset += 500) {
-			const ids = await input.authorization.readableUnitIdsInTransaction(
+			const ids = await input.authorization.unit.readableUnitIdsInTransaction(
 				tx,
 				candidates.slice(offset, offset + 500).map((row) => row.unitId),
 			);
@@ -244,26 +281,35 @@ export async function listFollowing(input: ListFollowingInput) {
 }
 
 async function resolveFollowTarget(
+	tx: DatabaseTransaction,
 	unitId: string,
 	authorization: FollowAuthorization,
 ): Promise<FollowTarget> {
-	await authorization.ensureCanRead(unitId, () => new UnitNotFound());
-	const target = await readUnitStateById(database, unitId);
+	await lockUnitAccessState(tx, [unitId], "shared");
+	const target = await readUnitStateById(tx, unitId, { lock: "share" });
+	const decision = await authorization.unit.decideInTransaction(tx, unitId, "unit.read");
+	if (!decision.allowed) throw new UnitNotFound();
 	if (!target || target.reference.owner === "tag_path") throw new UnitNotFound();
 	return { id: target.id, owner: target.reference.owner };
 }
 
+/** Record the account Self's public interest under current contribution and target-read authority. @internal */
 export async function followUnit(input: {
 	readonly authUserId: string;
 	readonly followerProfileId: string;
 	readonly unitId: string;
 	readonly authorization: FollowAuthorization;
 }) {
-	const target = await resolveFollowTarget(input.unitId, input.authorization);
-	if (target.id === input.followerProfileId) throw new UserSelfFollowForbidden();
-
 	await database.transaction(async (tx) => {
-		await lockFollowingAccount(tx, input.authUserId, input.followerProfileId);
+		await lockFollowingAccount(
+			tx,
+			input.authUserId,
+			input.followerProfileId,
+			input.authorization,
+			"contribute",
+		);
+		const target = await resolveFollowTarget(tx, input.unitId, input.authorization);
+		if (target.id === input.followerProfileId) throw new UserSelfFollowForbidden();
 		if (target.owner === "entity") {
 			const [blocked] = await tx
 				.select({ id: accountEntityBlock.blockedEntityId })
@@ -309,31 +355,47 @@ export async function followUnit(input: {
 			});
 		if (target.owner === "realm")
 			await acknowledgeCurrentRealmRulesOnFollow(tx, target.id, input.followerProfileId);
+		await resolveFollowTarget(tx, input.unitId, input.authorization);
+		await input.authorization.account.ensureCanContribute(tx);
 	});
 	return { following: true as const };
 }
 
-export async function unfollowUnit(authUserId: string, followerProfileId: string, unitId: string) {
+/** Remove the account Self's choice even when its target is no longer readable. @internal */
+export async function unfollowUnit(
+	authUserId: string,
+	followerProfileId: string,
+	unitId: string,
+	authorization: FollowAuthorization,
+) {
 	await database.transaction(async (tx) => {
-		await lockFollowingAccount(tx, authUserId, followerProfileId);
+		await lockFollowingAccount(tx, authUserId, followerProfileId, authorization, "write");
 		await tx
 			.delete(unitFollow)
 			.where(
 				and(eq(unitFollow.followerProfileId, followerProfileId), eq(unitFollow.unitId, unitId)),
 			);
+		await authorization.account.ensureCanWrite(tx);
 	});
 	return { following: false as const };
 }
 
+/** Read private follow status after admitting the current Self and target. @internal */
 export async function getFollowingStatus(input: {
 	readonly authUserId: string;
 	readonly followerProfileId: string;
 	readonly unitId: string;
 	readonly authorization: FollowAuthorization;
 }) {
-	const target = await resolveFollowTarget(input.unitId, input.authorization);
 	return database.transaction(async (tx) => {
-		await lockFollowingAccount(tx, input.authUserId, input.followerProfileId);
+		await lockFollowingAccount(
+			tx,
+			input.authUserId,
+			input.followerProfileId,
+			input.authorization,
+			"read",
+		);
+		const target = await resolveFollowTarget(tx, input.unitId, input.authorization);
 		const [record] = await tx
 			.select({
 				favorite: accountFollowPreference.favorite,
@@ -401,6 +463,7 @@ export async function getFollowingStatus(input: {
 	});
 }
 
+/** Replace private delivery choices and retain authority through blocking writes. @internal */
 export async function replaceFollowingSettings(input: {
 	readonly authUserId: string;
 	readonly followerProfileId: string;
@@ -408,11 +471,16 @@ export async function replaceFollowingSettings(input: {
 	readonly authorization: FollowAuthorization;
 	readonly settings: ReplaceFollowingSettings;
 }) {
-	const target = await resolveFollowTarget(input.unitId, input.authorization);
-	if (target.owner !== input.settings.owner) throw new FollowingTargetKindMismatch();
-
 	const follow = await database.transaction(async (tx) => {
-		await lockFollowingAccount(tx, input.authUserId, input.followerProfileId);
+		await lockFollowingAccount(
+			tx,
+			input.authUserId,
+			input.followerProfileId,
+			input.authorization,
+			"write",
+		);
+		const target = await resolveFollowTarget(tx, input.unitId, input.authorization);
+		if (target.owner !== input.settings.owner) throw new FollowingTargetKindMismatch();
 		const [record] = await tx
 			.select({
 				favorite: accountFollowPreference.favorite,
@@ -463,6 +531,8 @@ export async function replaceFollowingSettings(input: {
 						),
 					);
 		}
+		await resolveFollowTarget(tx, input.unitId, input.authorization);
+		await input.authorization.account.ensureCanWrite(tx);
 		return record;
 	});
 
@@ -485,14 +555,16 @@ export async function replaceFollowingSettings(input: {
 	};
 }
 
+/** Edit private order/favorite state under the account's current write policy. @internal */
 export async function updateFollowingPresentation(
 	authUserId: string,
 	followerProfileId: string,
 	unitId: string,
 	input: { readonly favorite?: boolean; readonly position?: string },
+	authorization: FollowAuthorization,
 ) {
 	return database.transaction(async (tx) => {
-		await lockFollowingAccount(tx, authUserId, followerProfileId);
+		await lockFollowingAccount(tx, authUserId, followerProfileId, authorization, "write");
 		const [updated] = await tx
 			.update(accountFollowPreference)
 			.set({
@@ -513,6 +585,7 @@ export async function updateFollowingPresentation(
 				updatedAt: accountFollowPreference.updatedAt,
 			});
 		if (!updated) throw new UnitNotFound("Follow");
+		await authorization.account.ensureCanWrite(tx);
 		return updated;
 	});
 }

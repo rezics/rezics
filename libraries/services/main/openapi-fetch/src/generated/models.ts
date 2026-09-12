@@ -59546,6 +59546,31 @@ export type GetApiAccountMeFollowingStatus400 = {
 	requestId: string;
 };
 
+export const GetApiAccountMeFollowingStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type GetApiAccountMeFollowingStatus403ErrorCodeEnum =
+	(typeof GetApiAccountMeFollowingStatus403ErrorCodeEnum)[keyof typeof GetApiAccountMeFollowingStatus403ErrorCodeEnum];
+
+export type GetApiAccountMeFollowingStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: GetApiAccountMeFollowingStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type GetApiAccountMeFollowingStatus422 = ValidationError;
 
 export const GetApiAccountMeFollowingStatus429ErrorCodeEnum = {
@@ -59577,6 +59602,7 @@ export type GetApiAccountMeFollowingOptions = {
 export type GetApiAccountMeFollowingResponses = {
 	"200": GetApiAccountMeFollowingStatus200;
 	"400": GetApiAccountMeFollowingStatus400;
+	"403": GetApiAccountMeFollowingStatus403;
 	"422": GetApiAccountMeFollowingStatus422;
 	"429": GetApiAccountMeFollowingStatus429;
 	"500": GetApiAccountMeFollowingStatus500;
@@ -59588,6 +59614,7 @@ export type GetApiAccountMeFollowingResponses = {
 export type GetApiAccountMeFollowingResponse =
 	| GetApiAccountMeFollowingStatus200
 	| GetApiAccountMeFollowingStatus400
+	| GetApiAccountMeFollowingStatus403
 	| GetApiAccountMeFollowingStatus422
 	| GetApiAccountMeFollowingStatus429
 	| GetApiAccountMeFollowingStatus500;
@@ -59673,6 +59700,31 @@ export type GetApiAccountMeFollowingByUnitIdStatus200 =
 			realmTagSourceSubscribed: null;
 	  };
 
+export const GetApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type GetApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum =
+	(typeof GetApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum)[keyof typeof GetApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum];
+
+export type GetApiAccountMeFollowingByUnitIdStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: GetApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type GetApiAccountMeFollowingByUnitIdStatus404 = {
 	error: {
 		/**
@@ -59716,6 +59768,7 @@ export type GetApiAccountMeFollowingByUnitIdOptions = {
 
 export type GetApiAccountMeFollowingByUnitIdResponses = {
 	"200": GetApiAccountMeFollowingByUnitIdStatus200;
+	"403": GetApiAccountMeFollowingByUnitIdStatus403;
 	"404": GetApiAccountMeFollowingByUnitIdStatus404;
 	"422": GetApiAccountMeFollowingByUnitIdStatus422;
 	"429": GetApiAccountMeFollowingByUnitIdStatus429;
@@ -59727,6 +59780,7 @@ export type GetApiAccountMeFollowingByUnitIdResponses = {
  */
 export type GetApiAccountMeFollowingByUnitIdResponse =
 	| GetApiAccountMeFollowingByUnitIdStatus200
+	| GetApiAccountMeFollowingByUnitIdStatus403
 	| GetApiAccountMeFollowingByUnitIdStatus404
 	| GetApiAccountMeFollowingByUnitIdStatus422
 	| GetApiAccountMeFollowingByUnitIdStatus429
@@ -59743,6 +59797,31 @@ export type PutApiAccountMeFollowingByUnitIdPath = {
 
 export type PutApiAccountMeFollowingByUnitIdStatus200 = {
 	following: boolean;
+};
+
+export const PutApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type PutApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum =
+	(typeof PutApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum)[keyof typeof PutApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum];
+
+export type PutApiAccountMeFollowingByUnitIdStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: PutApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
 };
 
 export type PutApiAccountMeFollowingByUnitIdStatus404 = {
@@ -59809,6 +59888,7 @@ export type PutApiAccountMeFollowingByUnitIdOptions = {
 
 export type PutApiAccountMeFollowingByUnitIdResponses = {
 	"200": PutApiAccountMeFollowingByUnitIdStatus200;
+	"403": PutApiAccountMeFollowingByUnitIdStatus403;
 	"404": PutApiAccountMeFollowingByUnitIdStatus404;
 	"409": PutApiAccountMeFollowingByUnitIdStatus409;
 	"422": PutApiAccountMeFollowingByUnitIdStatus422;
@@ -59821,6 +59901,7 @@ export type PutApiAccountMeFollowingByUnitIdResponses = {
  */
 export type PutApiAccountMeFollowingByUnitIdResponse =
 	| PutApiAccountMeFollowingByUnitIdStatus200
+	| PutApiAccountMeFollowingByUnitIdStatus403
 	| PutApiAccountMeFollowingByUnitIdStatus404
 	| PutApiAccountMeFollowingByUnitIdStatus409
 	| PutApiAccountMeFollowingByUnitIdStatus422
@@ -59838,6 +59919,31 @@ export type DeleteApiAccountMeFollowingByUnitIdPath = {
 
 export type DeleteApiAccountMeFollowingByUnitIdStatus200 = {
 	following: boolean;
+};
+
+export const DeleteApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type DeleteApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum];
+
+export type DeleteApiAccountMeFollowingByUnitIdStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: DeleteApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
 };
 
 export type DeleteApiAccountMeFollowingByUnitIdStatus422 = ValidationError;
@@ -59870,6 +59976,7 @@ export type DeleteApiAccountMeFollowingByUnitIdOptions = {
 
 export type DeleteApiAccountMeFollowingByUnitIdResponses = {
 	"200": DeleteApiAccountMeFollowingByUnitIdStatus200;
+	"403": DeleteApiAccountMeFollowingByUnitIdStatus403;
 	"422": DeleteApiAccountMeFollowingByUnitIdStatus422;
 	"429": DeleteApiAccountMeFollowingByUnitIdStatus429;
 	"500": DeleteApiAccountMeFollowingByUnitIdStatus500;
@@ -59880,6 +59987,7 @@ export type DeleteApiAccountMeFollowingByUnitIdResponses = {
  */
 export type DeleteApiAccountMeFollowingByUnitIdResponse =
 	| DeleteApiAccountMeFollowingByUnitIdStatus200
+	| DeleteApiAccountMeFollowingByUnitIdStatus403
 	| DeleteApiAccountMeFollowingByUnitIdStatus422
 	| DeleteApiAccountMeFollowingByUnitIdStatus429
 	| DeleteApiAccountMeFollowingByUnitIdStatus500;
@@ -59918,6 +60026,31 @@ export type PatchApiAccountMeFollowingByUnitIdStatus200 = {
 };
 
 export type PatchApiAccountMeFollowingByUnitIdStatus400 = MalformedRequestBody;
+
+export const PatchApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type PatchApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum =
+	(typeof PatchApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum)[keyof typeof PatchApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum];
+
+export type PatchApiAccountMeFollowingByUnitIdStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: PatchApiAccountMeFollowingByUnitIdStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
 
 export type PatchApiAccountMeFollowingByUnitIdStatus404 = {
 	error: {
@@ -59975,6 +60108,7 @@ export type PatchApiAccountMeFollowingByUnitIdOptions = {
 export type PatchApiAccountMeFollowingByUnitIdResponses = {
 	"200": PatchApiAccountMeFollowingByUnitIdStatus200;
 	"400": PatchApiAccountMeFollowingByUnitIdStatus400;
+	"403": PatchApiAccountMeFollowingByUnitIdStatus403;
 	"404": PatchApiAccountMeFollowingByUnitIdStatus404;
 	"422": PatchApiAccountMeFollowingByUnitIdStatus422;
 	"429": PatchApiAccountMeFollowingByUnitIdStatus429;
@@ -59987,6 +60121,7 @@ export type PatchApiAccountMeFollowingByUnitIdResponses = {
 export type PatchApiAccountMeFollowingByUnitIdResponse =
 	| PatchApiAccountMeFollowingByUnitIdStatus200
 	| PatchApiAccountMeFollowingByUnitIdStatus400
+	| PatchApiAccountMeFollowingByUnitIdStatus403
 	| PatchApiAccountMeFollowingByUnitIdStatus404
 	| PatchApiAccountMeFollowingByUnitIdStatus422
 	| PatchApiAccountMeFollowingByUnitIdStatus429
@@ -60074,6 +60209,31 @@ export type PutApiAccountMeFollowingByUnitIdSettingsStatus200 =
 	  };
 
 export type PutApiAccountMeFollowingByUnitIdSettingsStatus400 = MalformedRequestBody;
+
+export const PutApiAccountMeFollowingByUnitIdSettingsStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type PutApiAccountMeFollowingByUnitIdSettingsStatus403ErrorCodeEnum =
+	(typeof PutApiAccountMeFollowingByUnitIdSettingsStatus403ErrorCodeEnum)[keyof typeof PutApiAccountMeFollowingByUnitIdSettingsStatus403ErrorCodeEnum];
+
+export type PutApiAccountMeFollowingByUnitIdSettingsStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: PutApiAccountMeFollowingByUnitIdSettingsStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
 
 export type PutApiAccountMeFollowingByUnitIdSettingsStatus404 = {
 	error: {
@@ -60168,6 +60328,7 @@ export type PutApiAccountMeFollowingByUnitIdSettingsOptions = {
 export type PutApiAccountMeFollowingByUnitIdSettingsResponses = {
 	"200": PutApiAccountMeFollowingByUnitIdSettingsStatus200;
 	"400": PutApiAccountMeFollowingByUnitIdSettingsStatus400;
+	"403": PutApiAccountMeFollowingByUnitIdSettingsStatus403;
 	"404": PutApiAccountMeFollowingByUnitIdSettingsStatus404;
 	"409": PutApiAccountMeFollowingByUnitIdSettingsStatus409;
 	"422": PutApiAccountMeFollowingByUnitIdSettingsStatus422;
@@ -60181,6 +60342,7 @@ export type PutApiAccountMeFollowingByUnitIdSettingsResponses = {
 export type PutApiAccountMeFollowingByUnitIdSettingsResponse =
 	| PutApiAccountMeFollowingByUnitIdSettingsStatus200
 	| PutApiAccountMeFollowingByUnitIdSettingsStatus400
+	| PutApiAccountMeFollowingByUnitIdSettingsStatus403
 	| PutApiAccountMeFollowingByUnitIdSettingsStatus404
 	| PutApiAccountMeFollowingByUnitIdSettingsStatus409
 	| PutApiAccountMeFollowingByUnitIdSettingsStatus422

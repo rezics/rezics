@@ -696,6 +696,7 @@ import type {
 	DeleteApiAccountBlocksByIdStatus500,
 	DeleteApiAccountMeFollowingByUnitIdOptions,
 	DeleteApiAccountMeFollowingByUnitIdStatus200,
+	DeleteApiAccountMeFollowingByUnitIdStatus403,
 	DeleteApiAccountMeFollowingByUnitIdStatus422,
 	DeleteApiAccountMeFollowingByUnitIdStatus429,
 	DeleteApiAccountMeFollowingByUnitIdStatus500,
@@ -1073,6 +1074,7 @@ import type {
 	GetApiAccountMeBlocksStatus500,
 	GetApiAccountMeFollowingByUnitIdOptions,
 	GetApiAccountMeFollowingByUnitIdStatus200,
+	GetApiAccountMeFollowingByUnitIdStatus403,
 	GetApiAccountMeFollowingByUnitIdStatus404,
 	GetApiAccountMeFollowingByUnitIdStatus422,
 	GetApiAccountMeFollowingByUnitIdStatus429,
@@ -1080,6 +1082,7 @@ import type {
 	GetApiAccountMeFollowingOptions,
 	GetApiAccountMeFollowingStatus200,
 	GetApiAccountMeFollowingStatus400,
+	GetApiAccountMeFollowingStatus403,
 	GetApiAccountMeFollowingStatus422,
 	GetApiAccountMeFollowingStatus429,
 	GetApiAccountMeFollowingStatus500,
@@ -2193,6 +2196,7 @@ import type {
 	PatchApiAccountMeFollowingByUnitIdOptions,
 	PatchApiAccountMeFollowingByUnitIdStatus200,
 	PatchApiAccountMeFollowingByUnitIdStatus400,
+	PatchApiAccountMeFollowingByUnitIdStatus403,
 	PatchApiAccountMeFollowingByUnitIdStatus404,
 	PatchApiAccountMeFollowingByUnitIdStatus422,
 	PatchApiAccountMeFollowingByUnitIdStatus429,
@@ -3109,12 +3113,14 @@ import type {
 	PutApiAccountMeFollowingByUnitIdSettingsOptions,
 	PutApiAccountMeFollowingByUnitIdSettingsStatus200,
 	PutApiAccountMeFollowingByUnitIdSettingsStatus400,
+	PutApiAccountMeFollowingByUnitIdSettingsStatus403,
 	PutApiAccountMeFollowingByUnitIdSettingsStatus404,
 	PutApiAccountMeFollowingByUnitIdSettingsStatus409,
 	PutApiAccountMeFollowingByUnitIdSettingsStatus422,
 	PutApiAccountMeFollowingByUnitIdSettingsStatus429,
 	PutApiAccountMeFollowingByUnitIdSettingsStatus500,
 	PutApiAccountMeFollowingByUnitIdStatus200,
+	PutApiAccountMeFollowingByUnitIdStatus403,
 	PutApiAccountMeFollowingByUnitIdStatus404,
 	PutApiAccountMeFollowingByUnitIdStatus409,
 	PutApiAccountMeFollowingByUnitIdStatus422,
@@ -27792,6 +27798,7 @@ export function getApiAccountMeFollowingQueryOptions(
 		GetApiAccountMeFollowingStatus200,
 		ResponseErrorConfig<
 			| GetApiAccountMeFollowingStatus400
+			| GetApiAccountMeFollowingStatus403
 			| GetApiAccountMeFollowingStatus422
 			| GetApiAccountMeFollowingStatus429
 			| GetApiAccountMeFollowingStatus500
@@ -27833,6 +27840,7 @@ export function useGetApiAccountMeFollowing<
 				GetApiAccountMeFollowingStatus200,
 				ResponseErrorConfig<
 					| GetApiAccountMeFollowingStatus400
+					| GetApiAccountMeFollowingStatus403
 					| GetApiAccountMeFollowingStatus422
 					| GetApiAccountMeFollowingStatus429
 					| GetApiAccountMeFollowingStatus500
@@ -27861,6 +27869,7 @@ export function useGetApiAccountMeFollowing<
 		TData,
 		ResponseErrorConfig<
 			| GetApiAccountMeFollowingStatus400
+			| GetApiAccountMeFollowingStatus403
 			| GetApiAccountMeFollowingStatus422
 			| GetApiAccountMeFollowingStatus429
 			| GetApiAccountMeFollowingStatus500
@@ -27889,6 +27898,7 @@ export function getApiAccountMeFollowingByUnitIdQueryOptions(
 	return queryOptions<
 		GetApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
+			| GetApiAccountMeFollowingByUnitIdStatus403
 			| GetApiAccountMeFollowingByUnitIdStatus404
 			| GetApiAccountMeFollowingByUnitIdStatus422
 			| GetApiAccountMeFollowingByUnitIdStatus429
@@ -27930,6 +27940,7 @@ export function useGetApiAccountMeFollowingByUnitId<
 			QueryObserverOptions<
 				GetApiAccountMeFollowingByUnitIdStatus200,
 				ResponseErrorConfig<
+					| GetApiAccountMeFollowingByUnitIdStatus403
 					| GetApiAccountMeFollowingByUnitIdStatus404
 					| GetApiAccountMeFollowingByUnitIdStatus422
 					| GetApiAccountMeFollowingByUnitIdStatus429
@@ -27959,6 +27970,7 @@ export function useGetApiAccountMeFollowingByUnitId<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiAccountMeFollowingByUnitIdStatus403
 			| GetApiAccountMeFollowingByUnitIdStatus404
 			| GetApiAccountMeFollowingByUnitIdStatus422
 			| GetApiAccountMeFollowingByUnitIdStatus429
@@ -27981,6 +27993,7 @@ export function putApiAccountMeFollowingByUnitIdMutationOptions<TContext = unkno
 	return mutationOptions<
 		PutApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiAccountMeFollowingByUnitIdStatus403
 			| PutApiAccountMeFollowingByUnitIdStatus404
 			| PutApiAccountMeFollowingByUnitIdStatus409
 			| PutApiAccountMeFollowingByUnitIdStatus422
@@ -28006,6 +28019,7 @@ export function usePutApiAccountMeFollowingByUnitId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiAccountMeFollowingByUnitIdStatus200,
 			ResponseErrorConfig<
+				| PutApiAccountMeFollowingByUnitIdStatus403
 				| PutApiAccountMeFollowingByUnitIdStatus404
 				| PutApiAccountMeFollowingByUnitIdStatus409
 				| PutApiAccountMeFollowingByUnitIdStatus422
@@ -28025,6 +28039,7 @@ export function usePutApiAccountMeFollowingByUnitId<TContext>(
 	const baseOptions = putApiAccountMeFollowingByUnitIdMutationOptions(config) as UseMutationOptions<
 		PutApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiAccountMeFollowingByUnitIdStatus403
 			| PutApiAccountMeFollowingByUnitIdStatus404
 			| PutApiAccountMeFollowingByUnitIdStatus409
 			| PutApiAccountMeFollowingByUnitIdStatus422
@@ -28038,6 +28053,7 @@ export function usePutApiAccountMeFollowingByUnitId<TContext>(
 	return useMutation<
 		PutApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiAccountMeFollowingByUnitIdStatus403
 			| PutApiAccountMeFollowingByUnitIdStatus404
 			| PutApiAccountMeFollowingByUnitIdStatus409
 			| PutApiAccountMeFollowingByUnitIdStatus422
@@ -28056,6 +28072,7 @@ export function usePutApiAccountMeFollowingByUnitId<TContext>(
 	) as UseMutationResult<
 		PutApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PutApiAccountMeFollowingByUnitIdStatus403
 			| PutApiAccountMeFollowingByUnitIdStatus404
 			| PutApiAccountMeFollowingByUnitIdStatus409
 			| PutApiAccountMeFollowingByUnitIdStatus422
@@ -28077,6 +28094,7 @@ export function deleteApiAccountMeFollowingByUnitIdMutationOptions<TContext = un
 	return mutationOptions<
 		DeleteApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiAccountMeFollowingByUnitIdStatus403
 			| DeleteApiAccountMeFollowingByUnitIdStatus422
 			| DeleteApiAccountMeFollowingByUnitIdStatus429
 			| DeleteApiAccountMeFollowingByUnitIdStatus500
@@ -28100,6 +28118,7 @@ export function useDeleteApiAccountMeFollowingByUnitId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiAccountMeFollowingByUnitIdStatus200,
 			ResponseErrorConfig<
+				| DeleteApiAccountMeFollowingByUnitIdStatus403
 				| DeleteApiAccountMeFollowingByUnitIdStatus422
 				| DeleteApiAccountMeFollowingByUnitIdStatus429
 				| DeleteApiAccountMeFollowingByUnitIdStatus500
@@ -28120,6 +28139,7 @@ export function useDeleteApiAccountMeFollowingByUnitId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiAccountMeFollowingByUnitIdStatus403
 			| DeleteApiAccountMeFollowingByUnitIdStatus422
 			| DeleteApiAccountMeFollowingByUnitIdStatus429
 			| DeleteApiAccountMeFollowingByUnitIdStatus500
@@ -28131,6 +28151,7 @@ export function useDeleteApiAccountMeFollowingByUnitId<TContext>(
 	return useMutation<
 		DeleteApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiAccountMeFollowingByUnitIdStatus403
 			| DeleteApiAccountMeFollowingByUnitIdStatus422
 			| DeleteApiAccountMeFollowingByUnitIdStatus429
 			| DeleteApiAccountMeFollowingByUnitIdStatus500
@@ -28147,6 +28168,7 @@ export function useDeleteApiAccountMeFollowingByUnitId<TContext>(
 	) as UseMutationResult<
 		DeleteApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiAccountMeFollowingByUnitIdStatus403
 			| DeleteApiAccountMeFollowingByUnitIdStatus422
 			| DeleteApiAccountMeFollowingByUnitIdStatus429
 			| DeleteApiAccountMeFollowingByUnitIdStatus500
@@ -28167,6 +28189,7 @@ export function patchApiAccountMeFollowingByUnitIdMutationOptions<TContext = unk
 		PatchApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
 			| PatchApiAccountMeFollowingByUnitIdStatus400
+			| PatchApiAccountMeFollowingByUnitIdStatus403
 			| PatchApiAccountMeFollowingByUnitIdStatus404
 			| PatchApiAccountMeFollowingByUnitIdStatus422
 			| PatchApiAccountMeFollowingByUnitIdStatus429
@@ -28197,6 +28220,7 @@ export function usePatchApiAccountMeFollowingByUnitId<TContext>(
 			PatchApiAccountMeFollowingByUnitIdStatus200,
 			ResponseErrorConfig<
 				| PatchApiAccountMeFollowingByUnitIdStatus400
+				| PatchApiAccountMeFollowingByUnitIdStatus403
 				| PatchApiAccountMeFollowingByUnitIdStatus404
 				| PatchApiAccountMeFollowingByUnitIdStatus422
 				| PatchApiAccountMeFollowingByUnitIdStatus429
@@ -28219,6 +28243,7 @@ export function usePatchApiAccountMeFollowingByUnitId<TContext>(
 		PatchApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
 			| PatchApiAccountMeFollowingByUnitIdStatus400
+			| PatchApiAccountMeFollowingByUnitIdStatus403
 			| PatchApiAccountMeFollowingByUnitIdStatus404
 			| PatchApiAccountMeFollowingByUnitIdStatus422
 			| PatchApiAccountMeFollowingByUnitIdStatus429
@@ -28232,6 +28257,7 @@ export function usePatchApiAccountMeFollowingByUnitId<TContext>(
 		PatchApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
 			| PatchApiAccountMeFollowingByUnitIdStatus400
+			| PatchApiAccountMeFollowingByUnitIdStatus403
 			| PatchApiAccountMeFollowingByUnitIdStatus404
 			| PatchApiAccountMeFollowingByUnitIdStatus422
 			| PatchApiAccountMeFollowingByUnitIdStatus429
@@ -28250,6 +28276,7 @@ export function usePatchApiAccountMeFollowingByUnitId<TContext>(
 		PatchApiAccountMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
 			| PatchApiAccountMeFollowingByUnitIdStatus400
+			| PatchApiAccountMeFollowingByUnitIdStatus403
 			| PatchApiAccountMeFollowingByUnitIdStatus404
 			| PatchApiAccountMeFollowingByUnitIdStatus422
 			| PatchApiAccountMeFollowingByUnitIdStatus429
@@ -28271,6 +28298,7 @@ export function putApiAccountMeFollowingByUnitIdSettingsMutationOptions<TContext
 		PutApiAccountMeFollowingByUnitIdSettingsStatus200,
 		ResponseErrorConfig<
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus400
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus403
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus404
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus409
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus422
@@ -28302,6 +28330,7 @@ export function usePutApiAccountMeFollowingByUnitIdSettings<TContext>(
 			PutApiAccountMeFollowingByUnitIdSettingsStatus200,
 			ResponseErrorConfig<
 				| PutApiAccountMeFollowingByUnitIdSettingsStatus400
+				| PutApiAccountMeFollowingByUnitIdSettingsStatus403
 				| PutApiAccountMeFollowingByUnitIdSettingsStatus404
 				| PutApiAccountMeFollowingByUnitIdSettingsStatus409
 				| PutApiAccountMeFollowingByUnitIdSettingsStatus422
@@ -28325,6 +28354,7 @@ export function usePutApiAccountMeFollowingByUnitIdSettings<TContext>(
 		PutApiAccountMeFollowingByUnitIdSettingsStatus200,
 		ResponseErrorConfig<
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus400
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus403
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus404
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus409
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus422
@@ -28339,6 +28369,7 @@ export function usePutApiAccountMeFollowingByUnitIdSettings<TContext>(
 		PutApiAccountMeFollowingByUnitIdSettingsStatus200,
 		ResponseErrorConfig<
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus400
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus403
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus404
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus409
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus422
@@ -28358,6 +28389,7 @@ export function usePutApiAccountMeFollowingByUnitIdSettings<TContext>(
 		PutApiAccountMeFollowingByUnitIdSettingsStatus200,
 		ResponseErrorConfig<
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus400
+			| PutApiAccountMeFollowingByUnitIdSettingsStatus403
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus404
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus409
 			| PutApiAccountMeFollowingByUnitIdSettingsStatus422

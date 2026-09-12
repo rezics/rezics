@@ -81,6 +81,10 @@ const ProfileMutationNotFoundResponse = toApiErrorResponse([
 	"ImageAssetNotFound",
 ]);
 const UnitForbiddenResponse = toApiErrorResponse(["ParticipationDenied"]);
+const FollowingForbiddenResponse = toApiErrorResponse([
+	"ParticipationDenied", "AccountRestricted", "AccountSuspended", "AccountClosed",
+	"EmailVerificationRequired", "ApiTokenPermissionRequired",
+]);
 
 function presentPreferences(preference: typeof accountPreference.$inferSelect) {
 	return {
@@ -357,6 +361,7 @@ export default new Elysia({ name: "account-entity-api" })
 			access: "interaction:read",
 			query: FollowingListQuery,
 			response: {
+				[StatusCodes.FORBIDDEN]: FollowingForbiddenResponse,
 				[StatusCodes.OK]: FollowingListResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
 			},
@@ -368,7 +373,7 @@ export default new Elysia({ name: "account-entity-api" })
 				authUserId: user.id,
 				followerProfileId: entity.id,
 				owner: query.owner,
-				authorization: authorization.unit,
+				authorization,
 				localizationLanguages: query.localizationLanguages,
 				cursor: query.cursor,
 				limit: query.limit ?? 30,
@@ -382,6 +387,7 @@ export default new Elysia({ name: "account-entity-api" })
 			access: "interaction:read",
 			params: FollowingUnitParams,
 			response: {
+				[StatusCodes.FORBIDDEN]: FollowingForbiddenResponse,
 				[StatusCodes.OK]: FollowingStatusResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
@@ -392,7 +398,7 @@ export default new Elysia({ name: "account-entity-api" })
 				authUserId: user.id,
 				followerProfileId: entity.id,
 				unitId: params.unitId,
-				authorization: authorization.unit,
+				authorization,
 			}),
 	)
 	.put(
@@ -402,6 +408,7 @@ export default new Elysia({ name: "account-entity-api" })
 			params: FollowingUnitParams,
 			body: ReplaceFollowingSettingsBody,
 			response: {
+				[StatusCodes.FORBIDDEN]: FollowingForbiddenResponse,
 				[StatusCodes.OK]: FollowingStatusResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["FollowingTargetKindMismatch"]),
@@ -416,7 +423,7 @@ export default new Elysia({ name: "account-entity-api" })
 				authUserId: user.id,
 				followerProfileId: entity.id,
 				unitId: params.unitId,
-				authorization: authorization.unit,
+				authorization,
 				settings: body,
 			}),
 	)
@@ -426,6 +433,7 @@ export default new Elysia({ name: "account-entity-api" })
 			access: "contribute:interaction:write",
 			params: FollowingUnitParams,
 			response: {
+				[StatusCodes.FORBIDDEN]: FollowingForbiddenResponse,
 				[StatusCodes.OK]: FollowResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
@@ -440,7 +448,7 @@ export default new Elysia({ name: "account-entity-api" })
 				authUserId: user.id,
 				followerProfileId: entity.id,
 				unitId: params.unitId,
-				authorization: authorization.unit,
+				authorization,
 			}),
 	)
 	.delete(
@@ -448,10 +456,10 @@ export default new Elysia({ name: "account-entity-api" })
 		{
 			access: "write:interaction:write",
 			params: FollowingUnitParams,
-			response: { [StatusCodes.OK]: FollowResponse },
+			response: { [StatusCodes.OK]: FollowResponse, [StatusCodes.FORBIDDEN]: FollowingForbiddenResponse },
 			detail: { summary: "Unfollow a Unit", tags: ["Users"] },
 		},
-		async ({ user, entity, params }) => unfollowUnit(user.id, entity.id, params.unitId),
+		async ({ user, entity, params, authorization }) => unfollowUnit(user.id, entity.id, params.unitId, authorization),
 	)
 	.patch(
 		"/account/me/following/:unitId",
@@ -460,13 +468,14 @@ export default new Elysia({ name: "account-entity-api" })
 			params: FollowingUnitParams,
 			body: UpdateFollowingBody,
 			response: {
+				[StatusCodes.FORBIDDEN]: FollowingForbiddenResponse,
 				[StatusCodes.OK]: FollowingPreferenceResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
 			detail: { summary: "Update followed Unit presentation", tags: ["Users"] },
 		},
-		async ({ user, entity, params, body }) =>
-			updateFollowingPresentation(user.id, entity.id, params.unitId, body),
+		async ({ user, entity, params, body, authorization }) =>
+			updateFollowingPresentation(user.id, entity.id, params.unitId, body, authorization),
 	)
 	.get(
 		"/entities/:id/activity",

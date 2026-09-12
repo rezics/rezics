@@ -550,3 +550,35 @@ recovery and 500M/3B workload qualification remain separate requirements.
 The 109-assertion structure/authority regression also passes with the native COMMIT
 barrier, and backend TypeScript passes. No production schema or runtime change is
 part of this phase-recovery qualification.
+
+## Following current authority
+
+`task services-main:db:following-authority:check` runs
+[check-following-authority.ts](../../services/main/scripts/check-following-authority.ts)
+on an installed disposable Atlas target. The [pinned run](database/following-authority-evidence.json)
+passes 61 assertions and 13 HTTP requests. Cases exercise all six personal Following
+operations with stale Self authority and suspended/closed account states. Current
+Self restoration permits reads again; another account's authorization cannot be
+substituted. Rule-backed bans/suspensions block writes, while silence distinguishes
+new public follows from private settings/presentation/removal.
+
+Exact-PID waits cover a Self revision change, target visibility change, a private
+read grant expiring while a setting update waits, and a scheduled account ban
+starting while a presentation update waits. Rejected operations preserve their
+prior state. An account may still edit/remove its own choice after target access
+expires when its account policy permits those private actions.
+
+Actual signed HTTP requests cover follow/status/list/settings/presentation/removal,
+unauthenticated access, owner-shape mismatch, session revocation on suspension/closure,
+and a new session after account restoration. API
+schemas and generated clients expose the current authority errors. Transaction
+cases roll back; race and HTTP actors remain only in the disposable database.
+The separate private-lifecycle fixture checks the existing empty filtered page,
+continuation through 512 hidden choices, account isolation and erasure behavior.
+This qualifies these authority boundaries, not all notification/block races,
+reference normalization or corpus-scale capacity.
+
+Backend tests pass 332 files/1,787 tests; the 31 Following tests pass after the
+final rechecks. Backend, all three SDKs and web TypeScript pass after OpenAPI
+generation. The private-lifecycle regression passes 49 assertions and four races.
+No schema migration is required.
