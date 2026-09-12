@@ -622,3 +622,31 @@ The full fresh database check installs ten migrations and 16,113 SQL statements,
 passes canonical SQL/constraint checks, reports healthy indexes and finds no schema
 drift. Backend tests pass 332 files/1,788 tests; the affected 95 deterministic tests,
 backend TypeScript and unchanged OpenAPI/generated-contract checks also pass.
+
+## Studio visit authority
+
+`task services-main:db:studio-visits:check` runs
+[check-studio-visit-authority.ts](../../services/main/scripts/check-studio-visit-authority.ts)
+on an installed disposable Atlas target. The [pinned run](database/studio-visit-authority-evidence.json)
+passes 39 assertions and 11 signed/anonymous HTTP requests. It checks repeated
+visits, private account ownership while an organization is selected, substituted
+accounts/Self identities, stale Self revisions, suspended/closed accounts,
+restoration and rule-backed ban/suspension/silence policy.
+
+Five observed PostgreSQL blocker pairs cover concurrent Self revision and target
+privacy changes, private read expiry during a visit-row wait, a scheduled ban
+starting during that wait, and visit time evaluated after the wait. Rejected
+writes retain the earlier timestamp. A stored future timestamp is never replaced
+by a smaller clock value. Actual requests verify returned native IDs/timestamps,
+account isolation, unknown/private targets, session revocation/restoration and
+typed restriction errors. Transaction cases roll back; race/request actors remain
+only in the disposable target.
+
+The [owning contract](../../services/main/src/services/studio/native-workspace.md#private-visit-authority)
+separates private visit metadata from editor eligibility and listing order.
+These authority checks do not establish reference normalization, all Studio
+listing disclosure paths or corpus-scale throughput.
+
+Backend tests pass 332 files/1,788 tests. After the selected-organization correction,
+20 focused tests and backend TypeScript pass. OpenAPI generation, all three SDK
+TypeScript checks and web TypeScript pass. No schema change is required.

@@ -82,9 +82,13 @@ const ProfileMutationNotFoundResponse = toApiErrorResponse([
 	"ImageAssetNotFound",
 ]);
 const UnitForbiddenResponse = toApiErrorResponse(["ParticipationDenied"]);
-const FollowingForbiddenResponse = toApiErrorResponse([
-	"ParticipationDenied", "AccountRestricted", "AccountSuspended", "AccountClosed",
-	"EmailVerificationRequired", "ApiTokenPermissionRequired",
+const PersonalStateForbiddenResponse = toApiErrorResponse([
+	"ParticipationDenied",
+	"AccountRestricted",
+	"AccountSuspended",
+	"AccountClosed",
+	"EmailVerificationRequired",
+	"ApiTokenPermissionRequired",
 ]);
 
 function presentPreferences(preference: typeof accountPreference.$inferSelect) {
@@ -184,6 +188,7 @@ export default new Elysia({ name: "account-entity-api" })
 			params: StudioResourceParams,
 			response: {
 				[StatusCodes.OK]: StudioVisitResponse,
+				[StatusCodes.FORBIDDEN]: PersonalStateForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
 			detail: {
@@ -196,7 +201,7 @@ export default new Elysia({ name: "account-entity-api" })
 			recordStudioVisit({
 				authUserId: user.id,
 				unitId: params.unitId,
-				authorization: authorization.unit,
+				authorization,
 			}),
 	)
 	.patch(
@@ -362,7 +367,7 @@ export default new Elysia({ name: "account-entity-api" })
 			access: "interaction:read",
 			query: FollowingListQuery,
 			response: {
-				[StatusCodes.FORBIDDEN]: FollowingForbiddenResponse,
+				[StatusCodes.FORBIDDEN]: PersonalStateForbiddenResponse,
 				[StatusCodes.OK]: FollowingListResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
 			},
@@ -388,7 +393,7 @@ export default new Elysia({ name: "account-entity-api" })
 			access: "interaction:read",
 			params: FollowingUnitParams,
 			response: {
-				[StatusCodes.FORBIDDEN]: FollowingForbiddenResponse,
+				[StatusCodes.FORBIDDEN]: PersonalStateForbiddenResponse,
 				[StatusCodes.OK]: FollowingStatusResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
@@ -409,7 +414,7 @@ export default new Elysia({ name: "account-entity-api" })
 			params: FollowingUnitParams,
 			body: ReplaceFollowingSettingsBody,
 			response: {
-				[StatusCodes.FORBIDDEN]: FollowingForbiddenResponse,
+				[StatusCodes.FORBIDDEN]: PersonalStateForbiddenResponse,
 				[StatusCodes.OK]: FollowingStatusResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["FollowingTargetKindMismatch"]),
@@ -434,7 +439,7 @@ export default new Elysia({ name: "account-entity-api" })
 			access: "contribute:interaction:write",
 			params: FollowingUnitParams,
 			response: {
-				[StatusCodes.FORBIDDEN]: FollowingForbiddenResponse,
+				[StatusCodes.FORBIDDEN]: PersonalStateForbiddenResponse,
 				[StatusCodes.OK]: FollowResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
@@ -457,10 +462,14 @@ export default new Elysia({ name: "account-entity-api" })
 		{
 			access: "write:interaction:write",
 			params: FollowingUnitParams,
-			response: { [StatusCodes.OK]: FollowResponse, [StatusCodes.FORBIDDEN]: FollowingForbiddenResponse },
+			response: {
+				[StatusCodes.OK]: FollowResponse,
+				[StatusCodes.FORBIDDEN]: PersonalStateForbiddenResponse,
+			},
 			detail: { summary: "Unfollow a Unit", tags: ["Users"] },
 		},
-		async ({ user, entity, params, authorization }) => unfollowUnit(user.id, entity.id, params.unitId, authorization),
+		async ({ user, entity, params, authorization }) =>
+			unfollowUnit(user.id, entity.id, params.unitId, authorization),
 	)
 	.patch(
 		"/account/me/following/:unitId",
@@ -469,7 +478,7 @@ export default new Elysia({ name: "account-entity-api" })
 			params: FollowingUnitParams,
 			body: UpdateFollowingBody,
 			response: {
-				[StatusCodes.FORBIDDEN]: FollowingForbiddenResponse,
+				[StatusCodes.FORBIDDEN]: PersonalStateForbiddenResponse,
 				[StatusCodes.OK]: FollowingPreferenceResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
@@ -706,8 +715,14 @@ export default new Elysia({ name: "account-entity-api" })
 					.delete(unitFollow)
 					.where(
 						or(
-							and(eq(unitFollow.followerProfileId, entity.id), eq(unitFollow.targetReferenceId, referenceValueIdForNativeId(params.id))),
-							and(eq(unitFollow.followerProfileId, params.id), eq(unitFollow.targetReferenceId, referenceValueIdForNativeId(entity.id))),
+							and(
+								eq(unitFollow.followerProfileId, entity.id),
+								eq(unitFollow.targetReferenceId, referenceValueIdForNativeId(params.id)),
+							),
+							and(
+								eq(unitFollow.followerProfileId, params.id),
+								eq(unitFollow.targetReferenceId, referenceValueIdForNativeId(entity.id)),
+							),
 						),
 					);
 			});

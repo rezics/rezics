@@ -1,3 +1,8 @@
+import type { Authorization } from "../authorization";
+import { ensureAccountAuthenticationAllowed } from "../auth/account-state";
+import { lockUnitAccessState } from "../authorization/unit/access-lock";
+import { readUnitStateById } from "../units/query";
+import { UnitNotFound } from "../units/errors";
 import {
 	CatalogOwnerValues,
 	CatalogReferenceSchema,
@@ -33,6 +38,9 @@ import { selfAuthUserIdForEntity } from "../participation/account-query";
 import { database } from "../database";
 import {
 	realm,
+	users,
+	authEntity,
+	unitMergeRedirect,
 	participationGrant,
 	realmMember,
 	studioAuthEditorCandidate,
@@ -798,30 +806,80 @@ export async function listStudioContent(input: {
 	};
 }
 
+/** Record a monotonic private visit under the current Self and target-read authority. @internal */
 export async function recordStudioVisit(input: {
 	readonly authUserId: string;
 	readonly unitId: string;
-	readonly authorization: UnitAuthorization<string>;
+	readonly authorization: Authorization<string>;
 }) {
-	await input.authorization.ensureCanRead(input.unitId);
-	const now = new Date();
-	const [visit] = await database
-		.insert(studioResourceVisit)
-		.values({
-			authUserId: input.authUserId,
-			resourceUnitId: input.unitId,
-			lastVisitedAt: now,
-		})
-		.onConflictDoUpdate({
-			target: [studioResourceVisit.authUserId, studioResourceVisit.resourceUnitId],
-			set: { lastVisitedAt: now },
-		})
-		.returning({
-			unitId: studioResourceVisit.resourceUnitId,
-			lastVisitedAt: studioResourceVisit.lastVisitedAt,
-		});
-	if (!visit) throw new Error("Studio visit upsert returned no row");
-	return visit;
+	const { authorization, authUserId, unitId } = input;
+	const authority = authorization.participationAuthority;
+	if (
+		authorization.authUserId !== authUserId ||
+		!authority ||
+		authority.principal.kind !== "auth" ||
+		authority.principal.authUserId !== authUserId
+	)
+		throw new ParticipationDenied("Studio visits require the current account's Self authority");
+	return database.transaction(async (tx) => {
+		const [account] = await tx
+			.select({ id: users.id })
+			.from(users)
+			.where(
+				and(eq(users.id, authUserId), eq(users.principalKind, "human"), isNull(users.erasedAt)),
+			)
+			.limit(1)
+			.for("share");
+		if (!account) throw new ParticipationDenied("Account is unavailable");
+		await ensureAccountAuthenticationAllowed(authUserId, tx);
+		await authorization.account.ensureCanWrite(tx);
+		const [self] = await tx
+			.select({ id: authEntity.entityId })
+			.from(authEntity)
+			.where(
+				and(
+					eq(authEntity.authUserId, authUserId),
+					eq(authEntity.entityId, authorization.profileId),
+					eq(authEntity.state, "active"),
+					eq(authEntity.revision, authority.authorizationRevision),
+				),
+			)
+			.limit(1)
+			.for("share");
+		if (!self) throw new ParticipationDenied("Account Self identity changed");
+		await lockUnitAccessState(tx, [unitId], "shared");
+		const target = await readUnitStateById(tx, unitId, { lock: "share" });
+		if (!target || !(await authorization.unit.decideInTransaction(tx, unitId, "unit.read")).allowed)
+			throw new UnitNotFound();
+		const [merged] = await tx
+			.select({ id: unitMergeRedirect.sourceUnitId })
+			.from(unitMergeRedirect)
+			.where(eq(unitMergeRedirect.sourceUnitId, unitId))
+			.limit(1);
+		if (merged) throw new UnitNotFound("Studio resource");
+		const [visit] = await tx
+			.insert(studioResourceVisit)
+			.values({
+				authUserId,
+				resourceUnitId: unitId,
+				lastVisitedAt: sql`clock_timestamp()`,
+			})
+			.onConflictDoUpdate({
+				target: [studioResourceVisit.authUserId, studioResourceVisit.resourceUnitId],
+				set: {
+					lastVisitedAt: sql`greatest(${studioResourceVisit.lastVisitedAt}, clock_timestamp())`,
+				},
+			})
+			.returning({
+				unitId: studioResourceVisit.resourceUnitId,
+				lastVisitedAt: studioResourceVisit.lastVisitedAt,
+			});
+		if (!visit) throw new Error("Studio visit upsert returned no row");
+		if (!(await authorization.unit.decideInTransaction(tx, unitId, "unit.read")).allowed)
+			throw new UnitNotFound();
+		await authorization.account.ensureCanWrite(tx);
+		return visit;
+	});
 }
 
 /** Repairs one owner-local projection page; operators persist the returned PK cursor between transactions. */

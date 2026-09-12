@@ -72075,6 +72075,40 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": [
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {

@@ -1,0 +1,29 @@
+{
+  "checks": 39,
+  "httpChecks": 11,
+  "orderedRaces": 5,
+  "sourceDigests": {
+    "services/main/scripts/check-studio-visit-authority.ts": "6ec19121cd702b4d521c42b5ecc5bffdd520dda26a16ae53074c9949b0f16ac8",
+    "services/main/src/services/studio/service.ts": "1ff12107376328f490fe50e41cf63a687d11b329fba45d05ae8df694843dc048",
+    "services/main/src/services/api/users/index.ts": "e266a027a173e00fa5269dd983131bd93b8f1d0f8a39bb85f63bf69532935044",
+    "services/main/src/services/database/migrations/atlas.sum": "944a118b6932eff28c04de29abf391376b54b02ace78c413ec778fcd2367c092"
+  },
+  "transactionCasesRolledBack": true,
+  "raceFixturesRetained": true,
+  "baseCommit": "75d6bfa96f62a2d6c06d48894145fa0e67eff55d",
+  "verification": {
+    "backendTests": {
+      "files": 332,
+      "tests": 1788
+    },
+    "focusedTestsAfterOrganizationCorrection": {
+      "files": 4,
+      "tests": 20
+    },
+    "backendTypeScript": "passed",
+    "sdkTypeScript": "3 passed",
+    "webTypeScript": "passed",
+    "openApiGeneration": "passed",
+    "schemaChange": false
+  }
+}

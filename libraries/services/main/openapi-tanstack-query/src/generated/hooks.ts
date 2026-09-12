@@ -3724,6 +3724,7 @@ import type {
 	ReadTextVersionChapterNodeStatus500,
 	RecordCurrentUserStudioVisitOptions,
 	RecordCurrentUserStudioVisitStatus200,
+	RecordCurrentUserStudioVisitStatus403,
 	RecordCurrentUserStudioVisitStatus404,
 	RecordCurrentUserStudioVisitStatus422,
 	RecordCurrentUserStudioVisitStatus429,
@@ -27327,6 +27328,7 @@ export function recordCurrentUserStudioVisitMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		RecordCurrentUserStudioVisitStatus200,
 		ResponseErrorConfig<
+			| RecordCurrentUserStudioVisitStatus403
 			| RecordCurrentUserStudioVisitStatus404
 			| RecordCurrentUserStudioVisitStatus422
 			| RecordCurrentUserStudioVisitStatus429
@@ -27351,6 +27353,7 @@ export function useRecordCurrentUserStudioVisit<TContext>(
 		mutation?: UseMutationOptions<
 			RecordCurrentUserStudioVisitStatus200,
 			ResponseErrorConfig<
+				| RecordCurrentUserStudioVisitStatus403
 				| RecordCurrentUserStudioVisitStatus404
 				| RecordCurrentUserStudioVisitStatus422
 				| RecordCurrentUserStudioVisitStatus429
@@ -27369,6 +27372,7 @@ export function useRecordCurrentUserStudioVisit<TContext>(
 	const baseOptions = recordCurrentUserStudioVisitMutationOptions(config) as UseMutationOptions<
 		RecordCurrentUserStudioVisitStatus200,
 		ResponseErrorConfig<
+			| RecordCurrentUserStudioVisitStatus403
 			| RecordCurrentUserStudioVisitStatus404
 			| RecordCurrentUserStudioVisitStatus422
 			| RecordCurrentUserStudioVisitStatus429
@@ -27381,6 +27385,7 @@ export function useRecordCurrentUserStudioVisit<TContext>(
 	return useMutation<
 		RecordCurrentUserStudioVisitStatus200,
 		ResponseErrorConfig<
+			| RecordCurrentUserStudioVisitStatus403
 			| RecordCurrentUserStudioVisitStatus404
 			| RecordCurrentUserStudioVisitStatus422
 			| RecordCurrentUserStudioVisitStatus429
@@ -27398,6 +27403,7 @@ export function useRecordCurrentUserStudioVisit<TContext>(
 	) as UseMutationResult<
 		RecordCurrentUserStudioVisitStatus200,
 		ResponseErrorConfig<
+			| RecordCurrentUserStudioVisitStatus403
 			| RecordCurrentUserStudioVisitStatus404
 			| RecordCurrentUserStudioVisitStatus422
 			| RecordCurrentUserStudioVisitStatus429

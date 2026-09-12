@@ -82,6 +82,7 @@
     "docs/testing/database/reference-values-evidence.json",
     "docs/testing/database/related-post-recommendations-evidence.json",
     "docs/testing/database/scenarios.tsv",
+    "docs/testing/database/studio-visit-authority-evidence.json",
     "docs/testing/foundation.md",
     "docs/testing/known-failures.md",
     "docs/testing/recommendations.md",
@@ -118,6 +119,7 @@
     "services/main/scripts/check-reference-values.ts",
     "services/main/scripts/check-related-post-recommendations.ts",
     "services/main/scripts/check-revision-references.ts",
+    "services/main/scripts/check-studio-visit-authority.ts",
     "services/main/scripts/check-unit-merge-review-policy.ts",
     "services/main/scripts/check-unit-read-scopes.ts",
     "services/main/scripts/reference-merge-fixture.ts",
@@ -129,6 +131,7 @@
     "services/main/src/services/participation/organization-membership.md",
     "services/main/src/services/realms/README.md",
     "services/main/src/services/recommendations/README.md",
+    "services/main/src/services/studio/native-workspace.md",
     "services/main/src/services/units/merge/README.md"
   ],
   "schema_inputs": [

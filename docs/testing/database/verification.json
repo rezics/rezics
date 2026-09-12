@@ -30,7 +30,7 @@
     "scenarios.tsv": "07738e2923baef54d4e4baebedc79b5b5dc25e2196685b51cd170c40f34c7cda",
     "capacity.json": "00565a116367dbdaee7cbddd4e1e0c8ace7be142546c0b46b436f1a32c8b23d4",
     "capacity.md": "7117a8893f40bcfd09a116d974ad2ef3d06b2e6f7d47d725a80c2f1e54e13f84",
-    "dependency-manifest.json": "96e7661dcd9876163de445b0f71ee6544c603d12d7005a3ac5f84ba04029d520"
+    "dependency-manifest.json": "58c63aed8fbdca9cbc4a45d36143a99d5dfea967041e692d52e3765a3889596b"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -47,7 +47,7 @@
     "docs/architecture/database/creation.md": "7cd97242eb39b099a445934a6d345edfc4b45206f72a8f4bd626453e1af24cbd",
     "docs/architecture/database/data-dictionary.md": "fd48fb922c4d6d7be9dbceda02c535af3bbea22bb309e4e449d4e76781a44450",
     "docs/architecture/database/relationship-graph.md": "f849ff42ecba6c161cb25c392cfc8ef65c51d5be1eacc718ee6b3aa06d3245ef",
-    "docs/plan/README.md": "ce5e1cf825b00977a65154f1df7d2f76b47a716a422ca2badf200e9a28379990",
+    "docs/plan/README.md": "4da62d9cf6ed666963e5f6c19b4e1ba28e5cda517929a05ce57dbd1c674f7a64",
     "docs/plan/backend-acceptance.md": "13b3b8e23f05cf3d433dd1383a8f1f59f2a5d5586c2ea5413c0caa8ee7059199",
     "docs/plan/frontend.md": "60a94396354064d4de457964276c721e817bc9b7190ccae2678cb3f83284fabc",
     "docs/plan/modules/ai-hub.md": "b95b2996692fcef54d168477b80278214157257762b4fb7839b5918435aa677b",
@@ -65,7 +65,7 @@
     "docs/testing/ai-hub.md": "e26dbe58f28fe78b51a81bd54bfe47a7d267d97f6e18a15f46239bbb58f0c971",
     "docs/testing/backend-integration.md": "2e55da1a8997b9044e751a3df2106a69bcda952d49ba7f58962baa87716495bb",
     "docs/testing/book-and-creation.md": "91af6b8352c20c1e933fe68e8ff0d828464d94ab43e64b2d32491598d1cb5cef",
-    "docs/testing/foundation.md": "465652c59e505f174ca18710a5bb64c079f4783560405533f9c40c13e6e16744",
+    "docs/testing/foundation.md": "239d16837679befa47813ad55c85d37634034637fd51e6fd819eafe28f5511a3",
     "docs/testing/known-failures.md": "8597f8212e03d70488fc2fb9568d89823f4515e1409918f26ede9c3fd80114f8",
     "docs/testing/recommendations.md": "9bfa9aa60b621e41a025eb5eb0254eff6157afa8124bd7cedc8052a22d6863f2",
     "docs/testing/relationship-graph.md": "7f3aaa37d76e80a9d2a5e54c9e2fa52102ba5830594121275ebefb278a5e2b91",

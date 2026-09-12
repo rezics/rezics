@@ -60,3 +60,28 @@ The trigger ordering and transactional rollback assumptions follow PostgreSQL's
 [trigger behavior](https://www.postgresql.org/docs/current/trigger-definition.html).
 Selective leading keys follow its
 [multicolumn index rules](https://www.postgresql.org/docs/current/indexes-multicolumn.html).
+
+## Private visit authority
+
+`recordStudioVisit` records one account's latest visit to one currently readable
+resource. The command validates the human account, active Self binding and its
+authorization revision inside the write transaction. Selecting an organization
+never transfers ownership of this private state. Suspended/closed accounts and
+active bans/suspensions cannot write; silence still permits private visits.
+
+Lock order is the Auth row, Self binding, shared target-access fence, native
+target row and visit row. The target must remain readable, and a merged source
+cannot receive a new visit. Read authority and account write enforcement are
+checked again after the upsert, because grants can expire and scheduled account
+restrictions can start during a row wait. Rejection rolls back the visit.
+The database completion clock advances the timestamp monotonically; delayed
+requests and a backward clock adjustment cannot replace a later stored value.
+
+A visit is private presentation metadata, never an editor assignment or evidence
+of target ownership. Listing still obtains candidates and ordering from its
+existing sources, independently checks current access and joins only the current
+account's visit. Each visit command addresses one resource and one account/target
+key; it creates no history row or per-reader fan-out. Repeated writes contend on
+that exact private key. Auth and target shared locks also serialize the command
+with authority changes; this point-operation qualification does not establish
+hot-account throughput or the integrated capacity gates above.

@@ -361,6 +361,12 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-following-references.ts
 
+    db:studio-visits:check:
+        desc: Verify current Studio visit authority, monotonic timestamps and observed lock races.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-studio-visit-authority.ts
+
     db:following-authority:check:
         desc: Verify current Following Self/account authority, target/expiry races and private setting boundaries.
         cmds:

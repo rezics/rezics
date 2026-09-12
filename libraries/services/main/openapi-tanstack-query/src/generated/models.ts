@@ -58456,6 +58456,31 @@ export type RecordCurrentUserStudioVisitStatus200 = {
 	lastVisitedAt: string;
 };
 
+export const RecordCurrentUserStudioVisitStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type RecordCurrentUserStudioVisitStatus403ErrorCodeEnum =
+	(typeof RecordCurrentUserStudioVisitStatus403ErrorCodeEnum)[keyof typeof RecordCurrentUserStudioVisitStatus403ErrorCodeEnum];
+
+export type RecordCurrentUserStudioVisitStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: RecordCurrentUserStudioVisitStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type RecordCurrentUserStudioVisitStatus404 = {
 	error: {
 		/**
@@ -58499,6 +58524,7 @@ export type RecordCurrentUserStudioVisitOptions = {
 
 export type RecordCurrentUserStudioVisitResponses = {
 	"200": RecordCurrentUserStudioVisitStatus200;
+	"403": RecordCurrentUserStudioVisitStatus403;
 	"404": RecordCurrentUserStudioVisitStatus404;
 	"422": RecordCurrentUserStudioVisitStatus422;
 	"429": RecordCurrentUserStudioVisitStatus429;
@@ -58510,6 +58536,7 @@ export type RecordCurrentUserStudioVisitResponses = {
  */
 export type RecordCurrentUserStudioVisitResponse =
 	| RecordCurrentUserStudioVisitStatus200
+	| RecordCurrentUserStudioVisitStatus403
 	| RecordCurrentUserStudioVisitStatus404
 	| RecordCurrentUserStudioVisitStatus422
 	| RecordCurrentUserStudioVisitStatus429
