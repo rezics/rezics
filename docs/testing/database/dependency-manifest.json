@@ -353,6 +353,7 @@
     "https://api.vndb.org/kana",
     "https://api.vndb.org/kana#release-fields",
     "https://api.vndb.org/kana#vn-fields",
+    "https://db.cs.uni-tuebingen.de/publications/2008/multi-tenant-databases-for-software-as-a-service-schema-mapping-techniques/mtdb.pdf",
     "https://developers.openai.com/api/docs/guides/latest-model",
     "https://github.com/bangumi/Archive",
     "https://github.com/bangumi/Archive/blob/master/README.md",
@@ -363,7 +364,9 @@
     "https://musicbrainz.org/doc/Cover_Art_Archive/API",
     "https://musicbrainz.org/doc/MusicBrainz_Database/Schema",
     "https://openlibrary.org/developers/api",
+    "https://repository.ifla.org/bitstreams/7d23aa55-1f85-490f-b500-6170285585a6/download",
     "https://secure.ao3.org/tos_faq",
+    "https://www.oclc.org/content/dam/research/publications/library/2002/oneill_frbr22.pdf",
     "https://www.postgresql.org/docs/18/continuous-archiving.html",
     "https://www.postgresql.org/docs/18/ddl-constraints.html",
     "https://www.postgresql.org/docs/18/ddl-partitioning.html",
@@ -373,6 +376,8 @@
     "https://www.postgresql.org/docs/18/indexes-expressional.html",
     "https://www.postgresql.org/docs/18/sql-createdatabase.html",
     "https://www.postgresql.org/docs/18/transaction-iso.html",
+    "https://www.vldb.org/pvldb/vol3/R04.pdf",
+    "https://www.vldb.org/pvldb/vol8/p185-bailis.pdf",
     "https://www.w3.org/TR/prov-dm/",
     "https://www.w3.org/TR/swbp-n-aryRelations/"
   ]

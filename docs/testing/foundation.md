@@ -2,6 +2,22 @@
 
 The [plan](../plan/README.md) owns module progress. These fixtures qualify individual foundation contracts on a fresh disposable PostgreSQL target; they do not establish all of M01 or the backend acceptance gate.
 
+## Unit capability contract acceptance
+
+These additional cases specify the [logical Unit boundary](../architecture/database/README.md#34-unit-capabilities-across-owner-tables). They are pending executable qualification and are not covered merely by the reference-allocation evidence below. Run them against registered owners within one PostgreSQL authority; no cross-database fixture is required.
+
+| Case | Required behavior |
+| --- | --- |
+| UNIT01 | Create a metadata-only REZICS Work without a global parent, reference value, Document or publisher edition; first authorized generic use allocates a reusable REF without changing identity. |
+| UNIT02 | Apply the same eligible Tag to targets in different owners, collect them and query each feature in both directions; one feature implementation preserves each owner and actor/scope. |
+| UNIT03 | Reject incompatible structural capabilities and unauthorized actors independently, even for existing valid refs; classification alone grants neither. |
+| UNIT04 | Demonstrate that generic consumer schemas store canonical target values rather than each owner's nullable alternative; adding an owner requires bridge/adapter/applicability changes without per-kind Tag or favorite logic. |
+| UNIT05 | Change an owner's internal table layout in an isolated conformance fixture, retaining its logical reference and adapter contract; generic targets, histories and feature queries retain their meaning. No second database or live migration is implied. |
+| UNIT06 | Resolve a bounded mixed-owner candidate page by owner batches; private/missing/stale targets follow disclosure rules without a full owner scan or per-item hydration loop. |
+| UNIT07 | Preserve exact revision/occurrence citations when Work selections change; owner withdrawal, deletion restrictions, capability retirement and revocation follow their distinct contracts. |
+
+Include global, Realm and private Tag scopes, feature-specific duplicate rules, follow/discussion targets, grants and progress. Do not infer completion for a feature from another feature's successful REF conversion. Record schema and behavior evidence separately from these specifications.
+
 ## Disposable domain fixture workflow
 
 The [service Taskfile](../../services/main/Taskfile.yml) can retain a fresh installed target for several domain fixtures. With the default migration port:

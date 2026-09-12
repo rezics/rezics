@@ -36,6 +36,8 @@ Maintain one authority for each fact. Remove completed work and rejected alterna
 
 Define cases before implementation. A specification or skipped/TODO test is not a passing executable test. Integrate cross-module tests as dependencies become available; G4 is the final combined gate, not the first integration attempt. Modules may progress independently after G1, but APIs cannot bypass their own persistence gate.
 
+The selected [REZICS Work](../architecture/database/catalog-model.md#rezics-work-and-primary-version) and [logical Unit capability](../architecture/database/README.md#34-unit-capabilities-across-owner-tables) contracts qualify subsequent work. Reconcile their semantics and keys before affected persistence/API changes: metadata-only virtual publication, multilingual community adoption, independent anthology/part identities, generic target storage and occurrence identity. Earlier fixtures qualify only their recorded contracts; they do not establish these revised journeys. The current separation gate concerns logical table ownership and stable feature interfaces in one PostgreSQL authority. Cross-database operation or live relocation is a later activation, not a G2-G4 deliverable.
+
 ## Modules and current target qualification
 
 Existing code provides foundations. The revised target has not passed G2-G4 merely because older APIs or fixtures exist. This table is the single progress authority; module files contain work and criteria rather than duplicate status ledgers.

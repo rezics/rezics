@@ -6,6 +6,7 @@ Dependencies: M01-M04 native contracts. Owners: [source conformance](../../testi
 
 - Complete MusicBrainz, Cover Art Archive, VNDB, Bangumi and elected book/Open Library converters; treat archive/dump/API/media surfaces separately.
 - Link source contract -> native meaning -> command -> query -> export -> fixture. Distinguish native, source-only, excluded-private and unresolved dispositions.
+- Map book-provider conceptual works and ISBN editions explicitly to REZICS Work evidence, text correspondence or external publications. Do not equate an upstream Work ID with the platform's virtual publication or let an official language list erase community adoptions. Keep uncertain text identity unresolved and define bibliographic export mappings explicitly.
 - Complete field journals, same-value human takeover, API/dump composition, redirects, child correspondence and ordinary large staged applications.
 - Close Bangumi fixed/infobox/API semantics, VNDB dump joins/aggregates, MusicBrainz secondary/candidate/alternative structures and artwork mappings.
 - Build reproducible acquisition manifests and small committed fixtures; stream large data with checksums, bounded joins and resumable stages.

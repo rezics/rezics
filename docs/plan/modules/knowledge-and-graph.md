@@ -5,8 +5,10 @@ Dependencies: M01. Owners: dictionary D03-D04/D11, [Tag Path architecture](../..
 ## Remaining work
 
 - Qualify fact slots, typed assertions, evidence/support, scope decisions, n-ary associations and participant type witnesses.
+- Extend generic participants beyond the current catalog-only alternatives through qualified Unit identity/revision/occurrence references and role applicability; do not widen every predicate to every owner automatically.
 - Preserve semantic context, canon, valid time and governance scope independently. Capability retirement invalidates current proofs without rewriting history.
 - Reconcile Tag/Expression/Path/Sense/Application/inference code with the target; preserve contextual rendering, collision repair and direct versus inferred evidence.
+- Use canonical subject references for global, Realm and private Tag features with their own scope/actor uniqueness and reverse indexes. Prove common feature behavior across owners without a global Unit parent or per-kind Tag services.
 - Implement neighborhood and relation-detail queries with node/relation budgets, cursor context, partial results and current visibility.
 - Specify the persisted Relationship Graph Block query descriptor and serialization without introducing a renderer or second writable graph.
 - Test [graph scenarios](../../testing/relationship-graph.md), including Book character appearances and story-specific relationships.

@@ -6,11 +6,12 @@ Book is the first end-to-end creation/reading acceptance journey. The model supp
 
 | Product concept | Native representation |
 | --- | --- |
-| Creative work | Optional independently indexed publishing/other-domain Work with semantic classification. |
+| Primary Book / REZICS Work | `publishing_work`, the maintained virtual publication defined by the catalog model; metadata-only authoring is valid. |
 | Authored body | Document, language/representation variants, immutable revisions and explicit derivation. |
-| Publication | Social Publication and exact manifest; catalog publication specifications remain distinct. |
+| Publishing and distribution | Work selects content through slots/structures; a social Publication has its own exact utterance manifest; external catalog publications retain publisher specifications. |
 | Chapters/installments | Text identities and ordered, versioned structure occurrences with declared completion/coverage. |
-| Series or creative collection | Governed Grouping/Collection identity and memberships/order; not body containment by assumption. |
+| Anthology and constituent books | Independently maintained Works with explicit aggregation/part relationships and separate selected contents. |
+| Series or user-curated collection | Governed Grouping/Collection identity and memberships/order; not automatically a Work or body containment. |
 | Original work | Valid without a source Work or fabricated fandom. |
 | Fandom/crossover/source work | Named grouping/source-work references and typed relationship assertions with evidence. |
 | Character appearance | Entity participation in a particular Work/expression/continuity, with role and optional coverage. |
@@ -20,6 +21,18 @@ Book is the first end-to-end creation/reading acceptance journey. The model supp
 | Gift/dedication | Typed relationship and recipient presentation/acceptance state; no automatic ownership transfer. |
 
 A story's relationship declaration applies in that story's context. It cannot silently establish a canon-wide fact about characters with the same identities. Source work, fandom, canon and Realm scope remain independently queryable. Ambiguous imported tags retain evidence/unresolved mappings instead of guessed native character identities.
+
+## Work authoring and multilingual adoption
+
+Use the [REZICS Work definition](catalog-model.md#rezics-work-and-primary-version) as the primary Book entry point. Create its metadata independently of any publisher edition, ISBN, source record or hosted Document. The metadata-only state can be published; it does not manufacture a publisher release event. A later content contribution keeps the Work identity and adds independently authorized content/adoption state.
+
+A contributor maintains a Document/text identity and its revisions. A Work editor adopts an eligible exact revision into a canonical content slot with language and variant dimensions, and arranges occurrences in a versioned contents structure. Unadopted contributions, private drafts and the contributor's latest head are not implicitly published by appearing in a Work's context. Several same-language contributions can coexist; an explicit selection decides the current reading presentation without deleting alternatives or their credits. Adopting content does not transfer the contributor's editing rights.
+
+The Work's language-admission policy may accept any language, including community translations absent from official publisher releases. Store that policy without preallocating a language-by-Work matrix. Language slots and contributions are sparse and created when needed. Particular declared consumption languages, metadata languages, actual readable coverage and the all-language policy are separate values. Officialness and method belong to the exact contribution/use; adoption by REZICS does not turn a community translation into a publisher-authorized one.
+
+Publish an exact reading selection by sealing its structure manifest and pinning the relevant adoption/content revisions. Empty known contents, unknown contents and metadata-only publication are explicit states. Changes append the owning metadata, adoption or structure revisions; a metadata edit does not copy all chapters, and restoring metadata does not implicitly restore independently governed content. Reading progress and export pin the selected content and structure, rather than an unqualified current Work head.
+
+An anthology Work can select contributions associated with constituent Works, and each split book can be independently maintained. Membership alone does not select all future child revisions. Repeated targets, partial coverage, alternate ordering and removal from one anthology preserve the independently maintained Work and its other uses. Work-level tags, discussion and favorites target the Work's logical Unit; content-specific annotations or translation feedback use their own precise targets through the same reference contracts.
 
 ## Publication and privacy
 

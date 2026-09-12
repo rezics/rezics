@@ -2,6 +2,14 @@
 
 The Graph API is a bounded read projection of native identities, associations, participants, accepted claims and evidence. It introduces no second graph authority. Existing relation/participant CRUD is a foundation, not proof of graph-query completion.
 
+## Generic participants and capability admission
+
+Use the [logical Unit capability contract](README.md#34-unit-capabilities-across-owner-tables) for identity targets across catalog and platform owners. Persist participants through REF or the appropriate exact revision/occurrence citation; do not enumerate every owner as nullable columns in each generic association family. Predicate/role contracts decide which targets and structural capabilities are eligible. A valid reference alone does not establish role compatibility, accepted truth or permission.
+
+The Book translation example can relate a REZICS Work, an exact source-text revision, an exact contributed translation and its contributing Entity through separate roles. Work aggregation, editorial selection, part coverage and external-edition correspondence remain distinct predicates/structures. Selected ordered contents still use their structural owner; a generic edge does not replace manifest, order or adoption integrity. Tag concepts and contextual applications share the same target vocabulary while keeping their own evidence and inference rules.
+
+The present catalog participant tables provide a narrower catalog-only foundation. Cross-owner admission, revision citations and the generic feature queries must be qualified through the plan; a shared owner registry or a rendered graph is not evidence that every Unit capability is implemented.
+
 ## Query contract
 
 A request names root references, allowed predicates/participant roles, semantic context/canon/work, governance scope, valid-time or exact historical cut, viewer spoiler policy, depth, node/relation budgets and continuation. The server derives authority from the authenticated caller; request scope is not permission.

@@ -12,6 +12,8 @@ Dependency policy: a clean Git checkout contains every local design/reproduction
 
 Use one PostgreSQL write authority initially, in the public schema, with owner-local identity tables and typed domain structures. Separate authored content, publication, content selection, discussion, knowledge assertions, moderation, identity control, and personal activity. Preserve real foreign keys. Keep searchable/current projections rebuildable. Keep large binary payloads in object storage and durable transport in the existing NATS JetStream direction. There is no mandatory graph database, universal Edition, global content table, or all-purpose event-sourced aggregate.
 
+The current separation requirement is logical: owners can evolve their tables behind stable reference and capability contracts, preparing for a later database split. Cross-database deployment, distributed transactions and online relocation are not current implementation deliverables. Existing local partitions remain implementation choices; neither adding partitions nor removing a shared parent table alone proves this separation.
+
 “Complete” here means that every existing schema/API owner has a disposition; every selected domain has identity, cardinality, lifecycle, authority and query contracts; and interactions across domains have defined outcomes. It does not mean arbitrary future businesses require no new schema, nor that all upstream fields have already been qualified. Product, commerce, education and compute extensions are specified at their boundaries without creating unused runtime tables.
 
 Selected defaults:
@@ -21,13 +23,14 @@ Selected defaults:
 | Native ownership | Publishing, music, program, software, entity, grouping, reference and distribution remain meaningful owners; content/social/platform owners are explicit. |
 | User-facing kinds | Mutable classifications, presentation choices, contextual roles and workflow choices; never a single exclusive enum controlling every capability. |
 | Authored text | Document identity and immutable revisions for short comments, articles, chapters, rules and other content requiring content-level history. |
+| REZICS Work | The platform's maintained virtual publication; Book semantics and external-edition distinctions belong to the catalog model. |
 | Publication | A persistent social utterance/distribution item with an exact published manifest and its own history. |
 | Content selection | A canonical slot, versioned adoption decisions, and an explicit current selection. |
 | Facts | Claim, evidence, scope-specific acceptance and effective read model are separate. |
 | Private state | Private account/persona control, messages, progress and credentials have dedicated tables and restricted access paths. |
 | Physical references | Direct domain FKs for structural relations; a validated reference-value bridge for genuinely generic endpoints. |
 | Concurrency | Local aggregate/slot version checks and shared/exclusive authorization fences; no global revision counter. |
-| Growth | Bounded requests, staged large operations, keyset reads, partitionable child keys, measured operational activation. |
+| Growth | Logical owner/aggregate boundaries, bounded requests, staged large operations, keyset reads and partitionable child keys; physical scale-out has a separate activation gate. |
 
 Implement the selected contracts through the plan's design/test/API gates. Use evidence to resolve gaps; do not request approval again for decisions and environment actions already authorized by the maintainer.
 
@@ -40,7 +43,7 @@ Implement the selected contracts through the plan's design/test/API gates. Use e
 | Access and rights | Ownership, operation grants, restrictions, current authority fences, exact disclosure grants | Classification, Realm display placement, source assertions |
 | Catalog | Native referents and domain-specific structures | One provider's schema or a social post |
 | Knowledge and provenance | Definitions, typed assertions, evidence, acceptance, named forms, identifiers | Votes, audit logs or arbitrary JSON paths |
-| Content and assets | Editorial lineages, immutable revisions, files, manifests, asset uses | Real-world Work identities or publication visibility |
+| Content and assets | Editorial lineages, immutable revisions, files, manifests, asset uses | REZICS Work identity, its adoption decisions or social-publication visibility |
 | Social publishing | Publications, reviews, replies, discussions, polls | Catalog editions, facts or generic relation predicates |
 | Community and presentation | Realm membership/rules, Zone pages/docks/themes, curation | Global identity, content ownership, implicit execution rights |
 | Discovery and participation | Tags, judgments, ratings, following, collections, favorites, progress | Imported statistics or universal engagement counts |
@@ -67,9 +70,9 @@ Select a reference_value bridge for endpoints whose valid target set spans many 
 
 A bridge value is allocated on first generic use, reused by unique target lookup, and never retargeted. Generic links reference its PK. Direct music-track-to-recording, message-to-conversation and revision-to-document relations retain direct composite FKs. Exact version references use a separate revision_reference bridge whose alternatives reference complete owner-local revision keys. A citation discriminates identity, exact revision, occurrence, fragment and unresolved external target; only the selected alternative is present.
 
-Adding a semantic class changes data, not the bridge. Adding a physical owner adds one bridge alternative and its validation/index plus resolver registration; it does not add columns to every comment, grant, tag or association endpoint. Existing inline alternatives remain valid during an explicitly designed cutover; they are not required for compatibility in the target.
+Adding a semantic class changes data, not the bridge. Adding a physical owner adds one bridge alternative and its validation/index plus resolver and capability registration; it does not add columns or owner-specific business implementations to every generic tag, favorite, grant or association endpoint. Current inline alternatives prove concrete targets but still spread owner dependencies into consumer schemas. Replacing those generic alternatives is remaining module work, not a compatibility requirement. Domain-specific structural FKs remain explicit.
 
-Costs are explicit: one extra lookup, a shared reference table, and an index/row per generically referenced identity. Batch hydration by owner. No global update is required when content changes. Start the bridge unpartitioned to retain per-target uniqueness; do not hash it by reference id and pretend that per-target unique constraints remain global. If its size exceeds measured maintenance limits, use an owner-routed bridge layout with routing included in consumer keys, or keep direct owner-specific edges. Cross-database FKs are not promised. This growth conversion is a separate activation gate with dual-read reconciliation and persistent reference-key translation.
+Costs are explicit: one extra lookup, a shared reference table, and an index/row per generically referenced identity. Batch hydration by owner. No global update is required when content changes. Start the bridge unpartitioned to retain per-target uniqueness; do not hash it by reference id and pretend that per-target unique constraints remain global. A future owner-routed layout must specify consumer routing keys, target uniqueness and reference resolution before activation. Cross-database FKs are not promised. A live relocation protocol is required only if that deployment scope is later elected; this program can rebuild its development/test state without dual-read or legacy transfer work.
 
 This preserves CONTRIBUTING's owner-local identity and concrete-FK requirements. Native object existence does not require a global resource parent. A rebuildable locator remains a routing projection and is never a foreign-key authority.
 
@@ -85,6 +88,23 @@ This preserves CONTRIBUTING's owner-local identity and concrete-FK requirements.
 | Lifecycle | Draft, withdrawn, closed, suppressed | Owner-specific state machines. |
 
 No classification or kind gives a user a permission. “Wiki” must be expanded into independently meaningful choices: collaborative editing, encyclopedic purpose, and scope-specific selection. They can occur separately.
+
+### 3.4 Unit capabilities across owner tables
+
+Unit remains the shared logical identity/reference/capability contract. Removing the physical `unit` parent does not remove shared features or require a Tag, favorite or authorization implementation for every catalog class. Owners retain identity and lifecycle; generic feature modules own their behavior and persist validated references. A common reference proves a target, not feature eligibility or permission.
+
+| Boundary | Contract |
+| --- | --- |
+| Logical identity | `{ owner, id }` identifies a registered native object; a bare-ID entry point resolves its owner through the locator. Neither includes a database address. |
+| Owner adapter | Resolve the concrete target; provide bounded state/summary reads, structural eligibility and owner-specific validation; expose exact revision/occurrence references where supported. |
+| Generic target storage | Identity consumers use REF; exact content/history uses XREV or a typed occurrence/citation. Keep specialized structural keys local to their actual owner. |
+| Capability module | Tag application/judgment, association, favorite, follow, discussion, access and progress each retain their own commands, state and query contracts. Common targeting does not collapse them into one arbitrary relation table. |
+| Authorization | Apply the shared access vocabulary to current owner state, grants and scope. Supporting a capability and permitting this actor to use it are separate decisions. |
+| Query/presentation | Select bounded reference candidates through feature indexes, batch hydration by owner, and check disclosure before returning metadata or content. Do not scan all owner tables to resolve one ID. |
+
+For example, global Tag applications key subject REF/Tag, Realm applications add Realm scope, and private applications add the account. Their subject-first and Tag-first indexes support both directions without knowing how a Book or music record stores its body. Relation participants use the same reference contract with role and exact-revision validation. Following a Work does not follow every referenced edition automatically; discussing a Work does not give control of its adopted Documents. Repeated, inferred and contextual relationships retain their feature-specific semantics.
+
+Owner admission must declare supported capabilities and their rejected cases; an unknown classification can still use capabilities backed by its actual structure. New semantic classes do not change the physical registry. A new physical owner requires registry/adapter and applicability tests, but must not require adding its nullable FK to every generic feature. This is the current logical separation acceptance criterion, independent of any future database split. [Foundation acceptance](../../testing/foundation.md#unit-capability-contract-acceptance) owns the remaining cross-feature cases; existing point-reference tests alone do not qualify all capabilities.
 
 ## 4. Common relational contracts
 
@@ -102,10 +122,12 @@ JSONB is appropriate for bounded versioned rich-content payloads, external raw r
 
 The native model exists without any provider. Keep an explicit owner for each domain with shared protocols for names, assertions, revisions and references. Do not force all domains into Work -> Edition -> Release -> File, and do not promote every scalar into a social identity.
 
+The [catalog model](catalog-model.md#rezics-work-and-primary-version) defines REZICS Work as the platform's virtual publication, including metadata-only and community multilingual forms. It is not an abstract bibliographic Work or an external edition selected as primary. Domain-specific referents such as musical compositions retain their own meaning.
+
 | Owner | Selected objects and structures | Boundary |
 | --- | --- | --- |
 | Entity | Person, organization, fictional character, software agent; public descriptions, existence dates and contextual identity assertions | An indexed person is not an account; fictional dates are not real-world lifespan. Control/participation is separately admitted. |
-| Publishing | Work, text expression/translation, catalog publication, publication contents, release events, serialization and installment | A translation can have independent identity; a hardcover can share text with paperback. A catalog publication is distinct from a social Publication. |
+| Publishing | REZICS Work, text/translation identities, external catalog publications, publication contents, release events, serialization and installment | Work adopts independently maintained content; publisher editions and their identifiers are separate. Social Publication owns the utterance rather than Work identity. |
 | Music | Work, recording, release group, release, medium, track occurrence, artist credit, release label/event, TOC, candidates and alternative presentations | Track is an occurrence; recording is reusable; one recording can realize several works. Printed credits stay local. |
 | Program | Program work, season, cut/version, episode, broadcast/distribution event, ordered episode occurrence | Episode identity differs from its position and displayed numbering in a release/season. |
 | Software | Content/project, functional variant, version/build, release, platforms/languages/media, contribution contexts, patch targets | Version labels are not unique globally; a source staff grouping is not automatically a software version. |
@@ -263,6 +285,10 @@ Search candidates are generated from dedicated indexed projections carrying owne
 
 Keep provider-neutral query semantics and bounded native execution. Ordinary lookup uses owner/PK indexes. Lists use keysets with a stable tie-breaker. Relation queries bind participant roles to one association revision. Filtered full-text queries use indexed candidate plans with a work budget and continuation; they cannot scan indefinitely to fill a page. Filter-before-top-k and approximate retrieval have different recall contracts. Exact total counts are background aggregates or explicitly expensive operations.
 
+Dynamic schema acceptance and query acceptance are separate. A new property can be stored before it is elected for global equality, range, sort or full-text operations. Each supported operation names its typed authoritative field or effective-fact projection, scope/contract, index, continuation and work bound. A typical numeric projection orders property contract/scope/value/subject with a stable tie-breaker; text, dates and references need their own typed semantics. Index only elected predicates, preserve pending/conflicted/no-selection states and pin the source decision/revision. Do not index every raw claim as accepted truth or promise arbitrary unindexed combinations.
+
+Generic feature indexes use their own read direction: subject REF/Tag and Tag/subject REF; participant target/role/relation revision; parent/manifest/order/occurrence for contents. A reverse index is an access path, not another owner of the relationship. These logical query contracts survive a table-layout change even if a later database split needs a new physical read projection.
+
 The [current PGroonga/PostgreSQL failure evidence](../../testing/known-failures.md) is not closed by this schema design. Search index selection and extension activation require reproduction of those failures and measured recovery/stability. Keep semantic writes independent from a search extension so a disabled/rebuilding index does not corrupt canonical content. Derived ranking stores algorithm, inputs/watermark, generation and exclusion policy. Activate a recommendation snapshot only after all partitions validate; retain the previous snapshot on failure.
 
 Canonical semantic export includes identities, original/resolved references, exact versions, typed values, context, occurrence roles, evidence and decisions subject to audience and retention. Raw source export and semantic export are separate. Exports pin a consistent snapshot/cut or an explicit version manifest with a completion watermark; an arbitrary timestamp or highest allocated UUID does not establish global commit order. Very large resumable exports use checkpointed snapshots/manifests rather than holding a database transaction open indefinitely. Import/export roundtrips preserve distinctions and unknown states; source-private fields stay excluded.
@@ -281,7 +307,11 @@ Outbox and consumer checkpoints are transport coordination, not an authority for
 
 ## 15. Physical layout, access paths and capacity
 
+Design table families around their owning aggregate and transactions now; keep physical placement behind the owner boundary. A Work's metadata, an independently revised structure and a contributed Document each retain their own keys and write authority. An anthology's membership does not make all referenced Works or texts its children for storage, locking or deletion. Shared Tag/reference tables remain legal: logical separation is about authority and dependency direction, not a ban on shared storage.
+
 Use owner-local roots and narrow mutable heads. Partition large histories/children by the owning aggregate key so normal reads prune and every unique/FK key includes that routing key. Use time partitions for bounded-retention telemetry/outbox/delivery attempts only when the key/retention contract permits it. Do not create hundreds of partitions for every small table on day one. Target reverse lookups use selective reverse indexes or separately maintained target-routed projections.
+
+The [study by Aulbach et al., SIGMOD 2008](https://db.cs.uni-tuebingen.de/publications/2008/multi-tenant-databases-for-software-as-a-service-schema-mapping-techniques/mtdb.pdf) examines mappings from extensible logical schemas to shared physical structures, including the cost of reconstruction and many tables. It supports evaluating the chosen hybrid, not creating a SQL table for every logical class. [Schism, VLDB 2010](https://www.vldb.org/pvldb/vol3/R04.pdf) motivates grouping data by observed transactional access and balancing load. The [study by Bailis et al., PVLDB 2014](https://www.vldb.org/pvldb/vol8/p185-bailis.pdf) motivates analyzing each invariant before deciding whether coordination can be avoided. These results guide future placement decisions; they neither require distributed infrastructure now nor certify REZICS throughput.
 
 PostgreSQL partitioned primary/unique constraints must include the partition key. This constrains reference bridges, global slug uniqueness, token hashes and ballot duplicate keys. Keep small/global directories unpartitioned until a deliberately designed routing conversion; hash partitioning alone does not preserve a missing global uniqueness guarantee. Partitioning improves pruning/maintenance and does not add another machine's write capacity. [PostgreSQL partitioning](https://www.postgresql.org/docs/18/ddl-partitioning.html)
 
@@ -330,7 +360,7 @@ The [testing specifications](../../testing/README.md) and [backend gate](../../p
 
 ## 18. Related contract owners
 
-Owner-local identity, shared access vocabulary, source-independent catalog grain, optional Work/Edition layers, versioned rules, private/public identity separation, independent spoiler/rating/display mechanisms and exact theme installation are selected semantic contracts. They are retained for their meaning, not old-data compatibility.
+Owner-local identity, logical Unit capabilities, shared access vocabulary, REZICS virtual-publication Work, independent external editions, versioned rules, private/public identity separation, independent spoiler/rating/display mechanisms and exact theme installation are selected semantic contracts. They are retained for their meaning, not old-data compatibility.
 
 Use explicit roles, content selection, validated references, source journals and independent Threads. Each owning implementation must satisfy its target tests before APIs are treated as qualified. Do not maintain a second progress ledger here.
 

@@ -23,6 +23,8 @@ Notation: PK is primary key, UQ is unique key, FK is concrete foreign key, REV m
 
 reference_value is a normalized version of the current validated alternative reference, not a renamed Unit parent. Every selected target is backed by its concrete FK. There is no root-row totality requirement: an unreferenced Document exists without a bridge value. Hard deletion of a referenced native anchor is restricted; payload erasure and tombstone visibility remain separate. Arbitrary bridge creation is not an API bypass for private object existence.
 
+The [logical Unit capability contract](README.md#34-unit-capabilities-across-owner-tables) separates owner identity, generic targeting, feature eligibility and actor authorization. REF consumers do not retain a separately writable native ID/owner or duplicate owner alternatives. A physical owner addition is confined to registry/bridge/adapters and capability applicability; semantic classes remain data. D03, D09 and D11 reuse these contracts without moving their feature state into a universal parent. The present implementation still has inline alternatives in some generic consumers; their conversion and qualification remain plan work.
+
 For revision_reference, do not store an independently writable parent REF alongside the typed revision keys. The parent is derived from the selected exact revision. If a cached parent is necessary, a generated bounded guard proves equality; the cache is not a second identity authority. Partition conversion must preserve target uniqueness, which is why the first bridge layout is unpartitioned.
 
 Generic consumers joining back to a native UUID use the exact `coalesce` expression indexed by `reference_value_native_id_idx`. The non-unique projection index supports predicate pushdown through candidate sets without a writable cached UUID or another identity authority. PostgreSQL [expression indexes](https://www.postgresql.org/docs/18/indexes-expressional.html) trade an additional index write on allocation for selective reads. Owner-specific partial unique indexes remain necessary for concrete FK reverse probes. Adding an owner changes this expression and requires budgeting its index rebuild alongside the other registry changes.
@@ -83,6 +85,8 @@ Independent catalog intake and participant construction have separate [admission
 
 For temporal single-value results, either use exclusion constraints on exact effective intervals or stage and validate a non-overlapping accepted timeline under the slot lock. Uncertain intervals are not silently coerced into exact ranges. Ordinary current-head queries are separate from historical valid-time queries.
 
+Participant targets may span registered catalog and platform owners when the predicate's role contract permits them. The current catalog-only target set is not the target Graph API's full admission contract. Valid REF existence, compatible structural capability and current authority must each be established. [Selected query indexes](README.md#13-search-recommendation-export-and-derived-state) distinguish subject-local fact reads from global property/value search; a typed value node is not evidence that every such search is indexed.
+
 ## D04. Names, identifiers and language
 
 | Relation family | Key / fields | Contract | Access |
@@ -99,9 +103,9 @@ For temporal single-value results, either use exclusion constraints on exact eff
 
 | Relations | Keys / crucial fields | Grain, cardinality and constraints |
 | --- | --- | --- |
-| publishing_work | Owner identity FK; work metadata | Optional abstract creation; never fabricated just to satisfy a publication parent |
-| publishing_text_version, publishing_text_work | Text identity; language, expression/translation relationship; work membership/coverage | Multiple translations and expressions; multi-work anthology text allowed; native metadata revisions differ from text identity |
-| publishing_publication, publication_text, publication_work, publication_facet | Catalog publication identity; distribution specification, text/work occurrences, format/pagination/identifiers | Many publications can embody same text; one publication can contain several works; repeated occurrences allowed |
+| publishing_work | Owner identity FK; native metadata and language-admission policy; Work-owned slots/structures use D09-D10 | REZICS virtual publication/primary version as defined in the catalog model; metadata-only valid; no required ISBN, external edition or abstract Work parent |
+| publishing_text_version, publishing_text_work | Text identity; language, derivation and Work correspondence/coverage | Independent official/community contributions, including same-language alternatives and multi-work text containers; correspondence is not adoption or text equality |
+| publishing_publication, publication_text, publication_work, publication_facet | External catalog publication identity; distribution specification; content PK publication/manifest/occurrence, target text/Work, order, coverage; format/pagination/identifiers | Many editions can use the same text; repeated target occurrences allowed; an external edition is not the primary REZICS Work |
 | publishing_release_event | Publication/event id; area, date value, channel/status | Multiple releases across countries/dates; announced/cancelled is not occurred |
 | publishing_serialization, publishing_installment | Serialization identity; installment occurrence, issue/order/original number, text/coverage | Installment appearance differs from chapter text; order and progress pin exact manifest |
 | program_work, program_season | Program identity; season identity and contextual membership | Season identity/order can differ across catalogs; membership is not ownership inheritance |
@@ -111,6 +115,8 @@ For temporal single-value results, either use exclusion constraints on exact eff
 | distribution_member | PK package,manifest,occurrence; ordinal, quantity, coverage, typed concrete content target | Exactly one eligible target FK; repeated target permitted; no arbitrary recursive package target in initial contract |
 
 All child lists use parent/manifest/ordinal/occurrence keysets and target reverse indexes. History and source correspondence include original owner and child revision; replacing a manifest does not destroy the old correspondence. A complete manifest can be staged in bounded chunks and restored by pointer selection without copying all members.
+
+The [Work contract](catalog-model.md#rezics-work-and-primary-version) owns native identity and external-edition mapping. Publisher language/ISBN metadata cannot narrow the Work's community content policy. A Work's selected contents use D09 adoption revisions and D10 structure manifests; known-empty, metadata-only and unknown contents remain distinguishable. Aggregation or part links can connect several independently maintained Works without an exclusive primary parent. The current publication/target primary keys cannot represent repeated occurrences; persistence qualification must replace those keys together with histories, source correspondence and consumers.
 
 ## D06. Music catalog
 
@@ -236,7 +242,7 @@ Editing a comment into an article keeps document/publication identities. Selecti
 | Relation family | Keys / fields | Contract / access |
 | --- | --- | --- |
 | tag, tag_relation | Concept identity and semantic relation/predicate | Tags can be renamed/reclassified without rewriting every application; hierarchical cycle rules explicit |
-| unit_tag, realm_unit_tag, account_unit_tag | Subject REF, tag, scope/actor, assertion history | Direct applications are authoritative statements; inferred applications remain projections |
+| unit_tag, realm_unit_tag, account_unit_tag | Subject REF, tag, scope/actor, assertion history | Feature-specific UQ on subject/Tag plus Realm or account where applicable; subject-first and Tag-first indexes; direct applications remain distinct from inferred projections |
 | tag_path, member, sense, sense_binding, path_merge | Path/sense identity, ordered members and governed resolution | Path is not an arbitrary joined label string; identity/history preserved |
 | unit_tag_path_application, judgments; Realm equivalents | Subject, path/sense, context, actor, value/spoiler, revision | Application and actor judgment are separate; scope never dropped during aggregation |
 | tag_expression, argument, inference_rule | Versioned expression AST/contract and rule revisions | Arity/type/cycle checks; no unchecked SQL; bounded evaluation with rebuild generation |
@@ -251,6 +257,8 @@ Editing a comment into an article keeps document/publication identities. Selecti
 | striped_counter_delta / aggregate heads | Target, metric, stripe/epoch, operation; projected totals | At-most-once delta receipt; exact ballot/eligibility independent; hot target does not serialize on one counter |
 
 Account-private Tag current rows use a canonical target REF. The account/target/Tag key permits independent annotations by different accounts while rejecting duplicate triples. Self-targeting is checked against the reference's derived native identity; content labels and category-only concepts retain their separate applicability rules. Private filtering accepts only the authenticated viewer's self binding, not an arbitrary account chosen in the filter. Query/index budgets live with the [Filter compiler](../../../services/main/src/services/filter/README.md).
+
+Global, Realm and account applications share the logical Unit target contract, not one scope-free assertion or copied per-kind Tag service. Apply owner state/applicability and feature authorization before allocating a reference or recording a judgment. Effective-Tag and reverse-discovery rows are rebuildable; reference existence never grants disclosure. Converting a target's physical storage must preserve the feature's target, scope and history rather than recreate its votes or memberships.
 
 ## D12. Communication and delivery
 
@@ -384,7 +392,9 @@ Reuse existing native table families for these specializations. Do not add AO3-s
 
 | Contract | Native keys and values | Required invariant |
 | --- | --- | --- |
-| Creative metadata | Native Work/content REF; form/classification, completion state, optional planned part count | Original work needs no source/fandom; planned, published and known-complete counts differ. |
+| Work metadata | Publishing Work REF; form/classification, language-admission policy, completion state, optional planned part count | Metadata-only virtual publication is valid without source/fandom/ISBN; planned, published and known-complete counts differ. |
+| Multilingual Work contents | Work-subject slot, language/variant dimensions, adoption REV/XREV, structure/manifest/occurrence | Multiple official/community and same-language contributions; exact selections preserve provenance, current disclosure and historical reading interpretation. |
+| Anthology, parts and external editions | Independent Work/publication refs; typed aggregation/part/correspondence roles and coverage | Each maintained Work is primary for itself; no family-wide primary flag, implied identity merge or grant/progress inheritance. |
 | Source work/fandom/crossover | Association REV with created-work/source-work/grouping roles and evidence | Multiple sources allowed; membership differs from derivation and from actual ownership. |
 | Character appearance and pairing | Exact relation REV, participants, Work/expression/canon and coverage | Story-specific relationships do not become global character facts; n-ary meaning preserved. |
 | Co-creator and pseudonym | Native credits/name REV plus independently authorized operator/editor | Attribution is not control; privacy changes do not erase allowed contribution history. |

@@ -18,6 +18,9 @@ Owner: M02. Contract: [Relationship Graph API and Block](../architecture/databas
 | GRAPH12 | Roundtrip the Block query descriptor; reject invalid/unbounded settings and embedded writable graph facts. |
 | GRAPH13 | Verify cache isolation and revocation while a paginated traversal is in progress. |
 | GRAPH14 | Measure high-degree roots, selective predicates, cross-owner hydration and skew using actual plans. |
+| GRAPH15 | Relate permitted catalog and platform targets through the same participant contract; reject a valid REF whose structural capability is incompatible with the role, independently of caller permission. |
+| GRAPH16 | Represent a REZICS Work, exact original/translated content and contributor in one translation relation; replacing the Work's selected translation does not retarget the historical participants. |
+| GRAPH17 | Query anthology aggregation, part coverage, external-edition correspondence and contextual Tag evidence without treating them as identity equality, implicit content adoption or permission inheritance. |
 
 Use multi-principal native fixtures, including canon facts and contradictory fanwork-specific declarations. Build expected nodes/relations from known fixture semantics, not by calling the same query implementation twice. Mutation/API tests must create IDs before querying them.
 

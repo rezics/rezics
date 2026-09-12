@@ -27,8 +27,11 @@ manifest ID and occurrence ID. Package/content is never a uniqueness key.
 
 Each occurrence has exactly one concrete FK to publication, text version,
 software content, software release, music release, recording, program version or
-episode. Abstract works, franchises and packages are not valid targets. The
-absence of package targets proves acyclicity without recursive corpus scans.
+episode. A bare REZICS Work, musical composition, franchise or package identity
+is not one of these eligible targets. The [Work's virtual-publication role](database/catalog-model.md#rezics-work-and-primary-version)
+does not itself provide a pinned distributable selection; its eligible content
+or publication must be identified explicitly. The absence of package targets
+proves acyclicity without recursive corpus scans.
 All target FKs restrict deletion; removing or revising a package cannot delete
 its independently owned content.
 

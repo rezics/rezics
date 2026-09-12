@@ -15,6 +15,16 @@ empty channel array is invalid. Input is normalized into code-point-sorted
 language order and registry-sorted channel order before storage, revision
 hashing, or response caching.
 
+For a [REZICS Work](database/catalog-model.md#rezics-work-and-primary-version),
+the declared languages may include community-contributed content absent from
+publisher editions. Publisher ISBNs and official release languages do not define
+the Work's language set. Its all-language contribution policy is separate from
+this list of particular language/channel declarations; it does not expand into
+preallocated support rows. [Creation](database/creation.md#work-authoring-and-multilingual-adoption)
+defines contribution adoption and actual readable coverage. The target Work
+policy and adoption behavior still require implementation qualification; they
+are not inferred from the existing field's storage or editor choices below.
+
 The first-party web editor does not expose a free-form language-tag input. It
 offers a bounded Select whose nine canonical choices are derived from the
 product's supported content-language groups and UI locales, including `zh`,
@@ -39,10 +49,13 @@ contract:
 
 The sparse `unit_content_language_support` relation stores one bounded JSONB
 `value` per supported Unit. Absence means the authoritative value is `[]`;
-empty arrays are never stored. The primary key is `unit_id`, and the composite
-foreign key `(unit_id, unit_kind)` proves that the declaration belongs to a
-Book, Software, Media, Video, Audio, or Release Unit. PostgreSQL proves only
-the row-local kind and top-level non-empty array bound. The shared runtime
+empty arrays are never stored. The primary key is `unit_id`; the
+[current schema](../../services/main/src/services/database/schema/content-language.ts)
+uses validated concrete owner-FK alternatives rather than a global Unit parent.
+The `unit_kind` vocabulary and top-level non-empty array bound are separate
+checks, not a composite FK proving feature eligibility. Generic target conversion
+follows the [Unit capability contract](database/README.md#34-unit-capabilities-across-owner-tables)
+and remains distinct from validating the language value. The shared runtime
 contract proves canonical BCP 47 tags, exact object keys, supported channels,
 uniqueness after canonicalization, and the 64-entry ceiling on every public
 write and persisted read. There is deliberately no JSONB GIN index: discovery

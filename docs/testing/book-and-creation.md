@@ -24,6 +24,14 @@ Owner: M05. Use [native creation contracts](../architecture/database/creation.md
 | BOOK18 | Withdraw/remove content, hide identity or relinquish control through distinct operations; no guessed AO3 orphaning semantics. |
 | BOOK19 | Run one complete multi-principal author/editor/reader/moderator journey entirely through native APIs. |
 | BOOK20 | Repeat the journey under concurrent edits, source changes, failed jobs, revoked grants and cache/index lag. |
+| BOOK21 | Create and publish a metadata-only REZICS Work without ISBN, external edition or dummy Document; tag, discuss and favorite the Work through generic Unit contracts before any body is adopted. |
+| BOOK22 | Adopt an English original and community Chinese/Japanese contributions into the same Work with no corresponding trilingual publisher edition; preserve exact provenance, officialness, credits and independent contributor control. |
+| BOOK23 | Admit all languages by policy without preallocated language rows; distinguish that policy from particular support declarations, metadata translations and actual readable coverage. Two same-language contributions coexist with an explicit reading selection. |
+| BOOK24 | Link hardcover, paperback and ebook publications with their own identifiers/contents to one Work; no external edition becomes its primary flag and a provider language update cannot remove community adoptions. |
+| BOOK25 | Maintain anthology C and split/constituent Works A and B independently; aggregation, part coverage and ordered adoption remain distinct, with no family-wide primary uniqueness or inherited permissions/votes/progress. |
+| BOOK26 | Repeat the same text/Work target in one publication manifest with different occurrence IDs, order and coverage; preserve exact citations and source correspondence through reorder/removal/restore. |
+| BOOK27 | Correct Work metadata, revise a contributed Document and change an adoption independently; historical reading/export pins the earlier exact selection and progress maps or becomes unknown after changed structure. |
+| BOOK28 | Export a virtual Work with unknown text correspondence and a multi-work text container; preserve native identity and explicitly map bibliographic components without claiming the Work itself is an LRM abstract Work. |
 
 ## AO3 functional coverage
 

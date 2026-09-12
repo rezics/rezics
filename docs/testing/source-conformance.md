@@ -10,7 +10,7 @@ Owner: M07. Native meaning is defined by [catalog architecture](../architecture/
 | Cover Art Archive | Multiple artwork uses/types, main-front versus role, release origin for group representatives, representations/locations and source approval evidence. |
 | VNDB | VN/content/releases, names/aliases, contribution contexts, character/voice roles, tags/traits/quotes, image/screenshot applicability, API/dump joins and complete aggregates. |
 | Bangumi | Subject grain, names/descriptions, episodes, characters/people, multi-party voice relations, archive/API-only relationships, fixed profiles and elected infobox semantics. |
-| Open Library and elected book sources | Work/expression/publication, identifiers, contributors, translation/serialization, covers, series and source-free book scenarios not supplied by one provider. |
+| Open Library and elected book sources | Explicit conceptual-work/text/ISBN-edition mappings to REZICS virtual Work evidence and external publications; contributors, translation/serialization, covers, series and native scenarios absent from one provider. |
 | AO3-oriented creative input | Functional/content examples for native creation and export; elect acquisition/import formats explicitly rather than assuming a universal source API. |
 
 The current [source artifact inventory](../../services/main/src/services/catalog/source-contracts/artifacts.json) and [field inventory](../../services/main/src/services/catalog/source-contracts/fields.jsonl) are inputs to reviewed mapping. Declaration counts, raw dumps and old reports are not evidence that every field is supported.
@@ -43,6 +43,10 @@ Preserve source-specific vocabulary before applying standards normalization. Dis
 - VNDB dump tag/Wikidata joins and API/dump aggregate coverage are explicit, bounded and source-qualified.
 - MusicBrainz secondary/alternative/candidate updates and media merge/split retain exact revisions and independent recordings/credits.
 - Artwork removal, new encodings and changed remote locators preserve source/native selection boundaries.
+- An upstream conceptual Work ID does not automatically create or merge a primary REZICS Work; retain reviewed correspondence, source-only and unresolved cases.
+- Publisher ISBN/format/territory/language changes affect the mapped external publication, not the Work's identity or independently adopted community translations.
+- Metadata-only sources do not manufacture identical-text assertions or dummy content; multiple same-language contributions and unknown correspondence survive roundtrip.
+- Repeated book-content targets retain manifest-qualified occurrence identities through import/update/export; native virtual Work and multi-work text containers use explicit bibliographic export mappings.
 
 ## Data acquisition
 
