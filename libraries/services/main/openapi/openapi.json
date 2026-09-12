@@ -120718,6 +120718,40 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": [
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -120799,7 +120833,67 @@
 				"summary": "Delete progress",
 				"tags": ["Progress"],
 				"responses": {
-					"204": { "description": "No Content" },
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": [
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"enum": ["UnitNotFound"],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
 					"422": {
 						"description": "Request validation failed",
 						"content": {
@@ -121210,6 +121304,40 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": [
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -121450,6 +121578,40 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": [
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -121561,6 +121723,40 @@
 				"summary": "Delete a Progress journal entry",
 				"tags": ["Progress"],
 				"responses": {
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": [
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -121659,6 +121855,40 @@
 				"summary": "Set a Progress journal entry as current",
 				"tags": ["Progress"],
 				"responses": {
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": [
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -121955,6 +122185,40 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": [
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -122126,6 +122390,40 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": [
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -122236,6 +122534,40 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": [
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -122340,6 +122672,40 @@
 									"type": "object",
 									"properties": { "completed": { "type": "boolean" } },
 									"required": ["completed"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": [
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
 								}
 							}
 						}

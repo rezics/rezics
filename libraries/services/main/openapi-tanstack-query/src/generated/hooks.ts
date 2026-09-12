@@ -792,18 +792,22 @@ import type {
 	DeleteApiPollsByPollIdVoteStatus500,
 	DeleteApiProgressByUnitIdEntriesByEntryIdOptions,
 	DeleteApiProgressByUnitIdEntriesByEntryIdResponse,
+	DeleteApiProgressByUnitIdEntriesByEntryIdStatus403,
 	DeleteApiProgressByUnitIdEntriesByEntryIdStatus404,
 	DeleteApiProgressByUnitIdEntriesByEntryIdStatus422,
 	DeleteApiProgressByUnitIdEntriesByEntryIdStatus429,
 	DeleteApiProgressByUnitIdEntriesByEntryIdStatus500,
 	DeleteApiProgressByUnitIdNodesByNodeIdOptions,
 	DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
+	DeleteApiProgressByUnitIdNodesByNodeIdStatus403,
 	DeleteApiProgressByUnitIdNodesByNodeIdStatus404,
 	DeleteApiProgressByUnitIdNodesByNodeIdStatus422,
 	DeleteApiProgressByUnitIdNodesByNodeIdStatus429,
 	DeleteApiProgressByUnitIdNodesByNodeIdStatus500,
 	DeleteApiProgressByUnitIdOptions,
-	DeleteApiProgressByUnitIdStatus204,
+	DeleteApiProgressByUnitIdResponse,
+	DeleteApiProgressByUnitIdStatus403,
+	DeleteApiProgressByUnitIdStatus404,
 	DeleteApiProgressByUnitIdStatus422,
 	DeleteApiProgressByUnitIdStatus429,
 	DeleteApiProgressByUnitIdStatus500,
@@ -2663,6 +2667,7 @@ import type {
 	PostApiProgressByUnitIdCompleteOptions,
 	PostApiProgressByUnitIdCompleteStatus200,
 	PostApiProgressByUnitIdCompleteStatus400,
+	PostApiProgressByUnitIdCompleteStatus403,
 	PostApiProgressByUnitIdCompleteStatus404,
 	PostApiProgressByUnitIdCompleteStatus422,
 	PostApiProgressByUnitIdCompleteStatus429,
@@ -2670,12 +2675,14 @@ import type {
 	PostApiProgressByUnitIdEntriesOptions,
 	PostApiProgressByUnitIdEntriesStatus200,
 	PostApiProgressByUnitIdEntriesStatus400,
+	PostApiProgressByUnitIdEntriesStatus403,
 	PostApiProgressByUnitIdEntriesStatus404,
 	PostApiProgressByUnitIdEntriesStatus422,
 	PostApiProgressByUnitIdEntriesStatus429,
 	PostApiProgressByUnitIdEntriesStatus500,
 	PostApiProgressByUnitIdNodesByNodeIdReadOptions,
 	PostApiProgressByUnitIdNodesByNodeIdReadStatus200,
+	PostApiProgressByUnitIdNodesByNodeIdReadStatus403,
 	PostApiProgressByUnitIdNodesByNodeIdReadStatus404,
 	PostApiProgressByUnitIdNodesByNodeIdReadStatus422,
 	PostApiProgressByUnitIdNodesByNodeIdReadStatus429,
@@ -3301,6 +3308,7 @@ import type {
 	PutApiPostsByPostIdScoresStatus500,
 	PutApiProgressByUnitIdEntriesByEntryIdCurrentOptions,
 	PutApiProgressByUnitIdEntriesByEntryIdCurrentResponse,
+	PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus403,
 	PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404,
 	PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422,
 	PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429,
@@ -3308,12 +3316,14 @@ import type {
 	PutApiProgressByUnitIdEntriesByEntryIdOptions,
 	PutApiProgressByUnitIdEntriesByEntryIdStatus200,
 	PutApiProgressByUnitIdEntriesByEntryIdStatus400,
+	PutApiProgressByUnitIdEntriesByEntryIdStatus403,
 	PutApiProgressByUnitIdEntriesByEntryIdStatus404,
 	PutApiProgressByUnitIdEntriesByEntryIdStatus422,
 	PutApiProgressByUnitIdEntriesByEntryIdStatus429,
 	PutApiProgressByUnitIdEntriesByEntryIdStatus500,
 	PutApiProgressByUnitIdNodesByNodeIdOptions,
 	PutApiProgressByUnitIdNodesByNodeIdStatus200,
+	PutApiProgressByUnitIdNodesByNodeIdStatus403,
 	PutApiProgressByUnitIdNodesByNodeIdStatus404,
 	PutApiProgressByUnitIdNodesByNodeIdStatus422,
 	PutApiProgressByUnitIdNodesByNodeIdStatus429,
@@ -3321,6 +3331,7 @@ import type {
 	PutApiProgressByUnitIdOptions,
 	PutApiProgressByUnitIdStatus200,
 	PutApiProgressByUnitIdStatus400,
+	PutApiProgressByUnitIdStatus403,
 	PutApiProgressByUnitIdStatus404,
 	PutApiProgressByUnitIdStatus422,
 	PutApiProgressByUnitIdStatus429,
@@ -46868,6 +46879,7 @@ export function putApiProgressByUnitIdMutationOptions<TContext = unknown>(
 		PutApiProgressByUnitIdStatus200,
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdStatus400
+			| PutApiProgressByUnitIdStatus403
 			| PutApiProgressByUnitIdStatus404
 			| PutApiProgressByUnitIdStatus422
 			| PutApiProgressByUnitIdStatus429
@@ -46893,6 +46905,7 @@ export function usePutApiProgressByUnitId<TContext>(
 			PutApiProgressByUnitIdStatus200,
 			ResponseErrorConfig<
 				| PutApiProgressByUnitIdStatus400
+				| PutApiProgressByUnitIdStatus403
 				| PutApiProgressByUnitIdStatus404
 				| PutApiProgressByUnitIdStatus422
 				| PutApiProgressByUnitIdStatus429
@@ -46912,6 +46925,7 @@ export function usePutApiProgressByUnitId<TContext>(
 		PutApiProgressByUnitIdStatus200,
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdStatus400
+			| PutApiProgressByUnitIdStatus403
 			| PutApiProgressByUnitIdStatus404
 			| PutApiProgressByUnitIdStatus422
 			| PutApiProgressByUnitIdStatus429
@@ -46925,6 +46939,7 @@ export function usePutApiProgressByUnitId<TContext>(
 		PutApiProgressByUnitIdStatus200,
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdStatus400
+			| PutApiProgressByUnitIdStatus403
 			| PutApiProgressByUnitIdStatus404
 			| PutApiProgressByUnitIdStatus422
 			| PutApiProgressByUnitIdStatus429
@@ -46943,6 +46958,7 @@ export function usePutApiProgressByUnitId<TContext>(
 		PutApiProgressByUnitIdStatus200,
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdStatus400
+			| PutApiProgressByUnitIdStatus403
 			| PutApiProgressByUnitIdStatus404
 			| PutApiProgressByUnitIdStatus422
 			| PutApiProgressByUnitIdStatus429
@@ -46961,8 +46977,10 @@ export function deleteApiProgressByUnitIdMutationOptions<TContext = unknown>(
 ) {
 	const mutationKey = deleteApiProgressByUnitIdMutationKey();
 	return mutationOptions<
-		DeleteApiProgressByUnitIdStatus204,
+		DeleteApiProgressByUnitIdResponse,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdStatus403
+			| DeleteApiProgressByUnitIdStatus404
 			| DeleteApiProgressByUnitIdStatus422
 			| DeleteApiProgressByUnitIdStatus429
 			| DeleteApiProgressByUnitIdStatus500
@@ -46984,8 +47002,10 @@ export function deleteApiProgressByUnitIdMutationOptions<TContext = unknown>(
 export function useDeleteApiProgressByUnitId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			DeleteApiProgressByUnitIdStatus204,
+			DeleteApiProgressByUnitIdResponse,
 			ResponseErrorConfig<
+				| DeleteApiProgressByUnitIdStatus403
+				| DeleteApiProgressByUnitIdStatus404
 				| DeleteApiProgressByUnitIdStatus422
 				| DeleteApiProgressByUnitIdStatus429
 				| DeleteApiProgressByUnitIdStatus500
@@ -47001,8 +47021,10 @@ export function useDeleteApiProgressByUnitId<TContext>(
 	const mutationKey = mutationOptions.mutationKey ?? deleteApiProgressByUnitIdMutationKey();
 
 	const baseOptions = deleteApiProgressByUnitIdMutationOptions(config) as UseMutationOptions<
-		DeleteApiProgressByUnitIdStatus204,
+		DeleteApiProgressByUnitIdResponse,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdStatus403
+			| DeleteApiProgressByUnitIdStatus404
 			| DeleteApiProgressByUnitIdStatus422
 			| DeleteApiProgressByUnitIdStatus429
 			| DeleteApiProgressByUnitIdStatus500
@@ -47012,8 +47034,10 @@ export function useDeleteApiProgressByUnitId<TContext>(
 	>;
 
 	return useMutation<
-		DeleteApiProgressByUnitIdStatus204,
+		DeleteApiProgressByUnitIdResponse,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdStatus403
+			| DeleteApiProgressByUnitIdStatus404
 			| DeleteApiProgressByUnitIdStatus422
 			| DeleteApiProgressByUnitIdStatus429
 			| DeleteApiProgressByUnitIdStatus500
@@ -47028,8 +47052,10 @@ export function useDeleteApiProgressByUnitId<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		DeleteApiProgressByUnitIdStatus204,
+		DeleteApiProgressByUnitIdResponse,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdStatus403
+			| DeleteApiProgressByUnitIdStatus404
 			| DeleteApiProgressByUnitIdStatus422
 			| DeleteApiProgressByUnitIdStatus429
 			| DeleteApiProgressByUnitIdStatus500
@@ -47161,6 +47187,7 @@ export function postApiProgressByUnitIdEntriesMutationOptions<TContext = unknown
 		PostApiProgressByUnitIdEntriesStatus200,
 		ResponseErrorConfig<
 			| PostApiProgressByUnitIdEntriesStatus400
+			| PostApiProgressByUnitIdEntriesStatus403
 			| PostApiProgressByUnitIdEntriesStatus404
 			| PostApiProgressByUnitIdEntriesStatus422
 			| PostApiProgressByUnitIdEntriesStatus429
@@ -47186,6 +47213,7 @@ export function usePostApiProgressByUnitIdEntries<TContext>(
 			PostApiProgressByUnitIdEntriesStatus200,
 			ResponseErrorConfig<
 				| PostApiProgressByUnitIdEntriesStatus400
+				| PostApiProgressByUnitIdEntriesStatus403
 				| PostApiProgressByUnitIdEntriesStatus404
 				| PostApiProgressByUnitIdEntriesStatus422
 				| PostApiProgressByUnitIdEntriesStatus429
@@ -47205,6 +47233,7 @@ export function usePostApiProgressByUnitIdEntries<TContext>(
 		PostApiProgressByUnitIdEntriesStatus200,
 		ResponseErrorConfig<
 			| PostApiProgressByUnitIdEntriesStatus400
+			| PostApiProgressByUnitIdEntriesStatus403
 			| PostApiProgressByUnitIdEntriesStatus404
 			| PostApiProgressByUnitIdEntriesStatus422
 			| PostApiProgressByUnitIdEntriesStatus429
@@ -47218,6 +47247,7 @@ export function usePostApiProgressByUnitIdEntries<TContext>(
 		PostApiProgressByUnitIdEntriesStatus200,
 		ResponseErrorConfig<
 			| PostApiProgressByUnitIdEntriesStatus400
+			| PostApiProgressByUnitIdEntriesStatus403
 			| PostApiProgressByUnitIdEntriesStatus404
 			| PostApiProgressByUnitIdEntriesStatus422
 			| PostApiProgressByUnitIdEntriesStatus429
@@ -47236,6 +47266,7 @@ export function usePostApiProgressByUnitIdEntries<TContext>(
 		PostApiProgressByUnitIdEntriesStatus200,
 		ResponseErrorConfig<
 			| PostApiProgressByUnitIdEntriesStatus400
+			| PostApiProgressByUnitIdEntriesStatus403
 			| PostApiProgressByUnitIdEntriesStatus404
 			| PostApiProgressByUnitIdEntriesStatus422
 			| PostApiProgressByUnitIdEntriesStatus429
@@ -47257,6 +47288,7 @@ export function putApiProgressByUnitIdEntriesByEntryIdMutationOptions<TContext =
 		PutApiProgressByUnitIdEntriesByEntryIdStatus200,
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus400
+			| PutApiProgressByUnitIdEntriesByEntryIdStatus403
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus404
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus422
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus429
@@ -47287,6 +47319,7 @@ export function usePutApiProgressByUnitIdEntriesByEntryId<TContext>(
 			PutApiProgressByUnitIdEntriesByEntryIdStatus200,
 			ResponseErrorConfig<
 				| PutApiProgressByUnitIdEntriesByEntryIdStatus400
+				| PutApiProgressByUnitIdEntriesByEntryIdStatus403
 				| PutApiProgressByUnitIdEntriesByEntryIdStatus404
 				| PutApiProgressByUnitIdEntriesByEntryIdStatus422
 				| PutApiProgressByUnitIdEntriesByEntryIdStatus429
@@ -47309,6 +47342,7 @@ export function usePutApiProgressByUnitIdEntriesByEntryId<TContext>(
 		PutApiProgressByUnitIdEntriesByEntryIdStatus200,
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus400
+			| PutApiProgressByUnitIdEntriesByEntryIdStatus403
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus404
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus422
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus429
@@ -47322,6 +47356,7 @@ export function usePutApiProgressByUnitIdEntriesByEntryId<TContext>(
 		PutApiProgressByUnitIdEntriesByEntryIdStatus200,
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus400
+			| PutApiProgressByUnitIdEntriesByEntryIdStatus403
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus404
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus422
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus429
@@ -47340,6 +47375,7 @@ export function usePutApiProgressByUnitIdEntriesByEntryId<TContext>(
 		PutApiProgressByUnitIdEntriesByEntryIdStatus200,
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus400
+			| PutApiProgressByUnitIdEntriesByEntryIdStatus403
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus404
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus422
 			| PutApiProgressByUnitIdEntriesByEntryIdStatus429
@@ -47360,6 +47396,7 @@ export function deleteApiProgressByUnitIdEntriesByEntryIdMutationOptions<TContex
 	return mutationOptions<
 		DeleteApiProgressByUnitIdEntriesByEntryIdResponse,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus403
 			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus404
 			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus422
 			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus429
@@ -47388,6 +47425,7 @@ export function useDeleteApiProgressByUnitIdEntriesByEntryId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiProgressByUnitIdEntriesByEntryIdResponse,
 			ResponseErrorConfig<
+				| DeleteApiProgressByUnitIdEntriesByEntryIdStatus403
 				| DeleteApiProgressByUnitIdEntriesByEntryIdStatus404
 				| DeleteApiProgressByUnitIdEntriesByEntryIdStatus422
 				| DeleteApiProgressByUnitIdEntriesByEntryIdStatus429
@@ -47409,6 +47447,7 @@ export function useDeleteApiProgressByUnitIdEntriesByEntryId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiProgressByUnitIdEntriesByEntryIdResponse,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus403
 			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus404
 			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus422
 			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus429
@@ -47421,6 +47460,7 @@ export function useDeleteApiProgressByUnitIdEntriesByEntryId<TContext>(
 	return useMutation<
 		DeleteApiProgressByUnitIdEntriesByEntryIdResponse,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus403
 			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus404
 			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus422
 			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus429
@@ -47438,6 +47478,7 @@ export function useDeleteApiProgressByUnitIdEntriesByEntryId<TContext>(
 	) as UseMutationResult<
 		DeleteApiProgressByUnitIdEntriesByEntryIdResponse,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus403
 			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus404
 			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus422
 			| DeleteApiProgressByUnitIdEntriesByEntryIdStatus429
@@ -47458,6 +47499,7 @@ export function putApiProgressByUnitIdEntriesByEntryIdCurrentMutationOptions<TCo
 	return mutationOptions<
 		PutApiProgressByUnitIdEntriesByEntryIdCurrentResponse,
 		ResponseErrorConfig<
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus403
 			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404
 			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422
 			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429
@@ -47486,6 +47528,7 @@ export function usePutApiProgressByUnitIdEntriesByEntryIdCurrent<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiProgressByUnitIdEntriesByEntryIdCurrentResponse,
 			ResponseErrorConfig<
+				| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus403
 				| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404
 				| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422
 				| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429
@@ -47507,6 +47550,7 @@ export function usePutApiProgressByUnitIdEntriesByEntryIdCurrent<TContext>(
 	) as UseMutationOptions<
 		PutApiProgressByUnitIdEntriesByEntryIdCurrentResponse,
 		ResponseErrorConfig<
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus403
 			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404
 			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422
 			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429
@@ -47519,6 +47563,7 @@ export function usePutApiProgressByUnitIdEntriesByEntryIdCurrent<TContext>(
 	return useMutation<
 		PutApiProgressByUnitIdEntriesByEntryIdCurrentResponse,
 		ResponseErrorConfig<
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus403
 			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404
 			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422
 			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429
@@ -47536,6 +47581,7 @@ export function usePutApiProgressByUnitIdEntriesByEntryIdCurrent<TContext>(
 	) as UseMutationResult<
 		PutApiProgressByUnitIdEntriesByEntryIdCurrentResponse,
 		ResponseErrorConfig<
+			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus403
 			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404
 			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422
 			| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429
@@ -47652,6 +47698,7 @@ export function postApiProgressByUnitIdNodesByNodeIdReadMutationOptions<TContext
 	return mutationOptions<
 		PostApiProgressByUnitIdNodesByNodeIdReadStatus200,
 		ResponseErrorConfig<
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus403
 			| PostApiProgressByUnitIdNodesByNodeIdReadStatus404
 			| PostApiProgressByUnitIdNodesByNodeIdReadStatus422
 			| PostApiProgressByUnitIdNodesByNodeIdReadStatus429
@@ -47680,6 +47727,7 @@ export function usePostApiProgressByUnitIdNodesByNodeIdRead<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiProgressByUnitIdNodesByNodeIdReadStatus200,
 			ResponseErrorConfig<
+				| PostApiProgressByUnitIdNodesByNodeIdReadStatus403
 				| PostApiProgressByUnitIdNodesByNodeIdReadStatus404
 				| PostApiProgressByUnitIdNodesByNodeIdReadStatus422
 				| PostApiProgressByUnitIdNodesByNodeIdReadStatus429
@@ -47701,6 +47749,7 @@ export function usePostApiProgressByUnitIdNodesByNodeIdRead<TContext>(
 	) as UseMutationOptions<
 		PostApiProgressByUnitIdNodesByNodeIdReadStatus200,
 		ResponseErrorConfig<
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus403
 			| PostApiProgressByUnitIdNodesByNodeIdReadStatus404
 			| PostApiProgressByUnitIdNodesByNodeIdReadStatus422
 			| PostApiProgressByUnitIdNodesByNodeIdReadStatus429
@@ -47713,6 +47762,7 @@ export function usePostApiProgressByUnitIdNodesByNodeIdRead<TContext>(
 	return useMutation<
 		PostApiProgressByUnitIdNodesByNodeIdReadStatus200,
 		ResponseErrorConfig<
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus403
 			| PostApiProgressByUnitIdNodesByNodeIdReadStatus404
 			| PostApiProgressByUnitIdNodesByNodeIdReadStatus422
 			| PostApiProgressByUnitIdNodesByNodeIdReadStatus429
@@ -47730,6 +47780,7 @@ export function usePostApiProgressByUnitIdNodesByNodeIdRead<TContext>(
 	) as UseMutationResult<
 		PostApiProgressByUnitIdNodesByNodeIdReadStatus200,
 		ResponseErrorConfig<
+			| PostApiProgressByUnitIdNodesByNodeIdReadStatus403
 			| PostApiProgressByUnitIdNodesByNodeIdReadStatus404
 			| PostApiProgressByUnitIdNodesByNodeIdReadStatus422
 			| PostApiProgressByUnitIdNodesByNodeIdReadStatus429
@@ -47751,6 +47802,7 @@ export function postApiProgressByUnitIdCompleteMutationOptions<TContext = unknow
 		PostApiProgressByUnitIdCompleteStatus200,
 		ResponseErrorConfig<
 			| PostApiProgressByUnitIdCompleteStatus400
+			| PostApiProgressByUnitIdCompleteStatus403
 			| PostApiProgressByUnitIdCompleteStatus404
 			| PostApiProgressByUnitIdCompleteStatus422
 			| PostApiProgressByUnitIdCompleteStatus429
@@ -47781,6 +47833,7 @@ export function usePostApiProgressByUnitIdComplete<TContext>(
 			PostApiProgressByUnitIdCompleteStatus200,
 			ResponseErrorConfig<
 				| PostApiProgressByUnitIdCompleteStatus400
+				| PostApiProgressByUnitIdCompleteStatus403
 				| PostApiProgressByUnitIdCompleteStatus404
 				| PostApiProgressByUnitIdCompleteStatus422
 				| PostApiProgressByUnitIdCompleteStatus429
@@ -47800,6 +47853,7 @@ export function usePostApiProgressByUnitIdComplete<TContext>(
 		PostApiProgressByUnitIdCompleteStatus200,
 		ResponseErrorConfig<
 			| PostApiProgressByUnitIdCompleteStatus400
+			| PostApiProgressByUnitIdCompleteStatus403
 			| PostApiProgressByUnitIdCompleteStatus404
 			| PostApiProgressByUnitIdCompleteStatus422
 			| PostApiProgressByUnitIdCompleteStatus429
@@ -47813,6 +47867,7 @@ export function usePostApiProgressByUnitIdComplete<TContext>(
 		PostApiProgressByUnitIdCompleteStatus200,
 		ResponseErrorConfig<
 			| PostApiProgressByUnitIdCompleteStatus400
+			| PostApiProgressByUnitIdCompleteStatus403
 			| PostApiProgressByUnitIdCompleteStatus404
 			| PostApiProgressByUnitIdCompleteStatus422
 			| PostApiProgressByUnitIdCompleteStatus429
@@ -47831,6 +47886,7 @@ export function usePostApiProgressByUnitIdComplete<TContext>(
 		PostApiProgressByUnitIdCompleteStatus200,
 		ResponseErrorConfig<
 			| PostApiProgressByUnitIdCompleteStatus400
+			| PostApiProgressByUnitIdCompleteStatus403
 			| PostApiProgressByUnitIdCompleteStatus404
 			| PostApiProgressByUnitIdCompleteStatus422
 			| PostApiProgressByUnitIdCompleteStatus429
@@ -47851,6 +47907,7 @@ export function putApiProgressByUnitIdNodesByNodeIdMutationOptions<TContext = un
 	return mutationOptions<
 		PutApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| PutApiProgressByUnitIdNodesByNodeIdStatus403
 			| PutApiProgressByUnitIdNodesByNodeIdStatus404
 			| PutApiProgressByUnitIdNodesByNodeIdStatus422
 			| PutApiProgressByUnitIdNodesByNodeIdStatus429
@@ -47875,6 +47932,7 @@ export function usePutApiProgressByUnitIdNodesByNodeId<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiProgressByUnitIdNodesByNodeIdStatus200,
 			ResponseErrorConfig<
+				| PutApiProgressByUnitIdNodesByNodeIdStatus403
 				| PutApiProgressByUnitIdNodesByNodeIdStatus404
 				| PutApiProgressByUnitIdNodesByNodeIdStatus422
 				| PutApiProgressByUnitIdNodesByNodeIdStatus429
@@ -47896,6 +47954,7 @@ export function usePutApiProgressByUnitIdNodesByNodeId<TContext>(
 	) as UseMutationOptions<
 		PutApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| PutApiProgressByUnitIdNodesByNodeIdStatus403
 			| PutApiProgressByUnitIdNodesByNodeIdStatus404
 			| PutApiProgressByUnitIdNodesByNodeIdStatus422
 			| PutApiProgressByUnitIdNodesByNodeIdStatus429
@@ -47908,6 +47967,7 @@ export function usePutApiProgressByUnitIdNodesByNodeId<TContext>(
 	return useMutation<
 		PutApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| PutApiProgressByUnitIdNodesByNodeIdStatus403
 			| PutApiProgressByUnitIdNodesByNodeIdStatus404
 			| PutApiProgressByUnitIdNodesByNodeIdStatus422
 			| PutApiProgressByUnitIdNodesByNodeIdStatus429
@@ -47925,6 +47985,7 @@ export function usePutApiProgressByUnitIdNodesByNodeId<TContext>(
 	) as UseMutationResult<
 		PutApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| PutApiProgressByUnitIdNodesByNodeIdStatus403
 			| PutApiProgressByUnitIdNodesByNodeIdStatus404
 			| PutApiProgressByUnitIdNodesByNodeIdStatus422
 			| PutApiProgressByUnitIdNodesByNodeIdStatus429
@@ -47945,6 +48006,7 @@ export function deleteApiProgressByUnitIdNodesByNodeIdMutationOptions<TContext =
 	return mutationOptions<
 		DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdNodesByNodeIdStatus403
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus404
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
@@ -47973,6 +48035,7 @@ export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 			ResponseErrorConfig<
+				| DeleteApiProgressByUnitIdNodesByNodeIdStatus403
 				| DeleteApiProgressByUnitIdNodesByNodeIdStatus404
 				| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
 				| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
@@ -47994,6 +48057,7 @@ export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdNodesByNodeIdStatus403
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus404
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
@@ -48006,6 +48070,7 @@ export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
 	return useMutation<
 		DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdNodesByNodeIdStatus403
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus404
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
@@ -48023,6 +48088,7 @@ export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
 	) as UseMutationResult<
 		DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
+			| DeleteApiProgressByUnitIdNodesByNodeIdStatus403
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus404
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus429

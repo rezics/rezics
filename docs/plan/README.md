@@ -42,7 +42,7 @@ Existing code provides foundations. The revised target has not passed G2-G4 mere
 
 | ID | Module | Dependencies | Design | Target persistence/API/integration |
 | --- | --- | --- | --- | --- |
-| M01 | [Foundation](modules/foundation.md) | None | Defined; reference allocation protocol specified | G2 in progress: [canonical reference storage, selected private/event consumers, canonical Following and Studio visits qualified](../testing/foundation.md); native private review/disclosure, reconciliation and selected worker recovery/current-executor fences qualified; reviewer authority and canonicalization/catalog-effect process recovery qualified; remaining recovery, consumers, revision/occurrence families, ownership/disclosure and other contracts pending |
+| M01 | [Foundation](modules/foundation.md) | None | Defined; reference allocation protocol specified | G2 in progress: [canonical reference storage, selected private/event consumers, canonical Following/Studio and Progress parent authority qualified](../testing/foundation.md); native private review/disclosure, reconciliation and selected worker recovery/current-executor fences qualified; reviewer authority and canonicalization/catalog-effect process recovery qualified; remaining recovery, consumers, revision/occurrence families, ownership/disclosure and other contracts pending |
 | M02 | [Knowledge and graph](modules/knowledge-and-graph.md) | M01 | Defined; graph query contract specified | Pending |
 | M03 | [Content and media](modules/content-and-media.md) | M01, M02 contracts | Defined | Pending |
 | M04 | [Catalog](modules/catalog.md) | M01, M02, M03 contracts | Defined; source-free grain cases required | Pending |

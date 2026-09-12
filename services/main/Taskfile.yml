@@ -361,6 +361,13 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-}"
             - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-following-references.ts
 
+    db:progress-authority:check:
+        desc: Verify current Progress account/Self and parent-read authority, lock races and stateful HTTP journal commands.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-progress-command-authority.ts
+            - REZICS_DISPOSABLE_MIGRATION_FIXTURE=1 EMAIL_MODE=log DATABASE_URL="${DATABASE_ADMIN_URL}" yarn exec tsx scripts/check-progress-authority.ts
+
     db:studio-visit-references:check:
         desc: Verify canonical private Studio visits, native listing IDs, merge guards, erasure and selective plans.
         cmds:

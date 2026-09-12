@@ -8,7 +8,8 @@ import { StatusCodes } from "http-status-codes";
 import session from "../../auth/session";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { ContentStructureKindPolicies } from "../../content-structure/contracts";
-import { database } from "../../database";
+import { database, type DatabaseTransaction } from "../../database";
+import { withProgressWriteAuthority } from "./authority";
 import {
 	contentStructure,
 	contentStructureNode,
@@ -18,7 +19,6 @@ import {
 	unitProgress,
 	unitProgressEntry,
 } from "../../database/schema";
-
 
 import { ContentStructureNodeNotFound } from "../content-structure/errors";
 import { NoContentResponse } from "../schema/action-response";
@@ -62,20 +62,32 @@ import {
 import {
 	createProgressEntry,
 	deleteProgressEntry,
-	lockUnitProgress,
 	recordChapterReading,
 	recordMediaNodeCompletion,
 	replaceProgressEntry,
 	setCurrentProgressEntry,
 } from "./service";
 
-const contentState=unitStateRelation(contentStructureNode.contentUnitId,"progress_content_state");
-const ownerState=unitStateRelation(sql`null::uuid`,"progress_owner_state");
+const ProgressForbiddenResponse = toApiErrorResponse([
+	"ParticipationDenied",
+	"AccountRestricted",
+	"AccountSuspended",
+	"AccountClosed",
+	"EmailVerificationRequired",
+	"ApiTokenPermissionRequired",
+]);
+
+const contentState = unitStateRelation(
+	contentStructureNode.contentUnitId,
+	"progress_content_state",
+);
+const ownerState = unitStateRelation(sql`null::uuid`, "progress_owner_state");
 async function findCompletableContentStructureNode(
+	tx: DatabaseTransaction,
 	unitId: string,
 	nodeId: string,
 ): Promise<"book" | "media" | null> {
-	const [node] = await database
+	const [node] = await tx
 		.select({
 			structureKind: contentStructure.kind,
 			unitOwner: contentState.owner,
@@ -83,7 +95,7 @@ async function findCompletableContentStructureNode(
 		})
 		.from(contentStructureNode)
 		.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
-		.innerJoinLateral(contentState,sql`true`)
+		.innerJoinLateral(contentState, sql`true`)
 		.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 		.where(
 			and(
@@ -102,32 +114,79 @@ async function findCompletableContentStructureNode(
 		return "book";
 	if (
 		node?.structureKind === "media.contents" &&
-		ContentStructureKindPolicies["media.contents"].contributesProgress(node.unitOwner, node.postKind)
+		ContentStructureKindPolicies["media.contents"].contributesProgress(
+			node.unitOwner,
+			node.postKind,
+		)
 	)
 		return "media";
 	return null;
 }
 
-async function resolveProgressContinuation(unitId:string,nodeId:string|null):Promise<ProgressContinuationResponse> {
- const [candidate]=await database.select({owner:ownerState.owner,shape:ownerState.shape,nodeId:contentStructureNode.id,
-  structureKind:contentStructure.kind,contentUnitId:contentState.id,contentOwner:contentState.owner,contentShape:contentState.shape,
- }).from(unitStatesForIds([unitId],"progress_owner_state"))
-  .leftJoin(contentStructureNode,and(nodeId ? eq(contentStructureNode.id,nodeId) : sql`false`,eq(contentStructureNode.ownerUnitId,ownerState.id),isNull(contentStructureNode.deletedAt)))
-  .leftJoin(contentStructure,and(eq(contentStructure.id,contentStructureNode.structureId),eq(contentStructure.ownerUnitId,ownerState.id),isNull(contentStructure.deletedAt)))
-  .leftJoinLateral(contentState,and(eq(contentState.moderationStatus,"approved"),eq(contentState.status,"published"),inArray(contentState.visibility,["public","unlisted"])))
-  .limit(1);
- if(!candidate) return {kind:"none"};
- if(candidate.owner==="publishing" && candidate.shape==="text_version") {
-  return candidate.nodeId && candidate.structureKind==="book.contents" && candidate.contentOwner==="post" && candidate.contentShape==="chapter"
-   ? {kind:"text-version-node",textVersionId:unitId,nodeId:candidate.nodeId}
-   : {kind:"contents",ownerUnit:{id:unitId,owner:"publishing",shape:"text_version"}};
- }
- if(candidate.owner==="program") {
-  return candidate.structureKind==="media.contents" && candidate.contentUnitId && (candidate.contentOwner==="video"||candidate.contentOwner==="audio")
-   ? {kind:"unit",contentUnit:{id:candidate.contentUnitId,owner:candidate.contentOwner,shape:candidate.contentOwner}}
-   : {kind:"contents",ownerUnit:{id:unitId,owner:"program",shape:"program"}};
- }
- return {kind:"none"};
+async function resolveProgressContinuation(
+	unitId: string,
+	nodeId: string | null,
+): Promise<ProgressContinuationResponse> {
+	const [candidate] = await database
+		.select({
+			owner: ownerState.owner,
+			shape: ownerState.shape,
+			nodeId: contentStructureNode.id,
+			structureKind: contentStructure.kind,
+			contentUnitId: contentState.id,
+			contentOwner: contentState.owner,
+			contentShape: contentState.shape,
+		})
+		.from(unitStatesForIds([unitId], "progress_owner_state"))
+		.leftJoin(
+			contentStructureNode,
+			and(
+				nodeId ? eq(contentStructureNode.id, nodeId) : sql`false`,
+				eq(contentStructureNode.ownerUnitId, ownerState.id),
+				isNull(contentStructureNode.deletedAt),
+			),
+		)
+		.leftJoin(
+			contentStructure,
+			and(
+				eq(contentStructure.id, contentStructureNode.structureId),
+				eq(contentStructure.ownerUnitId, ownerState.id),
+				isNull(contentStructure.deletedAt),
+			),
+		)
+		.leftJoinLateral(
+			contentState,
+			and(
+				eq(contentState.moderationStatus, "approved"),
+				eq(contentState.status, "published"),
+				inArray(contentState.visibility, ["public", "unlisted"]),
+			),
+		)
+		.limit(1);
+	if (!candidate) return { kind: "none" };
+	if (candidate.owner === "publishing" && candidate.shape === "text_version") {
+		return candidate.nodeId &&
+			candidate.structureKind === "book.contents" &&
+			candidate.contentOwner === "post" &&
+			candidate.contentShape === "chapter"
+			? { kind: "text-version-node", textVersionId: unitId, nodeId: candidate.nodeId }
+			: { kind: "contents", ownerUnit: { id: unitId, owner: "publishing", shape: "text_version" } };
+	}
+	if (candidate.owner === "program") {
+		return candidate.structureKind === "media.contents" &&
+			candidate.contentUnitId &&
+			(candidate.contentOwner === "video" || candidate.contentOwner === "audio")
+			? {
+					kind: "unit",
+					contentUnit: {
+						id: candidate.contentUnitId,
+						owner: candidate.contentOwner,
+						shape: candidate.contentOwner,
+					},
+				}
+			: { kind: "contents", ownerUnit: { id: unitId, owner: "program", shape: "program" } };
+	}
+	return { kind: "none" };
 }
 
 function toProgressResponse<
@@ -209,11 +268,39 @@ export default new Elysia({ prefix: "/progress" })
 			response: { [StatusCodes.OK]: ProgressListResponse },
 			detail: { summary: "List current profile progress", tags: ["Progress"] },
 		},
-        async ({user,authorization,query}) => {
-         const request=resolveProgressSearchRequest({state:{sort:"progressLastSeenAt:desc",pageSize:query.limit??50,cursor:query.cursor}},JSON.stringify({surface:"list",status:query.status,languages:query.localizationLanguages}));
-         const page=await readProgressPage({authUserId:user.id,profileId:authorization.profileId,languages:query.localizationLanguages??[],request,...(query.status ? {status:query.status} : {})});
-         return {items:page.items,nextCursor:page.boundary ? createProgressSearchCursor(request,{boundary:page.boundary,consumed:page.consumed,total:page.total}) : null};
-        },
+		async ({ user, authorization, query }) => {
+			const request = resolveProgressSearchRequest(
+				{
+					state: {
+						sort: "progressLastSeenAt:desc",
+						pageSize: query.limit ?? 50,
+						cursor: query.cursor,
+					},
+				},
+				JSON.stringify({
+					surface: "list",
+					status: query.status,
+					languages: query.localizationLanguages,
+				}),
+			);
+			const page = await readProgressPage({
+				authUserId: user.id,
+				profileId: authorization.profileId,
+				languages: query.localizationLanguages ?? [],
+				request,
+				...(query.status ? { status: query.status } : {}),
+			});
+			return {
+				items: page.items,
+				nextCursor: page.boundary
+					? createProgressSearchCursor(request, {
+							boundary: page.boundary,
+							consumed: page.consumed,
+							total: page.total,
+						})
+					: null,
+			};
+		},
 	)
 	.get(
 		"/search/filter",
@@ -241,11 +328,31 @@ export default new Elysia({ prefix: "/progress" })
 				tags: ["Progress", "Search"],
 			},
 		},
-        async ({user,authorization,body}) => {
-         const request=resolveProgressSearchRequest(body,JSON.stringify({surface:"search",languages:body.localizationLanguages}));
-         const page=await readProgressPage({authUserId:user.id,profileId:authorization.profileId,languages:body.localizationLanguages??[],request});
-         return {items:page.items,total:page.total,...(page.boundary ? {nextCursor:createProgressSearchCursor(request,{boundary:page.boundary,consumed:page.consumed,total:page.total})} : {})};
-        },
+		async ({ user, authorization, body }) => {
+			const request = resolveProgressSearchRequest(
+				body,
+				JSON.stringify({ surface: "search", languages: body.localizationLanguages }),
+			);
+			const page = await readProgressPage({
+				authUserId: user.id,
+				profileId: authorization.profileId,
+				languages: body.localizationLanguages ?? [],
+				request,
+			});
+			return {
+				items: page.items,
+				total: page.total,
+				...(page.boundary
+					? {
+							nextCursor: createProgressSearchCursor(request, {
+								boundary: page.boundary,
+								consumed: page.consumed,
+								total: page.total,
+							}),
+						}
+					: {}),
+			};
+		},
 	)
 	.get(
 		"/:unitId",
@@ -353,6 +460,7 @@ export default new Elysia({ prefix: "/progress" })
 			params: ProgressUnitParams,
 			body: CreateProgressEntryBody,
 			response: {
+				[StatusCodes.FORBIDDEN]: ProgressForbiddenResponse,
 				[StatusCodes.OK]: ProgressEntryResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
@@ -363,20 +471,21 @@ export default new Elysia({ prefix: "/progress" })
 			detail: { summary: "Create a Progress journal entry", tags: ["Progress"] },
 		},
 		async ({ user, authorization, params, body }) => {
-			await authorization.unit.ensureCanRead(params.unitId);
-			const entry = await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, user.id, params.unitId);
-				return createProgressEntry(tx, user.id, params.unitId, {
-					entryKind: body.entryKind,
-					status: body.status,
-					progress: body.progress,
-					totalTimeMs: body.totalTimeMs,
-					lastContentStructureNodeId: body.lastContentStructureNodeId,
-					occurredAt: body.occurredAt,
-					datePrecision: body.datePrecision,
-					affectsCurrent: false,
-				});
-			});
+			const entry = await withProgressWriteAuthority(
+				{ authUserId: user.id, unitId: params.unitId, authorization },
+				async (tx) => {
+					return createProgressEntry(tx, user.id, params.unitId, {
+						entryKind: body.entryKind,
+						status: body.status,
+						progress: body.progress,
+						totalTimeMs: body.totalTimeMs,
+						lastContentStructureNodeId: body.lastContentStructureNodeId,
+						occurredAt: body.occurredAt,
+						datePrecision: body.datePrecision,
+						affectsCurrent: false,
+					});
+				},
+			);
 			return toProgressEntryResponse({ ...entry, reviewId: null });
 		},
 	)
@@ -387,6 +496,7 @@ export default new Elysia({ prefix: "/progress" })
 			params: ProgressEntryParams,
 			body: ReplaceProgressEntryBody,
 			response: {
+				[StatusCodes.FORBIDDEN]: ProgressForbiddenResponse,
 				[StatusCodes.OK]: ProgressEntryResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
@@ -398,19 +508,20 @@ export default new Elysia({ prefix: "/progress" })
 			detail: { summary: "Replace a Progress journal entry", tags: ["Progress"] },
 		},
 		async ({ user, authorization, params, body }) => {
-			await authorization.unit.ensureCanRead(params.unitId);
-			const entry = await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, user.id, params.unitId);
-				return replaceProgressEntry(tx, user.id, params.unitId, params.entryId, {
-					entryKind: body.entryKind,
-					status: body.status,
-					progress: body.progress,
-					totalTimeMs: body.totalTimeMs,
-					lastContentStructureNodeId: body.lastContentStructureNodeId,
-					occurredAt: body.occurredAt,
-					datePrecision: body.datePrecision,
-				});
-			});
+			const entry = await withProgressWriteAuthority(
+				{ authUserId: user.id, unitId: params.unitId, authorization },
+				async (tx) => {
+					return replaceProgressEntry(tx, user.id, params.unitId, params.entryId, {
+						entryKind: body.entryKind,
+						status: body.status,
+						progress: body.progress,
+						totalTimeMs: body.totalTimeMs,
+						lastContentStructureNodeId: body.lastContentStructureNodeId,
+						occurredAt: body.occurredAt,
+						datePrecision: body.datePrecision,
+					});
+				},
+			);
 			const [binding] = await database
 				.select({ reviewId: postProgressEntry.postId })
 				.from(postProgressEntry)
@@ -428,6 +539,7 @@ export default new Elysia({ prefix: "/progress" })
 			access: "write:interaction:write",
 			params: ProgressEntryParams,
 			response: {
+				[StatusCodes.FORBIDDEN]: ProgressForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ProgressEntryNotFound"]),
 			},
 			detail: {
@@ -437,11 +549,12 @@ export default new Elysia({ prefix: "/progress" })
 			},
 		},
 		async ({ user, authorization, params }) => {
-			await authorization.unit.ensureCanRead(params.unitId);
-			await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, user.id, params.unitId);
-				await setCurrentProgressEntry(tx, user.id, params.unitId, params.entryId);
-			});
+			await withProgressWriteAuthority(
+				{ authUserId: user.id, unitId: params.unitId, authorization },
+				async (tx) => {
+					await setCurrentProgressEntry(tx, user.id, params.unitId, params.entryId);
+				},
+			);
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 	)
@@ -451,6 +564,7 @@ export default new Elysia({ prefix: "/progress" })
 			access: "write:interaction:write",
 			params: ProgressEntryParams,
 			response: {
+				[StatusCodes.FORBIDDEN]: ProgressForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ProgressEntryNotFound"]),
 			},
 			detail: {
@@ -460,11 +574,12 @@ export default new Elysia({ prefix: "/progress" })
 			},
 		},
 		async ({ user, authorization, params }) => {
-			await authorization.unit.ensureCanRead(params.unitId);
-			await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, user.id, params.unitId);
-				await deleteProgressEntry(tx, user.id, params.unitId, params.entryId);
-			});
+			await withProgressWriteAuthority(
+				{ authUserId: user.id, unitId: params.unitId, authorization },
+				async (tx) => {
+					await deleteProgressEntry(tx, user.id, params.unitId, params.entryId);
+				},
+			);
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 	)
@@ -492,7 +607,7 @@ export default new Elysia({ prefix: "/progress" })
 					eq(contentStructureNode.id, contentStructureNodeProgress.nodeId),
 				)
 				.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
-				.innerJoinLateral(contentState,sql`true`)
+				.innerJoinLateral(contentState, sql`true`)
 				.leftJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 				.where(
 					and(
@@ -512,7 +627,7 @@ export default new Elysia({ prefix: "/progress" })
 						isNull(contentStructureNode.deletedAt),
 						isNull(contentStructure.deletedAt),
 						isNull(contentState.deletedAt),
-                        getUnitReadCondition(authorization.profileId,{},contentState),
+						getUnitReadCondition(authorization.profileId, {}, contentState),
 					),
 				)
 				.orderBy(desc(contentStructureNodeProgress.completedAt));
@@ -525,6 +640,7 @@ export default new Elysia({ prefix: "/progress" })
 			access: "write:interaction:write",
 			params: ProgressNodeParams,
 			response: {
+				[StatusCodes.FORBIDDEN]: ProgressForbiddenResponse,
 				[StatusCodes.OK]: ChapterReadingProgressResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
@@ -534,16 +650,18 @@ export default new Elysia({ prefix: "/progress" })
 			detail: { summary: "Record a Book chapter read", tags: ["Progress"] },
 		},
 		async ({ user, authorization, params }) => {
-			await authorization.unit.ensureCanRead(params.unitId);
-			const canReadUnpublished = await authorization.unit.canUpdate(params.unitId);
-			const result = await database.transaction((tx) =>
-				recordChapterReading(tx, {
-					canReadUnpublished,
-					nodeId: params.nodeId,
-					now: new Date(),
-					authUserId: user.id,
-					unitId: params.unitId,
-				}),
+			const result = await withProgressWriteAuthority(
+				{ authUserId: user.id, unitId: params.unitId, authorization },
+				async (tx) =>
+					recordChapterReading(tx, {
+						canReadUnpublished: (
+							await authorization.unit.decideInTransaction(tx, params.unitId, "unit.update")
+						).allowed,
+						nodeId: params.nodeId,
+						now: new Date(),
+						authUserId: user.id,
+						unitId: params.unitId,
+					}),
 			);
 			return {
 				completed: true as const,
@@ -559,6 +677,7 @@ export default new Elysia({ prefix: "/progress" })
 			params: ProgressUnitParams,
 			body: UpsertProgressBody,
 			response: {
+				[StatusCodes.FORBIDDEN]: ProgressForbiddenResponse,
 				[StatusCodes.OK]: ProgressResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
@@ -568,32 +687,33 @@ export default new Elysia({ prefix: "/progress" })
 			detail: { summary: "Create or replace progress", tags: ["Progress"] },
 		},
 		async ({ user, authorization, params, body }) => {
-			await authorization.unit.ensureCanRead(params.unitId);
 			const now = new Date();
-			await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, user.id, params.unitId);
-				await createProgressEntry(tx, user.id, params.unitId, {
-					entryKind: "update",
-					status: body.status,
-					progress: body.progress,
-					totalTimeMs: body.totalTimeMs,
-					lastContentStructureNodeId: body.lastContentStructureNodeId,
-					occurredAt: now,
-					datePrecision: "instant",
-					affectsCurrent: true,
-				});
-				if (body.visibility !== undefined)
-					await tx
-						.update(unitProgress)
-						.set({ visibility: body.visibility, updatedAt: new Date() })
-						.where(
-							and(
-								eq(unitProgress.authUserId, user.id),
-								eq(unitProgress.unitId, params.unitId),
-								isNull(unitProgress.deletedAt),
-							),
-						);
-			});
+			await withProgressWriteAuthority(
+				{ authUserId: user.id, unitId: params.unitId, authorization },
+				async (tx) => {
+					await createProgressEntry(tx, user.id, params.unitId, {
+						entryKind: "update",
+						status: body.status,
+						progress: body.progress,
+						totalTimeMs: body.totalTimeMs,
+						lastContentStructureNodeId: body.lastContentStructureNodeId,
+						occurredAt: now,
+						datePrecision: "instant",
+						affectsCurrent: true,
+					});
+					if (body.visibility !== undefined)
+						await tx
+							.update(unitProgress)
+							.set({ visibility: body.visibility, updatedAt: new Date() })
+							.where(
+								and(
+									eq(unitProgress.authUserId, user.id),
+									eq(unitProgress.unitId, params.unitId),
+									isNull(unitProgress.deletedAt),
+								),
+							);
+				},
+			);
 			return selectProgressSnapshot(user.id, params.unitId);
 		},
 	)
@@ -604,37 +724,39 @@ export default new Elysia({ prefix: "/progress" })
 			params: ProgressUnitParams,
 			body: CompleteProgressBody,
 			response: {
+				[StatusCodes.FORBIDDEN]: ProgressForbiddenResponse,
 				[StatusCodes.OK]: ProgressResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
 			detail: { summary: "Complete current progress", tags: ["Progress"] },
 		},
 		async ({ user, authorization, params, body }) => {
-			await authorization.unit.ensureCanRead(params.unitId);
 			const now = new Date();
-			await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, user.id, params.unitId);
-				await createProgressEntry(tx, user.id, params.unitId, {
-					entryKind: "completion",
-					status: "completed",
-					totalTimeMs: body.totalTimeMs,
-					lastContentStructureNodeId: null,
-					occurredAt: now,
-					datePrecision: "instant",
-					affectsCurrent: true,
-				});
-				if (body.visibility !== undefined)
-					await tx
-						.update(unitProgress)
-						.set({ visibility: body.visibility, updatedAt: new Date() })
-						.where(
-							and(
-								eq(unitProgress.authUserId, user.id),
-								eq(unitProgress.unitId, params.unitId),
-								isNull(unitProgress.deletedAt),
-							),
-						);
-			});
+			await withProgressWriteAuthority(
+				{ authUserId: user.id, unitId: params.unitId, authorization },
+				async (tx) => {
+					await createProgressEntry(tx, user.id, params.unitId, {
+						entryKind: "completion",
+						status: "completed",
+						totalTimeMs: body.totalTimeMs,
+						lastContentStructureNodeId: null,
+						occurredAt: now,
+						datePrecision: "instant",
+						affectsCurrent: true,
+					});
+					if (body.visibility !== undefined)
+						await tx
+							.update(unitProgress)
+							.set({ visibility: body.visibility, updatedAt: new Date() })
+							.where(
+								and(
+									eq(unitProgress.authUserId, user.id),
+									eq(unitProgress.unitId, params.unitId),
+									isNull(unitProgress.deletedAt),
+								),
+							);
+				},
+			);
 			return selectProgressSnapshot(user.id, params.unitId);
 		},
 	)
@@ -643,6 +765,10 @@ export default new Elysia({ prefix: "/progress" })
 		{
 			access: "write:interaction:write",
 			params: ProgressUnitParams,
+			response: {
+				[StatusCodes.FORBIDDEN]: ProgressForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
 			detail: {
 				summary: "Delete progress",
 				tags: ["Progress"],
@@ -650,48 +776,51 @@ export default new Elysia({ prefix: "/progress" })
 			},
 		},
 		async ({ user, authorization, params }) => {
-			await authorization.unit.ensureCanRead(params.unitId);
-			await database.transaction(async (tx) => {
-				await lockUnitProgress(tx, user.id, params.unitId);
-				const now = new Date();
-				const entries = await tx
-					.select({ id: unitProgressEntry.id })
-					.from(unitProgressEntry)
-					.where(
-						and(
-							eq(unitProgressEntry.authUserId, user.id),
-							eq(unitProgressEntry.unitId, params.unitId),
-							isNull(unitProgressEntry.deletedAt),
-						),
-					)
-					.for("update");
-				if (entries.length)
-					await tx.delete(postProgressEntry).where(
-						inArray(
-							postProgressEntry.progressEntryId,
-							entries.map(({ id }) => id),
-						),
-					);
-				await tx
-					.update(unitProgress)
-					.set({
-						currentEntryId: null,
-						currentBasis: null,
-						deletedAt: now,
-						lastSeenAt: now,
-					})
-					.where(and(eq(unitProgress.authUserId, user.id), eq(unitProgress.unitId, params.unitId)));
-				await tx
-					.update(unitProgressEntry)
-					.set({ deletedAt: now, updatedAt: now })
-					.where(
-						and(
-							eq(unitProgressEntry.authUserId, user.id),
-							eq(unitProgressEntry.unitId, params.unitId),
-							isNull(unitProgressEntry.deletedAt),
-						),
-					);
-			});
+			await withProgressWriteAuthority(
+				{ authUserId: user.id, unitId: params.unitId, authorization },
+				async (tx) => {
+					const now = new Date();
+					const entries = await tx
+						.select({ id: unitProgressEntry.id })
+						.from(unitProgressEntry)
+						.where(
+							and(
+								eq(unitProgressEntry.authUserId, user.id),
+								eq(unitProgressEntry.unitId, params.unitId),
+								isNull(unitProgressEntry.deletedAt),
+							),
+						)
+						.for("update");
+					if (entries.length)
+						await tx.delete(postProgressEntry).where(
+							inArray(
+								postProgressEntry.progressEntryId,
+								entries.map(({ id }) => id),
+							),
+						);
+					await tx
+						.update(unitProgress)
+						.set({
+							currentEntryId: null,
+							currentBasis: null,
+							deletedAt: now,
+							lastSeenAt: now,
+						})
+						.where(
+							and(eq(unitProgress.authUserId, user.id), eq(unitProgress.unitId, params.unitId)),
+						);
+					await tx
+						.update(unitProgressEntry)
+						.set({ deletedAt: now, updatedAt: now })
+						.where(
+							and(
+								eq(unitProgressEntry.authUserId, user.id),
+								eq(unitProgressEntry.unitId, params.unitId),
+								isNull(unitProgressEntry.deletedAt),
+							),
+						);
+				},
+			);
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 	)
@@ -701,6 +830,7 @@ export default new Elysia({ prefix: "/progress" })
 			access: "write:interaction:write",
 			params: ProgressNodeParams,
 			response: {
+				[StatusCodes.FORBIDDEN]: ProgressForbiddenResponse,
 				[StatusCodes.OK]: CompletionStateResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
@@ -709,30 +839,36 @@ export default new Elysia({ prefix: "/progress" })
 			},
 			detail: { summary: "Complete Content Structure node", tags: ["Progress"] },
 		},
-		async ({ user, authorization, params }) => {
-			await authorization.unit.ensureCanRead(params.unitId);
-			const nodeKind = await findCompletableContentStructureNode(params.unitId, params.nodeId);
-			if (!nodeKind) throw new ContentStructureNodeNotFound();
-			if (nodeKind === "media") {
-				const canReadUnpublished = await authorization.unit.canUpdate(params.unitId);
-				await database.transaction((tx) =>
-					recordMediaNodeCompletion(tx, {
-						canReadUnpublished,
-						completed: true,
-						nodeId: params.nodeId,
-						now: new Date(),
-						authUserId: user.id,
-						unitId: params.unitId,
-					}),
-				);
-				return { completed: true };
-			}
-			await database
-				.insert(contentStructureNodeProgress)
-				.values({ authUserId: user.id, nodeId: params.nodeId })
-				.onConflictDoNothing();
-			return { completed: true };
-		},
+		async ({ user, authorization, params }) =>
+			withProgressWriteAuthority(
+				{ authUserId: user.id, unitId: params.unitId, authorization },
+				async (tx) => {
+					const nodeKind = await findCompletableContentStructureNode(
+						tx,
+						params.unitId,
+						params.nodeId,
+					);
+					if (!nodeKind) throw new ContentStructureNodeNotFound();
+					if (nodeKind === "media")
+						await recordMediaNodeCompletion(tx, {
+							canReadUnpublished: (
+								await authorization.unit.decideInTransaction(tx, params.unitId, "unit.update")
+							).allowed,
+							completed: true,
+							nodeId: params.nodeId,
+							now: new Date(),
+							authUserId: user.id,
+							unitId: params.unitId,
+						});
+					else {
+						await tx
+							.insert(contentStructureNodeProgress)
+							.values({ authUserId: user.id, nodeId: params.nodeId })
+							.onConflictDoNothing();
+					}
+					return { completed: true };
+				},
+			),
 	)
 	.delete(
 		"/:unitId/nodes/:nodeId",
@@ -740,6 +876,7 @@ export default new Elysia({ prefix: "/progress" })
 			access: "write:interaction:write",
 			params: ProgressNodeParams,
 			response: {
+				[StatusCodes.FORBIDDEN]: ProgressForbiddenResponse,
 				[StatusCodes.OK]: CompletionStateResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
@@ -748,32 +885,38 @@ export default new Elysia({ prefix: "/progress" })
 			},
 			detail: { summary: "Uncomplete Content Structure node", tags: ["Progress"] },
 		},
-		async ({ user, authorization, params }) => {
-			await authorization.unit.ensureCanRead(params.unitId);
-			const nodeKind = await findCompletableContentStructureNode(params.unitId, params.nodeId);
-			if (!nodeKind) throw new ContentStructureNodeNotFound();
-			if (nodeKind === "media") {
-				const canReadUnpublished = await authorization.unit.canUpdate(params.unitId);
-				await database.transaction((tx) =>
-					recordMediaNodeCompletion(tx, {
-						canReadUnpublished,
-						completed: false,
-						nodeId: params.nodeId,
-						now: new Date(),
-						authUserId: user.id,
-						unitId: params.unitId,
-					}),
-				);
-				return { completed: false };
-			}
-			await database
-				.delete(contentStructureNodeProgress)
-				.where(
-					and(
-						eq(contentStructureNodeProgress.authUserId, user.id),
-						eq(contentStructureNodeProgress.nodeId, params.nodeId),
-					),
-				);
-			return { completed: false };
-		},
+		async ({ user, authorization, params }) =>
+			withProgressWriteAuthority(
+				{ authUserId: user.id, unitId: params.unitId, authorization },
+				async (tx) => {
+					const nodeKind = await findCompletableContentStructureNode(
+						tx,
+						params.unitId,
+						params.nodeId,
+					);
+					if (!nodeKind) throw new ContentStructureNodeNotFound();
+					if (nodeKind === "media")
+						await recordMediaNodeCompletion(tx, {
+							canReadUnpublished: (
+								await authorization.unit.decideInTransaction(tx, params.unitId, "unit.update")
+							).allowed,
+							completed: false,
+							nodeId: params.nodeId,
+							now: new Date(),
+							authUserId: user.id,
+							unitId: params.unitId,
+						});
+					else {
+						await tx
+							.delete(contentStructureNodeProgress)
+							.where(
+								and(
+									eq(contentStructureNodeProgress.authUserId, user.id),
+									eq(contentStructureNodeProgress.nodeId, params.nodeId),
+								),
+							);
+					}
+					return { completed: false };
+				},
+			),
 	);

@@ -1,0 +1,48 @@
+{
+  "baseCommit": "0b1b0f40460973853dd8e5d2d870009117f7ecc5",
+  "commands": {
+    "checks": 24,
+    "orderedRaces": 4,
+    "sourceDigests": {
+      "services/main/scripts/check-progress-command-authority.ts": "5d97423405e23b4c1fafbfd1dafa2d345609a25ac74824889c39faffe50b7ea9",
+      "services/main/src/services/api/progress/authority.ts": "00e04600057323d3714b1c38c9b8d147eba1000f69d5f197f88fadf98f4b7e66",
+      "services/main/src/services/database/migrations/atlas.sum": "cdbfad41cb05a6890c2e2cf0fe9993b55afcf0aa32d2281f90a1e8a624ec8de6"
+    },
+    "transactionCasesRolledBack": true,
+    "raceFixturesRetained": true
+  },
+  "http": {
+    "checks": 14,
+    "httpChecks": 18,
+    "orderedAuthorityWaits": 2,
+    "sourceDigests": {
+      "services/main/scripts/check-progress-authority.ts": "44ece75e833fea40a91a7cb3c884b8c1f22c32624a062243862926301b3dbc6e",
+      "services/main/src/services/api/progress/authority.ts": "00e04600057323d3714b1c38c9b8d147eba1000f69d5f197f88fadf98f4b7e66",
+      "services/main/src/services/api/progress/index.ts": "9f734e3ff1610210eded8176e8866ba6595a29806aed7ce7f3ad660cab34f6a9",
+      "services/main/src/services/database/migrations/atlas.sum": "cdbfad41cb05a6890c2e2cf0fe9993b55afcf0aa32d2281f90a1e8a624ec8de6"
+    },
+    "committedFixtures": true
+  },
+  "beforeRepair": {
+    "observedJournalWait": true,
+    "selfRevisionChangedBeforeWrite": true,
+    "httpStatus": 200,
+    "snapshotsCreated": 1
+  },
+  "scope": "current private Auth/Self and parent-read authority; versioned child/manifest and capacity target remains open",
+  "verification": {
+    "backendTests": {
+      "files": 332,
+      "tests": 1789
+    },
+    "focusedTestsAfterFinalBoundaryChecks": {
+      "files": 4,
+      "tests": 22
+    },
+    "backendTypeScript": "passed",
+    "sdkTypeScript": "3 passed",
+    "webTypeScript": "passed",
+    "openApiGeneration": "passed",
+    "schemaChange": false
+  }
+}

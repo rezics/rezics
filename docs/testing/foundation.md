@@ -685,3 +685,39 @@ finds no schema drift. The final creator-path fixture was rerun on that installe
 layout. The authority regression passes 39 assertions/11 requests/five races.
 Backend tests pass 332 files/1,789 tests, with 23 focused tests after creator-path
 specialization; backend TypeScript and unchanged OpenAPI/generated contracts pass.
+
+## Progress parent authority
+
+`task services-main:db:progress-authority:check` runs the
+[native command fixture](../../services/main/scripts/check-progress-command-authority.ts)
+and [stateful HTTP fixture](../../services/main/scripts/check-progress-authority.ts)
+serially on an installed disposable Atlas target. The
+[pinned evidence](database/progress-authority-evidence.json) contains 24 command
+assertions, four observed command races, 14 HTTP assertions and 18 HTTP requests.
+
+Native cases cover verified-email eligibility, account/Self substitution, stale
+Self revisions, private ownership with an organization selected, suspended/closed
+accounts and rule-backed ban/suspension/silence policy. Exact blockers exercise
+Self revision changes and private-parent transitions before admission, a selected
+native catalog read grant expiring during a journal wait, and a scheduled ban
+starting during that wait. Rejected writes create neither journal entries nor
+snapshots. Transaction cases roll back; race actors remain only in the disposable
+database.
+
+The original HTTP probe changed Self revision while an admitted request waited
+and still received `200` with a new snapshot. The corrected flow observes the
+request waiting on its private journal and then the revision change waiting on
+the request's Self lock. The admitted write commits before the change. Subsequent
+requests use returned journal entry IDs through create/edit/current/delete,
+completion, private visibility, whole-journal removal and restoration; anonymous
+and invalid participation selections are rejected.
+
+All mutation handlers enter the [owning boundary](../../services/main/src/services/api/progress/README.md).
+The fixtures qualify current Auth/Self and parent read authority, not exact
+content/structure versions, every child disclosure path, large journals or the
+complete creation/reading module. Existing journals and underlying reference
+layout remain separate target work; no schema migration is required here.
+
+Backend tests pass 332 files/1,789 tests. The final boundary also passes 22 focused
+tests and backend TypeScript. OpenAPI and all three SDKs were regenerated; all
+three SDK TypeScript checks and web TypeScript pass.

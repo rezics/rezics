@@ -101394,6 +101394,31 @@ export type PutApiProgressByUnitIdStatus200 = {
 
 export type PutApiProgressByUnitIdStatus400 = MalformedRequestBody;
 
+export const PutApiProgressByUnitIdStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type PutApiProgressByUnitIdStatus403ErrorCodeEnum =
+	(typeof PutApiProgressByUnitIdStatus403ErrorCodeEnum)[keyof typeof PutApiProgressByUnitIdStatus403ErrorCodeEnum];
+
+export type PutApiProgressByUnitIdStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: PutApiProgressByUnitIdStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export const PutApiProgressByUnitIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
@@ -101489,6 +101514,7 @@ export type PutApiProgressByUnitIdOptions = {
 export type PutApiProgressByUnitIdResponses = {
 	"200": PutApiProgressByUnitIdStatus200;
 	"400": PutApiProgressByUnitIdStatus400;
+	"403": PutApiProgressByUnitIdStatus403;
 	"404": PutApiProgressByUnitIdStatus404;
 	"422": PutApiProgressByUnitIdStatus422;
 	"429": PutApiProgressByUnitIdStatus429;
@@ -101501,6 +101527,7 @@ export type PutApiProgressByUnitIdResponses = {
 export type PutApiProgressByUnitIdResponse =
 	| PutApiProgressByUnitIdStatus200
 	| PutApiProgressByUnitIdStatus400
+	| PutApiProgressByUnitIdStatus403
 	| PutApiProgressByUnitIdStatus404
 	| PutApiProgressByUnitIdStatus422
 	| PutApiProgressByUnitIdStatus429
@@ -101515,7 +101542,43 @@ export type DeleteApiProgressByUnitIdPath = {
 	unitId: string;
 };
 
-export type DeleteApiProgressByUnitIdStatus204 = void;
+export const DeleteApiProgressByUnitIdStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type DeleteApiProgressByUnitIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiProgressByUnitIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiProgressByUnitIdStatus403ErrorCodeEnum];
+
+export type DeleteApiProgressByUnitIdStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: DeleteApiProgressByUnitIdStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export type DeleteApiProgressByUnitIdStatus404 = {
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
 
 export type DeleteApiProgressByUnitIdStatus422 = ValidationError;
 
@@ -101546,7 +101609,8 @@ export type DeleteApiProgressByUnitIdOptions = {
 };
 
 export type DeleteApiProgressByUnitIdResponses = {
-	"204": DeleteApiProgressByUnitIdStatus204;
+	"403": DeleteApiProgressByUnitIdStatus403;
+	"404": DeleteApiProgressByUnitIdStatus404;
 	"422": DeleteApiProgressByUnitIdStatus422;
 	"429": DeleteApiProgressByUnitIdStatus429;
 	"500": DeleteApiProgressByUnitIdStatus500;
@@ -101556,7 +101620,8 @@ export type DeleteApiProgressByUnitIdResponses = {
  * @description Union of all possible responses
  */
 export type DeleteApiProgressByUnitIdResponse =
-	| DeleteApiProgressByUnitIdStatus204
+	| DeleteApiProgressByUnitIdStatus403
+	| DeleteApiProgressByUnitIdStatus404
 	| DeleteApiProgressByUnitIdStatus422
 	| DeleteApiProgressByUnitIdStatus429
 	| DeleteApiProgressByUnitIdStatus500;
@@ -101923,6 +101988,31 @@ export type PostApiProgressByUnitIdEntriesStatus200 = {
 
 export type PostApiProgressByUnitIdEntriesStatus400 = MalformedRequestBody;
 
+export const PostApiProgressByUnitIdEntriesStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type PostApiProgressByUnitIdEntriesStatus403ErrorCodeEnum =
+	(typeof PostApiProgressByUnitIdEntriesStatus403ErrorCodeEnum)[keyof typeof PostApiProgressByUnitIdEntriesStatus403ErrorCodeEnum];
+
+export type PostApiProgressByUnitIdEntriesStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: PostApiProgressByUnitIdEntriesStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export const PostApiProgressByUnitIdEntriesStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
@@ -102056,6 +102146,7 @@ export type PostApiProgressByUnitIdEntriesOptions = {
 export type PostApiProgressByUnitIdEntriesResponses = {
 	"200": PostApiProgressByUnitIdEntriesStatus200;
 	"400": PostApiProgressByUnitIdEntriesStatus400;
+	"403": PostApiProgressByUnitIdEntriesStatus403;
 	"404": PostApiProgressByUnitIdEntriesStatus404;
 	"422": PostApiProgressByUnitIdEntriesStatus422;
 	"429": PostApiProgressByUnitIdEntriesStatus429;
@@ -102068,6 +102159,7 @@ export type PostApiProgressByUnitIdEntriesResponses = {
 export type PostApiProgressByUnitIdEntriesResponse =
 	| PostApiProgressByUnitIdEntriesStatus200
 	| PostApiProgressByUnitIdEntriesStatus400
+	| PostApiProgressByUnitIdEntriesStatus403
 	| PostApiProgressByUnitIdEntriesStatus404
 	| PostApiProgressByUnitIdEntriesStatus422
 	| PostApiProgressByUnitIdEntriesStatus429
@@ -102209,6 +102301,31 @@ export type PutApiProgressByUnitIdEntriesByEntryIdStatus200 = {
 
 export type PutApiProgressByUnitIdEntriesByEntryIdStatus400 = MalformedRequestBody;
 
+export const PutApiProgressByUnitIdEntriesByEntryIdStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type PutApiProgressByUnitIdEntriesByEntryIdStatus403ErrorCodeEnum =
+	(typeof PutApiProgressByUnitIdEntriesByEntryIdStatus403ErrorCodeEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdStatus403ErrorCodeEnum];
+
+export type PutApiProgressByUnitIdEntriesByEntryIdStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: PutApiProgressByUnitIdEntriesByEntryIdStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export const PutApiProgressByUnitIdEntriesByEntryIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ProgressEntryNotFound: "ProgressEntryNotFound",
@@ -102343,6 +102460,7 @@ export type PutApiProgressByUnitIdEntriesByEntryIdOptions = {
 export type PutApiProgressByUnitIdEntriesByEntryIdResponses = {
 	"200": PutApiProgressByUnitIdEntriesByEntryIdStatus200;
 	"400": PutApiProgressByUnitIdEntriesByEntryIdStatus400;
+	"403": PutApiProgressByUnitIdEntriesByEntryIdStatus403;
 	"404": PutApiProgressByUnitIdEntriesByEntryIdStatus404;
 	"422": PutApiProgressByUnitIdEntriesByEntryIdStatus422;
 	"429": PutApiProgressByUnitIdEntriesByEntryIdStatus429;
@@ -102355,6 +102473,7 @@ export type PutApiProgressByUnitIdEntriesByEntryIdResponses = {
 export type PutApiProgressByUnitIdEntriesByEntryIdResponse =
 	| PutApiProgressByUnitIdEntriesByEntryIdStatus200
 	| PutApiProgressByUnitIdEntriesByEntryIdStatus400
+	| PutApiProgressByUnitIdEntriesByEntryIdStatus403
 	| PutApiProgressByUnitIdEntriesByEntryIdStatus404
 	| PutApiProgressByUnitIdEntriesByEntryIdStatus422
 	| PutApiProgressByUnitIdEntriesByEntryIdStatus429
@@ -102373,6 +102492,31 @@ export type DeleteApiProgressByUnitIdEntriesByEntryIdPath = {
 	 * @type string
 	 */
 	entryId: string;
+};
+
+export const DeleteApiProgressByUnitIdEntriesByEntryIdStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type DeleteApiProgressByUnitIdEntriesByEntryIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiProgressByUnitIdEntriesByEntryIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiProgressByUnitIdEntriesByEntryIdStatus403ErrorCodeEnum];
+
+export type DeleteApiProgressByUnitIdEntriesByEntryIdStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: DeleteApiProgressByUnitIdEntriesByEntryIdStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
 };
 
 export const DeleteApiProgressByUnitIdEntriesByEntryIdStatus404ErrorCodeEnum = {
@@ -102425,6 +102569,7 @@ export type DeleteApiProgressByUnitIdEntriesByEntryIdOptions = {
 };
 
 export type DeleteApiProgressByUnitIdEntriesByEntryIdResponses = {
+	"403": DeleteApiProgressByUnitIdEntriesByEntryIdStatus403;
 	"404": DeleteApiProgressByUnitIdEntriesByEntryIdStatus404;
 	"422": DeleteApiProgressByUnitIdEntriesByEntryIdStatus422;
 	"429": DeleteApiProgressByUnitIdEntriesByEntryIdStatus429;
@@ -102435,6 +102580,7 @@ export type DeleteApiProgressByUnitIdEntriesByEntryIdResponses = {
  * @description Union of all possible responses
  */
 export type DeleteApiProgressByUnitIdEntriesByEntryIdResponse =
+	| DeleteApiProgressByUnitIdEntriesByEntryIdStatus403
 	| DeleteApiProgressByUnitIdEntriesByEntryIdStatus404
 	| DeleteApiProgressByUnitIdEntriesByEntryIdStatus422
 	| DeleteApiProgressByUnitIdEntriesByEntryIdStatus429
@@ -102453,6 +102599,31 @@ export type PutApiProgressByUnitIdEntriesByEntryIdCurrentPath = {
 	 * @type string
 	 */
 	entryId: string;
+};
+
+export const PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus403ErrorCodeEnum =
+	(typeof PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus403ErrorCodeEnum)[keyof typeof PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus403ErrorCodeEnum];
+
+export type PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
 };
 
 export const PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404ErrorCodeEnum = {
@@ -102505,6 +102676,7 @@ export type PutApiProgressByUnitIdEntriesByEntryIdCurrentOptions = {
 };
 
 export type PutApiProgressByUnitIdEntriesByEntryIdCurrentResponses = {
+	"403": PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus403;
 	"404": PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404;
 	"422": PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422;
 	"429": PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429;
@@ -102515,6 +102687,7 @@ export type PutApiProgressByUnitIdEntriesByEntryIdCurrentResponses = {
  * @description Union of all possible responses
  */
 export type PutApiProgressByUnitIdEntriesByEntryIdCurrentResponse =
+	| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus403
 	| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus404
 	| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus422
 	| PutApiProgressByUnitIdEntriesByEntryIdCurrentStatus429
@@ -102706,6 +102879,31 @@ export type PostApiProgressByUnitIdNodesByNodeIdReadStatus200 = {
 	};
 };
 
+export const PostApiProgressByUnitIdNodesByNodeIdReadStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type PostApiProgressByUnitIdNodesByNodeIdReadStatus403ErrorCodeEnum =
+	(typeof PostApiProgressByUnitIdNodesByNodeIdReadStatus403ErrorCodeEnum)[keyof typeof PostApiProgressByUnitIdNodesByNodeIdReadStatus403ErrorCodeEnum];
+
+export type PostApiProgressByUnitIdNodesByNodeIdReadStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: PostApiProgressByUnitIdNodesByNodeIdReadStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export const PostApiProgressByUnitIdNodesByNodeIdReadStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
@@ -102757,6 +102955,7 @@ export type PostApiProgressByUnitIdNodesByNodeIdReadOptions = {
 
 export type PostApiProgressByUnitIdNodesByNodeIdReadResponses = {
 	"200": PostApiProgressByUnitIdNodesByNodeIdReadStatus200;
+	"403": PostApiProgressByUnitIdNodesByNodeIdReadStatus403;
 	"404": PostApiProgressByUnitIdNodesByNodeIdReadStatus404;
 	"422": PostApiProgressByUnitIdNodesByNodeIdReadStatus422;
 	"429": PostApiProgressByUnitIdNodesByNodeIdReadStatus429;
@@ -102768,6 +102967,7 @@ export type PostApiProgressByUnitIdNodesByNodeIdReadResponses = {
  */
 export type PostApiProgressByUnitIdNodesByNodeIdReadResponse =
 	| PostApiProgressByUnitIdNodesByNodeIdReadStatus200
+	| PostApiProgressByUnitIdNodesByNodeIdReadStatus403
 	| PostApiProgressByUnitIdNodesByNodeIdReadStatus404
 	| PostApiProgressByUnitIdNodesByNodeIdReadStatus422
 	| PostApiProgressByUnitIdNodesByNodeIdReadStatus429
@@ -102866,6 +103066,31 @@ export type PostApiProgressByUnitIdCompleteStatus200 = {
 
 export type PostApiProgressByUnitIdCompleteStatus400 = MalformedRequestBody;
 
+export const PostApiProgressByUnitIdCompleteStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type PostApiProgressByUnitIdCompleteStatus403ErrorCodeEnum =
+	(typeof PostApiProgressByUnitIdCompleteStatus403ErrorCodeEnum)[keyof typeof PostApiProgressByUnitIdCompleteStatus403ErrorCodeEnum];
+
+export type PostApiProgressByUnitIdCompleteStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: PostApiProgressByUnitIdCompleteStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type PostApiProgressByUnitIdCompleteStatus404 = {
 	error: {
 		/**
@@ -102929,6 +103154,7 @@ export type PostApiProgressByUnitIdCompleteOptions = {
 export type PostApiProgressByUnitIdCompleteResponses = {
 	"200": PostApiProgressByUnitIdCompleteStatus200;
 	"400": PostApiProgressByUnitIdCompleteStatus400;
+	"403": PostApiProgressByUnitIdCompleteStatus403;
 	"404": PostApiProgressByUnitIdCompleteStatus404;
 	"422": PostApiProgressByUnitIdCompleteStatus422;
 	"429": PostApiProgressByUnitIdCompleteStatus429;
@@ -102941,6 +103167,7 @@ export type PostApiProgressByUnitIdCompleteResponses = {
 export type PostApiProgressByUnitIdCompleteResponse =
 	| PostApiProgressByUnitIdCompleteStatus200
 	| PostApiProgressByUnitIdCompleteStatus400
+	| PostApiProgressByUnitIdCompleteStatus403
 	| PostApiProgressByUnitIdCompleteStatus404
 	| PostApiProgressByUnitIdCompleteStatus422
 	| PostApiProgressByUnitIdCompleteStatus429
@@ -102963,6 +103190,31 @@ export type PutApiProgressByUnitIdNodesByNodeIdPath = {
 
 export type PutApiProgressByUnitIdNodesByNodeIdStatus200 = {
 	completed: boolean;
+};
+
+export const PutApiProgressByUnitIdNodesByNodeIdStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type PutApiProgressByUnitIdNodesByNodeIdStatus403ErrorCodeEnum =
+	(typeof PutApiProgressByUnitIdNodesByNodeIdStatus403ErrorCodeEnum)[keyof typeof PutApiProgressByUnitIdNodesByNodeIdStatus403ErrorCodeEnum];
+
+export type PutApiProgressByUnitIdNodesByNodeIdStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: PutApiProgressByUnitIdNodesByNodeIdStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
 };
 
 export const PutApiProgressByUnitIdNodesByNodeIdStatus404ErrorCodeEnum = {
@@ -103016,6 +103268,7 @@ export type PutApiProgressByUnitIdNodesByNodeIdOptions = {
 
 export type PutApiProgressByUnitIdNodesByNodeIdResponses = {
 	"200": PutApiProgressByUnitIdNodesByNodeIdStatus200;
+	"403": PutApiProgressByUnitIdNodesByNodeIdStatus403;
 	"404": PutApiProgressByUnitIdNodesByNodeIdStatus404;
 	"422": PutApiProgressByUnitIdNodesByNodeIdStatus422;
 	"429": PutApiProgressByUnitIdNodesByNodeIdStatus429;
@@ -103027,6 +103280,7 @@ export type PutApiProgressByUnitIdNodesByNodeIdResponses = {
  */
 export type PutApiProgressByUnitIdNodesByNodeIdResponse =
 	| PutApiProgressByUnitIdNodesByNodeIdStatus200
+	| PutApiProgressByUnitIdNodesByNodeIdStatus403
 	| PutApiProgressByUnitIdNodesByNodeIdStatus404
 	| PutApiProgressByUnitIdNodesByNodeIdStatus422
 	| PutApiProgressByUnitIdNodesByNodeIdStatus429
@@ -103049,6 +103303,31 @@ export type DeleteApiProgressByUnitIdNodesByNodeIdPath = {
 
 export type DeleteApiProgressByUnitIdNodesByNodeIdStatus200 = {
 	completed: boolean;
+};
+
+export const DeleteApiProgressByUnitIdNodesByNodeIdStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type DeleteApiProgressByUnitIdNodesByNodeIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiProgressByUnitIdNodesByNodeIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiProgressByUnitIdNodesByNodeIdStatus403ErrorCodeEnum];
+
+export type DeleteApiProgressByUnitIdNodesByNodeIdStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: DeleteApiProgressByUnitIdNodesByNodeIdStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
 };
 
 export const DeleteApiProgressByUnitIdNodesByNodeIdStatus404ErrorCodeEnum = {
@@ -103102,6 +103381,7 @@ export type DeleteApiProgressByUnitIdNodesByNodeIdOptions = {
 
 export type DeleteApiProgressByUnitIdNodesByNodeIdResponses = {
 	"200": DeleteApiProgressByUnitIdNodesByNodeIdStatus200;
+	"403": DeleteApiProgressByUnitIdNodesByNodeIdStatus403;
 	"404": DeleteApiProgressByUnitIdNodesByNodeIdStatus404;
 	"422": DeleteApiProgressByUnitIdNodesByNodeIdStatus422;
 	"429": DeleteApiProgressByUnitIdNodesByNodeIdStatus429;
@@ -103113,6 +103393,7 @@ export type DeleteApiProgressByUnitIdNodesByNodeIdResponses = {
  */
 export type DeleteApiProgressByUnitIdNodesByNodeIdResponse =
 	| DeleteApiProgressByUnitIdNodesByNodeIdStatus200
+	| DeleteApiProgressByUnitIdNodesByNodeIdStatus403
 	| DeleteApiProgressByUnitIdNodesByNodeIdStatus404
 	| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
 	| DeleteApiProgressByUnitIdNodesByNodeIdStatus429

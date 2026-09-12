@@ -9,6 +9,7 @@ Dependencies: M02-M04. Owners: [Book/creation tests](../../testing/book-and-crea
 - Represent source works/crossovers, fandom/grouping, character appearance, contextual pairings, translation/adaptation/inspiration and series without AO3-specific native tables.
 - Test co-creation, pseudonyms, anonymous presentation, ownership separation, gifts and creative collections/events. Privacy/withdrawal choices need explicit retention semantics.
 - Preserve rating, warning, nondisclosure and unknown states with search, spoilers and exact progress.
+- Replace whole-journal aggregation/deletion work with incremental statistics and bounded deletion; qualify child/manifest disclosure and revocation races independently of the parent authority boundary.
 - Build stateful author/reader APIs and export after native commands; frontend stays behind G4.
 
 ## Acceptance
