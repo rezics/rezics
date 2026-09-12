@@ -129,6 +129,11 @@ tasks:
         cmds:
             - yarn exec tsx scripts/check-performance-sql-replay.ts
 
+    performance:connection-loss:check:
+        desc: Verify failed-run reporting after terminating the exact idle harness backend in a retained performance dataset.
+        cmds:
+            - yarn exec tsx scripts/check-performance-connection-loss.ts {{.CLI_ARGS}}
+
     performance:check:
         desc: Check performance harness integrity without creating data or starting servers.
         dir: ../..

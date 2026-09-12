@@ -233,7 +233,14 @@ try {
 	if (!port) throw new Error("Database was not bound to loopback");
 	const adminUrl = `postgres://postgres:performance-only@127.0.0.1:${port}/rezics_performance`;
 	for (let attempt = 0; attempt < 120; attempt++) {
-		const probe = new Client({ connectionString: adminUrl, connectionTimeoutMillis: 1000 });
+		const probe = new Client({
+			connectionString: adminUrl,
+			connectionTimeoutMillis: 1000,
+			application_name: `rezics-performance:${runId}:admin`,
+		});
+		probe.on("error", (error) => {
+			if (admin === probe) report.databaseConnectionError = error.message;
+		});
 		try {
 			await probe.connect();
 			admin = probe;
@@ -291,7 +298,10 @@ try {
 			],
 			{ cwd: repositoryRoot, windowsHide: true, maxBuffer: 16 * 1024 * 1024, timeout: 900_000 },
 		);
-		admin = new Client({ connectionString: adminUrl });
+		admin = new Client({
+			connectionString: adminUrl,
+			application_name: `rezics-performance:${runId}:admin`,
+		});
 		admin.on("error", (error) => {
 			report.databaseConnectionError = error.message;
 		});
@@ -304,9 +314,6 @@ try {
 			prepareDefinitions(adminUrl),
 		);
 	}
-	admin.on("error", (error) => {
-		report.databaseConnectionError = error.message;
-	});
 	const receipts = await admin.query<{
 		version: string;
 		applied: number;
@@ -504,9 +511,15 @@ try {
 	if (!captured.length) throw new Error("No production SQL was captured");
 	const plans: Record<string, unknown>[] = [];
 	const unique = new Map(captured.map((query) => [JSON.stringify(query), query]));
-	const reader = new Client({ connectionString: appUrl });
-	await reader.connect();
+	const reader = new Client({
+		connectionString: appUrl,
+		application_name: `rezics-performance:${runId}:reader`,
+	});
+	reader.on("error", (error) => {
+		report.databaseConnectionError = error.message;
+	});
 	try {
+		await reader.connect();
 		for (const query of unique.values()) {
 			await reader.query("begin read only");
 			try {
@@ -532,9 +545,9 @@ try {
 			}
 		}
 	} finally {
-		await reader.end();
+		await reader.end().catch(() => {});
+		await writeFile(resolve(output, "plans.json"), JSON.stringify(plans, null, 2));
 	}
-	await writeFile(resolve(output, "plans.json"), JSON.stringify(plans, null, 2));
 	report.planCoverage = {
 		captured: captured.length,
 		distinct: unique.size,
@@ -546,7 +559,14 @@ try {
 		admin = undefined;
 		await exec("docker", ["restart", container], { windowsHide: true });
 		for (let attempt = 0; attempt < 120; attempt++) {
-			const probe = new Client({ connectionString: adminUrl, connectionTimeoutMillis: 1000 });
+			const probe = new Client({
+				connectionString: adminUrl,
+				connectionTimeoutMillis: 1000,
+				application_name: `rezics-performance:${runId}:admin`,
+			});
+			probe.on("error", (error) => {
+				if (admin === probe) report.databaseConnectionError = error.message;
+			});
 			try {
 				await probe.connect();
 				admin = probe;
@@ -557,9 +577,6 @@ try {
 			}
 		}
 		if (!admin) throw new Error("Database did not recover after the cache experiment restart");
-		admin.on("error", (error) => {
-			report.databaseConnectionError = error.message;
-		});
 		if (
 			!(
 				await admin.query<{ locked: boolean }>(
@@ -620,6 +637,8 @@ try {
 	await stopApi();
 	if (config.mode === "load" && !loadError)
 		report.pgbench = await runSqlLoad(container, output, [...unique.values()]);
+	if (report.databaseConnectionError)
+		throw new Error(`Performance database connection failed: ${report.databaseConnectionError}`);
 	report.status = loadError || plans.some((plan) => plan.error) ? "failed" : "passed";
 	await persist();
 	if (loadError) throw new Error("k6 thresholds failed; see k6-summary.json", { cause: loadError });
@@ -642,7 +661,7 @@ try {
 	process.exitCode = 1;
 } finally {
 	await stopApi();
-	await admin?.end();
+	await admin?.end().catch(() => {});
 	if (created && !config.keep) {
 		const inspection = await exec(
 			"docker",

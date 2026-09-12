@@ -169,3 +169,22 @@ a short timeout and an application name, then verifies that a later read inherit
 neither. Collapsing those statements into one replay transaction caused false
 facet timeouts. Application/Search deadlines remain unchanged and are qualified
 by the actual HTTP workload; the SQL diagnostic is a separate comparison.
+
+
+## Database connection loss
+
+All harness PostgreSQL clients register error handlers before connecting. An idle
+connection loss is recorded as an experiment failure, including during initial
+reuse and cache-restart setup. Failed EXPLAIN work retains its partial plan file;
+connection cleanup does not suppress the original report. Connection failures do
+not qualify an interrupted workload as passed.
+
+On a retained run-owned dataset, run
+`task services-main:performance:connection-loss:check -- <datasetRunId>` with no
+other harness using that dataset. The fixture launches the actual harness and
+terminates only its uniquely named idle administrator backend. The
+[pinned run](../../../docs/testing/database/performance-connection-loss-evidence.json)
+passes six assertions, verifies a failed report and captured server log, and
+preserves the dataset. This is an intentional connection-loss test, not a native
+engine-crash repair. A host shutdown can still prevent the process from writing
+its final report; interrupted reports must not be counted as acceptance evidence.

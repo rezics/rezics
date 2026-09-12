@@ -1,0 +1,19 @@
+{
+  "runId": "5c7b6a7e27c09256",
+  "datasetId": "21f7f9a59a035ccd",
+  "checks": 6,
+  "exactIdleBackendTerminated": true,
+  "failureReported": true,
+  "nativeLogCaptured": true,
+  "unhandledClientError": false,
+  "datasetPreserved": true,
+  "baseCommit": "ab53f94aece1403933a6e0dff8be573438af3831",
+  "sourceDigests": {
+    "services/main/scripts/performance/run.ts": "c67f17cfe3275f232f4b019925aad9ed238c7329abb59fc25206b5b75c703ee9",
+    "services/main/scripts/check-performance-connection-loss.ts": "36bad7bb87937bdb710d6bcf182b993a6f881ce1ea86208dea1ab74d21fe83be"
+  },
+  "verification": {
+    "backendTypeScript": "passed",
+    "performanceFrameworkTests": 7
+  }
+}
