@@ -43,12 +43,9 @@ export async function runSqlLoad(
 		const filename = `query-${groupIndex++}.sql`;
 		const statements = group.map(
 			(query, index) =>
-				`PREPARE perf_${index} AS ${query.text.replace(/;\s*$/, "")};\nEXECUTE perf_${index}${query.values.length ? `(${query.values.map(parameterLiteral).join(",")})` : ""};\nDEALLOCATE perf_${index};`,
+				`BEGIN READ ONLY;\nSET LOCAL statement_timeout='10s';\nPREPARE perf_${index} AS ${query.text.replace(/;\s*$/, "")};\nEXECUTE perf_${index}${query.values.length ? `(${query.values.map(parameterLiteral).join(",")})` : ""};\nDEALLOCATE perf_${index};\nCOMMIT;`,
 		);
-		await writeFile(
-			resolve(directory, filename),
-			`BEGIN READ ONLY;\nSET LOCAL statement_timeout='10s';\n${statements.join("\n")}\nCOMMIT;\n`,
-		);
+		await writeFile(resolve(directory, filename), `${statements.join("\n")}\n`);
 		files.push(`/tmp/rezics-pgbench/${filename}`);
 	}
 	await exec("docker", ["exec", container, "mkdir", "-p", "/tmp/rezics-pgbench"], {
@@ -95,6 +92,9 @@ export async function runSqlLoad(
 		durationSeconds: 10,
 		clients: 4,
 		failedTransactions: Number(failed),
-		scope: "SQL-only mixed workload, includes preparation, after API load",
+		scope:
+			"SQL-only mixed workload, includes preparation and per-query transactions, after API load",
+		statementTimeoutMs: 10_000,
+		transactionScope: "one-per-query",
 	};
 }

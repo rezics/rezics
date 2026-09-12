@@ -154,8 +154,18 @@ the current workload are passed to pgbench. Native stdout/stderr is written to
 `task services-main:performance:sql-replay:check` runs a separate scratch PostgreSQL
 container and replays a valid query, a changed division-by-zero query, and another
 valid query through the actual helper. The [pinned run](../../../docs/testing/database/performance-sql-replay-evidence.json)
-passes four assertions: the changed query fails, its native error log survives,
-and a subsequent valid script succeeds. Before the repair, the changed invalid
-query falsely passed because the container still executed the first script.
+passes five assertions: the changed query fails, its native error log survives,
+a subsequent valid script succeeds, and transaction-local settings stay isolated.
+Before the repair, the changed invalid query falsely passed because the container still executed the first script.
 No application schema is installed in this fixture. This qualifies replay input
 and failure capture, not application query latency or corpus capacity.
+
+SQL capture contains read statements, not the API's complete transaction topology.
+Like the EXPLAIN diagnostic, replay gives each captured query its own read-only
+transaction and ten-second statement budget, including preparation and commit cost.
+A captured `set_config(..., true)` therefore cannot impose its timeout or other
+local settings on a later query from a different API transaction. The fixture sets
+a short timeout and an application name, then verifies that a later read inherits
+neither. Collapsing those statements into one replay transaction caused false
+facet timeouts. Application/Search deadlines remain unchanged and are qualified
+by the actual HTTP workload; the SQL diagnostic is a separate comparison.

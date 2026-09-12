@@ -12,7 +12,8 @@ const runId = randomBytes(8).toString("hex"),
 	container = `rezics-perf-${runId}`;
 const output = resolve(repositoryRoot, ".temp/performance-sql-replay", runId);
 await mkdir(output, { recursive: true });
-for (const phase of ["first", "changed", "recovered"]) await mkdir(resolve(output, phase));
+for (const phase of ["first", "changed", "recovered", "settings"])
+	await mkdir(resolve(output, phase));
 let created = false,
 	client: Client | undefined;
 try {
@@ -73,10 +74,28 @@ try {
 		{ caseId: "probe", text: "SELECT $1::integer", values: [2] },
 	]);
 	assert.equal(recovered.failedTransactions, 0);
+	const scoped = await runSqlLoad(container, resolve(output, "settings"), [
+		{
+			caseId: "settings",
+			text: "SELECT set_config('statement_timeout',$1,true),set_config('application_name',$2,true)",
+			values: ["100ms", "isolated-replay-fixture"],
+		},
+		{
+			caseId: "settings",
+			text: "SELECT pg_sleep(0.2), 1 / CASE WHEN current_setting('application_name')=$1 THEN 0 ELSE 1 END",
+			values: ["isolated-replay-fixture"],
+		},
+	]);
+	assert.equal(
+		scoped.failedTransactions,
+		0,
+		"Captured transaction-local settings cannot leak into another diagnostic query",
+	);
 	console.info(
 		JSON.stringify({
 			runId,
-			checks: 4,
+			checks: 5,
+			transactionLocalSettingsIsolated: true,
 			reusedContainerUsesCurrentSql: true,
 			failedNativeLogRetained: true,
 			changedSqlRejected: true,
