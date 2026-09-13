@@ -6,7 +6,7 @@ import { post } from "../database/schema/post";
 import { catalogRoutingControl, catalogUnitLocator } from "../database/schema/catalog-identity";
 import { unitOwnerTable } from "../database/schema/unit-reference-columns";
 
-type Lock = "share" | "update" | "key share";
+type Lock = "share" | "update" | "no key update" | "key share";
 type ReadOptions = { readonly lock?: Lock; readonly includeDeleted?: boolean };
 
 /** Reads one explicitly identified owner row. Metadata is internal; callers must apply the owning authorization policy. */

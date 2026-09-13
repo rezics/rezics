@@ -30,7 +30,7 @@
     "scenarios.tsv": "07738e2923baef54d4e4baebedc79b5b5dc25e2196685b51cd170c40f34c7cda",
     "capacity.json": "00565a116367dbdaee7cbddd4e1e0c8ace7be142546c0b46b436f1a32c8b23d4",
     "capacity.md": "7117a8893f40bcfd09a116d974ad2ef3d06b2e6f7d47d725a80c2f1e54e13f84",
-    "dependency-manifest.json": "e5d128b09060c3b24548baeed80c73b6526ab38ce62d6cb05bbb0125b70d1df7"
+    "dependency-manifest.json": "7083676c987e8044e87cadc985d74c64ecd15b6ae44a4dac48461ef8f2a094cc"
   },
   "artifact_paths": {
     "current-schema-map.tsv": "docs/testing/database/current-schema-map.tsv",
@@ -47,7 +47,7 @@
     "docs/architecture/database/creation.md": "7cd97242eb39b099a445934a6d345edfc4b45206f72a8f4bd626453e1af24cbd",
     "docs/architecture/database/data-dictionary.md": "8047904e622ff6a18c164c6481f169a1c9f300f141977916d7712a8a7764f3f1",
     "docs/architecture/database/relationship-graph.md": "f849ff42ecba6c161cb25c392cfc8ef65c51d5be1eacc718ee6b3aa06d3245ef",
-    "docs/plan/README.md": "e8e45fd04dc5a79946e900d970ab5cf8f6b33c6d117181bb4fe9d6d69fb77a77",
+    "docs/plan/README.md": "e4b37d28e096f449996d20b31399ae9a8121389fd1c0aed09df7f0662682a068",
     "docs/plan/backend-acceptance.md": "13b3b8e23f05cf3d433dd1383a8f1f59f2a5d5586c2ea5413c0caa8ee7059199",
     "docs/plan/frontend.md": "60a94396354064d4de457964276c721e817bc9b7190ccae2678cb3f83284fabc",
     "docs/plan/modules/ai-hub.md": "b95b2996692fcef54d168477b80278214157257762b4fb7839b5918435aa677b",
@@ -70,7 +70,7 @@
     "docs/testing/recommendations.md": "09640bf8c9269bff7cd7ffa341d0f99a76e4ba056d801f4af99204d6d08af15a",
     "docs/testing/relationship-graph.md": "7f3aaa37d76e80a9d2a5e54c9e2fa52102ba5830594121275ebefb278a5e2b91",
     "docs/testing/source-conformance.md": "36473ecd59994220f4bf3273631c84e5042e4a5abe81ba3666a047624b82beda",
-    "docs/testing/wiki-composition.md": "a0c4d2877ecb4bf130c670fcf29598d4f0b3ff28c49070876deb9884796f69dc",
+    "docs/testing/wiki-composition.md": "c7d95e27e5fc37995025af596f90d5a50334f0defa9c51aca4abb8e9b37befe2",
     "docs/testing/database/check_design.py": "72cf4386cc4ff3d9f076054b7de6d6099d1bbb124a0f66d6e93bdd6f0e86d5e2"
   }
 }

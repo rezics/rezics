@@ -59,3 +59,34 @@ cardinality: 500M/3B responses at the fixture's 152 bytes would transfer about
 These bounds do not qualify full Collection history/checkpoint costs, every
 metadata count policy, adopted-revision disclosure, mixed workloads or sustained
 throughput. Those remain under the community and operations acceptance gates.
+
+## Current curation and history authority
+
+Creation, item changes, metadata changes and restoration require the current
+human account, active Self binding, verified email and account write eligibility.
+History reads require the current account/Self but do not require email verification
+or write eligibility. A ban cannot be bypassed through the session-only restoration
+route. Time-dependent permissions and account write restrictions are checked again
+after the callback and its waits, before committing.
+
+`CollectionHistoryPermissions` is the shared policy behind both `canViewHistory`
+and the history list/compare endpoints: current root edit, access-management or
+history-restoration authority. Public Collection readability alone does not grant
+access to curation history, whose snapshots may identify private members. Curators
+retain history access without gaining access to members' private content. Existing
+scope and actor requirements remain separate from credential/API permissions.
+
+The order is Auth, Self, resource access fence and native Collection row, followed
+by the existing history locks. Metadata changes take an exclusive access fence and
+the status-transition lock before the row, preserving the lifecycle lock order.
+Other mutations use a shared access fence and `FOR NO KEY UPDATE`; the latter
+allows foreign-key key-share checks between distinct Collections. History readers
+use a shared row lock. The [PostgreSQL lock modes](https://www.postgresql.org/docs/18/explicit-locking.html#LOCKING-ROWS)
+define those compatibility guarantees. The native fixture includes reciprocal
+Collection references and a status-lock holder to prevent regressions.
+
+A status change still requires `unit.status.update` independently from ordinary
+editing. Repeating the locked status does not manufacture a new permission
+requirement. Mutation CAS and membership ordering retain their existing owners.
+These constant-size authority checks add no persisted rows or indexes; long
+history callbacks still extend lock lifetime and need the remaining capacity work.

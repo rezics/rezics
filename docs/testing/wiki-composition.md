@@ -42,3 +42,31 @@ TypeScript checks and web TypeScript passing. The related-post regression passes
 55 assertions/23 HTTP requests on its isolated candidate lane. Node 26.8.2 and
 Bun 1.4.2 exchange tokens successfully; 10,000 local round trips took about 1.48
 seconds. No schema migration or frontend visual change is required.
+
+## Curation and history authority
+
+`task services-main:db:collection-authority:check` runs the
+[authority fixture](../../services/main/scripts/check-collection-authority.ts).
+The [pinned run](database/collection-authority-evidence.json) passes 29 checks and
+22 HTTP requests. Public and ordinary authenticated readers cannot inspect private
+curation history; owners and current editors can, consistently with the existing
+`canViewHistory` capability. This authority does not disclose private member bodies.
+
+The original API exposed a private member ID in a public history comparison and
+committed an item addition after its edit grant expired during a history-lock wait.
+Both regressions are rejected. Cases also cover stale Self state across creation,
+history, editing and restoration; verified-email write eligibility; history access
+without write eligibility; and rule-backed bans on creation, editing and restoration.
+
+Stateful HTTP cases preserve produced revision IDs through additions, stale CAS,
+restoration and metadata/status changes. An editor can repeat the existing status
+while editing metadata but cannot change it without the status permission. The
+concurrency cases verify expiry rollback, reciprocal references between two
+Collections and lifecycle-lock ordering during metadata edits.
+
+Backend tests pass 333 files/1,796 tests; 45 focused tests and backend TypeScript
+pass. The wiki composition regression retains 35 checks/12 requests/two races.
+OpenAPI/SDKs were regenerated; all three SDK and web TypeScript checks pass.
+No schema migration is required. The API/UI design guidance is applied by sharing
+the existing history-capability policy with server enforcement; no UI capability
+or cardinality is reduced to fit a control.

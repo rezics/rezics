@@ -53,7 +53,8 @@ function actorColumns(actor: UnitStatusActor) {
 		: { actorKind: actor.kind, changedByProfileId: null };
 }
 
-async function lockStatus(tx: DatabaseTransaction, unitId: string): Promise<void> {
+/** Acquire the lifecycle lock before locking a native row during a status-capable mutation. @internal */
+export async function lockUnitStatusTransition(tx: DatabaseTransaction, unitId: string): Promise<void> {
 	await tx.execute(
 		sql`select pg_advisory_xact_lock(hashtextextended(${`unit-status:${unitId}`}::text, 0))`,
 	);
@@ -68,7 +69,7 @@ export async function recordInitialUnitStatus(
 		readonly revisionId?: string | null;
 	},
 ): Promise<string> {
-	await lockStatus(tx, input.unitId);
+	await lockUnitStatusTransition(tx, input.unitId);
 	const current = input.reference
 		? await readUnitState(tx, input.reference, { lock: "update" })
 		: await readUnitStateById(tx, input.unitId, { lock: "update" });
@@ -164,7 +165,7 @@ export async function transitionUnitStatus(
 		readonly expectedUpdatedAt?: Date;
 	},
 ): Promise<TransitionUnitStatusResult> {
-	await lockStatus(tx, input.unitId);
+	await lockUnitStatusTransition(tx, input.unitId);
 	const current = await readUnitStateById(tx, input.unitId, { lock: "update" });
 	if (current && CatalogReferenceSchema.safeParse(current.reference).success)
 		throw new Error("Native catalog lifecycle changes require the owning command");

@@ -1,3 +1,4 @@
+import { CollectionHistoryPermissions } from "../../collection-structure/authority";
 import { decodeCollectionItemsCursor, encodeCollectionItemsCursor } from "./items-cursor";
 import { presentImageAsset } from "../image-assets/presentation";
 import { and, asc, eq, gt, or } from "drizzle-orm";
@@ -102,6 +103,11 @@ export async function getCollection(
 		collectionId,
 		"unit.realm-publication.manage",
 	);
+	const historyDecisions = {
+		"unit.update": updateDecision.allowed,
+		"unit.access.manage": accessDecision.allowed,
+		"unit.history.restore": restoreDecision.allowed,
+	};
 	const canUpdate = updateDecision.allowed;
 	const detail = record;
 	return {
@@ -146,7 +152,9 @@ export async function getCollection(
 			canManageLocalizations: canUpdate,
 			canManageAccess: accessDecision.allowed,
 			canManageRealmPublications: realmPublicationDecision.allowed,
-			canViewHistory: updateDecision.allowed || accessDecision.allowed || restoreDecision.allowed,
+			canViewHistory: CollectionHistoryPermissions.some(
+				(permission) => historyDecisions[permission],
+			),
 			canRestoreHistory: restoreDecision.allowed,
 		},
 	};

@@ -123653,6 +123653,42 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -128829,7 +128865,16 @@
 											"properties": {
 												"code": {
 													"default": "UnitPermissionForbidden",
-													"enum": ["UnitPermissionForbidden", "UnitAccessRestricted"],
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -129115,7 +129160,16 @@
 											"properties": {
 												"code": {
 													"default": "UnitPermissionForbidden",
-													"enum": ["UnitPermissionForbidden", "UnitAccessRestricted"],
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -129142,7 +129196,7 @@
 											"properties": {
 												"code": {
 													"default": "UnitNotFound",
-													"enum": ["UnitNotFound"],
+													"enum": ["UnitNotFound", "CollectionNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -129351,7 +129405,16 @@
 											"properties": {
 												"code": {
 													"default": "UnitPermissionForbidden",
-													"enum": ["UnitPermissionForbidden", "UnitAccessRestricted"],
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -129378,7 +129441,7 @@
 											"properties": {
 												"code": {
 													"default": "UnitNotFound",
-													"enum": ["UnitNotFound"],
+													"enum": ["UnitNotFound", "CollectionNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -129588,7 +129651,16 @@
 											"properties": {
 												"code": {
 													"default": "UnitPermissionForbidden",
-													"enum": ["UnitPermissionForbidden", "UnitAccessRestricted"],
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -129615,7 +129687,7 @@
 											"properties": {
 												"code": {
 													"default": "UnitNotFound",
-													"enum": ["UnitNotFound"],
+													"enum": ["UnitNotFound", "CollectionNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -129802,7 +129874,16 @@
 											"properties": {
 												"code": {
 													"default": "UnitPermissionForbidden",
-													"enum": ["UnitPermissionForbidden", "UnitAccessRestricted"],
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -129829,7 +129910,7 @@
 											"properties": {
 												"code": {
 													"default": "UnitNotFound",
-													"enum": ["UnitNotFound"],
+													"enum": ["UnitNotFound", "CollectionNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -130014,7 +130095,43 @@
 											"properties": {
 												"code": {
 													"default": "UnitPermissionForbidden",
-													"enum": ["UnitPermissionForbidden", "UnitAccessRestricted"],
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"enum": ["UnitNotFound", "CollectionNotFound"],
 													"type": "string"
 												},
 												"message": { "type": "string" },
@@ -130185,6 +130302,38 @@
 							}
 						}
 					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": [
+														"ParticipationDenied",
+														"AccountSuspended",
+														"AccountClosed",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -130275,6 +130424,38 @@
 										}
 									},
 									"required": ["fromRevisionId", "toRevisionId", "changes"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"default": "ParticipationDenied",
+													"enum": [
+														"ParticipationDenied",
+														"AccountSuspended",
+														"AccountClosed",
+														"ApiTokenPermissionRequired"
+													],
+													"type": "string"
+												},
+												"message": { "type": "string" },
+												"details": {}
+											},
+											"required": ["code", "message"]
+										},
+										"requestId": { "type": "string" }
+									},
+									"required": ["error", "requestId"]
 								}
 							}
 						}
@@ -130425,7 +130606,16 @@
 											"properties": {
 												"code": {
 													"default": "UnitPermissionForbidden",
-													"enum": ["UnitPermissionForbidden", "UnitAccessRestricted"],
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"ParticipationDenied",
+														"AccountRestricted",
+														"AccountSuspended",
+														"AccountClosed",
+														"EmailVerificationRequired",
+														"ApiTokenPermissionRequired"
+													],
 													"type": "string"
 												},
 												"message": { "type": "string" },

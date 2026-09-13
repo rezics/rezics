@@ -104009,6 +104009,33 @@ export type PostApiCollectionsStatus400 =
 	  }
 	| MalformedRequestBody;
 
+export const PostApiCollectionsStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type PostApiCollectionsStatus403ErrorCodeEnum =
+	(typeof PostApiCollectionsStatus403ErrorCodeEnum)[keyof typeof PostApiCollectionsStatus403ErrorCodeEnum];
+
+export type PostApiCollectionsStatus403 = {
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PostApiCollectionsStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export const PostApiCollectionsStatus404ErrorCodeEnum = {
 	CollectionNotFound: "CollectionNotFound",
 	ImageAssetNotFound: "ImageAssetNotFound",
@@ -104196,6 +104223,7 @@ export type PostApiCollectionsOptions = {
 export type PostApiCollectionsResponses = {
 	"200": PostApiCollectionsStatus200;
 	"400": PostApiCollectionsStatus400;
+	"403": PostApiCollectionsStatus403;
 	"404": PostApiCollectionsStatus404;
 	"422": PostApiCollectionsStatus422;
 	"429": PostApiCollectionsStatus429;
@@ -104208,6 +104236,7 @@ export type PostApiCollectionsResponses = {
 export type PostApiCollectionsResponse =
 	| PostApiCollectionsStatus200
 	| PostApiCollectionsStatus400
+	| PostApiCollectionsStatus403
 	| PostApiCollectionsStatus404
 	| PostApiCollectionsStatus422
 	| PostApiCollectionsStatus429
@@ -107566,6 +107595,12 @@ export type PatchApiCollectionsByCollectionIdStatus400 =
 export const PatchApiCollectionsByCollectionIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 } as const;
 
 export type PatchApiCollectionsByCollectionIdStatus403ErrorCodeEnum =
@@ -107862,6 +107897,12 @@ export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus400 = Malforme
 export const PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 } as const;
 
 export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403ErrorCodeEnum =
@@ -107880,13 +107921,21 @@ export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus403 = {
 	requestId: string;
 };
 
+export const PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	CollectionNotFound: "CollectionNotFound",
+} as const;
+
+export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404ErrorCodeEnum =
+	(typeof PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404ErrorCodeEnum)[keyof typeof PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404ErrorCodeEnum];
+
 export type PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404 = {
 	error: {
 		/**
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: "UnitNotFound";
+		code: PostApiCollectionsByCollectionIdItemsBatchUpdateStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -108116,6 +108165,12 @@ export type PostApiCollectionsByCollectionIdItemsBatchStatus400 = MalformedReque
 export const PostApiCollectionsByCollectionIdItemsBatchStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 } as const;
 
 export type PostApiCollectionsByCollectionIdItemsBatchStatus403ErrorCodeEnum =
@@ -108134,13 +108189,21 @@ export type PostApiCollectionsByCollectionIdItemsBatchStatus403 = {
 	requestId: string;
 };
 
+export const PostApiCollectionsByCollectionIdItemsBatchStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	CollectionNotFound: "CollectionNotFound",
+} as const;
+
+export type PostApiCollectionsByCollectionIdItemsBatchStatus404ErrorCodeEnum =
+	(typeof PostApiCollectionsByCollectionIdItemsBatchStatus404ErrorCodeEnum)[keyof typeof PostApiCollectionsByCollectionIdItemsBatchStatus404ErrorCodeEnum];
+
 export type PostApiCollectionsByCollectionIdItemsBatchStatus404 = {
 	error: {
 		/**
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: "UnitNotFound";
+		code: PostApiCollectionsByCollectionIdItemsBatchStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -108266,6 +108329,12 @@ export type PostApiCollectionsByCollectionIdItemsMoveStatus400 = MalformedReques
 export const PostApiCollectionsByCollectionIdItemsMoveStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 } as const;
 
 export type PostApiCollectionsByCollectionIdItemsMoveStatus403ErrorCodeEnum =
@@ -108284,13 +108353,21 @@ export type PostApiCollectionsByCollectionIdItemsMoveStatus403 = {
 	requestId: string;
 };
 
+export const PostApiCollectionsByCollectionIdItemsMoveStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	CollectionNotFound: "CollectionNotFound",
+} as const;
+
+export type PostApiCollectionsByCollectionIdItemsMoveStatus404ErrorCodeEnum =
+	(typeof PostApiCollectionsByCollectionIdItemsMoveStatus404ErrorCodeEnum)[keyof typeof PostApiCollectionsByCollectionIdItemsMoveStatus404ErrorCodeEnum];
+
 export type PostApiCollectionsByCollectionIdItemsMoveStatus404 = {
 	error: {
 		/**
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: "UnitNotFound";
+		code: PostApiCollectionsByCollectionIdItemsMoveStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -108440,6 +108517,12 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus400 = MalformedR
 export const PutApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 } as const;
 
 export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum =
@@ -108458,13 +108541,21 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus403 = {
 	requestId: string;
 };
 
+export const PutApiCollectionsByCollectionIdItemsByTargetIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	CollectionNotFound: "CollectionNotFound",
+} as const;
+
+export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus404ErrorCodeEnum =
+	(typeof PutApiCollectionsByCollectionIdItemsByTargetIdStatus404ErrorCodeEnum)[keyof typeof PutApiCollectionsByCollectionIdItemsByTargetIdStatus404ErrorCodeEnum];
+
 export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus404 = {
 	error: {
 		/**
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: "UnitNotFound";
+		code: PutApiCollectionsByCollectionIdItemsByTargetIdStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -108588,6 +108679,12 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400 = Malform
 export const DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitAccessRestricted: "UnitAccessRestricted",
+	ParticipationDenied: "ParticipationDenied",
+	AccountRestricted: "AccountRestricted",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 } as const;
 
 export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum =
@@ -108600,6 +108697,27 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403 = {
 		 * @type string
 		 */
 		code: DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
+export const DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	CollectionNotFound: "CollectionNotFound",
+} as const;
+
+export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus404ErrorCodeEnum];
+
+export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus404 = {
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus404ErrorCodeEnum;
 		message: string;
 		details?: void;
 	};
@@ -108660,6 +108778,7 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdResponses = {
 	"200": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200;
 	"400": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400;
 	"403": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403;
+	"404": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus404;
 	"409": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409;
 	"422": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422;
 	"429": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429;
@@ -108673,6 +108792,7 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdResponse =
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
+	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus404
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
@@ -108758,6 +108878,29 @@ export type GetApiCollectionsByCollectionIdItemRevisionsStatus200 = {
 	}[];
 };
 
+export const GetApiCollectionsByCollectionIdItemRevisionsStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemRevisionsStatus403ErrorCodeEnum =
+	(typeof GetApiCollectionsByCollectionIdItemRevisionsStatus403ErrorCodeEnum)[keyof typeof GetApiCollectionsByCollectionIdItemRevisionsStatus403ErrorCodeEnum];
+
+export type GetApiCollectionsByCollectionIdItemRevisionsStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: GetApiCollectionsByCollectionIdItemRevisionsStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type GetApiCollectionsByCollectionIdItemRevisionsStatus404 = {
 	error: {
 		/**
@@ -108784,6 +108927,7 @@ export type GetApiCollectionsByCollectionIdItemRevisionsOptions = {
 
 export type GetApiCollectionsByCollectionIdItemRevisionsResponses = {
 	"200": GetApiCollectionsByCollectionIdItemRevisionsStatus200;
+	"403": GetApiCollectionsByCollectionIdItemRevisionsStatus403;
 	"404": GetApiCollectionsByCollectionIdItemRevisionsStatus404;
 	"422": GetApiCollectionsByCollectionIdItemRevisionsStatus422;
 	"500": GetApiCollectionsByCollectionIdItemRevisionsStatus500;
@@ -108794,6 +108938,7 @@ export type GetApiCollectionsByCollectionIdItemRevisionsResponses = {
  */
 export type GetApiCollectionsByCollectionIdItemRevisionsResponse =
 	| GetApiCollectionsByCollectionIdItemRevisionsStatus200
+	| GetApiCollectionsByCollectionIdItemRevisionsStatus403
 	| GetApiCollectionsByCollectionIdItemRevisionsStatus404
 	| GetApiCollectionsByCollectionIdItemRevisionsStatus422
 	| GetApiCollectionsByCollectionIdItemRevisionsStatus500;
@@ -108842,6 +108987,29 @@ export type GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200 = {
 	}[];
 };
 
+export const GetApiCollectionsByCollectionIdItemRevisionsCompareStatus403ErrorCodeEnum = {
+	ParticipationDenied: "ParticipationDenied",
+	AccountSuspended: "AccountSuspended",
+	AccountClosed: "AccountClosed",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+} as const;
+
+export type GetApiCollectionsByCollectionIdItemRevisionsCompareStatus403ErrorCodeEnum =
+	(typeof GetApiCollectionsByCollectionIdItemRevisionsCompareStatus403ErrorCodeEnum)[keyof typeof GetApiCollectionsByCollectionIdItemRevisionsCompareStatus403ErrorCodeEnum];
+
+export type GetApiCollectionsByCollectionIdItemRevisionsCompareStatus403 = {
+	error: {
+		/**
+		 * @default 'ParticipationDenied'
+		 * @type string
+		 */
+		code: GetApiCollectionsByCollectionIdItemRevisionsCompareStatus403ErrorCodeEnum;
+		message: string;
+		details?: void;
+	};
+	requestId: string;
+};
+
 export type GetApiCollectionsByCollectionIdItemRevisionsCompareStatus404 = {
 	error: {
 		/**
@@ -108881,6 +109049,7 @@ export type GetApiCollectionsByCollectionIdItemRevisionsCompareOptions = {
 
 export type GetApiCollectionsByCollectionIdItemRevisionsCompareResponses = {
 	"200": GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200;
+	"403": GetApiCollectionsByCollectionIdItemRevisionsCompareStatus403;
 	"404": GetApiCollectionsByCollectionIdItemRevisionsCompareStatus404;
 	"409": GetApiCollectionsByCollectionIdItemRevisionsCompareStatus409;
 	"422": GetApiCollectionsByCollectionIdItemRevisionsCompareStatus422;
@@ -108892,6 +109061,7 @@ export type GetApiCollectionsByCollectionIdItemRevisionsCompareResponses = {
  */
 export type GetApiCollectionsByCollectionIdItemRevisionsCompareResponse =
 	| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200
+	| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus403
 	| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus404
 	| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus409
 	| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus422
@@ -108930,6 +109100,12 @@ export const PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreSta
 	{
 		UnitPermissionForbidden: "UnitPermissionForbidden",
 		UnitAccessRestricted: "UnitAccessRestricted",
+		ParticipationDenied: "ParticipationDenied",
+		AccountRestricted: "AccountRestricted",
+		AccountSuspended: "AccountSuspended",
+		AccountClosed: "AccountClosed",
+		EmailVerificationRequired: "EmailVerificationRequired",
+		ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	} as const;
 
 export type PostApiCollectionsByCollectionIdItemRevisionsByRevisionIdRestoreStatus403ErrorCodeEnum =

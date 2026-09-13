@@ -738,6 +738,7 @@ import type {
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403,
+	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus404,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429,
@@ -1129,12 +1130,14 @@ import type {
 	GetApiAuditEventsStatus500,
 	GetApiCollectionsByCollectionIdItemRevisionsCompareOptions,
 	GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200,
+	GetApiCollectionsByCollectionIdItemRevisionsCompareStatus403,
 	GetApiCollectionsByCollectionIdItemRevisionsCompareStatus404,
 	GetApiCollectionsByCollectionIdItemRevisionsCompareStatus409,
 	GetApiCollectionsByCollectionIdItemRevisionsCompareStatus422,
 	GetApiCollectionsByCollectionIdItemRevisionsCompareStatus500,
 	GetApiCollectionsByCollectionIdItemRevisionsOptions,
 	GetApiCollectionsByCollectionIdItemRevisionsStatus200,
+	GetApiCollectionsByCollectionIdItemRevisionsStatus403,
 	GetApiCollectionsByCollectionIdItemRevisionsStatus404,
 	GetApiCollectionsByCollectionIdItemRevisionsStatus422,
 	GetApiCollectionsByCollectionIdItemRevisionsStatus500,
@@ -2445,6 +2448,7 @@ import type {
 	PostApiCollectionsOptions,
 	PostApiCollectionsStatus200,
 	PostApiCollectionsStatus400,
+	PostApiCollectionsStatus403,
 	PostApiCollectionsStatus404,
 	PostApiCollectionsStatus422,
 	PostApiCollectionsStatus429,
@@ -48204,6 +48208,7 @@ export function postApiCollectionsMutationOptions<TContext = unknown>(
 		PostApiCollectionsStatus200,
 		ResponseErrorConfig<
 			| PostApiCollectionsStatus400
+			| PostApiCollectionsStatus403
 			| PostApiCollectionsStatus404
 			| PostApiCollectionsStatus422
 			| PostApiCollectionsStatus429
@@ -48229,6 +48234,7 @@ export function usePostApiCollections<TContext>(
 			PostApiCollectionsStatus200,
 			ResponseErrorConfig<
 				| PostApiCollectionsStatus400
+				| PostApiCollectionsStatus403
 				| PostApiCollectionsStatus404
 				| PostApiCollectionsStatus422
 				| PostApiCollectionsStatus429
@@ -48248,6 +48254,7 @@ export function usePostApiCollections<TContext>(
 		PostApiCollectionsStatus200,
 		ResponseErrorConfig<
 			| PostApiCollectionsStatus400
+			| PostApiCollectionsStatus403
 			| PostApiCollectionsStatus404
 			| PostApiCollectionsStatus422
 			| PostApiCollectionsStatus429
@@ -48261,6 +48268,7 @@ export function usePostApiCollections<TContext>(
 		PostApiCollectionsStatus200,
 		ResponseErrorConfig<
 			| PostApiCollectionsStatus400
+			| PostApiCollectionsStatus403
 			| PostApiCollectionsStatus404
 			| PostApiCollectionsStatus422
 			| PostApiCollectionsStatus429
@@ -48279,6 +48287,7 @@ export function usePostApiCollections<TContext>(
 		PostApiCollectionsStatus200,
 		ResponseErrorConfig<
 			| PostApiCollectionsStatus400
+			| PostApiCollectionsStatus403
 			| PostApiCollectionsStatus404
 			| PostApiCollectionsStatus422
 			| PostApiCollectionsStatus429
@@ -49092,6 +49101,7 @@ export function deleteApiCollectionsByCollectionIdItemsByTargetIdMutationOptions
 		ResponseErrorConfig<
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus404
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
@@ -49123,6 +49133,7 @@ export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 			ResponseErrorConfig<
 				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400
 				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
+				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus404
 				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409
 				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
 				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
@@ -49146,6 +49157,7 @@ export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus404
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
@@ -49160,6 +49172,7 @@ export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus404
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
@@ -49179,6 +49192,7 @@ export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus400
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus404
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus409
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
@@ -49210,6 +49224,7 @@ export function getApiCollectionsByCollectionIdItemRevisionsQueryOptions(
 	return queryOptions<
 		GetApiCollectionsByCollectionIdItemRevisionsStatus200,
 		ResponseErrorConfig<
+			| GetApiCollectionsByCollectionIdItemRevisionsStatus403
 			| GetApiCollectionsByCollectionIdItemRevisionsStatus404
 			| GetApiCollectionsByCollectionIdItemRevisionsStatus422
 			| GetApiCollectionsByCollectionIdItemRevisionsStatus500
@@ -49255,6 +49270,7 @@ export function useGetApiCollectionsByCollectionIdItemRevisions<
 			QueryObserverOptions<
 				GetApiCollectionsByCollectionIdItemRevisionsStatus200,
 				ResponseErrorConfig<
+					| GetApiCollectionsByCollectionIdItemRevisionsStatus403
 					| GetApiCollectionsByCollectionIdItemRevisionsStatus404
 					| GetApiCollectionsByCollectionIdItemRevisionsStatus422
 					| GetApiCollectionsByCollectionIdItemRevisionsStatus500
@@ -49287,6 +49303,7 @@ export function useGetApiCollectionsByCollectionIdItemRevisions<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiCollectionsByCollectionIdItemRevisionsStatus403
 			| GetApiCollectionsByCollectionIdItemRevisionsStatus404
 			| GetApiCollectionsByCollectionIdItemRevisionsStatus422
 			| GetApiCollectionsByCollectionIdItemRevisionsStatus500
@@ -49319,6 +49336,7 @@ export function getApiCollectionsByCollectionIdItemRevisionsCompareQueryOptions(
 	return queryOptions<
 		GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200,
 		ResponseErrorConfig<
+			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus403
 			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus404
 			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus409
 			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus422
@@ -49365,6 +49383,7 @@ export function useGetApiCollectionsByCollectionIdItemRevisionsCompare<
 			QueryObserverOptions<
 				GetApiCollectionsByCollectionIdItemRevisionsCompareStatus200,
 				ResponseErrorConfig<
+					| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus403
 					| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus404
 					| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus409
 					| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus422
@@ -49398,6 +49417,7 @@ export function useGetApiCollectionsByCollectionIdItemRevisionsCompare<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus403
 			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus404
 			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus409
 			| GetApiCollectionsByCollectionIdItemRevisionsCompareStatus422

@@ -1,3 +1,7 @@
+import {
+	withCollectionAuthority,
+	withCollectionCreationAuthority,
+} from "../../collection-structure/authority";
 import { lockUnitAccessState } from "../../authorization/unit/access-lock";
 import { readUnitStateById } from "../../units/query";
 import { presentImageAsset } from "../image-assets/presentation";
@@ -92,8 +96,14 @@ const CollectionMutationNotFoundResponse = toApiErrorResponse([
 const CollectionMutationForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
 	"UnitAccessRestricted",
+	"ParticipationDenied",
+	"AccountRestricted",
+	"AccountSuspended",
+	"AccountClosed",
+	"EmailVerificationRequired",
+	"ApiTokenPermissionRequired",
 ]);
-const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
+const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound", "CollectionNotFound"]);
 const UnitRevisionConflictResponse = toApiErrorResponse(["UnitRevisionConflict"]);
 const CollectionStructureRevisionConflictResponse = toApiErrorResponse([
 	"CollectionStructureRevisionConflict",
@@ -313,6 +323,7 @@ export default new Elysia({ prefix: "/collections" })
 			body: CreateCollectionBody,
 			response: {
 				[StatusCodes.OK]: CollectionDetailResponse,
+				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
 					"RevisionCreditEntityInvalid",
 					"RevisionContributionActorRequired",
@@ -322,7 +333,7 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Create collection", tags: ["Collections"] },
 		},
 		async ({ entity, authorization, body, principal }) => {
-			const id = await database.transaction(async (tx) => {
+			const id = await withCollectionCreationAuthority(authorization, async (tx) => {
 				await ensureImageAssetsAttachable(
 					tx,
 					selfAuthUserIdForEntity(entity.id),
@@ -426,52 +437,61 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Update collection", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.update");
-			const statusUpdateDecision = body.status
-				? await authorization.unit.decide(params.collectionId, "unit.status.update", ["unit"])
-				: undefined;
-			await database.transaction(async (tx) => {
-				if (body.localization)
-					await ensureImageAssetsAttachable(
-						tx,
-						selfAuthUserIdForEntity(entity.id),
-						unitLocalizationImageAssetReferences(body.localization),
-					);
-				const unitUpdate = toUnitVisibilityUpdate(body.visibility);
-				if (unitUpdate)
-					await tx.update(collection).set(unitUpdate).where(eq(collection.id, params.collectionId));
-				if (body.localization) {
-					const storedLocalization = toUnitLocalizationStorage(body.localization);
-					await tx
-						.insert(unitLocalization)
-						.values({
-							unitId: params.collectionId,
-							...storedLocalization,
-						})
-						.onConflictDoUpdate({
-							target: [unitLocalization.unitId, unitLocalization.language],
-							set: storedLocalization,
-						});
-				}
-				const revision = await recordUnitRevision(tx, {
-					unitId: params.collectionId,
-					actorProfileId: entity.id,
-					contribution: body.revisionContext?.contribution,
-					event: "update",
-					baseRevisionId: body.baseRevisionId,
-				});
-				if (body.status)
-					await transitionUnitStatus(tx, {
+			await withCollectionAuthority(
+				{ collectionId: params.collectionId, authorization, mode: "metadata", status: body.status },
+				async (tx) => {
+					if (body.localization)
+						await ensureImageAssetsAttachable(
+							tx,
+							selfAuthUserIdForEntity(entity.id),
+							unitLocalizationImageAssetReferences(body.localization),
+						);
+					const unitUpdate = toUnitVisibilityUpdate(body.visibility);
+					if (unitUpdate)
+						await tx
+							.update(collection)
+							.set(unitUpdate)
+							.where(eq(collection.id, params.collectionId));
+					if (body.localization) {
+						const storedLocalization = toUnitLocalizationStorage(body.localization);
+						await tx
+							.insert(unitLocalization)
+							.values({
+								unitId: params.collectionId,
+								...storedLocalization,
+							})
+							.onConflictDoUpdate({
+								target: [unitLocalization.unitId, unitLocalization.language],
+								set: storedLocalization,
+							});
+					}
+					const revision = await recordUnitRevision(tx, {
 						unitId: params.collectionId,
-						toStatus: body.status,
-						actor: { kind: "profile", profileId: entity.id },
-						authorization: {
-							kind: "interactive",
-							statusUpdateAllowed: statusUpdateDecision?.allowed ?? false,
-						},
-						revisionId: revision.revisionId,
+						actorProfileId: entity.id,
+						contribution: body.revisionContext?.contribution,
+						event: "update",
+						baseRevisionId: body.baseRevisionId,
 					});
-			});
+					if (body.status)
+						await transitionUnitStatus(tx, {
+							unitId: params.collectionId,
+							toStatus: body.status,
+							actor: { kind: "profile", profileId: entity.id },
+							authorization: {
+								kind: "interactive",
+								statusUpdateAllowed: (
+									await authorization.unit.decideInTransaction(
+										tx,
+										params.collectionId,
+										"unit.status.update",
+										["unit"],
+									)
+								).allowed,
+							},
+							revisionId: revision.revisionId,
+						});
+				},
+			);
 			return getCollection(params.collectionId, authorization);
 		},
 	)
@@ -494,23 +514,24 @@ export default new Elysia({ prefix: "/collections" })
 			},
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.update");
-			const result = await database.transaction((tx) =>
-				applyCollectionBatch(tx, {
-					collectionId: params.collectionId,
-					actorProfileId: entity.id,
-					baseRevisionId: body.baseItemsRevisionId,
-					commands: body.changes,
-					errors: CollectionBatchErrors,
-					ensureTargetReadable: async (targetId) => {
-						const decision = await authorization.unit.decideInTransaction(
-							tx,
-							targetId,
-							"unit.read",
-						);
-						if (!decision.allowed) throw new UnitNotFound();
-					},
-				}),
+			const result = await withCollectionAuthority(
+				{ collectionId: params.collectionId, authorization, mode: "items" },
+				(tx) =>
+					applyCollectionBatch(tx, {
+						collectionId: params.collectionId,
+						actorProfileId: entity.id,
+						baseRevisionId: body.baseItemsRevisionId,
+						commands: body.changes,
+						errors: CollectionBatchErrors,
+						ensureTargetReadable: async (targetId) => {
+							const decision = await authorization.unit.decideInTransaction(
+								tx,
+								targetId,
+								"unit.read",
+							);
+							if (!decision.allowed) throw new UnitNotFound();
+						},
+					}),
 			);
 			return {
 				results: [...result.results],
@@ -535,40 +556,42 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Add collection items atomically", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.update");
 			if (new Set(body.items.map(({ targetId }) => targetId)).size !== body.items.length)
 				throw new ValidationError({ items: "targetId values must be unique" });
 			if (body.items.some(({ targetId }) => targetId === params.collectionId))
 				throw new ValidationError({ items: "a Collection cannot contain itself" });
-			return database.transaction(async (tx) => {
-				const result = await applyCollectionBatch(tx, {
-					collectionId: params.collectionId,
-					actorProfileId: entity.id,
-					baseRevisionId: body.baseItemsRevisionId,
-					commands: body.items.map(({ targetId }, index) => ({
-						opId: String(index),
-						type: "item.add" as const,
-						targetId,
-					})),
-					errors: CollectionBatchErrors,
-					ensureTargetReadable: async (targetId) => {
-						const decision = await authorization.unit.decideInTransaction(
-							tx,
+			return withCollectionAuthority(
+				{ collectionId: params.collectionId, authorization, mode: "items" },
+				async (tx) => {
+					const result = await applyCollectionBatch(tx, {
+						collectionId: params.collectionId,
+						actorProfileId: entity.id,
+						baseRevisionId: body.baseItemsRevisionId,
+						commands: body.items.map(({ targetId }, index) => ({
+							opId: String(index),
+							type: "item.add" as const,
 							targetId,
-							"unit.read",
-						);
-						if (!decision.allowed) throw new UnitNotFound();
-					},
-				});
-				return {
-					items: body.items.map(({ targetId }, index) => {
-						const itemState = result.results[index]?.itemState;
-						if (!itemState) throw new Error("Collection add batch result is incomplete");
-						return { targetId, state: itemState };
-					}),
-					latestItemsRevisionId: result.revisionId,
-				};
-			});
+						})),
+						errors: CollectionBatchErrors,
+						ensureTargetReadable: async (targetId) => {
+							const decision = await authorization.unit.decideInTransaction(
+								tx,
+								targetId,
+								"unit.read",
+							);
+							if (!decision.allowed) throw new UnitNotFound();
+						},
+					});
+					return {
+						items: body.items.map(({ targetId }, index) => {
+							const itemState = result.results[index]?.itemState;
+							if (!itemState) throw new Error("Collection add batch result is incomplete");
+							return { targetId, state: itemState };
+						}),
+						latestItemsRevisionId: result.revisionId,
+					};
+				},
+			);
 		},
 	)
 	.post(
@@ -587,23 +610,24 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Move collection items atomically", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.update");
-			const result = await database.transaction((tx) =>
-				applyCollectionBatch(tx, {
-					collectionId: params.collectionId,
-					actorProfileId: entity.id,
-					baseRevisionId: body.baseItemsRevisionId,
-					commands: [
-						{
-							opId: "move",
-							type: "items.move",
-							targetIds: body.targetIds,
-							placement: body.placement,
-						},
-					],
-					errors: CollectionBatchErrors,
-					ensureTargetReadable: async () => {},
-				}),
+			const result = await withCollectionAuthority(
+				{ collectionId: params.collectionId, authorization, mode: "items" },
+				(tx) =>
+					applyCollectionBatch(tx, {
+						collectionId: params.collectionId,
+						actorProfileId: entity.id,
+						baseRevisionId: body.baseItemsRevisionId,
+						commands: [
+							{
+								opId: "move",
+								type: "items.move",
+								targetIds: body.targetIds,
+								placement: body.placement,
+							},
+						],
+						errors: CollectionBatchErrors,
+						ensureTargetReadable: async () => {},
+					}),
 			);
 			return { saved: true, latestItemsRevisionId: result.revisionId };
 		},
@@ -624,26 +648,27 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Save collection item", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.update");
 			if (params.targetId === params.collectionId)
 				throw new ValidationError({ targetId: "a Collection cannot contain itself" });
 			await authorization.unit.ensureCanRead(params.targetId);
-			const result = await database.transaction((tx) =>
-				applyCollectionBatch(tx, {
-					collectionId: params.collectionId,
-					actorProfileId: entity.id,
-					baseRevisionId: body.baseItemsRevisionId,
-					commands: [{ opId: "add", type: "item.add", targetId: params.targetId }],
-					errors: CollectionBatchErrors,
-					ensureTargetReadable: async (targetId) => {
-						const decision = await authorization.unit.decideInTransaction(
-							tx,
-							targetId,
-							"unit.read",
-						);
-						if (!decision.allowed) throw new UnitNotFound();
-					},
-				}),
+			const result = await withCollectionAuthority(
+				{ collectionId: params.collectionId, authorization, mode: "items" },
+				(tx) =>
+					applyCollectionBatch(tx, {
+						collectionId: params.collectionId,
+						actorProfileId: entity.id,
+						baseRevisionId: body.baseItemsRevisionId,
+						commands: [{ opId: "add", type: "item.add", targetId: params.targetId }],
+						errors: CollectionBatchErrors,
+						ensureTargetReadable: async (targetId) => {
+							const decision = await authorization.unit.decideInTransaction(
+								tx,
+								targetId,
+								"unit.read",
+							);
+							if (!decision.allowed) throw new UnitNotFound();
+						},
+					}),
 			);
 			return { saved: true, latestItemsRevisionId: result.revisionId };
 		},
@@ -655,6 +680,7 @@ export default new Elysia({ prefix: "/collections" })
 			params: CollectionItemParams,
 			body: CollectionItemsRevisionBody,
 			response: {
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 				[StatusCodes.OK]: SavedCollectionItemsResponse,
 				[StatusCodes.FORBIDDEN]: CollectionMutationForbiddenResponse,
 				[StatusCodes.CONFLICT]: t.Union([CollectionStructureRevisionConflictResponse]),
@@ -662,16 +688,17 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Remove collection item", tags: ["Collections"] },
 		},
 		async ({ params, entity, authorization, body }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.update");
-			const result = await database.transaction((tx) =>
-				applyCollectionBatch(tx, {
-					collectionId: params.collectionId,
-					actorProfileId: entity.id,
-					baseRevisionId: body.baseItemsRevisionId,
-					commands: [{ opId: "remove", type: "item.remove", targetId: params.targetId }],
-					errors: CollectionBatchErrors,
-					ensureTargetReadable: async () => {},
-				}),
+			const result = await withCollectionAuthority(
+				{ collectionId: params.collectionId, authorization, mode: "items" },
+				(tx) =>
+					applyCollectionBatch(tx, {
+						collectionId: params.collectionId,
+						actorProfileId: entity.id,
+						baseRevisionId: body.baseItemsRevisionId,
+						commands: [{ opId: "remove", type: "item.remove", targetId: params.targetId }],
+						errors: CollectionBatchErrors,
+						ensureTargetReadable: async () => {},
+					}),
 			);
 			return { saved: false, latestItemsRevisionId: result.revisionId };
 		},
@@ -682,6 +709,7 @@ export default new Elysia({ prefix: "/collections" })
 			params: CollectionParams,
 			query: CollectionStructureRevisionListQuery,
 			response: {
+				[StatusCodes.FORBIDDEN]: CollectionReadForbiddenResponse,
 				[StatusCodes.OK]: CollectionStructureRevisionListResponse,
 				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
 			},
@@ -689,10 +717,12 @@ export default new Elysia({ prefix: "/collections" })
 		},
 		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
-			await authorization.unit.ensureCanRead(params.collectionId);
-			return database.transaction(async (tx) => ({
-				items: await listCollectionStructureRevisions(tx, params.collectionId, query.limit ?? 50),
-			}));
+			return withCollectionAuthority(
+				{ collectionId: params.collectionId, authorization, mode: "history" },
+				async (tx) => ({
+					items: await listCollectionStructureRevisions(tx, params.collectionId, query.limit ?? 50),
+				}),
+			);
 		},
 	)
 	.get(
@@ -701,6 +731,7 @@ export default new Elysia({ prefix: "/collections" })
 			params: CollectionParams,
 			query: CollectionStructureRevisionCompareQuery,
 			response: {
+				[StatusCodes.FORBIDDEN]: CollectionReadForbiddenResponse,
 				[StatusCodes.OK]: CollectionStructureRevisionCompareResponse,
 				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
 				[StatusCodes.CONFLICT]: CollectionStructureRevisionConflictResponse,
@@ -709,24 +740,24 @@ export default new Elysia({ prefix: "/collections" })
 		},
 		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request, "unit:read");
-			await authorization.unit.ensureCanRead(params.collectionId);
-			return database.transaction(async (tx) => {
-				const [before, after] = await Promise.all([
-					getCollectionStructureRevisionState(tx, {
+			return withCollectionAuthority(
+				{ collectionId: params.collectionId, authorization, mode: "history" },
+				async (tx) => {
+					const before = await getCollectionStructureRevisionState(tx, {
 						collectionId: params.collectionId,
 						revisionId: query.from,
-					}),
-					getCollectionStructureRevisionState(tx, {
+					});
+					const after = await getCollectionStructureRevisionState(tx, {
 						collectionId: params.collectionId,
 						revisionId: query.to,
-					}),
-				]);
-				return {
-					fromRevisionId: query.from,
-					toRevisionId: query.to,
-					changes: compareCollectionStructureStates(before, after),
-				};
-			});
+					});
+					return {
+						fromRevisionId: query.from,
+						toRevisionId: query.to,
+						changes: compareCollectionStructureStates(before, after),
+					};
+				},
+			);
 		},
 	)
 	.post(
@@ -744,18 +775,20 @@ export default new Elysia({ prefix: "/collections" })
 			detail: { summary: "Restore a Collection item revision", tags: ["Collections"] },
 		},
 		async ({ params, body, entity, authorization }) => {
-			await authorization.unit.ensure(params.collectionId, "unit.history.restore");
-			const result = await database.transaction(async (tx) => {
-				await ensureEditableCollection(tx, params.collectionId);
-				return restoreCollectionStructureRevision(tx, {
-					collectionId: params.collectionId,
-					sourceRevisionId: params.revisionId,
-					baseRevisionId: body.baseItemsRevisionId,
-					actorProfileId: entity.id,
-					message: body.message,
-					minor: body.minor,
-				});
-			});
+			const result = await withCollectionAuthority(
+				{ collectionId: params.collectionId, authorization, mode: "restore" },
+				async (tx) => {
+					await ensureEditableCollection(tx, params.collectionId);
+					return restoreCollectionStructureRevision(tx, {
+						collectionId: params.collectionId,
+						sourceRevisionId: params.revisionId,
+						baseRevisionId: body.baseItemsRevisionId,
+						actorProfileId: entity.id,
+						message: body.message,
+						minor: body.minor,
+					});
+				},
+			);
 			return {
 				updated: true as const,
 				latestItemsRevisionId: result.revisionId,
